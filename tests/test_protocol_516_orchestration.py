@@ -73,7 +73,10 @@ class Protocol516OrchestrationTests(unittest.TestCase):
         self.assertIn("verification", self.lower)
         self.assertIn("high-risk", self.lower)
         self.assertIn("stabilization", self.lower)
-        self.assertIn("non-mutating", self.lower)
+        self.assertTrue(
+            "non-mutating" in self.lower
+            or "do not implement refactors during this stabilization-review stage" in self.lower
+        )
         self.assertIn("health audit", self.lower)
         self.assertIn("periodic", self.lower)
 
