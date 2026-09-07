@@ -29,3 +29,19 @@ jobs:
         run: python source/check_dist.py --expected /tmp/protocol-dist --committed dist
       - name: Check patch whitespace
         run: git diff --check
+
+  orchestrator-core:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install orchestrator Core and its development dependencies
+        run: >-
+          python -m pip install ./orchestrator/packages/core
+          -r orchestrator/packages/core/requirements-dev.txt
+      - name: Verify the packaged Protocol snapshot matches canonical source
+        run: python orchestrator/scripts/generate_protocol_snapshot.py --check
+      - name: Run orchestrator Core acceptance suite
+        run: python orchestrator/scripts/run_core_tests.py
