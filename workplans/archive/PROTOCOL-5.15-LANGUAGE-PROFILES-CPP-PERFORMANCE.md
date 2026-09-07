@@ -2,6 +2,8 @@
 kind: implementation-workplan
 workplan_id: PROTOCOL-5.15-LANGUAGE-PROFILES-CPP-PERFORMANCE
 protocol_version: 5.14.0
+status: completed
+completed_date: 2026-09-04
 ---
 
 # Protocol 5.15 Language Engineering Profiles and Cross-Language Performance Workplan

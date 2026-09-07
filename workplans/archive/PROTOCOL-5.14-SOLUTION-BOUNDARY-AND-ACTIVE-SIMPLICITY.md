@@ -3,7 +3,8 @@ kind: implementation-workplan
 workplan_id: PROTOCOL-5.14-SOLUTION-BOUNDARY-AND-ACTIVE-SIMPLICITY
 protocol_version: 5.13.0
 target_protocol_version: 5.14.0
-status: active
+status: completed
+completed_date: 2026-09-04
 base_commit: a7fd42e37f32cd2ff4f382b2f5e623343c28b3ad
 ---
 
