@@ -12,6 +12,9 @@ The prompts do not create new protocol authority. They route a user request into
 4. Define each input once. The rest of the prompt refers to the variable name instead of repeating paths, branches, workplan names, or authorities.
 5. Use `AUTO_LOCAL_FIRST` for portable protocol-skill discovery, `AUTO` when the agent should infer a value from governing repository/protocol authority, and `NONE` when a parameter intentionally does not apply.
 6. Input variables identify task context; they do not override higher-authority product requirements, Frozen architecture, safety rules, repository/project instructions, or the protocol version governing an accepted workplan.
+7. Leave `EXECUTION_MODE = AUTO_EXECUTE` when the agent should perform every action the selected stage authorizes; use `REPORT_ONLY` only when repository mutation is intentionally forbidden.
+8. Prefer resolving `AUTO` inputs from the target repository, current branch/worktree, governing artifacts, and available tool context. Ask the user only when missing information is genuinely blocking or choosing among materially different authorized outcomes.
+9. Select the stage by its required artifact and mutation boundary, not by a keyword alone. Do not silently cross from Review into repair, from Stabilization into refactoring, or from Health Audit into implementation.
 
 For substantial work, the common lifecycle is:
 
@@ -31,6 +34,16 @@ health audit is periodic across accumulated repository history rather than manda
 ```
 
 Testing, verification, stabilization, qualification, documentation, and hygiene are modes or supporting capabilities. They do not create additional product-approval authorities beyond the protocol's Design and Implementation roles.
+
+## Execution contract
+
+These are **execution prompts**, not advisory templates. `AUTO_EXECUTE` means: inspect the actual target with available tools, resolve inferable context from repository evidence, perform the selected stage's authorized actions to a coherent closure, and return the concrete artifacts/actions/evidence produced. Do not stop at commands, patch suggestions, sample text, or "next steps" when the same work can be performed with available authorized tools.
+
+`REPORT_ONLY` suppresses repository writes but does not permit superficial analysis: still inspect the real target and establish the strongest evidence available. Explicit user, safety, repository, or harness constraints override either mode.
+
+Respect the selected stage's mutation boundary. A stage may write only the artifacts that stage owns. If evidence shows another stage is required, route explicitly to that stage rather than silently performing its work. For a request spanning multiple stages, preserve the normal sequence and acceptance boundaries instead of collapsing them into one mixed activity.
+
+Prefer action over clarification when ordinary context is discoverable. Infer repository target, current branch, workplan location, affected authorities, and equivalent low-risk details when evidence makes them unambiguous; state a material assumption when useful. Ask only when proceeding would require guessing a genuinely consequential requirement, authority, target, or irreversible action.
 
 ## Portable protocol-skill resolution
 
@@ -56,9 +69,12 @@ REPOSITORY_TARGET = [repository/worktree/branch; AUTO = current repository]
 GOVERNING_AUTHORITY = [product/Frozen/workplan authority to preserve; AUTO = discover relevant authority]
 PROTOCOL_SOURCE = [AUTO_LOCAL_FIRST = compatible installed skill/root first, then canonical public repository fallback; otherwise explicit source]
 PROTOCOL_REF = [AUTO = governing protocol version when declared, otherwise current compatible protocol; or explicit branch/tag/commit/version]
+EXECUTION_MODE = [AUTO_EXECUTE = perform this stage's authorized actions with available tools; REPORT_ONLY = inspect/report without repository writes; or explicit user delivery constraint]
 ADDITIONAL_CONSTRAINTS = [optional explicit user constraints; NONE if absent]
 
 Before substantive work, resolve REQUIRED_SKILL = software-design from PROTOCOL_SOURCE at PROTOCOL_REF. Under AUTO_LOCAL_FIRST, use a governing-version-compatible skill through a harness-native selector or documented exposed installed-skill root; selectors such as @software-design or /software-design are not shell commands. If no compatible local skill is readable, fall back to https://github.com/hjin98/software-development-protocol and load the canonical source skill plus required references at an evidence-backed compatible ref. If neither a compatible local installation/root nor the compatible public source can be read, report truthful non-closure and do not claim protocol execution from memory. Do not silently substitute a different protocol version.
+
+Under AUTO_EXECUTE, inspect REPOSITORY_TARGET and capture the baseline evidence now; do not merely tell the user which commands or metrics they could collect. This stage may record task-local baseline evidence but must not modify product implementation.
 
 Run this intake only when BASELINE_SCOPE is substantial or structurally risky enough that a before/after comparison will materially improve the quality-ratchet judgment. It is not a mandatory per-change gate.
 
@@ -81,9 +97,12 @@ EXISTING_AUTHORITIES = [existing workplans/specifications/architecture/method pa
 WORKPLAN_DESTINATION = [desired workplan path; AUTO = repository convention]
 PROTOCOL_SOURCE = [AUTO_LOCAL_FIRST = compatible installed skill/root first, then canonical public repository fallback; otherwise explicit source]
 PROTOCOL_REF = [AUTO = governing protocol version when task authority declares one, otherwise current compatible protocol; or explicit branch/tag/commit/version]
+EXECUTION_MODE = [AUTO_EXECUTE = perform this stage's authorized actions with available tools; REPORT_ONLY = inspect/report without repository writes; or explicit user delivery constraint]
 ADDITIONAL_CONSTRAINTS = [optional explicit user constraints; NONE if absent]
 
 Before substantive work, resolve REQUIRED_SKILL = software-design from PROTOCOL_SOURCE at PROTOCOL_REF. Under AUTO_LOCAL_FIRST, use a governing-version-compatible skill through a harness-native selector or documented exposed installed-skill root; selectors such as @software-design or /software-design are not shell commands. If no compatible local skill is readable, fall back to https://github.com/hjin98/software-development-protocol and load the canonical source skill plus required references at an evidence-backed compatible ref. If neither a compatible local installation/root nor the compatible public source can be read, report truthful non-closure and do not claim protocol execution from memory. Do not silently substitute a different protocol version.
+
+Under AUTO_EXECUTE, actually create or update the governing workplan at WORKPLAN_DESTINATION after inspecting the real repository and authorities; do not stop at design advice or an outline in chat when the workplan can be written. Design may modify design/workplan/review artifacts, but do not modify product implementation in this stage.
 
 If TASK is substantial or structurally risky and no useful baseline was supplied, first capture the minimum task-local Baseline/Change-Health evidence needed for later quality-ratchet comparison. Do not turn that preamble into a mandatory per-change gate or persistent ledger.
 
@@ -117,9 +136,12 @@ WORKPLAN = [governing workplan path/identifier]
 REPOSITORY_TARGET = [repository/worktree/branch to modify; AUTO = current repository]
 PROTOCOL_SOURCE = [AUTO_LOCAL_FIRST = compatible installed skill/root first, then canonical public repository fallback; otherwise explicit source]
 PROTOCOL_REF = [AUTO = WORKPLAN's governing protocol version when declared, otherwise current compatible protocol; or explicit branch/tag/commit/version]
+EXECUTION_MODE = [AUTO_EXECUTE = perform this stage's authorized actions with available tools; REPORT_ONLY = inspect/report without repository writes; or explicit user delivery constraint]
 ADDITIONAL_CONSTRAINTS = [optional explicit user constraints; NONE if absent]
 
 Before substantive work, resolve REQUIRED_SKILL = software-implementation from PROTOCOL_SOURCE at PROTOCOL_REF. Under AUTO_LOCAL_FIRST, use a governing-version-compatible skill through a harness-native selector or documented exposed installed-skill root; selectors such as @software-implementation or /software-implementation are not shell commands. If no compatible local skill is readable, fall back to https://github.com/hjin98/software-development-protocol and load the canonical source skill plus required references at an evidence-backed compatible ref. If neither a compatible local installation/root nor the compatible public source can be read, report truthful non-closure and do not claim protocol execution from memory. Do not silently substitute a different protocol version.
+
+Under AUTO_EXECUTE, this is the product/repository mutation stage: actually modify REPOSITORY_TARGET and its owned tests/documentation as required. Do not stop at a plan, code snippets, patch suggestions, or commands for the user to run when authorized write/execution tools are available. Follow explicit user/repository delivery and Git policy; otherwise leave a coherent directly inspectable candidate and report its identity.
 
 Implement WORKPLAN in full against REPOSITORY_TARGET. Treat its problem/product invariants and explicitly Frozen high-level architecture as binding; treat delegated machinery as replaceable.
 
@@ -151,9 +173,12 @@ IMPLEMENTATION_TARGET = [implemented branch/commit/worktree; AUTO = current impl
 RELATED_AUTHORITIES = [parent/relative workplans, architecture, specifications, method papers, contracts; AUTO = discover relevant authorities]
 PROTOCOL_SOURCE = [AUTO_LOCAL_FIRST = compatible installed skill/root first, then canonical public repository fallback; otherwise explicit source]
 PROTOCOL_REF = [AUTO = WORKPLAN's governing protocol version when declared, otherwise current compatible protocol; or explicit branch/tag/commit/version]
+EXECUTION_MODE = [AUTO_EXECUTE = perform this stage's authorized actions with available tools; REPORT_ONLY = inspect/report without repository writes; or explicit user delivery constraint]
 ADDITIONAL_CONSTRAINTS = [optional explicit user constraints; NONE if absent]
 
 Before substantive work, resolve REQUIRED_SKILL = software-design from PROTOCOL_SOURCE at PROTOCOL_REF. Under AUTO_LOCAL_FIRST, use a governing-version-compatible skill through a harness-native selector or documented exposed installed-skill root; selectors such as @software-design or /software-design are not shell commands. If no compatible local skill is readable, fall back to https://github.com/hjin98/software-development-protocol and load the canonical source skill plus required references at an evidence-backed compatible ref. If neither a compatible local installation/root nor the compatible public source can be read, report truthful non-closure and do not claim protocol execution from memory. Do not silently substitute a different protocol version. Use the resolved skill in independent implementation-review mode.
+
+Under AUTO_EXECUTE, perform the review against the actual candidate. Review must not modify production implementation, but Review & Update may update, reopen, or close the governing workplan/review lifecycle record when the verdict requires it and write access is available. Do not stop at findings alone when the requested stage explicitly includes Update.
 
 Review the assembled current implementation, not merely its diff or implementer summary. Prefer a fresh context where practical and reconstruct the contract independently from WORKPLAN, RELATED_AUTHORITIES, repository state, tests, and product paths.
 
@@ -182,9 +207,12 @@ GOVERNING_DESIGN = [Frozen architecture/specifications/workplans/product contrac
 SCIENTIFIC_AUTHORITIES = [method papers/equations/reference methods/domain documentation; AUTO = discover relevant authorities; NONE if non-scientific]
 PROTOCOL_SOURCE = [AUTO_LOCAL_FIRST = compatible installed skill/root first, then canonical public repository fallback; otherwise explicit source]
 PROTOCOL_REF = [AUTO = governing workplan/design protocol version when declared, otherwise current compatible protocol; or explicit branch/tag/commit/version]
+EXECUTION_MODE = [AUTO_EXECUTE = perform this stage's authorized actions with available tools; REPORT_ONLY = inspect/report without repository writes; or explicit user delivery constraint]
 ADDITIONAL_CONSTRAINTS = [optional explicit user constraints; NONE if absent]
 
 Before substantive work, resolve REQUIRED_SKILL = software-design from PROTOCOL_SOURCE at PROTOCOL_REF. Under AUTO_LOCAL_FIRST, use a governing-version-compatible skill through a harness-native selector or documented exposed installed-skill root; selectors such as @software-design or /software-design are not shell commands. If no compatible local skill is readable, fall back to https://github.com/hjin98/software-development-protocol and load the canonical source skill plus required references at an evidence-backed compatible ref. If neither a compatible local installation/root nor the compatible public source can be read, report truthful non-closure and do not claim protocol execution from memory. Do not silently substitute a different protocol version. Use the resolved skill in independent adversarial-verification mode.
+
+Under AUTO_EXECUTE, execute the strongest proportionate verification evidence available against the real candidate rather than returning a list of tests that someone else should run. Verification does not modify production implementation; route any required repair through the owning Design/Implementation path.
 
 Verify that IMPLEMENTATION_TARGET faithfully realizes the Frozen scientific, computational, product, and architectural design governing VERIFICATION_SCOPE. Prefer a fresh context and attempt to falsify claims rather than confirm the implementer's rationale.
 
@@ -208,9 +236,12 @@ IMPLEMENTATION_TARGET = [accepted branch/commit/worktree; AUTO = current impleme
 GOVERNING_AUTHORITY = [workplan/Frozen architecture/product constraints to preserve; AUTO = discover relevant authorities]
 PROTOCOL_SOURCE = [AUTO_LOCAL_FIRST = compatible installed skill/root first, then canonical public repository fallback; otherwise explicit source]
 PROTOCOL_REF = [AUTO = governing workplan/design protocol version when declared, otherwise current compatible protocol; or explicit branch/tag/commit/version]
+EXECUTION_MODE = [AUTO_EXECUTE = perform this stage's authorized actions with available tools; REPORT_ONLY = inspect/report without repository writes; or explicit user delivery constraint]
 ADDITIONAL_CONSTRAINTS = [optional explicit user constraints; NONE if absent]
 
 Before substantive work, resolve REQUIRED_SKILL = software-design from PROTOCOL_SOURCE at PROTOCOL_REF. Under AUTO_LOCAL_FIRST, use a governing-version-compatible skill through a harness-native selector or documented exposed installed-skill root; selectors such as @software-design or /software-design are not shell commands. If no compatible local skill is readable, fall back to https://github.com/hjin98/software-development-protocol and load the canonical source skill plus required references at an evidence-backed compatible ref. If neither a compatible local installation/root nor the compatible public source can be read, report truthful non-closure and do not claim protocol execution from memory. Do not silently substitute a different protocol version. Use the resolved skill in stabilization / architecture-GC mode.
+
+Under AUTO_EXECUTE, actually inspect the accepted realization for simplification opportunities and produce the stabilization verdict/evidence. Stabilization remains non-mutating: do not perform the refactor inside this stage even when the simplification is obvious.
 
 Run this stage only after STABILIZATION_SCOPE has otherwise passed ordinary implementation review. Ask whether the accepted Tier-2 realization would still be deliberately chosen today for the same product/Frozen contract.
 
@@ -233,9 +264,12 @@ FROZEN_PARENT_AUTHORITY = [parent workplan/design/architecture that remains auth
 IMPLEMENTATION_TARGET = [repository/worktree/branch containing the accepted upstream state; AUTO = current repository]
 PROTOCOL_SOURCE = [AUTO_LOCAL_FIRST = compatible installed skill/root first, then canonical public repository fallback; otherwise explicit source]
 PROTOCOL_REF = [AUTO = DOWNSTREAM_WORKPLAN/FROZEN_PARENT_AUTHORITY governing protocol version when declared, otherwise current compatible protocol; or explicit branch/tag/commit/version]
+EXECUTION_MODE = [AUTO_EXECUTE = perform this stage's authorized actions with available tools; REPORT_ONLY = inspect/report without repository writes; or explicit user delivery constraint]
 ADDITIONAL_CONSTRAINTS = [optional explicit user constraints; NONE if absent]
 
 Before substantive work, resolve REQUIRED_SKILL = software-design from PROTOCOL_SOURCE at PROTOCOL_REF. Under AUTO_LOCAL_FIRST, use a governing-version-compatible skill through a harness-native selector or documented exposed installed-skill root; selectors such as @software-design or /software-design are not shell commands. If no compatible local skill is readable, fall back to https://github.com/hjin98/software-development-protocol and load the canonical source skill plus required references at an evidence-backed compatible ref. If neither a compatible local installation/root nor the compatible public source can be read, report truthful non-closure and do not claim protocol execution from memory. Do not silently substitute a different protocol version.
+
+Under AUTO_EXECUTE, actually update DOWNSTREAM_WORKPLAN to the accepted current starting state; do not merely describe the edits. Alignment may modify the downstream workplan and its directly owned planning metadata, but must not modify production implementation.
 
 Re-align DOWNSTREAM_WORKPLAN with the accepted current state produced by UPSTREAM_ACCEPTED_WORK while FROZEN_PARENT_AUTHORITY remains binding unless explicitly reopened.
 
@@ -259,9 +293,12 @@ GOVERNING_ARCHITECTURE = [current architecture/product/scientific authorities; A
 PROTOCOL_SOURCE = [AUTO_LOCAL_FIRST = compatible installed skill/root first, then canonical public repository fallback; otherwise explicit source]
 PROTOCOL_REF = [AUTO = governing architecture/workplan protocol version when declared, otherwise current compatible protocol; or explicit branch/tag/commit/version]
 EXCLUSIONS = [explicitly excluded surfaces; NONE if absent]
+EXECUTION_MODE = [AUTO_EXECUTE = perform this stage's authorized actions with available tools; REPORT_ONLY = inspect/report without repository writes; or explicit user delivery constraint]
 ADDITIONAL_CONSTRAINTS = [optional explicit user constraints; NONE if absent]
 
 Before substantive work, resolve PREFERRED_SKILL = software-maintenance-audit from PROTOCOL_SOURCE at PROTOCOL_REF. Under AUTO_LOCAL_FIRST, use a governing-version-compatible skill through a harness-native selector or documented exposed installed-skill root; selectors such as @software-maintenance-audit or /software-maintenance-audit are not shell commands. If no compatible local specialist is readable, fall back to https://github.com/hjin98/software-development-protocol and load the canonical specialist plus required references at an evidence-backed compatible ref. If that governing protocol version has no maintenance-audit specialist, resolve FALLBACK_SKILL = software-design through the same local-root/public-source contract and use semantic-health audit mode. If neither a compatible local installation/root nor compatible public source for the required/fallback skill can be read, report truthful non-closure and do not claim protocol execution from memory. Do not silently substitute a different protocol version.
+
+Under AUTO_EXECUTE, inspect the real repository and available history and produce evidence-backed findings/routing now. Health Audit does not implement the repairs it discovers; route them through the authority rules below rather than silently refactoring the repository.
 
 This is a periodic long-horizon repository audit, not a feature review or approval gate. Inspect current state plus trustworthy history and prioritize change-sensitive risk rather than static ugliness. If history is unavailable, report static risks without fabricating churn/change-coupling trends.
 
@@ -294,9 +331,12 @@ IMPLEMENTATION_TARGET = [accepted branch/commit/worktree; AUTO = current reposit
 AFFECTED_DOCUMENTATION = [known documentation surfaces; AUTO = discover affected durable documentation]
 PROTOCOL_SOURCE = [AUTO_LOCAL_FIRST = compatible installed skill/root first, then canonical public repository fallback; otherwise explicit source]
 PROTOCOL_REF = [AUTO = COMPLETED_WORK governing protocol version when declared, otherwise current compatible protocol; or explicit branch/tag/commit/version]
+EXECUTION_MODE = [AUTO_EXECUTE = perform this stage's authorized actions with available tools; REPORT_ONLY = inspect/report without repository writes; or explicit user delivery constraint]
 ADDITIONAL_CONSTRAINTS = [optional explicit user constraints; NONE if absent]
 
 Before substantive work, resolve REQUIRED_SKILLS = [software-documentation, repository-hygiene] from PROTOCOL_SOURCE at PROTOCOL_REF when their respective triggers apply. Under AUTO_LOCAL_FIRST, resolve each skill independently through a harness-native selector or documented exposed governing-version-compatible installed-skill root; selectors such as @software-documentation, /software-documentation, @repository-hygiene, or /repository-hygiene are not shell commands. For each required skill not readable locally, fall back to https://github.com/hjin98/software-development-protocol and load its canonical specialist plus required references at an evidence-backed compatible ref. If neither a compatible local installation/root nor compatible public source can be read for a required skill, report truthful non-closure for that required closeout capability and do not claim protocol execution from memory. Do not silently substitute a different protocol version.
+
+Under AUTO_EXECUTE, actually perform the documentation, lifecycle, generated-artifact, and conservative hygiene work that Closeout authorizes when write access exists; do not return a cleanup checklist in place of the authorized actions. Closeout must not change product behavior.
 
 Run Closeout only after relevant implementation, Review, required Verification, Stabilization, and required qualification have closed.
 
@@ -311,16 +351,24 @@ Do not alter product behavior during Closeout. Route any semantic defect back to
 
 ## Stage-selection rule of thumb
 
-Use **Baseline / Change-Health Intake** when substantial or structurally risky work needs a compact before-state for later quality-ratchet comparison.
+Choose the stage by the **artifact and mutation boundary it must produce**, not by superficial wording in the request.
 
-Use **Review & Update** to ask: *Was this workplan implemented correctly?*
+Use **Baseline / Change-Health Intake** to capture a compact before-state when substantial or structurally risky work needs later quality-ratchet comparison; it does not modify product implementation.
 
-Use **Verification** to ask: *Are the scientific, product, numerical, and architectural claims actually true in the real implementation?*
+Use **Design / Workplan** to diagnose a problem and create or revise the authoritative implementation contract/Frozen architecture. Its primary executable artifact is the workplan, not product code.
 
-Use **Stabilization** to ask: *Even if correct, is the accepted realization now unnecessarily complicated?*
+Use **Implementation** to change product/repository behavior under an accepted contract and close semantic plus functional acceptance. If the user asks to implement, fix, refactor, or complete an accepted workplan, do not answer with another plan when the required repository actions are authorized and possible.
 
-Use **Alignment** to ask: *Does a not-yet-implemented downstream plan still describe the repository state after accepted predecessor work?*
+Use **Review & Update** to ask: *Was this workplan implemented correctly, and what governing workplan/lifecycle update follows from the verdict?* Review may update planning/review state but does not repair production code.
 
-Use **Health Audit** to ask: *Across time and multiple changes, is the repository accumulating structural/test/ownership risk faster than it is being resolved?*
+Use **Verification** to ask: *Are the scientific, product, numerical, and architectural claims actually true in the real implementation?* It gathers falsification evidence but does not repair production code.
 
-Use **Closeout** to make the accepted present system and repository lifecycle state coherent after engineering work is complete.
+Use **Stabilization** to ask: *Even if correct, is the accepted realization now unnecessarily complicated?* It is non-mutating and routes any simplification through the normal cycle.
+
+Use **Alignment** to ask: *Does a not-yet-implemented downstream plan still describe the repository state after accepted predecessor work?* Its output is the corrected downstream workplan, not downstream implementation.
+
+Use **Health Audit** to ask: *Across time and multiple changes, is the repository accumulating structural/test/ownership risk faster than it is being resolved?* It emits findings and routing, not broad repairs.
+
+Use **Closeout** to make the accepted present system and repository lifecycle state coherent after engineering work is complete through documentation, generated-artifact, lifecycle, and conservative hygiene actions without changing product behavior.
+
+When one user request spans stages, preserve the authority sequence. For example, `review and fix` means Review determines and records blockers -> Implementation performs the repair -> fresh Review when required; it does not authorize production edits inside Review.

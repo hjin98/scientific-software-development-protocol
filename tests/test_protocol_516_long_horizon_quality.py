@@ -123,6 +123,8 @@ class Protocol516LongHorizonQualityTests(unittest.TestCase):
             "trivial local change",
             "stateful restart or recovery defect",
             "missing repository history",
+            "execution stage performs work instead of returning instructions",
+            "mixed-stage request preserves mutation boundaries",
         ):
             self.assertIn(heading, self.scenarios)
 

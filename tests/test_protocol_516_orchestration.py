@@ -28,6 +28,12 @@ class Protocol516OrchestrationTests(unittest.TestCase):
         self.assertIn("do not claim protocol execution from memory", lower)
         self.assertIn("do not silently substitute a different protocol version", lower)
 
+    def assert_execution_mode_contract(self, block: str) -> None:
+        lower = block.lower()
+        self.assertIn("execution_mode =", lower)
+        self.assertIn("auto_execute", lower)
+        self.assertIn("report_only", lower)
+
     def test_prompt_reference_has_parameterized_stage_entrypoints(self) -> None:
         for stage in (
             "0. Baseline / Change-Health Intake",
@@ -44,6 +50,9 @@ class Protocol516OrchestrationTests(unittest.TestCase):
         self.assertGreaterEqual(self.prompt.count("INPUTS"), 9)
         self.assertIn("AUTO_LOCAL_FIRST", self.prompt)
         self.assertIn("PROTOCOL_REF", self.prompt)
+        self.assertGreaterEqual(self.prompt.count("EXECUTION_MODE"), 9)
+        self.assertIn("AUTO_EXECUTE", self.prompt)
+        self.assertIn("REPORT_ONLY", self.prompt)
 
     def test_baseline_is_user_discoverable_and_conditional(self) -> None:
         block = self.stage_block("0. Baseline / Change-Health Intake").lower()
@@ -69,6 +78,7 @@ class Protocol516OrchestrationTests(unittest.TestCase):
             "8. Closeout",
         ):
             self.assert_portable_resolution_contract(self.stage_block(heading))
+            self.assert_execution_mode_contract(self.stage_block(heading))
 
     def test_local_first_public_fallback_is_explicit(self) -> None:
         self.assertIn("local first, public repository second", self.lower)
@@ -110,6 +120,45 @@ class Protocol516OrchestrationTests(unittest.TestCase):
         self.assertIn("stabilization is non-mutating", stabilize)
         self.assertIn("periodic long-horizon repository audit", health)
         self.assertIn("not a feature review or approval gate", health)
+
+    def test_execution_contract_prefers_action_and_resolves_inferable_context(self) -> None:
+        self.assertIn("execution prompts", self.lower)
+        self.assertIn("do not stop at commands, patch suggestions, sample text, or \"next steps\"", self.lower)
+        self.assertIn("prefer action over clarification when ordinary context is discoverable", self.lower)
+        self.assertIn("ask only when proceeding would require guessing a genuinely consequential", self.lower)
+
+    def test_stage_execution_and_mutation_boundaries_are_explicit(self) -> None:
+        design = self.stage_block("1. Design / Workplan").lower()
+        implementation = self.stage_block("2. Implementation").lower()
+        review = self.stage_block("3. Review & Update").lower()
+        verify = self.stage_block("4. Verification").lower()
+        stabilize = self.stage_block("5. Stabilization / Architecture GC").lower()
+        align = self.stage_block("6. Alignment of a Downstream Workplan").lower()
+        health = self.stage_block("7. Health Audit").lower()
+        closeout = self.stage_block("8. Closeout").lower()
+
+        self.assertIn("actually create or update the governing workplan", design)
+        self.assertIn("do not modify product implementation", design)
+        self.assertIn("actually modify repository_target", implementation)
+        self.assertIn("do not stop at a plan", implementation)
+        self.assertIn("update, reopen, or close the governing workplan/review lifecycle record", review)
+        self.assertIn("must not modify production implementation", review)
+        self.assertIn("does not modify production implementation", verify)
+        self.assertIn("stabilization remains non-mutating", stabilize)
+        self.assertIn("actually update downstream_workplan", align)
+        self.assertIn("must not modify production implementation", align)
+        self.assertIn("health audit does not implement the repairs", health)
+        self.assertIn("actually perform the documentation, lifecycle, generated-artifact", closeout)
+        self.assertIn("must not change product behavior", closeout)
+
+    def test_stage_selection_covers_design_implementation_and_mixed_stage_routing(self) -> None:
+        selection = self.prompt[self.prompt.index("## Stage-selection rule of thumb"):].lower()
+        self.assertIn("artifact and mutation boundary", selection)
+        self.assertIn("use **design / workplan**", selection)
+        self.assertIn("use **implementation**", selection)
+        self.assertIn("if the user asks to implement, fix, refactor", selection)
+        self.assertIn("review and fix", selection)
+        self.assertIn("review determines and records blockers -> implementation performs the repair", selection)
 
     def test_no_source_means_truthful_nonclosure_in_each_stage(self) -> None:
         for heading in (

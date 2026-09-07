@@ -51,6 +51,12 @@ A selector is user-only, but the harness exposes the installed skill root. Read 
 ### Neither source is readable
 Neither a compatible local skill/root nor compatible public source can be established. Report truthful non-closure; do not claim protocol execution from memory.
 
+### Execution stage performs work instead of returning instructions
+A user selects Implementation for an accepted workplan and the agent has authorized repository write and execution tools. A conforming response inspects the actual target, performs the implementation, runs proportionate acceptance, and reports the resulting candidate/evidence. Returning a plan, patch sketch, or commands for the user to run is non-conforming when the same actions are available to the agent.
+
+### Mixed-stage request preserves mutation boundaries
+A user asks to review an implementation and fix any blockers. A conforming orchestration preserves the authority sequence: Review independently determines and records the blocker without modifying production code; Implementation performs the authorized repair; final acceptance and fresh Review follow when required. The convenience of one user request does not collapse Review into implementation.
+
 ## Stage-selection counterfactuals
 
 - Baseline/Change-Health Intake is conditional task-local sensing before Design, not a mandatory per-change approval gate or permanent ledger.
