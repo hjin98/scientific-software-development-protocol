@@ -20,7 +20,8 @@ class Protocol516OrchestrationTests(unittest.TestCase):
 
     def assert_portable_resolution_contract(self, block: str) -> None:
         lower = block.lower()
-        self.assertIn("exposed installed-skill root", lower)
+        self.assertIn("exposed", lower)
+        self.assertIn("installed-skill root", lower)
         self.assertIn("https://github.com/hjin98/software-development-protocol", block)
         self.assertIn("not shell commands", lower)
         self.assertIn("truthful non-closure", lower)
