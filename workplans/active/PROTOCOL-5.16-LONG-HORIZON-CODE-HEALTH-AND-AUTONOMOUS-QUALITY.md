@@ -579,3 +579,63 @@ correct patches
 ```
 
 The intended result is not a larger mandatory process. It is an earlier-warning, more falsifiable, more portable, and more autonomous control loop that helps agents preserve a coherent system over many development cycles instead of merely producing locally correct patches.
+
+## Independent Review & Update — Protocol 5.16 implementation blockers
+
+Independent Software Design review of implementation commit `642d9299d94690cd53d7c0d8db6da073c48221d0` returns **NO-PASS**. The Frozen Protocol 5.16 architecture remains valid; the findings below are bounded implementation nonconformances and do not authorize redesign.
+
+### R1 — Make the orchestration prompt contract-complete at the actual copied-stage boundary
+
+**Problem / violated authority:** Obligation 13 and acceptance requirements 6–8 require the canonical `source/shared/references/development-workflow-prompts.md` to make Baseline/change-health intake user-discoverable, preserve compatible-local-first/public-fallback/version-coherent resolution, use an exposed installed-skill root when selectors are user-only, report truthful non-closure when neither compatible source is readable, and keep Health Audit routing subordinate to existing Design/Implementation authority.
+
+The current implementation violates that contract in four connected ways:
+
+1. the visible prompt lifecycle starts at Design and the Design block has no Baseline/change-health prompt or unmistakable triggered preamble, while `README.md` and `source/README.md` claim the prompt provides an optional Baseline/Change-Health Intake entrypoint;
+2. `tests/test_protocol_516_orchestration.py` checks Baseline wording in `workflow-and-workplans.md` instead of asserting Baseline discoverability in the actual user-facing prompt, so the oracle can remain green while the accepted prompt contract is broken;
+3. individual stage blocks are documented as self-contained/copyable but do not independently preserve the exposed-installed-skill-root case and terminal `neither compatible local nor public source is readable -> truthful non-closure` behavior required by the workplan; and
+4. the Health Audit block routes a Tier-2 simplification candidate to a “bounded workplan and software-implementation” without preserving the accepted distinction that direct Implementation is valid only for a local Tier-2 repair under already-sufficient authority, while substantial maintenance needing a new/revised workplan must route through Software Design first.
+
+**Required end state / repair instructions:**
+
+- Add either a standalone optional **Baseline / Change-Health Intake** prompt or an unmistakable triggered Baseline preamble inside Design. It must be visible in the human-facing lifecycle and usable for substantial/structurally risky work without becoming a mandatory per-change gate or persistent metric ledger.
+- Keep each stage genuinely standalone. At the copied-stage boundary, resolve the required skill through: harness-native selector **or exposed governing-version-compatible installed-skill root** -> canonical public `source/` fallback -> truthful non-closure if neither compatible source is readable. Preserve selector-not-shell semantics and prohibit silent protocol-version upgrades. Do not add a resolver service, wrapper, new specialist, or per-harness doctrine copy.
+- Correct Health Audit routing: local Tier-2 repair under existing sufficient authority -> `software-implementation`; substantial maintenance/new or revised workplan -> `software-design` first; Frozen-architecture concern -> `software-design`.
+- Rewrite `tests/test_protocol_516_orchestration.py` to exercise the actual prompt/stage blocks rather than proxy wording in another reference. It must fail when Baseline is absent, an exposed installed-skill root is ignored, terminal no-source handling disappears, or Health Audit bypasses Design for a new/revised workplan.
+- Extend `qualification/long-horizon/SCENARIOS.md` with Baseline/change-health discoverability/conditionality. Reconcile `README.md`, `source/README.md`, and `PORTABILITY.md` only as needed so their claims match the actual prompt surface; include optional Baseline/change-health intake in the workflow-stage description where appropriate.
+
+**Acceptance:** the prompt itself satisfies all Obligation 13 portable-resolution cases and Baseline discoverability; stage-block tests protect those semantics counterfactually; no new lifecycle authority or resolver machinery is introduced; all prior Review/Verification/Stabilization/Health-Audit distinctions and version binding remain intact.
+
+### R2 — Remove exact Python checker identity from the acceptance oracle
+
+**Problem / violated authority:** `tests/test_protocol_516_long_horizon_quality.py::test_python_static_correctness_has_first_class_route` currently requires the literal tool names `ruff`, `pyright`, and `mypy`. Obligation 4 explicitly defines those as representative examples, keeps tool identity delegated, and requires language-profile tests to verify the route **without requiring any exact vendor/tool**. The Python profile prose is acceptable; the test oracle is the nonconforming surface.
+
+**Required end state / repair instructions:**
+
+- Replace exact checker-name assertions with semantic assertions that material Python work uses the project's configured fast lint/type/static analysis capabilities when they provide high-information evidence; that such tools are evidence rather than product truth; and that the protocol does not introduce a second checker/type/schema system solely for symmetry.
+- Keep representative tool names in prose if useful, but do not make their identities acceptance requirements.
+- Prefer a counterfactual test showing that replacing representative checker names with equivalent examples does not fail the protocol contract while removing the capability route does fail it.
+
+**Acceptance:** the executable test contract protects capability semantics and project configuration while allowing equivalent vendor/tool substitutions; no exact Python checker identity becomes Frozen or quasi-Frozen.
+
+### Rework scope and closure
+
+Expected repair surface is bounded to this active workplan/review record, `source/shared/references/development-workflow-prompts.md`, `tests/test_protocol_516_orchestration.py`, `tests/test_protocol_516_long_horizon_quality.py`, `qualification/long-horizon/SCENARIOS.md`, and `README.md` / `source/README.md` / `PORTABILITY.md` only where needed for consistency. Regenerate `dist/` only for canonical source surfaces that repository packaging actually includes and that changed.
+
+Do not introduce a new role, new specialist, resolver service, per-harness protocol copy, compatibility wrapper, or new testing framework to repair these findings. Prefer correcting the existing prompt and oracle surfaces.
+
+Re-run the complete repository acceptance workflow:
+
+```bash
+python -m pip install -r source/requirements-validation.txt
+python -m unittest discover -s tests -v
+python source/build_skills.py --output /tmp/protocol-dist
+python source/validate_packages.py --dist /tmp/protocol-dist
+python source/check_dist.py --expected /tmp/protocol-dist --committed dist
+git diff --check
+```
+
+Return the assembled repaired candidate for fresh Software Design Review & Update. The Protocol 5.16 workplan remains active until that review passes.
+
+### Design verdict
+
+**NO-PASS — bounded implementation repair required; Frozen architecture unchanged.**
