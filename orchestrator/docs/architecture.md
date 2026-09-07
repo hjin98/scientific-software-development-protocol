@@ -1,8 +1,8 @@
 ---
 kind: architecture
 architecture_id: SDP-ORCHESTRATOR
-architecture_version: 1.2.0
-supersedes_architecture_version: 1.1.0
+architecture_version: 1.3.0
+supersedes_architecture_version: 1.2.0
 protocol_version: 5.16.0
 status: frozen
 frozen_date: 2026-09-07
@@ -29,7 +29,7 @@ Level 3  Scheduler + metering + prediction + AUTO routing
 
 Every higher level requires the complete lower level. No lower level may require, import, instantiate, persist state for, or otherwise depend on a higher level in order to perform its accepted functions.
 
-This architecture is Tier 1B Frozen architecture for the orchestrator implementation series. Module workplans derive implementation obligations losslessly from it. They may choose delegated implementation details, but may not silently change dependency direction, authority boundaries, public API/SPI semantics, persistence ownership, capability roles, or module responsibilities.
+This architecture is Tier 1B Frozen architecture for the orchestrator implementation series. Module workplans derive implementation obligations losslessly from it. They may choose delegated realization details, but may not silently change dependency direction, authority boundaries, public API/SPI semantics, persistence ownership, capability roles, or module responsibilities.
 
 If implementation evidence invalidates a Frozen choice, reopen only the affected architecture surface before changing it.
 
@@ -48,11 +48,14 @@ If implementation evidence invalidates a Frozen choice, reopen only the affected
 11. **Private state stays outside project repositories.** Tracker and higher modules persist history/telemetry under user-local state roots, never in the protocol repository or target software repository by default.
 12. **Subset acceptance is permanent.** A later module may not make an earlier module's standalone acceptance depend on the later module.
 13. **Stable IDs cross modules; implementation objects do not.** Cross-module references use small value objects and opaque IDs, not private repositories, SQL/ORM objects, backend sessions, event loops, or subprocess instances.
-14. **Read-only query and durable mutation are visibly distinct.** Preview/query calls may not hide durable writes. Scheduler `preview` is read-only; `admit` is atomic and reserving.
-15. **Long-running execution is explicit.** Agent execution supports start, event observation, control/permission response, cancellation, and terminal result without exposing one backend's async/session implementation.
-16. **Manual and direct routes share one execution-route vocabulary.** A web/manual route is not a failed local route. It is a first-class route with different delivery and repository-access capabilities.
-17. **Capability identity is independent of API version.** Semantic capability keys do not embed `v1`; API compatibility is represented separately so a future v2 service can satisfy the same semantic capability without inventing another capability name.
-18. **Explicit route choice is not an admission bypass.** When Scheduler policy is active, an explicitly requested route bypasses ranking but still undergoes configured hard feasibility/resource admission. Scheduler may reject it but may not silently substitute another route.
+14. **Read-only query and durable mutation are visibly distinct.** Preview/query calls may not hide durable writes. Scheduler `preview` is read-only; admission is atomic and reserving.
+15. **Long-running execution is explicit.** Agent execution supports admission, start, event observation, control/permission response, cancellation, and terminal result without exposing one backend's async/session implementation.
+16. **Manual and direct routes share one route vocabulary.** A web/manual route is not a failed local route. It is a first-class route with different delivery, prompt-context, and repository-access capabilities.
+17. **Capability identity is independent of API version.** Semantic capability keys do not embed `v1`; API compatibility is represented separately.
+18. **Explicit route choice is not an admission bypass.** With Scheduler active, an explicitly requested route bypasses ranking but still undergoes configured hard feasibility/resource admission. It may be rejected but not silently substituted.
+19. **Route admission precedes final prompt rendering.** The selected route determines prompt context (`local`, `web`, or future mode), so AUTO/explicit route admission must be resolved before the final prompt is rendered for execution.
+20. **Run identity precedes both scheduling and rendering.** Core can allocate a `RunId` without persistence so Scheduler admission, prompt rendering, Tracker history, and Adapter execution refer to the same attempt.
+21. **Manual result tracking has a structured compatibility seam from day one.** Core prompts request a versioned result envelope carrying run/fingerprint identity. Tracker can later ingest it without changing the Prompt API.
 
 ## 3. Capability ladder and distributions
 
@@ -72,13 +75,13 @@ No durable workflow history, agent process, benchmark refresh, metering, or sche
 
 ### 3.2 Level 1 — Tracker
 
-Adds persistent development history, prompt/output association, manual response ingestion, current development projection, active/retired workplan history, PASS/NO-PASS and stale-evidence handling, next-action recommendation, and text/JSON/graph query surfaces.
+Adds persistent development history, prompt/output association, manual response ingestion, current development projection, active/retired workplan history, PASS/NO-PASS and stale-evidence handling, next-action recommendation, persistent user workplan selection, and text/JSON/graph query surfaces.
 
 All agent I/O may remain manual.
 
 ### 3.3 Level 2 — Adapters
 
-Adds configured routes, direct structured agent integration, one-command execution of a user-selected route, manual-web route catalog/handoff integration, online benchmark collection, and static capability recommendation.
+Adds configured routes, direct structured agent integration, manual-web handoff routes, one-command execution of a selected route, online benchmark collection, and static capability recommendation.
 
 There is no quota metering, usage prediction, or resource-aware automatic route selection at this level. Without Scheduler, execution requires an explicit route or explicit user-configured default.
 
@@ -157,7 +160,7 @@ Adding optional response fields with safe defaults, new methods, new namespaced 
 
 Existing callers must not be forced to enumerate every future stage, model, effort, event, status, or error value.
 
-Persisted schema, event schema, benchmark source schema, and API major versions are independent dimensions.
+Persisted schema, event schema, benchmark-source schema, digest/canonicalization schemes, and API major versions are independent dimensions.
 
 ### 5.3 Public records
 
@@ -167,7 +170,7 @@ Rules:
 
 - timestamps serialize as timezone-aware ISO-8601 UTC;
 - IDs serialize as opaque strings;
-- digests use `DigestRef`;
+- digests preserve cryptographic algorithm and canonicalization scheme;
 - request parsing rejects unsupported required semantics rather than silently dropping them;
 - response consumers tolerate additive optional fields;
 - public records never contain open file handles, DB connections, subprocess/SDK/session objects, event loops, locks, or mutable repository objects.
@@ -186,7 +189,7 @@ Cursor representation is opaque and valid only for the owning API/query contract
 
 ### 5.5 Problems/errors
 
-Do not freeze a broad exception hierarchy. Public failures use:
+Public failures use one stable envelope rather than a broad exception hierarchy:
 
 ```text
 Problem
@@ -196,9 +199,7 @@ Problem
   details: mapping
 ```
 
-Python APIs raise `OrchestratorError` carrying `Problem`. CLI maps `Problem.code` to deterministic exit behavior and stderr diagnostics.
-
-Core generic classes include namespaced meanings such as invalid request, not found, ambiguous, incompatible, unavailable, conflict, stale, permission required, timeout, and cancelled. Modules add their own namespaced codes. Consumers branch on `code`, never message text.
+Python APIs raise `OrchestratorError` carrying `Problem`. CLI maps `Problem.code` to deterministic exit behavior/stderr diagnostics. Modules add namespaced codes; consumers branch on code, not message text.
 
 ### 5.6 Idempotency and mutation semantics
 
@@ -208,18 +209,20 @@ Durable mutation methods return a receipt/identity when retry matters.
 
 - Tracker event recording is idempotent by `EventId`.
 - Manual result ingestion is idempotent for the same result artifact/run binding.
+- Tracker workplan selection is idempotent for the same project/selection binding.
+- Adapter admission is idempotent for the same run/admission request.
 - Adapter start creates at most one active execution per `RunId`; ambiguous transport start must reconcile before retry creates another execution.
-- Adapter control responses are idempotent by stable control-request identity where the backend permits a deterministic acknowledgement.
-- Scheduler admission is idempotent by `RunId` + admission-request fingerprint: exact retry returns the same active admission; a conflicting request for the same run fails with conflict.
-- Scheduler reconciliation is idempotent by reconciliation identity and may not double-charge or double-release reservations.
+- Adapter control responses are idempotent by stable control-request identity where the backend supports deterministic acknowledgement.
+- Scheduler admission is idempotent by `RunId` + admission-request fingerprint; exact retry returns the same active admission, conflicting retry fails.
+- Scheduler release/reconciliation are idempotent and may not double-release/double-charge reservations.
 
 ### 5.7 Sync/async boundary
 
-Core, Tracker, benchmark catalog/query, and Scheduler planning services are synchronously callable. Adapter long-running execution uses explicit run handles and event/control methods rather than exposing a backend coroutine/event loop. Implementations may use asyncio internally.
+Core, Tracker, benchmark catalog/query, Adapter admission, and Scheduler planning/admission services are synchronously callable. Adapter long-running execution uses explicit handles/event/control methods rather than exposing backend coroutine/event loops. Implementations may use asyncio internally.
 
 ### 5.8 Two-stage API freeze
 
-This architecture freezes semantic roles, method families, mutation/idempotency behavior, required identity dimensions, and inter-module ownership. Each module workplan may finalize exact Pydantic field spelling and private realization only within these semantics. Once that module passes independent Review, its accepted `api.v1`/required `spi.v1` wire/model schema becomes the compatibility floor for later modules.
+This architecture freezes semantic roles, method families, mutation/idempotency behavior, required identity dimensions, and inter-module ownership. Each module workplan may finalize exact Pydantic field spelling and private realization only within these semantics. Once a module passes independent Review, its accepted `api.v1`/required `spi.v1` schemas become the compatibility floor for later modules.
 
 ## 6. Core composition SPI
 
@@ -235,7 +238,7 @@ Do not scan arbitrary directories or import repository/user files as plugins.
 
 ### 6.2 Capability identity and service versions
 
-`CapabilityKey` names a semantic service and does **not** embed an API version. Initial first-party keys include:
+`CapabilityKey` names a semantic service and does not embed an API version. Initial first-party keys:
 
 ```text
 prompt.render
@@ -252,21 +255,19 @@ usage.predict
 route.schedule
 ```
 
-Version compatibility is represented separately:
+Version compatibility is separate:
 
 ```text
 CapabilityRequirement
   key: CapabilityKey
-  api_spec: version/specifier constraint
+  api_spec
   multiplicity: singular | many
 
 CapabilityProvision
   key: CapabilityKey
-  api_major: int
+  api_major
   multiplicity: singular | many
 ```
-
-This removes double-versioning such as `agent.execute.v1` plus `api_major=1`.
 
 ### 6.3 Extension manifest
 
@@ -292,19 +293,13 @@ class ExtensionProvider(Protocol):
     def activate(self, context: ExtensionContext) -> ExtensionRegistration: ...
 ```
 
-`ExtensionContext` exposes only versioned services needed for composition: effective Core configuration plus the provider's namespace, already-activated required services, CLI registrar, config-schema registrar, process-local event publisher/sink registrar, and diagnostics.
+`ExtensionContext` exposes only versioned services needed for composition: effective Core config plus provider namespace, already-activated required services, CLI registrar, config-schema registrar, process-local event publisher/sink registrar, and diagnostics.
 
 Activation is dependency-topological. Incompatible/failed providers disable themselves and dependents while healthy lower capabilities continue.
 
-### 6.5 Service registry and application API
+### 6.5 Service registry/application API
 
-Services register under `CapabilityKey + api_major + provider_id`.
-
-- singular capability: at most one active primary service for one requested major;
-- many capability: multiple providers returned in stable provider-ID order;
-- registration never silently replaces another singular service.
-
-Core exports:
+Services register under `CapabilityKey + api_major + provider_id`. Singular capabilities have one active primary service for a requested major; multi-provider capabilities return stable provider-ID ordering; registration never silently replaces a singular service.
 
 ```python
 class ApplicationAPI(Protocol):
@@ -318,34 +313,23 @@ class ApplicationAPI(Protocol):
 def create_application(request: ApplicationRequest | None = None) -> ApplicationAPI: ...
 ```
 
-A missing/disabled/incompatible service returns a structured problem, not an import-time crash. Concrete constructors remain private.
+Missing/disabled/incompatible capability returns a structured problem, not import-time crash.
 
 ### 6.6 CLI ownership
 
-The first module defining a semantic command owns that command. Later modules extend behavior only through lower-defined hooks/subcommands; they do not replace handlers.
-
-Adapter owns `sdp run`. Scheduler extends omitted/explicit-route admission through Adapter's route-policy SPI.
+The first module defining a semantic command owns it. Later modules extend behavior through lower-defined hooks/subcommands, not handler replacement. Adapter owns `sdp run`; Scheduler extends route admission through Adapter route-policy SPI.
 
 ### 6.7 Configuration registration
 
-Core owns one config resolution path. Extensions contribute exactly one namespaced validated section/default provider. Precedence:
-
-```text
-built-in defaults
-  -> config/profile
-  -> documented environment allowlist
-  -> explicit CLI/API override
-```
-
-Unknown sections belonging to absent extensions are preserved/diagnosed rather than interpreted. Secrets remain references/environment/approved secret-store inputs.
+Core owns one config resolution path. Extensions contribute one namespaced validated section/default provider. Precedence is defaults -> config/profile -> documented environment allowlist -> explicit CLI/API override. Unknown absent-extension sections are preserved/diagnosed. Secrets remain references/approved secret inputs.
 
 ### 6.8 Event publication
 
-Core owns the generic process-local event publisher. Extension sinks are at-least-once within the process attempt when retry is practical and must therefore be idempotent by `EventId`. Sink failure cannot counterfeit the primary lower-module result; the owning extension reports/degrades its own health as appropriate.
+Core owns a generic process-local event publisher. Extension sinks are at-least-once within a process attempt when retry is practical and are idempotent by `EventId`. Sink failure cannot counterfeit a primary lower-module result.
 
 ## 7. Core shared records
 
-Core owns only cross-module concepts that exist independently of higher modules.
+Core owns only concepts existing independently of higher modules.
 
 ### 7.1 Stable identifiers
 
@@ -358,17 +342,18 @@ CapabilityKey
 ExtensionId
 ```
 
-`RouteId`, model/backend/account/transport/effort identities belong to Adapter API, not Core.
+Route/model/backend/account/transport/effort identities belong to Adapter API, not Core.
 
 ### 7.2 DigestRef
 
 ```text
 DigestRef
-  algorithm
-  value
+  algorithm: str
+  canonicalization_scheme: str | None
+  value: str
 ```
 
-Initial canonical algorithm is SHA-256. Consumers do not assume fixed digest length for all future algorithms.
+Initial cryptographic algorithm is SHA-256. Domain digests that depend on canonicalization must carry a versioned scheme such as `sdp.prompt-fingerprint.v1`, `sdp.workplan-semantic.v1`, or `sdp.git-working-tree.v1`. Changing canonicalization without changing the scheme is forbidden.
 
 ### 7.3 StageRef
 
@@ -382,11 +367,12 @@ WorkplanRef
   protocol_version
   path
   artifact_digest: DigestRef
-  semantic_digest: DigestRef
+  semantic_digest: DigestRef | None
+  semantic_identity_complete: bool
   lifecycle_state
 ```
 
-Lifecycle-only movement/status bookkeeping may alter path/artifact digest while preserving semantic digest. Substantive authority change alters semantic digest.
+Semantic identity is protocol-profile/schema aware and deterministic; it does not use an LLM to guess what text is semantic. Lifecycle-only movement/status may preserve semantic digest. When the profile cannot confidently distinguish lifecycle-only fields from authority, set `semantic_identity_complete=false`; Tracker then invalidates conservatively on artifact change rather than manufacturing equivalence.
 
 ### 7.5 CandidateRef
 
@@ -395,18 +381,16 @@ CandidateRef
   repository_id
   branch_or_detached
   head_commit
-  working_tree_digest | None
+  working_tree_digest: DigestRef | None
   identity_complete: bool
   upstream_ref | None
   observed_remote_commit | None
   observed_at
 ```
 
-Material staged/unstaged/untracked source changes alter `working_tree_digest`. If relevant dirty state cannot be fingerprinted confidently, `identity_complete=false`.
+Material staged/unstaged/untracked source changes alter the versioned working-tree digest. If relevant dirty state cannot be fingerprinted confidently, `identity_complete=false`.
 
 ### 7.6 ProjectDescriptor versus prompt-safe context
-
-Core must distinguish local execution data from prompt-safe data.
 
 ```text
 ProjectDescriptor
@@ -418,11 +402,9 @@ ProjectDescriptor
   configuration_identity
 ```
 
-`ProjectDescriptor` is local process data for trusted lower/higher modules; it is never automatically embedded into a web prompt.
+`ProjectDescriptor` is trusted local-process data and is not automatically embedded in web prompts.
 
-`PromptProjectSnapshot` contains only execution-mode-safe repository/workplan/candidate context. In web mode it excludes local absolute paths, private state paths, secrets, account/resource telemetry, and credential-bearing remotes.
-
-This distinction prevents Adapter from importing Core config internals merely to obtain a local working directory while preserving the web privacy boundary.
+`PromptProjectSnapshot` contains only execution-mode-safe repository/workplan/candidate context. Web mode excludes local absolute paths, private state, secrets, account/resource telemetry, and credential-bearing remotes.
 
 ### 7.7 EventEnvelope
 
@@ -438,20 +420,44 @@ EventEnvelope
   payload
 ```
 
-Event type values are namespaced/versioned (for example `core.prompt.rendered.v1`). Events are evidence, not workflow authority. Tracker may persist unknown future event types opaquely.
+Event types are namespaced/versioned. Events are evidence, not workflow authority. Tracker may persist unknown future event types opaquely.
+
+### 7.8 StageResultEnvelope v1
+
+Core defines the minimum structured result contract requested in every rendered prompt so future Tracker/Adapter integration does not require changing Prompt semantics:
+
+```text
+StageResultEnvelope
+  schema_version
+  run_id
+  prompt_fingerprint
+  stage
+  outcome
+  recommended_next_stage | None
+  blockers: tuple[structured summary, ...]
+  completed_obligations: tuple[str, ...]
+  pending_obligations: tuple[str, ...]
+  checks_executed: tuple[structured summary, ...]
+  checks_unavailable: tuple[structured summary, ...]
+  candidate: CandidateRef | None
+  summary: str | None
+```
+
+Outcome/stage/check status values are extensible strings, not closed enums. The envelope is reported evidence, not authority. Core only requests/renders the schema; it does not persist or interpret result semantics.
 
 ## 8. Core / Prompt Module
 
 ### 8.1 Responsibilities
 
-Core owns CLI/application composition, project config/catalog, read-only Git/workplan observation, protocol-profile/stage catalog, canonical prompt loading/substitution, local/web prompt rendering, run/prompt identity, stdout/optional clipboard, and capability/doctor reporting.
+Core owns CLI/application composition, project config/catalog, read-only Git/workplan observation, protocol-profile/stage catalog, canonical prompt loading/substitution, local/web prompt rendering, run/prompt/result-envelope identity, stdout/optional clipboard, and capability/doctor reporting.
 
-Core does not own durable workflow history, next-stage inference from prior results, agent processes, benchmarks, resources, or scheduling.
+Core does not own durable workflow history, next-stage inference, agent processes, benchmarks, resources, or scheduling.
 
 ### 8.2 CoreAPI v1
 
 ```python
 class CoreAPI(Protocol):
+    def allocate_run_id(self) -> RunId: ...
     def projects(self, query: ProjectQuery | None = None) -> Page[ProjectDescriptor]: ...
     def get_project(self, project: ProjectKey) -> ProjectDescriptor: ...
     def list_stages(self, project: ProjectKey) -> tuple[StageDescriptor, ...]: ...
@@ -460,11 +466,11 @@ class CoreAPI(Protocol):
     def render(self, request: PromptRequest) -> RenderedPrompt: ...
 ```
 
-These methods are read-only with respect to target repositories. They may read Git/workplans and explicitly requested read-only remote state but never silently pull/merge/rebase/push/edit.
+`allocate_run_id` creates an opaque non-secret identifier only; it performs no persistence. `render` accepts an optional caller-supplied `RunId`; if absent, Core allocates one.
 
-### 8.3 Observation network policy
+All methods are read-only with respect to target repositories. They may perform explicitly requested read-only remote observation but never silently pull/merge/rebase/push/edit.
 
-Network use is explicit in requests:
+### 8.3 Observation policy
 
 ```text
 ObservationPolicy
@@ -472,48 +478,50 @@ ObservationPolicy
   max_remote_staleness | None
 ```
 
-Programmatic default is `local_only` unless the caller/configuration explicitly requests otherwise. Results carry provenance/freshness. `UNKNOWN`/stale is preferable to hidden network I/O or invented freshness.
+Programmatic default is `local_only` unless explicitly configured/requested otherwise. Results carry provenance/freshness. Unknown/stale is preferable to hidden network I/O or invented freshness.
 
 ### 8.4 Workplan catalog
 
-`workplans()` is paginated because archives can grow without bound. It reports active/archive descriptors, exact + semantic fingerprints, lifecycle consistency, and selection evidence. It does not guess among materially plausible workplans by mtime.
+`workplans()` is paginated because archives can grow. It reports active/archive descriptors, exact + semantic identity completeness, lifecycle consistency, and selection evidence. It does not guess materially ambiguous plans by mtime.
 
-`ProjectObservation` includes the current workplan resolution state when one is unambiguous/configured; ambiguity remains explicit.
-
-### 8.5 PromptRequest v1 semantics
+### 8.5 PromptRequest v1
 
 ```text
+run_id: RunId | None
 project: ProjectKey
 stage: StageRef
-execution_mode: local | web
+execution_mode: local | web | future compatible data value
 workplan_selector: optional explicit selector
 first_task: optional description for workplan-free Design
-input_overrides: declared prompt input -> value
+input_overrides
 observation_policy: optional ObservationPolicy
 ```
-
-Execution mode is an extensible data value; v1 validates at least `local` and `web`.
 
 ### 8.6 RenderedPrompt v1
 
 ```text
-run_id: RunId
+run_id
 prompt_text
 prompt_fingerprint: DigestRef
-stage: StageRef
-prompt_source: PromptSourceRef
+stage
+prompt_source
 resolved_inputs + provenance
 prompt_context: PromptProjectSnapshot
 selected_workplan: WorkplanRef | None
+requested_result_schema: StageResultEnvelope schema identity
 ```
 
 `prompt_text` is the complete copy/paste artifact. Diagnostics/recommendations are not inserted into prompt stdout.
 
 ### 8.7 Prompt fingerprint v1
 
-Core renders the full prompt using a fixed fingerprint placeholder after `RunId` is known, computes SHA-256 over exact UTF-8 bytes of that placeholder-form artifact, then substitutes `sha256:<hex>`. The placeholder token/normalization rule are frozen by WP-1 compatibility fixtures. A future scheme uses a new explicit fingerprint scheme/version.
+Core renders the full prompt using a fixed fingerprint placeholder after `RunId` is known, computes SHA-256 over exact UTF-8 bytes of that placeholder-form artifact under canonicalization scheme `sdp.prompt-fingerprint.v1`, then substitutes `sha256:<hex>`. WP-1 freezes the literal placeholder and byte-normalization fixture. A future scheme changes the canonicalization scheme identifier.
 
-### 8.8 Core-only CLI
+### 8.8 Core prompt footer
+
+Every prompt includes compact machine-readable instructions asking the agent to return `StageResultEnvelope v1` with matching `RunId` and prompt fingerprint when possible. The human-readable response remains unrestricted. The footer must not require hidden chain-of-thought.
+
+### 8.9 Core-only CLI
 
 ```text
 sdp prompt <stage>
@@ -526,17 +534,17 @@ sdp capabilities
 sdp doctor
 ```
 
-Prompt command stdout contains only the complete prompt. Ambiguous workplans require bounded explicit selection. Core must operate offline from a compatible packaged prompt snapshot when local information is sufficient.
+Prompt command stdout contains only the complete prompt. Ambiguous workplans require bounded explicit selection. Core operates offline from a compatible packaged prompt snapshot when local information is sufficient.
 
-### 8.9 Core dependencies
+### 8.10 Core dependencies
 
-Expected: `platformdirs`, `typer`, `pydantic`, `python-frontmatter`, `packaging`. Clipboard may be an optional `pyperclip` extra. Core does not require `filelock`, ACP, `httpx`, ML, or higher modules.
+Expected: `platformdirs`, `typer`, `pydantic`, `python-frontmatter`, `packaging`. Clipboard may be optional `pyperclip`. Core does not require `filelock`, ACP, `httpx`, ML, or higher modules.
 
 ## 9. Tracker Module
 
 ### 9.1 Responsibilities
 
-Tracker owns user-local SQLite history/migrations, run/event history, prompt/output association, manual result ingestion, workplan history, derived development projection, stale/ambiguous evidence handling, next-action recommendation, history/workplan/graph interfaces, retention/export/purge, and storage coordination for higher modules.
+Tracker owns private SQLite history/migrations, run/event/prompt/output history, manual result ingestion, workplan observation/history and user selection, derived development projection, stale/ambiguous evidence handling, next-action recommendation, graph/history/workplan interfaces, retention/export/purge, and storage coordination for higher modules.
 
 Tracker does not run agents or rank online benchmarks.
 
@@ -550,15 +558,26 @@ class TrackerAPI(Protocol):
     def next_action(self, request: NextActionRequest) -> NextAction: ...
     def get_run(self, run_id: RunId) -> TrackedRun: ...
     def history(self, query: HistoryQuery) -> Page[RecordedEvent]: ...
+    def workplans(self, query: TrackedWorkplanQuery) -> Page[TrackedWorkplan]: ...
+    def select_workplan(self, request: WorkplanSelectionRequest) -> WorkplanSelectionReceipt: ...
+    def graph(self, request: WorkflowGraphRequest) -> WorkflowGraph: ...
 ```
 
 `StatusRequest`/`NextActionRequest` include project + observation policy so callers control remote freshness/network cost. Tracker reconciles current public Core observations before current-state claims.
 
-`record` is idempotent by `EventId`. `ingest` binds to Core `RunId` + prompt fingerprint and is idempotent for the exact same result artifact. Wrong-run/ambiguous results fail safely or require explicit bounded confirmation.
+### 9.3 Manual result ingestion
 
-### 9.3 RecordedEvent
+Ingestion precedence:
 
-History exposes Tracker recording order separately from producer wall clock:
+1. valid `StageResultEnvelope` whose run/fingerprint match known prompt identity;
+2. bounded deterministic strong markers when structured output is absent;
+3. explicit user confirmation/selection when still ambiguous.
+
+Tracker does not silently call an LLM to reinterpret arbitrary pasted text for basic state classification. Pasted content is untrusted data and cannot issue orchestrator commands.
+
+Re-ingesting the same artifact is idempotent. Wrong-run/mismatched fingerprint fails safely unless the user explicitly binds it after seeing the mismatch.
+
+### 9.4 RecordedEvent and ordering
 
 ```text
 RecordedEvent
@@ -567,15 +586,23 @@ RecordedEvent
   event: EventEnvelope
 ```
 
-This makes replay/history deterministic even when producer clocks differ. `occurred_at` remains source provenance, not the sole total-order authority.
+Recording order is separate from producer wall-clock `occurred_at`, giving deterministic replay under differing clocks.
 
-### 9.4 DevelopmentProjection
+### 9.5 DevelopmentProjection
 
-The projection is bounded current/summary state, not full history. It minimally identifies current candidate/workplan/protocol, stage attempts/outcomes summary, stale/ambiguous/inconsistent evidence, current blockers, recommended next stage/action with reason codes, and observation freshness. Detailed attempts remain in history.
+Bounded current/summary state identifies current candidate/workplan/protocol, stage attempts/outcomes summary, stale/ambiguous/inconsistent evidence, current blockers, recommended next stage/action with reason codes, and observation freshness. Detailed attempts remain in history.
 
-Execution status and semantic outcome are separate.
+Execution status and semantic outcome remain distinct.
 
-### 9.5 Tracker storage
+### 9.6 Workplan selection
+
+`select_workplan` records a private user preference, not repository authority. It is used only while compatible with current Core workplan evidence. If the selected artifact disappears, becomes semantically incompatible, or conflicts with explicit task input, Tracker reports stale/ambiguous rather than forcing the old selection.
+
+### 9.7 WorkflowGraph
+
+Tracker exposes a structured graph of allowed Protocol-stage relations overlaid with observed attempts/outcomes/current recommendation. Graph data is canonical; rendering is presentation. CLI must support text plus at least one machine-readable form (JSON). Mermaid/DOT are optional renderers and do not require graph-library authority.
+
+### 9.8 Tracker storage
 
 ```text
 <platform state>/sdp-orchestrator/
@@ -586,7 +613,7 @@ Execution status and semantic outcome are separate.
 
 SQLite/WAL is v1 durable control storage. `filelock` begins here for migration/process coordination and later run ownership.
 
-### 9.6 TrackerStorageSPI v1
+### 9.9 TrackerStorageSPI v1
 
 ```python
 class TrackerStorageSPI(Protocol):
@@ -594,9 +621,9 @@ class TrackerStorageSPI(Protocol):
     def transaction(self, extension: ExtensionId, *, write: bool) -> ContextManager[sqlite3.Connection]: ...
 ```
 
-Tracker owns DB opening/configuration, migration ordering, backup/recovery policy, and transaction boundaries. Extensions own namespaced tables and may not alter/read another module's semantic tables directly; cross-module semantic reads use APIs. SQLite is honestly part of this SPI major. Scheduler may use transactions across its own resource/reservation tables atomically.
+Tracker owns DB opening/configuration, migration ordering, backup/recovery policy, and transaction boundaries. Extensions own namespaced tables and may not alter/read another module's semantic tables directly; cross-module semantic reads use APIs. SQLite is honestly part of this SPI major.
 
-### 9.7 Tracker CLI
+### 9.10 Tracker CLI
 
 ```text
 sdp status
@@ -608,22 +635,21 @@ sdp use <workplan>
 sdp graph ...
 ```
 
-Without Tracker these commands need not exist; Core remains fully functional.
+Without Tracker these commands need not exist; Core remains functional.
 
 ## 10. Adapter Module
 
 ### 10.1 Responsibilities
 
-Adapter owns agent/backend/account/model/effort route identity, manual/direct delivery modes, structured transports, execution lifecycle, benchmark-source providers/cache/identity resolution, static capability recommendation, route probing, and automatic tracking of direct/manual-run state through Tracker.
+Adapter owns route/model/backend/account/effort identity, manual/direct delivery, prompt-context requirements per route, structured transports, pre-render execution admission, execution lifecycle, benchmark source/cache/identity resolution, static capability recommendation, route probing, and automatic tracking through Tracker.
 
-It does not own resource ledgers or quota-aware selection.
+Adapter does not own quota/resource ledgers.
 
-### 10.2 Adapter-owned route identities
-
-Adapter `api.v1` owns:
+### 10.2 Adapter-owned identities
 
 ```text
 RouteId
+ExecutionAdmissionId
 ModelRef
 BackendRef / HarnessRef
 AccountRef
@@ -632,11 +658,9 @@ EffortRef
 ObservedExecutionIdentity
 ```
 
-`RouteId` is a stable configured opaque key, not a hash of mutable display fields.
+Route IDs are stable configured opaque keys, not hashes of mutable display fields.
 
 ### 10.3 ExecutionRoute v1
-
-A route is configured execution identity:
 
 ```text
 ExecutionRoute
@@ -647,13 +671,18 @@ ExecutionRoute
   model
   effort
   delivery_mode: direct | manual_handoff
-  repository_access: local_worktree | remote_connector | other supported data value
+  prompt_execution_mode: local | web | compatible future value
+  repository_access: local_worktree | remote_connector | compatible future value
   configured capability metadata
 ```
 
-Manual-web routes are first-class. They can participate in recommendation and later Scheduler AUTO selection. They do not pretend to be direct subprocess routes.
+Manual-web routes are first-class for recommendation and Scheduler AUTO. `prompt_execution_mode` is explicit rather than inferred from delivery because a future direct cloud route may still require web/remote-safe prompt context.
 
-### 10.4 AdapterAPI v1
+### 10.4 Route identity resolution
+
+Internal model/route identities are stable local keys distinct from external benchmark slugs/display names. Adapter owns one alias/mapping resolver shared by benchmark providers. Automatic mapping requires sufficient provider/model/effort evidence; ambiguous aliases require explicit configuration. Source-specific effort labels are normalized inside source mappings, not through a Core closed enum.
+
+### 10.5 AdapterAPI v1
 
 ```python
 class AdapterAPI(Protocol):
@@ -661,54 +690,71 @@ class AdapterAPI(Protocol):
     def probe(self, route: RouteId) -> RouteCapabilitySnapshot: ...
     def benchmarks(self, query: BenchmarkQuery) -> Page[BenchmarkObservation]: ...
     def recommend(self, request: RecommendationRequest) -> RecommendationSet: ...
-    def start(self, request: AgentExecutionRequest) -> AgentRunHandle: ...
+    def admit(self, request: ExecutionAdmissionRequest) -> ExecutionAdmission: ...
+    def abandon(self, request: ExecutionAdmissionAbandonRequest) -> ExecutionAdmissionReceipt: ...
+    def start(self, request: AgentStartRequest) -> AgentRunHandle: ...
     def events(self, request: AgentEventQuery) -> Page[AgentEvent]: ...
     def respond(self, request: AgentControlResponse) -> AgentControlReceipt: ...
     def cancel(self, run_id: RunId) -> AgentControlReceipt: ...
     def wait(self, request: AgentWaitRequest) -> AgentRunResult: ...
 ```
 
-### 10.5 AgentExecutionRequest and route policy
+### 10.6 Pre-render execution admission
 
-Request includes Core `RenderedPrompt` binding, optional requested `RouteId`, expected project/candidate, interaction/permission policy, and whether manual handoff is allowed.
+`ExecutionAdmissionRequest` is built from current Core/Tracker state **before final prompt rendering** and includes:
 
-If no active route-policy provider exists:
+- `RunId` already allocated by Core;
+- project/stage/task/workplan/candidate identity;
+- optional requested RouteId;
+- interaction/manual-handoff constraints;
+- required route capabilities/tooling/privacy constraints;
+- Adapter-generated candidate route snapshots/capability evidence.
 
-- explicit route is used;
-- otherwise an explicit user-configured default may be used;
-- otherwise return route-required; Adapter does not choose the highest benchmark automatically.
+If no route-policy provider exists, Adapter admits the explicit route or explicit configured default and otherwise returns route-required. It does not automatically choose the highest benchmark.
 
-If a route-policy provider is active, Adapter consults it for **every** execution:
+If a route-policy provider exists, Adapter passes the bounded candidate route snapshots to it:
 
-- explicit route: provider validates/admit/reserves that exact route; it may reject but may not substitute another route;
-- no route: provider may select/admit a route according to its policy (Scheduler AUTO);
-- provider returns an opaque admission reference carried through terminal reconciliation.
+- explicit route is either admitted unchanged or rejected;
+- omitted route may be selected automatically;
+- provider does not need to call back re-entrantly into Adapter admission to enumerate candidates.
 
-This resolves both AUTO routing and explicit-route resource safety without command replacement.
+`ExecutionAdmission` returns `ExecutionAdmissionId`, `RunId`, selected route, `prompt_execution_mode`, candidate binding, optional opaque policy-admission reference, expiration/revalidation conditions, and reason metadata.
 
-### 10.6 Manual handoff lifecycle
+### 10.7 Render after admission
 
-For `delivery_mode=manual_handoff`, `start` does not spawn an agent process. It uses the existing Core/Tracker prompt/run binding and returns an `AgentRunHandle` in an awaiting-external-result state plus a `ManualHandoffArtifact` suitable for clipboard/stdout presentation.
+The application flow for `sdp run` is Frozen at the semantic level:
 
-The user supplies the external response through Tracker ingestion. Adapter/Tracker can then expose terminal result state for the run. `wait` may observe completion or timeout; unsupported direct control operations return a structured problem rather than fabricating a local process.
+```text
+Core.allocate_run_id
+  -> observe/resolve stage + current candidate/workplan
+  -> Adapter.admit(route explicit/default/AUTO policy)
+  -> Core.render(using same RunId + admitted route.prompt_execution_mode)
+  -> Adapter.start(using exact admission + rendered prompt)
+```
 
-Thus manual mode remains usable without Adapter, while Adapter can represent it uniformly once installed and Scheduler can later select it.
+`AgentStartRequest` must bind the same RunId/stage/candidate and prompt mode as the admission. Adapter rejects mismatches/stale admission rather than starting with a prompt rendered for another route context.
 
-### 10.7 Direct execution lifecycle
+If rendering/user confirmation fails after admission but before start, caller invokes `Adapter.abandon`; admission expiration is a fail-safe, not the normal cleanup mechanism.
 
-For direct routes, `start` returns promptly with a stable handle, `events` yields normalized user/tool/permission/status events via cursor pages, `respond` addresses stable control-request IDs, `cancel` is idempotent, and `wait` returns terminal result or timeout without implicitly destroying the underlying run.
+### 10.8 Manual handoff lifecycle
 
-One `RunId` has at most one concurrently active Adapter execution. Ambiguous start/crash must reconcile before another execution is created.
+For `delivery_mode=manual_handoff`, `start` does not spawn a process. It uses the admitted route + rendered prompt and returns a handle in awaiting-external-result state plus `ManualHandoffArtifact` for clipboard/stdout. User response arrives through Tracker ingestion. `wait` may observe resulting completion or timeout. Direct process controls return a structured unsupported/unavailable problem.
 
-### 10.8 AgentRunResult v1
+Manual Core/Tracker copy-paste remains possible without Adapter; Adapter only gives that lower flow a common route/run abstraction when installed.
 
-Terminal result separates execution terminal status from agent-reported workflow semantics. It includes run/route identity, configured route, `ObservedExecutionIdentity` with confidence/provenance, backend/session identity where available, final visible response, structured result when available, candidate observations, interruption/failure class, transport telemetry, and Tracker-ingestion evidence.
+### 10.9 Direct execution lifecycle
 
-Configured/planned model identity and observed actual identity remain separate, especially for manual web products whose serving/model routing may not be externally confirmable.
+For direct routes, `start` returns promptly with stable handle; `events` yields normalized user/tool/permission/status events via cursors; `respond` addresses stable control-request IDs; `cancel` is idempotent; `wait` returns terminal result or timeout without implicitly destroying the run.
 
-A zero process exit never manufactures workflow PASS.
+One RunId has at most one concurrently active execution. Ambiguous start/crash is reconciled before another execution can be created.
 
-### 10.9 Agent transport SPI v1
+### 10.10 AgentRunResult v1
+
+Result separates execution terminal status from agent-reported workflow semantics. It includes run/admission/route identity, configured route, `ObservedExecutionIdentity` with provenance/confidence, backend/session identity where available, visible final response, structured result when available, candidate observations, interruption/failure class, transport telemetry, and Tracker-ingestion evidence.
+
+Planned/configured identity and observed actual model/backend identity remain distinct, especially for manual web/provider-side routing. Zero process exit does not manufacture workflow PASS.
+
+### 10.11 Agent transport SPI v1
 
 ```python
 class AgentTransportProvider(Protocol):
@@ -721,28 +767,21 @@ class AgentTransportProvider(Protocol):
     def wait(self, request: TransportWaitRequest) -> TransportTerminalResult: ...
 ```
 
-Prefer ACP when sufficiently conformant; use documented native structured RPC/SDK/JSON when needed. PTY scraping is not primary when structured transport exists. Initial backend families remain Claude, Codex, OMP, Pi, and Antigravity.
+Prefer ACP when sufficiently conformant; use documented native structured RPC/SDK/JSON fallbacks where needed. PTY scraping is not primary when structured transport exists. Initial backend families remain Claude, Codex, OMP, Pi, and Antigravity.
 
-### 10.10 Route-policy SPI v1
+### 10.12 Route-policy SPI v1
 
 ```python
 class RoutePolicyProvider(Protocol):
     def preview(self, request: RoutePolicyRequest) -> RoutePolicyDecision: ...
-    def admit(self, request: RoutePolicyRequest) -> RouteAdmission: ...
+    def admit(self, request: RoutePolicyRequest) -> RoutePolicyAdmission: ...
+    def abandon(self, request: RoutePolicyAbandonment) -> RoutePolicyReceipt: ...
     def reconcile(self, request: RoutePolicyReconciliation) -> RoutePolicyReceipt: ...
 ```
 
-`RoutePolicyRequest` includes `RunId`, stage/task identity, configured candidate context, requested route if any, and interaction/manual-handoff constraints.
+Preview is read-only. Admit may reserve/mutate. Explicit route is admitted unchanged or rejected; omitted route may be selected. Abandon handles pre-start release; reconcile handles started/terminal/manual-result outcomes. Operations are idempotent.
 
-- preview is read-only;
-- admit may reserve/mutate;
-- explicit requested route is either admitted unchanged or rejected;
-- omitted route may be selected by provider;
-- reconciliation is idempotent.
-
-Without provider, Adapter remains explicit/default-route only.
-
-### 10.11 Benchmark source SPI and observations
+### 10.13 Benchmark source SPI
 
 ```python
 class BenchmarkSourceProvider(Protocol):
@@ -751,34 +790,21 @@ class BenchmarkSourceProvider(Protocol):
     def normalize(self, raw: RawBenchmarkSnapshot) -> BenchmarkSnapshot: ...
 ```
 
-Snapshots preserve source identity/schema/version, fetched/generated timestamps, content digest/ETag, source/license/attribution metadata, and contextual observations.
+Snapshots preserve source/schema/version, fetched/generated times, digest/ETag, licensing/attribution, and observations. Observations preserve metric/direction/value/unit, uncertainty, external model identity, effort, harness/config, benchmark version, freshness, and identity-match quality.
 
-Observation preserves metric/direction/value/unit, uncertainty, external model identity, effort, harness/configuration, benchmark version, freshness, and internal identity-match quality.
+Artificial Analysis is the preferred current general-intelligence source; DeepSWE is the preferred current coding evidence source. Exact endpoints/tier limits are mutable provider configuration, not Frozen architecture. Never fabricate missing scores.
 
-### 10.12 Artificial Analysis
-
-Preferred general-intelligence source is the official Artificial Analysis Data API. Current endpoint/version details are adapter defaults, not Frozen architecture. Preserve API/index version, stable upstream identity, source freshness, rate/error semantics, private API-key handling, attribution/licensing, and last-known-good/unavailable behavior. Never fabricate a score.
-
-### 10.13 DeepSWE
-
-Preferred coding evidence is current DeepSWE data. Treat results as harness + model + effort/config observations. Preserve match quality:
-
-```text
-EXACT_CONFIG_MATCH
-MODEL_EFFORT_PROXY
-MODEL_ONLY_PROXY
-UNRESOLVED
-```
-
-A score from one harness is not relabeled as measured success of another. Endpoint/schema changes fail clearly and are handled by provider updates.
+DeepSWE evidence preserves `EXACT_CONFIG_MATCH`, `MODEL_EFFORT_PROXY`, `MODEL_ONLY_PROXY`, or `UNRESOLVED`; a score from one harness is not relabeled as measured success of another.
 
 ### 10.14 Recommendation policy
 
-Design/architecture/difficult diagnosis prioritize current general-intelligence evidence among eligible routes. Implementation/repair prioritize current DeepSWE/coding evidence, exact configuration first. Review/Verification prioritize high general intelligence and may display provider/model independence as a secondary signal.
+Design/architecture/difficult diagnosis prioritize current general-intelligence evidence among eligible routes. Implementation/repair prioritize current coding evidence, exact configuration first. Review/Verification prioritize high general intelligence and may display model/provider independence as secondary robustness evidence.
 
-Do not invent a universal scalar combining incompatible Intelligence Index and DeepSWE measures. Missing evidence is UNSCORED, not zero.
+Do not combine incompatible Intelligence Index and DeepSWE measures into one universal scalar absent separate validated design. Missing evidence is UNSCORED, not zero.
 
-### 10.15 Adapter CLI
+### 10.15 Adapter dependencies/CLI
+
+ACP support is an optional transport dependency; `httpx` is justified for bounded benchmark/source HTTP. Adapter does not require Scheduler/ML.
 
 ```text
 sdp agents
@@ -789,13 +815,13 @@ sdp recommend <stage>
 sdp run <stage> --route <route-id>
 ```
 
-A manual route may make `sdp run` produce/copy a handoff artifact and mark the run awaiting external result instead of launching a process.
+Manual route may produce/copy handoff artifact and remain awaiting external result.
 
 ## 11. Scheduler Module
 
 ### 11.1 Responsibilities
 
-Scheduler owns resource ledgers/meters, pricing/opaque quota representation, reset/window inference, global reservations/uncertainty holds, usage attribution, task features, usage/outcome prediction, future-stage reserves, route admission/scoring, AUTO selection, and quota/provider interruption rescheduling.
+Scheduler owns resource ledgers/meters, pricing/opaque quota representation, reset/window inference, global reservations/uncertainty holds, usage attribution, task features, usage/outcome prediction, future-stage reserves, route admission/scoring, AUTO selection, and interruption rescheduling.
 
 Scheduler never launches agents directly.
 
@@ -803,40 +829,53 @@ Scheduler never launches agents directly.
 
 ```python
 class SchedulerAPI(Protocol):
-    def resources(self, query: ResourceQuery | None = None) -> ResourceProjection: ...
+    def resources(self, query: ResourceQuery | None = None) -> Page[ResourceState]: ...
     def usage(self, query: UsageQuery) -> Page[UsageRecord]: ...
     def predict(self, request: PredictionRequest) -> UsagePrediction: ...
     def preview(self, request: ScheduleRequest) -> ScheduleDecision: ...
     def admit(self, request: ScheduleRequest) -> AdmissionDecision: ...
+    def release(self, request: AdmissionReleaseRequest) -> AdmissionReleaseReceipt: ...
     def reconcile(self, request: ReservationReconciliationRequest) -> ReservationReconciliation: ...
 ```
 
-Preview is read-only. Admit atomically re-observes required resource state, revalidates feasibility, selects/validates route, and creates required reservations in one DB transaction.
+Preview is read-only. Admit atomically re-observes required resource state, revalidates feasibility, selects/validates route, and creates reservations in one DB transaction.
 
 ### 11.3 ScheduleRequest explicit versus AUTO
 
-`ScheduleRequest` includes `RunId`, project/stage/task features, optional requested `RouteId`, interaction/manual-handoff constraints, candidate/workplan identity, and policy overrides.
+Schedule request includes RunId, project/stage/task features, candidate/workplan identity, bounded Adapter-supplied candidate route snapshots, optional requested RouteId, interaction/manual-handoff constraints, and policy overrides.
 
-- requested route present: evaluate that exact route only; do not replace it with a cheaper/better route;
-- requested route absent: AUTO may choose among feasible routes;
-- manual-handoff route is feasible only when the request permits user-mediated handoff;
-- direct route is required for unattended execution unless another supported automatic transport exists.
+- requested route: evaluate that exact route only;
+- omitted route: AUTO may choose among feasible candidates;
+- manual route requires allowed user-mediated handoff;
+- unattended execution requires a direct/automatable route.
 
-### 11.4 Admission idempotency
+### 11.4 Admission idempotency and release
 
-Admission computes an `admission_request_fingerprint` over all semantics that affect feasibility/reservation. `admit` is idempotent for `(RunId, fingerprint)`: exact retry returns the same live admission/reservation identities. A different fingerprint for the same run while admission is active returns conflict unless the old admission has been explicitly reconciled/cancelled according to policy.
+Admission request fingerprint covers all semantics affecting feasibility/reservation. `admit` is idempotent for `(RunId, fingerprint)`: exact retry returns same live admission; conflicting request for same live run fails.
 
-This prevents duplicate reservations after caller/transport retry ambiguity.
+`release` idempotently abandons an admission that never started and releases/retains reservations according to meter uncertainty. It is the Scheduler implementation of Adapter route-policy abandonment. Expiration is fail-safe cleanup, not normal success path.
 
 ### 11.5 AdmissionDecision
 
-Records selected route, run/project/stage/task identity, admission/fingerprint, decision time, binding resource observations/freshness, prediction quantiles, reservation IDs/amounts, rejected alternatives/reasons, score/explanation components, and expiration/revalidation conditions.
+Records selected route, run/project/stage/task identity, admission/fingerprint, decision time, binding meter observations/freshness, prediction quantiles, reservation IDs/amounts, rejected alternatives/reason codes, explanation components, and expiration/revalidation conditions.
 
-### 11.6 Resource model
+### 11.6 Resource ledger model
 
-Routes consume zero or more Scheduler-owned ledgers. Ledgers preserve allowance visibility, expiration, reset/window semantics, funding behavior, source/provenance/freshness, and reservations/uncertainty holds.
+A route consumes zero or more Scheduler-owned ledgers. Each ledger preserves:
 
-`UNMETERED_FOR_SCHEDULER`, `METERED`, and `UNKNOWN` are distinct. Shared account quota is represented once and referenced by all consuming routes. Dual windows are simultaneous constraints. Opaque quota remains in observed provider units; PAYG uses versioned pricing rather than invented token equivalents for opaque quota.
+```text
+allowance_visibility: OPAQUE | PRICED
+expiration: EXPIRING | NON_EXPIRING
+reset_semantics:
+  NONE | FIRST_USE_ANCHORED | ACCOUNT_FIXED | BILLING_CYCLE |
+  CALENDAR_FIXED | CONTINUOUS_ROLLING | UNKNOWN
+funding_behavior:
+  HARD_STOP | FALLBACK_TO_OVERAGE | POSTPAID
+meter/source/provenance/freshness
+reservations/uncertainty holds
+```
+
+`UNMETERED_FOR_SCHEDULER`, `METERED`, and `UNKNOWN` remain distinct route/resource states. Shared account quota is represented once and referenced by all routes; dual short/long windows are simultaneous constraints. Opaque quota stays in observed provider units. Transparent PAYG uses versioned pricing functions.
 
 ### 11.7 Meter SPI
 
@@ -846,47 +885,39 @@ class AccountMeterProvider(Protocol):
     def observe(self, request: MeterRequest) -> MeterSnapshot: ...
 ```
 
-Prefer official/machine-readable sources. Browser scraping is not normal. Observations preserve source, unit, time/freshness, confidence, and account identity.
+Prefer official/machine-readable sources; browser scraping is not normal. Preserve source/unit/time/freshness/confidence/account identity.
 
 ### 11.8 Reservation/reconciliation
 
-Before metered direct execution, admit reserves predicted capacity on every consumed ledger atomically. Manual unmetered routes may need no quota reservation but still produce an admission record when Scheduler selected them.
+Metered direct execution reserves predicted capacity on every consumed ledger atomically. Manual/unmetered route may need no quota reservation but still receives admission identity when Scheduler selected it.
 
-If execution dies before final meter state is known, preserve uncertainty holds rather than releasing as zero usage. Provider hard-limit/current meter observations outrank stale predictions.
-
-Reconciliation is idempotent and correlates planned route with observed execution identity where available.
+If execution dies before final meter state is known, preserve uncertainty holds rather than release as zero. Provider current hard limits/meters outrank stale predictions. Reconciliation is idempotent and correlates planned route with observed execution identity when available.
 
 ### 11.9 Prediction
 
 Predict distributions for runtime, consumption per ledger, billable token categories where relevant, monetary cost, probability of stage-quality completion, interruption probability, and future repair rounds.
 
-Cold start uses interpretable priors by stage/role x model x effort x backend/transport with project corrections. Early learning uses empirical quantiles/EWMA/shrinkage without mandatory ML. Persist calibration evidence. Optimize expected resource/cash cost to accepted stage completion, not merely first-call use.
+Cold start uses interpretable priors by stage/role x model x effort x backend/transport with project corrections. Early learning uses empirical quantiles/EWMA/shrinkage without mandatory ML. Persist calibration evidence. Optimize expected resource/cash cost to accepted completion, not only first-call usage.
 
 ### 11.10 Scheduling policy
 
-AUTO is default omitted-route policy only when Scheduler is active. Hard feasibility precedes ranking. Feasibility includes capability/effort, tools/skills, repository access, privacy/security, session independence, backend health, interaction constraints, predicted capacity, and protected future Review/Design reasoning reserve.
+AUTO is default omitted-route policy only when Scheduler is active. Hard feasibility precedes ranking. Feasibility includes stage capability/effort, tools/skills, repository access, privacy/security, session independence, backend health, interaction constraints, predicted capacity, and protected future Review/Design reasoning reserve.
 
 Ranking may consider quality-completion probability, interruption risk, future reasoning capacity, expiring quota opportunity cost, PAYG cost, manual handoff/continuity, independence/diversity, and latency. Decisions remain explainable.
 
 ### 11.11 Adapter integration
 
-Scheduler implements Adapter `RoutePolicyProvider`:
+Scheduler implements Adapter `RoutePolicyProvider`. Adapter supplies route candidates and requested-route/AUTO intent; Scheduler preview/admit validates/selects; Adapter receives an admission and then causes Core to render for the selected route mode; Adapter starts direct/manual execution; pre-start failure invokes abandon/release; terminal/manual-result completion invokes reconcile.
 
-- Adapter passes requested route or AUTO request;
-- Scheduler preview/admit validates explicit route or chooses omitted route;
-- Adapter executes/directs manual handoff using returned route/admission ref;
-- Adapter terminal/manual ingestion reconciliation returns to Scheduler;
-- Scheduler reconciles resource/usage state.
-
-Scheduler therefore never replaces `sdp run` and Adapter never imports Scheduler.
+Scheduler never replaces `sdp run`; Adapter never imports Scheduler.
 
 ### 11.12 Persistence
 
-Scheduler adds namespaced tables/migrations to the Tracker-owned user-global SQLite DB through Tracker SPI. Quota/account state is global across projects. Scheduler does not modify Tracker workflow tables directly.
+Scheduler adds namespaced tables/migrations to Tracker's user-global SQLite DB through Tracker SPI. Quota/account state is global across projects. Scheduler does not modify Tracker workflow tables directly.
 
 ## 12. Configuration ownership
 
-Core owns canonical config loading and `ProjectKey`. Extensions contribute namespaced validated sections.
+Core owns canonical config loading and ProjectKey. Extensions contribute namespaced validated sections.
 
 ```toml
 [core]
@@ -907,19 +938,17 @@ mode = "hybrid"
 
 Unknown absent-extension sections are preserved/diagnosed. Secrets remain references or approved secret inputs, never ordinary history/config snapshots.
 
-## 13. Persistence and event ownership
+## 13. Persistence/event ownership
 
-Core is stateless across invocations except configuration and bounded prompt/cache artifacts.
-
-Tracker introduces persistence. Higher modules extend it through Tracker SPI.
+Core is stateless across invocations except configuration and bounded prompt/cache artifacts. Tracker introduces persistence; higher modules extend it through Tracker SPI.
 
 - one SQLite DB may contain multiple extension table families, each with one semantic owner;
-- only the owner writes its tables;
+- only owner writes its tables;
 - semantic cross-module reads use APIs;
 - migration order follows dependency order;
-- removing a higher extension leaves lower data readable/functional;
+- removing higher extension leaves lower data readable/functional;
 - raw prompt/output and numeric telemetry have separable retention;
-- persisted state remains private local evidence, not repository authority.
+- persisted state is private local evidence, not repository authority.
 
 ## 14. CLI capability behavior
 
@@ -943,6 +972,7 @@ sdp status
 sdp ingest
 sdp history
 sdp workplans
+sdp use <workplan>
 sdp graph
 ```
 
@@ -955,7 +985,7 @@ sdp benchmarks ...
 sdp run <stage> --route <id>
 ```
 
-No resource-aware AUTO exists. Manual routes are valid explicit/default routes.
+No resource-aware AUTO. Manual routes are valid explicit/default routes.
 
 ### + Scheduler
 
@@ -969,43 +999,41 @@ sdp run <stage>
 
 With Scheduler active, omitted route may AUTO-select. Explicit route bypasses ranking but not configured hard compatibility/resource admission.
 
-Failure of Scheduler must not make Adapter explicit/manual route operation unavailable when resource policy permits downgrade. Failure of Adapter disables dependent Scheduler but leaves Tracker/Core manual operation.
-
 ## 15. Failure/degradation rules
 
 ```text
 Scheduler unavailable
-  -> Adapter explicit/default routes + benchmark recommendation
+  -> Adapter explicit/default/manual routes + benchmark recommendation
 
 one direct transport unavailable
-  -> disable that direct route; manual/other direct routes remain
+  -> disable that route; manual/other direct routes remain
 
 Adapter unavailable
   -> Tracker manual copy/paste remains
 
 Tracker DB unavailable/corrupt
-  -> Tracker/Adapter/Scheduler report unavailable
+  -> Tracker/Adapter/Scheduler unavailable
   -> Core prompt rendering remains
 ```
 
-A module advertises only capabilities whose semantic contract is actually healthy.
+A module advertises only healthy semantic capabilities.
 
-## 16. Security and privacy
+## 16. Security/privacy
 
 - Plugin entry points are trusted installed code, not a sandbox.
-- Manual pasted agent output, structured agent results, benchmark/meter responses, and remote metadata are untrusted data: bound size/time/schema before persistence/use and never execute instructions from them as control commands.
-- API keys/tokens never enter prompts, benchmark caches, events, logs, or repository files.
-- Web prompt context excludes local absolute paths/private state/account/resource telemetry/credential-bearing remotes.
+- Pasted agent output, structured results, benchmark/meter responses, and remote metadata are untrusted data: enforce size/time/schema bounds and never execute instructions from them as orchestrator commands.
+- API keys/tokens never enter prompts, caches, events, logs, or repositories.
+- Web prompt context excludes local paths/private state/account/resource telemetry/credential-bearing remotes.
 - ProjectDescriptor local paths remain local process data.
-- Agent subprocesses use direct argv/structured transports with explicit permission handling; no dangerous permission bypass by default.
-- Historical transcripts are not automatically re-injected into future prompts; only bounded structured projection is automatic.
-- Benchmark source licensing/attribution metadata travels with cached observations.
+- Agent subprocesses use direct argv/structured transports with explicit permissions; no dangerous bypass by default.
+- Historical transcripts are not automatically injected into later prompts; only bounded structured projection is automatic.
+- Benchmark licensing/attribution travels with cached observations.
 
 ## 17. Benchmark recommendation integrity
 
-Every recommendation using online evidence is reconstructible from source snapshots/observations. Display/record source, metric, version, generated/fetched time, model + effort + harness/config, value/uncertainty, identity-match quality, and staleness when material.
+Every recommendation using online evidence is reconstructible from source snapshot/observation. Preserve source, metric, benchmark/index version, source-generated/fetched time, model + effort + harness/config, value/uncertainty, identity-match quality, and staleness.
 
-Do not compare incompatible benchmark/index versions as a stable scale. Do not combine Artificial Analysis Intelligence Index and DeepSWE pass@1 into one universal scalar absent separate validated design.
+Do not compare incompatible benchmark/index versions as one stable scale. Do not combine Artificial Analysis Intelligence Index and DeepSWE pass@1 into one universal scalar without separate validated design.
 
 ## 18. Executable architecture fitness
 
@@ -1018,27 +1046,27 @@ Adapters    may import Core + Tracker public API/SPI only
 Scheduler   may import Core + Tracker + Adapters public API/SPI only
 ```
 
-Also check native PEP 420 namespace packaging, one extension entry-point group, no private cross-module imports, and single ownership of `sdp run`.
+Also check native PEP 420 namespace packaging, one extension entry-point group, no private cross-module imports, and one ownership of `sdp run`.
 
 ## 19. Module acceptance ladder
 
-Each module is implemented, independently reviewed, and accepted before the next workplan begins.
+Each module is implemented, independently reviewed, and accepted before next workplan.
 
 ### WP-1 Prompt
 
-Must prove Core-only install/CLI; project catalog/descriptor; read-only local observation/workplan paging; explicit remote observation policy; prompt rendering and privacy; ambiguous workplans not guessed; RunId/fingerprint scheme; composition with no extensions; API/SPI serialization/error/idempotency fixtures; no higher imports/persistence.
+Prove Core-only install/CLI; project descriptor/catalog; run-ID preallocation; read-only observation/workplan paging; versioned workplan/candidate digest schemes and incomplete-identity behavior; explicit remote observation policy; prompt rendering/privacy; ambiguity handling; prompt fingerprint; StageResultEnvelope footer; composition with no extensions; API/SPI serialization/error fixtures; no higher imports/persistence.
 
 ### WP-2 Tracker
 
-Must re-prove Prompt standalone with/without Tracker plus event/result idempotency, correct run association, fresh Core observation through public API, deterministic RecordedEvent pagination, bounded development projection, persistence/restart, storage SPI/migrations/ownership, and Core usability when Tracker disabled/deleted.
+Re-prove Prompt standalone with/without Tracker plus event/result idempotency; structured/manual ingestion precedence; correct run association; fresh Core observation; deterministic RecordedEvent paging; persistent but subordinate workplan selection; bounded status; structured workflow graph; persistence/restart; storage SPI; Core usability when Tracker disabled/deleted.
 
 ### WP-3 Adapter
 
-Must re-prove lower acceptance plus direct and manual-handoff route lifecycles, explicit route/default behavior, route-policy SPI with no provider and fake provider, start/events/respond/cancel/wait semantics, planned versus observed execution identity, automatic tracking, benchmark provenance/identity mapping/failure degradation, capability recommendation separation, and no quota-aware selection.
+Re-prove lower acceptance plus manual/direct routes; pre-render admission -> render -> start ordering; explicit/default behavior; route-policy SPI with no/fake provider; admission abandonment; prompt-mode binding; start/events/respond/cancel/wait; planned-vs-observed identity; automatic tracking; benchmark provenance/central identity mapping/failure degradation; capability recommendation separation; no quota-aware selection.
 
 ### WP-4 Scheduler
 
-Must re-prove lower acceptance plus read-only preview, atomic/idempotent admit, explicit-route validation without substitution, omitted-route AUTO, manual-handoff route scheduling, shared/dual-window ledgers, cross-project reservation, UNMETERED versus UNKNOWN, prediction/calibration, future-review reserve, PAYG/expiring quota behavior, idempotent reconciliation/uncertainty holds, Adapter route-policy integration, and Scheduler disablement restoring Adapter behavior.
+Re-prove lower acceptance plus read-only preview; atomic/idempotent admit; pre-start release; explicit-route validation without substitution; omitted-route AUTO; manual-handoff scheduling; shared/dual-window ledgers; cross-project reservation; UNMETERED vs UNKNOWN; prediction/calibration; future-review reserve; PAYG/expiring quota behavior; idempotent reconciliation/uncertainty holds; Adapter route-policy integration; Scheduler disablement restoring Adapter behavior.
 
 ## 20. Lossless module-workplan derivation
 
@@ -1055,7 +1083,7 @@ Each workplan declares:
 
 ```text
 parent_architecture: orchestrator/docs/architecture.md
-parent_architecture_version: 1.2.0
+parent_architecture_version: 1.3.0
 required_lower_module_api_versions: ...
 module_capabilities_delivered: ...
 forbidden_higher_module_dependencies: ...
@@ -1065,47 +1093,43 @@ Each workplan carries relevant parent invariants, module responsibilities/non-re
 
 Do not pre-implement later modules merely for future convenience. The API/SPI seams and stable IDs here are the justified future-facing surface.
 
-## 21. Versioning and evolution
+## 21. Versioning/evolution
 
-Architecture versioning:
-
-- major: breaks module ladder, authority model, dependency direction, or public API role boundaries;
+- architecture major: breaks ladder, authority, dependency direction, or API role boundaries;
 - minor: backward-compatible architecture/API strengthening before/alongside module adoption;
 - patch: clarification without semantic change.
 
-1.2.0 supersedes 1.1.0 because this second pre-implementation review materially strengthened route/capability/project/admission contracts before WP-1.
+1.3.0 supersedes 1.2.0 because this review corrected execution ordering and result/tracker API contracts before WP-1.
 
-Module package versions are independent and declare compatible lower API/SPI majors.
+Module package versions are independent and declare compatible lower API/SPI majors. New benchmark sources implement Adapter SPI; new transports implement Adapter SPI; new meters/pricing implement Scheduler SPI. Ordinary provider/model/benchmark/flag/predictor churn does not reopen parent architecture unless Frozen boundary is insufficient.
 
-New benchmark sources normally implement Adapter SPI; new direct transports implement Adapter SPI; new meter/pricing sources implement Scheduler SPI. Ordinary provider/API churn, new models, benchmark versions, agent flags, and predictor algorithms do not reopen this parent architecture unless a Frozen boundary proves insufficient.
+## 22. Active simplicity/reopen triggers
 
-## 22. Active simplicity and redesign triggers
+Reopen/simplify before adding multiple plugin loaders, reverse dependencies, duplicated CLI composition, separate mutable workflow authority, benchmark fields in Core, quota abstractions below Scheduler, duplicated model identity mapping, backend-specific workflow logic, Scheduler-owned process execution, private SQL/process objects in public APIs, hidden writes in previews, or stubs preserving broken higher layers instead of clean downgrade.
 
-Reopen/simplify before adding machinery if implementation creates multiple plugin loaders, reverse dependencies, duplicated CLI composition, separate mutable workflow authority, benchmark fields in Core, quota abstractions below Scheduler, duplicated model identity mapping, backend-specific workflow logic, Scheduler-owned process execution, private SQL/process objects in public APIs, hidden writes in preview/query calls, or stubs whose only purpose is preserving a broken higher layer instead of clean downgrade.
+Reopen parent architecture only when evidence shows a Frozen boundary cannot satisfy the product: required reverse dependency, single registry insufficiency, public API role incapable of supporting next module without semantic break, or execution lifecycle unable to represent a required backend safely.
 
-Reopen parent architecture only when evidence shows a Frozen boundary cannot satisfy the product: a required reverse dependency, single registry insufficiency, public API role incapable of supporting the next module without semantic break, or execution lifecycle unable to represent a required backend safely.
+## 23. Third pre-implementation review — 2026-09-07
 
-## 23. Second pre-implementation review — 2026-09-07
+This pass challenged the complete control flow rather than individual interfaces. Material gaps closed:
 
-This pass challenged 1.1.0 as if WP-2 through WP-4 already depended on it. Material gaps closed:
+1. **Route/render ordering cycle:** AUTO route selection previously happened after a route-sensitive prompt had already been rendered. Core now allocates RunId first; Adapter admits route; Core renders for admitted prompt mode; Adapter starts.
+2. **Pre-start reservation leak:** admitted-but-not-started runs now have explicit Adapter abandonment / Scheduler release semantics plus expiration as fail-safe.
+3. **Manual-route prompt mode:** `prompt_execution_mode` is explicit on routes rather than inferred from direct/manual delivery.
+4. **Scheduler re-entrant route lookup risk:** Adapter passes bounded candidate route snapshots into route-policy admission rather than requiring policy to re-enter Adapter admission to enumerate candidates.
+5. **Tracker public graph gap:** TrackerAPI now exposes structured WorkflowGraph instead of leaving `sdp graph` on private implementation.
+6. **Tracker workplan-selection gap:** persistent user workplan choice has a public, subordinate, stale-aware API matching `sdp use`.
+7. **Manual output parsing gap:** Core now requests StageResultEnvelope v1; Tracker defines structured-first/deterministic-marker/user-confirmation precedence without mandatory LLM classification.
+8. **Digest evolution gap:** digest records carry canonicalization scheme; workplan/candidate identity can report incomplete rather than pretending equivalence across unsupported schemas.
+9. **Workplan semantic-equivalence risk:** semantic digest is protocol/schema aware and conservative, not an LLM or heuristic claim that arbitrary metadata/text is non-semantic.
+10. **Scheduler resource detail preservation:** ledger reset/expiration/funding categories required by the accepted quota architecture are restored explicitly.
+11. **Model alias ownership:** one Adapter-owned model identity resolver prevents benchmark providers from creating competing model identities.
+12. **Resource collection growth:** Scheduler resource queries are paginated like other potentially growing catalogs.
 
-1. **Capability double-versioning:** capability keys are now semantic/unversioned; API version is separate in requirement/provision records.
-2. **Provider compatibility discovery:** manifests now declare provided capability API majors, allowing dependency compatibility before activation.
-3. **Core future-type leakage:** `RouteId` moved from Core shared identifiers to Adapter API ownership.
-4. **Project execution-context gap:** Core now exposes trusted local `ProjectDescriptor` separately from prompt-safe `PromptProjectSnapshot`, so Adapter can obtain worktree location without Core-private imports or leaking it to web prompts.
-5. **Project/workplan query growth:** project/workplan catalogs are paginated where they can grow.
-6. **Hidden network-I/O ambiguity:** repository/status APIs now carry explicit observation policy/freshness instead of silently refreshing remotes.
-7. **Tracker history ordering:** Tracker exposes recording sequence separately from producer wall-clock time.
-8. **Manual-web route gap:** manual handoff is a first-class Adapter route/delivery mode and can later participate in Scheduler AUTO selection.
-9. **Planned-versus-observed identity:** route configuration is separated from actual observed execution/model identity, essential for manual web and provider-side routing.
-10. **Explicit-route admission contradiction:** Scheduler policy now applies to every Adapter execution when active; explicit routes are validated/reserved unchanged, while only omitted routes may be selected automatically.
-11. **Admission retry race:** Scheduler admit/reconcile semantics are idempotent and fingerprinted, preventing duplicate reservations after ambiguous retries.
-12. **Untrusted manual output boundary:** pasted/structured agent output is explicitly treated as untrusted data rather than executable control input.
-
-No remaining architecture-level blocker was found after these corrections. The architecture is sufficiently specific to derive WP-1 through WP-4 without private cross-module coupling while leaving module-local algorithms/classes delegated.
+No remaining architecture-level blocker was found after these corrections. The architecture can now derive WP-1 through WP-4 without a route/render circularity or a need for future private cross-module imports.
 
 ## 24. Design verdict
 
-**PASS — architecture 1.2.0 is implementation-ready.**
+**PASS — architecture 1.3.0 is implementation-ready.**
 
-The next active implementation contract should be WP-1 Prompt Module only. WP-1 establishes Core, CLI/composition, Core API/SPI v1, project/repository/workplan observation, canonical prompt rendering, and prompt identity. It must not introduce Tracker persistence, agent integration, benchmark networking, or Scheduler/resource machinery.
+The next active implementation contract should be WP-1 Prompt Module only. WP-1 establishes Core, CLI/composition, Core API/SPI v1, run allocation, project/repository/workplan observation, canonical prompt rendering/result envelope, and prompt identity. It must not introduce Tracker persistence, agent integration, benchmark networking, or Scheduler/resource machinery.
