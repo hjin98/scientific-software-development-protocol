@@ -20,6 +20,8 @@ Ask explicitly:
 - Which details are intentionally **not** Frozen?
 - Would changing a listed detail alter high-level architecture, or only the delegated realization?
 
+For substantial or structurally risky work, note any task-local baseline/change-health evidence needed later to judge whether the affected system regressed in maintainability or behavioral protection. Do not create a permanent metric ledger solely for protocol compliance.
+
 ## Implementation obligations and delegated solution space
 
 Record task-specific obligations, not generic protocol prose or a frozen proof script. An ordinary material obligation should preserve:
@@ -33,6 +35,8 @@ Attach only when material:
 
 - **Suggested realization:** useful guidance, explicitly replaceable by an equivalent simpler realization.
 - **Acceptance boundary:** product/Frozen claim, current real semantic owner/path or owner class, allowed doubles, forbidden substitutions, and observable evidence when proxy acceptance is a material risk. State whether exact owner/path identity is itself product/Frozen authority or merely the current Tier-2 realization; if delegated, an equivalent replacement remaps acceptance to the new real owner rather than reopening Design.
+- **Oracle-strength relation:** reference/differential/metamorphic/property/counterfactual/failure-path evidence when ordinary fixture equality would be weak.
+- **Objective architecture-fitness rule:** a stable dependency/absence/uniqueness constraint worth executable enforcement.
 - **Stage/dependency:** when ordering materially reduces risk or rework.
 - **Anti-shortcut / integrity constraint:** a known way local compliance/evidence manipulation could appear to pass while defeating the stakeholder outcome.
 
@@ -58,7 +62,7 @@ The accepted plan is the minimum known contract, not a ceiling only for newly di
 
 <Initially expected changed/new behavior plus callers/consumers/shared utilities/configuration/persistence/state/orchestration/interfaces/packaging/documentation/transitive behavior that could plausibly change. This is provisional and must be re-derived from the final assembled implementation.>
 
-Generic functional-acceptance requirements are inherited from the protocol version declared by `protocol_version`; later releases do not silently reinterpret this workplan. Record only task-specific mappings, thresholds, real-owner/test-double boundaries, repository-required checks, and structural/absence claims not already clear in the obligations.
+Generic functional-acceptance requirements are inherited from the protocol version declared by `protocol_version`; later releases do not silently reinterpret this workplan. Record only task-specific mappings, thresholds, real-owner/test-double boundaries, repository-required checks, structural/absence claims, and quality-ratchet/failure-path evidence not already clear in the obligations.
 
 Production qualification: <required / deferred / unnecessary, with reason when materially relevant>.
 

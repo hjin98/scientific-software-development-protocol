@@ -70,7 +70,7 @@ class Protocol515LanguageProfileTests(unittest.TestCase):
             for role in ("software-design", "software-implementation"):
                 refs = {p.name for p in (out / "skills" / role / "references").iterdir() if p.is_file()}
                 self.assertTrue(routed <= refs, (role, sorted(routed - refs)))
-            for specialist in ("software-documentation", "repository-hygiene"):
+            for specialist in ("software-documentation", "repository-hygiene", "software-maintenance-audit"):
                 refs = {p.name for p in (out / "skills" / specialist / "references").iterdir() if p.is_file()}
                 self.assertTrue(routed.isdisjoint(refs), (specialist, sorted(routed & refs)))
 
@@ -106,9 +106,10 @@ class Protocol515LanguageProfileTests(unittest.TestCase):
         versioning = read("source/shared/references/protocol-versioning-and-compatibility.md").lower()
         root_readme = read("README.md").lower()
         self.assertIn("protocol 5.15 is a backward-compatible", versioning)
-        self.assertIn("active older workplans do not automatically adopt protocol 5.15", versioning)
+        self.assertIn("active older workplans do not automatically adopt protocol 5.16 or any later release", versioning)
+        self.assertIn("may continue under their declared version", versioning)
         self.assertIn("repository-local tier-2 validation machinery", root_readme)
-        self.assertIn("protocol_version: 5.14.0", read("workplans/active/PROTOCOL-5.15-LANGUAGE-PROFILES-CPP-PERFORMANCE.md"))
+        self.assertIn("protocol_version: 5.14.0", read("workplans/archive/PROTOCOL-5.15-LANGUAGE-PROFILES-CPP-PERFORMANCE.md"))
 
 
 if __name__ == "__main__":

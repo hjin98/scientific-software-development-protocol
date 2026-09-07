@@ -42,6 +42,17 @@ For randomized scientific tests:
 - save enough failing input/provenance to reproduce;
 - include physically difficult geometries/regimes, not only random nominal cases.
 
+## Differential and metamorphic validation
+
+When exact fixture outputs are incomplete or implementation change is substantial, strengthen scientific evidence with independently justified relations.
+
+- **Differential testing:** compare a trusted/reference implementation against an optimized/new/backend realization on governed observables.
+- **Metamorphic testing:** apply an authority-backed transformation and verify the required relation on outputs.
+
+Useful examples include permutation-invariant aggregate statistics, restart/continuation versus uninterrupted equivalence, unit-consistent transformation, valid translation/rotation symmetry or equivariance, normalized-weight rescaling that should preserve ranking, and backend equivalence within justified tolerance.
+
+Do not invent a metamorphic relation merely because it is convenient. It must follow from the scientific/product contract, and tolerance rules remain governed by numerical conditioning and precision.
+
 ## Approximation and resolution
 
 Do not silently trade scientific fidelity for speed.

@@ -20,6 +20,12 @@ runtime state/crash relation -> language/runtime debugger when useful
 memory/lifetime/UB/resource relation -> language-appropriate runtime/static instrumentation
 race/synchronization relation -> race/concurrency evidence
 performance/vectorization relation -> profiler/compiler/hardware evidence
+test effectiveness / oracle-strength relation -> mutation or equivalent semantic-perturbation evidence
+changed-code behavioral-protection relation -> diff/changed-surface coverage evidence
+objective dependency/architecture-invariant relation -> architecture/dependency fitness check
+complexity/duplication/maintainability-hotspot relation -> language-appropriate static metrics
+longitudinal maintenance-risk relation -> VCS churn/change-coupling + structural/test-risk evidence
+failure/recovery/state-interruption relation -> bounded fault-injection or equivalent controlled simulation
 ```
 
 The Protocol 5.13 direct mappings remain valid specializations of those generic classes:
@@ -39,6 +45,19 @@ A task may activate several relation classes at different times. A security task
 For a triggered specialized class, read its directly linked method/profile before relying solely on lower-information defaults. If availability is unknown, use a cheap read-only/non-mutating capability probe when the host exposes one without material setup cost. When the specialized capability is available, current, supported, and directly models the claim, presumptively use it. Fall back for a concrete reason such as unsupported language/backend, unavailable tool surface, stale/unreliable state that cannot economically be refreshed, model mismatch, disproportionate setup for a trivially bounded claim, or already-available evidence that establishes the same claim at least as reliably and more cheaply. Familiarity with Grep/Read/shell/tests is not itself a fallback reason.
 
 **Tool availability alone is not a reason** to invoke a tool. **Tool unavailability is not an acceptance failure** unless project/task authority requires that tool or no alternative evidence can establish the required claim. Tool absence never relaxes the engineering claim.
+
+## Maintainability and test-effectiveness capabilities
+
+The Protocol 5.16 capability classes above remain conditional and relation-first. They do not create a fixed quality-tool pipeline.
+
+- Mutation/semantic perturbation is useful when the material question is whether tests reject plausible wrong behavior; surviving mutants are interpreted semantically rather than converted into a universal score target.
+- Diff/changed-surface coverage helps identify unprotected changed behavior; it does not prove adequate assertions.
+- Architecture/dependency checks are strongest for objective stable rules such as forbidden edges, layers, independence, or acyclicity.
+- Complexity/duplication metrics identify candidate hotspots; combine them with ownership, change frequency, test weakness, and product impact before recommending work.
+- Longitudinal analysis requires actual history. If VCS history is unavailable, do not manufacture churn/change-coupling claims from a static snapshot.
+- Fault injection is appropriate for actual failure/recovery relations and should keep the real semantic owner executing.
+
+Prefer existing project-configured tools and simple local analyses over adding a dependency solely for protocol symmetry.
 
 ## Composition and overlap
 

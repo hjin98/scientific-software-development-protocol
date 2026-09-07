@@ -20,14 +20,15 @@ class ProtocolContractTests(unittest.TestCase):
         self.template = read("source/shared/templates/implementation_workplan_template.md").lower()
         self.versioning = read("source/shared/references/protocol-versioning-and-compatibility.md").lower()
 
-    def test_protocol_515_identity_and_two_role_lifecycle(self) -> None:
-        self.assertEqual("5.15.0", read("source/PROTOCOL_VERSION").strip())
+    def test_protocol_516_identity_and_two_role_lifecycle(self) -> None:
+        self.assertEqual("5.16.0", read("source/PROTOCOL_VERSION").strip())
         source_readme = read("source/README.md").lower()
         root_readme = read("README.md").lower()
-        self.assertIn("software development protocol 5.15", source_readme)
-        self.assertIn("current protocol version: **5.15**", root_readme)
-        self.assertIn("protocol 5.15 is a backward-compatible", self.versioning)
+        self.assertIn("software development protocol 5.16", source_readme)
+        self.assertIn("current protocol version: **5.16**", root_readme)
+        self.assertIn("protocol 5.16 is a backward-compatible", self.versioning)
         for historical in (
+            "protocol 5.15 is a backward-compatible",
             "protocol 5.14 is a backward-compatible",
             "protocol 5.13 is a backward-compatible",
             "protocol 5.12 is a backward-compatible",

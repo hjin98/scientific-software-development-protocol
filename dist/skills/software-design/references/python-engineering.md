@@ -73,6 +73,12 @@ Use shared relation-first tool routing, then select Python-appropriate evidence.
 
 Exact tool identity remains delegated. Tool absence never relaxes the engineering claim.
 
+## Fast static correctness
+
+For material Python changes, use the project's configured fast lint/type/static checks when they provide high-information evidence for the changed surface. Ruff-class lint/format diagnostics and Pyright/mypy-class type analysis are representative capabilities, not mandated vendors.
+
+Run the checks at the scope/configuration the project actually supports. A type/lint tool is not product truth, but ignoring an available configured check merely because unit tests pass discards cheap evidence. Do not introduce a second type/schema system or a new checker solely for protocol symmetry.
+
 ## Packaging and native boundaries
 
 Preserve the project's supported interpreter/package/import/environment contract.

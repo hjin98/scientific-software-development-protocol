@@ -168,6 +168,10 @@ When persistence is material, test representative cases such as:
 - cleanup after failure without deleting authoritative/external inputs;
 - deterministic reconstruction and result equivalence after resume.
 
+## Bounded fault injection
+
+For material persistence/recovery claims, prefer deterministic failpoints or controlled simulation at publication/restart boundaries when they can establish crash/recovery behavior without destructive resource exhaustion. Establish that the failpoint fired when practical and keep the production persistence/recovery owner executing; a harness-side reimplementation is not sufficient evidence.
+
 ## Hard rules
 
 - Do not use file existence as a completion or cache-validity contract.

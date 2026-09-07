@@ -44,6 +44,14 @@ Among designs satisfying Tier 1, prefer the lowest justified **total product/sys
 
 This is an active product policy, not merely a tie-breaker at initial design time. Necessary specialization remains valid when it protects a real Tier-1 requirement or when one canonical abstraction replaces broader duplicated machinery.
 
+## Quality ratchet and executable architecture fitness
+
+Existing architectural debt does not excuse new debt in a materially touched subsystem. The changed surface should ordinarily leave ownership, dependency direction, state, public/configuration surface, and behavioral protection no harder to reason about unless additional complexity is required by Tier-1/Frozen authority.
+
+Metrics such as complexity, churn, duplication, centrality, CRAP-like measures, or change coupling are sensors rather than architecture truth. Use them to prioritize semantic inspection, especially when risk concentrates where change frequency, structural complexity, test weakness, and architectural centrality overlap.
+
+When an architectural rule is objective, stable, and cheap to encode, prefer an executable fitness check over repeated prose-only review. Suitable examples include forbidden dependency/import direction, layer direction, acyclic package/subsystem relationships, independence constraints, and structural absence/uniqueness of deprecated owners. Do not create a global machine-readable architecture manifest solely for protocol compliance.
+
 ## Solution-created problems are not product invariants
 
 An intermediate problem created only by the chosen realization remains Tier 2. For example, if a design creates two synchronized representations, "keep the representations synchronized" is not automatically a new product requirement. An alternative realization that removes one representation can eliminate the intermediate problem while preserving the actual product requirement.
@@ -108,6 +116,12 @@ A first clean local defect remains local. Materially equivalent sibling recurren
 Use bounded semantic defect families and finite census when the **Tier-1 correctness claim itself** requires completeness, or when sibling discovery is necessary to remove/canonicalize the affected realization safely. Family closure is subordinate to Tier-1 product truth, Frozen architecture, and Tier-2 simplification; it must not turn an accidental mechanism into an invariant merely by completing its current "canonical realization."
 
 Post-simplification recurrence or evidence that a Frozen high-level decision itself is wrong triggers bounded Software Design reconsideration. Reopen only the affected design surface.
+
+## Milestone stabilization / architecture GC
+
+At a material convergence boundary, after ordinary implementation review has otherwise passed, reassess the accepted Tier-2 realization as if it appeared fully formed today. Inspect duplicated representations, competing authorities, wrappers/adapters/fallbacks/special cases, stale compatibility paths, unnecessary states/configuration/public API, ownership leakage, dependency cycles, historical-exception conditionals, dead/bypassed paths, duplicated algorithms, and tests dominated by internal orchestration.
+
+Stabilization is a non-mutating review mode. If the same product/Frozen contract can be realized more simply, route the smallest coherent Tier-2 simplification through the normal Design/Implementation/final-acceptance/review path. If simplification requires changing Frozen architecture, reopen only that affected Design surface.
 
 ## Architecture documentation
 

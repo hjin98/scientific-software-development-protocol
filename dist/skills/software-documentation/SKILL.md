@@ -208,6 +208,13 @@ Do not change product behavior merely to force agreement with prose. If product 
 
 Do not create a documentation approval lifecycle, universal provenance database, mandatory repository-wide audit, or extensive checker framework unless the project independently demonstrates a material need.
 
+## Milestone reconciliation
+
+At substantial workplan, architecture-migration, or release closeout, reconcile affected durable documentation to the accepted present system when conceptual ownership, scientific methodology, public interfaces/configuration, persistence/state semantics, workflows, or performance/resource behavior changed. Treat an accumulation of historical caveats needed to explain current behavior as a possible design/maintenance signal, not as permission to rewrite product semantics.
+
+Do not turn current-state documentation into an append-only patch history. If reconciliation exposes a genuine code/architecture contradiction, route the semantic issue back to Software Design/Implementation rather than editing documentation to bless unintended behavior.
+
+
 ## Completion
 
 Report proportionally:
