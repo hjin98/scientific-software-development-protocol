@@ -1,8 +1,8 @@
 ---
 kind: architecture
 architecture_id: SDP-ORCHESTRATOR
-architecture_version: 1.5.0
-supersedes_architecture_version: 1.4.0
+architecture_version: 1.6.0
+supersedes_architecture_version: 1.5.0
 protocol_version: 5.16.0
 status: frozen
 frozen_date: 2026-09-07
@@ -29,7 +29,7 @@ Level 3  Scheduler + metering + prediction + AUTO routing
 
 Every higher level requires the complete lower level. No lower level may require, import, instantiate, persist state for, or otherwise depend on a higher level in order to perform its accepted functions.
 
-This architecture is Tier 1B Frozen architecture for the orchestrator implementation series. Module workplans derive implementation obligations losslessly from it. They may choose delegated realization details, but may not silently change dependency direction, authority boundaries, public API/SPI semantics, persistence ownership, capability roles, or module responsibilities.
+This architecture is Tier 1B Frozen architecture for the orchestrator implementation series. Module workplans derive implementation obligations losslessly from it. They may choose delegated realization details, but may not silently change dependency direction, authority boundaries, public API/SPI semantics, persistence ownership, capability roles, repository-containment rules, or module responsibilities.
 
 If implementation evidence invalidates a Frozen choice, reopen only the affected architecture surface before changing it.
 
@@ -53,13 +53,14 @@ If implementation evidence invalidates a Frozen choice, reopen only the affected
 16. **Manual and direct routes share one route vocabulary.** A web/manual route is first-class with explicit delivery, prompt-context, and repository-access capabilities.
 17. **Capability identity is independent of API version.** Semantic capability keys do not embed `v1`; API compatibility is represented separately.
 18. **Explicit route choice is not an admission bypass.** With Scheduler active, explicit route bypasses ranking but still undergoes configured hard feasibility/resource admission; it may be rejected but not silently substituted.
-19. **Route admission precedes final prompt rendering.** Selected route determines prompt context, so route admission occurs before execution prompt rendering.
+19. **Route admission precedes final prompt rendering.** Selected route determines prompt context, so route admission occurs after route-independent Core preparation and before final execution prompt rendering.
 20. **Run identity precedes scheduling and rendering.** Core allocates a RunId without persistence so Scheduler, prompt, Tracker, and Adapter share one attempt identity.
-21. **Manual result tracking has a structured seam from day one.** Core prompts request a versioned result envelope with run/fingerprint identity.
+21. **Manual result tracking has a structured seam from day one.** Core prompts request a versioned terminal machine-readable result envelope with run/fingerprint identity.
 22. **Protocol version binding is explicit.** An older workplan is never silently rendered through a newer incompatible workflow profile merely because the installed orchestrator is newer.
 23. **One mutating run owns one local worktree.** Concurrent orchestrator-controlled mutating local executions against the same physical worktree are serialized through a cross-process lease keyed by worktree identity, not project name.
 24. **Workflow routing authority is profile-owned.** Tracker may project history and recommend the next action, but it consumes the compatible Core Protocol profile's declared stage/routing contract rather than duplicating private prompt/profile logic.
 25. **Uncertain routing remains uncertain.** Unknown result outcomes, blocker classes, or multiple materially valid next stages produce an explicit ambiguous recommendation rather than a guessed transition.
+26. **Repository containment is Frozen.** All orchestrator-owned executable source, package/build metadata, tests, fixtures, package resources, developer scripts, and orchestrator documentation live under repository-relative `orchestrator/`. Protocol-standard workplans remain under `workplans/`; existing repository-level CI/config may contain only thin invocation/wiring that points into `orchestrator/`. No orchestrator implementation logic is placed in top-level `source/`, `tests/`, `tools/`, `scripts/`, or another sibling tree merely for convenience.
 
 ## 3. Capability ladder and distributions
 
@@ -69,7 +70,8 @@ If implementation evidence invalidates a Frozen choice, reopen only the affected
 command
   -> observe configured repository/workplan/protocol inputs
   -> resolve requested stage under compatible Protocol profile
-  -> render canonical compatible prompt
+  -> prepare route-independent prompt context
+  -> render canonical compatible prompt for selected prompt mode
   -> print complete copy/paste-ready prompt
 ```
 
@@ -104,17 +106,48 @@ sdp-orchestrator-scheduler
 
 Installing a higher distribution installs required lower distributions. Core alone does not pull higher/ACP/DB-lock/benchmark/ML dependencies merely for future convenience.
 
-## 4. Python packaging and namespace
+## 4. Repository layout, Python packaging, and namespace
 
-Native PEP 420 namespace:
+Repository containment is architectural; exact subdirectory naming beneath `orchestrator/` remains delegated. A conforming multi-distribution layout may be:
 
 ```text
-src/sdp_orchestrator/              # NO __init__.py
+orchestrator/
+  docs/
+    architecture.md
+    ...
+  packages/
     core/
+      pyproject.toml
+      src/
+        sdp_orchestrator/
+          core/
+      tests/
+      fixtures/
     tracker/
+      pyproject.toml
+      src/
+        sdp_orchestrator/
+          tracker/
+      tests/
     adapters/
+      pyproject.toml
+      src/
+        sdp_orchestrator/
+          adapters/
+      tests/
     scheduler/
+      pyproject.toml
+      src/
+        sdp_orchestrator/
+          scheduler/
+      tests/
+  scripts/                 # orchestrator-owned development/release helpers only
+  tests/                   # optional cross-distribution integration tests
 ```
+
+All of the above remain under `orchestrator/`. Existing Protocol source under `source/`, Protocol workplans under `workplans/`, and generated/install artifacts outside the repository are external authorities/integration outputs, not alternate orchestrator implementation locations. Repository-level `.github/...` or equivalent CI may invoke commands under `orchestrator/`, but reusable test/build/orchestration logic remains contained.
+
+Use native PEP 420 namespace packaging. No distribution owns `sdp_orchestrator/__init__.py`.
 
 Public APIs:
 
@@ -181,11 +214,11 @@ Problem
   details: mapping
 ```
 
-Python raises `OrchestratorError(Problem)`. CLI uses `Problem.code` for deterministic exits/stderr. Modules add namespaced codes; callers do not parse human messages.
+Python raises `OrchestratorError(Problem)`. CLI uses `Problem.code` for deterministic exits/stderr. Modules add namespaced codes; callers do not parse human messages. User-facing problem serialization is JSON-safe and redacts credentials/sensitive local values according to the owning boundary.
 
 ### 5.6 Idempotency/mutation
 
-Read-looking methods (`list/get/observe/status/preview/predict/recommend/probe`) are read-only unless explicitly documented. Durable writes return receipts/IDs where retry matters.
+Read-looking methods (`list/get/observe/status/preview/predict/recommend/probe/prepare/render`) are read-only unless explicitly documented. Durable writes return receipts/IDs where retry matters.
 
 - Tracker event record idempotent by EventId.
 - Result ingest idempotent for same artifact/run binding.
@@ -251,7 +284,7 @@ CapabilityProvision
 
 ### 6.3 Extension manifest/activation
 
-Manifest inspection is side-effect-minimal: no subprocess/network/repository mutation/storage migration.
+Normal extension loading uses:
 
 ```text
 ExtensionManifest
@@ -263,7 +296,7 @@ ExtensionManifest
   provides_capabilities
 ```
 
-Use `packaging` version/specifier comparison. First-party IDs reserved under `sdp.*`.
+Use `packaging` version/specifier comparison. First-party IDs are reserved under `sdp.*`.
 
 ```python
 class ExtensionProvider(Protocol):
@@ -271,11 +304,20 @@ class ExtensionProvider(Protocol):
     def activate(self, context: ExtensionContext) -> ExtensionRegistration: ...
 ```
 
-Context exposes effective Core config/provider namespace, required active services, CLI/config/event/diagnostic registrars. Activation is dependency-topological; failed providers disable dependents, lower healthy services remain.
+Normal activation imports/loads trusted provider code, obtains a side-effect-minimal manifest, then activates in dependency-topological order. Failed providers disable dependents while lower healthy services remain.
+
+`ApplicationRequest.activation_policy` supports at least:
+
+```text
+normal
+ discovery_only
+```
+
+Discovery-only reads package/distribution entry-point metadata only. It does **not** import/execute provider code and therefore reports extensions as discovered/not-loaded rather than claiming unobserved provider health/capabilities. `sdp doctor` and `sdp capabilities` use discovery-only by default. Normal composition is the provider-loading path.
 
 ### 6.4 Service registry/application API
 
-Services register by capability + api major + provider. Singular service cannot be silently replaced; multi-provider service order is stable by provider ID.
+Services register by capability + API major + provider. Singular service cannot be silently replaced; multi-provider order is stable by provider ID.
 
 ```python
 class ApplicationAPI(Protocol):
@@ -295,9 +337,9 @@ Missing/disabled/incompatible service is a structured problem, not import crash.
 
 The first module defining a semantic command owns it; later modules extend through lower hooks. Adapter owns `sdp run`; Scheduler extends admission through Adapter SPI.
 
-Core owns config precedence: defaults -> config/profile -> documented env allowlist -> explicit CLI/API. Absent-extension config is preserved/diagnosed. Secrets are references/approved secret inputs.
+Core owns config precedence: defaults -> config/profile -> documented environment allowlist -> explicit CLI/API. Absent-extension config is preserved/diagnosed. Secrets are references/approved secret inputs.
 
-Core process event publisher gives at-least-once optional sink delivery when retry is practical. Sinks are idempotent by EventId; sink failure cannot counterfeit primary result.
+Event sinks register explicit event-type subscriptions during normal activation. Prompt-containing events are not broadcast to unsubscribed sinks. Core events are non-durable; sinks are idempotent by EventId and sink failure cannot counterfeit the primary operation result.
 
 ## 7. Core shared records
 
@@ -308,12 +350,15 @@ ProjectKey
 WorktreeKey
 RunId
 EventId
+StageSelector
 StageRef
 CapabilityKey
 ExtensionId
 ```
 
 Route/model/backend/account/transport/effort identities belong to Adapter.
+
+`StageSelector` is profile-neutral user/request input. `StageRef` includes Protocol-profile identity + protocol version + resolved stage key and is created only after compatible profile resolution.
 
 `WorktreeKey` identifies one configured physical local worktree after canonical path/repository resolution. Different ProjectKeys targeting the same checkout resolve to the same WorktreeKey. Distinct Git worktrees resolve to distinct WorktreeKeys.
 
@@ -326,11 +371,9 @@ DigestRef
   value
 ```
 
-Initial crypto is SHA-256. Domain digests carry versioned schemes such as `sdp.prompt-fingerprint.v1`, `sdp.workplan-semantic.v1`, and `sdp.git-working-tree.v1`. Scheme semantics never change silently.
+Initial crypto is SHA-256. Domain digests carry versioned schemes such as `sdp.prompt-preparation.v1`, `sdp.prompt-fingerprint.v1`, `sdp.workplan-semantic.v1`, and `sdp.git-working-tree.v1`. Scheme semantics never change silently.
 
-### 7.3 StageRef / ProtocolProfileRef
-
-`StageRef` includes protocol-profile identity + protocol version + stage key. Stage names are data.
+### 7.3 ProtocolProfileRef
 
 `ProtocolProfileRef` identifies the workflow/prompt interpretation contract used for a project/workplan. A profile declares protocol-version compatibility explicitly; compatibility is not inferred merely because versions share a major.
 
@@ -373,12 +416,12 @@ ProjectDescriptor
   worktree_key | None
   local_repo_root | None
   sanitized_remote_repository
-  configured_mode
+  configured_prompt_mode
   protocol_profile
   configuration_identity
 ```
 
-ProjectDescriptor is trusted local-process data, not auto-embedded in web prompts. PromptProjectSnapshot contains only execution-mode-safe repository/workplan/candidate context; web mode excludes local paths/private state/secrets/account-resource telemetry/credential-bearing remotes.
+ProjectDescriptor is trusted local-process data, not auto-embedded in web prompts. `PromptProjectSnapshot` contains only prompt-mode-safe repository/workplan/candidate context; web mode excludes local paths/private state/secrets/account-resource telemetry/credential-bearing remotes.
 
 ### 7.7 EventEnvelope
 
@@ -394,7 +437,7 @@ EventEnvelope
   payload
 ```
 
-Event types namespaced/versioned. Events are evidence, not workflow authority; unknown future types may be stored opaquely.
+Event types are namespaced/versioned. Events are evidence, not workflow authority; unknown future types may be stored opaquely.
 
 ### 7.8 Workflow profile contract
 
@@ -422,13 +465,13 @@ StageTransitionDescriptor
   explanation
 ```
 
-`trigger_key` is a profile-defined opaque semantic routing class, not arbitrary executable expression text. The profile documents how normalized result facts map to trigger keys. Typical Protocol 5 classes may distinguish pass/complete, implementation nonconformance, design/workplan deficiency, new independent issue, optional verification/stabilization/closeout, and terminal closure, but exact classes belong to the profile/version.
+`trigger_key` is a profile-defined opaque routing class, not executable expression text. The profile documents how normalized result facts map to trigger keys. Optional/context-dependent Protocol relations remain alternatives/ambiguous rather than being invented as deterministic edges.
 
-The descriptor defines allowed/recognized routing relations, not an autonomous approval engine. Tracker may recommend only a transition compatible with the descriptor and current evidence. If normalized evidence maps to zero or multiple materially plausible routing classes, recommendation is `AMBIGUOUS` rather than guessed.
+The descriptor defines allowed/recognized routing relations, not an autonomous approval engine. Tracker may recommend only a transition compatible with the descriptor and current evidence. If evidence maps to zero or multiple materially plausible routing classes, recommendation is `AMBIGUOUS` rather than guessed.
 
 ### 7.9 StageResultEnvelope v1
 
-Every rendered prompt requests:
+Every rendered prompt requests an ordinary human-readable response followed by exactly one terminal uniquely marked machine-readable JSON footer representing:
 
 ```text
 StageResultEnvelope
@@ -453,35 +496,23 @@ BlockerRecord
   authority_class | None
 ```
 
-Outcome, blocker classification, authority class, and check states are extensible strings. A profile may recognize some values and leave unknown values unresolved. `recommended_next_stage` is reported evidence/hint, not routing authority; Tracker reconciles it against the WorkflowProfileDescriptor and blocker/outcome evidence.
+Outcome, blocker classification, authority class, and check states are extensible strings. A profile may recognize some values and leave unknown values unresolved. `recommended_next_stage` is reported evidence/hint, not routing authority; Tracker reconciles it against WorkflowProfileDescriptor and blocker/outcome evidence.
 
-Core renders the result request but does not persist or interpret the reported semantics.
+The literal footer marker, terminal-block extraction rule, and exact accepted v1 schema fixture are frozen during WP-1 independent Review before Tracker depends on them. Core renders the result request but does not persist or interpret returned semantics.
 
 ## 8. Core / Prompt Module
 
 ### 8.1 Responsibilities
 
-Core owns CLI/application composition, project/protocol-profile config, project catalog/worktree identity, read-only Git/workplan observation, compatible workflow-profile/stage catalog, compatible prompt-source resolution, canonical prompt loading/substitution, local/web rendering, run/prompt/result-envelope identity, stdout/optional clipboard, and capability/doctor reporting.
+Core owns CLI/application composition, project/protocol-profile config, project catalog/worktree identity, read-only Git/workplan observation, compatible workflow-profile/stage catalog, governing-workplan resolution, compatible prompt-source resolution, canonical prompt loading/substitution, route-independent preparation, local/web final rendering, run/preparation/prompt/result-envelope identity, stdout/optional clipboard, and capability/doctor reporting.
 
 Core does not own durable workflow history, next-stage inference, agent processes, benchmarks, resources, or scheduling.
 
-### 8.2 CoreAPI v1
+### 8.2 Prompt mode versus canonical EXECUTION_MODE
 
-```python
-class CoreAPI(Protocol):
-    def allocate_run_id(self) -> RunId: ...
-    def projects(self, query: ProjectQuery | None = None) -> Page[ProjectDescriptor]: ...
-    def get_project(self, project: ProjectKey) -> ProjectDescriptor: ...
-    def workflow(self, project: ProjectKey) -> WorkflowProfileDescriptor: ...
-    def list_stages(self, project: ProjectKey) -> tuple[StageDescriptor, ...]: ...
-    def observe(self, request: ProjectObservationRequest) -> ProjectObservation: ...
-    def workplans(self, request: WorkplanQuery) -> Page[WorkplanDescriptor]: ...
-    def render(self, request: PromptRequest) -> RenderedPrompt: ...
-```
+Core's prompt-context selector is `PromptExecutionMode` with v1 values `local` and `web`. It answers where/how the final prompt will be consumed. It is deliberately distinct from the canonical SDP prompt INPUT `EXECUTION_MODE`, whose values such as `AUTO_EXECUTE` and `REPORT_ONLY` govern what the receiving agent is authorized to do.
 
-`list_stages` is a bounded convenience view over `workflow().stages`, not a second source of stage semantics.
-
-Run allocation creates an opaque ID only, no persistence. Render accepts caller RunId or allocates one. All methods are read-only with respect to target repositories.
+Core config/CLI uses `default_prompt_mode` / `--prompt-mode`; generic prompt input may separately set `EXECUTION_MODE` when the selected canonical prompt declares it. Changing one does not silently change the other.
 
 ### 8.3 Observation policy
 
@@ -491,82 +522,109 @@ ObservationPolicy
   max_remote_staleness | None
 ```
 
-Programmatic default local-only unless explicitly configured/requested. Results carry freshness/provenance. Unknown/stale beats hidden network I/O or invented freshness.
+Programmatic default is local-only unless explicitly configured/requested. `refresh_remote` is a bounded non-mutating query such as `git ls-remote`, not fetch/pull. Results carry freshness/provenance. Unknown/stale beats hidden network I/O or invented freshness.
 
-### 8.4 Protocol profile and prompt-source resolution
+### 8.4 Workplan resolution and Protocol binding
 
-Core renders and exposes workflow semantics only through a compatible ProtocolProfileRef.
+Core owns exact stage-specific workplan resolution. Explicit selector is exact workplan ID or repository-relative path. A profile defines whether a stage requires, permits explicit-only, or disallows a workplan. Governing workplan `protocol_version` takes precedence over project default when resolving the compatible workflow profile. A missing/invalid/unsupported required protocol version fails rather than silently assigning a newer default.
 
-Resolution order:
+### 8.5 Protocol profile and Core render-source resolution
+
+Core resolves workflow semantics only through a compatible ProtocolProfileRef:
 
 ```text
 explicit configured compatible local protocol source/profile
   -> exact compatible packaged prompt/profile snapshot
-  -> explicitly permitted read-only canonical remote source/profile
+  -> explicitly permitted read-only canonical remote source/profile at one resolved immutable identity
   -> truthful incompatible/unavailable non-closure
 ```
 
-Rules:
+Semantic protocol version is never guessed to be a Git ref/tag. Packaged snapshots are derived/version-bound artifacts, not independently edited authority.
 
-- workplan `protocol_version=X` is not silently interpreted as latest installed protocol;
-- a newer profile serves older work only when it explicitly declares compatibility preserving the older contract;
-- semantic protocol version is not guessed to be a Git ref/tag;
-- packaged snapshots are derived/version-bound artifacts, not independently edited authority;
-- PromptSourceRef and WorkflowProfileDescriptor record profile/version/source identities so Tracker can reconstruct the contract used.
+`PromptSourceRef` is Core's provenance for where canonical prompt/profile material was read. It is distinct from the canonical agent-facing `PROTOCOL_SOURCE` INPUT, whose default remains `AUTO_LOCAL_FIRST`; Core local filesystem source paths therefore do not leak into web prompts. Canonical `PROTOCOL_REF` follows the governing Protocol contract.
 
-### 8.5 Workplan catalog
+### 8.6 Two-phase Core API
 
-Paginated active/archive descriptors with exact/semantic identity completeness, lifecycle consistency, and selection evidence. No mtime guessing among materially plausible plans.
-
-### 8.6 PromptRequest / RenderedPrompt
+Core separates route-independent preparation from route-sensitive final rendering so higher modules can insert route admission without duplicating Core authority or rendering a provisional prompt.
 
 ```text
-PromptRequest
-  run_id | None
-  project
-  stage
-  execution_mode
-  workplan_selector | None
-  first_task | None
-  input_overrides
-  observation_policy | None
+Core-only:
+  allocate/prepare -> configured or explicit prompt mode -> render
 
-RenderedPrompt
-  run_id
-  prompt_text
-  prompt_fingerprint: DigestRef
-  stage
-  prompt_source: PromptSourceRef
-  workflow_profile: ProtocolProfileRef
-  resolved_inputs + provenance
-  prompt_context: PromptProjectSnapshot
-  selected_workplan | None
-  requested_result_schema identity
+Adapter/Scheduler:
+  allocate/prepare
+    -> Adapter/Scheduler admission
+    -> render using admitted route.prompt_execution_mode
+    -> Adapter.start
 ```
 
-Execution mode is extensible data; v1 supports local/web.
+Public v1 surface:
 
-### 8.7 Prompt fingerprint/footer
+```python
+class CoreAPI(Protocol):
+    def allocate_run_id(self) -> RunId: ...
+    def projects(self, query: ProjectQuery | None = None) -> Page[ProjectDescriptor]: ...
+    def get_project(self, project: ProjectKey) -> ProjectDescriptor: ...
+    def observe(self, request: ProjectObservationRequest) -> ProjectObservation: ...
+    def workplans(self, request: WorkplanQuery) -> Page[WorkplanDescriptor]: ...
+    def resolve_workplan(self, request: WorkplanResolutionRequest) -> WorkplanResolution: ...
+    def workflow(self, request: WorkflowRequest) -> WorkflowProfileDescriptor: ...
+    def list_stages(self, request: WorkflowRequest) -> tuple[StageDescriptor, ...]: ...
+    def prepare(self, request: PromptPreparationRequest) -> PreparedPrompt: ...
+    def render(self, request: PromptRenderRequest) -> RenderedPrompt: ...
+```
 
-Under canonicalization `sdp.prompt-fingerprint.v1`, Core renders exact prompt bytes using fixed fingerprint placeholder after RunId is known, SHA-256 hashes placeholder-form UTF-8 bytes, then substitutes digest. WP-1 freezes literal placeholder/byte-normalization fixtures.
+All are read-only with respect to target repositories. `resolve_workplan()` is the public owner of stage-specific selection; Tracker/Adapter do not reproduce it. `list_stages()` is a convenience view of the same workflow descriptor.
 
-Every prompt asks agent to emit StageResultEnvelope v1 with matching RunId/fingerprint when possible, without requesting hidden chain-of-thought.
+`PromptPreparationRequest` semantically carries optional RunId, ProjectKey, StageSelector, optional exact workplan selector, Design first task, declared input overrides, and ObservationPolicy; it intentionally carries no local/web prompt mode.
 
-### 8.8 Core CLI/dependencies
+`PreparedPrompt` carries RunId, preparation fingerprint, resolved StageRef, ProjectObservation/CandidateRef, selected WorkplanResolution, WorkflowProfileDescriptor/ProtocolProfileRef, PromptSourceRef, classified/resolved mode-independent inputs with provenance, and requested result-schema identity.
+
+`PreparedPrompt.preparation_fingerprint` uses versioned `sdp.prompt-preparation.v1`, SHA-256 over canonical JSON of the material mode-independent preparation identity. Volatile observation timestamps/diagnostics and unrelated extension config are excluded; material stage/candidate/workplan/profile/source/input identity is included.
+
+`PromptRenderRequest` carries PreparedPrompt + `prompt_execution_mode: PromptExecutionMode(local|web)`. Render derives prompt-mode-safe target/context, revalidates material preparation identity, then returns final artifact. Candidate/workplan/mutable local Protocol-source drift produces a stale-context problem rather than a mixed snapshot.
+
+### 8.7 Prompt input binding
+
+Every canonical INPUT is profile-classified as:
+
+```text
+mechanical
+canonical_default
+required_user
+```
+
+Core never guesses a semantic user decision merely to produce a prompt. Canonical `REPOSITORY_TARGET`/equivalent is final-render mode-dependent mechanical context; `PROTOCOL_SOURCE` defaults to `AUTO_LOCAL_FIRST`; `PROTOCOL_REF` is governing-contract mechanical; canonical `EXECUTION_MODE` defaults to `AUTO_EXECUTE`; `ADDITIONAL_CONSTRAINTS` defaults to `NONE` where canonical source permits it.
+
+Generic input overrides may set only declared inputs not exclusively owned by a first-class/mechanical binding. Concrete inserted values use deterministic structure-safe scalar representation; raw structural control injection is not spliced into the canonical INPUT grammar.
+
+### 8.8 Prompt fingerprint/footer
+
+Under `sdp.prompt-fingerprint.v1`, Core renders exact prompt bytes using a fixed fingerprint placeholder after RunId is known, hashes normalized placeholder-form UTF-8 bytes with SHA-256, then substitutes the digest. WP-1 freezes the placeholder, line-ending, terminal-newline, scalar normalization, and result-footer request fixtures.
+
+Only successful final render emits `core.prompt.rendered.v1`, and only to explicitly subscribed sinks. Core constructs complete prompt bytes before writing stdout; failure produces no partial prompt artifact. Prompt stdout is prompt-only; diagnostics go to stderr. Optional clipboard is additive.
+
+### 8.9 Core CLI/dependencies
+
+Core exposes at least:
 
 ```text
 sdp prompt <stage>
+sdp baseline
 sdp design
 sdp implementation
 sdp review
+sdp verification
+sdp stabilization
+sdp alignment
+sdp health-audit
+sdp closeout
 sdp projects
 sdp capabilities
 sdp doctor
 ```
 
-Prompt stdout is only complete prompt. Ambiguous workplan requires bounded explicit selection. Offline compatible packaged profile/snapshot works when local repo evidence is sufficient.
-
-Expected Core dependencies: platformdirs, typer, pydantic, python-frontmatter, packaging; optional pyperclip. No filelock/ACP/httpx/ML/higher module requirement.
+Expected Core dependencies: platformdirs, typer, pydantic, python-frontmatter, packaging; clipboard extra may use pyperclip. No filelock/ACP/httpx/ML/higher-module requirement.
 
 ## 9. Tracker Module
 
@@ -589,15 +647,15 @@ class TrackerAPI(Protocol):
     def graph(self, request: WorkflowGraphRequest) -> WorkflowGraph: ...
 ```
 
-Status/next/graph consume the compatible public Core `workflow()` descriptor plus fresh Core observations; they do not parse Core private profile/prompt files.
+Status/next/graph consume public Core workflow descriptors plus fresh Core observations; they do not parse Core private profile/prompt files.
 
 ### 9.3 Manual result ingestion
 
 Precedence: matching valid StageResultEnvelope -> bounded deterministic strong markers -> explicit user confirmation/selection. No mandatory LLM classification. Pasted data is untrusted and cannot execute orchestrator commands. Exact duplicate ingest is idempotent; mismatch fails safely unless explicitly rebound by user after disclosure.
 
-If fallback parsing cannot confidently determine a profile-recognized outcome/blocker classification needed to route rework, Tracker stores the evidence but reports the next action as ambiguous instead of inventing classification.
+If parsing cannot confidently determine a profile-recognized outcome/blocker class needed for routing, Tracker stores the evidence but reports next action as ambiguous.
 
-### 9.4 RecordedEvent / projection / selection / graph
+### 9.4 RecordedEvent / projection / graph
 
 ```text
 RecordedEvent
@@ -606,13 +664,9 @@ RecordedEvent
   event
 ```
 
-Recording order differs from producer wall clock. DevelopmentProjection is bounded current summary; detailed attempts remain in history. Execution status and semantic outcome are distinct.
+Recording order differs from producer wall clock. DevelopmentProjection is bounded current summary; attempts remain in history. Execution status and semantic outcome are distinct.
 
-Persistent workplan selection is private convenience, only used while compatible with current Core evidence. Stale/disappeared/conflicting selection is reported, not forced.
-
-WorkflowGraph uses Core WorkflowProfileDescriptor stages/transitions as the allowed topology and overlays observed attempts/outcomes/current recommendation. CLI supports text + JSON; Mermaid/DOT optional presentation.
-
-`next_action` uses normalized current evidence + profile transitions. Agent `recommended_next_stage` can corroborate but cannot override an incompatible profile transition. Multiple valid optional follow-ups may be returned as alternatives rather than forced into one pseudo-authoritative next stage.
+Persistent workplan selection is private convenience used only while compatible with current Core evidence. WorkflowGraph uses Core WorkflowProfileDescriptor topology and overlays attempts/outcomes/current recommendation. Agent `recommended_next_stage` can corroborate but never override an incompatible profile transition.
 
 ### 9.5 Tracker storage/coordination SPI v1
 
@@ -625,7 +679,7 @@ Private root:
   exports/
 ```
 
-SQLite/WAL is v1 control store; owner-only filesystem permissions are used where OS supports them. Filelock may support local process coordination but semantic lease ownership is exposed through Tracker SPI.
+SQLite/WAL is v1 control store; owner-only filesystem permissions where supported. Higher modules add namespaced tables through Tracker-owned migrations/transactions and may not directly read/write another module's semantic tables.
 
 ```python
 class TrackerStorageSPI(Protocol):
@@ -636,7 +690,7 @@ class TrackerStorageSPI(Protocol):
     def release_lease(self, request: LeaseReleaseRequest) -> LeaseReceipt: ...
 ```
 
-Tracker owns DB/config/migration/lease recovery policy. Extensions own namespaced tables and may not read/write another module's semantics directly. Lease requests carry extension owner, resource key, RunId/owner identity, TTL/renewal policy. Crashed/stale leases recover deterministically; duplicate acquire by same owner is idempotent. SQLite is explicitly part of this SPI major.
+Lease requests carry extension owner, resource key, RunId/owner identity, TTL/renewal policy. Crashed/stale leases recover deterministically; duplicate acquire by same owner is idempotent. SQLite is explicitly part of this SPI major.
 
 ### 9.6 Tracker CLI
 
@@ -672,8 +726,6 @@ TransportRef
 EffortRef
 ObservedExecutionIdentity
 ```
-
-RouteId is stable configured opaque key.
 
 ```text
 ExecutionRoute
@@ -711,37 +763,36 @@ class AdapterAPI(Protocol):
 
 ### 10.4 Pre-render admission and worktree lease
 
-Admission request includes allocated RunId, project/stage/task/workplan/candidate, optional requested route, interaction/manual constraints, capability/tool/privacy constraints, and Adapter-generated candidate route snapshots.
+Admission consumes the Core `PreparedPrompt` identity/context or an equivalent public projection sufficient to bind RunId, project, resolved stage, workplan, candidate, profile, and task constraints. It may include an optional requested route plus interaction/manual/tool/privacy constraints.
 
-No route-policy provider: admit explicit route or explicit configured default only. Active route-policy provider: explicit route admitted unchanged/rejected; omitted route may AUTO select.
+No route-policy provider: admit explicit route or explicit configured default only. Active route-policy provider: explicit route is admitted unchanged or rejected; omitted route may AUTO select.
 
-ExecutionAdmission returns selected route, prompt mode, candidate binding, optional policy admission ref, expiry/revalidation, and reason metadata.
+ExecutionAdmission returns selected route, prompt mode, candidate/preparation binding, optional policy admission ref, expiry/revalidation, and reason metadata.
 
-For a mutating local-worktree route, Adapter acquires a Tracker coordination lease on WorktreeKey before start and holds/renews it through terminal/abandonment. Different ProjectKeys targeting the same WorktreeKey conflict. Read-only local sharing is allowed only if explicit lease semantics safely support it; mutating default is exclusive.
+For mutating local-worktree routes, Adapter acquires a Tracker coordination lease on WorktreeKey before start and holds/renews it through terminal/abandonment. Different ProjectKeys targeting the same WorktreeKey conflict.
 
 ### 10.5 Frozen execution flow
 
 ```text
-Core.allocate_run_id
-  -> Core.observe/resolve stage + candidate/workplan/profile
+Core.allocate_run_id / Core.prepare
   -> Adapter.admit(route explicit/default/AUTO policy; acquire required admission/lease)
-  -> Core.render(same RunId; execution_mode = admitted route.prompt_execution_mode)
+  -> Core.render(same PreparedPrompt; prompt_execution_mode = admitted route.prompt_execution_mode)
   -> Adapter.start(exact admission + rendered prompt)
 ```
 
-Start rejects RunId/stage/candidate/profile/prompt-mode mismatch or stale admission. Render/user-confirm failure before start invokes Adapter.abandon. Expiry is fail-safe, not normal cleanup.
+Start rejects RunId/preparation/stage/candidate/profile/prompt-mode mismatch or stale admission. Render/user-confirm failure before start invokes Adapter.abandon. Expiry is fail-safe, not normal cleanup.
 
 ### 10.6 Manual/direct lifecycle
 
-Manual route start spawns no process; returns awaiting-external-result handle + ManualHandoffArtifact. User response enters Tracker ingest; wait may observe completion/timeout. Direct process controls on manual route return structured unsupported problem.
+Manual route start spawns no process; it returns awaiting-external-result handle + ManualHandoffArtifact. User response enters Tracker ingest; wait may observe completion/timeout. Direct process controls on manual route return structured unsupported problem.
 
-Direct route start returns stable handle; events are cursor-paged normalized events; respond uses stable control-request IDs; cancel idempotent; wait returns terminal result/timeout without destroying underlying run automatically.
+Direct route start returns stable handle; events are cursor-paged normalized events; respond uses stable control-request IDs; cancel is idempotent; wait returns terminal result/timeout without destroying the underlying run automatically.
 
 One RunId has at most one active execution. Ambiguous start/crash reconciles before retry. Worktree lease releases only after safe terminal/abandon reconciliation.
 
 ### 10.7 AgentRunResult
 
-Separates process status from agent workflow semantics. Includes run/admission/route, configured route, ObservedExecutionIdentity + provenance/confidence, backend/session where available, visible final response, structured result, candidate observations, interruption/failure class, transport telemetry, and Tracker evidence. Planned identity and observed identity remain distinct. Zero exit is not workflow PASS.
+Separates process status from workflow semantics. Includes run/admission/route, configured route, ObservedExecutionIdentity + provenance/confidence, backend/session where available, visible final response, structured result, candidate observations, interruption/failure class, transport telemetry, and Tracker evidence. Planned and observed identity remain distinct. Zero exit is not workflow PASS.
 
 ### 10.8 Agent transport SPI
 
@@ -756,7 +807,7 @@ class AgentTransportProvider(Protocol):
     def wait(self, request: TransportWaitRequest) -> TransportTerminalResult: ...
 ```
 
-Prefer ACP where conformant; use documented native structured RPC/SDK/JSON otherwise. PTY scraping not primary when structured interface exists. Initial families: Claude, Codex, OMP, Pi, Antigravity.
+Prefer ACP where conformant; use documented native structured RPC/SDK/JSON otherwise. PTY scraping is not primary when a structured interface exists. Initial families: Claude, Codex, OMP, Pi, Antigravity.
 
 ### 10.9 Route-policy SPI
 
@@ -772,13 +823,13 @@ Preview read-only; admit may reserve; explicit route unchanged/rejected; omitted
 
 ### 10.10 Benchmark SPI/recommendation
 
-Benchmark providers fetch/normalize versioned snapshots preserving source/schema/version, fetched/generated time, digest/ETag, licensing/attribution, metric value/unit/uncertainty, external model identity, effort, harness/config, freshness, and identity-match quality.
+Benchmark providers fetch/normalize versioned observations preserving source/schema/version, fetched/generated time, digest/ETag, licensing/attribution, metric value/unit/uncertainty, external model identity, effort, harness/config, freshness, and identity-match quality.
 
-Artificial Analysis is preferred current general-intelligence evidence; DeepSWE preferred current coding evidence. Exact endpoints/tiers are mutable provider configuration. DeepSWE match quality remains `EXACT_CONFIG_MATCH`, `MODEL_EFFORT_PROXY`, `MODEL_ONLY_PROXY`, or `UNRESOLVED`. Never fabricate missing scores or a universal scalar combining incompatible metrics.
+Artificial Analysis is preferred current general-intelligence evidence; DeepSWE preferred current coding evidence. Exact endpoints/tiers are provider configuration. DeepSWE match quality remains `EXACT_CONFIG_MATCH`, `MODEL_EFFORT_PROXY`, `MODEL_ONLY_PROXY`, or `UNRESOLVED`. Never fabricate missing scores or a universal scalar combining incompatible metrics.
 
 Role policy: Design/hard semantic work prioritizes general intelligence; Implementation prioritizes coding evidence; Review/Verification prioritize high general intelligence and may show provider/model independence secondarily.
 
-ACP is optional transport dependency; httpx justified for bounded source HTTP. No Scheduler/ML requirement.
+ACP is optional transport dependency; bounded source HTTP may justify httpx. No Scheduler/ML requirement.
 
 ### 10.11 Adapter CLI
 
@@ -812,15 +863,15 @@ class SchedulerAPI(Protocol):
     def reconcile(self, request: ReservationReconciliationRequest) -> ReservationReconciliation: ...
 ```
 
-Preview read-only; admit atomically re-observes resources, revalidates feasibility, selects/validates route, creates reservations.
+Preview is read-only; admit atomically re-observes resources, revalidates feasibility, selects/validates route, and creates reservations.
 
 ### 11.3 ScheduleRequest/idempotency
 
-Request includes RunId, project/stage/task features, candidate/workplan/profile identity, Adapter candidate route snapshots, optional requested RouteId, interaction/manual constraints, policy overrides.
+Request includes RunId, project/stage/task features, candidate/workplan/profile/preparation identity, Adapter candidate route snapshots, optional requested RouteId, interaction/manual constraints, and policy overrides.
 
 Requested route evaluates exact route only. Omitted route AUTO may choose. Manual route requires allowed handoff; unattended requires automatable route.
 
-Admission request fingerprint covers all feasibility/reservation semantics. Same RunId+fingerprint retry returns same live admission; conflicting live request fails. `release` handles never-started admission; expiration is fail-safe. Reconcile idempotent.
+Admission fingerprint covers all feasibility/reservation semantics. Same RunId+fingerprint retry returns same live admission; conflicting live request fails. Release handles never-started admission; expiration is fail-safe. Reconcile is idempotent.
 
 ### 11.4 Resource ledger model
 
@@ -836,7 +887,7 @@ meter/source/provenance/freshness
 reservations/uncertainty holds
 ```
 
-`UNMETERED_FOR_SCHEDULER`, `METERED`, `UNKNOWN` remain distinct. Shared account quota represented once/referenced by routes; dual windows simultaneous. Opaque quota remains provider units; PAYG uses versioned pricing.
+`UNMETERED_FOR_SCHEDULER`, `METERED`, and `UNKNOWN` remain distinct. Shared account quota is represented once/referenced by routes; dual windows are simultaneous constraints. Opaque quota remains provider units; PAYG uses versioned pricing.
 
 ### 11.5 Meter SPI/reservations
 
@@ -846,15 +897,15 @@ class AccountMeterProvider(Protocol):
     def observe(self, request: MeterRequest) -> MeterSnapshot: ...
 ```
 
-Prefer official/machine-readable sources; browser scraping not normal. Preserve source/unit/time/freshness/confidence/account.
+Prefer official/machine-readable sources; browser scraping is not normal. Preserve source/unit/time/freshness/confidence/account.
 
-Metered execution reserves predicted capacity across consumed ledgers atomically. Manual/unmetered route may have no quota reservation but still admission identity. Crash before authoritative post-meter keeps uncertainty hold; current provider meters/hard limits outrank stale predictions.
+Metered execution reserves predicted capacity across consumed ledgers atomically. Manual/unmetered route may have no quota reservation but still has admission identity. Crash before authoritative post-meter keeps an uncertainty hold; current provider meters/hard limits outrank stale predictions.
 
 ### 11.6 Prediction/scheduling
 
 Predict distributions for runtime, per-ledger consumption, token categories where relevant, monetary cost, stage-quality completion probability, interruption probability, and future repair rounds. Cold start uses interpretable priors by stage/role x model x effort x backend/transport with project corrections; early learning uses empirical quantiles/EWMA/shrinkage without mandatory ML; persist calibration.
 
-AUTO only when Scheduler active. Hard feasibility before ranking. Feasibility includes capability/effort, tools/skills, repository access, privacy, independence, backend health, interaction, predicted capacity, and protected future Review/Design reserve. Ranking may consider quality completion, interruption, future capacity, expiring quota opportunity cost, PAYG cost, handoff/continuity, independence/diversity, latency.
+AUTO exists only when Scheduler is active. Apply hard feasibility before ranking. Feasibility includes capability/effort, tools/skills, repository access, privacy, independence, backend health, interaction, predicted capacity, and protected future Review/Design reserve. Ranking may consider quality completion, interruption, future capacity, expiring-quota opportunity cost, PAYG cost, handoff/continuity, independence/diversity, and latency.
 
 ### 11.7 Adapter integration/persistence
 
@@ -868,8 +919,6 @@ Standalone Adapter operation remains valid when Scheduler is not installed/enabl
 
 If Scheduler was configured as required and fails activation/becomes unavailable, Adapter does not silently treat it as absent for a resource-governed run. AUTO is unavailable and such execution fails closed or requires an explicit user-approved downgrade/override according to configuration. Unmetered/manual routes may remain available when policy permits.
 
-This distinguishes modular degradation from accidental resource-policy bypass.
-
 ## 12. Configuration ownership
 
 Core owns canonical config/project identity. Extensions contribute namespaced validated sections.
@@ -879,7 +928,7 @@ Core owns canonical config/project identity. Extensions contribute namespaced va
 
 [projects.mdstats]
 repo = "/path/to/mdstats"
-mode = "hybrid"
+default_prompt_mode = "web"
 
 [tracker]
 # retention/history
@@ -891,11 +940,11 @@ mode = "hybrid"
 # ledgers/meters/prediction/admission/failure policy
 ```
 
-Unknown absent-extension sections preserved/diagnosed. Secrets are references/approved secret inputs, never ordinary snapshots/history.
+Unknown absent-extension sections are preserved/diagnosed. Secrets are references/approved secret inputs, never ordinary snapshots/history.
 
 ## 13. Persistence/event ownership
 
-Core stateless across invocations except config/bounded prompt-profile cache. Tracker introduces persistence; higher modules extend through Tracker SPI.
+Core is stateless across invocations except config/bounded prompt-profile cache. Tracker introduces persistence; higher modules extend through Tracker SPI.
 
 - one SQLite DB may contain multiple extension table families with one semantic owner each;
 - only owner writes tables; semantic cross-module reads use APIs;
@@ -919,6 +968,8 @@ sdp capabilities
 sdp doctor
 ```
 
+Additional canonical stage aliases may be exposed by the compatible workflow profile.
+
 ### + Tracker
 
 ```text
@@ -940,7 +991,7 @@ sdp benchmarks ...
 sdp run <stage> --route <id>
 ```
 
-No resource-aware AUTO. Manual routes valid.
+No resource-aware AUTO. Manual routes remain valid.
 
 ### + Scheduler
 
@@ -979,10 +1030,11 @@ A module advertises only healthy semantic capabilities.
 ## 16. Security/privacy
 
 - Installed entry-point code is trusted code, not sandboxed.
-- Pasted agent output, structured results, benchmark/meter responses, remote metadata are untrusted data: enforce size/time/schema bounds; never execute embedded instructions as control commands.
+- Discovery-only diagnostics do not import/execute extension providers.
+- Pasted agent output, structured results, benchmark/meter responses, and remote metadata are untrusted data: enforce size/time/schema bounds; never execute embedded instructions as control commands.
 - API keys/tokens never enter prompts/caches/events/logs/repositories.
 - Web prompt context excludes local paths/private state/account-resource telemetry/credential remotes.
-- ProjectDescriptor local path stays local process data.
+- ProjectDescriptor local path stays local-process data.
 - Agent subprocesses use direct argv/structured transport with explicit permission policy; no dangerous bypass default.
 - Historical transcripts are not auto-injected into later prompts; only bounded structured projection is automatic.
 - Benchmark licensing/attribution travels with cache.
@@ -990,7 +1042,7 @@ A module advertises only healthy semantic capabilities.
 
 ## 17. Benchmark integrity
 
-Recommendations reconstruct from source snapshots/observations preserving source, metric, benchmark/index version, generated/fetched time, model+effort+harness/config, value/uncertainty, identity match, staleness. Do not compare incompatible benchmark versions as one scale or combine Artificial Analysis Intelligence Index and DeepSWE pass@1 into a universal scalar absent separate validated design.
+Recommendations reconstruct from source snapshots/observations preserving source, metric, benchmark/index version, generated/fetched time, model+effort+harness/config, value/uncertainty, identity match, and staleness. Do not compare incompatible benchmark versions as one scale or combine Artificial Analysis Intelligence Index and DeepSWE pass@1 into a universal scalar absent separate validated design.
 
 ## 18. Executable architecture fitness
 
@@ -1003,27 +1055,36 @@ Adapters    may import Core + Tracker public API/SPI only
 Scheduler   may import Core + Tracker + Adapters public API/SPI only
 ```
 
-Also enforce native namespace packaging, one extension group, no private cross-module imports, one ownership of `sdp run`, no Scheduler process runner, and Tracker graph/next-action use of Core workflow profile rather than private profile parsing.
+Also enforce:
+
+- every orchestrator-owned repository implementation/test/package/doc/script path is under `orchestrator/` except Protocol-standard workplans and minimal repository-level invocation wiring;
+- native namespace packaging with no root `sdp_orchestrator/__init__.py`;
+- one extension group;
+- no private cross-module imports;
+- one ownership of `sdp run`;
+- no Scheduler process runner;
+- Tracker graph/next-action use public Core workflow profile rather than private profile parsing;
+- Adapter/Scheduler use Core preparation/workplan/profile services rather than duplicating resolution.
 
 ## 19. Module acceptance ladder
 
-Each module is implemented, independently reviewed, accepted before next.
+Each module is implemented, independently reviewed, and accepted before the next.
 
 ### WP-1 Prompt
 
-Prove Core-only install/CLI; project/worktree identity; RunId allocation; local observation/workplan paging; protocol-profile version binding and exact compatible snapshot resolution; WorkflowProfileDescriptor/stage-transition fixtures; digest/incomplete-identity schemes; explicit remote observation; prompt privacy; ambiguity; fingerprint/StageResultEnvelope+BlockerRecord fixtures; composition no extensions; API/SPI/error serialization; no higher imports/persistence.
+Prove Core-only install/CLI; all orchestrator implementation files contained under `orchestrator/`; project/worktree identity; RunId allocation; local observation/workplan paging/resolution; Protocol-profile version binding and exact compatible snapshot resolution; StageSelector -> StageRef and WorkflowProfileDescriptor fixtures; route-independent prepare + final render; preparation/prompt digest schemes; explicit remote observation; prompt privacy; ambiguity; terminal StageResultEnvelope/BlockerRecord fixture; extension discovery/activation boundaries; API/SPI/error serialization; no higher imports/persistence.
 
 ### WP-2 Tracker
 
-Re-prove Prompt with/without Tracker plus event/result idempotency; structured/manual ingest precedence; blocker/outcome classification and ambiguous-route behavior; run association; fresh Core observation; next-action/graph use of public WorkflowProfileDescriptor; deterministic history; subordinate workplan selection; persistence/restart; storage/migration/lease SPI; lease crash recovery; restrictive state permissions; Core usable without Tracker.
+Re-prove Prompt with/without Tracker plus event/result idempotency; structured/manual ingest precedence; blocker/outcome classification and ambiguous-route behavior; run association; fresh Core observation; next-action/graph use of public WorkflowProfileDescriptor; deterministic history; subordinate workplan selection; persistence/restart; storage/migration/lease SPI; lease crash recovery; restrictive state permissions; Core usable without Tracker; all Tracker code/tests/resources contained under `orchestrator/`.
 
 ### WP-3 Adapter
 
-Re-prove lower plus manual/direct routes; pre-render admission -> render -> start; explicit/default behavior; route-policy no/fake provider; admission abandon; prompt-mode/profile binding; same-worktree mutating-run exclusion across ProjectKeys/processes; start/events/respond/cancel/wait; planned-vs-observed identity; tracking; benchmark identity/provenance/failure degradation; no quota AUTO.
+Re-prove lower plus manual/direct routes; Core prepare -> pre-render admission -> Core render -> start; explicit/default behavior; route-policy no/fake provider; admission abandon; prompt-mode/profile/preparation binding; same-worktree mutating-run exclusion across ProjectKeys/processes; start/events/respond/cancel/wait; planned-vs-observed identity; tracking; benchmark identity/provenance/failure degradation; no quota AUTO; Adapter code/tests/resources contained under `orchestrator/`.
 
 ### WP-4 Scheduler
 
-Re-prove lower plus read-only preview; atomic/idempotent admit; pre-start release; explicit route no substitution; AUTO; manual scheduling; shared/dual-window ledgers; cross-project reservations; UNMETERED vs UNKNOWN; prediction/calibration; future reserve; PAYG/expiring quota; idempotent reconcile/uncertainty; route-policy integration; configured-required Scheduler failure does not silently bypass policy; disabled/not-installed Scheduler restores intended Adapter mode.
+Re-prove lower plus read-only preview; atomic/idempotent admit; pre-start release; explicit route no substitution; AUTO; manual scheduling; shared/dual-window ledgers; cross-project reservations; UNMETERED vs UNKNOWN; prediction/calibration; future reserve; PAYG/expiring quota; idempotent reconcile/uncertainty; route-policy integration; configured-required Scheduler failure does not silently bypass policy; disabled/not-installed Scheduler restores intended Adapter mode; Scheduler code/tests/resources contained under `orchestrator/`.
 
 ## 20. Lossless module-workplan derivation
 
@@ -1040,31 +1101,31 @@ Each declares:
 
 ```text
 parent_architecture: orchestrator/docs/architecture.md
-parent_architecture_version: 1.5.0
+parent_architecture_version: 1.6.0
 required_lower_module_api_versions: ...
 module_capabilities_delivered: ...
 forbidden_higher_module_dependencies: ...
 ```
 
-Each carries relevant parent invariants, responsibilities/non-responsibilities, consumed lower APIs/SPIs, public API/SPI established, affected/acceptance surface, standalone acceptance, lower-stack compatibility, and simplification/reopen triggers. Do not pre-implement later modules merely for future convenience.
+Each carries relevant parent invariants, responsibilities/non-responsibilities, consumed lower APIs/SPIs, public API/SPI established, repository-containment obligation, affected/acceptance surface, standalone acceptance, lower-stack compatibility, and simplification/reopen triggers. Do not pre-implement later modules merely for future convenience.
 
 ## 21. Versioning/evolution
 
 Architecture major breaks ladder/authority/dependency/API role; minor is backward-compatible strengthening before/alongside adoption; patch is clarification.
 
-1.5.0 supersedes 1.4.0 because this final pre-implementation review added the public workflow-profile/routing contract and structured blocker routing needed by Tracker before WP-1 freezes Core API v1.
+`1.6.0` supersedes `1.5.0` because the final WP-1 closure review exposed two parent-authority gaps before implementation: Core needed the public route-independent `prepare`/workplan-resolution/profile-resolution seam implied by the already-Frozen admission-before-render architecture, and the stakeholder explicitly froze repository containment of orchestrator implementation under `orchestrator/`. This version also names `PromptExecutionMode` separately from the canonical SDP `EXECUTION_MODE` input and records passive package-metadata-only extension discovery so the lower API can be implemented without semantic collision.
 
-Module package versions are independent. New benchmarks/transports/meters use owning SPIs. Ordinary provider/model/benchmark/flag/predictor churn does not reopen parent architecture unless Frozen boundary is insufficient.
+Module package versions are independent. New benchmarks/transports/meters use owning SPIs. Ordinary provider/model/benchmark/flag/predictor churn does not reopen parent architecture unless a Frozen boundary is insufficient.
 
 ## 22. Active simplicity/reopen triggers
 
-Reopen/simplify before multiple plugin loaders, reverse dependencies, duplicated CLI composition, separate mutable workflow authority, Tracker private parsing of Core profile files, a generic workflow-expression engine where profile transition descriptors suffice, benchmark fields in Core, quota abstractions below Scheduler, duplicated model identity mapping, backend-specific workflow logic, Scheduler process execution, private SQL/process objects in public API, hidden preview writes, or stubs preserving broken higher layers instead of downgrade.
+Reopen/simplify before multiple plugin loaders, reverse dependencies, duplicated CLI composition, separate mutable workflow authority, Tracker private parsing of Core profile files, a generic workflow-expression engine where profile transition descriptors suffice, benchmark fields in Core, quota abstractions below Scheduler, duplicated model identity mapping, backend-specific workflow logic, Scheduler process execution, private SQL/process objects in public API, hidden preview writes, provisional prompts used merely for admission, duplicated workplan/profile resolution outside Core, orchestrator implementation/test/build logic outside `orchestrator/`, or stubs preserving broken higher layers instead of downgrade.
 
-Reopen parent only if evidence shows required reverse dependency, single registry insufficiency, workflow-profile descriptor unable to encode required Protocol routing without a materially different owner, public API role unable to support next module without semantic break, protocol-profile model insufficient for compatibility, or execution lifecycle unable to represent a required backend safely.
+Reopen parent only if evidence shows required reverse dependency, single registry insufficiency, WorkflowProfileDescriptor unable to encode required Protocol routing without a materially different owner, public API role unable to support the next module without semantic break, protocol-profile model insufficient for compatibility, execution lifecycle unable to represent a required backend safely, or the `orchestrator/` repository-containment boundary irreconcilably conflicts with an independently required build/release mechanism that cannot be expressed through thin repository-level invocation wiring.
 
 ## 23. Final pre-implementation review closure — 2026-09-07
 
-Across the repeated independent review passes, the following material pre-freeze gaps were closed before any module implementation began:
+Across repeated independent review passes, material pre-freeze gaps were closed before any module implementation began:
 
 1. capability identity separated from API version and provider compatibility became explicit;
 2. Core exposes trusted local project/worktree data separately from prompt-safe web context;
@@ -1075,16 +1136,20 @@ Across the repeated independent review passes, the following material pre-freeze
 7. manual-web is a first-class route, while planned and observed model identities remain separate;
 8. route admission occurs before route-sensitive prompt rendering, with pre-start abandonment/release;
 9. explicit Scheduler routes are admitted unchanged or rejected, not silently substituted, and reservations/reconciliation are idempotent;
-10. protocol prompt/profile resolution is version-bound and cannot silently reinterpret older workplans;
+10. Protocol prompt/profile resolution is version-bound and cannot silently reinterpret older workplans;
 11. mutating local executions serialize by physical WorktreeKey rather than ProjectKey;
 12. configured-required Scheduler failure cannot silently bypass resource policy;
-13. Core requests a stable StageResultEnvelope and Tracker uses structured-first/manual-safe ingestion;
-14. Core now exposes WorkflowProfileDescriptor stage/transition semantics and structured BlockerRecord classification so Tracker next-action/graph logic does not duplicate private Protocol routing authority.
+13. Core requests a stable terminal StageResultEnvelope and Tracker uses structured-first/manual-safe ingestion;
+14. Core exposes WorkflowProfileDescriptor stage/transition semantics and structured BlockerRecord classification so Tracker next-action/graph logic does not duplicate private Protocol routing authority;
+15. Core now exposes route-independent `prepare`, stage-specific `resolve_workplan`, profile-aware `workflow`, and final `render` so Adapter/Scheduler can honor admission-before-render without duplicating Core authority or creating provisional prompt artifacts;
+16. local/web `PromptExecutionMode` is distinct from canonical agent `EXECUTION_MODE`;
+17. discovery-only diagnostics stop at package metadata and do not execute extension providers;
+18. all orchestrator-owned implementation, package, test, fixture, script, and documentation files are contained under repository-relative `orchestrator/`, with only Protocol-standard workplans and minimal repository-level invocation wiring outside that boundary.
 
-No remaining architecture-level blocker was found. The cross-module seams are now specific enough to derive WP-1 through WP-4 losslessly, while module-local algorithms/classes remain delegated. Further speculative generalization should be rejected unless implementation evidence triggers a stated reopen condition.
+No remaining architecture-level blocker is known. The cross-module seams are specific enough to derive WP-1 through WP-4 losslessly, while module-local algorithms/classes remain delegated. Further speculative generalization should be rejected unless implementation evidence triggers a stated reopen condition.
 
 ## 24. Design verdict
 
-**PASS — architecture 1.5.0 is implementation-ready.**
+**PASS — architecture 1.6.0 is implementation-ready.**
 
-The next active implementation contract should be WP-1 Prompt Module only. WP-1 establishes Core, CLI/composition, Core API/SPI v1, RunId/ProjectKey/WorktreeKey/ProtocolProfileRef identity, repository/workplan observation, WorkflowProfileDescriptor, compatible canonical prompt rendering, StageResultEnvelope/BlockerRecord request schema, and prompt identity. It must not introduce Tracker persistence, agent integration, benchmark networking, or Scheduler/resource machinery.
+The active implementation contract is WP-1 Prompt Module. It establishes Core, CLI/composition, Core API/SPI v1, RunId/ProjectKey/WorktreeKey/ProtocolProfileRef identity, repository/workplan observation and resolution, WorkflowProfileDescriptor, route-independent prompt preparation, compatible canonical final prompt rendering, StageResultEnvelope/BlockerRecord request schema, preparation/prompt identity, and repository containment under `orchestrator/`. It must not introduce Tracker persistence, agent integration, benchmark networking, or Scheduler/resource machinery.

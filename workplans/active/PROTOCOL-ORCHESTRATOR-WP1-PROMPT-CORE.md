@@ -4,7 +4,7 @@ workplan_id: PROTOCOL-ORCHESTRATOR-WP1-PROMPT-CORE
 protocol_version: 5.16.0
 status: active
 parent_architecture: orchestrator/docs/architecture.md
-parent_architecture_version: 1.5.0
+parent_architecture_version: 1.6.0
 base_commit: af4e7ed637891cc49c0ccc40cc9636491df71457
 target_branch: plan/protocol-orchestrator
 required_lower_module_api_versions: NONE
@@ -53,6 +53,7 @@ Core-only installation is a finished operating mode. It requires no history data
 13. **Render consistency is optimistic and coherent.** Core does not lock repositories in WP-1, but it does not emit a prompt assembled from materially different candidate/workplan/local-source states. Material drift between preparation and final render fails/retries boundedly rather than producing a mixed snapshot.
 14. **Determinism follows semantic state.** With fixed RunId and unchanged material preparation state plus prompt mode/input state, preparation/prompt identities do not drift because of wall-clock metadata or unrelated extension configuration.
 15. **Installed behavior is the acceptance owner.** Helper tests cannot proxy-pass a broken wheel, packaged profile, extension-discovery surface, real Git observer, console entry point, stdout contract, or privacy/remote-truth boundary.
+16. **Repository containment is mandatory.** Every orchestrator-owned executable source file, package/build metadata, test, fixture, package resource, developer script, and orchestrator documentation introduced by WP-1 lives under repository-relative `orchestrator/`. Repository-level workplans remain under the Protocol workplan convention, and existing repository CI/config may invoke `orchestrator/...`, but no orchestrator implementation logic is placed in top-level `source/`, `tests/`, `tools/`, `scripts/`, or another sibling tree merely for convenience.
 
 ### 1.2 Non-goals
 
@@ -76,23 +77,42 @@ Parent authority:
 
 ```text
 orchestrator/docs/architecture.md
-architecture_version = 1.5.0
+architecture_version = 1.6.0
 protocol_version = 5.16.0
 ```
 
-This workplan inherits the parent module ladder, dependency direction, Core ownership, workflow-profile ownership, Protocol binding, privacy boundary, route-before-render invariant, and standalone acceptance. Protocol 5.16 remains the generic lifecycle/testing/review authority. Canonical prompt source:
+This workplan inherits the parent module ladder, dependency direction, Core ownership, workflow-profile ownership, Protocol binding, privacy boundary, route-before-render invariant, repository-containment invariant, and standalone acceptance. Protocol 5.16 remains the generic lifecycle/testing/review authority. Canonical prompt source:
 
 ```text
 source/shared/references/development-workflow-prompts.md
 ```
 
-At workplan creation there is no executable Core implementation. The greenfield ratchet is therefore: one prompt authority, no higher-module machinery, minimum justified dependencies/public surface, executable dependency/namespace guards, and rejection-capable ambiguity/version/privacy/identity tests.
+At workplan creation there is no executable Core implementation. The greenfield ratchet is therefore: one prompt authority, no higher-module machinery, minimum justified dependencies/public surface, executable dependency/namespace/layout guards, and rejection-capable ambiguity/version/privacy/identity tests.
 
 ## 3. Frozen WP-1 architecture
 
-### 3.1 Distribution, namespace, and version dimensions
+### 3.1 Distribution, repository containment, namespace, and version dimensions
 
 Create one independently installable Python distribution `sdp-orchestrator-core`, console entry point `sdp`, and native PEP 420 namespace `sdp_orchestrator.core`. Core must not own `sdp_orchestrator/__init__.py`. Initial runtime floor is Python 3.11+.
+
+All WP-1 implementation-owned repository files are contained under `orchestrator/`. A conforming layout may be, for example:
+
+```text
+orchestrator/
+  docs/
+    architecture.md
+    ...
+  packages/
+    core/
+      pyproject.toml
+      src/
+        sdp_orchestrator/
+          core/
+      tests/
+      fixtures/
+```
+
+The exact subdirectory names beneath `orchestrator/` are delegated, but the containment boundary is Frozen. Shared repository-level CI/workflow files may contain only the minimal invocation/wiring needed to run orchestrator checks; reusable orchestrator logic, fixtures, package metadata, and test code remain under `orchestrator/`. Existing Protocol source under `source/`, ordinary repository workplans under `workplans/`, and generated/install artifacts outside the repository are inputs/integration surfaces, not orchestrator implementation placement.
 
 Package release version, architecture version, Protocol version, config schema, API/SPI major, workflow-profile schema, result-envelope schema, event schema, and digest-canonicalization schemes are independent identities.
 
@@ -341,7 +361,7 @@ Normal activation imports/loads eligible providers, obtains side-effect-minimal 
 
 ```text
 normal
- discovery_only
+discovery_only
 ```
 
 **Discovery-only does not import or execute third-party extension provider code.** It reads installed distribution/entry-point metadata only and reports higher extensions as discovered/not-loaded unless equivalent declarative metadata is safely available. Therefore it does not claim provider capabilities/health that were not loaded/probed. `sdp doctor` and `sdp capabilities` use discovery-only by default, preserving their no-hidden-mutation/network guarantee. Normal composition is the path that loads providers and validates manifests/dependency graph.
@@ -513,9 +533,9 @@ Aliases resolve through compatible profile, not duplicate hard-coded semantics.
 
 ## 5. Implementation obligations and acceptance
 
-### O1 — Build/install/package boundary
+### O1 — Build/install/package/layout boundary
 
-Build Core distribution/entry point/PEP 420 namespace/packaged 5.16 resources with justified dependencies. Acceptance: wheel/sdist build, independent artifact inspection, install outside source checkout, installed CLI smoke, sibling namespace coexistence fixture, no root namespace `__init__.py`, no production higher-module imports.
+Build Core distribution/entry point/PEP 420 namespace/packaged 5.16 resources with justified dependencies. Acceptance: wheel/sdist build, independent artifact inspection, install outside source checkout, installed CLI smoke, sibling namespace coexistence fixture, no root namespace `__init__.py`, no production higher-module imports, and a structural layout check proving all orchestrator-owned source/package/test/fixture/script/doc files introduced by WP-1 are under `orchestrator/` except repository-level workplan authority and minimal pre-existing CI invocation wiring.
 
 ### O2 — Config/project/composition normalization
 
@@ -568,9 +588,9 @@ Acceptance through real installed entry-point metadata. Discovery-only does not 
 
 Installed `sdp` subprocess, not direct callbacks. Every alias and `sdp prompt <stage>` uses same prepare/render path. Stdout atomic/prompt-only; errors redacted stderr/nonzero. Optional copy additive. Doctor reports Core readiness without hidden load/network/mutation.
 
-### O12 — Documentation, CI, final simplicity
+### O12 — Documentation, CI, and final simplicity
 
-Document install/config/project/remote/prompt mode, prompt-mode vs canonical EXECUTION_MODE, Core render source vs agent PROTOCOL_SOURCE, required inputs/workplan policies, local/web visibility, result-footer contract, piping/copying, extension trust/discovery/subscriptions, bounded secret guarantee, higher-feature absence.
+Document install/config/project/remote/prompt mode, prompt-mode vs canonical EXECUTION_MODE, Core render source vs agent PROTOCOL_SOURCE, required inputs/workplan policies, local/web visibility, result-footer contract, piping/copying, extension trust/discovery/subscriptions, bounded secret guarantee, repository-containment rule, and higher-feature absence.
 
 Integrate Core acceptance into ordinary repository validation; do not create a competing CI authority. Preserve:
 
@@ -583,7 +603,7 @@ python source/check_dist.py --expected /tmp/protocol-dist --committed dist
 git diff --check
 ```
 
-Core package/test/install acceptance is additional. Before handoff reconcile every obligation, re-derive affected surface, run final Core regression/real-owner integration/repository checks, and remove speculative persistence/transport/resource/benchmark hooks or duplicate authorities.
+Core package/test/install acceptance is additional and lives under `orchestrator/`; existing repository-level validation/CI may invoke those checks using minimal wiring but must not host orchestrator implementation logic outside the containment boundary. Before handoff reconcile every obligation, re-derive affected surface, run final Core regression/real-owner integration/repository checks, and remove speculative persistence/transport/resource/benchmark hooks, duplicate authorities, or misplaced orchestrator files.
 
 ## 6. Real semantic-owner acceptance boundaries
 
@@ -595,7 +615,8 @@ Core package/test/install acceptance is additional. Before handoff reconcile eve
 6. Real entry-point discovery in both metadata-only and normal-load modes.
 7. Final rendered prompt/stdout for privacy/remote truth.
 8. Successful final render -> explicitly subscribed event sink.
-9. Ordinary repository CI actually invokes Core acceptance and retains Protocol checks.
+9. Repository layout structural check over the final candidate proves the orchestrator implementation surface is contained under `orchestrator/`.
+10. Ordinary repository CI actually invokes Core acceptance and retains Protocol checks.
 
 Doubles are valid only below/outside the owner under claim; evidence that stays green with a broken owner cannot close it.
 
@@ -603,9 +624,9 @@ Doubles are valid only below/outside the owner under claim; evidence that stays 
 
 ### Stage 1 — Package/contracts/config/Git/workplans
 
-Package skeleton, public records/composition, config/project/prompt-mode normalization, Git/worktree/remote observation, workplan catalog/resolution/stage policy.
+Package skeleton under `orchestrator/`, public records/composition, config/project/prompt-mode normalization, Git/worktree/remote observation, workplan catalog/resolution/stage policy.
 
-Closure: focused contract/config/Git/workplan/path/remote tests + affected regression; no persistence/higher import.
+Closure: focused contract/config/Git/workplan/path/remote/layout tests + affected regression; no persistence/higher import.
 
 ### Stage 2 — Protocol profile + preparation
 
@@ -615,7 +636,7 @@ Closure: canonical/profile parity, all-stage workplan/input policy, source/versi
 
 ### Stage 3 — Final renderer/composition/CLI/package closure
 
-Mode-sensitive render, privacy/remote target, result-footer/prompt fingerprint/event, real extension discovery/passive diagnostics, CLI/clipboard, docs, package build/install/CI, architecture-fitness checks, final reconciliation/regression/integration/simplification.
+Mode-sensitive render, privacy/remote target, result-footer/prompt fingerprint/event, real extension discovery/passive diagnostics, CLI/clipboard, docs, package build/install/CI, architecture-fitness/layout checks, final reconciliation/regression/integration/simplification.
 
 Closure: installed-wheel end-to-end acceptance on representative temporary repositories + ordinary repository validation; ready for independent Review.
 
@@ -623,10 +644,11 @@ Closure: installed-wheel end-to-end acceptance on representative temporary repos
 
 ### Frozen for WP-1
 
-- parent architecture 1.5 module/dependency/ownership direction;
+- parent architecture 1.6 module/dependency/ownership direction;
+- all orchestrator implementation-owned repository files contained under `orchestrator/`, with only minimal repository-level CI invocation wiring and Protocol-standard workplan authority outside it;
 - Core standalone distribution/CLI/composition and capabilities;
 - Python 3.11+ and PEP 420;
-- public Core API/Application/Extension SPI semantic families including additive `resolve_workplan`, profile-aware `workflow`, route-independent `prepare`, and final `render` required by parent invariants;
+- public Core API/Application/Extension SPI semantic families including `resolve_workplan`, profile-aware `workflow`, route-independent `prepare`, and final `render` required by parent invariants;
 - StageSelector vs StageRef;
 - PromptExecutionMode(local|web) and separation from canonical EXECUTION_MODE;
 - built-in web prompt default/no silent local fallback;
@@ -643,6 +665,7 @@ Closure: installed-wheel end-to-end acceptance on representative temporary repos
 ### Delegated until WP-1 Review freezes fixtures
 
 - private decomposition/build backend/test runner/package release number;
+- exact subdirectory naming beneath the Frozen `orchestrator/` containment root;
 - concrete Git/network plumbing satisfying semantics;
 - finite numeric parser/read/download limits;
 - lifecycle-only semantic-digest exclusion list;
@@ -653,20 +676,22 @@ Closure: installed-wheel end-to-end acceptance on representative temporary repos
 
 ### Design reopen triggers
 
-Reopen only affected surface if evidence shows Core prepare/render/resolve still cannot support Tracker/Adapter without private/reverse dependency; required workflow facts need a different owner/model; canonical prompt cannot package offline without competing authority; target workplan conventions systematically defeat exact resolution; one extension registry/subscription seam cannot compose later modules; non-mutating observation/revalidation cannot establish coherent identity; web/local privacy/addressability cannot be preserved; or Python 3.11+ violates required distribution target.
+Reopen only affected surface if evidence shows Core prepare/render/resolve still cannot support Tracker/Adapter without private/reverse dependency; required workflow facts need a different owner/model; canonical prompt cannot package offline without competing authority; target workplan conventions systematically defeat exact resolution; one extension registry/subscription seam cannot compose later modules; non-mutating observation/revalidation cannot establish coherent identity; web/local privacy/addressability cannot be preserved; the `orchestrator/` repository-containment boundary conflicts with an independently required packaging/release mechanism that cannot be expressed by thin invocation wiring; or Python 3.11+ violates a required distribution target.
 
 ## 9. Simplification triggers
 
-Simplify before durable addition if implementation starts creating a second prompt-body authority; separate local/web renderers instead of one context policy; separate CLI/API config logic; multiple plugin loaders; generic workflow DSL; persistence/event queue in Core; agent/model/account/resource placeholders; fuzzy workplan/remote heuristics; generic secret scanner guarantees; repository-mutating observation; generic input overriding first-class identity; provisional prompt rendering for admission; duplicated workplan/profile resolution outside Core; or competing CI workflow without real isolation need.
+Simplify before durable addition if implementation starts creating a second prompt-body authority; separate local/web renderers instead of one context policy; separate CLI/API config logic; multiple plugin loaders; generic workflow DSL; persistence/event queue in Core; agent/model/account/resource placeholders; fuzzy workplan/remote heuristics; generic secret scanner guarantees; repository-mutating observation; generic input overriding first-class identity; provisional prompt rendering for admission; duplicated workplan/profile resolution outside Core; orchestrator implementation/test/build logic outside `orchestrator/`; or a competing CI workflow without real isolation need.
 
 ## 10. Final closure review — 2026-09-07
 
 Closure re-read the remote Protocol 5.16 `software-design` role and workflow/workplan, testing/proxy-proof, architecture/simplicity, versioning, long-horizon, Python, configuration, security, specification, release, repository, and canonical workflow-prompt authorities, then falsified WP-1 as the compatibility floor for WP-2 through WP-4.
 
-Repeated review closed: complete stage input ownership; exact/path-safe/stage-specific workplan resolution; deterministic non-mutating Git/remote identity; truthful web/privacy/secret boundaries; conservative candidate/workplan/source identity and stale-snapshot rejection; canonical prompt/remote Protocol source coherence; absent-extension config; one registry/subscribed event seam; installed namespace/entry-point acceptance; prompt-mode versus canonical EXECUTION_MODE separation; render-source versus agent PROTOCOL_SOURCE separation; profile-neutral StageSelector; public workplan/profile resolution; route-independent prepare/final render; versioned preparation identity; passive package-metadata-only diagnostics; and an unambiguous terminal machine-readable result-footer contract.
+Repeated review closed: complete stage input ownership; exact/path-safe/stage-specific workplan resolution; deterministic non-mutating Git/remote identity; truthful web/privacy/secret boundaries; conservative candidate/workplan/source identity and stale-snapshot rejection; canonical prompt/remote Protocol source coherence; absent-extension config; one registry/subscribed event seam; installed namespace/entry-point acceptance; prompt-mode versus canonical EXECUTION_MODE separation; render-source versus agent PROTOCOL_SOURCE separation; profile-neutral StageSelector; public workplan/profile resolution; route-independent prepare/final render; versioned preparation identity; passive package-metadata-only diagnostics; an unambiguous terminal machine-readable result-footer contract; and repository containment of all orchestrator implementation-owned files.
+
+The parent architecture was reconciled at 1.6.0 so these Core seams and the `orchestrator/` repository boundary are Tier-1B authority rather than workplan-only refinements.
 
 A final counterexample pass after those corrections finds no significant unresolved Design gap. Remaining choices are Tier-2 realization details or explicitly deferred higher-module concerns.
 
-Snapshot-loss counterfactual: parent architecture + this workplan + supplied Protocol 5.16 source/reference tree recover every still-binding WP-1 invariant, Frozen decision, API/SPI role, stage/workplan/input policy, non-goal, acceptance boundary, and reopen trigger without chat or Git review history.
+Snapshot-loss counterfactual: parent architecture + this workplan + supplied Protocol 5.16 source/reference tree recover every still-binding WP-1 invariant, Frozen decision, API/SPI role, stage/workplan/input policy, repository-layout rule, non-goal, acceptance boundary, and reopen trigger without chat or Git review history.
 
 **Design verdict: PASS — WP-1 Prompt Module + Core Program is closure-complete and ready for `software-implementation`.**
