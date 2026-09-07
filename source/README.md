@@ -36,6 +36,16 @@ software-design -> software-implementation
 
 Testing and independent review are activities/modes, not extra lifecycle roles. Optional specialists remain supporting capabilities rather than approval gates.
 
+## Development workflow prompt entrypoint
+
+The canonical human-facing orchestration reference is:
+
+- `shared/references/development-workflow-prompts.md`
+
+It provides standalone prompts for Design/Workplan, Implementation, Review & Update, Verification, Stabilization/Architecture GC, downstream-workplan Alignment, Health Audit, and Closeout. Each stage exposes a small `INPUTS` block so users define task-specific values once and the prompt refers to those symbolic variables thereafter.
+
+These prompts are entry routing for the existing protocol skills and references. They do not create a parallel lifecycle, requirement source, approval authority, or independent doctrine.
+
 ## Shared doctrine and language engineering profiles
 
 Protocol 5.15 adds a thin language adaptation layer without creating separate protocols:
@@ -103,6 +113,7 @@ Required C++ behavior must survive supported optimized/production builds rather 
 
 Lifecycle entrypoints retain high-salience invariants and deterministic triggers. Detailed semantics live in canonical references:
 
+- human-facing workflow orchestration prompts -> `shared/references/development-workflow-prompts.md`;
 - lifecycle/workplans/authority/stages/handoff/rework -> `shared/references/workflow-and-workplans.md`;
 - recurrence/active simplification/review readiness/revision economy -> `shared/references/convergence-and-cycle-economy.md`;
 - regression/integration/evidence reuse/proxy-proof acceptance/qualification -> `shared/references/testing-and-validation.md`;

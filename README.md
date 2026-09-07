@@ -26,6 +26,14 @@ Design separates original product/problem invariants from cycle-scoped Frozen ar
 
 Affected-surface growth expands implementation/testing impact; it does not itself create requirements. Proxy-proof acceptance follows the real owner of the final accepted realization.
 
+## Development workflow prompt entrypoint
+
+For repeatable human-to-agent orchestration of Design, Implementation, Review, Verification, Stabilization, Alignment, Health Audit, and Closeout, use the canonical prompt reference:
+
+- [`source/shared/references/development-workflow-prompts.md`](source/shared/references/development-workflow-prompts.md)
+
+Each prompt exposes an `INPUTS` block so task-specific values such as workplan path, implementation target, governing authorities, and protocol source are defined once and referenced symbolically throughout the stage prompt. These prompts route into the protocol; they do not create a parallel authority model.
+
 ## Language-native engineering
 
 Protocol 5.15 preserves one shared doctrine and adds thin differential language profiles:
