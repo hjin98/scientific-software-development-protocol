@@ -1,0 +1,3 @@
+interface:
+  display_name: "Software Maintenance Audit"
+  short_description: "Audit long-lived codebases for semantic maintenance risk."

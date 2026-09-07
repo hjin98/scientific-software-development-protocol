@@ -17,12 +17,12 @@ ROLE_513 = {
     "tool-hypothesis.md",
     "tool-codeql.md",
 }
-
 ROLE_515 = {
     "language-profiles.md",
     "python-engineering.md",
     "cpp-engineering.md",
 }
+ROLE_516 = {"long-horizon-code-health.md"}
 
 EXPECTED_REFERENCES = {
     "roles/software-design": {
@@ -31,7 +31,7 @@ EXPECTED_REFERENCES = {
         "release-and-distribution.md", "repository-intake.md",
         "configuration-and-policy.md", "concurrency-and-orchestration.md", "security-and-trust-boundaries.md",
         "performance-and-parallelism.md", "storage-and-io.md", "scientific-software.md",
-    } | ROLE_513 | ROLE_515,
+    } | ROLE_513 | ROLE_515 | ROLE_516,
     "roles/software-implementation": {
         "workflow-and-workplans.md", "testing-and-validation.md", "protocol-versioning-and-compatibility.md",
         "architecture-and-design.md", "debugging-and-state-recovery.md", "documentation-and-evidence.md",
@@ -39,7 +39,7 @@ EXPECTED_REFERENCES = {
         "git-and-version-control.md", "configuration-and-policy.md",
         "concurrency-and-orchestration.md", "security-and-trust-boundaries.md", "performance-and-parallelism.md",
         "storage-and-io.md", "scientific-software.md",
-    } | ROLE_513 | ROLE_515,
+    } | ROLE_513 | ROLE_515 | ROLE_516,
     "specialists/software-documentation": {
         "workflow-and-workplans.md", "testing-and-validation.md", "protocol-versioning-and-compatibility.md",
         "architecture-and-design.md", "documentation-and-evidence.md", "documentation-maintenance.md",
@@ -50,6 +50,12 @@ EXPECTED_REFERENCES = {
         "workflow-and-workplans.md", "testing-and-validation.md", "protocol-versioning-and-compatibility.md",
         "git-and-version-control.md", "documentation-and-evidence.md", "release-and-distribution.md",
         "repository-intake.md", "security-and-trust-boundaries.md", "storage-and-io.md",
+    },
+    "specialists/software-maintenance-audit": {
+        "workflow-and-workplans.md", "testing-and-validation.md", "protocol-versioning-and-compatibility.md",
+        "long-horizon-code-health.md", "architecture-and-design.md", "git-and-version-control.md",
+        "repository-intake.md", "tool-assisted-engineering.md", "convergence-and-cycle-economy.md",
+        "documentation-and-evidence.md", "scientific-software.md",
     },
 }
 
@@ -66,25 +72,46 @@ class ProtocolPortabilityTests(unittest.TestCase):
             linked = {Path(path).name for path in LINK_RE.findall(text)}
             self.assertEqual(expected, linked, rel)
 
-    def test_protocol_513_tool_and_convergence_refs_are_lifecycle_only(self) -> None:
+    def test_protocol_513_direct_tool_refs_remain_lifecycle_only(self) -> None:
         for rel in ("roles/software-design", "roles/software-implementation"):
             text = (SOURCE / rel / "SKILL.md").read_text(encoding="utf-8")
             linked = {Path(path).name for path in LINK_RE.findall(text)}
             self.assertTrue(ROLE_513 <= linked)
-        for rel in ("specialists/software-documentation", "specialists/repository-hygiene"):
+        direct_tools = {"tool-serena.md", "tool-semgrep.md", "tool-hypothesis.md", "tool-codeql.md"}
+        for rel in (
+            "specialists/software-documentation",
+            "specialists/repository-hygiene",
+            "specialists/software-maintenance-audit",
+        ):
             text = (SOURCE / rel / "SKILL.md").read_text(encoding="utf-8")
             linked = {Path(path).name for path in LINK_RE.findall(text)}
-            self.assertTrue(ROLE_513.isdisjoint(linked))
+            self.assertTrue(direct_tools.isdisjoint(linked))
+        audit = (SOURCE / "specialists/software-maintenance-audit/SKILL.md").read_text(encoding="utf-8")
+        self.assertIn("](references/tool-assisted-engineering.md)", audit)
 
     def test_protocol_515_language_profiles_are_lifecycle_only(self) -> None:
         for rel in ("roles/software-design", "roles/software-implementation"):
             text = (SOURCE / rel / "SKILL.md").read_text(encoding="utf-8")
             linked = {Path(path).name for path in LINK_RE.findall(text)}
             self.assertTrue(ROLE_515 <= linked)
-        for rel in ("specialists/software-documentation", "specialists/repository-hygiene"):
+        for rel in (
+            "specialists/software-documentation",
+            "specialists/repository-hygiene",
+            "specialists/software-maintenance-audit",
+        ):
             text = (SOURCE / rel / "SKILL.md").read_text(encoding="utf-8")
             linked = {Path(path).name for path in LINK_RE.findall(text)}
             self.assertTrue(ROLE_515.isdisjoint(linked))
+
+    def test_protocol_516_long_horizon_reference_is_progressively_disclosed(self) -> None:
+        for rel in ("roles/software-design", "roles/software-implementation", "specialists/software-maintenance-audit"):
+            text = (SOURCE / rel / "SKILL.md").read_text(encoding="utf-8")
+            linked = {Path(path).name for path in LINK_RE.findall(text)}
+            self.assertIn("long-horizon-code-health.md", linked, rel)
+        for rel in ("specialists/software-documentation", "specialists/repository-hygiene"):
+            text = (SOURCE / rel / "SKILL.md").read_text(encoding="utf-8")
+            linked = {Path(path).name for path in LINK_RE.findall(text)}
+            self.assertNotIn("long-horizon-code-health.md", linked, rel)
 
     def test_language_profile_routes_are_mandatory_for_both_lifecycle_roles(self) -> None:
         for rel in ("roles/software-design", "roles/software-implementation"):

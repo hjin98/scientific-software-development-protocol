@@ -1,6 +1,6 @@
 # Software Development Protocol
 
-Software Development Protocol 5 is an engineering-fitness-first workflow for AI-assisted software engineering. Current protocol version: **5.15**.
+Software Development Protocol 5 is an engineering-fitness-first workflow for AI-assisted software engineering. Current protocol version: **5.16**.
 
 ## Governing doctrine
 
@@ -12,9 +12,13 @@ Tier 1 is intrinsic stakeholder/domain product truth plus high-level architectur
 
 The durable stakeholder product is the objective. Workplans, tests, gates, metrics, reviews, reports, tools, language runtimes, and current implementation machinery are constraints, evidence, or solutions—not product truth.
 
-## Active simplicity
+## Active simplicity and long-horizon quality
 
-Tier 2 is an active restoring policy. A clean local bug receives a clean owning-layer repair, but repeated patches, wrappers/fallbacks/special cases, duplicated state/authorities, repeated reconciliation, or a materially simpler equivalent realization require simplification/re-derivation before another additive durable repair.
+A clean local bug receives a clean owning-layer repair. Repeated patches, wrappers/fallbacks/special cases, duplicated state/authorities, repeated reconciliation, or a materially simpler equivalent realization require Tier-2 simplification/re-derivation before another additive durable repair.
+
+Protocol 5.16 adds an earlier-warning quality loop without replacing engineering judgment with scores. Complexity, churn, dependency structure, coverage, mutation survival, duplication, API/configuration growth, and related observations are **sensors, not verdicts**. Touched code follows a semantic quality ratchet: existing debt does not excuse making an affected subsystem harder to reason about unless Tier-1/Frozen requirements justify the added complexity.
+
+The shared owner for these semantics is `source/shared/references/long-horizon-code-health.md`.
 
 ## Two-role lifecycle
 
@@ -24,61 +28,43 @@ software-design -> software-implementation
 
 Design separates original product/problem invariants from cycle-scoped Frozen architecture and delegated solution space. Implementation preserves Tier 1 while remaining free to reduce, consolidate, refactor, or replace Tier-2 machinery. Evidence that invalidates Frozen architecture routes back to Design on the affected surface.
 
-Affected-surface growth expands implementation/testing impact; it does not itself create requirements. Proxy-proof acceptance follows the real owner of the final accepted realization.
+Final accepted-contract reconciliation, final affected regression/integration, and project-required checks remain Implementation acceptance. Independent Review follows that evidence when warranted. Verification is a deeper risk-triggered Software Design mode; Stabilization is a non-mutating architecture-GC mode; Health Audit is periodic and longitudinal. These are not extra authority-bearing lifecycle roles.
 
 ## Development workflow prompt entrypoint
 
-For repeatable human-to-agent orchestration of Design, Implementation, Review, Verification, Stabilization, Alignment, Health Audit, and Closeout, use the canonical prompt reference:
+For repeatable human-to-agent orchestration use the canonical prompt reference:
 
 - [`source/shared/references/development-workflow-prompts.md`](source/shared/references/development-workflow-prompts.md)
 
-Each prompt exposes an `INPUTS` block so task-specific values such as workplan path, implementation target, governing authorities, and protocol source are defined once and referenced symbolically throughout the stage prompt. These prompts route into the protocol; they do not create a parallel authority model.
+It provides parameterized entrypoints for optional Baseline/Change-Health Intake, Design/Workplan, Implementation, Review & Update, risk-triggered Verification, Stabilization/Architecture GC, downstream-workplan Alignment, periodic Health Audit, and Closeout.
 
-By default, prompt orchestration resolves protocol skills **local first, public repository second**. The agent should use the current harness's native installed-skill mechanism where available (for example `@software-design`, `/software-implementation`, or the harness's equivalent selector; these are not shell commands). If the required skill is absent, unreadable, or incompatible with the governing protocol version, the prompt falls back to the canonical public repository at `https://github.com/hjin98/software-development-protocol`, reads the appropriate canonical `source/` skill entrypoint and references, and preserves the protocol version governing the task.
+By default, prompt orchestration resolves protocol skills **local first, public repository second**. Use the current harness's native installed-skill mechanism or exposed installed-skill root where available (for example `@software-design`, `/software-implementation`, or a harness-equivalent selector; these are not shell commands). If the required skill is absent, unreadable, or cannot preserve the governing protocol contract, fall back to the canonical public repository at `https://github.com/hjin98/software-development-protocol` and read the appropriate canonical `source/` skill plus required references. Never silently reinterpret an older accepted workplan under newer doctrine.
+
+## Test effectiveness, architecture fitness, and failure paths
+
+Protocol 5.16 makes several evidence classes explicit while keeping them conditional:
+
+- mutation/counterfactual evidence for test-oracle strength;
+- differential and metamorphic testing where exact fixture oracles are weak;
+- executable architecture-fitness checks for objective, stable dependency/ownership rules;
+- changed-code/affected-surface quality ratchets rather than arbitrary whole-repository thresholds;
+- bounded deterministic fault injection for material restart/recovery/failure claims through the real semantic owner.
+
+Tool identity remains delegated. Optional capabilities never form a mandatory pipeline.
 
 ## Language-native engineering
 
-Protocol 5.15 preserves one shared doctrine and adds thin differential language profiles:
+Protocol 5.15 introduced thin differential language profiles, preserved by 5.16:
 
 ```text
 shared domain rule -> language profile(s) -> implementation-local realization
 ```
 
-Material executable Python work loads the Python profile; material C++ work loads the C++ profile; mixed Python/C++ boundaries load both. Shared architecture, testing, scientific, security, performance, concurrency, storage, release, and versioning references remain canonical.
+Material executable Python work loads the Python profile; material C++ work loads the C++ profile; mixed Python/C++ boundaries load both. Protocol 5.16 additionally gives Python project-configured fast lint/static typing first-class routing parity with the existing C++ compiler/static-analysis path.
 
-The profiles prevent lowest-common-denominator code: Python should exploit its high-level runtime/library model without denying compiled numerical performance, while C++ should exploit explicit lifetime/value/build semantics without importing dynamic-language machinery or gratuitous low-level cleverness.
+## Periodic software maintenance audit
 
-## Performance and complexity
-
-Shared performance doctrine prioritizes algorithm/work reduction, data representation and movement, established optimized kernels, effective resource discovery, appropriate execution classes, and representative profiling before low-level specialization.
-
-A clearly equivalent efficiency improvement that removes work/copies/allocation without adding material complexity can proceed without pre-benchmark ceremony, but a quantitative performance claim requires comparable measurement. New native boundaries, bespoke kernels, explicit SIMD dispatch, additional parallel runtimes, custom allocators, backend matrices, governed PGO/LTO, and accelerator support require evidence that their total-system benefit earns their complexity.
-
-GPU/accelerator implementation is dormant unless Tier-1/Frozen architecture explicitly enables it.
-
-## Deterministic progressive disclosure
-
-Protocol 5.15 preserves Protocol 5.13 relation-first optional-tool routing while generalizing the capability classes:
-
-```text
-literal/path/text -> ordinary repository search/read
-symbol ownership/reference -> semantic capability
-AST/syntax/structural family -> structural analyzer
-broad input/state invariant -> language-appropriate property/generative method
-interprocedural flow -> data-flow analyzer
-runtime state/crash -> debugger evidence
-memory/lifetime/UB -> language-appropriate instrumentation
-race/synchronization -> concurrency/race evidence
-performance/vectorization -> profiler/compiler/hardware evidence
-```
-
-Serena, Semgrep, Hypothesis, CodeQL, compiler-native C++ tools, sanitizers, debuggers, profilers, and fuzzers are bounded optional evidence instruments. Tool presence never creates a mandatory pipeline.
-
-## Acceptance and convergence
-
-Executable changes retain focused checks, stage-local affected regression for material behavior-changing stages, final affected-surface re-derivation/regression, integration through real product/consumer boundaries, project-required checks, proxy-proof real-owner acceptance, and separate production qualification where material.
-
-A first clean local defect remains local. Material recurrence moves reasoning to the shared owner/mechanism; if recurrence also exposes solution complexity, simplification precedes another additive durable closure.
+Protocol 5.16 adds one optional `software-maintenance-audit` specialist. It combines semantic inspection with available longitudinal evidence such as churn, temporal change coupling, complexity, centrality, recurring defects, weak tests, duplicated authority, dependency drift, configuration/API growth, and documentation difficulty. Metrics remain sensors. If history is unavailable, the audit must not fabricate trends. Findings route back through ordinary Design/Implementation, documentation, or repository-hygiene authority.
 
 ## Repository layout and validation
 

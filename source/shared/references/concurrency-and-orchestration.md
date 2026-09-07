@@ -165,6 +165,10 @@ Test concurrency at the state-transition/resource boundary, not only by comparin
 - nested runtime budget behavior;
 - repeated stress/race checks where deterministic tests cannot expose the risk.
 
+## Bounded failure injection
+
+For material orchestration/recovery claims, use controlled worker/task death, cancellation, duplicate delivery, publication interruption, or equivalent bounded failpoints when happy-path testing cannot establish the state-transition contract. Keep the real orchestration owner executing, prove trigger liveness when practical, and avoid indiscriminate chaos/resource exhaustion when a deterministic simulation provides the same evidence.
+
 ## Hard rules
 
 - Do not equate more concurrency with correctness or performance.

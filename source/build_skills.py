@@ -24,6 +24,7 @@ CORE = [
 
 ROLE_CONDITIONAL = [
     "convergence-and-cycle-economy.md",
+    "long-horizon-code-health.md",
 ]
 
 LANGUAGE_PROFILES = [
@@ -102,6 +103,20 @@ SPECIALIST_SPECS = {
             "repository-intake.md",
             "security-and-trust-boundaries.md",
             "storage-and-io.md",
+        ],
+        "templates": [],
+    },
+    "software-maintenance-audit": {
+        "specialty": "maintenance-audit",
+        "references": CORE + [
+            "long-horizon-code-health.md",
+            "architecture-and-design.md",
+            "git-and-version-control.md",
+            "repository-intake.md",
+            "tool-assisted-engineering.md",
+            "convergence-and-cycle-economy.md",
+            "documentation-and-evidence.md",
+            "scientific-software.md",
         ],
         "templates": [],
     },

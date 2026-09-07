@@ -1,6 +1,6 @@
-# Software Development Protocol 5.15
+# Software Development Protocol 5.16
 
-This directory is the canonical Protocol 5.15 source.
+This directory is the canonical Protocol 5.16 source.
 
 ## Governing hierarchy and authority boundary
 
@@ -8,33 +8,24 @@ This directory is the canonical Protocol 5.15 source.
 product engineering fitness > minimum justified product/system complexity > development economy
 ```
 
-Protocol 5.15 preserves the Protocol 5.14 authority model:
+Protocol 5.16 preserves the Protocol 5.15 authority model:
 
 - **Tier 1A — product/problem truth:** stakeholder research, computational, scientific, operational, correctness, reliability, compatibility, resource, performance, security, and governed external-contract demands.
 - **Tier 1B — Frozen high-level architecture:** material architecture/ownership/algorithm/data-representation/resource/compatibility decisions Software Design deliberately fixes for the current implementation cycle.
 - **Tier 2 — solution machinery:** lower-level realization remains replaceable unless explicitly promoted by Design for material architectural value.
 - **Tier 3 — development economy:** optimize reasoning/context/tool/compute/I/O/wall time only after Tier 1 is met through the minimum justified Tier-2 system.
 
-Implementation machinery does not become Tier 1 through existence, dependency, tests, documentation, review history, previous plan wording, or previous repair. If a current realization creates an intermediate problem, first ask whether simplifying/replacing that Tier-2 realization makes the problem disappear.
+Implementation machinery does not become Tier 1 through existence, dependency, tests, documentation, review history, previous plan wording, or previous repair. Active simplicity still prefers removing, narrowing, altering, consolidating, or refactoring the cause of solution-created problems before adding durable machinery.
 
-## Active simplicity
-
-A first clean local defect remains a local owning-layer repair. Repeated patches, duplicated/synchronized state, competing authorities, accumulating wrappers/fallbacks/special cases, repeated reconciliation, or a materially simpler equivalent realization trigger Tier-2 simplification/re-derivation before another additive durable repair.
-
-Hold Tier-1 product truth and Frozen architecture fixed, then prefer removing, narrowing, altering, consolidating, or refactoring the cause of solution-created problems. Add machinery only when a genuinely required capability is missing or one canonical mechanism replaces broader complexity.
-
-Affected-surface expansion expands implementation/testing impact; it does not create a new product requirement or freeze the current realization. Proxy-proof acceptance follows the real production owner of the final accepted realization.
-
-## Two-role lifecycle
+## Two-role lifecycle and quality-feedback modes
 
 ```text
 software-design -> software-implementation
 ```
 
-- `software-design` diagnoses the real problem, separates product/problem invariants from cycle-scoped Frozen architecture and delegated solution space, chooses the globally justified high-level design, defines simplification/redesign triggers, designs acceptance, and independently reviews substantial/high-risk implementations.
-- `software-implementation` realizes the accepted contract adaptively, may simplify/replace delegated machinery while preserving Tier 1, closes coherent stages semantically and functionally, and completes final accepted-contract reconciliation plus affected-surface regression/integration.
+`software-design` owns diagnosis/design and independent review; `software-implementation` owns code/refactoring and executable completion. Protocol 5.16 preserves final implementation reconciliation plus final affected regression/integration/project checks before independent Review readiness.
 
-Testing and independent review are activities/modes, not extra lifecycle roles. Optional specialists remain supporting capabilities rather than approval gates.
+Review, risk-triggered Verification, non-mutating Stabilization/Architecture GC, periodic Health Audit, production qualification, documentation, and hygiene are modes/supporting capabilities—not extra approval authorities. Details live in `shared/references/workflow-and-workplans.md` and `shared/references/long-horizon-code-health.md`.
 
 ## Development workflow prompt entrypoint
 
@@ -42,15 +33,29 @@ The canonical human-facing orchestration reference is:
 
 - `shared/references/development-workflow-prompts.md`
 
-It provides standalone prompts for Design/Workplan, Implementation, Review & Update, Verification, Stabilization/Architecture GC, downstream-workplan Alignment, Health Audit, and Closeout. Each stage exposes a small `INPUTS` block so users define task-specific values once and the prompt refers to those symbolic variables thereafter.
+It provides parameterized `INPUTS` blocks for optional Baseline/Change-Health Intake, Design/Workplan, Implementation, Review & Update, Verification, Stabilization/Architecture GC, downstream-workplan Alignment, Health Audit, and Closeout.
 
-The prompts use portable **local-first protocol-skill resolution**. With `PROTOCOL_SOURCE = AUTO_LOCAL_FIRST`, the agent first inspects/invokes the current harness's installed skill using its native selector or registry (for example `@software-design`, `/software-implementation`, or equivalent; these are harness selectors, not shell commands). If the required skill is absent, unreadable, or incompatible with the governing `PROTOCOL_REF`, the agent falls back to `https://github.com/hjin98/software-development-protocol`, reads the canonical `source/roles/<skill>/SKILL.md` or `source/specialists/<skill>/SKILL.md` entrypoint plus required shared references, and preserves the protocol version governing the task.
+With `PROTOCOL_SOURCE = AUTO_LOCAL_FIRST`, resolve a governing-version-compatible installed skill through the current harness/installed-skill root first. Harness selectors such as `@software-design` or `/software-implementation` are examples, not shell commands. If local resolution fails, fall back to `https://github.com/hjin98/software-development-protocol`, read canonical `source/roles/<skill>/SKILL.md` or `source/specialists/<skill>/SKILL.md` plus required references, and preserve the protocol contract governing the task. Do not guess historical Git refs or silently upgrade older workplans.
 
-These prompts are entry routing for the existing protocol skills and references. They do not create a parallel lifecycle, requirement source, approval authority, or independent doctrine.
+## Long-horizon code health
+
+`shared/references/long-horizon-code-health.md` owns the detailed 5.16 quality-feedback semantics:
+
+- semantic changed-code/affected-surface quality ratchets;
+- complexity/churn/coverage/mutation/dependency observations as sensors rather than product truth;
+- conditional mutation/counterfactual oracle-strength evidence;
+- differential and metamorphic testing;
+- executable architecture fitness for objective stable rules;
+- fresh-context falsification-oriented independent review/verification;
+- non-mutating milestone stabilization;
+- bounded failure-path evidence;
+- periodic longitudinal maintenance sensing.
+
+`software-maintenance-audit` is the single optional repository-level semantic health specialist. It produces findings and routing only; it does not define product requirements, Frozen architecture, or acceptance.
 
 ## Shared doctrine and language engineering profiles
 
-Protocol 5.15 adds a thin language adaptation layer without creating separate protocols:
+Protocol 5.16 preserves Protocol 5.15's thin language adaptation layer:
 
 ```text
 shared domain doctrine
@@ -63,68 +68,36 @@ language profile router
         +--> both for mixed Python/C++ boundaries
 ```
 
-Material executable Python/C++ design, implementation, and review load the relevant profile. Shared owners remain canonical for architecture, workplans, testing, performance, concurrency, scientific fidelity, security, storage, release, and compatibility; profiles specialize only language/runtime/build consequences.
-
 Canonical language owners:
 
 - routing/composition -> `shared/references/language-profiles.md`;
 - Python execution/idioms/runtime/tool/package specialization -> `shared/references/python-engineering.md`;
 - C++ ownership/build/safety/numerics/SIMD/tool/package specialization -> `shared/references/cpp-engineering.md`.
 
-Python guidance derives concurrency from the actual interpreter/runtime mode rather than assuming a universal GIL. C++ guidance treats lifetime/UB/build semantics as correctness concerns and prefers tuned kernels/compiler vectorization before bespoke low-level machinery. A mixed-language boundary activates both profiles without arbitrary profile precedence.
-
-## Performance with minimum justified complexity
-
-The shared performance owner keeps algorithm/work reduction, data representation/movement, optimized-kernel preference, effective resource discovery, execution classes, nested parallelism, accelerator gating, benchmark comparability, and performance-claim evidence language-agnostic.
-
-Obvious semantically equivalent improvements that remove work/copies/allocation without material complexity need not wait for a pre-change benchmark, but quantitative speedup/scaling/resource claims require representative comparable evidence. Complexity-increasing optimization—new native boundaries, bespoke kernels, explicit SIMD dispatch, additional parallel runtimes, custom allocators, backend matrices, governed PGO/LTO, or accelerators—must earn its total-system cost.
-
-Accelerator support remains dormant unless Tier-1/Frozen architecture explicitly enables it.
+Protocol 5.16 makes project-configured Python fast lint/static typing (Ruff-class and Pyright/mypy-class capabilities) explicit without mandating exact tools.
 
 ## Deterministic progressive disclosure and tools
 
-Protocol 5.15 preserves Protocol 5.13 relation-first optional-tool routing and generalizes the parent capability classes:
+Relation-first routing remains canonical in `shared/references/tool-assisted-engineering.md`. Direct tool-method owners remain `shared/references/tool-serena.md`, `shared/references/tool-semgrep.md`, `shared/references/tool-hypothesis.md`, and `shared/references/tool-codeql.md`.
 
-```text
-literal/path/text -> ordinary repository search/read
-symbol ownership/reference -> semantic capability (Serena when supported)
-AST/syntax/structural family -> structural analyzer (Semgrep when supported)
-broad input/state invariant -> language-appropriate property/generative method
-interprocedural source-to-sink -> CodeQL when supported
-runtime state/crash -> debugger evidence when useful
-memory/lifetime/UB -> language-appropriate instrumentation
-race/synchronization -> concurrency/race evidence
-performance/vectorization -> profiler/compiler/hardware evidence
-```
-
-The common selection/composition owner is `shared/references/tool-assisted-engineering.md`. The direct tool-method owners remain `shared/references/tool-serena.md`, `shared/references/tool-semgrep.md`, `shared/references/tool-hypothesis.md`, and `shared/references/tool-codeql.md`.
-
-Hypothesis remains the Python-specific property/stateful method. C++ uses project-appropriate property/generative/fuzz methods plus compiler-native/sanitizer/debugger/profiler tools according to the claim. Tool presence never creates a fixed multi-tool pipeline.
-
-All tool output remains bounded evidence, not product truth or task authority. Tools do not replace focused checks, stage-local/final affected regression, real-boundary integration, project-required checks, or production qualification where required.
+Protocol 5.16 adds conditional capability classes for test effectiveness/oracle strength, changed-code protection, objective architecture/dependency fitness, complexity/duplication hotspots, longitudinal maintenance risk, and failure/recovery evidence. Optional capabilities never create a fixed multi-tool pipeline.
 
 ## Workplans and acceptance
 
-A substantial accepted workplan is a compressed task-specific implementation contract, not a frozen proof script. It preserves product/problem invariants, Frozen architecture, delegated solution space, task-specific acceptance boundaries, affected surfaces, and genuine redesign/simplification triggers.
+A substantial accepted workplan remains a compressed task-specific implementation contract, not a frozen proof script. It preserves product/problem invariants, Frozen architecture, delegated solution space, task-specific acceptance boundaries, affected surfaces, and genuine redesign/simplification triggers.
 
 Executable changes require focused checks, stage-local affected regression for material behavior-changing stages, final affected-surface re-derivation/regression, real-boundary integration, and repository/project-required checks. Green tests do not prove an omitted obligation. Production qualification remains separate.
 
-Required C++ behavior must survive supported optimized/production builds rather than depend on debug-only assertions or instrumentation. Instrumented builds are correctness evidence, not production-performance evidence.
-
 ## Canonical detailed owners
-
-Lifecycle entrypoints retain high-salience invariants and deterministic triggers. Detailed semantics live in canonical references:
 
 - human-facing workflow orchestration prompts -> `shared/references/development-workflow-prompts.md`;
 - lifecycle/workplans/authority/stages/handoff/rework -> `shared/references/workflow-and-workplans.md`;
+- long-horizon quality/ratchets/verification/stabilization/health sensing -> `shared/references/long-horizon-code-health.md`;
 - recurrence/active simplification/review readiness/revision economy -> `shared/references/convergence-and-cycle-economy.md`;
-- regression/integration/evidence reuse/proxy-proof acceptance/qualification -> `shared/references/testing-and-validation.md`;
+- regression/integration/oracle strength/failure-path evidence -> `shared/references/testing-and-validation.md`;
 - architecture/ownership/Tier-1/Tier-2/redesign/complexity -> `shared/references/architecture-and-design.md`;
 - language routing -> `shared/references/language-profiles.md`;
-- generic performance -> `shared/references/performance-and-parallelism.md`;
-- generic concurrency -> `shared/references/concurrency-and-orchestration.md`;
 - optional tool capability selection -> `shared/references/tool-assisted-engineering.md`;
-- tool-specific methods -> the four `shared/references/tool-*.md` owners named above;
 - protocol/workplan inheritance -> `shared/references/protocol-versioning-and-compatibility.md`;
 - other domain concerns -> their existing canonical references.
 
@@ -143,4 +116,4 @@ python source/check_dist.py --expected /tmp/protocol-dist --committed dist
 git diff --check
 ```
 
-These Python commands are this repository's validation implementation, not Python-specific product doctrine. All commands must succeed before a Protocol 5.15 revision is complete.
+These Python commands are this repository's validation implementation, not Python-specific product doctrine. All commands must succeed before a Protocol 5.16 revision is complete.

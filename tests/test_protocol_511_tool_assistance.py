@@ -15,13 +15,13 @@ COMMON = "source/shared/references/tool-assisted-engineering.md"
 SERENA = "source/shared/references/tool-serena.md"
 SEMGREP = "source/shared/references/tool-semgrep.md"
 HYPOTHESIS = "source/shared/references/tool-hypothesis.md"
-TOOL_FILES = (
-    "tool-assisted-engineering.md",
+DIRECT_TOOL_FILES = (
     "tool-serena.md",
     "tool-semgrep.md",
     "tool-hypothesis.md",
     "tool-codeql.md",
 )
+TOOL_FILES = ("tool-assisted-engineering.md",) + DIRECT_TOOL_FILES
 
 
 def read(path: str) -> str:
@@ -30,12 +30,7 @@ def read(path: str) -> str:
 
 class Protocol511ToolAssistanceTests(unittest.TestCase):
     def test_lifecycle_entrypoints_dispatch_directly_by_question_class(self) -> None:
-        expected = (
-            "references/tool-serena.md",
-            "references/tool-semgrep.md",
-            "references/tool-hypothesis.md",
-            "references/tool-codeql.md",
-        )
+        expected = tuple(f"references/{name}" for name in DIRECT_TOOL_FILES)
         for rel in (
             "source/roles/software-design/SKILL.md",
             "source/roles/software-implementation/SKILL.md",
@@ -49,13 +44,20 @@ class Protocol511ToolAssistanceTests(unittest.TestCase):
                 line = next(line for line in text.splitlines() if ref in line)
                 self.assertIn("must read", line, (rel, ref))
 
-    def test_tool_references_are_packaged_only_for_lifecycle_roles(self) -> None:
+    def test_tool_references_remain_progressively_disclosed_by_role(self) -> None:
         for spec in build_skills.ROLE_SPECS.values():
             for name in TOOL_FILES:
                 self.assertIn(name, spec["references"])
-        for spec in build_skills.SPECIALIST_SPECS.values():
+
+        for specialist in ("software-documentation", "repository-hygiene"):
+            spec = build_skills.SPECIALIST_SPECS[specialist]
             for name in TOOL_FILES:
                 self.assertNotIn(name, spec["references"])
+
+        audit = build_skills.SPECIALIST_SPECS["software-maintenance-audit"]
+        self.assertIn("tool-assisted-engineering.md", audit["references"])
+        for name in DIRECT_TOOL_FILES:
+            self.assertNotIn(name, audit["references"])
 
         with tempfile.TemporaryDirectory() as tmp:
             dist = Path(tmp) / "dist"
@@ -63,9 +65,13 @@ class Protocol511ToolAssistanceTests(unittest.TestCase):
             for role in build_skills.ROLE_SPECS:
                 for name in TOOL_FILES:
                     self.assertTrue((dist / "skills" / role / "references" / name).is_file())
-            for specialist in build_skills.SPECIALIST_SPECS:
+            for specialist in ("software-documentation", "repository-hygiene"):
                 for name in TOOL_FILES:
                     self.assertFalse((dist / "skills" / specialist / "references" / name).exists())
+            audit_root = dist / "skills" / "software-maintenance-audit" / "references"
+            self.assertTrue((audit_root / "tool-assisted-engineering.md").is_file())
+            for name in DIRECT_TOOL_FILES:
+                self.assertFalse((audit_root / name).exists())
 
     def test_common_reference_owns_selection_composition_and_authority(self) -> None:
         text = read(COMMON)

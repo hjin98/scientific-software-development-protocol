@@ -12,6 +12,14 @@ Test, fixture, threshold, and specification changes remain legitimate when the a
 
 For material completion claims, apply a bounded independent-evaluator counterfactual: if the visible acceptance harness were replaced by an independent expert evaluation of the same accepted stakeholder outcome and engineering envelope, would the candidate still deserve to pass? If materially no, local green evidence is insufficient. This is a reasoning safeguard, not a mandate for hidden tests, mutation testing, or new evaluator infrastructure.
 
+## Oracle strength, counterfactuals, and mutation evidence
+
+Coverage and green execution do not establish that a test can reject materially wrong behavior. For important decision logic, boundary-heavy changed code, historically escaped defects, high-risk hotspots, or suspiciously weak assertions, ask what smallest plausible semantically wrong implementation could still pass the current tests.
+
+When that counterexample is material and economical to test, strengthen the oracle through an appropriate method: mutation testing or equivalent semantic perturbation, a known-broken/corrected counterfactual, property/stateful testing, differential comparison, metamorphic relations, or real-owner integration. Mutation survival is investigation evidence, not a universal failure score: equivalent/dead mutants, ambiguous requirements, and intentionally unobserved behavior must be interpreted semantically. Do not require 100% mutation scores or run mutation testing on every task.
+
+Use **differential testing** when independently justified implementations/backends should agree on governed observables. Use **metamorphic testing** when an authority-backed transformation implies a relation on outputs even when a complete fixture oracle is difficult. The relation must come from product/scientific authority, not from convenience.
+
 ## Functional acceptance for executable changes
 
 Every executable product change requires:
@@ -110,6 +118,12 @@ Rerun a check when a changed dimension can plausibly alter the result or interpr
 
 Evidence reuse is an intermediate development-economy optimization. It never removes final assembled acceptance requirements and never turns an unexecuted required check into a pass.
 
+## Changed-code and affected-surface quality ratchets
+
+When project tooling makes the evidence cheap and stable, prefer changed-code/affected-surface ratchets over arbitrary whole-repository thresholds. Material questions include whether new/modified important behavior is behaviorally protected, whether the change introduced an objective architecture violation or dependency cycle, whether it created an unjustified complexity hotspot/public/configuration expansion, and whether an important oracle became weaker.
+
+Changed-line/diff coverage, complexity, duplication, mutation effectiveness, and similar observations are sensors. They trigger semantic investigation and become hard thresholds only when project/task authority explicitly adopts them. Existing debt does not authorize worsening touched code without product/Frozen justification.
+
 ## Final assembled acceptance
 
 Before functional completion:
@@ -137,6 +151,12 @@ Do not run full production qualification by default during implementation or bet
 Bounded benchmarks, accelerator smoke tests, reference-equivalence checks, and representative resource checks remain normal implementation validation when relevant.
 
 A successful production run never substitutes for missing focused/regression/integration coverage. Bounded functional testing does not prove production-scale performance/resource qualification.
+
+## Bounded failure injection for recovery claims
+
+For persistence, restart, orchestration, cancellation, or failure-propagation claims, use deterministic bounded failure injection or equivalent controlled simulation when it materially strengthens the evidence. Representative cases include interrupted checkpoint publication, truncated artifacts, stale/missing cache state, restart at material boundaries, controlled worker/task death, controlled I/O failure, duplicate callback/event delivery, and partial transition state.
+
+Keep the real semantic recovery/state owner live and place doubles/failpoints below or outside that owner. A harness that reimplements recovery logic cannot prove the production owner. Prefer bounded simulation over actual resource exhaustion or indiscriminate chaos, and establish failpoint/trigger liveness when practical. Fault injection is conditional on the claim; it is not a universal test stage.
 
 ## Resource safety
 

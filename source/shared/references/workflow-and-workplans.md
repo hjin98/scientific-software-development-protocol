@@ -45,11 +45,27 @@ design/diagnose
   -> active simplification if structural complexity triggers fire
   -> final accepted-contract reconciliation
   -> re-derive final affected surface
-  -> final affected regression + integration
-  -> independent review when warranted
+  -> final affected regression + integration + project-required checks
+  -> independent Review & Update when warranted
+  -> deeper Verification only when high-risk claims warrant it
+  -> Stabilization / architecture-GC at material convergence boundaries when warranted
+  -> documentation + repository closeout when affected
 ```
 
 These are patterns, not fixed gate counts. Production qualification is appended only when independently required.
+
+## Quality-feedback modes without lifecycle-role proliferation
+
+Protocol 5.16 adds bounded quality-feedback modes around the existing two-role lifecycle. They are not fixed mandatory gates and do not create new approval authorities.
+
+- **Baseline / change-health intake** — for substantial or structurally risky work, capture only the task-local before-state needed to judge relevant changed-code/affected-surface quality. It may be an explicit stage or a Design preamble; do not create a permanent ledger solely for compliance.
+- **Review & Update** — Software Design independently reviews an implementation after normal Implementation completion evidence. Missing final regression/integration/project checks remain blockers; review does not move those checks later in the lifecycle.
+- **Verification** — a separate optional Software Design mode for materially high-risk scientific, numerical, product, or architectural claims. It attempts deeper falsification and authority reconciliation; it does not replace Review or become a routine duplicate review.
+- **Stabilization / architecture-GC** — after ordinary review has otherwise passed at a material convergence boundary, inspect whether accepted Tier-2 machinery remains the minimum justified realization. Stabilization is non-mutating; required code changes re-enter the normal Design/Implementation/final-acceptance/review path.
+- **Health Audit** — periodic repository-level longitudinal analysis, outside the per-change linear path. It may route findings but does not define Frozen architecture or accept implementation contracts. If history is unavailable, report static risks without inventing temporal trends.
+- **Closeout** — reconcile durable documentation and repository lifecycle state after semantic/functional engineering work closes; do not alter product behavior during closeout.
+
+See [Long-horizon code health](long-horizon-code-health.md) for quality-ratchet, test-effectiveness, stabilization, and maintenance-audit method.
 
 ## Workplans as bounded implementation contracts
 
@@ -144,11 +160,13 @@ Thus final acceptance independently asks: **did we implement the accepted produc
 
 A different machine, GPU, HPC allocation, production dataset, or external service does not automatically create a new role. Record reproducible commands/material conditions when external execution is required.
 
-Update affected durable documentation when accepted behavior/architecture/contracts changed. Optional specialists remain supporting capabilities, not lifecycle gates.
+Update affected durable documentation when accepted behavior/architecture/contracts changed. At substantial workplan/release closeout, also reconcile completed/superseded workplan state, generated artifacts, and proven task-owned residue through the appropriate documentation/hygiene specialist. Closeout must not mutate product behavior or perform destructive cleanup without the existing authorization/safety rules. Optional specialists remain supporting capabilities, not lifecycle gates.
 
 ## Independent review and rework
 
-Independent review remains independent and may inspect any surface needed for a sound conclusion. It first challenges product/Frozen contract conformance, then unplanned engineering risks/design premises including functionality/correctness, scientific fidelity, scaling/resources/hardware/performance, complexity/ownership, failure handling, affected surfaces, regression/integration, unavailable checks, and qualification boundaries.
+Independent review remains independent and may inspect any surface needed for a sound conclusion. Normal review readiness follows final accepted-contract reconciliation, final affected-surface regression, real-boundary integration, repository/project-required checks, and any task-required structural/liveness evidence. A requested review still proceeds when evidence is missing, but records the missing evidence as a blocker rather than moving functional acceptance after review.
+
+For substantial/high-risk work, prefer a fresh review context when practical. Reconstruct the product/Frozen contract and candidate behavior before relying on the implementer's rationale, then attempt targeted falsification. Review first challenges product/Frozen contract conformance, then unplanned engineering risks/design premises including functionality/correctness, scientific fidelity, scaling/resources/hardware/performance, complexity/ownership, failure handling, affected surfaces, regression/integration, unavailable checks, and qualification boundaries. Deeper claim-level Verification is separate and risk-triggered rather than a mandatory second review.
 
 When a finding asks to preserve or add implementation machinery, identify the Tier-1/Frozen authority it protects. If the problem exists only because of delegated solution machinery, challenge that machinery under Tier 2 before demanding another patch.
 
