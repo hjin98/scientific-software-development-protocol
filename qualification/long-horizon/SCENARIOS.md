@@ -30,6 +30,9 @@ A health audit has only a static snapshot and no trustworthy VCS history. A conf
 
 ## Portable orchestration scenarios
 
+### Baseline/change-health intake is discoverable but conditional
+A substantial or structurally risky change needs a before/after maintainability comparison. A conforming orchestration surface exposes Baseline/Change-Health Intake directly, or Design unmistakably runs it as a triggered preamble, and captures only task-local evidence needed for the quality ratchet. A trivial local change does not acquire a mandatory baseline stage or persistent health ledger.
+
 ### Compatible local skill
 A governing-version-compatible installed skill is readable through the harness. Use it without remote fallback merely for ceremony.
 
@@ -43,14 +46,16 @@ The installed skill is newer than the workplan and cannot explicitly preserve th
 The harness documents `@software-design` or `/software-implementation` as UI/agent selectors. Do not execute those strings as shell commands.
 
 ### Installed skill root exposed without callable selector
-A selector is user-only, but the harness exposes the installed skill root. Read the local skill from that supported resource rather than falsely declaring it unavailable.
+A selector is user-only, but the harness exposes the installed skill root. Read the governing-version-compatible local skill from that supported resource rather than falsely declaring it unavailable or fetching the public repository unnecessarily.
 
 ### Neither source is readable
-Neither compatible local skill nor public source can be established. Report the limitation; do not claim protocol execution from memory.
+Neither a compatible local skill/root nor compatible public source can be established. Report truthful non-closure; do not claim protocol execution from memory.
 
 ## Stage-selection counterfactuals
 
+- Baseline/Change-Health Intake is conditional task-local sensing before Design, not a mandatory per-change approval gate or permanent ledger.
 - Review asks whether the governing workplan was realized and begins only after final implementation acceptance evidence is available or explicitly missing/blocking.
 - Verification is a separate risk-triggered claim-level falsification mode, not a mandatory duplicate review.
 - Stabilization is non-mutating and routes any required code change back through the normal Design/Implementation/acceptance/review path.
 - Health Audit is periodic and longitudinal when history exists; it is not a per-change approval gate.
+- A local Tier-2 maintenance repair may route directly to Implementation only when existing authority is already sufficient; substantial maintenance needing a new/revised implementation contract routes through Design first.

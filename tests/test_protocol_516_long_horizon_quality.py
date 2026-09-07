@@ -10,6 +10,13 @@ def read(path: str) -> str:
     return (ROOT / path).read_text(encoding="utf-8").lower()
 
 
+def section(text: str, heading: str) -> str:
+    start = text.index(heading)
+    body = text[start + len(heading):]
+    pos = body.find("\n## ")
+    return body if pos < 0 else body[:pos]
+
+
 class Protocol516LongHorizonQualityTests(unittest.TestCase):
     def setUp(self) -> None:
         self.workflow = read("source/shared/references/workflow-and-workplans.md")
@@ -62,11 +69,26 @@ class Protocol516LongHorizonQualityTests(unittest.TestCase):
         for token in ("restart", "permutation", "symmetry", "backend"):
             self.assertIn(token, self.science)
 
-    def test_python_static_correctness_has_first_class_route(self) -> None:
-        self.assertIn("ruff", self.python)
-        self.assertIn("pyright", self.python)
-        self.assertIn("mypy", self.python)
-        self.assertIn("project", self.python)
+    def test_python_static_correctness_has_first_class_vendor_neutral_route(self) -> None:
+        block = section(self.python, "## fast static correctness")
+
+        def assert_semantics(candidate: str) -> None:
+            self.assertIn("project's configured fast lint/type/static checks", candidate)
+            self.assertIn("high-information evidence", candidate)
+            self.assertIn("not product truth", candidate)
+            self.assertIn("do not introduce a second type/schema system", candidate)
+
+        assert_semantics(block)
+        vendor_substituted = (
+            block.replace("ruff", "lint-tool-example")
+            .replace("pyright", "type-tool-example-a")
+            .replace("mypy", "type-tool-example-b")
+        )
+        assert_semantics(vendor_substituted)
+
+        route_removed = block.replace("project's configured fast lint/type/static checks", "project checks")
+        with self.assertRaises(AssertionError):
+            assert_semantics(route_removed)
 
     def test_failure_injection_is_bounded_and_real_owner_preserving(self) -> None:
         self.assertIn("bounded failure", self.testing)
