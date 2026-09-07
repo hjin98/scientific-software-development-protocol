@@ -1,0 +1,18 @@
+name: Remove refinement trigger
+on:
+  push:
+    branches: [plan/protocol-5.16-long-horizon-code-health]
+permissions:
+  contents: write
+jobs:
+  remove:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: |
+          rm -f .trigger-refinement-ci .github/workflows/delete-trigger-temp.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "Remove prompt refinement CI trigger"
+          git push origin HEAD:plan/protocol-5.16-long-horizon-code-health
