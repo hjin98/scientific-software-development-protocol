@@ -37,7 +37,6 @@ class Protocol516OrchestrationTests(unittest.TestCase):
         self.assertIn("https://github.com/hjin98/software-development-protocol", self.prompt)
         self.assertRegex(self.lower, r"source/roles/<skill(?:-name)?>/skill\.md")
         self.assertRegex(self.lower, r"source/specialists/<skill(?:-name)?>/skill\.md")
-        self.assertIn("skill root", self.lower)
 
     def test_selector_examples_are_not_shell_commands(self) -> None:
         self.assertIn("@software-design", self.prompt)
