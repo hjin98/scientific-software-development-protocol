@@ -19,60 +19,57 @@ forbidden_higher_module_dependencies:
   - sdp-orchestrator-scheduler
 ---
 
-# Protocol Orchestrator WP-1 — Prompt Module + Core Program Workplan
+# Protocol Orchestrator WP-1 — Prompt Module + Core Program
 
-## 1. Objective / problem invariants / non-goals
+## 1. Product objective and hard boundaries
 
-### 1.1 Original problem
-
-Build the smallest independently useful Protocol Orchestrator product. A user configures a target software repository, runs a command such as:
+WP-1 builds the smallest independently useful Protocol Orchestrator product. A user configures a software repository and runs commands such as:
 
 ```text
 sdp design --task "..."
 sdp implementation
 sdp review
-sdp prompt verification
+sdp prompt verification --input VERIFICATION_SCOPE="..."
 ```
 
-and receives on stdout one complete, copy/paste-ready, stage-correct Protocol prompt whose mechanically knowable repository, workplan, candidate, and Protocol inputs are already resolved.
+Core prints one complete, copy/paste-ready, stage-correct Protocol prompt to stdout. Mechanically knowable repository, candidate, workplan, Protocol-profile, and execution-context inputs are resolved automatically. Inputs that are genuinely user-authored and cannot be inferred safely are required explicitly rather than left as editable placeholders.
 
-This Core-only installation is a finished product mode. It must not require a history database, agent integration, benchmark service, quota meter, or scheduler.
+Core-only installation is a finished operating mode. It requires no history database, agent process integration, benchmark service, account model, quota meter, predictor, or scheduler.
 
-### 1.2 Tier-1 product invariants
+### 1.1 Tier-1 product invariants
 
-1. **Core is independently useful.** Core alone performs project observation, governing-workplan resolution, compatible workflow/profile resolution, and complete prompt rendering end to end.
-2. **Target observation is non-mutating.** Core never edits the configured target repository, working tree, index, branch, local refs, or remote repository merely to observe it. Network refresh, when explicitly requested, must use a non-mutating query such as `git ls-remote` or an equivalent read-only remote API rather than `git fetch`/pull.
-3. **Canonical prompt authority is singular.** Prompt bodies come from a governing-version-compatible canonical SDP prompt source. Packaged snapshots are derived/version-bound runtime artifacts, never an independently edited prompt authority.
-4. **Protocol-version coherence is explicit.** A workplan bound to Protocol version `X` is never silently interpreted with an incompatible newer profile.
-5. **Ambiguity stays explicit.** Project/workplan/profile/source ambiguity is reported rather than resolved by mtime, fuzzy similarity, path ordering, or an ungrounded heuristic.
-6. **Web/local context is truthful and private.** Web-mode prompt rendering excludes local/private/credential material and does not represent local-only uncommitted state as remotely inspectable. Local mode may include authorized local execution context but never secrets.
-7. **The Core API/SPI is a durable lower-module seam.** Tracker, Adapter, and Scheduler must later be able to consume accepted Core v1 services without private imports, duplicated Protocol routing logic, or reverse dependency.
-8. **No higher-module preimplementation.** Core does not implement durable history, next-stage projection, agent transport, benchmark recommendation, metering, usage prediction, or automatic routing.
-9. **There is one CLI/composition root.** Core owns the `sdp` executable and the single extension entry-point group.
-10. **Manual result compatibility exists from day one.** Every rendered prompt carries `RunId`, prompt fingerprint, and a requested `StageResultEnvelope v1`; Core also exposes a bounded prompt-rendered event seam so Tracker can later record prompts without changing the Prompt API.
-11. **Public artifacts are deterministic where the semantic state is unchanged.** With a caller-supplied fixed RunId and unchanged material repository/workplan/profile/input state, prompt text/fingerprint do not drift merely because wall-clock observation time changed.
-12. **Installed behavior is the acceptance boundary.** Source helpers cannot proxy-pass a broken wheel, console entry point, packaged profile, real repository observer, or final stdout/privacy behavior.
+1. **Core works alone.** `sdp-orchestrator-core` plus the `sdp` CLI performs configuration, project/worktree observation, workplan resolution, compatible workflow/profile resolution, and prompt rendering end to end without Tracker/Adapter/Scheduler.
+2. **Observation is non-mutating.** Core never changes target worktree content, index, HEAD, branches, local refs, remote-tracking refs, or remote repository merely to inspect state. Explicit remote refresh uses a read-only query boundary, not `git fetch`/pull.
+3. **Canonical prompt authority is singular.** Stage prompt prose comes from the governing-version-compatible SDP canonical prompt source. Packaged prompt resources are reproducible version-bound derivatives, never independently maintained authority.
+4. **Protocol binding is explicit.** Work governed by Protocol `X` is never silently interpreted through an incompatible newer profile. Semantic versions are not guessed to be Git refs.
+5. **Ambiguity is explicit.** Project, workplan, Protocol source/profile, Git remote, and required user-input ambiguity fails truthfully instead of using fuzzy names, mtime, path ordering, or undocumented heuristics.
+6. **Rendered prompts are operationally truthful.** Web-mode output does not claim that local-only dirty/unpushed state is remotely inspectable. Local mode may reference the local worktree. Both modes preserve actual candidate/profile provenance.
+7. **Privacy is bounded and truthful.** Core never automatically embeds local private paths in web prompts, credential-bearing remote userinfo, ambient environment data, credential-helper output, or private orchestrator state. Explicit user-authored `--task`/`--input` text is intentional prompt content and is not subject to impossible arbitrary-secret inference.
+8. **Core v1 is a durable lower-module seam.** Later modules can consume accepted public API/SPI services without private imports, duplicated Protocol-routing logic, or reverse dependency.
+9. **There is one composition root.** Core owns the `sdp` executable, the application/service registry, and the single extension entry-point group.
+10. **Manual tracking compatibility exists from day one.** Every prompt carries a `RunId`, deterministic prompt fingerprint, and a requested `StageResultEnvelope v1`; Core exposes a non-durable prompt-rendered event seam for later Tracker integration.
+11. **Determinism follows semantic state.** With a caller-supplied fixed RunId and unchanged semantically relevant project/candidate/workplan/profile/input state, prompt bytes/fingerprint do not drift merely because wall-clock observation metadata or unrelated extension configuration changed.
+12. **Installed behavior is the acceptance owner.** Helper-level tests cannot proxy-pass a broken built artifact, packaged profile, extension discovery surface, real Git observer, console entry point, stdout contract, or web privacy/truthfulness boundary.
 
-### 1.3 Explicit non-goals
+### 1.2 Explicit non-goals
 
 WP-1 does not implement:
 
-- SQLite or durable run/event/workflow history;
-- `sdp status`, `sdp next`, `sdp ingest`, `sdp history`, `sdp graph`, or persistent workplan selection;
-- Claude/Codex/OMP/Pi/Antigravity/ACP execution, approval handling, or cancellation;
-- Artificial Analysis, DeepSWE, model/account catalogs, or benchmark recommendation;
-- quota/cost meters, resource ledgers, reservations, prediction, or Scheduler AUTO routing;
-- a daemon, resident watcher, generic workflow engine, ORM, or event-sourcing framework;
+- SQLite or durable event/run/workflow history;
+- `sdp status`, `sdp next`, `sdp ingest`, `sdp history`, `sdp graph`, persistent workplan selection, or lifecycle projection;
+- Claude/Codex/OMP/Pi/Antigravity/ACP execution, subprocess control, sessions, approvals, or cancellation;
+- Artificial Analysis, DeepSWE, model/backend/account catalogs, recommendation/ranking, or network benchmark refresh;
+- quota/cost meters, resource ledgers, reservations, usage prediction, or AUTO scheduling;
+- daemon/resident watcher, generic workflow engine, ORM, or event-sourcing framework;
 - repository-local orchestrator state;
-- automatic installation/upgrading of protocol sources, plugins, agents, or providers;
-- speculative compatibility profiles for unsupplied/untested Protocol versions;
-- a second CI authority or generated `dist/skills` representation for the orchestrator package unless repository release policy later requires one.
+- arbitrary plugin-directory scanning or repository-loaded executable plugins;
+- automatic installation/upgrading of Protocol sources, extensions, agents, or providers;
+- speculative compatibility profiles for Protocol versions whose exact contract is not supplied and validated;
+- a second CI authority or an orchestrator representation under generated `dist/skills` unless later release policy explicitly requires one.
 
 ## 2. Governing authority and baseline
 
-### 2.1 Parent authority
-
-This workplan derives from and is subordinate to:
+Parent authority:
 
 ```text
 orchestrator/docs/architecture.md
@@ -80,35 +77,19 @@ architecture_version = 1.5.0
 protocol_version = 5.16.0
 ```
 
-The parent module ladder, ownership, dependency direction, API/SPI roles, workflow-profile routing ownership, protocol-version binding, privacy boundary, and WP-1 acceptance obligations are Frozen for this cycle.
+WP-1 inherits the parent module ladder, one-way dependency direction, Core API/SPI ownership, workflow-profile ownership, Protocol-version binding, privacy boundary, and standalone acceptance rules.
 
-### 2.2 Protocol authority
-
-Implementation and Review inherit Protocol 5.16. Initial canonical prompt source:
+Protocol 5.16 remains the generic lifecycle/testing/review authority. Initial canonical prompt source:
 
 ```text
 source/shared/references/development-workflow-prompts.md
 ```
 
-Workflow and authority semantics remain governed by the supplied Protocol 5.16 source/reference tree, not by a new orchestrator-private doctrine.
+At workplan creation `orchestrator/` contains architecture documentation but no executable Core implementation. The greenfield quality ratchet is therefore: no duplicate prompt authority, no later-module machinery, minimal justified dependencies/public surface, executable namespace/import/entry-point guards, and rejection-capable ambiguity/version/privacy/identity tests.
 
-### 2.3 Baseline / quality ratchet
+## 3. Frozen WP-1 architecture
 
-At workplan creation, `orchestrator/` contains architecture documentation but no executable Core package. There is no legacy Core machinery to preserve.
-
-The greenfield quality ratchet is:
-
-- no second prompt authority;
-- no later-module machinery below its owning future module;
-- minimal justified runtime/public surface;
-- executable guards for objective namespace/import/entry-point rules;
-- rejection-capable tests for ambiguity, version compatibility, remote truthfulness, privacy, and identity;
-- one canonical config normalization path for API and CLI;
-- no test-only reimplementation of the production observer, resolver, renderer, or extension registry.
-
-## 3. Frozen high-level architecture and engineering envelope
-
-### 3.1 Distribution and namespace
+### 3.1 Distribution and package boundary
 
 Create one independently installable Python distribution:
 
@@ -116,51 +97,37 @@ Create one independently installable Python distribution:
 sdp-orchestrator-core
 ```
 
-under native PEP 420 namespace `sdp_orchestrator.core`. The namespace root must not contain `sdp_orchestrator/__init__.py`.
-
-Initial supported runtime floor: **Python 3.11+**. Keep implementation OS-neutral where practical and claim only platform behavior actually tested.
-
-### 3.2 Core ownership
-
-Core owns:
-
-- `sdp` CLI/application composition;
-- Core configuration and project catalog;
-- public Core identifiers/request/response/value records;
-- read-only Git/project/workplan observation;
-- candidate and physical worktree identity;
-- compatible Protocol profile/workflow descriptor resolution;
-- canonical prompt-source resolution and packaged compatible snapshot;
-- prompt input resolution/rendering;
-- RunId/fingerprint/result-envelope request identity;
-- one extension registry/service composition root;
-- one in-process event-sink registration/publish seam;
-- Core-only `projects`, `capabilities`, and `doctor` diagnostics;
-- optional clipboard output.
-
-Core owns none of the §1.3 responsibilities.
-
-### 3.3 CLI/composition root
-
-Console entry point:
+with console entry point:
 
 ```text
 sdp
 ```
 
-Extension discovery group:
+and native PEP 420 namespace:
 
 ```text
-sdp_orchestrator.extensions.v1
+sdp_orchestrator.core
 ```
 
-No arbitrary plugin-directory scanning, repository plugin loading, or higher-module import special cases.
+No `sdp_orchestrator/__init__.py` may be owned by Core. Initial supported runtime floor is Python 3.11+. Package release version, architecture version, Protocol version, config schema version, API/SPI major, workflow-profile schema, result schema, and digest-canonicalization versions are independent identities and must not be conflated.
 
-### 3.4 Configuration and project resolution
+Expected runtime dependencies, unless implementation demonstrates a smaller contract-equivalent set:
 
-Use one TOML normalization/validation path. Default config location comes from `platformdirs`; CLI/API can explicitly override it. The environment override allowlist is empty in v1 unless implementation evidence establishes a genuine Core need; arbitrary environment variables never alter semantic behavior.
+```text
+platformdirs
+typer
+pydantic
+python-frontmatter
+packaging
+```
 
-V1 project semantics:
+Optional clipboard support may use a `pyperclip` extra/equivalent. Core has no runtime dependency on `filelock`, ACP, `httpx`, ORM/event-sourcing, ML packages, Tracker, Adapter, or Scheduler.
+
+### 3.2 Configuration and extension namespaces
+
+Core owns one TOML normalization/validation path. Default config location comes from `platformdirs`; API/CLI may explicitly override the path. V1 has no semantic environment-variable override allowlist unless implementation evidence establishes a genuine Core need; ambient environment variables do not silently alter prompt semantics.
+
+Minimum Core config:
 
 ```toml
 schema_version = 1
@@ -172,35 +139,41 @@ default_execution_mode = "web"    # optional; local | web
 [projects.mdstats]
 repo = "/absolute/path/to/mdstats"
 protocol_profile = "sdp-protocol-5.16"
-default_execution_mode = "web"    # optional per-project override
-```
+default_execution_mode = "web"    # optional
+remote_name = "origin"             # optional; Git remote name, never a credential URL
 
-V1 optional Protocol-source override semantics:
-
-```toml
 [protocol_sources."sdp-protocol-5.16"]
 local_root = "/path/to/software-development-protocol"   # optional
 allow_remote = false                                    # default
-remote_repository = "https://github.com/hjin98/software-development-protocol"  # optional override only when explicitly supported
-remote_ref = "<exact evidence-backed ref>"              # required for remote fallback; never inferred from semantic version
+remote_repository = "https://github.com/hjin98/software-development-protocol"  # optional
+remote_ref = "<exact evidence-backed ref>"              # required when remote fallback is enabled
+
+[extensions."some.extension"]
+# extension-owned data; Core preserves but does not semantically interpret it
 ```
 
-Secrets/tokens are not accepted as ordinary persisted Core config values. Authentication for an explicitly permitted remote operation may use the user's established Git/platform credential mechanism without serializing credentials into config snapshots, diagnostics, prompts, or cache identity.
+Rules:
+
+- Core validates Core/project/protocol-source namespaces through one canonical model.
+- Unknown/absent-extension namespaces are preserved as bounded raw configuration and diagnosed as inactive, not rejected merely because the extension is not installed.
+- When an extension activates, only that extension validates/owns its namespace through the Core SPI.
+- Opaque extension configuration does not participate in Core prompt identity unless an active extension explicitly changes a Core-owned prompt request through a defined public hook; unrelated extension settings cannot perturb Core-only prompt bytes.
+- Secrets/tokens are not supported as ordinary Core config values. Explicit remote authentication may use established Git/platform credential mechanisms without serializing credential values into Core config snapshots, diagnostics, prompt context, event payload metadata, or digests.
 
 CLI project resolution when `--project` is absent:
 
 ```text
 unique configured project whose canonical worktree contains cwd
-  -> core.default_project
+  -> configured core.default_project
   -> sole configured project
-  -> AMBIGUOUS / NOT_FOUND
+  -> core.project.ambiguous / core.project.not_found
 ```
 
-An explicit `--project` overrides that chain. Public Core API requests use explicit `ProjectKey`; CLI convenience resolution does not become hidden API behavior.
+Public Core API requests use explicit `ProjectKey`; CLI convenience resolution is not hidden API behavior.
 
-### 3.5 Read-only repository/candidate/worktree observation
+### 3.3 Read-only repository, candidate, and worktree observation
 
-`ObservationPolicy` supports:
+`ObservationPolicy` v1 supports:
 
 ```text
 local_only
@@ -208,47 +181,65 @@ use_cached_remote
 refresh_remote
 ```
 
-Default is `local_only`. `use_cached_remote` may inspect local remote-tracking/upstream refs without updating them. `refresh_remote` may query the remote explicitly but must not mutate the target repository; use `git ls-remote` or an equivalent read-only API, not `git fetch`/pull. Results carry observation time, source, freshness/confidence, and whether remote visibility is known.
+- default = `local_only`;
+- `use_cached_remote` may inspect existing upstream/remote-tracking refs without changing them;
+- `refresh_remote` performs a bounded noninteractive read-only query such as `git ls-remote`/equivalent and must not mutate target refs/worktree/index;
+- remote queries have bounded runtime/output and redact credential-bearing diagnostics;
+- Core does not execute repository files or build hooks merely to inspect Git/workplan state.
 
-`CandidateRef` captures branch/detached HEAD, commit, relevant staged/unstaged/untracked state, upstream/observed remote when known, and identity completeness. `sdp.git-working-tree.v1` may use any bounded deterministic Git-native realization, but materially different dirty content at the same paths must change the digest. If relevant state cannot be fingerprinted within safe resource bounds, set `identity_complete=false` rather than claiming exact identity.
+`CandidateRef` identifies at least repository identity, branch/detached state, HEAD commit, relevant staged/unstaged/untracked state, upstream/observed remote state when known, observation provenance, and identity completeness. `sdp.git-working-tree.v1` must change when materially different dirty content exists at the same paths, not only when path/status changes. If bounded exact fingerprinting is not possible, `identity_complete=false` rather than counterfeit exactness.
 
-`WorktreeKey` identifies the physical Git worktree: aliases/symlinks to the same worktree resolve to the same key; distinct Git worktrees resolve to distinct keys.
+`WorktreeKey` identifies one physical Git worktree: symlink/path aliases to the same worktree map to one key; distinct linked Git worktrees map to different keys.
 
-Observation of the target repository treats repository content as data. Core must not execute repository files merely to discover Git/workplan state.
+### 3.4 Git remote selection and web target identity
 
-### 3.6 Workplan discovery, selection, path safety, and identity
+Remote selection is deterministic and separate from credentials:
 
-Catalog repository conventions under `workplans/active/` and `workplans/archive/`, including nested current `AUTHORITY.md` files and frontmatter-marked implementation workplans. Discovery is bounded to regular text files whose resolved paths remain within the configured repository root; do not follow symlink/path traversal outside the repository. Bound individual file size/frontmatter parsing sufficiently to avoid accidental unbounded reads.
+```text
+projects.<key>.remote_name, when configured and valid
+  -> current branch upstream remote, when uniquely defined
+  -> remote named origin, when present
+  -> sole configured Git remote
+  -> core.remote.ambiguous / core.remote.unavailable
+```
 
-Deduplicate documents sharing the same `workplan_id`; do not treat historical numbered revisions as independent active authorities when a current authority file clearly owns the workplan. Where current repository conventions cannot determine ownership without guessing, return ambiguity instead of encoding a heuristic exception stack.
+Core records the selected remote name and a sanitized repository identity. It strips URL userinfo/embedded credentials. `file://` and filesystem-path remotes are local-only and are not valid web-agent targets.
 
-An explicit selector has exact semantics only:
+For a normal branch, the web target ref is the configured/upstream branch when known, otherwise the current local branch name on the selected remote. Detached HEAD web rendering is unavailable in v1 unless Core can establish an explicit remotely addressable target without guessing; local rendering remains valid.
+
+Web rendering requires a non-local sanitized remote repository identity. Material dirty local state blocks web render. Known local/remote committed divergence blocks web render rather than pretending the local candidate is remotely visible. Cached/unknown remote freshness may still be represented only when the prompt/footer labels that provenance truthfully; explicit `refresh_remote` can establish fresher evidence without mutating the target repository.
+
+### 3.5 Workplan discovery, selection, and identity
+
+Core catalogs repository-owned regular Markdown/text workplan documents under `workplans/active/` and `workplans/archive/`, including nested current `AUTHORITY.md` and frontmatter-marked implementation workplans. Path resolution remains inside the configured repository root; symlink/traversal escapes are rejected/ignored safely. File count, file size, and frontmatter/parser work are bounded.
+
+Parsing is data-only. YAML/frontmatter loading must not permit arbitrary Python object construction or repository code execution.
+
+Documents sharing a `workplan_id` are deduplicated according to explicit current-authority evidence. Historical numbered revisions are not independent active plans when a current authority file clearly owns the workplan. If repository conventions cannot determine current authority without guessing, report ambiguity.
+
+Explicit workplan selector semantics are exact:
 
 ```text
 exact workplan_id
 or exact repository-relative canonical workplan path
 ```
 
-If either maps to more than one material authority, selection is ambiguous.
-
-For a stage requiring a governing workplan:
+For stages requiring a governing workplan:
 
 ```text
 explicit selector
-  -> unique exact branch binding declared by recognized workplan metadata (initial recognized key: target_branch)
+  -> unique current-branch binding from recognized metadata (v1 recognizes target_branch)
   -> exactly one active workplan
-  -> AMBIGUOUS / REQUIRED
+  -> required/ambiguous failure
 ```
 
-No fuzzy filename matching or recency guessing.
+No fuzzy filename or recency selection.
 
-Design of a new task may proceed without an existing workplan only when `first_task`/`--task` is supplied.
+`WorkplanRef` carries artifact digest, semantic digest when safely available, semantic-identity completeness, path, protocol version, workplan ID, and lifecycle state. `sdp.workplan-semantic.v1` uses an explicit tested list of lifecycle-only metadata that may be excluded; unknown/unrecognized semantics are conservative. Body/Frozen-authority changes must alter semantic identity. Exact v1 exclusion rules are frozen in fixtures before WP-1 Review acceptance.
 
-`WorkplanRef` carries exact artifact digest plus deterministic semantic digest. `sdp.workplan-semantic.v1` may exclude only documented lifecycle-only metadata so archive/status bookkeeping can preserve semantic identity. A body/Frozen-authority change must alter semantic identity. Unknown/unrecognized semantics are conservative; if safe canonicalization is unavailable, mark semantic identity incomplete.
+### 3.6 Protocol profile, canonical prompt source, and packaged snapshot
 
-### 3.7 Protocol profile and canonical prompt source
-
-Initial release supports a Protocol 5.16-compatible profile only unless additional compatibility is explicitly supplied and accepted later.
+V1 supports one explicit Protocol 5.16-compatible profile unless later accepted evidence adds another.
 
 Resolution order:
 
@@ -256,115 +247,125 @@ Resolution order:
 explicit configured compatible local source/profile
   -> exact compatible packaged profile/prompt snapshot
   -> explicitly permitted canonical read-only remote source at exact evidence-backed ref
-  -> truthful INCOMPATIBLE / UNAVAILABLE
+  -> truthful core.protocol.incompatible / core.protocol.unavailable
 ```
 
-Never guess a semantic version string as a Git ref.
+A semantic protocol version is never guessed to be a Git branch/tag/ref.
 
-The packaged profile/snapshot is derived runtime material. Canonical stage prompt bodies are extracted reproducibly from `development-workflow-prompts.md`, not independently rewritten. For v1, the selected stage prompt body is the literal contents of the fenced `text` block belonging to the uniquely identified canonical stage heading. If the canonical source structure no longer supports unambiguous stage extraction, generation fails rather than heuristically choosing another block.
+Canonical stage prose is extracted reproducibly from the canonical source. For v1, each stage body is the literal fenced `text` block belonging to the uniquely identified canonical stage heading. If canonical structure no longer permits unique extraction, generation fails instead of choosing heuristically.
 
-A small machine-readable profile metadata source is allowed for stage keys/aliases, transition trigger classes, compatibility, first-class input bindings, and source identity. It must not duplicate prompt prose and must be validated against the supplied Protocol references.
+A small machine-readable 5.16 profile may define only bounded control metadata: stage keys/aliases, role owner, mutation class, recognized outcomes, routing trigger classes/transitions, workplan requirement, input bindings/default classes, compatibility/source identity, and result-schema identity. It may not duplicate stage prompt prose or become a generic executable workflow DSL.
 
-The installed wheel must render its compatible packaged profile offline when target-repository evidence is local and sufficient. Source-to-packaged parity must compare against the actual canonical source, not against another generated/private constant.
+The installed wheel must render its packaged 5.16 prompt/profile offline when local repository evidence is sufficient. Source-to-package parity compares the actual canonical source against packaged stage bodies/profile metadata; self-comparison of two products of the same stale private constant is not acceptance.
 
-### 3.8 Prompt execution modes, remote truthfulness, and privacy
+### 3.7 Stage input completeness and ownership
 
-Core v1 execution modes:
+A successful WP-1 render contains no unresolved user-edit placeholder. Every canonical stage INPUT is classified by the 5.16 profile as one of:
 
 ```text
-local
-web
+mechanical          # Core resolves from project/candidate/workplan/profile/request
+canonical_default   # canonical AUTO/NONE/default sentinel remains deliberately
+required_user       # caller must provide explicit data; absence is an error
 ```
 
-Web mode is both a privacy and repository-visibility boundary:
+Core does not convert a semantic question into an automatic guess merely to avoid asking for required data.
 
-- no local absolute repository/config/private-state path;
-- no credential/token or credential-bearing Git URL userinfo;
-- no local file:// or filesystem remote identity in the prompt;
-- no future account/quota/resource telemetry;
-- repository target uses sanitized remote identity plus branch/commit/workplan path when available;
-- material uncommitted local state is not representable as a remotely inspectable candidate and therefore blocks a web render with a structured problem;
-- if Core has evidence that the committed local candidate differs from the observed remote candidate, web rendering fails as stale/unavailable rather than pretending they are the same;
-- when remote visibility is not freshly established, the prompt/footer reports that visibility as cached/unknown according to actual provenance rather than asserting freshness.
+Required user-owned v1 stage inputs are:
 
-Local mode may include authorized local repository/worktree paths but still never secrets.
+| Stage | Required user input | Binding |
+| --- | --- | --- |
+| baseline | `BASELINE_SCOPE` | `--input BASELINE_SCOPE=...` |
+| design | `TASK` | dedicated `--task` |
+| implementation | none beyond a resolvable governing workplan | automatic/`--workplan` |
+| review | none beyond a resolvable governing workplan | automatic/`--workplan` |
+| verification | `VERIFICATION_SCOPE` | `--input VERIFICATION_SCOPE=...` |
+| stabilization | `STABILIZATION_SCOPE` | `--input STABILIZATION_SCOPE=...` |
+| alignment | downstream workplan + `UPSTREAM_ACCEPTED_WORK` | `--workplan` + `--input UPSTREAM_ACCEPTED_WORK=...` |
+| health-audit | `AUDIT_SCOPE` | `--input AUDIT_SCOPE=...` |
+| closeout | `COMPLETED_WORK`, unless an explicitly selected workplan satisfies the profile binding exactly | `--input COMPLETED_WORK=...` or exact `--workplan` |
 
-### 3.9 Prompt input ownership and override semantics
+The profile may preserve canonical `AUTO`/`NONE` for fields such as authority discovery, history window, additional constraints, documentation discovery, or implementation target where the canonical prompt explicitly permits that sentinel.
 
-The renderer fills all mechanically supported stage inputs. Values requiring semantic agent investigation remain the canonical explicit `AUTO`/`NONE`; Core does not guess them.
+`input_overrides`/`--input` may set only names declared by the selected canonical INPUT block and not already owned by a dedicated first-class request field/mechanical binding. Unknown input => `core.prompt.input_unknown`; missing required user input => `core.prompt.input_required`; conflict with a first-class/mechanical binding => `core.prompt.input_conflict`.
 
-Profile metadata defines the mapping from canonical stage INPUT names to first-class PromptRequest fields/mechanically owned values. `input_overrides` may set only names declared by the selected canonical stage INPUT block and not owned by a first-class request field. Unknown names fail with `core.prompt.input_unknown`; attempting to use generic input override to contradict a first-class/mechanically owned field fails with `core.prompt.input_conflict` and points to the dedicated API/CLI option.
+Concrete inserted user/mechanical strings use one deterministic structure-safe single-line serialization rule. Raw NUL/CR/LF or similar structural injection is never spliced directly into the `INPUTS` grammar; the exact reversible v1 encoding is frozen in fixtures before Review. Canonical sentinel values remain canonical. This is representation safety, not a claim that user-authored prompt content is semantically untrusted or secret-scanned.
 
-Examples of first-class ownership include project/repository target, selected workplan where the stage has one, protocol source/profile/ref, execution mode, and Design `TASK` through `first_task`/`--task`. Stage-specific semantic inputs such as additional constraints or authority hints may remain explicit overrides when declared by the canonical stage.
+### 3.8 Prompt modes, privacy, and secret boundary
 
-A successful render contains no unresolved square-bracket user-edit placeholder that Core was responsible for resolving.
+Core v1 prompt execution modes are `local` and `web`.
 
-### 3.10 Canonical body plus orchestrator footer
+Web mode excludes automatically derived local absolute repository/config/state paths, local/file remotes, ambient environment values, credential-helper output, and credential-bearing remote userinfo. It includes only sanitized remotely useful repository/candidate/workplan/profile context whose visibility is represented truthfully.
 
-The canonical stage prompt body is preserved except for substitution of declared INPUT values under the binding rules above. Core may append only the architecture-approved orchestration metadata/result-request footer containing RunId, prompt fingerprint, bounded prompt-source/candidate/remote-visibility provenance, and `StageResultEnvelope v1` instructions.
+Local mode may include authorized local repository/worktree paths but still never automatically includes credential values or unrelated environment data.
 
-The footer is not an alternate stage prompt and may not weaken, replace, or reinterpret the canonical stage body. Canonical-source parity tests compare the body separately from the appended footer.
+Core does **not** promise arbitrary secret detection over user-authored `--task`/`--input` text. Explicit user values are intentionally rendered. Documentation must state that secrets should not be placed in prompt inputs. Core's hard guarantee is that it does not automatically source or propagate secrets from unsupported config fields, environment, credential stores/helpers, or URL userinfo.
 
-Volatile observation timestamps and diagnostics are returned as structured provenance but are not injected into prompt text unless a canonical input materially requires them. With fixed RunId and identical semantic inputs/candidate/source, repeated renders must be byte-stable.
+### 3.9 Prompt artifact, fingerprint, and result envelope
 
-### 3.11 Prompt stdout contract
+The canonical selected stage body is preserved except for declared INPUT substitution under §3.7. Core may append only the architecture-approved orchestration footer: RunId, prompt fingerprint, bounded source/candidate/remote-visibility provenance, and the `StageResultEnvelope v1` request. The footer cannot weaken or reinterpret stage instructions.
 
-Prompt commands write exactly the complete prompt to stdout. Diagnostics/errors go to stderr with deterministic nonzero exits. Therefore:
+Volatile observation timestamps/diagnostics remain structured provenance and are not injected into prompt bytes unless a canonical input materially requires them.
+
+`sdp.prompt-fingerprint.v1`:
+
+1. use caller RunId or allocate one opaque RunId;
+2. render exact full prompt artifact with a fixed fingerprint placeholder;
+3. hash the exact normalized UTF-8 placeholder-form bytes with SHA-256;
+4. substitute `sha256:<hex>`;
+5. freeze placeholder, line-ending, terminal-newline, and input-scalar normalization in executable fixtures.
+
+Every prompt requests `StageResultEnvelope v1` with at least schema version, run_id, prompt_fingerprint, stage, outcome, optional recommended_next_stage, blockers, completed/pending obligations, checks executed/unavailable, candidate, and summary. `BlockerRecord` includes summary plus optional blocker ID/classification/authority class. The footer never requests hidden chain-of-thought. Core renders but does not persist or semantically interpret returned results.
+
+### 3.10 Extension composition and event subscription
+
+Core discovers extensions only through:
+
+```text
+sdp_orchestrator.extensions.v1
+```
+
+`ExtensionProvider.manifest()` is side-effect-minimal. Activation is dependency-topological, with explicit capability/API-major requirements. Incompatible/failed optional extensions disable themselves and dependents without breaking healthy Core. Dependency cycles/missing required capabilities are diagnosed deterministically. Singular services cannot be silently replaced; multi-provider ordering is stable by provider ID.
+
+In-process extensions are trusted executable code, not a security sandbox. Core nevertheless applies least-privilege API exposure: `ExtensionContext` provides only versioned required services, the extension's own config namespace, and bounded CLI/config/event/diagnostic registrars rather than private Core objects.
+
+Event sinks register explicit event-type subscriptions. Core does not broadcast prompt text to sinks that did not request the prompt-rendered event. `core.prompt.rendered.v1` is a sensitive local-process event whose payload is sufficient for an authorized Tracker sink to reconstruct the `RenderedPrompt` record, including complete prompt text. Its logical `EventId` is stable for event type + RunId + prompt fingerprint so duplicate delivery is idempotent. Core has no durable queue; sink failure is diagnosed but cannot counterfeit or invalidate an otherwise successful primary render result.
+
+### 3.11 CLI stdout and diagnostics
+
+Prompt commands write exactly one complete prompt to stdout. Warnings/errors/diagnostics go to stderr; failure uses deterministic nonzero exit status derived from structured `Problem.code`. Thus:
 
 ```text
 sdp review > prompt.txt
 ```
 
-produces a clean prompt artifact. Optional clipboard support is additive and may never make ordinary stdout rendering depend on clipboard availability.
+produces a clean prompt artifact.
+
+Optional `--copy` is additive. Clipboard unavailability may produce a clipboard-specific problem/warning for the copy action but never removes the rendered prompt from stdout.
 
 ## 4. Public Core API/SPI v1 contract
 
-### 4.1 Public-record rule
+### 4.1 General public-record rule
 
-Every request, response, identifier, descriptor, receipt, query, and nested record reachable from a public `api.v1`/`spi.v1` signature must itself be public under that versioned surface or be a standard immutable scalar/container type. Public methods must not expose private Pydantic models, subprocess/session objects, Git-library objects, file handles, locks, or implementation repositories.
+Anything reachable from a public `sdp_orchestrator.core.api.v1` or `sdp_orchestrator.core.spi.v1` signature is itself a public v1 record or standard immutable scalar/container. Public records are JSON-compatible immutable-by-convention values; Pydantic is initial technology, not semantic authority. No public record contains open files, subprocess/session objects, Git library objects, locks, event loops, DB connections, or private implementation objects.
 
-Public records are JSON-compatible immutable-by-convention values. Pydantic is the initial realization, not semantic authority. Opaque IDs serialize as strings; timestamps as timezone-aware UTC ISO-8601; `DigestRef` carries algorithm + canonicalization scheme + value. Potentially unbounded collections use `Page[T]` with opaque query-scoped cursors.
+Opaque IDs serialize as strings; timestamps as UTC ISO-8601; domain digests carry algorithm + versioned canonicalization scheme + value. Potentially unbounded collections use `Page[T]` with opaque query-scoped cursor.
 
-Core must expose at least the parent-required identities/descriptors plus all request/response records used below, including:
+Critical v1 public types include at least:
 
 ```text
-ProjectKey
-WorktreeKey
-RunId
-EventId
-StageRef
-CapabilityKey
-ExtensionId
-DigestRef
-ProtocolProfileRef
-PromptSourceRef
-WorkplanRef
-CandidateRef
-ProjectDescriptor
-PromptProjectSnapshot
-EventEnvelope
-WorkflowProfileDescriptor
-StageDescriptor
-StageTransitionDescriptor
-BlockerRecord
-StageResultEnvelope
-Problem
-Page[T]
-ProjectQuery
-ProjectObservationRequest
-ProjectObservation
-WorkplanQuery
-WorkplanDescriptor
-PromptRequest
-RenderedPrompt
-CapabilityRequirement
-CapabilityProvision
-CapabilityStatus
-ExtensionManifest
-ExtensionRegistration
+ProjectKey, WorktreeKey, RunId, EventId, StageRef, CapabilityKey, ExtensionId
+DigestRef, ProtocolProfileRef, PromptSourceRef, WorkplanRef, CandidateRef
+RemoteRepositoryRef, ProjectDescriptor, PromptProjectSnapshot
+WorkflowProfileDescriptor, StageDescriptor, StageTransitionDescriptor
+BlockerRecord, StageResultEnvelope, EventEnvelope
+ProjectQuery, ProjectObservationRequest, ProjectObservation, ObservationPolicy
+WorkplanQuery, WorkplanDescriptor, PromptRequest, RenderedPrompt, ResolvedInput
+CapabilityRequirement, CapabilityProvision, CapabilityStatus
+ApplicationRequest, ExtensionManifest, ExtensionContext, ExtensionRegistration
+EventSubscription, Problem, Page[T]
 ```
 
-Exact field spelling/serialization may be finalized during implementation only within the semantics in this plan and parent architecture. Before WP-1 Review passes, the accepted `api.v1`/`spi.v1` wire/schema fixtures become the compatibility floor for WP-2+.
+Exact field spelling/private decomposition may be finalized during Implementation only within the parent/workplan semantics. Independent WP-1 Review freezes accepted `api.v1`/`spi.v1` schemas as the compatibility floor for WP-2+.
 
 ### 4.2 CoreAPI v1
 
@@ -380,9 +381,9 @@ class CoreAPI(Protocol):
     def render(self, request: PromptRequest) -> RenderedPrompt: ...
 ```
 
-All methods are read-only with respect to target repositories. `allocate_run_id` creates identity only, no persistent record. `list_stages()` is a bounded convenience view of `workflow().stages`, not a second source of stage semantics.
+All methods are read-only with respect to target repositories. `allocate_run_id()` creates identity only, no durable record. `list_stages()` is a convenience view of `workflow().stages`, not second stage authority.
 
-### 4.3 Application/composition API v1
+### 4.3 Application API v1
 
 ```python
 class ApplicationAPI(Protocol):
@@ -405,9 +406,9 @@ workplan.catalog
 workflow.profile
 ```
 
-Capability keys are semantic/unversioned; API compatibility is separate. Singular services may not be silently replaced. Multi-provider ordering, when a future capability permits it, is stable by provider ID.
+Capability identity is semantic/unversioned; API major/spec compatibility is separate.
 
-### 4.4 Extension SPI v1 and event sink
+### 4.4 Extension SPI v1
 
 ```python
 class ExtensionProvider(Protocol):
@@ -415,124 +416,41 @@ class ExtensionProvider(Protocol):
     def activate(self, context: ExtensionContext) -> ExtensionRegistration: ...
 ```
 
-Manifest inspection is side-effect-minimal: no subprocess, network, repository mutation, or storage migration. Activation is dependency-topological. Failed/incompatible optional providers disable themselves/dependents without breaking healthy Core.
+Manifest/activation semantics follow §3.10 and parent architecture. `ExtensionContext` must support explicit event subscription/sink registration and preserve absent-extension configuration semantics from §3.2.
 
-`ExtensionContext` exposes only explicit versioned composition services: effective namespaced config, already-active required services, CLI/config/event/diagnostic registrars. No Core private implementation object crosses the SPI.
+### 4.5 PromptRequest / RenderedPrompt
 
-The event registrar supports a minimal sink contract finalized under `core.spi.v1` with semantics equivalent to:
-
-```python
-class EventSink(Protocol):
-    def handle(self, event: EventEnvelope) -> None: ...
-```
-
-Core emits at least `core.prompt.rendered.v1` after a successful render. Its payload is sufficient for an authorized later Tracker sink to reconstruct the rendered prompt record, including RunId, fingerprint, stage/project/workplan/source/context identity and the complete rendered prompt. The event identity is stable for the same RunId + prompt fingerprint + event type so an invocation retry may redeliver without creating a distinct logical event. Core has no durable queue in WP-1; a sink failure is diagnosed and may be retried in-process where practical, but it cannot counterfeit/fail an otherwise successful primary prompt result. Sinks must tolerate duplicate delivery by EventId.
-
-### 4.5 WorkflowProfileDescriptor v1
-
-Profile exposes the bounded machine-readable Protocol routing contract required by Tracker later:
-
-```text
-WorkflowProfileDescriptor
-  profile
-  schema_version
-  stages
-  transitions
-
-StageDescriptor
-  stage
-  role_owner
-  mutation_class
-  optionality
-  recognized_outcomes
-
-StageTransitionDescriptor
-  from_stage
-  trigger_key
-  to_stage | terminal
-  priority_hint | None
-  explanation
-```
-
-`trigger_key` is a profile-defined opaque routing class, not executable expression text. The 5.16 profile documents how normalized StageResultEnvelope facts map to trigger classes. Core exposes this contract but does not infer current next action in WP-1.
-
-### 4.6 PromptRequest / RenderedPrompt
-
-`PromptRequest v1` represents:
+`PromptRequest v1` semantically carries:
 
 ```text
 run_id | None
-project: ProjectKey
-stage: StageRef
-execution_mode: local | web
+project
+stage
+execution_mode
 workplan_selector | None
 first_task | None
 input_overrides
 observation_policy | None
 ```
 
-`RenderedPrompt v1` returns:
+`RenderedPrompt v1` semantically carries:
 
 ```text
 run_id
 prompt_text
-prompt_fingerprint: DigestRef
+prompt_fingerprint
 stage
-prompt_source: PromptSourceRef
-workflow_profile: ProtocolProfileRef
+prompt_source
+workflow_profile
 resolved_inputs + provenance
-prompt_context: PromptProjectSnapshot
+prompt_context
 selected_workplan | None
 requested_result_schema identity
 ```
 
-### 4.7 Run/fingerprint/result-envelope contract
+### 4.6 Error contract
 
-Under `sdp.prompt-fingerprint.v1`:
-
-1. allocate/use RunId;
-2. render the exact full artifact using a fixed fingerprint placeholder;
-3. SHA-256 hash exact UTF-8 placeholder-form bytes under a frozen line-ending/terminal-newline normalization;
-4. substitute `sha256:<hex>`.
-
-WP-1 freezes the literal placeholder and byte normalization with executable fixtures.
-
-Every prompt requests:
-
-```text
-StageResultEnvelope v1
-  schema_version
-  run_id
-  prompt_fingerprint
-  stage
-  outcome
-  recommended_next_stage | None
-  blockers: tuple[BlockerRecord, ...]
-  completed_obligations
-  pending_obligations
-  checks_executed
-  checks_unavailable
-  candidate | None
-  summary | None
-
-BlockerRecord
-  blocker_id | None
-  classification | None
-  summary
-  authority_class | None
-```
-
-The footer must not request hidden chain-of-thought. Core neither persists nor semantically interprets returned results in WP-1.
-
-### 4.8 Error contract
-
-Python APIs raise one `OrchestratorError` carrying:
-
-```text
-Problem(code, message, retryable, details)
-```
-
-Consumers branch on code, not message text. Establish/test at least:
+Python APIs raise one `OrchestratorError(Problem)`. Callers branch on `Problem.code`, never message text. V1 establishes at least:
 
 ```text
 core.config.invalid
@@ -546,19 +464,25 @@ core.protocol.incompatible
 core.protocol.unavailable
 core.stage.unknown
 core.remote.unavailable
+core.remote.ambiguous
+core.remote.local_only
 core.remote.stale
+core.remote.target_unavailable
+core.prompt.input_required
 core.prompt.input_unknown
 core.prompt.input_conflict
+core.prompt.input_invalid
 core.extension.incompatible
 core.extension.activation_failed
+core.extension.dependency_cycle
 core.clipboard.unavailable
 ```
 
-Do not create a broad exception subclass hierarchy.
+Do not create a large subclass hierarchy merely to mirror codes.
 
-### 4.9 CLI request mapping
+### 4.7 CLI request mapping
 
-The CLI exposes every Core-only input needed to form a complete PromptRequest without interactive stdout contamination:
+All Core prompt request inputs are available non-interactively:
 
 ```text
 --project <ProjectKey>
@@ -566,97 +490,18 @@ The CLI exposes every Core-only input needed to form a complete PromptRequest wi
 --execution-mode local|web
 --config <path>
 --remote-mode local_only|use_cached_remote|refresh_remote
---task <text>                         # first_task; required for workplan-free Design
---input NAME=VALUE                    # repeatable; only non-first-class declared stage inputs
---copy                                # optional clipboard extra
+--task <text>                  # Design TASK
+--input NAME=VALUE             # repeatable, profile-declared non-first-class inputs
+--copy                         # optional clipboard extra
 ```
 
-A missing required first task fails clearly instead of prompting on stdout. Unknown/conflicting `--input` values fail before render. CLI and API route through the same normalization/validation layer.
+`--task` outside Design fails clearly. Missing required user input, unknown `--input`, and conflicting override fail before rendering. API and CLI share one normalization/validation path.
 
-## 5. Implementation obligations
-
-### O1 — Core distribution/package boundary
-
-Create `sdp-orchestrator-core`, PEP 420 namespace, `sdp` entry point, packaged 5.16 profile/prompt resources, and only justified Core dependencies.
-
-Expected runtime dependencies unless a simpler equivalent is demonstrated:
-
-```text
-platformdirs
-typer
-pydantic
-python-frontmatter
-packaging
-```
-
-Clipboard support optional (`pyperclip` extra/equivalent). No `filelock`, ACP, `httpx`, ORM/event-sourcing, ML, Tracker, Adapter, or Scheduler runtime dependency.
-
-**Acceptance:** build supported wheel/sdist; independently inspect metadata/resources/entry point; install wheel outside source checkout; execute installed `sdp --help`, `sdp projects`, and representative prompt commands; prove no root namespace `__init__.py` and no forbidden higher-module imports.
-
-### O2 — Canonical config/project/source resolution
-
-Implement §3.4 through one API/CLI normalization path with provenance and redaction. Explicit source override/remote fallback are opt-in and exact-ref-bound; default packaged/offline operation requires no network.
-
-**Acceptance:** explicit project, cwd match, configured default, sole project, ambiguity, invalid repo, CLI/API precedence, mode override, local protocol-source override, remote disabled by default, exact remote-ref validation, malformed TOML/frontmatter, and secret-redaction cases.
-
-### O3 — Real non-mutating Git/worktree/remote observation
-
-Implement production observation against actual Git repositories.
-
-**Acceptance boundary:** actual temporary Git repositories/worktrees, not precomputed CandidateRefs.
-
-**Acceptance:** branch/detached HEAD; upstream known/unknown; staged/unstaged/untracked state; two different dirty contents at the same paths produce different working-tree identities; symlink alias same WorktreeKey; separate Git worktree different WorktreeKey; credential-bearing remote sanitization; local/file remotes do not leak into web context; identity-incomplete bounded case; cached-remote provenance; `refresh_remote` through non-mutating remote query; target worktree/index/HEAD/local refs/remote-tracking refs remain unchanged after observation.
-
-### O4 — Workplan catalog/resolution/path safety/semantic identity
-
-Support current active/archive conventions, nested `AUTHORITY.md`, frontmatter IDs, exact selectors, deterministic branch binding, conservative identity, and repository-bound path handling.
-
-**Acceptance:** top-level plan; nested authority; lifecycle-only archive/status change; body/Frozen semantic change; multiple-active ambiguity; exact ID/path selector; not-found selector; exact `target_branch` match; Design without plan + task; required-plan failure for Implementation/Review; symlink/path escape rejected/ignored safely; oversized/malformed workplan handled without arbitrary read/execute.
-
-**Counterfactual:** two plausible active plans fail rather than select by mtime/path ordering.
-
-### O5 — Version-bound Protocol 5.16 profile/snapshot
-
-Produce reproducible packaged prompt/profile resources from canonical supplied Protocol authority.
-
-**Acceptance:** uniquely extract every canonical stage fenced body; source-to-packaged body parity for all stages; workflow keys/aliases/transitions/input-binding metadata reconciled with supplied 5.16 references; package source/profile identity recorded; offline installed-wheel rendering; unknown/older workplan not silently rendered as 5.16; explicit local source success; remote fallback disabled by default and exact-ref-bound when enabled; incompatible explicit source fails truthfully.
-
-**Anti-shortcut:** comparing two products of the same stale private constant does not prove canonical-source parity.
-
-### O6 — Core API/Application API/extension/event SPI v1
-
-Implement public import paths, JSON-compatible public request/response records, composition/service registry, capability/API-major matching, extension activation/degradation, and the prompt-rendered event seam.
-
-**Acceptance:** public API round-trip/schema fixtures; no public signature references private classes; capability/version separation including `workflow.profile`; compatible/incompatible providers through production composition root; duplicate singular service rejected; manifest inspection has no activation side effects; failed optional provider does not break Core prompt rendering; `core.prompt.rendered.v1` event emitted with stable logical EventId; duplicate delivery tolerated; sink failure does not change primary render result.
-
-**Real integration boundary:** exercise discovery through actual Python entry-point metadata in an isolated installed test extension/fixture distribution or equivalent real `importlib.metadata` installation boundary; an in-memory fake provider list alone is insufficient to prove plugin discovery.
-
-### O7 — Canonical prompt renderer and input contract
-
-Resolve stage via compatible profile; fill mechanically known first-class inputs; preserve canonical `AUTO`/`NONE` for semantic discovery; enforce override ownership; preserve canonical stage body except declared INPUT substitution; append only approved orchestrator footer.
-
-**Acceptance:** all canonical stage bodies, with focused fixtures for Design/Implementation/Review/Verification/optional stages; exact body extraction; workplan-free Design with `--task`; unknown/conflicting override rejection; API/CLI override parity; no cross-stage body; no unresolved Core-owned placeholder; fixed RunId + unchanged semantic state remains byte-stable across time.
-
-### O8 — Local/web privacy and remote-access truthfulness
-
-Use fixtures containing distinctive home/config/private paths, credential-bearing HTTPS remote, SSH-style remote, local/file remote, dirty local state, cached-remote divergence, and unrelated secret-like values.
-
-**Acceptance boundary:** final production `RenderedPrompt.prompt_text` and installed CLI stdout.
-
-Web output contains none of the prohibited local/credential values while retaining sufficient remote/branch/workplan identity when safely available. Material dirty local state blocks web mode. Known committed local/remote divergence blocks web mode. Unknown/cached remote visibility is labeled with actual provenance, not asserted fresh. Local output may include authorized repo path but never secrets.
-
-### O9 — RunId/fingerprint/StageResultEnvelope v1
-
-Preserve caller RunId, allocate opaque IDs otherwise, implement frozen placeholder/UTF-8 normalization hash, and append matching structured result request without chain-of-thought demand.
-
-**Acceptance:** fixed RunId + identical semantic observation/source/input gives identical prompt/fingerprint across wall-clock time; stage/workplan/candidate/mode/input change alters fingerprint when prompt artifact changes; placeholder algorithm fixture; final prompt has digest and no placeholder; result schema/BlockerRecord present and matches requested schema identity.
-
-### O10 — Core CLI/diagnostics
-
-Required canonical commands:
+Canonical stage commands:
 
 ```text
 sdp prompt <stage>
+sdp baseline
 sdp design
 sdp implementation
 sdp review
@@ -670,119 +515,126 @@ sdp capabilities
 sdp doctor
 ```
 
-Canonical option mapping is §4.9. Prompt stdout is prompt-only; diagnostics use stderr; ambiguity/incompatibility has deterministic nonzero exit. Optional `--copy` never removes stdout usability.
+Aliases resolve through the compatible profile rather than hard-coded duplicate stage semantics.
 
-`sdp doctor` is non-mutating and reports only Core-relevant readiness: config validity, selected/known projects and repository reachability, packaged/profile identity/compatibility, extension activation status, optional clipboard availability, and explicitly requested remote-probe status. It performs no hidden network operation by default and does not report higher-module health when those modules are absent.
+## 5. Implementation obligations and acceptance
 
-**Acceptance boundary:** installed `sdp` subprocess execution; direct Typer callback tests alone are insufficient.
+### O1 — Build/install/package boundary
 
-### O11 — Core-only user documentation
+Create `sdp-orchestrator-core`, PEP 420 namespace, `sdp` entry point, packaged 5.16 profile/prompt resources, and only justified Core dependencies.
 
-Document installation, config/schema/source policy, project selection, `--task`, `--input`, stage commands, local/web behavior and remote-visibility requirements, ambiguity handling, protocol binding, piping/copying, event/plugin trust, and explicit absence of Tracker/Adapter/Scheduler features. Do not present future commands as current.
+Acceptance:
 
-### O12 — Repository CI/release integration
+- build supported wheel/sdist;
+- independently inspect metadata/resources/entry point and absence of accidental secrets/local paths/scratch;
+- install wheel outside source checkout;
+- execute installed `sdp --help`, `sdp projects`, `sdp capabilities`, `sdp doctor`, and representative prompt commands;
+- install a sibling namespace fixture distribution to prove namespace coexistence;
+- reject root namespace `__init__.py` and production imports of Tracker/Adapter/Scheduler.
 
-Integrate Core acceptance into the repository's ordinary validation path without creating a competing workflow authority. Prefer extending the existing `.github/workflows/protocol-check.yml`/repository validation invocation so Core tests plus package/install smoke run in normal CI. Do not place the orchestrator wheel into generated `dist/skills` unless a separate release policy explicitly requires that representation.
+### O2 — Config/project/extension-namespace resolution
 
-**Acceptance:** ordinary CI/repository validation fails when Core unit/integration/package acceptance is broken and remains compatible with existing Protocol skill build/validation/parity checks.
+Implement §3.2 through one normalization path.
 
-### O13 — Final assembled conformance/simplicity closure
+Acceptance covers explicit/cwd/default/sole/ambiguous project selection; invalid/malformed Core config; empty env allowlist; project mode override; absent-extension config preservation; active extension namespace handoff; unrelated extension config not changing fixed-RunId prompt identity; secret-bearing Core config rejection/redaction; local Protocol-source override; remote source disabled by default and exact-ref-bound when enabled.
 
-Reconcile every obligation against assembled Core. Remove duplicate prompt/profile representations, speculative persistence/transport/resource hooks, unused compatibility shims, and helpers serving only hypothetical later modules rather than accepted API/SPI seams.
+### O3 — Real Git/worktree/remote observation
 
-Re-derive final affected surface and run complete Core affected regression, installed-package integration, and the repository-required Protocol validation on the final assembled candidate.
+Acceptance owner is the production observer against actual temporary Git repositories/worktrees/remotes.
 
-## 6. Implementation authority
+Cover branch/detached HEAD, staged/unstaged/untracked content, two different dirty contents at same paths, symlink alias same WorktreeKey, separate linked worktree different WorktreeKey, upstream known/unknown, deterministic remote-selection precedence, multiple-remote ambiguity, local/file remote rejection for web, sanitized HTTPS/SSH remotes, cached remote provenance, bounded noninteractive read-only remote refresh, and identity-incomplete bounded cases.
 
-### Frozen
+Prove target worktree/index/HEAD/local refs/remote-tracking refs remain unchanged after observation/refresh.
 
-- parent architecture 1.5.0 module/dependency/ownership boundaries;
-- Core independent usefulness;
-- `sdp-orchestrator-core`, `sdp`, PEP 420 namespace, one extension group;
-- public Core API/SPI semantic method families and event seam in §4;
-- Python 3.11+ initial compatibility floor;
-- non-mutating target/remote observation semantics;
-- deterministic project/workplan selection rules and exact selector semantics;
-- version-bound Protocol profile resolution;
-- canonical prompt body + derived packaged snapshot relationship and deterministic fenced-stage extraction;
-- local/web privacy and remote-access truthfulness;
-- first-class input ownership/override-conflict semantics;
-- RunId/fingerprint v1/StageResultEnvelope v1 request seam;
-- Core capability set including `workflow.profile`;
-- no Tracker/Adapter/Scheduler responsibilities in Core.
+### O4 — Workplan catalog and identity
 
-### Delegated
+Cover top-level plans, nested current `AUTHORITY.md`, archive state, exact ID/path selector, `target_branch` binding, multiple-active ambiguity, selector not found, safe lifecycle-only semantic-digest preservation, body/Frozen semantic change, malformed/oversized documents, symlink/path escape, duplicate IDs, and conservative unknown-schema handling.
 
-- private class/function/module decomposition;
-- PEP 517 backend/test-runner details;
-- Git plumbing implementation satisfying the Frozen non-mutating identity semantics;
-- bounded workplan/prompt parser implementation;
-- bounded protocol-source cache layout;
-- non-prompt diagnostic formatting;
-- internal Pydantic decomposition/validators preserving accepted public wire semantics;
-- optional clipboard implementation;
-- standard-library versus focused dependency choice when contract-equivalent and simpler;
-- exact public field spelling only until WP-1 Review accepts the `api.v1`/`spi.v1` schema, after which it is compatibility authority.
+Implementation/Review must fail if no governing workplan can be resolved. Design may run without an existing workplan only with `--task`. Alignment requires an exact downstream plan.
 
-Do not add abstractions merely for hypothetical later use; later modules consume accepted v1 APIs/SPIs.
+### O5 — Protocol 5.16 source/profile/snapshot
 
-### Reopen only on evidence
+Acceptance:
 
-Reopen only the affected Design surface if evidence shows:
+- uniquely extract every canonical stage fenced body from actual `development-workflow-prompts.md`;
+- source-to-packaged body parity for all stages;
+- reconcile stage aliases, input bindings, workplan requirements, outcomes/transitions, source/profile identity with supplied 5.16 references;
+- offline installed-wheel rendering;
+- explicit local source success;
+- remote source fallback off by default, exact-ref-bound when enabled;
+- older/unknown workplan never silently rendered as 5.16;
+- incompatible source fails truthfully.
 
-- required workflow/profile information cannot be exposed without materially different ownership;
-- canonical prompt cannot be packaged offline without creating a second authority under the current model;
-- Core API/SPI cannot support Tracker/Adapter direction without private/reverse dependency;
-- one extension registry/event seam cannot compose required modules safely;
-- material target-workplan conventions cannot fit the Frozen identity/resolution model without systematic false ambiguity;
-- Python 3.11+ violates an independently required compatibility target;
-- local/web privacy or remote truthfulness cannot be preserved under the current prompt-context ownership.
+### O6 — Stage-input completeness
 
-Ordinary parser, packaging backend, Git command, internal model field, or diagnostic-format choices remain Implementation discretion.
+Exercise **all canonical stages**, not only Design/Implementation/Review.
 
-## 7. Affected surface and task-specific acceptance
+Acceptance proves:
 
-### 7.1 Expected affected surface
+- every canonical INPUT is classified as mechanical/canonical_default/required_user;
+- table in §3.7 is enforced;
+- missing required user input fails with `core.prompt.input_required` and no partial prompt on stdout;
+- unknown/conflicting input fails before render;
+- `--task`/API first_task parity;
+- selected workplan bindings for Implementation/Review/Alignment/eligible Closeout;
+- deterministic structure-safe scalar encoding for multiline/control-bearing values;
+- no unresolved editable placeholder in a successful final prompt.
 
-```text
-orchestrator/core/                         # new Core distribution/source/tests/package data
-orchestrator/docs/                         # Core user/operator docs; parent architecture preserved
-workplans/active/PROTOCOL-ORCHESTRATOR-WP1-PROMPT-CORE.md
-.github/workflows/protocol-check.yml       # minimally extend ordinary validation if needed
-repository test/build configuration        # only as needed for Core package acceptance
-source/shared/references/development-workflow-prompts.md   # canonical input; do not modify absent proven authority defect
-source/shared/references/workflow-and-workplans.md         # routing authority input
-```
+### O7 — Core API/Application API/extension/event SPI
 
-Re-derive final surface from assembled implementation; this is not a ceiling.
+Acceptance:
 
-### 7.2 Real semantic-owner boundaries
+- public import/schema/round-trip fixtures for every type reachable from v1 signatures;
+- no private class in a public signature;
+- capability/API-major separation including `workflow.profile`;
+- actual `importlib.metadata` entry-point discovery using an installed fixture extension distribution;
+- compatible/incompatible/missing-dependency/cyclic extension cases;
+- duplicate singular service rejection and stable multi-provider ordering;
+- absent-extension config preserved;
+- prompt event delivered only to an explicitly subscribed sink;
+- unsubscribed sink does not receive complete prompt text;
+- stable logical EventId/duplicate delivery tolerance;
+- sink failure does not change primary render result.
 
-1. **Prompt product:** installed `sdp` -> production Core composition -> production observer/resolver/renderer -> stdout. A direct helper returning expected text cannot close a broken installed CLI.
-2. **Repository observation:** production observer against actual temporary Git repositories/worktrees and non-mutating remote query boundary.
-3. **Canonical source:** source/package preparation reads the actual canonical Protocol prompt source; stale private-copy self-comparison cannot close parity.
-4. **Packaging:** built wheel installed outside source tree, including packaged profile/resources and console entry point.
-5. **Privacy/remote truthfulness:** final `RenderedPrompt.prompt_text` and installed CLI stdout.
-6. **Extension composition:** production `importlib.metadata`/entry-point discovery plus service registry with a real installed fixture provider; an injected in-memory provider list alone is not enough.
-7. **Event seam:** production render path -> registered event sink; test cannot bypass render and manually call the sink.
-8. **Repository CI:** ordinary repository validation path actually invokes the Core acceptance surface.
+### O8 — Canonical prompt renderer
 
-### 7.3 Required evidence
+Use the production observer/resolver/profile/renderer path.
 
-At minimum:
+Acceptance:
 
-- focused API/config/Git/workplan/profile/renderer/fingerprint/SPI/event tests;
-- stage-local affected regression after each material executable stage;
-- final Core affected regression;
-- actual temporary Git repo/worktree/remote fixtures for observer claims;
-- built artifact inspection + isolated installed-wheel CLI integration;
-- actual entry-point discovery integration with an installed fixture extension;
-- objective import-direction/namespace-package guards;
-- offline packaged-profile prompt integration;
-- web privacy/credential-redaction/dirty-local/remote-divergence integration;
-- ambiguity/incompatibility/override-conflict counterfactuals;
-- project-configured fast Python static checks when available/justified; do not add a second checker for symmetry;
-- repository-required Protocol validation on the final candidate exactly as documented by the governing repository, currently:
+- all stage bodies render from the correct canonical fenced block;
+- no cross-stage body contamination;
+- declared INPUT substitution only;
+- canonical AUTO/NONE sentinels preserved when profile-classified as defaults;
+- footer is appended separately and cannot rewrite stage prose;
+- fixed RunId + identical semantic state gives byte-identical prompt/fingerprint across time;
+- relevant stage/workplan/candidate/mode/input/source changes change fingerprint when artifact changes.
+
+### O9 — Web/local privacy and remote truthfulness
+
+Acceptance boundary is final `RenderedPrompt.prompt_text` and installed CLI stdout.
+
+Fixtures include distinctive home/config/private-state paths, credential-bearing HTTPS URL, SSH remote, local/file remote, multiple remotes, dirty local state, local-ahead/remote-ahead divergence, cached/unknown remote state, and ambient secret-like environment values.
+
+Web output must not automatically contain prohibited local/credential/ambient values. Web render requires a deterministic non-local remote target; dirty local state and known committed divergence block. Cached/unknown freshness is labeled truthfully. Local mode may include the authorized repo path.
+
+Explicit user `--task`/`--input` text is expected to appear and is not used as an arbitrary-secret-detection test.
+
+### O10 — Run/fingerprint/result-envelope contract
+
+Freeze and test RunId preservation/allocation, exact placeholder, input-scalar normalization, UTF-8/line-ending/terminal-newline normalization, prompt digest, StageResultEnvelope/BlockerRecord schema identity, and no hidden-chain-of-thought request.
+
+### O11 — CLI and diagnostics
+
+Acceptance boundary is installed `sdp` subprocess execution, not direct Typer callbacks.
+
+Prompt stdout contains prompt only. Errors/ambiguity go to stderr with deterministic nonzero status. Every stage alias and `sdp prompt <stage>` resolves through the same profile. `sdp doctor` is non-mutating/no-network by default and reports Core config/project/profile/extension/clipboard readiness only. Optional `--copy` does not remove stdout usability.
+
+### O12 — Documentation, CI, and final simplicity closure
+
+Document install/config/project/remote selection, required stage inputs, local/web behavior, Protocol binding, exact workplan selection, piping/copying, extension trust/subscriptions, bounded secret guarantee, and explicit absence of higher-module features.
+
+Integrate Core acceptance into the repository's ordinary validation path rather than creating a competing CI authority. Preserve existing Protocol validation:
 
 ```text
 python -m pip install -r source/requirements-validation.txt
@@ -793,70 +645,126 @@ python source/check_dist.py --expected /tmp/protocol-dist --committed dist
 git diff --check
 ```
 
-Core-specific package/test commands are additional to, not substitutes for, those repository checks. If final impact cannot be bounded confidently, run the broader available suite.
+Core package/test/install acceptance is additional. `dist/skills` remains Protocol-skill transport, not an automatic orchestrator wheel destination.
 
-Production qualification: **unnecessary** for WP-1; no production-scale performance/resource claim is made.
+Before handoff, reconcile every WP-1 obligation against the assembled implementation, re-derive affected surface, run final complete Core regression/real-boundary integration/repository checks, and delete speculative persistence/transport/resource/benchmark hooks or duplicate prompt/profile authorities.
 
-## 8. Implementation sequence
+## 6. Real semantic-owner acceptance boundaries
 
-### Stage 1 — Package/contracts/config/repository observation
+1. **Prompt product:** installed `sdp` -> production application composition -> production observer/workplan/profile resolver -> production renderer -> stdout.
+2. **Git observation:** production observer against real temporary Git repositories/worktrees/remotes.
+3. **Canonical prompt source:** actual canonical Protocol prompt file -> generation/extraction -> packaged wheel resource -> installed renderer.
+4. **Packaging:** built wheel installed outside the source checkout.
+5. **Namespace/extension composition:** real Python package/entry-point metadata with an installed sibling/extension fixture distribution.
+6. **Privacy/remote truth:** final rendered prompt and installed stdout, not an intermediate sanitized helper.
+7. **Event seam:** actual production render path -> subscribed production event registrar/sink path.
+8. **Repository CI:** ordinary repository validation actually invokes Core acceptance and retains existing Protocol checks.
 
-Create distribution/namespace/entry point, public API/SPI records/services, canonical config/project/source resolution, Git/Candidate/Worktree observation, and workplan catalog/identity/resolution.
+A fake/helper is valid only below/outside the owner under claim. Evidence that could remain green while these owners are broken cannot close the corresponding obligation.
 
-**Closure:** focused public-contract/config/Git/workplan/path-safety tests + affected Core regression; dirty-content identity; non-mutating remote refresh; no higher-module imports/persistence.
+## 7. Implementation sequence
 
-### Stage 2 — Protocol profile/snapshot + prompt renderer
+### Stage 1 — Package/contracts/config/Git/workplans
 
-Implement version-bound source/profile resolution, deterministic canonical fenced-stage extraction/packaged snapshot, WorkflowProfileDescriptor, input binding/override validation, local/web context and remote truthfulness, RunId/fingerprint/result footer, event publication, stage aliases, `--task`/`--input`, and prompt-only stdout.
+Implement package skeleton, public value/request/response types, composition root, config/project/extension-namespace normalization, Git/worktree/remote observation, and workplan catalog/identity/resolution.
 
-**Closure:** canonical source parity; incompatible-version rejection; local/web privacy and remote-visibility cases; fingerprint byte-stability; structured event/result fixtures; Design task and all-stage prompt extraction; offline packaged-profile test + affected regression.
+Closure: focused contract/config/Git/workplan/path-safety/remote tests + affected Core regression; no higher-module dependency or persistence.
 
-### Stage 3 — Composition/CLI/package/CI integration and final closure
+### Stage 2 — Protocol profile/snapshot/prompt artifact
 
-Complete real entry-point discovery/service composition, diagnostics/projects/doctor commands, optional clipboard, docs, build/install integration, ordinary repository-CI integration, architecture-fitness checks, final accepted-contract reconciliation, final affected regression, repository-required checks, and simplification cleanup.
+Implement canonical stage extraction, packaged 5.16 profile/snapshot, workflow descriptor, stage-input classification/binding, local/web prompt context, RunId/fingerprint/result footer, and prompt-rendered subscribed event.
 
-**Closure:** isolated installed-wheel end-to-end acceptance on representative temporary target repositories plus ordinary repository validation on the final candidate; implementation handoff ready for independent Review.
+Closure: all-stage canonical parity/input-completeness, source/version rejection, byte-stability, privacy/remote truthfulness, event/result fixtures, offline packaged-profile integration + affected regression.
+
+### Stage 3 — CLI/extension discovery/package/CI closure
+
+Implement complete CLI aliases/diagnostics/doctor/optional clipboard, real entry-point discovery, installed fixture extension integration, docs, package build/install tests, ordinary repository-CI integration, architecture-fitness checks, final accepted-contract reconciliation, final affected regression/integration, and simplification cleanup.
+
+Closure: isolated installed-wheel end-to-end acceptance on representative temporary repositories plus ordinary repository validation on final candidate; ready for independent Review.
+
+## 8. Frozen versus delegated
+
+### Frozen for WP-1
+
+- parent architecture 1.5.0 module/dependency/ownership direction;
+- Core standalone usefulness and one distribution/CLI/composition root;
+- public Core API/Application API/Extension SPI method families and semantic roles;
+- Core capability set: `prompt.render`, `project.observe`, `workplan.catalog`, `workflow.profile`;
+- Python 3.11+ initial floor;
+- config/project/extension-namespace ownership and deterministic project selection;
+- non-mutating Git/remote observation;
+- deterministic remote selection/web-target truthfulness;
+- exact workplan selector/branch-binding/ambiguity semantics;
+- Protocol-version-bound source/profile/snapshot resolution;
+- canonical stage-body extraction and one prompt authority;
+- stage input classification and required-user-input table;
+- local/web privacy boundary and bounded secret guarantee;
+- RunId/fingerprint/result-envelope contract class;
+- one extension registry, explicit event subscription, and non-durable prompt event;
+- no Tracker/Adapter/benchmark/meter/predictor/Scheduler implementation in Core.
+
+### Delegated to Implementation
+
+- private module/class/function decomposition;
+- PEP 517 build backend/test runner;
+- concrete Git plumbing satisfying frozen semantics;
+- bounded parser implementation;
+- exact safe input-scalar representation, lifecycle semantic-digest exclusion list, and public field spelling **only until WP-1 Review freezes the v1 fixtures**;
+- diagnostic presentation and numeric exit-code mapping from `Problem.code`;
+- optional clipboard implementation;
+- focused dependency substitutions that preserve the contract with less complexity.
+
+### Design reopen triggers
+
+Reopen only the affected surface if evidence shows that:
+
+- Core API/SPI cannot support Tracker/Adapter direction without private/reverse dependency;
+- required Protocol workflow/profile facts cannot be exposed without a materially different ownership model;
+- canonical prompts cannot be packaged offline without creating competing authority;
+- target workplan conventions systematically cannot fit exact/conservative resolution;
+- one extension registry/subscription seam cannot safely compose required later modules;
+- non-mutating observation cannot establish the required target identity;
+- web/local privacy/remote truthfulness cannot be preserved under this prompt-context architecture;
+- Python 3.11+ violates an independently required distribution target.
+
+Ordinary parser/library/field-layout/Git-command choices remain Implementation discretion.
 
 ## 9. Simplification triggers
 
-Simplify/re-derive before adding machinery if implementation starts producing:
+Stop and simplify before adding durable machinery if implementation starts creating:
 
-- a second manually maintained prompt-body set;
-- duplicated local/web renderers instead of one context/privacy policy;
+- a second maintained prompt-body set;
+- separate local/web renderers rather than one renderer plus context/privacy policy;
 - separate CLI/API config semantics;
-- multiple plugin registries/loaders;
-- a generic workflow engine instead of bounded 5.16 descriptors;
-- persistent event queue/run database machinery in Core;
-- transport/model/account/resource placeholder objects in Core;
-- fuzzy workplan heuristic exception stacks;
-- wrappers/fallbacks compensating for an overcomplicated profile extractor;
-- custom semver/TOML/YAML/CLI/package machinery where focused maintained libraries already own the problem;
-- public objects leaking Git subprocess/Pydantic/private implementation state;
-- remote observation implemented by mutating the target repository;
-- generic input override logic capable of contradicting first-class prompt identity/context;
-- a separate orchestrator CI workflow duplicating the ordinary repository validation path without a real isolation requirement.
+- multiple extension registries;
+- a generic workflow/expression engine;
+- persistent event queue/history/database in Core;
+- agent/model/account/resource placeholder objects in Core;
+- fuzzy workplan/remote heuristic stacks;
+- custom semver/TOML/YAML/CLI/package mechanisms where focused maintained libraries already own the need;
+- public records leaking private implementation objects;
+- generic secret scanners presented as a correctness guarantee;
+- remote observation implemented by mutating the repository;
+- generic `--input` capable of overriding first-class identity/context;
+- a second CI workflow duplicating ordinary repository validation without a real isolation need.
 
-## 10. Independent workplan review closure — 2026-09-07
+## 10. Independent Design review closure — 2026-09-07
 
-This workplan was re-reviewed against `orchestrator/docs/architecture.md`, the remote Protocol 5.16 `software-design` role, and the supplied workflow/workplan, testing, architecture, versioning, Python, configuration, security, specification, release, repository instructions, and canonical prompt source.
+This pass re-reviewed WP-1 against the frozen parent architecture, the remote Protocol 5.16 `software-design` role, workflow/workplan authority, testing/proxy-proof acceptance, architecture/active-simplicity doctrine, protocol versioning, long-horizon architecture fitness, Python packaging guidance, configuration rules, security/trust boundaries, release/distribution guidance, repository instructions, and the canonical workflow-prompt source.
 
-The review found and closed the following material pre-implementation gaps:
+The review closed the remaining material gaps:
 
-1. added the parent-required `workflow.profile` capability to the delivered Core capability set;
-2. made target/remote observation genuinely non-mutating by defining `refresh_remote` as a read-only remote query rather than an implicit fetch;
-3. strengthened working-tree identity so content changes, not merely dirty path/status, change candidate identity;
-4. bounded workplan discovery to repository-owned regular files and defined exact selector/path-safety behavior;
-5. defined canonical stage extraction from the canonical fenced prompt block, preventing heuristic/stale stage-body selection;
-6. made Protocol-source override/remote fallback explicit, opt-in, and exact-ref-bound while preserving offline packaged operation;
-7. defined first-class prompt-input ownership and rejection of unknown/conflicting generic overrides;
-8. added a real Core event-sink/prompt-rendered seam required for later Tracker integration without persistence in Core;
-9. strengthened plugin acceptance to exercise actual installed Python entry-point discovery rather than only injected providers;
-10. made web mode truthful about local-only dirty state and known local/remote divergence;
-11. removed volatile observation time from default prompt bytes so fixed-RunId identical semantic state is reproducible;
-12. bound completion to the repository's actual required Protocol validation commands and ordinary CI path, in addition to Core package/install acceptance.
+1. added explicit required-user-input semantics for **every** canonical stage so the product cannot claim a copy/paste-ready prompt while leaving unresolved human placeholders;
+2. defined deterministic Git remote selection and web-target availability, including multi-remote/local-only/detached-head failure cases;
+3. separated truthful Core secret guarantees from impossible arbitrary-secret detection over user-authored prompt data;
+4. made absent-extension configuration forward-compatible and non-authoritative to Core prompt identity;
+5. converted prompt events from implicit broadcast to explicit event-type subscription, limiting sensitive complete-prompt delivery to authorized sinks;
+6. completed public API/SPI reachability with Application/observation/extension/event and remote records rather than allowing private types to leak through public signatures;
+7. added real namespace coexistence, extension dependency-cycle, and installed entry-point acceptance;
+8. required deterministic structure-safe input serialization so multiline/control-bearing values cannot corrupt the canonical INPUT block;
+9. bound web-mode success to a remotely addressable, non-local target while retaining truthful cached/unknown freshness semantics;
+10. clarified that unrelated extension configuration and volatile observation metadata do not perturb prompt identity.
 
-Snapshot-loss counterfactual: with prior chat and Git history removed, `orchestrator/docs/architecture.md`, this workplan, and the supplied Protocol 5.16 source/reference tree recover all still-binding WP-1 product/Frozen semantics, public API/SPI roles, non-goals, acceptance boundaries, and Design-reopen triggers.
-
-No Tracker, Adapter, benchmark, metering, prediction, or Scheduler implementation is required for WP-1. The only future-facing machinery justified now is the parent-required public API/SPI, stable identities, workflow profile, extension registry, and non-durable event seam.
+Snapshot-loss counterfactual: with prior chat and Git history removed, the parent architecture, this workplan, and the supplied Protocol 5.16 source/reference tree recover every still-binding WP-1 problem invariant, Frozen architecture decision, public API/SPI role, required stage input, non-goal, real acceptance boundary, and Design-reopen trigger.
 
 **Design verdict: PASS — WP-1 Prompt Module + Core Program is snapshot-complete, internally coherent, and ready for `software-implementation`.**
