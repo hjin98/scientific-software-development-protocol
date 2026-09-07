@@ -7,15 +7,17 @@ status: active
 base_commit: 3715a7e34c10c1735347cd3ee8e2b75c8a2eed55
 ---
 
-# Protocol Orchestrator — Semi-Automatic Workflow Control Workplan
+# Protocol Orchestrator — Semi-Automatic Workflow Control, Metering, and Quota-Aware Scheduling Workplan
 
 ## Objective / problem invariants / non-goals
 
 ### Original problem
 
-Protocol 5.16 has a canonical parameterized workflow-prompt reference, but the user still has to select a stage, discover the current workplan/branch/candidate, substitute inputs, remember prior PASS/NO-PASS outcomes, decide what comes next, move prompts/results between agents, and reconstruct workflow state afterward. This bookkeeping is especially awkward when semantic work happens in a web agent against a remote Git repository while implementation happens in a local coding agent against a local worktree.
+Protocol 5.16 provides canonical parameterized workflow prompts, but the user still has to select a stage, discover the current workplan/branch/candidate, substitute inputs, remember prior PASS/NO-PASS outcomes, decide what comes next, move prompts/results between agents, reconstruct workflow state, choose an execution backend, and manually reason about which provider/account still has enough quota for the next stage.
 
-Build a **local, privacy-preserving protocol orchestrator** that turns those stages into an executable control surface. The common path should approach:
+Build one **local, privacy-preserving protocol orchestrator** that turns those stages into an executable control surface and also meters/predicts resource consumption so the system can choose an engineering-sufficient execution route automatically.
+
+The common path should approach:
 
 ```text
 sdp status
@@ -26,43 +28,50 @@ sdp implementation --run
 sdp review
 ```
 
-A stage command renders a directly usable canonical protocol prompt with repository/workplan/protocol variables resolved from current evidence. Manual-web mode makes prompt copy and response ingestion one-step operations. Local mode can invoke supported agents, stream user-visible output, ingest structured completion metadata, reconcile the repository afterward, and preserve private history.
+A stage command first resolves the Protocol stage from repository/workplan evidence. It then selects an execution route from configured web/local agent routes. Manual-web mode makes prompt copy and response ingestion one-step operations. Local mode can invoke supported agents, stream user-visible output, meter usage when available, reconcile the repository afterward, and preserve private history.
 
 ### Tier-1 product invariants
 
-1. **The orchestrator is not protocol authority.** Product/problem truth, Frozen architecture, workplan meaning, implementation behavior, and Design/Implementation verdicts remain owned by governing repository artifacts, protocol skills, and the agents/users acting in those roles. The orchestrator observes, remembers, reconciles, transports, and recommends; it must not silently invent or override product/Frozen authority.
-2. **Current repository evidence outranks stale local history.** Every material command reconciles private history with present Git/worktree/upstream/remote observations and present active/archive workplans. A stale database record cannot silently override a repository fact.
-3. **Private history stays private and local.** Prompts, pasted/final responses, structured stage results, backend/session metadata, and optional raw event logs live outside both the protocol repository and target software repository by default.
-4. **One workflow semantics, multiple transports.** Manual web, Claude, Codex, Pi, OMP, and Antigravity consume the same rendered protocol-stage semantics. Transport adapters may differ in process/RPC/SDK protocol, structured I/O, session handling, permissions, and repository representation; they must not fork protocol doctrine.
-5. **Web and local operation are explicit execution modes.** Web mode identifies the remote repository/branch/candidate and assumes remote tools/connectors. Local mode identifies the configured worktree and allows direct local repository work. Web prompts must not leak local absolute paths, private state paths, credential-bearing remote URLs, environment secrets, or machine-private metadata.
-6. **Automatic when evidence is strong; bounded choice when consequentially ambiguous.** Branch, HEAD, upstream, protocol version, workplan path, and known stage history should resolve automatically. Multiple materially plausible workplans or routes produce `AMBIGUOUS`/`INCONSISTENT` state and one bounded selection rather than a guess.
-7. **Agent results are evidence with provenance.** PASS/NO-PASS, blockers, completed/pending obligations, checks, and routing are stored with stage/run/backend/candidate/workplan/protocol identity. The orchestrator may detect contradictions and staleness but must not rewrite a reported verdict to manufacture closure.
-8. **Prompt generation remains useful without direct agent integration.** Manual web is a first-class mode, not an error path.
-9. **Direct integration is capability-aware and safe by default.** ACP is preferred when a backend's ACP surface preserves the required capabilities; documented native structured RPC/SDK/JSON is the bounded fallback. Unsupported or incompatible integration degrades clearly to prompt generation. Never default to dangerous permission/sandbox bypass.
-10. **Workflow state is inspectable.** Query current workplan/stage, branch/candidate/upstream/remote relation, previous attempts/verdicts, blockers, completed/pending obligation observations, active/retired workplans, stale evidence, and current/recommended action as text/JSON and as a workflow graph.
-11. **The private database is disposable convenience state.** Deleting it may lose private history but must not damage or redefine either repository. Fresh bootstrap recovers the strongest state Git/workplans can establish and reports genuinely unrecoverable history as unknown.
-12. **Historical transcripts do not become automatic prompt context.** Future prompts receive a compact structured projection of relevant state/blockers, not raw prior agent transcripts. Raw history is injected only by explicit user action. This prevents context bloat, stale authority, and prompt-injection propagation from archived outputs.
-13. **Manual result ingestion cannot silently attach to the wrong run.** Every generated prompt carries a non-secret run identity and prompt fingerprint. Structured results echo that identity; ambiguous pasted output requires bounded user selection/confirmation.
-14. **Evidence invalidation follows changed dimensions, not timestamps alone.** Workplan semantic changes, candidate changes, protocol changes, and lifecycle-only moves are distinguished so the orchestrator neither reuses stale evidence nor discards still-valid evidence merely because an archive/status field changed.
+1. **The orchestrator is not protocol authority.** Product/problem truth, Frozen architecture, workplan meaning, implementation behavior, and Design/Implementation verdicts remain owned by governing repository artifacts, protocol skills, and the agents/users acting in those roles.
+2. **Workflow-stage authority and execution-route scheduling are separate.** The workflow reducer determines which stage is required. The scheduler chooses who executes that already-required stage. Quota pressure may change account/model/harness/effort only inside the stage's engineering-feasible set; it may not skip Review, weaken a required reasoning tier, reinterpret a workplan, or rewrite PASS/NO-PASS.
+3. **Current repository evidence outranks stale local history.** Every material command reconciles private history with current Git/worktree/upstream/remote observations and active/archive workplans.
+4. **Observed meter state outranks prediction.** Metering describes resources currently observed; prediction estimates future consumption; scheduling chooses a route. A prediction never rewrites a provider-reported balance/quota observation.
+5. **`UNMETERED_FOR_SCHEDULER`, `METERED`, and `UNKNOWN` are distinct.** A configured web route may consume no quota tracked by this orchestrator. That is not equivalent to unknown meter state or infinite provider capacity.
+6. **Quota/account state is user-global, not project-local.** If two projects share the same Claude/Codex/provider account, they consume the same ledgers and must participate in one atomic reservation domain.
+7. **Private history stays private and local.** Prompts, pasted/final responses, structured stage results, account/resource telemetry, predictions, schedule decisions, backend/session metadata, and optional raw event logs live outside both the protocol repository and target software repositories by default.
+8. **One workflow semantics, multiple transports.** Manual web, Claude, Codex, Pi, OMP, Antigravity, and future compatible agents consume the same rendered Protocol stage semantics. Transport adapters must not fork workflow doctrine.
+9. **Web and local operation are explicit execution modes.** Web mode identifies a sanitized remote repository/branch/candidate and assumes remote tools/connectors. Local mode identifies the configured worktree and allows direct local repository work. Web prompts must not leak local paths, account balances, private state paths, credential-bearing remotes, environment secrets, or machine-private metadata.
+10. **Automatic when evidence is strong; bounded choice when consequentially ambiguous.** Multiple plausible workplans, routes, account identities, or materially different next actions produce explicit ambiguity instead of a guess.
+11. **Agent results are evidence with provenance.** PASS/NO-PASS, blockers, completed/pending obligations, checks, route identity, and candidate/workplan identity are stored as reported observations, not self-authorizing transitions.
+12. **Prompt generation remains useful without direct integration.** Manual web is a first-class route, not an error path.
+13. **Direct integration is capability-aware and safe by default.** ACP is preferred when it preserves required capabilities; documented native structured RPC/SDK/JSON is the bounded fallback. Never default to dangerous permission/sandbox bypass.
+14. **Workflow and resource state are inspectable and explainable.** The user can query current stage, workplan, candidate, last outcomes, active/retired plans, route/resource state, quota reservations, predictions, selected route, rejected alternatives, and recommendation reason codes.
+15. **The private database is disposable convenience state, not product authority.** Deleting it may lose history, predictions, and inferred quota knowledge but must not damage/redefine either repository. Fresh bootstrap recovers the strongest repository facts and reports unrecoverable private history as unknown.
+16. **Historical transcripts do not become automatic prompt context.** Future prompts receive compact structured state/blocker summaries, never raw prior transcripts unless explicitly requested.
+17. **Manual result ingestion cannot silently attach to the wrong run.** Every generated prompt carries a non-secret run identity and prompt fingerprint.
+18. **Evidence invalidation follows changed dimensions.** Candidate changes, semantic workplan changes, protocol changes, route identity uncertainty, and lifecycle-only moves are distinguished.
+19. **Scheduler optimization is quality-feasible first.** Cost/quota optimization happens only after filtering out routes that cannot satisfy stage capability, repository-access, privacy, independence, automation, or tooling requirements.
+20. **The scheduler remains interpretable.** Cold-start priors, quantile estimates, reservations, reserves, and route scores must be explainable. No black-box model may own admission or stage transitions.
 
 ### Explicit non-goals for v0.1
 
-- No new lifecycle/approval role; no replacement for Git, workplans, protocol skills, CI, or agent-native safety systems.
+- No new lifecycle/approval role and no replacement for Git, workplans, protocol skills, CI, or agent-native safety systems.
 - No mandatory repository-local `.sdp` ledger/state/transcript directory.
-- No browser DOM automation, credential scraping, or brittle automation of ChatGPT/Claude/Gemini web UIs. Web transport is user-mediated clipboard/stdin/stdout.
-- No cloud orchestration or multi-user synchronization service.
-- No hidden automatic merge/rebase/pull/push. Remote/local synchronization is observed and reported; mutations follow explicit delivery policy.
+- No browser DOM scraping for ChatGPT/Claude/Gemini web interaction or quota meters as a primary mechanism.
+- No cloud orchestration/multi-user synchronization service.
+- No hidden automatic merge/rebase/pull/push.
 - No automatic installation/upgrading of agent CLIs, ACP adapters, or registry-discovered binaries.
-- No requirement to persist hidden reasoning/thought channels. Store user-visible final responses and normalized metadata by default; raw event streams are optional.
-- No LLM dependency for basic state classification. Structured output + deterministic parsing/reconciliation is primary; ambiguous pasted text requires confirmation.
-- No mandatory resident daemon/MCP service, generic workflow engine, event-sourcing framework, or TUI in v0.1.
-- No orchestrator-managed Git worktree creation/merging or parallel-agent scheduler in v0.1. Multiple independently configured worktrees may be orchestrated as separate project profiles.
+- No invented token-equivalent pricing for opaque subscription quotas.
+- No assumption that missing meter data means zero usage or unlimited capacity.
+- No mandatory resident daemon, Temporal deployment, generic workflow engine, event-sourcing framework, or TUI in v0.1. A later fully autonomous service may adopt a durable execution substrate only if it remains subordinate to the same protocol/workflow authority model.
+- No orchestrator-managed parallel worktree scheduler in v0.1. Independently configured worktrees/projects may run concurrently only through global quota reservations and per-worktree run locks.
+- No mature neural/black-box learned scheduler before telemetry volume and calibration evidence justify it.
 
 ## Frozen high-level architecture and engineering envelope
 
 ### A. Product placement, runtime, and dependency policy
 
-Implement a Python 3.11+ subproject distributed alongside the protocol but logically separable from skill bundles, e.g.:
+Implement a Python 3.11+ subproject distributed alongside the protocol but logically separable from skill bundles:
 
 ```text
 orchestrator/
@@ -73,264 +82,427 @@ orchestrator/
 
 Install console entrypoint `sdp`; retain `python -m sdp_orchestrator` fallback.
 
-Use focused maintained dependencies where they delete meaningful portability/schema/protocol machinery:
+Use focused maintained dependencies where they remove real portability/schema/protocol machinery:
 
-- `platformdirs` — cross-platform user config/state/cache roots;
-- `typer` — CLI command model and completion; use Rich rendering through Typer or declare `rich` directly only if the package imports Rich APIs itself;
-- `pydantic` — versioned configuration, normalized event/result models, validation, and JSON Schema;
-- `python-frontmatter` — safe workplan frontmatter parsing; use its safe YAML path and validate the resulting bounded metadata with Pydantic;
-- `filelock` — cross-platform private-state project/run lock for long-lived direct-agent execution and migration serialization;
-- `pyperclip` — bounded clipboard adapter for manual-web ergonomics, always with stdout/stdin fallback when the platform clipboard is unavailable;
-- optional `agent-client-protocol` extra — preferred ACP client implementation for local-agent integration.
+- `platformdirs` — user config/state/cache roots;
+- `typer` — CLI command model/completion;
+- `pydantic` — configuration, normalized events/results/resources/predictions, validation, JSON Schema;
+- `python-frontmatter` — safe workplan frontmatter parsing;
+- `filelock` — cross-platform project/worktree run and migration locks;
+- `pyperclip` — bounded clipboard adapter with stdout/stdin fallback;
+- optional `agent-client-protocol` extra — preferred ACP client for local-agent integration.
 
-Keep `sqlite3`, `tomllib`, `subprocess`, `asyncio`, `json`, `pathlib`, `hashlib`, `uuid/secrets`, and compression on the standard library. Do not add GitPython, a generic FSM/workflow engine, an event-sourcing framework, NetworkX, Jinja2, or an ORM merely for symmetry when the bounded owner is simpler directly.
+Keep `sqlite3`, `tomllib`, `subprocess`, `asyncio`, `json`, `pathlib`, `hashlib`, `statistics`, `math`, `uuid/secrets`, and compression on the standard library.
 
-`tomlkit` is allowed only if v0.1 implements in-place comment-preserving config mutation beyond initial file creation/validation. `markdown-it-py` is allowed only if a strict line/fence parser cannot robustly preserve the canonical prompt blocks. Textual is a future optional TUI dependency, not v0.1 core.
+Do not add GitPython, an ORM, NetworkX, Jinja2, OR-Tools/PuLP, a generic FSM/event-sourcing framework, or Temporal merely for symmetry. The initial scheduler has a small route set and can enumerate/score feasible routes directly. `tomlkit`, `markdown-it-py`, Textual, or a statistical/ML package such as scikit-learn/River may be added only after their concrete need is demonstrated. Mature predictive models are an optional later dependency surface, not a prerequisite for deterministic metering/scheduling.
 
-Dependency versions are not Frozen identities. Use deliberate compatible ranges and a reproducible development/test lock. Because ACP SDK releases are pre-1.0, bound the initial supported ACP minor series rather than accepting an unbounded `<1` range; refresh that range only after conformance tests pass. Verify supported Python versions, licenses, source provenance, and dependency changes during release work. The protocol repository is MIT; selected core libraries are permissively licensed, and ACP components are Apache-2.0-compatible dependencies.
+Dependency versions are not Frozen identities. Use deliberate compatible ranges and a reproducible development/test lock. Bound pre-1.0 ACP versions to a tested compatible range. Record supported Python versions, licenses, provenance, and dependency changes during release work.
 
-### B. Authority model: repository evidence + private journal -> derived projection
+### B. Authority and control-flow architecture
+
+The orchestrator has two subordinate projections and one route-selection boundary:
 
 ```text
 TARGET/PROTOCOL REPOSITORY EVIDENCE
               +
-PRIVATE APPEND-ORIENTED OBSERVATIONS/RUNS
+PRIVATE PROJECT RUN/RESULT HISTORY
               |
               v
-DERIVED CURRENT WORKFLOW PROJECTION
+DERIVED WORKFLOW PROJECTION
+              |
+              v
+          STAGE INTENT
+              |
+              +-----------------------------+
+                                            |
+METER OBSERVATIONS + RESERVATIONS           |
+        + USAGE TELEMETRY                    |
+              |                              |
+              v                              v
+   DERIVED RESOURCE PROJECTION      ROUTE CATALOG + POLICY
+              |                              |
+              +-------------+----------------+
+                            v
+                  USAGE/OUTCOME PREDICTOR
+                            |
+                            v
+                     ROUTE SCHEDULER
+                            |
+                            v
+                  SELECTED EXECUTION ROUTE
+                            |
+                +-----------+-----------+
+                |                       |
+          MANUAL WEB               LOCAL AGENT
 ```
 
-Do not create an independent mutable `current_state` source of truth. Current state is recomputed/reconciled from present Git/workplan/protocol observations plus private stage-run/result/user-selection history. Explicit retention/purge may remove private history; ordinary run records are otherwise immutable evidence. A cached projection is allowed only when invalidated/reconciled before use.
+The workflow reducer owns stage recommendation. The scheduler owns route selection only. Meter observations own present resource facts. The predictor owns no authority; it supplies distributions/uncertainty to the scheduler.
 
-### C. Protocol support, canonical prompt ownership, and source resolution
+### C. User-global private state and project partitioning
+
+Use one user-global private state root via `platformdirs`. Store one transactional SQLite control database containing project-scoped workflow history **and** user-global account/resource/route/prediction/reservation state. This is required so capacity shared across repositories is reserved atomically.
+
+Conceptual state:
+
+```text
+state_root/
+  orchestrator.sqlite
+  projects/
+    <project-key>/
+      raw/           # optional bounded raw events/transcripts
+      exports/       # only when explicitly requested
+```
+
+Project rows remain separable for purge/export. Global account/resource telemetry may retain project/task references according to privacy policy. SQLite WAL mode is appropriate for the single-user multi-process controller. Per-project/worktree `filelock` prevents simultaneous local mutation; SQLite transactions protect global reservations and meter updates across processes.
+
+Do not persist raw provider credentials. Account/credential profiles contain only stable local identifiers and references to provider/backend-native authentication configuration or a secret store.
+
+### D. Protocol support, canonical prompt ownership, and source resolution
 
 `source/shared/references/development-workflow-prompts.md` remains canonical prompt prose. Do not hand-maintain backend-specific copies.
 
-The orchestrator uses a strict prompt loader that extracts stage blocks and `INPUTS`, substitutes only declared input values, and preserves the remainder byte-for-byte where practical. It may wrap the canonical block with:
+The prompt loader extracts stage blocks and declared `INPUTS`, substitutes only declared input values, and preserves the remaining canonical text where practical. It may wrap the block with:
 
-1. compact `ORCHESTRATOR_CONTEXT` (derived, explicitly non-authoritative); and
-2. versioned `ORCHESTRATOR_RESULT` schema request carrying `run_id` and `prompt_fingerprint`.
+1. `ORCHESTRATOR_CONTEXT` — compact derived workflow context, explicitly non-authoritative; and
+2. `ORCHESTRATOR_RESULT` — versioned structured-result schema carrying `run_id` and `prompt_fingerprint`.
 
-The installed package must work without a protocol-repository checkout. Resolve prompt authority in this order:
+The installed package must work without a protocol checkout. Resolve explicit compatible source -> packaged version-bound generated snapshot -> remotely readable compatible canonical source -> truthful non-closure.
 
-1. explicit configured compatible protocol source/ref;
-2. version-bound prompt snapshot packaged with the orchestrator, generated from the canonical prompt during build/release and carrying protocol version/source identity;
-3. compatible remotely readable canonical protocol source when network use is allowed;
-4. truthful non-closure if the required governing version cannot be resolved.
-
-The packaged snapshot is generated transport, not a second editable authority. Build tests prove parity with canonical source.
-
-v0.1 ships a Protocol 5.16 workflow profile and prompt snapshot. It may catalog older/newer workplans, but automatic stage routing/rendering for another governing protocol version requires an explicitly compatible prompt/profile source; it must not silently reinterpret an older workplan through 5.16 semantics merely because the current package contains a 5.16 prompt.
-
-### D. Project configuration and private state
-
-Use local TOML config supporting multiple named projects. Resolve built-in defaults -> local config/profile -> documented environment allowlist if any -> CLI overrides. Parse with `tomllib`; validate the resolved representation with Pydantic. A project profile minimally carries:
-
-- stable local project key and local repository/worktree path;
-- remote name/URL policy and main/default branch as needed;
-- active/archive workplan globs;
-- protocol source/ref/profile policy;
-- operation mode (`hybrid`, `web`, `local`) and per-stage route/backend overrides;
-- privacy/retention/session policy;
-- remote-refresh/network policy;
-- optional backend executable/transport/sandbox/delivery settings.
-
-Do not store credentials. Sanitize Git remote URLs before display, persistence, or prompt rendering: strip URL userinfo/tokens and normalize SSH/HTTPS remotes to a safe display identity.
-
-Private state defaults under the user's platform state directory via `platformdirs`, with owner-only permissions where supported. SQLite stores metadata/history. Optional high-volume raw event streams may be bounded compressed files under the same private state root and referenced from SQLite.
+v0.1 ships a Protocol 5.16 workflow profile. Older/newer workplans may be cataloged, but automatic routing/rendering requires an explicitly compatible profile/source.
 
 ### E. Workplan discovery, lifecycle consistency, and semantic identity
 
-Scan configured active/archive workplan locations; parse bounded frontmatter (`workplan_id`, `protocol_version`, `status` and recognized lifecycle metadata), path, exact content hash, and a **semantic authority fingerprint**.
-
-The semantic fingerprint includes the workplan's governing protocol binding and authoritative body while excluding only explicitly recognized lifecycle-only metadata/path changes such as active -> archive relocation or status/completion bookkeeping. A substantive body/authority change must change the semantic fingerprint. Store both exact artifact hash and semantic fingerprint so closeout metadata does not falsely invalidate earlier semantic evidence.
+Discover configured active/archive workplans and parse bounded frontmatter plus path, exact hash, and **semantic authority fingerprint**. Lifecycle-only metadata/path changes may preserve semantic fingerprint; substantive authority/body changes must alter it.
 
 Selection precedence:
 
-1. explicit command workplan;
-2. still-valid private user pin;
-3. unambiguous branch/workplan association from current evidence + recorded association;
+1. explicit command selection;
+2. still-valid private pin;
+3. unambiguous branch/workplan association;
 4. exactly one active candidate;
-5. else `AMBIGUOUS` and offer `sdp use <workplan>`.
+5. otherwise `AMBIGUOUS`.
 
-Never silently choose among plausible plans by mtime. An active-path/completed-status or archive-path/active-status contradiction is `INCONSISTENT`, not silently normalized. Track archive/retirement from current files plus historical observations; disappearance is reported as disappearance, not invented archive state.
+Lifecycle contradictions are `INCONSISTENT`, not normalized silently.
 
 ### F. Candidate identity and evidence invalidation
 
-Candidate identity is stronger than branch name. Observe as applicable:
+Candidate identity includes repository/project identity, branch/detached state, HEAD, source-relevant staged/unstaged/untracked fingerprint, upstream relation, observed remote commit, and freshness. If dirty state cannot be fingerprinted confidently, identity is incomplete rather than falsely durable.
 
-- repository/project identity;
-- local branch or detached state;
-- `HEAD` commit;
-- source-relevant dirty/staged/untracked fingerprint;
-- upstream relation;
-- observed remote branch commit;
-- observation timestamp/freshness.
+At minimum:
 
-Exact fingerprint mechanics are delegated, but a source-relevant working-tree change must alter candidate identity. If a dirty surface cannot be fingerprinted confidently, report identity incomplete rather than pretending a durable candidate exists.
+- Baseline binds to before-candidate identity;
+- Design acceptance binds to protocol + workplan semantic fingerprint;
+- Implementation completion binds to protocol + workplan semantic fingerprint + resulting candidate;
+- Review/Verification/Stabilization bind to exact reviewed candidate + semantic workplan + protocol;
+- lifecycle-only closeout changes may preserve semantic evidence when the product candidate and semantic fingerprint are unchanged.
 
-Stage evidence carries the dimensions it depends on. At minimum:
-
-- Baseline binds to the before-candidate identity;
-- Design/workplan acceptance binds to protocol identity + workplan semantic fingerprint;
-- Implementation completion binds to protocol identity + workplan semantic fingerprint + resulting candidate identity;
-- Review/Verification/Stabilization bind to protocol identity + workplan semantic fingerprint + exact reviewed candidate identity;
-- lifecycle-only closeout changes may change artifact hash/path without invalidating already valid semantic review evidence when product candidate and semantic fingerprint are unchanged.
-
-The reducer invalidates only evidence whose material dimensions changed. A reported PASS on commit A does not automatically apply to commit B.
-
-### G. Workflow/state model and recommendation engine
+### G. Workflow-state and stage-intent model
 
 Registry stages: baseline/change-health, design/workplan, implementation, review/update, verification, stabilization/architecture-GC, downstream alignment, health audit, closeout.
 
-Separate execution status (`pending`, `running`, `completed`, `failed`, `cancelled`, `blocked`, `unknown`) from semantic outcome (`pass`, `no_pass`, `action_required`, `complete`, `not_applicable`, `unknown`). `UNKNOWN`, `AMBIGUOUS`, `INCONSISTENT`, and `STALE` are first-class projection states.
+Separate execution status (`pending`, `running`, `completed`, `failed`, `cancelled`, `blocked`, `unknown`) from semantic outcome (`pass`, `no_pass`, `action_required`, `complete`, `not_applicable`, `unknown`). `UNKNOWN`, `AMBIGUOUS`, `INCONSISTENT`, and `STALE` are first-class.
 
-Projection exposes selected workplan, local branch/HEAD/dirty/upstream/divergence, observed remote head/freshness, protocol identity, recent/completed stage attempts, blocker classifications, completed/pending obligation observations, stale evidence, current recommended stage/action, and machine-readable reason codes.
+The reducer emits a **StageIntent** that includes stage, required capability class, required session freshness/independence, repository-access needs, whether manual interaction is allowed, whether unattended direct execution is required, and task-specific policy constraints. These are scheduling inputs, not scheduler-invented requirements.
 
-Maintain a small deterministic **version-bound** stage graph matching the compatible protocol profile. Example 5.16 conditional edges include Review NO-PASS -> Implementation repair or bounded Design reconsideration by finding class; Verification blockers route by class; Stabilization action re-enters normal Design/Implementation cycle; Closeout is terminal for the workplan; Health Audit sits outside the linear per-change path.
+A brand-new task still requires `sdp start <task>` or `sdp design --task ...` when no repository evidence can supply the task itself.
 
-Recommendations are derived advice, not semantic verdicts. Record recommendation snapshots/reason codes for history, but recompute them from current evidence before acting.
+### H. Execution-route model
 
-### H. First-task Design gap
+Keep **model**, **backend/harness**, **account/credential profile**, **transport**, **effort**, and **resource-ledger mapping** separate.
 
-A brand-new task cannot always be inferred from Git. Support `sdp start <task>` and `sdp design --task ...` to record a private pending task description once. If no active workplan and no task evidence exist, ask for that genuinely missing input rather than fabricating a task. Once a workplan exists, subsequent stages derive context from repository authority.
+Conceptually:
 
-### I. Result contract, run binding, and ingestion
+```text
+ExecutionRoute =
+    provider
+  + account_profile
+  + backend_profile
+  + transport
+  + model
+  + effort
+  + repository_access_mode
+  + resource_ledgers
+  + metering_class
+```
 
-Every rendered prompt requests a compact versioned JSON result after the normal human-readable response. It includes a non-secret `run_id` and `prompt_fingerprint` and must normalize at least:
+A model can appear in multiple routes and the same account can expose multiple models that share the same quota ledgers.
 
-- schema version, run identity, prompt fingerprint, stage, reported outcome;
-- reported recommended next stage/action;
-- workplan identity/path + semantic fingerprint when known;
-- candidate branch/HEAD/dirty/remote identity when known;
-- blockers with route class (implementation nonconformance, design deficiency, missing evidence, independent issue, etc.);
-- completed/pending obligation locators/summaries;
-- checks/evidence executed or unavailable;
-- planning/product artifacts claimed changed;
-- concise human summary.
+Examples:
 
-All agent-reported repository identities are claims until independently reconciled against current repository observations. Store **reported route** separately from **derived route**. Material conflict -> inconsistent/needs confirmation.
+```text
+chatgpt-web-sol-high
+  transport = manual-web
+  model = GPT-5.6 Sol
+  effort = high
+  repo_access = remote-connector
+  metering = UNMETERED_FOR_SCHEDULER
+  resource_ledgers = []
+  human_interaction = required
 
-Manual ingestion accepts stdin/file/clipboard. Association order:
+codex-a-sol-high
+  transport = ACP/native structured
+  account = chatgpt-a
+  model = GPT-5.6 Sol
+  effort = high
+  resource_ledgers = [chatgpt-a.5h, chatgpt-a.weekly]
 
-1. exact structured `run_id` + prompt fingerprint match;
-2. exact explicit `--run <id>` selected by user;
-3. one outstanding compatible manual run with unchanged candidate/workplan, followed by bounded confirmation;
-4. otherwise reject ambiguous attachment and list candidate runs.
+codex-a-luna-high
+  account = chatgpt-a
+  model = GPT-5.6 Luna
+  resource_ledgers = [chatgpt-a.5h, chatgpt-a.weekly]
+```
 
-Then parse structured result first, conservative strong markers second, bounded user confirmation third. Pasted text is inert data: never execute embedded commands/code/paths/instructions merely because they appear in a response. Apply schema/size bounds before persistence.
+Do not hard-code a provider such as ChatGPT Web as permanently unmetered. Metering class is route configuration with provenance so provider/product policy can change without architecture changes.
 
-### J. Mode-specific prompt rendering
+Manual web's zero tracked quota cost does **not** make it universally preferred: user interaction, automation availability, repository access, latency, and stage/tool suitability are separate feasibility/score dimensions.
 
-One renderer, transport-specific context.
+### I. Resource-ledger model
 
-**Local:** local configured worktree + candidate identity; normally compatible local protocol source; constraints say repository work occurs in the configured worktree and remote delivery follows explicit policy.
+Do not make `SUBSCRIPTION` versus `PAYG` the scheduler primitive. A route consumes zero or more **ResourceLedgers**.
 
-**Web:** sanitized remote repo identity + remote branch/candidate only; no local paths/private state. Prefer explicit remotely readable canonical protocol source/ref. Constraints say inspect/mutate only through authorized remote tools/connectors and do not assume local filesystem execution.
+A ledger records:
 
-**Hybrid:** selects web/local per stage policy, otherwise uses the same renderer/reconciler.
+- allowance visibility: `OPAQUE` / `PRICED`;
+- expiration: `EXPIRING` / `NON_EXPIRING`;
+- reset/window semantics: `NONE`, `FIRST_USE_ANCHORED`, `ACCOUNT_FIXED`, `BILLING_CYCLE`, `CALENDAR_FIXED`, `CONTINUOUS_ROLLING`, `UNKNOWN`;
+- funding behavior: `HARD_STOP`, `FALLBACK_TO_OVERAGE`, `POSTPAID`;
+- current observed balance/usage when available;
+- meter units and provenance/confidence;
+- reservations and uncertainty holds.
 
-### K. ACP-first local-agent transport architecture
+A dual-window route must satisfy every active ledger simultaneously. Shared account quota is represented once and referenced by all routes that consume it.
 
-Do not build five independent agent protocols. Use one normalized orchestrator `AgentTransport`/event/result/permission boundary.
+Transparent PAYG uses versioned pricing functions over provider-specific billable components. Opaque subscription quota is modeled/predicted in the provider's observed meter units; never invent unsupported token-equivalent conversion.
 
-**ACP is preferred when the requested backend has a sufficiently maintained/conformant ACP surface and that surface preserves the stage-relevant local-agent capabilities.** Use the official Python `agent-client-protocol` SDK for ACP schema models, JSON-RPC/stdio lifecycle, sessions, permission requests, and tool-call/event plumbing rather than duplicating that protocol.
+A route with no scheduler-tracked quota uses `UNMETERED_FOR_SCHEDULER` and no capacity ledger. `UNKNOWN` means the scheduler lacks enough evidence and must follow configured conservative admission policy.
 
-Backend profiles select launch paths and capability requirements; they do not own workflow semantics. Initial preference order:
+### J. Metering, reset inference, and provenance
 
-- Claude: maintained `agentclientprotocol/claude-agent-acp` when its Claude Agent SDK surface preserves the required project skills/MCP/auth/model/permission/session behavior; otherwise documented native structured Claude interface;
-- Codex: maintained `agentclientprotocol/codex-acp` when its Codex App Server mapping preserves the required skills/MCP/auth/model/reasoning/sandbox/session behavior; otherwise documented native structured Codex interface;
-- OMP: native `omp acp` when conformant for the required tool/MCP/session/permission behavior; native OMP RPC only for a materially required capability absent or defective over ACP;
-- Pi: native `pi --mode rpc` initially; an ACP bridge may be explicitly configured only after it satisfies the same capability/conformance contract;
-- Antigravity: official structured headless CLI or official Python SDK with schema/streaming support; do not make an unofficial ACP shim a core dependency while official structured surfaces are stronger.
+Keep `AccountMeter` separate from `AgentTransport`. A transport may report per-run token/cost events while a meter independently reports account/window state.
 
-ACP compatibility is not assumed to mean complete behavioral equivalence with a user's interactive CLI. Capability probes and backend qualification must test the properties `sdp` relies on. Known adapter limitations or regressions route to the next supported structured transport; they do not justify PTY scraping or dangerous permission bypass.
+Per field, prefer official vendor/API or backend-reported meter state; then stable provider/account profile knowledge; then empirical inference; then explicit user-supplied state where automatic evidence is unavailable. Explicit user overrides may supersede automatic discovery only with visible provenance.
 
-ACP Registry may be used as discovery metadata after local capability probing. It must not silently install or upgrade executables. `acpx` may be supported as an optional external bridge/debugging tool, but it is not a core dependency or second session/workflow authority.
+Do not use browser scraping as the normal meter source. Support official APIs/machine-readable backend surfaces, hard-limit events, and explicit manual meter snapshots.
 
-### L. Manual-web transport
+Every observation carries source, timestamp/freshness, unit, and confidence. Meter-delta attribution carries quality such as `EXACT_RUN_REPORTED`, `EXCLUSIVE_INTERVAL`, `PARTIALLY_CONTAMINATED`, or `UNKNOWN`.
 
-`manual-web` is first-class. A stage command reconciles, renders, prints, copies to clipboard when safely supported, and prints the one follow-up ingestion command (`sdp ingest --clipboard` or an explicit run-aware variant when needed).
+Reset inference maintains competing hypotheses (first-use anchored, account fixed, billing-cycle, calendar fixed, continuous rolling) and updates them from observed discontinuities. Use ordinary deterministic/statistical logic, not an LLM. Insufficient evidence remains `UNKNOWN`.
 
-Clipboard use is reported explicitly and configurable. Failure to access a platform clipboard degrades to stdout/stdin without changing workflow semantics. No browser automation.
+### K. Global reservations and crash reconciliation
 
-### M. Local process, permission, session, and concurrency safety
+Before launching a metered direct run, reserve predicted capacity atomically on every consumed ledger. Admission and reservation occur in one SQLite transaction across all projects/processes using the same user-global database.
 
-Use direct argv process APIs (`shell=False` semantics), target repo cwd, bounded streaming, configurable timeout, cancellation escalation, and pre/post Git observations independently of agent claims.
+Reservations are predictive holds, never vendor-reported consumption. They are reconciled against live/post-run observations. If a run dies and final meter state is unavailable, do not blindly release all capacity as though no consumption occurred: retain an explicit uncertainty hold or conservative unresolved-consumption estimate until the next authoritative observation/policy decision.
 
-Never default to `--dangerously-*`, `--yolo`, unrestricted sandbox bypass, or equivalent. Normalize ACP/native permission-request events. Interactive runs surface approve/deny choices when supported; non-interactive mode follows explicit policy and fails safely rather than hanging.
+Provider-reported hard limits and refreshed meter state override stale reservations/predictions.
 
-Backend-native session persistence is distinct from orchestrator history. Record session ID when available. Allow config to request ephemeral/no-native-session persistence where supported. Fresh-context Review/Verification defaults to a fresh agent session; implementation repair may resume only when policy chooses and the candidate/workplan identity is compatible.
+### L. Usage telemetry and task features
 
-Serialize direct local agent runs per configured project/worktree in v0.1 using a private-state cross-platform lock. A second local run against the same worktree reports the active run and refuses by default; it may not create a second mutating authority race. Manual-web prompts may be outstanding concurrently only because run IDs/candidate identities disambiguate them. Parallel agent scheduling/worktree management is a future feature.
+Reuse the existing private run history as the spine of usage telemetry. A run records the planned route and, when knowable, the actual route/model/effort with provenance. This matters for manual web, where the scheduler can recommend a model but cannot always prove which UI model/effort the user actually used.
 
-A crashed direct run leaves a nonterminal historical attempt; on next reconciliation mark it interrupted/unknown from process/lock evidence rather than completed. SQLite migrations use the same project/state lock and transactions; destructive migrations preserve a recoverable backup when materially necessary.
+Record available run-level values:
 
-Do not serialize environment secrets into prompts/logs/DB. Bounded output capture must not accumulate an unbounded transcript in RAM.
+- stage/role and repair round;
+- project/workplan/candidate identity;
+- provider/account/backend/transport/model/effort;
+- prompt length and task features;
+- wall/model/tool/wait time where available;
+- model/tool call counts;
+- fresh/cached/output/reasoning token categories where exposed;
+- provider monetary cost;
+- meter snapshots before/after and attribution confidence;
+- outcome, interruption/quota exhaustion, review pass/fail, blocker recurrence.
 
-### N. Remote/local synchronization
+Missing telemetry stays missing.
 
-Track local worktree HEAD/status, local tracking ref, and observed remote branch HEAD separately. Remote observations carry freshness.
+Deterministic task features should include stage, task type, scope, diff size/file count, repository/subsystem scale, failing-test count, integration/benchmark burden, repair count, blocker recurrence, workplan-obligation count, prompt size, requested tool classes, and whether Design was reopened.
 
-`status` should not require hidden network mutation. `sdp sync` is the explicit remote refresh boundary by default; web prompt rendering may perform a read-only `ls-remote`-class refresh when project policy allows it and should otherwise state the age/staleness of the remote observation. Do not auto-merge/rebase/pull. After local run, report local changes and ahead/behind state; pushing is explicit/configured delivery.
+A semantic feature extractor is optional later. It must not be required for scheduling and must not silently consume scarce quota merely to decide how to spend quota.
 
-### O. Privacy, retention, history, and export
+### M. Usage/outcome predictor
 
-Default stored content: rendered prompt, user-visible final response, structured result, backend/run/session IDs, Git/workplan/protocol observations, and recommendation snapshots. Raw event/tool streams default off. Hidden reasoning/thought channels default not persisted or automatically re-exposed.
+Predict **distributions**, not point guesses, for task `t` on route `r`:
 
-Provide configurable retention, redaction, export, purge, and optional SQLite FTS/history search where available. Do not automatically inject full past prompts/responses into new prompts; only derived structured state/blocker summaries are automatic. Export never targets either repository implicitly and warns that exported history may contain proprietary/sensitive material.
+```text
+T(t,r)        runtime
+Q_j(t,r)      consumption of each resource ledger j
+Token_k(t,r)  billable token categories where relevant
+Cost(t,r)     monetary cost where priced
+P_pass(t,r)   probability of successful stage completion
+P_interrupt   probability of route/quota interruption
+N_repair      future repair-round distribution
+```
 
-Do not invent custom cryptography. Owner-only permissions plus user-selected OS/disk-encrypted storage are the v0.1 baseline. Future maintained keyring/encryption integration may sit behind the storage abstraction if explicit at-rest encryption becomes a product requirement.
+For `UNMETERED_FOR_SCHEDULER` routes, quota prediction is not required, but outcome/runtime/manual-interaction history can still inform route quality.
 
-### P. Future service/MCP/TUI seam
+Cold start uses conservative hierarchical priors by stage/role x model x effort x backend/transport, with optional project-specific corrections. Early online learning uses empirical quantiles/EWMA/Bayesian-style shrinkage that can be implemented without a heavy ML dependency. Mature prediction may add quantile gradient boosting or similar interpretable/tabular methods only after enough data exists.
 
-Core services (state query, render prompt, report stage result, get next action, run backend) must be callable without terminal rendering so a later `sdp mcp`/local service/Textual TUI can reuse them. No mandatory daemon/MCP/TUI in v0.1.
+Persist every prediction before execution and compare with actual observations. Track calibration of P50/P75/P90/P95. Low-confidence meter attribution receives reduced training weight. Selection bias is acknowledged; bounded exploration is optional later and may never sacrifice required engineering quality merely to collect data.
 
-### Q. Open-source reuse boundary
+The prediction target is expected resource/cash cost **to accepted stage completion**, not merely first-call usage, because low-quality routes may trigger additional repair/review rounds.
 
-Reuse third-party components when they remove delegated plumbing **without importing a competing authority model**.
+### N. Scheduler and default auto-routing
 
-Adopt the focused dependencies listed in section A and the official ACP Python SDK for the optional agent extra. Treat `acpx`, ACP Registry, Textual, `tomlkit`, and `markdown-it-py` as bounded optional integrations when their specific need appears.
+`AUTO` is the default route policy unless the user/project explicitly pins a route/backend.
 
-Bernstein, Agetor, Claim Plane, Harnss, Agent Deck, Claude Squad, Beads, Vibe Kanban, and similar projects are useful prior art or potential future interoperability surfaces, but do not adopt their task database, worktree scheduler, approval authority, or repository-local state as the orchestrator's core. Those systems solve overlapping but different ownership problems and would compete with Protocol workplan/Git authority.
+Scheduling is two-phase.
 
-Do not adopt a generic workflow/FSM/event-sourcing engine for current-state authority. The projection is a reconciliation over external authority plus subordinate history, not an application-owned transition log. Avoid PTY/tmux scraping as the normal agent integration path; prefer ACP or documented structured RPC/SDK/JSON.
+**Hard feasibility filter:**
 
-A third-party component is accepted only after license, maintenance, supported-platform, trust-boundary, persistence-location, and semantic-fit review. Reuse must reduce total product complexity, not merely local lines of code while adding another daemon/database/task system.
+- stage minimum capability and effort policy;
+- required tooling/skills/MCP visibility;
+- repository-access mode;
+- privacy/security policy;
+- fresh-session/independence requirements;
+- backend/provider health;
+- interaction mode: manual-web is infeasible for an unattended `--run` unless the user explicitly allows a manual handoff;
+- predicted consumption fits spendable ledger capacity at required quantile;
+- required future reasoning/review reserve remains protected.
+
+**Ranking inside the feasible set:**
+
+1. probability of required-quality completion;
+2. probability of finishing without interruption;
+3. preservation of mandatory future reasoning/review capacity;
+4. shadow/opportunity cost of expiring subscription quota;
+5. expected PAYG monetary cost;
+6. manual-interaction/handoff/continuity penalty;
+7. provider/model-family diversity preference for independent review;
+8. latency where otherwise equivalent.
+
+Use dynamic future-stage reserve rather than a permanent fixed percentage. The workflow graph supplies expected future Review/Design-reopen demand; reserve a conservative quantile.
+
+Use receding-horizon/MPC behavior without requiring a daemon: on each `sdp next`, run start, completion, interruption, or meter refresh, recompute current resource state, forecast the relevant reset horizon, choose only the next route, observe actuals, and re-optimize later.
+
+Expiring subscription quota has nonzero opportunity cost. A simple explainable shadow price may rise as remaining capacity becomes scarce relative to forecast demand and fall when capacity is likely to expire unused. This permits both conserving scarce weekly reasoning quota and intentionally burning excess quota near reset.
+
+The scheduler records candidate routes, rejection reasons, prediction quantiles, reservations, selected route, and deterministic score components. `sdp schedule --explain` must make the decision understandable.
+
+### O. Mode-specific rendering and manual web
+
+One renderer uses transport-specific context.
+
+**Local:** local configured worktree/candidate; compatible local protocol source; repository work happens locally.
+
+**Web:** sanitized remote repository identity + remote branch/candidate; no local/account/resource paths or quota balances; use remote-readable protocol source; repository inspection/mutation occurs through authorized remote tools/connectors.
+
+**Manual web is a first-class execution route.** When selected, render/print/copy the prompt and provide the run-aware ingestion command. Clipboard failure degrades to stdout/stdin. No browser automation.
+
+For interactive `sdp next`, an unmetered web route may be preferred for Design/Review when it is engineering-sufficient. For `sdp next --run`, manual routes are filtered unless explicit manual handoff is allowed.
+
+### P. ACP-first local-agent transport architecture
+
+Use one normalized `AgentTransport`/event/result/permission boundary.
+
+Prefer official Python `agent-client-protocol` when a backend's ACP surface preserves stage-relevant capabilities. Initial preference:
+
+- Claude: maintained Claude ACP when capability-equivalent; native structured fallback;
+- Codex: maintained Codex ACP when capability-equivalent; native structured fallback;
+- OMP: native `omp acp`; RPC fallback only for materially missing ACP capability;
+- Pi: native JSONL RPC initially; ACP bridge only after equivalent qualification;
+- Antigravity: official structured headless CLI or official SDK.
+
+ACP compatibility does not imply perfect equivalence with the user's interactive CLI. Capability tests must verify skills/MCP/config/auth/model/effort/sandbox/session behavior required by the route.
+
+ACP Registry may provide discovery metadata but may not silently install/upgrade agents. `acpx` is optional interoperability/debugging, not a core dependency or second workflow/session authority.
+
+### Q. Local process, permission, session, concurrency, and failover safety
+
+Use direct argv execution, target worktree cwd, bounded streaming, timeout/cancellation escalation, and independent pre/post Git observations.
+
+Never default to dangerous permission bypass. Normalize ACP/native permission events. Noninteractive runs follow explicit allow/deny policy and fail safely rather than hang.
+
+Backend-native session persistence is distinct from orchestrator history. Fresh Review/Verification defaults to a fresh session; Implementation repair may resume only under compatible candidate/workplan/route policy.
+
+Serialize local agent mutation per configured worktree with a private lock. Different projects/worktrees may run concurrently, but all metered routes share global reservation transactions.
+
+On quota/provider interruption, the current worktree/repository state is controller-observed WIP, not accepted state. After the process is terminated and the lock is safely released, the scheduler may choose another eligible route for the same stage/repair attempt. Cross-mode remote/local continuation requires explicit reconciliation of remote/local candidate state before resumption; do not silently pull/merge.
+
+The dying agent is not required to summarize itself. Repository diff/status, workplan, run/result history, checks, blockers, and optional structured agent summary form the continuation context. Automatic controller-owned worktree checkpoint refs and multi-worktree rollback machinery are future autonomy extensions, not required for v0.1.
+
+### R. Remote/local synchronization
+
+Track local HEAD/status, local tracking ref, and observed remote branch HEAD separately with freshness.
+
+`status` does not require hidden network mutation. `sdp sync` is the explicit remote refresh boundary by default; web rendering may use read-only remote observation when policy permits. No automatic merge/rebase/pull/push.
+
+### S. Privacy, retention, history, and export
+
+Default stored content: rendered prompt, user-visible final response, structured result, backend/run/session IDs, Git/workplan/protocol observations, route/schedule decision, numeric usage/resource telemetry, and prediction metadata. Raw tool/model event streams default off; hidden reasoning/thought channels are not persisted/re-exposed by default.
+
+Account/quota identities and balances stay private and are not inserted into agent prompts unless an explicit task genuinely requires them.
+
+Provide retention, redaction, export, purge, and optional SQLite FTS/history search. Allow raw prompt/transcript retention to be purged independently from useful numeric usage telemetry where policy permits. Derived task features/embeddings are also potentially sensitive and follow explicit retention policy.
+
+Do not invent custom cryptography. Owner-only permissions plus user-selected OS/disk-encrypted storage are the baseline.
+
+### T. Open-source reuse and future service boundary
+
+Reuse focused dependencies and ACP where they reduce delegated plumbing without importing a competing task/workflow authority.
+
+Bernstein, Agetor, Claim Plane, Harnss, Agent Deck, Claude Squad, Beads, Vibe Kanban, and similar projects remain prior art/possible future interoperability rather than core state authorities.
+
+Do not adopt a generic FSM/event-sourcing/optimization engine for the bounded stage/resource reducer. The route set is small enough for direct deterministic enumeration initially.
+
+Core services (state query, render prompt, report result, meter snapshot, predict usage, select route, run backend) remain terminal-independent so a later MCP/local service/TUI or durable autonomous outer executor can reuse them without creating a second orchestration model.
 
 ## Implementation obligations and delegated solution space
 
-### O1 — Installable package and core API
-Provide package/console entrypoint with separable services for config, observations, workplans, persistence, reconciliation, prompt source/rendering, ingestion, graph/status, and backend execution. Package install/import + `sdp --help` smoke.
+### O1 — Installable package and core APIs
+Provide separable services for config, repository/workplan observations, global persistence, reconciliation, prompt rendering, ingestion, resource/metering, prediction, scheduling, graph/status, and backend execution. Package/import/`sdp --help` smoke.
 
-### O2 — Dependency/configuration resolution
-Implement the dependency policy above and one validated multi-project configuration path with provenance for material defaults/automatic values; cwd project auto-selection when unambiguous; no secrets persisted. `sdp init` creates a minimal config. `sdp config` at minimum locates/displays/validates effective config; in-place comment-preserving edits are optional and may justify `tomlkit`. Test precedence, invalid combinations, path normalization, license/metadata expectations where release tooling supports them, and redaction.
+### O2 — Configuration resolution and private global state
+Validated multi-project config plus user-global accounts/models/backends/routes/resource-ledgers policy. Cwd project auto-selection when unambiguous. No raw secrets persisted. One global SQLite DB with project-scoped history and account-global resource state. Test precedence, redaction, project isolation, cross-project shared-ledger visibility.
 
-### O3 — Git observer and safe repository identity
-Machine-readable Git inspection for root/branch/detached/HEAD/source-relevant dirty/staged/untracked fingerprint/upstream/ahead-behind/remote. Sanitize remote URLs before any durable/user/web representation. Test clean, dirty, detached, no-upstream, divergence, credential-bearing remotes, and candidate fingerprint invalidation.
+### O3 — Git observer and candidate identity
+Machine-readable root/branch/detached/HEAD/dirty/staged/untracked fingerprint/upstream/ahead-behind/remote. Test candidate invalidation and credential-bearing remote sanitization.
 
-### O4 — Workplan catalog, lifecycle consistency, selection, and semantic fingerprints
-Discover active/archive plans, safe-parse frontmatter, compute exact + semantic fingerprints, track observations, implement Frozen selection precedence, `sdp workplans`, `sdp use`. Test zero/one/multiple candidates, pin/stale pin, branch affinity, archive/move/delete, lifecycle contradictions, lifecycle-only metadata changes that preserve semantic fingerprint, and substantive edits that invalidate it.
+### O4 — Workplan catalog/lifecycle/semantic fingerprint
+Discover active/archive plans, safe-parse frontmatter, exact + semantic fingerprints, selection precedence, contradictions, move/archive/delete behavior.
 
-### O5 — Private SQLite history/migrations
-Versioned transactional schema for project identity, observations, stage runs/results, explicit selections/overrides, recommendation snapshots, prompt/final-response retention metadata, optional raw-log refs, and migration version. Current state remains derived. Test migration, rollback/recoverable backup where needed, reopen, purge, absent/corrupt DB truthful recovery.
+### O5 — SQLite schema/migrations and concurrency
+Transactional schema for projects, runs/results, observations, accounts, models, backends, routes, ledgers, meter snapshots, reset observations, reservations/uncertainty holds, usage telemetry, predictions, schedule decisions, retention metadata, and migration version. WAL mode. Test rollback/recovery/corrupt DB truthfulness.
 
-### O6 — Project/run locking and interrupted-run recovery
-Use private-state cross-platform locking to serialize direct local runs/migrations per project/worktree. Record active run/process metadata. Test second-run refusal, normal release, crash/interruption recovery, stale history, and read-only status while a run is active.
+### O6 — Project locks and interrupted-run recovery
+Serialize local mutation per worktree, retain read-only status access, recover stale/nonterminal attempts after crashes, and separate project lock ownership from global quota transactions.
 
-### O7 — Reconciler, evidence keys, and recommendation reducer
-Deterministically combine current repository/workplan/protocol evidence and historical results; preserve reported-vs-derived route; apply stage-specific evidence invalidation; expose UNKNOWN/AMBIGUOUS/INCONSISTENT/STALE. Table-test lifecycle loops, candidate changes after PASS, workplan semantic changes, lifecycle-only moves, contradictory reports, and stale remote observations.
+### O7 — Workflow reducer and stage intent
+Derive stage from Protocol/repository evidence, preserve reported-vs-derived routing, stage-specific evidence invalidation, and emit hard scheduling requirements without choosing a provider/model.
 
-### O8 — Protocol source resolver and canonical prompt renderer
-Resolve explicit compatible source -> generated compatible package snapshot -> remotely readable canonical source -> non-closure. Parse canonical blocks/input topology, resolve declared variables, preserve intentional `AUTO`/`NONE`, add transport context/result contract/run identity. Build parity checks prove bundled snapshot comes from canonical source. Test every 5.16 stage local/web, unsupported protocol version, version mismatch, prompt drift, no local-path leak, and stable prompt fingerprint.
+### O8 — Protocol source resolver/canonical renderer
+Version-bound prompt snapshot/source resolution, declared-input substitution, run ID/prompt fingerprint, local/web privacy separation, unsupported-version non-closure.
 
-### O9 — New-task capture
-Implement `sdp start` / `design --task`; no-task/no-plan gives one bounded missing-input error. Test new and existing-workplan flows.
+### O9 — New-task capture and workplan-free Design entry
+`start` / `design --task`; no-task/no-plan gives one bounded missing-input error.
 
-### O10 — Structured result ingestion and run association
-Versioned Pydantic schema, run ID/prompt fingerprint binding, structured extraction, conservative fallback, explicit run selection/confirmation, semantic-workplan/candidate binding, inert handling of malicious pasted text, and payload size bounds. Test wrong-run paste, conflicting/missing IDs, invalid/ambiguous outputs, agent-claimed commit mismatch, plan-change invalidation, and multiple outstanding manual prompts.
+### O10 — Structured result ingestion/run association
+Pydantic schema, run/prompt binding, explicit run selection/confirmation, workplan/candidate reconciliation, inert malicious paste handling, size limits, multiple outstanding web prompts.
 
-### O11 — CLI surface and doctor
+### O11 — Model/backend/account/route catalog
+Implement distinct model capability profiles, backend transport profiles, account/credential references, effort levels, execution routes, repository-access properties, and route -> ledger mapping. Configuration, not hard-coded provider truth.
+
+### O12 — Resource-ledger and pricing model
+Opaque/priced, expiring/non-expiring, reset semantics, funding behavior, multiple simultaneous ledgers, shared pools, versioned PAYG pricing. Explicit `UNMETERED_FOR_SCHEDULER` and `UNKNOWN` semantics.
+
+### O13 — Meter interfaces/reset inference
+`AccountMeter` abstraction independent of transport; official/machine-readable/manual snapshots; provenance/confidence; hard-limit events; deterministic reset hypothesis inference; no browser-scraping requirement.
+
+### O14 — Atomic reservations/uncertainty reconciliation
+Quantile-based reservations on all consumed ledgers in one global transaction; cross-project oversubscription prevention; crash uncertainty holds; authoritative post-run meter reconciliation.
+
+### O15 — Usage telemetry and attribution
+Capture available tokens/cost/time/tool events/meter deltas/outcomes; planned versus actual route provenance; attribution confidence; no fabricated zeros.
+
+### O16 — Task feature extraction and cold-start predictor
+Deterministic task features plus hierarchical stage/model/effort/backend priors; empirical P50/P75/P90/P95 consumption/runtime/outcome estimates; project/route corrections when evidence exists; prediction persistence/calibration.
+
+### O17 — Deterministic quota-aware scheduler
+Hard capability/transport/privacy/automation/quota feasibility; dynamic future reasoning reserve; configurable admission quantile; expiring-ledger shadow cost; PAYG fallback; route quality/continuity/manual-interaction/diversity/latency scoring. Record rejected alternatives and reason codes.
+
+### O18 — Default auto-routing and explicit overrides
+`AUTO` default for `next`/stage commands; explicit `--route`/project policies override. Interactive calls may select manual web; unattended `--run` excludes manual routes unless explicitly allowed. No silent provider substitution outside configured eligible routes.
+
+### O19 — CLI/status/doctor/resource UX
 At minimum:
 
 ```text
@@ -338,168 +510,194 @@ sdp init
 sdp config
 sdp doctor
 sdp status [--json] [--refresh]
-sdp next [--copy] [--run]
+sdp next [--copy] [--run] [--route ID] [--explain]
 sdp baseline | design | implementation | review | verification
 sdp stabilization | alignment | health | closeout
 sdp ingest [--run ID] [--stdin|--clipboard|FILE]
 sdp history [--json]
-sdp history export ...
-sdp history purge ...
 sdp workplans
 sdp use <workplan>
 sdp graph [--format ascii|mermaid|dot|json]
 sdp backends
+sdp routes
+sdp resources [--json]
+sdp usage [--json]
+sdp predict [STAGE] [--route ID]
+sdp schedule [STAGE] [--explain]
 sdp sync
 ```
 
-Stage commands default to render/copy; `--run` dispatches policy/backend. `doctor` probes config/state permissions, protocol snapshot/parity identity, Git, clipboard, backend executables/transports, and reports actionable degradation without mutating the target repository. End-to-end fake-backend CLI tests required.
+`doctor` probes config/state permissions, protocol snapshot, Git, clipboard, backends/transports, configured meters, stale resource observations, and route eligibility without mutating the target repository.
 
-### O12 — Manual-web round trip
-Web rendering + clipboard/stdout fallback + run-aware response ingestion + remote-ref refresh/report + local/private-data non-disclosure. Test assembled render -> clipboard/stdout -> ingest -> reconcile path with fake clipboard/remote, including multiple outstanding prompts.
+### O20 — Manual-web round trip
+Render/copy/ingest/reconcile with run-aware association, remote refresh, no private/account data leakage. Test unmetered route selection for an interactive semantic stage and exclusion for unattended direct execution.
 
-### O13 — ACP transport, normalized agent boundary, and probes
-Implement one agent event/result/permission/session interface. Use the official ACP Python SDK for ACP JSON-RPC/stdio/session/permission mechanics. Probe executable/version/capabilities cheaply. Missing/unsupported/degraded transport gives a concrete reason and configured manual fallback. Test ACP initialization/session/prompt/update/permission/cancellation, protocol-version mismatch, adapter failure, and native-fallback normalization.
+### O21 — ACP transport and normalized agent boundary
+Official ACP Python client for schema/JSON-RPC/session/permission where appropriate, deterministic fake ACP/native streams, capability/version failure handling.
 
-### O14 — Backend profiles with bounded native fallbacks
-Close Claude through its maintained ACP adapter when capability-equivalent, Codex through maintained ACP when capability-equivalent, and OMP through native ACP when conformant. Close Pi through native RPC unless an explicitly selected ACP bridge passes the same contract. Close Antigravity through its official structured CLI or SDK. Each profile must preserve cwd, relevant skill/MCP/config visibility, auth/model/reasoning/sandbox/permission/session semantics required by the stage, stream normalized user-visible output, and capture final result/session when supported. Fixtures demonstrate transport parity at the orchestrator boundary; live authenticated smoke remains optional and never a CI credential requirement.
+### O22 — Backend profiles and native fallbacks
+Claude ACP-or-native, Codex ACP-or-native, OMP ACP-or-RPC, Pi RPC, Antigravity official structured transport. Preserve relevant skills/MCP/config/auth/model/effort/sandbox/session behavior.
 
-### O15 — Hybrid routing and session policy
-Config supports global web/local/hybrid + per-stage route/backend. Shipped hybrid defaults:
+### O23 — Local process lifecycle and quota interruption failover
+Direct argv, bounded output, timeouts/cancel, permission handling, pre/post Git, quota/hard-limit interruption classification, safe lock release, same-stage rescheduling to another eligible configured route without treating WIP as accepted.
 
-- Design/Review/Verification/Stabilization -> manual web;
-- Implementation -> configured local backend;
-- Baseline/Health Audit -> local;
-- Closeout -> local;
-- Alignment -> web default, configurable.
+### O24 — Remote/local reconciliation
+Explicit remote freshness, remote-only/local-only/divergent state, no surprise mutation, safe handoff boundary between remote web and local continuation.
 
-Defaults are convenience policy, not protocol authority. Missing preferred local provider must not silently switch to another paid provider unless explicitly configured. Fresh Review/Verification uses a new backend session by default; implementation repair may resume only under compatible state.
+### O25 — Privacy/retention/export/purge
+Separate raw transcript/prompt retention from numeric telemetry; redact secrets/account-sensitive values; export warnings; no automatic transcript injection; no reasoning-channel persistence by default.
 
-### O16 — Local process lifecycle/permission/resource safety
-Direct argv, no shell interpolation, bounded streams, explicit timeouts/cancel escalation, normalized permission handling, no default bypass flags, no secret logging, pre/post Git snapshots. Test hanging child, permission request, large output, nonzero exit, interruption, dirty baseline attribution, branch switch during run, and secret env non-persistence.
+### O26 — Status/history/workplans/graph/usage presentation
+Deterministic text/JSON and ASCII/Mermaid/DOT graph; route/resource panels show freshness, reservations, binding ledger, predicted usage, and next action without implying semantic authority.
 
-### O17 — Privacy/retention/export/purge
-Configurable prompt/final/raw retention; raw off by default; private permissions; redaction; export/purge/history search; no automatic historical transcript injection. Test permissions where supported, purge, export warning/boundary, redaction, raw-disabled, and reasoning-event exclusion.
+### O27 — Documentation, packaging, and supply-chain closure
+Document core/manual-web install versus optional agent extras, account/route/ledger configuration, meter provenance, quota prediction limits, auto-routing overrides, privacy/state locations, ACP/native backends, and troubleshooting. No runtime auto-download of agents/adapters.
 
-### O18 — Status/history/workplans/graph UX
-`status` shows project/workplan/branch/candidate/upstream/remote freshness, last outcome, blockers, stale/ambiguous evidence, active run, and next command/reason. `history` shows chronology; `workplans` active/retired/ambiguous/inconsistent; graph highlights current/recommended/loops. Deterministic text/JSON snapshots and ASCII/Mermaid/DOT/JSON graph output.
+### O28 — Predictor evolution/conformance guardrail
+Persist calibration evidence. Early predictor stays interpretable. A future ML dependency/model must outperform the simple calibrated baseline materially before adoption and must preserve explainable uncertainty/admission behavior. Dependency upgrades that alter ACP/meter/frontmatter/render semantics fail focused conformance.
 
-### O19 — Remote/local reconciliation without surprise mutation
-`sdp sync` refreshes observations and explains divergence. Network/fetch/ls-remote behavior is explicit/configurable. Fast-forward/push/merge/rebase remain separate explicit operations/policies. Test remote-only advancement, local-only advancement, divergence, stale remote observation, offline behavior, and no implicit worktree mutation.
-
-### O20 — Documentation, packaging, and supply-chain closure
-Document isolated install (pipx/uv-tool class), project registration, manual web round-trip, ACP/native backends, hybrid policy, privacy/state/session locations, retention/purge, graph/status, dependency extras, adapter installation responsibility, and troubleshooting. Protocol README/prompt reference may link to orchestrator as optional convenience; do not make it a lifecycle requirement or include private state in skill `dist/`.
-
-Package metadata must distinguish lightweight core/manual-web installation from optional local-agent integrations. Do not auto-download agent adapters at runtime. Release validation records supported dependency/ACP ranges and license/provenance checks sufficient to explain the shipped environment.
-
-### O21 — Future MCP/service/TUI seam
-Core APIs remain terminal-independent and suitable for later `get_state`, `render_prompt`, `report_stage_result`, `get_next_action`, and `run_backend` service/MCP/TUI exposure. No mandatory daemon/MCP/TUI in v0.1.
-
-### O22 — OSS reuse/conformance guardrail
-Maintain tests that prove external transports/libraries remain below the protocol state/authority boundary. A dependency upgrade that changes ACP event/permission/session behavior, frontmatter interpretation, path placement, or prompt rendering must fail focused conformance until reconciled. Do not add a full external orchestrator/task database merely because it offers overlapping UI/session features.
+### O29 — Future service/MCP/autonomy seam
+Core APIs remain terminal-independent for future MCP/TUI/service or durable autonomous execution. Temporal or another workflow engine is not required for v0.1 and may never become protocol authority.
 
 ## Implementation authority
 
 ### Frozen
 
 - local private control plane, not protocol/product authority;
-- canonical prompt prose remains `development-workflow-prompts.md`; bundled prompt is generated/version-bound transport only;
-- current workflow projection derives from repository/workplan/protocol evidence + subordinate private history, never stale DB override;
-- exact artifact hash and semantic workplan fingerprint remain distinct;
-- candidate-bound evidence cannot survive a material candidate-identity change by default;
-- history remains outside both repositories;
-- explicit web/local privacy and mutation boundary;
-- ACP-first normalized local-agent transport with structured native fallback when ACP lacks required capability/fidelity;
-- no silent backend/adapter installation or provider substitution;
-- serialized direct runs per configured project/worktree in v0.1;
-- SQLite local durable metadata/history for v0.1;
+- scheduler chooses execution route only after the workflow reducer determines the required stage;
+- current workflow projection derives from repository/workplan/protocol evidence + subordinate private history;
+- observed meter state is distinct from prediction and reservation;
+- one user-global private resource/reservation domain across all configured projects/accounts;
+- model, backend, account, route, and resource-ledger identities are separate;
+- `UNMETERED_FOR_SCHEDULER` is distinct from `UNKNOWN`;
+- opaque quota stays in observable provider meter units;
+- shared quota is represented by shared ledgers, including simultaneous short/long windows;
+- auto-routing is default but may choose only engineering-sufficient routes;
+- manual web remains first-class and may be unmetered, but unattended direct execution cannot silently rely on a manual route;
+- predictions are distributions with uncertainty/calibration and do not replace observed resource facts;
+- global reservations are atomic and cross-project safe;
+- exact workplan artifact hash and semantic fingerprint remain distinct;
+- candidate-bound evidence cannot survive a material candidate change by default;
+- history/resource telemetry remains outside both repositories;
+- ACP-first normalized local-agent transport with structured native fallback;
+- no silent backend installation/provider substitution;
+- serialized direct mutation per configured worktree in v0.1;
+- SQLite local durable control state for v0.1;
 - Python 3.11+;
-- no browser automation, generic workflow authority, orchestrator worktree scheduler, or mandatory daemon in v0.1.
+- no browser automation, generic workflow authority, mandatory daemon, or black-box scheduler in v0.1.
 
 ### Delegated
 
-Exact Python modules/classes; SQLite table/index names and normalized schema details; precise candidate dirty-fingerprint algorithm provided it is change-sensitive; clipboard implementation details; exact compatible dependency patch versions; exact backend launch flags; ACP versus native transport after capability qualification; graph styling/aliases; optional FTS; raw-log compression; config editing beyond init/validate; future TUI presentation.
+Exact module/class/table/index names; candidate fingerprint algorithm; specific empirical-prior formula; quantile estimator; shadow-price functional form; reset-hypothesis scoring; exact admission default; exact dependency patch versions; exact backend flags/ACP-vs-native choice after qualification; graph/presentation; optional later ML implementation; raw-log compression.
 
 ### Reopen only on evidence
 
-Reopen only the affected Design surface if canonical Markdown cannot be robustly parsed/versioned (then consider one structured canonical source that also generates the human reference); SQLite cannot meet local recovery/privacy/concurrency needs; stage-specific evidence invalidation cannot be represented without a materially different authority model; a named backend exposes no safely automatable structured interface capable of the required stage semantics; ACP-first transport causes unavoidable capability loss that cannot be covered by bounded native fallbacks; Python materially blocks required portability; or user-mediated web transport cannot meet supported-platform privacy/usability.
+Reopen only affected Design if SQLite cannot provide safe global reservation/concurrency semantics; stage/resource separation cannot represent required policy; a required provider exposes no safe meter or conservative unknown-mode scheduling path; opaque quota cannot be represented in stable observable units at all; a named backend has no safely automatable structured interface; ACP causes unavoidable capability loss without a bounded fallback; Python materially blocks portability; or manual web cannot meet supported privacy/usability needs.
 
 ## Affected surface and task-specific acceptance
 
-Expected protocol-repository surfaces: new `orchestrator/` package/tests/docs; small optional README/prompt-reference links; CI/package/release hooks as needed. Existing skill prompt semantics and skill `dist/` should remain unchanged except justified links/build parity metadata.
+Expected surfaces: new `orchestrator/` package/tests/docs, optional README/prompt-reference links, CI/package/release hooks. Existing skill prompt semantics and skill `dist/` remain unchanged except justified links/build parity metadata.
 
 ### Real-owner acceptance boundaries
 
-1. **Prompt correctness:** real prompt source resolver/loader/renderer operating on canonical/generated compatible source; hand-written duplicate prompt is not acceptance.
-2. **State correctness:** real reconciler over actual Git/workplan/protocol observations + recorded runs; seeding a final state object bypasses the claim.
-3. **Evidence validity:** real candidate/workplan semantic identity and invalidation path; changing the reviewed candidate or semantic workplan must stale the corresponding result, while lifecycle-only archival metadata must not counterfeit a semantic change.
-4. **Manual result association:** real run/prompt identity from render -> clipboard/stdout -> paste/ingest; attaching a response to the wrong outstanding run must fail safely.
-5. **Backend execution:** real ACP client/agent handshake or explicitly justified native structured fallback, real process/event/permission/result normalization, deterministic fake protocol streams, and optional live smoke; command construction alone is insufficient.
-6. **Concurrency safety:** real project/run lock around direct execution and crash recovery; two local runs may not concurrently own the same configured worktree by default.
-7. **Privacy:** assembled web prompt + persistence path + export path; prove local path/credential/raw-event/reasoning non-disclosure under relevant config.
-8. **Manual web:** real render -> clipboard/stdout -> ingest -> reconcile path.
+1. **Workflow correctness:** real reconciler over actual Git/workplan/protocol evidence; scheduler cannot invent/skip stages.
+2. **Prompt correctness:** real canonical source resolver/loader/renderer; no hand-written duplicate prompt acceptance.
+3. **Evidence validity:** candidate/workplan semantic identity invalidation works across Review PASS, candidate changes, and lifecycle-only archive moves.
+4. **Run association:** wrong outstanding manual response attachment fails safely.
+5. **Route separation:** model/backend/account/transport/effort/resource-ledger mappings are independently represented and testable.
+6. **Meter correctness:** observed meter state/provenance is distinct from predictions/reservations; unknown never becomes zero/infinite.
+7. **Reservation correctness:** two concurrent processes/projects cannot oversubscribe one shared ledger.
+8. **Scheduler correctness:** a lower-quota-cost route cannot win if it violates required stage capability/automation/privacy/tooling constraints.
+9. **Manual-web correctness:** unmetered route carries zero scheduler-ledger consumption but still has manual/operational constraints; unattended run does not silently select it.
+10. **Opaque quota correctness:** predicted directly in observed meter units with uncertainty/attribution quality.
+11. **PAYG correctness:** versioned price function and actual billable categories where available.
+12. **Backend execution:** real ACP/native structured handshake/event/permission/result normalization.
+13. **Failover:** quota-interrupted WIP may be rescheduled but never promoted to accepted state.
+14. **Privacy:** assembled web prompt/persistence/export paths prove no local/account/credential/raw reasoning leakage.
 
 ### Required evidence
 
-- unit tests for config/dependencies, Git observer/sanitization/candidate identity, workplan parser/fingerprints, DB/migrations, project lock, reducer/evidence invalidation, protocol source/extraction/rendering, result schema/run binding, graph, clipboard, routing, ACP/native transports, and backend profiles;
-- temporary-Git integration for active/archive/lifecycle contradictions, semantic-vs-lifecycle workplan changes, branch/upstream/divergence, dirty candidate changes, local/remote advancement, and offline/stale remote state;
-- end-to-end fake-backend loop: Design -> Implementation -> Review NO-PASS -> Implementation -> Review PASS -> Closeout, proving stale evidence on candidate changes;
-- manual-web test with two outstanding prompts proving wrong-run paste rejection;
-- web end-to-end local-path/credential non-disclosure;
-- direct-run concurrency/crash test;
-- package install/entrypoint/`sdp doctor` smoke for core and agent extra;
-- ACP conformance tests against deterministic fake agent plus backend-specific parser/profile fixtures;
+- unit tests for config, Git/candidate identity, workplans, DB/migrations, project lock, global resource transactions, workflow reducer, route/account/model/resource schemas, meter provenance/reset logic, pricing, reservations, predictor, scheduler, prompt rendering, result binding, graph/clipboard, ACP/native transports;
+- temporary-Git integration for lifecycle contradictions, candidate changes, remote/local divergence, dirty worktree identity;
+- cross-project test where two projects share one dual-window quota account and reservations prevent oversubscription;
+- shared-model-pool test where two models consume the same 5h/weekly ledgers;
+- explicit `UNMETERED_FOR_SCHEDULER` versus `UNKNOWN` admission tests;
+- interactive Design/Review routing test where a sufficient unmetered web route is preferred under policy;
+- unattended Implementation test where manual web is filtered and a metered local route is chosen/reserved;
+- dynamic reasoning-reserve test that prevents Implementation from starving a mandatory future Review;
+- near-reset test that consumes otherwise-wasted expiring subscription capacity when quality constraints are equal;
+- PAYG fallback test when subscription route is inadmissible;
+- opaque quota prediction/calibration test with low-confidence contaminated observations downweighted;
+- crash/reservation uncertainty test;
+- quota interruption -> alternate-route same-stage continuation test without false acceptance;
+- end-to-end Design -> Implementation -> Review NO-PASS -> repair -> Review PASS -> Closeout with usage/schedule history;
+- manual web wrong-run paste test;
+- package/`sdp doctor` smoke for core and optional agent extra;
 - full existing protocol regression/build/package validation;
-- live backend smoke only when installed/authenticated, skip-with-reason otherwise.
+- live backend/meter smoke only when installed/authenticated, skip-with-reason otherwise.
 
-Production qualification: unnecessary beyond bounded startup/status/render/history latency, SQLite size/retention sanity, and streaming-memory sanity for realistic local run counts.
+Production qualification: bounded startup/status/schedule latency, SQLite size/WAL/reservation behavior, prediction-query latency, and streaming-memory sanity for realistic single-user histories. No distributed-service qualification is required.
 
 ## Implementation sequence and redesign/simplification triggers
 
-### Stage 1 — Core model/config/observers/private history
-Package, selected focused dependencies, config resolution, Git/workplan observation, exact + semantic fingerprints, DB migrations, project locking, run persistence, reconciler, UNKNOWN/AMBIGUOUS/INCONSISTENT/STALE semantics. Close with temporary-repository integration and crash/lock recovery.
+### Stage 1 — Core workflow, global state, route/resource schemas
 
-### Stage 2 — Canonical prompt + manual web core
-Protocol source resolver/generated snapshot parity, version-bound stage profile, renderer/result contract/run identity, clipboard/stdin ingestion, start/use/status/next/stage/history/workplans/graph/doctor commands, web/local privacy separation. This stage must already be useful with no local agent integration.
+Package/dependencies/config; Git/workplan observation; exact + semantic fingerprints; user-global SQLite DB; project locks; run history; workflow reducer; model/backend/account/route/resource-ledger schemas; UNKNOWN/AMBIGUOUS/INCONSISTENT/STALE semantics. Close with temporary-repository and cross-project shared-resource tests.
 
-### Stage 3 — ACP-first local execution framework
-Normalized agent transport/event/result/permission boundary; official ACP Python client; capability probes; safe process/cancel/session policy; deterministic fake ACP/native transports; routing. Establish ACP protocol, permission, cancellation, and session tests before backend-specific work.
+### Stage 2 — Canonical prompt and manual-web core
 
-### Stage 4 — Backend profiles and bounded native fallbacks
-Close Claude ACP-or-native capability profile, Codex ACP-or-native profile, OMP ACP-or-RPC profile, Pi RPC profile, and Antigravity official structured profile one by one. Each closes capability/probe/parser/command tests before the next. No vendor may force backend-specific core workflow state. Optional `acpx`/ACP Registry interoperability is qualified only after the direct ACP client path is sound.
+Protocol source/snapshot parity; renderer/result/run identity; clipboard/stdin ingestion; start/use/status/next/stage/history/workplans/graph/doctor; web/local privacy separation; manual web represented as a normal schedulable route, including explicit unmetered configuration. Product is useful here even with no local agent integration.
 
-### Stage 5 — Hybrid/remote/privacy/docs/package closure
-Default routing/fresh-review policy, retention/export/purge/search, remote observation/freshness, supply-chain/package extras, docs/install/release, full protocol regression and end-to-end acceptance.
+### Stage 3 — ACP-first local execution framework and backend profiles
+
+Normalized transport/event/result/permission boundary; official ACP Python client; safe process/cancel/session policy; deterministic fake ACP/native transports; Claude/Codex/OMP/Pi/Antigravity profiles; project locking and structured quota/hard-limit interruption events where exposed.
+
+### Stage 4 — Metering, pricing, reservations, and deterministic auto-scheduler
+
+Meter interfaces/snapshots/provenance; resource windows/reset hypotheses; PAYG pricing; atomic cross-project reservations; route feasibility; conservative cold-start priors; fixed/empirical reasoning reserve; `AUTO` routing; resources/routes/schedule CLI. This stage must already prevent avoidable quota starvation without learned ML.
+
+### Stage 5 — Telemetry-driven prediction and receding-horizon scheduling
+
+Run usage telemetry; attribution quality; deterministic task features; hierarchical quantile priors/online corrections; prediction calibration; dynamic future-reasoning reserve; expiring-quota shadow pricing; expected cost-to-accepted-completion ranking; repeated reoptimization at each workflow boundary. Use simple interpretable statistics first.
+
+### Stage 6 — Failover, hybrid/remote/privacy/docs/package closure
+
+Quota-interruption same-stage rescheduling; remote/local handoff reporting; retention/export/purge; schedule-decision history; documentation/install/release; full protocol regression and end-to-end acceptance.
 
 ### Future extensions
-After the core stabilizes, consider `sdp mcp`, a local Textual dashboard/TUI, ACP Registry-assisted discovery, richer live events, explicit multi-worktree/parallel scheduling, and optional encrypted storage integrations. Reuse the core APIs; do not create a second orchestration model.
+
+After enough data and core stability: optional quantile boosted predictor/embedding similarity; bounded safe exploration; ACP Registry-assisted discovery; local TUI/MCP; explicit multi-worktree/parallel scheduling; controller-owned WIP checkpoint refs; durable autonomous outer execution such as Temporal only if genuinely needed.
 
 ### Active simplification triggers
 
-Before adding durable machinery, simplify if implementation develops backend-specific prompt/state copies; both mutable current-state tables and reconciler authority; duplicated local/web project models; multiple workplan parsers/fingerprints; duplicate full transcript storage in DB + files; wrapper-on-wrapper subprocess/retry/cancel frameworks around ACP; a custom permission protocol parallel to ACP/native structured permission events; a generic workflow/event-sourcing engine; or daemon/MCP/TUI introduced only to compensate for unclear core APIs.
+Simplify if implementation develops a second workflow authority inside the scheduler; duplicate per-project account ledgers; backend-specific quota databases; both mutable current-state tables and reducer authority; wrapper-on-wrapper retry/reservation frameworks; multiple pricing/meter abstractions for the same resource; a generic optimizer for a tiny route set; ML introduced before simple calibrated statistics are exhausted; browser scraping added to compensate for absent official meters; or daemon/TUI/Temporal introduced only because core APIs are unclear.
 
 ### Genuine Design-reopen triggers
 
-Backend CLI flag churn, ACP adapter bugs with a bounded structured fallback, missing clipboard utility, or presentation preferences do not reopen Design. Reopen only a Frozen choice listed above when evidence shows it cannot satisfy the product invariants.
+Provider flag churn, meter unavailability for one route with a conservative fallback, ACP adapter bugs with native fallback, missing clipboard utility, or poor initial calibration do not by themselves reopen Design. Reopen only a Frozen architectural choice listed above when evidence shows it cannot satisfy the product invariants.
 
-## Final Design review — 2026-09-06
+## Design integration review — 2026-09-07
 
-The final review incorporated the open-source survey and challenged the plan for authority duplication, dependency excess, protocol-version drift, wrong-run ingestion, candidate/workplan evidence staleness, direct-run races, backend capability fidelity, remote/local divergence, privacy, and install-time/runtime supply-chain behavior.
+The quota/metering plan has been integrated as a subordinate resource-control layer rather than a second workflow controller.
 
-Resolved material gaps:
+Key reconciliation decisions:
 
-- replaced five bespoke transport protocols with ACP-first shared plumbing plus bounded native structured fallbacks;
-- selected focused maintained dependencies that remove genuine portability/schema/locking/clipboard plumbing while rejecting heavyweight workflow/task/state frameworks;
-- added capability-fidelity qualification so ACP adapters do not silently substitute a semantically different Claude/Codex/OMP environment;
-- added run ID + prompt fingerprint association for manual/web response ingestion;
-- separated exact workplan artifact identity from semantic authority identity;
-- made candidate identity include dirty working-tree state and defined stage-specific evidence invalidation;
-- added serialized direct-run ownership and interrupted-run recovery;
-- made remote observation freshness/network behavior explicit;
-- made Protocol 5.16 workflow support version-bound instead of silently reinterpreting older plans;
-- added `sdp doctor`, dependency/supply-chain closure, and explicit no-auto-install policy.
+- Protocol workflow projection determines the next required stage; quota scheduler chooses only the execution route.
+- Manual web can be configured `UNMETERED_FOR_SCHEDULER`, while local agents commonly consume opaque subscription or PAYG ledgers. Zero scheduler quota cost does not erase manual-interaction/automation/tooling constraints.
+- Account/resource state moves to one user-global private database because subscription/PAYG capacity can be shared across projects; project transcripts/history remain logically partitioned.
+- Account, model, harness/backend, route, effort, and resource ledgers remain separate so shared quotas and alternate access paths are represented correctly.
+- Multiple subscription windows are simultaneous constraints and are reserved atomically across processes/projects.
+- Observed meter state, predictive reservation, and predicted consumption remain separate concepts.
+- Opaque subscription quotas are learned directly in provider meter units; transparent PAYG uses versioned pricing.
+- Existing run/workplan/candidate history supplies the task/outcome spine for quota prediction, minimizing new machinery.
+- Auto-routing is default, but feasibility is quality/operational-policy first. Quota cannot downgrade mandatory Design/Review quality.
+- Interactive manual-web and unattended direct-run scheduling are intentionally different feasibility contexts.
+- Cold-start scheduling is deterministic and conservative; online prediction is introduced only after telemetry exists; mature ML remains optional.
+- Receding-horizon scheduling reuses the existing `sdp next`/run-result boundaries and therefore does not require Temporal or a resident daemon.
+- Quota interruption can reschedule WIP to another configured route after safe lock/repository reconciliation, without treating interrupted work as accepted.
 
-No remaining design-level blocker was found. The plan preserves the Protocol 5 two-role authority model, keeps the database subordinate and disposable, remains useful in manual-web-only mode, and reduces rather than expands custom backend machinery.
+No architectural conflict remains between the original semi-automatic orchestrator and the quota-aware scheduler. The combined system remains one private control plane with a single Protocol workflow authority boundary.
 
 ## Design verdict
 
-**PASS — implementation-ready.**
+**PASS — integrated architecture is implementation-ready.**
