@@ -21,10 +21,16 @@ class Protocol516LifecycleCloseoutTests(unittest.TestCase):
             self.assertIn("status: completed", header, name)
             self.assertIn("completed_date: 2026-09-04", header, name)
 
-    def test_current_516_workplan_remains_active_until_independent_review(self) -> None:
+    def test_516_workplan_is_archived_after_passing_independent_review(self) -> None:
         name = "PROTOCOL-5.16-LONG-HORIZON-CODE-HEALTH-AND-AUTONOMOUS-QUALITY.md"
-        self.assertTrue((ACTIVE / name).is_file())
-        self.assertFalse((ARCHIVE / name).exists())
+        self.assertFalse((ACTIVE / name).exists())
+        archived = ARCHIVE / name
+        self.assertTrue(archived.is_file())
+        text = archived.read_text(encoding="utf-8")
+        header = text.split("---", 2)[1]
+        self.assertIn("status: completed", header)
+        self.assertIn("completed_date: 2026-09-06", header)
+        self.assertIn("Final Design verdict: PASS", text)
 
 
 if __name__ == "__main__":
