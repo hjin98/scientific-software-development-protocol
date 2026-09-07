@@ -75,3 +75,11 @@ No recurrence count, review count, cycle budget, or convergence target can force
 After product fitness and Tier-2 simplicity are preserved, minimize total cycle cost: diagnose before broad editing; search obvious variants before repeated instance patching; consolidate coherent edits before broad reruns; run cheap discriminating checks before broader regression/integration; reuse evidence whose claim cannot plausibly change; review deltas rather than replaying settled archaeology; and avoid requesting another comprehensive closure review until identified blocker families are closed where dependencies permit.
 
 Optional Serena/Semgrep/CodeQL/Hypothesis use can reduce rediscovery when their relation matches the claim. Tool absence does not relax required product closure, and tool presence does not create a mandatory multi-tool census.
+
+## Milestone stabilization after converged work
+
+Convergence can reveal complexity that no single repair exposed. After a substantial workplan, feature cluster, migration, or repeated repair sequence has otherwise converged and passed ordinary implementation review, a bounded **stabilization / architecture-GC** pass is appropriate when accumulated change is material.
+
+Stabilization is not a new lifecycle role and is not mandatory after trivial/local work. It is non-mutating review: inspect the accepted Tier-2 realization for duplicated authority, wrapper/fallback/special-case accumulation, stale compatibility paths, ownership drift, unnecessary public/configuration surface, internal states that mainly manage other machinery, and a materially simpler equivalent realization.
+
+If simplification is justified, route the minimum coherent change back through normal Design when a workplan/Frozen decision is needed, then Implementation, fresh final affected regression/integration, and ordinary review. Stabilization itself cannot directly bless changed production code. If no material simplification exists, do not manufacture refactoring work merely to satisfy a stage.

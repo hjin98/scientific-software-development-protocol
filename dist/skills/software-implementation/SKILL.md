@@ -18,6 +18,9 @@ Before substantive implementation reasoning, apply these explicit routes. A **MU
 - Before a material ownership/refactor/architecture/algorithm/complexity/redesign decision, **MUST read** [Architecture and design](references/architecture-and-design.md).
 - Before deciding protocol/workplan version binding, compatibility, or release-version semantics, **MUST read** [Protocol versioning and compatibility](references/protocol-versioning-and-compatibility.md).
 
+- Before reasoning about changed-code quality ratchets, test-oracle strength, maintainability hotspots, architecture fitness, bounded failure injection, or long-horizon structural risk, **MUST read** [Long-horizon code health](references/long-horizon-code-health.md).
+
+
 ### Language-profile dispatch
 
 For material executable work, language semantics are part of the normal implementation path rather than an optional performance appendix.
@@ -106,6 +109,15 @@ recover Tier-1 product/problem invariants
 This is not a line-count rule. New machinery is justified when Tier-1/Frozen requirements need a capability the simplified system cannot supply cleanly, or when it reduces total complexity by replacing broader machinery. Detailed criteria live in [Architecture and design](references/architecture-and-design.md).
 
 For material Python/C++ code, this owning-layer rule includes language-native realization: do not preserve Python compensating machinery when C++ offers a simpler value/lifetime/runtime model, and do not reproduce low-level C++ machinery in Python when a high-level compiled/library path is simpler and sufficient. Performance complexity must earn its source/build/dependency/maintenance cost under the shared performance owner.
+
+## Quality ratchet and long-horizon evidence
+
+For substantial or structurally risky work, compare the materially touched subsystem against only the baseline evidence needed for the change. Existing debt does not excuse making touched code harder to reason about, more cyclic, more duplicated in authority, more weakly tested, or more dependent on special-case machinery unless product/Frozen authority requires the added complexity.
+
+Treat complexity, coverage, mutation, duplication, churn, and similar metrics as sensors rather than product truth. When the material question is test effectiveness, changed-code protection, objective architecture dependency, hotspot risk, or failure/recovery behavior, route through [Long-horizon code health](references/long-horizon-code-health.md) and [Tool-assisted engineering](references/tool-assisted-engineering.md) instead of defaulting to a fixed analyzer pipeline.
+
+When persistence/restart/orchestration recovery is part of the claim, use deterministic bounded failure injection or equivalent controlled simulation when it materially strengthens evidence. Keep the real semantic owner executing and do not substitute resource-exhaustive chaos for a bounded failpoint that establishes the same behavior.
+
 
 ## Convergence trigger
 

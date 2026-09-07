@@ -3,16 +3,18 @@
     "software-design",
     "software-implementation"
   ],
-  "protocol_version": "5.15.0",
+  "protocol_version": "5.16.0",
   "runtime_root": "skills",
   "skills": [
     "software-design",
     "software-implementation",
     "software-documentation",
-    "repository-hygiene"
+    "repository-hygiene",
+    "software-maintenance-audit"
   ],
   "specialists": [
     "software-documentation",
-    "repository-hygiene"
+    "repository-hygiene",
+    "software-maintenance-audit"
   ]
 }
