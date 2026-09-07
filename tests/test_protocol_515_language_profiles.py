@@ -106,7 +106,8 @@ class Protocol515LanguageProfileTests(unittest.TestCase):
         versioning = read("source/shared/references/protocol-versioning-and-compatibility.md").lower()
         root_readme = read("README.md").lower()
         self.assertIn("protocol 5.15 is a backward-compatible", versioning)
-        self.assertIn("active older workplans do not automatically adopt protocol 5.15", versioning)
+        self.assertIn("active older workplans do not automatically adopt protocol 5.16 or any later release", versioning)
+        self.assertIn("may continue under their declared version", versioning)
         self.assertIn("repository-local tier-2 validation machinery", root_readme)
         self.assertIn("protocol_version: 5.14.0", read("workplans/archive/PROTOCOL-5.15-LANGUAGE-PROFILES-CPP-PERFORMANCE.md"))
 
