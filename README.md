@@ -34,6 +34,8 @@ For repeatable human-to-agent orchestration of Design, Implementation, Review, V
 
 Each prompt exposes an `INPUTS` block so task-specific values such as workplan path, implementation target, governing authorities, and protocol source are defined once and referenced symbolically throughout the stage prompt. These prompts route into the protocol; they do not create a parallel authority model.
 
+By default, prompt orchestration resolves protocol skills **local first, public repository second**. The agent should use the current harness's native installed-skill mechanism where available (for example `@software-design`, `/software-implementation`, or the harness's equivalent selector; these are not shell commands). If the required skill is absent, unreadable, or incompatible with the governing protocol version, the prompt falls back to the canonical public repository at `https://github.com/hjin98/software-development-protocol`, reads the appropriate canonical `source/` skill entrypoint and references, and preserves the protocol version governing the task.
+
 ## Language-native engineering
 
 Protocol 5.15 preserves one shared doctrine and adds thin differential language profiles:

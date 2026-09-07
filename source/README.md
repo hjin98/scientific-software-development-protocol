@@ -44,6 +44,8 @@ The canonical human-facing orchestration reference is:
 
 It provides standalone prompts for Design/Workplan, Implementation, Review & Update, Verification, Stabilization/Architecture GC, downstream-workplan Alignment, Health Audit, and Closeout. Each stage exposes a small `INPUTS` block so users define task-specific values once and the prompt refers to those symbolic variables thereafter.
 
+The prompts use portable **local-first protocol-skill resolution**. With `PROTOCOL_SOURCE = AUTO_LOCAL_FIRST`, the agent first inspects/invokes the current harness's installed skill using its native selector or registry (for example `@software-design`, `/software-implementation`, or equivalent; these are harness selectors, not shell commands). If the required skill is absent, unreadable, or incompatible with the governing `PROTOCOL_REF`, the agent falls back to `https://github.com/hjin98/software-development-protocol`, reads the canonical `source/roles/<skill>/SKILL.md` or `source/specialists/<skill>/SKILL.md` entrypoint plus required shared references, and preserves the protocol version governing the task.
+
 These prompts are entry routing for the existing protocol skills and references. They do not create a parallel lifecycle, requirement source, approval authority, or independent doctrine.
 
 ## Shared doctrine and language engineering profiles
