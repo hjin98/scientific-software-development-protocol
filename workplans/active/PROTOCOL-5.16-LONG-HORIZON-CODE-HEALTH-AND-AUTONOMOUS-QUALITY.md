@@ -17,70 +17,108 @@ Protocol 5.15 has strong doctrine for product truth, Frozen architecture, delega
 
 The remaining long-horizon failure mode is different: a repository can still degrade gradually across many locally defensible changes before structural complexity becomes obvious enough to trigger active simplification. Current protocol control is therefore stronger at reasoning about already-visible complexity than at observing early longitudinal deterioration, independently falsifying apparently correct implementations, and scheduling maintenance before a crisis.
 
+A second control-plane problem is now explicit: the protocol is used across heterogeneous agent harnesses. Skills are often installed locally, but may be absent or inaccessible in a web session. Human prompts therefore need a reliable, version-coherent way to activate the correct stage/skill locally when possible and fall back to the canonical public protocol source when not. Without that routing, a strong protocol can still fail simply because the wrong skill, wrong protocol version, or no skill was actually loaded.
+
 Protocol 5.16 must strengthen the development system as a closed-loop engineering process:
 
 ```text
 product truth
     -> design / implementation
     -> executable evidence
-    -> adversarial falsification
+    -> independent review / adversarial falsification
     -> structural and test-effectiveness signals
     -> longitudinal health observations
     -> simplification / redesign trigger
     -> product truth
 ```
 
-The protocol must improve early detection of architectural entropy, weak test oracles, change-risk concentration, lifecycle residue, and slowly growing maintenance burden without replacing engineering judgment with metric thresholds or adding bureaucratic approval machinery.
+The protocol must improve early detection of architectural entropy, weak test oracles, change-risk concentration, lifecycle residue, stage-routing mistakes, and slowly growing maintenance burden without replacing engineering judgment with metric thresholds or adding bureaucratic approval machinery.
 
 ### Product invariants
 
-1. **Preserve Protocol 5 authority.** Tier 1A product/problem truth, Tier 1B cycle-scoped Frozen architecture, Tier 2 delegated solution machinery, and Tier 3 development economy remain unchanged.
-2. **Preserve the two authority-bearing lifecycle roles.** `software-design -> software-implementation` remains the complete normative lifecycle. New verification, stabilization, health-audit, documentation, and hygiene activities are modes/stages/specialists, not new approval authorities.
-3. **Simplicity remains semantic, not numeric.** No universal CRAP, complexity, coverage, mutation-score, line-count, API-count, or similar threshold may define product correctness or architectural fitness by itself.
-4. **Metrics are sensors, not product truth.** Complexity, churn, dependency, coverage, mutation, duplication, hotspot, public-surface, and similar observations may trigger investigation or prioritization but do not automatically require redesign or acceptance failure unless project/task authority explicitly elevates a threshold.
-5. **Use quality ratchets rather than arbitrary repository-wide cleanup gates.** Existing debt does not excuse introducing new debt. A materially touched subsystem should ordinarily become no harder to reason about unless added complexity is required by Tier-1/Frozen requirements.
-6. **Strengthen oracle quality.** High coverage or green tests are insufficient when semantically wrong implementations can survive. Mutation, differential, metamorphic, property, counterfactual, and real-owner testing should be used when they materially strengthen a claim.
-7. **Independent verification should be genuinely adversarial.** Review should attempt to falsify the implementation, not merely confirm the implementer's explanation. Operational separation of verifier context from implementation rationale is preferred when practical.
-8. **Architecture fitness should become executable where the rule is objective.** Dependency direction, forbidden coupling, acyclicity, ownership boundaries, or equivalent structural invariants should be encoded as executable checks when doing so is cheap, stable, and semantically justified.
-9. **Longitudinal maintenance is periodic and evidence-driven.** Repository-level health audits inspect trends such as churn x complexity x test weakness x architectural centrality, recurring defect families, dependency drift, duplicated concepts, public/configuration growth, and stale compatibility paths without turning every local change into a whole-repository audit.
-10. **Scientific correctness remains primary.** Numerical/scientific invariants, trusted reference implementations, justified tolerances, differential/metamorphic relations, and reproducibility remain authoritative over test metrics or optimization goals.
-11. **Maintenance findings do not mutate authority.** A health audit may identify risks and simplification opportunities, but ordinary Tier-2 repairs route to Implementation and Frozen-architecture problems route to Design.
-12. **Protocol self-qualification must test behavior, not only wording.** Static phrase/structure tests remain useful regression guards, but real protocol-confidence claims should include bounded behavioral scenarios that distinguish good engineering decisions from attractive but wrong ones.
-13. **Repository lifecycle state should converge.** Completed/superseded workplans and post-stage residue must not remain indefinitely active merely because cleanup is optional; closeout triggers should make stale lifecycle state observable and routinely correctable.
+1. **Preserve Protocol 5 authority.** Tier 1A product/problem truth, Tier 1B cycle-scoped Frozen high-level architecture, Tier 2 delegated solution machinery, and Tier 3 development economy remain unchanged.
+2. **Preserve the two authority-bearing lifecycle roles.** `software-design -> software-implementation` remains the complete normative lifecycle. Verification, stabilization, health audit, qualification, documentation, and hygiene are modes/stages/specialists, not new approval authorities.
+3. **Preserve existing functional-acceptance ordering.** Implementation must complete final accepted-contract reconciliation, final affected-surface regression/integration, and repository/project-required checks before an independent implementation review can claim review readiness. Protocol 5.16 must not move adversarial verification ahead of the existing final assembled acceptance boundary.
+4. **Keep Review, Verification, Stabilization, and Health Audit semantically distinct.** Review asks whether the governing implementation contract was correctly realized; Verification independently falsifies high-risk scientific/product/architectural claims when warranted; Stabilization asks whether an otherwise accepted realization should be simplified; Health Audit examines longitudinal repository deterioration. They must not become duplicate mandatory review gates.
+5. **Simplicity remains semantic, not numeric.** No universal CRAP, complexity, coverage, mutation-score, line-count, API-count, or similar threshold may define product correctness or architectural fitness by itself.
+6. **Metrics are sensors, not product truth.** Complexity, churn, dependency, coverage, mutation, duplication, hotspot, public-surface, and similar observations may trigger investigation or prioritization but do not automatically require redesign or acceptance failure unless project/task authority explicitly elevates a threshold.
+7. **Use quality ratchets rather than arbitrary repository-wide cleanup gates.** Existing debt does not excuse introducing new debt. A materially touched subsystem should ordinarily become no harder to reason about unless added complexity is required by Tier-1/Frozen requirements.
+8. **Strengthen oracle quality.** High coverage or green tests are insufficient when semantically wrong implementations can survive. Mutation, differential, metamorphic, property, counterfactual, real-owner, and bounded fault-injection evidence should be used when they materially strengthen a claim.
+9. **Independent verification should be genuinely adversarial.** Review/verification should attempt to falsify the implementation or claim rather than merely confirm the implementer's explanation. Operational separation of verifier context from implementation rationale is preferred when practical.
+10. **Architecture fitness should become executable where the rule is objective.** Dependency direction, forbidden coupling, acyclicity, ownership boundaries, or equivalent structural invariants should be encoded as executable checks when doing so is cheap, stable, and semantically justified.
+11. **Longitudinal maintenance is periodic and evidence-driven.** Repository-level health audits inspect trends such as churn x complexity x test weakness x architectural centrality, recurring defect families, dependency drift, duplicated concepts, public/configuration growth, and stale compatibility paths without turning every local change into a whole-repository audit.
+12. **Scientific correctness remains primary.** Numerical/scientific invariants, trusted reference implementations, justified tolerances, differential/metamorphic relations, reproducibility, and relevant failure/restart semantics remain authoritative over test metrics or optimization goals.
+13. **Maintenance findings do not mutate authority.** A health audit may identify risks and simplification opportunities, but it does not define new Frozen architecture or become workplan approval authority. Tier-2 work routes through ordinary Implementation authority; any material new/revised implementation contract or Frozen-architecture concern routes through Software Design.
+14. **Protocol self-qualification must test behavior, not only wording.** Static phrase/structure tests remain useful regression guards, but real protocol-confidence claims should include bounded behavioral scenarios that distinguish good engineering decisions from attractive but wrong ones.
+15. **Repository lifecycle state should converge.** Completed/superseded workplans and post-stage residue must not remain indefinitely active merely because cleanup is optional; closeout triggers should make stale lifecycle state observable and routinely correctable.
+16. **Human-facing orchestration is part of the protocol control surface, not a parallel authority.** A canonical prompt reference must expose stage-specific parameter blocks, deterministic stage/skill routing, and portable skill resolution while remaining subordinate to the governing workplan, protocol version, and canonical skill/reference doctrine.
+17. **Portable skill resolution is local-first and version-coherent.** When a required protocol skill is available through the current harness or an exposed installed-skill root, use the compatible local installation first. If unavailable, unreadable, or incompatible, fall back to the canonical public repository `https://github.com/hjin98/software-development-protocol`. Never silently reinterpret an older workplan under a newer protocol or claim a skill was loaded when it was not.
 
 ### Non-goals
 
 - Do not replace Protocol 5.15's philosophy or authority model.
-- Do not create a mandatory third approval role for testing, QA, verification, or maintenance.
+- Do not create a mandatory third approval role for testing, QA, verification, stabilization, or maintenance.
 - Do not introduce a universal quality score, complexity ledger, deletion quota, refactoring quota, or permanent metric bureaucracy.
-- Do not require mutation testing, fuzzing, CodeQL, Semgrep, Serena, Hypothesis, coverage, architecture linting, or any other tool on every task.
-- Do not require whole-repository health audits after ordinary local changes.
+- Do not require mutation testing, fuzzing, CodeQL, Semgrep, Serena, Hypothesis, coverage, architecture linting, failure injection, or any other tool/method on every task.
+- Do not require whole-repository health audits or stabilization after ordinary local changes.
 - Do not turn maintainability tools into product truth or let agents optimize metrics at the expense of architecture.
-- Do not introduce one specialist per tool category.
-- Do not mandate one Python linter/type checker, one C++ analyzer, one mutation engine, one coverage implementation, one architecture-test library, or one hotspot-analysis product.
+- Do not introduce one specialist per tool category or one specialist per development stage.
+- Do not mandate one Python linter/type checker, one C++ analyzer, one mutation engine, one coverage implementation, one architecture-test library, one fault-injection framework, or one hotspot-analysis product.
+- Do not assume every harness can programmatically execute textual selectors such as `@software-design` or `/software-design`; they are examples of harness-native selectors, not shell commands.
+- Do not create per-harness copies of protocol doctrine merely to support routing.
+- Do not fetch the public repository when a readable governing-version-compatible local skill is already available merely for ceremony.
 - Do not retroactively reinterpret older workplans under Protocol 5.16.
 
 ## Frozen high-level architecture and engineering envelope
 
-### Frozen architecture
+### Frozen lifecycle architecture
 
-Protocol 5.16 keeps the existing lifecycle and adds bounded quality-feedback modes around it:
+Protocol 5.16 keeps the existing two-role lifecycle and adds bounded quality-feedback modes around the existing acceptance contract:
 
 ```text
-baseline / health intake when material
+baseline / change-health intake when material
         -> Software Design
-        -> Software Implementation + stage-local validation
-        -> adversarial independent verification when warranted
-        -> stabilization / simplification at milestone boundaries when warranted
-        -> final regression / integration
+        -> Software Implementation + stage-local semantic/functional validation
+        -> final accepted-contract reconciliation
+        -> final affected-surface regression + real-boundary integration + project checks
+        -> independent Review & Update when warranted
+             -> implementation repair or bounded Design reconsideration when blocked
+        -> independent claim-level Verification when warranted
+        -> Stabilization / architecture-GC at material convergence boundaries when warranted
+             -> if change is required, route through Design/Implementation + fresh final acceptance/review
         -> production qualification when independently required
         -> documentation + repository closeout when affected
-        -> periodic semantic health audit
-             -> Implementation for Tier-2 repair
-             -> Design for Frozen-architecture reconsideration
+
+periodic Health Audit sits outside the per-change linear path
+        -> ordinary Tier-2 repair/implementation path when sufficient
+        -> Software Design when a workplan/Frozen-architecture decision is required
 ```
 
-These are proportionate activities, not mandatory fixed gate counts. Small/local changes may still use the compact Protocol 5 workflow.
+These are proportionate activities, not mandatory fixed gate counts. Small/local changes may still use the compact Protocol 5 workflow. Full production qualification remains separate and assumes regression/integration acceptance already exists.
+
+### Stage semantics and orchestration boundaries
+
+The quality-feedback modes have deliberately different questions and closure semantics:
+
+- **Baseline / change-health intake:** for substantial or structurally risky work, capture only the task-local evidence needed to compare the touched system before/after. It may be an explicit user-facing stage or an explicitly triggered preamble to Design; it is not a permanent ledger.
+- **Review & Update:** Software Design independently reviews an implementation that has already reached normal implementation completion evidence. It decides Pass / No-Pass against the governing workplan plus material engineering risks and routes rework.
+- **Verification:** a separate optional Software Design mode for high-risk scientific, numerical, product, or architectural claims where deeper falsification across multiple sources of truth materially increases confidence. Verification does not replace ordinary workplan review and is not mandatory merely because Review exists.
+- **Stabilization / architecture-GC:** a non-mutating review mode after ordinary implementation review has otherwise passed. It asks whether the accepted realization remains the minimum justified Tier-2 system. Any resulting code change must return through the normal Design/Implementation/acceptance/review path; Stabilization itself does not refactor production code.
+- **Health Audit:** periodic repository-level trend analysis. It is not a feature gate, and it must report when longitudinal evidence is unavailable rather than pretending a static snapshot establishes a trend.
+- **Closeout:** documentation/lifecycle/hygiene reconciliation after the relevant semantic and functional engineering stages close. It must not alter product behavior.
+
+### Portable protocol-skill resolution architecture
+
+The canonical human-facing workflow prompt reference must support a harness-neutral resolver:
+
+1. Determine the required skill for the selected stage.
+2. Under the default local-first mode, inspect the current harness's available skill/plugin/command registry or documented exposed installed-skill root and use the native selector/invocation mechanism when available. Examples such as `@software-design` or `/software-implementation` are harness selectors, not shell commands.
+3. Prefer an exact governing-protocol installation. A newer skill may serve an older workplan only when it explicitly supports preserving that older protocol contract; backward-compatible release numbering alone does not authorize silently applying newer doctrine to an older accepted workplan.
+4. If the required local skill is absent, inaccessible, unreadable, or cannot preserve the governing protocol contract, fall back read-only to `https://github.com/hjin98/software-development-protocol`. Use canonical `source/roles/<skill>/SKILL.md` or `source/specialists/<skill>/SKILL.md` plus the references that entrypoint requires. Do not treat generated `dist/` bundles as the canonical repository authority.
+5. Resolve historical protocol versions by an explicit branch/tag/commit/release/version mapping or other repository evidence. Do not guess that a semantic version string is a Git ref. If a compatible historical source cannot be established, report the limitation instead of silently using `main`/latest.
+6. If neither compatible local nor public source is readable, report truthful non-closure and use only an explicitly documented stage fallback. Do not execute a similarly named unrelated skill or claim protocol compliance from memory.
+
+Exact harness syntax and local installation path are delegated portability details. The authority/version semantics above are Frozen for this cycle.
 
 ### Baseline and quality-ratchet model
 
@@ -102,17 +140,17 @@ The quality ratchet is semantic:
 
 Metrics and structural scans can support that judgment but do not replace it.
 
-### Adversarial verification model
+### Adversarial review and verification model
 
-Independent review remains a Software Design mode. For substantial/high-risk work, strengthen its operational independence:
+Independent review remains a Software Design mode and starts from a candidate that has the existing final implementation/functional acceptance evidence or explicitly reports missing evidence as a blocker. For substantial/high-risk work, strengthen operational independence:
 
 - reconstruct the product/Frozen contract from supplied authority and actual repository state;
 - inspect the final candidate before relying on the implementer's rationale;
-- attempt to falsify important claims through counterexamples, boundary cases, mutation-like perturbations, alternative state transitions, real-owner execution, affected-consumer inspection, numerical/metamorphic relations, or structural violations;
+- attempt to falsify important claims through counterexamples, boundary cases, mutation-like perturbations, alternative state transitions, real-owner execution, affected-consumer inspection, numerical/metamorphic relations, structural violations, or bounded failure injection where the claim is about failure/recovery;
 - prefer a fresh context/model instance when practical so the verifier is not anchored by the implementer's full reasoning trajectory;
 - only after independent reconstruction, consult implementation rationale when it resolves a real ambiguity.
 
-This is a verification method, not a third authority role.
+Ordinary Review still answers workplan conformance plus independent engineering challenge. The separate Verification stage is reserved for materially high-risk claim-level falsification and broader authority reconciliation. Neither creates a third authority role.
 
 ### Stabilization / architecture-GC model
 
@@ -132,7 +170,7 @@ Inspect especially:
 - dependency cycles or architecture-boundary drift;
 - tests that mostly compensate for internal orchestration rather than protect product semantics.
 
-Simplify Tier 2 where justified. Route any required Frozen-architecture change back to Software Design.
+Stabilization itself does not edit production implementation. If Tier-2 simplification is justified, create/reconcile the minimum bounded implementation contract needed and route the change through normal Implementation plus fresh final acceptance/review. Any required Frozen-architecture change routes to bounded Software Design reconsideration.
 
 ## Implementation obligations and delegated solution space
 
@@ -140,11 +178,11 @@ Simplify Tier 2 where justified. Route any required Frozen-architecture change b
 
 **Concern / rationale:** Current testing doctrine correctly rejects green-test complacency but lacks a positive route for mutation-based oracle-strength analysis.
 
-**Required end state:** `testing-and-validation.md` and tool-routing doctrine must explicitly recognize test-effectiveness/oracle-strength questions as a capability class. Mutation testing must remain conditional and non-authoritative.
+**Required end state:** `testing-and-validation.md` and tool-routing doctrine must explicitly recognize test-effectiveness/oracle-strength questions as a capability class. Mutation testing must remain conditional and non-authoritative. The doctrine should also include the bounded counterfactual: identify the smallest plausible semantically wrong implementation that could still pass the current tests, then strengthen the oracle when that counterexample is material and economically testable.
 
 **Delegated solution space:** Exact wording, tool examples, and placement may vary. Python/C++ examples may name representative tools, but no tool identity is Frozen.
 
-**Acceptance evidence:** Static protocol tests plus behavioral scenarios must demonstrate that mutation testing is neither universally mandatory nor ignored when an important weak-oracle question materially warrants it.
+**Acceptance evidence:** Static protocol tests plus behavioral scenarios must demonstrate that mutation/counterfactual oracle challenge is neither universally mandatory nor ignored when an important weak-oracle question materially warrants it.
 
 ### Obligation 2 — Add differential and metamorphic testing explicitly
 
@@ -203,28 +241,31 @@ Do not require a global machine-readable architecture manifest. Encode only rule
 
 **Acceptance evidence:** Behavioral qualification includes a scenario where an agent correctly prefers an executable dependency invariant over repeated prose-only review when the architectural rule is objective.
 
-### Obligation 6 — Make independent review explicitly falsification-oriented
+### Obligation 6 — Make independent review explicitly falsification-oriented while preserving review readiness
 
-**Concern / rationale:** Independent review is already owned by Software Design, but operational independence and anti-anchoring behavior are under-specified.
+**Concern / rationale:** Independent review is already owned by Software Design, but operational independence and anti-anchoring behavior are under-specified. The original draft also placed adversarial verification before final regression/integration, which would have contradicted existing Protocol 5 implementation acceptance.
 
-**Required end state:** `software-design`, workflow, and testing references should make clear that substantial/high-risk independent review attempts to falsify the candidate, reconstructs the contract independently, and should prefer fresh-context verification when practical.
+**Required end state:** `software-design`, workflow, and testing references must make clear that:
+
+- substantial/high-risk independent Review attempts to falsify the candidate and reconstructs the contract independently;
+- ordinary Review begins after final implementation reconciliation plus final affected regression/integration/project-required checks are available, or explicitly records those missing checks as blockers;
+- a separate deeper Verification mode may follow Review when scientific/numerical/product/architectural claim risk warrants it;
+- Verification does not replace ordinary workplan review or turn into a mandatory second review for routine changes;
+- fresh-context verification is preferred when practical.
 
 The protocol must not require hidden chain-of-thought transfer, private reasoning logs, or permanent review manifests.
 
-**Acceptance evidence:** Qualification scenarios distinguish:
-
-- confirmation-biased review that repeats the implementation explanation; and
-- independent reconstruction plus targeted falsification.
+**Acceptance evidence:** Qualification scenarios distinguish confirmation-biased review from independent reconstruction/falsification, reject verification-before-final-regression ordering, and reject mandatory duplicate Review+Verification for trivial work.
 
 ### Obligation 7 — Add milestone stabilization / architecture-GC guidance
 
 **Concern / rationale:** Active simplification currently depends mainly on explicit complexity triggers during implementation. Some entropy is only visible after multiple individually acceptable changes accumulate.
 
-**Required end state:** Workflow/convergence doctrine must recognize bounded stabilization passes at natural convergence boundaries. The pass is not mandatory after every change and not a new approval role.
+**Required end state:** Workflow/convergence doctrine must recognize bounded stabilization passes at natural convergence boundaries. The pass is not mandatory after every change and not a new approval role. It runs only after ordinary implementation review has otherwise passed, remains non-mutating itself, and inspects accumulated Tier-2 machinery for justified simplification.
 
-It should inspect accumulated Tier-2 machinery and simplify where doing so materially reduces total system complexity while preserving product/Frozen requirements.
+If stabilization identifies required change, the minimum coherent change routes back through Software Design when a workplan/architecture decision is required, then Software Implementation, final accepted-contract reconciliation, affected regression/integration, and ordinary review. Stabilization cannot directly bless unreviewed refactoring.
 
-**Acceptance evidence:** Counterfactual tests reject both extremes: never performing stabilization despite material accumulated entropy, and forcing whole-repository refactoring after trivial changes.
+**Acceptance evidence:** Counterfactual tests reject all three failures: never performing stabilization despite material accumulated entropy, forcing whole-repository refactoring after trivial changes, and directly editing/accepting production code inside the stabilization review stage.
 
 ### Obligation 8 — Add one semantic maintenance-audit specialist
 
@@ -235,9 +276,11 @@ It should inspect accumulated Tier-2 machinery and simplify where doing so mater
 - inspect long-lived repositories for architectural entropy and maintainability deterioration;
 - combine semantic inspection with longitudinal evidence such as churn, temporal change coupling, complexity, duplication, dependency centrality/cycles, recurring defect families, public/configuration growth, mutation/test weakness, and documentation difficulty;
 - identify high-risk hotspots and simplification opportunities;
-- emit findings and routing only;
-- route Tier-2 repair to Implementation and Frozen-architecture problems to Design;
-- never become an approval authority or autonomously perform broad unrelated refactors solely because a metric is high.
+- emit findings, evidence, and routing only;
+- state explicitly when relevant VCS/history evidence is unavailable and downgrade trend claims accordingly;
+- never define Frozen architecture, accept a new implementation contract, become an approval authority, or autonomously perform broad unrelated refactors solely because a metric is high.
+
+Tier-2 findings may route directly to ordinary Implementation only when existing task/architecture authority is already sufficient for a local repair. When substantial maintenance requires a new/revised workplan, or when Frozen architecture is implicated, route to Software Design first.
 
 The specialist should prefer risk concentration rather than raw complexity, conceptually:
 
@@ -247,7 +290,7 @@ maintenance risk ~ change frequency x structural complexity x test weakness x ar
 
 No exact formula is normative.
 
-**Acceptance evidence:** Skill/package validation and behavioral scenarios prove that the specialist finds semantic entropy without inventing metric thresholds or turning findings into automatic redesign.
+**Acceptance evidence:** Skill/package validation and behavioral scenarios prove that the specialist finds semantic entropy without inventing metric thresholds, fabricating longitudinal claims from a static snapshot, bypassing Design authority, or turning findings into automatic redesign.
 
 ### Obligation 9 — Strengthen workplan/release closeout triggers for documentation and repository hygiene
 
@@ -277,7 +320,9 @@ Include representative scenarios such as:
 3. high line coverage with weak assertions; the correct response identifies oracle weakness and routes to mutation/counterfactual strengthening;
 4. an objective dependency rule is repeatedly violated; the correct response recommends an executable architecture fitness check rather than repeated manual review;
 5. high-complexity but stable untouched code versus moderate-complexity high-churn hotspot; the audit prioritizes the latter without claiming the former is good;
-6. a trivial local change does not trigger repository-wide health audit or stabilization bureaucracy.
+6. a trivial local change does not trigger repository-wide health audit or stabilization bureaucracy;
+7. a stateful/restart defect warrants bounded failure injection at the semantic boundary rather than resource-exhaustive chaos or no failure-path evidence;
+8. a health audit without VCS history reports static risks but does not fabricate churn/change-coupling trends.
 
 Static tests must not claim these scenarios were behaviorally qualified unless actually run against the named harness/model configuration.
 
@@ -298,36 +343,94 @@ These are investigation/acceptance prompts grounded in product/Frozen semantics,
 
 **Acceptance evidence:** Counterfactual tests reject both arbitrary whole-repository thresholds and permission to worsen touched code merely because pre-existing debt exists.
 
-### Obligation 12 — Keep protocol entrypoints compact
+### Obligation 12 — Keep protocol skill entrypoints compact
 
 **Concern / rationale:** Adding every new method directly to `SKILL.md` would itself increase control-plane complexity.
 
-**Required end state:** Keep `software-design` and `software-implementation` entrypoints concise. Put detailed long-horizon-maintainability methodology in a shared reference when necessary and route to it only for material maintainability, stabilization, adversarial verification, or health-audit questions.
+**Required end state:** Keep `software-design` and `software-implementation` skill entrypoints concise. Put detailed long-horizon-maintainability methodology in shared references when necessary and route to it only for material maintainability, stabilization, adversarial verification, or health-audit questions.
 
-Do not duplicate full testing/tool doctrine across lifecycle roles.
+Do not duplicate full testing/tool doctrine across lifecycle roles. The human-facing prompt reference may repeat the minimum high-salience stage guardrails necessary for reliable orchestration, but canonical semantic ownership remains in the skills/shared references and prompt text must be reconciled when those owners change.
 
-**Acceptance evidence:** Package/contract tests verify direct reachability, non-duplication, and progressive-disclosure routing.
+**Acceptance evidence:** Package/contract tests verify direct reachability, non-duplication, progressive-disclosure routing, and absence of competing prompt-vs-skill authority.
+
+### Obligation 13 — Make the canonical workflow-orchestration prompt reference a first-class portable entrypoint
+
+**Concern / rationale:** User-to-agent stage prompts are a real control surface. Without a canonical parameterized router, users repeatedly hand-edit long prompts, stages blur together, locally installed skills may not activate, and web sessions may proceed without the intended protocol skill.
+
+**Required end state:** Maintain a canonical human-facing entrypoint at:
+
+`source/shared/references/development-workflow-prompts.md`
+
+It must:
+
+- be discoverable from `README.md`, `source/README.md`, and `PORTABILITY.md`;
+- provide standalone parameterized `INPUTS` blocks so users define values such as workplan path, target repository, governing authorities, protocol source, and protocol ref once;
+- cover Design/Workplan, Implementation, Review & Update, Verification, Stabilization/Architecture-GC, downstream-workplan Alignment, Health Audit, and Closeout;
+- make Baseline/change-health intake explicitly discoverable, either as its own optional prompt or an unmistakable triggered preamble to Design, so the Frozen lifecycle does not name a stage that users cannot invoke;
+- preserve the semantic distinction and ordering defined above rather than turning every stage into generic code review;
+- default protocol resolution to harness-native compatible local skill first, canonical public repository second;
+- permit harness-specific selectors such as `@skill` or `/skill` only as examples of native invocation and explicitly forbid treating them as shell commands;
+- use an exposed local skill root when the harness provides one even if textual selectors are user-only rather than agent-invokable;
+- fall back to `https://github.com/hjin98/software-development-protocol` when local skill resolution fails;
+- resolve canonical repository source from `source/roles/...` / `source/specialists/...` plus required references;
+- preserve governing protocol-version semantics and refuse to guess a historical Git ref or silently apply latest doctrine;
+- report truthful limitation when neither compatible local nor public source can be read;
+- remain a router/control surface, not a new source of product or architectural authority.
+
+**Delegated solution space:** Exact variable names, stage numbering, whether Baseline is a standalone prompt or a clearly triggered Design preamble, exact harness examples, and exact repository-version lookup mechanics are delegated provided the authority/version guarantees above hold.
+
+**Acceptance evidence:** Static/counterfactual and bounded live qualification where available must cover at least:
+
+1. compatible local skill present -> use local skill without unnecessary remote fallback;
+2. local skill absent/unreadable -> use canonical public source;
+3. local skill newer but unable to preserve an older workplan contract -> resolve historical compatible source or report non-closure rather than silently upgrade;
+4. selector examples are not executed as shell commands;
+5. user-only selector but exposed installed skill root exists -> read/invoke the local skill through supported harness/filesystem capability rather than falsely declaring it absent;
+6. neither source readable -> truthful limitation, no pretend skill execution;
+7. each stage routes to the correct skill/mode and preserves Review/Verification/Stabilization/Health-Audit distinctions;
+8. Baseline/change-health intake is discoverable for tasks where quality-ratchet comparison is material.
+
+### Obligation 14 — Add bounded failure-injection routing for stateful/recovery claims
+
+**Concern / rationale:** Long-term reliability defects often occur only on interruption, restart, stale state, partial persistence, duplicate delivery, or worker/I/O failure. Ordinary happy-path regression can leave these claims weak even when coverage is high.
+
+**Required end state:** Testing/tool/scientific/storage/concurrency doctrine should route failure/recovery claims to bounded fault-injection or equivalent controlled simulation when materially useful. Representative cases may include interrupted checkpoint writes, truncated artifacts, missing/stale cache state, restart at material boundaries, worker/task death, controlled I/O failure, duplicate callback/event delivery, and partial transition state.
+
+Prefer deterministic bounded simulation over actual resource exhaustion or indiscriminate chaos. The real semantic owner of recovery/state transition must still execute; a harness that reimplements the recovery algorithm is not sufficient evidence for the owner claim.
+
+**Acceptance evidence:** Counterfactual tests establish that fault injection is conditional, real-owner/proxy-proof, resource-safe, and selected for genuine recovery/failure claims rather than becoming a universal test stage.
 
 ## Implementation authority
 
 ### Frozen
 
 - Protocol 5 authority hierarchy and two-role lifecycle.
+- Existing final implementation reconciliation + affected regression/integration/project checks remain before independent implementation review readiness.
+- Review, Verification, Stabilization, Health Audit, qualification, documentation, and hygiene remain distinct non-authority modes/stages/specialists rather than extra lifecycle roles.
+- Verification is risk-triggered and does not become a mandatory duplicate review.
+- Stabilization is non-mutating; any resulting product-code change returns through normal Design/Implementation/final acceptance/review.
 - Metrics/tools remain evidence rather than product truth.
 - No universal simplicity or quality score.
-- Independent review remains a Software Design mode.
+- Independent review/verification remains a Software Design mode.
 - One optional semantic maintenance-audit specialist is sufficient for repository-level entropy analysis; do not proliferate tool-specific lifecycle specialists.
+- Maintenance audit does not define new Frozen architecture or accepted workplan authority.
 - Stabilization and maintenance audit are proportionate modes/stages, not mandatory per-change gates.
-- Mutation/differential/metamorphic/architecture-fitness/hotspot tooling is conditional and relation-driven.
+- Mutation/differential/metamorphic/failure-injection/architecture-fitness/hotspot tooling is conditional and relation-driven.
 - Quality-ratchet semantics apply to touched/affected code but do not impose arbitrary whole-repository thresholds.
+- The canonical human-facing workflow prompt reference is part of the protocol control surface but remains subordinate to canonical skill/reference authority.
+- Default portable skill resolution is compatible local first, canonical public repository second, with governing protocol-version preservation and truthful non-closure when neither source can be established.
 
 ### Delegated
 
 - Exact naming of the new shared maintainability reference, if one is needed.
 - Exact maintenance-audit specialist name, provided it is singular and semantically clear.
-- Exact metric/analyzer/mutation/coverage/architecture-tool examples.
+- Exact metric/analyzer/mutation/coverage/architecture/fault-injection tool examples.
 - Exact behavioral scenario harness and fixtures.
-- Exact phraseology and file distribution, provided progressive disclosure remains compact and coherent.
+- Exact phraseology/file distribution, provided progressive disclosure remains compact and coherent.
+- Exact prompt variable names and stage numbering.
+- Whether optional Baseline/change-health intake is a standalone prompt or an explicit triggered preamble to Design.
+- Exact harness selector syntax and documented installed-skill roots.
+- Exact repository-version lookup mechanics, provided no historical ref is guessed and older workplans are not silently upgraded.
 - Exact CI integration; no new external-service dependency is required merely to implement the doctrine.
 
 ### Reopen only on evidence
@@ -338,7 +441,10 @@ Reopen Design only if implementation proves one of these Frozen assumptions wron
 - a single maintenance-audit specialist cannot cover the semantic repository-audit problem without incoherent scope;
 - behavioral protocol qualification requires a fundamentally different packaging/qualification architecture;
 - quality-ratchet semantics conflict materially with existing affected-surface or active-simplicity doctrine;
-- the new capability classes materially duplicate existing owners in a way that cannot be consolidated cleanly.
+- the new capability classes materially duplicate existing owners in a way that cannot be consolidated cleanly;
+- portable local-first/public-fallback skill resolution cannot preserve version-bound workplan semantics without changing the protocol packaging/version architecture;
+- the human-facing prompt reference cannot remain a non-authoritative router without duplicating or overriding canonical doctrine;
+- current two-role authority is demonstrably insufficient for adversarial review/verification despite operational context separation.
 
 ## Affected surface and task-specific acceptance
 
@@ -347,17 +453,20 @@ Expected affected surfaces include:
 - `source/roles/software-design/SKILL.md`
 - `source/roles/software-implementation/SKILL.md`
 - `source/shared/references/workflow-and-workplans.md`
+- `source/shared/references/development-workflow-prompts.md`
 - `source/shared/references/testing-and-validation.md`
 - `source/shared/references/architecture-and-design.md`
 - `source/shared/references/convergence-and-cycle-economy.md`
 - `source/shared/references/tool-assisted-engineering.md`
 - `source/shared/references/python-engineering.md`
 - `source/shared/references/scientific-software.md`
+- storage/concurrency references where bounded failure-injection routing materially belongs
 - `source/shared/references/documentation-maintenance.md` where milestone reconciliation changes are material
 - `source/specialists/repository-hygiene/SKILL.md`
 - new maintenance-audit specialist source/package
-- build/package indexes and generated `dist/` bundles
-- `README.md`, `source/README.md`, `PORTABILITY.md`, and qualification scenarios where public protocol semantics change
+- build/package indexes and generated `dist/` bundles where the new specialist or canonical references affect packaged output
+- `README.md`, `source/README.md`, and `PORTABILITY.md`
+- qualification/reference-routing fixtures where portable orchestration behavior is exercised
 - protocol contract/routing/counterfactual/live-qualification tests
 - active/archive workplan lifecycle state if current authority establishes older protocol workplans are complete.
 
@@ -365,61 +474,75 @@ Expected affected surfaces include:
 
 1. Existing Protocol 5.15 tests and package checks remain green unless deliberately updated to stronger 5.16 semantics.
 2. New tests establish the 5.16 identity and preserve all prior authority/simplicity/tool-routing/language-profile contracts.
-3. Counterfactual tests protect against metric authority, universal mutation requirements, mandatory whole-repository audits, new lifecycle-role proliferation, and confirmation-biased review.
-4. Behavioral qualification scenarios cover at least the six anti-entropy cases listed above.
-5. New maintenance-audit package is self-contained and passes standard package validation.
-6. Generated `dist/` artifacts match canonical `source/`.
-7. Existing optional tool routing remains relation-first and no new mandatory multi-tool pipeline appears.
-8. Entry-point growth remains controlled; detailed doctrine is progressively disclosed rather than duplicated.
-9. Protocol 5.14/5.15 stale active-workplan state is reconciled or explicitly proven still active.
-10. Final repository checks documented by the current protocol all pass.
+3. Existing final assembled acceptance ordering remains explicit: final accepted-contract reconciliation and final affected regression/integration/project checks precede independent implementation Review readiness.
+4. Counterfactual tests protect against metric authority, universal mutation/failure-injection requirements, mandatory whole-repository audits, new lifecycle-role proliferation, confirmation-biased review, and duplicate mandatory Review+Verification.
+5. Behavioral qualification covers the anti-entropy/failure-history cases listed in Obligation 10.
+6. The canonical workflow prompt reference is discoverable and parameterized; stages route to the intended skill/mode and preserve stage semantics.
+7. Portable skill-resolution qualification covers compatible local success, local absence/unreadability fallback, older-workplan version preservation, selector-not-shell behavior, exposed installed-skill-root use, and truthful no-source limitation.
+8. Baseline/change-health intake is user-discoverable when material without becoming a mandatory per-change gate or persistent ledger.
+9. New maintenance-audit package is self-contained, passes standard package validation, and does not fabricate longitudinal claims when history is unavailable.
+10. Bounded failure-injection routing is conditional, resource-safe, and proxy-proof for real failure/recovery owner claims.
+11. Generated `dist/` artifacts match canonical `source/` for all package surfaces that are generated by repository policy.
+12. Existing optional tool routing remains relation-first and no new mandatory multi-tool pipeline appears.
+13. Skill entrypoint growth remains controlled; detailed doctrine is progressively disclosed rather than duplicated. Prompt-reference guardrails do not become competing semantic authority.
+14. `README.md`, `source/README.md`, and `PORTABILITY.md` describe the canonical workflow prompt entrypoint and local-first/public-fallback semantics consistently.
+15. Protocol 5.14/5.15 stale active-workplan state is reconciled or explicitly proven still active.
+16. Final repository checks documented by the governing protocol all pass.
 
 Production qualification: unnecessary; this is protocol/control-plane work. Live harness/model qualification remains bounded and named when actually executed.
 
 ## Implementation sequence and genuine redesign / simplification triggers
 
-### Stage 1 — Canonical long-horizon maintainability doctrine
+### Stage 1 — Reconcile canonical long-horizon doctrine and workflow orchestration
 
-Reconcile existing architecture, workflow, convergence, testing, and tool owners. Add only the minimum new shared owner needed for long-horizon maintainability/stabilization/adversarial-verification semantics. Avoid duplicating existing active-simplicity doctrine.
+Reconcile existing architecture, workflow, convergence, testing, versioning, and prompt-routing owners. Correct the lifecycle ordering so final assembled acceptance precedes independent Review. Make Review, Verification, Stabilization, Health Audit, and Closeout semantically distinct. Reconcile the canonical parameterized prompt reference and portable local-first/public-fallback resolver into the protocol without turning it into parallel authority.
 
-Close with protocol static/counterfactual tests for authority, metric-as-sensor semantics, quality ratchet, and non-bureaucracy.
+Close with static/counterfactual tests for authority, stage ordering/selection, prompt reachability, version-bound skill resolution, metric-as-sensor semantics, quality ratchet, and non-bureaucracy.
 
-### Stage 2 — Test-effectiveness and architecture-fitness capability routing
+### Stage 2 — Test-effectiveness, scientific/failure-path, and architecture-fitness routing
 
-Add mutation/oracle-strength, changed-code coverage, architecture-fitness, complexity/hotspot, and longitudinal-maintenance capability classes. Extend Python static tooling and scientific differential/metamorphic guidance.
+Add mutation/oracle-strength, changed-code coverage, differential/metamorphic testing, bounded fault-injection, architecture-fitness, complexity/hotspot, and longitudinal-maintenance capability classes. Extend Python static tooling and scientific reference guidance while keeping all routes conditional and claim-driven.
 
-Close with relation-first routing tests and language-profile regression.
+Close with relation-first routing tests, failure/recovery counterfactuals, scientific-method scenarios, and language-profile regression.
 
-### Stage 3 — Adversarial verification and stabilization lifecycle integration
+### Stage 3 — Adversarial Review/Verification and stabilization lifecycle integration
 
-Strengthen Software Design independent review and workflow guidance for fresh-context falsification and milestone stabilization without creating new authority roles or mandatory gates.
+Strengthen Software Design independent Review for fresh-context falsification while preserving existing review readiness. Add separate risk-triggered Verification semantics and non-mutating milestone Stabilization with normal-cycle re-entry for any resulting changes.
 
-Close with counterfactual scenarios for confirmation bias, excessive stabilization, and missed entropy.
+Close with counterfactual scenarios for confirmation bias, verification-before-final-acceptance, duplicate mandatory verification, excessive stabilization, direct stabilization mutation, and missed entropy.
 
 ### Stage 4 — Maintenance-audit specialist
 
-Implement the single semantic repository-health specialist with conservative routing boundaries and no automatic authority promotion.
+Implement the single semantic repository-health specialist with conservative routing boundaries, explicit history-evidence limitations, and no automatic authority promotion.
 
-Close with skill/package validation and representative behavioral scenarios.
+Close with skill/package validation and representative behavioral scenarios including missing-history behavior and routing to Design versus Implementation.
 
-### Stage 5 — Protocol behavioral qualification
+### Stage 5 — Behavioral and portable-routing qualification
 
-Add anti-entropy behavioral scenarios and update `PORTABILITY.md` so static protocol tests, reference routing, tool routing, and live behavioral protocol compliance remain clearly distinct evidence classes.
+Add anti-entropy behavioral scenarios plus prompt/skill-resolution scenarios. Update `PORTABILITY.md` so static protocol tests, reference routing, installed-skill resolution, public-repository fallback, tool routing, and live behavioral protocol compliance remain clearly distinct evidence classes.
 
-Close with whichever live harness/model qualification is actually available; do not claim unexecuted configurations.
+Close with whichever live harness/model qualification is actually available; do not claim unexecuted configurations or selectors.
 
-### Stage 6 — Lifecycle closeout and repository reconciliation
+### Stage 6 — Documentation, packaging, and public-entrypoint reconciliation
 
-Inspect Protocol 5.14/5.15 active workplans and archive/close them only if their accepted state proves completion. Reconcile documentation/indexes/generated distributions and run the full protocol repository acceptance workflow.
+Reconcile `README.md`, `source/README.md`, prompt reference, `PORTABILITY.md`, version documentation, build/package indexes, and generated distributions. Ensure the new maintenance-audit skill is packaged correctly and that the human-facing prompt entrypoint is discoverable without duplicating it gratuitously across every skill bundle unless the build/distribution architecture independently requires that.
+
+Close with package validation, distribution equivalence checks, and prompt/source discoverability checks.
+
+### Stage 7 — Lifecycle closeout and repository reconciliation
+
+Inspect Protocol 5.14/5.15 active workplans and archive/close them only if their accepted state proves completion. Reconcile remaining documentation/indexes/generated artifacts and run the full protocol repository acceptance workflow.
 
 ### Simplification triggers
 
 Before adding new durable protocol machinery, stop and simplify if implementation begins producing:
 
 - multiple new shared references covering overlapping maintainability concepts;
-- separate specialists for mutation, architecture, complexity, or verification;
+- separate specialists for mutation, architecture, complexity, verification, stabilization, or prompt routing;
 - a quality-score framework or permanent metric ledger;
 - duplicated lifecycle semantics across Design and Implementation entrypoints;
+- per-harness copies of the full workflow prompts or protocol doctrine;
+- a new resolver service/wrapper when simple harness-native discovery plus public source fallback is sufficient;
 - a mandatory fixed multi-stage pipeline for trivial changes;
 - a persistent architecture manifest created solely to satisfy this workplan;
 - repeated lexical tests that do not increase behavioral confidence;
@@ -433,22 +556,26 @@ Reopen only the affected design surface if:
 - the maintenance-audit specialist cannot remain non-authoritative without losing its purpose;
 - quality-ratchet semantics contradict an existing Tier-1/Frozen doctrine rather than merely requiring wording reconciliation;
 - a new capability class cannot be cleanly expressed under relation-first tool routing;
-- current two-role authority is demonstrably insufficient for adversarial verification despite operational context separation.
+- portable skill resolution cannot preserve older workplan semantics without a new version-distribution architecture;
+- the prompt entrypoint cannot remain a thin orchestration control surface without conflicting with canonical skill/reference authority;
+- current two-role authority is demonstrably insufficient for adversarial review/verification despite operational context separation.
 
 ## Expected end state
 
-Protocol 5.16 should preserve the compact two-role system while making long-term agentic development materially more self-correcting:
+Protocol 5.16 should preserve the compact two-role system while making long-term agentic development materially more self-correcting and more reliably activated across harnesses:
 
 ```text
 correct patches
     + strong oracles
     + executable architecture constraints
-    + adversarial verification
+    + adversarial review / risk-triggered verification
     + quality ratchets
+    + bounded failure-path evidence
     + longitudinal health sensing
     + milestone simplification
+    + portable stage/skill routing
     + disciplined closeout
     = durable codebase coherence
 ```
 
-The intended result is not a larger process. It is an earlier-warning, more falsifiable, more autonomous control loop that helps agents preserve a coherent system over many development cycles instead of merely producing locally correct patches.
+The intended result is not a larger mandatory process. It is an earlier-warning, more falsifiable, more portable, and more autonomous control loop that helps agents preserve a coherent system over many development cycles instead of merely producing locally correct patches.
