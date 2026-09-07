@@ -2,7 +2,7 @@
 
 This file is the canonical **human-facing prompt entrypoint** for orchestrating the Software Development Protocol across common development stages.
 
-The prompts do not create new protocol authority. They route a user request into the existing protocol skills and references with enough stage-specific control to make skill activation, evidence gathering, authority handling, and handoff behavior reliable.
+The prompts do not create new protocol authority. They route a user request into the existing protocol skills and references with enough stage-specific control to make skill activation, evidence gathering, authority handling, and handoff behavior reliable across web and local agent harnesses.
 
 ## How to use this reference
 
@@ -10,8 +10,8 @@ The prompts do not create new protocol authority. They route a user request into
 2. Copy that stage prompt as a whole.
 3. Edit only the `INPUTS` block at the top unless the task genuinely needs an additional explicit user constraint.
 4. Define each input once. The rest of the prompt refers to the variable name instead of repeating paths, branches, workplan names, or authorities.
-5. Use `AUTO` when the agent should discover the value from the repository/protocol, and `NONE` when the parameter intentionally does not apply.
-6. Input variables identify task context; they do not override higher-authority product requirements, Frozen architecture, safety rules, or repository/project instructions.
+5. Use `AUTO_LOCAL_FIRST` for portable protocol-skill discovery, `AUTO` when the agent should infer a value from governing repository/protocol authority, and `NONE` when a parameter intentionally does not apply.
+6. Input variables identify task context; they do not override higher-authority product requirements, Frozen architecture, safety rules, repository/project instructions, or the protocol version governing an accepted workplan.
 
 For substantial work, the common lifecycle is:
 
@@ -31,6 +31,20 @@ health audit is periodic across accumulated repository history rather than manda
 
 Testing, verification, stabilization, qualification, documentation, and hygiene are modes or supporting capabilities. They do not create additional product-approval authorities beyond the protocol's Design and Implementation roles.
 
+## Portable protocol-skill resolution
+
+Every stage below is self-contained and includes `PROTOCOL_SOURCE` plus `PROTOCOL_REF` inputs. Unless the user explicitly supplies another source, resolve each required protocol skill **local first, public repository second**.
+
+When `PROTOCOL_SOURCE = AUTO_LOCAL_FIRST`:
+
+1. **Discover/invoke the skill through the current harness first.** Inspect the harness's available skill/plugin/command registry and use its native invocation convention. Examples include `@software-design`, `/software-design`, `@software-implementation`, `/software-implementation`, or an equivalent harness-specific selector. These examples are harness commands/selectors, **not shell commands**; do not type them into a shell merely because they begin with `@` or `/`.
+2. **Prefer a readable compatible local installation.** If the required skill is installed and its governing protocol version is compatible with `PROTOCOL_REF`, load/invoke that installed skill and follow its progressive-disclosure references normally.
+3. **Fall back to the canonical public repository when local resolution fails.** If the skill is absent, inaccessible, unreadable, or incompatible with the governing protocol version, use `https://github.com/hjin98/software-development-protocol`. Resolve the appropriate repository ref, read the canonical entrypoint from `source/roles/<skill-name>/SKILL.md` or `source/specialists/<skill-name>/SKILL.md`, and then read the shared/source references that entrypoint requires. `source/` is canonical; generated `dist/` bundles are transport artifacts rather than the primary source of truth.
+4. **Preserve protocol-version coherence.** When a governing workplan declares a protocol version, `PROTOCOL_REF = AUTO` means resolve that governing version or a repository revision explicitly documented as compatible with it. Do not silently reinterpret an older accepted workplan under newer doctrine. When no accepted workplan governs the task, `AUTO` means the current compatible protocol source available to the task.
+5. **Do not pretend a skill was loaded.** If neither a compatible local installation nor the public repository source can be read, report the capability/source limitation and use only an explicitly documented fallback mode from the selected stage. Do not claim skill execution from memory or from a similarly named unrelated skill.
+
+If `PROTOCOL_SOURCE` is an explicit installed path, package, plugin, repository, or ref, use that source as directed, subject to higher-authority task/safety constraints and protocol-version compatibility.
+
 ---
 
 ## 1. Design / Workplan
@@ -41,10 +55,11 @@ TASK = [describe the stakeholder, scientific, computational, architectural, or o
 REPOSITORY_TARGET = [repository/worktree/branch to inspect; AUTO = current repository]
 EXISTING_AUTHORITIES = [existing workplans/specifications/architecture/method papers/contracts to preserve or reconcile; AUTO = discover relevant authorities]
 WORKPLAN_DESTINATION = [desired workplan path; AUTO = repository convention]
-PROTOCOL_SOURCE = [installed software-development-protocol skills or repository/ref containing them; AUTO = available current protocol]
+PROTOCOL_SOURCE = [AUTO_LOCAL_FIRST = harness-native installed skill first, then public repository fallback; otherwise explicit installed source or repository]
+PROTOCOL_REF = [AUTO = governing protocol version when task authority declares one, otherwise current compatible protocol; or explicit branch/tag/commit/version]
 ADDITIONAL_CONSTRAINTS = [optional explicit user constraints; NONE if absent]
 
-Use the `software-design` skill from PROTOCOL_SOURCE.
+Before substantive work, resolve REQUIRED_SKILL = software-design from PROTOCOL_SOURCE at PROTOCOL_REF. Under AUTO_LOCAL_FIRST, first use the current harness's native installed-skill discovery/invocation mechanism (for example @software-design, /software-design, or equivalent where supported; these are not shell commands). If the skill is unavailable, unreadable, or version-incompatible, load the canonical software-design skill and its required references from https://github.com/hjin98/software-development-protocol at the appropriate ref. Do not silently substitute a different protocol version.
 
 Diagnose TASK from the actual state of REPOSITORY_TARGET and create or update the governing workplan at WORKPLAN_DESTINATION. Load and reconcile EXISTING_AUTHORITIES rather than treating any single surface-level document as automatically complete.
 
@@ -76,10 +91,11 @@ Finish with a Pass / No-Pass verdict on whether the resulting workplan is snapsh
 INPUTS
 WORKPLAN = [governing workplan path/identifier]
 REPOSITORY_TARGET = [repository/worktree/branch to modify; AUTO = current repository]
-PROTOCOL_SOURCE = [installed software-development-protocol skills or repository/ref containing them; AUTO = available current protocol]
+PROTOCOL_SOURCE = [AUTO_LOCAL_FIRST = harness-native installed skill first, then public repository fallback; otherwise explicit installed source or repository]
+PROTOCOL_REF = [AUTO = WORKPLAN's governing protocol version when declared, otherwise current compatible protocol; or explicit branch/tag/commit/version]
 ADDITIONAL_CONSTRAINTS = [optional explicit user constraints; NONE if absent]
 
-Use the `software-implementation` skill from PROTOCOL_SOURCE.
+Before substantive work, resolve REQUIRED_SKILL = software-implementation from PROTOCOL_SOURCE at PROTOCOL_REF. Under AUTO_LOCAL_FIRST, first use the current harness's native installed-skill discovery/invocation mechanism (for example @software-implementation, /software-implementation, or equivalent where supported; these are not shell commands). If the skill is unavailable, unreadable, or version-incompatible, load the canonical software-implementation skill and its required references from https://github.com/hjin98/software-development-protocol at the appropriate ref. Do not silently substitute a different protocol version.
 
 Implement WORKPLAN in full against the current state of REPOSITORY_TARGET.
 
@@ -89,7 +105,7 @@ Implement at the semantic owning layer. Do not add a patch, wrapper, adapter, fa
 
 Prefer reduction or alteration over addition when engineering-equivalent. New machinery must either provide a genuinely missing Tier-1/Frozen capability or replace broader existing complexity so that total system complexity decreases.
 
-If implementation evidence invalidates a Frozen architecture decision, stop dependent work and route only the affected design surface back to `software-design`. Do not silently redesign around WORKPLAN.
+If implementation evidence invalidates a Frozen architecture decision, stop dependent work and route only the affected design surface back to `software-design`. Resolve that skill using the same local-first/public-fallback rule before redesign. Do not silently redesign around WORKPLAN.
 
 For each material engineering question, apply the protocol's relation-first tool routing. Use semantic navigation, structural analysis, property/generative testing, data-flow analysis, debuggers, sanitizers, profilers, or other specialized capabilities when their relation is triggered and they provide higher-information evidence. Do not invoke tools ceremonially, but do not ignore a directly triggered specialized capability merely because generic search is familiar.
 
@@ -126,10 +142,11 @@ INPUTS
 WORKPLAN = [governing workplan path/identifier]
 IMPLEMENTATION_TARGET = [implemented branch/commit/worktree; AUTO = current implementation]
 RELATED_AUTHORITIES = [parent/relative workplans, architecture, specifications, method papers, contracts; AUTO = discover relevant authorities]
-PROTOCOL_SOURCE = [installed software-development-protocol skills or repository/ref containing them; AUTO = available current protocol]
+PROTOCOL_SOURCE = [AUTO_LOCAL_FIRST = harness-native installed skill first, then public repository fallback; otherwise explicit installed source or repository]
+PROTOCOL_REF = [AUTO = WORKPLAN's governing protocol version when declared, otherwise current compatible protocol; or explicit branch/tag/commit/version]
 ADDITIONAL_CONSTRAINTS = [optional explicit user constraints; NONE if absent]
 
-Use the `software-design` skill from PROTOCOL_SOURCE in independent implementation-review mode.
+Before substantive work, resolve REQUIRED_SKILL = software-design from PROTOCOL_SOURCE at PROTOCOL_REF. Under AUTO_LOCAL_FIRST, first use the current harness's native installed-skill discovery/invocation mechanism (for example @software-design, /software-design, or equivalent where supported; these are not shell commands). If the skill is unavailable, unreadable, or version-incompatible, load the canonical software-design skill and its required references from https://github.com/hjin98/software-development-protocol at the appropriate ref. Do not silently substitute a different protocol version. Use the resolved skill in independent implementation-review mode.
 
 WORKPLAN has been implemented in IMPLEMENTATION_TARGET. Thoroughly review the assembled current implementation, not merely its diff or the implementer's summary. Reconcile WORKPLAN with RELATED_AUTHORITIES and the actual repository state.
 
@@ -179,10 +196,11 @@ VERIFICATION_SCOPE = [subsystem/workplan/feature/campaign/release whose claims m
 IMPLEMENTATION_TARGET = [branch/commit/worktree to verify; AUTO = current implementation]
 GOVERNING_DESIGN = [Frozen architecture/specifications/workplans/product contracts; AUTO = discover relevant normative authorities]
 SCIENTIFIC_AUTHORITIES = [method papers/equations/reference methods/domain documentation; AUTO = discover relevant authorities; NONE if non-scientific]
-PROTOCOL_SOURCE = [installed software-development-protocol skills or repository/ref containing them; AUTO = available current protocol]
+PROTOCOL_SOURCE = [AUTO_LOCAL_FIRST = harness-native installed skill first, then public repository fallback; otherwise explicit installed source or repository]
+PROTOCOL_REF = [AUTO = governing workplan/design protocol version when declared, otherwise current compatible protocol; or explicit branch/tag/commit/version]
 ADDITIONAL_CONSTRAINTS = [optional explicit user constraints; NONE if absent]
 
-Use the `software-design` skill from PROTOCOL_SOURCE in independent adversarial-verification mode.
+Before substantive work, resolve REQUIRED_SKILL = software-design from PROTOCOL_SOURCE at PROTOCOL_REF. Under AUTO_LOCAL_FIRST, first use the current harness's native installed-skill discovery/invocation mechanism (for example @software-design, /software-design, or equivalent where supported; these are not shell commands). If the skill is unavailable, unreadable, or version-incompatible, load the canonical software-design skill and its required references from https://github.com/hjin98/software-development-protocol at the appropriate ref. Do not silently substitute a different protocol version. Use the resolved skill in independent adversarial-verification mode.
 
 Verify that IMPLEMENTATION_TARGET faithfully realizes the Frozen scientific, computational, product, and architectural design governing VERIFICATION_SCOPE.
 
@@ -229,10 +247,11 @@ INPUTS
 STABILIZATION_SCOPE = [completed subsystem/workplan/feature cluster/migration/repair sequence to stabilize]
 IMPLEMENTATION_TARGET = [accepted branch/commit/worktree; AUTO = current implementation]
 GOVERNING_AUTHORITY = [workplan/Frozen architecture/product constraints to preserve; AUTO = discover relevant authorities]
-PROTOCOL_SOURCE = [installed software-development-protocol skills or repository/ref containing them; AUTO = available current protocol]
+PROTOCOL_SOURCE = [AUTO_LOCAL_FIRST = harness-native installed skill first, then public repository fallback; otherwise explicit installed source or repository]
+PROTOCOL_REF = [AUTO = governing workplan/design protocol version when declared, otherwise current compatible protocol; or explicit branch/tag/commit/version]
 ADDITIONAL_CONSTRAINTS = [optional explicit user constraints; NONE if absent]
 
-Use the `software-design` skill from PROTOCOL_SOURCE in stabilization / architecture-GC mode.
+Before substantive work, resolve REQUIRED_SKILL = software-design from PROTOCOL_SOURCE at PROTOCOL_REF. Under AUTO_LOCAL_FIRST, first use the current harness's native installed-skill discovery/invocation mechanism (for example @software-design, /software-design, or equivalent where supported; these are not shell commands). If the skill is unavailable, unreadable, or version-incompatible, load the canonical software-design skill and its required references from https://github.com/hjin98/software-development-protocol at the appropriate ref. Do not silently substitute a different protocol version. Use the resolved skill in stabilization / architecture-GC mode.
 
 Run this stage only after STABILIZATION_SCOPE has otherwise passed ordinary implementation review. The purpose is not to invent missing feature requirements. Determine whether the assembled accepted implementation has accumulated unnecessary Tier-2 complexity and whether it remains intellectually tractable for future development.
 
@@ -268,10 +287,11 @@ DOWNSTREAM_WORKPLAN = [workplan that must be realigned before implementation]
 UPSTREAM_ACCEPTED_WORK = [accepted/implemented predecessor workplans, commits, branches, migrations, or feature stages whose results change the starting state]
 FROZEN_PARENT_AUTHORITY = [parent workplan/design/architecture that remains authoritative; AUTO = discover governing parent authority]
 IMPLEMENTATION_TARGET = [repository/worktree/branch containing the accepted upstream state; AUTO = current repository]
-PROTOCOL_SOURCE = [installed software-development-protocol skills or repository/ref containing them; AUTO = available current protocol]
+PROTOCOL_SOURCE = [AUTO_LOCAL_FIRST = harness-native installed skill first, then public repository fallback; otherwise explicit installed source or repository]
+PROTOCOL_REF = [AUTO = DOWNSTREAM_WORKPLAN/FROZEN_PARENT_AUTHORITY governing protocol version when declared, otherwise current compatible protocol; or explicit branch/tag/commit/version]
 ADDITIONAL_CONSTRAINTS = [optional explicit user constraints; NONE if absent]
 
-Use the `software-design` skill from PROTOCOL_SOURCE.
+Before substantive work, resolve REQUIRED_SKILL = software-design from PROTOCOL_SOURCE at PROTOCOL_REF. Under AUTO_LOCAL_FIRST, first use the current harness's native installed-skill discovery/invocation mechanism (for example @software-design, /software-design, or equivalent where supported; these are not shell commands). If the skill is unavailable, unreadable, or version-incompatible, load the canonical software-design skill and its required references from https://github.com/hjin98/software-development-protocol at the appropriate ref. Do not silently substitute a different protocol version.
 
 Re-align DOWNSTREAM_WORKPLAN with the accepted current implementation state produced by UPSTREAM_ACCEPTED_WORK in IMPLEMENTATION_TARGET.
 
@@ -311,11 +331,12 @@ AUDIT_SCOPE = [repository, subsystem, package set, or architectural region to au
 REPOSITORY_TARGET = [repository/worktree/branch; AUTO = current repository]
 HISTORY_WINDOW = [history range/release interval/commit range to consider; AUTO = enough history to identify material trends]
 GOVERNING_ARCHITECTURE = [current architecture/product/scientific authorities; AUTO = discover relevant authorities]
-PROTOCOL_SOURCE = [installed software-development-protocol skills or repository/ref containing them; AUTO = available current protocol]
+PROTOCOL_SOURCE = [AUTO_LOCAL_FIRST = harness-native installed skill first, then public repository fallback; otherwise explicit installed source or repository]
+PROTOCOL_REF = [AUTO = governing architecture/workplan protocol version when declared, otherwise current compatible protocol; or explicit branch/tag/commit/version]
 EXCLUSIONS = [explicitly excluded surfaces; NONE if absent]
 ADDITIONAL_CONSTRAINTS = [optional explicit user constraints; NONE if absent]
 
-Use the `software-maintenance-audit` specialist from PROTOCOL_SOURCE when available. Until that specialist is implemented/available, use `software-design` in repository semantic-health audit mode under the same authority boundaries.
+Before substantive work, resolve PREFERRED_SKILL = software-maintenance-audit from PROTOCOL_SOURCE at PROTOCOL_REF. Under AUTO_LOCAL_FIRST, first use the current harness's native installed-skill discovery/invocation mechanism (for example @software-maintenance-audit, /software-maintenance-audit, or equivalent where supported; these are not shell commands). If it is unavailable locally, try the canonical specialist source at https://github.com/hjin98/software-development-protocol at the appropriate ref. If the specialist does not exist in that governing protocol version, resolve FALLBACK_SKILL = software-design through the same local-first/public-fallback rule and use repository semantic-health audit mode. Do not invent a maintenance-audit skill from memory and do not silently substitute a different protocol version.
 
 This is a periodic long-horizon repository audit, not a feature review and not a new approval gate.
 
@@ -364,6 +385,8 @@ Route findings as:
 - repository/lifecycle residue -> `repository-hygiene`;
 - watch item -> retain as observation when evidence is insufficient to justify work.
 
+For every routed skill above, resolve the skill through the same PROTOCOL_SOURCE/PROTOCOL_REF local-first/public-fallback rule before invoking it.
+
 Do not perform a repository-wide refactor merely because debt is visible. Do not create workplans whose maintenance cost exceeds the demonstrated problem.
 
 Conclude with one of:
@@ -383,10 +406,11 @@ INPUTS
 COMPLETED_WORK = [completed workplan/feature/migration/release scope being closed]
 IMPLEMENTATION_TARGET = [accepted branch/commit/worktree; AUTO = current repository]
 AFFECTED_DOCUMENTATION = [known documentation surfaces; AUTO = discover affected durable documentation]
-PROTOCOL_SOURCE = [installed software-development-protocol skills or repository/ref containing them; AUTO = available current protocol]
+PROTOCOL_SOURCE = [AUTO_LOCAL_FIRST = harness-native installed skill first, then public repository fallback; otherwise explicit installed source or repository]
+PROTOCOL_REF = [AUTO = COMPLETED_WORK governing protocol version when declared, otherwise current compatible protocol; or explicit branch/tag/commit/version]
 ADDITIONAL_CONSTRAINTS = [optional explicit user constraints; NONE if absent]
 
-Use `software-documentation` and `repository-hygiene` from PROTOCOL_SOURCE when their respective protocol triggers apply.
+Before substantive work, resolve REQUIRED_SKILLS = [software-documentation, repository-hygiene] from PROTOCOL_SOURCE at PROTOCOL_REF when their respective protocol triggers apply. Under AUTO_LOCAL_FIRST, first use the current harness's native installed-skill discovery/invocation mechanism (for example @software-documentation, /software-documentation, @repository-hygiene, /repository-hygiene, or equivalent where supported; these are not shell commands). For any required skill unavailable, unreadable, or version-incompatible locally, load its canonical specialist entrypoint and required references from https://github.com/hjin98/software-development-protocol at the appropriate ref. Resolve each skill independently; one locally installed skill does not imply the other is present. Do not silently substitute a different protocol version.
 
 Run this stage only after the relevant implementation, review, required verification, stabilization, and required qualification for COMPLETED_WORK have closed.
 
@@ -405,7 +429,7 @@ Verify that:
 - no active evidence, unique work, compatibility material, or recoverable state is lost;
 - repository indexes/navigation reflect the accepted current lifecycle state.
 
-Do not alter product behavior during closeout. Any semantic defect discovered here routes back to the appropriate Design/Implementation stage.
+Do not alter product behavior during closeout. Any semantic defect discovered here routes back to the appropriate Design/Implementation stage; resolve that stage's owning skill through the same local-first/public-fallback rule.
 
 Finish by reporting documentation reconciled, workplans archived/closed, residue removed or intentionally retained, repository-state limitations, and unresolved lifecycle inconsistencies.
 ```
