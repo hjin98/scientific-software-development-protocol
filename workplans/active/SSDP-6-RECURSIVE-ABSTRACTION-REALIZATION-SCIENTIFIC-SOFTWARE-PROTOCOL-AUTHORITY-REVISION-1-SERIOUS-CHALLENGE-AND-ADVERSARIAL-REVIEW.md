@@ -13,7 +13,7 @@ authority_entrypoint: workplans/active/SSDP-6-AUTHORITY.md
 
 ## 1. Purpose and authority
 
-This amendment is part of the current SSDP 6 transition authority identified by `SSDP-6-AUTHORITY.md`. It amends the review, verification, authority-state, and human-adjudication semantics of the parent SSDP 6 workplan without changing the accepted D1-D4 decomposition or recursive abstraction-realization model.
+This amendment is part of the current SSDP 6 transition authority identified by `SSDP-6-AUTHORITY.md`. It amends the parent workplan's review, verification, authority-state, human-adjudication, and narrowly related authority-clarification semantics without changing the accepted D1-D4 decomposition or recursive abstraction-realization model.
 
 The failure mode it forbids is epistemic compliance: a reviewer discovers strong evidence that an accepted abstraction is false, contradictory, materially ambiguous, incomplete, fallacious, or unrealizable, but suppresses the defect merely because the abstraction is already settled.
 
@@ -44,6 +44,8 @@ The final workflow adjudicator for a consequential epistemic dispute is the huma
 Every **material Review or verification/acceptance boundary** shall include a bounded adversarial **Challenge Pass** before normal closure. This includes D4->D3, D3->D2, D2->D1, D1 external-adequacy review, protocol self-review, and any equivalent material acceptance boundary.
 
 Operational independence or a fresh review context is preferred for substantial/high-risk claims when practical, but independence is not a prerequisite for the duty to challenge a serious defect. A role that discovers serious contradictory evidence during design, implementation, self-check, or any other activity must surface it even if a separate Review stage has not yet begun.
+
+For this doctrine, a review/acceptance claim is **material** when a wrong conclusion could plausibly alter acceptance of a governing scientific/mathematical claim, numerical guarantee/error envelope, public or governed contract, architecture/ownership decision, safety/security/reliability requirement, significant resource/compatibility constraint, or release/production decision. Tiny local details with no plausible effect on those claims remain proportionate low-risk work.
 
 The Challenge Pass asks whether the governing authority appears:
 
@@ -147,6 +149,10 @@ During bottom-up realization -> abstraction verification, a Serious Challenge mu
 
 Preserve the accepted authority as the explicit challenged baseline. If redesign is accepted, reopen the earliest/highest materially affected abstraction and invalidate only dependent descendants.
 
+Unless an explicit human risk override is active, **dependent realization/acceptance work shall not proceed as though the challenged claim were settled**. Work may continue only where it is independent of the challenged surface or is itself the bounded derivation, experiment, reference comparison, prototype, or probe needed to resolve the challenge.
+
+Existing descendant tests, calculations, benchmarks, or documents may remain useful observational evidence, but their ability to close the challenged semantic claim is suspended until the challenge is resolved or explicitly risk-overridden. Do not destroy still-useful evidence merely because its interpretation is provisional.
+
 ## 9. Human adjudication
 
 The designated human adjudicator evaluates the challenge with the agent's evidence and reasoning. Normal outcomes are:
@@ -160,6 +166,8 @@ Reopen the earliest affected authority, revise it through proposed -> review/fal
 The human demonstrates a false premise, missing governing assumption, misapplied theorem/model, invalid counterexample, misunderstood domain condition, applicable precedence rule, or other reason the alleged contradiction does not hold.
 
 The agent must genuinely reconsider the challenge. If the rebuttal resolves it, close the challenge and resume normal Review. Record the **material resolution rationale** durably near the challenged authority or in its canonical rationale when doing so prevents a plausible recurrence. Keep that record concise and scoped rather than preserving the full conversation.
+
+A resolved challenge record need only preserve the challenged claim/scope, resolution state, and material reasoning needed to prevent recurrence. Do not create a separate challenge database or permanent review transcript solely for this purpose.
 
 ### 9.3 Authority clarified or revised
 
@@ -186,9 +194,47 @@ Any descendant artifact or evidence whose validity depends on the challenged cla
 - be represented as ordinary accepted-current scientific/numerical/engineering closure;
 - propagate an unqualified `Pass` downstream.
 
-Unaffected claims may still close normally. The risk marker should follow only the dependent semantic surface. Normal unqualified `Pass`, publication/release claim, or Protocol release requires actual resolution of the Serious Challenge unless the product/release is explicitly and visibly classified as risk-accepted under project policy.
+Unaffected claims may still close normally. The risk marker follows only the dependent semantic surface.
 
-## 10. Anti-deference, anti-stubbornness, and debate convergence
+A project/product release may proceed under an explicit visible risk-accepted classification only where project policy permits and every independently binding release/safety/compliance requirement is still satisfied. **The SSDP 6 protocol itself may not use risk override to satisfy its own final release acceptance criteria.** An unresolved Serious Challenge to governing Protocol 6 authority blocks Protocol 6 release until resolved because the parent workplan requires final review with no genuine blocking defect.
+
+## 10. Durable domain authority versus cycle-scoped realization freeze
+
+The parent workplan's durable D1-D4 documentation authority and its generalized Protocol 5 `Frozen` concept are related but not identical.
+
+- **Accepted-current domain authority** is the durable current D1/D2/D3/D4 semantic record. It remains current until explicitly superseded through its owning authority.
+- **Cycle-scoped realization freeze** is the subset of solution decisions a specific change plan deliberately fixes to bound one realization cycle. It constrains that cycle but does not become durable domain authority merely because it was frozen in a workplan.
+
+A cycle-scoped decision becomes part of the durable current Scientific Method Paper, Numerical/Algorithmic Method Paper, Architecture Manual, or D4 Specification only when the owning domain explicitly accepts it as a current semantic claim that should govern future work.
+
+Conversely, a workplan must not treat durable current D1-D4 authority as optional merely because it was not restated in the cycle freeze. The cycle freeze is a bounded child-realization contract inside the larger current authority set, not a replacement for that set.
+
+This clarification preserves Protocol 5's useful implementation-cycle bounding without turning transient realization choices into permanent science, numerical method, architecture, or specification truth.
+
+## 11. Single semantic owner versus multiple applicable authorities
+
+The parent's rule that each material claim has exactly one current normative semantic owner prevents duplicated/competing ownership. It does **not** mean a realization may have only one governing authority.
+
+A concrete realization can simultaneously be constrained by:
+
+- one or more upstream domain claims;
+- domain-local governed external constraints;
+- safety/project/stakeholder/regulatory/public-contract authority;
+- ratified current domain decisions.
+
+Each individual claim should have one normative owner/source; the realization must satisfy **all applicable claims**. Do not copy an external governed contract into a D1/D2/D3/D4 document merely to manufacture local ownership. Domain documents should reference or incorporate its applicability without usurping the external source unless the project explicitly adopts a derived domain claim.
+
+If two applicable authorities genuinely conflict, route the conflict through the Serious Challenge/adjudication path rather than inventing duplicate ownership or silently choosing one.
+
+## 12. Snapshot-complete transition handoff
+
+`workplans/active/SSDP-6-AUTHORITY.md` is the canonical composition entrypoint for this transition. Supplying only the parent workplan while omitting an accepted amendment listed by that index is **not** snapshot-complete SSDP 6 transition authority.
+
+Agents asked to execute or review this SSDP 6 parent workplan should resolve the authority index first when it is available. No chat history or Git-history archaeology is required or authoritative once the listed current files are supplied.
+
+This is transition scaffolding only. Before Protocol 6 release, fold these semantics into the minimum canonical Protocol 6 role/reference owners so released operation does not depend on a parallel amendment/index layer.
+
+## 13. Anti-deference, anti-stubbornness, and debate convergence
 
 ### Anti-deference
 
@@ -202,7 +248,7 @@ Do not preserve a challenge merely because the reviewer stated it confidently, c
 
 A Serious Challenge is not an unlimited conversational veto. Once repeated debate adds no new evidence, stop restating the same arguments. Isolate the smallest unresolved premise and route to a discriminating experiment, formal derivation, primary/canonical source, additional designated human/domain expert, or explicit risk-override state. Preserve unresolved status honestly rather than cycling indefinitely.
 
-## 11. Constructive adversarialism
+## 14. Constructive adversarialism
 
 Material Review should default to constructive adversarialism rather than compliance checking. Actively attempt, proportionately, to find:
 
@@ -217,7 +263,7 @@ Material Review should default to constructive adversarialism rather than compli
 
 The objective is not objection production. It is to maximize discovery of high-consequence defects before they are deeply realized. Style preferences, speculative alternatives, and low-value questions remain ordinary review material, not Serious Challenges.
 
-## 12. Recursive application
+## 15. Recursive application
 
 The rule applies at every authority boundary:
 
@@ -245,7 +291,7 @@ Protocol self-review:
 
 A serious flaw discovered from a lower review scope must route upward to the earliest potentially wrong authority rather than being artificially contained in the original scope.
 
-## 13. Workflow and orchestrator representation
+## 16. Workflow and orchestrator representation
 
 SSDP 6 workflow/profile semantics must be able to represent an unresolved Serious Challenge without making the orchestrator an epistemic authority. It may need outcomes/states equivalent to:
 
@@ -259,9 +305,9 @@ risk_accepted_provisional
 
 Exact field/outcome names and whether they are stage results, authority states, or Tracker projections are delegated to profile design.
 
-The orchestrator may persist/rout the state and prevent counterfeit normal closure. It must never decide whether the challenge is true. The Challenge Pass ordinarily remains inside Review/verification rather than becoming a universal standalone stage; an interactive adjudication stage is warranted only when an actual challenge requires human participation.
+The orchestrator may persist/route the state and prevent counterfeit normal closure. It must never decide whether the challenge is true. The Challenge Pass ordinarily remains inside Review/verification rather than becoming a universal standalone stage; an interactive adjudication stage is warranted only when an actual challenge requires human participation.
 
-## 14. Required Protocol 6 implementation changes
+## 17. Required Protocol 6 implementation changes
 
 Before Protocol 6 release, consolidate this amendment into the minimum canonical owners rather than leaving permanent parallel doctrine. At minimum:
 
@@ -272,11 +318,14 @@ Before Protocol 6 release, consolidate this amendment into the minimum canonical
 5. human adjudication is distinguished from truth creation and supports a designated human domain authority/committee;
 6. Serious Challenge evidence-quality/source-verification rules are explicit;
 7. challenge resolution rationale is durable when materially useful to future reviewers;
-8. anti-deference, anti-stubbornness, and debate-convergence behavior are qualified;
-9. workflow/profile/orchestrator integration prevents unresolved challenge from becoming normal closure;
-10. this transient amendment is folded into canonical SSDP 6 sources before final release.
+8. durable accepted-current domain authority is distinguished from cycle-scoped realization freeze;
+9. one normative owner per claim is distinguished from multi-authority realization constraints;
+10. anti-deference, anti-stubbornness, and debate-convergence behavior are qualified;
+11. workflow/profile/orchestrator integration prevents unresolved challenge from becoming normal closure;
+12. snapshot-complete SSDP 6 transition resolution starts from the authority index;
+13. this transient amendment is folded into canonical SSDP 6 sources before final release.
 
-## 15. Behavioral qualification
+## 18. Behavioral qualification
 
 Qualification must include at least cases where:
 
@@ -290,20 +339,28 @@ Qualification must include at least cases where:
 8. a coherent missing assumption/theorem resolves a false alarm and the resolution rationale is preserved;
 9. a human risk override proceeds but is later reported as ordinary unqualified Pass;
 10. risk-accepted/provisional descendants are later mistaken for accepted-current evidence closing the unresolved parent claim;
-11. the same false alarm recurs because material prior resolution reasoning was not made durable;
-12. many low-value questions are promoted into Serious Challenges and create human fatigue;
-13. one root defect is fragmented into several dramatic challenge headings;
-14. a D2 flaw is discovered during D4 review and is incorrectly kept inside D4 scope;
-15. downstream realization is used to silently redefine upstream authority;
-16. workflow/orchestrator routes to normal completion despite unresolved Serious Challenge;
-17. a material Review skips the Challenge Pass because the reviewer is not operationally independent;
-18. a Serious Challenge is raised solely from an unverified recalled fact or secondary paraphrase when verification was practical;
-19. many sources repeat one underlying unsupported claim and are falsely treated as independent corroboration;
-20. agent-human debate cycles with no new evidence instead of isolating a discriminating premise/check;
-21. a team project uses a designated human domain authority/committee and the protocol incorrectly assumes one named individual researcher;
-22. an unresolved challenge contaminates unrelated sibling claims instead of remaining dependency-bounded.
+11. dependent work proceeds under unresolved challenge without risk override or a discriminating-evidence purpose;
+12. pre-challenge descendant evidence is incorrectly used as unqualified closure while the parent claim is challenged;
+13. the same false alarm recurs because material prior resolution reasoning was not made durable;
+14. many low-value questions are promoted into Serious Challenges and create human fatigue;
+15. one root defect is fragmented into several dramatic challenge headings;
+16. a D2 flaw is discovered during D4 review and is incorrectly kept inside D4 scope;
+17. downstream realization is used to silently redefine upstream authority;
+18. workflow/orchestrator routes to normal completion despite unresolved Serious Challenge;
+19. a material Review skips the Challenge Pass because the reviewer is not operationally independent;
+20. a Serious Challenge is raised solely from an unverified recalled fact or secondary paraphrase when verification was practical;
+21. many sources repeat one underlying unsupported claim and are falsely treated as independent corroboration;
+22. agent-human debate cycles with no new evidence instead of isolating a discriminating premise/check;
+23. a team project uses a designated human domain authority/committee and the protocol incorrectly assumes one named individual researcher;
+24. an unresolved challenge contaminates unrelated sibling claims instead of remaining dependency-bounded;
+25. a cycle-scoped workplan freeze is incorrectly copied into durable D1/D2/D3/D4 authority without owner acceptance;
+26. durable current method/architecture authority is incorrectly ignored because it was not restated in the cycle freeze;
+27. one semantic owner per claim is misread as forbidding multiple simultaneously applicable authorities;
+28. an external governed constraint is copied into a domain paper and silently re-owned instead of referenced as external authority;
+29. a Protocol 6 self-review Serious Challenge is explicitly risk-overridden and the candidate is incorrectly released as Protocol 6 anyway;
+30. the parent workplan is supplied without its accepted amendment and an agent falsely claims snapshot-complete transition authority.
 
-## 16. Acceptance criteria
+## 19. Acceptance criteria
 
 SSDP 6 is not review-complete until:
 
@@ -312,16 +369,21 @@ SSDP 6 is not review-complete until:
 - Serious Challenge has a high threshold distinct from ordinary blocker/risk;
 - material challenge evidence separates fact/source/inference/assumption and verifies external claims proportionately;
 - unresolved challenges appear before normal findings and block unqualified Pass for the affected claim;
+- dependent work is blocked absent resolution, explicit risk override, or bounded evidence-gathering purpose;
+- existing dependent evidence cannot counterfeit closure while its parent authority is challenged;
 - downstream evidence may challenge but not silently mutate upstream authority;
 - designated human adjudication governs workflow decisions without manufacturing epistemic resolution;
 - valid human reasoning/evidence can close a false alarm and materially useful resolution rationale is retained;
 - explicit risk override creates dependency-bounded provisional status rather than accepted closure;
+- durable current domain authority is distinct from cycle-scoped realization freeze;
+- one normative semantic owner per claim coexists cleanly with multiple applicable authorities;
+- transition handoff resolves through the authority index until consolidation;
 - challenge debate converges toward evidence instead of deference, stubbornness, or repetition;
 - challenge handling remains proportionate and does not become a human-fatigue mechanism;
-- normal Protocol 6 release cannot hide an unresolved Serious Challenge;
+- Protocol 6 cannot use risk override to satisfy its own final release acceptance criteria;
 - behavioral qualification demonstrates these properties.
 
-## 17. Final invariant
+## 20. Final invariant
 
 ```text
 Accepted authority constrains realization, but accepted authority is not infallible.
@@ -331,7 +393,11 @@ The challenge is evidence and advice, not self-authorized mutation.
 The designated human authority adjudicates consequential disputes, and sound rebuttal must be reconsidered.
 
 Unresolved truth-risk cannot become an ordinary Pass merely because closure is convenient.
+Dependent work stops unless it is resolving the challenge or is explicitly risk-overridden.
 Risk override may authorize bounded work, but dependent outputs remain explicitly provisional until resolution.
+
+Durable current authority is not the same thing as a cycle-scoped realization freeze.
+One claim should have one normative owner, while a realization may still be constrained by many applicable claims and authorities.
 
 Challenge serious matters; verify the challenge itself; do not manufacture serious matters.
 ```
