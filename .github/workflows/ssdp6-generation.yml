@@ -55,8 +55,24 @@ jobs:
         run: python source/check_dist.py --expected /tmp/protocol-dist --committed dist
       - name: Verify packaged protocol snapshots
         run: python orchestrator/scripts/generate_protocol_snapshot.py --check
-      - name: Run orchestrator Core acceptance suite
-        run: python orchestrator/scripts/run_core_tests.py
+      - name: Run orchestrator Core acceptance suite and persist exact failure diagnostics
+        run: |
+          set +e
+          python orchestrator/scripts/run_core_tests.py > /tmp/ssdp6-core-tests.log 2>&1
+          status=$?
+          set -e
+          cat /tmp/ssdp6-core-tests.log
+          if [ "$status" -ne 0 ]; then
+            cp /tmp/ssdp6-core-tests.log .ci-ssdp6-core-failure.log
+            git add .ci-ssdp6-core-failure.log
+            if ! git diff --cached --quiet; then
+              git config user.name "github-actions[bot]"
+              git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+              git commit -m "Record SSDP 6 Core diagnostics"
+              git push origin HEAD:impl/ssdp-6
+            fi
+            exit "$status"
+          fi
       - name: Check patch whitespace
         run: git diff --check
       - name: Commit generated derivatives after acceptance
