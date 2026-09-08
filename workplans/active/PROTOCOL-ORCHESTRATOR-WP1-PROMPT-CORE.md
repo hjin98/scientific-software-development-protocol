@@ -798,3 +798,146 @@ After R1-R7, rerun the complete affected surface on the exact candidate: Core fo
 WP-1 may return to independent Review only when all R1-R8 counterexamples are closed through the existing semantic owners, the complete final affected regression and installed-product integration pass on one exact candidate, ordinary repository validation passes, and no repair has introduced a parallel observer, registry, prompt authority, compatibility wrapper, persistence mechanism, or higher-module dependency.
 
 The positive implementation findings remain valid and should be preserved: one Core distribution and PEP 420 namespace, the intended small runtime dependency set, no higher-module runtime dependency, one extension entry-point group, canonical prompt snapshot parity, one canonical profile/body extraction path, non-mutating target Git commands, final-artifact privacy tests, passive discovery-only diagnostics, thin integration into the existing repository CI workflow, and no competing prompt-prose authority.
+
+## 12. Second independent review of the reopened repair contract — 2026-09-07
+
+**Verdict remains NO-PASS.** No production repair commit followed the first review; branch head at this pass was the review-only commit `455def2a8dc49e46c15015a0e01f239c242ee7cc`, so the executable candidate under review remains `5e6fd725213ccfdd211f79425d0aef33e03eaeaa`.
+
+This pass re-falsified the implementation and the R1-R8 repair contract against Architecture 1.6.0 and Protocol 5.16. It found additional manifestations in the same semantic owners. They are incorporated here to avoid another one-defect-per-review cycle. This section is a normative clarification/amendment of R1-R8 and adds R9-R11. Where wording conflicts, this section controls. It does not change parent architecture or add product capability.
+
+### 12.1 Amendments to R1-R8
+
+#### R1 amendment — candidate identity must cover all Git-material state safely
+
+In addition to staged blob bytes, `sdp.git-working-tree.v1` must distinguish materially different Git file modes/metadata that Git itself treats as candidate state. Non-UTF-8/surrogateescaped Git paths must not crash canonical JSON encoding; represent them deterministically and reversibly enough for identity, or mark identity incomplete. Apply a finite aggregate candidate-fingerprinting budget as well as per-file/path-count bounds so many individually legal files cannot force effectively unbounded reads.
+
+Required additions: mode-only staged/unstaged changes alter identity; a repository containing a non-UTF-8 dirty filename produces a structured stable/incomplete observation rather than an uncaught encoding failure; aggregate dirty-content overflow yields `identity_complete=false` or a structured bounded failure without pretending the candidate was fully fingerprinted.
+
+#### R2 amendment — selected-remote evidence includes enforceable freshness policy
+
+`ObservationPolicy.max_remote_staleness_seconds` is part of the Frozen public policy and currently has no behavioral owner. It must not remain fingerprint-only/no-op data. A caller-supplied maximum applies to the evidence used for the selected target. If cached remote-tracking evidence has no trustworthy observation age, Core must not invent one from a convenient filesystem/ref timestamp; that evidence cannot satisfy an explicit maximum without refresh or another evidence-backed age. A successful `refresh_remote` query may establish freshness at the actual observation time.
+
+Preserve the earlier remote/target-coherence and `core.remote.ambiguous` requirements. Update user documentation so the several-unresolved-remotes case is documented as `core.remote.ambiguous`, not `core.remote.unavailable`.
+
+Required additions: maximum-staleness policy changes feasibility/result when only age-unknown cached evidence exists; refresh satisfies a compatible maximum; no hidden network call occurs in cached mode; freshness provenance remains distinct from target existence.
+
+#### R3 amendment — canonical path selection and lifecycle authority must agree
+
+A lifecycle-inconsistent document must not silently enter `_active_authorities` merely because it physically resides under `workplans/active/`. Likewise, an exact selector must not let a stage that requires a current governing plan silently use an archived/completed or lifecycle-inconsistent document when that stage policy does not permit that lifecycle. Preserve the explicit Closeout completed-work binding and other stage-specific evidence semantics rather than applying one blanket active-only rule to every stage.
+
+Symlink aliases must not create a second lifecycle/authority interpretation of one underlying document. Prefer the simpler realization (for example, ignore symlink workplan entries) unless a real accepted use case requires them; do not maintain alias reconciliation machinery merely to preserve the current implementation.
+
+Required additions: active-directory + completed status is diagnosed and excluded from implicit active selection; Implementation/Review/Alignment cannot use an archive/inconsistent plan as current governance merely by exact path; Closeout can still bind the completed-plan case authorized by §3.5; an in-repository symlink alias cannot manufacture a second active authority.
+
+#### R4 amendment — preparation identity and revalidation cover the actual admission surface
+
+The recomputed preparation identity must bind the workflow/profile information that external admission is allowed to inspect, not merely a subset of fields used by final text rendering. In particular, `PreparedPrompt.workflow` must either participate in `sdp.prompt-preparation.v1` directly or be cryptographically/semantically bound by another included immutable profile/source identity that fully determines the descriptor. A JSON-roundtrip mutation of transitions, stage metadata, or other material workflow facts must not preserve an accepted preparation fingerprint.
+
+Final rendering must use the **revalidated current observation/source**, not unbound location data copied from the caller-supplied `PreparedPrompt`. Revalidate `WorktreeKey`, selected remote/target evidence, and the material workplan-resolution decision in addition to candidate bytes. This closes cases where the same commit/common repository is reached through a different worktree/config context, or where an ignored/unselected workplan changes an implicit resolver decision without changing the selected file.
+
+Protocol source identity must be checked for packaged, local, and remote sources against the prepared `PromptSourceRef`; mutability determines whether a second end-of-render stability check is needed, not whether prepared provenance may be ignored. Resolve one source snapshot for the body and its validation rather than checking one source object and rendering from a different re-resolution.
+
+Required additions: tampered workflow descriptor with old fingerprint is rejected; tampered/unbound local repo root cannot redirect a local prompt; switching to a different worktree/selected remote under the same serialized preparation is rejected; implicit workplan resolution changing between phases is stale; remote/package source identity differing from the prepared source is rejected rather than silently reinterpreted.
+
+#### R5 amendment — one canonical extension identity and satisfiable provider graph
+
+Use one canonical extension identity through entry-point discovery, manifest validation, dependency edges, status, configuration namespace, registration, and event ownership. Entry-point name versus `manifest.extension_id` disagreement and duplicate canonical IDs must fail/disable deterministically instead of creating two names for one provider.
+
+Capability resolution must consider all compatible providers rather than choosing an arbitrary first manifest as the dependency owner. If one provider for a capability fails but another compatible provider activates, a dependent should be admitted or disabled according to the actual satisfied requirement, not entry-point ordering. Extension registration must not collide silently with Core-owned singular capabilities, and manifest multiplicity/API-major declarations must reconcile with what activation registers.
+
+Keep one registry. Prefer making the existing staged activation result the single registration authority rather than synchronizing manifest, live side effects, and returned `ExtensionRegistration` as three competing truths.
+
+Required additions: entry-name/manifest-ID mismatch; duplicate extension ID; attempted registration of a Core-owned singular capability; two providers where the lexically first fails but the second satisfies the requirement; declared MANY/SINGULAR and API-major mismatch cases.
+
+#### R6 amendment — restore the complete parent public error contract
+
+Architecture 1.6.0 freezes `Problem` with `code`, `message`, `retryable: bool | None`, and `details`. WP-1 §4.6 omitted `retryable`, and the implementation omits it as well. Reconcile the workplan and existing `Problem` owner to the parent contract without creating an exception subclass hierarchy. Existing callers must continue branching on `Problem.code`; `retryable` is structured advisory data, not retry machinery.
+
+The prior public-signature requirement remains: all `api.v1`/`spi.v1` exports, including `create_application` and `ExtensionContext` methods, must expose public v1 protocols/records rather than private concrete classes.
+
+Required additions: `Problem.to_dict()` includes JSON-safe `retryable` (null when unknown); representative deterministic/transient classifications are tested only where Core genuinely knows them; all public exported callable signatures are checked for private implementation modules/types.
+
+#### R7 amendment — bound parsers and ambient process semantics, not only subprocess output
+
+Workplan/frontmatter parsing is an externally influenced resource boundary. Enforce the existing frontmatter byte/nesting/count intent **before or during** YAML/frontmatter materialization; do not parse an amplifying alias/object graph and only then discover it is too large/deep. The simplest compliant policy may reject unsupported YAML alias/complex constructs rather than add a general hardened YAML framework.
+
+Git/subprocess environment construction must also honor §3.2's no semantic environment-override contract. Do not copy arbitrary ambient `GIT_*` variables that can change repository discovery/config/object/remote semantics. Preserve only environment needed for normal process operation and explicitly justified credential/transport mechanisms, while forcing Core's noninteractive/non-mutating controls. This is not a request for a secret manager.
+
+Bound stdout **and stderr**, aggregate dirty-content reads, and remote transfer/materialization before exhaustion. Keep all external exception/diagnostic text behind the existing redaction boundary.
+
+Required additions: oversized/alias-amplified frontmatter is rejected without unbounded construction; ambient Git semantic override variables cannot silently change observed project/remote state; large stderr is bounded; an exception from an extension/subprocess containing a credential-bearing URL is redacted at the final CLI/status surface.
+
+#### R8 amendment — validate every produced distribution artifact that WP-1 claims to ship
+
+WP-1 explicitly requires both wheel and sdist. The acceptance owner must independently inspect the sdist's expected package/source metadata/resources and exercise the closest supported install/consumer path, rather than asserting only that a `.tar.gz` exists. If a distribution artifact were not supported, the correct simplification would be to stop claiming/producing it, but WP-1 currently freezes wheel+sdist delivery, so both must be validated.
+
+Required additions: wheel and sdist each contain the expected package metadata/canonical resources and can produce the supported installed Core behavior outside the checkout; build/install/inspection failure is a hard acceptance failure, not a skip.
+
+### R9 — Make prompt fingerprint/footer assembly collision-safe and enforce the terminal wire contract
+
+**Blocking authority:** product invariants 10, 13-15; §3.9; parent architecture result-envelope/fingerprint contract; O8/O11.
+
+The current renderer substitutes the fingerprint with a global `str.replace(FINGERPRINT_PLACEHOLDER, digest_text)`. Any canonical/user input containing the same literal placeholder is therefore modified even though only the architecture-owned fingerprint slots may change. The footer also interpolates caller-provided RunId directly into JSON without JSON-safe serialization, while `RunId` is a public opaque string. Finally, the reference extractor finds a marked block but does not require the end marker to be terminal and uses stripped marker comparisons, so trailing prose/indented pseudo-markers can be accepted despite the Frozen “terminal final content” rule.
+
+Alter the existing renderer only: substitute the digest at the known architecture-owned fingerprint fields/positions, never by replacing arbitrary prompt content. Serialize/validate dynamic footer identity values so the requested JSON is always valid and the RunId has one coherent semantic value across metadata/result identity. Preserve opaque-ID semantics; if a restricted v1 RunId grammar is chosen, validate it centrally rather than relying on accidental string safety.
+
+Freeze the extraction rule to the actual contract: the begin/end marker syntax must match the declared exact-line semantics, and no non-permitted content follows the terminal end marker. Ordinary human prose may **precede** the footer; “surrounding prose” must not be interpreted as permission for trailing prose after the terminal footer.
+
+Required counterexamples: an explicit input equal to or containing the fingerprint-placeholder literal survives unchanged outside the two fingerprint slots; a caller RunId containing quotes/backslashes/control characters either serializes to valid coherent JSON or is rejected through the declared boundary; indented/near-match markers do not masquerade as exact markers; trailing non-whitespace prose after the end marker is rejected by the reference extractor; the valid canonical footer remains extractable and matches RunId/stage/fingerprint exactly.
+
+### R10 — Make workflow/profile resolution obey governing-workplan precedence and validate explicit profile identity
+
+**Blocking authority:** product invariants 4, 8, 12; §4.2; parent architecture Protocol binding/workflow ownership; O5/O6.
+
+`CoreService.workflow()` currently returns the explicit profile whenever `WorkflowRequest.profile` is present, before considering `request.workplan`. This is the reverse of the Frozen rule in §4.2: selected governing-workplan binding takes precedence. It can therefore make a request carrying an older/incompatible governing workplan appear valid under an explicit 5.16 profile.
+
+The explicit `ProtocolProfileRef` path also consumes only `profile_id`; its declared protocol version/schema/source identity can disagree with the resolved profile and be silently discarded. A public profile reference is an identity assertion, not a hint whose material fields may be ignored.
+
+Rewire the existing workflow owner: when a governing WorkplanRef is supplied, resolve its Protocol contract first; an explicit profile, if also supplied, must agree with the resulting compatible identity or fail. With profile only, resolve the named profile and validate the supplied material identity fields against it rather than silently rewriting them. Project default remains fallback only when neither stronger authority determines the contract.
+
+Required counterexamples: explicit 5.16 profile + governing 5.9 workplan fails as incompatible rather than returning 5.16; explicit profile with mismatched protocol/schema/source identity fails; agreeing workplan+profile succeeds; profile-only and project-only paths still resolve through the one profile owner.
+
+### R11 — Make canonical source/profile reconciliation exhaustive and bind packaged generation to `PROTOCOL_VERSION`
+
+**Blocking authority:** product invariants 3-4, 12, 15; §3.6; O5/O8; release/source-of-truth requirements.
+
+The canonical parser proves that each expected 0-8 heading exists but does not reject additional numbered stage headings or conflicting numbered headings with different titles. `build_profile()` then checks its constant stage table rather than the full numbered stage set actually present in the document. A local/remote source can therefore contain an extra stage-like authority that Core silently ignores instead of reporting source/profile incoherence.
+
+The packaged snapshot generator derives `prompts.md` and `profile.json` from the prompt document but does not read/bind canonical `source/PROTOCOL_VERSION`. Today both happen to be 5.16.0, but the generation mechanism can produce a “5.16” package from a later-version canonical source after that version file changes. That violates the claim that the package is a version-bound reproducible derivative.
+
+Make canonical reconciliation exact: the numbered canonical stage-heading set for the supported profile must match the expected set without extras/duplicates/conflicting numbers. Bind generation/check mode to canonical `PROTOCOL_VERSION` and the profile's declared compatibility/version; a mismatch fails generation/check instead of emitting/revalidating a mislabeled package. Reuse the existing profile/source constants and generator; do not create a second manifest authority merely to solve this.
+
+Required counterexamples: extra `## 9. ...` stage heading fails source-incoherent; conflicting extra numbered heading fails; generator `--check`/generation fails when canonical `PROTOCOL_VERSION` is incompatible with the packaged profile; current 5.16 source still reproduces byte-identical packaged prompt/profile resources.
+
+### 12.2 Documentation reconciliation required by the repairs
+
+Update affected user/API documentation in the same implementation cycle so it does not preserve now-known false behavior. At minimum:
+
+- unresolved multiple remotes are `core.remote.ambiguous` when ambiguity is the cause;
+- terminal footer prose may precede the footer, not follow it;
+- explicit user text is intentional content but structure-sensitive INPUT insertion uses the documented reversible scalar encoding rather than literally splicing raw control characters;
+- `max_remote_staleness` behavior and cached-age uncertainty are documented once the existing public field has real semantics;
+- `Problem.retryable` is documented as advisory structured data, not automatic retry policy.
+
+Do not add a second specification document merely for these corrections; reconcile the existing architecture/workplan/public API docs and Core user guide.
+
+### 12.3 Final re-review gate
+
+WP-1 may return to independent Review only after R1-R11, including every amendment in §12.1, are closed in the existing semantic owners and no repair creates a parallel candidate identity, workplan resolver, remote observer, Protocol/profile authority, prompt renderer, service registry, compatibility wrapper, persistence layer, or higher-module dependency.
+
+The final exact candidate must have recorded executable evidence for:
+
+1. focused counterexample tests for R1-R11;
+2. complete Core regression, including Hypothesis properties when the declared dev dependency is installed;
+3. real temporary-Git/worktree/remote owner tests and non-mutation checks;
+4. canonical source/profile/generator parity and incompatibility tests;
+5. real installed entry-point extension composition tests;
+6. wheel **and** sdist build/inspection/install/installed-CLI behavior outside the checkout;
+7. final web/local privacy and prompt-wire fixtures;
+8. public API/SPI contract/signature fixtures;
+9. repository layout/architecture fitness checks;
+10. ordinary repository Protocol tests/build/package-parity/`git diff --check` validation.
+
+Any unavailable required owner check is recorded as unavailable and remains a blocker unless the governing contract explicitly permits substitute evidence. A green skip is not closure. Only after those checks pass on one exact candidate may the workplan be closed.
+
+**Second-pass review verdict: NO-PASS — the repair contract is now tightened and snapshot-complete for the currently observed blocker families; return to `software-implementation`, not another Review, until the listed families are repaired and final owner evidence is recorded.**
