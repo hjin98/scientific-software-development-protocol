@@ -409,10 +409,13 @@ class InstalledProductTests(unittest.TestCase):
         )
         fake_git.chmod(0o700)
 
-        source_config = self.case / "doctor-source-config.toml"
-        source_config.write_text(
-            "\n".join(
-                (
+        env = dict(os.environ)
+        env.pop("PYTHONPATH", None)
+        env["PATH"] = str(fake_bin) + os.pathsep + env.get("PATH", "")
+        for case_name, local_root in (("valid-local", PACKAGE_ROOT), ("remote-only", None)):
+            with self.subTest(case=case_name):
+                source_config = self.case / f"doctor-source-config-{case_name}.toml"
+                source_lines = [
                     "schema_version = 1",
                     "",
                     "[projects.demo]",
@@ -420,37 +423,39 @@ class InstalledProductTests(unittest.TestCase):
                     'protocol_profile = "sdp-protocol-5.16"',
                     "",
                     '[protocol_sources."sdp-protocol-5.16"]',
-                    f"local_root = {json.dumps(str(self.case / 'local-protocol'))}",
-                    "allow_remote = true",
-                    f"remote_repository = {json.dumps(str(self.case / 'remote-protocol'))}",
-                    'remote_ref = "main"',
+                ]
+                if local_root is not None:
+                    source_lines.append(f"local_root = {json.dumps(str(local_root))}")
+                source_lines.extend(
+                    (
+                        "allow_remote = true",
+                        'remote_repository = "https://example.invalid/remote.git"',
+                        'remote_ref = "main"',
+                    )
                 )
-            )
-            + "\n",
-            encoding="utf-8",
-        )
-        env = dict(os.environ)
-        env.pop("PYTHONPATH", None)
-        env["PATH"] = str(fake_bin) + os.pathsep + env.get("PATH", "")
-        profile.write_text("{}\n", encoding="utf-8")
-        try:
-            result = subprocess.run(  # noqa: S603
-                [str(self.sdp), "doctor", "--config", str(source_config)],
-                capture_output=True,
-                text=True,
-                check=False,
-                cwd=str(self.case),
-                env=env,
-                timeout=BUILD_TIMEOUT,
-            )
-        finally:
-            profile.write_bytes(original_profile)
+                source_config.write_text("\n".join(source_lines) + "\n", encoding="utf-8")
+                marker.unlink(missing_ok=True)
+                profile.write_text("{}\n", encoding="utf-8")
+                try:
+                    result = subprocess.run(
+                        [str(self.sdp), "doctor", "--config", str(source_config)],
+                        capture_output=True,
+                        text=True,
+                        check=False,
+                        cwd=str(self.case),
+                        env=env,
+                        timeout=BUILD_TIMEOUT,
+                    )
+                finally:
+                    profile.write_bytes(original_profile)
 
-        self.assertEqual(result.returncode, 0, result.stderr)
-        payload = json.loads(result.stdout)
-        self.assertIn("packaged_profile_problem", payload)
-        self.assertNotIn("packaged_profile", payload)
-        self.assertFalse(marker.exists(), "doctor must not query configured local/remote sources")
+                self.assertEqual(result.returncode, 0, result.stderr)
+                payload = json.loads(result.stdout)
+                self.assertIn("packaged_profile_problem", payload)
+                self.assertNotIn("packaged_profile", payload)
+                self.assertFalse(
+                    marker.exists(), "doctor must not query configured local/remote sources"
+                )
 
     def test_capabilities_defaults_to_discovery_only(self) -> None:
         result = self.sdp_run("capabilities", "--config", str(self.config))

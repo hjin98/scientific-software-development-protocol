@@ -214,7 +214,7 @@ class CoreService:
 
     def resolve_workplan(self, request: WorkplanResolutionRequest) -> WorkplanResolution:
         context = self._context(request.project)
-        descriptor = self._workflow_descriptor_for_project(context)
+        descriptor = self._protocol_source(request.stage.profile_id).snapshot.descriptor
         stage = P.stage_descriptor(descriptor, request.stage)
         return W.resolve(
             self._catalog(context),
@@ -262,12 +262,6 @@ class CoreService:
                 )
             return P.PROFILE_ID
         return (context.section.protocol_profile if context is not None else None) or P.PROFILE_ID
-
-    def _workflow_descriptor_for_project(
-        self, context: _ProjectContext
-    ) -> WorkflowProfileDescriptor:
-        profile_id = context.section.protocol_profile or P.PROFILE_ID
-        return self._protocol_source(profile_id).snapshot.descriptor
 
     def _validate_profile_ref(
         self, requested: ProtocolProfileRef, descriptor: WorkflowProfileDescriptor

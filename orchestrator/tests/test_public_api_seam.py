@@ -176,6 +176,53 @@ class WorkplanOwnershipTests(SeamBase):
         self.assertTrue(resolution.selection_basis)
         self.assertIn("workplans/active/WP.md", resolution.considered)
 
+    def test_resolve_workplan_honors_profile_bound_stage_over_project_default(self) -> None:
+        """A bound StageRef must not be vetoed by a lower-precedence project profile."""
+
+        self.config.write_text(
+            self.config.read_text(encoding="utf-8").replace(
+                'protocol_profile = "sdp-protocol-5.16"',
+                'protocol_profile = "sdp-protocol-9.9"',
+            ),
+            encoding="utf-8",
+        )
+        core = self.core()
+        workplan = next(
+            item.ref
+            for item in core.workplans(api.WorkplanQuery(project=api.ProjectKey("demo"))).items
+            if item.ref.workplan_id == "WP"
+        )
+        descriptor = core.workflow(api.WorkflowRequest(workplan=workplan))
+        stage = next(
+            item.stage for item in descriptor.stages if item.stage.stage_key == "implementation"
+        )
+
+        resolution = core.resolve_workplan(
+            api.WorkplanResolutionRequest(
+                project=api.ProjectKey("demo"),
+                stage=stage,
+                selector="WP",
+                branch="main",
+            )
+        )
+
+        self.assertEqual(resolution.workplan.workplan_id, "WP")
+        self.assertEqual(resolution.stage, stage)
+
+    def test_resolve_workplan_rejects_an_unsupported_stage_profile(self) -> None:
+        core = self.core()
+        stage = core.list_stages(api.WorkflowRequest(project=api.ProjectKey("demo")))[2].stage
+        unsupported = stage.model_copy(update={"profile_id": "sdp-protocol-9.9"})
+
+        with self.assertRaises(api.OrchestratorError) as caught:
+            core.resolve_workplan(
+                api.WorkplanResolutionRequest(
+                    project=api.ProjectKey("demo"), stage=unsupported, selector="WP", branch="main"
+                )
+            )
+
+        self.assertEqual(caught.exception.code, E.PROTOCOL_INCOMPATIBLE)
+
     def test_workflow_follows_the_governing_workplan_protocol(self) -> None:
         """A governing plan on an unsupported protocol fails; it is never coerced to 5.16."""
 
