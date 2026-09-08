@@ -6,6 +6,7 @@ target_protocol_version: 6.0.0
 status: active
 created_date: 2026-09-08
 base_protocol: Protocol 5.16
+base_commit: e151daaf5c8eebb351a85cfed86170fda80fb5e3
 repository_rename_deferred: true
 ---
 
@@ -13,460 +14,534 @@ repository_rename_deferred: true
 
 ## 1. Objective / core problem of concern
 
-Protocol 5.16 has matured into a strong software-development control system. It provides disciplined separation between product/problem invariants, cycle-scoped Frozen architecture, delegated implementation machinery, implementation fidelity, affected-surface validation, proxy-proof acceptance, active simplicity, independent review, adversarial verification, long-horizon health sensing, documentation maintenance, language-aware engineering, tool routing, and a profile-driven orchestration seam.
+Protocol 5.16 is a strong software-development control system. It already separates product/problem invariants from cycle-scoped Frozen architecture and delegated implementation machinery; preserves implementation fidelity, affected-surface validation, proxy-proof acceptance, active simplicity, version binding, independent review, adversarial Verification, long-horizon quality sensing, language-aware engineering, tool routing, and profile-owned orchestration.
 
-The remaining structural defect is upstream of software architecture.
+Its remaining structural defect is upstream of software architecture.
 
-Scientific and numerical concerns currently exist in Protocol 5 as requirements, review concerns, testing doctrine, and documentation guidance, but they do not exist as first-class authority-bearing lifecycle domains with their own normative artifacts, design responsibilities, handoff contracts, verification semantics, and change-propagation rules. Scientific and mathematical formulation, numerical/algorithmic design, software architecture, and implementation are therefore partially conflated. In particular:
+Scientific and numerical concerns currently exist as product requirements, review concerns, testing doctrine, and documentation guidance, but not as first-class authority-bearing domains with their own normative current-state artifacts, mutation authority, design responsibilities, handoff contracts, verification semantics, and change-propagation rules. Scientific/mathematical formulation, numerical/algorithmic design, software architecture, and implementation are therefore partially conflated. In particular:
 
-- scientific/problem truth is flattened into broad product truth;
-- high-level algorithm decisions can be frozen directly by Software Design together with software architecture;
+- scientific/problem truth is flattened into broad software product truth;
+- high-level algorithm decisions are owned and frozen together with software architecture;
 - methods/theory documentation is explanatory and non-normative by default;
-- scientific/numerical verification consumes scientific authorities but the protocol does not govern how those authorities are created, ratified, revised, or kept aligned;
-- code, architecture, specifications, methods papers, tests, and scientific intent can become mutually consistent at the software level while still implementing an incorrect or drifted scientific model;
-- downstream implementation evidence can reveal an upstream modeling or numerical defect, but Protocol 5 has no general cross-domain authority ladder for routing such contradictions to the earliest affected abstraction.
+- scientific/numerical Verification consumes scientific authorities but Protocol 5 does not govern how those authorities are created, accepted, challenged, revised, or synchronized;
+- code, architecture, specifications, methods papers, tests, and scientific intent can become mutually consistent at the software level while implementing the wrong scientific model or numerical method;
+- downstream evidence can reveal an upstream scientific, mathematical, numerical, or architectural defect, but Protocol 5 has no generic cross-domain authority model for routing that contradiction to the earliest affected abstraction.
 
-This creates the possibility of **high-integrity wrongness**: scientifically incorrect software that is nevertheless architecturally coherent, well tested, reproducible, performant, and faithfully implemented relative to an insufficient or wrong upstream contract.
+This permits **high-integrity wrongness**: scientifically incorrect software that is architecturally coherent, well tested, reproducible, performant, and faithfully implemented relative to an incomplete or incorrect upstream contract.
 
-SSDP 6.0 shall repair this by replacing the software-specific Tier-1A/Tier-1B/Tier-2 framing with a more general **recursive abstraction–realization doctrine** that applies across scientific modeling, mathematical formulation, numerical/algorithmic design, software architecture, and code.
-
-The central conceptual relation is:
+SSDP 6.0 shall repair this by making **recursive abstraction–realization** the governing doctrine:
 
 ```text
 ABSTRACTION  --design / constrain-->  REALIZATION
 ABSTRACTION  <--verify / reconstruct-- REALIZATION
 ```
 
-The abstraction defines the invariant semantic problem and the admissible realization space. The realization is selected by constrained optimization: first satisfy the abstraction faithfully, then optimize among admissible realizations according to the domain-appropriate form of engineering fitness, minimum justified solution complexity, and development economy. Verification is the inverse semantic direction: reconstruct what the realization actually means/does and establish whether it is a valid realization of the abstraction.
+The abstraction states what must remain semantically true. The realization is free to optimize how those truths are achieved. Fidelity is a feasibility condition, not a weighted objective. Among admissible realizations, the protocol prefers the domain-fit realization with the minimum justified complexity, then minimizes development cost.
 
-Every interior level is simultaneously:
+Every interior domain is simultaneously a realization of upstream authority and an abstraction constraining downstream realization. The four scientific-software domains are applications of one general relation, not four unrelated process philosophies.
 
-```text
-a realization of the level above
-and
-an abstraction constraining the level below.
-```
-
-This recursive relation is the governing philosophical and engineering foundation of SSDP 6.0.
+The revision must preserve Protocol 5's strongest engineering safeguards by **semantic refactoring rather than additive overlay**. The result should be simpler to reason about than Protocol 5 despite covering a broader scientific-development stack.
 
 ## 2. Governing abstraction–realization doctrine
 
-### 2.1 Generic relation
+### 2.1 Abstraction is a semantic contract, not vagueness
 
-For an abstraction `A`, let `I(A)` denote the set of semantic invariants, constraints, assumptions, bounds, validity conditions, and required observables that every acceptable realization must preserve.
+An abstraction is an intentionally incomplete but normative semantic description. It hides realization choices while preserving the properties that every acceptable realization must satisfy.
 
-A realization `R` is admissible only when:
+For abstraction `A`, let `I(A)` denote its material invariants, required outcomes, assumptions, bounds, validity conditions, observables, and governed semantic relations.
 
-```text
-semantics(R) satisfies I(A)
-```
+An abstraction is **not** merely a higher-level summary of the current realization. It exists to permit multiple valid realizations without losing the semantics that matter.
 
-or, conceptually:
+The design question at every boundary is:
 
-```text
-R |= A
-```
+> Which properties must remain invariant across acceptable realizations, and which properties are merely choices inside the realization search space?
 
-The realization problem is therefore not an unconstrained tradeoff between correctness, simplicity, performance, and development cost. Fidelity to the abstraction is a feasibility condition.
+### 2.2 Realization feasibility includes inherited authority and domain-local external constraints
 
-Among admissible realizations, select the globally best justified realization according to the domain-appropriate lexicographic preference:
+Protocol 5 Tier 1A includes stakeholder, scientific, security, reliability, compatibility, resource, performance, and governed external-contract constraints. SSDP 6 must not accidentally force all such constraints through D1.
 
-```text
-engineering / scientific / numerical fitness
-    > minimum justified realization complexity
-    > development economy
-```
+A domain realization may therefore be constrained by both inherited upstream abstractions and **domain-local externally governed constraints** that enter directly at the level where they matter.
 
-Equivalently:
+For realization `R_i` with upstream semantic authorities `A_i1 ... A_in` and domain-local governed constraints `C_i`:
 
 ```text
-first define the valid realization space;
-then optimize inside it.
+R_i is admissible only if
+
+semantics(R_i) |= I(A_i1) AND ... AND I(A_in) AND C_i
 ```
 
-A simple, fast, elegant, or cheap realization that violates the abstraction is not a lower-scoring candidate; it is outside the feasible set.
+Examples:
 
-### 2.2 Invariant versus delegation
+- a target scientific observable constrains D2-D4 through D1;
+- an externally required numerical accuracy or hardware budget may constrain D2 directly;
+- a security, reliability, compatibility, deployment, or accelerator requirement may constrain D3 directly;
+- a language/compiler/platform or concrete public-interface constraint may constrain D4 directly.
 
-The existing Protocol 5 Frozen/delegated doctrine shall be generalized as follows.
+These side constraints are not lower-authority merely because they enter below D1. Their authority comes from their governed source.
+
+### 2.3 Authority source and abstraction level are orthogonal
+
+The D1-D4 hierarchy describes **semantic abstraction level**. It does not by itself determine where a requirement came from or who may change it.
+
+SSDP 6 shall preserve an orthogonal authority-precedence rule:
+
+```text
+safety / explicit project and stakeholder authority / governed external contracts
+    -> accepted current domain abstractions and ratified decisions
+    -> repository/runtime evidence about actual realization state
+    -> delegated realization discretion
+```
+
+A material external constraint may attach to D1, D2, D3, or D4. Repository code/tests remain evidence of actual state and do not gain authority over accepted intent through existence.
+
+This preserves the protected purpose of Protocol 5 Tier 1A while replacing the software-specific tier vocabulary.
+
+### 2.4 Invariant versus delegated realization
 
 At every abstraction–realization boundary ask:
 
 > Is this property part of the abstraction being realized, or merely one way the current realization satisfies it?
 
-The abstraction owns only the semantic commitments that must remain invariant across admissible realizations. Everything not required by those commitments remains delegated realization space by default.
+Everything not required by inherited or domain-local governed constraints remains delegated realization space by default.
 
 A realization detail does not become an abstraction invariant merely because it:
 
-- already exists;
+- exists;
 - is depended upon;
-- appears in tests;
-- appears in documentation;
+- appears in tests or documentation;
 - appeared in a prior workplan;
 - survived prior review;
 - was previously patched;
 - is convenient to verify;
-- is named by an acceptance path.
+- is named by an acceptance path;
+- is currently the only implementation.
 
-Promotion of a realization detail into the parent abstraction requires explicit acceptance at the abstraction-owning domain and a material semantic reason.
+Promotion into an abstraction requires explicit acceptance by the abstraction-owning authority and a material semantic reason.
 
-### 2.3 Design and verification are inverse semantic operations
+### 2.5 Constrained optimization is conceptual and heuristic, not exhaustive search
 
-Design proceeds top-down:
-
-```text
-Given abstraction A:
-    recover its invariants and delegated space
-    -> search for candidate realizations
-    -> reject non-conforming candidates
-    -> optimize among conforming candidates
-    -> freeze only the lower-level abstraction necessary for the next domain
-```
-
-Verification proceeds bottom-up:
+If `F_i(R)` denotes domain fitness, the realization problem is conceptually:
 
 ```text
-Given realization R:
-    reconstruct its actual semantics
-    -> compare those semantics against the parent abstraction
-    -> attempt to falsify conformity
-    -> establish R |= A with the strongest justified evidence available
-    -> route contradictions to the earliest/highest affected abstraction owner
+choose R* among admissible R
+such that domain fitness is best justified;
+then prefer minimum justified realization complexity;
+then minimize development economy cost.
 ```
 
-Verification evidence may include formal proof, analytic derivation, symbolic checking, reference comparison, differential testing, metamorphic testing, property/stateful testing, convergence studies, uncertainty analysis, real-owner integration, structural checks, bounded fault injection, empirical validation, or other domain-appropriate methods.
+The preference is lexicographic only after all material feasibility constraints are satisfied:
 
-No single verification technique is universally required. Evidence strength must match claim risk and the semantic relation under test.
+```text
+semantic fidelity / governed constraints = feasibility
+then
+    domain engineering fitness
+    > minimum justified realization complexity
+    > development economy
+```
 
-### 2.4 Downstream evidence may challenge but not silently redefine upstream authority
+SSDP does not require mathematical global optimization or exhaustive enumeration of all possible realizations. Agents use bounded, evidence-motivated heuristic search and stop when additional search has lower expected engineering value than proceeding with the best justified admissible realization.
 
-A lower-level realization is evidence about what actually exists. It is never retroactive authority for what the parent abstraction ought to mean.
+A simple, fast, elegant, familiar, or cheap realization that violates a governing abstraction or external constraint is outside the feasible set rather than merely lower-scoring.
 
-Therefore:
+### 2.6 Design and verification are opposite-direction semantic operations, not a bijective inverse
+
+Design is generally one-to-many:
+
+```text
+A -> { R | R satisfies A and applicable C }
+```
+
+Verification is not the mathematical inverse of Design because many realizations can satisfy the same abstraction. It is the opposite-direction semantic operation:
+
+```text
+R -> reconstruct/projection of actual semantics
+  -> compare against A and applicable C
+  -> attempt to falsify conformity
+```
+
+Use the language **inverse semantic direction** or **reverse semantic verification**, not a claim that Design and Verification are bijective inverse functions.
+
+Verification establishes material claims with evidence appropriate to the risk. It need not and usually cannot prove the entire implementation state exhaustively. Formal proof is used where it is the right tool; elsewhere confidence comes from appropriately strong falsification-oriented evidence.
+
+### 2.7 Abstraction adequacy is itself a review obligation
+
+A realization can satisfy an abstraction perfectly while the abstraction omits a material requirement. Therefore every material handoff must challenge both:
+
+1. **realization fidelity** — does the child realize the parent correctly?; and
+2. **abstraction adequacy** — does the accepted child abstraction preserve enough of the parent/external authority to constrain the next realization safely?
+
+A too-weak abstraction is a design defect even if every downstream verification against its literal wording passes.
+
+This is the generic form of Protocol 5's independent-evaluator and protected-outcome doctrine.
+
+### 2.8 Real systems form a layered dependency DAG, not necessarily one linear chain
+
+D1-D4 define semantic levels, but a repository may contain:
+
+- several D1 methods sharing one D2 algorithm;
+- one D1 formulation realized by several alternative D2 methods;
+- multiple D2 methods sharing one D3 subsystem;
+- one D3 component realizing obligations from multiple D2 authorities;
+- cross-cutting external constraints attached at lower domains.
+
+Therefore the authoritative dependency structure is a **layered directed acyclic graph for a given accepted snapshot**, not necessarily a single parent-child chain.
+
+The pairwise abstraction–realization relation remains fundamental. Multi-parent realizations must satisfy every applicable upstream authority and governed side constraint. Development may iterate over time, but a current authority snapshot must not require circular normative ownership to determine what is true.
+
+### 2.9 Downstream evidence may challenge but never silently redefine upstream authority
+
+A lower-level realization is evidence about what actually exists. It is not retroactive authority over what an upstream abstraction ought to mean.
 
 ```text
 downstream contradiction
-    -> challenge upstream abstraction
-    -> abstraction owner adjudicates
-    -> accepted upstream revision may invalidate dependent descendants
+    -> challenge the earliest potentially wrong abstraction
+    -> owning authority adjudicates
+    -> accepted revision may invalidate dependent descendants
 ```
 
-The forbidden pattern is:
+Forbidden counterfeit reconciliation:
 
 ```text
 implementation differs
     -> rewrite architecture to match implementation
-    -> rewrite algorithm paper to match architecture
-    -> rewrite scientific paper to match algorithm
+    -> rewrite numerical paper to match architecture
+    -> rewrite scientific paper to match numerical paper
     -> declare restored consistency
 ```
 
-unless independent upstream reasoning actually establishes that each changed abstraction is the newly accepted correct one.
+unless independent reasoning at each affected authority level establishes those upstream changes as the newly accepted correct semantics.
 
-### 2.5 Change propagation and bounded invalidation
+### 2.10 Change propagation and bounded invalidation
 
-Upstream accepted changes invalidate only dependent downstream authority/evidence whose claim could materially change.
+Accepted upstream changes invalidate only dependent downstream authority/evidence whose claim could materially change.
 
 ```text
-accepted abstraction change
-    -> invalidate affected child abstraction/realization claims
-    -> propagate only through dependent descendants
-    -> preserve unrelated accepted authority and still-valid evidence
+accepted authority change
+    -> identify dependent semantic surface
+    -> mark affected descendant authority/evidence stale
+    -> preserve unrelated accepted authority/evidence
+    -> re-realize only as far downward as necessary
+    -> re-verify upward across the affected dependency surface
 ```
 
-Bottom-up observations do not automatically invalidate upstream authority. They produce a challenge requiring adjudication.
+Bottom-up observations produce challenges. They do not automatically mutate or supersede upstream authority.
 
-This generalizes Protocol 5's evidence invalidation and bounded Design reopening into a domain-independent rule.
+### 2.11 Reopen the earliest materially affected abstraction
 
-### 2.6 Reopen the earliest materially affected abstraction
-
-When new evidence invalidates an accepted decision, route rework to the earliest/highest domain whose abstraction may be wrong.
+Route rework to the earliest/highest domain whose accepted abstraction may be wrong, bounded to the affected semantic surface.
 
 Examples:
 
 ```text
-local helper defect                         -> implementation realization
-component ownership/dataflow defect         -> software architecture
-solver/discretization/estimator defect      -> numerical/algorithmic design
-incorrect objective/model/definition        -> scientific & mathematical formulation
-empirical/model-reality mismatch            -> scientific validation / formulation reconsideration
+local helper/data-structure defect                    -> D4
+component ownership/dataflow/state defect             -> D3
+discretization/solver/estimator/precision defect      -> D2
+observable/model/equation/assumption/meaning defect   -> D1
+model/context/evidence mismatch                       -> D1 validation/reconsideration
 ```
 
-Do not reopen higher domains merely because lower affected surfaces grow. Do not keep repair artificially low when the parent abstraction itself is invalid.
+Do not escalate merely because many lower files are affected. Do not keep repair artificially low when the parent abstraction is itself invalid.
 
-### 2.7 External validation boundary
+### 2.12 External adequacy boundary: validation, proof, standards, and uncertainty
 
-The recursive abstraction–realization relation governs the engineered hierarchy. At the highest scientific boundary, correctness against an internal parent abstraction is insufficient.
+The engineered D1-D4 hierarchy is internally governed by realization verification. D1 also has an external adequacy boundary whose evidence depends on the problem class.
 
-SSDP shall distinguish:
+For empirical/model-based science this includes **validation** against intended context and observed reality. For theoretical/mathematical software it may instead include proof, axiomatic consistency, reference theory, or accepted mathematical authority. For engineering software it may include experiments, standards, safety margins, qualification data, or stakeholder context-of-use requirements.
 
-- **verification:** whether a realization faithfully realizes an accepted abstraction;
-- **validation:** whether the scientific formulation/model is adequate for the intended real-world/research context;
-- **uncertainty quantification:** how uncertainty in data, parameters, modeling assumptions, stochastic processes, and numerical approximation affects conclusions.
+SSDP shall therefore distinguish:
 
-The top boundary is therefore:
+- **verification** — whether a realization faithfully realizes an accepted abstraction;
+- **external adequacy/validation** — whether D1 is adequate for its intended scientific/theoretical/engineering context;
+- **uncertainty quantification** — characterization/propagation of material uncertainty affecting conclusions.
 
-```text
-scientific formulation <-> empirical/research evidence and intended context of use
-```
+Do not force empirical validation language onto pure mathematical problems, and do not treat internal numerical verification as empirical scientific validation.
 
-A mathematically and computationally perfect realization of an invalid scientific model is not scientifically valid software.
+Uncertainty is layer-aware:
 
-## 3. Four-domain hierarchy
+- D1 owns data/parameter/model/assumption and scientific interpretive uncertainty as applicable;
+- D2 owns discretization, truncation, stochastic numerical, conditioning, and floating-point uncertainty/error as applicable;
+- D3/D4 must preserve and expose those semantics without inventing a competing uncertainty model.
 
-SSDP 6.0 defines four first-class engineering domains.
+## 3. Four-domain hierarchy and boundary rule
+
+SSDP 6.0 defines four first-class semantic domains:
 
 ```text
 D1  Scientific & Mathematical Formulation
         |
-        | defines the scientific/mathematical problem
+        | defines accepted scientific/mathematical semantics
         v
 D2  Algorithm & Numerical Methods
         |
-        | defines the computational/numerical problem
+        | defines accepted computational/numerical semantics
         v
 D3  Software Architecture
         |
-        | defines the software realization problem
+        | defines accepted software-system semantics
         v
 D4  Software Implementation
 ```
 
-The reverse verification ladder is:
+Internal reverse verification proceeds upward:
 
 ```text
-D4 implementation
-    -> reverse-engineer semantics and verify against D3
-D3 architecture
-    -> reverse-engineer effective computational semantics and verify against D2
-D2 algorithm/numerics
-    -> reconstruct effective mathematical problem and verify against D1
-D1 scientific/mathematical formulation
-    -> validate against scientific evidence, intended use, and reality where applicable
+D4 -> reconstruct executable/software semantics -> verify D3
+D3 -> reconstruct effective computational semantics -> verify D2
+D2 -> reconstruct effective mathematical/scientific semantics -> verify D1
+D1 -> external adequacy/validation against its problem-specific authority/evidence
 ```
-
-Not every task activates every domain. Affected-domain routing shall activate the highest domain whose abstraction may materially change and all required descendants, while preserving still-valid authority above and outside the affected dependency surface.
 
 ### 3.1 D1 — Scientific & Mathematical Formulation
 
-D1 owns the most abstract internal semantic authority.
+D1 owns, as applicable:
 
-It shall govern, as applicable:
-
-- scientific/research question and context of use;
-- target observable, quantity, estimand, objective, or scientific conclusion;
-- theoretical/physical/statistical basis;
-- definitions, notation, conventions, units, frames, sign/index/tensor conventions;
-- mathematical formulation;
-- governing equations or probabilistic/statistical model;
+- scientific/research/engineering question and intended context of use;
+- target observable, quantity, estimand, objective, or conclusion semantics;
+- theoretical, physical, mathematical, or statistical basis;
+- definitions, notation, units, frames, signs, indexing, tensor/order conventions;
+- mathematical formulation, governing equations, objective, or probabilistic/statistical model;
 - initial/boundary conditions;
-- symmetry, conservation, invariance, and exact identities;
-- assumptions and approximations with scientific meaning;
-- identifiability/well-posedness concerns;
+- symmetries, conservation laws, invariances, exact identities;
+- assumptions, closures, and scientifically meaningful approximations;
+- identifiability and well-posedness concerns;
 - validity regime and known invalid regimes;
-- scientific/model uncertainty;
-- external literature and source provenance;
-- scientific validation strategy and falsification criteria;
-- human-ratified scientific judgments when required.
+- scientific/model/data/parameter uncertainty as applicable;
+- literature/reference provenance;
+- external adequacy, validation, and falsification strategy;
+- human-ratified epistemic decisions when required.
 
-D1 delegates the choice of computational/numerical realization unless a particular numerical property is itself scientifically intrinsic.
+D1 delegates computational/numerical realization unless a property of that realization is itself part of the scientific/mathematical meaning.
 
 ### 3.2 D2 — Algorithm & Numerical Methods
 
-D2 realizes the accepted D1 mathematical/scientific abstraction and becomes the abstraction for D3.
+D2 realizes applicable D1 authority and becomes a computational abstraction for D3.
 
-It shall govern, as applicable:
+D2 owns, as applicable:
 
 - algorithm family and computational formulation;
-- discretization;
+- discretization and approximation scheme;
 - numerical estimator construction;
-- approximation scheme;
-- conditioning and sensitivity;
-- consistency;
-- stability;
-- convergence and expected order/rate where meaningful;
 - solver semantics;
+- conditioning and sensitivity;
+- consistency, stability, and convergence;
+- expected order/rate where meaningful;
 - stopping/convergence criteria;
 - numerical error budget;
-- truncation/discretization error;
-- floating-point/roundoff requirements;
+- discretization/truncation error;
+- floating-point/roundoff/cancellation/range requirements;
 - stochastic/randomized semantics;
 - numerical reproducibility requirements;
 - reference/direct/slow oracle methods;
-- analytical/limiting/manufactured-solution checks where appropriate;
+- analytical, limiting, and manufactured-solution checks where appropriate;
 - degeneracies and numerical failure regimes;
 - computational complexity/scaling envelope;
-- admissible numerical alternatives and substitution criteria;
-- accuracy/performance trade space without permitting silent scientific-fidelity loss.
+- admissible numerical alternatives and equivalence criteria;
+- accuracy/performance trade space without silent scientific-fidelity loss.
 
-D2 delegates software decomposition, ownership, storage, API, concurrency mechanism, and low-level implementation unless those details are necessary to preserve a numerical invariant.
+D2 delegates software ownership, storage, APIs, concurrency mechanism, persistence, and low-level realization unless a software property is necessary to preserve numerical semantics.
 
 ### 3.3 D3 — Software Architecture
 
-D3 realizes the accepted D2 computational/numerical abstraction and becomes the abstraction for D4.
+D3 realizes applicable D2 authority plus D3-local governed constraints and becomes the software-system abstraction for D4.
 
-D3 shall govern, as applicable:
+D3 owns, as applicable:
 
 - semantic/component ownership;
 - package/module/service boundaries;
-- public/internal interfaces;
+- interfaces and dependency direction;
 - authoritative representations;
-- data and control flow;
+- data/control flow;
 - state and lifecycle;
 - persistence/checkpoint/cache authority;
 - concurrency/orchestration architecture;
-- resource and backend policy;
-- hardware/accelerator realization boundaries;
+- resource/backend/hardware realization policy;
 - compatibility/migration boundaries;
 - fault/recovery semantics;
 - security/trust boundaries;
-- architecture fitness rules;
+- architecture-fitness rules;
 - mapping from algorithmic responsibilities to software owners.
 
-Algorithmic meaning inherited from D2 is not to be redefined by D3 merely because a particular software decomposition is convenient.
+D3 must not redefine inherited D2 meaning merely because a software decomposition is convenient.
 
 ### 3.4 D4 — Software Implementation
 
-D4 realizes the accepted D3 software architecture subject to all inherited upstream constraints.
+D4 realizes applicable D3 authority plus inherited D1/D2 constraints and D4-local governed constraints.
 
-D4 owns, as delegated:
+D4 owns delegated realization such as:
 
 - concrete functions/classes/templates/modules within architectural ownership;
 - local data structures;
 - helpers and idioms;
-- library/tool use;
-- low-level optimizations;
-- implementation-local control flow;
+- libraries/tool use;
+- low-level control flow and optimizations;
 - code/refactor execution;
-- executable tests and validation machinery;
+- executable tests and evidence machinery;
 - repository reconciliation;
-- implementation specifications and concrete public contracts where delegated by D3.
+- concrete implementation specifications/public contracts delegated by D3.
 
-D4 may replace, remove, consolidate, or simplify realization machinery while preserving all applicable D3/D2/D1 invariants.
+D4 may remove, replace, consolidate, or simplify local machinery while preserving all applicable upstream constraints.
 
-## 4. One-to-one documentation correspondence
+The abstraction–realization relation may recurse below D4 internally, but SSDP stops creating additional authority-bearing lifecycle roles at code/implementation unless future evidence justifies a protocol redesign.
 
-SSDP 6.0 shall establish a first-class durable documentation stack corresponding to the abstraction hierarchy.
+### 3.5 Cross-cutting concerns are classified by semantic effect, not topic label
+
+A concern belongs to the highest abstraction whose semantics it can change, not to a fixed domain merely because of its name.
+
+Examples:
+
+- an accuracy requirement that changes the estimator/error envelope -> D2;
+- parallel summation order that changes estimator semantics -> D2;
+- choice of distributed ownership/process topology with unchanged numerical semantics -> D3;
+- choice of mutex/thread primitive under accepted concurrency architecture -> D4;
+- security/trust policy -> usually D3 external constraint;
+- a concrete secure API implementation -> D4;
+- accelerator availability policy -> D3 when architectural;
+- kernel precision/vectorization -> D4 unless it changes D2 numerical guarantees.
+
+This rule prevents duplicated ownership across domain-specific references and language profiles.
+
+## 4. One-to-one durable documentation correspondence
+
+SSDP 6.0 shall establish a first-class durable documentation stack aligned with the abstraction hierarchy:
 
 ```text
-D1 -> Scientific Method Paper
-D2 -> Numerical & Algorithmic Method Paper
-D3 -> Architecture Manual
+D1 -> Scientific Method Paper / canonical scientific-method document family
+D2 -> Numerical & Algorithmic Method Paper / canonical numerical-method document family
+D3 -> Architecture Manual / canonical architecture document family
 D4 -> Specification + Code Base
 ```
 
-These are current-state semantic records, not implementation chronology.
+The correspondence is **logical one-to-one semantic ownership**, not a requirement that every project keep exactly one physical Markdown file per domain. Large packages may use a coherent document family, shared method authorities, and per-capability papers. Each material claim must nevertheless have exactly one current normative semantic owner.
 
-The purpose is not documentation symmetry for its own sake. The stack provides a human-readable, AI-readable, publishable reconstruction of the scientific software from scientific intent through executable realization. A technically competent researcher should be able to understand what the software claims scientifically, how the claim is formulated mathematically, how the formulation is solved numerically, how the computation is architected, and how the public software realizes it without source archaeology or historical-chat recovery.
+These are current-state records, not implementation chronology. Together they should let a competent researcher reconstruct the package from scientific intent through executable behavior without source archaeology or lost conversation history.
 
-### 4.1 D1 Scientific Method Paper
+### 4.1 Normative authority is scoped inside a document
 
-Owned and maintained by `scientific-formulation`.
+Calling a method paper normative does not make every sentence, citation, historical discussion, or pedagogical explanation an invariant.
 
-This is a normative scientific/mathematical authority for the affected current method, not merely explanatory prose.
+Templates and doctrine shall distinguish, semantically and proportionately:
 
-It should contain, proportionately:
+- accepted definitions/formulation/assumptions/contracts/validity conditions — normative for that domain;
+- derivation, motivation, discussion, literature survey, examples, and evidence — supporting explanation/evidence unless explicitly adopted as a governed claim.
 
-1. background and scientific context;
-2. motivation and research/problem statement;
+External literature is evidence/provenance. It does not automatically override the project's accepted current formulation.
+
+### 4.2 D1 Scientific Method Paper
+
+Owned semantically by `scientific-formulation`.
+
+It is the canonical current authority for D1 and should contain, proportionately:
+
+1. background/scientific context;
+2. motivation and problem statement;
 3. goals and intended context of use;
 4. theoretical foundation;
-5. definitions and notation;
-6. conventions and units;
-7. mathematical formulation;
-8. assumptions and approximations;
-9. validity regime and known limitations;
-10. observable/estimand/objective definitions;
-11. validation/falsification strategy;
-12. uncertainty/model-adequacy considerations;
-13. relation to prior literature and project-specific adaptations;
-14. references;
-15. explicitly delegated numerical realization space.
+5. definitions, notation, conventions, units;
+6. mathematical formulation;
+7. assumptions, closures, and approximations;
+8. validity regime and limitations;
+9. observable/estimand/objective definitions;
+10. external adequacy/validation/falsification strategy;
+11. model/data/parameter uncertainty where material;
+12. relation to prior literature and project-specific adaptations;
+13. references/provenance;
+14. delegated D2 realization space.
 
-The paper may be publication-quality and may support derived PDF/publication formats, but publication polish must not replace semantic authority.
+### 4.3 D2 Numerical & Algorithmic Method Paper
 
-### 4.2 D2 Numerical & Algorithmic Method Paper
+Owned semantically by `numerical-algorithm-design`.
 
-Owned and maintained by `numerical-algorithm-design`.
+It is the canonical current authority for D2 and should contain, proportionately:
 
-This is a normative computational/numerical authority for the accepted realization of D1.
-
-It should contain, proportionately:
-
-1. inherited scientific/mathematical problem;
+1. inherited D1 problem;
 2. computational objective and numerical motivation;
 3. algorithmic formulation;
-4. discretization/estimation method;
-5. data/operation model where algorithmically material;
-6. pseudocode/flow description where useful;
-7. conditioning/sensitivity analysis;
+4. discretization/estimation/approximation method;
+5. algorithmically material data/operation model;
+6. pseudocode/flow where useful;
+7. conditioning/sensitivity;
 8. consistency/stability/convergence reasoning;
-9. error model and numerical error budget;
-10. tolerance, precision, stopping, and resolution policy;
-11. stochastic semantics where applicable;
-12. reference/oracle algorithm;
-13. analytical/limiting/reference cases;
-14. degenerate and failure regimes;
+9. numerical error model/budget;
+10. tolerance/precision/stopping/resolution policy;
+11. stochastic semantics;
+12. trusted reference/oracle algorithm;
+13. analytical/limiting/manufactured/reference cases;
+14. degenerate/failure regimes;
 15. complexity/scaling characteristics;
 16. accepted performance/fidelity trade space;
-17. relation to standard algorithms/literature and project adaptations;
-18. delegated software-architecture realization space.
+17. relation to standard algorithms/literature/project adaptations;
+18. delegated D3 realization space.
 
-This document must be computer-science/numerical-method oriented rather than merely repeating the D1 paper in implementation language.
+It must not merely restate D1 in implementation vocabulary.
 
-### 4.3 D3 Architecture Manual
+### 4.4 D3 Architecture Manual
 
-Owned and maintained by `software-design`.
+Owned semantically by `software-design`.
 
-The existing architecture doctrine shall be narrowed to software architecture. The architecture manual documents the accepted realization of D2 in terms of software ownership, boundaries, representations, state, persistence, concurrency, interfaces, resource policy, failure semantics, and mapping from algorithmic responsibility to software owners.
+It documents the accepted realization of D2 and applicable D3-local constraints in terms of software ownership, boundaries, representations, interfaces, data/control flow, state, persistence, concurrency, resource/backend policy, compatibility, failure/security semantics, and mapping from algorithmic responsibility to software owner.
 
-The architecture manual must not become the canonical owner of scientific formulation or numerical-method meaning merely because those semantics are implemented through the architecture.
+It must not become the canonical owner of D1/D2 meaning merely because those semantics are represented in software.
 
-### 4.4 D4 Specification and Code Base
+### 4.5 D4 Specification and Code Base
 
-Owned and maintained by `software-implementation`, subject to D3 authority.
+Owned operationally by `software-implementation`, subject to all accepted parent authority.
 
-The code base is the executable realization. Specifications own concrete externally relied-upon software contracts such as API/CLI/configuration, schemas/formats, units/shapes/order/precision at software boundaries, persistence semantics, compatibility/migration behavior, and durable error/fallback behavior where those are not already fixed by a higher abstraction.
+D4 contains two distinct surfaces:
 
-Specifications must not silently redefine D1/D2 scientific or numerical semantics. When a concrete specification exposes an upstream invariant, it references/preserves that invariant rather than becoming an independent competing authority.
+- **D4 specification** — the normative human-readable owner for concrete delegated software contracts such as API/CLI/configuration, schema/format, software-boundary units/shapes/order/precision, persistence, compatibility/migration, and durable error/fallback semantics where those are not already fixed upstream;
+- **code/executable behavior** — the actual realization and strongest evidence of what the software currently does.
 
-### 4.5 Documentation authority inversion to repair
+Code disagreement with an accepted D4 specification is not permission to rewrite the specification. It is first an implementation-conformance problem unless independent authority shows the specification itself must change.
 
-Protocol 5 currently treats methods/theory papers as explanatory and non-normative by default and places architecture/specification above them for behavior authority. SSDP 6.0 must reverse this where the method paper owns an upstream abstraction.
+The code base therefore remains evidence/realization, not automatic intended authority. This preserves Protocol 5's anti-counterfeit specification rule while respecting the user's D4 `Specification + Code Base` documentation layer.
 
-The authority chain shall be semantic rather than based on file type:
+### 4.6 Current, proposed, accepted, challenged, stale, superseded, and release-pinned states
+
+A normative paper/manual/specification must not become current authority merely because an agent drafted an edit.
+
+SSDP shall distinguish at least these semantic states without requiring a heavy database:
+
+- **proposed** — candidate change; not current authority;
+- **accepted current** — governing current semantic authority;
+- **challenged** — current authority has evidence questioning it but remains the explicit authority until adjudicated or marked unusable by policy;
+- **stale dependent** — a descendant artifact/evidence claim is no longer sufficient because an upstream accepted change may affect it;
+- **superseded/historical** — no longer current authority;
+- **release-pinned/publication snapshot** — intentionally frozen to a release/publication and not edited to track future current behavior.
+
+Human-ratification state is orthogonal and may be `not_required`, `required/pending`, `accepted`, or `rejected`.
+
+Exact metadata syntax is delegated. The semantic distinctions are not.
+
+### 4.7 Atomic authority mutation
+
+For material changes to a current normative abstraction:
 
 ```text
-Scientific Method Paper
-    -> Numerical & Algorithmic Method Paper
-        -> Architecture Manual
-            -> Specification + Code Base
+propose in a workplan/change artifact
+    -> independently review/falsify
+    -> obtain required human ratification
+    -> accept the new abstraction
+    -> update the canonical current normative document
+    -> mark dependent descendants/evidence stale as applicable
+    -> realize downward
+    -> verify upward
 ```
 
-Each document owns only its abstraction layer. Lower documents may add delegated detail but may not contradict upstream authority.
+Do not edit a current D1/D2/D3 authority into a speculative state and then ask downstream agents to infer which sentences are accepted.
 
-A downstream document/code disagreement is first classified as realization drift unless independent evidence establishes that the upstream abstraction itself must be reconsidered.
+An accepted change may be committed together with its current document update; the protocol does not require a separate database transaction. The requirement is semantic atomicity, not implementation machinery.
 
-### 4.6 Documentation maintenance is domain ownership, not a parallel documentation bureaucracy
+### 4.8 Publication and documentation specialist boundary
 
-The existing `software-documentation` specialist remains useful for editorial synthesis, reconciliation, publication, information architecture, user guides, and generated-document maintenance.
+`software-documentation` remains useful for editorial synthesis, information architecture, publication, generated artifacts, user guides, and cross-document navigation.
 
-However, SSDP 6.0 must not delegate semantic ownership of D1/D2/D3 normative documents to a generic documentation specialist.
+It is subordinate to domain semantic owners and may not approve or invent D1/D2/D3 meaning.
 
-Semantic ownership remains with the domain role:
+Publication-ready PDF/article outputs may be derived from current method sources or intentionally release-pinned. Published historical snapshots must not be rewritten merely because current science evolves.
 
-```text
-scientific-formulation      -> D1 semantics and Scientific Method Paper
-numerical-algorithm-design  -> D2 semantics and Numerical/Algorithmic Method Paper
-software-design             -> D3 semantics and Architecture Manual
-software-implementation     -> D4 specification/code semantics
-```
+## 5. Authority-bearing roles and boundary ownership
 
-`software-documentation` may assist any domain with presentation, coherence, publishing, cross-document navigation, and non-authoritative user documentation, but it may not approve or invent the owning domain's semantics.
-
-## 5. Lifecycle roles
-
-SSDP 6.0 introduces four authority-bearing roles.
+SSDP 6.0 introduces four authority-bearing lifecycle roles:
 
 ```text
 scientific-formulation
@@ -475,287 +550,269 @@ scientific-formulation
         -> software-implementation
 ```
 
-This is an incompatible lifecycle change and therefore requires Protocol major version 6 according to existing versioning doctrine.
+This is an incompatible lifecycle/governing-doctrine change and therefore requires Protocol major version 6.
 
-### 5.1 `scientific-formulation`
+### 5.1 Generic boundary responsibility
 
-Owns D1 design, maintenance, review, and D1->D2 handoff.
+For a material boundary `A -> R`:
+
+- the upstream/domain owner defines and maintains the accepted abstraction;
+- the downstream owner constructs the realization and produces conformance evidence;
+- the upstream owner accepts or rejects the child's fidelity to the upstream abstraction;
+- for substantial/high-risk claims, the acceptance pass should be operationally independent from the child authoring context when practical, using fresh-context falsification-oriented review;
+- no separate permanent verifier role is required;
+- required human ratification overlays acceptance where policy says the epistemic decision is human-owned.
+
+A child role may and should self-verify during design/implementation, but self-checking does not replace required independent parent-boundary review.
+
+### 5.2 `scientific-formulation`
+
+Owns D1 design, current authority maintenance, D1 external-adequacy reasoning, D1->D2 handoff, and acceptance/review of D2 fidelity to D1.
 
 Responsibilities include:
 
-- recover and define the scientific question independently of current code;
-- reconcile literature, existing method papers, equations, experiments, and intended context;
+- recover/define the scientific/theoretical/engineering question independently of current code;
+- reconcile literature, accepted equations, experiments, standards, and intended context;
 - derive/critique mathematical formulation;
-- identify assumptions, approximations, validity regimes, and falsification criteria;
-- define scientific/model uncertainty requirements where material;
-- maintain the Scientific Method Paper;
-- review D2 as a realization of D1;
-- adjudicate bottom-up challenges to D1;
-- require human scientific ratification for consequential epistemic changes under the HITL policy.
+- identify assumptions, approximations, validity regimes, uncertainty, and falsification criteria;
+- maintain the accepted-current Scientific Method Paper;
+- adjudicate D1 challenges;
+- route material human-ratification decisions.
 
-It does not own software architecture or implementation realization.
+It does not own D2 numerical mechanism, D3 software architecture, or D4 code.
 
-### 5.2 `numerical-algorithm-design`
+### 5.3 `numerical-algorithm-design`
 
-Owns D2 design, maintenance, review, and D2->D3 handoff.
+Owns D2 design, current authority maintenance, D1->D2 realization, D2->D3 handoff, and acceptance/review of D3 computational fidelity to D2.
 
 Responsibilities include:
 
-- translate accepted D1 formulation into a computational/numerical problem;
-- select/derive numerical algorithms and admissible alternatives;
+- translate accepted D1 semantics into a computational/numerical problem;
+- select/derive admissible numerical algorithms;
 - reason about conditioning, consistency, stability, convergence, precision, stochastic semantics, and error budgets;
-- design reference/oracle methods and numerical verification strategy;
-- maintain the Numerical & Algorithmic Method Paper;
-- review D3/assembled computation as a realization of D2;
-- adjudicate bottom-up numerical challenges;
-- escalate to D1 when numerical evidence invalidates a mathematical/scientific premise.
+- define reference/oracle methods and numerical verification strategy;
+- maintain the accepted-current Numerical & Algorithmic Method Paper;
+- adjudicate D2 challenges;
+- escalate to D1 when numerical evidence invalidates a scientific/mathematical premise.
 
-It does not own software component structure except where software properties are necessary to preserve the numerical abstraction.
+It does not own D3 decomposition except where a software property is necessary to preserve D2 semantics.
 
-### 5.3 `software-design`
+### 5.4 `software-design`
 
-Protocol 5 Software Design shall be narrowed and refactored to own D3 rather than D1-D3 simultaneously.
+Protocol 5 Software Design shall be narrowed to D3.
 
-It retains strong existing doctrine for:
+It retains strong doctrine for:
 
-- software architecture and ownership;
+- software architecture/ownership;
 - interfaces/data/state/persistence/concurrency/resources/security;
 - minimum justified software-system complexity;
-- implementation workplans;
+- D3->D4 workplans;
 - acceptance-boundary design;
-- independent implementation review;
+- independent D4 review;
 - active simplicity and architecture stabilization;
 - architecture fitness and affected-surface reasoning.
 
-It must consume D2 authority rather than inventing or silently freezing algorithmic/scientific semantics itself.
+It consumes D2 authority instead of inventing or silently freezing D1/D2 semantics.
 
-### 5.4 `software-implementation`
+### 5.5 `software-implementation`
 
 Retains D4 execution authority and most Protocol 5 implementation doctrine.
 
-It implements accepted D3 while preserving all inherited upstream authority, runs required executable evidence, reconciles affected surfaces, simplifies delegated machinery, and routes invalidated parent abstractions upward instead of silently changing them.
+It implements accepted D3 while preserving applicable D1/D2/D3 and D4-local constraints, runs executable evidence, reconciles affected surfaces, maintains delegated D4 specification/code coherently, simplifies delegated machinery, and routes invalidated parent abstractions upward instead of silently changing them.
 
-## 6. Domain handoff contract
+## 6. Generic change-plan and handoff contract
 
-Every material domain-to-domain handoff shall use the same generic semantic structure.
+Protocol 5's implementation workplan is too software-specific to be the only transition artifact in a four-domain protocol.
 
-A handoff is snapshot-complete for the affected abstraction without requiring Git history, prior chat, unavailable papers, or superseded artifacts to recover still-binding semantics.
+SSDP 6 shall refactor toward **one generic abstraction–realization change-plan contract**, specialized only where a domain materially needs additional fields. Do not create four nearly identical workplan templates.
 
-Each handoff records, proportionately:
+A material D1/D2/D3/D4 change plan records, proportionately:
 
-- parent abstraction/problem;
+- external/problem authority and affected upstream abstractions;
+- current accepted authority being changed or realized;
+- target abstraction/realization outcome;
 - invariants/required outcomes;
-- assumptions and validity conditions;
-- explicitly Frozen child-abstraction decisions for the next realization cycle;
+- domain-local governed constraints;
+- assumptions/validity conditions;
+- accepted child-abstraction decisions that constrain the next domain;
 - delegated realization space;
 - non-goals;
-- acceptance/verification relations;
+- verification/acceptance relations and real semantic owners;
 - oracle/reference sources;
-- relevant uncertainty/error budget;
-- affected dependent claims/surfaces;
-- genuine reopen triggers;
-- human-ratification state when required.
+- uncertainty/error budget where material;
+- affected dependency surface;
+- genuine reopen/simplification triggers;
+- authority state and required human-ratification state;
+- protocol/profile version binding.
 
-The handoff is a semantic contract, not a proof script and not a requirement to duplicate the full method paper into every workplan.
+The existing implementation workplan may become a D3->D4 specialization of this generic contract or be refactored into it. Preserve its strong proxy-proof acceptance, affected-surface, active-simplicity, and evidence clauses.
 
-## 7. Verification ladder
+A handoff must be snapshot-complete for still-binding task-specific semantics without requiring Git history, lost chat, unsupplied papers, or superseded artifacts. It must not duplicate whole method papers merely for ceremony; references to supplied current canonical authorities are valid composition.
 
-SSDP 6.0 shall distinguish four verification/validation boundaries.
+## 7. Verification ladder and composed scientific closure
 
 ### 7.1 D4 -> D3: implementation conformance verification
 
 Question:
 
-> Does the assembled executable software realize the accepted architecture and concrete software contracts completely and correctly?
+> Does the assembled executable software faithfully realize the accepted D3 architecture and applicable concrete D4 contracts?
 
-Evidence may include focused tests, affected regression, integration/end-to-end paths, structural/source checks, architecture fitness checks, real-owner execution, property/stateful testing, mutation/counterfactual evidence, failure injection, sanitizers/static analysis, and production qualification where independently required.
+Evidence may include focused tests, stage-local/final affected regression, integration/end-to-end paths, structural checks, architecture fitness, real-owner execution, property/stateful testing, mutation/counterfactual evidence, failure injection, static analysis, sanitizers, and independently required production qualification.
 
-### 7.2 D3 -> D2: algorithmic realization verification
+### 7.2 D3 -> D2: computational realization verification
 
 Question:
 
-> Does the assembled software architecture and execution path realize the accepted numerical/algorithmic method without changing its computational semantics?
+> Does the assembled software architecture and execution path realize the accepted D2 method without changing its computational semantics?
 
-Evidence may include mapping algorithm stages to semantic software owners, reference implementation comparison, numerical invariants, backend equivalence, ordering/reduction semantics, precision/tolerance checks, restart equivalence, deterministic/stochastic semantics, and end-observable comparison.
+Evidence may include algorithm-stage-to-owner mapping, trusted-reference comparison, numerical invariants, backend equivalence, ordering/reduction semantics, precision/tolerance checks, restart equivalence, stochastic semantics, and final governed-observable comparison.
 
 ### 7.3 D2 -> D1: mathematical/scientific fidelity verification
 
 Question:
 
-> Does the selected numerical/algorithmic method solve/estimate the accepted mathematical formulation within its governed approximation and error envelope?
+> Does the accepted D2 method solve/estimate the D1 formulation within its governed approximation and numerical-error envelope?
 
-Evidence may include analytical cases, manufactured solutions where valid, refinement studies, observed convergence order, residual/error analysis, conditioning studies, exact invariants, symmetry/conservation checks, estimator bias/variance analysis, sensitivity analysis, cross-method comparison, and independent derivation.
+Evidence may include analytical cases, manufactured solutions where valid, refinement/convergence studies, observed order, residual/error analysis, conditioning, exact invariants, symmetry/conservation, bias/variance analysis, sensitivity, cross-method comparison, and independent derivation.
 
-### 7.4 D1 -> empirical/research reality: validation and UQ
+### 7.4 D1 -> external authority: adequacy/validation
 
 Question:
 
-> Is the accepted scientific/mathematical formulation adequate for the intended scientific context and are its conclusions supported within understood uncertainty?
+> Is D1 adequate for its intended scientific, mathematical, or engineering context, and are conclusions supported within understood uncertainty?
 
-Evidence may include experimental/reference data comparison, held-out validation, model discrepancy analysis, uncertainty quantification, parameter identifiability, sensitivity, external literature, domain-expert judgment, and explicit falsification tests.
+Evidence depends on problem class: experiments/reference data, held-out validation, model discrepancy analysis, uncertainty quantification, parameter identifiability, standards, proof/theory, external literature, domain-expert judgment, and falsification tests.
 
-This boundary often requires human scientific judgment and must not be reduced to ordinary software test passing.
+### 7.5 Adjacent verification is necessary but not always sufficient
+
+Even when every adjacent contract appears satisfied, an omitted or underspecified invariant can allow the assembled product to violate the original scientific intent. Therefore material/high-risk scientific changes require a **composed end-to-end closure check** proportionate to risk:
+
+```text
+actual D4 executable behavior
+    -> final governed numerical observables
+    -> D2 error/equivalence envelope
+    -> D1 scientific/mathematical meaning
+    -> external adequacy/validation evidence where applicable
+```
+
+This is not a mandatory production-scale run. A bounded representative reference case may be sufficient. The purpose is to detect semantic loss at interfaces and incomplete abstractions that pairwise local checks missed.
 
 ## 8. Human-in-the-loop scientific authority
 
-SSDP shall increase autonomy without delegating consequential scientific authority blindly to agents.
+SSDP shall increase autonomy without blindly delegating consequential scientific authority to agents.
 
-AI agents may autonomously perform substantial upstream work including:
-
-- literature search and synthesis;
-- equation/derivation reconstruction;
-- consistency checking;
-- alternative formulation generation;
-- symbolic/numerical sanity checks;
-- sensitivity/convergence experiments;
-- counterexample/falsification attempts;
-- traceability maintenance;
-- draft method-paper updates;
-- downstream propagation of already-ratified semantic changes.
+Agents may autonomously perform substantial upstream work including literature search/synthesis, derivation reconstruction, consistency checking, alternative generation, symbolic/numerical sanity checks, sensitivity/convergence studies, falsification attempts, traceability maintenance, proposed method-paper edits, and downstream propagation of already accepted changes.
 
 Human ratification is normally required before materially accepting changes to:
 
-- the research/scientific question or intended interpretation;
+- research/scientific question or intended interpretation;
 - target observable/estimand/objective semantics;
-- governing physical/statistical model;
-- major modeling assumptions or closures;
-- mathematical formulation with scientific consequences;
-- context-of-use or validity regime;
-- approximation that may change scientific conclusions;
+- governing physical/statistical/modeling assumptions;
+- closures or mathematical formulation with scientific consequence;
+- context-of-use/validity regime;
+- approximation that can alter scientific conclusions;
 - scientific/model uncertainty assumptions;
 - acceptance of unexplained model-data discrepancy;
-- algorithmic changes that materially alter scientific/numerical guarantees or interpretation;
-- numerical error budgets/tolerances where the choice may alter scientific conclusions.
+- D2 algorithm changes that materially alter scientific/numerical guarantees or interpretation;
+- numerical error budgets/tolerances where conclusions can change.
 
-Projects may explicitly delegate lower-risk upstream decisions after establishing a policy. Absence of a human at every routine step must not force a synchronous waterfall; the gate is semantic-risk based.
+Projects may explicitly delegate lower-risk classes after establishing a policy. Human approval is semantic-risk based, not a mandatory synchronous gate between every domain.
 
-The protocol and orchestrator must represent `human ratification required/pending/accepted/rejected` truthfully rather than allowing a model to self-approve an explicitly human-owned decision.
+Required human approval state and scope must be durable enough for later agents to know what was accepted. The protocol must not require storing unnecessary personal identity data merely to prove that a gate occurred.
 
-## 9. Sparse semantic claim lineage
+The orchestrator may represent and route ratification state but may never self-approve a decision that policy assigns to a human.
 
-SSDP 6.0 shall provide lightweight traceability between material claims across abstraction levels without requiring a universal requirements database or exhaustive graph of every function/equation.
+## 9. Sparse semantic lineage without a parallel requirements system
 
-Projects should be able to express relations conceptually such as:
+Cross-layer dependency knowledge is necessary for bounded invalidation, but SSDP must not create a universal graph/database merely because graph language is convenient.
+
+Projects shall be able to represent material relations such as:
 
 ```text
-SCI-04  target observable definition
-    -> MATH-07 mathematical estimator
-        -> NUM-12 finite numerical estimator
-            -> ARCH-21 aggregation owner
-                -> IMPL semantic owner/symbol family
-                    -> EV-31 verification evidence
+scientific observable
+    -> mathematical estimator
+        -> numerical estimator
+            -> architecture owner
+                -> implementation semantic owner
+                    -> verification evidence
 ```
 
-Only claims whose cross-layer dependency materially improves correctness, impact analysis, verification, publication, or change propagation need durable identities.
+Possible relation classes include:
 
-The lineage system must support:
+- realizes / constrained-by;
+- depends-on;
+- verifies / evidence-for;
+- supersedes/revises;
+- stale-because-of.
 
-- parent/child abstraction relation;
-- realization-of relation;
-- verifies/evidence-for relation;
-- supersedes/revises relation where needed;
-- dependency-aware stale/invalidation state.
+Durable claim IDs are optional unless they materially improve correctness, impact analysis, publication, or automation. Section anchors, document references, workplan mappings, or profile metadata may be sufficient.
 
-Do not build a large ontology, graph database, or mandatory identifier bureaucracy unless concrete use proves it necessary. Markdown-native structured metadata or another lightweight representation is preferred initially.
+The requirement is **bounded traceability of material semantic dependencies**, not a separate lineage product.
 
 ## 10. Recasting Protocol 5 doctrine in SSDP language
 
-SSDP 6.0 shall preserve the successful substance of Protocol 5 while reducing conceptual duplication.
+### 10.1 Tier 1A product/problem truth
 
-### 10.1 Product truth / Tier 1A
+Preserve its protected purpose as **governed external/domain constraints plus accepted parent-abstraction invariants**. Do not collapse external constraints into D1.
 
-Refactor into **parent abstraction invariants**. What Protocol 5 called intrinsic product/problem truth is the abstraction that constrains a realization at the relevant boundary.
+### 10.2 Tier 1B Frozen architecture
 
-### 10.2 Frozen high-level architecture / Tier 1B
-
-Generalize into **accepted child abstraction**. Every domain may freeze only the material decisions needed to define the next domain's problem for the current realization cycle.
-
-The concept is no longer software-architecture-specific.
+Generalize into **accepted child abstraction for a realization cycle**. Every domain may freeze only material child-abstraction decisions needed to constrain the next realization.
 
 ### 10.3 Tier 2 delegated machinery
 
-Generalize into **delegated realization space** at every boundary.
+Generalize into **delegated realization space** at each boundary.
 
-Scientific modeling choices, numerical algorithms, software architecture, and code can each be delegated relative to an upstream abstraction until explicitly fixed by the owning domain.
+### 10.4 Tier 3 development economy
 
-### 10.4 Engineering fitness / simplicity / economy
-
-Retain as the constrained-realization objective hierarchy.
-
-At each domain:
-
-```text
-fidelity to parent abstraction = feasibility constraint
-then optimize:
-    domain fitness
-    > minimum justified realization complexity
-    > development economy
-```
-
-Domain fitness changes meaning by layer but not structure:
-
-- D1: scientific explanatory/predictive adequacy for intended use;
-- D2: numerical correctness, accuracy, robustness, scaling, tractability;
-- D3: architectural fitness, ownership clarity, operability, resources, maintainability;
-- D4: implementation correctness, idiomatic realization, efficiency, testability.
+Preserve as optimization after feasibility and minimum justified realization complexity.
 
 ### 10.5 Active simplicity
 
-Generalize from Tier-2 code/architecture cleanup to **realization simplification at any layer**.
+Generalize to realization simplification at any layer. Before adding another durable correction around accumulating exceptions, compensating assumptions, duplicated authority, wrappers, synchronized states, or heuristic patches, ask whether the current realization can be removed, narrowed, consolidated, rederived, or replaced while preserving governing authority.
 
-If a realization accumulates patches, exceptions, compensating assumptions, duplicated authority, special cases, repeated reconciliation, or a materially simpler equally valid realization becomes evident, simplify/rederive that realization before adding further durable complexity.
-
-This applies to:
-
-- scientific models with accumulating ad hoc corrections;
-- numerical methods with compensating heuristic patches;
-- software architectures with wrappers/fallbacks/duplicated state;
-- implementations with patch-on-patch machinery.
-
-Never simplify by weakening the parent abstraction silently.
+This applies to scientific models, numerical methods, software architecture, and code. Never simplify by silently weakening the parent abstraction or external constraint.
 
 ### 10.6 Affected surface
 
-Generalize into **affected semantic dependency surface**.
-
-A changed abstraction may affect child algorithms, architecture, implementation, tests, documentation, validation evidence, benchmarks, or published conclusions. Expansion of the affected surface does not create new upstream requirements.
+Generalize to **affected semantic dependency surface** spanning descendant methods, architecture, implementation, tests, papers, specifications, validation evidence, benchmarks, profile state, and published/release-pinned conclusions. Affected-surface expansion does not mint new upstream requirements.
 
 ### 10.7 Proxy-proof acceptance
 
-Generalize into **semantic-owner proof at each layer**.
+Generalize to semantic-owner proof at every layer. Evidence that could remain green while the actual formulation/method/architecture/implementation owner is wrong cannot close that claim.
 
-Evidence must exercise or otherwise establish the actual realization component/semantic relation that constitutes the claim. A proxy that could remain green while the real semantic owner/algorithm/formulation is wrong cannot close the claim.
+### 10.8 Evidence reuse/invalidation
 
-### 10.8 Evidence invalidation and reuse
+Reuse evidence until a changed authority/realization dimension can plausibly alter its claim. Invalidate only dependent evidence; final assembled D4 regression/integration rules remain intact.
 
-Retain but generalize across all domains. Reuse evidence until a changed parent/realization dimension can plausibly alter the claim. Invalidate only dependent evidence.
+### 10.9 Independent review and Verification
 
-### 10.9 Independent review and adversarial verification
-
-Retain the falsification-oriented philosophy, but review independence is now available at each abstraction boundary rather than being only a Software Design mode over implementation.
+Retain fresh-context, falsification-oriented independent review. Make it available at every material abstraction boundary without proliferating verifier roles.
 
 ### 10.10 Snapshot-complete handoff
 
-Retain and generalize to all domain transitions. No still-binding semantic decision may exist only in lost chat, Git history, obsolete revisions, or unsupplied external context.
+Generalize to all domain transitions and current normative document stacks.
 
 ### 10.11 Convergence and recurrence
 
-Retain as evidence that the current realization or abstraction boundary may be wrong. Repeated local failures should broaden reasoning to the shared semantic owner and may trigger re-derivation at the appropriate domain.
+Repeated failures are evidence about the shared semantic owner, not proof that the current realization must survive. Broaden to the earliest shared abstraction/mechanism and simplify before another additive repair when structural evidence warrants it.
+
+### 10.12 Long-horizon quality
+
+Long-horizon audit, documentation, language-profile, testing, performance, security, storage, and tool-routing doctrine must be made domain-aware where they currently assume Software Design owns scientific/numerical semantics. Do not duplicate those references per domain.
 
 ## 11. Required protocol artifacts and repository changes
 
-The implementation of this workplan shall determine the minimum coherent repository structure, but the following semantic artifacts are required.
-
 ### 11.1 New role skills
 
-Create first-class source roles:
+Create:
 
 ```text
 source/roles/scientific-formulation/SKILL.md
 source/roles/numerical-algorithm-design/SKILL.md
 ```
 
-with generated/installable distributions following existing source->dist build rules.
+and generated installable distributions under existing source->dist rules.
 
 ### 11.2 Refactor existing roles
 
@@ -766,443 +823,489 @@ source/roles/software-design/SKILL.md
 source/roles/software-implementation/SKILL.md
 ```
 
-so they participate in the four-domain recursive model without duplicating D1/D2 authority.
+so D3/D4 participate in the recursive model without retaining duplicate D1/D2 authority.
 
-### 11.3 Canonical shared references
+### 11.3 Canonical shared doctrine
 
-Introduce or refactor canonical references sufficient to own:
+Introduce/refactor the minimum canonical references needed to own:
 
-- recursive abstraction-realization doctrine;
-- scientific formulation and scientific validation;
-- mathematical formulation and scientific authority;
+- abstraction–realization doctrine and authority provenance;
+- scientific/mathematical formulation and external adequacy/validation;
 - numerical/algorithmic design and numerical verification;
-- cross-domain workflow/handoffs/reopen semantics;
-- documentation-stack ownership;
+- cross-domain workflow, change plans, handoffs, authority state, reopen/invalidation;
+- four-layer documentation ownership;
 - human scientific ratification;
-- semantic claim lineage/invalidation;
+- bounded semantic lineage;
 - SSDP 6 versioning/compatibility/migration.
 
-Prefer refactoring and splitting existing references over adding duplicative parallel prose. Existing `scientific-software.md` and `scientific-technical-writing.md` should be decomposed/reassigned where their current mixed responsibility becomes obsolete.
+Prefer moving/splitting existing content over parallel `ssdp-*` duplication. Existing `scientific-software.md`, `scientific-technical-writing.md`, `workflow-and-workplans.md`, `architecture-and-design.md`, `testing-and-validation.md`, `documentation-maintenance.md`, language profiles, and long-horizon doctrine must be reconciled with the new ownership model.
 
-### 11.4 Normative document templates
+### 11.4 Generic change-plan and document templates
 
-Add lightweight templates for:
+Add/refactor lightweight templates for:
+
+- generic abstraction–realization change plan/handoff;
+- Scientific Method Paper;
+- Numerical & Algorithmic Method Paper;
+- Architecture Manual guidance where current doctrine is insufficient;
+- D3->D4 implementation workplan/specification linkage.
+
+Do not create one near-duplicate workplan template per domain unless evidence proves a specialization necessary.
+
+### 11.5 Qualification
+
+Extend protocol qualification with behavior scenarios that exercise authority routing and semantic falsification, not only static phrase tests.
+
+### 11.6 Workflow prompt/profile changes
+
+Extend human-facing workflow prompts and the protocol profile to represent four domains, affected-domain routing, current/proposed/stale authority, verification target, and human ratification as needed.
+
+### 11.7 Protocol version and historical recovery
+
+`source/PROTOCOL_VERSION` remains `5.16` until the complete SSDP 6 candidate is coherent and independently accepted.
+
+Before switching to 6.0, establish and test an immutable historical-resolution path from Protocol `5.16.0` to a known source/bundle identity, such as an immutable tag/release/commit mapping. The exact mechanism is delegated; silent use of `main`/latest for a 5.16 workplan is forbidden.
+
+The existing packaged `sdp-protocol-5.16` orchestrator profile and its semantics must remain recoverable after 6.0 release.
+
+Repository rename remains explicitly deferred.
+
+## 12. Workflow architecture and affected-domain routing
+
+SSDP must not become a mandatory four-domain waterfall.
+
+Before mutation, classify the **highest potentially affected semantic domain** plus applicable side constraints. A claim that a change is D4-only or D3-only should include a proportionate upstream-impact check when there is plausible scientific/numerical risk.
+
+Full scientific change example:
 
 ```text
-Scientific Method Paper
-Numerical & Algorithmic Method Paper
-Architecture Manual guidance/template where not already adequately governed
-Implementation workplan / specification linkage
-```
-
-Templates shall support progressive disclosure and publication-quality scientific writing without becoming mandatory fill-every-field forms.
-
-### 11.5 Workflow prompt/profile changes
-
-Extend the human-facing workflow prompt system and protocol profile so the four domains can be selected/routed explicitly and automatically by affected-domain reasoning.
-
-Preserve local-first/public-fallback skill resolution and protocol-version coherence.
-
-### 11.6 Protocol version
-
-Set target protocol version to `6.0.0` only after the full incompatible lifecycle/doctrine migration is complete and independently reviewed.
-
-The repository may retain its current name during implementation. Repository rename to SSDP is explicitly deferred and must not be coupled to semantic implementation unless a later migration step requires it.
-
-## 12. Workflow architecture
-
-SSDP must avoid becoming a mandatory four-domain waterfall.
-
-A full scientific feature may follow:
-
-```text
-scientific question / evidence
-    -> D1 formulation + human ratification when required
-    -> D1 verification/validation readiness
-    -> D2 algorithm/numerical design
-    -> D2 verification against D1
-    -> D3 software architecture/workplan
-    -> D3 verification against D2
-    -> D4 implementation
-    -> D4 verification against D3
-    -> upward cross-verification through affected domains
-    -> publication/documentation reconciliation
+external question/evidence
+    -> proposed D1 change
+    -> D1 review + human ratification when required
+    -> accept current D1 / invalidate dependent descendants
+    -> D2 realization + D1 acceptance of D2 fidelity
+    -> D3 realization + D2 acceptance of D3 computational fidelity
+    -> D4 implementation + D3 acceptance of D4 fidelity
+    -> composed end-to-end scientific closure when material
+    -> current documentation/specification reconciliation
     -> closeout
 ```
 
-A software-local change may activate only:
+Reduced examples:
 
 ```text
-D3 -> D4 -> D3 verification
+software-local architecture change:   D3 -> D4 -> verify D4 against D3
+pure implementation refactor:         D4 only, after plausible upstream-impact exclusion
+numerical optimization:               D2 -> D3 -> D4 -> verify back to D1 as affected
+scientific formulation change:        D1 downward through dependent descendants
 ```
 
-A pure implementation refactor may remain within D4 when D3/D2/D1 semantics are provably unchanged.
+Routing rule:
 
-A numerical optimization may begin at D2 and propagate through D3/D4 while preserving D1.
+> Start at the earliest/highest abstraction whose accepted semantics or applicable external constraints may materially change; realize downward only through dependent surfaces; verify back upward through the affected semantic dependency graph.
 
-A changed scientific hypothesis may begin at D1 and invalidate dependent descendants downward.
+Do not require unaffected sibling branches of the authority DAG to rerun merely because they share a repository.
 
-The routing rule is:
+## 13. Scientific and numerical oracle doctrine
 
-> Start at the earliest/highest abstraction whose accepted semantics may materially change, then realize downward only as far as necessary and verify back upward across the affected dependency surface.
-
-## 13. Numerical and scientific oracle requirements
-
-SSDP shall strengthen D1/D2 oracle engineering beyond the current downstream scientific-software reference.
-
-The numerical-method doctrine should route proportionately among methods such as:
+D2 doctrine should route proportionately among:
 
 - dimensional/unit consistency;
-- analytical exact cases;
-- limiting/asymptotic cases;
+- analytical/exact/limiting/asymptotic cases;
 - manufactured solutions where valid;
 - residual checking;
 - conservation/invariant checks;
 - mesh/time-step/order refinement;
-- observed convergence-order analysis;
+- observed convergence order;
 - Richardson/extrapolation methods where justified;
-- conditioning and sensitivity analysis;
-- forward/backward error reasoning;
-- floating-point cancellation/range/precision analysis;
+- conditioning/sensitivity;
+- forward/backward error;
+- floating-point range/cancellation/precision analysis;
 - reference/direct solver comparison;
-- cross-implementation differential validation;
-- stochastic convergence/bias/variance analysis;
-- uncertainty propagation;
+- cross-implementation differential testing;
+- stochastic convergence/bias/variance;
+- numerical uncertainty propagation;
 - seed/backend/precision robustness;
-- performance-versus-accuracy Pareto analysis.
+- accuracy/performance Pareto analysis.
 
-The scientific-formulation doctrine should route proportionately among methods such as:
+D1 doctrine should route proportionately among:
 
-- empirical validation against appropriate data;
+- empirical validation where applicable;
 - calibration-versus-validation separation;
-- parameter identifiability analysis;
-- model discrepancy analysis;
-- sensitivity to modeling assumptions;
+- parameter identifiability;
+- model discrepancy;
+- sensitivity to assumptions;
 - falsification/counterexample design;
+- proof/theory/standards where appropriate;
 - external literature reconciliation;
-- uncertainty quantification;
-- robustness of conclusions to plausible model alternatives.
+- scientific/model uncertainty quantification;
+- robustness of conclusions to plausible alternative models.
 
-Do not mandate every technique. Select the cheapest sufficiently strong evidence for the claim, escalating when risk, ambiguity, or failed falsification warrants it.
+Select the cheapest sufficiently strong evidence for the claim. Escalate when risk, ambiguity, failed falsification, or conflicting authorities warrant it.
 
 ## 14. Protocol qualification
 
-Protocol 6 acceptance must include behavioral qualification scenarios that distinguish superficially compliant but scientifically wrong behavior from sound SSDP reasoning.
+SSDP 6 acceptance must include adversarial behavioral scenarios. At minimum cover:
 
-At minimum add scenarios covering:
-
-1. code perfectly matches architecture but the governing equation has the wrong sign;
+1. code matches architecture but the governing equation has the wrong sign;
 2. architecture faithfully implements the wrong estimator;
-3. a numerical algorithm converges reliably to the wrong continuous model;
+3. numerical algorithm converges reliably to the wrong continuous model;
 4. tests duplicate the implementation's incorrect formula and all pass;
 5. tolerance is widened solely to make an optimized backend pass;
-6. reduced precision introduces scientifically meaningful bias while ordinary unit tests remain green;
-7. method paper and implementation use different normalizations;
+6. reduced precision introduces scientifically meaningful bias while unit tests remain green;
+7. D2 paper and implementation use different normalizations;
 8. units are numerically compatible but physically interpreted incorrectly;
-9. a stable stochastic estimator is biased relative to D1;
+9. stable stochastic estimator is biased relative to D1;
 10. observed convergence order degrades after optimization;
-11. boundary-condition implementation changes the modeled physics;
+11. boundary-condition implementation changes modeled physics;
 12. calibration data is reused as validation evidence;
-13. parallel reduction/summation changes results beyond the accepted numerical error budget;
-14. restart/checkpoint semantics alter the stochastic estimator;
-15. a downstream implementation is used to rewrite upstream authority without independent adjudication;
-16. D1 changes only one observable and the protocol invalidates unrelated D2/D3/D4 evidence unnecessarily;
-17. a software-local refactor incorrectly escalates to D1/D2 despite unchanged semantics;
-18. a numerical contradiction is incorrectly treated as a local code bug rather than reopening D2;
-19. a human-owned scientific decision is self-approved by an agent;
-20. a method paper is historically coherent but no longer represents the accepted current science.
+13. parallel reduction/summation exceeds the numerical error budget;
+14. restart/checkpoint behavior changes a stochastic estimator;
+15. implementation is used to rewrite upstream authority without adjudication;
+16. one D1 observable changes and unrelated descendant evidence is invalidated unnecessarily;
+17. software-local refactor escalates to D1/D2 despite unchanged semantics;
+18. numerical contradiction is treated as local code defect instead of reopening D2;
+19. human-owned scientific decision is self-approved by an agent;
+20. historically coherent method paper no longer represents accepted current science;
+21. a draft D1/D2 paper edit is incorrectly treated as current authority before acceptance;
+22. code conflicts with accepted D4 specification and the specification is rewritten merely to match code;
+23. D3 security/reliability constraint entering directly from project authority is lost because it is absent from D1;
+24. one shared D3/D4 realization serves multiple D2 authorities and a change to one incorrectly invalidates all siblings;
+25. a realization has two applicable upstream authorities and satisfies only one;
+26. all adjacent checks pass but an end-to-end governed observable violates D1 because an intermediate abstraction omitted a necessary invariant;
+27. release-pinned/published method paper is rewritten to follow current science rather than preserved as historical publication truth;
+28. pure mathematical/theoretical software is forced through meaningless empirical validation instead of proof/reference-theory adequacy;
+29. a D4-only claim is accepted without checking an obvious possible D2 precision/ordering impact;
+30. supporting literature prose is treated as stronger normative authority than the project's accepted D1 formulation;
+31. a lower-domain hardware/performance constraint is incorrectly promoted into D1 merely to fit a linear hierarchy;
+32. a candidate introduces circular normative ownership between documents so no authority can be resolved independently.
 
-Qualification should test role routing, authority precedence, correct reopen domain, documentation ownership, evidence invalidation, and refusal to counterfeit closure.
+Qualification should test role routing, authority provenance, correct reopen domain, current-vs-proposed document state, multi-parent constraints, documentation ownership, bounded invalidation, D4 spec/code precedence, composed scientific closure, and refusal to counterfeit completion.
 
-## 15. Orchestrator compatibility and integration
+## 15. Orchestrator compatibility and profile evolution
 
-The current orchestrator architecture already makes workflow routing profile-owned and keeps the orchestrator subordinate to protocol intent. SSDP 6 shall preserve that architecture.
+The orchestrator architecture correctly makes workflow routing profile-owned and keeps Core/Tracker/Adapters/Scheduler subordinate to protocol intent. Preserve that architecture.
 
-Do not hard-code scientific workflow semantics into Tracker/Adapters/Scheduler as a second authority.
+Do not hard-code SSDP scientific semantics independently into Tracker, Adapters, or Scheduler.
 
-After SSDP 6 semantics stabilize, extend the protocol profile minimally to represent, as needed:
+The existing Protocol 5.16 profile schema is stage-oriented and versioned. SSDP 6 may extend it only as far as the accepted workflow semantics require. If required domain/dependency/authority-state semantics cannot be represented safely as backward-compatible additive fields, create a new `profile_schema_version` rather than overloading version-1 fields.
+
+The orchestrator must then support the required old/new schema versions explicitly while preserving the immutable `sdp-protocol-5.16` profile.
+
+SSDP 6 profile semantics may need to represent:
 
 - domain identity;
 - role owner;
-- artifact kind;
-- upstream authority dependencies;
+- artifact/authority kind;
+- upstream authority dependencies, potentially multiple;
+- domain-local governed constraints;
 - verification target;
 - affected-domain/invalidation edges;
+- accepted/proposed/stale state as required for routing;
 - recognized outcomes;
 - human-ratification requirement/state;
 - reopen/routing semantics.
 
-Tracker may project these states and recommend next actions. It must consume the compatible protocol profile rather than independently interpreting scientific doctrine.
+Tracker may project these states and recommend next actions. It must not independently infer scientific truth from code or user telemetry.
 
-Adapter/Scheduler capability and resource routing remains subordinate to the required SSDP stage/domain. Resource optimization may choose among engineering-sufficient execution routes but may never decide scientific truth or bypass a required human epistemic gate.
-
-Existing Protocol 5.16 profiles and historical workplans remain version-bound and must not be silently reinterpreted under SSDP 6.
+Scheduler/resource optimization may select among engineering-sufficient execution routes only after protocol-required domain/authority constraints and human gates are satisfied.
 
 ## 16. Migration strategy
 
-### Phase 0 — Parent authority freeze
+### Phase 0 — Parent authority review/freeze
 
-This workplan is the parent transition contract. Before broad implementation, independently review it for conceptual completeness, contradictions with preserved Protocol 5 guarantees, lifecycle ambiguity, and unnecessary machinery.
+Independently review this workplan for conceptual completeness, loss of Protocol 5 guarantees, lifecycle/document ambiguity, and unnecessary machinery. Do not begin broad skill edits until this parent authority passes.
 
-Do not begin by mechanically editing all skills.
+### Phase 1 — Core recursive doctrine and compatibility scaffold
 
-### Phase 1 — Core recursive doctrine
-
-Create the canonical abstraction-realization reference and refactor governing README/workflow/versioning language around it.
+Create/refactor the canonical abstraction–realization doctrine, authority-precedence model, generic change-plan semantics, and versioning/migration rules.
 
 Acceptance:
 
-- `R |= A` feasibility semantics are explicit;
-- invariant/delegated classification is generic;
-- fitness/simplicity/economy is expressed as optimization inside the feasible realization space;
-- design/verification inverse relation is explicit;
-- upward challenge/downward invalidation semantics are explicit;
-- validation boundary is distinguished from verification.
+- feasibility includes inherited abstractions plus domain-local external constraints;
+- abstraction level and authority source are orthogonal;
+- Design/Verification opposite-direction relation is explicit without claiming bijective inversion;
+- abstraction adequacy is reviewable;
+- multi-parent layered DAG semantics are supported;
+- upward challenge/downward invalidation are explicit;
+- external adequacy/validation is distinguished from internal verification;
+- immutable Protocol 5.16 recovery path is designed before 6.0 cutover.
+
+Do not make `source/README.md` or `PROTOCOL_VERSION` claim current 6.0 authority before the complete candidate is coherent.
 
 ### Phase 2 — D1 scientific-formulation role and paper
 
-Implement the D1 role, method-paper ownership, scientific validation/UQ doctrine, literature/provenance rules, and HITL scientific authority.
-
-Acceptance includes behavioral qualification against model/formulation drift.
+Implement D1 role, accepted/proposed Scientific Method Paper semantics, external adequacy/validation/UQ doctrine, provenance rules, and HITL policy.
 
 ### Phase 3 — D2 numerical-algorithm-design role and paper
 
-Implement D2 role, numerical-method doctrine, numerical paper ownership, error/convergence/conditioning/oracle requirements, and D1<->D2 handoff/verification.
-
-Acceptance includes genuine numerical qualification scenarios rather than phrase-only checks.
+Implement D2 role, Numerical & Algorithmic Method Paper, D1->D2 handoff/review, error/convergence/conditioning/oracle doctrine, and numerical uncertainty.
 
 ### Phase 4 — Narrow/refactor D3 Software Design
 
-Remove D1/D2 semantic ownership from Software Design while preserving its strong architecture, workplan, active-simplicity, review, tool-routing, resource, security, state, and acceptance doctrine.
+Remove D1/D2 semantic ownership from Software Design while preserving architecture/workplan/acceptance/active-simplicity/resource/security/tool-routing strengths. Reclassify cross-cutting references by semantic effect.
 
-Do not duplicate old algorithm/scientific language in D3 for compatibility. Route it upward.
+### Phase 5 — Adapt D4 Software Implementation and specification semantics
 
-### Phase 5 — Adapt D4 Software Implementation
-
-Teach Implementation to consume D3/D2/D1 authority, distinguish parent-abstraction invalidation from local realization reconciliation, and preserve multi-domain evidence invalidation.
+Teach Implementation to consume applicable upstream authorities/side constraints, preserve D4 spec-versus-code precedence, maintain affected-surface regression/integration, and route parent invalidation upward.
 
 ### Phase 6 — Four-layer documentation architecture
 
-Refactor documentation doctrine so normative current scientific/numerical papers are first-class upstream authorities.
+Refactor documentation doctrine for logical one-to-one domain correspondence, current/proposed/release-pinned state, scoped normative sections, publication derivation, and semantic-owner/editorial-specialist separation.
 
-Preserve `software-documentation` as a semantic-subordinate editorial/publication specialist.
+### Phase 7 — Minimal dependency lineage and affected-domain routing
 
-Add cross-document navigation/traceability conventions sufficient for a human researcher to traverse the full stack.
-
-### Phase 7 — Sparse claim lineage and affected-domain routing
-
-Implement the minimum useful structured representation for cross-layer material claims, dependencies, stale state, and reopen routing.
-
-Do not introduce a database or heavy graph machinery unless markdown/profile-level structures prove insufficient through concrete evidence.
+Implement only the minimum representation necessary to identify material cross-layer dependencies, stale descendants, and reopen routing. Prefer existing document links/workplans/profile structures before new registries.
 
 ### Phase 8 — Workflow prompts and protocol profile
 
-Add four-domain stage/routing support, human-gate states, and domain-aware invalidation to the canonical prompt/profile system.
-
-Preserve profile ownership and orchestrator compatibility.
+Add affected-domain routing and human/authority-state support. Evolve profile schema version only if semantically required; preserve 5.16 profile behavior.
 
 ### Phase 9 — Protocol qualification and self-review
 
-Run static package/build validation plus adversarial behavioral qualification across the scenarios above.
+Run static/source-package validation plus adversarial behavioral qualification, including multi-parent, side-constraint, draft-authority, spec/code, and end-to-end composition cases.
 
-Review whether SSDP 6 itself creates unnecessary bureaucracy, duplicated authority, or fixed-stage overhead. Simplify before release where equivalent semantics can be preserved.
+Review whether SSDP itself introduced avoidable bureaucracy or duplicated authority; simplify before release where equivalent semantics survive.
 
 ### Phase 10 — Orchestrator SSDP 6 integration
 
-Only after the protocol profile is accepted, update the orchestrator's compatible snapshot/profile support. Preserve the existing orchestrator architecture unless concrete evidence forces a bounded reopen.
+After SSDP 6 profile semantics are accepted, update orchestrator support minimally. Preserve profile ownership and 5.16 compatibility; reopen orchestrator architecture only on evidence.
 
-### Phase 11 — Release/closeout
+### Phase 11 — Atomic release/closeout
 
-- set `PROTOCOL_VERSION` to `6.0.0`;
-- regenerate skill distributions;
+Before release:
+
+- establish/test immutable 5.16 protocol-source/profile recovery;
+- set `PROTOCOL_VERSION` to `6.0.0` only on the coherent accepted candidate;
+- regenerate all skill distributions;
 - validate source/dist coherence;
-- update repository README/portability guidance;
-- preserve Protocol 5 historical compatibility semantics;
-- close/archive this workplan only after independent Review passes;
-- repository rename to SSDP remains a separate user-controlled operation.
+- update root/source README and portability guidance;
+- run repository tests/package checks and new behavioral qualification;
+- verify 5.16 and 6.0 profile resolution independently;
+- perform independent final Review;
+- archive this workplan only after Pass;
+- leave repository rename as separate user-controlled work.
+
+Do not publish a mixed current state where canonical docs claim 6.0 while required roles/profile/distributions still encode 5.16 semantics.
 
 ## 17. Required implementation obligations
 
-### Obligation A — Replace the three-tier software-specific authority model with recursive abstraction–realization semantics
+### Obligation A — Make recursive abstraction–realization the primary doctrine
 
-**Required end state:** Protocol-wide governing doctrine uses abstraction invariants, delegated realization space, constrained optimization, and inverse verification as the primary conceptual vocabulary. Tier-1A/Tier-1B/Tier-2 terminology may survive only in historical compatibility explanations or where needed to explain Protocol 5 workplans.
+**Required end state:** protocol-wide language centers on abstraction invariants, applicable governed constraints, delegated realization space, constrained realization search, abstraction adequacy, reverse semantic verification, and bounded invalidation.
 
-**Anti-shortcut:** Do not merely add abstraction-realization prose above unchanged role semantics while Software Design still owns D1/D2 authority.
+**Anti-shortcut:** do not add new prose above unchanged software-specific authority semantics.
 
-### Obligation B — Establish four true authority-bearing domains
+### Obligation B — Preserve authority provenance and lower-domain external constraints
 
-**Required end state:** D1-D4 have distinct semantic ownership, mutation authority, handoff/reopen behavior, and verification responsibility.
+**Required end state:** user/project/safety/external contracts remain authoritative and may constrain any domain directly. D1 is not a universal dumping ground for every product constraint.
 
-**Anti-shortcut:** Do not implement D1/D2 as optional references or documentation specialists under Software Design.
+### Obligation C — Establish four true authority-bearing domains
 
-### Obligation C — Establish one-to-one normative documentation ownership
+**Required end state:** D1-D4 have distinct semantic ownership, mutation/acceptance authority, handoff/reopen behavior, and verification responsibility.
 
-**Required end state:** Scientific Method Paper, Numerical & Algorithmic Method Paper, Architecture Manual, and Specification+Code correspond to D1-D4 and are maintained by their semantic owners.
+**Anti-shortcut:** D1/D2 are not optional documentation specialists under Software Design.
 
-**Anti-shortcut:** Do not leave D1/D2 papers non-normative while claiming the documentation stack is complete.
+### Obligation D — Establish logical one-to-one normative documentation ownership
 
-### Obligation D — Preserve valid Protocol 5 strengths by semantic refactoring rather than additive duplication
+**Required end state:** D1 Scientific Method Paper, D2 Numerical & Algorithmic Method Paper, D3 Architecture Manual, and D4 Specification+Code correspond to the four domains with exactly one current semantic owner per material claim.
 
-**Required end state:** active simplicity, proxy-proof acceptance, snapshot-complete handoffs, affected-surface reasoning, evidence invalidation, convergence, language profiles, tool routing, long-horizon quality, security/resource/performance doctrine, and version binding remain effective under SSDP 6.
+**Anti-shortcut:** do not interpret one-to-one as mandatory monolithic files or make every explanatory sentence normative.
 
-**Anti-shortcut:** Do not create parallel `ssdp-*` references that duplicate existing doctrine wholesale while leaving the old system intact underneath.
+### Obligation E — Define current/proposed/stale authority semantics and atomic acceptance
 
-### Obligation E — Generalize verification to every abstraction boundary
+**Required end state:** speculative edits cannot become current authority accidentally; accepted upstream changes invalidate only dependent descendants; publication/release-pinned snapshots remain historical.
 
-**Required end state:** every domain can design downward and independently verify upward using domain-appropriate methods; scientific validation remains distinguished at the top boundary.
+### Obligation F — Preserve D4 specification/code distinction
 
-### Obligation F — Add risk-sensitive human scientific ratification
+**Required end state:** accepted D4 specification is intended concrete contract; code is actual realization/evidence. Neither may silently rewrite higher authority, and implementation disagreement does not automatically bless code.
 
-**Required end state:** consequential D1 and scientifically material D2 decisions cannot be silently self-approved by autonomous agents; ordinary delegated work remains automatable.
+### Obligation G — Generalize Verification without false invertibility or false completeness
 
-### Obligation G — Add bounded cross-layer lineage and invalidation
+**Required end state:** every material boundary supports reverse semantic reconstruction/falsification; the doctrine does not claim Design is bijective or that finite tests prove total semantics.
 
-**Required end state:** material upstream changes can identify dependent downstream authority/evidence as stale without invalidating unrelated work; downstream contradictions route upward without rewriting authority.
+### Obligation H — Add composed end-to-end scientific closure where risk warrants it
 
-### Obligation H — Keep SSDP proportional
+**Required end state:** important assembled claims can be checked from executable observables through D2 error semantics to D1 meaning/external adequacy rather than relying exclusively on pairwise contract checks.
 
-**Required end state:** software-only projects and local changes can use reduced profiles. The protocol must not force four documents, four reviews, or four stages when upstream domains are not material.
+### Obligation I — Add risk-sensitive human scientific ratification
 
-### Obligation I — Preserve orchestrator authority separation
+**Required end state:** consequential D1 and scientifically material D2 decisions cannot be silently self-approved, while routine delegated work remains autonomous.
 
-**Required end state:** the orchestrator consumes SSDP profile semantics; it does not become an independent scientific workflow engine or epistemic authority.
+### Obligation J — Provide bounded multi-parent dependency tracing and invalidation
 
-### Obligation J — Self-qualify with adversarial scientific/numerical scenarios
+**Required end state:** shared/multi-authority realizations satisfy all applicable parents and invalidate only affected descendants without requiring a universal graph database.
 
-**Required end state:** Protocol 6 acceptance demonstrates correct behavior on intentionally deceptive cross-layer cases, not only static textual structure.
+### Obligation K — Preserve Protocol 5 strengths by refactoring, not duplication
+
+**Required end state:** active simplicity, proxy-proof acceptance, snapshot-complete handoff, affected regression/integration, evidence reuse/invalidation, convergence, language profiles, tool routing, long-horizon quality, resource/security/performance doctrine, and version binding remain effective.
+
+### Obligation L — Keep SSDP proportional
+
+**Required end state:** reduced profiles support software-only/local work. The protocol does not force four papers, four reviews, or four stages when upstream domains are absent/unaffected.
+
+### Obligation M — Preserve historical Protocol 5.16 and orchestrator authority separation
+
+**Required end state:** 5.16 workplans/profile remain resolvable under 5.16 semantics; SSDP 6 profile may evolve schema explicitly; orchestrator never becomes scientific authority.
+
+### Obligation N — Self-qualify adversarially
+
+**Required end state:** Protocol 6 passes deceptive scientific/numerical/authority/document-state scenarios, not only static wording tests.
 
 ## 18. Delegated implementation space
 
-The following remain delegated unless later evidence requires a Frozen decision:
+Delegated unless evidence requires a Frozen decision:
 
-- exact role names if equivalent clearer names are found before public release;
-- exact file names of new references/templates;
-- whether D1 mathematical formulation is one reference or split scientific/mathematical references;
-- exact Markdown metadata schema for claim lineage;
-- exact profile-schema field names;
+- exact final role names;
+- exact reference/template filenames;
+- physical document directory/file topology;
+- whether D1 science and mathematics use one or several files within one semantic document family;
+- exact proposed/current/stale metadata syntax;
+- exact dependency-link/claim-ID syntax;
+- exact profile-schema field names and whether SSDP 6 requires schema v2;
 - exact qualification harness implementation;
-- exact document directory conventions in downstream scientific repositories;
-- whether architecture manual/specification templates are full files or doctrinal templates;
 - exact symbolic/numerical tools named as examples;
-- exact publication/PDF generation stack;
-- exact human-approval UI in future orchestrator modules.
+- exact publication/PDF stack;
+- exact human-approval UI;
+- exact immutable historical-ref mechanism, provided 5.16 recovery is deterministic and tested.
 
-Prefer reuse and refactoring. New durable machinery must either provide a capability impossible to express cleanly in the simplified existing system or replace broader duplicated complexity.
+Prefer reduction, movement of authority, and refactoring. New durable machinery must provide a capability the simplified existing system cannot express cleanly or replace broader duplicated machinery.
 
 ## 19. Explicit non-goals
 
-- Do not rename the GitHub repository as part of this workplan.
-- Do not rewrite or invalidate historical Protocol 5 workplans.
-- Do not force non-scientific software to invent scientific papers or numerical methods.
-- Do not create four mandatory approvals for every change.
-- Do not make documentation volume a proxy for rigor.
-- Do not require formal proof where empirical/numerical evidence is the correct epistemic tool.
-- Do not let empirical validation substitute for software/numerical verification, or vice versa.
-- Do not create a universal claim graph/database covering every line, function, equation, or test.
-- Do not make the orchestrator an authority over scientific truth.
-- Do not turn human-in-the-loop into human-in-every-loop.
-- Do not preserve obsolete Protocol 5 conceptual duplication merely for wording compatibility inside Protocol 6 roles.
-- Do not create patches/wrappers around role-boundary problems that are more cleanly solved by moving ownership to the correct abstraction layer.
+- Do not rename the repository under this workplan.
+- Do not reinterpret historical Protocol 5 workplans under SSDP 6.
+- Do not force non-scientific software to invent D1/D2 documents.
+- Do not force a linear four-stage waterfall.
+- Do not force every project into exactly four physical files.
+- Do not make documentation volume a rigor proxy.
+- Do not require formal proof where empirical/numerical evidence is appropriate.
+- Do not force empirical validation onto pure theoretical/mathematical problems.
+- Do not let validation substitute for numerical/software verification or vice versa.
+- Do not create a universal requirements/claim graph or semantic database.
+- Do not make orchestrator/Tracker scientific authority.
+- Do not turn HITL into human-in-every-loop.
+- Do not preserve obsolete Protocol 5 duplication merely for wording compatibility inside 6.0.
+- Do not create wrappers around role-boundary defects that are solved more cleanly by moving ownership.
+- Do not make code automatically normative when it contradicts accepted specification.
+- Do not make every literature citation or explanatory paragraph a normative scientific invariant.
+- Do not assume one parent abstraction when a realization genuinely serves several authorities.
 
 ## 20. Acceptance criteria
 
-SSDP 6.0 is ready for release only when all of the following are true.
+SSDP 6.0 is release-ready only when all are true.
 
 ### Conceptual closure
 
-- recursive abstraction-realization is the clearly governing doctrine;
-- realization fidelity is a feasibility constraint, not a weighted tradeoff;
-- invariant versus delegated realization is consistently defined across domains;
-- design and verification are expressed as forward/inverse semantic relations;
-- upstream authority/downstream evidence direction is unambiguous;
-- validation/UQ are correctly distinguished from internal verification;
-- active simplicity and engineering economy remain subordinate to semantic fidelity.
+- abstraction is defined as an intentionally incomplete normative semantic contract;
+- realization feasibility includes inherited authority plus domain-local governed constraints;
+- abstraction level and authority source are orthogonal;
+- fidelity is a feasibility condition, not a weighted objective;
+- realization search is proportionate heuristic engineering rather than a false global-optimum requirement;
+- Design and Verification are opposite-direction semantic operations without false bijective-inverse claims;
+- abstraction adequacy/incompleteness can block handoff;
+- multi-parent layered-DAG semantics are supported;
+- upward challenge/downward bounded invalidation are unambiguous;
+- external adequacy/validation and layer-aware uncertainty are distinguished from internal verification.
 
 ### Domain closure
 
-- D1-D4 roles and authority boundaries are complete and non-overlapping;
-- D1/D2 no longer depend on Software Design to own scientific/numerical semantics;
-- D3 no longer silently owns algorithm/scientific meaning;
-- D4 retains adaptive implementation authority within inherited constraints;
-- reopen routing reaches the earliest materially affected abstraction.
+- D1-D4 role boundaries are complete and non-competing;
+- cross-cutting concerns route by semantic effect;
+- D3 no longer owns D1/D2 semantics;
+- D4 remains adaptive under inherited constraints;
+- reduced-domain routing works;
+- reopen reaches the earliest affected abstraction.
 
 ### Documentation closure
 
-- D1 Scientific Method Paper is normative for D1;
-- D2 Numerical & Algorithmic Method Paper is normative for D2;
-- D3 Architecture Manual is normative for D3;
-- D4 specification/code own concrete software behavior for D4;
-- semantic ownership and editorial/documentation-specialist responsibilities are separated;
-- methods papers are publication-quality capable but not made bureaucratically mandatory when the domain is absent.
+- logical D1-D4 documentation correspondence exists;
+- exactly one current normative owner exists per material claim;
+- normative versus supporting/evidence prose is distinguishable semantically;
+- proposed edits cannot masquerade as accepted current authority;
+- release-pinned/publication snapshots are preserved;
+- D4 specification and code have explicit non-competing roles;
+- `software-documentation` is editorial/publication support, not semantic approval authority.
 
 ### Verification closure
 
-- each abstraction boundary has clear verification questions and evidence routes;
-- numerical verification includes genuine convergence/error/conditioning/oracle reasoning;
-- scientific validation includes context-of-use/model-adequacy/UQ reasoning where applicable;
-- proxy-proof evidence principles generalize across layers;
-- evidence invalidation is dependency-aware.
+- every material abstraction boundary has a verification question and evidence route;
+- parent-boundary review is independently falsification-oriented when risk warrants it;
+- numerical verification includes convergence/error/conditioning/oracle reasoning;
+- external D1 adequacy fits empirical, theoretical, and engineering problem classes;
+- composed end-to-end scientific closure exists for material/high-risk claims;
+- proxy-proof evidence and evidence invalidation generalize across layers.
 
-### Autonomy/HITL closure
+### Workflow/autonomy closure
 
-- human scientific ratification triggers are explicit and risk-based;
-- autonomous agents can perform substantial derivation/search/testing without unnecessary synchronous gates;
-- orchestrator/profile semantics can represent pending human authority truthfully.
+- generic abstraction–realization change-plan/handoff semantics exist;
+- D4-only/local routes require only proportionate upstream-impact exclusion;
+- human ratification is risk-based and represented truthfully;
+- multi-parent dependency invalidation is bounded;
+- no unnecessary fixed gate count is introduced.
 
-### Compatibility and implementation closure
+### Compatibility/implementation closure
 
-- Protocol 5.16 historical semantics remain recoverable and version-bound;
-- Protocol 6 source/dist build and package checks pass;
-- all new roles build as installable skills under existing packaging rules;
-- workflow prompts/profile resolve the correct roles and stages;
-- orchestrator integration remains subordinate to profile authority;
-- repository/project test suites and new qualification scenarios pass;
-- `git diff --check` and existing repository acceptance commands pass after implementation;
-- independent Review finds no genuine blocking semantic or architectural defect.
+- immutable Protocol 5.16 source/profile recovery is demonstrably available;
+- 5.16 workplans are not silently interpreted by 6.0 roles;
+- Protocol 6 source/dist build/package checks pass;
+- all four role skills build/install correctly;
+- workflow prompts/profile route domains correctly;
+- any required profile-schema major/version evolution is explicit and backward support for 5.16 is tested;
+- orchestrator remains subordinate to profile authority;
+- repository tests and new adversarial qualification pass;
+- existing repository acceptance commands and `git diff --check` pass;
+- no mixed 5.16/6.0 canonical release state remains;
+- independent final Review finds no genuine blocking defect.
 
 ## 21. Genuine redesign / simplification triggers
 
-Reopen this parent authority only when evidence shows that one of its central assumptions is wrong, including:
+Reopen this parent authority only on evidence that a central assumption is wrong, including:
 
-- the recursive abstraction-realization relation cannot cleanly represent a material scientific/software development class;
+- pairwise abstraction–realization cannot represent a material scientific/software development class even with multi-parent/side-constraint semantics;
 - D1-D4 boundaries produce unavoidable competing authority;
-- the one-to-one documentation stack forces systematic duplication rather than semantic ownership;
-- human ratification rules materially block ordinary autonomous work without increasing scientific assurance;
-- lightweight lineage cannot support bounded invalidation without disproportionate machinery;
-- the four-role lifecycle causes unavoidable orchestration ambiguity that cannot be resolved through profile semantics;
-- a simpler equivalent domain decomposition explains and controls the same failure modes with less authority machinery.
+- logical one-to-one documentation ownership causes systematic duplication rather than clarity;
+- current/proposed authority state requires disproportionate bureaucracy;
+- human ratification blocks ordinary autonomous work without increasing assurance;
+- bounded dependency tracing cannot support correct invalidation without heavy machinery;
+- profile-driven orchestration cannot express affected-domain routing without redesigning orchestrator architecture;
+- a simpler domain decomposition controls the same failure modes with less authority machinery.
 
-Before adding another role, stage, registry, database, wrapper, or reconciliation mechanism, determine whether the issue can be solved by reducing, moving, or clarifying abstraction ownership.
+Before adding another role, stage, registry, database, wrapper, ledger, or reconciliation mechanism, determine whether reducing, moving, or clarifying abstraction ownership solves the problem.
 
 ## 22. Final design invariant
 
-The target SSDP 6.0 system should be understandable through one recursive rule:
+The target SSDP 6.0 system should be understandable through a small recursive rule set:
 
 ```text
-Every downstream domain is a realization of an upstream abstraction.
-The upstream abstraction defines what must remain true.
-The downstream domain is free to optimize how it is made true.
-Verification reconstructs the realization and attempts to prove/falsify that it is faithful.
-A realization may challenge its abstraction through evidence but may never silently redefine it.
-Accepted upstream change invalidates only dependent downstream authority and evidence.
+An abstraction states the semantic invariants that must survive realization.
+A realization must satisfy every applicable upstream abstraction and governed external constraint.
+Within that feasible set, optimize domain fitness, then minimum justified complexity, then development economy.
+A realization remains delegated except where an owning authority explicitly accepts a property into the abstraction.
+Verification reconstructs realization semantics and attempts to falsify conformity; it is opposite-direction reasoning, not a bijective inverse function.
+A realization may challenge upstream authority through evidence but may never silently redefine it.
+Accepted upstream change invalidates only dependent downstream authority/evidence.
+Current normative documents change only through accepted authority mutation, not speculative edits.
 ```
 
-Applied recursively:
+Applied to scientific software:
 
 ```text
-scientific intent / empirical reality
-          <->
-scientific & mathematical formulation
-          <->
-algorithm & numerical methods
-          <->
-software architecture
-          <->
-specification & implementation
-          <->
-executable behavior and evidence
+external scientific / theoretical / engineering authority and evidence
+                 ||  adequacy / validation / proof / UQ
+                 \/
+D1 scientific & mathematical formulation
+                 <-> design / verification
+D2 algorithm & numerical methods
+                 <-> design / verification
+D3 software architecture
+                 <-> design / verification
+D4 specification & implementation
+                 -> executable behavior / evidence
 ```
 
-SSDP 6.0 shall teach agents to engineer scientific software as **recursive abstraction-preserving realization under constrained optimization, closed by inverse semantic verification and bounded scientific validation**.
+The simple chain is a pedagogical projection; the accepted dependency structure may be a layered DAG with multiple applicable upstream authorities and domain-local governed constraints.
 
-That principle, rather than the incidental machinery of any current implementation, is the central invariant of this protocol revision.
+SSDP 6.0 shall teach agents to engineer scientific software as **recursive abstraction-preserving realization under constrained optimization, closed by reverse semantic verification, bounded dependency-aware invalidation, and problem-appropriate external scientific/theoretical/engineering adequacy**.
+
+That principle, rather than any incidental role, file layout, algorithm, code mechanism, or orchestrator implementation, is the central invariant of this protocol revision.
