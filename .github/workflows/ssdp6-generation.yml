@@ -29,12 +29,28 @@ jobs:
         run: python source/build_skills.py --output /tmp/protocol-dist
       - name: Validate generated skill packages independently
         run: python source/validate_packages.py --dist /tmp/protocol-dist
-      - name: Replace committed generated distribution from the canonical build
+      - name: Replace committed generated distribution from canonical build
         run: |
           rm -rf dist
           cp -a /tmp/protocol-dist dist
-      - name: Run protocol regression tests
-        run: python -m unittest discover -s tests -v
+      - name: Run protocol regression tests and persist exact failure diagnostics
+        run: |
+          set +e
+          python -m unittest discover -s tests -v > /tmp/ssdp6-protocol-tests.log 2>&1
+          status=$?
+          set -e
+          cat /tmp/ssdp6-protocol-tests.log
+          if [ "$status" -ne 0 ]; then
+            cp /tmp/ssdp6-protocol-tests.log .ci-ssdp6-failure.log
+            git add .ci-ssdp6-failure.log
+            if ! git diff --cached --quiet; then
+              git config user.name "github-actions[bot]"
+              git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+              git commit -m "Record SSDP 6 regression diagnostics"
+              git push origin HEAD:impl/ssdp-6
+            fi
+            exit "$status"
+          fi
       - name: Verify generated distribution parity
         run: python source/check_dist.py --expected /tmp/protocol-dist --committed dist
       - name: Verify packaged protocol snapshots
