@@ -16,12 +16,12 @@ import sys
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-PACKAGE_SRC = REPO_ROOT / "orchestrator" / "packages" / "core" / "src"
+PACKAGE_SRC = REPO_ROOT / "orchestrator" / "src"
 sys.path.insert(0, str(PACKAGE_SRC))
 
-from sdp_orchestrator.core import _profile as P  # noqa: E402
-from sdp_orchestrator.core._canonical import parse_document  # noqa: E402
-from sdp_orchestrator.core._protocolsrc import (  # noqa: E402
+from sdp_orchestrator.core import profile as P  # noqa: E402
+from sdp_orchestrator.core.canonical import parse_document  # noqa: E402
+from sdp_orchestrator.core.protocol_source import (  # noqa: E402
     CANONICAL_PROMPTS_RELPATH,
     CANONICAL_VERSION_RELPATH,
     PACKAGED_PROFILE,

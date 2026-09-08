@@ -20,8 +20,9 @@ import time
 from concurrent.futures import ProcessPoolExecutor
 from pathlib import Path
 
-PACKAGE_ROOT = Path(__file__).resolve().parents[1] / "packages" / "core"
+PACKAGE_ROOT = Path(__file__).resolve().parents[1]
 TESTS_DIR = PACKAGE_ROOT / "tests"
+SOURCE_DIR = PACKAGE_ROOT / "src"
 
 
 def effective_cpus() -> int:
@@ -41,9 +42,15 @@ def discover() -> list[str]:
 
 def run_module(module: str) -> tuple[str, int, str, float]:
     started = time.monotonic()
+    environment = dict(os.environ)
+    pythonpath = [str(SOURCE_DIR)]
+    if environment.get("PYTHONPATH"):
+        pythonpath.append(environment["PYTHONPATH"])
+    environment["PYTHONPATH"] = os.pathsep.join(pythonpath)
     result = subprocess.run(  # noqa: S603
         [sys.executable, "-m", "unittest", "-v", module],
         cwd=str(PACKAGE_ROOT),
+        env=environment,
         capture_output=True,
         text=True,
         check=False,

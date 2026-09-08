@@ -22,6 +22,18 @@ sdp doctor
 `sdp doctor` reports readiness without importing extension code, touching the
 network, or modifying anything.
 
+For checkout development, the same CLI owner is available without installing
+this package:
+
+```bash
+python3 orchestrator/sdp.py --help
+python3 orchestrator/sdp.py doctor --config /path/to/config.toml
+python3 orchestrator/sdp.py implementation --config /path/to/config.toml --prompt-mode local
+```
+
+`orchestrator/sdp.py` only places the adjacent `src/` tree first and delegates
+to `sdp_orchestrator.core.cli:main`; it contains no command or product logic.
+
 ---
 
 ## 2. Configure
@@ -310,19 +322,20 @@ homes for orchestrator code.
 ```
 orchestrator/
   docs/          architecture.md, core-user-guide.md
-  packages/core/ pyproject.toml, src/sdp_orchestrator/core/, tests/
+  pyproject.toml, sdp.py, src/sdp_orchestrator/core/, tests/
   scripts/       snapshot generation, test runner
 ```
 
 ## 11. Development
 
 ```bash
-pip install -e orchestrator/packages/core -r orchestrator/packages/core/requirements-dev.txt
-python orchestrator/scripts/run_core_tests.py            # parallel, sized to the machine
-python orchestrator/scripts/generate_protocol_snapshot.py --check
+python3 -m pip install -e orchestrator -r orchestrator/requirements-dev.txt
+python3 orchestrator/sdp.py --help                         # zero-install checkout path
+python3 orchestrator/scripts/run_core_tests.py             # parallel, sized to the machine
+python3 orchestrator/scripts/generate_protocol_snapshot.py --check
 ```
 
 The packaged Protocol snapshot under
-`src/sdp_orchestrator/core/resources/protocol/` is generated from
+`orchestrator/src/sdp_orchestrator/core/resources/protocol/` is generated from
 `source/shared/references/development-workflow-prompts.md` and is never edited by
 hand; `--check` proves the committed copy matches canonical source.

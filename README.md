@@ -84,7 +84,7 @@ git diff --check
 When the SDP Orchestrator under `orchestrator/` is affected, also run its acceptance suite:
 
 ```bash
-python -m pip install ./orchestrator/packages/core -r orchestrator/packages/core/requirements-dev.txt
+python3 -m pip install ./orchestrator -r orchestrator/requirements-dev.txt
 python orchestrator/scripts/generate_protocol_snapshot.py --check
 python orchestrator/scripts/run_core_tests.py
 ```

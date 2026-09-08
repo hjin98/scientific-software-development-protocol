@@ -104,58 +104,37 @@ sdp-orchestrator-adapters
 sdp-orchestrator-scheduler
 ```
 
-Installing a higher distribution installs required lower distributions. Core alone does not pull higher/ACP/DB-lock/benchmark/ML dependencies merely for future convenience.
+The WP-1 delivery is one Python distribution with a finished Core-only mode. The
+future Tracker, Adapter, and Scheduler layers remain architectural dependency
+directions; they do not require separate WP-1 distributions or speculative
+runtime machinery.
 
 ## 4. Repository layout, Python packaging, and namespace
 
-Repository containment is architectural; exact subdirectory naming beneath `orchestrator/` remains delegated. A conforming multi-distribution layout may be:
+The WP-1 source and release owner is one shallow distribution. All orchestrator
+implementation, tests, resources, scripts, and documentation remain below the
+containment root:
 
 ```text
 orchestrator/
-  docs/
-    architecture.md
-    ...
-  packages/
-    core/
-      pyproject.toml
-      src/
-        sdp_orchestrator/
-          core/
-      tests/
-      fixtures/
-    tracker/
-      pyproject.toml
-      src/
-        sdp_orchestrator/
-          tracker/
-      tests/
-    adapters/
-      pyproject.toml
-      src/
-        sdp_orchestrator/
-          adapters/
-      tests/
-    scheduler/
-      pyproject.toml
-      src/
-        sdp_orchestrator/
-          scheduler/
-      tests/
-  scripts/                 # orchestrator-owned development/release helpers only
-  tests/                   # optional cross-distribution integration tests
+  docs/                     # architecture and Core user documentation
+  pyproject.toml            # sdp-orchestrator-core release owner
+  sdp.py                    # zero-install checkout launcher
+  src/
+    sdp_orchestrator/       # native PEP 420 namespace; no root __init__.py
+      core/                  # one Core composition root and public API/SPI
+  tests/                    # Core and product-boundary regression tests
+  scripts/                  # snapshot generation and test runner
 ```
 
 All of the above remain under `orchestrator/`. Existing Protocol source under `source/`, Protocol workplans under `workplans/`, and generated/install artifacts outside the repository are external authorities/integration outputs, not alternate orchestrator implementation locations. Repository-level `.github/...` or equivalent CI may invoke commands under `orchestrator/`, but reusable test/build/orchestration logic remains contained.
 
 Use native PEP 420 namespace packaging. No distribution owns `sdp_orchestrator/__init__.py`.
 
-Public APIs:
+The WP-1 public Core surfaces are:
 
 ```text
 sdp_orchestrator.core.api.v1
-sdp_orchestrator.tracker.api.v1
-sdp_orchestrator.adapters.api.v1
-sdp_orchestrator.scheduler.api.v1
 ```
 
 Provider SPIs:
@@ -1047,7 +1026,7 @@ Recommendations reconstruct from source snapshots/observations preserving source
 
 ## 18. Executable architecture fitness
 
-Static checks once packages exist:
+Static checks for the source distribution:
 
 ```text
 Core        must not import Tracker/Adapters/Scheduler

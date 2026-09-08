@@ -39,8 +39,8 @@ jobs:
           python-version: "3.12"
       - name: Install orchestrator Core and its development dependencies
         run: >-
-          python -m pip install ./orchestrator/packages/core
-          -r orchestrator/packages/core/requirements-dev.txt
+          python -m pip install ./orchestrator
+          -r orchestrator/requirements-dev.txt
       - name: Verify the packaged Protocol snapshot matches canonical source
         run: python orchestrator/scripts/generate_protocol_snapshot.py --check
       - name: Run orchestrator Core acceptance suite
