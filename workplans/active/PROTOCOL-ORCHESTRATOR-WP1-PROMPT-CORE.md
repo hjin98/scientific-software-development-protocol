@@ -2,7 +2,11 @@
 kind: implementation-workplan
 workplan_id: PROTOCOL-ORCHESTRATOR-WP1-PROMPT-CORE
 protocol_version: 5.16.0
-status: active
+status: reopened
+reviewed_date: 2026-09-07
+reviewed_candidate: 5e6fd725213ccfdd211f79425d0aef33e03eaeaa
+review_verdict: no-pass
+reopened_date: 2026-09-07
 parent_architecture: orchestrator/docs/architecture.md
 parent_architecture_version: 1.6.0
 base_commit: af4e7ed637891cc49c0ccc40cc9636491df71457
@@ -695,3 +699,102 @@ A final counterexample pass after those corrections finds no significant unresol
 Snapshot-loss counterfactual: parent architecture + this workplan + supplied Protocol 5.16 source/reference tree recover every still-binding WP-1 invariant, Frozen decision, API/SPI role, stage/workplan/input policy, repository-layout rule, non-goal, acceptance boundary, and reopen trigger without chat or Git review history.
 
 **Design verdict: PASS — WP-1 Prompt Module + Core Program is closure-complete and ready for `software-implementation`.**
+
+## 11. Independent implementation review — 2026-09-07
+
+**Implementation review verdict: NO-PASS — WP-1 is reopened for bounded implementation repair.**
+
+Reviewed candidate: `5e6fd725213ccfdd211f79425d0aef33e03eaeaa` on `plan/protocol-orchestrator`.
+
+The parent architecture remains valid at 1.6.0. These findings are implementation nonconformance under the already-accepted Core architecture, not evidence for a new subsystem or a parent-architecture redesign. Repair the existing semantic owners in place. Prefer alteration/removal/consolidation; do not add a second observer, second registry, wrapper service, persistence layer, or compatibility shim.
+
+### R1 — Make candidate identity include the staged/index state it claims to identify
+
+**Blocking authority:** product invariants 13-15; §§3.3, 3.8; O3/O6.
+
+The current dirty-worktree fingerprint hashes status/path plus working-tree file content, but does not bind the staged/index blob content. Two candidates can therefore have identical `sdp.git-working-tree.v1` identity while the staged patch differs, with `identity_complete=true`; the same omission lets index drift evade render revalidation.
+
+Repair the existing Git candidate-identity path so materially relevant staged state and working-tree/untracked state are both represented under the one existing candidate identity. Do not introduce a second candidate record or parallel observer. If any relevant index/content state cannot be bounded safely, mark the identity incomplete rather than claiming completeness.
+
+Required counterexample: hold path/status and working-tree bytes constant, change only the staged blob, and prove the candidate digest changes; prepare a prompt, mutate only that staged blob, and prove final render rejects the stale preparation with no prompt event.
+
+### R2 — Bind remote evidence to the selected remote and preserve remote ambiguity as a public semantic result
+
+**Blocking authority:** product invariants 5-6, 13-14; §3.4; §4.6; O3/O9.
+
+Remote selection and target observation are currently separable in a way that can select one remote while consuming another remote's upstream/tracking evidence. A configured `fork` can therefore inherit `origin/main` evidence and render a fork URL even when the target was never established on fork. Conversely, same-branch cached evidence on the actually selected remote is not consistently used when there is no matching upstream. In addition, an ambiguous remote selection is collapsed into `core.remote.unavailable` at the web-render boundary even though `core.remote.ambiguous` is a Frozen caller-visible code.
+
+Rewire the existing observation flow so one coherent tuple owns `selected remote + target branch/ref + evidence provenance + observed commit`. Upstream evidence is valid only when its remote is the selected remote; otherwise use the selected remote's same-branch cached tracking ref or a bounded refresh for that selected target. Never render another remote's `origin/main`-style name as a branch of the selected repository. Preserve `core.remote.ambiguous` rather than recoding it as unavailable when ambiguity is the observed cause.
+
+Required real-Git counterexamples: branch tracks `origin/main`, configured remote is `fork`, fork branch absent -> web render fails target-unavailable/ambiguity truthfully; fork/main cached at the candidate commit -> web target is fork/main (branch `main`) with cached provenance; multiple unresolvable remotes -> caller-visible `core.remote.ambiguous`.
+
+### R3 — Enforce exact canonical workplan paths instead of normalizing traversal aliases into valid selectors
+
+**Blocking authority:** product invariant 5; §3.5; O4.
+
+The current selector normalizer can collapse leading/interior `..` components and make a non-canonical traversal-like input such as `../workplans/active/A.md` resolve to the real in-repository plan. That is not an exact repository-relative canonical selector.
+
+Alter the existing exact-path lookup so an explicit path must already be canonical, relative, traversal-free, and under a recognized workplan root before it can match. Do not add fuzzy recovery or a second path-resolution mode. Exact `workplan_id` lookup remains separate.
+
+Required counterexamples: canonical path succeeds; absolute path, leading/interior `.` or `..` aliases, backslash aliases that are not the canonical repository spelling, and traversal strings that normalize onto an existing plan all fail rather than selecting it.
+
+### R4 — Make `PreparedPrompt` admission identity enforceable and make final render one coherent optimistic snapshot
+
+**Blocking authority:** product invariants 8, 11, 13-14; §§3.6, 3.8; O5/O6/O8.
+
+Two gaps must close in the existing prepare/render owner:
+
+1. `render()` trusts the caller-supplied `preparation_fingerprint` without recomputing it. Because `PreparedPrompt` is intentionally JSON round-trippable, a caller can modify a material mode-independent field after admission, preserve the old fingerprint, reconstruct the record, and render content that no longer corresponds to the admitted identity.
+2. mutable local Protocol source is re-resolved after the stale-context check. It may change between validation and body loading, yielding a body from one source state with profile/input identity from another. The current revalidation also occurs before assembly rather than immediately before successful publication/return, leaving a mutation window across final construction.
+
+At render entry, recompute `sdp.prompt-preparation.v1` from the supplied public record and reject a mismatch before any prompt event. Resolve/use mutable source material coherently rather than checking one read and rendering from a later unchecked read. After artifact construction, perform the final optimistic unchanged-state check required by §3.8 before event publication/return so candidate/workplan/local-source movement during assembly cannot escape. This remains lock-free; do not add repository locks or persistence.
+
+Also make local multi-file Protocol-source resolution itself optimistic/coherent: the version/prompts used for one source identity must be proven to belong to one stable read snapshot or fail/retry boundedly.
+
+Required counterexamples: JSON-roundtrip tamper of a material input/workplan/profile/source/observation field while retaining the old preparation fingerprint -> rejection; local source changes between validation and body use -> stale/incoherent failure; candidate/workplan/source changes during final assembly -> no event and no accepted render.
+
+### R5 — Make extension activation failure-atomic and enforce the already-declared capability/API contract
+
+**Blocking authority:** product invariants 8-10; §3.10; §§4.3-4.4; O10.
+
+The current `ExtensionContext` mutates the live service registry and event bus during `activate()`. If a provider registers a service/subscription and then raises, the provider is marked failed but its registrations survive. This can make a failed extension usable, let it receive prompt-bearing events, and allow dependents to activate incorrectly.
+
+The same composition path currently matches dependencies and `Application.has/service/services` by capability key while ignoring `CapabilityRequirement.api_spec` versus the provisioned API major. Manifest-declared provisions are also not reconciled tightly with services registered during activation, allowing the pre-activation dependency authority and post-activation registry to disagree.
+
+Rewire the one existing composition root to stage activation registrations and commit them to the live registry/event bus only after successful activation and contract validation. Use the existing `CapabilityRequirement`, `CapabilityProvision`, `ExtensionManifest`, and `ExtensionRegistration` fields as the single compatibility contract: enforce API compatibility, singular/multi-provider semantics, provider identity consistency, and declared-versus-registered service consistency. Do not introduce another global registry or plugin layer.
+
+Required counterexamples: provider registers/subscribes then raises -> no capability, no event delivery, dependent disabled; requirement `api_spec` incompatible with Core/provider API -> not admitted/available; undeclared or API-major-mismatched registration -> deterministic incompatibility; healthy unrelated providers/Core remain active.
+
+### R6 — Remove private concrete implementation types from the public v1 API/SPI seam
+
+**Blocking authority:** product invariant 8; parent architecture stable-ID/public-boundary rules; §4.1-4.4; O6.
+
+`spi.v1` publicly re-exports `ExtensionContext`, whose `core()` signature returns private concrete `CoreService`; `api.v1` publicly re-exports `create_application`, whose implementation signature returns private concrete `Application` rather than the Frozen `ApplicationAPI` contract. These are exactly the private lower-module types WP-2+ must not bind to.
+
+Change the existing public annotations/contract wiring so public signatures expose `CoreAPI`/`ApplicationAPI` or other public v1 records/protocols only. Do not wrap the implementation solely to hide its type. Extend the seam test to inspect all public exported callables/context methods, not only `CoreAPI`, for private implementation types/modules.
+
+### R7 — Enforce external-output/resource bounds before materialization and keep user-facing diagnostics redacted
+
+**Blocking authority:** product invariant 7; §§3.3, 3.6, 3.11; O3/O5/O11; Protocol security/release requirements.
+
+The current Git helpers use `subprocess.run(..., capture_output=True)` and only inspect output size after the complete stdout has already been materialized; the remote Protocol-source helper likewise captures command output without a streaming/materialization bound. Remote Protocol resolution also performs a Git fetch into a temporary mirror before the later per-file byte checks, so unrelated remote repository content can be downloaded/materialized outside the stated `MAX_REMOTE_READ_BYTES` contract.
+
+Alter the existing subprocess/remote-source readers so time/output/resource bounds are effective while data is being read, not merely asserted afterward, and so resolving two required Protocol files does not require unbounded unrelated repository content. Keep the current Git/data-only approach if it can satisfy those bounds; do not add a general transport framework. Unexpected CLI/event diagnostics that can contain external exception text must pass through the existing redaction boundary or remain generic.
+
+Required boundary tests: oversized stdout/stderr is terminated/rejected without full in-memory materialization; oversized required remote files fail; a remote repository containing large unrelated content does not force unbounded transfer/materialization to read the bounded required source; user-facing diagnostics remain redacted.
+
+### R8 — Make installed-product acceptance fail closed and record final executable closure evidence
+
+**Blocking authority:** product invariant 15; O1/O11/O12; §6; Protocol testing and release/distribution rules.
+
+`InstalledProductTests.setUpClass()` currently converts wheel-build failure, missing wheel/sdist, venv-creation failure, and wheel-install failure into `SkipTest`. Those are the acceptance owner itself, not optional environment conveniences. A broken distributable can therefore proxy-pass the Core suite as skipped. The branch head also has no GitHub check-run/workflow-run evidence, and the workplan contained no implementation-closure command/result record before this review.
+
+Change required build/install/artifact failures to hard acceptance failures in the normal Core acceptance path. If a truly unsupported external environment prevents an owner check, report that check unavailable explicitly; do not count it as pass. Preserve the existing ordinary repository CI job rather than adding a competing workflow.
+
+After R1-R7, rerun the complete affected surface on the exact candidate: Core focused/regression suite, snapshot parity, wheel+sdist build/inspection/install outside checkout, installed `sdp` end-to-end owner tests, extension composition owner tests, real Git/worktree/remote tests, privacy/web tests, layout/architecture fitness, and the ordinary repository Protocol build/validation/parity/`git diff --check` commands. Record the exact candidate and executed/unavailable results in this workplan before requesting independent Review again.
+
+### 11.1 Re-review gate
+
+WP-1 may return to independent Review only when all R1-R8 counterexamples are closed through the existing semantic owners, the complete final affected regression and installed-product integration pass on one exact candidate, ordinary repository validation passes, and no repair has introduced a parallel observer, registry, prompt authority, compatibility wrapper, persistence mechanism, or higher-module dependency.
+
+The positive implementation findings remain valid and should be preserved: one Core distribution and PEP 420 namespace, the intended small runtime dependency set, no higher-module runtime dependency, one extension entry-point group, canonical prompt snapshot parity, one canonical profile/body extraction path, non-mutating target Git commands, final-artifact privacy tests, passive discovery-only diagnostics, thin integration into the existing repository CI workflow, and no competing prompt-prose authority.
