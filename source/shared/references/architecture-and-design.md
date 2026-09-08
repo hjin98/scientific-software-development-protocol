@@ -20,6 +20,8 @@ D3 may own material decisions about:
 
 D3 does **not** own the scientific model merely because software implements it, and does not own the numerical algorithm merely because components execute it. Route a change in equation/estimand/assumption to D1 and a change in estimator/discretization/error/precision semantics to D2.
 
+D3 stewardship remains inside the accepted scope of the active task, governing contracts, and affected semantic surface. Architecture authority does not authorize unrelated enhancement or speculative future-proofing.
+
 ## Governing feasibility
 
 A D3 candidate is admissible only when it satisfies every applicable upstream D1/D2 claim and every domain-local governed constraint such as security, reliability, compatibility, target hardware, resource limits, performance/scaling, deployment, and external API obligations.

@@ -86,10 +86,7 @@ ROLE_SPECS = {
             "release-and-distribution.md",
             "repository-intake.md",
         ] + TOOL_METHODS + CROSS_CUTTING + ENGINEERING_FITNESS,
-        "templates": [
-            "implementation_workplan_template.md",
-            "abstraction_realization_change_plan_template.md",
-        ],
+        "templates": ["implementation_workplan_template.md"],
     },
     "software-implementation": {
         "role": "d4-software-implementation",

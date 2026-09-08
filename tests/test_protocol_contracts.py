@@ -72,8 +72,9 @@ class Protocol6ContractTests(unittest.TestCase):
     def test_stage_local_final_regression_and_proxy_proof_survive(self) -> None:
         self.assertIn("stage-local regression", self.testing)
         self.assertIn("final assembled acceptance", self.testing)
-        self.assertIn("proxy-proof semantic-owner evidence", self.testing)
-        self.assertIn("real semantic owner", self.testing)
+        self.assertIn("proxy-proof acceptance", self.testing)
+        self.assertIn("semantic owner under acceptance", self.testing)
+        self.assertIn("could this evidence remain green", self.testing)
 
     def test_active_simplicity_survives_without_machinery_preservation(self) -> None:
         for text in (self.d3, read("source/roles/software-implementation/SKILL.md").lower()):

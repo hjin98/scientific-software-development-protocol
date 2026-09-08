@@ -19,6 +19,8 @@ When material, also route security to [Security and trust boundaries](references
 
 ## Authority boundary
 
+Documentation serves truthful stakeholder understanding of the accepted system. It is not a mechanism for redefining scientific/product truth or manufacturing apparent closure. **Never rewrite product truth** merely to legitimize defective code, a failing test, or a convenient current realization.
+
 The logical normative families are D1 Scientific Method Paper, D2 Numerical & Algorithmic Method Paper, D3 Architecture Manual, and D4 Specification. An authority-bearing document can contain both normative semantic core and non-normative rationale/evidence/pedagogy.
 
 This specialist may edit/draft those documents, but semantic acceptance belongs to the owning D1/D2/D3/D4 role and required human adjudicator. Do not self-approve a scientific, numerical, architecture, or specification mutation because the prose is clearer.
@@ -59,4 +61,4 @@ Do not create a universal documentation approval lifecycle, provenance database,
 
 ## Completion
 
-Report documents/source chains inspected and changed, authority/drift conflicts and their routing, substantial editorial refactoring, examples/build/render checks executed, generated artifacts regenerated, and unresolved semantic contradictions. The result should make accepted authority more understandable without changing product semantics through editorial action.
+Report documents/source chains inspected and changed, authority/drift conflicts and their routing, substantial editorial refactoring, examples/build/render checks executed, generated artifacts regenerated, and unresolved semantic contradictions. The result should make accepted authority more understandable and preserve truthful stakeholder communication without changing product semantics through editorial action.

@@ -4,11 +4,11 @@ Evidence exists to test governed claims; it is not a parallel authority system. 
 
 ## Evidence integrity
 
-Tests, proofs, benchmarks, metrics, reports, literature, and runtime observations are instruments. They do not manufacture the claim they measure.
+Tests, proofs, benchmarks, metrics, reports, literature, and runtime observations are **measurement instruments**, not truth or product objectives. They do not manufacture the claim they measure.
 
-Without an accepted semantic change or independent proof that the prior oracle was wrong, it is invalid to create a pass by **deleting/weakening its assertion**, **removing known failing inputs** from the fixture population, copying buggy implementation output into expected values, converting a required failure/exception into warning/success, skipping or making a required check optional, widening a material tolerance merely because it failed, adding product fallback solely for test scaffolding, or **rewriting specification/documentation** to bless unintended implementation. The same anti-counterfeit rule applies to method papers and architecture authority.
+Without an accepted semantic change or independent proof that the prior oracle was wrong, it is invalid to create a pass by **deleting/weakening its assertion**, **removing known failing inputs** from the fixture population, copying **buggy implementation output** into expected values, converting a required failure/exception into **warning/success**, skipping or **making a required check optional**, **relaxing a material threshold** or widening tolerance merely because it failed, adding product fallback solely for test scaffolding, or **rewriting specification/documentation** to bless unintended implementation. The same anti-counterfeit rule applies to method papers and architecture authority.
 
-A test, threshold, fixture, or specification may change when its governing authority genuinely changed, the previous expectation is independently shown incorrect, or a stronger test preserves the same accepted claim. The justification must be semantic rather than merely that the old check is inconvenient or red.
+**Test, fixture, threshold, and specification changes remain legitimate** when their governing authority genuinely changed, the previous expectation is independently shown incorrect, or a stronger oracle preserves the same accepted claim. The justification must be semantic rather than merely that the old check is inconvenient or red.
 
 For material completion claims apply a bounded **independent-evaluator counterfactual**: if the visible acceptance harness were replaced by an independent expert evaluation of the same accepted stakeholder/domain outcome and engineering envelope, would the candidate still deserve to pass? If materially no, local green evidence is insufficient.
 
@@ -79,23 +79,32 @@ After each material executable behavior-changing stage, run focused checks plus 
 
 Stage-local evidence improves fault localization; it does not remove final assembled regression.
 
-## Proxy-proof semantic-owner evidence
+## Proxy-proof acceptance and allowed test-double boundary
 
-Identify the **real semantic owner** of the claim in the current realization. Evidence cannot close that owner claim if it mocks, stubs, monkeypatches, precomputes, substantially reimplements, or bypasses the owner whose behavior constitutes the claim.
+For a material acceptance claim identify the **semantic owner under acceptance**: the real production decision-maker/state transition/persistence boundary/orchestrator/algorithm/consumer path whose behavior constitutes the claim. Then state the **allowed test-double boundary** below or outside that owner.
 
-This is **not a global ban on mocks or fakes**. Bounded doubles remain valid below or outside the owner to control external services, hardware, data volume, nondeterminism, and **expensive ML/scientific training or prediction**.
+Apply this counterfactual:
 
-Examples of invalid owner proof include:
+> **Could this evidence remain green** while the semantic owner under acceptance is materially broken?
 
-- patching the production decision-maker to return the expected answer;
-- evidence that **directly invokes a downstream helper** when production caller/orchestrator/restart/reconciliation/authorization detection is part of the claim;
-- seeding post-transition state when the transition itself is under acceptance;
-- replacing persistence with an in-memory substitute when restart/persistence semantics are the claim;
-- reimplementing compatibility/migration/scheduling/authorization logic in the harness.
+If yes, it cannot establish **proxy-proof acceptance** and **cannot close the owner claim**.
 
-If evidence could remain green while the real semantic owner is broken, it **cannot close the owner claim**.
+Historical invalid substitutions include evidence that:
 
-After a legitimate delegated-owner replacement, old owner-specific evidence is stale for that claim and must be remapped to the new real owner.
+- **mocks, stubs, monkeypatches**, precomputes, or substantially reimplements the semantic owner;
+- **directly invokes a downstream helper** when the production caller/orchestrator/restart/reconciliation/authorization detection is part of the claim;
+- **seeds post-decision or post-transition state** when the decision/transition is under acceptance;
+- **replaces durable/project persistence** with an in-memory substitute when persistence/restart semantics are the claim;
+- **reimplements production compatibility**/migration/scheduling/authorization logic in the harness;
+- accepts a **helper-produced plan/result** when production construction/routing of that plan/result is the behavior being verified.
+
+This is **not a global ban on mocks or fakes**. **Bounded deterministic fixtures remain preferred** where they establish the claim economically, and bounded test doubles remain valid below or outside the real owner to control external services, hardware, data volume, nondeterminism, and **expensive ML/scientific training or prediction**. Production-scale execution is required only when production-scale behavior/resource qualification is itself the claim.
+
+When an exact owner/path is merely delegated realization, the lower-level Tier-2 owner **does not become Frozen** in historical Protocol 5 vocabulary merely because acceptance named it. Suppose accepted semantics move from delegated owner `A` to equivalent owner `B`: **equivalent owner `B`** is valid when governing authority is unchanged, but owner-specific evidence for `A` is stale. **Reconcile the acceptance mapping to the new real owner** and rerun owner-specific evidence instead of preserving `A` or calling the remap proxy-passing.
+
+If the required real-owner boundary is unavailable, mark the claim **unavailable/blocking** rather than substituting a proxy and declaring a pass.
+
+When a bypass is easy to regress and the claim is structural, a **robust inexpensive structural/negative check** can protect the boundary. Do **not require universal AST scanning**, a **global monkeypatch ban**, or a **new anti-mocking framework** merely to police ordinary tests.
 
 ## Conformance and structural evidence
 
@@ -143,7 +152,7 @@ Before implementation completion:
 
 1. reconcile every accepted governing obligation and material structural/absence claim;
 2. re-derive the affected behavioral/semantic surface from the final assembled implementation;
-3. account for every affected path with executed coverage or an explicit unavailable blocker;
+3. account for every affected path with executed coverage or an explicit **unavailable/blocking** result;
 4. rerun complete affected-surface regression after all material executable edits;
 5. run assembled real-boundary integration/end-to-end tests;
 6. run repository/project-required build/lint/type/package checks.

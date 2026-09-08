@@ -1,150 +1,115 @@
 from __future__ import annotations
 
 import re
+import sys
 import unittest
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 SOURCE = ROOT / "source"
-HIERARCHY = "product engineering fitness > minimum justified product/system complexity > development economy"
-LINK_RE = re.compile(r"\[[^\]]+\]\((references/[A-Za-z0-9_.-]+\.md)\)")
+sys.path.insert(0, str(SOURCE))
+import build_skills  # noqa: E402
 
-ROLE_513 = {
-    "convergence-and-cycle-economy.md",
-    "tool-assisted-engineering.md",
-    "tool-serena.md",
-    "tool-semgrep.md",
-    "tool-hypothesis.md",
-    "tool-codeql.md",
-}
-ROLE_515 = {
-    "language-profiles.md",
-    "python-engineering.md",
-    "cpp-engineering.md",
-}
-ROLE_516 = {"long-horizon-code-health.md"}
+LINK_RE = re.compile(r"\[[^\]]+\]\(((?:references|templates)/[A-Za-z0-9_.-]+\.md)\)")
+DIRECT_TOOLS = {"tool-serena.md", "tool-semgrep.md", "tool-hypothesis.md", "tool-codeql.md"}
+LANGUAGE_PROFILES = {"language-profiles.md", "python-engineering.md", "cpp-engineering.md"}
 
-EXPECTED_REFERENCES = {
-    "roles/software-design": {
-        "workflow-and-workplans.md", "testing-and-validation.md", "protocol-versioning-and-compatibility.md",
-        "architecture-and-design.md", "documentation-and-evidence.md", "specification-and-implementation.md",
-        "release-and-distribution.md", "repository-intake.md",
-        "configuration-and-policy.md", "concurrency-and-orchestration.md", "security-and-trust-boundaries.md",
-        "performance-and-parallelism.md", "storage-and-io.md", "scientific-software.md",
-    } | ROLE_513 | ROLE_515 | ROLE_516,
-    "roles/software-implementation": {
-        "workflow-and-workplans.md", "testing-and-validation.md", "protocol-versioning-and-compatibility.md",
-        "architecture-and-design.md", "debugging-and-state-recovery.md", "documentation-and-evidence.md",
-        "specification-and-implementation.md", "release-and-distribution.md", "repository-intake.md",
-        "git-and-version-control.md", "configuration-and-policy.md",
-        "concurrency-and-orchestration.md", "security-and-trust-boundaries.md", "performance-and-parallelism.md",
-        "storage-and-io.md", "scientific-software.md",
-    } | ROLE_513 | ROLE_515 | ROLE_516,
-    "specialists/software-documentation": {
-        "workflow-and-workplans.md", "testing-and-validation.md", "protocol-versioning-and-compatibility.md",
-        "architecture-and-design.md", "documentation-and-evidence.md", "documentation-maintenance.md",
-        "scientific-technical-writing.md", "specification-and-implementation.md", "release-and-distribution.md",
-        "security-and-trust-boundaries.md", "performance-and-parallelism.md", "storage-and-io.md", "scientific-software.md",
-    },
-    "specialists/repository-hygiene": {
-        "workflow-and-workplans.md", "testing-and-validation.md", "protocol-versioning-and-compatibility.md",
-        "git-and-version-control.md", "documentation-and-evidence.md", "release-and-distribution.md",
-        "repository-intake.md", "security-and-trust-boundaries.md", "storage-and-io.md",
-    },
-    "specialists/software-maintenance-audit": {
-        "workflow-and-workplans.md", "testing-and-validation.md", "protocol-versioning-and-compatibility.md",
-        "long-horizon-code-health.md", "architecture-and-design.md", "git-and-version-control.md",
-        "repository-intake.md", "tool-assisted-engineering.md", "convergence-and-cycle-economy.md",
-        "documentation-and-evidence.md", "scientific-software.md",
-    },
-}
+
+def links_for(kind: str, name: str) -> set[str]:
+    parent = "roles" if kind == "role" else "specialists"
+    text = (SOURCE / parent / name / "SKILL.md").read_text(encoding="utf-8")
+    return set(LINK_RE.findall(text))
 
 
 class ProtocolPortabilityTests(unittest.TestCase):
-    def test_doctrine_hierarchy_remains_verbatim_in_lifecycle_entrypoints(self) -> None:
-        for rel in ("roles/software-design", "roles/software-implementation"):
-            text = (SOURCE / rel / "SKILL.md").read_text(encoding="utf-8")
-            self.assertIn(HIERARCHY, text, rel)
+    def test_current_protocol_uses_abstraction_realization_hierarchy(self) -> None:
+        foundation = (SOURCE / "shared/references/abstraction-and-realization.md").read_text(encoding="utf-8").lower()
+        self.assertIn("domain engineering fitness", foundation)
+        self.assertIn("minimum justified realization complexity", foundation)
+        self.assertIn("development economy", foundation)
+        self.assertIn("fidelity is a feasibility condition", foundation)
 
-    def test_reference_sets_are_preserved_and_directly_linked(self) -> None:
-        for rel, expected in EXPECTED_REFERENCES.items():
-            text = (SOURCE / rel / "SKILL.md").read_text(encoding="utf-8")
-            linked = {Path(path).name for path in LINK_RE.findall(text)}
-            self.assertEqual(expected, linked, rel)
+    def test_registry_resources_are_exactly_directly_linked(self) -> None:
+        for name, spec in build_skills.ROLE_SPECS.items():
+            expected = {f"references/{ref}" for ref in spec["references"]} | {
+                f"templates/{template}" for template in spec["templates"]
+            }
+            self.assertEqual(expected, links_for("role", name), name)
+        for name, spec in build_skills.SPECIALIST_SPECS.items():
+            expected = {f"references/{ref}" for ref in spec["references"]} | {
+                f"templates/{template}" for template in spec["templates"]
+            }
+            self.assertEqual(expected, links_for("specialist", name), name)
 
-    def test_protocol_513_direct_tool_refs_remain_lifecycle_only(self) -> None:
-        for rel in ("roles/software-design", "roles/software-implementation"):
-            text = (SOURCE / rel / "SKILL.md").read_text(encoding="utf-8")
-            linked = {Path(path).name for path in LINK_RE.findall(text)}
-            self.assertTrue(ROLE_513 <= linked)
-        direct_tools = {"tool-serena.md", "tool-semgrep.md", "tool-hypothesis.md", "tool-codeql.md"}
-        for rel in (
-            "specialists/software-documentation",
-            "specialists/repository-hygiene",
-            "specialists/software-maintenance-audit",
-        ):
-            text = (SOURCE / rel / "SKILL.md").read_text(encoding="utf-8")
-            linked = {Path(path).name for path in LINK_RE.findall(text)}
-            self.assertTrue(direct_tools.isdisjoint(linked))
-        audit = (SOURCE / "specialists/software-maintenance-audit/SKILL.md").read_text(encoding="utf-8")
-        self.assertIn("](references/tool-assisted-engineering.md)", audit)
+    def test_direct_software_tool_routes_remain_d3_d4_only(self) -> None:
+        for role in ("software-design", "software-implementation"):
+            linked = {Path(path).name for path in links_for("role", role)}
+            self.assertTrue(DIRECT_TOOLS <= linked, role)
+            self.assertIn("tool-assisted-engineering.md", linked, role)
 
-    def test_protocol_515_language_profiles_are_lifecycle_only(self) -> None:
-        for rel in ("roles/software-design", "roles/software-implementation"):
-            text = (SOURCE / rel / "SKILL.md").read_text(encoding="utf-8")
-            linked = {Path(path).name for path in LINK_RE.findall(text)}
-            self.assertTrue(ROLE_515 <= linked)
-        for rel in (
-            "specialists/software-documentation",
-            "specialists/repository-hygiene",
-            "specialists/software-maintenance-audit",
-        ):
-            text = (SOURCE / rel / "SKILL.md").read_text(encoding="utf-8")
-            linked = {Path(path).name for path in LINK_RE.findall(text)}
-            self.assertTrue(ROLE_515.isdisjoint(linked))
+        for role in ("scientific-formulation", "numerical-algorithm-design"):
+            linked = {Path(path).name for path in links_for("role", role)}
+            self.assertTrue(DIRECT_TOOLS.isdisjoint(linked), role)
 
-    def test_protocol_516_long_horizon_reference_is_progressively_disclosed(self) -> None:
-        for rel in ("roles/software-design", "roles/software-implementation", "specialists/software-maintenance-audit"):
-            text = (SOURCE / rel / "SKILL.md").read_text(encoding="utf-8")
-            linked = {Path(path).name for path in LINK_RE.findall(text)}
-            self.assertIn("long-horizon-code-health.md", linked, rel)
-        for rel in ("specialists/software-documentation", "specialists/repository-hygiene"):
-            text = (SOURCE / rel / "SKILL.md").read_text(encoding="utf-8")
-            linked = {Path(path).name for path in LINK_RE.findall(text)}
-            self.assertNotIn("long-horizon-code-health.md", linked, rel)
+        for specialist in ("software-documentation", "repository-hygiene", "software-maintenance-audit"):
+            linked = {Path(path).name for path in links_for("specialist", specialist)}
+            self.assertTrue(DIRECT_TOOLS.isdisjoint(linked), specialist)
+        self.assertIn(
+            "references/tool-assisted-engineering.md",
+            links_for("specialist", "software-maintenance-audit"),
+        )
 
-    def test_language_profile_routes_are_mandatory_for_both_lifecycle_roles(self) -> None:
-        for rel in ("roles/software-design", "roles/software-implementation"):
-            text = (SOURCE / rel / "SKILL.md").read_text(encoding="utf-8")
+    def test_language_profiles_remain_d3_d4_execution_routes(self) -> None:
+        for role in ("software-design", "software-implementation"):
+            linked = {Path(path).name for path in links_for("role", role)}
+            self.assertTrue(LANGUAGE_PROFILES <= linked, role)
+        for role in ("scientific-formulation", "numerical-algorithm-design"):
+            linked = {Path(path).name for path in links_for("role", role)}
+            self.assertTrue(LANGUAGE_PROFILES.isdisjoint(linked), role)
+        for specialist in build_skills.SPECIALIST_SPECS:
+            linked = {Path(path).name for path in links_for("specialist", specialist)}
+            self.assertTrue(LANGUAGE_PROFILES.isdisjoint(linked), specialist)
+
+    def test_language_profile_routes_are_mandatory_for_d3_d4(self) -> None:
+        for role in ("software-design", "software-implementation"):
+            text = (SOURCE / "roles" / role / "SKILL.md").read_text(encoding="utf-8")
             for path in (
                 "references/language-profiles.md",
                 "references/python-engineering.md",
                 "references/cpp-engineering.md",
             ):
                 line = next(line for line in text.splitlines() if f"]({path})" in line)
-                self.assertIn("MUST read", line, (rel, path))
+                self.assertIn("MUST read", line, (role, path))
 
-    def test_design_role_critical_routes_are_mandatory(self) -> None:
-        text = (SOURCE / "roles/software-design/SKILL.md").read_text(encoding="utf-8")
-        for path in (
-            "references/workflow-and-workplans.md",
-            "references/testing-and-validation.md",
-            "references/architecture-and-design.md",
-            "references/protocol-versioning-and-compatibility.md",
-        ):
-            line = next(line for line in text.splitlines() if f"]({path})" in line)
-            self.assertIn("MUST read", line, path)
+    def test_role_critical_routes_are_mandatory_for_d3_d4(self) -> None:
+        for role in ("software-design", "software-implementation"):
+            text = (SOURCE / "roles" / role / "SKILL.md").read_text(encoding="utf-8")
+            for path in (
+                "references/abstraction-and-realization.md",
+                "references/workflow-and-workplans.md",
+                "references/testing-and-validation.md",
+                "references/architecture-and-design.md",
+                "references/protocol-versioning-and-compatibility.md",
+            ):
+                line = next(line for line in text.splitlines() if f"]({path})" in line)
+                self.assertIn("MUST read", line, (role, path))
 
-    def test_implementation_role_critical_routes_are_mandatory(self) -> None:
-        text = (SOURCE / "roles/software-implementation/SKILL.md").read_text(encoding="utf-8")
-        for path in (
-            "references/workflow-and-workplans.md",
-            "references/testing-and-validation.md",
-            "references/architecture-and-design.md",
-            "references/protocol-versioning-and-compatibility.md",
-        ):
-            line = next(line for line in text.splitlines() if f"]({path})" in line)
-            self.assertIn("MUST read", line, path)
+    def test_new_authority_roles_package_their_domain_documents(self) -> None:
+        d1 = links_for("role", "scientific-formulation")
+        d2 = links_for("role", "numerical-algorithm-design")
+        self.assertIn("references/scientific-formulation.md", d1)
+        self.assertIn("templates/scientific_method_paper_template.md", d1)
+        self.assertIn("references/numerical-algorithm-design.md", d2)
+        self.assertIn("templates/numerical_algorithmic_method_paper_template.md", d2)
+        self.assertIn("templates/abstraction_realization_change_plan_template.md", d1)
+        self.assertIn("templates/abstraction_realization_change_plan_template.md", d2)
+        self.assertNotIn("templates/abstraction_realization_change_plan_template.md", links_for("role", "software-design"))
+
+    def test_historical_516_resolution_is_explicit(self) -> None:
+        versioning = (SOURCE / "shared/references/protocol-versioning-and-compatibility.md").read_text(encoding="utf-8").lower()
+        self.assertIn("5.16.0 -> e151daaf5c8eebb351a85cfed86170fda80fb5e3", versioning)
+        self.assertIn("sdp-protocol-5.16", versioning)
+        self.assertIn("profile schema v1", versioning)
 
     def test_sentinel_value_is_reference_only(self) -> None:
         root = ROOT / "qualification/reference-routing/protocol-routing-sentinel"

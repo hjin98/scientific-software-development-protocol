@@ -7,6 +7,10 @@ description: Implement, refactor, test, package, and validate D4 software realiz
 
 Own executable D4 realization. Implement the accepted D4 specification and D3 architecture while satisfying every applicable upstream D1/D2 semantic invariant and domain-local governed constraint.
 
+## Engineering stewardship boundary
+
+The stakeholder's **durable software product** and its accepted D1-D4 semantics are the objective. Workplans, tests, metrics, wrappers, helpers, current code, and implementation process are evidence or realization machinery; they are **not the objective**. Interpret accepted requirements according to their **protected engineering purpose**. Truthful non-closure is preferable to counterfeit completion, but continue self-correction while a **reasonable in-scope engineering path remains**.
+
 ## Reference routing
 
 Before substantive implementation, **MUST read** [Abstraction, realization, authority, and challenge](references/abstraction-and-realization.md).
@@ -92,13 +96,13 @@ A D4 Specification is intended concrete behavior; code is actual realization/evi
 
 An **equivalent local realization** that preserves governing parent semantics is **local reconciliation**, not redesign. It may remove, consolidate, refactor, or replace previously expected delegated machinery. Suggested realization is not automatically Frozen merely because earlier Design or a workplan named it.
 
-If representative measurement invalidates a premise of accepted D3/D2/D1 authority, stop dependent work and reopen only the affected authority surface at the **earliest materially affected stage/domain**. Do not reopen unrelated design merely because the affected surface is large.
+If **representative measurement invalidating a premise** of accepted D3/D2/D1 authority appears, stop dependent work and reopen only the affected authority surface at the **earliest materially affected stage/domain**. Do not reopen unrelated design merely because the affected surface is large.
 
-If later evidence proves accepted implementation work unsound, **invalidate it and repair/retest**. Truthful non-closure is preferable to counterfeit completion, but it is not permission to stop while a reasonable in-scope repair path remains.
+If later evidence proves accepted implementation work unsound, **invalidate it and repair/retest**. Truthful non-closure is preferable to counterfeit completion, but continue while a reasonable in-scope engineering path remains.
 
 ## Owning-layer repair and active simplification
 
-Fix a clear local defect at the owning layer. Before adding durable machinery, ask whether removing, narrowing, altering, consolidating, refactoring, or replacing the lower-level cause eliminates the problem.
+**Fix a clear local defect at the owning layer.** Before adding durable machinery, ask whether removing, narrowing, altering, consolidating, refactoring, or replacing the lower-level cause eliminates the problem.
 
 A first clean local defect remains local. Material sibling recurrence changes reasoning to the shared owner/mechanism but does not make the current realization invariant. Repeated patch-on-patch repair, wrapper/fallback/special-case accumulation, duplicated/synchronized authority, repeated reconciliation, or an evident materially simpler equivalent realization makes simplification/re-derivation mandatory before another additive durable repair.
 
@@ -117,9 +121,11 @@ Do not defer all affected regression to the end merely because a later full suit
 
 ## Proxy-proof D4 acceptance
 
-For a material claim identify the real semantic owner/path in the final accepted realization. Bounded doubles are valid only below/outside that owner. Evidence that could remain green while the actual owner is broken cannot close the claim.
+For a material claim identify the **real semantic owner/path of the final accepted realization**. Ask whether evidence **could remain green** while that actual owner is broken. **Bounded test doubles remain valid below or outside** the semantic owner, but may not replace the owner under acceptance.
 
-An equivalent delegated owner replacement is permitted when governing semantics survive; invalidate/remap owner-specific evidence and test the new real owner. Exact owner identity is binding only when an accepted contract or D3 architecture makes it so.
+An equivalent delegated owner replacement is permitted when governing semantics survive; invalidate/remap owner-specific evidence and test the new real owner. Do not treat that remapping as proxy-passing or Design reopening merely because the owner identity changed.
+
+If the required real-owner boundary is unavailable, record it as **unavailable/blocking**. Do not declare success by **silently proxy-passing** the unavailable owner.
 
 ## Final assembled acceptance
 
@@ -131,7 +137,7 @@ Before completion:
 4. run the complete affected-surface regression after all material executable edits;
 5. run real-boundary integration/end-to-end paths;
 6. run repository/project-required lint/type/build/package/checks;
-7. account for structural absence/uniqueness claims and unavailable required checks.
+7. account for structural absence/uniqueness claims and unavailable/blocking required checks.
 
 A required check that did not execute is not a pass. Green tests do not prove an omitted obligation. Production qualification remains separate from regression/integration.
 

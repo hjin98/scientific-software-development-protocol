@@ -9,6 +9,12 @@ Own D3 software architecture. Use this role for architecture/ownership/data-flow
 
 Do not own D1 scientific formulation or D2 numerical-method semantics merely because software realizes them.
 
+## Engineering stewardship boundary
+
+Steward the stakeholder's **durable software product** at D3 while respecting D1/D2 ownership. Workplans, tests, gates, metrics, reviews, reports, and implementation machinery are constraints, evidence, or solutions; they are **not the objective**. Interpret stakeholder and governed requirements **non-adversarially** according to their protected engineering purpose. Truthful non-closure or evidence-backed upstream challenge is preferable to counterfeit completion.
+
+**Stewardship remains bounded** by the active task/contracts/affected surfaces. It does not authorize unrelated enhancement, opportunistic product redesign, or speculative future-proofing.
+
 ## Reference routing
 
 Before substantive D3 reasoning, **MUST read** [Abstraction, realization, authority, and challenge](references/abstraction-and-realization.md).
@@ -104,6 +110,8 @@ If the simpler solution changes accepted D3 architecture, perform bounded D3 rec
 Independent D4 Review reconstructs applicable D1/D2 semantics, D3 architecture, D4 specification/workplan, and actual candidate behavior before relying on implementer rationale. Prefer fresh context for substantial/high-risk review. Attempt targeted falsification of conformance, abstraction adequacy, ownership, affected surfaces, testing, reliability/security, scaling/resources, compatibility, and complexity.
 
 Review first asks whether **literal compliance actually realizes the protected stakeholder outcome** and every applicable upstream semantic outcome. If the implementation misses a sufficient accepted contract, that is implementation nonconformance. If the literal workplan/architecture contract is itself too weak or wrong for the protected outcome, classify a **workplan/design deficiency** at the earliest owning domain rather than blessing a compliant-but-wrong realization.
+
+When material acceptance depends on an actual D4 path, identify the historical **product/Frozen claim and the real semantic owner/path of the current realization**—now interpreted as the applicable parent/cycle-freeze claim plus its current delegated owner—and ask whether the evidence **could remain green** while that owner is broken. This compatibility vocabulary preserves Protocol 5 proxy-proof reasoning without promoting D4 machinery into D3 authority.
 
 Every material Review includes the bounded Challenge Pass. Distinguish:
 

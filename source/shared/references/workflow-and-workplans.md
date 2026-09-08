@@ -2,6 +2,8 @@
 
 Protocol 6 uses recursive abstraction–realization rather than one mandatory linear lifecycle. Read [Abstraction, realization, authority, and challenge](abstraction-and-realization.md) as the governing semantic model.
 
+Workplans, gates, reviews, tests, and process stages are coordination/evidence mechanisms, **not terminal objectives**. They are bounded by explicit stakeholder requirements, accepted domain authority, and the affected semantic scope and **must never create pressure to manufacture a pass**.
+
 ## Roles and semantic domains
 
 The authority-bearing roles are:
@@ -15,7 +17,7 @@ D1 scientific-formulation
 
 This is a semantic ordering, not a required four-stage waterfall. A local implementation refactor can remain D4-only after a proportionate upstream-impact exclusion. A software-architecture change can be D3->D4. A numerical change can begin at D2. A scientific formulation change begins at D1 and realizes downward only through dependent descendants.
 
-Supporting capabilities such as `software-documentation`, `software-maintenance-audit`, and `repository-hygiene` are not a third lifecycle role and are not authority-bearing approval roles. The preserved Protocol 5 software-local subcycle remains recognizable as `software-design -> software-implementation`, but it now occupies D3->D4 rather than owning D1/D2.
+Supporting capabilities such as `software-documentation`, `software-maintenance-audit`, and `repository-hygiene` are **not a third lifecycle role** and are not authority-bearing approval roles. The preserved Protocol 5 software-local subcycle remains recognizable as `software-design -> software-implementation`, but it now occupies D3->D4 rather than owning D1/D2.
 
 ## Start at the highest potentially affected domain
 
@@ -27,11 +29,11 @@ Before mutation classify:
 
 Route by semantic effect rather than topic. A parallel-reduction change that can alter estimator meaning is D2 even if implemented in C++; a process-topology change with unchanged numerical semantics is D3; a mutex replacement under unchanged architecture is D4.
 
-Do not escalate merely because many files are affected. Do not keep work artificially low when evidence shows the parent abstraction is wrong.
+Do not escalate merely because many files are affected. Do not keep work artificially low when evidence shows the parent abstraction is wrong. Reopen only the affected semantic surface and do not reopen unrelated design.
 
 ## Typical workflows
 
-Small/local executable work may look like:
+**Small/local executable work may look like**:
 
 ```text
 inspect -> implement -> conformance + affected regression -> integration -> done
@@ -60,7 +62,7 @@ These are patterns, not fixed gate counts. Production qualification is appended 
 
 ## Workplans as bounded implementation contracts
 
-Use a change plan/workplan when it materially reduces rediscovery, ambiguity, sequencing risk, cross-domain drift, or downstream rework.
+Use a change plan/workplan when it materially reduces rediscovery, ambiguity, sequencing risk, cross-domain drift, or downstream rework. Workplans remain subordinate to the protected stakeholder/domain outcome and are not proof scripts.
 
 A substantial handoff separates:
 
@@ -68,11 +70,11 @@ A substantial handoff separates:
 2. **cycle-scoped child decisions** deliberately fixed for the current realization cycle; and
 3. **delegated realization space** that remains replaceable, reducible, consolidatable, or deletable while the first two classes remain satisfied.
 
-A D3->D4 executable workplan is a specialization of this generic abstraction-realization handoff, not a separate philosophy. A suggested realization is not automatically Frozen merely because Design discussed or documented it.
+A D3->D4 executable workplan is a specialization of this generic abstraction-realization handoff, not a separate philosophy. A **suggested realization is not automatically Frozen** merely because Design discussed or documented it.
 
 For material obligations preserve as applicable: concern/rationale, required end state, required constraints/preservation/forbidden behavior, useful expected owning/affected surface, task-specific acceptance evidence, and stage/dependency where material. Attach a suggested realization, proxy-proof acceptance boundary, or anti-shortcut only when it materially improves correctness.
 
-The accepted plan is the minimum known contract, not a ceiling only for newly discovered affected behavior and logically necessary consequences of already-binding authority. Affected-surface expansion is not requirement expansion.
+The accepted plan is the minimum known contract, not a ceiling only for **newly discovered affected behavior** and logically necessary consequences of already-binding authority. Affected-surface expansion is not requirement expansion.
 
 ## Durable current authority versus cycle-scoped freeze
 
@@ -82,6 +84,8 @@ Keep two concepts distinct:
 - **cycle-scoped realization freeze** is the subset of child-realization decisions a change plan fixes to bound one implementation/design cycle.
 
 A cycle-scoped decision does not become durable scientific, numerical, architectural, or specification authority merely because a workplan froze it. Durable authority must be explicitly accepted by the owning domain. Conversely, a workplan cannot ignore already-current authority merely because it is not restated in the cycle freeze.
+
+In Protocol 5 terminology: **do not elevate a delegated Tier-2 owner into Frozen authority** merely because current acceptance happens to execute that owner.
 
 ## Snapshot-complete handoff
 
@@ -103,13 +107,13 @@ A workplan's suggested realization is not automatically frozen. Newly discovered
 
 A **first clean local defect remains local**. It does not require a census merely because variants are imaginable.
 
-**Material sibling recurrence** changes the unit of reasoning to the shared owner/mechanism. Recurrence is evidence about the shared semantic owner or mechanism, not proof that the current mechanism must survive. See [Convergence and development-cycle economy](convergence-and-cycle-economy.md).
+**Material sibling recurrence** changes the unit of reasoning to the **shared owner/mechanism**. Recurrence is evidence about the shared semantic owner or mechanism, not proof that the current mechanism must survive. See [Convergence and development-cycle economy](convergence-and-cycle-economy.md).
 
 When repeated patches, wrappers, fallbacks, synchronized representations, competing authorities, special cases, repeated reconciliation, or an evident materially simpler equivalent realization show structural complexity, **active Tier-2 simplification/re-derivation is required** before adding another durable repair. In Protocol 6, `Tier-2` here is historical shorthand for delegated realization beneath the governing abstraction.
 
 If post-simplification recurrence or evidence shows the Frozen/accepted parent abstraction is wrong, route bounded reconsideration to the earliest affected D1-D3 owner. **No recurrence/review count can force acceptance**; escalation changes the engineering method, not the pass threshold.
 
-Ordinary implementation attempts and review cycles do not require a numbered authority revision unless accepted task semantics actually change.
+**Ordinary implementation attempts and review cycles do not require a numbered authority revision** unless accepted task semantics actually change.
 
 ## Verification at each boundary
 
@@ -151,9 +155,9 @@ Executable D4 changes retain strict functional closure. Each material behavior-c
 - focused checks appropriate to the changed mechanism;
 - stage-local affected regression before dependent executable work proceeds, unless a genuinely non-executable intermediate stage must combine with the nearest executable stage.
 
-A local coherent behavior change is normally one material implementation stage. Several tightly coupled edits may close under one stage; they do not become separate stages merely because they touch separate files/functions.
+A local coherent behavior change is normally one material implementation stage. **Several tightly coupled edits may close under one stage** when they form one coherent behavior/risk boundary; they do not become separate stages merely because they touch separate files/functions.
 
-Green tests never prove an omitted obligation was implemented. Silent omission is not an accepted state.
+**Green tests never prove an omitted obligation was implemented. Silent omission is not an accepted state.**
 
 Final assembled acceptance requires:
 
@@ -169,9 +173,9 @@ Full production qualification is separate. A production run does not replace reg
 
 ## Proxy-proof semantic-owner evidence
 
-At every layer, evidence must exercise the actual semantic owner of the claim. A test, derivation, benchmark, or review that could stay green while the real formulation/method/architecture/implementation owner is materially wrong cannot close that owner claim.
+**When material acceptance depends** on a real owner/path, identify the **real production owner/consumer boundary** constituting the claim and the allowed lower test-double boundary. At every layer, evidence must exercise the actual semantic owner. A test, derivation, benchmark, or review that could stay green while the real formulation/method/architecture/implementation owner is materially wrong cannot close that owner claim.
 
-For D4 integration, bounded doubles are valid below or outside the semantic owner under acceptance. Do not mock, bypass, precompute, or substantially reimplement the owner whose behavior constitutes the claim.
+For D4 integration, bounded doubles are valid below or outside the semantic owner under acceptance. Do not mock, bypass, precompute, or substantially reimplement the owner whose behavior constitutes the claim. Exact lower-owner identity remains delegated unless parent/domain authority makes it an invariant.
 
 ## Independent Review, Verification, Stabilization, and Audit
 
