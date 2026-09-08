@@ -67,6 +67,12 @@ recover applicable parent invariants and external constraints
 
 Do not simplify by weakening D1/D2 semantics or governed engineering constraints.
 
+## Solution-created problems and recurrence
+
+A problem created only by delegated realization remains a realization problem. Dependency on a helper, wrapper, synchronized representation, state machine, or previous patch is evidence about that realization's cost and shape; it does not make the mechanism an invariant.
+
+A first clean local defect remains local. **Recurrence is evidence about the shared owner/mechanism**, not evidence that the current realization should survive. Material sibling recurrence changes the unit of reasoning to that shared owner/mechanism. If recurrence also exposes accumulating complexity, simplify/re-derive delegated realization before another additive repair.
+
 ## Cross-cutting concerns route by semantic effect
 
 Topic names do not determine domain ownership.

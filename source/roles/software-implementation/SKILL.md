@@ -7,58 +7,66 @@ description: Implement, refactor, test, package, and validate D4 software realiz
 
 Own executable D4 realization. Implement the accepted D4 specification and D3 architecture while satisfying every applicable upstream D1/D2 semantic invariant and domain-local governed constraint.
 
-## Role-critical reference routing
+## Reference routing
 
 Before substantive implementation, **MUST read** [Abstraction, realization, authority, and challenge](references/abstraction-and-realization.md).
 
-Before implementing from an accepted workplan, closing a material stage, performing local reconciliation, or routing parent invalidation, **MUST read** [Workflow and workplans](references/workflow-and-workplans.md).
+### Role-critical routes
 
-Before executable acceptance, affected regression/integration, proxy-proof boundaries, evidence reuse, oracle strength, or qualification, **MUST read** [Testing and validation](references/testing-and-validation.md).
+- Before implementing from an accepted workplan, closing a material stage, performing local reconciliation, or routing parent invalidation, **MUST read** [Workflow and workplans](references/workflow-and-workplans.md).
+- Before executable acceptance, affected regression/integration, proxy-proof boundaries, evidence reuse, oracle strength, or qualification, **MUST read** [Testing and validation](references/testing-and-validation.md).
+- Before architecture/ownership/complexity/redesign decisions, **MUST read** [Software architecture and design](references/architecture-and-design.md).
+- Before protocol/workplan version binding or historical recovery decisions, **MUST read** [Protocol versioning and compatibility](references/protocol-versioning-and-compatibility.md).
+- Before changed-code quality, maintainability/test-effectiveness, recovery/failure-path, or structural-risk reasoning, **MUST read** [Long-horizon code health](references/long-horizon-code-health.md).
 
-Before architecture/ownership/complexity/redesign decisions, **MUST read** [Software architecture and design](references/architecture-and-design.md).
+### Upstream semantic routes
 
-Before specification/API/schema/compatibility behavior changes, read [Specification and implementation](references/specification-and-implementation.md).
-
-Before protocol/workplan version binding or historical recovery decisions, **MUST read** [Protocol versioning and compatibility](references/protocol-versioning-and-compatibility.md).
-
-Before changed-code quality, maintainability/test-effectiveness, recovery/failure-path, or structural-risk reasoning, read [Long-horizon code health](references/long-horizon-code-health.md) and [Convergence and development-cycle economy](references/convergence-and-cycle-economy.md) as applicable.
-
-## Upstream semantic routes
-
-When implementation can alter scientific meaning, read [Scientific and mathematical formulation](references/scientific-formulation.md). When it can alter estimator/discretization/error/convergence/precision/stochastic semantics, read [Algorithm and numerical method design](references/numerical-algorithm-design.md). Cross-domain scientific evidence routes through [Scientific software](references/scientific-software.md).
+- When implementation can alter scientific meaning, **MUST read** [Scientific and mathematical formulation](references/scientific-formulation.md).
+- When it can alter estimator/discretization/error/convergence/precision/stochastic semantics, **MUST read** [Algorithm and numerical method design](references/numerical-algorithm-design.md).
+- Cross-domain scientific evidence routes through [Scientific software](references/scientific-software.md).
 
 Implementation evidence may challenge upstream authority but never silently redefine it.
 
-## Language-profile dispatch
+### Language-profile dispatch
 
-For material executable work, first read [Language engineering profiles](references/language-profiles.md). For affected Python surfaces read [Python engineering](references/python-engineering.md); for C++ read [C++ engineering](references/cpp-engineering.md); mixed boundaries read both.
+For material executable work, language semantics are part of the normal implementation path rather than an optional performance appendix.
 
-Use language-native realization beneath shared authority. Do not preserve compensating machinery simply because an earlier language or implementation used it.
+- First **MUST read** [Language engineering profiles](references/language-profiles.md) to classify the affected runtime/build surface.
+- For materially affected Python executable surfaces, **MUST read** [Python engineering](references/python-engineering.md).
+- For materially affected C++ executable surfaces, **MUST read** [C++ engineering](references/cpp-engineering.md).
+- Mixed Python/C++ boundaries **MUST read both** language profiles and apply the router's boundary rules. Tiny literal/text/config-only work may remain on shared doctrine when language semantics cannot alter the decision.
 
-## Tool dispatch
+Shared owners outrank language profiles. Implement idiomatically for the active language/runtime while preserving the accepted parent contract and minimum justified total complexity.
 
-Per material question:
+### Per-question tool dispatch
 
-- symbol ownership/definitions/callers -> [Serena](references/tool-serena.md);
-- AST/structural variants/absence -> [Semgrep](references/tool-semgrep.md);
-- broad/combinatorial Python invariants -> [Hypothesis](references/tool-hypothesis.md);
-- supported interprocedural flow/taint -> [CodeQL](references/tool-codeql.md);
-- combined/alternative capabilities -> [Tool-assisted engineering](references/tool-assisted-engineering.md).
+Classify each material engineering question by the relation under the claim, not once per task:
 
-Use cheap non-mutating capability probes when warranted. Tool absence does not relax correctness.
+- literal/path/text lookup or small deterministic local inspection -> ordinary repository search/read normally remains sufficient;
+- symbol ownership/definition/callers/references/implementations, bounded semantic navigation, or symbol-aware editing -> **MUST read** [Serena](references/tool-serena.md) before relying solely on lower-information defaults;
+- AST/syntax/structural patterns, diagnosed variants, forbidden/legacy constructs, or structural absence/uniqueness -> **MUST read** [Semgrep](references/tool-semgrep.md);
+- broad/combinatorial Python input/state invariants -> **MUST read** [Hypothesis](references/tool-hypothesis.md);
+- broad/combinatorial non-Python input/state invariants -> use the language-appropriate property/generative route in [Tool-assisted engineering](references/tool-assisted-engineering.md) plus the active language profile;
+- supported interprocedural flow/taint/source-to-sink relations -> **MUST read** [CodeQL](references/tool-codeql.md).
 
-## Other domain-conditional routes
+Runtime-state/debugger, memory/lifetime/UB, race/synchronization, and performance/vectorization questions route through [Tool-assisted engineering](references/tool-assisted-engineering.md) plus the active language profile rather than a fixed tool sequence. For overlaps/composition/common evidence limits, read [Tool-assisted engineering](references/tool-assisted-engineering.md).
 
-- repository intake -> [Repository intake](references/repository-intake.md)
-- debugging/state reconstruction -> [Debugging and state recovery](references/debugging-and-state-recovery.md)
-- evidence/documentation -> [Documentation and evidence](references/documentation-and-evidence.md)
-- packaging/release -> [Release and distribution](references/release-and-distribution.md)
-- Git/version control -> [Git and version control](references/git-and-version-control.md)
-- configuration -> [Configuration and policy](references/configuration-and-policy.md)
-- orchestration/concurrency -> [Concurrency and orchestration](references/concurrency-and-orchestration.md)
-- security/trust boundaries -> [Security and trust boundaries](references/security-and-trust-boundaries.md)
-- performance/resources/parallelism -> [Performance and parallelism](references/performance-and-parallelism.md)
-- storage/checkpoint/cache/I/O -> [Storage and I/O](references/storage-and-io.md)
+When a specialized trigger fires and availability is unknown, use a cheap non-mutating capability probe when practical. If the capability is available/current/supported and directly models the claim, presumptively use it; otherwise take a concrete fallback such as unsupported backend/language, unavailable tool surface, stale/unreliable analysis state that cannot economically be refreshed, model mismatch, disproportionate setup for a trivially bounded claim, or already-available evidence that establishes the same claim at least as reliably and more cheaply. Familiarity with built-in search/read/shell/test tools is not itself a fallback reason.
+
+### Domain-conditional routes
+
+- Repository intake/context economy -> [Repository intake](references/repository-intake.md).
+- Recurrence/family closure/review readiness/review saturation/revision economy -> [Convergence and development-cycle economy](references/convergence-and-cycle-economy.md).
+- Debugging/recovery/state reconstruction -> [Debugging and state recovery](references/debugging-and-state-recovery.md).
+- Specification/API/schema ownership or implementation fidelity -> [Specification and implementation](references/specification-and-implementation.md).
+- Evidence/documentation -> [Documentation and evidence](references/documentation-and-evidence.md).
+- Packaging/release -> [Release and distribution](references/release-and-distribution.md).
+- Git/version control -> [Git and version control](references/git-and-version-control.md).
+- Configuration -> [Configuration and policy](references/configuration-and-policy.md).
+- Orchestration/concurrency -> [Concurrency and orchestration](references/concurrency-and-orchestration.md).
+- Security/trust boundaries -> [Security and trust boundaries](references/security-and-trust-boundaries.md).
+- Performance/resources/parallelism -> [Performance and parallelism](references/performance-and-parallelism.md).
+- Storage/checkpoint/cache/I/O -> [Storage and I/O](references/storage-and-io.md).
 
 ## D4 authority and adaptive realization
 
@@ -80,17 +88,27 @@ Code, tests, wrappers, caches, state machines, retries, helpers, previous patche
 
 A D4 Specification is intended concrete behavior; code is actual realization/evidence. When they disagree, do not automatically rewrite the specification to bless code. Repair implementation, or route a genuine contract/parent mutation through its owning authority.
 
+## Adaptive realization, local reconciliation, and self-correction
+
+An **equivalent local realization** that preserves governing parent semantics is **local reconciliation**, not redesign. It may remove, consolidate, refactor, or replace previously expected delegated machinery. Suggested realization is not automatically Frozen merely because earlier Design or a workplan named it.
+
+If representative measurement invalidates a premise of accepted D3/D2/D1 authority, stop dependent work and reopen only the affected authority surface at the **earliest materially affected stage/domain**. Do not reopen unrelated design merely because the affected surface is large.
+
+If later evidence proves accepted implementation work unsound, **invalidate it and repair/retest**. Truthful non-closure is preferable to counterfeit completion, but it is not permission to stop while a reasonable in-scope repair path remains.
+
 ## Owning-layer repair and active simplification
 
 Fix a clear local defect at the owning layer. Before adding durable machinery, ask whether removing, narrowing, altering, consolidating, refactoring, or replacing the lower-level cause eliminates the problem.
 
-Repeated patch-on-patch repair, wrapper/fallback/special-case accumulation, duplicated/synchronized authority, repeated reconciliation, or an evident materially simpler equivalent realization makes simplification/re-derivation mandatory before another additive durable repair.
+A first clean local defect remains local. Material sibling recurrence changes reasoning to the shared owner/mechanism but does not make the current realization invariant. Repeated patch-on-patch repair, wrapper/fallback/special-case accumulation, duplicated/synchronized authority, repeated reconciliation, or an evident materially simpler equivalent realization makes simplification/re-derivation mandatory before another additive durable repair.
 
 If correction requires changing accepted D3/D2/D1 semantics, stop dependent closure and route the earliest affected abstraction rather than constructing a compatibility wrapper around the contradiction.
 
 ## Coherent implementation stages
 
-A local coherent behavior change is normally one material stage even if several files/helpers/tests change. Each material executable stage closes both:
+A local coherent behavior change is normally one material implementation stage even if several files/helpers/tests change. Several tightly coupled caller/helper/test edits **do not become separate stages merely because** they touch separate files or functions unless they form an independent risk boundary.
+
+Each material executable stage closes both:
 
 - semantic/conformance obligations assigned to that stage; and
 - focused checks plus the stage-local affected regression subset.
@@ -107,9 +125,9 @@ An equivalent delegated owner replacement is permitted when governing semantics 
 
 Before completion:
 
-1. reconcile every accepted D4/D3/upstream obligation;
+1. reconcile every accepted D4/D3/upstream obligation; **silent omission is not an accepted state**;
 2. inspect superseded machinery, duplicate authority, bypass/fallback paths, and material complexity drift;
-3. re-derive the complete affected behavioral and semantic surface;
+3. re-derive the complete affected behavioral and semantic surface, including newly discovered affected behavior governed by existing authority;
 4. run the complete affected-surface regression after all material executable edits;
 5. run real-boundary integration/end-to-end paths;
 6. run repository/project-required lint/type/build/package/checks;

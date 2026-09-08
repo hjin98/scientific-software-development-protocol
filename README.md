@@ -91,4 +91,6 @@ python orchestrator/scripts/generate_protocol_snapshot.py --check
 python orchestrator/scripts/run_core_tests.py
 ```
 
+These Python commands are repository-local Tier-2 validation machinery in the historical Protocol 5 terminology—delegated D4 validation machinery under Protocol 6—not language-specific protocol doctrine.
+
 A Protocol 6 release is not complete while a governing Serious Challenge is unresolved or any required assembled acceptance check has not executed.

@@ -67,7 +67,13 @@ The orchestrator ships both `sdp-protocol-5.16` profile schema v1 and `ssdp-prot
 - versioning -> `shared/references/protocol-versioning-and-compatibility.md`
 - orchestration prompts -> `shared/references/development-workflow-prompts.md`
 
+## Language and tool routing
+
 Language, tool, security, performance, storage, release, debugging, configuration, convergence, and long-horizon references remain reusable cross-domain doctrine and are routed by material relation.
+
+The common relation-first tool owner is `shared/references/tool-assisted-engineering.md`; specialized routes are `shared/references/tool-serena.md`, `shared/references/tool-semgrep.md`, `shared/references/tool-hypothesis.md`, and `shared/references/tool-codeql.md`. These are progressively disclosed by the D3/D4 executable roles rather than copied into every specialist.
+
+Language engineering remains under `shared/references/language-profiles.md` plus the Python/C++ differential profiles. Shared domain authority outranks language-specific implementation advice.
 
 ## Repository acceptance
 
@@ -81,3 +87,5 @@ git diff --check
 ```
 
 When orchestrator code/profile resources change also run its snapshot parity and Core suite. Required evidence that did not execute is blocking, not a pass.
+
+These Python commands are repository-local Tier-2 validation machinery in historical Protocol 5 vocabulary—delegated D4 validation machinery under Protocol 6—not language-specific protocol doctrine.

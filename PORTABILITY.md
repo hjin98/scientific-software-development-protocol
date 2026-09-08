@@ -6,6 +6,8 @@ Protocol 6 preserves the portable Agent Skill contract while adding first-class 
 
 The runtime unit is the self-contained directory `dist/skills/<skill-name>/`; the top-level ZIP contains identical files under one enclosing skill directory. Install each skill as a direct child of the harness-supported skill root so `<skills-root>/<skill-name>/SKILL.md` exists. `source/` is canonical development source, not the runtime bundle.
 
+This direct-directory installation contract remains the portability baseline. ZIPs are transport artifacts; extract the enclosing `<skill-name>/` directory before placing it under a runtime skill root. A shared/symlinked installation is a separate harness capability and must be qualified on that harness.
+
 Current authority-bearing skills:
 
 - `scientific-formulation`
@@ -19,7 +21,7 @@ Optional specialists: `software-documentation`, `software-maintenance-audit`, `r
 
 `source/shared/references/development-workflow-prompts.md` is the canonical prompt source. With `AUTO_LOCAL_FIRST`:
 
-1. use a governing-version-compatible installed skill/ exposed skill root through the harness-native mechanism;
+1. use a governing-version-compatible installed skill/exposed skill root through the harness-native mechanism;
 2. otherwise use the canonical public repository `https://github.com/hjin98/software-development-protocol` and its `source/` entrypoint plus required references;
 3. preserve the workplan's protocol binding; never guess a semantic version as a Git ref or silently substitute current doctrine;
 4. report truthful non-closure if no compatible source can be read.
@@ -39,11 +41,43 @@ Historical 5.16 prompt/profile bytes remain immutable. A workplan's declared `pr
 
 Protocol 6 profile stages include authority intake, D1, D2, D3, D4, Review/Challenge, Verification, Stabilization, Alignment, Health Audit, and Closeout. Serious Challenge/human-pending outcomes stop automatic normal routing; the orchestrator records/routes state but never decides scientific truth.
 
-## Other deterministic routing dimensions
+## Deterministic routing dimensions
 
-Language/runtime routing remains under `references/language-profiles.md`; material Python/C++ surfaces load the matching profile(s). Engineering-relation routing selects Serena/Semgrep/Hypothesis/CodeQL or other capabilities only when their relation matches the claim. External development tools are optional environment capabilities unless project/task authority explicitly requires them.
+Protocol 6 keeps three independent routing concerns:
 
-Static package validation proves structural reachability and byte/source parity; it does not prove that a named live harness/model actually follows the route. Live harness/tool/model claims require executed qualification for that exact configuration.
+1. **Workflow/domain routing:** classify the earliest affected D1-D4 owner, then use reduced or full realization paths as required.
+2. **Language/runtime routing:** material executable Python/C++ work routes through `references/language-profiles.md` and the matching language profile(s).
+3. **Engineering-relation/tool routing:** semantic, structural, property/generative, interprocedural, runtime-state, memory/UB, race, performance, test-effectiveness, architecture-fitness, longitudinal-risk, and failure/recovery questions route to capabilities that directly model the relation.
+
+Static validation proves that referenced files are packaged, directly linked, and structurally reachable. It **cannot prove** that a real harness/model follows the route or invokes an external capability, so live qualification remains a separate evidence class.
+
+## Optional external development capabilities
+
+Serena, Semgrep, Hypothesis, CodeQL, mutation engines, architecture/dependency checkers, complexity/hotspot analyzers, compiler-native analyzers, sanitizers, debuggers, profilers, fuzzers, and similar tools are **optional environment capabilities**. They are **not part of generic Agent Skill validity**, the **direct-directory installation contract**, or reference-routing package validity unless project/task authority explicitly requires one.
+
+Generic bundles do not embed executable paths, credentials, analyzer databases, compiler/toolchain installations, hosted-service configuration, or project-specific query/rule settings. Language/backend/build/runtime support varies independently of skill packaging.
+
+A claim that a particular harness actually exposes or invokes an external capability requires evidence for that **named harness/tool configuration**. Static package validation or reference-routing success does not establish those external-tool claims.
+
+## Bounded reference-routing qualification
+
+Use `qualification/reference-routing/protocol-routing-sentinel/` as a tiny independent Agent Skill. The required answer token exists only in its bundled reference; `SKILL.md` deliberately does not contain the token.
+
+For each harness/model/install mode being claimed, install the sentinel, start a fresh session, request the routing sentinel, verify the reference-backed token, and distinguish discovery, activation, resource-access/path-canonicalization, route-selection, and model-compliance failures.
+
+A simulated parser/local loader cannot establish a real-harness claim. This is **bounded reference-routing qualification**.
+
+## Language-profile routing qualification
+
+When claiming live language routing, use a representative material executable prompt whose language/runtime surface is unambiguous. Static tests may establish protocol-level route/package completeness; they do not establish universal model compliance.
+
+## Bounded live tool-routing qualification
+
+Reference reachability and tool selection are different claims. Use `qualification/tool-routing/SCENARIOS.md` for a **bounded live tool-routing qualification** of each actually available harness/model/tool combination.
+
+Verify the direct relevant reference read where traces are exposed, then verify either specialized invocation or a concrete permitted fallback. Silent preference for built-in search/read/shell/tests after a specialized trigger is not automatically a valid fallback. Record only the combination actually exercised; **do not infer another harness/model/tool** from static tests or a different run.
+
+If no suitable live harness/tool environment exists, static/counterfactual/package tests may establish deterministic protocol-level routing semantics but **must not claim empirical universal model compliance** or an unexecuted harness/tool pass.
 
 ## Behavioral qualification
 

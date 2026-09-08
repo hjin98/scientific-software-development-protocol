@@ -17,21 +17,23 @@ Existing debt does not justify making a materially touched surface harder to rea
 
 For substantial/structurally risky work capture only the task-local before-state needed for meaningful comparison. Do not create a permanent health ledger solely for compliance.
 
-## Metrics are sensors
+## Metrics are sensors, not verdicts
 
-Complexity, CRAP-like measures, churn, temporal change coupling, centrality/cycles, duplication, coverage, mutation survival, public/configuration growth, and related metrics can identify risk concentration. They do not independently prove correctness or require refactoring.
+Complexity, CRAP-like measures, churn, temporal change coupling, **architectural centrality**/cycles, duplication, coverage, mutation survival, public/configuration growth, and related metrics can identify risk concentration. They do not independently prove correctness or require refactoring.
 
 A useful qualitative model is:
 
 ```text
-maintenance risk ~ change frequency x structural complexity x oracle weakness x semantic centrality
+maintenance risk ~ change frequency x structural complexity x test weakness x architectural centrality
 ```
 
-No universal threshold is normative.
+No universal threshold is normative. Metrics are sensors; investigate the semantic reason behind the signal before acting.
 
-## Oracle strength
+## Test effectiveness and oracle strength
 
 For important decision logic/high-risk changed code, ask what plausible wrong behavior could still pass. Strengthen evidence with counterfactual/mutation, property/stateful, differential/metamorphic, reference, or real-owner integration when economical. The semantic claim decides whether a surviving mutant matters.
+
+Mutation testing is conditional. Surviving mutants are investigation evidence; they may reflect weak assertions, untested decisions, dead/equivalent code, or ambiguous requirements. **Do not require 100% mutation** scores or optimize tests for a score rather than product/domain behavior.
 
 Scientific/numerical relations come from D1/D2 authority, not from test convenience.
 
@@ -39,9 +41,9 @@ Scientific/numerical relations come from D1/D2 authority, not from test convenie
 
 Objective stable D3 rules may be executable: dependency direction, acyclicity, independence, or absence/uniqueness of a retired owner. Do not build a universal architecture model just to obtain a score.
 
-## Independent Review and Challenge Pass
+## Review
 
-Review reconstructs the applicable current authority and actual realization, then attempts falsification. Prefer fresh operational context for substantial/high-risk work when practical.
+Independent Review reconstructs the applicable current authority and actual realization, then attempts falsification. Prefer fresh operational context for substantial/high-risk work when practical.
 
 Every material review/verification boundary includes the bounded Challenge Pass. Review must distinguish an ordinary child nonconformance from evidence that accepted authority itself is false, contradictory, inadequate, materially ambiguous, or unrealizable. The latter is a Serious Challenge routed to the earliest affected owner/human adjudicator.
 
@@ -49,7 +51,7 @@ Review readiness normally includes final accepted-contract reconciliation, final
 
 ## Verification
 
-Verification is a deeper optional falsification mode for materially high-risk scientific, numerical, architecture, or implementation claims. It may reconcile authorities, construct counterexamples, compare reference methods, inspect failure paths, or trace composed D4->D1 behavior. It is not a routine duplicate Review.
+Verification is a deeper optional **risk-triggered** falsification mode for materially high-risk scientific, numerical, architecture, or implementation claims. It may reconcile authorities, construct counterexamples, compare reference methods, inspect failure paths, or trace composed D4->D1 behavior. It is not a routine duplicate Review.
 
 ## Stabilization / architecture GC
 
@@ -59,7 +61,7 @@ At a material convergence boundary after ordinary review otherwise passes, ask:
 
 Inspect duplicate representations, competing authorities, wrappers/adapters/fallbacks/special cases, stale compatibility, unnecessary state/config/public API, ownership leakage, dependency cycles, historical-exception conditionals, dead/bypassed paths, duplicated algorithms, and tests dominated by internal orchestration.
 
-Stabilization is non-mutating. Route required changes to the owning domain. If D4 machinery can be simplified under unchanged D3, keep it D4. If D3 architecture must change, reopen D3. If evidence shows D2/D1 is the problem, route further upstream rather than architecture-patching it.
+Stabilization is **non-mutating**. Required changes return through the **normal Design**/Implementation/acceptance/Review path at the owning domain rather than being silently edited during stabilization. If D4 machinery can be simplified under unchanged D3, keep it D4. If D3 architecture must change, reopen D3 through Software Design. If evidence shows D2/D1 is the problem, route further upstream rather than architecture-patching it.
 
 ## Health Audit
 

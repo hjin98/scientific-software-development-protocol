@@ -6,9 +6,11 @@ Evidence exists to test governed claims; it is not a parallel authority system. 
 
 Tests, proofs, benchmarks, metrics, reports, literature, and runtime observations are instruments. They do not manufacture the claim they measure.
 
-Without an accepted semantic change or independent proof that the prior oracle was wrong, it is invalid to create a pass by deleting/weakening assertions, excluding known failing inputs, copying buggy output into expected values, converting required failure into warning/success, skipping a required check, widening a material tolerance merely because it failed, adding product fallback only for the harness, or rewriting specification/method/architecture to bless unintended behavior.
+Without an accepted semantic change or independent proof that the prior oracle was wrong, it is invalid to create a pass by **deleting/weakening its assertion**, **removing known failing inputs** from the fixture population, copying buggy implementation output into expected values, converting a required failure/exception into warning/success, skipping or making a required check optional, widening a material tolerance merely because it failed, adding product fallback solely for test scaffolding, or **rewriting specification/documentation** to bless unintended implementation. The same anti-counterfeit rule applies to method papers and architecture authority.
 
-A test or threshold may change when its governing authority genuinely changed or when the old oracle is independently shown incorrect. The justification must be semantic, not convenience.
+A test, threshold, fixture, or specification may change when its governing authority genuinely changed, the previous expectation is independently shown incorrect, or a stronger test preserves the same accepted claim. The justification must be semantic rather than merely that the old check is inconvenient or red.
+
+For material completion claims apply a bounded **independent-evaluator counterfactual**: if the visible acceptance harness were replaced by an independent expert evaluation of the same accepted stakeholder/domain outcome and engineering envelope, would the candidate still deserve to pass? If materially no, local green evidence is insufficient.
 
 ## Two closure questions at every abstraction boundary
 
@@ -37,7 +39,7 @@ Use the cheapest sufficiently strong combination of authority-backed evidence, s
 
 Tolerance comes from accepted numerical/error semantics, not from observing what a backend happens to produce.
 
-## Oracle strength
+## Oracle strength, counterfactuals, and mutation evidence
 
 Coverage and green execution do not show that an oracle rejects materially wrong behavior. For important changed logic ask:
 
@@ -45,7 +47,7 @@ Coverage and green execution do not show that an oracle rejects materially wrong
 
 When material and economical, strengthen the oracle through a known-broken/corrected counterfactual, property/stateful testing, mutation/semantic perturbation, differential comparison, metamorphic relation, reference solution, or real-owner integration.
 
-Mutation survival is investigation evidence, not a universal score. Do not optimize tests for 100% mutation or coverage rather than governed behavior.
+Mutation survival is investigation evidence, not a universal score. **Do not require 100% mutation** scores or optimize tests for coverage/mutation percentages rather than governed behavior. Mutation/counterfactual work is **not a universal test stage**; use it only when it materially strengthens an important oracle.
 
 ## Differential and metamorphic evidence
 
@@ -79,19 +81,27 @@ Stage-local evidence improves fault localization; it does not remove final assem
 
 ## Proxy-proof semantic-owner evidence
 
-Identify the real semantic owner of the claim in the current realization. Evidence cannot close that owner claim if it mocks, stubs, monkeypatches, precomputes, substantially reimplements, or bypasses the owner whose behavior constitutes the claim.
+Identify the **real semantic owner** of the claim in the current realization. Evidence cannot close that owner claim if it mocks, stubs, monkeypatches, precomputes, substantially reimplements, or bypasses the owner whose behavior constitutes the claim.
 
-Bounded doubles remain valid below or outside the owner to control external services, hardware, data volume, expensive ML/scientific work, or nondeterminism.
+This is **not a global ban on mocks or fakes**. Bounded doubles remain valid below or outside the owner to control external services, hardware, data volume, nondeterminism, and **expensive ML/scientific training or prediction**.
 
 Examples of invalid owner proof include:
 
 - patching the production decision-maker to return the expected answer;
-- direct helper invocation when caller/orchestrator detection is part of the claim;
+- evidence that **directly invokes a downstream helper** when production caller/orchestrator/restart/reconciliation/authorization detection is part of the claim;
 - seeding post-transition state when the transition itself is under acceptance;
 - replacing persistence with an in-memory substitute when restart/persistence semantics are the claim;
 - reimplementing compatibility/migration/scheduling/authorization logic in the harness.
 
+If evidence could remain green while the real semantic owner is broken, it **cannot close the owner claim**.
+
 After a legitimate delegated-owner replacement, old owner-specific evidence is stale for that claim and must be remapped to the new real owner.
+
+## Conformance and structural evidence
+
+Green tests do not prove that every accepted implementation obligation was performed. Semantic/workplan conformance and functional testing answer different questions and both must close.
+
+For **removal, uniqueness, ownership, or no-legacy-path claims**, use **structural/source** inspection or negative/absence assertions when runtime tests cannot establish the claim directly.
 
 ## Acceptance liveness and failure injection
 
@@ -99,7 +109,7 @@ When evidence depends on a hook/failpoint/callback/state transition, establish t
 
 For persistence/restart/orchestration/recovery/failure-propagation claims, use deterministic bounded failure injection where it materially strengthens evidence: interrupted publication, truncated artifact, stale/missing cache, restart at material boundaries, worker/task death, controlled I/O failure, duplicate callback/event, or partial transition state.
 
-Keep the real recovery/state owner executing. Prefer bounded simulation over actual resource exhaustion.
+Keep the real recovery/state owner executing. Prefer bounded simulation over actual resource exhaustion. Bounded failure injection is conditional on the claim and is **not a universal test stage**.
 
 ## Evidence reuse and invalidation
 
@@ -123,9 +133,11 @@ actual D4 executable behavior
  -> external adequacy/validation/proof/standards evidence where applicable
 ```
 
-This is risk-triggered; do not force it onto a local software refactor with no plausible upstream semantic impact.
+This **composed end-to-end scientific closure** is risk-triggered; do not force it onto a local software refactor with no plausible upstream semantic impact.
 
-## Final assembled acceptance
+## Review readiness and final assembled acceptance
+
+Normal review readiness follows final accepted-contract reconciliation, **final complete affected-surface regression**, real-boundary integration, repository/project-required checks, and task-required structural/liveness evidence on the candidate whose relevant dimensions have not changed afterward. Missing required evidence remains blocking; Review does not move those checks later.
 
 Before implementation completion:
 

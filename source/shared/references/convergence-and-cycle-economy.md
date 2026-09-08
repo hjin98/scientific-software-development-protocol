@@ -1,71 +1,84 @@
 # Convergence and Development-Cycle Economy
 
-Convergence prevents repeated low-value repair cycles. It is subordinate to governing authority and minimum justified realization complexity; recurrence must not turn an accidental mechanism into an invariant.
+Convergence exists to stop repeated low-value repair cycles. It is subordinate to governing abstraction/external authority and minimum justified realization complexity; recurrence must not turn an accidental realization mechanism into an invariant.
+
+Protocol 6 preserves the useful Protocol 5 convergence doctrine while generalizing its owner from `software-design`/Tier-1 vocabulary to the earliest affected D1-D4 abstraction. Historical phrases below remain intentionally recognizable because older protocol-version tests and workplans use them; where they name Tier 1 or Software Design, interpret them at the corresponding current domain boundary rather than as renewed D3 ownership of D1/D2 semantics.
 
 ## Core progression
 
 ```text
 first clean local defect
- -> direct owning-layer repair
+    -> direct owning-layer repair
 
 material sibling recurrence
- -> reason at the shared semantic owner/mechanism
+    -> stop isolated instance patching; reason at the shared owner/mechanism
 
 structural complexity accumulation
- -> simplify/re-derive delegated realization before more additive repair
+    -> re-derive and simplify the Tier-2 realization before further additive durable repair
 
-post-simplification recurrence or evidence parent abstraction is wrong
- -> reopen earliest affected abstraction
+post-simplification recurrence, or evidence governing abstraction is wrong
+    -> bounded reconsideration of the earliest affected abstraction
 ```
 
-A first clean local defect remains local. Do not require a family census or redesign merely because variants are imaginable.
+A **first clean local defect remains local**. It does not require a census, matrix, family artifact, or redesign merely because similar bugs are imaginable.
 
 ## Semantic defect families
 
-A defect family is a bounded set of materially equivalent manifestations sharing a governing invariant, semantic owner/authority class, and failure mechanism. Text similarity or broad subsystem labels are insufficient.
+A semantic defect family is a bounded set of materially equivalent manifestations sharing a governing invariant, semantic owner/authority class, and materially equivalent failure mechanism. Family membership is not textual similarity, and broad subsystem labels are not valid families by themselves.
 
-Family reasoning identifies a shared cause; it does not prove the current realization should survive.
+Family reasoning answers which manifestations share one engineering cause; it **does not answer whether the current realization should survive**. Recurrence around a complicated mechanism is evidence to challenge that delegated realization, not evidence that the mechanism has become authority.
 
-Use bounded family census when the actual correctness claim is finite/exhaustive, or when sibling discovery is needed to remove/consolidate/canonicalize safely. Bound by governing invariant, semantic owner, lifecycle/transition class, and plausible affected chain rather than the whole repository.
+## When bounded family closure is justified
+
+Use a bounded family census/closure basis when either:
+
+- the actual **Tier-1 correctness claim is finite/exhaustive** in Protocol 5 vocabulary—equivalently, the current governing parent/external correctness claim is finite/exhaustive—and correctness depends on all members satisfying one invariant; or
+- **bounded sibling discovery is needed** to remove, consolidate, or canonicalize the affected realization safely and prevent obvious equivalent bypasses.
+
+Bound by governing invariant, semantic owner, transition/lifecycle class, and plausible affected chain rather than the whole repository. A temporary closure map may be used when completeness itself establishes a real claim; it is not a universal persistent artifact.
+
+Do not require completion of an existing "canonical realization" merely because previous work selected it. First ask whether that realization is still the minimum justified way to satisfy governing authority. A simpler equivalent realization may replace the family mechanism entirely.
 
 ## Active simplification trigger
 
-Before another additive durable repair, re-derive/simplify when evidence shows repeated patches around one mechanism, wrappers/adapters/retries/fallbacks/special cases, duplicated/synchronized authority, competing owners, repeated reconciliation, family closure that fails to reduce the failure surface, or an evident materially simpler equivalent realization.
+Active simplification/re-derivation is **mandatory before another additive durable repair** when evidence shows repeated patches around the same mechanism, patch-on-patch repair, wrappers/adapters/retries/fallbacks/special cases accumulating around one owner, duplicated/synchronized authoritative state, competing authorities, repeated reconciliation machinery, family closure that does not reduce the failure surface, or an evident materially simpler equivalent realization.
 
-Hold governing parent semantics/constraints fixed, treat delegated child machinery as replaceable, and prefer remove/narrow/alter/consolidate/refactor. Add machinery only for a genuinely missing required capability or when one canonical mechanism replaces broader complexity.
+The simplification pass holds governing parent semantics and external constraints fixed, then treats lower-level machinery as replaceable. Prefer removing, narrowing, altering, consolidating, or refactoring causes of intermediate problems. Add machinery only when a required capability genuinely remains absent or one canonical mechanism replaces broader existing complexity.
 
-If simplification requires changing accepted parent authority, route to that owner rather than silently mutating it.
+If the simpler solution would change accepted parent abstraction, stop dependent work and route to bounded reconsideration rather than silently changing it. For a D3 parent this is **bounded Software Design reconsideration**; for D1 or D2 use the corresponding scientific/numerical owner.
 
-## Review readiness and family findings
+## Review readiness and independent review sufficiency
 
-Normal final D4 Review challenges an actually completed candidate: accepted-contract reconciliation, required stage/final affected regression, real-boundary integration, repository checks, and task-required structural/liveness evidence.
+Normal final review should challenge a candidate Implementation has actually completed. Review readiness includes accepted-contract reconciliation, required stage-local/final affected regression, real-boundary integration where material, repository/project-required checks, and any task-required structural/absence/liveness evidence.
 
-An explicitly requested Review still proceeds when evidence is missing and records the missing evidence as a blocker.
+Missing required closure/evidence is implementation nonconformance, not an automatic authority revision. An **explicitly requested review still proceeds** to the highest useful depth available.
 
-When a blocker implicates a family, inspect cheap high-information siblings far enough to characterize the shared problem, then route one family-level finding rather than intentionally returning one sibling per cycle. Stop when further discovery becomes implementation-like, expensive/unavailable, or no longer follows an evidence-backed affected chain.
+When a blocker implicates a semantic family, the reviewer should proportionately inspect cheap, high-information sibling variants far enough to characterize the shared issue, then route one family-level problem rather than intentionally returning one cheap sibling per review cycle. Stop when further discovery becomes implementation-like, expensive/unavailable, mainly duplicates the systematic work Implementation must perform, or lacks an evidence-driven affected chain. Review sufficiency is not proof of zero conceivable defects.
 
-## Finding routing
+## Finding routing and revision economy
 
-Route by earliest semantic owner, not review count:
+Route by engineering meaning and earliest semantic owner, not cycle count:
 
-- child fails coherent governing authority -> implementation/realization nonconformance in that child domain;
-- governing child abstraction is incomplete/incorrect -> reconcile that owning domain before further descent;
-- newly discovered affected behavior under existing authority -> expand implementation/validation without minting new upstream requirements;
-- evidence accepted authority itself may be materially false/contradictory/unrealizable -> Serious Challenge to the earliest affected owner;
-- unrelated pre-existing issue -> keep separate unless the active change materially depends on it.
+- an already-binding governing requirement/acceptance miss -> realization nonconformance under the same authority;
+- a genuinely missing/incorrect child abstraction -> reconcile that owning domain before the next handoff;
+- newly discovered affected behavior under existing authority -> incorporate implementation/validation impact without minting new upstream requirements;
+- evidence accepted authority itself may be materially false, contradictory, ambiguous, inadequate, or unrealizable -> Serious Challenge to the earliest affected owner;
+- an unrelated pre-existing issue -> keep separate unless the active change exposes, depends on, or materially interacts with it.
 
-Concrete failing inputs/call stacks/sites are evidence, not new normative semantics when existing authority already governs them.
+Concrete new sites, call stacks, examples, failing inputs, or sibling manifestations are evidence rather than new normative semantics when current authority already governs them.
 
-Ordinary implementation attempts and review cycles do not require numbered authority revisions. No recurrence count, review count, cycle budget, or convergence target can force acceptance.
+**Ordinary implementation attempts and review cycles do not require a numbered authority revision.** Existing-obligation misses, failed/unexecuted tests, additional violating sites, implementation patches, simpler equivalent realization, generated-derivative regeneration, or clearer non-normative evidence do not by themselves mint task semantics.
+
+**No recurrence count, review count, cycle budget, or convergence target can force acceptance**; escalation changes the engineering method, **not the pass threshold**.
 
 ## Development-cycle economy
 
-After fidelity and simplicity are protected, minimize total cycle cost: diagnose before broad editing; search obvious variants before repeated patching; consolidate coherent edits before broad reruns; use cheap discriminating checks before full suites; reuse evidence whose claim cannot plausibly change; review deltas instead of replaying settled archaeology; and avoid another comprehensive closure review until known blocker families are closed where dependencies permit.
+After fidelity and realization simplicity are protected, minimize total cycle cost: diagnose before broad editing; search obvious variants before repeated instance patching; consolidate coherent edits before broad reruns; run cheap discriminating checks before broader regression/integration; reuse evidence whose claim cannot plausibly change; review deltas rather than replaying settled archaeology; and avoid requesting another comprehensive closure review until identified blocker families are closed where dependencies permit.
 
-Tool availability does not create a mandatory pipeline and tool absence does not lower the pass threshold.
+Optional Serena/Semgrep/CodeQL/Hypothesis use can reduce rediscovery when their relation matches the claim. Tool absence does not relax required closure, and tool presence does not create a mandatory multi-tool census.
 
-## Stabilization
+## Milestone stabilization after converged work
 
-After substantial converged work, a bounded non-mutating stabilization pass may inspect duplicate authority/state, wrapper/fallback/special-case accumulation, stale compatibility, ownership drift, unnecessary public/configuration surface, internal states that mostly manage other machinery, and materially simpler equivalent realization.
+After substantial converged work, a bounded **non-mutating stabilization** pass may inspect duplicate authority/state, wrapper/fallback/special-case accumulation, stale compatibility, ownership drift, unnecessary public/configuration surface, internal states that mostly manage other machinery, and a materially simpler equivalent realization.
 
-If simplification is justified, route the minimum coherent change through the owning D1/D2/D3/D4 domain and fresh affected acceptance. Do not manufacture refactoring solely because stabilization exists.
+If simplification is justified, route the minimum coherent change through the owning D1/D2/D3/D4 domain and fresh affected acceptance. If accepted D3 architecture must change, use bounded Software Design reconsideration; if D1/D2 authority is implicated, route there instead. Do not manufacture refactoring solely because stabilization exists.

@@ -9,57 +9,65 @@ Own D3 software architecture. Use this role for architecture/ownership/data-flow
 
 Do not own D1 scientific formulation or D2 numerical-method semantics merely because software realizes them.
 
-## Role-critical reference routing
+## Reference routing
 
 Before substantive D3 reasoning, **MUST read** [Abstraction, realization, authority, and challenge](references/abstraction-and-realization.md).
 
-Before creating/amending a D3->D4 workplan, closing handoff, reviewing implementation, reasoning about stages/invalidations, or routing rework, **MUST read** [Workflow and workplans](references/workflow-and-workplans.md).
+### Role-critical routes
 
-Before architecture, ownership, dependency, resource, compatibility, or simplification decisions, **MUST read** [Software architecture and design](references/architecture-and-design.md).
+- Before creating/amending a D3->D4 workplan, closing handoff, reviewing implementation, reasoning about stages/invalidations, or routing rework, **MUST read** [Workflow and workplans](references/workflow-and-workplans.md).
+- Before architecture, ownership, dependency, resource, compatibility, or simplification decisions, **MUST read** [Software architecture and design](references/architecture-and-design.md).
+- Before affected regression, integration, proxy-proof acceptance, oracle-strength, failure injection, or qualification decisions, **MUST read** [Testing and validation](references/testing-and-validation.md).
+- Before protocol/workplan version binding or historical recovery decisions, **MUST read** [Protocol versioning and compatibility](references/protocol-versioning-and-compatibility.md).
+- Before changed-code quality, adversarial Verification, stabilization, or long-horizon structural-risk reasoning, **MUST read** [Long-horizon code health](references/long-horizon-code-health.md).
 
-Before affected regression, integration, proxy-proof acceptance, oracle-strength, failure injection, or qualification decisions, **MUST read** [Testing and validation](references/testing-and-validation.md).
+### Upstream semantic routes
 
-Before protocol/workplan version binding or historical recovery decisions, **MUST read** [Protocol versioning and compatibility](references/protocol-versioning-and-compatibility.md).
-
-Before changed-code quality, adversarial Verification, stabilization, or long-horizon structural-risk reasoning, read [Long-horizon code health](references/long-horizon-code-health.md) and [Convergence and development-cycle economy](references/convergence-and-cycle-economy.md) as applicable.
-
-Use [D3->D4 implementation workplan template](templates/implementation_workplan_template.md) for substantial executable work; use [Abstraction–realization change-plan template](templates/abstraction_realization_change_plan_template.md) when a D2->D3 or other architecture-level handoff needs the generic form.
-
-## Upstream semantic routes
-
-When architecture reasoning touches scientific meaning, read [Scientific and mathematical formulation](references/scientific-formulation.md). When it touches estimator/discretization/error/precision semantics, read [Algorithm and numerical method design](references/numerical-algorithm-design.md). Cross-domain scientific/numerical evidence routes through [Scientific software](references/scientific-software.md).
+- When architecture reasoning touches scientific meaning, **MUST read** [Scientific and mathematical formulation](references/scientific-formulation.md).
+- When it touches estimator/discretization/error/precision semantics, **MUST read** [Algorithm and numerical method design](references/numerical-algorithm-design.md).
+- Cross-domain scientific/numerical evidence routes through [Scientific software](references/scientific-software.md).
 
 A discovered D1/D2 defect is not D3 authority to rewrite. Surface and route it to the owning role, including a Serious Challenge when accepted upstream authority itself may be materially wrong.
 
-## Language-profile dispatch
+### Language-profile dispatch
 
-For material executable architecture/review, first read [Language engineering profiles](references/language-profiles.md). For materially affected Python surfaces read [Python engineering](references/python-engineering.md); for C++ read [C++ engineering](references/cpp-engineering.md); mixed boundaries read both.
+For material executable design or independent review, language semantics are part of the normal reasoning path rather than an optional performance appendix.
 
-Language profiles refine D3/D4 realization but do not override shared scientific, numerical, architecture, testing, security, or performance authority.
+- First **MUST read** [Language engineering profiles](references/language-profiles.md) to classify the affected runtime/build surface.
+- For materially affected Python executable surfaces, **MUST read** [Python engineering](references/python-engineering.md).
+- For materially affected C++ executable surfaces, **MUST read** [C++ engineering](references/cpp-engineering.md).
+- Mixed Python/C++ boundaries **MUST read both** language profiles and apply the router's boundary rules. Purely generic architecture/documentation or tiny text/config work need not load a profile when language semantics cannot affect the decision.
 
-## Tool dispatch
+Shared domain owners remain authoritative over the profiles. Do not create global Python-vs-C++ precedence or duplicate shared doctrine in language-specific branches.
 
-Classify each engineering question by the relation under the claim:
+### Per-question tool dispatch
 
-- symbol ownership/definition/callers/references -> [Serena](references/tool-serena.md);
-- AST/structural families/forbidden patterns/absence -> [Semgrep](references/tool-semgrep.md);
-- broad/combinatorial Python invariants -> [Hypothesis](references/tool-hypothesis.md);
-- supported interprocedural flow/taint -> [CodeQL](references/tool-codeql.md);
-- overlaps, availability, maintainability/test-effectiveness/failure-path capabilities -> [Tool-assisted engineering](references/tool-assisted-engineering.md).
+Classify each material engineering question by the relation under the claim, not once per task:
 
-Use a cheap non-mutating capability probe when specialized availability is unknown and the relation warrants the tool. Tool absence never relaxes the engineering claim.
+- literal/path/text lookup or small deterministic local inspection -> ordinary repository search/read normally remains sufficient;
+- symbol ownership/definition/callers/references/implementations or bounded semantic navigation -> **MUST read** [Serena](references/tool-serena.md) before relying solely on lower-information defaults;
+- AST/syntax/structural patterns, diagnosed variants, forbidden/legacy constructs, or structural absence/uniqueness -> **MUST read** [Semgrep](references/tool-semgrep.md);
+- broad/combinatorial Python input/state invariants -> **MUST read** [Hypothesis](references/tool-hypothesis.md);
+- broad/combinatorial non-Python input/state invariants -> use the language-appropriate property/generative route in [Tool-assisted engineering](references/tool-assisted-engineering.md) plus the active language profile;
+- supported interprocedural flow/taint/source-to-sink relations -> **MUST read** [CodeQL](references/tool-codeql.md).
 
-## Other domain-conditional routes
+Runtime-state/debugger, memory/lifetime/UB, race/synchronization, performance/vectorization, test-effectiveness, changed-code protection, objective architecture dependency, maintainability-hotspot, longitudinal-risk, and failure/recovery questions route through [Tool-assisted engineering](references/tool-assisted-engineering.md), [Long-horizon code health](references/long-horizon-code-health.md), and the active language/domain owner as applicable rather than a fixed tool pipeline.
 
-- repository intake/context economy -> [Repository intake](references/repository-intake.md)
-- D4 specification/API/schema fidelity -> [Specification and implementation](references/specification-and-implementation.md)
-- evidence/document communication -> [Documentation and evidence](references/documentation-and-evidence.md)
-- release/package mechanics -> [Release and distribution](references/release-and-distribution.md)
-- configuration -> [Configuration and policy](references/configuration-and-policy.md)
-- orchestration/concurrency -> [Concurrency and orchestration](references/concurrency-and-orchestration.md)
-- security/trust boundaries -> [Security and trust boundaries](references/security-and-trust-boundaries.md)
-- performance/resources/parallelism/hardware -> [Performance and parallelism](references/performance-and-parallelism.md)
-- storage/checkpoint/cache/I/O -> [Storage and I/O](references/storage-and-io.md)
+When a specialized trigger fires and availability is unknown, use a cheap non-mutating capability probe when practical. If the capability is available/current/supported and directly models the claim, presumptively use it; otherwise take a concrete fallback such as unsupported backend/language, unavailable tool surface, stale/unreliable analysis state that cannot economically be refreshed, model mismatch, disproportionate setup for a trivially bounded claim, or already-available evidence that establishes the same claim at least as reliably and more cheaply. Familiarity with built-in search/read/shell/test tools is not itself a fallback reason.
+
+### Domain-conditional routes
+
+- Repository inspection strategy/context economy -> [Repository intake](references/repository-intake.md).
+- Recurrence/family closure/review readiness/review saturation/revision economy -> [Convergence and development-cycle economy](references/convergence-and-cycle-economy.md).
+- D4 specification/API/schema fidelity -> [Specification and implementation](references/specification-and-implementation.md).
+- Evidence/document communication -> [Documentation and evidence](references/documentation-and-evidence.md).
+- Release/package mechanics -> [Release and distribution](references/release-and-distribution.md).
+- Configuration -> [Configuration and policy](references/configuration-and-policy.md).
+- Orchestration/concurrency -> [Concurrency and orchestration](references/concurrency-and-orchestration.md).
+- Security/trust boundaries -> [Security and trust boundaries](references/security-and-trust-boundaries.md).
+- Performance/resources/parallelism/hardware -> [Performance and parallelism](references/performance-and-parallelism.md).
+- Storage/checkpoint/cache/I/O -> [Storage and I/O](references/storage-and-io.md).
+- Substantial executable workplan -> [D3->D4 implementation workplan template](templates/implementation_workplan_template.md).
 
 ## D3 feasibility and authority
 
@@ -85,15 +93,17 @@ Existing code/tests/helpers/wrappers/caches/state machines/library choices do no
 6. Define D4 acceptance through real semantic-owner boundaries and complete affected regression/integration.
 7. State evidence that would reopen D3 versus evidence that should remain a D4 local reconciliation.
 
-## Active simplicity
+## Active simplicity and convergence
 
-A first clean D4 defect may remain local. When repeated patches, wrappers, fallbacks, duplicated/synchronized state, competing authorities, lifecycle machinery, or an evident simpler equivalent realization show architecture-created complexity, reduce/re-derive delegated machinery before another additive repair.
+A first clean local defect remains local. Material sibling recurrence changes the unit of reasoning to the shared owner/mechanism; it does not answer whether the current realization should survive. When repeated patches, wrappers, fallbacks, duplicated/synchronized state, competing authorities, lifecycle machinery, or an evident simpler equivalent realization show architecture-created complexity, remove, narrow, alter, consolidate, refactor, or re-derive delegated machinery before another additive durable repair.
 
-If the simpler solution changes accepted D3 architecture, perform bounded D3 reconsideration. If the problem is actually D2/D1, route upstream rather than designing around it.
+If the simpler solution changes accepted D3 architecture, perform bounded D3 reconsideration. If the problem is actually D2/D1, route upstream rather than designing around it. Recurrence is evidence about the shared owner/mechanism, not authority for preserving that mechanism.
 
 ## Review, Verification, and Serious Challenge
 
 Independent D4 Review reconstructs applicable D1/D2 semantics, D3 architecture, D4 specification/workplan, and actual candidate behavior before relying on implementer rationale. Prefer fresh context for substantial/high-risk review. Attempt targeted falsification of conformance, abstraction adequacy, ownership, affected surfaces, testing, reliability/security, scaling/resources, compatibility, and complexity.
+
+Review first asks whether **literal compliance actually realizes the protected stakeholder outcome** and every applicable upstream semantic outcome. If the implementation misses a sufficient accepted contract, that is implementation nonconformance. If the literal workplan/architecture contract is itself too weak or wrong for the protected outcome, classify a **workplan/design deficiency** at the earliest owning domain rather than blessing a compliant-but-wrong realization.
 
 Every material Review includes the bounded Challenge Pass. Distinguish:
 
