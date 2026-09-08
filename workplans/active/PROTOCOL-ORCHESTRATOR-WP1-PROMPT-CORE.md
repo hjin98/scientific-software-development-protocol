@@ -4,7 +4,7 @@ workplan_id: PROTOCOL-ORCHESTRATOR-WP1-PROMPT-CORE
 protocol_version: 5.16.0
 status: reopened
 reviewed_date: 2026-09-08
-reviewed_candidate: 442fc776b0999363d81179e4706e7732661cb266
+reviewed_candidate: b7d18506d1fb7e07b32db0527c7fece9aa633716
 review_verdict: no-pass
 reopened_date: 2026-09-08
 parent_architecture: orchestrator/docs/architecture.md
@@ -33,7 +33,7 @@ Core-only operation is a finished product mode. It requires no Tracker, Adapters
 
 This workplan is governed by Protocol 5.16.0 and Frozen `orchestrator/docs/architecture.md` Architecture 1.6.0. Canonical human-facing stage prose remains `source/shared/references/development-workflow-prompts.md`; packaged prompt/profile resources are reproducible derivatives, not competing authorities.
 
-This file is the snapshot-complete current WP-1 handoff. Superseded repair chronology is non-normative Git history; all still-binding product/Frozen semantics and current blockers are represented below.
+This file is the snapshot-complete current WP-1 handoff. Superseded review chronology is non-normative Git history. Only the current blockers in §6 remain open.
 
 ## 2. Product and Frozen invariants
 
@@ -224,7 +224,7 @@ O8. **Renderer/wire/events:** canonical body fidelity, deterministic preparation
 
 O9. **Privacy/web truth:** final RenderedPrompt/stdout tests for paths/credentials/environment/local remotes/dirty/divergent/stale/absent/ambiguous cases.
 
-O10. **Extensions/diagnostics:** real installed entry-point metadata; passive discovery; compatible/incompatible/missing/cyclic/alternative-provider graphs; staged activation; canonical ID/API/multiplicity/SPI; passive doctor/capabilities with no hidden network/mutation. Doctor failure-path evidence must distinguish a correct packaged-only path from the known-broken configured local/remote resolution path.
+O10. **Extensions/diagnostics:** real installed entry-point metadata; passive discovery; compatible/incompatible/missing/cyclic/alternative-provider graphs; staged activation; canonical ID/API/multiplicity/SPI; passive doctor/capabilities with no hidden network/mutation. Doctor failure-path evidence must distinguish packaged-only behavior from both configured valid-local-source consultation and configured remote fallback.
 
 O11. **CLI product/development boundary:** installed `sdp` and zero-install `orchestrator/sdp.py` converge on one `core.cli:main` behavior owner; stdout atomic/prompt-only; failures redacted/nonzero; clipboard additive; representative stage/doctor commands work through both invocation modes.
 
@@ -234,76 +234,54 @@ O13. **Final repository acceptance:** complete Core affected regression with Hyp
 
 Acceptance must execute the real semantic owner. Evidence that could stay green while the final owner is broken does not close the claim.
 
-## 6. Independent Review of candidate `442fc776b0999363d81179e4706e7732661cb266` — 2026-09-08
+## 6. Independent Review of candidate `b7d18506d1fb7e07b32db0527c7fece9aa633716` — 2026-09-08
 
 **Verdict: NO-PASS. WP-1 remains reopened. Parent Architecture 1.6.0 remains valid and does not reopen.**
 
-The candidate is one implementation commit directly on review authority `4482ec3b9174c60bac41d9231800ea512247232c`. Its eight-file delta is appropriately narrow: existing workplan/profile resolution owners, Frozen/user documentation, and focused tests. It introduces no new resolver, wrapper hierarchy, transport layer, persistence, or higher-module machinery.
+Candidate `b7d18506...` is one implementation commit directly on review authority `90029fb4923110158e0856129bf7b2757cd0bc5b`. The delta is appropriately narrow: one owning-layer service rewire plus deletion of an obsolete helper, and focused test-oracle changes. It adds no resolver, wrapper, compatibility layer, transport abstraction, persistence, or higher-module machinery.
 
-### 6.1 Confirmed closure since the previous Review
+### 6.1 Closed in this candidate
 
-- The shallow source tree, descriptive module names, installed `sdp` entry point, and thin zero-install `orchestrator/sdp.py` remain aligned.
-- `prepare()` now looks up an explicit exact workplan from the existing catalog before project-profile bootstrap and then returns to the existing `W.resolve` owner for stage-policy/lifecycle validation. The previously reported explicit required/optional workplan precedence counterexamples are covered by focused tests.
-- Architecture 1.6.0 again states higher-distribution -> lower-distribution installation semantics, retains the shallow WP-1 layout, defers future physical roots without scaffolding, and restores all future API/SPI namespace commitments.
-- The user guide now requires exactly one begin/end result marker and makes the zero-install launcher the normal checkout-development path; editable installation is explicitly optional.
-- The preparation-identity regression now varies both `DigestRef.algorithm` and `canonicalization_scheme` across candidate, workplan, profile, and prompt-source material digests.
-- The Git regression now arms an ambient executable `GIT_SSH_COMMAND` helper and exercises the real refreshed remote-observation path, proving the helper is not executed.
-- Production `doctor` remains correctly implemented through direct packaged-only resolution.
+**C1 is closed.** `CoreService.resolve_workplan()` now derives the descriptor from `request.stage.profile_id`, validates the supplied full `StageRef` through the existing `P.stage_descriptor`, then calls the existing `W.resolve`. `_workflow_descriptor_for_project()` was removed. The focused public-API regression covers the conflicting project-default counterexample and unsupported profile identity. This is the intended reduction/rewiring solution and preserves one workplan owner and one Protocol profile/source owner.
 
-These closures do not justify a parent redesign and should not be reopened absent new evidence.
+**C2 remote-fallback half is closed.** The installed-product doctor test now contains a `remote-only` case with no local root, an intentionally corrupted packaged profile, remote fallback enabled, and a fake Git executable marker. A regression to the known-broken general configured-source resolver would attempt the remote query and trip the marker.
 
-### C1 — Public `resolve_workplan()` still reinterprets a profile-bound StageRef through the project default
+No new evidence reopens the previously closed source-tree, architecture, footer, extension, digest-identity, Git-environment, public-value, or documentation families.
 
-**Authority:** Tier 1A invariants 4, 8, and 12; §3.3; O4/O6; Frozen Core v1 value-boundary semantics.
-
-`PromptPreparationRequest` was repaired, but the public sibling `CoreService.resolve_workplan()` still calls `_workflow_descriptor_for_project(context)`, which loads `context.section.protocol_profile`, before applying the request's already profile-bound `StageRef`. This allows a lower-precedence or unsupported project default to veto a valid StageRef produced under the governing workplan/profile.
-
-Concrete counterexample:
-
-1. Project config names unsupported `protocol_profile = "sdp-protocol-9.9"`.
-2. A compatible workplan declaring Protocol 5.16 is resolved/cataloged and `workflow(WorkflowRequest(workplan=<ref>))` yields the compatible 5.16 descriptor.
-3. The caller passes that descriptor's Implementation `StageRef` plus the exact workplan selector to public `resolve_workplan()`.
-4. Current `resolve_workplan()` tries the project's 9.9 profile before honoring the supplied 5.16 StageRef and fails for the wrong authority.
-
-**Repair:** alter the existing `resolve_workplan()` ownership path so stage validation is derived from `request.stage.profile_id` through the existing Protocol-source/profile owner, then validate the full `StageRef` with the existing `P.stage_descriptor`, and call the existing `W.resolve`. Do not add another resolver or compatibility wrapper. If `_workflow_descriptor_for_project()` becomes unused, remove it rather than retaining dead bootstrap machinery.
-
-**Required regression:** exercise the public `CoreAPI.resolve_workplan()` counterexample above. A compatible profile-bound StageRef must not be vetoed by an unrelated unsupported project default; a mismatched/unsupported StageRef must still fail truthfully. Preserve ordinary configured/default behavior where no already-bound StageRef overrides it.
-
-### C2 — The new passive-doctor adversarial test can still pass the known-broken configured-source behavior
+### D1 — The doctor "valid-local" adversarial case is still not a valid local Protocol source
 
 **Authority:** Tier 1A invariant 15; §3.7; O10; Protocol 5.16 proxy-proof/oracle-strength rules.
 
-Production `doctor` is correct, but its new installed-product failure-path test is not yet a discriminating oracle. The test corrupts the packaged profile, configures both `local_root` and remote fallback, but makes `local_root` nonexistent. Under the previously broken implementation that called general configured Protocol-source resolution, `resolve()` would fail immediately on that nonexistent local root before reaching the packaged snapshot or remote query. The CLI could still emit `packaged_profile_problem`, the fake Git marker would remain absent, and every current assertion could pass while `doctor` was incorrectly consulting configured source state.
+`orchestrator/tests/test_installed_product.py` defines `PACKAGE_ROOT = Path(__file__).resolve().parents[1]`, which is the repository's `orchestrator/` directory. The new test passes `PACKAGE_ROOT` as the `local_root` for its `valid-local` subcase. But the real local Protocol-source owner resolves `source/PROTOCOL_VERSION` and `source/shared/references/development-workflow-prompts.md` beneath `local_root`. Those paths exist beneath the repository root, not beneath `orchestrator/`.
 
-**Repair:** strengthen the existing test, not the product. The test must make the known-broken configured-source path observably differ from packaged-only behavior. A minimal repair is either:
+Therefore the supposedly valid-local subcase still exercises an invalid/missing local source. A broken doctor implementation that consults configured local source state can fail immediately on that invalid root and still satisfy the subcase's current `packaged_profile_problem` assertions. The `remote-only` subcase correctly protects the remote-fallback half, but O10 requires installed evidence that configured **valid local source** also cannot affect doctor.
 
-- use a valid configured local Protocol source while corrupting the installed packaged profile, so any accidental local-source consultation would incorrectly succeed and fail the packaged-only assertion; and separately arm remote fallback with no local short-circuit to prove no remote query after packaged failure; or
-- split these into two focused cases using the existing installed-product harness: one valid-local-source isolation case and one no-local-root + fake-Git remote-fallback trap.
+**Repair:** change the existing test fixture only. Point the local-source case at the actual repository root containing `source/PROTOCOL_VERSION` and `source/shared/references/development-workflow-prompts.md` (for this test layout, derive it from the existing package root rather than hard-coding a machine path). Keep the installed wheel's packaged profile corrupted. Under correct packaged-only doctor behavior, the command must still report `packaged_profile_problem`; under a broken configured-local-source path, the valid local source would succeed and the test must fail. Retain the separate remote-only fake-Git marker case. Do not change production doctor code or introduce new source/network abstractions.
 
-Do not introduce a network abstraction, doctor-specific resolver, or new test framework.
+### D2 — Exact assembled-candidate final acceptance is still not evidenced
 
-### C3 — Exact assembled-candidate final acceptance is still not evidenced
+**Authority:** O13 and Protocol 5.16 final affected-regression/integration requirements.
 
-**Authority:** O13 and the Re-review gate; Protocol 5.16 final affected-regression/integration requirements.
+Candidate `b7d18506...` has no GitHub status contexts, no check runs, and no Actions runs. Its commit message does not carry the required final commands/results, and the active workplan still contains no exact-candidate execution record. The independent Review environment attempted an exact checkout for runtime falsification, but outbound DNS/network access from that execution environment was unavailable; no independent runtime pass is claimed.
 
-No GitHub status context, check run, or Actions run exists for candidate `442fc776b0999363d81179e4706e7732661cb266`, and the implementation commit does not record the required final assembled commands/results. The Review environment could inspect the exact GitHub source but could not obtain a runnable checkout, so it does not substitute an independent execution claim.
-
-**Repair:** after C1/C2 and any resulting material edits, run final acceptance on one exact assembled candidate and record concise evidence tied to that candidate. No evidence manifest or new reporting subsystem is required.
+**Repair:** after D1, run final acceptance on the resulting exact assembled candidate and record concise evidence tied to that exact commit. No new evidence manifest, framework, or reporting subsystem is needed.
 
 Minimum final execution set:
 
-1. focused C1/C2 plus the already-added digest/Git/explicit-precedence regressions;
+1. focused D1 plus the already-present C1, digest-identity, Git transport-helper, explicit-workplan precedence, duplicate-footer, extension/provider, public-record, and doctor remote-only regressions;
 2. complete Core regression with Hypothesis active where configured;
 3. installed extension composition/passive diagnostics and public API-SPI/wire/privacy suites;
 4. real Git/remote non-mutation and environment-boundary tests;
 5. canonical profile/snapshot generator parity;
 6. wheel and sdist build/inspection/install plus installed CLI outside checkout;
 7. zero-install `orchestrator/sdp.py` from arbitrary cwd, including checkout-source precedence over a stale installed package;
-8. repository structural absence checks for legacy package/private-path compatibility and duplicate CLI authority;
+8. structural absence checks for legacy package/private-path compatibility and duplicate CLI authority;
 9. ordinary Protocol regression, skill build/validate/package parity, and `git diff --check`.
+
+Record the exact candidate SHA and command/result summary after the final material edit. A required check that did not execute is not a pass.
 
 ## 7. Re-review gate
 
-Return WP-1 to independent Review only after C1-C3 close on one exact assembled candidate. Do not reopen already-closed architecture/layout/footer/extension/digest/Git families unless new evidence materially contradicts them.
+Return WP-1 to independent Review only after D1-D2 close on one exact assembled candidate. Preserve the C1 closure and do not revisit previously closed architecture/layout/footer/extension/digest/Git families without new contradicting evidence.
 
-**Current routing: NO-PASS -> `software-implementation`. Rewire the existing public `resolve_workplan()` profile ownership, strengthen the existing doctor adversarial oracle, execute final assembled acceptance, and resubmit the exact candidate.**
+**Current routing: NO-PASS -> `software-implementation`. Correct the existing doctor valid-local test fixture, execute and record final assembled acceptance, then resubmit the exact candidate.**
