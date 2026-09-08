@@ -1,0 +1,1252 @@
+{
+  "profile": {
+    "compatible_protocol_versions": [
+      "5.16.0",
+      "5.16"
+    ],
+    "profile_id": "sdp-protocol-5.16",
+    "profile_schema_version": 1,
+    "protocol_version": "5.16.0",
+    "source_digest": {
+      "algorithm": "sha256",
+      "canonicalization_scheme": "sdp.content.v1",
+      "value": "75a3edab1e7a0b1e827f6a5fc24dceba42bfafe814a67ad82a1476bbeac15cff"
+    }
+  },
+  "result_schema_id": "sdp.stage-result-envelope",
+  "result_schema_version": 1,
+  "schema_version": 1,
+  "stages": [
+    {
+      "aliases": [],
+      "inputs": [
+        {
+          "default_value": null,
+          "description": null,
+          "first_class_source": null,
+          "mode_dependent": false,
+          "name": "BASELINE_SCOPE",
+          "override_allowed": true,
+          "ownership": "required_user"
+        },
+        {
+          "default_value": null,
+          "description": null,
+          "first_class_source": "observation",
+          "mode_dependent": true,
+          "name": "REPOSITORY_TARGET",
+          "override_allowed": false,
+          "ownership": "mechanical"
+        },
+        {
+          "default_value": "AUTO",
+          "description": null,
+          "first_class_source": null,
+          "mode_dependent": false,
+          "name": "GOVERNING_AUTHORITY",
+          "override_allowed": true,
+          "ownership": "canonical_default"
+        },
+        {
+          "default_value": "AUTO_LOCAL_FIRST",
+          "description": null,
+          "first_class_source": null,
+          "mode_dependent": false,
+          "name": "PROTOCOL_SOURCE",
+          "override_allowed": true,
+          "ownership": "canonical_default"
+        },
+        {
+          "default_value": null,
+          "description": null,
+          "first_class_source": "governing_protocol_contract",
+          "mode_dependent": false,
+          "name": "PROTOCOL_REF",
+          "override_allowed": false,
+          "ownership": "mechanical"
+        },
+        {
+          "default_value": "AUTO_EXECUTE",
+          "description": null,
+          "first_class_source": null,
+          "mode_dependent": false,
+          "name": "EXECUTION_MODE",
+          "override_allowed": true,
+          "ownership": "canonical_default"
+        },
+        {
+          "default_value": "NONE",
+          "description": null,
+          "first_class_source": null,
+          "mode_dependent": false,
+          "name": "ADDITIONAL_CONSTRAINTS",
+          "override_allowed": true,
+          "ownership": "canonical_default"
+        }
+      ],
+      "mutation_class": "task_local_evidence",
+      "optionality": "conditional",
+      "recognized_outcomes": [
+        "captured"
+      ],
+      "role_owner": "software-design",
+      "stage": {
+        "profile_id": "sdp-protocol-5.16",
+        "protocol_version": "5.16.0",
+        "stage_key": "baseline"
+      },
+      "title": "Baseline / Change-Health Intake",
+      "workplan_policy": "explicit_only"
+    },
+    {
+      "aliases": [],
+      "inputs": [
+        {
+          "default_value": null,
+          "description": null,
+          "first_class_source": "first_task",
+          "mode_dependent": false,
+          "name": "TASK",
+          "override_allowed": false,
+          "ownership": "required_user"
+        },
+        {
+          "default_value": null,
+          "description": null,
+          "first_class_source": "observation",
+          "mode_dependent": true,
+          "name": "REPOSITORY_TARGET",
+          "override_allowed": false,
+          "ownership": "mechanical"
+        },
+        {
+          "default_value": "AUTO",
+          "description": null,
+          "first_class_source": null,
+          "mode_dependent": false,
+          "name": "EXISTING_AUTHORITIES",
+          "override_allowed": true,
+          "ownership": "canonical_default"
+        },
+        {
+          "default_value": "AUTO",
+          "description": null,
+          "first_class_source": null,
+          "mode_dependent": false,
+          "name": "WORKPLAN_DESTINATION",
+          "override_allowed": true,
+          "ownership": "canonical_default"
+        },
+        {
+          "default_value": "AUTO_LOCAL_FIRST",
+          "description": null,
+          "first_class_source": null,
+          "mode_dependent": false,
+          "name": "PROTOCOL_SOURCE",
+          "override_allowed": true,
+          "ownership": "canonical_default"
+        },
+        {
+          "default_value": null,
+          "description": null,
+          "first_class_source": "governing_protocol_contract",
+          "mode_dependent": false,
+          "name": "PROTOCOL_REF",
+          "override_allowed": false,
+          "ownership": "mechanical"
+        },
+        {
+          "default_value": "AUTO_EXECUTE",
+          "description": null,
+          "first_class_source": null,
+          "mode_dependent": false,
+          "name": "EXECUTION_MODE",
+          "override_allowed": true,
+          "ownership": "canonical_default"
+        },
+        {
+          "default_value": "NONE",
+          "description": null,
+          "first_class_source": null,
+          "mode_dependent": false,
+          "name": "ADDITIONAL_CONSTRAINTS",
+          "override_allowed": true,
+          "ownership": "canonical_default"
+        }
+      ],
+      "mutation_class": "design_artifacts",
+      "optionality": "required",
+      "recognized_outcomes": [
+        "pass",
+        "no_pass"
+      ],
+      "role_owner": "software-design",
+      "stage": {
+        "profile_id": "sdp-protocol-5.16",
+        "protocol_version": "5.16.0",
+        "stage_key": "design"
+      },
+      "title": "Design / Workplan",
+      "workplan_policy": "explicit_only"
+    },
+    {
+      "aliases": [],
+      "inputs": [
+        {
+          "default_value": null,
+          "description": null,
+          "first_class_source": "workplan_selector",
+          "mode_dependent": false,
+          "name": "WORKPLAN",
+          "override_allowed": false,
+          "ownership": "mechanical"
+        },
+        {
+          "default_value": null,
+          "description": null,
+          "first_class_source": "observation",
+          "mode_dependent": true,
+          "name": "REPOSITORY_TARGET",
+          "override_allowed": false,
+          "ownership": "mechanical"
+        },
+        {
+          "default_value": "AUTO_LOCAL_FIRST",
+          "description": null,
+          "first_class_source": null,
+          "mode_dependent": false,
+          "name": "PROTOCOL_SOURCE",
+          "override_allowed": true,
+          "ownership": "canonical_default"
+        },
+        {
+          "default_value": null,
+          "description": null,
+          "first_class_source": "governing_protocol_contract",
+          "mode_dependent": false,
+          "name": "PROTOCOL_REF",
+          "override_allowed": false,
+          "ownership": "mechanical"
+        },
+        {
+          "default_value": "AUTO_EXECUTE",
+          "description": null,
+          "first_class_source": null,
+          "mode_dependent": false,
+          "name": "EXECUTION_MODE",
+          "override_allowed": true,
+          "ownership": "canonical_default"
+        },
+        {
+          "default_value": "NONE",
+          "description": null,
+          "first_class_source": null,
+          "mode_dependent": false,
+          "name": "ADDITIONAL_CONSTRAINTS",
+          "override_allowed": true,
+          "ownership": "canonical_default"
+        }
+      ],
+      "mutation_class": "product",
+      "optionality": "required",
+      "recognized_outcomes": [
+        "complete",
+        "blocked"
+      ],
+      "role_owner": "software-implementation",
+      "stage": {
+        "profile_id": "sdp-protocol-5.16",
+        "protocol_version": "5.16.0",
+        "stage_key": "implementation"
+      },
+      "title": "Implementation",
+      "workplan_policy": "required"
+    },
+    {
+      "aliases": [],
+      "inputs": [
+        {
+          "default_value": null,
+          "description": null,
+          "first_class_source": "workplan_selector",
+          "mode_dependent": false,
+          "name": "WORKPLAN",
+          "override_allowed": false,
+          "ownership": "mechanical"
+        },
+        {
+          "default_value": null,
+          "description": null,
+          "first_class_source": "observation",
+          "mode_dependent": true,
+          "name": "IMPLEMENTATION_TARGET",
+          "override_allowed": false,
+          "ownership": "mechanical"
+        },
+        {
+          "default_value": "AUTO",
+          "description": null,
+          "first_class_source": null,
+          "mode_dependent": false,
+          "name": "RELATED_AUTHORITIES",
+          "override_allowed": true,
+          "ownership": "canonical_default"
+        },
+        {
+          "default_value": "AUTO_LOCAL_FIRST",
+          "description": null,
+          "first_class_source": null,
+          "mode_dependent": false,
+          "name": "PROTOCOL_SOURCE",
+          "override_allowed": true,
+          "ownership": "canonical_default"
+        },
+        {
+          "default_value": null,
+          "description": null,
+          "first_class_source": "governing_protocol_contract",
+          "mode_dependent": false,
+          "name": "PROTOCOL_REF",
+          "override_allowed": false,
+          "ownership": "mechanical"
+        },
+        {
+          "default_value": "AUTO_EXECUTE",
+          "description": null,
+          "first_class_source": null,
+          "mode_dependent": false,
+          "name": "EXECUTION_MODE",
+          "override_allowed": true,
+          "ownership": "canonical_default"
+        },
+        {
+          "default_value": "NONE",
+          "description": null,
+          "first_class_source": null,
+          "mode_dependent": false,
+          "name": "ADDITIONAL_CONSTRAINTS",
+          "override_allowed": true,
+          "ownership": "canonical_default"
+        }
+      ],
+      "mutation_class": "planning_artifacts",
+      "optionality": "required",
+      "recognized_outcomes": [
+        "pass",
+        "no_pass"
+      ],
+      "role_owner": "software-design",
+      "stage": {
+        "profile_id": "sdp-protocol-5.16",
+        "protocol_version": "5.16.0",
+        "stage_key": "review"
+      },
+      "title": "Review & Update",
+      "workplan_policy": "required"
+    },
+    {
+      "aliases": [],
+      "inputs": [
+        {
+          "default_value": null,
+          "description": null,
+          "first_class_source": null,
+          "mode_dependent": false,
+          "name": "VERIFICATION_SCOPE",
+          "override_allowed": true,
+          "ownership": "required_user"
+        },
+        {
+          "default_value": null,
+          "description": null,
+          "first_class_source": "observation",
+          "mode_dependent": true,
+          "name": "IMPLEMENTATION_TARGET",
+          "override_allowed": false,
+          "ownership": "mechanical"
+        },
+        {
+          "default_value": "AUTO",
+          "description": null,
+          "first_class_source": null,
+          "mode_dependent": false,
+          "name": "GOVERNING_DESIGN",
+          "override_allowed": true,
+          "ownership": "canonical_default"
+        },
+        {
+          "default_value": "AUTO",
+          "description": null,
+          "first_class_source": null,
+          "mode_dependent": false,
+          "name": "SCIENTIFIC_AUTHORITIES",
+          "override_allowed": true,
+          "ownership": "canonical_default"
+        },
+        {
+          "default_value": "AUTO_LOCAL_FIRST",
+          "description": null,
+          "first_class_source": null,
+          "mode_dependent": false,
+          "name": "PROTOCOL_SOURCE",
+          "override_allowed": true,
+          "ownership": "canonical_default"
+        },
+        {
+          "default_value": null,
+          "description": null,
+          "first_class_source": "governing_protocol_contract",
+          "mode_dependent": false,
+          "name": "PROTOCOL_REF",
+          "override_allowed": false,
+          "ownership": "mechanical"
+        },
+        {
+          "default_value": "AUTO_EXECUTE",
+          "description": null,
+          "first_class_source": null,
+          "mode_dependent": false,
+          "name": "EXECUTION_MODE",
+          "override_allowed": true,
+          "ownership": "canonical_default"
+        },
+        {
+          "default_value": "NONE",
+          "description": null,
+          "first_class_source": null,
+          "mode_dependent": false,
+          "name": "ADDITIONAL_CONSTRAINTS",
+          "override_allowed": true,
+          "ownership": "canonical_default"
+        }
+      ],
+      "mutation_class": "none",
+      "optionality": "conditional",
+      "recognized_outcomes": [
+        "pass",
+        "no_pass"
+      ],
+      "role_owner": "software-design",
+      "stage": {
+        "profile_id": "sdp-protocol-5.16",
+        "protocol_version": "5.16.0",
+        "stage_key": "verification"
+      },
+      "title": "Verification",
+      "workplan_policy": "explicit_only"
+    },
+    {
+      "aliases": [],
+      "inputs": [
+        {
+          "default_value": null,
+          "description": null,
+          "first_class_source": null,
+          "mode_dependent": false,
+          "name": "STABILIZATION_SCOPE",
+          "override_allowed": true,
+          "ownership": "required_user"
+        },
+        {
+          "default_value": null,
+          "description": null,
+          "first_class_source": "observation",
+          "mode_dependent": true,
+          "name": "IMPLEMENTATION_TARGET",
+          "override_allowed": false,
+          "ownership": "mechanical"
+        },
+        {
+          "default_value": "AUTO",
+          "description": null,
+          "first_class_source": null,
+          "mode_dependent": false,
+          "name": "GOVERNING_AUTHORITY",
+          "override_allowed": true,
+          "ownership": "canonical_default"
+        },
+        {
+          "default_value": "AUTO_LOCAL_FIRST",
+          "description": null,
+          "first_class_source": null,
+          "mode_dependent": false,
+          "name": "PROTOCOL_SOURCE",
+          "override_allowed": true,
+          "ownership": "canonical_default"
+        },
+        {
+          "default_value": null,
+          "description": null,
+          "first_class_source": "governing_protocol_contract",
+          "mode_dependent": false,
+          "name": "PROTOCOL_REF",
+          "override_allowed": false,
+          "ownership": "mechanical"
+        },
+        {
+          "default_value": "AUTO_EXECUTE",
+          "description": null,
+          "first_class_source": null,
+          "mode_dependent": false,
+          "name": "EXECUTION_MODE",
+          "override_allowed": true,
+          "ownership": "canonical_default"
+        },
+        {
+          "default_value": "NONE",
+          "description": null,
+          "first_class_source": null,
+          "mode_dependent": false,
+          "name": "ADDITIONAL_CONSTRAINTS",
+          "override_allowed": true,
+          "ownership": "canonical_default"
+        }
+      ],
+      "mutation_class": "none",
+      "optionality": "conditional",
+      "recognized_outcomes": [
+        "stable",
+        "tier2_simplification",
+        "frozen_concern"
+      ],
+      "role_owner": "software-design",
+      "stage": {
+        "profile_id": "sdp-protocol-5.16",
+        "protocol_version": "5.16.0",
+        "stage_key": "stabilization"
+      },
+      "title": "Stabilization / Architecture GC",
+      "workplan_policy": "explicit_only"
+    },
+    {
+      "aliases": [],
+      "inputs": [
+        {
+          "default_value": null,
+          "description": null,
+          "first_class_source": "workplan_selector",
+          "mode_dependent": false,
+          "name": "DOWNSTREAM_WORKPLAN",
+          "override_allowed": false,
+          "ownership": "mechanical"
+        },
+        {
+          "default_value": null,
+          "description": null,
+          "first_class_source": null,
+          "mode_dependent": false,
+          "name": "UPSTREAM_ACCEPTED_WORK",
+          "override_allowed": true,
+          "ownership": "required_user"
+        },
+        {
+          "default_value": "AUTO",
+          "description": null,
+          "first_class_source": null,
+          "mode_dependent": false,
+          "name": "FROZEN_PARENT_AUTHORITY",
+          "override_allowed": true,
+          "ownership": "canonical_default"
+        },
+        {
+          "default_value": null,
+          "description": null,
+          "first_class_source": "observation",
+          "mode_dependent": true,
+          "name": "IMPLEMENTATION_TARGET",
+          "override_allowed": false,
+          "ownership": "mechanical"
+        },
+        {
+          "default_value": "AUTO_LOCAL_FIRST",
+          "description": null,
+          "first_class_source": null,
+          "mode_dependent": false,
+          "name": "PROTOCOL_SOURCE",
+          "override_allowed": true,
+          "ownership": "canonical_default"
+        },
+        {
+          "default_value": null,
+          "description": null,
+          "first_class_source": "governing_protocol_contract",
+          "mode_dependent": false,
+          "name": "PROTOCOL_REF",
+          "override_allowed": false,
+          "ownership": "mechanical"
+        },
+        {
+          "default_value": "AUTO_EXECUTE",
+          "description": null,
+          "first_class_source": null,
+          "mode_dependent": false,
+          "name": "EXECUTION_MODE",
+          "override_allowed": true,
+          "ownership": "canonical_default"
+        },
+        {
+          "default_value": "NONE",
+          "description": null,
+          "first_class_source": null,
+          "mode_dependent": false,
+          "name": "ADDITIONAL_CONSTRAINTS",
+          "override_allowed": true,
+          "ownership": "canonical_default"
+        }
+      ],
+      "mutation_class": "downstream_workplan",
+      "optionality": "conditional",
+      "recognized_outcomes": [
+        "pass",
+        "no_pass"
+      ],
+      "role_owner": "software-design",
+      "stage": {
+        "profile_id": "sdp-protocol-5.16",
+        "protocol_version": "5.16.0",
+        "stage_key": "alignment"
+      },
+      "title": "Alignment of a Downstream Workplan",
+      "workplan_policy": "explicit_required"
+    },
+    {
+      "aliases": [
+        "health_audit"
+      ],
+      "inputs": [
+        {
+          "default_value": null,
+          "description": null,
+          "first_class_source": null,
+          "mode_dependent": false,
+          "name": "AUDIT_SCOPE",
+          "override_allowed": true,
+          "ownership": "required_user"
+        },
+        {
+          "default_value": null,
+          "description": null,
+          "first_class_source": "observation",
+          "mode_dependent": true,
+          "name": "REPOSITORY_TARGET",
+          "override_allowed": false,
+          "ownership": "mechanical"
+        },
+        {
+          "default_value": "AUTO",
+          "description": null,
+          "first_class_source": null,
+          "mode_dependent": false,
+          "name": "HISTORY_WINDOW",
+          "override_allowed": true,
+          "ownership": "canonical_default"
+        },
+        {
+          "default_value": "AUTO",
+          "description": null,
+          "first_class_source": null,
+          "mode_dependent": false,
+          "name": "GOVERNING_ARCHITECTURE",
+          "override_allowed": true,
+          "ownership": "canonical_default"
+        },
+        {
+          "default_value": "AUTO_LOCAL_FIRST",
+          "description": null,
+          "first_class_source": null,
+          "mode_dependent": false,
+          "name": "PROTOCOL_SOURCE",
+          "override_allowed": true,
+          "ownership": "canonical_default"
+        },
+        {
+          "default_value": null,
+          "description": null,
+          "first_class_source": "governing_protocol_contract",
+          "mode_dependent": false,
+          "name": "PROTOCOL_REF",
+          "override_allowed": false,
+          "ownership": "mechanical"
+        },
+        {
+          "default_value": "NONE",
+          "description": null,
+          "first_class_source": null,
+          "mode_dependent": false,
+          "name": "EXCLUSIONS",
+          "override_allowed": true,
+          "ownership": "canonical_default"
+        },
+        {
+          "default_value": "AUTO_EXECUTE",
+          "description": null,
+          "first_class_source": null,
+          "mode_dependent": false,
+          "name": "EXECUTION_MODE",
+          "override_allowed": true,
+          "ownership": "canonical_default"
+        },
+        {
+          "default_value": "NONE",
+          "description": null,
+          "first_class_source": null,
+          "mode_dependent": false,
+          "name": "ADDITIONAL_CONSTRAINTS",
+          "override_allowed": true,
+          "ownership": "canonical_default"
+        }
+      ],
+      "mutation_class": "none",
+      "optionality": "periodic",
+      "recognized_outcomes": [
+        "healthy",
+        "watch",
+        "action_required"
+      ],
+      "role_owner": "software-maintenance-audit",
+      "stage": {
+        "profile_id": "sdp-protocol-5.16",
+        "protocol_version": "5.16.0",
+        "stage_key": "health-audit"
+      },
+      "title": "Health Audit",
+      "workplan_policy": "disallowed"
+    },
+    {
+      "aliases": [],
+      "inputs": [
+        {
+          "default_value": null,
+          "description": null,
+          "first_class_source": "workplan_selector_optional",
+          "mode_dependent": false,
+          "name": "COMPLETED_WORK",
+          "override_allowed": true,
+          "ownership": "required_user"
+        },
+        {
+          "default_value": null,
+          "description": null,
+          "first_class_source": "observation",
+          "mode_dependent": true,
+          "name": "IMPLEMENTATION_TARGET",
+          "override_allowed": false,
+          "ownership": "mechanical"
+        },
+        {
+          "default_value": "AUTO",
+          "description": null,
+          "first_class_source": null,
+          "mode_dependent": false,
+          "name": "AFFECTED_DOCUMENTATION",
+          "override_allowed": true,
+          "ownership": "canonical_default"
+        },
+        {
+          "default_value": "AUTO_LOCAL_FIRST",
+          "description": null,
+          "first_class_source": null,
+          "mode_dependent": false,
+          "name": "PROTOCOL_SOURCE",
+          "override_allowed": true,
+          "ownership": "canonical_default"
+        },
+        {
+          "default_value": null,
+          "description": null,
+          "first_class_source": "governing_protocol_contract",
+          "mode_dependent": false,
+          "name": "PROTOCOL_REF",
+          "override_allowed": false,
+          "ownership": "mechanical"
+        },
+        {
+          "default_value": "AUTO_EXECUTE",
+          "description": null,
+          "first_class_source": null,
+          "mode_dependent": false,
+          "name": "EXECUTION_MODE",
+          "override_allowed": true,
+          "ownership": "canonical_default"
+        },
+        {
+          "default_value": "NONE",
+          "description": null,
+          "first_class_source": null,
+          "mode_dependent": false,
+          "name": "ADDITIONAL_CONSTRAINTS",
+          "override_allowed": true,
+          "ownership": "canonical_default"
+        }
+      ],
+      "mutation_class": "documentation_and_lifecycle",
+      "optionality": "required",
+      "recognized_outcomes": [
+        "complete",
+        "blocked"
+      ],
+      "role_owner": "software-documentation,repository-hygiene",
+      "stage": {
+        "profile_id": "sdp-protocol-5.16",
+        "protocol_version": "5.16.0",
+        "stage_key": "closeout"
+      },
+      "title": "Closeout",
+      "workplan_policy": "explicit_only"
+    }
+  ],
+  "transitions": [
+    {
+      "explanation": "baseline evidence is carried into the following Design stage",
+      "from_stage": {
+        "profile_id": "sdp-protocol-5.16",
+        "protocol_version": "5.16.0",
+        "stage_key": "baseline"
+      },
+      "priority_hint": null,
+      "terminal": false,
+      "to_stage": {
+        "profile_id": "sdp-protocol-5.16",
+        "protocol_version": "5.16.0",
+        "stage_key": "design"
+      },
+      "trigger_key": "captured"
+    },
+    {
+      "explanation": "an accepted workplan is ready for Implementation",
+      "from_stage": {
+        "profile_id": "sdp-protocol-5.16",
+        "protocol_version": "5.16.0",
+        "stage_key": "design"
+      },
+      "priority_hint": null,
+      "terminal": false,
+      "to_stage": {
+        "profile_id": "sdp-protocol-5.16",
+        "protocol_version": "5.16.0",
+        "stage_key": "implementation"
+      },
+      "trigger_key": "pass"
+    },
+    {
+      "explanation": "a workplan that is not snapshot-complete stays in Design",
+      "from_stage": {
+        "profile_id": "sdp-protocol-5.16",
+        "protocol_version": "5.16.0",
+        "stage_key": "design"
+      },
+      "priority_hint": null,
+      "terminal": false,
+      "to_stage": {
+        "profile_id": "sdp-protocol-5.16",
+        "protocol_version": "5.16.0",
+        "stage_key": "design"
+      },
+      "trigger_key": "no_pass"
+    },
+    {
+      "explanation": "an assembled candidate is reviewed",
+      "from_stage": {
+        "profile_id": "sdp-protocol-5.16",
+        "protocol_version": "5.16.0",
+        "stage_key": "implementation"
+      },
+      "priority_hint": null,
+      "terminal": false,
+      "to_stage": {
+        "profile_id": "sdp-protocol-5.16",
+        "protocol_version": "5.16.0",
+        "stage_key": "review"
+      },
+      "trigger_key": "complete"
+    },
+    {
+      "explanation": "a bounded implementation blocker stays with the owning Implementation surface",
+      "from_stage": {
+        "profile_id": "sdp-protocol-5.16",
+        "protocol_version": "5.16.0",
+        "stage_key": "implementation"
+      },
+      "priority_hint": null,
+      "terminal": false,
+      "to_stage": {
+        "profile_id": "sdp-protocol-5.16",
+        "protocol_version": "5.16.0",
+        "stage_key": "implementation"
+      },
+      "trigger_key": "blocked"
+    },
+    {
+      "explanation": "a blocker that invalidates the implementation contract routes the affected design surface back to Design",
+      "from_stage": {
+        "profile_id": "sdp-protocol-5.16",
+        "protocol_version": "5.16.0",
+        "stage_key": "implementation"
+      },
+      "priority_hint": null,
+      "terminal": false,
+      "to_stage": {
+        "profile_id": "sdp-protocol-5.16",
+        "protocol_version": "5.16.0",
+        "stage_key": "design"
+      },
+      "trigger_key": "blocked"
+    },
+    {
+      "explanation": "Review blockers are repaired by Implementation",
+      "from_stage": {
+        "profile_id": "sdp-protocol-5.16",
+        "protocol_version": "5.16.0",
+        "stage_key": "review"
+      },
+      "priority_hint": null,
+      "terminal": false,
+      "to_stage": {
+        "profile_id": "sdp-protocol-5.16",
+        "protocol_version": "5.16.0",
+        "stage_key": "implementation"
+      },
+      "trigger_key": "no_pass"
+    },
+    {
+      "explanation": "a Review finding that invalidates the accepted contract routes to Design",
+      "from_stage": {
+        "profile_id": "sdp-protocol-5.16",
+        "protocol_version": "5.16.0",
+        "stage_key": "review"
+      },
+      "priority_hint": null,
+      "terminal": false,
+      "to_stage": {
+        "profile_id": "sdp-protocol-5.16",
+        "protocol_version": "5.16.0",
+        "stage_key": "design"
+      },
+      "trigger_key": "no_pass"
+    },
+    {
+      "explanation": "Verification when scientific/architectural/high-risk claims warrant it",
+      "from_stage": {
+        "profile_id": "sdp-protocol-5.16",
+        "protocol_version": "5.16.0",
+        "stage_key": "review"
+      },
+      "priority_hint": null,
+      "terminal": false,
+      "to_stage": {
+        "profile_id": "sdp-protocol-5.16",
+        "protocol_version": "5.16.0",
+        "stage_key": "verification"
+      },
+      "trigger_key": "pass"
+    },
+    {
+      "explanation": "Stabilization at substantial milestone boundaries",
+      "from_stage": {
+        "profile_id": "sdp-protocol-5.16",
+        "protocol_version": "5.16.0",
+        "stage_key": "review"
+      },
+      "priority_hint": null,
+      "terminal": false,
+      "to_stage": {
+        "profile_id": "sdp-protocol-5.16",
+        "protocol_version": "5.16.0",
+        "stage_key": "stabilization"
+      },
+      "trigger_key": "pass"
+    },
+    {
+      "explanation": "Closeout when no further stage is warranted",
+      "from_stage": {
+        "profile_id": "sdp-protocol-5.16",
+        "protocol_version": "5.16.0",
+        "stage_key": "review"
+      },
+      "priority_hint": null,
+      "terminal": false,
+      "to_stage": {
+        "profile_id": "sdp-protocol-5.16",
+        "protocol_version": "5.16.0",
+        "stage_key": "closeout"
+      },
+      "trigger_key": "pass"
+    },
+    {
+      "explanation": "Verification blockers route to the owning Implementation path",
+      "from_stage": {
+        "profile_id": "sdp-protocol-5.16",
+        "protocol_version": "5.16.0",
+        "stage_key": "verification"
+      },
+      "priority_hint": null,
+      "terminal": false,
+      "to_stage": {
+        "profile_id": "sdp-protocol-5.16",
+        "protocol_version": "5.16.0",
+        "stage_key": "implementation"
+      },
+      "trigger_key": "no_pass"
+    },
+    {
+      "explanation": "Verification blockers route to the owning Design path",
+      "from_stage": {
+        "profile_id": "sdp-protocol-5.16",
+        "protocol_version": "5.16.0",
+        "stage_key": "verification"
+      },
+      "priority_hint": null,
+      "terminal": false,
+      "to_stage": {
+        "profile_id": "sdp-protocol-5.16",
+        "protocol_version": "5.16.0",
+        "stage_key": "design"
+      },
+      "trigger_key": "no_pass"
+    },
+    {
+      "explanation": "Stabilization at substantial milestone boundaries",
+      "from_stage": {
+        "profile_id": "sdp-protocol-5.16",
+        "protocol_version": "5.16.0",
+        "stage_key": "verification"
+      },
+      "priority_hint": null,
+      "terminal": false,
+      "to_stage": {
+        "profile_id": "sdp-protocol-5.16",
+        "protocol_version": "5.16.0",
+        "stage_key": "stabilization"
+      },
+      "trigger_key": "pass"
+    },
+    {
+      "explanation": "Closeout when no further stage is warranted",
+      "from_stage": {
+        "profile_id": "sdp-protocol-5.16",
+        "protocol_version": "5.16.0",
+        "stage_key": "verification"
+      },
+      "priority_hint": null,
+      "terminal": false,
+      "to_stage": {
+        "profile_id": "sdp-protocol-5.16",
+        "protocol_version": "5.16.0",
+        "stage_key": "closeout"
+      },
+      "trigger_key": "pass"
+    },
+    {
+      "explanation": "a stable scope is ready for Closeout",
+      "from_stage": {
+        "profile_id": "sdp-protocol-5.16",
+        "protocol_version": "5.16.0",
+        "stage_key": "stabilization"
+      },
+      "priority_hint": null,
+      "terminal": false,
+      "to_stage": {
+        "profile_id": "sdp-protocol-5.16",
+        "protocol_version": "5.16.0",
+        "stage_key": "closeout"
+      },
+      "trigger_key": "stable"
+    },
+    {
+      "explanation": "Tier-2 simplification routes through a bounded workplan",
+      "from_stage": {
+        "profile_id": "sdp-protocol-5.16",
+        "protocol_version": "5.16.0",
+        "stage_key": "stabilization"
+      },
+      "priority_hint": null,
+      "terminal": false,
+      "to_stage": {
+        "profile_id": "sdp-protocol-5.16",
+        "protocol_version": "5.16.0",
+        "stage_key": "design"
+      },
+      "trigger_key": "tier2_simplification"
+    },
+    {
+      "explanation": "Tier-2 simplification under sufficient existing authority",
+      "from_stage": {
+        "profile_id": "sdp-protocol-5.16",
+        "protocol_version": "5.16.0",
+        "stage_key": "stabilization"
+      },
+      "priority_hint": null,
+      "terminal": false,
+      "to_stage": {
+        "profile_id": "sdp-protocol-5.16",
+        "protocol_version": "5.16.0",
+        "stage_key": "implementation"
+      },
+      "trigger_key": "tier2_simplification"
+    },
+    {
+      "explanation": "a Frozen-architecture concern reopens only the affected Design surface",
+      "from_stage": {
+        "profile_id": "sdp-protocol-5.16",
+        "protocol_version": "5.16.0",
+        "stage_key": "stabilization"
+      },
+      "priority_hint": null,
+      "terminal": false,
+      "to_stage": {
+        "profile_id": "sdp-protocol-5.16",
+        "protocol_version": "5.16.0",
+        "stage_key": "design"
+      },
+      "trigger_key": "frozen_concern"
+    },
+    {
+      "explanation": "a realigned downstream workplan is ready for Implementation",
+      "from_stage": {
+        "profile_id": "sdp-protocol-5.16",
+        "protocol_version": "5.16.0",
+        "stage_key": "alignment"
+      },
+      "priority_hint": null,
+      "terminal": false,
+      "to_stage": {
+        "profile_id": "sdp-protocol-5.16",
+        "protocol_version": "5.16.0",
+        "stage_key": "implementation"
+      },
+      "trigger_key": "pass"
+    },
+    {
+      "explanation": "an incomplete realignment stays in Alignment",
+      "from_stage": {
+        "profile_id": "sdp-protocol-5.16",
+        "protocol_version": "5.16.0",
+        "stage_key": "alignment"
+      },
+      "priority_hint": null,
+      "terminal": false,
+      "to_stage": {
+        "profile_id": "sdp-protocol-5.16",
+        "protocol_version": "5.16.0",
+        "stage_key": "alignment"
+      },
+      "trigger_key": "no_pass"
+    },
+    {
+      "explanation": "a realignment finding that invalidates the downstream contract routes to Design",
+      "from_stage": {
+        "profile_id": "sdp-protocol-5.16",
+        "protocol_version": "5.16.0",
+        "stage_key": "alignment"
+      },
+      "priority_hint": null,
+      "terminal": false,
+      "to_stage": {
+        "profile_id": "sdp-protocol-5.16",
+        "protocol_version": "5.16.0",
+        "stage_key": "design"
+      },
+      "trigger_key": "no_pass"
+    },
+    {
+      "explanation": "no action is required",
+      "from_stage": {
+        "profile_id": "sdp-protocol-5.16",
+        "protocol_version": "5.16.0",
+        "stage_key": "health-audit"
+      },
+      "priority_hint": null,
+      "terminal": true,
+      "to_stage": null,
+      "trigger_key": "healthy"
+    },
+    {
+      "explanation": "findings are retained as watch items",
+      "from_stage": {
+        "profile_id": "sdp-protocol-5.16",
+        "protocol_version": "5.16.0",
+        "stage_key": "health-audit"
+      },
+      "priority_hint": null,
+      "terminal": true,
+      "to_stage": null,
+      "trigger_key": "watch"
+    },
+    {
+      "explanation": "substantial maintenance needs an accepted contract first",
+      "from_stage": {
+        "profile_id": "sdp-protocol-5.16",
+        "protocol_version": "5.16.0",
+        "stage_key": "health-audit"
+      },
+      "priority_hint": null,
+      "terminal": false,
+      "to_stage": {
+        "profile_id": "sdp-protocol-5.16",
+        "protocol_version": "5.16.0",
+        "stage_key": "design"
+      },
+      "trigger_key": "action_required"
+    },
+    {
+      "explanation": "local Tier-2 repair under already-sufficient authority",
+      "from_stage": {
+        "profile_id": "sdp-protocol-5.16",
+        "protocol_version": "5.16.0",
+        "stage_key": "health-audit"
+      },
+      "priority_hint": null,
+      "terminal": false,
+      "to_stage": {
+        "profile_id": "sdp-protocol-5.16",
+        "protocol_version": "5.16.0",
+        "stage_key": "implementation"
+      },
+      "trigger_key": "action_required"
+    },
+    {
+      "explanation": "the lifecycle scope is closed",
+      "from_stage": {
+        "profile_id": "sdp-protocol-5.16",
+        "protocol_version": "5.16.0",
+        "stage_key": "closeout"
+      },
+      "priority_hint": null,
+      "terminal": true,
+      "to_stage": null,
+      "trigger_key": "complete"
+    },
+    {
+      "explanation": "a closeout blocker owned by the accepted implementation routes to Implementation",
+      "from_stage": {
+        "profile_id": "sdp-protocol-5.16",
+        "protocol_version": "5.16.0",
+        "stage_key": "closeout"
+      },
+      "priority_hint": null,
+      "terminal": false,
+      "to_stage": {
+        "profile_id": "sdp-protocol-5.16",
+        "protocol_version": "5.16.0",
+        "stage_key": "implementation"
+      },
+      "trigger_key": "blocked"
+    },
+    {
+      "explanation": "a closeout blocker that reopens the contract routes to Design",
+      "from_stage": {
+        "profile_id": "sdp-protocol-5.16",
+        "protocol_version": "5.16.0",
+        "stage_key": "closeout"
+      },
+      "priority_hint": null,
+      "terminal": false,
+      "to_stage": {
+        "profile_id": "sdp-protocol-5.16",
+        "protocol_version": "5.16.0",
+        "stage_key": "design"
+      },
+      "trigger_key": "blocked"
+    }
+  ]
+}

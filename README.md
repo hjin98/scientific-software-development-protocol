@@ -81,4 +81,14 @@ python source/check_dist.py --expected /tmp/protocol-dist --committed dist
 git diff --check
 ```
 
+When the SDP Orchestrator under `orchestrator/` is affected, also run its acceptance suite:
+
+```bash
+python3 -m pip install ./orchestrator -r orchestrator/requirements-dev.txt
+python orchestrator/scripts/generate_protocol_snapshot.py --check
+python orchestrator/scripts/run_core_tests.py
+```
+
+All orchestrator implementation, test, fixture, script, and documentation files live under `orchestrator/`; repository-level CI invokes those commands but hosts no orchestrator logic. See `orchestrator/docs/core-user-guide.md`.
+
 These Python commands are repository-local Tier-2 validation machinery, not language-specific protocol doctrine.

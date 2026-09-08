@@ -1,0 +1,37 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "sdp-orchestrator-core"
+version = "0.1.0"
+description = "Software Development Protocol orchestrator: prompt module and core program"
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "MIT" }
+authors = [{ name = "SDP Orchestrator" }]
+dependencies = [
+    "platformdirs>=4.0",
+    "typer>=0.12",
+    "pydantic>=2.6",
+    "python-frontmatter>=1.1",
+    "packaging>=23.0",
+]
+
+[project.optional-dependencies]
+clipboard = ["pyperclip>=1.8"]
+
+[project.scripts]
+sdp = "sdp_orchestrator.core.cli:main"
+
+[tool.setuptools]
+package-dir = { "" = "src" }
+zip-safe = false
+
+[tool.setuptools.packages.find]
+where = ["src"]
+include = ["sdp_orchestrator.core*"]
+namespaces = true
+
+[tool.setuptools.package-data]
+"sdp_orchestrator.core" = ["resources/protocol/*/*.md", "resources/protocol/*/*.json"]
