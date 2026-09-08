@@ -280,6 +280,31 @@ Minimum final execution set:
 
 Record the exact candidate SHA and command/result summary after the final material edit. A required check that did not execute is not a pass.
 
+### 6.3 — Implementation evidence for D1-D2
+
+On 2026-09-08, Implementation corrected D1 and executed the final acceptance set against executable candidate `6793883509e43888ef37815c2c22448f904785ec` (`wp1-5`). The candidate contains only the prescribed installed-product fixture correction. Results:
+
+```text
+conda run -n mace python -m unittest -v orchestrator.tests.test_installed_product.InstalledProductTests.test_doctor_packaged_failure_does_not_fallback_to_configured_sources
+  1 test passed
+conda run -n mace python orchestrator/scripts/run_core_tests.py
+  360 tests passed across 11 modules and 11 workers; effective CPU allocation: 32
+conda run -n mace python -m unittest discover -s tests -v
+  172 tests passed
+conda run -n mace python orchestrator/scripts/generate_protocol_snapshot.py --check
+  packaged snapshot matches canonical source
+conda run -n mace python source/build_skills.py --output /tmp/protocol-dist
+  canonical Protocol skill bundles and ZIPs built
+conda run -n mace python source/validate_packages.py --dist /tmp/protocol-dist
+  all generated Protocol skill bundles and ZIPs structurally valid
+conda run -n mace python source/check_dist.py --expected /tmp/protocol-dist --committed dist
+  committed dist matches the fresh canonical build semantically
+git diff --check
+  passed
+```
+
+The Core suite exercised the installed wheel/sdist and zero-install launcher acceptance owner, with Hypothesis 6.167.1 active. It also covered the named C1, digest-identity, Git transport-helper, explicit-workplan precedence, duplicate-footer, extension/provider, public-record, remote-only doctor, privacy, and real Git/remote regressions. After these checks, only this non-executable evidence record was added; no executable candidate content changed.
+
 ## 7. Re-review gate
 
 Return WP-1 to independent Review only after D1-D2 close on one exact assembled candidate. Preserve the C1 closure and do not revisit previously closed architecture/layout/footer/extension/digest/Git families without new contradicting evidence.
