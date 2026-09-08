@@ -1,10 +1,4 @@
-"""Shared fixtures: real temporary Git repositories and workplan trees.
-
-Git tests use genuine repositories rather than a fake, because the invariant
-under test -- that observation never mutates the target -- is only meaningful
-against real Git behaviour (index refresh, remote-tracking refs, linked
-worktrees).
-"""
+"""Shared fixtures: real temporary Git repositories and version-bound prompt trees."""
 
 from __future__ import annotations
 
@@ -14,7 +8,13 @@ import textwrap
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-CANONICAL_PROMPTS = REPO_ROOT / "source/shared/references/development-workflow-prompts.md"
+# Existing Core v1 suites intentionally exercise the frozen Protocol 5.16
+# package.  Current Protocol 6 suites use CURRENT_CANONICAL_PROMPTS explicitly.
+CANONICAL_PROMPTS = (
+    REPO_ROOT
+    / "orchestrator/src/sdp_orchestrator/core/resources/protocol/sdp-protocol-5.16/prompts.md"
+)
+CURRENT_CANONICAL_PROMPTS = REPO_ROOT / "source/shared/references/development-workflow-prompts.md"
 
 _GIT_ENV = {
     **os.environ,
@@ -29,7 +29,7 @@ _GIT_ENV = {
 
 
 def git(root: Path, *args: str) -> str:
-    result = subprocess.run(  # noqa: S603
+    result = subprocess.run(
         ["git", "-C", str(root), *args],
         capture_output=True,
         text=True,
@@ -40,10 +40,8 @@ def git(root: Path, *args: str) -> str:
 
 
 def init_bare(root: Path, *, branch: str = "main") -> Path:
-    """A bare repository usable as a push target for a test remote."""
-
     root.mkdir(parents=True, exist_ok=True)
-    subprocess.run(  # noqa: S603
+    subprocess.run(
         ["git", "init", "--quiet", "--bare", f"--initial-branch={branch}", str(root)],
         check=True,
         capture_output=True,
@@ -54,7 +52,7 @@ def init_bare(root: Path, *, branch: str = "main") -> Path:
 
 def init_repo(root: Path, *, branch: str = "main") -> Path:
     root.mkdir(parents=True, exist_ok=True)
-    subprocess.run(  # noqa: S603
+    subprocess.run(
         ["git", "init", "--quiet", f"--initial-branch={branch}", str(root)],
         check=True,
         capture_output=True,
@@ -112,6 +110,7 @@ def config_text(
     remote_name: str | None = None,
     core_prompt_mode: str | None = None,
     local_root: Path | None = None,
+    protocol_profile: str = "sdp-protocol-5.16",
     extra: str = "",
 ) -> str:
     lines = ["schema_version = 1", "", "[core]"]
@@ -119,18 +118,17 @@ def config_text(
         lines.append(f'default_project = "{default_project}"')
     if core_prompt_mode:
         lines.append(f'default_prompt_mode = "{core_prompt_mode}"')
-    lines += ["", f"[projects.{project}]", f'repo = "{repo}"', 'protocol_profile = "sdp-protocol-5.16"']
+    lines += ["", f"[projects.{project}]", f'repo = "{repo}"', f'protocol_profile = "{protocol_profile}"']
     if prompt_mode:
         lines.append(f'default_prompt_mode = "{prompt_mode}"')
     if remote_name:
         lines.append(f'remote_name = "{remote_name}"')
-    lines += ["", '[protocol_sources."sdp-protocol-5.16"]']
+    lines += ["", f'[protocol_sources."{protocol_profile}"]']
     if local_root:
         lines.append(f'local_root = "{local_root}"')
     else:
         lines.append("allow_remote = false")
-    text = "\n".join(lines) + "\n"
-    return text + textwrap.dedent(extra)
+    return "\n".join(lines) + "\n" + textwrap.dedent(extra)
 
 
 def write_config(path: Path, **kwargs: object) -> Path:
