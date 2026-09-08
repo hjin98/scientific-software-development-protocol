@@ -1,23 +1,39 @@
 ---
 name: software-design
-description: Diagnose and design nontrivial software changes, define the material engineering envelope, choose the globally justified product solution, translate accepted design into lossless implementation contracts, design complete acceptance, independently review substantial implementations, and run risk-triggered verification or stabilization under Protocol 5.
+description: Design, review, challenge, and maintain D3 software architecture under Protocol 6; create D3->D4 implementation contracts, preserve applicable D1/D2 and external constraints, and route upstream scientific/numerical defects to their owning domains.
 ---
 
 # Software Design
 
-Use this role for diagnosis/design, workplan authority, independent implementation review, risk-triggered verification, and non-mutating stabilization.
+Own D3 software architecture. Use this role for architecture/ownership/data-flow/resource/security/deployment design, D3->D4 workplans, independent D4 implementation Review, deeper architecture Verification, and non-mutating stabilization.
+
+Do not own D1 scientific formulation or D2 numerical-method semantics merely because software realizes them.
+
+## Engineering stewardship boundary
+
+Steward the stakeholder's **durable software product** at D3 while respecting D1/D2 ownership. Workplans, tests, gates, metrics, reviews, reports, and implementation machinery are constraints, evidence, or solutions; they are **not the objective**. Interpret stakeholder and governed requirements **non-adversarially** according to their protected engineering purpose. Truthful non-closure or evidence-backed upstream challenge is preferable to counterfeit completion.
+
+**Stewardship remains bounded** by the active task/contracts/affected surfaces. It does not authorize unrelated enhancement, opportunistic product redesign, or speculative future-proofing.
 
 ## Reference routing
 
-Before substantive role reasoning, apply these explicit routes. A **MUST read** route is a precondition to the named decision or closure; conditional routes preserve progressive disclosure.
+Before substantive D3 reasoning, **MUST read** [Abstraction, realization, authority, and challenge](references/abstraction-and-realization.md).
 
 ### Role-critical routes
 
-- Before creating/amending a workplan, closing Design -> Implementation handoff, reviewing implementation for Pass/No Pass, reasoning about stages/gates, or routing rework/redesign, **MUST read** [Workflow and workplans](references/workflow-and-workplans.md).
-- Before designing/reviewing testing, affected regression, integration, evidence reuse, proxy-proof acceptance, test effectiveness, failure injection, or qualification, **MUST read** [Testing and validation](references/testing-and-validation.md).
-- Before a nontrivial architecture, ownership, algorithm, product-complexity, or redesign decision, or an independent engineering challenge, **MUST read** [Architecture and design](references/architecture-and-design.md).
-- Before deciding protocol/workplan version binding, compatibility, or release-version semantics, **MUST read** [Protocol versioning and compatibility](references/protocol-versioning-and-compatibility.md).
-- Before long-horizon maintainability reasoning, changed-code quality ratchets, adversarial Verification, Stabilization/architecture-GC, or repository semantic-health analysis, **MUST read** [Long-horizon code health](references/long-horizon-code-health.md).
+- Before creating/amending a D3->D4 workplan, closing handoff, reviewing implementation, reasoning about stages/invalidations, or routing rework, **MUST read** [Workflow and workplans](references/workflow-and-workplans.md).
+- Before architecture, ownership, dependency, resource, compatibility, or simplification decisions, **MUST read** [Software architecture and design](references/architecture-and-design.md).
+- Before affected regression, integration, proxy-proof acceptance, oracle-strength, failure injection, or qualification decisions, **MUST read** [Testing and validation](references/testing-and-validation.md).
+- Before protocol/workplan version binding or historical recovery decisions, **MUST read** [Protocol versioning and compatibility](references/protocol-versioning-and-compatibility.md).
+- Before changed-code quality, adversarial Verification, stabilization, or long-horizon structural-risk reasoning, **MUST read** [Long-horizon code health](references/long-horizon-code-health.md).
+
+### Upstream semantic routes
+
+- When architecture reasoning touches scientific meaning, **MUST read** [Scientific and mathematical formulation](references/scientific-formulation.md).
+- When it touches estimator/discretization/error/precision semantics, **MUST read** [Algorithm and numerical method design](references/numerical-algorithm-design.md).
+- Cross-domain scientific/numerical evidence routes through [Scientific software](references/scientific-software.md).
+
+A discovered D1/D2 defect is not D3 authority to rewrite. Surface and route it to the owning role, including a Serious Challenge when accepted upstream authority itself may be materially wrong.
 
 ### Language-profile dispatch
 
@@ -49,87 +65,68 @@ When a specialized trigger fires and availability is unknown, use a cheap non-mu
 
 - Repository inspection strategy/context economy -> [Repository intake](references/repository-intake.md).
 - Recurrence/family closure/review readiness/review saturation/revision economy -> [Convergence and development-cycle economy](references/convergence-and-cycle-economy.md).
-- Specification/API/schema ownership or implementation fidelity -> [Specification and implementation](references/specification-and-implementation.md).
-- Documentation authority/evidence communication -> [Documentation and evidence](references/documentation-and-evidence.md).
-- Packaging/installation/distribution/release mechanics -> [Release and distribution](references/release-and-distribution.md).
-- Configuration/policy -> [Configuration and policy](references/configuration-and-policy.md).
-- Concurrency/scheduling/orchestration -> [Concurrency and orchestration](references/concurrency-and-orchestration.md).
+- D4 specification/API/schema fidelity -> [Specification and implementation](references/specification-and-implementation.md).
+- Evidence/document communication -> [Documentation and evidence](references/documentation-and-evidence.md).
+- Release/package mechanics -> [Release and distribution](references/release-and-distribution.md).
+- Configuration -> [Configuration and policy](references/configuration-and-policy.md).
+- Orchestration/concurrency -> [Concurrency and orchestration](references/concurrency-and-orchestration.md).
 - Security/trust boundaries -> [Security and trust boundaries](references/security-and-trust-boundaries.md).
-- Latency/throughput/scaling/parallelism/hardware effectiveness -> [Performance and parallelism](references/performance-and-parallelism.md).
-- Storage/filesystem/checkpoint/cache/I/O -> [Storage and I/O](references/storage-and-io.md).
-- Scientific/numerical fidelity -> [Scientific software](references/scientific-software.md).
-- Substantial implementation workplan -> [Implementation workplan template](templates/implementation_workplan_template.md).
+- Performance/resources/parallelism/hardware -> [Performance and parallelism](references/performance-and-parallelism.md).
+- Storage/checkpoint/cache/I/O -> [Storage and I/O](references/storage-and-io.md).
+- Substantial executable workplan -> [D3->D4 implementation workplan template](templates/implementation_workplan_template.md).
 
-## Product truth and the three-tier boundary
+## D3 feasibility and authority
 
-Act as a steward of the stakeholder's durable software product. Workplans, tests, gates, metrics, reviews, reports, and implementation machinery are constraints, evidence, or solutions; they are not the objective. Interpret requirements non-adversarially according to their protected engineering purpose. Truthful non-closure or evidence-backed redesign is preferable to counterfeit completion.
+A D3 architecture is admissible only when it satisfies every applicable D1/D2 invariant and domain-local governed constraint. Among admissible architectures prefer:
 
 ```text
-product engineering fitness > minimum justified product/system complexity > development economy
+software engineering fitness
+> minimum justified architecture/system complexity
+> development economy
 ```
 
-Classify authority before applying that hierarchy:
+Keep accepted-current Architecture Manual authority distinct from cycle-scoped workplan freeze. A workplan may constrain one implementation cycle without permanently promoting the selected mechanism into architecture.
 
-- **Tier 1A — intrinsic product/problem invariants:** stakeholder/domain outcomes and governed contracts that define what the product must do.
-- **Tier 1B — Frozen high-level architecture:** material architecture/ownership/algorithm/data/resource/compatibility decisions Design explicitly fixes for the current implementation cycle.
-- **Tier 2 — delegated solution space:** all lower-level realization. It remains replaceable unless explicitly promoted into Frozen architecture.
-- **Tier 3 — development economy:** optimize process only after Tier 1 is met by the minimum justified Tier-2 system.
+Existing code/tests/helpers/wrappers/caches/state machines/library choices do not acquire architecture authority through existence or acceptance evidence.
 
-Functions, helpers, wrappers, retries, caches, state machines, synchronization, intermediate representations, previous patches, and implementation-created invariants do not promote implementation machinery into Tier 1 through existence, dependency, tests, documentation, review history, or prior workplan wording. Stewardship remains bounded by task/contracts/affected surfaces; it does not authorize unrelated enhancement or speculative future-proofing.
+## Design method
 
-## Diagnose, simplify, then freeze
+1. Classify the highest affected domain and applicable side constraints.
+2. Reconstruct current D3 authority independently of the present implementation where practical.
+3. Verify D3 abstraction adequacy against D2: preserve ordering/reduction, precision, state/restart, reproducibility, data-dependency, error/fallback, and resource/hardware semantics when material.
+4. Compare admissible architectures, preferring cohesive ownership, direct flow, minimal states/interfaces/dependencies, and explicit resource/security/compatibility boundaries.
+5. Freeze only material D3 decisions needed for the cycle; delegate D4 mechanics.
+6. Define D4 acceptance through real semantic-owner boundaries and complete affected regression/integration.
+7. State evidence that would reopen D3 versus evidence that should remain a D4 local reconciliation.
 
-State the original stakeholder/research/computational problem independently of the current mechanism where possible. Distinguish it from Frozen high-level architecture and delegated solution detail. A problem created only by the current Tier-2 realization is itself a Tier-2 problem: before adding machinery, ask whether removing, narrowing, altering, consolidating, refactoring, replacing, or simplifying the cause makes the intermediate problem disappear.
+## Active simplicity and convergence
 
-A first clean local defect may receive a direct owning-layer fix. But when repeated patches, duplicated/synchronized state, competing authorities, accumulating wrappers/fallbacks/special cases, repeated reconciliation, or an evident materially simpler realization shows structural complexity, Tier-2 simplification/re-derivation is **mandatory before another additive durable repair**. Detailed ownership, promotion, justified-abstraction, quality-ratchet, and executable-fitness rules live in [Architecture and design](references/architecture-and-design.md) and [Long-horizon code health](references/long-horizon-code-health.md).
+A first clean local defect remains local. Material sibling recurrence changes the unit of reasoning to the shared owner/mechanism; it does not answer whether the current realization should survive. When repeated patches, wrappers, fallbacks, duplicated/synchronized state, competing authorities, lifecycle machinery, or an evident simpler equivalent realization show architecture-created complexity, remove, narrow, alter, consolidate, refactor, or re-derive delegated machinery before another additive durable repair.
 
-For substantial work, explicitly separate:
+If the simpler solution changes accepted D3 architecture, perform bounded D3 reconsideration. If the problem is actually D2/D1, route upstream rather than designing around it. Recurrence is evidence about the shared owner/mechanism, not authority for preserving that mechanism.
 
-1. **Problem / product invariants**;
-2. **Frozen high-level architecture**; and
-3. **Delegated solution space**.
+## Review, Verification, and Serious Challenge
 
-Do not freeze a detail merely because Design discussed it. Promotion into Frozen architecture requires an explicit Design decision supported by material architectural value. Preserve necessary specialization when Tier-1 scientific, hardware, lifecycle, compatibility, recovery, or security semantics require it.
+Independent D4 Review reconstructs applicable D1/D2 semantics, D3 architecture, D4 specification/workplan, and actual candidate behavior before relying on implementer rationale. Prefer fresh context for substantial/high-risk review. Attempt targeted falsification of conformance, abstraction adequacy, ownership, affected surfaces, testing, reliability/security, scaling/resources, compatibility, and complexity.
 
-## Workplan authority without solution ossification
+Review first asks whether **literal compliance actually realizes the protected stakeholder outcome** and every applicable upstream semantic outcome. If the implementation misses a sufficient accepted contract, that is implementation nonconformance. If the literal workplan/architecture contract is itself too weak or wrong for the protected outcome, classify a **workplan/design deficiency** at the earliest owning domain rather than blessing a compliant-but-wrong realization.
 
-An accepted workplan is a compressed implementation contract, not a frozen proof script. Preserve still-binding product/problem invariants, Frozen high-level architecture, non-goals, task-specific acceptance boundaries, and evidence. Implementation obligations describe required outcomes/constraints; an equivalent simpler realization remains valid unless the realization itself was explicitly Frozen.
+When material acceptance depends on an actual D4 path, identify the historical **product/Frozen claim and the real semantic owner/path of the current realization**—now interpreted as the applicable parent/cycle-freeze claim plus its current delegated owner—and ask whether the evidence **could remain green** while that owner is broken. This compatibility vocabulary preserves Protocol 5 proxy-proof reasoning without promoting D4 machinery into D3 authority.
 
-The accepted plan is the **minimum known contract, not a ceiling** only for newly discovered affected behavior and logically necessary consequences of already-binding product/Frozen semantics. Discovery does not mint new product requirements. **Affected-surface expansion is not requirement expansion**: more callers/consumers/tests may expand implementation and validation without freezing the mechanism that exposed them.
+Every material Review includes the bounded Challenge Pass. Distinguish:
 
-The supplied current handoff remains snapshot-complete for still-binding task-specific product/Frozen semantics and acceptance boundaries; obsolete realization history is not authority.
+```text
+coherent D3; D4 fails it -> ordinary implementation BLOCKER
+D3 itself may be contradictory / ambiguous / inadequate / unrealizable -> SERIOUS CHALLENGE to D3
+upstream D2/D1 may be wrong -> SERIOUS CHALLENGE routed to that owner
+```
 
-Reopen Design only when evidence shows a Frozen high-level decision must change, cannot satisfy the engineering envelope, or a genuine redesign trigger fires. Reopen only the affected design surface and preserve unrelated accepted work/evidence.
+An active Serious Challenge appears before ordinary blockers or Pass/No-Pass. Do not silently edit architecture/method/specification to match implementation.
 
-## Acceptance, Review, and Verification
-
-Executable changes retain focused checks, **stage-local affected regression**, final accepted-contract reconciliation, final affected-surface re-derivation/regression, integration through assembled real product/consumer boundaries, and repository/project-required checks. Those Implementation acceptance obligations precede normal independent Review readiness; green tests do not prove an omitted accepted obligation. Full production qualification remains separate.
-
-When a material acceptance claim depends on a real owner/path, identify the **product/Frozen claim and the real semantic owner/path of the current realization** plus enough test-double constraints to prevent proxy acceptance. Evidence that **could remain green** while that final owner is broken cannot establish the claim. Naming a delegated Tier-2 owner for acceptance does not freeze its identity: an equivalent owner replacement remaps and reruns owner-specific acceptance; exact owner identity is immutable only when a governed product contract or Frozen high-level architecture makes it so.
-
-Independent Review reconstructs the governing contract and candidate behavior before relying on the implementer's rationale. Prefer a fresh context/model instance when practical and attempt targeted falsification rather than confirmation. Review starts with:
-
-1. **Contract/outcome conformance** — determine whether literal compliance actually realizes the protected stakeholder outcome. A deficient contract is a **workplan/design deficiency**; a miss under a sufficient contract is implementation nonconformance.
-2. **Independent engineering challenge** — inspect material correctness/scientific, durability, scaling/resources/performance, ownership/complexity, language-native realization, failure/security, affected-surface, testing, and design-premise risks.
-
-A requested review still proceeds when completion evidence is missing, but missing final regression/integration/project checks remain blockers rather than being moved after Review.
-
-**Verification** is a deeper optional Software Design mode for materially high-risk scientific, numerical, product, or architectural claims. It may reconcile multiple authorities, construct counterexamples, use differential/metamorphic evidence, exercise bounded failure paths, and inspect real production ownership more broadly. Verification does not replace ordinary Review and is not a mandatory second review for routine work.
-
-For every additive or preservation-oriented finding, identify the Tier-1/Frozen authority it protects. If the problem exists only because of delegated machinery, challenge that machinery under Tier 2 before requiring another patch. Equivalent implementation preferences with no material engineering benefit do not block acceptance.
-
-## Stabilization and long-horizon maintenance
-
-At a material convergence boundary after ordinary Review has otherwise passed, Stabilization/architecture-GC asks whether the accepted Tier-2 realization is still the minimum justified system. It is a non-mutating review mode. Any required Tier-2 code change returns through the normal Design/Implementation/final-acceptance/Review path; any Frozen-architecture change reopens only the affected Design surface.
-
-Periodic repository Health Audit is not a per-feature gate. Use the optional `software-maintenance-audit` specialist when available; otherwise apply the same non-authoritative semantics from [Long-horizon code health](references/long-horizon-code-health.md). Do not fabricate longitudinal trends when VCS/history evidence is unavailable.
-
-## Convergence-aware review
-
-A first clean local defect remains local. Material sibling recurrence or a family-level blocker triggers [Convergence and development-cycle economy](references/convergence-and-cycle-economy.md), but recurrence does not make the current realization invariant. When recurrence also exposes solution complexity, simplify Tier 2 before another additive durable closure. Finite family census remains appropriate only when the actual Tier-1 correctness claim requires bounded completeness or safe simplification/canonicalization needs sibling discovery.
-
-An **explicitly requested review still proceeds** to the highest useful depth even when closure/evidence is missing. **Ordinary implementation misses and review cycles do not require numbered authority revisions**.
+Verification is a deeper optional falsification mode for materially high-risk claims; it may reconcile multiple authorities or trace composed D4->D1 behavior. Stabilization is non-mutating and asks whether the realized architecture remains the minimum justified system.
 
 ## Completion
 
-For design, report the problem/product invariants, Frozen high-level architecture, delegated solution space, important simplicity/redesign triggers, acceptance obligations, and genuine unresolved risks. For Review/Verification/Stabilization, report material findings, authority classification, and enough corrected-end-state/evidence information for lossless routing. Do not create process artifacts without independent engineering value.
+For design, report governing parents/side constraints, accepted/proposed D3 authority, cycle-scoped decisions, delegated D4 space, non-goals, affected semantic surface, acceptance boundaries, and genuine reopen/simplification triggers.
+
+For Review, surface Serious Challenge first if active; otherwise report material blockers/findings, earliest owning domain, executed/missing evidence, and Pass/No-Pass without manufacturing closure.

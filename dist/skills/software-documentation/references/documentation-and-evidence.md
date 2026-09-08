@@ -1,52 +1,46 @@
 # Engineering Documentation and Evidence
 
-Documentation exists to make software understandable and usable. It must not become a second acceptance system.
+Documentation serves two different purposes: some documents are accepted semantic authority, while others explain, operate, publish, or evidence that authority. Do not conflate them.
 
-Documentation and evidence serve product truth. They must not be edited, selected, or presented to manufacture apparent completion when the underlying accepted product claim is false or unestablished.
+## Current semantic owners
 
-## Keep one owner for each contract
+Protocol 6 recognizes logical normative families:
 
-Use durable documents only where they own real information:
+- D1 Scientific Method Paper;
+- D2 Numerical & Algorithmic Method Paper;
+- D3 Architecture Manual;
+- D4 Specification (with code/executable as realization/evidence).
 
-- architecture: accepted current structure and ownership;
-- specification: accepted public/data/configuration/persistence/numerical behavior;
-- workplan: temporary design/implementation contract for substantial work;
-- history/release notes: user- or release-significant chronology;
-- user/API/runbook documentation: stable usage and operation;
-- methods/theory documentation: explanatory and pedagogical material, non-normative unless the project explicitly assigns otherwise.
+Each material current claim has one semantic owner, though a realization may be constrained by many applicable authorities. An authority-bearing file can also contain non-normative rationale/evidence/pedagogy; scoped ownership matters more than file-wide labels.
 
-Do not create separate qualification, verification, evidence-capsule, handoff, or provenance documents by default.
+Guides, runbooks, release notes, audit reports, benchmarks, test logs, workplans, and publication outputs are non-authoritative unless explicitly assigned a semantic scope. Workplans can carry proposed/cycle-scoped authority but do not silently supersede accepted-current domain documents.
 
-## Update only material documentation
+## Evidence does not become truth by packaging
 
-Update specifications when a governed contract changes. Update architecture when ownership/components/data flow or another durable architectural boundary changes. Update user/release/version information according to repository policy when the deliverable requires it.
+Tests, command output, benchmarks, CI, experiments, proofs, literature, and runtime observations are normally sufficient evidence in their native form. Summarize only metadata needed to interpret a material claim. Do not create evidence capsules, manifests, hashes, timestamps, or report schemas merely because they can be generated.
 
-Permanent current documentation describes the accepted present system. Do not turn architecture manuals, specifications, or guides into append-only development histories. When a substantial conceptual change supersedes an older explanation, rewrite and reorganize the affected current document coherently; move chronology to history/release notes rather than preserving layers of corrective prose.
+Never edit/select evidence to manufacture completion.
 
-A **current normative document** must be semantically complete for its scope within the supplied current artifact set: readers must not need Git history, superseded revisions, prior conversation/review discussion, or an unsupplied external resource to determine what is presently true. Current cross-document composition remains valid when the referenced authority is current, explicit, and supplied with the artifact set; this is not a single-file or duplicate-everything requirement. Chronology and superseded semantics belong in history/release notes or Git history as non-current authority.
+## Current authority must be reconstructable
 
-Do not edit permanent manuals merely to record gate progress, temporary debugging, benchmark attempts, or implementation chronology.
+A current normative artifact set must be semantically complete for its scope without hidden chat, unsupplied external resources, or superseded history. Explicit current cross-document composition is valid; this does not require copying every invariant into one file.
 
-Protocol 5.1 provides the optional `software-documentation` specialist for substantive reconciliation, editorial refactoring, theory/method explanation, user-oriented synthesis, and publication maintenance. The specialist fills the gap between AI-driven development and human interpretation; it is not a third lifecycle role or approval authority.
+Distinguish proposed, accepted current, challenged, stale dependent, superseded/historical, and release-pinned/publication states where ambiguity could affect governance.
 
-## Evidence
+## Documentation specialist boundary
 
-Usually the test output, command, benchmark result, CI result, or production run log already is the evidence. Summarize it rather than wrapping it in another artifact unless a durable record is genuinely useful.
+`software-documentation` is an editorial/publication/reconciliation specialist. It may improve structure, synthesize explanations, maintain guides, and regenerate derived outputs. It does not independently approve D1/D2/D3/D4 semantic mutations.
 
-Record only what is needed to interpret a material claim, such as source/candidate identity, relevant inputs/configuration/environment, observed result, threshold, and important limitations.
-
-Do not require hashes, timestamps, duplicated identities, evidence manifests, or report schemas merely because they can be generated.
+If documentation work discovers a semantic contradiction, route it to the owning authority rather than choosing the convenient side.
 
 ## Generated formats
 
-Prefer editable canonical source. Generate PDFs, packages, reports, or other derived artifacts only when the project actually ships or needs them.
+Prefer editable canonical source and regenerate derived Markdown/PDF/site/diagram/package outputs. Do not independently patch a generated descendant when its source exists. Mechanical source-chain checks can establish reproducibility/integrity; they cannot decide whether an equation, estimator, architecture, or specification is semantically correct.
 
-A derived document may have a source graph rather than one source file: for example chapter sources -> assembler -> canonical assembled Markdown -> PDF, or diagram source -> rendered figure -> Markdown -> PDF. Edit the highest authoritative source and regenerate descendants rather than patching a derived artifact independently.
+Generate/track derived formats only when the project actually ships or needs them.
 
-Generated build output should normally be reproducible rather than version-controlled unless exact generated bytes are themselves part of the product contract. Where generated documents are tracked, mechanical checks should verify only objective integrity of the affected source chain and should not become semantic approval machinery.
+## Cleanup and history
 
-## Cleanup
+Current documents describe the accepted present system coherently. Move chronology to history/release notes; preserve release-pinned publication truth. Remove obsolete duplicate current documents and stale generated artifacts when they no longer own information, subject to repository policy.
 
-Delete superseded task-local plans, failed experimental machinery, stale generated artifacts, and duplicate documents when they no longer own current information. Git history is normally sufficient chronology.
-
-Do not create an archive hierarchy solely to avoid deleting obsolete coordination files.
+Do not create an archive hierarchy solely to avoid deciding which artifact is current.

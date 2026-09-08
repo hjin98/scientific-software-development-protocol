@@ -1,25 +1,35 @@
 ---
 name: software-implementation
-description: Implement, refactor, test, benchmark, and validate accepted software designs under Protocol 5 with lossless requirement conformance, adaptive repository reconciliation, stage-local semantic plus functional closure, final affected-surface regression/integration, and robust delivery.
+description: Implement, refactor, test, package, and validate D4 software realizations under Protocol 6 while preserving applicable D1/D2/D3 authority, accepted D4 specification, affected-surface regression/integration, and upward challenge routing.
 ---
 
 # Software Implementation
 
-Implement the accepted product/problem requirements and Frozen high-level design as the globally best justified realization for the target environment.
+Own executable D4 realization. Implement the accepted D4 specification and D3 architecture while satisfying every applicable upstream D1/D2 semantic invariant and domain-local governed constraint.
+
+## Engineering stewardship boundary
+
+The stakeholder's **durable software product** and its accepted D1-D4 semantics are the objective. Workplans, tests, metrics, wrappers, helpers, current code, and implementation process are evidence or realization machinery; they are **not the objective**. Interpret accepted requirements according to their **protected engineering purpose**. Truthful non-closure is preferable to counterfeit completion, but continue self-correction while a **reasonable in-scope engineering path remains**.
 
 ## Reference routing
 
-Before substantive implementation reasoning, apply these explicit routes. A **MUST read** route is a precondition to the named decision or closure; conditional routes preserve progressive disclosure.
+Before substantive implementation, **MUST read** [Abstraction, realization, authority, and challenge](references/abstraction-and-realization.md).
 
 ### Role-critical routes
 
-- Before implementing from an accepted workplan, closing a material stage, performing local reconciliation, or routing a material redesign, **MUST read** [Workflow and workplans](references/workflow-and-workplans.md).
-- Before claiming executable stage/final acceptance or reasoning about affected regression, integration, evidence reuse, semantic-owner/test-double boundaries, or qualification, **MUST read** [Testing and validation](references/testing-and-validation.md).
-- Before a material ownership/refactor/architecture/algorithm/complexity/redesign decision, **MUST read** [Architecture and design](references/architecture-and-design.md).
-- Before deciding protocol/workplan version binding, compatibility, or release-version semantics, **MUST read** [Protocol versioning and compatibility](references/protocol-versioning-and-compatibility.md).
+- Before implementing from an accepted workplan, closing a material stage, performing local reconciliation, or routing parent invalidation, **MUST read** [Workflow and workplans](references/workflow-and-workplans.md).
+- Before executable acceptance, affected regression/integration, proxy-proof boundaries, evidence reuse, oracle strength, or qualification, **MUST read** [Testing and validation](references/testing-and-validation.md).
+- Before architecture/ownership/complexity/redesign decisions, **MUST read** [Software architecture and design](references/architecture-and-design.md).
+- Before protocol/workplan version binding or historical recovery decisions, **MUST read** [Protocol versioning and compatibility](references/protocol-versioning-and-compatibility.md).
+- Before changed-code quality, maintainability/test-effectiveness, recovery/failure-path, or structural-risk reasoning, **MUST read** [Long-horizon code health](references/long-horizon-code-health.md).
 
-- Before reasoning about changed-code quality ratchets, test-oracle strength, maintainability hotspots, architecture fitness, bounded failure injection, or long-horizon structural risk, **MUST read** [Long-horizon code health](references/long-horizon-code-health.md).
+### Upstream semantic routes
 
+- When implementation can alter scientific meaning, **MUST read** [Scientific and mathematical formulation](references/scientific-formulation.md).
+- When it can alter estimator/discretization/error/convergence/precision/stochastic semantics, **MUST read** [Algorithm and numerical method design](references/numerical-algorithm-design.md).
+- Cross-domain scientific evidence routes through [Scientific software](references/scientific-software.md).
+
+Implementation evidence may challenge upstream authority but never silently redefine it.
 
 ### Language-profile dispatch
 
@@ -30,7 +40,7 @@ For material executable work, language semantics are part of the normal implemen
 - For materially affected C++ executable surfaces, **MUST read** [C++ engineering](references/cpp-engineering.md).
 - Mixed Python/C++ boundaries **MUST read both** language profiles and apply the router's boundary rules. Tiny literal/text/config-only work may remain on shared doctrine when language semantics cannot alter the decision.
 
-Shared owners outrank language profiles. Implement idiomatically for the active language/runtime while preserving the accepted product/Frozen contract and minimum justified total complexity.
+Shared owners outrank language profiles. Implement idiomatically for the active language/runtime while preserving the accepted parent contract and minimum justified total complexity.
 
 ### Per-question tool dispatch
 
@@ -43,109 +53,107 @@ Classify each material engineering question by the relation under the claim, not
 - broad/combinatorial non-Python input/state invariants -> use the language-appropriate property/generative route in [Tool-assisted engineering](references/tool-assisted-engineering.md) plus the active language profile;
 - supported interprocedural flow/taint/source-to-sink relations -> **MUST read** [CodeQL](references/tool-codeql.md).
 
-Runtime-state/debugger, memory/lifetime/UB, race/synchronization, and performance/vectorization questions route through Tool-assisted engineering plus the active language profile rather than a fixed tool sequence. For overlaps/composition/common evidence limits, read [Tool-assisted engineering](references/tool-assisted-engineering.md).
+Runtime-state/debugger, memory/lifetime/UB, race/synchronization, and performance/vectorization questions route through [Tool-assisted engineering](references/tool-assisted-engineering.md) plus the active language profile rather than a fixed tool sequence. For overlaps/composition/common evidence limits, read [Tool-assisted engineering](references/tool-assisted-engineering.md).
 
 When a specialized trigger fires and availability is unknown, use a cheap non-mutating capability probe when practical. If the capability is available/current/supported and directly models the claim, presumptively use it; otherwise take a concrete fallback such as unsupported backend/language, unavailable tool surface, stale/unreliable analysis state that cannot economically be refreshed, model mismatch, disproportionate setup for a trivially bounded claim, or already-available evidence that establishes the same claim at least as reliably and more cheaply. Familiarity with built-in search/read/shell/test tools is not itself a fallback reason.
 
 ### Domain-conditional routes
 
-- Repository inspection strategy/context economy -> [Repository intake](references/repository-intake.md).
+- Repository intake/context economy -> [Repository intake](references/repository-intake.md).
 - Recurrence/family closure/review readiness/review saturation/revision economy -> [Convergence and development-cycle economy](references/convergence-and-cycle-economy.md).
 - Debugging/recovery/state reconstruction -> [Debugging and state recovery](references/debugging-and-state-recovery.md).
 - Specification/API/schema ownership or implementation fidelity -> [Specification and implementation](references/specification-and-implementation.md).
-- Documentation authority/evidence communication -> [Documentation and evidence](references/documentation-and-evidence.md).
-- Packaging/installation/distribution/release mechanics -> [Release and distribution](references/release-and-distribution.md).
-- Git/branches/commits/version-control operations -> [Git and version control](references/git-and-version-control.md).
-- Configuration/policy -> [Configuration and policy](references/configuration-and-policy.md).
-- Concurrency/scheduling/orchestration -> [Concurrency and orchestration](references/concurrency-and-orchestration.md).
+- Evidence/documentation -> [Documentation and evidence](references/documentation-and-evidence.md).
+- Packaging/release -> [Release and distribution](references/release-and-distribution.md).
+- Git/version control -> [Git and version control](references/git-and-version-control.md).
+- Configuration -> [Configuration and policy](references/configuration-and-policy.md).
+- Orchestration/concurrency -> [Concurrency and orchestration](references/concurrency-and-orchestration.md).
 - Security/trust boundaries -> [Security and trust boundaries](references/security-and-trust-boundaries.md).
-- Latency/throughput/scaling/parallelism/hardware effectiveness -> [Performance and parallelism](references/performance-and-parallelism.md).
-- Storage/filesystem/checkpoint/cache/I/O -> [Storage and I/O](references/storage-and-io.md).
-- Scientific/numerical fidelity -> [Scientific software](references/scientific-software.md).
+- Performance/resources/parallelism -> [Performance and parallelism](references/performance-and-parallelism.md).
+- Storage/checkpoint/cache/I/O -> [Storage and I/O](references/storage-and-io.md).
 
-## Product truth and solution authority
+## D4 authority and adaptive realization
 
-Act as a steward of the stakeholder's durable software product. The workplan, tests, gates, metrics, reviews, reports, and current implementation are evidence, constraints, or solution machinery; they are not the objective. Interpret requirements according to their **protected engineering purpose**.
+Separate:
 
-Never manufacture acceptance by weakening affected tests/specifications, hiding failures, bypassing required owners, or adding unjustified permissive fallbacks. If later evidence proves work unsound, **invalidate it and repair/retest**. **Truthful non-closure** is preferable to **counterfeit completion**, but is not permission to stop while a reasonable in-scope engineering path remains.
+1. applicable upstream accepted abstractions and external constraints;
+2. accepted D4 specification and cycle-scoped D3 decisions;
+3. delegated D4 realization.
 
-```text
-product engineering fitness > minimum justified product/system complexity > development economy
-```
-
-Intake three classes separately: **problem/product invariants**, **Frozen high-level architecture**, and **delegated solution space**. Existing helpers, wrappers, retries, caches, state machines, adapters, synchronization, intermediate invariants, and previous patches remain Tier 2 unless current authority explicitly freezes the high-level decision they embody. **Implementation history does not promote machinery into Tier 1** through dependency, tests, documentation, review, or previous repair.
-
-Consume the accepted current handoff as the complete task-specific authority for its scope. Unavailable history is not a normal source of requirements; a still-binding requirement that cannot be recovered from supplied authority is a **workplan/design deficiency**.
-
-## Adaptive realization and bounded redesign
-
-1. **Implementation realization** — local mechanics preserve product/Frozen semantics; proceed.
-2. **Local reconciliation** — an **equivalent local realization**, including deletion/consolidation/refactoring of expected Tier-2 machinery, preserves product/Frozen semantics; proceed.
-3. **Material redesign** — a Frozen high-level decision must change; stop dependent work and reopen Design on evidence.
-
-Redesign needs evidence such as irreconcilable ownership/contract conflict, inability to meet a requirement, **representative measurement invalidating a premise**, or a stated trigger. Reopen only the affected surface, preserve unrelated work/evidence, resume from the **earliest materially affected stage**, and **do not reopen unrelated design** merely because affected surface grows or another architecture exists.
-
-The accepted plan is the **minimum known contract, not a ceiling** only for **newly discovered affected behavior** and logically necessary consequences of existing product/Frozen authority. Discovery does not mint a new product requirement. **Affected-surface growth does not itself create a new product requirement or freeze the mechanism that caused the impact.**
-
-## Implement at the owning layer; actively restore simplicity
-
-Prefer direct control flow, one authoritative state, cohesive ownership, semantic reuse, consolidation, and deletion of obsolete paths. **Fix a clear local defect at the owning layer** rather than wrapping it.
-
-A problem caused only by the current realization is a Tier-2 problem. Before adding durable machinery, ask whether removing, narrowing, altering, consolidating, refactoring, or replacing the cause eliminates it.
-
-A clean first local defect remains lightweight. But repeated patches, patch-on-patch repair, wrappers/adapters/retries/fallbacks/special cases, duplicated/synchronized state, competing authorities, repeated reconciliation, or an evident materially simpler realization makes Tier-2 simplification/re-derivation **mandatory before another additive durable repair**.
-
-When triggered:
+Within the feasible set prefer:
 
 ```text
-recover Tier-1 product/problem invariants
--> recover Frozen high-level architecture
--> treat lower-level machinery as replaceable
--> remove / narrow / alter / consolidate / refactor where sufficient
--> add machinery only for a genuinely missing required capability
-   or when one canonical mechanism replaces broader existing complexity
+implementation fitness
+> minimum justified realization complexity
+> development economy
 ```
 
-This is not a line-count rule. New machinery is justified when Tier-1/Frozen requirements need a capability the simplified system cannot supply cleanly, or when it reduces total complexity by replacing broader machinery. Detailed criteria live in [Architecture and design](references/architecture-and-design.md).
+Code, tests, wrappers, caches, state machines, retries, helpers, previous patches, and current owner paths remain delegated unless governing authority explicitly requires them.
 
-For material Python/C++ code, this owning-layer rule includes language-native realization: do not preserve Python compensating machinery when C++ offers a simpler value/lifetime/runtime model, and do not reproduce low-level C++ machinery in Python when a high-level compiled/library path is simpler and sufficient. Performance complexity must earn its source/build/dependency/maintenance cost under the shared performance owner.
+A D4 Specification is intended concrete behavior; code is actual realization/evidence. When they disagree, do not automatically rewrite the specification to bless code. Repair implementation, or route a genuine contract/parent mutation through its owning authority.
 
-## Quality ratchet and long-horizon evidence
+## Adaptive realization, local reconciliation, and self-correction
 
-For substantial or structurally risky work, compare the materially touched subsystem against only the baseline evidence needed for the change. Existing debt does not excuse making touched code harder to reason about, more cyclic, more duplicated in authority, more weakly tested, or more dependent on special-case machinery unless product/Frozen authority requires the added complexity.
+An **equivalent local realization** that preserves governing parent semantics is **local reconciliation**, not redesign. It may remove, consolidate, refactor, or replace previously expected delegated machinery. Suggested realization is not automatically Frozen merely because earlier Design or a workplan named it.
 
-Treat complexity, coverage, mutation, duplication, churn, and similar metrics as sensors rather than product truth. When the material question is test effectiveness, changed-code protection, objective architecture dependency, hotspot risk, or failure/recovery behavior, route through [Long-horizon code health](references/long-horizon-code-health.md) and [Tool-assisted engineering](references/tool-assisted-engineering.md) instead of defaulting to a fixed analyzer pipeline.
+If **representative measurement invalidating a premise** of accepted D3/D2/D1 authority appears, stop dependent work and reopen only the affected authority surface at the **earliest materially affected stage/domain**. Do not reopen unrelated design merely because the affected surface is large.
 
-When persistence/restart/orchestration recovery is part of the claim, use deterministic bounded failure injection or equivalent controlled simulation when it materially strengthens evidence. Keep the real semantic owner executing and do not substitute resource-exhaustive chaos for a bounded failpoint that establishes the same behavior.
+If later evidence proves accepted implementation work unsound, **invalidate it and repair/retest**. Truthful non-closure is preferable to counterfeit completion, but continue while a reasonable in-scope engineering path remains.
 
+## Owning-layer repair and active simplification
 
-## Convergence trigger
+**Fix a clear local defect at the owning layer.** Before adding durable machinery, ask whether removing, narrowing, altering, consolidating, refactoring, or replacing the lower-level cause eliminates the problem.
 
-If materially equivalent sibling behavior recurs, a canonical mechanism has bypasses, or review identifies a family-level blocker, **MUST read** [Convergence and development-cycle economy](references/convergence-and-cycle-economy.md). Recurrence broadens reasoning to the shared owner/mechanism but does not make the current realization invariant. If recurrence also shows solution complexity, simplify Tier 2 before another equivalent additive repair. Use bounded family census when the actual Tier-1 claim is finite/exhaustive or safe simplification/canonicalization needs sibling discovery. Post-simplification recurrence or evidence that Frozen architecture is wrong routes to bounded Software Design reconsideration.
+A first clean local defect remains local. Material sibling recurrence changes reasoning to the shared owner/mechanism but does not make the current realization invariant. Repeated patch-on-patch repair, wrapper/fallback/special-case accumulation, duplicated/synchronized authority, repeated reconciliation, or an evident materially simpler equivalent realization makes simplification/re-derivation mandatory before another additive durable repair.
 
-**No recurrence/review count can force acceptance**; escalation changes engineering method, not the pass threshold.
+If correction requires changing accepted D3/D2/D1 semantics, stop dependent closure and route the earliest affected abstraction rather than constructing a compatibility wrapper around the contradiction.
 
-## Coherent stages and acceptance
+## Coherent implementation stages
 
-**A local coherent behavior change is normally one material implementation stage.** Several tightly coupled caller/helper/test edits **do not become separate stages merely because** they touch separate files/functions.
+A local coherent behavior change is normally one material implementation stage even if several files/helpers/tests change. Several tightly coupled caller/helper/test edits **do not become separate stages merely because** they touch separate files or functions unless they form an independent risk boundary.
 
-Each material stage closes semantically and functionally: accepted product/Frozen obligations remain satisfied, **newly discovered affected behavior** is accounted for, focused checks and relevant **stage-local affected regression** execute, and no unintended authority/stale path/unjustified complexity remains. Reuse still-valid intermediate evidence; green tests never prove an omitted obligation.
+Each material executable stage closes both:
 
-When acceptance depends on a production owner/state transition/consumer, the **real semantic owner/path of the final accepted realization that constitutes the claim must execute**. Evidence that **could remain green** while it is broken cannot close the claim. **Bounded test doubles remain valid below or outside** that boundary. A delegated Tier-2 owner named by earlier acceptance guidance may be replaced by an equivalent simpler owner when product/Frozen semantics survive; reconcile the acceptance mapping and invalidate/rerun owner-specific evidence against the new real owner. Do not treat that remapping as proxy-passing or Design reopening unless exact owner identity was itself product/Frozen authority. If a binding required boundary cannot execute, report **unavailable/blocking** rather than **silently proxy-passing** it.
+- semantic/conformance obligations assigned to that stage; and
+- focused checks plus the stage-local affected regression subset.
 
-For performance-sensitive work, distinguish implementation permission from performance evidence: an obvious semantically equivalent, low-complexity efficiency improvement need not wait for a pre-change benchmark, but quantitative speedup/scaling/resource claims require representative comparable measurement. Supported optimized/production build behavior must be exercised when build mode can change correctness; sanitizer/debug builds are complementary correctness evidence, not production-performance evidence.
+Do not defer all affected regression to the end merely because a later full suite exists. Reuse still-valid intermediate evidence until a changed dimension can plausibly invalidate it.
+
+## Proxy-proof D4 acceptance
+
+For a material claim identify the **real semantic owner/path of the final accepted realization**. Ask whether evidence **could remain green** while that actual owner is broken. **Bounded test doubles remain valid below or outside** the semantic owner, but may not replace the owner under acceptance.
+
+An equivalent delegated owner replacement is permitted when governing semantics survive; invalidate/remap owner-specific evidence and test the new real owner. Do not treat that remapping as proxy-passing or Design reopening merely because the owner identity changed.
+
+If the required real-owner boundary is unavailable, record it as **unavailable/blocking**. Do not declare success by **silently proxy-passing** the unavailable owner.
+
+## Final assembled acceptance
 
 Before completion:
 
-1. **Reconcile the complete accepted contract**; **silent omission is not an accepted state**.
-2. Inspect superseded machinery, ownership drift, fallbacks, and complexity; use **structural/source** or negative/absence evidence for removal/uniqueness claims.
-3. **Re-derive the complete affected behavioral surface**.
-4. Run the **complete affected-surface regression**, required **integration/end-to-end** paths, and repository/project-required checks; broaden when impact cannot be bounded.
+1. reconcile every accepted D4/D3/upstream obligation; **silent omission is not an accepted state**;
+2. inspect superseded machinery, duplicate authority, bypass/fallback paths, and material complexity drift;
+3. re-derive the complete affected behavioral and semantic surface, including newly discovered affected behavior governed by existing authority;
+4. run the complete affected-surface regression after all material executable edits;
+5. run real-boundary integration/end-to-end paths;
+6. run repository/project-required lint/type/build/package/checks;
+7. account for structural absence/uniqueness claims and unavailable/blocking required checks.
 
-Contract completeness and functional correctness are separate claims. Full **production qualification is separate**; a **production run never substitutes** for missing regression/integration.
+A required check that did not execute is not a pass. Green tests do not prove an omitted obligation. Production qualification remains separate from regression/integration.
+
+For high-risk scientific/numerical changes, final evidence may also need composed closure from executable observables through D2 error/equivalence semantics to D1 meaning and external adequacy.
+
+## Challenge duty
+
+Implementation is not epistemically compliant. If evidence indicates a governing abstraction may itself be materially false, contradictory, ambiguous, inadequate, or unrealizable, surface the Serious Challenge even before formal Review.
+
+```text
+parent coherent; child implementation wrong -> ordinary D4 blocker
+parent authority may be wrong -> Serious Challenge / human adjudication at earliest affected owner
+```
+
+Do not relax tolerance, add fallback/wrapper, rewrite tests/specification/method papers, or otherwise route around a serious parent contradiction.
 
 ## Completion
 
-Honor explicit resource limits, update durable documentation when its contract changed, and remove obsolete task-owned machinery when safe. Emergency/hotfix mitigation may temporarily bypass the restoring simplification pass only when urgency independently requires it; keep it bounded and explicitly temporary.
-
-Report material changes/reconciliations, checks actually executed, unavailable/blocking checks, and unresolved material risks. Do not emit empty protocol categories.
+Report material implementation/reconciliation, final semantic owner, checks actually executed, unavailable/blocking checks, upstream challenges, documentation/specification impact, and unresolved material risks. Do not emit empty protocol categories or claim Pass before assembled acceptance.
