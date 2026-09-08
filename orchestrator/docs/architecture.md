@@ -104,10 +104,9 @@ sdp-orchestrator-adapters
 sdp-orchestrator-scheduler
 ```
 
-The WP-1 delivery is one Python distribution with a finished Core-only mode. The
-future Tracker, Adapter, and Scheduler layers remain architectural dependency
-directions; they do not require separate WP-1 distributions or speculative
-runtime machinery.
+Installing a higher distribution installs required lower distributions. Core
+alone does not pull higher/ACP/DB-lock/benchmark/ML dependencies merely for
+future convenience.
 
 ## 4. Repository layout, Python packaging, and namespace
 
@@ -129,12 +128,20 @@ orchestrator/
 
 All of the above remain under `orchestrator/`. Existing Protocol source under `source/`, Protocol workplans under `workplans/`, and generated/install artifacts outside the repository are external authorities/integration outputs, not alternate orchestrator implementation locations. Repository-level `.github/...` or equivalent CI may invoke commands under `orchestrator/`, but reusable test/build/orchestration logic remains contained.
 
+The future Tracker, Adapters, and Scheduler physical package roots are deferred
+until those modules are implemented. Their API/SPI and distribution entries
+remain architectural commitments, not speculative WP-1 directories or runtime
+machinery.
+
 Use native PEP 420 namespace packaging. No distribution owns `sdp_orchestrator/__init__.py`.
 
 The WP-1 public Core surfaces are:
 
 ```text
 sdp_orchestrator.core.api.v1
+sdp_orchestrator.tracker.api.v1
+sdp_orchestrator.adapters.api.v1
+sdp_orchestrator.scheduler.api.v1
 ```
 
 Provider SPIs:

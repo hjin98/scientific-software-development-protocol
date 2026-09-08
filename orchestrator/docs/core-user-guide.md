@@ -13,17 +13,8 @@ and no scheduler, and it does not need them.
 
 ## 1. Install
 
-```bash
-pip install sdp-orchestrator-core          # Python 3.11+
-pip install "sdp-orchestrator-core[clipboard]"   # optional --copy support
-sdp doctor
-```
-
-`sdp doctor` reports readiness without importing extension code, touching the
-network, or modifying anything.
-
-For checkout development, the same CLI owner is available without installing
-this package:
+Checkout development does not require installing the package. The default
+zero-install path uses the same CLI owner from the current checkout:
 
 ```bash
 python3 orchestrator/sdp.py --help
@@ -33,6 +24,17 @@ python3 orchestrator/sdp.py implementation --config /path/to/config.toml --promp
 
 `orchestrator/sdp.py` only places the adjacent `src/` tree first and delegates
 to `sdp_orchestrator.core.cli:main`; it contains no command or product logic.
+
+For an installed console script, use Python 3.11+:
+
+```bash
+pip install sdp-orchestrator-core
+pip install "sdp-orchestrator-core[clipboard]"   # optional --copy support
+sdp doctor
+```
+
+`sdp doctor` reports readiness without importing extension code, touching the
+network, or modifying anything.
 
 ---
 
@@ -262,9 +264,11 @@ exactly one terminal, uniquely marked JSON footer**:
 SDP_STAGE_RESULT_V1>>>
 ```
 
-Extraction rule: the **last** line exactly equal to the begin marker starts the
-footer; the next line exactly equal to the end marker ends it, and only
-whitespace may follow that end marker. Ordinary prose may precede it, but
+Extraction rule: there must be exactly one line exactly equal to the begin
+marker and exactly one line exactly equal to the end marker. Any duplicate or
+extra exact begin/end marker invalidates extraction. The unique begin marker
+starts the footer; the next line exactly equal to the end marker ends it, and
+only whitespace may follow that end marker. Ordinary prose may precede it, but
 trailing prose or indented/near-match markers are not accepted. Unrecognized
 additional fields are permitted and ignored.
 
@@ -329,10 +333,16 @@ orchestrator/
 ## 11. Development
 
 ```bash
-python3 -m pip install -e orchestrator -r orchestrator/requirements-dev.txt
 python3 orchestrator/sdp.py --help                         # zero-install checkout path
 python3 orchestrator/scripts/run_core_tests.py             # parallel, sized to the machine
 python3 orchestrator/scripts/generate_protocol_snapshot.py --check
+```
+
+An editable installation is optional convenience when an installed `sdp`
+command is useful:
+
+```bash
+python3 -m pip install -e orchestrator -r orchestrator/requirements-dev.txt
 ```
 
 The packaged Protocol snapshot under

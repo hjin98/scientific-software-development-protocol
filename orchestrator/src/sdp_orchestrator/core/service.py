@@ -329,15 +329,26 @@ class CoreService:
             ProjectObservationRequest(project=request.project, policy=request.policy)
         )
 
-        # Stage identity requires a profile, and the governing profile may come
-        # from the selected workplan -- so resolve the project-default profile
-        # first only to interpret the selector, then rebind if the plan disagrees.
-        bootstrap = self._protocol_source(context.section.protocol_profile or P.PROFILE_ID)
+        # An explicit selector is already exact and profile-independent. Resolve
+        # its existing catalog metadata before loading the project-default
+        # profile, so a declared workplan Protocol contract gets precedence.
+        # W.resolve remains the sole owner of stage-policy/lifecycle validation
+        # and applies the same exact selection once the compatible profile
+        # supplies the profile-bound StageRef.
+        catalog = self._catalog(context)
+        explicit_workplan = (
+            W.lookup_exact(catalog, request.workplan_selector)
+            if request.workplan_selector
+            else None
+        )
+        bootstrap = self._protocol_source(
+            self._profile_id_for(context, explicit_workplan)
+        )
         stage_ref = P.resolve_stage_key(bootstrap.snapshot.descriptor, str(request.stage))
         stage_descriptor = P.stage_descriptor(bootstrap.snapshot.descriptor, stage_ref)
 
         resolution = W.resolve(
-            self._catalog(context),
+            catalog,
             stage=stage_ref,
             policy=stage_descriptor.workplan_policy,
             selector=request.workplan_selector,

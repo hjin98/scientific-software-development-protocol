@@ -378,7 +378,7 @@ def _normalize_relative(path_text: str) -> str:
 # --------------------------------------------------------------------------
 
 
-def _lookup_exact(catalog: tuple[CatalogEntry, ...], selector: str) -> WorkplanRef:
+def lookup_exact(catalog: tuple[CatalogEntry, ...], selector: str) -> WorkplanRef:
     """Resolve an exact workplan ID or exact repository-relative path."""
 
     by_path = [entry for entry in catalog if _is_canonical_relative_path(selector)
@@ -474,7 +474,7 @@ def resolve(
         )
 
     if selector:
-        selected = _lookup_exact(catalog, selector)
+        selected = lookup_exact(catalog, selector)
         if (
             policy in (WorkplanPolicy.REQUIRED, WorkplanPolicy.EXPLICIT_REQUIRED)
             and (

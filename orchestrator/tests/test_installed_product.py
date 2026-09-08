@@ -13,6 +13,7 @@ from __future__ import annotations
 
 import json
 import os
+import shlex
 import subprocess
 import sys
 import tarfile
@@ -377,6 +378,79 @@ class InstalledProductTests(unittest.TestCase):
         self.assertEqual(payload["activation_policy"], "discovery_only")
         self.assertEqual(payload["packaged_profile"]["protocol_version"], "5.16.0")
         self.assertEqual(len(payload["packaged_profile"]["stages"]), 9)
+
+    def test_doctor_packaged_failure_does_not_fallback_to_configured_sources(self) -> None:
+        """Doctor's packaged-only owner must stay passive even on failure."""
+
+        profile_location = _run(
+            [
+                str(self.venv_python),
+                "-c",
+                (
+                    "from pathlib import Path; import sdp_orchestrator.core as core; "
+                    "print(Path(core.__file__).parent / "
+                    "'resources/protocol/sdp-protocol-5.16/profile.json')"
+                ),
+            ]
+        )
+        self.assertEqual(profile_location.returncode, 0, profile_location.stderr)
+        profile = Path(profile_location.stdout.strip())
+        original_profile = profile.read_bytes()
+
+        fake_bin = self.case / "doctor-fake-bin"
+        fake_bin.mkdir()
+        marker = self.case / "doctor-remote-query-ran"
+        fake_git = fake_bin / "git"
+        fake_git.write_text(
+            "#!/bin/sh\n"
+            f"printf invoked > {shlex.quote(str(marker))}\n"
+            "exit 97\n",
+            encoding="utf-8",
+        )
+        fake_git.chmod(0o700)
+
+        source_config = self.case / "doctor-source-config.toml"
+        source_config.write_text(
+            "\n".join(
+                (
+                    "schema_version = 1",
+                    "",
+                    "[projects.demo]",
+                    f"repo = {json.dumps(str(self.repo))}",
+                    'protocol_profile = "sdp-protocol-5.16"',
+                    "",
+                    '[protocol_sources."sdp-protocol-5.16"]',
+                    f"local_root = {json.dumps(str(self.case / 'local-protocol'))}",
+                    "allow_remote = true",
+                    f"remote_repository = {json.dumps(str(self.case / 'remote-protocol'))}",
+                    'remote_ref = "main"',
+                )
+            )
+            + "\n",
+            encoding="utf-8",
+        )
+        env = dict(os.environ)
+        env.pop("PYTHONPATH", None)
+        env["PATH"] = str(fake_bin) + os.pathsep + env.get("PATH", "")
+        profile.write_text("{}\n", encoding="utf-8")
+        try:
+            result = subprocess.run(  # noqa: S603
+                [str(self.sdp), "doctor", "--config", str(source_config)],
+                capture_output=True,
+                text=True,
+                check=False,
+                cwd=str(self.case),
+                env=env,
+                timeout=BUILD_TIMEOUT,
+            )
+        finally:
+            profile.write_bytes(original_profile)
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        payload = json.loads(result.stdout)
+        self.assertIn("packaged_profile_problem", payload)
+        self.assertNotIn("packaged_profile", payload)
+        self.assertFalse(marker.exists(), "doctor must not query configured local/remote sources")
 
     def test_capabilities_defaults_to_discovery_only(self) -> None:
         result = self.sdp_run("capabilities", "--config", str(self.config))

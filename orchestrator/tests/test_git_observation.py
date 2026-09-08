@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import hashlib
 import os
+import shlex
 import sys
 import tempfile
 import unittest
@@ -113,6 +114,33 @@ class WorktreeIdentityTests(ObservationBase):
         self.assertNotIn("GIT_SSH", _git_env())
         self.assertNotIn("GIT_SSH_COMMAND", _git_env())
         self.assertNotIn("GIT_SSH_VARIANT", _git_env())
+
+    def test_git_executable_override_is_not_executed_by_remote_query(self) -> None:
+        """Exercise the real refresh path while an ambient helper is armed."""
+
+        marker = self.root / "ambient-ssh-helper-ran"
+        helper = self.root / "ambient-ssh-helper"
+        helper.write_text(
+            "#!/bin/sh\n"
+            f"printf invoked > {shlex.quote(str(marker))}\n"
+            "exit 0\n",
+            encoding="utf-8",
+        )
+        helper.chmod(0o700)
+        git(self.repo, "remote", "add", "origin", "ssh://127.0.0.1:1/unused.git")
+
+        with patch.dict(os.environ, {"GIT_SSH_COMMAND": str(helper)}, clear=False):
+            observed = observe(
+                identify_worktree(self.repo),
+                remote_mode=RemoteMode.REFRESH_REMOTE,
+                configured_remote_name=None,
+            )
+
+        self.assertFalse(marker.exists(), "the ambient Git SSH helper must not run")
+        self.assertTrue(
+            any("bounded remote query" in note for note in observed.diagnostics),
+            observed.diagnostics,
+        )
 
     def test_subprocess_stdout_and_stderr_are_bounded_during_collection(self) -> None:
         command = [sys.executable, "-c", "import sys; sys.stdout.write('x' * 100000)"]

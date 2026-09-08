@@ -198,6 +198,47 @@ class WorkplanOwnershipTests(SeamBase):
             self.prepare(self.core(), workplan_selector="NOVER")
         self.assertEqual(caught.exception.code, E.PROTOCOL_UNAVAILABLE)
 
+    def test_explicit_required_workplan_protocol_precedes_project_default(self) -> None:
+        self.config.write_text(
+            self.config.read_text(encoding="utf-8").replace(
+                'protocol_profile = "sdp-protocol-5.16"',
+                'protocol_profile = "sdp-protocol-9.9"',
+            ),
+            encoding="utf-8",
+        )
+        prepared = self.prepare(self.core(), workplan_selector="WP")
+        self.assertEqual(prepared.profile.protocol_version, "5.16.0")
+        self.assertEqual(prepared.workplan_resolution.workplan.workplan_id, "WP")
+
+    def test_explicit_optional_workplan_protocol_precedes_project_default(self) -> None:
+        write_workplan(
+            self.repo,
+            "workplans/active/OPTIONAL.md",
+            workplan_id="OPTIONAL",
+            target_branch="main",
+        )
+        commit_all(self.repo, "optional authority")
+        self.config.write_text(
+            self.config.read_text(encoding="utf-8").replace(
+                'protocol_profile = "sdp-protocol-5.16"',
+                'protocol_profile = "sdp-protocol-9.9"',
+            ),
+            encoding="utf-8",
+        )
+        prepared = self.prepare(
+            self.core(),
+            stage="verification",
+            workplan_selector="OPTIONAL",
+            input_overrides=(("VERIFICATION_SCOPE", "scope"),),
+        )
+        self.assertEqual(prepared.profile.protocol_version, "5.16.0")
+        self.assertEqual(prepared.workplan_resolution.workplan.workplan_id, "OPTIONAL")
+
+    def test_no_workplan_selector_uses_the_configured_profile(self) -> None:
+        prepared = self.prepare(self.core())
+        self.assertEqual(prepared.profile.profile_id, "sdp-protocol-5.16")
+        self.assertEqual(prepared.workplan_resolution.workplan.workplan_id, "WP")
+
     def test_governing_workplan_precedes_an_explicit_profile(self) -> None:
         core = self.core()
         old = next(

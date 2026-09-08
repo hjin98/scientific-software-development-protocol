@@ -19,6 +19,7 @@ from sdp_orchestrator.core.canonical import CANONICAL_STAGES
 from sdp_orchestrator.core.events import PROMPT_RENDERED_EVENT, logical_event_id
 from sdp_orchestrator.core.records import (
     ApplicationRequest,
+    DigestRef,
     EventEnvelope,
     ObservationPolicy,
     ProjectKey,
@@ -235,19 +236,110 @@ class FingerprintTests(RenderBase):
         self.assertNotEqual(base.preparation_fingerprint, again().preparation_fingerprint)
 
     def test_digest_metadata_is_part_of_preparation_identity(self) -> None:
+        """Every material DigestRef field is identity-bearing, not decoration."""
+
+        (self.repo / "digest-input.txt").write_text("dirty\n", encoding="utf-8")
         prepared = self.prepare("implementation")
-        name, digest = prepared.prompt_source.content_digests[0]
-        changed = digest.model_copy(update={"canonicalization_scheme": "other.scheme.v1"})
-        source = prepared.prompt_source.model_copy(
-            update={
-                "content_digests": ((name, changed),)
-                + prepared.prompt_source.content_digests[1:]
-            }
-        )
-        tampered = prepared.model_copy(update={"prompt_source": source})
-        self.assertNotEqual(
-            preparation_fingerprint(prepared), preparation_fingerprint(tampered)
-        )
+
+        def tamper(digest: DigestRef, field: str) -> DigestRef:
+            if field == "algorithm":
+                return digest.model_copy(update={"algorithm": "other-hash"})
+            scheme = digest.canonicalization_scheme or "unspecified"
+            return digest.model_copy(update={"canonicalization_scheme": scheme + ".tampered"})
+
+        candidate = prepared.observation.candidate
+        workplan = prepared.workplan_resolution.workplan
+        assert candidate.working_tree_digest is not None
+        assert workplan is not None
+        assert workplan.semantic_digest is not None
+        assert prepared.profile.source_digest is not None
+
+        variants = [
+            (
+                "candidate.working_tree_digest",
+                candidate.working_tree_digest,
+                lambda digest: prepared.model_copy(
+                    update={
+                        "observation": prepared.observation.model_copy(
+                            update={
+                                "candidate": candidate.model_copy(
+                                    update={"working_tree_digest": digest}
+                                )
+                            }
+                        )
+                    }
+                ),
+            ),
+            (
+                "workplan.artifact_digest",
+                workplan.artifact_digest,
+                lambda digest: prepared.model_copy(
+                    update={
+                        "workplan_resolution": prepared.workplan_resolution.model_copy(
+                            update={
+                                "workplan": workplan.model_copy(
+                                    update={"artifact_digest": digest}
+                                )
+                            }
+                        )
+                    }
+                ),
+            ),
+            (
+                "workplan.semantic_digest",
+                workplan.semantic_digest,
+                lambda digest: prepared.model_copy(
+                    update={
+                        "workplan_resolution": prepared.workplan_resolution.model_copy(
+                            update={
+                                "workplan": workplan.model_copy(
+                                    update={"semantic_digest": digest}
+                                )
+                            }
+                        )
+                    }
+                ),
+            ),
+            (
+                "profile.source_digest",
+                prepared.profile.source_digest,
+                lambda digest: prepared.model_copy(
+                    update={"profile": prepared.profile.model_copy(update={"source_digest": digest})}
+                ),
+            ),
+        ]
+        for index, (name, digest) in enumerate(prepared.prompt_source.content_digests):
+            variants.append(
+                (
+                    f"prompt_source.content_digests[{index}] ({name})",
+                    digest,
+                    lambda changed, index=index: prepared.model_copy(
+                        update={
+                            "prompt_source": prepared.prompt_source.model_copy(
+                                update={
+                                    "content_digests": tuple(
+                                        (
+                                            item_name,
+                                            changed if item_index == index else item_digest,
+                                        )
+                                        for item_index, (item_name, item_digest) in enumerate(
+                                            prepared.prompt_source.content_digests
+                                        )
+                                    )
+                                }
+                            )
+                        }
+                    ),
+                )
+            )
+
+        for name, original, make_variant in variants:
+            for field in ("algorithm", "canonicalization_scheme"):
+                with self.subTest(digest=name, field=field):
+                    self.assertNotEqual(
+                        preparation_fingerprint(prepared),
+                        preparation_fingerprint(make_variant(tamper(original, field))),
+                    )
 
     def test_different_run_ids_change_identity(self) -> None:
         a = self.prepare("implementation")
