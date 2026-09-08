@@ -81,7 +81,7 @@ Stage-local evidence improves fault localization; it does not remove final assem
 
 ## Proxy-proof acceptance and allowed test-double boundary
 
-For a material acceptance claim identify the **semantic owner under acceptance**: the real production decision-maker/state transition/persistence boundary/orchestrator/algorithm/consumer path whose behavior constitutes the claim. Then state the **allowed test-double boundary** below or outside that owner.
+For a material acceptance claim identify the **real semantic owner**—the **semantic owner under acceptance**: the real production decision-maker/state transition/persistence boundary/orchestrator/algorithm/consumer path whose behavior constitutes the claim. Then state the **allowed test-double boundary** below or outside that owner.
 
 Apply this counterfactual:
 
@@ -100,11 +100,11 @@ Historical invalid substitutions include evidence that:
 
 This is **not a global ban on mocks or fakes**. **Bounded deterministic fixtures remain preferred** where they establish the claim economically, and bounded test doubles remain valid below or outside the real owner to control external services, hardware, data volume, nondeterminism, and **expensive ML/scientific training or prediction**. Production-scale execution is required only when production-scale behavior/resource qualification is itself the claim.
 
-When an exact owner/path is merely delegated realization, the lower-level Tier-2 owner **does not become Frozen** in historical Protocol 5 vocabulary merely because acceptance named it. Suppose accepted semantics move from delegated owner `A` to equivalent owner `B`: **equivalent owner `B`** is valid when governing authority is unchanged, but owner-specific evidence for `A` is stale. **Reconcile the acceptance mapping to the new real owner** and rerun owner-specific evidence instead of preserving `A` or calling the remap proxy-passing.
+When an exact owner/path is merely delegated realization, the lower-level Tier-2 owner does **not** become frozen in historical Protocol 5 vocabulary merely because acceptance named it. Suppose accepted semantics move from delegated owner `A` to equivalent owner `B`: **equivalent owner `B`** is valid when governing authority is unchanged, but owner-specific evidence for `A` is stale. **Reconcile the acceptance mapping to the new real owner** and rerun owner-specific evidence instead of preserving `A` or calling the remap proxy-passing.
 
 If the required real-owner boundary is unavailable, mark the claim **unavailable/blocking** rather than substituting a proxy and declaring a pass.
 
-When a bypass is easy to regress and the claim is structural, a **robust inexpensive structural/negative check** can protect the boundary. Do **not require universal AST scanning**, a **global monkeypatch ban**, or a **new anti-mocking framework** merely to police ordinary tests.
+When a bypass is easy to regress and the claim is structural, a **robust inexpensive structural/negative check** can protect the boundary. Do not require universal AST scanning, a global monkeypatch ban, or a new anti-mocking framework merely to police ordinary tests.
 
 ## Conformance and structural evidence
 
@@ -118,7 +118,7 @@ When evidence depends on a hook/failpoint/callback/state transition, establish t
 
 For persistence/restart/orchestration/recovery/failure-propagation claims, use deterministic bounded failure injection where it materially strengthens evidence: interrupted publication, truncated artifact, stale/missing cache, restart at material boundaries, worker/task death, controlled I/O failure, duplicate callback/event, or partial transition state.
 
-Keep the real recovery/state owner executing. Prefer bounded simulation over actual resource exhaustion. Bounded failure injection is conditional on the claim and is **not a universal test stage**.
+Keep the **real semantic owner** of recovery/state behavior executing. Prefer bounded simulation over actual resource exhaustion. Bounded failure injection is conditional on the claim and is **not a universal test stage**.
 
 ## Evidence reuse and invalidation
 

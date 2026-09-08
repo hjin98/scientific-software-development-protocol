@@ -37,15 +37,15 @@ State existing machinery/state/path that should be removed, narrowed, altered, c
 
 ## 3. Implementation obligations
 
-For each material obligation capture only what is needed:
+For each material obligation capture only what is needed. **Attach only when material**:
 
 - concern/rationale;
 - required end state / governing constraint;
 - delegated realization freedom;
 - task-specific acceptance evidence;
-- real semantic-owner/test-double boundary when proxy acceptance is a material risk;
+- **acceptance boundary** — governing claim, current real semantic owner/path or owner class, allowed doubles, forbidden substitutions, and observable evidence when proxy acceptance is a material risk; state whether the owner is authoritative or **merely the current Tier-2 realization** so an equivalent delegated replacement remaps acceptance rather than freezing the old owner;
 - oracle-strength relation or structural absence/uniqueness check when ordinary tests are weak;
-- anti-shortcut/integrity constraint when a known counterfeit-pass path exists.
+- **anti-shortcut / integrity constraint** — a known way local compliance/evidence manipulation could appear to pass while defeating the governed outcome.
 
 Green tests do not prove an omitted obligation was implemented.
 

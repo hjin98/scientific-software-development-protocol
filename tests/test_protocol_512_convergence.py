@@ -42,10 +42,11 @@ class ConvergenceDurableSemanticsTests(unittest.TestCase):
         self.assertIn("tier-1 correctness claim itself is finite/exhaustive", self.intake)
         self.assertIn("recurrence by itself does not justify preserving the current mechanism", self.intake)
 
-    def test_post_simplification_recurrence_routes_to_design(self) -> None:
+    def test_post_simplification_recurrence_routes_to_earliest_domain(self) -> None:
         self.assertIn("post-simplification recurrence", self.convergence)
         self.assertIn("bounded software design reconsideration", self.convergence)
-        self.assertIn("frozen architecture is wrong", self.workflow)
+        self.assertIn("frozen/accepted parent abstraction is wrong", self.workflow)
+        self.assertIn("earliest affected d1-d3 owner", self.workflow)
 
     def test_revision_economy_and_nonrefusal_survive(self) -> None:
         self.assertIn("explicitly requested review still proceeds", self.convergence)
