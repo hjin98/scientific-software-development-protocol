@@ -1,94 +1,79 @@
-# Scientific and Numerical Software Requirements
+# Scientific and Numerical Software Evidence
 
-Apply these rules when code represents physical, mathematical, statistical, geometry, signal-processing, simulation, or ML-evaluation semantics.
+This reference provides cross-domain scientific/numerical evidence guidance. It is **not** the semantic owner of the scientific model or numerical method.
+
+- D1 meaning and external adequacy are owned by [Scientific and mathematical formulation](scientific-formulation.md).
+- D2 algorithm/error/convergence/precision semantics are owned by [Algorithm and numerical method design](numerical-algorithm-design.md).
+- D3 owns software architecture needed to preserve them.
+- D4 implements and evidences the accepted contracts.
 
 ## Conventions and units
 
-- State coordinate/cell/vector convention, units, sign convention, indexing, periodicity, tensor ordering, normalization, and precision where ambiguity can change results.
-- Convert at explicit boundaries; keep one canonical internal convention where feasible.
-- Treat units and frame semantics as part of the data contract, not comments.
-- Never fabricate missing physical data. Represent unavailable quantities explicitly.
+State coordinate/cell/vector conventions, units, signs, indexing, periodicity, tensor ordering, normalization, estimator/sample semantics, and precision at the owning authority level when ambiguity can change results. Convert at explicit D4 boundaries and preserve one canonical internal convention where feasible.
 
-## Numerical invariants
+Units and frame meanings are semantic data, not comments. Never fabricate missing physical data; represent unavailable quantities explicitly.
 
-Identify invariants before optimization or backend changes, such as:
+## Authority-backed invariants
 
-- symmetry or antisymmetry;
+Tests and diagnostics should derive from accepted D1/D2 authority, for example:
+
+- symmetry/antisymmetry or equivariance;
 - conservation/normalization;
-- periodic or basis invariance;
-- positive/finite constraints;
-- deterministic canonical ordering;
-- exact integer/image identities;
-- monotonic or bounded quantities;
-- estimator/sample semantics.
+- periodic/basis invariance;
+- positivity/finite/bounded behavior;
+- deterministic canonical ordering where governed;
+- exact integer/image/topological identities;
+- monotonicity;
+- estimator/sample semantics;
+- restart/continuation equivalence when method authority requires it.
 
-Use these invariants as tests in addition to fixture equality.
+Do not invent an invariant solely because it is easy to test.
 
-## Equivalence and tolerances
+## Exactness and tolerance
 
-- Use exact equality for discrete identities, indices, graph topology, categorical states, and serialization where required.
-- Use justified absolute/relative tolerances for floating values; choose them from numerical conditioning/precision, not merely to make tests pass.
-- Compare final physical/scientific observables after optimizing an intermediate kernel.
-- Preserve deterministic ordering if downstream code or reproducibility depends on it.
-- Record dtype/backend when numerical differences can arise.
+Use exact equality for exact discrete identities and contracts. Floating/statistical tolerances must be justified by accepted D2 conditioning/precision/stochastic/error semantics, not chosen after observing a failing backend.
 
-## Reference/oracle strategy
+Validate optimized kernels/backends against final governed observables, not only internal intermediates. Record dtype/backend/compiler/device when those dimensions can materially change the result.
 
-Retain a simple trusted implementation when practical, even if slower, to validate optimized backends on bounded fixtures. A dense/direct/reference path is often valuable as a permanent oracle and fallback.
+## Independent reference and oracle strength
 
-For randomized scientific tests:
+Retain or construct a simple independently justified reference method when its assurance value exceeds maintenance cost. A reference that substantially duplicates the production defect is not independent evidence.
 
-- seed deterministically;
-- save enough failing input/provenance to reproduce;
-- include physically difficult geometries/regimes, not only random nominal cases.
+Use differential, metamorphic, property, analytical, manufactured, limiting, convergence/refinement, residual, conditioning, or stochastic evidence according to the governing D2 claim. Ask what smallest plausible wrong realization could still pass the current oracle.
 
-## Differential and metamorphic validation
+## Approximation and performance
 
-When exact fixture outputs are incomplete or implementation change is substantial, strengthen scientific evidence with independently justified relations.
+Do not silently trade scientific fidelity for speed. Any material approximation needs accepted ownership of:
 
-- **Differential testing:** compare a trusted/reference implementation against an optimized/new/backend realization on governed observables.
-- **Metamorphic testing:** apply an authority-backed transformation and verify the required relation on outputs.
+- the mathematical/scientific approximation and valid regime;
+- the error metric/envelope;
+- failure/fallback behavior where applicable;
+- user visibility/configuration when governed;
+- accuracy evidence separate from performance benefit.
 
-Useful examples include permutation-invariant aggregate statistics, restart/continuation versus uninterrupted equivalence, unit-consistent transformation, valid translation/rotation symmetry or equivariance, normalized-weight rescaling that should preserve ranking, and backend equivalence within justified tolerance.
-
-Do not invent a metamorphic relation merely because it is convenient. It must follow from the scientific/product contract, and tolerance rules remain governed by numerical conditioning and precision.
-
-## Approximation and resolution
-
-Do not silently trade scientific fidelity for speed.
-
-Any approximation must define:
-
-- mathematical/physical approximation;
-- valid regime;
-- error metric/tolerance;
-- failure or fallback behavior;
-- user visibility/configuration;
-- benchmark benefit separately from accuracy evidence.
-
-Do not tune scientific resolution, cutoff, sampling, precision, estimator, or convergence criteria solely to improve benchmark numbers unless explicitly approved.
+Changing cutoff, resolution, sampling, precision, estimator, convergence criteria, reduction ordering, or restart semantics to improve benchmark numbers is a D1/D2 semantic change when it can alter governed conclusions.
 
 ## Provenance and reproducibility
 
-Record material choices needed to reproduce results:
+Record only material identity needed to reproduce or interpret results, such as input/source identity, normalization/preprocessing, algorithm/backend policy, seeds, precision/dtype, model/checkpoint/schema version, tolerances/cutoffs, fallback events, cache/checkpoint lineage, and relevant execution configuration.
 
-- input/source identity;
-- normalization/preprocessing;
-- algorithm/backend and policy resolution;
-- random seeds;
-- precision/dtype;
-- model/checkpoint/schema versions;
-- numerical tolerances and cutoffs;
-- fallback events;
-- cache/checkpoint identity and source-data lineage when derived state is reused;
-- relevant resource/execution configuration when it can affect result or performance.
+Diagnostics remain observational; they must not change scientific ordering/outcomes unless that behavior is explicitly part of authority.
 
-Diagnostics should be observational and should not influence scientific ordering or outcomes.
+## ML, stochastic, and accelerator execution
 
-## ML and accelerator-specific rules
+Separate model/scientific identity from execution optimization where possible. Validate checkpoint/schema compatibility. Compare accelerated/fused/mixed-precision execution with the accepted reference under D2 equivalence/error rules; do not widen tolerance merely to accept a device backend.
 
-- Separate model/scientific identity from execution optimization when possible.
-- Validate checkpoint/schema compatibility explicitly.
-- Compare accelerated/fused/mixed-precision execution against an accepted reference on representative data.
-- Treat training stochasticity separately from deterministic inference/evaluation equivalence.
-- Do not claim GPU qualification from CPU-only tests; mark target-hardware qualification blocked/deferred until actually run.
+Training stochasticity is distinct from deterministic inference/evaluation equivalence. CPU-only checks do not establish GPU qualification, and GPU availability does not authorize accelerator semantics when D3 architecture does not support them.
+
+## Composed closure
+
+For material scientific claims, local green checks can miss an omitted intermediate invariant. Trace:
+
+```text
+actual executable observables
+ -> D2 algorithm/error/equivalence envelope
+ -> D1 meaning
+ -> external adequacy/validation/proof/standards evidence as applicable
+```
+
+This composed closure is risk-triggered, not mandatory ceremony for every software change.
