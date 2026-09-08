@@ -4,7 +4,7 @@ workplan_id: PROTOCOL-ORCHESTRATOR-WP1-PROMPT-CORE
 protocol_version: 5.16.0
 status: reopened
 reviewed_date: 2026-09-08
-reviewed_candidate: 121ca48454e222740db9606e3a4a2f22719ef5e9
+reviewed_candidate: 5562a426df24e82621bd94756cb1c0c70cdc1cb1
 review_verdict: no-pass
 reopened_date: 2026-09-08
 parent_architecture: orchestrator/docs/architecture.md
@@ -27,116 +27,143 @@ forbidden_higher_module_dependencies:
 
 ## 1. Objective and authority
 
-WP-1 delivers the smallest independently useful SDP Orchestrator: an installable `sdp-orchestrator-core` distribution, installer-generated `sdp` console command, and repository-local zero-install `orchestrator/sdp.py` development launcher that all execute the same Core CLI implementation. Core observes a configured repository, resolves the governing workplan and compatible Protocol 5.16 workflow/profile, prepares a route-independent public record, renders one complete local/web stage prompt, requests a structured terminal result envelope, and composes optional extensions through one public SPI.
+WP-1 delivers the smallest independently useful SDP Orchestrator: one installable `sdp-orchestrator-core` distribution, one installer-generated `sdp` console command, and one repository-local zero-install `orchestrator/sdp.py` development launcher. Both invocation paths execute the same Core CLI owner. Core observes a configured repository, resolves the governing workplan and compatible Protocol 5.16 profile/source, prepares a route-independent public record, renders one complete local/web stage prompt, requests the versioned terminal result envelope, and composes optional extensions through one public SPI.
 
-Core-only operation is a finished mode. It must not require Tracker, Adapters, Scheduler, persistence, agent execution, model/account catalogs, benchmarking, quota/resource prediction, or AUTO scheduling.
+Core-only operation is a finished product mode. It requires no Tracker, Adapters, Scheduler, persistence, agent runner, model/account catalog, benchmark catalog, quota/resource predictor, or AUTO scheduler.
 
-Governing architecture is `orchestrator/docs/architecture.md` 1.6.0. Canonical human-facing prompt authority is `source/shared/references/development-workflow-prompts.md`; packaged prompt/profile resources are reproducible derivatives only.
+This workplan is governed by Protocol 5.16.0 and Frozen `orchestrator/docs/architecture.md` Architecture 1.6.0. Canonical human-facing stage prose remains `source/shared/references/development-workflow-prompts.md`; packaged prompt/profile resources are reproducible derivatives, not competing authorities.
 
-This file is the current snapshot-complete WP-1 implementation contract. Earlier repair chronology is non-normative Git history unless represented below.
+This file is the snapshot-complete current WP-1 handoff. Superseded repair chronology is non-normative history; all still-binding product/Frozen semantics and current blockers are carried below.
 
-## 2. Product / Frozen invariants
+## 2. Product and Frozen invariants
 
-### 2.1 Tier 1A — product and stakeholder invariants
+### 2.1 Tier 1A — stakeholder/product invariants
 
 1. **Core works alone.** Config, project/worktree observation, workplan/profile/source resolution, prepare, render, CLI, and diagnostics work without higher modules.
-2. **Observation is non-mutating.** Inspection does not change target worktree/index/HEAD/refs/remote-tracking refs/remotes; refresh is bounded read-only query, never fetch/pull.
-3. **Prompt/workflow authority is singular.** Canonical Protocol source owns stage prose/workflow meaning; packages/tests do not become competing semantic authorities.
-4. **Protocol binding is explicit.** Work governed by Protocol X is never silently interpreted under an incompatible newer profile.
+2. **Observation is non-mutating.** Inspection does not change worktree content, index, HEAD, refs, remote-tracking refs, or remotes. Refresh is a bounded read-only query, never fetch/pull.
+3. **Prompt/workflow authority is singular.** Canonical Protocol source owns stage prose/workflow meaning; package resources/tests do not become semantic authorities.
+4. **Protocol binding is explicit and precedence-correct.** A selected governing workplan's declared Protocol contract is never silently ignored or vetoed by a lower-precedence project default. Unsupported/incompatible authority fails truthfully.
 5. **Ambiguity remains explicit.** Project/workplan/profile/source/remote/stage/routing ambiguity fails or remains ambiguous rather than using fuzzy names, recency, ordering, or undocumented heuristics.
 6. **Prompt context is truthful.** Web mode never represents dirty/local-only/known-divergent state as remotely inspectable; local mode may reference the authorized worktree.
-7. **Privacy/security guarantees are bounded and truthful.** Automatically derived web content excludes private local paths, credential-bearing remote userinfo, ambient environment values, credential-helper output, and private orchestrator state. User-authored text is intentional content.
-8. **Core v1 is the durable lower seam.** Higher modules consume only documented `api.v1`/`spi.v1` value records/protocols; no private implementation objects or duplicated workplan/profile logic cross the boundary.
+7. **Privacy/security guarantees are bounded and truthful.** Automatically derived web content excludes private local paths, credential-bearing remote userinfo, ambient environment values, credential-helper output, and private orchestrator state. User-authored task/input text is intentional content.
+8. **Core v1 is the durable lower seam.** Higher modules consume documented `api.v1`/`spi.v1` value records/protocols only; no private implementation objects or duplicated workplan/profile logic cross the boundary.
 9. **One composition root.** Core owns the CLI, service registry, extension entry-point group, and event-subscription seam.
-10. **Manual tracking compatibility exists from day one.** Every successful prompt requests exactly one terminal `StageResultEnvelope v1` tied to RunId/prompt fingerprint and emits only the subscribed non-durable prompt event.
+10. **Manual tracking compatibility exists from day one.** Every successful prompt requests exactly one terminal `StageResultEnvelope v1` bound to RunId/prompt fingerprint and emits only the subscribed non-durable prompt event.
 11. **Admission precedes route-sensitive render.** `prepare()` is route-independent; later admission can occur before `render()` without provisional prompt/event side effects.
-12. **Stage identity is profile-bound.** User input is `StageSelector`; `StageRef` exists only after compatible profile resolution.
-13. **Render consistency is optimistic but coherent.** Material candidate/workplan/source/selection drift between prepare and final return produces stale/incoherent failure, not a mixed snapshot. WP-1 adds no repository lock/persistence.
-14. **Determinism follows semantic state.** Fixed RunId + unchanged material state gives stable identities/bytes; wall-clock diagnostics and unrelated extension config do not perturb them.
-15. **Installed behavior is the release acceptance owner.** Source helper tests cannot proxy-pass broken wheel/sdist, packaged profile, real Git observer, extension composition, installed CLI/stdout, privacy, or wire behavior.
+12. **Stage identity is profile-bound.** User input is a `StageSelector`; `StageRef` exists only after compatible profile resolution.
+13. **Render consistency is optimistic but coherent.** Material candidate/workplan/source/selection drift between prepare and final return yields stale/incoherent failure, not a mixed snapshot. WP-1 introduces no repository lock/persistence.
+14. **Determinism follows semantic state.** Fixed RunId + unchanged material state yields stable identities/bytes; wall-clock diagnostics and unrelated extension configuration do not perturb them.
+15. **Installed behavior is the release acceptance owner.** Source helper tests cannot proxy-pass broken wheel/sdist, packaged resources, real Git observer, extension composition, installed CLI/stdout, privacy, or wire behavior.
 16. **Repository containment is mandatory.** Orchestrator-owned source/build/test/fixture/script/doc material lives under `orchestrator/`; Protocol workplans remain under `workplans/`; repository CI contains thin invocation only.
-17. **The source tree is a maintained human interface.** Core source uses a conventional, shallow repository layout with obvious module names and discoverable CLI ownership. Redundant collection directories and making essentially every implementation module look private are not justified merely for hypothetical future symmetry.
-18. **Development execution must not require installing the package.** A developer working from a checkout can run the current source tree directly through one checked-in launcher without installing, uninstalling, or editable-installing `sdp-orchestrator-core`. That launcher must execute the same CLI implementation as the installed `sdp` command and must prefer checkout source over any stale installed copy.
+17. **The source tree is a maintained human interface.** Core uses a conventional shallow repository layout, obvious module names, and discoverable CLI ownership. Speculative collection directories and blanket private-looking module names are not justified.
+18. **Development execution does not require package installation.** A checkout can run the current source directly through `orchestrator/sdp.py` without installing/editable-installing `sdp-orchestrator-core`; the launcher uses the same CLI owner and checkout source wins over a stale installed copy.
 
 ### 2.2 Tier 1B — Frozen architecture for this cycle
 
-Preserve Architecture 1.6.0: one Python 3.11+ `sdp-orchestrator-core` distribution, one installer-generated `sdp` entry point, one thin repository-local development launcher dispatching the same CLI owner, native PEP 420 namespace with no `sdp_orchestrator/__init__.py`, strict `core <- tracker <- adapters <- scheduler` dependency direction, one config path, one Git observer, one workplan resolver, one Protocol/profile/source authority, public Core/Application/Extension API/SPI value boundaries, prepare-before-render, one extension registry, one exact result-footer wire, and no higher-module machinery in Core.
+Preserve Architecture 1.6.0:
 
-Exact implementation decomposition below those boundaries remains Tier 2 and should be simplified where possible.
+- capability/dependency ladder `core <- tracker <- adapters <- scheduler`; lower modules never depend on higher modules;
+- distribution ladder `sdp-orchestrator-core <- sdp-orchestrator-tracker <- sdp-orchestrator-adapters <- sdp-orchestrator-scheduler`; when higher distributions are implemented/installed, they install their required lower distributions, while Core alone pulls no higher dependencies;
+- one Python 3.11+ Core distribution now, one installer-generated `sdp` entry point, and one thin repository-local development launcher dispatching the same CLI implementation;
+- native PEP 420 `sdp_orchestrator` namespace and no `sdp_orchestrator/__init__.py`;
+- future versioned public API namespaces remain `sdp_orchestrator.core.api.v1`, `.tracker.api.v1`, `.adapters.api.v1`, `.scheduler.api.v1`; corresponding provider SPI namespaces remain `.core.spi.v1`, `.tracker.spi.v1`, `.adapters.spi.v1`, `.scheduler.spi.v1`;
+- one config normalization path, one non-mutating Git observer, one workplan selection owner, one Protocol profile/source owner, and no duplicated workflow authority;
+- public Core/Application/Extension API/SPI value boundaries; no implementation objects in public signatures;
+- route-independent `PreparedPrompt` before route-sensitive `RenderedPrompt`;
+- one extension registry/entry-point group with passive metadata-only discovery and failure-atomic normal activation;
+- one exact terminal result-footer/fingerprint wire;
+- no persistence, workflow reducer, agent runner, benchmark/resource/scheduler machinery in Core.
 
-## 3. Required Core behavior
+Repository containment is Frozen; exact physical subdirectory naming beneath `orchestrator/` is delegated unless explicitly fixed below. Everything beneath the product/Frozen boundaries remains Tier 2 and should be altered/reduced rather than wrapped when a simpler equivalent realization exists.
 
-### 3.1 Configuration and prompt mode
+## 3. Required Core behavioral contract
 
-One bounded TOML path. Prompt-mode precedence: explicit CLI/API -> project default -> core default -> built-in `web`. `PromptExecutionMode(local|web)` is distinct from canonical prompt `EXECUTION_MODE`. No silent web->local fallback. CLI project convenience: unique configured worktree containing cwd -> configured default -> sole project -> structured ambiguous/not-found. Public requests use explicit `ProjectKey`.
+### 3.1 Configuration, project selection, and prompt mode
 
-Core config is closed; extension namespaces are bounded opaque data interpreted only by activated extensions. Credential-bearing URLs are rejected/redacted. Unrelated extension config does not enter Core prompt/preparation identity.
+Use one bounded TOML parser/validator. Prompt-mode precedence is explicit CLI/API -> project default -> core default -> built-in `web`. `PromptExecutionMode(local|web)` is distinct from canonical prompt `EXECUTION_MODE`; Core never silently falls from web to local.
+
+CLI project convenience when `--project` is absent is unique configured project containing cwd -> configured default -> sole project -> structured ambiguous/not-found. Public Core requests use explicit `ProjectKey`.
+
+Core-owned config is closed. Extension namespaces are bounded opaque data interpreted only by their activated extension. Credential-bearing URLs are rejected/redacted. Unrelated extension configuration does not enter Core preparation/prompt identity.
 
 ### 3.2 Git/worktree/remote observation
 
-`ObservationPolicy`: `local_only`, `use_cached_remote`, `refresh_remote`, programmatic default local-only. Cached mode performs no network; refresh performs bounded noninteractive read-only query.
+`ObservationPolicy` supports `local_only`, `use_cached_remote`, and `refresh_remote`; programmatic default is local-only. Cached mode performs no network; refresh performs one bounded noninteractive read-only query.
 
-`CandidateRef` binds repository/worktree, branch/detached state, HEAD, staged/index + unstaged + untracked material state, selected remote/target evidence, provenance/freshness, and identity completeness. `sdp.git-working-tree.v1` includes staged blobs/modes and worktree/untracked content under finite per-file/count/aggregate bounds. Unsupported/unreadable/embedded state is incomplete rather than falsely complete. Non-UTF-8 Git paths do not crash identity.
+`CandidateRef` identifies repository/worktree, branch/detached state, HEAD, staged/index + unstaged + untracked material state, selected remote/target evidence, provenance/freshness, and identity completeness. `sdp.git-working-tree.v1` includes staged blobs/modes and worktree/untracked content under finite per-file/count/aggregate bounds. Unsupported/unreadable/embedded state gives incomplete identity rather than false completeness. Non-UTF-8 Git paths do not crash identity construction.
 
-Remote selection: configured remote -> branch upstream remote -> origin -> sole remote -> ambiguous/unavailable. Evidence is bound to the selected remote/target. File/path remotes are local-only. Web requires known target existence, blocks dirty state/known divergence, and preserves remote ambiguity. Unknown-age cached evidence cannot satisfy explicit `max_remote_staleness_seconds`; refresh may establish freshness.
+Remote selection is configured remote -> branch upstream remote -> origin -> sole remote -> ambiguous/unavailable. Evidence remains bound to the selected remote/target. Filesystem/file remotes are local-only. Web mode requires known target existence, blocks dirty state and known divergence, and preserves ambiguity. Unknown-age cached evidence cannot satisfy an explicit freshness maximum; a refresh may establish observation time.
 
-Git subprocesses are bounded during collection, non-mutating, noninteractive, and receive an intentionally constructed environment. Ambient repository/config/object redirection and executable transport overrides are not inherited.
+Git subprocesses are bounded, non-mutating, noninteractive, and receive an intentionally constructed environment. Ambient repository/config/object redirection and executable transport command overrides are not inherited merely because they exist.
 
 ### 3.3 Workplans and Protocol binding
 
-Catalog bounded regular workplan text under active/archive roots. Symlink aliases/special files/path escapes are ignored/rejected safely. Frontmatter is bounded before/during data-only materialization; unsupported amplification constructs may be rejected.
+Catalog bounded regular workplan text under `workplans/active/` and `workplans/archive/`. Symlink aliases/special files/path escapes are ignored/rejected safely. Frontmatter is bounded before/during data-only materialization.
 
-Selectors are exact workplan ID or exact canonical repository-relative POSIX path. Traversal/absolute/dot/backslash aliases do not normalize into matches. Current authority uses explicit supersession evidence only. Lifecycle directory and declared status must agree for current governance.
+Explicit selectors are exact `workplan_id` or exact canonical repository-relative POSIX path. Traversal/absolute/dot/backslash aliases do not normalize into matches. Current authority uses explicit supersession evidence only; ambiguity remains ambiguity. Lifecycle directory and declared status must agree for current governance.
 
-Stage policy: Baseline/Design/Verification/Stabilization explicit-only; Implementation/Review require governing plan; Alignment exact required; Health Audit disallows; Closeout allows optional exact completed binding otherwise `COMPLETED_WORK`.
+Stage policies remain:
 
-Any explicitly selected authority with a declared Protocol version must be reconciled against the compatible profile. Required stages fail on missing/invalid/unsupported governing version. Optional selected authority with absent version may remain evidence-only where the stage does not need it to determine the governing contract.
+| Stage | Workplan policy |
+| --- | --- |
+| baseline | optional explicit only |
+| design | optional explicit only |
+| implementation | governing workplan required |
+| review | governing workplan required |
+| verification | optional explicit authority |
+| stabilization | optional explicit authority |
+| alignment | exact downstream workplan required |
+| health-audit | workplan disallowed |
+| closeout | optional exact completed binding, otherwise `COMPLETED_WORK` |
 
-### 3.4 Protocol source/profile/workflow
+A selected authority with a declared Protocol version is reconciled before a lower-precedence project default can determine the governing profile. Required stages fail on missing/invalid/unsupported governing version. An optional explicitly selected authority whose version metadata is absent may remain evidence-only where the stage does not need it to determine the governing contract.
 
-V1 supports compatible Protocol 5.16. Source precedence: configured compatible local -> exact packaged derivative -> explicitly permitted bounded remote explicit ref -> truthful incompatible/unavailable failure.
+### 3.4 Protocol source/profile/workflow authority
 
-Remote source resolves one requested ref to one immutable identity before multi-file use, reads bounded required data only, revalidates the ref, never executes downloaded/repository code, and records requested/resolved provenance/digests. Local multi-file reads are coherent or fail changed. Packaged resources reproduce exactly from canonical prompt source and `source/PROTOCOL_VERSION`.
+V1 supports the explicitly compatible Protocol 5.16 profile. Source precedence for the selected profile is configured compatible local source -> exact packaged derivative -> explicitly permitted bounded remote source at an explicit ref -> truthful incompatible/unavailable failure.
 
-Canonical extraction requires exact numbered stage-heading set and one fenced text body per stage. Machine profile carries control metadata only. Optional/context-dependent routing remains multiple alternatives/ambiguous; outcome alone never invents a deterministic next stage.
+A remote source resolves one requested ref to one immutable identity before multi-file use, reads only bounded required data, revalidates the ref, never executes repository/downloaded code, and records requested/resolved provenance/content digests. Local multi-file reads are coherent or fail changed. Packaged resources reproduce exactly from canonical Protocol source and `source/PROTOCOL_VERSION`.
 
-### 3.5 Inputs and two-phase identity
+Canonical extraction requires the exact numbered stage-heading set and one fenced text body per stage. The machine profile carries bounded control metadata only. Routing is conservative: context-dependent Protocol outcomes expose alternatives/ambiguity rather than one guessed transition.
 
-Every canonical input is mechanical, canonical-default, or required-user. Mechanical/first-class bindings cannot be generic overrides. `PROTOCOL_REF` follows governing Protocol; `PROTOCOL_SOURCE` defaults `AUTO_LOCAL_FIRST`; canonical `EXECUTION_MODE` is independent of prompt mode. Inserted values use one reversible structure-safe scalar encoding.
+### 3.5 Inputs, two-phase identity, and public values
 
-`PreparedPrompt` contains RunId, Project/Worktree observation, StageRef, candidate, WorkplanResolution, complete WorkflowProfileDescriptor/ProfileRef, PromptSourceRef, resolved mode-independent inputs/provenance, result-schema identity, and `sdp.prompt-preparation.v1`.
+Every canonical INPUT is `mechanical`, `canonical_default`, or `required_user`. Mechanical/first-class bindings cannot be overridden generically. `PROTOCOL_REF` follows the governing contract; `PROTOCOL_SOURCE` defaults `AUTO_LOCAL_FIRST`; canonical `EXECUTION_MODE` is independent of prompt mode. Inserted values use one reversible structure-safe scalar encoding.
 
-Preparation identity binds complete material public admission data, including each `DigestRef` as algorithm + canonicalization scheme + value. Render recomputes the preparation fingerprint, revalidates current worktree/remote/workplan/source state, renders from the same resolved source snapshot, and performs final optimistic unchanged-state validation before event publication/return.
+`PreparedPrompt` carries RunId, Project/Worktree observation, profile-bound StageRef, candidate, WorkplanResolution, complete WorkflowProfileDescriptor/ProfileRef, PromptSourceRef, resolved mode-independent inputs/provenance, result-schema identity, and `sdp.prompt-preparation.v1`.
 
-### 3.6 Prompt wire, public values, and events
+Preparation identity binds the complete material public admission surface, including every material `DigestRef` as `{algorithm, canonicalization_scheme, value}`. Render recomputes the fingerprint, revalidates current worktree/remote/workplan/source state, uses the same resolved source snapshot, and performs a final optimistic unchanged-state check before event publication/return.
 
-Canonical body changes only at declared input substitutions. Fingerprint replacement touches only Core-owned footer slots. Opaque RunId is JSON-safe and coherent.
+Public records are immutable JSON-compatible value data. Open event/result payloads accept recursively JSON-compatible values, not live implementation objects. Public timestamps are UTC ISO-8601. `Problem` is one structured error record with `code`, redacted `message/details`, `retryable: bool | None`, and no exception subclass hierarchy.
 
-Every prompt requests ordinary prose followed by exactly one exact-line terminal JSON footer. Prose may precede; only whitespace may follow the end marker. Duplicate exact footer/marker pairs are invalid. Additive result/event payload data must be recursively JSON-compatible. Public timestamps are UTC ISO-8601. `Problem` is one structured error record with `code`, redacted message/details, `retryable`, and no mirrored exception hierarchy.
+### 3.6 Prompt wire and events
 
-Only successful final render emits `core.prompt.rendered.v1` to explicit subscribers. EventId is stable for event type + RunId + prompt fingerprint. Sink failures are redacted and cannot invalidate primary render.
+Canonical body changes only at declared INPUT substitutions. Fingerprint replacement touches only Core-owned fingerprint slots. Opaque RunId remains one coherent JSON-safe value.
+
+Every prompt requests ordinary prose followed by **exactly one** exact-line terminal JSON footer for `StageResultEnvelope v1`. Exactly one begin marker and one end marker must exist; any duplicate/extra exact marker invalidates extraction. Prose may precede; only whitespace may follow the end marker. Additive result fields are allowed only as JSON-compatible values.
+
+Only successful final render emits `core.prompt.rendered.v1`, only to explicitly subscribed sinks. EventId is stable for event type + RunId + prompt fingerprint. Sink failure is diagnosed/redacted but cannot counterfeit the primary result.
 
 ### 3.7 Extension composition and passive diagnostics
 
-One entry-point group: `sdp_orchestrator.extensions.v1`. Discovery-only reads distribution metadata without provider import and reports metadata failure truthfully. Normal activation uses canonical extension ID, API/multiplicity requirements, hard extension dependencies, and capability satisfaction from Core/already-active compatible providers. Registrations/subscriptions are staged and committed only after successful valid `ExtensionRegistration`. Wrong activation return type is failure. Alternative healthy providers can satisfy a capability even when another provider fails/cycles. Core singular services cannot be replaced silently.
+Core discovers extensions only through `sdp_orchestrator.extensions.v1`. Discovery-only reads installed distribution/entry-point metadata without importing provider code and reports metadata failure truthfully rather than as zero extensions.
 
-`doctor` and default `capabilities` perform no provider import, target mutation, or hidden network. Doctor's `packaged_profile` is packaged-only and cannot fall through configured local/remote source precedence.
+Normal activation uses canonical extension ID, SPI/API/multiplicity requirements, hard `requires_extensions`, and actual capability satisfaction from Core/already-active compatible providers. Registrations/subscriptions are staged and committed only after a valid `ExtensionRegistration`; wrong activation return type is failure. Alternative healthy providers may satisfy a capability when another provider fails/cycles. Failed/incompatible providers disable only themselves and truly dependent providers; healthy Core remains available.
 
-## 4. Source-tree and CLI layout — required simplification
+`doctor` and default `capabilities` are passive: no provider import, target-repository mutation, or hidden network. Doctor's `packaged_profile` is packaged-only and cannot fall through configured local/remote source precedence.
 
-The current `orchestrator/packages/core/src/sdp_orchestrator/core` layout is needlessly deep for WP-1 and pre-allocates a `packages/` collection for higher distributions that do not yet exist. The leading-underscore convention on nearly every implementation module also obscures ownership, including the product CLI. Development additionally needs a no-install path that executes the current checkout directly rather than requiring repeated package installation while the code is changing rapidly.
+## 4. Required source tree and CLI ownership
 
-### 4.1 Target repository layout
-
-Core becomes the direct Python project rooted at `orchestrator/`:
+WP-1 Core is the direct Python project rooted at `orchestrator/`:
 
 ```text
 orchestrator/
-  sdp.py                      # zero-install development launcher
-  pyproject.toml              # sdp-orchestrator-core distribution
+  sdp.py
+  pyproject.toml
   README.md
+  requirements-dev.txt
   src/
-    sdp_orchestrator/         # PEP 420 namespace; no __init__.py here
+    sdp_orchestrator/
       core/
         __init__.py
         cli.py
@@ -156,240 +183,129 @@ orchestrator/
         digest.py
         limits.py
         redaction.py
-        api/
-          __init__.py
-          v1.py
-        spi/
-          __init__.py
-          v1.py
-        resources/
-          protocol/...
+        api/{__init__.py,v1.py}
+        spi/{__init__.py,v1.py}
+        resources/protocol/...
   tests/
   docs/
   scripts/
 ```
 
-This preserves the conventional Python `src/sdp_orchestrator/core` import layout while removing the redundant `packages/core` repository layers. It does not use exotic setuptools `package-dir` remapping merely to flatten the import namespace.
+No `orchestrator/packages/core` compatibility tree, symlink, or forwarding module remains. Primary implementation modules use descriptive names rather than blanket `_foo.py` names. The supported consumer boundary remains `sdp_orchestrator.core.api.v1` / `.spi.v1`; implementation modules remain internal by API policy rather than by leading underscore convention.
 
-If Tracker/Adapters/Scheduler are later implemented, add only the package roots actually needed at that time under `orchestrator/` while preserving the Frozen distribution/import contracts. Do not retain a speculative collection directory solely for symmetry.
-
-### 4.2 Module naming and privacy
-
-The supported public consumer contract remains `sdp_orchestrator.core.api.v1` and `.spi.v1`. Other modules remain implementation detail by documentation/API policy; Python leading underscores are not the authority that makes them private.
-
-Rename primary modules descriptively rather than prefixing essentially every file with `_`:
-
-```text
-_app.py         -> application.py
-_cli.py         -> cli.py
-_config.py      -> config.py
-_git.py         -> git.py
-_workplans.py   -> workplans.py
-_protocolsrc.py -> protocol_source.py
-_canonical.py   -> canonical.py
-_profile.py     -> profile.py
-_inputs.py      -> inputs.py
-_render.py      -> render.py
-_records.py     -> records.py
-_errors.py      -> errors.py
-_events.py      -> events.py
-_digest.py      -> digest.py
-_limits.py      -> limits.py
-_redact.py      -> redaction.py
-_service.py     -> service.py
-```
-
-Implementation may consolidate genuinely tiny modules where ownership becomes clearer, but may not add forwarding modules/wrappers solely to preserve these old private paths. They are pre-release Tier-2 internals, not compatibility contracts.
-
-### 4.3 Installed and zero-install CLI entry points
-
-There are two supported invocation mechanisms but exactly one CLI implementation owner.
-
-**Installed/release path:**
+Installed entry point:
 
 ```toml
 [project.scripts]
 sdp = "sdp_orchestrator.core.cli:main"
 ```
 
-The package installer generates the `sdp` executable in the active environment. No separately maintained installed shell script is checked in.
+`orchestrator/sdp.py` is a thin standard-library development bootstrap only: resolve adjacent `src/`, place it ahead of site-packages, import the same `sdp_orchestrator.core.cli:main`, and execute it. It contains no Typer commands, parsing, validation, project/workplan/profile logic, output logic, or other product behavior. It works from arbitrary cwd and wins over an older installed package. Runtime dependencies still come from the active Python environment; no vendoring/bundling is introduced.
 
-**Development/source path:** `orchestrator/sdp.py` is a tiny checked-in launcher. It may contain only standard-library bootstrap needed to locate the adjacent `src/` tree and then delegate to `sdp_orchestrator.core.cli:main`. Its intended semantic shape is:
+Future Tracker/Adapters/Scheduler physical roots are added only when those modules are implemented; this does not alter the Frozen distribution/dependency/API ladder.
 
-```python
-#!/usr/bin/env python3
-from pathlib import Path
-import sys
+## 5. Acceptance obligations
 
-SRC = Path(__file__).resolve().parent / "src"
-sys.path.insert(0, str(SRC))
-
-from sdp_orchestrator.core.cli import main
-
-if __name__ == "__main__":
-    main()
-```
-
-Equivalent simpler bootstrap is acceptable. The key contract is that checkout `src` is placed ahead of site-packages so an older installed `sdp-orchestrator-core` cannot shadow the source under development.
-
-`sdp.py` contains **no Typer command declarations, option parsing, validation, project/workplan/profile logic, output logic, or product behavior**. All of that remains in `core/cli.py`; the launcher only selects the local source tree and calls the same `main`. Therefore it is not a second CLI authority or compatibility wrapper.
-
-Required development usage includes:
-
-```text
-python orchestrator/sdp.py --help
-python orchestrator/sdp.py doctor --config ...
-python orchestrator/sdp.py implementation --config ... --prompt-mode local
-```
-
-Optionally the file may be executable (`./orchestrator/sdp.py ...`) through a normal Python shebang. It must work from arbitrary current working directories because it resolves `src/` relative to its own file location.
-
-“Zero-install” means no installation/editable installation of the orchestrator package itself. The active Python environment must still provide declared runtime dependencies; WP-1 does not vendor or bundle Python and third-party dependencies into this development launcher.
-
-For developer inspection, `core/cli.py` should also remain directly module-runnable where practical (`PYTHONPATH=orchestrator/src python -m sdp_orchestrator.core.cli --help`), but `orchestrator/sdp.py` is the ergonomic default checkout entry point and does not require callers to set `PYTHONPATH`.
-
-## 5. Public API/SPI floor
-
-Preserve Architecture 1.6.0 `CoreAPI`/`ApplicationAPI` methods (`allocate_run_id`, project/observation/workplan/workflow/list-stages, `prepare`, `render`) and versioned JSON-compatible records. Public signatures contain no Git/subprocess/file/DB/lock/event-loop/private implementation types.
-
-Provider SPI remains `manifest() -> ExtensionManifest` and `activate(context) -> ExtensionRegistration`; `ExtensionContext` exposes public Core API, extension-owned config, and staged registrars only.
-
-Core capabilities remain `prompt.render`, `project.observe`, `workplan.catalog`, `workflow.profile`.
-
-## 6. Acceptance obligations
-
-O1. **Layout/distribution/development launcher:** target source tree in §4; no `orchestrator/packages/core`; no old underscore-module compatibility shims; wheel + sdist build/inspect/install; generated `sdp` entry point targets `sdp_orchestrator.core.cli:main`; installed CLI works outside checkout; checked-in `orchestrator/sdp.py` runs checkout source without package installation and prefers checkout source over a stale installed copy; PEP 420 sibling coexistence; no root namespace init/higher imports.
+O1. **Layout/distribution/launcher:** required §4 tree; absence of legacy package/private-module shims; wheel + sdist build/inspect/install; installed entry point; installed CLI outside checkout; zero-install launcher from arbitrary cwd and with a stale installed package; PEP 420 sibling coexistence; no root namespace init/higher imports.
 
 O2. **Config/projects:** precedence/default/ambiguity, bounded malformed/oversized config, no semantic env override surface, extension namespace preservation, secret URL rejection/redaction, source policy.
 
 O3. **Git/remote:** real temporary Git/worktree/remotes; staged/index/worktree/untracked identity, modes/non-UTF8/bounds, alias vs linked worktree, selected-remote evidence/freshness, no mutation, bounded subprocess/environment behavior.
 
-O4. **Workplans:** exact path/ID, branch binding, supersession ambiguity, lifecycle, bounded parser, symlink/path escape, every stage policy and Protocol-binding case.
+O4. **Workplans:** exact path/ID, branch binding, supersession ambiguity, lifecycle, bounded parser, symlink/path escape, every stage policy and Protocol-binding/precedence case.
 
-O5. **Protocol/profile/workflow:** canonical extraction, package/generator parity, local/packaged/remote coherence, immutable remote identity, unsupported version rejection, conservative routing.
+O5. **Protocol/profile/workflow:** exact canonical extraction, package/generator parity, local/packaged/remote coherence, immutable remote identity, unsupported version rejection, conservative routing.
 
-O6. **Public prepare/render:** public API completeness, profile-bound StageRef, governing-workplan precedence, external admission between phases, complete preparation identity, JSON tamper rejection, stale checks, no private objects.
+O6. **Public prepare/render:** public API completeness, StageSelector -> profile-bound StageRef, governing-workplan precedence, external admission between phases, complete preparation identity, JSON tamper rejection, optimistic stale checks, no private objects.
 
 O7. **Inputs:** all stages/inputs, required-user completeness, prompt-mode vs canonical execution mode, governing Protocol ref, reversible scalar encoding, atomic invalid failures.
 
-O8. **Renderer/wire/events:** body fidelity, deterministic fingerprints, exactly-one terminal footer, opaque RunId/placeholder collisions, JSON-compatible additive fields, explicit subscription/EventId/failure behavior.
+O8. **Renderer/wire/events:** canonical body fidelity, deterministic preparation/prompt fingerprints, exactly-one terminal footer, opaque RunId/placeholder collision behavior, JSON-compatible additive fields, explicit subscription/EventId/failure behavior.
 
 O9. **Privacy/web truth:** final RenderedPrompt/stdout tests for paths/credentials/environment/local remotes/dirty/divergent/stale/absent/ambiguous cases.
 
-O10. **Extensions/diagnostics:** real installed entry-point metadata; passive discovery; compatible/incompatible/missing/cyclic/alternative-provider graphs; staged activation; canonical ID/API/multiplicity/SPI; doctor/capabilities no hidden network/mutation.
+O10. **Extensions/diagnostics:** real installed entry-point metadata; passive discovery; compatible/incompatible/missing/cyclic/alternative-provider graphs; staged activation; canonical ID/API/multiplicity/SPI; passive doctor/capabilities with no hidden network/mutation.
 
-O11. **CLI product/development boundary:** installed `sdp` subprocess and zero-install `orchestrator/sdp.py` both dispatch the same `core.cli:main` path. Representative commands must produce equivalent governed behavior/exit semantics apart from expected executable-path/environment provenance. Source launcher works from outside `orchestrator/`, requires no package installation, and cannot be satisfied accidentally by an older installed package. Stdout remains atomic/prompt-only; failures redacted on stderr; clipboard additive; doctor passive.
+O11. **CLI product/development boundary:** installed `sdp` and zero-install `orchestrator/sdp.py` converge on one `core.cli:main` behavior owner; stdout atomic/prompt-only; failures redacted/nonzero; clipboard additive; representative stage/doctor commands work through both supported invocation modes.
 
-O12. **Documentation:** update architecture layout example so it no longer presents `orchestrator/packages/core/...` as preferred concrete shape; update README/user/developer commands and paths to the new layout; document both invocation modes (`sdp ...` after install and `python orchestrator/sdp.py ...` from checkout), clarify that both share `core.cli:main`, and explain public-vs-internal module boundary once without compatibility-history prose.
+O12. **Documentation/Frozen authority:** architecture retains all still-Frozen distribution/dependency/API commitments while documenting the shallow WP-1 physical tree; user/developer docs accurately describe exact footer semantics, installed vs zero-install invocation, and the public-vs-internal module boundary.
 
-O13. **Final repository acceptance:** complete Core regression with Hypothesis where installed, snapshot generator check, wheel+sdist integration, zero-install launcher regression, ordinary Protocol unit/build/validate/package-parity checks, `git diff --check`, and final simplicity/absence of higher-module or duplicate-authority machinery.
+O13. **Final repository acceptance:** complete Core affected regression with Hypothesis active where configured, canonical snapshot generator check, wheel+sdist integration, zero-install launcher regression, ordinary Protocol unit/build/validate/package-parity checks, `git diff --check`, and final simplicity/absence of duplicate authority or higher-module machinery.
 
-## 7. Implementation evidence reviewed
+Acceptance must execute the real semantic owner. Evidence that could stay green while the final owner is broken does not close the claim.
 
-Independent Review evaluated candidate `121ca48454e222740db9606e3a4a2f22719ef5e9`, based directly on review-contract commit `fc466570e7a9a3b6d2fab99a1440fe72a0a46064`.
+## 6. Independent Review of candidate `5562a426df24e82621bd94756cb1c0c70cdc1cb1` — 2026-09-08
 
-Recorded evidence: 312 focused tests; 339 complete Core tests including wheel+sdist installed-product owner, Git/remotes/extensions/privacy/wire/API; Hypothesis 400+200 generated examples; canonical generator check; 172 ordinary Protocol tests plus skill build/validate/check-dist and `git diff --check`; focused Semgrep and Serena inspection. This is strong reusable evidence where subsequent edits cannot plausibly invalidate the claim, but it does not override the findings below.
+**Verdict: NO-PASS. WP-1 remains reopened.**
 
-## 8. Open implementation findings — Review verdict NO-PASS
+The candidate is one implementation commit directly on the accepted WP-1 amendment. The structural simplification is successful at source level: `orchestrator/packages/core` is gone, Core is rooted directly under `orchestrator/`, primary modules are descriptively named, `sdp.py` is thin, and installed metadata targets `sdp_orchestrator.core.cli:main`.
 
-Parent Architecture 1.6.0 remains valid. F1-F8 are implementation nonconformance/oracle drift under existing authority. F9 is a stakeholder-directed Tier-2 source-layout and development-invocation simplification within the parent containment/namespace architecture. Repair existing owners; do not add parallel registries/resolvers/renderers/workflow engines/wrappers/persistence/higher-module dependencies.
+Source inspection also shows substantial closure of the prior F1-F9 defects: routing now preserves blocker alternatives; extension activation uses actual active capability satisfaction and rejects invalid SPI returns; complete DigestRef fields participate in preparation identity; doctor calls packaged resolution directly; the footer extractor rejects duplicate exact markers; explicit optional plans with unsupported declared versions reject; public open records enforce JSON/UTC boundaries; executable Git transport environment overrides are removed; and the source/launcher migration is present.
 
-### F1 — Workflow profile over-resolves blocker outcomes
+Those repairs do not close the candidate because the following blockers remain. They are existing-authority conformance/acceptance failures; the parent architecture does not require redesign.
 
-`_TRANSITIONS` still collapses context-dependent outcomes (`implementation/blocked`, `review/no_pass`, `alignment/no_pass`, `closeout/blocked`) to one next stage although Protocol 5.16 requires routing by blocker/authority context.
+### B1 — Explicit selected-workplan Protocol precedence is still ordered incorrectly in `prepare()`
 
-**Repair:** alter the existing profile transition metadata so insufficient outcomes expose all authority-backed alternatives. No routing DSL/engine.
+`CoreService.prepare()` first resolves `context.section.protocol_profile` as a bootstrap source, and only afterward resolves `request.workplan_selector`. Therefore a lower-precedence project-default profile can fail before an explicitly selected workplan's declared Protocol version is even examined.
 
-**Tests:** context-dependent blocker/no-pass triggers remain ambiguous where Protocol permits alternatives; truly deterministic outcomes remain deterministic; package parity passes.
+Counterexample: configure the project with unsupported `protocol_profile = "sdp-protocol-9.9"`; explicitly select an exact active workplan declaring compatible `protocol_version = "5.16.0"`; request Implementation (or another stage where the selected plan is governing). The accepted contract says the selected authority's declared Protocol contract takes precedence over project defaults. Current ordering instead raises profile/source incompatibility from the project default before the selected workplan can govern.
 
-### F2 — Capability dependency ordering can manufacture a false cycle
+**Repair:** rewire the existing preparation/catalog/selection flow so an explicit exact selector's already-existing workplan metadata is available early enough to determine/reconcile its declared Protocol version before project-default profile bootstrap. Reuse the existing exact-selector semantics and one catalog/selection owner; do not implement a second selector/resolver or wrapper. After the governing profile is known, apply the real stage policy and lifecycle/authority validation through the same workplan resolution owner.
 
-The current graph makes a capability consumer depend on all compatible providers. Counterexample: B independently provides `cap.shared`; A also provides it but requires extension D; D requires `cap.shared`. Valid order B -> D -> A is rejected as a cycle. Metadata enumeration failure also collapses to empty installation, and `activate() -> None` is silently promoted to success.
+**Required tests:**
+- compatible explicitly selected required-stage workplan succeeds even when project default names an unsupported different profile;
+- compatible explicitly selected optional authority with a declared version likewise binds/reconciles before the project default;
+- unsupported selected workplan still fails;
+- optional selected workplan with absent version retains the accepted evidence-only fallback;
+- no selector continues to use the configured/default profile normally.
 
-**Repair:** hard extension-ID dependencies remain graph constraints; capability readiness depends on Core or any compatible provider actually active. Prefer one iterative activation/readiness owner. Report discovery failure truthfully. Reject non-`ExtensionRegistration` activation results. Keep one registry/staged commit path.
+### B2 — Implementation edited Frozen parent architecture beyond the authorized layout reconciliation
 
-**Tests:** B/A/D activates; true unsatisfiable cycle stays disabled; metadata discovery failure is visible; `activate(None)` not active; healthy Core/providers remain available.
+The accepted Architecture 1.6.0 explicitly fixes the distribution ladder semantics: installing a higher distribution installs required lower distributions, and it names future versioned public APIs for Core, Tracker, Adapters, and Scheduler. The implementation was authorized to replace the illustrative `orchestrator/packages/core/...` physical layout because exact subdirectory naming was delegated. It was not authorized to delete those still-Frozen future distribution/public-API commitments.
 
-### F3 — Preparation identity drops DigestRef algorithm/scheme
+Candidate `orchestrator/docs/architecture.md` replaced the installation statement with WP-1-only wording and removed the future `tracker.api.v1`, `adapters.api.v1`, and `scheduler.api.v1` entries while leaving the document at Architecture 1.6.0 / status Frozen. That is Tier-1B authority drift, not a necessary consequence of the source-tree simplification.
 
-Material digest helpers compare/hash only `.value`, omitting public `algorithm` and `canonicalization_scheme`.
+**Repair:** restore the still-Frozen distribution installation/dependency semantics and the full future public API namespace list in Architecture 1.6.0. Keep the new shallow WP-1 layout example and clarify that future physical package roots are deferred/delegated until those modules are implemented. Do not create future package directories or compatibility scaffolding. Do not change architecture version/semantics unless a genuine Design reopen is separately justified.
 
-**Repair:** serialize complete DigestRef everywhere material identity participates. No second digest schema.
+### B3 — Durable user/developer documentation still contradicts the accepted product contract
 
-**Tests:** changing only algorithm/scheme on candidate/workplan/profile/source digests invalidates old preparation; unchanged records remain deterministic.
+The code-side F5 repair is correct, but `orchestrator/docs/core-user-guide.md` still says the **last** exact begin marker starts the result footer. The accepted wire and current extractor instead require exactly one begin marker and one end marker; any extra exact marker invalidates extraction. This is a direct user-facing contract contradiction.
 
-### F4 — Doctor is not guaranteed packaged-only/no-network
+The Development section also begins with an editable-install command even though the accepted development mode is explicitly usable without installing/editable-installing the orchestrator. The guide already contains the zero-install launcher; the development entry should not make installation appear prerequisite.
 
-`doctor` labels `packaged_profile` but calls normal workflow/source resolution, so configured local source can alter the result and packaged failure can reach remote fallback.
+**Repair:** alter the existing guide only. State the exact unique-marker rule and rejection of any extra exact begin/end marker. Present `python orchestrator/sdp.py ...` as the default checkout execution path; if editable installation is retained as an optional convenience, label it optional. Keep runtime dependency ownership in `pyproject.toml`/existing development dependency files rather than duplicating dependency lists in prose.
 
-**Repair:** doctor inspects packaged snapshot directly or an existing explicitly network-disabled packaged path. No second Protocol resolver.
+### B4 — Required exact-candidate acceptance is incomplete both in definition and execution evidence
 
-**Tests:** local/remote config cannot change doctor packaged observation; forced packaged failure performs zero remote calls; no provider import/repository mutation.
+The workplan explicitly invalidated most pre-migration evidence because F9 moved package/import/launcher boundaries. Candidate `5562a426...` does not record a fresh final affected-regression/integration/project-check run in the workplan or another supplied current acceptance artifact. The repository CI workflow runs on `main` pushes or pull requests, so this branch-head commit has no GitHub status contexts. The independent review environment could inspect the exact GitHub source but could not obtain a runnable checkout; no independent runtime rerun is claimed.
 
-### F5 — Footer extractor/test oracle accepts duplicate complete footers
+In addition, several focused counterexamples required by the accepted F1-F9 repair contract are still absent from the candidate test source:
 
-Frozen wire requires exactly one terminal footer, but extractor selects the last complete block and a test positively asserts this invalid behavior.
+1. **Digest identity matrix:** current regression mutates one prompt-source digest scheme, but acceptance requires algorithm and canonicalization-scheme tampering across material candidate/workplan/profile/source DigestRefs.
+2. **Passive doctor failure path:** current installed doctor smoke covers the happy path, but acceptance requires a forced packaged-profile failure while local/remote source configuration is present and proof that doctor performs zero remote fallback/query.
+3. **Git executable override liveness:** current test checks that `GIT_SSH*` variables are absent from `_git_env()`, but acceptance requires a test-owned ambient executable helper/marker exercised through the relevant remote-query path and proof that the helper is not executed.
+4. **B1 precedence counterexample:** the newly identified explicit-workplan-before-project-default case must be executable regression, not source reasoning only.
 
-**Repair:** reject duplicate exact begin/end marker blocks while preserving exact-line/terminal-whitespace semantics. Replace the weakened test and guide wording.
+**Repair:** add only focused tests at the existing real owners; no new test framework, transport abstraction, resolver, or diagnostic layer. Then execute and record the exact assembled candidate's required acceptance. Existing tests may be parameterized/consolidated rather than duplicated.
 
-**Tests:** one footer extracts; duplicate/extra exact markers reject; indented/near-match/trailing prose remain rejected.
+## 7. Re-review gate
 
-### F6 — Explicit optional workplan can have declared Protocol version ignored
-
-Explicit-only stages can select a plan whose declared version is silently ignored in favor of project/default profile.
-
-**Repair:** reconcile any declared version on an explicitly selected authority; preserve evidence-only behavior only when optional version metadata is absent.
-
-**Tests:** incompatible selected Verification/Stabilization/etc. plans fail; compatible version agrees; no-version optional plan retains accepted evidence-only path.
-
-### F7 — Public open fields accept live/non-JSON values and timestamps are unenforced
-
-`EventEnvelope.payload`, additive result fields, and timestamp strings can violate the public JSON/UTC value contract at construction.
-
-**Repair:** smallest validation at existing record boundary for recursively JSON-compatible values and UTC ISO-8601 timestamps. No parallel schema system.
-
-**Tests:** nested JSON round-trips; live objects/file handles reject; produced/deserialized timestamps are UTC ISO-8601; additive JSON compatibility remains.
-
-### F8 — Ambient executable Git transport overrides remain inherited
-
-Git environment still permits ambient `GIT_SSH`, `GIT_SSH_COMMAND`, `GIT_SSH_VARIANT`; `GIT_SSH_COMMAND` can execute arbitrary ambient command during a supposedly controlled query.
-
-**Repair:** narrow existing allowlist to normal required process/credential environment; do not inherit executable Git command overrides without an accepted config surface. No transport framework.
-
-**Test:** ambient helper that would create a marker is not executed by remote-query path; normal supported SSH-agent path remains available.
-
-### F9 — Simplify the source tree and provide both installed and zero-install CLI entry paths
-
-Current path `orchestrator/packages/core/src/sdp_orchestrator/core` is over-nested, repeats `core` as speculative distribution-directory and import package, and makes nearly every implementation module look private. The generated `sdp` command points at `_cli.py`, making product entry source obscure. Development currently also lacks a direct checked-in launcher, forcing package installation/editable-install workflows during rapid source iteration.
-
-**Repair sequence:**
-
-1. First move the Core project to the §4 target layout (`orchestrator/pyproject.toml`, `orchestrator/src/sdp_orchestrator/core`, `orchestrator/tests`). Remove `orchestrator/packages/core`; do not leave symlinks/forwarders.
-2. Rename the primary implementation modules per §4.2 and rewire imports/tests/generator/package-data directly. Do not add compatibility aliases for old private module names.
-3. Change installed console entry point directly to `sdp_orchestrator.core.cli:main`.
-4. Add `orchestrator/sdp.py` as the thin zero-install development launcher described in §4.3. It prepends the checkout `src/` directory and calls the same `core.cli:main`; it contains no CLI/business behavior and is not included as a second installed console-script authority.
-5. Reconcile architecture example, README, user/developer paths and commands.
-6. Only then implement F1-F8 against the simplified owners, so repair work is not immediately invalidated by second structural churn.
-
-**Tests/structural evidence:** old `orchestrator/packages/core` and old `_app.py`/`_cli.py`-class implementation paths are absent; `api.v1`/`spi.v1` consumer imports remain unchanged; source/wheel/sdist imports work; installed `sdp --help`, `sdp doctor`, and representative render work outside checkout; `python orchestrator/sdp.py --help`, doctor, and render work without installing the package and from an arbitrary cwd; with a deliberately stale/different installed `sdp_orchestrator.core`, the launcher demonstrably executes checkout source; source and installed invocation converge on the same CLI semantics; package resources/generator paths and CI/test runner use the new layout; no higher-module dependency, duplicate parser/command tree, or compatibility wrapper is introduced.
-
-## 9. Re-review gate
-
-WP-1 may return to independent Review only after F1-F9 are repaired on one exact assembled candidate. Because F9 changes import/layout/package/launcher paths, it invalidates most source-tree, packaging, CLI, API/SPI, extension, generator, and full-regression evidence; rerun those owners after the move rather than relying on pre-move green results.
+Return WP-1 to independent Review only after B1-B4 are closed on one exact assembled candidate.
 
 Required final evidence:
 
-1. structural migration evidence and focused F1-F9 counterexamples;
-2. complete Core regression with Hypothesis active;
-3. real installed extension composition and passive-doctor tests;
+1. focused B1 plus complete F1-F9 counterexamples, including the DigestRef matrix, passive-doctor no-network failure path, and ambient Git-helper non-execution;
+2. complete Core affected regression with Hypothesis active where configured;
+3. real installed extension composition and passive diagnostics;
 4. preparation/public API-SPI/wire/privacy tests;
 5. real Git/remote non-mutation and environment-boundary tests;
 6. canonical profile/snapshot generator parity;
-7. wheel and sdist build/inspection/install plus installed CLI outside checkout from the new `orchestrator/` project root;
-8. zero-install `orchestrator/sdp.py` tests from clean checkout-style paths and arbitrary cwd, including proof that local checkout source wins over a stale installed package;
-9. repository layout/absence checks proving no old package tree/private-path compatibility layer or duplicate CLI implementation remains;
-10. ordinary repository Protocol tests/build/package parity and `git diff --check`.
+7. wheel and sdist build/inspection/install plus installed CLI outside checkout;
+8. zero-install `orchestrator/sdp.py` from arbitrary cwd, including checkout-source precedence over a stale installed package;
+9. repository structural absence checks proving no legacy package/private-path compatibility layer or duplicate CLI implementation;
+10. ordinary Protocol regression, skill build/validate/package parity, and `git diff --check`;
+11. architecture/user-guide reconciliation showing no Tier-1B semantic deletion and no stale footer/install guidance.
 
-Any required unavailable owner check remains a blocker unless the governing contract permits substitute evidence. A green test whose oracle encodes the wrong contract is not closure.
+Record exact candidate identity and commands/results sufficient to establish that the checks actually ran after the final material edit. Still-valid evidence may be reused only where the changed dimension cannot plausibly affect the claim.
 
-**Current verdict: NO-PASS — return to `software-implementation`; perform F9 structural/development-entry simplification first, then repair F1-F8 in the simplified owners, then submit one exact candidate for fresh independent Review.**
+**Current verdict: NO-PASS — return to `software-implementation`; repair B1 by reordering existing ownership, restore the unintentionally deleted Frozen architecture statements, correct the existing guide, complete the focused acceptance tests, then rerun final assembled acceptance and submit the exact candidate for fresh Review.**
