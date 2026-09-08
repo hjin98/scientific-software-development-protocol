@@ -196,7 +196,7 @@ def resolve_remote(section: ProtocolSourceSection, *, profile_id: str = P.PROFIL
 
     archive = _run(["git", "archive", "--remote", repository, ref, "--", CANONICAL_VERSION_RELPATH, CANONICAL_PROMPTS_RELPATH])
     if archive.returncode != 0:
-        stderr = archive.stderr.decode("utf-8", "replace")
+        stderr = archive.stderr
         lowered = stderr.lower()
         missing_required_path = any(
             marker in lowered
