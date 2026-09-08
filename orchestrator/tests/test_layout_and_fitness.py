@@ -111,9 +111,15 @@ class ContainmentTests(unittest.TestCase):
         self.assertNotIn("def ", text)
 
     def test_protocol_workplans_remain_under_the_repository_convention(self) -> None:
+        active = REPO_ROOT / "workplans/active"
+        self.assertTrue((active / "SSDP-6-AUTHORITY.md").is_file())
         self.assertTrue(
-            (REPO_ROOT / "workplans/active/PROTOCOL-ORCHESTRATOR-WP1-PROMPT-CORE.md").is_file()
+            (
+                active
+                / "SSDP-6-RECURSIVE-ABSTRACTION-REALIZATION-SCIENTIFIC-SOFTWARE-PROTOCOL.md"
+            ).is_file()
         )
+        self.assertFalse((REPO_ROOT / "orchestrator/workplans").exists())
 
 
 class NamespaceTests(unittest.TestCase):

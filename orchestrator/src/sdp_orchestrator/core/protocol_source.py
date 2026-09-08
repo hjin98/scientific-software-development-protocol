@@ -196,7 +196,25 @@ def resolve_remote(section: ProtocolSourceSection, *, profile_id: str = P.PROFIL
 
     archive = _run(["git", "archive", "--remote", repository, ref, "--", CANONICAL_VERSION_RELPATH, CANONICAL_PROMPTS_RELPATH])
     if archive.returncode != 0:
-        E.fail(E.PROTOCOL_UNAVAILABLE, "the remote Protocol source could not be read", details={"repository": sanitized, "ref": ref, "stderr": archive.stderr})
+        stderr = archive.stderr.decode("utf-8", "replace")
+        lowered = stderr.lower()
+        missing_required_path = any(
+            marker in lowered
+            for marker in (
+                "pathspec",
+                "did not match any files",
+                "path not found",
+            )
+        )
+        E.fail(
+            E.PROTOCOL_SOURCE_INCOHERENT if missing_required_path else E.PROTOCOL_UNAVAILABLE,
+            (
+                "the pinned remote Protocol commit does not contain every required canonical file"
+                if missing_required_path
+                else "the remote Protocol source could not be read"
+            ),
+            details={"repository": sanitized, "ref": ref, "commit": commit, "stderr": stderr},
+        )
 
     confirmation = _run(["git", "ls-remote", "--", repository, ref])
     confirmed_commits = {line.split("\t", 1)[0].strip() for line in confirmation.stdout.decode("utf-8", "replace").splitlines() if "\t" in line} if confirmation.returncode == 0 else set()

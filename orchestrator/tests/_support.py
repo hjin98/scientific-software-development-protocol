@@ -60,6 +60,10 @@ def init_repo(root: Path, *, branch: str = "main") -> Path:
     )
     git(root, "config", "user.name", "sdp-test")
     git(root, "config", "user.email", "sdp-test@example.invalid")
+    # Several integration tests deliberately reuse a working repository as a
+    # local Git remote. Make that fixture explicit and deterministic instead of
+    # relying on two independently-created initial commits happening to hash alike.
+    git(root, "config", "receive.denyCurrentBranch", "updateInstead")
     (root / "README.md").write_text("temporary test repository\n", encoding="utf-8")
     git(root, "add", "README.md")
     git(root, "commit", "--quiet", "-m", "initial")

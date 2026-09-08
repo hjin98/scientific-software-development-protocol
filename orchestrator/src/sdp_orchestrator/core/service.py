@@ -264,6 +264,38 @@ class CoreService:
         stage_ref = P.resolve_stage_key(descriptor, str(request.stage))
         stage_descriptor = P.stage_descriptor(descriptor, stage_ref)
 
+        # Bootstrap selection may discover a version-bound workplan that changes
+        # the owning profile. Resolve the workplan again under that final profile
+        # so the public resolution and later stale-context check use the same
+        # StageRef/policy. A second profile change is an incoherent binding, not a
+        # reason to keep whichever bootstrap interpretation happened to run first.
+        resolution = W.resolve(
+            catalog,
+            stage=stage_ref,
+            policy=stage_descriptor.workplan_policy,
+            selector=request.workplan_selector,
+            branch=observation.candidate.branch,
+        )
+        selected_workplan = resolution.workplan
+        governing_workplan = selected_workplan if resolution.policy in (W.WorkplanPolicy.REQUIRED, W.WorkplanPolicy.EXPLICIT_REQUIRED) else None
+        profile_binding = selected_workplan if selected_workplan is not None and (governing_workplan is not None or selected_workplan.protocol_version is not None) else None
+        rebound_profile_id = self._profile_id_for(
+            context,
+            profile_binding,
+            require_version=governing_workplan is not None,
+        )
+        if rebound_profile_id != profile_id:
+            E.fail(
+                E.PROTOCOL_INCOMPATIBLE,
+                "workplan/profile resolution is not stable across the selected Protocol profile",
+                details={
+                    "initial_profile": profile_id,
+                    "resolved_profile": rebound_profile_id,
+                    "stage": stage_ref.stage_key,
+                },
+                remediation="select the governing workplan explicitly or configure the matching Protocol profile",
+            )
+
         governing_version = selected_workplan.protocol_version if selected_workplan is not None and selected_workplan.protocol_version else descriptor.profile.protocol_version
         inputs = resolve_inputs(
             stage_descriptor,
