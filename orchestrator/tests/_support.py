@@ -26,6 +26,7 @@ _GIT_ENV = {
     "GIT_CONFIG_SYSTEM": os.devnull,
     "LC_ALL": "C",
 }
+_INITIAL_COMMIT_DATE = "2000-01-01T00:00:00+0000"
 
 
 def git(root: Path, *args: str) -> str:
@@ -66,7 +67,17 @@ def init_repo(root: Path, *, branch: str = "main") -> Path:
     git(root, "config", "receive.denyCurrentBranch", "updateInstead")
     (root / "README.md").write_text("temporary test repository\n", encoding="utf-8")
     git(root, "add", "README.md")
-    git(root, "commit", "--quiet", "-m", "initial")
+    initial_env = {
+        **_GIT_ENV,
+        "GIT_AUTHOR_DATE": _INITIAL_COMMIT_DATE,
+        "GIT_COMMITTER_DATE": _INITIAL_COMMIT_DATE,
+    }
+    subprocess.run(
+        ["git", "-C", str(root), "commit", "--quiet", "-m", "initial"],
+        check=True,
+        capture_output=True,
+        env=initial_env,
+    )
     return root
 
 
