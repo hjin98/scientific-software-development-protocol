@@ -1,264 +1,16 @@
 running 12 test modules across 4 workers
     ok  tests.test_config_and_projects                     28 tests    1.0s
-    ok  tests.test_extension_composition                   30 tests    2.2s
-  FAIL  tests.test_git_observation                         44 tests    2.5s
-    ok  tests.test_input_binding                           31 tests    4.4s
-  FAIL  tests.test_installed_product                       32 tests   34.9s
-  FAIL  tests.test_layout_and_fitness                      21 tests    0.4s
-  FAIL  tests.test_privacy_and_remote_truth                31 tests    5.4s
-  FAIL  tests.test_protocol_source_and_profile             37 tests    1.2s
-    ok  tests.test_public_api_seam                         31 tests    2.6s
-    ok  tests.test_render_and_identity                     35 tests    4.3s
+    ok  tests.test_extension_composition                   30 tests    2.3s
+    ok  tests.test_git_observation                         44 tests    2.7s
+    ok  tests.test_input_binding                           31 tests    4.2s
+    ok  tests.test_installed_product                       32 tests   35.9s
+    ok  tests.test_layout_and_fitness                      21 tests    0.4s
+    ok  tests.test_privacy_and_remote_truth                31 tests    5.7s
+  FAIL  tests.test_protocol_source_and_profile             37 tests    1.3s
+    ok  tests.test_public_api_seam                         31 tests    2.7s
+    ok  tests.test_render_and_identity                     35 tests    4.7s
     ok  tests.test_ssdp6_profiles                          12 tests    0.4s
-    ok  tests.test_workplan_resolution                     40 tests    1.3s
-
-======================================================================
-tests.test_git_observation
-======================================================================
-test_ambiguous_remote_is_a_diagnostic_not_a_hard_failure (tests.test_git_observation.CandidateObservationTests.test_ambiguous_remote_is_a_diagnostic_not_a_hard_failure) ... ok
-test_branch_and_head_are_reported (tests.test_git_observation.CandidateObservationTests.test_branch_and_head_are_reported) ... ok
-test_cached_remote_reads_existing_tracking_refs (tests.test_git_observation.CandidateObservationTests.test_cached_remote_reads_existing_tracking_refs) ... ok
-test_detached_head_is_reported (tests.test_git_observation.CandidateObservationTests.test_detached_head_is_reported) ... ok
-test_dirty_content_marks_the_candidate (tests.test_git_observation.CandidateObservationTests.test_dirty_content_marks_the_candidate) ... ok
-test_local_only_gathers_no_remote_evidence (tests.test_git_observation.CandidateObservationTests.test_local_only_gathers_no_remote_evidence) ... ok
-test_missing_upstream_is_diagnosed_not_invented (tests.test_git_observation.CandidateObservationTests.test_missing_upstream_is_diagnosed_not_invented) ... ok
-test_refresh_remote_queries_without_mutating_tracking_refs (tests.test_git_observation.CandidateObservationTests.test_refresh_remote_queries_without_mutating_tracking_refs) ... ERROR
-test_cached_remote_observation_mutates_nothing (tests.test_git_observation.NonMutationTests.test_cached_remote_observation_mutates_nothing) ... ok
-test_head_and_branch_survive_observation (tests.test_git_observation.NonMutationTests.test_head_and_branch_survive_observation) ... ok
-test_local_only_observation_mutates_nothing (tests.test_git_observation.NonMutationTests.test_local_only_observation_mutates_nothing) ... ok
-test_refresh_remote_observation_mutates_nothing (tests.test_git_observation.NonMutationTests.test_refresh_remote_observation_mutates_nothing) ... ok
-test_branch_upstream_remote_precedes_origin (tests.test_git_observation.RemoteSelectionTests.test_branch_upstream_remote_precedes_origin) ... ok
-test_configured_remote_name_wins (tests.test_git_observation.RemoteSelectionTests.test_configured_remote_name_wins) ... ok
-test_credential_userinfo_is_stripped (tests.test_git_observation.RemoteSelectionTests.test_credential_userinfo_is_stripped) ... ok
-test_file_url_remote_is_local_only (tests.test_git_observation.RemoteSelectionTests.test_file_url_remote_is_local_only) ... ok
-test_filesystem_path_remote_is_local_only (tests.test_git_observation.RemoteSelectionTests.test_filesystem_path_remote_is_local_only) ... ok
-test_multiple_remotes_without_evidence_are_ambiguous (tests.test_git_observation.RemoteSelectionTests.test_multiple_remotes_without_evidence_are_ambiguous) ... ok
-test_no_remote_is_reported_as_unavailable (tests.test_git_observation.RemoteSelectionTests.test_no_remote_is_reported_as_unavailable) ... ok
-test_origin_precedes_other_remotes (tests.test_git_observation.RemoteSelectionTests.test_origin_precedes_other_remotes) ... ok
-test_remote_listing_is_complete (tests.test_git_observation.RemoteSelectionTests.test_remote_listing_is_complete) ... ok
-test_scp_style_ssh_remote_is_web_addressable (tests.test_git_observation.RemoteSelectionTests.test_scp_style_ssh_remote_is_web_addressable) ... ok
-test_sole_remote_is_selected (tests.test_git_observation.RemoteSelectionTests.test_sole_remote_is_selected) ... ok
-test_unknown_configured_remote_fails (tests.test_git_observation.RemoteSelectionTests.test_unknown_configured_remote_fails) ... ok
-test_aggregate_dirty_content_budget_marks_identity_incomplete (tests.test_git_observation.WorkingTreeIdentityTests.test_aggregate_dirty_content_budget_marks_identity_incomplete) ... ok
-test_clean_tree_has_no_digest (tests.test_git_observation.WorkingTreeIdentityTests.test_clean_tree_has_no_digest) ... ok
-test_dirty_content_changes_the_digest_at_the_same_path (tests.test_git_observation.WorkingTreeIdentityTests.test_dirty_content_changes_the_digest_at_the_same_path) ... ok
-test_embedded_repository_directory_marks_identity_incomplete (tests.test_git_observation.WorkingTreeIdentityTests.test_embedded_repository_directory_marks_identity_incomplete)
-Git reports an embedded repository as one directory entry. ... ok
-test_identical_dirty_content_is_stable (tests.test_git_observation.WorkingTreeIdentityTests.test_identical_dirty_content_is_stable) ... ok
-test_mode_only_staged_changes_participate (tests.test_git_observation.WorkingTreeIdentityTests.test_mode_only_staged_changes_participate) ... ok
-test_non_utf8_dirty_path_is_structured_without_encoding_failure (tests.test_git_observation.WorkingTreeIdentityTests.test_non_utf8_dirty_path_is_structured_without_encoding_failure) ... ok
-test_scheme_is_versioned (tests.test_git_observation.WorkingTreeIdentityTests.test_scheme_is_versioned) ... ok
-test_staged_and_untracked_content_both_participate (tests.test_git_observation.WorkingTreeIdentityTests.test_staged_and_untracked_content_both_participate) ... ok
-test_staged_blob_changes_participate_when_worktree_bytes_do_not (tests.test_git_observation.WorkingTreeIdentityTests.test_staged_blob_changes_participate_when_worktree_bytes_do_not) ... ok
-test_unreadable_file_marks_identity_incomplete (tests.test_git_observation.WorkingTreeIdentityTests.test_unreadable_file_marks_identity_incomplete) ... ok
-test_alias_paths_map_to_one_worktree_key (tests.test_git_observation.WorktreeIdentityTests.test_alias_paths_map_to_one_worktree_key) ... ok
-test_ambient_git_semantic_overrides_do_not_redirect_observation (tests.test_git_observation.WorktreeIdentityTests.test_ambient_git_semantic_overrides_do_not_redirect_observation) ... ok
-test_git_executable_override_is_not_executed_by_remote_query (tests.test_git_observation.WorktreeIdentityTests.test_git_executable_override_is_not_executed_by_remote_query)
-Exercise the real refresh path while an ambient helper is armed. ... ok
-test_git_executable_overrides_are_not_inherited (tests.test_git_observation.WorktreeIdentityTests.test_git_executable_overrides_are_not_inherited) ... ok
-test_key_does_not_expose_the_local_path (tests.test_git_observation.WorktreeIdentityTests.test_key_does_not_expose_the_local_path) ... ok
-test_linked_worktree_is_a_distinct_key_sharing_the_repository (tests.test_git_observation.WorktreeIdentityTests.test_linked_worktree_is_a_distinct_key_sharing_the_repository) ... ok
-test_non_repository_path_is_rejected (tests.test_git_observation.WorktreeIdentityTests.test_non_repository_path_is_rejected) ... ok
-test_subdirectory_resolves_to_the_worktree_root (tests.test_git_observation.WorktreeIdentityTests.test_subdirectory_resolves_to_the_worktree_root) ... ok
-test_subprocess_stdout_and_stderr_are_bounded_during_collection (tests.test_git_observation.WorktreeIdentityTests.test_subprocess_stdout_and_stderr_are_bounded_during_collection) ... ok
-
-======================================================================
-ERROR: test_refresh_remote_queries_without_mutating_tracking_refs (tests.test_git_observation.CandidateObservationTests.test_refresh_remote_queries_without_mutating_tracking_refs)
-----------------------------------------------------------------------
-Traceback (most recent call last):
-  File "/home/runner/work/software-development-protocol/software-development-protocol/orchestrator/tests/test_git_observation.py", line 393, in test_refresh_remote_queries_without_mutating_tracking_refs
-    git(self.repo, "push", "--quiet", "-u", "origin", "main")
-  File "/home/runner/work/software-development-protocol/software-development-protocol/orchestrator/tests/_support.py", line 32, in git
-    result = subprocess.run(
-             ^^^^^^^^^^^^^^^
-  File "/opt/hostedtoolcache/Python/3.12.14/x64/lib/python3.12/subprocess.py", line 571, in run
-    raise CalledProcessError(retcode, process.args,
-subprocess.CalledProcessError: Command '['git', '-C', '/tmp/tmpvpnba5xs/repo', 'push', '--quiet', '-u', 'origin', 'main']' returned non-zero exit status 1.
-
-----------------------------------------------------------------------
-Ran 44 tests in 1.829s
-
-FAILED (errors=1)
-
-
-======================================================================
-tests.test_installed_product
-======================================================================
-test_capabilities_defaults_to_discovery_only (tests.test_installed_product.InstalledProductTests.test_capabilities_defaults_to_discovery_only) ... ok
-test_clipboard_extra_is_additive_and_never_blocks_the_prompt (tests.test_installed_product.InstalledProductTests.test_clipboard_extra_is_additive_and_never_blocks_the_prompt) ... ok
-test_cwd_project_resolution_works_from_inside_the_worktree (tests.test_installed_product.InstalledProductTests.test_cwd_project_resolution_works_from_inside_the_worktree) ... ok
-test_doctor_packaged_failure_does_not_fallback_to_configured_sources (tests.test_installed_product.InstalledProductTests.test_doctor_packaged_failure_does_not_fallback_to_configured_sources)
-Doctor's packaged-only owner must stay passive even on failure. ... ok
-test_doctor_reports_readiness_without_loading_or_network (tests.test_installed_product.InstalledProductTests.test_doctor_reports_readiness_without_loading_or_network) ... ok
-test_errors_are_redacted_json_on_stderr_with_no_prompt_bytes (tests.test_installed_product.InstalledProductTests.test_errors_are_redacted_json_on_stderr_with_no_prompt_bytes) ... ok
-test_every_stage_alias_uses_the_same_path_as_prompt (tests.test_installed_product.InstalledProductTests.test_every_stage_alias_uses_the_same_path_as_prompt) ... ok
-test_execution_mode_override_does_not_change_prompt_mode (tests.test_installed_product.InstalledProductTests.test_execution_mode_override_does_not_change_prompt_mode) ... ok
-test_help_is_available_without_a_configuration (tests.test_installed_product.InstalledProductTests.test_help_is_available_without_a_configuration) ... ok
-test_installed_build_imports_no_higher_module (tests.test_installed_product.InstalledProductTests.test_installed_build_imports_no_higher_module) ... ok
-test_installed_cli_renders_a_stage_prompt (tests.test_installed_product.InstalledProductTests.test_installed_cli_renders_a_stage_prompt) ... ok
-test_installed_package_lives_outside_the_source_checkout (tests.test_installed_product.InstalledProductTests.test_installed_package_lives_outside_the_source_checkout) ... ok
-test_offline_rendering_uses_the_packaged_snapshot (tests.test_installed_product.InstalledProductTests.test_offline_rendering_uses_the_packaged_snapshot)
-No configured Protocol source: the wheel's own snapshot must suffice. ... FAIL
-test_pipe_safe_output (tests.test_installed_product.InstalledProductTests.test_pipe_safe_output) ... ok
-test_profile_alias_resolves (tests.test_installed_product.InstalledProductTests.test_profile_alias_resolves) ... ok
-test_projects_command_reports_configuration (tests.test_installed_product.InstalledProductTests.test_projects_command_reports_configuration) ... ok
-test_prompt_mode_web_leaves_canonical_execution_mode_alone (tests.test_installed_product.InstalledProductTests.test_prompt_mode_web_leaves_canonical_execution_mode_alone) ... ok
-test_sdist_contains_the_package_and_protocol_resources (tests.test_installed_product.InstalledProductTests.test_sdist_contains_the_package_and_protocol_resources) ... ok
-test_sdist_installed_cli_runs_outside_the_checkout (tests.test_installed_product.InstalledProductTests.test_sdist_installed_cli_runs_outside_the_checkout) ... ok
-test_sdist_is_produced (tests.test_installed_product.InstalledProductTests.test_sdist_is_produced) ... ok
-test_sdist_was_installed_in_a_separate_environment (tests.test_installed_product.InstalledProductTests.test_sdist_was_installed_in_a_separate_environment) ... ok
-test_sibling_namespace_package_coexists (tests.test_installed_product.InstalledProductTests.test_sibling_namespace_package_coexists)
-A future sibling distribution must share the PEP 420 namespace. ... ok
-test_stage_disallowed_workplan_fails_at_the_cli (tests.test_installed_product.InstalledProductTests.test_stage_disallowed_workplan_fails_at_the_cli) ... ok
-test_stdout_carries_only_the_prompt (tests.test_installed_product.InstalledProductTests.test_stdout_carries_only_the_prompt) ... ok
-test_task_outside_design_fails_at_the_cli (tests.test_installed_product.InstalledProductTests.test_task_outside_design_fails_at_the_cli) ... ok
-test_wheel_contains_no_root_namespace_init (tests.test_installed_product.InstalledProductTests.test_wheel_contains_no_root_namespace_init) ... ok
-test_wheel_declares_the_console_script (tests.test_installed_product.InstalledProductTests.test_wheel_declares_the_console_script) ... ok
-test_wheel_ships_the_packaged_protocol_snapshot (tests.test_installed_product.InstalledProductTests.test_wheel_ships_the_packaged_protocol_snapshot) ... ok
-test_zero_install_launcher_matches_installed_cli_semantics (tests.test_installed_product.InstalledProductTests.test_zero_install_launcher_matches_installed_cli_semantics) ... ok
-test_zero_install_launcher_propagates_structured_failures (tests.test_installed_product.InstalledProductTests.test_zero_install_launcher_propagates_structured_failures) ... ok
-test_zero_install_launcher_runs_from_outside_the_checkout (tests.test_installed_product.InstalledProductTests.test_zero_install_launcher_runs_from_outside_the_checkout) ... ok
-test_zero_install_launcher_wins_over_a_stale_namespace_copy (tests.test_installed_product.InstalledProductTests.test_zero_install_launcher_wins_over_a_stale_namespace_copy) ... ok
-
-======================================================================
-FAIL: test_offline_rendering_uses_the_packaged_snapshot (tests.test_installed_product.InstalledProductTests.test_offline_rendering_uses_the_packaged_snapshot)
-No configured Protocol source: the wheel's own snapshot must suffice.
-----------------------------------------------------------------------
-Traceback (most recent call last):
-  File "/home/runner/work/software-development-protocol/software-development-protocol/orchestrator/tests/test_installed_product.py", line 493, in test_offline_rendering_uses_the_packaged_snapshot
-    self.assertEqual(result.returncode, 0, result.stderr)
-AssertionError: 2 != 0 : {
-  "code": "core.context.stale",
-  "details": {},
-  "message": "the governing workplan resolution changed between preparation and final render",
-  "remediation": null,
-  "retryable": null
-}
-
-
-----------------------------------------------------------------------
-Ran 32 tests in 34.845s
-
-FAILED (failures=1)
-
-
-======================================================================
-tests.test_layout_and_fitness
-======================================================================
-test_core_declares_exactly_one_extension_entry_point_group (tests.test_layout_and_fitness.ArchitectureFitnessTests.test_core_declares_exactly_one_extension_entry_point_group)
-One group constant, and one place that reads entry points from it. ... ok
-test_core_defines_no_higher_module_command (tests.test_layout_and_fitness.ArchitectureFitnessTests.test_core_defines_no_higher_module_command) ... ok
-test_core_imports_no_forbidden_machinery (tests.test_layout_and_fitness.ArchitectureFitnessTests.test_core_imports_no_forbidden_machinery) ... ok
-test_core_imports_no_higher_module (tests.test_layout_and_fitness.ArchitectureFitnessTests.test_core_imports_no_higher_module) ... ok
-test_core_introduces_no_persistence (tests.test_layout_and_fitness.ArchitectureFitnessTests.test_core_introduces_no_persistence) ... ok
-test_core_remote_source_reads_do_not_fetch_repository_mirrors (tests.test_layout_and_fitness.ArchitectureFitnessTests.test_core_remote_source_reads_do_not_fetch_repository_mirrors)
-Bounded archive reads avoid materializing an unrelated mirror. ... ok
-test_no_higher_module_placeholders_remain (tests.test_layout_and_fitness.ArchitectureFitnessTests.test_no_higher_module_placeholders_remain)
-Guard against speculative Adapter/Scheduler scaffolding inside Core. ... ok
-test_public_surfaces_import_only_within_core (tests.test_layout_and_fitness.ArchitectureFitnessTests.test_public_surfaces_import_only_within_core) ... ok
-test_target_observer_uses_no_mutating_git_subcommand (tests.test_layout_and_fitness.ArchitectureFitnessTests.test_target_observer_uses_no_mutating_git_subcommand)
-The single module that touches target repositories stays read-only. ... ok
-test_every_orchestrator_python_file_lives_under_the_containment_root (tests.test_layout_and_fitness.ContainmentTests.test_every_orchestrator_python_file_lives_under_the_containment_root) ... ok
-test_legacy_core_tree_and_private_module_paths_are_absent (tests.test_layout_and_fitness.ContainmentTests.test_legacy_core_tree_and_private_module_paths_are_absent) ... ok
-test_no_orchestrator_package_exists_outside_the_containment_root (tests.test_layout_and_fitness.ContainmentTests.test_no_orchestrator_package_exists_outside_the_containment_root) ... ok
-test_protocol_workplans_remain_under_the_repository_convention (tests.test_layout_and_fitness.ContainmentTests.test_protocol_workplans_remain_under_the_repository_convention) ... FAIL
-test_repository_ci_only_invokes_orchestrator_commands (tests.test_layout_and_fitness.ContainmentTests.test_repository_ci_only_invokes_orchestrator_commands)
-CI may call into ``orchestrator/``; it must not host orchestrator logic. ... ok
-test_sibling_repository_trees_do_not_import_orchestrator_code (tests.test_layout_and_fitness.ContainmentTests.test_sibling_repository_trees_do_not_import_orchestrator_code) ... ok
-test_clipboard_is_an_optional_extra (tests.test_layout_and_fitness.NamespaceTests.test_clipboard_is_an_optional_extra) ... ok
-test_declared_runtime_dependencies_are_the_justified_set (tests.test_layout_and_fitness.NamespaceTests.test_declared_runtime_dependencies_are_the_justified_set) ... ok
-test_exactly_one_console_entry_point (tests.test_layout_and_fitness.NamespaceTests.test_exactly_one_console_entry_point) ... ok
-test_no_distribution_owns_the_root_namespace_init (tests.test_layout_and_fitness.NamespaceTests.test_no_distribution_owns_the_root_namespace_init) ... ok
-test_packaging_declares_native_namespaces (tests.test_layout_and_fitness.NamespaceTests.test_packaging_declares_native_namespaces) ... ok
-test_runtime_floor_is_python_311 (tests.test_layout_and_fitness.NamespaceTests.test_runtime_floor_is_python_311) ... ok
-
-======================================================================
-FAIL: test_protocol_workplans_remain_under_the_repository_convention (tests.test_layout_and_fitness.ContainmentTests.test_protocol_workplans_remain_under_the_repository_convention)
-----------------------------------------------------------------------
-Traceback (most recent call last):
-  File "/home/runner/work/software-development-protocol/software-development-protocol/orchestrator/tests/test_layout_and_fitness.py", line 114, in test_protocol_workplans_remain_under_the_repository_convention
-    self.assertTrue(
-AssertionError: False is not true
-
-----------------------------------------------------------------------
-Ran 21 tests in 0.313s
-
-FAILED (failures=1)
-
-
-======================================================================
-tests.test_privacy_and_remote_truth
-======================================================================
-test_explicit_protocol_source_override_is_honoured (tests.test_privacy_and_remote_truth.ExplicitUserTextTests.test_explicit_protocol_source_override_is_honoured) ... ok
-test_user_task_text_is_rendered_verbatim (tests.test_privacy_and_remote_truth.ExplicitUserTextTests.test_user_task_text_is_rendered_verbatim) ... ok
-test_detached_head_renders_in_local_mode (tests.test_privacy_and_remote_truth.LocalModeTests.test_detached_head_renders_in_local_mode) ... ok
-test_local_prompt_does_not_carry_credential_remotes (tests.test_privacy_and_remote_truth.LocalModeTests.test_local_prompt_does_not_carry_credential_remotes) ... ok
-test_local_prompt_excludes_ambient_environment_values (tests.test_privacy_and_remote_truth.LocalModeTests.test_local_prompt_excludes_ambient_environment_values) ... ok
-test_local_prompt_may_reference_the_authorized_worktree (tests.test_privacy_and_remote_truth.LocalModeTests.test_local_prompt_may_reference_the_authorized_worktree) ... ok
-test_local_prompt_states_worktree_cleanliness_truthfully (tests.test_privacy_and_remote_truth.LocalModeTests.test_local_prompt_states_worktree_cleanliness_truthfully) ... ok
-test_absent_remote_branch_blocks_web_mode (tests.test_privacy_and_remote_truth.WebAddressabilityTests.test_absent_remote_branch_blocks_web_mode)
-A branch that does not exist on the remote is never rendered as a web target. ... ok
-test_ambiguous_remotes_are_reported_not_guessed (tests.test_privacy_and_remote_truth.WebAddressabilityTests.test_ambiguous_remotes_are_reported_not_guessed) ... ok
-test_cached_tracking_evidence_admits_a_web_render (tests.test_privacy_and_remote_truth.WebAddressabilityTests.test_cached_tracking_evidence_admits_a_web_render) ... ok
-test_configured_remote_name_disambiguates (tests.test_privacy_and_remote_truth.WebAddressabilityTests.test_configured_remote_name_disambiguates) ... ok
-test_detached_head_blocks_web_mode (tests.test_privacy_and_remote_truth.WebAddressabilityTests.test_detached_head_blocks_web_mode) ... ok
-test_dirty_worktree_blocks_web_mode (tests.test_privacy_and_remote_truth.WebAddressabilityTests.test_dirty_worktree_blocks_web_mode) ... ok
-test_explicit_freshness_rejects_age_unknown_cached_evidence (tests.test_privacy_and_remote_truth.WebAddressabilityTests.test_explicit_freshness_rejects_age_unknown_cached_evidence) ... ok
-test_file_remote_is_rejected_for_web_mode (tests.test_privacy_and_remote_truth.WebAddressabilityTests.test_file_remote_is_rejected_for_web_mode) ... ok
-test_filesystem_path_remote_is_rejected_for_web_mode (tests.test_privacy_and_remote_truth.WebAddressabilityTests.test_filesystem_path_remote_is_rejected_for_web_mode) ... ok
-test_local_ahead_of_remote_blocks_web_mode (tests.test_privacy_and_remote_truth.WebAddressabilityTests.test_local_ahead_of_remote_blocks_web_mode) ... ok
-test_local_only_observation_cannot_establish_a_web_target (tests.test_privacy_and_remote_truth.WebAddressabilityTests.test_local_only_observation_cannot_establish_a_web_target) ... ok
-test_no_remote_at_all_is_reported (tests.test_privacy_and_remote_truth.WebAddressabilityTests.test_no_remote_at_all_is_reported) ... ok
-test_refreshed_evidence_carries_a_real_age_for_the_freshness_bound (tests.test_privacy_and_remote_truth.WebAddressabilityTests.test_refreshed_evidence_carries_a_real_age_for_the_freshness_bound) ... ok
-test_refreshed_evidence_is_labelled_distinctly (tests.test_privacy_and_remote_truth.WebAddressabilityTests.test_refreshed_evidence_is_labelled_distinctly) ... ok
-test_remote_ahead_of_local_blocks_web_mode (tests.test_privacy_and_remote_truth.WebAddressabilityTests.test_remote_ahead_of_local_blocks_web_mode) ... ok
-test_selected_fork_does_not_inherit_origin_upstream_evidence (tests.test_privacy_and_remote_truth.WebAddressabilityTests.test_selected_fork_does_not_inherit_origin_upstream_evidence) ... ok
-test_selected_fork_uses_its_cached_same_branch_target (tests.test_privacy_and_remote_truth.WebAddressabilityTests.test_selected_fork_uses_its_cached_same_branch_target) ... ok
-test_web_render_requires_known_target_existence (tests.test_privacy_and_remote_truth.WebAddressabilityTests.test_web_render_requires_known_target_existence) ... ok
-test_ssh_remote_is_rendered_without_alteration_of_its_user (tests.test_privacy_and_remote_truth.WebLeakageTests.test_ssh_remote_is_rendered_without_alteration_of_its_user) ... ok
-test_web_prompt_contains_no_credential_material (tests.test_privacy_and_remote_truth.WebLeakageTests.test_web_prompt_contains_no_credential_material) ... ok
-test_web_prompt_contains_no_local_paths (tests.test_privacy_and_remote_truth.WebLeakageTests.test_web_prompt_contains_no_local_paths) ... ok
-test_web_prompt_does_not_include_ambient_environment_values (tests.test_privacy_and_remote_truth.WebLeakageTests.test_web_prompt_does_not_include_ambient_environment_values) ... ok
-test_web_prompt_protocol_source_stays_agent_facing (tests.test_privacy_and_remote_truth.WebLeakageTests.test_web_prompt_protocol_source_stays_agent_facing)
-A local render source must never become the agent's PROTOCOL_SOURCE. ... ERROR
-test_web_prompt_reports_the_exact_candidate_commit (tests.test_privacy_and_remote_truth.WebLeakageTests.test_web_prompt_reports_the_exact_candidate_commit) ... ok
-
-======================================================================
-ERROR: test_web_prompt_protocol_source_stays_agent_facing (tests.test_privacy_and_remote_truth.WebLeakageTests.test_web_prompt_protocol_source_stays_agent_facing)
-A local render source must never become the agent's PROTOCOL_SOURCE.
-----------------------------------------------------------------------
-Traceback (most recent call last):
-  File "/home/runner/work/software-development-protocol/software-development-protocol/orchestrator/tests/test_privacy_and_remote_truth.py", line 355, in test_web_prompt_protocol_source_stays_agent_facing
-    rendered = self.render()
-               ^^^^^^^^^^^^^
-  File "/home/runner/work/software-development-protocol/software-development-protocol/orchestrator/tests/test_privacy_and_remote_truth.py", line 68, in render
-    prepared = application.core().prepare(
-               ^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/runner/work/software-development-protocol/software-development-protocol/orchestrator/src/sdp_orchestrator/core/service.py", line 246, in prepare
-    bootstrap = self._protocol_source(self._profile_id_for(context, explicit_workplan))
-                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/runner/work/software-development-protocol/software-development-protocol/orchestrator/src/sdp_orchestrator/core/service.py", line 169, in _protocol_source
-    return PS.resolve(section, profile_id=profile_id)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/runner/work/software-development-protocol/software-development-protocol/orchestrator/src/sdp_orchestrator/core/protocol_source.py", line 252, in resolve
-    return resolve_local(Path(section.local_root), profile_id=profile_id)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/runner/work/software-development-protocol/software-development-protocol/orchestrator/src/sdp_orchestrator/core/protocol_source.py", line 96, in resolve_local
-    document = parse_document(first_prompts, profile_id=profile_id)
-               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/runner/work/software-development-protocol/software-development-protocol/orchestrator/src/sdp_orchestrator/core/canonical.py", line 200, in parse_document
-    _fail_incoherent(
-  File "/home/runner/work/software-development-protocol/software-development-protocol/orchestrator/src/sdp_orchestrator/core/canonical.py", line 99, in _fail_incoherent
-    E.fail(E.PROTOCOL_SOURCE_INCOHERENT, message, details=details)
-  File "/home/runner/work/software-development-protocol/software-development-protocol/orchestrator/src/sdp_orchestrator/core/errors.py", line 162, in fail
-    raise OrchestratorError(
-sdp_orchestrator.core.errors.OrchestratorError: core.protocol.source_incoherent: the canonical source has extra, missing, or conflicting numbered stage headings
-
-----------------------------------------------------------------------
-Ran 31 tests in 4.960s
-
-FAILED (errors=1)
-
+    ok  tests.test_workplan_resolution                     40 tests    1.4s
 
 ======================================================================
 tests.test_protocol_source_and_profile
@@ -301,23 +53,23 @@ test_absent_ref_is_unavailable (tests.test_protocol_source_and_profile.RemoteSou
 test_all_files_come_from_the_pinned_identity (tests.test_protocol_source_and_profile.RemoteSourceTests.test_all_files_come_from_the_pinned_identity) ... ok
 test_explicit_ref_resolves_once_to_an_immutable_commit (tests.test_protocol_source_and_profile.RemoteSourceTests.test_explicit_ref_resolves_once_to_an_immutable_commit) ... ok
 test_incompatible_remote_version_fails (tests.test_protocol_source_and_profile.RemoteSourceTests.test_incompatible_remote_version_fails) ... ok
-test_missing_required_file_is_incoherent (tests.test_protocol_source_and_profile.RemoteSourceTests.test_missing_required_file_is_incoherent) ... FAIL
+test_missing_required_file_is_incoherent (tests.test_protocol_source_and_profile.RemoteSourceTests.test_missing_required_file_is_incoherent) ... ERROR
 
 ======================================================================
-FAIL: test_missing_required_file_is_incoherent (tests.test_protocol_source_and_profile.RemoteSourceTests.test_missing_required_file_is_incoherent)
+ERROR: test_missing_required_file_is_incoherent (tests.test_protocol_source_and_profile.RemoteSourceTests.test_missing_required_file_is_incoherent)
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "/home/runner/work/software-development-protocol/software-development-protocol/orchestrator/tests/test_protocol_source_and_profile.py", line 368, in test_missing_required_file_is_incoherent
-    self.assertEqual(caught.exception.code, E.PROTOCOL_SOURCE_INCOHERENT)
-AssertionError: 'core.protocol.unavailable' != 'core.protocol.source_incoherent'
-- core.protocol.unavailable
-+ core.protocol.source_incoherent
-
+  File "/home/runner/work/software-development-protocol/software-development-protocol/orchestrator/tests/test_protocol_source_and_profile.py", line 367, in test_missing_required_file_is_incoherent
+    PS.resolve_remote(self._section())
+  File "/home/runner/work/software-development-protocol/software-development-protocol/orchestrator/src/sdp_orchestrator/core/protocol_source.py", line 199, in resolve_remote
+    stderr = archive.stderr.decode("utf-8", "replace")
+             ^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'str' object has no attribute 'decode'. Did you mean: 'encode'?
 
 ----------------------------------------------------------------------
-Ran 37 tests in 0.827s
+Ran 37 tests in 0.892s
 
-FAILED (failures=1)
+FAILED (errors=1)
 
 
-372 tests across 12 modules in 36.0s -- FAILED: tests.test_git_observation, tests.test_installed_product, tests.test_layout_and_fitness, tests.test_privacy_and_remote_truth, tests.test_protocol_source_and_profile
+372 tests across 12 modules in 36.9s -- FAILED: tests.test_protocol_source_and_profile
