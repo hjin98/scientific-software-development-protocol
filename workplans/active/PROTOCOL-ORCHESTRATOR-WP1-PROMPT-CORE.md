@@ -25,288 +25,333 @@ forbidden_higher_module_dependencies:
 
 # Protocol Orchestrator WP-1 — Prompt Module + Core Program
 
-## 1. Current authority and objective
+## 1. Objective and authority
 
-WP-1 delivers the smallest independently useful Protocol Orchestrator: an installable `sdp-orchestrator-core` distribution and `sdp` CLI that observe a configured repository, resolve the governing workplan and compatible Protocol 5.16 workflow/profile, prepare a route-independent public record, render one complete local/web stage prompt, request a structured terminal result envelope, and compose optional extensions through one public SPI.
+WP-1 delivers the smallest independently useful SDP Orchestrator: an installable `sdp-orchestrator-core` distribution and generated `sdp` console command that observe a configured repository, resolve the governing workplan and compatible Protocol 5.16 workflow/profile, prepare a route-independent public record, render one complete local/web stage prompt, request a structured terminal result envelope, and compose optional extensions through one public SPI.
 
-Core-only operation is a finished product mode. It must not require Tracker, Adapters, Scheduler, persistence, agent execution, model/account catalogs, benchmarking, quota/resource prediction, or AUTO scheduling.
+Core-only operation is a finished mode. It must not require Tracker, Adapters, Scheduler, persistence, agent execution, model/account catalogs, benchmarking, quota/resource prediction, or AUTO scheduling.
 
-This workplan is governed by `orchestrator/docs/architecture.md` version 1.6.0 and Protocol 5.16.0. The canonical human-facing prompt authority is `source/shared/references/development-workflow-prompts.md`; packaged prompt/profile resources are reproducible derivatives only.
+Governing architecture is `orchestrator/docs/architecture.md` 1.6.0. Canonical human-facing prompt authority is `source/shared/references/development-workflow-prompts.md`; packaged prompt/profile resources are reproducible derivatives only.
 
-Repeated implementation-review history has been consolidated into this current snapshot. Earlier R1-R11 labels are no longer a separate normative patch log: every still-binding semantic end state is carried below under the product/Frozen contract, acceptance obligations, and current open findings. Git history may retain the chronology, but it is not required to recover the active contract.
+This file is the current snapshot-complete WP-1 implementation contract. Earlier repair chronology is non-normative Git history unless represented below.
 
-## 2. Authority classes
+## 2. Product / Frozen invariants
 
-### 2.1 Problem / product invariants (Tier 1A)
+### 2.1 Tier 1A — product and stakeholder invariants
 
-1. **Core works alone.** Configuration, project/worktree observation, workplan selection, compatible profile/source resolution, prepare, render, CLI, and required diagnostics work without higher modules.
-2. **Observation is non-mutating.** Core inspection does not change target worktree content, index, HEAD, refs, remote-tracking refs, or remotes. Explicit refresh is a bounded read-only query, never fetch/pull.
-3. **Prompt/workflow authority is singular.** Canonical Protocol source owns stage prose and workflow meaning; packaged resources and tests do not become competing semantic authorities.
-4. **Protocol binding is explicit.** A workplan governed by Protocol X is never silently interpreted under an incompatible newer profile. A semantic version is never guessed into a Git ref.
+1. **Core works alone.** Config, project/worktree observation, workplan/profile/source resolution, prepare, render, CLI, and diagnostics work without higher modules.
+2. **Observation is non-mutating.** Inspection does not change target worktree/index/HEAD/refs/remote-tracking refs/remotes; refresh is bounded read-only query, never fetch/pull.
+3. **Prompt/workflow authority is singular.** Canonical Protocol source owns stage prose/workflow meaning; packages/tests do not become competing semantic authorities.
+4. **Protocol binding is explicit.** Work governed by Protocol X is never silently interpreted under an incompatible newer profile.
 5. **Ambiguity remains explicit.** Project/workplan/profile/source/remote/stage/routing ambiguity fails or remains ambiguous rather than using fuzzy names, recency, ordering, or undocumented heuristics.
-6. **Prompt context is truthful.** Web mode never represents dirty/local-only or known-divergent state as remotely inspectable; local mode may reference the authorized worktree.
-7. **Privacy/security guarantees are bounded and truthful.** Automatically derived web prompt content excludes private local paths, credential-bearing remote userinfo, ambient environment values, credential-helper output, and private orchestrator state. User-authored task/input text is intentional content, not subject to a fictitious arbitrary-secret detector.
+6. **Prompt context is truthful.** Web mode never represents dirty/local-only/known-divergent state as remotely inspectable; local mode may reference the authorized worktree.
+7. **Privacy/security guarantees are bounded and truthful.** Automatically derived web content excludes private local paths, credential-bearing remote userinfo, ambient environment values, credential-helper output, and private orchestrator state. User-authored text is intentional content.
 8. **Core v1 is the durable lower seam.** Higher modules consume only documented `api.v1`/`spi.v1` value records/protocols; no private implementation objects or duplicated workplan/profile logic cross the boundary.
-9. **One composition root.** Core owns the single CLI, service registry, extension entry-point group, and event-subscription seam.
-10. **Manual tracking compatibility exists from day one.** Every successful final prompt requests exactly one terminal `StageResultEnvelope v1` associated with RunId/prompt fingerprint and emits only the subscribed non-durable prompt event.
-11. **Admission precedes final route-sensitive render.** `prepare()` is route-independent; later Adapter/Scheduler admission can occur before `render()` without provisional prompt/event side effects.
-12. **Stage identity is profile-bound.** User input is a `StageSelector`; a `StageRef` exists only after compatible profile resolution.
-13. **Render consistency is optimistic but coherent.** Material candidate/workplan/source/selection drift between prepare and final return produces stale/incoherent failure, not a mixed snapshot. No WP-1 repository lock/persistence is introduced.
-14. **Determinism follows semantic state.** Fixed RunId + unchanged material preparation/mode/input state yields stable identities/bytes; wall-clock diagnostics and unrelated extension configuration do not perturb them.
-15. **Installed behavior is the acceptance owner.** Source helper tests cannot proxy-pass a broken wheel/sdist, packaged profile, real Git observer, entry-point composition, CLI/stdout, or final privacy/wire behavior.
-16. **Repository containment is mandatory.** Orchestrator-owned source/build/test/fixture/script/doc material lives under `orchestrator/`; Protocol workplans remain under `workplans/`; repository CI contains only thin invocation wiring.
+9. **One composition root.** Core owns the CLI, service registry, extension entry-point group, and event-subscription seam.
+10. **Manual tracking compatibility exists from day one.** Every successful prompt requests exactly one terminal `StageResultEnvelope v1` tied to RunId/prompt fingerprint and emits only the subscribed non-durable prompt event.
+11. **Admission precedes route-sensitive render.** `prepare()` is route-independent; later admission can occur before `render()` without provisional prompt/event side effects.
+12. **Stage identity is profile-bound.** User input is `StageSelector`; `StageRef` exists only after compatible profile resolution.
+13. **Render consistency is optimistic but coherent.** Material candidate/workplan/source/selection drift between prepare and final return produces stale/incoherent failure, not a mixed snapshot. WP-1 adds no repository lock/persistence.
+14. **Determinism follows semantic state.** Fixed RunId + unchanged material state gives stable identities/bytes; wall-clock diagnostics and unrelated extension config do not perturb them.
+15. **Installed behavior is the acceptance owner.** Source helper tests cannot proxy-pass broken wheel/sdist, packaged profile, real Git observer, extension composition, CLI/stdout, privacy, or wire behavior.
+16. **Repository containment is mandatory.** Orchestrator-owned source/build/test/fixture/script/doc material lives under `orchestrator/`; Protocol workplans remain under `workplans/`; repository CI contains thin invocation only.
+17. **The source tree is a maintained human interface.** Core source must use a conventional, shallow repository layout with obvious module names and a discoverable CLI owner. Redundant collection directories and making essentially every implementation module look private are not justified merely for hypothetical future symmetry.
 
-### 2.2 Frozen high-level architecture (Tier 1B)
+### 2.2 Tier 1B — Frozen architecture for this cycle
 
-The parent Architecture 1.6.0 remains fully Frozen. WP-1 additionally fixes these task-local consequences:
+Preserve Architecture 1.6.0: one Python 3.11+ `sdp-orchestrator-core` distribution, one generated `sdp` entry point, native PEP 420 namespace with no `sdp_orchestrator/__init__.py`, strict `core <- tracker <- adapters <- scheduler` dependency direction, one config path, one Git observer, one workplan resolver, one Protocol/profile/source authority, public Core/Application/Extension API/SPI value boundaries, prepare-before-render, one extension registry, one exact result-footer wire, and no higher-module machinery in Core.
 
-- one Python 3.11+ `sdp-orchestrator-core` distribution, one `sdp` entry point, native PEP 420 `sdp_orchestrator.core`, and no root namespace `__init__.py`;
-- strict lower-to-higher dependency direction; Core has no Tracker/Adapter/Scheduler dependency or placeholder state;
-- one TOML normalization path and no semantic environment-variable override surface unless explicitly accepted;
-- one non-mutating Git/worktree/remote observer and one stage-specific workplan resolver;
-- one compatible Protocol 5.16 profile/source owner and one canonical body extraction/generation path;
-- public `CoreAPI`, `ApplicationAPI`, `ExtensionProvider`/`ExtensionContext`, JSON-compatible records, stable value identities, and no private implementation types in public signatures;
-- route-independent `PreparedPrompt` plus route-sensitive final `RenderedPrompt`;
-- one extension registry/entry-point group with metadata-only discovery and failure-atomic normal activation;
-- one exact terminal result-footer/fingerprint wire contract;
-- no persistence, workflow reducer, agent runner, benchmark/resource/scheduler machinery in Core.
+Exact implementation decomposition below those boundaries remains Tier 2 and should be simplified where possible.
 
-Everything below those boundaries is Tier 2 and may be altered, reduced, consolidated, or replaced when the same contract is satisfied more simply.
+## 3. Required Core behavior
 
-## 3. Frozen WP-1 behavioral contract
+### 3.1 Configuration and prompt mode
 
-### 3.1 Configuration, project selection, and prompt mode
+One bounded TOML path. Prompt-mode precedence: explicit CLI/API -> project default -> core default -> built-in `web`. `PromptExecutionMode(local|web)` is distinct from canonical prompt `EXECUTION_MODE`. No silent web->local fallback. CLI project convenience: unique configured worktree containing cwd -> configured default -> sole project -> structured ambiguous/not-found. Public requests use explicit `ProjectKey`.
 
-Core uses one bounded TOML parser/validator. Core prompt-mode precedence is explicit CLI/API -> project default -> core default -> built-in `web`. `PromptExecutionMode(local|web)` is distinct from canonical prompt `EXECUTION_MODE` (`AUTO_EXECUTE`, `REPORT_ONLY`, etc.). Core never silently falls from web to local.
-
-CLI project convenience when `--project` is absent is: unique configured project containing cwd -> configured default -> sole project -> structured ambiguous/not-found. Public Core requests use explicit `ProjectKey`.
-
-Core-owned config is closed; extension namespaces are bounded opaque data interpreted only by their activated extension. Credential-bearing URLs are rejected/redacted. Unrelated extension config does not enter Core preparation/prompt identity.
+Core config is closed; extension namespaces are bounded opaque data interpreted only by activated extensions. Credential-bearing URLs are rejected/redacted. Unrelated extension config does not enter Core prompt/preparation identity.
 
 ### 3.2 Git/worktree/remote observation
 
-`ObservationPolicy` supports `local_only`, `use_cached_remote`, and `refresh_remote`, with programmatic default `local_only`. Cached mode performs no network; refresh performs a bounded noninteractive read-only query.
+`ObservationPolicy`: `local_only`, `use_cached_remote`, `refresh_remote`, programmatic default local-only. Cached mode performs no network; refresh performs bounded noninteractive read-only query.
 
-`CandidateRef` identifies repository/worktree, branch/detached state, HEAD, materially relevant staged/index + unstaged + untracked state, selected remote/target evidence, provenance/freshness, and identity completeness. `sdp.git-working-tree.v1` includes staged blob/mode identity and worktree/untracked content under finite per-file/count/aggregate bounds. Unsupported/unreadable/embedded state gives incomplete identity rather than false completeness. Non-UTF-8 Git paths must not crash identity construction.
+`CandidateRef` binds repository/worktree, branch/detached state, HEAD, staged/index + unstaged + untracked material state, selected remote/target evidence, provenance/freshness, and identity completeness. `sdp.git-working-tree.v1` includes staged blobs/modes and worktree/untracked content under finite per-file/count/aggregate bounds. Unsupported/unreadable/embedded state is incomplete rather than falsely complete. Non-UTF-8 Git paths do not crash identity.
 
-Remote selection is configured remote -> branch upstream remote -> origin -> sole remote -> ambiguous/unavailable. Evidence is always bound to the selected remote/target. Filesystem/file remotes are local-only. Web rendering requires known target existence, blocks dirty state and known local/remote divergence, and preserves `core.remote.ambiguous` when ambiguity is the cause.
+Remote selection: configured remote -> branch upstream remote -> origin -> sole remote -> ambiguous/unavailable. Evidence is bound to the selected remote/target. File/path remotes are local-only. Web requires known target existence, blocks dirty state/known divergence, and preserves remote ambiguity. Unknown-age cached evidence cannot satisfy explicit `max_remote_staleness_seconds`; refresh may establish freshness.
 
-`max_remote_staleness_seconds` is behavioral policy. Unknown-age cached evidence cannot satisfy an explicit maximum; a successful refresh may establish an observation timestamp. Core never invents age from convenient ref/file mtimes or silently refreshes cached mode.
+Git subprocesses are bounded during collection, non-mutating, noninteractive, and receive an intentionally constructed environment. Ambient repository/config/object redirection and executable transport overrides are not inherited.
 
-Git subprocesses are bounded during collection, non-mutating, noninteractive, and use an intentionally constructed environment rather than arbitrary ambient Git semantic overrides.
+### 3.3 Workplans and Protocol binding
 
-### 3.3 Workplan catalog, lifecycle, and Protocol binding
+Catalog bounded regular workplan text under active/archive roots. Symlink aliases/special files/path escapes are ignored/rejected safely. Frontmatter is bounded before/during data-only materialization; unsupported amplification constructs may be rejected.
 
-Core catalogs bounded regular workplan text under `workplans/active/` and `workplans/archive/`; symlink aliases/special files/path escapes are ignored/rejected safely. Frontmatter is bounded before/during data-only YAML materialization; aliases/anchors or unsupported complex forms may be rejected rather than materialized unboundedly.
+Selectors are exact workplan ID or exact canonical repository-relative POSIX path. Traversal/absolute/dot/backslash aliases do not normalize into matches. Current authority uses explicit supersession evidence only. Lifecycle directory and declared status must agree for current governance.
 
-Explicit selector is an exact `workplan_id` or exact canonical repository-relative POSIX path under a recognized workplan root. Traversal/absolute/dot/backslash aliases do not normalize into matches. Current-authority deduplication uses explicit supersession evidence only; ambiguity remains ambiguity.
+Stage policy: Baseline/Design/Verification/Stabilization explicit-only; Implementation/Review require governing plan; Alignment exact required; Health Audit disallows; Closeout allows optional exact completed binding otherwise `COMPLETED_WORK`.
 
-Lifecycle directory and declared status must agree for current governance. Implementation/Review/Alignment require a current active semantically identified governing workplan; Closeout may bind the completed-plan case authorized by the stage policy.
+Any explicitly selected authority with a declared Protocol version must be reconciled against the compatible profile. Required stages fail on missing/invalid/unsupported governing version. Optional selected authority with absent version may remain evidence-only where the stage does not need it to determine the governing contract.
 
-Stage workplan policy remains:
+### 3.4 Protocol source/profile/workflow
 
-| Stage | Policy |
-| --- | --- |
-| baseline | optional explicit only |
-| design | optional explicit only; no implicit active capture |
-| implementation | governing workplan required |
-| review | governing workplan required |
-| verification | optional explicit governing authority |
-| stabilization | optional explicit governing authority |
-| alignment | exact downstream workplan required |
-| health-audit | workplan disallowed |
-| closeout | optional exact completed binding; otherwise `COMPLETED_WORK` |
+V1 supports compatible Protocol 5.16. Source precedence: configured compatible local -> exact packaged derivative -> explicitly permitted bounded remote explicit ref -> truthful incompatible/unavailable failure.
 
-A governing selected workplan with a declared Protocol version takes precedence over project defaults. Required stages fail on missing/invalid/unsupported governing version. An explicitly selected optional authority whose Protocol metadata is absent may remain evidence-only where the stage does not require it to determine the governing contract; a version that is actually declared is never silently ignored.
+Remote source resolves one requested ref to one immutable identity before multi-file use, reads bounded required data only, revalidates the ref, never executes downloaded/repository code, and records requested/resolved provenance/digests. Local multi-file reads are coherent or fail changed. Packaged resources reproduce exactly from canonical prompt source and `source/PROTOCOL_VERSION`.
 
-### 3.4 Protocol source/profile/workflow authority
+Canonical extraction requires exact numbered stage-heading set and one fenced text body per stage. Machine profile carries control metadata only. Optional/context-dependent routing remains multiple alternatives/ambiguous; outcome alone never invents a deterministic next stage.
 
-V1 supports the explicitly compatible Protocol 5.16 profile. Source precedence is configured compatible local source -> exact packaged derivative -> explicitly permitted bounded remote source at an explicit ref -> truthful incompatible/unavailable failure.
+### 3.5 Inputs and two-phase identity
 
-A remote source resolves one requested ref to one immutable identity before multi-file use, reads only bounded required data, revalidates the ref, never executes repository/downloaded code, and records requested/resolved provenance/content digests. Local multi-file reads are optimistic/coherent or fail as changed. Packaged profile and prompt resources must reproduce exactly from canonical Protocol source and `source/PROTOCOL_VERSION`.
+Every canonical input is mechanical, canonical-default, or required-user. Mechanical/first-class bindings cannot be generic overrides. `PROTOCOL_REF` follows governing Protocol; `PROTOCOL_SOURCE` defaults `AUTO_LOCAL_FIRST`; canonical `EXECUTION_MODE` is independent of prompt mode. Inserted values use one reversible structure-safe scalar encoding.
 
-Canonical extraction requires the exact numbered stage-heading set and exactly one fenced text body per stage; extras/duplicates/conflicts are source-incoherent. The machine profile carries bounded control metadata only, no duplicated prompt prose or generic workflow DSL.
+`PreparedPrompt` contains RunId, Project/Worktree observation, StageRef, candidate, WorkplanResolution, complete WorkflowProfileDescriptor/ProfileRef, PromptSourceRef, resolved mode-independent inputs/provenance, result-schema identity, and `sdp.prompt-preparation.v1`.
 
-Workflow routing is conservative: relations that are optional/context-dependent in Protocol 5.16 remain multiple alternatives/ambiguous; the profile never invents a deterministic edge from an outcome that is insufficient to choose one stage.
+Preparation identity binds complete material public admission data, including each `DigestRef` as algorithm + canonicalization scheme + value. Render recomputes the preparation fingerprint, revalidates current worktree/remote/workplan/source state, renders from the same resolved source snapshot, and performs final optimistic unchanged-state validation before event publication/return.
 
-### 3.5 Input ownership
+### 3.6 Prompt wire, public values, and events
 
-Every canonical INPUT is `mechanical`, `canonical_default`, or `required_user`. Mechanical/first-class bindings cannot be overridden by generic input. Canonical `PROTOCOL_REF` follows the governing Protocol contract; `PROTOCOL_SOURCE` defaults to `AUTO_LOCAL_FIRST`; canonical `EXECUTION_MODE` is independent of local/web prompt mode.
+Canonical body changes only at declared input substitutions. Fingerprint replacement touches only Core-owned footer slots. Opaque RunId is JSON-safe and coherent.
 
-Required user inputs remain: Baseline `BASELINE_SCOPE`; Design `--task`; Verification `VERIFICATION_SCOPE`; Stabilization `STABILIZATION_SCOPE`; Alignment `UPSTREAM_ACCEPTED_WORK` plus exact plan; Health Audit `AUDIT_SCOPE`; Closeout `COMPLETED_WORK` unless selected completed plan supplies it. Generic overrides accept declared overridable inputs only.
+Every prompt requests ordinary prose followed by exactly one exact-line terminal JSON footer. Prose may precede; only whitespace may follow the end marker. Duplicate exact footer/marker pairs are invalid. Additive result/event payload data must be recursively JSON-compatible. Public timestamps are UTC ISO-8601. `Problem` is one structured error record with `code`, redacted message/details, `retryable`, and no mirrored exception hierarchy.
 
-Concrete inserted values use the single reversible structure-safe scalar encoding. NUL/CR/LF/control data cannot inject additional prompt grammar; arbitrary user content remains reversible data.
+Only successful final render emits `core.prompt.rendered.v1` to explicit subscribers. EventId is stable for event type + RunId + prompt fingerprint. Sink failures are redacted and cannot invalidate primary render.
 
-### 3.6 Two-phase preparation/render identity
+### 3.7 Extension composition and passive diagnostics
 
-`PreparedPrompt` contains RunId, ProjectKey/WorktreeKey observation, resolved StageRef, candidate, WorkplanResolution, complete WorkflowProfileDescriptor/ProtocolProfileRef, PromptSourceRef, resolved mode-independent inputs/provenance, result-schema identity, and `sdp.prompt-preparation.v1`.
+One entry-point group: `sdp_orchestrator.extensions.v1`. Discovery-only reads distribution metadata without provider import and reports metadata failure truthfully. Normal activation uses canonical extension ID, API/multiplicity requirements, hard extension dependencies, and capability satisfaction from Core/already-active compatible providers. Registrations/subscriptions are staged and committed only after successful valid `ExtensionRegistration`. Wrong activation return type is failure. Alternative healthy providers can satisfy a capability even when another provider fails/cycles. Core singular services cannot be replaced silently.
 
-The preparation fingerprint binds the complete material public admission surface, including complete `DigestRef` identity (algorithm + canonicalization scheme + value), complete workflow/profile facts, candidate/workplan/source identity, selection basis/policy, and mode-independent inputs. It excludes only genuinely volatile/non-semantic diagnostics/timestamps and unrelated extension config.
+`doctor` and default `capabilities` perform no provider import, target mutation, or hidden network. Doctor's `packaged_profile` is packaged-only and cannot fall through configured local/remote source precedence.
 
-At render entry Core recomputes the preparation fingerprint and rejects tampering. Final render uses revalidated current repository/worktree/selected-remote/workplan-resolution/source state rather than caller-supplied locations. Packaged/local/remote source provenance is compared with the prepared source; mutable local source is stability-checked again. A final optimistic unchanged-state check occurs before event publication/return.
+## 4. Source-tree and CLI layout — required simplification
 
-### 3.7 Prompt artifact, result footer, events, and public values
+The current `orchestrator/packages/core/src/sdp_orchestrator/core` layout is needlessly deep for WP-1 and pre-allocates a `packages/` collection for higher distributions that do not yet exist. The leading-underscore convention on nearly every implementation module also obscures ownership, including the product CLI.
 
-Canonical body is preserved except declared INPUT substitutions. Fingerprint substitution changes only Core-owned fingerprint slots; user/canonical occurrences of the placeholder literal remain data. Caller RunId is serialized safely and remains one coherent value.
+### 4.1 Target repository layout
 
-Every prompt requests ordinary prose followed by **exactly one** exact-line terminal JSON footer for `StageResultEnvelope v1`. Prose may precede, but no non-whitespace follows the end marker. Duplicate exact footer blocks/marker pairs are invalid. Additive result fields are permitted only as JSON-compatible value data. Core requests the footer but does not persist/interpret result semantics in WP-1.
+Core becomes the direct Python project rooted at `orchestrator/`:
 
-All public records remain JSON-compatible immutable value data. Open event/result payload fields accept JSON-compatible nested values, not live implementation objects. Public timestamps are UTC ISO-8601. `Problem` is one structured error record with `code`, redacted `message/details`, `retryable: bool | None`, and no exception subclass hierarchy.
+```text
+orchestrator/
+  pyproject.toml              # sdp-orchestrator-core distribution
+  README.md
+  src/
+    sdp_orchestrator/         # PEP 420 namespace; no __init__.py here
+      core/
+        __init__.py
+        cli.py
+        application.py
+        service.py
+        config.py
+        git.py
+        workplans.py
+        protocol_source.py
+        canonical.py
+        profile.py
+        inputs.py
+        render.py
+        records.py
+        errors.py
+        events.py
+        digest.py
+        limits.py
+        redaction.py
+        api/
+          __init__.py
+          v1.py
+        spi/
+          __init__.py
+          v1.py
+        resources/
+          protocol/...
+  tests/
+  docs/
+  scripts/
+```
 
-Only a successful final render emits `core.prompt.rendered.v1`, only to explicitly subscribed sinks. EventId is stable for event type + RunId + prompt fingerprint. Sink failure is redacted/diagnosed but cannot counterfeit the primary result.
+This preserves the conventional Python `src/sdp_orchestrator/core` import layout while removing the redundant `packages/core` repository layers. It does **not** use exotic setuptools `package-dir` remapping merely to flatten the import namespace.
 
-### 3.8 Extension composition and passive diagnostics
+If Tracker/Adapters/Scheduler are later implemented, add only the package roots actually needed at that time under `orchestrator/` (for example `tracker/`, `adapters/`, `scheduler/`) while preserving the Frozen distribution/import contracts. Do not retain a speculative collection directory solely for symmetry.
 
-Core discovers extensions only through `sdp_orchestrator.extensions.v1`. Discovery-only reads installed distribution/entry-point metadata without importing provider code and does not claim unobserved capability/health. Metadata failure is diagnosed truthfully rather than silently represented as no extensions.
+### 4.2 Module naming and privacy
 
-Normal activation uses the public manifest/SPI, canonical extension ID, API/multiplicity requirements, hard `requires_extensions`, and actual capability satisfaction from Core/already-active compatible providers. Activation registrations/subscriptions are staged and committed atomically only after successful `ExtensionRegistration` validation. A provider returning the wrong SPI result is not promoted to active. Failed/incompatible providers disable only themselves and truly dependent providers; healthy Core/alternative providers remain available. Core-owned singular services cannot be replaced silently; multi-provider order is deterministic where multiplicity permits it.
+The supported public consumer contract remains `sdp_orchestrator.core.api.v1` and `.spi.v1`. Other modules remain implementation detail by documentation/API policy; Python leading underscores are **not** the authority that makes them private.
 
-`doctor` and default `capabilities` remain passive: no provider import, target-repository mutation, or hidden network. Doctor's `packaged_profile` observation is packaged-only and cannot fall through configured local/remote source precedence.
+Rename primary modules descriptively rather than prefixing essentially every file with `_`:
 
-### 3.9 Bounded trust/resource boundary
+```text
+_app.py         -> application.py
+_cli.py         -> cli.py
+_config.py      -> config.py
+_git.py         -> git.py
+_workplans.py   -> workplans.py
+_protocolsrc.py -> protocol_source.py
+_canonical.py   -> canonical.py
+_profile.py     -> profile.py
+_inputs.py      -> inputs.py
+_render.py      -> render.py
+_records.py     -> records.py
+_errors.py      -> errors.py
+_events.py      -> events.py
+_digest.py      -> digest.py
+_limits.py      -> limits.py
+_redact.py      -> redaction.py
+_service.py     -> service.py
+```
 
-Core-controlled config/workplan/source/archive/subprocess/network readers enforce finite byte/count/nesting/time/output/aggregate limits before unbounded materialization. Remote/downloaded material remains data; repository build hooks/files are not executed merely to inspect state. User-facing external diagnostics are redacted.
+Implementation may consolidate genuinely tiny modules where ownership becomes clearer, but may not add forwarding modules/wrappers solely to preserve these old private paths. They are pre-release Tier-2 internals, not compatibility contracts.
 
-Subprocess environments follow least privilege. Ambient variables that redirect Git repository/config/object semantics or specify executable transport commands are not inherited merely because they exist. Established non-secret process/credential environment may be preserved only where it is actually needed by the supported transport contract.
+### 4.3 CLI discoverability
 
-## 4. Public API/SPI floor
+The installed `sdp` executable remains a conventional console script generated by the package installer; do **not** commit a second shell/Python launcher named `sdp` that can drift from packaging metadata.
 
-The v1 consumer surface remains the Architecture 1.6.0 `CoreAPI`/`ApplicationAPI` family with `allocate_run_id`, project/observation/workplan/workflow/list-stages, `prepare`, and `render`. Public requests/responses are versioned JSON-compatible records; no Git/subprocess/file/DB/lock/event-loop/private Core implementation types appear in public signatures.
+Make its source owner obvious:
 
-The provider surface remains one `ExtensionProvider.manifest() -> ExtensionManifest` and `activate(context) -> ExtensionRegistration` SPI. `ExtensionContext` exposes public Core API, the extension's own bounded config namespace, and staged service/event registrars only.
+```toml
+[project.scripts]
+sdp = "sdp_orchestrator.core.cli:main"
+```
 
-Core provisions exactly the WP-1 lower capabilities: `prompt.render`, `project.observe`, `workplan.catalog`, `workflow.profile`. Semantic capability keys are unversioned; API compatibility is separate.
+`cli.py` must be directly readable and runnable as a module for developer inspection (for example `python -m sdp_orchestrator.core.cli --help` where supported by the existing `main` guard). README/user/developer documentation must state that installation creates the `sdp` executable and show the installed smoke path.
 
-## 5. Acceptance obligations and real owners
+## 5. Public API/SPI floor
 
-O1. **Distribution/layout:** wheel + sdist build, independent metadata/resource inspection, clean install outside checkout, installed `sdp` smoke, PEP 420 sibling coexistence, no root namespace init/higher imports, repository containment fitness.
+Preserve Architecture 1.6.0 `CoreAPI`/`ApplicationAPI` methods (`allocate_run_id`, project/observation/workplan/workflow/list-stages, `prepare`, `render`) and versioned JSON-compatible records. Public signatures contain no Git/subprocess/file/DB/lock/event-loop/private implementation types.
 
-O2. **Config/projects:** precedence/default/ambiguity, bounded malformed/oversized config, empty semantic env override surface, absent extension namespace preservation, secret URL rejection/redaction, local/remote source policy.
+Provider SPI remains `manifest() -> ExtensionManifest` and `activate(context) -> ExtensionRegistration`; `ExtensionContext` exposes public Core API, extension-owned config, and staged registrars only.
 
-O3. **Git/remote:** real temporary Git/worktree/remotes; staged/index/worktree/untracked identity, modes/non-UTF8/bounds, alias vs linked worktree, remote selection/evidence/freshness, no mutation, bounded subprocess/environment behavior.
+Core capabilities remain `prompt.render`, `project.observe`, `workplan.catalog`, `workflow.profile`.
 
-O4. **Workplans:** top-level/nested/archive, exact path/ID, branch binding, supersession ambiguity, lifecycle, bounded parser, symlink/path escape, every stage policy and Protocol-binding case.
+## 6. Acceptance obligations
 
-O5. **Protocol/profile/workflow:** exact canonical extraction, package/generator parity, local/packaged/remote source coherence, immutable remote identity, unsupported version rejection, conservative/ambiguous routing.
+O1. **Layout/distribution:** target source tree in §4; no `orchestrator/packages/core`; no old underscore-module compatibility shims; wheel + sdist build/inspect/install; generated `sdp` entry point targets `sdp_orchestrator.core.cli:main`; installed CLI works outside checkout; PEP 420 sibling coexistence; no root namespace init/higher imports.
 
-O6. **Public prepare/render seam:** public API completeness, StageSelector -> profile-bound StageRef, governing-workplan precedence, adapter-shaped external admission between phases, full preparation identity, JSON roundtrip tamper rejection, optimistic stale checks, no private objects.
+O2. **Config/projects:** precedence/default/ambiguity, bounded malformed/oversized config, no semantic env override surface, extension namespace preservation, secret URL rejection/redaction, source policy.
 
-O7. **Inputs:** all stages/inputs, required-user completeness, prompt-mode vs canonical execution mode, governing Protocol ref, structure-safe reversible scalar encoding, atomic invalid-input failures.
+O3. **Git/remote:** real temporary Git/worktree/remotes; staged/index/worktree/untracked identity, modes/non-UTF8/bounds, alias vs linked worktree, selected-remote evidence/freshness, no mutation, bounded subprocess/environment behavior.
 
-O8. **Renderer/wire/events:** canonical body fidelity, deterministic preparation/prompt fingerprints, exactly-one terminal footer extraction, opaque RunId/placeholder collisions, JSON-compatible additive fields, explicit subscription/EventId/failure behavior.
+O4. **Workplans:** exact path/ID, branch binding, supersession ambiguity, lifecycle, bounded parser, symlink/path escape, every stage policy and Protocol-binding case.
 
-O9. **Privacy/web truth:** final RenderedPrompt/stdout tests for paths/credentials/ambient environment/local remotes/dirty/divergent/stale/absent/ambiguous remote cases.
+O5. **Protocol/profile/workflow:** canonical extraction, package/generator parity, local/packaged/remote coherence, immutable remote identity, unsupported version rejection, conservative routing.
 
-O10. **Extensions/diagnostics:** real installed entry-point metadata; passive discovery/no import; compatible/incompatible/missing/cyclic/alternative-provider graphs; staged activation; canonical ID/API/multiplicity/SPI; explicit event subscription; doctor/capabilities no hidden network/mutation.
+O6. **Public prepare/render:** public API completeness, profile-bound StageRef, governing-workplan precedence, external admission between phases, complete preparation identity, JSON tamper rejection, stale checks, no private objects.
 
-O11. **CLI product boundary:** installed `sdp` subprocess, every stage alias and generic prompt path, stdout atomic/prompt-only, redacted stderr/nonzero failures, additive clipboard, passive doctor.
+O7. **Inputs:** all stages/inputs, required-user completeness, prompt-mode vs canonical execution mode, governing Protocol ref, reversible scalar encoding, atomic invalid failures.
 
-O12. **Final repository acceptance:** complete affected Core regression, Hypothesis where installed, canonical generator check, ordinary Protocol unit/build/validate/package-parity checks, `git diff --check`, and final simplicity/absence of higher-module or duplicate-authority machinery.
+O8. **Renderer/wire/events:** body fidelity, deterministic fingerprints, exactly-one terminal footer, opaque RunId/placeholder collisions, JSON-compatible additive fields, explicit subscription/EventId/failure behavior.
 
-Acceptance must execute the real semantic owner. Evidence that could remain green while the final owner is broken does not close the claim.
+O9. **Privacy/web truth:** final RenderedPrompt/stdout tests for paths/credentials/environment/local remotes/dirty/divergent/stale/absent/ambiguous cases.
 
-## 6. Implementation evidence reviewed
+O10. **Extensions/diagnostics:** real installed entry-point metadata; passive discovery; compatible/incompatible/missing/cyclic/alternative-provider graphs; staged activation; canonical ID/API/multiplicity/SPI; doctor/capabilities no hidden network/mutation.
 
-The independent Review evaluated implementation candidate `121ca48454e222740db9606e3a4a2f22719ef5e9`, directly based on review-contract commit `fc466570e7a9a3b6d2fab99a1440fe72a0a46064`.
+O11. **CLI product boundary:** installed `sdp` subprocess plus source-owner `cli.py`; every alias/generic prompt path; stdout atomic/prompt-only; redacted stderr; additive clipboard; passive doctor.
 
-Implementation recorded the following exact-candidate evidence before Review:
+O12. **Documentation:** update architecture layout example so it no longer presents `orchestrator/packages/core/...` as the preferred concrete shape; update Core README/user/developer commands and paths to the new layout; explain console-script generation and public-vs-internal module boundary once, without compatibility-history prose.
 
-- focused affected regression: 312 tests / 10 modules / 10 workers;
-- complete Core acceptance: 339 tests / all 11 modules / 11 workers, including wheel+sdist build/install/installed CLI, real Git/remotes, extensions, privacy/wire/API;
-- Hypothesis active with 400 + 200 generated scalar examples;
-- canonical snapshot generator `--check` and incompatible-version counterexample;
-- ordinary repository acceptance: 172 tests plus skill build/validate/check-dist and `git diff --check`;
-- focused local Semgrep checks and Serena owner/reference inspection.
+O13. **Final repository acceptance:** complete Core regression with Hypothesis where installed, snapshot generator check, wheel+sdist integration, ordinary Protocol unit/build/validate/package-parity checks, `git diff --check`, and final simplicity/absence of higher-module or duplicate-authority machinery.
 
-This is strong evidence and most previously identified defects are genuinely closed. It is not a substitute for the independent counterexamples below, and there were no GitHub commit-status contexts to add independent CI evidence at Review time.
+## 7. Implementation evidence reviewed
 
-## 7. Independent implementation Review — 2026-09-08
+Independent Review evaluated candidate `121ca48454e222740db9606e3a4a2f22719ef5e9`, based directly on review-contract commit `fc466570e7a9a3b6d2fab99a1440fe72a0a46064`.
 
-**Verdict: NO-PASS. WP-1 remains reopened.**
+Recorded evidence: 312 focused tests; 339 complete Core tests including wheel+sdist installed-product owner, Git/remotes/extensions/privacy/wire/API; Hypothesis 400+200 generated examples; canonical generator check; 172 ordinary Protocol tests plus skill build/validate/check-dist and `git diff --check`; focused Semgrep and Serena inspection. This is strong reusable evidence where subsequent edits cannot plausibly invalidate the claim, but it does not override the findings below.
 
-The parent Architecture 1.6.0 is not reopened. Every finding below is implementation nonconformance or oracle/documentation drift under the already-binding contract. Repair existing owners in place; do not add parallel registries/resolvers/renderers/workflow engines/wrappers/persistence/higher-module dependencies.
+## 8. Open implementation findings — Review verdict NO-PASS
 
-### F1 — Workflow profile still over-resolves blocker outcomes
+Parent Architecture 1.6.0 remains valid. F1-F8 are implementation nonconformance/oracle drift under existing authority. F9 is a stakeholder-directed Tier-2 source-layout simplification within the parent containment/namespace architecture. Repair existing owners; do not add parallel registries/resolvers/renderers/workflow engines/wrappers/persistence/higher-module dependencies.
 
-`_TRANSITIONS` still collapses context-dependent outcomes to one next stage, including `implementation/blocked -> design`, `review/no_pass -> implementation`, `alignment/no_pass -> alignment`, and `closeout/blocked -> implementation`. Protocol 5.16 routes by the actual blocker/authority class; outcome alone is insufficient. This violates Architecture invariant 25 and O5.
+### F1 — Workflow profile over-resolves blocker outcomes
 
-**Repair:** alter the existing profile transition metadata so each outcome exposes all authority-backed alternatives when it cannot determine one stage. Preserve ambiguity; do not add a routing DSL/engine.
+`_TRANSITIONS` still collapses context-dependent outcomes (`implementation/blocked`, `review/no_pass`, `alignment/no_pass`, `closeout/blocked`) to one next stage although Protocol 5.16 requires routing by blocker/authority context.
 
-**Required tests:** every context-dependent blocker/no-pass trigger above is non-deterministic where Protocol permits Design/Implementation/stay-stage alternatives; truly deterministic outcomes remain deterministic; regenerated package parity passes.
+**Repair:** alter the existing profile transition metadata so insufficient outcomes expose all authority-backed alternatives. No routing DSL/engine.
 
-### F2 — Capability dependency ordering can manufacture a cycle despite a healthy provider
+**Tests:** context-dependent blocker/no-pass triggers remain ambiguous where Protocol permits alternatives; truly deterministic outcomes remain deterministic; package parity passes.
 
-The current topological graph makes a capability consumer depend on *all* compatible providers. Counterexample: `B` independently provides `cap.shared`; `A` also provides it but requires extension `D`; `D` requires `cap.shared`. A valid order is `B -> D -> A`, but the current graph makes `D` depend on both A and B and reports a cycle, disabling the manifest set. This violates R5/O10 graceful degradation and actual-satisfaction semantics.
+### F2 — Capability dependency ordering can manufacture a false cycle
 
-The same composition owner still masks two SPI/discovery failures: entry-point metadata enumeration failure becomes an indistinguishable empty installation, and `activate()` returning `None` is silently converted to a successful empty registration despite the public SPI return contract.
+The current graph makes a capability consumer depend on all compatible providers. Counterexample: B independently provides `cap.shared`; A also provides it but requires extension D; D requires `cap.shared`. Valid order B -> D -> A is rejected as a cycle. Metadata enumeration failure also collapses to empty installation, and `activate() -> None` is silently promoted to success.
 
-**Repair:** keep hard extension-ID dependencies as graph edges, but make capability readiness depend on Core or any compatible provider that is actually active; one iterative activation/readiness owner is preferable to an over-constrained provider graph. Report metadata discovery failure truthfully. Reject non-`ExtensionRegistration` activation results. Keep the existing one registry and staged failure-atomic commit path.
+**Repair:** hard extension-ID dependencies remain graph constraints; capability readiness depends on Core or any compatible provider actually active. Prefer one iterative activation/readiness owner. Report discovery failure truthfully. Reject non-`ExtensionRegistration` activation results. Keep one registry/staged commit path.
 
-**Required tests:** B/A/D activates; true unsatisfiable cycle stays disabled; metadata discovery failure is not “zero extensions”; `activate(None)` is not active; unrelated Core/healthy providers remain available.
+**Tests:** B/A/D activates; true unsatisfiable cycle stays disabled; metadata discovery failure is visible; `activate(None)` not active; healthy Core/providers remain available.
 
-### F3 — Preparation identity drops `DigestRef` algorithm/scheme
+### F3 — Preparation identity drops DigestRef algorithm/scheme
 
-Preparation/revalidation helpers reduce candidate/workplan/profile/source digests to `.value`, omitting `DigestRef.algorithm` and `canonicalization_scheme`. Those fields are part of the public identity and visible to external admission, so a JSON-roundtrip caller can alter only the algorithm/scheme while retaining the old preparation fingerprint/comparison result.
+Material digest helpers compare/hash only `.value`, omitting public `algorithm` and `canonicalization_scheme`.
 
-**Repair:** use the existing preparation identity owner to serialize the complete digest record (`algorithm`, `canonicalization_scheme`, `value`) everywhere a material DigestRef participates. Do not add a second digest/preparation schema.
+**Repair:** serialize complete DigestRef everywhere material identity participates. No second digest schema.
 
-**Required tests:** altering only algorithm or scheme on working-tree, selected workplan artifact/semantic, profile-source, or prompt-source content digests invalidates the old preparation; unchanged exact records remain deterministic.
+**Tests:** changing only algorithm/scheme on candidate/workplan/profile/source digests invalidates old preparation; unchanged records remain deterministic.
 
-### F4 — `doctor` is not guaranteed packaged-only/no-network
+### F4 — Doctor is not guaranteed packaged-only/no-network
 
-`doctor_command()` labels its result `packaged_profile` and promises no network, but calls normal `workflow()` resolution. A configured `local_root` can therefore supply the reported profile, and if the packaged snapshot is unavailable/incoherent while remote fallback is enabled, the normal source path may query the network. Current tests do not install a network trap on this failure/fallback path.
+`doctor` labels `packaged_profile` but calls normal workflow/source resolution, so configured local source can alter the result and packaged failure can reach remote fallback.
 
-**Repair:** make doctor inspect the packaged snapshot directly or use an existing explicitly network-disabled packaged-source path. Do not create another general Protocol resolver.
+**Repair:** doctor inspects packaged snapshot directly or an existing explicitly network-disabled packaged path. No second Protocol resolver.
 
-**Required tests:** configured local/remote sources cannot change doctor’s packaged-profile observation; forced packaged failure with remote allowed reports a packaged problem and performs zero remote calls; provider import/repository mutation remain absent.
+**Tests:** local/remote config cannot change doctor packaged observation; forced packaged failure performs zero remote calls; no provider import/repository mutation.
 
-### F5 — Footer extractor and test oracle accept duplicate complete footers
+### F5 — Footer extractor/test oracle accepts duplicate complete footers
 
-The Frozen wire says exactly one terminal uniquely marked footer. `extract_result_footer()` instead selects the last complete block, and `test_extraction_takes_the_last_marked_block` positively asserts this invalid behavior. The user guide likewise says “exactly one” but documents a last-marker extraction rule.
+Frozen wire requires exactly one terminal footer, but extractor selects the last complete block and a test positively asserts this invalid behavior.
 
-**Repair:** alter the existing extractor to reject duplicate exact begin/end marker blocks while preserving exact-line matching, terminal whitespace-only semantics, and the valid single-footer path. Replace the weakened test and reconcile the guide. No general parser is needed.
+**Repair:** reject duplicate exact begin/end marker blocks while preserving exact-line/terminal-whitespace semantics. Replace the weakened test and guide wording.
 
-**Required tests:** one terminal footer extracts; two complete footers reject; extra exact begin/end markers reject; indented/near-match/trailing-prose cases remain rejected.
+**Tests:** one footer extracts; duplicate/extra exact markers reject; indented/near-match/trailing prose remain rejected.
 
-### F6 — Explicit optional workplan can have its declared Protocol version ignored
+### F6 — Explicit optional workplan can have declared Protocol version ignored
 
-`prepare()` only treats the selected workplan as governing profile input for `REQUIRED`/`EXPLICIT_REQUIRED` policies. In `EXPLICIT_ONLY` stages, a selected plan with a declared `protocol_version` is therefore silently rendered using project/default profile. The accepted evidence-only exception applies to optional authorities with **incomplete** Protocol metadata; it does not authorize ignoring a version that is present.
+Explicit-only stages can select a plan whose declared version is silently ignored in favor of project/default profile.
 
-**Repair:** in the one existing prepare/profile-binding path, reconcile/bind a declared Protocol version on any explicitly selected governing authority. Preserve the evidence-only fallback when optional selected metadata is absent.
+**Repair:** reconcile any declared version on an explicitly selected authority; preserve evidence-only behavior only when optional version metadata is absent.
 
-**Required tests:** explicitly selected incompatible-version plans for Verification/Stabilization/other explicit-only stages fail rather than silently 5.16; compatible declared version agrees; optional selected plan with no version retains the accepted evidence-only behavior.
+**Tests:** incompatible selected Verification/Stabilization/etc. plans fail; compatible version agrees; no-version optional plan retains accepted evidence-only path.
 
-### F7 — Open public record fields can carry non-JSON/live values; timestamp contract is unenforced
+### F7 — Public open fields accept live/non-JSON values and timestamps are unenforced
 
-The public v1 floor promises JSON-compatible immutable values and UTC ISO-8601 timestamps, but `EventEnvelope.payload: dict[str, Any]` and additive `StageResultEnvelope` fields can accept arbitrary live Python objects and only fail later at JSON serialization. Public timestamp fields also accept arbitrary strings.
+`EventEnvelope.payload`, additive result fields, and timestamp strings can violate the public JSON/UTC value contract at construction.
 
-**Repair:** add the smallest validation at the existing public-record boundary: recursively accept JSON-compatible scalar/list/map values in open payload/additive fields and reject live/non-JSON objects; validate declared public timestamps as UTC ISO-8601. Do not create a parallel schema/type system.
+**Repair:** smallest validation at existing record boundary for recursively JSON-compatible values and UTC ISO-8601 timestamps. No parallel schema system.
 
-**Required tests:** nested JSON payload/extra fields round-trip; `object()`, file handles, and similar live values reject at construction; produced/deserialized public timestamps satisfy UTC ISO-8601; additive JSON compatibility remains.
+**Tests:** nested JSON round-trips; live objects/file handles reject; produced/deserialized timestamps are UTC ISO-8601; additive JSON compatibility remains.
 
 ### F8 — Ambient executable Git transport overrides remain inherited
 
-The repaired Git environment removes repository/config/object redirection but still allowlists ambient `GIT_SSH`, `GIT_SSH_COMMAND`, and `GIT_SSH_VARIANT`. `GIT_SSH_COMMAND` is executable process configuration: a remote refresh/source query can execute an arbitrary ambient command that Core never configured. That conflicts with the no-semantic-environment-override and least-privilege trust boundary. Normal SSH can use standard client/config and agent state without inheriting an arbitrary command string.
+Git environment still permits ambient `GIT_SSH`, `GIT_SSH_COMMAND`, `GIT_SSH_VARIANT`; `GIT_SSH_COMMAND` can execute arbitrary ambient command during a supposedly controlled query.
 
-**Repair:** narrow the existing `_git_env()` allowlist. Preserve only process/credential environment actually needed by the accepted normal transport contract; do not inherit executable Git command overrides without an explicit accepted configuration surface. Do not add a transport framework.
+**Repair:** narrow existing allowlist to normal required process/credential environment; do not inherit executable Git command overrides without an accepted config surface. No transport framework.
 
-**Required test:** ambient `GIT_SSH_COMMAND`/equivalent helper that would create a marker is not executed by the relevant remote-query path; normal supported SSH-agent/environment-independent observation remains available.
+**Test:** ambient helper that would create a marker is not executed by remote-query path; normal supported SSH-agent path remains available.
 
-## 8. Re-review gate
+### F9 — Simplify the source tree and expose the CLI owner clearly
 
-WP-1 may return to independent Review only after F1-F8 are repaired in the existing owners and the assembled exact candidate re-establishes affected acceptance. The strong prior evidence remains reusable only for dimensions these edits cannot plausibly affect.
+Current path `orchestrator/packages/core/src/sdp_orchestrator/core` is over-nested, repeats `core` as both speculative distribution-directory and import package, and makes nearly every implementation module look private. The generated `sdp` command points at `_cli.py`, making the product entry source obscure.
 
-The next exact candidate must record:
+**Repair sequence:**
 
-1. focused counterexamples for F1-F8;
+1. First move the Core project to the §4 target layout (`orchestrator/pyproject.toml`, `orchestrator/src/sdp_orchestrator/core`, `orchestrator/tests`). Remove `orchestrator/packages/core`; do not leave symlinks/forwarders.
+2. Rename the primary implementation modules per §4.2 and rewire imports/tests/generator/package-data directly. Do not add compatibility aliases for old private module names.
+3. Change console entry point directly to `sdp_orchestrator.core.cli:main`; keep the installer-generated `sdp` executable as the single CLI artifact.
+4. Reconcile architecture example, README, user/developer paths and commands.
+5. Only then implement F1-F8 against the simplified owners, so repair work is not immediately invalidated by a second structural churn.
+
+**Tests/structural evidence:** old `orchestrator/packages/core` and old `_app.py`/`_cli.py`-class implementation paths are absent; `api.v1`/`spi.v1` consumer imports remain unchanged; editable/source and wheel/sdist installed imports work; installed `sdp --help`, `sdp doctor`, and a render command work outside checkout; source CLI module is directly inspectable/runnable; package resources/generator paths and CI/test runner use the new layout; no higher-module dependency or compatibility wrapper is introduced.
+
+## 9. Re-review gate
+
+WP-1 may return to independent Review only after F1-F9 are repaired on one exact assembled candidate. Because F9 changes import/layout/package paths, it invalidates most source-tree, packaging, CLI, API/SPI, extension, generator, and full-regression evidence; rerun those owners after the move rather than relying on pre-move green results.
+
+Required final evidence:
+
+1. structural migration evidence and focused F1-F9 counterexamples;
 2. complete Core regression with Hypothesis active;
 3. real installed extension composition and passive-doctor tests;
 4. preparation/public API-SPI/wire/privacy tests;
 5. real Git/remote non-mutation and environment-boundary tests;
 6. canonical profile/snapshot generator parity;
-7. wheel and sdist build/inspection/install/installed CLI outside checkout;
-8. ordinary repository Protocol tests/build/package parity and `git diff --check`.
+7. wheel and sdist build/inspection/install plus installed CLI outside checkout from the new `orchestrator/` project root;
+8. repository layout/absence checks proving no old package tree/private-path compatibility layer remains;
+9. ordinary repository Protocol tests/build/package parity and `git diff --check`.
 
-Any required unavailable owner check remains a blocker unless the governing contract explicitly permits substitute evidence. A green test whose oracle encodes the wrong contract does not count as closure.
+Any required unavailable owner check remains a blocker unless the governing contract permits substitute evidence. A green test whose oracle encodes the wrong contract is not closure.
 
-**Current verdict: NO-PASS — return to `software-implementation`, repair F1-F8 without adding parallel machinery, then submit one exact assembled candidate for fresh independent Review.**
+**Current verdict: NO-PASS — return to `software-implementation`; perform F9 structural simplification first, then repair F1-F8 in the simplified owners, then submit one exact candidate for fresh independent Review.**
