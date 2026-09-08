@@ -6,143 +6,123 @@ target_protocol_version: 6.0.0
 status: accepted-amendment
 created_date: 2026-09-08
 base_parent_commit: e00bb0d8f40f98c03c37dc03c4418b99c968338c
+authority_entrypoint: workplans/active/SSDP-6-AUTHORITY.md
 ---
 
 # SSDP 6.0 Authority Revision 1 — Serious Challenge and Adversarial Review Doctrine
 
-## 1. Purpose and amendment authority
+## 1. Purpose and authority
 
-This amendment is part of the current snapshot-complete parent authority for SSDP 6.0 until its rules are consolidated into the parent workplan and then the canonical Protocol 6 source.
+This amendment is part of the current SSDP 6 transition authority identified by `SSDP-6-AUTHORITY.md`. It amends the review, verification, authority-state, and human-adjudication semantics of the parent SSDP 6 workplan without changing the accepted D1-D4 decomposition or recursive abstraction-realization model.
 
-It amends the review/verification semantics of `SSDP-6-RECURSIVE-ABSTRACTION-REALIZATION-SCIENTIFIC-SOFTWARE-PROTOCOL` without changing the accepted D1-D4 decomposition or the recursive abstraction-realization model.
+The failure mode it forbids is epistemic compliance: a reviewer discovers strong evidence that an accepted abstraction is false, contradictory, materially ambiguous, incomplete, fallacious, or unrealizable, but suppresses the defect merely because the abstraction is already settled.
 
-The problem is a remaining epistemic failure mode:
-
-> A reviewer can faithfully verify a downstream realization against an accepted abstraction, discover strong evidence that the abstraction itself is false, contradictory, ambiguous, incomplete, or unrealizable, and nevertheless remain compliant with the settled authority instead of surfacing the defect to the human researcher.
-
-That behavior is forbidden in SSDP 6.
-
-The protocol must distinguish **respect for accepted authority** from **epistemic obedience**. Accepted abstractions control realization until they are changed through their owning authority, but no accepted abstraction is immune from evidence-based challenge.
+Accepted authority controls mutation and realization. It is not immune from evidence-based challenge.
 
 ## 2. Governing epistemic invariant
 
-SSDP 6 shall adopt the following invariant:
-
 ```text
-Truth is not created by the human, the agent, the workplan, the method paper,
-the architecture manual, the specification, the code, or the test suite.
+Authority governs what the project has accepted, who may mutate it, and what may be acted upon.
+Authority does not manufacture correctness.
 
-Those artifacts and actors are instruments for recovering and preserving truth
-about the intended scientific / mathematical / engineering problem.
+Empirical scientific claims remain answerable to reality and evidence in their context of use.
+Mathematical/theoretical claims remain answerable to formal validity, assumptions, and justified reference theory.
+Engineering claims remain answerable to governed requirements, constraints, and evidence.
 
-Accepted authority governs mutation and realization.
+Humans, agents, papers, workplans, architecture, specifications, code, and tests are instruments
+for recovering, expressing, realizing, and checking those truths; none is infallible merely by status.
+
 Evidence may challenge accepted authority.
-No actor may counterfeit closure by suppressing a material contradiction merely
-because the contradicted statement is already settled.
+No actor may counterfeit closure by suppressing a material contradiction because the contradicted
+statement is settled or inconvenient to reopen.
 ```
 
-The human researcher is the final protocol adjudicator for material epistemic decisions because the protocol requires stable accountable judgment and domain ownership. This does **not** mean human assertions automatically become scientific or logical truth.
+The final workflow adjudicator for a consequential epistemic dispute is the human researcher or other explicitly designated human domain authority/committee. Human adjudication supplies stable accountable governance; it does not convert unsupported assertion into scientific, mathematical, or engineering truth. An agent challenge is likewise not correct merely because it is confident, elaborate, or accompanied by many sources.
 
-Likewise, an agent's challenge is not automatically correct merely because it is confident, elaborate, or supported by many retrieved sources.
+## 3. Mandatory bounded Challenge Pass
 
-The control loop is therefore:
+Every **material Review or verification/acceptance boundary** shall include a bounded adversarial **Challenge Pass** before normal closure. This includes D4->D3, D3->D2, D2->D1, D1 external-adequacy review, protocol self-review, and any equivalent material acceptance boundary.
 
-```text
-accepted abstraction
-    -> realization
-    -> adversarial reconstruction / verification
-    -> serious contradiction if discovered
-    -> explicit challenge to human adjudicator
-    -> evidence and reasoning are examined
-    -> accept challenge / reject challenge / revise authority / defer / explicit risk override
-    -> durable resolution context
-    -> continue from the earliest affected abstraction
-```
+Operational independence or a fresh review context is preferred for substantial/high-risk claims when practical, but independence is not a prerequisite for the duty to challenge a serious defect. A role that discovers serious contradictory evidence during design, implementation, self-check, or any other activity must surface it even if a separate Review stage has not yet begun.
 
-## 3. Mandatory bounded challenge pass in material Review
-
-Every **material independent Review** shall include a bounded adversarial **Challenge Pass** before ordinary closure.
-
-This is a reasoning phase inside Review, not a fifth authority-bearing role and not automatically a separate persisted workflow stage.
-
-The reviewer shall independently ask whether the governing abstraction itself appears:
+The Challenge Pass asks whether the governing authority appears:
 
 - internally consistent;
 - sufficiently unambiguous to admit meaningful verification;
-- realizable under its own constraints and applicable external constraints;
+- jointly realizable under all applicable upstream and domain-local constraints;
 - logically and mathematically coherent;
-- scientifically/theoretically/engineering-adequate for the claim it governs;
-- complete enough to preserve the material upstream invariant into the child abstraction;
-- compatible with other simultaneously applicable authorities;
-- free from a known counterexample, contradiction, or fallacious inference that would invalidate the accepted claim.
+- adequate for the scientific, theoretical, or engineering claim it governs;
+- complete enough to preserve material upstream semantics into the child abstraction;
+- compatible with simultaneously applicable authorities;
+- free from a material counterexample, contradiction, or fallacious inference known to the reviewer.
 
-The reviewer shall then continue with ordinary realization-conformance, affected-surface, engineering-risk, evidence-quality, and simplicity review.
-
-For a tiny/local low-risk review, the Challenge Pass may be implicit and extremely short. A separate checklist, report, or ceremony is not required.
-
-However, **if serious evidence appears at any time**, the reviewer has an affirmative obligation to raise it even when the original review scope did not expect an upstream design problem.
+For tiny/local low-risk work the pass may be implicit and very short. It is a reasoning obligation, not a mandatory standalone workflow stage, checklist, or report.
 
 ## 4. Serious Challenge threshold
 
-A **Serious Challenge** is reserved for a material potential defect in accepted authority, not for ordinary disagreement or implementation nonconformance.
+A **Serious Challenge** is reserved for a material potential defect in accepted authority. It is not the label for ordinary realization nonconformance or design preference.
 
-A Serious Challenge is warranted when the reviewer has specific, independently reasoned evidence for one or more conditions such as:
+Raise a Serious Challenge when there is specific, independently reasoned evidence for one or more of the following:
 
-1. **Unrealizable abstraction** — no admissible realization appears capable of satisfying the accepted invariants and applicable external constraints simultaneously, or a required realization would violate another binding invariant.
-2. **Contradictory invariants** — two or more accepted requirements cannot all be true or satisfied together in the governed regime.
-3. **Material ambiguity** — the invariant is underspecified or admits materially incompatible interpretations such that correctness cannot be established without choosing hidden semantics.
-4. **Logical inconsistency or fallacy** — an accepted inference, proof step, derivation, architecture premise, or requirement contains a demonstrable logical contradiction, invalid implication, circular justification, category error, or other material reasoning defect.
-5. **Mathematical/numerical counterexample** — an analytical case, limiting case, dimensional argument, convergence result, conditioning result, reference method, or explicit counterexample materially contradicts the accepted abstraction.
-6. **Scientific/model contradiction** — credible empirical, theoretical, literature, or domain evidence materially conflicts with the accepted formulation, interpretation, validity regime, or conclusion.
-7. **Abstraction inadequacy** — the child abstraction omits or weakens an upstream invariant enough that downstream pairwise checks can pass while the composed scientific/engineering claim is false.
-8. **Authority conflict** — multiple applicable accepted authorities impose incompatible semantics and no existing precedence/adjudication resolves them.
-9. **Major philosophical/design flaw** — the governing decomposition, definition, objective, or conceptual model is materially self-defeating or solves the wrong problem in a way that cannot be repaired as local realization detail.
-10. **Unsafe counterfeit closure risk** — normal compliance would require hiding, rationalizing, or documenting around a material contradiction rather than resolving it.
+1. **Unrealizable abstraction** — no admissible realization appears capable of satisfying the accepted invariants and applicable constraints simultaneously.
+2. **Contradictory invariants** — accepted requirements cannot all be true or satisfied together in the governed regime.
+3. **Material ambiguity** — materially incompatible interpretations are possible, so correctness cannot be established without choosing hidden semantics.
+4. **Logical inconsistency or fallacy** — a governing inference, derivation, proof step, premise, definition, or requirement contains a material logical defect.
+5. **Mathematical/numerical counterexample** — an analytical, limiting, dimensional, convergence, conditioning, reference-method, or explicit counterexample contradicts the accepted abstraction.
+6. **Scientific/model contradiction** — credible empirical, theoretical, literature, or domain evidence materially conflicts with the accepted formulation, validity regime, interpretation, or conclusion.
+7. **Abstraction inadequacy** — a child abstraction omits/weakens an upstream invariant so local checks can pass while the composed claim is false.
+8. **Authority conflict** — multiple applicable accepted authorities impose incompatible semantics with no existing precedence/adjudication that resolves them.
+9. **Major conceptual/philosophical defect** — the governing decomposition, objective, definition, or model is materially self-defeating or solves the wrong problem and cannot be repaired as local realization detail.
+10. **Counterfeit-closure requirement** — normal compliance would require hiding, rationalizing, documenting around, or weakening evidence of a material contradiction.
 
-A Serious Challenge is **not** warranted merely because:
+Do **not** raise a Serious Challenge merely because another equivalent realization is preferred, wording could be improved without semantic effect, a speculative alternative may be better, evidence is weak or remote, an ordinary lower-layer implementation defect exists under a coherent parent, or an unrelated future improvement can be imagined.
 
-- the reviewer prefers another equivalent realization;
-- wording could be polished without changing semantic interpretation;
-- a speculative alternative might be better but the accepted abstraction remains sound;
-- evidence is weak, remote, or only hypothetical;
-- an ordinary D4/D3/D2 realization defect exists under a clear and coherent parent abstraction;
-- a non-blocking edge case has no material effect on the governed claim;
-- the reviewer wants broader future-proofing or unrelated research.
+The threshold is deliberately high: challenge truth-risk, not human attention.
 
-The threshold is intentionally high. The protocol wants serious dissent when truth is at risk, not review fatigue.
+## 5. Evidence quality before escalation
 
-## 5. Mandatory review output for a Serious Challenge
+A Serious Challenge must be inspectable rather than rhetorical. Before escalation, separate:
 
-When a Serious Challenge is active, it must be surfaced **before ordinary `BLOCKERS`**, findings, or Pass/No-Pass prose.
+- **observed facts / executable observations**;
+- **external source claims**;
+- **reviewer inference/derivation**;
+- **assumptions needed for the inference**;
+- **uncertainty, applicability limits, and known counterevidence**.
 
-Use a prominent first-line status equivalent to:
+For material external factual, literature, standards, API, or contemporary claims, verify the relevant claim against a primary, canonical, or otherwise suitably authoritative/current source when practical. Source count is not independent corroboration when several sources repeat one underlying claim. Do not escalate a Serious Challenge solely from vague model memory, rhetorical confidence, an unverified paraphrase, or the prestige of a source whose claim does not actually apply.
+
+A direct mathematical contradiction, executable counterexample, or internally demonstrable inconsistency does not require external sourcing merely for ceremony. Evidence requirements should match the type of claim.
+
+When evidence is plausible but not yet strong enough for Serious Challenge, report it as an ordinary risk/question and identify the cheapest discriminating check rather than overstating certainty.
+
+## 6. Mandatory output when active
+
+An active Serious Challenge must appear before ordinary `BLOCKERS`, findings, or Pass/No-Pass prose with a first-line status equivalent to:
 
 ```text
 SERIOUS CHALLENGE — BLOCKED PENDING HUMAN ADJUDICATION
 ```
 
-If the evidence points specifically to redesign, the reviewer may use:
+When the evidence specifically points to an upstream redesign:
 
 ```text
 SERIOUS CHALLENGE — CONSIDER REDESIGN / UPSTREAM AUTHORITY REOPEN
 ```
 
-The exact typography is delegated; the semantic prominence is not.
+The exact typography is delegated. Prominence and blocking semantics are not.
 
-The challenge shall state concisely and specifically:
+The challenge must identify:
 
-1. **Challenged authority** — domain, artifact, invariant/claim, and affected scope.
-2. **Why this is serious** — the concrete contradiction, impossibility, ambiguity, fallacy, counterexample, or truth-risk.
-3. **Evidence/reasoning** — enough derivation, source evidence, counterexample, executable observation, or logical chain for an independent human to inspect.
-4. **Consequence if correct** — what realization, evidence, downstream authority, scientific conclusion, or product claim becomes invalid.
-5. **Suggested resolution direction** — clarification, bounded redesign, revised assumption, stronger oracle, alternative formulation, or further experiment; this is advisory rather than self-authorizing.
-6. **What would resolve or falsify the challenge** — the missing evidence or reasoning that would make the current abstraction defensible.
+1. **Challenged authority** — domain, artifact, invariant/claim, and scope.
+2. **Why serious** — the concrete contradiction, impossibility, ambiguity, fallacy, counterexample, or truth-risk.
+3. **Evidence/reasoning** — facts/sources/inference/assumptions sufficient for human inspection.
+4. **Consequence if correct** — affected realizations, evidence, descendants, conclusions, or product claims.
+5. **Suggested resolution direction** — advisory clarification, redesign, revised assumption, stronger oracle, alternative formulation, or experiment.
+6. **What would resolve/falsify the challenge** — the discriminating evidence or reasoning that would make the current authority defensible.
 
-The reviewer should consolidate sibling manifestations of one root contradiction into one Serious Challenge rather than creating several dramatic headings for the same issue.
+Consolidate multiple manifestations of one root defect into one Serious Challenge unless they genuinely have independent causes.
 
-## 6. Serious Challenge versus ordinary blocker
-
-The distinction is semantic:
+## 7. Serious Challenge versus ordinary blocker
 
 ```text
 accepted abstraction is coherent;
@@ -150,240 +130,208 @@ realization fails to satisfy it
     -> ordinary BLOCKER / realization nonconformance
 
 accepted abstraction itself may be materially wrong, contradictory,
-ambiguous, incomplete, or unrealizable
+ambiguous, incomplete, fallacious, or unrealizable
     -> SERIOUS CHALLENGE / human adjudication required
 ```
 
-A review can contain both kinds simultaneously.
+A review may contain both. A Serious Challenge blocks normal unqualified `Pass` for the affected claim until resolved. It does not automatically declare the challenged authority false.
 
-A Serious Challenge blocks normal `Pass` closure for the affected claim until adjudicated. It does not automatically declare the challenged abstraction false.
+## 8. Upstream authority is challenged, not silently mutated
 
-## 7. Upstream authority is challenged, not silently mutated
+During bottom-up realization -> abstraction verification, a Serious Challenge must not cause the reviewer to:
 
-When a Serious Challenge arises during bottom-up realization -> abstraction verification:
+- silently rewrite the accepted invariant to make the realization pass;
+- treat downstream realization as retroactive authority;
+- relax tolerance, add exception/wrapper/fallback, or rewrite documentation merely to route around the contradiction;
+- mark a proposed replacement as accepted current before adjudication.
 
-- the reviewer must **not** silently edit the accepted invariant to make the realization pass;
-- the reviewer must **not** treat the downstream realization as retroactive authority;
-- the reviewer must **not** create a patch, exception, tolerance relaxation, wrapper, or documentation rewrite merely to route around the contradiction;
-- the reviewer must preserve the currently accepted authority as the explicit challenged baseline until adjudication;
-- any proposed replacement remains `proposed`, not `accepted current`;
-- redesign, if accepted, reopens the earliest/highest materially affected abstraction and invalidates only dependent descendants.
+Preserve the accepted authority as the explicit challenged baseline. If redesign is accepted, reopen the earliest/highest materially affected abstraction and invalidate only dependent descendants.
 
-This preserves the abstraction-realization authority direction while still allowing evidence from below to falsify a mistaken abstraction.
+## 9. Human adjudication
 
-## 8. Human adjudication and constructive debate
+The designated human adjudicator evaluates the challenge with the agent's evidence and reasoning. Normal outcomes are:
 
-The human researcher is the final adjudicator of a Serious Challenge, but adjudication should be evidence-bearing rather than ceremonial.
+### 9.1 Challenge accepted
 
-The normal outcomes are:
+Reopen the earliest affected authority, revise it through proposed -> review/falsification -> required human ratification -> accepted-current transition, invalidate dependent descendants, and re-realize/re-verify proportionately.
 
-### 8.1 Challenge accepted
+### 9.2 Challenge rejected with satisfactory reasoning/evidence
 
-The human agrees that the current abstraction is materially defective.
+The human demonstrates a false premise, missing governing assumption, misapplied theorem/model, invalid counterexample, misunderstood domain condition, applicable precedence rule, or other reason the alleged contradiction does not hold.
 
-Route to the earliest affected authority owner, revise the abstraction through the normal proposed -> review -> human-ratification-if-required -> accepted-current transition, invalidate dependent descendants, and re-realize/re-verify proportionately.
+The agent must genuinely reconsider the challenge. If the rebuttal resolves it, close the challenge and resume normal Review. Record the **material resolution rationale** durably near the challenged authority or in its canonical rationale when doing so prevents a plausible recurrence. Keep that record concise and scoped rather than preserving the full conversation.
 
-### 8.2 Challenge rejected with satisfactory reasoning/evidence
+### 9.3 Authority clarified or revised
 
-The human shows that the reviewer relied on a false premise, missed a governing assumption, misapplied a theorem/model, misunderstood domain semantics, used an invalid counterexample, overlooked an existing precedence rule, or otherwise failed to establish the alleged defect.
+If the intent was sound but the accepted invariant was materially ambiguous/incomplete, any clarification that changes the admissible realization set is an authority mutation, not editorial cleanup. Route it through the owning domain and invalidate dependent evidence as necessary.
 
-The reviewing agent shall genuinely reconsider the challenge rather than mechanically repeating its previous conclusion.
+### 9.4 More evidence required / adjudication deferred
 
-If the reasoning resolves the contradiction, the challenge closes and normal Review resumes.
+The affected claim remains blocked. Identify the smallest disputed premise and the cheapest discriminating derivation, experiment, proof, primary reference, expert judgment, reference-method comparison, or implementation probe likely to resolve it.
 
-Because the challenge was serious enough to block closure, record the **material resolution rationale** durably near the challenged authority or in the canonical current design/method rationale so future reviewers can see why the apparent contradiction is not a defect. Keep this concise and scoped; do not turn every review discussion into permanent documentation.
+### 9.5 Explicit human risk override
 
-### 8.3 Authority clarified or revised
-
-The human determines that the intent was sound but the accepted invariant was materially ambiguous or incomplete.
-
-Clarification that changes what realizations are admissible is an authority mutation, not an editorial rewrite. Route it through the owning domain and invalidate dependent evidence as necessary.
-
-### 8.4 More evidence required / adjudication deferred
-
-If neither side has enough evidence, the affected claim remains blocked. Identify the cheapest discriminating derivation, experiment, literature check, proof, reference comparison, or implementation probe likely to resolve the uncertainty.
-
-### 8.5 Explicit human risk override
-
-A human may explicitly direct work to proceed despite an unresolved Serious Challenge when safety/project rules permit it.
-
-The agent shall obey the authorized execution direction, but it must not counterfeit epistemic resolution:
+When safety/project rules permit, the human may direct bounded work to proceed despite an unresolved challenge. Preserve a status equivalent to:
 
 ```text
 HUMAN OVERRIDE — UNRESOLVED SERIOUS CHALLENGE ACCEPTED AS RISK
 ```
 
-must remain visible in the affected handoff/evidence. The affected claim may not be reported as an ordinary unqualified `Pass` unless the challenge is actually resolved.
+This is authorization to proceed, **not epistemic resolution**.
 
-This preserves human governance without requiring the protocol to state something is true when its own evidence says the contradiction remains unresolved.
+Any descendant artifact or evidence whose validity depends on the challenged claim is **risk-accepted/provisional with respect to that claim**. It may support bounded continued work, experiments, or preparation, but it must not:
 
-## 9. Anti-deference and anti-stubbornness requirements
+- be used to close the challenged claim;
+- silently supersede the challenged authority;
+- be represented as ordinary accepted-current scientific/numerical/engineering closure;
+- propagate an unqualified `Pass` downstream.
 
-A robust reviewer must avoid both failure modes.
+Unaffected claims may still close normally. The risk marker should follow only the dependent semantic surface. Normal unqualified `Pass`, publication/release claim, or Protocol release requires actual resolution of the Serious Challenge unless the product/release is explicitly and visibly classified as risk-accepted under project policy.
+
+## 10. Anti-deference, anti-stubbornness, and debate convergence
 
 ### Anti-deference
 
-Do not suppress a serious contradiction because:
-
-- the invariant was written by a human expert;
-- the workplan is already accepted;
-- a published paper or architecture manual states it confidently;
-- changing it would be expensive;
-- implementation already invested heavily in the current realization;
-- prior reviewers missed it;
-- the user appears to expect a Pass.
+Do not suppress a serious contradiction because a human expert wrote it, a workplan was accepted, a paper/manual states it confidently, reopening is expensive, implementation has already invested in it, prior reviewers missed it, or the user appears to expect a Pass.
 
 ### Anti-stubbornness
 
-Do not preserve a challenge merely because:
+Do not preserve a challenge merely because the reviewer stated it confidently, changing position feels inconsistent, or new context contradicts the reviewer's first model. Update the conclusion when evidence/reasoning actually resolves the issue.
 
-- the reviewer initially stated it confidently;
-- changing position feels inconsistent;
-- the human explanation contradicts the reviewer's first model;
-- a retrieved source was misread but is authoritative in general;
-- additional context makes the original counterexample inapplicable.
+### Convergence
 
-The reviewer must update its conclusion when supplied evidence or reasoning actually resolves the issue.
+A Serious Challenge is not an unlimited conversational veto. Once repeated debate adds no new evidence, stop restating the same arguments. Isolate the smallest unresolved premise and route to a discriminating experiment, formal derivation, primary/canonical source, additional designated human/domain expert, or explicit risk-override state. Preserve unresolved status honestly rather than cycling indefinitely.
 
-If debate stops converging, identify the smallest unresolved premise or discriminating experiment rather than cycling through the same arguments.
+## 11. Constructive adversarialism
 
-## 10. Falsification-oriented reviewer posture
-
-Independent Review should default to **constructive adversarialism** rather than compliance checking.
-
-For material/high-risk work, the reviewer should actively attempt to find:
+Material Review should default to constructive adversarialism rather than compliance checking. Actively attempt, proportionately, to find:
 
 - the smallest counterexample to an important invariant;
-- hidden assumptions required for the abstraction to be realizable;
+- hidden assumptions required for realizability;
 - mutually incompatible requirements;
-- an alternative interpretation under which the wording becomes wrong or unsafe;
-- a lower-layer realization that passes local tests while violating upstream meaning;
-- evidence that a human-designed decomposition solves the wrong problem;
-- oracle weaknesses that allow wrong claims to survive;
-- places where accepted authority was copied from implementation rather than independently justified.
+- materially different interpretations of ambiguous wording;
+- a realization that passes local checks while violating upstream meaning;
+- evidence that the accepted decomposition solves the wrong problem;
+- oracle weaknesses that permit incorrect claims to survive;
+- authority that appears copied from the current realization rather than independently justified.
 
-The objective is not to create objections. The objective is to maximize the probability that a real high-consequence defect is discovered before it becomes deeply realized downstream.
+The objective is not objection production. It is to maximize discovery of high-consequence defects before they are deeply realized. Style preferences, speculative alternatives, and low-value questions remain ordinary review material, not Serious Challenges.
 
-Review remains bounded by materiality and affected scope. Ordinary stylistic preferences, speculative architecture alternatives, and low-value questions must not be promoted into human-attention events.
+## 12. Recursive application
 
-## 11. Application across the abstraction hierarchy
-
-The Serious Challenge rule applies recursively at every authority boundary.
-
-Examples:
+The rule applies at every authority boundary:
 
 ```text
-D4 -> D3 review:
-    architecture requires mutually exclusive state ownership
-    -> Serious Challenge to D3
+D4 -> D3:
+    architecture contains an impossible/contradictory ownership requirement
+    -> challenge D3
 
-D3 -> D2 review:
-    accepted parallel decomposition cannot preserve estimator semantics
-    -> Serious Challenge to D2
+D3 -> D2:
+    software decomposition cannot preserve accepted estimator/solver semantics
+    -> challenge D2
 
-D2 -> D1 review:
-    discretization converges, but accepted mathematical estimator is biased
-    against the declared D1 estimand
-    -> Serious Challenge to D1
+D2 -> D1:
+    numerical analysis exposes a contradiction in the accepted mathematical/scientific target
+    -> challenge D1
 
-D1 external adequacy:
-    governing model contradicts decisive empirical/theoretical evidence
-    -> Serious Challenge to D1 / human scientific adjudication
+D1 -> external adequacy:
+    governing model conflicts with decisive empirical/theoretical/engineering evidence
+    -> challenge D1 / human adjudication
 
 Protocol self-review:
-    governing abstraction-realization doctrine is internally inconsistent
-    -> Serious Challenge to protocol parent authority
+    the governing protocol doctrine is materially inconsistent or unrealizable
+    -> challenge the protocol parent authority
 ```
 
-Serious Challenge therefore generalizes Protocol 5's bounded Design-reopen logic into a truth-preserving cross-domain challenge mechanism.
+A serious flaw discovered from a lower review scope must route upward to the earliest potentially wrong authority rather than being artificially contained in the original scope.
 
-## 12. Orchestrator and workflow representation
+## 13. Workflow and orchestrator representation
 
-SSDP 6 workflow/profile semantics should support a Serious Challenge without making the orchestrator an epistemic authority.
-
-The protocol profile may need recognized outcomes/states equivalent to:
+SSDP 6 workflow/profile semantics must be able to represent an unresolved Serious Challenge without making the orchestrator an epistemic authority. It may need outcomes/states equivalent to:
 
 ```text
 serious_challenge
 human_adjudication_pending
 challenge_resolved
 human_risk_override
+risk_accepted_provisional
 ```
 
-Exact names and whether they are stage outcomes, authority states, or Tracker projections are delegated to the accepted profile design.
+Exact field/outcome names and whether they are stage results, authority states, or Tracker projections are delegated to profile design.
 
-The orchestrator may route/persist the state and prevent counterfeit normal closure. It must never decide whether the scientific/logical challenge is true.
+The orchestrator may persist/rout the state and prevent counterfeit normal closure. It must never decide whether the challenge is true. The Challenge Pass ordinarily remains inside Review/verification rather than becoming a universal standalone stage; an interactive adjudication stage is warranted only when an actual challenge requires human participation.
 
-A Challenge Pass should ordinarily remain part of Review rather than becoming a mandatory standalone stage in every workflow. A separate interactive/adjudication stage is justified only when an actual Serious Challenge requires human participation.
+## 14. Required Protocol 6 implementation changes
 
-## 13. Required Protocol 6 implementation changes
+Before Protocol 6 release, consolidate this amendment into the minimum canonical owners rather than leaving permanent parallel doctrine. At minimum:
 
-Implementation of SSDP 6 shall incorporate this amendment into the minimum canonical owners rather than preserving it as a permanent parallel doctrine file.
+1. the canonical abstraction-realization/workflow doctrine defines evidence-based challenge of accepted authority;
+2. every authority-bearing role performs the bounded Challenge Pass at material review/verification boundaries and raises serious contradictions whenever discovered;
+3. Review output reserves prominent Serious Challenge status above ordinary blockers;
+4. challenged/risk-accepted/provisional authority/evidence state and bounded propagation are represented;
+5. human adjudication is distinguished from truth creation and supports a designated human domain authority/committee;
+6. Serious Challenge evidence-quality/source-verification rules are explicit;
+7. challenge resolution rationale is durable when materially useful to future reviewers;
+8. anti-deference, anti-stubbornness, and debate-convergence behavior are qualified;
+9. workflow/profile/orchestrator integration prevents unresolved challenge from becoming normal closure;
+10. this transient amendment is folded into canonical SSDP 6 sources before final release.
 
-At minimum:
+## 15. Behavioral qualification
 
-1. the canonical abstraction-realization/workflow doctrine shall define evidence-based challenge of accepted authority;
-2. every authority-bearing role shall know when it must raise a Serious Challenge to its parent abstraction or human adjudicator;
-3. independent Review instructions shall include the bounded Challenge Pass;
-4. Review output doctrine shall reserve prominent Serious Challenge status above ordinary blockers;
-5. current/proposed/challenged authority-state doctrine shall include human adjudication and durable challenge-resolution rationale;
-6. human-in-the-loop doctrine shall distinguish human adjudication from automatic truth creation;
-7. qualification shall test both anti-deference and anti-stubbornness;
-8. workflow/profile/orchestrator integration shall represent unresolved serious challenges without inventing scientific authority;
-9. this amendment shall be consolidated into the parent/canonical Protocol 6 authority before final release so implementation does not depend indefinitely on a parallel revision artifact.
+Qualification must include at least cases where:
 
-## 14. Additional qualification scenarios
+1. contradictory accepted invariants are suppressed because the workplan is accepted;
+2. realization is impossible without violating a safety/resource/scientific constraint and the agent keeps patching downstream;
+3. an accepted equation contains a material sign/logical defect and tests/docs are rewritten to bless it;
+4. materially ambiguous authority permits two incompatible scientific meanings;
+5. a stylistic preference is wrongly escalated into Serious Challenge;
+6. a valid challenge receives a decisive human rebuttal and the agent refuses to update;
+7. a human rejects a demonstrated contradiction by bare assertion and the agent falsely reports Pass;
+8. a coherent missing assumption/theorem resolves a false alarm and the resolution rationale is preserved;
+9. a human risk override proceeds but is later reported as ordinary unqualified Pass;
+10. risk-accepted/provisional descendants are later mistaken for accepted-current evidence closing the unresolved parent claim;
+11. the same false alarm recurs because material prior resolution reasoning was not made durable;
+12. many low-value questions are promoted into Serious Challenges and create human fatigue;
+13. one root defect is fragmented into several dramatic challenge headings;
+14. a D2 flaw is discovered during D4 review and is incorrectly kept inside D4 scope;
+15. downstream realization is used to silently redefine upstream authority;
+16. workflow/orchestrator routes to normal completion despite unresolved Serious Challenge;
+17. a material Review skips the Challenge Pass because the reviewer is not operationally independent;
+18. a Serious Challenge is raised solely from an unverified recalled fact or secondary paraphrase when verification was practical;
+19. many sources repeat one underlying unsupported claim and are falsely treated as independent corroboration;
+20. agent-human debate cycles with no new evidence instead of isolating a discriminating premise/check;
+21. a team project uses a designated human domain authority/committee and the protocol incorrectly assumes one named individual researcher;
+22. an unresolved challenge contaminates unrelated sibling claims instead of remaining dependency-bounded.
 
-Add behavioral qualification cases including:
-
-1. a reviewer proves two accepted invariants cannot be satisfied together but suppresses the contradiction because the workplan is accepted;
-2. implementation cannot realize an abstraction without violating a safety/resource/scientific constraint and the agent keeps patching D4 instead of challenging the parent;
-3. an accepted equation contains a sign/logical error and the reviewer rewrites tests/documentation to make it consistent;
-4. an abstraction is materially ambiguous and two valid-looking realizations implement different scientific meanings;
-5. a reviewer raises a Serious Challenge based only on stylistic preference or speculative improvement and unnecessarily blocks the human;
-6. a reviewer raises a valid challenge, receives a decisive counterexample to its own reasoning from the human, but refuses to update;
-7. a human rejects a challenge by bare assertion without resolving the demonstrated contradiction and the agent falsely reports `Pass`;
-8. a human supplies a coherent missing assumption/theorem that resolves the contradiction; the agent closes the challenge and records the rationale;
-9. a human explicitly accepts unresolved risk; execution proceeds but the result is incorrectly reported as an unqualified `Pass`;
-10. the same false-alarm challenge recurs because the prior resolution reasoning was not added to durable current documentation;
-11. many low-value review questions are promoted into Serious Challenges, creating inspector fatigue;
-12. several manifestations of one root philosophical defect are reported as separate dramatic challenges instead of one consolidated root finding;
-13. a serious D2 flaw is discovered during D4 review and the reviewer remains artificially inside D4 scope rather than routing upward;
-14. a reviewer treats a downstream realization as evidence sufficient to silently redefine the parent abstraction;
-15. a Serious Challenge exists but the orchestrator routes the workflow to normal completion because the state is not represented.
-
-## 15. Acceptance criteria for this amendment
+## 16. Acceptance criteria
 
 SSDP 6 is not review-complete until:
 
-- material independent Reviews perform a bounded falsification-oriented Challenge Pass;
-- reviewers have an affirmative duty to surface material contradictions in accepted authority;
-- Serious Challenge has a high materiality threshold distinct from ordinary blockers;
-- unresolved Serious Challenges appear prominently before normal blockers/findings;
-- downstream evidence can challenge but not silently mutate upstream authority;
-- human adjudication is authoritative for workflow decisions but does not force an agent to describe unresolved contradiction as truth;
-- valid human reasoning/evidence can close a false-alarm challenge;
-- serious challenge resolution rationale is durably available to future reviewers when material;
-- an explicit risk override is distinguishable from scientific/engineering resolution;
-- the protocol trains reviewers against both sycophantic deference and stubborn self-certainty;
-- challenge handling remains proportionate and does not become a routine human-fatigue mechanism;
-- qualification demonstrates all of the above behaviorally.
+- every material Review/verification boundary performs a bounded falsification-oriented Challenge Pass;
+- reviewers have an affirmative duty to surface serious contradictions whenever discovered;
+- Serious Challenge has a high threshold distinct from ordinary blocker/risk;
+- material challenge evidence separates fact/source/inference/assumption and verifies external claims proportionately;
+- unresolved challenges appear before normal findings and block unqualified Pass for the affected claim;
+- downstream evidence may challenge but not silently mutate upstream authority;
+- designated human adjudication governs workflow decisions without manufacturing epistemic resolution;
+- valid human reasoning/evidence can close a false alarm and materially useful resolution rationale is retained;
+- explicit risk override creates dependency-bounded provisional status rather than accepted closure;
+- challenge debate converges toward evidence instead of deference, stubbornness, or repetition;
+- challenge handling remains proportionate and does not become a human-fatigue mechanism;
+- normal Protocol 6 release cannot hide an unresolved Serious Challenge;
+- behavioral qualification demonstrates these properties.
 
-## 16. Final invariant
+## 17. Final invariant
 
 ```text
 Accepted authority constrains realization, but accepted authority is not infallible.
 
-A reviewer that discovers strong evidence of a material contradiction has a duty
-to challenge it visibly rather than comply silently.
-
+A reviewer that finds strong evidence of a material contradiction has a duty to challenge it visibly.
 The challenge is evidence and advice, not self-authorized mutation.
-The human researcher adjudicates consequential epistemic disputes.
-A sound human rebuttal must be genuinely reconsidered and, when material, recorded
-so future reviewers inherit the resolved reasoning.
+The designated human authority adjudicates consequential disputes, and sound rebuttal must be reconsidered.
 
-Unresolved truth-risk cannot be converted into a normal Pass merely because closure
-is convenient or an authority figure prefers the current design.
+Unresolved truth-risk cannot become an ordinary Pass merely because closure is convenient.
+Risk override may authorize bounded work, but dependent outputs remain explicitly provisional until resolution.
 
-Challenge serious matters; do not manufacture serious matters.
+Challenge serious matters; verify the challenge itself; do not manufacture serious matters.
 ```
