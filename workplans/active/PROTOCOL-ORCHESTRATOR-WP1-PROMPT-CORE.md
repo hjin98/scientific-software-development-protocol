@@ -27,7 +27,7 @@ forbidden_higher_module_dependencies:
 
 ## 1. Objective and authority
 
-WP-1 delivers the smallest independently useful SDP Orchestrator: an installable `sdp-orchestrator-core` distribution and generated `sdp` console command that observe a configured repository, resolve the governing workplan and compatible Protocol 5.16 workflow/profile, prepare a route-independent public record, render one complete local/web stage prompt, request a structured terminal result envelope, and compose optional extensions through one public SPI.
+WP-1 delivers the smallest independently useful SDP Orchestrator: an installable `sdp-orchestrator-core` distribution, installer-generated `sdp` console command, and repository-local zero-install `orchestrator/sdp.py` development launcher that all execute the same Core CLI implementation. Core observes a configured repository, resolves the governing workplan and compatible Protocol 5.16 workflow/profile, prepares a route-independent public record, renders one complete local/web stage prompt, requests a structured terminal result envelope, and composes optional extensions through one public SPI.
 
 Core-only operation is a finished mode. It must not require Tracker, Adapters, Scheduler, persistence, agent execution, model/account catalogs, benchmarking, quota/resource prediction, or AUTO scheduling.
 
@@ -53,13 +53,14 @@ This file is the current snapshot-complete WP-1 implementation contract. Earlier
 12. **Stage identity is profile-bound.** User input is `StageSelector`; `StageRef` exists only after compatible profile resolution.
 13. **Render consistency is optimistic but coherent.** Material candidate/workplan/source/selection drift between prepare and final return produces stale/incoherent failure, not a mixed snapshot. WP-1 adds no repository lock/persistence.
 14. **Determinism follows semantic state.** Fixed RunId + unchanged material state gives stable identities/bytes; wall-clock diagnostics and unrelated extension config do not perturb them.
-15. **Installed behavior is the acceptance owner.** Source helper tests cannot proxy-pass broken wheel/sdist, packaged profile, real Git observer, extension composition, CLI/stdout, privacy, or wire behavior.
+15. **Installed behavior is the release acceptance owner.** Source helper tests cannot proxy-pass broken wheel/sdist, packaged profile, real Git observer, extension composition, installed CLI/stdout, privacy, or wire behavior.
 16. **Repository containment is mandatory.** Orchestrator-owned source/build/test/fixture/script/doc material lives under `orchestrator/`; Protocol workplans remain under `workplans/`; repository CI contains thin invocation only.
-17. **The source tree is a maintained human interface.** Core source must use a conventional, shallow repository layout with obvious module names and a discoverable CLI owner. Redundant collection directories and making essentially every implementation module look private are not justified merely for hypothetical future symmetry.
+17. **The source tree is a maintained human interface.** Core source uses a conventional, shallow repository layout with obvious module names and discoverable CLI ownership. Redundant collection directories and making essentially every implementation module look private are not justified merely for hypothetical future symmetry.
+18. **Development execution must not require installing the package.** A developer working from a checkout can run the current source tree directly through one checked-in launcher without installing, uninstalling, or editable-installing `sdp-orchestrator-core`. That launcher must execute the same CLI implementation as the installed `sdp` command and must prefer checkout source over any stale installed copy.
 
 ### 2.2 Tier 1B — Frozen architecture for this cycle
 
-Preserve Architecture 1.6.0: one Python 3.11+ `sdp-orchestrator-core` distribution, one generated `sdp` entry point, native PEP 420 namespace with no `sdp_orchestrator/__init__.py`, strict `core <- tracker <- adapters <- scheduler` dependency direction, one config path, one Git observer, one workplan resolver, one Protocol/profile/source authority, public Core/Application/Extension API/SPI value boundaries, prepare-before-render, one extension registry, one exact result-footer wire, and no higher-module machinery in Core.
+Preserve Architecture 1.6.0: one Python 3.11+ `sdp-orchestrator-core` distribution, one installer-generated `sdp` entry point, one thin repository-local development launcher dispatching the same CLI owner, native PEP 420 namespace with no `sdp_orchestrator/__init__.py`, strict `core <- tracker <- adapters <- scheduler` dependency direction, one config path, one Git observer, one workplan resolver, one Protocol/profile/source authority, public Core/Application/Extension API/SPI value boundaries, prepare-before-render, one extension registry, one exact result-footer wire, and no higher-module machinery in Core.
 
 Exact implementation decomposition below those boundaries remains Tier 2 and should be simplified where possible.
 
@@ -123,7 +124,7 @@ One entry-point group: `sdp_orchestrator.extensions.v1`. Discovery-only reads di
 
 ## 4. Source-tree and CLI layout — required simplification
 
-The current `orchestrator/packages/core/src/sdp_orchestrator/core` layout is needlessly deep for WP-1 and pre-allocates a `packages/` collection for higher distributions that do not yet exist. The leading-underscore convention on nearly every implementation module also obscures ownership, including the product CLI.
+The current `orchestrator/packages/core/src/sdp_orchestrator/core` layout is needlessly deep for WP-1 and pre-allocates a `packages/` collection for higher distributions that do not yet exist. The leading-underscore convention on nearly every implementation module also obscures ownership, including the product CLI. Development additionally needs a no-install path that executes the current checkout directly rather than requiring repeated package installation while the code is changing rapidly.
 
 ### 4.1 Target repository layout
 
@@ -131,6 +132,7 @@ Core becomes the direct Python project rooted at `orchestrator/`:
 
 ```text
 orchestrator/
+  sdp.py                      # zero-install development launcher
   pyproject.toml              # sdp-orchestrator-core distribution
   README.md
   src/
@@ -167,13 +169,13 @@ orchestrator/
   scripts/
 ```
 
-This preserves the conventional Python `src/sdp_orchestrator/core` import layout while removing the redundant `packages/core` repository layers. It does **not** use exotic setuptools `package-dir` remapping merely to flatten the import namespace.
+This preserves the conventional Python `src/sdp_orchestrator/core` import layout while removing the redundant `packages/core` repository layers. It does not use exotic setuptools `package-dir` remapping merely to flatten the import namespace.
 
-If Tracker/Adapters/Scheduler are later implemented, add only the package roots actually needed at that time under `orchestrator/` (for example `tracker/`, `adapters/`, `scheduler/`) while preserving the Frozen distribution/import contracts. Do not retain a speculative collection directory solely for symmetry.
+If Tracker/Adapters/Scheduler are later implemented, add only the package roots actually needed at that time under `orchestrator/` while preserving the Frozen distribution/import contracts. Do not retain a speculative collection directory solely for symmetry.
 
 ### 4.2 Module naming and privacy
 
-The supported public consumer contract remains `sdp_orchestrator.core.api.v1` and `.spi.v1`. Other modules remain implementation detail by documentation/API policy; Python leading underscores are **not** the authority that makes them private.
+The supported public consumer contract remains `sdp_orchestrator.core.api.v1` and `.spi.v1`. Other modules remain implementation detail by documentation/API policy; Python leading underscores are not the authority that makes them private.
 
 Rename primary modules descriptively rather than prefixing essentially every file with `_`:
 
@@ -199,18 +201,52 @@ _service.py     -> service.py
 
 Implementation may consolidate genuinely tiny modules where ownership becomes clearer, but may not add forwarding modules/wrappers solely to preserve these old private paths. They are pre-release Tier-2 internals, not compatibility contracts.
 
-### 4.3 CLI discoverability
+### 4.3 Installed and zero-install CLI entry points
 
-The installed `sdp` executable remains a conventional console script generated by the package installer; do **not** commit a second shell/Python launcher named `sdp` that can drift from packaging metadata.
+There are two supported invocation mechanisms but exactly one CLI implementation owner.
 
-Make its source owner obvious:
+**Installed/release path:**
 
 ```toml
 [project.scripts]
 sdp = "sdp_orchestrator.core.cli:main"
 ```
 
-`cli.py` must be directly readable and runnable as a module for developer inspection (for example `python -m sdp_orchestrator.core.cli --help` where supported by the existing `main` guard). README/user/developer documentation must state that installation creates the `sdp` executable and show the installed smoke path.
+The package installer generates the `sdp` executable in the active environment. No separately maintained installed shell script is checked in.
+
+**Development/source path:** `orchestrator/sdp.py` is a tiny checked-in launcher. It may contain only standard-library bootstrap needed to locate the adjacent `src/` tree and then delegate to `sdp_orchestrator.core.cli:main`. Its intended semantic shape is:
+
+```python
+#!/usr/bin/env python3
+from pathlib import Path
+import sys
+
+SRC = Path(__file__).resolve().parent / "src"
+sys.path.insert(0, str(SRC))
+
+from sdp_orchestrator.core.cli import main
+
+if __name__ == "__main__":
+    main()
+```
+
+Equivalent simpler bootstrap is acceptable. The key contract is that checkout `src` is placed ahead of site-packages so an older installed `sdp-orchestrator-core` cannot shadow the source under development.
+
+`sdp.py` contains **no Typer command declarations, option parsing, validation, project/workplan/profile logic, output logic, or product behavior**. All of that remains in `core/cli.py`; the launcher only selects the local source tree and calls the same `main`. Therefore it is not a second CLI authority or compatibility wrapper.
+
+Required development usage includes:
+
+```text
+python orchestrator/sdp.py --help
+python orchestrator/sdp.py doctor --config ...
+python orchestrator/sdp.py implementation --config ... --prompt-mode local
+```
+
+Optionally the file may be executable (`./orchestrator/sdp.py ...`) through a normal Python shebang. It must work from arbitrary current working directories because it resolves `src/` relative to its own file location.
+
+“Zero-install” means no installation/editable installation of the orchestrator package itself. The active Python environment must still provide declared runtime dependencies; WP-1 does not vendor or bundle Python and third-party dependencies into this development launcher.
+
+For developer inspection, `core/cli.py` should also remain directly module-runnable where practical (`PYTHONPATH=orchestrator/src python -m sdp_orchestrator.core.cli --help`), but `orchestrator/sdp.py` is the ergonomic default checkout entry point and does not require callers to set `PYTHONPATH`.
 
 ## 5. Public API/SPI floor
 
@@ -222,7 +258,7 @@ Core capabilities remain `prompt.render`, `project.observe`, `workplan.catalog`,
 
 ## 6. Acceptance obligations
 
-O1. **Layout/distribution:** target source tree in §4; no `orchestrator/packages/core`; no old underscore-module compatibility shims; wheel + sdist build/inspect/install; generated `sdp` entry point targets `sdp_orchestrator.core.cli:main`; installed CLI works outside checkout; PEP 420 sibling coexistence; no root namespace init/higher imports.
+O1. **Layout/distribution/development launcher:** target source tree in §4; no `orchestrator/packages/core`; no old underscore-module compatibility shims; wheel + sdist build/inspect/install; generated `sdp` entry point targets `sdp_orchestrator.core.cli:main`; installed CLI works outside checkout; checked-in `orchestrator/sdp.py` runs checkout source without package installation and prefers checkout source over a stale installed copy; PEP 420 sibling coexistence; no root namespace init/higher imports.
 
 O2. **Config/projects:** precedence/default/ambiguity, bounded malformed/oversized config, no semantic env override surface, extension namespace preservation, secret URL rejection/redaction, source policy.
 
@@ -242,11 +278,11 @@ O9. **Privacy/web truth:** final RenderedPrompt/stdout tests for paths/credentia
 
 O10. **Extensions/diagnostics:** real installed entry-point metadata; passive discovery; compatible/incompatible/missing/cyclic/alternative-provider graphs; staged activation; canonical ID/API/multiplicity/SPI; doctor/capabilities no hidden network/mutation.
 
-O11. **CLI product boundary:** installed `sdp` subprocess plus source-owner `cli.py`; every alias/generic prompt path; stdout atomic/prompt-only; redacted stderr; additive clipboard; passive doctor.
+O11. **CLI product/development boundary:** installed `sdp` subprocess and zero-install `orchestrator/sdp.py` both dispatch the same `core.cli:main` path. Representative commands must produce equivalent governed behavior/exit semantics apart from expected executable-path/environment provenance. Source launcher works from outside `orchestrator/`, requires no package installation, and cannot be satisfied accidentally by an older installed package. Stdout remains atomic/prompt-only; failures redacted on stderr; clipboard additive; doctor passive.
 
-O12. **Documentation:** update architecture layout example so it no longer presents `orchestrator/packages/core/...` as the preferred concrete shape; update Core README/user/developer commands and paths to the new layout; explain console-script generation and public-vs-internal module boundary once, without compatibility-history prose.
+O12. **Documentation:** update architecture layout example so it no longer presents `orchestrator/packages/core/...` as preferred concrete shape; update README/user/developer commands and paths to the new layout; document both invocation modes (`sdp ...` after install and `python orchestrator/sdp.py ...` from checkout), clarify that both share `core.cli:main`, and explain public-vs-internal module boundary once without compatibility-history prose.
 
-O13. **Final repository acceptance:** complete Core regression with Hypothesis where installed, snapshot generator check, wheel+sdist integration, ordinary Protocol unit/build/validate/package-parity checks, `git diff --check`, and final simplicity/absence of higher-module or duplicate-authority machinery.
+O13. **Final repository acceptance:** complete Core regression with Hypothesis where installed, snapshot generator check, wheel+sdist integration, zero-install launcher regression, ordinary Protocol unit/build/validate/package-parity checks, `git diff --check`, and final simplicity/absence of higher-module or duplicate-authority machinery.
 
 ## 7. Implementation evidence reviewed
 
@@ -256,7 +292,7 @@ Recorded evidence: 312 focused tests; 339 complete Core tests including wheel+sd
 
 ## 8. Open implementation findings — Review verdict NO-PASS
 
-Parent Architecture 1.6.0 remains valid. F1-F8 are implementation nonconformance/oracle drift under existing authority. F9 is a stakeholder-directed Tier-2 source-layout simplification within the parent containment/namespace architecture. Repair existing owners; do not add parallel registries/resolvers/renderers/workflow engines/wrappers/persistence/higher-module dependencies.
+Parent Architecture 1.6.0 remains valid. F1-F8 are implementation nonconformance/oracle drift under existing authority. F9 is a stakeholder-directed Tier-2 source-layout and development-invocation simplification within the parent containment/namespace architecture. Repair existing owners; do not add parallel registries/resolvers/renderers/workflow engines/wrappers/persistence/higher-module dependencies.
 
 ### F1 — Workflow profile over-resolves blocker outcomes
 
@@ -322,23 +358,24 @@ Git environment still permits ambient `GIT_SSH`, `GIT_SSH_COMMAND`, `GIT_SSH_VAR
 
 **Test:** ambient helper that would create a marker is not executed by remote-query path; normal supported SSH-agent path remains available.
 
-### F9 — Simplify the source tree and expose the CLI owner clearly
+### F9 — Simplify the source tree and provide both installed and zero-install CLI entry paths
 
-Current path `orchestrator/packages/core/src/sdp_orchestrator/core` is over-nested, repeats `core` as both speculative distribution-directory and import package, and makes nearly every implementation module look private. The generated `sdp` command points at `_cli.py`, making the product entry source obscure.
+Current path `orchestrator/packages/core/src/sdp_orchestrator/core` is over-nested, repeats `core` as speculative distribution-directory and import package, and makes nearly every implementation module look private. The generated `sdp` command points at `_cli.py`, making product entry source obscure. Development currently also lacks a direct checked-in launcher, forcing package installation/editable-install workflows during rapid source iteration.
 
 **Repair sequence:**
 
 1. First move the Core project to the §4 target layout (`orchestrator/pyproject.toml`, `orchestrator/src/sdp_orchestrator/core`, `orchestrator/tests`). Remove `orchestrator/packages/core`; do not leave symlinks/forwarders.
 2. Rename the primary implementation modules per §4.2 and rewire imports/tests/generator/package-data directly. Do not add compatibility aliases for old private module names.
-3. Change console entry point directly to `sdp_orchestrator.core.cli:main`; keep the installer-generated `sdp` executable as the single CLI artifact.
-4. Reconcile architecture example, README, user/developer paths and commands.
-5. Only then implement F1-F8 against the simplified owners, so repair work is not immediately invalidated by a second structural churn.
+3. Change installed console entry point directly to `sdp_orchestrator.core.cli:main`.
+4. Add `orchestrator/sdp.py` as the thin zero-install development launcher described in §4.3. It prepends the checkout `src/` directory and calls the same `core.cli:main`; it contains no CLI/business behavior and is not included as a second installed console-script authority.
+5. Reconcile architecture example, README, user/developer paths and commands.
+6. Only then implement F1-F8 against the simplified owners, so repair work is not immediately invalidated by second structural churn.
 
-**Tests/structural evidence:** old `orchestrator/packages/core` and old `_app.py`/`_cli.py`-class implementation paths are absent; `api.v1`/`spi.v1` consumer imports remain unchanged; editable/source and wheel/sdist installed imports work; installed `sdp --help`, `sdp doctor`, and a render command work outside checkout; source CLI module is directly inspectable/runnable; package resources/generator paths and CI/test runner use the new layout; no higher-module dependency or compatibility wrapper is introduced.
+**Tests/structural evidence:** old `orchestrator/packages/core` and old `_app.py`/`_cli.py`-class implementation paths are absent; `api.v1`/`spi.v1` consumer imports remain unchanged; source/wheel/sdist imports work; installed `sdp --help`, `sdp doctor`, and representative render work outside checkout; `python orchestrator/sdp.py --help`, doctor, and render work without installing the package and from an arbitrary cwd; with a deliberately stale/different installed `sdp_orchestrator.core`, the launcher demonstrably executes checkout source; source and installed invocation converge on the same CLI semantics; package resources/generator paths and CI/test runner use the new layout; no higher-module dependency, duplicate parser/command tree, or compatibility wrapper is introduced.
 
 ## 9. Re-review gate
 
-WP-1 may return to independent Review only after F1-F9 are repaired on one exact assembled candidate. Because F9 changes import/layout/package paths, it invalidates most source-tree, packaging, CLI, API/SPI, extension, generator, and full-regression evidence; rerun those owners after the move rather than relying on pre-move green results.
+WP-1 may return to independent Review only after F1-F9 are repaired on one exact assembled candidate. Because F9 changes import/layout/package/launcher paths, it invalidates most source-tree, packaging, CLI, API/SPI, extension, generator, and full-regression evidence; rerun those owners after the move rather than relying on pre-move green results.
 
 Required final evidence:
 
@@ -349,9 +386,10 @@ Required final evidence:
 5. real Git/remote non-mutation and environment-boundary tests;
 6. canonical profile/snapshot generator parity;
 7. wheel and sdist build/inspection/install plus installed CLI outside checkout from the new `orchestrator/` project root;
-8. repository layout/absence checks proving no old package tree/private-path compatibility layer remains;
-9. ordinary repository Protocol tests/build/package parity and `git diff --check`.
+8. zero-install `orchestrator/sdp.py` tests from clean checkout-style paths and arbitrary cwd, including proof that local checkout source wins over a stale installed package;
+9. repository layout/absence checks proving no old package tree/private-path compatibility layer or duplicate CLI implementation remains;
+10. ordinary repository Protocol tests/build/package parity and `git diff --check`.
 
 Any required unavailable owner check remains a blocker unless the governing contract permits substitute evidence. A green test whose oracle encodes the wrong contract is not closure.
 
-**Current verdict: NO-PASS — return to `software-implementation`; perform F9 structural simplification first, then repair F1-F8 in the simplified owners, then submit one exact candidate for fresh independent Review.**
+**Current verdict: NO-PASS — return to `software-implementation`; perform F9 structural/development-entry simplification first, then repair F1-F8 in the simplified owners, then submit one exact candidate for fresh independent Review.**
