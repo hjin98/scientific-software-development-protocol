@@ -107,18 +107,20 @@ def _json_safe(value: Any, depth: int = 0) -> Any:
 class Problem:
     """Structured, redacted, JSON-safe description of a Core failure."""
 
-    __slots__ = ("code", "message", "details", "remediation")
+    __slots__ = ("code", "message", "retryable", "details", "remediation")
 
     def __init__(
         self,
         code: str,
         message: str,
         *,
+        retryable: bool | None = None,
         details: Mapping[str, Any] | None = None,
         remediation: str | None = None,
     ) -> None:
         self.code = code
         self.message = redact_text(message)
+        self.retryable = retryable
         self.details: dict[str, Any] = dict(
             redact_details(_json_safe(dict(details or {})))  # type: ignore[arg-type]
         )
@@ -128,6 +130,7 @@ class Problem:
         return {
             "code": self.code,
             "message": self.message,
+            "retryable": self.retryable,
             "details": self.details,
             "remediation": self.remediation,
         }
@@ -152,7 +155,16 @@ def fail(
     code: str,
     message: str,
     *,
+    retryable: bool | None = None,
     details: Mapping[str, Any] | None = None,
     remediation: str | None = None,
 ) -> NoReturn:
-    raise OrchestratorError(Problem(code, message, details=details, remediation=remediation))
+    raise OrchestratorError(
+        Problem(
+            code,
+            message,
+            retryable=retryable,
+            details=details,
+            remediation=remediation,
+        )
+    )

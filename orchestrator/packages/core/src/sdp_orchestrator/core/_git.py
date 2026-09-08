@@ -20,16 +20,20 @@ from __future__ import annotations
 import hashlib
 import os
 import re
+import selectors
+import stat as stat_module
 import subprocess
+import time
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
 
 from . import _errors as E
-from ._digest import SCHEME_GIT_WORKING_TREE, digest_canonical
+from ._digest import SCHEME_GIT_WORKING_TREE, digest_bytes, digest_canonical
 from ._limits import (
     GIT_REMOTE_TIMEOUT_SECONDS,
     GIT_TIMEOUT_SECONDS,
+    MAX_DIRTY_CONTENT_BYTES,
     MAX_DIRTY_FILE_BYTES,
     MAX_DIRTY_PATHS,
     MAX_GIT_OUTPUT_BYTES,
@@ -46,12 +50,39 @@ from ._redact import redact_text, sanitize_url
 
 _SCP_LIKE = re.compile(r"^(?:[^@/\s]+@)?(?P<host>[^:/\s]+):(?!//)(?P<path>.+)$")
 _WEB_SCHEMES = frozenset({"https", "http", "ssh", "git"})
+_SAFE_ENVIRONMENT = frozenset(
+    {
+        "PATH",
+        "HOME",
+        "USER",
+        "LOGNAME",
+        "TMPDIR",
+        "XDG_CONFIG_HOME",
+        "XDG_CACHE_HOME",
+        "XDG_DATA_HOME",
+        "SSH_AUTH_SOCK",
+        "SSH_AGENT_PID",
+        "GIT_SSH",
+        "GIT_SSH_COMMAND",
+        "GIT_SSH_VARIANT",
+        "HTTP_PROXY",
+        "HTTPS_PROXY",
+        "ALL_PROXY",
+        "NO_PROXY",
+        "SSL_CERT_FILE",
+        "SSL_CERT_DIR",
+        "CURL_CA_BUNDLE",
+    }
+)
 
 
 def _git_env() -> dict[str, str]:
     """A noninteractive, non-mutating, credential-quiet environment."""
 
-    env = dict(os.environ)
+    # Do not inherit ambient GIT_* variables that can redirect repository
+    # discovery, configuration, objects, refs, or the index. HOME and the
+    # established transport variables remain available for credential helpers.
+    env = {name: value for name, value in os.environ.items() if name in _SAFE_ENVIRONMENT}
     env.update(
         {
             "GIT_OPTIONAL_LOCKS": "0",
@@ -63,9 +94,6 @@ def _git_env() -> dict[str, str]:
             "LC_ALL": "C",
         }
     )
-    env.pop("GIT_DIR", None)
-    env.pop("GIT_WORK_TREE", None)
-    env.pop("GIT_INDEX_FILE", None)
     return env
 
 
@@ -76,6 +104,80 @@ class GitResult:
     stderr: str
 
 
+class _BoundedRunError(Exception):
+    def __init__(self, reason: str, stream: str | None = None) -> None:
+        super().__init__(reason)
+        self.reason = reason
+        self.stream = stream
+
+
+def run_bounded(
+    command: list[str],
+    *,
+    cwd: Path | None = None,
+    timeout: float,
+    max_output_bytes: int,
+    env: dict[str, str] | None = None,
+) -> GitResult:
+    """Run a fixed command while bounding both pipes during collection."""
+
+    process = subprocess.Popen(  # noqa: S603 - callers provide fixed argv
+        command,
+        cwd=str(cwd) if cwd is not None else None,
+        env=env if env is not None else _git_env(),
+        stdin=subprocess.DEVNULL,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+    )
+    selector = selectors.DefaultSelector()
+    streams: dict[int, tuple[str, bytearray]] = {}
+    assert process.stdout is not None
+    assert process.stderr is not None
+    stdout_fd = process.stdout.fileno()
+    stderr_fd = process.stderr.fileno()
+    for name, pipe in (("stdout", process.stdout), ("stderr", process.stderr)):
+        selector.register(pipe, selectors.EVENT_READ, name)
+        streams[pipe.fileno()] = (name, bytearray())
+
+    deadline = time.monotonic() + timeout
+    total_bytes = 0
+    try:
+        while selector.get_map():
+            remaining = deadline - time.monotonic()
+            if remaining <= 0:
+                process.kill()
+                process.wait()
+                raise _BoundedRunError("timeout")
+            for key, _ in selector.select(min(remaining, 0.1)):
+                pipe = key.fileobj
+                chunk = os.read(pipe.fileno(), 64 * 1024)
+                if not chunk:
+                    selector.unregister(pipe)
+                    continue
+                name, buffer = streams[pipe.fileno()]
+                buffer.extend(chunk)
+                total_bytes += len(chunk)
+                if total_bytes > max_output_bytes:
+                    process.kill()
+                    process.wait()
+                    raise _BoundedRunError("output", name)
+
+        returncode = process.wait()
+        stdout = bytes(streams[stdout_fd][1])
+        stderr = redact_text(
+            bytes(streams[stderr_fd][1]).decode("utf-8", "replace").strip()
+        )
+        return GitResult(returncode, stdout, stderr)
+    finally:
+        selector.close()
+        for pipe in (process.stdout, process.stderr):
+            if pipe is not None and not pipe.closed:
+                pipe.close()
+        if process.poll() is None:
+            process.kill()
+            process.wait()
+
+
 def run_git(
     root: Path, args: list[str], *, timeout: float = GIT_TIMEOUT_SECONDS
 ) -> GitResult:
@@ -83,12 +185,11 @@ def run_git(
 
     command = ["git", "--no-optional-locks", "-C", str(root), *args]
     try:
-        completed = subprocess.run(  # noqa: S603 - fixed argv, no shell
+        return run_bounded(
             command,
-            capture_output=True,
             timeout=timeout,
+            max_output_bytes=MAX_GIT_OUTPUT_BYTES,
             env=_git_env(),
-            check=False,
         )
     except FileNotFoundError:
         E.fail(
@@ -96,20 +197,19 @@ def run_git(
             "the 'git' executable is not available",
             remediation="install Git or make it available on PATH",
         )
-    except subprocess.TimeoutExpired:
+    except _BoundedRunError as exc:
+        if exc.reason == "output":
+            E.fail(
+                E.REPOSITORY_INVALID,
+                "a Git command produced more output than the supported bound",
+                details={"args": args, "stream": exc.stream, "limit": MAX_GIT_OUTPUT_BYTES},
+            )
         E.fail(
             E.REPOSITORY_INVALID,
             "a Git command exceeded its time bound",
             details={"args": args, "timeout_seconds": timeout},
+            retryable=True,
         )
-    if len(completed.stdout) > MAX_GIT_OUTPUT_BYTES:
-        E.fail(
-            E.REPOSITORY_INVALID,
-            "a Git command produced more output than the supported bound",
-            details={"args": args, "limit": MAX_GIT_OUTPUT_BYTES},
-        )
-    stderr = redact_text(completed.stderr.decode("utf-8", "replace").strip())
-    return GitResult(completed.returncode, completed.stdout, stderr)
 
 
 def _git_text(root: Path, args: list[str], *, timeout: float = GIT_TIMEOUT_SECONDS) -> str | None:
@@ -183,19 +283,62 @@ def _entry_content(path: Path) -> tuple[str, bool]:
     mode = stat.st_mode
     if os.path.islink(path):
         try:
-            return "symlink:" + os.readlink(path), True
+            target = os.fsencode(os.readlink(path)).hex()
+            return f"symlink:{mode:o}:{target}", True
         except OSError:
-            return "symlink:unreadable", False
-    if not os.path.isfile(path):
+            return f"symlink:{mode:o}:unreadable", False
+    if not stat_module.S_ISREG(mode):
         # FIFOs, sockets, devices: no safe bounded content identity exists.
         return f"special:{mode:o}", False
     if stat.st_size > MAX_DIRTY_FILE_BYTES:
         return f"oversize:{stat.st_size}", False
     try:
-        digest = hashlib.sha256(path.read_bytes()).hexdigest()
+        digest_builder = hashlib.sha256()
+        total = 0
+        with path.open("rb") as handle:
+            while True:
+                chunk = handle.read(min(64 * 1024, MAX_DIRTY_FILE_BYTES - total + 1))
+                if not chunk:
+                    break
+                total += len(chunk)
+                if total > MAX_DIRTY_FILE_BYTES:
+                    return f"oversize:>{MAX_DIRTY_FILE_BYTES}", False
+                digest_builder.update(chunk)
     except OSError:
         return "unreadable", False
-    return f"blob:{digest}", True
+    return f"file:{mode:o}:blob:{digest_builder.hexdigest()}", True
+
+
+def _path_token(path: str) -> str:
+    """Encode a Git path without placing surrogate escapes in JSON."""
+
+    return "hex:" + os.fsencode(path).hex()
+
+
+def _entry_metadata(path: Path) -> dict[str, int | str]:
+    try:
+        stat = path.lstat()
+    except OSError:
+        return {"state": "unreadable"}
+    return {"mode": stat.st_mode, "size": stat.st_size}
+
+
+def _staged_identity(toplevel: Path) -> DigestRef | None:
+    """Digest the index patch, including staged blob ids and file modes."""
+
+    result = run_git(
+        toplevel,
+        ["diff", "--cached", "--raw", "-z", "--no-renames", "--no-abbrev"],
+    )
+    if result.returncode != 0:
+        E.fail(
+            E.REPOSITORY_INVALID,
+            "unable to inspect the Git index state",
+            details={"stderr": result.stderr},
+        )
+    if not result.stdout:
+        return None
+    return digest_bytes(result.stdout, SCHEME_GIT_WORKING_TREE)
 
 
 def _parse_porcelain(payload: bytes) -> list[tuple[str, str]]:
@@ -251,13 +394,45 @@ def working_tree_identity(toplevel: Path) -> tuple[DigestRef | None, bool]:
             ),
             False,
         )
+    staged = _staged_identity(toplevel)
     complete = True
+    total_bytes = 0
+    unique_entries = sorted(set(entries))
+    for _, path in unique_entries:
+        try:
+            candidate = toplevel / path
+            stat = candidate.lstat()
+        except OSError:
+            continue
+        if stat_module.S_ISREG(stat.st_mode):
+            total_bytes += stat.st_size
+        if total_bytes > MAX_DIRTY_CONTENT_BYTES:
+            return (
+                digest_canonical(
+                    {
+                        "staged": staged.value if staged else None,
+                        "overflow": [
+                            {
+                                "status": status,
+                                "path": _path_token(item_path),
+                                "metadata": _entry_metadata(toplevel / item_path),
+                            }
+                            for status, item_path in unique_entries
+                        ],
+                    },
+                    SCHEME_GIT_WORKING_TREE,
+                ),
+                False,
+            )
     records: list[dict[str, str]] = []
-    for status, path in sorted(set(entries)):
+    for status, path in unique_entries:
         content, ok = _entry_content(toplevel / path)
         complete = complete and ok
-        records.append({"status": status, "path": path, "content": content})
-    return digest_canonical({"entries": records}, SCHEME_GIT_WORKING_TREE), complete
+        records.append({"status": status, "path": _path_token(path), "content": content})
+    return digest_canonical(
+        {"staged": staged.value if staged else None, "entries": records},
+        SCHEME_GIT_WORKING_TREE,
+    ), complete
 
 
 # --------------------------------------------------------------------------
@@ -344,6 +519,13 @@ def _upstream_ref(toplevel: Path) -> str | None:
     return _git_text(toplevel, ["rev-parse", "--abbrev-ref", "--symbolic-full-name", "@{upstream}"])
 
 
+def _upstream_parts(value: str | None) -> tuple[str, str] | None:
+    if not value or "/" not in value:
+        return None
+    remote, branch = value.split("/", 1)
+    return (remote, branch) if remote and branch else None
+
+
 def ls_remote_head(toplevel: Path, remote: str, branch: str) -> str | None:
     """One bounded, noninteractive, read-only remote query.
 
@@ -383,6 +565,7 @@ def observe(
     *,
     remote_mode: RemoteMode,
     configured_remote_name: str | None,
+    max_remote_staleness_seconds: int | None = None,
 ) -> Observation:
     """Observe the candidate without mutating anything in the target."""
 
@@ -397,6 +580,15 @@ def observe(
     upstream: str | None = None
     observed_remote_commit: str | None = None
     evidence = RemoteEvidence.NONE
+    remote_observed_at: str | None = None
+    observed_at = datetime.now(timezone.utc).isoformat(timespec="microseconds")
+
+    if max_remote_staleness_seconds is not None and max_remote_staleness_seconds < 0:
+        E.fail(
+            E.CONFIG_INVALID,
+            "max_remote_staleness_seconds must be non-negative",
+            details={"value": max_remote_staleness_seconds},
+        )
 
     if remote_mode is not RemoteMode.LOCAL_ONLY:
         try:
@@ -407,17 +599,24 @@ def observe(
             diagnostics.append(f"{exc.problem.code}: {exc.problem.message}")
         if remote is not None and not detached:
             upstream = _upstream_ref(toplevel)
-            if upstream:
-                cached = _git_text(toplevel, ["rev-parse", "--verify", "--quiet", upstream])
+            upstream_parts = _upstream_parts(upstream)
+            target_branch = branch
+            if upstream_parts and upstream_parts[0] == remote.remote_name:
+                target_branch = upstream_parts[1]
+            if target_branch:
+                selected_tracking_ref = f"refs/remotes/{remote.remote_name}/{target_branch}"
+                cached = _git_text(
+                    toplevel,
+                    ["rev-parse", "--verify", "--quiet", selected_tracking_ref],
+                )
                 if cached:
                     observed_remote_commit = cached
                     evidence = RemoteEvidence.CACHED
-                else:
+                elif upstream_parts and upstream_parts[0] == remote.remote_name:
                     diagnostics.append(
                         f"upstream {upstream} has no local remote-tracking commit"
                     )
             if remote_mode is RemoteMode.REFRESH_REMOTE and branch:
-                target_branch = upstream.split("/", 1)[1] if upstream else branch
                 refreshed = ls_remote_head(toplevel, remote.remote_name, target_branch)
                 if refreshed is None:
                     diagnostics.append(
@@ -426,12 +625,14 @@ def observe(
                 elif refreshed == "":
                     observed_remote_commit = None
                     evidence = RemoteEvidence.REFRESHED
+                    remote_observed_at = datetime.now(timezone.utc).isoformat(timespec="microseconds")
                     diagnostics.append(
                         f"remote {remote.remote_name} has no branch {target_branch}"
                     )
                 else:
                     observed_remote_commit = refreshed
                     evidence = RemoteEvidence.REFRESHED
+                    remote_observed_at = datetime.now(timezone.utc).isoformat(timespec="microseconds")
 
     candidate = CandidateRef(
         repository_id=identity.repository_id,
@@ -443,6 +644,7 @@ def observe(
         upstream_ref=upstream,
         observed_remote_commit=observed_remote_commit,
         remote_evidence=evidence,
-        observed_at=datetime.now(timezone.utc).isoformat(timespec="seconds"),
+        remote_observed_at=remote_observed_at,
+        observed_at=observed_at,
     )
     return Observation(candidate=candidate, remote=remote, diagnostics=tuple(diagnostics))

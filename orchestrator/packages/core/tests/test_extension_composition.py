@@ -45,8 +45,10 @@ from pathlib import Path
 from sdp_orchestrator.core.spi.v1 import (
     CapabilityProvision,
     CapabilityRequirement,
+    EventSubscription,
     ExtensionManifest,
     ExtensionRegistration,
+    Multiplicity,
 )
 
 # Recorded at import time so a test can observe whether this module was loaded.
@@ -62,24 +64,34 @@ ACTIVATED = []
 class Provider:
     def manifest(self):
         return ExtensionManifest(
-            extension_id={extension_id!r},
+            extension_id={manifest_extension_id!r},
             extension_version="1.0.0",
             core_spi_spec={spi_spec!r},
             requires_extensions={requires_extensions!r},
             requires_capabilities=tuple(
-                CapabilityRequirement(key=key) for key in {requires_capabilities!r}
+                CapabilityRequirement(key=key, api_spec=api_spec)
+                for key, api_spec in zip({requires_capabilities!r}, {required_api_specs!r})
             ),
             provides_capabilities=tuple(
-                CapabilityProvision(key=key, api_major=1) for key in {provides!r}
+                CapabilityProvision(
+                    key=key, api_major={provide_api_major},
+                    multiplicity=Multiplicity({provides_multiplicity!r})
+                ) for key in {provides!r}
             ),
         )
 
     def activate(self, context):
         {activate_body}
         for key in {provides!r}:
-            context.register_service(key, 1, self)
+            context.register_service(key, {provide_api_major}, self)
         ACTIVATED.append(context.extension_id)
-        return ExtensionRegistration(services=tuple((k, 1) for k in {provides!r}))
+        return ExtensionRegistration(
+            services=tuple((k, {provide_api_major}) for k in {provides!r}),
+            subscriptions=tuple(
+                EventSubscription(event_types=event_types)
+                for event_types in {subscriptions!r}
+            ),
+        )
 
 
 provider = Provider()
@@ -92,22 +104,34 @@ def _install_fixture(
     name: str,
     extension_id: str,
     spi_spec: str = ">=1.0.0",
+    manifest_extension_id: str | None = None,
     requires_extensions: tuple[str, ...] = (),
     requires_capabilities: tuple[str, ...] = (),
+    required_api_specs: tuple[str, ...] = (),
     provides: tuple[str, ...] = (),
+    provide_api_major: int = 1,
+    provides_multiplicity: str = "singular",
+    subscriptions: tuple[tuple[str, ...], ...] = (),
     activate_body: str = "pass",
 ) -> None:
     """Write a real installed distribution: module + ``.dist-info`` metadata."""
 
     module = f"sdp_fixture_{name}"
+    manifest_extension_id = manifest_extension_id or extension_id
+    required_api_specs = required_api_specs or tuple("" for _ in requires_capabilities)
     (root / f"{module}.py").write_text(
         PROVIDER_TEMPLATE.format(
             marker_env=MARKER_ENV,
             extension_id=extension_id,
+            manifest_extension_id=manifest_extension_id,
             spi_spec=spi_spec,
             requires_extensions=requires_extensions,
             requires_capabilities=requires_capabilities,
+            required_api_specs=required_api_specs,
             provides=provides,
+            provide_api_major=provide_api_major,
+            provides_multiplicity=provides_multiplicity,
+            subscriptions=subscriptions,
             activate_body=activate_body,
         ),
         encoding="utf-8",
@@ -274,6 +298,107 @@ class NormalActivationTests(ExtensionBase):
         self.assertEqual(self.status(application, "vendor.ok").state, "active")
         self.assertTrue(application.has(CapabilityRequirement(key=CapabilityKey("cap.ok"))))
 
+    def test_staged_registration_is_discarded_when_activation_raises(self) -> None:
+        _install_fixture(
+            self.site,
+            name="broken_staged",
+            extension_id="vendor.broken_staged",
+            provides=("cap.broken",),
+            activate_body=(
+                "context.register_service('cap.broken', 1, self);"
+                " context.subscribe(('core.prompt.rendered.v1',), lambda event: None);"
+                " raise RuntimeError('activation exploded after registration')"
+            ),
+        )
+        _install_fixture(
+            self.site,
+            name="dependent",
+            extension_id="vendor.dependent",
+            requires_capabilities=("cap.broken",),
+        )
+        application = self.app()
+        self.assertEqual(self.status(application, "vendor.broken_staged").state, "failed")
+        self.assertEqual(self.status(application, "vendor.dependent").state, "disabled")
+        self.assertFalse(
+            application.has(CapabilityRequirement(key=CapabilityKey("cap.broken")))
+        )
+        self.assertEqual(application.events()._sinks, [])  # noqa: SLF001 - atomicity oracle
+
+    def test_capability_api_spec_is_checked_against_the_provisioned_major(self) -> None:
+        _install_fixture(
+            self.site,
+            name="api_one",
+            extension_id="vendor.api_one",
+            provides=("cap.versioned",),
+            provide_api_major=1,
+        )
+        application = self.app()
+        requirement = CapabilityRequirement(
+            key=CapabilityKey("cap.versioned"), api_spec=">=2"
+        )
+        self.assertFalse(application.has(requirement))
+        with self.assertRaises(E.OrchestratorError) as caught:
+            application.service(requirement)
+        self.assertEqual(caught.exception.code, E.EXTENSION_INCOMPATIBLE)
+
+    def test_entry_point_and_manifest_identity_mismatch_is_disabled(self) -> None:
+        _install_fixture(
+            self.site,
+            name="mismatch",
+            extension_id="vendor.entry",
+            manifest_extension_id="vendor.manifest",
+            provides=("cap.mismatch",),
+        )
+        application = self.app()
+        self.assertEqual(self.status(application, "vendor.entry").state, "disabled")
+        self.assertFalse(
+            application.has(CapabilityRequirement(key=CapabilityKey("cap.mismatch")))
+        )
+
+    def test_duplicate_canonical_identity_disables_all_colliding_providers(self) -> None:
+        _install_fixture(
+            self.site,
+            name="first_duplicate",
+            extension_id="vendor.duplicate",
+            provides=("cap.duplicate",),
+        )
+        _install_fixture(
+            self.site,
+            name="second_duplicate",
+            extension_id="vendor.duplicate",
+            provides=("cap.duplicate",),
+        )
+        application = self.app()
+        self.assertEqual(self.status(application, "vendor.duplicate").state, "disabled")
+        self.assertFalse(
+            application.has(CapabilityRequirement(key=CapabilityKey("cap.duplicate")))
+        )
+
+    def test_dependent_uses_a_healthy_compatible_provider_when_another_fails(self) -> None:
+        _install_fixture(
+            self.site,
+            name="first_provider",
+            extension_id="vendor.a_fail",
+            provides=("cap.shared",),
+            activate_body="raise RuntimeError('first provider failed')",
+        )
+        _install_fixture(
+            self.site,
+            name="second_provider",
+            extension_id="vendor.z_ok",
+            provides=("cap.shared",),
+        )
+        _install_fixture(
+            self.site,
+            name="dependent_provider",
+            extension_id="vendor.zz_dependent",
+            requires_capabilities=("cap.shared",),
+        )
+        application = self.app()
+        self.assertEqual(self.status(application, "vendor.a_fail").state, "failed")
+        self.assertEqual(self.status(application, "vendor.z_ok").state, "active")
+        self.assertEqual(self.status(application, "vendor.zz_dependent").state, "active")
+
     def test_multi_provider_order_is_stable_by_provider_id(self) -> None:
         _install_fixture(self.site, name="zeta", extension_id="vendor.zeta", provides=("cap.many",))
         _install_fixture(self.site, name="alpha", extension_id="vendor.alpha", provides=("cap.many",))
@@ -319,6 +444,7 @@ class ExtensionContextTests(ExtensionBase):
     def test_prompt_event_reaches_only_an_explicit_subscriber(self) -> None:
         _install_fixture(
             self.site, name="sink", extension_id="vendor.sink",
+            subscriptions=(("core.prompt.rendered.v1",),),
             activate_body=(
                 "context.subscribe(('core.prompt.rendered.v1',),"
                 " lambda event: ACTIVATED.append(event.event_type))"

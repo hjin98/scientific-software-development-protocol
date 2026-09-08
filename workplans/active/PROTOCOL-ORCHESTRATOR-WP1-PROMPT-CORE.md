@@ -941,3 +941,56 @@ The final exact candidate must have recorded executable evidence for:
 Any unavailable required owner check is recorded as unavailable and remains a blocker unless the governing contract explicitly permits substitute evidence. A green skip is not closure. Only after those checks pass on one exact candidate may the workplan be closed.
 
 **Second-pass review verdict: NO-PASS — the repair contract is now tightened and snapshot-complete for the currently observed blocker families; return to `software-implementation`, not another Review, until the listed families are repaired and final owner evidence is recorded.**
+
+## 13. Implementation closure evidence — 2026-09-07
+
+Implementation acceptance evidence for the reopened R1-R11 repair contract is
+recorded below. This is not an independent Review verdict; the prior Review
+verdict remains **NO-PASS** until a separate review evaluates this candidate.
+
+### Exact candidate
+
+- Branch: `plan/protocol-orchestrator`
+- Base HEAD before the implementation diff: `fc466570e7a9a3b6d2fab99a1440fe72a0a46064`
+- Implementation diff: 26 changed files under `orchestrator/`; SHA-256 of
+  `git diff --binary` excluding this workplan evidence section:
+  `51e9c4fca97f38da28acd253888ae12251a7ea5139ff700a1021b43899bbc920`
+- No commit, reset, stash, or destructive worktree cleanup was performed.
+
+### Executed evidence
+
+All required owner checks were available and passed on this candidate:
+
+1. Focused affected regression:
+   `PYTHONPATH=orchestrator/packages/core/src /tmp/sdp-orchestrator-core-venv/bin/python orchestrator/scripts/run_core_tests.py tests.test_config_and_projects tests.test_extension_composition tests.test_git_observation tests.test_input_binding tests.test_layout_and_fitness tests.test_privacy_and_remote_truth tests.test_protocol_source_and_profile tests.test_public_api_seam tests.test_render_and_identity tests.test_workplan_resolution`
+   passed **312 tests across 10 modules in 10 concurrent workers**.
+2. Complete Core acceptance:
+   `PYTHONPATH=orchestrator/packages/core/src /tmp/sdp-orchestrator-core-py311-venv/bin/python orchestrator/scripts/run_core_tests.py`
+   passed **339 tests across all 11 modules in 11 concurrent workers**, including
+   the installed-product owner: wheel and sdist build, inspection, clean
+   installation, installed `sdp` CLI behavior outside the checkout, extension
+   composition, real temporary Git/worktree/remote, privacy, wire, and public
+   API/SPI fixtures.
+3. Hypothesis was installed and active in `test_input_binding`; the two scalar
+   properties ran with **400 + 200 generated examples**.
+4. Canonical source/profile and generator checks passed:
+   `orchestrator/scripts/generate_protocol_snapshot.py --check`, including the
+   incompatible canonical-version counterexample.
+5. Ordinary repository acceptance passed:
+   `python -m unittest discover -s tests` (**172 tests**),
+   `source/build_skills.py --output <temporary directory>`,
+   `source/validate_packages.py --dist <temporary directory>`,
+   `source/check_dist.py --expected <temporary directory> --committed dist`,
+   and `git diff --check`.
+6. Focused Semgrep scans completed successfully over the tracked Core source:
+   `subprocess.run(...)` and `shutil.copytree(...)` each produced zero findings.
+   The only direct `os.environ` match was the intended allowlisted environment
+   construction in `_git.py`; no managed/cloud scan or source upload was used.
+7. Serena project activation and symbol/reference inspection were used during
+   owner reconciliation. No additional observer, prompt authority, persistence
+   layer, compatibility wrapper, higher-module dependency, or second registry
+   was introduced.
+
+The implementation evidence is complete and ready for the separate independent
+Review gate; this workplan remains active until that gate records its own
+verdict.

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import importlib.util
 import shutil
 import subprocess
 import tempfile
@@ -65,6 +66,18 @@ class CanonicalExtractionTests(unittest.TestCase):
             parse_document(broken)
         self.assertEqual(caught.exception.code, E.PROTOCOL_SOURCE_INCOHERENT)
 
+    def test_extra_numbered_stage_heading_is_incoherent(self) -> None:
+        broken = CANONICAL_TEXT + "\n\n## 9. Future Stage\n\n```text\nINPUTS\nX = [y]\n\nbody\n```\n"
+        with self.assertRaises(E.OrchestratorError) as caught:
+            parse_document(broken)
+        self.assertEqual(caught.exception.code, E.PROTOCOL_SOURCE_INCOHERENT)
+
+    def test_conflicting_numbered_stage_heading_is_incoherent(self) -> None:
+        broken = CANONICAL_TEXT + "\n\n## 2. Different Implementation\n\n```text\nINPUTS\nX = [y]\n\nbody\n```\n"
+        with self.assertRaises(E.OrchestratorError) as caught:
+            parse_document(broken)
+        self.assertEqual(caught.exception.code, E.PROTOCOL_SOURCE_INCOHERENT)
+
     def test_oversized_source_is_rejected(self) -> None:
         from sdp_orchestrator.core._limits import MAX_PROTOCOL_SOURCE_BYTES
 
@@ -102,6 +115,26 @@ class PackagedSnapshotTests(unittest.TestCase):
             check=False,
         )
         self.assertEqual(result.returncode, 0, result.stderr)
+
+    def test_generator_rejects_a_canonical_version_mismatch(self) -> None:
+        script = REPO_ROOT / "orchestrator/scripts/generate_protocol_snapshot.py"
+        spec = importlib.util.spec_from_file_location("sdp_snapshot_test", script)
+        self.assertIsNotNone(spec and spec.loader)
+        module = importlib.util.module_from_spec(spec)
+        assert spec.loader is not None
+        spec.loader.exec_module(module)
+
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "source/shared/references").mkdir(parents=True)
+            shutil.copyfile(
+                CANONICAL_PROMPTS,
+                root / "source/shared/references/development-workflow-prompts.md",
+            )
+            (root / "source/PROTOCOL_VERSION").write_text("5.16.1\n", encoding="utf-8")
+            module.REPO_ROOT = root
+            with self.assertRaises(ValueError):
+                module.render()
 
     def test_packaged_profile_contains_no_prompt_prose(self) -> None:
         """Prose has exactly one authority; the profile is control metadata only."""

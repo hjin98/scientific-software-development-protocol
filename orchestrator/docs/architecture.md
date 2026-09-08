@@ -403,6 +403,7 @@ CandidateRef
   identity_complete
   upstream_ref | None
   observed_remote_commit | None
+  remote_observed_at | None
   observed_at
 ```
 
@@ -522,7 +523,7 @@ ObservationPolicy
   max_remote_staleness | None
 ```
 
-Programmatic default is local-only unless explicitly configured/requested. `refresh_remote` is a bounded non-mutating query such as `git ls-remote`, not fetch/pull. Results carry freshness/provenance. Unknown/stale beats hidden network I/O or invented freshness.
+Programmatic default is local-only unless explicitly configured/requested. `refresh_remote` is a bounded non-mutating query such as `git ls-remote`, not fetch/pull. Results carry freshness/provenance. Cached age is unknown unless a refresh query timestamp is present; an explicit freshness bound rejects unknown-age evidence. Unknown/stale beats hidden network I/O or invented freshness.
 
 ### 8.4 Workplan resolution and Protocol binding
 
@@ -580,7 +581,7 @@ All are read-only with respect to target repositories. `resolve_workplan()` is t
 
 `PreparedPrompt` carries RunId, preparation fingerprint, resolved StageRef, ProjectObservation/CandidateRef, selected WorkplanResolution, WorkflowProfileDescriptor/ProtocolProfileRef, PromptSourceRef, classified/resolved mode-independent inputs with provenance, and requested result-schema identity.
 
-`PreparedPrompt.preparation_fingerprint` uses versioned `sdp.prompt-preparation.v1`, SHA-256 over canonical JSON of the material mode-independent preparation identity. Volatile observation timestamps/diagnostics and unrelated extension config are excluded; material stage/candidate/workplan/profile/source/input identity is included.
+`PreparedPrompt.preparation_fingerprint` uses versioned `sdp.prompt-preparation.v1`, SHA-256 over canonical JSON of the material mode-independent preparation identity. Volatile observation timestamps/diagnostics and unrelated extension config are excluded; material stage/candidate/workplan/profile/source/input identity, including the complete workflow descriptor, is included.
 
 `PromptRenderRequest` carries PreparedPrompt + `prompt_execution_mode: PromptExecutionMode(local|web)`. Render derives prompt-mode-safe target/context, revalidates material preparation identity, then returns final artifact. Candidate/workplan/mutable local Protocol-source drift produces a stale-context problem rather than a mixed snapshot.
 
@@ -600,7 +601,7 @@ Generic input overrides may set only declared inputs not exclusively owned by a 
 
 ### 8.8 Prompt fingerprint/footer
 
-Under `sdp.prompt-fingerprint.v1`, Core renders exact prompt bytes using a fixed fingerprint placeholder after RunId is known, hashes normalized placeholder-form UTF-8 bytes with SHA-256, then substitutes the digest. WP-1 freezes the placeholder, line-ending, terminal-newline, scalar normalization, and result-footer request fixtures.
+Under `sdp.prompt-fingerprint.v1`, Core renders exact prompt bytes using a fixed fingerprint placeholder after RunId is known, hashes normalized placeholder-form UTF-8 bytes with SHA-256, then substitutes the digest only in the two Core-owned footer slots. WP-1 freezes the placeholder, line-ending, terminal-newline, scalar normalization, and result-footer request fixtures. Footer extraction accepts no non-whitespace content after the terminal marker.
 
 Only successful final render emits `core.prompt.rendered.v1`, and only to explicitly subscribed sinks. Core constructs complete prompt bytes before writing stdout; failure produces no partial prompt artifact. Prompt stdout is prompt-only; diagnostics go to stderr. Optional clipboard is additive.
 

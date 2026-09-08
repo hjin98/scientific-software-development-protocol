@@ -10,15 +10,20 @@ from __future__ import annotations
 
 import hashlib
 import os
+import sys
 import tempfile
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
 from sdp_orchestrator.core import _errors as E
 from sdp_orchestrator.core._git import (
+    _BoundedRunError,
+    _git_env,
     identify_worktree,
     list_remotes,
     observe,
+    run_bounded,
     select_remote,
     working_tree_identity,
 )
@@ -88,6 +93,33 @@ class WorktreeIdentityTests(ObservationBase):
         self.assertNotIn(str(self.repo), str(identity.worktree_key))
         self.assertNotIn(str(self.repo), identity.repository_id)
 
+    def test_ambient_git_semantic_overrides_do_not_redirect_observation(self) -> None:
+        other = init_repo(self.root / "other")
+        with patch.dict(
+            os.environ,
+            {
+                "GIT_DIR": str(other / ".git"),
+                "GIT_WORK_TREE": str(other),
+                "GIT_INDEX_FILE": str(other / ".git" / "index"),
+                "GIT_OBJECT_DIRECTORY": str(other / ".git" / "objects"),
+            },
+            clear=False,
+        ):
+            identity = identify_worktree(self.repo)
+        self.assertEqual(identity.toplevel, self.repo.resolve())
+        self.assertNotIn("GIT_DIR", _git_env())
+
+    def test_subprocess_stdout_and_stderr_are_bounded_during_collection(self) -> None:
+        command = [sys.executable, "-c", "import sys; sys.stdout.write('x' * 100000)"]
+        with self.assertRaises(_BoundedRunError) as caught:
+            run_bounded(command, timeout=5, max_output_bytes=1024, env={"PATH": os.environ["PATH"]})
+        self.assertEqual(caught.exception.reason, "output")
+
+        command = [sys.executable, "-c", "import sys; sys.stderr.write('x' * 100000)"]
+        with self.assertRaises(_BoundedRunError) as caught:
+            run_bounded(command, timeout=5, max_output_bytes=1024, env={"PATH": os.environ["PATH"]})
+        self.assertEqual(caught.exception.reason, "output")
+
 
 class WorkingTreeIdentityTests(ObservationBase):
     def test_clean_tree_has_no_digest(self) -> None:
@@ -116,6 +148,67 @@ class WorkingTreeIdentityTests(ObservationBase):
         git(self.repo, "add", "untracked.txt")
         staged, _ = working_tree_identity(self.repo)
         self.assertNotEqual(untracked_only, staged)
+
+    def test_staged_blob_changes_participate_when_worktree_bytes_do_not(self) -> None:
+        target = self.repo / "staged.txt"
+        target.write_text("base\n", encoding="utf-8")
+        git(self.repo, "add", "staged.txt")
+        git(self.repo, "commit", "--quiet", "-m", "staged base")
+
+        target.write_text("worktree\n", encoding="utf-8")
+        git(self.repo, "add", "staged.txt")
+        first, complete = working_tree_identity(self.repo)
+
+        alternate = self.root / "alternate.txt"
+        alternate.write_text("index-only\n", encoding="utf-8")
+        blob = git(self.repo, "hash-object", "-w", str(alternate))
+        alternate.unlink()
+        git(self.repo, "update-index", "--cacheinfo", f"100644,{blob},staged.txt")
+        second, second_complete = working_tree_identity(self.repo)
+
+        self.assertTrue(complete)
+        self.assertTrue(second_complete)
+        self.assertNotEqual(first, second)
+        self.assertEqual(target.read_text(encoding="utf-8"), "worktree\n")
+
+    def test_mode_only_staged_changes_participate(self) -> None:
+        git(self.repo, "config", "core.filemode", "true")
+        target = self.repo / "mode.txt"
+        target.write_text("same\n", encoding="utf-8")
+        git(self.repo, "add", "mode.txt")
+        git(self.repo, "commit", "--quiet", "-m", "mode")
+
+        target.chmod(0o755)
+        git(self.repo, "add", "mode.txt")
+        first, first_complete = working_tree_identity(self.repo)
+        target.chmod(0o644)
+        git(self.repo, "add", "mode.txt")
+        second, second_complete = working_tree_identity(self.repo)
+
+        self.assertTrue(first_complete and second_complete)
+        self.assertNotEqual(first, second)
+
+    def test_non_utf8_dirty_path_is_structured_without_encoding_failure(self) -> None:
+        raw_name = b"non-utf8-\xff.txt"
+        raw_path = os.path.join(os.fsencode(self.repo), raw_name)
+        fd = os.open(raw_path, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o644)
+        try:
+            os.write(fd, b"payload\n")
+        finally:
+            os.close(fd)
+        self.addCleanup(lambda: os.unlink(raw_path) if os.path.exists(raw_path) else None)
+
+        digest, complete = working_tree_identity(self.repo)
+
+        self.assertIsNotNone(digest)
+        self.assertTrue(complete)
+
+    def test_aggregate_dirty_content_budget_marks_identity_incomplete(self) -> None:
+        (self.repo / "large-enough.txt").write_text("0123456789", encoding="utf-8")
+        with patch("sdp_orchestrator.core._git.MAX_DIRTY_CONTENT_BYTES", 1):
+            digest, complete = working_tree_identity(self.repo)
+        self.assertIsNotNone(digest)
+        self.assertFalse(complete)
 
     def test_embedded_repository_directory_marks_identity_incomplete(self) -> None:
         """Git reports an embedded repository as one directory entry.

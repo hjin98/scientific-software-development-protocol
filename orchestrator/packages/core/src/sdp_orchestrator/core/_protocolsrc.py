@@ -11,18 +11,19 @@ The resulting :class:`PromptSourceRef` is Core provenance only. It is *not* the
 agent-facing ``PROTOCOL_SOURCE`` input, so a local render-source path can never
 reach a web prompt merely because Core happened to read from it.
 
-Remote resolution reads an explicit ref once, pins it to an immutable commit, and
-reads every file for that preparation from that one identity. Downloaded bytes
-are data: they are parsed, never executed, and never handed to a build hook.
+Remote resolution resolves an explicit ref, reads a bounded archive, and
+revalidates the ref so every file for that preparation is tied to one commit.
+Downloaded bytes are data: they are parsed, never executed, and never handed to
+a build hook.
 """
 
 from __future__ import annotations
 
-import shutil
-import subprocess
-import tempfile
+import io
+import tarfile
 from dataclasses import dataclass
 from importlib import resources
+from importlib.resources.abc import Traversable
 from pathlib import Path
 
 from . import _errors as E
@@ -30,7 +31,7 @@ from . import _profile as P
 from ._canonical import CanonicalDocument, parse_document
 from ._config import ProtocolSourceSection
 from ._digest import SCHEME_CONTENT, digest_bytes
-from ._git import _git_env
+from ._git import GitResult, _BoundedRunError, _git_env, run_bounded
 from ._limits import (
     MAX_PROTOCOL_PROFILE_BYTES,
     MAX_PROTOCOL_SOURCE_BYTES,
@@ -38,7 +39,7 @@ from ._limits import (
     REMOTE_READ_TIMEOUT_SECONDS,
 )
 from ._records import DigestRef, PromptSourceRef
-from ._redact import redact_text, sanitize_url
+from ._redact import sanitize_url
 
 CANONICAL_PROMPTS_RELPATH = "source/shared/references/development-workflow-prompts.md"
 CANONICAL_VERSION_RELPATH = "source/PROTOCOL_VERSION"
@@ -78,15 +79,23 @@ def _read_bounded(path: Path, limit: int, label: str) -> str:
             f"the configured Protocol source has no {label}",
             details={"path": str(path)},
         )
-    size = path.stat().st_size
-    if size > limit:
-        E.fail(
-            E.PROTOCOL_UNAVAILABLE,
-            f"the Protocol source {label} exceeds the supported size bound",
-            details={"path": str(path), "bytes": size, "limit": limit},
-        )
     try:
-        return path.read_text(encoding="utf-8")
+        chunks: list[bytes] = []
+        total = 0
+        with path.open("rb") as handle:
+            while True:
+                chunk = handle.read(min(64 * 1024, limit - total + 1))
+                if not chunk:
+                    break
+                chunks.append(chunk)
+                total += len(chunk)
+                if total > limit:
+                    E.fail(
+                        E.PROTOCOL_UNAVAILABLE,
+                        f"the Protocol source {label} exceeds the supported size bound",
+                        details={"path": str(path), "limit": limit},
+                    )
+        return b"".join(chunks).decode("utf-8")
     except (OSError, UnicodeDecodeError) as exc:
         E.fail(E.PROTOCOL_UNAVAILABLE, f"unable to read the Protocol source {label}: {exc}")
 
@@ -104,11 +113,28 @@ def resolve_local(local_root: Path) -> ResolvedProtocolSource:
             "the configured Protocol local_root is not an existing directory",
             details={"path": str(root)},
         )
-    version_text = _read_bounded(root / CANONICAL_VERSION_RELPATH, 4096, "PROTOCOL_VERSION").strip()
-    _require_compatible(version_text, origin="local_root")
-    prompts = _read_bounded(
+    first_version = _read_bounded(
+        root / CANONICAL_VERSION_RELPATH, 4096, "PROTOCOL_VERSION"
+    )
+    first_prompts = _read_bounded(
         root / CANONICAL_PROMPTS_RELPATH, MAX_PROTOCOL_SOURCE_BYTES, "canonical prompt document"
     )
+    second_version = _read_bounded(
+        root / CANONICAL_VERSION_RELPATH, 4096, "PROTOCOL_VERSION"
+    )
+    second_prompts = _read_bounded(
+        root / CANONICAL_PROMPTS_RELPATH, MAX_PROTOCOL_SOURCE_BYTES, "canonical prompt document"
+    )
+    if (first_version, first_prompts) != (second_version, second_prompts):
+        E.fail(
+            E.PROTOCOL_SOURCE_INCOHERENT,
+            "the local Protocol source changed while it was being read",
+            details={"root": str(root)},
+            remediation="retry after the local Protocol checkout is stable",
+        )
+    version_text = first_version.strip()
+    _require_compatible(version_text, origin="local_root")
+    prompts = first_prompts
     document = parse_document(prompts)
     identity = digest_bytes(
         (version_text + "\n" + prompts).encode("utf-8"), SCHEME_CONTENT
@@ -140,6 +166,31 @@ def _packaged_dir(profile_id: str):
     )
 
 
+def _read_resource_bounded(resource: Traversable, limit: int, label: str) -> str:
+    try:
+        chunks: list[bytes] = []
+        total = 0
+        with resource.open("rb") as handle:
+            while True:
+                chunk = handle.read(min(64 * 1024, limit - total + 1))
+                if not chunk:
+                    break
+                chunks.append(chunk)
+                total += len(chunk)
+                if total > limit:
+                    E.fail(
+                        E.PROTOCOL_UNAVAILABLE,
+                        f"the packaged Protocol {label} exceeds the supported size bound",
+                        details={"limit": limit},
+                    )
+        return b"".join(chunks).decode("utf-8")
+    except (OSError, UnicodeDecodeError) as exc:
+        E.fail(
+            E.PROTOCOL_UNAVAILABLE,
+            f"the packaged Protocol {label} could not be read: {type(exc).__name__}",
+        )
+
+
 def resolve_packaged(profile_id: str = P.PROFILE_ID) -> ResolvedProtocolSource:
     """Read the reproducible, version-bound snapshot shipped inside the wheel."""
 
@@ -152,12 +203,10 @@ def resolve_packaged(profile_id: str = P.PROFILE_ID) -> ResolvedProtocolSource:
             "this build ships no packaged snapshot for the requested profile",
             details={"profile": profile_id},
         )
-    prompts = prompts_res.read_text(encoding="utf-8")
-    if len(prompts.encode("utf-8")) > MAX_PROTOCOL_SOURCE_BYTES:
-        E.fail(E.PROTOCOL_UNAVAILABLE, "the packaged prompt snapshot exceeds the supported bound")
-    profile_text = profile_res.read_text(encoding="utf-8")
-    if len(profile_text.encode("utf-8")) > MAX_PROTOCOL_PROFILE_BYTES:
-        E.fail(E.PROTOCOL_UNAVAILABLE, "the packaged profile exceeds the supported bound")
+    prompts = _read_resource_bounded(
+        prompts_res, MAX_PROTOCOL_SOURCE_BYTES, "prompt snapshot"
+    )
+    profile_text = _read_resource_bounded(profile_res, MAX_PROTOCOL_PROFILE_BYTES, "profile")
 
     document = parse_document(prompts)
     packaged_descriptor = P.profile_from_json(profile_text)
@@ -190,28 +239,37 @@ def resolve_packaged(profile_id: str = P.PROFILE_ID) -> ResolvedProtocolSource:
 # --------------------------------------------------------------------------
 
 
-def _run(args: list[str], *, cwd: Path | None = None) -> subprocess.CompletedProcess[bytes]:
+def _run(args: list[str], *, cwd: Path | None = None) -> GitResult:
     try:
-        return subprocess.run(  # noqa: S603 - fixed argv, no shell
+        return run_bounded(
             args,
-            capture_output=True,
             timeout=REMOTE_READ_TIMEOUT_SECONDS,
+            max_output_bytes=MAX_REMOTE_READ_BYTES,
             env=_git_env(),
-            cwd=str(cwd) if cwd else None,
-            check=False,
+            cwd=cwd,
         )
     except FileNotFoundError:
         E.fail(E.PROTOCOL_UNAVAILABLE, "the 'git' executable is not available for remote Protocol reads")
-    except subprocess.TimeoutExpired:
-        E.fail(E.PROTOCOL_UNAVAILABLE, "a remote Protocol read exceeded its time bound")
+    except _BoundedRunError as exc:
+        E.fail(
+            E.PROTOCOL_UNAVAILABLE,
+            (
+                "a remote Protocol read exceeded its time bound"
+                if exc.reason == "timeout"
+                else "a remote Protocol read exceeded the supported transfer bound"
+            ),
+            retryable=exc.reason == "timeout",
+            details={"stream": exc.stream} if exc.stream else None,
+        )
 
 
 def resolve_remote(section: ProtocolSourceSection) -> ResolvedProtocolSource:
     """Read canonical material from an explicitly permitted remote at one pinned commit.
 
-    The mirror is created in a private temporary directory, so nothing about the
-    user's repositories is mutated. The requested ref is resolved to a commit
-    once; every file for this preparation is then read from that commit.
+    The required files are streamed from a bounded ``git archive`` response;
+    Core does not fetch or mirror unrelated repository content. The requested
+    ref is resolved and revalidated so every file for this preparation is tied
+    to one commit.
     """
 
     if not section.allow_remote:
@@ -232,7 +290,7 @@ def resolve_remote(section: ProtocolSourceSection) -> ResolvedProtocolSource:
             details={
                 "repository": sanitized,
                 "ref": ref,
-                "stderr": redact_text(listing.stderr.decode("utf-8", "replace").strip()),
+                "stderr": listing.stderr,
             },
         )
     rows = [
@@ -249,61 +307,95 @@ def resolve_remote(section: ProtocolSourceSection) -> ResolvedProtocolSource:
         )
     commit = next(iter(commits))
 
-    workdir = Path(tempfile.mkdtemp(prefix="sdp-protocol-"))
-    try:
-        if _run(["git", "init", "--quiet", "--bare", str(workdir)]).returncode != 0:
-            E.fail(E.PROTOCOL_UNAVAILABLE, "unable to prepare a temporary Protocol mirror")
-        fetched = _run(
-            ["git", "fetch", "--quiet", "--depth", "1", "--", repository, ref], cwd=workdir
-        )
-        if fetched.returncode != 0:
-            E.fail(
-                E.PROTOCOL_UNAVAILABLE,
-                "the remote Protocol source could not be read",
-                details={
-                    "repository": sanitized,
-                    "ref": ref,
-                    "stderr": redact_text(fetched.stderr.decode("utf-8", "replace").strip()),
-                },
-            )
-        head = _run(["git", "rev-parse", "FETCH_HEAD"], cwd=workdir)
-        resolved = head.stdout.decode("utf-8", "replace").strip()
-        if head.returncode != 0 or resolved != commit:
+    archive = _run(
+        [
+            "git",
+            "archive",
+            "--remote",
+            repository,
+            ref,
+            "--",
+            CANONICAL_VERSION_RELPATH,
+            CANONICAL_PROMPTS_RELPATH,
+        ]
+    )
+    if archive.returncode != 0:
+        if "pathspec" in archive.stderr and "did not match any files" in archive.stderr:
             E.fail(
                 E.PROTOCOL_SOURCE_INCOHERENT,
-                "the remote ref changed between resolution and read",
-                details={"repository": sanitized, "ref": ref, "expected": commit, "read": resolved},
+                "the pinned remote Protocol ref does not contain a required file",
+                details={"repository": sanitized, "commit": commit},
             )
+        E.fail(
+            E.PROTOCOL_UNAVAILABLE,
+            "the remote Protocol source could not be read",
+            details={"repository": sanitized, "ref": ref, "stderr": archive.stderr},
+        )
 
-        def _blob(relpath: str, limit: int) -> str:
-            result = _run(["git", "cat-file", "blob", f"{commit}:{relpath}"], cwd=workdir)
-            if result.returncode != 0:
-                E.fail(
-                    E.PROTOCOL_SOURCE_INCOHERENT,
-                    "the pinned remote Protocol commit does not contain a required file",
-                    details={"repository": sanitized, "commit": commit, "path": relpath},
-                )
-            if len(result.stdout) > min(limit, MAX_REMOTE_READ_BYTES):
-                E.fail(
-                    E.PROTOCOL_UNAVAILABLE,
-                    "a remote Protocol file exceeds the supported size bound",
-                    details={"path": relpath, "bytes": len(result.stdout)},
-                )
-            try:
-                return result.stdout.decode("utf-8")
-            except UnicodeDecodeError:
-                E.fail(
-                    E.PROTOCOL_SOURCE_INCOHERENT,
-                    "a remote Protocol file is not valid UTF-8",
-                    details={"path": relpath},
-                )
+    confirmation = _run(["git", "ls-remote", "--", repository, ref])
+    if confirmation.returncode != 0:
+        E.fail(
+            E.PROTOCOL_UNAVAILABLE,
+            "the remote Protocol ref could not be revalidated after its bounded read",
+            details={"repository": sanitized, "ref": ref, "stderr": confirmation.stderr},
+        )
+    confirmed_commits = {
+        line.split("\t", 1)[0].strip()
+        for line in confirmation.stdout.decode("utf-8", "replace").splitlines()
+        if "\t" in line
+    }
+    if confirmed_commits != {commit}:
+        E.fail(
+            E.PROTOCOL_SOURCE_INCOHERENT,
+            "the remote ref changed while the Protocol source was being read",
+            details={"repository": sanitized, "ref": ref},
+        )
 
-        version_text = _blob(CANONICAL_VERSION_RELPATH, 4096).strip()
-        _require_compatible(version_text, origin="remote")
-        prompts = _blob(CANONICAL_PROMPTS_RELPATH, MAX_PROTOCOL_SOURCE_BYTES)
-    finally:
-        shutil.rmtree(workdir, ignore_errors=True)
+    try:
+        with tarfile.open(fileobj=io.BytesIO(archive.stdout), mode="r:*") as bundle:
+            members = {member.name: member for member in bundle.getmembers()}
 
+            def _archive_file(relpath: str, limit: int) -> str:
+                member = members.get(relpath)
+                if member is None or not member.isfile():
+                    E.fail(
+                        E.PROTOCOL_SOURCE_INCOHERENT,
+                        "the pinned remote Protocol commit does not contain a required file",
+                        details={"repository": sanitized, "commit": commit, "path": relpath},
+                    )
+                handle = bundle.extractfile(member)
+                if handle is None:
+                    E.fail(
+                        E.PROTOCOL_SOURCE_INCOHERENT,
+                        "the pinned remote Protocol file could not be materialized",
+                        details={"path": relpath},
+                    )
+                content = handle.read(limit + 1)
+                if len(content) > limit:
+                    E.fail(
+                        E.PROTOCOL_UNAVAILABLE,
+                        "a remote Protocol file exceeds the supported size bound",
+                        details={"path": relpath, "limit": limit},
+                    )
+                try:
+                    return content.decode("utf-8")
+                except UnicodeDecodeError:
+                    E.fail(
+                        E.PROTOCOL_SOURCE_INCOHERENT,
+                        "a remote Protocol file is not valid UTF-8",
+                        details={"path": relpath},
+                    )
+
+            version_text = _archive_file(CANONICAL_VERSION_RELPATH, 4096).strip()
+            prompts = _archive_file(CANONICAL_PROMPTS_RELPATH, MAX_PROTOCOL_SOURCE_BYTES)
+    except (tarfile.TarError, OSError) as exc:
+        E.fail(
+            E.PROTOCOL_SOURCE_INCOHERENT,
+            "the remote Protocol archive is not a valid bounded source bundle",
+            details={"repository": sanitized, "error": type(exc).__name__},
+        )
+
+    _require_compatible(version_text, origin="remote")
     document = parse_document(prompts)
     return ResolvedProtocolSource(
         source=PromptSourceRef(

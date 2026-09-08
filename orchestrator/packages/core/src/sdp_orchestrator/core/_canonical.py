@@ -157,6 +157,13 @@ def parse_document(text: str) -> CanonicalDocument:
         )
     lines = text.replace("\r\n", "\n").replace("\r", "\n").split("\n")
     spans = _sections(lines)
+    expected_headings = {(number, title) for number, _, title in CANONICAL_STAGES}
+    if set(spans) != expected_headings:
+        _fail_incoherent(
+            "the canonical source has extra, missing, or conflicting numbered stage headings",
+            expected=sorted(f"{number}. {title}" for number, title in expected_headings),
+            actual=sorted(f"{number}. {title}" for number, title in spans),
+        )
 
     stages: dict[str, CanonicalStage] = {}
     for number, stage_key, title in CANONICAL_STAGES:

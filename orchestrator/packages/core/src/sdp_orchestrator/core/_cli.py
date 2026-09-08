@@ -35,6 +35,7 @@ from ._records import (
     WorkflowRequest,
     WorkplanQuery,
 )
+from ._redact import redact_text
 
 EXIT_OK = 0
 EXIT_INTERNAL = 1
@@ -371,7 +372,9 @@ def main() -> int:
     except SystemExit as exc:
         return int(exc.code or 0)
     except Exception as exc:  # noqa: BLE001 - never leak a traceback as the product surface
-        typer.echo(f"internal error: {type(exc).__name__}: {exc}", err=True)
+        typer.echo(
+            f"internal error: {type(exc).__name__}: {redact_text(str(exc))}", err=True
+        )
         return EXIT_INTERNAL
     return EXIT_OK
 

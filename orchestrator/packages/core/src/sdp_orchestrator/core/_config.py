@@ -151,7 +151,29 @@ def load_config(path: str | os.PathLike[str] | None = None) -> CoreConfig:
             "configuration file exceeds the supported size bound",
             details={"path": str(resolved), "bytes": size, "limit": MAX_CONFIG_BYTES},
         )
-    raw_bytes = resolved.read_bytes()
+    try:
+        chunks: list[bytes] = []
+        total = 0
+        with resolved.open("rb") as handle:
+            while True:
+                chunk = handle.read(min(64 * 1024, MAX_CONFIG_BYTES - total + 1))
+                if not chunk:
+                    break
+                chunks.append(chunk)
+                total += len(chunk)
+                if total > MAX_CONFIG_BYTES:
+                    E.fail(
+                        E.CONFIG_INVALID,
+                        "configuration file exceeds the supported size bound",
+                        details={"path": str(resolved), "limit": MAX_CONFIG_BYTES},
+                    )
+        raw_bytes = b"".join(chunks)
+    except OSError as exc:
+        E.fail(
+            E.CONFIG_INVALID,
+            f"configuration file could not be read: {type(exc).__name__}",
+            details={"path": str(resolved)},
+        )
     try:
         raw = tomllib.loads(raw_bytes.decode("utf-8"))
     except (UnicodeDecodeError, tomllib.TOMLDecodeError) as exc:

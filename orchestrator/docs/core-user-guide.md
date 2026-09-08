@@ -170,7 +170,7 @@ Web mode refuses, rather than guessing or silently downgrading to local, when:
 | the branch is absent on the remote | `core.remote.target_unavailable` |
 | HEAD is detached | `core.remote.target_unavailable` |
 | the remote is a path or `file://` URL | `core.remote.local_only` |
-| several remotes and none is selected | `core.remote.unavailable` |
+| several remotes and none is selected | `core.remote.ambiguous` |
 
 Target *existence* must be known; only *freshness* may be cached, and cached
 freshness is labelled as such in the prompt.
@@ -195,6 +195,12 @@ even an opportunistic index refresh.
 The CLI defaults to `use_cached_remote` — enough to tell whether a web target
 exists, without touching the network. The programmatic API defaults to
 `local_only`.
+
+If `max_remote_staleness_seconds` is set through the API, cached evidence whose
+age is unknown is rejected; it cannot satisfy an explicit freshness bound.
+`refresh_remote` records the time of its bounded query and is the available
+freshness-bearing evidence path in this release. Core never performs hidden
+network I/O to refresh a cached observation.
 
 ---
 
@@ -244,9 +250,16 @@ exactly one terminal, uniquely marked JSON footer**:
 SDP_STAGE_RESULT_V1>>>
 ```
 
-Extraction rule: the **last** line equal to the begin marker starts the footer;
-the next line equal to the end marker ends it. Ordinary prose may surround it.
-Unrecognized additional fields are permitted and ignored.
+Extraction rule: the **last** line exactly equal to the begin marker starts the
+footer; the next line exactly equal to the end marker ends it, and only
+whitespace may follow that end marker. Ordinary prose may precede it, but
+trailing prose or indented/near-match markers are not accepted. Unrecognized
+additional fields are permitted and ignored.
+
+Declared scalar inputs use structure-safe encoding, so quotes, newlines, and
+backslashes remain input data rather than changing the prompt's control
+structure. `Problem.retryable` is advisory metadata for callers; Core does not
+perform automatic retries.
 
 The prompt never requests hidden reasoning. Core renders this request but does
 not parse or store the response; that is Tracker's job in a later module.

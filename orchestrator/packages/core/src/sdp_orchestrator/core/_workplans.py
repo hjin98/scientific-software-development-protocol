@@ -18,6 +18,7 @@ from pathlib import Path
 from typing import Any, Iterable, Mapping
 
 import frontmatter
+import yaml
 
 from . import _errors as E
 from ._digest import (
@@ -30,6 +31,9 @@ from ._limits import (
     MAX_WORKPLAN_BYTES,
     MAX_WORKPLAN_DEPTH,
     MAX_WORKPLAN_FILES,
+    MAX_WORKPLAN_FRONTMATTER_BYTES,
+    MAX_WORKPLAN_FRONTMATTER_DEPTH,
+    MAX_WORKPLAN_FRONTMATTER_TOKENS,
     WORKPLAN_SUFFIXES,
 )
 from ._records import (
@@ -80,7 +84,7 @@ class CatalogEntry:
 
 
 def _is_scalar_tree(value: Any, depth: int = 0) -> bool:
-    if depth > 12:
+    if depth > MAX_WORKPLAN_FRONTMATTER_DEPTH:
         return False
     if value is None or isinstance(value, (str, int, float, bool)):
         return True
@@ -100,15 +104,62 @@ def _read_document(path: Path) -> tuple[dict[str, Any], str, bytes, tuple[str, .
     """
 
     diagnostics: list[str] = []
-    size = path.stat().st_size
-    if size > MAX_WORKPLAN_BYTES:
-        return {}, "", b"", (f"exceeds the {MAX_WORKPLAN_BYTES}-byte workplan bound",)
-    raw = path.read_bytes()
+    try:
+        chunks: list[bytes] = []
+        total = 0
+        with path.open("rb") as handle:
+            while True:
+                chunk = handle.read(min(64 * 1024, MAX_WORKPLAN_BYTES - total + 1))
+                if not chunk:
+                    break
+                chunks.append(chunk)
+                total += len(chunk)
+                if total > MAX_WORKPLAN_BYTES:
+                    return {}, "", b"", (
+                        f"exceeds the {MAX_WORKPLAN_BYTES}-byte workplan bound",
+                    )
+        raw = b"".join(chunks)
+    except OSError as exc:
+        return {}, "", b"", (f"could not be read: {type(exc).__name__}",)
     try:
         text = raw.decode("utf-8")
     except UnicodeDecodeError:
         return {}, "", raw, ("is not valid UTF-8",)
+    frontmatter_text = _frontmatter_text(text)
+    if len(frontmatter_text.encode("utf-8")) > MAX_WORKPLAN_FRONTMATTER_BYTES:
+        return {}, text, raw, (
+            f"frontmatter exceeds the {MAX_WORKPLAN_FRONTMATTER_BYTES}-byte bound",
+        )
     try:
+        depth = 0
+        token_count = 0
+        starts = (
+            yaml.tokens.BlockMappingStartToken,
+            yaml.tokens.BlockSequenceStartToken,
+            yaml.tokens.FlowMappingStartToken,
+            yaml.tokens.FlowSequenceStartToken,
+        )
+        ends = (
+            yaml.tokens.BlockEndToken,
+            yaml.tokens.FlowMappingEndToken,
+            yaml.tokens.FlowSequenceEndToken,
+        )
+        for token in yaml.scan(frontmatter_text):
+            token_count += 1
+            if token_count > MAX_WORKPLAN_FRONTMATTER_TOKENS:
+                return {}, text, raw, (
+                    f"frontmatter exceeds the {MAX_WORKPLAN_FRONTMATTER_TOKENS}-token bound",
+                )
+            if isinstance(token, (yaml.tokens.AnchorToken, yaml.tokens.AliasToken)):
+                return {}, text, raw, ("frontmatter aliases and anchors are not supported",)
+            if isinstance(token, starts):
+                depth += 1
+                if depth > MAX_WORKPLAN_FRONTMATTER_DEPTH:
+                    return {}, text, raw, (
+                        f"frontmatter nesting exceeds the {MAX_WORKPLAN_FRONTMATTER_DEPTH}-level bound",
+                    )
+            elif isinstance(token, ends):
+                depth = max(0, depth - 1)
         document = frontmatter.loads(text)
     except Exception as exc:  # noqa: BLE001 - any parser failure is data-level
         return {}, text, raw, (f"frontmatter could not be parsed: {type(exc).__name__}",)
@@ -117,6 +168,18 @@ def _read_document(path: Path) -> tuple[dict[str, Any], str, bytes, tuple[str, .
         diagnostics.append("frontmatter contains non-scalar data and is treated as incomplete")
         metadata = {}
     return metadata, document.content, raw, tuple(diagnostics)
+
+
+def _frontmatter_text(text: str) -> str:
+    """Return only the YAML region, before any YAML object is materialized."""
+
+    lines = text.splitlines(keepends=True)
+    if not lines or lines[0].strip() != "---":
+        return ""
+    for index, line in enumerate(lines[1:], start=1):
+        if line.strip() in {"---", "..."}:
+            return "".join(lines[1:index])
+    return "".join(lines[1:])
 
 
 def _semantic_digest(metadata: Mapping[str, Any], body: str) -> Any:
@@ -144,14 +207,10 @@ def _iter_files(root: Path, base: Path) -> Iterable[Path]:
             continue
         for child in children:
             if child.is_symlink():
-                # A symlink may point outside the repository; resolving and
-                # re-checking containment is cheaper than trusting it.
-                try:
-                    target = child.resolve(strict=True)
-                except OSError:
-                    continue
-                if not target.is_relative_to(base):
-                    continue
+                # A symlink can alias an existing authority under a second
+                # canonical path. Ignore it so one document cannot acquire two
+                # lifecycle identities through directory-tree aliases.
+                continue
             if child.is_dir():
                 stack.append((child, depth + 1))
                 continue
@@ -220,7 +279,7 @@ def build_catalog(repo_root: Path) -> tuple[CatalogEntry, ...]:
         status = metadata.get("status")
         status_text = str(status) if status is not None else None
         superseded = entry.get("superseded_by")
-        consistent = True if superseded else _lifecycle_consistent(entry["state"], status_text)
+        consistent = _lifecycle_consistent(entry["state"], status_text)
         if not consistent:
             entry["diagnostics"].append(
                 f"declared status {status_text!r} is inconsistent with the {entry['state'].value} lifecycle directory"
@@ -322,8 +381,8 @@ def _normalize_relative(path_text: str) -> str:
 def _lookup_exact(catalog: tuple[CatalogEntry, ...], selector: str) -> WorkplanRef:
     """Resolve an exact workplan ID or exact repository-relative path."""
 
-    normalized_path = _normalize_relative(selector.replace("\\", "/"))
-    by_path = [entry for entry in catalog if entry.relative_path == normalized_path]
+    by_path = [entry for entry in catalog if _is_canonical_relative_path(selector)
+               and entry.relative_path == selector]
     if len(by_path) == 1:
         return by_path[0].descriptor.ref
 
@@ -359,11 +418,24 @@ def _lookup_exact(catalog: tuple[CatalogEntry, ...], selector: str) -> WorkplanR
     )
 
 
+def _is_canonical_relative_path(selector: str) -> bool:
+    """Accept only the catalog's canonical POSIX paths, never traversal aliases."""
+
+    if not selector or "\\" in selector or selector.startswith("/"):
+        return False
+    parts = selector.split("/")
+    if any(part in {"", ".", ".."} for part in parts):
+        return False
+    return selector.startswith("workplans/active/") or selector.startswith("workplans/archive/")
+
+
 def _active_authorities(catalog: tuple[CatalogEntry, ...]) -> list[CatalogEntry]:
     return [
         entry
         for entry in catalog
         if entry.descriptor.ref.lifecycle_state is LifecycleState.ACTIVE
+        and entry.descriptor.ref.lifecycle_consistent
+        and entry.descriptor.ref.semantic_identity_complete
         and entry.descriptor.is_current_authority
         and entry.descriptor.superseded_by is None
     ]
@@ -402,10 +474,25 @@ def resolve(
         )
 
     if selector:
+        selected = _lookup_exact(catalog, selector)
+        if (
+            policy in (WorkplanPolicy.REQUIRED, WorkplanPolicy.EXPLICIT_REQUIRED)
+            and (
+                selected.lifecycle_state is not LifecycleState.ACTIVE
+                or not selected.lifecycle_consistent
+                or not selected.semantic_identity_complete
+            )
+        ):
+            E.fail(
+                E.WORKPLAN_NOT_FOUND,
+                "the selected workplan is not a current active authority for this stage",
+                details={"selector": selector, "path": selected.path},
+                remediation="select the current active workplan authority",
+            )
         return WorkplanResolution(
             stage=stage,
             policy=policy,
-            workplan=_lookup_exact(catalog, selector),
+            workplan=selected,
             selection_basis="explicit_selector",
             considered=considered,
         )

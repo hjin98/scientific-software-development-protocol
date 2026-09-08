@@ -17,6 +17,7 @@ from datetime import datetime, timezone
 from typing import Protocol
 
 from ._digest import sha256_hex
+from ._redact import redact_text
 from ._records import EventEnvelope, EventId, ProjectKey, RunId
 
 PROMPT_RENDERED_EVENT = "core.prompt.rendered.v1"
@@ -60,7 +61,9 @@ class EventBus:
             try:
                 sink(event)
             except Exception as exc:  # noqa: BLE001 - a sink must not break the primary result
-                self._failures.append(f"{owner}: {type(exc).__name__}: {exc}")
+                self._failures.append(
+                    f"{owner}: {type(exc).__name__}: {redact_text(str(exc))}"
+                )
 
     def build_prompt_event(
         self,

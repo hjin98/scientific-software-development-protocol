@@ -29,7 +29,7 @@ from sdp_orchestrator.core._records import (
     StageSelector,
 )
 
-from ._support import commit_all, config_text, init_repo, write_workplan
+from ._support import commit_all, config_text, git, init_repo, write_workplan
 
 REQUIRED_INPUT = {
     "baseline": [("BASELINE_SCOPE", "the storage subsystem")],
@@ -252,6 +252,20 @@ class FingerprintTests(RenderBase):
         restored = PreparedPrompt(**json.loads(json.dumps(payload)))
         self.assertEqual(restored, prepared)
 
+    def test_workflow_tampering_cannot_reuse_the_old_preparation_fingerprint(self) -> None:
+        application = self.application()
+        prepared = self.prepare("implementation", app=application)
+        tampered_workflow = prepared.workflow.model_copy(update={"transitions": ()})
+        tampered = prepared.model_copy(update={"workflow": tampered_workflow})
+
+        with self.assertRaises(E.OrchestratorError) as caught:
+            application.core().render(
+                PromptRenderRequest(
+                    prepared=tampered, prompt_execution_mode=PromptExecutionMode.LOCAL
+                )
+            )
+        self.assertEqual(caught.exception.code, E.CONTEXT_STALE)
+
 
 class ResultFooterTests(RenderBase):
     def _footer(self, text: str) -> dict:
@@ -295,6 +309,51 @@ class ResultFooterTests(RenderBase):
             f"{R.FOOTER_BEGIN}\n{{\"outcome\": \"final\"}}\n{R.FOOTER_END}\n"
         )
         self.assertEqual(json.loads(R.extract_result_footer(response))["outcome"], "final")
+
+    def test_indented_markers_and_trailing_prose_are_not_terminal_footers(self) -> None:
+        indented = f"  {R.FOOTER_BEGIN}\n{{}}\n{R.FOOTER_END}\n"
+        self.assertIsNone(R.extract_result_footer(indented))
+        trailing = f"{R.FOOTER_BEGIN}\n{{}}\n{R.FOOTER_END}\ntrailing prose\n"
+        self.assertIsNone(R.extract_result_footer(trailing))
+
+    def test_opaque_run_id_is_json_serialized_coherently(self) -> None:
+        application = self.application()
+        prepared = self.prepare("implementation", app=application)
+        snapshot = R.build_snapshot(prepared.observation, PromptExecutionMode.LOCAL)
+        run_id = 'opaque "run"\\id\n'
+        source_body = application.core()._protocol_source(  # noqa: SLF001
+            prepared.profile.profile_id
+        ).snapshot.bodies["implementation"]
+        text, _ = R.assemble(
+            body=source_body,
+            run_id=run_id,
+            stage=prepared.stage,
+            inputs=prepared.inputs,
+            snapshot=snapshot,
+            result_schema_id=prepared.result_schema_id,
+            result_schema_version=prepared.result_schema_version,
+        )
+        payload = json.loads(R.extract_result_footer(text))
+        self.assertEqual(payload["run_id"], run_id)
+
+    def test_fingerprint_placeholder_in_body_is_not_rewritten(self) -> None:
+        application = self.application()
+        prepared = self.prepare("implementation", app=application)
+        snapshot = R.build_snapshot(prepared.observation, PromptExecutionMode.LOCAL)
+        literal = R.FINGERPRINT_PLACEHOLDER
+        source_body = application.core()._protocol_source(  # noqa: SLF001
+            prepared.profile.profile_id
+        ).snapshot.bodies["implementation"]
+        text, _ = R.assemble(
+            body=source_body + f"\nLiteral placeholder: {literal}\n",
+            run_id=str(prepared.run_id),
+            stage=prepared.stage,
+            inputs=prepared.inputs,
+            snapshot=snapshot,
+            result_schema_id=prepared.result_schema_id,
+            result_schema_version=prepared.result_schema_version,
+        )
+        self.assertIn(f"Literal placeholder: {literal}", text)
 
     def test_absent_footer_returns_none(self) -> None:
         self.assertIsNone(R.extract_result_footer("just prose\n"))
@@ -375,6 +434,31 @@ class StaleContextTests(RenderBase):
                 )
             )
         self.assertEqual(caught.exception.code, E.CONTEXT_STALE)
+
+    def test_staged_index_drift_between_phases_is_refused_without_event(self) -> None:
+        target = self.repo / "staged.txt"
+        target.write_text("base\n", encoding="utf-8")
+        commit_all(self.repo, "add staged file")
+
+        application = self.application()
+        received = []
+        application.events().subscribe((PROMPT_RENDERED_EVENT,), received.append, "sink")
+        prepared = self.prepare("implementation", app=application)
+
+        alternate = self.root / "alternate.txt"
+        alternate.write_text("index-only\n", encoding="utf-8")
+        blob = git(self.repo, "hash-object", "-w", str(alternate))
+        alternate.unlink()
+        git(self.repo, "update-index", "--cacheinfo", f"100644,{blob},staged.txt")
+
+        with self.assertRaises(E.OrchestratorError) as caught:
+            application.core().render(
+                PromptRenderRequest(
+                    prepared=prepared, prompt_execution_mode=PromptExecutionMode.LOCAL
+                )
+            )
+        self.assertEqual(caught.exception.code, E.CONTEXT_STALE)
+        self.assertEqual(received, [])
 
     def test_workplan_drift_between_phases_is_refused(self) -> None:
         application = self.application()

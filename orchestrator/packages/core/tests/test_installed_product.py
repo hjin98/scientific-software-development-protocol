@@ -15,6 +15,7 @@ import json
 import os
 import subprocess
 import sys
+import tarfile
 import tempfile
 import unittest
 import zipfile
@@ -27,6 +28,10 @@ BUILD_TIMEOUT = 900
 
 
 def _run(args: list[str], **kwargs) -> subprocess.CompletedProcess[str]:
+    if "env" not in kwargs:
+        clean_env = dict(os.environ)
+        clean_env.pop("PYTHONPATH", None)
+        kwargs["env"] = clean_env
     return subprocess.run(  # noqa: S603
         args, capture_output=True, text=True, check=False, timeout=BUILD_TIMEOUT, **kwargs
     )
@@ -39,7 +44,9 @@ class InstalledProductTests(unittest.TestCase):
     root: Path
     wheel: Path
     sdp: Path
+    sdist_sdp: Path
     venv_python: Path
+    sdist_python: Path
 
     @classmethod
     def setUpClass(cls) -> None:
@@ -51,23 +58,35 @@ class InstalledProductTests(unittest.TestCase):
             [sys.executable, "-m", "build", "--outdir", str(dist), str(PACKAGE_ROOT)]
         )
         if built.returncode != 0:
-            raise unittest.SkipTest(f"wheel build unavailable: {built.stderr[-2000:]}")
+            raise AssertionError(f"wheel/sdist build failed: {built.stderr[-2000:]}")
         wheels = sorted(dist.glob("*.whl"))
         sdists = sorted(dist.glob("*.tar.gz"))
         if not wheels or not sdists:
-            raise unittest.SkipTest("build produced no wheel/sdist")
+            raise AssertionError("build produced no wheel/sdist")
         cls.wheel = wheels[0]
         cls.sdist = sdists[0]
 
         env_dir = cls.root / "venv"
         created = _run([sys.executable, "-m", "venv", str(env_dir)])
         if created.returncode != 0:
-            raise unittest.SkipTest(f"venv creation unavailable: {created.stderr[-2000:]}")
+            raise AssertionError(f"venv creation failed: {created.stderr[-2000:]}")
         cls.venv_python = env_dir / "bin" / "python"
         installed = _run([str(cls.venv_python), "-m", "pip", "install", "--quiet", str(cls.wheel)])
         if installed.returncode != 0:
-            raise unittest.SkipTest(f"install unavailable: {installed.stderr[-2000:]}")
+            raise AssertionError(f"wheel install failed: {installed.stderr[-2000:]}")
         cls.sdp = env_dir / "bin" / "sdp"
+
+        sdist_env = cls.root / "sdist-venv"
+        sdist_created = _run([sys.executable, "-m", "venv", str(sdist_env)])
+        if sdist_created.returncode != 0:
+            raise AssertionError(f"sdist venv creation failed: {sdist_created.stderr[-2000:]}")
+        cls.sdist_python = sdist_env / "bin" / "python"
+        sdist_installed = _run(
+            [str(cls.sdist_python), "-m", "pip", "install", "--quiet", str(cls.sdist)]
+        )
+        if sdist_installed.returncode != 0:
+            raise AssertionError(f"sdist install failed: {sdist_installed.stderr[-2000:]}")
+        cls.sdist_sdp = sdist_env / "bin" / "sdp"
 
     @classmethod
     def tearDownClass(cls) -> None:
@@ -125,6 +144,40 @@ class InstalledProductTests(unittest.TestCase):
     def test_sdist_is_produced(self) -> None:
         self.assertTrue(self.sdist.exists())
 
+    def test_sdist_contains_the_package_and_protocol_resources(self) -> None:
+        with tarfile.open(self.sdist, mode="r:gz") as archive:
+            names = set(archive.getnames())
+        self.assertTrue(any(name.endswith("/sdp_orchestrator/core/__init__.py") for name in names))
+        self.assertTrue(any(name.endswith("/resources/protocol/sdp-protocol-5.16/prompts.md") for name in names))
+
+    def test_sdist_was_installed_in_a_separate_environment(self) -> None:
+        result = _run(
+            [str(self.sdist_python), "-m", "pip", "show", "sdp-orchestrator-core"]
+        )
+        self.assertEqual(result.returncode, 0, result.stderr)
+
+    def test_sdist_installed_cli_runs_outside_the_checkout(self) -> None:
+        env = dict(os.environ)
+        env.pop("PYTHONPATH", None)
+        result = subprocess.run(  # noqa: S603
+            [
+                str(self.sdist_sdp),
+                "implementation",
+                "--config",
+                str(self.config),
+                "--prompt-mode",
+                "local",
+            ],
+            capture_output=True,
+            text=True,
+            check=False,
+            cwd=str(self.case),
+            env=env,
+            timeout=BUILD_TIMEOUT,
+        )
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn("<<<SDP_STAGE_RESULT_V1", result.stdout)
+
     def test_installed_package_lives_outside_the_source_checkout(self) -> None:
         result = _run(
             [str(self.venv_python), "-c",
@@ -154,8 +207,9 @@ class InstalledProductTests(unittest.TestCase):
         result = _run(
             [str(self.venv_python), "-c",
              "import sdp_orchestrator.core.api.v1, sys;"
-             " print([m for m in sys.modules if 'tracker' in m or 'adapters' in m"
-             " or 'scheduler' in m])"]
+             " print([m for m in sys.modules if m.startswith('sdp_orchestrator.tracker')"
+             " or m.startswith('sdp_orchestrator.adapters')"
+             " or m.startswith('sdp_orchestrator.scheduler')])"]
         )
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertIn("[]", result.stdout)

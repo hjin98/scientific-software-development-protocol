@@ -19,6 +19,9 @@ automatically.
 
 from __future__ import annotations
 
+import json
+from datetime import datetime, timezone
+
 from . import _errors as E
 from ._digest import SCHEME_PROMPT_FINGERPRINT, digest_bytes
 from ._records import (
@@ -49,7 +52,7 @@ _ORCHESTRATION_HEADING = "SDP ORCHESTRATION METADATA"
 def _target_ref(upstream_ref: str | None, remote_name: str, branch: str | None) -> str | None:
     if upstream_ref:
         prefix = f"{remote_name}/"
-        return upstream_ref[len(prefix) :] if upstream_ref.startswith(prefix) else upstream_ref
+        return upstream_ref[len(prefix) :] if upstream_ref.startswith(prefix) else branch
     return branch
 
 
@@ -104,9 +107,17 @@ def _web_snapshot(
                 details={"remote_mode": observation.policy.remote_mode.value},
                 remediation="observe with --remote-mode use_cached_remote or refresh_remote, or render with --prompt-mode local",
             )
+        diagnostic_codes = {
+            note.split(":", 1)[0] for note in observation.remote_diagnostics if ":" in note
+        }
+        code = E.REMOTE_AMBIGUOUS if E.REMOTE_AMBIGUOUS in diagnostic_codes else E.REMOTE_UNAVAILABLE
         E.fail(
-            E.REMOTE_UNAVAILABLE,
-            "web prompt mode requires a selected Git remote and none was resolved",
+            code,
+            (
+                "web prompt mode cannot select a unique Git remote"
+                if code == E.REMOTE_AMBIGUOUS
+                else "web prompt mode requires a selected Git remote and none was resolved"
+            ),
             details={"diagnostics": list(observation.remote_diagnostics)},
             remediation="configure projects.<key>.remote_name, or render with --prompt-mode local",
         )
@@ -155,12 +166,45 @@ def _web_snapshot(
             remediation="publish the candidate commit, or render with --prompt-mode local",
         )
 
+    max_age = observation.policy.max_remote_staleness_seconds
+    age_seconds: float | None = None
+    if max_age is not None:
+        if candidate.remote_observed_at is None:
+            E.fail(
+                E.REMOTE_STALE,
+                "cached remote evidence has unknown age and cannot satisfy an explicit freshness bound",
+                details={"max_remote_staleness_seconds": max_age, "age": "unknown"},
+                remediation="refresh the remote observation before rendering a web prompt",
+            )
+        try:
+            observed_at = datetime.fromisoformat(candidate.remote_observed_at)
+            if observed_at.tzinfo is None:
+                observed_at = observed_at.replace(tzinfo=timezone.utc)
+            age_seconds = max(0.0, (datetime.now(timezone.utc) - observed_at).total_seconds())
+        except (TypeError, ValueError):
+            E.fail(
+                E.REMOTE_STALE,
+                "remote evidence carries an invalid observation timestamp",
+                details={"max_remote_staleness_seconds": max_age, "age": "unknown"},
+            )
+        if age_seconds > max_age:
+            E.fail(
+                E.REMOTE_STALE,
+                "remote evidence is older than the configured freshness bound",
+                details={
+                    "max_remote_staleness_seconds": max_age,
+                    "age_seconds": age_seconds,
+                },
+                remediation="refresh the remote observation before rendering a web prompt",
+            )
+
     target_ref = _target_ref(candidate.upstream_ref, remote.remote_name, candidate.branch)
-    freshness = (
-        "remote target confirmed by a bounded read-only remote query"
-        if candidate.remote_evidence is RemoteEvidence.REFRESHED
-        else "remote target confirmed by an existing local remote-tracking ref; freshness not re-queried"
-    )
+    if candidate.remote_evidence is RemoteEvidence.REFRESHED:
+        freshness = "remote target confirmed by a bounded read-only remote query"
+        if age_seconds is not None:
+            freshness += f"; query age {age_seconds:.3f}s"
+    else:
+        freshness = "remote target confirmed by an existing local remote-tracking ref; freshness not re-queried"
     target = (
         f"{remote.sanitized_repository} (branch {target_ref}, "
         f"commit {candidate.head_commit}, {freshness})"
@@ -208,6 +252,9 @@ def substitute_inputs(body: str, values: dict[str, str]) -> str:
 def _footer_request(
     run_id: str, stage: StageRef, result_schema_id: str, result_schema_version: int
 ) -> str:
+    def json_string(value: str) -> str:
+        return json.dumps(value, ensure_ascii=False)
+
     return "\n".join(
         (
             "---",
@@ -231,12 +278,18 @@ def _footer_request(
             "content. The footer begins on its own line with the begin marker, contains one",
             "JSON object, and ends on its own line with the end marker:",
             "",
+            "Rules for the footer: emit it exactly once, as the last content of your response;",
+            "keep run_id, prompt_fingerprint, and stage byte-identical to the values above;",
+            "use JSON null rather than omitting an unknown optional field; leave a list empty",
+            "when it has no entries. Additional fields are permitted and are ignored by",
+            "consumers that do not recognize them. Ordinary prose may precede the footer.",
+            "",
             FOOTER_BEGIN,
             "{",
             '  "schema_version": 1,',
-            f'  "run_id": "{run_id}",',
+            f'  "run_id": {json_string(run_id)},',
             f'  "prompt_fingerprint": "{FINGERPRINT_PLACEHOLDER}",',
-            f'  "stage": "{stage.stage_key}",',
+            f'  "stage": {json_string(stage.stage_key)},',
             '  "outcome": "<one recognized outcome for this stage>",',
             '  "recommended_next_stage": "<stage key, or null>",',
             '  "blockers": [',
@@ -251,12 +304,6 @@ def _footer_request(
             '  "summary": "<one-paragraph result summary>"',
             "}",
             FOOTER_END,
-            "",
-            "Rules for the footer: emit it exactly once, as the last content of your response;",
-            "keep run_id, prompt_fingerprint, and stage byte-identical to the values above;",
-            "use JSON null rather than omitting an unknown optional field; leave a list empty",
-            "when it has no entries. Additional fields are permitted and are ignored by",
-            "consumers that do not recognize them. Ordinary prose may precede the footer.",
             "",
         )
     )
@@ -301,7 +348,16 @@ def assemble(
         placeholder_form.encode("utf-8"), SCHEME_PROMPT_FINGERPRINT
     )
     digest_text = f"sha256:{fingerprint.value}"
-    return placeholder_form.replace(FINGERPRINT_PLACEHOLDER, digest_text), fingerprint
+    footer = footer.replace(
+        f"PROMPT_FINGERPRINT = {FINGERPRINT_PLACEHOLDER}",
+        f"PROMPT_FINGERPRINT = {digest_text}",
+        1,
+    ).replace(
+        f'  "prompt_fingerprint": "{FINGERPRINT_PLACEHOLDER}",',
+        f'  "prompt_fingerprint": "{digest_text}",',
+        1,
+    )
+    return substituted.rstrip("\n") + "\n\n" + footer.rstrip("\n") + "\n", fingerprint
 
 
 def extract_result_footer(response: str) -> str | None:
@@ -314,12 +370,14 @@ def extract_result_footer(response: str) -> str | None:
     lines = response.replace("\r\n", "\n").replace("\r", "\n").split("\n")
     begin = None
     for index in range(len(lines) - 1, -1, -1):
-        if lines[index].strip() == FOOTER_BEGIN:
+        if lines[index] == FOOTER_BEGIN:
             begin = index
             break
     if begin is None:
         return None
     for index in range(begin + 1, len(lines)):
-        if lines[index].strip() == FOOTER_END:
+        if lines[index] == FOOTER_END:
+            if any(line.strip() for line in lines[index + 1 :]):
+                return None
             return "\n".join(lines[begin + 1 : index])
     return None

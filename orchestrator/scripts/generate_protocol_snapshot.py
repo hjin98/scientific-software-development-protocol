@@ -23,6 +23,7 @@ from sdp_orchestrator.core import _profile as P  # noqa: E402
 from sdp_orchestrator.core._canonical import parse_document  # noqa: E402
 from sdp_orchestrator.core._protocolsrc import (  # noqa: E402
     CANONICAL_PROMPTS_RELPATH,
+    CANONICAL_VERSION_RELPATH,
     PACKAGED_PROFILE,
     PACKAGED_PROMPTS,
 )
@@ -33,6 +34,14 @@ TARGET_DIR = (
 
 
 def render() -> dict[str, str]:
+    declared_version = (REPO_ROOT / CANONICAL_VERSION_RELPATH).read_text(
+        encoding="utf-8"
+    ).strip()
+    if declared_version != P.PROFILE_PROTOCOL_VERSION:
+        raise ValueError(
+            "canonical source Protocol version does not match the packaged profile: "
+            f"{declared_version!r} != {P.PROFILE_PROTOCOL_VERSION!r}"
+        )
     prompts = (REPO_ROOT / CANONICAL_PROMPTS_RELPATH).read_text(encoding="utf-8")
     document = parse_document(prompts)
     snapshot = P.build_profile(document)
@@ -51,7 +60,11 @@ def main() -> int:
     )
     args = parser.parse_args()
 
-    expected = render()
+    try:
+        expected = render()
+    except (OSError, UnicodeDecodeError, ValueError) as exc:
+        print(f"snapshot generation failed: {exc}", file=sys.stderr)
+        return 1
     if args.check:
         drift = []
         for name, text in expected.items():

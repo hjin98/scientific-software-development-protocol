@@ -170,17 +170,15 @@ class ArchitectureFitnessTests(unittest.TestCase):
                     f"_git.py mentions the mutating subcommand {node.value!r}",
                 )
 
-    def test_only_the_temporary_mirror_path_may_fetch(self) -> None:
-        """``git fetch`` is permitted only against Core's own throwaway mirror."""
+    def test_core_remote_source_reads_do_not_fetch_repository_mirrors(self) -> None:
+        """Bounded archive reads avoid materializing an unrelated mirror."""
 
         offenders = [
             path.name
             for path in _core_modules()
             if '"fetch"' in path.read_text(encoding="utf-8")
         ]
-        self.assertEqual(offenders, ["_protocolsrc.py"])
-        source = (CORE_SRC / "_protocolsrc.py").read_text(encoding="utf-8")
-        self.assertIn("tempfile.mkdtemp", source)
+        self.assertEqual(offenders, [])
 
     def test_core_defines_no_higher_module_command(self) -> None:
         cli = (CORE_SRC / "_cli.py").read_text(encoding="utf-8")

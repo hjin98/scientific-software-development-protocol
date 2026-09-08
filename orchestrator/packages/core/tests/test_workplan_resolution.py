@@ -68,11 +68,11 @@ class CatalogDiscoveryTests(CatalogBase):
         (self.repo / "workplans/active/link.md").symlink_to(outside)
         self.assertEqual(self.catalog(), ())
 
-    def test_symlink_inside_the_repository_is_followed(self) -> None:
+    def test_symlink_inside_the_repository_does_not_create_an_alias_authority(self) -> None:
         write_workplan(self.repo, "workplans/archive/real.md", workplan_id="R", status="completed")
         (self.repo / "workplans/active").mkdir(parents=True)
         (self.repo / "workplans/active/link.md").symlink_to(self.repo / "workplans/archive/real.md")
-        self.assertEqual(len(self.catalog()), 2)
+        self.assertEqual(len(self.catalog()), 1)
 
     def test_oversized_document_is_reported_not_parsed(self) -> None:
         path = self.repo / "workplans/active/huge.md"
@@ -88,6 +88,28 @@ class CatalogDiscoveryTests(CatalogBase):
         path.write_text("---\nworkplan_id: [unclosed\n---\nbody\n", encoding="utf-8")
         entry = self.by_path("workplans/active/bad.md")
         self.assertFalse(entry.descriptor.ref.semantic_identity_complete)
+
+    def test_yaml_aliases_are_rejected_before_frontmatter_materialization(self) -> None:
+        path = self.repo / "workplans/active/alias.md"
+        path.parent.mkdir(parents=True)
+        path.write_text(
+            "---\nbase: &base {workplan_id: A}\ncopy: *base\n---\nbody\n",
+            encoding="utf-8",
+        )
+        entry = self.by_path("workplans/active/alias.md")
+        self.assertFalse(entry.descriptor.ref.semantic_identity_complete)
+        self.assertTrue(any("aliases" in item for item in entry.descriptor.diagnostics))
+
+    def test_deep_frontmatter_is_rejected_before_recursive_tree_walk(self) -> None:
+        path = self.repo / "workplans/active/deep.md"
+        path.parent.mkdir(parents=True)
+        nested = "".join(
+            f"{'  ' * index}level_{index}:\n" for index in range(32)
+        ) + f"{'  ' * 32}value: x\n"
+        path.write_text(f"---\n{nested}---\nbody\n", encoding="utf-8")
+        entry = self.by_path("workplans/active/deep.md")
+        self.assertFalse(entry.descriptor.ref.semantic_identity_complete)
+        self.assertTrue(any("nesting" in item for item in entry.descriptor.diagnostics))
 
     def test_document_without_frontmatter_is_selectable_by_path_only(self) -> None:
         path = self.repo / "workplans/active/plain.md"
@@ -242,6 +264,31 @@ class StagePolicyTests(CatalogBase):
             self._resolve("implementation", WorkplanPolicy.REQUIRED, branch="main")
         self.assertEqual(caught.exception.code, E.WORKPLAN_NOT_FOUND)
 
+    def test_lifecycle_inconsistent_active_plan_is_not_implicitly_current(self) -> None:
+        write_workplan(self.repo, "workplans/active/A.md", workplan_id="A", status="completed")
+        with self.assertRaises(E.OrchestratorError) as caught:
+            self._resolve("implementation", WorkplanPolicy.REQUIRED, branch="main")
+        self.assertEqual(caught.exception.code, E.WORKPLAN_NOT_FOUND)
+
+    def test_current_governance_cannot_select_archive_by_exact_path(self) -> None:
+        write_workplan(self.repo, "workplans/archive/A.md", workplan_id="A", status="completed")
+        with self.assertRaises(E.OrchestratorError) as caught:
+            self._resolve(
+                "implementation",
+                WorkplanPolicy.REQUIRED,
+                selector="workplans/archive/A.md",
+            )
+        self.assertEqual(caught.exception.code, E.WORKPLAN_NOT_FOUND)
+
+    def test_closeout_can_bind_an_exact_completed_archive_plan(self) -> None:
+        write_workplan(self.repo, "workplans/archive/A.md", workplan_id="A", status="completed")
+        resolution = self._resolve(
+            "closeout",
+            WorkplanPolicy.EXPLICIT_ONLY,
+            selector="workplans/archive/A.md",
+        )
+        self.assertEqual(resolution.workplan.workplan_id, "A")
+
     def test_new_task_design_does_not_capture_a_sole_active_plan(self) -> None:
         """Counterfactual required by O4: Design must not silently adopt an unrelated plan."""
 
@@ -291,6 +338,20 @@ class StagePolicyTests(CatalogBase):
         with self.assertRaises(E.OrchestratorError) as caught:
             self._resolve("implementation", WorkplanPolicy.REQUIRED, selector="../../etc/passwd")
         self.assertEqual(caught.exception.code, E.WORKPLAN_NOT_FOUND)
+
+    def test_noncanonical_path_aliases_do_not_select_a_real_plan(self) -> None:
+        write_workplan(self.repo, "workplans/active/A.md", workplan_id="A")
+        selectors = (
+            "workplans/active/./A.md",
+            "workplans/active/../active/A.md",
+            "workplans\\active\\A.md",
+            str(self.repo / "workplans/active/A.md"),
+        )
+        for selector in selectors:
+            with self.subTest(selector=selector):
+                with self.assertRaises(E.OrchestratorError) as caught:
+                    self._resolve("implementation", WorkplanPolicy.REQUIRED, selector=selector)
+                self.assertEqual(caught.exception.code, E.WORKPLAN_NOT_FOUND)
 
     def test_selection_is_never_fuzzy(self) -> None:
         write_workplan(self.repo, "workplans/active/A.md", workplan_id="ALPHA-ONE")

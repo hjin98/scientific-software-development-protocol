@@ -102,6 +102,12 @@ class SurfaceCompletenessTests(SeamBase):
         else:  # pragma: no cover
             self.fail("expected a problem")
 
+    def test_problem_retryable_is_structured_advisory_data(self) -> None:
+        problem = api.Problem("core.context.stale", "retry", retryable=True)
+        payload = problem.to_dict()
+        self.assertIs(payload["retryable"], True)
+        self.assertIsNone(api.Problem("core.context.stale", "unknown").to_dict()["retryable"])
+
     def test_no_private_object_leaks_through_public_records(self) -> None:
         """A public record must never carry a live implementation object."""
 
@@ -191,6 +197,26 @@ class WorkplanOwnershipTests(SeamBase):
         with self.assertRaises(api.OrchestratorError) as caught:
             self.prepare(self.core(), workplan_selector="NOVER")
         self.assertEqual(caught.exception.code, E.PROTOCOL_UNAVAILABLE)
+
+    def test_governing_workplan_precedes_an_explicit_profile(self) -> None:
+        core = self.core()
+        old = next(
+            item.ref
+            for item in core.workplans(api.WorkplanQuery(project=api.ProjectKey("demo"))).items
+            if item.ref.workplan_id == "OLD"
+        )
+        profile = core.workflow(api.WorkflowRequest(project=api.ProjectKey("demo"))).profile
+        with self.assertRaises(api.OrchestratorError) as caught:
+            core.workflow(api.WorkflowRequest(workplan=old, profile=profile))
+        self.assertEqual(caught.exception.code, E.PROTOCOL_INCOMPATIBLE)
+
+    def test_explicit_profile_identity_fields_are_not_silently_rewritten(self) -> None:
+        core = self.core()
+        profile = core.workflow(api.WorkflowRequest(project=api.ProjectKey("demo"))).profile
+        mismatched = profile.model_copy(update={"profile_schema_version": 99})
+        with self.assertRaises(api.OrchestratorError) as caught:
+            core.workflow(api.WorkflowRequest(profile=mismatched))
+        self.assertEqual(caught.exception.code, E.PROTOCOL_INCOMPATIBLE)
 
     def test_explicit_only_stage_tolerates_incomplete_protocol_metadata(self) -> None:
         """An optional authority is evidence; it does not decide the governing contract."""

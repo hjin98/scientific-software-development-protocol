@@ -189,6 +189,7 @@ class CandidateRef(_Record):
     upstream_ref: str | None = None
     observed_remote_commit: str | None = None
     remote_evidence: RemoteEvidence = RemoteEvidence.NONE
+    remote_observed_at: str | None = None
     observed_at: str | None = None
 
 

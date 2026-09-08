@@ -250,11 +250,15 @@ def build_profile(document: CanonicalDocument) -> ProfileSnapshot:
     """
 
     canonical_keys = [key for _, key, _ in CANONICAL_STAGES]
-    if sorted(canonical_keys) != sorted(_STAGE_TABLE):
+    if sorted(canonical_keys) != sorted(_STAGE_TABLE) or set(document.stages) != set(canonical_keys):
         E.fail(
             E.PROTOCOL_SOURCE_INCOHERENT,
             "the profile stage set does not match the canonical stage set",
-            details={"canonical": sorted(canonical_keys), "profile": sorted(_STAGE_TABLE)},
+            details={
+                "canonical": sorted(canonical_keys),
+                "document": sorted(document.stages),
+                "profile": sorted(_STAGE_TABLE),
+            },
         )
 
     stages: list[StageDescriptor] = []

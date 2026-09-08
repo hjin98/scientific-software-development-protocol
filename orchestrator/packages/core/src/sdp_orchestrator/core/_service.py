@@ -45,6 +45,7 @@ from ._records import (
     PromptPreparationRequest,
     PromptRenderRequest,
     PromptSourceRef,
+    ProtocolProfileRef,
     RenderedPrompt,
     RunId,
     StageDescriptor,
@@ -171,6 +172,7 @@ class CoreService:
             context.identity,
             remote_mode=request.policy.remote_mode,
             configured_remote_name=context.section.remote_name,
+            max_remote_staleness_seconds=request.policy.max_remote_staleness_seconds,
         )
 
     def observe(self, request: ProjectObservationRequest) -> ProjectObservation:
@@ -228,7 +230,9 @@ class CoreService:
         section = self._config.protocol_sources.get(profile_id)
         return PS.resolve(section, profile_id=profile_id)
 
-    def _profile_id_for(self, context: _ProjectContext, workplan: WorkplanRef | None) -> str:
+    def _profile_id_for(
+        self, context: _ProjectContext | None, workplan: WorkplanRef | None
+    ) -> str:
         """Governing workplan protocol version wins over the project default."""
 
         if workplan is not None:
@@ -251,7 +255,7 @@ class CoreService:
                     },
                 )
             return P.PROFILE_ID
-        return context.section.protocol_profile or P.PROFILE_ID
+        return (context.section.protocol_profile if context is not None else None) or P.PROFILE_ID
 
     def _workflow_descriptor_for_project(
         self, context: _ProjectContext
@@ -259,17 +263,50 @@ class CoreService:
         profile_id = context.section.protocol_profile or P.PROFILE_ID
         return self._protocol_source(profile_id).snapshot.descriptor
 
+    def _validate_profile_ref(
+        self, requested: ProtocolProfileRef, descriptor: WorkflowProfileDescriptor
+    ) -> None:
+        expected = descriptor.profile
+        if (
+            requested.profile_id != expected.profile_id
+            or requested.profile_schema_version != expected.profile_schema_version
+            or requested.protocol_version != expected.protocol_version
+            or requested.compatible_protocol_versions != expected.compatible_protocol_versions
+            or (
+                requested.source_digest is not None
+                and requested.source_digest != expected.source_digest
+            )
+        ):
+            E.fail(
+                E.PROTOCOL_INCOMPATIBLE,
+                "the supplied Protocol profile identity does not match the resolved source",
+                details={
+                    "requested_profile": requested.profile_id,
+                    "resolved_profile": expected.profile_id,
+                },
+                remediation="use the profile identity returned by Core for the selected source",
+            )
+
     def workflow(self, request: WorkflowRequest) -> WorkflowProfileDescriptor:
-        if request.profile is not None:
-            return self._protocol_source(request.profile.profile_id).snapshot.descriptor
-        if request.project is None:
+        governing_profile_id: str | None = None
+        if request.workplan is not None:
+            governing_profile_id = self._profile_id_for(None, request.workplan)
+        elif request.profile is not None:
+            governing_profile_id = request.profile.profile_id
+        elif request.project is not None:
+            governing_profile_id = self._profile_id_for(self._context(request.project), None)
+        else:
             E.fail(
                 E.PROTOCOL_UNAVAILABLE,
                 "a workflow request needs an explicit profile or a project context",
             )
-        context = self._context(request.project)
-        profile_id = self._profile_id_for(context, request.workplan)
-        return self._protocol_source(profile_id).snapshot.descriptor
+
+        profile_id = governing_profile_id
+        assert profile_id is not None
+        descriptor = self._protocol_source(profile_id).snapshot.descriptor
+        if request.profile is not None:
+            self._validate_profile_ref(request.profile, descriptor)
+        return descriptor
 
     def list_stages(self, request: WorkflowRequest) -> tuple[StageDescriptor, ...]:
         return self.workflow(request).stages
@@ -351,10 +388,24 @@ class CoreService:
     def render(self, request: PromptRenderRequest) -> RenderedPrompt:
         prepared = request.prepared
         context = self._context(prepared.observation.project_key)
-        self._revalidate(context, prepared)
+        if preparation_fingerprint(prepared) != prepared.preparation_fingerprint:
+            E.fail(
+                E.CONTEXT_STALE,
+                "the prepared prompt fingerprint does not match its material contents",
+                remediation="use the unmodified preparation returned by Core",
+            )
+        current, source = self._revalidate(context, prepared)
+        current_observation = ProjectObservation(
+            project_key=prepared.observation.project_key,
+            worktree_key=context.identity.worktree_key,
+            candidate=current.candidate,
+            selected_remote=current.remote,
+            remote_diagnostics=current.diagnostics,
+            policy=prepared.observation.policy,
+            local_repo_root=str(context.identity.toplevel),
+        )
 
-        snapshot = R.build_snapshot(prepared.observation, request.prompt_execution_mode)
-        source = self._protocol_source(prepared.profile.profile_id)
+        snapshot = R.build_snapshot(current_observation, request.prompt_execution_mode)
         body = source.snapshot.bodies[prepared.stage.stage_key]
 
         text, fingerprint = R.assemble(
@@ -366,6 +417,11 @@ class CoreService:
             result_schema_id=prepared.result_schema_id,
             result_schema_version=prepared.result_schema_version,
         )
+
+        # The final optimistic check is immediately before publication. A sink
+        # can observe the event only after both the assembled artifact and the
+        # source/candidate/workplan snapshot have passed this check.
+        self._revalidate(context, prepared)
 
         rendered = RenderedPrompt(
             run_id=prepared.run_id,
@@ -395,14 +451,32 @@ class CoreService:
         )
         return rendered
 
-    def _revalidate(self, context: _ProjectContext, prepared: PreparedPrompt) -> None:
+    def _revalidate(
+        self, context: _ProjectContext, prepared: PreparedPrompt
+    ) -> tuple[Observation, PS.ResolvedProtocolSource]:
         """Refuse to render a prompt assembled from a state that has since moved."""
 
         current = observe(
             context.identity,
             remote_mode=prepared.observation.policy.remote_mode,
             configured_remote_name=context.section.remote_name,
+            max_remote_staleness_seconds=prepared.observation.policy.max_remote_staleness_seconds,
         )
+        if current.candidate.repository_id != prepared.observation.candidate.repository_id:
+            E.fail(
+                E.CONTEXT_STALE,
+                "the repository identity changed between preparation and final render",
+            )
+        if context.identity.worktree_key != prepared.observation.worktree_key:
+            E.fail(
+                E.CONTEXT_STALE,
+                "the Git worktree identity changed between preparation and final render",
+            )
+        if current.remote != prepared.observation.selected_remote:
+            E.fail(
+                E.CONTEXT_STALE,
+                "the selected remote changed between preparation and final render",
+            )
         if _candidate_identity(current.candidate) != _candidate_identity(
             prepared.observation.candidate
         ):
@@ -412,34 +486,62 @@ class CoreService:
                 remediation="re-run the command to prepare and render one coherent snapshot",
             )
 
-        selected = prepared.workplan_resolution.workplan
-        if selected is not None:
-            catalog = {
-                entry.relative_path: entry.descriptor.ref for entry in self._catalog(context)
-            }
-            now = catalog.get(selected.path)
-            if now is None:
-                E.fail(
-                    E.CONTEXT_STALE,
-                    "the selected workplan disappeared between preparation and final render",
-                    details={"workplan": selected.path},
-                )
-            if _workplan_identity(now) != _workplan_identity(selected):
-                E.fail(
-                    E.CONTEXT_STALE,
-                    "the selected workplan changed between preparation and final render",
-                    details={"workplan": selected.path},
-                )
-
-        source = self._protocol_source(prepared.profile.profile_id)
-        if source.mutable_identity is not None and (
-            source.source.identity != prepared.prompt_source.identity
+        try:
+            source = self._protocol_source(prepared.profile.profile_id)
+            current_stage = P.stage_descriptor(source.snapshot.descriptor, prepared.stage)
+        except E.OrchestratorError as exc:
+            E.fail(
+                E.CONTEXT_STALE,
+                "the prepared stage is not defined by the current Protocol source",
+                details={"code": exc.problem.code},
+            )
+        if source.snapshot.descriptor.model_dump(mode="json") != prepared.workflow.model_dump(
+            mode="json"
         ):
             E.fail(
                 E.CONTEXT_STALE,
-                "the local Protocol render source changed between preparation and final render",
+                "the workflow profile changed between preparation and final render",
+            )
+        if source.snapshot.descriptor.profile != prepared.profile:
+            E.fail(
+                E.CONTEXT_STALE,
+                "the prepared Protocol profile is not the current source profile",
+            )
+        if current_stage.workplan_policy is not prepared.workplan_resolution.policy:
+            E.fail(
+                E.CONTEXT_STALE,
+                "the prepared stage policy changed between preparation and final render",
+            )
+
+        if _source_identity(source.source) != _source_identity(prepared.prompt_source):
+            E.fail(
+                E.CONTEXT_STALE,
+                "the Protocol render source changed between preparation and final render",
                 details={"source": prepared.prompt_source.kind},
             )
+
+        original = prepared.workplan_resolution
+        selector = original.workplan.path if original.selection_basis == "explicit_selector" and original.workplan else None
+        try:
+            current_resolution = W.resolve(
+                self._catalog(context),
+                stage=prepared.stage,
+                policy=original.policy,
+                selector=selector,
+                branch=current.candidate.branch,
+            )
+        except E.OrchestratorError as exc:
+            E.fail(
+                E.CONTEXT_STALE,
+                "the governing workplan resolution changed between preparation and final render",
+                details={"code": exc.problem.code},
+            )
+        if current_resolution.model_dump(mode="json") != original.model_dump(mode="json"):
+            E.fail(
+                E.CONTEXT_STALE,
+                "the governing workplan resolution changed between preparation and final render",
+            )
+        return current, source
 
 
 # --------------------------------------------------------------------------
@@ -481,14 +583,15 @@ def _workplan_identity(ref: WorkplanRef) -> dict[str, object]:
 def _source_identity(source: PromptSourceRef) -> dict[str, object]:
     """Content identity of the render source.
 
-    ``sanitized_location`` is excluded on purpose: two checkouts with identical
-    content produce identical prompts, so moving a local root must not change
-    preparation identity.
+    The sanitized location is part of the identity because a local root or
+    explicitly configured remote source is an authority boundary, not just a
+    bag of bytes. A moved or redirected source must revalidate.
     """
 
     return {
         "kind": source.kind,
         "identity": source.identity,
+        "sanitized_location": source.sanitized_location,
         "requested_ref": source.requested_ref,
         "resolved_ref": source.resolved_ref,
         "content_digests": [
@@ -551,6 +654,7 @@ def preparation_fingerprint(prepared: PreparedPrompt) -> DigestRef:
             ),
         },
         "prompt_source": _source_identity(prepared.prompt_source),
+        "workflow": prepared.workflow.model_dump(mode="json"),
         "inputs": [
             {
                 "name": item.name,
