@@ -412,7 +412,7 @@ class InstalledProductTests(unittest.TestCase):
         env = dict(os.environ)
         env.pop("PYTHONPATH", None)
         env["PATH"] = str(fake_bin) + os.pathsep + env.get("PATH", "")
-        for case_name, local_root in (("valid-local", PACKAGE_ROOT), ("remote-only", None)):
+        for case_name, local_root in (("valid-local", PACKAGE_ROOT.parent), ("remote-only", None)):
             with self.subTest(case=case_name):
                 source_config = self.case / f"doctor-source-config-{case_name}.toml"
                 source_lines = [
