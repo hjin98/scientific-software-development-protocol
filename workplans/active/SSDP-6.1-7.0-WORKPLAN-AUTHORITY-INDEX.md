@@ -18,17 +18,24 @@ Do not copy substantive requirements into this index. Read the listed governing 
 
 ## Protocol 6.1 current implementation handoff
 
-Protocol 6.1 is intentionally consolidated into one snapshot-complete current workplan:
+Protocol 6.1 implementation/review SHALL read and satisfy, as one snapshot-complete handoff:
 
 1. `workplans/active/SSDP-6.1-EVIDENCE-EVOLUTION-AND-CONCRETIZATION-ALIGNMENT.md`
+2. `workplans/active/SSDP-6.1-EVIDENCE-EVOLUTION-AND-CONCRETIZATION-ALIGNMENT-REVISION-1-HUMAN-FACING-DOCUMENTATION-AND-FINAL-REVIEW-CLOSURE.md`
 
-The former second-review companion was folded losslessly into the parent during final pre-implementation review and is no longer a separate current contract. Git retains its development history; implementation must use the consolidated parent rather than mentally applying amendment history.
+Precedence:
+
+- the consolidated parent remains the governing evidence/evolution/concretization workplan;
+- Revision 1 supplements it with the human-facing background/terminology/abbreviation standard and fourth-review closures;
+- every parent requirement not explicitly narrowed by Revision 1 remains binding;
+- the composition must remain lossless with respect to Protocol 6.0 and inherited Protocol 5.16 doctrine.
 
 Current review disposition:
 
 ```text
 SERIOUS CHALLENGE: NONE
 FINAL WORKPLAN DESIGN REVIEW: PASS
+REVIEW ROUND: 4
 IMPLEMENTATION STATUS: ACTIVE
 READY FOR IMPLEMENTATION: YES
 ```
@@ -45,10 +52,10 @@ Protocol 7.0 design/implementation/review SHALL read and satisfy, as one compose
 
 Precedence:
 
-- Revision 1 closes ownership, semantic/control binding, storage/transport, cutover, lifecycle-migration, graph-completeness, and compatibility gaps and corrects Scheduler/control-kernel ownership.
-- Revision 2 closes reducer-purity, ambient-state, external-effect, deterministic replay, and canonical recovery gaps.
-- Every parent requirement not explicitly changed by the revisions remains binding.
-- Protocol 7 inherits the accepted final Protocol 6.1 authority/evidence/evolution terminology and dependency semantics unless 7.0 explicitly replaces a rule through its own accepted authority revision.
+- Revision 1 closes ownership, semantic/control binding, storage/transport, cutover, lifecycle-migration, graph-completeness, and compatibility gaps and corrects Scheduler/control-kernel ownership;
+- Revision 2 closes reducer-purity, ambient-state, external-effect, deterministic replay, and canonical recovery gaps;
+- every parent requirement not explicitly changed by the revisions remains binding;
+- Protocol 7 inherits the accepted final Protocol 6.1 authority/evidence/evolution/dependency doctrine and human-facing documentation standard unless 7.0 explicitly replaces a rule through accepted authority revision.
 
 Current review disposition:
 
@@ -59,6 +66,8 @@ IMPLEMENTATION STATUS: PROPOSED
 BLOCKED ON: COMPLETED + QUALIFIED + IMMUTABLY PINNED PROTOCOL 6.1
 ALSO REQUIRES: DELIBERATE D3 ORCHESTRATOR ARCHITECTURE REOPEN/SUPERSESSION BEFORE D4 IMPLEMENTATION
 ```
+
+Protocol 7 machine control records remain compact machine data. Human-readable control/schema/user documentation inherits the Protocol 6.1 background-context and first-use abbreviation requirements.
 
 ## Version/cutover rule
 
@@ -71,6 +80,6 @@ There is exactly one canonical workflow-control authority for any current run.
 
 ## Historical discipline
 
-Do not edit archived/version-pinned Protocol 6.0/5.x transition records merely to adopt 6.1 terminology. Current 6.1/7.0 work follows abstraction/concretization terminology while legacy stable identifiers may retain older lexemes only under the compatibility rule in the consolidated 6.1 workplan.
+Do not edit archived/version-pinned Protocol 6.0/5.x transition records merely to adopt 6.1 terminology or presentation rules. Current 6.1/7.0 work follows abstraction/concretization terminology and the human-facing documentation standard while legacy stable identifiers may retain older lexemes only under the explicit compatibility rule in the current 6.1 handoff.
 
-When these workplans complete, preserve normal repository closeout/history conventions; this index may then be archived or replaced by accepted release/version authority mapping. It must not become a permanent parallel protocol authority.
+When these workplans complete, preserve normal repository closeout/history conventions; this index may then be archived or replaced by accepted release/version authority mapping. It must not become permanent parallel protocol authority.
