@@ -6,6 +6,7 @@ target_protocol_version: 6.0.0
 status: active-authority-index
 phase_0_parent_authority_review: passed
 active_serious_challenge: none
+implementation_review: no-pass-consolidation-rework-authorized
 ---
 
 # SSDP 6.0 Active Transition Authority
@@ -26,23 +27,27 @@ Supplying only the parent workplan while omitting an accepted amendment listed h
    - accepted amendment to review/verification, authority-state, human-adjudication, and narrowly related parent-authority clarification semantics;
    - owns the Serious Challenge threshold, bounded Challenge Pass, evidence-quality requirements, challenge/risk-override propagation, durable-authority-versus-cycle-freeze clarification, one-owner-versus-multi-authority clarification, and Protocol-self-release challenge rule until consolidated into canonical Protocol 6 sources.
 
-If these documents appear to conflict, first determine whether Revision 1 intentionally amends or clarifies the parent's stated surface. Within that amended/clarified surface, Revision 1 controls. Outside it, the parent controls. Any genuine unresolved contradiction between them is itself review evidence and may trigger a Serious Challenge.
+3. `SSDP-6-RECURSIVE-ABSTRACTION-REALIZATION-SCIENTIFIC-SOFTWARE-PROTOCOL-AUTHORITY-REVISION-2-PROTOCOL-5-INHERITANCE-AND-CONSOLIDATION.md`
+   - accepted post-implementation consolidation amendment;
+   - owns the Protocol 6 generalization / Protocol 5 specialization relation, performance-lossless functional inheritance requirement, current-language consolidation rule, semantic-oracle migration rule, restoration of bounded urgent mitigation and compact resumable state, and second-round implementation acceptance criteria.
 
-## Phase 0 review closure
+If these documents appear to conflict, first determine whether a later accepted revision intentionally amends or clarifies the parent's stated surface. Within that amended/clarified surface, the later revision controls. Outside it, the parent controls. Any genuine unresolved contradiction between them is itself review evidence and may trigger a Serious Challenge.
 
-The parent authority has now undergone repeated adversarial review under the Serious Challenge doctrine.
+## Phase 0 and implementation-review state
 
-Current result:
+The parent authority underwent repeated adversarial review under the Serious Challenge doctrine.
+
+Current state:
 
 ```text
 PHASE 0 PARENT-AUTHORITY REVIEW: PASS
 ACTIVE SERIOUS CHALLENGE: NONE
-NEXT AUTHORIZED MIGRATION PHASE: PHASE 1
+POST-IMPLEMENTATION REVIEW: NO-PASS — CONSOLIDATION REWORK AUTHORIZED
 ```
 
-This is **not** Protocol 6 release acceptance. It means the parent design is coherent enough to begin the implementation/migration phases while remaining subject to challenge if later evidence invalidates an accepted premise.
+The No-Pass does **not** reopen the D1-D4 theory. It records implementation-level migration blockers: incomplete Protocol 5 functional inheritance and an incompletely consolidated dual vocabulary. Revision 2 defines the minimum repair. A later implementation re-review must independently determine whether those blockers are closed.
 
-The Phase 0 Pass specifically includes closure of the following review-discovered ambiguities:
+The Phase 0 Pass specifically includes closure of the following parent-design ambiguities:
 
 - Challenge Pass applicability and evidence quality;
 - dependency-bounded unresolved-challenge/risk-override semantics;
@@ -51,11 +56,13 @@ The Phase 0 Pass specifically includes closure of the following review-discovere
 - snapshot-complete transition composition through this index;
 - Protocol 6 self-release cannot be justified by risk-overriding an unresolved Serious Challenge.
 
+Revision 2 adds no new conceptual domain. It strengthens the migration contract so Protocol 5 is recovered as a functional specialization of Protocol 6 without remaining a parallel current control plane.
+
 ## Amendment discipline
 
 Any further accepted transition amendment must update this index in the same accepted change so the active authority set remains discoverable. Do not accumulate hidden amendments that require Git history or prior conversation to reconstruct.
 
-Prefer consolidating corrections into the existing parent/amendment rather than creating additional authority files. A new amendment is justified only when changing an existing accepted artifact directly would obscure authority history or cannot be performed coherently.
+Prefer consolidating corrections into the existing parent/amendments rather than creating additional authority files. A new amendment is justified only when changing an existing accepted artifact directly would obscure authority history or cannot be performed coherently.
 
 ## Release transition
 
@@ -66,4 +73,4 @@ This index is transition scaffolding, not intended permanent Protocol 6 doctrine
 - preserve historical workplan/version recovery separately;
 - retire or archive transient amendment/index artifacts according to repository lifecycle policy once their semantics are fully represented by the released protocol.
 
-An unresolved Serious Challenge to governing Protocol 6 authority blocks Protocol 6 release; Phase 0 or later migration progress may not be used as a substitute for resolving it.
+An unresolved Serious Challenge to governing Protocol 6 authority blocks Protocol 6 release. Likewise, the current consolidation No-Pass remains a release blocker until repaired and independently re-reviewed; migration progress may not be used as a substitute for closure.
