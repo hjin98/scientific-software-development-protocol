@@ -16,31 +16,36 @@ This file is a **routing/index artifact**, not a D1-D4 semantic authority and no
 
 Do not copy substantive requirements into this index. Read the listed governing artifacts themselves.
 
-## Protocol 6.1 current implementation handoff
+## Protocol 6.1 completed implementation handoff
 
-Protocol 6.1 implementation/review SHALL read and satisfy, as one snapshot-complete handoff:
+Protocol 6.1 was implemented and independently reviewed from the composed handoff:
 
-1. `workplans/active/SSDP-6.1-EVIDENCE-EVOLUTION-AND-CONCRETIZATION-ALIGNMENT.md`
-2. `workplans/active/SSDP-6.1-EVIDENCE-EVOLUTION-AND-CONCRETIZATION-ALIGNMENT-REVISION-1-HUMAN-FACING-DOCUMENTATION-AND-FINAL-REVIEW-CLOSURE.md`
+1. `workplans/archive/SSDP-6.1-EVIDENCE-EVOLUTION-AND-CONCRETIZATION-ALIGNMENT.md`
+2. `workplans/archive/SSDP-6.1-EVIDENCE-EVOLUTION-AND-CONCRETIZATION-ALIGNMENT-REVISION-1-HUMAN-FACING-DOCUMENTATION-AND-FINAL-REVIEW-CLOSURE.md`
 
-Precedence:
+The archived files preserve the exact reviewed handoff bytes, including their pre-closeout `status: active` metadata. Their **current lifecycle state is completed/archived** as established by this index, the final independent Review, and repository placement; the historical metadata is intentionally not rewritten after Review merely to manufacture a different reviewed artifact.
 
-- the consolidated parent remains the governing evidence/evolution/concretization workplan;
-- Revision 1 supplements it with the human-facing background/terminology/abbreviation standard and fourth-review closures;
-- every parent requirement not explicitly narrowed by Revision 1 remains binding;
-- the composition must remain lossless with respect to Protocol 6.0 and inherited Protocol 5.16 doctrine.
+Precedence for historical reconstruction remains:
 
-Current review disposition:
+- the consolidated parent governed evidence/evolution/concretization implementation;
+- Revision 1 supplemented it with the human-facing background/terminology/abbreviation standard and fourth-review closures;
+- every parent requirement not explicitly narrowed by Revision 1 remained binding;
+- the composition was required to remain lossless with respect to Protocol 6.0 and inherited Protocol 5.16 doctrine.
+
+Final implementation/review disposition:
 
 ```text
 SERIOUS CHALLENGE: NONE
 FINAL WORKPLAN DESIGN REVIEW: PASS
-REVIEW ROUND: 4
-IMPLEMENTATION STATUS: ACTIVE
-READY FOR IMPLEMENTATION: YES
+IMPLEMENTATION: COMPLETE
+BEHAVIORAL QUALIFICATION: PASS — 92 SCENARIOS, NO UNRESOLVED FAILURE
+FINAL INDEPENDENT REVIEW: PASS
+BLOCKING FINDINGS OPEN: 0
+SEMANTIC CANDIDATE: 25d30858e7a33a72cb04b4d07393cb143b7777f8
+RECOVERY PIN: PENDING DOCUMENTATION-ONLY SUCCESSOR THAT CITES THIS CLOSEOUT COMMIT
 ```
 
-Protocol 6.1 remains the final document-controlled/semi-automated release and must be completed, behaviorally qualified, independently reviewed, and pinned as an immutable recovery snapshot before Protocol 7 cutover work can become canonical.
+The final Review is `qualification/ssdp6/FINAL-REVIEW-GPT-5.6-SOL-2026-09-09-PROTOCOL-6.1.md`. This closeout does not mutate the qualified Protocol 6.1 semantics. The immutable recovery mapping is intentionally recorded by a successor commit so the mapping can name this coherent closeout snapshot without a self-referential commit identity.
 
 ## Protocol 7.0 current design handoff
 
@@ -63,9 +68,11 @@ Current review disposition:
 SERIOUS CHALLENGE: NONE
 WORKPLAN DESIGN REVIEW: PASS
 IMPLEMENTATION STATUS: PROPOSED
-BLOCKED ON: COMPLETED + QUALIFIED + IMMUTABLY PINNED PROTOCOL 6.1
+BLOCKED ON: IMMUTABLY DOCUMENTED PROTOCOL 6.1 RECOVERY IDENTITY
 ALSO REQUIRES: DELIBERATE D3 ORCHESTRATOR ARCHITECTURE REOPEN/SUPERSESSION BEFORE D4 IMPLEMENTATION
 ```
+
+Protocol 6.1 implementation, qualification, and independent Review are complete. Protocol 7 remains blocked until the immediately following lifecycle-only recovery-mapping commit documents the immutable Protocol 6.1 closeout identity; after that, the separate D3 architecture-reopen/supersession requirement still applies.
 
 Protocol 7 machine control records remain compact machine data. Human-readable control/schema/user documentation inherits the Protocol 6.1 background-context and first-use abbreviation requirements.
 
@@ -82,4 +89,4 @@ There is exactly one canonical workflow-control authority for any current run.
 
 Do not edit archived/version-pinned Protocol 6.0/5.x transition records merely to adopt 6.1 terminology or presentation rules. Current 6.1/7.0 work follows abstraction/concretization terminology and the human-facing documentation standard while legacy stable identifiers may retain older lexemes only under the explicit compatibility rule in the current 6.1 handoff.
 
-When these workplans complete, preserve normal repository closeout/history conventions; this index may then be archived or replaced by accepted release/version authority mapping. It must not become permanent parallel protocol authority.
+The completed Protocol 6.1 workplans are archived as exact reviewed historical handoff artifacts. The active index remains because it also routes the proposed Protocol 7.0 work. It must not become permanent parallel protocol authority.
