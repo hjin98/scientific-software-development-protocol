@@ -16,10 +16,10 @@ A reduced reproducer is a diagnostic aid, not a reason to narrow final regressio
 
 ## Accepted workplans and unexpected evidence
 
-When debugging occurs under an accepted workplan, distinguish an implementation defect from evidence that invalidates a frozen design assumption.
+When debugging occurs under an accepted workplan, distinguish an implementation defect from evidence that invalidates an accepted architecture or cycle-scoped design assumption.
 
-- If the frozen target remains valid and the defect is local, fix or locally reconcile the implementation without reopening design.
-- If the failure shows that a frozen ownership, algorithm, persistence, compatibility, resource, or semantic decision cannot satisfy the material contract, classify it as a material redesign trigger.
+- If the accepted target and governing cycle-scoped decisions remain valid and the defect is local, fix or locally reconcile the implementation without reopening design.
+- If the failure shows that an accepted ownership, algorithm, persistence, compatibility, resource, or semantic decision cannot satisfy the material contract, classify it as a material redesign trigger at the earliest owning domain.
 - Do not silently rewrite the workplan to fit a local patch and do not blindly force a demonstrably invalid plan onto the repository.
 - When redesign is required, preserve unrelated accepted work/evidence and reopen only the affected design surface before resuming from the earliest materially affected stage.
 

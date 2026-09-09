@@ -17,6 +17,8 @@ class HistoricalFailureModeScenarios(unittest.TestCase):
         self.workflow = read("source/shared/references/workflow-and-workplans.md")
         self.testing = read("source/shared/references/testing-and-validation.md")
         self.versioning = read("source/shared/references/protocol-versioning-and-compatibility.md")
+        self.concurrency = read("source/shared/references/concurrency-and-orchestration.md")
+        self.debugging = read("source/shared/references/debugging-and-state-recovery.md")
 
     def test_green_tests_plus_omitted_obligation_is_incomplete(self) -> None:
         self.assertIn("green tests never prove an omitted obligation was implemented", self.workflow)
@@ -35,7 +37,7 @@ class HistoricalFailureModeScenarios(unittest.TestCase):
         self.assertIn("equivalent local realization", self.implementation)
         self.assertIn("suggested realization does not become a cycle-scoped or durable authority", self.workflow)
 
-    def test_invalidated_frozen_premise_triggers_bounded_redesign(self) -> None:
+    def test_invalidated_accepted_premise_triggers_bounded_redesign(self) -> None:
         self.assertIn("representative measurement invalidating a premise", self.implementation)
         self.assertIn("reopen only the affected", self.workflow)
         self.assertIn("earliest materially affected stage", self.implementation)
@@ -87,6 +89,24 @@ class HistoricalFailureModeScenarios(unittest.TestCase):
         self.assertIn("current governing snapshot", self.workflow)
         self.assertIn("not normative authority", self.workflow)
         self.assertIn("do not create a permanent ledger", self.workflow)
+
+    def test_current_operational_control_plane_uses_protocol6_semantics(self) -> None:
+        current_operational = (
+            self.design,
+            self.implementation,
+            self.workflow,
+            self.testing,
+            self.concurrency,
+            self.debugging,
+        )
+        for text in current_operational:
+            self.assertNotIn("product/frozen", text)
+            self.assertNotIn("tier-2", text)
+            self.assertNotIn("tier 1a", text)
+            self.assertNotIn("tier 1b", text)
+            self.assertNotIn("shared protocol 5 doctrine remains authoritative", text)
+        self.assertIn("accepted d3 architecture", self.concurrency)
+        self.assertIn("cycle-scoped design assumption", self.debugging)
 
 
 if __name__ == "__main__":
