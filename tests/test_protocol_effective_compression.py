@@ -113,6 +113,7 @@ class HistoricalFailureModeScenarios(unittest.TestCase):
     def test_current_operational_control_plane_uses_protocol6_semantics(self) -> None:
         forbidden = (
             "product/frozen",
+            "frozen_parent_authority",
             "tier-2",
             "tier 1a",
             "tier 1b",

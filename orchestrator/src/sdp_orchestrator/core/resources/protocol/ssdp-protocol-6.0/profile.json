@@ -10,7 +10,7 @@
     "source_digest": {
       "algorithm": "sha256",
       "canonicalization_scheme": "sdp.content.v1",
-      "value": "f71c55073a5b33fbb42d7ad52a855a5fc9688274fd26648e64e81e7a3c6d9009"
+      "value": "ce9fa2212884833369a34e2893a9aec31354f74e4ad51d181cb5d7e2a0ba4d79"
     }
   },
   "result_schema_id": "sdp.stage-result-envelope",
@@ -783,7 +783,7 @@
           "description": null,
           "first_class_source": null,
           "mode_dependent": false,
-          "name": "FROZEN_PARENT_AUTHORITY",
+          "name": "GOVERNING_AUTHORITY",
           "override_allowed": true,
           "ownership": "canonical_default"
         },

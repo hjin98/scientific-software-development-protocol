@@ -234,7 +234,7 @@ INPUTS
 UPSTREAM_ACCEPTED_WORK = [accepted upstream authority/change that altered assumptions]
 DOWNSTREAM_WORKPLAN = [downstream plan/authority to reconcile]
 REPOSITORY_TARGET = [repository/worktree/branch; AUTO = current repository]
-FROZEN_PARENT_AUTHORITY = [accepted parent invariants/cycle decisions; AUTO = discover]
+GOVERNING_AUTHORITY = [accepted parent invariants and cycle-scoped decisions; AUTO = discover]
 PROTOCOL_SOURCE = [AUTO_LOCAL_FIRST = compatible installed skill/root first, then canonical public repository; otherwise explicit source]
 PROTOCOL_REF = [AUTO = downstream workplan governing version; otherwise explicit immutable compatible ref]
 EXECUTION_MODE = [AUTO_EXECUTE = update owned downstream plan/authority; REPORT_ONLY = inspect/report only]

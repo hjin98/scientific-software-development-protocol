@@ -47,6 +47,12 @@ class SSDP6CanonicalProfileTests(unittest.TestCase):
             declared = {binding.name for binding in stage.inputs}
             self.assertEqual(declared, set(self.document.stages[stage.stage.stage_key].input_names))
 
+    def test_current_profile_uses_protocol6_native_parent_authority_input(self) -> None:
+        by_key = {stage.stage.stage_key: stage for stage in self.descriptor.stages}
+        alignment_inputs = {item.name for item in by_key["alignment"].inputs}
+        self.assertIn("GOVERNING_AUTHORITY", alignment_inputs)
+        self.assertNotIn("FROZEN_PARENT_AUTHORITY", alignment_inputs)
+
     def test_task_is_not_re_requested_by_downstream_governed_stages(self) -> None:
         by_key = {stage.stage.stage_key: stage for stage in self.descriptor.stages}
         for key in ("software-implementation", "review", "verification", "stabilization", "alignment", "health-audit", "closeout"):
@@ -95,6 +101,12 @@ class FrozenLegacyProfileTests(unittest.TestCase):
             data = (root / name).read_bytes()
             actual = hashlib.sha1(f"blob {len(data)}\0".encode("ascii") + data).hexdigest()  # noqa: S324
             self.assertEqual(actual, sha, name)
+
+    def test_legacy_alignment_retains_frozen_parent_input(self) -> None:
+        legacy = PS.resolve_packaged(P.PROFILE_ID).snapshot.descriptor
+        by_key = {stage.stage.stage_key: stage for stage in legacy.stages}
+        alignment_inputs = {item.name for item in by_key["alignment"].inputs}
+        self.assertIn("FROZEN_PARENT_AUTHORITY", alignment_inputs)
 
     def test_legacy_profile_is_still_derived_from_legacy_prompts(self) -> None:
         root = REPO_ROOT / "orchestrator/src/sdp_orchestrator/core/resources/protocol/sdp-protocol-5.16"
