@@ -16,144 +16,24 @@ ROLES = ROOT / "roles"
 SPECIALISTS = ROOT / "specialists"
 PROTOCOL_VERSION = (ROOT / "PROTOCOL_VERSION").read_text(encoding="utf-8").strip()
 
-CORE = [
-    "workflow-and-workplans.md",
-    "testing-and-validation.md",
-    "evidence-evolution-and-dependencies.md",
-    "protocol-versioning-and-compatibility.md",
-]
-FOUNDATION = ["abstraction-and-realization.md"]
-ROLE_CONDITIONAL = [
-    "convergence-and-cycle-economy.md",
-    "long-horizon-code-health.md",
-]
-LANGUAGE_PROFILES = [
-    "language-profiles.md",
-    "python-engineering.md",
-    "cpp-engineering.md",
-]
-TOOL_METHODS = [
-    "tool-assisted-engineering.md",
-    "tool-serena.md",
-    "tool-semgrep.md",
-    "tool-hypothesis.md",
-    "tool-codeql.md",
-]
-CROSS_CUTTING = [
-    "configuration-and-policy.md",
-    "concurrency-and-orchestration.md",
-    "security-and-trust-boundaries.md",
-]
-ENGINEERING_FITNESS = [
-    "performance-and-parallelism.md",
-    "storage-and-io.md",
-    "scientific-software.md",
-]
-
 ROLE_SPECS = {
-    "scientific-formulation": {
-        "role": "d1-scientific-formulation",
-        "references": FOUNDATION + CORE + [
-            "scientific-formulation.md",
-            "scientific-software.md",
-            "scientific-technical-writing.md",
-            "documentation-and-evidence.md",
-        ],
-        "templates": [
-            "abstraction_realization_change_plan_template.md",
-            "scientific_method_paper_template.md",
-        ],
-    },
-    "numerical-algorithm-design": {
-        "role": "d2-numerical-algorithm-design",
-        "references": FOUNDATION + CORE + [
-            "numerical-algorithm-design.md",
-            "scientific-software.md",
-            "scientific-technical-writing.md",
-            "documentation-and-evidence.md",
-            "performance-and-parallelism.md",
-        ],
-        "templates": [
-            "abstraction_realization_change_plan_template.md",
-            "numerical_algorithmic_method_paper_template.md",
-        ],
-    },
-    "software-design": {
-        "role": "d3-software-design",
-        "references": FOUNDATION + CORE + ROLE_CONDITIONAL + LANGUAGE_PROFILES + [
-            "architecture-and-design.md",
-            "scientific-formulation.md",
-            "numerical-algorithm-design.md",
-            "documentation-and-evidence.md",
-            "specification-and-implementation.md",
-            "release-and-distribution.md",
-            "repository-intake.md",
-        ] + TOOL_METHODS + CROSS_CUTTING + ENGINEERING_FITNESS,
-        "templates": ["implementation_workplan_template.md"],
-    },
-    "software-implementation": {
-        "role": "d4-software-implementation",
-        "references": FOUNDATION + CORE + ROLE_CONDITIONAL + LANGUAGE_PROFILES + [
-            "architecture-and-design.md",
-            "scientific-formulation.md",
-            "numerical-algorithm-design.md",
-            "debugging-and-state-recovery.md",
-            "documentation-and-evidence.md",
-            "specification-and-implementation.md",
-            "release-and-distribution.md",
-            "repository-intake.md",
-            "git-and-version-control.md",
-        ] + TOOL_METHODS + CROSS_CUTTING + ENGINEERING_FITNESS,
-        "templates": [],
-    },
+    "scientific-formulation": {"role": "d1-scientific-formulation"},
+    "numerical-algorithm-design": {"role": "d2-numerical-algorithm-design"},
+    "software-design": {"role": "d3-software-design"},
+    "software-implementation": {"role": "d4-software-implementation"},
 }
 
 SPECIALIST_SPECS = {
-    "software-documentation": {
-        "specialty": "documentation",
-        "references": CORE + [
-            "architecture-and-design.md",
-            "documentation-and-evidence.md",
-            "documentation-maintenance.md",
-            "scientific-technical-writing.md",
-            "specification-and-implementation.md",
-            "release-and-distribution.md",
-            "security-and-trust-boundaries.md",
-        ] + ENGINEERING_FITNESS,
-        "templates": [],
-    },
-    "repository-hygiene": {
-        "specialty": "repository-hygiene",
-        "references": CORE + [
-            "git-and-version-control.md",
-            "documentation-and-evidence.md",
-            "release-and-distribution.md",
-            "repository-intake.md",
-            "security-and-trust-boundaries.md",
-            "storage-and-io.md",
-        ],
-        "templates": [],
-    },
-    "software-maintenance-audit": {
-        "specialty": "maintenance-audit",
-        "references": CORE + [
-            "long-horizon-code-health.md",
-            "architecture-and-design.md",
-            "git-and-version-control.md",
-            "repository-intake.md",
-            "tool-assisted-engineering.md",
-            "convergence-and-cycle-economy.md",
-            "documentation-and-evidence.md",
-            "scientific-software.md",
-        ],
-        "templates": [],
-    },
+    "software-documentation": {"specialty": "documentation"},
+    "repository-hygiene": {"specialty": "repository-hygiene"},
+    "software-maintenance-audit": {"specialty": "maintenance-audit"},
 }
 
 DIRECT_ROUTE_RE = re.compile(r"\]\((?P<kind>references|templates)/(?P<name>[A-Za-z0-9_.-]+\.md)\)")
 
 
 def _direct_payload(root: Path, skill_name: str) -> tuple[list[str], list[str]]:
+    """Derive package payload directly from the skill's explicit Markdown routes."""
     text = (root / skill_name / "SKILL.md").read_text(encoding="utf-8")
     references: list[str] = []
     templates: list[str] = []
