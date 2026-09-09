@@ -16,31 +16,31 @@ final_review: pass
 
 This file is the historical composition entrypoint for the completed SSDP 6.0 transition authority. Current Protocol 6 operational authority is consolidated in canonical `source/`; this archive record no longer governs new work.
 
-A reviewer, designer, implementer, or orchestrator resolving the SSDP 6 parent workplan must read **all accepted members listed here** before claiming snapshot-complete understanding of the current transition contract. No chat history, unlisted discussion, or unlisted file silently amends this authority set.
+For historical reconstruction of the SSDP 6 transition, the parent workplan is snapshot-complete only when read with **all accepted members listed here**. During the transition, no chat history, unlisted discussion, or unlisted file silently amended this authority set.
 
-Supplying only the parent workplan while omitting an accepted amendment listed here is not a snapshot-complete SSDP 6 transition handoff. Until the transition authority is consolidated into canonical Protocol 6 sources, this index is the entrypoint that closes that composition ambiguity.
+During the active transition, supplying only the parent workplan while omitting an accepted amendment listed here was not a snapshot-complete SSDP 6 transition handoff. This index closed that composition ambiguity until the accepted transition semantics were consolidated into canonical Protocol 6 sources.
 
 ## Historical transition authority set
 
 1. `SSDP-6-RECURSIVE-ABSTRACTION-REALIZATION-SCIENTIFIC-SOFTWARE-PROTOCOL.md`
    - parent SSDP 6.0 abstraction-realization design/workplan;
-   - owns the D1-D4 decomposition, recursive abstraction-realization doctrine, documentation hierarchy, lifecycle/migration obligations, and implementation program.
+   - owned the D1-D4 decomposition, recursive abstraction-realization doctrine, documentation hierarchy, lifecycle/migration obligations, and implementation program for the transition.
 
 2. `SSDP-6-RECURSIVE-ABSTRACTION-REALIZATION-SCIENTIFIC-SOFTWARE-PROTOCOL-AUTHORITY-REVISION-1-SERIOUS-CHALLENGE-AND-ADVERSARIAL-REVIEW.md`
    - accepted amendment to review/verification, authority-state, human-adjudication, and narrowly related parent-authority clarification semantics;
-   - owns the Serious Challenge threshold, bounded Challenge Pass, evidence-quality requirements, challenge/risk-override propagation, durable-authority-versus-cycle-freeze clarification, one-owner-versus-multi-authority clarification, and Protocol-self-release challenge rule until consolidated into canonical Protocol 6 sources.
+   - owned the Serious Challenge threshold, bounded Challenge Pass, evidence-quality requirements, challenge/risk-override propagation, durable-authority-versus-cycle-freeze clarification, one-owner-versus-multi-authority clarification, and Protocol-self-release challenge rule until those semantics were consolidated into canonical Protocol 6 sources.
 
 3. `SSDP-6-RECURSIVE-ABSTRACTION-REALIZATION-SCIENTIFIC-SOFTWARE-PROTOCOL-AUTHORITY-REVISION-2-PROTOCOL-5-INHERITANCE-AND-CONSOLIDATION.md`
    - accepted post-implementation consolidation amendment;
-   - owns the Protocol 6 generalization / Protocol 5 specialization relation, performance-lossless functional inheritance requirement, current-language consolidation rule, semantic-oracle migration rule, restoration of bounded urgent mitigation and compact resumable state, and second-round implementation acceptance criteria.
+   - owned the Protocol 6 generalization / Protocol 5 specialization relation, performance-lossless functional inheritance requirement, current-language consolidation rule, semantic-oracle migration rule, restoration of bounded urgent mitigation and compact resumable state, and second-round implementation acceptance criteria for the transition.
 
-If these documents appear to conflict, first determine whether a later accepted revision intentionally amends or clarifies the parent's stated surface. Within that amended/clarified surface, the later revision controls. Outside it, the parent controls. Any genuine unresolved contradiction between them is itself review evidence and may trigger a Serious Challenge.
+When reconstructing the historical transition authority, a later accepted revision controlled only the parent surface it intentionally amended or clarified; outside that surface, the parent controlled. A genuine unresolved contradiction between them would have been review evidence and a possible Serious Challenge.
 
 ## Phase 0 and implementation-review state
 
 The parent authority underwent repeated adversarial review under the Serious Challenge doctrine.
 
-Current state:
+Final recorded state:
 
 ```text
 PHASE 0 PARENT-AUTHORITY REVIEW: PASS
@@ -60,13 +60,13 @@ The Phase 0 Pass specifically includes closure of the following parent-design am
 - snapshot-complete transition composition through this index;
 - Protocol 6 self-release cannot be justified by risk-overriding an unresolved Serious Challenge.
 
-Revision 2 adds no new conceptual domain. It strengthens the migration contract so Protocol 5 is recovered as a functional specialization of Protocol 6 without remaining a parallel current control plane.
+Revision 2 added no new conceptual domain. It strengthened the migration contract so Protocol 5 is recovered as a functional specialization of Protocol 6 without remaining a parallel current control plane.
 
-## Amendment discipline
+## Historical amendment discipline
 
-Any further accepted transition amendment must update this index in the same accepted change so the active authority set remains discoverable. Do not accumulate hidden amendments that require Git history or prior conversation to reconstruct.
+During the active transition, any further accepted transition amendment had to update this index in the same accepted change so the authority set remained discoverable; hidden amendments depending on Git history or prior conversation were forbidden. That transition-only mutation rule is now closed and does not authorize new amendments to current Protocol 6 authority.
 
-Prefer consolidating corrections into the existing parent/amendments rather than creating additional authority files. A new amendment is justified only when changing an existing accepted artifact directly would obscure authority history or cannot be performed coherently.
+During the transition, corrections were to be consolidated into the existing parent/amendments rather than accumulating additional authority files unless preserving authority history required a separate amendment. Current work is governed by canonical Protocol 6 source and explicitly applicable version-bound project/domain authority.
 
 ## Final transition closeout
 
