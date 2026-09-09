@@ -21,15 +21,15 @@ If the task is claimed D4-only, state the proportionate upstream-impact exclusio
 
 ## 2. Cycle-scoped D3 decisions and delegated D4 realization
 
-### Frozen for this realization cycle
+### Cycle-scoped decisions
 
 List only material D3 architecture/ownership/interface/data-flow/resource/security/compatibility decisions deliberately fixed for this implementation cycle plus any exact acceptance identity required by governing authority.
 
-A cycle freeze is not automatically durable current Architecture Manual authority.
+A cycle-scoped decision is not automatically durable current Architecture Manual authority.
 
 ### Delegated D4 realization
 
-List implementation-local mechanisms that remain replaceable: helpers, internal APIs, data structures, wrappers, retries, caches, state machines, library choices, local algorithms, synchronization primitives, and current Tier-2 owner paths unless exact identity is governed.
+List implementation-local mechanisms that remain replaceable: helpers, internal APIs, data structures, wrappers, retries, caches, state machines, library choices, local algorithms, synchronization primitives, and current delegated owner paths unless exact identity is governed.
 
 ### Active simplification
 
@@ -43,7 +43,7 @@ For each material obligation capture only what is needed. **Attach only when mat
 - required end state / governing constraint;
 - delegated realization freedom;
 - task-specific acceptance evidence;
-- **acceptance boundary** — governing claim, current real semantic owner/path or owner class, allowed doubles, forbidden substitutions, and observable evidence when proxy acceptance is a material risk; state whether the owner is authoritative or **merely the current Tier-2 realization** so an equivalent delegated replacement remaps acceptance rather than freezing the old owner;
+- **acceptance boundary** — governing claim, current real semantic owner/path or owner class, allowed doubles, forbidden substitutions, and observable evidence when proxy acceptance is a material risk; state whether the owner is governed identity or **merely the current delegated realization** so an equivalent delegated replacement remaps acceptance rather than freezing the old owner;
 - oracle-strength relation or structural absence/uniqueness check when ordinary tests are weak;
 - **anti-shortcut / integrity constraint** — a known way local compliance/evidence manipulation could appear to pass while defeating the governed outcome.
 

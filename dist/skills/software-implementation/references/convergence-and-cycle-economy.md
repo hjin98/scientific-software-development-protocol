@@ -2,8 +2,6 @@
 
 Convergence exists to stop repeated low-value repair cycles. It is subordinate to governing abstraction/external authority and minimum justified realization complexity; recurrence must not turn an accidental realization mechanism into an invariant.
 
-Protocol 6 preserves the useful Protocol 5 convergence doctrine while generalizing its owner from `software-design`/Tier-1 vocabulary to the earliest affected D1-D4 abstraction. Historical phrases below remain intentionally recognizable because older protocol-version tests and workplans use them; where they name Tier 1 or Software Design, interpret them at the corresponding current domain boundary rather than as renewed D3 ownership of D1/D2 semantics.
-
 ## Core progression
 
 ```text
@@ -14,7 +12,7 @@ material sibling recurrence
     -> stop isolated instance patching; reason at the shared owner/mechanism
 
 structural complexity accumulation
-    -> re-derive and simplify the Tier-2 realization before further additive durable repair
+    -> re-derive and simplify the delegated realization before further additive durable repair
 
 post-simplification recurrence, or evidence governing abstraction is wrong
     -> bounded reconsideration of the earliest affected abstraction
@@ -32,7 +30,7 @@ Family reasoning answers which manifestations share one engineering cause; it **
 
 Use a bounded family census/closure basis when either:
 
-- the actual **Tier-1 correctness claim is finite/exhaustive** in Protocol 5 vocabulary—equivalently, the current governing parent/external correctness claim is finite/exhaustive—and correctness depends on all members satisfying one invariant; or
+- the actual **governing parent/external correctness claim is finite/exhaustive**, and correctness depends on all members satisfying one invariant; or
 - **bounded sibling discovery is needed** to remove, consolidate, or canonicalize the affected realization safely and prevent obvious equivalent bypasses.
 
 Bound by governing invariant, semantic owner, transition/lifecycle class, and plausible affected chain rather than the whole repository. A temporary closure map may be used when completeness itself establishes a real claim; it is not a universal persistent artifact.
@@ -45,7 +43,7 @@ Active simplification/re-derivation is **mandatory before another additive durab
 
 The simplification pass holds governing parent semantics and external constraints fixed, then treats lower-level machinery as replaceable. Prefer removing, narrowing, altering, consolidating, or refactoring causes of intermediate problems. Add machinery only when a required capability genuinely remains absent or one canonical mechanism replaces broader existing complexity.
 
-If the simpler solution would change accepted parent abstraction, stop dependent work and route to bounded reconsideration rather than silently changing it. For a D3 parent this is **bounded Software Design reconsideration**; for D1 or D2 use the corresponding scientific/numerical owner.
+If the simpler solution would change an accepted parent abstraction or cycle-scoped decision, stop dependent work and route to bounded reconsideration rather than silently changing it. For D3 this is bounded Software Design reconsideration; for D1 or D2 use the corresponding scientific/numerical owner.
 
 ## Review readiness and independent review sufficiency
 

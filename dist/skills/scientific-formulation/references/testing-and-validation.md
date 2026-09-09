@@ -100,7 +100,7 @@ Historical invalid substitutions include evidence that:
 
 This is **not a global ban on mocks or fakes**. **Bounded deterministic fixtures remain preferred** where they establish the claim economically, and bounded test doubles remain valid below or outside the real owner to control external services, hardware, data volume, nondeterminism, and **expensive ML/scientific training or prediction**. Production-scale execution is required only when production-scale behavior/resource qualification is itself the claim.
 
-When an exact owner/path is merely delegated realization, the lower-level Tier-2 owner does **not** become frozen in historical Protocol 5 vocabulary merely because acceptance named it. Suppose accepted semantics move from delegated owner `A` to equivalent owner `B`: **equivalent owner `B`** is valid when governing authority is unchanged, but owner-specific evidence for `A` is stale. **Reconcile the acceptance mapping to the new real owner** and rerun owner-specific evidence instead of preserving `A` or calling the remap proxy-passing.
+When an exact owner/path is delegated realization, acceptance does **not** make that lower-level owner durable authority. If accepted semantics move from delegated owner `A` to equivalent owner `B`, owner-specific evidence for `A` becomes stale. **Reconcile the acceptance mapping to the new real owner** and rerun owner-specific evidence instead of preserving `A` or calling the remap proxy-passing.
 
 If the required real-owner boundary is unavailable, mark the claim **unavailable/blocking** rather than substituting a proxy and declaring a pass.
 

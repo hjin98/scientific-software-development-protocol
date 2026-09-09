@@ -54,15 +54,15 @@ Do not require a persistent complexity ledger, universal health score, or reposi
 
 Classify each material finding by authority and smallest coherent repair scope:
 
-- **Tier-2 local repair/simplification under existing authority** -> route to `software-implementation` when no new workplan/Frozen decision is needed.
-- **Substantial maintenance work or new/revised implementation contract needed** -> route to `software-design` for a bounded workplan.
-- **Frozen-architecture concern** -> route to `software-design`; do not redesign inside the audit.
+- **D4 local repair/simplification under unchanged accepted authority** -> route to `software-implementation` when no new/revised D3 workplan or cycle-scoped architecture decision is needed.
+- **Substantial maintenance work or new/revised implementation contract needed** -> route to `software-design` for a bounded D3->D4 workplan.
+- **Accepted D3 architecture or cycle-scoped architecture concern** -> route to `software-design`; do not redesign inside the audit.
 - **Test/oracle weakness** -> route validation strengthening to the real semantic owner under the existing/new workplan as appropriate.
 - **Documentation reconciliation** -> route to `software-documentation`.
 - **Repository/lifecycle residue** -> route to `repository-hygiene`.
 - **Watch item** -> retain as an observation when evidence is insufficient to justify intervention.
 
-Do not perform broad unrelated refactors merely because debt exists. Do not define new product requirements, freeze architecture, or grant acceptance.
+Do not perform broad unrelated refactors merely because debt exists. Do not define new product requirements, accept architecture changes, or grant implementation acceptance inside the audit.
 
 ## Output
 

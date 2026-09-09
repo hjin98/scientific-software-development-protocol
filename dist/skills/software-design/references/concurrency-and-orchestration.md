@@ -6,13 +6,13 @@ Read `performance-and-parallelism.md` for throughput/resource sizing. Language-s
 
 ## Choose the execution class deliberately
 
-Use the simplest class that satisfies the product/Frozen workload and resource envelope:
+Use the simplest class that satisfies the applicable governed workload/resource constraints and accepted D3 architecture:
 
 - **synchronous serial** when concurrency adds no material value;
 - **asynchronous/event-driven** for high-concurrency I/O, events, network/service orchestration, or useful pipeline overlap;
 - **shared-memory concurrency** when low-cost shared address-space access and clear synchronization/ownership fit the workload;
 - **process isolation** for independent address spaces, failure/security/runtime isolation, external executables, or a deliberately process-oriented architecture;
-- **distributed-memory execution** for multi-process/multi-node scaling when required by product/Frozen architecture;
+- **distributed-memory execution** for multi-process/multi-node scaling when required by accepted D3 architecture or another governed constraint;
 - **accelerator execution** only when architecture-authorized.
 
 Do not equate a particular language with one class. Python may use threads, async, processes, MPI, or native kernels depending on interpreter/runtime semantics; C++ may use native threads/task runtimes, OpenMP-like execution, processes, MPI, or async/event runtimes. The profiles own those mappings.
@@ -130,7 +130,7 @@ Language/runtime-specific memory-model and race hazards belong in the active pro
 
 ## Distributed-memory execution
 
-When distributed execution is Frozen, reason explicitly about:
+When distributed execution is part of the accepted D3 architecture or directly required by another governed constraint, reason explicitly about:
 
 - decomposition and rank ownership;
 - communication volume and message size;

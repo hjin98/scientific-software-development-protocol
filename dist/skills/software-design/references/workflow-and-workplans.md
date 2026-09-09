@@ -17,7 +17,7 @@ D1 scientific-formulation
 
 This is a semantic ordering, not a required four-stage waterfall. A local implementation refactor can remain D4-only after a proportionate upstream-impact exclusion. A software-architecture change can be D3->D4. A numerical change can begin at D2. A scientific formulation change begins at D1 and realizes downward only through dependent descendants.
 
-Supporting capabilities such as `software-documentation`, `software-maintenance-audit`, and `repository-hygiene` are **not a third lifecycle role** and are not authority-bearing approval roles. The preserved Protocol 5 software-local subcycle remains recognizable as `software-design -> software-implementation`, but it now occupies D3->D4 rather than owning D1/D2.
+Supporting capabilities such as `software-documentation`, `software-maintenance-audit`, and `repository-hygiene` are **not a third lifecycle role** and are not authority-bearing approval roles. The software-local subcycle remains `software-design -> software-implementation` at D3->D4; it does not own D1/D2.
 
 ## Start at the highest potentially affected domain
 
@@ -70,7 +70,7 @@ A substantial handoff separates:
 2. **cycle-scoped child decisions** deliberately fixed for the current realization cycle; and
 3. **delegated realization space** that remains replaceable, reducible, consolidatable, or deletable while the first two classes remain satisfied.
 
-A D3->D4 executable workplan is a specialization of this generic abstraction-realization handoff, not a separate philosophy. A **suggested realization is not automatically Frozen** merely because Design discussed or documented it.
+A D3->D4 executable workplan is a specialization of this generic abstraction-realization handoff, not a separate philosophy. A **suggested realization does not become a cycle-scoped or durable authority** merely because Design discussed or documented it.
 
 For material obligations preserve as applicable: concern/rationale, required end state, required constraints/preservation/forbidden behavior, useful expected owning/affected surface, task-specific acceptance evidence, and stage/dependency where material. Attach a suggested realization, proxy-proof acceptance boundary, or anti-shortcut only when it materially improves correctness.
 
@@ -85,8 +85,6 @@ Keep two concepts distinct:
 
 A cycle-scoped decision does not become durable scientific, numerical, architectural, or specification authority merely because a workplan froze it. Durable authority must be explicitly accepted by the owning domain. Conversely, a workplan cannot ignore already-current authority merely because it is not restated in the cycle freeze.
 
-In Protocol 5 terminology: **do not elevate a delegated Tier-2 owner into Frozen authority** merely because current acceptance happens to execute that owner.
-
 ## Snapshot-complete handoff
 
 The accepted current handoff artifact set must recover every still-binding task-specific invariant, applicable side constraint, cycle-scoped decision, non-goal, material acceptance boundary, authority state, and genuine reopen trigger without requiring prior chat or hidden Git history.
@@ -95,13 +93,19 @@ Current composition can span multiple supplied artifacts. Do not copy generic pr
 
 If not, the handoff is deficient.
 
+## Compact resumable working state
+
+For long, interruption-prone, multi-session, or materially handed-off work, maintain compact temporary coordination state sufficient to resume without hidden chat/history or needless rediscovery. Capture only what materially helps continuation: the current governing snapshot, open/closed obligations, material evidence/results and known invalidations, unresolved blockers/risks/Serious Challenges/reopen triggers, and the next action.
+
+This working state is coordination machinery, **not normative authority**. It should disappear when no longer useful. Do not create a permanent ledger, database, manifest, or parallel requirements/evidence system solely to satisfy resumability.
+
 ## Realization and bounded local reconciliation
 
 A child role may choose any realization that satisfies every applicable parent and side constraint. Existing helpers, wrappers, algorithms, APIs, processes, caches, states, and prior patches remain replaceable unless explicitly accepted as authority.
 
 **Local reconciliation** may remove, consolidate, or replace an expected lower-level mechanism with an **equivalent local realization** when governing semantics survive. Reopen the parent only when evidence shows a governing abstraction or cycle-scoped decision must change. Reopen only the affected semantic surface.
 
-A workplan's suggested realization is not automatically frozen. Newly discovered affected behavior must be incorporated, but discovery does not mint unrelated authority.
+A workplan's suggested realization is not automatically authoritative. Newly discovered affected behavior must be incorporated, but discovery does not mint unrelated authority.
 
 ## Active simplicity and recurrence
 
@@ -109,9 +113,13 @@ A **first clean local defect remains local**. It does not require a census merel
 
 **Material sibling recurrence** changes the unit of reasoning to the **shared owner/mechanism**. Recurrence is evidence about the shared semantic owner or mechanism, not proof that the current mechanism must survive. See [Convergence and development-cycle economy](convergence-and-cycle-economy.md).
 
-When repeated patches, wrappers, fallbacks, synchronized representations, competing authorities, special cases, repeated reconciliation, or an evident materially simpler equivalent realization show structural complexity, **active Tier-2 simplification/re-derivation is required** before adding another durable repair. In Protocol 6, `Tier-2` here is historical shorthand for delegated realization beneath the governing abstraction.
+When repeated patches, wrappers, fallbacks, synchronized representations, competing authorities, special cases, repeated reconciliation, or an evident materially simpler equivalent realization show structural complexity, **active simplification/re-derivation of delegated realization is required** before adding another durable repair.
 
-If post-simplification recurrence or evidence shows the Frozen/accepted parent abstraction is wrong, route bounded reconsideration to the earliest affected D1-D3 owner. **No recurrence/review count can force acceptance**; escalation changes the engineering method, not the pass threshold.
+If post-simplification recurrence or evidence shows the accepted parent abstraction or a material cycle-scoped decision is wrong, route bounded reconsideration to the earliest affected D1-D3 owner. **No recurrence/review count can force acceptance**; escalation changes the engineering method, not the pass threshold.
+
+### Bounded urgent mitigation
+
+When an independently governed urgency, safety, security, reliability, or incident-containment constraint requires immediate action, a **bounded reversible or safely replaceable mitigation may precede the normal simplification/re-derivation pass**. Keep unresolved structural debt/risk explicit, do not let emergency use promote the mitigation into durable authority, and reconcile the owning realization/abstraction at the earliest safe point. Urgency changes sequencing; it does not authorize counterfeit closure or permanent patch accretion.
 
 **Ordinary implementation attempts and review cycles do not require a numbered authority revision** unless accepted task semantics actually change.
 

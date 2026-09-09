@@ -1,6 +1,6 @@
 # Language Engineering Profiles
 
-Shared Protocol 5 doctrine remains authoritative. Language profiles adapt that doctrine to execution, type, lifetime, build, packaging, and performance semantics that genuinely differ by language; they do not create parallel lifecycle, testing, scientific, security, or performance policies.
+Current Protocol 6 domain doctrine is authoritative. Language profiles specialize that doctrine for execution, type, lifetime, build, packaging, and performance semantics that genuinely differ by language; they do not create parallel lifecycle, testing, scientific, security, or performance policies.
 
 Use this precedence:
 
@@ -24,7 +24,7 @@ Do not infer a global Python-over-C++ or C++-over-Python precedence. Each profil
 
 Profiles refine, but do not duplicate or weaken:
 
-- product/Frozen/Tier-2 authority, active simplicity, lifecycle, workplans, convergence, and development economy;
+- applicable parent abstractions and governed constraints, accepted-current authority versus cycle-scoped decisions, delegated realization, active simplicity, workflow, convergence, and development economy;
 - testing, affected regression, integration, proxy-proof acceptance, and evidence integrity;
 - generic performance order, optimized-kernel preference, data movement, resource discovery, parallelism classes, benchmark comparability, and accelerator gating;
 - orchestration correctness, cancellation, failure propagation, resource ownership, and deterministic aggregation;
@@ -45,11 +45,11 @@ When both profiles apply:
 - test the installed/packaged extension or real supported consumer path rather than accepting direct kernel invocation as a proxy;
 - treat generated binding code as derived unless project authority explicitly governs it as source.
 
-Introducing or removing a material language boundary is a Design-level decision when it changes Frozen ownership, deployment, ABI, packaging, resource, portability, or performance architecture. A local equivalent realization below those boundaries remains Implementation discretion.
+Introducing or removing a material language boundary is a D3 decision when it changes accepted architecture/ownership, deployment, ABI, packaging, resource, portability, or performance semantics. A local equivalent realization beneath those boundaries remains D4 discretion.
 
 ## Complexity and performance
 
-Use language-native mechanisms to satisfy the shared product contract with minimum justified total complexity. Do not translate compensating machinery from one language into another mechanically.
+Use language-native mechanisms to satisfy the governing contract with minimum justified total complexity. Do not translate compensating machinery from one language into another mechanically.
 
 An obvious semantically equivalent efficiency improvement that does not add material complexity may be implemented without a pre-change benchmark. It still requires normal correctness/regression evidence, and no quantitative speedup or scaling claim may be made without representative measurement.
 

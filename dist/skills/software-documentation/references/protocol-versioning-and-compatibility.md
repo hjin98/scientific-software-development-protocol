@@ -10,7 +10,33 @@
 
 Protocol 6.0 is a major revision because scientific/mathematical formulation and numerical/algorithm design become first-class authority-bearing domains and the governing doctrine changes from a software-centric two-role hierarchy to recursive abstraction–realization across D1-D4.
 
-Protocol 6 preserves the strongest Protocol 5 engineering guarantees by refactoring them into the new hierarchy: minimum justified complexity, adaptive realization, snapshot-complete handoff, proxy-proof acceptance, affected regression/integration, evidence reuse/invalidation, active simplification, convergence-aware reasoning, language/tool routing, long-horizon quality, and version-bound workplans.
+Protocol 6 preserves the strongest Protocol 5 engineering guarantees by refactoring them into the new hierarchy: minimum justified complexity, adaptive realization, snapshot-complete handoff, proxy-proof acceptance, affected regression/integration, evidence reuse/invalidation, active simplification, convergence-aware reasoning, language/tool routing, long-horizon quality, bounded urgent mitigation, compact resumable working state, and version-bound workplans.
+
+## Protocol 6 generalization and Protocol 5 specialization
+
+Protocol 6 is the general theory. Protocol 5 is a narrower software-local specialization recoverable inside it. Restricting active scope to software architecture and executable realization recovers the former `software-design -> software-implementation` loop as the D3 -> D4 specialization of recursive abstraction-realization.
+
+The concise historical mapping is:
+
+```text
+Protocol 5 Tier 1A
+    -> applicable accepted parent-abstraction invariants
+       + directly governed external/domain constraints
+
+Protocol 5 Tier 1B / Frozen high-level architecture
+    -> cycle-scoped child-realization decisions
+       and, when explicitly accepted as durable, current D3 architecture
+
+Protocol 5 Tier 2
+    -> delegated realization beneath the governing abstraction
+
+Protocol 5 Tier 3
+    -> development economy after fidelity and minimum justified complexity
+```
+
+This mapping preserves capability, not vocabulary. Every material Protocol 5 safeguard must remain recoverable as Protocol 6 behavior unless deliberately replaced by a stronger/general rule. Compression that deletes a capability is a defect; compression that expresses the same behavior once in broader Protocol 6 language is preferred.
+
+Current Protocol 6 operational roles, routing references, templates, and current guidance should therefore speak Protocol 6 semantics directly. Legacy control-plane vocabulary belongs here, in immutable/version-pinned 5.x artifacts, and in explicitly historical qualification—not as a second current control plane. Current regression tests should protect semantic capability rather than require obsolete words merely for recognizability.
 
 ## Historical Protocol 5 lineage
 
