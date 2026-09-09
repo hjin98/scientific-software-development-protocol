@@ -94,7 +94,7 @@ A D4 Specification is intended concrete behavior; code is actual realization/evi
 
 ## Adaptive realization, local reconciliation, and self-correction
 
-An **equivalent local realization** that preserves governing parent semantics is **local reconciliation**, not redesign. It may remove, consolidate, refactor, or replace previously expected delegated machinery. Suggested realization is not automatically Frozen merely because earlier Design or a workplan named it.
+An **equivalent local realization** that preserves governing parent semantics is **local reconciliation**, not redesign. It may remove, consolidate, refactor, or replace previously expected delegated machinery. Suggested realization does not become accepted authority merely because earlier Design or a workplan named it.
 
 If **representative measurement invalidating a premise** of accepted D3/D2/D1 authority appears, stop dependent work and reopen only the affected authority surface at the **earliest materially affected stage/domain**. Do not reopen unrelated design merely because the affected surface is large.
 
@@ -105,6 +105,8 @@ If later evidence proves accepted implementation work unsound, **invalidate it a
 **Fix a clear local defect at the owning layer.** Before adding durable machinery, ask whether removing, narrowing, altering, consolidating, refactoring, or replacing the lower-level cause eliminates the problem.
 
 A first clean local defect remains local. Material sibling recurrence changes reasoning to the shared owner/mechanism but does not make the current realization invariant. Repeated patch-on-patch repair, wrapper/fallback/special-case accumulation, duplicated/synchronized authority, repeated reconciliation, or an evident materially simpler equivalent realization makes simplification/re-derivation mandatory before another additive durable repair.
+
+When an independently governed urgency, safety, security, reliability, or incident-containment constraint requires immediate action, a **bounded reversible or safely replaceable mitigation may precede the normal simplification/re-derivation pass**. Keep unresolved structural debt/risk explicit, do not let emergency use promote the mitigation into durable authority, and reconcile the owning realization/abstraction at the earliest safe point.
 
 If correction requires changing accepted D3/D2/D1 semantics, stop dependent closure and route the earliest affected abstraction rather than constructing a compatibility wrapper around the contradiction.
 

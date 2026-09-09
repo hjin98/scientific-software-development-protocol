@@ -111,7 +111,7 @@ Independent D4 Review reconstructs applicable D1/D2 semantics, D3 architecture, 
 
 Review first asks whether **literal compliance actually realizes the protected stakeholder outcome** and every applicable upstream semantic outcome. If the implementation misses a sufficient accepted contract, that is implementation nonconformance. If the literal workplan/architecture contract is itself too weak or wrong for the protected outcome, classify a **workplan/design deficiency** at the earliest owning domain rather than blessing a compliant-but-wrong realization.
 
-When material acceptance depends on an actual D4 path, identify the historical **product/Frozen claim and the real semantic owner/path of the current realization**—now interpreted as the applicable parent/cycle-freeze claim plus its current delegated owner—and ask whether the evidence **could remain green** while that owner is broken. This compatibility vocabulary preserves Protocol 5 proxy-proof reasoning without promoting D4 machinery into D3 authority.
+When material acceptance depends on an actual D4 path, identify the applicable accepted parent/cycle-scoped claim and the real semantic owner/path of the current delegated realization, then ask whether the evidence **could remain green** while that owner is broken. Owner replacement is allowed when governing semantics survive; evidence must follow the final real owner rather than freezing replaceable D4 machinery.
 
 Every material Review includes the bounded Challenge Pass. Distinguish:
 

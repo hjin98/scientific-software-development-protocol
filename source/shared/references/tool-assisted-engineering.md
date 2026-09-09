@@ -1,14 +1,14 @@
 # Tool-Assisted Engineering
 
-Serena, Semgrep, Hypothesis, and CodeQL remain optional engineering instruments. Protocol 5.15 generalizes the parent capability classes and adds language-specific compiler/debugger/sanitizer/profiler/fuzz mappings through the active language profile, without weakening the existing Protocol 5.11/5.13 tool contracts. Use a specialized capability when it provides higher-information evidence, broader defect discovery, stronger invariant testing, or lower total development cost for the current material relation. Tool output is evidence or assistance, **not product truth**, normative task authority, or a lifecycle gate.
+Serena, Semgrep, Hypothesis, CodeQL, compiler/debugger/sanitizer/profiler/fuzzing capabilities, and related tools are optional engineering instruments. Protocol 6 preserves **relation-first capability routing**: use a specialized capability when it provides higher-information evidence, broader defect discovery, stronger invariant testing, or lower total development cost for the current material relation. Tool output is evidence or assistance, **not product truth**, normative task authority, or a lifecycle gate.
 
-Detailed existing methods are owned by [Serena](tool-serena.md), [Semgrep](tool-semgrep.md), [Hypothesis](tool-hypothesis.md), and [CodeQL](tool-codeql.md). Language-specific compiler/debugger/sanitizer/profiler/fuzz mappings live in the active [language engineering profile](language-profiles.md). Underlying doctrine remains owned by repository intake, testing/validation, workflow/workplans, security/trust, performance, and release references.
+Detailed methods are owned by [Serena](tool-serena.md), [Semgrep](tool-semgrep.md), [Hypothesis](tool-hypothesis.md), and [CodeQL](tool-codeql.md). Language-specific compiler/debugger/sanitizer/profiler/fuzz mappings live in the active [language engineering profile](language-profiles.md). Underlying doctrine remains owned by repository intake, testing/validation, workflow/workplans, security/trust, performance, and release references.
 
 ## Per-question capability selection
 
 Classify the **relation under the current material claim**, not the task's broad topic or repository language.
 
-The generic Protocol 5.15 classes are:
+Current relation classes are:
 
 ```text
 literal/path/text relation -> ordinary repository search/read
@@ -28,7 +28,7 @@ longitudinal maintenance-risk relation -> VCS churn/change-coupling + structural
 failure/recovery/state-interruption relation -> bounded fault-injection or equivalent controlled simulation
 ```
 
-The Protocol 5.13 direct mappings remain valid specializations of those generic classes:
+Concrete direct mappings include:
 
 ```text
 literal/path/text relation -> ordinary repository search/read
@@ -48,7 +48,7 @@ For a triggered specialized class, read its directly linked method/profile befor
 
 ## Maintainability and test-effectiveness capabilities
 
-The Protocol 5.16 capability classes above remain conditional and relation-first. They do not create a fixed quality-tool pipeline.
+These capability classes remain conditional and relation-first. They do not create a fixed quality-tool pipeline.
 
 - Mutation/semantic perturbation is useful when the material question is whether tests reject plausible wrong behavior; surviving mutants are interpreted semantically rather than converted into a universal score target.
 - Diff/changed-surface coverage helps identify unprotected changed behavior; it does not prove adequate assertions.

@@ -191,3 +191,26 @@ Generated skill/PDF/snapshot differs from canonical source. Regenerate from the 
 
 ### 60. Local-first skill unavailable
 Compatible local skill cannot be read. Fall back to the canonical public repository at an evidence-backed compatible ref; if neither is readable report truthful non-closure rather than executing from memory.
+
+## F. Protocol 5 inheritance and Protocol 6 consolidation
+
+### 61. Generalization without dual doctrine
+A current D3->D4 task needs the old adaptive-realization capability. The agent derives it directly from Protocol 6 parent/cycle-scoped/delegated-realization semantics. It does not need to translate through Tier-1/Tier-2/Frozen terminology.
+
+### 62. Legacy words removed, capability preserved
+Current convergence text is rewritten without legacy Protocol 5 control-plane tokens but still requires sibling recurrence to broaden reasoning and structural accumulation to trigger simplification before another additive repair. Qualification passes: behavior, not wording, is the oracle.
+
+### 63. Legacy words preserved, capability lost
+A candidate keeps the phrases `Tier-2` and `Frozen` but allows delegated machinery to become authority through repeated use. Qualification fails despite token compatibility.
+
+### 64. Bounded urgent mitigation
+An active reliability/security incident requires immediate containment while structural simplification would delay restoration. A bounded replaceable mitigation may land first, but it remains temporary risk and the owning simplification/re-derivation must resume at the earliest safe point.
+
+### 65. Emergency patch promoted to authority
+A hotfix becomes the permanent owner merely because it survived an incident. Reject: urgency changed sequencing, not authority.
+
+### 66. Compact resumable state
+A long multi-session implementation records current governing snapshot, open obligations, material evidence/invalidations, blockers/risks, and next action in temporary working state. It does not create a permanent parallel requirements ledger.
+
+### 67. Historical recovery stays historical
+A 5.16 workplan is intentionally inspected using immutable 5.16 terminology while current Protocol 6 routing remains Protocol-6-native. This is correct separation, not doctrinal duplication.

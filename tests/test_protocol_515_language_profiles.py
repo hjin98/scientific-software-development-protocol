@@ -41,6 +41,8 @@ class Protocol515LanguageProfileTests(unittest.TestCase):
     def test_shared_profile_direction_rejects_global_language_precedence(self) -> None:
         self.assertRegex(self.router, r"shared domain rule\s*->\s*active language profile\(s\)\s*->\s*implementation-local realization")
         self.assertIn("shared owners remain canonical", self.router)
+        self.assertIn("current protocol 6 domain doctrine is authoritative", self.router)
+        self.assertNotIn("shared protocol 5 doctrine remains authoritative", self.router)
         forbidden = (
             r"python(?: profile)?\s+(?:globally\s+)?(?:outranks|overrides|takes precedence over)\s+c\+\+",
             r"c\+\+(?: profile)?\s+(?:globally\s+)?(?:outranks|overrides|takes precedence over)\s+python",
@@ -58,7 +60,7 @@ class Protocol515LanguageProfileTests(unittest.TestCase):
             block = section(read(path), "### Language-profile dispatch", "### ")
             for name in design_links:
                 line = next(line for line in block.splitlines() if name in line)
-                self.assertIn("MUST read", line)
+                self.assertIn("MUST read", line, (path, name))
         self.assertIn("must read both", self.router)
         self.assertIn("do not infer a global python-over-c++ or c++-over-python precedence", self.router)
 
@@ -82,13 +84,13 @@ class Protocol515LanguageProfileTests(unittest.TestCase):
 
     def test_python_accelerator_counterfactual_is_gated_and_complete(self) -> None:
         accel = section(self.python, "## architecture-gated accelerator realization")
-        for concept in ("dormant unless", "cpu-only", "when enabled", "dtype and precision", "cpu/reference", "transfer", "synchronization", "device-memory", "packaging/runtime/device compatibility", "shared performance and scientific owners", "examples rather than required identities"):
+        for concept in ("dormant unless", "cpu-only", "when enabled", "dtype and precision", "cpu/reference", "transfer", "synchronization", "device-memory", "packaging/runtime/device compatibility", "shared performance and scientific owners", "examples rather than required identities", "accepted d3 architecture"):
             self.assertIn(concept, accel)
         self.assertNotRegex(accel, r"(?:always|universally)\s+(?:require|enable|use).{0,30}(?:gpu|accelerator|cuda)")
 
     def test_cpp_accelerator_uses_same_shared_gate(self) -> None:
         accel = section(self.cpp, "## accelerator realization")
-        for concept in ("dormant unless", "when enabled", "cpu/reference numerical equivalence", "end-to-end benefit"):
+        for concept in ("dormant unless", "accepted d3 architecture", "when enabled", "cpu/reference numerical equivalence", "end-to-end benefit"):
             self.assertIn(concept, accel)
 
     def test_performance_counterfactual_separates_simple_efficiency_from_complexity(self) -> None:
@@ -108,7 +110,7 @@ class Protocol515LanguageProfileTests(unittest.TestCase):
         self.assertIn("protocol 5.15 is a backward-compatible", versioning)
         self.assertIn("active older workplans do not automatically adopt protocol 5.16 or any later release", versioning)
         self.assertIn("may continue under their declared version", versioning)
-        self.assertIn("repository-local tier-2 validation machinery", root_readme)
+        self.assertIn("repository-local delegated d4 validation machinery", root_readme)
         self.assertIn("protocol_version: 5.14.0", read("workplans/archive/PROTOCOL-5.15-LANGUAGE-PROFILES-CPP-PERFORMANCE.md"))
 
 

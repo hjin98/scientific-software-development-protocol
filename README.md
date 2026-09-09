@@ -55,7 +55,9 @@ Authority governs mutation; evidence can challenge authority; neither human nor 
 
 ## Preserved engineering strengths
 
-Protocol 6 preserves and generalizes Protocol 5's strongest controls: adaptive realization, active simplification, snapshot-complete handoff, version-bound workplans, stage-local plus final affected regression, proxy-proof real-owner evidence, evidence reuse/invalidation, differential/metamorphic testing, bounded fault injection, language/tool routing, long-horizon health sensing, and conservative closeout.
+Protocol 6 is the general doctrine and Protocol 5 is its narrower software-local specialization. Protocol 6 preserves and generalizes Protocol 5's strongest controls as current semantic capabilities rather than a second current vocabulary: adaptive realization, active simplification, snapshot-complete handoff, version-bound workplans, stage-local plus final affected regression, proxy-proof real-owner evidence, evidence reuse/invalidation, differential/metamorphic testing, bounded fault injection, language/tool routing, long-horizon health sensing, bounded urgent mitigation, compact resumable working state, and conservative closeout.
+
+The concise historical mapping lives only in `source/shared/references/protocol-versioning-and-compatibility.md`; ordinary Protocol 6 work should not require translating through Protocol 5 control-plane terms.
 
 ## Workflow and portable skills
 
@@ -91,6 +93,6 @@ python orchestrator/scripts/generate_protocol_snapshot.py --check
 python orchestrator/scripts/run_core_tests.py
 ```
 
-These Python commands are repository-local Tier-2 validation machinery in the historical Protocol 5 terminology—delegated D4 validation machinery under Protocol 6—not language-specific protocol doctrine.
+These Python commands are repository-local delegated D4 validation machinery; they are not language-specific protocol doctrine.
 
 A Protocol 6 release is not complete while a governing Serious Challenge is unresolved or any required assembled acceptance check has not executed.

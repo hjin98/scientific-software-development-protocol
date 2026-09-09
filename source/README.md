@@ -45,7 +45,9 @@ Human ratification is risk-triggered for consequential D1/D2 decisions; it is no
 
 ## Historical compatibility
 
-Protocol 6 is a major semantic revision. Protocol 5.16 workplans retain 5.16 semantics and are not silently reinterpreted. Immutable historical source mapping:
+Protocol 6 is the general theory and Protocol 5 is its narrower software-local specialization. Current Protocol 6 doctrine inherits Protocol 5 capabilities without retaining a parallel current vocabulary. The one current historical mapping owner is `shared/references/protocol-versioning-and-compatibility.md`.
+
+Protocol 5.16 workplans retain 5.16 semantics and are not silently reinterpreted. Immutable historical source mapping:
 
 ```text
 5.16.0 -> e151daaf5c8eebb351a85cfed86170fda80fb5e3
@@ -88,4 +90,4 @@ git diff --check
 
 When orchestrator code/profile resources change also run its snapshot parity and Core suite. Required evidence that did not execute is blocking, not a pass.
 
-These Python commands are repository-local Tier-2 validation machinery in historical Protocol 5 vocabulary—delegated D4 validation machinery under Protocol 6—not language-specific protocol doctrine.
+These Python commands are repository-local delegated D4 validation machinery; they are not language-specific protocol doctrine.
