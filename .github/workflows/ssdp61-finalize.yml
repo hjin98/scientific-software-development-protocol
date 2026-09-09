@@ -73,15 +73,17 @@ jobs:
         run: python source/check_dist.py --expected dist --committed dist
       - name: Verify Protocol snapshot parity
         run: python orchestrator/scripts/generate_protocol_snapshot.py --check
-      - name: Remove temporary migration helpers before Core acceptance
+      - name: Prepare final containment tree for Core acceptance
         run: |
+          cp .git/index /tmp/ssdp61-core-index
+          GIT_INDEX_FILE=/tmp/ssdp61-core-index git rm --cached --ignore-unmatch tools/ssdp61_finalize.py tools/ssdp61_patch_tests.py
           rm -f tools/ssdp61_finalize.py tools/ssdp61_patch_tests.py
           rm -f tools/ssdp61-test-failure.log tools/ssdp61-core-failure.log
       - name: Run orchestrator Core acceptance suite
         shell: bash
         run: |
           set +e
-          python orchestrator/scripts/run_core_tests.py > tools/ssdp61-core-failure.log 2>&1
+          GIT_INDEX_FILE=/tmp/ssdp61-core-index python orchestrator/scripts/run_core_tests.py > tools/ssdp61-core-failure.log 2>&1
           status=$?
           cat tools/ssdp61-core-failure.log
           if [ "$status" -eq 0 ]; then rm -f tools/ssdp61-core-failure.log; fi
