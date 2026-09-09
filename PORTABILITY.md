@@ -42,6 +42,18 @@ Historical 5.16 and 6.0 prompt/profile bytes remain immutable. A workplan's decl
 
 Protocol 6 profile stages include authority intake, D1, D2, D3, D4, Review/Challenge, Verification, Stabilization, Alignment, Health Audit, and Closeout. Serious Challenge/human-pending outcomes stop automatic normal routing; the orchestrator records/routes state but never decides scientific truth.
 
+## Immutable recovery identities
+
+Version-bound recovery uses immutable repository commits rather than `main`/latest:
+
+| Protocol | Immutable recovery commit |
+| --- | --- |
+| 5.16.0 | `e151daaf5c8eebb351a85cfed86170fda80fb5e3` |
+| 6.0.0 | `21d5188f5bd9a0270d7a2ebf93d41a6b7842ccd2` |
+| 6.1.0 | `dec5ff2767e14fd1cda46e073757aa27f40e270c` |
+
+The Protocol 6.1 commit is the final document-controlled/semi-automated pre-Protocol-7 rollback snapshot. It contains the qualified current source/profile and required generated artifacts plus the completed 6.1 lifecycle record. Protocol 7 fallback uses that immutable snapshot as a version rollback; it does not keep a second live canonical control plane.
+
 ## Deterministic routing dimensions
 
 Protocol 6 keeps three independent routing concerns:

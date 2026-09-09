@@ -32,7 +32,7 @@ Precedence for historical reconstruction remains:
 - every parent requirement not explicitly narrowed by Revision 1 remained binding;
 - the composition was required to remain lossless with respect to Protocol 6.0 and inherited Protocol 5.16 doctrine.
 
-Final implementation/review disposition:
+Final implementation/review/closeout disposition:
 
 ```text
 SERIOUS CHALLENGE: NONE
@@ -42,10 +42,11 @@ BEHAVIORAL QUALIFICATION: PASS — 92 SCENARIOS, NO UNRESOLVED FAILURE
 FINAL INDEPENDENT REVIEW: PASS
 BLOCKING FINDINGS OPEN: 0
 SEMANTIC CANDIDATE: 25d30858e7a33a72cb04b4d07393cb143b7777f8
-RECOVERY PIN: PENDING DOCUMENTATION-ONLY SUCCESSOR THAT CITES THIS CLOSEOUT COMMIT
+IMMUTABLE PROTOCOL 6.1 RECOVERY: dec5ff2767e14fd1cda46e073757aa27f40e270c
+LIFECYCLE STATUS: COMPLETED / ARCHIVED / PINNED
 ```
 
-The final Review is `qualification/ssdp6/FINAL-REVIEW-GPT-5.6-SOL-2026-09-09-PROTOCOL-6.1.md`. This closeout does not mutate the qualified Protocol 6.1 semantics. The immutable recovery mapping is intentionally recorded by a successor commit so the mapping can name this coherent closeout snapshot without a self-referential commit identity.
+The final Review is `qualification/ssdp6/FINAL-REVIEW-GPT-5.6-SOL-2026-09-09-PROTOCOL-6.1.md`. The immutable recovery commit is the coherent lifecycle-closeout snapshot immediately before this documentation-only mapping commit. No qualified Protocol 6.1 semantic source was changed during closeout.
 
 ## Protocol 7.0 current design handoff
 
@@ -68,11 +69,11 @@ Current review disposition:
 SERIOUS CHALLENGE: NONE
 WORKPLAN DESIGN REVIEW: PASS
 IMPLEMENTATION STATUS: PROPOSED
-BLOCKED ON: IMMUTABLY DOCUMENTED PROTOCOL 6.1 RECOVERY IDENTITY
-ALSO REQUIRES: DELIBERATE D3 ORCHESTRATOR ARCHITECTURE REOPEN/SUPERSESSION BEFORE D4 IMPLEMENTATION
+PROTOCOL 6.1 COMPLETION/QUALIFICATION/PIN PREREQUISITE: SATISFIED
+REMAINING PRE-D4 REQUIREMENT: DELIBERATE D3 ORCHESTRATOR ARCHITECTURE REOPEN/SUPERSESSION
 ```
 
-Protocol 6.1 implementation, qualification, and independent Review are complete. Protocol 7 remains blocked until the immediately following lifecycle-only recovery-mapping commit documents the immutable Protocol 6.1 closeout identity; after that, the separate D3 architecture-reopen/supersession requirement still applies.
+Protocol 6.1 implementation, qualification, independent Review, lifecycle archival, and immutable recovery mapping are complete. This clears only the Protocol-6.1 prerequisite for Protocol 7. It does **not** authorize Protocol 7 D4 implementation until the separately required deliberate D3 orchestrator architecture reopen/supersession is completed under the Protocol 7 handoff.
 
 Protocol 7 machine control records remain compact machine data. Human-readable control/schema/user documentation inherits the Protocol 6.1 background-context and first-use abbreviation requirements.
 
@@ -83,7 +84,7 @@ There is exactly one canonical workflow-control authority for any current run.
 - Under Protocol 6.1, workplan/skill/prompt/profile document control remains valid and the Protocol 7 control plane is non-authoritative.
 - Under Protocol 7 after qualified cutover, the deterministic orchestrator control plane owns machine lifecycle transitions while workplans/skills/documents remain semantic artifacts.
 - Shadow comparison is permitted only while one side remains explicitly non-authoritative.
-- Fallback from Protocol 7 uses the immutable Protocol 6.1 release as a version rollback, never a simultaneous dual-current control system.
+- Fallback from Protocol 7 uses immutable Protocol 6.1 commit `dec5ff2767e14fd1cda46e073757aa27f40e270c` as a version rollback, never a simultaneous dual-current control system.
 
 ## Historical discipline
 

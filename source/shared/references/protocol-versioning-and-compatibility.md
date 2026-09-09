@@ -23,7 +23,7 @@ Protocol 6.1 is a backward-compatible minor revision. It preserves the Protocol 
 - strengthening human-facing background/context and first-use abbreviation standards;
 - preserving a distinct frozen Protocol 6.0 profile while introducing `ssdp-protocol-6.1` as the current profile after qualification.
 
-Protocol 6.1 is intended to be the final document-controlled/semi-automated release before the Protocol 7 mandatory deterministic orchestrator control-plane transition.
+Protocol 6.1 is the final document-controlled/semi-automated release before the Protocol 7 mandatory deterministic orchestrator control-plane transition.
 
 Protocol 6 preserves the strongest Protocol 5 engineering guarantees by refactoring them into the new hierarchy: minimum justified complexity, adaptive concretization, snapshot-complete handoff, proxy-proof acceptance, affected regression/integration, evidence reuse/invalidation, active simplification, convergence-aware reasoning, language/tool routing, long-horizon quality, bounded urgent mitigation, compact resumable working state, and version-bound workplans.
 
@@ -101,6 +101,18 @@ This identity represents the canonical Protocol 6.0 source and `ssdp-protocol-6.
 
 Historical/declared 6.0 resolution must continue to use immutable 6.0 source/profile semantics after 6.1 becomes current. Do not mutate packaged `ssdp-protocol-6.0` resources into 6.1 vocabulary or routing.
 
+## Immutable Protocol 6.1 recovery
+
+The accepted Protocol 6.1 pre-automation source/profile/lifecycle snapshot is pinned to:
+
+```text
+6.1.0 -> dec5ff2767e14fd1cda46e073757aa27f40e270c
+```
+
+This identity contains the qualified Protocol 6.1 canonical skills/references/templates/prompts, current `ssdp-protocol-6.1` profile/snapshot, frozen 5.16/6.0 compatibility resources, generated package artifacts, evidence/dependency/evolution doctrine, final qualification/review records, and archived Protocol 6.1 implementation handoff. It is the immutable document-controlled/semi-automated rollback baseline for Protocol 7 development.
+
+Protocol 7 must not retroactively mutate or dependently reinterpret this snapshot. Fallback from Protocol 7 is version rollback to this identity, not simultaneous dual-current workflow authority.
+
 ## Protocol 6 orchestration profiles
 
 Protocol 6 uses separately versioned profile identities under profile schema v2 rather than overloading Protocol 5 schema v1.
@@ -133,7 +145,7 @@ Final assembled acceptance must still reflect the candidate after all material e
 
 ## Protocol 6.1 recovery and Protocol 7 rollback boundary
 
-After Protocol 6.1 implementation, complete qualification, independent Review, and closeout, pin an immutable 6.1 source/profile recovery identity. That snapshot must be sufficient to restore the document-controlled/semi-automated workflow without Protocol 7 machinery.
+Protocol 6.1 implementation, complete qualification, independent Review, and lifecycle closeout are represented by the immutable recovery mapping above. The pinned snapshot is sufficient to restore the document-controlled/semi-automated workflow without Protocol 7 machinery.
 
 Protocol 7 fallback is version rollback to that immutable Protocol 6.1 snapshot, never simultaneous dual-current workflow authority.
 

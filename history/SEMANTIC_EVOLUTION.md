@@ -47,7 +47,16 @@ Historical entries identify the previous semantics, replacement, triggering evid
 
 - **Protocol 6.0 recovery identity:** the accepted pre-6.1 source/profile baseline is repository commit `21d5188f5bd9a0270d7a2ebf93d41a6b7842ccd2`.
 - **Profile policy:** packaged `ssdp-protocol-6.0` remains frozen/resolvable for declared Protocol 6.0 work. Protocol 6.1 introduces distinct current profile identity `ssdp-protocol-6.1` under profile schema v2 unless a future accepted change requires a schema revision.
-- **Protocol 7 dependency:** Protocol 6.1 is intended to be the final stable document-controlled/semi-automated release and the immutable rollback baseline for the later mandatory deterministic orchestrator control-plane migration.
+- **Protocol 6.1 semantic candidate:** `25d30858e7a33a72cb04b4d07393cb143b7777f8` is the qualified semantic candidate identified by the final independent Review.
+- **Protocol 6.1 immutable recovery identity:** lifecycle-closeout commit `dec5ff2767e14fd1cda46e073757aa27f40e270c` is the accepted pre-automation rollback snapshot. It preserves the qualified 6.1 source/profile/generated artifacts, final evidence/review records, and archived 6.1 handoff without Protocol 7 implementation machinery.
+- **Protocol 7 dependency:** Protocol 6.1 is the final stable document-controlled/semi-automated release and immutable rollback baseline for the later mandatory deterministic orchestrator control-plane migration.
+
+### Protocol 6.1 closeout evidence
+
+- **Behavioral qualification:** 92 bounded scenarios, no unresolved failure; scenario 82 was explicitly requalified after its owning relation-token repair rather than retaining stale green evidence.
+- **Independent Review:** PASS; no active Serious Challenge and zero blocking findings open.
+- **Executable acceptance:** repository regression, canonical package build, package validation, committed-distribution parity, whitespace, Protocol snapshot parity, and Orchestrator Core all passed on the reviewed candidate/evidence chain.
+- **Lifecycle disposition:** the two governing 6.1 workplans are archived as exact reviewed historical handoff artifacts. Their pre-closeout frontmatter is preserved rather than edited after Review; current completion is recorded by repository placement, the active 6.1/7.0 authority index, this evolution record, and the final Review.
 
 ## Maintenance
 
