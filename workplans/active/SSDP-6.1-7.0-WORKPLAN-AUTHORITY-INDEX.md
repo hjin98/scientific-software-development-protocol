@@ -4,6 +4,7 @@ workplan_id: SSDP-6.1-7.0-WORKPLAN-AUTHORITY-INDEX
 protocol_version: 6.0.0
 status: active
 created_date: 2026-09-09
+reviewed_date: 2026-09-09
 active_serious_challenge: none
 ---
 
@@ -11,29 +12,25 @@ active_serious_challenge: none
 
 ## Purpose
 
-This file is a **routing/index artifact**, not a new D1-D4 semantic authority and not an independent implementation contract. It makes the complete current workplan composition explicit so an implementer/reviewer does not accidentally execute a parent plan while missing accepted review amendments.
+This file is a **routing/index artifact**, not a D1-D4 semantic authority and not an independent implementation contract. It identifies the complete current workplan composition so an implementer/reviewer does not miss a governing artifact.
 
-Do not copy the substantive requirements into this index. Read the listed governing artifacts themselves.
+Do not copy substantive requirements into this index. Read the listed governing artifacts themselves.
 
 ## Protocol 6.1 current implementation handoff
 
-Protocol 6.1 implementation/review SHALL read and satisfy, as one composed handoff:
+Protocol 6.1 is intentionally consolidated into one snapshot-complete current workplan:
 
 1. `workplans/active/SSDP-6.1-EVIDENCE-EVOLUTION-AND-CONCRETIZATION-ALIGNMENT.md`
-2. `workplans/active/SSDP-6.1-EVIDENCE-EVOLUTION-AND-CONCRETIZATION-ALIGNMENT-REVISION-1-SECOND-REVIEW-CLOSURE.md`
 
-Precedence:
-
-- Revision 1 narrows/clarifies the parent where it explicitly addresses an ambiguity or missing obligation.
-- Every parent requirement not explicitly changed by Revision 1 remains binding.
-- The composition must remain lossless with respect to Protocol 6.0 and inherited Protocol 5.16 doctrine.
+The former second-review companion was folded losslessly into the parent during final pre-implementation review and is no longer a separate current contract. Git retains its development history; implementation must use the consolidated parent rather than mentally applying amendment history.
 
 Current review disposition:
 
 ```text
 SERIOUS CHALLENGE: NONE
-WORKPLAN DESIGN REVIEW: PASS
+FINAL WORKPLAN DESIGN REVIEW: PASS
 IMPLEMENTATION STATUS: ACTIVE
+READY FOR IMPLEMENTATION: YES
 ```
 
 Protocol 6.1 remains the final document-controlled/semi-automated release and must be completed, behaviorally qualified, independently reviewed, and pinned as an immutable recovery snapshot before Protocol 7 cutover work can become canonical.
@@ -51,6 +48,7 @@ Precedence:
 - Revision 1 closes ownership, semantic/control binding, storage/transport, cutover, lifecycle-migration, graph-completeness, and compatibility gaps and corrects Scheduler/control-kernel ownership.
 - Revision 2 closes reducer-purity, ambient-state, external-effect, deterministic replay, and canonical recovery gaps.
 - Every parent requirement not explicitly changed by the revisions remains binding.
+- Protocol 7 inherits the accepted final Protocol 6.1 authority/evidence/evolution terminology and dependency semantics unless 7.0 explicitly replaces a rule through its own accepted authority revision.
 
 Current review disposition:
 
@@ -73,6 +71,6 @@ There is exactly one canonical workflow-control authority for any current run.
 
 ## Historical discipline
 
-Do not edit archived/version-pinned Protocol 6.0/5.x transition records merely to adopt 6.1 terminology. Current 6.1/7.0 work follows abstraction/concretization terminology while legacy stable identifiers may retain older lexemes only under the explicit compatibility rule in the 6.1 Revision 1 workplan.
+Do not edit archived/version-pinned Protocol 6.0/5.x transition records merely to adopt 6.1 terminology. Current 6.1/7.0 work follows abstraction/concretization terminology while legacy stable identifiers may retain older lexemes only under the compatibility rule in the consolidated 6.1 workplan.
 
-When these workplans complete, preserve normal repository closeout/history conventions; this index may then be archived or replaced by the accepted release/version authority mapping. It must not become a permanent parallel protocol authority.
+When these workplans complete, preserve normal repository closeout/history conventions; this index may then be archived or replaced by accepted release/version authority mapping. It must not become a permanent parallel protocol authority.
