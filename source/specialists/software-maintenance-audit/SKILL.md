@@ -62,7 +62,7 @@ Classify each material finding by authority and smallest coherent repair scope:
 - **Repository/lifecycle residue** -> route to `repository-hygiene`.
 - **Watch item** -> retain as an observation when evidence is insufficient to justify intervention.
 
-Do not perform broad unrelated refactors merely because debt exists. Do not define new domain/product requirements, accept architecture changes, or grant implementation acceptance inside the audit.
+Do not perform broad unrelated refactors merely because debt exists. Do not define new product requirements, accept architecture changes, or grant implementation acceptance inside the audit.
 
 ## Output
 
