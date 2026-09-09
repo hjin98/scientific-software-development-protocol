@@ -22,7 +22,9 @@ jobs:
       - name: Materialize reviewed Protocol 6.1 source edits
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: python tools/ssdp61_finalize.py
+        run: |
+          python tools/ssdp61_finalize.py
+          python tools/ssdp61_patch_tests.py
       - name: Install validation dependencies
         run: |
           python -m pip install -r source/requirements-validation.txt
