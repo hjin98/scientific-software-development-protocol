@@ -33,14 +33,18 @@ jobs:
         run: |
           python source/build_skills.py --output dist
           python orchestrator/scripts/generate_protocol_snapshot.py
-      - name: Run repository acceptance before publishing generated results
-        run: |
-          python -m unittest discover -s tests -v
-          python source/validate_packages.py --dist dist
-          python source/check_dist.py --expected dist --committed dist
-          python orchestrator/scripts/generate_protocol_snapshot.py --check
-          python orchestrator/scripts/run_core_tests.py
-          git diff --check
+      - name: Run protocol regression tests
+        run: python -m unittest discover -s tests -v
+      - name: Validate generated packages
+        run: python source/validate_packages.py --dist dist
+      - name: Verify generated distribution self-parity
+        run: python source/check_dist.py --expected dist --committed dist
+      - name: Verify Protocol snapshot parity
+        run: python orchestrator/scripts/generate_protocol_snapshot.py --check
+      - name: Run orchestrator Core acceptance suite
+        run: python orchestrator/scripts/run_core_tests.py
+      - name: Check whitespace
+        run: git diff --check
       - name: Commit deterministic Protocol 6.1 migration
         run: |
           git config user.name "github-actions[bot]"
