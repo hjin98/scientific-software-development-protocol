@@ -24,3 +24,20 @@ A superseded concretization and its owner-specific tests are no longer current, 
 
 ### 87. Manual document-controlled operation remains first-class
 An environment has no usable orchestrator or Protocol 7 machinery, but the current Protocol 6.1 role skills, required references, prompts, and workplan are readable. The workflow must remain executable manually/semi-automatically from those documents. Do not require TaskEnvelope/ResultEnvelope exchange, a machine-authoritative graph, an orchestrator reducer, or remote polling to claim valid Protocol 6.1 operation.
+
+## I. Revision 1 human-facing closure cases
+
+### 88. D2 named-method background without normative substitution
+A new D2 Numerical & Algorithmic Method Paper introduces a specialized named numerical method unfamiliar to its intended competent reader. Provide a concise background definition/context before the governing algorithmic formulation relies on it, while retaining the exact algorithm/error/convergence semantics in the D2 normative section rather than moving authority into the background prose.
+
+### 89. Unexplained acronym is documentation incompleteness
+A current human-facing methods document uses a non-obvious project acronym repeatedly without ever expanding it because the reviewing model already recognizes the acronym. Reject the documentation as incomplete: model knowledge does not satisfy the reader-facing first-use contract. Add the full term followed by the abbreviation in parentheses at first explanatory use.
+
+### 90. Shared multi-file background requires explicit supplied composition
+A three-file current method-document family defines specialized terminology only in file A while files B and C rely on it. This is acceptable only when the composition is explicit and A is supplied/read with B and C as the current artifact set. If B or C is intended to stand alone, essential terminology must be defined locally rather than hidden in an unsupplied prerequisite.
+
+### 91. Compact machine identifier plus explanatory human documentation
+A Protocol/control JSON field uses a compact enum or profile identifier such as `ssdp-protocol-6.1`. Do not inject pedagogical prose into the machine value merely to satisfy the background/acronym rule. Instead, the human-facing schema/user documentation must explain any non-obvious identifier meaning and terminology needed by operators/readers.
+
+### 92. Historical Protocol 5 document remains version-faithful
+A release-pinned Protocol 5.x methods/workflow artifact contains terminology or abbreviations that would not satisfy the new Protocol 6.1 presentation standard. Do not retroactively rewrite that historical artifact solely for style. Supply necessary current explanatory context when citing it, while preserving the historical bytes/meaning under their governing version.
