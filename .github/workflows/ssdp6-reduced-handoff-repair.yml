@@ -1,0 +1,143 @@
+name: SSDP 6 reduced-handoff repair
+
+on:
+  push:
+    branches:
+      - impl/ssdp-6
+
+permissions:
+  contents: write
+
+jobs:
+  repair:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Apply reduced-handoff contract repair
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          prompts = Path("source/shared/references/development-workflow-prompts.md")
+          text = prompts.read_text(encoding="utf-8")
+
+          d1_input = "CURRENT_AUTHORITY = [current Scientific Method Paper / D1 authority; AUTO = discover]\n"
+          d1_input_new = d1_input + "WORKPLAN_DESTINATION = [generic abstraction-realization change-plan path for an authorized direct downstream handoff; AUTO = repository convention]\n"
+          if text.count(d1_input) != 1 or d1_input_new in text:
+              raise SystemExit("unexpected D1 input shape")
+          text = text.replace(d1_input, d1_input_new)
+
+          d1_para = "Draft proposed authority separately from accepted-current authority. Consequential changes to scientific meaning, model/equations/closures, material assumptions/validity, model uncertainty, or conclusions require designated human ratification when policy assigns it; do not self-approve them.\n"
+          d1_para_new = d1_para + "\nBefore a direct D1->D3 or D1->D4 handoff that intentionally skips unchanged intermediate domains, actually create or update a snapshot-complete generic abstraction-realization change plan at WORKPLAN_DESTINATION. Do not create that extra plan when a dependent D2/D3 stage will own the next handoff or when no downstream realization is affected.\n"
+          if text.count(d1_para) != 1:
+              raise SystemExit("unexpected D1 paragraph shape")
+          text = text.replace(d1_para, d1_para_new)
+
+          d2_input = "CURRENT_AUTHORITY = [current Numerical & Algorithmic Method Paper / D2 authority; AUTO = discover]\n"
+          d2_input_new = d2_input + "WORKPLAN_DESTINATION = [generic abstraction-realization change-plan path for an authorized direct D4 handoff; AUTO = repository convention]\n"
+          if text.count(d2_input) != 1 or d2_input_new in text:
+              raise SystemExit("unexpected D2 input shape")
+          text = text.replace(d2_input, d2_input_new)
+
+          d2_para = "Draft proposed authority separately. Human adjudication is required when a D2 change can alter scientific conclusions or a governing algorithm/error guarantee. Before D2->D3 handoff test fidelity to D1 and D3-abstraction adequacy needs. If accepted D2 authority itself may be materially wrong/contradictory/ambiguous/unrealizable, raise SERIOUS CHALLENGE rather than requesting a software workaround.\n"
+          d2_para_new = "Draft proposed authority separately. Human adjudication is required when a D2 change can alter scientific conclusions or a governing algorithm/error guarantee. Before D2->D3 handoff test fidelity to D1 and D3-abstraction adequacy needs. Before an authorized direct D2->D4 handoff with unchanged D3 authority, actually create or update a snapshot-complete generic abstraction-realization change plan at WORKPLAN_DESTINATION so D4 receives a governing implementation contract without manufacturing a D3 change. If accepted D2 authority itself may be materially wrong/contradictory/ambiguous/unrealizable, raise SERIOUS CHALLENGE rather than requesting a software workaround.\n"
+          if text.count(d2_para) != 1:
+              raise SystemExit("unexpected D2 paragraph shape")
+          text = text.replace(d2_para, d2_para_new)
+
+          d3_para = "Actually create or update the governing D3->D4 workplan at WORKPLAN_DESTINATION when material. Do not modify product implementation in this stage. Freeze only architecture-level choices needed to bound implementation; leave D4 helpers/APIs/data structures/libraries/local algorithms replaceable. Define real-owner acceptance boundaries, focused/stage-local/final affected regression, integration, repository checks, and genuine simplification/reopen triggers.\n"
+          d3_para_new = "Actually create or update the governing D3->D4 workplan at WORKPLAN_DESTINATION when D4 realization is materially affected. If accepted D3 authority changes but existing D4 already realizes it and no implementation work is affected, do not manufacture an empty D4 workplan solely to satisfy routing mechanics; the D3-only scope may proceed to Review or Closeout. Do not modify product implementation in this stage. Freeze only architecture-level choices needed to bound implementation; leave D4 helpers/APIs/data structures/libraries/local algorithms replaceable. Define real-owner acceptance boundaries, focused/stage-local/final affected regression, integration, repository checks, and genuine simplification/reopen triggers.\n"
+          if text.count(d3_para) != 1:
+              raise SystemExit("unexpected D3 paragraph shape")
+          text = text.replace(d3_para, d3_para_new)
+
+          d4_input = "WORKPLAN = [governing D3->D4 implementation workplan]\n"
+          d4_input_new = "WORKPLAN = [governing implementation/change plan; normally D3->D4, or an accepted upstream abstraction-realization plan for an authorized reduced route]\n"
+          if text.count(d4_input) != 1:
+              raise SystemExit("unexpected D4 WORKPLAN input shape")
+          text = text.replace(d4_input, d4_input_new)
+
+          d4_para = "Resolve REQUIRED_SKILL = software-implementation under WORKPLAN's declared protocol semantics. Under AUTO_EXECUTE, actually modify REPOSITORY_TARGET and its owned tests/documentation as required; do not stop at a plan or code snippets when authorized write/execution tools exist.\n"
+          d4_para_new = d4_para + "\nFor an authorized reduced D2->D4 or D1->D4 route, accept the governing upstream abstraction-realization change plan together with the unchanged current D3 architecture. Do not manufacture a D3 authority mutation or empty D3->D4 plan solely to satisfy orchestrator mechanics. WORKPLAN remains required so implementation still receives a snapshot-complete governing contract.\n"
+          if text.count(d4_para) != 1:
+              raise SystemExit("unexpected D4 paragraph shape")
+          prompts.write_text(text.replace(d4_para, d4_para_new), encoding="utf-8")
+
+          profile = Path("orchestrator/src/sdp_orchestrator/core/profile.py")
+          text = profile.read_text(encoding="utf-8")
+          d3_anchor = '''    ("software-design", "accepted", "software-implementation", "an accepted D3->D4 workplan is ready for implementation"),\n'''
+          d3_replacement = d3_anchor + '''    ("software-design", "accepted", "review", "review an accepted D3-only authority change when no D4 realization is affected"),\n    ("software-design", "accepted", "closeout", "close an accepted D3-only scope when existing D4 already conforms and no further review is required"),\n'''
+          if text.count(d3_anchor) != 1 or "accepted D3-only authority change" in text:
+              raise SystemExit("unexpected D3 transition shape")
+          profile.write_text(text.replace(d3_anchor, d3_replacement), encoding="utf-8")
+
+          tests = Path("orchestrator/tests/test_ssdp6_profiles.py")
+          text = tests.read_text(encoding="utf-8")
+          anchor = '''    def test_serious_challenge_stops_automatic_routing(self) -> None:\n'''
+          methods = '''    def test_direct_upstream_handoffs_produce_a_governing_plan(self) -> None:\n        by_key = {stage.stage.stage_key: stage for stage in self.descriptor.stages}\n        self.assertIn("WORKPLAN_DESTINATION", {item.name for item in by_key["scientific-formulation"].inputs})\n        self.assertIn("WORKPLAN_DESTINATION", {item.name for item in by_key["numerical-algorithm-design"].inputs})\n        d4_body = self.document.stages["software-implementation"].body.lower()\n        self.assertIn("authorized reduced d2->d4 or d1->d4 route", d4_body)\n        self.assertIn("do not manufacture a d3 authority mutation", d4_body)\n        self.assertIs(by_key["software-implementation"].workplan_policy, WorkplanPolicy.REQUIRED)\n\n    def test_d3_only_authority_change_can_skip_unaffected_d4(self) -> None:\n        destinations = {\n            t.to_stage.stage_key\n            for t in self.descriptor.transitions\n            if t.from_stage.stage_key == "software-design"\n            and t.trigger_key == "accepted"\n            and t.to_stage is not None\n        }\n        self.assertEqual(destinations, {"software-implementation", "review", "closeout"})\n\n'''
+          if text.count(anchor) != 1 or "test_direct_upstream_handoffs_produce_a_governing_plan" in text:
+              raise SystemExit("unexpected current-profile test shape")
+          tests.write_text(text.replace(anchor, methods + anchor), encoding="utf-8")
+          PY
+      - name: Install validation and Orchestrator dependencies
+        run: >-
+          python -m pip install
+          -r source/requirements-validation.txt
+          ./orchestrator
+          -r orchestrator/requirements-dev.txt
+      - name: Run protocol regression tests
+        run: python -m unittest discover -s tests -v
+      - name: Generate current Protocol 6 packaged snapshot
+        run: python orchestrator/scripts/generate_protocol_snapshot.py
+      - name: Build canonical skill packages
+        run: python source/build_skills.py --output /tmp/protocol-dist
+      - name: Validate generated skill packages independently
+        run: python source/validate_packages.py --dist /tmp/protocol-dist
+      - name: Replace committed distribution from canonical build
+        run: |
+          rm -rf dist
+          cp -a /tmp/protocol-dist dist
+      - name: Verify generated distribution parity
+        run: python source/check_dist.py --expected /tmp/protocol-dist --committed dist
+      - name: Verify generated Protocol snapshot parity
+        run: python orchestrator/scripts/generate_protocol_snapshot.py --check
+      - name: Run Orchestrator Core acceptance suite
+        run: python orchestrator/scripts/run_core_tests.py
+      - name: Verify reduced handoff semantics directly
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          profile = json.loads(Path("orchestrator/src/sdp_orchestrator/core/resources/protocol/ssdp-protocol-6.0/profile.json").read_text())
+          stages = {item["stage"]["stage_key"]: item for item in profile["stages"]}
+          assert "WORKPLAN_DESTINATION" in {item["name"] for item in stages["scientific-formulation"]["inputs"]}
+          assert "WORKPLAN_DESTINATION" in {item["name"] for item in stages["numerical-algorithm-design"]["inputs"]}
+          assert stages["software-implementation"]["workplan_policy"] == "required"
+          destinations = {
+              item["to_stage"]["stage_key"]
+              for item in profile["transitions"]
+              if item["from_stage"]["stage_key"] == "software-design"
+              and item["trigger_key"] == "accepted"
+              and item["to_stage"] is not None
+          }
+          assert destinations == {"software-implementation", "review", "closeout"}
+          PY
+      - name: Check patch whitespace
+        run: git diff --check
+      - name: Remove temporary repair workflow and commit accepted repair
+        run: |
+          git rm .github/workflows/ssdp6-reduced-handoff-repair.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add source/shared/references/development-workflow-prompts.md \
+                  orchestrator/src/sdp_orchestrator/core/profile.py \
+                  orchestrator/tests/test_ssdp6_profiles.py \
+                  orchestrator/src/sdp_orchestrator/core/resources/protocol/ssdp-protocol-6.0 \
+                  dist
+          git diff --cached --check
+          git commit -m "Make Protocol 6 reduced handoffs operational"
+          git push
