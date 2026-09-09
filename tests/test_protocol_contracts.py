@@ -52,7 +52,7 @@ class Protocol6ContractTests(unittest.TestCase):
         self.assertIn("composed end-to-end scientific closure", self.testing)
 
     def test_authority_states_and_bounded_invalidation_exist(self) -> None:
-        for phrase in ("proposed", "accepted current", "challenged", "stale dependent", "superseded/historical", "release-pinned/publication"):
+        for phrase in ("proposed", "accepted current", "challenged", "risk-accepted/provisional", "stale dependent", "superseded/historical", "release-pinned/publication"):
             self.assertIn(phrase, self.foundation)
         self.assertIn("invalidates only descendants/evidence whose claim could materially change", self.foundation)
 
@@ -81,6 +81,14 @@ class Protocol6ContractTests(unittest.TestCase):
             self.assertIn("remove", text)
             self.assertIn("consolidat", text)
         self.assertIn("before another additive durable repair", self.d3)
+
+    def test_protocol6_workflow_is_proportional_and_preserves_overridden_risk(self) -> None:
+        prompts = read("source/shared/references/development-workflow-prompts.md").lower()
+        self.assertIn("change_plan may be none", prompts)
+        self.assertIn("risk-accepted/provisional", prompts)
+        self.assertIn("authority_state", prompts)
+        self.assertIn("dependent descendant", self.workflow)
+        self.assertIn("unqualified pass/complete", self.workflow)
 
     def test_historical_516_is_immutable_and_not_silently_upgraded(self) -> None:
         self.assertIn("5.16.0 -> e151daaf5c8eebb351a85cfed86170fda80fb5e3", self.versioning)

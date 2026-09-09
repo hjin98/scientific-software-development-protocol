@@ -94,6 +94,7 @@ Normative artifacts must distinguish lifecycle state sufficiently to prevent spe
 - **proposed** — candidate authority; not yet governing;
 - **accepted current** — current normative semantic owner for its claim scope;
 - **challenged** — accepted current authority whose correctness is under a material unresolved challenge; still the explicit baseline, but dependent closure is blocked unless a visible human risk override applies;
+- **risk-accepted/provisional** — a descendant artifact/evidence result whose validity depends on an unresolved challenged claim under explicit human risk override; it may support bounded continuation but cannot close the challenged claim or propagate an unqualified Pass;
 - **stale dependent** — downstream authority/evidence invalidated by an accepted upstream change;
 - **superseded/historical** — no longer current but retained for history;
 - **release-pinned/publication snapshot** — immutable historical representation of a specific release/publication context.
@@ -191,6 +192,8 @@ Consequential scientific or mathematically material decisions require the design
 Routine delegated derivation, implementation, refactoring, bounded numerical checks, and literature gathering remain autonomous unless their result crosses such a decision boundary.
 
 A human may accept, reject with reason, revise/clarify authority, request discriminating evidence, or—where safety/project rules allow—issue an explicit visible risk override. A risk override authorizes bounded continuation but does not resolve the truth claim and may not be used to release Protocol 6 itself while a governing Serious Challenge remains unresolved.
+
+Every materially dependent descendant produced under that override remains risk-accepted/provisional with respect to the challenged claim. Unaffected siblings may close normally; dependent results must preserve the marker and may not be represented as ordinary accepted-current closure or an unqualified downstream Pass.
 
 When a serious challenge is rejected with satisfactory reasoning, genuinely reconsider it. If resolved, preserve only the concise material rationale needed to prevent plausible recurrence; do not create a permanent challenge database or review transcript.
 

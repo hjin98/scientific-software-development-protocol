@@ -9,6 +9,7 @@ from pathlib import Path
 from sdp_orchestrator.core import profile as P
 from sdp_orchestrator.core import protocol_source as PS
 from sdp_orchestrator.core.canonical import CANONICAL_STAGES, SSDP6_STAGES, parse_document
+from sdp_orchestrator.core.inputs import resolve_inputs
 from sdp_orchestrator.core.records import WorkplanPolicy
 
 from ._support import CURRENT_CANONICAL_PROMPTS, REPO_ROOT
@@ -60,10 +61,24 @@ class SSDP6CanonicalProfileTests(unittest.TestCase):
         for key in ("intake", "scientific-formulation", "numerical-algorithm-design", "software-design"):
             self.assertIn("TASK", {item.name for item in by_key[key].inputs}, key)
 
-    def test_implementation_and_review_require_governing_workplan(self) -> None:
-        policies = {stage.stage.stage_key: stage.workplan_policy for stage in self.descriptor.stages}
-        self.assertIs(policies["software-implementation"], WorkplanPolicy.REQUIRED)
-        self.assertIs(policies["review"], WorkplanPolicy.REQUIRED)
+    def test_local_d4_is_plan_optional_but_review_remains_plan_governed(self) -> None:
+        by_key = {stage.stage.stage_key: stage for stage in self.descriptor.stages}
+        self.assertIs(by_key["software-implementation"].workplan_policy, WorkplanPolicy.EXPLICIT_ONLY)
+        self.assertIs(by_key["review"].workplan_policy, WorkplanPolicy.REQUIRED)
+        d4_inputs = {item.name for item in by_key["software-implementation"].inputs}
+        self.assertIn("CHANGE_PLAN", d4_inputs)
+        self.assertNotIn("WORKPLAN", d4_inputs)
+        values = {
+            item.name: item.value
+            for item in resolve_inputs(
+                by_key["software-implementation"],
+                workplan=None,
+                first_task=None,
+                overrides={},
+                governing_protocol_version="6.0.0",
+            )
+        }
+        self.assertEqual(values["CHANGE_PLAN"], "NONE")
 
     def test_reduced_routes_skip_unaffected_intermediate_domains(self) -> None:
         def destinations(stage_key: str, trigger: str) -> set[str]:
@@ -92,14 +107,40 @@ class SSDP6CanonicalProfileTests(unittest.TestCase):
             {"numerical-algorithm-design", "software-design", "software-implementation"},
         )
 
-    def test_direct_upstream_handoffs_produce_a_governing_plan(self) -> None:
+    def test_material_authority_review_and_direct_handoffs_have_governing_plans(self) -> None:
         by_key = {stage.stage.stage_key: stage for stage in self.descriptor.stages}
-        self.assertIn("WORKPLAN_DESTINATION", {item.name for item in by_key["scientific-formulation"].inputs})
-        self.assertIn("WORKPLAN_DESTINATION", {item.name for item in by_key["numerical-algorithm-design"].inputs})
+        for key in ("scientific-formulation", "numerical-algorithm-design", "software-design"):
+            self.assertIn("WORKPLAN_DESTINATION", {item.name for item in by_key[key].inputs}, key)
+            self.assertIn("review", self.document.stages[key].body.lower(), key)
         d4_body = self.document.stages["software-implementation"].body.lower()
         self.assertIn("authorized reduced d2->d4 or d1->d4 route", d4_body)
         self.assertIn("do not manufacture a d3 authority mutation", d4_body)
-        self.assertIs(by_key["software-implementation"].workplan_policy, WorkplanPolicy.REQUIRED)
+        self.assertIn("change_plan may be none", d4_body)
+
+    def test_review_pass_can_continue_to_the_dependent_realization_domain(self) -> None:
+        destinations = {
+            t.to_stage.stage_key
+            for t in self.descriptor.transitions
+            if t.from_stage.stage_key == "review"
+            and t.trigger_key == "pass"
+            and t.to_stage is not None
+        }
+        self.assertTrue({"numerical-algorithm-design", "software-design", "software-implementation"}.issubset(destinations))
+
+    def test_risk_override_preserves_reduced_routes_and_provisional_state(self) -> None:
+        def destinations(stage_key: str) -> set[str]:
+            return {
+                t.to_stage.stage_key
+                for t in self.descriptor.transitions
+                if t.from_stage.stage_key == stage_key
+                and t.trigger_key == "risk_override"
+                and t.to_stage is not None
+            }
+        self.assertTrue({"numerical-algorithm-design", "software-design", "software-implementation"}.issubset(destinations("scientific-formulation")))
+        self.assertTrue({"software-design", "software-implementation"}.issubset(destinations("numerical-algorithm-design")))
+        self.assertTrue({"numerical-algorithm-design", "software-design", "software-implementation"}.issubset(destinations("review")))
+        self.assertIn("authority_state", self.document.text)
+        self.assertIn("risk_accepted_provisional", self.document.text)
 
     def test_d3_only_authority_change_can_skip_unaffected_d4(self) -> None:
         destinations = {

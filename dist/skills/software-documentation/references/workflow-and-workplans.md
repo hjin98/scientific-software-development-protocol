@@ -140,6 +140,8 @@ Human gates attach to semantic risk, not every domain transition. D1 and scienti
 
 The orchestrator may represent pending/accepted/rejected human state but may not self-approve a human-owned decision. A human risk override is visible authorization to continue with unresolved risk; it is not epistemic resolution and cannot be used to release Protocol 6 itself under an unresolved governing Serious Challenge.
 
+Any dependent descendant created while that override remains active is risk-accepted/provisional for the challenged claim. Preserve that state through downstream handoffs/results; unaffected siblings may close normally, but dependent work may not silently reset to accepted-current or emit an unqualified Pass/complete result.
+
 ## Bounded invalidation and stale descendants
 
 When accepted authority changes:

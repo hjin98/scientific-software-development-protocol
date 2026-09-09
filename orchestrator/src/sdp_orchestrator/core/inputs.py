@@ -227,6 +227,27 @@ def _resolve_one(
             provenance=P_WORKPLAN,
         )
 
+    if binding.first_class_source == "workplan_selector_optional_path":
+        if workplan is not None:
+            return ResolvedInput(
+                name=name,
+                ownership=binding.ownership,
+                value=encode_scalar(workplan.path),
+                provenance=P_WORKPLAN,
+            )
+        if binding.default_value is None:  # pragma: no cover - profile guarantees a default
+            E.fail(
+                E.PROMPT_INPUT_REQUIRED,
+                f"input {name} has no canonical default and no supplied workplan",
+                details={"input": name},
+            )
+        return ResolvedInput(
+            name=name,
+            ownership=binding.ownership,
+            value=encode_scalar(binding.default_value),
+            provenance=P_CANONICAL_DEFAULT,
+        )
+
     if binding.first_class_source == "first_task":
         if not first_task or not first_task.strip():
             E.fail(

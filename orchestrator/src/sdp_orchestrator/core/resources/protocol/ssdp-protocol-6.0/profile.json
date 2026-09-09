@@ -10,7 +10,7 @@
     "source_digest": {
       "algorithm": "sha256",
       "canonicalization_scheme": "sdp.content.v1",
-      "value": "d6cdbb603ef434c0900fab94e0d382c74b1b7de7bc714415dc302cad329db847"
+      "value": "0247f2ba5e7491b3d304593cf5e28b157b06ef95989158bb6d099f3ed0c93a16"
     }
   },
   "result_schema_id": "sdp.stage-result-envelope",
@@ -432,13 +432,13 @@
       ],
       "inputs": [
         {
-          "default_value": null,
+          "default_value": "NONE",
           "description": null,
-          "first_class_source": "workplan_selector",
+          "first_class_source": "workplan_selector_optional_path",
           "mode_dependent": false,
-          "name": "WORKPLAN",
+          "name": "CHANGE_PLAN",
           "override_allowed": false,
-          "ownership": "mechanical"
+          "ownership": "canonical_default"
         },
         {
           "default_value": null,
@@ -500,7 +500,7 @@
         "stage_key": "software-implementation"
       },
       "title": "D4 Software Implementation",
-      "workplan_policy": "required"
+      "workplan_policy": "explicit_only"
     },
     {
       "aliases": [],
@@ -1239,6 +1239,38 @@
       "trigger_key": "risk_override"
     },
     {
+      "explanation": "bounded D3 work may proceed under visible unresolved D1 risk when D2 authority is unaffected",
+      "from_stage": {
+        "profile_id": "ssdp-protocol-6.0",
+        "protocol_version": "6.0.0",
+        "stage_key": "scientific-formulation"
+      },
+      "priority_hint": null,
+      "terminal": false,
+      "to_stage": {
+        "profile_id": "ssdp-protocol-6.0",
+        "protocol_version": "6.0.0",
+        "stage_key": "software-design"
+      },
+      "trigger_key": "risk_override"
+    },
+    {
+      "explanation": "bounded D4 work may proceed under visible unresolved D1 risk when D2 and D3 authority are unaffected",
+      "from_stage": {
+        "profile_id": "ssdp-protocol-6.0",
+        "protocol_version": "6.0.0",
+        "stage_key": "scientific-formulation"
+      },
+      "priority_hint": null,
+      "terminal": false,
+      "to_stage": {
+        "profile_id": "ssdp-protocol-6.0",
+        "protocol_version": "6.0.0",
+        "stage_key": "software-implementation"
+      },
+      "trigger_key": "risk_override"
+    },
+    {
       "explanation": "realize accepted D2 changes through affected architecture",
       "from_stage": {
         "profile_id": "ssdp-protocol-6.0",
@@ -1355,6 +1387,22 @@
         "profile_id": "ssdp-protocol-6.0",
         "protocol_version": "6.0.0",
         "stage_key": "software-design"
+      },
+      "trigger_key": "risk_override"
+    },
+    {
+      "explanation": "bounded D4 work may proceed under visible unresolved D2 risk when D3 authority is unaffected",
+      "from_stage": {
+        "profile_id": "ssdp-protocol-6.0",
+        "protocol_version": "6.0.0",
+        "stage_key": "numerical-algorithm-design"
+      },
+      "priority_hint": null,
+      "terminal": false,
+      "to_stage": {
+        "profile_id": "ssdp-protocol-6.0",
+        "protocol_version": "6.0.0",
+        "stage_key": "software-implementation"
       },
       "trigger_key": "risk_override"
     },
@@ -1527,6 +1575,54 @@
       "trigger_key": "serious_challenge"
     },
     {
+      "explanation": "a passed D1-boundary review may continue into dependent D2 realization",
+      "from_stage": {
+        "profile_id": "ssdp-protocol-6.0",
+        "protocol_version": "6.0.0",
+        "stage_key": "review"
+      },
+      "priority_hint": null,
+      "terminal": false,
+      "to_stage": {
+        "profile_id": "ssdp-protocol-6.0",
+        "protocol_version": "6.0.0",
+        "stage_key": "numerical-algorithm-design"
+      },
+      "trigger_key": "pass"
+    },
+    {
+      "explanation": "a passed D1/D2-boundary review may continue into dependent D3 realization",
+      "from_stage": {
+        "profile_id": "ssdp-protocol-6.0",
+        "protocol_version": "6.0.0",
+        "stage_key": "review"
+      },
+      "priority_hint": null,
+      "terminal": false,
+      "to_stage": {
+        "profile_id": "ssdp-protocol-6.0",
+        "protocol_version": "6.0.0",
+        "stage_key": "software-design"
+      },
+      "trigger_key": "pass"
+    },
+    {
+      "explanation": "a passed D1/D2/D3-boundary review may continue into dependent D4 realization",
+      "from_stage": {
+        "profile_id": "ssdp-protocol-6.0",
+        "protocol_version": "6.0.0",
+        "stage_key": "review"
+      },
+      "priority_hint": null,
+      "terminal": false,
+      "to_stage": {
+        "profile_id": "ssdp-protocol-6.0",
+        "protocol_version": "6.0.0",
+        "stage_key": "software-implementation"
+      },
+      "trigger_key": "pass"
+    },
+    {
       "explanation": "deeper verification is optional for materially high-risk claims",
       "from_stage": {
         "profile_id": "ssdp-protocol-6.0",
@@ -1661,6 +1757,54 @@
       "terminal": true,
       "to_stage": null,
       "trigger_key": "human_pending"
+    },
+    {
+      "explanation": "bounded D2 realization may proceed under visible accepted risk where policy permits",
+      "from_stage": {
+        "profile_id": "ssdp-protocol-6.0",
+        "protocol_version": "6.0.0",
+        "stage_key": "review"
+      },
+      "priority_hint": null,
+      "terminal": false,
+      "to_stage": {
+        "profile_id": "ssdp-protocol-6.0",
+        "protocol_version": "6.0.0",
+        "stage_key": "numerical-algorithm-design"
+      },
+      "trigger_key": "risk_override"
+    },
+    {
+      "explanation": "bounded D3 realization may proceed under visible accepted risk where policy permits",
+      "from_stage": {
+        "profile_id": "ssdp-protocol-6.0",
+        "protocol_version": "6.0.0",
+        "stage_key": "review"
+      },
+      "priority_hint": null,
+      "terminal": false,
+      "to_stage": {
+        "profile_id": "ssdp-protocol-6.0",
+        "protocol_version": "6.0.0",
+        "stage_key": "software-design"
+      },
+      "trigger_key": "risk_override"
+    },
+    {
+      "explanation": "bounded D4 realization may proceed under visible accepted risk where policy permits",
+      "from_stage": {
+        "profile_id": "ssdp-protocol-6.0",
+        "protocol_version": "6.0.0",
+        "stage_key": "review"
+      },
+      "priority_hint": null,
+      "terminal": false,
+      "to_stage": {
+        "profile_id": "ssdp-protocol-6.0",
+        "protocol_version": "6.0.0",
+        "stage_key": "software-implementation"
+      },
+      "trigger_key": "risk_override"
     },
     {
       "explanation": "bounded verification may proceed under visible accepted risk where policy permits",

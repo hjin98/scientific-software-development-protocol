@@ -230,13 +230,15 @@ Protocol 6 stage policies are:
 | `scientific-formulation` | optional explicit only | `--task` |
 | `numerical-algorithm-design` | optional explicit only | `--task` |
 | `software-design` | optional explicit only | `--task` |
-| `software-implementation` | required/resolved | — |
+| `software-implementation` | optional explicit only | — |
 | `review` | required/resolved | — |
 | `verification` | optional explicit only | `VERIFICATION_SCOPE` |
 | `stabilization` | optional explicit only | `STABILIZATION_SCOPE` |
 | `alignment` | exact selector required | `UPSTREAM_ACCEPTED_WORK` |
 | `health-audit` | workplan disallowed | `AUDIT_SCOPE` |
 | `closeout` | optional exact binding | `COMPLETED_WORK` unless the selected plan supplies it |
+
+A genuinely local Protocol 6 D4-only implementation may omit `--workplan`; Core renders `CHANGE_PLAN = NONE` and the receiving agent must still perform the protocol's proportionate upstream-impact exclusion. When a change plan/workplan materially governs D4, pass it explicitly with `--workplan`; its declared `protocol_version` still binds the compatible profile. Review remains plan-governed.
 
 A new D3 design task with no `--workplan` does **not** adopt an unrelated sole
 active workplan. A workplan passed to a stage that disallows one fails rather
