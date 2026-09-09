@@ -1,0 +1,107 @@
+name: SSDP 6 alignment-input repair
+
+on:
+  push:
+    branches:
+      - impl/ssdp-6
+
+permissions:
+  contents: write
+
+jobs:
+  repair:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Apply bounded canonical repair and semantic regressions
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          prompts = Path("source/shared/references/development-workflow-prompts.md")
+          text = prompts.read_text(encoding="utf-8")
+          old = "FROZEN_PARENT_AUTHORITY = [accepted parent invariants/cycle decisions; AUTO = discover]"
+          new = "GOVERNING_AUTHORITY = [accepted parent invariants and cycle-scoped decisions; AUTO = discover]"
+          if text.count(old) != 1:
+              raise SystemExit(f"expected exactly one canonical alignment input occurrence, found {text.count(old)}")
+          prompts.write_text(text.replace(old, new), encoding="utf-8")
+
+          compression = Path("tests/test_protocol_effective_compression.py")
+          text = compression.read_text(encoding="utf-8")
+          anchor = '            "product/frozen",\n'
+          insertion = anchor + '            "frozen_parent_authority",\n'
+          if text.count(anchor) != 1 or "frozen_parent_authority" in text:
+              raise SystemExit("unexpected effective-compression oracle shape")
+          compression.write_text(text.replace(anchor, insertion), encoding="utf-8")
+
+          profile_test = Path("orchestrator/tests/test_ssdp6_profiles.py")
+          text = profile_test.read_text(encoding="utf-8")
+          anchor = '''    def test_task_is_not_re_requested_by_downstream_governed_stages(self) -> None:\n'''
+          method = '''    def test_current_profile_uses_protocol6_native_parent_authority_input(self) -> None:\n        by_key = {stage.stage.stage_key: stage for stage in self.descriptor.stages}\n        alignment_inputs = {item.name for item in by_key["alignment"].inputs}\n        self.assertIn("GOVERNING_AUTHORITY", alignment_inputs)\n        self.assertNotIn("FROZEN_PARENT_AUTHORITY", alignment_inputs)\n\n'''
+          if text.count(anchor) != 1 or "test_current_profile_uses_protocol6_native_parent_authority_input" in text:
+              raise SystemExit("unexpected current-profile test shape")
+          text = text.replace(anchor, method + anchor)
+
+          legacy_anchor = '''    def test_legacy_profile_is_still_derived_from_legacy_prompts(self) -> None:\n'''
+          legacy_method = '''    def test_legacy_alignment_retains_frozen_parent_input(self) -> None:\n        legacy = PS.resolve_packaged(P.PROFILE_ID).snapshot.descriptor\n        by_key = {stage.stage.stage_key: stage for stage in legacy.stages}\n        alignment_inputs = {item.name for item in by_key["alignment"].inputs}\n        self.assertIn("FROZEN_PARENT_AUTHORITY", alignment_inputs)\n\n'''
+          if text.count(legacy_anchor) != 1 or "test_legacy_alignment_retains_frozen_parent_input" in text:
+              raise SystemExit("unexpected legacy-profile test shape")
+          profile_test.write_text(text.replace(legacy_anchor, legacy_method + legacy_anchor), encoding="utf-8")
+          PY
+      - name: Install validation and Orchestrator dependencies
+        run: >-
+          python -m pip install
+          -r source/requirements-validation.txt
+          ./orchestrator
+          -r orchestrator/requirements-dev.txt
+      - name: Run protocol regression tests
+        run: python -m unittest discover -s tests -v
+      - name: Generate current Protocol 6 packaged snapshot
+        run: python orchestrator/scripts/generate_protocol_snapshot.py
+      - name: Build canonical skill packages
+        run: python source/build_skills.py --output /tmp/protocol-dist
+      - name: Validate generated skill packages independently
+        run: python source/validate_packages.py --dist /tmp/protocol-dist
+      - name: Replace committed distribution from canonical build
+        run: |
+          rm -rf dist
+          cp -a /tmp/protocol-dist dist
+      - name: Verify generated distribution parity
+        run: python source/check_dist.py --expected /tmp/protocol-dist --committed dist
+      - name: Verify generated Protocol snapshot parity
+        run: python orchestrator/scripts/generate_protocol_snapshot.py --check
+      - name: Run Orchestrator Core acceptance suite
+        run: python orchestrator/scripts/run_core_tests.py
+      - name: Confirm legacy/current profile vocabulary separation
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          current = json.loads(Path("orchestrator/src/sdp_orchestrator/core/resources/protocol/ssdp-protocol-6.0/profile.json").read_text())
+          legacy = json.loads(Path("orchestrator/src/sdp_orchestrator/core/resources/protocol/sdp-protocol-5.16/profile.json").read_text())
+          def names(profile, key):
+              stage = next(item for item in profile["stages"] if item["stage"]["stage_key"] == key)
+              return {item["name"] for item in stage["inputs"]}
+          assert "GOVERNING_AUTHORITY" in names(current, "alignment")
+          assert "FROZEN_PARENT_AUTHORITY" not in names(current, "alignment")
+          assert "FROZEN_PARENT_AUTHORITY" in names(legacy, "alignment")
+          PY
+      - name: Check patch whitespace
+        run: git diff --check
+      - name: Remove temporary repair workflow and commit accepted repair
+        run: |
+          git rm .github/workflows/ssdp6-alignment-repair.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add source/shared/references/development-workflow-prompts.md \
+                  tests/test_protocol_effective_compression.py \
+                  orchestrator/tests/test_ssdp6_profiles.py \
+                  dist \
+                  orchestrator/src/sdp_orchestrator/core/resources/protocol/ssdp-protocol-6.0
+          git diff --cached --check
+          git commit -m "Remove legacy parent-authority input from Protocol 6 profile"
+          git push
