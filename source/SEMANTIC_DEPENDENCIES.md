@@ -49,7 +49,7 @@ source/shared/references/protocol-versioning-and-compatibility.md
   DEPENDS_ON -> source/shared/references/evidence-evolution-and-dependencies.md
 ```
 
-Evidence specifications `EVIDENCES` the governed claims their oracles are designed to discriminate. Evidence realizations `INSTANTIATE` those specifications and `EXECUTION_DEPENDS_ON` the concrete implementation/harness/data/environment needed to execute them. Observations are `GENERATED_BY` evidence realizations.
+Evidence specifications `EVIDENCES` the governed claims their oracles are designed to discriminate. Evidence realizations `INSTANTIATES` those specifications and `EXECUTION_DEPENDS_ON` the concrete implementation/harness/data/environment needed to execute them. Observations are `GENERATED_BY` evidence realizations.
 
 ## Human-facing documentation relationships
 
