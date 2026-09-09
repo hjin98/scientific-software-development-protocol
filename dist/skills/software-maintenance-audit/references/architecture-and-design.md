@@ -1,8 +1,8 @@
 # Software Architecture and Design (D3)
 
-D3 owns software architecture: the accepted structural abstraction that realizes applicable D1/D2 semantics and domain-local governed engineering constraints while constraining D4 specification/implementation.
+D3 owns software architecture: the accepted structural abstraction that concretizes applicable D1/D2 semantics and domain-local governed engineering constraints while constraining D4 specification/implementation.
 
-Read [Abstraction, realization, authority, and challenge](abstraction-and-realization.md) first for the protocol-wide authority model.
+Read [Abstraction, concretization, authority, and challenge](abstraction-and-realization.md) first for the protocol-wide authority model.
 
 ## D3 boundary
 
@@ -40,7 +40,7 @@ A locally simple architecture that violates numerical fidelity, resource bounds,
 
 The logical D3 normative document family is the **Architecture Manual**. It describes accepted current ownership, interfaces, data/control flow, persistence/concurrency/security/resource boundaries, and material architecture decisions. Each material architecture claim has one current semantic owner.
 
-Keep current architecture separate from workplan-specific cycle freeze. A workplan can freeze a solution decision for one realization cycle without making it permanent architecture. Promote it into the Architecture Manual only when D3 deliberately accepts it as durable current structure.
+Keep current architecture separate from workplan-specific cycle freeze. A workplan can freeze a solution decision for one concretization cycle without making it permanent architecture. Promote it into the Architecture Manual only when D3 deliberately accepts it as durable current structure.
 
 For a material durable D3 authority mutation, deliberate acceptance requires an independent falsification pass by a reviewer/context that did not author the proposal before the Architecture Manual becomes accepted-current. A workplan's cycle freeze does not substitute for that durable-authority gate, and a later implementation Review cannot retroactively legitimize a prematurely promoted architecture.
 
@@ -63,7 +63,7 @@ When triggered:
 ```text
 recover applicable parent invariants and external constraints
  -> identify cycle-scoped D3 decisions
- -> treat lower realization as replaceable
+ -> treat lower concretization as replaceable
  -> remove / narrow / alter / consolidate / refactor where sufficient
  -> add machinery only for a genuinely missing capability
     or when one canonical mechanism replaces broader complexity
@@ -73,9 +73,9 @@ Do not simplify by weakening D1/D2 semantics or governed engineering constraints
 
 ## Solution-created problems and recurrence
 
-A problem created only by delegated realization remains a realization problem. Dependency on a helper, wrapper, synchronized representation, state machine, or previous patch is evidence about that realization's cost and shape; it does not make the mechanism an invariant.
+A problem created only by delegated concretization remains a concretization problem. Dependency on a helper, wrapper, synchronized representation, state machine, or previous patch is evidence about that concretization's cost and shape; it does not make the mechanism an invariant.
 
-A first clean local defect remains local. **Recurrence is evidence about the shared owner/mechanism**, not evidence that the current realization should survive. Material sibling recurrence changes the unit of reasoning to that shared owner/mechanism. If recurrence also exposes accumulating complexity, simplify/re-derive delegated realization before another additive repair.
+A first clean local defect remains local. **Recurrence is evidence about the shared owner/mechanism**, not evidence that the current concretization should survive. Material sibling recurrence changes the unit of reasoning to that shared owner/mechanism. If recurrence also exposes accumulating complexity, simplify/re-derive delegated concretization before another additive repair.
 
 ## Cross-cutting concerns route by semantic effect
 
@@ -95,7 +95,7 @@ An architecture can satisfy its own local diagrams while being too weak to prese
 
 ## D3 -> D4 handoff
 
-A D3->D4 implementation workplan should freeze only material architecture decisions needed to bound implementation. It should state accepted D3 invariants, applicable side constraints, delegated D4 realization space, non-goals, task-specific acceptance boundaries, and genuine redesign/simplification triggers.
+A D3->D4 implementation workplan should freeze only material architecture decisions needed to bound implementation. It should state accepted D3 invariants, applicable side constraints, delegated D4 concretization space, non-goals, task-specific acceptance boundaries, and genuine redesign/simplification triggers.
 
 Functions, helper APIs, wrappers, retries, caches, local algorithms, internal state machines, exact library choices, and current acceptance-owner identity remain D4-delegated unless architecture or a governed contract explicitly requires them.
 
@@ -111,6 +111,6 @@ Metrics such as complexity, churn, duplication, coverage, and centrality are sen
 
 D3 Review reconstructs applicable D1/D2 semantics, D3 architecture, side constraints, and actual D4 behavior. It attempts targeted falsification of ownership, dependency, state, reliability, security, scaling/resource, compatibility, and abstraction-adequacy claims.
 
-If D4 fails a coherent D3 contract, route an ordinary blocker to D4. If D3 itself appears contradictory, materially ambiguous, unrealizable under its simultaneous constraints, or incapable of preserving D2 semantics, raise a Serious Challenge to D3 rather than adding a D4 workaround.
+If D4 fails a coherent D3 contract, route an ordinary blocker to D4. If D3 itself appears contradictory, materially ambiguous, impossible to concretize under its simultaneous constraints, or incapable of preserving D2 semantics, raise a Serious Challenge to D3 rather than adding a D4 workaround.
 
 At a convergence boundary, stabilization asks whether the architecture would still be deliberately chosen today for the same governing contract. If not, route the smallest coherent D3 simplification or upstream reconsideration; do not accrete another compatibility layer automatically.

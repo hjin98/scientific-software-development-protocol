@@ -100,7 +100,7 @@ If representative measurement invalidating a premise of accepted D3/D2/D1 author
 
 If later evidence proves accepted implementation work unsound, invalidate it and repair/retest. Truthful non-closure is preferable to counterfeit completion, but continue while a reasonable in-scope engineering path remains.
 
-## Evidence specification, realization, and applicability
+## Evidence specification, concretization, and applicability
 
 Keep distinct:
 
@@ -160,7 +160,7 @@ When accepted authority or a material concretization changes, account proportion
 ```text
 changed authority/concretization
  -> materially affected descendant authority/concretizations
- -> affected evidence specifications/realizations
+ -> affected evidence specifications/concretizations
  -> affected documentation/current dependency view
  -> required human re-ratification where applicable
  -> required revalidation/retirement/semantic-history update
@@ -201,4 +201,4 @@ Do not relax tolerance, add fallback/wrapper, rewrite tests/specification/method
 
 ## Completion
 
-Report material implementation/reconciliation, final semantic owner, evidence specifications/realizations used and their applicability, checks actually executed, unavailable/blocking checks, upstream challenges, documentation/dependency/history impact, and unresolved material risks. Do not emit empty protocol categories or claim Pass before assembled acceptance.
+Report material implementation/reconciliation, final semantic owner, evidence specifications/concretizations used and their applicability, checks actually executed, unavailable/blocking checks, upstream challenges, documentation/dependency/history impact, and unresolved material risks. Do not emit empty protocol categories or claim Pass before assembled acceptance.

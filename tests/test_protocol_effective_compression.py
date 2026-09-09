@@ -49,13 +49,13 @@ class HistoricalFailureModeScenarios(unittest.TestCase):
         self.assertIn("cannot close the owner claim", self.testing)
 
     def test_expensive_dependency_can_be_faked_below_real_owner(self) -> None:
-        self.assertIn("expensive ml/scientific training or prediction", self.testing)
+        self.assertIn("expensive machine-learning/scientific training or prediction", self.testing)
         self.assertIn("not a global ban on mocks or fakes", self.testing)
 
-    def test_equivalent_local_realization_is_reconciliation_not_redesign(self) -> None:
+    def test_equivalent_local_concretization_is_reconciliation_not_redesign(self) -> None:
         self.assertIn("local reconciliation", self.implementation)
-        self.assertIn("equivalent local realization", self.implementation)
-        self.assertIn("suggested realization does not become a cycle-scoped or durable authority", self.workflow)
+        self.assertIn("equivalent local concretization", self.implementation)
+        self.assertIn("suggested concretization does not become a cycle-scoped or durable authority", self.workflow)
 
     def test_invalidated_accepted_premise_triggers_bounded_redesign(self) -> None:
         self.assertIn("representative measurement invalidating a premise", self.implementation)
@@ -88,7 +88,7 @@ class HistoricalFailureModeScenarios(unittest.TestCase):
         self.assertIn("structural/source", self.testing)
 
     def test_literal_contract_pass_that_defeats_stakeholder_outcome_is_rejected(self) -> None:
-        self.assertIn("literal compliance actually realizes the protected stakeholder outcome", self.design)
+        self.assertIn("literal compliance actually concretizes the protected stakeholder outcome", self.design)
         self.assertIn("workplan/design deficiency", self.design)
         self.assertIn("independent-evaluator counterfactual", self.testing)
 
@@ -96,7 +96,7 @@ class HistoricalFailureModeScenarios(unittest.TestCase):
         self.assertIn("protocol 6 is the general theory", self.versioning)
         self.assertIn("protocol 5 is a narrower software-local specialization", self.versioning)
         self.assertIn("mapping preserves capability, not vocabulary", self.versioning)
-        self.assertIn("delegated realization beneath the governing abstraction", self.versioning)
+        self.assertIn("delegated concretization beneath the governing abstraction", self.versioning)
 
     def test_urgent_mitigation_preserves_simplification_debt(self) -> None:
         self.assertIn("bounded urgent mitigation", self.workflow)

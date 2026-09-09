@@ -19,6 +19,7 @@ PROTOCOL_VERSION = (ROOT / "PROTOCOL_VERSION").read_text(encoding="utf-8").strip
 CORE = [
     "workflow-and-workplans.md",
     "testing-and-validation.md",
+    "evidence-evolution-and-dependencies.md",
     "protocol-versioning-and-compatibility.md",
 ]
 FOUNDATION = ["abstraction-and-realization.md"]
@@ -68,6 +69,8 @@ ROLE_SPECS = {
         "references": FOUNDATION + CORE + [
             "numerical-algorithm-design.md",
             "scientific-software.md",
+            "scientific-technical-writing.md",
+            "documentation-and-evidence.md",
             "performance-and-parallelism.md",
         ],
         "templates": [
@@ -146,6 +149,27 @@ SPECIALIST_SPECS = {
         "templates": [],
     },
 }
+
+DIRECT_ROUTE_RE = re.compile(r"\]\((?P<kind>references|templates)/(?P<name>[A-Za-z0-9_.-]+\.md)\)")
+
+
+def _direct_payload(root: Path, skill_name: str) -> tuple[list[str], list[str]]:
+    text = (root / skill_name / "SKILL.md").read_text(encoding="utf-8")
+    references: list[str] = []
+    templates: list[str] = []
+    for match in DIRECT_ROUTE_RE.finditer(text):
+        target = references if match.group("kind") == "references" else templates
+        name = match.group("name")
+        if name not in target:
+            target.append(name)
+    return references, templates
+
+
+for _name, _spec in ROLE_SPECS.items():
+    _spec["references"], _spec["templates"] = _direct_payload(ROLES, _name)
+for _name, _spec in SPECIALIST_SPECS.items():
+    _spec["references"], _spec["templates"] = _direct_payload(SPECIALISTS, _name)
+
 
 NAME_RE = re.compile(r"(?m)^name:\s*([a-z0-9]+(?:-[a-z0-9]+)*)\s*$")
 

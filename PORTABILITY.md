@@ -1,6 +1,6 @@
 # Agent portability and routing qualification
 
-Protocol 6 preserves the portable Agent Skill contract while adding first-class D1/D2 roles and a dual-version orchestration profile.
+Protocol 6.1 preserves the portable Agent Skill contract while adding first-class D1/D2 roles and a dual-version orchestration profile.
 
 ## Installation contract
 
@@ -22,7 +22,7 @@ Optional specialists: `software-documentation`, `software-maintenance-audit`, `r
 `source/shared/references/development-workflow-prompts.md` is the canonical prompt source. With `AUTO_LOCAL_FIRST`:
 
 1. use a governing-version-compatible installed skill/exposed skill root through the harness-native mechanism;
-2. otherwise use the canonical public repository `https://github.com/hjin98/software-development-protocol` and its `source/` entrypoint plus required references;
+2. otherwise use the canonical public repository `https://github.com/hjin98/scientific-software-development-protocol` and its `source/` entrypoint plus required references;
 3. preserve the workplan's protocol binding; never guess a semantic version as a Git ref or silently substitute current doctrine;
 4. report truthful non-closure if no compatible source can be read.
 
@@ -35,9 +35,10 @@ The Core supports independent version-bound profiles:
 | Profile | Protocol | Profile schema | Purpose |
 | --- | --- | ---: | --- |
 | `sdp-protocol-5.16` | 5.16.0 | 1 | frozen historical compatibility |
-| `ssdp-protocol-6.0` | 6.0.0 | 2 | current domain-aware workflow |
+| `ssdp-protocol-6.0` | 6.0.0 | 2 | frozen pre-6.1 compatibility |
+| `ssdp-protocol-6.1` | 6.1.0 | 2 | current evidence/evolution-aware document-controlled workflow |
 
-Historical 5.16 prompt/profile bytes remain immutable. A workplan's declared `protocol_version` selects its compatible profile before stage semantics are interpreted. Project profile configuration is a default, not authority to override an explicit workplan version.
+Historical 5.16 and 6.0 prompt/profile bytes remain immutable. A workplan's declared `protocol_version` selects its compatible profile before stage semantics are interpreted. Project profile configuration is a default, not authority to override an explicit workplan version.
 
 Protocol 6 profile stages include authority intake, D1, D2, D3, D4, Review/Challenge, Verification, Stabilization, Alignment, Health Audit, and Closeout. Serious Challenge/human-pending outcomes stop automatic normal routing; the orchestrator records/routes state but never decides scientific truth.
 
@@ -45,7 +46,7 @@ Protocol 6 profile stages include authority intake, D1, D2, D3, D4, Review/Chall
 
 Protocol 6 keeps three independent routing concerns:
 
-1. **Workflow/domain routing:** classify the earliest affected D1-D4 owner, then use reduced or full realization paths as required.
+1. **Workflow/domain routing:** classify the earliest affected D1-D4 owner, then use reduced or full concretization paths as required.
 2. **Language/runtime routing:** material executable Python/C++ work routes through `references/language-profiles.md` and the matching language profile(s).
 3. **Engineering-relation/tool routing:** semantic, structural, property/generative, interprocedural, runtime-state, memory/UB, race, performance, test-effectiveness, architecture-fitness, longitudinal-risk, and failure/recovery questions route to capabilities that directly model the relation.
 

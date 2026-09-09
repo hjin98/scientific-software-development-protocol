@@ -39,7 +39,7 @@ class ProxyProofAcceptanceContractTests(unittest.TestCase):
         testing = read("source/shared/references/testing-and-validation.md").lower()
         implementation = read("source/roles/software-implementation/SKILL.md").lower()
         self.assertIn("bounded deterministic fixtures remain preferred", testing)
-        self.assertIn("expensive ml/scientific training or prediction", testing)
+        self.assertIn("expensive machine-learning/scientific training or prediction", testing)
         self.assertIn("bounded test doubles remain valid below or outside", implementation)
         self.assertIn("production-scale execution", testing)
 
@@ -58,7 +58,7 @@ class ProxyProofAcceptanceContractTests(unittest.TestCase):
             self.assertIn("references/testing-and-validation.md", text)
             self.assertIn("could remain green", text)
         self.assertIn("applicable accepted parent/cycle-scoped claim and the real semantic owner/path", design)
-        self.assertIn("real semantic owner/path of the final accepted realization", implementation)
+        self.assertIn("real semantic owner/path of the final accepted concretization", implementation)
 
     def test_workplan_boundary_is_conditional_not_ceremonial(self) -> None:
         workflow = read("source/shared/references/workflow-and-workplans.md").lower()
@@ -78,14 +78,14 @@ class ProxyProofAcceptanceContractTests(unittest.TestCase):
         self.assertIn("equivalent owner `b`", testing)
         self.assertIn("reconcile the acceptance mapping to the new real owner", testing)
         self.assertIn("accepted-current domain authority", workflow)
-        self.assertIn("merely the current delegated realization", template)
-        self.assertIn("final accepted realization", implementation)
+        self.assertIn("merely the current delegated concretization", template)
+        self.assertIn("final accepted concretization", implementation)
         self.assertIn("do not treat that remapping as proxy-passing or design reopening", implementation)
 
     def test_targeted_guardrails_do_not_create_global_anti_mock_framework(self) -> None:
         text = read("source/shared/references/testing-and-validation.md").lower()
         self.assertIn("robust inexpensive structural/negative check", text)
-        self.assertIn("do not require universal ast scanning", text)
+        self.assertIn("do not require universal abstract-syntax-tree (ast) scanning", text)
         self.assertIn("global monkeypatch ban", text)
         self.assertIn("new anti-mocking framework", text)
 

@@ -1,11 +1,11 @@
 # Language Engineering Profiles
 
-Current Protocol 6 domain doctrine is authoritative. Language profiles specialize that doctrine for execution, type, lifetime, build, packaging, and performance semantics that genuinely differ by language; they do not create parallel lifecycle, testing, scientific, security, or performance policies.
+Current Protocol 6.1 domain doctrine is authoritative. Language profiles specialize that doctrine for execution, type, lifetime, build, packaging, and performance semantics that genuinely differ by language; they do not create parallel lifecycle, testing, scientific, security, evidence, or performance policies.
 
 Use this precedence:
 
 ```text
-shared domain rule -> active language profile(s) -> implementation-local realization
+shared domain rule -> active language profile(s) -> implementation-local concretization
 ```
 
 ## Activation
@@ -24,8 +24,8 @@ Do not infer a global Python-over-C++ or C++-over-Python precedence. Each profil
 
 Profiles refine, but do not duplicate or weaken:
 
-- applicable parent abstractions and governed constraints, accepted-current authority versus cycle-scoped decisions, delegated realization, active simplicity, workflow, convergence, and development economy;
-- testing, affected regression, integration, proxy-proof acceptance, and evidence integrity;
+- applicable parent abstractions and governed constraints, accepted-current authority versus cycle-scoped decisions, delegated concretization, active simplicity, workflow, convergence, and development economy;
+- testing, affected regression, integration, proxy-proof acceptance, evidence integrity/applicability, and bounded impact closure;
 - generic performance order, optimized-kernel preference, data movement, resource discovery, parallelism classes, benchmark comparability, and accelerator gating;
 - orchestration correctness, cancellation, failure propagation, resource ownership, and deterministic aggregation;
 - scientific/numerical invariants, tolerances, provenance, and reference-oracle semantics;
@@ -45,7 +45,11 @@ When both profiles apply:
 - test the installed/packaged extension or real supported consumer path rather than accepting direct kernel invocation as a proxy;
 - treat generated binding code as derived unless project authority explicitly governs it as source.
 
-Introducing or removing a material language boundary is a D3 decision when it changes accepted architecture/ownership, deployment, ABI, packaging, resource, portability, or performance semantics. A local equivalent realization beneath those boundaries remains D4 discretion.
+Introducing or removing a material language boundary is a D3 decision when it changes accepted architecture/ownership, deployment, application binary interface (ABI), packaging, resource, portability, or performance semantics. A local equivalent concretization beneath those boundaries remains D4 discretion.
+
+## Evidence and backend changes
+
+Language/runtime/backend changes can invalidate evidence execution without changing the evidence target proposition. When a compiler/runtime/backend/precision change can alter interpretation, review applicability and rerun the relevant evidence specification against the new candidate. Preserve still-valid evidence; do not assume every prior result is stale merely because one implementation mechanism changed.
 
 ## Complexity and performance
 
@@ -53,4 +57,4 @@ Use language-native mechanisms to satisfy the governing contract with minimum ju
 
 An obvious semantically equivalent efficiency improvement that does not add material complexity may be implemented without a pre-change benchmark. It still requires normal correctness/regression evidence, and no quantitative speedup or scaling claim may be made without representative measurement.
 
-Escalations that add durable build/runtime/dependency machinery—new language boundaries, custom native kernels, explicit SIMD dispatch, new parallel runtimes, custom allocators, backend matrices, PGO/LTO policy, or accelerators—require representative evidence and total-system justification under the shared performance and architecture owners.
+Escalations that add durable build/runtime/dependency machinery—new language boundaries, custom native kernels, explicit single-instruction multiple-data (SIMD) dispatch, new parallel runtimes, custom allocators, backend matrices, profile-guided optimization/link-time optimization (PGO/LTO) policy, or accelerators—require representative evidence and total-system justification under the shared performance and architecture owners.

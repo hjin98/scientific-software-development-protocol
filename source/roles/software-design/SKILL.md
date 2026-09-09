@@ -97,13 +97,13 @@ Existing code/tests/helpers/wrappers/caches/state machines/library choices do no
 4. Compare admissible architectures, preferring cohesive ownership, direct flow, minimal states/interfaces/dependencies, and explicit resource/security/compatibility boundaries.
 5. Freeze only material D3 decisions needed for the cycle; delegate D4 mechanics.
 6. Define D4 acceptance through real semantic-owner boundaries and complete affected regression/integration.
-7. Identify materially affected evidence specifications/realizations and dependency/history obligations. Distinguish evidence targets from execution dependencies and do not treat a partial dependency view as proof of non-impact.
+7. Identify materially affected evidence specifications/concretizations and dependency/history obligations. Distinguish evidence targets from execution dependencies and do not treat a partial dependency view as proof of non-impact.
 8. State evidence that would reopen D3 versus evidence that should remain a D4 local reconciliation.
 9. For a material durable D3 authority mutation, require an independent falsification pass by a reviewer/context that did not author the proposal before promoting it to accepted-current. If that pass is unavailable, leave D3 authority proposed and do not report accepted-current. Workplan-only cycle freezes remain distinct from durable Architecture Manual acceptance.
 
 ## Evidence, dependency, and evolution handling
 
-A changed D3 abstraction or material concretization creates a bounded review obligation over materially dependent descendants, evidence specifications/realizations, documentation, and semantic-history records. It does not prove every descendant wrong.
+A changed D3 abstraction or material concretization creates a bounded review obligation over materially dependent descendants, evidence specifications/concretizations, documentation, and semantic-history records. It does not prove every descendant wrong.
 
 A test can evidence a durable D3/D2/D1 contract while executing through replaceable D4 machinery. If D4 ownership changes under equivalent semantics, remap/rerun owner-specific evidence rather than preserving obsolete machinery merely to satisfy the old harness.
 

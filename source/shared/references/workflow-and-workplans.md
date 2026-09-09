@@ -21,7 +21,7 @@ D1 scientific-formulation
 
 This is a semantic ordering, not a required four-stage waterfall. A local implementation refactor can remain D4-only after a proportionate upstream-impact exclusion. A software-architecture change can be D3->D4. A numerical change can begin at D2. A scientific formulation change begins at D1 and concretizes downward only through materially dependent descendants.
 
-Supporting capabilities such as `software-documentation`, `software-maintenance-audit`, and `repository-hygiene` are not authority-bearing approval roles. The software-local subcycle remains `software-design -> software-implementation` at D3->D4; it does not own D1/D2.
+Supporting capabilities such as `software-documentation`, `software-maintenance-audit`, and `repository-hygiene` are not authority-bearing approval roles. In particular, `software-maintenance-audit` is not a third lifecycle role; it is non-authoritative longitudinal sensing/support. The software-local subcycle remains `software-design -> software-implementation` at D3->D4; it does not own D1/D2.
 
 ## Start at the highest potentially affected domain
 
@@ -112,6 +112,8 @@ A child role may choose any concretization that satisfies every applicable paren
 A workplan's suggested concretization is not automatically authoritative. Newly discovered affected behavior must be incorporated, but discovery does not mint unrelated authority.
 
 ## Active simplicity and recurrence
+
+Detailed recurrence, bounded family closure, simplification, review-sufficiency, and revision-economy rules route through [Convergence and development-cycle economy](convergence-and-cycle-economy.md).
 
 A **first clean local defect remains local**. It does not require a census merely because variants are imaginable.
 

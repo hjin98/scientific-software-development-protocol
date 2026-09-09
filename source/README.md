@@ -1,12 +1,12 @@
-# Scientific Software Development Protocol 6.0
+# Scientific Software Development Protocol 6.1
 
 This directory is the canonical Protocol 6 source.
 
 ## Governing model
 
-Read `shared/references/abstraction-and-realization.md` first. Protocol 6 treats scientific software as recursively constrained realization across D1 scientific formulation, D2 algorithm/numerical method, D3 software architecture, and D4 specification/implementation.
+Read `shared/references/abstraction-and-concretization.md` first. Protocol 6 treats scientific software as recursively constrained concretization across D1 scientific formulation, D2 algorithm/numerical method, D3 software architecture, and D4 specification/implementation.
 
-A child is admissible only when its actual semantics satisfy every applicable parent abstraction and governed external constraint. Fidelity is a hard feasibility condition. Among admissible realizations optimize domain engineering fitness, then minimum justified realization complexity, then development economy.
+A child is admissible only when its actual semantics satisfy every applicable parent abstraction and governed external constraint. Fidelity is a hard feasibility condition. Among admissible concretizations optimize domain engineering fitness, then minimum justified concretization complexity, then development economy.
 
 Authority provenance is orthogonal to domain level. Safety, explicit stakeholder/project authority, and governed external contracts may constrain the semantic level where their effect belongs rather than being forced through D1.
 
@@ -33,7 +33,7 @@ Optional `software-documentation`, `software-maintenance-audit`, and `repository
 - D1 -> Scientific Method Paper
 - D2 -> Numerical & Algorithmic Method Paper
 - D3 -> Architecture Manual
-- D4 -> accepted Specification + code/executable realization
+- D4 -> accepted Specification + code/executable concretization
 
 One logical family may span several physical files. Each material current normative claim has one semantic owner. Proposed/current/challenged/stale/historical/release-pinned state must remain distinguishable.
 
@@ -53,17 +53,18 @@ Protocol 5.16 workplans retain 5.16 semantics and are not silently reinterpreted
 5.16.0 -> e151daaf5c8eebb351a85cfed86170fda80fb5e3
 ```
 
-The orchestrator ships both `sdp-protocol-5.16` profile schema v1 and `ssdp-protocol-6.0` profile schema v2.
+The orchestrator ships frozen `sdp-protocol-5.16` schema v1 and `ssdp-protocol-6.0` schema v2 profiles plus current `ssdp-protocol-6.1` schema v2.
 
 ## Canonical owners
 
-- recursive authority/challenge -> `shared/references/abstraction-and-realization.md`
+- recursive authority/challenge -> `shared/references/abstraction-and-concretization.md`
 - D1 -> `shared/references/scientific-formulation.md`
 - D2 -> `shared/references/numerical-algorithm-design.md`
 - D3 -> `shared/references/architecture-and-design.md`
 - D4 specification/code -> `shared/references/specification-and-implementation.md`
 - workflow/handoffs -> `shared/references/workflow-and-workplans.md`
-- evidence -> `shared/references/testing-and-validation.md`
+- evidence/evolution/dependencies -> `shared/references/evidence-evolution-and-dependencies.md`
+- testing/validation -> `shared/references/testing-and-validation.md`
 - scientific/numerical evidence -> `shared/references/scientific-software.md`
 - documentation states -> `shared/references/documentation-maintenance.md`
 - versioning -> `shared/references/protocol-versioning-and-compatibility.md`

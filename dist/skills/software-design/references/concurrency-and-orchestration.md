@@ -9,13 +9,13 @@ Read `performance-and-parallelism.md` for throughput/resource sizing. Language-s
 Use the simplest class that satisfies the applicable governed workload/resource constraints and accepted D3 architecture:
 
 - **synchronous serial** when concurrency adds no material value;
-- **asynchronous/event-driven** for high-concurrency I/O, events, network/service orchestration, or useful pipeline overlap;
+- **asynchronous/event-driven** for high-concurrency input/output (I/O), events, network/service orchestration, or useful pipeline overlap;
 - **shared-memory concurrency** when low-cost shared address-space access and clear synchronization/ownership fit the workload;
 - **process isolation** for independent address spaces, failure/security/runtime isolation, external executables, or a deliberately process-oriented architecture;
 - **distributed-memory execution** for multi-process/multi-node scaling when required by accepted D3 architecture or another governed constraint;
 - **accelerator execution** only when architecture-authorized.
 
-Do not equate a particular language with one class. Python may use threads, async, processes, MPI, or native kernels depending on interpreter/runtime semantics; C++ may use native threads/task runtimes, OpenMP-like execution, processes, MPI, or async/event runtimes. The profiles own those mappings.
+Do not equate a particular language with one class. Python may use threads, async, processes, Message Passing Interface (MPI), or native kernels depending on interpreter/runtime semantics; C++ may use native threads/task runtimes, OpenMP-like execution, processes, MPI, or async/event runtimes. The profiles own those mappings.
 
 ## Define the execution state machine
 
@@ -46,7 +46,7 @@ Do not infer completion from worker disappearance, file existence, or a progress
 Classify failures before retrying. Useful classes include:
 
 - transient infrastructure/resource failures where retry can preserve semantics;
-- adaptive resource failures with a bounded corrective action, such as an OOM-safe smaller batch;
+- adaptive resource failures with a bounded corrective action, such as an out-of-memory (OOM)-safe smaller batch;
 - external-service/transient I/O failures with bounded backoff where idempotency is established;
 - deterministic input/configuration/scientific-invariant failures;
 - programmer defects/assertion failures;
@@ -68,7 +68,7 @@ For file-backed publication, coordinate with `storage-and-io.md`.
 
 ## Cancellation, signals, and preemption
 
-Long-running user/HPC workflows should define behavior for cancellation and common termination signals where the platform permits it.
+Long-running user/high-performance-computing (HPC) workflows should define behavior for cancellation and common termination signals where the platform permits it.
 
 - Stop admitting/scheduling new work once cancellation begins.
 - Propagate cancellation to owned tasks/processes/ranks/coroutines/workers as the runtime supports.
@@ -85,7 +85,7 @@ Producer/consumer and async pipelines need bounded in-flight work.
 
 - Bound queues/futures/tasks by count and/or resource footprint.
 - Avoid reading/materializing an entire dataset merely because downstream work is slower.
-- Couple admission to RAM/VRAM/I/O/storage budgets for heterogeneous tasks.
+- Couple admission to random-access memory (RAM), video random-access memory (VRAM), I/O, and storage budgets for heterogeneous tasks.
 - Avoid unbounded result buffers, logs, pending serialization, requests, and callbacks.
 
 When throughput stalls, distinguish compute saturation from queueing, lock contention, event-loop blocking, I/O saturation, communication, or downstream backpressure.
@@ -94,7 +94,7 @@ When throughput stalls, distinguish compute saturation from queueing, lock conte
 
 Make ownership of scarce resources explicit:
 
-- CPU worker/thread/rank leases;
+- central-processing-unit (CPU) worker/thread/rank leases;
 - accelerator/device assignment and concurrent-job limits;
 - RAM/VRAM reservations or admission estimates;
 - I/O concurrency budgets;
@@ -140,13 +140,13 @@ When distributed execution is part of the accepted D3 architecture or directly r
 - I/O topology and publication;
 - deterministic/global aggregation where required.
 
-MPI is a common realization from both Python and C++, not a C++-only doctrine. Do not introduce distributed execution merely because an MPI runtime is installed.
+MPI is a common concretization from both Python and C++, not a C++-only doctrine. Do not introduce distributed execution merely because an MPI runtime is installed.
 
-## Progress and ETA
+## Progress and estimated time of arrival
 
 Progress describes accepted logical work, not merely submitted tasks. Keep output convention stable within a project. Restored completed work should not be double-counted.
 
-ETA is observational: base it on representative completed work, use a consistent project-defined format, and do not let progress reporting materially perturb hot loops, event loops, communication, or disk I/O.
+Estimated time of arrival (ETA) is observational: base it on representative completed work, use a consistent project-defined format, and do not let progress reporting materially perturb hot loops, event loops, communication, or disk I/O.
 
 ## Verification
 
@@ -164,6 +164,8 @@ Test concurrency at the state-transition/resource boundary, not only by comparin
 - cleanup of children/tasks/temp state/locks after failure;
 - nested runtime budget behavior;
 - repeated stress/race checks where deterministic tests cannot expose the risk.
+
+Each execution is an evidence realization. After material changes to orchestration ownership, retry semantics, publication, runtime/backend, or state transitions, review prior evidence applicability and rerun the relevant evidence specifications rather than assuming historical green results remain current.
 
 ## Bounded failure injection
 

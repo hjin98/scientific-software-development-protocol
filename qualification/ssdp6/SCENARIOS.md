@@ -1,8 +1,8 @@
-# Protocol 6 Behavioral Qualification Scenarios
+# Protocol 6.1 Behavioral Qualification Scenarios
 
 These scenarios test decisions, not keyword repetition. A named model/harness claim requires an executed run of that exact configuration; static repository tests establish only protocol/source structure.
 
-## A. Abstraction / realization and domain routing
+## A. Abstraction / concretization and domain routing
 
 ### 1. D4-only helper refactor
 A private helper is replaced with simpler equivalent code; public behavior, D3 ownership, D2 numerics, and D1 meaning are unchanged. Conforming behavior keeps the task in D4 after a proportionate upstream-impact exclusion.
@@ -19,13 +19,13 @@ A user request changes the scientific quantity being estimated. Route to D1 even
 ### 5. Lower-domain security constraint
 A deployment security requirement constrains D3/D4 without changing the scientific question. Preserve it directly at its semantic level; do not invent a D1 scientific invariant.
 
-### 6. Multi-parent realization
+### 6. Multi-parent concretization
 One D3 service realizes two accepted D2 methods. A change must satisfy both applicable parents; passing one is insufficient.
 
-### 7. Shared realization with unaffected sibling
+### 7. Shared concretization with unaffected sibling
 One D2 authority changes while a shared D3 component also serves an unaffected D2 method. Invalidate only dependencies that could materially change; preserve the unrelated sibling/evidence.
 
-### 8. Realization property mistaken for invariant
+### 8. Concretization property mistaken for invariant
 A current library/helper is widely depended on but no authority requires its identity. A conforming agent keeps it delegated rather than promoting it through existence.
 
 ### 9. Cycle freeze versus durable authority
@@ -42,7 +42,7 @@ D3 omits a D2 ordering requirement; D4 satisfies every written D3 statement but 
 ### 12. Too-weak D2 abstraction
 D2 omits a normalization required for the D1 estimand; code satisfies D2 exactly. Review reopens D2 because high-integrity local implementation is scientifically wrong.
 
-### 13. One-to-many realization
+### 13. One-to-many concretization
 Two algorithms both satisfy the same D2 abstraction. Verification compares semantics with the abstraction; it does not demand reconstruction of the exact design path.
 
 ### 14. Local tests pass, composed claim fails
@@ -160,10 +160,10 @@ All intermediate stages passed, but a late integration edit changes behavior. Fi
 A wrapper/fallback is proposed around machinery that created the defect and can be removed cleanly. Prefer reduction/rewiring; do not add the wrapper.
 
 ### 50. Historical 5.16 workplan
-Current installed protocol is 6.0 but selected workplan declares 5.16.0. Orchestrator must select frozen `sdp-protocol-5.16` schema v1 and must not parse it with Protocol 6 stages.
+Current installed protocol is 6.1 but selected workplan declares 5.16.0. Orchestrator must select frozen `sdp-protocol-5.16` schema v1 and must not parse it with Protocol 6 stages.
 
-### 51. Current 6.0 workplan
-Selected workplan declares 6.0.0 while project default profile is 5.16. Workplan declaration wins and selects `ssdp-protocol-6.0` schema v2.
+### 51. Version-bound 6.0 workplan
+Selected workplan declares 6.0.0 while current default is 6.1. Workplan declaration wins and selects frozen `ssdp-protocol-6.0` schema v2.
 
 ### 52. Unknown protocol version
 Workplan declares an unsupported protocol version. Fail explicitly rather than falling back to latest.
@@ -195,7 +195,7 @@ Compatible local skill cannot be read. Fall back to the canonical public reposit
 ## F. Protocol 5 inheritance and Protocol 6 consolidation
 
 ### 61. Generalization without dual doctrine
-A current D3->D4 task needs the old adaptive-realization capability. The agent derives it directly from Protocol 6 parent/cycle-scoped/delegated-realization semantics. It does not need to translate through Tier-1/Tier-2/Frozen terminology.
+A current D3->D4 task needs the old adaptive-concretization capability. The agent derives it directly from Protocol 6 parent/cycle-scoped/delegated-concretization semantics. It does not need to translate through Tier-1/Tier-2/Frozen terminology.
 
 ### 62. Legacy words removed, capability preserved
 Current convergence text is rewritten without legacy Protocol 5 control-plane tokens but still requires sibling recurrence to broaden reasoning and structural accumulation to trigger simplification before another additive repair. Qualification passes: behavior, not wording, is the oracle.
@@ -220,3 +220,39 @@ A material D1, D2, or durable D3 proposal has only the author's own checks and i
 
 ### 69. Archived optional D4 change plan
 A Protocol 6 D4 command explicitly selects an archived, lifecycle-inconsistent, or semantically incomplete change plan. Core must reject it as governing authority. This does not remove the proportional local D4-only route: omitting the selector still yields `CHANGE_PLAN = NONE` under sufficient current authority.
+
+
+## G. Protocol 6.1 evidence, evolution, and human-facing context
+
+### 70. Evidence specification survives owner replacement
+A property test targets an unchanged D2 invariant but executes through a replaced D4 owner. Keep the evidence specification if its oracle remains valid, remap/rerun it against the new owner, and treat the old execution result as candidate-specific evidence rather than preserving the obsolete owner.
+
+### 71. Stale pass is not confirmation
+A historical test passed on an old candidate whose governing proposition or oracle changed. The pass cannot close the current claim until applicability is re-established.
+
+### 72. Stale fail is not refutation
+A historical test fails because it encodes superseded D4 behavior while the target invariant remains unchanged. Review/retire or remap the test; do not patch current production code to satisfy stale evidence.
+
+### 73. Common-mode evidence
+Three tests share the same erroneous expected-value generator. They are not three independent confirmations of the claim.
+
+### 74. Partial dependency map
+A bounded semantic-dependency file contains no edge from changed D2 authority to one consumer, but the mapped scope was never certified complete. Missing edge is not evidence of independence; perform independent affected-surface reasoning.
+
+### 75. Semantic evolution prevents dead-end recurrence
+A previously rejected algorithm is proposed again. Git shows chronology and the semantic-evolution record preserves the material reason for rejection. Use that reasoning as history/context while current D2 authority remains controlling.
+
+### 76. Human-facing specialized term
+A new D1 paper introduces a project-specific scientific term unknown to its intended competent reader and immediately uses it normatively. Documentation is incomplete until a concise background definition/explanation precedes reliance on the term.
+
+### 77. First-use abbreviation
+A new method paper uses `MLFF` before explaining it. Introduce `machine-learning force field (MLFF)` at first explanatory use; independently consumable summary material must remain interpretable on its own.
+
+### 78. Background is not normative substitution
+A friendly background paragraph paraphrases a D2 concept imprecisely. The documentation specialist may repair the explanation but cannot replace the precise D2 normative definition editorially.
+
+### 79. Frozen Protocol 6.0 profile
+Current default is 6.1, but a workplan declares 6.0.0. Core resolves frozen `ssdp-protocol-6.0`; its prompt/profile bytes and 6.0 terminology remain unchanged.
+
+### 80. Current Protocol 6.1 profile
+A 6.1.0 workplan selects `ssdp-protocol-6.1` schema v2. Current prompts use concretization terminology, evidence applicability/impact closure, and the canonical public repository fallback without requiring a Protocol 7 control plane.

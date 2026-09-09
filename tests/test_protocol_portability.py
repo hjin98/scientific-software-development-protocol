@@ -22,10 +22,10 @@ def links_for(kind: str, name: str) -> set[str]:
 
 
 class ProtocolPortabilityTests(unittest.TestCase):
-    def test_current_protocol_uses_abstraction_realization_hierarchy(self) -> None:
+    def test_current_protocol_uses_abstraction_concretization_hierarchy(self) -> None:
         foundation = (SOURCE / "shared/references/abstraction-and-realization.md").read_text(encoding="utf-8").lower()
         self.assertIn("domain engineering fitness", foundation)
-        self.assertIn("minimum justified realization complexity", foundation)
+        self.assertIn("minimum justified concretization complexity", foundation)
         self.assertIn("development economy", foundation)
         self.assertIn("fidelity is a feasibility condition", foundation)
 

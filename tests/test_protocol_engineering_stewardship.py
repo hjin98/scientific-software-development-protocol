@@ -63,7 +63,7 @@ class EngineeringStewardshipContractTests(unittest.TestCase):
     def test_independent_review_can_reject_literal_but_bad_outcome(self) -> None:
         design = read("source/roles/software-design/SKILL.md").lower()
         testing = read("source/shared/references/testing-and-validation.md").lower()
-        self.assertIn("literal compliance actually realizes the protected stakeholder outcome", design)
+        self.assertIn("literal compliance actually concretizes the protected stakeholder outcome", design)
         self.assertIn("workplan/design deficiency", design)
         self.assertIn("independent-evaluator counterfactual", testing)
 
@@ -72,7 +72,7 @@ class EngineeringStewardshipContractTests(unittest.TestCase):
         template = read("source/shared/templates/implementation_workplan_template.md").lower()
         self.assertIn("not terminal objectives", workflow)
         self.assertIn("must never create pressure to manufacture a pass", workflow)
-        self.assertIn("anti-shortcut / integrity constraint", template)
+        self.assertIn("anti-shortcut/integrity constraint", template)
         self.assertIn("attach only when material", template)
 
     def test_root_agents_is_compact_router_not_duplicate_manual(self) -> None:
