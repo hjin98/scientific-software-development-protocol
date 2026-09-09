@@ -3,10 +3,14 @@ kind: protocol-major-revision-authority-amendment
 amends_workplan: SSDP-6-RECURSIVE-ABSTRACTION-REALIZATION-SCIENTIFIC-SOFTWARE-PROTOCOL
 protocol_version: 5.16.0
 target_protocol_version: 6.0.0
-status: accepted-amendment
+status: completed
+completed_date: 2026-09-09
+final_candidate_commit: 952bcc325ceb0a36744bfd05f0befe25a50956cb
+final_review: pass
+active_serious_challenge: none
 created_date: 2026-09-08
 base_parent_commit: e00bb0d8f40f98c03c37dc03c4418b99c968338c
-authority_entrypoint: workplans/active/SSDP-6-AUTHORITY.md
+authority_entrypoint: workplans/archive/SSDP-6-AUTHORITY.md
 ---
 
 # SSDP 6.0 Authority Revision 1 — Serious Challenge and Adversarial Review Doctrine
@@ -401,3 +405,7 @@ One claim should have one normative owner, while a realization may still be cons
 
 Challenge serious matters; verify the challenge itself; do not manufacture serious matters.
 ```
+
+## Final transition closeout
+
+This accepted amendment is archived as historical transition authority. Its binding Protocol 6 semantics were consolidated into canonical `source/` owners before candidate `952bcc325ceb0a36744bfd05f0befe25a50956cb` passed the final independent Review / Challenge Pass. No active Serious Challenge remains; the amendment no longer participates in current operational authority composition.

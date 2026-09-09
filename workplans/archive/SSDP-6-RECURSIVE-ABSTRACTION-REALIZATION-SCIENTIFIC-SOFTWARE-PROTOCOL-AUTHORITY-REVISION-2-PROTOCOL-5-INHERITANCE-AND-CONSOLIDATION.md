@@ -3,10 +3,14 @@ kind: protocol-major-revision-authority-amendment
 amends_workplan: SSDP-6-RECURSIVE-ABSTRACTION-REALIZATION-SCIENTIFIC-SOFTWARE-PROTOCOL
 protocol_version: 5.16.0
 target_protocol_version: 6.0.0
-status: accepted-amendment
+status: completed
+completed_date: 2026-09-09
+final_candidate_commit: 952bcc325ceb0a36744bfd05f0befe25a50956cb
+final_review: pass
+active_serious_challenge: none
 created_date: 2026-09-08
 review_origin: post-implementation-generalization-and-inheritance-review
-authority_entrypoint: workplans/active/SSDP-6-AUTHORITY.md
+authority_entrypoint: workplans/archive/SSDP-6-AUTHORITY.md
 ---
 
 # SSDP 6 Authority Revision 2 — Protocol 5 Functional Inheritance and Doctrine Consolidation
@@ -193,3 +197,8 @@ Historical Protocol 5 vocabulary lives at historical/version-compatibility bound
 Tests protect semantic capability rather than forcing obsolete words to survive.
 The resulting protocol should be easier for an agent to route than the stitched dual-doctrine candidate while remaining functionally lossless.
 ```
+
+
+## Final transition closeout
+
+This accepted amendment is archived as historical transition authority. Its binding Protocol 6 semantics were consolidated into canonical `source/` owners before candidate `952bcc325ceb0a36744bfd05f0befe25a50956cb` passed the final independent Review / Challenge Pass. No active Serious Challenge remains; the amendment no longer participates in current operational authority composition.

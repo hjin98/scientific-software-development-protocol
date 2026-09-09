@@ -3,21 +3,24 @@ kind: protocol-major-revision-authority-index
 workplan_id: SSDP-6-RECURSIVE-ABSTRACTION-REALIZATION-SCIENTIFIC-SOFTWARE-PROTOCOL
 protocol_version: 5.16.0
 target_protocol_version: 6.0.0
-status: active-authority-index
+status: completed
+completed_date: 2026-09-09
+final_candidate_commit: 952bcc325ceb0a36744bfd05f0befe25a50956cb
 phase_0_parent_authority_review: passed
 active_serious_challenge: none
-implementation_review: no-pass-consolidation-rework-authorized
+implementation_review: pass
+final_review: pass
 ---
 
-# SSDP 6.0 Active Transition Authority
+# SSDP 6.0 Transition Authority — Archived Closeout Record
 
-This file is the canonical composition entrypoint for the active SSDP 6.0 transition authority.
+This file is the historical composition entrypoint for the completed SSDP 6.0 transition authority. Current Protocol 6 operational authority is consolidated in canonical `source/`; this archive record no longer governs new work.
 
 A reviewer, designer, implementer, or orchestrator resolving the SSDP 6 parent workplan must read **all accepted members listed here** before claiming snapshot-complete understanding of the current transition contract. No chat history, unlisted discussion, or unlisted file silently amends this authority set.
 
 Supplying only the parent workplan while omitting an accepted amendment listed here is not a snapshot-complete SSDP 6 transition handoff. Until the transition authority is consolidated into canonical Protocol 6 sources, this index is the entrypoint that closes that composition ambiguity.
 
-## Current authority set
+## Historical transition authority set
 
 1. `SSDP-6-RECURSIVE-ABSTRACTION-REALIZATION-SCIENTIFIC-SOFTWARE-PROTOCOL.md`
    - parent SSDP 6.0 abstraction-realization design/workplan;
@@ -42,10 +45,11 @@ Current state:
 ```text
 PHASE 0 PARENT-AUTHORITY REVIEW: PASS
 ACTIVE SERIOUS CHALLENGE: NONE
-POST-IMPLEMENTATION REVIEW: NO-PASS — CONSOLIDATION REWORK AUTHORIZED
+POST-IMPLEMENTATION REVIEW: PASS
+FINAL INDEPENDENT REVIEW / CHALLENGE PASS: PASS
 ```
 
-The No-Pass does **not** reopen the D1-D4 theory. It records implementation-level migration blockers: incomplete Protocol 5 functional inheritance and an incompletely consolidated dual vocabulary. Revision 2 defines the minimum repair. A later implementation re-review must independently determine whether those blockers are closed.
+The earlier consolidation No-Pass was repaired and independently re-reviewed on candidate `952bcc325ceb0a36744bfd05f0befe25a50956cb`. Protocol 5 functional inheritance is consolidated into Protocol 6-native owners, the current/legacy profile boundary is explicit, and the remaining authority-integrity defects found during adversarial review were closed without reopening the D1-D4 theory.
 
 The Phase 0 Pass specifically includes closure of the following parent-design ambiguities:
 
@@ -64,13 +68,15 @@ Any further accepted transition amendment must update this index in the same acc
 
 Prefer consolidating corrections into the existing parent/amendments rather than creating additional authority files. A new amendment is justified only when changing an existing accepted artifact directly would obscure authority history or cannot be performed coherently.
 
-## Release transition
+## Final transition closeout
 
-This index is transition scaffolding, not intended permanent Protocol 6 doctrine. Before final SSDP 6.0 release:
+The release-transition predicates are closed on candidate `952bcc325ceb0a36744bfd05f0befe25a50956cb`:
 
-- fold accepted amendment semantics into the minimum canonical Protocol 6 role/reference owners;
-- ensure the released protocol has one discoverable current authority structure rather than depending on this temporary composition file;
-- preserve historical workplan/version recovery separately;
-- retire or archive transient amendment/index artifacts according to repository lifecycle policy once their semantics are fully represented by the released protocol.
+- accepted Revision 1 and Revision 2 semantics are folded into canonical Protocol 6 owners;
+- `source/PROTOCOL_VERSION` is `6.0.0`;
+- the v6 profile/snapshot and generated distributions are derived from current canonical source;
+- immutable Protocol 5.16 recovery remains separate and unchanged;
+- root regressions, package build/validation/parity, snapshot parity, full Orchestrator Core acceptance, direct authority/legacy counterchecks, and whitespace checks passed;
+- final independent Review / Challenge Pass found no genuine blocking defect and no active Serious Challenge.
 
-An unresolved Serious Challenge to governing Protocol 6 authority blocks Protocol 6 release. Likewise, the current consolidation No-Pass remains a release blocker until repaired and independently re-reviewed; migration progress may not be used as a substitute for closure.
+The transition index and its three governing records are therefore archived together as historical evidence. They are no longer a parallel current authority layer.
