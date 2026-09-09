@@ -25,6 +25,20 @@ jobs:
         run: |
           python tools/ssdp61_finalize.py
           python tools/ssdp61_patch_tests.py
+          python - <<'PY'
+          from pathlib import Path
+          path = Path("orchestrator/tests/test_ssdp6_profiles.py")
+          text = path.read_text(encoding="utf-8")
+          text = text.replace(
+              'self.assertIn("direct d1/d2->d4", d4_body)',
+              'self.assertIn("authorized reduced d2->d4 or d1->d4 route", d4_body)',
+          )
+          text = text.replace(
+              'self.assertIn("do not manufacture d3 mutation", d4_body)',
+              'self.assertIn("do not manufacture a d3 authority mutation", d4_body)',
+          )
+          path.write_text(text, encoding="utf-8")
+          PY
       - name: Install validation dependencies
         run: |
           python -m pip install -r source/requirements-validation.txt
@@ -42,7 +56,7 @@ jobs:
           python -m unittest discover -s tests -v > tools/ssdp61-test-failure.log 2>&1
           status=$?
           cat tools/ssdp61-test-failure.log
-          if [ "$status" -eq 0 ]; then rm tools/ssdp61-test-failure.log; fi
+          if [ "$status" -eq 0 ]; then rm -f tools/ssdp61-test-failure.log; fi
           exit "$status"
       - name: Publish regression diagnostic
         if: failure()
@@ -59,6 +73,10 @@ jobs:
         run: python source/check_dist.py --expected dist --committed dist
       - name: Verify Protocol snapshot parity
         run: python orchestrator/scripts/generate_protocol_snapshot.py --check
+      - name: Remove temporary migration helpers before Core acceptance
+        run: |
+          rm -f tools/ssdp61_finalize.py tools/ssdp61_patch_tests.py
+          rm -f tools/ssdp61-test-failure.log tools/ssdp61-core-failure.log
       - name: Run orchestrator Core acceptance suite
         shell: bash
         run: |
@@ -66,7 +84,7 @@ jobs:
           python orchestrator/scripts/run_core_tests.py > tools/ssdp61-core-failure.log 2>&1
           status=$?
           cat tools/ssdp61-core-failure.log
-          if [ "$status" -eq 0 ]; then rm tools/ssdp61-core-failure.log; fi
+          if [ "$status" -eq 0 ]; then rm -f tools/ssdp61-core-failure.log; fi
           exit "$status"
       - name: Publish Core diagnostic
         if: failure()
@@ -79,11 +97,15 @@ jobs:
           git push origin HEAD:ssdp-6.1-implementation
       - name: Check whitespace
         run: git diff --check
-      - name: Commit deterministic Protocol 6.1 migration
+      - name: Commit deterministic Protocol 6.1 migration and remove temporary machinery
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          rm -f .github/workflows/ssdp61-finalize.yml
+          rm -f tools/ssdp61_finalize.py tools/ssdp61_patch_tests.py
+          rm -f tools/ssdp61-test-failure.log tools/ssdp61-core-failure.log
           git add README.md PORTABILITY.md source qualification tests orchestrator dist history
+          git add -u tools .github/workflows
           if git diff --cached --quiet; then
             echo "No generated changes to commit"
             exit 0
