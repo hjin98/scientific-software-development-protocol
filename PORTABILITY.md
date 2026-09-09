@@ -50,9 +50,9 @@ Version-bound recovery uses immutable repository commits rather than `main`/late
 | --- | --- |
 | 5.16.0 | `e151daaf5c8eebb351a85cfed86170fda80fb5e3` |
 | 6.0.0 | `21d5188f5bd9a0270d7a2ebf93d41a6b7842ccd2` |
-| 6.1.0 | `dec5ff2767e14fd1cda46e073757aa27f40e270c` |
+| 6.1.0 | pending reopened qualification and independent Review |
 
-The Protocol 6.1 commit is the final document-controlled/semi-automated pre-Protocol-7 rollback snapshot. It contains the qualified current source/profile and required generated artifacts plus the completed 6.1 lifecycle record. Protocol 7 fallback uses that immutable snapshot as a version rollback; it does not keep a second live canonical control plane.
+The earlier Protocol 6.1 closeout snapshot `dec5ff2767e14fd1cda46e073757aa27f40e270c` remains immutable historical evidence, but a post-closeout review found current-source terminology and navigation defects that invalidate its status as the final accepted Protocol 6.1 rollback baseline. A replacement immutable 6.1 recovery identity may be published only after the repaired candidate passes the required 94-scenario behavioral requalification, repository/package acceptance, and fresh independent Review. Until then Protocol 7 may not claim the Protocol 6.1 recovery prerequisite is satisfied.
 
 ## Deterministic routing dimensions
 
@@ -94,6 +94,6 @@ If no suitable live harness/tool environment exists, static/counterfactual/packa
 
 ## Behavioral qualification
 
-`qualification/ssdp6/SCENARIOS.md` defines Protocol 6 authority, abstraction adequacy, D1/D2/D3/D4 routing, Serious Challenge, anti-deference/anti-stubbornness, historical compatibility, and composed-closure scenarios. Existing Protocol 5 qualification remains historical evidence for its release semantics.
+`qualification/ssdp6/SCENARIOS.md` defines Protocol 6 authority, abstraction adequacy, D1/D2/D3/D4 routing, Serious Challenge, anti-deference/anti-stubbornness, historical compatibility, and composed-closure scenarios. `qualification/ssdp6/SCENARIOS-6.1-ADDITIONS.md` extends the Protocol 6.1 set through scenario 94, including the reopened terminology and canonical-navigation counterexamples. Existing Protocol 5 qualification remains historical evidence for its release semantics.
 
 Reference-routing and tool-routing sentinel qualifications remain useful for named harness configurations. Ordinary repository CI does not infer universal model compliance from static tests.

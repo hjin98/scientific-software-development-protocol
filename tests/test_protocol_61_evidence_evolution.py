@@ -22,6 +22,23 @@ class Protocol61EvidenceEvolutionTests(unittest.TestCase):
         self.assertIn("stale passing", testing.lower())
         self.assertIn("stale failing", testing.lower())
 
+    def test_role_skills_do_not_call_evidence_realizations_concretizations(self) -> None:
+        for role in ("software-design", "software-implementation"):
+            text = self.read(f"source/roles/{role}/SKILL.md").lower()
+            self.assertNotIn("evidence specifications/concretizations", text, role)
+            self.assertNotIn("evidence specification, concretization", text, role)
+        implementation = self.read("source/roles/software-implementation/SKILL.md").lower()
+        self.assertIn("evidence specification, realization, and applicability", implementation)
+        self.assertIn("evidence specifications/realizations", implementation)
+
+    def test_source_readme_canonical_routes_exist(self) -> None:
+        readme = self.read("source/README.md")
+        self.assertIn("shared/references/abstraction-and-realization.md", readme)
+        self.assertNotIn("shared/references/abstraction-and-concretization.md", readme)
+        for raw in readme.split("`"):
+            if raw.startswith("shared/references/") and raw.endswith(".md"):
+                self.assertTrue((ROOT / "source" / raw).is_file(), raw)
+
     def test_bounded_dependency_and_history_surfaces_exist(self) -> None:
         dep = self.read("source/SEMANTIC_DEPENDENCIES.md")
         hist = self.read("history/SEMANTIC_EVOLUTION.md")

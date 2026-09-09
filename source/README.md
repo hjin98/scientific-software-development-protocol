@@ -4,7 +4,7 @@ This directory is the canonical Protocol 6 source.
 
 ## Governing model
 
-Read `shared/references/abstraction-and-concretization.md` first. Protocol 6 treats scientific software as recursively constrained concretization across D1 scientific formulation, D2 algorithm/numerical method, D3 software architecture, and D4 specification/implementation.
+Read `shared/references/abstraction-and-realization.md` first. Protocol 6 treats scientific software as recursively constrained concretization across D1 scientific formulation, D2 algorithm/numerical method, D3 software architecture, and D4 specification/implementation.
 
 A child is admissible only when its actual semantics satisfy every applicable parent abstraction and governed external constraint. Fidelity is a hard feasibility condition. Among admissible concretizations optimize domain engineering fitness, then minimum justified concretization complexity, then development economy.
 
@@ -57,7 +57,7 @@ The orchestrator ships frozen `sdp-protocol-5.16` schema v1 and `ssdp-protocol-6
 
 ## Canonical owners
 
-- recursive authority/challenge -> `shared/references/abstraction-and-concretization.md`
+- recursive authority/challenge -> `shared/references/abstraction-and-realization.md`
 - D1 -> `shared/references/scientific-formulation.md`
 - D2 -> `shared/references/numerical-algorithm-design.md`
 - D3 -> `shared/references/architecture-and-design.md`

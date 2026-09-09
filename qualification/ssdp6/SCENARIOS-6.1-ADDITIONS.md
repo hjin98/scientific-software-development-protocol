@@ -41,3 +41,11 @@ A Protocol/control JSON field uses a compact enum or profile identifier such as 
 
 ### 92. Historical Protocol 5 document remains version-faithful
 A release-pinned Protocol 5.x methods/workflow artifact contains terminology or abbreviations that would not satisfy the new Protocol 6.1 presentation standard. Do not retroactively rewrite that historical artifact solely for style. Supply necessary current explanatory context when citing it, while preserving the historical bytes/meaning under their governing version.
+
+## J. Reopened final-review closure cases
+
+### 93. Evidence realization is not an evidence concretization
+A current D3 or D4 role says `evidence specifications/concretizations`, or labels its evidence lifecycle section `Evidence specification, concretization, and applicability`, while elsewhere defining the correct chain `evidence specification -> evidence realization -> observation -> evidence assessment`. Reject the current role text as semantically inconsistent. `Concretization` remains reserved for downstream D1-D4 semantic expression; one execution/instantiation of an evidence specification is an `evidence realization`.
+
+### 94. Canonical source navigation must resolve retained compatibility paths
+A current README tells operators to read `shared/references/abstraction-and-concretization.md`, but the deliberately retained compatibility filename is `shared/references/abstraction-and-realization.md` and no alias exists. Reject the current documentation as incomplete/dangling. Correct the navigation to the real retained path; do not add a duplicate alias merely to make the bad link resolve.

@@ -100,7 +100,7 @@ If representative measurement invalidating a premise of accepted D3/D2/D1 author
 
 If later evidence proves accepted implementation work unsound, invalidate it and repair/retest. Truthful non-closure is preferable to counterfeit completion, but continue while a reasonable in-scope engineering path remains.
 
-## Evidence specification, concretization, and applicability
+## Evidence specification, realization, and applicability
 
 Keep distinct:
 
@@ -160,7 +160,7 @@ When accepted authority or a material concretization changes, account proportion
 ```text
 changed authority/concretization
  -> materially affected descendant authority/concretizations
- -> affected evidence specifications/concretizations
+ -> affected evidence specifications/realizations
  -> affected documentation/current dependency view
  -> required human re-ratification where applicable
  -> required revalidation/retirement/semantic-history update
@@ -168,7 +168,7 @@ changed authority/concretization
 
 Preserve unaffected siblings and still-valid evidence. A changed parent creates a review obligation over material descendants but does not automatically prove every descendant wrong.
 
-A bounded dependency record is an aid, not a complete oracle by default. Absence of an edge is not proof of independence unless the relevant mapped scope was explicitly reviewed as complete for that exclusion.
+A bounded dependency record is an aid, not a complete oracle by default. Absence of an edge is not proof of independence unless the relevant mapped scope was explicitly reviewed as complete for the exclusion.
 
 Before closure every material impact item must be resolved, preserved as still-valid with reason, or explicitly unavailable/blocking. Old green tests are never a substitute for impact closure.
 
@@ -201,4 +201,4 @@ Do not relax tolerance, add fallback/wrapper, rewrite tests/specification/method
 
 ## Completion
 
-Report material implementation/reconciliation, final semantic owner, evidence specifications/concretizations used and their applicability, checks actually executed, unavailable/blocking checks, upstream challenges, documentation/dependency/history impact, and unresolved material risks. Do not emit empty protocol categories or claim Pass before assembled acceptance.
+Report material implementation/reconciliation, final semantic owner, evidence specifications/realizations used and their applicability, checks actually executed, unavailable/blocking checks, upstream challenges, documentation/dependency/history impact, and unresolved material risks. Do not emit empty protocol categories or claim Pass before assembled acceptance.
