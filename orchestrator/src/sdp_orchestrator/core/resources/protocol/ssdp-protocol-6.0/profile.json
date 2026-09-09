@@ -1101,6 +1101,38 @@
       "trigger_key": "accepted"
     },
     {
+      "explanation": "realize accepted D1 changes through affected architecture when D2 authority remains unchanged",
+      "from_stage": {
+        "profile_id": "ssdp-protocol-6.0",
+        "protocol_version": "6.0.0",
+        "stage_key": "scientific-formulation"
+      },
+      "priority_hint": null,
+      "terminal": false,
+      "to_stage": {
+        "profile_id": "ssdp-protocol-6.0",
+        "protocol_version": "6.0.0",
+        "stage_key": "software-design"
+      },
+      "trigger_key": "accepted"
+    },
+    {
+      "explanation": "realize accepted D1 changes directly in D4 when D2 and D3 authority remain unchanged",
+      "from_stage": {
+        "profile_id": "ssdp-protocol-6.0",
+        "protocol_version": "6.0.0",
+        "stage_key": "scientific-formulation"
+      },
+      "priority_hint": null,
+      "terminal": false,
+      "to_stage": {
+        "profile_id": "ssdp-protocol-6.0",
+        "protocol_version": "6.0.0",
+        "stage_key": "software-implementation"
+      },
+      "trigger_key": "accepted"
+    },
+    {
       "explanation": "review a D1-only authority change when no lower realization is affected",
       "from_stage": {
         "profile_id": "ssdp-protocol-6.0",
@@ -1201,6 +1233,22 @@
         "profile_id": "ssdp-protocol-6.0",
         "protocol_version": "6.0.0",
         "stage_key": "software-design"
+      },
+      "trigger_key": "accepted"
+    },
+    {
+      "explanation": "realize accepted D2 changes directly in D4 when D3 authority remains unchanged",
+      "from_stage": {
+        "profile_id": "ssdp-protocol-6.0",
+        "protocol_version": "6.0.0",
+        "stage_key": "numerical-algorithm-design"
+      },
+      "priority_hint": null,
+      "terminal": false,
+      "to_stage": {
+        "profile_id": "ssdp-protocol-6.0",
+        "protocol_version": "6.0.0",
+        "stage_key": "software-implementation"
       },
       "trigger_key": "accepted"
     },
@@ -1825,7 +1873,39 @@
       "trigger_key": "serious_challenge"
     },
     {
-      "explanation": "a realigned downstream D3->D4 plan is ready for implementation",
+      "explanation": "an aligned downstream D2 plan is ready for numerical-method realization",
+      "from_stage": {
+        "profile_id": "ssdp-protocol-6.0",
+        "protocol_version": "6.0.0",
+        "stage_key": "alignment"
+      },
+      "priority_hint": null,
+      "terminal": false,
+      "to_stage": {
+        "profile_id": "ssdp-protocol-6.0",
+        "protocol_version": "6.0.0",
+        "stage_key": "numerical-algorithm-design"
+      },
+      "trigger_key": "pass"
+    },
+    {
+      "explanation": "an aligned downstream D3 plan is ready for architecture/workplan realization",
+      "from_stage": {
+        "profile_id": "ssdp-protocol-6.0",
+        "protocol_version": "6.0.0",
+        "stage_key": "alignment"
+      },
+      "priority_hint": null,
+      "terminal": false,
+      "to_stage": {
+        "profile_id": "ssdp-protocol-6.0",
+        "protocol_version": "6.0.0",
+        "stage_key": "software-design"
+      },
+      "trigger_key": "pass"
+    },
+    {
+      "explanation": "an aligned downstream D3->D4 plan is ready for implementation",
       "from_stage": {
         "profile_id": "ssdp-protocol-6.0",
         "protocol_version": "6.0.0",

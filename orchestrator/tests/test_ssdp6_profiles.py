@@ -65,6 +65,33 @@ class SSDP6CanonicalProfileTests(unittest.TestCase):
         self.assertIs(policies["software-implementation"], WorkplanPolicy.REQUIRED)
         self.assertIs(policies["review"], WorkplanPolicy.REQUIRED)
 
+    def test_reduced_routes_skip_unaffected_intermediate_domains(self) -> None:
+        def destinations(stage_key: str, trigger: str) -> set[str]:
+            return {
+                t.to_stage.stage_key
+                for t in self.descriptor.transitions
+                if t.from_stage.stage_key == stage_key
+                and t.trigger_key == trigger
+                and t.to_stage is not None
+            }
+
+        self.assertIn("software-implementation", destinations("numerical-algorithm-design", "accepted"))
+        self.assertIn("software-design", destinations("scientific-formulation", "accepted"))
+        self.assertIn("software-implementation", destinations("scientific-formulation", "accepted"))
+
+    def test_alignment_pass_routes_by_downstream_domain_owner(self) -> None:
+        destinations = {
+            t.to_stage.stage_key
+            for t in self.descriptor.transitions
+            if t.from_stage.stage_key == "alignment"
+            and t.trigger_key == "pass"
+            and t.to_stage is not None
+        }
+        self.assertEqual(
+            destinations,
+            {"numerical-algorithm-design", "software-design", "software-implementation"},
+        )
+
     def test_serious_challenge_stops_automatic_routing(self) -> None:
         for stage_key in ("scientific-formulation", "numerical-algorithm-design", "software-design", "software-implementation", "review", "verification", "stabilization", "alignment", "health-audit", "closeout"):
             matches = [t for t in self.descriptor.transitions if t.from_stage.stage_key == stage_key and t.trigger_key == "serious_challenge"]
