@@ -90,7 +90,7 @@ class Protocol515LanguageProfileTests(unittest.TestCase):
 
     def test_cpp_accelerator_uses_same_shared_gate(self) -> None:
         accel = section(self.cpp, "## accelerator realization")
-        for concept in ("dormant unless", "accepted d3 architecture", "when enabled", "cpu/reference numerical equivalence", "end-to-end benefit"):
+        for concept in ("dormant unless", "accepted d3 architecture", "when enabled", "central-processing-unit (cpu)/reference numerical equivalence", "end-to-end benefit"):
             self.assertIn(concept, accel)
 
     def test_performance_counterfactual_separates_simple_efficiency_from_complexity(self) -> None:
