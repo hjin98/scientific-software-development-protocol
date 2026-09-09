@@ -36,7 +36,23 @@ jobs:
           python source/build_skills.py --output dist
           python orchestrator/scripts/generate_protocol_snapshot.py
       - name: Run protocol regression tests
-        run: python -m unittest discover -s tests -v
+        shell: bash
+        run: |
+          set +e
+          python -m unittest discover -s tests -v > tools/ssdp61-test-failure.log 2>&1
+          status=$?
+          cat tools/ssdp61-test-failure.log
+          if [ "$status" -eq 0 ]; then rm tools/ssdp61-test-failure.log; fi
+          exit "$status"
+      - name: Publish regression diagnostic
+        if: failure()
+        run: |
+          if [ ! -f tools/ssdp61-test-failure.log ]; then exit 0; fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add tools/ssdp61-test-failure.log
+          git commit -m "[skip ci] Record temporary Protocol 6.1 regression diagnostic"
+          git push origin HEAD:ssdp-6.1-implementation
       - name: Validate generated packages
         run: python source/validate_packages.py --dist dist
       - name: Verify generated distribution self-parity
