@@ -1,0 +1,163 @@
+name: SSDP 6 transition closeout recovery
+
+on:
+  push:
+    branches:
+      - impl/ssdp-6
+
+permissions:
+  contents: write
+
+jobs:
+  closeout:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Reconcile archived transition records
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          CANDIDATE = "952bcc325ceb0a36744bfd05f0befe25a50956cb"
+          DATE = "2026-09-09"
+          archive = Path("workplans/archive")
+
+          def replace_once(path: Path, old: str, new: str, label: str) -> None:
+              text = path.read_text(encoding="utf-8")
+              count = text.count(old)
+              if count != 1:
+                  raise SystemExit(f"{label}: expected one match, found {count}")
+              path.write_text(text.replace(old, new), encoding="utf-8")
+
+          names = (
+              "SSDP-6-AUTHORITY.md",
+              "SSDP-6-RECURSIVE-ABSTRACTION-REALIZATION-SCIENTIFIC-SOFTWARE-PROTOCOL.md",
+              "SSDP-6-RECURSIVE-ABSTRACTION-REALIZATION-SCIENTIFIC-SOFTWARE-PROTOCOL-AUTHORITY-REVISION-1-SERIOUS-CHALLENGE-AND-ADVERSARIAL-REVIEW.md",
+              "SSDP-6-RECURSIVE-ABSTRACTION-REALIZATION-SCIENTIFIC-SOFTWARE-PROTOCOL-AUTHORITY-REVISION-2-PROTOCOL-5-INHERITANCE-AND-CONSOLIDATION.md",
+          )
+          for name in names:
+              if not (archive / name).is_file():
+                  raise SystemExit(f"missing archived transition record: {name}")
+              if (Path("workplans/active") / name).exists():
+                  raise SystemExit(f"transition record unexpectedly remains active: {name}")
+
+          parent = archive / names[1]
+          replace_once(
+              parent,
+              "status: active\ncreated_date: 2026-09-08\n",
+              f"status: completed\ncreated_date: 2026-09-08\ncompleted_date: {DATE}\nfinal_candidate_commit: {CANDIDATE}\nfinal_review: pass\nactive_serious_challenge: none\n",
+              "parent closeout frontmatter",
+          )
+          text = parent.read_text(encoding="utf-8")
+          if "## 23. Final transition closeout" in text:
+              raise SystemExit("parent already contains final closeout")
+          text += f'''\n\n## 23. Final transition closeout\n\n**Final independent Review / Challenge Pass: PASS.** No Serious Challenge and no remaining implementation blocker persisted on accepted candidate `{CANDIDATE}`.\n\nThe accepted Protocol 6 semantics are consolidated into canonical `source/` owners; `source/PROTOCOL_VERSION` is `6.0.0`; generated `dist/` and the packaged `ssdp-protocol-6.0` snapshot match canonical source; immutable packaged Protocol 5.16 recovery remains unchanged. Root protocol regression, package build/validation/parity, snapshot parity, Orchestrator Core acceptance, direct current/legacy authority counterchecks, and whitespace checks all passed before closeout.\n\nThis workplan is therefore historical transition evidence, not current Protocol 6 operational authority. Future work is governed by canonical Protocol 6 source and by explicitly version-bound project/domain artifacts.\n'''
+          parent.write_text(text, encoding="utf-8")
+
+          for name in names[2:]:
+              path = archive / name
+              replace_once(
+                  path,
+                  "status: accepted-amendment\n",
+                  f"status: completed\ncompleted_date: {DATE}\nfinal_candidate_commit: {CANDIDATE}\nfinal_review: pass\nactive_serious_challenge: none\n",
+                  f"{name} closeout frontmatter",
+              )
+              replace_once(
+                  path,
+                  "authority_entrypoint: workplans/active/SSDP-6-AUTHORITY.md\n",
+                  "authority_entrypoint: workplans/archive/SSDP-6-AUTHORITY.md\n",
+                  f"{name} archived authority entrypoint",
+              )
+              text = path.read_text(encoding="utf-8")
+              if "## Final transition closeout" in text:
+                  raise SystemExit(f"{name}: final closeout already present")
+              text += f'''\n\n## Final transition closeout\n\nThis accepted amendment is archived as historical transition authority. Its binding Protocol 6 semantics were consolidated into canonical `source/` owners before candidate `{CANDIDATE}` passed the final independent Review / Challenge Pass. No active Serious Challenge remains; the amendment no longer participates in current operational authority composition.\n'''
+              path.write_text(text, encoding="utf-8")
+
+          index = archive / names[0]
+          replace_once(
+              index,
+              "status: active-authority-index\nphase_0_parent_authority_review: passed\nactive_serious_challenge: none\nimplementation_review: no-pass-consolidation-rework-authorized\n",
+              f"status: completed\ncompleted_date: {DATE}\nfinal_candidate_commit: {CANDIDATE}\nphase_0_parent_authority_review: passed\nactive_serious_challenge: none\nimplementation_review: pass\nfinal_review: pass\n",
+              "authority index closeout frontmatter",
+          )
+          replace_once(
+              index,
+              "# SSDP 6.0 Active Transition Authority\n\nThis file is the canonical composition entrypoint for the active SSDP 6.0 transition authority.\n",
+              "# SSDP 6.0 Transition Authority — Archived Closeout Record\n\nThis file is the historical composition entrypoint for the completed SSDP 6.0 transition authority. Current Protocol 6 operational authority is consolidated in canonical `source/`; this archive record no longer governs new work.\n",
+              "authority index title/current status",
+          )
+          replace_once(index, "## Current authority set\n", "## Historical transition authority set\n", "authority set heading")
+          replace_once(
+              index,
+              "POST-IMPLEMENTATION REVIEW: NO-PASS — CONSOLIDATION REWORK AUTHORIZED\n",
+              "POST-IMPLEMENTATION REVIEW: PASS\nFINAL INDEPENDENT REVIEW / CHALLENGE PASS: PASS\n",
+              "authority index review state",
+          )
+          replace_once(
+              index,
+              "The No-Pass does **not** reopen the D1-D4 theory. It records implementation-level migration blockers: incomplete Protocol 5 functional inheritance and an incompletely consolidated dual vocabulary. Revision 2 defines the minimum repair. A later implementation re-review must independently determine whether those blockers are closed.\n",
+              f"The earlier consolidation No-Pass was repaired and independently re-reviewed on candidate `{CANDIDATE}`. Protocol 5 functional inheritance is consolidated into Protocol 6-native owners, the current/legacy profile boundary is explicit, and the remaining authority-integrity defects found during adversarial review were closed without reopening the D1-D4 theory.\n",
+              "authority index stale no-pass explanation",
+          )
+          text = index.read_text(encoding="utf-8")
+          marker = "## Release transition\n\nThis index is transition scaffolding, not intended permanent Protocol 6 doctrine. Before final SSDP 6.0 release:\n"
+          if marker not in text:
+              raise SystemExit("authority index release-transition marker missing")
+          start = text.index(marker)
+          replacement = f'''## Final transition closeout\n\nThe release-transition predicates are closed on candidate `{CANDIDATE}`:\n\n- accepted Revision 1 and Revision 2 semantics are folded into canonical Protocol 6 owners;\n- `source/PROTOCOL_VERSION` is `6.0.0`;\n- the v6 profile/snapshot and generated distributions are derived from current canonical source;\n- immutable Protocol 5.16 recovery remains separate and unchanged;\n- root regressions, package build/validation/parity, snapshot parity, full Orchestrator Core acceptance, direct authority/legacy counterchecks, and whitespace checks passed;\n- final independent Review / Challenge Pass found no genuine blocking defect and no active Serious Challenge.\n\nThe transition index and its three governing records are therefore archived together as historical evidence. They are no longer a parallel current authority layer.\n'''
+          index.write_text(text[:start] + replacement, encoding="utf-8")
+
+          test = Path("tests/test_protocol_516_lifecycle_closeout.py")
+          text = test.read_text(encoding="utf-8")
+          anchor = "\n\nif __name__ == \"__main__\":\n"
+          method = f'''\n    def test_ssdp6_transition_authority_is_archived_after_final_pass(self) -> None:\n        names = (\n            "SSDP-6-AUTHORITY.md",\n            "SSDP-6-RECURSIVE-ABSTRACTION-REALIZATION-SCIENTIFIC-SOFTWARE-PROTOCOL.md",\n            "SSDP-6-RECURSIVE-ABSTRACTION-REALIZATION-SCIENTIFIC-SOFTWARE-PROTOCOL-AUTHORITY-REVISION-1-SERIOUS-CHALLENGE-AND-ADVERSARIAL-REVIEW.md",\n            "SSDP-6-RECURSIVE-ABSTRACTION-REALIZATION-SCIENTIFIC-SOFTWARE-PROTOCOL-AUTHORITY-REVISION-2-PROTOCOL-5-INHERITANCE-AND-CONSOLIDATION.md",\n        )\n        for name in names:\n            self.assertFalse((ACTIVE / name).exists(), name)\n            archived = ARCHIVE / name\n            self.assertTrue(archived.is_file(), name)\n            header = archived.read_text(encoding="utf-8").split("---", 2)[1]\n            self.assertIn("status: completed", header, name)\n            self.assertIn("completed_date: {DATE}", header, name)\n            self.assertIn("final_review: pass", header, name)\n            self.assertIn("active_serious_challenge: none", header, name)\n        authority = (ARCHIVE / "SSDP-6-AUTHORITY.md").read_text(encoding="utf-8")\n        self.assertIn("FINAL INDEPENDENT REVIEW / CHALLENGE PASS: PASS", authority)\n        self.assertIn("no longer a parallel current authority layer", authority)\n'''
+          if text.count(anchor) != 1 or "test_ssdp6_transition_authority_is_archived_after_final_pass" in text:
+              raise SystemExit("lifecycle closeout test insertion unexpected")
+          test.write_text(text.replace(anchor, method + anchor), encoding="utf-8")
+          PY
+      - name: Install acceptance dependencies
+        run: >-
+          python -m pip install
+          -r source/requirements-validation.txt
+          ./orchestrator
+          -r orchestrator/requirements-dev.txt
+      - name: Run protocol regression tests
+        run: python -m unittest discover -s tests -v
+      - name: Build and validate canonical skill packages
+        run: |
+          python source/build_skills.py --output /tmp/protocol-dist
+          python source/validate_packages.py --dist /tmp/protocol-dist
+          python source/check_dist.py --expected /tmp/protocol-dist --committed dist
+      - name: Verify Protocol snapshot and Orchestrator Core
+        run: |
+          python orchestrator/scripts/generate_protocol_snapshot.py --check
+          python orchestrator/scripts/run_core_tests.py
+      - name: Verify closeout structure directly
+        run: |
+          test -z "$(find workplans/active -maxdepth 1 -type f -name 'SSDP-6-*' -print)"
+          test -f workplans/archive/SSDP-6-AUTHORITY.md
+          test -f workplans/archive/SSDP-6-RECURSIVE-ABSTRACTION-REALIZATION-SCIENTIFIC-SOFTWARE-PROTOCOL.md
+          grep -q '^final_review: pass$' workplans/archive/SSDP-6-AUTHORITY.md
+          test "$(cat source/PROTOCOL_VERSION)" = "6.0.0"
+          test "$(git hash-object orchestrator/src/sdp_orchestrator/core/resources/protocol/sdp-protocol-5.16/prompts.md)" = "3730b06393843e9c24406a324f981ab4481858da"
+          test "$(git hash-object orchestrator/src/sdp_orchestrator/core/resources/protocol/sdp-protocol-5.16/profile.json)" = "b3d4257fcd18af7bdb1799b2db742659bb2403fc"
+      - name: Check patch whitespace
+        run: git diff --check
+      - name: Commit reconciled transition closeout and remove diagnostics
+        run: |
+          git rm .github/workflows/ssdp6-transition-closeout.yml \
+                 .github/workflows/ssdp6-transition-closeout-diagnostics.yml \
+                 .github/workflows/ssdp6-transition-closeout-corrected.yml \
+                 .github/workflows/ssdp6-transition-closeout-recovery.yml \
+                 .ci-ssdp6-closeout-failure.log
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add workplans/archive tests/test_protocol_516_lifecycle_closeout.py
+          git diff --cached --check
+          git commit -m "Archive completed SSDP 6 transition authority"
+          git push
