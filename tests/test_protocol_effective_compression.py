@@ -10,6 +10,26 @@ def read(path: str) -> str:
     return (ROOT / path).read_text(encoding="utf-8").lower()
 
 
+def current_operational_documents() -> tuple[Path, ...]:
+    roots = (
+        ROOT / "source" / "roles",
+        ROOT / "source" / "specialists",
+        ROOT / "source" / "shared" / "references",
+        ROOT / "source" / "shared" / "templates",
+    )
+    historical_compatibility_owner = (
+        ROOT / "source" / "shared" / "references" / "protocol-versioning-and-compatibility.md"
+    )
+    return tuple(
+        sorted(
+            path
+            for root in roots
+            for path in root.rglob("*.md")
+            if path != historical_compatibility_owner
+        )
+    )
+
+
 class HistoricalFailureModeScenarios(unittest.TestCase):
     def setUp(self) -> None:
         self.design = read("source/roles/software-design/SKILL.md")
@@ -91,20 +111,18 @@ class HistoricalFailureModeScenarios(unittest.TestCase):
         self.assertIn("do not create a permanent ledger", self.workflow)
 
     def test_current_operational_control_plane_uses_protocol6_semantics(self) -> None:
-        current_operational = (
-            self.design,
-            self.implementation,
-            self.workflow,
-            self.testing,
-            self.concurrency,
-            self.debugging,
+        forbidden = (
+            "product/frozen",
+            "tier-2",
+            "tier 1a",
+            "tier 1b",
+            "shared protocol 5 doctrine remains authoritative",
         )
-        for text in current_operational:
-            self.assertNotIn("product/frozen", text)
-            self.assertNotIn("tier-2", text)
-            self.assertNotIn("tier 1a", text)
-            self.assertNotIn("tier 1b", text)
-            self.assertNotIn("shared protocol 5 doctrine remains authoritative", text)
+        for path in current_operational_documents():
+            text = path.read_text(encoding="utf-8").lower()
+            with self.subTest(path=path.relative_to(ROOT).as_posix()):
+                for legacy_token in forbidden:
+                    self.assertNotIn(legacy_token, text)
         self.assertIn("accepted d3 architecture", self.concurrency)
         self.assertIn("cycle-scoped design assumption", self.debugging)
 
