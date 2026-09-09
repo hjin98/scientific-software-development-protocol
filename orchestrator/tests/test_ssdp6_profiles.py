@@ -92,6 +92,25 @@ class SSDP6CanonicalProfileTests(unittest.TestCase):
             {"numerical-algorithm-design", "software-design", "software-implementation"},
         )
 
+    def test_direct_upstream_handoffs_produce_a_governing_plan(self) -> None:
+        by_key = {stage.stage.stage_key: stage for stage in self.descriptor.stages}
+        self.assertIn("WORKPLAN_DESTINATION", {item.name for item in by_key["scientific-formulation"].inputs})
+        self.assertIn("WORKPLAN_DESTINATION", {item.name for item in by_key["numerical-algorithm-design"].inputs})
+        d4_body = self.document.stages["software-implementation"].body.lower()
+        self.assertIn("authorized reduced d2->d4 or d1->d4 route", d4_body)
+        self.assertIn("do not manufacture a d3 authority mutation", d4_body)
+        self.assertIs(by_key["software-implementation"].workplan_policy, WorkplanPolicy.REQUIRED)
+
+    def test_d3_only_authority_change_can_skip_unaffected_d4(self) -> None:
+        destinations = {
+            t.to_stage.stage_key
+            for t in self.descriptor.transitions
+            if t.from_stage.stage_key == "software-design"
+            and t.trigger_key == "accepted"
+            and t.to_stage is not None
+        }
+        self.assertEqual(destinations, {"software-implementation", "review", "closeout"})
+
     def test_serious_challenge_stops_automatic_routing(self) -> None:
         for stage_key in ("scientific-formulation", "numerical-algorithm-design", "software-design", "software-implementation", "review", "verification", "stabilization", "alignment", "health-audit", "closeout"):
             matches = [t for t in self.descriptor.transitions if t.from_stage.stage_key == stage_key and t.trigger_key == "serious_challenge"]

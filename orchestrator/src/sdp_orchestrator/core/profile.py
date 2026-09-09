@@ -167,6 +167,8 @@ _SSDP6_TRANSITIONS: tuple[TransitionRow, ...] = (
     ("numerical-algorithm-design", "human_pending", None, "required human ratification is pending"),
     ("numerical-algorithm-design", "risk_override", "software-design", "bounded downstream work may proceed under visible unresolved risk where policy permits"),
     ("software-design", "accepted", "software-implementation", "an accepted D3->D4 workplan is ready for implementation"),
+    ("software-design", "accepted", "review", "review an accepted D3-only authority change when no D4 realization is affected"),
+    ("software-design", "accepted", "closeout", "close an accepted D3-only scope when existing D4 already conforms and no further review is required"),
     ("software-design", "no_pass", "software-design", "incomplete D3 authority/workplan stays with Software Design"),
     ("software-design", "serious_challenge", None, "human adjudication is required before dependent routing"),
     ("software-implementation", "complete", "review", "an assembled D4 candidate is reviewed"),

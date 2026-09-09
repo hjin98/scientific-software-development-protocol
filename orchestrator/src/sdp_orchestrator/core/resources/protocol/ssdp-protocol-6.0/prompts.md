@@ -77,6 +77,7 @@ INPUTS
 TASK = [scientific/mathematical formulation change, question, or review scope]
 REPOSITORY_TARGET = [repository/worktree/branch; AUTO = current repository]
 CURRENT_AUTHORITY = [current Scientific Method Paper / D1 authority; AUTO = discover]
+WORKPLAN_DESTINATION = [generic abstraction-realization change-plan path for an authorized direct downstream handoff; AUTO = repository convention]
 HUMAN_RATIFICATION = [AUTO = derive whether human decision is required from semantic risk]
 PROTOCOL_SOURCE = [AUTO_LOCAL_FIRST = compatible installed skill/root first, then canonical public repository; otherwise explicit source]
 PROTOCOL_REF = [AUTO = governing declared protocol/version; otherwise explicit immutable compatible ref]
@@ -86,6 +87,8 @@ ADDITIONAL_CONSTRAINTS = [optional explicit user constraints; NONE if absent]
 Resolve REQUIRED_SKILL = scientific-formulation. Reconstruct the scientific/theoretical/engineering question independently of current code. Distinguish normative D1 claims from literature/evidence/rationale. Define or review observables/estimands, governing equations/models, assumptions, validity regime, interpretation, D1 uncertainty, and problem-appropriate external adequacy/validation/proof/standards evidence.
 
 Draft proposed authority separately from accepted-current authority. Consequential changes to scientific meaning, model/equations/closures, material assumptions/validity, model uncertainty, or conclusions require designated human ratification when policy assigns it; do not self-approve them.
+
+Before a direct D1->D3 or D1->D4 handoff that intentionally skips unchanged intermediate domains, actually create or update a snapshot-complete generic abstraction-realization change plan at WORKPLAN_DESTINATION. Do not create that extra plan when a dependent D2/D3 stage will own the next handoff or when no downstream realization is affected.
 
 Before D1->D2 handoff, test both realization fidelity and abstraction adequacy. On accepted D1 change, mark only materially dependent descendants/evidence stale. If current D1 authority itself appears materially contradictory, false, ambiguous, or unrealizable, raise SERIOUS CHALLENGE before ordinary findings.
 ```
@@ -99,6 +102,7 @@ INPUTS
 TASK = [algorithm/numerical-method change, question, or review scope]
 REPOSITORY_TARGET = [repository/worktree/branch; AUTO = current repository]
 CURRENT_AUTHORITY = [current Numerical & Algorithmic Method Paper / D2 authority; AUTO = discover]
+WORKPLAN_DESTINATION = [generic abstraction-realization change-plan path for an authorized direct D4 handoff; AUTO = repository convention]
 SCIENTIFIC_AUTHORITIES = [applicable D1 authority; AUTO = discover; NONE only when genuinely absent]
 HUMAN_RATIFICATION = [AUTO = derive whether human decision is required from semantic risk]
 PROTOCOL_SOURCE = [AUTO_LOCAL_FIRST = compatible installed skill/root first, then canonical public repository; otherwise explicit source]
@@ -110,7 +114,7 @@ Resolve REQUIRED_SKILL = numerical-algorithm-design. Recover every applicable D1
 
 Choose the minimum justified admissible method. Design sufficiently independent numerical oracles: exact/limiting/manufactured/reference cases, residual/invariants, refinement/convergence order, conditioning/sensitivity, differential/metamorphic relations, stochastic bias/variance, and backend/precision robustness as applicable. Never widen a tolerance or weaken a method merely to accept an implementation/backend.
 
-Draft proposed authority separately. Human adjudication is required when a D2 change can alter scientific conclusions or a governing algorithm/error guarantee. Before D2->D3 handoff test fidelity to D1 and D3-abstraction adequacy needs. If accepted D2 authority itself may be materially wrong/contradictory/ambiguous/unrealizable, raise SERIOUS CHALLENGE rather than requesting a software workaround.
+Draft proposed authority separately. Human adjudication is required when a D2 change can alter scientific conclusions or a governing algorithm/error guarantee. Before D2->D3 handoff test fidelity to D1 and D3-abstraction adequacy needs. Before an authorized direct D2->D4 handoff with unchanged D3 authority, actually create or update a snapshot-complete generic abstraction-realization change plan at WORKPLAN_DESTINATION so D4 receives a governing implementation contract without manufacturing a D3 change. If accepted D2 authority itself may be materially wrong/contradictory/ambiguous/unrealizable, raise SERIOUS CHALLENGE rather than requesting a software workaround.
 ```
 
 ---
@@ -132,7 +136,7 @@ Resolve REQUIRED_SKILL = software-design. Treat D3 as software architecture, not
 
 Design the minimum justified admissible architecture. Prefer cohesive ownership, direct flow, one authoritative representation, fewer interfaces/states/dependencies, and removal/consolidation over compensating machinery. Keep durable current Architecture Manual authority distinct from cycle-scoped workplan decisions.
 
-Actually create or update the governing D3->D4 workplan at WORKPLAN_DESTINATION when material. Do not modify product implementation in this stage. Freeze only architecture-level choices needed to bound implementation; leave D4 helpers/APIs/data structures/libraries/local algorithms replaceable. Define real-owner acceptance boundaries, focused/stage-local/final affected regression, integration, repository checks, and genuine simplification/reopen triggers.
+Actually create or update the governing D3->D4 workplan at WORKPLAN_DESTINATION when D4 realization is materially affected. If accepted D3 authority changes but existing D4 already realizes it and no implementation work is affected, do not manufacture an empty D4 workplan solely to satisfy routing mechanics; the D3-only scope may proceed to Review or Closeout. Do not modify product implementation in this stage. Freeze only architecture-level choices needed to bound implementation; leave D4 helpers/APIs/data structures/libraries/local algorithms replaceable. Define real-owner acceptance boundaries, focused/stage-local/final affected regression, integration, repository checks, and genuine simplification/reopen triggers.
 
 Challenge D3 abstraction adequacy against D2. If evidence instead invalidates D2 or D1, route upstream rather than encoding a workaround. Finish with Pass / No-Pass on handoff readiness, with any SERIOUS CHALLENGE first.
 ```
@@ -143,7 +147,7 @@ Challenge D3 abstraction adequacy against D2. If evidence instead invalidates D2
 
 ```text
 INPUTS
-WORKPLAN = [governing D3->D4 implementation workplan]
+WORKPLAN = [governing implementation/change plan; normally D3->D4, or an accepted upstream abstraction-realization plan for an authorized reduced route]
 REPOSITORY_TARGET = [repository/worktree/branch to modify; AUTO = current repository]
 PROTOCOL_SOURCE = [AUTO_LOCAL_FIRST = compatible installed skill/root first, then canonical public repository; otherwise explicit source]
 PROTOCOL_REF = [AUTO = WORKPLAN protocol_version; otherwise explicit immutable compatible ref]
@@ -151,6 +155,8 @@ EXECUTION_MODE = [AUTO_EXECUTE = modify/test the candidate; REPORT_ONLY = inspec
 ADDITIONAL_CONSTRAINTS = [optional explicit user constraints; NONE if absent]
 
 Resolve REQUIRED_SKILL = software-implementation under WORKPLAN's declared protocol semantics. Under AUTO_EXECUTE, actually modify REPOSITORY_TARGET and its owned tests/documentation as required; do not stop at a plan or code snippets when authorized write/execution tools exist.
+
+For an authorized reduced D2->D4 or D1->D4 route, accept the governing upstream abstraction-realization change plan together with the unchanged current D3 architecture. Do not manufacture a D3 authority mutation or empty D3->D4 plan solely to satisfy orchestrator mechanics. WORKPLAN remains required so implementation still receives a snapshot-complete governing contract.
 
 Implement the accepted D4 specification and D3 architecture while preserving every applicable D1/D2 invariant and governed side constraint.
 

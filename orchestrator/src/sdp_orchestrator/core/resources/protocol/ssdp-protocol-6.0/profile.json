@@ -10,7 +10,7 @@
     "source_digest": {
       "algorithm": "sha256",
       "canonicalization_scheme": "sdp.content.v1",
-      "value": "ce9fa2212884833369a34e2893a9aec31354f74e4ad51d181cb5d7e2a0ba4d79"
+      "value": "d6cdbb603ef434c0900fab94e0d382c74b1b7de7bc714415dc302cad329db847"
     }
   },
   "result_schema_id": "sdp.stage-result-envelope",
@@ -147,6 +147,15 @@
           "description": null,
           "first_class_source": null,
           "mode_dependent": false,
+          "name": "WORKPLAN_DESTINATION",
+          "override_allowed": true,
+          "ownership": "canonical_default"
+        },
+        {
+          "default_value": "AUTO",
+          "description": null,
+          "first_class_source": null,
+          "mode_dependent": false,
           "name": "HUMAN_RATIFICATION",
           "override_allowed": true,
           "ownership": "canonical_default"
@@ -236,6 +245,15 @@
           "first_class_source": null,
           "mode_dependent": false,
           "name": "CURRENT_AUTHORITY",
+          "override_allowed": true,
+          "ownership": "canonical_default"
+        },
+        {
+          "default_value": "AUTO",
+          "description": null,
+          "first_class_source": null,
+          "mode_dependent": false,
+          "name": "WORKPLAN_DESTINATION",
           "override_allowed": true,
           "ownership": "canonical_default"
         },
@@ -1353,6 +1371,38 @@
         "profile_id": "ssdp-protocol-6.0",
         "protocol_version": "6.0.0",
         "stage_key": "software-implementation"
+      },
+      "trigger_key": "accepted"
+    },
+    {
+      "explanation": "review an accepted D3-only authority change when no D4 realization is affected",
+      "from_stage": {
+        "profile_id": "ssdp-protocol-6.0",
+        "protocol_version": "6.0.0",
+        "stage_key": "software-design"
+      },
+      "priority_hint": null,
+      "terminal": false,
+      "to_stage": {
+        "profile_id": "ssdp-protocol-6.0",
+        "protocol_version": "6.0.0",
+        "stage_key": "review"
+      },
+      "trigger_key": "accepted"
+    },
+    {
+      "explanation": "close an accepted D3-only scope when existing D4 already conforms and no further review is required",
+      "from_stage": {
+        "profile_id": "ssdp-protocol-6.0",
+        "protocol_version": "6.0.0",
+        "stage_key": "software-design"
+      },
+      "priority_hint": null,
+      "terminal": false,
+      "to_stage": {
+        "profile_id": "ssdp-protocol-6.0",
+        "protocol_version": "6.0.0",
+        "stage_key": "closeout"
       },
       "trigger_key": "accepted"
     },
