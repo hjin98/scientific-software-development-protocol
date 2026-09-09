@@ -57,7 +57,7 @@ class ProxyProofAcceptanceContractTests(unittest.TestCase):
             self.assertIn("semantic owner", text)
             self.assertIn("references/testing-and-validation.md", text)
             self.assertIn("could remain green", text)
-        self.assertIn("product/frozen claim and the real semantic owner/path of the current realization", design)
+        self.assertIn("applicable accepted parent/cycle-scoped claim and the real semantic owner/path", design)
         self.assertIn("real semantic owner/path of the final accepted realization", implementation)
 
     def test_workplan_boundary_is_conditional_not_ceremonial(self) -> None:
@@ -74,11 +74,11 @@ class ProxyProofAcceptanceContractTests(unittest.TestCase):
         workflow = read("source/shared/references/workflow-and-workplans.md").lower()
         template = read("source/shared/templates/implementation_workplan_template.md").lower()
         implementation = read("source/roles/software-implementation/SKILL.md").lower()
-        self.assertIn("lower-level tier-2 owner does **not** become frozen", testing)
+        self.assertIn("acceptance does **not** make that lower-level owner durable authority", testing)
         self.assertIn("equivalent owner `b`", testing)
         self.assertIn("reconcile the acceptance mapping to the new real owner", testing)
-        self.assertIn("do not elevate a delegated tier-2 owner into frozen authority", workflow)
-        self.assertIn("merely the current tier-2 realization", template)
+        self.assertIn("accepted-current domain authority", workflow)
+        self.assertIn("merely the current delegated realization", template)
         self.assertIn("final accepted realization", implementation)
         self.assertIn("do not treat that remapping as proxy-passing or design reopening", implementation)
 
