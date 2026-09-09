@@ -1,0 +1,223 @@
+name: SSDP 6 authority acceptance finalizer
+
+on:
+  push:
+    branches:
+      - impl/ssdp-6
+
+permissions:
+  contents: write
+
+jobs:
+  finalize:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Apply authority acceptance integrity repair
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          def replace_once(path: str, old: str, new: str, label: str) -> None:
+              p = Path(path)
+              text = p.read_text(encoding="utf-8")
+              count = text.count(old)
+              if count != 1:
+                  raise SystemExit(f"{label}: expected one match, found {count}")
+              p.write_text(text.replace(old, new), encoding="utf-8")
+
+          prompts = "source/shared/references/development-workflow-prompts.md"
+          global_old = "When an unresolved Serious Challenge is proceeding under explicit human risk override, keep the dependent semantic surface visibly `risk-accepted/provisional`. In the terminal machine-readable footer, use the permitted additional field `authority_state = risk_accepted_provisional` (JSON key `authority_state`) for any result that depends on that unresolved claim. Do not reset the state to ordinary accepted-current merely because a descendant stage locally completes, and do not emit an unqualified downstream Pass/complete result for the affected claim.\n"
+          global_new = global_old + "\nFor a material D1, D2, or durable D3 authority mutation, `accepted` means accepted-current only after an independent falsification pass by a reviewer/context that did not author the proposal and after any required human ratification. The proposing agent's own checks do not satisfy the independent pass. If the prerequisite evidence is unavailable, keep the authority proposed and return truthful `human_pending` where applicable or No-Pass rather than accepted-current. A later generic Review may add assurance, but it cannot retroactively legitimize authority that was marked accepted-current without this pre-acceptance pass.\n"
+          replace_once(prompts, global_old, global_new, "global pre-acceptance contract")
+
+          d1_old = "Draft proposed authority separately from accepted-current authority. Consequential changes to scientific meaning, model/equations/closures, material assumptions/validity, model uncertainty, or conclusions require designated human ratification when policy assigns it; do not self-approve them.\n"
+          d1_new = d1_old + "\nBefore returning `accepted` for a material D1 authority mutation, require evidence that an independent reviewer/context that did not author the proposal attempted falsification and passed it, then obtain any required human ratification. If either prerequisite is missing, keep the authority proposed and return `human_pending` when ratification is pending or truthful No-Pass otherwise.\n"
+          replace_once(prompts, d1_old, d1_new, "D1 accepted-current gate")
+
+          d2_old = "Draft proposed authority separately. Human adjudication is required when a D2 change can alter scientific conclusions or a governing algorithm/error guarantee. For a material D2 authority mutation that will use the independent Review stage, actually create or update a snapshot-complete generic abstraction-realization change plan at WORKPLAN_DESTINATION so Review has a governing artifact. Before D2->D3 handoff test fidelity to D1 and D3-abstraction adequacy needs. The same generic plan may govern an authorized direct D2->D4 handoff with unchanged D3 authority so D4 receives a governing implementation contract without manufacturing a D3 change. If accepted D2 authority itself may be materially wrong/contradictory/ambiguous/unrealizable, raise SERIOUS CHALLENGE rather than requesting a software workaround.\n"
+          d2_new = "Draft proposed authority separately. Human adjudication is required when a D2 change can alter scientific conclusions or a governing algorithm/error guarantee. Before returning `accepted` for a material D2 authority mutation, require evidence that an independent reviewer/context that did not author the proposal attempted falsification and passed it, then obtain any required human ratification. If either prerequisite is missing, keep the authority proposed and return `human_pending` when ratification is pending or truthful No-Pass otherwise. For a material D2 authority mutation that will use the independent Review stage, actually create or update a snapshot-complete generic abstraction-realization change plan at WORKPLAN_DESTINATION so Review has a governing artifact. Before D2->D3 handoff test fidelity to D1 and D3-abstraction adequacy needs. The same generic plan may govern an authorized direct D2->D4 handoff with unchanged D3 authority so D4 receives a governing implementation contract without manufacturing a D3 change. If accepted D2 authority itself may be materially wrong/contradictory/ambiguous/unrealizable, raise SERIOUS CHALLENGE rather than requesting a software workaround.\n"
+          replace_once(prompts, d2_old, d2_new, "D2 accepted-current gate")
+
+          d3_old = "Actually create or update the governing D3->D4 workplan at WORKPLAN_DESTINATION when D4 realization is materially affected. For a material D3-only authority mutation that will use the independent Review stage, create or update the generic abstraction-realization change plan there instead so Review has a governing artifact. If accepted D3 authority changes but existing D4 already realizes it and no implementation work or separate Review is affected, do not manufacture an empty D4 workplan solely to satisfy routing mechanics; the D3-only scope may proceed directly to Closeout. Do not modify product implementation in this stage. Freeze only architecture-level choices needed to bound implementation; leave D4 helpers/APIs/data structures/libraries/local algorithms replaceable. Define real-owner acceptance boundaries, focused/stage-local/final affected regression, integration, repository checks, and genuine simplification/reopen triggers.\n"
+          d3_new = d3_old + "\nBefore returning `accepted` for a material durable D3 authority mutation, require evidence that an independent reviewer/context that did not author the proposal attempted falsification and passed it. If the pass is unavailable, keep the authority proposed and return truthful No-Pass. A workplan-only handoff that does not mutate durable D3 authority remains governed by the normal material Challenge Pass and its accepted cycle freeze.\n"
+          replace_once(prompts, d3_old, d3_new, "D3 accepted-current gate")
+
+          d1_role = "source/roles/scientific-formulation/SKILL.md"
+          d1_steps_old = "7. Draft proposed authority; do not edit accepted-current semantics speculatively and then treat the edit as governing.\n8. Obtain required human ratification for consequential D1 changes.\n9. On acceptance, invalidate only dependent descendants/evidence and hand the minimum necessary invariants to D2.\n"
+          d1_steps_new = "7. Draft proposed authority; do not edit accepted-current semantics speculatively and then treat the edit as governing.\n8. Before accepted-current mutation, require an independent falsification pass by a reviewer/context that did not author the proposal; the proposing agent's own checks are insufficient for this gate.\n9. Obtain required human ratification for consequential D1 changes after that independent pass.\n10. Only then accept current D1 authority, invalidate dependent descendants/evidence, and hand the minimum necessary invariants to D2. If independent review or required ratification is unavailable, leave the authority proposed and report non-acceptance truthfully.\n"
+          replace_once(d1_role, d1_steps_old, d1_steps_new, "D1 role acceptance sequence")
+
+          d2_role = "source/roles/numerical-algorithm-design/SKILL.md"
+          d2_steps_old = "7. Draft proposed D2 authority; do not bless implementation output by rewriting the method paper or widening tolerances without accepted semantic justification.\n8. Obtain human adjudication when a D2 change can alter scientific conclusions or a governing algorithm/error guarantee.\n9. On acceptance, invalidate only dependent descendants/evidence and hand the minimum computational semantics to D3.\n"
+          d2_steps_new = "7. Draft proposed D2 authority; do not bless implementation output by rewriting the method paper or widening tolerances without accepted semantic justification.\n8. Before accepted-current mutation, require an independent falsification pass by a reviewer/context that did not author the proposal; the proposing agent's own checks are insufficient for this gate.\n9. Obtain human adjudication when a D2 change can alter scientific conclusions or a governing algorithm/error guarantee after that independent pass.\n10. Only then accept current D2 authority, invalidate dependent descendants/evidence, and hand the minimum computational semantics to D3. If independent review or required adjudication is unavailable, leave the authority proposed and report non-acceptance truthfully.\n"
+          replace_once(d2_role, d2_steps_old, d2_steps_new, "D2 role acceptance sequence")
+
+          d3_role = "source/roles/software-design/SKILL.md"
+          d3_step_old = "7. State evidence that would reopen D3 versus evidence that should remain a D4 local reconciliation.\n"
+          d3_step_new = d3_step_old + "8. For a material durable D3 authority mutation, require an independent falsification pass by a reviewer/context that did not author the proposal before promoting it to accepted-current. If that pass is unavailable, leave D3 authority proposed and do not report accepted-current. Workplan-only cycle freezes remain distinct from durable Architecture Manual acceptance.\n"
+          replace_once(d3_role, d3_step_old, d3_step_new, "D3 role acceptance sequence")
+
+          d1_ref = "source/shared/references/scientific-formulation.md"
+          d1_ref_old = "7. define the external adequacy/falsification route appropriate to the problem class.\n\nA scientific model that is convenient to compute but does not answer the intended question is inadmissible even if all software tests pass.\n"
+          d1_ref_new = "7. define the external adequacy/falsification route appropriate to the problem class.\n\nA material proposed D1 mutation is not accepted-current authority until an independent reviewer/context that did not author it has attempted falsification and passed it, followed by any required human ratification. If either prerequisite is missing, preserve the proposal as non-governing rather than promoting it through existence or later downstream use.\n\nA scientific model that is convenient to compute but does not answer the intended question is inadmissible even if all software tests pass.\n"
+          replace_once(d1_ref, d1_ref_old, d1_ref_new, "D1 reference acceptance gate")
+
+          d2_ref = "source/shared/references/numerical-algorithm-design.md"
+          d2_ref_old = "7. define numerical verification evidence before optimization can obscure the reference behavior.\n\nDo not widen tolerances, lower resolution, change an estimator, alter summation/reduction semantics, or relax convergence criteria merely because a backend otherwise fails.\n"
+          d2_ref_new = "7. define numerical verification evidence before optimization can obscure the reference behavior.\n\nA material proposed D2 mutation is not accepted-current authority until an independent reviewer/context that did not author it has attempted falsification and passed it, followed by any required human adjudication. If either prerequisite is missing, preserve the proposal as non-governing rather than allowing implementation or later review to make it authoritative by use.\n\nDo not widen tolerances, lower resolution, change an estimator, alter summation/reduction semantics, or relax convergence criteria merely because a backend otherwise fails.\n"
+          replace_once(d2_ref, d2_ref_old, d2_ref_new, "D2 reference acceptance gate")
+
+          d3_ref = "source/shared/references/architecture-and-design.md"
+          d3_ref_old = "Keep current architecture separate from workplan-specific cycle freeze. A workplan can freeze a solution decision for one realization cycle without making it permanent architecture. Promote it into the Architecture Manual only when D3 deliberately accepts it as durable current structure.\n"
+          d3_ref_new = d3_ref_old + "\nFor a material durable D3 authority mutation, deliberate acceptance requires an independent falsification pass by a reviewer/context that did not author the proposal before the Architecture Manual becomes accepted-current. A workplan's cycle freeze does not substitute for that durable-authority gate, and a later implementation Review cannot retroactively legitimize a prematurely promoted architecture.\n"
+          replace_once(d3_ref, d3_ref_old, d3_ref_new, "D3 reference acceptance gate")
+
+          inputs = "orchestrator/src/sdp_orchestrator/core/inputs.py"
+          import_old = "from .records import (\n    InputBinding,\n    InputOwnership,\n    ResolvedInput,\n    StageDescriptor,\n    WorkplanRef,\n)\n"
+          import_new = "from .records import (\n    InputBinding,\n    InputOwnership,\n    LifecycleState,\n    ResolvedInput,\n    StageDescriptor,\n    WorkplanRef,\n)\n"
+          replace_once(inputs, import_old, import_new, "inputs lifecycle import")
+          optional_old = "    if binding.first_class_source == \"workplan_selector_optional_path\":\n        if workplan is not None:\n            return ResolvedInput(\n                name=name,\n                ownership=binding.ownership,\n                value=encode_scalar(workplan.path),\n                provenance=P_WORKPLAN,\n            )\n"
+          optional_new = "    if binding.first_class_source == \"workplan_selector_optional_path\":\n        if workplan is not None:\n            if (\n                workplan.lifecycle_state is not LifecycleState.ACTIVE\n                or not workplan.lifecycle_consistent\n                or not workplan.semantic_identity_complete\n            ):\n                E.fail(\n                    E.WORKPLAN_NOT_FOUND,\n                    \"the selected optional change plan is not a current active governing authority\",\n                    details={\"path\": workplan.path, \"input\": name},\n                    remediation=(\n                        \"select an active, lifecycle-consistent, semantically complete change plan \"\n                        \"or omit --workplan for genuinely local D4-only work\"\n                    ),\n                )\n            return ResolvedInput(\n                name=name,\n                ownership=binding.ownership,\n                value=encode_scalar(workplan.path),\n                provenance=P_WORKPLAN,\n            )\n"
+          replace_once(inputs, optional_old, optional_new, "optional change-plan validation")
+
+          profile_test = Path("orchestrator/tests/test_ssdp6_profiles.py")
+          text = profile_test.read_text(encoding="utf-8")
+          import_old = "from sdp_orchestrator.core import profile as P\nfrom sdp_orchestrator.core import protocol_source as PS\n"
+          import_new = "from sdp_orchestrator.core import errors as E\nfrom sdp_orchestrator.core import profile as P\nfrom sdp_orchestrator.core import protocol_source as PS\n"
+          if text.count(import_old) != 1:
+              raise SystemExit("profile test imports: unexpected shape")
+          text = text.replace(import_old, import_new)
+          records_old = "from sdp_orchestrator.core.records import WorkplanPolicy\n"
+          records_new = "from sdp_orchestrator.core.records import DigestRef, LifecycleState, WorkplanPolicy, WorkplanRef\n"
+          if text.count(records_old) != 1:
+              raise SystemExit("profile test record imports: unexpected shape")
+          text = text.replace(records_old, records_new)
+          anchor = "    def test_reduced_routes_skip_unaffected_intermediate_domains(self) -> None:\n"
+          method = '''    def test_optional_d4_change_plan_must_be_current_active_authority(self) -> None:\n        by_key = {stage.stage.stage_key: stage for stage in self.descriptor.stages}\n        d4 = by_key["software-implementation"]\n\n        def plan(*, lifecycle_state=LifecycleState.ACTIVE, lifecycle_consistent=True, semantic_identity_complete=True):\n            return WorkplanRef(\n                workplan_id="WP6-AUTHORITY",\n                protocol_version="6.0.0",\n                path="workplans/active/WP6-AUTHORITY.md",\n                artifact_digest=DigestRef(algorithm="sha256", value="a" * 64),\n                semantic_digest=DigestRef(algorithm="sha256", value="b" * 64),\n                semantic_identity_complete=semantic_identity_complete,\n                lifecycle_state=lifecycle_state,\n                lifecycle_consistent=lifecycle_consistent,\n            )\n\n        active = {\n            item.name: item.value\n            for item in resolve_inputs(\n                d4,\n                workplan=plan(),\n                first_task=None,\n                overrides={},\n                governing_protocol_version="6.0.0",\n            )\n        }\n        self.assertEqual(active["CHANGE_PLAN"], "workplans/active/WP6-AUTHORITY.md")\n\n        for invalid in (\n            plan(lifecycle_state=LifecycleState.ARCHIVE),\n            plan(lifecycle_consistent=False),\n            plan(semantic_identity_complete=False),\n        ):\n            with self.subTest(invalid=invalid):\n                with self.assertRaises(E.OrchestratorError) as caught:\n                    resolve_inputs(\n                        d4,\n                        workplan=invalid,\n                        first_task=None,\n                        overrides={},\n                        governing_protocol_version="6.0.0",\n                    )\n                self.assertEqual(caught.exception.code, E.WORKPLAN_NOT_FOUND)\n\n'''
+          if text.count(anchor) != 1 or "test_optional_d4_change_plan_must_be_current_active_authority" in text:
+              raise SystemExit("profile test insertion: unexpected shape")
+          profile_test.write_text(text.replace(anchor, method + anchor), encoding="utf-8")
+
+          root_test = Path("tests/test_protocol_516_orchestration.py")
+          text = root_test.read_text(encoding="utf-8")
+          anchor = "    def test_stage_routes_preserve_domain_ownership(self) -> None:\n"
+          method = '''    def test_material_authority_acceptance_requires_independent_falsification_first(self) -> None:\n        for heading in (\n            "1. D1 Scientific & Mathematical Formulation",\n            "2. D2 Algorithm & Numerical Method Design",\n            "3. D3 Software Architecture / Workplan",\n        ):\n            block = self.stage_block(heading).lower()\n            self.assertIn("before returning `accepted`", block, heading)\n            self.assertIn("independent reviewer/context", block, heading)\n            self.assertIn("did not author the proposal", block, heading)\n            self.assertIn("keep the authority proposed", block, heading)\n        self.assertIn("cannot retroactively legitimize", self.lower)\n\n'''
+          if text.count(anchor) != 1 or "test_material_authority_acceptance_requires_independent_falsification_first" in text:
+              raise SystemExit("root orchestration test insertion: unexpected shape")
+          root_test.write_text(text.replace(anchor, method + anchor), encoding="utf-8")
+
+          scenarios = Path("qualification/ssdp6/SCENARIOS.md")
+          text = scenarios.read_text(encoding="utf-8")
+          if "### 68. Premature authority acceptance" in text:
+              raise SystemExit("qualification scenarios already extended")
+          if not text.endswith("This is correct separation, not doctrinal duplication.\n"):
+              raise SystemExit("qualification scenario tail changed")
+          text += "\n### 68. Premature authority acceptance\nA material D1, D2, or durable D3 proposal has only the author's own checks and is marked accepted-current before independent falsification. Reject that transition: preserve the proposal as non-governing until an independent reviewer/context passes it and any required human ratification completes. A later generic Review cannot retroactively legalize the premature mutation.\n\n### 69. Archived optional D4 change plan\nA Protocol 6 D4 command explicitly selects an archived, lifecycle-inconsistent, or semantically incomplete change plan. Core must reject it as governing authority. This does not remove the proportional local D4-only route: omitting the selector still yields `CHANGE_PLAN = NONE` under sufficient current authority.\n"
+          scenarios.write_text(text, encoding="utf-8")
+
+          guide = "orchestrator/docs/core-user-guide.md"
+          guide_old = "A genuinely local Protocol 6 D4-only implementation may omit `--workplan`; Core renders `CHANGE_PLAN = NONE` and the receiving agent must still perform the protocol's proportionate upstream-impact exclusion. When a change plan/workplan materially governs D4, pass it explicitly with `--workplan`; its declared `protocol_version` still binds the compatible profile. Review remains plan-governed.\n"
+          guide_new = guide_old + "\nAn explicitly supplied Protocol 6 D4 change plan must be active, lifecycle-consistent, and semantically complete. Core rejects archived or incomplete explicit plans instead of treating them as governing authority; this validation does not affect the plan-free local D4-only route.\n"
+          replace_once(guide, guide_old, guide_new, "Core guide optional plan semantics")
+          PY
+      - name: Install validation and Orchestrator dependencies
+        run: >-
+          python -m pip install
+          -r source/requirements-validation.txt
+          ./orchestrator
+          -r orchestrator/requirements-dev.txt
+      - name: Run root protocol regression tests
+        run: python -m unittest discover -s tests -v
+      - name: Generate current Protocol 6 packaged snapshot
+        run: python orchestrator/scripts/generate_protocol_snapshot.py
+      - name: Build canonical skill packages
+        run: python source/build_skills.py --output /tmp/protocol-dist
+      - name: Validate generated skill packages independently
+        run: python source/validate_packages.py --dist /tmp/protocol-dist
+      - name: Replace committed distribution from canonical build
+        run: |
+          rm -rf dist
+          cp -a /tmp/protocol-dist dist
+      - name: Verify generated distribution parity
+        run: python source/check_dist.py --expected /tmp/protocol-dist --committed dist
+      - name: Verify generated Protocol snapshot parity
+        run: python orchestrator/scripts/generate_protocol_snapshot.py --check
+      - name: Run Orchestrator Core acceptance suite
+        run: python orchestrator/scripts/run_core_tests.py
+      - name: Verify authority acceptance and legacy isolation directly
+        run: |
+          python - <<'PY'
+          import hashlib
+          import json
+          from pathlib import Path
+          from sdp_orchestrator.core import errors as E
+          from sdp_orchestrator.core import profile as P
+          from sdp_orchestrator.core.canonical import parse_document
+          from sdp_orchestrator.core.inputs import resolve_inputs
+          from sdp_orchestrator.core.records import DigestRef, LifecycleState, WorkplanRef
+
+          prompt = Path("source/shared/references/development-workflow-prompts.md").read_text(encoding="utf-8")
+          doc = parse_document(prompt, profile_id=P.DEFAULT_PROFILE_ID)
+          for key in ("scientific-formulation", "numerical-algorithm-design", "software-design"):
+              body = doc.stages[key].body.lower()
+              assert "before returning `accepted`" in body
+              assert "did not author the proposal" in body
+              assert "keep the authority proposed" in body
+
+          descriptor = P.build_profile(doc, P.DEFAULT_PROFILE_ID).descriptor
+          d4 = next(stage for stage in descriptor.stages if stage.stage.stage_key == "software-implementation")
+          archived = WorkplanRef(
+              workplan_id="ARCHIVED",
+              protocol_version="6.0.0",
+              path="workplans/archive/ARCHIVED.md",
+              artifact_digest=DigestRef(algorithm="sha256", value="a" * 64),
+              semantic_digest=DigestRef(algorithm="sha256", value="b" * 64),
+              semantic_identity_complete=True,
+              lifecycle_state=LifecycleState.ARCHIVE,
+          )
+          try:
+              resolve_inputs(d4, workplan=archived, first_task=None, overrides={}, governing_protocol_version="6.0.0")
+          except E.OrchestratorError as exc:
+              assert exc.code == E.WORKPLAN_NOT_FOUND
+          else:
+              raise AssertionError("archived Protocol 6 D4 change plan was accepted")
+
+          root = Path("orchestrator/src/sdp_orchestrator/core/resources/protocol/sdp-protocol-5.16")
+          expected = {
+              "prompts.md": "3730b06393843e9c24406a324f981ab4481858da",
+              "profile.json": "b3d4257fcd18af7bdb1799b2db742659bb2403fc",
+          }
+          for name, sha in expected.items():
+              data = (root / name).read_bytes()
+              actual = hashlib.sha1(f"blob {len(data)}\0".encode("ascii") + data).hexdigest()
+              assert actual == sha, (name, actual)
+          PY
+      - name: Check patch whitespace
+        run: git diff --check
+      - name: Commit accepted repair and remove temporary workflow
+        run: |
+          git rm .github/workflows/ssdp6-authority-acceptance-finalizer.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add source/shared/references/development-workflow-prompts.md \
+                  source/shared/references/scientific-formulation.md \
+                  source/shared/references/numerical-algorithm-design.md \
+                  source/shared/references/architecture-and-design.md \
+                  source/roles/scientific-formulation/SKILL.md \
+                  source/roles/numerical-algorithm-design/SKILL.md \
+                  source/roles/software-design/SKILL.md \
+                  qualification/ssdp6/SCENARIOS.md \
+                  orchestrator/src/sdp_orchestrator/core/inputs.py \
+                  orchestrator/tests/test_ssdp6_profiles.py \
+                  orchestrator/docs/core-user-guide.md \
+                  tests/test_protocol_516_orchestration.py \
+                  orchestrator/src/sdp_orchestrator/core/resources/protocol/ssdp-protocol-6.0 \
+                  dist
+          git diff --cached --check
+          git commit -m "Require independent authority acceptance in Protocol 6"
+          git push
