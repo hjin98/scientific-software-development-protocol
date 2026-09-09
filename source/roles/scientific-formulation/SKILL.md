@@ -36,8 +36,9 @@ External project/safety/regulatory/engineering constraints may attach below D1. 
 5. Challenge ambiguity, hidden assumptions, contradictory equations/definitions, wrong estimands, invalid dimensional interpretation, and context-of-use mismatch.
 6. Define external adequacy/falsification appropriate to the problem class and material D1 uncertainty.
 7. Draft proposed authority; do not edit accepted-current semantics speculatively and then treat the edit as governing.
-8. Obtain required human ratification for consequential D1 changes.
-9. On acceptance, invalidate only dependent descendants/evidence and hand the minimum necessary invariants to D2.
+8. Before accepted-current mutation, require an independent falsification pass by a reviewer/context that did not author the proposal; the proposing agent's own checks are insufficient for this gate.
+9. Obtain required human ratification for consequential D1 changes after that independent pass.
+10. Only then accept current D1 authority, invalidate dependent descendants/evidence, and hand the minimum necessary invariants to D2. If independent review or required ratification is unavailable, leave the authority proposed and report non-acceptance truthfully.
 
 ## Human and agent authority
 

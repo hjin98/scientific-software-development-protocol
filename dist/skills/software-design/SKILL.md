@@ -98,6 +98,7 @@ Existing code/tests/helpers/wrappers/caches/state machines/library choices do no
 5. Freeze only material D3 decisions needed for the cycle; delegate D4 mechanics.
 6. Define D4 acceptance through real semantic-owner boundaries and complete affected regression/integration.
 7. State evidence that would reopen D3 versus evidence that should remain a D4 local reconciliation.
+8. For a material durable D3 authority mutation, require an independent falsification pass by a reviewer/context that did not author the proposal before promoting it to accepted-current. If that pass is unavailable, leave D3 authority proposed and do not report accepted-current. Workplan-only cycle freezes remain distinct from durable Architecture Manual acceptance.
 
 ## Active simplicity and convergence
 

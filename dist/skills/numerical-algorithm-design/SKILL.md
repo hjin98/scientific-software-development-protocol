@@ -34,8 +34,9 @@ A performance or hardware constraint may enter D2 directly when it constrains al
 5. Define independent oracles/counterexamples before optimization can contaminate the reference.
 6. Verify limiting/reference behavior, convergence/refinement, invariants, tolerance justification, and uncertainty proportionately to risk.
 7. Draft proposed D2 authority; do not bless implementation output by rewriting the method paper or widening tolerances without accepted semantic justification.
-8. Obtain human adjudication when a D2 change can alter scientific conclusions or a governing algorithm/error guarantee.
-9. On acceptance, invalidate only dependent descendants/evidence and hand the minimum computational semantics to D3.
+8. Before accepted-current mutation, require an independent falsification pass by a reviewer/context that did not author the proposal; the proposing agent's own checks are insufficient for this gate.
+9. Obtain human adjudication when a D2 change can alter scientific conclusions or a governing algorithm/error guarantee after that independent pass.
+10. Only then accept current D2 authority, invalidate dependent descendants/evidence, and hand the minimum computational semantics to D3. If independent review or required adjudication is unavailable, leave the authority proposed and report non-acceptance truthfully.
 
 ## Oracle discipline
 

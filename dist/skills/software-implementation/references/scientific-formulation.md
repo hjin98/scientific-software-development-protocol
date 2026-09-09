@@ -42,6 +42,8 @@ When formulating or changing D1:
 6. keep lower-level numerical/architectural/implementation mechanisms delegated unless they are themselves scientifically semantic;
 7. define the external adequacy/falsification route appropriate to the problem class.
 
+A material proposed D1 mutation is not accepted-current authority until an independent reviewer/context that did not author it has attempted falsification and passed it, followed by any required human ratification. If either prerequisite is missing, preserve the proposal as non-governing rather than promoting it through existence or later downstream use.
+
 A scientific model that is convenient to compute but does not answer the intended question is inadmissible even if all software tests pass.
 
 ## External adequacy

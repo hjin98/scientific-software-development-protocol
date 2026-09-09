@@ -42,6 +42,8 @@ The logical D3 normative document family is the **Architecture Manual**. It desc
 
 Keep current architecture separate from workplan-specific cycle freeze. A workplan can freeze a solution decision for one realization cycle without making it permanent architecture. Promote it into the Architecture Manual only when D3 deliberately accepts it as durable current structure.
 
+For a material durable D3 authority mutation, deliberate acceptance requires an independent falsification pass by a reviewer/context that did not author the proposal before the Architecture Manual becomes accepted-current. A workplan's cycle freeze does not substitute for that durable-authority gate, and a later implementation Review cannot retroactively legitimize a prematurely promoted architecture.
+
 ## Minimum justified architecture
 
 Prefer cohesive ownership, direct control flow, one authoritative representation/state, acyclic understandable dependencies, and the fewest necessary components/interfaces/synchronization points/compatibility paths.

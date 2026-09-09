@@ -240,6 +240,8 @@ Protocol 6 stage policies are:
 
 A genuinely local Protocol 6 D4-only implementation may omit `--workplan`; Core renders `CHANGE_PLAN = NONE` and the receiving agent must still perform the protocol's proportionate upstream-impact exclusion. When a change plan/workplan materially governs D4, pass it explicitly with `--workplan`; its declared `protocol_version` still binds the compatible profile. Review remains plan-governed.
 
+An explicitly supplied Protocol 6 D4 change plan must be active, lifecycle-consistent, and semantically complete. Core rejects archived or incomplete explicit plans instead of treating them as governing authority; this validation does not affect the plan-free local D4-only route.
+
 A new D3 design task with no `--workplan` does **not** adopt an unrelated sole
 active workplan. A workplan passed to a stage that disallows one fails rather
 than being ignored.

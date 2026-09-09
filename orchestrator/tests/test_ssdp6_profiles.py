@@ -6,11 +6,12 @@ import json
 import unittest
 from pathlib import Path
 
+from sdp_orchestrator.core import errors as E
 from sdp_orchestrator.core import profile as P
 from sdp_orchestrator.core import protocol_source as PS
 from sdp_orchestrator.core.canonical import CANONICAL_STAGES, SSDP6_STAGES, parse_document
 from sdp_orchestrator.core.inputs import resolve_inputs
-from sdp_orchestrator.core.records import WorkplanPolicy
+from sdp_orchestrator.core.records import DigestRef, LifecycleState, WorkplanPolicy, WorkplanRef
 
 from ._support import CURRENT_CANONICAL_PROMPTS, REPO_ROOT
 
@@ -79,6 +80,50 @@ class SSDP6CanonicalProfileTests(unittest.TestCase):
             )
         }
         self.assertEqual(values["CHANGE_PLAN"], "NONE")
+
+    def test_optional_d4_change_plan_must_be_current_active_authority(self) -> None:
+        by_key = {stage.stage.stage_key: stage for stage in self.descriptor.stages}
+        d4 = by_key["software-implementation"]
+
+        def plan(*, lifecycle_state=LifecycleState.ACTIVE, lifecycle_consistent=True, semantic_identity_complete=True):
+            return WorkplanRef(
+                workplan_id="WP6-AUTHORITY",
+                protocol_version="6.0.0",
+                path="workplans/active/WP6-AUTHORITY.md",
+                artifact_digest=DigestRef(algorithm="sha256", value="a" * 64),
+                semantic_digest=DigestRef(algorithm="sha256", value="b" * 64),
+                semantic_identity_complete=semantic_identity_complete,
+                lifecycle_state=lifecycle_state,
+                lifecycle_consistent=lifecycle_consistent,
+            )
+
+        active = {
+            item.name: item.value
+            for item in resolve_inputs(
+                d4,
+                workplan=plan(),
+                first_task=None,
+                overrides={},
+                governing_protocol_version="6.0.0",
+            )
+        }
+        self.assertEqual(active["CHANGE_PLAN"], "workplans/active/WP6-AUTHORITY.md")
+
+        for invalid in (
+            plan(lifecycle_state=LifecycleState.ARCHIVE),
+            plan(lifecycle_consistent=False),
+            plan(semantic_identity_complete=False),
+        ):
+            with self.subTest(invalid=invalid):
+                with self.assertRaises(E.OrchestratorError) as caught:
+                    resolve_inputs(
+                        d4,
+                        workplan=invalid,
+                        first_task=None,
+                        overrides={},
+                        governing_protocol_version="6.0.0",
+                    )
+                self.assertEqual(caught.exception.code, E.WORKPLAN_NOT_FOUND)
 
     def test_reduced_routes_skip_unaffected_intermediate_domains(self) -> None:
         def destinations(stage_key: str, trigger: str) -> set[str]:

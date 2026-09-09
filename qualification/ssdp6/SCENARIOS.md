@@ -214,3 +214,9 @@ A long multi-session implementation records current governing snapshot, open obl
 
 ### 67. Historical recovery stays historical
 A 5.16 workplan is intentionally inspected using immutable 5.16 terminology while current Protocol 6 routing remains Protocol-6-native. This is correct separation, not doctrinal duplication.
+
+### 68. Premature authority acceptance
+A material D1, D2, or durable D3 proposal has only the author's own checks and is marked accepted-current before independent falsification. Reject that transition: preserve the proposal as non-governing until an independent reviewer/context passes it and any required human ratification completes. A later generic Review cannot retroactively legalize the premature mutation.
+
+### 69. Archived optional D4 change plan
+A Protocol 6 D4 command explicitly selects an archived, lifecycle-inconsistent, or semantically incomplete change plan. Core must reject it as governing authority. This does not remove the proportional local D4-only route: omitting the selector still yields `CHANGE_PLAN = NONE` under sufficient current authority.

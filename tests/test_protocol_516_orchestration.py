@@ -60,6 +60,19 @@ class Protocol6OrchestrationTests(unittest.TestCase):
         self.assertIn("prefer action over clarification when ordinary context is discoverable", self.lower)
         self.assertIn("ask only when proceeding would require guessing a genuinely consequential", self.lower)
 
+    def test_material_authority_acceptance_requires_independent_falsification_first(self) -> None:
+        for heading in (
+            "1. D1 Scientific & Mathematical Formulation",
+            "2. D2 Algorithm & Numerical Method Design",
+            "3. D3 Software Architecture / Workplan",
+        ):
+            block = self.stage_block(heading).lower()
+            self.assertIn("before returning `accepted`", block, heading)
+            self.assertIn("independent reviewer/context", block, heading)
+            self.assertIn("did not author the proposal", block, heading)
+            self.assertIn("keep the authority proposed", block, heading)
+        self.assertIn("cannot retroactively legitimize", self.lower)
+
     def test_stage_routes_preserve_domain_ownership(self) -> None:
         expected = {
             "1. D1 Scientific & Mathematical Formulation": "scientific-formulation",

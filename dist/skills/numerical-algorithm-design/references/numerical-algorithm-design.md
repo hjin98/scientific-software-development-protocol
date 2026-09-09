@@ -36,6 +36,8 @@ For a new or changed D2 method:
 6. preserve alternative implementation freedom below D2 when exact mechanism identity is unnecessary;
 7. define numerical verification evidence before optimization can obscure the reference behavior.
 
+A material proposed D2 mutation is not accepted-current authority until an independent reviewer/context that did not author it has attempted falsification and passed it, followed by any required human adjudication. If either prerequisite is missing, preserve the proposal as non-governing rather than allowing implementation or later review to make it authoritative by use.
+
 Do not widen tolerances, lower resolution, change an estimator, alter summation/reduction semantics, or relax convergence criteria merely because a backend otherwise fails.
 
 ## Numerical oracle and verification strategy
