@@ -1,32 +1,39 @@
-# Workflow and Workplans
+# Workflow, Change Plans, Handoffs, and Review
 
-Protocol 5 keeps the lifecycle small while allowing proportionate engineering work needed to establish the correct product.
+Protocol 6 uses recursive abstraction–realization rather than one mandatory linear lifecycle. Read [Abstraction, realization, authority, and challenge](abstraction-and-realization.md) as the governing semantic model.
 
-## Shared engineering objective
+Workplans, gates, reviews, tests, and process stages are coordination/evidence mechanisms, **not terminal objectives**. They are bounded by explicit stakeholder requirements, accepted domain authority, and the affected semantic scope and **must never create pressure to manufacture a pass**.
 
-Every protocol actor is a steward of the stakeholder's durable software outcome. Workplans, tests, gates, metrics, reviews, reports, and implementation mechanisms are constraints, evidence, or solutions; they are **not terminal objectives**. Stage/final closure is earned by product/conformance/evidence state and **must never create pressure to manufacture a pass**.
+## Roles and semantic domains
 
-Long-horizon stewardship is bounded by explicit stakeholder requirements, governed contracts, the accepted engineering envelope, plausibly affected surfaces, and material maintenance/operation consequences. It does not authorize unrelated enhancements or speculative refactoring.
-
-## Roles
+The authority-bearing roles are:
 
 ```text
-software-design -> software-implementation
+D1 scientific-formulation
+    -> D2 numerical-algorithm-design
+        -> D3 software-design
+            -> D4 software-implementation
 ```
 
-`software-design` owns diagnosis/design, Tier-1 engineering-envelope definition, high-level architecture/algorithm/resource decisions, product-complexity review, lossless translation of accepted design into the implementation contract, validation design, and independent review. `software-implementation` owns code/refactoring, repository reconciliation, adaptive realization beneath Frozen authority, semantic/conformance closure, stage-local/final affected-surface regression plus integration, benchmarking/validation, ordinary cleanup, and completion evidence.
+This is a semantic ordering, not a required four-stage waterfall. A local implementation refactor can remain D4-only after a proportionate upstream-impact exclusion. A software-architecture change can be D3->D4. A numerical change can begin at D2. A scientific formulation change begins at D1 and realizes downward only through dependent descendants.
 
-Testing is not a separate authority. Independent review is a mode of Software Design, not a third lifecycle role. Production qualification is not a separate lifecycle role.
+Supporting capabilities such as `software-documentation`, `software-maintenance-audit`, and `repository-hygiene` are **not a third lifecycle role** and are not authority-bearing approval roles. The software-local subcycle remains `software-design -> software-implementation` at D3->D4; it does not own D1/D2.
 
-## Product simplicity versus development economy
+## Start at the highest potentially affected domain
 
-Material Tier-1 engineering requirements define the feasible product space. Among engineering-sufficient realizations, prefer the lowest justified total product/system complexity. This simplicity rule applies both prospectively when choosing a solution and retrospectively when accumulated structural complexity shows the current realization should be reduced or re-derived.
+Before mutation classify:
 
-Only after product fitness and simplicity are preserved should development optimize human/model/context/tool/compute/I/O/wall-time cost.
+1. the earliest/highest accepted abstraction whose semantics may materially change;
+2. every applicable domain-local governed external constraint; and
+3. the dependent semantic surface below it.
+
+Route by semantic effect rather than topic. A parallel-reduction change that can alter estimator meaning is D2 even if implemented in C++; a process-topology change with unchanged numerical semantics is D3; a mutex replacement under unchanged architecture is D4.
+
+Do not escalate merely because many files are affected. Do not keep work artificially low when evidence shows the parent abstraction is wrong. Reopen only the affected semantic surface and do not reopen unrelated design.
 
 ## Typical workflows
 
-Small/local executable work may look like:
+**Small/local executable work may look like**:
 
 ```text
 inspect -> implement -> conformance + affected regression -> integration -> done
@@ -35,18 +42,17 @@ inspect -> implement -> conformance + affected regression -> integration -> done
 Substantial work normally behaves like:
 
 ```text
-design/diagnose
-  -> classify problem/product invariants
-  -> freeze only high-level architecture
-  -> delegate lower-level solution space
-  -> coherent material implementation stage
+classify highest affected domain
+  -> design/diagnose at that domain when needed
+  -> freeze only material child-abstraction decisions
+  -> coherent material implementation/realization stage
        -> semantic/conformance closure
        -> focused + affected regression
   -> active simplification if structural complexity triggers fire
   -> final accepted-contract reconciliation
   -> re-derive final affected surface
   -> final affected regression + integration + project-required checks
-  -> independent Review & Update when warranted
+  -> independent Review when warranted
   -> deeper Verification only when high-risk claims warrant it
   -> Stabilization / architecture-GC at material convergence boundaries when warranted
   -> documentation + repository closeout when affected
@@ -54,126 +60,156 @@ design/diagnose
 
 These are patterns, not fixed gate counts. Production qualification is appended only when independently required.
 
-## Quality-feedback modes without lifecycle-role proliferation
-
-Protocol 5.16 adds bounded quality-feedback modes around the existing two-role lifecycle. They are not fixed mandatory gates and do not create new approval authorities.
-
-- **Baseline / change-health intake** — for substantial or structurally risky work, capture only the task-local before-state needed to judge relevant changed-code/affected-surface quality. It may be an explicit stage or a Design preamble; do not create a permanent ledger solely for compliance.
-- **Review & Update** — Software Design independently reviews an implementation after normal Implementation completion evidence. Missing final regression/integration/project checks remain blockers; review does not move those checks later in the lifecycle.
-- **Verification** — a separate optional Software Design mode for materially high-risk scientific, numerical, product, or architectural claims. It attempts deeper falsification and authority reconciliation; it does not replace Review or become a routine duplicate review.
-- **Stabilization / architecture-GC** — after ordinary review has otherwise passed at a material convergence boundary, inspect whether accepted Tier-2 machinery remains the minimum justified realization. Stabilization is non-mutating; required code changes re-enter the normal Design/Implementation/final-acceptance/review path.
-- **Health Audit** — periodic repository-level longitudinal analysis, outside the per-change linear path. It may route findings but does not define Frozen architecture or accept implementation contracts. If history is unavailable, report static risks without inventing temporal trends.
-- **Closeout** — reconcile durable documentation and repository lifecycle state after semantic/functional engineering work closes; do not alter product behavior during closeout.
-
-See [Long-horizon code health](long-horizon-code-health.md) for quality-ratchet, test-effectiveness, stabilization, and maintenance-audit method.
-
 ## Workplans as bounded implementation contracts
 
-Use a workplan when it materially reduces rediscovery, ambiguity, sequencing risk, cross-module drift, or downstream rework.
+Use a change plan/workplan when it materially reduces rediscovery, ambiguity, sequencing risk, cross-domain drift, or downstream rework. Workplans remain subordinate to the protected stakeholder/domain outcome and are not proof scripts.
 
-A substantial workplan separates three authority classes:
+A substantial handoff separates:
 
-1. **Problem/product invariants** — the stakeholder/domain outcomes and governed contracts that define what must ultimately be true.
-2. **Frozen high-level architecture** — material solution decisions Design deliberately fixes for the current cycle.
-3. **Delegated solution space** — implementation realization that remains replaceable, reducible, consolidatable, or deletable while the first two classes remain satisfied.
+1. **governing parent/problem invariants and side constraints**;
+2. **cycle-scoped child decisions** deliberately fixed for the current realization cycle; and
+3. **delegated realization space** that remains replaceable, reducible, consolidatable, or deletable while the first two classes remain satisfied.
 
-Task-specific obligations preserve required outcomes/constraints, important preservation/non-goals, acceptance evidence, useful affected/owning surfaces, and sequencing where material. They are not a frozen proof script. A suggested realization is not automatically Frozen. A detailed mechanism does not become binding merely because a prior plan named it.
+A D3->D4 executable workplan is a specialization of this generic abstraction-realization handoff, not a separate philosophy. A **suggested realization does not become a cycle-scoped or durable authority** merely because Design discussed or documented it.
 
-A known downstream consequence is binding only because it is logically necessary to an already-binding product invariant or Frozen architecture decision. Implementation may satisfy that parent authority through an equivalent simpler realization unless the realization itself was explicitly frozen at architecture level.
+For material obligations preserve as applicable: concern/rationale, required end state, required constraints/preservation/forbidden behavior, useful expected owning/affected surface, task-specific acceptance evidence, and stage/dependency where material. Attach a suggested realization, proxy-proof acceptance boundary, or anti-shortcut only when it materially improves correctness.
 
-The accepted plan is the **minimum known contract, not a ceiling** in this bounded sense: newly discovered affected behavior and logically necessary consequences of existing product/Frozen architecture must be incorporated and validated. Discovery does not mint new product capability, does not grant an incidental mechanism invariant status, and does not authorize unrelated improvement.
+The accepted plan is the minimum known contract, not a ceiling only for **newly discovered affected behavior** and logically necessary consequences of already-binding authority. Affected-surface expansion is not requirement expansion.
 
-For material obligations, preserve as applicable: concern/rationale, required end state, required constraints/preservation/forbidden behavior, useful expected owning/affected surface, task-specific acceptance evidence, and stage/dependency where material. **Attach only when material**: a suggested realization, an **acceptance boundary** when proxy acceptance is a material risk, or an **anti-shortcut / integrity constraint** when local wording/evidence could defeat the stakeholder outcome.
+## Durable current authority versus cycle-scoped freeze
 
-When material acceptance depends on a **real production owner/consumer boundary**, preserve the product/Frozen claim, the current real owner/path or owner class needed to exercise it, allowed doubles, forbidden substitutions, and observable evidence enough to prevent proxy acceptance. Do not elevate a delegated Tier-2 owner into Frozen authority merely by naming it for acceptance. Exact owner/path identity is binding only when a governed product contract or explicitly Frozen architecture requires that identity; otherwise an equivalent owner replacement reconciles the acceptance mapping and invalidates owner-specific evidence.
+Keep two concepts distinct:
 
-## Affected surface is not requirement surface
+- **accepted-current domain authority** is the durable current semantic owner in D1, D2, D3, or D4;
+- **cycle-scoped realization freeze** is the subset of child-realization decisions a change plan fixes to bound one implementation/design cycle.
 
-The affected surface can expand during implementation: additional callers, consumers, shared utilities, configuration, persistence, state, orchestration, interfaces, packaging, documentation, and transitive behavior may require implementation or validation.
-
-**Affected-surface expansion is not requirement expansion.** It expands inspection, implementation impact, and acceptance coverage where existing Tier-1/Frozen semantics propagate. It does not by itself create a new product capability, freeze the current mechanism, or turn a solution-created intermediate problem into a product invariant.
+A cycle-scoped decision does not become durable scientific, numerical, architectural, or specification authority merely because a workplan froze it. Durable authority must be explicitly accepted by the owning domain. Conversely, a workplan cannot ignore already-current authority merely because it is not restated in the cycle freeze.
 
 ## Snapshot-complete handoff
 
-The accepted current handoff artifact set must be **snapshot-complete** for still-binding task-specific product/problem invariants, Frozen architecture, non-goals, acceptance claims/boundaries, and redesign/simplification triggers. Preserve exact acceptance-owner identity only when product/Frozen authority makes that identity binding; a replaceable current Tier-2 owner mapping is not normative history. Reconcile accepted amendments/review corrections into supplied current authority; do not leave a requirement only in Git history, prior chat/session context, PR/issue/review discussion, superseded revisions, or an external document not actually supplied.
+The accepted current handoff artifact set must recover every still-binding task-specific invariant, applicable side constraint, cycle-scoped decision, non-goal, material acceptance boundary, authority state, and genuine reopen trigger without requiring prior chat or hidden Git history.
 
-Current composition remains valid: a workplan may inherit generic rules from its declared `protocol_version` and reference current supplied protocol/specification/architecture/package authorities. Snapshot completeness is not a single-file rule and does not require copying generic doctrine into each workplan.
+Current composition can span multiple supplied artifacts. Do not copy generic protocol doctrine into every plan. Use the snapshot-loss counterfactual: if `.git`, old discussions, and superseded revisions disappear, can a competent implementer still reconstruct the complete governing contract from the supplied current authority?
 
-Apply the **snapshot-loss counterfactual** before handoff: conceptually remove `.git`, prior conversation/review history, superseded revisions not supplied, and external links/resources not supplied. If the remaining supplied current artifacts do not recover every still-binding task-specific product/Frozen decision and material acceptance boundary, handoff is not closed. Obsolete implementation-realization history is not normative storage.
+If not, the handoff is deficient.
 
-Do not create a mandatory handoff manifest, revision ledger, provenance database, evidence capsule, or semantic workplan linter solely for this rule.
+## Compact resumable working state
 
-## Accepted-workplan authority
+For long, interruption-prone, multi-session, or materially handed-off work, maintain compact temporary coordination state sufficient to resume without hidden chat/history or needless rediscovery. Capture only what materially helps continuation: the current governing snapshot, open/closed obligations, material evidence/results and known invalidations, unresolved blockers/risks/Serious Challenges/reopen triggers, and the next action.
 
-Precedence is:
+This working state is coordination machinery, **not normative authority**. It should disappear when no longer useful. Do not create a permanent ledger, database, manifest, or parallel requirements/evidence system solely to satisfy resumability.
+
+## Realization and bounded local reconciliation
+
+A child role may choose any realization that satisfies every applicable parent and side constraint. Existing helpers, wrappers, algorithms, APIs, processes, caches, states, and prior patches remain replaceable unless explicitly accepted as authority.
+
+**Local reconciliation** may remove, consolidate, or replace an expected lower-level mechanism with an **equivalent local realization** when governing semantics survive. Reopen the parent only when evidence shows a governing abstraction or cycle-scoped decision must change. Reopen only the affected semantic surface.
+
+A workplan's suggested realization is not automatically authoritative. Newly discovered affected behavior must be incorporated, but discovery does not mint unrelated authority.
+
+## Active simplicity and recurrence
+
+A **first clean local defect remains local**. It does not require a census merely because variants are imaginable.
+
+**Material sibling recurrence** changes the unit of reasoning to the **shared owner/mechanism**. Recurrence is evidence about the shared semantic owner or mechanism, not proof that the current mechanism must survive. See [Convergence and development-cycle economy](convergence-and-cycle-economy.md).
+
+When repeated patches, wrappers, fallbacks, synchronized representations, competing authorities, special cases, repeated reconciliation, or an evident materially simpler equivalent realization show structural complexity, **active simplification/re-derivation of delegated realization is required** before adding another durable repair.
+
+If post-simplification recurrence or evidence shows the accepted parent abstraction or a material cycle-scoped decision is wrong, route bounded reconsideration to the earliest affected D1-D3 owner. **No recurrence/review count can force acceptance**; escalation changes the engineering method, not the pass threshold.
+
+### Bounded urgent mitigation
+
+When an independently governed urgency, safety, security, reliability, or incident-containment constraint requires immediate action, a **bounded reversible or safely replaceable mitigation may precede the normal simplification/re-derivation pass**. Keep unresolved structural debt/risk explicit, do not let emergency use promote the mitigation into durable authority, and reconcile the owning realization/abstraction at the earliest safe point. Urgency changes sequencing; it does not authorize counterfeit closure or permanent patch accretion.
+
+**Ordinary implementation attempts and review cycles do not require a numbered authority revision** unless accepted task semantics actually change.
+
+## Verification at each boundary
+
+Every material handoff evaluates both:
+
+1. **realization fidelity** — does the child satisfy every applicable parent and side constraint?; and
+2. **abstraction adequacy** — does the child abstraction preserve enough upstream meaning to constrain its own descendants safely?
+
+Verification reconstructs actual child semantics and attempts falsification. It is not a bijective inverse of Design and finite evidence does not prove total semantics.
+
+Material review/verification includes the bounded Challenge Pass from [Abstraction, realization, authority, and challenge](abstraction-and-realization.md). An ordinary child defect under a coherent parent is a blocker. Evidence that accepted authority itself may be contradictory, materially ambiguous, false, inadequate, or unrealizable is a **Serious Challenge** requiring the explicit adjudication path.
+
+## Human ratification
+
+Human gates attach to semantic risk, not every domain transition. D1 and scientifically consequential D2 decisions normally require designated human adjudication when they change scientific meaning, governing models/assumptions, material algorithm guarantees, or error/tolerance semantics capable of changing conclusions.
+
+The orchestrator may represent pending/accepted/rejected human state but may not self-approve a human-owned decision. A human risk override is visible authorization to continue with unresolved risk; it is not epistemic resolution and cannot be used to release Protocol 6 itself under an unresolved governing Serious Challenge.
+
+Any dependent descendant created while that override remains active is risk-accepted/provisional for the challenged claim. Preserve that state through downstream handoffs/results; unaffected siblings may close normally, but dependent work may not silently reset to accepted-current or emit an unqualified Pass/complete result.
+
+## Bounded invalidation and stale descendants
+
+When accepted authority changes:
 
 ```text
-explicit user/task requirements + safety/project instructions
-    -> material product requirements and governed contracts
-    -> explicitly Frozen high-level workplan decisions
-    -> repository evidence about actual state
-    -> delegated implementation-local discretion
+accept upstream change
+ -> identify materially dependent descendants/evidence
+ -> mark only those descendants/evidence stale
+ -> preserve unrelated siblings and still-valid evidence
+ -> realize downward as needed
+ -> verify upward across the affected surface
 ```
 
-Repository code/tests provide evidence of actual state; they do not automatically override an accepted target or become product authority through existence.
+Use existing document links, workplan references, section anchors, and profile metadata before inventing a registry or claim database.
 
-Implementation may locally realize/reconcile the plan while preserving product/Frozen semantics. An **equivalent local realization** may remove, consolidate, or replace previously expected Tier-2 machinery. If a materially simpler realization would change Frozen high-level architecture, route to bounded Design reconsideration instead of silently changing it.
+## D4 executable implementation acceptance
 
-Reopen Design only when evidence shows a Frozen decision cannot satisfy the engineering envelope, conflicts irreconcilably with actual ownership/contracts, is invalidated by representative measurement, or reaches a stated redesign trigger. Reopen only the affected design surface, preserve unrelated accepted stages/evidence, and resume from the earliest materially affected dependency.
+Executable D4 changes retain strict functional closure. Each material behavior-changing implementation stage needs:
 
-Workplans inherit generic obligations from their declared protocol version; later releases do not silently reinterpret older active/completed plans. Explicit adoption of a newer backward-compatible version requires reconciliation of changed obligations.
+- semantic/conformance closure against the accepted D4 specification, D3 architecture, and any directly applicable constraints;
+- focused checks appropriate to the changed mechanism;
+- stage-local affected regression before dependent executable work proceeds, unless a genuinely non-executable intermediate stage must combine with the nearest executable stage.
 
-## Convergence trigger and active simplicity
+A local coherent behavior change is normally one material implementation stage. **Several tightly coupled edits may close under one stage** when they form one coherent behavior/risk boundary; they do not become separate stages merely because they touch separate files/functions.
 
-The **first clean local defect remains local** and receives an owning-layer repair plus proportionate consideration of obvious variants.
+**Green tests never prove an omitted obligation was implemented. Silent omission is not an accepted state.**
 
-**Material sibling recurrence** changes the unit of reasoning from isolated instances to the shared owner/mechanism. Recurrence alone does not require preserving that mechanism. When recurrence or other structural evidence shows patch-on-patch repair, duplicated/synchronized state, competing authorities, accumulating wrappers/fallbacks/special cases, or a materially simpler realization, active Tier-2 simplification/re-derivation is required before another additive durable repair.
+Final assembled acceptance requires:
 
-Detailed bounded recurrence/family/review-economy semantics live in `convergence-and-cycle-economy.md`. Use finite family census when the product correctness claim itself requires bounded completeness or when sibling discovery is needed to simplify/canonicalize safely. Post-simplification recurrence or evidence that Frozen architecture is wrong routes to bounded Design reconsideration. **No recurrence/review count can force acceptance**; escalation changes engineering method, not the pass threshold.
+1. reconcile the complete accepted contract;
+2. inspect obsolete/bypassed/duplicate ownership and material complexity drift;
+3. re-derive the affected behavioral surface from the final candidate;
+4. run the complete affected-surface regression;
+5. run integration/end-to-end paths through the real semantic owner/consumer boundaries;
+6. run repository/project-required checks;
+7. account for unavailable required checks as blockers rather than proxy-passing them.
 
-## Compact working state for long gated work
+Full production qualification is separate. A production run does not replace regression or integration.
 
-For long gated sessions, carry enough compact task-local state to avoid rediscovering accepted decisions/evidence: product/Frozen decisions, open/closed obligations, accepted stages, affected-surface deltas, still-valid/invalidated evidence, and unresolved risks/redesign/simplification triggers.
+## Proxy-proof semantic-owner evidence
 
-This is **not a required persistent artifact**. Do not create a ledger/database/manifest/parallel evidence system solely for protocol compliance.
+**When material acceptance depends** on a real owner/path, identify the **real production owner/consumer boundary** constituting the claim and the allowed lower test-double boundary. At every layer, evidence must exercise the actual semantic owner. A test, derivation, benchmark, or review that could stay green while the real formulation/method/architecture/implementation owner is materially wrong cannot close that owner claim.
 
-## Gates and dual stage closure
+For D4 integration, bounded doubles are valid below or outside the semantic owner under acceptance. Do not mock, bypass, precompute, or substantially reimplement the owner whose behavior constitutes the claim. Exact lower-owner identity remains delegated unless parent/domain authority makes it an invariant.
 
-Gates are value-based. A material behavior-changing implementation stage is not accepted until both dimensions close:
+## Independent Review, Verification, Stabilization, and Audit
 
-1. **semantic/conformance closure** — assigned obligations are implemented or legitimately reconciled, product/Frozen decisions remain satisfied, newly discovered affected behavior is accounted for, and no unintended authority/obsolete path/material complexity regression was introduced; and
-2. **functional closure** — focused checks and the relevant **stage-local affected regression** execute for changed behavior, or an explicitly non-executable validation dependency is carried to the nearest executable stage.
+**Review** reconstructs the governing contract and candidate behavior, then attempts targeted falsification. Review readiness follows final accepted-contract reconciliation, final affected regression/integration, real-boundary checks, and repository/project-required checks. Missing required implementation acceptance evidence is a blocker, not a reason to move those checks after Review.
 
-Define a material stage by a coherent behavior/risk boundary, not individual files/helpers. **Several tightly coupled edits may close under one stage.** Use the cheapest high-signal order. Semantic review never substitutes for executable regression; **green tests never prove an omitted obligation was implemented**.
+**Verification** is a deeper optional, risk-triggered mode for materially high-risk claims. It may reconcile several authorities, construct counterexamples, compare reference methods, or inspect composed D4->D1 closure. It does not replace ordinary Review.
 
-Reuse still-valid intermediate evidence until a changed dimension can plausibly invalidate its claim. Final assembled affected-surface regression/integration remain fresh acceptance boundaries after material executable edits.
+**Stabilization / architecture-GC** is a non-mutating milestone review of whether the accepted realization remains the minimum justified system. Required changes re-enter the owning domain; stabilization is not an extra approval authority.
 
-## Final implementation and functional acceptance
+**Health Audit** is periodic longitudinal sensing. It may route findings but does not mutate D1-D4 authority.
 
-Before handoff, Implementation reconciles every material product/Frozen obligation against the assembled candidate, inspects unintended/obsolete/ownership/complexity/documentation drift, and uses structural/absence evidence for removal/uniqueness claims when runtime tests cannot prove them.
+## Review outputs and routing
 
-For executable changes, final acceptance requires re-deriving the affected surface from the assembled candidate, complete affected-surface regression, repository/project-required checks, and integration testing. When impact cannot be bounded confidently, run the broader/full available suite.
+Before ordinary blockers or Pass/No-Pass language, surface any active Serious Challenge prominently. Otherwise classify findings by earliest owning domain:
 
-Thus final acceptance independently asks: **did we implement the accepted product/Frozen contract completely?** and **does the assembled affected product work?** Production runs/benchmarks/qualification cannot substitute for missing regression coverage.
+- D4 realization nonconformance -> `software-implementation`;
+- D3 architecture deficiency -> `software-design`;
+- D2 numerical/algorithm deficiency -> `numerical-algorithm-design`;
+- D1 scientific/mathematical deficiency -> `scientific-formulation`;
+- documentation-only drift -> `software-documentation` support;
+- lifecycle residue -> `repository-hygiene` support.
 
-## External execution, documentation, and hygiene
+Equivalent preferences without material engineering benefit are not blockers.
 
-A different machine, GPU, HPC allocation, production dataset, or external service does not automatically create a new role. Record reproducible commands/material conditions when external execution is required.
+## Closeout
 
-Update affected durable documentation when accepted behavior/architecture/contracts changed. At substantial workplan/release closeout, also reconcile completed/superseded workplan state, generated artifacts, and proven task-owned residue through the appropriate documentation/hygiene specialist. Closeout must not mutate product behavior or perform destructive cleanup without the existing authorization/safety rules. Optional specialists remain supporting capabilities, not lifecycle gates.
-
-## Independent review and rework
-
-Independent review remains independent and may inspect any surface needed for a sound conclusion. Normal review readiness follows final accepted-contract reconciliation, final affected-surface regression, real-boundary integration, repository/project-required checks, and any task-required structural/liveness evidence. A requested review still proceeds when evidence is missing, but records the missing evidence as a blocker rather than moving functional acceptance after review.
-
-For substantial/high-risk work, prefer a fresh review context when practical. Reconstruct the product/Frozen contract and candidate behavior before relying on the implementer's rationale, then attempt targeted falsification. Review first challenges product/Frozen contract conformance, then unplanned engineering risks/design premises including functionality/correctness, scientific fidelity, scaling/resources/hardware/performance, complexity/ownership, failure handling, affected surfaces, regression/integration, unavailable checks, and qualification boundaries. Deeper claim-level Verification is separate and risk-triggered rather than a mandatory second review.
-
-When a finding asks to preserve or add implementation machinery, identify the Tier-1/Frozen authority it protects. If the problem exists only because of delegated solution machinery, challenge that machinery under Tier 2 before demanding another patch.
-
-Route rework as:
-
-- **implementation nonconformance** -> same accepted product/Frozen design, implementation repair/refactor;
-- **workplan/design deficiency** -> reconcile affected governing design/workplan before reimplementation;
-- **new independent issue** -> local necessary consequence, separate issue, or evidence-backed bounded redesign according to its authority.
-
-Equivalent preferences without material engineering benefit are not blockers. No separate verification report is required unless project/release/compliance policy independently requires one.
+After semantic/functional closure, reconcile current normative documents, guides, generated artifacts, workplan state, and conservative repository hygiene. Closeout must not mutate product semantics. Archive/supersede completed transition artifacts only after their accepted semantics are represented by current canonical authority.

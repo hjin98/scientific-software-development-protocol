@@ -27,7 +27,15 @@ from sdp_orchestrator.core.records import (
     StageSelector,
 )
 
-from ._support import commit_all, config_text, git, init_bare, init_repo, write_workplan
+from ._support import (
+    CANONICAL_PROMPTS,
+    commit_all,
+    config_text,
+    git,
+    init_bare,
+    init_repo,
+    write_workplan,
+)
 
 DISTINCTIVE = "zq7-private-marker-path"
 SECRET = "tok3n-should-never-appear"
@@ -345,8 +353,7 @@ class WebLeakageTests(PrivacyBase):
         (local_root / "source/shared/references").mkdir(parents=True)
         (local_root / "source/PROTOCOL_VERSION").write_text("5.16.0\n", encoding="utf-8")
         (local_root / "source/shared/references/development-workflow-prompts.md").write_text(
-            (Path(__file__).resolve().parents[2]
-             / "source/shared/references/development-workflow-prompts.md").read_text(encoding="utf-8"),
+            CANONICAL_PROMPTS.read_text(encoding="utf-8"),
             encoding="utf-8",
         )
         self._write_config(local_root=local_root)

@@ -1,38 +1,55 @@
 # Agent portability and routing qualification
 
-Protocol 5.9 established the portable skill-routing/distribution contract. Protocol 5.13 made optional-tool routing deterministic per material relation. Protocol 5.15 added deterministic language-profile routing. Protocol 5.16 preserves those contracts and adds a human-facing stage-orchestration entrypoint with compatible-local-first/public-repository-fallback skill resolution.
-
-The runtime installation unit remains the self-contained directory under `dist/skills/<skill-name>/`; the top-level ZIP with the same skill name contains identical files under one enclosing skill directory.
+Protocol 6 preserves the portable Agent Skill contract while adding first-class D1/D2 roles and a dual-version orchestration profile.
 
 ## Installation contract
 
-Install each skill as a direct child of a harness skill root so the entrypoint is exactly `<skills-root>/<skill-name>/SKILL.md`. Do not install `source/roles/...` or `source/specialists/...` directly as a runtime bundle: canonical source references become self-contained only in generated bundles.
+The runtime unit is the self-contained directory `dist/skills/<skill-name>/`; the top-level ZIP contains identical files under one enclosing skill directory. Install each skill as a direct child of the harness-supported skill root so `<skills-root>/<skill-name>/SKILL.md` exists. `source/` is canonical development source, not the runtime bundle.
 
-Use a harness-supported shared `.agents/skills` root when available or the harness-native root when required. Harness-specific paths are integration guidance, not protocol doctrine; verify them against the harness version being qualified.
+This direct-directory installation contract remains the portability baseline. ZIPs are transport artifacts; extract the enclosing `<skill-name>/` directory before placing it under a runtime skill root. A shared/symlinked installation is a separate harness capability and must be qualified on that harness.
 
-ZIPs are transport artifacts: extract the enclosing `<skill-name>/` directory before placing it under a runtime skill root. A symlinked/shared installation is a separate harness capability and must be qualified on that harness; the **direct-directory installation contract** is the portability baseline.
+Current authority-bearing skills:
 
-## Human-facing workflow orchestration
+- `scientific-formulation`
+- `numerical-algorithm-design`
+- `software-design`
+- `software-implementation`
 
-The canonical prompt entrypoint is `source/shared/references/development-workflow-prompts.md`. Each stage defines task inputs once and resolves its required skill using `AUTO_LOCAL_FIRST` by default.
+Optional specialists: `software-documentation`, `software-maintenance-audit`, `repository-hygiene`.
 
-1. Inspect the current harness skill/plugin/command registry or documented exposed installed-skill root.
-2. Use a readable local skill when it can preserve the protocol contract governing the task. If a selector is user-only but the harness exposes the installed-skill root, read the compatible local skill from that supported resource. Harness selectors such as `@software-design` or `/software-implementation` are examples of native selectors, **not shell commands**.
-3. If local resolution fails, use the public canonical repository `https://github.com/hjin98/software-development-protocol` and read the appropriate `source/roles/<skill>/SKILL.md` or `source/specialists/<skill>/SKILL.md` plus required references.
-4. Preserve version binding. A newer installed skill does not silently reinterpret an older workplan. Resolve a historically compatible source/ref from evidence; do not guess that a semantic version string is a Git ref.
-5. If neither a compatible local skill/root nor compatible public source is readable, report truthful non-closure rather than claiming skill execution from memory.
+## Human-facing orchestration
 
-This orchestration surface routes into the protocol; it is not a parallel source of product or architectural authority.
+`source/shared/references/development-workflow-prompts.md` is the canonical prompt source. With `AUTO_LOCAL_FIRST`:
+
+1. use a governing-version-compatible installed skill/exposed skill root through the harness-native mechanism;
+2. otherwise use the canonical public repository `https://github.com/hjin98/software-development-protocol` and its `source/` entrypoint plus required references;
+3. preserve the workplan's protocol binding; never guess a semantic version as a Git ref or silently substitute current doctrine;
+4. report truthful non-closure if no compatible source can be read.
+
+Before mutation classify the highest potentially affected D1/D2/D3/D4 domain and direct governed side constraints. Reduced routes are normal; do not force every task through all four skills.
+
+## Orchestrator profile compatibility
+
+The Core supports independent version-bound profiles:
+
+| Profile | Protocol | Profile schema | Purpose |
+| --- | --- | ---: | --- |
+| `sdp-protocol-5.16` | 5.16.0 | 1 | frozen historical compatibility |
+| `ssdp-protocol-6.0` | 6.0.0 | 2 | current domain-aware workflow |
+
+Historical 5.16 prompt/profile bytes remain immutable. A workplan's declared `protocol_version` selects its compatible profile before stage semantics are interpreted. Project profile configuration is a default, not authority to override an explicit workplan version.
+
+Protocol 6 profile stages include authority intake, D1, D2, D3, D4, Review/Challenge, Verification, Stabilization, Alignment, Health Audit, and Closeout. Serious Challenge/human-pending outcomes stop automatic normal routing; the orchestrator records/routes state but never decides scientific truth.
 
 ## Deterministic routing dimensions
 
-Protocol 5.16 has three independent routing concerns:
+Protocol 6 keeps three independent routing concerns:
 
-1. **Workflow-stage routing:** optional Baseline/Change-Health Intake when material, Design, Implementation, Review, risk-triggered Verification, Stabilization, Alignment, Health Audit, and Closeout activate their appropriate role/specialist mode. Baseline is task-local sensing rather than a mandatory approval gate.
-2. **Language/runtime routing:** material executable Python/C++ work routes through `references/language-profiles.md` and the matching language profiles.
+1. **Workflow/domain routing:** classify the earliest affected D1-D4 owner, then use reduced or full realization paths as required.
+2. **Language/runtime routing:** material executable Python/C++ work routes through `references/language-profiles.md` and the matching language profile(s).
 3. **Engineering-relation/tool routing:** semantic, structural, property/generative, interprocedural, runtime-state, memory/UB, race, performance, test-effectiveness, architecture-fitness, longitudinal-risk, and failure/recovery questions route to capabilities that directly model the relation.
 
-Static validation proves that referenced files are packaged, directly linked, and structurally reachable. It cannot prove that a real harness/model follows the route or invokes an external capability, so live qualification remains a separate evidence class.
+Static validation proves that referenced files are packaged, directly linked, and structurally reachable. It **cannot prove** that a real harness/model follows the route or invokes an external capability, so live qualification remains a separate evidence class.
 
 ## Optional external development capabilities
 
@@ -52,16 +69,7 @@ A simulated parser/local loader cannot establish a real-harness claim. This is *
 
 ## Language-profile routing qualification
 
-When claiming live language routing, use a representative material executable prompt whose language/runtime surface is unambiguous. Expected trace when observable:
-
-```text
-lifecycle SKILL.md
--> references/language-profiles.md
--> matching Python or C++ profile
--> shared domain references/tools only as triggered by the engineering question
-```
-
-Static tests may establish protocol-level route/package completeness; they do not establish universal model compliance.
+When claiming live language routing, use a representative material executable prompt whose language/runtime surface is unambiguous. Static tests may establish protocol-level route/package completeness; they do not establish universal model compliance.
 
 ## Bounded live tool-routing qualification
 
@@ -71,23 +79,8 @@ Verify the direct relevant reference read where traces are exposed, then verify 
 
 If no suitable live harness/tool environment exists, static/counterfactual/package tests may establish deterministic protocol-level routing semantics but **must not claim empirical universal model compliance** or an unexecuted harness/tool pass.
 
-## Protocol 5.16 behavioral and orchestration qualification
+## Behavioral qualification
 
-`qualification/long-horizon/SCENARIOS.md` defines bounded semantic scenarios for anti-entropy decisions, oracle strength, architecture fitness, change-sensitive risk, bounded fault injection, missing-history behavior, conditional Baseline/Change-Health Intake, stage selection, and local-first/public-fallback routing.
+`qualification/ssdp6/SCENARIOS.md` defines Protocol 6 authority, abstraction adequacy, D1/D2/D3/D4 routing, Serious Challenge, anti-deference/anti-stubbornness, historical compatibility, and composed-closure scenarios. Existing Protocol 5 qualification remains historical evidence for its release semantics.
 
-Static tests can prove that these scenarios and routes exist. A claim that a named model/harness actually makes the intended decision requires an executed run of that **named harness/tool configuration** or named harness/model configuration. Never generalize one live result to another configuration.
-
-## Compatibility matrix
-
-Record actual qualification results in release/PR closeout when relevant. Do not infer a pass from static validation.
-
-| Harness | Direct-directory/reference routing | Workflow skill resolution | Language-profile routing | Tool routing | 5.16 behavioral scenarios | Notes |
-| --- | --- | --- | --- | --- | --- | --- |
-| Codex/OpenAI | unqualified | unqualified | unqualified | unqualified | unqualified | Qualify the actual installed model/tool configuration. |
-| Claude Code | unqualified | unqualified | unqualified | unqualified | unqualified | Qualify only installed/exposed capabilities actually exercised. |
-| Pi | unqualified | unqualified | unqualified | unqualified | unqualified | Qualify only installed/exposed capabilities actually exercised. |
-| Gemini CLI / Antigravity | unqualified | unqualified | unqualified | unqualified | unqualified | Qualify only installed/exposed capabilities actually exercised. |
-| GitHub Copilot | unqualified | unqualified | unqualified | unqualified | unqualified | Qualify only installed/exposed capabilities actually exercised. |
-| DeepSeek Harness | unqualified | unqualified | unqualified | unqualified | unqualified | Qualify only installed/exposed capabilities actually exercised. |
-
-Ordinary repository CI intentionally does not call external agents. Live qualification may enter CI only if credentials, harness/model/tool versions, cost, and stochastic behavior become stable enough to make it a reliable release signal.
+Reference-routing and tool-routing sentinel qualifications remain useful for named harness configurations. Ordinary repository CI does not infer universal model compliance from static tests.

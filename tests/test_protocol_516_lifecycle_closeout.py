@@ -32,6 +32,26 @@ class Protocol516LifecycleCloseoutTests(unittest.TestCase):
         self.assertIn("completed_date: 2026-09-06", header)
         self.assertIn("Final Design verdict: PASS", text)
 
+    def test_ssdp6_transition_authority_is_archived_after_final_pass(self) -> None:
+        names = (
+            "SSDP-6-AUTHORITY.md",
+            "SSDP-6-RECURSIVE-ABSTRACTION-REALIZATION-SCIENTIFIC-SOFTWARE-PROTOCOL.md",
+            "SSDP-6-RECURSIVE-ABSTRACTION-REALIZATION-SCIENTIFIC-SOFTWARE-PROTOCOL-AUTHORITY-REVISION-1-SERIOUS-CHALLENGE-AND-ADVERSARIAL-REVIEW.md",
+            "SSDP-6-RECURSIVE-ABSTRACTION-REALIZATION-SCIENTIFIC-SOFTWARE-PROTOCOL-AUTHORITY-REVISION-2-PROTOCOL-5-INHERITANCE-AND-CONSOLIDATION.md",
+        )
+        for name in names:
+            self.assertFalse((ACTIVE / name).exists(), name)
+            archived = ARCHIVE / name
+            self.assertTrue(archived.is_file(), name)
+            header = archived.read_text(encoding="utf-8").split("---", 2)[1]
+            self.assertIn("status: completed", header, name)
+            self.assertIn("completed_date: 2026-09-09", header, name)
+            self.assertIn("final_review: pass", header, name)
+            self.assertIn("active_serious_challenge: none", header, name)
+        authority = (ARCHIVE / "SSDP-6-AUTHORITY.md").read_text(encoding="utf-8")
+        self.assertIn("FINAL INDEPENDENT REVIEW / CHALLENGE PASS: PASS", authority)
+        self.assertIn("no longer a parallel current authority layer", authority)
+
 
 if __name__ == "__main__":
     unittest.main()

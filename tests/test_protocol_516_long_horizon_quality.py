@@ -17,7 +17,7 @@ def section(text: str, heading: str) -> str:
     return body if pos < 0 else body[:pos]
 
 
-class Protocol516LongHorizonQualityTests(unittest.TestCase):
+class Protocol6LongHorizonQualityTests(unittest.TestCase):
     def setUp(self) -> None:
         self.workflow = read("source/shared/references/workflow-and-workplans.md")
         self.testing = read("source/shared/references/testing-and-validation.md")
@@ -29,10 +29,13 @@ class Protocol516LongHorizonQualityTests(unittest.TestCase):
         self.audit = read("source/specialists/software-maintenance-audit/SKILL.md")
         self.scenarios = read("qualification/long-horizon/SCENARIOS.md")
 
-    def test_protocol_identity_and_two_role_authority(self) -> None:
-        self.assertEqual("5.16.0", read("source/PROTOCOL_VERSION").strip())
+    def test_protocol6_identity_preserves_516_quality_lineage(self) -> None:
+        self.assertEqual("6.0.0", read("source/PROTOCOL_VERSION").strip())
         versioning = read("source/shared/references/protocol-versioning-and-compatibility.md")
         self.assertIn("protocol 5.16 is a backward-compatible", versioning)
+        self.assertIn("5.16.0 -> e151daaf5c8eebb351a85cfed86170fda80fb5e3", versioning)
+        self.assertIn("d1 scientific-formulation", self.workflow)
+        self.assertIn("d2 numerical-algorithm-design", self.workflow)
         self.assertIn("software-design -> software-implementation", self.workflow)
         self.assertIn("not a third lifecycle role", self.workflow)
 

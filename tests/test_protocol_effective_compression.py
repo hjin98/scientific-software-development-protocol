@@ -10,12 +10,35 @@ def read(path: str) -> str:
     return (ROOT / path).read_text(encoding="utf-8").lower()
 
 
+def current_operational_documents() -> tuple[Path, ...]:
+    roots = (
+        ROOT / "source" / "roles",
+        ROOT / "source" / "specialists",
+        ROOT / "source" / "shared" / "references",
+        ROOT / "source" / "shared" / "templates",
+    )
+    historical_compatibility_owner = (
+        ROOT / "source" / "shared" / "references" / "protocol-versioning-and-compatibility.md"
+    )
+    return tuple(
+        sorted(
+            path
+            for root in roots
+            for path in root.rglob("*.md")
+            if path != historical_compatibility_owner
+        )
+    )
+
+
 class HistoricalFailureModeScenarios(unittest.TestCase):
     def setUp(self) -> None:
         self.design = read("source/roles/software-design/SKILL.md")
         self.implementation = read("source/roles/software-implementation/SKILL.md")
         self.workflow = read("source/shared/references/workflow-and-workplans.md")
         self.testing = read("source/shared/references/testing-and-validation.md")
+        self.versioning = read("source/shared/references/protocol-versioning-and-compatibility.md")
+        self.concurrency = read("source/shared/references/concurrency-and-orchestration.md")
+        self.debugging = read("source/shared/references/debugging-and-state-recovery.md")
 
     def test_green_tests_plus_omitted_obligation_is_incomplete(self) -> None:
         self.assertIn("green tests never prove an omitted obligation was implemented", self.workflow)
@@ -32,9 +55,9 @@ class HistoricalFailureModeScenarios(unittest.TestCase):
     def test_equivalent_local_realization_is_reconciliation_not_redesign(self) -> None:
         self.assertIn("local reconciliation", self.implementation)
         self.assertIn("equivalent local realization", self.implementation)
-        self.assertIn("suggested realization is not automatically frozen", self.workflow)
+        self.assertIn("suggested realization does not become a cycle-scoped or durable authority", self.workflow)
 
-    def test_invalidated_frozen_premise_triggers_bounded_redesign(self) -> None:
+    def test_invalidated_accepted_premise_triggers_bounded_redesign(self) -> None:
         self.assertIn("representative measurement invalidating a premise", self.implementation)
         self.assertIn("reopen only the affected", self.workflow)
         self.assertIn("earliest materially affected stage", self.implementation)
@@ -68,6 +91,41 @@ class HistoricalFailureModeScenarios(unittest.TestCase):
         self.assertIn("literal compliance actually realizes the protected stakeholder outcome", self.design)
         self.assertIn("workplan/design deficiency", self.design)
         self.assertIn("independent-evaluator counterfactual", self.testing)
+
+    def test_protocol5_is_functionally_inherited_as_protocol6_specialization(self) -> None:
+        self.assertIn("protocol 6 is the general theory", self.versioning)
+        self.assertIn("protocol 5 is a narrower software-local specialization", self.versioning)
+        self.assertIn("mapping preserves capability, not vocabulary", self.versioning)
+        self.assertIn("delegated realization beneath the governing abstraction", self.versioning)
+
+    def test_urgent_mitigation_preserves_simplification_debt(self) -> None:
+        self.assertIn("bounded urgent mitigation", self.workflow)
+        self.assertIn("may precede the normal simplification/re-derivation pass", self.workflow)
+        self.assertIn("unresolved structural debt/risk", self.workflow)
+        self.assertIn("earliest safe point", self.implementation)
+
+    def test_long_work_has_compact_non_authoritative_resumable_state(self) -> None:
+        self.assertIn("compact resumable working state", self.workflow)
+        self.assertIn("current governing snapshot", self.workflow)
+        self.assertIn("not normative authority", self.workflow)
+        self.assertIn("do not create a permanent ledger", self.workflow)
+
+    def test_current_operational_control_plane_uses_protocol6_semantics(self) -> None:
+        forbidden = (
+            "product/frozen",
+            "frozen_parent_authority",
+            "tier-2",
+            "tier 1a",
+            "tier 1b",
+            "shared protocol 5 doctrine remains authoritative",
+        )
+        for path in current_operational_documents():
+            text = path.read_text(encoding="utf-8").lower()
+            with self.subTest(path=path.relative_to(ROOT).as_posix()):
+                for legacy_token in forbidden:
+                    self.assertNotIn(legacy_token, text)
+        self.assertIn("accepted d3 architecture", self.concurrency)
+        self.assertIn("cycle-scoped design assumption", self.debugging)
 
 
 if __name__ == "__main__":

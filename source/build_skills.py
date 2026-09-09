@@ -21,18 +21,16 @@ CORE = [
     "testing-and-validation.md",
     "protocol-versioning-and-compatibility.md",
 ]
-
+FOUNDATION = ["abstraction-and-realization.md"]
 ROLE_CONDITIONAL = [
     "convergence-and-cycle-economy.md",
     "long-horizon-code-health.md",
 ]
-
 LANGUAGE_PROFILES = [
     "language-profiles.md",
     "python-engineering.md",
     "cpp-engineering.md",
 ]
-
 TOOL_METHODS = [
     "tool-assisted-engineering.md",
     "tool-serena.md",
@@ -40,13 +38,11 @@ TOOL_METHODS = [
     "tool-hypothesis.md",
     "tool-codeql.md",
 ]
-
 CROSS_CUTTING = [
     "configuration-and-policy.md",
     "concurrency-and-orchestration.md",
     "security-and-trust-boundaries.md",
 ]
-
 ENGINEERING_FITNESS = [
     "performance-and-parallelism.md",
     "storage-and-io.md",
@@ -54,10 +50,37 @@ ENGINEERING_FITNESS = [
 ]
 
 ROLE_SPECS = {
+    "scientific-formulation": {
+        "role": "d1-scientific-formulation",
+        "references": FOUNDATION + CORE + [
+            "scientific-formulation.md",
+            "scientific-software.md",
+            "scientific-technical-writing.md",
+            "documentation-and-evidence.md",
+        ],
+        "templates": [
+            "abstraction_realization_change_plan_template.md",
+            "scientific_method_paper_template.md",
+        ],
+    },
+    "numerical-algorithm-design": {
+        "role": "d2-numerical-algorithm-design",
+        "references": FOUNDATION + CORE + [
+            "numerical-algorithm-design.md",
+            "scientific-software.md",
+            "performance-and-parallelism.md",
+        ],
+        "templates": [
+            "abstraction_realization_change_plan_template.md",
+            "numerical_algorithmic_method_paper_template.md",
+        ],
+    },
     "software-design": {
-        "role": "design",
-        "references": CORE + ROLE_CONDITIONAL + LANGUAGE_PROFILES + [
+        "role": "d3-software-design",
+        "references": FOUNDATION + CORE + ROLE_CONDITIONAL + LANGUAGE_PROFILES + [
             "architecture-and-design.md",
+            "scientific-formulation.md",
+            "numerical-algorithm-design.md",
             "documentation-and-evidence.md",
             "specification-and-implementation.md",
             "release-and-distribution.md",
@@ -66,9 +89,11 @@ ROLE_SPECS = {
         "templates": ["implementation_workplan_template.md"],
     },
     "software-implementation": {
-        "role": "implementation",
-        "references": CORE + ROLE_CONDITIONAL + LANGUAGE_PROFILES + [
+        "role": "d4-software-implementation",
+        "references": FOUNDATION + CORE + ROLE_CONDITIONAL + LANGUAGE_PROFILES + [
             "architecture-and-design.md",
+            "scientific-formulation.md",
+            "numerical-algorithm-design.md",
             "debugging-and-state-recovery.md",
             "documentation-and-evidence.md",
             "specification-and-implementation.md",
@@ -140,27 +165,20 @@ def entries(skill_name: str, spec: dict, kind: str) -> list[tuple[str, Path]]:
         ("agents/openai.yaml", skill / "agents" / "openai.yaml"),
         ("PROTOCOL_VERSION", ROOT / "PROTOCOL_VERSION"),
     ]
-    out += [
-        (f"references/{name}", SHARED / "references" / name)
-        for name in spec["references"]
-    ]
-    out += [
-        (f"templates/{name}", SHARED / "templates" / name)
-        for name in spec["templates"]
-    ]
+    out += [(f"references/{name}", SHARED / "references" / name) for name in spec["references"]]
+    out += [(f"templates/{name}", SHARED / "templates" / name) for name in spec["templates"]]
     return out
 
 
 def validate_registry(root: Path, specs: dict, kind: str) -> None:
     actual = {
-        p.name for p in root.iterdir()
+        p.name
+        for p in root.iterdir()
         if p.is_dir() and (p / "SKILL.md").is_file()
     } if root.is_dir() else set()
     expected = set(specs)
     if actual != expected:
-        raise SystemExit(
-            f"{kind} registry mismatch: expected={sorted(expected)} actual={sorted(actual)}"
-        )
+        raise SystemExit(f"{kind} registry mismatch: expected={sorted(expected)} actual={sorted(actual)}")
 
     for skill_name, spec in specs.items():
         skill = skill_root(skill_name, kind) / "SKILL.md"
@@ -175,7 +193,6 @@ def validate_registry(root: Path, specs: dict, kind: str) -> None:
 def validate() -> None:
     if not re.fullmatch(r"\d+\.\d+\.\d+", PROTOCOL_VERSION):
         raise SystemExit(f"invalid protocol version: {PROTOCOL_VERSION!r}")
-
     validate_registry(ROLES, ROLE_SPECS, "role")
     validate_registry(SPECIALISTS, SPECIALIST_SPECS, "specialist")
 
@@ -183,7 +200,6 @@ def validate() -> None:
 def build_one(skill_name: str, spec: dict, kind: str, stage: Path) -> Path:
     root = stage / skill_name
     root.mkdir(parents=True, exist_ok=True)
-
     for rel, src in entries(skill_name, spec, kind):
         dst = root / rel
         dst.parent.mkdir(parents=True, exist_ok=True)
@@ -192,19 +208,14 @@ def build_one(skill_name: str, spec: dict, kind: str, stage: Path) -> Path:
         )
         dst.write_text(text, encoding="utf-8")
 
-    manifest = {
-        "protocol_version": PROTOCOL_VERSION,
-        "skill_name": skill_name,
-    }
+    manifest = {"protocol_version": PROTOCOL_VERSION, "skill_name": skill_name}
     if kind == "role":
         manifest["role"] = spec["role"]
     else:
         manifest["kind"] = "specialist"
         manifest["specialty"] = spec["specialty"]
-
     (root / "protocol-manifest.json").write_text(
-        json.dumps(manifest, indent=2, sort_keys=True) + "\n",
-        encoding="utf-8",
+        json.dumps(manifest, indent=2, sort_keys=True) + "\n", encoding="utf-8"
     )
     return root
 
@@ -247,8 +258,7 @@ def build(output: Path) -> None:
             },
             indent=2,
             sort_keys=True,
-        )
-        + "\n",
+        ) + "\n",
         encoding="utf-8",
     )
 

@@ -20,6 +20,7 @@ from .limits import MAX_INPUT_OVERRIDES, MAX_INPUT_VALUE_BYTES
 from .records import (
     InputBinding,
     InputOwnership,
+    LifecycleState,
     ResolvedInput,
     StageDescriptor,
     WorkplanRef,
@@ -225,6 +226,41 @@ def _resolve_one(
             ownership=binding.ownership,
             value=encode_scalar(workplan.path),
             provenance=P_WORKPLAN,
+        )
+
+    if binding.first_class_source == "workplan_selector_optional_path":
+        if workplan is not None:
+            if (
+                workplan.lifecycle_state is not LifecycleState.ACTIVE
+                or not workplan.lifecycle_consistent
+                or not workplan.semantic_identity_complete
+            ):
+                E.fail(
+                    E.WORKPLAN_NOT_FOUND,
+                    "the selected optional change plan is not a current active governing authority",
+                    details={"path": workplan.path, "input": name},
+                    remediation=(
+                        "select an active, lifecycle-consistent, semantically complete change plan "
+                        "or omit --workplan for genuinely local D4-only work"
+                    ),
+                )
+            return ResolvedInput(
+                name=name,
+                ownership=binding.ownership,
+                value=encode_scalar(workplan.path),
+                provenance=P_WORKPLAN,
+            )
+        if binding.default_value is None:  # pragma: no cover - profile guarantees a default
+            E.fail(
+                E.PROMPT_INPUT_REQUIRED,
+                f"input {name} has no canonical default and no supplied workplan",
+                details={"input": name},
+            )
+        return ResolvedInput(
+            name=name,
+            ownership=binding.ownership,
+            value=encode_scalar(binding.default_value),
+            provenance=P_CANONICAL_DEFAULT,
         )
 
     if binding.first_class_source == "first_task":

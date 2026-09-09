@@ -1,128 +1,116 @@
-# Architecture and Design
+# Software Architecture and Design (D3)
 
-Architecture exists to help software satisfy the stakeholder's real engineering problem with the lowest justified total system complexity.
+D3 owns software architecture: the accepted structural abstraction that realizes applicable D1/D2 semantics and domain-local governed engineering constraints while constraining D4 specification/implementation.
 
-Architecture is judged over the material operational and maintenance horizon of the accepted scope. A locally convenient design is not simpler when it knowingly creates avoidable ownership ambiguity, operational fragility, maintenance debt, synchronization burden, or supported-evolution cost. Conversely, stewardship does not justify speculative generalization or unrelated future-proofing.
+Read [Abstraction, realization, authority, and challenge](abstraction-and-realization.md) first for the protocol-wide authority model.
 
-## Three-tier authority model
+## D3 boundary
 
-The protocol hierarchy is:
+D3 may own material decisions about:
 
-```text
-product engineering fitness > minimum justified product/system complexity > development economy
-```
+- component/subsystem ownership and dependency direction;
+- public/internal architectural interfaces and extension boundaries;
+- data/control flow and durable representation architecture;
+- persistence/recovery/checkpoint architecture;
+- concurrency/scheduling/process/service topology;
+- security/trust boundaries;
+- resource/hardware/deployment/compatibility architecture;
+- architecture-level fault handling and lifecycle;
+- architecture choices required to preserve D2 computational semantics.
 
-The hierarchy is lexicographic only after authority is classified correctly.
+D3 does **not** own the scientific model merely because software implements it, and does not own the numerical algorithm merely because components execute it. Route a change in equation/estimand/assumption to D1 and a change in estimator/discretization/error/precision semantics to D2.
 
-### Tier 1A: intrinsic product/problem truth
+D3 stewardship remains inside the accepted scope of the active task, governing contracts, and affected semantic surface. Architecture authority does not authorize unrelated enhancement or speculative future-proofing.
 
-Tier 1A is the stakeholder/domain problem the software must solve: required capability, correctness/scientific invariants, reliability/recovery/security/compatibility, target workload/scaling, CPU/RAM/VRAM/storage/I/O/wall-time limits, target hardware/portability, material latency/throughput, and governed external contracts.
+## Governing feasibility
 
-These requirements originate outside the implementation. They constrain every acceptable solution and may be high level. Do not weaken them merely because the current solution is inconvenient.
+A D3 candidate is admissible only when it satisfies every applicable upstream D1/D2 claim and every domain-local governed constraint such as security, reliability, compatibility, target hardware, resource limits, performance/scaling, deployment, and external API obligations.
 
-### Tier 1B: cycle-scoped Frozen architecture
-
-For substantial architecture work, Software Design may deliberately freeze high-level architecture/ownership/algorithm/data-representation/resource/compatibility decisions for the current implementation cycle. This bounds the search space and prevents implementation from continuously reopening settled design.
-
-Tier 1B is solution-derived but temporarily invariant for the cycle. Implementation may not silently change it. Evidence may trigger bounded Design reconsideration; if a Frozen decision is reopened, preserve unrelated accepted design and evidence whose claims remain valid.
-
-### Tier 2: delegated solution machinery
-
-Everything beneath Tier 1A/1B is solution machinery by default: functions, helpers, internal APIs, wrappers, adapters, retries, caches, state machines, synchronization schemes, intermediate representations, local algorithms, implementation-created invariants, and previous patches.
-
-Such machinery does **not** acquire Tier-1 authority merely because it exists, is depended upon, is tested, documented, reviewed, patched, or appears in a previous implementation plan. Correctness of a currently used mechanism is not evidence of necessity of that mechanism.
-
-A detail may be promoted into Frozen architecture only through an explicit Software Design decision supported by material evidence that the architectural commitment is justified.
-
-## Engineering fitness first
-
-Define the Tier-1 engineering envelope before choosing architecture. Reject designs that cannot satisfy it cleanly enough for the actual product. Do not prefer a locally simple architecture that is globally unusable because of poor scaling, excessive resource use, weak hardware utilization, missing capability, scientific error, security weakness, or required compatibility loss.
-
-## Minimum justified product complexity
-
-Among designs satisfying Tier 1, prefer the lowest justified **total product/system complexity**: fewer unnecessary components, states, interfaces, dependencies, synchronization points, duplicated authorities, compatibility paths, runtime/operational stages, special cases, and maintenance burdens.
-
-This is an active product policy, not merely a tie-breaker at initial design time. Necessary specialization remains valid when it protects a real Tier-1 requirement or when one canonical abstraction replaces broader duplicated machinery.
-
-## Quality ratchet and executable architecture fitness
-
-Existing architectural debt does not excuse new debt in a materially touched subsystem. The changed surface should ordinarily leave ownership, dependency direction, state, public/configuration surface, and behavioral protection no harder to reason about unless additional complexity is required by Tier-1/Frozen authority.
-
-Metrics such as complexity, churn, duplication, centrality, CRAP-like measures, or change coupling are sensors rather than architecture truth. Use them to prioritize semantic inspection, especially when risk concentrates where change frequency, structural complexity, test weakness, and architectural centrality overlap.
-
-When an architectural rule is objective, stable, and cheap to encode, prefer an executable fitness check over repeated prose-only review. Suitable examples include forbidden dependency/import direction, layer direction, acyclic package/subsystem relationships, independence constraints, and structural absence/uniqueness of deprecated owners. Do not create a global machine-readable architecture manifest solely for protocol compliance.
-
-## Solution-created problems are not product invariants
-
-An intermediate problem created only by the chosen realization remains Tier 2. For example, if a design creates two synchronized representations, "keep the representations synchronized" is not automatically a new product requirement. An alternative realization that removes one representation can eliminate the intermediate problem while preserving the actual product requirement.
-
-Before adding machinery to repair a Tier-2 problem, distinguish:
-
-1. the original Tier-1 requirement;
-2. the Frozen high-level architecture, if any;
-3. the lower-level choice that created the intermediate problem; and
-4. whether changing/removing/consolidating that choice makes the problem disappear.
-
-Do not preserve a solution merely because later solution code depends on it. Dependency created by a solution is evidence about the cost and shape of that solution, not evidence that the solution became part of the product objective.
-
-## Active complexity restoration
-
-A first clean local defect with a clean local cause receives a direct owning-layer repair. Do not invoke broad redesign merely because alternatives exist.
-
-However, Tier-2 simplification/re-derivation becomes **mandatory before another additive durable repair** when structural evidence shows that the current realization is accumulating unnecessary complexity. Evidence includes materially repeated patches around the same mechanism, patch-on-patch repair, wrappers/adapters/retries/fallbacks/special cases accumulating around one owner, duplicated or synchronized authoritative state, competing authorities, repeated reconciliation machinery, lifecycle/control states primarily managing internal machinery, tests dominated by reimplementing internal orchestration, repeated family closure without reducing the failure surface, or a materially simpler equivalent realization becoming evident.
-
-When triggered, reason in this order:
+Among admissible architectures prefer:
 
 ```text
-recover Tier-1 product/problem invariants
--> recover Frozen high-level architecture
--> treat lower-level machinery as replaceable
--> identify problems created only by the current realization
--> remove / narrow / alter / consolidate / refactor where sufficient
--> add machinery only for a genuinely missing required capability
-   or when one canonical mechanism replaces broader existing complexity
+software engineering fitness
+> minimum justified total architecture/system complexity
+> development economy
 ```
 
-This ordering is semantic, not a mechanical requirement to attempt each verb or minimize lines of code. The burden is against additive preservation of avoidable machinery.
+A locally simple architecture that violates numerical fidelity, resource bounds, security, reliability, or a public contract is outside the feasible set.
 
-## Justified abstraction and promotion
+## Architecture Manual
 
-A new mechanism or abstraction is justified when either:
+The logical D3 normative document family is the **Architecture Manual**. It describes accepted current ownership, interfaces, data/control flow, persistence/concurrency/security/resource boundaries, and material architecture decisions. Each material architecture claim has one current semantic owner.
 
-- Tier 1 requires a capability the simplified existing realization cannot supply cleanly; or
-- evidence shows the mechanism is sufficiently general/prevalent across a real problem class that making it canonical replaces multiple authorities, patches, states, or special cases and reduces total system complexity.
+Keep current architecture separate from workplan-specific cycle freeze. A workplan can freeze a solution decision for one realization cycle without making it permanent architecture. Promote it into the Architecture Manual only when D3 deliberately accepts it as durable current structure.
 
-Do not promote machinery because hypothetical future uses can be imagined. Promotion from Tier 2 to Frozen architecture requires explicit Design acceptance and a material architectural reason.
+For a material durable D3 authority mutation, deliberate acceptance requires an independent falsification pass by a reviewer/context that did not author the proposal before the Architecture Manual becomes accepted-current. A workplan's cycle freeze does not substitute for that durable-authority gate, and a later implementation Review cannot retroactively legitimize a prematurely promoted architecture.
 
-## Accepted design and implementation authority
+## Minimum justified architecture
 
-Once a substantial design is accepted, implementation should not repeat the whole architecture search. The workplan distinguishes:
+Prefer cohesive ownership, direct control flow, one authoritative representation/state, acyclic understandable dependencies, and the fewest necessary components/interfaces/synchronization points/compatibility paths.
 
-- **Problem/product invariants**;
-- **Frozen high-level architecture**;
-- **Delegated solution space**; and
-- **Reopen only on evidence** assumptions/triggers.
+A first clean local defect can receive a direct repair. Before another additive durable repair, mandatory simplification/re-derivation is triggered by structural evidence such as:
 
-An equivalent local realization that preserves the first two classes remains implementation work even when it removes/consolidates machinery that Design expected but did not freeze. A material redesign changes a Frozen high-level decision and requires Design reconsideration.
+- patch-on-patch repair around one owner;
+- accumulating wrappers/adapters/retries/fallbacks/special cases;
+- duplicated or synchronized authoritative state;
+- competing ownership or reconciliation machinery;
+- lifecycle states existing mainly to manage solution-created machinery;
+- tests dominated by reimplementing internal orchestration;
+- an evident materially simpler architecture satisfying the same authority.
 
-Repository evidence may invalidate a Frozen assumption. Treat that as a bounded design-invalidation question rather than silently changing the target or blindly forcing incompatible architecture.
+When triggered:
 
-## Recurrence and semantic defect families
+```text
+recover applicable parent invariants and external constraints
+ -> identify cycle-scoped D3 decisions
+ -> treat lower realization as replaceable
+ -> remove / narrow / alter / consolidate / refactor where sufficient
+ -> add machinery only for a genuinely missing capability
+    or when one canonical mechanism replaces broader complexity
+```
 
-Recurrence is evidence about the shared owner/mechanism; it is not evidence that the current realization should survive.
+Do not simplify by weakening D1/D2 semantics or governed engineering constraints.
 
-A first clean local defect remains local. Materially equivalent sibling recurrence should stop repeated instance patching and move reasoning to the shared semantic owner/mechanism. If recurrence also exposes structural complexity, the active simplicity rule fires before another additive durable closure.
+## Solution-created problems and recurrence
 
-Use bounded semantic defect families and finite census when the **Tier-1 correctness claim itself** requires completeness, or when sibling discovery is necessary to remove/canonicalize the affected realization safely. Family closure is subordinate to Tier-1 product truth, Frozen architecture, and Tier-2 simplification; it must not turn an accidental mechanism into an invariant merely by completing its current "canonical realization."
+A problem created only by delegated realization remains a realization problem. Dependency on a helper, wrapper, synchronized representation, state machine, or previous patch is evidence about that realization's cost and shape; it does not make the mechanism an invariant.
 
-Post-simplification recurrence or evidence that a Frozen high-level decision itself is wrong triggers bounded Software Design reconsideration. Reopen only the affected design surface.
+A first clean local defect remains local. **Recurrence is evidence about the shared owner/mechanism**, not evidence that the current realization should survive. Material sibling recurrence changes the unit of reasoning to that shared owner/mechanism. If recurrence also exposes accumulating complexity, simplify/re-derive delegated realization before another additive repair.
 
-## Milestone stabilization / architecture GC
+## Cross-cutting concerns route by semantic effect
 
-At a material convergence boundary, after ordinary implementation review has otherwise passed, reassess the accepted Tier-2 realization as if it appeared fully formed today. Inspect duplicated representations, competing authorities, wrappers/adapters/fallbacks/special cases, stale compatibility paths, unnecessary states/configuration/public API, ownership leakage, dependency cycles, historical-exception conditionals, dead/bypassed paths, duplicated algorithms, and tests dominated by internal orchestration.
+Topic names do not determine domain ownership.
 
-Stabilization is a non-mutating review mode. If the same product/Frozen contract can be realized more simply, route the smallest coherent Tier-2 simplification through the normal Design/Implementation/final-acceptance/review path. If simplification requires changing Frozen architecture, reopen only that affected Design surface.
+- Parallel summation that changes estimator/error semantics -> D2.
+- Parallel process/component topology preserving D2 semantics -> D3.
+- Thread primitive inside unchanged topology -> D4.
+- GPU support as a required deployment/resource architecture -> D3, while accepted numerical equivalence/error semantics remain D2.
+- Units/observable meaning -> D1 when scientifically semantic; concrete public serialization of those units -> D4 specification.
 
-## Architecture documentation
+## D2 -> D3 abstraction adequacy
 
-Permanent architecture documentation describes accepted current product structure, ownership, interfaces, data/control flow, important product/Frozen invariants, persistence/concurrency/security/resource boundaries, target-hardware assumptions where material, and accepted high-level algorithms. Do not turn it into a log of temporary proof machinery, development-process gates, or superseded patches.
+Before D3 acceptance, challenge whether the architecture preserves all D2 semantics needed downstream: ordering/reduction, precision, state/restart behavior, reproducibility, data dependencies, error/fallback semantics, and target resource/hardware constraints where material.
+
+An architecture can satisfy its own local diagrams while being too weak to preserve the numerical method. That is a D3 abstraction-adequacy defect.
+
+## D3 -> D4 handoff
+
+A D3->D4 implementation workplan should freeze only material architecture decisions needed to bound implementation. It should state accepted D3 invariants, applicable side constraints, delegated D4 realization space, non-goals, task-specific acceptance boundaries, and genuine redesign/simplification triggers.
+
+Functions, helper APIs, wrappers, retries, caches, local algorithms, internal state machines, exact library choices, and current acceptance-owner identity remain D4-delegated unless architecture or a governed contract explicitly requires them.
+
+Affected-surface expansion is not requirement expansion. Additional callers/configuration/persistence/tests may need implementation or validation without becoming new architecture authority.
+
+## Architecture fitness evidence
+
+When an architectural rule is objective, durable, and cheap to encode, an executable fitness check may protect it—for example dependency direction, acyclicity, forbidden imports, independence, or structural absence/uniqueness of a retired owner. Do not create a universal architecture manifest solely for protocol compliance.
+
+Metrics such as complexity, churn, duplication, coverage, and centrality are sensors, not architecture truth. Investigate the semantic reason behind a signal before changing authority.
+
+## Review and Serious Challenge
+
+D3 Review reconstructs applicable D1/D2 semantics, D3 architecture, side constraints, and actual D4 behavior. It attempts targeted falsification of ownership, dependency, state, reliability, security, scaling/resource, compatibility, and abstraction-adequacy claims.
+
+If D4 fails a coherent D3 contract, route an ordinary blocker to D4. If D3 itself appears contradictory, materially ambiguous, unrealizable under its simultaneous constraints, or incapable of preserving D2 semantics, raise a Serious Challenge to D3 rather than adding a D4 workaround.
+
+At a convergence boundary, stabilization asks whether the architecture would still be deliberately chosen today for the same governing contract. If not, route the smallest coherent D3 simplification or upstream reconsideration; do not accrete another compatibility layer automatically.

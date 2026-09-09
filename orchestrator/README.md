@@ -1,19 +1,28 @@
 # sdp-orchestrator-core
 
 The Core / Prompt module of the SDP Orchestrator: it renders one complete,
-copy/paste-ready, stage-correct Software Development Protocol prompt for a
-configured target repository.
+copy/paste-ready, profile-correct Scientific Software Development Protocol prompt
+for a configured target repository.
 
 Core-only installation is a finished operating mode. It needs no database, agent
 process, model catalog, quota meter, or scheduler.
 
+The current default profile is Protocol 6.0 (`ssdp-protocol-6.0`, workflow
+profile schema v2). The frozen Protocol 5.16 profile remains packaged and
+supported under schema v1 for historical workplans; workplan version binding
+prevents silent reinterpretation across the major-version boundary.
+
 See [the Core user guide](docs/core-user-guide.md) for installation,
-configuration, and the full command reference.
+configuration, Protocol 6 stages, 5.16 compatibility, and the full command
+reference.
 
 ```bash
 pip install sdp-orchestrator-core
 sdp doctor
-sdp implementation
+sdp software-implementation --workplan workplans/active/MY-WORKPLAN.md
+
+# Common software-stage alias, valid for Protocol 6 and Protocol 5.16
+sdp implementation --workplan workplans/active/MY-WORKPLAN.md
 
 # checkout development, without installing this package
 python3 orchestrator/sdp.py --help

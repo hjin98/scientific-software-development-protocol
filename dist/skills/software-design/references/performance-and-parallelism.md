@@ -56,7 +56,7 @@ The shared principle applies across languages. Python may reach a tuned BLAS/FFT
 - Do not assume an API is fast merely because it looks vectorized; measure materialization, object conversion, dispatch, and backend behavior when relevant.
 - Do not rewrite a well-mapped tuned operation as custom loops/SIMD merely to make low-level control visible.
 - Do not convert irregular sparse/combinatorial algorithms into dense layouts solely to satisfy a generic "vectorize/no loops" heuristic.
-- When replacing a hot path, protect a particular implementation form with a regression/static check only when that form is itself a real project/Frozen contract; normally protect behavior and performance instead.
+- When replacing a hot path, protect a particular implementation form with a regression/static check only when that form is itself a real governed D3/D4 contract; normally protect behavior and performance instead.
 
 ## I/O and data movement
 
@@ -110,7 +110,7 @@ Choose the execution class from workload and architecture before choosing a lang
 - **Asynchronous/event-driven:** appropriate for high-concurrency I/O, event processing, network/service orchestration, or pipeline overlap when it reduces thread/process complexity.
 - **Shared-memory concurrency:** appropriate for work that benefits from low-cost shared address-space access and has clear ownership/synchronization.
 - **Process isolation:** appropriate for independent address spaces, failure/security/runtime isolation, external executables, or runtime constraints; not automatically the best CPU-speed mechanism.
-- **Distributed memory:** appropriate when product/Frozen architecture requires multi-process/multi-node scaling or a representative single-node limit drives Design to distributed execution.
+- **Distributed memory:** appropriate when accepted D3 architecture or another governed constraint requires multi-process/multi-node scaling, or a representative single-node limit drives D3 to distributed execution.
 - **Accelerator execution:** architecture-gated; hardware availability alone does not create a requirement.
 
 The Python and C++ profiles specialize how these classes map to GIL/free-threaded interpreter modes, native threads/OpenMP/task runtimes, processes, MPI, and other runtimes.
@@ -127,7 +127,7 @@ For long-running user-facing workflows, make resource ownership observable when 
 
 ## GPU/accelerator policy
 
-Accelerator implementation is **dormant unless accelerator support is a Tier-1 requirement or explicitly Frozen architecture decision**. Do not require GPU probing, dependencies, builds, tests, or profiler tooling for CPU-only architecture.
+Accelerator implementation is **dormant unless** an applicable governed requirement or accepted D3 architecture enables accelerator support. Do not require GPU probing, dependencies, builds, tests, or profiler tooling for CPU-only architecture.
 
 When enabled, require:
 

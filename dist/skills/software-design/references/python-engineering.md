@@ -1,6 +1,6 @@
 # Python Engineering Profile
 
-Read [Language engineering profiles](language-profiles.md) first. This profile specializes shared Protocol 5 doctrine for Python execution and packaging. Shared architecture, testing, performance, concurrency, scientific, security, and release owners remain authoritative.
+Read [Language engineering profiles](language-profiles.md) first. This profile specializes shared Protocol 6 domain doctrine for Python execution and packaging. Shared architecture, testing, performance, concurrency, scientific, security, and release owners remain authoritative.
 
 ## Language-native design
 
@@ -37,7 +37,7 @@ Do not assume one universal Python threading model.
 - When free-threading is active, ordinary shared-state synchronization and extension compatibility become explicit correctness concerns; do not assume all installed extensions are free-thread-safe merely because the interpreter build is.
 - Use asynchronous/event-loop execution for high-concurrency I/O or event-driven workloads when it reduces thread/process complexity and matches project architecture. Do not spread async through synchronous numerical code without a material need.
 - Use processes for isolation, independent address spaces, external executables, or actual runtime constraints. Account for startup, serialization, duplicated memory, shared-memory lifetime, and IPC.
-- Distributed-memory/MPI execution is an architecture capability, not a C++ feature. Use the project-appropriate Python MPI/runtime interface when distributed execution is Frozen.
+- Distributed-memory/MPI execution is an architecture capability, not a C++ feature. Use the project-appropriate Python MPI/runtime interface when distributed execution is required by accepted D3 architecture or a governed constraint.
 - Model nested execution explicitly: Python workers/threads/async tasks can call BLAS, FFT, OpenMP, framework, MPI, or accelerator runtimes. Do not let each layer independently claim the full allocation.
 
 ## Effective resources
@@ -48,7 +48,7 @@ For long-running orchestration, keep worker counts overrideable and preserve a b
 
 ## Architecture-gated accelerator realization
 
-Accelerator work is **dormant unless** shared Tier-1/Frozen architecture enables accelerator support. CPU-only Python work must not acquire GPU probing, dependencies, device initialization, accelerator profilers, or backend fallback machinery merely because an accelerator stack is available.
+Accelerator work is **dormant unless** an applicable governed requirement or accepted D3 architecture enables accelerator support. CPU-only Python work must not acquire GPU probing, dependencies, device initialization, accelerator profilers, or backend fallback machinery merely because an accelerator stack is available.
 
 When enabled, map the shared accelerator contract through the project-compatible Python execution stack. CuPy, JAX, PyTorch, Numba, or equivalent array/compiler/framework backends are examples rather than required identities.
 
@@ -96,6 +96,6 @@ For materially affected Python code ask:
 2. Is dominant numerical work kept out of scalable Python-level loops when an equally simple compiled primitive exists?
 3. Does concurrency match the actual interpreter/runtime and nested-library behavior rather than a universal GIL assumption?
 4. Did a JIT/native/binding/async/process layer earn its integration and maintenance cost?
-5. Would a simpler Python-native realization satisfy the same product/Frozen contract with equal or better performance fitness?
+5. Would a simpler Python-native realization satisfy the same governing parent/side-constraint contract with equal or better performance fitness?
 
 These are engineering questions, not style gates. Equivalent stylistic preferences without material correctness, performance, ownership, or maintenance effect do not block acceptance.

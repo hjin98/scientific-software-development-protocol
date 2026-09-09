@@ -45,9 +45,18 @@ class Protocol511ToolAssistanceTests(unittest.TestCase):
                 self.assertIn("must read", line, (rel, ref))
 
     def test_tool_references_remain_progressively_disclosed_by_role(self) -> None:
-        for spec in build_skills.ROLE_SPECS.values():
+        # Protocol 5.11's software-tool routing is a D3/D4 executable-role guarantee.
+        # Protocol 6 adds D1/D2 authority roles; it must not force software repository
+        # analyzers into those new roles merely because ROLE_SPECS grew.
+        for role in ("software-design", "software-implementation"):
+            spec = build_skills.ROLE_SPECS[role]
             for name in TOOL_FILES:
                 self.assertIn(name, spec["references"])
+
+        for role in ("scientific-formulation", "numerical-algorithm-design"):
+            spec = build_skills.ROLE_SPECS[role]
+            for name in DIRECT_TOOL_FILES:
+                self.assertNotIn(name, spec["references"])
 
         for specialist in ("software-documentation", "repository-hygiene"):
             spec = build_skills.SPECIALIST_SPECS[specialist]
@@ -62,9 +71,12 @@ class Protocol511ToolAssistanceTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             dist = Path(tmp) / "dist"
             build_skills.build(dist)
-            for role in build_skills.ROLE_SPECS:
+            for role in ("software-design", "software-implementation"):
                 for name in TOOL_FILES:
                     self.assertTrue((dist / "skills" / role / "references" / name).is_file())
+            for role in ("scientific-formulation", "numerical-algorithm-design"):
+                for name in DIRECT_TOOL_FILES:
+                    self.assertFalse((dist / "skills" / role / "references" / name).exists())
             for specialist in ("software-documentation", "repository-hygiene"):
                 for name in TOOL_FILES:
                     self.assertFalse((dist / "skills" / specialist / "references" / name).exists())

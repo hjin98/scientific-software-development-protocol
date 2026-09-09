@@ -1,75 +1,89 @@
 ---
 kind: implementation-workplan
 workplan_id: REPLACE_ME
-protocol_version: 5.16.0
+protocol_version: 6.0.0
+status: proposed
 ---
 
-# <Task> Workplan
+# <Task> D3 -> D4 Implementation Workplan
 
-## Objective / problem invariants / non-goals
+This is the D3->D4 specialization of the generic abstraction–realization change plan. Use it for material executable software work. It must not absorb D1/D2 authority merely because implementation is scientific or numerical.
 
-<State the original stakeholder, research, computational, scientific, or operational problem independently of the current implementation where possible. Record the Tier-1 product requirements, governed contracts, durable-success criteria, and explicit non-goals.>
+## 1. Target outcome, governing authority, and non-goals
 
-## Frozen high-level architecture and engineering envelope
+- Stakeholder/product outcome:
+- Accepted D3 architecture being realized:
+- Applicable D1/D2 invariants that reach this implementation surface:
+- Domain-local governed D4 constraints/contracts:
+- Explicit non-goals:
 
-<Record only the material high-level architecture/ownership/algorithm/data-representation/resource/compatibility decisions Software Design deliberately freezes for this implementation cycle, plus material correctness/scientific/resource/scaling/hardware/performance/security/reliability requirements.>
+If the task is claimed D4-only, state the proportionate upstream-impact exclusion when scientific/numerical semantics could plausibly be affected.
 
-Ask explicitly:
+## 2. Cycle-scoped D3 decisions and delegated D4 realization
 
-- What high-level architecture is deliberately Frozen for this cycle?
-- Which details are intentionally **not** Frozen?
-- Would changing a listed detail alter high-level architecture, or only the delegated realization?
+### Cycle-scoped decisions
 
-For substantial or structurally risky work, note any task-local baseline/change-health evidence needed later to judge whether the affected system regressed in maintainability or behavioral protection. Do not create a permanent metric ledger solely for protocol compliance.
+List only material D3 architecture/ownership/interface/data-flow/resource/security/compatibility decisions deliberately fixed for this implementation cycle plus any exact acceptance identity required by governing authority.
 
-## Implementation obligations and delegated solution space
+A cycle-scoped decision is not automatically durable current Architecture Manual authority.
 
-Record task-specific obligations, not generic protocol prose or a frozen proof script. An ordinary material obligation should preserve:
+### Delegated D4 realization
 
-- **Concern / rationale:** why the outcome matters.
-- **Required end state / constraint:** what must hold at product/Frozen-architecture level.
-- **Delegated solution space:** what implementation-local machinery may be replaced, consolidated, simplified, or deleted while preserving the end state.
-- **Acceptance evidence:** focused/regression/integration, numerical/resource/compatibility threshold, structural/absence check, or other proof.
+List implementation-local mechanisms that remain replaceable: helpers, internal APIs, data structures, wrappers, retries, caches, state machines, library choices, local algorithms, synchronization primitives, and current delegated owner paths unless exact identity is governed.
 
-Attach only when material:
+### Active simplification
 
-- **Suggested realization:** useful guidance, explicitly replaceable by an equivalent simpler realization.
-- **Acceptance boundary:** product/Frozen claim, current real semantic owner/path or owner class, allowed doubles, forbidden substitutions, and observable evidence when proxy acceptance is a material risk. State whether exact owner/path identity is itself product/Frozen authority or merely the current Tier-2 realization; if delegated, an equivalent replacement remaps acceptance to the new real owner rather than reopening Design.
-- **Oracle-strength relation:** reference/differential/metamorphic/property/counterfactual/failure-path evidence when ordinary fixture equality would be weak.
-- **Objective architecture-fitness rule:** a stable dependency/absence/uniqueness constraint worth executable enforcement.
-- **Stage/dependency:** when ordering materially reduces risk or rework.
-- **Anti-shortcut / integrity constraint:** a known way local compliance/evidence manipulation could appear to pass while defeating the stakeholder outcome.
+State existing machinery/state/path that should be removed, narrowed, altered, consolidated, or replaced. New durable machinery must protect a governing capability the simpler system cannot provide or replace broader complexity.
 
-For simplification/refactor work, state what existing machinery/state/path should be removed, narrowed, altered, or consolidated. If net-new machinery is required, state which Tier-1/Frozen capability cannot be met cleanly without it, or which broader existing machinery it replaces to reduce total system complexity.
+## 3. Implementation obligations
 
-The accepted plan is the minimum known contract, not a ceiling only for newly discovered affected behavior and logically necessary consequences of already-binding product/Frozen-architecture semantics. Affected-surface expansion does not itself create a new product requirement or freeze the current realization.
+For each material obligation capture only what is needed. **Attach only when material**:
 
-## Implementation authority
+- concern/rationale;
+- required end state / governing constraint;
+- delegated realization freedom;
+- task-specific acceptance evidence;
+- **acceptance boundary** — governing claim, current real semantic owner/path or owner class, allowed doubles, forbidden substitutions, and observable evidence when proxy acceptance is a material risk; state whether the owner is governed identity or **merely the current delegated realization** so an equivalent delegated replacement remaps acceptance rather than freezing the old owner;
+- oracle-strength relation or structural absence/uniqueness check when ordinary tests are weak;
+- **anti-shortcut / integrity constraint** — a known way local compliance/evidence manipulation could appear to pass while defeating the governed outcome.
 
-### Frozen
+Green tests do not prove an omitted obligation was implemented.
 
-<List only Tier-1 product/problem requirements, deliberately Frozen high-level architecture, and acceptance boundaries whose exact identity is independently required by product/Frozen authority. Do not freeze a Tier-2 owner merely because current acceptance executes it.>
+## 4. Affected surface and acceptance
 
-### Delegated
+Initial expected affected behavior may include callers/consumers, shared utilities, public interfaces, configuration, persistence/restart, orchestration/concurrency, packaging/entrypoints, compatibility, documentation/specification, and transitive scientific/numerical behavior. This list is provisional and must be re-derived from the final assembled candidate.
 
-<List implementation-local mechanics and solution machinery intentionally left replaceable. Existing code, helpers, wrappers, state machines, retries, caches, adapters, synchronization, or prior patches are delegated unless explicitly promoted above.>
+Executable acceptance inherits Protocol 6 requirements:
 
-### Reopen only on evidence
+- focused checks;
+- stage-local affected regression for each material behavior-changing stage;
+- final accepted-contract reconciliation;
+- final affected-surface re-derivation and complete regression;
+- integration/end-to-end through real semantic-owner/consumer boundaries;
+- repository/project-required checks;
+- explicit blocking treatment of any required check that did not execute.
 
-<List material Frozen assumptions/decisions that may change only after a genuine redesign trigger. Reopen only the affected surface and preserve still-valid accepted work/evidence.>
+Production qualification: <required / deferred / unnecessary with reason if material>.
 
-## Affected surface and task-specific acceptance
+## 5. Specification and documentation impact
 
-<Initially expected changed/new behavior plus callers/consumers/shared utilities/configuration/persistence/state/orchestration/interfaces/packaging/documentation/transitive behavior that could plausibly change. This is provisional and must be re-derived from the final assembled implementation.>
+- D4 Specification changes required? If yes, distinguish accepted contract mutation from implementation repair.
+- D3 Architecture Manual update required?
+- D2/D1 authority affected? If yes, this plan is insufficient by itself; route to the earliest affected domain.
+- Guides/runbooks/generated artifacts affected?
 
-Generic functional-acceptance requirements are inherited from the protocol version declared by `protocol_version`; later releases do not silently reinterpret this workplan. Record only task-specific mappings, thresholds, real-owner/test-double boundaries, repository-required checks, structural/absence claims, and quality-ratchet/failure-path evidence not already clear in the obligations.
+Do not rewrite specification/architecture/method papers merely to match unintended code.
 
-Production qualification: <required / deferred / unnecessary, with reason when materially relevant>.
+## 6. Stages, dependency order, and evidence reuse
 
-## Implementation sequence and genuine redesign / simplification triggers
+Use coherent behavior/risk stages only where ordering reduces ambiguity or rework. Several tightly coupled file/helper/test edits may form one stage. Reuse still-valid evidence until a changed dimension can plausibly invalidate it.
 
-<List only coherent behavior/risk stages where ordering materially reduces ambiguity or rework. A local coherent behavior change is normally one material stage; do not split tightly coupled helper/caller/test edits merely by file/function.>
+## 7. Reopen, Serious Challenge, and simplification triggers
 
-<Record structural evidence that should trigger active Tier-2 simplification before another additive durable repair: repeated patches, patch-on-patch repair, wrapper/fallback/special-case accumulation, duplicated/synchronized authoritative state, competing authorities, repeated reconciliation machinery, or a materially simpler equivalent realization.>
+- D4-local implementation blockers that stay within this plan:
+- evidence requiring D3 architecture reopen:
+- evidence requiring D2 or D1 challenge/reopen:
+- structural complexity requiring simplification before another additive repair:
+- material authority contradiction that would require `SERIOUS CHALLENGE` rather than ordinary implementation repair:
 
-<Record separately the evidence that would require bounded Design reconsideration because a **Frozen high-level architecture** decision itself must change.>
+An unresolved Serious Challenge to governing authority blocks normal Pass for the dependent claim.

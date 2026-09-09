@@ -1,31 +1,71 @@
-# Specification and Implementation
+# D4 Specification and Implementation
 
-Create or update a specification only when changing a contract that consumers, persisted data, or scientific interpretation relies on: public API/CLI/configuration, formats/schemas, units/shapes/order/precision, persistence semantics, compatibility/migration, backend policy, or durable error/fallback behavior.
+D4 is the concrete software-contract and executable-realization domain. It is constrained by applicable D3 architecture, upstream semantics that reach D4 directly, and domain-local governed contracts.
 
-Do not create specifications for purely internal implementation details.
+## Specification versus code
 
-## Keep contracts minimal
+Where a concrete behavior is governed, the accepted **D4 Specification** is the normative statement of intended software behavior. Code/executable behavior is the realization and evidence of what actually exists.
 
-Specify the stable information consumers actually need. Avoid exposing implementation details that unnecessarily constrain future simplification.
+```text
+accepted D4 specification  --constrains--> code / executable behavior
+accepted D4 specification  <--verify------ code / executable behavior
+```
 
-## Implementation structure
+Code does not become the intended contract merely because it exists or because tests encode its current output. If code disagrees with an accepted specification, classify the disagreement before editing either side:
 
-Factor by genuine responsibility, not by arbitrary size targets. A single clear function is better than a network of helpers when responsibilities do not actually differ.
+- code is wrong -> repair implementation;
+- specification is stale because an accepted upstream/D4 contract legitimately changed -> update specification and affected consumers/evidence;
+- intent is ambiguous -> route to the owning authority;
+- accepted specification itself may be materially wrong/contradictory -> Serious Challenge rather than silent rewrite.
 
-Separate layers when they own materially different invariants or lifecycle concerns. Do not split merely to increase abstraction.
+Never rewrite a specification solely to make unintended implementation pass.
 
-Prefer canonical internal representations and one authoritative state. Avoid synchronized copies and parallel code paths unless necessary.
+## What belongs in a D4 Specification
+
+Specify only concrete stable contracts that consumers, persisted data, automation, or scientific interpretation rely on, such as:
+
+- public API/CLI/configuration behavior;
+- formats, schemas, units/shapes/order/precision exposed at the concrete boundary;
+- persistence/restart/migration semantics;
+- compatibility and supported-version behavior;
+- concrete backend/device policy when it is public or governed;
+- durable error/fallback behavior;
+- externally observable state transitions and authorization/security contracts.
+
+Do not specify private helpers, incidental call graphs, local data structures, or other replaceable machinery unless their identity is genuinely part of an accepted contract.
+
+## Implementation authority
+
+Within the feasible set defined by specification, architecture, upstream semantics, and external constraints, implementation remains adaptive. Prefer direct control flow, cohesive ownership, one authoritative state/representation, established language/library mechanisms, and deletion/consolidation over compensating wrappers.
+
+Existing tests, documentation, helpers, caches, retry loops, state machines, or previous patches do not promote machinery into authority.
+
+## Contract-changing implementation
+
+When an accepted upstream/domain decision changes a concrete contract:
+
+1. change the authoritative specification deliberately;
+2. identify affected consumers, persisted state, compatibility surfaces, tests, examples, and documentation;
+3. implement the new specification;
+4. verify actual behavior through affected regression and real integration boundaries;
+5. invalidate evidence whose expectation depended on the old contract.
+
+Specification mutation and implementation repair are separate semantic actions even when committed together.
 
 ## Compatibility
 
-Preserve compatibility when it is a real supported contract. Do not add speculative compatibility layers for hypothetical users or indefinitely retain obsolete paths after the supported migration window.
+Preserve compatibility only when an actual supported contract or migration requirement needs it. Compatibility machinery has product complexity cost. Remove obsolete paths when their supported window ends; do not preserve historical implementation merely because it once existed.
 
-Derived caches can often be invalidated/rebuilt instead of migrated. Authoritative user data may require explicit migration.
+Derived caches may often be invalidated/rebuilt. Authoritative user/project data may require explicit migration.
 
-## Error handling
+## Errors and state
 
-Validate meaningful boundaries and raise actionable failures. Do not hide invariant violations behind broad fallbacks. Keep cleanup deterministic where it materially protects resources or state.
+Validate meaningful boundaries and fail actionably. Do not hide invariant violations behind permissive fallback. Persistence, restart, transaction, cleanup, and state-transition behavior must match the accepted specification and D3 ownership model where material.
 
-## Alignment
+## Verification
 
-Before accepting a contract-changing implementation, compare actual behavior with the specification, update affected consumers/tests/examples, and update architecture only when architecture actually changed.
+Before D4 acceptance, compare actual executable semantics against the accepted D4 specification, D3 architecture, and directly applicable upstream/external constraints. Green tests do not prove a missing specification obligation.
+
+For public/consumer contracts, test through the real supported interface or semantic owner. Direct helper invocation cannot prove caller/orchestrator/persistence behavior when those are part of the claim.
+
+A D4-only local refactor needs only a proportionate check that no plausible D3/D2/D1 semantics changed. If implementation evidence reveals a parent defect, challenge the earliest affected abstraction rather than forcing code to preserve a wrong contract.

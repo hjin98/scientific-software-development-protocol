@@ -1,15 +1,8 @@
-"""Extraction of canonical stage prose from the SDP workflow-prompt document.
+"""Version-selected extraction of canonical Protocol prompt bodies.
 
-There is exactly one prompt-body authority: the canonical
-``source/shared/references/development-workflow-prompts.md`` document (or a
-reproducible version-bound snapshot of it). This module reads that document; it
-never paraphrases, rewrites, or supplements it.
-
-Extraction is deliberately brittle about structure. A stage heading must be
-unique and must own exactly one fenced ``text`` block. If the document drifts
-into a shape this parser cannot resolve unambiguously, that is reported as
-``core.protocol.source_incoherent`` rather than resolved by a heuristic that
-could silently select the wrong prose.
+The parser remains deliberately strict: every profile definition owns an exact
+numbered stage set and each stage owns exactly one fenced ``text`` block.  A
+source that cannot be mapped unambiguously to its declared profile fails loudly.
 """
 
 from __future__ import annotations
@@ -19,10 +12,14 @@ from dataclasses import dataclass
 
 from . import errors as E
 from .digest import SCHEME_CONTENT, digest_bytes
-from .records import DigestRef
 from .limits import MAX_PROTOCOL_SOURCE_BYTES
+from .records import DigestRef
 
-#: Frozen canonical stage identity: (heading number, stage key, heading title).
+LEGACY_PROFILE_ID = "sdp-protocol-5.16"
+SSDP6_PROFILE_ID = "ssdp-protocol-6.0"
+
+# Kept as the legacy compatibility name because existing Core v1 tests and
+# consumers import CANONICAL_STAGES directly.
 CANONICAL_STAGES: tuple[tuple[int, str, str], ...] = (
     (0, "baseline", "Baseline / Change-Health Intake"),
     (1, "design", "Design / Workplan"),
@@ -34,6 +31,25 @@ CANONICAL_STAGES: tuple[tuple[int, str, str], ...] = (
     (7, "health-audit", "Health Audit"),
     (8, "closeout", "Closeout"),
 )
+
+SSDP6_STAGES: tuple[tuple[int, str, str], ...] = (
+    (0, "intake", "Authority / Affected-Domain Intake"),
+    (1, "scientific-formulation", "D1 Scientific & Mathematical Formulation"),
+    (2, "numerical-algorithm-design", "D2 Algorithm & Numerical Method Design"),
+    (3, "software-design", "D3 Software Architecture / Workplan"),
+    (4, "software-implementation", "D4 Software Implementation"),
+    (5, "review", "Review & Challenge Pass"),
+    (6, "verification", "Verification"),
+    (7, "stabilization", "Stabilization / Architecture GC"),
+    (8, "alignment", "Downstream Authority Alignment"),
+    (9, "health-audit", "Health Audit"),
+    (10, "closeout", "Closeout"),
+)
+
+_PROFILE_STAGES = {
+    LEGACY_PROFILE_ID: CANONICAL_STAGES,
+    SSDP6_PROFILE_ID: SSDP6_STAGES,
+}
 
 _HEADING = re.compile(r"^##\s+(?:(?P<number>\d+)\.\s+)?(?P<title>.+?)\s*$")
 _FENCE = re.compile(r"^```(?P<info>[A-Za-z0-9_-]*)\s*$")
@@ -54,6 +70,29 @@ class CanonicalDocument:
     text: str
     content_digest: DigestRef
     stages: dict[str, CanonicalStage]
+    profile_id: str = LEGACY_PROFILE_ID
+
+
+def stages_for_profile(profile_id: str) -> tuple[tuple[int, str, str], ...]:
+    try:
+        return _PROFILE_STAGES[profile_id]
+    except KeyError:
+        E.fail(
+            E.PROTOCOL_INCOMPATIBLE,
+            "no canonical stage definition is available for the requested profile",
+            details={"requested": profile_id, "available": sorted(_PROFILE_STAGES)},
+        )
+
+
+def all_stage_keys() -> tuple[str, ...]:
+    """Union of CLI-safe stage keys across supported profiles, preserving order."""
+
+    seen: list[str] = []
+    for profile_id in (LEGACY_PROFILE_ID, SSDP6_PROFILE_ID):
+        for _, key, _ in _PROFILE_STAGES[profile_id]:
+            if key not in seen:
+                seen.append(key)
+    return tuple(seen)
 
 
 def _fail_incoherent(message: str, **details: object) -> None:
@@ -61,8 +100,6 @@ def _fail_incoherent(message: str, **details: object) -> None:
 
 
 def _sections(lines: list[str]) -> dict[tuple[int, str], tuple[int, int]]:
-    """Map each ``## N. Title`` heading to its half-open line span."""
-
     starts: list[tuple[int, int | None, str]] = []
     in_fence = False
     for index, line in enumerate(lines):
@@ -145,8 +182,8 @@ def _input_names(body: str, heading: str) -> tuple[str, ...]:
     return tuple(names)
 
 
-def parse_document(text: str) -> CanonicalDocument:
-    """Parse a canonical workflow-prompt document into its stage bodies."""
+def parse_document(text: str, *, profile_id: str = LEGACY_PROFILE_ID) -> CanonicalDocument:
+    """Parse canonical workflow prose under one explicit profile definition."""
 
     encoded = text.encode("utf-8")
     if len(encoded) > MAX_PROTOCOL_SOURCE_BYTES:
@@ -155,25 +192,21 @@ def parse_document(text: str) -> CanonicalDocument:
             "the canonical prompt source exceeds the supported size bound",
             details={"bytes": len(encoded), "limit": MAX_PROTOCOL_SOURCE_BYTES},
         )
+    stage_spec = stages_for_profile(profile_id)
     lines = text.replace("\r\n", "\n").replace("\r", "\n").split("\n")
     spans = _sections(lines)
-    expected_headings = {(number, title) for number, _, title in CANONICAL_STAGES}
+    expected_headings = {(number, title) for number, _, title in stage_spec}
     if set(spans) != expected_headings:
         _fail_incoherent(
             "the canonical source has extra, missing, or conflicting numbered stage headings",
+            profile=profile_id,
             expected=sorted(f"{number}. {title}" for number, title in expected_headings),
             actual=sorted(f"{number}. {title}" for number, title in spans),
         )
 
     stages: dict[str, CanonicalStage] = {}
-    for number, stage_key, title in CANONICAL_STAGES:
-        span = spans.get((number, title))
-        if span is None:
-            _fail_incoherent(
-                "the canonical source does not contain the expected stage heading",
-                expected=f"## {number}. {title}",
-                available=sorted(f"{n}. {t}" for n, t in spans),
-            )
+    for number, stage_key, title in stage_spec:
+        span = spans[(number, title)]
         heading = f"{number}. {title}"
         body = _single_text_block(lines, span, heading)
         stages[stage_key] = CanonicalStage(
@@ -184,5 +217,8 @@ def parse_document(text: str) -> CanonicalDocument:
             input_names=_input_names(body, heading),
         )
     return CanonicalDocument(
-        text=text, content_digest=digest_bytes(encoded, SCHEME_CONTENT), stages=stages
+        text=text,
+        content_digest=digest_bytes(encoded, SCHEME_CONTENT),
+        stages=stages,
+        profile_id=profile_id,
     )

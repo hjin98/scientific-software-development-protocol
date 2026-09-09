@@ -1,71 +1,93 @@
-# Protocol Versioning and Compatibility
+# Protocol Versioning, Historical Recovery, and Compatibility
 
 ## Versioning
 
-`PROTOCOL_VERSION` identifies the protocol contract.
+`source/PROTOCOL_VERSION` identifies the current canonical protocol contract.
 
-- major: incompatible role/lifecycle or governing-doctrine change;
-- minor: backward-compatible capability, doctrine, or control-plane strengthening;
-- patch: clarification or defect correction.
+- **major** — incompatible lifecycle/authority/governing-doctrine change;
+- **minor** — backward-compatible capability/doctrine/control-plane strengthening;
+- **patch** — clarification or defect correction.
+
+Protocol 6.0 is a major revision because scientific/mathematical formulation and numerical/algorithm design become first-class authority-bearing domains and the governing doctrine changes from a software-centric two-role hierarchy to recursive abstraction–realization across D1-D4.
+
+Protocol 6 preserves the strongest Protocol 5 engineering guarantees by refactoring them into the new hierarchy: minimum justified complexity, adaptive realization, snapshot-complete handoff, proxy-proof acceptance, affected regression/integration, evidence reuse/invalidation, active simplification, convergence-aware reasoning, language/tool routing, long-horizon quality, bounded urgent mitigation, compact resumable working state, and version-bound workplans.
+
+## Protocol 6 generalization and Protocol 5 specialization
+
+Protocol 6 is the general theory. Protocol 5 is a narrower software-local specialization recoverable inside it. Restricting active scope to software architecture and executable realization recovers the former `software-design -> software-implementation` loop as the D3 -> D4 specialization of recursive abstraction-realization.
+
+The concise historical mapping is:
+
+```text
+Protocol 5 Tier 1A
+    -> applicable accepted parent-abstraction invariants
+       + directly governed external/domain constraints
+
+Protocol 5 Tier 1B / Frozen high-level architecture
+    -> cycle-scoped child-realization decisions
+       and, when explicitly accepted as durable, current D3 architecture
+
+Protocol 5 Tier 2
+    -> delegated realization beneath the governing abstraction
+
+Protocol 5 Tier 3
+    -> development economy after fidelity and minimum justified complexity
+```
+
+This mapping preserves capability, not vocabulary. Every material Protocol 5 safeguard must remain recoverable as Protocol 6 behavior unless deliberately replaced by a stronger/general rule. Compression that deletes a capability is a defect; compression that expresses the same behavior once in broader Protocol 6 language is preferred.
+
+Current Protocol 6 operational roles, routing references, templates, and current guidance should therefore speak Protocol 6 semantics directly. Legacy control-plane vocabulary belongs here, in immutable/version-pinned 5.x artifacts, and in explicitly historical qualification—not as a second current control plane. Current regression tests should protect semantic capability rather than require obsolete words merely for recognizability.
+
+## Historical Protocol 5 lineage
 
 Protocol 5 established the governing product doctrine: material engineering requirements define the feasible product space, and among engineering-sufficient solutions the protocol prefers the globally justified software/system design with the lowest unnecessary total complexity.
 
 Protocol 5.1 added the optional `software-documentation` specialist. Protocol 5.2 added the optional `repository-hygiene` specialist. Protocol 5.3 strengthened stage-local/final functional acceptance and separated production qualification. Protocol 5.4 added development-economy, accepted-workplan authority, bounded redesign, version-bound workplan inheritance, evidence/context reuse, coherent stage granularity, and evidence-directed review.
 
-Protocol 5.5 is a backward-compatible **implementation-fidelity and workflow-integration refinement**. It preserves the Protocol 5 doctrine, two-role lifecycle, and Protocol 5.3/5.4 acceptance/economy guarantees while adding lossless Design -> Implementation translation, protected-concern preservation, required-consequence versus suggestion/delegation distinctions, minimum-known-contract semantics, dual semantic/functional stage closure, final accepted-contract reconciliation, and lossless review/rework routing.
+Protocol 5.5 is a backward-compatible implementation-fidelity and workflow-integration refinement. Protocol 5.6 is a backward-compatible proxy-proof acceptance and test-double-boundary strengthening. Protocol 5.7 is a backward-compatible engineering-stewardship and outcome-alignment strengthening. Protocol 5.8 is a backward-compatible effective-compression and canonical-ownership refinement. Protocol 5.9 is a backward-compatible agent-portable deterministic-routing refinement. Protocol 5.10 is a backward-compatible snapshot-complete handoff refinement. Protocol 5.11 is a backward-compatible tool-assisted engineering methodology and capability refinement. Protocol 5.12 is a backward-compatible development-convergence and cycle-economy control refinement. Protocol 5.13 is a backward-compatible deterministic tool-entry, CodeQL, and progressive-disclosure compression refinement. Protocol 5.14 is a backward-compatible solution-boundary and active-simplicity strengthening. Protocol 5.15 is a backward-compatible language-engineering-profile and cross-language performance refinement. Protocol 5.16 is a backward-compatible long-horizon code-health, adversarial-verification, and portable workflow-orchestration refinement.
 
-Protocol 5.6 is a backward-compatible **proxy-proof acceptance and test-double-boundary strengthening**. It preserves all earlier Protocol 5 guarantees while adding explicit semantic-owner-under-acceptance, allowed test-double boundary, proxy-proof counterfactual, real-owner handoff, and independent-review challenge rules.
+Protocol 5.16 was the final backward-compatible refinement of the Protocol 5 software-centric lifecycle. It preserved the Protocol 5 hierarchy and two-role lifecycle while adding non-authoritative quality ratchets and maintenance sensors, conditional mutation/differential/metamorphic/failure-injection evidence, executable architecture-fitness guidance, fresh-context falsification-oriented review, risk-triggered Verification, non-mutating milestone Stabilization, one optional semantic maintenance-audit specialist, stronger lifecycle closeout, and a canonical parameterized human-facing prompt entrypoint with compatible-local-first/public-repository-fallback skill resolution.
 
-Protocol 5.7 is a backward-compatible **engineering-stewardship and outcome-alignment strengthening**. It preserves the exact Protocol 5 hierarchy, two-role lifecycle, and all earlier guarantees while making the stakeholder's intended durable product the shared optimization target.
-
-Protocol 5.8 is a backward-compatible **effective-compression and canonical-ownership refinement**. It preserves material engineering semantics while reducing always-loaded duplication and keeping detailed generic doctrine behind canonical references.
-
-Protocol 5.9 is a backward-compatible **agent-portable deterministic-routing refinement**. It preserves the Protocol 5 hierarchy, two-role lifecycle, and prior safeguards while making progressive disclosure reliable across Agent-Skills-style harnesses.
-
-Protocol 5.10 is a backward-compatible **snapshot-complete handoff refinement**. It preserves the Protocol 5 hierarchy and requires accepted Design -> Implementation handoff artifact sets to carry every still-binding task-specific semantic without depending on unavailable history or unsupplied external resources.
-
-Protocol 5.11 is a backward-compatible **tool-assisted engineering methodology and capability refinement**. It preserves the Protocol 5 hierarchy and adds optional capability-aware guidance for Serena semantic repository work, Semgrep structural/variant analysis, and Hypothesis property/stateful testing.
-
-Protocol 5.12 is a backward-compatible **development-convergence and cycle-economy control refinement**. It preserves the Protocol 5 hierarchy while making repeated evidence change the engineering method: local repair can broaden to semantic-family reasoning and repeated post-closure failure can trigger bounded Design reconsideration. It also adds review readiness, acceptance liveness, revision economy, and evidence/test-cycle reuse.
-
-Protocol 5.13 is a backward-compatible **deterministic tool-entry, CodeQL, and progressive-disclosure compression refinement**. It preserves prior engineering/acceptance/convergence safeguards while making optional-tool routing operational per material engineering question, adding CodeQL for supported interprocedural/data-flow relations, and reducing always-loaded convergence/tool context.
-
-Protocol 5.14 is a backward-compatible **solution-boundary and active-simplicity strengthening**. It clarifies the existing three-tier doctrine rather than changing it: Tier 1 consists of intrinsic stakeholder/domain product truth plus high-level architecture explicitly Frozen by Software Design for the current implementation cycle; lower-level realization remains Tier 2 by default and does not acquire invariant authority through existence, dependency, testing, documentation, review history, previous repair, or acceptance evidence that merely names the current owner. Protocol 5.14 narrows minimum-known-contract semantics accordingly, distinguishes affected-surface expansion from requirement expansion, makes Tier-2 simplification/re-derivation mandatory before another additive durable repair when structural evidence shows solution ossification or unnecessary complexity, and preserves proxy-proof acceptance by binding evidence to the final real production owner of the accepted claim rather than implicitly freezing a replaceable Tier-2 owner. It preserves the two-role lifecycle, product requirements, snapshot-complete handoff, affected regression/integration, revision economy, and Protocol 5.13 deterministic tool routing.
-
-Protocol 5.15 is a backward-compatible **language-engineering-profile and cross-language performance refinement**. It preserves the Protocol 5 hierarchy, two-role lifecycle, active simplicity, acceptance, convergence, snapshot-complete handoff, and version-binding guarantees while separating shared language-agnostic doctrine from thin differential Python and C++ engineering profiles. Material executable Python/C++ work deterministically activates the relevant profile; mixed-language surfaces compose both without a global language precedence. Protocol 5.15 generalizes performance/concurrency/tool relation classes, preserves language-native realization, modern Python runtime variants, compiled build-mode correctness, effective resource discovery, architecture-gated accelerators, scientific equivalence, and evidence-before-complexity escalation without creating parallel protocols or mandatory tool/runtime stacks.
-
-Protocol 5.16 is a backward-compatible **long-horizon code-health, adversarial-verification, and portable workflow-orchestration refinement**. It preserves the Protocol 5 hierarchy and two-role lifecycle while adding non-authoritative quality ratchets and maintenance sensors, conditional mutation/differential/metamorphic/failure-injection evidence, executable architecture-fitness guidance, fresh-context falsification-oriented review, risk-triggered Verification, non-mutating milestone Stabilization, one optional semantic maintenance-audit specialist, stronger lifecycle closeout, and a canonical parameterized human-facing prompt entrypoint with compatible-local-first/public-repository-fallback skill resolution. Metrics remain sensors rather than product truth, routine changes do not acquire fixed new gates, and older workplans retain their declared protocol semantics.
-
-The two-role lifecycle remains unchanged:
-
-```text
-software-design -> software-implementation
-```
+Earlier completed Protocol 5 work remains valid under the version that governed it. Protocol 6 does not retroactively rewrite that history.
 
 ## Workplan protocol binding
 
-Every workplan that inherits protocol-wide behavior binds that inheritance to its declared `protocol_version`.
+Every workplan that inherits protocol-wide behavior binds to its declared `protocol_version`.
 
-A workplan governed by version `X` continues to mean the Protocol `X` contract after newer releases. Do not reinterpret an active or completed older plan using newer generic rules merely because the installed/latest skill changed.
+A workplan governed by version `X` continues to mean Protocol `X` after newer releases. **Do not reinterpret active or completed 5.x work using Protocol 6** merely because the installed/latest skill changed.
 
-An active workplan may explicitly adopt a newer backward-compatible protocol version after reconciling changed obligations and updating `protocol_version`; do not silently upgrade it. Previously executed evidence remains reusable when no changed protocol obligation or affected product dimension can plausibly alter its claim.
+Historical Protocol 5 wording remains authoritative for those workplans. In particular, **active older workplans do not automatically adopt Protocol 5.16 or any later release**. They **may continue under their declared version** or explicitly adopt a newer compatible version after reconciling changed obligations. A 5.x -> 6.0 adoption is a major semantic migration and is never silent.
+
+A plan may explicitly adopt a newer compatible contract only after reconciling changed obligations. Previously executed evidence remains reusable when no changed protocol obligation or affected product/authority dimension can plausibly alter its claim.
+
+## Immutable Protocol 5.16 recovery
+
+Historical Protocol 5.16 authority is pinned to immutable repository commit:
+
+```text
+5.16.0 -> e151daaf5c8eebb351a85cfed86170fda80fb5e3
+```
+
+That commit is the canonical source snapshot immediately preceding the SSDP 6 transition workplan. Historical resolution must use this immutable identity (or another explicitly equivalent release/tag mapping), never `main`/latest.
+
+The orchestrator's packaged `sdp-protocol-5.16` profile remains a reproducible version-bound snapshot and must continue to resolve 5.16 workplans under profile schema v1 after Protocol 6 release.
+
+## Protocol 6 orchestration profile
+
+Protocol 6 uses a separately versioned profile identity/schema. Its domain-aware routing is represented under profile schema v2 rather than overloading profile schema v1. Core supports both schemas and selects by declared protocol/profile identity rather than by a global current constant.
+
+Historical 5.16 source/profile behavior must remain testable independently of the Protocol 6 current profile.
+
+## Evidence invalidation across version changes
+
+Reuse evidence until a changed protocol obligation or product/authority dimension can plausibly alter the claim. Version adoption does not automatically invalidate unrelated executable evidence.
+
+Final assembled acceptance must still reflect the candidate after all material executable edits.
 
 ## Candidate identity
 
-For a normal Git repository, the candidate commit plus absence of unintended product-defining working-tree changes is usually sufficient source identity. Use additional hashes/manifests only at real boundaries not represented by Git.
+For a normal Git repository, candidate commit plus absence of unintended product-defining working-tree changes is usually sufficient source identity. Additional hashes/manifests are required only at real boundaries not represented by Git.
 
-## Evidence invalidation
+## Software/product compatibility
 
-Rerun a check when a changed dimension could plausibly alter its result or interpretation. Stage-local evidence must correspond to the stage it accepts; final affected-surface regression and integration must reflect the assembled candidate after all material executable edits that could invalidate earlier evidence.
-
-Semantic/conformance closure and functional evidence are separate claims. A protocol-version adoption may require newly introduced conformance reasoning without automatically invalidating still-valid unrelated executable evidence.
-
-## Compatibility
-
-Preserve software compatibility when the product contract requires it. Compatibility mechanisms create product complexity, so do not retain obsolete layers indefinitely without a supported-version or migration requirement.
-
-Protocol 5.14 clarified that historical implementation machinery is not itself a compatibility contract. Protocol 5.15 applies the same rule to language/runtime machinery: a current Python or C++ implementation, tool, backend, compiler, GIL mode, or packaging mechanism does not become product authority merely because it exists. Preserve it only when product/Frozen requirements need it or it remains the minimum justified realization.
-
-## Earlier protocol versions
-
-Completed work under earlier protocol versions remains valid historical work under the version that governed it. Active older workplans do not automatically adopt Protocol 5.16 or any later release. They may continue under their declared version or explicitly adopt a newer backward-compatible version after reconciling changed obligations. A protocol-version change alone does not require repeating still-valid evidence unless a newly adopted requirement or affected dimension invalidates the claim.
+Preserve API/data/runtime compatibility only where an actual supported contract requires it. Historical implementation machinery does not become a compatibility requirement through existence. Retain compatibility layers only for a supported version/migration window or when they remain the minimum justified realization.

@@ -1,6 +1,6 @@
 # C++ Engineering Profile
 
-Read [Language engineering profiles](language-profiles.md) first. This profile specializes shared Protocol 5 doctrine for C++ compilation, lifetime, ABI, native parallelism, numerical kernels, and low-level performance. Shared architecture, testing, performance, concurrency, scientific, security, and release owners remain authoritative.
+Read [Language engineering profiles](language-profiles.md) first. This profile specializes shared Protocol 6 domain doctrine for C++ compilation, lifetime, ABI, native parallelism, numerical kernels, and low-level performance. Shared architecture, testing, performance, concurrency, scientific, security, and release owners remain authoritative.
 
 ## Language-native design and ownership
 
@@ -70,7 +70,7 @@ After the shared performance owner identifies compiled/vector execution as mater
 5. use explicit ISA intrinsics only for a still-dominant kernel whose benefit justifies the complexity;
 6. adopt LTO, PGO, or target-specific tuning as durable build policy only after representative evidence establishes total-system value.
 
-A portable x86 product must not silently become AVX-512-only because a development machine supports it. Prefer a conservative baseline plus safe runtime dispatch/multiversioning or a library that performs dispatch. Architecture-specific builds may target AVX/AVX2/AVX-512, Arm NEON/SVE, or another ISA when that target is product/Frozen authority.
+A portable x86 product must not silently become AVX-512-only because a development machine supports it. Prefer a conservative baseline plus safe runtime dispatch/multiversioning or a library that performs dispatch. Architecture-specific builds may target AVX/AVX2/AVX-512, Arm NEON/SVE, or another ISA when that target is accepted D3 architecture or another governed constraint.
 
 Compiler transformations that change floating-point semantics—reassociation, contraction/FMA policy, reciprocal approximations, denormal handling, fast-math classes, mixed precision, or reduction order—are scientific-semantic decisions and require accepted equivalence evidence.
 
@@ -119,7 +119,7 @@ Exact tool names remain delegated, and absence of one tool does not weaken the r
 
 ## Accelerator realization
 
-GPU/accelerator work is dormant unless shared Tier-1/Frozen architecture enables it.
+GPU/accelerator work is dormant unless an applicable governed requirement or accepted D3 architecture enables it.
 
 When enabled, choose the backend according to the supported hardware and portability contract: CUDA, HIP, SYCL, OpenCL, Kokkos/RAJA-like portability layers, or project equivalents. Prefer optimized accelerator libraries such as BLAS/solver/FFT primitives before custom kernels when the computation maps cleanly.
 
@@ -139,6 +139,6 @@ For materially affected C++ code ask:
 4. Have tuned kernels/auto-vectorization/data-layout improvements been exhausted before bespoke SIMD or allocators?
 5. Does concurrency match workload topology without nested oversubscription?
 6. Did templates, dispatch, backend matrices, native boundaries, or build machinery earn their compile/binary/deployment/maintenance cost?
-7. Would a simpler C++-native realization satisfy the same product/Frozen contract with equal or better engineering fitness?
+7. Would a simpler C++-native realization satisfy the same governing parent/side-constraint contract with equal or better engineering fitness?
 
 These are engineering questions, not style gates. Equivalent stylistic preferences without material correctness, performance, ownership, portability, or maintenance effect do not block acceptance.

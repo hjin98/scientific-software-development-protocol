@@ -1,76 +1,84 @@
-# Software Development Protocol
+# Scientific Software Development Protocol
 
-Software Development Protocol 5 is an engineering-fitness-first workflow for AI-assisted software engineering. Current protocol version: **5.16**.
+Current protocol version: **6.0**.
 
-## Governing doctrine
-
-```text
-product engineering fitness > minimum justified product/system complexity > development economy
-```
-
-Tier 1 is intrinsic stakeholder/domain product truth plus high-level architecture explicitly Frozen by Software Design for the current implementation cycle. Lower-level realization remains Tier 2 and does not become invariant through existence, dependency, tests, documentation, prior plan wording, or previous repair. Development-process cost is Tier 3.
-
-The durable stakeholder product is the objective. Workplans, tests, gates, metrics, reviews, reports, tools, language runtimes, and current implementation machinery are constraints, evidence, or solutions—not product truth.
-
-## Active simplicity and long-horizon quality
-
-A clean local bug receives a clean owning-layer repair. Repeated patches, wrappers/fallbacks/special cases, duplicated state/authorities, repeated reconciliation, or a materially simpler equivalent realization require Tier-2 simplification/re-derivation before another additive durable repair.
-
-Protocol 5.16 adds an earlier-warning quality loop without replacing engineering judgment with scores. Complexity, churn, dependency structure, coverage, mutation survival, duplication, API/configuration growth, and related observations are **sensors, not verdicts**. Touched code follows a semantic quality ratchet: existing debt does not excuse making an affected subsystem harder to reason about unless Tier-1/Frozen requirements justify the added complexity.
-
-The shared owner for these semantics is `source/shared/references/long-horizon-code-health.md`.
-
-## Two-role lifecycle
+Protocol 6 generalizes the former Software Development Protocol into a recursive scientific-software development system:
 
 ```text
-software-design -> software-implementation
+ABSTRACTION  --design / constrain-->  REALIZATION
+ABSTRACTION  <--verify / reconstruct-- REALIZATION
 ```
 
-Design separates original product/problem invariants from cycle-scoped Frozen architecture and delegated solution space. Implementation preserves Tier 1 while remaining free to reduce, consolidate, refactor, or replace Tier-2 machinery. Evidence that invalidates Frozen architecture routes back to Design on the affected surface.
+An abstraction states the semantic invariants that must survive realization. A realization is admissible only when it satisfies every applicable upstream abstraction and governed external constraint. Within that feasible set optimize:
 
-Final accepted-contract reconciliation, final affected regression/integration, and project-required checks remain Implementation acceptance. Independent Review follows that evidence when warranted. Verification is a deeper risk-triggered Software Design mode; Stabilization is a non-mutating architecture-GC mode; Health Audit is periodic and longitudinal. These are not extra authority-bearing lifecycle roles.
+```text
+domain engineering fitness
+> minimum justified realization complexity
+> development economy
+```
 
-## Development workflow prompt entrypoint
+## Four semantic domains
 
-For repeatable human-to-agent orchestration use the canonical prompt reference:
+```text
+D1  scientific-formulation
+     Scientific & Mathematical Formulation
+        |
+D2  numerical-algorithm-design
+     Algorithm & Numerical Methods
+        |
+D3  software-design
+     Software Architecture
+        |
+D4  software-implementation
+     Specification & executable implementation
+```
+
+This is a semantic hierarchy, not a mandatory four-stage waterfall. D4-only and D3->D4 work are normal when upstream meaning is unaffected; multi-parent constraints form a layered DAG.
+
+Logical normative document families are D1 Scientific Method Paper, D2 Numerical & Algorithmic Method Paper, D3 Architecture Manual, and D4 Specification plus code/executable realization. Each material current normative claim has one semantic owner. Proposed, accepted-current, challenged, stale-dependent, superseded/historical, and release-pinned/publication states remain distinct.
+
+## Verification and challenge
+
+Verification reconstructs realization semantics and attempts to falsify conformity. It is opposite-direction reasoning, not a bijective inverse. Every material handoff checks both realization fidelity and abstraction adequacy. High-risk scientific claims may require composed closure:
+
+```text
+actual executable behavior
+ -> governed numerical observables
+ -> D2 error/equivalence envelope
+ -> D1 scientific/mathematical meaning
+ -> external adequacy / validation / proof / standards evidence
+```
+
+Every material Review includes a bounded **Challenge Pass**. A child that fails a coherent parent has an ordinary blocker. Strong evidence that accepted authority itself is materially false, contradictory, ambiguous, inadequate, or unrealizable produces a prominent **SERIOUS CHALLENGE** and human adjudication rather than silent compliance or downstream patching.
+
+Authority governs mutation; evidence can challenge authority; neither human nor agent creates truth by assertion.
+
+## Preserved engineering strengths
+
+Protocol 6 is the general doctrine and Protocol 5 is its narrower software-local specialization. Protocol 6 preserves and generalizes Protocol 5's strongest controls as current semantic capabilities rather than a second current vocabulary: adaptive realization, active simplification, snapshot-complete handoff, version-bound workplans, stage-local plus final affected regression, proxy-proof real-owner evidence, evidence reuse/invalidation, differential/metamorphic testing, bounded fault injection, language/tool routing, long-horizon health sensing, bounded urgent mitigation, compact resumable working state, and conservative closeout.
+
+The concise historical mapping lives only in `source/shared/references/protocol-versioning-and-compatibility.md`; ordinary Protocol 6 work should not require translating through Protocol 5 control-plane terms.
+
+## Workflow and portable skills
+
+Canonical human-facing orchestration prompts:
 
 - [`source/shared/references/development-workflow-prompts.md`](source/shared/references/development-workflow-prompts.md)
 
-It provides parameterized entrypoints for optional Baseline/Change-Health Intake, Design/Workplan, Implementation, Review & Update, risk-triggered Verification, Stabilization/Architecture GC, downstream-workplan Alignment, periodic Health Audit, and Closeout.
+Canonical role entrypoints:
 
-By default, prompt orchestration resolves protocol skills **local first, public repository second**. Use the current harness's native installed-skill mechanism or exposed installed-skill root where available (for example `@software-design`, `/software-implementation`, or a harness-equivalent selector; these are not shell commands). If the required skill is absent, unreadable, or cannot preserve the governing protocol contract, fall back to the canonical public repository at `https://github.com/hjin98/software-development-protocol` and read the appropriate canonical `source/` skill plus required references. Never silently reinterpret an older accepted workplan under newer doctrine.
+- `source/roles/scientific-formulation/SKILL.md`
+- `source/roles/numerical-algorithm-design/SKILL.md`
+- `source/roles/software-design/SKILL.md`
+- `source/roles/software-implementation/SKILL.md`
 
-## Test effectiveness, architecture fitness, and failure paths
+Optional specialists remain non-authoritative support capabilities: `software-documentation`, `software-maintenance-audit`, and `repository-hygiene`.
 
-Protocol 5.16 makes several evidence classes explicit while keeping them conditional:
+Skill resolution is compatible-local-first, canonical-public-source-second. Never silently reinterpret an older workplan under newer doctrine. Historical Protocol 5.16 is pinned to immutable commit `e151daaf5c8eebb351a85cfed86170fda80fb5e3` and the orchestrator retains its packaged `sdp-protocol-5.16` schema-v1 profile alongside current `ssdp-protocol-6.0` schema v2.
 
-- mutation/counterfactual evidence for test-oracle strength;
-- differential and metamorphic testing where exact fixture oracles are weak;
-- executable architecture-fitness checks for objective, stable dependency/ownership rules;
-- changed-code/affected-surface quality ratchets rather than arbitrary whole-repository thresholds;
-- bounded deterministic fault injection for material restart/recovery/failure claims through the real semantic owner.
+## Build and acceptance
 
-Tool identity remains delegated. Optional capabilities never form a mandatory pipeline.
-
-## Language-native engineering
-
-Protocol 5.15 introduced thin differential language profiles, preserved by 5.16:
-
-```text
-shared domain rule -> language profile(s) -> implementation-local realization
-```
-
-Material executable Python work loads the Python profile; material C++ work loads the C++ profile; mixed Python/C++ boundaries load both. Protocol 5.16 additionally gives Python project-configured fast lint/static typing first-class routing parity with the existing C++ compiler/static-analysis path.
-
-## Periodic software maintenance audit
-
-Protocol 5.16 adds one optional `software-maintenance-audit` specialist. It combines semantic inspection with available longitudinal evidence such as churn, temporal change coupling, complexity, centrality, recurring defects, weak tests, duplicated authority, dependency drift, configuration/API growth, and documentation difficulty. Metrics remain sensors. If history is unavailable, the audit must not fabricate trends. Findings route back through ordinary Design/Implementation, documentation, or repository-hygiene authority.
-
-## Repository layout and validation
-
-`source/` is canonical. `dist/skills/<skill-name>/` contains ready-to-install generated bundles; top-level ZIPs are backward-compatible generated transports. See `PORTABILITY.md` for installation and routing qualification.
-
-Before a protocol revision is complete:
+`source/` is canonical. `dist/skills/` and top-level ZIPs are generated transport artifacts.
 
 ```bash
 python -m pip install -r source/requirements-validation.txt
@@ -79,16 +87,12 @@ python source/build_skills.py --output /tmp/protocol-dist
 python source/validate_packages.py --dist /tmp/protocol-dist
 python source/check_dist.py --expected /tmp/protocol-dist --committed dist
 git diff --check
-```
 
-When the SDP Orchestrator under `orchestrator/` is affected, also run its acceptance suite:
-
-```bash
-python3 -m pip install ./orchestrator -r orchestrator/requirements-dev.txt
+python -m pip install ./orchestrator -r orchestrator/requirements-dev.txt
 python orchestrator/scripts/generate_protocol_snapshot.py --check
 python orchestrator/scripts/run_core_tests.py
 ```
 
-All orchestrator implementation, test, fixture, script, and documentation files live under `orchestrator/`; repository-level CI invokes those commands but hosts no orchestrator logic. See `orchestrator/docs/core-user-guide.md`.
+These Python commands are repository-local delegated D4 validation machinery; they are not language-specific protocol doctrine.
 
-These Python commands are repository-local Tier-2 validation machinery, not language-specific protocol doctrine.
+A Protocol 6 release is not complete while a governing Serious Challenge is unresolved or any required assembled acceptance check has not executed.

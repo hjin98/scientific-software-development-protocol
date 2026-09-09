@@ -1,13 +1,8 @@
-"""The ``sdp`` command line -- Core owns the composition root and this entry point.
+"""The ``sdp`` command line for version-selected Protocol prompt rendering.
 
-Two output rules are contractual:
-
-* A prompt command writes **only** the prompt to stdout, and writes it only after
-  the complete artifact exists. Any failure produces zero prompt bytes.
-* Diagnostics go to stderr, redacted, with a nonzero exit status.
-
-Every stage alias and ``sdp prompt <stage>`` share one prepare/render path; the
-aliases are convenience spellings, not duplicated semantics.
+Every convenience stage alias and ``sdp prompt <stage>`` share one prepare/render
+path.  Alias names are the union of supported profile stage keys; their semantics
+are always resolved through the selected profile at run time.
 """
 
 from __future__ import annotations
@@ -22,7 +17,7 @@ from . import errors as E
 from . import profile as P
 from . import protocol_source as PS
 from .application import create_application
-from .canonical import CANONICAL_STAGES
+from .canonical import all_stage_keys
 from .records import (
     ActivationPolicy,
     ApplicationRequest,
@@ -43,35 +38,20 @@ EXIT_PROBLEM = 2
 
 app = typer.Typer(
     name="sdp",
-    help="Software Development Protocol orchestrator: render stage-correct Protocol prompts.",
+    help="Scientific Software Development Protocol orchestrator: render profile-correct stage prompts.",
     add_completion=False,
     no_args_is_help=True,
 )
 
-# Typer needs its command surface at import time, before any configuration or
-# profile is loaded, so the alias *names* come from the frozen canonical stage
-# list. This is not a second semantic authority: `build_profile` requires the
-# profile's stage set to match this list exactly, and every command resolves its
-# stage through the compatible profile at run time.
-_STAGE_KEYS = tuple(key for _, key, _ in CANONICAL_STAGES)
-
-# --- shared option declarations -------------------------------------------
+_STAGE_KEYS = all_stage_keys()
 
 _project_opt = typer.Option(None, "--project", help="configured project key")
-_workplan_opt = typer.Option(
-    None, "--workplan", help="exact workplan_id or exact repository-relative path"
-)
-_mode_opt = typer.Option(
-    None, "--prompt-mode", help="where the prompt will be consumed: local or web"
-)
+_workplan_opt = typer.Option(None, "--workplan", help="exact workplan_id or exact repository-relative path")
+_mode_opt = typer.Option(None, "--prompt-mode", help="where the prompt will be consumed: local or web")
 _config_opt = typer.Option(None, "--config", help="explicit configuration file path")
-_remote_opt = typer.Option(
-    None, "--remote-mode", help="local_only, use_cached_remote (default), or refresh_remote"
-)
-_task_opt = typer.Option(None, "--task", help="Design-stage task description")
-_input_opt = typer.Option(
-    None, "--input", help="declared profile INPUT as NAME=VALUE (repeatable)"
-)
+_remote_opt = typer.Option(None, "--remote-mode", help="local_only, use_cached_remote (default), or refresh_remote")
+_task_opt = typer.Option(None, "--task", help="task description for an intake/D1/D2/D3 entry stage")
+_input_opt = typer.Option(None, "--input", help="declared profile INPUT as NAME=VALUE (repeatable)")
 _copy_opt = typer.Option(False, "--copy", help="additionally copy the prompt to the clipboard")
 
 
@@ -79,46 +59,26 @@ def _parse_inputs(values: Optional[list[str]]) -> tuple[tuple[str, str], ...]:
     pairs: list[tuple[str, str]] = []
     for item in values or []:
         if "=" not in item:
-            E.fail(
-                E.PROMPT_INPUT_INVALID,
-                "--input expects NAME=VALUE",
-                details={"argument": item[:120]},
-            )
+            E.fail(E.PROMPT_INPUT_INVALID, "--input expects NAME=VALUE", details={"argument": item[:120]})
         name, value = item.split("=", 1)
         pairs.append((name.strip(), value))
     return tuple(pairs)
 
 
 def _prompt_mode(explicit: str) -> PromptExecutionMode:
-    """explicit -> project default -> core default -> built-in web.
-
-    Core never silently falls back from web to local: an infeasible web target is
-    reported, not quietly downgraded.
-    """
-
     try:
         return PromptExecutionMode(explicit)
     except ValueError:
-        E.fail(
-            E.PROMPT_MODE_INVALID,
-            "--prompt-mode must be 'local' or 'web'",
-            details={"supplied": explicit},
-        )
+        E.fail(E.PROMPT_MODE_INVALID, "--prompt-mode must be 'local' or 'web'", details={"supplied": explicit})
 
 
 def _remote_mode(explicit: str | None) -> RemoteMode:
     if explicit is None:
-        # CLI default: read existing local remote-tracking evidence. No network,
-        # no mutation, and enough to tell whether a web target actually exists.
         return RemoteMode.USE_CACHED_REMOTE
     try:
         return RemoteMode(explicit)
     except ValueError:
-        E.fail(
-            E.CONFIG_INVALID,
-            "--remote-mode must be local_only, use_cached_remote, or refresh_remote",
-            details={"supplied": explicit},
-        )
+        E.fail(E.CONFIG_INVALID, "--remote-mode must be local_only, use_cached_remote, or refresh_remote", details={"supplied": explicit})
 
 
 def _emit_problem(problem: E.Problem) -> None:
@@ -129,33 +89,12 @@ def _copy_to_clipboard(text: str) -> None:
     try:
         import pyperclip  # noqa: PLC0415 - optional extra
     except ImportError:
-        typer.echo(
-            json.dumps(
-                E.Problem(
-                    E.CLIPBOARD_UNAVAILABLE,
-                    "clipboard support is not installed",
-                    remediation="install sdp-orchestrator-core[clipboard]",
-                ).to_dict(),
-                indent=2,
-                sort_keys=True,
-            ),
-            err=True,
-        )
+        typer.echo(json.dumps(E.Problem(E.CLIPBOARD_UNAVAILABLE, "clipboard support is not installed", remediation="install sdp-orchestrator-core[clipboard]").to_dict(), indent=2, sort_keys=True), err=True)
         return
     try:
         pyperclip.copy(text)
     except Exception as exc:  # noqa: BLE001 - clipboard is strictly additive
-        typer.echo(
-            json.dumps(
-                E.Problem(
-                    E.CLIPBOARD_UNAVAILABLE,
-                    f"clipboard copy failed: {type(exc).__name__}",
-                ).to_dict(),
-                indent=2,
-                sort_keys=True,
-            ),
-            err=True,
-        )
+        typer.echo(json.dumps(E.Problem(E.CLIPBOARD_UNAVAILABLE, f"clipboard copy failed: {type(exc).__name__}").to_dict(), indent=2, sort_keys=True), err=True)
 
 
 def _render_stage(
@@ -170,11 +109,7 @@ def _render_stage(
     inputs: Optional[list[str]],
     copy: bool,
 ) -> None:
-    """The single prepare/render path shared by every stage command."""
-
-    application = create_application(
-        ApplicationRequest(config_path=config, activation_policy=ActivationPolicy.NORMAL)
-    )
+    application = create_application(ApplicationRequest(config_path=config, activation_policy=ActivationPolicy.NORMAL))
     core = application.core()
     project_key = core.resolve_project_key(project)
     section = application.config().project(str(project_key))
@@ -198,11 +133,7 @@ def _render_stage(
             policy=ObservationPolicy(remote_mode=_remote_mode(remote_mode)),
         )
     )
-    rendered = core.render(
-        PromptRenderRequest(prepared=prepared, prompt_execution_mode=mode)
-    )
-
-    # The artifact is complete before a single byte reaches stdout.
+    rendered = core.render(PromptRenderRequest(prepared=prepared, prompt_execution_mode=mode))
     sys.stdout.write(rendered.prompt_text)
     sys.stdout.flush()
     if copy:
@@ -212,8 +143,8 @@ def _render_stage(
 
 
 def _register_stage_command(stage_key: str) -> None:
-    @app.command(stage_key, help=f"Render the {stage_key} stage prompt.")
-    def _command(  # noqa: D401 - Typer command
+    @app.command(stage_key, help=f"Render the {stage_key} stage prompt when the selected profile defines it.")
+    def _command(
         project: Optional[str] = _project_opt,
         workplan: Optional[str] = _workplan_opt,
         prompt_mode: Optional[str] = _mode_opt,
@@ -223,17 +154,7 @@ def _register_stage_command(stage_key: str) -> None:
         inputs: Optional[list[str]] = _input_opt,
         copy: bool = _copy_opt,
     ) -> None:
-        _render_stage(
-            stage_key,
-            project=project,
-            workplan=workplan,
-            prompt_mode=prompt_mode,
-            config=config,
-            remote_mode=remote_mode,
-            task=task,
-            inputs=inputs,
-            copy=copy,
-        )
+        _render_stage(stage_key, project=project, workplan=workplan, prompt_mode=prompt_mode, config=config, remote_mode=remote_mode, task=task, inputs=inputs, copy=copy)
 
     _command.__name__ = f"stage_{stage_key.replace('-', '_')}"
 
@@ -242,7 +163,7 @@ for _key in _STAGE_KEYS:
     _register_stage_command(_key)
 
 
-@app.command("prompt", help="Render any stage prompt by profile stage key or alias.")
+@app.command("prompt", help="Render any stage prompt by the selected profile's stage key or alias.")
 def prompt_command(
     stage: str = typer.Argument(..., help="stage key or profile alias"),
     project: Optional[str] = _project_opt,
@@ -254,17 +175,7 @@ def prompt_command(
     inputs: Optional[list[str]] = _input_opt,
     copy: bool = _copy_opt,
 ) -> None:
-    _render_stage(
-        stage,
-        project=project,
-        workplan=workplan,
-        prompt_mode=prompt_mode,
-        config=config,
-        remote_mode=remote_mode,
-        task=task,
-        inputs=inputs,
-        copy=copy,
-    )
+    _render_stage(stage, project=project, workplan=workplan, prompt_mode=prompt_mode, config=config, remote_mode=remote_mode, task=task, inputs=inputs, copy=copy)
 
 
 @app.command("projects", help="List configured projects and their observable workplans.")
@@ -290,38 +201,16 @@ def projects_command(
 @app.command("capabilities", help="Report capability status (metadata-only discovery by default).")
 def capabilities_command(
     config: Optional[str] = _config_opt,
-    load_extensions: bool = typer.Option(
-        False,
-        "--load-extensions",
-        help="import and activate installed providers instead of reading metadata only",
-    ),
+    load_extensions: bool = typer.Option(False, "--load-extensions", help="import and activate installed providers instead of reading metadata only"),
 ) -> None:
     policy = ActivationPolicy.NORMAL if load_extensions else ActivationPolicy.DISCOVERY_ONLY
-    application = create_application(
-        ApplicationRequest(config_path=config, activation_policy=policy)
-    )
-    typer.echo(
-        json.dumps(
-            {
-                "activation_policy": policy.value,
-                "capabilities": [
-                    status.model_dump(mode="json") for status in application.capabilities()
-                ],
-                "extensions": [
-                    status.model_dump(mode="json") for status in application.extensions()
-                ],
-            },
-            indent=2,
-            sort_keys=True,
-        )
-    )
+    application = create_application(ApplicationRequest(config_path=config, activation_policy=policy))
+    typer.echo(json.dumps({"activation_policy": policy.value, "capabilities": [status.model_dump(mode="json") for status in application.capabilities()], "extensions": [status.model_dump(mode="json") for status in application.extensions()]}, indent=2, sort_keys=True))
 
 
 @app.command("doctor", help="Report Core readiness without hidden loading, network, or mutation.")
 def doctor_command(config: Optional[str] = _config_opt) -> None:
-    application = create_application(
-        ApplicationRequest(config_path=config, activation_policy=ActivationPolicy.DISCOVERY_ONLY)
-    )
+    application = create_application(ApplicationRequest(config_path=config, activation_policy=ActivationPolicy.DISCOVERY_ONLY))
     core_config = application.config()
     report: dict[str, object] = {
         "activation_policy": ActivationPolicy.DISCOVERY_ONLY.value,
@@ -330,38 +219,43 @@ def doctor_command(config: Optional[str] = _config_opt) -> None:
         "projects": sorted(core_config.projects),
         "protocol_sources": sorted(core_config.protocol_sources),
         "inactive_extension_config_namespaces": sorted(core_config.extension_namespaces),
-        "core_capabilities": [
-            status.model_dump(mode="json") for status in application.capabilities()
-        ],
-        "discovered_extensions": [
-            status.model_dump(mode="json") for status in application.extensions()
-        ],
+        "core_capabilities": [status.model_dump(mode="json") for status in application.capabilities()],
+        "discovered_extensions": [status.model_dump(mode="json") for status in application.extensions()],
+        "default_profile_id": P.DEFAULT_PROFILE_ID,
         "notes": [
             "extension providers were not imported; their capabilities and health are unobserved",
             "no repository was mutated and no network request was made by this command",
         ],
     }
-    try:
-        descriptor = PS.resolve_packaged(P.PROFILE_ID).snapshot.descriptor
-        report["packaged_profile"] = {
-            "profile_id": descriptor.profile.profile_id,
-            "protocol_version": descriptor.profile.protocol_version,
-            "stages": [stage.stage.stage_key for stage in descriptor.stages],
-            "result_schema": f"{descriptor.result_schema_id} v{descriptor.result_schema_version}",
-        }
-    except E.OrchestratorError as exc:
-        report["packaged_profile_problem"] = exc.problem.to_dict()
+
+    packaged: list[dict[str, object]] = []
+    for profile_id in P.available_profile_ids():
+        try:
+            descriptor = PS.resolve_packaged(profile_id).snapshot.descriptor
+            packaged.append({
+                "profile_id": descriptor.profile.profile_id,
+                "profile_schema_version": descriptor.profile.profile_schema_version,
+                "protocol_version": descriptor.profile.protocol_version,
+                "stages": [stage.stage.stage_key for stage in descriptor.stages],
+                "result_schema": f"{descriptor.result_schema_id} v{descriptor.result_schema_version}",
+            })
+        except E.OrchestratorError as exc:
+            packaged.append({"profile_id": profile_id, "problem": exc.problem.to_dict()})
+    report["packaged_profiles"] = packaged
+
+    # Backward-compatible doctor field retained for consumers that used the v1
+    # single-profile report.  It continues to mean the frozen 5.16 package.
+    legacy = next((item for item in packaged if item.get("profile_id") == P.PROFILE_ID and "problem" not in item), None)
+    if legacy is not None:
+        report["packaged_profile"] = legacy
+    else:
+        legacy_problem = next((item.get("problem") for item in packaged if item.get("profile_id") == P.PROFILE_ID), None)
+        report["packaged_profile_problem"] = legacy_problem
+
     typer.echo(json.dumps(report, indent=2, sort_keys=True))
 
 
 def main() -> int:
-    """Console entry point.
-
-    Usage errors are rendered by Typer itself. Structured Core problems are
-    emitted as redacted JSON on stderr with exit status 2; an unexpected failure
-    exits 1 without printing a traceback as the product surface.
-    """
-
     try:
         app()
     except E.OrchestratorError as exc:
@@ -369,10 +263,8 @@ def main() -> int:
         return EXIT_PROBLEM
     except SystemExit as exc:
         return int(exc.code or 0)
-    except Exception as exc:  # noqa: BLE001 - never leak a traceback as the product surface
-        typer.echo(
-            f"internal error: {type(exc).__name__}: {redact_text(str(exc))}", err=True
-        )
+    except Exception as exc:  # noqa: BLE001 - never leak a traceback as product surface
+        typer.echo(f"internal error: {type(exc).__name__}: {redact_text(str(exc))}", err=True)
         return EXIT_INTERNAL
     return EXIT_OK
 
