@@ -1,0 +1,239 @@
+name: SSDP 6 authority-routing repair
+
+on:
+  push:
+    branches:
+      - impl/ssdp-6
+
+permissions:
+  contents: write
+
+jobs:
+  repair:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Apply proportional routing and authority-state repair
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          def replace_once(text: str, old: str, new: str, label: str) -> str:
+              if text.count(old) != 1:
+                  raise SystemExit(f"{label}: expected exactly one match, found {text.count(old)}")
+              return text.replace(old, new)
+
+          prompts = Path("source/shared/references/development-workflow-prompts.md")
+          text = prompts.read_text(encoding="utf-8")
+
+          execution = "A stage may mutate only its owned authority/realization surface. If evidence points to another domain, route explicitly rather than silently crossing the boundary. Review, Verification, Stabilization, and Health Audit remain non-product-mutation activities except for lifecycle/planning records that their stage explicitly owns.\n"
+          execution_new = execution + "\nWhen an unresolved Serious Challenge is proceeding under explicit human risk override, keep the dependent semantic surface visibly `risk-accepted/provisional`. In the terminal machine-readable footer, use the permitted additional field `authority_state = risk_accepted_provisional` (JSON key `authority_state`) for any result that depends on that unresolved claim. Do not reset the state to ordinary accepted-current merely because a descendant stage locally completes, and do not emit an unqualified downstream Pass/complete result for the affected claim.\n"
+          text = replace_once(text, execution, execution_new, "execution risk propagation")
+
+          text = replace_once(
+              text,
+              "WORKPLAN_DESTINATION = [generic abstraction-realization change-plan path for an authorized direct downstream handoff; AUTO = repository convention]\n",
+              "WORKPLAN_DESTINATION = [generic abstraction-realization change-plan path for a material D1 mutation/review or authorized direct downstream handoff; AUTO = repository convention]\n",
+              "D1 workplan destination",
+          )
+          d1_old = "Before a direct D1->D3 or D1->D4 handoff that intentionally skips unchanged intermediate domains, actually create or update a snapshot-complete generic abstraction-realization change plan at WORKPLAN_DESTINATION. Do not create that extra plan when a dependent D2/D3 stage will own the next handoff or when no downstream realization is affected.\n"
+          d1_new = "For a material D1 authority mutation that will use the independent Review stage, actually create or update a snapshot-complete generic abstraction-realization change plan at WORKPLAN_DESTINATION so Review has a governing artifact. The same plan may govern a direct D1->D3 or D1->D4 handoff that intentionally skips unchanged intermediate domains. Do not create an extra plan when the scope is genuinely trivial/non-material, when a dependent D2/D3 stage will own the next handoff, or when no separate Review/downstream realization needs one.\n"
+          text = replace_once(text, d1_old, d1_new, "D1 review handoff")
+
+          text = replace_once(
+              text,
+              "WORKPLAN_DESTINATION = [generic abstraction-realization change-plan path for an authorized direct D4 handoff; AUTO = repository convention]\n",
+              "WORKPLAN_DESTINATION = [generic abstraction-realization change-plan path for a material D2 mutation/review or authorized direct D4 handoff; AUTO = repository convention]\n",
+              "D2 workplan destination",
+          )
+          d2_old = "Draft proposed authority separately. Human adjudication is required when a D2 change can alter scientific conclusions or a governing algorithm/error guarantee. Before D2->D3 handoff test fidelity to D1 and D3-abstraction adequacy needs. Before an authorized direct D2->D4 handoff with unchanged D3 authority, actually create or update a snapshot-complete generic abstraction-realization change plan at WORKPLAN_DESTINATION so D4 receives a governing implementation contract without manufacturing a D3 change. If accepted D2 authority itself may be materially wrong/contradictory/ambiguous/unrealizable, raise SERIOUS CHALLENGE rather than requesting a software workaround.\n"
+          d2_new = "Draft proposed authority separately. Human adjudication is required when a D2 change can alter scientific conclusions or a governing algorithm/error guarantee. For a material D2 authority mutation that will use the independent Review stage, actually create or update a snapshot-complete generic abstraction-realization change plan at WORKPLAN_DESTINATION so Review has a governing artifact. Before D2->D3 handoff test fidelity to D1 and D3-abstraction adequacy needs. The same generic plan may govern an authorized direct D2->D4 handoff with unchanged D3 authority so D4 receives a governing implementation contract without manufacturing a D3 change. If accepted D2 authority itself may be materially wrong/contradictory/ambiguous/unrealizable, raise SERIOUS CHALLENGE rather than requesting a software workaround.\n"
+          text = replace_once(text, d2_old, d2_new, "D2 review handoff")
+
+          text = replace_once(
+              text,
+              "WORKPLAN_DESTINATION = [D3->D4 implementation workplan path; AUTO = repository convention]\n",
+              "WORKPLAN_DESTINATION = [D3 change-plan/workplan path; use the D3->D4 implementation-workplan specialization when D4 is affected; AUTO = repository convention]\n",
+              "D3 workplan destination",
+          )
+          d3_old = "Actually create or update the governing D3->D4 workplan at WORKPLAN_DESTINATION when D4 realization is materially affected. If accepted D3 authority changes but existing D4 already realizes it and no implementation work is affected, do not manufacture an empty D4 workplan solely to satisfy routing mechanics; the D3-only scope may proceed to Review or Closeout. Do not modify product implementation in this stage. Freeze only architecture-level choices needed to bound implementation; leave D4 helpers/APIs/data structures/libraries/local algorithms replaceable. Define real-owner acceptance boundaries, focused/stage-local/final affected regression, integration, repository checks, and genuine simplification/reopen triggers.\n"
+          d3_new = "Create or update the governing D3->D4 implementation workplan at WORKPLAN_DESTINATION when D4 realization is materially affected. For a material D3-only authority mutation that will use the independent Review stage, create or update the generic abstraction-realization change plan there instead so Review has a governing artifact. If accepted D3 authority changes but existing D4 already realizes it and no implementation work or separate Review is affected, do not manufacture an empty D4 workplan solely to satisfy routing mechanics; the D3-only scope may proceed directly to Closeout. Do not modify product implementation in this stage. Freeze only architecture-level choices needed to bound implementation; leave D4 helpers/APIs/data structures/libraries/local algorithms replaceable. Define real-owner acceptance boundaries, focused/stage-local/final affected regression, integration, repository checks, and genuine simplification/reopen triggers.\n"
+          text = replace_once(text, d3_old, d3_new, "D3 review handoff")
+
+          text = replace_once(
+              text,
+              "WORKPLAN = [governing implementation/change plan; normally D3->D4, or an accepted upstream abstraction-realization plan for an authorized reduced route]\n",
+              "CHANGE_PLAN = [accepted governing change/work plan when one is materially warranted; NONE only for genuinely local D4-only work under sufficient current authority]\n",
+              "D4 plan input",
+          )
+          text = replace_once(
+              text,
+              "PROTOCOL_REF = [AUTO = WORKPLAN protocol_version; otherwise explicit immutable compatible ref]\n",
+              "PROTOCOL_REF = [AUTO = CHANGE_PLAN protocol_version when supplied, otherwise current compatible Protocol 6 profile; otherwise explicit immutable compatible ref]\n",
+              "D4 protocol ref",
+          )
+          d4_old = "Resolve REQUIRED_SKILL = software-implementation under WORKPLAN's declared protocol semantics. Under AUTO_EXECUTE, actually modify REPOSITORY_TARGET and its owned tests/documentation as required; do not stop at a plan or code snippets when authorized write/execution tools exist.\n\nFor an authorized reduced D2->D4 or D1->D4 route, accept the governing upstream abstraction-realization change plan together with the unchanged current D3 architecture. Do not manufacture a D3 authority mutation or empty D3->D4 plan solely to satisfy orchestrator mechanics. WORKPLAN remains required so implementation still receives a snapshot-complete governing contract.\n"
+          d4_new = "Resolve REQUIRED_SKILL = software-implementation under CHANGE_PLAN's declared protocol semantics when a plan is supplied; otherwise use the current compatible Protocol 6 profile and the accepted current D1-D4/external authority discoverable from the target. Under AUTO_EXECUTE, actually modify REPOSITORY_TARGET and its owned tests/documentation as required; do not stop at a plan or code snippets when authorized write/execution tools exist.\n\nFor genuinely local D4-only work under sufficient current authority, CHANGE_PLAN may be NONE. Perform the proportionate upstream-impact exclusion and do not manufacture a workplan merely to satisfy routing mechanics. For an authorized reduced D2->D4 or D1->D4 route, use the governing upstream abstraction-realization change plan together with the unchanged current D3 architecture; do not manufacture a D3 authority mutation or empty D3->D4 plan.\n"
+          text = replace_once(text, d4_old, d4_new, "D4 optional plan semantics")
+          prompts.write_text(text, encoding="utf-8")
+
+          foundation = Path("source/shared/references/abstraction-and-realization.md")
+          text = foundation.read_text(encoding="utf-8")
+          state_old = "- **challenged** — accepted current authority whose correctness is under a material unresolved challenge; still the explicit baseline, but dependent closure is blocked unless a visible human risk override applies;\n- **stale dependent** — downstream authority/evidence invalidated by an accepted upstream change;\n"
+          state_new = "- **challenged** — accepted current authority whose correctness is under a material unresolved challenge; still the explicit baseline, but dependent closure is blocked unless a visible human risk override applies;\n- **risk-accepted/provisional** — a descendant artifact/evidence result whose validity depends on an unresolved challenged claim under explicit human risk override; it may support bounded continuation but cannot close the challenged claim or propagate an unqualified Pass;\n- **stale dependent** — downstream authority/evidence invalidated by an accepted upstream change;\n"
+          text = replace_once(text, state_old, state_new, "foundation provisional state")
+          human_old = "A human may accept, reject with reason, revise/clarify authority, request discriminating evidence, or—where safety/project rules allow—issue an explicit visible risk override. A risk override authorizes bounded continuation but does not resolve the truth claim and may not be used to release Protocol 6 itself while a governing Serious Challenge remains unresolved.\n"
+          human_new = human_old + "\nEvery materially dependent descendant produced under that override remains risk-accepted/provisional with respect to the challenged claim. Unaffected siblings may close normally; dependent results must preserve the marker and may not be represented as ordinary accepted-current closure or an unqualified downstream Pass.\n"
+          text = replace_once(text, human_old, human_new, "foundation risk propagation")
+          foundation.write_text(text, encoding="utf-8")
+
+          workflow = Path("source/shared/references/workflow-and-workplans.md")
+          text = workflow.read_text(encoding="utf-8")
+          human_old = "The orchestrator may represent pending/accepted/rejected human state but may not self-approve a human-owned decision. A human risk override is visible authorization to continue with unresolved risk; it is not epistemic resolution and cannot be used to release Protocol 6 itself under an unresolved governing Serious Challenge.\n"
+          human_new = human_old + "\nAny dependent descendant created while that override remains active is risk-accepted/provisional for the challenged claim. Preserve that state through downstream handoffs/results; unaffected siblings may close normally, but dependent work may not silently reset to accepted-current or emit an unqualified Pass/complete result.\n"
+          text = replace_once(text, human_old, human_new, "workflow risk propagation")
+          workflow.write_text(text, encoding="utf-8")
+
+          profile = Path("orchestrator/src/sdp_orchestrator/core/profile.py")
+          text = profile.read_text(encoding="utf-8")
+          input_anchor = '    "WORKPLAN": (_MECHANICAL, None, False, False, "workplan_selector"),\n'
+          input_new = input_anchor + '    "CHANGE_PLAN": (_DEFAULT, "NONE", False, False, "workplan_selector_optional_path"),\n'
+          if "workplan_selector_optional_path" not in text:
+              text = replace_once(text, input_anchor, input_new, "CHANGE_PLAN classification")
+          d4_stage_old = '    "software-implementation": ("D4 Software Implementation", "software-implementation", "d4_product", "conditional", ("complete", "blocked", "serious_challenge"), WorkplanPolicy.REQUIRED, ("d4", "implementation")),\n'
+          d4_stage_new = '    "software-implementation": ("D4 Software Implementation", "software-implementation", "d4_product", "conditional", ("complete", "blocked", "serious_challenge"), WorkplanPolicy.EXPLICIT_ONLY, ("d4", "implementation")),\n'
+          text = replace_once(text, d4_stage_old, d4_stage_new, "D4 workplan policy")
+
+          d1_risk = '    ("scientific-formulation", "risk_override", "numerical-algorithm-design", "bounded downstream work may proceed under visible unresolved risk where policy permits"),\n'
+          d1_risk_new = d1_risk + '    ("scientific-formulation", "risk_override", "software-design", "bounded D3 work may proceed under visible unresolved D1 risk when D2 authority is unaffected"),\n    ("scientific-formulation", "risk_override", "software-implementation", "bounded D4 work may proceed under visible unresolved D1 risk when D2 and D3 authority are unaffected"),\n'
+          text = replace_once(text, d1_risk, d1_risk_new, "D1 reduced risk routes")
+          d2_risk = '    ("numerical-algorithm-design", "risk_override", "software-design", "bounded downstream work may proceed under visible unresolved risk where policy permits"),\n'
+          d2_risk_new = d2_risk + '    ("numerical-algorithm-design", "risk_override", "software-implementation", "bounded D4 work may proceed under visible unresolved D2 risk when D3 authority is unaffected"),\n'
+          text = replace_once(text, d2_risk, d2_risk_new, "D2 reduced risk routes")
+
+          review_pass_anchor = '    ("review", "pass", "verification", "deeper verification is optional for materially high-risk claims"),\n'
+          review_pass_new = '    ("review", "pass", "numerical-algorithm-design", "a passed D1-boundary review may continue into dependent D2 realization"),\n    ("review", "pass", "software-design", "a passed D1/D2-boundary review may continue into dependent D3 realization"),\n    ("review", "pass", "software-implementation", "a passed D1/D2/D3-boundary review may continue into dependent D4 realization"),\n' + review_pass_anchor
+          text = replace_once(text, review_pass_anchor, review_pass_new, "review pass continuation")
+
+          review_risk_anchor = '    ("review", "risk_override", "verification", "bounded verification may proceed under visible accepted risk where policy permits"),\n'
+          review_risk_new = '    ("review", "risk_override", "numerical-algorithm-design", "bounded D2 realization may proceed under visible accepted risk where policy permits"),\n    ("review", "risk_override", "software-design", "bounded D3 realization may proceed under visible accepted risk where policy permits"),\n    ("review", "risk_override", "software-implementation", "bounded D4 realization may proceed under visible accepted risk where policy permits"),\n' + review_risk_anchor
+          text = replace_once(text, review_risk_anchor, review_risk_new, "review risk continuation")
+          profile.write_text(text, encoding="utf-8")
+
+          inputs = Path("orchestrator/src/sdp_orchestrator/core/inputs.py")
+          text = inputs.read_text(encoding="utf-8")
+          optional_anchor = '''    if binding.first_class_source == "first_task":\n'''
+          optional_block = '''    if binding.first_class_source == "workplan_selector_optional_path":\n        if workplan is not None:\n            return ResolvedInput(\n                name=name,\n                ownership=binding.ownership,\n                value=encode_scalar(workplan.path),\n                provenance=P_WORKPLAN,\n            )\n        if binding.default_value is None:  # pragma: no cover - profile guarantees a default\n            E.fail(\n                E.PROMPT_INPUT_REQUIRED,\n                f"input {name} has no canonical default and no supplied workplan",\n                details={"input": name},\n            )\n        return ResolvedInput(\n            name=name,\n            ownership=binding.ownership,\n            value=encode_scalar(binding.default_value),\n            provenance=P_CANONICAL_DEFAULT,\n        )\n\n'''
+          if "workplan_selector_optional_path" not in text:
+              text = replace_once(text, optional_anchor, optional_block + optional_anchor, "optional CHANGE_PLAN resolver")
+          inputs.write_text(text, encoding="utf-8")
+
+          guide = Path("orchestrator/docs/core-user-guide.md")
+          text = guide.read_text(encoding="utf-8")
+          text = replace_once(text, "| `software-implementation` | required/resolved | — |\n", "| `software-implementation` | optional explicit only | — |\n", "guide D4 policy")
+          guide_note = "A new D3 design task with no `--workplan` does **not** adopt an unrelated sole\nactive workplan. A workplan passed to a stage that disallows one fails rather\nthan being ignored.\n"
+          guide_note_new = "A genuinely local Protocol 6 D4-only implementation may omit `--workplan`; Core renders `CHANGE_PLAN = NONE` and the receiving agent must still perform the protocol's proportionate upstream-impact exclusion. When a change plan/workplan materially governs D4, pass it explicitly with `--workplan`; its declared `protocol_version` still binds the compatible profile. Review remains plan-governed.\n\n" + guide_note
+          text = replace_once(text, guide_note, guide_note_new, "guide local D4 note")
+          guide.write_text(text, encoding="utf-8")
+
+          tests = Path("orchestrator/tests/test_ssdp6_profiles.py")
+          text = tests.read_text(encoding="utf-8")
+          text = replace_once(
+              text,
+              "from sdp_orchestrator.core.canonical import CANONICAL_STAGES, SSDP6_STAGES, parse_document\n",
+              "from sdp_orchestrator.core.canonical import CANONICAL_STAGES, SSDP6_STAGES, parse_document\nfrom sdp_orchestrator.core.inputs import resolve_inputs\n",
+              "test import resolver",
+          )
+          old_test = '''    def test_implementation_and_review_require_governing_workplan(self) -> None:\n        policies = {stage.stage.stage_key: stage.workplan_policy for stage in self.descriptor.stages}\n        self.assertIs(policies["software-implementation"], WorkplanPolicy.REQUIRED)\n        self.assertIs(policies["review"], WorkplanPolicy.REQUIRED)\n\n'''
+          new_test = '''    def test_local_d4_is_plan_optional_but_review_remains_plan_governed(self) -> None:\n        by_key = {stage.stage.stage_key: stage for stage in self.descriptor.stages}\n        self.assertIs(by_key["software-implementation"].workplan_policy, WorkplanPolicy.EXPLICIT_ONLY)\n        self.assertIs(by_key["review"].workplan_policy, WorkplanPolicy.REQUIRED)\n        d4_inputs = {item.name for item in by_key["software-implementation"].inputs}\n        self.assertIn("CHANGE_PLAN", d4_inputs)\n        self.assertNotIn("WORKPLAN", d4_inputs)\n        values = {\n            item.name: item.value\n            for item in resolve_inputs(\n                by_key["software-implementation"],\n                workplan=None,\n                first_task=None,\n                overrides={},\n                governing_protocol_version="6.0.0",\n            )\n        }\n        self.assertEqual(values["CHANGE_PLAN"], "NONE")\n\n'''
+          text = replace_once(text, old_test, new_test, "replace D4 policy test")
+
+          old_direct = '''    def test_direct_upstream_handoffs_produce_a_governing_plan(self) -> None:\n        by_key = {stage.stage.stage_key: stage for stage in self.descriptor.stages}\n        self.assertIn("WORKPLAN_DESTINATION", {item.name for item in by_key["scientific-formulation"].inputs})\n        self.assertIn("WORKPLAN_DESTINATION", {item.name for item in by_key["numerical-algorithm-design"].inputs})\n        d4_body = self.document.stages["software-implementation"].body.lower()\n        self.assertIn("authorized reduced d2->d4 or d1->d4 route", d4_body)\n        self.assertIn("do not manufacture a d3 authority mutation", d4_body)\n        self.assertIs(by_key["software-implementation"].workplan_policy, WorkplanPolicy.REQUIRED)\n\n'''
+          new_direct = '''    def test_material_authority_review_and_direct_handoffs_have_governing_plans(self) -> None:\n        by_key = {stage.stage.stage_key: stage for stage in self.descriptor.stages}\n        for key in ("scientific-formulation", "numerical-algorithm-design", "software-design"):\n            self.assertIn("WORKPLAN_DESTINATION", {item.name for item in by_key[key].inputs}, key)\n            self.assertIn("review", self.document.stages[key].body.lower(), key)\n        d4_body = self.document.stages["software-implementation"].body.lower()\n        self.assertIn("authorized reduced d2->d4 or d1->d4 route", d4_body)\n        self.assertIn("do not manufacture a d3 authority mutation", d4_body)\n        self.assertIn("change_plan may be none", d4_body)\n\n    def test_review_pass_can_continue_to_the_dependent_realization_domain(self) -> None:\n        destinations = {\n            t.to_stage.stage_key\n            for t in self.descriptor.transitions\n            if t.from_stage.stage_key == "review"\n            and t.trigger_key == "pass"\n            and t.to_stage is not None\n        }\n        self.assertTrue({"numerical-algorithm-design", "software-design", "software-implementation"}.issubset(destinations))\n\n    def test_risk_override_preserves_reduced_routes_and_provisional_state(self) -> None:\n        def destinations(stage_key: str) -> set[str]:\n            return {\n                t.to_stage.stage_key\n                for t in self.descriptor.transitions\n                if t.from_stage.stage_key == stage_key\n                and t.trigger_key == "risk_override"\n                and t.to_stage is not None\n            }\n        self.assertTrue({"numerical-algorithm-design", "software-design", "software-implementation"}.issubset(destinations("scientific-formulation")))\n        self.assertTrue({"software-design", "software-implementation"}.issubset(destinations("numerical-algorithm-design")))\n        self.assertTrue({"numerical-algorithm-design", "software-design", "software-implementation"}.issubset(destinations("review")))\n        self.assertIn("authority_state", self.document.text)\n        self.assertIn("risk_accepted_provisional", self.document.text)\n\n'''
+          text = replace_once(text, old_direct, new_direct, "replace handoff test")
+          tests.write_text(text, encoding="utf-8")
+
+          root_tests = Path("tests/test_protocol_contracts.py")
+          text = root_tests.read_text(encoding="utf-8")
+          state_old = '        for phrase in ("proposed", "accepted current", "challenged", "stale dependent", "superseded/historical", "release-pinned/publication"):\n'
+          state_new = '        for phrase in ("proposed", "accepted current", "challenged", "risk-accepted/provisional", "stale dependent", "superseded/historical", "release-pinned/publication"):\n'
+          text = replace_once(text, state_old, state_new, "root authority-state test")
+          anchor = '''    def test_historical_516_is_immutable_and_not_silently_upgraded(self) -> None:\n'''
+          added = '''    def test_protocol6_workflow_is_proportional_and_preserves_overridden_risk(self) -> None:\n        prompts = read("source/shared/references/development-workflow-prompts.md").lower()\n        self.assertIn("change_plan may be none", prompts)\n        self.assertIn("risk-accepted/provisional", prompts)\n        self.assertIn("authority_state", prompts)\n        self.assertIn("dependent descendant", self.workflow)\n        self.assertIn("unqualified pass/complete", self.workflow)\n\n'''
+          text = replace_once(text, anchor, added + anchor, "root proportionality test")
+          root_tests.write_text(text, encoding="utf-8")
+          PY
+      - name: Install validation and Orchestrator dependencies
+        run: >-
+          python -m pip install
+          -r source/requirements-validation.txt
+          ./orchestrator
+          -r orchestrator/requirements-dev.txt
+      - name: Run protocol regression tests
+        run: python -m unittest discover -s tests -v
+      - name: Generate current Protocol 6 packaged snapshot
+        run: python orchestrator/scripts/generate_protocol_snapshot.py
+      - name: Build canonical skill packages
+        run: python source/build_skills.py --output /tmp/protocol-dist
+      - name: Validate generated skill packages independently
+        run: python source/validate_packages.py --dist /tmp/protocol-dist
+      - name: Replace committed distribution from canonical build
+        run: |
+          rm -rf dist
+          cp -a /tmp/protocol-dist dist
+      - name: Verify generated distribution parity
+        run: python source/check_dist.py --expected /tmp/protocol-dist --committed dist
+      - name: Verify generated Protocol snapshot parity
+        run: python orchestrator/scripts/generate_protocol_snapshot.py --check
+      - name: Run Orchestrator Core acceptance suite
+        run: python orchestrator/scripts/run_core_tests.py
+      - name: Verify repaired profile semantics directly
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          profile = json.loads(Path("orchestrator/src/sdp_orchestrator/core/resources/protocol/ssdp-protocol-6.0/profile.json").read_text())
+          stages = {item["stage"]["stage_key"]: item for item in profile["stages"]}
+          assert stages["software-implementation"]["workplan_policy"] == "explicit_only"
+          d4_inputs = {item["name"] for item in stages["software-implementation"]["inputs"]}
+          assert "CHANGE_PLAN" in d4_inputs and "WORKPLAN" not in d4_inputs
+          def dest(stage, trigger):
+              return {
+                  item["to_stage"]["stage_key"]
+                  for item in profile["transitions"]
+                  if item["from_stage"]["stage_key"] == stage
+                  and item["trigger_key"] == trigger
+                  and item["to_stage"] is not None
+              }
+          assert {"numerical-algorithm-design", "software-design", "software-implementation"}.issubset(dest("review", "pass"))
+          assert {"software-design", "software-implementation"}.issubset(dest("numerical-algorithm-design", "risk_override"))
+          assert {"numerical-algorithm-design", "software-design", "software-implementation"}.issubset(dest("scientific-formulation", "risk_override"))
+          legacy = json.loads(Path("orchestrator/src/sdp_orchestrator/core/resources/protocol/sdp-protocol-5.16/profile.json").read_text())
+          legacy_stages = {item["stage"]["stage_key"]: item for item in legacy["stages"]}
+          assert legacy_stages["implementation"]["workplan_policy"] == "required"
+          assert "WORKPLAN" in {item["name"] for item in legacy_stages["implementation"]["inputs"]}
+          PY
+      - name: Check patch whitespace
+        run: git diff --check
+      - name: Remove temporary repair workflow and commit accepted repair
+        run: |
+          git rm .github/workflows/ssdp6-authority-routing-repair.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add source/shared/references/abstraction-and-realization.md \
+                  source/shared/references/workflow-and-workplans.md \
+                  source/shared/references/development-workflow-prompts.md \
+                  tests/test_protocol_contracts.py \
+                  orchestrator/src/sdp_orchestrator/core/profile.py \
+                  orchestrator/src/sdp_orchestrator/core/inputs.py \
+                  orchestrator/docs/core-user-guide.md \
+                  orchestrator/tests/test_ssdp6_profiles.py \
+                  orchestrator/src/sdp_orchestrator/core/resources/protocol/ssdp-protocol-6.0 \
+                  dist
+          git diff --cached --check
+          git commit -m "Close Protocol 6 proportional routing gaps"
+          git push
