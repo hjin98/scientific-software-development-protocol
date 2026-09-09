@@ -60,7 +60,23 @@ jobs:
       - name: Verify Protocol snapshot parity
         run: python orchestrator/scripts/generate_protocol_snapshot.py --check
       - name: Run orchestrator Core acceptance suite
-        run: python orchestrator/scripts/run_core_tests.py
+        shell: bash
+        run: |
+          set +e
+          python orchestrator/scripts/run_core_tests.py > tools/ssdp61-core-failure.log 2>&1
+          status=$?
+          cat tools/ssdp61-core-failure.log
+          if [ "$status" -eq 0 ]; then rm tools/ssdp61-core-failure.log; fi
+          exit "$status"
+      - name: Publish Core diagnostic
+        if: failure()
+        run: |
+          if [ ! -f tools/ssdp61-core-failure.log ]; then exit 0; fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add tools/ssdp61-core-failure.log
+          git commit -m "[skip ci] Record temporary Protocol 6.1 Core diagnostic"
+          git push origin HEAD:ssdp-6.1-implementation
       - name: Check whitespace
         run: git diff --check
       - name: Commit deterministic Protocol 6.1 migration
