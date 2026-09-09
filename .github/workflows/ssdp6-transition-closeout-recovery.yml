@@ -148,13 +148,9 @@ jobs:
           test "$(git hash-object orchestrator/src/sdp_orchestrator/core/resources/protocol/sdp-protocol-5.16/profile.json)" = "b3d4257fcd18af7bdb1799b2db742659bb2403fc"
       - name: Check patch whitespace
         run: git diff --check
-      - name: Commit reconciled transition closeout and remove diagnostics
+      - name: Commit reconciled transition closeout
         run: |
-          git rm .github/workflows/ssdp6-transition-closeout.yml \
-                 .github/workflows/ssdp6-transition-closeout-diagnostics.yml \
-                 .github/workflows/ssdp6-transition-closeout-corrected.yml \
-                 .github/workflows/ssdp6-transition-closeout-recovery.yml \
-                 .ci-ssdp6-closeout-failure.log
+          git rm .github/workflows/ssdp6-transition-closeout-recovery.yml
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add workplans/archive tests/test_protocol_516_lifecycle_closeout.py

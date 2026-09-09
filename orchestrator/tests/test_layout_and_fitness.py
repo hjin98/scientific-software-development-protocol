@@ -112,13 +112,16 @@ class ContainmentTests(unittest.TestCase):
 
     def test_protocol_workplans_remain_under_the_repository_convention(self) -> None:
         active = REPO_ROOT / "workplans/active"
-        self.assertTrue((active / "SSDP-6-AUTHORITY.md").is_file())
-        self.assertTrue(
-            (
-                active
-                / "SSDP-6-RECURSIVE-ABSTRACTION-REALIZATION-SCIENTIFIC-SOFTWARE-PROTOCOL.md"
-            ).is_file()
+        archive = REPO_ROOT / "workplans/archive"
+        names = (
+            "SSDP-6-AUTHORITY.md",
+            "SSDP-6-RECURSIVE-ABSTRACTION-REALIZATION-SCIENTIFIC-SOFTWARE-PROTOCOL.md",
+            "SSDP-6-RECURSIVE-ABSTRACTION-REALIZATION-SCIENTIFIC-SOFTWARE-PROTOCOL-AUTHORITY-REVISION-1-SERIOUS-CHALLENGE-AND-ADVERSARIAL-REVIEW.md",
+            "SSDP-6-RECURSIVE-ABSTRACTION-REALIZATION-SCIENTIFIC-SOFTWARE-PROTOCOL-AUTHORITY-REVISION-2-PROTOCOL-5-INHERITANCE-AND-CONSOLIDATION.md",
         )
+        for name in names:
+            self.assertFalse((active / name).exists(), name)
+            self.assertTrue((archive / name).is_file(), name)
         self.assertFalse((REPO_ROOT / "orchestrator/workplans").exists())
 
 
