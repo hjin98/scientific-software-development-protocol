@@ -29,33 +29,39 @@ def read(path: str) -> str:
 
 
 class Protocol511ToolAssistanceTests(unittest.TestCase):
-    def test_lifecycle_entrypoints_dispatch_directly_by_question_class(self) -> None:
-        expected = tuple(f"references/{name}" for name in DIRECT_TOOL_FILES)
+    def test_lifecycle_entrypoints_route_tool_questions_through_canonical_concern_owner(self) -> None:
         for rel in (
             "source/roles/software-design/SKILL.md",
             "source/roles/software-implementation/SKILL.md",
         ):
             text = read(rel)
-            self.assertIn("classify each material engineering question", text, rel)
-            self.assertIn("relation under the claim", text, rel)
-            self.assertIn("cheap non-mutating capability probe", text, rel)
-            self.assertIn("familiarity with built-in", text, rel)
-            for ref in expected:
-                line = next(line for line in text.splitlines() if ref in line)
-                self.assertIn("must read", line, (rel, ref))
+            self.assertIn("references/tool-assisted-engineering.md", text, rel)
+            self.assertIn("relation", text, rel)
+            self.assertIn("ordinary hyperlinks", text, rel)
+            self.assertIn("activation", text, rel)
+            for name in DIRECT_TOOL_FILES:
+                self.assertNotIn(f"references/{name}", text, (rel, name))
 
-    def test_tool_references_remain_progressively_disclosed_by_role(self) -> None:
-        # Protocol 5.11's software-tool routing is a D3/D4 executable-role guarantee.
-        # Protocol 6 adds D1/D2 authority roles; it must not force software repository
-        # analyzers into those new roles merely because ROLE_SPECS grew.
+        common = read(COMMON)
+        self.assertIn("relation under the current material claim", common)
+        self.assertIn("cheap read-only/non-mutating capability probe", common)
+        self.assertIn("familiarity with grep/read/shell/tests is not itself a fallback reason", common)
+        for name in DIRECT_TOOL_FILES:
+            self.assertIn(name, common)
+
+    def test_tool_references_remain_progressively_disclosed_and_packaged(self) -> None:
+        # Protocol 5.11 guarantees relation-first access to the specialist analyzers.
+        # Protocol 6.2 preserves that capability through a concern router instead of
+        # freezing every analyzer leaf into each D3/D4 root entrypoint.
         for role in ("software-design", "software-implementation"):
             spec = build_skills.ROLE_SPECS[role]
-            for name in TOOL_FILES:
-                self.assertIn(name, spec["references"])
+            self.assertIn("tool-assisted-engineering.md", spec["references"])
+            for name in DIRECT_TOOL_FILES:
+                self.assertNotIn(name, spec["references"])
 
         for role in ("scientific-formulation", "numerical-algorithm-design"):
             spec = build_skills.ROLE_SPECS[role]
-            for name in DIRECT_TOOL_FILES:
+            for name in TOOL_FILES:
                 self.assertNotIn(name, spec["references"])
 
         for specialist in ("software-documentation", "repository-hygiene"):
@@ -68,9 +74,8 @@ class Protocol511ToolAssistanceTests(unittest.TestCase):
         for name in DIRECT_TOOL_FILES:
             self.assertNotIn(name, audit["references"])
 
-        # Package payload may now contain transitive local-Markdown dependencies.
-        # Progressive disclosure is governed by the direct SKILL.md activation
-        # routes asserted above, not by absence of transitively required payload.
+        # Transport closure includes concern-local leaves transitively while runtime
+        # activation remains governed by explicit router predicates.
         with tempfile.TemporaryDirectory() as tmp:
             dist = Path(tmp) / "dist"
             build_skills.build(dist)
@@ -78,7 +83,8 @@ class Protocol511ToolAssistanceTests(unittest.TestCase):
                 for name in TOOL_FILES:
                     self.assertTrue((dist / "skills" / role / "references" / name).is_file())
             audit_root = dist / "skills" / "software-maintenance-audit" / "references"
-            self.assertTrue((audit_root / "tool-assisted-engineering.md").is_file())
+            for name in TOOL_FILES:
+                self.assertTrue((audit_root / name).is_file())
 
     def test_common_reference_owns_selection_composition_and_authority(self) -> None:
         text = read(COMMON)
