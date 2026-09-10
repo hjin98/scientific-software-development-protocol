@@ -30,6 +30,36 @@ jobs:
       - name: Check patch whitespace
         run: git diff --check
 
+  regression-diagnostic:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        case:
+          - test_protocol_513_oracle_family_closure.py Protocol513OracleFamilyClosureTests.test_common_router_requires_every_preserved_relation_class
+          - test_protocol_513_live_tool_qualification.py Protocol513LiveToolQualificationTests.test_portability_separates_static_reference_and_live_tool_routing_claims
+          - test_protocol_516_long_horizon_quality.py Protocol6LongHorizonQualityTests.test_protocol62_identity_preserves_516_quality_lineage
+          - test_protocol_513_tool_routing_codeql_compression.py Protocol513RoutingPreservationTests.test_513_history_is_preserved_without_owning_current_version
+          - test_protocol_513_live_tool_qualification.py Protocol513LiveToolQualificationTests.test_live_qualification_does_not_infer_unrun_harness_tool_combinations
+          - test_protocol_511_tool_assistance.py Protocol511ToolAssistanceTests.test_portability_keeps_external_tooling_optional
+          - test_protocol_62_representation.py Protocol62RepresentationTests.test_current_navigation_uses_new_kernel_path
+          - test_protocol_contracts.py Protocol6ContractTests.test_active_simplicity_survives_without_machinery_preservation
+          - test_protocol_515_language_profiles.py Protocol515LanguageProfileTests.test_material_routes_are_mandatory_and_composed_through_router
+          - test_protocol_511_tool_assistance.py Protocol511ToolAssistanceTests.test_source_readme_routes_to_split_tool_owners_without_copying_manuals
+          - test_protocol_515_language_profiles.py Protocol515LanguageProfileTests.test_version_binding_and_repository_local_python_remain_preserved
+          - test_protocol_515_language_profiles.py Protocol515LanguageProfileTests.test_cpp_accelerator_uses_same_shared_gate
+          - test_protocol_tooling.py ProtocolToolingTests.test_build_and_validate_packages
+    name: regression-diagnostic (${{ matrix.case }})
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install validation dependencies
+        run: python -m pip install -r source/requirements-validation.txt
+      - name: Run ${{ matrix.case }}
+        run: python tests/${{ matrix.case }}
+
   orchestrator-core:
     runs-on: ubuntu-latest
     steps:
