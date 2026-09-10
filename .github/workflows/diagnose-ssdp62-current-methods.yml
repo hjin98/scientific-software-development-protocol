@@ -1,0 +1,86 @@
+name: Diagnose SSDP 6.2 current profile methods
+
+on:
+  pull_request:
+    types: [synchronize, opened, reopened]
+
+permissions:
+  contents: read
+
+jobs:
+  diagnose-current-methods:
+    if: github.event.pull_request.head.repo.full_name == github.repository && github.head_ref == 'ssdp-6.2-lossless-representation'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Prepare 6.2 candidate
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          text = Path('.github/workflows/materialize-ssdp62.yml').read_text(encoding='utf-8')
+          start = text.index('      - name: Apply bounded 6.2 profile delta\n')
+          block_start = text.index('        run: |\n', start) + len('        run: |\n')
+          end = text.index('      - name: Install generation dependencies\n', block_start)
+          lines = text[block_start:end].splitlines()
+          Path('/tmp/apply.sh').write_text('\n'.join(line[10:] if line.startswith('          ') else line for line in lines) + '\n', encoding='utf-8')
+          PY
+          bash /tmp/apply.sh
+          python -m pip install -r source/requirements-validation.txt
+          python -m pip install ./orchestrator -r orchestrator/requirements-dev.txt
+          python orchestrator/scripts/generate_protocol_snapshot.py
+      - name: current identity
+        if: always()
+        run: python -m unittest orchestrator.tests.test_ssdp6_profiles.SSDP6CanonicalProfileTests.test_current_profile_is_schema_v2_protocol_6 -v
+      - name: exact stage set
+        if: always()
+        run: python -m unittest orchestrator.tests.test_ssdp6_profiles.SSDP6CanonicalProfileTests.test_current_canonical_source_has_exact_domain_stage_set -v
+      - name: version mapping
+        if: always()
+        run: python -m unittest orchestrator.tests.test_ssdp6_profiles.SSDP6CanonicalProfileTests.test_profile_version_mapping_is_unambiguous -v
+      - name: input classification
+        if: always()
+        run: python -m unittest orchestrator.tests.test_ssdp6_profiles.SSDP6CanonicalProfileTests.test_every_current_input_is_classified -v
+      - name: parent authority input
+        if: always()
+        run: python -m unittest orchestrator.tests.test_ssdp6_profiles.SSDP6CanonicalProfileTests.test_current_profile_uses_protocol6_native_parent_authority_input -v
+      - name: task routing inputs
+        if: always()
+        run: python -m unittest orchestrator.tests.test_ssdp6_profiles.SSDP6CanonicalProfileTests.test_task_is_not_re_requested_by_downstream_governed_stages -v
+      - name: D4 optional plan
+        if: always()
+        run: python -m unittest orchestrator.tests.test_ssdp6_profiles.SSDP6CanonicalProfileTests.test_local_d4_is_plan_optional_but_review_remains_plan_governed -v
+      - name: D4 current authority
+        if: always()
+        run: python -m unittest orchestrator.tests.test_ssdp6_profiles.SSDP6CanonicalProfileTests.test_optional_d4_change_plan_must_be_current_active_authority -v
+      - name: reduced routes
+        if: always()
+        run: python -m unittest orchestrator.tests.test_ssdp6_profiles.SSDP6CanonicalProfileTests.test_reduced_routes_skip_unaffected_intermediate_domains -v
+      - name: alignment routes
+        if: always()
+        run: python -m unittest orchestrator.tests.test_ssdp6_profiles.SSDP6CanonicalProfileTests.test_alignment_pass_routes_by_downstream_domain_owner -v
+      - name: authority review plans
+        if: always()
+        run: python -m unittest orchestrator.tests.test_ssdp6_profiles.SSDP6CanonicalProfileTests.test_material_authority_review_and_direct_handoffs_have_governing_plans -v
+      - name: review dependent routes
+        if: always()
+        run: python -m unittest orchestrator.tests.test_ssdp6_profiles.SSDP6CanonicalProfileTests.test_review_pass_can_continue_to_the_dependent_realization_domain -v
+      - name: risk override routes
+        if: always()
+        run: python -m unittest orchestrator.tests.test_ssdp6_profiles.SSDP6CanonicalProfileTests.test_risk_override_preserves_reduced_routes_and_provisional_state -v
+      - name: D3-only route
+        if: always()
+        run: python -m unittest orchestrator.tests.test_ssdp6_profiles.SSDP6CanonicalProfileTests.test_d3_only_authority_change_can_skip_unaffected_d4 -v
+      - name: serious challenge terminal
+        if: always()
+        run: python -m unittest orchestrator.tests.test_ssdp6_profiles.SSDP6CanonicalProfileTests.test_serious_challenge_stops_automatic_routing -v
+      - name: transition triggers
+        if: always()
+        run: python -m unittest orchestrator.tests.test_ssdp6_profiles.SSDP6CanonicalProfileTests.test_every_transition_trigger_is_recognized -v
+      - name: profile JSON round trip
+        if: always()
+        run: python -m unittest orchestrator.tests.test_ssdp6_profiles.SSDP6CanonicalProfileTests.test_profile_json_round_trips -v
