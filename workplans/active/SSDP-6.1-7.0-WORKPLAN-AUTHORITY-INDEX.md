@@ -4,56 +4,54 @@ workplan_id: SSDP-6.1-7.0-WORKPLAN-AUTHORITY-INDEX
 protocol_version: 6.0.0
 status: active
 created_date: 2026-09-09
-reviewed_date: 2026-09-09
+reviewed_date: 2026-09-10
 active_serious_challenge: none
 ---
 
 # SSDP 6.1 / 7.0 Workplan Authority Index
 
+## Background and terminology
+
+The **Scientific Software Development Protocol (SSDP)** uses D1 scientific/mathematical, D2 algorithm/numerical, D3 software-architecture, and D4 specification/implementation authority. This file is only a routing/index artifact: it identifies the complete workplan composition and lifecycle state, but it does not create independent D1-D4 semantic authority. A **semantic candidate** is the immutable Git commit under qualification; a **recovery snapshot** is an immutable commit accepted for rollback.
+
 ## Purpose
 
-This file is a **routing/index artifact**, not a D1-D4 semantic authority and not an independent implementation contract. It identifies the complete current workplan composition so an implementer/reviewer does not miss a governing artifact.
+Do not copy substantive requirements into this index. Read the listed governing artifacts themselves. Archived workplans preserve the exact historical handoff that governed their completed cycles; a later repair may supersede release/closeout disposition without rewriting those historical artifacts.
 
-Do not copy substantive requirements into this index. Read the listed governing artifacts themselves.
+## Protocol 6.1 second-reopened handoff
 
-## Protocol 6.1 completed repaired handoff
-
-Protocol 6.1 was originally implemented and reviewed from the composed historical handoff:
+Protocol 6.1 implementation/review now SHALL read and satisfy, as one composed handoff:
 
 1. `workplans/archive/SSDP-6.1-EVIDENCE-EVOLUTION-AND-CONCRETIZATION-ALIGNMENT.md`
 2. `workplans/archive/SSDP-6.1-EVIDENCE-EVOLUTION-AND-CONCRETIZATION-ALIGNMENT-REVISION-1-HUMAN-FACING-DOCUMENTATION-AND-FINAL-REVIEW-CLOSURE.md`
-
-A later independent review found two current-source conformance defects and an acceptance-oracle gap. The bounded repair was governed by:
-
 3. `workplans/archive/SSDP-6.1-REOPENED-FINAL-REVIEW-REPAIR.md`
+4. `workplans/active/SSDP-6.1-SECOND-REOPENED-PORTABILITY-DOCUMENTATION-AND-RECOVERY-REPAIR.md`
 
-All three files are now archived historical handoff evidence. Their historical frontmatter is preserved rather than rewritten after execution/review. Current completion is established by this index, the fresh qualification/Review records, semantic-evolution history, and the immutable recovery mapping.
+Precedence and preservation:
 
-Precedence for reconstruction remains:
-
-- the consolidated parent governed evidence/evolution/concretization implementation;
-- Revision 1 supplemented it with the human-facing background/terminology/abbreviation standard and fourth-review closures;
-- the reopened repair corrected discovered nonconformance without changing Protocol 6.1 doctrine;
+- the consolidated parent governs evidence/evolution/concretization semantics and lossless Protocol 6.0/5.16 inheritance;
+- Revision 1 supplements it with the human-facing background/terminology/abbreviation standard;
+- the first reopened repair corrected D3/D4 evidence-realization terminology, canonical navigation, and associated acceptance oracles;
+- the second reopened repair corrects package transitive-reference closure, version-correct immutable public fallback/recovery documentation, and incomplete application of the already-accepted human-facing standard;
 - every parent requirement not explicitly narrowed by a later artifact remains binding;
-- the composition remains lossless with respect to Protocol 6.0 and inherited Protocol 5.16 doctrine.
+- no current repair changes accepted D1/D2/D3 doctrine or authorizes Protocol 7 implementation machinery.
 
 Current disposition:
 
 ```text
 SERIOUS CHALLENGE: NONE
-PREVIOUS FINAL WORKPLAN DESIGN REVIEW: PASS — HISTORICAL
-PREVIOUS IMPLEMENTATION/QUALIFICATION/REVIEW CLOSEOUT: SUPERSEDED FOR RELEASE CLOSURE
-REOPENED IMPLEMENTATION STATUS: COMPLETE
-BEHAVIORAL QUALIFICATION: PASS — 94/94
-FINAL INDEPENDENT REVIEW: PASS — qualification/ssdp6/FINAL-REVIEW-GPT-5.6-SOL-2026-09-09-PROTOCOL-6.1-REOPENED.md
-OPEN BLOCKING FINDINGS: 0
-SEMANTIC CANDIDATE: 5f911fecb0de2847f63c0b4859e1dd8c63d3d8ef
-PREVIOUS RECOVERY SNAPSHOT: dec5ff2767e14fd1cda46e073757aa27f40e270c — HISTORICAL, NOT FINAL ACCEPTED RECOVERY
-REPLACEMENT RECOVERY SNAPSHOT: 0c90fda19bf6ed9cb0c4511beb3da80ace6584ed
-LIFECYCLE STATUS: COMPLETED / ARCHIVED
+PREVIOUS 94/94 QUALIFICATION: HISTORICAL FOR CURRENT CLOSEOUT
+PREVIOUS FINAL INDEPENDENT REVIEW: HISTORICAL FOR CURRENT CLOSEOUT
+SECOND REOPEN FINDINGS: 3 BLOCKING
+SECOND REOPEN IMPLEMENTATION STATUS: ACTIVE
+OPEN BLOCKING FINDINGS: 3
+PREVIOUS SEMANTIC CANDIDATE: 5f911fecb0de2847f63c0b4859e1dd8c63d3d8ef — HISTORICAL
+PREVIOUS RECOVERY SNAPSHOT: 0c90fda19bf6ed9cb0c4511beb3da80ace6584ed — IMMUTABLE HISTORICAL, NOT FINAL ACCEPTED RECOVERY
+REPLACEMENT RECOVERY SNAPSHOT: PENDING SECOND-REOPEN QUALIFICATION/REVIEW/CLOSEOUT
+LIFECYCLE STATUS: ACTIVE / NO-PASS
 ```
 
-The prior Review `qualification/ssdp6/FINAL-REVIEW-GPT-5.6-SOL-2026-09-09-PROTOCOL-6.1.md` remains historical evidence for the earlier candidate. The fresh current Review is `qualification/ssdp6/FINAL-REVIEW-GPT-5.6-SOL-2026-09-09-PROTOCOL-6.1-REOPENED.md`, which reviews semantic candidate `5f911fecb0de2847f63c0b4859e1dd8c63d3d8ef` after complete repository/package acceptance and fresh 94-scenario qualification.
+The prior current Review `qualification/ssdp6/FINAL-REVIEW-GPT-5.6-SOL-2026-09-09-PROTOCOL-6.1-REOPENED.md` and fresh 94-scenario result remain valid historical evidence for the candidate they evaluated. They cannot close the newly affected package/public-fallback/documentation surfaces.
 
 ## Protocol 7.0 current design handoff
 
@@ -76,14 +74,13 @@ Current review disposition:
 SERIOUS CHALLENGE: NONE
 WORKPLAN DESIGN REVIEW: PASS
 IMPLEMENTATION STATUS: PROPOSED
-PROTOCOL 6.1 COMPLETION/QUALIFICATION/RECOVERY PREREQUISITE: SATISFIED — RECOVERY 0c90fda19bf6ed9cb0c4511beb3da80ace6584ed
+PROTOCOL 6.1 COMPLETION/QUALIFICATION/RECOVERY PREREQUISITE: REOPENED / UNSATISFIED
 REMAINING PRE-D4 REQUIREMENTS:
-  1. DELIBERATE D3 ORCHESTRATOR ARCHITECTURE REOPEN/SUPERSESSION
+  1. COMPLETE AND REQUALIFY THE SECOND-REOPEN PROTOCOL 6.1 REPAIR
+  2. DELIBERATE D3 ORCHESTRATOR ARCHITECTURE REOPEN/SUPERSESSION
 ```
 
-Protocol 7 D4 implementation remains unauthorized until the remaining D3 Orchestrator architecture prerequisite closes. The completed Protocol 6.1 repair does not modify Protocol 7 semantics; it restores and pins the valid pre-automation baseline Protocol 7 requires.
-
-Protocol 7 machine control records remain compact machine data. Human-readable control/schema/user documentation inherits the Protocol 6.1 background-context and first-use abbreviation requirements.
+Protocol 7 D4 implementation remains unauthorized until both requirements close. The second Protocol 6.1 repair does not modify Protocol 7 semantics; it restores the valid pre-automation baseline Protocol 7 requires.
 
 ## Version/cutover rule
 
@@ -92,10 +89,8 @@ There is exactly one canonical workflow-control authority for any current run.
 - Under Protocol 6.1, workplan/skill/prompt/profile document control remains valid and the Protocol 7 control plane is non-authoritative.
 - Under Protocol 7 after qualified cutover, the deterministic orchestrator control plane owns machine lifecycle transitions while workplans/skills/documents remain semantic artifacts.
 - Shadow comparison is permitted only while one side remains explicitly non-authoritative.
-- Protocol 7 fallback uses replacement immutable Protocol 6.1 recovery commit `0c90fda19bf6ed9cb0c4511beb3da80ace6584ed`. The historical `dec5ff2767e14fd1cda46e073757aa27f40e270c` snapshot is not the final rollback baseline after the discovered defects.
+- Protocol 7 fallback may use only the replacement immutable Protocol 6.1 recovery identity accepted after this second reopen. Earlier Protocol 6.1 recovery snapshots remain historical evidence.
 
 ## Historical discipline
 
-Do not edit archived/version-pinned Protocol 6.0/5.x transition records merely to adopt 6.1 terminology or presentation rules. Current 6.1/7.0 work follows abstraction/concretization terminology and the human-facing documentation standard while legacy stable identifiers may retain older lexemes only under the explicit compatibility rule in the current 6.1 handoff.
-
-The original Protocol 6.1 workplans and the reopened repair workplan remain archived as exact historical handoff artifacts. Current completion/recovery state is recorded by this index, current portability mapping, semantic-evolution history, the fresh qualification/Review records, and replacement immutable recovery commit `0c90fda19bf6ed9cb0c4511beb3da80ace6584ed`.
+Do not edit archived/version-pinned Protocol 5.x/6.0 records merely to adopt 6.1 terminology or presentation rules. Do not rewrite the earlier Protocol 6.1 workplans or prior qualification/Review reports merely to hide the reason for reopening. Current 6.1 artifacts follow abstraction/concretization terminology and the human-facing documentation standard while legacy stable identifiers may retain older lexemes only under the explicit compatibility rule.

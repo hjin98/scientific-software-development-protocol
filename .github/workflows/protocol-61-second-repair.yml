@@ -1,0 +1,335 @@
+name: Temporary Protocol 6.1 second repair implementation
+
+on:
+  push:
+    branches:
+      - ssdp-6.1-implementation
+
+permissions:
+  contents: write
+
+jobs:
+  repair:
+    if: github.event.head_commit.message == 'Reopen Protocol 6.1 second repair'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ssdp-6.1-implementation
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Configure repository writer
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+      - name: Install validation dependencies
+        run: python -m pip install -r source/requirements-validation.txt
+      - name: Apply Stage A source, documentation, package-validation, and lifecycle repair
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import re
+
+          def read(path):
+              return Path(path).read_text(encoding='utf-8')
+
+          def write(path, text):
+              Path(path).write_text(text, encoding='utf-8')
+
+          skill_background = '''## Background and terminology\n\nThe **Scientific Software Development Protocol (SSDP)** organizes authority into four semantic domains: **D1** scientific/mathematical formulation, **D2** algorithm/numerical method, **D3** software architecture, and **D4** specification/implementation. A **concretization** is a lower-level expression of governing semantic authority. An **evidence realization** is one concrete execution or instantiation of an evidence specification; it is not a D1-D4 concretization.\n\n'''
+
+          skill_paths = [
+              'source/roles/scientific-formulation/SKILL.md',
+              'source/roles/numerical-algorithm-design/SKILL.md',
+              'source/roles/software-design/SKILL.md',
+              'source/roles/software-implementation/SKILL.md',
+              'source/specialists/software-documentation/SKILL.md',
+              'source/specialists/software-maintenance-audit/SKILL.md',
+              'source/specialists/repository-hygiene/SKILL.md',
+          ]
+          for path in skill_paths:
+              text = read(path)
+              first_h1 = re.search(r'(?m)^# .+\n\n', text)
+              if first_h1 is None:
+                  raise SystemExit(f'missing H1 in {path}')
+              if '## Background and terminology\n' not in text[:first_h1.end() + 1200]:
+                  text = text[:first_h1.end()] + skill_background + text[first_h1.end():]
+              if '(references/documentation-and-evidence.md)' in text and '(references/scientific-technical-writing.md)' not in text:
+                  lines = text.splitlines()
+                  for i, line in enumerate(lines):
+                      if '(references/documentation-and-evidence.md)' in line:
+                          lines.insert(i + 1, '- Human-facing scientific/technical documentation -> [Scientific and technical writing](references/scientific-technical-writing.md).')
+                          break
+                  else:
+                      raise SystemExit(f'could not place writing route in {path}')
+                  text = '\n'.join(lines) + ('\n' if text.endswith('\n') else '')
+              write(path, text)
+
+          root = read('README.md')
+          anchor = 'Current protocol version: **6.1**.\n\n'
+          bg = '''## Background and terminology\n\nThe **Scientific Software Development Protocol (SSDP)** is a document-controlled scientific-software development protocol. It separates four semantic authority domains: **D1** scientific/mathematical formulation, **D2** algorithm/numerical method, **D3** software architecture, and **D4** specification/implementation. An **abstraction** states governing semantics; a **concretization** is a lower-level expression that must preserve them.\n\n'''
+          if '## Background and terminology\n' not in root[:1000]:
+              if anchor not in root:
+                  raise SystemExit('root README background anchor missing')
+              root = root.replace(anchor, anchor + bg, 1)
+          root = root.replace('multi-parent constraints form a layered DAG.', 'multi-parent constraints form a layered directed acyclic graph (DAG).')
+          write('README.md', root)
+
+          src = read('source/README.md')
+          bg = '''## Background and terminology\n\nThe **Scientific Software Development Protocol (SSDP)** uses four semantic authority domains: **D1** scientific/mathematical formulation, **D2** algorithm/numerical method, **D3** software architecture, and **D4** specification/implementation. An **abstraction** states governing semantic invariants; a **concretization** is a lower-level expression constrained by those invariants. An **evidence realization** is a concrete execution of an evidence specification.\n\n'''
+          marker = '# Scientific Software Development Protocol 6.1\n\n'
+          if '## Background and terminology\n' not in src[:1000]:
+              if marker not in src:
+                  raise SystemExit('source README background anchor missing')
+              src = src.replace(marker, marker + bg, 1)
+          src = src.replace('multi-parent constraints form a layered DAG.', 'multi-parent constraints form a layered directed acyclic graph (DAG).')
+          write('source/README.md', src)
+
+          port = read('PORTABILITY.md')
+          bg = '''## Background and terminology\n\nThe **Scientific Software Development Protocol (SSDP)** is distributed as portable **Agent Skills**: self-contained skill directories whose `SKILL.md` entrypoint routes the references needed for a role or specialist. SSDP uses **D1** scientific/mathematical, **D2** algorithm/numerical, **D3** software-architecture, and **D4** specification/implementation authority. An **orchestration profile** is a version-bound machine-readable representation of the human-facing workflow prompts used by the optional Orchestrator Core.\n\n'''
+          marker = '# Agent portability and routing qualification\n\n'
+          if '## Background and terminology\n' not in port[:1200]:
+              if marker not in port:
+                  raise SystemExit('PORTABILITY background anchor missing')
+              port = port.replace(marker, marker + bg, 1)
+          port = port.replace('| 6.1.0 | `0c90fda19bf6ed9cb0c4511beb3da80ace6584ed` |', '| 6.1.0 | pending second-reopen qualification, Review, and replacement recovery |')
+          old = 'The earlier Protocol 6.1 closeout snapshot `dec5ff2767e14fd1cda46e073757aa27f40e270c` remains immutable historical evidence but is superseded as the final rollback baseline. The repaired semantic candidate `5f911fecb0de2847f63c0b4859e1dd8c63d3d8ef` passed complete repository/package/orchestrator acceptance, fresh 94/94 behavioral qualification, and fresh independent Review before lifecycle closeout. Replacement recovery commit `0c90fda19bf6ed9cb0c4511beb3da80ace6584ed` contains the qualified Protocol 6.1 source/profile/generated artifacts, fresh evidence/Review records, corrected semantic-history state, and the archived repair handoff without Protocol 7 implementation machinery. Later metadata-only pinning records that identity without changing qualified Protocol semantics or executable behavior.'
+          new = 'The earlier Protocol 6.1 closeout snapshots `dec5ff2767e14fd1cda46e073757aa27f40e270c` and `0c90fda19bf6ed9cb0c4511beb3da80ace6584ed` remain immutable historical evidence but are superseded for final release/recovery authority by the active second-reopen repair. The prior semantic candidate `5f911fecb0de2847f63c0b4859e1dd8c63d3d8ef` and its 94/94 qualification remain historical evidence for their evaluated surfaces; package-reference closure, version-correct public fallback, and current human-facing documentation conformance require fresh repair and requalification before Protocol 7 may use a Protocol 6.1 recovery prerequisite.'
+          if old not in port:
+              raise SystemExit('PORTABILITY recovery paragraph anchor missing')
+          port = port.replace(old, new, 1)
+          port = port.replace('The fresh current result is `qualification/ssdp6/RESULTS-GPT-5.6-SOL-2026-09-09-PROTOCOL-6.1-REOPENED-94.md`: 94/94 PASS with no Serious Challenge, explicitly bound to semantic candidate `5f911fecb0de2847f63c0b4859e1dd8c63d3d8ef`.', 'The most recent pre-second-reopen result is `qualification/ssdp6/RESULTS-GPT-5.6-SOL-2026-09-09-PROTOCOL-6.1-REOPENED-94.md`: 94/94 PASS for its historical candidate. It is not current closeout evidence for the newly reopened package/public-fallback/documentation surfaces.')
+          write('PORTABILITY.md', port)
+
+          vp = Path('source/validate_packages.py')
+          text = vp.read_text(encoding='utf-8')
+          if 'import posixpath\n' not in text:
+              text = text.replace('import json\nimport re\n', 'import json\nimport posixpath\nimport re\n', 1)
+          function = r'''
+
+def validate_packaged_markdown_links(files: dict[str, bytes]) -> list[str]:
+    """Require every local Markdown-to-Markdown route in a bundle to resolve in-bundle."""
+    errors: list[str] = []
+    for rel, data in sorted(files.items()):
+        if not rel.endswith(".md"):
+            continue
+        try:
+            text = data.decode("utf-8")
+        except UnicodeDecodeError as exc:
+            errors.append(f"{rel}: not UTF-8: {exc}")
+            continue
+        for raw_target in MARKDOWN_LINK_RE.findall(text):
+            target = raw_target.strip()
+            if not target or target.startswith("#"):
+                continue
+            decoded = urllib.parse.unquote(target)
+            if URI_SCHEME_RE.match(decoded) or decoded.startswith("//"):
+                continue
+            path_part = decoded.split("#", 1)[0].split("?", 1)[0]
+            if not path_part or not path_part.lower().endswith(".md"):
+                continue
+            if decoded != target:
+                errors.append(f"{rel}: encoded local Markdown route is not allowed: {target}")
+                continue
+            if path_part.startswith("/") or WINDOWS_ABSOLUTE_RE.match(path_part):
+                errors.append(f"{rel}: unsafe local Markdown route: {target}")
+                continue
+            normalized = posixpath.normpath(posixpath.join(posixpath.dirname(rel), path_part))
+            if normalized == ".." or normalized.startswith("../"):
+                errors.append(f"{rel}: local Markdown route escapes bundle: {target}")
+                continue
+            if normalized not in files:
+                errors.append(f"{rel}: local Markdown route is not packaged: {target} -> {normalized}")
+    return errors
+'''
+          if 'def validate_packaged_markdown_links(' not in text:
+              marker = '\ndef validate_agent_yaml(text: str) -> list[str]:\n'
+              if marker not in text:
+                  raise SystemExit('validator insertion anchor missing')
+              text = text.replace(marker, function + marker, 1)
+          call = '    errors.extend(validate_resource_routes(body, files))\n'
+          if 'errors.extend(validate_packaged_markdown_links(files))' not in text:
+              if call not in text:
+                  raise SystemExit('validator call anchor missing')
+              text = text.replace(call, call + '    errors.extend(validate_packaged_markdown_links(files))\n', 1)
+          vp.write_text(text, encoding='utf-8')
+
+          Path('tests/test_package_reference_closure.py').write_text(r'''from __future__ import annotations
+
+import sys
+import tempfile
+import unittest
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[1]
+SOURCE = ROOT / "source"
+sys.path.insert(0, str(SOURCE))
+import build_skills  # noqa: E402
+import validate_packages  # noqa: E402
+
+
+class PackageReferenceClosureTests(unittest.TestCase):
+    def test_every_built_bundle_has_closed_local_markdown_routes(self) -> None:
+        with tempfile.TemporaryDirectory() as td:
+            out = Path(td) / "dist"
+            build_skills.build(out)
+            for skill_name, _, _ in build_skills.all_specs():
+                files = validate_packages.directory_files(out / "skills" / skill_name)
+                self.assertEqual([], validate_packages.validate_packaged_markdown_links(files), skill_name)
+
+    def test_nested_dangling_markdown_route_is_rejected(self) -> None:
+        files = {
+            "SKILL.md": b"# Example\n\n[packaged](references/a.md)\n",
+            "references/a.md": b"# A\n\n[missing](scientific-technical-writing.md)\n",
+        }
+        errors = validate_packages.validate_packaged_markdown_links(files)
+        self.assertTrue(any("local Markdown route is not packaged" in error for error in errors), errors)
+
+    def test_documentation_route_packages_writing_owner_explicitly(self) -> None:
+        for skill_name, spec, _ in build_skills.all_specs():
+            refs = set(spec["references"])
+            if "documentation-and-evidence.md" in refs:
+                self.assertIn("scientific-technical-writing.md", refs, skill_name)
+
+
+if __name__ == "__main__":
+    unittest.main()
+''', encoding='utf-8')
+
+          history = read('history/SEMANTIC_EVOLUTION.md')
+          if '## Protocol 6.1 second reopened portability/documentation/recovery repair' not in history:
+              entry = '''## Protocol 6.1 second reopened portability/documentation/recovery repair\n\nA subsequent Protocol-6.1-self-review reopened release closure again after finding three bounded implementation/acceptance defects: packaged references could contain unresolved nested Markdown routes that the validator did not inspect; current public fallback named the repository but could land on the incompatible Protocol 6.0 default branch; and the accepted human-facing background standard was not consistently applied to current Protocol-owned entrypoints/evidence reports.\n\n- **Authority disposition:** no D1/D2/D3 semantic doctrine is changed and no Serious Challenge is active. Repair is bounded to D4 packaging/validation, documentation concretization, public-source version resolution, and lifecycle/recovery evidence.\n- **Prior closeout disposition:** semantic candidate `5f911fecb0de2847f63c0b4859e1dd8c63d3d8ef` and recovery `0c90fda19bf6ed9cb0c4511beb3da80ace6584ed` remain immutable historical evidence but are superseded for final release/recovery authority.\n- **Current repair authority:** `workplans/active/SSDP-6.1-SECOND-REOPENED-PORTABILITY-DOCUMENTATION-AND-RECOVERY-REPAIR.md`.\n- **Public-source bootstrap:** pending Stage-A repaired immutable commit.\n- **Lifecycle:** ACTIVE / NO-PASS until fresh package/orchestrator acceptance, 95-scenario qualification, independent Review, and replacement recovery closeout.\n\n'''
+              marker = '## Maintenance\n'
+              if marker not in history:
+                  raise SystemExit('semantic history maintenance anchor missing')
+              history = history.replace(marker, entry + marker, 1)
+              write('history/SEMANTIC_EVOLUTION.md', history)
+          PY
+
+          python -m unittest discover -s tests -v
+          python source/build_skills.py --output /tmp/protocol-dist
+          python source/validate_packages.py --dist /tmp/protocol-dist
+          rm -rf dist
+          cp -R /tmp/protocol-dist dist
+          python source/check_dist.py --expected /tmp/protocol-dist --committed dist
+          git diff --check
+          python -m pip install ./orchestrator -r orchestrator/requirements-dev.txt
+          python orchestrator/scripts/generate_protocol_snapshot.py --check
+          python orchestrator/scripts/run_core_tests.py
+          git add -A
+          git commit -m 'Repair Protocol 6.1 package closure and documentation surfaces'
+      - name: Bind current 6.1 fallback to immutable repaired public source
+        shell: bash
+        run: |
+          export BOOTSTRAP_SHA="$(git rev-parse HEAD)"
+          python - <<'PY'
+          from pathlib import Path
+          import os
+          import re
+
+          sha = os.environ['BOOTSTRAP_SHA']
+          repo = 'https://github.com/hjin98/scientific-software-development-protocol'
+
+          def read(path):
+              return Path(path).read_text(encoding='utf-8')
+          def write(path, text):
+              Path(path).write_text(text, encoding='utf-8')
+
+          prompts = read('source/shared/references/development-workflow-prompts.md')
+          marker = '# Scientific Software Development Workflow Prompts\n\n'
+          bg = '''## Background and terminology\n\nThe **Scientific Software Development Protocol (SSDP)** uses D1 scientific/mathematical, D2 algorithm/numerical, D3 software-architecture, and D4 specification/implementation authority. A **protocol source ref** is the Git identity used to read the governing version's canonical `source/` files. A **public-source bootstrap snapshot** is an immutable compatible commit used when no governing-version-compatible local skill is available.\n\n'''
+          if '## Background and terminology\n' not in prompts[:1200]:
+              if marker not in prompts:
+                  raise SystemExit('workflow prompt background anchor missing')
+              prompts = prompts.replace(marker, marker + bg, 1)
+          public_block = f'''Current Protocol 6.1 public fallback identity:\n\n```text\nPUBLIC_REPOSITORY = {repo}\nPUBLIC_REF = {sha}\n```\n\nThe immutable `PUBLIC_REF` is intentional: the repository default branch may still expose another protocol version during release/cutover. Current 6.1 fallback must therefore resolve `source/` at this exact compatible commit rather than silently reading repository-default bytes.\n\n'''
+          heading = '## Portable protocol-skill resolution\n\n'
+          if 'PUBLIC_REF = ' not in prompts:
+              if heading not in prompts:
+                  raise SystemExit('workflow prompt public heading missing')
+              prompts = prompts.replace(heading, heading + public_block, 1)
+          old = f'2. If no compatible local skill is readable, fall back to the canonical public repository `{repo}` and load `source/roles/<skill-name>/SKILL.md` or `source/specialists/<skill-name>/SKILL.md` plus the entrypoint\'s required references. `source/` is canonical; generated `dist/` is transport output.'
+          new = f'2. If no compatible local skill is readable, fall back to the canonical public repository `{repo}`. For current Protocol 6.1, read `source/roles/<skill-name>/SKILL.md` or `source/specialists/<skill-name>/SKILL.md` and required references at immutable `PUBLIC_REF = {sha}`; do not use the repository default branch unless it resolves to the same compatible source. `source/` is canonical; generated `dist/` is transport output.'
+          if old not in prompts:
+              raise SystemExit('workflow prompt step-2 anchor missing')
+          prompts = prompts.replace(old, new, 1)
+          write('source/shared/references/development-workflow-prompts.md', prompts)
+
+          versioning = read('source/shared/references/protocol-versioning-and-compatibility.md')
+          replacement = f'''## Public-source resolution\n\nCurrent Protocol 6.1 local-first/public-fallback resolution is explicitly version-bound:\n\n```text\nrepository -> {repo}\n6.1.0 public-source bootstrap -> {sha}\n```\n\nA current 6.1 resolver must use both the canonical repository identity and the immutable compatible bootstrap commit above. The repository default branch is not a protocol-version oracle and may remain on 6.0 during release/cutover. Do not guess that `6.1.0` is itself a Git ref and do not silently substitute default-branch semantics. Historical 5.16/6.0 work continues to use its own immutable mappings.\n\nThe bootstrap commit contains the repaired current 6.1 roles/references/package-validation/documentation source needed for public fallback. It is distinct from the final replacement recovery identity, which is established only after the final semantic candidate passes fresh qualification and independent Review.\n\nHistorical release-pinned prompts/profiles retain their historical bytes and URLs. Do not rewrite a frozen profile merely because the repository identity or current documentation changed later.\n\n'''
+          versioning, n = re.subn(r'## Public-source resolution\n.*?(?=## Evidence invalidation across version changes\n)', replacement, versioning, flags=re.S)
+          if n != 1:
+              raise SystemExit(f'versioning public-source replacement count={n}')
+          recovery = f'''## Protocol 6.1 recovery and Protocol 7 rollback boundary\n\nProtocol 6.1 release closure is currently reopened. The immutable public-source bootstrap `{sha}` is a compatible source target for current web/manual fallback, but it is not automatically the final Protocol 6.1 rollback identity.\n\nAfter the repaired final semantic candidate passes complete qualification and independent Review, establish a replacement immutable recovery commit sufficient to restore the document-controlled/semi-automated workflow without Protocol 7 machinery. Publish that exact recovery SHA in this current versioning guidance and in `PORTABILITY.md` through the post-Review mapping-only closeout. Git commits cannot self-name, so the immutable recovery target need not contain its own SHA; the immediately later current mapping may identify it without changing the recovered protocol behavior.\n\nProtocol 7 fallback is version rollback to that accepted immutable Protocol 6.1 recovery snapshot, never simultaneous dual-current workflow authority. The prior `0c90fda19bf6ed9cb0c4511beb3da80ace6584ed` snapshot is historical only after this second reopen.\n\n'''
+          versioning, n = re.subn(r'## Protocol 6\.1 recovery and Protocol 7 rollback boundary\n.*?(?=## Candidate identity\n)', recovery, versioning, flags=re.S)
+          if n != 1:
+              raise SystemExit(f'versioning recovery replacement count={n}')
+          write('source/shared/references/protocol-versioning-and-compatibility.md', versioning)
+
+          port = read('PORTABILITY.md')
+          old = f'2. otherwise use the canonical public repository `{repo}` and its `source/` entrypoint plus required references;'
+          new = f'2. otherwise use the canonical public repository `{repo}` at immutable current-6.1 public-source bootstrap `{sha}` and load its `source/` entrypoint plus required references; never use repository-default bytes as a substitute for the declared protocol version;'
+          if old not in port:
+              raise SystemExit('PORTABILITY public fallback anchor missing')
+          port = port.replace(old, new, 1)
+          insertion = f'Current Protocol 6.1 immutable public-source bootstrap: `{sha}`. This source identity is usable before default-branch cutover and is distinct from the replacement rollback recovery identity, which remains pending fresh qualification/Review closeout.\n\n'
+          marker = 'Before mutation classify the highest potentially affected D1/D2/D3/D4 domain and direct governed side constraints. Reduced routes are normal; do not force every task through all four skills.\n\n'
+          if insertion not in port:
+              if marker not in port:
+                  raise SystemExit('PORTABILITY bootstrap insertion anchor missing')
+              port = port.replace(marker, marker + insertion, 1)
+          write('PORTABILITY.md', port)
+
+          root = read('README.md')
+          old = 'Skill resolution is compatible-local-first, canonical-public-source-second. Never silently reinterpret an older workplan under newer doctrine.'
+          new = f'Skill resolution is compatible-local-first, canonical-public-source-second. Current Protocol 6.1 public fallback uses immutable compatible source `{sha}` rather than assuming the repository default branch is already 6.1. Never silently reinterpret an older workplan under newer doctrine.'
+          if old not in root:
+              raise SystemExit('root README fallback anchor missing')
+          root = root.replace(old, new, 1)
+          write('README.md', root)
+
+          test = read('tests/test_protocol_61_evidence_evolution.py')
+          anchor = '        self.assertNotIn("https://github.com/hjin98/software-development-protocol", prompts)\n'
+          addition = f'        self.assertIn("{sha}", prompts)\n        self.assertIn("repository default branch", prompts.lower())\n'
+          if addition not in test:
+              if anchor not in test:
+                  raise SystemExit('protocol-61 prompt-test anchor missing')
+              test = test.replace(anchor, anchor + addition, 1)
+          write('tests/test_protocol_61_evidence_evolution.py', test)
+
+          scenarios = read('qualification/ssdp6/SCENARIOS-6.1-ADDITIONS.md')
+          if '### 95. Current public fallback must not depend on an incompatible default branch' not in scenarios:
+              scenarios += f'''\n## K. Second-reopened portability and recovery closure case\n\n### 95. Current public fallback must not depend on an incompatible default branch\nA web environment has no governing-version-compatible installed skill. The canonical repository default branch still exposes Protocol 6.0 while the requested work is explicitly governed by current Protocol 6.1. Resolve current 6.1 public source from `{repo}` at immutable compatible bootstrap commit `{sha}` and load the required `source/` entrypoint/references there. Do not silently use the default branch, do not reinterpret the work as 6.0, and do not guess that the semantic version string itself is a Git ref. If the immutable compatible source cannot be read, report truthful non-closure instead of executing from memory.\n'''
+          write('qualification/ssdp6/SCENARIOS-6.1-ADDITIONS.md', scenarios)
+
+          hist = read('history/SEMANTIC_EVOLUTION.md')
+          hist = hist.replace('- **Public-source bootstrap:** pending Stage-A repaired immutable commit.', f'- **Public-source bootstrap:** `{sha}`; current 6.1 web/manual fallback must resolve this immutable compatible source instead of repository-default bytes.')
+          write('history/SEMANTIC_EVOLUTION.md', hist)
+
+          index = read('workplans/active/SSDP-6.1-7.0-WORKPLAN-AUTHORITY-INDEX.md')
+          index = index.replace('SECOND REOPEN IMPLEMENTATION STATUS: ACTIVE', f'SECOND REOPEN IMPLEMENTATION STATUS: SOURCE/PACKAGE REPAIR COMPLETE — PUBLIC BOOTSTRAP {sha}')
+          index = index.replace('OPEN BLOCKING FINDINGS: 3', 'OPEN IMPLEMENTATION FINDINGS: 0 — FRESH QUALIFICATION/REVIEW STILL REQUIRED')
+          write('workplans/active/SSDP-6.1-7.0-WORKPLAN-AUTHORITY-INDEX.md', index)
+          PY
+
+          python orchestrator/scripts/generate_protocol_snapshot.py
+          python -m unittest discover -s tests -v
+          python source/build_skills.py --output /tmp/protocol-dist-final
+          python source/validate_packages.py --dist /tmp/protocol-dist-final
+          rm -rf dist
+          cp -R /tmp/protocol-dist-final dist
+          python source/check_dist.py --expected /tmp/protocol-dist-final --committed dist
+          git diff --check
+          python orchestrator/scripts/generate_protocol_snapshot.py --check
+          python orchestrator/scripts/run_core_tests.py
+          git add -A
+          git commit -m 'Bind Protocol 6.1 public fallback to immutable repaired source'
+      - name: Remove temporary implementation workflow
+        run: |
+          git rm .github/workflows/protocol-61-second-repair.yml
+          git commit -m 'Remove temporary Protocol 6.1 second repair workflow'
+      - name: Push repaired candidate
+        run: git push origin HEAD:ssdp-6.1-implementation
