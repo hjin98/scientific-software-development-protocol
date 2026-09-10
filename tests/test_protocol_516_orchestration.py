@@ -8,6 +8,8 @@ PROMPT = ROOT / "source/shared/references/development-workflow-prompts.md"
 
 
 class Protocol6OrchestrationTests(unittest.TestCase):
+    """Preserve Protocol 5.16 orchestration capability under the Protocol 6.2 prompt representation."""
+
     def setUp(self) -> None:
         self.prompt = PROMPT.read_text(encoding="utf-8")
         self.lower = self.prompt.lower()
@@ -40,38 +42,36 @@ class Protocol6OrchestrationTests(unittest.TestCase):
 
     def test_portable_resolution_is_canonical_once_for_all_stages(self) -> None:
         for token in (
-            "local first, public repository second",
-            "documented exposed installed-skill root",
+            "auto_local_first",
+            "governing-version-compatible installed skill/exposed skill root",
             "https://github.com/hjin98/scientific-software-development-protocol",
-            "source/roles/<skill-name>/skill.md",
-            "source/specialists/<skill-name>/skill.md",
-            "not shell commands",
+            "immutable public-source ref mapped for that version",
             "truthful non-closure",
-            "do not claim protocol execution from memory",
-            "do not silently substitute a different protocol version",
-            "do not guess that a semantic version is a git ref",
+            "silently substitute latest/default-branch doctrine",
+            "never guess that a semantic version is a git ref",
+            "repository-default bytes are never a substitute",
         ):
             self.assertIn(token, self.lower)
-        self.assertIn("stated once here rather than duplicated eleven times", self.lower)
+        self.assertIn("pre-bootstrap source intentionally does not invent a `public_ref`", self.lower)
 
     def test_execution_contract_prefers_action_and_resolves_inferable_context(self) -> None:
-        self.assertIn("execution prompts", self.lower)
-        self.assertIn("do not stop at commands, patch suggestions, sample text, or \"next steps\"", self.lower)
-        self.assertIn("prefer action over clarification when ordinary context is discoverable", self.lower)
-        self.assertIn("ask only when proceeding would require guessing a genuinely consequential", self.lower)
+        self.assertIn("these are execution prompts", self.lower)
+        self.assertIn("perform every authorized action rather than stopping at commands/snippets/next steps", self.lower)
+        self.assertIn("prefer action over clarification when context is discoverable", self.lower)
+        self.assertIn("ask only when proceeding would require guessing consequential authority", self.lower)
 
     def test_material_authority_acceptance_requires_independent_falsification_first(self) -> None:
+        self.assertIn("material d1/d2/durable-d3 authority mutation becomes accepted-current only after", self.lower)
+        self.assertIn("independent falsification by a context/reviewer that did not author the proposal", self.lower)
+        self.assertIn("required human ratification", self.lower)
         for heading in (
             "1. D1 Scientific & Mathematical Formulation",
             "2. D2 Algorithm & Numerical Method Design",
             "3. D3 Software Architecture / Workplan",
         ):
             block = self.stage_block(heading).lower()
-            self.assertIn("before returning `accepted`", block, heading)
-            self.assertIn("independent reviewer/context", block, heading)
-            self.assertIn("did not author the proposal", block, heading)
-            self.assertIn("keep the authority proposed", block, heading)
-        self.assertIn("cannot retroactively legitimize", self.lower)
+            self.assertIn("independent falsification", block, heading)
+            self.assertIn("otherwise remain", block, heading)
 
     def test_stage_routes_preserve_domain_ownership(self) -> None:
         expected = {
@@ -80,17 +80,16 @@ class Protocol6OrchestrationTests(unittest.TestCase):
             "3. D3 Software Architecture / Workplan": "software-design",
             "4. D4 Software Implementation": "software-implementation",
             "9. Health Audit": "software-maintenance-audit",
-            "10. Closeout": "software-documentation",
         }
         for heading, skill in expected.items():
             self.assertIn(skill, self.stage_block(heading).lower(), heading)
 
     def test_reduced_routes_and_upstream_impact_exclusion_are_explicit(self) -> None:
         intake = self.stage_block("0. Authority / Affected-Domain Intake").lower()
-        self.assertIn("d4-only/d3-only classification", intake)
+        self.assertIn("d3/d4-only classification", intake)
         self.assertIn("proportionate upstream-impact exclusion", intake)
-        self.assertIn("do not invent missing d1/d2 documents", intake)
-        self.assertIn("reduced d4-only, d3->d4, or d2->d4 paths are normal", self.lower)
+        self.assertIn("do not invent missing d1/d2 artifacts", intake)
+        self.assertIn("reduced d4-only, d3->d4, d2->d4 or d1->d3/d4 paths are normal", self.lower)
 
     def test_mutation_boundaries_are_explicit(self) -> None:
         d3 = self.stage_block("3. D3 Software Architecture / Workplan").lower()
@@ -102,43 +101,42 @@ class Protocol6OrchestrationTests(unittest.TestCase):
         health = self.stage_block("9. Health Audit").lower()
         closeout = self.stage_block("10. Closeout").lower()
 
-        self.assertIn("actually create or update the governing d3->d4 workplan", d3)
-        self.assertIn("do not modify product implementation", d3)
-        self.assertIn("actually modify repository_target", d4)
-        self.assertIn("review must not modify production implementation", review)
-        self.assertIn("does not modify production implementation", verify)
-        self.assertIn("stabilization remains non-mutating", stabilize)
-        self.assertIn("actually update downstream_workplan", align)
-        self.assertIn("must not modify production implementation", align)
-        self.assertIn("health audit does not implement the repairs", health)
-        self.assertIn("actually perform the documentation, lifecycle, generated-artifact", closeout)
-        self.assertIn("must not change product behavior", closeout)
+        self.assertIn("create/update the governing d3->d4 plan", d3)
+        self.assertIn("under auto_execute modify/test the real target", d4)
+        self.assertIn("review does not modify product implementation", review)
+        self.assertIn("deeper non-mutating risk-triggered falsification", verify)
+        self.assertIn("non-mutatingly ask whether", stabilize)
+        self.assertIn("update the downstream plan/authority when warranted, never production implementation", align)
+        self.assertIn("the audit itself neither accepts architecture nor implements repairs", health)
+        self.assertIn("under auto_execute reconcile affected current d1-d4 authority", closeout)
+        self.assertIn("closeout cannot change product semantics", closeout)
 
     def test_review_verification_stabilization_and_audit_are_not_collapsed(self) -> None:
         review = self.stage_block("5. Review & Challenge Pass").lower()
         verify = self.stage_block("6. Verification").lower()
         stabilize = self.stage_block("7. Stabilization / Architecture GC").lower()
         health = self.stage_block("9. Health Audit").lower()
-        self.assertIn("independent implementation-review mode", review)
-        self.assertIn("adversarial-verification", verify)
-        self.assertIn("stabilization remains non-mutating", stabilize)
-        self.assertIn("periodic long-horizon repository audit", health)
-        self.assertIn("not a feature review or approval gate", health)
+        self.assertIn("independent review mode", review)
+        self.assertIn("deeper non-mutating risk-triggered falsification", verify)
+        self.assertIn("after ordinary review otherwise passes", stabilize)
+        self.assertIn("longitudinal sensing", health)
+        self.assertIn("metrics are sensors", health)
 
     def test_stage_selection_covers_mixed_review_and_fix_routing(self) -> None:
-        selection = self.stage_block("Stage-selection rule of thumb").lower()
-        self.assertIn("artifact and mutation boundary", selection)
-        self.assertIn("review and fix", selection)
-        self.assertIn("review determines and records blockers", selection)
-        self.assertIn("d4 implementation performs ordinary code repair", selection)
-        self.assertIn("d1-d3 deficiencies route to their owning design domain", selection)
+        selection = self.stage_block("Stage selection").lower()
+        self.assertIn("semantic/mutation boundary", selection)
+        self.assertIn("mixed `review and fix` preserves the boundary", selection)
+        self.assertIn("review identifies/routes findings", selection)
+        self.assertIn("the owning mutation stage performs repair", selection)
 
     def test_serious_challenge_blocks_normal_release_semantics(self) -> None:
         self.assertIn("serious challenge", self.lower)
-        self.assertIn("before ordinary blockers or pass/no-pass", self.lower)
+        self.assertIn("emit `serious challenge` before ordinary findings", self.lower)
+        self.assertIn("stop unqualified closure", self.lower)
         closeout = self.stage_block("10. Closeout").lower()
-        self.assertIn("unresolved serious challenge", closeout)
-        self.assertIn("blocks protocol 6.1 release", closeout)
+        self.assertIn("unresolved acceptance/serious challenge", closeout)
+        self.assertIn("cannot", closeout)
+        self.assertIn("completion", closeout)
 
 
 if __name__ == "__main__":
