@@ -474,7 +474,7 @@ class InstalledProductTests(unittest.TestCase):
         self.assertIn("INPUTS", result.stdout)
 
     def test_offline_rendering_uses_the_packaged_snapshot(self) -> None:
-        """No configured Protocol source: the wheel's own snapshot must suffice."""
+        """No configured Protocol source: the frozen 5.16 wheel snapshot must suffice."""
 
         offline = self.case / "offline.toml"
         offline.write_text(
@@ -484,6 +484,7 @@ class InstalledProductTests(unittest.TestCase):
                     "",
                     "[projects.demo]",
                     f'repo = "{self.repo}"',
+                    'protocol_profile = "sdp-protocol-5.16"',
                 )
             )
             + "\n",
