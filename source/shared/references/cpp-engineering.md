@@ -74,7 +74,7 @@ Exact tools remain delegated; absence of one tool does not weaken the engineerin
 
 Graphics-processing-unit (GPU)/accelerator work is dormant unless governed requirement or accepted D3 enables it. When enabled, choose backend to supported hardware/portability: CUDA, HIP, SYCL, OpenCL, Kokkos/RAJA-like layers, or project equivalents. Prefer tuned accelerator BLAS/solver/FFT/domain primitives before custom kernels when mapping is clean.
 
-Acceptance includes CPU/reference numerical equivalence, host-device transfer/synchronization, device-memory bounds, runtime/device identity, packaged deployment, and end-to-end benefit. GPU-specific profilers/debuggers activate only inside this architecture-gated path.
+Acceptance includes numerical equivalence against the central processing unit (CPU)/reference path, host-device transfer/synchronization, device-memory bounds, runtime/device identity, packaged deployment, and end-to-end benefit. GPU-specific profilers/debuggers activate only inside this architecture-gated path.
 
 ## Python/C++ boundary
 

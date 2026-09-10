@@ -35,7 +35,7 @@ class Protocol6LongHorizonQualityTests(unittest.TestCase):
         self.assertEqual("6.2.0", read("source/PROTOCOL_VERSION").strip())
         versioning = read("source/shared/references/protocol-versioning-and-compatibility.md")
         self.assertIn("protocol 6.2 is a backward-compatible representation/progressive-disclosure strengthening", versioning)
-        self.assertIn("protocol 5.16 is a backward-compatible", versioning)
+        self.assertIn("5.16 long-horizon health/verification/stabilization/maintenance audit/workflow prompts/public fallback", versioning)
         self.assertIn("5.16.0 -> e151daaf5c8eebb351a85cfed86170fda80fb5e3", versioning)
         self.assertIn("d1 scientific formulation -> d2 numerical method -> d3 architecture -> d4 specification/implementation", self.workflow)
         self.assertIn("supporting specialists", self.workflow)

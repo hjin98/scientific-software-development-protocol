@@ -30,95 +30,21 @@ jobs:
       - name: Check patch whitespace
         run: git diff --check
 
-  regression-diagnostic:
+  validator-diagnostic:
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
-        case:
-          - test_protocol_516_long_horizon_quality.py Protocol6LongHorizonQualityTests.test_protocol62_identity_preserves_516_quality_lineage
-          - test_protocol_516_long_horizon_quality.py Protocol6LongHorizonQualityTests.test_final_acceptance_precedes_independent_review
-          - test_protocol_516_long_horizon_quality.py Protocol6LongHorizonQualityTests.test_quality_metrics_are_sensors_not_authority
-          - test_protocol_516_long_horizon_quality.py Protocol6LongHorizonQualityTests.test_test_effectiveness_routes_are_conditional
-          - test_protocol_516_long_horizon_quality.py Protocol6LongHorizonQualityTests.test_scientific_evidence_names_differential_and_metamorphic_relations
-          - test_protocol_516_long_horizon_quality.py Protocol6LongHorizonQualityTests.test_python_static_correctness_has_first_class_vendor_neutral_route
-          - test_protocol_516_long_horizon_quality.py Protocol6LongHorizonQualityTests.test_failure_injection_is_bounded_and_real_owner_preserving
-          - test_protocol_516_long_horizon_quality.py Protocol6LongHorizonQualityTests.test_stabilization_is_non_mutating_and_risk_triggered
-          - test_protocol_516_long_horizon_quality.py Protocol6LongHorizonQualityTests.test_maintenance_audit_is_non_authoritative_and_truthful_about_history
-          - test_protocol_516_long_horizon_quality.py Protocol6LongHorizonQualityTests.test_behavioral_scenarios_cover_anti_entropy_counterfactuals
-          - test_protocol_contracts.py Protocol6ContractTests.test_protocol_62_identity_and_four_domain_roles
-          - test_protocol_contracts.py Protocol6ContractTests.test_recursive_abstraction_concretization_and_feasibility_are_canonical
-          - test_protocol_contracts.py Protocol6ContractTests.test_evidence_evolution_contract_is_first_class
-          - test_protocol_contracts.py Protocol6ContractTests.test_authority_provenance_is_orthogonal_to_domain_level
-          - test_protocol_contracts.py Protocol6ContractTests.test_d1_d2_d3_d4_ownership_is_separated
-          - test_protocol_contracts.py Protocol6ContractTests.test_verification_is_reverse_semantic_not_bijective_inverse
-          - test_protocol_contracts.py Protocol6ContractTests.test_authority_states_and_bounded_invalidation_exist
-          - test_protocol_contracts.py Protocol6ContractTests.test_serious_challenge_is_mandatory_material_review_semantics
-          - test_protocol_contracts.py Protocol6ContractTests.test_tests_and_code_cannot_counterfeit_authority
-          - test_protocol_contracts.py Protocol6ContractTests.test_stage_local_final_regression_and_proxy_proof_survive
-          - test_protocol_contracts.py Protocol6ContractTests.test_active_simplicity_survives_without_machinery_preservation
-          - test_protocol_contracts.py Protocol6ContractTests.test_workflow_is_proportional_and_preserves_overridden_risk
-          - test_protocol_contracts.py Protocol6ContractTests.test_historical_versions_are_immutable_and_not_silently_upgraded
-          - test_protocol_contracts.py Protocol6ContractTests.test_build_registry_contains_four_roles_and_three_specialists
-          - test_protocol_513_tool_routing_codeql_compression.py Protocol513RoutingPreservationTests.test_513_history_is_preserved_without_owning_current_version
-          - test_protocol_513_tool_routing_codeql_compression.py Protocol513RoutingPreservationTests.test_dispatch_remains_per_question_relation_first_via_concern_router
-          - test_protocol_513_tool_routing_codeql_compression.py Protocol513RoutingPreservationTests.test_specialized_trigger_keeps_non_silent_disposition
-          - test_protocol_513_tool_routing_codeql_compression.py Protocol513RoutingPreservationTests.test_relation_first_common_router_and_optional_tools_remain
-          - test_protocol_513_tool_routing_codeql_compression.py Protocol513RoutingPreservationTests.test_codeql_provenance_and_optional_status_remain
-          - test_protocol_513_tool_routing_codeql_compression.py Protocol513RoutingPreservationTests.test_convergence_remains_conditionally_loaded_and_canonically_owned
-          - test_protocol_513_oracle_family_closure.py Protocol513OracleFamilyClosureTests.test_current_hierarchical_routing_chain_is_accepted
-          - test_protocol_513_oracle_family_closure.py Protocol513OracleFamilyClosureTests.test_flat_root_leaf_routing_regression_is_rejected
-          - test_protocol_513_oracle_family_closure.py Protocol513OracleFamilyClosureTests.test_relation_class_inversions_are_rejected_at_canonical_router
-          - test_protocol_513_oracle_family_closure.py Protocol513OracleFamilyClosureTests.test_common_router_requires_every_preserved_relation_class
-          - test_protocol_513_oracle_family_closure.py Protocol513OracleFamilyClosureTests.test_mandatory_pipeline_inversion_is_rejected
-          - test_protocol_513_oracle_family_closure.py Protocol513OracleFamilyClosureTests.test_hypothesis_anti_gaming_inversions_are_rejected
-          - test_protocol_513_oracle_family_closure.py Protocol513OracleFamilyClosureTests.test_hypothesis_settings_inversion_is_rejected
-          - test_protocol_513_oracle_family_closure.py Protocol513OracleFamilyClosureTests.test_specialized_owner_boundaries_remain_distinct
-          - test_protocol_513_oracle_family_closure.py Protocol513OracleFamilyClosureTests.test_model_limit_cross_check_stays_proportionate
-          - test_protocol_513_live_tool_qualification.py Protocol513LiveToolQualificationTests.test_portability_separates_static_reference_and_live_tool_routing_claims
-          - test_protocol_513_live_tool_qualification.py Protocol513LiveToolQualificationTests.test_live_scenarios_cover_each_specialized_class_and_non_silent_fallback
-          - test_protocol_513_live_tool_qualification.py Protocol513LiveToolQualificationTests.test_live_qualification_does_not_infer_unrun_harness_tool_combinations
-          - test_protocol_513_live_tool_qualification.py Protocol513LiveToolQualificationTests.test_serena_scenario_is_the_initiating_regression
-          - test_protocol_62_representation.py Protocol62RepresentationTests.test_current_version_and_nomenclature
-          - test_protocol_62_representation.py Protocol62RepresentationTests.test_universal_kernel_contains_lossless_representation_contract
-          - test_protocol_62_representation.py Protocol62RepresentationTests.test_every_entrypoint_routes_to_current_kernel
-          - test_protocol_62_representation.py Protocol62RepresentationTests.test_root_roles_delegate_language_and_tool_leaf_routing
-          - test_protocol_62_representation.py Protocol62RepresentationTests.test_navigation_does_not_define_activation_by_package_presence
-          - test_protocol_62_representation.py Protocol62RepresentationTests.test_prebootstrap_source_does_not_invent_protocol_62_public_sha
-          - test_protocol_62_representation.py Protocol62RepresentationTests.test_preservation_evidence_is_explicitly_non_authoritative
-          - test_protocol_62_representation.py Protocol62RepresentationTests.test_current_navigation_uses_new_kernel_path
-          - test_protocol_511_tool_assistance.py Protocol511ToolAssistanceTests.test_lifecycle_entrypoints_route_tool_questions_through_canonical_concern_owner
-          - test_protocol_511_tool_assistance.py Protocol511ToolAssistanceTests.test_tool_references_remain_progressively_disclosed_and_packaged
-          - test_protocol_511_tool_assistance.py Protocol511ToolAssistanceTests.test_common_reference_owns_selection_composition_and_authority
-          - test_protocol_511_tool_assistance.py Protocol511ToolAssistanceTests.test_common_reference_is_progressive_disclosure_not_tool_manual
-          - test_protocol_511_tool_assistance.py Protocol511ToolAssistanceTests.test_serena_guidance_protects_backend_completeness_mutation_and_memory
-          - test_protocol_511_tool_assistance.py Protocol511ToolAssistanceTests.test_semgrep_guidance_bounds_rule_engine_scope_and_suppressions
-          - test_protocol_511_tool_assistance.py Protocol511ToolAssistanceTests.test_hypothesis_guidance_preserves_oracle_durability_and_isolation
-          - test_protocol_511_tool_assistance.py Protocol511ToolAssistanceTests.test_source_readme_routes_to_split_tool_owners_without_copying_manuals
-          - test_protocol_511_tool_assistance.py Protocol511ToolAssistanceTests.test_portability_keeps_external_tooling_optional
-          - test_protocol_515_language_profiles.py Protocol515LanguageProfileTests.test_shared_profile_direction_rejects_global_language_precedence
-          - test_protocol_515_language_profiles.py Protocol515LanguageProfileTests.test_material_routes_are_mandatory_and_composed_through_router
-          - test_protocol_515_language_profiles.py Protocol515LanguageProfileTests.test_real_package_builder_carries_router_and_leaf_profiles_transitively
-          - test_protocol_515_language_profiles.py Protocol515LanguageProfileTests.test_python_runtime_selection_is_not_gil_monoculture
-          - test_protocol_515_language_profiles.py Protocol515LanguageProfileTests.test_python_accelerator_counterfactual_is_gated_and_complete
-          - test_protocol_515_language_profiles.py Protocol515LanguageProfileTests.test_cpp_accelerator_uses_same_shared_gate
-          - test_protocol_515_language_profiles.py Protocol515LanguageProfileTests.test_performance_counterfactual_separates_simple_efficiency_from_complexity
-          - test_protocol_515_language_profiles.py Protocol515LanguageProfileTests.test_counterfactual_qualification_covers_direction_not_tool_identity
-          - test_protocol_515_language_profiles.py Protocol515LanguageProfileTests.test_version_binding_and_repository_local_python_remain_preserved
-          - test_protocol_tooling.py ProtocolToolingTests.test_build_and_validate_packages
-          - test_protocol_tooling.py ProtocolToolingTests.test_build_emits_unpacked_and_zip_runtime_forms
-          - test_protocol_tooling.py ProtocolToolingTests.test_implementation_package_contains_cross_cutting_references_and_openai_adapter
-          - test_protocol_tooling.py ProtocolToolingTests.test_generic_core_validation_does_not_require_openai_adapter
-          - test_protocol_tooling.py ProtocolToolingTests.test_repository_adapter_validation_rejects_missing_openai_metadata
-          - test_protocol_tooling.py ProtocolToolingTests.test_validator_rejects_broken_direct_reference_route
-          - test_protocol_tooling.py ProtocolToolingTests.test_validator_rejects_packaged_unlinked_reference
-          - test_protocol_tooling.py ProtocolToolingTests.test_frontmatter_accepts_standard_optional_field
-          - test_protocol_tooling.py ProtocolToolingTests.test_frontmatter_rejects_nonportable_name
-          - test_protocol_tooling.py ProtocolToolingTests.test_dist_parity_detects_modified_zip_member
-          - test_protocol_tooling.py ProtocolToolingTests.test_dist_parity_detects_modified_unpacked_member
-          - test_protocol_tooling.py ProtocolToolingTests.test_dist_parity_ignores_zip_metadata_when_contents_match
-          - test_protocol_tooling.py ProtocolToolingTests.test_build_index_matches_protocol_version_and_runtime_root
-    name: diagnostic (${{ matrix.case }})
+        category:
+          - route
+          - reachability
+          - canonical
+          - adapter
+          - identity
+          - archive
+          - frontmatter
+          - unsafe
+    name: validator-diagnostic (${{ matrix.category }})
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -126,8 +52,31 @@ jobs:
           python-version: "3.12"
       - name: Install validation dependencies
         run: python -m pip install -r source/requirements-validation.txt
-      - name: Run ${{ matrix.case }}
-        run: python tests/${{ matrix.case }}
+      - name: Classify generated-package validation errors
+        env:
+          CATEGORY: ${{ matrix.category }}
+        run: |
+          python source/build_skills.py --output /tmp/validator-dist >/dev/null
+          python - <<'PY'
+          import os
+          import sys
+          from pathlib import Path
+          sys.path.insert(0, "source")
+          import validate_packages
+          errors = validate_packages.validate(Path("/tmp/validator-dist"))
+          categories = {
+              "route": ("routed resource is not packaged", "local markdown route is not packaged"),
+              "reachability": ("not reachable from skill.md",),
+              "canonical": ("differs from canonical", "no canonical source"),
+              "adapter": ("openai adapter",),
+              "identity": ("protocol version", "manifest", "build_index", "runtime skill set", "top-level"),
+              "archive": ("unpacked/zip", "zip member", "duplicate zip", "exceeds 25"),
+              "frontmatter": ("frontmatter", "not utf-8"),
+              "unsafe": ("unsafe", "encoded"),
+          }
+          needles = categories[os.environ["CATEGORY"]]
+          raise SystemExit(1 if any(any(needle in error.lower() for needle in needles) for error in errors) else 0)
+          PY
 
   orchestrator-core:
     runs-on: ubuntu-latest

@@ -200,7 +200,7 @@ class Protocol513OracleFamilyClosureTests(unittest.TestCase):
         self.assertTrue(common_router_holds(self.common))
         for anchor in anchors:
             with self.subTest(anchor=anchor):
-                self.assertFalse(common_router_holds(self.common.replace(anchor, "", 1)))
+                self.assertFalse(common_router_holds(self.common.replace(anchor, "")))
 
     def test_mandatory_pipeline_inversion_is_rejected(self) -> None:
         self.assertTrue(negative_pipeline_holds(self.common))

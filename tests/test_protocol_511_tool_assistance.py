@@ -171,17 +171,19 @@ class Protocol511ToolAssistanceTests(unittest.TestCase):
 
     def test_source_readme_routes_to_split_tool_owners_without_copying_manuals(self) -> None:
         readme = read("source/README.md")
+        common = read(COMMON)
         self.assertIn("shared/references/tool-assisted-engineering.md", readme)
-        for name in ("tool-serena.md", "tool-semgrep.md", "tool-hypothesis.md", "tool-codeql.md"):
-            self.assertIn(name, readme)
+        for name in DIRECT_TOOL_FILES:
+            self.assertIn(name, common)
+            self.assertNotIn(f"shared/references/{name}", readme)
         self.assertNotIn("## serena: semantic repository intelligence", readme)
 
     def test_portability_keeps_external_tooling_optional(self) -> None:
         text = read("PORTABILITY.md")
         self.assertIn("optional environment capabilities", text)
-        self.assertIn("not part of generic agent skill validity", text)
-        self.assertIn("direct-directory installation contract", text)
-        self.assertIn("named harness/tool configuration", text)
+        self.assertIn("not generic agent skill validity requirements", text)
+        self.assertIn("install a skill as a direct child", text)
+        self.assertIn("named harness/model/tool evidence", text)
 
 
 if __name__ == "__main__":

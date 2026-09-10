@@ -89,10 +89,11 @@ class Protocol6ContractTests(unittest.TestCase):
         self.assertIn("could remain green", self.testing)
 
     def test_active_simplicity_survives_without_machinery_preservation(self) -> None:
-        for text in (self.d3, read("source/roles/software-implementation/SKILL.md").lower()):
-            self.assertIn("remove", text)
-            self.assertIn("consolidat", text)
+        implementation = read("source/roles/software-implementation/SKILL.md").lower()
+        self.assertIn("simplify/re-derive delegated concretization", self.d3)
         self.assertIn("before another additive durable repair", self.d3)
+        self.assertIn("remove/narrow/alter/consolidate/refactor", implementation)
+        self.assertIn("obsolete/bypassed/duplicate ownership", implementation)
 
     def test_workflow_is_proportional_and_preserves_overridden_risk(self) -> None:
         prompts = read("source/shared/references/development-workflow-prompts.md").lower()

@@ -27,8 +27,8 @@ class Protocol513RoutingPreservationTests(unittest.TestCase):
 
     def test_513_history_is_preserved_without_owning_current_version(self) -> None:
         versioning = lower("source/shared/references/protocol-versioning-and-compatibility.md")
-        self.assertIn("protocol 5.14 is a backward-compatible", versioning)
-        self.assertIn("protocol 5.13 is a backward-compatible", versioning)
+        self.assertIn("5.13 deterministic tool entry/codeql/progressive disclosure", versioning)
+        self.assertIn("5.14 solution-boundary/active simplicity", versioning)
 
     def test_dispatch_remains_per_question_relation_first_via_concern_router(self) -> None:
         for text in (self.design, self.implementation):

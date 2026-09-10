@@ -10,6 +10,8 @@ Authority roles: `scientific-formulation`, `numerical-algorithm-design`, `softwa
 
 The active role/specialist `SKILL.md` owns **root activation**. It routes to the universal kernel/owning concern; a canonical concern owner may conditionally dispatch to a narrower leaf only within that concern. Each activation edge states a decision predicate and resolvable resource, remains acyclic, adds/narrows material semantics, and reuses already-loaded applicable owners rather than reloading them.
 
+The canonical universal-kernel source is `source/shared/references/abstraction-and-concretization.md`; inside a packaged skill it is reached as `references/abstraction-and-concretization.md`.
+
 ```text
 activation -> required source/package reachability
 reachability / ordinary Markdown link / semantic dependency / package membership != activation

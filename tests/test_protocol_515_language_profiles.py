@@ -49,7 +49,8 @@ class Protocol515LanguageProfileTests(unittest.TestCase):
         for path in (self.design_path, self.impl_path):
             text = read(path).lower()
             self.assertIn("references/language-profiles.md", text, path)
-            self.assertIn("conditionally dispatches to python/c++ profiles", text, path)
+            self.assertIn("load only triggered concern owners", text, path)
+            self.assertIn("dispatches to python/c++ profiles", text, path)
             self.assertNotIn("references/python-engineering.md", text, path)
             self.assertNotIn("references/cpp-engineering.md", text, path)
 
@@ -87,7 +88,7 @@ class Protocol515LanguageProfileTests(unittest.TestCase):
 
     def test_cpp_accelerator_uses_same_shared_gate(self) -> None:
         accel = section(self.cpp, "## accelerator concretization")
-        for concept in ("dormant unless", "accepted d3 architecture", "when enabled", "central-processing-unit (cpu)/reference numerical equivalence", "end-to-end benefit"):
+        for concept in ("dormant unless", "accepted d3 architecture", "when enabled", "central processing unit (cpu)/reference path", "end-to-end benefit"):
             self.assertIn(concept, accel)
 
     def test_performance_counterfactual_separates_simple_efficiency_from_complexity(self) -> None:
@@ -104,10 +105,11 @@ class Protocol515LanguageProfileTests(unittest.TestCase):
     def test_version_binding_and_repository_local_python_remain_preserved(self) -> None:
         versioning = read("source/shared/references/protocol-versioning-and-compatibility.md").lower()
         root_readme = read("README.md").lower()
-        self.assertIn("protocol 5.15 is a backward-compatible", versioning)
-        self.assertIn("active older workplans may continue under their declared version", versioning)
+        self.assertIn("5.15 language profiles/cross-language performance", versioning)
+        self.assertIn("older active work may continue under their declared version", versioning)
         self.assertIn("may continue under their declared version", versioning)
-        self.assertIn("repository-local delegated d4 validation machinery", root_readme)
+        self.assertIn("python source/build_skills.py", root_readme)
+        self.assertNotIn("python source/build_skills.py", self.python)
         self.assertIn("protocol_version: 5.14.0", read("workplans/archive/PROTOCOL-5.15-LANGUAGE-PROFILES-CPP-PERFORMANCE.md"))
 
 
