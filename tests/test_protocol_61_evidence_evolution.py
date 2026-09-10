@@ -24,14 +24,15 @@ class Protocol61EvidenceEvolutionTests(unittest.TestCase):
         self.assertIn("stale pass", testing.lower())
         self.assertIn("stale fail", testing.lower())
 
-    def test_role_skills_do_not_call_evidence_realizations_concretizations(self) -> None:
+    def test_role_skills_keep_evidence_target_separate_from_execution_machinery(self) -> None:
         for role in ("software-design", "software-implementation"):
             text = self.read(f"source/roles/{role}/SKILL.md").lower()
             self.assertNotIn("evidence specifications/concretizations", text, role)
             self.assertNotIn("evidence specification, concretization", text, role)
         implementation = self.read("source/roles/software-implementation/SKILL.md").lower()
-        self.assertIn("evidence target", implementation)
-        self.assertIn("execution dependency", implementation)
+        evidence = self.read("source/shared/references/evidence-evolution-and-dependencies.md")
+        self.assertIn("evidence target separately from harness/fixture/backend/implementation dependencies", implementation)
+        self.assertIn("EXECUTION_DEPENDS_ON", evidence)
 
     def test_source_readme_canonical_routes_exist(self) -> None:
         readme = self.read("source/README.md")
