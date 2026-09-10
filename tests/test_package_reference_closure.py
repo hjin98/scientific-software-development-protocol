@@ -29,11 +29,17 @@ class PackageReferenceClosureTests(unittest.TestCase):
         errors = validate_packages.validate_packaged_markdown_links(files)
         self.assertTrue(any("local Markdown route is not packaged" in error for error in errors), errors)
 
-    def test_documentation_route_packages_writing_owner_explicitly(self) -> None:
-        for skill_name, spec, _ in build_skills.all_specs():
-            refs = set(spec["references"])
-            if "documentation-and-evidence.md" in refs:
-                self.assertIn("scientific-technical-writing.md", refs, skill_name)
+    def test_documentation_route_packages_writing_owner_transitively(self) -> None:
+        with tempfile.TemporaryDirectory() as td:
+            out = Path(td) / "dist"
+            build_skills.build(out)
+            for skill_name, spec, _ in build_skills.all_specs():
+                if "documentation-and-evidence.md" not in set(spec["references"]):
+                    continue
+                files = validate_packages.directory_files(out / "skills" / skill_name)
+                self.assertIn("references/documentation-and-evidence.md", files, skill_name)
+                self.assertIn("references/scientific-technical-writing.md", files, skill_name)
+                self.assertEqual([], validate_packages.validate_packaged_markdown_links(files), skill_name)
 
 
 class PackageReferenceReachabilityTests(unittest.TestCase):
