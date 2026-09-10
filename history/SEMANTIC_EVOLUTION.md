@@ -78,7 +78,7 @@ A subsequent Protocol-6.1-self-review reopened release closure again after findi
 - **Authority disposition:** no D1/D2/D3 semantic doctrine is changed and no Serious Challenge is active. Repair is bounded to D4 packaging/validation, documentation concretization, public-source version resolution, and lifecycle/recovery evidence.
 - **Prior closeout disposition:** semantic candidate `5f911fecb0de2847f63c0b4859e1dd8c63d3d8ef` and recovery `0c90fda19bf6ed9cb0c4511beb3da80ace6584ed` remain immutable historical evidence but are superseded for final release/recovery authority.
 - **Current repair authority:** `workplans/active/SSDP-6.1-SECOND-REOPENED-PORTABILITY-DOCUMENTATION-AND-RECOVERY-REPAIR.md`.
-- **Public-source bootstrap:** pending Stage-A repaired immutable commit.
+- **Public-source bootstrap:** `47e9155632c44493644b0b02fa1fa625703cf480`; current 6.1 web/manual fallback must resolve this immutable compatible source instead of repository-default bytes.
 - **Lifecycle:** ACTIVE / NO-PASS until fresh package/orchestrator acceptance, 95-scenario qualification, independent Review, and replacement recovery closeout.
 
 ## Maintenance

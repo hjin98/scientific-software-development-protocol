@@ -49,3 +49,8 @@ A current D3 or D4 role says `evidence specifications/concretizations`, or label
 
 ### 94. Canonical source navigation must resolve retained compatibility paths
 A current README tells operators to read `shared/references/abstraction-and-concretization.md`, but the deliberately retained compatibility filename is `shared/references/abstraction-and-realization.md` and no alias exists. Reject the current documentation as incomplete/dangling. Correct the navigation to the real retained path; do not add a duplicate alias merely to make the bad link resolve.
+
+## K. Second-reopened portability and recovery closure case
+
+### 95. Current public fallback must not depend on an incompatible default branch
+A web environment has no governing-version-compatible installed skill. The canonical repository default branch still exposes Protocol 6.0 while the requested work is explicitly governed by current Protocol 6.1. Resolve current 6.1 public source from `https://github.com/hjin98/scientific-software-development-protocol` at immutable compatible bootstrap commit `47e9155632c44493644b0b02fa1fa625703cf480` and load the required `source/` entrypoint/references there. Do not silently use the default branch, do not reinterpret the work as 6.0, and do not guess that the semantic version string itself is a Git ref. If the immutable compatible source cannot be read, report truthful non-closure instead of executing from memory.

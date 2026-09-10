@@ -115,11 +115,16 @@ Core selects by declared protocol/profile identity rather than by one global cur
 
 ## Public-source resolution
 
-Current Protocol 6.1 local-first/public-fallback guidance uses the canonical public repository:
+Current Protocol 6.1 local-first/public-fallback resolution is explicitly version-bound:
 
 ```text
-https://github.com/hjin98/scientific-software-development-protocol
+repository -> https://github.com/hjin98/scientific-software-development-protocol
+6.1.0 public-source bootstrap -> 47e9155632c44493644b0b02fa1fa625703cf480
 ```
+
+A current 6.1 resolver must use both the canonical repository identity and the immutable compatible bootstrap commit above. The repository default branch is not a protocol-version oracle and may remain on 6.0 during release/cutover. Do not guess that `6.1.0` is itself a Git ref and do not silently substitute default-branch semantics. Historical 5.16/6.0 work continues to use its own immutable mappings.
+
+The bootstrap commit contains the repaired current 6.1 roles/references/package-validation/documentation source needed for public fallback. It is distinct from the final replacement recovery identity, which is established only after the final semantic candidate passes fresh qualification and independent Review.
 
 Historical release-pinned prompts/profiles retain their historical bytes and URLs. Do not rewrite a frozen profile merely because the repository identity or current documentation changed later.
 
@@ -133,9 +138,11 @@ Final assembled acceptance must still reflect the candidate after all material e
 
 ## Protocol 6.1 recovery and Protocol 7 rollback boundary
 
-After Protocol 6.1 implementation, complete qualification, independent Review, and closeout, pin an immutable 6.1 source/profile recovery identity. That snapshot must be sufficient to restore the document-controlled/semi-automated workflow without Protocol 7 machinery.
+Protocol 6.1 release closure is currently reopened. The immutable public-source bootstrap `47e9155632c44493644b0b02fa1fa625703cf480` is a compatible source target for current web/manual fallback, but it is not automatically the final Protocol 6.1 rollback identity.
 
-Protocol 7 fallback is version rollback to that immutable Protocol 6.1 snapshot, never simultaneous dual-current workflow authority.
+After the repaired final semantic candidate passes complete qualification and independent Review, establish a replacement immutable recovery commit sufficient to restore the document-controlled/semi-automated workflow without Protocol 7 machinery. Publish that exact recovery SHA in this current versioning guidance and in `PORTABILITY.md` through the post-Review mapping-only closeout. Git commits cannot self-name, so the immutable recovery target need not contain its own SHA; the immediately later current mapping may identify it without changing the recovered protocol behavior.
+
+Protocol 7 fallback is version rollback to that accepted immutable Protocol 6.1 recovery snapshot, never simultaneous dual-current workflow authority. The prior `0c90fda19bf6ed9cb0c4511beb3da80ace6584ed` snapshot is historical only after this second reopen.
 
 ## Candidate identity
 

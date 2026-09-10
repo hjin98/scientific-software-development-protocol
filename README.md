@@ -82,7 +82,7 @@ Canonical role entrypoints:
 
 Optional specialists remain non-authoritative support capabilities: `software-documentation`, `software-maintenance-audit`, and `repository-hygiene`.
 
-Skill resolution is compatible-local-first, canonical-public-source-second. Never silently reinterpret an older workplan under newer doctrine. Historical Protocol 5.16 is pinned to immutable commit `e151daaf5c8eebb351a85cfed86170fda80fb5e3` and the orchestrator retains its packaged `sdp-protocol-5.16` schema-v1 profile alongside frozen `ssdp-protocol-6.0` schema v2 and current `ssdp-protocol-6.1` schema v2.
+Skill resolution is compatible-local-first, canonical-public-source-second. Current Protocol 6.1 public fallback uses immutable compatible source `47e9155632c44493644b0b02fa1fa625703cf480` rather than assuming the repository default branch is already 6.1. Never silently reinterpret an older workplan under newer doctrine. Historical Protocol 5.16 is pinned to immutable commit `e151daaf5c8eebb351a85cfed86170fda80fb5e3` and the orchestrator retains its packaged `sdp-protocol-5.16` schema-v1 profile alongside frozen `ssdp-protocol-6.0` schema v2 and current `ssdp-protocol-6.1` schema v2.
 
 ## Build and acceptance
 

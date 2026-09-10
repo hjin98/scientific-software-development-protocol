@@ -26,11 +26,13 @@ Optional specialists: `software-documentation`, `software-maintenance-audit`, `r
 `source/shared/references/development-workflow-prompts.md` is the canonical prompt source. With `AUTO_LOCAL_FIRST`:
 
 1. use a governing-version-compatible installed skill/exposed skill root through the harness-native mechanism;
-2. otherwise use the canonical public repository `https://github.com/hjin98/scientific-software-development-protocol` and its `source/` entrypoint plus required references;
+2. otherwise use the canonical public repository `https://github.com/hjin98/scientific-software-development-protocol` at immutable current-6.1 public-source bootstrap `47e9155632c44493644b0b02fa1fa625703cf480` and load its `source/` entrypoint plus required references; never use repository-default bytes as a substitute for the declared protocol version;
 3. preserve the workplan's protocol binding; never guess a semantic version as a Git ref or silently substitute current doctrine;
 4. report truthful non-closure if no compatible source can be read.
 
 Before mutation classify the highest potentially affected D1/D2/D3/D4 domain and direct governed side constraints. Reduced routes are normal; do not force every task through all four skills.
+
+Current Protocol 6.1 immutable public-source bootstrap: `47e9155632c44493644b0b02fa1fa625703cf480`. This source identity is usable before default-branch cutover and is distinct from the replacement rollback recovery identity, which remains pending fresh qualification/Review closeout.
 
 ## Orchestrator profile compatibility
 

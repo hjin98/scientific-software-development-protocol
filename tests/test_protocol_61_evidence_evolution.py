@@ -59,6 +59,8 @@ class Protocol61EvidenceEvolutionTests(unittest.TestCase):
         prompts = self.read("source/shared/references/development-workflow-prompts.md")
         self.assertIn("https://github.com/hjin98/scientific-software-development-protocol", prompts)
         self.assertNotIn("https://github.com/hjin98/software-development-protocol", prompts)
+        self.assertIn("47e9155632c44493644b0b02fa1fa625703cf480", prompts)
+        self.assertIn("repository default branch", prompts.lower())
 
 if __name__ == "__main__":
     unittest.main()

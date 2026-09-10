@@ -1,17 +1,30 @@
 # Scientific Software Development Workflow Prompts
 
+## Background and terminology
+
+The **Scientific Software Development Protocol (SSDP)** uses D1 scientific/mathematical, D2 algorithm/numerical, D3 software-architecture, and D4 specification/implementation authority. A **protocol source ref** is the Git identity used to read the governing version's canonical `source/` files. A **public-source bootstrap snapshot** is an immutable compatible commit used when no governing-version-compatible local skill is available.
+
 This is the canonical human-facing orchestration source for Protocol 6.1. These are **execution prompts**, not advisory examples: under `AUTO_EXECUTE` the selected stage performs its authorized work with available tools and returns concrete artifacts/evidence rather than merely suggesting commands or next steps.
 
 Protocol 6.1 routes work through the authority-bearing domain that actually owns the semantics rather than forcing every task through a four-stage waterfall.
 
 ## Portable protocol-skill resolution
 
+Current Protocol 6.1 public fallback identity:
+
+```text
+PUBLIC_REPOSITORY = https://github.com/hjin98/scientific-software-development-protocol
+PUBLIC_REF = 47e9155632c44493644b0b02fa1fa625703cf480
+```
+
+The immutable `PUBLIC_REF` is intentional: the repository default branch may still expose another protocol version during release/cutover. Current 6.1 fallback must therefore resolve `source/` at this exact compatible commit rather than silently reading repository-default bytes.
+
 Resolve compatible skills **local first, public repository second**.
 
 When `PROTOCOL_SOURCE = AUTO_LOCAL_FIRST`:
 
 1. Inspect the current harness skill/plugin/command registry and any **documented exposed installed-skill root**. Use a governing-version-compatible installed skill through the harness-native mechanism. Selectors such as `@software-design` or `/software-implementation` are harness selectors, **not shell commands**.
-2. If no compatible local skill is readable, fall back to the canonical public repository `https://github.com/hjin98/scientific-software-development-protocol` and load `source/roles/<skill-name>/SKILL.md` or `source/specialists/<skill-name>/SKILL.md` plus the entrypoint's required references. `source/` is canonical; generated `dist/` is transport output.
+2. If no compatible local skill is readable, fall back to the canonical public repository `https://github.com/hjin98/scientific-software-development-protocol`. For current Protocol 6.1, read `source/roles/<skill-name>/SKILL.md` or `source/specialists/<skill-name>/SKILL.md` and required references at immutable `PUBLIC_REF = 47e9155632c44493644b0b02fa1fa625703cf480`; do not use the repository default branch unless it resolves to the same compatible source. `source/` is canonical; generated `dist/` is transport output.
 3. Preserve governing protocol-version coherence. A workplan's declared `protocol_version` controls inherited semantics. **Do not guess that a semantic version is a Git ref** and **do not silently substitute a different protocol version** merely because current Protocol 6.1 is installed.
 4. If neither a compatible local installation/root nor a compatible public source can be read, report **truthful non-closure** and **do not claim protocol execution from memory** or from a similarly named unrelated skill.
 
