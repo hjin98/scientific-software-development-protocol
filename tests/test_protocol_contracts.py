@@ -98,8 +98,10 @@ class Protocol6ContractTests(unittest.TestCase):
         prompts = read("source/shared/references/development-workflow-prompts.md").lower()
         self.assertIn("change_plan may be none", prompts)
         self.assertIn("risk-accepted/provisional", prompts)
-        self.assertIn("dependent descendants", prompts)
-        self.assertIn("cannot emit unqualified", prompts)
+        self.assertIn("authority_state", prompts)
+        self.assertIn("risk_accepted_provisional", prompts)
+        self.assertIn("dependent result", prompts)
+        self.assertIn("unqualified pass/complete", prompts)
         self.assertIn("risk override", self.workflow)
 
     def test_historical_versions_are_immutable_and_not_silently_upgraded(self) -> None:
