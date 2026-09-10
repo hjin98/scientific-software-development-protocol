@@ -1,10 +1,14 @@
 #!/usr/bin/env python3
 """Run the Core acceptance suite, sharded across processes.
 
-Test modules are independent by construction, so each runs in its own
-interpreter. Concurrency is sized from the machine's effective CPU allocation and
-capped by the module count -- there is nothing to gain from more workers than
-shards, and oversubscription only slows the Git-heavy modules down.
+Most test modules are independent and run concurrently in separate interpreters.
+Resource-heavy installed-artifact acceptance runs as an exclusive shard because
+it builds and installs wheel/sdist artifacts in multiple virtual environments;
+running that shard beside the full parallel suite can exceed a shared CI runner's
+resource envelope and terminate it outside unittest reporting.
+
+Concurrency for the remaining shards is sized from the machine's effective CPU
+allocation and capped by the parallel module count.
 
 Usage:
     python orchestrator/scripts/run_core_tests.py [-j N] [module ...]
@@ -23,6 +27,7 @@ from pathlib import Path
 PACKAGE_ROOT = Path(__file__).resolve().parents[1]
 TESTS_DIR = PACKAGE_ROOT / "tests"
 SOURCE_DIR = PACKAGE_ROOT / "src"
+EXCLUSIVE_MODULES = frozenset({"tests.test_installed_product"})
 
 
 def effective_cpus() -> int:
@@ -58,6 +63,19 @@ def run_module(module: str) -> tuple[str, int, str, float]:
     return module, result.returncode, result.stdout + result.stderr, time.monotonic() - started
 
 
+def _record_result(
+    result: tuple[str, int, str, float],
+    failures: list[tuple[str, str]],
+) -> int:
+    module, code, output, elapsed = result
+    count = _test_count(output)
+    status = "ok" if code == 0 else f"FAIL({code})"
+    print(f"  {status:>8}  {module:<48} {count:>4} tests  {elapsed:5.1f}s")
+    if code != 0:
+        failures.append((module, output))
+    return count
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("modules", nargs="*", help="test modules (default: all)")
@@ -70,20 +88,32 @@ def main() -> int:
     if not modules:
         print("no test modules found", file=sys.stderr)
         return 1
-    jobs = min(args.jobs or effective_cpus(), len(modules))
 
-    print(f"running {len(modules)} test modules across {jobs} workers")
+    exclusive = [module for module in modules if module in EXCLUSIVE_MODULES]
+    parallel = [module for module in modules if module not in EXCLUSIVE_MODULES]
+    requested_jobs = args.jobs or effective_cpus()
+    jobs = min(requested_jobs, len(parallel)) if parallel else 0
+
+    description = f"running {len(modules)} test modules"
+    if parallel:
+        description += f" with {len(parallel)} parallel shard(s) across {jobs} worker(s)"
+    if exclusive:
+        description += f" and {len(exclusive)} exclusive shard(s)"
+    print(description)
+
     failures: list[tuple[str, str]] = []
     total = 0
     started = time.monotonic()
-    with ProcessPoolExecutor(max_workers=jobs) as pool:
-        for module, code, output, elapsed in pool.map(run_module, modules):
-            count = _test_count(output)
-            total += count
-            status = "ok" if code == 0 else "FAIL"
-            print(f"  {status:>4}  {module:<48} {count:>4} tests  {elapsed:5.1f}s")
-            if code != 0:
-                failures.append((module, output))
+
+    if parallel:
+        with ProcessPoolExecutor(max_workers=jobs) as pool:
+            for result in pool.map(run_module, parallel):
+                total += _record_result(result, failures)
+
+    # Run resource-heavy shards only after the parallel worker pool has exited,
+    # so their build/install subprocess trees do not overlap other test shards.
+    for module in exclusive:
+        total += _record_result(run_module(module), failures)
 
     elapsed = time.monotonic() - started
     for module, output in failures:
