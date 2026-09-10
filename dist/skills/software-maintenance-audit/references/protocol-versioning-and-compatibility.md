@@ -124,7 +124,7 @@ repository -> https://github.com/hjin98/scientific-software-development-protocol
 
 A current 6.1 resolver must use both the canonical repository identity and the immutable compatible bootstrap commit above. The repository default branch is not a protocol-version oracle and may remain on 6.0 during release/cutover. Do not guess that `6.1.0` is itself a Git ref and do not silently substitute default-branch semantics. Historical 5.16/6.0 work continues to use its own immutable mappings.
 
-The bootstrap commit contains the repaired current 6.1 roles/references/package-validation/documentation source needed for public fallback. It is distinct from the final replacement recovery identity, which is established only after the final semantic candidate passes fresh qualification and independent Review.
+The bootstrap commit contains the repaired current 6.1 roles/references/package-validation/documentation source needed for public fallback. It remains distinct from the accepted second-reopen recovery snapshot `802e75af261efb4f70d71284d860613a2197b639`, which also contains the final semantic candidate and its fresh qualification/Review evidence.
 
 Historical release-pinned prompts/profiles retain their historical bytes and URLs. Do not rewrite a frozen profile merely because the repository identity or current documentation changed later.
 
@@ -138,11 +138,17 @@ Final assembled acceptance must still reflect the candidate after all material e
 
 ## Protocol 6.1 recovery and Protocol 7 rollback boundary
 
-Protocol 6.1 release closure is currently reopened. The immutable public-source bootstrap `47e9155632c44493644b0b02fa1fa625703cf480` is a compatible source target for current web/manual fallback, but it is not automatically the final Protocol 6.1 rollback identity.
+The second-reopened Protocol 6.1 semantic candidate `be7d05827f52a3029c294c38edf5ede1afb1f9b4` passed fresh 95/95 behavioral qualification and fresh independent D3 Review with no Serious Challenge and zero open blockers. The accepted replacement immutable recovery snapshot is:
 
-After the repaired final semantic candidate passes complete qualification and independent Review, establish a replacement immutable recovery commit sufficient to restore the document-controlled/semi-automated workflow without Protocol 7 machinery. Publish that exact recovery SHA in this current versioning guidance and in `PORTABILITY.md` through the post-Review mapping-only closeout. Git commits cannot self-name, so the immutable recovery target need not contain its own SHA; the immediately later current mapping may identify it without changing the recovered protocol behavior.
+```text
+6.1.0 -> 802e75af261efb4f70d71284d860613a2197b639
+```
 
-Protocol 7 fallback is version rollback to that accepted immutable Protocol 6.1 recovery snapshot, never simultaneous dual-current workflow authority. The prior `0c90fda19bf6ed9cb0c4511beb3da80ace6584ed` snapshot is historical only after this second reopen.
+That recovery commit contains the accepted semantic candidate through ancestry together with the candidate-bound 95-scenario qualification record and independent Review record needed to interpret the rollback state. The immutable public-source bootstrap remains `47e9155632c44493644b0b02fa1fa625703cf480`; it is the version-correct source fallback, not the release recovery identity.
+
+Git commits cannot self-name, so this current mapping is intentionally published after the immutable recovery target. The earlier Protocol 6.1 recovery snapshots `dec5ff2767e14fd1cda46e073757aa27f40e270c` and `0c90fda19bf6ed9cb0c4511beb3da80ace6584ed` remain immutable historical evidence but are superseded for current release/rollback authority.
+
+Protocol 7 fallback is version rollback to `802e75af261efb4f70d71284d860613a2197b639`, never simultaneous dual-current workflow authority.
 
 ## Candidate identity
 
