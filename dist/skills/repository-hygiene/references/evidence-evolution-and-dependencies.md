@@ -1,207 +1,117 @@
 # Evidence, Evolution, and Semantic Dependencies
 
-Protocol 6.1 treats scientific-software development as an evolving relationship among accepted authority, downstream concretizations, and evidence. This reference supplements the governing abstraction/concretization model; it does not create a fifth authority domain.
+Own evidence specification/realization/observation/assessment, applicability and stale-state, evidentiary target vs execution dependency, independence/common-mode risk, bounded semantic dependency/impact closure, and semantic-evolution history. Evidence is not D5 and never becomes D1-D4/external authority by packaging or repetition.
 
-## Background and terminology
-
-The **Scientific Software Development Protocol (SSDP)** uses four semantic authority domains: D1 scientific/mathematical formulation, D2 algorithm/numerical method, D3 software architecture, and D4 specification/implementation.
-
-Protocol 6.1 uses these terms:
-
-- **concretization** — a lower-level scientific, numerical, architectural, specification, or implementation choice constrained by one or more governing abstractions;
-- **evidence specification** — a reusable definition of a test, experiment, benchmark, proof/check procedure, validation procedure, or other evidence-generating instrument;
-- **evidence realization** — one concrete execution or instantiation of an evidence specification under identified subject revision, inputs/regime, environment, and assumptions;
-- **observation** — the result produced by an evidence realization;
-- **evidence assessment** — an interpretation of one or more observations with respect to a governed claim;
-- **semantic evolution record** — concise historical reasoning that explains why a material authority, concretization, evidence expectation, or delegated mechanism was replaced, generalized, retired, or restored.
-
-Evidence is not D5 and does not become semantic truth by packaging. It supports, challenges, or fails to resolve claims owned by D1-D4 or by applicable external authority.
-
-## Authority-Evidence-Evolution model
-
-Maintain three orthogonal concerns:
-
-1. **Authority/concretization structure** — what is currently supposed to be true and how accepted abstractions are concretized downstream.
-2. **Evidence structure** — what specifications, realizations, observations, and assessments bear on governed claims and under what assumptions/regimes.
-3. **Evolution history** — how and why authorities, concretizations, evidence expectations, and delegated mechanisms changed over time.
-
-The development cycle is therefore dynamic:
+## Core model and terminology
 
 ```text
-observation/context
- -> model or authority proposal
- -> accepted abstraction
- -> downstream concretization
- -> prediction/behavior
+authority / governed claim
+ -> evidence specification
  -> evidence realization
  -> observation
- -> evidence assessment/challenge
- -> authority or concretization revision when justified
- -> bounded dependency impact
- -> reconcretization/revalidation
+ -> evidence assessment
 ```
 
-A contradiction observed at D4 does not prove D4 is the faulty owner. Investigation must consider D4 nonconformance, D3 architecture inadequacy, D2 algorithm/numerical inadequacy, D1 model/context inadequacy, conflicting authority, an invalid evidence specification/oracle, an inapplicable evidence realization, or incorrect interpretation of an observation.
+- **evidence specification** — reusable test/experiment/benchmark/proof/check/validation definition;
+- **evidence realization** — one concrete execution/instantiation under identified subject, inputs/regime, environment and assumptions;
+- **observation** — result produced by a realization;
+- **evidence assessment** — interpretation of observations relative to a governed claim;
+- **semantic evolution record** — concise historical reasoning for material authority/concretization/evidence replacement, generalization, rejection, retirement or restoration.
 
-## Typed semantic relationships
+**Concretization** remains D1-D4 semantic descent; do not use evidence realization as a synonym.
 
-When an explicit Markdown dependency record materially improves impact analysis or review, prefer semantically typed relationships over a generic graph.
+A contradictory observation at D4 does not identify the faulty owner. Consider D4 nonconformance, D3 inadequacy, D2 numerical inadequacy, D1 model/context inadequacy, conflicting authority, defective oracle/specification, inapplicable realization, or incorrect interpretation.
 
-Use consistent direction:
+## Typed relationships
 
-- `CONCRETIZES`: child/concretization -> governing parent abstraction;
-- `DERIVED_FROM`: subject -> semantic/source basis;
-- `DEPENDS_ON`: subject -> material semantic dependency only when no more specific relation fits;
-- `ASSUMES`: subject -> governing assumption;
-- `CONSTRAINED_BY`: subject -> external/domain constraint;
-- `SUPERSEDES` / `REPLACES`: new/current item -> old/superseded item;
-- `CHALLENGES` / `CONTRADICTS`: observation/assessment/finding/authority -> challenged target;
-- `EVIDENCES`: evidence specification -> intended governed claim;
-- `EXECUTION_DEPENDS_ON`: evidence specification or realization -> machinery/data/environment needed to execute or interpret it;
-- `INSTANTIATES`: evidence realization -> evidence specification;
-- `GENERATED_BY`: observation -> evidence realization.
+Use an explicit Markdown dependency record only when it materially improves impact/review. Prefer specific direction:
 
-Do not use `DEPENDS_ON` as a generic substitute for source imports, call graphs, or evidence execution dependencies.
+```text
+child CONCRETIZES -> parent abstraction
+subject DERIVED_FROM -> semantic/source basis
+subject DEPENDS_ON -> material semantic dependency when no narrower relation fits
+subject ASSUMES -> governing assumption
+subject CONSTRAINED_BY -> external/domain constraint
+new SUPERSEDES / REPLACES -> old
+finding/observation CHALLENGES / CONTRADICTS -> target
+evidence specification EVIDENCES -> governed claim
+evidence specification/realization EXECUTION_DEPENDS_ON -> machinery/data/environment
+evidence realization INSTANTIATES -> evidence specification
+observation GENERATED_BY -> evidence realization
+```
 
-### Reference integrity
+Do not overload `DEPENDS_ON` for imports/call graphs or evidence execution dependencies. Endpoints must be recoverable without hidden chat using the cheapest sufficient stable logical/path/workplan/protocol/release/Git identity.
 
-Recorded endpoints must be recoverable without hidden chat. Use the cheapest sufficient identity, for example a stable logical name, existing workplan/domain ID, repository path and section anchor, protocol/release identity, Git commit/tag for a historical revision, or another governed project identity.
+A dependency view is bounded evidence, not automatically complete:
 
-A universal claim-ID registry is not required. When a current artifact moves or is renamed and a maintained current dependency reference would become dangling or ambiguous, reconcile the reference during the same closeout.
+> Absence of an edge establishes independence only when the relevant mapped scope was explicitly reviewed complete for that exclusion.
 
-### Bounded completeness
+Otherwise inspect current authority/implementation/evidence directly.
 
-A dependency record is not automatically complete merely because it exists.
+## Target vs execution dependency
 
-> Absence of an edge is not evidence of independence unless the relevant bounded scope has been explicitly reviewed as complete for that exclusion.
+Keep separate the **evidentiary target** (proposition/invariant evaluated) and **execution dependency** (implementation, harness, fixture, dataset, environment, backend, tool or other machinery required to realize/interpret it).
 
-If completeness has not been established, affected-surface reasoning must still inspect current authority, implementation, and evidence directly.
+A test can target D1/D2 while executing through replaceable D4. Replacing D4 may require rerun/harness remap or retirement of a concretization-specific oracle without invalidating the higher-level proposition/specification. Do not preserve obsolete product machinery merely to keep old evidence executable.
 
-## Evidence target versus execution dependency
+## Applicability and stale evidence
 
-Keep these separate:
-
-- **evidentiary target** — the proposition or invariant the evidence specification evaluates;
-- **execution dependency** — the implementation, harness, fixture, dataset, environment, backend, tool, or other machinery needed to realize and interpret the evidence.
-
-A test can evidence a D1 or D2 invariant while executing through a replaceable D4 concretization. Replacing that D4 concretization may require only a rerun, a harness remap, or retirement of a concretization-specific oracle; it does not automatically invalidate the higher-level proposition or evidence specification.
-
-## Evidence lifecycle and applicability
-
-Projects may encode status locally, but evidence handling must distinguish enough states to prevent false closure, including:
-
-- pending/unrealized;
-- admissible/valid for the current claim and regime;
-- review-required;
-- inconclusive;
-- challenged;
-- stale/inapplicable;
-- rejected/invalid;
-- retired/historical.
+Projects may encode local status but must distinguish enough to prevent false closure: pending/unrealized; admissible/valid; review-required; inconclusive; challenged; stale/inapplicable; rejected/invalid; retired/historical.
 
 Core rule:
 
-> A valid failing observation is evidence. A stale failing observation is not admissible evidence against current authority. A stale passing observation is not admissible confirmation of current authority.
+> A valid failing observation is evidence. A stale failing observation is not admissible evidence against current authority. A stale passing observation is not admissible confirmation.
 
-`stale` means the prior specification/realization mapping cannot currently support or refute the target claim without review, rerun, or remapping. It does not itself prove the governed claim false. Use `review-required` when applicability is uncertain.
+Use `review-required` when applicability is uncertain. PASS/accepted/closed cannot depend on stale, rejected, unavailable-required or otherwise inadmissible evidence.
 
-A PASS/accepted/closed claim may not depend on stale, rejected, unavailable-required, or otherwise inadmissible evidence.
+Where material, applicability must be recoverable over evidence-spec revision, subject/candidate, governed-claim revision, input/validity regime, oracle semantics, environment/backend/precision/configuration, stochastic replicate identity and protocol obligation. Native CI/test/benchmark/experiment artifacts are sufficient when they already establish this; no universal evidence manifest is required.
 
-Where material, evidence applicability must be recoverable across the relevant combination of evidence-specification revision, candidate/subject revision, governed-claim revision, input/validity regime, oracle semantics, environment/backend/precision/configuration, stochastic replicate identity, and protocol obligation. Native test/continuous-integration/benchmark/experiment artifacts are sufficient when they already establish the needed identity; Protocol 6.1 does not require a universal evidence manifest.
+A rerun on a changed candidate creates a new realization; it does not rewrite the old result into evidence for the new subject.
 
-A rerun against a changed candidate creates a new evidence realization. It does not mutate an old result into evidence for the new candidate.
+## Durability, sufficiency, and independence
 
-## Evidence durability, sufficiency, and independence
-
-When evidentiary strength is equivalent, prefer specifications coupled to durable governed invariants over replaceable concretization detail:
+When strength is equivalent, prefer evidence coupled to durable governed invariants over replaceable detail:
 
 ```text
-scientific/mathematical invariant evidence
- > algorithm/numerical property evidence
- > behavioral/architectural contract evidence
- > concretization-specific evidence
+scientific/mathematical invariant
+ > algorithm/numerical property
+ > behavioral/architectural contract
+ > concretization-specific detail
 ```
 
-This is a durability preference, not a substitution hierarchy. D1 evidence does not replace required D2 numerical verification; D1/D2 invariant evidence does not replace required D4 conformance/integration evidence; low-level precision does not establish scientific adequacy.
+This is durability, not substitution: D1 evidence does not replace D2 verification; D1/D2 evidence does not replace required D4 conformance/integration; low-level precision does not establish external adequacy.
 
-Evidence may satisfy only claims its oracle and exercised semantic owner can establish. Proxy-proof and real-owner requirements remain controlling.
+Evidence only establishes claims its oracle and exercised semantic owner can discriminate. Apply proxy-proof real-owner rules from testing.
 
-For important/high-risk claims, prefer more than one independently justified evidence route when it materially reduces common-mode risk. Separate test functions are not independent when they share the same expected-value generator, reference implementation, defective dataset, fixture, or mistaken assumption.
+For important/high-risk claims, use independently justified evidence routes when they materially reduce common-mode risk. Separate executions sharing one expected-value generator, reference implementation, defective dataset/fixture or mistaken assumption are correlated. Do not suppress contradictory admissible observations to manufacture a pass.
 
-An evidence assessment may aggregate several realizations/observations for replication, stochastic/statistical interpretation, convergence, cross-backend comparison, or independent evidence routes. Contradictory admissible observations may not be silently discarded to manufacture a pass.
-
-## Bounded change impact and impact closure
+## Change impact and closure
 
 When accepted authority or a material concretization changes:
 
 ```text
 identify materially dependent descendants/evidence
- -> preserve unaffected siblings and still-valid evidence
+ -> preserve unaffected siblings/still-valid evidence
  -> mark only affected items review-required/stale
  -> reconcretize/remap as needed
- -> realize required evidence again
- -> verify upward across the affected surface
+ -> execute required evidence again
+ -> verify upward over the affected surface
 ```
 
-A changed parent creates a review obligation over materially dependent descendants; it does not prove every descendant wrong.
+A changed parent creates a bounded review obligation; it does not prove every descendant wrong. Account proportionately for dependent authority/concretizations, evidence specifications/realizations, documentation/current dependency view, human re-ratification, revalidation/retirement and semantic history.
 
-For a material change, workplan/review impact reasoning should account proportionately for:
+Before closure every material impact item is resolved, explicitly preserved as still-valid with reason, or unavailable/blocking. Old green tests never substitute for impact closure. Protocol 6.2 remains document-controlled: these are reasoning obligations, not a required universal machine graph/database.
 
-```text
-changed authority/concretization
- -> affected descendant authority/concretizations
- -> affected evidence specifications/realizations
- -> affected documentation/current dependency view
- -> required human re-ratification where applicable
- -> required revalidation/retirement/history update
-```
+## Semantic evolution
 
-Before closure, every material impact item must be resolved, preserved as still-valid with reason, or explicitly unavailable/blocking. Old green tests are never a substitute for impact closure.
+Git records chronology; semantic history records **why** material meaning changed. Preserve concise reasoning when likely to prevent rediscovery/confusion, including material model/method/architecture replacement/generalization/rejection/restoration, retirement of delegated machinery after recurrence/complexity evidence, invalid assumptions/regimes, evidence that triggered upstream reconsideration, or obsolete evidence propositions/oracles.
 
-Because Protocol 6.1 remains document-controlled, these integrity checks remain reasoning obligations rather than a mandatory machine graph:
+A useful entry identifies the affected authority/concretization/evidence, previous vs replacement semantics, triggering evidence/challenge, material regime/assumptions, owning disposition, dependent impact, and references to current authority/workplan/report/commit where useful.
 
-- no accepted-current concretization is knowingly bound to a superseded parent without an explicit compatibility/historical relationship;
-- no PASS relies on stale/rejected/unavailable-required evidence;
-- material accepted authority changes receive bounded impact closure;
-- evidence targeting superseded propositions is reviewed rather than silently retained as current confirmation;
-- invariant-level evidence is preserved/remapped when still applicable;
-- new material authoritative claims receive appropriate evidence;
-- unresolved material dependency/evidence ambiguity remains blocking rather than inferred away from an incomplete map.
+Current dependency views describe currently applicable relationships. History explains why; current owners explain what is true; Git preserves detailed chronology. Do not make history a second current authority or preload archived workplans when current owners + qualification + semantic evolution already establish the capability lineage.
 
-## Semantic evolution history
+## Retirement
 
-Git records chronology but normally cannot explain semantic causation. Preserve concise historical reasoning when it is likely to prevent rediscovery or future confusion, including material model generalization/replacement, algorithm rejection, architecture supersession, retirement of delegated machinery after recurrence/complexity evidence, invalidated assumptions/regimes, evidence that triggered upstream reconsideration, evidence specifications retired because their proposition/oracle became obsolete, previously rejected approaches when recurrence is plausible, or later restoration of an older approach under new evidence.
+A superseded artifact is ordinarily retireable only when it no longer owns current authority, no supported current concretization/evidence/compatibility path materially depends on it, and material historical rationale remains recoverable. Stale tests should be retired/remapped/clearly marked rather than retained as apparent confidence.
 
-A material entry should identify, where applicable:
-
-- affected authority/concretization/evidence specification;
-- previous and replacement semantics;
-- triggering observation/evidence/challenge;
-- validity regime/assumptions;
-- rationale and owning-domain disposition;
-- affected descendants/evidence;
-- references to current authority/workplans/reports/commits.
-
-Current dependency records describe currently applicable relationships. Evolution history explains why current state changed. Git retains detailed file chronology. Do not turn the current dependency view into append-only patch history or make history a second current authority.
-
-## Retirement and repository hygiene
-
-A superseded artifact is ordinarily eligible for retirement when:
-
-1. it no longer owns current semantic authority;
-2. no supported current concretization/evidence/compatibility path materially depends on it; and
-3. material historical rationale needed to prevent rediscovery/confusion has been preserved through Git and/or semantic evolution history.
-
-Stale passing tests are an authority-confusion risk because they can fabricate confidence. Retire, remap, or clearly mark them according to current applicability rather than retaining them as apparent confirmation.
-
-## Final invariant
-
-```text
-authority defines what must be true;
-concretization defines how that authority is expressed downstream;
-evidence specifications define how claims are interrogated;
-evidence realizations produce observations under concrete conditions;
-evidence assessments determine what those observations can legitimately support or challenge;
-evolution history preserves why material semantic choices changed;
-bounded impact closure keeps all of these aligned over time.
-```
+Apply the Lossless Representation Rule: keep current applicability/impact decisions and contradictory evidence salient; keep raw realizations/history cold when their provenance and retrieval route remain adequate; never compact away a condition needed to decide whether evidence is admissible.

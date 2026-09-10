@@ -1,79 +1,50 @@
 # Repository Intake
 
-Build enough context to make the requested change safely and to bound its affected behavioral, semantic, and evidence surface with appropriate confidence. Do not inventory the entire repository when ownership, dependencies, and impact are already clear.
+Own repository inspection strategy and context economy. Build enough context to make the requested decision/change safely and bound its affected behavioral, semantic and evidence surface; do not inventory the repository when ownership/impact are already clear.
 
-## Start focused and expand on evidence
+## Evidence-directed inspection
 
-1. read applicable repository instructions;
-2. locate the requested entry point/module/feature;
-3. follow callers, semantic dependencies, persisted state, tests/evidence specifications, and owning documentation until the material ownership and affected surface are understood;
-4. inspect relevant build/continuous-integration (CI)/configuration/security/release surfaces when the change touches them;
-5. preserve unrelated user changes.
+Start with repository instructions, requested entry point/module/feature, owning authority/docs, callers/consumers, persisted state and relevant tests/evidence. Expand into build/CI/configuration/security/release/concurrency/performance or other concerns only when the affected chain enters them. Preserve unrelated user/concurrent work.
 
-Use progressive inspection rather than exhaustive reconnaissance. Process efficiency means avoiding unrelated inspection, not stopping before plausible transitive impact has been understood.
+Choose the lowest-cost next read/search/semantic query/test/benchmark that most strongly resolves a material uncertainty or establishes required evidence:
 
-## Information gain and context economy
+- prefer targeted symbol/search/range inspection before loading an entire large file when sufficient;
+- reuse already-established repository facts while their protocol/source/workplan/candidate/regime/scope remains applicable; re-read when exact wording/new evidence makes it necessary;
+- prefer discriminating evidence over broad speculative reconnaissance;
+- expand through plausible ownership/dependency/contract/evidence/behavior chains, not file adjacency;
+- keep full large outputs available when useful but bring only the smallest sufficient failing/decision region into active context; never hide material warnings/failures;
+- combine related read-only queries when it reduces turns without obscuring evidence.
 
-Choose the lowest-cost next inspection, search, test, benchmark, or other read-only action that most strongly resolves a material uncertainty or establishes required acceptance evidence.
+Context economy never permits omission of required affected behavior, failure evidence, or plausible transitive impact. Apply the universal Lossless Representation Rule to active context as well as written output.
 
-- Prefer targeted symbol/search/range inspection before loading an entire large file when the bounded view is sufficient.
-- Reuse repository facts already established in the current task until later evidence invalidates them; do not reread unchanged material without a new material question.
-- Prefer an inspection or evidence realization that distinguishes among remaining materially plausible explanations over broad speculative reconnaissance.
-- Expand scope through a plausible ownership, dependency, contract, evidence-applicability, or behavioral-impact chain rather than adjacency alone.
-- When command/test/build output is large, preserve the full output when materially useful but bring the smallest sufficient summary/failing region into active reasoning context. Do not hide warnings/failures that may affect acceptance.
-- Combine closely related read-only queries when that reduces turns without broadening the investigated surface or obscuring evidence.
-- Avoid repeatedly reloading a governing workplan or reference solely to restate already-established decisions; consult it again when a new question depends on exact wording or later evidence may have invalidated an assumption.
+## Affected surface
 
-Context minimization is never permission to omit required affected behavior, material failure evidence, or a transitive dependency that can plausibly change the result.
+For substantial work consider only materially applicable surfaces: public API/data contracts/callers/consumers, configuration, evidence, persistence/restart, concurrency/orchestration, performance/resources, security/trust, documentation, semantic dependency/history, packaging/release, and shared transitive dependencies.
 
-## Change surface
+Do not create a mandatory matrix when most rows are irrelevant. Conversely, Git diff is not the behavioral surface when shared contracts propagate beyond changed files. Affected-surface expansion under existing authority is not requirement expansion and does not make current implementation mechanisms invariant.
 
-For substantial work, identify the material surfaces that actually apply: public application programming interface (API), data contracts, callers/consumers, configuration, evidence specifications/realizations, persistence, concurrency/orchestration, performance, security/trust, documentation, semantic dependency/history records, packaging/release, and transitive shared dependencies.
+## Dependency views and bounded census
 
-Do not create a mandatory matrix when most rows are irrelevant. Conversely, do not equate the Git diff with the behavioral surface when shared contracts propagate beyond changed files.
+Protocol 6.2 may use bounded Markdown semantic dependency views when ordinary links/inspection are insufficient. They are aids, not automatically complete graphs:
 
-Affected-surface expansion is not requirement expansion. Additional callers/consumers/evidence may require implementation or validation under existing accepted parent/cycle-scoped semantics without creating new product capability or making the current implementation mechanism invariant.
+> Absence of an edge establishes independence only when the relevant mapped scope was explicitly reviewed complete for that exclusion.
 
-## Bounded semantic dependency views
+Progressive inspection remains default. Switch to a bounded census only when the governing correctness claim is itself finite/exhaustive or bounded sibling discovery is needed for safe consolidation/removal/family closure. Bound by invariant, semantic owner, transition/lifecycle class and plausible affected chain—not the whole repository.
 
-Protocol 6.1 may maintain bounded Markdown semantic dependency records when implicit links are insufficient for reliable impact reasoning. Treat them as aids rather than automatically complete graphs.
+State the completeness basis and material blind spots of symbol/static tools, dynamic registration/configuration, generated code, external consumers and runtime-only behavior. Cross-check where those can hide material members. If the family cannot be bounded confidently, do not present a partial search as exhaustive; reconsider ownership or use broader executable/property/integration evidence appropriate to the claim. Temporary closure maps are derived coordination evidence, not permanent authority.
 
-> Absence of an edge is not evidence of independence unless the relevant bounded scope was explicitly reviewed as complete for that exclusion.
+## Evidence applicability and history
 
-If a dependency view is incomplete for the question, continue ordinary repository/authority/evidence inspection rather than accepting a missing edge as a negative oracle.
+A test file/historical result is not automatically current evidence. When reusing prior evidence, confirm its specification still targets the claim and the realization remains applicable to candidate/regime/oracle/environment. Stale pass is not confirmation; stale fail is not refutation.
 
-## Bounded census when completeness is a real claim
+Consult `history/SEMANTIC_EVOLUTION.md` only when recurrence, restoration, rejected prior approaches, or semantic lineage matters. Current owners + qualification + semantic evolution are the normal historical proof path; archived workplans stay cold unless lineage is ambiguous/unmapped/challenged.
 
-Progressive evidence-directed inspection remains the default. Switch to a bounded census when the **governing correctness claim itself is finite/exhaustive**, or when bounded sibling discovery is needed to remove, consolidate, or canonicalize a recurring delegated concretization safely. Recurrence by itself does not justify preserving the current mechanism or performing a census merely to complete it.
+## Existing patterns, simplification, generated artifacts
 
-Bound the census by governing invariant, semantic owner/authority, transition/lifecycle class, and plausible affected chain rather than the whole repository. State the completeness basis and material blind spots of symbol/reference tools, static rules, dynamic registration/configuration, generated code, external consumers, or runtime-only behavior. Cross-check where those limitations can hide material members.
+Inspect adjacent implementation before inventing a new abstraction and reuse existing ownership when clean. Do not split modules/add frameworks/reorganize unrelated areas merely because the repository could be cleaner. Refactor when it materially improves the requested change, removes a failure surface, or collapses duplicated authority/machinery. When the current concretization creates the problem, consider removal/narrowing/alteration/consolidation rather than preserving it by default.
 
-If the family cannot be bounded with sufficient confidence, do not present a partial search as exhaustive. Reconsider ownership/design when uncontrolled entry points are themselves the problem, or use broader executable/property/integration evidence appropriate to the claim. Temporary closure maps are allowed when they materially reduce omission risk; they are not universal persistent traceability artifacts.
+Determine canonical source vs generated output before editing. Edit source and regenerate required descendants. When generated output is shipped/committed, validate both consumer-facing validity and source parity; do not commit transient caches/analysis data unless policy makes them durable.
 
-## Evidence applicability during intake
+## Safety
 
-A test file or historical result is not automatically current evidence. When prior evidence matters, identify whether the evidence specification still targets the current claim and whether its realization remains applicable to the current candidate/regime/oracle/environment.
-
-A passing stale result is not current confirmation and a failing stale result is not current refutation. Reuse evidence only when the changed dimensions cannot plausibly alter its claim or interpretation.
-
-## Prefer existing patterns and simpler ownership
-
-Inspect adjacent implementation before introducing a new abstraction. Reuse an existing component when it can own the responsibility cleanly.
-
-Do not split modules, introduce frameworks, or reorganize unrelated areas merely because the repository could be cleaner in general. Refactor when it materially improves the requested change, removes an identified failure surface, or collapses duplicated authorities/machinery.
-
-When a problem is created by the current concretization, do not assume the current concretization must survive. Prefer removal, narrowing, alteration, consolidation, or refactoring when that preserves governing semantics and reduces total system complexity.
-
-## Generated artifacts
-
-Determine source versus generated output before editing. Edit the source of truth and regenerate required derivatives.
-
-When a generated artifact is shipped or committed by policy, validate both its consumer-facing structure/behavior and its parity with canonical source. Generated scratch/build artifacts should not be committed unless repository policy makes them authoritative.
-
-## Semantic history
-
-Git provides detailed chronology but not always the semantic reason for material replacement. During intake, consult `history/SEMANTIC_EVOLUTION.md` or project-equivalent history when recurrence, restoration, or rejected prior approaches are relevant. Historical reasoning informs investigation; current accepted authority still governs.
-
-## Repository safety
-
-Do not delete, revert, overwrite, or broadly reformat unrelated work. Do not change dependency versions merely for local convenience. Do not commit secrets, machine-specific paths, large transient data, caches, or benchmark noise.
+Do not delete/revert/overwrite/broadly reformat unrelated work; do not change dependencies for local convenience; do not commit secrets, machine-specific paths, transient data/caches/benchmark noise. Destructive/high-risk repository operations route to their owning Git/hygiene/security procedures rather than being inferred from intake.

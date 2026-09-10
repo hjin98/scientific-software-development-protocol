@@ -1,60 +1,45 @@
 # Language Engineering Profiles
 
-Current Protocol 6.1 domain doctrine is authoritative. Language profiles specialize that doctrine for execution, type, lifetime, build, packaging, and performance semantics that genuinely differ by language; they do not create parallel lifecycle, testing, scientific, security, evidence, or performance policies.
-
-Use this precedence:
+Current Protocol 6.2 shared domain doctrine is authoritative. This reference is the **language concern router**: identify affected runtime/build surfaces, then activate only the matching language profile(s). Profiles specialize execution/type/lifetime/build/packaging/performance semantics; they do not duplicate lifecycle, testing, evidence, scientific, security, performance or representation policy.
 
 ```text
-shared domain rule -> active language profile(s) -> implementation-local concretization
+shared domain rule -> language router -> active language profile(s) -> implementation-local concretization
 ```
 
 ## Activation
 
-For material executable design, implementation, refactoring, performance work, or independent review, identify every language/runtime/build surface whose semantics can affect the decision.
+For material executable design, implementation, refactoring, performance work, or independent review, identify every language/runtime/build surface whose semantics can affect the decision:
 
-- Python-only executable surface -> **MUST read** [Python engineering](python-engineering.md).
-- C++-only executable surface -> **MUST read** [C++ engineering](cpp-engineering.md).
-- Python/C++ extension, binding, embedding, callback, shared buffer, or ownership boundary -> **MUST read both** profiles and apply the mixed-boundary rules below.
-- Generated bindings or accelerator translation units activate the profile of the runtime/build surface they materially participate in; file suffix alone is not authority.
-- Pure documentation, literal configuration/text edits, or genuinely language-independent architecture questions need not load a language profile when language semantics cannot change the result.
+- Python-only -> **read [Python engineering](python-engineering.md)**;
+- C++-only -> **read [C++ engineering](cpp-engineering.md)**;
+- Python/C++ extension/binding/embedding/callback/shared-buffer/ownership boundary -> **read both** and apply the mixed-boundary rules below;
+- generated bindings/accelerator translation units activate the profile of the runtime/build surface they materially participate in; file suffix alone is not authority;
+- pure documentation/literal configuration/text or genuinely language-independent architecture need not load a leaf profile.
 
-Do not infer a global Python-over-C++ or C++-over-Python precedence. Each profile governs its own side; shared owners govern cross-cutting product semantics.
+Do not infer global Python-vs-C++ precedence. Shared owners govern cross-cutting semantics; each language profile governs its own specialization. Ordinary links from a leaf are navigation unless an explicit decision predicate activates another concern.
 
 ## Shared owners remain canonical
 
-Profiles refine, but do not duplicate or weaken:
-
-- applicable parent abstractions and governed constraints, accepted-current authority versus cycle-scoped decisions, delegated concretization, active simplicity, workflow, convergence, and development economy;
-- testing, affected regression, integration, proxy-proof acceptance, evidence integrity/applicability, and bounded impact closure;
-- generic performance order, optimized-kernel preference, data movement, resource discovery, parallelism classes, benchmark comparability, and accelerator gating;
-- orchestration correctness, cancellation, failure propagation, resource ownership, and deterministic aggregation;
-- scientific/numerical invariants, tolerances, provenance, and reference-oracle semantics;
-- security/trust boundaries, storage/I/O, configuration, documentation, compatibility, and release/distribution.
-
-If profile wording appears to conflict with a shared owner, the shared owner controls and the profile must be corrected. Language-specific examples in a shared reference do not convert the shared rule into language-specific doctrine.
+Profiles may specialize but never weaken or re-own parent abstractions/constraints, workflow/authority/delegation, testing/evidence/applicability, generic performance/resource/parallelism, orchestration, scientific/numerical semantics, security/trust, storage/I/O, configuration, documentation, compatibility, release/distribution, or the Lossless Representation Rule. If a profile conflicts with a shared owner, correct the profile.
 
 ## Mixed Python/C++ boundaries
 
 When both profiles apply:
 
-- keep one clear owner for each object, buffer, handle, thread-affine resource, and lifetime;
-- prefer compatible buffer/view transfer and zero-copy only when lifetime, mutability, stride, alignment, and synchronization contracts remain explicit and safe;
-- batch calls when boundary dispatch dominates rather than rewriting whole components reflexively;
-- account for exception/error translation, callback direction, interpreter/runtime locks, thread ownership, shutdown/finalization, and re-entrancy where material;
-- include conversion, copy, marshaling, synchronization, import/load, and packaging costs in end-to-end performance evidence;
-- test the installed/packaged extension or real supported consumer path rather than accepting direct kernel invocation as a proxy;
-- treat generated binding code as derived unless project authority explicitly governs it as source.
+- keep one clear owner for each object/buffer/handle/thread-affine resource/lifetime;
+- use compatible view/zero-copy transfer only with explicit lifetime, mutability, stride, alignment and synchronization contracts;
+- batch boundary calls when dispatch dominates rather than reflexively rewriting components;
+- account for error/exception translation, callback direction, interpreter/runtime locks, thread ownership, shutdown/finalization and re-entrancy where material;
+- include conversion/copy/marshaling/synchronization/import/load/packaging costs in end-to-end evidence;
+- test the installed/packaged extension or real supported consumer path when that boundary is the claim;
+- treat generated bindings as derived unless project authority deliberately governs them as source.
 
-Introducing or removing a material language boundary is a D3 decision when it changes accepted architecture/ownership, deployment, application binary interface (ABI), packaging, resource, portability, or performance semantics. A local equivalent concretization beneath those boundaries remains D4 discretion.
+Introducing/removing a material language boundary is D3 when it changes accepted ownership, deployment, application binary interface (ABI), packaging, resource, portability or performance semantics. Equivalent local concretization beneath those boundaries remains D4.
 
-## Evidence and backend changes
+## Evidence, complexity and performance
 
-Language/runtime/backend changes can invalidate evidence execution without changing the evidence target proposition. When a compiler/runtime/backend/precision change can alter interpretation, review applicability and rerun the relevant evidence specification against the new candidate. Preserve still-valid evidence; do not assume every prior result is stale merely because one implementation mechanism changed.
+Runtime/compiler/backend/precision changes may invalidate evidence execution without changing the target proposition. Apply the evidence owner: preserve still-valid evidence and rerun/remap only materially affected specifications.
 
-## Complexity and performance
+Use language-native mechanisms to satisfy governing semantics with minimum justified total complexity. Do not translate compensating machinery mechanically across languages. An obvious equivalent efficiency improvement that adds no material complexity may proceed without a pre-change benchmark, but correctness/regression remains required and no quantitative performance claim is valid without representative measurement.
 
-Use language-native mechanisms to satisfy the governing contract with minimum justified total complexity. Do not translate compensating machinery from one language into another mechanically.
-
-An obvious semantically equivalent efficiency improvement that does not add material complexity may be implemented without a pre-change benchmark. It still requires normal correctness/regression evidence, and no quantitative speedup or scaling claim may be made without representative measurement.
-
-Escalations that add durable build/runtime/dependency machinery—new language boundaries, custom native kernels, explicit single-instruction multiple-data (SIMD) dispatch, new parallel runtimes, custom allocators, backend matrices, profile-guided optimization/link-time optimization (PGO/LTO) policy, or accelerators—require representative evidence and total-system justification under the shared performance and architecture owners.
+New durable language boundaries, custom native kernels, explicit SIMD dispatch, new parallel runtimes, custom allocators, backend matrices, profile-guided/link-time optimization policy or accelerators require representative evidence and total-system justification under D3/performance owners.

@@ -8,12 +8,12 @@ while leaving genuine semantic decisions to the user or receiving agent.
 Core works alone. It has no history database, agent runner, model catalog, quota
 meter, or scheduler, and it does not need them.
 
-The current default is **Scientific Software Development Protocol 6.0** using
-profile `ssdp-protocol-6.0` and profile schema v2. The frozen Protocol 5.16
-profile `sdp-protocol-5.16` remains packaged and supported under schema v1 for
-older workplans. Core selects workflow semantics from the compatible profile; it
-does not reinterpret a 5.16 workplan as 6.0 merely because the installed Core is
-newer.
+The current default is **Scientific Software Development Protocol 6.2** using
+profile `ssdp-protocol-6.2` and profile schema v2. Frozen Protocol 6.1 and 6.0
+profiles remain packaged under schema v2, while `sdp-protocol-5.16` remains
+packaged under schema v1 for older workplans. Core selects workflow semantics
+from the compatible profile; it does not reinterpret an older workplan through
+6.2 merely because the installed Core is newer.
 
 ---
 
@@ -64,7 +64,7 @@ default_prompt_mode = "web"      # optional; built-in default is web
 
 [projects.mdstats]
 repo = "/absolute/path/to/mdstats"
-protocol_profile = "ssdp-protocol-6.0"   # optional; this is the current default
+protocol_profile = "ssdp-protocol-6.2"   # optional; this is the current default
 default_prompt_mode = "web"      # optional, per project
 remote_name = "origin"           # optional; a remote name, never a credential URL
 
@@ -76,7 +76,7 @@ With no `[protocol_sources.*]` entry, Core uses the exact packaged snapshot for
 the selected profile. To use a compatible local Protocol checkout instead:
 
 ```toml
-[protocol_sources."ssdp-protocol-6.0"]
+[protocol_sources."ssdp-protocol-6.2"]
 local_root = "/path/to/software-development-protocol"
 ```
 
@@ -90,7 +90,7 @@ one immutable commit and revalidated. Do not use `main`/latest as a substitute
 for historical version identity.
 
 ```toml
-[protocol_sources."ssdp-protocol-6.0"]
+[protocol_sources."ssdp-protocol-6.2"]
 allow_remote = true
 remote_repository = "<credential-free compatible Git repository>"
 remote_ref = "<explicit evidence-backed ref>"
@@ -252,7 +252,7 @@ A governing workplan for a stage that requires one must declare a supported
 `protocol_version`. That version can bind the final workflow profile even when
 the project default points elsewhere. Core then resolves the stage and workplan
 again under that final profile before rendering, so preparation cannot contain a
-half-5.16/half-6.0 interpretation.
+half-5.16/half-6.2 interpretation.
 
 For example, a 5.16 workplan remains renderable through the frozen
 `sdp-protocol-5.16` package. Use a stage name meaningful to both versions (for

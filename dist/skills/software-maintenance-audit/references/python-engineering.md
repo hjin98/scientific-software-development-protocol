@@ -1,6 +1,6 @@
 # Python Engineering Profile
 
-Read [Language engineering profiles](language-profiles.md) first. This profile specializes shared Protocol 6.1 domain doctrine for Python execution and packaging. Shared architecture, testing, evidence, performance, concurrency, scientific, security, and release owners remain authoritative.
+Read [Language engineering profiles](language-profiles.md) first. This profile specializes shared Protocol 6.2 domain doctrine for Python execution and packaging. Shared architecture, testing, evidence, performance, concurrency, scientific, security, release, and representation owners remain authoritative.
 
 ## Language-native design
 
@@ -103,3 +103,5 @@ For materially affected Python code ask:
 5. Would a simpler Python-native concretization satisfy the same governing parent/side-constraint contract with equal or better performance fitness?
 
 These are engineering questions, not style gates. Equivalent stylistic preferences without material correctness, performance, ownership, or maintenance effect do not block acceptance.
+
+Apply the Lossless Representation Rule to profile use: keep this leaf cold unless Python semantics can change the decision; once active, use the sections relevant to the material relation rather than reloading unrelated language doctrine.

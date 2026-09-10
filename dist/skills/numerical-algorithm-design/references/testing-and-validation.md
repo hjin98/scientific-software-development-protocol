@@ -1,236 +1,79 @@
 # Testing, Verification, and Validation
 
-Evidence exists to test governed claims; it is not a parallel authority system. Read [Abstraction, concretization, authority, and challenge](abstraction-and-realization.md) for the authority model and [Evidence, evolution, and semantic dependencies](evidence-evolution-and-dependencies.md) for evidence specification/realization/observation, applicability, stale-evidence, dependency, and impact-closure semantics.
-
-## Background and terminology
-
-Under Protocol 6.1:
-
-- an **evidence specification** is the reusable test/experiment/benchmark/proof/check definition;
-- an **evidence realization** is one concrete execution of that specification under identified conditions;
-- an **observation** is the result produced by the realization;
-- an **evidence assessment** interprets one or more observations with respect to a governed claim;
-- a **concretization** is a downstream scientific/numerical/architectural/software expression of a governing abstraction.
-
-Do not use a test specification, one execution, and the resulting observation as interchangeable concepts when applicability or historical reuse matters.
+Own evidence **methodology**: oracle integrity, scientific/numerical/architecture/D4 verification techniques, affected regression/integration, proxy-proof boundaries, failure injection, and qualification. Evidence specification/realization/observation/assessment, applicability, stale evidence, independence/common-mode risk, dependency, and impact lifecycle are owned by [Evidence, evolution, and semantic dependencies](evidence-evolution-and-dependencies.md). Universal authority/Challenge semantics are in [Abstraction, concretization, authority, challenge, and representation](abstraction-and-concretization.md).
 
 ## Evidence integrity
 
-Tests, proofs, benchmarks, metrics, reports, literature, and runtime observations are **measurement instruments**, not truth or product objectives. They do not manufacture the claim they measure.
+Tests, proofs, benchmarks, metrics, literature and runtime observations are instruments, not truth or product objectives. Do not manufacture a pass by deleting/weakening assertions, removing known failing inputs, copying defective production output into expected values, converting required failure into success/warning, skipping/making required checks optional, widening tolerances/thresholds because they failed, adding product fallback only for a harness, or rewriting authority to bless unintended behavior.
 
-Without an accepted semantic change or independent proof that the prior oracle was wrong, it is invalid to create a pass by **deleting/weakening its assertion**, **removing known failing inputs** from the fixture population, copying **buggy implementation output** into expected values, converting a required failure/exception into **warning/success**, skipping or **making a required check optional**, **relaxing a material threshold** or widening tolerance merely because it failed, adding product fallback solely for test scaffolding, or **rewriting specification/documentation** to bless unintended implementation. The same anti-counterfeit rule applies to method papers and architecture authority.
+Test/fixture/threshold/specification changes are legitimate when governing authority genuinely changed, the old oracle is independently shown wrong, or a stronger oracle preserves the same claim. For material completion, ask whether an independent evaluator of the same accepted outcome/engineering envelope would still consider the candidate correct.
 
-**Test, fixture, threshold, and specification changes remain legitimate** when their governing authority genuinely changed, the previous expectation is independently shown incorrect, or a stronger oracle preserves the same accepted claim. The justification must be semantic rather than merely that the old check is inconvenient or red.
+A required check that did not execute is not a pass. Green tests do not establish omitted workplan/conformance obligations.
 
-For material completion claims apply a bounded **independent-evaluator counterfactual**: if the visible acceptance harness were replaced by an independent expert evaluation of the same accepted stakeholder/domain outcome and engineering envelope, would the candidate still deserve to pass? If materially no, local green evidence is insufficient.
+## Oracle strength
 
-## Two closure questions at every abstraction boundary
+For important changed logic ask: **What is the smallest plausible semantically wrong concretization that could still pass this evidence?** Strengthen economically with exact/reference cases, properties/stateful tests, known-broken counterfactuals, mutation/semantic perturbation, differential comparison, metamorphic relations, or real-owner integration. Coverage/mutation/complexity scores are sensors unless project authority adopts a threshold; do not optimize the score instead of the governed behavior.
 
-For a material parent->child handoff establish:
+Use differential testing only when independently justified concretizations should agree on governed observables. Use metamorphic testing only when accepted authority implies the relation; do not invent convenient relations.
 
-1. **concretization fidelity:** actual child semantics satisfy every applicable parent and domain-local governed constraint;
-2. **abstraction adequacy:** the child abstraction is strong enough that downstream concretization cannot satisfy it while violating material upstream meaning.
+## D1 external adequacy and D2 numerical verification
 
-Evidence that exercises only a proxy abstraction cannot close an omitted upstream invariant.
+Internal D2-D4 correctness cannot prove D1 adequacy. Use problem-appropriate evidence: empirical independent observations for empirical claims; proof/axiomatic consistency/limiting or reference theory for mathematical claims; standards/qualification experiments/safety margins/stakeholder context for engineering claims. Conversely, external agreement does not prove faithful numerical/software concretization.
 
-Every material acceptance/review boundary includes the bounded Challenge Pass. A defect in a coherent concretization is an ordinary blocker. Evidence that accepted authority itself may be contradictory, false, materially ambiguous, inadequate, or impossible to concretize triggers Serious Challenge/human adjudication rather than oracle manipulation.
-
-## Evidence applicability and lifecycle
-
-Evidence has a validity domain. A previous result may remain reusable, require review/rerun, or become stale depending on whether materially relevant dimensions changed.
-
-Projects may encode status locally, but interpretation must distinguish enough states to prevent false closure, including:
-
-- pending/unrealized;
-- admissible/valid for the current claim and regime;
-- review-required;
-- inconclusive;
-- challenged;
-- stale/inapplicable;
-- rejected/invalid;
-- retired/historical.
-
-Core rule:
-
-> A valid failing observation is evidence. A stale failing observation is not admissible evidence against current authority. A stale passing observation is not admissible confirmation of current authority.
-
-`stale` means the previous specification/realization/subject mapping cannot currently support or refute the target claim without review, rerun, or remapping. It does not by itself prove the claim false. Use `review-required` when applicability is uncertain rather than known inapplicable.
-
-A PASS/accepted/closed claim may not depend on stale, rejected, unavailable-required, or otherwise inadmissible evidence.
-
-Where material, enough provenance must be recoverable to determine applicability across the relevant combination of evidence-specification revision, subject/candidate revision, governed-claim revision, input/validity regime, oracle semantics, environment/backend/precision/configuration, stochastic seed/replicate identity, and protocol obligation. Native continuous-integration (CI), test, benchmark, and experiment artifacts are sufficient when they already establish this identity; do not manufacture a universal evidence manifest.
-
-A rerun against a changed candidate creates a new evidence realization. It does not mutate an old result into evidence for the new candidate.
-
-## Evidence target versus execution dependency
-
-Keep separate:
-
-- **evidentiary target** — the proposition/invariant the evidence specification evaluates;
-- **execution dependency** — the implementation, harness, fixture, dataset, environment, backend, tool, or other machinery needed to realize and interpret the evidence.
-
-A test may evidence a D1/D2 invariant while executing through a replaceable D4 concretization. Replacing that D4 concretization may leave the specification valid and require only rerun/remapping; a concretization-specific oracle may instead become stale. Follow the actual dependency and applicability rather than file proximity.
-
-## Evidence durability, sufficiency, and independence
-
-When evidentiary strength is equivalent, prefer specifications coupled to durable governed invariants over replaceable concretization detail:
-
-```text
-scientific/mathematical invariant evidence
- > algorithm/numerical property evidence
- > behavioral/architectural contract evidence
- > concretization-specific evidence
-```
-
-This is a durability preference, not a substitution hierarchy. D1 evidence does not replace required D2 verification; D1/D2 invariant evidence does not replace required D4 conformance/integration; a low-level unit test does not establish scientific adequacy.
-
-For important/high-risk claims, use more than one independently justified evidence route when that materially reduces common-mode risk. Multiple tests sharing one expected-value generator, reference implementation, defective dataset, fixture, or mistaken assumption are not independent merely because they are separate functions.
-
-An evidence assessment may aggregate several realizations/observations for replication, stochastic/statistical interpretation, convergence, cross-backend comparison, or independent evidence routes. Do not suppress contradictory admissible observations to manufacture a pass.
-
-## D1 external adequacy is not internal verification
-
-Internal D2/D3/D4 correctness cannot prove that D1 is adequate for its intended world/context. Use problem-appropriate evidence:
-
-- empirical validation / independent observations for empirical science;
-- proof, axiomatic consistency, limiting/reference theory for mathematical/theoretical work;
-- standards, qualification experiments, safety margins, or stakeholder context for engineering work.
-
-Likewise, good external agreement does not prove that the numerical method or code faithfully concretizes the accepted formulation.
-
-## D2 numerical verification
-
-Use the cheapest sufficiently strong combination of authority-backed evidence, such as analytical/exact/limiting cases, manufactured solutions, residuals, conservation/invariants, mesh/time-step/order/sample refinement, observed convergence order, Richardson/extrapolation, conditioning/sensitivity, forward/backward error, precision/range/cancellation analysis, trusted reference comparison, differential implementations/backends, stochastic bias/variance/convergence, and seed/backend/precision robustness.
-
-Tolerance comes from accepted numerical/error semantics, not from observing what a backend happens to produce.
-
-## Oracle strength, counterfactuals, and mutation evidence
-
-Coverage and green execution do not show that an oracle rejects materially wrong behavior. For important changed logic ask:
-
-> What is the smallest plausible semantically wrong concretization that could still pass this evidence?
-
-When material and economical, strengthen the oracle through a known-broken/corrected counterfactual, property/stateful testing, mutation/semantic perturbation, differential comparison, metamorphic relation, reference solution, or real-owner integration.
-
-Mutation survival is investigation evidence, not a universal score. **Do not require 100% mutation** scores or optimize tests for coverage/mutation percentages rather than governed behavior. Mutation/counterfactual work is **not a universal test stage**; use it only when it materially strengthens an important oracle.
-
-## Differential and metamorphic evidence
-
-Use differential testing only when independently justified concretizations should agree on governed observables. Use metamorphic testing only when accepted authority implies the relation. Examples include valid symmetry/equivariance, permutation-invariant aggregate statistics, restart/continuation equivalence, unit-consistent transformations, normalized rescaling that preserves ranking, and reference/backend equivalence within a justified D2 envelope.
-
-Do not invent relations because they are convenient.
+For D2 use the cheapest sufficiently strong authority-backed combination, as applicable: analytical/exact/limiting/manufactured cases, residuals/conservation/invariants, refinement and observed convergence order, extrapolation, conditioning/sensitivity, forward/backward error, precision/range/cancellation, trusted reference comparison, independent implementations/backends, stochastic bias/variance/convergence, and seed/backend/precision robustness. Tolerance derives from accepted D2 error/equivalence semantics, never from the backend result that happened to fail.
 
 ## D3 architecture verification
 
-Architecture evidence may include dependency/ownership inspection, structural fitness checks, real state/consumer boundaries, recovery/concurrency/security/resource tests, and configuration/deployment checks. Objective stable rules such as forbidden dependency direction, acyclicity, or uniqueness/absence of a retired owner may be executable. Do not create a universal architecture manifest solely for protocol compliance.
+Use dependency/ownership inspection, architecture fitness checks, real state/consumer boundaries, recovery/concurrency/security/resource tests, and configuration/deployment evidence when they model the claim. Objective durable rules such as forbidden dependency direction, acyclicity, independence, or absence/uniqueness of a retired owner may be executable. Do not build a universal architecture manifest solely for compliance.
 
-If D4 violates a coherent D3 architecture, repair D4. If D3 itself cannot preserve D2 semantics or simultaneous constraints, challenge D3.
+If D4 violates coherent D3, repair D4. If D3 cannot preserve D2 or simultaneous constraints, challenge D3.
 
-## D4 executable functional acceptance
+## D4 executable acceptance
 
-Every executable product change requires:
+Every material executable change requires, at minimum:
 
-1. **focused checks** appropriate to the changed mechanism;
-2. **affected-surface regression** covering changed behavior and every existing behavior that could plausibly change;
-3. **integration/end-to-end evidence** through the assembled affected product and relevant real consumer/state/interface boundaries.
+1. focused checks for the changed mechanism/claim;
+2. affected-surface regression for changed behavior plus existing behavior that could plausibly change;
+3. integration/end-to-end evidence through the assembled affected product and relevant real consumer/state/interface boundaries.
 
-Affected surface can include callers/consumers, shared utilities, public interfaces, configuration, persistence/restart, caches/checkpoints, orchestration/concurrency, packaging/entrypoints, compatibility, documentation/contracts, and transitive scientific/numerical behavior.
+Affected surface may include callers/consumers, shared utilities, public interfaces, configuration, persistence/restart, caches/checkpoints, orchestration/concurrency, packaging/entrypoints, compatibility, documentation/contracts, and transitive D1/D2 behavior. If impact cannot be bounded confidently, run the broader/full available suite.
 
-A required check that did not execute is not a pass. If impact cannot be bounded confidently, run the broader/full available suite.
+After each coherent material executable stage, run focused + stage-local affected regression before dependent executable work continues. A tiny atomic change may use the final pass as its stage pass; a genuinely non-executable intermediate may combine with the nearest executable stage when explicit. Stage-local evidence aids localization but never removes final assembled regression.
 
-## Stage-local regression
+## Proxy-proof real-owner evidence
 
-After each material executable behavior-changing stage, run focused checks plus the affected regression subset relevant to that stage before dependent executable work continues. A tiny atomic change may use the final pass as its stage pass. A genuinely non-executable intermediate may combine with the nearest executable stage when that dependency is explicit.
+For a material acceptance claim identify the **real semantic owner/path** whose behavior constitutes the claim and the allowed test-double boundary below/outside it. Ask whether evidence could remain green while that owner is materially broken. If yes, it cannot close that owner claim.
 
-Stage-local evidence improves fault localization; it does not remove final assembled regression.
+Invalid substitutions include mocking/reimplementing the owner, calling a downstream helper when production routing is part of the claim, seeding post-decision state when the decision is under test, replacing durable persistence when restart/persistence is the claim, or accepting helper-generated results when production construction/routing is the behavior being verified.
 
-## Proxy-proof acceptance and allowed test-double boundary
+This is not a blanket mock ban. Bounded deterministic doubles remain valid below/outside the owner to control external services, hardware, expensive data/training, or nondeterminism. Production scale is needed only when production-scale behavior/resource qualification is itself the claim. If delegated owner identity changes under equivalent semantics, remap/rerun owner-specific evidence rather than preserving the old owner. If the required real-owner boundary is unavailable, mark the claim unavailable/blocking.
 
-For a material acceptance claim identify the **real semantic owner**—the real production decision-maker/state transition/persistence boundary/orchestrator/algorithm/consumer path whose behavior constitutes the claim. Then state the **allowed test-double boundary** below or outside that owner.
+## Structural, liveness, and failure-path evidence
 
-Apply this counterfactual:
+For removal/uniqueness/ownership/no-legacy-path claims, use source/structural negative assertions when runtime behavior cannot establish absence. When evidence depends on a hook/failpoint/callback/state transition, establish that the trigger actually fired when practical.
 
-> **Could this evidence remain green** while the semantic owner under acceptance is materially broken?
+For persistence/restart/orchestration/recovery/failure-propagation claims, bounded deterministic failure injection can strengthen evidence: interrupted publication, truncated artifact, stale/missing cache, restart at material boundaries, worker/task death, controlled I/O failure, duplicate event/callback, or partial transition. Keep the real recovery owner executing; prefer bounded simulation over resource exhaustion. Failure injection is claim-triggered, not universal ceremony.
 
-If yes, it cannot establish **proxy-proof acceptance** and cannot close the owner claim.
+## Evidence applicability and composed closure
 
-Historical invalid substitutions include evidence that:
+Apply the evidence owner rather than duplicating lifecycle rules. A prior result is reusable only while its target claim, subject/candidate, oracle, regime/input, environment/backend/precision/configuration and other material dimensions remain applicable. A rerun against a changed candidate is a new evidence realization. A stale pass cannot confirm and a stale fail cannot refute current authority. Important/high-risk claims should use independent evidence routes when they materially reduce common-mode risk.
 
-- **mocks, stubs, monkeypatches**, precomputes, or substantially reimplements the semantic owner;
-- **directly invokes a downstream helper** when the production caller/orchestrator/restart/reconciliation/authorization detection is part of the claim;
-- **seeds post-decision or post-transition state** when the decision/transition is under acceptance;
-- **replaces durable/project persistence** with an in-memory substitute when persistence/restart semantics are the claim;
-- **reimplements production compatibility**/migration/scheduling/authorization logic in the harness;
-- accepts a **helper-produced plan/result** when production construction/routing of that plan/result is the behavior being verified.
-
-This is **not a global ban on mocks or fakes**. **Bounded deterministic fixtures remain preferred** where they establish the claim economically, and bounded test doubles remain valid below or outside the real owner to control external services, hardware, data volume, nondeterminism, and expensive machine-learning/scientific training or prediction. Production-scale execution is required only when production-scale behavior/resource qualification is itself the claim.
-
-When an exact owner/path is a delegated concretization, acceptance does **not** make that lower-level owner durable authority. If accepted semantics move from delegated owner `A` to equivalent owner `B`, owner-specific evidence for `A` becomes stale. Reconcile the acceptance mapping to the new real owner and rerun owner-specific evidence instead of preserving `A` or calling the remap proxy-passing.
-
-If the required real-owner boundary is unavailable, mark the claim **unavailable/blocking** rather than substituting a proxy and declaring a pass.
-
-When a bypass is easy to regress and the claim is structural, a **robust inexpensive structural/negative check** can protect the boundary. Do not require universal abstract-syntax-tree (AST) scanning, a global monkeypatch ban, or a new anti-mocking framework merely to police ordinary tests.
-
-## Conformance and structural evidence
-
-Green tests do not prove that every accepted implementation obligation was performed. Semantic/workplan conformance and functional testing answer different questions and both must close.
-
-For **removal, uniqueness, ownership, or no-legacy-path claims**, use **structural/source** inspection or negative/absence assertions when runtime tests cannot establish the claim directly.
-
-## Acceptance liveness and failure injection
-
-When evidence depends on a hook/failpoint/callback/state transition, establish that the trigger actually fired when practical. Green evidence that never exercised the intended boundary is insufficient.
-
-For persistence/restart/orchestration/recovery/failure-propagation claims, use deterministic bounded failure injection where it materially strengthens evidence: interrupted publication, truncated artifact, stale/missing cache, restart at material boundaries, worker/task death, controlled input/output (I/O) failure, duplicate callback/event, or partial transition state.
-
-Keep the **real semantic owner** of recovery/state behavior executing. Prefer bounded simulation over actual resource exhaustion. Bounded failure injection is conditional on the claim and is **not a universal test stage**.
-
-## Evidence reuse and invalidation
-
-Reuse evidence until a changed authority/concretization/evidence-specification/environment dimension can plausibly alter its claim or interpretation. Accepted upstream changes invalidate only materially dependent evidence. Executable refactors invalidate affected D4 regression; serialization changes invalidate persistence/compatibility evidence; graphics-processing-unit (GPU) execution-policy changes invalidate GPU equivalence/performance evidence without automatically invalidating an unchanged central-processing-unit (CPU) reference.
-
-Final assembled D4 regression/integration always reflects the candidate after all material executable edits that could affect behavior.
-
-When an accepted authority or material concretization changes, perform bounded impact closure over affected descendants, evidence specifications/realizations, documentation/dependency views, human re-ratification where applicable, revalidation/retirement, and semantic-evolution history. Preserve unaffected siblings and still-valid evidence. Old green tests are never a substitute for impact closure.
-
-## Changed-code quality ratchets
-
-Complexity, duplication, coverage, mutation, churn, dependency centrality/cycles, and changed-line metrics are sensors. Use them to prioritize semantic inspection and to prevent touched code from becoming harder to reason about without authority-backed need. They become hard thresholds only when project/task authority explicitly adopts them.
-
-## Composed end-to-end scientific closure
-
-For material/high-risk scientific claims, pairwise checks can all pass while an omitted intermediate invariant makes the assembled conclusion wrong. Trace:
+For material/high-risk scientific claims, trace composed closure when warranted:
 
 ```text
 actual D4 executable behavior
- -> final governed numerical observables
+ -> governed numerical observables
  -> D2 error/equivalence/uncertainty envelope
  -> D1 scientific/mathematical meaning
- -> external adequacy/validation/proof/standards evidence where applicable
+ -> external adequacy / validation / proof / standards evidence
 ```
 
-This **composed end-to-end scientific closure** is risk-triggered; do not force it onto a local software refactor with no plausible upstream semantic impact.
+Do not force this onto a local software refactor with no plausible upstream semantic impact.
 
-## Review readiness and final assembled acceptance
+## Final assembled acceptance
 
-Normal review readiness follows final accepted-contract reconciliation, **final complete affected-surface regression**, real-boundary integration, repository/project-required checks, task-required structural/liveness evidence, and bounded impact closure for material authority/concretization changes on the candidate whose relevant dimensions have not changed afterward. Missing required evidence remains blocking; Review does not move those checks later.
+Before implementation completion: reconcile every accepted governing obligation and material structural/absence claim; re-derive the final affected semantic/behavioral/evidence/documentation surface; account for each affected path with executed coverage or unavailable/blocking state; run complete affected regression after all material executable edits; run assembled real-boundary integration/end-to-end; run repository/project-required build/lint/type/package checks; and close material evidence/dependency/history impact under their owners.
 
-Before implementation completion:
+Review readiness normally follows this acceptance. Review may still inspect missing evidence, but missing required acceptance remains a blocker rather than being moved after Review. Production qualification is separate from functional acceptance; use long/data-heavy/target-hardware workloads only when they establish production-scale time, throughput, RAM/VRAM, storage/I/O, scaling, accelerator use, or recovery cost.
 
-1. reconcile every accepted governing obligation and material structural/absence claim;
-2. re-derive the affected behavioral/semantic surface from the final assembled implementation;
-3. account for every affected path with executed coverage or an explicit **unavailable/blocking** result;
-4. rerun complete affected-surface regression after all material executable edits;
-5. run assembled real-boundary integration/end-to-end tests;
-6. run repository/project-required build/lint/type/package checks;
-7. resolve or explicitly block every material evidence/dependency impact item.
-
-A successful production run does not substitute for missing regression/integration.
-
-## Production qualification
-
-Production qualification is distinct from functional acceptance. Use real long/data-heavy/target-hardware workloads only when explicitly required or necessary to establish production-scale wall time, throughput, random-access memory (RAM), video random-access memory (VRAM), storage/I/O, scaling, accelerator utilization, or recovery cost. Bounded performance/equivalence/resource checks remain normal implementation evidence when sufficient.
-
-## Resource safety
-
-Honor explicit CPU/RAM/VRAM/storage/I/O/wall-time limits. Do not exhaust the machine merely to prove functionality. Use bounded representative fixtures and controlled failure simulation when they establish the same claim.
+Apply the Lossless Representation Rule to evidence summaries: lead with invalid/unavailable/contradictory evidence and decision consequences, keep raw logs cold when provenance remains recoverable, and never let compactness hide a required failure, uncertainty, applicability qualification, or lower-salience closure obligation.

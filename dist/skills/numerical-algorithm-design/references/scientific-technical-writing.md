@@ -1,147 +1,77 @@
 # Scientific and Technical Writing
 
-Write scientific/technical material so it is rigorous, reproducible, interpretable, and clear about semantic authority.
+Own human-facing scientific/technical exposition. The universal [Lossless Representation Rule](abstraction-and-concretization.md) governs completeness, salience, progressive disclosure and compactness; this reference specializes it for readable technical documents.
 
 ## Background and terminology
 
-The **Scientific Software Development Protocol (SSDP)** treats human-facing documentation as a semantic communication surface: readers must be able to recover the meaning needed to interpret the document without hidden chat or unexplained project jargon.
+**Human-facing documentation** is material read directly for scientific, engineering, operational, review, handoff or explanatory understanding rather than only as machine data. The **intended competent reader** is the audience reasonably assumed by the document. **Non-common domain terminology** is a specialized/named/project-specific term that audience cannot reasonably be expected to understand without explanation.
 
-For this reference:
+For every newly introduced non-common term on which later reasoning depends, give a concise definition and short contextual explanation in `Background`, `Background and terminology`, or an equivalent explicit early section. Explain enough to make later reasoning interpretable, not to turn the document into a textbook. A shared background section is valid only when the multi-file composition is explicit and supplied/read together; a standalone file cannot depend on hidden context.
 
-- **human-facing documentation** means material intended to be read directly for scientific, engineering, operational, review, handoff, or explanatory understanding rather than consumed only as machine data;
-- **intended competent reader** means the audience the document is reasonably written for, including its stated or evident scientific/engineering background;
-- **non-common domain terminology** means a specialized term, named method, project-specific concept, or domain-specific usage that cannot reasonably be assumed to be understood by that intended reader without explanation;
-- **background definition** means a concise explanatory definition sufficient to orient the reader before the term carries substantive reasoning.
+The standard is audience-relative: common specialist terminology need not be re-taught, but project-specific/unusually specialized terms cannot be hidden behind an artificially expert audience assumption. When commonness is genuinely uncertain, a short definition is cheaper than unexplained jargon.
 
-The standard is audience-relative. A term common to specialists in the explicitly intended audience need not be re-taught merely because it is technical. Project-specific and unusually specialized terminology must not be hidden behind an artificially expert audience assumption. When commonness is genuinely uncertain, prefer a short definition over unexplained jargon.
+### Explanatory vs normative definitions
 
-## Authority-aware writing
+Background explanation does not acquire D1/D2/D3/D4 authority merely by defining a term. When meaning can change scientific conclusions, numerical semantics, architecture or public behavior, put the precise contract in its semantic owner and keep background prose orienting/consistent. Material disagreement routes to the owner; documentation cannot adjudicate it editorially.
 
-Before drafting, identify the document's role:
+## Abbreviations and opaque identifiers
 
-- D1 Scientific Method Paper;
-- D2 Numerical & Algorithmic Method Paper;
-- D3 Architecture Manual;
-- D4 Specification;
-- non-normative guide/tutorial/rationale/evidence/history/publication output.
-
-A D1/D2 methods document can contain an accepted normative semantic core plus supporting explanation/evidence. Do not declare all methods prose non-normative, and do not treat every sentence/citation inside an authority-bearing file as an invariant.
-
-State proposed/current/challenged/stale/historical/release-pinned status when ambiguity could cause the wrong document to govern work.
-
-## Human-facing background-context standard
-
-Every newly introduced non-common domain-knowledge term used by a current human-facing document must be backed by a concise definition and short contextual explanation in a `Background`, `Background and terminology`, or equivalently explicit background section before the reader is expected to rely on that term for substantive reasoning.
-
-This applies, proportionately, to D1/D2 method papers, D3 Architecture Manuals, D4 Specifications that introduce domain concepts, substantial workplans/handoffs, guides/runbooks, review/verification/qualification reports, semantic-evolution reports, and human-readable schema/control documentation.
-
-For substantial D1/D2 papers and other documents introducing several specialized concepts, place `Background and terminology` near the beginning, before the normative formulation or design discussion depends on those concepts. Explain only enough background to make later reasoning interpretable; detailed derivations, normative equations, algorithm guarantees, architecture contracts, and implementation specifications remain in their owning sections.
-
-A short artifact introducing only one or two specialized terms may use a compact explicit background subsection. Do not create a universal glossary database or terminology registry solely for protocol symmetry.
-
-A multi-file document family may share one background section when composition is explicit and every dependent file is supplied/read with it as part of the current artifact set. A standalone file must not require hidden chat or an unsupplied document to decode essential terminology.
-
-### Explanatory versus normative definitions
-
-A background explanation does not automatically become D1/D2/D3/D4 semantic authority merely because it defines a term for the reader.
-
-When a term has project-specific normative meaning capable of changing scientific conclusions, numerical semantics, architecture, or public behavior:
-
-1. provide the concise human-facing explanation in background context;
-2. place the precise normative definition/contract in the appropriate D1/D2/D3/D4 owner;
-3. cross-reference that owner when useful rather than creating a competing definition.
-
-If explanatory prose and accepted semantic authority disagree materially, route the disagreement to the owning domain. Documentation support may repair explanatory drift but may not choose new scientific/numerical/architectural/product truth editorially.
-
-## Abbreviations and acronyms
-
-Human-facing prose introduces a non-obvious abbreviation or acronym at first explanatory use by writing the full term followed immediately by the abbreviation in parentheses:
+Introduce a non-obvious abbreviation/acronym at first explanatory use as:
 
 ```text
-alpha beta gamma (ABG)
+full term (ABC)
 ```
 
-After introduction, `ABG` may be used consistently within the same standalone document or explicitly composed document unit.
+Use it consistently thereafter. Independently consumable abstracts/executive summaries/captions should define non-obvious abbreviations within that component when needed; the main body may define again when useful for standalone readability. Avoid abbreviation collisions and inconsistent capitalization.
 
-Examples:
+Machine-facing JSON keys/enums, code identifiers, symbols, standardized units, filenames, command-line interface (CLI) tokens, application programming interface (API) identifiers, profile keys and immutable compatibility identifiers need not be expanded inside the machine representation. Explain non-obvious meaning at the first relevant human-facing occurrence. Do not create a universal glossary/acronym registry or mechanical acronym gate solely for protocol symmetry.
 
-```text
-machine-learning force field (MLFF)
-molecular dynamics (MD)
-finite element method (FEM)
-```
+## Authority-aware structure
 
-An abstract, executive summary, figure/table caption, or other independently consumable human-facing component should define a non-obvious abbreviation on first use within that component when a reader may encounter it without the main body. The main body may define it again at first use when that materially improves standalone readability.
+Know whether the artifact is a D1 paper, D2 paper, D3 Architecture Manual, D4 Specification, or non-normative guide/rationale/evidence/history/publication output. An authority-bearing file may contain normative core plus explanation/evidence/pedagogy; do not treat every sentence/citation as invariant or the whole methods paper as non-normative.
 
-Prefer the full term in titles/headings when practical. If a conventional or externally fixed abbreviation must appear in a title, filename, command-line interface (CLI) token, application programming interface (API) identifier, profile key, or other opaque label, define it at the first explanatory prose occurrence where a human reader must understand the meaning.
+State authority/lifecycle status when ambiguity could cause the wrong artifact to govern. Current documentation explains present truth; release-pinned historical material stays historically accurate.
 
-Machine-facing values, code identifiers, JSON keys/enums, mathematical symbols, chemical symbols, standardized units, filenames, and immutable compatibility identifiers do not require expansion inside the machine representation. Their human-facing reference/schema documentation must still explain non-obvious meaning.
+## Lossless technical representation
 
-Do not use one abbreviation for two different terms in the same document unless unavoidable and explicitly disambiguated. Preserve one expansion and capitalization convention after introduction. Do not mechanically expand every capitalized token with an acronym linter; abbreviation correctness is semantic/contextual.
+After semantic completeness is secured, optimize the writing itself:
 
-## Style and structure
+1. state each generic rule once at its canonical owner; secondary text gives only the local consequence and precise route unless a short restatement lowers inferential cost;
+2. lead with the information that determines action/interpretation—governing claim, decision, blocker/Challenge, material uncertainty—then supporting detail;
+3. use the fewest paragraphs/sections consistent with unambiguous interpretation; merge adjacent prose serving the same semantic function;
+4. prefer direct stable terminology and explicit definitions over rhetoric, filler, repeated restatement, amendment chronology, excessive abbreviation or chained references;
+5. keep specialized/historical/raw detail cold until a visible condition makes it relevant, but keep that route discoverable;
+6. do not let importance weighting omit a lower-salience mandatory constraint; prominence and acceptance are different;
+7. optimize total cognitive/inferential cost, not character count—over-fragmentation and over-compression are defects when they make the document harder to reconstruct.
 
-Prefer direct prose, explicit definitions, stable terminology, coherent sections, and enough local context to interpret equations, algorithms, inputs, outputs, assumptions, and limitations. Avoid filler, repetitive restatement, implementation chronology, and unexplained internal jargon.
+## Scientific/mathematical conventions
 
-Write permanent current documentation as a coherent present-state explanation rather than a chain of patch notes.
+State conventions before ambiguity can change meaning: units, signs, coordinates/frames, indexing/tensor order, boundary/periodic assumptions, normalization, estimator/sample semantics, precision/tolerance policy. Use LaTeX for formulas and define symbols near first use. Distinguish exact identities, approximations, empirical relationships, heuristics, assumptions and conclusions.
 
-## Mathematical and scientific conventions
+### D1
 
-State conventions before ambiguity can change meaning: units, signs, coordinates/frames, indexing/tensor order, periodic/boundary assumptions, normalization, estimator/sample semantics, and precision/tolerance policy where material.
+A Scientific Method Paper should communicate problem/context, prerequisite terminology, governing formulation, observables/estimands, assumptions, validity regime, model uncertainty/limitations, external adequacy/falsification, and material provenance/literature; hand D2 only the minimum invariants needed for faithful numerical concretization.
 
-Use LaTeX for formulas. Define symbols near first use. Distinguish exact identities, approximations, empirical relationships, heuristics, assumptions, and conclusions.
+### D2
 
-## D1 writing
+A Numerical & Algorithmic Method Paper should communicate governed algorithm/estimator/discretization, normalization/order/precision/stochastic semantics, approximation/error/convergence/conditioning, numerical uncertainty, verification oracles, and the minimum computational semantics D3 must preserve.
 
-A Scientific Method Paper should explain the problem/context, background terminology, governing formulation, observables/estimands, assumptions, validity regime, model uncertainty, limitations, external adequacy/falsification route, and supporting literature/provenance. It should hand D2 the minimum semantic invariants needed for faithful numerical concretization.
+### D3 / D4
 
-## D2 writing
-
-A Numerical & Algorithmic Method Paper should explain prerequisite terminology and then define the governed algorithm/estimator/discretization, normalization/order/precision/stochastic semantics, approximation/error/convergence/conditioning behavior, numerical uncertainty, verification oracles, and the minimum computational semantics D3 must preserve.
-
-## Architecture and specification writing
-
-Architecture documentation explains accepted ownership, interfaces, data/control flow, persistence/concurrency/security/resource boundaries, and durable structure without freezing private D4 mechanics unnecessarily. Introduce specialized domain concepts before relying on them in architecture reasoning.
-
-Specifications state concrete stable behavior needed by consumers/automation/persisted state. Keep them minimal and precise; do not turn source-code detail into public contract merely because it exists.
+Architecture documentation states accepted ownership, interfaces, data/control flow, persistence/concurrency/security/resource/deployment boundaries and durable structure without freezing private D4 mechanics unnecessarily. Specifications state concrete stable behavior needed by consumers/automation/persisted state; source detail is not public contract merely because it exists.
 
 ## Reproducibility and provenance
 
-Document material inputs, units/shapes/constraints, preprocessing/normalization, algorithms, tolerances/cutoffs, seeds/stochastic semantics, backend/dtype/model/schema identities, failure behavior, approximation regime, and material resource/scaling behavior according to the owning domain.
+At the owning domain, document material inputs, units/shapes/constraints, preprocessing/normalization, algorithms, tolerances/cutoffs, seeds/stochastic semantics, backend/dtype/model/schema identities, failure behavior, approximation regime, and material resource/scaling behavior when required for interpretation or reproduction.
 
-Do not fabricate citations. Prefer primary scientific sources and official software/API documentation when external claims matter. Distinguish project-specific adaptation from standard borrowed methods.
+Do not fabricate citations. Prefer primary scientific sources and official software/API documentation for material external claims; distinguish standard borrowed method from project-specific adaptation.
 
-## User guides
+## Guides and rendered output
 
-Bridge concept to operation:
+User guides should bridge concept -> package abstraction -> CLI/API/config -> minimal supported workflow -> output interpretation. Lead with current supported operation; compatibility/advanced alternatives follow when relevant.
 
-```text
-scientific/technical concept
- -> package abstraction
- -> CLI/API/configuration
- -> minimal workflow
- -> output interpretation
-```
+For rendered PDF/site outputs, materially changed pages should preserve readable headings/equations/tables/code/figures/captions, working cross-references, consistent notation and no clipping/overlap/broken glyphs. Renderer success alone is not presentation acceptance.
 
-Lead with the supported current workflow; put compatibility and advanced alternatives later. Define non-obvious package/project terminology before operational instructions depend on it.
+## Completion
 
-## Historical/version-bound discipline
-
-Do not retroactively edit release-pinned historical artifacts solely to satisfy a later presentation standard. Current documentation should supply enough context to interpret cited historical terminology without rewriting historical truth.
-
-## Presentation quality
-
-For rendered PDF/site outputs, preserve coherent headings, equations/tables, useful figures/captions, readable code blocks, working cross-references, consistent notation, and absence of clipping/overlap/broken glyphs on materially changed pages. Renderer success alone is not presentation acceptance.
-
-## Completion check
-
-For newly created or materially refactored human-facing documentation, review proportionately for:
-
-- unexplained non-common terminology;
-- missing or insufficient background context;
-- first-use abbreviation expansion;
-- abbreviation collisions/inconsistent capitalization;
-- explanatory definitions that drift from their accepted semantic owner;
-- hidden cross-file prerequisites that prevent standalone/current composition from being understood.
-
-These are semantic/editorial checks, not a mandate for a universal glossary or acronym-checking framework.
+For newly created/materially refactored human-facing material check proportionately: unexplained non-common terms, insufficient background, first-use abbreviation expansion/collisions, explanatory definitions drifting from semantic owners, hidden cross-file prerequisites, repeated generic doctrine, amendment-style present-state prose, and compression that loses constraints/uncertainty/provenance. These are semantic/editorial checks, not a mandate for new registries or checker frameworks.
