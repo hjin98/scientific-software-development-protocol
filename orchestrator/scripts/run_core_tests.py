@@ -2,10 +2,11 @@
 """Run the Core acceptance suite, sharded across processes.
 
 Most test modules are independent and run concurrently in separate interpreters.
-Resource-heavy installed-artifact acceptance runs as an exclusive shard because
-it builds and installs wheel/sdist artifacts in multiple virtual environments;
-running that shard beside the full parallel suite can exceed a shared CI runner's
-resource envelope and terminate it outside unittest reporting.
+Resource-heavy installed-artifact acceptance runs as an exclusive leading shard
+because it builds and installs wheel/sdist artifacts in multiple virtual
+environments.  CI qualification showed that this shard is stable from a clean
+runner but can fail after a parallel predecessor pool, so it is deliberately
+executed before the pool rather than coupled to residual runner state/resources.
 
 Concurrency for the remaining shards is sized from the machine's effective CPU
 allocation and capped by the parallel module count.
@@ -95,25 +96,26 @@ def main() -> int:
     jobs = min(requested_jobs, len(parallel)) if parallel else 0
 
     description = f"running {len(modules)} test modules"
-    if parallel:
-        description += f" with {len(parallel)} parallel shard(s) across {jobs} worker(s)"
     if exclusive:
-        description += f" and {len(exclusive)} exclusive shard(s)"
+        description += f" with {len(exclusive)} leading exclusive shard(s)"
+    if parallel:
+        description += f" and {len(parallel)} parallel shard(s) across {jobs} worker(s)"
     print(description)
 
     failures: list[tuple[str, str]] = []
     total = 0
     started = time.monotonic()
 
+    # Run installed-artifact acceptance from clean runner state.  It is the
+    # installed product's acceptance owner and intentionally does substantial
+    # wheel/sdist/venv work; predecessor pools must not affect that observation.
+    for module in exclusive:
+        total += _record_result(run_module(module), failures)
+
     if parallel:
         with ProcessPoolExecutor(max_workers=jobs) as pool:
             for result in pool.map(run_module, parallel):
                 total += _record_result(result, failures)
-
-    # Run resource-heavy shards only after the parallel worker pool has exited,
-    # so their build/install subprocess trees do not overlap other test shards.
-    for module in exclusive:
-        total += _record_result(run_module(module), failures)
 
     elapsed = time.monotonic() - started
     for module, output in failures:
