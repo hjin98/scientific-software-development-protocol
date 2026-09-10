@@ -49,7 +49,7 @@ FINAL INDEPENDENT REVIEW: PASS — qualification/ssdp6/FINAL-REVIEW-GPT-5.6-SOL-
 OPEN BLOCKING FINDINGS: 0
 SEMANTIC CANDIDATE: 5f911fecb0de2847f63c0b4859e1dd8c63d3d8ef
 PREVIOUS RECOVERY SNAPSHOT: dec5ff2767e14fd1cda46e073757aa27f40e270c — HISTORICAL, NOT FINAL ACCEPTED RECOVERY
-REPLACEMENT RECOVERY SNAPSHOT: THIS LIFECYCLE-CLOSEOUT COMMIT — IMMUTABLE SHA RECORDED BY THE IMMEDIATELY FOLLOWING METADATA-ONLY PIN
+REPLACEMENT RECOVERY SNAPSHOT: 0c90fda19bf6ed9cb0c4511beb3da80ace6584ed
 LIFECYCLE STATUS: COMPLETED / ARCHIVED
 ```
 
@@ -76,7 +76,7 @@ Current review disposition:
 SERIOUS CHALLENGE: NONE
 WORKPLAN DESIGN REVIEW: PASS
 IMPLEMENTATION STATUS: PROPOSED
-PROTOCOL 6.1 COMPLETION/QUALIFICATION/RECOVERY PREREQUISITE: SATISFIED BY THIS CLOSEOUT; EXACT IMMUTABLE SHA IS RECORDED BY THE IMMEDIATELY FOLLOWING METADATA-ONLY PIN
+PROTOCOL 6.1 COMPLETION/QUALIFICATION/RECOVERY PREREQUISITE: SATISFIED — RECOVERY 0c90fda19bf6ed9cb0c4511beb3da80ace6584ed
 REMAINING PRE-D4 REQUIREMENTS:
   1. DELIBERATE D3 ORCHESTRATOR ARCHITECTURE REOPEN/SUPERSESSION
 ```
@@ -92,10 +92,10 @@ There is exactly one canonical workflow-control authority for any current run.
 - Under Protocol 6.1, workplan/skill/prompt/profile document control remains valid and the Protocol 7 control plane is non-authoritative.
 - Under Protocol 7 after qualified cutover, the deterministic orchestrator control plane owns machine lifecycle transitions while workplans/skills/documents remain semantic artifacts.
 - Shadow comparison is permitted only while one side remains explicitly non-authoritative.
-- Protocol 7 fallback uses the replacement immutable Protocol 6.1 recovery commit established by this closeout and identified by the immediately following metadata-only pin. The historical `dec5ff2767e14fd1cda46e073757aa27f40e270c` snapshot is not the final rollback baseline after the discovered defects.
+- Protocol 7 fallback uses replacement immutable Protocol 6.1 recovery commit `0c90fda19bf6ed9cb0c4511beb3da80ace6584ed`. The historical `dec5ff2767e14fd1cda46e073757aa27f40e270c` snapshot is not the final rollback baseline after the discovered defects.
 
 ## Historical discipline
 
 Do not edit archived/version-pinned Protocol 6.0/5.x transition records merely to adopt 6.1 terminology or presentation rules. Current 6.1/7.0 work follows abstraction/concretization terminology and the human-facing documentation standard while legacy stable identifiers may retain older lexemes only under the explicit compatibility rule in the current 6.1 handoff.
 
-The original Protocol 6.1 workplans and the reopened repair workplan remain archived as exact historical handoff artifacts. Current completion/recovery state is recorded by this index, current portability mapping, semantic-evolution history, the fresh qualification/Review records, and the replacement immutable recovery pin.
+The original Protocol 6.1 workplans and the reopened repair workplan remain archived as exact historical handoff artifacts. Current completion/recovery state is recorded by this index, current portability mapping, semantic-evolution history, the fresh qualification/Review records, and replacement immutable recovery commit `0c90fda19bf6ed9cb0c4511beb3da80ace6584ed`.

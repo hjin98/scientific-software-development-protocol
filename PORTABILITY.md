@@ -50,9 +50,9 @@ Version-bound recovery uses immutable repository commits rather than `main`/late
 | --- | --- |
 | 5.16.0 | `e151daaf5c8eebb351a85cfed86170fda80fb5e3` |
 | 6.0.0 | `21d5188f5bd9a0270d7a2ebf93d41a6b7842ccd2` |
-| 6.1.0 | this lifecycle-closeout commit; exact immutable SHA is recorded by the immediately following metadata-only pin |
+| 6.1.0 | `0c90fda19bf6ed9cb0c4511beb3da80ace6584ed` |
 
-The earlier Protocol 6.1 closeout snapshot `dec5ff2767e14fd1cda46e073757aa27f40e270c` remains immutable historical evidence but is superseded as the final rollback baseline. The repaired semantic candidate `5f911fecb0de2847f63c0b4859e1dd8c63d3d8ef` passed complete repository/package/orchestrator acceptance, fresh 94/94 behavioral qualification, and fresh independent Review before this lifecycle closeout. This closeout commit is the replacement document-controlled/semi-automated recovery snapshot; the immediately following metadata-only pin records its exact SHA without changing qualified Protocol semantics or executable behavior.
+The earlier Protocol 6.1 closeout snapshot `dec5ff2767e14fd1cda46e073757aa27f40e270c` remains immutable historical evidence but is superseded as the final rollback baseline. The repaired semantic candidate `5f911fecb0de2847f63c0b4859e1dd8c63d3d8ef` passed complete repository/package/orchestrator acceptance, fresh 94/94 behavioral qualification, and fresh independent Review before lifecycle closeout. Replacement recovery commit `0c90fda19bf6ed9cb0c4511beb3da80ace6584ed` contains the qualified Protocol 6.1 source/profile/generated artifacts, fresh evidence/Review records, corrected semantic-history state, and the archived repair handoff without Protocol 7 implementation machinery. Later metadata-only pinning records that identity without changing qualified Protocol semantics or executable behavior.
 
 ## Deterministic routing dimensions
 
@@ -94,6 +94,6 @@ If no suitable live harness/tool environment exists, static/counterfactual/packa
 
 ## Behavioral qualification
 
-`qualification/ssdp6/SCENARIOS.md` defines Protocol 6 authority, abstraction adequacy, D1/D2/D3/D4 routing, Serious Challenge, anti-deference/anti-stubbornness, historical compatibility, and composed-closure scenarios. `qualification/ssdp6/SCENARIOS-6.1-ADDITIONS.md` extends the Protocol 6.1 set through scenario 94, including the reopened terminology and canonical-navigation counterexamples. The fresh current result is `qualification/ssdp6/RESULTS-GPT-5.6-SOL-2026-09-09-PROTOCOL-6.1-REOPENED-94.md`: 94/94 PASS with no Serious Challenge, explicitly bound to semantic candidate `5f911fecb0de2847f63c0b4859e1dd8c63d3d8ef`. Existing earlier Protocol 6.1 and Protocol 5 qualification remains historical evidence for its candidate/release semantics.
+`qualification/ssdp6/SCENARIOS.md` defines Protocol 6 authority, abstraction adequacy, D1/D2/D3/D4 routing, Serious Challenge, anti-deference/anti-stubbornness, historical compatibility, and composed-closure scenarios. `qualification/ssdp6/SCENARIOS-6.1-ADDITIONS.md` extends the Protocol 6.1 set through scenario 94, including the reopened terminology and canonical-navigation counterexamples. The fresh current result is `qualification/ssdp6/RESULTS-GPT-5.6-SOL-2026-09-09-PROTOCOL-6.1-REOPENED-94.md`: 94/94 PASS with no Serious Challenge, explicitly bound to semantic candidate `5f911fecb0de2847f63c0b4859e1dd8c63d3d8ef`. Earlier Protocol 6.1 and Protocol 5 qualification records remain historical evidence for their candidate/release semantics.
 
 Reference-routing and tool-routing sentinel qualifications remain useful for named harness configurations. Ordinary repository CI does not infer universal model compliance from static tests.
