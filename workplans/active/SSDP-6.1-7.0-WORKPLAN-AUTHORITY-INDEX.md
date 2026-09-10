@@ -26,13 +26,15 @@ Protocol 6.1 implementation/review now SHALL read and satisfy, as one composed h
 2. `workplans/archive/SSDP-6.1-EVIDENCE-EVOLUTION-AND-CONCRETIZATION-ALIGNMENT-REVISION-1-HUMAN-FACING-DOCUMENTATION-AND-FINAL-REVIEW-CLOSURE.md`
 3. `workplans/archive/SSDP-6.1-REOPENED-FINAL-REVIEW-REPAIR.md`
 4. `workplans/active/SSDP-6.1-SECOND-REOPENED-PORTABILITY-DOCUMENTATION-AND-RECOVERY-REPAIR.md`
+5. `workplans/active/SSDP-6.1-SECOND-REOPENED-PORTABILITY-DOCUMENTATION-AND-RECOVERY-REPAIR-REVISION-1-PACKAGE-CLOSURE.md`
 
 Precedence and preservation:
 
 - the consolidated parent governs evidence/evolution/concretization semantics and lossless Protocol 6.0/5.16 inheritance;
 - Revision 1 supplements it with the human-facing background/terminology/abbreviation standard;
 - the first reopened repair corrected D3/D4 evidence-realization terminology, canonical navigation, and associated acceptance oracles;
-- the second reopened repair corrects package transitive-reference closure, version-correct immutable public fallback/recovery documentation, and incomplete application of the already-accepted human-facing standard;
+- the second reopened repair corrects package reference closure, version-correct immutable public fallback/recovery documentation, and incomplete application of the already-accepted human-facing standard;
+- second-reopen Revision 1 supersedes only the parent repair's direct-only package-membership freeze after live counterexample evidence exposed 68 unresolved transitive local Markdown routes; direct `SKILL.md` routes remain activation seeds while transport payload uses bounded transitive local-Markdown closure;
 - every parent requirement not explicitly narrowed by a later artifact remains binding;
 - no current repair changes accepted D1/D2/D3 doctrine or authorizes Protocol 7 implementation machinery.
 
@@ -43,6 +45,7 @@ SERIOUS CHALLENGE: NONE
 PREVIOUS 94/94 QUALIFICATION: HISTORICAL FOR CURRENT CLOSEOUT
 PREVIOUS FINAL INDEPENDENT REVIEW: HISTORICAL FOR CURRENT CLOSEOUT
 SECOND REOPEN FINDINGS: 3 BLOCKING
+PACKAGE-DESIGN RECONCILIATION: ACTIVE — DIRECT-ONLY MEMBERSHIP SUPERSEDED BY BOUNDED TRANSITIVE CLOSURE
 SECOND REOPEN IMPLEMENTATION STATUS: ACTIVE
 OPEN BLOCKING FINDINGS: 3
 PREVIOUS SEMANTIC CANDIDATE: 5f911fecb0de2847f63c0b4859e1dd8c63d3d8ef — HISTORICAL
@@ -51,7 +54,7 @@ REPLACEMENT RECOVERY SNAPSHOT: PENDING SECOND-REOPEN QUALIFICATION/REVIEW/CLOSEO
 LIFECYCLE STATUS: ACTIVE / NO-PASS
 ```
 
-The prior current Review `qualification/ssdp6/FINAL-REVIEW-GPT-5.6-SOL-2026-09-09-PROTOCOL-6.1-REOPENED.md` and fresh 94-scenario result remain valid historical evidence for the candidate they evaluated. They cannot close the newly affected package/public-fallback/documentation surfaces.
+The prior current Review `qualification/ssdp6/FINAL-REVIEW-GPT-5.6-SOL-2026-09-09-PROTOCOL-6.1-REOPENED.md` and fresh 94-scenario result remain valid historical evidence for the candidate they evaluated. They cannot close the newly affected package/public-fallback/documentation surfaces. The failed pre-commit package-closure run is diagnostic evidence only; it did not accept a partial repair candidate.
 
 ## Protocol 7.0 current design handoff
 
