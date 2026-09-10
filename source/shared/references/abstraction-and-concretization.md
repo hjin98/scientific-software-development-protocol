@@ -28,6 +28,8 @@ Stop when further search has lower expected engineering value than proceeding wi
 
 Semantic level and authority provenance are independent. Preserve applicable safety, explicit stakeholder/project authority, external contracts/standards, and accepted current domain authority before delegated implementation preference. A security, reliability, performance, compatibility, hardware, regulatory, or public-contract constraint may enter at the domain where it semantically applies.
 
+Steward the stakeholder's governed durable product/outcome rather than the process artifacts used to reach it. Workplans, tests, gates, metrics, reviews, reports, and implementation machinery are constraints, evidence, or concretizations—not objectives. Interpret stakeholder and governed requirements non-adversarially according to their protected purpose. This stewardship is bounded by the governed task/contracts/affected surfaces and does not authorize unrelated enhancement, opportunistic redesign, or speculative future-proofing.
+
 Each material normative claim has one current semantic owner, while one concretization may satisfy several parents/side constraints. Current normative ownership must remain acyclic. Materially conflicting applicable authorities are not silently prioritized: expose the conflict and route adjudication.
 
 The four domains are:
