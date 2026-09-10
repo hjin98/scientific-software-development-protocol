@@ -28,36 +28,26 @@ jobs:
           rc=$?
           echo "$rc" > /tmp/core.rc
           exit 0
-      - name: Artifact packaging assertion failed
+      - name: Clipboard-extra assertion failed
         if: always()
         shell: bash
         run: |
-          if grep -E '^(FAIL|ERROR): test_(wheel|sdist|installed_package|sibling_namespace|installed_build)' /tmp/core.log; then exit 1; fi
-      - name: Launcher and prompt assertion failed
+          if grep -E '^(FAIL|ERROR): test_clipboard_extra_is_additive_and_never_blocks_the_prompt' /tmp/core.log; then exit 1; fi
+      - name: Offline-snapshot assertion failed
         if: always()
         shell: bash
         run: |
-          if grep -E '^(FAIL|ERROR): test_(installed_cli|zero_install|stdout|every_stage|profile_alias|errors_are|stage_disallowed|task_outside|execution_mode|prompt_mode|cwd_project)' /tmp/core.log; then exit 1; fi
-      - name: Discovery or doctor assertion failed
+          if grep -E '^(FAIL|ERROR): test_offline_rendering_uses_the_packaged_snapshot' /tmp/core.log; then exit 1; fi
+      - name: Help-without-config assertion failed
         if: always()
         shell: bash
         run: |
-          if grep -E '^(FAIL|ERROR): test_(projects_command|doctor|capabilities)' /tmp/core.log; then exit 1; fi
-      - name: Offline or UX assertion failed
+          if grep -E '^(FAIL|ERROR): test_help_is_available_without_a_configuration' /tmp/core.log; then exit 1; fi
+      - name: Pipe-safe-output assertion failed
         if: always()
         shell: bash
         run: |
-          if grep -E '^(FAIL|ERROR): test_(clipboard|offline|help|pipe)' /tmp/core.log; then exit 1; fi
-      - name: Installed-product fixture setup failed
-        if: always()
-        shell: bash
-        run: |
-          if grep -Eq 'ERROR: setUpClass.*InstalledProductTests|wheel/sdist build failed|wheel install failed|sdist install failed|venv creation failed' /tmp/core.log; then exit 1; fi
-      - name: Any unclassified installed-product assertion failed
-        if: always()
-        shell: bash
-        run: |
-          if grep -E '^(FAIL|ERROR): .*InstalledProductTests' /tmp/core.log; then exit 1; fi
+          if grep -E '^(FAIL|ERROR): test_pipe_safe_output' /tmp/core.log; then exit 1; fi
       - name: Core wrapper passed
         if: always()
         shell: bash
