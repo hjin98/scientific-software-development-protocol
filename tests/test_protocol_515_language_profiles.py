@@ -22,12 +22,6 @@ def section(text: str, heading: str, next_level: str = "## ") -> str:
     return body if pos < 0 else body[:pos]
 
 
-def language_route_links(role_path: str) -> set[str]:
-    text = read(role_path)
-    block = section(text, "### Language-profile dispatch", "### ")
-    return {Path(link).name for link in LINK_RE.findall(block)}
-
-
 class Protocol515LanguageProfileTests(unittest.TestCase):
     def setUp(self) -> None:
         self.router = read("source/shared/references/language-profiles.md").lower()
@@ -39,9 +33,9 @@ class Protocol515LanguageProfileTests(unittest.TestCase):
         self.impl_path = "source/roles/software-implementation/SKILL.md"
 
     def test_shared_profile_direction_rejects_global_language_precedence(self) -> None:
-        self.assertRegex(self.router, r"shared domain rule\s*->\s*active language profile\(s\)\s*->\s*implementation-local concretization")
+        self.assertRegex(self.router, r"shared domain rule\s*->\s*language router\s*->\s*active language profile\(s\)\s*->\s*implementation-local concretization")
         self.assertIn("shared owners remain canonical", self.router)
-        self.assertIn("current protocol 6.1 domain doctrine is authoritative", self.router)
+        self.assertIn("current protocol 6.2 shared domain doctrine is authoritative", self.router)
         self.assertNotIn("shared protocol 5 doctrine remains authoritative", self.router)
         forbidden = (
             r"python(?: profile)?\s+(?:globally\s+)?(?:outranks|overrides|takes precedence over)\s+c\+\+",
@@ -51,35 +45,33 @@ class Protocol515LanguageProfileTests(unittest.TestCase):
         for pattern in forbidden:
             self.assertIsNone(re.search(pattern, self.router), pattern)
 
-    def test_material_routes_are_mandatory_and_composed(self) -> None:
-        design_links = language_route_links(self.design_path)
-        impl_links = language_route_links(self.impl_path)
-        self.assertEqual(design_links, impl_links)
-        self.assertEqual(3, len(design_links))
+    def test_material_routes_are_mandatory_and_composed_through_router(self) -> None:
         for path in (self.design_path, self.impl_path):
-            block = section(read(path), "### Language-profile dispatch", "### ")
-            for name in design_links:
-                line = next(line for line in block.splitlines() if name in line)
-                self.assertIn("MUST read", line, (path, name))
-        self.assertIn("must read both", self.router)
-        self.assertIn("do not infer a global python-over-c++ or c++-over-python precedence", self.router)
+            text = read(path).lower()
+            self.assertIn("references/language-profiles.md", text, path)
+            self.assertIn("conditionally dispatches to python/c++ profiles", text, path)
+            self.assertNotIn("references/python-engineering.md", text, path)
+            self.assertNotIn("references/cpp-engineering.md", text, path)
 
-    def test_real_package_builder_carries_routed_profiles_without_promoting_transitive_payload(self) -> None:
-        routed = language_route_links(self.design_path)
+        self.assertIn("python-only -> **read [python engineering](python-engineering.md)**", self.router)
+        self.assertIn("c++-only -> **read [c++ engineering](cpp-engineering.md)**", self.router)
+        self.assertIn("python/c++ extension/binding/embedding/callback/shared-buffer/ownership boundary -> **read both**", self.router)
+        self.assertIn("do not infer global python-vs-c++ precedence", self.router)
+
+    def test_real_package_builder_carries_router_and_leaf_profiles_transitively(self) -> None:
         with tempfile.TemporaryDirectory() as td:
             out = Path(td) / "dist"
             subprocess.run([sys.executable, str(ROOT / "source/build_skills.py"), "--output", str(out)], cwd=ROOT, check=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
             for role in ("software-design", "software-implementation"):
                 refs = {p.name for p in (out / "skills" / role / "references").iterdir() if p.is_file()}
-                self.assertTrue(routed <= refs, (role, sorted(routed - refs)))
+                for name in ("language-profiles.md", "python-engineering.md", "cpp-engineering.md"):
+                    self.assertIn(name, refs, (role, name))
 
-        # Under bounded transitive package closure, payload presence is not an
-        # activation route. Specialists must still omit language profiles from
-        # their direct SKILL.md routing contract unless that role explicitly owns
-        # a language-profile decision.
+        # Transport closure is not activation. Specialists must not acquire direct
+        # language-profile routing unless their role explicitly owns such a decision.
         for specialist in ("software-documentation", "repository-hygiene", "software-maintenance-audit"):
             direct = {Path(link).name for link in LINK_RE.findall(read(f"source/specialists/{specialist}/SKILL.md"))}
-            self.assertTrue(routed.isdisjoint(direct), (specialist, sorted(routed & direct)))
+            self.assertTrue({"language-profiles.md", "python-engineering.md", "cpp-engineering.md"}.isdisjoint(direct), specialist)
 
     def test_python_runtime_selection_is_not_gil_monoculture(self) -> None:
         runtime = section(self.python, "## interpreter/runtime and concurrency")
