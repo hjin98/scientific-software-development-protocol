@@ -1,4 +1,4 @@
-name: Diagnose residual Core failure kind
+name: Diagnose residual Core failing assertion
 
 on:
   pull_request:
@@ -28,46 +28,36 @@ jobs:
           rc=$?
           echo "$rc" > /tmp/core.rc
           exit 0
-      - name: Installed-product module failed
+      - name: Artifact packaging assertion failed
         if: always()
         shell: bash
         run: |
-          if grep -q 'FAILED:.*tests.test_installed_product' /tmp/core.log; then exit 1; fi
-      - name: Another module failed
+          if grep -E '^(FAIL|ERROR): test_(wheel|sdist|installed_package|sibling_namespace|installed_build)' /tmp/core.log; then exit 1; fi
+      - name: Launcher and prompt assertion failed
         if: always()
         shell: bash
         run: |
-          if grep -q 'FAILED:' /tmp/core.log && ! grep -q 'FAILED: tests.test_installed_product$' /tmp/core.log; then exit 1; fi
-      - name: Installed subprocess killed
+          if grep -E '^(FAIL|ERROR): test_(installed_cli|zero_install|stdout|every_stage|profile_alias|errors_are|stage_disallowed|task_outside|execution_mode|prompt_mode|cwd_project)' /tmp/core.log; then exit 1; fi
+      - name: Discovery or doctor assertion failed
         if: always()
         shell: bash
         run: |
-          if grep -Eq 'FAIL\(-9\).*tests\.test_installed_product|Killed|returncode.?-9' /tmp/core.log; then exit 1; fi
-      - name: Wheel or sdist build failed
+          if grep -E '^(FAIL|ERROR): test_(projects_command|doctor|capabilities)' /tmp/core.log; then exit 1; fi
+      - name: Offline or UX assertion failed
         if: always()
         shell: bash
         run: |
-          if grep -q 'wheel/sdist build failed' /tmp/core.log; then exit 1; fi
-      - name: Wheel install failed
+          if grep -E '^(FAIL|ERROR): test_(clipboard|offline|help|pipe)' /tmp/core.log; then exit 1; fi
+      - name: Installed-product fixture setup failed
         if: always()
         shell: bash
         run: |
-          if grep -q 'wheel install failed' /tmp/core.log; then exit 1; fi
-      - name: Sdist install failed
+          if grep -Eq 'ERROR: setUpClass.*InstalledProductTests|wheel/sdist build failed|wheel install failed|sdist install failed|venv creation failed' /tmp/core.log; then exit 1; fi
+      - name: Any unclassified installed-product assertion failed
         if: always()
         shell: bash
         run: |
-          if grep -q 'sdist install failed' /tmp/core.log; then exit 1; fi
-      - name: Venv creation failed
-        if: always()
-        shell: bash
-        run: |
-          if grep -Eq 'venv creation failed|sdist venv creation failed' /tmp/core.log; then exit 1; fi
-      - name: Unittest assertion or error present
-        if: always()
-        shell: bash
-        run: |
-          if grep -Eq '^FAILED \(|^ERROR: |^FAIL: ' /tmp/core.log; then exit 1; fi
+          if grep -E '^(FAIL|ERROR): .*InstalledProductTests' /tmp/core.log; then exit 1; fi
       - name: Core wrapper passed
         if: always()
         shell: bash
