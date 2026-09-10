@@ -47,7 +47,7 @@ A stale pass is not current confirmation; a stale fail is not current refutation
 
 ## Language/tool execution
 
-Use language-native mechanisms and the project’s configured fast static/test/build tooling when materially informative. Do not introduce a tool/dependency solely for protocol symmetry. The language router decides Python/C++ specialization; the relation-first tool owner decides semantic/structural/property/data-flow/runtime/memory/race/performance/etc. capability routing.
+Use language-native mechanisms and the project's configured fast static/test/build tooling when materially informative. Do not introduce a tool/dependency solely for protocol symmetry. The language router decides Python/C++ specialization; the relation-first tool owner decides semantic/structural/property/data-flow/runtime/memory/race/performance/etc. capability routing.
 
 ## Challenge duty
 

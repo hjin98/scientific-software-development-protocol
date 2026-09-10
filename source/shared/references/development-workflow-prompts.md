@@ -28,7 +28,7 @@ A stage mutates only its owned authority/concretization/lifecycle surface. Route
 
 Apply the Protocol 6.2 Lossless Representation Rule to every stage/output: preserve complete governed meaning first; load generic doctrine once at its canonical owner; activate additional concern owners only when their decision predicate fires; reuse applicable established context; lead with Serious Challenge/blockers/current decisions/material uncertainty; keep routine/history/raw detail cold but discoverable; never omit a mandatory lower-salience constraint for brevity.
 
-A material D1/D2/durable-D3 authority mutation becomes accepted-current only after the owning acceptance process, including independent falsification by a context/reviewer that did not author the proposal and required human ratification. Otherwise leave it proposed or human-pending. An unresolved Serious Challenge under an allowed explicit human risk override remains `risk-accepted/provisional`; dependent descendants cannot emit unqualified accepted/Pass state. In a terminal machine-readable result that depends on the unresolved override, preserve the established field `authority_state = risk_accepted_provisional` (JSON key `authority_state`) and do not reset it merely because a downstream stage completes locally.
+A material D1/D2/durable-D3 authority mutation becomes accepted-current only after the owning acceptance process, including independent falsification by a context/reviewer that did not author the proposal and required human ratification. Otherwise leave it proposed or human-pending. An unresolved Serious Challenge under an allowed explicit human risk override remains `risk-accepted/provisional`; dependent descendants cannot emit unqualified accepted/Pass state.
 
 Evidence specification, realization, observation and assessment are distinct. Stale passing evidence cannot confirm current authority and stale failing evidence cannot refute it until applicability is restored. Keep target claims separate from replaceable execution dependencies. On material change, perform bounded impact closure over dependent descendants/evidence/documentation/dependency views/re-ratification/retirement/history while preserving unaffected siblings and still-valid evidence.
 
@@ -49,7 +49,7 @@ longitudinal repository sensing                      -> Health Audit
 accepted docs/lifecycle/generated reconciliation     -> Closeout
 ```
 
-Reduced D4-only, D3->D4, D2->D4 or D1->D3/D4 paths are normal when intermediate/higher semantics are unaffected. Mixed "review and fix" preserves the boundary: Review identifies/routes findings; the owning mutation stage performs repair.
+Reduced D4-only, D3->D4, D2->D4 or D1->D3/D4 paths are normal when intermediate/higher semantics are unaffected. Mixed "review and fix" preserves the boundary: Review identifies/routs findings; the owning mutation stage performs repair.
 
 Every material Review/verification/acceptance boundary includes the Challenge Pass. If accepted authority itself may be materially false, contradictory, ambiguous, inadequate, mutually incompatible, or impossible to concretize, emit `SERIOUS CHALLENGE` before ordinary findings and stop unqualified closure pending owning/human adjudication.
 

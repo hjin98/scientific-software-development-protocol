@@ -60,11 +60,9 @@ Executable D4 stage-local/final acceptance is owned by [Testing and validation](
 
 Every material Review/Verification/acceptance boundary applies the universal Challenge rule. Surface an active Serious Challenge before ordinary blockers or Pass/No-Pass and route it to the earliest affected semantic owner.
 
-## Human gates
+## Human gates and closeout
 
 Human gates attach to governed semantic risk, not every transition. The designated human authority is required where project/domain policy assigns ratification/adjudication. Orchestration may represent pending/accepted/rejected state but cannot self-approve it. A visible risk override authorizes only bounded continuation where allowed; dependent outputs remain provisional and cannot close the challenged claim unqualified.
-
-## Closeout
 
 After semantic/functional closure, reconcile only affected current normative documents, guides, generated artifacts, evidence/dependency views, semantic history, workplan state and repository hygiene. Current owners explain what is true; history explains why. Archive/supersede transition artifacts only after their still-current semantics reside in canonical current authority.
 

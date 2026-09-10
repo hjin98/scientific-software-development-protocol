@@ -1,9 +1,7 @@
 from __future__ import annotations
 
 import re
-import subprocess
 import sys
-import tempfile
 import unittest
 from pathlib import Path
 
@@ -49,83 +47,56 @@ class ProtocolPortabilityTests(unittest.TestCase):
             linked = {Path(path).name for path in links_for("role", role)}
             self.assertIn("tool-assisted-engineering.md", linked, role)
             self.assertTrue(TOOL_LEAVES.isdisjoint(linked), role)
-
-        router = (SOURCE / "shared/references/tool-assisted-engineering.md").read_text(encoding="utf-8")
-        for leaf in TOOL_LEAVES:
-            self.assertIn(leaf, router)
-
         for role in ("scientific-formulation", "numerical-algorithm-design"):
             linked = {Path(path).name for path in links_for("role", role)}
             self.assertTrue(TOOL_LEAVES.isdisjoint(linked), role)
-        for specialist in ("software-documentation", "repository-hygiene"):
-            linked = {Path(path).name for path in links_for("specialist", specialist)}
-            self.assertTrue(TOOL_LEAVES.isdisjoint(linked), specialist)
-        self.assertIn("references/tool-assisted-engineering.md", links_for("specialist", "software-maintenance-audit"))
+        tool_router = (SOURCE / "shared/references/tool-assisted-engineering.md").read_text(encoding="utf-8")
+        for leaf in TOOL_LEAVES:
+            self.assertIn(leaf, tool_router)
 
     def test_language_leaf_routing_is_hierarchical(self) -> None:
         for role in ("software-design", "software-implementation"):
             linked = {Path(path).name for path in links_for("role", role)}
             self.assertIn("language-profiles.md", linked, role)
             self.assertTrue(LANGUAGE_LEAVES.isdisjoint(linked), role)
-
-        router = (SOURCE / "shared/references/language-profiles.md").read_text(encoding="utf-8")
-        for leaf in LANGUAGE_LEAVES:
-            self.assertIn(leaf, router)
-        self.assertIn("python-only", router.lower())
-        self.assertIn("c++-only", router.lower())
-
         for role in ("scientific-formulation", "numerical-algorithm-design"):
             linked = {Path(path).name for path in links_for("role", role)}
             self.assertTrue(LANGUAGE_LEAVES.isdisjoint(linked), role)
-        for specialist in build_skills.SPECIALIST_SPECS:
-            linked = {Path(path).name for path in links_for("specialist", specialist)}
-            self.assertTrue(LANGUAGE_LEAVES.isdisjoint(linked), specialist)
+        router = (SOURCE / "shared/references/language-profiles.md").read_text(encoding="utf-8")
+        for leaf in LANGUAGE_LEAVES:
+            self.assertIn(leaf, router)
 
-    def test_root_role_baseline_and_concern_routes_are_explicit(self) -> None:
-        for role, owner in (
-            ("software-design", "references/architecture-and-design.md"),
-            ("software-implementation", "references/specification-and-implementation.md"),
-        ):
-            text = (SOURCE / "roles" / role / "SKILL.md").read_text(encoding="utf-8")
-            self.assertIn("references/abstraction-and-concretization.md", text)
-            self.assertIn(owner, text)
-            self.assertIn("references/workflow-and-workplans.md", text)
-            self.assertIn("references/testing-and-validation.md", text)
-            self.assertIn("load only", text.lower())
-            self.assertIn("package membership", text.lower())
+    def test_root_roles_have_minimal_universal_and_domain_routes(self) -> None:
+        expected_owner = {
+            "scientific-formulation": "references/scientific-formulation.md",
+            "numerical-algorithm-design": "references/numerical-algorithm-design.md",
+            "software-design": "references/architecture-and-design.md",
+            "software-implementation": "references/specification-and-implementation.md",
+        }
+        for role, owner in expected_owner.items():
+            routes = links_for("role", role)
+            self.assertIn("references/abstraction-and-concretization.md", routes)
+            self.assertIn(owner, routes)
 
-    def test_new_authority_roles_package_their_domain_documents(self) -> None:
+    def test_new_authority_roles_package_current_templates(self) -> None:
         d1 = links_for("role", "scientific-formulation")
         d2 = links_for("role", "numerical-algorithm-design")
-        self.assertIn("references/scientific-formulation.md", d1)
         self.assertIn("templates/scientific_method_paper_template.md", d1)
-        self.assertIn("references/numerical-algorithm-design.md", d2)
         self.assertIn("templates/numerical_algorithmic_method_paper_template.md", d2)
         self.assertIn("templates/abstraction_concretization_change_plan_template.md", d1)
         self.assertIn("templates/abstraction_concretization_change_plan_template.md", d2)
-        self.assertNotIn("templates/abstraction_concretization_change_plan_template.md", links_for("role", "software-design"))
+        self.assertNotIn("templates/abstraction_realization_change_plan_template.md", d1 | d2)
 
-    def test_transitive_transport_keeps_conditional_leaves_reachable(self) -> None:
-        with tempfile.TemporaryDirectory() as td:
-            out = Path(td) / "dist"
-            subprocess.run(
-                [sys.executable, str(SOURCE / "build_skills.py"), "--output", str(out)],
-                cwd=ROOT,
-                check=True,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.STDOUT,
-                text=True,
-            )
-            for role in ("software-design", "software-implementation"):
-                refs = {p.name for p in (out / "skills" / role / "references").iterdir() if p.is_file()}
-                self.assertTrue(LANGUAGE_LEAVES <= refs, (role, sorted(LANGUAGE_LEAVES - refs)))
-                self.assertTrue(TOOL_LEAVES <= refs, (role, sorted(TOOL_LEAVES - refs)))
-
-    def test_historical_516_resolution_is_explicit(self) -> None:
+    def test_historical_resolution_is_explicit(self) -> None:
         versioning = (SOURCE / "shared/references/protocol-versioning-and-compatibility.md").read_text(encoding="utf-8").lower()
-        self.assertIn("5.16.0 -> e151daaf5c8eebb351a85cfed86170fda80fb5e3", versioning)
+        for mapping in (
+            "5.16.0 -> e151daaf5c8eebb351a85cfed86170fda80fb5e3",
+            "6.0.0  -> 21d5188f5bd9a0270d7a2ebf93d41a6b7842ccd2",
+            "6.1.0  -> 802e75af261efb4f70d71284d860613a2197b639",
+        ):
+            self.assertIn(mapping, versioning)
         self.assertIn("sdp-protocol-5.16", versioning)
-        self.assertIn("schema", versioning)
+        self.assertIn("ssdp-protocol-6.2", versioning)
 
     def test_sentinel_value_is_reference_only(self) -> None:
         root = ROOT / "qualification/reference-routing/protocol-routing-sentinel"

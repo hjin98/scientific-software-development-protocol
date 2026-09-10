@@ -7,57 +7,87 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 def read(path: str) -> str:
-    return (ROOT / path).read_text(encoding="utf-8").lower()
+    return (ROOT / path).read_text(encoding="utf-8")
 
 
 class ProxyProofAcceptanceContractTests(unittest.TestCase):
-    def setUp(self) -> None:
-        self.testing = read("source/shared/references/testing-and-validation.md")
-        self.design = read("source/roles/software-design/SKILL.md")
-        self.implementation = read("source/roles/software-implementation/SKILL.md")
-        self.workflow = read("source/shared/references/workflow-and-workplans.md")
-        self.template = read("source/shared/templates/implementation_workplan_template.md")
-
     def test_testing_reference_is_canonical_proxy_proof_owner(self) -> None:
-        for phrase in ("proxy-proof real-owner evidence", "real semantic owner/path", "allowed test-double boundary", "could the evidence remain green", "cannot close that owner claim"):
-            self.assertIn(phrase, self.testing)
+        text = read("source/shared/references/testing-and-validation.md").lower()
+        for phrase in (
+            "semantic owner under acceptance",
+            "allowed test-double boundary",
+            "proxy-proof acceptance",
+            "could this evidence remain green",
+            "cannot close the owner claim",
+            "not a global ban on mocks or fakes",
+        ):
+            self.assertIn(phrase, text)
 
-    def test_historical_proxy_substitution_classes_remain_rejected(self) -> None:
-        for phrase in ("mocking/reimplementing the owner", "calling a downstream helper", "seeding post-decision state", "replacing durable persistence", "helper-generated results"):
-            self.assertIn(phrase, self.testing)
+    def test_historical_proxy_substitutions_remain_rejected(self) -> None:
+        text = read("source/shared/references/testing-and-validation.md").lower()
+        for phrase in (
+            "mocks, stubs, monkeypatches",
+            "directly invokes a downstream helper",
+            "seeds post-decision or post-transition state",
+            "replaces durable/project persistence",
+            "reimplements production compatibility",
+            "helper-produced plan/result",
+        ):
+            self.assertIn(phrase, text)
 
-    def test_bounded_doubles_below_real_owner_remain_valid(self) -> None:
-        self.assertIn("not a blanket mock ban", self.testing)
-        self.assertIn("bounded deterministic doubles remain valid below/outside the owner", self.testing)
-        self.assertIn("expensive data/training", self.testing)
-        self.assertIn("production scale", self.testing)
+    def test_bounded_fakes_below_real_owner_remain_valid(self) -> None:
+        testing = read("source/shared/references/testing-and-validation.md").lower()
+        implementation = read("source/roles/software-implementation/SKILL.md").lower()
+        self.assertIn("bounded deterministic fixtures remain preferred", testing)
+        self.assertIn("expensive machine-learning/scientific training or prediction", testing)
+        self.assertIn("bounded test doubles remain valid below or outside", implementation)
+        self.assertIn("production-scale execution", testing)
 
     def test_unavailable_required_owner_boundary_is_not_proxy_passed(self) -> None:
-        self.assertIn("unavailable/blocking", self.testing)
-        self.assertIn("required evidence", self.implementation)
-        self.assertIn("blocking", self.implementation)
+        testing = read("source/shared/references/testing-and-validation.md").lower()
+        implementation = read("source/roles/software-implementation/SKILL.md").lower()
+        self.assertIn("unavailable/blocking", testing)
+        self.assertIn("unavailable/blocking", implementation)
+        self.assertIn("silently proxy-passing", implementation)
 
-    def test_entrypoints_keep_salient_owner_trigger_not_full_duplicate_manual(self) -> None:
-        for text in (self.design, self.implementation):
+    def test_entrypoints_keep_only_salient_owner_trigger(self) -> None:
+        design = read("source/roles/software-design/SKILL.md").lower()
+        implementation = read("source/roles/software-implementation/SKILL.md").lower()
+        for text in (design, implementation):
+            self.assertIn("semantic owner", text)
             self.assertIn("references/testing-and-validation.md", text)
-            self.assertIn("owner", text)
-            self.assertNotIn("mocking/reimplementing the owner", text)
+            self.assertIn("could remain green", text)
+        self.assertIn("applicable accepted parent/cycle-scoped claim and the real semantic owner/path", design)
+        self.assertIn("real semantic owner/path of the final accepted concretization", implementation)
 
     def test_workplan_boundary_is_conditional_not_ceremonial(self) -> None:
-        self.assertIn("acceptance boundary", self.template)
-        self.assertIn("when proxy acceptance is a material risk", self.template)
-        self.assertIn("when material", self.template)
-        self.assertIn("real-owner", self.workflow)
+        workflow = read("source/shared/references/workflow-and-workplans.md").lower()
+        template = read("source/shared/templates/implementation_workplan_template.md").lower()
+        self.assertIn("when material acceptance depends", workflow)
+        self.assertIn("real production owner/consumer boundary", workflow)
+        self.assertIn("acceptance boundary", template)
+        self.assertIn("when proxy acceptance is a material risk", template)
+        self.assertIn("attach only when material", template)
 
-    def test_delegated_owner_replacement_remaps_without_freezing_old_owner(self) -> None:
-        self.assertIn("if delegated owner identity changes under equivalent semantics", self.testing)
-        self.assertIn("remap/rerun owner-specific evidence", self.testing)
-        self.assertIn("delegated", self.template)
-        self.assertIn("replaceable", self.implementation)
+    def test_delegated_owner_replacement_remaps_acceptance_without_freezing_old_owner(self) -> None:
+        testing = read("source/shared/references/testing-and-validation.md").lower()
+        workflow = read("source/shared/references/workflow-and-workplans.md").lower()
+        template = read("source/shared/templates/implementation_workplan_template.md").lower()
+        implementation = read("source/roles/software-implementation/SKILL.md").lower()
+        self.assertIn("acceptance does **not** make that lower-level owner durable authority", testing)
+        self.assertIn("equivalent owner `b`", testing)
+        self.assertIn("reconcile the acceptance mapping to the new real owner", testing)
+        self.assertIn("accepted-current domain authority", workflow)
+        self.assertIn("merely the current delegated concretization", template)
+        self.assertIn("final accepted concretization", implementation)
+        self.assertIn("do not treat that remapping as proxy-passing or design reopening", implementation)
 
-    def test_targeted_structural_guardrails_do_not_create_global_mock_policy(self) -> None:
-        self.assertIn("source/structural negative assertions", self.testing)
-        self.assertIn("not a blanket mock ban", self.testing)
+    def test_targeted_guardrails_do_not_create_global_anti_mock_framework(self) -> None:
+        text = read("source/shared/references/testing-and-validation.md").lower()
+        self.assertIn("robust inexpensive structural/negative check", text)
+        self.assertIn("do not require universal abstract-syntax-tree (ast) scanning", text)
+        self.assertIn("global monkeypatch ban", text)
+        self.assertIn("new anti-mocking framework", text)
 
 
 if __name__ == "__main__":
