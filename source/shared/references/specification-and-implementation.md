@@ -13,7 +13,7 @@ accepted D4 specification --constrains--> executable behavior
 accepted D4 specification <--verify----- executable behavior
 ```
 
-Code does not become intended contract through existence or test capture. If code and accepted specification disagree, classify first: repair wrong code; update a genuinely stale specification only after accepted authority changed; route ambiguous intent; Serious Challenge a materially defective accepted specification. Never rewrite the specification merely to make unintended code pass.
+Code does not become the intended contract through existence or test capture. If code and accepted specification disagree, classify first: repair wrong code; update a genuinely stale specification only after accepted authority changed; route ambiguous intent; Serious Challenge a materially defective accepted specification. Never rewrite the specification merely to make unintended code pass.
 
 Specify only stable consumer/automation/persistence/scientific-interpretation contracts such as public API/CLI/config behavior, formats/schemas/units/shapes/order/precision, persistence/restart/migration, compatibility/supported versions, public backend/device policy, durable error/fallback behavior, externally observable state transitions, and authorization/security behavior. Private helpers/call graphs/data structures remain delegated unless genuinely governed.
 
