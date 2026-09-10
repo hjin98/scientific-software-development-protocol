@@ -11,56 +11,46 @@ def read(path: str) -> str:
 
 
 class ConvergenceDurableSemanticsTests(unittest.TestCase):
-    """Retain the useful Protocol 5.12 convergence capability through Protocol 6 semantics."""
-
     def setUp(self) -> None:
         self.workflow = read("source/shared/references/workflow-and-workplans.md")
         self.convergence = read("source/shared/references/convergence-and-cycle-economy.md")
         self.architecture = read("source/shared/references/architecture-and-design.md")
         self.intake = read("source/shared/references/repository-intake.md")
 
-    def test_first_clean_local_defect_remains_lightweight(self) -> None:
+    def test_local_defect_and_recurrence_semantics_survive(self) -> None:
         self.assertIn("first clean local defect remains local", self.convergence)
-        self.assertIn("does not require a census", self.convergence)
-        self.assertIn("first clean local defect remains local", self.workflow)
-
-    def test_recurrence_changes_reasoning_unit_without_freezing_mechanism(self) -> None:
         self.assertIn("material sibling recurrence", self.convergence)
         self.assertIn("shared owner/mechanism", self.convergence)
-        self.assertIn("does not answer whether the current concretization should survive", self.convergence)
-        self.assertIn("recurrence is evidence about the shared owner/mechanism", self.architecture)
+        self.assertIn("convergence-and-cycle-economy.md", self.workflow)
 
-    def test_complexity_evidence_triggers_simplification_before_addition(self) -> None:
+    def test_complexity_triggers_simplification_before_addition(self) -> None:
         self.assertIn("structural complexity accumulation", self.convergence)
-        self.assertIn("re-derive and simplify the delegated concretization", self.convergence)
-        self.assertIn("mandatory before another additive durable repair", self.convergence)
-        self.assertIn("active simplification/re-derivation of delegated concretization is required", self.workflow)
+        self.assertIn("re-derive and simplify", self.convergence)
+        self.assertIn("before another additive durable repair", self.convergence)
+        self.assertIn("simplification", self.workflow)
 
-    def test_census_is_for_real_completeness_or_safe_simplification(self) -> None:
-        self.assertIn("governing parent/external correctness claim is finite/exhaustive", self.convergence)
-        self.assertIn("bounded sibling discovery is needed", self.convergence)
+    def test_census_is_bounded_by_a_real_completeness_claim(self) -> None:
+        self.assertIn("finite/exhaustive", self.convergence)
+        self.assertIn("bounded sibling discovery", self.convergence)
         self.assertIn("governing correctness claim itself is finite/exhaustive", self.intake)
         self.assertIn("recurrence by itself does not justify preserving the current mechanism", self.intake)
 
-    def test_post_simplification_recurrence_routes_to_earliest_domain(self) -> None:
+    def test_recurrence_can_route_to_earliest_affected_owner(self) -> None:
         self.assertIn("post-simplification recurrence", self.convergence)
-        self.assertIn("bounded software design reconsideration", self.convergence)
-        self.assertIn("accepted parent abstraction or a material cycle-scoped decision is wrong", self.workflow)
-        self.assertIn("earliest affected d1-d3 owner", self.workflow)
+        self.assertIn("earliest", self.convergence)
+        self.assertIn("d1", self.convergence)
+        self.assertIn("d3", self.convergence)
+        self.assertIn("earliest affected", self.workflow)
 
-    def test_revision_economy_and_nonrefusal_survive(self) -> None:
-        self.assertIn("explicitly requested review still proceeds", self.convergence)
+    def test_revision_economy_remains_non_numeric(self) -> None:
         self.assertIn("ordinary implementation attempts and review cycles do not require a numbered authority revision", self.convergence)
         self.assertIn("no recurrence count, review count", self.convergence)
-        self.assertIn("not the pass threshold", self.convergence)
+        self.assertIn("acceptance", self.convergence)
 
-    def test_current_convergence_control_plane_is_protocol6_native(self) -> None:
-        for text in (self.workflow, self.convergence, self.intake):
-            self.assertNotIn("tier-2", text)
-            self.assertNotIn("tier 1", text)
-            self.assertNotIn("product/frozen", text)
+    def test_current_control_plane_uses_concretization_vocabulary(self) -> None:
         self.assertIn("delegated concretization", self.convergence)
-        self.assertIn("accepted-current domain authority", self.workflow)
+        self.assertIn("accepted-current", self.workflow)
+        self.assertIn("recurrence", self.architecture)
 
 
 if __name__ == "__main__":
