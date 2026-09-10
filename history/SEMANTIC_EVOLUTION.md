@@ -58,6 +58,18 @@ Historical entries identify the previous semantics, replacement, triggering evid
 - **Executable acceptance:** repository regression, canonical package build, package validation, committed-distribution parity, whitespace, Protocol snapshot parity, and Orchestrator Core all passed on the reviewed candidate/evidence chain.
 - **Lifecycle disposition:** the two governing 6.1 workplans are archived as exact reviewed historical handoff artifacts. Their pre-closeout frontmatter is preserved rather than edited after Review; current completion is recorded by repository placement, the active 6.1/7.0 authority index, this evolution record, and the final Review.
 
+## Protocol 6.1 reopened final-review repair
+
+A later independent post-closeout review superseded the release/rollback disposition stated in the preceding closeout entry without rewriting that historical evidence.
+
+- **Reopen trigger:** the closed candidate still used `concretization` for evidence execution in current D3/D4 role prose and routed the canonical source README to nonexistent `shared/references/abstraction-and-concretization.md`. The acceptance oracle also lacked direct counterexamples for those failure classes.
+- **Historical candidate/recovery disposition:** `25d30858e7a33a72cb04b4d07393cb143b7777f8` and `dec5ff2767e14fd1cda46e073757aa27f40e270c` remain immutable evidence of the earlier closeout, but they are **superseded for current Protocol 6.1 release/recovery authority** and are not the final accepted rollback baseline.
+- **Repaired semantic candidate:** `5f911fecb0de2847f63c0b4859e1dd8c63d3d8ef`. The source repair corrects the D3/D4 evidence-realization terminology and README navigation, strengthens direct regression/behavioral oracles, and regenerates the affected D3/D4 ZIP transports from canonical source without changing Protocol 6.1 doctrine.
+- **Executable acceptance:** PASS for full repository regression, canonical package build, independent package validation, committed-distribution parity, whitespace, Protocol snapshot parity, Orchestrator Core acceptance, and exact two-ZIP generated-artifact scope in GitHub Actions run `34428272223`. Temporary transport machinery was removed from the final candidate tree.
+- **Behavioral qualification:** fresh 94/94 PASS, zero failures, no Serious Challenge; result recorded in commit `d1a6e0fe9fe37d70b2bc72e13332d14891ca034b` and explicitly bound to semantic candidate `5f911fecb0de2847f63c0b4859e1dd8c63d3d8ef`.
+- **Independent Review:** pending after this history/lifecycle reconciliation. No replacement Protocol 6.1 recovery identity is valid until that fresh Review passes and closeout completes.
+- **Protocol 7 dependency:** the Protocol 6.1 completion/qualification/recovery prerequisite remains unsatisfied until the fresh Review and replacement recovery closeout finish.
+
 ## Maintenance
 
 Add entries only for material semantic replacement/generalization/rejection/restoration whose rationale is likely to matter to future scientific or engineering reasoning. Do not copy review transcripts or ordinary patch chronology. If an entry conflicts with accepted current authority, current authority governs and the historical record must be corrected as historical documentation rather than treated as a competing source of truth.
