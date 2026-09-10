@@ -32,7 +32,7 @@ Optional specialists: `software-documentation`, `software-maintenance-audit`, `r
 
 Before mutation classify the highest potentially affected D1/D2/D3/D4 domain and direct governed side constraints. Reduced routes are normal; do not force every task through all four skills.
 
-Current Protocol 6.1 immutable public-source bootstrap: `47e9155632c44493644b0b02fa1fa625703cf480`. This source identity is usable before default-branch cutover and is distinct from the replacement rollback recovery identity, which remains pending fresh qualification/Review closeout.
+Current Protocol 6.1 immutable public-source bootstrap: `47e9155632c44493644b0b02fa1fa625703cf480`. This source identity is usable before default-branch cutover and remains distinct from accepted replacement rollback recovery snapshot `802e75af261efb4f70d71284d860613a2197b639`.
 
 ## Orchestrator profile compatibility
 
@@ -56,9 +56,9 @@ Version-bound recovery uses immutable repository commits rather than `main`/late
 | --- | --- |
 | 5.16.0 | `e151daaf5c8eebb351a85cfed86170fda80fb5e3` |
 | 6.0.0 | `21d5188f5bd9a0270d7a2ebf93d41a6b7842ccd2` |
-| 6.1.0 | pending second-reopen qualification, Review, and replacement recovery |
+| 6.1.0 | `802e75af261efb4f70d71284d860613a2197b639` |
 
-The earlier Protocol 6.1 closeout snapshots `dec5ff2767e14fd1cda46e073757aa27f40e270c` and `0c90fda19bf6ed9cb0c4511beb3da80ace6584ed` remain immutable historical evidence but are superseded for final release/recovery authority by the active second-reopen repair. The prior semantic candidate `5f911fecb0de2847f63c0b4859e1dd8c63d3d8ef` and its 94/94 qualification remain historical evidence for their evaluated surfaces; package-reference closure, version-correct public fallback, and current human-facing documentation conformance require fresh repair and requalification before Protocol 7 may use a Protocol 6.1 recovery prerequisite.
+Protocol 6.1 semantic candidate `be7d05827f52a3029c294c38edf5ede1afb1f9b4` passed fresh 95/95 behavioral qualification and fresh independent D3 Review with no Serious Challenge and zero open blockers. Recovery snapshot `802e75af261efb4f70d71284d860613a2197b639` contains that candidate through ancestry together with the fresh qualification and Review records needed to interpret rollback. The earlier Protocol 6.1 closeout snapshots `dec5ff2767e14fd1cda46e073757aa27f40e270c` and `0c90fda19bf6ed9cb0c4511beb3da80ace6584ed` remain immutable historical evidence but are superseded for current release/recovery authority.
 
 ## Deterministic routing dimensions
 
@@ -100,6 +100,6 @@ If no suitable live harness/tool environment exists, static/counterfactual/packa
 
 ## Behavioral qualification
 
-`qualification/ssdp6/SCENARIOS.md` defines Protocol 6 authority, abstraction adequacy, D1/D2/D3/D4 routing, Serious Challenge, anti-deference/anti-stubbornness, historical compatibility, and composed-closure scenarios. `qualification/ssdp6/SCENARIOS-6.1-ADDITIONS.md` extends the Protocol 6.1 set through scenario 95, including the reopened terminology, canonical-navigation, and immutable public-fallback counterexamples. The most recent pre-second-reopen result is `qualification/ssdp6/RESULTS-GPT-5.6-SOL-2026-09-09-PROTOCOL-6.1-REOPENED-94.md`: 94/94 PASS for its historical candidate. It is not current closeout evidence for the newly reopened package/public-fallback/documentation surfaces. Earlier Protocol 6.1 and Protocol 5 qualification records remain historical evidence for their candidate/release semantics.
+`qualification/ssdp6/SCENARIOS.md` defines Protocol 6 authority, abstraction adequacy, D1/D2/D3/D4 routing, Serious Challenge, anti-deference/anti-stubbornness, historical compatibility, and composed-closure scenarios. `qualification/ssdp6/SCENARIOS-6.1-ADDITIONS.md` extends the Protocol 6.1 set through scenario 95, including the reopened terminology, canonical-navigation, and immutable public-fallback counterexamples. The current second-reopen result is `qualification/ssdp6/RESULTS-GPT-5.6-SOL-2026-09-10-PROTOCOL-6.1-SECOND-REOPENED-95.md`: 95/95 PASS for semantic candidate `be7d05827f52a3029c294c38edf5ede1afb1f9b4`, with no Serious Challenge. The earlier 94/94 and prior Protocol 6.1/Protocol 5 records remain historical evidence for their evaluated candidate/release semantics.
 
 Reference-routing and tool-routing sentinel qualifications remain useful for named harness configurations. Ordinary repository CI does not infer universal model compliance from static tests.
