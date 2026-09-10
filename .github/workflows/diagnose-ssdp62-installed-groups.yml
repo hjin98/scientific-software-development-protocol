@@ -1,0 +1,48 @@
+name: Diagnose SSDP 6.2 installed-product groups
+
+on:
+  pull_request:
+    types: [synchronize, opened, reopened]
+
+permissions:
+  contents: read
+
+jobs:
+  diagnose-installed-groups:
+    if: github.event.pull_request.head.repo.full_name == github.repository && github.head_ref == 'ssdp-6.2-lossless-representation'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install Core
+        run: python -m pip install ./orchestrator -r orchestrator/requirements-dev.txt
+      - name: Run installed-product suite once
+        shell: bash
+        run: |
+          set +e
+          (cd orchestrator && python -m unittest -v tests.test_installed_product) 2>&1 | tee /tmp/installed-product.out
+          exit 0
+      - name: Artifact packaging contracts
+        if: always()
+        shell: bash
+        run: |
+          if grep -E '^(test_wheel_|test_sdist_|test_installed_package_lives_|test_sibling_namespace_|test_installed_build_imports_)' /tmp/installed-product.out | grep -E '\.\.\. (FAIL|ERROR)$'; then exit 1; fi
+      - name: Prompt and launcher contracts
+        if: always()
+        shell: bash
+        run: |
+          if grep -E '^(test_installed_cli_|test_zero_install_|test_stdout_|test_every_stage_alias_|test_profile_alias_|test_errors_|test_stage_disallowed_|test_task_outside_|test_execution_mode_|test_prompt_mode_web_|test_cwd_project_)' /tmp/installed-product.out | grep -E '\.\.\. (FAIL|ERROR)$'; then exit 1; fi
+      - name: Discovery and diagnostic contracts
+        if: always()
+        shell: bash
+        run: |
+          if grep -E '^(test_projects_command_|test_doctor_|test_capabilities_)' /tmp/installed-product.out | grep -E '\.\.\. (FAIL|ERROR)$'; then exit 1; fi
+      - name: Offline and UX contracts
+        if: always()
+        shell: bash
+        run: |
+          if grep -E '^(test_clipboard_|test_offline_|test_help_|test_pipe_)' /tmp/installed-product.out | grep -E '\.\.\. (FAIL|ERROR)$'; then exit 1; fi
