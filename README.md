@@ -1,92 +1,66 @@
 # Scientific Software Development Protocol
 
-Current protocol version: **6.1**.
+Current source candidate: **Protocol 6.2**. Accepted rollback/current release remains Protocol 6.1 until Protocol 6.2 qualification, independent Review, recovery mapping, generated-artifact reconciliation, and lifecycle closeout complete.
 
-## Background and terminology
+## Core model
 
-The **Scientific Software Development Protocol (SSDP)** is a document-controlled scientific-software development protocol. It separates four semantic authority domains: **D1** scientific/mathematical formulation, **D2** algorithm/numerical method, **D3** software architecture, and **D4** specification/implementation. An **abstraction** states governing semantics; a **concretization** is a lower-level expression that must preserve them.
-
-Protocol 6.1 preserves and refines the former Software Development Protocol into a recursive scientific-software development system:
+The Scientific Software Development Protocol (SSDP) separates four semantic authority domains:
 
 ```text
-ABSTRACTION  --design / constrain-->  CONCRETIZATION
-ABSTRACTION  <--verify / reconstruct-- CONCRETIZATION
+D1 scientific/mathematical formulation
+ -> D2 algorithm/numerical method
+ -> D3 software architecture
+ -> D4 specification/implementation
 ```
 
-An abstraction states the semantic invariants that must survive concretization. A concretization is admissible only when it satisfies every applicable upstream abstraction and governed external constraint. Within that feasible set optimize:
+This is a semantic hierarchy, not a mandatory waterfall. A child concretization must preserve every applicable parent abstraction and directly governed external constraint. Among admissible concretizations prefer domain engineering fitness, then minimum justified total complexity, then development economy.
+
+The universal current kernel is `source/shared/references/abstraction-and-concretization.md`. It owns authority/concretization, Challenge, and Protocol 6.2 Lossless Representation rules. Role entrypoints route progressively to concern owners rather than loading the complete reference library up front.
+
+## Protocol 6.2 representation rule
+
+Protocol 6.2 preserves all accepted Protocol 6.1 doctrine and still-valid historical capability as a prerequisite while improving how that information is communicated. Among lossless representations prefer semantic precision, importance-weighted attention, cognitive digestibility, context/routing efficiency, then compactness. A writer may not shrink governed scope, hide a mandatory lower-salience constraint, or remove globally required doctrine merely because it is cold for one task.
+
+Activation is explicit and typed:
 
 ```text
-domain engineering fitness
-> minimum justified concretization complexity
-> development economy
+task/orchestration
+ -> role or specialist SKILL.md
+      -> universal kernel + owning domain
+      -> conditional concern owner
+           -> conditional concern-local leaf
 ```
 
-## Four semantic domains
+Ordinary Markdown links, semantic dependencies, and package membership do not themselves activate context. Router prose is authoritative; graphs/traces are diagnostic derivatives.
+
+## Roles, specialists, and documentation
+
+Authority-bearing roles:
+
+- `scientific-formulation` (D1)
+- `numerical-algorithm-design` (D2)
+- `software-design` (D3)
+- `software-implementation` (D4)
+
+Optional specialists: `software-documentation`, `software-maintenance-audit`, `repository-hygiene`.
+
+Current human-facing documents define newly introduced non-common terminology for their intended competent reader and expand non-obvious abbreviations on first explanatory use (`full term (ABC)`). Current documents explain present truth; semantic history explains why it changed.
+
+## Version compatibility
+
+Frozen historical mappings remain immutable:
 
 ```text
-D1  scientific-formulation
-     Scientific & Mathematical Formulation
-        |
-D2  numerical-algorithm-design
-     Algorithm & Numerical Methods
-        |
-D3  software-design
-     Software Architecture
-        |
-D4  software-implementation
-     Specification & executable implementation
+5.16.0 -> e151daaf5c8eebb351a85cfed86170fda80fb5e3
+6.0.0  -> 21d5188f5bd9a0270d7a2ebf93d41a6b7842ccd2
+6.1.0  -> 802e75af261efb4f70d71284d860613a2197b639
 ```
 
-This is a semantic hierarchy, not a mandatory four-stage waterfall. D4-only and D3->D4 work are normal when upstream meaning is unaffected; multi-parent constraints form a layered directed acyclic graph (DAG).
+Protocol 6.1 public-source bootstrap remains `47e9155632c44493644b0b02fa1fa625703cf480`. The Protocol 6.2 bootstrap is intentionally not invented before validation; a later semantic-candidate commit will publish its exact immutable SHA. Repository default branch is never a protocol-version oracle.
 
-Logical normative document families are D1 Scientific Method Paper, D2 Numerical & Algorithmic Method Paper, D3 Architecture Manual, and D4 Specification plus code/executable concretization. Each material current normative claim has one semantic owner. Proposed, accepted-current, challenged, stale-dependent, superseded/historical, and release-pinned/publication states remain distinct.
+## Canonical source and acceptance
 
-## Evidence and evolution
-
-Protocol 6.1 distinguishes downstream **concretization** from **evidence realization**. Evidence follows `evidence specification -> evidence realization -> observation -> evidence assessment`; applicability, target-vs-execution dependencies, stale evidence, bounded semantic dependency views, and semantic-evolution history are first-class maintenance concerns. Evidence is not a fifth semantic authority.
-
-## Verification and challenge
-
-Verification reconstructs concretization semantics and attempts to falsify conformity. It is opposite-direction reasoning, not a bijective inverse. Every material handoff checks both concretization fidelity and abstraction adequacy. High-risk scientific claims may require composed closure:
-
-```text
-actual executable behavior
- -> governed numerical observables
- -> D2 error/equivalence envelope
- -> D1 scientific/mathematical meaning
- -> external adequacy / validation / proof / standards evidence
-```
-
-Every material Review includes a bounded **Challenge Pass**. A child that fails a coherent parent has an ordinary blocker. Strong evidence that accepted authority itself is materially false, contradictory, ambiguous, inadequate, or unrealizable produces a prominent **SERIOUS CHALLENGE** and human adjudication rather than silent compliance or downstream patching.
-
-Authority governs mutation; evidence can challenge authority; neither human nor agent creates truth by assertion.
-
-## Preserved engineering strengths
-
-Protocol 6 is the general doctrine and Protocol 5 is its narrower software-local specialization. Protocol 6 preserves and generalizes Protocol 5's strongest controls as current semantic capabilities rather than a second current vocabulary: adaptive concretization, active simplification, snapshot-complete handoff, version-bound workplans, stage-local plus final affected regression, proxy-proof real-owner evidence, evidence reuse/invalidation, differential/metamorphic testing, bounded fault injection, language/tool routing, long-horizon health sensing, bounded urgent mitigation, compact resumable working state, and conservative closeout.
-
-The concise historical mapping lives only in `source/shared/references/protocol-versioning-and-compatibility.md`; ordinary Protocol 6 work should not require translating through Protocol 5 control-plane terms.
-
-## Workflow and portable skills
-
-Canonical human-facing orchestration prompts:
-
-- [`source/shared/references/development-workflow-prompts.md`](source/shared/references/development-workflow-prompts.md)
-
-Canonical role entrypoints:
-
-- `source/roles/scientific-formulation/SKILL.md`
-- `source/roles/numerical-algorithm-design/SKILL.md`
-- `source/roles/software-design/SKILL.md`
-- `source/roles/software-implementation/SKILL.md`
-
-Optional specialists remain non-authoritative support capabilities: `software-documentation`, `software-maintenance-audit`, and `repository-hygiene`.
-
-Skill resolution is compatible-local-first, canonical-public-source-second. Current Protocol 6.1 public fallback uses immutable compatible source `47e9155632c44493644b0b02fa1fa625703cf480` rather than assuming the repository default branch is already 6.1. Never silently reinterpret an older workplan under newer doctrine. Historical Protocol 5.16 is pinned to immutable commit `e151daaf5c8eebb351a85cfed86170fda80fb5e3` and the orchestrator retains its packaged `sdp-protocol-5.16` schema-v1 profile alongside frozen `ssdp-protocol-6.0` schema v2 and current `ssdp-protocol-6.1` schema v2.
-
-## Build and acceptance
-
-`source/` is canonical. `dist/skills/` and top-level ZIPs are generated transport artifacts.
+`source/` is canonical. `dist/skills/`, top-level skill ZIPs, and orchestrator protocol resources are generated/packaged descendants.
 
 ```bash
 python -m pip install -r source/requirements-validation.txt
@@ -101,6 +75,4 @@ python orchestrator/scripts/generate_protocol_snapshot.py --check
 python orchestrator/scripts/run_core_tests.py
 ```
 
-These Python commands are repository-local delegated D4 validation machinery; they are not language-specific protocol doctrine.
-
-A Protocol 6 release is not complete while a governing Serious Challenge is unresolved or any required assembled acceptance check has not executed.
+A release cannot close while a governing Serious Challenge or required assembled acceptance check remains unresolved/unexecuted.

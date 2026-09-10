@@ -12,7 +12,7 @@ def read(path: str) -> str:
 
 class Protocol6ContractTests(unittest.TestCase):
     def setUp(self) -> None:
-        self.foundation = read("source/shared/references/abstraction-and-realization.md").lower()
+        self.foundation = read("source/shared/references/abstraction-and-concretization.md").lower()
         self.workflow = read("source/shared/references/workflow-and-workplans.md").lower()
         self.testing = read("source/shared/references/testing-and-validation.md").lower()
         self.d1 = read("source/shared/references/scientific-formulation.md").lower()
@@ -22,66 +22,83 @@ class Protocol6ContractTests(unittest.TestCase):
         self.versioning = read("source/shared/references/protocol-versioning-and-compatibility.md").lower()
         self.evolution = read("source/shared/references/evidence-evolution-and-dependencies.md").lower()
 
-    def test_protocol_61_identity_and_four_domain_roles(self) -> None:
-        self.assertEqual("6.1.0", read("source/PROTOCOL_VERSION").strip())
-        self.assertIn("current protocol version: **6.1**", read("README.md").lower())
+    def test_protocol_62_identity_and_four_domain_roles(self) -> None:
+        self.assertEqual("6.2.0", read("source/PROTOCOL_VERSION").strip())
+        self.assertIn("protocol 6.2", read("README.md").lower())
         for skill in ("scientific-formulation", "numerical-algorithm-design", "software-design", "software-implementation"):
             self.assertTrue((ROOT / f"source/roles/{skill}/SKILL.md").is_file(), skill)
 
-    def test_recursive_abstraction_concretization_and_feasibility_are_canonical(self) -> None:
-        self.assertIn("abstraction  --design / constrain-->  concretization", self.foundation)
-        self.assertIn("fidelity is a feasibility condition", self.foundation)
-        self.assertIn("domain engineering fitness", self.foundation)
-        self.assertIn("minimum justified concretization complexity", self.foundation)
+    def test_recursive_concretization_feasibility_and_delegation_are_canonical(self) -> None:
+        for phrase in (
+            "fidelity is a feasibility condition",
+            "domain engineering fitness",
+            "minimum justified concretization complexity",
+            "development economy",
+            "layered directed acyclic graph",
+            "does not acquire authority because it exists",
+        ):
+            self.assertIn(phrase, self.foundation)
 
-    def test_protocol61_evidence_evolution_contract_is_first_class(self) -> None:
+    def test_protocol61_evidence_evolution_capabilities_remain_first_class(self) -> None:
         for phrase in ("evidence specification", "evidence realization", "observation", "evidence assessment", "execution_depends_on"):
             self.assertIn(phrase, self.evolution)
         self.assertIn("absence of an edge", self.evolution)
         self.assertIn("stale", self.evolution)
+        self.assertIn("common-mode", self.evolution)
 
-    def test_authority_provenance_is_orthogonal_to_domain_level(self) -> None:
-        self.assertIn("authority source is orthogonal to abstraction level", self.foundation)
-        self.assertIn("safety / explicit stakeholder and project authority / governed external contracts", self.foundation)
-        self.assertIn("do not force every external requirement through d1", self.foundation)
+    def test_authority_provenance_and_multiple_constraints_survive(self) -> None:
+        self.assertIn("semantic level and authority provenance are independent", self.foundation)
+        self.assertIn("safety", self.foundation)
+        self.assertIn("stakeholder", self.foundation)
+        self.assertIn("external contracts", self.foundation)
+        self.assertIn("one current semantic owner", self.foundation)
+        self.assertIn("several parents/side constraints", self.foundation)
 
     def test_d1_d2_d3_d4_ownership_is_separated(self) -> None:
         self.assertIn("scientific method paper", self.d1)
         self.assertIn("numerical & algorithmic method paper", self.d2)
-        self.assertIn("d3 boundary", self.d3)
+        self.assertIn("architecture manual", self.d3)
         self.assertIn("accepted d4 specification", self.d4)
-        self.assertIn("code/executable behavior is the concretization", self.d4)
+        self.assertIn("code/executable behavior", self.d4)
 
-    def test_verification_is_reverse_semantic_not_bijective_inverse(self) -> None:
-        self.assertIn("verification therefore is not a mathematical inverse", self.foundation)
+    def test_verification_is_reverse_semantic_and_checks_adequacy(self) -> None:
+        self.assertIn("verification therefore is opposite-direction semantic reconstruction", self.foundation)
         self.assertIn("concretization fidelity", self.foundation)
         self.assertIn("abstraction adequacy", self.foundation)
-        self.assertIn("composed end-to-end scientific closure", self.testing)
+        self.assertIn("composed scientific closure", self.testing)
 
-    def test_authority_states_and_bounded_invalidation_exist(self) -> None:
-        for phrase in ("proposed", "accepted current", "challenged", "risk-accepted/provisional", "stale dependent", "superseded/historical", "release-pinned/publication"):
+    def test_authority_states_bounded_impact_and_challenge_survive(self) -> None:
+        for phrase in ("proposed", "accepted-current", "challenged", "risk-accepted/provisional", "stale-dependent", "superseded/historical", "release-pinned/publication"):
             self.assertIn(phrase, self.foundation)
-        self.assertIn("invalidates only descendants/evidence whose claim could materially change", self.foundation)
-
-    def test_serious_challenge_is_mandatory_material_review_semantics(self) -> None:
-        self.assertIn("mandatory bounded challenge pass", self.foundation)
+        self.assertIn("review only materially dependent descendants/evidence", self.foundation)
+        self.assertIn("challenge pass", self.foundation)
         self.assertIn("serious challenge", self.foundation)
         self.assertIn("human adjudication", self.foundation)
-        self.assertIn("serious challenge", self.workflow)
-        self.assertIn("truth", self.foundation)
+
+    def test_lossless_representation_is_a_hard_current_contract(self) -> None:
+        for phrase in (
+            "lossless representation rule",
+            "governed scope",
+            "one detailed owner per generic rule",
+            "use progressive disclosure",
+            "keep cold paths discoverable",
+            "weight attention without weakening acceptance",
+            "do not deduplicate by adjudicating semantics",
+            "keep derivatives subordinate",
+        ):
+            self.assertIn(phrase, self.foundation)
 
     def test_tests_and_code_cannot_counterfeit_authority(self) -> None:
         self.assertIn("evidence integrity", self.testing)
-        self.assertIn("rewriting specification", self.testing)
         self.assertIn("required check that did not execute is not a pass", self.testing)
-        self.assertIn("code does not become the intended contract", self.d4)
+        self.assertIn("rewrite", self.testing)
+        self.assertIn("code does not become intended contract", self.d4)
 
     def test_stage_local_final_regression_and_proxy_proof_survive(self) -> None:
-        self.assertIn("stage-local regression", self.testing)
+        self.assertIn("stage-local affected regression", self.testing)
         self.assertIn("final assembled acceptance", self.testing)
-        self.assertIn("proxy-proof acceptance", self.testing)
-        self.assertIn("semantic owner under acceptance", self.testing)
-        self.assertIn("could this evidence remain green", self.testing)
+        self.assertIn("proxy-proof real-owner evidence", self.testing)
+        self.assertIn("could the evidence remain green while the owner", self.testing)
 
     def test_active_simplicity_survives_without_machinery_preservation(self) -> None:
         for text in (self.d3, read("source/roles/software-implementation/SKILL.md").lower()):
@@ -89,17 +106,20 @@ class Protocol6ContractTests(unittest.TestCase):
             self.assertIn("consolidat", text)
         self.assertIn("before another additive durable repair", self.d3)
 
-    def test_protocol6_workflow_is_proportional_and_preserves_overridden_risk(self) -> None:
+    def test_workflow_is_proportional_and_preserves_risk_and_impact(self) -> None:
         prompts = read("source/shared/references/development-workflow-prompts.md").lower()
         self.assertIn("change_plan may be none", prompts)
         self.assertIn("risk-accepted/provisional", prompts)
-        self.assertIn("authority_state", prompts)
-        self.assertIn("dependent descendant", self.workflow)
-        self.assertIn("unqualified pass/complete", self.workflow)
+        self.assertIn("bounded impact closure", prompts)
+        self.assertIn("reduced d4-only", prompts)
+        self.assertIn("dependent descendants", self.workflow)
+        self.assertIn("cannot close", self.workflow)
 
-    def test_historical_516_is_immutable_and_not_silently_upgraded(self) -> None:
+    def test_historical_recovery_is_immutable_and_not_silently_upgraded(self) -> None:
         self.assertIn("5.16.0 -> e151daaf5c8eebb351a85cfed86170fda80fb5e3", self.versioning)
-        self.assertIn("do not reinterpret active or completed 5.x or 6.0 work using protocol 6.1", self.versioning)
+        self.assertIn("6.0.0  -> 21d5188f5bd9a0270d7a2ebf93d41a6b7842ccd2", self.versioning)
+        self.assertIn("6.1.0  -> 802e75af261efb4f70d71284d860613a2197b639", self.versioning)
+        self.assertIn("never silently reinterprets older work", self.versioning)
 
     def test_build_registry_contains_four_roles_and_three_specialists(self) -> None:
         build = read("source/build_skills.py")

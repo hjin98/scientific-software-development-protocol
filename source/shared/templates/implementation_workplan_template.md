@@ -7,112 +7,89 @@ status: proposed
 
 # <Task> D3 -> D4 Implementation Workplan
 
-This is the D3->D4 specialization of the generic abstraction–concretization change plan. Use it for material executable software work. It must not absorb D1/D2 authority merely because implementation is scientific or numerical.
+Use for material executable D3->D4 work. Preserve applicable D1/D2 and directly governed constraints; do not absorb upstream authority merely because implementation is scientific/numerical. Keep this handoff snapshot-complete for its governed scope while routing generic protocol doctrine to canonical owners.
 
 ## Background and terminology
 
-For a substantial human-facing plan that introduces non-common project/domain terminology, define it briefly here before later sections rely on it. State intended reader/assumed prerequisites when material. Expand non-obvious abbreviations at first explanatory use with `full term (ABC)`.
+Define newly introduced non-common project/domain terms needed by the intended competent reader before substantive use; expand non-obvious abbreviations at first explanatory use (`full term (ABC)`). Explanatory background does not replace precise D1-D4 owners.
 
-Background explanation is not a substitute for precise D1/D2/D3/D4 normative definitions.
+## 1. Outcome and authority
 
-## 1. Target outcome, governing authority, and non-goals
-
-- Stakeholder/product outcome:
+- Protected stakeholder/product outcome:
 - Accepted D3 architecture being concretized:
-- Applicable D1/D2 invariants that reach this implementation surface:
-- Domain-local governed D4 constraints/contracts:
+- Applicable D1/D2 and external/domain constraints:
+- Stable D4 contracts/specification:
 - Explicit non-goals:
+- If D4-only, upstream-impact exclusion where scientific/numerical risk is plausible:
 
-If the task is claimed D4-only, state the proportionate upstream-impact exclusion when scientific/numerical semantics could plausibly be affected.
+## 2. Cycle decisions and delegated D4 space
 
-## 2. Cycle-scoped D3 decisions and delegated D4 concretization
+### Frozen for this cycle
+List only material architecture/ownership/interface/data-flow/resource/security/compatibility choices needed to bound implementation. Cycle freeze is not automatically durable Architecture Manual authority.
 
-### Cycle-scoped decisions
+### Delegated
+List implementation-local mechanisms that remain replaceable: helpers/internal APIs/data structures/wrappers/retries/caches/state machines/libraries/local algorithms/synchronization/current owner paths unless identity is governed.
 
-List only material D3 architecture/ownership/interface/data-flow/resource/security/compatibility decisions deliberately fixed for this implementation cycle plus any exact acceptance identity required by governing authority.
+### Simplification target
+State existing machinery/state/path to remove, narrow, alter, consolidate or replace. New durable machinery must protect a governing capability the simpler system cannot provide or replace broader complexity.
 
-A cycle-scoped decision is not automatically durable current Architecture Manual authority.
+## 3. Material implementation obligations
 
-### Delegated D4 concretization
+For each obligation record only material fields:
 
-List implementation-local mechanisms that remain replaceable: helpers, internal APIs, data structures, wrappers, retries, caches, state machines, library choices, local algorithms, synchronization primitives, and current delegated owner paths unless exact identity is governed.
-
-### Active simplification
-
-State existing machinery/state/path that should be removed, narrowed, altered, consolidated, or replaced. New durable machinery must protect a governing capability the simpler system cannot provide or replace broader complexity.
-
-## 3. Implementation obligations
-
-For each material obligation capture only what is needed. Attach only when material:
-
-- concern/rationale;
-- required end state / governing constraint;
-- delegated concretization freedom;
+- concern/rationale and required end state;
+- governing constraint and delegated freedom;
 - task-specific acceptance evidence;
-- **acceptance boundary** — governing claim, current real semantic owner/path or owner class, allowed doubles, forbidden substitutions, and observable evidence when proxy acceptance is a material risk; state whether the owner is governed identity or merely the current delegated concretization so an equivalent delegated replacement remaps acceptance rather than freezing the old owner;
-- oracle-strength relation or structural absence/uniqueness check when ordinary tests are weak;
-- anti-shortcut/integrity constraint — a known way local compliance/evidence manipulation could appear to pass while defeating the governed outcome.
+- real semantic-owner/consumer boundary, allowed doubles and forbidden proxy substitutions when material;
+- structural absence/uniqueness or oracle-strength requirement when ordinary tests are insufficient;
+- known shortcut that could appear green while defeating the outcome.
 
-Green tests do not prove an omitted obligation was implemented.
+Green tests do not prove omitted obligations.
 
-## 4. Evidence specifications, realizations, and dependencies
+## 4. Evidence and dependencies
 
-For material acceptance claims distinguish:
-
-- evidence specification / governed proposition;
-- real semantic owner the specification interrogates;
-- execution dependencies such as harness, fixtures, datasets, backend, environment, or replaceable D4 machinery;
-- evidence-realization identity dimensions that can change applicability;
-- prior evidence expected to remain admissible, become review-required, or become stale;
-- independent evidence routes warranted to reduce common-mode risk.
-
-A rerun against a changed candidate is a new evidence realization. A stale passing observation cannot confirm the current candidate and a stale failing observation cannot refute it.
+For material claims identify evidence specification/target proposition, current real semantic owner, execution dependencies, applicability identity dimensions, prior evidence expected to remain admissible/review-required/stale, and independent evidence routes when common-mode risk matters. A rerun against a changed candidate is a new evidence realization; stale pass/fail cannot confirm/refute current authority.
 
 ## 5. Affected surface and acceptance
 
-Initial expected affected behavior may include callers/consumers, shared utilities, public interfaces, configuration, persistence/restart, orchestration/concurrency, packaging/entrypoints, compatibility, documentation/specification, dependency/history records, evidence specifications/realizations, and transitive scientific/numerical behavior. This list is provisional and must be re-derived from the final assembled candidate.
+Initial affected surface may include callers/consumers, shared utilities, public interfaces, configuration, persistence/restart, orchestration/concurrency, packaging/entrypoints, compatibility, documentation/specification, semantic dependencies/history, evidence, and transitive scientific/numerical behavior. Re-derive it from the final assembled candidate.
 
-Executable acceptance inherits Protocol 6.1 requirements:
+Required executable acceptance, proportionate to scope:
 
 - focused checks;
-- stage-local affected regression for each material behavior-changing stage;
-- final accepted-contract reconciliation;
-- final affected-surface re-derivation and complete regression;
-- integration/end-to-end through real semantic-owner/consumer boundaries;
+- stage-local affected regression for each coherent material executable stage;
+- final governing-contract reconciliation;
+- final affected-surface re-derivation and complete affected regression;
+- integration/end-to-end through real owner/consumer boundaries;
 - repository/project-required checks;
-- bounded impact closure over materially dependent authority/evidence/documentation;
-- explicit blocking treatment of any required check or impact item that did not close.
+- bounded impact closure over dependent authority/evidence/documentation/history;
+- explicit blocking state for every required unexecuted check or unresolved material impact item.
 
-Production qualification: <required / deferred / unnecessary with reason if material>.
+Production qualification: <required / deferred / unnecessary with reason when material>.
 
-## 6. Specification, documentation, dependency, and history impact
+## 6. Authority/documentation/history impact
 
-- D4 Specification changes required? If yes, distinguish accepted contract mutation from implementation repair.
-- D3 Architecture Manual update required?
-- D2/D1 authority affected? If yes, this plan is insufficient by itself; route to the earliest affected domain.
+- D4 Specification change? Distinguish contract mutation from implementation repair.
+- D3 Architecture Manual change?
+- D2/D1 affected? If yes, route earliest owner; this plan alone is insufficient.
 - Guides/runbooks/generated artifacts affected?
-- Current semantic dependency view affected?
-- Evidence specifications/realizations needing remap/rerun/retirement?
-- Semantic-evolution history triggered by material supersession/rejection/generalization/restoration?
+- Semantic dependency/evidence remap/rerun/retirement?
+- Semantic-evolution update warranted?
 
-Do not rewrite specification/architecture/method papers or evidence oracles merely to match unintended code.
+Do not rewrite owners/oracles merely to match unintended code.
 
-## 7. Stages, dependency order, and evidence reuse
+## 7. Stages and reuse
 
-Use coherent behavior/risk stages only where ordering reduces ambiguity or rework. Several tightly coupled file/helper/test edits may form one stage. Reuse still-valid evidence until a changed authority/concretization/evidence-specification/environment dimension can plausibly invalidate it.
+Use coherent behavior/risk stages only when sequencing reduces risk. Several tightly coupled files may form one stage. Reuse established evidence/context only while authority/workplan/candidate/regime/source applicability holds. If a bounded dependency map supports non-impact, state whether its relevant scope is complete.
 
-If a bounded dependency map is used to justify non-impact, state whether that scope is complete for the exclusion. Missing edges in a partial map are not proof of independence.
+## 8. Reopen / Challenge triggers
 
-## 8. Reopen, Serious Challenge, and simplification triggers
+- D4-local blockers:
+- Evidence requiring D3 reopen:
+- Evidence requiring D2/D1 challenge/reopen:
+- Structural complexity requiring simplification before another additive repair:
+- Accepted-authority contradiction requiring `SERIOUS CHALLENGE`:
 
-- D4-local implementation blockers that stay within this plan:
-- evidence requiring D3 architecture reopen:
-- evidence requiring D2 or D1 challenge/reopen:
-- structural complexity requiring simplification before another additive repair:
-- material authority contradiction that would require `SERIOUS CHALLENGE` rather than ordinary implementation repair:
+## 9. Final handoff
 
-An unresolved Serious Challenge to governing authority blocks normal Pass for the dependent claim.
-
-## 9. Impact closure
-
-Before final closure account for every materially affected descendant, evidence specification/realization, documentation/current dependency record, human re-ratification obligation, retirement/cleanup action, and semantic-history update. Resolve it, preserve it as still-valid with reason, or mark it unavailable/blocking. Old green tests do not substitute for this closure.
+Before closure every material obligation/descendant/evidence/documentation/dependency/re-ratification/retirement/history item is resolved, preserved as still-valid with reason, or unavailable/blocking. Lead the final handoff with Serious Challenge/blockers/current disposition, then concise supporting evidence; do not replay routine implementation chronology.

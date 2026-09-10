@@ -1,128 +1,61 @@
 # Documentation Authority, Maintenance, and Evolution
 
-Documentation is both semantic authority and explanatory/publication material. The first task is to identify which role a document is playing.
+Own document lifecycle, authority-state hygiene, current-vs-history separation, source-chain reconciliation, and documentation impact closure. Human-facing exposition is owned by [Scientific and technical writing](scientific-technical-writing.md); evidence/dependency/evolution semantics by [Evidence, evolution, and semantic dependencies](evidence-evolution-and-dependencies.md); universal representation by [Abstraction, concretization, authority, challenge, and representation](abstraction-and-concretization.md).
 
-Read [Scientific and technical writing](scientific-technical-writing.md) for Protocol 6.1 human-facing background/terminology and abbreviation standards. Read [Evidence, evolution, and semantic dependencies](evidence-evolution-and-dependencies.md) for dependency/history/evidence applicability.
+## Document roles and state
 
-## Background and terminology
-
-Protocol 6.1 uses **concretization** for downstream scientific/software expression of an abstraction. **Evidence realization** means one concrete execution of an evidence specification. Current documentation should keep those relations distinct.
-
-## Four logical normative document families
-
-Protocol 6.1 maps the semantic domains to logical current-state owners:
+Logical normative families are:
 
 ```text
-D1 -> Scientific Method Paper family
-D2 -> Numerical & Algorithmic Method Paper family
-D3 -> Architecture Manual family
-D4 -> Specification + code/executable concretization
+D1 -> Scientific Method Paper
+D2 -> Numerical & Algorithmic Method Paper
+D3 -> Architecture Manual
+D4 -> Specification + executable concretization
 ```
 
-This is logical one-to-one semantic ownership, not a requirement for exactly four physical files. A domain may use several coordinated files, but each material current normative claim has exactly one semantic owner. A concretization may still be constrained by multiple applicable claims from different owners.
+This is semantic ownership, not exactly four files. A domain may span coordinated files, but each material current normative claim has one owner. Guides/tutorials/runbooks/release notes/audit/benchmark reports/dependency views/history/publication outputs are not semantic authority unless explicitly assigned a bounded scope.
 
-Generic guides, tutorials, runbooks, release notes, audit reports, benchmark reports, dependency views, semantic-evolution histories, and publication outputs do not become semantic authority unless explicitly assigned an authority scope.
+An authority-bearing file can contain normative claims plus rationale, evidence, pedagogy and historical commentary. Do not promote every sentence/citation/example to invariant status or declare the entire methods document non-normative when it owns accepted D1/D2 semantics.
 
-`software-documentation` may edit, synthesize, publish, and reconcile documentation, but it does not self-approve D1/D2/D3/D4 semantic changes.
+Where ambiguity can affect governance, distinguish proposed, accepted-current, challenged, risk-accepted/provisional, stale-dependent, superseded/historical and release-pinned/publication state; human-ratification state remains orthogonal. Preserve release-pinned historical truth rather than editing it to match current terminology/science.
 
-## Normative core versus supporting prose
+## Reconcile before editing
 
-A method paper is not uniformly normative merely because the file is authoritative. Distinguish:
+Code is evidence of actual behavior, not automatic intent. Default routing:
 
-- accepted normative semantic claims;
-- rationale and design explanation;
-- literature/evidence/provenance;
-- pedagogy/examples;
-- historical commentary.
-
-Do not let a citation, example, background definition, or explanatory sentence accidentally acquire invariant status. Conversely, do not label the whole methods document non-normative when it is the accepted D1/D2 owner.
-
-## Authority states
-
-Documents that can carry semantic authority must distinguish state enough to prevent speculative edits from becoming current accidentally:
-
-- proposed;
-- accepted current;
-- challenged;
-- risk-accepted/provisional when applicable;
-- stale dependent;
-- superseded/historical;
-- release-pinned/publication snapshot.
-
-Exact metadata syntax is project-local. Human-ratification state is orthogonal.
-
-Current normative mutation is atomic: draft proposed changes separately or clearly as proposed, review/falsify them, obtain required ratification, then accept/update the current owner and invalidate only materially dependent descendants/evidence.
-
-Do not edit a release-pinned/publication snapshot to track later current science or terminology; preserve publication truth and create/update the current authority separately.
-
-## Reconcile disagreement before editing
-
-Code is evidence of actual behavior, not automatic intent. Classify discrepancies:
-
-| Observation | Default route |
+| Observation | Route |
 | --- | --- |
-| code and accepted D4 spec agree; guide differs | documentation drift |
-| code differs from accepted D4 spec | D4 implementation defect unless authority evidence says otherwise |
-| implementation structure differs from accepted D3 manual | D3/D4 conformance question |
-| D2 paper and implemented numerical semantics differ | D2/D3/D4 concretization/verification question |
-| D1 paper and numerical method encode different scientific meaning | D1/D2 concretization/verification question |
-| two applicable current authorities conflict | Serious Challenge / owning-authority adjudication |
-| proposed edit is being used as current authority | authority-state defect |
-| generated output differs from its canonical source | generated-artifact drift |
-| explanatory background conflicts with the precise normative definition | documentation drift or owning-domain challenge, depending on which side is wrong |
-| stale evidence is presented as current confirmation/refutation | evidence-applicability defect |
+| owners agree; guide differs | documentation drift |
+| code differs from accepted D4 specification | D4 defect unless authority changed |
+| implementation differs from D3 architecture | D3/D4 conformance question |
+| numerical behavior differs from accepted D2 | D2 concretization/verification question |
+| scientific meaning differs from accepted D1 | D1 concretization/adequacy question |
+| applicable current authorities conflict | owning-domain adjudication / Serious Challenge when warranted |
+| proposed edit is used as current | authority-state defect |
+| generated output differs from canonical source | regenerate source chain |
+| explanatory background differs from precise owner | documentation drift or owning-domain challenge |
+| stale evidence is presented as current | evidence-applicability defect |
 
-Do not repair inconsistency by rewriting every upstream document to match the current code or by redefining scientific/numerical terms editorially.
-
-## Human-facing background and abbreviation maintenance
-
-When creating or materially refactoring a human-facing current artifact:
-
-- identify the intended competent reader when needed to judge assumed background;
-- define newly introduced non-common domain terminology with a short explanation in an explicit background section before substantive use;
-- expand non-obvious abbreviations at first explanatory use as `full term (ABC)`;
-- check independently consumable summaries/captions when they may be read without the body;
-- keep explanatory definitions subordinate to precise D1/D2/D3/D4 normative owners;
-- avoid universal glossary/acronym registries or mechanical gates when ordinary editorial review is sufficient.
-
-A shared background across several files is valid only when the current composition is explicit and supplied together. Current documents must not require hidden chat to decode essential terminology.
+Do not repair inconsistency by rewriting upstream authority to match current code or by choosing new semantic truth editorially.
 
 ## Current system, not patch history
 
-Current documents describe the accepted present system coherently. Avoid append-only narratives of amendments/exceptions. When the conceptual model changes materially, rewrite/reorder/merge/split sections so a competent reader can understand the current state without mentally applying patch history.
+Current documents should explain the accepted present system coherently. Rewrite/reorder/merge/split when conceptual structure changes instead of appending amendment/exceptions. Preserve still-valid scientific, numerical, architecture, specification, compatibility, limitation, evidence-applicability and edge-case semantics during refactor. Detailed chronology and material supersession rationale belong in release/history/semantic evolution.
 
-Preserve still-valid subtle scientific, numerical, architectural, specification, compatibility, limitation, evidence-applicability, and edge-case content during major editorial refactors. Chronology and material supersession rationale belong in release/history or semantic-evolution material.
+A current document may route to another supplied owner rather than repeat generic doctrine. Shared background across files is valid only when current composition is explicit and resolvable; essential meaning cannot depend on hidden chat or an unsupplied prerequisite.
 
-## Dependency views and semantic evolution history
+## Human-facing and source-chain maintenance
 
-Use bounded Markdown dependency records only when existing links/anchors/workplan mappings are insufficient for reliable impact reasoning. The current view describes current materially relevant relationships; do not retain obsolete edges merely for history.
+When creating/materially refactoring human-facing current material, apply the scientific-writing owner: audience-appropriate background for newly introduced non-common terminology, first-use `full term (ABC)` for non-obvious abbreviations, and explanatory definitions subordinate to precise D1-D4 owners.
 
-A missing edge in a partial view is not evidence of independence unless the mapped scope was explicitly reviewed as complete for that exclusion.
+Edit the highest authoritative source and regenerate descendants. Mechanical source-chain checks establish reproducibility/integrity, not whether equations/method/architecture/evidence interpretation is correct.
 
-Preserve concise semantic-evolution reasoning when material model/algorithm/architecture/concretization/evidence replacement, generalization, rejection, retirement, or restoration is likely to recur or matter to later reviewers. History explains why current authority exists; current normative documents remain sufficient to explain what is true now.
+Use bounded Markdown dependency views only when ordinary links/anchors/workplan mappings are insufficient. Current dependency views describe current relations, not history. A missing edge in a partial view is not proof of independence unless that bounded scope was explicitly reviewed complete.
 
-## Source chains and generated outputs
+Preserve concise semantic-evolution reasoning when a material model/method/architecture/concretization/evidence choice is replaced/generalized/rejected/retired/restored and future rediscovery is plausible. Current owners explain what; history explains why; Git preserves detailed chronology. Resolved Challenge rationale should be only the concise material reasoning needed to prevent recurrence, not a debate transcript/database.
 
-Edit the highest authoritative source and regenerate descendants:
+## Documentation impact closure
 
-```text
-canonical source -> assembled markdown / diagrams / PDF / site / packaged skill
-```
+A local code refactor with no contract/explanation/evidence-applicability impact need not trigger broad documentation work. A material authority change must reconcile its current normative owner plus materially affected explanation/navigation, evidence/dependency records and semantic history.
 
-Do not independently patch a generated descendant when an upstream source exists. Mechanical checks may fail source-chain integrity; they cannot determine that a scientific equation, estimator, architecture, or evidence interpretation is semantically correct.
-
-## Guides and operational documentation
-
-Guides translate accepted authority into task-oriented use. Prefer the current supported workflow, explicit inputs/outputs, result interpretation, common failures, and links to the owning D1-D4 authority. Introduce project/domain terminology before operational steps rely on it. Compatibility/history detail follows only where materially needed.
-
-Runbooks must state whether they are current or release-pinned. Do not blindly change version strings or later terminology in a pinned runbook.
-
-## Documentation impact and impact closure
-
-A code-only local refactor with no contract/explanation/evidence-applicability impact need not trigger broad documentation work. A material D1/D2/D3/D4 authority change must reconcile its normative owner and materially affected explanations/navigation, evidence/dependency records, and semantic history when triggered.
-
-Use `software-documentation` for substantial synthesis/publication, not as a mandatory approval gate. Closeout verifies required documentation/dependency/history updates but does not invent scientific/product truth.
-
-## Resolved Serious Challenge rationale
-
-When a serious challenge is rejected with satisfactory reasoning and recurrence is plausible, preserve only the concise challenged claim/scope, resolution state, and material reasoning needed for future reviewers to understand why the apparent contradiction is not a defect. Do not store full debate transcripts or create a challenge database.
+Apply the Lossless Representation Rule: governed scope cannot be narrowed for editorial convenience; one detailed generic owner; local consequence + precise route; importance-weighted presentation without dropping mandatory constraints; history cold but discoverable; no append-only revision replay. `software-documentation` is support, never an approval gate.
