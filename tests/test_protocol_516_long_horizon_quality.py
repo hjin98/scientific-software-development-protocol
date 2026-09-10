@@ -46,7 +46,7 @@ class Protocol6LongHorizonQualityTests(unittest.TestCase):
         self.assertIn("final assembled acceptance still reflects the candidate after all material executable edits", self.workflow)
         self.assertIn("missing required pre-review acceptance remains a blocker", self.workflow)
         self.assertIn("review readiness normally follows this acceptance", self.testing)
-        self.assertIn("final complete affected-surface regression", self.testing)
+        self.assertIn("run complete affected regression after all material executable edits", self.testing)
 
     def test_quality_metrics_are_sensors_not_authority(self) -> None:
         self.assertIn("sensors, not verdicts", self.health)
@@ -55,7 +55,7 @@ class Protocol6LongHorizonQualityTests(unittest.TestCase):
         self.assertIn("quality ratchet", self.health)
         self.assertIn("change frequency", self.health)
         self.assertIn("architectural centrality", self.health)
-        self.assertIn("do not require 100% mutation", self.testing + self.health + self.tools)
+        self.assertIn("mutation survival is investigation evidence, not a required score", self.health)
 
     def test_test_effectiveness_routes_are_conditional(self) -> None:
         for token in ("mutation", "differential", "metamorphic", "counterfactual"):
