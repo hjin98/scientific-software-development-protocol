@@ -58,13 +58,15 @@ class Protocol61EvidenceEvolutionTests(unittest.TestCase):
         self.assertLess(d1.index("## Background and terminology"), d1.index("## Normative scientific / mathematical formulation"))
         self.assertLess(d2.index("## Background and terminology"), d2.index("## Governing numerical / algorithmic formulation"))
 
-    def test_current_prompt_preserves_public_source_discipline_without_premature_62_ref(self) -> None:
+    def test_current_prompt_preserves_public_source_discipline_after_62_bootstrap(self) -> None:
+        bootstrap = "1181c2031710c5d343194d87d08543290fded0ab"
         prompts = self.read("source/shared/references/development-workflow-prompts.md")
         self.assertIn("https://github.com/hjin98/scientific-software-development-protocol", prompts)
         self.assertNotIn("https://github.com/hjin98/software-development-protocol", prompts)
-        self.assertIn("pre-bootstrap", prompts.lower())
-        self.assertIn("automatic current-6.2 public fallback is unavailable", prompts.lower())
+        self.assertIn(f"PUBLIC_REF = {bootstrap}", prompts)
+        self.assertIn("current 6.2 may fall back", prompts.lower())
         self.assertIn("repository-default bytes are never a substitute", prompts.lower())
+        self.assertNotIn("automatic current-6.2 public fallback is unavailable", prompts.lower())
 
     def test_accepted_61_recovery_and_bootstrap_remain_immutable(self) -> None:
         recovery = "802e75af261efb4f70d71284d860613a2197b639"

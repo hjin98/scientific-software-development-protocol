@@ -1,4 +1,3 @@
-import re
 import unittest
 from pathlib import Path
 
@@ -76,14 +75,21 @@ class Protocol62RepresentationTests(unittest.TestCase):
             self.assertIn("package membership", text)
             self.assertIn("activation", text)
 
-    def test_prebootstrap_source_does_not_invent_protocol_62_public_sha(self):
-        prompt = (REFERENCES / "development-workflow-prompts.md").read_text()
-        portability = (ROOT / "PORTABILITY.md").read_text()
-        self.assertIn("pre-bootstrap", prompt.lower())
-        self.assertIn("pre-bootstrap", portability.lower())
-        pattern = re.compile(r"6\.2(?:\.0)?[^\n]{0,80}[0-9a-f]{40}", re.IGNORECASE)
-        self.assertIsNone(pattern.search(prompt))
-        self.assertIsNone(pattern.search(portability))
+    def test_public_source_surfaces_publish_exact_protocol_62_bootstrap(self):
+        bootstrap = "1181c2031710c5d343194d87d08543290fded0ab"
+        surfaces = (
+            REFERENCES / "development-workflow-prompts.md",
+            REFERENCES / "protocol-versioning-and-compatibility.md",
+            ROOT / "PORTABILITY.md",
+            ROOT / "README.md",
+        )
+        for path in surfaces:
+            with self.subTest(path=path):
+                self.assertIn(bootstrap, path.read_text())
+        prompt = (REFERENCES / "development-workflow-prompts.md").read_text().lower()
+        portability = (ROOT / "PORTABILITY.md").read_text().lower()
+        self.assertNotIn("automatic current-6.2 public fallback is unavailable", prompt)
+        self.assertNotIn("protocol 6.2 pre-bootstrap state", portability)
 
     def test_preservation_evidence_is_explicitly_non_authoritative(self):
         census = ROOT / "qualification" / "ssdp6" / "SSDP-6.2-PRESERVATION-CENSUS.md"

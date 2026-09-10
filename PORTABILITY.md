@@ -32,13 +32,14 @@ Accepted immutable mappings:
 6.0.0 recovery  -> 21d5188f5bd9a0270d7a2ebf93d41a6b7842ccd2
 6.1.0 public bootstrap -> 47e9155632c44493644b0b02fa1fa625703cf480
 6.1.0 recovery -> 802e75af261efb4f70d71284d860613a2197b639
+6.2.0 public bootstrap -> 1181c2031710c5d343194d87d08543290fded0ab
 ```
 
 Canonical repository: `https://github.com/hjin98/scientific-software-development-protocol`.
 
-**Protocol 6.2 pre-bootstrap state:** this source candidate intentionally does not publish a 6.2 public-source SHA before validation. Until the complete 6.2 fallback source set passes package/link validation and an immutable bootstrap commit is created, automatic 6.2 public fallback is unavailable. A later semantic-candidate commit must publish that exact bootstrap SHA. The repository default branch is never a protocol-version oracle and `6.2.0` is not assumed to be a Git ref.
+**Protocol 6.2 public-source bootstrap:** `1181c2031710c5d343194d87d08543290fded0ab` is the immutable current 6.2 public fallback source. When no governing-version-compatible installed skill/exposed root is readable, resolve the canonical repository at this exact ref. The repository default branch is never a protocol-version oracle and `6.2.0` is not assumed to be a Git ref.
 
-If neither a compatible installed source nor an explicit compatible immutable public source can be read, report truthful non-closure rather than executing the protocol from memory.
+If neither a compatible installed source nor the compatible immutable public source can be read, report truthful non-closure rather than executing the protocol from memory.
 
 ## Version-bound profiles
 

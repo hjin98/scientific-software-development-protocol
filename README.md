@@ -56,7 +56,7 @@ Frozen historical mappings remain immutable:
 6.1.0  -> 802e75af261efb4f70d71284d860613a2197b639
 ```
 
-Protocol 6.1 public-source bootstrap remains `47e9155632c44493644b0b02fa1fa625703cf480`. The Protocol 6.2 bootstrap is intentionally not invented before validation; a later semantic-candidate commit will publish its exact immutable SHA. Repository default branch is never a protocol-version oracle.
+Protocol 6.1 public-source bootstrap remains `47e9155632c44493644b0b02fa1fa625703cf480`. Protocol 6.2 public-source bootstrap is `1181c2031710c5d343194d87d08543290fded0ab`; current 6.2 public fallback resolves to that exact immutable ref when a governing-version-compatible installed source is unavailable. Repository default branch is never a protocol-version oracle.
 
 ## Canonical source and acceptance
 

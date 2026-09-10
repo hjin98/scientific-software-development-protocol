@@ -41,6 +41,13 @@ repository -> https://github.com/hjin98/scientific-software-development-protocol
 6.1.0 public-source bootstrap -> 47e9155632c44493644b0b02fa1fa625703cf480
 ```
 
+Protocol 6.2 now has its own immutable public-source bootstrap, distinct from its future accepted recovery snapshot:
+
+```text
+repository -> https://github.com/hjin98/scientific-software-development-protocol
+6.2.0 public-source bootstrap -> 1181c2031710c5d343194d87d08543290fded0ab
+```
+
 The repository default branch is never a protocol-version oracle and a semantic version string is not assumed to be a Git ref.
 
 ## Orchestration profiles
@@ -60,12 +67,12 @@ Schema v2 remains unless an actual machine profile contract changes. Core select
 
 Git commits cannot self-name. Protocol 6.2 therefore uses two immutable identities:
 
-1. **public-source bootstrap** — a commit containing the complete usable 6.2 source/routing/package set; created only after source coherence and standalone package/link validation;
-2. **recovery snapshot** — an accepted rollback commit containing the qualified semantic candidate and required decision evidence through ancestry.
+1. **public-source bootstrap** — `1181c2031710c5d343194d87d08543290fded0ab`, the complete usable 6.2 source/routing/package source set after source regression, canonical package build, and independent standalone package validation passed;
+2. **recovery snapshot** — a later accepted rollback commit containing the qualified semantic candidate and required decision evidence through ancestry.
 
-Before the bootstrap commit exists, pre-bootstrap source is not a valid 6.2 public fallback target. After it exists, a later semantic-candidate mapping commit publishes its exact SHA in current resolver/prompt/portability surfaces. After candidate qualification and independent Review, choose an immutable recovery commit; only a later mapping commit publishes `6.2.0 -> <recovery SHA>`.
+Current 6.2 public fallback resolves to the bootstrap commit when no governing-version-compatible installed source is readable. The bootstrap remains immutable even as later semantic-candidate/profile/generated/qualification commits advance. After candidate qualification and independent Review, choose an immutable recovery commit; only a later mapping commit publishes `6.2.0 -> <recovery SHA>`.
 
-Until those 6.2 acceptance stages complete, Protocol 6.1 remains accepted-current/rollback authority and public fallback for accepted 6.1 work. Do not substitute the repository default branch for a missing 6.2 immutable mapping.
+Until those 6.2 acceptance stages complete, Protocol 6.1 remains accepted-current/rollback authority and public fallback for accepted 6.1 work. Do not substitute the repository default branch for any immutable 6.2 source or recovery mapping.
 
 ## Candidate identity and compatibility
 
