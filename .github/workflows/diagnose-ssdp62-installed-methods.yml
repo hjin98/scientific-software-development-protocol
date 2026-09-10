@@ -1,0 +1,124 @@
+name: Diagnose SSDP 6.2 installed-product methods
+
+on:
+  pull_request:
+    types: [synchronize, opened, reopened]
+
+permissions:
+  contents: read
+
+jobs:
+  diagnose-installed-methods:
+    if: github.event.pull_request.head.repo.full_name == github.repository && github.head_ref == 'ssdp-6.2-lossless-representation'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install Core
+        run: python -m pip install ./orchestrator -r orchestrator/requirements-dev.txt
+      - name: Run installed-product suite once
+        shell: bash
+        run: |
+          set +e
+          (cd orchestrator && python -m unittest -v tests.test_installed_product) 2>&1 | tee /tmp/installed-product.out
+          exit 0
+      - name: Classify wheel namespace
+        if: always()
+        run: "! grep -E '^test_wheel_contains_no_root_namespace_init .* \.\.\. (FAIL|ERROR)$' /tmp/installed-product.out"
+      - name: Classify wheel protocol resources
+        if: always()
+        run: "! grep -E '^test_wheel_ships_the_packaged_protocol_snapshot .* \.\.\. (FAIL|ERROR)$' /tmp/installed-product.out"
+      - name: Classify wheel console script
+        if: always()
+        run: "! grep -E '^test_wheel_declares_the_console_script .* \.\.\. (FAIL|ERROR)$' /tmp/installed-product.out"
+      - name: Classify sdist production
+        if: always()
+        run: "! grep -E '^test_sdist_is_produced .* \.\.\. (FAIL|ERROR)$' /tmp/installed-product.out"
+      - name: Classify sdist protocol resources
+        if: always()
+        run: "! grep -E '^test_sdist_contains_the_package_and_protocol_resources .* \.\.\. (FAIL|ERROR)$' /tmp/installed-product.out"
+      - name: Classify sdist install
+        if: always()
+        run: "! grep -E '^test_sdist_was_installed_in_a_separate_environment .* \.\.\. (FAIL|ERROR)$' /tmp/installed-product.out"
+      - name: Classify sdist CLI
+        if: always()
+        run: "! grep -E '^test_sdist_installed_cli_runs_outside_the_checkout .* \.\.\. (FAIL|ERROR)$' /tmp/installed-product.out"
+      - name: Classify installed location
+        if: always()
+        run: "! grep -E '^test_installed_package_lives_outside_the_source_checkout .* \.\.\. (FAIL|ERROR)$' /tmp/installed-product.out"
+      - name: Classify namespace coexistence
+        if: always()
+        run: "! grep -E '^test_sibling_namespace_package_coexists .* \.\.\. (FAIL|ERROR)$' /tmp/installed-product.out"
+      - name: Classify higher-module isolation
+        if: always()
+        run: "! grep -E '^test_installed_build_imports_no_higher_module .* \.\.\. (FAIL|ERROR)$' /tmp/installed-product.out"
+      - name: Classify installed prompt render
+        if: always()
+        run: "! grep -E '^test_installed_cli_renders_a_stage_prompt .* \.\.\. (FAIL|ERROR)$' /tmp/installed-product.out"
+      - name: Classify zero-install help
+        if: always()
+        run: "! grep -E '^test_zero_install_launcher_runs_from_outside_the_checkout .* \.\.\. (FAIL|ERROR)$' /tmp/installed-product.out"
+      - name: Classify zero-install parity
+        if: always()
+        run: "! grep -E '^test_zero_install_launcher_matches_installed_cli_semantics .* \.\.\. (FAIL|ERROR)$' /tmp/installed-product.out"
+      - name: Classify zero-install structured failures
+        if: always()
+        run: "! grep -E '^test_zero_install_launcher_propagates_structured_failures .* \.\.\. (FAIL|ERROR)$' /tmp/installed-product.out"
+      - name: Classify stale namespace defense
+        if: always()
+        run: "! grep -E '^test_zero_install_launcher_wins_over_a_stale_namespace_copy .* \.\.\. (FAIL|ERROR)$' /tmp/installed-product.out"
+      - name: Classify stdout purity
+        if: always()
+        run: "! grep -E '^test_stdout_carries_only_the_prompt .* \.\.\. (FAIL|ERROR)$' /tmp/installed-product.out"
+      - name: Classify stage alias parity
+        if: always()
+        run: "! grep -E '^test_every_stage_alias_uses_the_same_path_as_prompt .* \.\.\. (FAIL|ERROR)$' /tmp/installed-product.out"
+      - name: Classify profile alias
+        if: always()
+        run: "! grep -E '^test_profile_alias_resolves .* \.\.\. (FAIL|ERROR)$' /tmp/installed-product.out"
+      - name: Classify stderr redaction
+        if: always()
+        run: "! grep -E '^test_errors_are_redacted_json_on_stderr_with_no_prompt_bytes .* \.\.\. (FAIL|ERROR)$' /tmp/installed-product.out"
+      - name: Classify disallowed workplan
+        if: always()
+        run: "! grep -E '^test_stage_disallowed_workplan_fails_at_the_cli .* \.\.\. (FAIL|ERROR)$' /tmp/installed-product.out"
+      - name: Classify task conflict
+        if: always()
+        run: "! grep -E '^test_task_outside_design_fails_at_the_cli .* \.\.\. (FAIL|ERROR)$' /tmp/installed-product.out"
+      - name: Classify execution-mode override
+        if: always()
+        run: "! grep -E '^test_execution_mode_override_does_not_change_prompt_mode .* \.\.\. (FAIL|ERROR)$' /tmp/installed-product.out"
+      - name: Classify web prompt mode
+        if: always()
+        run: "! grep -E '^test_prompt_mode_web_leaves_canonical_execution_mode_alone .* \.\.\. (FAIL|ERROR)$' /tmp/installed-product.out"
+      - name: Classify cwd project resolution
+        if: always()
+        run: "! grep -E '^test_cwd_project_resolution_works_from_inside_the_worktree .* \.\.\. (FAIL|ERROR)$' /tmp/installed-product.out"
+      - name: Classify projects command
+        if: always()
+        run: "! grep -E '^test_projects_command_reports_configuration .* \.\.\. (FAIL|ERROR)$' /tmp/installed-product.out"
+      - name: Classify doctor readiness
+        if: always()
+        run: "! grep -E '^test_doctor_reports_readiness_without_loading_or_network .* \.\.\. (FAIL|ERROR)$' /tmp/installed-product.out"
+      - name: Classify doctor passive failure
+        if: always()
+        run: "! grep -E '^test_doctor_packaged_failure_does_not_fallback_to_configured_sources .* \.\.\. (FAIL|ERROR)$' /tmp/installed-product.out"
+      - name: Classify capabilities
+        if: always()
+        run: "! grep -E '^test_capabilities_defaults_to_discovery_only .* \.\.\. (FAIL|ERROR)$' /tmp/installed-product.out"
+      - name: Classify clipboard
+        if: always()
+        run: "! grep -E '^test_clipboard_extra_is_additive_and_never_blocks_the_prompt .* \.\.\. (FAIL|ERROR)$' /tmp/installed-product.out"
+      - name: Classify offline packaged snapshot
+        if: always()
+        run: "! grep -E '^test_offline_rendering_uses_the_packaged_snapshot .* \.\.\. (FAIL|ERROR)$' /tmp/installed-product.out"
+      - name: Classify config-free help
+        if: always()
+        run: "! grep -E '^test_help_is_available_without_a_configuration .* \.\.\. (FAIL|ERROR)$' /tmp/installed-product.out"
+      - name: Classify pipe safety
+        if: always()
+        run: "! grep -E '^test_pipe_safe_output .* \.\.\. (FAIL|ERROR)$' /tmp/installed-product.out"
