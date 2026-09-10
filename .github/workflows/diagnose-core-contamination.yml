@@ -1,0 +1,54 @@
+name: Diagnose Core installed-product contamination
+
+on:
+  pull_request:
+    types: [synchronize, opened, reopened]
+
+permissions:
+  contents: read
+
+jobs:
+  early-group:
+    if: github.event.pull_request.head.repo.full_name == github.repository && github.head_ref == 'ssdp-6.2-lossless-representation'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install Core
+        run: python -m pip install ./orchestrator -r orchestrator/requirements-dev.txt
+      - name: Run early predecessors then installed product
+        run: >-
+          python orchestrator/scripts/run_core_tests.py
+          tests.test_config_and_projects
+          tests.test_extension_composition
+          tests.test_git_observation
+          tests.test_input_binding
+          tests.test_layout_and_fitness
+          tests.test_installed_product
+
+  late-group:
+    if: github.event.pull_request.head.repo.full_name == github.repository && github.head_ref == 'ssdp-6.2-lossless-representation'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install Core
+        run: python -m pip install ./orchestrator -r orchestrator/requirements-dev.txt
+      - name: Run late predecessors then installed product
+        run: >-
+          python orchestrator/scripts/run_core_tests.py
+          tests.test_privacy_and_remote_truth
+          tests.test_protocol_source_and_profile
+          tests.test_public_api_seam
+          tests.test_render_and_identity
+          tests.test_ssdp6_profiles
+          tests.test_workplan_resolution
+          tests.test_installed_product
