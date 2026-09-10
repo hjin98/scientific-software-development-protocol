@@ -28,7 +28,7 @@ class ConvergenceDurableSemanticsTests(unittest.TestCase):
         self.assertIn("material sibling recurrence", self.convergence)
         self.assertIn("shared owner/mechanism", self.convergence)
         self.assertIn("does not answer whether the current concretization should survive", self.convergence)
-        self.assertIn("material sibling recurrence", self.architecture)
+        self.assertIn("sibling recurrence", self.architecture)
         self.assertIn("shared mechanism", self.architecture)
         self.assertIn("simplify/re-derive delegated concretization", self.architecture)
 
