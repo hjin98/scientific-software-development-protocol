@@ -42,7 +42,7 @@ class Protocol6OrchestrationTests(unittest.TestCase):
         for token in (
             "local first, public repository second",
             "documented exposed installed-skill root",
-            "https://github.com/hjin98/software-development-protocol",
+            "https://github.com/hjin98/scientific-software-development-protocol",
             "source/roles/<skill-name>/skill.md",
             "source/specialists/<skill-name>/skill.md",
             "not shell commands",
@@ -138,7 +138,7 @@ class Protocol6OrchestrationTests(unittest.TestCase):
         self.assertIn("before ordinary blockers or pass/no-pass", self.lower)
         closeout = self.stage_block("10. Closeout").lower()
         self.assertIn("unresolved serious challenge", closeout)
-        self.assertIn("blocks protocol 6 release", closeout)
+        self.assertIn("blocks protocol 6.1 release", closeout)
 
 
 if __name__ == "__main__":

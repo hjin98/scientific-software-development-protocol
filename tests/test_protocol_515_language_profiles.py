@@ -39,9 +39,9 @@ class Protocol515LanguageProfileTests(unittest.TestCase):
         self.impl_path = "source/roles/software-implementation/SKILL.md"
 
     def test_shared_profile_direction_rejects_global_language_precedence(self) -> None:
-        self.assertRegex(self.router, r"shared domain rule\s*->\s*active language profile\(s\)\s*->\s*implementation-local realization")
+        self.assertRegex(self.router, r"shared domain rule\s*->\s*active language profile\(s\)\s*->\s*implementation-local concretization")
         self.assertIn("shared owners remain canonical", self.router)
-        self.assertIn("current protocol 6 domain doctrine is authoritative", self.router)
+        self.assertIn("current protocol 6.1 domain doctrine is authoritative", self.router)
         self.assertNotIn("shared protocol 5 doctrine remains authoritative", self.router)
         forbidden = (
             r"python(?: profile)?\s+(?:globally\s+)?(?:outranks|overrides|takes precedence over)\s+c\+\+",
@@ -64,7 +64,7 @@ class Protocol515LanguageProfileTests(unittest.TestCase):
         self.assertIn("must read both", self.router)
         self.assertIn("do not infer a global python-over-c++ or c++-over-python precedence", self.router)
 
-    def test_real_package_builder_carries_only_routed_profile_payload(self) -> None:
+    def test_real_package_builder_carries_routed_profiles_without_promoting_transitive_payload(self) -> None:
         routed = language_route_links(self.design_path)
         with tempfile.TemporaryDirectory() as td:
             out = Path(td) / "dist"
@@ -72,25 +72,30 @@ class Protocol515LanguageProfileTests(unittest.TestCase):
             for role in ("software-design", "software-implementation"):
                 refs = {p.name for p in (out / "skills" / role / "references").iterdir() if p.is_file()}
                 self.assertTrue(routed <= refs, (role, sorted(routed - refs)))
-            for specialist in ("software-documentation", "repository-hygiene", "software-maintenance-audit"):
-                refs = {p.name for p in (out / "skills" / specialist / "references").iterdir() if p.is_file()}
-                self.assertTrue(routed.isdisjoint(refs), (specialist, sorted(routed & refs)))
+
+        # Under bounded transitive package closure, payload presence is not an
+        # activation route. Specialists must still omit language profiles from
+        # their direct SKILL.md routing contract unless that role explicitly owns
+        # a language-profile decision.
+        for specialist in ("software-documentation", "repository-hygiene", "software-maintenance-audit"):
+            direct = {Path(link).name for link in LINK_RE.findall(read(f"source/specialists/{specialist}/SKILL.md"))}
+            self.assertTrue(routed.isdisjoint(direct), (specialist, sorted(routed & direct)))
 
     def test_python_runtime_selection_is_not_gil_monoculture(self) -> None:
         runtime = section(self.python, "## interpreter/runtime and concurrency")
-        for token in ("gil-constrained", "free-threaded", "alternative interpreters", "when a gil is active", "when free-threading is active", "asynchronous/event-loop"):
+        for token in ("global-interpreter-lock (gil)-constrained", "free-threaded", "alternative interpreters", "when a gil is active", "when free-threading is active", "asynchronous/event-loop"):
             self.assertIn(token, runtime)
         self.assertNotIn("python => gil => processes", runtime)
 
     def test_python_accelerator_counterfactual_is_gated_and_complete(self) -> None:
-        accel = section(self.python, "## architecture-gated accelerator realization")
+        accel = section(self.python, "## architecture-gated accelerator concretization")
         for concept in ("dormant unless", "cpu-only", "when enabled", "dtype and precision", "cpu/reference", "transfer", "synchronization", "device-memory", "packaging/runtime/device compatibility", "shared performance and scientific owners", "examples rather than required identities", "accepted d3 architecture"):
             self.assertIn(concept, accel)
         self.assertNotRegex(accel, r"(?:always|universally)\s+(?:require|enable|use).{0,30}(?:gpu|accelerator|cuda)")
 
     def test_cpp_accelerator_uses_same_shared_gate(self) -> None:
-        accel = section(self.cpp, "## accelerator realization")
-        for concept in ("dormant unless", "accepted d3 architecture", "when enabled", "cpu/reference numerical equivalence", "end-to-end benefit"):
+        accel = section(self.cpp, "## accelerator concretization")
+        for concept in ("dormant unless", "accepted d3 architecture", "when enabled", "central-processing-unit (cpu)/reference numerical equivalence", "end-to-end benefit"):
             self.assertIn(concept, accel)
 
     def test_performance_counterfactual_separates_simple_efficiency_from_complexity(self) -> None:
@@ -108,7 +113,7 @@ class Protocol515LanguageProfileTests(unittest.TestCase):
         versioning = read("source/shared/references/protocol-versioning-and-compatibility.md").lower()
         root_readme = read("README.md").lower()
         self.assertIn("protocol 5.15 is a backward-compatible", versioning)
-        self.assertIn("active older workplans do not automatically adopt protocol 5.16 or any later release", versioning)
+        self.assertIn("active older workplans may continue under their declared version", versioning)
         self.assertIn("may continue under their declared version", versioning)
         self.assertIn("repository-local delegated d4 validation machinery", root_readme)
         self.assertIn("protocol_version: 5.14.0", read("workplans/archive/PROTOCOL-5.15-LANGUAGE-PROFILES-CPP-PERFORMANCE.md"))

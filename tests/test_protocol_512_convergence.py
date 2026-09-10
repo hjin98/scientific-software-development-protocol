@@ -27,14 +27,14 @@ class ConvergenceDurableSemanticsTests(unittest.TestCase):
     def test_recurrence_changes_reasoning_unit_without_freezing_mechanism(self) -> None:
         self.assertIn("material sibling recurrence", self.convergence)
         self.assertIn("shared owner/mechanism", self.convergence)
-        self.assertIn("does not answer whether the current realization should survive", self.convergence)
+        self.assertIn("does not answer whether the current concretization should survive", self.convergence)
         self.assertIn("recurrence is evidence about the shared owner/mechanism", self.architecture)
 
     def test_complexity_evidence_triggers_simplification_before_addition(self) -> None:
         self.assertIn("structural complexity accumulation", self.convergence)
-        self.assertIn("re-derive and simplify the delegated realization", self.convergence)
+        self.assertIn("re-derive and simplify the delegated concretization", self.convergence)
         self.assertIn("mandatory before another additive durable repair", self.convergence)
-        self.assertIn("active simplification/re-derivation of delegated realization is required", self.workflow)
+        self.assertIn("active simplification/re-derivation of delegated concretization is required", self.workflow)
 
     def test_census_is_for_real_completeness_or_safe_simplification(self) -> None:
         self.assertIn("governing parent/external correctness claim is finite/exhaustive", self.convergence)
@@ -59,7 +59,7 @@ class ConvergenceDurableSemanticsTests(unittest.TestCase):
             self.assertNotIn("tier-2", text)
             self.assertNotIn("tier 1", text)
             self.assertNotIn("product/frozen", text)
-        self.assertIn("delegated realization", self.convergence)
+        self.assertIn("delegated concretization", self.convergence)
         self.assertIn("accepted-current domain authority", self.workflow)
 
 

@@ -1,31 +1,39 @@
-# Abstraction, Realization, Authority, and Challenge
+# Abstraction, Concretization, Authority, and Challenge
 
-Protocol 6 governs scientific-software development through one recursive relation:
+Protocol 6.1 governs scientific-software development through one recursive relation:
 
 ```text
-ABSTRACTION  --design / constrain-->  REALIZATION
-ABSTRACTION  <--verify / reconstruct-- REALIZATION
+ABSTRACTION  --design / constrain-->  CONCRETIZATION
+ABSTRACTION  <--verify / reconstruct-- CONCRETIZATION
 ```
 
-An abstraction is an intentionally incomplete but normative semantic contract. It states the material invariants, required outcomes, assumptions, validity conditions, observables, bounds, and governed relations that every admissible realization must preserve. A realization is the lower-level scientific, numerical, architectural, or implementation choice that satisfies those semantics.
+The historical filename `abstraction-and-realization.md` is retained as an opaque Protocol 6.0 compatibility path. In current Protocol 6.1 semantic prose, **concretization** names downstream scientific/software expression of an abstraction and **realization** is reserved for concrete evidence execution as defined in [Evidence, evolution, and semantic dependencies](evidence-evolution-and-dependencies.md).
+
+## Background and terminology
+
+An **abstraction** is an intentionally incomplete but normative semantic contract. It states the material invariants, required outcomes, assumptions, validity conditions, observables, bounds, and governed relations that every admissible concretization must preserve.
+
+A **concretization** is a lower-level scientific, numerical, architectural, specification, or implementation choice that satisfies applicable parent abstractions and governed side constraints. An interior D1-D4 artifact may be a concretization of its parent while serving as an abstraction for its descendants.
+
+The **Scientific Software Development Protocol (SSDP)** uses four semantic domains: D1 scientific/mathematical formulation, D2 algorithm/numerical method, D3 software architecture, and D4 specification/implementation.
 
 ## Feasibility before optimization
 
-For a realization `R` constrained by applicable upstream abstractions `A1 ... An` and domain-local governed constraints `C`:
+For a concretization `K` constrained by applicable upstream abstractions `A1 ... An` and domain-local governed constraints `C`:
 
 ```text
-semantics(R) |= I(A1) AND ... AND I(An) AND C
+semantics(K) |= I(A1) AND ... AND I(An) AND C
 ```
 
-Fidelity is a feasibility condition, not a weighted objective. Among admissible realizations prefer, in order:
+Fidelity is a feasibility condition, not a weighted objective. Among admissible concretizations prefer, in order:
 
 ```text
 domain engineering fitness
-> minimum justified realization complexity
+> minimum justified concretization complexity
 > development economy
 ```
 
-This is a bounded engineering search rule, not a demand for exhaustive global optimization. Stop when further search has lower expected engineering value than proceeding with the best justified admissible realization.
+This is a bounded engineering search rule, not a demand for exhaustive global optimization. Stop when further search has lower expected engineering value than proceeding with the best justified admissible concretization.
 
 ## Authority source is orthogonal to abstraction level
 
@@ -34,32 +42,32 @@ D1-D4 describe semantic level. They do not determine where authority originated.
 ```text
 safety / explicit stakeholder and project authority / governed external contracts
     -> accepted current domain abstractions and ratified decisions
-    -> repository/runtime evidence about actual realization state
-    -> delegated realization discretion
+    -> repository/runtime evidence about actual concretization state
+    -> delegated concretization discretion
 ```
 
 A security, reliability, performance, compatibility, hardware, regulatory, or public-contract constraint may enter directly at D2, D3, or D4. Do not force every external requirement through D1 merely to make the hierarchy linear.
 
-Each material claim has one current normative semantic owner, but a realization may be constrained by many applicable authorities simultaneously. If applicable authorities conflict materially, do not silently choose one; surface the conflict for adjudication.
+Each material claim has one current normative semantic owner, but a concretization may be constrained by many applicable authorities simultaneously. If applicable authorities conflict materially, do not silently choose one; surface the conflict for adjudication.
 
 ## Four semantic domains
 
 The scientific-software specialization is:
 
 - **D1 — Scientific & Mathematical Formulation:** the scientific question, observables/estimands, governing model/equations, assumptions, validity regime, interpretation, and external adequacy semantics. Owned by `scientific-formulation`.
-- **D2 — Algorithm & Numerical Methods:** numerical/discrete/stochastic realization, approximation/error/convergence/conditioning/precision semantics, algorithmic guarantees, and numerical uncertainty. Owned by `numerical-algorithm-design`.
+- **D2 — Algorithm & Numerical Methods:** numerical/discrete/stochastic concretization of D1, approximation/error/convergence/conditioning/precision semantics, algorithmic guarantees, and numerical uncertainty. Owned by `numerical-algorithm-design`.
 - **D3 — Software Architecture:** component ownership, data/control flow, interfaces, persistence/concurrency/resource/security/deployment architecture, and cycle-scoped architectural decisions. Owned by `software-design`.
-- **D4 — Specification & Implementation:** accepted concrete software contract plus code/executable behavior, tests, packaging, and operational realization. Implemented by `software-implementation`; the accepted specification remains normative where one exists and code is evidence of actual realization.
+- **D4 — Specification & Implementation:** accepted concrete software contract plus code/executable behavior, tests, packaging, and operational concretization. Implemented by `software-implementation`; the accepted specification remains normative where one exists and code is evidence of actual behavior.
 
-The four levels form a layered DAG, not necessarily one linear chain. Shared algorithms, shared architecture, alternative realizations, and multi-parent constraints are valid. Current normative ownership must remain acyclic so authority can be resolved independently.
+The four levels form a layered directed acyclic graph (DAG), not necessarily one linear chain. Shared algorithms, shared architecture, alternative concretizations, and multi-parent constraints are valid. Current normative ownership must remain acyclic so authority can be resolved independently.
 
-## Invariant versus delegated realization
+## Invariant versus delegated concretization
 
 At every boundary ask:
 
-> Is this property required by the abstraction or an applicable governed constraint, or is it merely one way the current realization satisfies them?
+> Is this property required by the abstraction or an applicable governed constraint, or is it merely one way the current concretization satisfies them?
 
-A lower-level detail does not acquire authority because it exists, is depended upon, is tested, is documented, survived review, appears in a previous workplan, or is convenient to verify. Promote a realization property into an abstraction only through explicit acceptance by that abstraction's owning authority and for a material semantic reason.
+A lower-level detail does not acquire authority because it exists, is depended upon, is tested, is documented, survived review, appears in a previous workplan, or is convenient to verify. Promote a concretization property into an abstraction only through explicit acceptance by that abstraction's owning authority and for a material semantic reason.
 
 When solution-created machinery causes its own intermediate problems, prefer removing, narrowing, altering, consolidating, re-deriving, or replacing that machinery before adding another durable repair. Never simplify by weakening a governing abstraction.
 
@@ -68,13 +76,13 @@ When solution-created machinery causes its own intermediate problems, prefer rem
 Design is normally one-to-many:
 
 ```text
-A -> {R | R satisfies A and applicable C}
+A -> {K | K satisfies A and applicable C}
 ```
 
 Verification therefore is not a mathematical inverse. It operates in the opposite semantic direction:
 
 ```text
-actual realization
+actual concretization
  -> reconstruct/project material semantics
  -> compare with every applicable parent and side constraint
  -> attempt to falsify conformity
@@ -82,10 +90,10 @@ actual realization
 
 Every material handoff asks two different questions:
 
-1. **Realization fidelity:** does the child realize its governing parents correctly?
-2. **Abstraction adequacy:** is the child abstraction strong and complete enough to preserve the material upstream meaning for the next realization?
+1. **Concretization fidelity:** does the child concretize its governing parents correctly?
+2. **Abstraction adequacy:** is the child abstraction strong and complete enough to preserve the material upstream meaning for the next concretization?
 
-A realization can perfectly satisfy a too-weak abstraction and still be wrong. Such abstraction inadequacy is an upstream design defect, not a successful handoff.
+A concretization can perfectly satisfy a too-weak abstraction and still be wrong. Such abstraction inadequacy is an upstream design defect, not a successful handoff.
 
 ## Current, proposed, challenged, stale, and historical authority
 
@@ -109,16 +117,18 @@ propose
  -> required human ratification
  -> accept new authority
  -> update canonical current owner
- -> mark only dependent descendants/evidence stale
- -> realize downward
+ -> mark only dependent descendants/evidence review-required or stale
+ -> concretize downward
  -> verify upward
 ```
 
 Do not mutate current normative documents speculatively and then treat the edit as authority merely because it exists in the repository.
 
-## Bounded dependency tracing and invalidation
+## Bounded dependency tracing, evidence, and invalidation
 
-Represent only material semantic dependencies needed for realization, impact analysis, invalidation, or verification. Section anchors, document links, workplan mappings, and profile metadata are normally sufficient; Protocol 6 does not require a universal claim graph or database.
+Represent only material semantic dependencies needed for concretization, impact analysis, invalidation, or verification. Section anchors, document links, workplan mappings, profile metadata, and bounded Markdown dependency views are normally sufficient. Protocol 6.1 does not require a universal claim graph or database.
+
+When a dependency view is partial, absence of an edge does not prove independence. See [Evidence, evolution, and semantic dependencies](evidence-evolution-and-dependencies.md) for typed relationship direction, evidence applicability, stale-evidence semantics, and manual impact closure.
 
 Accepted upstream change invalidates only descendants/evidence whose claim could materially change. Preserve unaffected siblings and still-valid evidence. Reopen the earliest/highest materially affected abstraction, not every higher domain and not merely the lowest file where the contradiction became visible.
 
@@ -152,13 +162,13 @@ Uncertainty is layer-aware. D1 owns model/data/parameter/assumption/model-discre
 
 ## Mandatory bounded Challenge Pass
 
-Every material review or verification/acceptance boundary includes a bounded adversarial Challenge Pass before normal closure. Ask whether governing authority is internally consistent, sufficiently unambiguous, jointly realizable under all constraints, logically/mathematically coherent, adequate for its problem, complete enough to preserve upstream semantics, compatible with simultaneous authorities, and free from a known material counterexample.
+Every material review or verification/acceptance boundary includes a bounded adversarial Challenge Pass before normal closure. Ask whether governing authority is internally consistent, sufficiently unambiguous, jointly concretizable under all constraints, logically/mathematically coherent, adequate for its problem, complete enough to preserve upstream semantics, compatible with simultaneous authorities, and free from a known material counterexample.
 
 For tiny low-risk work this may be implicit and brief. It is not a mandatory standalone stage or checklist.
 
 Raise a **Serious Challenge** only for a material potential defect in accepted authority, such as:
 
-- unrealizable or contradictory invariants;
+- unconcretizable or contradictory invariants;
 - material ambiguity that admits incompatible semantics;
 - logical/mathematical fallacy or counterexample;
 - scientific/model contradiction;
@@ -167,7 +177,7 @@ Raise a **Serious Challenge** only for a material potential defect in accepted a
 - a major conceptual decomposition that solves the wrong problem;
 - a requirement to counterfeit closure by hiding or weakening contradictory evidence.
 
-Ordinary realization nonconformance under a coherent parent remains an ordinary blocker.
+Ordinary concretization nonconformance under a coherent parent remains an ordinary blocker.
 
 An active Serious Challenge must be prominent before ordinary blockers or Pass/No-Pass language, using an equivalent of:
 
@@ -181,7 +191,7 @@ or, when redesign is implicated:
 SERIOUS CHALLENGE — CONSIDER REDESIGN / UPSTREAM AUTHORITY REOPEN
 ```
 
-State the challenged authority/scope, concrete contradiction, evidence and assumptions, consequence if correct, suggested resolution direction, and what evidence would resolve or falsify the challenge. Preserve the accepted authority as the challenged baseline; do not silently rewrite it to fit downstream realization.
+State the challenged authority/scope, concrete contradiction, evidence and assumptions, consequence if correct, suggested resolution direction, and what evidence would resolve or falsify the challenge. Preserve the accepted authority as the challenged baseline; do not silently rewrite it to fit downstream concretization.
 
 ## Human adjudication and truth
 
@@ -191,7 +201,7 @@ Consequential scientific or mathematically material decisions require the design
 
 Routine delegated derivation, implementation, refactoring, bounded numerical checks, and literature gathering remain autonomous unless their result crosses such a decision boundary.
 
-A human may accept, reject with reason, revise/clarify authority, request discriminating evidence, or—where safety/project rules allow—issue an explicit visible risk override. A risk override authorizes bounded continuation but does not resolve the truth claim and may not be used to release Protocol 6 itself while a governing Serious Challenge remains unresolved.
+A human may accept, reject with reason, revise/clarify authority, request discriminating evidence, or—where safety/project rules allow—issue an explicit visible risk override. A risk override authorizes bounded continuation but does not resolve the truth claim and may not be used to release Protocol 6.1 itself while a governing Serious Challenge remains unresolved.
 
 Every materially dependent descendant produced under that override remains risk-accepted/provisional with respect to the challenged claim. Unaffected siblings may close normally; dependent results must preserve the marker and may not be represented as ordinary accepted-current closure or an unqualified downstream Pass.
 
@@ -200,13 +210,13 @@ When a serious challenge is rejected with satisfactory reasoning, genuinely reco
 ## Final invariant
 
 ```text
-An abstraction states the semantic invariants that must survive realization.
-A realization must satisfy every applicable upstream abstraction and governed external constraint.
+An abstraction states the semantic invariants that must survive concretization.
+A concretization must satisfy every applicable upstream abstraction and governed external constraint.
 Within that feasible set, optimize domain fitness, then minimum justified complexity, then development economy.
-A realization remains delegated except where an owning authority explicitly accepts a property into the abstraction.
-Verification reconstructs realization semantics and attempts to falsify conformity; it is opposite-direction reasoning, not a bijective inverse function.
-A realization may challenge upstream authority through evidence but may never silently redefine it.
-Accepted upstream change invalidates only dependent downstream authority/evidence.
+A concretization remains delegated except where an owning authority explicitly accepts a property into the abstraction.
+Verification reconstructs concretization semantics and attempts to falsify conformity; it is opposite-direction reasoning, not a bijective inverse function.
+Evidence realizations may challenge upstream authority through observations and assessments but may never silently redefine it.
+Accepted upstream change invalidates only materially dependent downstream authority/evidence.
 Current normative documents change only through accepted authority mutation, not speculative edits.
 Accepted authority is governable but not infallible.
 ```

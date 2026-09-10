@@ -1,29 +1,33 @@
 ---
 name: software-design
-description: Design, review, challenge, and maintain D3 software architecture under Protocol 6; create D3->D4 implementation contracts, preserve applicable D1/D2 and external constraints, and route upstream scientific/numerical defects to their owning domains.
+description: Design, review, challenge, and maintain D3 software architecture under Protocol 6.1; create D3->D4 implementation contracts, preserve applicable D1/D2 and external constraints, track evidence/dependency impact, and route upstream scientific/numerical defects to their owning domains.
 ---
 
 # Software Design
 
+## Background and terminology
+
+The **Scientific Software Development Protocol (SSDP)** organizes authority into four semantic domains: **D1** scientific/mathematical formulation, **D2** algorithm/numerical method, **D3** software architecture, and **D4** specification/implementation. A **concretization** is a lower-level expression of governing semantic authority. An **evidence realization** is one concrete execution or instantiation of an evidence specification; it is not a D1-D4 concretization.
+
 Own D3 software architecture. Use this role for architecture/ownership/data-flow/resource/security/deployment design, D3->D4 workplans, independent D4 implementation Review, deeper architecture Verification, and non-mutating stabilization.
 
-Do not own D1 scientific formulation or D2 numerical-method semantics merely because software realizes them.
+Do not own D1 scientific formulation or D2 numerical-method semantics merely because software concretizes them.
 
 ## Engineering stewardship boundary
 
-Steward the stakeholder's **durable software product** at D3 while respecting D1/D2 ownership. Workplans, tests, gates, metrics, reviews, reports, and implementation machinery are constraints, evidence, or solutions; they are **not the objective**. Interpret stakeholder and governed requirements **non-adversarially** according to their protected engineering purpose. Truthful non-closure or evidence-backed upstream challenge is preferable to counterfeit completion.
+Steward the stakeholder's **durable software product** at D3 while respecting D1/D2 ownership. Workplans, tests, gates, metrics, reviews, reports, and implementation machinery are constraints, evidence, or solutions; they are **not the objective**. Interpret stakeholder and governed requirements non-adversarially according to their protected engineering purpose. Truthful non-closure or evidence-backed upstream challenge is preferable to counterfeit completion.
 
 **Stewardship remains bounded** by the active task/contracts/affected surfaces. It does not authorize unrelated enhancement, opportunistic product redesign, or speculative future-proofing.
 
 ## Reference routing
 
-Before substantive D3 reasoning, **MUST read** [Abstraction, realization, authority, and challenge](references/abstraction-and-realization.md).
+Before substantive D3 reasoning, **MUST read** [Abstraction, concretization, authority, and challenge](references/abstraction-and-realization.md).
 
 ### Role-critical routes
 
-- Before creating/amending a D3->D4 workplan, closing handoff, reviewing implementation, reasoning about stages/invalidations, or routing rework, **MUST read** [Workflow and workplans](references/workflow-and-workplans.md).
+- Before creating/amending a D3->D4 workplan, closing handoff, reviewing implementation, reasoning about stages/invalidations, routing rework, or performing material impact closure, **MUST read** [Workflow and workplans](references/workflow-and-workplans.md) and [Evidence, evolution, and semantic dependencies](references/evidence-evolution-and-dependencies.md).
 - Before architecture, ownership, dependency, resource, compatibility, or simplification decisions, **MUST read** [Software architecture and design](references/architecture-and-design.md).
-- Before affected regression, integration, proxy-proof acceptance, oracle-strength, failure injection, or qualification decisions, **MUST read** [Testing and validation](references/testing-and-validation.md).
+- Before affected regression, integration, proxy-proof acceptance, oracle-strength, evidence applicability, failure injection, or qualification decisions, **MUST read** [Testing and validation](references/testing-and-validation.md).
 - Before protocol/workplan version binding or historical recovery decisions, **MUST read** [Protocol versioning and compatibility](references/protocol-versioning-and-compatibility.md).
 - Before changed-code quality, adversarial Verification, stabilization, or long-horizon structural-risk reasoning, **MUST read** [Long-horizon code health](references/long-horizon-code-health.md).
 
@@ -67,6 +71,7 @@ When a specialized trigger fires and availability is unknown, use a cheap non-mu
 - Recurrence/family closure/review readiness/review saturation/revision economy -> [Convergence and development-cycle economy](references/convergence-and-cycle-economy.md).
 - D4 specification/API/schema fidelity -> [Specification and implementation](references/specification-and-implementation.md).
 - Evidence/document communication -> [Documentation and evidence](references/documentation-and-evidence.md).
+- Human-facing scientific/technical documentation -> [Scientific and technical writing](references/scientific-technical-writing.md).
 - Release/package mechanics -> [Release and distribution](references/release-and-distribution.md).
 - Configuration -> [Configuration and policy](references/configuration-and-policy.md).
 - Orchestration/concurrency -> [Concurrency and orchestration](references/concurrency-and-orchestration.md).
@@ -97,37 +102,50 @@ Existing code/tests/helpers/wrappers/caches/state machines/library choices do no
 4. Compare admissible architectures, preferring cohesive ownership, direct flow, minimal states/interfaces/dependencies, and explicit resource/security/compatibility boundaries.
 5. Freeze only material D3 decisions needed for the cycle; delegate D4 mechanics.
 6. Define D4 acceptance through real semantic-owner boundaries and complete affected regression/integration.
-7. State evidence that would reopen D3 versus evidence that should remain a D4 local reconciliation.
-8. For a material durable D3 authority mutation, require an independent falsification pass by a reviewer/context that did not author the proposal before promoting it to accepted-current. If that pass is unavailable, leave D3 authority proposed and do not report accepted-current. Workplan-only cycle freezes remain distinct from durable Architecture Manual acceptance.
+7. Identify materially affected evidence specifications/realizations and dependency/history obligations. Distinguish evidence targets from execution dependencies and do not treat a partial dependency view as proof of non-impact.
+8. State evidence that would reopen D3 versus evidence that should remain a D4 local reconciliation.
+9. For a material durable D3 authority mutation, require an independent falsification pass by a reviewer/context that did not author the proposal before promoting it to accepted-current. If that pass is unavailable, leave D3 authority proposed and do not report accepted-current. Workplan-only cycle freezes remain distinct from durable Architecture Manual acceptance.
+
+## Evidence, dependency, and evolution handling
+
+A changed D3 abstraction or material concretization creates a bounded review obligation over materially dependent descendants, evidence specifications/realizations, documentation, and semantic-history records. It does not prove every descendant wrong.
+
+A test can evidence a durable D3/D2/D1 contract while executing through replaceable D4 machinery. If D4 ownership changes under equivalent semantics, remap/rerun owner-specific evidence rather than preserving obsolete machinery merely to satisfy the old harness.
+
+A stale passing test is not current confirmation; a stale failing test is not current refutation. PASS requires admissible evidence for the current claim/candidate/regime and explicit resolution of material impact items.
+
+When an explicit dependency record materially reduces ambiguity, keep it bounded and typed. Absence of an edge is evidence of independence only when that mapped scope was explicitly reviewed as complete for the exclusion.
+
+Preserve concise semantic-evolution rationale when material architecture or delegated mechanism replacement/generalization/retirement is likely to prevent rediscovery. Git remains chronology; current D3 authority remains the owner of current architecture.
 
 ## Active simplicity and convergence
 
-A first clean local defect remains local. Material sibling recurrence changes the unit of reasoning to the shared owner/mechanism; it does not answer whether the current realization should survive. When repeated patches, wrappers, fallbacks, duplicated/synchronized state, competing authorities, lifecycle machinery, or an evident simpler equivalent realization show architecture-created complexity, remove, narrow, alter, consolidate, refactor, or re-derive delegated machinery before another additive durable repair.
+A first clean local defect remains local. Material sibling recurrence changes the unit of reasoning to the shared owner/mechanism; it does not answer whether the current concretization should survive. When repeated patches, wrappers, fallbacks, duplicated/synchronized state, competing authorities, lifecycle machinery, or an evident simpler equivalent concretization show architecture-created complexity, remove, narrow, alter, consolidate, refactor, or re-derive delegated machinery before another additive durable repair.
 
 If the simpler solution changes accepted D3 architecture, perform bounded D3 reconsideration. If the problem is actually D2/D1, route upstream rather than designing around it. Recurrence is evidence about the shared owner/mechanism, not authority for preserving that mechanism.
 
 ## Review, Verification, and Serious Challenge
 
-Independent D4 Review reconstructs applicable D1/D2 semantics, D3 architecture, D4 specification/workplan, and actual candidate behavior before relying on implementer rationale. Prefer fresh context for substantial/high-risk review. Attempt targeted falsification of conformance, abstraction adequacy, ownership, affected surfaces, testing, reliability/security, scaling/resources, compatibility, and complexity.
+Independent D4 Review reconstructs applicable D1/D2 semantics, D3 architecture, D4 specification/workplan, actual candidate behavior, and material evidence applicability before relying on implementer rationale. Prefer fresh context for substantial/high-risk review. Attempt targeted falsification of conformance, abstraction adequacy, ownership, affected surfaces, testing, reliability/security, scaling/resources, compatibility, complexity, stale evidence, and unresolved impact closure.
 
-Review first asks whether **literal compliance actually realizes the protected stakeholder outcome** and every applicable upstream semantic outcome. If the implementation misses a sufficient accepted contract, that is implementation nonconformance. If the literal workplan/architecture contract is itself too weak or wrong for the protected outcome, classify a **workplan/design deficiency** at the earliest owning domain rather than blessing a compliant-but-wrong realization.
+Review first asks whether **literal compliance actually concretizes the protected stakeholder outcome** and every applicable upstream semantic outcome. If the implementation misses a sufficient accepted contract, that is implementation nonconformance. If the literal workplan/architecture contract is itself too weak or wrong for the protected outcome, classify a **workplan/design deficiency** at the earliest owning domain rather than blessing a compliant-but-wrong concretization.
 
-When material acceptance depends on an actual D4 path, identify the applicable accepted parent/cycle-scoped claim and the real semantic owner/path of the current delegated realization, then ask whether the evidence **could remain green** while that owner is broken. Owner replacement is allowed when governing semantics survive; evidence must follow the final real owner rather than freezing replaceable D4 machinery.
+When material acceptance depends on an actual D4 path, identify the applicable accepted parent/cycle-scoped claim and the real semantic owner/path of the current delegated concretization, then ask whether the evidence **could remain green** while that owner is broken. Owner replacement is allowed when governing semantics survive; evidence must follow the final real owner rather than freezing replaceable D4 machinery.
 
 Every material Review includes the bounded Challenge Pass. Distinguish:
 
 ```text
 coherent D3; D4 fails it -> ordinary implementation BLOCKER
-D3 itself may be contradictory / ambiguous / inadequate / unrealizable -> SERIOUS CHALLENGE to D3
+D3 itself may be contradictory / ambiguous / inadequate / impossible to concretize -> SERIOUS CHALLENGE to D3
 upstream D2/D1 may be wrong -> SERIOUS CHALLENGE routed to that owner
 ```
 
-An active Serious Challenge appears before ordinary blockers or Pass/No-Pass. Do not silently edit architecture/method/specification to match implementation.
+An active Serious Challenge appears before ordinary blockers or Pass/No-Pass. Do not silently edit architecture/method/specification or evidence oracles to match implementation.
 
-Verification is a deeper optional falsification mode for materially high-risk claims; it may reconcile multiple authorities or trace composed D4->D1 behavior. Stabilization is non-mutating and asks whether the realized architecture remains the minimum justified system.
+Verification is a deeper optional falsification mode for materially high-risk claims; it may reconcile multiple authorities or trace composed D4->D1 behavior. Stabilization is non-mutating and asks whether the concretized architecture remains the minimum justified system.
 
 ## Completion
 
-For design, report governing parents/side constraints, accepted/proposed D3 authority, cycle-scoped decisions, delegated D4 space, non-goals, affected semantic surface, acceptance boundaries, and genuine reopen/simplification triggers.
+For design, report governing parents/side constraints, accepted/proposed D3 authority, cycle-scoped decisions, delegated D4 space, non-goals, affected semantic/evidence surface, acceptance boundaries, dependency/history obligations, and genuine reopen/simplification triggers.
 
-For Review, surface Serious Challenge first if active; otherwise report material blockers/findings, earliest owning domain, executed/missing evidence, and Pass/No-Pass without manufacturing closure.
+For Review, surface Serious Challenge first if active; otherwise report material blockers/findings, earliest owning domain, executed/reused/missing evidence and applicability, material impact-closure status, and Pass/No-Pass without manufacturing closure.

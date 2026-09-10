@@ -1,5 +1,9 @@
 # Protocol Versioning, Historical Recovery, and Compatibility
 
+## Background and terminology
+
+The **Scientific Software Development Protocol (SSDP)** binds every workplan and orchestration profile to an explicit protocol version. Protocol 6.1 uses **concretization** for downstream D1-D4 semantic expression; historical Protocol 6.0 uses **realization** for the same relation and remains correct within its release-pinned context.
+
 ## Versioning
 
 `source/PROTOCOL_VERSION` identifies the current canonical protocol contract.
@@ -10,11 +14,22 @@
 
 Protocol 6.0 is a major revision because scientific/mathematical formulation and numerical/algorithm design become first-class authority-bearing domains and the governing doctrine changes from a software-centric two-role hierarchy to recursive abstraction–realization across D1-D4.
 
-Protocol 6 preserves the strongest Protocol 5 engineering guarantees by refactoring them into the new hierarchy: minimum justified complexity, adaptive realization, snapshot-complete handoff, proxy-proof acceptance, affected regression/integration, evidence reuse/invalidation, active simplification, convergence-aware reasoning, language/tool routing, long-horizon quality, bounded urgent mitigation, compact resumable working state, and version-bound workplans.
+Protocol 6.1 is a backward-compatible minor revision. It preserves the Protocol 6 control architecture while:
+
+- resolving current semantic-descent terminology to abstraction/concretization and reserving realization for evidence execution;
+- making evidence specification, evidence realization, observation, assessment, applicability, stale-evidence handling, and evidentiary common-mode risk explicit;
+- introducing bounded Markdown semantic-dependency and semantic-evolution-history conventions without requiring a machine graph/database;
+- requiring manual impact closure for material authority/concretization changes;
+- strengthening human-facing background/context and first-use abbreviation standards;
+- preserving a distinct frozen Protocol 6.0 profile while introducing `ssdp-protocol-6.1` as the current profile after qualification.
+
+Protocol 6.1 is intended to be the final document-controlled/semi-automated release before the Protocol 7 mandatory deterministic orchestrator control-plane transition.
+
+Protocol 6 preserves the strongest Protocol 5 engineering guarantees by refactoring them into the new hierarchy: minimum justified complexity, adaptive concretization, snapshot-complete handoff, proxy-proof acceptance, affected regression/integration, evidence reuse/invalidation, active simplification, convergence-aware reasoning, language/tool routing, long-horizon quality, bounded urgent mitigation, compact resumable working state, and version-bound workplans.
 
 ## Protocol 6 generalization and Protocol 5 specialization
 
-Protocol 6 is the general theory. Protocol 5 is a narrower software-local specialization recoverable inside it. Restricting active scope to software architecture and executable realization recovers the former `software-design -> software-implementation` loop as the D3 -> D4 specialization of recursive abstraction-realization.
+Protocol 6 is the general theory. Protocol 5 is a narrower software-local specialization recoverable inside it. Restricting active scope to software architecture and executable concretization recovers the former `software-design -> software-implementation` loop as the D3 -> D4 specialization of recursive abstraction/concretization.
 
 The concise historical mapping is:
 
@@ -24,11 +39,11 @@ Protocol 5 Tier 1A
        + directly governed external/domain constraints
 
 Protocol 5 Tier 1B / Frozen high-level architecture
-    -> cycle-scoped child-realization decisions
+    -> cycle-scoped child-concretization decisions
        and, when explicitly accepted as durable, current D3 architecture
 
 Protocol 5 Tier 2
-    -> delegated realization beneath the governing abstraction
+    -> delegated concretization beneath the governing abstraction
 
 Protocol 5 Tier 3
     -> development economy after fidelity and minimum justified complexity
@@ -36,7 +51,7 @@ Protocol 5 Tier 3
 
 This mapping preserves capability, not vocabulary. Every material Protocol 5 safeguard must remain recoverable as Protocol 6 behavior unless deliberately replaced by a stronger/general rule. Compression that deletes a capability is a defect; compression that expresses the same behavior once in broader Protocol 6 language is preferred.
 
-Current Protocol 6 operational roles, routing references, templates, and current guidance should therefore speak Protocol 6 semantics directly. Legacy control-plane vocabulary belongs here, in immutable/version-pinned 5.x artifacts, and in explicitly historical qualification—not as a second current control plane. Current regression tests should protect semantic capability rather than require obsolete words merely for recognizability.
+Current Protocol 6.1 operational roles, routing references, templates, and guidance should speak Protocol 6.1 semantics directly. Legacy Protocol 5/6.0 vocabulary belongs in immutable/version-pinned artifacts, compatibility mappings, and explicitly historical qualification—not as a second current vocabulary. Current regression tests should protect semantic capability rather than require obsolete words merely for recognizability.
 
 ## Historical Protocol 5 lineage
 
@@ -54,11 +69,13 @@ Earlier completed Protocol 5 work remains valid under the version that governed 
 
 Every workplan that inherits protocol-wide behavior binds to its declared `protocol_version`.
 
-A workplan governed by version `X` continues to mean Protocol `X` after newer releases. **Do not reinterpret active or completed 5.x work using Protocol 6** merely because the installed/latest skill changed.
+A workplan governed by version `X` continues to mean Protocol `X` after newer releases. Do not reinterpret active or completed 5.x or 6.0 work using Protocol 6.1 merely because the installed/latest skill changed.
 
-Historical Protocol 5 wording remains authoritative for those workplans. In particular, **active older workplans do not automatically adopt Protocol 5.16 or any later release**. They **may continue under their declared version** or explicitly adopt a newer compatible version after reconciling changed obligations. A 5.x -> 6.0 adoption is a major semantic migration and is never silent.
+Historical wording remains authoritative for work under the version that introduced it. Active older workplans may continue under their declared version or explicitly adopt a newer compatible version only after reconciling changed obligations.
 
-A plan may explicitly adopt a newer compatible contract only after reconciling changed obligations. Previously executed evidence remains reusable when no changed protocol obligation or affected product/authority dimension can plausibly alter its claim.
+A 5.x -> 6.x adoption is a major semantic migration and is never silent. A 6.0 -> 6.1 adoption is minor/backward-compatible but still must preserve version binding when the workplan remains declared as 6.0.
+
+Previously executed evidence remains reusable when no changed protocol obligation, governed claim, concretization, evidence specification/oracle, candidate, or material environment dimension can plausibly alter its applicability.
 
 ## Immutable Protocol 5.16 recovery
 
@@ -70,24 +87,75 @@ Historical Protocol 5.16 authority is pinned to immutable repository commit:
 
 That commit is the canonical source snapshot immediately preceding the SSDP 6 transition workplan. Historical resolution must use this immutable identity (or another explicitly equivalent release/tag mapping), never `main`/latest.
 
-The orchestrator's packaged `sdp-protocol-5.16` profile remains a reproducible version-bound snapshot and must continue to resolve 5.16 workplans under profile schema v1 after Protocol 6 release.
+The orchestrator's packaged `sdp-protocol-5.16` profile remains a reproducible version-bound snapshot and must continue to resolve 5.16 workplans under profile schema v1 after Protocol 6 releases.
 
-## Protocol 6 orchestration profile
+## Immutable Protocol 6.0 recovery
 
-Protocol 6 uses a separately versioned profile identity/schema. Its domain-aware routing is represented under profile schema v2 rather than overloading profile schema v1. Core supports both schemas and selects by declared protocol/profile identity rather than by a global current constant.
+The accepted pre-6.1 Protocol 6.0 source/profile baseline is pinned to:
 
-Historical 5.16 source/profile behavior must remain testable independently of the Protocol 6 current profile.
+```text
+6.0.0 -> 21d5188f5bd9a0270d7a2ebf93d41a6b7842ccd2
+```
+
+This identity represents the canonical Protocol 6.0 source and `ssdp-protocol-6.0` behavior immediately before Protocol 6.1 implementation began.
+
+Historical/declared 6.0 resolution must continue to use immutable 6.0 source/profile semantics after 6.1 becomes current. Do not mutate packaged `ssdp-protocol-6.0` resources into 6.1 vocabulary or routing.
+
+## Protocol 6 orchestration profiles
+
+Protocol 6 uses separately versioned profile identities under profile schema v2 rather than overloading Protocol 5 schema v1.
+
+- `sdp-protocol-5.16` -> Protocol 5.16, profile schema v1, frozen compatibility;
+- `ssdp-protocol-6.0` -> Protocol 6.0, profile schema v2, frozen compatibility after 6.1 acceptance;
+- `ssdp-protocol-6.1` -> Protocol 6.1, profile schema v2, current/default after 6.1 qualification.
+
+Profile schema v2 is retained for 6.1 because the minor revision changes doctrine/prose/version identity rather than introducing a new machine-control field. A future schema bump requires an actual profile-contract change.
+
+Core selects by declared protocol/profile identity rather than by one global current constant. Historical 5.16 and 6.0 behavior must remain testable independently of the current 6.1 profile.
+
+## Public-source resolution
+
+Current Protocol 6.1 local-first/public-fallback resolution is explicitly version-bound:
+
+```text
+repository -> https://github.com/hjin98/scientific-software-development-protocol
+6.1.0 public-source bootstrap -> 47e9155632c44493644b0b02fa1fa625703cf480
+```
+
+A current 6.1 resolver must use both the canonical repository identity and the immutable compatible bootstrap commit above. The repository default branch is not a protocol-version oracle and may remain on 6.0 during release/cutover. Do not guess that `6.1.0` is itself a Git ref and do not silently substitute default-branch semantics. Historical 5.16/6.0 work continues to use its own immutable mappings.
+
+The bootstrap commit contains the repaired current 6.1 roles/references/package-validation/documentation source needed for public fallback. It remains distinct from the accepted second-reopen recovery snapshot `802e75af261efb4f70d71284d860613a2197b639`, which also contains the final semantic candidate and its fresh qualification/Review evidence.
+
+Historical release-pinned prompts/profiles retain their historical bytes and URLs. Do not rewrite a frozen profile merely because the repository identity or current documentation changed later.
 
 ## Evidence invalidation across version changes
 
-Reuse evidence until a changed protocol obligation or product/authority dimension can plausibly alter the claim. Version adoption does not automatically invalidate unrelated executable evidence.
+Reuse evidence until a changed protocol obligation or governed authority/concretization/evidence dimension can plausibly alter the claim or interpretation. Version adoption does not automatically invalidate unrelated executable evidence.
 
-Final assembled acceptance must still reflect the candidate after all material executable edits.
+A stale passing result cannot close a current 6.1 claim; a stale failing result cannot refute it. Review/remap/rerun the applicable evidence specification as required.
+
+Final assembled acceptance must still reflect the candidate after all material executable edits and material authority/evidence impacts.
+
+## Protocol 6.1 recovery and Protocol 7 rollback boundary
+
+The second-reopened Protocol 6.1 semantic candidate `be7d05827f52a3029c294c38edf5ede1afb1f9b4` passed fresh 95/95 behavioral qualification and fresh independent D3 Review with no Serious Challenge and zero open blockers. The accepted replacement immutable recovery snapshot is:
+
+```text
+6.1.0 -> 802e75af261efb4f70d71284d860613a2197b639
+```
+
+That recovery commit contains the accepted semantic candidate through ancestry together with the candidate-bound 95-scenario qualification record and independent Review record needed to interpret the rollback state. The immutable public-source bootstrap remains `47e9155632c44493644b0b02fa1fa625703cf480`; it is the version-correct source fallback, not the release recovery identity.
+
+Git commits cannot self-name, so this current mapping is intentionally published after the immutable recovery target. The earlier Protocol 6.1 recovery snapshots `dec5ff2767e14fd1cda46e073757aa27f40e270c` and `0c90fda19bf6ed9cb0c4511beb3da80ace6584ed` remain immutable historical evidence but are superseded for current release/rollback authority.
+
+Protocol 7 fallback is version rollback to `802e75af261efb4f70d71284d860613a2197b639`, never simultaneous dual-current workflow authority.
 
 ## Candidate identity
 
-For a normal Git repository, candidate commit plus absence of unintended product-defining working-tree changes is usually sufficient source identity. Additional hashes/manifests are required only at real boundaries not represented by Git.
+For a normal Git repository, semantic candidate commit plus absence of unintended product-defining working-tree changes is usually sufficient source identity. Additional hashes/manifests are required only at real boundaries not represented by Git.
+
+If qualification results or workplan closeout necessarily create later commits, distinguish the **semantic candidate commit** from later evidence-bearing/lifecycle-only commits. A later semantic mutation invalidates/reopens the applicable qualification surface.
 
 ## Software/product compatibility
 
-Preserve API/data/runtime compatibility only where an actual supported contract requires it. Historical implementation machinery does not become a compatibility requirement through existence. Retain compatibility layers only for a supported version/migration window or when they remain the minimum justified realization.
+Preserve application-programming-interface (API), data, runtime, and profile compatibility only where an actual supported contract requires it. Historical implementation machinery does not become a compatibility requirement through existence. Retain compatibility layers only for a supported version/migration window or when they remain the minimum justified concretization.

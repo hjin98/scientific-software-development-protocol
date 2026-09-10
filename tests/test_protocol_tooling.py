@@ -112,7 +112,7 @@ class ProtocolToolingTests(unittest.TestCase):
 
             rewrite_zip(package, add_unlinked)
             errors = validate_packages.validate(dist)
-            self.assertTrue(any("not directly Markdown-linked" in error for error in errors), errors)
+            self.assertTrue(any("not reachable from SKILL.md" in error for error in errors), errors)
 
     def test_frontmatter_accepts_standard_optional_field(self) -> None:
         text = "---\nname: sample-skill\ndescription: Portable sample.\nlicense: MIT\nmetadata:\n  owner: test\n---\nbody\n"

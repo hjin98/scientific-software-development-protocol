@@ -6,6 +6,7 @@ from __future__ import annotations
 import argparse
 import json
 import re
+import urllib.parse
 import shutil
 import zipfile
 from pathlib import Path
@@ -16,136 +17,42 @@ ROLES = ROOT / "roles"
 SPECIALISTS = ROOT / "specialists"
 PROTOCOL_VERSION = (ROOT / "PROTOCOL_VERSION").read_text(encoding="utf-8").strip()
 
-CORE = [
-    "workflow-and-workplans.md",
-    "testing-and-validation.md",
-    "protocol-versioning-and-compatibility.md",
-]
-FOUNDATION = ["abstraction-and-realization.md"]
-ROLE_CONDITIONAL = [
-    "convergence-and-cycle-economy.md",
-    "long-horizon-code-health.md",
-]
-LANGUAGE_PROFILES = [
-    "language-profiles.md",
-    "python-engineering.md",
-    "cpp-engineering.md",
-]
-TOOL_METHODS = [
-    "tool-assisted-engineering.md",
-    "tool-serena.md",
-    "tool-semgrep.md",
-    "tool-hypothesis.md",
-    "tool-codeql.md",
-]
-CROSS_CUTTING = [
-    "configuration-and-policy.md",
-    "concurrency-and-orchestration.md",
-    "security-and-trust-boundaries.md",
-]
-ENGINEERING_FITNESS = [
-    "performance-and-parallelism.md",
-    "storage-and-io.md",
-    "scientific-software.md",
-]
-
 ROLE_SPECS = {
-    "scientific-formulation": {
-        "role": "d1-scientific-formulation",
-        "references": FOUNDATION + CORE + [
-            "scientific-formulation.md",
-            "scientific-software.md",
-            "scientific-technical-writing.md",
-            "documentation-and-evidence.md",
-        ],
-        "templates": [
-            "abstraction_realization_change_plan_template.md",
-            "scientific_method_paper_template.md",
-        ],
-    },
-    "numerical-algorithm-design": {
-        "role": "d2-numerical-algorithm-design",
-        "references": FOUNDATION + CORE + [
-            "numerical-algorithm-design.md",
-            "scientific-software.md",
-            "performance-and-parallelism.md",
-        ],
-        "templates": [
-            "abstraction_realization_change_plan_template.md",
-            "numerical_algorithmic_method_paper_template.md",
-        ],
-    },
-    "software-design": {
-        "role": "d3-software-design",
-        "references": FOUNDATION + CORE + ROLE_CONDITIONAL + LANGUAGE_PROFILES + [
-            "architecture-and-design.md",
-            "scientific-formulation.md",
-            "numerical-algorithm-design.md",
-            "documentation-and-evidence.md",
-            "specification-and-implementation.md",
-            "release-and-distribution.md",
-            "repository-intake.md",
-        ] + TOOL_METHODS + CROSS_CUTTING + ENGINEERING_FITNESS,
-        "templates": ["implementation_workplan_template.md"],
-    },
-    "software-implementation": {
-        "role": "d4-software-implementation",
-        "references": FOUNDATION + CORE + ROLE_CONDITIONAL + LANGUAGE_PROFILES + [
-            "architecture-and-design.md",
-            "scientific-formulation.md",
-            "numerical-algorithm-design.md",
-            "debugging-and-state-recovery.md",
-            "documentation-and-evidence.md",
-            "specification-and-implementation.md",
-            "release-and-distribution.md",
-            "repository-intake.md",
-            "git-and-version-control.md",
-        ] + TOOL_METHODS + CROSS_CUTTING + ENGINEERING_FITNESS,
-        "templates": [],
-    },
+    "scientific-formulation": {"role": "d1-scientific-formulation"},
+    "numerical-algorithm-design": {"role": "d2-numerical-algorithm-design"},
+    "software-design": {"role": "d3-software-design"},
+    "software-implementation": {"role": "d4-software-implementation"},
 }
 
 SPECIALIST_SPECS = {
-    "software-documentation": {
-        "specialty": "documentation",
-        "references": CORE + [
-            "architecture-and-design.md",
-            "documentation-and-evidence.md",
-            "documentation-maintenance.md",
-            "scientific-technical-writing.md",
-            "specification-and-implementation.md",
-            "release-and-distribution.md",
-            "security-and-trust-boundaries.md",
-        ] + ENGINEERING_FITNESS,
-        "templates": [],
-    },
-    "repository-hygiene": {
-        "specialty": "repository-hygiene",
-        "references": CORE + [
-            "git-and-version-control.md",
-            "documentation-and-evidence.md",
-            "release-and-distribution.md",
-            "repository-intake.md",
-            "security-and-trust-boundaries.md",
-            "storage-and-io.md",
-        ],
-        "templates": [],
-    },
-    "software-maintenance-audit": {
-        "specialty": "maintenance-audit",
-        "references": CORE + [
-            "long-horizon-code-health.md",
-            "architecture-and-design.md",
-            "git-and-version-control.md",
-            "repository-intake.md",
-            "tool-assisted-engineering.md",
-            "convergence-and-cycle-economy.md",
-            "documentation-and-evidence.md",
-            "scientific-software.md",
-        ],
-        "templates": [],
-    },
+    "software-documentation": {"specialty": "documentation"},
+    "repository-hygiene": {"specialty": "repository-hygiene"},
+    "software-maintenance-audit": {"specialty": "maintenance-audit"},
 }
+
+DIRECT_ROUTE_RE = re.compile(r"\]\((?P<kind>references|templates)/(?P<name>[A-Za-z0-9_.-]+\.md)\)")
+LOCAL_MARKDOWN_LINK_RE = re.compile(r"\[[^\]]+\]\(([^)]+)\)")
+URI_SCHEME_RE = re.compile(r"^[A-Za-z][A-Za-z0-9+.-]*:")
+
+
+def _direct_payload(root: Path, skill_name: str) -> tuple[list[str], list[str]]:
+    """Derive package payload directly from the skill's explicit Markdown routes."""
+    text = (root / skill_name / "SKILL.md").read_text(encoding="utf-8")
+    references: list[str] = []
+    templates: list[str] = []
+    for match in DIRECT_ROUTE_RE.finditer(text):
+        target = references if match.group("kind") == "references" else templates
+        name = match.group("name")
+        if name not in target:
+            target.append(name)
+    return references, templates
+
+
+for _name, _spec in ROLE_SPECS.items():
+    _spec["references"], _spec["templates"] = _direct_payload(ROLES, _name)
+for _name, _spec in SPECIALIST_SPECS.items():
+    _spec["references"], _spec["templates"] = _direct_payload(SPECIALISTS, _name)
+
 
 NAME_RE = re.compile(r"(?m)^name:\s*([a-z0-9]+(?:-[a-z0-9]+)*)\s*$")
 
@@ -158,6 +65,48 @@ def skill_root(skill_name: str, kind: str) -> Path:
     raise ValueError(f"unknown skill kind: {kind!r}")
 
 
+
+def _transitive_payload(spec: dict) -> list[tuple[str, Path]]:
+    'Return the finite local-Markdown closure of direct SKILL activation seeds.'
+    seeds = [
+        *[(f"references/{name}", SHARED / "references" / name) for name in spec["references"]],
+        *[(f"templates/{name}", SHARED / "templates" / name) for name in spec["templates"]],
+    ]
+    shared_root = SHARED.resolve()
+    found: dict[str, Path] = {}
+    queue = list(seeds)
+    while queue:
+        rel, src = queue.pop(0)
+        if rel in found:
+            continue
+        if not src.is_file():
+            raise SystemExit(f"missing package source: {src}")
+        found[rel] = src
+        text = src.read_text(encoding="utf-8")
+        for raw_target in LOCAL_MARKDOWN_LINK_RE.findall(text):
+            target = raw_target.strip()
+            if not target or target.startswith("#"):
+                continue
+            decoded = urllib.parse.unquote(target)
+            if URI_SCHEME_RE.match(decoded) or decoded.startswith("//"):
+                continue
+            path_part = decoded.split("#", 1)[0].split("?", 1)[0]
+            if not path_part or not path_part.lower().endswith(".md"):
+                continue
+            if decoded != target:
+                raise SystemExit(f"encoded local Markdown package route is not allowed: {src}: {target}")
+            resolved = (src.parent / path_part).resolve()
+            try:
+                shared_rel = resolved.relative_to(shared_root)
+            except ValueError as exc:
+                raise SystemExit(f"local Markdown package route escapes shared root: {src}: {target}") from exc
+            if not shared_rel.parts or shared_rel.parts[0] not in {"references", "templates"}:
+                raise SystemExit(f"local Markdown package route is outside packageable roots: {src}: {target}")
+            next_rel = shared_rel.as_posix()
+            if next_rel not in found:
+                queue.append((next_rel, resolved))
+    return list(found.items())
+
 def entries(skill_name: str, spec: dict, kind: str) -> list[tuple[str, Path]]:
     skill = skill_root(skill_name, kind)
     out = [
@@ -165,8 +114,7 @@ def entries(skill_name: str, spec: dict, kind: str) -> list[tuple[str, Path]]:
         ("agents/openai.yaml", skill / "agents" / "openai.yaml"),
         ("PROTOCOL_VERSION", ROOT / "PROTOCOL_VERSION"),
     ]
-    out += [(f"references/{name}", SHARED / "references" / name) for name in spec["references"]]
-    out += [(f"templates/{name}", SHARED / "templates" / name) for name in spec["templates"]]
+    out += _transitive_payload(spec)
     return out
 
 

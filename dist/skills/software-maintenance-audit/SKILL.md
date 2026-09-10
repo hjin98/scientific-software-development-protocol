@@ -5,6 +5,10 @@ description: Audit long-lived software repositories for architectural entropy, m
 
 # Software Maintenance Audit
 
+## Background and terminology
+
+The **Scientific Software Development Protocol (SSDP)** organizes authority into four semantic domains: **D1** scientific/mathematical formulation, **D2** algorithm/numerical method, **D3** software architecture, and **D4** specification/implementation. A **concretization** is a lower-level expression of governing semantic authority. An **evidence realization** is one concrete execution or instantiation of an evidence specification; it is not a D1-D4 concretization.
+
 Audit repository health over time without becoming a new lifecycle authority.
 
 ## Reference routing
@@ -21,6 +25,7 @@ Before substantive audit reasoning:
 - Read [Tool-assisted engineering](references/tool-assisted-engineering.md) when a material audit question maps to a specialized capability.
 - Read [Convergence and development-cycle economy](references/convergence-and-cycle-economy.md) for recurring defect families and repeated repair patterns.
 - Read [Documentation and evidence](references/documentation-and-evidence.md) when documentation coherence is part of the signal.
+- Human-facing scientific/technical documentation -> [Scientific and technical writing](references/scientific-technical-writing.md).
 - Read [Scientific software](references/scientific-software.md) when the audited risk includes scientific/numerical correctness or oracle weakness.
 
 ## Audit objective

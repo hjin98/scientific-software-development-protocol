@@ -1,19 +1,23 @@
 # Scientific Software Development Protocol
 
-Current protocol version: **6.0**.
+Current protocol version: **6.1**.
 
-Protocol 6 generalizes the former Software Development Protocol into a recursive scientific-software development system:
+## Background and terminology
+
+The **Scientific Software Development Protocol (SSDP)** is a document-controlled scientific-software development protocol. It separates four semantic authority domains: **D1** scientific/mathematical formulation, **D2** algorithm/numerical method, **D3** software architecture, and **D4** specification/implementation. An **abstraction** states governing semantics; a **concretization** is a lower-level expression that must preserve them.
+
+Protocol 6.1 preserves and refines the former Software Development Protocol into a recursive scientific-software development system:
 
 ```text
-ABSTRACTION  --design / constrain-->  REALIZATION
-ABSTRACTION  <--verify / reconstruct-- REALIZATION
+ABSTRACTION  --design / constrain-->  CONCRETIZATION
+ABSTRACTION  <--verify / reconstruct-- CONCRETIZATION
 ```
 
-An abstraction states the semantic invariants that must survive realization. A realization is admissible only when it satisfies every applicable upstream abstraction and governed external constraint. Within that feasible set optimize:
+An abstraction states the semantic invariants that must survive concretization. A concretization is admissible only when it satisfies every applicable upstream abstraction and governed external constraint. Within that feasible set optimize:
 
 ```text
 domain engineering fitness
-> minimum justified realization complexity
+> minimum justified concretization complexity
 > development economy
 ```
 
@@ -33,13 +37,17 @@ D4  software-implementation
      Specification & executable implementation
 ```
 
-This is a semantic hierarchy, not a mandatory four-stage waterfall. D4-only and D3->D4 work are normal when upstream meaning is unaffected; multi-parent constraints form a layered DAG.
+This is a semantic hierarchy, not a mandatory four-stage waterfall. D4-only and D3->D4 work are normal when upstream meaning is unaffected; multi-parent constraints form a layered directed acyclic graph (DAG).
 
-Logical normative document families are D1 Scientific Method Paper, D2 Numerical & Algorithmic Method Paper, D3 Architecture Manual, and D4 Specification plus code/executable realization. Each material current normative claim has one semantic owner. Proposed, accepted-current, challenged, stale-dependent, superseded/historical, and release-pinned/publication states remain distinct.
+Logical normative document families are D1 Scientific Method Paper, D2 Numerical & Algorithmic Method Paper, D3 Architecture Manual, and D4 Specification plus code/executable concretization. Each material current normative claim has one semantic owner. Proposed, accepted-current, challenged, stale-dependent, superseded/historical, and release-pinned/publication states remain distinct.
+
+## Evidence and evolution
+
+Protocol 6.1 distinguishes downstream **concretization** from **evidence realization**. Evidence follows `evidence specification -> evidence realization -> observation -> evidence assessment`; applicability, target-vs-execution dependencies, stale evidence, bounded semantic dependency views, and semantic-evolution history are first-class maintenance concerns. Evidence is not a fifth semantic authority.
 
 ## Verification and challenge
 
-Verification reconstructs realization semantics and attempts to falsify conformity. It is opposite-direction reasoning, not a bijective inverse. Every material handoff checks both realization fidelity and abstraction adequacy. High-risk scientific claims may require composed closure:
+Verification reconstructs concretization semantics and attempts to falsify conformity. It is opposite-direction reasoning, not a bijective inverse. Every material handoff checks both concretization fidelity and abstraction adequacy. High-risk scientific claims may require composed closure:
 
 ```text
 actual executable behavior
@@ -55,7 +63,7 @@ Authority governs mutation; evidence can challenge authority; neither human nor 
 
 ## Preserved engineering strengths
 
-Protocol 6 is the general doctrine and Protocol 5 is its narrower software-local specialization. Protocol 6 preserves and generalizes Protocol 5's strongest controls as current semantic capabilities rather than a second current vocabulary: adaptive realization, active simplification, snapshot-complete handoff, version-bound workplans, stage-local plus final affected regression, proxy-proof real-owner evidence, evidence reuse/invalidation, differential/metamorphic testing, bounded fault injection, language/tool routing, long-horizon health sensing, bounded urgent mitigation, compact resumable working state, and conservative closeout.
+Protocol 6 is the general doctrine and Protocol 5 is its narrower software-local specialization. Protocol 6 preserves and generalizes Protocol 5's strongest controls as current semantic capabilities rather than a second current vocabulary: adaptive concretization, active simplification, snapshot-complete handoff, version-bound workplans, stage-local plus final affected regression, proxy-proof real-owner evidence, evidence reuse/invalidation, differential/metamorphic testing, bounded fault injection, language/tool routing, long-horizon health sensing, bounded urgent mitigation, compact resumable working state, and conservative closeout.
 
 The concise historical mapping lives only in `source/shared/references/protocol-versioning-and-compatibility.md`; ordinary Protocol 6 work should not require translating through Protocol 5 control-plane terms.
 
@@ -74,7 +82,7 @@ Canonical role entrypoints:
 
 Optional specialists remain non-authoritative support capabilities: `software-documentation`, `software-maintenance-audit`, and `repository-hygiene`.
 
-Skill resolution is compatible-local-first, canonical-public-source-second. Never silently reinterpret an older workplan under newer doctrine. Historical Protocol 5.16 is pinned to immutable commit `e151daaf5c8eebb351a85cfed86170fda80fb5e3` and the orchestrator retains its packaged `sdp-protocol-5.16` schema-v1 profile alongside current `ssdp-protocol-6.0` schema v2.
+Skill resolution is compatible-local-first, canonical-public-source-second. Current Protocol 6.1 public fallback uses immutable compatible source `47e9155632c44493644b0b02fa1fa625703cf480` rather than assuming the repository default branch is already 6.1. Never silently reinterpret an older workplan under newer doctrine. Historical Protocol 5.16 is pinned to immutable commit `e151daaf5c8eebb351a85cfed86170fda80fb5e3` and the orchestrator retains its packaged `sdp-protocol-5.16` schema-v1 profile alongside frozen `ssdp-protocol-6.0` schema v2 and current `ssdp-protocol-6.1` schema v2.
 
 ## Build and acceptance
 

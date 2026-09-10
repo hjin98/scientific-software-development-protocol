@@ -2,8 +2,8 @@
 
 Profile metadata is control-plane data only.  Canonical prompt prose remains in
 its version-bound prompt document.  Protocol 5.16 schema-v1 is preserved as a
-frozen compatibility definition while Protocol 6.0 uses an independent
-schema-v2 profile selected by declared protocol/profile identity.
+frozen compatibility definition while Protocol 6.0 and 6.1 use independent
+schema-v2 profiles selected by declared protocol/profile identity.
 """
 
 from __future__ import annotations
@@ -17,6 +17,7 @@ from .canonical import (
     CANONICAL_STAGES,
     LEGACY_PROFILE_ID,
     SSDP6_PROFILE_ID,
+    SSDP61_PROFILE_ID,
     SSDP6_STAGES,
     CanonicalDocument,
     stages_for_profile,
@@ -39,10 +40,14 @@ PROFILE_SCHEMA_VERSION = 1
 PROFILE_PROTOCOL_VERSION = "5.16.0"
 COMPATIBLE_PROTOCOL_VERSIONS: tuple[str, ...] = ("5.16.0", "5.16")
 
-DEFAULT_PROFILE_ID = SSDP6_PROFILE_ID
 SSDP6_PROFILE_SCHEMA_VERSION = 2
 SSDP6_PROTOCOL_VERSION = "6.0.0"
 SSDP6_COMPATIBLE_PROTOCOL_VERSIONS: tuple[str, ...] = ("6.0.0", "6.0")
+
+SSDP61_PROFILE_SCHEMA_VERSION = 2
+SSDP61_PROTOCOL_VERSION = "6.1.0"
+SSDP61_COMPATIBLE_PROTOCOL_VERSIONS: tuple[str, ...] = ("6.1.0", "6.1")
+DEFAULT_PROFILE_ID = SSDP61_PROFILE_ID
 RESULT_SCHEMA_ID = "sdp.stage-result-envelope"
 RESULT_SCHEMA_VERSION = 1
 
@@ -234,6 +239,17 @@ _SSDP6_TRANSITIONS: tuple[TransitionRow, ...] = (
 )
 
 
+def _protocol61_term(text: str) -> str:
+    return text.replace("realization", "concretization").replace("realize", "concretize")
+
+
+_SSDP61_STAGE_TABLE: dict[str, StageRow] = dict(_SSDP6_STAGE_TABLE)
+_SSDP61_TRANSITIONS: tuple[TransitionRow, ...] = tuple(
+    (source, trigger, target, _protocol61_term(explanation))
+    for source, trigger, target, explanation in _SSDP6_TRANSITIONS
+)
+
+
 @dataclass(frozen=True)
 class ProfileDefinition:
     profile_id: str
@@ -246,7 +262,8 @@ class ProfileDefinition:
 
 _DEFINITIONS = {
     LEGACY_PROFILE_ID: ProfileDefinition(LEGACY_PROFILE_ID, 1, PROFILE_PROTOCOL_VERSION, COMPATIBLE_PROTOCOL_VERSIONS, _LEGACY_STAGE_TABLE, _LEGACY_TRANSITIONS),
-    SSDP6_PROFILE_ID: ProfileDefinition(SSDP6_PROFILE_ID, 2, SSDP6_PROTOCOL_VERSION, SSDP6_COMPATIBLE_PROTOCOL_VERSIONS, _SSDP6_STAGE_TABLE, _SSDP6_TRANSITIONS),
+    SSDP6_PROFILE_ID: ProfileDefinition(SSDP6_PROFILE_ID, SSDP6_PROFILE_SCHEMA_VERSION, SSDP6_PROTOCOL_VERSION, SSDP6_COMPATIBLE_PROTOCOL_VERSIONS, _SSDP6_STAGE_TABLE, _SSDP6_TRANSITIONS),
+    SSDP61_PROFILE_ID: ProfileDefinition(SSDP61_PROFILE_ID, SSDP61_PROFILE_SCHEMA_VERSION, SSDP61_PROTOCOL_VERSION, SSDP61_COMPATIBLE_PROTOCOL_VERSIONS, _SSDP61_STAGE_TABLE, _SSDP61_TRANSITIONS),
 }
 
 

@@ -20,18 +20,25 @@ class Protocol6ContractTests(unittest.TestCase):
         self.d3 = read("source/shared/references/architecture-and-design.md").lower()
         self.d4 = read("source/shared/references/specification-and-implementation.md").lower()
         self.versioning = read("source/shared/references/protocol-versioning-and-compatibility.md").lower()
+        self.evolution = read("source/shared/references/evidence-evolution-and-dependencies.md").lower()
 
-    def test_protocol_60_identity_and_four_domain_roles(self) -> None:
-        self.assertEqual("6.0.0", read("source/PROTOCOL_VERSION").strip())
-        self.assertIn("current protocol version: **6.0**", read("README.md").lower())
+    def test_protocol_61_identity_and_four_domain_roles(self) -> None:
+        self.assertEqual("6.1.0", read("source/PROTOCOL_VERSION").strip())
+        self.assertIn("current protocol version: **6.1**", read("README.md").lower())
         for skill in ("scientific-formulation", "numerical-algorithm-design", "software-design", "software-implementation"):
             self.assertTrue((ROOT / f"source/roles/{skill}/SKILL.md").is_file(), skill)
 
-    def test_recursive_abstraction_realization_and_feasibility_are_canonical(self) -> None:
-        self.assertIn("abstraction  --design / constrain-->  realization", self.foundation)
+    def test_recursive_abstraction_concretization_and_feasibility_are_canonical(self) -> None:
+        self.assertIn("abstraction  --design / constrain-->  concretization", self.foundation)
         self.assertIn("fidelity is a feasibility condition", self.foundation)
         self.assertIn("domain engineering fitness", self.foundation)
-        self.assertIn("minimum justified realization complexity", self.foundation)
+        self.assertIn("minimum justified concretization complexity", self.foundation)
+
+    def test_protocol61_evidence_evolution_contract_is_first_class(self) -> None:
+        for phrase in ("evidence specification", "evidence realization", "observation", "evidence assessment", "execution_depends_on"):
+            self.assertIn(phrase, self.evolution)
+        self.assertIn("absence of an edge", self.evolution)
+        self.assertIn("stale", self.evolution)
 
     def test_authority_provenance_is_orthogonal_to_domain_level(self) -> None:
         self.assertIn("authority source is orthogonal to abstraction level", self.foundation)
@@ -43,11 +50,11 @@ class Protocol6ContractTests(unittest.TestCase):
         self.assertIn("numerical & algorithmic method paper", self.d2)
         self.assertIn("d3 boundary", self.d3)
         self.assertIn("accepted d4 specification", self.d4)
-        self.assertIn("code/executable behavior is the realization", self.d4)
+        self.assertIn("code/executable behavior is the concretization", self.d4)
 
     def test_verification_is_reverse_semantic_not_bijective_inverse(self) -> None:
         self.assertIn("verification therefore is not a mathematical inverse", self.foundation)
-        self.assertIn("realization fidelity", self.foundation)
+        self.assertIn("concretization fidelity", self.foundation)
         self.assertIn("abstraction adequacy", self.foundation)
         self.assertIn("composed end-to-end scientific closure", self.testing)
 
@@ -92,7 +99,7 @@ class Protocol6ContractTests(unittest.TestCase):
 
     def test_historical_516_is_immutable_and_not_silently_upgraded(self) -> None:
         self.assertIn("5.16.0 -> e151daaf5c8eebb351a85cfed86170fda80fb5e3", self.versioning)
-        self.assertIn("do not reinterpret active or completed 5.x work using protocol 6", self.versioning)
+        self.assertIn("do not reinterpret active or completed 5.x or 6.0 work using protocol 6.1", self.versioning)
 
     def test_build_registry_contains_four_roles_and_three_specialists(self) -> None:
         build = read("source/build_skills.py")

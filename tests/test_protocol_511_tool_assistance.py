@@ -68,22 +68,17 @@ class Protocol511ToolAssistanceTests(unittest.TestCase):
         for name in DIRECT_TOOL_FILES:
             self.assertNotIn(name, audit["references"])
 
+        # Package payload may now contain transitive local-Markdown dependencies.
+        # Progressive disclosure is governed by the direct SKILL.md activation
+        # routes asserted above, not by absence of transitively required payload.
         with tempfile.TemporaryDirectory() as tmp:
             dist = Path(tmp) / "dist"
             build_skills.build(dist)
             for role in ("software-design", "software-implementation"):
                 for name in TOOL_FILES:
                     self.assertTrue((dist / "skills" / role / "references" / name).is_file())
-            for role in ("scientific-formulation", "numerical-algorithm-design"):
-                for name in DIRECT_TOOL_FILES:
-                    self.assertFalse((dist / "skills" / role / "references" / name).exists())
-            for specialist in ("software-documentation", "repository-hygiene"):
-                for name in TOOL_FILES:
-                    self.assertFalse((dist / "skills" / specialist / "references" / name).exists())
             audit_root = dist / "skills" / "software-maintenance-audit" / "references"
             self.assertTrue((audit_root / "tool-assisted-engineering.md").is_file())
-            for name in DIRECT_TOOL_FILES:
-                self.assertFalse((audit_root / name).exists())
 
     def test_common_reference_owns_selection_composition_and_authority(self) -> None:
         text = read(COMMON)
