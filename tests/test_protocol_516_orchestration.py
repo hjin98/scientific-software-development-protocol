@@ -52,7 +52,9 @@ class Protocol6OrchestrationTests(unittest.TestCase):
             "repository-default bytes are never a substitute",
         ):
             self.assertIn(token, self.lower)
-        self.assertIn("pre-bootstrap source intentionally does not invent a `public_ref`", self.lower)
+        self.assertIn("public_ref = 1181c2031710c5d343194d87d08543290fded0ab", self.lower)
+        self.assertIn("current 6.2 may fall back", self.lower)
+        self.assertNotIn("automatic current-6.2 public fallback is unavailable", self.lower)
 
     def test_execution_contract_prefers_action_and_resolves_inferable_context(self) -> None:
         self.assertIn("these are execution prompts", self.lower)
