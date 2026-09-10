@@ -1,0 +1,4 @@
+  File "/home/runner/work/scientific-software-development-protocol/scientific-software-development-protocol/.github/protocol-61-second-repair-v3.py", line 70
+    old = '''    out += [(f"references/{name}", SHARED / "references" / name) for name in spec["references"]]\n    out += [(f"templates/{name}", SHARED / "templates" / name) for name in spec["templates"]]\n    return out\n'''
+                 ^^^
+SyntaxError: invalid syntax
