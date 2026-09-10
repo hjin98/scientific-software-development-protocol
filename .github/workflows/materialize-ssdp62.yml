@@ -1,0 +1,180 @@
+name: Materialize SSDP 6.2 Stage E
+
+on:
+  pull_request:
+    types: [synchronize, opened, reopened]
+
+permissions:
+  contents: write
+
+jobs:
+  materialize:
+    if: github.event.pull_request.head.repo.full_name == github.repository && github.head_ref == 'ssdp-6.2-lossless-representation'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Apply bounded 6.2 profile delta
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          def replace(path: str, old: str, new: str, count: int = 1) -> None:
+              p = Path(path)
+              text = p.read_text(encoding='utf-8')
+              actual = text.count(old)
+              if actual != count:
+                  raise SystemExit(f'{path}: expected {count} occurrence(s), found {actual}: {old!r}')
+              p.write_text(text.replace(old, new), encoding='utf-8')
+
+          # Canonical profile identity: 6.2 uses the established Protocol-6 stage set.
+          replace(
+              'orchestrator/src/sdp_orchestrator/core/canonical.py',
+              'SSDP61_PROFILE_ID = "ssdp-protocol-6.1"\n',
+              'SSDP61_PROFILE_ID = "ssdp-protocol-6.1"\nSSDP62_PROFILE_ID = "ssdp-protocol-6.2"\n',
+          )
+          replace(
+              'orchestrator/src/sdp_orchestrator/core/canonical.py',
+              '    SSDP61_PROFILE_ID: SSDP6_STAGES,\n}',
+              '    SSDP61_PROFILE_ID: SSDP6_STAGES,\n    SSDP62_PROFILE_ID: SSDP6_STAGES,\n}',
+          )
+          replace(
+              'orchestrator/src/sdp_orchestrator/core/canonical.py',
+              'for profile_id in (LEGACY_PROFILE_ID, SSDP6_PROFILE_ID, SSDP61_PROFILE_ID):',
+              'for profile_id in (LEGACY_PROFILE_ID, SSDP6_PROFILE_ID, SSDP61_PROFILE_ID, SSDP62_PROFILE_ID):',
+          )
+
+          # Profile 6.2 is a new version-bound identity on schema v2. Its machine
+          # contract is intentionally the 6.1 contract: representation changed,
+          # orchestration semantics did not.
+          replace(
+              'orchestrator/src/sdp_orchestrator/core/profile.py',
+              'frozen compatibility definition while Protocol 6.0 and 6.1 use independent\n',
+              'frozen compatibility definition while Protocol 6.0, 6.1, and 6.2 use independent\n',
+          )
+          replace(
+              'orchestrator/src/sdp_orchestrator/core/profile.py',
+              '    SSDP61_PROFILE_ID,\n    SSDP6_STAGES,',
+              '    SSDP61_PROFILE_ID,\n    SSDP62_PROFILE_ID,\n    SSDP6_STAGES,',
+          )
+          replace(
+              'orchestrator/src/sdp_orchestrator/core/profile.py',
+              'SSDP61_PROFILE_SCHEMA_VERSION = 2\nSSDP61_PROTOCOL_VERSION = "6.1.0"\nSSDP61_COMPATIBLE_PROTOCOL_VERSIONS: tuple[str, ...] = ("6.1.0", "6.1")\nDEFAULT_PROFILE_ID = SSDP61_PROFILE_ID',
+              'SSDP61_PROFILE_SCHEMA_VERSION = 2\nSSDP61_PROTOCOL_VERSION = "6.1.0"\nSSDP61_COMPATIBLE_PROTOCOL_VERSIONS: tuple[str, ...] = ("6.1.0", "6.1")\n\nSSDP62_PROFILE_SCHEMA_VERSION = 2\nSSDP62_PROTOCOL_VERSION = "6.2.0"\nSSDP62_COMPATIBLE_PROTOCOL_VERSIONS: tuple[str, ...] = ("6.2.0", "6.2")\nDEFAULT_PROFILE_ID = SSDP62_PROFILE_ID',
+          )
+          replace(
+              'orchestrator/src/sdp_orchestrator/core/profile.py',
+              '_SSDP61_TRANSITIONS: tuple[TransitionRow, ...] = tuple(\n    (source, trigger, target, _protocol61_term(explanation))\n    for source, trigger, target, explanation in _SSDP6_TRANSITIONS\n)\n\n\n@dataclass(frozen=True)',
+              '_SSDP61_TRANSITIONS: tuple[TransitionRow, ...] = tuple(\n    (source, trigger, target, _protocol61_term(explanation))\n    for source, trigger, target, explanation in _SSDP6_TRANSITIONS\n)\n\n# Protocol 6.2 changes representation, not the schema-v2 routing contract.\n_SSDP62_STAGE_TABLE: dict[str, StageRow] = dict(_SSDP61_STAGE_TABLE)\n_SSDP62_TRANSITIONS: tuple[TransitionRow, ...] = tuple(_SSDP61_TRANSITIONS)\n\n\n@dataclass(frozen=True)',
+          )
+          replace(
+              'orchestrator/src/sdp_orchestrator/core/profile.py',
+              '    SSDP61_PROFILE_ID: ProfileDefinition(SSDP61_PROFILE_ID, SSDP61_PROFILE_SCHEMA_VERSION, SSDP61_PROTOCOL_VERSION, SSDP61_COMPATIBLE_PROTOCOL_VERSIONS, _SSDP61_STAGE_TABLE, _SSDP61_TRANSITIONS),\n}',
+              '    SSDP61_PROFILE_ID: ProfileDefinition(SSDP61_PROFILE_ID, SSDP61_PROFILE_SCHEMA_VERSION, SSDP61_PROTOCOL_VERSION, SSDP61_COMPATIBLE_PROTOCOL_VERSIONS, _SSDP61_STAGE_TABLE, _SSDP61_TRANSITIONS),\n    SSDP62_PROFILE_ID: ProfileDefinition(SSDP62_PROFILE_ID, SSDP62_PROFILE_SCHEMA_VERSION, SSDP62_PROTOCOL_VERSION, SSDP62_COMPATIBLE_PROTOCOL_VERSIONS, _SSDP62_STAGE_TABLE, _SSDP62_TRANSITIONS),\n}',
+          )
+
+          replace(
+              'orchestrator/src/sdp_orchestrator/core/protocol_source.py',
+              'Protocol 5.16, Protocol 6.0, and Protocol 6.1 are separate profile/source contracts.  A source\n',
+              'Protocol 5.16, Protocol 6.0, Protocol 6.1, and Protocol 6.2 are separate profile/source contracts.  A source\n',
+          )
+
+          # Snapshot generator: 6.1 becomes immutable predecessor; 6.2 becomes current.
+          replace(
+              'orchestrator/scripts/generate_protocol_snapshot.py',
+              '"""Generate/check current Protocol 6.1 snapshot and prove frozen profile parity."""',
+              '"""Generate/check current Protocol 6.2 snapshot and prove frozen profile parity."""',
+          )
+          replace(
+              'orchestrator/scripts/generate_protocol_snapshot.py',
+              '    P.SSDP6_PROFILE_ID: {PACKAGED_PROMPTS: "d127b9eb8da165afd905d4c35cc8b7572b201d56", PACKAGED_PROFILE: "76c53539a985bc8408f8432932e91e5477696db9"},\n}',
+              '    P.SSDP6_PROFILE_ID: {PACKAGED_PROMPTS: "d127b9eb8da165afd905d4c35cc8b7572b201d56", PACKAGED_PROFILE: "76c53539a985bc8408f8432932e91e5477696db9"},\n    P.SSDP61_PROFILE_ID: {PACKAGED_PROMPTS: "4e79f1c5c10fb4f867595ba6ade391a6d97020dc", PACKAGED_PROFILE: "c74b4e0f4cc40530710fea21c83268d917f03612"},\n}',
+          )
+          replace(
+              'orchestrator/scripts/generate_protocol_snapshot.py',
+              'print("current Protocol 6.1 snapshot matches canonical source; Protocol 5.16 and 6.0 snapshots are immutable and coherent")',
+              'print("current Protocol 6.2 snapshot matches canonical source; Protocol 5.16, 6.0, and 6.1 snapshots are immutable and coherent")',
+          )
+          replace(
+              'orchestrator/scripts/generate_protocol_snapshot.py',
+              'print("validated frozen Protocol 5.16 and 6.0 snapshots without rewriting them")',
+              'print("validated frozen Protocol 5.16, 6.0, and 6.1 snapshots without rewriting them")',
+          )
+
+          # Current-profile tests advance to 6.2; explicit 6.1 recovery remains frozen.
+          replace(
+              'orchestrator/tests/test_ssdp6_profiles.py',
+              '        self.assertEqual(P.DEFAULT_PROFILE_ID, "ssdp-protocol-6.1")',
+              '        self.assertEqual(P.DEFAULT_PROFILE_ID, "ssdp-protocol-6.2")',
+          )
+          replace(
+              'orchestrator/tests/test_ssdp6_profiles.py',
+              '        self.assertEqual(self.descriptor.profile.protocol_version, "6.1.0")',
+              '        self.assertEqual(self.descriptor.profile.protocol_version, "6.2.0")',
+          )
+          replace(
+              'orchestrator/tests/test_ssdp6_profiles.py',
+              '        self.assertEqual(P.profile_id_for_version("6.1.0"), P.DEFAULT_PROFILE_ID)\n        self.assertEqual(P.profile_id_for_version("6.1"), P.DEFAULT_PROFILE_ID)',
+              '        self.assertEqual(P.profile_id_for_version("6.1.0"), P.SSDP61_PROFILE_ID)\n        self.assertEqual(P.profile_id_for_version("6.1"), P.SSDP61_PROFILE_ID)\n        self.assertEqual(P.profile_id_for_version("6.2.0"), P.DEFAULT_PROFILE_ID)\n        self.assertEqual(P.profile_id_for_version("6.2"), P.DEFAULT_PROFILE_ID)',
+          )
+          replace(
+              'orchestrator/tests/test_ssdp6_profiles.py',
+              'governing_protocol_version="6.1.0"',
+              'governing_protocol_version="6.2.0"',
+              3,
+          )
+          replace(
+              'orchestrator/tests/test_ssdp6_profiles.py',
+              '                protocol_version="6.1.0",',
+              '                protocol_version="6.2.0",',
+          )
+          frozen61 = '''\n\nclass FrozenProtocol61ProfileTests(unittest.TestCase):\n    def test_protocol61_profile_stays_schema_v2_and_version_bound(self) -> None:\n        frozen = PS.resolve_packaged(P.SSDP61_PROFILE_ID).snapshot.descriptor\n        self.assertEqual(frozen.profile.profile_id, "ssdp-protocol-6.1")\n        self.assertEqual(frozen.profile.protocol_version, "6.1.0")\n        self.assertEqual(frozen.profile.profile_schema_version, 2)\n        self.assertEqual(frozen.schema_version, 2)\n        self.assertEqual([s.stage.stage_key for s in frozen.stages], [key for _, key, _ in SSDP6_STAGES])\n\n    def test_protocol61_packaged_bytes_are_frozen(self) -> None:\n        import hashlib\n        root = REPO_ROOT / "orchestrator/src/sdp_orchestrator/core/resources/protocol/ssdp-protocol-6.1"\n        expected = {"prompts.md": "4e79f1c5c10fb4f867595ba6ade391a6d97020dc", "profile.json": "c74b4e0f4cc40530710fea21c83268d917f03612"}\n        for name, sha in expected.items():\n            data = (root / name).read_bytes()\n            actual = hashlib.sha1(f"blob {len(data)}\\0".encode("ascii") + data).hexdigest()  # noqa: S324\n            self.assertEqual(actual, sha, name)\n\n    def test_protocol61_profile_is_still_derived_from_protocol61_prompts(self) -> None:\n        root = REPO_ROOT / "orchestrator/src/sdp_orchestrator/core/resources/protocol/ssdp-protocol-6.1"\n        text = (root / "prompts.md").read_text(encoding="utf-8")\n        document = parse_document(text, profile_id=P.SSDP61_PROFILE_ID)\n        expected = P.profile_to_json(P.build_profile(document, P.SSDP61_PROFILE_ID).descriptor)\n        self.assertEqual((root / "profile.json").read_text(encoding="utf-8"), expected)\n'''
+          replace(
+              'orchestrator/tests/test_ssdp6_profiles.py',
+              '\n\n\nclass FrozenProtocol60ProfileTests(unittest.TestCase):',
+              frozen61 + '\n\nclass FrozenProtocol60ProfileTests(unittest.TestCase):',
+          )
+
+          # Keep current human-facing Core documentation truthful. Frozen architecture is untouched.
+          replace(
+              'orchestrator/README.md',
+              'The current default profile is Protocol 6.0 (`ssdp-protocol-6.0`, workflow\nprofile schema v2). The frozen Protocol 5.16 profile remains packaged and\nsupported under schema v1 for historical workplans; workplan version binding\nprevents silent reinterpretation across the major-version boundary.',
+              'The current default profile is Protocol 6.2 (`ssdp-protocol-6.2`, workflow\nprofile schema v2). Frozen Protocol 6.1 and 6.0 profiles remain packaged under\nschema v2, and the frozen Protocol 5.16 profile remains packaged under schema v1;\nworkplan version binding prevents silent reinterpretation across versions.',
+          )
+          replace(
+              'orchestrator/docs/core-user-guide.md',
+              'The current default is **Scientific Software Development Protocol 6.0** using\nprofile `ssdp-protocol-6.0` and profile schema v2. The frozen Protocol 5.16\nprofile `sdp-protocol-5.16` remains packaged and supported under schema v1 for\nolder workplans. Core selects workflow semantics from the compatible profile; it\ndoes not reinterpret a 5.16 workplan as 6.0 merely because the installed Core is\nnewer.',
+              'The current default is **Scientific Software Development Protocol 6.2** using\nprofile `ssdp-protocol-6.2` and profile schema v2. Frozen Protocol 6.1 and 6.0\nprofiles remain packaged under schema v2, while `sdp-protocol-5.16` remains\npackaged under schema v1 for older workplans. Core selects workflow semantics\nfrom the compatible profile; it does not reinterpret an older workplan through\n6.2 merely because the installed Core is newer.',
+          )
+          replace('orchestrator/docs/core-user-guide.md', 'protocol_profile = "ssdp-protocol-6.0"   # optional; this is the current default', 'protocol_profile = "ssdp-protocol-6.2"   # optional; this is the current default')
+          replace('orchestrator/docs/core-user-guide.md', '[protocol_sources."ssdp-protocol-6.0"]', '[protocol_sources."ssdp-protocol-6.2"]', 2)
+          replace('orchestrator/docs/core-user-guide.md', 'half-5.16/half-6.0 interpretation', 'half-5.16/half-6.2 interpretation')
+          PY
+      - name: Install generation dependencies
+        run: |
+          python -m pip install -r source/requirements-validation.txt
+          python -m pip install ./orchestrator -r orchestrator/requirements-dev.txt
+      - name: Generate version-bound profile snapshot and distributions
+        run: |
+          python orchestrator/scripts/generate_protocol_snapshot.py
+          python source/build_skills.py
+      - name: Validate materialized outputs
+        run: |
+          python orchestrator/scripts/generate_protocol_snapshot.py --check
+          python source/validate_packages.py --dist dist
+          python -m unittest orchestrator.tests.test_ssdp6_profiles -v
+          git diff --check
+      - name: Commit Stage E materialization
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add orchestrator dist
+          git diff --cached --exit-code && exit 0 || true
+          git commit -m 'Materialize Protocol 6.2 profile and distributions'
+          git push origin HEAD:${{ github.head_ref }}
