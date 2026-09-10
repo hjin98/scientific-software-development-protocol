@@ -160,8 +160,8 @@ class SSDP6CanonicalProfileTests(unittest.TestCase):
             self.assertIn("WORKPLAN_DESTINATION", {item.name for item in by_key[key].inputs}, key)
             self.assertIn("review", self.document.stages[key].body.lower(), key)
         d4_body = self.document.stages["software-implementation"].body.lower()
-        self.assertIn("authorized reduced d2->d4 or d1->d4 route", d4_body)
-        self.assertIn("do not manufacture a d3 authority mutation", d4_body)
+        self.assertIn("for valid d1/d2->d4 reduced routes", d4_body)
+        self.assertIn("rather than manufacturing d3 mutation", d4_body)
         self.assertIn("change_plan may be none", d4_body)
 
     def test_review_pass_can_continue_to_the_dependent_realization_domain(self) -> None:
