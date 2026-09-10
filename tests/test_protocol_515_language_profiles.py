@@ -88,7 +88,7 @@ class Protocol515LanguageProfileTests(unittest.TestCase):
 
     def test_cpp_accelerator_uses_same_shared_gate(self) -> None:
         accel = section(self.cpp, "## accelerator concretization")
-        for concept in ("dormant unless", "accepted d3 architecture", "when enabled", "central processing unit (cpu)/reference path", "end-to-end benefit"):
+        for concept in ("dormant unless", "accepted d3", "enables it", "when enabled", "central processing unit (cpu)/reference path", "end-to-end benefit"):
             self.assertIn(concept, accel)
 
     def test_performance_counterfactual_separates_simple_efficiency_from_complexity(self) -> None:
@@ -106,8 +106,8 @@ class Protocol515LanguageProfileTests(unittest.TestCase):
         versioning = read("source/shared/references/protocol-versioning-and-compatibility.md").lower()
         root_readme = read("README.md").lower()
         self.assertIn("5.15 language profiles/cross-language performance", versioning)
-        self.assertIn("older active work may continue under their declared version", versioning)
-        self.assertIn("may continue under their declared version", versioning)
+        self.assertIn("older active work may continue under its declared version", versioning)
+        self.assertIn("may continue under its declared version", versioning)
         self.assertIn("python source/build_skills.py", root_readme)
         self.assertNotIn("python source/build_skills.py", self.python)
         self.assertIn("protocol_version: 5.14.0", read("workplans/archive/PROTOCOL-5.15-LANGUAGE-PROFILES-CPP-PERFORMANCE.md"))
