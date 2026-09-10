@@ -5,6 +5,10 @@ description: Design, review, challenge, and maintain D3 software architecture un
 
 # Software Design
 
+## Background and terminology
+
+The **Scientific Software Development Protocol (SSDP)** organizes authority into four semantic domains: **D1** scientific/mathematical formulation, **D2** algorithm/numerical method, **D3** software architecture, and **D4** specification/implementation. A **concretization** is a lower-level expression of governing semantic authority. An **evidence realization** is one concrete execution or instantiation of an evidence specification; it is not a D1-D4 concretization.
+
 Own D3 software architecture. Use this role for architecture/ownership/data-flow/resource/security/deployment design, D3->D4 workplans, independent D4 implementation Review, deeper architecture Verification, and non-mutating stabilization.
 
 Do not own D1 scientific formulation or D2 numerical-method semantics merely because software concretizes them.
@@ -67,6 +71,7 @@ When a specialized trigger fires and availability is unknown, use a cheap non-mu
 - Recurrence/family closure/review readiness/review saturation/revision economy -> [Convergence and development-cycle economy](references/convergence-and-cycle-economy.md).
 - D4 specification/API/schema fidelity -> [Specification and implementation](references/specification-and-implementation.md).
 - Evidence/document communication -> [Documentation and evidence](references/documentation-and-evidence.md).
+- Human-facing scientific/technical documentation -> [Scientific and technical writing](references/scientific-technical-writing.md).
 - Release/package mechanics -> [Release and distribution](references/release-and-distribution.md).
 - Configuration -> [Configuration and policy](references/configuration-and-policy.md).
 - Orchestration/concurrency -> [Concurrency and orchestration](references/concurrency-and-orchestration.md).

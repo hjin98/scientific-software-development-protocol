@@ -2,6 +2,10 @@
 
 Current protocol version: **6.1**.
 
+## Background and terminology
+
+The **Scientific Software Development Protocol (SSDP)** is a document-controlled scientific-software development protocol. It separates four semantic authority domains: **D1** scientific/mathematical formulation, **D2** algorithm/numerical method, **D3** software architecture, and **D4** specification/implementation. An **abstraction** states governing semantics; a **concretization** is a lower-level expression that must preserve them.
+
 Protocol 6.1 preserves and refines the former Software Development Protocol into a recursive scientific-software development system:
 
 ```text
@@ -33,7 +37,7 @@ D4  software-implementation
      Specification & executable implementation
 ```
 
-This is a semantic hierarchy, not a mandatory four-stage waterfall. D4-only and D3->D4 work are normal when upstream meaning is unaffected; multi-parent constraints form a layered DAG.
+This is a semantic hierarchy, not a mandatory four-stage waterfall. D4-only and D3->D4 work are normal when upstream meaning is unaffected; multi-parent constraints form a layered directed acyclic graph (DAG).
 
 Logical normative document families are D1 Scientific Method Paper, D2 Numerical & Algorithmic Method Paper, D3 Architecture Manual, and D4 Specification plus code/executable concretization. Each material current normative claim has one semantic owner. Proposed, accepted-current, challenged, stale-dependent, superseded/historical, and release-pinned/publication states remain distinct.
 

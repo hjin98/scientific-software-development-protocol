@@ -1,5 +1,9 @@
 # Scientific Software Development Protocol 6.1
 
+## Background and terminology
+
+The **Scientific Software Development Protocol (SSDP)** uses four semantic authority domains: **D1** scientific/mathematical formulation, **D2** algorithm/numerical method, **D3** software architecture, and **D4** specification/implementation. An **abstraction** states governing semantic invariants; a **concretization** is a lower-level expression constrained by those invariants. An **evidence realization** is a concrete execution of an evidence specification.
+
 This directory is the canonical Protocol 6 source.
 
 ## Governing model

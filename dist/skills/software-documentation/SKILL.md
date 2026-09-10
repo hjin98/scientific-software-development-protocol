@@ -5,6 +5,10 @@ description: Maintain, reconcile, refactor, explain, and publish current documen
 
 # Software Documentation
 
+## Background and terminology
+
+The **Scientific Software Development Protocol (SSDP)** organizes authority into four semantic domains: **D1** scientific/mathematical formulation, **D2** algorithm/numerical method, **D3** software architecture, and **D4** specification/implementation. A **concretization** is a lower-level expression of governing semantic authority. An **evidence realization** is one concrete execution or instantiation of an evidence specification; it is not a D1-D4 concretization.
+
 Use this optional specialist for substantive documentation reconciliation, restructuring, scientific/technical exposition, user-guide synthesis, or publication maintenance. It is editorial/publication support, not a fifth authority domain.
 
 ## Reference routing

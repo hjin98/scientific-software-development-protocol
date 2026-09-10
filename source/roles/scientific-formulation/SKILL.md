@@ -5,6 +5,10 @@ description: Formulate, review, challenge, and maintain D1 scientific and mathem
 
 # Scientific Formulation
 
+## Background and terminology
+
+The **Scientific Software Development Protocol (SSDP)** organizes authority into four semantic domains: **D1** scientific/mathematical formulation, **D2** algorithm/numerical method, **D3** software architecture, and **D4** specification/implementation. A **concretization** is a lower-level expression of governing semantic authority. An **evidence realization** is one concrete execution or instantiation of an evidence specification; it is not a D1-D4 concretization.
+
 Own D1 scientific and mathematical formulation. Use this role when the scientific question, observable/estimand, governing model/equations, assumptions, validity regime, interpretation, external adequacy, or model-level uncertainty may change or require independent review.
 
 ## Required reference routing

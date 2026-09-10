@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import posixpath
 import re
 import urllib.parse
 import zipfile
@@ -131,14 +132,63 @@ def validate_resource_routes(body: str, files: dict[str, bytes]) -> list[str]:
         direct_links.add(target)
         if target not in files:
             errors.append(f"routed resource is not packaged: {target}")
-    packaged_routes = {
+    return errors
+
+
+
+
+def validate_packaged_markdown_links(files: dict[str, bytes]) -> list[str]:
+    'Validate local Markdown closure and reachability from the SKILL entrypoint.'
+    errors: list[str] = []
+    edges: dict[str, set[str]] = {}
+    for rel, data in sorted(files.items()):
+        if not rel.endswith(".md"):
+            continue
+        edges.setdefault(rel, set())
+        try:
+            text = data.decode("utf-8")
+        except UnicodeDecodeError as exc:
+            errors.append(f"{rel}: not UTF-8: {exc}")
+            continue
+        for raw_target in MARKDOWN_LINK_RE.findall(text):
+            target = raw_target.strip()
+            if not target or target.startswith("#"):
+                continue
+            decoded = urllib.parse.unquote(target)
+            if URI_SCHEME_RE.match(decoded) or decoded.startswith("//"):
+                continue
+            path_part = decoded.split("#", 1)[0].split("?", 1)[0]
+            if not path_part or not path_part.lower().endswith(".md"):
+                continue
+            if decoded != target:
+                errors.append(f"{rel}: encoded local Markdown route is not allowed: {target}")
+                continue
+            if path_part.startswith("/") or WINDOWS_ABSOLUTE_RE.match(path_part):
+                errors.append(f"{rel}: unsafe local Markdown route: {target}")
+                continue
+            normalized = posixpath.normpath(posixpath.join(posixpath.dirname(rel), path_part))
+            if normalized == ".." or normalized.startswith("../"):
+                errors.append(f"{rel}: local Markdown route escapes bundle: {target}")
+                continue
+            edges[rel].add(normalized)
+            if normalized not in files:
+                errors.append(f"{rel}: local Markdown route is not packaged: {target} -> {normalized}")
+
+    reachable = {"SKILL.md"}
+    queue = ["SKILL.md"]
+    while queue:
+        rel = queue.pop(0)
+        for target in sorted(edges.get(rel, set())):
+            if target in files and target not in reachable:
+                reachable.add(target)
+                queue.append(target)
+    packaged_resources = {
         rel for rel in files
         if (rel.startswith("references/") or rel.startswith("templates/")) and rel.endswith(".md")
     }
-    for rel in sorted(packaged_routes - direct_links):
-        errors.append(f"packaged resource is not directly Markdown-linked from SKILL.md: {rel}")
+    for rel in sorted(packaged_resources - reachable):
+        errors.append(f"packaged Markdown resource is not reachable from SKILL.md: {rel}")
     return errors
-
 
 def validate_agent_yaml(text: str) -> list[str]:
     errors: list[str] = []
@@ -241,6 +291,7 @@ def validate_core_bundle(files: dict[str, bytes], skill_name: str, kind: str, so
         errors.append("specialist package missing manifest kind")
 
     errors.extend(validate_resource_routes(body, files))
+    errors.extend(validate_packaged_markdown_links(files))
     packaged_routes = {
         rel for rel in files
         if (rel.startswith("references/") or rel.startswith("templates/")) and rel.endswith(".md")

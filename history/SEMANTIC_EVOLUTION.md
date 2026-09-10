@@ -71,6 +71,16 @@ A later independent post-closeout review superseded the release/rollback disposi
 - **Lifecycle disposition:** reopened repair workplan archived after all required acceptance, qualification, and Review gates passed. Replacement immutable Protocol 6.1 document-controlled/semi-automated recovery snapshot is commit `0c90fda19bf6ed9cb0c4511beb3da80ace6584ed`.
 - **Protocol 7 dependency:** the Protocol 6.1 completion/qualification/recovery prerequisite is satisfied by recovery commit `0c90fda19bf6ed9cb0c4511beb3da80ace6584ed`. Protocol 7 D4 implementation remains separately blocked on its deliberate D3 Orchestrator architecture reopen/supersession prerequisite.
 
+## Protocol 6.1 second reopened portability/documentation/recovery repair
+
+A subsequent Protocol-6.1-self-review reopened release closure again after finding three bounded implementation/acceptance defects: packaged references could contain unresolved nested Markdown routes that the validator did not inspect; current public fallback named the repository but could land on the incompatible Protocol 6.0 default branch; and the accepted human-facing background standard was not consistently applied to current Protocol-owned entrypoints/evidence reports.
+
+- **Authority disposition:** no D1/D2/D3 semantic doctrine is changed and no Serious Challenge is active. Repair is bounded to D4 packaging/validation, documentation concretization, public-source version resolution, and lifecycle/recovery evidence.
+- **Prior closeout disposition:** semantic candidate `5f911fecb0de2847f63c0b4859e1dd8c63d3d8ef` and recovery `0c90fda19bf6ed9cb0c4511beb3da80ace6584ed` remain immutable historical evidence but are superseded for final release/recovery authority.
+- **Current repair authority:** `workplans/active/SSDP-6.1-SECOND-REOPENED-PORTABILITY-DOCUMENTATION-AND-RECOVERY-REPAIR.md`.
+- **Public-source bootstrap:** pending Stage-A repaired immutable commit.
+- **Lifecycle:** ACTIVE / NO-PASS until fresh package/orchestrator acceptance, 95-scenario qualification, independent Review, and replacement recovery closeout.
+
 ## Maintenance
 
 Add entries only for material semantic replacement/generalization/rejection/restoration whose rationale is likely to matter to future scientific or engineering reasoning. Do not copy review transcripts or ordinary patch chronology. If an entry conflicts with accepted current authority, current authority governs and the historical record must be corrected as historical documentation rather than treated as a competing source of truth.

@@ -5,6 +5,10 @@ description: Implement, refactor, test, package, and validate D4 software concre
 
 # Software Implementation
 
+## Background and terminology
+
+The **Scientific Software Development Protocol (SSDP)** organizes authority into four semantic domains: **D1** scientific/mathematical formulation, **D2** algorithm/numerical method, **D3** software architecture, and **D4** specification/implementation. A **concretization** is a lower-level expression of governing semantic authority. An **evidence realization** is one concrete execution or instantiation of an evidence specification; it is not a D1-D4 concretization.
+
 Own executable D4 concretization. Implement the accepted D4 specification and D3 architecture while satisfying every applicable upstream D1/D2 semantic invariant and domain-local governed constraint.
 
 ## Engineering stewardship boundary
@@ -64,6 +68,7 @@ When a specialized trigger fires and availability is unknown, use a cheap non-mu
 - Debugging/recovery/state reconstruction -> [Debugging and state recovery](references/debugging-and-state-recovery.md).
 - Specification/API/schema ownership or implementation fidelity -> [Specification and implementation](references/specification-and-implementation.md).
 - Evidence/documentation -> [Documentation and evidence](references/documentation-and-evidence.md).
+- Human-facing scientific/technical documentation -> [Scientific and technical writing](references/scientific-technical-writing.md).
 - Packaging/release -> [Release and distribution](references/release-and-distribution.md).
 - Git/version control -> [Git and version control](references/git-and-version-control.md).
 - Configuration -> [Configuration and policy](references/configuration-and-policy.md).

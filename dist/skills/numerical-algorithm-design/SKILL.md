@@ -5,6 +5,10 @@ description: Design, review, challenge, and maintain D2 algorithm and numerical-
 
 # Numerical Algorithm Design
 
+## Background and terminology
+
+The **Scientific Software Development Protocol (SSDP)** organizes authority into four semantic domains: **D1** scientific/mathematical formulation, **D2** algorithm/numerical method, **D3** software architecture, and **D4** specification/implementation. A **concretization** is a lower-level expression of governing semantic authority. An **evidence realization** is one concrete execution or instantiation of an evidence specification; it is not a D1-D4 concretization.
+
 Own D2 algorithm and numerical-method semantics. Use this role when a discretization, estimator, solver, approximation, convergence/error guarantee, conditioning/stability property, precision policy, stochastic semantics, or numerical uncertainty may change or require review.
 
 ## Required reference routing

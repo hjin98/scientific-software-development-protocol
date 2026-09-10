@@ -64,7 +64,7 @@ class Protocol515LanguageProfileTests(unittest.TestCase):
         self.assertIn("must read both", self.router)
         self.assertIn("do not infer a global python-over-c++ or c++-over-python precedence", self.router)
 
-    def test_real_package_builder_carries_only_routed_profile_payload(self) -> None:
+    def test_real_package_builder_carries_routed_profiles_without_promoting_transitive_payload(self) -> None:
         routed = language_route_links(self.design_path)
         with tempfile.TemporaryDirectory() as td:
             out = Path(td) / "dist"
@@ -72,9 +72,14 @@ class Protocol515LanguageProfileTests(unittest.TestCase):
             for role in ("software-design", "software-implementation"):
                 refs = {p.name for p in (out / "skills" / role / "references").iterdir() if p.is_file()}
                 self.assertTrue(routed <= refs, (role, sorted(routed - refs)))
-            for specialist in ("software-documentation", "repository-hygiene", "software-maintenance-audit"):
-                refs = {p.name for p in (out / "skills" / specialist / "references").iterdir() if p.is_file()}
-                self.assertTrue(routed.isdisjoint(refs), (specialist, sorted(routed & refs)))
+
+        # Under bounded transitive package closure, payload presence is not an
+        # activation route. Specialists must still omit language profiles from
+        # their direct SKILL.md routing contract unless that role explicitly owns
+        # a language-profile decision.
+        for specialist in ("software-documentation", "repository-hygiene", "software-maintenance-audit"):
+            direct = {Path(link).name for link in LINK_RE.findall(read(f"source/specialists/{specialist}/SKILL.md"))}
+            self.assertTrue(routed.isdisjoint(direct), (specialist, sorted(routed & direct)))
 
     def test_python_runtime_selection_is_not_gil_monoculture(self) -> None:
         runtime = section(self.python, "## interpreter/runtime and concurrency")

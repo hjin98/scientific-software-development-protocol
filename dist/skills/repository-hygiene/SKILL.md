@@ -5,6 +5,10 @@ description: Perform conservative post-stage repository cleanup after developmen
 
 # Repository Hygiene
 
+## Background and terminology
+
+The **Scientific Software Development Protocol (SSDP)** organizes authority into four semantic domains: **D1** scientific/mathematical formulation, **D2** algorithm/numerical method, **D3** software architecture, and **D4** specification/implementation. A **concretization** is a lower-level expression of governing semantic authority. An **evidence realization** is one concrete execution or instantiation of an evidence specification; it is not a D1-D4 concretization.
+
 Use this optional specialist **after a development stage is formally closed**, or when the user explicitly requests a repository-hygiene pass.
 
 ## Reference routing
@@ -20,6 +24,7 @@ Before substantive repository-hygiene reasoning, apply these explicit routes; lo
 - When cache/checkpoint/scratch ownership or recovery value is material, read [Storage and I/O](references/storage-and-io.md).
 - When tracked/generated/release artifact boundaries are material, read [Release and distribution](references/release-and-distribution.md).
 - When distinguishing durable records/evidence from disposable coordination material, read [Documentation and evidence](references/documentation-and-evidence.md).
+- Human-facing scientific/technical documentation -> [Scientific and technical writing](references/scientific-technical-writing.md).
 
 It is not a lifecycle role, approval gate, design review, or substitute for implementation. It must not interrupt active engineering merely to make the tree look tidy. Its purpose is to restore a structurally sound, comprehensible repository after substantial design/implementation/test cycles while preserving useful work and history.
 

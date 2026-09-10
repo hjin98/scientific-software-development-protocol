@@ -1,5 +1,9 @@
 # Agent portability and routing qualification
 
+## Background and terminology
+
+The **Scientific Software Development Protocol (SSDP)** is distributed as portable **Agent Skills**: self-contained skill directories whose `SKILL.md` entrypoint routes the references needed for a role or specialist. SSDP uses **D1** scientific/mathematical, **D2** algorithm/numerical, **D3** software-architecture, and **D4** specification/implementation authority. An **orchestration profile** is a version-bound machine-readable representation of the human-facing workflow prompts used by the optional Orchestrator Core.
+
 Protocol 6.1 preserves the portable Agent Skill contract while adding first-class D1/D2 roles and a dual-version orchestration profile.
 
 ## Installation contract
@@ -50,9 +54,9 @@ Version-bound recovery uses immutable repository commits rather than `main`/late
 | --- | --- |
 | 5.16.0 | `e151daaf5c8eebb351a85cfed86170fda80fb5e3` |
 | 6.0.0 | `21d5188f5bd9a0270d7a2ebf93d41a6b7842ccd2` |
-| 6.1.0 | `0c90fda19bf6ed9cb0c4511beb3da80ace6584ed` |
+| 6.1.0 | pending second-reopen qualification, Review, and replacement recovery |
 
-The earlier Protocol 6.1 closeout snapshot `dec5ff2767e14fd1cda46e073757aa27f40e270c` remains immutable historical evidence but is superseded as the final rollback baseline. The repaired semantic candidate `5f911fecb0de2847f63c0b4859e1dd8c63d3d8ef` passed complete repository/package/orchestrator acceptance, fresh 94/94 behavioral qualification, and fresh independent Review before lifecycle closeout. Replacement recovery commit `0c90fda19bf6ed9cb0c4511beb3da80ace6584ed` contains the qualified Protocol 6.1 source/profile/generated artifacts, fresh evidence/Review records, corrected semantic-history state, and the archived repair handoff without Protocol 7 implementation machinery. Later metadata-only pinning records that identity without changing qualified Protocol semantics or executable behavior.
+The earlier Protocol 6.1 closeout snapshots `dec5ff2767e14fd1cda46e073757aa27f40e270c` and `0c90fda19bf6ed9cb0c4511beb3da80ace6584ed` remain immutable historical evidence but are superseded for final release/recovery authority by the active second-reopen repair. The prior semantic candidate `5f911fecb0de2847f63c0b4859e1dd8c63d3d8ef` and its 94/94 qualification remain historical evidence for their evaluated surfaces; package-reference closure, version-correct public fallback, and current human-facing documentation conformance require fresh repair and requalification before Protocol 7 may use a Protocol 6.1 recovery prerequisite.
 
 ## Deterministic routing dimensions
 
@@ -94,6 +98,6 @@ If no suitable live harness/tool environment exists, static/counterfactual/packa
 
 ## Behavioral qualification
 
-`qualification/ssdp6/SCENARIOS.md` defines Protocol 6 authority, abstraction adequacy, D1/D2/D3/D4 routing, Serious Challenge, anti-deference/anti-stubbornness, historical compatibility, and composed-closure scenarios. `qualification/ssdp6/SCENARIOS-6.1-ADDITIONS.md` extends the Protocol 6.1 set through scenario 94, including the reopened terminology and canonical-navigation counterexamples. The fresh current result is `qualification/ssdp6/RESULTS-GPT-5.6-SOL-2026-09-09-PROTOCOL-6.1-REOPENED-94.md`: 94/94 PASS with no Serious Challenge, explicitly bound to semantic candidate `5f911fecb0de2847f63c0b4859e1dd8c63d3d8ef`. Earlier Protocol 6.1 and Protocol 5 qualification records remain historical evidence for their candidate/release semantics.
+`qualification/ssdp6/SCENARIOS.md` defines Protocol 6 authority, abstraction adequacy, D1/D2/D3/D4 routing, Serious Challenge, anti-deference/anti-stubbornness, historical compatibility, and composed-closure scenarios. `qualification/ssdp6/SCENARIOS-6.1-ADDITIONS.md` extends the Protocol 6.1 set through scenario 94, including the reopened terminology and canonical-navigation counterexamples. The most recent pre-second-reopen result is `qualification/ssdp6/RESULTS-GPT-5.6-SOL-2026-09-09-PROTOCOL-6.1-REOPENED-94.md`: 94/94 PASS for its historical candidate. It is not current closeout evidence for the newly reopened package/public-fallback/documentation surfaces. Earlier Protocol 6.1 and Protocol 5 qualification records remain historical evidence for their candidate/release semantics.
 
 Reference-routing and tool-routing sentinel qualifications remain useful for named harness configurations. Ordinary repository CI does not infer universal model compliance from static tests.

@@ -6,6 +6,7 @@ from __future__ import annotations
 import argparse
 import json
 import re
+import urllib.parse
 import shutil
 import zipfile
 from pathlib import Path
@@ -30,6 +31,8 @@ SPECIALIST_SPECS = {
 }
 
 DIRECT_ROUTE_RE = re.compile(r"\]\((?P<kind>references|templates)/(?P<name>[A-Za-z0-9_.-]+\.md)\)")
+LOCAL_MARKDOWN_LINK_RE = re.compile(r"\[[^\]]+\]\(([^)]+)\)")
+URI_SCHEME_RE = re.compile(r"^[A-Za-z][A-Za-z0-9+.-]*:")
 
 
 def _direct_payload(root: Path, skill_name: str) -> tuple[list[str], list[str]]:
@@ -62,6 +65,48 @@ def skill_root(skill_name: str, kind: str) -> Path:
     raise ValueError(f"unknown skill kind: {kind!r}")
 
 
+
+def _transitive_payload(spec: dict) -> list[tuple[str, Path]]:
+    'Return the finite local-Markdown closure of direct SKILL activation seeds.'
+    seeds = [
+        *[(f"references/{name}", SHARED / "references" / name) for name in spec["references"]],
+        *[(f"templates/{name}", SHARED / "templates" / name) for name in spec["templates"]],
+    ]
+    shared_root = SHARED.resolve()
+    found: dict[str, Path] = {}
+    queue = list(seeds)
+    while queue:
+        rel, src = queue.pop(0)
+        if rel in found:
+            continue
+        if not src.is_file():
+            raise SystemExit(f"missing package source: {src}")
+        found[rel] = src
+        text = src.read_text(encoding="utf-8")
+        for raw_target in LOCAL_MARKDOWN_LINK_RE.findall(text):
+            target = raw_target.strip()
+            if not target or target.startswith("#"):
+                continue
+            decoded = urllib.parse.unquote(target)
+            if URI_SCHEME_RE.match(decoded) or decoded.startswith("//"):
+                continue
+            path_part = decoded.split("#", 1)[0].split("?", 1)[0]
+            if not path_part or not path_part.lower().endswith(".md"):
+                continue
+            if decoded != target:
+                raise SystemExit(f"encoded local Markdown package route is not allowed: {src}: {target}")
+            resolved = (src.parent / path_part).resolve()
+            try:
+                shared_rel = resolved.relative_to(shared_root)
+            except ValueError as exc:
+                raise SystemExit(f"local Markdown package route escapes shared root: {src}: {target}") from exc
+            if not shared_rel.parts or shared_rel.parts[0] not in {"references", "templates"}:
+                raise SystemExit(f"local Markdown package route is outside packageable roots: {src}: {target}")
+            next_rel = shared_rel.as_posix()
+            if next_rel not in found:
+                queue.append((next_rel, resolved))
+    return list(found.items())
+
 def entries(skill_name: str, spec: dict, kind: str) -> list[tuple[str, Path]]:
     skill = skill_root(skill_name, kind)
     out = [
@@ -69,8 +114,7 @@ def entries(skill_name: str, spec: dict, kind: str) -> list[tuple[str, Path]]:
         ("agents/openai.yaml", skill / "agents" / "openai.yaml"),
         ("PROTOCOL_VERSION", ROOT / "PROTOCOL_VERSION"),
     ]
-    out += [(f"references/{name}", SHARED / "references" / name) for name in spec["references"]]
-    out += [(f"templates/{name}", SHARED / "templates" / name) for name in spec["templates"]]
+    out += _transitive_payload(spec)
     return out
 
 
