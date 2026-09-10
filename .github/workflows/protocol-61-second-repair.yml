@@ -10,7 +10,7 @@ permissions:
 
 jobs:
   repair:
-    if: ${{ github.event.head_commit.message == 'Correct Protocol 6.1 repair transport and rerun' }}
+    if: ${{ github.event.head_commit.message == 'Correct Protocol 6.1 repair transport quoting and rerun' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -32,12 +32,12 @@ jobs:
         shell: bash
         run: |
           set +e
-          python .github/protocol-61-second-repair-v4.py 2>&1 | tee /tmp/protocol-61-second-repair-v4.log
+          python .github/protocol-61-second-repair-v5.py 2>&1 | tee /tmp/protocol-61-second-repair-v5.log
           status=${PIPESTATUS[0]}
           if [ "$status" -ne 0 ]; then
-            cp /tmp/protocol-61-second-repair-v4.log workplans/active/.protocol-61-second-repair-diagnostic-v4.txt
-            git add workplans/active/.protocol-61-second-repair-diagnostic-v4.txt
-            git commit -m 'Record corrected Protocol 6.1 repair diagnostic'
+            cp /tmp/protocol-61-second-repair-v5.log workplans/active/.protocol-61-second-repair-diagnostic-v5.txt
+            git add workplans/active/.protocol-61-second-repair-diagnostic-v5.txt
+            git commit -m 'Record Protocol 6.1 repair diagnostic v5'
             git push origin HEAD:ssdp-6.1-implementation
             exit "$status"
           fi
