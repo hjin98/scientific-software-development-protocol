@@ -62,5 +62,18 @@ class Protocol61EvidenceEvolutionTests(unittest.TestCase):
         self.assertIn("47e9155632c44493644b0b02fa1fa625703cf480", prompts)
         self.assertIn("repository default branch", prompts.lower())
 
+    def test_current_recovery_mapping_is_immutable_and_coherent(self) -> None:
+        recovery = "802e75af261efb4f70d71284d860613a2197b639"
+        bootstrap = "47e9155632c44493644b0b02fa1fa625703cf480"
+        versioning = self.read("source/shared/references/protocol-versioning-and-compatibility.md")
+        portability = self.read("PORTABILITY.md")
+        self.assertIn(f"6.1.0 -> {recovery}", versioning)
+        self.assertIn(f"| 6.1.0 | `{recovery}` |", portability)
+        self.assertIn(f"6.1.0 public-source bootstrap -> {bootstrap}", versioning)
+        self.assertIn(f"public-source bootstrap: `{bootstrap}`", portability)
+        self.assertNotEqual(recovery, bootstrap)
+        self.assertIn("0c90fda19bf6ed9cb0c4511beb3da80ace6584ed", versioning)
+        self.assertIn("historical", versioning.lower())
+
 if __name__ == "__main__":
     unittest.main()
