@@ -20,11 +20,11 @@ jobs:
           python-version: '3.12'
       - name: Install Core
         run: python -m pip install ./orchestrator -r orchestrator/requirements-dev.txt
-      - name: Run installed-product suite once
+      - name: Run installed-product suite through acceptance wrapper
         shell: bash
         run: |
           set +e
-          (cd orchestrator && python -m unittest -v tests.test_installed_product) 2>&1 | tee /tmp/installed-product.out
+          python orchestrator/scripts/run_core_tests.py -j 1 tests.test_installed_product 2>&1 | tee /tmp/installed-product.out
           exit 0
       - name: Artifact packaging contracts
         if: always()
