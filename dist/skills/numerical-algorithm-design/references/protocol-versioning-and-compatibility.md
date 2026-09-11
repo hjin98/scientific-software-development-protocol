@@ -61,6 +61,14 @@ The first Protocol 6.2 pre-acceptance bootstrap attempt was later invalidated by
 
 The invalidated SHA remains historical implementation evidence only and **must not** be used as current Protocol 6.2 public fallback. The replacement SHA is the immutable self-reference-safe source snapshot whose source regression, canonical package build, and independent standalone package/link validation passed before this descendant published it.
 
+Protocol 6.3 public-source bootstrap is likewise distinct from future recovery:
+
+```text
+6.3.0 public-source bootstrap -> 1484c1d3caa49d87cc15bc52a5e775399c1dae1b
+```
+
+That immutable ancestor passed repository regression, canonical package build, independent package validation and committed-distribution parity, Protocol 6.3 profile/snapshot parity, the full Orchestrator Core acceptance suite, and an exact-ref remote source/route/bootstrap realization before this descendant published the mapping. The bootstrap snapshot intentionally does not self-name; this later mapping supplies the version-to-ref authority. Protocol 6.3 recovery remains unavailable until complete qualification and independent Review close.
+
 The repository default branch is never a protocol-version oracle and a semantic version string is not assumed to be a Git ref.
 
 ## Orchestration profiles
@@ -73,7 +81,7 @@ Profiles remain independently version-bound:
 | `ssdp-protocol-6.0` | 6.0.0 | 2 | frozen historical |
 | `ssdp-protocol-6.1` | 6.1.0 | 2 | frozen historical rollback |
 | `ssdp-protocol-6.2` | 6.2.0 | 2 | accepted current |
-| `ssdp-protocol-6.3` | 6.3.0 | 2 unless profile contract qualification proves a schema change is necessary | candidate/new only after 6.3 profile generation |
+| `ssdp-protocol-6.3` | 6.3.0 | 2 | candidate; generated and independently parity-checked |
 
 During 6.3 qualification, the 6.2 profile bytes are frozen as the immutable predecessor resource while 6.2 remains accepted-current until 6.3 cutover. Schema v2 remains unless an actual machine profile contract changes. Core selects by declared protocol/profile identity, not one global latest constant. Frozen profile bytes/behavior remain independently testable. A generic profile/package may include 6.3 PEM doctrine/template but never a live project's `PROJECT-ENGINEERING-MEMORY.md` or derived local project summary.
 
@@ -99,13 +107,13 @@ Protocol 6.3 follows the same self-reference-safe separation learned from 6.2, w
 
 1. build the semantic/source candidate and self-hosted **candidate** PEM without claiming recovery;
 2. run source regression, 6.3 schema/route/counterfactual tests, inherited qualification, package/profile/Core integrity, static sensors and required falsification passes on the assembled candidate;
-3. create a **public-source bootstrap** only from a source state whose required bootstrap-readiness checks already passed; later descendant mapping records that exact immutable ref—never `main`/latest/guessed version;
+3. use public-source bootstrap `1484c1d3caa49d87cc15bc52a5e775399c1dae1b` for version-bound 6.3 public fallback; that already-existing source state passed bootstrap-readiness checks before this later descendant published the exact mapping—never substitute `main`/latest/guessed version;
 4. generate a new `ssdp-protocol-6.3` profile/prompts/snapshots without altering frozen 6.2 bytes;
 5. perform independent Protocol 6.3 Review against the assembled candidate and accepted 6.2 baseline;
 6. only after all required acceptance/Review/impact items pass, establish an immutable 6.3 recovery target and publish its mapping from a descendant commit because a commit cannot self-name;
 7. regenerate mapping-bearing descendants and rerun recovery/parity/package/Core acceptance before any accepted-current cutover.
 
-Until the exact 6.3 bootstrap and recovery identities exist and their qualifying evidence is recorded, **do not insert placeholders or guessed SHAs into current fallback mappings** and do not treat the candidate profile as accepted-current. The accepted 6.2 mappings above remain operative for 6.2.
+The exact 6.3 public-source bootstrap is now `1484c1d3caa49d87cc15bc52a5e775399c1dae1b` and is usable only as the version-bound 6.3 public fallback. Recovery is still unavailable: **do not insert placeholders or guessed SHAs into recovery mappings** and do not treat the candidate profile as accepted-current. The accepted 6.2 mappings above remain operative for 6.2.
 
 ## Candidate identity and compatibility
 

@@ -15,11 +15,11 @@ With `PROTOCOL_SOURCE = AUTO_LOCAL_FIRST`, use a governing-version-compatible in
 ```text
 PUBLIC_REPOSITORY = https://github.com/hjin98/scientific-software-development-protocol
 CURRENT_PROTOCOL = 6.3.0
-CURRENT_PUBLIC_REF = UNAVAILABLE_PENDING_6.3_BOOTSTRAP_QUALIFICATION
+CURRENT_PUBLIC_REF = 1484c1d3caa49d87cc15bc52a5e775399c1dae1b
 ACCEPTED_6_2_PUBLIC_REF = 5a062ebc472755607b9dc66d33a5ebbc4b7429aa
 ```
 
-**Protocol 6.3 pre-bootstrap state:** automatic public fallback for current 6.3 is intentionally unavailable until an already validated self-reference-safe source snapshot is designated by a later descendant. Never use repository default/latest, a guessed semantic-version ref, the current candidate branch, or the accepted 6.2 bootstrap as a substitute for a 6.3 ref. Version-bound 6.2 work continues to use exactly `5a062ebc472755607b9dc66d33a5ebbc4b7429aa`; historical 5.16/6.0/6.1 resolution remains version-bound to its own immutable mapping.
+**Protocol 6.3 bootstrap state:** automatic public fallback for current version-bound 6.3 uses exactly immutable ref `1484c1d3caa49d87cc15bc52a5e775399c1dae1b`. That self-reference-safe source snapshot passed bootstrap-readiness and exact-ref remote route realization before a later descendant published this mapping; the bootstrap source intentionally does not self-name. Never use repository default/latest, a guessed semantic-version ref, the current candidate branch, or the accepted 6.2 bootstrap as a substitute for the 6.3 ref. Version-bound 6.2 work continues to use exactly `5a062ebc472755607b9dc66d33a5ebbc4b7429aa`; historical 5.16/6.0/6.1 resolution remains version-bound to its own immutable mapping.
 
 `AUTO_EXECUTE` means inspect the real target, infer ordinary discoverable context, and perform every authorized action rather than stopping at commands/snippets/next steps. Prefer action over clarification when context is discoverable; ask only when proceeding would require guessing consequential authority, semantics, target, or irreversible action.
 
