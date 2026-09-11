@@ -1,1 +1,0 @@
-The following transient probe artifacts must be deleted before the first Protocol 6.3 semantic-source candidate: `source/shared/references/pem-routing-placeholder.md` and `source/roles/software-design/SKILL-6.3.tmp`. They own no semantics and must not enter generated packages. This is non-authoritative implementation evidence only.

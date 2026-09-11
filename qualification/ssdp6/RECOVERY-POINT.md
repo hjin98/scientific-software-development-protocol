@@ -1,1 +1,0 @@
-Current source remains pre-candidate. Resume by deleting transient probes and editing canonical owners.

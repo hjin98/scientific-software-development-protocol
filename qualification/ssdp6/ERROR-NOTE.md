@@ -1,1 +1,0 @@
-Implementation encountered repeated accidental creation of transient evidence notes while preparing a Git tree update. These notes are non-semantic and must be deleted in the next tree reconciliation. No accepted or proposed protocol semantics depend on them.

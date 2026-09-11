@@ -1,1 +1,0 @@
-Transient implementation note: `source/shared/references/pem-routing-placeholder.md` was created during route probing and owns no semantics. It is explicitly marked for deletion in the next source-reconciliation tree commit. This note is non-authoritative evidence and may remain only as implementation chronology; the placeholder itself must not survive the semantic candidate.

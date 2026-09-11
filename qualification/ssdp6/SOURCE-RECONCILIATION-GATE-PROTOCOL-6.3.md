@@ -1,1 +1,0 @@
-Stage B remains in progress. No Protocol 6.3 semantic candidate/bootstrap/profile/recovery is claimed while canonical 6.2 role/concern routers remain unreconciled. Transient probe paths are explicitly non-semantic and scheduled for deletion in the canonical source-reconciliation tree commit.

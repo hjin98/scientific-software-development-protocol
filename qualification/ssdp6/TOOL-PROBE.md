@@ -1,1 +1,0 @@
-This file is transient implementation evidence and must be removed before semantic candidate.

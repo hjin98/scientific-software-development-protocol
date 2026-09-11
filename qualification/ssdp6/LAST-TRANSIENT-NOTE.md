@@ -1,1 +1,0 @@
-This note marks the end of transient source-probe notes. All probe-only files are scheduled for deletion before semantic candidate.

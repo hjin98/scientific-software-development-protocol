@@ -1,1 +1,0 @@
-No further transient probe artifacts should be created. Remove all probe-only files before semantic candidate.

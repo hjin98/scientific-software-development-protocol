@@ -1,1 +1,0 @@
-A Git tree cleanup is required before semantic candidate.
