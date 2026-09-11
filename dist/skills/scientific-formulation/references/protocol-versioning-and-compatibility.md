@@ -1,6 +1,6 @@
 # Protocol Versioning, Historical Recovery, and Compatibility
 
-Own protocol/workplan/profile version binding, immutable historical recovery, public-source fallback identity, and compatibility interpretation. Detailed semantic chronology belongs in `history/SEMANTIC_EVOLUTION.md`; ordinary current work should not replay old control-plane vocabulary.
+Own protocol/workplan/profile version binding, immutable historical recovery, public-source fallback identity, Project Engineering Memory (PEM) schema/version adoption behavior, and compatibility interpretation. Detailed semantic chronology belongs in `history/SEMANTIC_EVOLUTION.md`; ordinary current work should not replay old control-plane vocabulary.
 
 ## Version classes
 
@@ -12,15 +12,25 @@ Own protocol/workplan/profile version binding, immutable historical recovery, pu
 
 Protocol 6.0 is major because D1 scientific formulation and D2 numerical-method design become first-class authority domains in a recursive D1-D4 abstraction/concretization model. Protocol 6.1 is minor: current concretization terminology, evidence lifecycle/applicability/dependency/evolution, impact closure, human-facing background/abbreviation standards, and distinct frozen/current profiles. Protocol 6.2 is a backward-compatible representation/progressive-disclosure strengthening: accepted 6.1 semantics remain required while current communication/routing is losslessly compacted and the current kernel path becomes `abstraction-and-concretization.md`.
 
+Protocol 6.3 is a backward-compatible project-learning strengthening over 6.2: accepted 6.2 semantics remain required while evidence-backed, project-local, non-authoritative engineering memory, conditional Historical Applicability Set (HAS) use, capability-transfer/closeout learning, evidence-binding health, and branch/schema-safe memory lifecycle are added. It does not create D5 or let history/statistics/memory override D1-D4/current project/external authority.
+
 ## Capability preservation across versions
 
 Protocol 6 generalizes Protocol 5 rather than maintaining a second current vocabulary. Restricting active scope to D3 architecture and D4 implementation recovers the former software-local design->implementation specialization. Historical Tier terms map to applicable accepted parents/constraints, cycle-scoped child decisions, delegated concretization, and development economy.
 
 Capability, not obsolete wording, is the compatibility oracle. Every still-valid Protocol 5 safeguard remains recoverable under current generalized rules unless deliberately replaced by stronger accepted authority; compression that loses behavior is a defect. Concise lineage: 5.1 documentation specialist; 5.2 hygiene; 5.3 stage/final acceptance + separate production qualification; 5.4 development economy/version-bound plans/evidence-context reuse; 5.5 implementation fidelity; 5.6 proxy-proof acceptance; 5.7 stewardship/outcome alignment; 5.8 effective compression/canonical ownership; 5.9 portable deterministic routing; 5.10 snapshot-complete handoff; 5.11 tool-assisted engineering; 5.12 convergence/cycle economy; 5.13 deterministic tool entry/CodeQL/progressive disclosure; 5.14 solution-boundary/active simplicity; 5.15 language profiles/cross-language performance; 5.16 long-horizon health/Verification/Stabilization/maintenance audit/workflow prompts/public fallback. Detailed rationale is historical, not normal hot-path doctrine.
 
-## Workplan binding and evidence reuse
+Protocol 6.3 additionally preserves every accepted 6.2 behavioral/representation/routing/package/profile capability. PEM is additive decision support: a version-bound 6.2 task remains valid without loading/interpreting a 6.3 project memory, and the existence of a 6.3 PEM cannot retroactively alter a 6.2 contract.
 
-Every workplan that inherits protocol behavior binds to its declared `protocol_version`. A newer installed/latest skill never silently reinterprets older work. Older active work may continue under its declared version or explicitly adopt a compatible newer version after changed obligations are reconciled. A 5.x->6.x adoption is a major migration; 6.0->6.1->6.2 are backward-compatible minor steps but still preserve explicit version identity.
+## Workplan binding, PEM adoption, and evidence reuse
+
+Every workplan that inherits protocol behavior binds to its declared `protocol_version`. A newer installed/latest skill never silently reinterprets older work. Older active work may continue under its declared version or explicitly adopt a compatible newer version after changed obligations are reconciled. A 5.x->6.x adoption is a major migration; 6.0->6.1->6.2->6.3 are backward-compatible minor steps but still preserve explicit version identity.
+
+For 6.2-bound work, any 6.3 `PROJECT-ENGINEERING-MEMORY.md` is inert protocol-wise: do not delete it, reinterpret it under 6.2, or let it modify 6.2 acceptance. Explicit adoption of 6.3 validates a supported memory schema, resolves the project-governed accepted/base memory, and reconciles materially relevant memory/HAS obligations from the bounded adoption scope.
+
+PEM `memory_schema_version` is independent of SSDP protocol version and orchestration workflow-profile schema. Protocol 6.3 supports PEM schema 1. Unknown/newer/incompatible schemas fail safe for memory-dependent decisions: only explicitly forward-readable identity metadata may be inspected, and the memory-dependent decision becomes `REVIEW_REQUIRED` until a compatible reader or explicit lossless migration exists. Unsupported memory does not block unrelated protocol routes.
+
+A restored old PEM snapshot is not current merely because it parses. Re-adoption/recovery reconciles schema, project/scope identity, accepted base, candidate overlay, owners, evidence/binding health, and the uncovered project interval. `reconciled_through` is an identity horizon, not proof of exhaustive historical coverage.
 
 Previously executed evidence remains reusable only while no changed protocol obligation, governed claim/concretization, evidence specification/oracle, candidate, or material environment dimension can plausibly change applicability. Apply the evidence owner; version adoption does not automatically invalidate unrelated evidence.
 
@@ -33,7 +43,7 @@ Previously executed evidence remains reusable only while no changed protocol obl
 6.2.0  -> b59adc77efe6951912cfd705cc43830c58ca27d0
 ```
 
-Resolve historical work through immutable version-specific source/profile semantics, never `main`/latest. Frozen source/publication/profile artifacts remain historical truth and are not rewritten to current terminology.
+Resolve historical work through immutable version-specific source/profile semantics, never `main`/latest. Frozen source/publication/profile artifacts remain historical truth and are not rewritten to current terminology. Protocol 6.3 must not mutate any frozen 5.16/6.0/6.1/6.2 resource; 6.3 receives new versioned resources after qualification.
 
 Protocol 6.1 public-source bootstrap is distinct from recovery:
 
@@ -62,13 +72,14 @@ Profiles remain independently version-bound:
 | `sdp-protocol-5.16` | 5.16.0 | 1 | frozen historical |
 | `ssdp-protocol-6.0` | 6.0.0 | 2 | frozen historical |
 | `ssdp-protocol-6.1` | 6.1.0 | 2 | frozen historical rollback |
-| `ssdp-protocol-6.2` | 6.2.0 | 2 | accepted current |
+| `ssdp-protocol-6.2` | 6.2.0 | 2 | accepted current while 6.3 candidate is being qualified |
+| `ssdp-protocol-6.3` | 6.3.0 | 2 unless profile contract qualification proves a schema change is necessary | candidate/new only after 6.3 profile generation |
 
-Schema v2 remains unless an actual machine profile contract changes. Core selects by declared protocol/profile identity, not one global latest constant. Frozen profile bytes/behavior remain independently testable.
+Schema v2 remains unless an actual machine profile contract changes. Core selects by declared protocol/profile identity, not one global latest constant. Frozen profile bytes/behavior remain independently testable. A generic profile/package may include 6.3 PEM doctrine/template but never a live project's `PROJECT-ENGINEERING-MEMORY.md` or derived local project summary.
 
 ## Protocol 6.2 public-source and recovery staging
 
-The replacement public-source bootstrap is `5a062ebc472755607b9dc66d33a5ebbc4b7429aa`. When `AUTO_LOCAL_FIRST` finds no governing-version-compatible installed source, current Protocol 6.2 may fall back to the canonical repository at **that exact immutable ref**. Never use the invalidated attempt, `main`, latest, or a guessed semantic-version ref. The bootstrap source itself intentionally does not self-name; its later descendant mapping is the authority for the exact ref.
+The replacement public-source bootstrap is `5a062ebc472755607b9dc66d33a5ebbc4b7429aa`. When `AUTO_LOCAL_FIRST` finds no governing-version-compatible installed source, current accepted Protocol 6.2 may fall back to the canonical repository at **that exact immutable ref**. Never use the invalidated attempt, `main`, latest, or a guessed semantic-version ref. The bootstrap source itself intentionally does not self-name; its later descendant mapping is the authority for the exact ref.
 
 The accepted Protocol 6.2 recovery target is:
 
@@ -82,10 +93,24 @@ Git commits cannot self-name, so the recovery mapping was published only by late
 
 Protocol 6.2 is accepted-current after qualification, independent Review, immutable recovery mapping, generated-artifact reconciliation, semantic-evolution/Protocol-7 handoff reconciliation, and lifecycle closeout. Protocol 6.1 remains immutable historical rollback authority at `802e75af261efb4f70d71284d860613a2197b639` for version-bound 6.1 work.
 
+## Protocol 6.3 candidate/bootstrap/recovery staging
+
+Protocol 6.3 follows the same self-reference-safe separation learned from 6.2, with stronger memory/version separation:
+
+1. build the semantic/source candidate and self-hosted **candidate** PEM without claiming recovery;
+2. run source regression, 6.3 schema/route/counterfactual tests, inherited qualification, package/profile/Core integrity, static sensors and required falsification passes on the assembled candidate;
+3. create a **public-source bootstrap** only from a source state whose required bootstrap-readiness checks already passed; later descendant mapping records that exact immutable ref—never `main`/latest/guessed version;
+4. generate a new `ssdp-protocol-6.3` profile/prompts/snapshots without altering frozen 6.2 bytes;
+5. perform independent Protocol 6.3 Review against the assembled candidate and accepted 6.2 baseline;
+6. only after all required acceptance/Review/impact items pass, establish an immutable 6.3 recovery target and publish its mapping from a descendant commit because a commit cannot self-name;
+7. regenerate mapping-bearing descendants and rerun recovery/parity/package/Core acceptance before any accepted-current cutover.
+
+Until the exact 6.3 bootstrap and recovery identities exist and their qualifying evidence is recorded, **do not insert placeholders or guessed SHAs into current fallback mappings** and do not treat the candidate profile as accepted-current. The accepted 6.2 mappings above remain operative for 6.2.
+
 ## Candidate identity and compatibility
 
-For normal Git repositories, semantic candidate commit plus absence of unintended product-defining changes is usually sufficient source identity. Later qualification/lifecycle commits must distinguish themselves from the semantic candidate; any later semantic mutation reopens affected qualification.
+For normal Git repositories, semantic candidate commit plus absence of unintended product-defining changes is usually sufficient source identity. Later qualification/lifecycle/PEM-reconciliation commits must distinguish themselves from the semantic candidate; any later semantic mutation reopens affected qualification. A branch-local PEM overlay is likewise not accepted/base merely because it shares the candidate branch.
 
-Preserve API/data/runtime/profile compatibility only where an actual supported contract requires it. Historical machinery does not become compatibility authority through existence. Retain compatibility layers only for a supported version/migration window or while they remain the minimum justified concretization.
+Preserve API/data/runtime/profile compatibility only where an actual supported contract requires it. Historical machinery does not become compatibility authority through existence or PEM recording. Retain compatibility layers only for a supported version/migration window or while they remain the minimum justified concretization.
 
 Apply the Lossless Representation Rule: keep current operational version/recovery decisions hot and exact; keep detailed historical chronology cold but discoverable through semantic history and immutable recovery sources.

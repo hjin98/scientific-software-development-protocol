@@ -1,6 +1,6 @@
 ---
 name: software-implementation
-description: Implement, refactor, test, package, and validate D4 concretizations under Protocol 6.2 while preserving accepted D1-D3/D4 authority, affected regression/integration, evidence applicability, active simplicity, and upward Challenge routing.
+description: Implement, refactor, test, package, and validate D4 concretizations under Protocol 6.3 while preserving accepted D1-D3/D4 authority, affected regression/integration, evidence applicability, project learning, active simplicity, and upward Challenge routing.
 ---
 
 # Software Implementation
@@ -15,6 +15,7 @@ Load only triggered concern owners:
 
 - accepted workplan, stage/handoff/rework/impact closure -> [Workflow and workplans](references/workflow-and-workplans.md);
 - evidence applicability/dependency/evolution -> [Evidence, evolution, and semantic dependencies](references/evidence-evolution-and-dependencies.md); executable acceptance/regression/integration/proxy-proof/oracle/qualification -> [Testing and validation](references/testing-and-validation.md);
+- mature concretization rework, replacement/consolidation, suspected recurrence, substantial optimization/scaling, migration/recovery/revert, or an active workplan that can materially depend on demonstrated project history -> [Project Engineering Memory](references/project-engineering-memory.md); resolve accepted/base memory plus any validated same-branch overlay, preserve every materially relevant Historical Applicability Set (HAS) disposition, and treat evidence-only learned capabilities as replaceable design priors rather than authority;
 - architecture/ownership/complexity/redesign question -> [Software architecture and design](references/architecture-and-design.md); recurrence/simplification -> [Convergence and development-cycle economy](references/convergence-and-cycle-economy.md); long-horizon structural/test risk or Stabilization -> [Long-horizon code health](references/long-horizon-code-health.md);
 - protocol-version/historical recovery -> [Protocol versioning and compatibility](references/protocol-versioning-and-compatibility.md);
 - material executable language/runtime/build semantics -> [Language engineering profiles](references/language-profiles.md), which dispatches to Python/C++ profiles;

@@ -1,6 +1,6 @@
 ---
 name: software-design
-description: Design, review, challenge, and maintain D3 software architecture under Protocol 6.2; create D3->D4 implementation contracts, preserve applicable D1/D2 and external constraints, track evidence/dependency impact, and route upstream scientific/numerical defects to their owners.
+description: Design, review, challenge, and maintain D3 software architecture under Protocol 6.3; create D3->D4 implementation contracts, preserve applicable D1/D2 and external constraints, track evidence/dependency impact, and route upstream scientific/numerical defects to their owners.
 ---
 
 # Software Design
@@ -15,6 +15,7 @@ Load only triggered concern owners:
 
 - D3->D4 workplan, handoff, lifecycle/rework/impact closure, implementation Review -> [Workflow and workplans](references/workflow-and-workplans.md);
 - evidence applicability/dependency/evolution -> [Evidence, evolution, and semantic dependencies](references/evidence-evolution-and-dependencies.md); regression/integration/proxy-proof/oracle/qualification method -> [Testing and validation](references/testing-and-validation.md);
+- mature architecture/concretization rework, replacement/consolidation of mature machinery, suspected recurrence, substantial optimization/scaling, migration/recovery/revert, or an active workplan that can materially depend on demonstrated project history -> [Project Engineering Memory](references/project-engineering-memory.md); resolve the project-governed accepted/base memory plus any validated same-branch candidate overlay, build a Historical Applicability Set (HAS) over every materially relevant entry regardless of temperature, and build a capability-transfer map when replacing mature machinery;
 - protocol-version/historical recovery -> [Protocol versioning and compatibility](references/protocol-versioning-and-compatibility.md);
 - recurrence/simplification/review saturation -> [Convergence and development-cycle economy](references/convergence-and-cycle-economy.md); longitudinal health/Stabilization -> [Long-horizon code health](references/long-horizon-code-health.md);
 - scientific meaning -> [Scientific formulation](references/scientific-formulation.md); estimator/discretization/error/precision/stochastic meaning -> [Numerical algorithm design](references/numerical-algorithm-design.md); cross-domain scientific evidence -> [Scientific software](references/scientific-software.md);
