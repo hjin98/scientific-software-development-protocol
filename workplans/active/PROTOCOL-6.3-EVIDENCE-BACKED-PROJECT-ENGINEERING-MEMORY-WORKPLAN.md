@@ -6,7 +6,7 @@ target_protocol_version: 6.3.0
 status: active
 created_date: 2026-09-11
 reviewed_date: 2026-09-11
-design_closure_status: pass-after-fourth-review-repair
+design_closure_status: pass-after-fifth-review-repair
 implementation_handoff: authorized
 active_serious_challenge: none
 parent_protocol_62_recovery: b59adc77efe6951912cfd705cc43830c58ca27d0
@@ -21,1857 +21,736 @@ branch_point: bf856f742d1744a8ff50f300ee6493fb93e5c9d0
 
 ## Background and terminology
 
-The **Scientific Software Development Protocol (SSDP)** preserves detailed engineering history in Git, workplans, reviews, qualification records, tests, benchmarks, semantic-evolution records, generated/package evidence, and immutable recovery snapshots. Protocol 6.2 made this history cheaper to use through lossless representation and progressive disclosure, but a fresh-context engineer can still miss important project-specific lessons distributed across long historical evidence chains.
+The **Scientific Software Development Protocol (SSDP)** already preserves engineering history in Git, workplans, reviews, qualifications, tests, benchmarks, semantic-evolution records, generated/package evidence, and immutable recovery snapshots. Protocol 6.2 added lossless representation and progressive disclosure, but a fresh-context engineer can still miss important project-specific lessons distributed across that history.
 
-Protocol 6.3 adds a compact, current, evidence-backed learning layer without replacing history, creating a fifth authority domain, or turning historical success into architectural dogma.
+Protocol 6.3 adds **Project Engineering Memory (PEM)**: a compact, project-local, non-authoritative representation of demonstrated engineering lessons. It must help a fresh agent recover what repeatedly failed, what repeatedly worked, why, under what conditions, with what evidence, and with what current applicability. It must not become a fifth authority domain, a substitute for history, or a mechanism for freezing old implementations.
 
-For this plan:
+Terms used by this workplan:
 
-- **Project Engineering Memory (PEM)** — a compact, project-local, non-authoritative representation of demonstrated engineering lessons, recurring failure families, successful patterns, important discoveries, capability lessons, and high-impact current notices, with exact routes to supporting evidence and governing authority where one exists;
-- **historical evidentiary corpus** — durable project evidence from which PEM findings are assessed, including commits, workplans, reviews, qualification records, tests, benchmarks, profiles, analyses, semantic-evolution records, and other applicable observations; this corpus is evidence/provenance, not D1-D4 authority;
-- **evidence binding** — a resolvable, normally immutable reference from a PEM claim to the evidence specification, realization, observation, and assessment that warrants it;
-- **binding health** — whether a material evidence/authority route remains resolvable and interpretable enough to support current use (`HEALTHY`, `REVIEW_REQUIRED`, `UNAVAILABLE`, or `RETIRED`);
-- **evidence admissibility state** — whether an evidence row may contribute to a current claim/count (`ADMISSIBLE`, `REVIEW_REQUIRED`, `INCONCLUSIVE`, `CHALLENGED`, `REJECTED_OR_INVALID`, `STALE_OR_INAPPLICABLE`, or `RETIRED`); historical retention and current admissibility are separate;
-- **learning family** — a stable generalized project lesson. Failure-family membership follows the existing convergence rule: materially equivalent manifestations share a governing invariant, semantic owner/authority class, and materially equivalent failure mechanism; textual similarity or a broad subsystem label is insufficient;
-- **occurrence** — one independently introduced or independently existing confirmed manifestation of a failure family; one cause producing many symptoms is normally one occurrence;
-- **evaluated application** — one materially distinct attempt to apply a positive pattern under a declared regime, with an admissible outcome assessment of supporting, neutral/no-demonstrated-benefit, contradicting, or inconclusive;
-- **successful application** — an evaluated application whose claimed benefit and governing constraints are supported by admissible evidence;
-- **aggregation scope** — the bounded regime over which occurrence/application statistics may be combined without hiding material differences in owner, implementation class, language/runtime, hardware/backend, input regime, lifecycle context, or other dimensions that can change interpretation;
-- **coverage state** — the declared extent to which the historical corpus has been examined for a family or PEM instance; absence from incomplete memory is not evidence of absence;
-- **memory temperature** — an importance/attention classification (`HOT`, `WARM`, `COLD`, or `UNASSESSED`) derived from confirmed recurrence/application statistics plus explicit evidence-backed impact promotion; memory temperature is distinct from Protocol 6.2 hot-path/cold-path activation state and is never authority or an acceptance threshold;
-- **evidence maturity** — confidence in a bounded finding (`PROVISIONAL`, `SUPPORTED`, or `PROVEN`), kept distinct from evidence admissibility and current applicability/conflict/retirement state;
-- **authority binding** — the relation between a capability lesson and current accepted semantic authority: `EVIDENCE_ONLY`, `AUTHORITY_BOUND`, or `PROPOSED_FOR_PROMOTION`; only an `AUTHORITY_BOUND` capability is mandatory, and it is mandatory because of its cited current D1-D4/project owner, not because PEM says so;
-- **positive-guidance eligibility** — whether a success pattern may be presented in the active summary as a recommended project instinct. A pattern is eligible only when its bounded claim is current, sufficiently supported, free of unresolved material contradiction for that regime, and its material evidence/authority bindings are healthy and admissible;
-- **lifecycle context** — where an occurrence/application was observed, such as development branch, qualification, accepted-current runtime, production, recovery/migration, or historical-only regime; this prevents development observations from being misrepresented as production incidence;
-- **Historical Applicability Set (HAS)** — the bounded current-work record stating which materially relevant PEM families/capability lessons/notices apply, do not apply with reason, or require deeper evidence inspection;
-- **capability-transfer map** — a mapping from a replaced mechanism to each materially relevant learned capability, its authority-binding state, governing owner when any, replacement owner/mechanism or deliberate retirement, and verifying evidence;
-- **logical canonical memory** — one project-level PEM source of current meaning with one discoverable root; for a small project this is normally one Markdown file, while justified scale/concurrency/context pressure may partition cold canonical detail without creating duplicate hand-authored authorities;
-- **accepted project-memory basis** — the exact project integration/release/acceptance state under project Git/workflow policy whose PEM is the accepted/base memory for new work; branch name, default branch, newest timestamp, or the PEM file claiming itself accepted is not sufficient by itself;
-- **fresh-context agent** — an agent or engineer that does not carry reliable private conversational memory of prior project cycles and therefore must recover project state from durable artifacts.
+- **historical evidentiary corpus** - durable project evidence from which PEM findings are assessed; evidence/provenance, not D1-D4 authority;
+- **evidence binding** - a resolvable reference from a PEM claim to the evidence specification, realization, observation, and assessment that warrants it;
+- **binding health** - whether a material evidence/authority route remains resolvable and interpretable (`HEALTHY`, `REVIEW_REQUIRED`, `UNAVAILABLE`, `RETIRED`);
+- **evidence admissibility state** - whether a row may contribute to a current bounded claim/count (`ADMISSIBLE`, `REVIEW_REQUIRED`, `INCONCLUSIVE`, `CHALLENGED`, `REJECTED_OR_INVALID`, `STALE_OR_INAPPLICABLE`, `RETIRED`);
+- **learning family** - a stable generalized project lesson, classified as `FAILURE_FAMILY`, `SUCCESS_PATTERN`, `DISCOVERY`, or `PRESERVATION_CAPABILITY`;
+- **occurrence** - one independently introduced or independently existing confirmed manifestation of a failure family; one causal episode producing many symptoms is normally one occurrence;
+- **evaluated application** - one materially distinct attempt to apply a positive pattern under a declared regime, assessed as `SUPPORTING`, `NEUTRAL`, `CONTRADICTING`, or `INCONCLUSIVE`;
+- **successful application** - an evaluated application whose claimed benefit and governing constraints are supported by admissible evidence;
+- **aggregation scope** - the bounded regime over which statistics may be combined without hiding material differences in owner, implementation class, language/runtime, backend/hardware, input regime, lifecycle context, or project identity;
+- **coverage state** - declared historical-search coverage (`UNINITIALIZED`, `PARTIAL`, `RECONCILED_FOR_DECLARED_SCOPE`); absence from incomplete memory is never evidence of absence;
+- **memory temperature** - importance/attention classification (`HOT`, `WARM`, `COLD`, `UNASSESSED`), distinct from Protocol 6.2 hot/cold activation and never authority or a pass threshold;
+- **evidence maturity** - confidence in a bounded finding (`PROVISIONAL`, `SUPPORTED`, `PROVEN`), distinct from admissibility and current applicability;
+- **authority binding** - relation between a learned capability and current authority: `EVIDENCE_ONLY`, `AUTHORITY_BOUND`, or `PROPOSED_FOR_PROMOTION`;
+- **positive-guidance eligibility** - whether a success pattern may be phrased as a recommended project instinct; it requires current applicability, adequate support, healthy/admissible warrants, and no unresolved material contradiction for the stated regime;
+- **lifecycle context** - where an event was observed, such as development, qualification, accepted-current runtime, production, recovery/migration, or historical-only;
+- **Historical Applicability Set (HAS)** - the current-work record of materially relevant PEM entries and their applicability dispositions;
+- **capability-transfer map** - mapping from replaced machinery to learned capability, authority-binding state, current owner if any, replacement/retirement, and verification;
+- **logical canonical memory** - one project-level PEM source of current meaning with one discoverable root; cold canonical detail may be partitioned only when justified and without duplicate hand-authored truth;
+- **logical-memory publication unit** - the coherent root/detail state that must be reviewed and published together when one semantic PEM change spans multiple canonical files;
+- **accepted project-memory basis** - the exact project integration/release/acceptance state selected by project Git/workflow policy whose PEM is the base for new work; branch/default/latest/timestamp/self-declaration is insufficient;
+- **candidate memory overlay** - validated same-branch candidate PEM changes composed explicitly over the accepted/base memory for that branch only;
+- **PEM relation** - a typed non-authoritative relationship among PEM entries used for lineage or impact closure; it may not recursively manufacture warrant;
+- **causal attribution** - a claim that an intervention or mechanism caused an observation, stronger than merely recording the observation or association and therefore requiring discriminating evidence;
+- **fresh-context agent** - an agent or engineer that must recover project state from durable artifacts rather than private conversational memory.
 
-The goal is not a bug database, universal project graph, mandatory archaeology pass, or cautious freeze on change. The goal is to give a fresh-context agent the smallest complete project-aware representation of engineering experience likely to improve the current decision while retaining exact evidence, uncertainty, contradictory outcomes, current authority boundaries, and the conditions under which each lesson remains applicable.
+## 1. Outcome, authority, and parent contract
 
-## 1. Outcome, authority, baseline, and scope
+Protocol 6.3 is a backward-compatible minor strengthening of accepted Protocol 6.2. The accepted semantic/rollback parent is `b59adc77efe6951912cfd705cc43830c58ca27d0`; the 6.2 semantic candidate through that recovery is `ebbc4591bdfed039512026b8acb3a6749475c1c5`; public-source bootstrap is `5a062ebc472755607b9dc66d33a5ebbc4b7429aa`; mapping and generated reconciliation are `bc76b16fda96be09f38a1b40a2ef877e8309534d` and `ca622ea2b1c33e70668060cf0cc2fe9138776f7f`. These identities are distinct and must remain distinct.
 
-Protocol 6.3 SHALL be a backward-compatible minor strengthening of accepted Protocol 6.2. It adds evidence-backed engineering-memory semantics and workflow integration without weakening accepted D1-D4 authority, evidence, Challenge, compatibility, representation, routing, package, profile, Git, security, testing, repository-intake, documentation, or lifecycle rules.
+Protocol 6.3 SHALL preserve every accepted Protocol 6.2 doctrine and still-valid historical capability, including T01-T39, D1-D4 authority and routing, Challenge/Serious Challenge, evidence lifecycle/applicability/independence, first-clean-local-defect economy, owner-layer simplification, lossless representation, current-vs-history separation, cold-route behavior, replacement-bootstrap discipline, static activation sensors, immutable 5.16/6.0/6.1/6.2 resources, profile identity, source/generated/package parity, all 115 accepted 6.2 behavioral scenarios, affected requalifications and Stage-G recovery/package acceptance, human-facing background/terminology rules, assembled-candidate independent Review, and Git/concurrent-work/history-mutation safeguards.
 
-The exact accepted 6.2 identities governing this plan are:
+Tests, commits, reviews, workplans, statistics, history, and PEM are evidence/coordination/representation according to their actual role. None becomes D1-D4 semantic authority through repetition, packaging, temperature, or qualification status. If implementation exposes a genuine defect in accepted 6.2 authority, stop at the earliest affected owner and use the existing Challenge process; PEM cannot choose new semantic truth.
 
-```text
-accepted current protocol:               6.2.0
-accepted 6.2 recovery:                   b59adc77efe6951912cfd705cc43830c58ca27d0
-6.2 semantic candidate through recovery: ebbc4591bdfed039512026b8acb3a6749475c1c5
-6.2 public-source bootstrap:              5a062ebc472755607b9dc66d33a5ebbc4b7429aa
-6.2 recovery mapping commit:              bc76b16fda96be09f38a1b40a2ef877e8309534d
-6.2 mapping-bearing generated commit:     ca622ea2b1c33e70668060cf0cc2fe9138776f7f
-6.3 branch point on accepted main:        bf856f742d1744a8ff50f300ee6493fb93e5c9d0
-```
+Protocol 6.2 remains accepted-current until the full 6.3 lifecycle passes. This workplan does not authorize merge/cutover to `main`.
 
-The recovery identity is the immutable semantic/rollback baseline. Later mapping/generated/main descendants are separately relevant to current document-control, generated/package parity, and ancestry. Do not collapse these identities.
+### 1.1 Non-goals
 
-Protocol 6.2 remains accepted-current until Protocol 6.3 completes semantic qualification, independent Review, immutable public bootstrap, recovery mapping, generated/profile/package reconciliation, semantic-evolution/authority-index reconciliation, affected Protocol 7 inheritance reconciliation, and lifecycle closeout. Version-bound older work remains governed by its declared version; a newer installed skill never silently reinterprets it.
+Protocol 6.3 MUST NOT create a universal database/graph/daemon/background indexer; force full-history scans on ordinary tasks; make PEM universal hot context; turn every local bug into durable memory; infer probabilities from raw counts; treat historical mechanisms as invariants; create a second hand-authored JSON/YAML authority; package live project PEM as generic SSDP content; silently interpret unknown schemas; pool incompatible regimes or projects; count copied/forked history as local incidence; or broaden this revision into unrelated Protocol 7 architecture.
 
-This workplan has no semantic-supersession escape hatch. If implementation reveals that accepted 6.2 authority is materially false, contradictory, inadequate, or impossible to preserve coherently, stop at the earliest affected owner and use the existing Challenge/Serious Challenge process. A PEM edit cannot choose new semantic truth.
-
-### 1.1 Accepted 6.2 preservation baseline
-
-Protocol 6.3 MUST preserve every accepted Protocol 6.2 doctrine and still-valid historical capability, including at minimum:
-
-- complete T01-T39 semantic preservation as independently reviewed under 6.2;
-- feasibility/admissibility before optimization and minimum justified total complexity;
-- authority provenance, one current semantic owner, precedence, evidence-not-authority, and bounded human ratification;
-- D1-D4 directed-acyclic-graph routing, reduced routes, multi-parent fidelity/adequacy review, bounded invalidation, Challenge/Serious Challenge, and composed closure;
-- D1, D2, D3, and D4 owner semantics;
-- documentation, repository-hygiene, maintenance-audit, evidence, testing, workflow, long-horizon, language/tool, security, performance, storage, release, debugging, Git, and other concern-owner semantics;
-- root-cause/semantic-family reasoning, first-clean-local-defect locality, recurrence-driven simplification, and removal/rewiring before compensating machinery;
-- snapshot-complete handoffs and validity-scoped context reuse;
-- current-vs-history separation and semantic-evolution provenance;
-- evidence specification/realization/observation/assessment, applicability, stale evidence in both polarities, evidentiary target versus execution dependency, independence/common-mode risk, and bounded impact closure;
-- proxy-proof/real-owner testing, stage-local plus final assembled acceptance, qualification separation, failure paths, and missing-required-check blocking;
-- lossless representation, anti-scope-laundering, importance-weighted attention without acceptance loss, one detailed owner per generic rule, bounded typed progressive disclosure, cold-path reachability, non-activating ordinary links, and derived-view non-authority;
-- Protocol 6.2 replacement-bootstrap discipline and exact immutable fallback;
-- repaired software-documentation cold routes and standalone reachability;
-- static activation sensors as structural evidence rather than live-model performance proof;
-- immutable 5.16/6.0/6.1 resources and current 6.2 profile behavior/identity;
-- source/generated/package/snapshot parity and canonical-generation ownership;
-- all 115 accepted Protocol 6.2 behavioral scenarios plus both affected requalifications and Stage G acceptance;
-- current abstraction/concretization nomenclature while frozen historical identities remain unchanged;
-- the human-facing background/terminology/first-use abbreviation standard;
-- assembled-candidate independent Review rather than diff/summary/green-status acceptance;
-- immutable bootstrap versus recovery separation and the rule that default/latest is never a protocol-version oracle;
-- Git baseline inspection, protection of concurrent work, no unauthorized history rewrite, coherent commits, and generated/transient-data hygiene.
-
-T01-T39 are preservation/review hypotheses and evidence labels, not semantic authority. Current accepted owners remain authority.
-
-### 1.2 Non-goals
-
-Protocol 6.3 MUST NOT:
-
-- replace Git, semantic evolution, workplans, qualifications, or archived evidence with PEM;
-- turn tests, benchmarks, commits, history, statistics, temperature, or PEM into D1-D4 authority;
-- preserve every ordinary bug fix as permanent memory;
-- force family census for a first clean local defect merely because siblings are imaginable;
-- make historical mechanisms immutable merely because they once worked;
-- treat frequency, temperature, benchmark magnitude, review count, or a success count as an acceptance threshold or probability estimate;
-- introduce a universal database, graph, daemon, background indexer, or second routing registry;
-- load PEM/project history unconditionally for every task;
-- scan all Git history on every bootstrap or recompute all statistics on every read;
-- create separately maintained Markdown and JSON/YAML authorities for the same memory;
-- copy secrets/private data into PEM or durable evidence merely for completeness;
-- pool materially different regimes merely to produce larger statistics;
-- treat the active summary as the complete search boundary for applicability;
-- let invalid/rejected evidence continue to support current counts or guidance merely because it once passed;
-- infer current-memory acceptance from `main`, default/latest, file timestamp, or self-declared metadata without project acceptance semantics;
-- silently interpret an unknown/incompatible PEM schema;
-- force a permanently monolithic physical file if demonstrated scale/concurrency/context pressure warrants a lossless canonical partition;
-- count another project's/fork's history as local incidence merely because the files were copied;
-- rewrite archived workplans or frozen protocol/profile resources to match 6.3 terminology;
-- broaden a local memory feature into unrelated Protocol 7 control-plane implementation;
-- merge/cut over to `main` without separate authorization.
-
-## 2. Governing 6.3 rules
+## 2. Governing learning and evidence rules
 
 ### 2.1 Evidence-backed learning
 
-Project memory stores conclusions together with their warrant.
+The required epistemic chain is:
 
 ```text
-idea / hypothesis
+idea/hypothesis
  -> implementation or attempted intervention
  -> evidence specification
  -> evidence realization
  -> observation
- -> evidence assessment
+ -> assessment
  -> bounded finding
  -> generalized project lesson when justified
  -> current PEM representation
 ```
 
-A plausible idea, author preference, attractive implementation, repeated phrase, or existing mechanism is not project knowledge merely because it exists.
+Statements such as "this should be faster", "this seems cleaner", or "this might scale better" remain hypotheses until evidence suitable to the bounded claim exists. Qualification decides whether a bounded claim is accepted under its governing authority; qualification itself is not a new authority domain.
 
-Statements such as `this should be faster`, `this seems cleaner`, or `this might scale better` remain hypotheses until evidence suitable to the bounded claim exists.
+### 2.2 Outcome, association, and causal attribution
 
-Conversely, evidence is not authority. Qualification is an acceptance gate for a bounded claim under its governing authority and evidence assessment; it does not become a fifth semantic domain and does not automatically prove that an oracle, model, architecture, or generalization is correct.
-
-### 2.2 Admissibility before optimization
-
-A positive engineering pattern is admissible only when it satisfies all applicable correctness, D1/D2, architecture, compatibility, security, reliability, resource, and external constraints.
-
-A faster implementation that violates accepted semantics is not a successful optimization. Record gains with material costs, tradeoffs, uncertainty, comparator identity, and regime.
-
-### 2.3 Historical evidence is a prior, not a veto or authority
-
-Past success creates an evidence-backed preference, not architectural immunity. Past failure creates an evidence-backed warning, not permanent prohibition.
-
-A new approach MAY replace a proven historical approach when it:
-
-1. considers applicable historical evidence;
-2. identifies materially relevant learned capabilities and their authority-binding state;
-3. preserves every `AUTHORITY_BOUND` capability because its cited owner requires it;
-4. explicitly evaluates `EVIDENCE_ONLY` capabilities as design priors rather than silently treating them as invariants;
-5. keeps governing parents/side constraints fixed unless explicitly reopened;
-6. supplies evidence appropriate to new claims; and
-7. passes affected acceptance/qualification.
-
-An evidence-only capability may be deliberately discarded when a better admissible design justifies doing so. Promotion from evidence-only lesson to mandatory authority requires acceptance by the actual D1-D4/project owner; PEM cannot perform that promotion itself.
-
-### 2.4 Balanced evidence before and after positive-pattern admission
-
-Positive-pattern evidence must not be selected by outcome.
-
-Before admitting or materially strengthening a `SUCCESS_PATTERN`, perform a bounded evidence-directed search within the declared coverage/aggregation scope for known materially applicable neutral, contradicting, failed, or inconclusive attempts as well as supporting results. The search need not be globally exhaustive unless the claimed scope is exhaustive, but its basis and material blind spots must be stated.
-
-After a success pattern exists, materially applicable evaluated attempts under its declared regime must not be selectively omitted because they were neutral, failed, contradicted the generalized claim, or were inconclusive. Keep raw detail cold when useful, but preserve routes to material counterevidence and narrow/split/reclassify the pattern when warranted.
-
-A candidate positive pattern with incomplete counterevidence search may remain `PROVISIONAL`/`REVIEW_REQUIRED`; it may not be presented as a proven project instinct merely because favorable examples were easy to locate.
-
-### 2.5 Failure families also preserve disconfirming/safe-regime evidence
-
-A failure family records confirmed failures, but its generalized cause/applicability must also account for material evidence that the same apparent mechanism/regime does **not** fail or that a proposed causal explanation is not sufficient. Such evidence does not subtract occurrences; it constrains the family claim, aggregation scope, cause, and applicability.
-
-If safe counterexamples show the generalized family is too broad, narrow/split/reclassify it rather than retaining a dramatic but false universal warning.
-
-### 2.6 Statistics are descriptive unless a denominator exists
-
-Occurrence/application counts are evidence-bound descriptive counts under declared coverage and aggregation scope. They do not by themselves estimate failure probability, success probability, comparative risk, causal strength, or incidence rate. Any rate/probability claim requires an explicit opportunity/exposure denominator and defensible sampling/measurement basis.
-
-### 2.7 Invalidated evidence does not remain current knowledge
-
-Evidence can later be shown defective: an oracle may be wrong, a benchmark may be confounded, a fixture may not exercise the claimed owner, a result may be mistranscribed, or a realization may be inapplicable.
-
-Historical evidence rows are not erased merely because their assessment changes. However, a row contributes to current confirmation/support statistics only while its evidence is admissible for that bounded claim and family/application classification. When a material supporting row becomes `REJECTED_OR_INVALID`, `STALE_OR_INAPPLICABLE`, or otherwise inadmissible:
+PEM MUST NOT strengthen the claim beyond the evidence. Keep distinct:
 
 ```text
-retain historical row + prior assessment provenance
- -> recompute affected current counts/maturity/temperature
- -> re-evaluate family membership and positive-guidance eligibility
- -> preserve unaffected evidence
- -> route any changed current lesson through semantic reconciliation
+observed outcome
+association with a change
+mechanism-specific causal attribution
+generalized transferable lesson
 ```
 
-If the observation remains real but its causal/family assignment is disproven, reclassify the event rather than deleting it.
+A bundled repair A+B+C may prove that the assembled candidate no longer crashes without proving that A alone caused the repair, that B/C were irrelevant, or that the mechanism generalizes. A causal/mechanism-specific claim requires discriminating evidence appropriate to the claim: isolation, ablation/counterfactual comparison, causal trace, owner-tied static/property analysis, algorithmic proof, or another independently justified method. Temporal proximity to a commit is investigation evidence, not root-cause proof. Where isolation is unavailable, preserve the combined-change outcome and keep causal interpretation provisional/bounded.
 
-### 2.8 Conflicting assessments are not resolved by votes or recency alone
+### 2.3 Positive and negative evidence balance
 
-Two reviews, benchmarks, analyses, or evidence assessments can disagree. Do not resolve a substantive conflict by majority count, latest-editor-wins, reviewer prestige, or preserving whichever conclusion is more convenient.
+Before admitting or materially strengthening a `SUCCESS_PATTERN`, perform a bounded evidence-directed search over the declared coverage/aggregation scope for materially applicable supporting, neutral, contradicting, failed, and inconclusive attempts. State the search basis and material blind spots. Incomplete counterevidence search may support `PROVISIONAL`/`REVIEW_REQUIRED`, not an unqualified project instinct.
 
-First inspect evidence applicability, oracle strength, independence/common-mode risk, aggregation scope, and governing claim. If the material conflict remains unresolved, mark the bounded finding/family `REVIEW_REQUIRED`/contested and preserve the competing assessments. Unresolved material conflict blocks unqualified positive guidance and any claim that depends on the disputed conclusion, without turning PEM itself into an adjudicating authority.
+After admission, materially applicable evaluated attempts must not be selectively omitted by outcome. Failure families likewise preserve material safe/disconfirming evidence that narrows or falsifies an overbroad cause or regime. Real occurrences remain history; overbroad interpretation must narrow, split, or reclassify.
 
-## 3. Finite representation census and no-loss map
+### 2.4 Evidence admissibility, contradiction, and disagreement
 
-Before protocol-source mutation, Stage A SHALL create `qualification/ssdp6/SSDP-6.3-PRESERVATION-CENSUS.md` as non-authoritative implementation/review evidence.
+Historical rows are retained when useful even if their current assessment changes. Only currently admissible rows for the stated bounded claim/family assignment contribute to current confirmation/support counts. Invalidated oracle, confounded benchmark, stale realization, or disproven family assignment triggers bounded reassessment, recomputation of affected counts/maturity/temperature/guidance, and preservation of unaffected evidence.
 
-The census SHALL enumerate every current durable/generative Protocol 6.2 representation surface before deciding what is touched, including:
+Conflicting competent assessments are not resolved by majority vote, reviewer prestige, chronology, or latest-editor wins. Assess applicability, oracle strength, independence/common-mode risk, aggregation scope, and governing claim. If material disagreement remains, mark the claim contested/`REVIEW_REQUIRED`; do not present it as established positive guidance.
 
-- all four `source/roles/*/SKILL.md` entrypoints and three current specialist entrypoints;
-- all current `source/shared/references/*.md`;
-- all current shared templates plus the proposed PEM template;
-- `AGENTS.md`, root/source `README.md`, `PORTABILITY.md`, `source/SEMANTIC_DEPENDENCIES.md`, and `source/PROTOCOL_VERSION`;
-- workflow-prompt source;
-- current Protocol 6.2 profile/prompts/snapshot resources and proposed 6.3 successors;
-- protocol-bearing schemas/renderers/help/status text affected by this feature;
-- qualification scenario/routing/package assets;
-- active workplan authority index and this workplan;
-- `history/SEMANTIC_EVOLUTION.md` as append-only cold history at closeout;
-- archived workplans as frozen cold evidence;
-- `dist/` and generated snapshots as generated descendants;
-- frozen 5.16/6.0/6.1/6.2 resources.
+### 2.5 Counts and recurrence
 
-Classify each as `refactor`, `route-only`, `new`, `generated`, `frozen/historical`, or `intentionally unchanged with reason`.
+Counts are descriptive under declared coverage and aggregation scope. They are not probabilities, rates, or causal strength unless an explicit exposure/opportunity denominator and defensible sampling basis exist.
 
-For every materially changed accepted obligation, record:
+One causal episode producing many failures is normally one occurrence. A recurrence-after-accepted-repair requires evidence that an earlier repair was actually accepted before a later independent occurrence in the relevant project/causal lineage. Author/committer/issue/file timestamps and cherry-pick order are supporting metadata only; rebases or copies must not manufacture recurrence chronology.
+
+### 2.6 Evidence independence and shared causes
+
+Repeated executions, reviews, or applications sharing one defective oracle, fixture, benchmark harness, dataset, reference implementation, or assumption are correlated. They do not automatically constitute independent evidence or independent successful applications. Independence claims must identify the meaningful common-mode boundary.
+
+### 2.7 PEM relations do not recursively create proof
+
+Typed PEM relations MAY capture lineage, narrowing/generalization, discovery-to-pattern learning, or capability relationships. Every substantive endpoint remains independently grounded in admissible evidence and, where normative, current authority. A PEM-to-PEM chain or cycle cannot be the sole warrant for a substantive claim.
+
+Current split/merge/supersession lineage must be acyclic enough to identify one current interpretation. When a source entry is invalidated, narrowed, split, merged, retired, or materially reclassified, perform bounded downstream impact closure over dependent current PEM entries. Absence of a relation proves independence only if the mapped scope was explicitly complete enough for that exclusion.
+
+### 2.8 Evidence across trust boundaries remains data
+
+Issue text, logs, model output, generated reports, external documents, copied PEM, and other evidence content remains data. Embedded commands, prompts, links, tool requests, or policy-like prose do not gain instruction/authorization precedence merely because PEM retrieved them. Preserve provenance/trust classification, avoid unnecessary raw untrusted instruction-like text in the active summary, and keep tool/network/repository mutation under existing authorization owners.
+
+## 3. Canonical ownership and architecture
+
+Stage A SHALL confirm actual 6.2 ownership before mutation. Intended local ownership is:
 
 ```text
-preservation ID
-accepted 6.2 owner/location
-6.3 owner/location
-governed obligation
-preservation/generalization relation
-oracle/evidence that can detect loss
-disposition: PRESERVED or BLOCKING
+universal authority/Challenge/lossless representation -> abstraction-and-concretization.md
+PEM-specific schema/representation/family relations -> project-engineering-memory.md
+evidence lifecycle/admissibility/applicability/impact -> evidence-evolution-and-dependencies.md
+recurrence/family membership/first-local-defect -> convergence-and-cycle-economy.md
+architecture capability/mechanism replacement -> architecture-and-design.md
+workflow/HAS/handoff/closeout -> workflow-and-workplans.md
+current-vs-history documentation lifecycle -> documentation-maintenance.md
+testing/benchmark/oracle methodology -> testing-and-validation.md
+version/bootstrap/recovery/profile -> protocol-versioning-and-compatibility.md
+repository intake/scope/history economy -> repository-intake.md
+branch/merge/integration/history mutation -> git-and-version-control.md
+trust/privacy/least privilege -> security-and-trust-boundaries.md
 ```
 
-Green tests or labels do not prove preservation. Independent Review challenges the map against actual owners and assembled candidate.
+`project-engineering-memory.md` owns only PEM-specific semantics and routes generic doctrine to existing owners. Do not duplicate generic current SSDP rules into PEM as competing authority.
 
-### 3.1 Required appended 6.3 preservation hypotheses
+### 3.1 One logical canonical project memory
 
-After independently reproducing T01-T39 unchanged, append the next available IDs for at least:
+Default root is `PROJECT-ENGINEERING-MEMORY.md` at the governed project/repository root unless project authority declares one alternative canonical path. The artifact declares project/repository/scope identity.
+
+One physical Markdown file is preferred while sufficient. If demonstrated scale, merge contention, or context/search cost makes it materially inferior, cold canonical detail MAY be partitioned beneath one logical PEM namespace. Partitioning must retain one root discovery/current-summary surface, one canonical home per family/notice/evidence row, stable IDs/routes, lossless coverage/aggregation/lineage, no duplicate hand-authored current truth, and source-control review visibility.
+
+A semantic change spanning root plus canonical partitions is one **logical-memory publication unit**. Root, affected partitions, and any required canonical metadata must be reviewed/published coherently; mixed semantic revisions must not masquerade as one current memory. A derived index is non-authoritative and may be stale/unavailable; stale index results cannot prove absence. Fall back to canonical search where feasible or expose `REVIEW_REQUIRED` uncertainty.
+
+### 3.2 Project, fork, and multi-project scope
+
+Copied/forked PEM may be useful evidence but does not automatically become local incidence or accepted local memory. Preserve source-project identity. Local continuity requires project governance to declare lineage continuity/reconciliation. Cross-project aggregation requires an explicitly multi-project aggregation scope and compatible evidence; nearest-file discovery never decides precedence.
+
+For non-local evidence, a bare commit SHA plus path is insufficient because Git object identities are repository-relative in interpretation. Bind source repository/project identity (or equivalent durable source identity), immutable revision, and stable locator. Repository moves/renames require explicit alias/lineage or binding health degrades.
+
+### 3.3 Schema and accepted-memory basis
+
+Initial PEM schema is `memory_schema_version: 1`, separate from SSDP protocol version and orchestration profile schema. A reader must not infer compatibility from similar Markdown headings. Unknown/incompatible schema permits only explicitly forward-readable identity metadata; substantive memory becomes unsupported/`REVIEW_REQUIRED` for tasks requiring it. Supported migration is a `PEM_SCHEMA_OR_PROTOCOL_CHANGE` and must losslessly preserve accepted IDs, evidence/assessments, coverage, aggregation scope, lineage, counterevidence, authority bindings, notices, and cold routes.
+
+Accepted/base memory comes from the exact project integration/release/baseline selected under project workflow/Git policy. `main`, default/latest, timestamp, or the PEM file claiming itself accepted is not sufficient by itself.
+
+A validated same-branch **candidate memory overlay** composes over that accepted/base PEM for later work on the same branch:
 
 ```text
-T40 authoritative-current-owner / non-authoritative-memory separation
-T41 compact active project-engineering-memory representation
-T42 stable learning-family identity and explicit lineage
-T43 exact durable evidence binding
-T44 evidence-ledger-derived recurrence/application statistics
-T45 evidence-backed positive success patterns and demonstrated tradeoffs
-T46 hypothesis / evidence maturity / applicability-state separation
-T47 reproducible temperature with explicit evidence-backed overrides
-T48 historical-coverage state and no absence inference from incomplete memory
-T49 semantic family-membership discipline
-T50 first-local-defect / admission-threshold preservation
-T51 Historical Applicability Set for materially memory-relevant work
-T52 mechanism-to-capability transfer accounting
-T53 justified promotion of repeated lessons into owner-backed invariants/sensors
-T54 mandatory material closeout learning assessment
-T55 quantitative effect-size and experimental-envelope preservation
-T56 contradictory evidence and retirement without historical erasure
-T57 evidence applicability/staleness and bounded invalidation of PEM
-T58 evidentiary independence/common-mode-risk preservation
-T59 active-summary progressive disclosure and cold detail reachability
-T60 project-local PEM versus packaged protocol/template separation
-T61 single logical canonical memory; derived indexes subordinate and optional cold partitioning lossless
-T62 6.3 bootstrap/profile/recovery/version-bound compatibility staging
-T63 frozen 5.16/6.0/6.1/6.2 profile/resource preservation
-T64 generated/package/source parity and exact-ref fallback
-T65 static-versus-live claim discipline for context/performance claims
-T66 Protocol 7 inheritance/current-lifecycle reconciliation
-T67 human-facing background/terminology/abbreviation completeness
-T68 independent assembled-candidate qualification/Review
-T69 anti-scope-laundering and lower-salience mandatory-constraint preservation
-T70 no recursive summary/evidence laundering
-T71 preservation-capability authority binding; PEM cannot mint invariants
-T72 self-reference-safe routine PEM evidence/update staging
-T73 balanced positive-pattern supporting/neutral/contradicting/inconclusive evidence
-T74 descriptive-count versus incidence/rate/probability distinction
-T75 memory-temperature versus hot/cold activation-state separation
-T76 accepted/base versus branch-candidate PEM lifecycle and merge reconciliation
-T77 stable accepted IDs, collision-safe pre-acceptance ID reconciliation, no ID reuse
-T78 security/trust/privacy constraints on PEM/evidence persistence
-T79 owner-responsible learning assessment and bounded PEM update classes
-T80 cross-domain D1-D4/specialist applicability without universal activation
-T81 current-owner deduplication when a project lesson becomes accepted doctrine
-T82 occurrence/application lifecycle-context preservation
-T83 pre-admission counterevidence search and anti-selection-bias discipline
-T84 applicability-led HAS selection independent of memory temperature/active-summary presence
-T85 aggregation-scope declaration and cross-regime stratification
-T86 evidence/authority binding-health and broken-route handling
-T87 reverse impact closure for authority-bound PEM after current-owner change
-T88 failure-family disconfirming/safe-regime evidence preservation
-T89 current-notice expiry/review semantics
-T90 matched-comparator/uncertainty discipline for quantitative optimization claims
-T91 positive-guidance eligibility under contradiction/inconclusive or unhealthy evidence
-T92 active workplan current-state representation without review/amendment replay
-T93 PEM schema compatibility, explicit migration, and unknown-schema fail-safe behavior
-T94 accepted project-memory basis distinct from branch/default/latest/self-declared state
-T95 PEM rollback/corruption/recovery and Protocol-version downgrade/re-adoption behavior
-T96 evidence admissibility/retraction with derived-count and guidance recomputation
-T97 unresolved evidence-assessment disagreement preserved without vote/latest-editor laundering
-T98 bounded context/maintenance scaling independent of raw historical-corpus growth
-T99 canonical logical memory with justified lossless cold partitioning and stale-index fallback
-T100 fork/copy/cross-project provenance and local-count separation
-T101 Git/version-control ownership for branch/merge/self-reference/repository-state behavior
-T102 revert/restoration impact closure for affected PEM applicability
+accepted/base PEM
+ + explicit candidate overlay for this branch/cycle
+ -> effective branch-local decision support
 ```
 
-If the accepted census already uses later IDs, append rather than collide. These IDs remain preservation evidence, not authority.
+The overlay remains visibly candidate, preserves its base identity, cannot self-ratify or override current authority, and cannot silently erase an accepted entry through omission. Candidate deletion/retirement is explicit. Conflict or partial reconciliation between base and overlay is `REVIEW_REQUIRED` until resolved.
 
-## 4. Canonical owner and routing architecture
+### 3.4 Conditional activation and applicability
 
-### 4.1 One detailed owner per generic rule
+PEM activation is decision-local. Trigger it for substantial rework of mature D1-D4 semantics/concretization, replacement/consolidation of mature machinery, suspected recurrence, substantial optimization/scaling work, migration/recovery/revert where historical choices matter, or an active workplan explicitly binding relevant PEM entries.
 
-Intended owner topology:
+A first clean local defect with no recurrence/generalization signal remains local. Ordinary/trivial/unrelated routes do not load PEM merely because it exists. Memory temperature does not activate context.
+
+When triggered, use progressive disclosure:
 
 ```text
-universal authority / Challenge / lossless representation
-  -> source/shared/references/abstraction-and-concretization.md
-
-PEM schema / compact representation / coverage / family records / logical partitioning
-  -> source/shared/references/project-engineering-memory.md
-
-evidence lifecycle / admissibility / applicability / stale state / independence / impact
-  -> source/shared/references/evidence-evolution-and-dependencies.md
-
-recurrence / semantic-family membership / first-local-defect / simplification
-  -> source/shared/references/convergence-and-cycle-economy.md
-
-D3 accepted capability / mechanism replacement / architecture transfer
-  -> source/shared/references/architecture-and-design.md
-
-workflow activation / HAS / handoff / closeout update responsibility
-  -> source/shared/references/workflow-and-workplans.md
-
-current-vs-history lifecycle / source-chain reconciliation
-  -> source/shared/references/documentation-maintenance.md
-
-testing / benchmark / oracle / acceptance methodology
-  -> source/shared/references/testing-and-validation.md
-
-protocol version / public bootstrap / recovery / profile / fallback
-  -> source/shared/references/protocol-versioning-and-compatibility.md
-
-repository-context reuse / scope / historical intake economy
-  -> source/shared/references/repository-intake.md
-
-branch / merge / accepted integration / commit staging / self-reference / history mutation
-  -> source/shared/references/git-and-version-control.md
-
-PEM data/evidence trust, secret/private-data handling, least privilege
-  -> source/shared/references/security-and-trust-boundaries.md
+accepted base + validated branch overlay
+ -> active summary
+ -> cheapest sufficient metadata-level applicability match
+ -> relevant family/notice detail
+ -> raw evidence only when needed
 ```
 
-`project-engineering-memory.md` owns only PEM-specific semantics and routes generic evidence/family/workflow/Git/security/version doctrine to existing owners rather than restating them. The universal kernel receives only the minimum route/constraint needed to keep PEM subordinate and discoverable; PEM is not universal-kernel material.
+Applicability matching uses owner, surface, mechanism, capability, regime, project scope, and current task. The active/Hot summary is not the complete search boundary. Warm/Cold entries can be materially applicable.
 
-If Stage A finds accepted 6.2 ownership differs, preserve that owner or block and resolve ownership before implementation. Do not create a parallel owner to match this proposed map.
+Applicability metadata is part of current family semantics. When claim/cause/scope/owner/regime/split/merge/retirement/project identity changes, update matching predicates in the same semantic publication. Stale tags cannot prove non-applicability; suspect metadata requires broader canonical search or `REVIEW_REQUIRED` uncertainty.
 
-### 4.2 Project-local logical canonical artifact and scope
+## 4. Canonical PEM content model
 
-Default project-local discovery/root artifact:
+### 4.1 Global metadata
 
-```text
-PROJECT-ENGINEERING-MEMORY.md
-```
-
-at the governed project/repository root unless existing project authority explicitly declares one alternative canonical path. The artifact declares project/repository/scope identity sufficiently to prevent accidental reuse in an unrelated repository, monorepo component, subproject, copy, or fork.
-
-For ordinary-size projects, one Markdown file is preferred because it minimizes machinery. However, Protocol 6.3 freezes **one logical canonical memory**, not a permanently monolithic physical file. If demonstrated scale, merge contention, or context/search cost makes one file materially inferior, canonical cold detail MAY be partitioned beneath one project-local PEM namespace while the root remains the sole discovery/current-summary surface and every detail has one canonical home.
-
-A partitioned form MUST preserve:
-
-```text
-one root discovery/current-summary surface
-one canonical home for each family/notice/evidence-ledger row
-stable IDs and routes
-lossless coverage/aggregation/lineage semantics
-no duplicated hand-authored active truth
-source-control merge/review visibility
-```
-
-Do not shard preemptively. Do not invent nested memories merely because directory nesting exists. If a real multi-project or multi-repository ownership boundary requires more than one logical PEM, each instance must declare scope, precedence/composition rules, and cross-project evidence treatment explicitly. Nearest-file discovery alone is never authority.
-
-Add one packaged protocol template, proposed as:
-
-```text
-source/shared/templates/project_engineering_memory_template.md
-```
-
-The live project instance is project state and SHALL NOT enter generic SSDP `dist/` skill packages or orchestration profiles. The template and protocol instructions are canonical protocol source and follow normal generated/package closure. In the SSDP repository, self-hosted `PROJECT-ENGINEERING-MEMORY.md` is ordinary project-local content.
-
-Do not maintain a second hand-authored JSON/YAML database. A generated index may exist only for a demonstrated consumer need; it must be reproducible from canonical Markdown, explicitly non-authoritative, and failure/staleness of the index must fall back to canonical search or an explicit `REVIEW_REQUIRED` state rather than silently omitting entries.
-
-### 4.3 Bounded cross-domain activation
-
-Preferred shape:
-
-```text
-task
- -> active D1/D2/D3/D4 role or specialist root
-      -> universal kernel + current domain owner
-      -> only when a project-memory predicate is material: project-engineering-memory.md
-           -> project-local PEM active summary
-                -> bounded applicability search over relevant current PEM metadata
-                     -> relevant family/current notice detail
-                          -> underlying evidence only when needed
-```
-
-Triggers include:
-
-- material rework of existing D1/D2/D3/D4 project semantics or mature concretization where prior project lessons can change the decision;
-- replacement/consolidation of mature machinery with learned capabilities;
-- a defect believed to recur or belong to an existing semantic family;
-- substantial optimization/performance/scaling rework of existing machinery or algorithms;
-- migration/recovery/revert work where prior project choices can change the decision;
-- an active workplan explicitly binding relevant PEM entries.
-
-A first clean local defect with no recurrence/generalization signal remains local. Ordinary documentation, trivial implementation, or unrelated cold concerns do not load PEM because it exists.
-
-**Memory temperature does not itself activate context.** A `HOT` family unrelated to the current governed question remains cold/unloaded. A `COLD` family may become active when its applicability predicate is materially triggered. Ordinary links, package membership, semantic dependencies, or PEM existence do not activate it.
-
-The active summary is an attention layer, not the complete applicability index. When PEM is triggered, use bounded evidence-directed matching over current family/notices by owner, surface, mechanism, capability, regime, and task predicates as needed. The search need not read cold raw evidence unless a candidate match is material.
-
-### 4.4 Missing/partial memory and adoption
-
-Missing/partial PEM is not proof of no historical lesson.
-
-For a new project with no material history, initialization may create an empty PEM with explicit coverage state. For an established project adopting 6.3:
-
-- ordinary work may continue without full backfill;
-- before a memory-triggering substantial rework, perform bounded relevant historical intake or establish/update PEM coverage for the affected scope;
-- if required coverage cannot be established, preserve uncertainty and never claim relevant families are absent;
-- version-bound 6.2 work does not retroactively acquire 6.3 obligations unless it explicitly adopts 6.3 after compatibility/impact reconciliation.
-
-A malformed, unsupported-schema, or inaccessible PEM is treated as unavailable/partial for memory-dependent decisions; it must not become a universal repository failure that blocks unrelated work whose governing route does not require project memory.
-
-### 4.5 Project/fork/copy provenance
-
-A copied repository or fork may inherit useful historical evidence, but inherited files do not automatically become local incidence or accepted local memory.
-
-On repository/project identity mismatch, fork, extraction into a new project, or multi-project composition:
-
-- identify whether project authority declares continuity of the same project lineage;
-- preserve source-project identity for inherited evidence;
-- treat inherited lessons as external/historical evidence until explicitly adopted/reconciled for the new scope;
-- do not increment local occurrence/application counts merely because a commit/file was copied;
-- allow cross-project aggregation only when the family explicitly declares a multi-project aggregation scope and the evidence/coverage basis supports that claim;
-- never let nearest-file discovery decide cross-project precedence.
-
-## 5. Canonical PEM representation, schema, and acceptance state
-
-PEM is current engineering-learning representation, not patch history. Detailed chronology remains in Git/history/evidence artifacts.
-
-### 5.1 Global metadata and coverage
-
-PEM SHALL expose enough metadata to judge applicability without loading history:
+Expose at least:
 
 ```text
 memory_schema_version
 maintained_under_protocol
 project/repository/scope identity
-coverage_state
-coverage_basis: bounded owners/surfaces/history range/sources reviewed
+coverage_state and coverage_basis
 reconciled_through: already-existing immutable accepted project identity
 known unreviewed ranges/surfaces when material
+accepted/base identity used by a candidate overlay
 open review-required families/notices
 ```
 
-Coverage states include at least:
+`RECONCILED_FOR_DECLARED_SCOPE` claims only the declared bounded scope. `reconciled_through` records history considered; it cannot self-ratify the containing PEM commit.
+
+### 4.2 Family and notice identifiers
+
+Use stable namespaces:
 
 ```text
-UNINITIALIZED
-PARTIAL
-RECONCILED_FOR_DECLARED_SCOPE
+FF-### failure family
+SP-### success pattern
+DS-### discovery
+PC-### preservation capability
+NT-### current notice
 ```
 
-`RECONCILED_FOR_DECLARED_SCOPE` means the declared bounded corpus/surface was reviewed sufficiently for represented claims/counts. It claims nothing outside that scope.
+Occurrence/application IDs are family-scoped (`O01`, `A01`, ...). Accepted IDs are stable and never recycled. Branch-local IDs are provisional and collision-safe reconciliation is required before acceptance. Cherry-picked/rebased copies of one underlying event are provenance aliases, not new occurrences.
 
-`reconciled_through` names already-existing accepted history whose evidence has been considered. It is **not** the identity proving that the PEM file containing the field is accepted.
+### 4.3 Admission threshold
 
-The accepted/base PEM for a new cycle is established from the exact accepted project integration/release/baseline selected by project workflow/Git policy. The current file cannot self-ratify itself as accepted, and branch/default/latest/timestamp alone is not an acceptance oracle. A branch-local edit is a candidate representation until the project acceptance/integration process accepts the containing state.
+Admit/materially update a family only when evidence supports materially recurring same-family failure; reintroduction after accepted repair; one high-impact broadly reusable lesson; meaningful likely-reusable optimization/simplification; repeated independent successful use; a discovery materially changing preferred recurring work; mechanism replacement/generalization/rejection/restoration likely to prevent rediscovery; or a high-risk temporary fact best represented as a current notice.
 
-### 5.2 Schema compatibility and migration
+A first clean local defect normally stays local. Generic textbook knowledge/current generic protocol doctrine stays at its existing owner.
 
-Protocol 6.3 SHALL define the first supported PEM schema explicitly, proposed as:
+### 4.4 Failure-family semantics
+
+Membership requires materially equivalent governing invariant, semantic owner/authority class, and failure mechanism/cause at the repair-relevant level. Symptom/error/file/subsystem similarity is insufficient. Record observed failure separately from causal interpretation. Preserve safe/disconfirming cases that narrow the family.
+
+A compact occurrence retains immutable event identity, lifecycle context, aggregation/project dimensions, subject/candidate, owner/surface, observed failure, bounded cause claim plus cause evidence, repair reference, post-repair qualification, material disconfirming evidence, admissibility/family assignment, limits, and applicability.
+
+### 4.5 Success-pattern semantics
+
+Record every materially applicable evaluated application, not only wins: subject/candidate/comparator, regime, intended benefit, outcome, qualification/analysis binding and health/admissibility, effect size when available, experimental envelope/uncertainty, governing correctness/constraints, costs/tradeoffs, applicability/limits, project/lifecycle context.
+
+A supporting outcome increments support only while admissible. Neutral/contradicting/inconclusive/rejected/stale rows remain historically recoverable and constrain current interpretation. A positive recommendation requires positive-guidance eligibility, not merely high temperature or high historical support count.
+
+### 4.6 Discovery and preservation capability
+
+A discovery records the changed project understanding, bounded evidence, regime, competing prior interpretation, and whether authority changed separately.
+
+A preservation capability is explicitly `EVIDENCE_ONLY`, `AUTHORITY_BOUND`, or `PROPOSED_FOR_PROMOTION`. Only `AUTHORITY_BOUND` is mandatory, and only because the cited current owner requires it. Repetition/temperature/qualification cannot promote evidence into authority.
+
+When machinery is replaced:
 
 ```text
-memory_schema_version: 1
+old mechanism -> learned capability -> authority-binding/current owner
+              -> new mechanism or justified omission/retirement -> verification
 ```
 
-Schema identity is distinct from `maintained_under_protocol`. A protocol version may support one or more explicitly compatible PEM schemas; no reader may infer compatibility merely from similar Markdown headings.
+Preserve demonstrated capabilities as evidence and actual owner-bound obligations as requirements; do not preserve obsolete wrappers/caches/executors/checkpoint formats merely because history mentions them.
 
-For an unknown/newer/incompatible schema:
+### 4.7 Typed PEM relations
 
-- do not silently reinterpret fields or drop unrecognized semantics;
-- read only the minimal safe identity/version metadata that is explicitly forward-readable;
-- treat substantive PEM interpretation as `REVIEW_REQUIRED`/unsupported;
-- use missing/partial-memory behavior for tasks that require memory until a supported migration/reader exists.
+Relations MAY include `LED_TO`, `NARROWS`, `GENERALIZES`, `SUPERSEDES`, `REPLACES`, `SUPPORTS_LEARNING_FROM`, and equivalent explicitly defined types. Keep current lineage direction unambiguous. Same underlying evidence reused by multiple entries does not become multiple independent routes or multiple events.
 
-For a supported older schema, either read it under an explicitly declared compatibility rule or perform an explicit lossless migration. Migration is `PEM_SCHEMA_OR_PROTOCOL_CHANGE`, not a casual evidence append. It MUST preserve stable accepted IDs, evidence rows and prior assessments, coverage/aggregation scope, lineage, counterevidence, authority binding, binding health, applicability, notices, and cold retrieval routes. Old historical versions remain recoverable through Git; do not maintain two hand-authored current schemas as parallel authorities.
+### 4.8 Current notices
 
-A future protocol may replace the schema, but compatibility or migration must be explicit and version-bound.
+A notice stores stable ID, current bounded claim/state, governing owner when normative or explicit non-authoritative status, evidence/source route with health/admissibility, applicability, and review/expiry condition. Notices do not contribute to family counts. When expiry/review triggers, remove unqualified active guidance and reconcile to `REVIEW_REQUIRED`, `RETIRED`, a family, or current owner as appropriate.
 
-### 5.3 Active engineering memory
+## 5. Evidence, statistics, temperature, and salience
 
-The beginning of the logical PEM SHALL answer compactly:
+### 5.1 Evidence bindings
 
-```text
-What repeatedly fails here?
-What repeatedly works here?
-What learned capabilities should I consider, and which are actually authority-bound?
-What high-impact current notices matter?
-What evidence-backed engineering instincts are useful now?
-```
+Prefer immutable Git revision + path + stable section/test/finding identifier. For expiring external CI/benchmark evidence on which long-lived PEM depends, preserve a compact durable repository record of the material observation and exact external run/candidate identity when policy permits. PEM or a generated summary cannot be the sole warrant for its own substantive claim.
 
-Each summary item should carry only:
+Material current bindings are checked when activated, semantically reconciled, or reached by affected impact closure; no full-memory daemon is required. Broken/uninterpretable bindings preserve historical record but remove unsupported unqualified current guidance.
 
-```text
-stable ID
-kind
-one-line bounded lesson
-memory temperature
-evidence maturity/current applicability
-authority-binding state where relevant
-positive-guidance eligibility where relevant
-confirmed/supporting count plus visible material counterevidence signal
-aggregation scope/regime cue when materially necessary
-primary applicability trigger
-short evidence/authority route and binding-health/admissibility cue
-```
+### 5.2 Self-reference-safe updates
 
-Only `CURRENT` success patterns with sufficient evidence maturity, healthy material bindings, currently admissible support, and no unresolved material contradiction for the stated regime may be phrased as positive recommendations. A contested, stale, invalidated, or inconclusive high-temperature pattern may remain salient, but it must be presented as uncertainty/caution rather than “what works.”
-
-No arbitrary token threshold may delete material entries. If dense, generalize genuinely equivalent families, remove duplication, and make detail cold while preserving routes. Metrics are sensors, not thresholds.
-
-A task-specific selected view may be generated transiently from PEM but remains derived coordination state, never a maintained authority.
-
-### 5.4 Current notices
-
-A small current-notice section MAY represent a high-impact project fact that materially affects engineering now but is not a generalized family.
-
-A notice requires:
-
-```text
-stable notice ID
-current claim/state
-governing owner when normative, otherwise explicit non-authoritative/provisional status
-source/evidence route + binding health/admissibility
-applicability
-review/expiry condition
-```
-
-A notice cannot become shadow authority. Notices do not contribute to family counts. When an expiry/review condition becomes true, the notice must leave unqualified active guidance and become `REVIEW_REQUIRED`, `RETIRED`, or be reconciled to a current family/owner before further reliance. This check is event/activation-driven; Protocol 6.3 does not require a background daemon.
-
-## 6. Learning-family schema, admission, identity, and aggregation
-
-### 6.1 Family kinds
-
-At minimum:
-
-```text
-FAILURE_FAMILY
-SUCCESS_PATTERN
-DISCOVERY
-PRESERVATION_CAPABILITY
-```
-
-Current identifiers use one consistent namespace:
-
-```text
-FF-###  failure family
-SP-###  success pattern
-DS-###  discovery
-PC-###  preservation capability
-```
-
-Occurrence/application IDs are family-scoped (`O01`, `A01`, ...). Historical aliases remain only where migration evidence requires them.
-
-### 6.2 Admission threshold
-
-PEM is not a permanent ledger of ordinary fix chronology. Admit/materially update a family only when evidence supports at least one:
-
-- materially recurring same semantic failure mechanism;
-- reintroduction after accepted repair;
-- one high-impact incident exposing a broadly reusable lesson/capability;
-- optimization/simplification with meaningful demonstrated benefit likely to matter again;
-- repeated independent successful use;
-- discovery materially changing preferred project approach to recurring work;
-- mechanism replacement/generalization/rejection/restoration whose rationale is likely to prevent rediscovery;
-- current high-risk issue best represented as temporary notice rather than false family generalization.
-
-A first clean local defect normally remains local. Generic textbook knowledge or generic protocol doctrine belongs at its owner, not PEM.
-
-A proposed positive family must satisfy the balanced pre-admission evidence rule in Section 2.4 before becoming `SUPPORTED`/`PROVEN` active guidance.
-
-### 6.3 Failure-family membership
-
-Failure-family membership requires materially equivalent:
-
-1. governing invariant;
-2. semantic owner/authority class; and
-3. failure mechanism/cause at the level relevant to repair.
-
-Common symptoms, error messages, file locations, or subsystem labels are insufficient. Uncertain classification stays `PROVISIONAL`/review-required.
-
-Material safe/disconfirming evidence is part of assessing whether the claimed family boundary/cause is correct; it is not discarded merely because it does not increment occurrence count.
-
-### 6.4 Success/discovery/capability minimum fields
-
-A success pattern states its bounded claim, applicable regime/aggregation scope, evaluated applications, supporting and counterevidence, demonstrated benefit/cost, comparator basis, uncertainty where material, and limits.
-
-A discovery states the changed project understanding, exact evidence, applicable regime, competing prior interpretation when material, and whether any current authority was changed separately.
-
-A preservation capability states the capability, applicability, authority-binding state, governing owner if `AUTHORITY_BOUND`, evidence showing why it matters, and mechanism independence. `EVIDENCE_ONLY` capability lessons are strong design context but not mandatory.
-
-### 6.5 Split, merge, reclassification, and accepted ID stability
-
-For split:
-
-- retain predecessor ID as historical/superseded lineage;
-- reassign occurrences/applications to justified children;
-- remove the superseded parent from ordinary current-family aggregate totals unless explicitly reporting lineage history;
-- avoid double-counting one event across parent/child aggregate views.
-
-For merge:
-
-- create/select current generalized family;
-- retain predecessor IDs as lineage/aliases;
-- deduplicate overlapping event/application identities;
-- preserve distinct causes/limits/regimes rather than flattening them.
-
-A reclassification changes current interpretation, not historical observation.
-
-An ID becomes stable/no-reuse once present in accepted project memory. New branch-local IDs are provisional until project acceptance. Concurrent branches may choose colliding provisional IDs; merge/rebase reconciliation must resolve collisions before acceptance, update branch-local references, and never renumber an already-accepted ID merely for compactness. Retired accepted IDs are never recycled.
-
-Cherry-picked/rebased copies of the same underlying historical event are provenance aliases, not new occurrences. Deduplicate by underlying event/evidence identity and causal episode rather than commit-count arithmetic.
-
-### 6.6 Aggregation scope and stratification
-
-Every family whose statistics can affect summary/temperature SHALL state the aggregation scope within which rows are considered materially comparable.
-
-Do not pool across materially different:
-
-```text
-semantic owners or governing invariants
-failure mechanisms
-algorithm/implementation classes
-language/runtime/toolchain regimes
-hardware/backend/precision regimes
-input/scale regimes
-lifecycle contexts when interpretation changes
-project/fork identity when interpretation changes
-```
-
-unless the generalized family claim explicitly spans those dimensions and evidence supports doing so.
-
-When mixed regimes are informative but not safely poolable, preserve one family with stratified subgroup counts only if one generalized lesson genuinely remains correct; otherwise split families. An aggregate project-history count may be shown only alongside enough stratification to prevent misleading interpretation.
-
-### 6.7 Promotion into current doctrine
-
-If a project lesson later becomes explicit accepted D1-D4/project doctrine, the current owner governs. PEM then either:
-
-- retains only compact project-specific recurrence/evidence context that still improves future decisions and points to the owner; or
-- retires/removes redundant active guidance while preserving historical lineage.
-
-Do not duplicate generic current protocol doctrine in self-hosted PEM merely to praise it. A project-specific success pattern that adds measured local evidence may remain, but it routes to the current owner and cannot become a second statement of the rule.
-
-## 7. Evidence model, bindings, quantitative claims, and security
-
-### 7.1 Inherit complete Protocol 6.2 evidence lifecycle
-
-```text
-governed claim
- -> evidence specification
- -> evidence realization
- -> observation
- -> evidence assessment
-```
-
-For material entries preserve enough to judge applicability:
-
-```text
-evidentiary target
-specification/oracle identity
-subject/candidate identity
-input/validity regime
-environment/backend/precision/configuration when material
-execution dependencies
-observation
-assessment + admissibility state
-stochastic replicate identity when material
-protocol/workplan obligation
-lifecycle context
-source project/scope when non-local
-```
-
-A rerun on a changed candidate is a new realization. Old results are not rewritten into evidence for a new subject.
-
-### 7.2 Exact durable evidence, binding health, and self-reference-safe updates
-
-Prefer immutable Git commit + path + stable section/test/finding identifier. A branch/default-branch path alone is insufficient for a long-lived material warrant because later edits can change meaning.
-
-If external CI/benchmark evidence can expire, preserve a compact durable repository record containing the material observation and exact external run/candidate identity when long-lived PEM depends on it.
-
-PEM, generated summaries, implementer narrative, or recursively compressed memory cannot be the sole warrant for their own substantive claim.
-
-For material current entries, evidence and authority routes must carry/check binding health when the entry is activated, semantically reconciled, or otherwise touched by affected impact closure. This is bounded and event-driven; no background full-memory scan is required.
-
-If a material binding becomes unavailable or no longer interpretable:
-
-- do not delete the historical claim automatically;
-- mark the affected current use `REVIEW_REQUIRED`/`UNAVAILABLE` as appropriate;
-- remove unqualified positive guidance if its warrant is no longer sufficient;
-- preserve unaffected evidence and route to replacement/recovered evidence only when justified.
-
-A routine PEM update must not recreate the Git self-reference defect fixed by Protocol 6.2. When the new occurrence/application requires exact identity of the engineering/evidence commit, use this order:
+If a PEM event must bind exact engineering/evidence commit identity, use:
 
 ```text
 engineering/evidence candidate exists immutably
  -> qualification/assessment exists or is durably identifiable
- -> descendant PEM reconciliation binds those pre-existing identities
- -> later closeout/mapping may bind the PEM reconciliation if needed
+ -> descendant PEM reconciliation binds those identities
+ -> later closeout/mapping binds reconciliation if needed
 ```
 
-Do not require a PEM-containing commit to know its own SHA. A same-commit PEM edit is allowed only when every material evidence/subject identity it references already exists independently and no self identity is needed to establish the claim. Otherwise use the minimum descendant reconciliation commit; do not invent a new framework.
+A PEM-containing commit never needs to know its own SHA. Same-commit update is permitted only when all material subject/evidence identities already exist independently.
 
-Git branch/merge/rebase/commit/rewrite operations used for PEM follow `git-and-version-control.md`; PEM semantics do not authorize force-moving history or overwriting concurrent work.
+### 5.3 Quantitative evidence
 
-### 7.3 Failure occurrence evidence
+Preserve effect size rather than adjectives when quantitative evidence exists, together with material baseline/candidate identity, input/data, hardware/backend/precision/toolchain, concurrency/resources, warm-up/cache/checkpoint state, measurement definition, normalization/scaling basis, replicate count, and dispersion/uncertainty where noise can change the conclusion.
 
-Preserve compactly:
+Do not attribute a gain to one mechanism when candidate and baseline differ materially elsewhere unless the claim explicitly concerns the combined change. Complexity claims such as `O(N^2) -> O(N log N)` require adequate algorithmic analysis plus evidence that implementation realizes the analyzed algorithm; a single timing sample is insufficient.
+
+### 5.4 Derived statistics
+
+Counters are derived from current admissible ledger rows, never independently hand-maintained. Track at minimum:
 
 ```text
-occurrence ID
-confirmed date / immutable event identity
-lifecycle context
-aggregation-scope dimensions when material
-source project/scope when non-local
-subject/candidate
-owner/surface
-observed failure
-cause claim + cause evidence
-repair reference
-post-repair qualification
-material safe/disconfirming evidence route when needed to delimit cause/scope
-current evidence admissibility/family-assignment state
-limits/applicability
+failure: confirmed occurrences, repair cycles, affected surfaces,
+         recurrence-after-accepted-repair, first/last confirmed,
+         coverage, aggregation scope, lifecycle strata
+success: evaluated applications, supporting/neutral/contradicting/inconclusive,
+         rejected/invalid when material, independent surfaces,
+         first/last evaluated, coverage, aggregation scope, lifecycle strata
 ```
 
-Distinguish incident-level cause from generalized cause and literal patch from generalized repair principle.
+Split/merge/reclassification preserves lineage, reallocates rows, deduplicates underlying events, and prevents superseded parent plus children from being double-counted as one current total.
 
-### 7.4 Positive-pattern evaluated applications and counterevidence
+Do not pool materially different owner/invariant, failure mechanism, implementation class, language/runtime/toolchain, backend/precision, scale, lifecycle, or project regimes unless the generalized claim explicitly spans them and evidence supports that aggregation. Otherwise stratify or split.
 
-Record materially applicable evaluated applications, not only wins:
+### 5.5 Memory temperature
+
+Default frequency floors inside declared aggregation scope:
 
 ```text
-application ID
-lifecycle context
-aggregation-scope dimensions
-source project/scope when non-local
-subject/candidate and comparator when material
-owner/surface
-intended benefit
-outcome: SUPPORTING | NEUTRAL | CONTRADICTING | INCONCLUSIVE
-qualification/analysis reference + binding health + admissibility state
-quantitative effect when available
-experimental envelope / uncertainty when material
-correctness/constraint evidence
-material costs/tradeoffs
-applicability/limits
+confirmed failures >=3 -> HOT
+confirmed failures ==2 -> WARM
+confirmed failures ==1 -> COLD only with adequate coverage; else UNASSESSED
+qualified supporting applications >=3 -> HOT
+==2 -> WARM
+==1 -> COLD/UNASSESSED subject to coverage
 ```
 
-A supporting outcome may increment qualified supporting count only while its evidence remains admissible for the bounded claim. Neutral, contradicting, inconclusive, rejected/invalid, or stale/inapplicable rows do not become current successes but remain historically recoverable when material. If counterevidence narrows the valid regime, narrow/split/reclassify the pattern instead of averaging away contradiction.
+A single event/application may receive evidence-backed impact promotion for demonstrated severity, breadth, cost, architectural criticality, or exceptional benefit. Preserve base classification, reason, and final temperature. Recency may affect attention/review, not erase counts.
 
-### 7.5 Quantitative/benchmark comparability
+Temperature is only salience. It is not authority, probability, acceptance, applicability, or activation.
 
-A quantitative improvement claim must compare materially comparable subjects or state and justify the normalization used. Where measurement noise can change the conclusion, use sufficient repeated observations/statistical summary for the bounded claim rather than a single favorable run.
+### 5.6 Active-summary salience
 
-Preserve where material:
+The active summary must not become a positive-success leaderboard. Current high-impact unresolved states - `REVIEW_REQUIRED`, material contradiction, unavailable warrant, expired high-risk notice, security/reliability hazard, or authority-binding uncertainty - receive consequence-aware visibility before lower-consequence optional positive guidance. Authority-bound obligations remain governed by their owners. Compact/group as needed, but do not hide material unresolved risk to satisfy a fixed positive/negative balance or aesthetic quota.
+
+## 6. Workflow integration
+
+### 6.1 Design/workplan
+
+For a memory-triggering substantial task:
+
+1. resolve accepted/base PEM from project integration/Git policy;
+2. validate supported schema and compose any validated same-branch candidate overlay;
+3. determine governing D1-D4 parents/side constraints;
+4. read active summary and perform bounded metadata-level applicability matching beyond Hot entries;
+5. create HAS for every materially relevant current family/capability/notice surfaced or independently known;
+6. inspect only relevant detail/evidence;
+7. build capability-transfer map where mature machinery is replaced;
+8. identify new claims and required qualification;
+9. preserve lower-salience mandatory constraints regardless of memory ranking.
+
+Missing/partial PEM, absent dependency edge, stale index, or stale applicability tag cannot prove independence/non-applicability. Established projects adopting 6.3 may use bounded historical intake for the affected scope rather than mandatory global backfill, while keeping uncertainty explicit.
+
+### 6.2 Implementation and review
+
+Implementation preserves actual owner-bound obligations and considers evidence-only learned capabilities as strong but replaceable design priors. Review challenges historical recurrence, lost optimization/reuse/parallelism, eager preparation, lost sensors, package drift, shadow authority, stale/invalid/counterevidenced guidance, applicability omissions, unsafe aggregation, broken bindings, unsupported schema, branch/base confusion, expired notices, causal overclaim, timestamp recurrence laundering, cross-repository ambiguity, derived-index omission, partial publication, untrusted-evidence instruction injection, and context-scaling regression.
+
+Review evaluates current owners and the assembled candidate. PEM is a high-information hypothesis index, not proof.
+
+### 6.3 Impact closure and transitive PEM effects
+
+When authority, concretization, evidence, family semantics, or a materially depended-on PEM entry changes, identify bounded materially dependent entries, preserve unaffected siblings with reason, mark affected entries appropriately, rerun/remap/reassess required evidence, recompute statistics/guidance, update applicability metadata, and close downstream PEM relations whose current meaning changes. No universal graph is required; repository search/bounded dependency views are sufficient when they establish the affected scope.
+
+Changes to an owner cited by `AUTHORITY_BOUND` capability/current normative notice require reverse impact closure: confirm, remap, downgrade to `EVIDENCE_ONLY`, mark review-required/retired, or raise a real Challenge.
+
+### 6.4 Closeout learning assessment
+
+Every accepted material repair/rework/optimization/revert/restoration asks whether a known family recurred; a positive pattern gained supporting/neutral/contradicting/inconclusive/invalidating evidence; a reusable discovery/capability emerged; evidence narrowed/retired/invalidated a lesson; coverage/aggregation/project scope changed; a binding became unhealthy; a notice expired; project/fork identity changed interpretation; causal attribution strength changed; a PEM dependency changed; or schema/base/overlay reconciliation is needed.
+
+Update PEM only when admission threshold is met or an existing entry materially changes. Ordinary fix chronology stays out of permanent memory.
+
+## 7. Maintenance, branch reconciliation, and recovery
+
+### 7.1 Update transaction and publication
+
+A material update SHALL bind admissible evidence; search bounded counterevidence when required; classify/reclassify family; update ledger rows and admissibility; recompute statistics; update coverage/aggregation/lifecycle/project scope; update maturity/conflict, binding health, temperature, authority binding, positive-guidance eligibility, applicability metadata and active summary; preserve lineage/relations; perform bounded downstream/reverse impact closure; run structural/security/schema checks; and publish one coherent logical-memory unit under Git policy.
+
+Derived index regeneration may fail without corrupting canonical truth, but the index must then be explicitly stale/unavailable and cannot silently serve incomplete applicability results.
+
+Update classes:
 
 ```text
-baseline and candidate identities
-same or justified-comparable input/data
-hardware/backend/precision/toolchain
-worker/concurrency/resource settings
-warm-up/cache/checkpoint state
-measurement definition
-replicate count and dispersion/uncertainty
-normalization or scaling basis
+EVIDENCE_APPEND - meaning/applicability unchanged; focused evidence/statistical checks
+EVIDENCE_REASSESSMENT - prior row admissibility/validity changes; recompute affected current state
+SEMANTIC_RECONCILIATION - claim/cause/scope/relations/applicability/authority binding/split/merge/promotion/retirement changes; affected owner review + proportionate falsification
+PEM_SCHEMA_OR_PROTOCOL_CHANGE - representation/routing/schema semantics change; protocol/workplan path
 ```
 
-Do not attribute a speed/memory improvement to the changed mechanism when the comparison is materially confounded by changed hardware, workload, precision, cache state, parallelism, or measurement definition unless the claim is explicitly about the combined change.
+### 7.2 Branch/merge behavior
 
-A complexity claim such as `O(N^2) -> O(N log N)` requires adequate algorithmic analysis and evidence that implementation realizes the analyzed algorithm; one timing sample cannot establish asymptotic complexity. Empirical scaling may supplement analysis.
+Branch-local PEM is a candidate overlay over the target accepted/base memory. Before merge/rebase: inspect repository/concurrent state under Git owner; reconcile against target accepted memory; resolve provisional ID collisions; deduplicate shared/cherry-picked events; preserve underlying event and repair-acceptance lineage; re-evaluate applicability/admissibility/binding health after target changes; reconcile aggregation/project scope; update applicability predicates and relations; recompute statistics/temperature; and rerun affected validation. Textual merge success is not semantic reconciliation.
 
-### 7.6 Applicability, admissibility, stale state, contradiction, and common-mode risk
+No PEM rule authorizes force push, destructive rebase, history rewrite, or overwrite of unrelated/concurrent work.
 
-A valid old pass is not confirmation of a changed candidate; a stale old failure is not refutation.
+### 7.3 Event-driven freshness
 
-When protocol obligation, governing claim, candidate, evidence specification/oracle, regime, environment, or execution dependency changes enough to plausibly affect a PEM claim, mark only materially affected family/application `REVIEW_REQUIRED` or stale and preserve unaffected entries with reason.
+No daemon or periodic full scan is required. Reconciliation triggers include accepted authority/concretization change; evidence oracle/assessment invalidation; evidence retention/path change; revert/restoration; project/fork/scope change; schema migration/reader change; PEM activation for a relevant task; PEM semantic/evidence reconciliation; branch integration; and an otherwise justified maintenance audit.
 
-Evidence admissibility follows the current evidence assessment, not the historical filename/status alone. A material row may be:
+A stale untouched Cold family need not be refreshed by time alone. A current recommendation whose warrant is unavailable/inadmissible/plausibly invalidated cannot remain unqualified merely because no scheduled audit ran.
+
+### 7.4 Corruption, rollback, downgrade, and re-adoption
+
+Malformed/unreadable/unsupported/corrupt PEM makes memory unavailable/partial for memory-dependent decisions; it does not block unrelated routes. Recover through project Git/document ownership, not an alternate memory authority.
+
+Restored old PEM must be reconciled against current accepted state, schema, scope, owners, and evidence. Version-bound Protocol 6.2 leaves 6.3 PEM inert rather than deleting/reinterpreting it. Re-adopting 6.3 requires supported schema and reconciliation from the last covered accepted identity. Revert/restoration preserves historical events but reconciles current applicability, admissibility, authority binding, statistics, relations, and guidance where affected.
+
+## 8. Context economy and scalability
+
+Normal behavior must be structurally decoupled from raw historical-corpus growth:
 
 ```text
-ADMISSIBLE
-REVIEW_REQUIRED
-INCONCLUSIVE
-CHALLENGED
-REJECTED_OR_INVALID
-STALE_OR_INAPPLICABLE
-RETIRED
+non-triggering route -> no substantive PEM/history load
+triggering route -> root summary + cheapest sufficient metadata match
+                  -> selected detail -> raw evidence only if needed
+material update -> affected families + declared search scope
+                  -> full corpus only for genuinely exhaustive/backfill/migration claims
 ```
 
-Only rows admissible for the current bounded claim/family assignment contribute to `confirmed_occurrence_count` or `qualified_supporting_application_count`. If admissibility changes, recompute derived statistics and any dependent maturity/temperature/guidance. Historical invalid/rejected rows remain cold and recoverable when they explain past decisions.
+Do not preload all family prose or all cold evidence. Family-count growth may increase search work, but use repository search/range/derived index rather than eager context. A stale/missing index falls back to canonical search or explicit uncertainty. Static bytes/tokens/routes/call counts are structural sensors only; claims about actual model latency, attention, cache behavior, productivity, or live memory use require live evidence for the stated harness/model/install regime.
 
-For important claims account for evidentiary independence/common-mode risk. Multiple checks sharing one defective expected-value generator, fixture, benchmark harness, dataset, or assumption do not automatically provide independent confirmation.
+## 9. Self-hosted SSDP migration/backfill
 
-Contradictory admissible observations and materially conflicting assessments remain visible. If evidence applicability/oracle/independence analysis cannot resolve a material conflict, the current claim is contested/review-required; reviewer count does not decide truth.
+SSDP SHALL be the first qualified project-local PEM instance. Backfill from actual repository evidence, not examples in this workplan or agent recollection. Inspect semantic evolution, relevant archived workplans, Protocol 6.1/6.2 qualification/review, commit/patch episodes, replacement-bootstrap repair, cold-route requalification, static activation sensors, frozen-profile preservation, generated/package repairs, documentation-standard repairs, and materially relevant optimization/simplification history.
 
-Evidence maturity:
+Candidate investigations include mature optimization loss, repeated computation, eager/cold-route contamination, accidental serialization, checkpoint/intermediate reuse loss, ownership leakage, generated/package drift, bootstrap identity drift, frozen-profile mutation, activation-sensor loss, wrapper accumulation, documentation source-chain drift, and diff-only review. Positive candidates include evidence-backed route-local lazy activation, provenance-valid artifact reuse, bounded independent parallelism, and direct owner-layer simplification.
+
+Candidates are not pre-approved families. For each seeded family record coverage, aggregation/project scope, lifecycle context, binding health, admissibility, causal claim strength, and material counterevidence. Self-hosted PEM remains branch-candidate memory until actual project integration accepts it.
+
+## 10. Finite representation census and preservation map
+
+Before protocol-source mutation, Stage A SHALL create `qualification/ssdp6/SSDP-6.3-PRESERVATION-CENSUS.md`. Inventory all current role/specialist entrypoints, shared references/templates, AGENTS/README/PORTABILITY/semantic dependencies/version, workflow-prompt source, profile/prompts/snapshots, schemas/renderers/help/status text, qualification/routing/package assets, workplan authority index, semantic history, archived workplans, `dist/`, generated snapshots, and frozen 5.16/6.0/6.1/6.2 resources. Classify each `refactor`, `route-only`, `new`, `generated`, `frozen/historical`, or `intentionally unchanged with reason`.
+
+Independently reconstruct T01-T39 from accepted 6.2; do not inherit labels as proof. Append collision-free 6.3 preservation hypotheses with these meanings:
 
 ```text
-PROVISIONAL
-SUPPORTED
-PROVEN
+T40 authority/current-owner vs non-authoritative memory separation
+T41 compact active PEM representation
+T42 stable family identity and lineage
+T43 exact durable evidence binding
+T44 ledger-derived recurrence/application statistics
+T45 evidence-backed positive patterns and tradeoffs
+T46 hypothesis/maturity/applicability separation
+T47 reproducible temperature and explicit impact override
+T48 coverage state; no absence inference from incomplete memory
+T49 semantic family-membership discipline
+T50 first-local-defect/admission economy
+T51 HAS for materially memory-relevant work
+T52 mechanism-to-capability transfer
+T53 owner-backed promotion into invariants/sensors
+T54 material closeout learning assessment
+T55 quantitative effect/envelope preservation
+T56 contradiction/retirement without erasure
+T57 evidence applicability/staleness/bounded invalidation
+T58 independence/common-mode risk
+T59 active-summary progressive disclosure/cold reachability
+T60 project-local PEM vs generic package/template separation
+T61 one logical canonical memory; derived indexes subordinate; optional partition lossless
+T62 6.3 bootstrap/profile/recovery/version staging
+T63 frozen prior profiles/resources
+T64 source/generated/package parity and exact-ref fallback
+T65 static-vs-live claim discipline
+T66 Protocol 7 inheritance/current-lifecycle reconciliation
+T67 human-facing background/terminology/abbreviation completeness
+T68 independent assembled-candidate qualification/Review
+T69 anti-scope-laundering/lower-salience mandatory preservation
+T70 no recursive summary/evidence laundering
+T71 capability authority binding; PEM cannot mint invariants
+T72 self-reference-safe routine updates
+T73 balanced positive supporting/neutral/contradicting/inconclusive evidence
+T74 descriptive count vs rate/probability
+T75 memory temperature vs activation state
+T76 accepted/base vs branch-candidate lifecycle/merge reconciliation
+T77 stable accepted IDs; collision-safe provisional IDs; no reuse
+T78 security/trust/privacy persistence
+T79 owner-responsible learning assessment/update classes
+T80 cross-domain D1-D4/specialist applicability without universal activation
+T81 owner deduplication after doctrine promotion
+T82 occurrence/application lifecycle context
+T83 pre-admission counterevidence/anti-selection bias
+T84 applicability-led HAS independent of temperature/summary presence
+T85 aggregation scope/cross-regime stratification
+T86 evidence/authority binding-health
+T87 reverse owner-impact closure for authority-bound PEM
+T88 failure-family safe/disconfirming evidence
+T89 current-notice expiry/review
+T90 matched comparator/uncertainty for quantitative claims
+T91 positive-guidance eligibility under conflict/unhealthy evidence
+T92 active workplan current-state representation; no review replay
+T93 PEM schema compatibility/migration/unknown-schema fail-safe
+T94 accepted memory basis distinct from default/latest/self-declaration
+T95 PEM corruption/rollback/downgrade/re-adoption
+T96 evidence admissibility/retraction and recomputation
+T97 unresolved assessment disagreement without vote/latest-editor laundering
+T98 context/maintenance scaling independent of raw-history growth
+T99 logical canonical partitioning and stale-index fallback
+T100 fork/copy/cross-project provenance/local-count separation
+T101 Git ownership for branch/merge/self-reference/history behavior
+T102 revert/restoration impact closure
+T103 typed PEM relations, non-recursive warrants, transitive impact closure
+T104 atomic logical-memory publication across root/partition/index surfaces
+T105 accepted-base plus explicit branch-candidate overlay composition
+T106 applicability metadata co-evolution; no stale-match false negatives
+T107 observation/association/causal-attribution claim-strength discipline
+T108 recurrence chronology from accepted repair/event lineage, not timestamps
+T109 cross-repository evidence includes unambiguous source identity
+T110 active-summary salience preserves current high-impact unresolved state
+T111 untrusted evidence content remains data, not instruction/tool authorization
 ```
 
-Current applicability/lifecycle state:
+For every materially changed obligation, census records old owner, new owner, obligation, preservation/generalization relation, discriminating oracle/evidence, and `PRESERVED` or `BLOCKING` disposition. These rows are evidence, not authority.
+
+## 11. Protocol 6.3 bootstrap, profile, package, and recovery lifecycle
+
+Preserve the repaired 6.2 self-reference discipline.
+
+1. Complete and validate self-reference-safe 6.3 canonical source, including PEM doctrine/template, version/navigation, and package closure.
+2. Create immutable 6.3 public-source bootstrap only after source regression, canonical package build, standalone package/link validation, and routing reachability pass.
+3. Publish that exact bootstrap only from a later semantic-candidate/publication commit. Never use `main`, latest, semantic-version guessing, or future recovery identity as fallback.
+4. Create distinct `ssdp-protocol-6.3` profile/snapshot; profile schema and PEM schema are separate contracts. Do not mutate 5.16/6.0/6.1/6.2 resources.
+5. Bind qualification to one immutable semantic candidate. Later evidence/generated/lifecycle commits contain no hidden canonical semantic mutation; otherwise affected qualification reopens.
+6. Regenerate `dist/` and orchestrator descendants from canonical source and validate parity, package closure, profile identity/topology, exact fallback, and closest supported consumer ingestion. Generic packages contain PEM doctrine/template/reader semantics, never live project PEM.
+7. After semantic qualification and independent Review PASS, choose immutable 6.3 recovery containing candidate and required decision evidence through ancestry.
+8. Publish `6.3.0 -> <exact recovery>` only in a later mapping commit, regenerate mapping-bearing descendants, and rerun targeted recovery/parity/package/Core acceptance.
+9. Reconcile semantic evolution, workplan authority index, navigation/portability, self-hosted PEM accepted basis, and Protocol 7 inheritance representation. Protocol 7 D3 architecture remains unchanged unless separately reopened.
+10. Archive workplan only after current 6.3 semantics live at canonical owners and impact closure is complete.
+
+## 12. Qualification obligations
+
+Run complete affected repository/package/orchestrator regression, all 115 accepted Protocol 6.2 semantic scenarios against 6.3, all affected prior requalifications, the four inherited 6.2 Challenge falsifications, focused Q63 cases below, generated/profile/package checks, and independent assembled-candidate Review.
 
 ```text
-CURRENT
-REVIEW_REQUIRED
-STALE_OR_INAPPLICABLE
-RETIRED
+Q63-01 complete 6.2/T01-T39 no-loss preservation
+Q63-02 finite representation census and transformation closure
+Q63-03 authority/evidence/PEM separation
+Q63-04 conditional activation and cold-route behavior
+Q63-05 missing/partial memory cannot prove absence/non-applicability
+Q63-06 durable non-recursive evidence binding
+Q63-07 stale evidence in both polarities and bounded invalidation
+Q63-08 evidence independence/common-mode risk/visible contradiction
+Q63-09 semantic failure-family membership, not textual similarity
+Q63-10 one causal episode/many symptoms counts once
+Q63-11 genuine recurrence after accepted repair increments correctly
+Q63-12 split/merge lineage, deduplication, recomputed totals
+Q63-13 coverage-sensitive reproducible temperature
+Q63-14 importance is not authority/pass threshold
+Q63-15 positive promotion requires suitable evidence and governing constraints
+Q63-16 quantitative effect survives compaction
+Q63-17 complexity claim discipline
+Q63-18 capability transfer permits simpler/new mechanism without losing owner-bound requirement
+Q63-19 first-local-defect economy
+Q63-20 invalidation/contradiction/retirement retains history and refreshes guidance
+Q63-21 lossless active-summary compaction
+Q63-22 no repeated-history/full-corpus scan on normal routes
+Q63-23 static-vs-live claim discipline
+Q63-24 project-local PEM excluded from generic package/profile
+Q63-25 exact immutable 6.3 public fallback
+Q63-26 frozen 5.16/6.0/6.1/6.2 integrity
+Q63-27 final generated/package/profile/Core acceptance
+Q63-28 self-hosted backfill statistics independently reconstructed
+Q63-29 material closeout update; non-material local repair creates no memory noise
+Q63-30 bootstrap/recovery/version/Protocol-7 lifecycle separation
+Q63-31 evidence-only capability cannot become mandatory through PEM
+Q63-32 routine PEM update is self-reference-safe
+Q63-33 supporting count cannot hide neutral/contradicting/inconclusive outcomes
+Q63-34 counts cannot masquerade as rates/probabilities
+Q63-35 temperature distinct from current activation/applicability
+Q63-36 concurrent branch/ID/merge/cherry-pick reconciliation
+Q63-37 sensitive/private evidence preservation rules
+Q63-38 update-class and owner responsibility; documentation cannot self-promote findings
+Q63-39 bounded cross-domain D1-D4/specialist applicability
+Q63-40 lesson promoted to current doctrine does not remain competing PEM rule
+Q63-41 lifecycle context prevents development-to-production incidence laundering
+Q63-42 pre-admission counterevidence search catches favorable-history cherry-pick
+Q63-43 HAS surfaces materially relevant non-Hot entry
+Q63-44 incompatible regimes are stratified/split rather than pooled
+Q63-45 broken material binding degrades current guidance
+Q63-46 current-owner change closes reverse authority-binding impact
+Q63-47 safe/disconfirming evidence narrows overbroad failure family
+Q63-48 notice expiry removes unqualified active guidance
+Q63-49 quantitative comparator/uncertainty integrity
+Q63-50 contested/unhealthy success not phrased as "what works"
+Q63-51 active workplan is current-state contract; review chronology stays cold
+Q63-52 schema compatibility/migration and unknown-schema fail-safe
+Q63-53 accepted memory basis is project-governed, not default/latest/self-declared
+Q63-54 corruption/restored-old-memory/downgrade/re-adoption behavior
+Q63-55 invalidated evidence is withdrawn from current derived support
+Q63-56 conflicting assessment cannot be vote/latest-editor resolved
+Q63-57 active-context/maintenance scaling independent of raw cold-history growth
+Q63-58 logical canonical partitioning and stale-index fallback
+Q63-59 fork/cross-project provenance and local-count separation
+Q63-60 Git owner controls repository mutation and semantic merge does not authorize rewrite
+Q63-61 revert/restoration preserves history and reconciles current meaning
+Q63-62 typed PEM relation endpoints remain independently warranted; upstream change triggers bounded downstream closure
+Q63-63 root/partition/index semantic publication is coherent; mixed revisions fail
+Q63-64 same-branch candidate overlay composes explicitly over accepted base without self-ratification or silent deletion
+Q63-65 applicability metadata co-evolves with family semantics; stale tag cannot hide a relevant family
+Q63-66 assembled-outcome evidence cannot be promoted to mechanism-specific causality without discriminating evidence
+Q63-67 recurrence-after-repair follows accepted project/causal lineage, not misleading timestamps/rebase order
+Q63-68 non-local evidence binding requires unambiguous source repository/project identity
+Q63-69 active summary preserves current high-impact unresolved risk despite abundant positive patterns
+Q63-70 untrusted instruction-like evidence remains data and cannot authorize tools/actions or change instruction precedence
 ```
 
-Contradiction/contestation is explicit assessment state/flag, not deletion. Temperature/confidence/admissibility/applicability are orthogonal.
+Each Q63 case SHALL contain a negative/counterfactual fixture that would fail if the claimed distinction were omitted; word-presence checks are insufficient.
 
-### 7.7 Security and trust boundary
+## 13. Falsification obligations
 
-PEM and evidence records are durable repository content and inherit `security-and-trust-boundaries.md`.
+Retain the four Protocol 6.2 Challenge passes unchanged in semantic purpose:
 
-- never copy secrets, credentials, private keys, sensitive user data, restricted logs, or unnecessary machine-specific paths into PEM;
-- preserve the minimum safe evidence summary/reference necessary for the claim;
-- when raw evidence cannot safely be committed, use the project-approved protected evidence location/identifier and record access/retention limitations;
-- lack of safe access to required evidence is unavailable/blocking where that evidence is necessary for the claim;
-- review staged PEM/evidence/generated outputs for accidental private-data inclusion;
-- external links and artifacts remain subject to provenance/trust policy.
+1. **Loss** - attempt to remove a distinction needed for a future decision.
+2. **Scope/materiality laundering** - attempt to pass by shrinking the governed/affected scope.
+3. **Priority inversion** - attempt to let high-salience memory erase lower-salience mandatory current constraints.
+4. **False compaction** - attempt to replace genuine progressive disclosure with recursive summaries, incomplete indexes, eager loading, or hidden duplicate authority.
 
-Compactness never justifies leaking sensitive evidence.
-
-## 8. Statistics, coverage, and memory temperature
-
-### 8.1 Canonical ledger; derived summaries
-
-Evidence ledger rows are the statistical basis. Displayed counters are derived and never independently hand-maintained.
-
-Failure family tracks at least:
+Run the following 6.3 adversarial cases:
 
 ```text
-confirmed_occurrence_count
-independent_repair_cycle_count
-affected_surface_count
-recurrence_after_accepted_repair_count
-first_confirmed
-last_confirmed
-coverage_state / coverage_basis
-aggregation_scope
-stratified counts when material
-lifecycle-context distribution when material
+F63-A speculation laundering
+F63-B statistical inflation
+F63-C family overgeneralization
+F63-D incomplete-history false Cold
+F63-E cargo-cult positive pattern
+F63-F summary/evidence recursion
+F63-G stale-green/stale-red laundering
+F63-H common-mode fake independence
+F63-I architectural ossification
+F63-J history-compaction loss
+F63-K false quantitative generalization
+F63-L eager memory regression
+F63-M project-memory package contamination
+F63-N shadow capability authority
+F63-O routine self-SHA recursion
+F63-P positive survivor bias after admission
+F63-Q pseudo-statistical risk/rate
+F63-R temperature/activation conflation
+F63-S branch memory overwrite
+F63-T accepted-ID reuse
+F63-U sensitive-evidence laundering
+F63-V documentation self-promotion
+F63-W generic-doctrine duplication
+F63-X lifecycle-incidence laundering
+F63-Y pre-admission favorable-history cherry-pick
+F63-Z Hot-summary applicability trap
+F63-AA cross-regime pooling
+F63-AB broken-warrant persistence
+F63-AC authority-binding drift
+F63-AD failure-family safe-counterexample suppression
+F63-AE expired-notice persistence
+F63-AF benchmark confounding
+F63-AG contested pattern presented as "what works"
+F63-AH active-workplan amendment replay
+F63-AI unknown-schema reinterpretation
+F63-AJ default/latest memory laundering
+F63-AK stale restored-memory laundering
+F63-AL invalid-evidence persistence in current statistics
+F63-AM review-vote/latest-editor truth
+F63-AN cold-history scaling regression
+F63-AO canonical-memory representation ossification/duplicate authority
+F63-AP fork-count contamination
+F63-AQ stale-index omission
+F63-AR revert erases/strands learning
+F63-AS recursive PEM-to-PEM warrant
+F63-AT half-published root/partition state
+F63-AU accepted-base/candidate-overlay confusion
+F63-AV stale applicability-tag false negative
+F63-AW post-hoc causal laundering
+F63-AX timestamp-based recurrence laundering
+F63-AY bare cross-repository evidence identity
+F63-AZ positive-guidance salience starvation of unresolved risk
+F63-BA evidence-content instruction injection
 ```
 
-Success pattern tracks at least:
+A required case that does not execute is not PASS.
 
-```text
-evaluated_application_count
-qualified_supporting_application_count
-qualified_neutral_count
-qualified_contradicting_count
-inconclusive_count
-rejected_or_invalid_count when material to interpretation
-independent_surface_count
-first_evaluated
-last_evaluated
-coverage_state / coverage_basis
-aggregation_scope
-stratified counts when material
-```
+## 14. Implementation stages
 
-A merge/rebase reconciles evidence rows first and recomputes counts; never sum stored counters blindly.
+### Stage A - baseline and no-loss map
+Reconfirm accepted 6.2 identities; build finite representation census; independently reproduce T01-T39; map actual owners/consumers; append T40-T111 or collision-free successors; classify prior evidence applicability. **Gate:** no source mutation until finite no-loss scope is adequate.
 
-Current confirmation/support counters are derived from currently admissible rows for the stated family/aggregation scope. Historical rows that become invalid, stale, retired, or reclassified remain provenance but no longer support current confirmation unless another admissible route does.
+### Stage B - canonical doctrine and schema
+Add the smallest justified `source/shared/references/project-engineering-memory.md` owner or prove existing owner sufficient. Implement schema, families, relations, evidence/admissibility, aggregation, causality, statistics, temperature/salience, scope/provenance, branch overlay, logical publication, trust handling, notices, and optional cold partition semantics. Update existing concern owners only with their local consequences/routes. **Gate:** no duplicate owner, shadow authority, recursive warrant, unknown-schema laundering, or duplicate canonical memory.
 
-### 8.2 Counting rules
+### Stage C - routing and workflow
+Add visible conditional routes from relevant D1-D4/specialist/workflow entrypoints; implement accepted-base plus candidate overlay, bounded applicability matching/HAS, capability transfer, missing/partial/corrupt memory behavior, reverse/transitive impact, applicability co-evolution, expiry, binding-health/admissibility checks, revert/restoration, causal-claim distinction, and closeout responsibility. **Gate:** first-local, Hot-irrelevant, Cold-material, non-Hot-HAS, stale-tag, overlay, expired-notice, unsupported-schema, and ordinary-route cases behave correctly.
 
-One causal change producing many failing tests is normally one occurrence. A defect repaired/accepted then independently reintroduced is another occurrence and one recurrence-after-repair. Several commits in one coherent repair episode are one repair cycle when they close one occurrence through accepted qualification.
+### Stage D - validation and self-hosted backfill
+Extend existing validators rather than create parallel compliance machinery. Validate schema, IDs, logical-publication coherence, relations, evidence resolution/source identity/admissibility, derived counts, recurrence lineage, aggregation/project scope, counterevidence, coverage, temperature/activation, salience, positive eligibility, authority binding, branch overlay, Git state, security/trust, notice expiry, partition/index parity, applicability metadata, and active-summary integrity. Build SSDP PEM from real evidence. **Gate:** independent reconstruction and counterevidence checks pass; no cross-regime/project pooling, recursive warrant, half-publication, causal overclaim, or cold-history load regression.
 
-Repeated executions of one implementation do not create new successful applications. A later materially independent use may count when separately qualified. The same underlying application copied/cherry-picked across branches is not multiplied.
+### Stage E - bootstrap/profile/candidate/generated descendants
+Complete self-reference-safe source, validate, create immutable public bootstrap, publish exact bootstrap later, create distinct 6.3 profile/snapshot, keep old resources frozen, regenerate/package, and bind one immutable semantic candidate. **Gate:** exact self-reference-safe bootstrap/candidate/profile/package separation.
 
-Development/qualification occurrences may count as engineering-history events, but lifecycle context must remain visible; their count cannot be relabeled as production incidence.
+### Stage F - qualification and independent Review
+Run full affected regression, all 115 6.2 scenarios, affected prior requalifications, Q63-01 through Q63-70, F63-A through F63-BA, and the four inherited Challenge passes. Use static activation/context sensors without overclaiming live performance. Prepare snapshot-complete handoff and perform independent assembled-candidate Protocol/D3 Review. **Gate:** no missing check, unresolved preservation row, hidden red/unavailable evidence, shadow authority, invalid count, stale applicability, partial publication, causal overclaim, trust-boundary defect, or package/profile drift.
 
-Counts are computed within the family aggregation scope. Cross-stratum/lifetime totals may be displayed only as explicitly aggregated history and do not erase subgroup interpretation. Cross-project rows do not become local counts without explicit multi-project aggregation semantics.
+### Stage G - recovery and closeout
+After Stage-F PASS choose immutable recovery, later publish mapping, regenerate mapping-bearing descendants, rerun targeted recovery/parity/package/Core acceptance, reconcile semantic evolution/authority index/navigation/self-hosted accepted PEM basis/Protocol-7 inheritance, and archive only after current doctrine resides at owners. No `main` cutover without separate authorization.
 
-### 8.3 Coverage and absence
+## 15. Independent-review handoff
 
-`confirmed_occurrence_count` is exactly the number of currently admissible evidence-bound counted occurrences in the declared aggregation scope, but may be a lower bound when coverage is partial.
+Create `qualification/ssdp6/INDEPENDENT-REVIEW-HANDOFF-PROTOCOL-6.3.md` only after implementation/qualification readiness. Bind exact 6.2 parent identities; 6.3 bootstrap/candidate; complete preservation census/map; supported PEM schema; self-hosted PEM scope/coverage/aggregation; accepted base and candidate overlay; logical publication state; typed relation/transitive-impact state; applicability metadata; supporting/disconfirming/invalidated evidence; causal-attribution basis; recurrence lineage; non-local source identities; binding health/admissibility; salience state; static/live evidence with correct claim scope; generated/package/profile/frozen-resource evidence; candidate-to-evidence descendant range; known red/unavailable/contested observations; and security-sensitive evidence handling.
 
-- `>=3` confirmed failure occurrences give a frequency-based `HOT` floor even under partial coverage;
-- `2` give at least `WARM`;
-- `1` may be `COLD` by frequency only with adequate declared family-relevant coverage; otherwise `UNASSESSED` absent evidence-backed impact promotion;
-- `0` or absent family under partial/uninitialized coverage never proves absence.
+Reviewer independently reconstructs governing semantics and attempts falsification. It MUST inspect the assembled candidate rather than PR diff, implementer summary, preservation labels, or green statuses alone. It samples positive claims for omitted counterevidence, failure families for overbroad causes, relations for recursive warrant/transitive staleness, recurrence for timestamp laundering, non-Hot applicability, branch overlays, root/partition coherence, causal claims, cross-repository evidence identity, unresolved-risk salience, and trust-boundary handling.
 
-Apply equivalent coverage discipline to positive-pattern application history.
+## 16. PASS / NO-PASS
 
-### 8.4 Reproducible memory temperature
+PASS requires: complete 6.2 preservation; all new T rows closed; authority/evidence separation; one coherent logical project-local PEM; valid schema and accepted-base semantics; explicit branch overlay; evidence-backed balanced positive/negative learning; admissibility-driven statistics; honest coverage/aggregation/lifecycle/project scope; non-recursive typed relations and bounded transitive impact; claim-strength/causal discipline; genuine recurrence lineage; healthy source-identified bindings; applicability-led HAS; consequence-aware salience; no shadow authority; safe rollback/revert/fork behavior; bounded context/maintenance cost; lossless optional partitioning/index fallback; untrusted evidence treated as data; Git-owner control; all inherited/new qualification and falsification passing; exact 6.3 bootstrap/recovery/profile/package lifecycle; frozen old resources; bounded Protocol 7 reconciliation; and independent Review with no genuine blocker/Serious Challenge.
 
-Default frequency classification within a declared aggregation scope:
+NO-PASS includes any material violation of those requirements, especially: loss of accepted 6.2 semantics; memory/evidence becoming authority; cherry-picked positive learning; overbroad negative learning; invalid/stale evidence contributing current support; causal attribution stronger than evidence; fabricated recurrence from timestamps/copies; correlated evidence called independent; probability claims without denominator; incompatible aggregation; stale applicability hiding a relevant lesson; recursive PEM warrant; half-published logical memory; branch candidate mistaken for accepted memory; silent accepted-entry deletion; source-ambiguous cross-repository warrant; unresolved high-impact state crowded out by positive guidance; instruction-like evidence treated as executable instruction/authorization; unsupported schema interpretation; stale restored PEM; destructive Git behavior authorized by PEM; eager history activation; package/live-PEM contamination; frozen/profile/package drift; semantic mutation after candidate without requalification; diff-only Review; premature recovery mapping; or silent Protocol 7 architecture change.
 
-```text
-confirmed failure occurrences >= 3            -> HOT
-confirmed failure occurrences == 2            -> WARM
-confirmed failure occurrences == 1            -> COLD only with adequate declared coverage
+## 17. Reopen and repair rule
 
-qualified supporting applications >= 3        -> HOT
-qualified supporting applications == 2        -> WARM
-qualified supporting applications == 1        -> COLD/UNASSESSED by frequency subject to coverage
-```
+If implementation or independent Review finds a genuine blocker, route to the earliest owning D1/D2/D3/D4 or concern layer; reopen this workplan only when its cycle contract must change; give precise owner-layer repair instructions; prefer removal/narrowing/rewiring/consolidation/re-derivation over compensating wrappers; rerun only affected evidence while preserving demonstrably unaffected admissible evidence; recompute affected PEM state; and use the Git owner for repository/history operations. Raise Serious Challenge only when accepted governing authority may itself be defective.
 
-A single event/application may be promoted to `WARM`/`HOT` for demonstrated severity, breadth, cost, architectural criticality, or exceptional benefit, but store base class, evidence-bound override, and final temperature.
+## 18. Current design closure state
 
-Counterevidence or invalidated support affects evidence maturity, applicability, positive-guidance eligibility, regime, and whether a `SUCCESS_PATTERN` remains correctly generalized. A high historical supporting count does not erase qualified contradictions or invalidated rows.
+This is the current-state workplan contract. Detailed review chronology remains in non-authoritative qualification review records rather than amendment replay here.
 
-Recency may order attention or trigger applicability review; it does not erase counts or automatically demote an old applicable lesson.
+The design now preserves accepted 6.2 semantics while adding one evidence-backed, project-local learning layer with: balanced positive and negative evidence; exact admissible warrants; explicit uncertainty/counterevidence; stable family identity and counts; aggregation/lifecycle/project scope; authority-safe capability learning; current-owner deduplication; branch-safe overlay and merge semantics; self-reference-safe updates; schema/recovery behavior; lossless scalable canonical representation; typed non-recursive relations with transitive impact closure; atomic logical publication; co-evolving applicability metadata; observation-versus-causation discipline; accepted-lineage recurrence semantics; cross-repository source identity; consequence-aware active salience; and evidence-as-data trust boundaries.
 
-### 8.5 Counts are not rates
+No Serious Challenge to accepted Protocol 6.2 authority is identified. Implementation remains authorized on the dedicated 6.3 branch subject to Stages A-G. Protocol 6.3 remains proposed until qualification, independent Review, immutable bootstrap/recovery, generated/profile/package reconciliation, lifecycle closeout, and separately authorized cutover pass.
 
-Unless an explicit exposure/opportunity denominator and sampling basis exist, do not infer:
-
-```text
-FF-A occurred 4 times and FF-B 2 times
-therefore FF-A is twice as likely
-```
-
-or infer a success probability from supporting/application counts. Counts support recurrence/salience heuristics only within declared coverage/aggregation scope.
-
-### 8.6 Memory temperature versus activation/current applicability
-
-Memory temperature records historical/project importance. Activation remains decision-local under Protocol 6.2 progressive disclosure.
-
-- a `HOT` but irrelevant family stays cold for the current task;
-- a `COLD` but materially applicable family may become active;
-- a historically `HOT` family whose mechanism/regime is retired does not remain active merely because lifetime count is high;
-- lifetime statistics remain recoverable while current applicability controls active guidance.
-
-No count or temperature forces a design decision, acceptance, or context load.
-
-## 9. Failure-to-success learning and authority-safe capability transfer
-
-PEM SHALL record what the project learned, not only scars.
-
-```text
-FF-### repeated expensive preparation
-  -> DS-### preparation ownership is route-local
-  -> SP-### lazy route-owned construction repeatedly qualifies
-  -> PC-### learned cold-route capability
-```
-
-A `PC-###` record MUST say whether it is:
-
-```text
-EVIDENCE_ONLY
-  useful demonstrated property; design prior only
-
-AUTHORITY_BOUND
-  exact current D1/D2/D3/D4/project owner explicitly requires it
-
-PROPOSED_FOR_PROMOTION
-  evidence suggests durable authority may need change; route to owner
-```
-
-PEM never promotes `EVIDENCE_ONLY` to `AUTHORITY_BOUND` by repetition, temperature, qualification count, or wording. The owning semantic acceptance process does that.
-
-When mechanism is removed/replaced:
-
-```text
-old mechanism
- -> learned capability
- -> authority-binding state + governing owner if any
- -> new mechanism / justified omission / deliberate owner-approved retirement
- -> verification
-```
-
-Historical wrapper/cache/executor/checkpoint format does not become authority through existence.
-
-## 10. Workflow integration, historical applicability, and owner impact
-
-### 10.1 Design/workplan phase
-
-For memory-triggering substantial work:
-
-1. resolve the accepted/base PEM from project integration/Git policy rather than branch/default/latest assumption;
-2. validate supported schema sufficiently to interpret current metadata;
-3. read the PEM active summary;
-4. determine governed scope from actual parents/side constraints;
-5. run bounded applicability matching over current PEM by owner/surface/mechanism/capability/regime rather than treating the active summary or Hot entries as exhaustive;
-6. inspect only relevant family/detail/evidence;
-7. record HAS for every materially relevant current family/capability/notice surfaced or independently known, regardless of temperature;
-8. identify learned capabilities and authority-binding state;
-9. build capability-transfer map where relevant;
-10. identify new claims requiring qualification;
-11. preserve lower-salience mandatory constraints regardless of memory ranking.
-
-`HOT` items receive attention priority, not exclusive HAS membership. A missing/partial memory, absent active-summary row, stale derived index, or missing dependency edge cannot prove non-applicability.
-
-### 10.2 Implementation phase
-
-Implementation MUST preserve authority-bound capabilities because their real owners require them. Evidence-only learned capabilities are considered and dispositioned proportionately but remain replaceable design space. Do not accept a positive pattern merely because code was written or tests happen to be green.
-
-### 10.3 Review phase
-
-Challenge at least:
-
-```text
-reintroduced historical failure mechanism
-lost mature optimization or valid reuse
-accidental serialization / lost parallel capability
-new eager preparation
-lost sensor/oracle
-generated/package drift
-shadow authority created by PEM or capability wording
-capability loss during mechanism replacement
-stale/inapplicable/counterevidenced/invalidated PEM guidance
-Hot-only or active-summary-only applicability selection
-cross-regime or cross-project statistical pooling
-broken evidence/authority binding still shown as current guidance
-unsupported/unknown PEM schema silently interpreted
-branch/default/latest/self-declared state mistaken for accepted memory
-restored old PEM treated as current without reconciliation
-invalid/rejected evidence still contributing to current counts
-conflicting assessments resolved by vote/editor order
-scope/materiality laundering through memory selection
-security/private-data leakage
-branch-candidate memory mistaken for accepted project memory
-expired current notice still treated as current
-confounded quantitative improvement claim
-unbounded metadata/detail/history loading
-stale derived index silently hiding a relevant family
-```
-
-Review proceeds against current owners and assembled candidate. PEM is a high-information hypothesis index, not proof.
-
-### 10.4 Evidence and impact closure
-
-When material authority/concretization/evidence change can affect PEM:
-
-```text
-identify materially dependent families/applications/capabilities/notices
- -> preserve unaffected entries with reason
- -> mark affected entries REVIEW_REQUIRED/STALE/INVALID as appropriate
- -> rerun/remap/reassess evidence where required
- -> recompute affected current statistics/guidance
- -> update current PEM only after assessment
-```
-
-Changing one family does not invalidate all memory. Old summary text cannot be reused blindly after owner/candidate/regime/evidence changes.
-
-### 10.5 Reverse authority-binding impact
-
-Any accepted change to a current owner cited by an `AUTHORITY_BOUND` PEM capability or normative current notice MUST include bounded reverse impact closure over those bindings before closeout. A repository search or existing dependency mechanism is sufficient; Protocol 6.3 does not require a universal reverse-index database.
-
-For each affected binding, either:
-
-- confirm the owner obligation still exists and remains applicable;
-- update the binding to the new owner/location/semantics;
-- downgrade to `EVIDENCE_ONLY` if the property is no longer authority-bound but still useful as evidence;
-- mark `REVIEW_REQUIRED`/`RETIRED`; or
-- route a real authority conflict through Challenge.
-
-### 10.6 Learning-update responsibility
-
-Responsibility follows the semantic change. The D1/D2/D3/D4 or concern owner responsible for the material change ensures relevant learning assessment and authority binding are correct. `software-documentation` may reconcile wording/source chain but cannot independently promote a substantive finding, declare an authority-bound capability, or adjudicate contradiction.
-
-Git state mutation, branch integration, conflict resolution, and history rewriting remain governed by `git-and-version-control.md`; a PEM merge rule cannot authorize a destructive Git operation.
-
-### 10.7 Closeout learning assessment
-
-Every accepted material repair/rework/optimization/revert/restoration asks:
-
-```text
-Did a known family recur?
-Did an existing positive pattern receive supporting, neutral, contradicting, inconclusive, or invalidating new evidence?
-Did a reusable discovery emerge?
-Did a capability lesson emerge, and what is its authority-binding state?
-Did evidence contradict/retire/narrow/invalidate a lesson?
-Did coverage or aggregation scope materially change?
-Did an authority/evidence binding become stale or unhealthy?
-Did a current notice expire or require conversion?
-Did project/fork/scope identity change the meaning of inherited memory?
-Did the accepted project-memory basis or schema require reconciliation?
-```
-
-Update PEM only when admission threshold is met or an existing entry materially changes. Ordinary fix chronology remains out of permanent memory.
-
-## 11. Maintenance transaction, update classes, branch reconciliation, freshness, and recovery
-
-### 11.1 Update transaction
-
-A material PEM update SHALL:
-
-1. identify candidate learning/current notice;
-2. bind exact admissible evidence;
-3. perform bounded pre-admission counterevidence search for a new/strengthened positive pattern;
-4. classify/create family under semantic-family rules;
-5. update evidence rows and admissibility/assessment state, not counters;
-6. recompute current statistics within declared aggregation scope from currently admissible rows;
-7. update coverage/applicability/lifecycle/project-scope context;
-8. update evidence maturity/conflict state;
-9. check evidence/authority binding health for materially touched entries;
-10. compute base temperature and evidence-bound override;
-11. update authority-binding state only from actual owner state;
-12. update positive-guidance eligibility and active summary if current importance/applicability changed;
-13. preserve split/merge/retirement/reclassification lineage;
-14. verify no still-valid lesson, counterevidence, mandatory condition, or sensitive-data rule was lost;
-15. run structural/source-chain/security/schema checks;
-16. use self-reference-safe evidence/update staging;
-17. follow Git owner for branch/merge/commit operations;
-18. commit memory reconciliation as the minimum associated descendant/current-state change.
-
-### 11.2 Update classes
-
-Avoid both unreviewed semantic drift and heavyweight ceremony for every evidence row.
-
-```text
-EVIDENCE_APPEND
-  family meaning/applicability unchanged; add admissible evidence and derived counts
-  -> focused applicability + structural/statistical validation
-
-EVIDENCE_REASSESSMENT
-  existing realization/observation changes admissibility/validity without changing protocol schema
-  -> affected evidence assessment + derived-count/current-guidance recomputation
-
-SEMANTIC_RECONCILIATION
-  generalized cause/claim, aggregation scope, authority binding, split/merge,
-  applicability, contradiction resolution, promotion/retirement, or active lesson materially changes
-  -> affected owner review + proportionate independent falsification
-
-PEM_SCHEMA_OR_PROTOCOL_CHANGE
-  representation/routing/required field/schema semantics change
-  -> protocol/workplan path; do not smuggle through project-memory edit
-```
-
-### 11.3 Branch, merge, and accepted-memory basis
-
-The accepted/base PEM at cycle start comes from the exact accepted project integration/baseline selected by project workflow/Git policy, not merely whatever file is on a default branch at read time. Branch-local memory edits are candidate updates for that branch.
-
-Before merging/rebasing a branch with PEM changes:
-
-- inspect repository baseline/concurrent work under the Git owner;
-- reconcile against target accepted/base PEM;
-- resolve provisional family-ID collisions;
-- deduplicate shared/cherry-picked event identities;
-- re-evaluate evidence applicability/admissibility/binding health if target authority/candidate/regime changed;
-- reconcile aggregation/project scopes before recomputing counts/temperature;
-- rerun affected structural/semantic review;
-- do not let later branch text silently overwrite contradictory accepted evidence;
-- do not infer that textual merge success means semantic reconciliation succeeded.
-
-Accepted IDs are stable and never recycled. No rule here authorizes force push, destructive rebase, or unrelated history cleanup.
-
-### 11.4 Event-driven freshness
-
-Protocol 6.3 does not require a daemon or periodic full scan. Freshness is maintained through existing project events that can invalidate memory:
-
-- accepted authority/concretization change affecting a bound entry;
-- evidence specification/oracle/assessment invalidation;
-- evidence artifact/path/retention change affecting a current warrant;
-- revert/restoration of implementation, owner, qualification, or evidence-bearing state;
-- repository/project/fork/scope identity change;
-- PEM schema migration or reader-compatibility change;
-- PEM activation for a materially relevant task;
-- PEM semantic reconciliation/evidence reassessment;
-- project closeout/merge where memory changed or relevant authority changed;
-- explicit maintenance/health audit when one is otherwise justified.
-
-A stale untouched Cold family need not trigger work merely because time passed. A current active recommendation whose material warrant is unavailable, inadmissible, or plausibly invalidated cannot remain unqualified merely because no scheduled audit ran.
-
-### 11.5 PEM corruption, rollback, protocol downgrade, and re-adoption
-
-PEM is project decision support, not a runtime/build single point of failure.
-
-If the current PEM is malformed, unreadable, unsupported-schema, or materially corrupted:
-
-- do not silently ignore the defect for a memory-triggering task;
-- treat required memory as unavailable/partial and use bounded historical intake or mark the affected decision `REVIEW_REQUIRED`/blocked as appropriate;
-- do not block unrelated work whose route does not materially depend on PEM;
-- repair/recover through project Git/document ownership rather than inventing an alternate memory authority.
-
-Restoring an older PEM snapshot does not make it current merely because the file parses. Compare its `reconciled_through`, schema, project/scope identity, and bound owners/evidence against the current accepted project state; mark affected entries/coverage review-required until reconciled.
-
-If a project deliberately runs version-bound Protocol 6.2 after having a 6.3 PEM, the PEM remains inert non-authoritative project content unless the 6.2 work explicitly adopts 6.3. Do not delete/rewrite it merely to make 6.2 work look clean. If the project later re-adopts 6.3, validate supported schema and reconcile changes since the last covered accepted identity before relying on it.
-
-A code/evidence revert does not erase the historical event/application. It may change current applicability, authority binding, or positive guidance and therefore triggers bounded impact closure.
-
-### 11.6 Lossless compaction
-
-Active summary stays compact through generalization/progressive disclosure, not deletion by quota. Raw narratives, benchmark tables, patch transcripts, and debate stay at evidence/history owners unless needed for current interpretation.
-
-Compaction may rewrite wording, merge equivalent exposition, partition cold detail, or make detail colder only when it preserves identity, statistics, coverage, aggregation/project scope, lifecycle context, supporting/counterevidence, evidence admissibility, authority binding, binding health, cause distinctions, limits, contradiction, capability relationships, and retrieval routes. If apparent duplicates materially differ, stop compaction and preserve/resolve the distinction.
-
-## 12. Performance, context-economy, and activation constraints
-
-Protocol 6.3 MUST NOT recreate the regression class it exists to prevent.
-
-Normal operation primarily consumes the curated PEM summary plus a bounded metadata-level applicability match when its trigger fires. It SHALL NOT:
-
-- rescan Git history on every task;
-- recompute all statistics from full corpus on every bootstrap;
-- load all family detail/evidence merely to read summary or identify candidates;
-- activate backfill machinery during normal use;
-- serialize unrelated initialization merely to load PEM;
-- force all cold canonical detail into model context merely because it shares a file;
-- require an always-running indexer/daemon for correctness.
-
-Required scaling behavior is structural rather than a magic token threshold:
-
-```text
-non-triggering route
-  -> no substantive PEM/history load
-
-triggering route
-  -> root active summary + cheapest sufficient current metadata search
-  -> detail only for materially matched entries
-  -> raw evidence only when decision/review requires it
-
-material update
-  -> affected families + declared evidence-search scope
-  -> full corpus only when the claim/backfill/migration actually requires exhaustive coverage
-```
-
-Growth in raw historical evidence volume alone MUST NOT proportionally increase normal active-context load. Growth in family count may increase metadata/search work, but should use repository search/range/derived-index mechanisms rather than preloading all family prose. If the canonical representation itself becomes a demonstrated merge/context/search bottleneck, use the optional logical-memory partitioning rule rather than creating duplicate authorities.
-
-A derived index/search accelerator is a replaceable optimization. It cannot be the sole source of family existence/applicability. If stale/missing/corrupt, use canonical search when feasible or expose uncertainty; do not silently return an incomplete HAS.
-
-Qualification SHOULD compare representative small and expanded cold-history/PEM fixtures to detect accidental whole-history/detail loading, quadratic family scans where avoidable, or context growth caused by cold evidence rather than selected current meaning. Static bytes/tokens/routes/call counts are sensors only. Claims of actual model latency, attention, cache behavior, context use, or engineering productivity require corresponding live evidence for the claimed harness/model/install regime; otherwise state the empirical claim is unavailable.
-
-## 13. Self-hosted SSDP migration/backfill
-
-SSDP SHALL be the first qualified project-local PEM instance.
-
-Backfill from actual evidence, not this workplan's examples or agent recollection. Inspect where relevant:
-
-- semantic evolution;
-- archived Protocol 5.x/6.x workplans only where lineage/family evidence requires them;
-- Protocol 6.1/6.2 qualification and independent reviews;
-- commit/patch history needed to identify concrete episodes;
-- replacement-bootstrap invalidation/repair;
-- cold-route repair/requalification;
-- static activation-sensor evidence;
-- frozen-profile preservation;
-- generated/package-integrity repairs;
-- documentation background/terminology repairs;
-- materially relevant optimization/simplification history.
-
-Candidate investigations, not pre-accepted families:
-
-```text
-failure candidates
-- mature optimization lost during rework
-- repeated calculation after architecture change
-- eager/cold-route contamination
-- accidental serialization
-- loss of checkpoint/intermediate reuse
-- ownership leakage
-- generated/package divergence
-- bootstrap identity drift
-- frozen-profile mutation
-- loss of activation protection
-- patch/wrapper accumulation instead of owner correction
-- documentation source-chain/background terminology drift
-- diff-only review instead of assembled-candidate review
-
-positive candidates
-- project-specific qualified examples of route-local lazy activation
-- project-specific provenance-valid artifact reuse
-- bounded independent parallelism with measured project benefit
-- direct owner-layer repair/simplification with qualified outcome
-- other concrete project improvements supported by evidence
-```
-
-Before promoting a positive candidate, search the declared covered history for known materially applicable non-success outcomes as well as favorable examples. Before generalizing a failure candidate, inspect material safe/disconfirming examples that could narrow the causal family.
-
-Do not duplicate a generic current SSDP rule merely because SSDP historically discovered it. If generic doctrine already lives at a current owner, retain only project-specific evidence/recurrence context that materially improves future decisions, otherwise keep the lesson at its canonical owner/history.
-
-The initial self-hosted PEM SHALL use the explicit Protocol 6.3-supported schema and declare project/scope identity. For each seeded family declare coverage basis, aggregation scope, lifecycle context, material binding health, and current evidence admissibility. A partial search is never exhaustive. Archived workplans remain byte-identical; semantic evolution is appended only through normal closeout.
-
-The self-hosted backfill is not automatically the accepted project memory merely because it is generated on the feature branch. It becomes accepted/base memory only through the eventual project integration/cutover semantics.
-
-## 14. Validation architecture
-
-Extend existing qualification/test owners rather than creating competing compliance machinery.
-
-The canonical logical Markdown PEM is source. Minimum validator SHOULD detect:
-
-- unsupported/malformed `memory_schema_version` and incompatible silent interpretation;
-- duplicate/current-colliding accepted IDs and invalid provisional-ID merge state;
-- invalid kind/maturity/applicability/temperature/authority-binding/binding-health/admissibility values;
-- malformed/non-resolving required evidence/authority bindings;
-- displayed count versus currently admissible ledger mismatch;
-- rejected/invalid/stale/reclassified evidence still counted as current confirmation/support;
-- double-counted event/application identities after split/merge/cherry-pick/fork;
-- superseded parent plus child counts simultaneously presented as one current-family total;
-- pooling rows outside declared aggregation/project scope without explicit supported generalization;
-- `COLD` classification unsupported by coverage;
-- unexplained temperature override;
-- active-summary reference to nonexistent/stale/retired/invalidated entry;
-- `HOT` temperature used as unconditional activation command;
-- active-summary-only or Hot-only HAS selection where a materially applicable lower-temperature entry exists;
-- Provisional finding presented as proven fact;
-- evidence-only capability presented as mandatory authority;
-- contradicted/neutral/inconclusive material evidence hidden from success assessment;
-- success pattern promoted without declared bounded counterevidence search;
-- contested/unhealthy/inadmissibly-supported positive pattern presented as recommended guidance;
-- failure family whose current cause/scope ignores material disconfirming evidence;
-- unresolved material assessment conflict hidden by reviewer count/latest editor;
-- expired/review-due current notice presented as unqualified current guidance;
-- branch/default/latest/self-declared metadata represented as sufficient accepted-memory proof;
-- restored old PEM treated as current despite uncovered later project change;
-- project/fork identity mismatch silently contributing local counts;
-- project-local PEM copied into generic protocol package;
-- two hand-authored canonical representations for the same current family/row;
-- generated index diverging from canonical Markdown or silently hiding a canonical entry;
-- self-referential evidence binding requiring current commit SHA;
-- forbidden secret/private-data patterns where repository policy can test them;
-- loss of T01-T39 or any 6.3 preservation row;
-- source/generated/profile/package divergence.
-
-Objective absence/uniqueness/derivation properties may be executable. Do not build a universal database/graph solely for validation.
-
-## 15. Protocol 6.3 version, bootstrap, profile, package, and PEM compatibility staging
-
-Git commits cannot self-name. Preserve the repaired 6.2 staging discipline.
-
-### 15.1 Public-source bootstrap
-
-1. Complete self-reference-safe 6.3 public-source set: current role/specialist entrypoints, all routed references/templates including PEM doctrine/template, `source/PROTOCOL_VERSION`, navigation/version-resolution source, required package closure.
-2. Validate source regression, canonical package build, standalone package/link closure, and routing reachability without unknown self SHA.
-3. Create immutable 6.3 public-source bootstrap only after checks pass.
-4. In later semantic-candidate/publication commit, publish that exact bootstrap in current 6.3 resolution surfaces. Never use `main`, latest, guessed version, or eventual recovery identity as bootstrap.
-
-### 15.2 Profile and frozen resources
-
-Create distinct `ssdp-protocol-6.3` profile/snapshot using schema v2 unless an actual machine profile contract requires schema change. The orchestration profile schema and PEM schema are separate contracts; do not conflate their version numbers.
-
-Do not mutate packaged/frozen 5.16/6.0/6.1/6.2 resources. Protocol 6.2 becomes historical rollback only after 6.3 cutover; until then it is accepted-current.
-
-Live project PEM is not embedded into generic profile; only doctrine/template/routing/schema interpretation needed to use project-local PEM is packaged.
-
-### 15.3 Semantic candidate and generated descendants
-
-Bind qualification to one immutable 6.3 semantic candidate. Later evidence/generated/lifecycle commits contain no hidden canonical semantic mutation; such mutation reopens affected qualification.
-
-Rebuild `dist/` and orchestrator 6.3 descendants from canonical source and validate source parity, package structure/local-resource closure, profile identity/schema/topology, exact immutable fallback, closest supported consumer ingestion, and project-local PEM exclusion.
-
-The 6.3 package/skill reader SHALL recognize the supported PEM schema(s) declared by canonical source. An unknown incompatible project PEM does not invalidate the generic package; it makes the project-memory concern unavailable/review-required for tasks that need it.
-
-### 15.4 Recovery and closeout staging
-
-After semantic qualification and independent Review pass:
-
-1. choose immutable 6.3 recovery containing accepted candidate and required decision evidence through ancestry;
-2. publish `6.3.0 -> <exact recovery>` only in later mapping commit;
-3. regenerate mapping-bearing descendants;
-4. rerun targeted recovery/parity/package/Core acceptance;
-5. append concise 6.3 semantic evolution;
-6. update workplan authority index;
-7. reconcile Protocol 7 pre-cutover inheritance/fallback to accepted 6.3 only after 6.3 acceptance, without silently changing Protocol 7 D3 architecture;
-8. reconcile the self-hosted PEM as candidate project state against the exact eventual accepted integration basis; do not self-declare it accepted before that basis exists;
-9. archive this workplan only when current 6.3 rules reside at owners and impact closure is complete.
-
-No `main` merge/cutover is authorized by this workplan.
-
-### 15.5 Protocol rollback and PEM
-
-Protocol recovery identity and project PEM recovery are distinct. Rolling protocol interpretation back to immutable 6.2 does not reinterpret or erase a 6.3 PEM. Version-bound 6.2 work simply does not acquire 6.3 memory semantics. Re-adoption of 6.3 requires supported schema plus bounded reconciliation from the last covered accepted project identity.
-
-## 16. Qualification plan
-
-Run complete affected repository/package/orchestrator regression, all 115 Protocol 6.2 semantic scenarios against 6.3, focused 6.3 cases below, generated/profile/package checks, and independent assembled-candidate Review.
-
-### Q63-01 through Q63-41 — retained prior qualification obligations
-
-| ID | Required claim |
-|---|---|
-| Q63-01 | Complete 6.2 no-loss preservation, independently challenging T01-T39 and all inherited bootstrap/cold-route/static-sensor/frozen-profile/generated/package/115-case/Stage-G semantics. |
-| Q63-02 | Finite artifact census and transformation closure; every current durable/generative 6.2 surface has a disposition and every changed obligation closes `PRESERVED` or `BLOCKING`. |
-| Q63-03 | Authority/evidence separation; test, benchmark, commit, history, PEM, or statistic cannot override current D1-D4 owner by existence. |
-| Q63-04 | Correct conditional activation/cold-route behavior; memory-relevant work activates PEM, unrelated first-clean-local work does not, cold detail remains reachable. |
-| Q63-05 | Missing/partial memory cannot prove absence/non-applicability; substantial relevant rework performs bounded intake or carries explicit uncertainty. |
-| Q63-06 | Durable evidence binding; seeded material claims resolve beyond default-branch-only/recursive-summary proof. |
-| Q63-07 | Stale evidence in both polarities and bounded invalidation. |
-| Q63-08 | Evidentiary independence/common-mode risk and visible contradiction. |
-| Q63-09 | Semantic failure-family membership; textual similarity is insufficient. |
-| Q63-10 | One cause/many symptoms counts once absent independent introduction. |
-| Q63-11 | Recurrence after accepted repair increments occurrence/recurrence once and binds both cycles. |
-| Q63-12 | Split/merge lineage, evidence deduplication, and derived-total recomputation. |
-| Q63-13 | Coverage-sensitive memory temperature; 3 Hot, 2 Warm, 1 Cold only with adequate coverage, evidence-bound overrides. |
-| Q63-14 | Importance is not authority/pass threshold; Cold mandatory constraints survive closure. |
-| Q63-15 | Positive-evidence promotion; unmeasured optimization remains Provisional and qualified benefit stays within demonstrated regime/constraints. |
-| Q63-16 | Quantitative effect preservation through compaction. |
-| Q63-17 | Complexity-claim discipline; one timing result cannot prove asymptotic change. |
-| Q63-18 | Capability transfer without ossification; simpler qualified replacement is allowed while actual owner-bound requirements remain preserved. |
-| Q63-19 | First-local-defect economy; one clean local bug does not force permanent family/backfill. |
-| Q63-20 | Invalidation/contradiction/retirement preserves historical evidence and refreshes current guidance. |
-| Q63-21 | Lossless active-summary compaction preserves identity, statistics, coverage, lifecycle, applicability, limits, counterevidence, authority binding, capability links, cold routes, and governed scope. |
-| Q63-22 | No repeated-history regression; triggering operation consumes curated memory without full-history rescan/stat recomputation and non-triggering work adds no memory preparation. |
-| Q63-23 | Static-versus-live claim discipline. |
-| Q63-24 | Project-local PEM versus generic package/profile separation. |
-| Q63-25 | Exact 6.3 immutable public fallback; default/latest/guessed refs rejected. |
-| Q63-26 | Frozen 5.16/6.0/6.1/6.2 resource integrity. |
-| Q63-27 | Full generated/package/profile/Core acceptance after semantic candidate and recovery mapping. |
-| Q63-28 | Self-hosted backfill statistics independently reconstructed for all Hot and risk-based remainder; coverage no broader than evidence. |
-| Q63-29 | Material closeout learning transaction updates memory; non-material local repairs create no noise. |
-| Q63-30 | Version/bootstrap/recovery/Protocol-7 lifecycle separation and reconciliation. |
-| Q63-31 | Capability authority binding; `EVIDENCE_ONLY` cannot become mandatory through memory/frequency/qualification. |
-| Q63-32 | Self-reference-safe routine PEM update staging. |
-| Q63-33 | Balanced positive evidence after pattern admission; supporting count cannot hide neutral/contradicting/inconclusive outcomes. |
-| Q63-34 | Count-versus-rate discipline. |
-| Q63-35 | Memory temperature versus activation; Hot irrelevant remains cold, Cold material activates, retired Hot does not reactivate by count alone. |
-| Q63-36 | Concurrent branch/ID/merge reconciliation and cherry-pick deduplication. |
-| Q63-37 | Security/private-data preservation. |
-| Q63-38 | Update-class and owner-responsibility discipline; documentation cannot self-promote finding and schema change cannot hide in project PEM. |
-| Q63-39 | Cross-domain D1/D2/D3/D4/specialist applicability without universal activation or authority override. |
-| Q63-40 | Promotion-to-current-owner deduplication; current doctrine owner governs and duplicate active PEM prose is retired/narrowed. |
-| Q63-41 | Lifecycle-context integrity; development/qualification/production history remains distinguishable. |
-
-### Q63-42 through Q63-51 — retained third-review obligations
-
-| ID | Required claim |
-|---|---|
-| Q63-42 | Before positive-family admission/material strengthening, bounded covered history includes materially applicable unfavorable/neutral/inconclusive evidence or explicitly narrows the claim. |
-| Q63-43 | HAS selection is applicability-led and can surface relevant Warm/Cold entries absent from Hot summary emphasis. |
-| Q63-44 | Materially incompatible backend/language/scale/lifecycle regimes are stratified/split rather than pooled without supported generalization. |
-| Q63-45 | Broken/retired material evidence or authority binding makes affected current use review-required/unavailable and removes unqualified positive guidance. |
-| Q63-46 | Current-owner change closes reverse impact over `AUTHORITY_BOUND` capabilities/notices without a universal graph. |
-| Q63-47 | Safe/disconfirming evidence narrows/splits/reclassifies an overbroad failure-family cause while retaining real occurrence history. |
-| Q63-48 | Triggered notice expiry/review condition removes unqualified active guidance until reconciled. |
-| Q63-49 | Quantitative causal claims use comparable baseline/candidate regimes and adequate repeated measurement/uncertainty where noise matters. |
-| Q63-50 | High-temperature pattern with unresolved contradiction/unhealthy warrant is not rendered as recommended “what works” guidance. |
-| Q63-51 | Active workplan carries current cycle contract/closure; review chronology remains in non-authoritative review/history artifacts. |
-
-### Q63-52 — PEM schema compatibility and migration
-
-A valid schema-1 PEM is interpreted under Protocol 6.3. An unknown incompatible/newer schema cannot be silently parsed as schema 1 and becomes review-required for memory-dependent work. A supported migration preserves stable IDs, evidence/admissibility rows, coverage, aggregation scope, lineage, authority binding, notices, and retrieval routes without creating two active hand-authored authorities.
-
-### Q63-53 — Accepted project-memory basis
-
-Create a case where default branch/newest PEM differs from the exact accepted project integration baseline. New work must use the project-governed accepted/base memory, not default/latest/timestamp/self-declaration. A branch-local PEM cannot self-ratify itself as accepted.
-
-### Q63-54 — PEM corruption, rollback, downgrade, and re-adoption
-
-Corrupt or restore an older PEM. Memory-triggering work must surface unavailable/review-required state or reconcile it; unrelated routes remain usable. Version-bound 6.2 work ignores 6.3 PEM semantics without deleting the artifact. Later 6.3 re-adoption reconciles from the last covered accepted project identity before relying on memory.
-
-### Q63-55 — Evidence invalidation and derived-statistic withdrawal
-
-Start with a qualified supporting application/confirmed occurrence, then independently establish that its oracle/realization is invalid or its family assignment is wrong. Historical row remains, but current confirmation/support counts, maturity, temperature, family assignment, and positive guidance recompute from the remaining admissible evidence.
-
-### Q63-56 — Conflicting assessment without vote laundering
-
-Provide two materially competent conflicting assessments. Reviewer count, chronology, or latest editor cannot select truth. Applicability/oracle/independence analysis must resolve the conflict or leave the bounded claim contested/review-required and ineligible for unqualified positive guidance.
-
-### Q63-57 — Context and maintenance scaling
-
-Expand raw historical evidence substantially while holding current active summary/applicable-family set fixed. Normal memory-triggering active-context load must not scale with raw evidence volume; non-triggering route remains cold. Expand family count and verify candidate matching uses search/metadata rather than loading all family prose/raw evidence. Any live performance claim remains separate from these structural sensors.
-
-### Q63-58 — Logical canonical memory and partition/index fallback
-
-For a small fixture, one-file PEM remains valid/preferred. For a justified large/concurrent fixture, partition cold canonical detail while preserving one logical root, one canonical home per item, stable routes/IDs, and no duplicated hand-authored truth. A stale/corrupt derived index cannot silently hide a canonical applicable family; canonical fallback or explicit uncertainty is required.
-
-### Q63-59 — Fork/cross-project provenance and local-count separation
-
-Copy/fork a project carrying PEM. Unless project governance declares lineage continuity and reconciliation, inherited events remain source-project evidence and do not become local occurrence/application counts. Explicit multi-project aggregation requires declared scope and compatible evidence.
-
-### Q63-60 — Git-owner integration
-
-PEM branch/merge/conflict/self-reference operations obey repository baseline/concurrent-work/authorization semantics from `git-and-version-control.md`. A semantic merge rule cannot authorize force rewriting history, overwriting unrelated work, or treating textual merge success as semantic reconciliation.
-
-### Q63-61 — Revert/restoration impact
-
-Revert a mechanism, owner, qualification, or evidence-bearing change that materially affects a current PEM entry. Historical events remain; affected applicability/admissibility/authority binding/current guidance is reconciled. Revert does not silently erase history or leave now-stale advice current.
-
-## 17. Falsification
-
-Retain the four Protocol 6.2 Challenge falsifications unchanged in semantic purpose:
-
-1. **Loss test** — find compaction/generalization that loses edge case, authority/evidence boundary, compatibility rule, trigger, salience, counterevidence, aggregation/authority binding, schema state, or uncertainty.
-2. **Scope/materiality laundering test** — reject passing by shrinking scope or calling globally preserved doctrine non-material because cold locally.
-3. **Priority-inversion test** — prominent high-importance memory must not erase lower-salience mandatory active constraints.
-4. **False-compaction test** — reject link-moving, flattened routing, stale summaries, parallel registry, recursive summaries, active-summary-only lookup, or unnecessarily dense active context.
-
-Retain F63-A through F63-X with their established semantics:
-
-```text
-F63-A  speculation laundering
-F63-B  statistical inflation
-F63-C  family overgeneralization
-F63-D  incomplete-history false Cold
-F63-E  cargo-cult positive pattern
-F63-F  summary/evidence recursion
-F63-G  stale-green/stale-red laundering
-F63-H  common-mode fake independence
-F63-I  architectural ossification
-F63-J  history-compaction loss
-F63-K  false quantitative generalization
-F63-L  eager memory regression
-F63-M  project-memory package contamination
-F63-N  shadow capability authority
-F63-O  routine self-SHA recursion
-F63-P  positive survivor bias after admission
-F63-Q  pseudo-statistical risk
-F63-R  temperature/activation conflation
-F63-S  branch memory overwrite
-F63-T  accepted-ID reuse
-F63-U  sensitive-evidence laundering
-F63-V  documentation self-promotion
-F63-W  generic-doctrine duplication
-F63-X  lifecycle-incidence laundering
-```
-
-Retain F63-Y through F63-AH:
-
-```text
-F63-Y   pre-admission favorable-history cherry-pick
-F63-Z   Hot-summary applicability trap
-F63-AA  cross-regime pooling
-F63-AB  broken-warrant persistence
-F63-AC  authority-binding drift
-F63-AD  failure-family safe-counterexample suppression
-F63-AE  expired-notice persistence
-F63-AF  benchmark confounding
-F63-AG  contested pattern presented as “what works”
-F63-AH  active-workplan amendment replay
-```
-
-Add:
-
-### F63-AI — Unknown-schema reinterpretation
-
-Feed a newer/incompatible PEM schema to a 6.3 reader and silently interpret familiar-looking fields while dropping unknown semantics. Reject; substantive memory is review-required/unsupported until compatibility or migration is established.
-
-### F63-AJ — Default/latest memory laundering
-
-Place newer branch/default PEM content ahead of the project-accepted baseline and select it merely because it is newest/default. Reject; resolve the accepted project-memory basis through project workflow/Git semantics.
-
-### F63-AK — Stale restored-memory laundering
-
-Restore an old parsing-valid PEM over newer project state and treat it as current. Reject until bounded reconciliation closes the uncovered interval/affected owners/evidence.
-
-### F63-AL — Invalid-evidence persistence
-
-Invalidate a benchmark/oracle/fixture but leave its row contributing to current success/occurrence counts and positive guidance. Reject; retain history but recompute from admissible rows.
-
-### F63-AM — Review-vote truth
-
-Resolve conflicting evidence assessments by 2-to-1 reviewer count or latest-editor-wins. Reject; resolve evidentiary substance or keep the claim contested/review-required.
-
-### F63-AN — Cold-history scaling regression
-
-Add large amounts of raw cold evidence and make normal PEM activation load/scan it all. Reject; active-context/detail loading must remain bounded to current summary/metadata/applicable detail.
-
-### F63-AO — Canonical-memory representation ossification
-
-Either force a demonstrably harmful monolithic file forever, or “solve” scale by creating duplicate hand-authored memories/indexes. Reject both. Allow only justified lossless partitioning under one logical canonical memory with one canonical home per item.
-
-### F63-AP — Fork-count contamination
-
-Copy/fork a project and count inherited occurrences/applications as new/local merely because history/files exist locally. Reject unless explicit lineage/multi-project aggregation semantics justify the classification.
-
-### F63-AQ — Stale-index omission
-
-Make a derived applicability index stale so it omits a canonical relevant family, then pass HAS because the index returned no match. Reject; derived indexes are non-authoritative and require canonical fallback or explicit uncertainty.
-
-### F63-AR — Revert erases/strands learning
-
-Revert code/evidence and either delete the historical PEM event as though it never occurred or leave affected current guidance unchanged when its applicability changed. Reject; preserve history and reconcile current meaning.
-
-## 18. Implementation stages
-
-### Stage A — Baseline capture, owner census, and preservation map
-
-1. Reconfirm exact accepted 6.2 identities.
-2. Build finite artifact census and independently reproduce T01-T39.
-3. Identify exact current owners/source/generated/profile/package/Git/security consumers.
-4. Append T40-T102 (or collision-free successors) and their acceptance oracles.
-5. Record which 6.2 evidence remains applicable and which requires rerun after planned changes.
-6. Confirm no current 6.2 artifact is being treated as a PEM-schema authority merely because it contains historical/evidence-like fields.
-
-**Gate:** no protocol-source mutation before finite no-loss map sufficiently bounds change.
-
-### Stage B — Canonical doctrine and PEM representation
-
-1. Add smallest justified `source/shared/references/project-engineering-memory.md` concern owner, or prove an existing owner sufficient.
-2. Implement canonical logical PEM/template schema, supported schema version, coverage, admission, family/evaluated-application/statistics/temperature, aggregation/project scope, authority binding, binding health, evidence admissibility, counterevidence, branch lifecycle, notice lifecycle, security, contradiction/retirement, and optional lossless cold partitioning semantics.
-3. Update evidence, convergence, architecture, workflow, documentation, repository, testing, Git, security, version owners only with local consequences/routes.
-4. Keep universal kernel additions minimal.
-
-**Gate:** one semantic owner per rule; no shadow authority, duplicated generic doctrine, hidden prerequisite, current/history conflation, unknown-schema silent interpretation, or duplicate canonical memory.
-
-### Stage C — Routing/workflow/project-local integration
-
-1. Add visible conditional routes from materially relevant D1-D4/specialist/workflow entrypoints without making PEM universal hot context.
-2. Implement bounded applicability matching plus HAS and authority-safe capability-transfer handoff.
-3. Implement project-local discovery, project/fork scope safety, missing/partial/corrupt/unsupported-memory behavior, accepted/base versus branch-candidate behavior.
-4. Implement reverse authority-binding impact closure, current-notice expiry/review handling, event-driven binding-health/admissibility checks, and revert/restoration impact.
-5. Extend closeout so only admitted material learning changes PEM and responsibility follows owner.
-
-**Gate:** first-local-defect, Hot-irrelevant, Cold-material, non-Hot-HAS, expired-notice, unsupported-schema, stale-restored-memory, and ordinary-route cases prove correct activation/selection.
-
-### Stage D — Structural validation and self-hosted backfill
-
-1. Extend validation for canonical logical Markdown, schema support, evidence resolution/admissibility, binding health, derived counts, aggregation/project scope, counterevidence, lineage, coverage, temperature/activation separation, positive-guidance eligibility, authority binding, branch IDs, Git state, security, notice expiry, partition/index parity, and active-summary integrity.
-2. Create SSDP project-local PEM from actual historical evidence using the supported schema.
-3. Qualify seeded families; no recollection-derived counts.
-4. Search bounded covered history for unfavorable evidence before positive-family promotion and safe/disconfirming evidence before broad failure-family generalization.
-5. Ensure invalid/rejected evidence cannot remain current support and cross-project history is not miscounted.
-6. Ensure no live project memory enters generic packages.
-7. Use self-reference-safe PEM reconciliation commits where current evidence identity must be bound.
-8. Exercise small and expanded cold-history/current-family fixtures to detect unbounded activation/context behavior.
-
-**Gate:** independent reconstruction reproduces all Hot statistics and risk-based remainder; no known material counterevidence omitted; no unsafe cross-regime/project pooling; schema/accepted-memory/recovery semantics pass; no cold-history load regression.
-
-### Stage E — 6.3 bootstrap/profile/semantic candidate/generated descendants
-
-1. Complete/validate self-reference-safe public-source set.
-2. Create immutable public bootstrap.
-3. Publish exact bootstrap only in later semantic-candidate/publication commit.
-4. Add distinct 6.3 profile/snapshot; leave 5.16/6.0/6.1/6.2 frozen.
-5. Regenerate/package and validate local routes/links/parity/Core ingestion, including supported PEM-schema handling while excluding live project memory.
-
-**Gate:** bootstrap and semantic candidate distinct, exact, self-reference-safe; profile schema and PEM schema remain distinct contracts.
-
-### Stage F — Qualification and independent Review
-
-1. Run complete affected regression.
-2. Re-run all 115 Protocol 6.2 scenarios against 6.3.
-3. Run Q63-01 through Q63-61 and F63-A through F63-AR plus the four inherited 6.2 falsifications.
-4. Compare representative 6.2/6.3 static activation traces as sensors and expanded-memory fixtures for structural scaling.
-5. Obtain live evidence only for live empirical claims actually made; otherwise mark unavailable.
-6. Prepare snapshot-complete independent-review handoff.
-7. Perform independent D3/protocol Review over assembled semantic candidate, not diff/summary/preservation labels.
-
-**Gate:** no PASS with missing required check, stale/counterevidence hidden, invalid evidence still counted, aggregation/project-scope error, broken material binding, unsupported-schema laundering, stale restored memory, assessment-vote laundering, sensitive-data defect, shadow authority, expired current notice, benchmark confounding, cold-history scaling regression, or unresolved preservation row.
-
-### Stage G — Recovery/current-state reconciliation/closeout
-
-1. Choose immutable 6.3 recovery only after Stage F PASS.
-2. Publish recovery mapping only in later descendant.
-3. Regenerate mapping-bearing descendants and rerun targeted recovery/parity/package/Core acceptance.
-4. Reconcile semantic evolution, authority index, version/portability/navigation, and project-local PEM.
-5. Establish the self-hosted PEM's accepted/base state only through the actual project integration/cutover basis; do not self-ratify inside the pre-integration file.
-6. Reconcile Protocol 7 representation/version inheritance only after 6.3 acceptance; preserve existing D3 reopen prerequisite/architecture unless separately reopened.
-7. Archive workplan only when current 6.3 semantics reside at canonical owners and impact closure complete.
-8. Do not merge/cut over `main` without separate authorization.
-
-## 19. Independent Review handoff
-
-Create `qualification/ssdp6/INDEPENDENT-REVIEW-HANDOFF-PROTOCOL-6.3.md` (or established equivalent) only after implementation/qualification evidence is ready.
-
-Bind at least:
-
-```text
-accepted 6.2 recovery/current branch ancestry
-6.3 public-source bootstrap
-6.3 semantic candidate
-preservation census/map T01-T39 + T40+
-supported PEM schema(s)
-self-hosted PEM + declared coverage/lifecycle/aggregation/project scopes
-accepted/base memory basis used for the review candidate
-qualification/requalification evidence
-supporting, disconfirming, invalidated, and material counterevidence
-binding-health/admissibility assessment for active high-impact entries
-static activation/context-scaling evidence
-available live evidence with exact claim scope
-partition/derived-index state if present
-generated/package/profile evidence
-frozen-profile tree identities
-candidate-to-evidence descendant range
-known red/unavailable/contested observations
-security-sensitive evidence handling where material
-```
-
-Reviewer independently reconstructs governing semantics; treats census/PEM/qualification as falsifiable evidence; inspects high-risk current owners; verifies assembled source/generated/package/profile state; checks candidate descendants for semantic mutation; samples positive claims for omitted pre/post-admission counterevidence; samples failure families for overbroad cause/scope; verifies invalidated evidence no longer supports current statistics; verifies materially applicable non-Hot entries can reach HAS; verifies active positive guidance has healthy/admissible warrants; challenges accepted-memory basis/schema/recovery semantics; and checks cold-history growth does not force corresponding active-context growth.
-
-## 20. Acceptance and No-Pass criteria
-
-### 20.1 PASS
-
-Protocol 6.3 passes only when:
-
-- every accepted 6.2 doctrine/still-valid historical capability is preserved;
-- T01-T39 independently remain preserved and all new rows close;
-- D1-D4/current project authority remains distinct from evidence/PEM;
-- PEM is compact, project-local, current, evidence-backed, coverage-aware, aggregation-aware, project-scope-aware, schema-bound, security-safe, and non-authoritative;
-- one accepted logical PEM meaning exists for the selected project baseline; branch/default/latest/self-declaration cannot silently replace it;
-- positive and negative learning are represented without selective success recording, overbroad failure generalization, invalid evidence persistence, or permanent ordinary-bug chronology;
-- family membership, lineage, counts, coverage, aggregation/project scope, lifecycle context, temperature, authority binding, evidence admissibility/binding health, branch state, and active summary are independently reproducible;
-- stale/correlated/contradictory/neutral/inconclusive/rejected/material disconfirming evidence is handled correctly;
-- positive guidance is restricted to currently supported healthy/admissible bounded claims;
-- unresolved material assessment conflicts remain contested rather than vote-resolved;
-- statistical claims are no broader than denominator/sampling evidence;
-- quantitative/complexity claims are no broader than comparable evidence;
-- historical mechanism replacement remains possible while actual authority-bound capabilities remain preserved;
-- HAS selection is applicability-led rather than Hot-summary-led;
-- authority/evidence/revert changes close materially affected memory bindings/statistics/guidance;
-- notice review/expiry conditions cannot leave stale unqualified guidance;
-- unsupported schema, corrupted/restored old memory, protocol downgrade, and re-adoption behave safely;
-- cross-project/fork evidence does not silently become local incidence;
-- bounded activation/context scaling prevents ordinary/history-unrelated routes from unnecessary work and raw-history growth from inflating normal active context;
-- optional partition/index mechanisms remain subordinate and lossless;
-- Git operations remain under the Git owner and no semantic rule authorizes destructive history mutation;
-- all 115 inherited scenarios and all 6.3 qualification/falsification pass;
-- exact 6.3 bootstrap/recovery/profile/fallback lifecycle passes;
-- frozen 5.16/6.0/6.1/6.2 bytes/behavior intact;
-- source/generated/package/profile/Core acceptance passes;
-- Protocol 7/current lifecycle reconciliation bounded/correct;
-- independent Review finds no genuine blocker or Serious Challenge.
-
-### 20.2 NO-PASS
-
-Blocking includes:
-
-- PEM/tests/commits/history/statistics treated as semantic authority;
-- evidence-only capability treated as mandatory without accepted owner;
-- loss/weakening/orphaning of accepted 6.2 semantics;
-- scope shrunk to avoid historical/preservation obligation;
-- partial memory used to prove absence/Cold status;
-- recurrence manufactured from symptoms/text similarity;
-- positive pattern promoted from cherry-picked favorable history;
-- failure family kept overbroad despite material safe/disconfirming evidence;
-- counters not reproducible from currently admissible ledger rows;
-- invalid/rejected/stale/reclassified evidence remains current support without justification;
-- rows pooled across materially incompatible aggregation/project scopes;
-- positive record omits material neutral/contradicting/inconclusive evidence;
-- unsupported/contested/unhealthy/inadmissibly-supported success guidance presented as established “what works” knowledge;
-- substantive evidence conflict resolved by review count/latest editor instead of evidence assessment;
-- performance gain accepted despite violated constraints or confounded comparator;
-- stale pass/fail used as current confirmation/refutation;
-- material evidence/authority binding broken while current guidance remains unqualified;
-- correlated evidence represented as independent;
-- occurrence counts represented as probability/rate without denominator;
-- historical mechanism preserved merely because memory mentions it;
-- authority-bound capability silently lost or owner change leaves stale binding;
-- temperature used as activation command or verdict;
-- active-summary/Hot-only selection omits a materially applicable current lesson;
-- lower-salience mandatory active constraint hidden;
-- first local defect forced into permanent memory without rationale;
-- branch-candidate/default/latest/self-declared memory mistaken for project-accepted memory;
-- accepted IDs recycled/renumbered or concurrent/forked events double-counted;
-- routine PEM update requires self-SHA;
-- unsupported/incompatible schema silently interpreted or lossy migration accepted;
-- restored/corrupt PEM treated as current without reconciliation;
-- 6.2 rollback silently applies 6.3 memory semantics;
-- sensitive evidence leaked into repository memory;
-- generic current doctrine duplicated into PEM as competing rule;
-- development occurrence count presented as production incidence;
-- expired/review-due current notice remains unqualified active guidance;
-- raw historical growth materially inflates normal active-context load because cold detail is eagerly loaded;
-- stale derived index silently hides a canonical relevant entry;
-- partitioning creates duplicate hand-authored current truth or loses stable routes/IDs;
-- cross-project/fork history silently counted as local incidence;
-- PEM rule used to authorize destructive Git/history/concurrent-work mutation;
-- revert/restoration erases historical learning or leaves materially stale current guidance;
-- eager history/PEM activation on ordinary routes;
-- live claims inferred only from static sensors;
-- live project PEM packaged as generic protocol content;
-- frozen profile/resource drift;
-- default/latest/guessed-ref 6.3 protocol fallback;
-- package/generated/profile divergence;
-- semantic mutation after candidate without affected requalification;
-- diff-only/summary-only independent Review;
-- recovery mapping published before immutable recovery exists;
-- Protocol 7 architecture silently changed by 6.3 reconciliation.
-
-## 21. Reopen and repair rule
-
-If implementation/independent Review finds a genuine blocker:
-
-- route to earliest owning D1/D2/D3/D4 or concern layer;
-- reopen this workplan only when its accepted D3/cycle contract must change;
-- give precise owner-layer repair instructions;
-- prefer removal/narrowing/rewiring/consolidation/re-derivation over compensating wrappers;
-- rerun only affected evidence while preserving demonstrably unaffected admissible evidence;
-- recompute affected memory statistics/guidance when evidence assessment changes;
-- update PEM when repaired episode itself meets admission threshold;
-- use the Git owner for any repository/history operation and do not infer rewrite authorization from repair necessity.
-
-Raise Serious Challenge only when accepted governing authority may be defective; ordinary implementation misses remain ordinary blockers.
-
-## 22. Current design closure state
-
-The current cycle contract incorporates all still-valid workplan repairs from completed review rounds without embedding their chronological defect narratives here. Detailed review history remains in non-authoritative qualification records.
-
-Current design closure requires and now explicitly represents:
-
-- accepted Protocol 6.2 semantics and T01-T39 as the no-loss parent;
-- evidence/history/PEM as non-authoritative warrants and representations;
-- one logical canonical project-local PEM with bounded cross-domain activation and progressive disclosure;
-- explicit PEM schema compatibility/migration and fail-safe unknown-schema handling;
-- accepted project-memory basis derived from project integration/Git semantics rather than branch/default/latest/self-ratification;
-- semantic-family discipline, first-local-defect economy, stable IDs, branch reconciliation, and lossless split/merge lineage;
-- evidence-ledger-derived statistics from currently admissible rows with declared coverage, aggregation/project scope, lifecycle context, and honest denominator limits;
-- balanced pre/post-admission positive evidence plus failure-family disconfirming evidence;
-- evidence invalidation/retraction, contested assessment, and derived-statistic/guidance recomputation;
-- authority-safe capability lessons and reverse impact closure for authority-bound entries;
-- self-reference-safe evidence/PEM update staging;
-- security-safe evidence persistence;
-- material evidence/authority binding-health and notice-expiry handling;
-- applicability-led HAS selection independent of memory temperature or active-summary presence;
-- matched/comparable quantitative evidence and uncertainty discipline;
-- bounded context/maintenance scaling independent of raw cold-history volume;
-- optional evidence-justified canonical cold partitioning with non-authoritative index fallback;
-- fork/cross-project provenance separation;
-- PEM corruption/rollback/Protocol-6.2 downgrade/re-adoption and revert/restoration semantics;
-- Git-owner delegation for branch/merge/self-reference/history operations;
-- current-owner deduplication when lessons become accepted doctrine;
-- exact 6.3 bootstrap/profile/semantic-candidate/recovery/generated/package lifecycle;
-- affected Protocol 7 inheritance reconciliation only after 6.3 acceptance;
-- independent assembled-candidate Review and all inherited/new qualification/falsification gates.
-
-No Serious Challenge to accepted Protocol 6.2 authority is identified. Implementation remains authorized on the dedicated 6.3 branch subject to Stages A-G. Protocol 6.3 itself remains proposed until qualification, independent Review, immutable bootstrap/recovery, generated/profile/package reconciliation, lifecycle closeout, and separately authorized cutover pass.
-
-## 23. Intended end state
+## 19. Intended end state
 
 ```text
 lossless accepted Protocol 6.2 semantics
-+ exact historical evidence cold and recoverable
-+ one logical compact current project-engineering memory
-+ explicit schema/version compatibility and safe recovery
++ exact cold historical evidence remains recoverable
++ one coherent logical compact current project memory
 + evidence-backed negative and positive learning
-+ material supporting/disconfirming/counterevidence visible
++ observation/association/causal claims kept at demonstrated strength
 + invalidated evidence retained historically but removed from current support
-+ statistics with declared coverage, aggregation/project scope, lifecycle context, and honest denominators
-+ project-aware engineering instincts without shadow authority or review-vote truth
++ typed lesson relations without recursive proof
++ statistics with honest coverage, aggregation/project scope, lifecycle, and chronology
++ branch-safe accepted-base/candidate-overlay composition
++ atomic root/partition publication and subordinate derived indexes
++ applicability-led activation with no stale-tag false negatives
++ high-impact unresolved state cannot be crowded out by success stories
 + learned capabilities distinguished from accepted invariants
 + simpler/new mechanisms remain admissible
-+ branch-safe, self-reference-safe, Git-owner-safe memory updates
-+ applicability-led bounded activation independent of temperature
++ self-reference-safe and Git-owner-safe updates
++ untrusted evidence remains data, never instruction/authorization
 + no routine history replay or cold-history context growth
-+ optional lossless partitioning without duplicate authority
-+ security-safe evidence persistence
-+ stale/broken warrants and expired notices cannot masquerade as current knowledge
-+ fork/cross-project history cannot masquerade as local incidence
-+ rollback/revert preserves history while reconciling current meaning
-+ quantitative claims tied to comparable evidence and uncertainty
-+ qualification proportional to the claim
-+ fresh-context agents inherit project experience instead of rediscovering it
++ qualification proportional to each claim
++ fresh-context agents inherit demonstrated project experience instead of guesses
 ```
 
 Central invariant:
 
-> The project must be able to learn even when the individual agent does not persist, and every claimed lesson must remain traceable to admissible evidence, bounded applicability, supported schema, project scope, and current authority boundaries rather than memory, repetition, selective success reporting, misleading aggregation, stale or invalid warrants, branch/default recency, reviewer votes, or historical mechanism worship.
+> The project must be able to learn even when the individual agent does not persist, and every claimed lesson must remain traceable to admissible non-recursive evidence, evidence-supported claim strength, bounded applicability, supported schema, project scope, coherent publication state, and current authority boundaries rather than memory, repetition, selective success reporting, misleading aggregation, stale/invalid warrants, branch/default recency, reviewer votes, post-hoc causality, timestamp chronology, instruction-like evidence, or historical mechanism worship.
