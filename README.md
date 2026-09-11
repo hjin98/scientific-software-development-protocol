@@ -62,7 +62,7 @@ Frozen accepted historical mappings remain immutable:
 
 Protocol 6.2 public-source bootstrap remains **`5a062ebc472755607b9dc66d33a5ebbc4b7429aa`** for version-bound 6.2 work. The earlier `1181c2031710c5d343194d87d08543290fded0ab` attempt remains invalidated historical evidence only. Bootstrap and recovery identities are intentionally distinct.
 
-**Protocol 6.3 has no public bootstrap or recovery identity yet on this candidate branch.** The implementation intentionally refuses to guess/self-declare one. A 6.3 bootstrap may be named only after an already-existing source snapshot passes bootstrap-readiness validation; a later descendant publishes that exact SHA. Recovery is later still, after complete qualification and independent Review.
+**Protocol 6.3 public-source bootstrap is `1484c1d3caa49d87cc15bc52a5e775399c1dae1b`; Protocol 6.3 recovery remains unavailable.** The bootstrap is an already-existing self-reference-safe source snapshot that passed repository/package/profile/Core bootstrap-readiness plus exact-ref remote route realization before this later descendant published its identity. It is only the version-bound public fallback and does not make 6.3 accepted-current. Recovery remains later, after complete qualification and independent Review.
 
 ## Canonical source and acceptance
 

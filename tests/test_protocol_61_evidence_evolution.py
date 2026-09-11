@@ -87,7 +87,7 @@ class Protocol61EvidenceEvolutionTests(unittest.TestCase):
                 self.assertNotIn("automatic current-6.2 public fallback is unavailable", lower)
             else:
                 self.assertIn(f"ACCEPTED_6_2_PUBLIC_REF = {bootstrap}", prompts)
-                self.assertIn("CURRENT_PUBLIC_REF = UNAVAILABLE_PENDING_6.3_BOOTSTRAP_QUALIFICATION", prompts)
+                self.assertIn("CURRENT_PUBLIC_REF = 1484c1d3caa49d87cc15bc52a5e775399c1dae1b", prompts)
                 self.assertIn("version-bound 6.2 work continues to use exactly", lower)
 
     def test_accepted_61_recovery_and_bootstrap_remain_immutable(self) -> None:

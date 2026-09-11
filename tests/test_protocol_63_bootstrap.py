@@ -6,6 +6,7 @@ import re
 import unittest
 import urllib.error
 import urllib.request
+from pathlib import Path
 
 
 BOOTSTRAP = "1484c1d3caa49d87cc15bc52a5e775399c1dae1b"
@@ -14,6 +15,19 @@ LOCAL_MD_RE = re.compile(r"\[[^\]]+\]\(([^)]+\.md(?:#[^)]*)?)\)")
 
 
 class Protocol63BootstrapTests(unittest.TestCase):
+    def test_current_public_mapping_is_exact_and_recovery_remains_unavailable(self) -> None:
+        root = Path(__file__).resolve().parents[1]
+        versioning = (root / 'source/shared/references/protocol-versioning-and-compatibility.md').read_text(encoding='utf-8')
+        prompts = (root / 'source/shared/references/development-workflow-prompts.md').read_text(encoding='utf-8')
+        portability = (root / 'PORTABILITY.md').read_text(encoding='utf-8')
+        readme = (root / 'README.md').read_text(encoding='utf-8')
+        self.assertIn(f'6.3.0 public-source bootstrap -> {BOOTSTRAP}', versioning)
+        self.assertIn(f'CURRENT_PUBLIC_REF = {BOOTSTRAP}', prompts)
+        self.assertIn(f'6.3.0 public bootstrap -> {BOOTSTRAP}', portability)
+        self.assertIn(BOOTSTRAP, readme)
+        self.assertIn('6.3.0 recovery -> UNAVAILABLE_PENDING_6.3_ACCEPTANCE', portability)
+        self.assertNotIn('6.3.0  -> ' + BOOTSTRAP, versioning)
+
     def test_published_bootstrap_snapshot_is_real_self_reference_safe_and_route_complete(self) -> None:
         if not (os.environ.get("CI") or os.environ.get("SSDP_VALIDATE_PUBLIC_FALLBACK") == "1"):
             self.skipTest("remote Protocol 6.3 bootstrap realization runs in CI or with SSDP_VALIDATE_PUBLIC_FALLBACK=1")

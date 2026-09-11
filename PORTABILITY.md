@@ -36,7 +36,7 @@ Accepted immutable mappings:
 6.1.0 recovery -> 802e75af261efb4f70d71284d860613a2197b639
 6.2.0 public bootstrap -> 5a062ebc472755607b9dc66d33a5ebbc4b7429aa
 6.2.0 recovery -> b59adc77efe6951912cfd705cc43830c58ca27d0
-6.3.0 public bootstrap -> UNAVAILABLE_PENDING_6.3_BOOTSTRAP_QUALIFICATION
+6.3.0 public bootstrap -> 1484c1d3caa49d87cc15bc52a5e775399c1dae1b
 6.3.0 recovery -> UNAVAILABLE_PENDING_6.3_ACCEPTANCE
 ```
 
@@ -44,7 +44,7 @@ Canonical repository: `https://github.com/hjin98/scientific-software-development
 
 The first Protocol 6.2 bootstrap attempt `1181c2031710c5d343194d87d08543290fded0ab` remains invalidated historical evidence. Version-bound 6.2 public fallback uses exactly `5a062ebc472755607b9dc66d33a5ebbc4b7429aa`; accepted 6.2 recovery is separately `b59adc77efe6951912cfd705cc43830c58ca27d0`.
 
-For Protocol 6.3, **do not** substitute the 6.2 bootstrap, current branch, repository default/latest, or a guessed `6.3.0` ref while the 6.3 mapping is unavailable. The 6.3 source candidate must first pass bootstrap-readiness checks at an immutable self-reference-safe source snapshot; only a later descendant may publish that exact SHA. Recovery is later and requires complete qualification plus independent Review. If neither compatible local source nor mapped compatible immutable public source can be read, report truthful non-closure.
+For Protocol 6.3, version-bound public fallback now uses exactly `1484c1d3caa49d87cc15bc52a5e775399c1dae1b`. Do **not** substitute the 6.2 bootstrap, current branch, repository default/latest, or a guessed `6.3.0` ref. This immutable source ancestor passed bootstrap-readiness and exact-ref remote route realization before a later descendant published the mapping. Recovery remains later and requires complete qualification plus independent Review. If neither compatible local source nor mapped compatible immutable public source can be read, report truthful non-closure.
 
 ## Version-bound profiles
 
@@ -85,4 +85,4 @@ For live routing, use normal supported entrypoints and fresh sessions; do not pr
 
 Compact routing/handoffs remain complete for governed scope. A reference can replace local repetition only when the receiving environment can resolve the version-bound owner; otherwise carry the minimum necessary semantics locally. Cold historical/specialized/project-memory detail must remain discoverable through visible triggers. Generated routing graphs/matrices/traces and derived PEM summaries/indexes are diagnostic/derived evidence, not second routing/memory authority.
 
-Protocol 6.2 remains accepted-current while 6.3 is a candidate. Version-bound 6.2 public fallback remains exact bootstrap `5a062ebc472755607b9dc66d33a5ebbc4b7429aa` and accepted recovery remains `b59adc77efe6951912cfd705cc43830c58ca27d0`. Protocol 6.3 cannot displace that baseline until its own bootstrap, distinct profile/package resources, complete qualification, independent Review, recovery mapping, generated/Core parity, and lifecycle gates close.
+Protocol 6.2 remains accepted-current while 6.3 is a candidate. Version-bound 6.2 public fallback remains exact bootstrap `5a062ebc472755607b9dc66d33a5ebbc4b7429aa` and accepted recovery remains `b59adc77efe6951912cfd705cc43830c58ca27d0`. Version-bound 6.3 public fallback is now exact bootstrap `1484c1d3caa49d87cc15bc52a5e775399c1dae1b`, but this does not make 6.3 accepted-current. Protocol 6.3 cannot displace the 6.2 baseline until complete qualification, independent Review, recovery mapping, regenerated parity, and lifecycle gates close.

@@ -66,7 +66,7 @@ class Protocol6OrchestrationTests(unittest.TestCase):
                 self.assertNotIn("automatic current-6.2 public fallback is unavailable", self.lower)
         else:
             self.assertIn("current_protocol = 6.3.0", self.lower)
-            self.assertIn("current_public_ref = unavailable_pending_6.3_bootstrap_qualification", self.lower)
+            self.assertIn("current_public_ref = 1484c1d3caa49d87cc15bc52a5e775399c1dae1b", self.lower)
             self.assertIn("accepted_6_2_public_ref = 5a062ebc472755607b9dc66d33a5ebbc4b7429aa", self.lower)
             self.assertIn("self-reference-safe source snapshot", self.lower)
 
