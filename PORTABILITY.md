@@ -6,7 +6,7 @@ The supported portable runtime unit is the self-contained directory `dist/skills
 
 Authority roles: `scientific-formulation`, `numerical-algorithm-design`, `software-design`, `software-implementation`. Optional non-authoritative specialists: `software-documentation`, `software-maintenance-audit`, `repository-hygiene`.
 
-## Protocol 6.2 routing contract
+## Protocol 6.3 candidate routing contract
 
 The active role/specialist `SKILL.md` owns **root activation**. It routes to the universal kernel/owning concern; a canonical concern owner may conditionally dispatch to a narrower leaf only within that concern. Each activation edge states a decision predicate and resolvable resource, remains acyclic, adds/narrows material semantics, and reuses already-loaded applicable owners rather than reloading them.
 
@@ -17,9 +17,11 @@ activation -> required source/package reachability
 reachability / ordinary Markdown link / semantic dependency / package membership != activation
 ```
 
-`language-profiles.md` is the language concern router and conditionally activates Python/C++ leaves. `tool-assisted-engineering.md` is the relation-first engineering-tool router and conditionally activates analyzer/runtime/tool methods. Do not flatten all leaves into every role entrypoint or infer activation from the transitive files bundled for standalone transport.
+`project-engineering-memory.md` is the Protocol 6.3 Project Engineering Memory (PEM) concern owner. It activates only when workflow/role predicates establish that demonstrated project history can materially change the decision. A project-local `PROJECT-ENGINEERING-MEMORY.md` is runtime/project state, not a portable skill dependency: generic bundles include the doctrine/template needed to interpret PEM but never copy a live project's memory, derived local summary, private evidence, or candidate overlay into the package.
 
-Static package/routing validation can establish declared route and resource integrity. It **cannot prove** that a named harness/model actually followed the route, kept non-triggered material cold, or gained performance. Live claims require fresh-session evidence for the named harness/model/install mode; unavailable telemetry remains unavailable rather than inferred.
+`language-profiles.md` is the language concern router and conditionally activates Python/C++ leaves. `tool-assisted-engineering.md` is the relation-first engineering-tool router and conditionally activates analyzer/runtime/tool methods. Do not flatten all leaves or PEM history into every role entrypoint, and do not infer activation from transitive files bundled for standalone transport.
+
+Static package/routing validation can establish declared route/resource integrity, schema/package exclusion, and deterministic generated parity. It **cannot prove** that a named harness/model followed the route, kept non-triggered material cold, gained performance, or benefited from memory. Live claims require fresh-session evidence for the named harness/model/install mode; unavailable telemetry remains unavailable rather than inferred.
 
 ## Compatible source resolution
 
@@ -34,17 +36,15 @@ Accepted immutable mappings:
 6.1.0 recovery -> 802e75af261efb4f70d71284d860613a2197b639
 6.2.0 public bootstrap -> 5a062ebc472755607b9dc66d33a5ebbc4b7429aa
 6.2.0 recovery -> b59adc77efe6951912cfd705cc43830c58ca27d0
+6.3.0 public bootstrap -> UNAVAILABLE_PENDING_6.3_BOOTSTRAP_QUALIFICATION
+6.3.0 recovery -> UNAVAILABLE_PENDING_6.3_ACCEPTANCE
 ```
 
 Canonical repository: `https://github.com/hjin98/scientific-software-development-protocol`.
 
-The first Protocol 6.2 pre-acceptance bootstrap attempt, `1181c2031710c5d343194d87d08543290fded0ab`, is invalidated because it predates a required explicit `software-documentation` cold-route repair. It remains historical evidence only and must not be used as current 6.2 public fallback.
+The first Protocol 6.2 bootstrap attempt `1181c2031710c5d343194d87d08543290fded0ab` remains invalidated historical evidence. Version-bound 6.2 public fallback uses exactly `5a062ebc472755607b9dc66d33a5ebbc4b7429aa`; accepted 6.2 recovery is separately `b59adc77efe6951912cfd705cc43830c58ca27d0`.
 
-**Protocol 6.2 public-source bootstrap:** `5a062ebc472755607b9dc66d33a5ebbc4b7429aa` is the replacement immutable current-6.2 public fallback source. Its source regression, canonical package build, and independent standalone package/link validation passed before publication. When no governing-version-compatible installed skill/exposed root is readable, resolve the canonical repository at this exact ref. The repository default branch is never a protocol-version oracle and `6.2.0` is not assumed to be a Git ref.
-
-Protocol 6.2 recovery is separately pinned to `b59adc77efe6951912cfd705cc43830c58ca27d0` after independent Review PASS. Recovery contains the accepted candidate and decision evidence through ancestry; public fallback continues to use bootstrap `5a062ebc472755607b9dc66d33a5ebbc4b7429aa`, not the recovery snapshot.
-
-If neither a compatible installed source nor the compatible immutable public source can be read, report truthful non-closure rather than executing the protocol from memory.
+For Protocol 6.3, **do not** substitute the 6.2 bootstrap, current branch, repository default/latest, or a guessed `6.3.0` ref while the 6.3 mapping is unavailable. The 6.3 source candidate must first pass bootstrap-readiness checks at an immutable self-reference-safe source snapshot; only a later descendant may publish that exact SHA. Recovery is later and requires complete qualification plus independent Review. If neither compatible local source nor mapped compatible immutable public source can be read, report truthful non-closure.
 
 ## Version-bound profiles
 
@@ -53,27 +53,36 @@ If neither a compatible installed source nor the compatible immutable public sou
 | `sdp-protocol-5.16` | 5.16.0 | 1 | frozen |
 | `ssdp-protocol-6.0` | 6.0.0 | 2 | frozen |
 | `ssdp-protocol-6.1` | 6.1.0 | 2 | frozen historical rollback |
-| `ssdp-protocol-6.2` | 6.2.0 | 2 | accepted current |
+| `ssdp-protocol-6.2` | 6.2.0 | 2 | accepted current / frozen when 6.3 profile is added |
+| `ssdp-protocol-6.3` | 6.3.0 | 2 | candidate after distinct generation/qualification |
 
-Historical profile/prompt bytes remain immutable. Workplan `protocol_version` selects compatible semantics before stage interpretation. Serious Challenge/human-pending state stops ordinary automatic closure; orchestration represents/routes state but never decides scientific truth.
+Historical profile/prompt bytes remain immutable. Workplan `protocol_version` selects compatible semantics before stage interpretation. Serious Challenge/human-pending state stops ordinary automatic closure; orchestration represents/routes state but never decides scientific truth. PEM schema versioning is independent of orchestration profile schema; Protocol 6.3 supports PEM schema 1 and fails safe for unsupported memory-dependent decisions.
+
+## Project-memory portability boundary
+
+A harness may discover project PEM from the project/repository context when Protocol 6.3 activation fires, but must resolve its accepted/base identity according to project integration policy rather than treating the newest/default-branch file as accepted. A same-branch candidate overlay remains candidate. Temperature and active-summary visibility are salience aids, not applicability filters; bounded canonical metadata search must still surface materially relevant lower-salience entries.
+
+Missing/partial PEM, stale index, or unsupported schema cannot be interpreted as historical absence. Unsupported memory blocks only memory-dependent decisions; unrelated protocol work continues under its governing owners. Cross-project/fork memory keeps source-project provenance and cannot manufacture local incidence.
 
 ## Packaging and external capabilities
 
-Standalone bundles must contain every local resource any supported activation path can require and every local Markdown resource needed to keep the bundled document graph non-dangling. Current transport may therefore use bounded transitive local-Markdown closure; that transport choice does not make every bundled file active context.
+Standalone bundles contain every local resource a supported activation path can require and every local Markdown resource needed to keep the bundled document graph non-dangling. Current transport may therefore use bounded transitive local-Markdown closure; that does not make every bundled file active context.
+
+Generic bundles may include `project-engineering-memory.md`, the schema template, and deterministic validator documentation when reachable, but **must exclude** repository-root live `PROJECT-ENGINEERING-MEMORY.md`, its cold partitions/indexes, secrets/private evidence, and project-specific candidate state.
 
 Serena, Semgrep, Hypothesis, CodeQL, compilers/debuggers/sanitizers/profilers/fuzzers and similar tools are optional environment capabilities, not generic Agent Skill validity requirements unless project/task authority explicitly requires one. Generic bundles do not embed executables, credentials, hosted-service configuration, analysis databases, compiler toolchains, or project-specific query/rule settings. Static package validity cannot establish external-tool availability or invocation.
 
 ## Qualification classes
 
-- **Static source/package tests:** route syntax, safe/reachable packaged resources, canonical-source parity, activation invariants that can be inspected from source, profile/version identities.
+- **Static source/package tests:** route syntax, safe/reachable packaged resources, canonical-source parity, activation invariants, PEM schema/package exclusion, profile/version identities.
 - **Reference-routing sentinel:** fresh-session evidence that a named harness/model can discover/activate a skill and read a required bundled reference.
-- **Tool-routing qualification:** named harness/model/tool evidence for specialized invocation or an allowed concrete fallback; do not infer another environment from one run.
-- **Protocol behavioral qualification:** current D1-D4 authority, Challenge, evidence, compatibility and Protocol 6.2 representation/routing scenarios.
+- **Tool-routing qualification:** named harness/model/tool evidence for specialized invocation or an allowed concrete fallback.
+- **Protocol behavioral qualification:** inherited D1-D4/Challenge/evidence/compatibility scenarios plus Protocol 6.3 Q63/F63 memory semantics.
 
-For live routing, use normal supported entrypoints and fresh sessions; do not preload the preservation map or expected leaf. Where traces exist, verify required conditional resources activate, non-triggered concerns remain cold, and attention prioritization does not erase a lower-salience mandatory closure condition.
+For live routing, use normal supported entrypoints and fresh sessions; do not preload the preservation map, expected leaf, or PEM family. Where traces exist, verify required conditional resources activate, unrelated memory/concerns remain cold, applicable lower-salience memory remains discoverable, and attention prioritization does not erase a mandatory closure condition.
 
 ## Lossless portability
 
-Compact routing/handoffs remain complete for governed scope. A reference can replace local repetition only when the receiving environment can resolve the version-bound owner; otherwise carry the minimum necessary semantics locally. Cold historical/specialized detail must remain discoverable through visible triggers. Generated routing graphs/matrices/traces are diagnostic evidence, not a second routing authority.
+Compact routing/handoffs remain complete for governed scope. A reference can replace local repetition only when the receiving environment can resolve the version-bound owner; otherwise carry the minimum necessary semantics locally. Cold historical/specialized/project-memory detail must remain discoverable through visible triggers. Generated routing graphs/matrices/traces and derived PEM summaries/indexes are diagnostic/derived evidence, not second routing/memory authority.
 
-Protocol 6.2 is accepted-current. Its public-source fallback remains the exact immutable bootstrap `5a062ebc472755607b9dc66d33a5ebbc4b7429aa`, while accepted rollback/recovery resolves to `b59adc77efe6951912cfd705cc43830c58ca27d0`. Protocol 6.1 remains an immutable historical rollback option for explicitly version-bound 6.1 work at `802e75af261efb4f70d71284d860613a2197b639`. Protocol 7 remains pre-cutover and may not displace this document-controlled baseline until its own D3/D4/qualification/cutover gates close.
+Protocol 6.2 remains accepted-current while 6.3 is a candidate. Version-bound 6.2 public fallback remains exact bootstrap `5a062ebc472755607b9dc66d33a5ebbc4b7429aa` and accepted recovery remains `b59adc77efe6951912cfd705cc43830c58ca27d0`. Protocol 6.3 cannot displace that baseline until its own bootstrap, distinct profile/package resources, complete qualification, independent Review, recovery mapping, generated/Core parity, and lifecycle gates close.
