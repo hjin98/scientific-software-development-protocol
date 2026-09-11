@@ -344,6 +344,87 @@ class Protocol63EngineeringMemoryTests(unittest.TestCase):
             errors = pem.validate_memory(pem.load_memory(path), check_summary=False)
             self.assertTrue(any("cannot target its own canonical family ID" in error for error in errors))
 
+    def test_duplicate_failure_occurrence_id_is_rejected_even_with_distinct_event_identity(self):
+        family = self._family(id="FF-001", kind="FAILURE_FAMILY", maturity="PROVISIONAL")
+        family.pop("applications")
+        family["semantic_identity"]["mechanism_family"] = "bounded test failure mechanism"
+        occurrence = {
+            "id": "O01",
+            "event_identity": "commit:3333333333333333333333333333333333333333",
+            "lifecycle_context": "qualification",
+            "source_project": "local",
+            "surfaces": ["module-a"],
+            "recurrence_after_accepted_repair": False,
+            "assessments": [
+                {
+                    "id": "AS01",
+                    "state": "ADMISSIBLE",
+                    "conclusion": "CONFIRMED",
+                    "evidence": ["repo@3333333:path#finding"],
+                }
+            ],
+        }
+        clone = copy.deepcopy(occurrence)
+        clone["event_identity"] = "commit:4444444444444444444444444444444444444444"
+        family["occurrences"] = [occurrence, clone]
+        with tempfile.TemporaryDirectory() as td:
+            path = Path(td) / "PROJECT-ENGINEERING-MEMORY.md"
+            path.write_text(self._root_text([family]), encoding="utf-8")
+            errors = pem.validate_memory(pem.load_memory(path), check_summary=False)
+            self.assertTrue(any("occurrence IDs must be non-empty and unique" in error for error in errors))
+
+    def test_current_notice_requires_nonempty_evidence_and_owner_when_normative(self):
+        base_notice = {
+            "id": "NT-001",
+            "state": "CURRENT",
+            "summary": "Bounded current notice.",
+            "normative_status": "NON_AUTHORITATIVE",
+            "owner": "NONE",
+            "applicability": ["test"],
+            "binding_health": "HEALTHY",
+            "evidence": ["repo@1111111:path#finding"],
+            "review_or_expiry": "review on next accepted-base change",
+        }
+
+        def root_with_notice(notice):
+            nl = chr(10)
+            return (
+                self._root_text([])
+                + nl
+                + "## Current notices"
+                + nl + nl
+                + "### NT-001 — Test notice"
+                + nl + nl
+                + "```yaml pem-notice"
+                + nl
+                + yaml.safe_dump(notice, sort_keys=False)
+                + "```"
+                + nl
+            )
+
+        with tempfile.TemporaryDirectory() as td:
+            notice = copy.deepcopy(base_notice)
+            notice["evidence"] = []
+            path = Path(td) / "PROJECT-ENGINEERING-MEMORY.md"
+            path.write_text(root_with_notice(notice), encoding="utf-8")
+            errors = pem.validate_memory(pem.load_memory(path), check_summary=False)
+            self.assertTrue(any("evidence must contain at least one non-empty route" in error for error in errors))
+
+        with tempfile.TemporaryDirectory() as td:
+            notice = copy.deepcopy(base_notice)
+            notice["normative_status"] = "AUTHORITY_BOUND"
+            path = Path(td) / "PROJECT-ENGINEERING-MEMORY.md"
+            path.write_text(root_with_notice(notice), encoding="utf-8")
+            errors = pem.validate_memory(pem.load_memory(path), check_summary=False)
+            self.assertTrue(any("normative notice requires governing owner" in error for error in errors))
+
+        with tempfile.TemporaryDirectory() as td:
+            path = Path(td) / "PROJECT-ENGINEERING-MEMORY.md"
+            path.write_text(root_with_notice(base_notice), encoding="utf-8")
+            doc = pem.load_memory(path)
+            pem.write_summary(doc)
+            self.assertEqual(pem.validate_memory(pem.load_memory(path)), [])
+
     def test_unknown_schema_fails_safe(self):
         with tempfile.TemporaryDirectory() as td:
             path = Path(td) / "PROJECT-ENGINEERING-MEMORY.md"

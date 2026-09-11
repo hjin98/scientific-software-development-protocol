@@ -373,7 +373,7 @@ def _validate_family(family: dict[str, Any]) -> list[str]:
             if counts.get("contradicting", 0):
                 errors.append(f"{fid}: positive guidance eligibility hides admissible contradiction")
             if binding_health != "HEALTHY":
-                errors.append(f"{fid}: positive guidance eligibility requires explicit HEALTHY inding_health")
+                errors.append(f"{fid}: positive guidance eligibility requires explicit HEALTHY binding_health")
         if guidance in {"RECOMMENDED", "PREFERRED", "DEFAULT", "BEST"} and not eligible:
             errors.append(f"{fid}: positive recommendation is not eligible")
         if guidance in {"PREFERRED", "DEFAULT", "BEST"}:
