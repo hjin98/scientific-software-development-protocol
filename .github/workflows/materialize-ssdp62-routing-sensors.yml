@@ -1,0 +1,163 @@
+name: Materialize SSDP 6.2 static routing sensors
+
+on:
+  pull_request:
+    types: [synchronize]
+
+permissions:
+  contents: write
+
+jobs:
+  measure:
+    if: github.event.pull_request.head.repo.full_name == github.repository && github.head_ref == 'ssdp-6.2-lossless-representation'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
+          fetch-depth: 0
+      - name: Generate static activation sensor report
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import subprocess
+
+          BASE = 'cec29671b9db59d20124a6e2ce99725ed60b8f0a'
+          CAND = '6f71812fe79bb9996fa467cc68dfe8d988d278d6'
+          OUT = Path('qualification/ssdp6/SSDP-6.2-STATIC-ACTIVATION-SENSORS.md')
+
+          def ref(name):
+              return f'source/shared/references/{name}.md'
+          def role(name):
+              return f'source/roles/{name}/SKILL.md'
+          def spec(name):
+              return f'source/specialists/{name}/SKILL.md'
+
+          K61 = ref('abstraction-and-realization')
+          K62 = ref('abstraction-and-concretization')
+          D1 = ref('scientific-formulation')
+          D2 = ref('numerical-algorithm-design')
+          D3 = ref('architecture-and-design')
+          D4 = ref('specification-and-implementation')
+          W = ref('workflow-and-workplans')
+          E = ref('evidence-evolution-and-dependencies')
+          T = ref('testing-and-validation')
+          V = ref('protocol-versioning-and-compatibility')
+          H = ref('long-horizon-code-health')
+          LP = ref('language-profiles')
+          PY = ref('python-engineering')
+          DM = ref('documentation-maintenance')
+          DE = ref('documentation-and-evidence')
+          GIT = ref('git-and-version-control')
+          REPO = ref('repository-intake')
+          CONV = ref('convergence-and-cycle-economy')
+          REL = ref('release-and-distribution')
+
+          # A trace is a declared static activation sample, not runtime telemetry.
+          # root is already selected by stage routing. uncond are references required
+          # before substantive reasoning by that root. cond are references whose
+          # stated predicates are true for the exact representative task below.
+          # hops is maximum activation-edge depth after root selection; hierarchical
+          # language dispatch therefore costs two hops in 6.2 (root -> router -> leaf).
+          traces = [
+              ('Local D4 Python helper repair',
+               'Equivalent local Python repair; no workplan; affected regression and impact closure required; no evidence reuse/dependency change or architecture/science change.',
+               role('software-implementation'),
+               ([K61], [W,E,T,LP,PY], 1),
+               ([K62,D4], [W,T,LP,PY], 2)),
+              ('D3 -> D4 Python workplan',
+               'Substantial Python implementation workplan; architecture, evidence applicability, acceptance/regression design, and language semantics material; D1/D2 unchanged.',
+               role('software-design'),
+               ([K61], [W,E,D3,T,LP,PY], 1),
+               ([K62,D3], [W,E,T,LP,PY], 2)),
+              ('Independent D4 Review',
+               'Ordinary substantial Python D4 implementation Review; workflow/evidence/testing/language material; no Stabilization or longitudinal-health audit and no specialized analyzer predicate assumed.',
+               role('software-design'),
+               ([K61], [W,E,D3,T,H,LP,PY], 1),
+               ([K62,D3], [W,E,T,LP,PY], 2)),
+              ('D2 numerical-method design',
+               'Pure D2 method decision before change-plan/evidence-design concerns; D1 meaning unchanged and no performance/historical/human-facing-paper predicate.',
+               role('numerical-algorithm-design'),
+               ([K61,D2], [], 1),
+               ([K62,D2], [], 1)),
+              ('D1 scientific formulation',
+               'Pure D1 formulation decision before change-plan/evidence-design/historical/human-facing-paper predicates.',
+               role('scientific-formulation'),
+               ([K61,D1], [], 1),
+               ([K62,D1], [], 1)),
+              ('Documentation reconciliation',
+               'Current non-scientific guide reconciliation; no represented D1-D4 concern beyond documentation ownership and no specialized technical-writing predicate.',
+               spec('software-documentation'),
+               ([DM,DE], [], 1),
+               ([K62,DM,DE], [], 1)),
+              ('Maintenance audit',
+               'Architecture/test/history/lifecycle maintenance audit with version-sensitive history; no scientific-numerical risk and no specialized analyzer predicate.',
+               spec('software-maintenance-audit'),
+               ([W,T,V,H,D3], [GIT,REPO,CONV,DE], 1),
+               ([K62,H], [D3,T,E,W,GIT,REPO,CONV,DE,V], 1)),
+              ('Release/package reconciliation',
+               'Post-implementation package/release reconciliation with package validation, lifecycle/evidence and version identity; no language-specific build-behavior question.',
+               role('software-implementation'),
+               ([K61], [W,E,T,REL,V], 1),
+               ([K62,D4], [W,E,T,REL,V], 1)),
+              ('Historical recovery/migration',
+               'D3/workplan historical recovery and compatibility reasoning; no executable-language or scientific/numerical mutation.',
+               role('software-design'),
+               ([K61], [W,E,D3,V], 1),
+               ([K62,D3], [W,E,V], 1)),
+              ('Closeout',
+               'Post-acceptance documentation/version/generated-artifact closeout with no repository residue and no product mutation; hygiene branch therefore not triggered.',
+               spec('software-documentation'),
+               ([DM,DE], [W,E,V,REL], 1),
+               ([K62,DM,DE], [W,E,V,REL], 1)),
+          ]
+
+          def blob(commit, path):
+              return subprocess.check_output(['git','show',f'{commit}:{path}'])
+
+          def measure(commit, root, parts):
+              uncond, cond, hops = parts
+              seq = [root] + list(uncond) + list(cond)
+              unique = list(dict.fromkeys(seq))
+              sizes = {p: len(blob(commit,p)) for p in unique}
+              return {
+                  'bytes': sum(sizes.values()),
+                  'root_bytes': sizes[root],
+                  'uncond': len(uncond),
+                  'cond': len(cond),
+                  'repeats': len(seq)-len(unique),
+                  'hops': hops,
+                  'files': unique,
+              }
+
+          rows=[]
+          details=[]
+          for name,predicate,root,p61,p62 in traces:
+              a=measure(BASE,root,p61); b=measure(CAND,root,p62)
+              delta=b['bytes']-a['bytes']
+              pct=(100.0*delta/a['bytes']) if a['bytes'] else 0.0
+              rows.append((name,a,b,delta,pct))
+              details.append((name,predicate,a,b))
+
+          lines=[]
+          lines += ['---','kind: ssdp62-static-activation-sensor-evidence','protocol_version: 6.2.0',f'accepted_baseline_commit: {BASE}',f'semantic_candidate: {CAND}','authority: non-normative-qualification-evidence','status: measured','live_telemetry: unavailable','---','', '# Protocol 6.2 Static Activation Sensors','']
+          lines += ['## Measurement contract','', 'This is deterministic static source measurement, not live model/harness telemetry. Each representative trace fixes a task predicate first, then applies the activation requirements stated by the corresponding root/router at the accepted Protocol 6.1 baseline and the Protocol 6.2 candidate. Scope is therefore not narrowed after observing the measurements.','', '**Unique active bytes** are the sum of exact UTF-8 Git-blob bytes for the selected root `SKILL.md` plus each unique activated reference. Templates and task/product files are excluded symmetrically because this sensor measures protocol routing context only. **Unconditional reads** are reference reads required before substantive reasoning by the selected root; **conditional reads** are additional references whose explicit predicates are true for the fixed representative task. **Repeated owner loads** count duplicate paths in the declared trace before de-duplication. **Routing hops** are the maximum activation-edge depth after root selection; root -> concern router -> leaf is two hops, so a larger hop count is not automatically worse.','', 'No numerical value is an acceptance threshold. Required information may increase a sensor; lossless semantics outrank compactness.','']
+          lines += ['## Sensor table','', '| Representative task | 6.1 active bytes | 6.2 active bytes | Delta | 6.1 U/C reads | 6.2 U/C reads | Repeated loads 6.1/6.2 | Max hops 6.1/6.2 |','|---|---:|---:|---:|---:|---:|---:|---:|']
+          for name,a,b,delta,pct in rows:
+              lines.append(f"| {name} | {a['bytes']:,} | {b['bytes']:,} | {delta:+,} ({pct:+.1f}%) | {a['uncond']}/{a['cond']} | {b['uncond']}/{b['cond']} | {a['repeats']}/{b['repeats']} | {a['hops']}/{b['hops']} |")
+          total61=sum(a['bytes'] for _,a,_,_,_ in rows); total62=sum(b['bytes'] for _,_,b,_,_ in rows)
+          lines += ['', f'Across these ten fixed representative traces, the unweighted sum of per-trace active protocol bytes changes from **{total61:,}** to **{total62:,}** ({total62-total61:+,}, {(100.0*(total62-total61)/total61):+.1f}%). This aggregate is only a descriptive sensor because traces overlap and are not a workload-frequency model.', '', '## Trace definitions and active sets','']
+          for name,predicate,a,b in details:
+              lines += [f'### {name}','',f'Fixed predicate: {predicate}','',f"- 6.1: {a['bytes']:,} bytes; unconditional={a['uncond']}; conditional={a['cond']}; repeated={a['repeats']}; max-hops={a['hops']}; active: " + ', '.join(f'`{p}`' for p in a['files']), f"- 6.2: {b['bytes']:,} bytes; unconditional={b['uncond']}; conditional={b['cond']}; repeated={b['repeats']}; max-hops={b['hops']}; active: " + ', '.join(f'`{p}`' for p in b['files']), '']
+          lines += ['## Interpretation','', '- This measurement repairs the Stage-F sensor omission in the original 115-case report and adds the previously omitted independent-D4-Review representative trace.', '- It does not claim every individual metric improves. In particular, D3/D4 Python traces intentionally gain one routing hop in 6.2 because language leaf dispatch is moved behind `language-profiles.md`; that extra hop is the progressive-disclosure boundary, not a failure.', '- Repeated owner loads are reported rather than assumed to improve. The selected traces contain no duplicate path loads under either version; the 6.2 reuse rule remains a semantic safeguard against future repeated activation.', '- Static source bytes do not establish actual prompt tokens, latency, cache behavior, or model quality. No live-harness performance claim is made.', '- Independent Review must assess both the fixed-predicate choices and whether any required owner was omitted from an active set. A disputed trace is an evidence issue to correct, not permission to narrow governed scope.','']
+          OUT.write_text('\n'.join(lines) + '\n')
+          PY
+      - name: Commit sensor evidence and remove materializer
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git rm .github/workflows/materialize-ssdp62-routing-sensors.yml
+          git add qualification/ssdp6/SSDP-6.2-STATIC-ACTIVATION-SENSORS.md
+          git diff --check
+          git commit -m 'Record Protocol 6.2 static activation sensors'
+          git push origin HEAD:${{ github.head_ref }}
