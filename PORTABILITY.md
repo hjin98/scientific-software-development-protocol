@@ -1,105 +1,79 @@
-# Agent portability and routing qualification
-
-## Background and terminology
-
-The **Scientific Software Development Protocol (SSDP)** is distributed as portable **Agent Skills**: self-contained skill directories whose `SKILL.md` entrypoint routes the references needed for a role or specialist. SSDP uses **D1** scientific/mathematical, **D2** algorithm/numerical, **D3** software-architecture, and **D4** specification/implementation authority. An **orchestration profile** is a version-bound machine-readable representation of the human-facing workflow prompts used by the optional Orchestrator Core.
-
-Protocol 6.1 preserves the portable Agent Skill contract while adding first-class D1/D2 roles and a dual-version orchestration profile.
+# Agent Portability and Routing Qualification
 
 ## Installation contract
 
-The runtime unit is the self-contained directory `dist/skills/<skill-name>/`; the top-level ZIP contains identical files under one enclosing skill directory. Install each skill as a direct child of the harness-supported skill root so `<skills-root>/<skill-name>/SKILL.md` exists. `source/` is canonical development source, not the runtime bundle.
+The supported portable runtime unit is the self-contained directory `dist/skills/<skill-name>/`; each top-level ZIP contains the same files under one enclosing skill directory. Install a skill as a direct child of the harness-supported skill root so `<skills-root>/<skill-name>/SKILL.md` exists. `source/` is canonical development source; ZIPs are transport artifacts. A shared/symlinked install is a separate harness capability and must be qualified on that harness.
 
-This direct-directory installation contract remains the portability baseline. ZIPs are transport artifacts; extract the enclosing `<skill-name>/` directory before placing it under a runtime skill root. A shared/symlinked installation is a separate harness capability and must be qualified on that harness.
+Authority roles: `scientific-formulation`, `numerical-algorithm-design`, `software-design`, `software-implementation`. Optional non-authoritative specialists: `software-documentation`, `software-maintenance-audit`, `repository-hygiene`.
 
-Current authority-bearing skills:
+## Protocol 6.2 routing contract
 
-- `scientific-formulation`
-- `numerical-algorithm-design`
-- `software-design`
-- `software-implementation`
+The active role/specialist `SKILL.md` owns **root activation**. It routes to the universal kernel/owning concern; a canonical concern owner may conditionally dispatch to a narrower leaf only within that concern. Each activation edge states a decision predicate and resolvable resource, remains acyclic, adds/narrows material semantics, and reuses already-loaded applicable owners rather than reloading them.
 
-Optional specialists: `software-documentation`, `software-maintenance-audit`, `repository-hygiene`.
+The canonical universal-kernel source is `source/shared/references/abstraction-and-concretization.md`; inside a packaged skill it is reached as `references/abstraction-and-concretization.md`.
 
-## Human-facing orchestration
+```text
+activation -> required source/package reachability
+reachability / ordinary Markdown link / semantic dependency / package membership != activation
+```
 
-`source/shared/references/development-workflow-prompts.md` is the canonical prompt source. With `AUTO_LOCAL_FIRST`:
+`language-profiles.md` is the language concern router and conditionally activates Python/C++ leaves. `tool-assisted-engineering.md` is the relation-first engineering-tool router and conditionally activates analyzer/runtime/tool methods. Do not flatten all leaves into every role entrypoint or infer activation from the transitive files bundled for standalone transport.
 
-1. use a governing-version-compatible installed skill/exposed skill root through the harness-native mechanism;
-2. otherwise use the canonical public repository `https://github.com/hjin98/scientific-software-development-protocol` at immutable current-6.1 public-source bootstrap `47e9155632c44493644b0b02fa1fa625703cf480` and load its `source/` entrypoint plus required references; never use repository-default bytes as a substitute for the declared protocol version;
-3. preserve the workplan's protocol binding; never guess a semantic version as a Git ref or silently substitute current doctrine;
-4. report truthful non-closure if no compatible source can be read.
+Static package/routing validation can establish declared route and resource integrity. It **cannot prove** that a named harness/model actually followed the route, kept non-triggered material cold, or gained performance. Live claims require fresh-session evidence for the named harness/model/install mode; unavailable telemetry remains unavailable rather than inferred.
 
-Before mutation classify the highest potentially affected D1/D2/D3/D4 domain and direct governed side constraints. Reduced routes are normal; do not force every task through all four skills.
+## Compatible source resolution
 
-Current Protocol 6.1 immutable public-source bootstrap: `47e9155632c44493644b0b02fa1fa625703cf480`. This source identity is usable before default-branch cutover and remains distinct from accepted replacement rollback recovery snapshot `802e75af261efb4f70d71284d860613a2197b639`.
+Resolve declared-version-compatible skills local first, canonical public source second. Never reinterpret an older workplan under the newest installed skill merely because it is available.
 
-## Orchestrator profile compatibility
+Accepted immutable mappings:
 
-The Core supports independent version-bound profiles:
+```text
+5.16.0 recovery -> e151daaf5c8eebb351a85cfed86170fda80fb5e3
+6.0.0 recovery  -> 21d5188f5bd9a0270d7a2ebf93d41a6b7842ccd2
+6.1.0 public bootstrap -> 47e9155632c44493644b0b02fa1fa625703cf480
+6.1.0 recovery -> 802e75af261efb4f70d71284d860613a2197b639
+6.2.0 public bootstrap -> 5a062ebc472755607b9dc66d33a5ebbc4b7429aa
+6.2.0 recovery -> b59adc77efe6951912cfd705cc43830c58ca27d0
+```
 
-| Profile | Protocol | Profile schema | Purpose |
+Canonical repository: `https://github.com/hjin98/scientific-software-development-protocol`.
+
+The first Protocol 6.2 pre-acceptance bootstrap attempt, `1181c2031710c5d343194d87d08543290fded0ab`, is invalidated because it predates a required explicit `software-documentation` cold-route repair. It remains historical evidence only and must not be used as current 6.2 public fallback.
+
+**Protocol 6.2 public-source bootstrap:** `5a062ebc472755607b9dc66d33a5ebbc4b7429aa` is the replacement immutable current-6.2 public fallback source. Its source regression, canonical package build, and independent standalone package/link validation passed before publication. When no governing-version-compatible installed skill/exposed root is readable, resolve the canonical repository at this exact ref. The repository default branch is never a protocol-version oracle and `6.2.0` is not assumed to be a Git ref.
+
+Protocol 6.2 recovery is separately pinned to `b59adc77efe6951912cfd705cc43830c58ca27d0` after independent Review PASS. Recovery contains the accepted candidate and decision evidence through ancestry; public fallback continues to use bootstrap `5a062ebc472755607b9dc66d33a5ebbc4b7429aa`, not the recovery snapshot.
+
+If neither a compatible installed source nor the compatible immutable public source can be read, report truthful non-closure rather than executing the protocol from memory.
+
+## Version-bound profiles
+
+| Profile | Protocol | Schema | State |
 | --- | --- | ---: | --- |
-| `sdp-protocol-5.16` | 5.16.0 | 1 | frozen historical compatibility |
-| `ssdp-protocol-6.0` | 6.0.0 | 2 | frozen pre-6.1 compatibility |
-| `ssdp-protocol-6.1` | 6.1.0 | 2 | current evidence/evolution-aware document-controlled workflow |
+| `sdp-protocol-5.16` | 5.16.0 | 1 | frozen |
+| `ssdp-protocol-6.0` | 6.0.0 | 2 | frozen |
+| `ssdp-protocol-6.1` | 6.1.0 | 2 | frozen historical rollback |
+| `ssdp-protocol-6.2` | 6.2.0 | 2 | accepted current |
 
-Historical 5.16 and 6.0 prompt/profile bytes remain immutable. A workplan's declared `protocol_version` selects its compatible profile before stage semantics are interpreted. Project profile configuration is a default, not authority to override an explicit workplan version.
+Historical profile/prompt bytes remain immutable. Workplan `protocol_version` selects compatible semantics before stage interpretation. Serious Challenge/human-pending state stops ordinary automatic closure; orchestration represents/routes state but never decides scientific truth.
 
-Protocol 6 profile stages include authority intake, D1, D2, D3, D4, Review/Challenge, Verification, Stabilization, Alignment, Health Audit, and Closeout. Serious Challenge/human-pending outcomes stop automatic normal routing; the orchestrator records/routes state but never decides scientific truth.
+## Packaging and external capabilities
 
-## Immutable recovery identities
+Standalone bundles must contain every local resource any supported activation path can require and every local Markdown resource needed to keep the bundled document graph non-dangling. Current transport may therefore use bounded transitive local-Markdown closure; that transport choice does not make every bundled file active context.
 
-Version-bound recovery uses immutable repository commits rather than `main`/latest:
+Serena, Semgrep, Hypothesis, CodeQL, compilers/debuggers/sanitizers/profilers/fuzzers and similar tools are optional environment capabilities, not generic Agent Skill validity requirements unless project/task authority explicitly requires one. Generic bundles do not embed executables, credentials, hosted-service configuration, analysis databases, compiler toolchains, or project-specific query/rule settings. Static package validity cannot establish external-tool availability or invocation.
 
-| Protocol | Immutable recovery commit |
-| --- | --- |
-| 5.16.0 | `e151daaf5c8eebb351a85cfed86170fda80fb5e3` |
-| 6.0.0 | `21d5188f5bd9a0270d7a2ebf93d41a6b7842ccd2` |
-| 6.1.0 | `802e75af261efb4f70d71284d860613a2197b639` |
+## Qualification classes
 
-Protocol 6.1 semantic candidate `be7d05827f52a3029c294c38edf5ede1afb1f9b4` passed fresh 95/95 behavioral qualification and fresh independent D3 Review with no Serious Challenge and zero open blockers. Recovery snapshot `802e75af261efb4f70d71284d860613a2197b639` contains that candidate through ancestry together with the fresh qualification and Review records needed to interpret rollback. The earlier Protocol 6.1 closeout snapshots `dec5ff2767e14fd1cda46e073757aa27f40e270c` and `0c90fda19bf6ed9cb0c4511beb3da80ace6584ed` remain immutable historical evidence but are superseded for current release/recovery authority.
+- **Static source/package tests:** route syntax, safe/reachable packaged resources, canonical-source parity, activation invariants that can be inspected from source, profile/version identities.
+- **Reference-routing sentinel:** fresh-session evidence that a named harness/model can discover/activate a skill and read a required bundled reference.
+- **Tool-routing qualification:** named harness/model/tool evidence for specialized invocation or an allowed concrete fallback; do not infer another environment from one run.
+- **Protocol behavioral qualification:** current D1-D4 authority, Challenge, evidence, compatibility and Protocol 6.2 representation/routing scenarios.
 
-## Deterministic routing dimensions
+For live routing, use normal supported entrypoints and fresh sessions; do not preload the preservation map or expected leaf. Where traces exist, verify required conditional resources activate, non-triggered concerns remain cold, and attention prioritization does not erase a lower-salience mandatory closure condition.
 
-Protocol 6 keeps three independent routing concerns:
+## Lossless portability
 
-1. **Workflow/domain routing:** classify the earliest affected D1-D4 owner, then use reduced or full concretization paths as required.
-2. **Language/runtime routing:** material executable Python/C++ work routes through `references/language-profiles.md` and the matching language profile(s).
-3. **Engineering-relation/tool routing:** semantic, structural, property/generative, interprocedural, runtime-state, memory/UB, race, performance, test-effectiveness, architecture-fitness, longitudinal-risk, and failure/recovery questions route to capabilities that directly model the relation.
+Compact routing/handoffs remain complete for governed scope. A reference can replace local repetition only when the receiving environment can resolve the version-bound owner; otherwise carry the minimum necessary semantics locally. Cold historical/specialized detail must remain discoverable through visible triggers. Generated routing graphs/matrices/traces are diagnostic evidence, not a second routing authority.
 
-Static validation proves that referenced files are packaged, directly linked, and structurally reachable. It **cannot prove** that a real harness/model follows the route or invokes an external capability, so live qualification remains a separate evidence class.
-
-## Optional external development capabilities
-
-Serena, Semgrep, Hypothesis, CodeQL, mutation engines, architecture/dependency checkers, complexity/hotspot analyzers, compiler-native analyzers, sanitizers, debuggers, profilers, fuzzers, and similar tools are **optional environment capabilities**. They are **not part of generic Agent Skill validity**, the **direct-directory installation contract**, or reference-routing package validity unless project/task authority explicitly requires one.
-
-Generic bundles do not embed executable paths, credentials, analyzer databases, compiler/toolchain installations, hosted-service configuration, or project-specific query/rule settings. Language/backend/build/runtime support varies independently of skill packaging.
-
-A claim that a particular harness actually exposes or invokes an external capability requires evidence for that **named harness/tool configuration**. Static package validation or reference-routing success does not establish those external-tool claims.
-
-## Bounded reference-routing qualification
-
-Use `qualification/reference-routing/protocol-routing-sentinel/` as a tiny independent Agent Skill. The required answer token exists only in its bundled reference; `SKILL.md` deliberately does not contain the token.
-
-For each harness/model/install mode being claimed, install the sentinel, start a fresh session, request the routing sentinel, verify the reference-backed token, and distinguish discovery, activation, resource-access/path-canonicalization, route-selection, and model-compliance failures.
-
-A simulated parser/local loader cannot establish a real-harness claim. This is **bounded reference-routing qualification**.
-
-## Language-profile routing qualification
-
-When claiming live language routing, use a representative material executable prompt whose language/runtime surface is unambiguous. Static tests may establish protocol-level route/package completeness; they do not establish universal model compliance.
-
-## Bounded live tool-routing qualification
-
-Reference reachability and tool selection are different claims. Use `qualification/tool-routing/SCENARIOS.md` for a **bounded live tool-routing qualification** of each actually available harness/model/tool combination.
-
-Verify the direct relevant reference read where traces are exposed, then verify either specialized invocation or a concrete permitted fallback. Silent preference for built-in search/read/shell/tests after a specialized trigger is not automatically a valid fallback. Record only the combination actually exercised; **do not infer another harness/model/tool** from static tests or a different run.
-
-If no suitable live harness/tool environment exists, static/counterfactual/package tests may establish deterministic protocol-level routing semantics but **must not claim empirical universal model compliance** or an unexecuted harness/tool pass.
-
-## Behavioral qualification
-
-`qualification/ssdp6/SCENARIOS.md` defines Protocol 6 authority, abstraction adequacy, D1/D2/D3/D4 routing, Serious Challenge, anti-deference/anti-stubbornness, historical compatibility, and composed-closure scenarios. `qualification/ssdp6/SCENARIOS-6.1-ADDITIONS.md` extends the Protocol 6.1 set through scenario 95, including the reopened terminology, canonical-navigation, and immutable public-fallback counterexamples. The current second-reopen result is `qualification/ssdp6/RESULTS-GPT-5.6-SOL-2026-09-10-PROTOCOL-6.1-SECOND-REOPENED-95.md`: 95/95 PASS for semantic candidate `be7d05827f52a3029c294c38edf5ede1afb1f9b4`, with no Serious Challenge. The earlier 94/94 and prior Protocol 6.1/Protocol 5 records remain historical evidence for their evaluated candidate/release semantics.
-
-Reference-routing and tool-routing sentinel qualifications remain useful for named harness configurations. Ordinary repository CI does not infer universal model compliance from static tests.
+Protocol 6.2 is accepted-current. Its public-source fallback remains the exact immutable bootstrap `5a062ebc472755607b9dc66d33a5ebbc4b7429aa`, while accepted rollback/recovery resolves to `b59adc77efe6951912cfd705cc43830c58ca27d0`. Protocol 6.1 remains an immutable historical rollback option for explicitly version-bound 6.1 work at `802e75af261efb4f70d71284d860613a2197b639`. Protocol 7 remains pre-cutover and may not displace this document-controlled baseline until its own D3/D4/qualification/cutover gates close.

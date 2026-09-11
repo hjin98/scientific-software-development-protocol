@@ -7,7 +7,7 @@ Precedence for one explicit profile remains:
       -> explicitly permitted remote source at an explicit ref
       -> truthful incompatible/unavailable failure
 
-Protocol 5.16, Protocol 6.0, and Protocol 6.1 are separate profile/source contracts.  A source
+Protocol 5.16, Protocol 6.0, Protocol 6.1, and Protocol 6.2 are separate profile/source contracts.  A source
 for one is never silently interpreted under the other.
 """
 

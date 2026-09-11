@@ -11,7 +11,7 @@ def read(path: str) -> str:
 
 
 class ConvergenceDurableSemanticsTests(unittest.TestCase):
-    """Retain the useful Protocol 5.12 convergence capability through Protocol 6 semantics."""
+    """Retain Protocol 5.12 convergence capability through Protocol 6.2 canonical ownership."""
 
     def setUp(self) -> None:
         self.workflow = read("source/shared/references/workflow-and-workplans.md")
@@ -28,25 +28,28 @@ class ConvergenceDurableSemanticsTests(unittest.TestCase):
         self.assertIn("material sibling recurrence", self.convergence)
         self.assertIn("shared owner/mechanism", self.convergence)
         self.assertIn("does not answer whether the current concretization should survive", self.convergence)
-        self.assertIn("recurrence is evidence about the shared owner/mechanism", self.architecture)
+        self.assertIn("sibling recurrence", self.architecture)
+        self.assertIn("shared mechanism", self.architecture)
+        self.assertIn("simplify/re-derive delegated concretization", self.architecture)
 
     def test_complexity_evidence_triggers_simplification_before_addition(self) -> None:
         self.assertIn("structural complexity accumulation", self.convergence)
         self.assertIn("re-derive and simplify the delegated concretization", self.convergence)
         self.assertIn("mandatory before another additive durable repair", self.convergence)
-        self.assertIn("active simplification/re-derivation of delegated concretization is required", self.workflow)
+        self.assertIn("simplify/re-derive delegated machinery before another additive durable repair", self.workflow)
 
     def test_census_is_for_real_completeness_or_safe_simplification(self) -> None:
         self.assertIn("governing parent/external correctness claim is finite/exhaustive", self.convergence)
         self.assertIn("bounded sibling discovery is needed", self.convergence)
-        self.assertIn("governing correctness claim itself is finite/exhaustive", self.intake)
-        self.assertIn("recurrence by itself does not justify preserving the current mechanism", self.intake)
+        self.assertIn("governing correctness claim is itself finite/exhaustive", self.intake)
+        self.assertIn("bounded sibling discovery is needed for safe consolidation/removal/family closure", self.intake)
 
     def test_post_simplification_recurrence_routes_to_earliest_domain(self) -> None:
         self.assertIn("post-simplification recurrence", self.convergence)
         self.assertIn("bounded software design reconsideration", self.convergence)
-        self.assertIn("accepted parent abstraction or a material cycle-scoped decision is wrong", self.workflow)
-        self.assertIn("earliest affected d1-d3 owner", self.workflow)
+        self.assertIn("accepted parent abstraction or cycle-scoped decision", self.convergence)
+        self.assertIn("earliest affected abstraction", self.convergence)
+        self.assertIn("reopen the parent only when its accepted abstraction or material cycle decision must change", self.workflow)
 
     def test_revision_economy_and_nonrefusal_survive(self) -> None:
         self.assertIn("explicitly requested review still proceeds", self.convergence)
@@ -60,7 +63,7 @@ class ConvergenceDurableSemanticsTests(unittest.TestCase):
             self.assertNotIn("tier 1", text)
             self.assertNotIn("product/frozen", text)
         self.assertIn("delegated concretization", self.convergence)
-        self.assertIn("accepted-current domain authority", self.workflow)
+        self.assertIn("accepted-current d1-d4 authority", self.workflow)
 
 
 if __name__ == "__main__":

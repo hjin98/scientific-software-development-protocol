@@ -1,87 +1,49 @@
 # Engineering Documentation and Evidence
 
-Documentation serves two different purposes: some documents are accepted semantic authority, while others explain, operate, publish, or evidence that authority. Do not conflate them.
+Own how engineering documents and evidence are **communicated and composed**, not the underlying D1-D4 truth. Some documents carry accepted semantic authority; others explain, operate, publish, coordinate, or evidence it. Distinguish those roles explicitly.
 
-Read [Evidence, evolution, and semantic dependencies](evidence-evolution-and-dependencies.md) for evidence specification/realization/observation, stale-evidence, dependency, and semantic-history doctrine. Read [Scientific and technical writing](scientific-technical-writing.md) for human-facing background/terminology and first-use abbreviation requirements.
+Evidence lifecycle/applicability/dependency/evolution is owned by [Evidence, evolution, and semantic dependencies](evidence-evolution-and-dependencies.md); human-facing exposition by [Scientific and technical writing](scientific-technical-writing.md); document lifecycle/current-vs-history by [Documentation maintenance](documentation-maintenance.md); universal authority/representation rules by [Abstraction, concretization, authority, challenge, and representation](abstraction-and-concretization.md).
 
-## Background and terminology
+## Authority-aware documentation
 
-Protocol 6.1 distinguishes **concretization** (a downstream scientific/software expression of an abstraction) from **evidence realization** (one concrete execution of an evidence specification). Evidence is support/challenge material for governed claims; it is not a fifth semantic authority.
+Logical normative families are D1 Scientific Method Paper, D2 Numerical & Algorithmic Method Paper, D3 Architecture Manual, and D4 Specification (with code/executable as actual concretization/evidence of behavior). One physical file may mix normative claims with rationale/evidence/pedagogy; scoped semantic ownership matters more than file labels.
 
-## Current semantic owners
+Guides, runbooks, release notes, audit/benchmark/qualification reports, test logs, dependency views, semantic history, workplans and publication outputs are non-authoritative except for any explicit bounded authority they actually carry. Workplans may freeze proposed/cycle-scoped decisions but do not silently supersede accepted-current domain owners.
 
-Protocol 6.1 recognizes logical normative families:
+When ambiguity matters, distinguish proposed, accepted-current, challenged, risk-accepted/provisional, stale-dependent, superseded/historical and release-pinned/publication state.
 
-- D1 Scientific Method Paper;
-- D2 Numerical & Algorithmic Method Paper;
-- D3 Architecture Manual;
-- D4 Specification (with code/executable as actual concretization/evidence of behavior).
+## Evidence communication
 
-Each material current claim has one semantic owner, though a concretization may be constrained by many applicable authorities. An authority-bearing file can also contain non-normative rationale/evidence/pedagogy; scoped ownership matters more than file-wide labels.
+Native tests/CI/benchmarks/experiments/proofs/literature/runtime output are normally sufficient evidence when they retain the identity needed to interpret the claim. Do not manufacture capsules/manifests/hashes/report schemas merely because they can be generated.
 
-Guides, runbooks, release notes, audit reports, benchmarks, test logs, workplans, semantic-dependency views, evolution histories, and publication outputs are non-authoritative unless explicitly assigned a semantic scope. Workplans can carry proposed/cycle-scoped authority but do not silently supersede accepted-current domain documents.
-
-## Evidence does not become truth by packaging
-
-Tests, command output, benchmarks, continuous integration (CI), experiments, proofs, literature, and runtime observations are normally sufficient evidence in their native form. Summarize only metadata needed to interpret a material claim. Do not create evidence capsules, manifests, hashes, timestamps, or report schemas merely because they can be generated.
-
-Never edit/select evidence to manufacture completion.
-
-Keep separate, where material:
+When evidence lifecycle matters preserve the distinction:
 
 ```text
-evidence specification
- -> evidence realization
- -> observation
- -> evidence assessment
+evidence specification -> evidence realization -> observation -> evidence assessment
 ```
 
-A rerun against a changed candidate creates a new evidence realization. A prior result does not silently become evidence for a new subject revision.
+Summaries may keep raw detail cold but must retain material provenance/applicability, failures, warnings, contradictory admissible evidence, unavailable required checks and uncertainty. A stale pass is not current confirmation; a stale fail is not current refutation. Never select/edit evidence to manufacture completion.
 
-## Evidence applicability and stale documentation
+## Current authority and composition
 
-Evidence and documentation have validity/applicability domains. A passing historical test that no longer interrogates the current claim or current semantic owner is not current confirmation. A failing stale test is not current refutation either.
+A current normative artifact set must be complete for its governed scope without hidden chat or unavailable history. Explicit cross-document composition is valid and preferable to duplicating every generic invariant. A historical evolution record may explain why current authority exists but must not be required to reconstruct what is true now.
 
-When authority or a material concretization changes, reconcile materially dependent tests/evidence, explanatory documentation, current dependency records, and semantic-history obligations. Preserve unaffected evidence and documentation rather than invalidating everything indiscriminately.
-
-## Current authority must be reconstructable
-
-A current normative artifact set must be semantically complete for its scope without hidden chat, unsupplied external resources, or superseded history. Explicit current cross-document composition is valid; this does not require copying every invariant into one file.
-
-Distinguish proposed, accepted current, challenged, risk-accepted/provisional, stale dependent, superseded/historical, and release-pinned/publication states where ambiguity could affect governance.
-
-A historical semantic-evolution record may explain why current authority exists but must not be required to reconstruct what is currently true.
+When authority/concretization changes, reconcile materially dependent explanatory docs, tests/evidence, current dependency views and semantic history; preserve unaffected material rather than invalidating everything.
 
 ## Human-facing comprehension
 
-Human-facing current documentation must introduce newly appearing non-common domain terminology for its intended competent reader before relying on it in substantive reasoning. Use a concise `Background`, `Background and terminology`, or equivalent section. Expand non-obvious abbreviations at first explanatory use with `full term (ABC)`.
+Human-facing current documentation must introduce newly appearing non-common domain terminology for its intended competent reader before substantive reasoning depends on it, normally in a concise `Background`/`Background and terminology` section. Expand non-obvious abbreviations at first explanatory use (`full term (ABC)`). A friendly background definition does not replace the precise D1-D4 owner; material disagreement routes to that owner.
 
-A reader-friendly background explanation does not replace a precise normative definition owned by D1/D2/D3/D4. If explanatory and normative meanings disagree materially, route the disagreement to the owning domain.
+Machine fields/code identifiers/symbols/filenames/compatibility IDs need not contain pedagogical prose internally, but their human-facing reference should explain non-obvious meaning.
 
-Machine-facing JSON fields, code identifiers, symbols, filenames, and other opaque values need not contain pedagogical prose themselves; their human-facing reference/schema documentation must explain non-obvious meaning.
+## Generated/source-chain discipline
 
-## Documentation specialist boundary
+Edit the highest canonical source and regenerate descendants. Do not independently patch generated Markdown/PDF/site/diagram/package/profile output when source exists. Mechanical parity proves source-chain integrity, not scientific/numerical/architectural correctness. Track/generated formats only when the supported product/repository needs them.
 
-`software-documentation` is an editorial/publication/reconciliation specialist. It may improve structure, synthesize explanations, maintain guides, dependency/history support artifacts, and regenerate derived outputs. It does not independently approve D1/D2/D3/D4 semantic mutations.
+Use bounded dependency/history support artifacts only when they materially reduce ambiguity, invalidation risk or rediscovery. A partial dependency view is not proof of non-dependency unless its relevant scope was explicitly reviewed complete.
 
-If documentation work discovers a semantic contradiction, route it to the owning authority rather than choosing the convenient side.
+## Representation consequence
 
-## Generated formats
+Apply the Lossless Representation Rule to every document/evidence summary: preserve complete governed meaning first; state generic doctrine once at its canonical owner; communicate only the local delta plus resolvable routes; lead with disposition/Challenge/blockers/current decisions and material uncertainty; keep raw evidence, chronology and specialized detail cold until relevant; do not hide lower-salience mandatory closure obligations.
 
-Prefer editable canonical source and regenerate derived Markdown/PDF/site/diagram/package outputs. Do not independently patch a generated descendant when its source exists. Mechanical source-chain checks can establish reproducibility/integrity; they cannot decide whether an equation, estimator, architecture, specification, or evidence interpretation is semantically correct.
-
-Generate/track derived formats only when the project actually ships or needs them.
-
-## Dependency and evolution support artifacts
-
-Use existing anchors, document links, workplan mappings, and profile metadata before adding a separate semantic dependency record. Add/maintain a bounded Markdown view only when it materially reduces ambiguity, invalidation risk, rediscovery, or stale-evidence confusion.
-
-A partial dependency view is not proof of non-dependency: absence of an edge proves independence only when the relevant scope was explicitly reviewed as complete for that exclusion.
-
-Semantic evolution history should preserve concise reasons for material model/algorithm/architecture/concretization/evidence replacement, generalization, rejection, retirement, or restoration when future rediscovery is plausible. Git remains detailed chronology; history explains why; current normative documents explain what is true now.
-
-## Cleanup and history
-
-Current documents describe the accepted present system coherently. Move chronology to history/release notes/semantic-evolution records; preserve release-pinned publication truth. Remove obsolete duplicate current documents, stale evidence specifications, superseded concretizations, and stale generated artifacts when they no longer own/support a current or explicit compatibility/forensic role.
-
-Do not create an archive hierarchy, evidence database, or documentation approval system solely to avoid deciding which artifact is current.
+`software-documentation` may restructure/synthesize/publish and repair explanatory drift, but it never self-approves D1-D4 semantic mutation.

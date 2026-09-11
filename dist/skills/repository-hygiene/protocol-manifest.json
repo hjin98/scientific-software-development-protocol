@@ -1,6 +1,6 @@
 {
   "kind": "specialist",
-  "protocol_version": "6.1.0",
+  "protocol_version": "6.2.0",
   "skill_name": "repository-hygiene",
   "specialty": "repository-hygiene"
 }

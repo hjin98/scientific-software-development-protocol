@@ -18,6 +18,7 @@ from .records import DigestRef
 LEGACY_PROFILE_ID = "sdp-protocol-5.16"
 SSDP6_PROFILE_ID = "ssdp-protocol-6.0"
 SSDP61_PROFILE_ID = "ssdp-protocol-6.1"
+SSDP62_PROFILE_ID = "ssdp-protocol-6.2"
 
 # Kept as the legacy compatibility name because existing Core v1 tests and
 # consumers import CANONICAL_STAGES directly.
@@ -51,6 +52,7 @@ _PROFILE_STAGES = {
     LEGACY_PROFILE_ID: CANONICAL_STAGES,
     SSDP6_PROFILE_ID: SSDP6_STAGES,
     SSDP61_PROFILE_ID: SSDP6_STAGES,
+    SSDP62_PROFILE_ID: SSDP6_STAGES,
 }
 
 _HEADING = re.compile(r"^##\s+(?:(?P<number>\d+)\.\s+)?(?P<title>.+?)\s*$")
@@ -90,7 +92,7 @@ def all_stage_keys() -> tuple[str, ...]:
     """Union of CLI-safe stage keys across supported profiles, preserving order."""
 
     seen: list[str] = []
-    for profile_id in (LEGACY_PROFILE_ID, SSDP6_PROFILE_ID, SSDP61_PROFILE_ID):
+    for profile_id in (LEGACY_PROFILE_ID, SSDP6_PROFILE_ID, SSDP61_PROFILE_ID, SSDP62_PROFILE_ID):
         for _, key, _ in _PROFILE_STAGES[profile_id]:
             if key not in seen:
                 seen.append(key)

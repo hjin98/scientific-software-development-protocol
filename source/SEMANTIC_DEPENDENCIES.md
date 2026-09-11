@@ -1,99 +1,72 @@
 # SSDP Current Semantic Dependency View
 
-This is a bounded human/agent-readable view of material current relationships inside the Scientific Software Development Protocol (SSDP) repository. It supports impact analysis and evidence reconciliation under Protocol 6.1. It is not a universal claim graph, source-code dependency graph, or independent authority.
+This is a bounded human/agent-readable view of material **current Protocol 6.2** relationships. It supports impact analysis; it is not a universal claim/source-code graph, activation registry, or independent authority. Absence of an edge outside explicitly complete mapped scope is not evidence of independence.
 
-## Scope and completeness
-
-This view is intentionally complete only for the protocol-wide relationships listed below. Absence of an edge outside this declared scope is not evidence of independence. Repository/code/document inspection remains required for affected-surface reasoning when a scope has not been explicitly mapped here.
-
-## Protocol semantic chain
+## Semantic authority chain
 
 ```text
-D2 algorithm/numerical authority
-  CONCRETIZES -> D1 scientific/mathematical authority
-
-D3 architecture authority
-  CONCRETIZES -> applicable D2 authority
-  CONSTRAINED_BY -> applicable D1/external invariants that enter D3 directly
-
-D4 specification/implementation authority
-  CONCRETIZES -> applicable D3 authority
-  CONSTRAINED_BY -> applicable D1/D2/external invariants that enter D4 directly
+D2 CONCRETIZES -> D1
+D3 CONCRETIZES -> applicable D2
+D3 CONSTRAINED_BY -> applicable D1/external constraints entering D3 directly
+D4 CONCRETIZES -> applicable D3
+D4 CONSTRAINED_BY -> applicable D1/D2/external constraints entering D4 directly
 ```
 
-Current canonical domain owners:
+Current owners:
 
-- D1: `source/shared/references/scientific-formulation.md` and project Scientific Method Paper families;
-- D2: `source/shared/references/numerical-algorithm-design.md` and project Numerical & Algorithmic Method Paper families;
-- D3: `source/shared/references/architecture-and-design.md` and project Architecture Manual families;
-- D4: `source/shared/references/specification-and-implementation.md`, accepted D4 specifications, and executable implementation.
+- universal relation/Challenge/representation: `source/shared/references/abstraction-and-concretization.md`;
+- D1: `source/shared/references/scientific-formulation.md` + project Scientific Method Paper family;
+- D2: `source/shared/references/numerical-algorithm-design.md` + project Numerical & Algorithmic Method Paper family;
+- D3: `source/shared/references/architecture-and-design.md` + project Architecture Manual family;
+- D4: `source/shared/references/specification-and-implementation.md` + accepted D4 Specification/executable implementation.
 
-The governing recursive relation is defined in `source/shared/references/abstraction-and-realization.md`; the filename is retained as a Protocol 6.0 compatibility identifier while Protocol 6.1 prose uses abstraction/concretization terminology.
+Frozen historical Protocol 6.0/6.1 sources may retain `abstraction-and-realization.md`; current 6.2 does not use that path as a compatibility alias.
 
-## Evidence doctrine relationships
+## Evidence relationships
 
 ```text
-source/shared/references/testing-and-validation.md
-  DEPENDS_ON -> source/shared/references/evidence-evolution-and-dependencies.md
-
-source/shared/references/workflow-and-workplans.md
-  DEPENDS_ON -> source/shared/references/evidence-evolution-and-dependencies.md
-
-source/shared/references/documentation-and-evidence.md
-  DEPENDS_ON -> source/shared/references/evidence-evolution-and-dependencies.md
-
-source/shared/references/documentation-maintenance.md
-  DEPENDS_ON -> source/shared/references/evidence-evolution-and-dependencies.md
-
-source/shared/references/protocol-versioning-and-compatibility.md
-  DEPENDS_ON -> source/shared/references/evidence-evolution-and-dependencies.md
+evidence specification EVIDENCES -> governed claim
+evidence realization INSTANTIATES -> evidence specification
+evidence specification/realization EXECUTION_DEPENDS_ON -> implementation/harness/data/environment
+observation GENERATED_BY -> evidence realization
 ```
 
-Evidence specifications `EVIDENCES` the governed claims their oracles are designed to discriminate. Evidence realizations `INSTANTIATES` those specifications and `EXECUTION_DEPENDS_ON` the concrete implementation/harness/data/environment needed to execute them. Observations are `GENERATED_BY` evidence realizations.
+`source/shared/references/evidence-evolution-and-dependencies.md` owns evidence lifecycle/applicability/dependency/evolution semantics. `testing-and-validation.md`, workflow and documentation owners consume those semantics rather than redefining them.
 
-## Human-facing documentation relationships
+## Activation relationships
+
+Activation is intentionally distinct from this semantic view. Root role/specialist `SKILL.md` files select canonical concern owners; a concern owner may conditionally activate a narrower leaf. Ordinary links, this dependency view and package membership are **not activation edges**. Any generated activation graph/trace is diagnostic evidence derived from canonical router prose, never another current routing authority.
+
+Representative concern routers:
 
 ```text
-source/specialists/software-documentation/SKILL.md
-  DEPENDS_ON -> source/shared/references/scientific-technical-writing.md
-
-source/shared/templates/scientific_method_paper_template.md
-  DEPENDS_ON -> source/shared/references/scientific-technical-writing.md
-
-source/shared/templates/numerical_algorithmic_method_paper_template.md
-  DEPENDS_ON -> source/shared/references/scientific-technical-writing.md
+role/specialist SKILL.md -> universal kernel + owning concern
+material language/runtime/build question -> language-profiles.md -> python-engineering.md / cpp-engineering.md
+material specialized engineering relation -> tool-assisted-engineering.md -> applicable tool-* method
 ```
 
-The scientific-technical-writing reference owns the Protocol 6.1 human-facing background/terminology and first-use abbreviation standard. D1-D4 owners retain authority over precise normative definitions.
+## Human-facing documentation
+
+`scientific-technical-writing.md` owns technical exposition/background/first-use abbreviation rules. `documentation-maintenance.md` owns current-vs-history/document lifecycle. `documentation-and-evidence.md` owns engineering-document/evidence communication. D1-D4 retain precise semantic ownership.
 
 ## Version/profile relationships
 
 ```text
-ssdp-protocol-6.1
-  SUPERSEDES -> ssdp-protocol-6.0 as the default/current profile after 6.1 acceptance
-
-ssdp-protocol-6.1
-  CONSTRAINED_BY -> Protocol 6.1 canonical source
-
-ssdp-protocol-6.0
-  CONSTRAINED_BY -> immutable Protocol 6.0 recovery semantics
+ssdp-protocol-6.1 CONSTRAINED_BY -> immutable historical Protocol 6.1 rollback semantics
+ssdp-protocol-6.2 CONSTRAINED_BY -> accepted-current Protocol 6.2 semantics
 ```
 
-`ssdp-protocol-6.0` remains a frozen compatibility profile for workplans declared under Protocol 6.0. `ssdp-protocol-6.1` is a separate profile identity; Protocol 6.0 bytes are not edited into Protocol 6.1.
+Frozen 5.16/6.0/6.1 profiles remain independent compatibility resources. Protocol 6.2 is accepted-current after qualification, independent Review, recovery mapping, generated-artifact reconciliation, Protocol 7 handoff reconciliation, and lifecycle closeout.
 
-## Build/source-chain relationships
+## Source/generated relationships
 
 ```text
-source/
-  -> source/build_skills.py
-  -> dist/skills/* and dist/*.zip
-
-source/ + current protocol profile resources
-  -> orchestrator packaged protocol snapshot/resources
+source/ -> source/build_skills.py -> dist/skills/* + dist/*.zip
+source/ + current protocol prompt/profile inputs -> orchestrator current profile/snapshot resources
 ```
 
-Generated distribution/profile descendants are not independently authoritative and must be regenerated from their canonical current source rather than patched as competing truth.
+Generated descendants are not independent authority. Package transport closure and runtime activation are separate relationships.
 
 ## Maintenance rule
 
-When one of the mapped current endpoints is renamed, split, merged, superseded, or materially changes meaning, reconcile the affected current relationships during the same closeout. Preserve material reasons for supersession in `history/SEMANTIC_EVOLUTION.md`; do not retain obsolete edges here merely to preserve history.
+When a mapped current endpoint is renamed/split/merged or materially changes meaning, reconcile this view during the same affected closeout. Preserve historical rationale in `history/SEMANTIC_EVOLUTION.md` rather than keeping obsolete current edges. Do not broaden this bounded view merely to make a graph look complete.

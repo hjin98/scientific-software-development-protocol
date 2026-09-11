@@ -1,6 +1,6 @@
 # C++ Engineering Profile
 
-Read [Language engineering profiles](language-profiles.md) first. This profile specializes shared Protocol 6.1 domain doctrine for C++ compilation, lifetime, application binary interface (ABI), native parallelism, numerical kernels, and low-level performance. Shared architecture, testing, evidence, performance, concurrency, scientific, security, and release owners remain authoritative.
+Read [Language engineering profiles](language-profiles.md) first. This profile specializes shared Protocol 6.2 domain doctrine for C++ compilation, lifetime, application binary interface (ABI), native parallelism, numerical kernels, and low-level performance. Shared architecture, testing, evidence, performance, concurrency, scientific, security, release, and representation owners remain authoritative.
 
 ## Language-native design and ownership
 
@@ -11,138 +11,77 @@ Use C++ to express ownership, lifetime, value semantics, and compile-time contra
 - Use templates/concepts/static polymorphism when they remove real duplication or material dispatch cost cleanly. Avoid template/metaprogramming complexity whose compile-time, diagnostics, binary-size, or maintenance cost exceeds its product benefit.
 - Dynamic polymorphism remains valid when runtime substitution is the product model; do not force static polymorphism for ideology.
 - Follow the project's accepted error/application-programming-interface (API) contract—exceptions, `expected`/result/status types, error codes, assertions, or combinations—rather than imposing one universal style. Preserve exception safety and resource ownership on every failure path.
-- Avoid **Python-in-C++**: pervasive heap objects, dictionary-like dynamic state, late binding, wrapper-heavy object graphs, or process-based parallelism copied from Python when simpler static/value/native constructs fit the contract.
-- Avoid **C++ cleverness for its own sake**: metaprogramming, intrusive ownership, custom allocators, hand-written single-instruction multiple-data (SIMD), wrapper layers, or abstractions that do not materially improve correctness, performance, reuse, or total complexity.
+- Avoid Python-in-C++: pervasive heap objects, dictionary-like dynamic state, late binding, wrapper-heavy object graphs, or process-based parallelism copied from Python when simpler static/value/native constructs fit the contract.
+- Avoid C++ cleverness for its own sake: metaprogramming, intrusive ownership, custom allocators, hand-written single-instruction multiple-data (SIMD), wrapper layers, or abstractions that do not materially improve correctness, performance, reuse, or total complexity.
 
 ## Build semantics are part of behavior
 
-C++ source is interpreted through a toolchain and build graph. When material, affected-surface reasoning includes:
+When material, affected-surface reasoning includes compiler/family/version, language standard/definitions, optimization/debug/instrumentation mode, target instruction-set architecture (ISA)/feature dispatch, standard library/runtime and third-party ABI, include/generated-header/macros/visibility/export/exception/run-time type information policy, templates/inline consumers/rebuilds, and shared/static library packaging/runtime loading.
 
-- compiler and version/family;
-- language standard and compile definitions;
-- optimization/debug/instrumentation mode;
-- target architecture/instruction-set architecture (ISA) and feature dispatch;
-- standard library/runtime and relevant third-party ABI;
-- include paths, generated headers, feature macros, visibility/export settings, exceptions/run-time type information (RTTI) policy where governed;
-- headers/templates/inline code and all consumers that must rebuild;
-- shared/static library packaging and runtime loading.
-
-A correct debug or sanitizer build does not prove the supported optimized build is correct. Required behavior must not depend on assertions or validation compiled out in production. Conversely, production-performance evidence must not come from sanitizer/coverage/instrumented builds.
-
-For semantic tooling, prefer an accurate compilation database such as `compile_commands.json` or an equivalent project/toolchain model when macros/includes/build flags materially affect the question.
+A correct debug/sanitizer build does not prove the supported optimized build is correct; required behavior must not depend on assertions compiled out. Production performance evidence must not come from sanitizer/coverage builds. Prefer an accurate compilation database such as `compile_commands.json` when macro/include/build configuration materially affects semantic tools.
 
 ## Correctness before optimization
 
-Treat these as correctness defects before exploiting optimizer behavior:
-
-- use-after-free/use-after-scope and invalid object lifetime;
-- out-of-bounds access and invalid iterator/reference/view lifetime;
-- uninitialized reads;
-- invalid aliasing/alignment promises;
-- signed-overflow dependence or other undefined behavior where material;
-- data races and unsynchronized shared state;
-- exception/failure paths that leak or leave invalid ownership/state;
-- ABI/one-definition-rule (ODR) mismatches when the supported product boundary makes them material.
-
-Do not introduce `restrict`-like promises, alignment assumptions, unchecked casts, lifetime extension tricks, or intrinsics merely to induce optimization without proving the underlying contract.
+Treat use-after-free/scope, invalid lifetime, out-of-bounds, invalid iterators/views, uninitialized reads, invalid alias/alignment promises, undefined-behavior dependence, data races, failure-path ownership leaks, and material ABI/one-definition-rule (ODR) mismatches as correctness defects before exploiting optimizer behavior. Do not introduce restrictive/alignment/lifetime/cast/intrinsic promises for speed without proving the underlying contract.
 
 ## Numerical kernels and data layout
 
-Apply the shared optimization order first.
+Apply shared optimization order first. Prefer established validated optimized primitives when the operation and dependency/precision/portability/deployment contracts fit. Dense linear algebra normally maps to Basic Linear Algebra Subprograms (BLAS)/Linear Algebra Package (LAPACK)-class APIs or established abstractions backed by tuned kernels before custom loops/SIMD; fast Fourier transform (FFT) workloads similarly prefer FFTW/vendor/platform-tuned equivalents. Apply the same principle to sparse/eigen/convolution/domain/accelerator kernels.
 
-- Prefer established validated optimized primitives when the operation maps cleanly and dependency/precision/portability/deployment constraints are satisfied.
-- Dense linear algebra should normally map to Basic Linear Algebra Subprograms (BLAS)/Linear Algebra Package (LAPACK)-class APIs or an established abstraction backed by tuned kernels before custom loops or SIMD.
-- Fast Fourier transform (FFT) workloads should normally map to FFTW-class or vendor/platform-tuned equivalents before custom FFT implementations.
-- Apply the same rule to sparse solvers, eigensolvers, convolutions, domain kernels, and accelerator libraries.
-- Distinguish mathematical/interface contracts from performance backends: a BLAS/LAPACK API does not imply the reference implementation is the intended performance backend. OpenBLAS, BLIS, oneMKL, AMD Optimizing CPU Libraries (AOCL), Accelerate, vendor libraries, or project equivalents remain delegated choices.
-- Account for contiguous/strided layout, array-of-structures/structure-of-arrays (AoS/SoA), indirection, cache/translation-lookaside-buffer (TLB) locality, temporary objects, allocation frequency, copies/moves, branch behavior, false sharing, and non-uniform memory access (NUMA) only to the depth justified by representative evidence.
-
-Do not micro-optimize a kernel while a larger algorithmic, layout, allocation, communication, or language-boundary cost dominates.
+API identity does not force a specific backend: OpenBLAS, BLIS, oneMKL, AMD Optimizing CPU Libraries (AOCL), Accelerate and project equivalents remain delegated where the governing contract permits. Consider contiguous/strided layout, array-of-structures/structure-of-arrays, indirection, cache/translation-lookaside-buffer locality, temporaries, allocation, copies/moves, branches, false sharing and non-uniform memory access only to the depth justified by representative evidence. Do not micro-optimize a kernel while a larger algorithmic/layout/allocation/communication/language-boundary cost dominates.
 
 ## Compiler optimization, vectorization, and SIMD
 
-After the shared performance owner identifies compiled/vector execution as material, prefer this concretization order:
+After shared performance analysis identifies compiled/vector execution as material:
 
-1. establish a correct production-like optimized baseline;
-2. inspect representative profiler evidence and compiler optimization/vectorization diagnostics;
-3. improve data/loop form, alias/lifetime clarity, and layout so safe auto-vectorization can succeed;
-4. use established libraries or portable SIMD abstractions/runtime multiversioning when portability matters;
-5. use explicit ISA intrinsics only for a still-dominant kernel whose benefit justifies the complexity;
-6. adopt link-time optimization (LTO), profile-guided optimization (PGO), or target-specific tuning as durable build policy only after representative evidence establishes total-system value.
+1. establish correct production-like optimized baseline;
+2. inspect representative profiler and compiler optimization/vectorization evidence;
+3. improve data/loop/alias/lifetime/layout form for safe auto-vectorization;
+4. use tuned libraries or portable SIMD/runtime multiversioning when appropriate;
+5. use explicit ISA intrinsics only for a still-dominant kernel whose benefit earns the complexity;
+6. adopt link-time optimization (LTO), profile-guided optimization (PGO), or target tuning as durable build policy only after representative total-system evidence.
 
-A portable x86 product must not silently become Advanced Vector Extensions 512 (AVX-512)-only because a development machine supports it. Prefer a conservative baseline plus safe runtime dispatch/multiversioning or a library that performs dispatch. Architecture-specific builds may target AVX/AVX2/AVX-512, Arm NEON/Scalable Vector Extension (SVE), or another ISA when that target is accepted D3 architecture or another governed constraint.
+A portable product must not silently become Advanced Vector Extensions 512 (AVX-512)-only because a development machine supports it. Prefer conservative baseline + safe runtime dispatch/multiversioning or a dispatching library. Architecture-specific builds may target AVX/AVX2/AVX-512, Arm NEON/Scalable Vector Extension (SVE), or another ISA when accepted D3/constraint requires it.
 
-Compiler transformations that change floating-point semantics—reassociation, contraction/fused-multiply-add (FMA) policy, reciprocal approximations, denormal handling, fast-math classes, mixed precision, or reduction order—are scientific-semantic decisions and require accepted equivalence evidence.
+Floating-point transformations that change reassociation, contraction/fused-multiply-add policy, reciprocal approximation, denormal handling, fast-math, mixed precision, or reduction order are numerical/scientific semantic questions requiring accepted equivalence evidence.
 
 ## Native concurrency and distributed execution
 
-Concurrency class is selected by the shared performance/concurrency owners; C++ supplies efficient native concretizations.
+Concurrency class is selected by shared performance/concurrency owners; C++ supplies native concretizations.
 
-- Use `std::thread`/`std::jthread`, project task pools, or equivalent runtimes for irregular shared-memory tasks, asynchronous pipelines, or ownership/control that does not map cleanly to loop parallelism. Prefer bounded long-lived pools over thread-per-small-task creation.
-- Use OpenMP-like shared-memory execution for regular loop/data parallelism and scientific kernels when it materially reduces implementation complexity and performs well on supported toolchains.
-- Use processes primarily for isolation, failure containment, independent address spaces, external executables, privilege/runtime boundaries, or an explicitly process-oriented architecture—not as the default analogue of Python multiprocessing.
-- Use Message Passing Interface (MPI)-class execution when distributed-memory/multi-node architecture is required. Treat decomposition, communication volume, collectives, synchronization, rank-local threading, input/output (I/O), and failure assumptions as material architecture concerns.
-- Model nested execution explicitly: MPI ranks x application/task threads x OpenMP x BLAS/FFT threads x accelerator work. Each runtime must not independently assume ownership of all cores/resources.
-- Async/event-driven execution is valid for I/O, network, event, or pipeline workloads; do not add coroutine/event-loop machinery to ordinary synchronous numerical kernels without need.
+- `std::thread`/`std::jthread`, task pools or equivalents fit irregular shared-memory tasks/asynchronous pipelines/ownership-control; prefer bounded long-lived pools over thread-per-small-task.
+- OpenMP-like execution fits regular loop/data parallelism/scientific kernels when it reduces complexity and performs well on supported toolchains.
+- Processes primarily serve isolation/failure containment/independent address spaces/external executables/privilege-runtime boundaries, not as a copied default from Python multiprocessing.
+- Message Passing Interface (MPI)-class execution fits distributed-memory/multi-node architecture; decomposition/communication/collectives/synchronization/rank-local threading/I/O/failure assumptions remain architecture concerns.
+- Model nested execution explicitly: MPI ranks x application/task threads x OpenMP x BLAS/FFT threads x accelerator work. No layer independently owns all resources.
+- Async/event-driven execution is valid for I/O/network/event/pipeline workloads; do not add coroutine/event-loop machinery to ordinary synchronous numerical kernels without need.
 
-## Evidence applicability across toolchain changes
+## Evidence across toolchain changes
 
-Compiler/standard-library/build-mode/ISA/backend changes can invalidate evidence execution without changing the target proposition. Review prior evidence applicability when a changed optimization, ABI, precision policy, vectorization path, sanitizer/instrumentation mode, or supported runtime can plausibly alter observations. Rerun/remap the same evidence specification against the new candidate when its target/oracle remains valid.
+Compiler/standard-library/build-mode/ISA/backend changes can invalidate evidence execution without changing the target proposition. Review applicability when optimization, ABI, precision/vector path, sanitizer/instrumentation or supported runtime can plausibly change observation/interpretation; rerun/remap the same valid specification against the new candidate.
 
 ## High-return C++ tools
 
-Use shared relation-first routing. These are high-return mappings, not a mandatory pipeline.
+Use shared relation-first routing; these are mappings, not a mandatory pipeline.
 
-### Semantic understanding
+- Semantic understanding: Serena when supported; clangd/ccls/compiler AST with accurate compilation database as direct fallback/complement; Semgrep for bounded structural/syntax families; CodeQL for supported interprocedural/data-flow relations when extraction/build cost is justified.
+- Static/runtime safety: compiler diagnostics/clang-tidy-class checks; AddressSanitizer (ASan) for relevant memory bounds/lifetime classes; UndefinedBehaviorSanitizer (UBSan); ThreadSanitizer (TSan) for race risk; MemorySanitizer (MSan) when economical; leak/Valgrind-like tools as targeted complement. Sanitizer silence is not proof and sanitizer builds are not performance evidence.
+- Runtime/fuzz/performance: GDB/LLDB-class debuggers for stack/thread/signal/core/watchpoint state; property/generative or bounded deterministic generation for broad invariants; libFuzzer/AFL++-class fuzzing for parser/decoder/binary/memory-sensitive surfaces; representative sampling profiler first for performance, compiler vectorization diagnostics for transformation questions, hardware counters when they materially explain cache/TLB/branch/vector/bandwidth/stall behavior; MPI/OpenMP/accelerator profilers only when those runtimes are present.
 
-- Use Serena for supported symbol owner/definition/reference/caller/implementation questions when available. For C/C++, a clangd/ccls-class backend is most reliable when it sees the actual compilation database and generated/include configuration.
-- Direct clangd/compiler abstract-syntax-tree (AST) information is an appropriate fallback or complement when it more directly models the question.
-- Use Semgrep for bounded structural/syntax families when its active C/C++ engine adequately models the pattern; do not treat it as a substitute for full compiler type/lifetime/build semantics.
-- Use CodeQL for supported C/C++ interprocedural/data-flow relations when the claim and extraction/build cost justify it.
-
-### Local static and runtime safety
-
-- Use compiler diagnostics and clang-tidy-class AST checks for high-signal local semantic, API, portability, suspicious-conversion, modernize, and performance issues relevant to the affected code. Equivalent GCC/MSVC/vendor tools remain valid.
-- Use AddressSanitizer (ASan)-class instrumentation for relevant out-of-bounds/use-after-free/use-after-scope/invalid-free defects.
-- Use UndefinedBehaviorSanitizer (UBSan)-class instrumentation for relevant undefined-behavior classes.
-- Use ThreadSanitizer (TSan)-class instrumentation when changed shared-memory synchronization creates material race risk.
-- Use MemorySanitizer (MSan)-class instrumentation for uninitialized-memory risk only when platform/dependency support makes it economical.
-- Use leak analysis or Valgrind-like tooling as a targeted complement/fallback where its model adds value; do not prefer it merely because it is traditional.
-
-Sanitizer silence does not prove all schedules/lifetimes safe, and sanitizer builds are not performance evidence.
-
-### Runtime state, fuzzing, and performance
-
-- Use GNU Debugger (GDB)/LLDB-class debuggers for stack/frame/thread/signal/core/watchpoint/runtime-state questions when debugger evidence is more direct than added logging.
-- Route broad C++ input/state invariants to an available property/generative mechanism or bounded deterministic generation. Use libFuzzer/AFL++-class fuzzing for parsers, decoders, binary formats, and memory-sensitive input surfaces when appropriate.
-- Start performance diagnosis with representative sampling profiling (`perf`, Instruments, VTune, or project/vendor equivalent) before heavy instrumentation.
-- Use compiler vectorization reports for transformation questions; use hardware counters for cache/TLB/branch/vector/bandwidth/stall questions only when those measurements materially explain the bottleneck.
-- Use MPI/OpenMP or accelerator-specific profilers only when those runtimes are actually part of the architecture.
-
-Exact tool names remain delegated, and absence of one tool does not weaken the required engineering claim.
+Exact tools remain delegated; absence of one tool does not weaken the engineering claim.
 
 ## Accelerator concretization
 
-Graphics-processing-unit (GPU)/accelerator work is dormant unless an applicable governed requirement or accepted D3 architecture enables it.
+Graphics-processing-unit (GPU)/accelerator work is dormant unless governed requirement or accepted D3 enables it. When enabled, choose backend to supported hardware/portability: CUDA, HIP, SYCL, OpenCL, Kokkos/RAJA-like layers, or project equivalents. Prefer tuned accelerator BLAS/solver/FFT/domain primitives before custom kernels when mapping is clean.
 
-When enabled, choose the backend according to the supported hardware and portability contract: CUDA, HIP, SYCL, OpenCL, Kokkos/RAJA-like portability layers, or project equivalents. Prefer optimized accelerator libraries such as BLAS/solver/FFT primitives before custom kernels when the computation maps cleanly.
-
-Acceptance must include central-processing-unit (CPU)/reference numerical equivalence, host-device transfer/synchronization, device memory bounds, runtime/device identity, packaged deployment, and end-to-end benefit. GPU profiling/debugging tools become relevant only inside this architecture-gated path.
+Acceptance includes numerical equivalence against the central processing unit (CPU)/reference path, host-device transfer/synchronization, device-memory bounds, runtime/device identity, packaged deployment, and end-to-end benefit. GPU-specific profilers/debuggers activate only inside this architecture-gated path.
 
 ## Python/C++ boundary
 
-When C++ participates in a Python extension or embedding boundary, also read the Python profile and apply the router's mixed-boundary rules. In particular, account for buffer ownership/lifetime/stride/alignment, copies/conversions, exception translation, actual interpreter threading/global-interpreter-lock (GIL) mode, callbacks/re-entrancy, batching, library thread pools, and packaged extension loading.
+When C++ participates in Python extension/embedding, also read the Python profile and apply mixed-boundary router rules: explicit buffer ownership/lifetime/stride/alignment, copy/conversion semantics, exception translation, actual interpreter threading/global-interpreter-lock mode, callbacks/re-entrancy, batching, nested library thread pools, and packaged extension loading.
 
 ## Review challenge
 
-For materially affected C++ code ask:
+For material C++ ask: Is ownership/lifetime explicit and minimal? Is the abstraction C++-native rather than translated dynamic machinery? Is optimized-build behavior correct independent of debug-only instrumentation? Have tuned kernels/auto-vectorization/layout improvements been exhausted before bespoke SIMD/allocators? Does concurrency match topology without oversubscription? Did templates/dispatch/backend matrices/native boundaries/build machinery earn their compile/binary/deployment/maintenance cost? Would a simpler C++-native concretization satisfy the same governing contract?
 
-1. Is ownership/lifetime explicit and simpler than the alternatives?
-2. Is the abstraction appropriate for C++ rather than a translated dynamic-language pattern?
-3. Is optimized-build behavior correct and independent of debug-only assertions/instrumentation?
-4. Have tuned kernels/auto-vectorization/data-layout improvements been exhausted before bespoke SIMD or allocators?
-5. Does concurrency match workload topology without nested oversubscription?
-6. Did templates, dispatch, backend matrices, native boundaries, or build machinery earn their compile/binary/deployment/maintenance cost?
-7. Would a simpler C++-native concretization satisfy the same governing parent/side-constraint contract with equal or better engineering fitness?
-
-These are engineering questions, not style gates. Equivalent stylistic preferences without material correctness, performance, ownership, portability, or maintenance effect do not block acceptance.
+These are engineering questions, not style gates. Apply the Lossless Representation Rule to profile use: keep this leaf cold unless C++ semantics can change the decision, and once active load only sections relevant to the material relation rather than treating the entire profile as a mandatory appendix.
