@@ -5,11 +5,13 @@ authority: non-normative-review-handoff
 semantic_candidate: 8d0ad2395ccd126c133d8aad206cfc859f660124
 qualification_result_commit: 7ddd3c87b822c3f28bf674f999202e8cd2406aba
 qualification_result: qualification/ssdp6/RESULTS-GPT-5.6-SOL-2026-09-11-PROTOCOL-6.3-260.md
+implementation_stage_f_closure_commit: 82e6e1badf2c88c00967155bb9d30c773b80d1ef
+implementation_stage_f_closure_ci_run: 34623553593
 public_source_bootstrap: 1484c1d3caa49d87cc15bc52a5e775399c1dae1b
 accepted_protocol_62_recovery: b59adc77efe6951912cfd705cc43830c58ca27d0
 accepted_protocol_62_public_bootstrap: 5a062ebc472755607b9dc66d33a5ebbc4b7429aa
 accepted_protocol_62_semantic_candidate: ebbc4591bdfed039512026b8acb3a6749475c1c5
-candidate_to_evidence_descendant_head: 7ddd3c87b822c3f28bf674f999202e8cd2406aba
+candidate_to_evidence_descendant_head: 82e6e1badf2c88c00967155bb9d30c773b80d1ef
 independent_review: required_fresh_context
 protocol_63_recovery: unavailable_pending_review
 accepted_current_protocol: 6.2.0
@@ -35,10 +37,12 @@ Protocol 6.3 public bootstrap:            1484c1d3caa49d87cc15bc52a5e775399c1dae
 Protocol 6.3 semantic candidate:          8d0ad2395ccd126c133d8aad206cfc859f660124
 Stage-F static sensor evidence descendant: 6d234e583a93a413894393aa2b5ffb8cbbe8ac50
 260-decision qualification commit:        7ddd3c87b822c3f28bf674f999202e8cd2406aba
+implementation Stage-F closure commit:    82e6e1badf2c88c00967155bb9d30c773b80d1ef
+closure PR CI run:                        34623553593
 Protocol 6.3 recovery:                    UNAVAILABLE
 ```
 
-The semantic candidate is `8d0ad239...`. Descendants through `7ddd3c87...` are qualification/evidence only and must contain no hidden canonical semantic mutation. Confirm that independently.
+The semantic candidate is `8d0ad239...`. Descendants through `82e6e1ba...` are qualification/evidence/control-state only and contain no canonical source, validator, test, package, profile, or project-PEM semantic mutation. Commit comparison from candidate to the original handoff shows only final static-sensor evidence, the 260-decision qualification, and this Review handoff; `82e6e1ba...` then changes only the preservation census and implementation-state evidence. Confirm that independently rather than trusting this statement.
 
 ## Governing surfaces
 
@@ -46,6 +50,7 @@ Review at minimum:
 
 - active workplan: `workplans/active/PROTOCOL-6.3-EVIDENCE-BACKED-PROJECT-ENGINEERING-MEMORY-WORKPLAN.md`;
 - preservation census: `qualification/ssdp6/SSDP-6.3-PRESERVATION-CENSUS.md`;
+- implementation-state evidence: `qualification/ssdp6/IMPLEMENTATION-STATE-PROTOCOL-6.3.md`;
 - PEM owner: `source/shared/references/project-engineering-memory.md`;
 - evidence owner: `source/shared/references/evidence-evolution-and-dependencies.md`;
 - workflow/HAS owner: `source/shared/references/workflow-and-workplans.md`;
@@ -69,7 +74,7 @@ Protocol 6.3 is a backward-compatible project-learning strengthening. It must pr
 
 The inherited T01–T39 map is preservation evidence, not proof by label. Independently sample/reconstruct the accepted 6.2 capabilities most exposed to 6.3 change: domain/authority routing, Challenge, evidence lifecycle, stage/final acceptance, active simplicity, progressive disclosure, version-bound frozen recovery, exact-ref public fallback, package/profile integrity, and manual/document-controlled operation.
 
-For T40–T120, distinguish semantic-qualification closure from later lifecycle/Review obligations. In particular, recovery selection/mapping, final Protocol-7/current-lifecycle reconciliation, and this independent Review cannot be declared closed by implementation-context qualification.
+For T40–T120, distinguish semantic-qualification closure from later lifecycle/Review obligations. The current census at `82e6e1ba...` closes the implementation-context semantic obligations except T62's recovery leg, T66's final Protocol-7/current-lifecycle reconciliation, and T68 independent Review. Those three remain open for their actual owning stage; do not manufacture closure from the implementation-context qualification.
 
 ## Supported PEM representation
 
@@ -163,7 +168,8 @@ Candidate-bound executable evidence reports:
 - PR CI run `34622113601`: build/regression/package/dist **PASS** and Core **PASS** on exact `8d0ad239...`;
 - full clean Stage-F hardening run `34621952288`: focused 6.3 tests + self-hosted PEM + repository/package/dist/snapshot/Core/whitespace/clean-tree **PASS**;
 - assessment-lineage run `34621638514`: focused assessment counterfactuals + full affected acceptance **PASS**;
-- final static-sensor run `34622174641`: **PASS**.
+- final static-sensor run `34622174641`: **PASS**;
+- implementation Stage-F closure run `34623553593` on `82e6e1ba...`: repository regression, package build/validation, committed-dist parity, whitespace, snapshot parity and Orchestrator Core **PASS**.
 
 Frozen 5.16/6.0/6.1/6.2 resources must remain unchanged. Dist/profile generation includes 6.3 PEM doctrine/template/reader semantics where routed, but never the live root `PROJECT-ENGINEERING-MEMORY.md` or a project-local derived summary.
 
@@ -232,7 +238,7 @@ These pending lifecycle items do not authorize a reviewer to mark Protocol 6.3 a
 Produce a durable independent Review record under `qualification/ssdp6/` that states:
 
 - exact semantic candidate and accepted baseline inspected;
-- evidence/qualification descendant identities consulted;
+- evidence/qualification descendant identities consulted, including Stage-F closure `82e6e1ba...`;
 - preservation/candidate semantic disposition;
 - executable/package/profile/frozen-resource disposition;
 - sampled Q63/F63/falsification findings;
