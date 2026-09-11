@@ -6,8 +6,7 @@ target_protocol_version: 6.3.0
 status: active
 created_date: 2026-09-11
 reviewed_date: 2026-09-11
-second_reviewed_date: 2026-09-11
-design_closure_status: pass-after-second-review-repair
+design_closure_status: pass-after-third-review-repair
 implementation_handoff: authorized
 active_serious_challenge: none
 parent_protocol_62_recovery: b59adc77efe6951912cfd705cc43830c58ca27d0
@@ -22,7 +21,7 @@ branch_point: bf856f742d1744a8ff50f300ee6493fb93e5c9d0
 
 ## Background and terminology
 
-The **Scientific Software Development Protocol (SSDP)** preserves detailed engineering history in Git, workplans, reviews, qualifications, semantic-evolution records, generated/package evidence, and immutable protocol recovery snapshots. Protocol 6.2 made that sophistication cheaper to use through lossless representation and progressive disclosure, but a fresh-context engineer can still miss project-specific lessons distributed across long historical evidence chains.
+The **Scientific Software Development Protocol (SSDP)** preserves detailed engineering history in Git, workplans, reviews, qualification records, tests, benchmarks, semantic-evolution records, generated/package evidence, and immutable recovery snapshots. Protocol 6.2 made this history cheaper to use through lossless representation and progressive disclosure, but a fresh-context engineer can still miss important project-specific lessons distributed across long historical evidence chains.
 
 Protocol 6.3 adds a compact, current, evidence-backed learning layer without replacing history, creating a fifth authority domain, or turning historical success into architectural dogma.
 
@@ -30,25 +29,28 @@ For this plan:
 
 - **Project Engineering Memory (PEM)** — a compact, project-local, non-authoritative representation of demonstrated engineering lessons, recurring failure families, successful patterns, important discoveries, capability lessons, and high-impact current notices, with exact routes to supporting evidence and governing authority where one exists;
 - **historical evidentiary corpus** — durable project evidence from which PEM findings are assessed, including commits, workplans, reviews, qualification records, tests, benchmarks, profiles, analyses, semantic-evolution records, and other applicable observations; this corpus is evidence/provenance, not D1-D4 authority;
-- **evidence binding** — a resolvable, normally immutable reference from a PEM claim to the evidence specification/realization/observation/assessment that warrants it;
+- **evidence binding** — a resolvable, normally immutable reference from a PEM claim to the evidence specification, realization, observation, and assessment that warrants it;
+- **binding health** — whether a material evidence/authority route remains resolvable and interpretable enough to support current use (`HEALTHY`, `REVIEW_REQUIRED`, `UNAVAILABLE`, or `RETIRED`);
 - **learning family** — a stable generalized project lesson. Failure-family membership follows the existing convergence rule: materially equivalent manifestations share a governing invariant, semantic owner/authority class, and materially equivalent failure mechanism; textual similarity or a broad subsystem label is insufficient;
 - **occurrence** — one independently introduced or independently existing confirmed manifestation of a failure family; one cause producing many symptoms is normally one occurrence;
 - **evaluated application** — one materially distinct attempt to apply a positive pattern under a declared regime, with an admissible outcome assessment of supporting, neutral/no-demonstrated-benefit, contradicting, or inconclusive;
 - **successful application** — an evaluated application whose claimed benefit and governing constraints are supported by admissible evidence;
+- **aggregation scope** — the bounded regime over which occurrence/application statistics may be combined without hiding material differences in owner, implementation class, language/runtime, hardware/backend, input regime, lifecycle context, or other dimensions that can change interpretation;
 - **coverage state** — the declared extent to which the historical corpus has been examined for a family or PEM instance; absence from incomplete memory is not evidence of absence;
 - **memory temperature** — an importance/attention classification (`HOT`, `WARM`, `COLD`, or `UNASSESSED`) derived from confirmed recurrence/application statistics plus explicit evidence-backed impact promotion; memory temperature is distinct from Protocol 6.2 hot-path/cold-path activation state and is never authority or an acceptance threshold;
 - **evidence maturity** — confidence in a bounded finding (`PROVISIONAL`, `SUPPORTED`, or `PROVEN`), kept distinct from current applicability/conflict/retirement state;
 - **authority binding** — the relation between a capability lesson and current accepted semantic authority: `EVIDENCE_ONLY`, `AUTHORITY_BOUND`, or `PROPOSED_FOR_PROMOTION`; only an `AUTHORITY_BOUND` capability is mandatory, and it is mandatory because of its cited current D1-D4/project owner, not because PEM says so;
+- **positive-guidance eligibility** — whether a success pattern may be presented in the active summary as a recommended project instinct. A pattern is eligible only when its bounded claim is current, sufficiently supported, free of unresolved material contradiction for that regime, and evidence/authority bindings are healthy;
 - **lifecycle context** — where an occurrence/application was observed, such as development branch, qualification, accepted-current runtime, production, recovery/migration, or historical-only regime; this prevents development observations from being misrepresented as production incidence;
-- **Historical Applicability Set (HAS)** — the bounded current-work record stating which materially relevant PEM families/capability lessons apply, do not apply with reason, or require deeper evidence inspection;
+- **Historical Applicability Set (HAS)** — the bounded current-work record stating which materially relevant PEM families/capability lessons/notices apply, do not apply with reason, or require deeper evidence inspection;
 - **capability-transfer map** — a mapping from a replaced mechanism to each materially relevant learned capability, its authority-binding state, governing owner when any, replacement owner/mechanism or deliberate retirement, and verifying evidence;
 - **fresh-context agent** — an agent or engineer that does not carry reliable private conversational memory of prior project cycles and therefore must recover project state from durable artifacts.
 
-The goal is not a bug database, universal project graph, mandatory archaeology pass, or cautious freeze on change. The goal is to give a fresh-context agent the smallest complete project-aware representation of engineering experience likely to improve the current decision while retaining exact evidence, uncertainty, contradictory outcomes, and current authority boundaries.
+The goal is not a bug database, universal project graph, mandatory archaeology pass, or cautious freeze on change. The goal is to give a fresh-context agent the smallest complete project-aware representation of engineering experience likely to improve the current decision while retaining exact evidence, uncertainty, contradictory outcomes, current authority boundaries, and the conditions under which each lesson remains applicable.
 
 ## 1. Outcome, authority, baseline, and scope
 
-Protocol 6.3 SHALL be a backward-compatible minor strengthening of accepted Protocol 6.2. It adds evidence-backed engineering-memory semantics and workflow integration without weakening accepted D1-D4 authority, evidence, Challenge, compatibility, representation, routing, package, profile, security, or lifecycle rules.
+Protocol 6.3 SHALL be a backward-compatible minor strengthening of accepted Protocol 6.2. It adds evidence-backed engineering-memory semantics and workflow integration without weakening accepted D1-D4 authority, evidence, Challenge, compatibility, representation, routing, package, profile, security, testing, repository-intake, documentation, or lifecycle rules.
 
 The exact accepted 6.2 identities governing this plan are:
 
@@ -102,7 +104,7 @@ T01-T39 are preservation/review hypotheses and evidence labels, not semantic aut
 Protocol 6.3 MUST NOT:
 
 - replace Git, semantic evolution, workplans, qualifications, or archived evidence with PEM;
-- turn tests, benchmarks, commits, history, statistics, or PEM into D1-D4 authority;
+- turn tests, benchmarks, commits, history, statistics, temperature, or PEM into D1-D4 authority;
 - preserve every ordinary bug fix as permanent memory;
 - force family census for a first clean local defect merely because siblings are imaginable;
 - make historical mechanisms immutable merely because they once worked;
@@ -112,6 +114,8 @@ Protocol 6.3 MUST NOT:
 - scan all Git history on every bootstrap or recompute all statistics on every read;
 - create separately maintained Markdown and JSON/YAML authorities for the same memory;
 - copy secrets/private data into PEM or durable evidence merely for completeness;
+- pool materially different regimes merely to produce larger statistics;
+- treat the active summary as the complete search boundary for applicability;
 - rewrite archived workplans or frozen protocol/profile resources to match 6.3 terminology;
 - broaden a local memory feature into unrelated Protocol 7 control-plane implementation;
 - merge/cut over to `main` without separate authorization.
@@ -144,7 +148,7 @@ Conversely, evidence is not authority. Qualification is an acceptance gate for a
 
 A positive engineering pattern is admissible only when it satisfies all applicable correctness, D1/D2, architecture, compatibility, security, reliability, resource, and external constraints.
 
-A faster implementation that violates accepted semantics is not a successful optimization. Record gains with material costs, tradeoffs, uncertainty, and regime.
+A faster implementation that violates accepted semantics is not a successful optimization. Record gains with material costs, tradeoffs, uncertainty, comparator identity, and regime.
 
 ### 2.3 Historical evidence is a prior, not a veto or authority
 
@@ -160,15 +164,27 @@ A new approach MAY replace a proven historical approach when it:
 6. supplies evidence appropriate to new claims; and
 7. passes affected acceptance/qualification.
 
-An evidence-only capability may be deliberately discarded when a better admissible design justifies doing so. Promotion from evidence-only lesson to mandatory architecture requires acceptance by the actual D1-D4/project owner; PEM cannot perform that promotion itself.
+An evidence-only capability may be deliberately discarded when a better admissible design justifies doing so. Promotion from evidence-only lesson to mandatory authority requires acceptance by the actual D1-D4/project owner; PEM cannot perform that promotion itself.
 
-### 2.4 Positive evidence must include counterevidence
+### 2.4 Balanced evidence before and after positive-pattern admission
 
-Once a success pattern exists, materially applicable evaluated attempts under its declared regime must not be selectively omitted because they were neutral, failed, contradicted the generalized claim, or were inconclusive. The current assessment may keep raw detail cold, but it must preserve a route to material counterevidence and narrow/split/reclassify the pattern when warranted.
+Positive-pattern evidence must not be selected by outcome.
 
-### 2.5 Statistics are descriptive unless a denominator exists
+Before admitting or materially strengthening a `SUCCESS_PATTERN`, perform a bounded evidence-directed search within the declared coverage/aggregation scope for known materially applicable neutral, contradicting, failed, or inconclusive attempts as well as supporting results. The search need not be globally exhaustive unless the claimed scope is exhaustive, but its basis and material blind spots must be stated.
 
-Occurrence/application counts are evidence-bound descriptive counts under declared coverage. They do not by themselves estimate failure probability, success probability, comparative risk, causal strength, or incidence rate. Any rate/probability claim requires an explicit opportunity/exposure denominator and defensible sampling/measurement basis.
+After a success pattern exists, materially applicable evaluated attempts under its declared regime must not be selectively omitted because they were neutral, failed, contradicted the generalized claim, or were inconclusive. Keep raw detail cold when useful, but preserve routes to material counterevidence and narrow/split/reclassify the pattern when warranted.
+
+A candidate positive pattern with incomplete counterevidence search may remain `PROVISIONAL`/`REVIEW_REQUIRED`; it may not be presented as a proven project instinct merely because favorable examples were easy to locate.
+
+### 2.5 Failure families also preserve disconfirming/safe-regime evidence
+
+A failure family records confirmed failures, but its generalized cause/applicability must also account for material evidence that the same apparent mechanism/regime does **not** fail or that a proposed causal explanation is not sufficient. Such evidence does not subtract occurrences; it constrains the family claim, aggregation scope, cause, and applicability.
+
+If safe counterexamples show the generalized family is too broad, narrow/split/reclassify it rather than retaining a dramatic but false universal warning.
+
+### 2.6 Statistics are descriptive unless a denominator exists
+
+Occurrence/application counts are evidence-bound descriptive counts under declared coverage and aggregation scope. They do not by themselves estimate failure probability, success probability, comparative risk, causal strength, or incidence rate. Any rate/probability claim requires an explicit opportunity/exposure denominator and defensible sampling/measurement basis.
 
 ## 3. Finite representation census and no-loss map
 
@@ -254,6 +270,16 @@ T79 owner-responsible learning assessment and bounded PEM update classes
 T80 cross-domain D1-D4/specialist applicability without universal activation
 T81 current-owner deduplication when a project lesson becomes accepted doctrine
 T82 occurrence/application lifecycle-context preservation
+T83 pre-admission counterevidence search and anti-selection-bias discipline
+T84 applicability-led HAS selection independent of memory temperature/active-summary presence
+T85 aggregation-scope declaration and cross-regime stratification
+T86 evidence/authority binding-health and broken-route handling
+T87 reverse impact closure for authority-bound PEM after current-owner change
+T88 failure-family disconfirming/safe-regime evidence preservation
+T89 current-notice expiry/review semantics
+T90 matched-comparator/uncertainty discipline for quantitative optimization claims
+T91 positive-guidance eligibility under contradiction/inconclusive or unhealthy evidence
+T92 active workplan current-state representation without review/amendment replay
 ```
 
 If the accepted census already uses later IDs, append rather than collide. These IDs remain preservation evidence, not authority.
@@ -272,38 +298,38 @@ PEM schema / compact representation / coverage / family records
   -> source/shared/references/project-engineering-memory.md
 
 evidence lifecycle / applicability / stale state / independence / impact
-  -> evidence-evolution-and-dependencies.md
+  -> source/shared/references/evidence-evolution-and-dependencies.md
 
 recurrence / semantic-family membership / first-local-defect / simplification
-  -> convergence-and-cycle-economy.md
+  -> source/shared/references/convergence-and-cycle-economy.md
 
 D3 accepted capability / mechanism replacement / architecture transfer
-  -> architecture-and-design.md
+  -> source/shared/references/architecture-and-design.md
 
 workflow activation / HAS / handoff / closeout update responsibility
-  -> workflow-and-workplans.md
+  -> source/shared/references/workflow-and-workplans.md
 
 current-vs-history lifecycle / source-chain reconciliation
-  -> documentation-maintenance.md
+  -> source/shared/references/documentation-maintenance.md
 
 testing / benchmark / oracle / acceptance methodology
-  -> testing-and-validation.md
+  -> source/shared/references/testing-and-validation.md
 
 version / bootstrap / recovery / profile / fallback
-  -> protocol-versioning-and-compatibility.md
+  -> source/shared/references/protocol-versioning-and-compatibility.md
 
 repository-context reuse / historical intake economy
-  -> repository-intake.md
+  -> source/shared/references/repository-intake.md
 
 PEM data/evidence trust, secret/private-data handling, least privilege
-  -> security-and-trust-boundaries.md
+  -> source/shared/references/security-and-trust-boundaries.md
 ```
 
 `project-engineering-memory.md` owns only PEM-specific semantics and routes generic evidence/family/workflow/security/version doctrine to existing owners rather than restating them. The universal kernel receives only the minimum route/constraint needed to keep PEM subordinate and discoverable; PEM is not universal-kernel material.
 
 If Stage A finds accepted 6.2 ownership differs, preserve that owner or block and resolve ownership before implementation. Do not create a parallel owner to match this proposed map.
 
-### 4.2 Project-local canonical artifact
+### 4.2 Project-local canonical artifact and scope
 
 Default project-local artifact:
 
@@ -311,7 +337,9 @@ Default project-local artifact:
 PROJECT-ENGINEERING-MEMORY.md
 ```
 
-at the governed project/repository root unless existing project authority explicitly declares one alternative canonical path. The artifact declares its project/scope identity sufficiently to prevent accidental reuse in an unrelated repository or subproject. Do not invent a hierarchy of nested memories unless a real multi-project ownership boundary requires one; if such a boundary exists, make precedence/scope explicit rather than relying on nearest-file discovery.
+at the governed project/repository root unless existing project authority explicitly declares one alternative canonical path. The artifact declares project/repository/scope identity sufficiently to prevent accidental reuse in an unrelated repository, monorepo component, or subproject.
+
+Do not invent nested memories merely because directory nesting exists. If a real multi-project or multi-repository ownership boundary requires more than one PEM, each instance must declare scope, precedence/composition rules, and cross-project evidence treatment explicitly. Nearest-file discovery alone is never authority.
 
 Add one packaged protocol template, proposed as:
 
@@ -333,8 +361,9 @@ task
       -> universal kernel + current domain owner
       -> only when a project-memory predicate is material: project-engineering-memory.md
            -> project-local PEM active summary
-                -> relevant family/current notice only
-                     -> underlying evidence only when needed
+                -> bounded applicability search over relevant PEM entries
+                     -> relevant family/current notice detail
+                          -> underlying evidence only when needed
 ```
 
 Triggers include:
@@ -349,6 +378,8 @@ Triggers include:
 A first clean local defect with no recurrence/generalization signal remains local. Ordinary documentation, trivial implementation, or unrelated cold concerns do not load PEM because it exists.
 
 **Memory temperature does not itself activate context.** A `HOT` family unrelated to the current governed question remains cold/unloaded. A `COLD` family may become active when its applicability predicate is materially triggered. Ordinary links, package membership, semantic dependencies, or PEM existence do not activate it.
+
+The active summary is an attention layer, not the complete applicability index. When PEM is triggered, use bounded evidence-directed matching over current family/notices by owner, surface, mechanism, capability, regime, and task predicates as needed. The search need not read cold raw evidence unless a candidate match is material.
 
 ### 4.4 Missing/partial memory and adoption
 
@@ -416,10 +447,14 @@ one-line bounded lesson
 memory temperature
 evidence maturity/current applicability
 authority-binding state where relevant
+positive-guidance eligibility where relevant
 confirmed/supporting count plus visible material counterevidence signal
+aggregation scope/regime cue when materially necessary
 primary applicability trigger
-short evidence/authority route
+short evidence/authority route and binding-health state
 ```
+
+Only `CURRENT` success patterns with sufficient evidence maturity, healthy material bindings, and no unresolved contradiction for the stated regime may be phrased as positive recommendations. A contested, stale, or inconclusive high-temperature pattern may remain salient, but it must be presented as uncertainty/caution rather than “what works.”
 
 No arbitrary token threshold may delete material entries. If dense, generalize genuinely equivalent families, remove duplication, and make detail cold while preserving routes. Metrics are sensors, not thresholds.
 
@@ -435,14 +470,14 @@ A notice requires:
 stable notice ID
 current claim/state
 governing owner when normative, otherwise explicit non-authoritative/provisional status
-source/evidence route
+source/evidence route + binding health
 applicability
 review/expiry condition
 ```
 
-A notice cannot become shadow authority. Notices do not contribute to family counts and must be retired or converted when their lifecycle changes.
+A notice cannot become shadow authority. Notices do not contribute to family counts. When an expiry/review condition becomes true, the notice must leave unqualified active guidance and become `REVIEW_REQUIRED`, `RETIRED`, or be reconciled to a current family/owner before further reliance. This check is event/activation-driven; Protocol 6.3 does not require a background daemon.
 
-## 6. Learning-family schema, admission, and identity
+## 6. Learning-family schema, admission, identity, and aggregation
 
 ### 6.1 Family kinds
 
@@ -481,6 +516,8 @@ PEM is not a permanent ledger of ordinary fix chronology. Admit/materially updat
 
 A first clean local defect normally remains local. Generic textbook knowledge or generic protocol doctrine belongs at its owner, not PEM.
 
+A proposed positive family must satisfy the balanced pre-admission evidence rule in Section 2.4 before becoming `SUPPORTED`/`PROVEN` active guidance.
+
 ### 6.3 Failure-family membership
 
 Failure-family membership requires materially equivalent:
@@ -491,9 +528,11 @@ Failure-family membership requires materially equivalent:
 
 Common symptoms, error messages, file locations, or subsystem labels are insufficient. Uncertain classification stays `PROVISIONAL`/review-required.
 
+Material safe/disconfirming evidence is part of assessing whether the claimed family boundary/cause is correct; it is not discarded merely because it does not increment occurrence count.
+
 ### 6.4 Success/discovery/capability minimum fields
 
-A success pattern states its bounded claim, applicable regime, evaluated applications, supporting and counterevidence, demonstrated benefit/cost, and limits.
+A success pattern states its bounded claim, applicable regime/aggregation scope, evaluated applications, supporting and counterevidence, demonstrated benefit/cost, comparator basis, uncertainty where material, and limits.
 
 A discovery states the changed project understanding, exact evidence, applicable regime, competing prior interpretation when material, and whether any current authority was changed separately.
 
@@ -504,23 +543,44 @@ A preservation capability states the capability, applicability, authority-bindin
 For split:
 
 - retain predecessor ID as historical/superseded lineage;
-- reassign occurrences to justified children;
-- avoid double-counting one event across aggregate views.
+- reassign occurrences/applications to justified children;
+- remove the superseded parent from ordinary current-family aggregate totals unless explicitly reporting lineage history;
+- avoid double-counting one event across parent/child aggregate views.
 
 For merge:
 
 - create/select current generalized family;
 - retain predecessor IDs as lineage/aliases;
 - deduplicate overlapping event/application identities;
-- preserve distinct causes/limits rather than flattening them.
+- preserve distinct causes/limits/regimes rather than flattening them.
 
 A reclassification changes current interpretation, not historical observation.
 
 An ID becomes stable/no-reuse once present in accepted project memory. New branch-local IDs are provisional until project acceptance. Concurrent branches may choose colliding provisional IDs; merge/rebase reconciliation must resolve collisions before acceptance, update branch-local references, and never renumber an already-accepted ID merely for compactness. Retired accepted IDs are never recycled.
 
-Cherry-picked/rebased copies of the same underlying historical event are provenance aliases, not new occurrences. Deduplicate by the underlying event/evidence identity and causal episode rather than commit-count arithmetic.
+Cherry-picked/rebased copies of the same underlying historical event are provenance aliases, not new occurrences. Deduplicate by underlying event/evidence identity and causal episode rather than commit-count arithmetic.
 
-### 6.6 Promotion into current doctrine
+### 6.6 Aggregation scope and stratification
+
+Every family whose statistics can affect summary/temperature SHALL state the aggregation scope within which rows are considered materially comparable.
+
+Do not pool across materially different:
+
+```text
+semantic owners or governing invariants
+failure mechanisms
+algorithm/implementation classes
+language/runtime/toolchain regimes
+hardware/backend/precision regimes
+input/scale regimes
+lifecycle contexts when interpretation changes
+```
+
+unless the generalized family claim explicitly spans those dimensions and evidence supports doing so.
+
+When mixed regimes are informative but not safely poolable, preserve one family with stratified subgroup counts only if one generalized lesson genuinely remains correct; otherwise split families. An aggregate project-history count may be shown only alongside enough stratification to prevent misleading interpretation.
+
+### 6.7 Promotion into current doctrine
 
 If a project lesson later becomes explicit accepted D1-D4/project doctrine, the current owner governs. PEM then either:
 
@@ -529,7 +589,7 @@ If a project lesson later becomes explicit accepted D1-D4/project doctrine, the 
 
 Do not duplicate generic current protocol doctrine in self-hosted PEM merely to praise it. A project-specific success pattern that adds measured local evidence may remain, but it routes to the current owner and cannot become a second statement of the rule.
 
-## 7. Evidence model, bindings, and security
+## 7. Evidence model, bindings, quantitative claims, and security
 
 ### 7.1 Inherit complete Protocol 6.2 evidence lifecycle
 
@@ -559,13 +619,22 @@ lifecycle context
 
 A rerun on a changed candidate is a new realization. Old results are not rewritten into evidence for a new subject.
 
-### 7.2 Exact durable evidence and self-reference-safe update staging
+### 7.2 Exact durable evidence, binding health, and self-reference-safe updates
 
 Prefer immutable Git commit + path + stable section/test/finding identifier. A branch/default-branch path alone is insufficient for a long-lived material warrant because later edits can change meaning.
 
 If external CI/benchmark evidence can expire, preserve a compact durable repository record containing the material observation and exact external run/candidate identity when long-lived PEM depends on it.
 
 PEM, generated summaries, implementer narrative, or recursively compressed memory cannot be the sole warrant for their own substantive claim.
+
+For material current entries, evidence and authority routes must carry/check binding health when the entry is activated, semantically reconciled, or otherwise touched by affected impact closure. This is bounded and event-driven; no background full-memory scan is required.
+
+If a material binding becomes unavailable or no longer interpretable:
+
+- do not delete the historical claim automatically;
+- mark the affected current use `REVIEW_REQUIRED`/`UNAVAILABLE` as appropriate;
+- remove unqualified positive guidance if its warrant is no longer sufficient;
+- preserve unaffected evidence and route to replacement/recovered evidence only when justified.
 
 A routine PEM update must not recreate the Git self-reference defect fixed by Protocol 6.2. When the new occurrence/application requires exact identity of the engineering/evidence commit, use this order:
 
@@ -576,7 +645,7 @@ engineering/evidence candidate exists immutably
  -> later closeout/mapping may bind the PEM reconciliation if needed
 ```
 
-Do not require a PEM-containing commit to know its own SHA. A same-commit PEM edit is allowed only when every material evidence/subject identity it references already exists independently and no self identity is needed to establish the claim. Otherwise use the minimal descendant reconciliation commit; do not invent a new framework.
+Do not require a PEM-containing commit to know its own SHA. A same-commit PEM edit is allowed only when every material evidence/subject identity it references already exists independently and no self identity is needed to establish the claim. Otherwise use the minimum descendant reconciliation commit; do not invent a new framework.
 
 ### 7.3 Failure occurrence evidence
 
@@ -586,12 +655,14 @@ Preserve compactly:
 occurrence ID
 confirmed date / immutable event identity
 lifecycle context
+aggregation-scope dimensions when material
 subject/candidate
 owner/surface
 observed failure
 cause claim + cause evidence
 repair reference
 post-repair qualification
+material safe/disconfirming evidence route when needed to delimit cause/scope
 limits/applicability
 ```
 
@@ -599,16 +670,17 @@ Distinguish incident-level cause from generalized cause and literal patch from g
 
 ### 7.4 Positive-pattern evaluated applications and counterevidence
 
-Once a success pattern is admitted, record materially applicable evaluated applications, not only wins:
+Record materially applicable evaluated applications, not only wins:
 
 ```text
 application ID
 lifecycle context
+aggregation-scope dimensions
 subject/candidate and comparator when material
 owner/surface
 intended benefit
 outcome: SUPPORTING | NEUTRAL | CONTRADICTING | INCONCLUSIVE
-qualification/analysis reference
+qualification/analysis reference + binding health
 quantitative effect when available
 experimental envelope / uncertainty when material
 correctness/constraint evidence
@@ -616,11 +688,30 @@ material costs/tradeoffs
 applicability/limits
 ```
 
-A supporting outcome may increment qualified supporting count. Neutral, contradicting, or inconclusive outcomes do not become successes but remain visible in the current assessment when material. If counterevidence narrows the valid regime, narrow/split/reclassify the pattern instead of averaging away the contradiction.
+A supporting outcome may increment qualified supporting count. Neutral, contradicting, or inconclusive outcomes do not become successes but remain visible in the current assessment when material. If counterevidence narrows the valid regime, narrow/split/reclassify the pattern instead of averaging away contradiction.
+
+### 7.5 Quantitative/benchmark comparability
+
+A quantitative improvement claim must compare materially comparable subjects or state and justify the normalization used. Where measurement noise can change the conclusion, use sufficient repeated observations/statistical summary for the bounded claim rather than a single favorable run.
+
+Preserve where material:
+
+```text
+baseline and candidate identities
+same or justified-comparable input/data
+hardware/backend/precision/toolchain
+worker/concurrency/resource settings
+warm-up/cache/checkpoint state
+measurement definition
+replicate count and dispersion/uncertainty
+normalization or scaling basis
+```
+
+Do not attribute a speed/memory improvement to the changed mechanism when the comparison is materially confounded by changed hardware, workload, precision, cache state, parallelism, or measurement definition unless the claim is explicitly about the combined change.
 
 A complexity claim such as `O(N^2) -> O(N log N)` requires adequate algorithmic analysis and evidence that implementation realizes the analyzed algorithm; one timing sample cannot establish asymptotic complexity. Empirical scaling may supplement analysis.
 
-### 7.5 Applicability, stale state, contradiction, and common-mode risk
+### 7.6 Applicability, stale state, contradiction, and common-mode risk
 
 A valid old pass is not confirmation of a changed candidate; a stale old failure is not refutation.
 
@@ -649,7 +740,7 @@ RETIRED
 
 Contradiction is explicit assessment state/flag, not deletion. Temperature/confidence/applicability are orthogonal.
 
-### 7.6 Security and trust boundary
+### 7.7 Security and trust boundary
 
 PEM and evidence records are durable repository content and inherit `security-and-trust-boundaries.md`.
 
@@ -678,6 +769,8 @@ recurrence_after_accepted_repair_count
 first_confirmed
 last_confirmed
 coverage_state / coverage_basis
+aggregation_scope
+stratified counts when material
 lifecycle-context distribution when material
 ```
 
@@ -693,6 +786,8 @@ independent_surface_count
 first_evaluated
 last_evaluated
 coverage_state / coverage_basis
+aggregation_scope
+stratified counts when material
 ```
 
 A merge/rebase reconciles evidence rows first and recomputes counts; never sum stored counters blindly.
@@ -705,9 +800,11 @@ Repeated executions of one implementation do not create new successful applicati
 
 Development/qualification occurrences may count as engineering-history events, but lifecycle context must remain visible; their count cannot be relabeled as production incidence.
 
+Counts are computed within the family aggregation scope. Cross-stratum/lifetime totals may be displayed only as explicitly aggregated history and do not erase subgroup interpretation.
+
 ### 8.3 Coverage and absence
 
-`confirmed_occurrence_count` is exactly the number of evidence-bound counted occurrences, but may be a lower bound when coverage is partial.
+`confirmed_occurrence_count` is exactly the number of evidence-bound counted occurrences in the declared aggregation scope, but may be a lower bound when coverage is partial.
 
 - `>=3` confirmed failure occurrences give a frequency-based `HOT` floor even under partial coverage;
 - `2` give at least `WARM`;
@@ -718,7 +815,7 @@ Apply equivalent coverage discipline to positive-pattern application history.
 
 ### 8.4 Reproducible memory temperature
 
-Default frequency classification:
+Default frequency classification within a declared aggregation scope:
 
 ```text
 confirmed failure occurrences >= 3            -> HOT
@@ -732,7 +829,7 @@ qualified supporting applications == 1        -> COLD/UNASSESSED by frequency su
 
 A single event/application may be promoted to `WARM`/`HOT` for demonstrated severity, breadth, cost, architectural criticality, or exceptional benefit, but store base class, evidence-bound override, and final temperature.
 
-Counterevidence affects evidence maturity, applicability, regime, and whether a `SUCCESS_PATTERN` remains correctly generalized. A high supporting count does not erase qualified contradictions.
+Counterevidence affects evidence maturity, applicability, positive-guidance eligibility, regime, and whether a `SUCCESS_PATTERN` remains correctly generalized. A high supporting count does not erase qualified contradictions.
 
 Recency may order attention or trigger applicability review; it does not erase counts or automatically demote an old applicable lesson.
 
@@ -745,7 +842,7 @@ FF-A occurred 4 times and FF-B 2 times
 therefore FF-A is twice as likely
 ```
 
-or infer a success probability from supporting/application counts. Counts support recurrence/salience heuristics only within declared coverage.
+or infer a success probability from supporting/application counts. Counts support recurrence/salience heuristics only within declared coverage/aggregation scope.
 
 ### 8.6 Memory temperature versus activation/current applicability
 
@@ -796,7 +893,7 @@ old mechanism
 
 Historical wrapper/cache/executor/checkpoint format does not become authority through existence.
 
-## 10. Workflow integration, ownership, and historical applicability
+## 10. Workflow integration, historical applicability, and owner impact
 
 ### 10.1 Design/workplan phase
 
@@ -804,14 +901,15 @@ For memory-triggering substantial work:
 
 1. read PEM active summary;
 2. determine governed scope from actual parents/side constraints;
-3. inspect only relevant family detail/evidence;
-4. record HAS;
-5. identify learned capabilities and authority-binding state;
-6. build capability-transfer map where relevant;
-7. identify new claims requiring qualification;
-8. preserve lower-salience mandatory constraints regardless of memory ranking.
+3. run bounded applicability matching over current PEM by owner/surface/mechanism/capability/regime rather than treating the active summary or Hot entries as exhaustive;
+4. inspect only relevant family/detail/evidence;
+5. record HAS for every materially relevant current family/capability/notice surfaced or independently known, regardless of temperature;
+6. identify learned capabilities and authority-binding state;
+7. build capability-transfer map where relevant;
+8. identify new claims requiring qualification;
+9. preserve lower-salience mandatory constraints regardless of memory ranking.
 
-A `HOT` family intersecting governed scope is dispositioned `applicable`, `not applicable with reason`, or `review required`. Missing/partial memory or missing edges cannot prove non-applicability.
+`HOT` items receive attention priority, not exclusive HAS membership. A missing/partial memory, absent active-summary row, or missing dependency edge cannot prove non-applicability.
 
 ### 10.2 Implementation phase
 
@@ -831,9 +929,14 @@ generated/package drift
 shadow authority created by PEM or capability wording
 capability loss during mechanism replacement
 stale/inapplicable/counterevidenced PEM guidance
+Hot-only or active-summary-only applicability selection
+cross-regime statistical pooling
+broken evidence/authority binding still shown as current guidance
 scope/materiality laundering through memory selection
 security/private-data leakage
 branch-candidate memory mistaken for accepted project memory
+expired current notice still treated as current
+confounded quantitative improvement claim
 ```
 
 Review proceeds against current owners and assembled candidate. PEM is a high-information hypothesis index, not proof.
@@ -843,7 +946,7 @@ Review proceeds against current owners and assembled candidate. PEM is a high-in
 When material authority/concretization change can affect PEM:
 
 ```text
-identify materially dependent families/applications/capabilities
+identify materially dependent families/applications/capabilities/notices
  -> preserve unaffected entries with reason
  -> mark affected entries REVIEW_REQUIRED/STALE as appropriate
  -> rerun/remap evidence where required
@@ -852,11 +955,23 @@ identify materially dependent families/applications/capabilities
 
 Changing one family does not invalidate all memory. Old summary text cannot be reused blindly after owner/candidate/regime/evidence changes.
 
-### 10.5 Learning-update responsibility
+### 10.5 Reverse authority-binding impact
+
+Any accepted change to a current owner cited by an `AUTHORITY_BOUND` PEM capability or normative current notice MUST include bounded reverse impact closure over those bindings before closeout. A repository search or existing dependency mechanism is sufficient; Protocol 6.3 does not require a universal reverse-index database.
+
+For each affected binding, either:
+
+- confirm the owner obligation still exists and remains applicable;
+- update the binding to the new owner/location/semantics;
+- downgrade to `EVIDENCE_ONLY` if the property is no longer authority-bound but still useful as evidence;
+- mark `REVIEW_REQUIRED`/`RETIRED`; or
+- route a real authority conflict through Challenge.
+
+### 10.6 Learning-update responsibility
 
 Responsibility follows the semantic change. The D1/D2/D3/D4 or concern owner responsible for the material change ensures relevant learning assessment and authority binding are correct. `software-documentation` may reconcile wording/source chain but cannot independently promote a substantive finding, declare an authority-bound capability, or adjudicate contradiction.
 
-### 10.6 Closeout learning assessment
+### 10.7 Closeout learning assessment
 
 Every accepted material repair/rework/optimization asks:
 
@@ -866,12 +981,14 @@ Did an existing positive pattern receive supporting, neutral, contradicting, or 
 Did a reusable discovery emerge?
 Did a capability lesson emerge, and what is its authority-binding state?
 Did evidence contradict/retire/narrow a lesson?
-Did coverage materially change?
+Did coverage or aggregation scope materially change?
+Did an authority/evidence binding become stale or unhealthy?
+Did a current notice expire or require conversion?
 ```
 
 Update PEM only when admission threshold is met or an existing entry materially changes. Ordinary fix chronology remains out of permanent memory.
 
-## 11. Maintenance transaction, update classes, and branch reconciliation
+## 11. Maintenance transaction, update classes, branch reconciliation, and freshness
 
 ### 11.1 Update transaction
 
@@ -879,19 +996,21 @@ A material PEM update SHALL:
 
 1. identify candidate learning/current notice;
 2. bind exact admissible evidence;
-3. classify/create family under semantic-family rules;
-4. update evidence rows, not counters;
-5. recompute statistics;
-6. update coverage/applicability/lifecycle context;
-7. update evidence maturity/conflict state;
-8. compute base temperature and evidence-bound override;
-9. update authority-binding state only from actual owner state;
-10. update active summary if current importance/applicability changed;
-11. preserve split/merge/retirement lineage;
-12. verify no still-valid lesson, counterevidence, mandatory condition, or sensitive-data rule was lost;
-13. run structural/source-chain/security checks;
-14. use self-reference-safe evidence/update staging;
-15. commit memory reconciliation as the minimum associated descendant/current-state change.
+3. perform bounded pre-admission counterevidence search for a new/strengthened positive pattern;
+4. classify/create family under semantic-family rules;
+5. update evidence rows, not counters;
+6. recompute statistics within declared aggregation scope;
+7. update coverage/applicability/lifecycle context;
+8. update evidence maturity/conflict state;
+9. check evidence/authority binding health for materially touched entries;
+10. compute base temperature and evidence-bound override;
+11. update authority-binding state only from actual owner state;
+12. update positive-guidance eligibility and active summary if current importance/applicability changed;
+13. preserve split/merge/retirement lineage;
+14. verify no still-valid lesson, counterevidence, mandatory condition, or sensitive-data rule was lost;
+15. run structural/source-chain/security checks;
+16. use self-reference-safe evidence/update staging;
+17. commit memory reconciliation as the minimum associated descendant/current-state change.
 
 ### 11.2 Update classes
 
@@ -903,8 +1022,8 @@ EVIDENCE_APPEND
   -> focused applicability + structural/statistical validation
 
 SEMANTIC_RECONCILIATION
-  generalized cause/claim, scope, authority binding, split/merge, applicability,
-  contradiction resolution, promotion/retirement, or active lesson materially changes
+  generalized cause/claim, aggregation scope, authority binding, split/merge,
+  applicability, contradiction resolution, promotion/retirement, or active lesson materially changes
   -> affected owner review + proportionate independent falsification
 
 PEM_SCHEMA_OR_PROTOCOL_CHANGE
@@ -921,24 +1040,37 @@ Before merging/rebasing a branch with PEM changes:
 - reconcile against target branch accepted PEM;
 - resolve provisional family-ID collisions;
 - deduplicate shared/cherry-picked event identities;
-- re-evaluate evidence applicability if target authority/candidate/regime changed;
-- recompute counts/temperature from reconciled ledger;
+- re-evaluate evidence applicability/binding health if target authority/candidate/regime changed;
+- reconcile aggregation scopes/strata before recomputing counts/temperature;
 - rerun affected structural/semantic review;
 - do not let later branch text silently overwrite contradictory accepted evidence.
 
 Accepted IDs are stable and never recycled.
 
-### 11.4 Lossless compaction
+### 11.4 Event-driven freshness
+
+Protocol 6.3 does not require a daemon or periodic full scan. Freshness is maintained through existing project events that can invalidate memory:
+
+- accepted authority/concretization change affecting a bound entry;
+- evidence artifact/path/retention change affecting a current warrant;
+- PEM activation for a materially relevant task;
+- PEM semantic reconciliation;
+- project closeout/merge where memory changed or relevant authority changed;
+- explicit maintenance/health audit when one is otherwise justified.
+
+A stale untouched Cold family need not trigger work merely because time passed. A current active recommendation whose material warrant is unavailable or plausibly invalidated cannot remain unqualified merely because no scheduled audit ran.
+
+### 11.5 Lossless compaction
 
 Active summary stays compact through generalization/progressive disclosure, not deletion by quota. Raw narratives, benchmark tables, patch transcripts, and debate stay at evidence/history owners unless needed for current interpretation.
 
-Compaction may rewrite wording, merge equivalent exposition, or make detail cold only when it preserves identity, statistics, coverage, lifecycle context, supporting/counterevidence, authority binding, cause distinctions, limits, contradiction, capability relationships, and retrieval routes. If apparent duplicates materially differ, stop compaction and preserve/resolve the distinction.
+Compaction may rewrite wording, merge equivalent exposition, or make detail cold only when it preserves identity, statistics, coverage, aggregation scope, lifecycle context, supporting/counterevidence, authority binding, binding health, cause distinctions, limits, contradiction, capability relationships, and retrieval routes. If apparent duplicates materially differ, stop compaction and preserve/resolve the distinction.
 
 ## 12. Performance and activation constraints
 
 Protocol 6.3 MUST NOT recreate the regression class it exists to prevent.
 
-Normal operation primarily consumes the curated PEM summary when its trigger fires. It SHALL NOT:
+Normal operation primarily consumes the curated PEM summary plus a bounded metadata-level applicability match when its trigger fires. It SHALL NOT:
 
 - rescan Git history on every task;
 - recompute all statistics from full corpus on every bootstrap;
@@ -994,9 +1126,11 @@ positive candidates
 - other concrete project improvements supported by evidence
 ```
 
-Do not duplicate a generic current SSDP rule merely because SSDP historically discovered it. If the generic doctrine already lives at a current owner, retain only project-specific evidence/recurrence context that materially improves future decisions, otherwise keep the lesson at its canonical owner/history.
+Before promoting a positive candidate, search the declared covered history for known materially applicable non-success outcomes as well as favorable examples. Before generalizing a failure candidate, inspect material safe/disconfirming examples that could narrow the causal family.
 
-For each seeded family declare coverage basis and lifecycle context. A partial search is never exhaustive. Archived workplans remain byte-identical; semantic evolution is appended only through normal closeout.
+Do not duplicate a generic current SSDP rule merely because SSDP historically discovered it. If generic doctrine already lives at a current owner, retain only project-specific evidence/recurrence context that materially improves future decisions, otherwise keep the lesson at its canonical owner/history.
+
+For each seeded family declare coverage basis, aggregation scope, lifecycle context, and material binding health. A partial search is never exhaustive. Archived workplans remain byte-identical; semantic evolution is appended only through normal closeout.
 
 ## 14. Validation architecture
 
@@ -1005,18 +1139,24 @@ Extend existing qualification/test owners rather than creating competing complia
 The canonical Markdown PEM is source. Minimum validator SHOULD detect:
 
 - duplicate/current-colliding accepted IDs and invalid provisional-ID merge state;
-- invalid kind/maturity/applicability/temperature/authority-binding values;
-- malformed/non-resolving required evidence;
+- invalid kind/maturity/applicability/temperature/authority-binding/binding-health values;
+- malformed/non-resolving required evidence/authority bindings;
 - displayed count versus ledger mismatch;
 - double-counted event/application identities after split/merge/cherry-pick;
+- superseded parent plus child counts being simultaneously presented as one current-family total;
+- pooling rows outside declared aggregation scope without explicit supported generalization;
 - `COLD` classification unsupported by coverage;
 - unexplained temperature override;
 - active-summary reference to nonexistent/stale/retired entry;
 - `HOT` temperature being used as an unconditional activation command;
+- active-summary-only or Hot-only HAS selection where a materially applicable lower-temperature entry exists;
 - Provisional finding presented as proven fact;
 - evidence-only capability presented as mandatory authority;
 - contradicted/neutral/inconclusive material evidence hidden from success assessment;
-- retired entry presented as active guidance;
+- a success pattern promoted without declared bounded counterevidence search;
+- a contested/unhealthy positive pattern presented as recommended positive guidance;
+- failure family whose current cause/scope ignores material disconfirming evidence;
+- expired/review-due current notice presented as unqualified current guidance;
 - branch-candidate PEM represented as accepted project memory;
 - project-local PEM copied into generic protocol package;
 - generated index diverging from canonical Markdown;
@@ -1069,211 +1209,173 @@ No `main` merge/cutover is authorized by this workplan.
 
 Run complete affected repository/package/orchestrator regression, all 115 Protocol 6.2 semantic scenarios against 6.3, focused 6.3 cases below, generated/profile/package checks, and independent assembled-candidate Review.
 
-### Q63-01 — Complete 6.2 no-loss preservation
-Independently challenge T01-T39 against current owners/assembled 6.3 candidate, including bootstrap, cold-route repair, static sensors, frozen profiles, generated/package integrity, 115-case behavior, affected requalifications, and Stage G lifecycle.
+### Q63-01 through Q63-41 — retained prior qualification obligations
 
-### Q63-02 — Finite census/transformation closure
-Every current durable/generative 6.2 artifact receives disposition; each transformed obligation closes `PRESERVED` or `BLOCKING`.
+The following current obligations remain mandatory and retain their established meaning from earlier review rounds:
 
-### Q63-03 — Authority/evidence separation
-Tests, benchmark, commit, PEM, or history may warrant/challenge but cannot override current D1-D4 owner by existence.
+| ID | Required claim |
+|---|---|
+| Q63-01 | Complete 6.2 no-loss preservation, independently challenging T01-T39 and all inherited bootstrap/cold-route/static-sensor/frozen-profile/generated/package/115-case/Stage-G semantics. |
+| Q63-02 | Finite artifact census and transformation closure; every current durable/generative 6.2 surface has a disposition and every changed obligation closes `PRESERVED` or `BLOCKING`. |
+| Q63-03 | Authority/evidence separation; test, benchmark, commit, history, PEM, or statistic cannot override current D1-D4 owner by existence. |
+| Q63-04 | Correct conditional activation/cold-route behavior; memory-relevant work activates PEM, unrelated first-clean-local work does not, cold detail remains reachable. |
+| Q63-05 | Missing/partial memory cannot prove absence/non-applicability; substantial relevant rework performs bounded intake or carries explicit uncertainty. |
+| Q63-06 | Durable evidence binding; seeded material claims resolve beyond default-branch-only/recursive-summary proof. |
+| Q63-07 | Stale evidence in both polarities and bounded invalidation. |
+| Q63-08 | Evidentiary independence/common-mode risk and visible contradiction. |
+| Q63-09 | Semantic failure-family membership; textual similarity is insufficient. |
+| Q63-10 | One cause/many symptoms counts once absent independent introduction. |
+| Q63-11 | Recurrence after accepted repair increments occurrence/recurrence once and binds both cycles. |
+| Q63-12 | Split/merge lineage, evidence deduplication, and derived-total recomputation. |
+| Q63-13 | Coverage-sensitive memory temperature; 3 Hot, 2 Warm, 1 Cold only with adequate coverage, evidence-bound overrides. |
+| Q63-14 | Importance is not authority/pass threshold; Cold mandatory constraints survive closure. |
+| Q63-15 | Positive-evidence promotion; unmeasured optimization remains Provisional and qualified benefit stays within demonstrated regime/constraints. |
+| Q63-16 | Quantitative effect preservation through compaction. |
+| Q63-17 | Complexity-claim discipline; one timing result cannot prove asymptotic change. |
+| Q63-18 | Capability transfer without ossification; simpler qualified replacement is allowed while actual owner-bound requirements remain preserved. |
+| Q63-19 | First-local-defect economy; one clean local bug does not force permanent family/backfill. |
+| Q63-20 | Invalidation/contradiction/retirement preserves historical evidence and refreshes current guidance. |
+| Q63-21 | Lossless active-summary compaction preserves identity, statistics, coverage, lifecycle, applicability, limits, counterevidence, authority binding, capability links, cold routes, and governed scope. |
+| Q63-22 | No repeated-history regression; triggering operation consumes curated memory without full-history rescan/stat recomputation and non-triggering work adds no memory preparation. |
+| Q63-23 | Static-versus-live claim discipline. |
+| Q63-24 | Project-local PEM versus generic package/profile separation. |
+| Q63-25 | Exact 6.3 immutable public fallback; default/latest/guessed refs rejected. |
+| Q63-26 | Frozen 5.16/6.0/6.1/6.2 resource integrity. |
+| Q63-27 | Full generated/package/profile/Core acceptance after semantic candidate and recovery mapping. |
+| Q63-28 | Self-hosted backfill statistics independently reconstructed for all Hot and risk-based remainder; coverage no broader than evidence. |
+| Q63-29 | Material closeout learning transaction updates memory; non-material local repairs create no noise. |
+| Q63-30 | Version/bootstrap/recovery/Protocol-7 lifecycle separation and reconciliation. |
+| Q63-31 | Capability authority binding; `EVIDENCE_ONLY` cannot become mandatory through memory/frequency/qualification. |
+| Q63-32 | Self-reference-safe routine PEM update staging. |
+| Q63-33 | Balanced positive evidence after pattern admission; supporting count cannot hide neutral/contradicting/inconclusive outcomes. |
+| Q63-34 | Count-versus-rate discipline. |
+| Q63-35 | Memory temperature versus activation; Hot irrelevant remains cold, Cold material activates, retired Hot does not reactivate by count alone. |
+| Q63-36 | Concurrent branch/ID/merge reconciliation and cherry-pick deduplication. |
+| Q63-37 | Security/private-data preservation. |
+| Q63-38 | Update-class and owner-responsibility discipline; documentation cannot self-promote finding and schema change cannot hide in project PEM. |
+| Q63-39 | Cross-domain D1/D2/D3/D4/specialist applicability without universal activation or authority override. |
+| Q63-40 | Promotion-to-current-owner deduplication; current doctrine owner governs and duplicate active PEM prose is retired/narrowed. |
+| Q63-41 | Lifecycle-context integrity; development/qualification/production history remains distinguishable. |
 
-### Q63-04 — Activation/cold-route behavior
-A material memory-relevant change activates PEM; first clean unrelated local defect does not; ordinary links/package membership do not; relevant cold detail remains reachable.
+### Q63-42 — Pre-admission counterevidence search
 
-### Q63-05 — Missing/partial memory
-No PEM/partial coverage cannot prove historical absence/non-applicability; major relevant rework performs bounded intake or carries uncertainty.
+Seed several favorable historical optimization results plus a materially applicable unfavorable result that predates family admission. A candidate `SUCCESS_PATTERN` cannot become unqualified `SUPPORTED`/`PROVEN` positive guidance until the bounded covered search accounts for the unfavorable evidence or explicitly narrows the claim/regime.
 
-### Q63-06 — Evidence-binding durability
-Every seeded family resolves to durable evidence; default-branch-only and recursive-PEM-only proof rejected.
+### Q63-43 — Applicability-led HAS beyond Hot summary
 
-### Q63-07 — Stale evidence both polarities
-Stale pass cannot confirm and stale fail cannot refute; bounded invalidation preserves unaffected evidence.
+Construct a task where the materially relevant lesson is Warm/Cold and absent from the compact Hot emphasis but is matchable by owner/surface/mechanism/capability. HAS must include/disposition it. Hot-only or active-summary-only selection fails.
 
-### Q63-08 — Independence/common-mode risk
-Correlated checks do not masquerade as independent support; contradictory admissible observations remain visible.
+### Q63-44 — Aggregation-scope stratification
 
-### Q63-09 — Semantic family membership
-Textually similar but semantically different failures do not merge; equivalent manifestations with shared cause may group.
+Provide outcomes that differ materially by backend/language/scale/lifecycle regime. Pooling them into one count/temperature/claim without supported cross-regime generalization fails; correct stratification or family split passes.
 
-### Q63-10 — One cause/many symptoms
-One causal defect producing many failures/sites counts once absent independent introduction.
+### Q63-45 — Binding-health degradation
 
-### Q63-11 — Recurrence after repair
-Independent later reintroduction increments occurrence/recurrence exactly once and binds both repair cycles.
+Break or retire a material evidence/authority route for a current active lesson. Historical record remains, but the affected claim becomes review-required/unavailable and cannot remain unqualified positive guidance until its warrant is recovered/replaced.
 
-### Q63-12 — Split/merge lineage
-Split/merge preserves lineage, deduplicates evidence, recomputes totals.
+### Q63-46 — Reverse authority-binding impact
 
-### Q63-13 — Coverage-sensitive temperature
-Three confirmed occurrences Hot; two Warm; one under incomplete coverage not confidently Cold; overrides reproducible.
+Change a current owner cited by one or more `AUTHORITY_BOUND` capability lessons/current notices. Closeout must find and disposition the affected bindings without requiring a universal graph; leaving stale mandatory memory passes no gate.
 
-### Q63-14 — Importance is not authority
-Hot family cannot force architecture/pass threshold; Cold but materially mandatory constraint survives closure.
+### Q63-47 — Failure-family disconfirming evidence
 
-### Q63-15 — Positive-evidence promotion
-Unmeasured optimization remains Provisional; qualified benefit is bounded to demonstrated regime and governing constraints.
+Create confirmed failures plus safe counterexamples invalidating an overbroad causal family. Occurrence rows remain, but generalized cause/scope must narrow/split/reclassify rather than present a universal false warning.
 
-### Q63-16 — Quantitative effect preservation
-Effect sizes retain comparator/candidate/envelope/evidence through compaction.
+### Q63-48 — Current-notice expiry
 
-### Q63-17 — Complexity claim discipline
-One timing result cannot establish asymptotic change; adequate analysis + implementation correspondence required.
+Trigger a notice's review/expiry condition. It must leave unqualified active guidance and become reconciled, review-required, or retired. Absence of a background daemon is not a defect if event/activation-driven enforcement works.
 
-### Q63-18 — Capability transfer without ossification
-Replace historical mechanism with simpler qualified design while preserving actual authority-bound capability; evidence-only capability may be justified away.
+### Q63-49 — Quantitative comparator/uncertainty integrity
 
-### Q63-19 — First-local-defect economy
-One clean local bug does not force permanent family/backfill; repeated/high-impact/generalizable case triggers proportionate assessment.
+Compare candidate and baseline under intentionally confounded hardware/cache/concurrency settings. A causal `4x faster` claim must fail or be narrowed to the combined change. A matched or justified-comparable experiment with adequate repeated measurement where noise matters may pass.
 
-### Q63-20 — Invalidation/contradiction/retirement
-Material owner/candidate change updates affected memory while retaining old evidence/history.
+### Q63-50 — Positive-guidance eligibility
 
-### Q63-21 — Active-summary lossless compaction
-Compaction preserves identity, statistics, coverage, lifecycle context, applicability, limits, counterevidence, authority binding, capability links, cold routes, and governed scope.
+Give a high-temperature success pattern unresolved material contradiction or unhealthy required evidence. It may remain salient as contested history but cannot be rendered as recommended “what works” guidance.
 
-### Q63-22 — No repeated-history regression
-Normal triggering operation consumes curated summary without full-history scan/stat recomputation; non-triggering work adds no memory preparation.
+### Q63-51 — Current-state workplan representation
 
-### Q63-23 — Static-versus-live claims
-Static sensors establish structural claims only; live model/performance claims require live evidence or remain unavailable.
-
-### Q63-24 — Project-local/package separation
-Self-hosted PEM is project content absent from generic package/profile; template/doctrine present where routing requires.
-
-### Q63-25 — Exact 6.3 fallback
-No-local-compatible and incompatible-default cases resolve only exact validated bootstrap; default/latest/guessed refs rejected.
-
-### Q63-26 — Frozen resource integrity
-5.16/6.0/6.1/6.2 resource trees remain byte/behavior identical; 6.3 distinct/version-bound.
-
-### Q63-27 — Full generated/package/Core acceptance
-After candidate and recovery mapping validate package build, standalone closure, `dist` parity, snapshot parity, profile identity, consumer ingestion.
-
-### Q63-28 — Self-hosted backfill statistics
-Independently reconstruct every Hot family and risk-based Warm/Cold sample; counts and coverage no broader than evidence.
-
-### Q63-29 — Closeout learning transaction
-Qualified material recurrence/success/counterevidence updates PEM; non-material local repair creates no noise.
-
-### Q63-30 — Version/recovery/Protocol 7 lifecycle
-Verify distinct bootstrap/recovery, late mapping, regeneration, authority-index/semantic-evolution, bounded Protocol 7 inheritance.
-
-### Q63-31 — Capability authority binding
-An `EVIDENCE_ONLY` capability cannot become mandatory through PEM, frequency, or qualification count. `AUTHORITY_BOUND` requires exact accepted owner and is enforced because that owner governs.
-
-### Q63-32 — Self-reference-safe PEM update
-An occurrence whose repair commit identity is material cannot be bound by a PEM-containing commit to its unknown own SHA. Validate candidate/evidence -> descendant PEM reconciliation staging and allow same-commit update only when all material identities preexist.
-
-### Q63-33 — Balanced positive evidence
-Create a success pattern with supporting plus neutral/contradicting/inconclusive evaluated applications. Current assessment preserves all material outcomes; supporting count alone cannot hide counterevidence.
-
-### Q63-34 — Count versus rate
-Four occurrences versus two cannot be represented as twice the failure probability without denominator/sampling basis. With a valid denominator, a bounded rate claim may be assessed separately.
-
-### Q63-35 — Temperature versus activation
-A Hot irrelevant family remains cold for unrelated work; a Cold materially applicable family activates when required; retired historical Hot family does not activate solely from lifetime count.
-
-### Q63-36 — Concurrent branch/ID/merge reconciliation
-Two branches create colliding provisional IDs and shared/cherry-picked event evidence. Merge resolves provisional collision, keeps accepted IDs stable, deduplicates underlying event, recomputes counts, and rechecks applicability.
-
-### Q63-37 — Security/private-data preservation
-Attempt to place secret/private material in PEM/evidence. Expected: use safe minimal summary/protected reference; required inaccessible evidence remains unavailable/blocking rather than leaked.
-
-### Q63-38 — Update-class and responsibility discipline
-Evidence-only append under unchanged family uses focused checks; semantic split/promotion/authority-binding change triggers affected owner review; schema change cannot be smuggled through project PEM. Documentation support cannot self-promote finding.
-
-### Q63-39 — Cross-domain applicability
-A material D2/D1 or specialist project lesson can activate PEM when decision-relevant without making PEM universally hot or allowing it to override domain authority.
-
-### Q63-40 — Promotion-to-current-owner deduplication
-Promote a lesson into current accepted doctrine. Current owner becomes governing source; PEM retains only useful project evidence/lineage or retires duplicate active prose.
-
-### Q63-41 — Lifecycle-context integrity
-Development/qualification/production occurrences remain distinguishable. Historical counts may aggregate explicitly, but a development count cannot be presented as production incidence.
+Verify the active workplan contains the current cycle contract and current closure state, while detailed first/second/third review chronology resides in non-authoritative qualification/history artifacts rather than amendment replay inside the workplan.
 
 ## 17. Falsification
 
 Retain the four Protocol 6.2 Challenge falsifications unchanged in semantic purpose:
 
-1. **Loss test** — find compaction/generalization that loses edge case, authority/evidence boundary, compatibility rule, trigger, salience, counterevidence, or authority binding.
+1. **Loss test** — find compaction/generalization that loses edge case, authority/evidence boundary, compatibility rule, trigger, salience, counterevidence, aggregation/authority binding, or uncertainty.
 2. **Scope/materiality laundering test** — reject passing by shrinking scope or calling globally preserved doctrine non-material because cold locally.
 3. **Priority-inversion test** — prominent high-importance memory must not erase lower-salience mandatory active constraints.
-4. **False-compaction test** — reject link-moving, flattened routing, stale summaries, parallel registry, recursive summaries, or unnecessarily dense active context.
+4. **False-compaction test** — reject link-moving, flattened routing, stale summaries, parallel registry, recursive summaries, active-summary-only lookup, or unnecessarily dense active context.
 
-Additional 6.3 falsification:
+Retain F63-A through F63-X with their established semantics:
 
-### F63-A — Speculation laundering
-Promote `this seems faster` without suitable evidence. Reject.
+```text
+F63-A  speculation laundering
+F63-B  statistical inflation
+F63-C  family overgeneralization
+F63-D  incomplete-history false Cold
+F63-E  cargo-cult positive pattern
+F63-F  summary/evidence recursion
+F63-G  stale-green/stale-red laundering
+F63-H  common-mode fake independence
+F63-I  architectural ossification
+F63-J  history-compaction loss
+F63-K  false quantitative generalization
+F63-L  eager memory regression
+F63-M  project-memory package contamination
+F63-N  shadow capability authority
+F63-O  routine self-SHA recursion
+F63-P  positive survivor bias after admission
+F63-Q  pseudo-statistical risk
+F63-R  temperature/activation conflation
+F63-S  branch memory overwrite
+F63-T  accepted-ID reuse
+F63-U  sensitive-evidence laundering
+F63-V  documentation self-promotion
+F63-W  generic-doctrine duplication
+F63-X  lifecycle-incidence laundering
+```
 
-### F63-B — Statistical inflation
-Turn one causal defect into many occurrences via tests/files. Reject absent independent introduction.
+Add:
 
-### F63-C — Family overgeneralization
-Group superficially similar but semantically different failures. Split/review-required.
+### F63-Y — Pre-admission favorable-history cherry-pick
 
-### F63-D — Incomplete-history false Cold
-One found occurrence under partial coverage cannot prove Cold.
+Create a new success family from only favorable historical examples while known materially applicable failures remain in the declared covered range. Reject promotion until counterevidence is assessed.
 
-### F63-E — Cargo-cult positive pattern
-Apply historical technique outside assumptions or while violating correctness. Historical success does not qualify new use.
+### F63-Z — Hot-summary applicability trap
 
-### F63-F — Summary/evidence recursion
-Use PEM/derived summary as sole warrant. Follow to admissible evidence or remain unsupported.
+Hide the only relevant current lesson outside Hot summary emphasis and attempt to omit it from HAS. Reject; applicability drives selection after trigger.
 
-### F63-G — Stale-green/stale-red laundering
-Use old pass/fail after material subject/oracle/regime change. Reject until applicability restored.
+### F63-AA — Cross-regime pooling
 
-### F63-H — Common-mode fake independence
-Count correlated checks as independent. Reject.
+Pool contradictory CPU/GPU, Python/C++, small/large-scale, or development/production evidence solely to raise counts or smooth a conclusion. Reject unless one supported generalized claim truly spans the dimensions.
 
-### F63-I — Architectural ossification
-Remove old mechanism while preserving actual owner-bound capabilities with simpler qualified design. Allow.
+### F63-AB — Broken-warrant persistence
 
-### F63-J — History-compaction loss
-Split/merge/compact while losing event, counterevidence, limit, lifecycle context, or lineage. Block.
+Make an active positive lesson's only material warrant unavailable and leave it as unqualified recommended guidance. Reject.
 
-### F63-K — False quantitative generalization
-Use microbenchmark to claim global scaling/performance superiority. Narrow/reject.
+### F63-AC — Authority-binding drift
 
-### F63-L — Eager memory regression
-Make every task load PEM/history because it might help. Reject.
+Change the cited current owner while leaving an `AUTHORITY_BOUND` PEM capability unchanged. Reject closeout until reverse impact is dispositioned.
 
-### F63-M — Project-memory package contamination
-Package live SSDP PEM as generic protocol content. Reject.
+### F63-AD — Failure-family safe-counterexample suppression
 
-### F63-N — Shadow capability authority
-Mark evidence-only optimization as `must preserve` with no governing owner. Reject; either bind exact authority or keep as design prior.
+Retain a broad failure cause while hiding evidence that the purported mechanism behaves safely under materially same conditions. Reject/narrow/split.
 
-### F63-O — Routine self-SHA recursion
-Require PEM reconciliation commit to cite its own unknown SHA as evidence. Reject and stage against pre-existing evidence identity.
+### F63-AE — Expired-notice persistence
 
-### F63-P — Positive survivor bias
-Record three successful applications while omitting a materially applicable qualified failure/neutral result. Reject current assessment.
+Trigger a notice expiry/review condition but keep it active unchanged. Reject.
 
-### F63-Q — Pseudo-statistical risk
-Claim `4 occurrences = 2x risk of a 2-occurrence family` without denominator. Reject.
+### F63-AF — Benchmark confounding
 
-### F63-R — Temperature/activation conflation
-Unconditionally load all Hot families or ignore a Cold-but-material family. Reject.
+Attribute performance gain to one mechanism when baseline/candidate also differ materially in hardware, cache, precision, workload, concurrency, or measurement semantics. Reject/narrow unless combined-change claim is intended and supported.
 
-### F63-S — Branch memory overwrite
-Merge branch-local PEM over newer accepted memory without reconciliation. Reject.
+### F63-AG — Contested pattern presented as “what works”
 
-### F63-T — Accepted-ID reuse
-Recycle retired accepted `FF-###` or renumber accepted IDs for compactness. Reject.
+Leave unresolved material contradiction or unhealthy warrant but show the pattern as positive project guidance. Reject; contested history may remain salient only with correct state.
 
-### F63-U — Sensitive-evidence laundering
-Copy secret/private raw evidence into PEM because exact evidence is required. Reject; use safe approved binding.
+### F63-AH — Active-workplan amendment replay
 
-### F63-V — Documentation self-promotion
-Documentation-only reconciliation upgrades an evidence-only lesson into owner-bound invariant. Reject.
-
-### F63-W — Generic-doctrine duplication
-Self-hosted SSDP PEM repeats current generic protocol doctrine as a second active rule without project-specific added evidence value. Reject/deduplicate.
-
-### F63-X — Lifecycle-incidence laundering
-Use development-branch occurrence count as production incident rate. Reject.
+Append each review's defect chronology into the active workplan until current contract is obscured. Reject; consolidate current meaning and keep detailed review chronology in review/history evidence.
 
 ## 18. Implementation stages
 
@@ -1282,7 +1384,7 @@ Use development-branch occurrence count as production incident rate. Reject.
 1. Reconfirm exact accepted 6.2 identities.
 2. Build finite artifact census and independently reproduce T01-T39.
 3. Identify exact current owners/source/generated/profile/package/security consumers.
-4. Append T40+ hypotheses and oracles.
+4. Append T40-T92 (or collision-free successors) and their acceptance oracles.
 5. Record which 6.2 evidence remains applicable and which requires rerun after planned changes.
 
 **Gate:** no protocol-source mutation before finite no-loss map sufficiently bounds change.
@@ -1290,30 +1392,32 @@ Use development-branch occurrence count as production incident rate. Reject.
 ### Stage B — Canonical doctrine and PEM representation
 
 1. Add smallest justified `source/shared/references/project-engineering-memory.md` concern owner, or prove an existing owner sufficient.
-2. Implement canonical PEM/template schema, coverage, admission, family/evaluated-application/statistics/temperature, authority binding, evidence binding, counterevidence, branch lifecycle, security, contradiction/retirement.
+2. Implement canonical PEM/template schema, coverage, admission, family/evaluated-application/statistics/temperature, aggregation scope, authority binding, binding health, evidence binding, counterevidence, branch lifecycle, notice lifecycle, security, contradiction/retirement.
 3. Update evidence, convergence, architecture, workflow, documentation, repository, testing, security, version owners only with local consequences/routes.
 4. Keep universal kernel additions minimal.
 
-**Gate:** one semantic owner per rule; no shadow authority, duplicated generic doctrine, or hidden prerequisite.
+**Gate:** one semantic owner per rule; no shadow authority, duplicated generic doctrine, hidden prerequisite, or current/history conflation.
 
 ### Stage C — Routing/workflow/project-local integration
 
 1. Add visible conditional routes from materially relevant D1-D4/specialist/workflow entrypoints without making PEM universal hot context.
-2. Implement HAS and authority-safe capability-transfer handoff.
-3. Implement project-local discovery, missing/partial-memory, accepted/base versus branch-candidate behavior.
-4. Extend closeout so only admitted material learning changes PEM and responsibility follows owner.
+2. Implement bounded applicability matching plus HAS and authority-safe capability-transfer handoff.
+3. Implement project-local discovery, multi-scope safety, missing/partial-memory, accepted/base versus branch-candidate behavior.
+4. Implement reverse authority-binding impact closure, current-notice expiry/review handling, and event-driven binding-health checks.
+5. Extend closeout so only admitted material learning changes PEM and responsibility follows owner.
 
-**Gate:** first-local-defect, Hot-irrelevant, Cold-material, and ordinary-route cases prove correct activation.
+**Gate:** first-local-defect, Hot-irrelevant, Cold-material, non-Hot-HAS, expired-notice, and ordinary-route cases prove correct activation/selection.
 
 ### Stage D — Structural validation and self-hosted backfill
 
-1. Extend validation for canonical Markdown, evidence resolution, derived counts, counterevidence, lineage, coverage, temperature/activation separation, authority binding, branch IDs, security, and active-summary integrity.
+1. Extend validation for canonical Markdown, evidence resolution, binding health, derived counts, aggregation scope, counterevidence, lineage, coverage, temperature/activation separation, positive-guidance eligibility, authority binding, branch IDs, security, notice expiry, and active-summary integrity.
 2. Create SSDP project-local PEM from actual historical evidence.
 3. Qualify seeded families; no recollection-derived counts.
-4. Ensure no live project memory enters generic packages.
-5. Use self-reference-safe PEM reconciliation commits where current evidence identity must be bound.
+4. Search bounded covered history for unfavorable evidence before positive-family promotion and safe/disconfirming evidence before broad failure-family generalization.
+5. Ensure no live project memory enters generic packages.
+6. Use self-reference-safe PEM reconciliation commits where current evidence identity must be bound.
 
-**Gate:** independent reconstruction reproduces all Hot statistics and risk-based remainder; no known material counterevidence omitted.
+**Gate:** independent reconstruction reproduces all Hot statistics and risk-based remainder; no known material counterevidence omitted; no unsafe cross-regime pooling.
 
 ### Stage E — 6.3 bootstrap/profile/semantic candidate/generated descendants
 
@@ -1329,13 +1433,13 @@ Use development-branch occurrence count as production incident rate. Reject.
 
 1. Run complete affected regression.
 2. Re-run all 115 Protocol 6.2 scenarios against 6.3.
-3. Run Q63-01 through Q63-41 and F63-A through F63-X.
+3. Run Q63-01 through Q63-51 and F63-A through F63-AH plus the four inherited 6.2 falsifications.
 4. Compare representative 6.2/6.3 static activation traces as sensors.
 5. Obtain live evidence only for live empirical claims actually made; otherwise mark unavailable.
 6. Prepare snapshot-complete independent-review handoff.
 7. Perform independent D3/protocol Review over assembled semantic candidate, not diff/summary/preservation labels.
 
-**Gate:** no PASS with missing required check, stale/counterevidence hidden, sensitive-data defect, shadow authority, or unresolved preservation row.
+**Gate:** no PASS with missing required check, stale/counterevidence hidden, aggregation error, broken material binding, sensitive-data defect, shadow authority, expired current notice, benchmark confounding, or unresolved preservation row.
 
 ### Stage G — Recovery/current-state reconciliation/closeout
 
@@ -1358,9 +1462,10 @@ accepted 6.2 recovery/current branch ancestry
 6.3 public-source bootstrap
 6.3 semantic candidate
 preservation census/map T01-T39 + T40+
-self-hosted PEM + declared coverage/lifecycle state
+self-hosted PEM + declared coverage/lifecycle/aggregation scopes
 qualification/requalification evidence
 supporting and material counterevidence
+binding-health assessment for active high-impact entries
 static activation evidence
 available live evidence with exact claim scope
 generated/package/profile evidence
@@ -1370,7 +1475,7 @@ known red/unavailable observations
 security-sensitive evidence handling where material
 ```
 
-Reviewer independently reconstructs governing semantics; treats census/PEM/qualification as falsifiable evidence; inspects high-risk current owners; verifies assembled source/generated/package/profile state; checks candidate descendants for semantic mutation; and samples positive claims for omitted counterevidence as well as negative family counts.
+Reviewer independently reconstructs governing semantics; treats census/PEM/qualification as falsifiable evidence; inspects high-risk current owners; verifies assembled source/generated/package/profile state; checks candidate descendants for semantic mutation; samples positive claims for omitted pre/post-admission counterevidence; samples failure families for overbroad cause/scope; verifies materially applicable non-Hot entries can reach HAS; and checks that active positive guidance has healthy warrants.
 
 ## 20. Acceptance and No-Pass criteria
 
@@ -1381,13 +1486,17 @@ Protocol 6.3 passes only when:
 - every accepted 6.2 doctrine/still-valid historical capability is preserved;
 - T01-T39 independently remain preserved and all new rows close;
 - D1-D4/current project authority remains distinct from evidence/PEM;
-- PEM is compact, project-local, current, evidence-backed, coverage-aware, security-safe, and non-authoritative;
-- positive and negative learning are both represented without selective success recording or permanent ordinary-bug chronology;
-- family membership, lineage, counts, coverage, lifecycle context, temperature, authority binding, branch state, and active summary are independently reproducible;
-- stale/correlated/contradictory/neutral/inconclusive material evidence is handled correctly;
+- PEM is compact, project-local, current, evidence-backed, coverage-aware, aggregation-aware, security-safe, and non-authoritative;
+- positive and negative learning are represented without selective success recording, overbroad failure generalization, or permanent ordinary-bug chronology;
+- family membership, lineage, counts, coverage, aggregation scope, lifecycle context, temperature, authority binding, binding health, branch state, and active summary are independently reproducible;
+- stale/correlated/contradictory/neutral/inconclusive/material disconfirming evidence is handled correctly;
+- positive guidance is restricted to currently supported healthy bounded claims;
 - statistical claims are no broader than their denominator/sampling evidence;
-- quantitative/complexity claims no broader than evidence;
+- quantitative/complexity claims are no broader than comparable evidence;
 - historical mechanism replacement remains possible while actual authority-bound capabilities remain preserved;
+- HAS selection is applicability-led rather than Hot-summary-led;
+- authority changes close materially affected memory bindings;
+- notice review/expiry conditions cannot leave stale unqualified guidance;
 - bounded activation prevents ordinary/history-unrelated routes from unnecessary work;
 - all 115 inherited scenarios and all 6.3 qualification/falsification pass;
 - exact 6.3 bootstrap/recovery/profile/fallback lifecycle passes;
@@ -1406,16 +1515,21 @@ Blocking includes:
 - scope shrunk to avoid historical/preservation obligation;
 - partial memory used to prove absence/Cold status;
 - recurrence manufactured from symptoms/text similarity;
+- positive pattern promoted from cherry-picked favorable history;
+- failure family kept overbroad despite material safe/disconfirming evidence;
 - counters not reproducible from ledger;
+- rows pooled across materially incompatible aggregation scopes;
 - positive record omits material neutral/contradicting/inconclusive evidence;
-- unsupported success guidance presented as established knowledge;
-- performance gain accepted despite violated constraints;
+- unsupported/contested/unhealthy success guidance presented as established “what works” knowledge;
+- performance gain accepted despite violated constraints or confounded comparator;
 - stale pass/fail used as current confirmation/refutation;
+- material evidence/authority binding broken while current guidance remains unqualified;
 - correlated evidence represented as independent;
 - occurrence counts represented as probability/rate without denominator;
 - historical mechanism preserved merely because memory mentions it;
-- authority-bound capability silently lost;
+- authority-bound capability silently lost or owner change leaves stale binding;
 - temperature used as activation command or verdict;
+- active-summary/Hot-only selection omits a materially applicable current lesson;
 - lower-salience mandatory active constraint hidden;
 - first local defect forced into permanent memory without rationale;
 - branch-candidate memory mistaken for accepted project memory;
@@ -1424,6 +1538,7 @@ Blocking includes:
 - sensitive evidence leaked into repository memory;
 - generic current doctrine duplicated into PEM as competing rule;
 - development occurrence count presented as production incidence;
+- expired/review-due current notice remains unqualified active guidance;
 - eager history/PEM activation on ordinary routes;
 - live claims inferred only from static sensors;
 - live project PEM packaged as generic protocol content;
@@ -1448,25 +1563,28 @@ If implementation/independent Review finds a genuine blocker:
 
 Raise Serious Challenge only when accepted governing authority may be defective; ordinary implementation misses remain ordinary blockers.
 
-## 22. Workplan closure review
+## 22. Current design closure state
 
-**WORKPLAN CLOSURE REVIEW: PASS AFTER SECOND-REVIEW REPAIR.**
+The current cycle contract incorporates all accepted workplan repairs from the completed review rounds without embedding their chronological defect narratives here. Detailed review history remains in non-authoritative qualification records.
 
-The current workplan incorporates the first review repairs and this second independent 6.2-style review without requiring an amendment chain for current meaning.
+Current design closure requires and now explicitly represents:
 
-Second-pass repairs close remaining material gaps:
-
-- capability lessons no longer become shadow architecture authority; each carries explicit authority binding;
-- routine PEM updates inherit the Protocol 6.2 self-reference-safe staging lesson;
-- positive patterns preserve materially applicable neutral/contradicting/inconclusive evidence rather than success-only survivor bias;
-- occurrence/application counts are explicitly descriptive and cannot masquerade as probability/rate without denominator;
-- memory temperature is distinct from Protocol 6.2 hot/cold activation and from current applicability;
-- branch-candidate memory, accepted ID stability, merge collision/deduplication, and cherry-pick identity are defined;
-- durable PEM/evidence obey security/trust/private-data constraints;
-- learning-update responsibility follows the real semantic owner and update classes keep review proportional;
-- D1/D2/D3/D4/specialist project lessons can activate conditionally without universal loading;
-- self-hosted PEM cannot duplicate generic current protocol doctrine as a second authority;
-- occurrence/application lifecycle context prevents development evidence from being mislabeled as production incidence.
+- accepted Protocol 6.2 semantics and T01-T39 as the no-loss parent;
+- evidence/history/PEM as non-authoritative warrants and representations;
+- one canonical project-local PEM with bounded cross-domain activation and progressive disclosure;
+- semantic-family discipline, first-local-defect economy, stable IDs, branch reconciliation, and lossless split/merge lineage;
+- evidence-ledger-derived statistics with declared coverage, aggregation scope, lifecycle context, and honest denominator limits;
+- balanced pre- and post-admission positive evidence plus failure-family disconfirming evidence;
+- authority-safe capability lessons and reverse impact closure for authority-bound entries;
+- self-reference-safe evidence/PEM update staging;
+- security-safe evidence persistence;
+- material evidence/authority binding-health and notice-expiry handling;
+- applicability-led HAS selection independent of memory temperature or active-summary presence;
+- matched/comparable quantitative evidence and uncertainty discipline;
+- current-owner deduplication when lessons become accepted doctrine;
+- exact 6.3 bootstrap/profile/semantic-candidate/recovery/generated/package lifecycle;
+- affected Protocol 7 inheritance reconciliation only after 6.3 acceptance;
+- independent assembled-candidate Review and all inherited/new qualification/falsification gates.
 
 No Serious Challenge to accepted Protocol 6.2 authority is identified. Implementation remains authorized on the dedicated 6.3 branch subject to Stages A-G. Protocol 6.3 itself remains proposed until qualification, independent Review, immutable bootstrap/recovery, generated/profile/package reconciliation, lifecycle closeout, and separately authorized cutover pass.
 
@@ -1477,19 +1595,21 @@ lossless accepted Protocol 6.2 semantics
 + exact historical evidence cold and recoverable
 + one compact current project-engineering memory
 + evidence-backed negative and positive learning
-+ material counterevidence visible
-+ statistics with declared coverage and honest denominators
++ material supporting and counterevidence visible
++ statistics with declared coverage, aggregation scope, lifecycle context, and honest denominators
 + project-aware engineering instincts without shadow authority
 + learned capabilities distinguished from accepted invariants
 + simpler/new mechanisms remain admissible
 + branch-safe, self-reference-safe memory updates
-+ bounded decision-driven activation independent of temperature
++ applicability-led bounded activation independent of temperature
 + no routine history replay
 + security-safe evidence persistence
++ stale/broken warrants and expired notices cannot masquerade as current knowledge
++ quantitative claims tied to comparable evidence and uncertainty
 + qualification proportional to the claim
 + fresh-context agents inherit project experience instead of rediscovering it
 ```
 
 Central invariant:
 
-> The project must be able to learn even when the individual agent does not persist, and every claimed lesson must remain traceable to admissible evidence and current authority boundaries rather than memory, repetition, selective success reporting, or historical mechanism worship.
+> The project must be able to learn even when the individual agent does not persist, and every claimed lesson must remain traceable to admissible evidence, bounded applicability, and current authority boundaries rather than memory, repetition, selective success reporting, misleading aggregation, stale warrants, or historical mechanism worship.
