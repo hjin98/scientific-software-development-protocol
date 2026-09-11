@@ -64,6 +64,19 @@ class Protocol62RepresentationTests(unittest.TestCase):
         for leaf in ("tool-serena.md", "tool-semgrep.md", "tool-hypothesis.md", "tool-codeql.md"):
             self.assertIn(leaf, tool_router)
 
+    def test_documentation_specialist_cold_domain_routes_are_resolvable_and_packaged(self):
+        text = (SPECIALISTS / "software-documentation" / "SKILL.md").read_text()
+        packaged = ROOT / "dist" / "skills" / "software-documentation" / "references"
+        for leaf in (
+            "security-and-trust-boundaries.md",
+            "performance-and-parallelism.md",
+            "storage-and-io.md",
+            "release-and-distribution.md",
+        ):
+            with self.subTest(leaf=leaf):
+                self.assertIn(f"references/{leaf}", text)
+                self.assertTrue((packaged / leaf).is_file())
+
     def test_navigation_does_not_define_activation_by_package_presence(self):
         for path in (
             ROOT / "README.md",
