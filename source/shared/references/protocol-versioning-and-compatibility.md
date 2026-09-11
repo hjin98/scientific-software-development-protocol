@@ -41,13 +41,14 @@ repository -> https://github.com/hjin98/scientific-software-development-protocol
 6.1.0 public-source bootstrap -> 47e9155632c44493644b0b02fa1fa625703cf480
 ```
 
-The first Protocol 6.2 pre-acceptance bootstrap attempt was later invalidated by a required routing repair:
+The first Protocol 6.2 pre-acceptance bootstrap attempt was later invalidated by a required routing repair, and the repaired replacement bootstrap was validated before publication:
 
 ```text
 6.2.0 invalidated bootstrap attempt -> 1181c2031710c5d343194d87d08543290fded0ab
+6.2.0 public-source bootstrap -> 5a062ebc472755607b9dc66d33a5ebbc4b7429aa
 ```
 
-That SHA remains historical implementation evidence only. It **must not** be used as current Protocol 6.2 public fallback because it predates the repaired explicit `software-documentation` cold concern routes.
+The invalidated SHA remains historical implementation evidence only and **must not** be used as current Protocol 6.2 public fallback. The replacement SHA is the immutable self-reference-safe source snapshot whose source regression, canonical package build, and independent standalone package/link validation passed before this descendant published it.
 
 The repository default branch is never a protocol-version oracle and a semantic version string is not assumed to be a Git ref.
 
@@ -66,17 +67,11 @@ Schema v2 remains unless an actual machine profile contract changes. Core select
 
 ## Protocol 6.2 public-source and recovery staging
 
-Git commits cannot self-name. A valid Protocol 6.2 bootstrap source snapshot therefore carries no automatic current-6.2 mapping to itself. The lifecycle is deliberately staged:
+The replacement public-source bootstrap is `5a062ebc472755607b9dc66d33a5ebbc4b7429aa`. When `AUTO_LOCAL_FIRST` finds no governing-version-compatible installed source, current Protocol 6.2 may fall back to the canonical repository at **that exact immutable ref**. Never use the invalidated attempt, `main`, latest, or a guessed semantic-version ref. The bootstrap source itself intentionally does not self-name; its later descendant mapping is the authority for the exact ref.
 
-1. **candidate bootstrap source snapshot** — an internally coherent source/routing/package source set that is usable when reached through an explicit immutable ref, but does not claim its own unknown SHA;
-2. **public-source publication mapping** — only a later current-source commit may publish `6.2.0 public-source bootstrap -> <exact validated bootstrap SHA>`;
-3. **recovery snapshot** — a still later accepted rollback commit containing the qualified semantic candidate and required decision evidence through ancestry, selected only after independent Review passes.
+After candidate qualification and independent Review, choose a separate immutable recovery commit containing the accepted semantic candidate and required decision evidence through ancestry. Only a later mapping commit may publish `6.2.0 -> <recovery SHA>`; the public-source bootstrap is not acceptance/recovery identity.
 
-Until step 2 is committed, **automatic current-6.2 public fallback is unavailable**. If `AUTO_LOCAL_FIRST` finds no governing-version-compatible installed source, report truthful non-closure instead of using the invalidated attempt, `main`, latest, or a guessed semantic-version ref. If this source snapshot was already reached through an explicit immutable ref or through a later exact mapping, continue using that already-resolved source and do not recursively resolve through repository-default bytes.
-
-After a replacement bootstrap is validated, its exact immutable SHA is published only in a descendant mapping commit. After candidate qualification and independent Review, choose an immutable recovery commit; only a later mapping commit publishes `6.2.0 -> <recovery SHA>`.
-
-Until all 6.2 acceptance stages complete, Protocol 6.1 remains accepted-current/rollback authority and public fallback for accepted 6.1 work.
+Until all 6.2 acceptance stages complete, Protocol 6.1 remains accepted-current/rollback authority.
 
 ## Candidate identity and compatibility
 

@@ -32,13 +32,16 @@ Accepted immutable mappings:
 6.0.0 recovery  -> 21d5188f5bd9a0270d7a2ebf93d41a6b7842ccd2
 6.1.0 public bootstrap -> 47e9155632c44493644b0b02fa1fa625703cf480
 6.1.0 recovery -> 802e75af261efb4f70d71284d860613a2197b639
+6.2.0 public bootstrap -> 5a062ebc472755607b9dc66d33a5ebbc4b7429aa
 ```
 
 Canonical repository: `https://github.com/hjin98/scientific-software-development-protocol`.
 
 The first Protocol 6.2 pre-acceptance bootstrap attempt, `1181c2031710c5d343194d87d08543290fded0ab`, is invalidated because it predates a required explicit `software-documentation` cold-route repair. It remains historical evidence only and must not be used as current 6.2 public fallback.
 
-A replacement 6.2 bootstrap source snapshot intentionally cannot self-name. Until a later current-source mapping publishes its exact immutable validated SHA, **automatic current-6.2 public fallback is unavailable**: if no governing-version-compatible installed skill/exposed root is readable, report truthful non-closure rather than use the invalidated attempt, repository default branch, latest, or a guessed `6.2.0` ref. If the replacement snapshot has already been reached through an explicit immutable ref or a later exact mapping, continue using that resolved source rather than resolving again.
+**Protocol 6.2 public-source bootstrap:** `5a062ebc472755607b9dc66d33a5ebbc4b7429aa` is the replacement immutable current-6.2 public fallback source. Its source regression, canonical package build, and independent standalone package/link validation passed before publication. When no governing-version-compatible installed skill/exposed root is readable, resolve the canonical repository at this exact ref. The repository default branch is never a protocol-version oracle and `6.2.0` is not assumed to be a Git ref.
+
+If neither a compatible installed source nor the compatible immutable public source can be read, report truthful non-closure rather than executing the protocol from memory.
 
 ## Version-bound profiles
 

@@ -56,7 +56,9 @@ Frozen historical mappings remain immutable:
 6.1.0  -> 802e75af261efb4f70d71284d860613a2197b639
 ```
 
-Protocol 6.1 public-source bootstrap remains `47e9155632c44493644b0b02fa1fa625703cf480`. The first 6.2 bootstrap attempt, `1181c2031710c5d343194d87d08543290fded0ab`, is invalidated pre-acceptance because it predates a required explicit cold-route repair and must not be used as current 6.2 fallback. A replacement 6.2 bootstrap source snapshot does not self-name; until a later current-source commit publishes its exact validated SHA, **automatic current-6.2 public fallback is unavailable** and no compatible local source means truthful non-closure. Repository default branch is never a protocol-version oracle.
+Protocol 6.1 public-source bootstrap remains `47e9155632c44493644b0b02fa1fa625703cf480`. The first 6.2 bootstrap attempt, `1181c2031710c5d343194d87d08543290fded0ab`, is invalidated pre-acceptance because it predates a required explicit cold-route repair and must not be used as current 6.2 fallback.
+
+Protocol 6.2 replacement public-source bootstrap is **`5a062ebc472755607b9dc66d33a5ebbc4b7429aa`**. That immutable self-reference-safe source snapshot passed source regression, canonical package build, and independent standalone package/link validation before its SHA was published by a descendant. Current 6.2 public fallback, when no compatible installed source is readable, resolves only to that exact ref. Repository default branch is never a protocol-version oracle.
 
 ## Canonical source and acceptance
 
