@@ -1,6 +1,6 @@
 # Scientific Software Development Protocol
 
-Current source candidate: **Protocol 6.2**. Accepted rollback/current release remains Protocol 6.1 until Protocol 6.2 qualification, independent Review, recovery mapping, generated-artifact reconciliation, and lifecycle closeout complete.
+Current accepted document-controlled release: **Protocol 6.2**. Protocol 6.1 remains the immutable historical rollback for explicitly version-bound 6.1 work; Protocol 7 remains a proposed deterministic-control-plane successor and is not cut over.
 
 ## Core model
 
@@ -54,11 +54,12 @@ Frozen historical mappings remain immutable:
 5.16.0 -> e151daaf5c8eebb351a85cfed86170fda80fb5e3
 6.0.0  -> 21d5188f5bd9a0270d7a2ebf93d41a6b7842ccd2
 6.1.0  -> 802e75af261efb4f70d71284d860613a2197b639
+6.2.0  -> b59adc77efe6951912cfd705cc43830c58ca27d0
 ```
 
 Protocol 6.1 public-source bootstrap remains `47e9155632c44493644b0b02fa1fa625703cf480`. The first 6.2 bootstrap attempt, `1181c2031710c5d343194d87d08543290fded0ab`, is invalidated pre-acceptance because it predates a required explicit cold-route repair and must not be used as current 6.2 fallback.
 
-Protocol 6.2 replacement public-source bootstrap is **`5a062ebc472755607b9dc66d33a5ebbc4b7429aa`**. That immutable self-reference-safe source snapshot passed source regression, canonical package build, and independent standalone package/link validation before its SHA was published by a descendant. Current 6.2 public fallback, when no compatible installed source is readable, resolves only to that exact ref. Repository default branch is never a protocol-version oracle.
+Protocol 6.2 replacement public-source bootstrap is **`5a062ebc472755607b9dc66d33a5ebbc4b7429aa`**. That immutable self-reference-safe source snapshot passed source regression, canonical package build, and independent standalone package/link validation before its SHA was published by a descendant. Accepted Protocol 6.2 recovery is **`b59adc77efe6951912cfd705cc43830c58ca27d0`**; bootstrap and recovery identities are intentionally distinct. Current 6.2 public fallback, when no compatible installed source is readable, resolves only to the bootstrap exact ref. Repository default branch is never a protocol-version oracle.
 
 ## Canonical source and acceptance
 

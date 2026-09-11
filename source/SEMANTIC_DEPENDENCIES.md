@@ -52,11 +52,11 @@ material specialized engineering relation -> tool-assisted-engineering.md -> app
 ## Version/profile relationships
 
 ```text
-ssdp-protocol-6.1 CONSTRAINED_BY -> immutable accepted Protocol 6.1 semantics
-ssdp-protocol-6.2 CONSTRAINED_BY -> Protocol 6.2 candidate/current source
+ssdp-protocol-6.1 CONSTRAINED_BY -> immutable historical Protocol 6.1 rollback semantics
+ssdp-protocol-6.2 CONSTRAINED_BY -> accepted-current Protocol 6.2 semantics
 ```
 
-Frozen 5.16/6.0/6.1 profiles remain independent compatibility resources. Protocol 6.2 is not accepted-current until its qualification/Review/recovery lifecycle closes.
+Frozen 5.16/6.0/6.1 profiles remain independent compatibility resources. Protocol 6.2 is accepted-current after qualification, independent Review, recovery mapping, generated-artifact reconciliation, Protocol 7 handoff reconciliation, and lifecycle closeout.
 
 ## Source/generated relationships
 

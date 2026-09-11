@@ -1,6 +1,6 @@
 # Scientific Software Development Protocol 6.2
 
-`source/` is the canonical Protocol 6.2 source. Generated distributions and orchestrator snapshots are derivatives.
+`source/` is the canonical accepted-current Protocol 6.2 source. Generated distributions and orchestrator snapshots are derivatives; Protocol 6.1 remains immutable historical rollback authority for version-bound 6.1 work.
 
 ## Governing model
 

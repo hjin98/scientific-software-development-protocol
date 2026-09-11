@@ -61,8 +61,8 @@ Profiles remain independently version-bound:
 | --- | --- | ---: | --- |
 | `sdp-protocol-5.16` | 5.16.0 | 1 | frozen historical |
 | `ssdp-protocol-6.0` | 6.0.0 | 2 | frozen historical |
-| `ssdp-protocol-6.1` | 6.1.0 | 2 | accepted current until 6.2 closeout |
-| `ssdp-protocol-6.2` | 6.2.0 | 2 | candidate/current-source successor; accepted only after 6.2 qualification/Review/recovery closeout |
+| `ssdp-protocol-6.1` | 6.1.0 | 2 | frozen historical rollback |
+| `ssdp-protocol-6.2` | 6.2.0 | 2 | accepted current |
 
 Schema v2 remains unless an actual machine profile contract changes. Core selects by declared protocol/profile identity, not one global latest constant. Frozen profile bytes/behavior remain independently testable.
 
@@ -78,7 +78,9 @@ The accepted Protocol 6.2 recovery target is:
 
 That immutable commit contains semantic candidate `ebbc4591bdfed039512026b8acb3a6749475c1c5` through ancestry together with its qualification/requalification/generated evidence and independent Review PASS. The public-source bootstrap remains `5a062ebc472755607b9dc66d33a5ebbc4b7429aa` and is intentionally distinct from recovery identity.
 
-Git commits cannot self-name, so this recovery mapping is published only by a later descendant after the recovery target already exists. Until mapping-bearing generated descendants, targeted recovery/parity checks, semantic-evolution/Protocol-7 reconciliation, and lifecycle closeout pass, Protocol 6.1 remains accepted-current/rollback authority.
+Git commits cannot self-name, so the recovery mapping was published only by later descendant mapping commit `bc76b16fda96be09f38a1b40a2ef877e8309534d` after the recovery target already existed. Mapping-bearing generated descendants were regenerated at `ca622ea2b1c33e70668060cf0cc2fe9138776f7f`, and Stage G recovery/parity/package/Core acceptance passed in GitHub Actions run `34566291966`.
+
+Protocol 6.2 is accepted-current after qualification, independent Review, immutable recovery mapping, generated-artifact reconciliation, semantic-evolution/Protocol-7 handoff reconciliation, and lifecycle closeout. Protocol 6.1 remains immutable historical rollback authority at `802e75af261efb4f70d71284d860613a2197b639` for version-bound 6.1 work.
 
 ## Candidate identity and compatibility
 

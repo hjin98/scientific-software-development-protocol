@@ -52,8 +52,8 @@ If neither a compatible installed source nor the compatible immutable public sou
 | --- | --- | ---: | --- |
 | `sdp-protocol-5.16` | 5.16.0 | 1 | frozen |
 | `ssdp-protocol-6.0` | 6.0.0 | 2 | frozen |
-| `ssdp-protocol-6.1` | 6.1.0 | 2 | accepted-current until 6.2 closeout |
-| `ssdp-protocol-6.2` | 6.2.0 | 2 | candidate successor; accepted only after 6.2 qualification/Review/recovery closeout |
+| `ssdp-protocol-6.1` | 6.1.0 | 2 | frozen historical rollback |
+| `ssdp-protocol-6.2` | 6.2.0 | 2 | accepted current |
 
 Historical profile/prompt bytes remain immutable. Workplan `protocol_version` selects compatible semantics before stage interpretation. Serious Challenge/human-pending state stops ordinary automatic closure; orchestration represents/routes state but never decides scientific truth.
 
@@ -76,4 +76,4 @@ For live routing, use normal supported entrypoints and fresh sessions; do not pr
 
 Compact routing/handoffs remain complete for governed scope. A reference can replace local repetition only when the receiving environment can resolve the version-bound owner; otherwise carry the minimum necessary semantics locally. Cold historical/specialized detail must remain discoverable through visible triggers. Generated routing graphs/matrices/traces are diagnostic evidence, not a second routing authority.
 
-Protocol 6.1 remains accepted-current/rollback until 6.2 qualification, independent candidate Review, immutable recovery mapping, generated-artifact reconciliation and lifecycle closeout all pass.
+Protocol 6.2 is accepted-current. Its public-source fallback remains the exact immutable bootstrap `5a062ebc472755607b9dc66d33a5ebbc4b7429aa`, while accepted rollback/recovery resolves to `b59adc77efe6951912cfd705cc43830c58ca27d0`. Protocol 6.1 remains an immutable historical rollback option for explicitly version-bound 6.1 work at `802e75af261efb4f70d71284d860613a2197b639`. Protocol 7 remains pre-cutover and may not displace this document-controlled baseline until its own D3/D4/qualification/cutover gates close.

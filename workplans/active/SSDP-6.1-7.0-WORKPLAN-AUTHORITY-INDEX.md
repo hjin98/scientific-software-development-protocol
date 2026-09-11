@@ -1,10 +1,10 @@
 ---
 kind: protocol-workplan-authority-index
 workplan_id: SSDP-6.1-7.0-WORKPLAN-AUTHORITY-INDEX
-protocol_version: 6.0.0
+protocol_version: 6.2.0
 status: active
 created_date: 2026-09-09
-reviewed_date: 2026-09-10
+reviewed_date: 2026-09-11
 active_serious_challenge: none
 ---
 
@@ -55,38 +55,32 @@ LIFECYCLE STATUS: COMPLETED / ARCHIVED
 
 Current closeout evidence is `qualification/ssdp6/RESULTS-GPT-5.6-SOL-2026-09-10-PROTOCOL-6.1-SECOND-REOPENED-95.md` plus `qualification/ssdp6/FINAL-REVIEW-GPT-5.6-SOL-2026-09-10-PROTOCOL-6.1-SECOND-REOPENED.md`. Earlier qualification/Review records remain historical evidence only for their evaluated candidates.
 
-## Protocol 6.2 current implementation handoff
+## Protocol 6.2 completed handoff
 
-Current governing workplan:
+Protocol 6.2 lossless-representation/progressive-disclosure implementation, qualification, independent Review, recovery, generated reconciliation, and closeout are complete. The governing workplan is preserved byte-identically at:
 
-1. `workplans/active/SSDP-6.2-LOSSLESS-REPRESENTATION-AND-PROGRESSIVE-DISCLOSURE-REFINEMENT.md`
-
-Protocol 6.2 is a backward-compatible representation/progressive-disclosure strengthening governed by accepted Protocol 6.1. It preserves every accepted 6.1 doctrine and still-valid historical capability as a hard prerequisite; it may generalize, relocate, compact, or reroute their representation but may not semantically retire them inside this cycle. The workplan also corrects current terminology by migrating `abstraction-and-realization.md` to `abstraction-and-concretization.md` while leaving frozen historical releases untouched.
+1. `workplans/archive/SSDP-6.2-LOSSLESS-REPRESENTATION-AND-PROGRESSIVE-DISCLOSURE-REFINEMENT.md`
 
 Current disposition:
 
 ```text
 SERIOUS CHALLENGE: NONE
-FINAL WORKPLAN CLOSURE REVIEW: PASS AFTER REPAIR
-WORKPLAN STATUS: ACTIVE CYCLE AUTHORITY
-IMPLEMENTATION HANDOFF: AUTHORIZED
-IMPLEMENTATION STATUS: EXECUTED / ASSEMBLED
 SEMANTIC CANDIDATE: ebbc4591bdfed039512026b8acb3a6749475c1c5
 PUBLIC BOOTSTRAP: 5a062ebc472755607b9dc66d33a5ebbc4b7429aa
 INVALIDATED BOOTSTRAP ATTEMPT: 1181c2031710c5d343194d87d08543290fded0ab
 QUALIFICATION: ORIGINAL 115/115 PASS + COLD-ROUTE REQUALIFICATION PASS + BOOTSTRAP REQUALIFICATION PASS
-GENERATED / PACKAGE / CORE ACCEPTANCE: PASS — CLEAN RUN 34556209092; POST-EVIDENCE RUN 34556568108 PASS
-INDEPENDENT REVIEW: PENDING — REQUIRED BEFORE STAGE G
-RECOVERY MAPPING: NOT PUBLISHED
-LIFECYCLE STATUS: ACTIVE — BLOCKED ON INDEPENDENT REVIEW, THEN RECOVERY / CLOSEOUT
+INDEPENDENT REVIEW: PASS — qualification/ssdp6/FINAL-REVIEW-GPT-5.6-SOL-2026-09-10-PROTOCOL-6.2.md
+RECOVERY: b59adc77efe6951912cfd705cc43830c58ca27d0
+RECOVERY MAPPING COMMIT: bc76b16fda96be09f38a1b40a2ef877e8309534d
+MAPPING-BEARING GENERATED COMMIT: ca622ea2b1c33e70668060cf0cc2fe9138776f7f
+STAGE G ACCEPTANCE: PASS — GITHUB ACTIONS RUN 34566291966
+LIFECYCLE STATUS: COMPLETED / ARCHIVED
 PARENT ACCEPTED BASELINE: Protocol 6.1 closeout cec29671b9db59d20124a6e2ce99725ed60b8f0a
-PARENT RECOVERY: 802e75af261efb4f70d71284d860613a2197b639
-TARGET: Protocol 6.2.0
+PARENT HISTORICAL ROLLBACK: 802e75af261efb4f70d71284d860613a2197b639
+CURRENT ACCEPTED DOCUMENT-CONTROLLED BASELINE: Protocol 6.2
 ```
 
-The current review packet is `qualification/ssdp6/INDEPENDENT-REVIEW-HANDOFF-PROTOCOL-6.2.md`. It binds Review to semantic candidate `ebbc4591bdfed039512026b8acb3a6749475c1c5`, replacement public bootstrap `5a062ebc472755607b9dc66d33a5ebbc4b7429aa`, the original 115-case qualification plus both bounded affected requalifications, the preservation transformation map, and refreshed static activation sensors. Author-context reviews and qualification evidence do not satisfy the required independent Review.
-
-Protocol 6.1 remains accepted-current and the rollback authority until Protocol 6.2 independent candidate Review, immutable recovery mapping, mapping-bearing generated-artifact reconciliation, semantic-evolution/lifecycle closeout, and archive transition all pass. On this branch, Protocol 6.2 completion/reconciliation precedes further Protocol 7 D4 work.
+The public-source bootstrap and accepted recovery remain intentionally distinct. Static activation sensors remain structural evidence only; no live token, latency, cache, or model-performance claim was accepted without corresponding live telemetry.
 
 ## Protocol 7.0 current design handoff
 
@@ -95,37 +89,41 @@ Protocol 7.0 design/implementation/review SHALL read and satisfy, as one compose
 1. `workplans/active/SSDP-7.0-DETERMINISTIC-CONTROL-PLANE-AND-MANDATORY-ORCHESTRATOR-MIGRATION.md`
 2. `workplans/active/SSDP-7.0-DETERMINISTIC-CONTROL-PLANE-AND-MANDATORY-ORCHESTRATOR-MIGRATION-REVISION-1-SECOND-REVIEW-CLOSURE.md`
 3. `workplans/active/SSDP-7.0-DETERMINISTIC-CONTROL-PLANE-AND-MANDATORY-ORCHESTRATOR-MIGRATION-REVISION-2-DETERMINISM-AND-RECOVERY-CLOSURE.md`
+4. `workplans/active/SSDP-7.0-DETERMINISTIC-CONTROL-PLANE-AND-MANDATORY-ORCHESTRATOR-MIGRATION-REVISION-3-PROTOCOL-6.2-INHERITANCE-RECONCILIATION.md`
 
 Precedence:
 
 - Revision 1 closes ownership, semantic/control binding, storage/transport, cutover, lifecycle-migration, graph-completeness, and compatibility gaps and corrects Scheduler/control-kernel ownership;
 - Revision 2 closes reducer-purity, ambient-state, external-effect, deterministic replay, and canonical recovery gaps;
-- every parent requirement not explicitly changed by the revisions remains binding;
-- the accepted Protocol 7 design currently inherits Protocol 6.1 semantics; after 6.2 acceptance its representation-rule inheritance/cutover references must be reconciled explicitly without silently changing Protocol 7 architecture semantics.
+- Revision 3 changes only representation/version inheritance after Protocol 6.2 acceptance: current pre-cutover document-controlled baseline and fallback/rollback become Protocol 6.2, while the parent/Revisions 1-2 D3 architecture semantics remain unchanged;
+- every parent requirement not explicitly changed by a later revision remains binding.
 
-Current review disposition:
+Current disposition:
 
 ```text
 SERIOUS CHALLENGE: NONE
 WORKPLAN DESIGN REVIEW: PASS
 IMPLEMENTATION STATUS: PROPOSED
-PROTOCOL 6.1 COMPLETION/QUALIFICATION/RECOVERY PREREQUISITE: SATISFIED
-BRANCH-LOCAL PROTOCOL 6.2 PRE-D4 PREREQUISITE: PENDING INDEPENDENT REVIEW / RECOVERY / CLOSEOUT
+PROTOCOL 6.1 HISTORICAL COMPLETION/RECOVERY: SATISFIED
+PROTOCOL 6.2 COMPLETION/QUALIFICATION/RECOVERY PREREQUISITE: SATISFIED
+PROTOCOL 6.2 REPRESENTATION-INHERITANCE RECONCILIATION: SATISFIED
+CURRENT PRE-CUTOVER FALLBACK/ROLLBACK BASELINE: Protocol 6.2 recovery b59adc77efe6951912cfd705cc43830c58ca27d0
 REMAINING PROTOCOL-7-SPECIFIC PRE-D4 REQUIREMENT:
   1. DELIBERATE D3 ORCHESTRATOR ARCHITECTURE REOPEN/SUPERSESSION
+PROTOCOL 7 D4: NOT AUTHORIZED
 ```
 
-Protocol 7 D4 remains unauthorized on this branch until both Protocol 6.2 completion/reconciliation and the existing deliberate Protocol 7 D3 Orchestrator architecture reopen/supersession requirement close.
+Protocol 7 D4 remains unauthorized until the existing deliberate D3 Orchestrator architecture reopen/supersession requirement closes. Revision 3 does not perform that reopen and no `main` cutover is implied.
 
 ## Version/cutover rule
 
 There is exactly one canonical workflow-control authority for any current run.
 
-- Protocol 6.1 remains accepted-current while 6.2 remains under independent Review and lifecycle closeout; 6.2 work is governed by this accepted 6.1 cycle handoff.
-- After qualified 6.2 acceptance/cutover, Protocol 6.2 becomes the document-controlled current baseline unless separately superseded.
+- Protocol 6.2 is the accepted-current document-controlled baseline; version-bound 6.1 work may still resolve immutable historical recovery `802e75af261efb4f70d71284d860613a2197b639`.
+- Protocol 7 remains proposed/pre-cutover. Its current fallback/rollback baseline is Protocol 6.2 recovery `b59adc77efe6951912cfd705cc43830c58ca27d0` until Protocol 7 itself completes the outstanding D3 architecture reopen and subsequent D4/Review/qualification/recovery/cutover gates.
 - Under Protocol 7 after qualified cutover, the deterministic orchestrator control plane owns machine lifecycle transitions while workplans/skills/documents remain semantic artifacts.
 - Shadow comparison is permitted only while one side remains explicitly non-authoritative.
-- Until Protocol 6.2 has an accepted immutable recovery identity and Protocol 7 is reconciled to it, the existing Protocol 7 fallback remains Protocol 6.1 recovery `802e75af261efb4f70d71284d860613a2197b639`.
+- No `main` merge/cutover is authorized by Protocol 6.2 closeout.
 
 ## Historical discipline
 
