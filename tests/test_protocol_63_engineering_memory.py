@@ -138,6 +138,7 @@ class Protocol63EngineeringMemoryTests(unittest.TestCase):
                 "id": "AS02",
                 "state": "REJECTED_OR_INVALID",
                 "conclusion": "ORACLE_INVALID",
+                "supersedes": ["AS01"],
                 "evidence": ["repo@2222222:path#invalidation"],
             }
         )
@@ -148,6 +149,60 @@ class Protocol63EngineeringMemoryTests(unittest.TestCase):
             self.assertEqual(pem.derived_counts(doc.families["SP-001"])["supporting"], 0)
             self.assertEqual(doc.families["SP-001"]["applications"][0]["observation"], original_observation)
             self.assertEqual(pem.validate_memory(doc), [])
+
+    def test_conflicting_assessments_are_not_resolved_by_latest_editor_order(self):
+        second = {
+            "id": "AS02",
+            "state": "REVIEW_REQUIRED",
+            "conclusion": "COMPETENT_ASSESSMENT_DISAGREES",
+            "evidence": ["repo@2222222:path#independent-assessment"],
+        }
+        for reverse in (False, True):
+            with self.subTest(reverse=reverse), tempfile.TemporaryDirectory() as td:
+                family = self._family(maturity="PROVISIONAL")
+                assessments = family["applications"][0]["assessments"]
+                assessments.append(copy.deepcopy(second))
+                if reverse:
+                    assessments.reverse()
+                path = Path(td) / "PROJECT-ENGINEERING-MEMORY.md"
+                path.write_text(self._root_text([family]), encoding="utf-8")
+                errors = pem.validate_memory(pem.load_memory(path), check_summary=False)
+                self.assertTrue(any("conflicting live assessments" in error for error in errors))
+
+    def test_explicit_review_required_adjudication_supersedes_prior_current_assessment(self):
+        family = self._family(maturity="PROVISIONAL")
+        family["applications"][0]["assessments"].append(
+            {
+                "id": "AS02",
+                "state": "REVIEW_REQUIRED",
+                "conclusion": "MATERIAL_DISAGREEMENT_REMAINS",
+                "supersedes": ["AS01"],
+                "evidence": ["repo@2222222:path#adjudication"],
+            }
+        )
+        with tempfile.TemporaryDirectory() as td:
+            path = self._write(Path(td), [family])
+            doc = pem.load_memory(path)
+            self.assertEqual(pem.derived_counts(doc.families["SP-001"])["supporting"], 0)
+            self.assertEqual(pem.validate_memory(doc), [])
+
+    def test_assessment_supersession_must_target_known_acyclic_identity(self):
+        for supersedes, expected in ((["MISSING"], "unknown assessment"), (["AS02"], "cannot supersede itself")):
+            with self.subTest(supersedes=supersedes), tempfile.TemporaryDirectory() as td:
+                family = self._family(maturity="PROVISIONAL")
+                family["applications"][0]["assessments"].append(
+                    {
+                        "id": "AS02",
+                        "state": "REVIEW_REQUIRED",
+                        "conclusion": "REQUIRES_REVIEW",
+                        "supersedes": supersedes,
+                        "evidence": ["repo@2222222:path#assessment"],
+                    }
+                )
+                path = Path(td) / "PROJECT-ENGINEERING-MEMORY.md"
+                path.write_text(self._root_text([family]), encoding="utf-8")
+                errors = pem.validate_memory(pem.load_memory(path), check_summary=False)
+                self.assertTrue(any(expected in error for error in errors))
 
     def test_proven_is_claim_relative_not_count_relative(self):
         family = self._family(maturity="PROVEN")

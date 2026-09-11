@@ -199,17 +199,18 @@ def load_memory(root: Path | str) -> PemDocument:
     return PemDocument(root, metadata, families, notices, sources, text)
 
 
-def _latest_assessment(row: dict[str, Any], where: str) -> dict[str, Any] | None:
+def _current_assessment(row: dict[str, Any], where: str) -> dict[str, Any] | None:
+    """Resolve current assessment from explicit supersession, never serialized row order."""
     assessments = _list(row.get("assessments", []), f"{where}:assessments")
     if not assessments:
         return None
-    ids: set[str] = set()
-    for item in assessments:
-        item = _mapping(item, f"{where}:assessment")
+
+    parsed: dict[str, dict[str, Any]] = {}
+    for raw in assessments:
+        item = _mapping(raw, f"{where}:assessment")
         aid = str(item.get("id", ""))
-        if not aid or aid in ids:
+        if not aid or aid in parsed:
             raise PemError(f"{where}: assessment IDs must be non-empty and unique")
-        ids.add(aid)
         if item.get("state") not in ASSESSMENT_STATES:
             raise PemError(f"{where}:{aid}: invalid assessment state {item.get('state')!r}")
         _required_text(item.get("conclusion"), f"{where}:{aid}:conclusion")
@@ -218,12 +219,53 @@ def _latest_assessment(row: dict[str, Any], where: str) -> dict[str, Any] | None
             raise PemError(f"{where}:{aid}: assessment requires non-empty evidence route(s)")
         for route in evidence:
             _required_text(route, f"{where}:{aid}:evidence route")
-    return _mapping(assessments[-1], f"{where}:latest-assessment")
+        parsed[aid] = item
+
+    graph: dict[str, set[str]] = {aid: set() for aid in parsed}
+    superseded: set[str] = set()
+    for aid, item in parsed.items():
+        targets = _list(item.get("supersedes", []), f"{where}:{aid}:supersedes")
+        for raw_target in targets:
+            target = _required_text(raw_target, f"{where}:{aid}:supersedes target")
+            if target == aid:
+                raise PemError(f"{where}:{aid}: assessment cannot supersede itself")
+            if target not in parsed:
+                raise PemError(f"{where}:{aid}: supersedes unknown assessment {target!r}")
+            graph[aid].add(target)
+            superseded.add(target)
+
+    visiting: set[str] = set()
+    done: set[str] = set()
+
+    def visit(aid: str) -> None:
+        if aid in done:
+            return
+        if aid in visiting:
+            raise PemError(f"{where}: assessment supersession cycle includes {aid}")
+        visiting.add(aid)
+        for target in graph[aid]:
+            visit(target)
+        visiting.remove(aid)
+        done.add(aid)
+
+    for aid in graph:
+        visit(aid)
+
+    live = [item for aid, item in parsed.items() if aid not in superseded]
+    if not live:
+        raise PemError(f"{where}: assessment supersession leaves no current assessment")
+    signatures = {(str(item.get("state")), str(item.get("conclusion"))) for item in live}
+    if len(signatures) != 1:
+        raise PemError(
+            f"{where}: conflicting live assessments require explicit adjudication/supersession; "
+            "serialized order, reviewer count, or latest-editor position cannot select current truth"
+        )
+    return live[0]
 
 
 def _admissible(row: dict[str, Any], where: str) -> bool:
-    latest = _latest_assessment(row, where)
-    return bool(latest and latest.get("state") == "ADMISSIBLE")
+    current = _current_assessment(row, where)
+    return bool(current and current.get("state") == "ADMISSIBLE")
 
 
 def derived_counts(family: dict[str, Any]) -> dict[str, int]:
@@ -249,8 +291,8 @@ def derived_counts(family: dict[str, Any]) -> dict[str, int]:
             _required_text(row.get("lifecycle_context"), f"{family_id}:{oid}:lifecycle_context")
             _validate_source_project(row, f"{family_id}:{oid}")
             surfaces.update(str(v) for v in _list(row.get("surfaces", []), f"{family_id}:{oid}:surfaces"))
-            latest = _latest_assessment(row, f"{family_id}:{oid}")
-            if latest and latest.get("state") == "ADMISSIBLE" and latest.get("conclusion") == "CONFIRMED":
+            current = _current_assessment(row, f"{family_id}:{oid}")
+            if current and current.get("state") == "ADMISSIBLE" and current.get("conclusion") == "CONFIRMED":
                 confirmed += 1
                 if row.get("recurrence_after_accepted_repair") is True:
                     if not row.get("prior_accepted_repair"):
@@ -279,8 +321,8 @@ def derived_counts(family: dict[str, Any]) -> dict[str, int]:
             outcome = row.get("outcome")
             if outcome not in APPLICATION_OUTCOMES:
                 raise PemError(f"{family_id}:{aid}: invalid outcome {outcome!r}")
-            latest = _latest_assessment(row, f"{family_id}:{aid}")
-            if latest and latest.get("state") == "ADMISSIBLE":
+            current = _current_assessment(row, f"{family_id}:{aid}")
+            if current and current.get("state") == "ADMISSIBLE":
                 counts[outcome.lower()] += 1
         counts["affected_surfaces"] = len(surfaces)
         return counts

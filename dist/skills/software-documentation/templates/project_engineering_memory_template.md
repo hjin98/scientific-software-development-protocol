@@ -118,6 +118,8 @@ applications:
           - REPLACE_WITH_IMMUTABLE_EVIDENCE_ROUTE
 ```
 
+When a later assessment replaces an earlier current interpretation, append it with explicit lineage rather than relying on list order, for example `supersedes: [AS01]`. If competent assessments remain materially conflicting, preserve both as live or append an explicit `REVIEW_REQUIRED` adjudication that supersedes the resolved prior state; do not use latest-editor position or vote count as current truth.
+
 ## Current notices
 
 Use notices only for high-impact current facts that are not yet honest generalized families.

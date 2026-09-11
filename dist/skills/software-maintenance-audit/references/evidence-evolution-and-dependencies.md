@@ -132,7 +132,7 @@ Before closure every material impact item is resolved, explicitly preserved as s
 
 ## Assessment disagreement
 
-When competent evidence assessments materially conflict, preserve the disagreement and route adjudication to the governing claim/owner or obtain discriminating evidence. Do not resolve material assessment disagreement by majority vote, latest-editor order, reviewer seniority, count, or temperature. An unresolved material disagreement keeps dependent present guidance/closure visibly qualified.
+When competent evidence assessments materially conflict, preserve the disagreement and route adjudication to the governing claim/owner or obtain discriminating evidence. Do not resolve material assessment disagreement by majority vote, latest-editor order, reviewer seniority, count, temperature, or serialized record position. When a durable representation stores multiple assessments, supersession/adjudication must be explicit enough to distinguish resolved reassessment from still-live disagreement. An unresolved material disagreement keeps dependent present guidance/closure visibly qualified.
 
 ## Semantic evolution
 
