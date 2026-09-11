@@ -234,5 +234,20 @@ class Protocol62RepresentationTests(unittest.TestCase):
                 self.assertNotIn("source/shared/references/abstraction-and-realization.md", text)
 
 
+    def test_accepted_62_recovery_and_bootstrap_remain_distinct(self):
+        recovery = "b59adc77efe6951912cfd705cc43830c58ca27d0"
+        bootstrap = "5a062ebc472755607b9dc66d33a5ebbc4b7429aa"
+        invalidated = "1181c2031710c5d343194d87d08543290fded0ab"
+        versioning = (REFERENCES / "protocol-versioning-and-compatibility.md").read_text()
+        portability = (ROOT / "PORTABILITY.md").read_text()
+        self.assertIn(f"6.2.0  -> {recovery}", versioning)
+        self.assertIn(f"6.2.0 recovery -> {recovery}", portability)
+        self.assertIn(f"6.2.0 public-source bootstrap -> {bootstrap}", versioning)
+        self.assertIn(f"6.2.0 public bootstrap -> {bootstrap}", portability)
+        self.assertNotEqual(recovery, bootstrap)
+        self.assertNotEqual(recovery, invalidated)
+        self.assertNotIn(f"6.2.0  -> {invalidated}", versioning)
+
+
 if __name__ == "__main__":
     unittest.main()

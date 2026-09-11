@@ -30,6 +30,7 @@ Previously executed evidence remains reusable only while no changed protocol obl
 5.16.0 -> e151daaf5c8eebb351a85cfed86170fda80fb5e3
 6.0.0  -> 21d5188f5bd9a0270d7a2ebf93d41a6b7842ccd2
 6.1.0  -> 802e75af261efb4f70d71284d860613a2197b639
+6.2.0  -> b59adc77efe6951912cfd705cc43830c58ca27d0
 ```
 
 Resolve historical work through immutable version-specific source/profile semantics, never `main`/latest. Frozen source/publication/profile artifacts remain historical truth and are not rewritten to current terminology.
@@ -69,9 +70,15 @@ Schema v2 remains unless an actual machine profile contract changes. Core select
 
 The replacement public-source bootstrap is `5a062ebc472755607b9dc66d33a5ebbc4b7429aa`. When `AUTO_LOCAL_FIRST` finds no governing-version-compatible installed source, current Protocol 6.2 may fall back to the canonical repository at **that exact immutable ref**. Never use the invalidated attempt, `main`, latest, or a guessed semantic-version ref. The bootstrap source itself intentionally does not self-name; its later descendant mapping is the authority for the exact ref.
 
-After candidate qualification and independent Review, choose a separate immutable recovery commit containing the accepted semantic candidate and required decision evidence through ancestry. Only a later mapping commit may publish `6.2.0 -> <recovery SHA>`; the public-source bootstrap is not acceptance/recovery identity.
+The accepted Protocol 6.2 recovery target is:
 
-Until all 6.2 acceptance stages complete, Protocol 6.1 remains accepted-current/rollback authority.
+```text
+6.2.0 -> b59adc77efe6951912cfd705cc43830c58ca27d0
+```
+
+That immutable commit contains semantic candidate `ebbc4591bdfed039512026b8acb3a6749475c1c5` through ancestry together with its qualification/requalification/generated evidence and independent Review PASS. The public-source bootstrap remains `5a062ebc472755607b9dc66d33a5ebbc4b7429aa` and is intentionally distinct from recovery identity.
+
+Git commits cannot self-name, so this recovery mapping is published only by a later descendant after the recovery target already exists. Until mapping-bearing generated descendants, targeted recovery/parity checks, semantic-evolution/Protocol-7 reconciliation, and lifecycle closeout pass, Protocol 6.1 remains accepted-current/rollback authority.
 
 ## Candidate identity and compatibility
 
