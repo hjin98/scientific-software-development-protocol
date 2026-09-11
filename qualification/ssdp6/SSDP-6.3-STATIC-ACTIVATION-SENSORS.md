@@ -2,7 +2,7 @@
 kind: ssdp63-static-activation-sensor-evidence
 protocol_version: 6.3.0
 accepted_baseline_commit: b59adc77efe6951912cfd705cc43830c58ca27d0
-semantic_candidate: aca79079f353936d3eb4e78b408a1bddb3b81216
+semantic_candidate: 8d0ad2395ccd126c133d8aad206cfc859f660124
 authority: non-normative-qualification-evidence
 status: measured
 live_telemetry: unavailable
@@ -21,16 +21,16 @@ The sensor specifically falsifies the two opposite 6.3 routing errors: eager PEM
 | Representative task | 6.2 bytes | 6.3 bytes | Delta | 6.3 U/C reads | PEM active |
 | --- | ---: | ---: | ---: | ---: | :---: |
 | Local D4 Python helper repair | 57,930 | 69,695 | +11,765 | 2/4 | NO |
-| D3 to D4 Python workplan without demonstrated-history predicate | 67,371 | 88,959 | +21,588 | 2/5 | NO |
-| Independent D4 Review without demonstrated-history predicate | 67,371 | 88,959 | +21,588 | 2/5 | NO |
+| D3 to D4 Python workplan without demonstrated-history predicate | 67,371 | 89,163 | +21,792 | 2/5 | NO |
+| Independent D4 Review without demonstrated-history predicate | 67,371 | 89,163 | +21,792 | 2/5 | NO |
 | D2 numerical-method design | 23,588 | 26,853 | +3,265 | 2/0 | NO |
 | D1 scientific formulation | 23,177 | 26,434 | +3,257 | 2/0 | NO |
 | Documentation reconciliation | 28,522 | 34,563 | +6,041 | 3/0 | NO |
-| Maintenance audit without admitted reusable-learning predicate | 94,848 | 134,892 | +40,044 | 2/9 | NO |
-| Release/package reconciliation | 60,953 | 85,157 | +24,204 | 2/5 | NO |
-| Historical recovery/migration where prior choices matter | 50,187 | 94,476 | +44,289 | 2/4 | YES |
-| Closeout without material learning update | 54,702 | 77,626 | +22,924 | 3/4 | NO |
-| Mature D3 replacement with demonstrated project history | 61,543 | 108,890 | +47,347 | 2/5 | YES |
+| Maintenance audit without admitted reusable-learning predicate | 94,848 | 135,096 | +40,248 | 2/9 | NO |
+| Release/package reconciliation | 60,953 | 85,361 | +24,408 | 2/5 | NO |
+| Historical recovery/migration where prior choices matter | 50,187 | 95,833 | +45,646 | 2/4 | YES |
+| Closeout without material learning update | 54,702 | 77,830 | +23,128 | 3/4 | NO |
+| Mature D3 replacement with demonstrated project history | 61,543 | 110,247 | +48,704 | 2/5 | YES |
 
 ## 6.3 active sets
 
@@ -41,12 +41,12 @@ The sensor specifically falsifies the two opposite 6.3 routing errors: eager PEM
 
 ### D3 to D4 Python workplan without demonstrated-history predicate
 
-- active bytes: 88,959; unconditional=2; conditional=5; repeated owner loads=0; PEM=cold
+- active bytes: 89,163; unconditional=2; conditional=5; repeated owner loads=0; PEM=cold
 - active: `source/roles/software-design/SKILL.md`, `source/shared/references/abstraction-and-concretization.md`, `source/shared/references/architecture-and-design.md`, `source/shared/references/workflow-and-workplans.md`, `source/shared/references/evidence-evolution-and-dependencies.md`, `source/shared/references/testing-and-validation.md`, `source/shared/references/language-profiles.md`, `source/shared/references/python-engineering.md`
 
 ### Independent D4 Review without demonstrated-history predicate
 
-- active bytes: 88,959; unconditional=2; conditional=5; repeated owner loads=0; PEM=cold
+- active bytes: 89,163; unconditional=2; conditional=5; repeated owner loads=0; PEM=cold
 - active: `source/roles/software-design/SKILL.md`, `source/shared/references/abstraction-and-concretization.md`, `source/shared/references/architecture-and-design.md`, `source/shared/references/workflow-and-workplans.md`, `source/shared/references/evidence-evolution-and-dependencies.md`, `source/shared/references/testing-and-validation.md`, `source/shared/references/language-profiles.md`, `source/shared/references/python-engineering.md`
 
 ### D2 numerical-method design
@@ -66,27 +66,27 @@ The sensor specifically falsifies the two opposite 6.3 routing errors: eager PEM
 
 ### Maintenance audit without admitted reusable-learning predicate
 
-- active bytes: 134,892; unconditional=2; conditional=9; repeated owner loads=0; PEM=cold
+- active bytes: 135,096; unconditional=2; conditional=9; repeated owner loads=0; PEM=cold
 - active: `source/specialists/software-maintenance-audit/SKILL.md`, `source/shared/references/abstraction-and-concretization.md`, `source/shared/references/long-horizon-code-health.md`, `source/shared/references/architecture-and-design.md`, `source/shared/references/testing-and-validation.md`, `source/shared/references/evidence-evolution-and-dependencies.md`, `source/shared/references/workflow-and-workplans.md`, `source/shared/references/git-and-version-control.md`, `source/shared/references/repository-intake.md`, `source/shared/references/convergence-and-cycle-economy.md`, `source/shared/references/documentation-and-evidence.md`, `source/shared/references/protocol-versioning-and-compatibility.md`
 
 ### Release/package reconciliation
 
-- active bytes: 85,157; unconditional=2; conditional=5; repeated owner loads=0; PEM=cold
+- active bytes: 85,361; unconditional=2; conditional=5; repeated owner loads=0; PEM=cold
 - active: `source/roles/software-implementation/SKILL.md`, `source/shared/references/abstraction-and-concretization.md`, `source/shared/references/specification-and-implementation.md`, `source/shared/references/workflow-and-workplans.md`, `source/shared/references/evidence-evolution-and-dependencies.md`, `source/shared/references/testing-and-validation.md`, `source/shared/references/release-and-distribution.md`, `source/shared/references/protocol-versioning-and-compatibility.md`
 
 ### Historical recovery/migration where prior choices matter
 
-- active bytes: 94,476; unconditional=2; conditional=4; repeated owner loads=0; PEM=active
+- active bytes: 95,833; unconditional=2; conditional=4; repeated owner loads=0; PEM=active
 - active: `source/roles/software-design/SKILL.md`, `source/shared/references/abstraction-and-concretization.md`, `source/shared/references/architecture-and-design.md`, `source/shared/references/workflow-and-workplans.md`, `source/shared/references/evidence-evolution-and-dependencies.md`, `source/shared/references/protocol-versioning-and-compatibility.md`, `source/shared/references/project-engineering-memory.md`
 
 ### Closeout without material learning update
 
-- active bytes: 77,626; unconditional=3; conditional=4; repeated owner loads=0; PEM=cold
+- active bytes: 77,830; unconditional=3; conditional=4; repeated owner loads=0; PEM=cold
 - active: `source/specialists/software-documentation/SKILL.md`, `source/shared/references/abstraction-and-concretization.md`, `source/shared/references/documentation-maintenance.md`, `source/shared/references/documentation-and-evidence.md`, `source/shared/references/workflow-and-workplans.md`, `source/shared/references/evidence-evolution-and-dependencies.md`, `source/shared/references/protocol-versioning-and-compatibility.md`, `source/shared/references/release-and-distribution.md`
 
 ### Mature D3 replacement with demonstrated project history
 
-- active bytes: 108,890; unconditional=2; conditional=5; repeated owner loads=0; PEM=active
+- active bytes: 110,247; unconditional=2; conditional=5; repeated owner loads=0; PEM=active
 - active: `source/roles/software-design/SKILL.md`, `source/shared/references/abstraction-and-concretization.md`, `source/shared/references/architecture-and-design.md`, `source/shared/references/workflow-and-workplans.md`, `source/shared/references/evidence-evolution-and-dependencies.md`, `source/shared/references/testing-and-validation.md`, `source/shared/references/convergence-and-cycle-economy.md`, `source/shared/references/project-engineering-memory.md`
 
 ## Interpretation
