@@ -1,4 +1,11 @@
+from __future__ import annotations
+
+import os
+import posixpath
+import re
 import unittest
+import urllib.error
+import urllib.request
 from pathlib import Path
 
 
@@ -8,6 +15,16 @@ REFERENCES = SOURCE / "shared" / "references"
 TEMPLATES = SOURCE / "shared" / "templates"
 ROLES = SOURCE / "roles"
 SPECIALISTS = SOURCE / "specialists"
+BOOTSTRAP_RE = re.compile(r"6\.2\.0 public-source bootstrap -> ([0-9a-f]{40})")
+LOCAL_MD_RE = re.compile(r"\[[^\]]+\]\(([^)]+\.md(?:#[^)]*)?)\)")
+INVALIDATED_BOOTSTRAP = "1181c2031710c5d343194d87d08543290fded0ab"
+PUBLIC_ROOT = "https://raw.githubusercontent.com/hjin98/scientific-software-development-protocol"
+
+
+def current_public_bootstrap() -> str | None:
+    text = (REFERENCES / "protocol-versioning-and-compatibility.md").read_text(encoding="utf-8")
+    match = BOOTSTRAP_RE.search(text)
+    return match.group(1) if match else None
 
 
 class Protocol62RepresentationTests(unittest.TestCase):
@@ -88,29 +105,119 @@ class Protocol62RepresentationTests(unittest.TestCase):
             self.assertIn("package membership", text)
             self.assertIn("activation", text)
 
-    def test_public_source_surfaces_publish_exact_protocol_62_bootstrap(self):
-        bootstrap = "1181c2031710c5d343194d87d08543290fded0ab"
-        surfaces = (
-            REFERENCES / "development-workflow-prompts.md",
-            REFERENCES / "protocol-versioning-and-compatibility.md",
-            ROOT / "PORTABILITY.md",
-            ROOT / "README.md",
-        )
-        for path in surfaces:
-            with self.subTest(path=path):
-                self.assertIn(bootstrap, path.read_text())
+    def test_protocol_62_public_fallback_state_is_coherent(self):
+        bootstrap = current_public_bootstrap()
+        versioning = (REFERENCES / "protocol-versioning-and-compatibility.md").read_text().lower()
         prompt = (REFERENCES / "development-workflow-prompts.md").read_text().lower()
         portability = (ROOT / "PORTABILITY.md").read_text().lower()
-        self.assertNotIn("automatic current-6.2 public fallback is unavailable", prompt)
-        self.assertNotIn("protocol 6.2 pre-bootstrap state", portability)
+        readme = (ROOT / "README.md").read_text().lower()
+        surfaces = (versioning, prompt, portability, readme)
 
-    def test_preservation_evidence_is_explicitly_non_authoritative(self):
+        self.assertIn(f"invalidated bootstrap attempt -> {INVALIDATED_BOOTSTRAP}", versioning)
+        self.assertNotIn(f"6.2.0 public-source bootstrap -> {INVALIDATED_BOOTSTRAP}", versioning)
+
+        if bootstrap is None:
+            for text in surfaces:
+                self.assertIn("automatic current-6.2 public fallback is unavailable", text)
+            self.assertIn("bootstrap self-reference rule", prompt)
+            self.assertNotIn("current 6.2 may fall back", prompt)
+        else:
+            self.assertNotEqual(bootstrap, INVALIDATED_BOOTSTRAP)
+            for text in surfaces:
+                self.assertIn(bootstrap, text)
+            self.assertIn(f"public_ref = {bootstrap}", prompt)
+            self.assertNotIn("automatic current-6.2 public fallback is unavailable", prompt)
+            self.assertNotIn("automatic current-6.2 public fallback is unavailable", portability)
+            self.assertIn("repository-default bytes are never a substitute", prompt)
+
+    def test_published_protocol_62_bootstrap_remote_snapshot_is_real_and_route_complete(self):
+        bootstrap = current_public_bootstrap()
+        if bootstrap is None:
+            self.skipTest("replacement Protocol 6.2 public bootstrap has not been published yet")
+        if not (os.environ.get("CI") or os.environ.get("SSDP_VALIDATE_PUBLIC_FALLBACK") == "1"):
+            self.skipTest("remote public-fallback realization runs in CI or with SSDP_VALIDATE_PUBLIC_FALLBACK=1")
+
+        cache: dict[str, str] = {}
+
+        def fetch(path: str) -> str:
+            if path in cache:
+                return cache[path]
+            url = f"{PUBLIC_ROOT}/{bootstrap}/{path}"
+            try:
+                with urllib.request.urlopen(url, timeout=15) as response:
+                    text = response.read().decode("utf-8")
+            except (urllib.error.URLError, UnicodeDecodeError) as exc:
+                self.fail(f"published bootstrap cannot resolve {path} at exact ref {bootstrap}: {exc}")
+            cache[path] = text
+            return text
+
+        self.assertEqual(fetch("source/PROTOCOL_VERSION").strip(), "6.2.0")
+
+        entrypoints = (
+            "source/roles/scientific-formulation/SKILL.md",
+            "source/roles/numerical-algorithm-design/SKILL.md",
+            "source/roles/software-design/SKILL.md",
+            "source/roles/software-implementation/SKILL.md",
+            "source/specialists/software-documentation/SKILL.md",
+            "source/specialists/software-maintenance-audit/SKILL.md",
+            "source/specialists/repository-hygiene/SKILL.md",
+        )
+        required_doc_routes = {
+            "references/security-and-trust-boundaries.md",
+            "references/performance-and-parallelism.md",
+            "references/storage-and-io.md",
+            "references/release-and-distribution.md",
+        }
+        queue: list[str] = []
+        for entrypoint in entrypoints:
+            text = fetch(entrypoint)
+            self.assertIn("references/abstraction-and-concretization.md", text, entrypoint)
+            direct = {target.split("#", 1)[0] for target in LOCAL_MD_RE.findall(text)}
+            if entrypoint.endswith("software-documentation/SKILL.md"):
+                self.assertTrue(required_doc_routes.issubset(direct), direct)
+            for target in direct:
+                if target.startswith("references/"):
+                    queue.append("source/shared/references/" + target.removeprefix("references/"))
+                elif target.startswith("templates/"):
+                    queue.append("source/shared/templates/" + target.removeprefix("templates/"))
+                else:
+                    self.fail(f"unsupported local entrypoint route at bootstrap: {entrypoint}: {target}")
+
+        seen: set[str] = set()
+        while queue:
+            path = queue.pop(0)
+            if path in seen:
+                continue
+            seen.add(path)
+            text = fetch(path)
+            base = posixpath.dirname(path)
+            for raw in LOCAL_MD_RE.findall(text):
+                target = raw.split("#", 1)[0]
+                if "://" in target or target.startswith("#"):
+                    continue
+                resolved = posixpath.normpath(posixpath.join(base, target))
+                if not resolved.startswith("source/shared/"):
+                    self.fail(f"bootstrap local Markdown route escapes shared roots: {path} -> {target}")
+                queue.append(resolved)
+
+        bootstrap_prompt = fetch("source/shared/references/development-workflow-prompts.md").lower()
+        self.assertIn("bootstrap self-reference rule", bootstrap_prompt)
+        self.assertIn("repository-default bytes are never a substitute", bootstrap_prompt)
+
+    def test_preservation_evidence_closes_artifacts_and_transformations(self):
         census = ROOT / "qualification" / "ssdp6" / "SSDP-6.2-PRESERVATION-CENSUS.md"
         text = census.read_text()
         self.assertIn("authority: non-normative-evidence", text)
+        self.assertIn("## Artifact-level finite census", text)
+        self.assertIn("## Transformation-level closure map", text)
         self.assertIn("all 95", text.lower())
         self.assertIn("Protocol 5.0", text)
         self.assertIn("6.1", text)
+        self.assertNotIn("| BLOCKING |", text)
+        for name in sorted(path.name for path in REFERENCES.glob("*.md")):
+            self.assertIn(f"`{name}`", text, name)
+        for name in sorted(path.name for path in TEMPLATES.glob("*.md")):
+            self.assertIn(f"`{name}`", text, name)
 
     def test_current_navigation_uses_new_kernel_path(self):
         current_files = [

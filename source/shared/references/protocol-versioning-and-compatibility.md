@@ -41,12 +41,13 @@ repository -> https://github.com/hjin98/scientific-software-development-protocol
 6.1.0 public-source bootstrap -> 47e9155632c44493644b0b02fa1fa625703cf480
 ```
 
-Protocol 6.2 now has its own immutable public-source bootstrap, distinct from its future accepted recovery snapshot:
+The first Protocol 6.2 pre-acceptance bootstrap attempt was later invalidated by a required routing repair:
 
 ```text
-repository -> https://github.com/hjin98/scientific-software-development-protocol
-6.2.0 public-source bootstrap -> 1181c2031710c5d343194d87d08543290fded0ab
+6.2.0 invalidated bootstrap attempt -> 1181c2031710c5d343194d87d08543290fded0ab
 ```
+
+That SHA remains historical implementation evidence only. It **must not** be used as current Protocol 6.2 public fallback because it predates the repaired explicit `software-documentation` cold concern routes.
 
 The repository default branch is never a protocol-version oracle and a semantic version string is not assumed to be a Git ref.
 
@@ -65,14 +66,17 @@ Schema v2 remains unless an actual machine profile contract changes. Core select
 
 ## Protocol 6.2 public-source and recovery staging
 
-Git commits cannot self-name. Protocol 6.2 therefore uses two immutable identities:
+Git commits cannot self-name. A valid Protocol 6.2 bootstrap source snapshot therefore carries no automatic current-6.2 mapping to itself. The lifecycle is deliberately staged:
 
-1. **public-source bootstrap** — `1181c2031710c5d343194d87d08543290fded0ab`, the complete usable 6.2 source/routing/package source set after source regression, canonical package build, and independent standalone package validation passed;
-2. **recovery snapshot** — a later accepted rollback commit containing the qualified semantic candidate and required decision evidence through ancestry.
+1. **candidate bootstrap source snapshot** — an internally coherent source/routing/package source set that is usable when reached through an explicit immutable ref, but does not claim its own unknown SHA;
+2. **public-source publication mapping** — only a later current-source commit may publish `6.2.0 public-source bootstrap -> <exact validated bootstrap SHA>`;
+3. **recovery snapshot** — a still later accepted rollback commit containing the qualified semantic candidate and required decision evidence through ancestry, selected only after independent Review passes.
 
-Current 6.2 public fallback resolves to the bootstrap commit when no governing-version-compatible installed source is readable. The bootstrap remains immutable even as later semantic-candidate/profile/generated/qualification commits advance. After candidate qualification and independent Review, choose an immutable recovery commit; only a later mapping commit publishes `6.2.0 -> <recovery SHA>`.
+Until step 2 is committed, **automatic current-6.2 public fallback is unavailable**. If `AUTO_LOCAL_FIRST` finds no governing-version-compatible installed source, report truthful non-closure instead of using the invalidated attempt, `main`, latest, or a guessed semantic-version ref. If this source snapshot was already reached through an explicit immutable ref or through a later exact mapping, continue using that already-resolved source and do not recursively resolve through repository-default bytes.
 
-Until those 6.2 acceptance stages complete, Protocol 6.1 remains accepted-current/rollback authority and public fallback for accepted 6.1 work. Do not substitute the repository default branch for any immutable 6.2 source or recovery mapping.
+After a replacement bootstrap is validated, its exact immutable SHA is published only in a descendant mapping commit. After candidate qualification and independent Review, choose an immutable recovery commit; only a later mapping commit publishes `6.2.0 -> <recovery SHA>`.
+
+Until all 6.2 acceptance stages complete, Protocol 6.1 remains accepted-current/rollback authority and public fallback for accepted 6.1 work.
 
 ## Candidate identity and compatibility
 
