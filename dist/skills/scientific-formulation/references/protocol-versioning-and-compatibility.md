@@ -72,10 +72,10 @@ Profiles remain independently version-bound:
 | `sdp-protocol-5.16` | 5.16.0 | 1 | frozen historical |
 | `ssdp-protocol-6.0` | 6.0.0 | 2 | frozen historical |
 | `ssdp-protocol-6.1` | 6.1.0 | 2 | frozen historical rollback |
-| `ssdp-protocol-6.2` | 6.2.0 | 2 | accepted current while 6.3 candidate is being qualified |
+| `ssdp-protocol-6.2` | 6.2.0 | 2 | accepted current |
 | `ssdp-protocol-6.3` | 6.3.0 | 2 unless profile contract qualification proves a schema change is necessary | candidate/new only after 6.3 profile generation |
 
-Schema v2 remains unless an actual machine profile contract changes. Core selects by declared protocol/profile identity, not one global latest constant. Frozen profile bytes/behavior remain independently testable. A generic profile/package may include 6.3 PEM doctrine/template but never a live project's `PROJECT-ENGINEERING-MEMORY.md` or derived local project summary.
+During 6.3 qualification, the 6.2 profile bytes are frozen as the immutable predecessor resource while 6.2 remains accepted-current until 6.3 cutover. Schema v2 remains unless an actual machine profile contract changes. Core selects by declared protocol/profile identity, not one global latest constant. Frozen profile bytes/behavior remain independently testable. A generic profile/package may include 6.3 PEM doctrine/template but never a live project's `PROJECT-ENGINEERING-MEMORY.md` or derived local project summary.
 
 ## Protocol 6.2 public-source and recovery staging
 

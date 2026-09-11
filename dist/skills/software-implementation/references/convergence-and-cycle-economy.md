@@ -100,7 +100,7 @@ Concrete new sites, call stacks, examples, failing inputs, or sibling manifestat
 
 **Ordinary implementation attempts and review cycles do not require a numbered authority revision.** Existing-obligation misses, failed/unexecuted tests, additional violating sites, implementation patches, simpler equivalent concretization, generated-derivative regeneration, or clearer non-normative evidence do not by themselves mint task semantics.
 
-**No recurrence count, review count, cycle budget, memory temperature, or convergence target can force acceptance**; escalation changes the engineering method, **not the pass threshold**.
+**No recurrence count, review count, cycle budget, or convergence target can force acceptance**; memory temperature cannot force acceptance either; escalation changes the engineering method, **not the pass threshold**.
 
 ## Development-cycle economy
 
