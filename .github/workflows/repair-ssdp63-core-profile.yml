@@ -1,0 +1,85 @@
+name: Temporary Protocol 6.3 Core profile repair
+on:
+  push:
+    branches: [ssdp-6.3-engineering-memory]
+    paths: [.github/workflows/repair-ssdp63-core-profile.yml]
+permissions:
+  contents: write
+jobs:
+  repair-core-profile:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ssdp-6.3-engineering-memory
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Repair current and frozen profile assertions
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p = Path('orchestrator/tests/test_ssdp6_profiles.py')
+          text = p.read_text(encoding='utf-8')
+          text = text.replace('self.assertEqual(P.DEFAULT_PROFILE_ID, "ssdp-protocol-6.2")', 'self.assertEqual(P.DEFAULT_PROFILE_ID, "ssdp-protocol-6.3")', 1)
+          text = text.replace('self.assertEqual(self.descriptor.profile.protocol_version, "6.2.0")', 'self.assertEqual(self.descriptor.profile.protocol_version, "6.3.0")', 1)
+          old = '''        self.assertEqual(P.profile_id_for_version("6.2.0"), P.DEFAULT_PROFILE_ID)
+        self.assertEqual(P.profile_id_for_version("6.2"), P.DEFAULT_PROFILE_ID)'''
+          new = '''        self.assertEqual(P.profile_id_for_version("6.2.0"), P.SSDP62_PROFILE_ID)
+        self.assertEqual(P.profile_id_for_version("6.2"), P.SSDP62_PROFILE_ID)
+        self.assertEqual(P.profile_id_for_version("6.3.0"), P.DEFAULT_PROFILE_ID)
+        self.assertEqual(P.profile_id_for_version("6.3"), P.DEFAULT_PROFILE_ID)'''
+          if old not in text:
+              raise SystemExit('missing profile mapping block')
+          text = text.replace(old, new, 1)
+          text = text.replace('governing_protocol_version="6.2.0"', 'governing_protocol_version="6.3.0"')
+          text = text.replace('workplan_id="WP6-AUTHORITY"', 'workplan_id="WP63-AUTHORITY"', 1)
+          text = text.replace('protocol_version="6.2.0"', 'protocol_version="6.3.0"', 1)
+          text = text.replace('path="workplans/active/WP6-AUTHORITY.md"', 'path="workplans/active/WP63-AUTHORITY.md"', 1)
+          text = text.replace('self.assertEqual(active["CHANGE_PLAN"], "workplans/active/WP6-AUTHORITY.md")', 'self.assertEqual(active["CHANGE_PLAN"], "workplans/active/WP63-AUTHORITY.md")', 1)
+          marker = '\n\nclass FrozenProtocol61ProfileTests(unittest.TestCase):\n'
+          if marker not in text:
+              raise SystemExit('missing frozen 6.1 insertion marker')
+          addition = '''
+
+class FrozenProtocol62ProfileTests(unittest.TestCase):
+    def test_protocol62_profile_stays_schema_v2_and_version_bound(self) -> None:
+        frozen = PS.resolve_packaged(P.SSDP62_PROFILE_ID).snapshot.descriptor
+        self.assertEqual(frozen.profile.profile_id, "ssdp-protocol-6.2")
+        self.assertEqual(frozen.profile.protocol_version, "6.2.0")
+        self.assertEqual(frozen.profile.profile_schema_version, 2)
+        self.assertEqual(frozen.schema_version, 2)
+        self.assertEqual([s.stage.stage_key for s in frozen.stages], [key for _, key, _ in SSDP6_STAGES])
+
+    def test_protocol62_packaged_bytes_are_frozen(self) -> None:
+        import hashlib
+        root = REPO_ROOT / "orchestrator/src/sdp_orchestrator/core/resources/protocol/ssdp-protocol-6.2"
+        expected = {"prompts.md": "159c58cbac0a8cf66311ddf7e11ad8eb03644e8c", "profile.json": "6f21ad0592da343db951ffd56d25aa74a881bd8c"}
+        for name, sha in expected.items():
+            data = (root / name).read_bytes()
+            actual = hashlib.sha1(f"blob {len(data)}\\0".encode("ascii") + data).hexdigest()  # noqa: S324
+            self.assertEqual(actual, sha, name)
+
+    def test_protocol62_profile_is_still_derived_from_protocol62_prompts(self) -> None:
+        root = REPO_ROOT / "orchestrator/src/sdp_orchestrator/core/resources/protocol/ssdp-protocol-6.2"
+        text = (root / "prompts.md").read_text(encoding="utf-8")
+        document = parse_document(text, profile_id=P.SSDP62_PROFILE_ID)
+        expected = P.profile_to_json(P.build_profile(document, P.SSDP62_PROFILE_ID).descriptor)
+        self.assertEqual((root / "profile.json").read_text(encoding="utf-8"), expected)
+'''
+          text = text.replace(marker, addition + marker, 1)
+          p.write_text(text, encoding='utf-8')
+          PY
+      - name: Verify full Core suite
+        run: |
+          python -m pip install ./orchestrator -r orchestrator/requirements-dev.txt
+          python orchestrator/scripts/generate_protocol_snapshot.py --check
+          python orchestrator/scripts/run_core_tests.py -j 2
+      - name: Commit repaired profile oracle
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add orchestrator/tests/test_ssdp6_profiles.py
+          git commit -m 'Extend Core profile qualification through Protocol 6.3'
+          git push origin HEAD:ssdp-6.3-engineering-memory
