@@ -1,10 +1,15 @@
 name: Temporary Protocol 6.3 Core profile repair
+
 on:
   push:
-    branches: [ssdp-6.3-engineering-memory]
-    paths: [.github/workflows/repair-ssdp63-core-profile.yml]
+    branches:
+      - ssdp-6.3-engineering-memory
+    paths:
+      - .github/workflows/repair-ssdp63-core-profile.yml
+
 permissions:
   contents: write
+
 jobs:
   repair-core-profile:
     runs-on: ubuntu-latest
@@ -17,6 +22,7 @@ jobs:
         with:
           python-version: '3.12'
       - name: Repair current and frozen profile assertions
+        shell: bash
         run: |
           python - <<'PY'
           from pathlib import Path
@@ -24,12 +30,8 @@ jobs:
           text = p.read_text(encoding='utf-8')
           text = text.replace('self.assertEqual(P.DEFAULT_PROFILE_ID, "ssdp-protocol-6.2")', 'self.assertEqual(P.DEFAULT_PROFILE_ID, "ssdp-protocol-6.3")', 1)
           text = text.replace('self.assertEqual(self.descriptor.profile.protocol_version, "6.2.0")', 'self.assertEqual(self.descriptor.profile.protocol_version, "6.3.0")', 1)
-          old = '''        self.assertEqual(P.profile_id_for_version("6.2.0"), P.DEFAULT_PROFILE_ID)
-        self.assertEqual(P.profile_id_for_version("6.2"), P.DEFAULT_PROFILE_ID)'''
-          new = '''        self.assertEqual(P.profile_id_for_version("6.2.0"), P.SSDP62_PROFILE_ID)
-        self.assertEqual(P.profile_id_for_version("6.2"), P.SSDP62_PROFILE_ID)
-        self.assertEqual(P.profile_id_for_version("6.3.0"), P.DEFAULT_PROFILE_ID)
-        self.assertEqual(P.profile_id_for_version("6.3"), P.DEFAULT_PROFILE_ID)'''
+          old = '        self.assertEqual(P.profile_id_for_version("6.2.0"), P.DEFAULT_PROFILE_ID)\n        self.assertEqual(P.profile_id_for_version("6.2"), P.DEFAULT_PROFILE_ID)'
+          new = '        self.assertEqual(P.profile_id_for_version("6.2.0"), P.SSDP62_PROFILE_ID)\n        self.assertEqual(P.profile_id_for_version("6.2"), P.SSDP62_PROFILE_ID)\n        self.assertEqual(P.profile_id_for_version("6.3.0"), P.DEFAULT_PROFILE_ID)\n        self.assertEqual(P.profile_id_for_version("6.3"), P.DEFAULT_PROFILE_ID)'
           if old not in text:
               raise SystemExit('missing profile mapping block')
           text = text.replace(old, new, 1)
@@ -72,11 +74,13 @@ class FrozenProtocol62ProfileTests(unittest.TestCase):
           p.write_text(text, encoding='utf-8')
           PY
       - name: Verify full Core suite
+        shell: bash
         run: |
           python -m pip install ./orchestrator -r orchestrator/requirements-dev.txt
           python orchestrator/scripts/generate_protocol_snapshot.py --check
           python orchestrator/scripts/run_core_tests.py -j 2
       - name: Commit repaired profile oracle
+        shell: bash
         run: |
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
