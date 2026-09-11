@@ -10,7 +10,7 @@ The **Scientific Software Development Protocol (SSDP)** separates D1 scientific/
 
 Resolve the governing protocol version before interpreting stages. A workplan's declared `protocol_version` controls inherited semantics; never guess that a semantic version is a Git ref or silently substitute latest/default-branch doctrine.
 
-With `PROTOCOL_SOURCE = AUTO_LOCAL_FIRST`, use a governing-version-compatible installed skill/exposed skill root when readable; otherwise use the canonical public repository only at the immutable public-source ref mapped for that version. If neither compatible source can be read, report truthful non-closure rather than executing from memory or a similarly named incompatible skill.
+With `PROTOCOL_SOURCE = AUTO_LOCAL_FIRST`, use a governing-version-compatible installed skill/exposed skill root when readable; otherwise use the canonical public repository only at the immutable public-source ref mapped for that version. If neither compatible source can be read, report truthful non-closure rather than executing from memory or a similarly named incompatible skill. Repository-default bytes are never a substitute for a version-mapped immutable source.
 
 ```text
 PUBLIC_REPOSITORY = https://github.com/hjin98/scientific-software-development-protocol

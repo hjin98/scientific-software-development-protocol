@@ -54,14 +54,21 @@ class Protocol6OrchestrationTests(unittest.TestCase):
         ):
             self.assertIn(token, self.lower)
 
-        published = re.search(r"public_ref = ([0-9a-f]{40})", self.lower)
-        if published is None:
-            self.assertIn("bootstrap self-reference rule", self.lower)
-            self.assertIn("automatic current-6.2 public fallback is unavailable", self.lower)
-            self.assertNotIn("current 6.2 may fall back", self.lower)
+        current_version = (ROOT / "source/PROTOCOL_VERSION").read_text(encoding="utf-8").strip()
+        if current_version == "6.2.0":
+            published = re.search(r"public_ref = ([0-9a-f]{40})", self.lower)
+            if published is None:
+                self.assertIn("bootstrap self-reference rule", self.lower)
+                self.assertIn("automatic current-6.2 public fallback is unavailable", self.lower)
+                self.assertNotIn("current 6.2 may fall back", self.lower)
+            else:
+                self.assertNotEqual(published.group(1), "1181c2031710c5d343194d87d08543290fded0ab")
+                self.assertNotIn("automatic current-6.2 public fallback is unavailable", self.lower)
         else:
-            self.assertNotEqual(published.group(1), "1181c2031710c5d343194d87d08543290fded0ab")
-            self.assertNotIn("automatic current-6.2 public fallback is unavailable", self.lower)
+            self.assertIn("current_protocol = 6.3.0", self.lower)
+            self.assertIn("current_public_ref = unavailable_pending_6.3_bootstrap_qualification", self.lower)
+            self.assertIn("accepted_6_2_public_ref = 5a062ebc472755607b9dc66d33a5ebbc4b7429aa", self.lower)
+            self.assertIn("self-reference-safe source snapshot", self.lower)
 
     def test_execution_contract_prefers_action_and_resolves_inferable_context(self) -> None:
         self.assertIn("these are execution prompts", self.lower)

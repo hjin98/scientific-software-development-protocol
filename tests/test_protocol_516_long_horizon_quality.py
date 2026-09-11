@@ -32,7 +32,9 @@ class Protocol6LongHorizonQualityTests(unittest.TestCase):
         self.scenarios = read("qualification/long-horizon/SCENARIOS.md")
 
     def test_protocol62_identity_preserves_516_quality_lineage(self) -> None:
-        self.assertEqual("6.2.0", read("source/PROTOCOL_VERSION").strip())
+        version = tuple(int(part) for part in read("source/PROTOCOL_VERSION").strip().split("."))
+        self.assertEqual(version[0], 6)
+        self.assertGreaterEqual(version, (6, 2, 0))
         versioning = read("source/shared/references/protocol-versioning-and-compatibility.md")
         self.assertIn("protocol 6.2 is a backward-compatible representation/progressive-disclosure strengthening", versioning)
         self.assertIn("5.16 long-horizon health/verification/stabilization/maintenance audit/workflow prompts/public fallback", versioning)

@@ -21,7 +21,7 @@ reachability / ordinary Markdown link / semantic dependency / package membership
 
 `language-profiles.md` is the language concern router and conditionally activates Python/C++ leaves. `tool-assisted-engineering.md` is the relation-first engineering-tool router and conditionally activates analyzer/runtime/tool methods. Do not flatten all leaves or PEM history into every role entrypoint, and do not infer activation from transitive files bundled for standalone transport.
 
-Static package/routing validation can establish declared route/resource integrity, schema/package exclusion, and deterministic generated parity. It **cannot prove** that a named harness/model followed the route, kept non-triggered material cold, gained performance, or benefited from memory. Live claims require fresh-session evidence for the named harness/model/install mode; unavailable telemetry remains unavailable rather than inferred.
+Static package/routing validation can establish declared route/resource integrity, schema/package exclusion, and deterministic generated parity. It **cannot prove** that a named harness/model followed the route, kept non-triggered material cold, gained performance, or benefited from memory. Live claims require fresh-session evidence for the named harness/model/install mode; unavailable telemetry remains unavailable rather than inferred. Do not infer another environment from one run.
 
 ## Compatible source resolution
 
@@ -53,10 +53,10 @@ For Protocol 6.3, **do not** substitute the 6.2 bootstrap, current branch, repos
 | `sdp-protocol-5.16` | 5.16.0 | 1 | frozen |
 | `ssdp-protocol-6.0` | 6.0.0 | 2 | frozen |
 | `ssdp-protocol-6.1` | 6.1.0 | 2 | frozen historical rollback |
-| `ssdp-protocol-6.2` | 6.2.0 | 2 | accepted current / frozen when 6.3 profile is added |
+| `ssdp-protocol-6.2` | 6.2.0 | 2 | accepted current |
 | `ssdp-protocol-6.3` | 6.3.0 | 2 | candidate after distinct generation/qualification |
 
-Historical profile/prompt bytes remain immutable. Workplan `protocol_version` selects compatible semantics before stage interpretation. Serious Challenge/human-pending state stops ordinary automatic closure; orchestration represents/routes state but never decides scientific truth. PEM schema versioning is independent of orchestration profile schema; Protocol 6.3 supports PEM schema 1 and fails safe for unsupported memory-dependent decisions.
+During Protocol 6.3 candidate qualification, the 6.2 resource is an immutable predecessor snapshot while Protocol 6.2 remains accepted-current operational authority until cutover. Historical profile/prompt bytes remain immutable. Workplan `protocol_version` selects compatible semantics before stage interpretation. Serious Challenge/human-pending state stops ordinary automatic closure; orchestration represents/routes state but never decides scientific truth. PEM schema versioning is independent of orchestration profile schema; Protocol 6.3 supports PEM schema 1 and fails safe for unsupported memory-dependent decisions.
 
 ## Project-memory portability boundary
 

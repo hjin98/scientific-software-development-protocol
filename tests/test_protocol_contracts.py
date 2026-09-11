@@ -23,7 +23,9 @@ class Protocol6ContractTests(unittest.TestCase):
         self.evolution = read("source/shared/references/evidence-evolution-and-dependencies.md").lower()
 
     def test_protocol_62_identity_and_four_domain_roles(self) -> None:
-        self.assertEqual("6.2.0", read("source/PROTOCOL_VERSION").strip())
+        version = tuple(int(part) for part in read("source/PROTOCOL_VERSION").strip().split("."))
+        self.assertEqual(version[0], 6)
+        self.assertGreaterEqual(version, (6, 2, 0))
         self.assertIn("protocol 6.2", read("README.md").lower())
         for skill in ("scientific-formulation", "numerical-algorithm-design", "software-design", "software-implementation"):
             self.assertTrue((ROOT / f"source/roles/{skill}/SKILL.md").is_file(), skill)
