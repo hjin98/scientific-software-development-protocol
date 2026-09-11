@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import re
 import unittest
 from pathlib import Path
 
@@ -58,15 +59,28 @@ class Protocol61EvidenceEvolutionTests(unittest.TestCase):
         self.assertLess(d1.index("## Background and terminology"), d1.index("## Normative scientific / mathematical formulation"))
         self.assertLess(d2.index("## Background and terminology"), d2.index("## Governing numerical / algorithmic formulation"))
 
-    def test_current_prompt_preserves_public_source_discipline_after_62_bootstrap(self) -> None:
-        bootstrap = "1181c2031710c5d343194d87d08543290fded0ab"
+    def test_current_prompt_preserves_public_source_discipline_during_and_after_62_bootstrap(self) -> None:
+        invalidated = "1181c2031710c5d343194d87d08543290fded0ab"
         prompts = self.read("source/shared/references/development-workflow-prompts.md")
+        lower = prompts.lower()
+        versioning = self.read("source/shared/references/protocol-versioning-and-compatibility.md")
+        published = re.search(r"6\.2\.0 public-source bootstrap -> ([0-9a-f]{40})", versioning)
+
         self.assertIn("https://github.com/hjin98/scientific-software-development-protocol", prompts)
         self.assertNotIn("https://github.com/hjin98/software-development-protocol", prompts)
-        self.assertIn(f"PUBLIC_REF = {bootstrap}", prompts)
-        self.assertIn("current 6.2 may fall back", prompts.lower())
-        self.assertIn("repository-default bytes are never a substitute", prompts.lower())
-        self.assertNotIn("automatic current-6.2 public fallback is unavailable", prompts.lower())
+        self.assertIn("repository-default bytes are never a substitute", lower)
+        self.assertNotIn(f"PUBLIC_REF = {invalidated}", prompts)
+
+        if published is None:
+            self.assertIn("bootstrap self-reference rule", lower)
+            self.assertIn("automatic current-6.2 public fallback is unavailable", lower)
+            self.assertNotIn("current 6.2 may fall back", lower)
+        else:
+            bootstrap = published.group(1)
+            self.assertNotEqual(bootstrap, invalidated)
+            self.assertIn(f"PUBLIC_REF = {bootstrap}", prompts)
+            self.assertIn("current 6.2 may fall back", lower)
+            self.assertNotIn("automatic current-6.2 public fallback is unavailable", lower)
 
     def test_accepted_61_recovery_and_bootstrap_remain_immutable(self) -> None:
         recovery = "802e75af261efb4f70d71284d860613a2197b639"
