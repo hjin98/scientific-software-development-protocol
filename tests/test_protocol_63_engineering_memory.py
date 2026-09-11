@@ -480,6 +480,67 @@ class Protocol63EngineeringMemoryTests(unittest.TestCase):
             pem.write_summary(doc)
             self.assertEqual(pem.validate_memory(pem.load_memory(path)), [])
 
+    def test_supported_discovery_requires_nonempty_evidence_route(self):
+        family = self._family(id="DS-001", kind="DISCOVERY", maturity="SUPPORTED")
+        family.pop("applications")
+        family["semantic_identity"]["mechanism_family"] = "bounded discovery"
+        family["evidence"] = [""]
+        with tempfile.TemporaryDirectory() as td:
+            path = Path(td) / "PROJECT-ENGINEERING-MEMORY.md"
+            path.write_text(self._root_text([family]), encoding="utf-8")
+            errors = pem.validate_memory(pem.load_memory(path), check_summary=False)
+            self.assertTrue(any("evidence route must be non-empty text" in error for error in errors))
+
+    def test_unavailable_binding_is_visible_and_prioritized_in_active_summary(self):
+        risk = self._family(
+            id="DS-001",
+            kind="DISCOVERY",
+            maturity="SUPPORTED",
+            binding_health="UNAVAILABLE",
+            summary="A current material warrant became unavailable.",
+        )
+        risk.pop("applications")
+        risk["semantic_identity"]["mechanism_family"] = "binding-health risk"
+        risk["evidence"] = ["repo@1111111:path#historical-observation"]
+
+        hot = self._family(
+            id="SP-002",
+            temperature="HOT",
+            positive_guidance_eligible=True,
+            binding_health="HEALTHY",
+            guidance_level="RECOMMENDED",
+            summary="A lower-consequence positive pattern.",
+        )
+        hot["applications"] = []
+        for i in range(3):
+            app = copy.deepcopy(self._family()["applications"][0])
+            app["id"] = f"A{i + 1:02d}"
+            app["episode_identity"] = f"commit:{i + 20:040d}"
+            hot["applications"].append(app)
+
+        with tempfile.TemporaryDirectory() as td:
+            path = self._write(Path(td), [hot, risk])
+            doc = pem.load_memory(path)
+            summary = pem.render_summary(doc)
+            self.assertIn("EVIDENCE_ONLY/UNAVAILABLE", summary)
+            self.assertLess(summary.index("DS-001"), summary.index("SP-002"))
+            self.assertEqual(pem.validate_memory(doc), [])
+
+    def test_lineage_target_cannot_remain_current(self):
+        newer = self._family(
+            id="SP-001",
+            relations=[{"type": "SUPERSEDES", "target": "SP-002"}],
+        )
+        older = copy.deepcopy(newer)
+        older["id"] = "SP-002"
+        older["relations"] = []
+        older["applications"][0]["episode_identity"] = "commit:2222222222222222222222222222222222222222"
+        with tempfile.TemporaryDirectory() as td:
+            path = Path(td) / "PROJECT-ENGINEERING-MEMORY.md"
+            path.write_text(self._root_text([newer, older]), encoding="utf-8")
+            errors = pem.validate_memory(pem.load_memory(path), check_summary=False)
+            self.assertTrue(any("lineage target SP-002 cannot remain CURRENT" in error for error in errors))
+
     def test_unknown_schema_fails_safe(self):
         with tempfile.TemporaryDirectory() as td:
             path = Path(td) / "PROJECT-ENGINEERING-MEMORY.md"

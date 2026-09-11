@@ -326,7 +326,10 @@ def derived_counts(family: dict[str, Any]) -> dict[str, int]:
                 counts[outcome.lower()] += 1
         counts["affected_surfaces"] = len(surfaces)
         return counts
-    return {"evidence": len(_list(family.get("evidence", []), f"{family_id}:evidence"))}
+    evidence = _list(family.get("evidence", []), f"{family_id}:evidence")
+    for route in evidence:
+        _required_text(route, f"{family_id}:evidence route")
+    return {"evidence": len(evidence)}
 
 
 def base_temperature(family: dict[str, Any], counts: dict[str, int]) -> str:
@@ -455,6 +458,11 @@ def _validate_lineage(doc: PemDocument) -> list[str]:
                 continue
             if relation.get("type") in LINEAGE_RELATIONS:
                 graph[fid].add(str(target))
+                target_family = doc.families[str(target)]
+                if target_family.get("state") == "CURRENT":
+                    errors.append(
+                        f"{fid}: lineage target {target} cannot remain CURRENT while superseded/replaced/split/merged lineage is active"
+                    )
             if relation.get("type") == "CONFLICTS_WITH":
                 other = doc.families[str(target)]
                 active_guidance = family.get("guidance_level") in {"RECOMMENDED", "PREFERRED", "DEFAULT", "BEST"}
@@ -505,7 +513,8 @@ def _validate_notices(doc: PemDocument) -> list[str]:
 
 
 def _salience_key(family: dict[str, Any]) -> tuple[int, int, str]:
-    unresolved = 0 if family.get("state") == "REVIEW_REQUIRED" else 1
+    binding_health = family.get("binding_health")
+    unresolved = 0 if family.get("state") == "REVIEW_REQUIRED" or binding_health in {"REVIEW_REQUIRED", "UNAVAILABLE"} else 1
     temp = {"HOT": 0, "WARM": 1, "COLD": 2, "UNASSESSED": 3}.get(str(family.get("temperature")), 4)
     return unresolved, temp, str(family.get("id"))
 
@@ -526,10 +535,14 @@ def render_summary(doc: PemDocument) -> str:
         else:
             count_text = f"{counts.get('evidence', 0)} evidence route(s)"
         guidance = family.get("guidance_level", "OBSERVED")
+        authority_binding = family.get("authority_binding", "EVIDENCE_ONLY")
+        binding_health = family.get("binding_health")
+        binding = f"{authority_binding}/{binding_health}" if binding_health else str(authority_binding)
         rows.append(
-            "| {id} | {kind} | {temp} | {maturity}/{state} | {guidance} | {count} | {summary} |".format(
+            "| {id} | {kind} | {temp} | {maturity}/{state} | {binding} | {guidance} | {count} | {summary} |".format(
                 id=family["id"], kind=family["kind"], temp=family["temperature"], maturity=family["maturity"],
-                state=family["state"], guidance=guidance, count=count_text, summary=str(family["summary"]).replace("|", "\\|"),
+                state=family["state"], binding=binding, guidance=guidance, count=count_text,
+                summary=str(family["summary"]).replace("|", "\\|"),
             )
         )
     notice_rows: list[str] = []
@@ -539,8 +552,8 @@ def render_summary(doc: PemDocument) -> str:
     parts: list[str] = []
     if rows:
         parts.extend([
-            "| ID | Kind | Temperature | Maturity/state | Guidance | Current evidence | Bounded lesson |",
-            "| --- | --- | --- | --- | --- | --- | --- |",
+            "| ID | Kind | Temperature | Maturity/state | Binding | Guidance | Current evidence | Bounded lesson |",
+            "| --- | --- | --- | --- | --- | --- | --- | --- |",
             *rows,
         ])
     else:

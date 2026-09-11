@@ -19,11 +19,11 @@ This is the Scientific Software Development Protocol (SSDP) repository's project
 ## Active summary
 
 <!-- BEGIN DERIVED PEM SUMMARY -->
-| ID | Kind | Temperature | Maturity/state | Guidance | Current evidence | Bounded lesson |
-| --- | --- | --- | --- | --- | --- | --- |
-| FF-001 | FAILURE_FAMILY | UNASSESSED | SUPPORTED/CURRENT | OBSERVED | 1 confirmed | Publishing an immutable public-source fallback before the source state contains all required repaired routes can freeze a semantically stale bootstrap even when the branch later becomes correct. |
-| PC-001 | PRESERVATION_CAPABILITY | UNASSESSED | SUPPORTED/CURRENT | OBSERVED | 2 evidence route(s) | Successor protocol work must preserve version-bound frozen historical profiles/resources independently; adding a new profile is not permission to mutate prior-version bytes or recovery semantics. |
-| SP-001 | SUCCESS_PATTERN | UNASSESSED | SUPPORTED/CURRENT | OBSERVED | 1 supporting / 0 neutral / 0 contradicting / 0 inconclusive | For source-to-package routing defects, repairing the canonical router first and regenerating derived packages restored both activation semantics and transport reachability without creating package-side shadow authority. |
+| ID | Kind | Temperature | Maturity/state | Binding | Guidance | Current evidence | Bounded lesson |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| FF-001 | FAILURE_FAMILY | UNASSESSED | SUPPORTED/CURRENT | EVIDENCE_ONLY | OBSERVED | 1 confirmed | Publishing an immutable public-source fallback before the source state contains all required repaired routes can freeze a semantically stale bootstrap even when the branch later becomes correct. |
+| PC-001 | PRESERVATION_CAPABILITY | UNASSESSED | SUPPORTED/CURRENT | AUTHORITY_BOUND/HEALTHY | OBSERVED | 2 evidence route(s) | Successor protocol work must preserve version-bound frozen historical profiles/resources independently; adding a new profile is not permission to mutate prior-version bytes or recovery semantics. |
+| SP-001 | SUCCESS_PATTERN | UNASSESSED | SUPPORTED/CURRENT | EVIDENCE_ONLY | OBSERVED | 1 supporting / 0 neutral / 0 contradicting / 0 inconclusive | For source-to-package routing defects, repairing the canonical router first and regenerating derived packages restored both activation semantics and transport reachability without creating package-side shadow authority. |
 <!-- END DERIVED PEM SUMMARY -->
 
 ## Families

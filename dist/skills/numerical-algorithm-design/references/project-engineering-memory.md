@@ -105,7 +105,7 @@ applicability: [owner/surface/mechanism/regime cues]
 relations: []
 ```
 
-Accepted IDs are never recycled. Material change outside the semantic identity envelope requires explicit `SUPERSEDES`, `SPLIT_FROM`, `MERGED_FROM`, `REPLACES`, or equivalent defined lineage. Current lineage must be acyclic and resolve each accepted historical ID to one unambiguous current disposition. Split/merge reallocates existing ledger identities and prevents parent-plus-child double counting.
+Accepted IDs are never recycled. Material change outside the semantic identity envelope requires explicit `SUPERSEDES`, `SPLIT_FROM`, `MERGED_FROM`, `REPLACES`, or equivalent defined lineage. Current lineage must be acyclic and resolve each accepted historical ID to one unambiguous current disposition. A family that is the historical target of active superseding/replacement/split/merge lineage cannot simultaneously remain an unqualified `CURRENT` peer. Split/merge reallocates existing ledger identities and prevents parent-plus-child double counting.
 
 Typed PEM relations may also express `LED_TO`, `NARROWS`, `GENERALIZES`, `SUPPORTS_LEARNING_FROM`, `CONFLICTS_WITH`, and other explicitly defined non-authoritative relationships. Relations help retrieval/impact closure; they cannot recursively manufacture warrant. Every substantive endpoint remains independently evidence-bound and, if normative, authority-bound.
 
@@ -227,7 +227,7 @@ A single event may be promoted for demonstrated severity, breadth, cost, archite
 
 ## Active summary and salience
 
-The active summary is a derived attention view of canonical current records. It should answer compactly: what repeatedly fails, what repeatedly works, what capabilities matter and which are authority-bound, what current notices matter, and what engineering instincts are useful now.
+The active summary is a derived attention view of canonical current records. It should answer compactly: what repeatedly fails, what repeatedly works, what capabilities matter and which are authority-bound, what current notices matter, and what engineering instincts are useful now. Its family rows retain stable ID, kind, temperature, maturity/state, authority-binding/binding-health status, guidance strength, current evidence count, and the bounded lesson so an unavailable material warrant or authority-bound capability is not hidden by compaction.
 
 Do not turn it into a positive leaderboard. Current high-impact unresolved contradiction, unavailable warrant, security/reliability hazard, expired high-risk notice, or authority-binding uncertainty receives consequence-aware visibility before lower-consequence optional positive guidance. Lower-salience mandatory owner constraints remain active even if absent from the summary.
 
