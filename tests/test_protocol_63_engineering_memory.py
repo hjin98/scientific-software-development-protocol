@@ -241,6 +241,109 @@ class Protocol63EngineeringMemoryTests(unittest.TestCase):
             self.assertEqual(pem.select_applicable(doc, ["checkpoint-restart"]), ["SP-002"])
             self.assertTrue(any("summary is stale" in error for error in pem.validate_memory(doc)))
 
+    def test_duplicate_application_id_is_rejected_even_with_distinct_episode_identity(self):
+        family = self._family()
+        clone = copy.deepcopy(family["applications"][0])
+        clone["episode_identity"] = "commit:2222222222222222222222222222222222222222"
+        family["applications"].append(clone)
+        with tempfile.TemporaryDirectory() as td:
+            path = Path(td) / "PROJECT-ENGINEERING-MEMORY.md"
+            path.write_text(self._root_text([family]), encoding="utf-8")
+            errors = pem.validate_memory(pem.load_memory(path), check_summary=False)
+            self.assertTrue(any("application IDs must be non-empty and unique" in error for error in errors))
+
+    def test_episode_requires_lifecycle_context_and_explicit_source_identity(self):
+        for field in ("lifecycle_context", "source_project"):
+            with self.subTest(field=field), tempfile.TemporaryDirectory() as td:
+                family = self._family()
+                family["applications"][0].pop(field)
+                path = Path(td) / "PROJECT-ENGINEERING-MEMORY.md"
+                path.write_text(self._root_text([family]), encoding="utf-8")
+                errors = pem.validate_memory(pem.load_memory(path), check_summary=False)
+                self.assertTrue(any(field in error for error in errors))
+
+        with tempfile.TemporaryDirectory() as td:
+            family = self._family()
+            family["applications"][0]["source_project"] = "external"
+            path = Path(td) / "PROJECT-ENGINEERING-MEMORY.md"
+            path.write_text(self._root_text([family]), encoding="utf-8")
+            errors = pem.validate_memory(pem.load_memory(path), check_summary=False)
+            self.assertTrue(any("unambiguous project/repository identity" in error for error in errors))
+
+    def test_admissible_assessment_requires_nonempty_conclusion_and_warrant(self):
+        for field, value, expected in (
+            ("conclusion", "", "conclusion"),
+            ("evidence", [], "non-empty evidence"),
+        ):
+            with self.subTest(field=field), tempfile.TemporaryDirectory() as td:
+                family = self._family()
+                family["applications"][0]["assessments"][0][field] = value
+                path = Path(td) / "PROJECT-ENGINEERING-MEMORY.md"
+                path.write_text(self._root_text([family]), encoding="utf-8")
+                errors = pem.validate_memory(pem.load_memory(path), check_summary=False)
+                self.assertTrue(any(expected in error for error in errors))
+
+    def test_current_authority_bound_family_requires_healthy_binding(self):
+        family = self._family(
+            authority_binding="AUTHORITY_BOUND",
+            authority_owner="source/shared/references/example-owner.md",
+            binding_health="UNAVAILABLE",
+        )
+        with tempfile.TemporaryDirectory() as td:
+            path = Path(td) / "PROJECT-ENGINEERING-MEMORY.md"
+            path.write_text(self._root_text([family]), encoding="utf-8")
+            errors = pem.validate_memory(pem.load_memory(path), check_summary=False)
+            self.assertTrue(any("CURRENT AUTHORITY_BOUND" in error for error in errors))
+
+    def test_positive_guidance_eligibility_requires_explicit_healthy_binding(self):
+        family = self._family(positive_guidance_eligible=True)
+        with tempfile.TemporaryDirectory() as td:
+            path = Path(td) / "PROJECT-ENGINEERING-MEMORY.md"
+            path.write_text(self._root_text([family]), encoding="utf-8")
+            errors = pem.validate_memory(pem.load_memory(path), check_summary=False)
+            self.assertTrue(any("positive guidance eligibility requires explicit HEALTHY" in error for error in errors))
+
+        family["binding_health"] = "HEALTHY"
+        with tempfile.TemporaryDirectory() as td:
+            path = self._write(Path(td), [family])
+            self.assertEqual(pem.validate_memory(pem.load_memory(path)), [])
+
+    def test_failure_recurrence_requires_prior_accepted_repair_identity(self):
+        family = self._family(id="FF-001", kind="FAILURE_FAMILY", maturity="PROVISIONAL")
+        family.pop("applications")
+        family["semantic_identity"]["mechanism_family"] = "bounded test failure mechanism"
+        family["occurrences"] = [
+            {
+                "id": "O01",
+                "event_identity": "commit:3333333333333333333333333333333333333333",
+                "lifecycle_context": "qualification",
+                "source_project": "local",
+                "surfaces": ["module-a"],
+                "recurrence_after_accepted_repair": True,
+                "assessments": [
+                    {
+                        "id": "AS01",
+                        "state": "ADMISSIBLE",
+                        "conclusion": "CONFIRMED",
+                        "evidence": ["repo@3333333:path#finding"],
+                    }
+                ],
+            }
+        ]
+        with tempfile.TemporaryDirectory() as td:
+            path = Path(td) / "PROJECT-ENGINEERING-MEMORY.md"
+            path.write_text(self._root_text([family]), encoding="utf-8")
+            errors = pem.validate_memory(pem.load_memory(path), check_summary=False)
+            self.assertTrue(any("recurrence requires prior_accepted_repair" in error for error in errors))
+
+    def test_self_relation_is_rejected(self):
+        family = self._family(relations=[{"type": "SUPPORTS_LEARNING_FROM", "target": "SP-001"}])
+        with tempfile.TemporaryDirectory() as td:
+            path = Path(td) / "PROJECT-ENGINEERING-MEMORY.md"
+            path.write_text(self._root_text([family]), encoding="utf-8")
+            errors = pem.validate_memory(pem.load_memory(path), check_summary=False)
+            self.assertTrue(any("cannot target its own canonical family ID" in error for error in errors))
+
     def test_unknown_schema_fails_safe(self):
         with tempfile.TemporaryDirectory() as td:
             path = Path(td) / "PROJECT-ENGINEERING-MEMORY.md"

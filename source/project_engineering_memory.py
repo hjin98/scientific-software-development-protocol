@@ -89,6 +89,22 @@ def _list(value: Any, where: str) -> list[Any]:
     return value
 
 
+def _required_text(value: Any, where: str) -> str:
+    if not isinstance(value, str) or not value.strip():
+        raise PemError(f"{where} must be non-empty text")
+    return value.strip()
+
+
+def _validate_source_project(row: dict[str, Any], where: str) -> str:
+    source_project = _required_text(row.get("source_project"), f"{where}:source_project")
+    if source_project.lower() in {"external", "remote", "other", "unknown", "non-local", "nonlocal"}:
+        raise PemError(
+            f"{where}: non-local source_project must be an unambiguous project/repository identity, "
+            f"not {source_project!r}"
+        )
+    return source_project
+
+
 def _frontmatter(text: str, path: Path) -> dict[str, Any]:
     match = FRONT_RE.search(text)
     if not match:
@@ -196,8 +212,12 @@ def _latest_assessment(row: dict[str, Any], where: str) -> dict[str, Any] | None
         ids.add(aid)
         if item.get("state") not in ASSESSMENT_STATES:
             raise PemError(f"{where}:{aid}: invalid assessment state {item.get('state')!r}")
-        if "evidence" not in item:
-            raise PemError(f"{where}:{aid}: assessment requires evidence route(s)")
+        _required_text(item.get("conclusion"), f"{where}:{aid}:conclusion")
+        evidence = _list(item.get("evidence"), f"{where}:{aid}:evidence")
+        if not evidence:
+            raise PemError(f"{where}:{aid}: assessment requires non-empty evidence route(s)")
+        for route in evidence:
+            _required_text(route, f"{where}:{aid}:evidence route")
     return _mapping(assessments[-1], f"{where}:latest-assessment")
 
 
@@ -214,14 +234,20 @@ def derived_counts(family: dict[str, Any]) -> dict[str, int]:
         confirmed = 0
         recurrence = 0
         surfaces: set[str] = set()
+        occurrence_ids: set[str] = set()
         episode_ids: set[str] = set()
         for row in occurrences:
             row = _mapping(row, f"{family_id}:occurrence")
             oid = str(row.get("id", ""))
             episode = str(row.get("event_identity", ""))
-            if not oid or not episode or episode in episode_ids:
-                raise PemError(f"{family_id}: occurrence IDs/event identities must be non-empty and event identities unique")
+            if not oid or oid in occurrence_ids:
+                raise PemError(f"{family_id}: occurrence IDs must be non-empty and unique within the family")
+            if not episode or episode in episode_ids:
+                raise PemError(f"{family_id}: occurrence event identities must be non-empty and unique within the family")
+            occurrence_ids.add(oid)
             episode_ids.add(episode)
+            _required_text(row.get("lifecycle_context"), f"{family_id}:{oid}:lifecycle_context")
+            _validate_source_project(row, f"{family_id}:{oid}")
             surfaces.update(str(v) for v in _list(row.get("surfaces", []), f"{family_id}:{oid}:surfaces"))
             latest = _latest_assessment(row, f"{family_id}:{oid}")
             if latest and latest.get("state") == "ADMISSIBLE" and latest.get("conclusion") == "CONFIRMED":
@@ -235,14 +261,20 @@ def derived_counts(family: dict[str, Any]) -> dict[str, int]:
         applications = _list(family.get("applications", []), f"{family_id}:applications")
         counts = {"evaluated": len(applications), "supporting": 0, "neutral": 0, "contradicting": 0, "inconclusive": 0}
         surfaces: set[str] = set()
+        application_ids: set[str] = set()
         episodes: set[str] = set()
         for row in applications:
             row = _mapping(row, f"{family_id}:application")
             aid = str(row.get("id", ""))
             episode = str(row.get("episode_identity", ""))
-            if not aid or not episode or episode in episodes:
-                raise PemError(f"{family_id}: application IDs/episode identities must be non-empty and episode identities unique")
+            if not aid or aid in application_ids:
+                raise PemError(f"{family_id}: application IDs must be non-empty and unique within the family")
+            if not episode or episode in episodes:
+                raise PemError(f"{family_id}: application episode identities must be non-empty and unique within the family")
+            application_ids.add(aid)
             episodes.add(episode)
+            _required_text(row.get("lifecycle_context"), f"{family_id}:{aid}:lifecycle_context")
+            _validate_source_project(row, f"{family_id}:{aid}")
             surfaces.update(str(v) for v in _list(row.get("surfaces", []), f"{family_id}:{aid}:surfaces"))
             outcome = row.get("outcome")
             if outcome not in APPLICATION_OUTCOMES:
@@ -289,6 +321,9 @@ def _validate_family(family: dict[str, Any]) -> list[str]:
         errors.append(f"{fid}: invalid temperature {family.get('temperature')!r}")
     if family.get("authority_binding") not in AUTHORITY_BINDINGS:
         errors.append(f"{fid}: invalid authority_binding {family.get('authority_binding')!r}")
+    binding_health = family.get("binding_health")
+    if binding_health is not None and binding_health not in BINDING_HEALTH:
+        errors.append(f"{fid}: invalid binding_health {binding_health!r}")
     for field in ("summary", "aggregation_scope", "coverage_state", "coverage_basis", "applicability"):
         if field not in family:
             errors.append(f"{fid}: missing {field}")
@@ -330,13 +365,17 @@ def _validate_family(family: dict[str, Any]) -> list[str]:
         errors.append(f"{fid}: invalid guidance_level {guidance!r}")
     if family.get("kind") == "SUCCESS_PATTERN":
         eligible = family.get("positive_guidance_eligible", False)
-        if guidance in {"RECOMMENDED", "PREFERRED", "DEFAULT", "BEST"}:
-            if not eligible or family.get("state") != "CURRENT" or family.get("maturity") not in {"SUPPORTED", "PROVEN"}:
-                errors.append(f"{fid}: positive recommendation is not eligible/current/sufficiently mature")
+        if eligible:
+            if family.get("state") != "CURRENT" or family.get("maturity") not in {"SUPPORTED", "PROVEN"}:
+                errors.append(f"{fid}: positive guidance eligibility requires CURRENT SUPPORTED/PROVEN state")
+            if counts.get("supporting", 0) < 1:
+                errors.append(f"{fid}: positive guidance eligibility requires admissible supporting evidence")
             if counts.get("contradicting", 0):
-                errors.append(f"{fid}: positive recommendation hides admissible contradiction")
-            if family.get("binding_health", "HEALTHY") != "HEALTHY":
-                errors.append(f"{fid}: positive recommendation has unhealthy material binding")
+                errors.append(f"{fid}: positive guidance eligibility hides admissible contradiction")
+            if binding_health != "HEALTHY":
+                errors.append(f"{fid}: positive guidance eligibility requires explicit HEALTHY inding_health")
+        if guidance in {"RECOMMENDED", "PREFERRED", "DEFAULT", "BEST"} and not eligible:
+            errors.append(f"{fid}: positive recommendation is not eligible")
         if guidance in {"PREFERRED", "DEFAULT", "BEST"}:
             comparative = family.get("comparative_basis")
             authority_basis = family.get("comparative_authority")
@@ -345,8 +384,11 @@ def _validate_family(family: dict[str, Any]) -> list[str]:
     elif guidance != "OBSERVED":
         errors.append(f"{fid}: only SUCCESS_PATTERN may carry positive guidance levels")
 
-    if family.get("authority_binding") == "AUTHORITY_BOUND" and not family.get("authority_owner"):
-        errors.append(f"{fid}: AUTHORITY_BOUND requires authority_owner")
+    if family.get("authority_binding") == "AUTHORITY_BOUND":
+        if not family.get("authority_owner"):
+            errors.append(f"{fid}: AUTHORITY_BOUND requires authority_owner")
+        if family.get("state") == "CURRENT" and binding_health != "HEALTHY":
+            errors.append(f"{fid}: CURRENT AUTHORITY_BOUND family requires explicit HEALTHY binding_health")
 
     relations = family.get("relations", [])
     if not isinstance(relations, list):
@@ -355,6 +397,8 @@ def _validate_family(family: dict[str, Any]) -> list[str]:
         for relation in relations:
             if not isinstance(relation, dict) or relation.get("type") not in RELATION_TYPES or not relation.get("target"):
                 errors.append(f"{fid}: invalid typed relation {relation!r}")
+            elif str(relation.get("target")) == fid:
+                errors.append(f"{fid}: relation cannot target its own canonical family ID")
     return errors
 
 
@@ -405,9 +449,14 @@ def _validate_notices(doc: PemDocument) -> list[str]:
             errors.append(f"{nid}: invalid state")
         if notice.get("binding_health") not in BINDING_HEALTH:
             errors.append(f"{nid}: invalid binding_health")
-        for key in ("summary", "applicability", "evidence", "review_or_expiry", "normative_status"):
+        for key in ("summary", "applicability", "review_or_expiry", "normative_status"):
             if not notice.get(key):
                 errors.append(f"{nid}: missing {key}")
+        evidence = notice.get("evidence")
+        if not isinstance(evidence, list) or not evidence or any(not isinstance(route, str) or not route.strip() for route in evidence):
+            errors.append(f"{nid}: evidence must contain at least one non-empty route")
+        if notice.get("normative_status") != "NON_AUTHORITATIVE" and notice.get("owner") in (None, "", "NONE"):
+            errors.append(f"{nid}: normative notice requires governing owner")
         if notice.get("state") == "CURRENT" and notice.get("binding_health") != "HEALTHY":
             errors.append(f"{nid}: unhealthy notice cannot remain unqualified CURRENT")
     return errors
