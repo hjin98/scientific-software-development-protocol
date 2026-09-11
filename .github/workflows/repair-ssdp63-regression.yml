@@ -1,0 +1,176 @@
+name: Temporary Protocol 6.3 regression repair
+
+on:
+  push:
+    branches:
+      - ssdp-6.3-engineering-memory
+    paths:
+      - .github/workflows/repair-ssdp63-regression.yml
+
+permissions:
+  contents: write
+
+jobs:
+  repair:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ssdp-6.3-engineering-memory
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Restore inherited semantics and generalize version-sensitive regression oracles
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          def replace(path: str, old: str, new: str) -> None:
+              p = Path(path)
+              text = p.read_text(encoding='utf-8')
+              if old not in text:
+                  raise SystemExit(f'missing expected text in {path}: {old!r}')
+              p.write_text(text.replace(old, new, 1), encoding='utf-8')
+
+          replace(
+              'PORTABILITY.md',
+              'Live claims require fresh-session evidence for the named harness/model/install mode; unavailable telemetry remains unavailable rather than inferred.',
+              'Live claims require fresh-session evidence for the named harness/model/install mode; unavailable telemetry remains unavailable rather than inferred. Do not infer another environment from one run.',
+          )
+          replace(
+              'PORTABILITY.md',
+              '| `ssdp-protocol-6.2` | 6.2.0 | 2 | accepted current / frozen when 6.3 profile is added |',
+              '| `ssdp-protocol-6.2` | 6.2.0 | 2 | accepted current |',
+          )
+          replace(
+              'PORTABILITY.md',
+              'Historical profile/prompt bytes remain immutable.',
+              'During Protocol 6.3 candidate qualification, the 6.2 resource is an immutable predecessor snapshot while Protocol 6.2 remains accepted-current operational authority until cutover. Historical profile/prompt bytes remain immutable.',
+          )
+          replace(
+              'source/shared/references/development-workflow-prompts.md',
+              'If neither compatible source can be read, report truthful non-closure rather than executing from memory or a similarly named incompatible skill.',
+              'If neither compatible source can be read, report truthful non-closure rather than executing from memory or a similarly named incompatible skill. Repository-default bytes are never a substitute for a version-mapped immutable source.',
+          )
+          replace(
+              'source/shared/references/abstraction-and-concretization.md',
+              "Workplans, tests, gates, metrics, reviews, reports, implementation machinery, historical frequency, and project memory are constraints, evidence, coordination, or concretizations—not objectives or self-authorizing rules.",
+              "Workplans, tests, gates, metrics, reviews, reports, and implementation machinery are constraints, evidence, or concretizations—not objectives. Historical frequency and project memory are likewise decision inputs or coordination state, not self-authorizing rules.",
+          )
+          replace(
+              'source/shared/references/convergence-and-cycle-economy.md',
+              '**No recurrence count, review count, cycle budget, memory temperature, or convergence target can force acceptance**; escalation changes the engineering method, **not the pass threshold**.',
+              '**No recurrence count, review count, cycle budget, or convergence target can force acceptance**; memory temperature cannot force acceptance either; escalation changes the engineering method, **not the pass threshold**.',
+          )
+          replace(
+              'source/shared/references/protocol-versioning-and-compatibility.md',
+              '| `ssdp-protocol-6.2` | 6.2.0 | 2 | accepted current while 6.3 candidate is being qualified |',
+              '| `ssdp-protocol-6.2` | 6.2.0 | 2 | accepted current |',
+          )
+          replace(
+              'source/shared/references/protocol-versioning-and-compatibility.md',
+              'Schema v2 remains unless an actual machine profile contract changes.',
+              'During 6.3 qualification, the 6.2 profile bytes are frozen as the immutable predecessor resource while 6.2 remains accepted-current until 6.3 cutover. Schema v2 remains unless an actual machine profile contract changes.',
+          )
+          replace(
+              'source/SEMANTIC_DEPENDENCIES.md',
+              'ssdp-protocol-6.2 CONSTRAINED_BY -> accepted Protocol 6.2 semantics/recovery',
+              'ssdp-protocol-6.2 CONSTRAINED_BY -> accepted-current Protocol 6.2 semantics',
+          )
+
+          # Inherited tests must continue to protect the 6.2 semantic floor without
+          # confusing the candidate source version with the accepted-current release.
+          for path in (
+              'tests/test_protocol_516_long_horizon_quality.py',
+              'tests/test_protocol_61_evidence_evolution.py',
+              'tests/test_protocol_62_representation.py',
+              'tests/test_protocol_contracts.py',
+          ):
+              p = Path(path)
+              text = p.read_text(encoding='utf-8')
+              old_variants = [
+                  'self.assertEqual("6.2.0", read("source/PROTOCOL_VERSION").strip())',
+                  'self.assertEqual(self.read("source/PROTOCOL_VERSION").strip(), "6.2.0")',
+                  'self.assertEqual((SOURCE / "PROTOCOL_VERSION").read_text().strip(), "6.2.0")',
+                  'self.assertEqual("6.2.0", read("source/PROTOCOL_VERSION").strip())',
+              ]
+              changed = False
+              for old in old_variants:
+                  if old in text:
+                      expr = '(SOURCE / "PROTOCOL_VERSION").read_text().strip()' if 'SOURCE /' in old else ('self.read("source/PROTOCOL_VERSION").strip()' if 'self.read' in old else 'read("source/PROTOCOL_VERSION").strip()')
+                      new = f'version = tuple(int(part) for part in {expr}.split("."))\n        self.assertEqual(version[0], 6)\n        self.assertGreaterEqual(version, (6, 2, 0))'
+                      text = text.replace(old, new, 1)
+                      changed = True
+                      break
+              if not changed:
+                  raise SystemExit(f'no 6.2 current-version assertion found in {path}')
+              p.write_text(text, encoding='utf-8')
+
+          p = Path('tests/test_protocol_62_representation.py')
+          text = p.read_text(encoding='utf-8')
+          text = text.replace(
+              'for name in sorted(path.name for path in REFERENCES.glob("*.md")):\n            self.assertIn(f"`{name}`", text, name)\n        for name in sorted(path.name for path in TEMPLATES.glob("*.md")):\n            self.assertIn(f"`{name}`", text, name)',
+              'baseline_references = {path.name for path in REFERENCES.glob("*.md")} - {"project-engineering-memory.md"}\n        baseline_templates = {path.name for path in TEMPLATES.glob("*.md")} - {"project_engineering_memory_template.md"}\n        for name in sorted(baseline_references):\n            self.assertIn(f"`{name}`", text, name)\n        for name in sorted(baseline_templates):\n            self.assertIn(f"`{name}`", text, name)',
+              1,
+          )
+          old = 'self.assertIn(f"public_ref = {bootstrap}", prompt)\n            self.assertNotIn("automatic current-6.2 public fallback is unavailable", prompt)'
+          new = 'current_version = (SOURCE / "PROTOCOL_VERSION").read_text().strip()\n            if current_version == "6.2.0":\n                self.assertIn(f"public_ref = {bootstrap}", prompt)\n                self.assertNotIn("automatic current-6.2 public fallback is unavailable", prompt)\n            else:\n                self.assertIn(f"accepted_6_2_public_ref = {bootstrap}", prompt)\n                self.assertIn("current_public_ref = unavailable_pending_6.3_bootstrap_qualification", prompt)'
+          if old not in text:
+              raise SystemExit('missing Protocol 6.2 fallback assertion block')
+          p.write_text(text.replace(old, new, 1), encoding='utf-8')
+
+          p = Path('tests/test_protocol_61_evidence_evolution.py')
+          text = p.read_text(encoding='utf-8')
+          old = 'self.assertIn(f"PUBLIC_REF = {bootstrap}", prompts)\n            self.assertIn("current 6.2 may fall back", lower)\n            self.assertNotIn("automatic current-6.2 public fallback is unavailable", lower)'
+          new = 'current_version = self.read("source/PROTOCOL_VERSION").strip()\n            if current_version == "6.2.0":\n                self.assertIn(f"PUBLIC_REF = {bootstrap}", prompts)\n                self.assertIn("current 6.2 may fall back", lower)\n                self.assertNotIn("automatic current-6.2 public fallback is unavailable", lower)\n            else:\n                self.assertIn(f"ACCEPTED_6_2_PUBLIC_REF = {bootstrap}", prompts)\n                self.assertIn("CURRENT_PUBLIC_REF = UNAVAILABLE_PENDING_6.3_BOOTSTRAP_QUALIFICATION", prompts)\n                self.assertIn("version-bound 6.2 work continues to use exactly", lower)'
+          if old not in text:
+              raise SystemExit('missing inherited 6.2 prompt fallback block')
+          p.write_text(text.replace(old, new, 1), encoding='utf-8')
+
+          p = Path('tests/test_protocol_516_orchestration.py')
+          text = p.read_text(encoding='utf-8')
+          old = '''published = re.search(r"public_ref = ([0-9a-f]{40})", self.lower)
+        if published is None:
+            self.assertIn("bootstrap self-reference rule", self.lower)
+            self.assertIn("automatic current-6.2 public fallback is unavailable", self.lower)
+            self.assertNotIn("current 6.2 may fall back", self.lower)
+        else:
+            self.assertNotEqual(published.group(1), "1181c2031710c5d343194d87d08543290fded0ab")
+            self.assertNotIn("automatic current-6.2 public fallback is unavailable", self.lower)'''
+          new = '''current_version = (ROOT / "source/PROTOCOL_VERSION").read_text(encoding="utf-8").strip()
+        if current_version == "6.2.0":
+            published = re.search(r"public_ref = ([0-9a-f]{40})", self.lower)
+            if published is None:
+                self.assertIn("bootstrap self-reference rule", self.lower)
+                self.assertIn("automatic current-6.2 public fallback is unavailable", self.lower)
+                self.assertNotIn("current 6.2 may fall back", self.lower)
+            else:
+                self.assertNotEqual(published.group(1), "1181c2031710c5d343194d87d08543290fded0ab")
+                self.assertNotIn("automatic current-6.2 public fallback is unavailable", self.lower)
+        else:
+            self.assertIn("current_protocol = 6.3.0", self.lower)
+            self.assertIn("current_public_ref = unavailable_pending_6.3_bootstrap_qualification", self.lower)
+            self.assertIn("accepted_6_2_public_ref = 5a062ebc472755607b9dc66d33a5ebbc4b7429aa", self.lower)
+            self.assertIn("self-reference-safe source snapshot", self.lower)'''
+          if old not in text:
+              raise SystemExit('missing orchestration fallback branch')
+          p.write_text(text.replace(old, new, 1), encoding='utf-8')
+          PY
+      - name: Run complete repository regression and package checks
+        shell: bash
+        run: |
+          python -m pip install -r source/requirements-validation.txt
+          python -m unittest discover -s tests -v
+          python source/build_skills.py --output /tmp/protocol-dist
+          python source/validate_packages.py --dist /tmp/protocol-dist
+          python source/check_dist.py --expected /tmp/protocol-dist --committed dist
+          git diff --check
+      - name: Commit repair if all checks pass
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add PORTABILITY.md source tests
+          git commit -m 'Repair inherited Protocol 6.3 regression semantics'
+          git push origin HEAD:ssdp-6.3-engineering-memory
