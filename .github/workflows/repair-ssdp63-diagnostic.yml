@@ -1,0 +1,51 @@
+name: Temporary Protocol 6.3 repair diagnostic
+on:
+  push:
+    branches: [ssdp-6.3-engineering-memory]
+    paths: [.github/workflows/repair-ssdp63-diagnostic.yml]
+permissions:
+  contents: write
+jobs:
+  repair-diagnostic:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ssdp-6.3-engineering-memory
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Apply justified repair
+        run: python .github/ssdp63_regression_repair.py
+      - name: Capture post-repair regression
+        shell: bash
+        run: |
+          python -m pip install -r source/requirements-validation.txt
+          set +e
+          python -m unittest discover -s tests -v > /tmp/tests.log 2>&1
+          status=$?
+          set -e
+          {
+            echo '---'
+            echo 'kind: protocol-6.3-regression-diagnostic'
+            echo 'stage: after-first-lossless-repair'
+            echo "exit_status: $status"
+            echo 'authority: non-normative-observation-evidence'
+            echo '---'
+            echo
+            echo '# Protocol 6.3 regression after first lossless repair'
+            echo
+            echo 'The semantic repair was applied before this run. This file records remaining failures and is not acceptance evidence.'
+            echo
+            echo '```text'
+            tail -n 320 /tmp/tests.log
+            echo '```'
+          } > qualification/ssdp6/DIAGNOSTIC-PROTOCOL-6.3-ORDINARY-REGRESSION-AFTER-REPAIR.md
+      - name: Commit repair and diagnostic
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add PORTABILITY.md source tests qualification/ssdp6/DIAGNOSTIC-PROTOCOL-6.3-ORDINARY-REGRESSION-AFTER-REPAIR.md
+          git commit -m 'Repair inherited Protocol 6.3 regression semantics'
+          git push origin HEAD:ssdp-6.3-engineering-memory
