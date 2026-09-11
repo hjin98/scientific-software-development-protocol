@@ -1,0 +1,25 @@
+name: Protocol 6.2 Lifecycle Closeout
+
+on:
+  push:
+    branches:
+      - ssdp-6.2-lossless-representation
+    paths:
+      - '.github/workflows/protocol-62-closeout.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  closeout:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ssdp-6.2-lossless-representation
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Execute Protocol 6.2 closeout
+        run: python orchestrator/scripts/protocol_62_closeout.py
