@@ -1,0 +1,1 @@
+Protocol 6.3 remains NO-PASS/pre-candidate until canonical source routing/version/profile surfaces are reconciled and transient probe files are deleted.
