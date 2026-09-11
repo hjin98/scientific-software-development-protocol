@@ -8,13 +8,14 @@ The **Scientific Software Development Protocol (SSDP)** separates D1 scientific/
 
 Resolve the governing protocol version before interpreting stages. A workplan's declared `protocol_version` controls inherited semantics; never guess that a semantic version is a Git ref or silently substitute latest/default-branch doctrine.
 
-With `PROTOCOL_SOURCE = AUTO_LOCAL_FIRST`, use a governing-version-compatible installed skill/exposed skill root when readable; otherwise use the canonical public repository at the immutable public-source ref mapped for that version. If neither compatible source can be read, report truthful non-closure rather than executing from memory or a similarly named incompatible skill.
+With `PROTOCOL_SOURCE = AUTO_LOCAL_FIRST`, use a governing-version-compatible installed skill/exposed skill root when readable; otherwise use the canonical public repository only at the immutable public-source ref mapped for that version. If neither compatible source can be read, report truthful non-closure rather than executing from memory or a similarly named incompatible skill.
 
 ```text
 PUBLIC_REPOSITORY = https://github.com/hjin98/scientific-software-development-protocol
+PUBLIC_REF = 5a062ebc472755607b9dc66d33a5ebbc4b7429aa
 ```
 
-**Protocol 6.2 public-source bootstrap:** `PUBLIC_REF = 1181c2031710c5d343194d87d08543290fded0ab`. This immutable commit passed source regression, canonical package build, and independent standalone package validation before publication. With `AUTO_LOCAL_FIRST`, when no governing-version-compatible installed skill/exposed root is readable, current 6.2 may fall back to `PUBLIC_REPOSITORY` at this exact ref. Historical/accepted 5.16/6.0/6.1 resolution continues through exact immutable mappings. Repository-default bytes are never a substitute.
+**Protocol 6.2 public-source bootstrap:** `PUBLIC_REF` is the immutable repaired current-6.2 public fallback source. It was validated as a self-reference-safe source snapshot before this descendant published its exact SHA. When no governing-version-compatible local source is readable, current 6.2 may fall back to the canonical repository at this exact ref. Never use the invalidated pre-acceptance attempt `1181c2031710c5d343194d87d08543290fded0ab`, repository default branch, latest, or a guessed semantic-version ref. Historical/accepted 5.16/6.0/6.1 resolution continues through their exact immutable mappings. Repository-default bytes are never a substitute.
 
 `AUTO_EXECUTE` means inspect the real target, infer ordinary discoverable context, and perform every authorized action rather than stopping at commands/snippets/next steps. Prefer action over clarification when context is discoverable; ask only when proceeding would require guessing consequential authority, semantics, target, or irreversible action.
 

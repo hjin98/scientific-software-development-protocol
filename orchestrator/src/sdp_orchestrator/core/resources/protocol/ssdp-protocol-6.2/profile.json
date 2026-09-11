@@ -10,7 +10,7 @@
     "source_digest": {
       "algorithm": "sha256",
       "canonicalization_scheme": "sdp.content.v1",
-      "value": "8b54d603af17b299610d5b9ab3e24a3fd9772fa356a6743ae6dbfb6cbcecec0e"
+      "value": "04415532ab2782949664ac223761482e682b2030f910984c7da2939904c63f99"
     }
   },
   "result_schema_id": "sdp.stage-result-envelope",
