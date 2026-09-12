@@ -1,4 +1,4 @@
-name: Temporary Protocol 6.3 Core diagnostic
+name: Temporary Protocol 6.3 final repair assembly
 
 on:
   push:
@@ -9,8 +9,8 @@ permissions:
   contents: write
 
 jobs:
-  diagnose:
-    if: github.event.head_commit.message == 'Diagnose Protocol 6.3 Core validation'
+  assemble:
+    if: github.event.head_commit.message == 'Assemble Protocol 6.3 repaired semantic candidate'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -20,30 +20,55 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - run: |
+      - name: Apply owner-layer repairs
+        run: |
           python .github/protocol63_repair.py
           python .github/protocol63_fixture_patch.py
-          python -m pip install -r source/requirements-validation.txt
-          python -m pip install ./orchestrator -r orchestrator/requirements-dev.txt
-      - name: Capture profile and Core validation
+          python .github/protocol63_strengthen.py
+      - name: Install validation dependencies
+        run: python -m pip install -r source/requirements-validation.txt
+      - name: Run focused independent-review discriminators
+        run: python -m unittest tests.test_protocol_63_independent_review_repairs -v
+      - name: Run Protocol 6.3 PEM regression
+        run: python -m unittest tests.test_protocol_63_engineering_memory tests.test_protocol_63_reopened_repairs tests.test_protocol_63_independent_review_repairs -v
+      - name: Run full repository regression
+        run: python -m unittest discover -s tests -v
+      - name: Validate self-hosted PEM
+        run: python source/project_engineering_memory.py PROJECT-ENGINEERING-MEMORY.md
+      - name: Regenerate and validate distribution
         run: |
-          set +e
-          {
-            echo '=== generate ==='
-            python orchestrator/scripts/generate_protocol_snapshot.py
-            echo "generate_status=$?"
-            echo '=== check ==='
-            python orchestrator/scripts/generate_protocol_snapshot.py --check
-            echo "check_status=$?"
-            echo '=== core ==='
-            python orchestrator/scripts/run_core_tests.py
-            echo "core_status=$?"
-          } > qualification/ssdp6/DIAGNOSTIC-PROTOCOL-6.3-CORE-REPAIR.txt 2>&1
-          exit 0
-      - name: Publish diagnostic
+          rm -rf /tmp/protocol-dist
+          python source/build_skills.py --output /tmp/protocol-dist
+          rm -rf dist
+          cp -a /tmp/protocol-dist dist
+          python source/validate_packages.py --dist dist
+          python source/check_dist.py --expected /tmp/protocol-dist --committed dist
+      - name: Install orchestrator Core
+        run: python -m pip install ./orchestrator -r orchestrator/requirements-dev.txt
+      - name: Remove temporary execution machinery before containment checks
+        run: |
+          rm -f .github/protocol63_repair.py
+          rm -f .github/protocol63_fixture_patch.py
+          rm -f .github/protocol63_strengthen.py
+          rm -f .github/workflows/temporary-protocol63-independent-review-repair.yml
+          rm -f qualification/ssdp6/DIAGNOSTIC-PROTOCOL-6.3-INDEPENDENT-REVIEW-REPAIR.txt
+          rm -f qualification/ssdp6/DIAGNOSTIC-PROTOCOL-6.3-CORE-REPAIR.txt
+      - name: Regenerate and validate current profile plus frozen profiles
+        run: |
+          python orchestrator/scripts/generate_protocol_snapshot.py
+          python orchestrator/scripts/generate_protocol_snapshot.py --check
+      - name: Run Orchestrator Core acceptance
+        run: python orchestrator/scripts/run_core_tests.py
+      - name: Final static checks
+        run: |
+          git diff --check
+          python -m unittest tests.test_protocol_63_independent_review_repairs -v
+          python source/project_engineering_memory.py PROJECT-ENGINEERING-MEMORY.md
+      - name: Commit repaired semantic candidate
         run: |
           git config user.name 'Protocol 6.3 repair automation'
           git config user.email 'protocol63-repair@users.noreply.github.com'
-          git add qualification/ssdp6/DIAGNOSTIC-PROTOCOL-6.3-CORE-REPAIR.txt
-          git commit -m 'Record Protocol 6.3 Core repair diagnostic'
+          git add -A
+          git diff --cached --check
+          git commit -m 'Repair Protocol 6.3 independent review blockers'
           git push origin HEAD:ssdp-6.3-engineering-memory
