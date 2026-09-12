@@ -34,7 +34,7 @@ accepted Protocol 6.2 public bootstrap:    5a062ebc472755607b9dc66d33a5ebbc4b742
 current 6.3 public bootstrap:               dc22f09fd38dbbfeaeb0160152da9b284654f66e
 later 6.3 public mapping descendant:        026eecf6ce382c3445ed218aeca80dcf2fb9a426
 final 6.3 semantic candidate:               026eecf6ce382c3445ed218aeca80dcf2fb9a426
-fresh F2/static-sensor evidence commit:     6fc26ce374b5346495782871d5d7241de5b90071
+fresh F3/static-sensor evidence commit:     5362f39107aa3f5760f501c02c66e3d25434cac7
 Protocol 6.3 recovery:                       UNAVAILABLE
 ```
 
@@ -42,7 +42,7 @@ Earlier 6.3 chains (`1484c1d...`/`8d0ad239...` and `5ee4b3ac...`/`1bfb789...`/`7
 
 ## Governing surfaces
 
-Review at minimum the active workplan; preservation census; implementation state; `qualification/ssdp6/RESULTS-GPT-5.6-SOL-2026-09-12-PROTOCOL-6.3-F2.md`; static activation sensors; PEM/evidence/convergence/workflow/testing/versioning/Git/trust owners; `source/project_engineering_memory.py`; `PROJECT-ENGINEERING-MEMORY.md`; Protocol 6.3 focused tests; generated `dist/`; Protocol 6.3 profile/prompts/snapshot; and frozen prior-version resources.
+Review at minimum the active workplan; preservation census; implementation state; `qualification/ssdp6/RESULTS-GPT-5.6-SOL-2026-09-12-PROTOCOL-6.3-F3.md`; static activation sensors; PEM/evidence/convergence/workflow/testing/versioning/Git/trust owners; `source/project_engineering_memory.py`; `PROJECT-ENGINEERING-MEMORY.md`; Protocol 6.3 focused tests; generated `dist/`; Protocol 6.3 profile/prompts/snapshot; and frozen prior-version resources.
 
 ## Highest-risk falsification obligations
 
