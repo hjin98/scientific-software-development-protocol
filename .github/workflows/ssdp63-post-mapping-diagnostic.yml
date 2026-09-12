@@ -1,0 +1,90 @@
+name: Protocol 6.3 post-mapping diagnostic
+
+on:
+  push:
+    branches:
+      - ssdp-6.3-engineering-memory
+
+permissions:
+  contents: write
+
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install dependencies
+        run: |
+          python -m pip install -r source/requirements-validation.txt
+          python -m pip install ./orchestrator -r orchestrator/requirements-dev.txt
+      - name: Reconstruct mapped descendant and capture gates
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          START_SHA=$(git rev-parse HEAD)
+          BOOTSTRAP=5ee4b3ac3ca1666b0499f7a72f55adcc411bf4bb
+          PENDING=UNAVAILABLE_PENDING_6.3_BOOTSTRAP_QUALIFICATION
+          python - <<'PY'
+          from pathlib import Path
+          pending = 'UNAVAILABLE_PENDING_6.3_BOOTSTRAP_QUALIFICATION'
+          replacement = '5ee4b3ac3ca1666b0499f7a72f55adcc411bf4bb'
+          for raw in [
+              'source/shared/references/protocol-versioning-and-compatibility.md',
+              'source/shared/references/development-workflow-prompts.md',
+              'PORTABILITY.md', 'README.md', 'tests/test_protocol_63_bootstrap.py']:
+              p = Path(raw); text = p.read_text(encoding='utf-8')
+              if pending not in text: raise SystemExit(f'missing pending sentinel: {raw}')
+              p.write_text(text.replace(pending, replacement), encoding='utf-8')
+          PY
+          python source/build_skills.py --output dist
+          python orchestrator/scripts/generate_protocol_snapshot.py
+          rm -f .github/workflows/ssdp63-post-mapping-diagnostic.yml
+
+          LOG=/tmp/ssdp63-post-map.log
+          : > "$LOG"
+          gate() {
+            name="$1"; shift
+            echo "===== $name =====" >> "$LOG"
+            set +e
+            "$@" >> "$LOG" 2>&1
+            rc=$?
+            set -e
+            echo "EXIT=$rc" >> "$LOG"
+            echo >> "$LOG"
+          }
+          gate UNITTEST env CI=1 python -m unittest discover -s tests -v
+          gate PEM python source/project_engineering_memory.py PROJECT-ENGINEERING-MEMORY.md
+          rm -rf /tmp/protocol-dist
+          gate BUILD python source/build_skills.py --output /tmp/protocol-dist
+          gate PACKAGES python source/validate_packages.py --dist /tmp/protocol-dist
+          gate DIST python source/check_dist.py --expected /tmp/protocol-dist --committed dist
+          gate SNAPSHOT python orchestrator/scripts/generate_protocol_snapshot.py --check
+          gate CORE python orchestrator/scripts/run_core_tests.py
+          gate WHITESPACE git diff --check
+          gate FROZEN git diff --exit-code "$START_SHA" -- \
+            orchestrator/src/sdp_orchestrator/core/resources/protocol/sdp-protocol-5.16 \
+            orchestrator/src/sdp_orchestrator/core/resources/protocol/ssdp-protocol-6.0 \
+            orchestrator/src/sdp_orchestrator/core/resources/protocol/ssdp-protocol-6.1 \
+            orchestrator/src/sdp_orchestrator/core/resources/protocol/ssdp-protocol-6.2
+
+          git reset --hard "$GITHUB_SHA"
+          git clean -fd
+          rm -f .github/workflows/ssdp63-post-mapping-diagnostic.yml
+          out=qualification/ssdp6/TEMP-PROTOCOL-6.3-POST-MAPPING-DIAGNOSTIC.txt
+          {
+            echo "Protocol 6.3 post-mapping generated descendant diagnostic"
+            echo "bootstrap=$BOOTSTRAP"
+            echo "trigger=$GITHUB_SHA"
+            echo
+            cat "$LOG"
+          } > "$out"
+          git add -A
+          git commit -m "Record temporary Protocol 6.3 post-mapping diagnostic"
+          git push origin "HEAD:${GITHUB_REF_NAME}"
