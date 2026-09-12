@@ -133,7 +133,13 @@ A failure record uses `occurrences`, each with a stable family-scoped ID and, wh
       evidence: [...]
 ```
 
-One causal episode producing many failing tests is normally one occurrence. A later independent reintroduction after an actually accepted repair is another occurrence and recurrence. Commit/file/issue timestamps or rebase order alone cannot establish recurrence chronology.
+One causal episode producing many failing tests is normally one occurrence. A later independent reintroduction after an actually accepted repair is another occurrence and recurrence. Commit/file/issue timestamps or rebase order alone cannot establish recurrence chronology. For Git-native recurrence, a repair-acceptance evidence route must resolve to immutable content containing a typed `pem-repair-acceptance` record that names the exact `repair_identity`, declares `state: ACCEPTED`, and names the governing accepting `owner`; an arbitrary descendant commit/file is not acceptance evidence. Non-Git recurrence requires a durable equivalent binding the same repair identity plus independently warrantable ordering.
+
+```yaml pem-repair-acceptance
+repair_identity: commit:<immutable-repair-identity>
+state: ACCEPTED
+owner: project-defined-acceptance-owner
+```
 
 Safe/disconfirming evidence that shows a family cause/regime is too broad narrows, splits, or reclassifies the family; it does not erase the real historical occurrence.
 
@@ -175,6 +181,8 @@ PROVEN      -> every owner/workplan evidence obligation for that exact claim is 
                with applicable admissible evidence, including required independence,
                replication/comparator, and contradiction closure
 ```
+
+For schema-1 Protocol 6.3 `SUCCESS_PATTERN` records, `PROVEN` is the generalized transferable pattern claim: replication and independent replication are therefore derived obligations even if claimant-supplied `requires_*` flags are absent or false. Independent replication requires at least two admissible supporting provenance clusters. Claimant flags may add detail but cannot waive obligations implied by the claim/family class.
 
 Count, temperature, age, reviewer vote, or repeated assertion cannot auto-promote maturity.
 

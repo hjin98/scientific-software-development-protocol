@@ -5,12 +5,12 @@ protocol_version: 6.2.0
 target_protocol_version: 6.3.0
 status: active
 created_date: 2026-09-11
-reviewed_date: 2026-09-11
+reviewed_date: 2026-09-12
 design_closure_status: pass-after-sixth-review-repair
 implementation_handoff: authorized
 implementation_review_state: reopened-no-pass
-reviewed_candidate_no_pass: 7f6774156e8595ac9a04227e1c0be30783525a67
-reopened_stages: B,C,D,E,F
+reviewed_candidate_no_pass: 100cbde296de6c1a8db14151f34cfacfebc90eb3
+reopened_stages: D,E,F
 stage_g_recovery_gate: blocked-pending-repair-requalification-independent-review
 active_serious_challenge: none
 parent_protocol_62_recovery: b59adc77efe6951912cfd705cc43830c58ca27d0
@@ -810,157 +810,70 @@ If implementation or independent Review finds a genuine blocker, route to the ea
 
 ### 17.1 Current Protocol 6.3 implementation-review repair contract
 
-The Protocol 6.2-governed independent assembled-candidate Review of semantic candidate `7f6774156e8595ac9a04227e1c0be30783525a67` is **NO-PASS** with **no Serious Challenge** to the accepted 6.2 parent or the 6.3 D3 design contract. The previously reviewed candidate `8d0ad2395ccd126c133d8aad206cfc859f660124` and bootstrap `1484c1d3caa49d87cc15bc52a5e775399c1dae1b` remain historical invalidated evidence only. The repaired publication-coherence work corresponding to prior D2 review findings is not reopened by this Review and should be preserved unless a new discriminator falsifies it. The remaining blockers are false-pass defects in evidence-binding health, observation identity, recurrence lineage, maturity/comparative claim validation, notice triggers, HAS/template integration, and Stage-F realization accounting. Stage G recovery/cutover remains blocked until these items close on one new replacement semantic candidate and a fresh independent assembled-candidate Review passes.
+The Protocol 6.2-governed assembled-candidate Review of branch state `100cbde296de6c1a8db14151f34cfacfebc90eb3` is **NO-PASS** with **no Serious Challenge** to accepted Protocol 6.2 authority or the Protocol 6.3 D3 design contract. D1 binding-health, D2 logical-publication, D3 observation-identity, D6 typed-notice, and D7 HAS/template repairs in that state are preserved as closed unless a new discriminator falsifies them. The remaining semantic blockers are D4 accepted-repair recurrence and D5 `PROVEN` maturity-obligation derivation. Those semantic repairs invalidate the prior 6.3 bootstrap/candidate acceptance chain and require fresh E/F lifecycle evidence. Stage G remains blocked.
 
-The replacement Stage-F record `qualification/ssdp6/RESULTS-GPT-5.6-SOL-2026-09-11-PROTOCOL-6.3-REOPENED-STAGE-F.md` at qualification commit `5f52fbdf05c62b307b5627d99989209578d1d95a` is historical evidence but **invalidated as Stage-F acceptance evidence** because its `260/260` accounting does not bind every required Q63/F63/Challenge case to an exact realized discriminator and because several claimed direct false-pass fixtures still accept invalid states. Static-sensor, generated/package, frozen-resource, and other realizations may be reused only where applicability to the replacement candidate is explicitly demonstrated; the Stage-F decision itself must be rebuilt.
+Earlier 6.3 candidates, bootstraps, mappings, and Stage-F result sets remain immutable historical evidence only; none may serve as the current acceptance anchor after these repairs begin.
 
-#### Repair D1 - binding health must be real, complete, and decision-relevant
+#### Repair D4R2 - acceptance evidence must establish acceptance of the same repair
 
-Owner: `source/project_engineering_memory.py` under `project-engineering-memory.md`, `evidence-evolution-and-dependencies.md`, Git/versioning, and trust constraints. Extend the existing validator; do not add a parallel registry, daemon, or shadow resolver.
+Owner: convergence/evidence semantics concretized by the existing PEM validator and Git owner. Extend the existing recurrence path; do not add an acceptance registry, daemon, shadow manifest, or wrapper.
 
-- Preserve the repaired local Git discriminator: path-qualified local repository evidence must resolve through a commit/tree-ish publication identity and existing path; a blob object cannot masquerade as a repository revision.
-- Remove the current non-local shortcut that returns `HEALTHY` solely because a route has syntactically explicit source identity. A material non-local route may remain externally/event-driven resolved, but until the declared source/revision/artifact/locator is actually known resolvable and interpretable under its route semantics, current health is `REVIEW_REQUIRED` or `UNAVAILABLE`, not `HEALTHY`.
-- Validate material route health for every current family/notice/capability whose evidence contributes current support, positive guidance, maturity, comparative guidance, authority binding, or current notice state. Do not skip resolution merely because `binding_health` is absent or already non-`HEALTHY`; absent health on a material current warrant is itself review-required and cannot contribute unqualified current support.
-- Repair the self-hosted PEM accordingly. In the reviewed candidate, `FF-001` and `SP-001` are current `SUPPORTED` families with material evidence but no `binding_health`; they must receive explicit recomputed health and any dependent summary/guidance/count state must be recomputed. Preserve the repaired `PC-001` route if it remains independently healthy under the stronger rule.
-- Add direct counterfactuals for an explicit but unreachable non-local source/revision/artifact, a previously healthy route becoming unavailable, and a current supported family whose material route exists but whose family-level binding health is omitted.
+- Preserve the real-prior-occurrence, resolvable-repair, later-independent-event, lineage-order, explicit-independence, and alias/patch-equivalence guards.
+- A healthy descendant evidence route plus Git ancestry is not proof that the repair was accepted. Each Git-native repair-acceptance route must resolve to immutable content carrying a typed acceptance record that binds the exact `repair_identity`, has state `ACCEPTED`, and names a non-empty governing/accepting owner. Its revision must lie after/at the repair and before the later recurrence event.
+- The PEM row references the durable acceptance record; it cannot self-attest acceptance by naming an arbitrary descendant commit/file.
+- Reject an unrelated descendant route, an acceptance record for a different repair, missing/ambiguous acceptance state, missing owner, reversed order, and copied/rebased/cherry-picked alias recurrence.
+- Non-Git recurrence requires an equivalent durable acceptance relation binding the same repair identity plus durable verified order evidence; prose chronology or a self-declared state alone cannot increment recurrence.
 
-**Gate D1:** every material warrant contributing current state has explicit/derived health and a route-specific realization basis; Q63-06/Q63-45/Q63-50/Q63-68 and F63-AB/F63-AY reject syntax-only external health and missing-health support.
+**Gate D4R2:** Q63-11/Q63-67/Q63-72 and F63-AX/F63-BC, including unrelated-descendant and wrong-subject counterfactuals, discriminate correctly.
 
-#### Repair D2 - preserve coherent logical publication repair
+#### Repair D5R2 - `PROVEN` success-pattern independence cannot be waived by omission
 
-No new D2 blocker was found in the second independent Review. Preserve the existing root/partition publication-coherence discriminator, schema/project/basis agreement, stale-partition rejection, and subordinate-index behavior. Re-run Q63-58/Q63-63 and F63-AQ/F63-AT on the new assembled candidate only to establish applicability after adjacent schema/validator edits; do not redesign this layer absent contrary evidence.
+Owner: evidence/testing maturity semantics concretized by the existing PEM validator. Strengthen the existing typed obligation model rather than adding a parallel mechanism.
 
-#### Repair D3 - immutable observation follows accepted event identity across representation changes
+- In schema-1 Protocol 6.3, a `PROVEN` `SUCCESS_PATTERN` is a generalized transferable engineering claim. Derive `replication` and `independent_replication` from that family/claim class in addition to claim support, applicability, and contradiction closure; independent replication requires at least two admissible supporting provenance clusters.
+- Claimant fields such as `requires_replication`, `requires_independence`, or `provenance_independence_required` may be redundant assertions but cannot waive derived obligations when omitted or false.
+- Comparative guidance continues to derive comparator plus comparative-independence or accepted-owner-priority obligations. Unknown/arbitrary CLOSED obligations cannot substitute for required classes.
+- Multiple supporting episodes from one provenance cluster cannot establish a `PROVEN` success pattern even when all `requires_*` flags are omitted.
 
-Owner: PEM schema/validator plus evidence owner.
+**Gate D5R2:** Q63-08/Q63-15/Q63-49/Q63-74/Q63-75/Q63-78 and F63-H/F63-AF/F63-BE/F63-BF/F63-BI include a direct omission counterfactual.
 
-- Preserve the requirement that every evidence-contributing occurrence/application has a non-empty observation/realization result and that assessment/admissibility changes do not rewrite that historical result.
-- Reconciliation must key historical observation immutability by stable accepted event/application identity across the entire logical memory, not by the tuple `(family ID, local row ID, event identity)`. Moving the same accepted event between families, changing a local occurrence/application row ID, split/merge reconciliation, or other representation edits must not create a loophole for silently changing the observation.
-- When the same accepted event/application identity has a changed observation, require explicit clerical-correction provenance that preserves the previous record/value, corrected record/value, reason, and correction evidence. Otherwise fail validation/review.
-- Keep `cause_claim`/mechanism inference independently warrantable from the immutable observation.
-- Add counterfactuals for same-event re-ID, same-event movement between families, and same-event observation mutation across a split/merge boundary without correction provenance, in addition to the existing missing-observation/same-row mutation cases.
+#### Repair E2 - replacement bootstrap after repaired readiness
 
-**Gate D3:** Q63-12/Q63-20/Q63-55/Q63-71/Q63-73 and F63-BB/F63-BD preserve one historical observation identity across valid representation evolution.
+After D4R2/D5R2 source, tests, doctrine, self-hosted PEM, generated descendants, full affected regression, package validation, profile/snapshot parity, Core acceptance, frozen-prior-resource integrity, and whitespace/clean-tree checks pass, choose an already-existing immutable repaired source snapshot. Publish that exact snapshot only from a later descendant mapping commit, rerun exact-ref public realization, regenerate 6.3 descendants, and keep every earlier 6.3 bootstrap/candidate as historical negative fixtures.
 
-#### Repair D4 - prove accepted-repair-before-independent-recurrence
+**Gate E2:** Q63-25/Q63-26/Q63-27/Q63-30 and bootstrap affected requalification pass against the new exact mapping with frozen 5.16/6.0/6.1/6.2 bytes unchanged.
 
-Owner: convergence/evidence semantics concretized by the existing PEM validator and Git owner where the evidence is Git-native.
+#### Repair F2 - rebuild Stage F on the new assembled candidate
 
-- Keep the structured recurrence basis, but stop treating its fields as self-attesting strings. `prior_occurrence`, `repair_identity`, `repair_acceptance_evidence`, `later_event_identity`, and independence basis must be mutually consistent and resolvable enough to establish the claimed chronology/lineage.
-- For Git-native recurrence, verify from immutable repository identity that the repair identity is a valid publication/repair object, the acceptance evidence actually establishes accepted repair, and that accepted repair precedes the later independent occurrence in the relevant lineage. Author/committer/issue timestamps are supporting metadata only.
-- Reject copy/rebase/cherry-pick aliases or the same causal episode even when no explicit `alias_of` flag is supplied. Use durable event/episode/provenance/lineage evidence rather than trusting a caller-declared non-alias state.
-- For non-Git incidents, require an explicit durable acceptance/order route with equivalent semantics; unresolved or uninterpretable chronology cannot increment recurrence-after-accepted-repair.
-- Add negative fixtures containing a real prior occurrence plus invented `repair_identity`/syntactically valid acceptance route, reversed acceptance/event order, and copied/rebased alias recurrence.
+Produce a fresh mechanically auditable per-case map for every Q63-01..Q63-79, F63-A..F63-BJ, and all four inherited Challenge passes. Bind the D4R2 unrelated-descendant/wrong-subject acceptance counterfactuals and the D5R2 omitted-`requires_*` counterfactual explicitly. Run all 115 inherited 6.2 scenarios, affected 6.1/6.2 requalifications, source/PEM/security regression, static activation sensors, new-bootstrap exact-ref realization, frozen-resource checks, build/dist validation, profile/snapshot parity, and Orchestrator Core acceptance. Refresh preservation census, sensors, implementation state, self-hosted PEM/HAS as affected, and independent-review handoff to the new identities. Then perform a fresh independent assembled-candidate Review.
 
-**Gate D4:** Q63-11/Q63-67/Q63-72 and F63-AX/F63-BC count recurrence only when accepted repair is proven before a genuinely independent later occurrence.
-
-#### Repair D5 - close maturity/comparative obligations structurally, not by truthy containers
-
-Owner: evidence/testing semantics concretized by PEM maturity and comparative-guidance validation.
-
-- For `PROVEN`, validate a closed, typed obligation set appropriate to the bounded claim and current owner/workplan. Unknown/arbitrary obligation names must not satisfy closure merely because they carry `status: CLOSED` and syntactically valid evidence. Required independence, replication, comparator, applicability, contradiction, and owner-priority obligations must be represented when the claim needs them and each closure must be backed by applicable admissible evidence.
-- Do not let the claimant decide that no required obligation exists merely by omitting it. Derive/check the obligation classes implied by claim strength, guidance, provenance clustering, governing owner/workplan, and comparator requirements.
-- For `PREFERRED`, `DEFAULT`, `BEST`, `BETTER`, or equivalent comparative guidance, require either explicit current owner authority selecting the tradeoff/default or a typed comparative basis containing the viable comparison set/comparator identity, governing objective and material constraints, applicable evidence, and provenance/independence state. `{}`, an arbitrary non-empty string, or an object with no discriminating comparator/evidence semantics is invalid.
-- Preserve legitimate multiple application counts while ensuring common provenance clusters cannot satisfy independence-sensitive maturity or comparative claims by multiplicity alone.
-- Add direct fixtures for `comparative_basis: {}`, arbitrary non-empty comparative strings, a comparator object lacking evidence/objective, arbitrary unknown CLOSED maturity obligations, and omitted required comparator/independence obligations.
-
-**Gate D5:** Q63-08/Q63-15/Q63-49/Q63-74/Q63-75/Q63-78 and F63-H/F63-AF/F63-BE/F63-BF/F63-BI reject truthy-container maturity/preference laundering.
-
-#### Repair D6 - current notices require typed triggers bound to the admitted basis
-
-Owner: PEM notice representation plus workflow/event-driven freshness and the canonical PEM template.
-
-- Remove the compatibility path that interprets legacy `review_or_expiry: "review on next accepted-base change"` as permanently `CLEAR`. An accepted-base/owner/binding change trigger without the exact basis captured at admission cannot prove that no change occurred; a current notice using such legacy/unbound state is `REVIEW_REQUIRED` until migrated.
-- Canonical schema/template examples must use the same typed/evaluable trigger representation as the validator. For accepted-base, owner, and binding triggers, store the admitted basis and compare it to current state; for deadline/date triggers, evaluate the declared time; for external/manual triggers, require an explicit current assessment state.
-- Fired, unknown, malformed, or indeterminate material triggers cannot leave a notice unqualified `CURRENT`.
-- Update existing tests that currently assert the legacy accepted-base-change text passes, and add a counterfactual proving that an accepted-base advance fires the trigger.
-- Preserve event-driven behavior; no daemon or periodic full-memory scan.
-
-**Gate D6:** Q63-48/Q63-53/Q63-89-equivalent preservation meaning and F63-AE/F63-AJ demonstrate basis-bound trigger transition rather than legacy-text clearance.
-
-#### Repair D7 - one canonical HAS/overlay interface across workflow, template, and validator
-
-Owner: workflow/HAS plus Git acceptance semantics; PEM stores representation but cannot self-select acceptance.
-
-- Keep the executable HAS basis shape already enforced by the validator: `accepted_project_state`, `accepted_pem`, and `candidate_overlay_semantic_candidate`, plus family/notice ID, disposition (`APPLICABLE`, `NOT_APPLICABLE`, `REVIEW_REQUIRED`) and reason. If field names change, change validator, workflow doctrine, workplan examples, and templates atomically; there must be one interface.
-- Repair `source/shared/templates/project_engineering_memory_template.md`, whose current handoff example still documents `accepted_base`/`candidate_overlay`, so a user following the canonical template cannot create a shape rejected by `validate_has`.
-- The template must also document the typed D6 notice trigger rather than opaque `review_or_expiry` text.
-- Preserve the existing overlay helper semantics: exact accepted base, explicit candidate identity, no self-ratification, no accepted-entry deletion by omission, and old HAS becoming review-required on accepted-base advance. Add integration tests that feed the canonical template/workflow shape through the executable validator.
-- This workplan is itself memory-triggering. Its current repair HAS is:
-
-```yaml
-pem_basis:
-  accepted_project_state: b59adc77efe6951912cfd705cc43830c58ca27d0
-  accepted_pem: NONE_PROTOCOL_6.2_PRE_PEM
-  candidate_overlay_semantic_candidate: 7f6774156e8595ac9a04227e1c0be30783525a67
-  overlay_state: REVIEW_REQUIRED_AFTER_INDEPENDENT_REVIEW_NO_PASS
-has:
-  - id: FF-001
-    disposition: REVIEW_REQUIRED
-    reason: The family remains materially relevant, but its current material evidence contributes to support without explicit recomputed binding health under the stronger D1 rule.
-  - id: PC-001
-    disposition: APPLICABLE
-    reason: Prior-version preservation remains directly applicable and its repaired local evidence route should be preserved if it remains healthy under D1 revalidation.
-  - id: SP-001
-    disposition: REVIEW_REQUIRED
-    reason: Owner-layer repair remains relevant, but the current supported family also omits explicit binding health and must be recomputed before unqualified current guidance.
-```
-
-Refresh this basis/HAS when the new replacement semantic candidate exists and again if the accepted project-memory basis materially advances before closeout.
-
-**Gate D7:** Q63-53/Q63-64/Q63-77 and F63-AJ/F63-AU/F63-BH pass using one documented/executable HAS shape; canonical template output is accepted by the same validator without translation glue.
-
-#### Repair E1 - invalidate the second bootstrap when semantic repair begins and publish a third only after readiness
-
-The repaired candidate's public bootstrap `5ee4b3ac3ca1666b0499f7a72f55adcc411bf4bb` and publication mapping `1bfb78947eb0b94a58ec8ff4f2828538f3d4702f` correctly replaced the older invalidated `1484c1d...` chain for candidate `7f677...`. However, D1/D3/D4/D5/D6/D7 require new canonical Protocol 6.3 source/template/validator semantics. Once those repairs begin, `5ee4b3ac...` cannot remain the current 6.3 public fallback because its immutable snapshot lacks the repaired required semantics.
-
-1. Preserve `5ee4b3ac3ca1666b0499f7a72f55adcc411bf4bb` and `1bfb78947eb0b94a58ec8ff4f2828538f3d4702f` as historical evidence of the second bootstrap lifecycle; do not rewrite them. Preserve `1484c1d...` as the earlier invalidated attempt.
-2. Complete current semantic repairs and affected regression first. Then choose an already-existing immutable descendant source snapshot containing the repairs only after canonical package build, standalone package/link validation, routing reachability, PEM validation, template/HAS integration validation, 6.3 profile/snapshot parity and Core acceptance required for bootstrap readiness pass.
-3. Publish the exact new replacement bootstrap only from a later descendant; the bootstrap cannot self-name. Update current versioning/workflow/portability/navigation and exact-ref tests to use only that new replacement for 6.3 fallback.
-4. Rerun exact-ref public realization from the new replacement. Do not use `main`, latest, semantic-version guessing, either invalidated 6.3 bootstrap, or future recovery as current fallback.
-5. Regenerate affected `dist/` and 6.3 profile/prompts/snapshot descendants after source/mapping repair while proving 5.16/6.0/6.1/6.2 frozen bytes unchanged.
-
-**Gate E1:** Q63-25/Q63-26/Q63-27/Q63-30 and bootstrap affected requalification pass against the new mapping; both old 6.3 bootstraps are negative fixtures for current fallback selection.
-
-#### Repair F1 - qualification must bind every claimed PASS to an exact realized discriminator
-
-- Treat both prior Stage-F result sets as historical evidence only for acceptance purposes: the original `...PROTOCOL-6.3-260.md` and the reopened `...PROTOCOL-6.3-REOPENED-STAGE-F.md`. Preserve their genuine observations, but do not copy their PASS dispositions forward.
-- Add/repair executable or paired-human discriminators at the owning surfaces for the specific false-pass states above: syntax-only non-local `HEALTHY`; omitted family-level binding health; same-event observation rewrite after family/row re-ID; invented or misordered structured recurrence; empty/arbitrary comparative basis; arbitrary/omitted maturity obligations; legacy accepted-base notice text; and canonical-template HAS mismatch.
-- Produce a fresh machine-checkable or mechanically auditable case-to-evidence map for **every** Q63-01..Q63-79, F63-A..F63-BJ, and each of the four inherited Challenge passes. Each row names the exact test/fixture/artifact/oracle, candidate/ref it ran against, expected valid/counterfactual discrimination, and realized result. Range summaries such as `Q63-09..20 PASS` are supplementary only and cannot substitute for per-case identity.
-- Missing, skipped, doctrine-only, prose-only, or non-discriminating cases are `NOT RUN`/`NO-PASS`. A test file existing is not proof that a required counterfactual was executed.
-- Run all 115 inherited 6.2 scenarios, affected 6.1/6.2 requalifications, source regression, validator/security tests, static activation sensors, new-bootstrap exact-ref realization, frozen-resource checks, canonical build/dist validation, profile/snapshot parity and Orchestrator Core acceptance on the final assembled replacement semantic candidate.
-- Reconstruct self-hosted PEM statistics, family-level binding health, notice states, maturity/comparative state, and HAS from the repaired canonical rows. Preserve historical observations while superseding invalid current assessments/bindings.
-- Refresh `qualification/ssdp6/INDEPENDENT-REVIEW-HANDOFF-PROTOCOL-6.3.md` to bind the new candidate/bootstrap/mapping, repaired template/HAS/publication state, fresh per-case qualification map, known red/unavailable evidence, and candidate-to-evidence ancestry.
-- Perform a fresh independent Protocol/D3 assembled-candidate Review from a context that does not inherit implementation conclusions. Green CI, the handoff summary, preservation labels, or the implementer's case map are inputs to falsify, not conclusions to inherit.
-
-**Gate F1:** one snapshot-complete Stage-F result maps every required case to an exact realized discriminator and contains no known false-pass oracle; a subsequent independent assembled-candidate Review finds no genuine blocker/Serious Challenge.
+**Gate F2:** no missing/skipped/doctrine-only/non-discriminating claimed PASS; no known false-pass oracle; fresh independent Review finds no blocker or Serious Challenge.
 
 #### Repair sequencing and preservation
 
-Use the smallest owner-layer sequence:
-
 ```text
-D1 + D3-D7 canonical validator/schema/template/workflow repairs
- -> preserve/reverify D2 publication-coherence behavior
- -> repair self-hosted PEM and current HAS/binding health/notice/maturity state
- -> affected source/validator/template integration regression
- -> E1 new replacement-bootstrap readiness and later exact mapping publication
- -> regenerate affected dist/profile/snapshot descendants
- -> bind one new replacement semantic candidate
- -> F1 complete fresh per-case Stage-F qualification
+D4R2 owner repair + direct counterfactuals
+ -> D5R2 derived obligation repair + omission counterfactual
+ -> preserve/reverify D1/D2/D3/D6/D7
+ -> full affected regression/build/package/profile/Core/frozen checks
+ -> E2 immutable replacement bootstrap + later exact mapping
+ -> regenerate descendants and bind one new semantic candidate
+ -> F2 fresh complete Stage-F qualification and lifecycle-evidence refresh
  -> fresh independent assembled-candidate Review
- -> only then Stage G recovery/closeout
+ -> only then Stage G
 ```
 
-Do not introduce a second PEM database, resolver daemon, qualification wrapper, shadow manifest, package-side patch, HAS translation adapter, or acceptance registry. Prefer changing/removing/narrowing the existing validator/schema/template/workflow surfaces so each invalid state becomes impossible or visibly review-required at its earliest owner. Preserve demonstrably unaffected 6.2 doctrine, frozen resources, the repaired D2 publication mechanism, and admissible historical observations. Do not preserve either reviewed 6.3 candidate's false PASS status or either stale 6.3 bootstrap as current fallback.
+Do not introduce a second PEM database, resolver daemon, acceptance registry, qualification wrapper, shadow manifest, package-side patch, or HAS adapter. Preserve accepted 6.2 doctrine, frozen resources, repaired D1/D2/D3/D6/D7 behavior, and admissible historical observations.
+
 
 ## 18. Current design closure state
 
-This is the current-state workplan contract. Detailed review chronology remains in non-authoritative qualification review records rather than amendment replay here.
+This is the current-state workplan contract. Detailed superseded review chronology remains in non-authoritative qualification/review records.
 
-The design preserves accepted 6.2 semantics while adding one evidence-backed, project-local learning layer with balanced positive and negative evidence; exact admissible warrants; immutable observation/superseding-assessment provenance across representation evolution; explicit uncertainty/counterevidence; stable semantic family identity and acyclic lineage; causal application-episode counts with provenance dependence; claim-relative maturity; demonstrated-success versus comparative-preference discipline; overlapping-guidance decision boundaries; aggregation/lifecycle/project scope; authority-safe capability learning; current-owner deduplication; branch-safe overlay and merge semantics; one documented/executable HAS interface; basis-bound typed notice triggers; self-reference-safe updates; schema/recovery behavior; lossless scalable canonical representation; typed non-recursive relations with transitive impact closure; atomic logical publication; co-evolving applicability metadata; observation-versus-causation discipline; accepted-lineage recurrence semantics; cross-repository source identity plus real binding health; coverage-watermark separation; consequence-aware active salience; and evidence-as-data trust boundaries.
+No Serious Challenge is active. Branch state `100cbde296de6c1a8db14151f34cfacfebc90eb3` is NO-PASS. D1, D2, D3, D6, and D7 are preserved closed; D4R2, D5R2, E2, and F2 are active. Protocol 6.3 remains proposed and Stage G/recovery/accepted-current/archive/`main` cutover remain blocked until a new bootstrap/mapping/candidate, complete fresh Stage-F qualification, and independent assembled-candidate Review pass.
 
-No Serious Challenge to accepted Protocol 6.2 authority or to the 6.3 D3 workplan design is identified. Implementation remains authorized on the dedicated 6.3 branch only for the current repair contract. Semantic candidate `7f6774156e8595ac9a04227e1c0be30783525a67` is NO-PASS; its replacement public bootstrap `5ee4b3ac3ca1666b0499f7a72f55adcc411bf4bb`, mapping `1bfb78947eb0b94a58ec8ff4f2828538f3d4702f`, and reopened Stage-F qualification commit `5f52fbdf05c62b307b5627d99989209578d1d95a` are historical/current-at-review evidence but become invalid as current acceptance anchors when the new canonical semantic repair begins. The earlier `8d0ad239...`/`1484c1d...` chain remains historical invalidated evidence. The repaired D2 logical-publication behavior should be preserved; D1, D3, D4, D5, D6, D7, E1, and F1 are reopened; Stage G is blocked. Protocol 6.3 remains proposed until a new replacement semantic candidate, new public bootstrap/mapping, complete fresh per-case qualification, independent Review, immutable recovery, generated/profile/package reconciliation, lifecycle closeout, and separately authorized cutover pass.
+The intended design remains evidence-backed project-local memory with non-authoritative evidence, exact durable warrants, immutable observations, stable semantic identity, provenance-aware application episodes, claim-relative maturity, actual accepted-repair recurrence rather than chronology inference, one HAS/overlay interface, basis-bound notices, atomic publication, and lossless progressive disclosure.
+
 
 ## 19. Intended end state
 

@@ -205,12 +205,18 @@ class ReopenedRepairs(unittest.TestCase):
             repo = Path(td); init_repo(repo)
             prior = commit_file(repo, "evidence.md", "prior\n", "prior occurrence")
             repair = commit_file(repo, "evidence.md", "repair\n", "repair")
-            accepted = commit_file(repo, "evidence.md", "accepted\n", "accept repair")
+            acceptance_text = f"""# Accepted repair\n\n```yaml pem-repair-acceptance\nrepair_identity: commit:{repair}\nstate: ACCEPTED\nowner: fixture qualification owner\n```\n"""
+            accepted = commit_file(repo, "acceptance.md", acceptance_text, "accept repair")
+            unrelated = commit_file(repo, "unrelated.md", "unrelated descendant\n", "unrelated descendant")
+            wrong_text = f"""```yaml pem-repair-acceptance\nrepair_identity: commit:{prior}\nstate: ACCEPTED\nowner: fixture qualification owner\n```\n"""
+            wrong_acceptance = commit_file(repo, "wrong-acceptance.md", wrong_text, "accept wrong repair")
+            missing_owner_text = f"""```yaml pem-repair-acceptance\nrepair_identity: commit:{repair}\nstate: ACCEPTED\n```\n"""
+            missing_owner = commit_file(repo, "missing-owner.md", missing_owner_text, "acceptance missing owner")
             later = commit_file(repo, "evidence.md", "later\n", "later independent occurrence")
             f = family("FAILURE_FAMILY", "FF-001"); f["temperature"] = "WARM"; f["binding_health"] = "HEALTHY"
             f["occurrences"] = [
                 {"id":"O01","event_identity":f"commit:{prior}","lifecycle_context":"qualification","source_project":"local","surfaces":["x"],"observation":"failure","assessments":[{"id":"AS01","state":"ADMISSIBLE","conclusion":"CONFIRMED","evidence":[f"fixture/project@{prior}:evidence.md"]}]},
-                {"id":"O02","event_identity":f"commit:{later}","lifecycle_context":"qualification","source_project":"local","surfaces":["x"],"observation":"later failure","recurrence_after_accepted_repair":True,"recurrence_basis":{"prior_occurrence_id":"O01","repair_identity":f"commit:{repair}","repair_acceptance_evidence":[f"fixture/project@{accepted}:evidence.md"],"later_event_identity":f"commit:{later}","independence_basis":"separate post-acceptance event"},"assessments":[{"id":"AS02","state":"ADMISSIBLE","conclusion":"CONFIRMED","evidence":[f"fixture/project@{later}:evidence.md"]}]},
+                {"id":"O02","event_identity":f"commit:{later}","lifecycle_context":"qualification","source_project":"local","surfaces":["x"],"observation":"later failure","recurrence_after_accepted_repair":True,"recurrence_basis":{"prior_occurrence_id":"O01","repair_identity":f"commit:{repair}","repair_acceptance_evidence":[f"fixture/project@{accepted}:acceptance.md"],"later_event_identity":f"commit:{later}","independence_basis":"separate post-acceptance event"},"assessments":[{"id":"AS02","state":"ADMISSIBLE","conclusion":"CONFIRMED","evidence":[f"fixture/project@{later}:evidence.md"]}]},
             ]
             doc = write_doc(repo / "PROJECT-ENGINEERING-MEMORY.md", [f])
             self.assertEqual(pem.validate_memory(doc), [])
@@ -220,17 +226,36 @@ class ReopenedRepairs(unittest.TestCase):
             errors = pem.validate_memory(pem.load_memory(path), check_summary=False)
             self.assertTrue(any("repair identity is not a resolvable commit" in e for e in errors))
 
+            unrelated_acceptance = copy.deepcopy(f)
+            unrelated_acceptance["occurrences"][1]["recurrence_basis"]["repair_acceptance_evidence"] = [f"fixture/project@{unrelated}:unrelated.md"]
+            path.write_text(root_text([unrelated_acceptance]), encoding="utf-8")
+            errors = pem.validate_memory(pem.load_memory(path), check_summary=False)
+            self.assertTrue(any("does not contain a typed pem-repair-acceptance record" in e for e in errors))
+
+            wrong_subject = copy.deepcopy(f)
+            wrong_subject["occurrences"][1]["recurrence_basis"]["repair_acceptance_evidence"] = [f"fixture/project@{wrong_acceptance}:wrong-acceptance.md"]
+            path.write_text(root_text([wrong_subject]), encoding="utf-8")
+            errors = pem.validate_memory(pem.load_memory(path), check_summary=False)
+            self.assertTrue(any("exactly one typed record for repair" in e for e in errors))
+
+            missing_acceptance_owner = copy.deepcopy(f)
+            missing_acceptance_owner["occurrences"][1]["recurrence_basis"]["repair_acceptance_evidence"] = [f"fixture/project@{missing_owner}:missing-owner.md"]
+            path.write_text(root_text([missing_acceptance_owner]), encoding="utf-8")
+            errors = pem.validate_memory(pem.load_memory(path), check_summary=False)
+            self.assertTrue(any("repair acceptance owner must be non-empty text" in e for e in errors))
+
             reversed_order = copy.deepcopy(f)
             reversed_order["occurrences"][1]["event_identity"] = f"commit:{accepted}"
             reversed_order["occurrences"][1]["recurrence_basis"]["later_event_identity"] = f"commit:{accepted}"
-            reversed_order["occurrences"][1]["recurrence_basis"]["repair_acceptance_evidence"] = [f"fixture/project@{later}:evidence.md"]
-            reversed_order["occurrences"][1]["assessments"][0]["evidence"] = [f"fixture/project@{accepted}:evidence.md"]
+            reversed_order["occurrences"][1]["recurrence_basis"]["repair_acceptance_evidence"] = [f"fixture/project@{later}:acceptance.md"]
+            reversed_order["occurrences"][1]["assessments"][0]["evidence"] = [f"fixture/project@{accepted}:acceptance.md"]
             path.write_text(root_text([reversed_order]), encoding="utf-8")
             errors = pem.validate_memory(pem.load_memory(path), check_summary=False)
             self.assertTrue(any("accepted repair does not precede the later recurrence event" in e for e in errors))
 
             alias_repair = commit_file(repo, "alias.txt", "alias patch\n", "alias repair")
-            alias_accepted = commit_file(repo, "evidence.md", "alias accepted\n", "accept alias repair")
+            alias_acceptance_text = f"""```yaml pem-repair-acceptance\nrepair_identity: commit:{alias_repair}\nstate: ACCEPTED\nowner: fixture qualification owner\n```\n"""
+            alias_accepted = commit_file(repo, "alias-acceptance.md", alias_acceptance_text, "accept alias repair")
             subprocess.run(["git", "-C", str(repo), "revert", "--no-edit", alias_repair], check=True, capture_output=True)
             subprocess.run(["git", "-C", str(repo), "cherry-pick", alias_repair], check=True, capture_output=True)
             alias_later = subprocess.check_output(["git", "-C", str(repo), "rev-parse", "HEAD"], text=True).strip()
@@ -239,7 +264,7 @@ class ReopenedRepairs(unittest.TestCase):
             alias_family["occurrences"][1]["recurrence_basis"] = {
                 "prior_occurrence_id": "O01",
                 "repair_identity": f"commit:{alias_repair}",
-                "repair_acceptance_evidence": [f"fixture/project@{alias_accepted}:evidence.md"],
+                "repair_acceptance_evidence": [f"fixture/project@{alias_accepted}:alias-acceptance.md"],
                 "later_event_identity": f"commit:{alias_later}",
                 "independence_basis": "claimed separate event despite patch alias",
             }
@@ -259,6 +284,25 @@ class ReopenedRepairs(unittest.TestCase):
             errors = pem.validate_memory(pem.load_memory(path), check_summary=False)
             self.assertTrue(any("supporting provenance cluster" in e for e in errors))
             self.assertTrue(any("omits required typed obligation" in e for e in errors))
+
+    def test_d5_proven_success_pattern_cannot_omit_independence_requirement(self):
+        f = family(); f["maturity"] = "PROVEN"; f["applications"] = []
+        for i in range(3):
+            app = copy.deepcopy(family()["applications"][0]); app["id"] = f"A{i+1:02d}"; app["episode_identity"] = f"event-omit-{i}"; app["provenance_cluster"] = "ONE-COMMON-CLUSTER"; f["applications"].append(app)
+        f["temperature"] = "HOT"
+        evidence = ["fixture/project@1111111:path.md#case"]
+        f["maturity_basis"] = {"claim": "transferable success pattern", "obligations": [
+            {"type": "claim_support", "status": "CLOSED", "evidence": evidence},
+            {"type": "applicability", "status": "CLOSED", "evidence": evidence},
+            {"type": "contradiction_resolution", "status": "CLOSED", "evidence": evidence},
+            {"type": "replication", "status": "CLOSED", "minimum_independent_clusters": 1, "evidence": evidence},
+        ]}
+        self.assertNotIn("requires_independence", f["maturity_basis"])
+        self.assertNotIn("provenance_independence_required", f)
+        with tempfile.TemporaryDirectory() as td:
+            path = Path(td) / "PROJECT-ENGINEERING-MEMORY.md"; path.write_text(root_text([f]), encoding="utf-8")
+            errors = pem.validate_memory(pem.load_memory(path), check_summary=False)
+            self.assertTrue(any("omits required typed obligation(s): independent_replication" in e for e in errors))
 
     def test_d5_truthy_comparative_or_arbitrary_closed_obligations_do_not_pass(self):
         with tempfile.TemporaryDirectory() as td:

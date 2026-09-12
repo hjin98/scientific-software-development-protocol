@@ -66,6 +66,10 @@ SUMMARY_RE = re.compile(
     r"(?P<start><!-- BEGIN DERIVED PEM SUMMARY -->\n)(?P<body>.*?)(?P<end><!-- END DERIVED PEM SUMMARY -->)",
     re.DOTALL,
 )
+REPAIR_ACCEPTANCE_RE = re.compile(
+    r"^```yaml pem-repair-acceptance\s*\n(?P<yaml>.*?)^```\s*$",
+    re.MULTILINE | re.DOTALL,
+)
 
 
 class PemError(ValueError):
@@ -201,6 +205,45 @@ def _git_text(root: Path, *args: str) -> str | None:
     except (OSError, subprocess.TimeoutExpired):
         return None
     return proc.stdout.strip() if proc.returncode == 0 else None
+
+
+def _validate_repair_acceptance_artifact(
+    root: Path, route: EvidenceRoute, repair_identity: str, where: str
+) -> None:
+    text = _git_text(root, "show", f"{route.revision}:{route.path}")
+    if text is None:
+        raise PemError(f"{where}: recurrence acceptance artifact cannot be read from immutable route")
+    records: list[dict[str, Any]] = []
+    for match in REPAIR_ACCEPTANCE_RE.finditer(text):
+        try:
+            record = yaml.safe_load(match.group("yaml")) or {}
+        except yaml.YAMLError as exc:
+            raise PemError(f"{where}: invalid typed repair-acceptance YAML: {exc}") from exc
+        records.append(_mapping(record, f"{where}:repair acceptance record"))
+    if not records:
+        raise PemError(f"{where}: recurrence acceptance route does not contain a typed pem-repair-acceptance record")
+    matches = [record for record in records if record.get("repair_identity") == repair_identity]
+    if len(matches) != 1:
+        raise PemError(f"{where}: recurrence acceptance artifact must contain exactly one typed record for repair {repair_identity!r}")
+    record = matches[0]
+    if record.get("state") != "ACCEPTED":
+        raise PemError(f"{where}: repair acceptance record for the claimed repair is not ACCEPTED")
+    _required_text(record.get("owner"), f"{where}:repair acceptance owner")
+
+
+def _validate_repair_acceptance_routes(
+    routes: list[EvidenceRoute], doc: PemDocument, root: Path, repair_identity: str, where: str
+) -> list[str]:
+    revisions: list[str] = []
+    for route in routes:
+        health, reason = evidence_route_health(route, doc)
+        if health != "HEALTHY":
+            raise PemError(f"{where}: recurrence acceptance route is not resolvable: {health}: {reason}")
+        if not _route_is_local(route, doc):
+            raise PemError(f"{where}: recurrence acceptance must be established by a resolvable project-local immutable artifact")
+        _validate_repair_acceptance_artifact(root, route, repair_identity, where)
+        revisions.append(route.revision)
+    return revisions
 
 
 def _route_is_local(route: EvidenceRoute, doc: PemDocument) -> bool:
@@ -441,14 +484,9 @@ def _validate_recurrence_structure(
         for label, commit in (("prior occurrence", prior_commit), ("repair", repair_commit), ("later event", later_commit)):
             if not _git_ok(root, "cat-file", "-e", f"{commit}^{{commit}}"):
                 raise PemError(f"{where}: recurrence {label} identity is not a resolvable commit")
-        acceptance_commits: list[str] = []
-        for route in parsed_evidence:
-            health, reason = evidence_route_health(route, doc)
-            if health != "HEALTHY":
-                raise PemError(f"{where}: recurrence acceptance route is not resolvable: {health}: {reason}")
-            if not _route_is_local(route, doc):
-                raise PemError(f"{where}: Git-native recurrence acceptance must be established by the same resolvable project lineage")
-            acceptance_commits.append(route.revision)
+        acceptance_commits = _validate_repair_acceptance_routes(
+            parsed_evidence, doc, root, repair_identity, where
+        )
         if not _git_ok(root, "merge-base", "--is-ancestor", prior_commit, repair_commit):
             raise PemError(f"{where}: prior occurrence does not precede the claimed repair in project lineage")
         for accepted in acceptance_commits:
@@ -465,6 +503,13 @@ def _validate_recurrence_structure(
                 raise PemError(f"{where}: copied/rebased/cherry-picked patch-equivalent event cannot count as recurrence")
         return True
 
+    if doc is None:
+        raise PemError(f"{where}: non-Git recurrence requires document context to realize repair acceptance")
+    root = _git_root(doc.root)
+    if root is None:
+        raise PemError(f"{where}: non-Git recurrence cannot realize durable repair-acceptance evidence")
+    _validate_repair_acceptance_routes(parsed_evidence, doc, root, repair_identity, where)
+
     chronology = basis.get("chronology_assessment")
     if not isinstance(chronology, dict) or chronology.get("state") != "VERIFIED":
         raise PemError(
@@ -473,8 +518,6 @@ def _validate_recurrence_structure(
     chronology_evidence = _list(chronology.get("evidence"), f"{where}:recurrence_basis:chronology_assessment:evidence")
     if not chronology_evidence:
         raise PemError(f"{where}: non-Git recurrence chronology assessment requires durable evidence")
-    if doc is None:
-        raise PemError(f"{where}: non-Git recurrence requires document context to realize chronology evidence")
     for raw in chronology_evidence:
         route = parse_evidence_route(raw, f"{where}:recurrence_basis:chronology_assessment:evidence")
         health, reason = evidence_route_health(route, doc)
@@ -584,10 +627,13 @@ def _supporting_clusters(family: dict[str, Any]) -> set[str]:
 
 def _required_maturity_obligations(family: dict[str, Any], basis: dict[str, Any]) -> set[str]:
     required = {"claim_support", "applicability", "contradiction_resolution"}
-    if basis.get("requires_replication"):
-        required.add("replication")
-    if basis.get("requires_independence") or family.get("provenance_independence_required"):
-        required.add("independent_replication")
+    if family.get("kind") == "SUCCESS_PATTERN":
+        required.update({"replication", "independent_replication"})
+    else:
+        if basis.get("requires_replication"):
+            required.add("replication")
+        if basis.get("requires_independence") or family.get("provenance_independence_required"):
+            required.add("independent_replication")
     if family.get("guidance_level") in COMPARATIVE_GUIDANCE:
         required.add("comparator")
         if not family.get("comparative_authority"):
