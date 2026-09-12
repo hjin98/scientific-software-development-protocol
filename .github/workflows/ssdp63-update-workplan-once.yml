@@ -1,5 +1,4 @@
-# trigger: current review repair contract
-name: SSDP 6.3 one-shot workplan update
+name: SSDP 6.3 repair execution
 
 on:
   push:
@@ -7,12 +6,13 @@ on:
       - ssdp-6.3-engineering-memory
     paths:
       - .github/workflows/ssdp63-update-workplan-once.yml
+      - .github/ssdp63-repair-runner
 
 permissions:
   contents: write
 
 jobs:
-  update-workplan:
+  repair:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -21,136 +21,40 @@ jobs:
           ref: ssdp-6.3-engineering-memory
       - uses: actions/setup-python@v5
         with:
-          python-version: "3.12"
-      - name: Rewrite current repair contract
-        shell: bash
+          python-version: '3.12'
+      - name: Apply owner-layer repairs
+        run: python .github/ssdp63-repair-runner
+      - name: Install validation and Core dependencies
         run: |
-          python - <<'PY'
-          from pathlib import Path
-
-          path = Path("workplans/active/PROTOCOL-6.3-EVIDENCE-BACKED-PROJECT-ENGINEERING-MEMORY-WORKPLAN.md")
-          text = path.read_text(encoding="utf-8")
-          text = text.replace("reviewed_date: 2026-09-11", "reviewed_date: 2026-09-12", 1)
-          text = text.replace(
-              "reviewed_candidate_no_pass: 7f6774156e8595ac9a04227e1c0be30783525a67",
-              "reviewed_candidate_no_pass: 100cbde296de6c1a8db14151f34cfacfebc90eb3",
-              1,
-          )
-          text = text.replace("reopened_stages: B,C,D,E,F", "reopened_stages: D,E,F", 1)
-
-          start = "### 17.1 Current Protocol 6.3 implementation-review repair contract"
-          end = "## 18. Current design closure state"
-          if start not in text or end not in text:
-              raise SystemExit("workplan repair-contract anchors not found")
-
-          replacement = '''### 17.1 Current Protocol 6.3 implementation-review repair contract
-
-The Protocol 6.2-governed assembled-candidate Review of branch state `100cbde296de6c1a8db14151f34cfacfebc90eb3` is **NO-PASS** with **no Serious Challenge** to accepted Protocol 6.2 authority or the Protocol 6.3 D3 design contract. The repaired D1 binding-health, D2 logical-publication, D3 observation-identity, D6 typed-notice, and D7 HAS/template behavior present in this branch state are preserved as closed implementation work unless a new discriminator falsifies them. The remaining semantic blockers are narrower false-pass defects in D4 accepted-repair recurrence and D5 `PROVEN` maturity obligation derivation. Those defects invalidate the current 6.3 bootstrap/candidate acceptance chain and all Stage-F PASS dispositions that depend on it. Stage G remains blocked.
-
-The earlier candidates `8d0ad2395ccd126c133d8aad206cfc859f660124` and `7f6774156e8595ac9a04227e1c0be30783525a67`, public bootstraps `1484c1d3caa49d87cc15bc52a5e775399c1dae1b` and `5ee4b3ac3ca1666b0499f7a72f55adcc411bf4bb`, mapping `1bfb78947eb0b94a58ec8ff4f2828538f3d4702f`, and both prior Protocol 6.3 Stage-F result sets remain immutable historical evidence. None may serve as the current acceptance anchor after the repairs below begin.
-
-#### Repair D4R2 - acceptance evidence must establish acceptance of the same repair
-
-Owner: convergence/evidence semantics concretized by the existing PEM validator and Git owner. Extend the existing recurrence validation path; do not add an acceptance registry, daemon, shadow manifest, or wrapper.
-
-- Preserve the existing requirements for a real prior occurrence, resolvable repair identity, later independent event, lineage order, explicit independence basis, and rejection of aliases/copies/patch-equivalent recurrence.
-- Stop treating a healthy descendant evidence route plus Git ancestry as proof that a repair was **accepted**. For a Git-native recurrence, each route used as repair-acceptance evidence must resolve to immutable content that carries a typed acceptance record whose subject binds to the exact `repair_identity`, whose state is explicitly `ACCEPTED`, and whose governing/accepting owner is non-empty. The acceptance artifact revision itself must lie after/at the repair and before the later recurrence event.
-- The validator may recognize the typed acceptance record from the evidence artifact itself (for example YAML/front matter carried by the routed immutable file); the PEM row may reference that record but may not self-attest acceptance merely by naming an arbitrary descendant commit or file.
-- A real repair followed by an unrelated descendant commit/file, a typed acceptance record naming a different repair, a missing/ambiguous acceptance state, or a missing accepting owner must not increment recurrence. If acceptance semantics cannot be established, the recurrence claim remains unavailable/review-required rather than counted.
-- Non-Git recurrence requires an equivalent durable acceptance/order route that binds the accepted subject to the same repair identity; prose chronology or a self-declared `VERIFIED` label without such evidence is insufficient.
-
-**Gate D4R2:** Q63-11/Q63-67/Q63-72 and F63-AX/F63-BC plus direct fixtures for unrelated-descendant pseudo-acceptance, wrong-subject acceptance, missing acceptance state/owner, reversed order, and copied/rebased/cherry-picked aliases all discriminate correctly.
-
-#### Repair D5R2 - `PROVEN` success-pattern independence cannot be waived by omission
-
-Owner: evidence/testing maturity semantics concretized by the existing PEM validator. Strengthen the existing typed obligation model rather than adding a parallel maturity mechanism.
-
-- For schema-1 Protocol 6.3 `SUCCESS_PATTERN` records, `PROVEN` is a generalized transferable engineering claim and therefore requires replication and independent replication as derived obligations of the claim/family class, in addition to claim support, applicability, and contradiction closure. At least two admissible supporting provenance clusters must satisfy the independent-replication closure.
-- `requires_replication`, `requires_independence`, `provenance_independence_required`, or equivalent claimant-supplied booleans may be retained only as redundant assertions; omitting or setting them false cannot waive obligations derived from `PROVEN` success-pattern semantics.
-- Comparative guidance continues to derive comparator plus comparative-independence or accepted-owner-priority obligations from guidance strength. Unknown/arbitrary CLOSED obligations remain invalid and cannot substitute for required classes.
-- A `PROVEN` success pattern containing several supporting episodes from one common provenance cluster must fail even when every `requires_*` flag is omitted. A claim that lacks independent replication remains at most `SUPPORTED` under this schema rather than manufacturing proof from count, temperature, review votes, or common harness/policy lineage.
-
-**Gate D5R2:** Q63-08/Q63-15/Q63-49/Q63-74/Q63-75/Q63-78 and F63-H/F63-AF/F63-BE/F63-BF/F63-BI include a direct omission counterfactual and reject common-provenance `PROVEN` laundering without relying on claimant flags.
-
-#### Repair E2 - publish a new bootstrap only after D4R2/D5R2 readiness
-
-`5ee4b3ac3ca1666b0499f7a72f55adcc411bf4bb`, `1bfb78947eb0b94a58ec8ff4f2828538f3d4702f`, `7f6774156e8595ac9a04227e1c0be30783525a67`, and branch state `100cbde296de6c1a8db14151f34cfacfebc90eb3` all predate the completed D4R2/D5R2 semantics and cannot be the current public fallback/candidate acceptance anchors.
-
-1. Complete D4R2/D5R2 owner-layer implementation, focused tests, affected regression, canonical build, standalone package validation, PEM validation, profile/snapshot parity, Core acceptance, frozen-prior-resource checks, and clean-tree/whitespace checks first.
-2. Choose an already-existing immutable descendant source snapshot only after those readiness checks pass. The snapshot must not self-name.
-3. Publish that exact snapshot from a later mapping descendant, regenerate affected `dist/` and 6.3 profile/prompts/snapshot state, and rerun exact-ref public realization.
-4. Bind one new immutable semantic candidate after mapping-bearing generated descendants are coherent. Keep all earlier 6.3 bootstraps/candidates as historical negative fixtures for current fallback selection.
-
-**Gate E2:** Q63-25/Q63-26/Q63-27/Q63-30 and bootstrap affected requalification pass against the new exact mapping while frozen 5.16/6.0/6.1/6.2 resources remain unchanged.
-
-#### Repair F2 - rebuild Stage F on the new candidate with exact D4R2/D5R2 discriminators
-
-- Both prior Protocol 6.3 Stage-F result sets are historical evidence only for acceptance purposes. Preserve genuine observations but do not inherit their PASS dispositions.
-- The fresh per-case map must bind every Q63-01..Q63-79, F63-A..F63-BJ, and all four inherited Challenge passes to exact realized evidence on the new candidate. It must explicitly bind the D4R2 unrelated-descendant/wrong-subject acceptance counterfactuals and the D5R2 omitted-`requires_*` common-provenance counterfactual.
-- Run all 115 inherited Protocol 6.2 scenarios, affected 6.1/6.2 requalifications, source regression, PEM/security validation, static activation sensors, new-bootstrap exact-ref realization, frozen-resource checks, canonical build/dist validation, profile/snapshot parity, and Orchestrator Core acceptance on the final assembled candidate.
-- Refresh the preservation census, static-sensor identity, implementation-state record, self-hosted PEM/HAS as affected, and independent-review handoff so no current artifact points at `7f677...`, `5ee4...`, `1bfb...`, `5f52...`, or `100cbde...` as the final repaired acceptance identity.
-- Perform a fresh independent assembled-candidate Protocol/D3 Review after implementation-context acceptance. Green CI and implementer qualification remain evidence to challenge rather than authority.
-
-**Gate F2:** one snapshot-complete fresh Stage-F result has no known false-pass oracle and a subsequent independent assembled-candidate Review finds no blocker or Serious Challenge.
-
-#### Repair sequencing and preservation
-
-Use the smallest owner-layer sequence:
-
-```text
-update this current repair contract
- -> D4R2 recurrence acceptance-subject binding + focused counterfactuals
- -> D5R2 derived PROVEN success-pattern independence + omission counterfactual
- -> preserve/reverify closed D1/D2/D3/D6/D7 behavior
- -> affected source/validator/documentation regression
- -> E2 replacement-bootstrap readiness, immutable snapshot, later exact mapping
- -> regenerate affected dist/profile/snapshot descendants and bind one new semantic candidate
- -> F2 complete fresh per-case Stage-F qualification and lifecycle-evidence refresh
- -> fresh independent assembled-candidate Review
- -> only then Stage G recovery/closeout
-```
-
-Do not introduce a second PEM database, resolver daemon, acceptance registry, qualification wrapper, shadow manifest, package-side patch, or HAS adapter. Prefer alteration of the existing validator/schema/evidence path and direct counterfactual tests. Preserve demonstrably unaffected Protocol 6.2 doctrine, frozen resources, D1/D2/D3/D6/D7 repairs, D2 logical-publication behavior, and admissible historical observations.
-'''
-          text = text[:text.index(start)] + replacement + "\n\n" + text[text.index(end):]
-
-          start18 = "## 18. Current design closure state"
-          end18 = "## 19. Intended end state"
-          if start18 not in text or end18 not in text:
-              raise SystemExit("workplan design-state anchors not found")
-          section18 = '''## 18. Current design closure state
-
-This is the current-state workplan contract; detailed superseded repair chronology remains in non-authoritative qualification/review records.
-
-The Protocol 6.3 design remains coherent with accepted Protocol 6.2 and no Serious Challenge is active. Branch state `100cbde296de6c1a8db14151f34cfacfebc90eb3` is NO-PASS. D1 binding health, D2 logical publication, D3 immutable observation identity, D6 typed notice triggers, and D7 HAS/template integration are preserved as closed implementation work. D4R2, D5R2, E2, and F2 are the active repair obligations. Protocol 6.3 remains proposed; Stage G, recovery, accepted-current status, workplan archive, and `main` cutover remain blocked until a new semantic candidate/bootstrap/mapping, fresh complete Stage-F qualification, and independent assembled-candidate Review pass.
-
-The intended 6.3 semantics remain evidence-backed, project-local engineering memory with balanced positive/negative learning; exact admissible warrants; immutable observation/superseding assessment; stable semantic identity and acyclic lineage; causal application-episode counting with provenance dependence; claim-relative maturity; demonstrated-success versus comparative-preference discipline; accepted-repair recurrence based on actual accepted subject identity rather than chronology; one HAS/overlay interface; basis-bound notices; atomic logical publication; consequence-aware salience; and non-authoritative evidence-as-data trust boundaries.
-'''
-          text = text[:text.index(start18)] + section18 + "\n\n" + text[text.index(end18):]
-
-          required = [
-              "reviewed_candidate_no_pass: 100cbde296de6c1a8db14151f34cfacfebc90eb3",
-              "#### Repair D4R2",
-              "unrelated-descendant pseudo-acceptance",
-              "#### Repair D5R2",
-              "omitting or setting them false cannot waive obligations",
-              "#### Repair E2",
-              "#### Repair F2",
-              "D4R2, D5R2, E2, and F2 are the active repair obligations",
-          ]
-          missing = [item for item in required if item not in text]
-          if missing:
-              raise SystemExit(f"workplan rewrite incomplete: {missing}")
-          path.write_text(text, encoding="utf-8")
-          PY
+          python -m pip install -r source/requirements-validation.txt
+          python -m pip install ./orchestrator -r orchestrator/requirements-dev.txt
+      - name: Focused D4 D5 repair tests
+        run: python -m unittest -v tests.test_protocol_63_reopened_repairs
+      - name: Validate self-hosted PEM and regenerate descendants
+        run: |
+          python source/project_engineering_memory.py PROJECT-ENGINEERING-MEMORY.md --write-summary
+          rm -rf /tmp/protocol-dist
+          python source/build_skills.py --output /tmp/protocol-dist
+          python source/validate_packages.py --dist /tmp/protocol-dist
+          rm -rf dist
+          cp -a /tmp/protocol-dist dist
+          python orchestrator/scripts/generate_protocol_snapshot.py
+      - name: Full affected repository regression
+        run: python -m unittest discover -s tests -v
+      - name: Final assembled package and Core checks
+        run: |
+          rm -rf /tmp/protocol-dist-check
+          python source/build_skills.py --output /tmp/protocol-dist-check
+          python source/validate_packages.py --dist /tmp/protocol-dist-check
+          python source/check_dist.py --expected /tmp/protocol-dist-check --committed dist
+          python orchestrator/scripts/generate_protocol_snapshot.py --check
+          python orchestrator/scripts/run_core_tests.py
           git diff --check
-          git diff -- workplans/active/PROTOCOL-6.3-EVIDENCE-BACKED-PROJECT-ENGINEERING-MEMORY-WORKPLAN.md
-      - name: Commit workplan and remove one-shot workflow
-        shell: bash
+      - name: Commit repaired semantic source
         run: |
-          rm .github/workflows/ssdp63-update-workplan-once.yml
-          git config user.name "ssdp-protocol-bot"
-          git config user.email "86921078+hjin98@users.noreply.github.com"
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add -A
-          git commit -m "Reopen Protocol 6.3 D4/D5 repair contract"
+          git diff --cached --check
+          git commit -m 'Repair Protocol 6.3 recurrence and maturity discriminators'
           git push origin HEAD:ssdp-6.3-engineering-memory

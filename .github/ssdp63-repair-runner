@@ -1,0 +1,165 @@
+from pathlib import Path
+
+ROOT = Path('.')
+
+# Workplan: collapse superseded repair replay into the current delta.
+wp = ROOT / 'workplans/active/PROTOCOL-6.3-EVIDENCE-BACKED-PROJECT-ENGINEERING-MEMORY-WORKPLAN.md'
+text = wp.read_text(encoding='utf-8')
+text = text.replace('reviewed_date: 2026-09-11', 'reviewed_date: 2026-09-12', 1)
+text = text.replace('reviewed_candidate_no_pass: 7f6774156e8595ac9a04227e1c0be30783525a67', 'reviewed_candidate_no_pass: 100cbde296de6c1a8db14151f34cfacfebc90eb3', 1)
+text = text.replace('reopened_stages: B,C,D,E,F', 'reopened_stages: D,E,F', 1)
+start = '### 17.1 Current Protocol 6.3 implementation-review repair contract'
+end = '## 18. Current design closure state'
+if start not in text or end not in text:
+    raise SystemExit('workplan repair-contract anchors not found')
+replacement = '''### 17.1 Current Protocol 6.3 implementation-review repair contract
+
+The Protocol 6.2-governed assembled-candidate Review of branch state `100cbde296de6c1a8db14151f34cfacfebc90eb3` is **NO-PASS** with **no Serious Challenge** to accepted Protocol 6.2 authority or the Protocol 6.3 D3 design contract. D1 binding-health, D2 logical-publication, D3 observation-identity, D6 typed-notice, and D7 HAS/template repairs in that state are preserved as closed unless a new discriminator falsifies them. The remaining semantic blockers are D4 accepted-repair recurrence and D5 `PROVEN` maturity-obligation derivation. Those semantic repairs invalidate the prior 6.3 bootstrap/candidate acceptance chain and require fresh E/F lifecycle evidence. Stage G remains blocked.
+
+Earlier 6.3 candidates, bootstraps, mappings, and Stage-F result sets remain immutable historical evidence only; none may serve as the current acceptance anchor after these repairs begin.
+
+#### Repair D4R2 - acceptance evidence must establish acceptance of the same repair
+
+Owner: convergence/evidence semantics concretized by the existing PEM validator and Git owner. Extend the existing recurrence path; do not add an acceptance registry, daemon, shadow manifest, or wrapper.
+
+- Preserve the real-prior-occurrence, resolvable-repair, later-independent-event, lineage-order, explicit-independence, and alias/patch-equivalence guards.
+- A healthy descendant evidence route plus Git ancestry is not proof that the repair was accepted. Each Git-native repair-acceptance route must resolve to immutable content carrying a typed acceptance record that binds the exact `repair_identity`, has state `ACCEPTED`, and names a non-empty governing/accepting owner. Its revision must lie after/at the repair and before the later recurrence event.
+- The PEM row references the durable acceptance record; it cannot self-attest acceptance by naming an arbitrary descendant commit/file.
+- Reject an unrelated descendant route, an acceptance record for a different repair, missing/ambiguous acceptance state, missing owner, reversed order, and copied/rebased/cherry-picked alias recurrence.
+- Non-Git recurrence requires an equivalent durable acceptance relation binding the same repair identity plus durable verified order evidence; prose chronology or a self-declared state alone cannot increment recurrence.
+
+**Gate D4R2:** Q63-11/Q63-67/Q63-72 and F63-AX/F63-BC, including unrelated-descendant and wrong-subject counterfactuals, discriminate correctly.
+
+#### Repair D5R2 - `PROVEN` success-pattern independence cannot be waived by omission
+
+Owner: evidence/testing maturity semantics concretized by the existing PEM validator. Strengthen the existing typed obligation model rather than adding a parallel mechanism.
+
+- In schema-1 Protocol 6.3, a `PROVEN` `SUCCESS_PATTERN` is a generalized transferable engineering claim. Derive `replication` and `independent_replication` from that family/claim class in addition to claim support, applicability, and contradiction closure; independent replication requires at least two admissible supporting provenance clusters.
+- Claimant fields such as `requires_replication`, `requires_independence`, or `provenance_independence_required` may be redundant assertions but cannot waive derived obligations when omitted or false.
+- Comparative guidance continues to derive comparator plus comparative-independence or accepted-owner-priority obligations. Unknown/arbitrary CLOSED obligations cannot substitute for required classes.
+- Multiple supporting episodes from one provenance cluster cannot establish a `PROVEN` success pattern even when all `requires_*` flags are omitted.
+
+**Gate D5R2:** Q63-08/Q63-15/Q63-49/Q63-74/Q63-75/Q63-78 and F63-H/F63-AF/F63-BE/F63-BF/F63-BI include a direct omission counterfactual.
+
+#### Repair E2 - replacement bootstrap after repaired readiness
+
+After D4R2/D5R2 source, tests, doctrine, self-hosted PEM, generated descendants, full affected regression, package validation, profile/snapshot parity, Core acceptance, frozen-prior-resource integrity, and whitespace/clean-tree checks pass, choose an already-existing immutable repaired source snapshot. Publish that exact snapshot only from a later descendant mapping commit, rerun exact-ref public realization, regenerate 6.3 descendants, and keep every earlier 6.3 bootstrap/candidate as historical negative fixtures.
+
+**Gate E2:** Q63-25/Q63-26/Q63-27/Q63-30 and bootstrap affected requalification pass against the new exact mapping with frozen 5.16/6.0/6.1/6.2 bytes unchanged.
+
+#### Repair F2 - rebuild Stage F on the new assembled candidate
+
+Produce a fresh mechanically auditable per-case map for every Q63-01..Q63-79, F63-A..F63-BJ, and all four inherited Challenge passes. Bind the D4R2 unrelated-descendant/wrong-subject acceptance counterfactuals and the D5R2 omitted-`requires_*` counterfactual explicitly. Run all 115 inherited 6.2 scenarios, affected 6.1/6.2 requalifications, source/PEM/security regression, static activation sensors, new-bootstrap exact-ref realization, frozen-resource checks, build/dist validation, profile/snapshot parity, and Orchestrator Core acceptance. Refresh preservation census, sensors, implementation state, self-hosted PEM/HAS as affected, and independent-review handoff to the new identities. Then perform a fresh independent assembled-candidate Review.
+
+**Gate F2:** no missing/skipped/doctrine-only/non-discriminating claimed PASS; no known false-pass oracle; fresh independent Review finds no blocker or Serious Challenge.
+
+#### Repair sequencing and preservation
+
+```text
+D4R2 owner repair + direct counterfactuals
+ -> D5R2 derived obligation repair + omission counterfactual
+ -> preserve/reverify D1/D2/D3/D6/D7
+ -> full affected regression/build/package/profile/Core/frozen checks
+ -> E2 immutable replacement bootstrap + later exact mapping
+ -> regenerate descendants and bind one new semantic candidate
+ -> F2 fresh complete Stage-F qualification and lifecycle-evidence refresh
+ -> fresh independent assembled-candidate Review
+ -> only then Stage G
+```
+
+Do not introduce a second PEM database, resolver daemon, acceptance registry, qualification wrapper, shadow manifest, package-side patch, or HAS adapter. Preserve accepted 6.2 doctrine, frozen resources, repaired D1/D2/D3/D6/D7 behavior, and admissible historical observations.
+'''
+text = text[:text.index(start)] + replacement + '\n\n' + text[text.index(end):]
+start18 = '## 18. Current design closure state'
+end18 = '## 19. Intended end state'
+section18 = '''## 18. Current design closure state
+
+This is the current-state workplan contract. Detailed superseded review chronology remains in non-authoritative qualification/review records.
+
+No Serious Challenge is active. Branch state `100cbde296de6c1a8db14151f34cfacfebc90eb3` is NO-PASS. D1, D2, D3, D6, and D7 are preserved closed; D4R2, D5R2, E2, and F2 are active. Protocol 6.3 remains proposed and Stage G/recovery/accepted-current/archive/`main` cutover remain blocked until a new bootstrap/mapping/candidate, complete fresh Stage-F qualification, and independent assembled-candidate Review pass.
+
+The intended design remains evidence-backed project-local memory with non-authoritative evidence, exact durable warrants, immutable observations, stable semantic identity, provenance-aware application episodes, claim-relative maturity, actual accepted-repair recurrence rather than chronology inference, one HAS/overlay interface, basis-bound notices, atomic publication, and lossless progressive disclosure.
+'''
+if start18 not in text or end18 not in text:
+    raise SystemExit('workplan state anchors not found')
+text = text[:text.index(start18)] + section18 + '\n\n' + text[text.index(end18):]
+wp.write_text(text, encoding='utf-8')
+
+# Validator D4: typed immutable acceptance artifact.
+p = ROOT / 'source/project_engineering_memory.py'
+src = p.read_text(encoding='utf-8')
+anchor = '''SUMMARY_RE = re.compile(\n    r"(?P<start><!-- BEGIN DERIVED PEM SUMMARY -->\\n)(?P<body>.*?)(?P<end><!-- END DERIVED PEM SUMMARY -->)",\n    re.DOTALL,\n)\n'''
+insert = anchor + '''REPAIR_ACCEPTANCE_RE = re.compile(\n    r"^```yaml pem-repair-acceptance\\s*\\n(?P<yaml>.*?)^```\\s*$",\n    re.MULTILINE | re.DOTALL,\n)\n'''
+if anchor not in src:
+    raise SystemExit('acceptance regex anchor not found')
+src = src.replace(anchor, insert, 1)
+anchor = '''def _git_text(root: Path, *args: str) -> str | None:\n    try:\n        proc = subprocess.run(\n            ["git", "-C", str(root), *args], check=False, capture_output=True, text=True, timeout=8,\n        )\n    except (OSError, subprocess.TimeoutExpired):\n        return None\n    return proc.stdout.strip() if proc.returncode == 0 else None\n\n\n'''
+helper = anchor + '''def _validate_repair_acceptance_artifact(\n    root: Path, route: EvidenceRoute, repair_identity: str, where: str\n) -> None:\n    text = _git_text(root, "show", f"{route.revision}:{route.path}")\n    if text is None:\n        raise PemError(f"{where}: recurrence acceptance artifact cannot be read from immutable route")\n    records: list[dict[str, Any]] = []\n    for match in REPAIR_ACCEPTANCE_RE.finditer(text):\n        try:\n            record = yaml.safe_load(match.group("yaml")) or {}\n        except yaml.YAMLError as exc:\n            raise PemError(f"{where}: invalid typed repair-acceptance YAML: {exc}") from exc\n        records.append(_mapping(record, f"{where}:repair acceptance record"))\n    if not records:\n        raise PemError(f"{where}: recurrence acceptance route does not contain a typed pem-repair-acceptance record")\n    matches = [record for record in records if record.get("repair_identity") == repair_identity]\n    if len(matches) != 1:\n        raise PemError(f"{where}: recurrence acceptance artifact must contain exactly one typed record for repair {repair_identity!r}")\n    record = matches[0]\n    if record.get("state") != "ACCEPTED":\n        raise PemError(f"{where}: repair acceptance record for the claimed repair is not ACCEPTED")\n    _required_text(record.get("owner"), f"{where}:repair acceptance owner")\n\n\ndef _validate_repair_acceptance_routes(\n    routes: list[EvidenceRoute], doc: PemDocument, root: Path, repair_identity: str, where: str\n) -> list[str]:\n    revisions: list[str] = []\n    for route in routes:\n        health, reason = evidence_route_health(route, doc)\n        if health != "HEALTHY":\n            raise PemError(f"{where}: recurrence acceptance route is not resolvable: {health}: {reason}")\n        if not _route_is_local(route, doc):\n            raise PemError(f"{where}: recurrence acceptance must be established by a resolvable project-local immutable artifact")\n        _validate_repair_acceptance_artifact(root, route, repair_identity, where)\n        revisions.append(route.revision)\n    return revisions\n\n\n'''
+if anchor not in src:
+    raise SystemExit('git_text helper anchor not found')
+src = src.replace(anchor, helper, 1)
+old = '''        acceptance_commits: list[str] = []\n        for route in parsed_evidence:\n            health, reason = evidence_route_health(route, doc)\n            if health != "HEALTHY":\n                raise PemError(f"{where}: recurrence acceptance route is not resolvable: {health}: {reason}")\n            if not _route_is_local(route, doc):\n                raise PemError(f"{where}: Git-native recurrence acceptance must be established by the same resolvable project lineage")\n            acceptance_commits.append(route.revision)\n'''
+new = '''        acceptance_commits = _validate_repair_acceptance_routes(\n            parsed_evidence, doc, root, repair_identity, where\n        )\n'''
+if old not in src:
+    raise SystemExit('git recurrence acceptance loop anchor not found')
+src = src.replace(old, new, 1)
+old = '''    chronology = basis.get("chronology_assessment")\n    if not isinstance(chronology, dict) or chronology.get("state") != "VERIFIED":\n'''
+new = '''    if doc is None:\n        raise PemError(f"{where}: non-Git recurrence requires document context to realize repair acceptance")\n    root = _git_root(doc.root)\n    if root is None:\n        raise PemError(f"{where}: non-Git recurrence cannot realize durable repair-acceptance evidence")\n    _validate_repair_acceptance_routes(parsed_evidence, doc, root, repair_identity, where)\n\n    chronology = basis.get("chronology_assessment")\n    if not isinstance(chronology, dict) or chronology.get("state") != "VERIFIED":\n'''
+if old not in src:
+    raise SystemExit('non-git recurrence anchor not found')
+src = src.replace(old, new, 1)
+src = src.replace('''    if doc is None:\n        raise PemError(f"{where}: non-Git recurrence requires document context to realize chronology evidence")\n    for raw in chronology_evidence:\n''', '''    for raw in chronology_evidence:\n''', 1)
+old = '''def _required_maturity_obligations(family: dict[str, Any], basis: dict[str, Any]) -> set[str]:\n    required = {"claim_support", "applicability", "contradiction_resolution"}\n    if basis.get("requires_replication"):\n        required.add("replication")\n    if basis.get("requires_independence") or family.get("provenance_independence_required"):\n        required.add("independent_replication")\n'''
+new = '''def _required_maturity_obligations(family: dict[str, Any], basis: dict[str, Any]) -> set[str]:\n    required = {"claim_support", "applicability", "contradiction_resolution"}\n    if family.get("kind") == "SUCCESS_PATTERN":\n        required.update({"replication", "independent_replication"})\n    else:\n        if basis.get("requires_replication"):\n            required.add("replication")\n        if basis.get("requires_independence") or family.get("provenance_independence_required"):\n            required.add("independent_replication")\n'''
+if old not in src:
+    raise SystemExit('maturity obligation anchor not found')
+src = src.replace(old, new, 1)
+p.write_text(src, encoding='utf-8')
+
+# Canonical doctrine.
+doc = ROOT / 'source/shared/references/project-engineering-memory.md'
+t = doc.read_text(encoding='utf-8')
+old = 'One causal episode producing many failing tests is normally one occurrence. A later independent reintroduction after an actually accepted repair is another occurrence and recurrence. Commit/file/issue timestamps or rebase order alone cannot establish recurrence chronology.\n'
+new = '''One causal episode producing many failing tests is normally one occurrence. A later independent reintroduction after an actually accepted repair is another occurrence and recurrence. Commit/file/issue timestamps or rebase order alone cannot establish recurrence chronology. For Git-native recurrence, a repair-acceptance evidence route must resolve to immutable content containing a typed `pem-repair-acceptance` record that names the exact `repair_identity`, declares `state: ACCEPTED`, and names the governing accepting `owner`; an arbitrary descendant commit/file is not acceptance evidence. Non-Git recurrence requires a durable equivalent binding the same repair identity plus independently warrantable ordering.\n\n```yaml pem-repair-acceptance\nrepair_identity: commit:<immutable-repair-identity>\nstate: ACCEPTED\nowner: project-defined-acceptance-owner\n```\n'''
+if old not in t:
+    raise SystemExit('PEM recurrence doctrine anchor not found')
+t = t.replace(old, new, 1)
+anchor = '''PROVEN      -> every owner/workplan evidence obligation for that exact claim is closed\n               with applicable admissible evidence, including required independence,\n               replication/comparator, and contradiction closure\n```\n'''
+addition = anchor + '''\nFor schema-1 Protocol 6.3 `SUCCESS_PATTERN` records, `PROVEN` is the generalized transferable pattern claim: replication and independent replication are therefore derived obligations even if claimant-supplied `requires_*` flags are absent or false. Independent replication requires at least two admissible supporting provenance clusters. Claimant flags may add detail but cannot waive obligations implied by the claim/family class.\n'''
+if anchor not in t:
+    raise SystemExit('PEM maturity doctrine anchor not found')
+t = t.replace(anchor, addition, 1)
+doc.write_text(t, encoding='utf-8')
+
+# Focused D4/D5 regressions.
+tp = ROOT / 'tests/test_protocol_63_reopened_repairs.py'
+t = tp.read_text(encoding='utf-8')
+old = '''            prior = commit_file(repo, "evidence.md", "prior\\n", "prior occurrence")\n            repair = commit_file(repo, "evidence.md", "repair\\n", "repair")\n            accepted = commit_file(repo, "evidence.md", "accepted\\n", "accept repair")\n            later = commit_file(repo, "evidence.md", "later\\n", "later independent occurrence")\n'''
+new = '''            prior = commit_file(repo, "evidence.md", "prior\\n", "prior occurrence")\n            repair = commit_file(repo, "evidence.md", "repair\\n", "repair")\n            acceptance_text = f"""# Accepted repair\\n\\n```yaml pem-repair-acceptance\\nrepair_identity: commit:{repair}\\nstate: ACCEPTED\\nowner: fixture qualification owner\\n```\\n"""\n            accepted = commit_file(repo, "acceptance.md", acceptance_text, "accept repair")\n            unrelated = commit_file(repo, "unrelated.md", "unrelated descendant\\n", "unrelated descendant")\n            wrong_text = f"""```yaml pem-repair-acceptance\\nrepair_identity: commit:{prior}\\nstate: ACCEPTED\\nowner: fixture qualification owner\\n```\\n"""\n            wrong_acceptance = commit_file(repo, "wrong-acceptance.md", wrong_text, "accept wrong repair")\n            missing_owner_text = f"""```yaml pem-repair-acceptance\\nrepair_identity: commit:{repair}\\nstate: ACCEPTED\\n```\\n"""\n            missing_owner = commit_file(repo, "missing-owner.md", missing_owner_text, "acceptance missing owner")\n            later = commit_file(repo, "evidence.md", "later\\n", "later independent occurrence")\n'''
+if old not in t:
+    raise SystemExit('D4 fixture setup anchor not found')
+t = t.replace(old, new, 1)
+t = t.replace('f"fixture/project@{accepted}:evidence.md"', 'f"fixture/project@{accepted}:acceptance.md"', 2)
+anchor = '''            self.assertTrue(any("repair identity is not a resolvable commit" in e for e in errors))\n\n            reversed_order = copy.deepcopy(f)\n'''
+insert = '''            self.assertTrue(any("repair identity is not a resolvable commit" in e for e in errors))\n\n            unrelated_acceptance = copy.deepcopy(f)\n            unrelated_acceptance["occurrences"][1]["recurrence_basis"]["repair_acceptance_evidence"] = [f"fixture/project@{unrelated}:unrelated.md"]\n            path.write_text(root_text([unrelated_acceptance]), encoding="utf-8")\n            errors = pem.validate_memory(pem.load_memory(path), check_summary=False)\n            self.assertTrue(any("does not contain a typed pem-repair-acceptance record" in e for e in errors))\n\n            wrong_subject = copy.deepcopy(f)\n            wrong_subject["occurrences"][1]["recurrence_basis"]["repair_acceptance_evidence"] = [f"fixture/project@{wrong_acceptance}:wrong-acceptance.md"]\n            path.write_text(root_text([wrong_subject]), encoding="utf-8")\n            errors = pem.validate_memory(pem.load_memory(path), check_summary=False)\n            self.assertTrue(any("exactly one typed record for repair" in e for e in errors))\n\n            missing_acceptance_owner = copy.deepcopy(f)\n            missing_acceptance_owner["occurrences"][1]["recurrence_basis"]["repair_acceptance_evidence"] = [f"fixture/project@{missing_owner}:missing-owner.md"]\n            path.write_text(root_text([missing_acceptance_owner]), encoding="utf-8")\n            errors = pem.validate_memory(pem.load_memory(path), check_summary=False)\n            self.assertTrue(any("repair acceptance owner must be non-empty text" in e for e in errors))\n\n            reversed_order = copy.deepcopy(f)\n'''
+if anchor not in t:
+    raise SystemExit('D4 discriminator insertion anchor not found')
+t = t.replace(anchor, insert, 1)
+t = t.replace('reversed_order["occurrences"][1]["recurrence_basis"]["repair_acceptance_evidence"] = [f"fixture/project@{later}:evidence.md"]', 'reversed_order["occurrences"][1]["recurrence_basis"]["repair_acceptance_evidence"] = [f"fixture/project@{later}:acceptance.md"]', 1)
+old = '''            alias_repair = commit_file(repo, "alias.txt", "alias patch\\n", "alias repair")\n            alias_accepted = commit_file(repo, "evidence.md", "alias accepted\\n", "accept alias repair")\n'''
+new = '''            alias_repair = commit_file(repo, "alias.txt", "alias patch\\n", "alias repair")\n            alias_acceptance_text = f"""```yaml pem-repair-acceptance\\nrepair_identity: commit:{alias_repair}\\nstate: ACCEPTED\\nowner: fixture qualification owner\\n```\\n"""\n            alias_accepted = commit_file(repo, "alias-acceptance.md", alias_acceptance_text, "accept alias repair")\n'''
+if old not in t:
+    raise SystemExit('alias acceptance anchor not found')
+t = t.replace(old, new, 1)
+t = t.replace('f"fixture/project@{alias_accepted}:evidence.md"', 'f"fixture/project@{alias_accepted}:alias-acceptance.md"', 1)
+anchor = '''    def test_d5_truthy_comparative_or_arbitrary_closed_obligations_do_not_pass(self):\n'''
+new_test = '''    def test_d5_proven_success_pattern_cannot_omit_independence_requirement(self):\n        f = family(); f["maturity"] = "PROVEN"; f["applications"] = []\n        for i in range(3):\n            app = copy.deepcopy(family()["applications"][0]); app["id"] = f"A{i+1:02d}"; app["episode_identity"] = f"event-omit-{i}"; app["provenance_cluster"] = "ONE-COMMON-CLUSTER"; f["applications"].append(app)\n        f["temperature"] = "HOT"\n        evidence = ["fixture/project@1111111:path.md#case"]\n        f["maturity_basis"] = {"claim": "transferable success pattern", "obligations": [\n            {"type": "claim_support", "status": "CLOSED", "evidence": evidence},\n            {"type": "applicability", "status": "CLOSED", "evidence": evidence},\n            {"type": "contradiction_resolution", "status": "CLOSED", "evidence": evidence},\n            {"type": "replication", "status": "CLOSED", "minimum_independent_clusters": 1, "evidence": evidence},\n        ]}\n        self.assertNotIn("requires_independence", f["maturity_basis"])\n        self.assertNotIn("provenance_independence_required", f)\n        with tempfile.TemporaryDirectory() as td:\n            path = Path(td) / "PROJECT-ENGINEERING-MEMORY.md"; path.write_text(root_text([f]), encoding="utf-8")\n            errors = pem.validate_memory(pem.load_memory(path), check_summary=False)\n            self.assertTrue(any("omits required typed obligation(s): independent_replication" in e for e in errors))\n\n    def test_d5_truthy_comparative_or_arbitrary_closed_obligations_do_not_pass(self):\n'''
+if anchor not in t:
+    raise SystemExit('D5 test insertion anchor not found')
+t = t.replace(anchor, new_test, 1)
+tp.write_text(t, encoding='utf-8')
+
+for raw in ('.github/workflows/ssdp63-update-workplan-once.yml', '.github/ssdp63-repair-runner'):
+    q = ROOT / raw
+    if q.exists():
+        q.unlink()
