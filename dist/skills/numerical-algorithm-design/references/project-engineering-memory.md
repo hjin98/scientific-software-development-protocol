@@ -290,3 +290,14 @@ A material accepted repair/rework/optimization/revert/restoration asks whether a
 Update PEM only when admission threshold is met or an existing entry materially changes. Ordinary fix chronology stays in Git/native evidence. Responsibility follows the substantive owner; `software-documentation` may reconcile representation but cannot self-promote a finding, declare `AUTHORITY_BOUND`, or adjudicate a material evidence conflict.
 
 Apply the Lossless Representation Rule: compact by generalization and progressive disclosure, not by deleting identity, scope, lifecycle, counterevidence, assessment lineage, uncertainty, tradeoffs, authority binding, evidence routes, or conditions needed to decide applicability.
+
+
+## Independent-review repair clarifications
+
+- Stable evidence locators participate in binding health; path-only realization cannot make a missing locator healthy.
+- Mechanism-specific failure cause claims require durable discriminating cause evidence; observation-only rows need not invent a cause.
+- Current positive guidance requires a bounded counterevidence-search disposition covering supporting, neutral, contradicting, and inconclusive outcomes plus blind spots and durable search evidence.
+- Candidate overlays bind the exact workflow-selected accepted PEM publication separately from accepted project state.
+- Same accepted family IDs cannot silently change kind, semantic identity envelope, or applicability meaning; within-envelope reconciliation is explicit and evidence-bound, while material change uses lineage/new identity.
+- Temperature override evidence uses ordinary evidence-route health.
+- High-impact unresolved notices precede optional positive guidance in the active summary.

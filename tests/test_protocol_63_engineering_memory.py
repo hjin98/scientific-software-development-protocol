@@ -359,6 +359,14 @@ class Protocol63EngineeringMemoryTests(unittest.TestCase):
             self.assertTrue(any("positive guidance eligibility requires explicit HEALTHY" in error for error in errors))
 
         family["binding_health"] = "HEALTHY"
+        family["counterevidence_search"] = {
+            "state": "COMPLETE_FOR_DECLARED_SCOPE",
+            "scope": family["aggregation_scope"],
+            "search_basis": "bounded test history",
+            "blind_spots": "broader history not claimed",
+            "outcomes_reviewed": ["SUPPORTING", "NEUTRAL", "CONTRADICTING", "INCONCLUSIVE"],
+            "evidence": ["repo@1111111:path#counterevidence-search"],
+        }
         self.assertFalse(any("positive guidance eligibility" in error for error in pem._validate_family(family)))
 
     def test_failure_recurrence_requires_prior_accepted_repair_identity(self):

@@ -344,6 +344,20 @@ def evidence_route_health(route: EvidenceRoute, doc: PemDocument) -> tuple[str, 
         return "UNAVAILABLE", "repository revision is not resolvable as a commit"
     if not _git_ok(root, "cat-file", "-e", f"{route.revision}:{route.path}"):
         return "UNAVAILABLE", "declared path is absent from the immutable repository revision"
+    if route.locator:
+        text = _git_text(root, "show", f"{route.revision}:{route.path}")
+        if text is None:
+            return "UNAVAILABLE", "declared path cannot be read for stable-locator realization"
+        locator = route.locator.strip()
+        if locator not in text:
+            normalized = re.sub(r"[-_]+", " ", locator).strip().lower()
+            normalized_text = re.sub(r"[-_]+", " ", text).lower()
+            if normalized and normalized in normalized_text:
+                return "HEALTHY", "commit, repository path, and normalized stable locator resolve"
+            if re.fullmatch(r"[A-Za-z0-9_.:/ -]+", locator):
+                return "UNAVAILABLE", "declared stable locator is absent from the immutable repository file"
+            return "REVIEW_REQUIRED", "stable locator syntax is not mechanically interpretable by schema-1 text-anchor realization"
+        return "HEALTHY", "commit, repository path, and stable locator resolve"
     return "HEALTHY", "commit and repository path resolve"
 
 
@@ -619,6 +633,13 @@ def derived_counts(family: dict[str, Any], doc: PemDocument | None = None) -> di
             _validate_source_project(row, f"{family_id}:{oid}")
             surfaces.update(str(v) for v in _list(row.get("surfaces", []), f"{family_id}:{oid}:surfaces"))
             current = _current_assessment(row, f"{family_id}:{oid}")
+            cause_claim = str(row.get("cause_claim", "")).strip()
+            cause_evidence = row.get("cause_evidence", [])
+            if cause_claim:
+                if not isinstance(cause_evidence, list) or not cause_evidence:
+                    raise PemError(f"{family_id}:{oid}: mechanism-specific cause_claim requires discriminating cause_evidence")
+                for raw in cause_evidence:
+                    parse_evidence_route(raw, f"{family_id}:{oid}:cause_evidence")
             if current and current.get("state") == "ADMISSIBLE" and current.get("conclusion") == "CONFIRMED":
                 if _validate_recurrence_structure(
                     row, f"{family_id}:{oid}", occurrence_ids, episode,
@@ -865,6 +886,12 @@ def _material_routes(family: dict[str, Any]) -> list[str]:
         routes.extend(str(v) for v in authority.get("evidence", []) if isinstance(v, str))
     if isinstance(family.get("authority_owner"), str): routes.append(str(family["authority_owner"]))
     routes.extend(str(v) for v in family.get("authority_evidence", []) if isinstance(v, str))
+    override = family.get("temperature_override")
+    if isinstance(override, dict):
+        routes.extend(str(v) for v in override.get("evidence", []) if isinstance(v, str))
+    counterevidence = family.get("counterevidence_search")
+    if isinstance(counterevidence, dict):
+        routes.extend(str(v) for v in counterevidence.get("evidence", []) if isinstance(v, str))
     return routes
 
 
@@ -908,8 +935,18 @@ def _validate_family(family: dict[str, Any], doc: PemDocument | None = None) -> 
     declared = family.get("temperature")
     if declared != base:
         override = family.get("temperature_override")
-        if not isinstance(override, dict) or override.get("final") != declared or not override.get("reason") or not override.get("evidence"):
+        if not isinstance(override, dict) or override.get("final") != declared or not override.get("reason"):
             errors.append(f"{fid}: temperature {declared!r} differs from derived base {base!r} without evidence-bound override")
+        else:
+            override_evidence = override.get("evidence")
+            if not isinstance(override_evidence, list) or not override_evidence:
+                errors.append(f"{fid}: temperature override requires non-empty evidence route(s)")
+            else:
+                for raw in override_evidence:
+                    try:
+                        parse_evidence_route(raw, f"{fid}:temperature override evidence")
+                    except PemError as exc:
+                        errors.append(str(exc))
     if family.get("maturity") == "SUPPORTED":
         if family.get("kind") == "FAILURE_FAMILY" and counts.get("confirmed", 0) < 1: errors.append(f"{fid}: SUPPORTED failure family has no admissible confirmed occurrence")
         elif family.get("kind") == "SUCCESS_PATTERN" and counts.get("supporting", 0) < 1: errors.append(f"{fid}: SUPPORTED success pattern has no admissible supporting application")
@@ -927,6 +964,28 @@ def _validate_family(family: dict[str, Any], doc: PemDocument | None = None) -> 
             if counts.get("supporting", 0) < 1: errors.append(f"{fid}: positive guidance eligibility requires admissible supporting evidence")
             if counts.get("contradicting", 0): errors.append(f"{fid}: positive guidance eligibility hides admissible contradiction")
             if binding_health != "HEALTHY": errors.append(f"{fid}: positive guidance eligibility requires explicit HEALTHY binding_health")
+            search = family.get("counterevidence_search")
+            if not isinstance(search, dict):
+                errors.append(f"{fid}: positive guidance eligibility requires structured bounded counterevidence_search")
+            else:
+                if search.get("state") != "COMPLETE_FOR_DECLARED_SCOPE":
+                    errors.append(f"{fid}: positive guidance counterevidence_search is not complete for the declared scope")
+                for key in ("scope", "search_basis", "blind_spots"):
+                    if key not in search or search.get(key) in (None, ""):
+                        errors.append(f"{fid}: counterevidence_search requires {key}")
+                outcomes = search.get("outcomes_reviewed")
+                required_outcomes = {"SUPPORTING", "NEUTRAL", "CONTRADICTING", "INCONCLUSIVE"}
+                if not isinstance(outcomes, list) or not required_outcomes.issubset({str(v) for v in outcomes}):
+                    errors.append(f"{fid}: counterevidence_search must review supporting, neutral, contradicting, and inconclusive outcomes")
+                evidence = search.get("evidence")
+                if not isinstance(evidence, list) or not evidence:
+                    errors.append(f"{fid}: counterevidence_search requires durable evidence")
+                else:
+                    for raw in evidence:
+                        try:
+                            parse_evidence_route(raw, f"{fid}:counterevidence search evidence")
+                        except PemError as exc:
+                            errors.append(str(exc))
         if guidance in ({"RECOMMENDED"} | COMPARATIVE_GUIDANCE) and not eligible: errors.append(f"{fid}: positive recommendation is not eligible")
         _validate_comparative_basis(family, errors, doc=doc)
     elif guidance != "OBSERVED": errors.append(f"{fid}: only SUCCESS_PATTERN may carry positive guidance levels")
@@ -1111,6 +1170,13 @@ def _salience_key(family: dict[str, Any]) -> tuple[int, int, str]:
     return unresolved, temp, str(family.get("id"))
 
 
+def _notice_is_unresolved(notice: dict[str, Any], doc: PemDocument) -> bool:
+    if notice.get("state") == "REVIEW_REQUIRED" or notice.get("binding_health") in {"REVIEW_REQUIRED", "UNAVAILABLE"}:
+        return True
+    trigger_state, _ = _notice_trigger_state(notice, doc)
+    return notice.get("state") == "CURRENT" and trigger_state != "CLEAR"
+
+
 def render_summary(doc: PemDocument) -> str:
     rows: list[str] = []
     for family in sorted(doc.families.values(), key=_salience_key):
@@ -1123,11 +1189,17 @@ def render_summary(doc: PemDocument) -> str:
         binding = f"{authority_binding}/{health}" if health else str(authority_binding)
         rows.append("| {id} | {kind} | {temp} | {maturity}/{state} | {binding} | {guidance} | {count} | {summary} |".format(
             id=family["id"], kind=family["kind"], temp=family["temperature"], maturity=family["maturity"], state=family["state"], binding=binding, guidance=guidance, count=count_text, summary=str(family["summary"]).replace("|", "\\|")))
-    notice_rows = [f"- **{n['id']}** [{n['state']}/{n['binding_health']}]: {n['summary']}" for n in sorted(doc.notices.values(), key=lambda n: (0 if n.get("state") == "REVIEW_REQUIRED" else 1, str(n.get("id")))) if n.get("state") in {"CURRENT", "REVIEW_REQUIRED"}]
+    active_notices = [n for n in doc.notices.values() if n.get("state") in {"CURRENT", "REVIEW_REQUIRED"}]
+    unresolved_notices = [n for n in active_notices if _notice_is_unresolved(n, doc)]
+    resolved_notices = [n for n in active_notices if n not in unresolved_notices]
+    def notice_rows(items: list[dict[str, Any]]) -> list[str]:
+        return [f"- **{n['id']}** [{n['state']}/{n['binding_health']}]: {n['summary']}" for n in sorted(items, key=lambda n: str(n.get("id")))]
     parts: list[str] = []
+    if unresolved_notices:
+        parts.extend(["High-impact unresolved notices:", "", *notice_rows(unresolved_notices), ""])
     if rows: parts.extend(["| ID | Kind | Temperature | Maturity/state | Binding | Guidance | Current evidence | Bounded lesson |", "| --- | --- | --- | --- | --- | --- | --- | --- |", *rows])
     else: parts.append("_No current learning families._")
-    if notice_rows: parts.extend(["", "Current notices:", "", *notice_rows])
+    if resolved_notices: parts.extend(["", "Current notices:", "", *notice_rows(resolved_notices)])
     return "\n".join(parts).rstrip() + "\n"
 
 
@@ -1181,9 +1253,44 @@ def validate_memory(doc: PemDocument, *, check_summary: bool = True) -> list[str
     return errors
 
 
+def _semantic_identity_signature(family: dict[str, Any]) -> str:
+    payload = {"kind": family.get("kind"), "semantic_identity": family.get("semantic_identity"), "applicability": family.get("applicability")}
+    return hashlib.sha256(yaml.safe_dump(payload, sort_keys=True).encode("utf-8")).hexdigest()
+
+
 def validate_reconciliation(previous: PemDocument, current: PemDocument) -> list[str]:
-    """Reject silent observation rewriting across family moves, row re-IDs, splits, and merges."""
+    """Reject silent accepted semantic drift and observation rewriting across representations."""
     errors: list[str] = []
+    for fid in previous.families.keys() & current.families.keys():
+        old_family = previous.families[fid]; new_family = current.families[fid]
+        old_sig = _semantic_identity_signature(old_family); new_sig = _semantic_identity_signature(new_family)
+        if old_sig != new_sig:
+            old_semantic = old_family.get("semantic_identity") if isinstance(old_family.get("semantic_identity"), dict) else {}
+            new_semantic = new_family.get("semantic_identity") if isinstance(new_family.get("semantic_identity"), dict) else {}
+            mechanically_material = []
+            if old_family.get("kind") != new_family.get("kind"):
+                mechanically_material.append("kind")
+            for key in ("owner_class", "mechanism_family"):
+                if old_semantic.get(key) != new_semantic.get(key):
+                    mechanically_material.append(key)
+            if mechanically_material:
+                errors.append(
+                    f"{fid}: accepted family changed mechanically material semantic identity field(s) under the same ID: "
+                    + ", ".join(mechanically_material)
+                    + "; use a new/successor/reclassified identity with lineage"
+                )
+                continue
+            record = new_family.get("semantic_reconciliation")
+            if not isinstance(record, dict):
+                errors.append(f"{fid}: accepted family semantic identity/applicability changed under the same ID without explicit reconciliation or lineage")
+            else:
+                evidence = record.get("evidence")
+                if (record.get("classification") != "WITHIN_ENVELOPE" or record.get("previous_identity_sha256") != old_sig or not record.get("reason") or not isinstance(evidence, list) or not evidence):
+                    errors.append(f"{fid}: same-ID semantic reconciliation must bind the previous envelope, WITHIN_ENVELOPE classification, reason, and evidence")
+                else:
+                    for raw in evidence:
+                        try: parse_evidence_route(raw, f"{fid}:semantic reconciliation evidence")
+                        except PemError as exc: errors.append(str(exc))
     old_rows = _all_event_rows(previous); new_rows = _all_event_rows(current)
     for identity in old_rows.keys() & new_rows.keys():
         error = _validate_observation_correction(identity, old_rows[identity], new_rows[identity])
@@ -1222,17 +1329,17 @@ def validate_has(
     return errors
 
 
-def validate_overlay(base: PemDocument, candidate: PemDocument, *, overlay_identity: str) -> list[str]:
+def validate_overlay(base: PemDocument, candidate: PemDocument, *, overlay_identity: str, accepted_pem_identity: str) -> list[str]:
     errors: list[str] = []
     declared = candidate.metadata.get("candidate_overlay")
     if isinstance(declared, dict): identity = str(declared.get("identity", "")); based_on = str(declared.get("based_on_accepted_pem", ""))
     else: identity = str(declared); based_on = ""
     if identity != overlay_identity: errors.append("candidate overlay identity does not match the selected overlay")
-    base_identity = _accepted_base_identity(base.metadata.get("accepted_base"))
-    if based_on != base_identity: errors.append("candidate overlay is not explicitly based on the declared accepted memory state")
-    if identity == base_identity: errors.append("candidate overlay cannot self-ratify as accepted memory")
+    if based_on != accepted_pem_identity: errors.append("candidate overlay is not explicitly based on the exact workflow-selected accepted PEM publication")
+    if identity == accepted_pem_identity: errors.append("candidate overlay cannot self-ratify as accepted memory")
     omitted = set(base.families) | set(base.notices); omitted -= set(candidate.families) | set(candidate.notices)
     if omitted: errors.append(f"candidate overlay cannot delete accepted entries by omission: {', '.join(sorted(omitted))}")
+    errors.extend(validate_reconciliation(base, candidate))
     return errors
 
 

@@ -6,6 +6,16 @@ repository: REPLACE_WITH_REPOSITORY_OR_PROJECT_IDENTITY
 scope: repository
 coverage_state: UNINITIALIZED
 coverage_basis: "No historical backfill has been claimed."
+
+  # Required before positive_guidance_eligible may be true. This is bounded to the declared scope; it is not a global-history crawl.
+  counterevidence_search:
+    state: COMPLETE_FOR_DECLARED_SCOPE
+    scope: "Replace with the aggregation/coverage scope searched"
+    search_basis: "Replace with the bounded history/evidence search performed"
+    outcomes_reviewed: [SUPPORTING, NEUTRAL, CONTRADICTING, INCONCLUSIVE]
+    blind_spots: "Replace with material unsearched history or 'none known within declared scope'"
+    evidence:
+      - SOURCE@IMMUTABLE_ID:path#stable-locator
 reconciled_through: REPLACE_WITH_ALREADY_EXISTING_ACCEPTED_PROJECT_IDENTITY
 accepted_base:
   project_state: REPLACE_WITH_EXACT_ACCEPTED_PROJECT_COMMIT
@@ -75,6 +85,14 @@ occurrences:
         evidence:
           - REPLACE_WITH_IMMUTABLE_EVIDENCE_ROUTE
 ```
+  # Optional only for evidence-bound same-ID editorial/narrowing changes that remain within the accepted envelope.
+  # Changes to kind, owner_class, or mechanism_family require a new/reclassified identity and lineage instead.
+  # semantic_reconciliation:
+  #   classification: WITHIN_ENVELOPE
+  #   previous_identity_sha256: "64-hex digest of prior kind + semantic_identity + applicability"
+  #   reason: "Why this is not a material identity change"
+  #   evidence: [SOURCE@IMMUTABLE_ID:path#stable-locator]
+
 
 ### SP-001 — Example success pattern
 
