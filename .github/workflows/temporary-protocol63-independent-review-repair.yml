@@ -10,7 +10,7 @@ permissions:
 
 jobs:
   repair:
-    if: github.event.head_commit.message == 'Run Protocol 6.3 repaired candidate'
+    if: github.event.head_commit.message == 'Run Protocol 6.3 repaired candidate with Core'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -42,11 +42,12 @@ jobs:
           cp -a /tmp/protocol-dist dist
           python source/validate_packages.py --dist dist
           python source/check_dist.py --expected /tmp/protocol-dist --committed dist
+      - name: Install orchestrator Core
+        run: python -m pip install ./orchestrator -r orchestrator/requirements-dev.txt
       - name: Regenerate and validate orchestrator snapshot
         run: |
           python orchestrator/scripts/generate_protocol_snapshot.py
           python orchestrator/scripts/generate_protocol_snapshot.py --check
-          python -m pip install ./orchestrator -r orchestrator/requirements-dev.txt
           python orchestrator/scripts/run_core_tests.py
       - name: Clean temporary repair machinery
         run: |
