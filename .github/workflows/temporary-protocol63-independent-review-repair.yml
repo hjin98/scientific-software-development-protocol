@@ -10,7 +10,7 @@ permissions:
 
 jobs:
   assemble:
-    if: github.event.head_commit.message == 'Assemble Protocol 6.3 repaired semantic candidate'
+    if: github.event.head_commit.message == 'Assemble Protocol 6.3 repaired semantic candidate cleanly'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -45,14 +45,14 @@ jobs:
           python source/check_dist.py --expected /tmp/protocol-dist --committed dist
       - name: Install orchestrator Core
         run: python -m pip install ./orchestrator -r orchestrator/requirements-dev.txt
-      - name: Remove temporary execution machinery before containment checks
+      - name: Remove temporary execution machinery from Git view before containment checks
         run: |
-          rm -f .github/protocol63_repair.py
-          rm -f .github/protocol63_fixture_patch.py
-          rm -f .github/protocol63_strengthen.py
-          rm -f .github/workflows/temporary-protocol63-independent-review-repair.yml
-          rm -f qualification/ssdp6/DIAGNOSTIC-PROTOCOL-6.3-INDEPENDENT-REVIEW-REPAIR.txt
-          rm -f qualification/ssdp6/DIAGNOSTIC-PROTOCOL-6.3-CORE-REPAIR.txt
+          git rm -f --ignore-unmatch .github/protocol63_repair.py
+          git rm -f --ignore-unmatch .github/protocol63_fixture_patch.py
+          git rm -f --ignore-unmatch .github/protocol63_strengthen.py
+          git rm -f --ignore-unmatch .github/workflows/temporary-protocol63-independent-review-repair.yml
+          git rm -f --ignore-unmatch qualification/ssdp6/DIAGNOSTIC-PROTOCOL-6.3-INDEPENDENT-REVIEW-REPAIR.txt
+          git rm -f --ignore-unmatch qualification/ssdp6/DIAGNOSTIC-PROTOCOL-6.3-CORE-REPAIR.txt
       - name: Regenerate and validate current profile plus frozen profiles
         run: |
           python orchestrator/scripts/generate_protocol_snapshot.py
