@@ -26,12 +26,14 @@ jobs:
           python -m pip install -r source/requirements-validation.txt
           python -m pip install ./orchestrator -r orchestrator/requirements-dev.txt
       - name: Apply lifecycle reconciliation and remove temporary machinery
+        shell: bash
         run: |
+          set -euo pipefail
           python .github/scripts/reconcile_ssdp63_f2_lifecycle.py
-          rm .github/workflows/ssdp63-reconcile-f2-lifecycle-once.yml
-          rm .github/workflows/ssdp63-reconcile-f2-lifecycle-v2-once.yml
-          rm .github/workflows/ssdp63-reconcile-f2-lifecycle-v3-once.yml
-          rm .github/scripts/reconcile_ssdp63_f2_lifecycle.py
+          git rm -f .github/workflows/ssdp63-reconcile-f2-lifecycle-once.yml
+          git rm -f .github/workflows/ssdp63-reconcile-f2-lifecycle-v2-once.yml
+          git rm -f .github/workflows/ssdp63-reconcile-f2-lifecycle-v3-once.yml
+          git rm -f .github/scripts/reconcile_ssdp63_f2_lifecycle.py
       - name: Validate PEM and focused Protocol 6.3 discriminators
         run: |
           python source/project_engineering_memory.py PROJECT-ENGINEERING-MEMORY.md --write-summary
@@ -49,6 +51,7 @@ jobs:
           git diff --check
           test "$(find .github/workflows -maxdepth 1 -type f | wc -l)" -eq 1
           test -f .github/workflows/protocol-check.yml
+          test -z "$(git ls-files '.github/**/*.py')"
           grep -F 'semantic_candidate: 3bbbdfa8120646d76336c7b916e6a891c9ed38f2' qualification/ssdp6/IMPLEMENTATION-STATE-PROTOCOL-6.3.md
           grep -F 'candidate_under_test: 3bbbdfa8120646d76336c7b916e6a891c9ed38f2' qualification/ssdp6/RESULTS-GPT-5.6-SOL-2026-09-12-PROTOCOL-6.3-F2.md
           grep -F 'implementation_review_state: repaired-qualified-independent-review-pending' workplans/active/PROTOCOL-6.3-EVIDENCE-BACKED-PROJECT-ENGINEERING-MEMORY-WORKPLAN.md
