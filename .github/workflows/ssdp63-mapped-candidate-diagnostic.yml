@@ -1,0 +1,81 @@
+name: Diagnose Protocol 6.3 mapped candidate acceptance
+
+on:
+  push:
+    branches: [ssdp-6.3-engineering-memory]
+    paths: [.github/workflows/ssdp63-mapped-candidate-diagnostic.yml]
+
+permissions:
+  contents: write
+
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: {fetch-depth: 0}
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - name: Install dependencies
+        run: |
+          python -m pip install -r source/requirements-validation.txt
+          python -m pip install ./orchestrator -r orchestrator/requirements-dev.txt
+      - name: Reproduce mapped state and capture exact failing oracle
+        shell: bash
+        run: |
+          set +e
+          candidate=07e71c7c4ef73e07e0e9ddc35bd8ac84d6bc09ad
+          out=qualification/ssdp6/DIAGNOSTIC-PROTOCOL-6.3-MAPPED-CANDIDATE-ACCEPTANCE.txt
+          : > "$out"
+          python - "$candidate" <<'PY'
+          from pathlib import Path
+          import sys
+          candidate = sys.argv[1]
+          sentinel = 'UNAVAILABLE_PENDING_REPLACEMENT_BOOTSTRAP'
+          paths = [
+              'source/shared/references/protocol-versioning-and-compatibility.md',
+              'source/shared/references/development-workflow-prompts.md',
+              'PORTABILITY.md',
+              'README.md',
+              'tests/test_protocol_63_bootstrap.py',
+          ]
+          for raw in paths:
+              p = Path(raw)
+              t = p.read_text(encoding='utf-8')
+              if sentinel not in t:
+                  raise SystemExit(f'expected bootstrap sentinel missing: {raw}')
+              p.write_text(t.replace(sentinel, candidate), encoding='utf-8')
+          PY
+          python source/project_engineering_memory.py PROJECT-ENGINEERING-MEMORY.md --write-summary >> "$out" 2>&1
+          rm -rf /tmp/protocol-dist-final
+          python source/build_skills.py --output /tmp/protocol-dist-final >> "$out" 2>&1
+          echo "BUILD_EXIT=$?" >> "$out"
+          python source/validate_packages.py --dist /tmp/protocol-dist-final >> "$out" 2>&1
+          echo "PACKAGE_EXIT=$?" >> "$out"
+          rm -rf dist && cp -a /tmp/protocol-dist-final dist
+          python orchestrator/scripts/generate_protocol_snapshot.py >> "$out" 2>&1
+          echo "SNAPSHOT_WRITE_EXIT=$?" >> "$out"
+          SSDP_VALIDATE_PUBLIC_FALLBACK=1 python -m unittest discover -s tests -v >> "$out" 2>&1
+          rc=$?
+          echo "FULL_TEST_EXIT=$rc" >> "$out"
+          rm -rf /tmp/protocol-dist-final-check
+          python source/build_skills.py --output /tmp/protocol-dist-final-check >> "$out" 2>&1
+          python source/validate_packages.py --dist /tmp/protocol-dist-final-check >> "$out" 2>&1
+          python source/check_dist.py --expected /tmp/protocol-dist-final-check --committed dist >> "$out" 2>&1
+          echo "DIST_EXIT=$?" >> "$out"
+          python orchestrator/scripts/generate_protocol_snapshot.py --check >> "$out" 2>&1
+          echo "SNAPSHOT_CHECK_EXIT=$?" >> "$out"
+          python orchestrator/scripts/run_core_tests.py >> "$out" 2>&1
+          echo "CORE_EXIT=$?" >> "$out"
+          git diff --check >> "$out" 2>&1
+          echo "DIFF_EXIT=$?" >> "$out"
+          git reset --hard HEAD
+          git clean -fd
+          rm -f .github/workflows/ssdp63-mapped-candidate-diagnostic.yml
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add "$out" .github/workflows/ssdp63-mapped-candidate-diagnostic.yml
+          git add -u
+          git commit -m 'Record Protocol 6.3 mapped-candidate acceptance diagnostic'
+          git push origin HEAD:ssdp-6.3-engineering-memory
+          exit "$rc"
