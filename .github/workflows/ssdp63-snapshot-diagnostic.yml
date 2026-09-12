@@ -1,0 +1,48 @@
+name: Diagnose Protocol 6.3 snapshot regeneration
+
+on:
+  push:
+    branches: [ssdp-6.3-engineering-memory]
+    paths: [.github/workflows/ssdp63-snapshot-diagnostic.yml]
+
+permissions:
+  contents: write
+
+jobs:
+  diagnose:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: {fetch-depth: 0}
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - name: Apply same owner mutations
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          old='5ee4b3ac3ca1666b0499f7a72f55adcc411bf4bb'; sentinel='UNAVAILABLE_PENDING_REPLACEMENT_BOOTSTRAP'
+          p=Path('source/shared/references/development-workflow-prompts.md'); t=p.read_text(); t=t.replace(f'CURRENT_PUBLIC_REF = {old}',f'CURRENT_PUBLIC_REF = {sentinel}',1)
+          a=t.find('**Protocol 6.3 bootstrap state:** '); b=t.find('\n\n`AUTO_EXECUTE` means',a)
+          para=f'**Protocol 6.3 bootstrap state:** all pre-repair 6.3 bootstrap snapshots are invalidated historical evidence only. `CURRENT_PUBLIC_REF` is `{sentinel}`, so no current 6.3 public fallback is authorized until a repaired immutable snapshot passes bootstrap readiness and exact-ref realization and a later descendant publishes that exact SHA. Never use repository default/latest, a guessed semantic-version ref, the current candidate branch, an invalidated bootstrap, or the accepted 6.2 bootstrap as a substitute. Version-bound 6.2 work continues to use exactly `5a062ebc472755607b9dc66d33a5ebbc4b7429aa`; historical 5.16/6.0/6.1 resolution remains version-bound to its own immutable mapping.'
+          if a<0 or b<0: raise SystemExit('prompt paragraph missing')
+          p.write_text(t[:a]+para+t[b:])
+          PY
+      - name: Capture snapshot generator result
+        shell: bash
+        run: |
+          set +e
+          python orchestrator/scripts/generate_protocol_snapshot.py > .ssdp63-snapshot-error.txt 2>&1
+          rc=$?
+          printf '\nEXIT_CODE=%s\n' "$rc" >> .ssdp63-snapshot-error.txt
+          cat .ssdp63-snapshot-error.txt
+          exit 0
+      - name: Commit diagnostic
+        shell: bash
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add .ssdp63-snapshot-error.txt
+          git commit -m 'Record Protocol 6.3 snapshot regeneration diagnostic'
+          git push origin HEAD:ssdp-6.3-engineering-memory
