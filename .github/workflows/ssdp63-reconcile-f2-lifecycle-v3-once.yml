@@ -57,7 +57,7 @@ jobs:
           grep -F 'implementation_review_state: repaired-qualified-independent-review-pending' workplans/active/PROTOCOL-6.3-EVIDENCE-BACKED-PROJECT-ENGINEERING-MEMORY-WORKPLAN.md
           grep -F 'stage_g_recovery_gate: blocked-pending-independent-review' workplans/active/PROTOCOL-6.3-EVIDENCE-BACKED-PROJECT-ENGINEERING-MEMORY-WORKPLAN.md
           grep -F 'independent_review: required_fresh_context' qualification/ssdp6/INDEPENDENT-REVIEW-HANDOFF-PROTOCOL-6.3.md
-          grep -F 'Protocol 6.3 recovery: UNAVAILABLE' qualification/ssdp6/SSDP-6.3-PRESERVATION-CENSUS.md
+          grep -F 'PROTOCOL 6.3 RECOVERY: UNAVAILABLE' qualification/ssdp6/SSDP-6.3-PRESERVATION-CENSUS.md
       - name: Commit reconciled lifecycle evidence
         shell: bash
         run: |
