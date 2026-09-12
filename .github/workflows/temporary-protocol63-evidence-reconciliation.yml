@@ -1,0 +1,94 @@
+name: Temporary Protocol 6.3 repaired-bootstrap evidence reconciliation
+
+on:
+  push:
+    branches: [ssdp-6.3-engineering-memory]
+
+permissions:
+  contents: write
+
+jobs:
+  reconcile:
+    if: github.event.head_commit.message == 'Reconcile Protocol 6.3 repaired bootstrap evidence'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ssdp-6.3-engineering-memory
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Reconcile current-facing evidence
+        shell: bash
+        run: |
+          set -euxo pipefail
+          git config user.name 'Protocol 6.3 lifecycle automation'
+          git config user.email 'protocol63-lifecycle@users.noreply.github.com'
+          python - <<'PY'
+          import re
+          from pathlib import Path
+          SEM='190c8b4d352c203ef74c94d57c4f18d30eb7186d'
+          OLD='dc22f09fd38dbbfeaeb0160152da9b284654f66e'
+          BNEW='86c13cab6bdd1991dffa94e277db8eacf87e2e11'
+          BPUB='a8dac814cc2813b3bb336e5b6abde5fbcf44949e'
+          F5='092c784383868081e9dee2081e3895f3d1263630'
+
+          p=Path('qualification/ssdp6/IMPLEMENTATION-STATE-PROTOCOL-6.3.md'); t=p.read_text()
+          t=t.replace('status: f5-implementation-qualification-complete-independent-review-pending','status: replacement-bootstrap-repaired-independent-review-r2-pending',1)
+          t=t.replace(f'protocol_63_public_bootstrap: {SEM}',f'protocol_63_public_bootstrap: {BNEW}',1)
+          t=t.replace(f'protocol_63_public_bootstrap_mapping: {F5}',f'protocol_63_public_bootstrap_mapping: {BPUB}',1)
+          t=t.replace('independent_review: pending_fresh_context','independent_review: r2_pending_after_bootstrap_repair',1)
+          t=t.replace('protocol_63_recovery: unavailable_pending_independent_review','protocol_63_recovery: unavailable_pending_r2_review',1)
+          t=t.replace('The D9 source mutation makes prior public bootstrap `42eb89388dc96879157ba92db9e7f3c59f2c0b36` historical. The exact already-existing candidate `190c8b4d352c203ef74c94d57c4f18d30eb7186d` is published as the replacement 6.3 source fallback only by the later F5 evidence descendant; it remains distinct from unavailable Protocol 6.3 recovery.',f'The D9 source mutation invalidated the prior D4R3 bootstrap `{OLD}`. F5 evidence incorrectly described semantic candidate `{SEM}` as if it were itself the replacement public bootstrap even though that immutable candidate still embedded `{OLD}` as its fallback. Promotion review exposed this lifecycle defect. Replacement self-reference-safe source snapshot `{BNEW}` was therefore constructed with the public fallback deliberately unavailable, fully qualified before publication, and only later published by descendant `{BPUB}`. The semantic candidate, public bootstrap, publication descendant, and unavailable recovery are now distinct identities.',1)
+          t=t.replace(f'Fresh independent assembled-candidate Protocol/D3 Review of `{SEM}` is required. Stage G, recovery, accepted-current promotion, workplan archive, and `main` cutover remain blocked until that Review passes.',f'Fresh independent assembled-candidate Protocol/D3 Review R2 is required over semantic candidate `{SEM}` together with repaired bootstrap `{BNEW}` and publication descendant `{BPUB}`. Earlier Review-PASS attempts are superseded by the subsequently discovered bootstrap-publication blocker. Stage G, recovery, accepted-current promotion, workplan archive, and `main` cutover remain blocked until R2 passes.',1)
+          p.write_text(t)
+
+          p=Path('qualification/ssdp6/SSDP-6.3-PRESERVATION-CENSUS.md'); t=p.read_text()
+          t=t.replace(f'public_source_bootstrap: {SEM}',f'public_source_bootstrap: {BNEW}',1)
+          t=t.replace(f'public_source_mapping_commit: {F5}',f'public_source_mapping_commit: {BPUB}',1)
+          t=t.replace('status: f5-qualified-evidence-reconciled-independent-review-pending','status: bootstrap-repaired-evidence-reconciled-independent-review-r2-pending',1)
+          t=t.replace(f'current repaired public bootstrap:          {SEM}\nlater public mapping descendant:            {F5}',f'historical D4R3 public bootstrap:            {OLD}\ncurrent repaired public bootstrap:          {BNEW}\nlater public mapping descendant:            {BPUB}',1)
+          t=t.replace('independent Review:                          PENDING','independent Review R2:                       PENDING',1)
+          marker='Earlier 6.3 candidates, bootstraps, mapping descendants, and qualification publications remain historical provenance and negative fixtures only.'
+          repl=f'F5 publication `{F5}` and later evidence reconciliation did not complete replacement-bootstrap publication correctly: they described semantic candidate `{SEM}` as the current bootstrap even though that candidate still named `{OLD}` as fallback. Promotion review exposed the defect. Qualified immutable bootstrap `{BNEW}` and publication descendant `{BPUB}` supersede that current-facing bootstrap claim without rewriting F5 as if it had been correct.\n\n'+marker
+          if marker not in t: raise SystemExit('census marker missing')
+          t=t.replace(marker,repl,1); p.write_text(t)
+
+          p=Path('qualification/ssdp6/INDEPENDENT-REVIEW-HANDOFF-PROTOCOL-6.3.md'); t=p.read_text()
+          t=t.replace(f'public_source_bootstrap: {SEM}',f'public_source_bootstrap: {BNEW}',1)
+          t=t.replace(f'public_source_mapping_commit: {F5}',f'public_source_mapping_commit: {BPUB}',1)
+          t=t.replace('independent_review: required_fresh_context','independent_review: required_fresh_r2_context',1)
+          t=t.replace('protocol_63_recovery: unavailable_pending_review','protocol_63_recovery: unavailable_pending_r2_review',1)
+          old=f'The new public source bootstrap is the already-existing candidate `{SEM}`, published only by later descendant `{F5}`. It is not Protocol 6.3 recovery. Until fresh independent Review PASS and separate Stage G recovery lifecycle complete, accepted current remains Protocol 6.2; recovery is unavailable; the workplan stays active; `main` cutover is not authorized.'
+          new=f'F5 incorrectly treated semantic candidate `{SEM}` as the replacement public bootstrap even though that immutable candidate still embedded historical fallback `{OLD}`. Promotion review caught the defect. The repaired public source bootstrap is instead self-reference-safe immutable snapshot `{BNEW}`, qualified before publication and named only by later descendant `{BPUB}`. It is not Protocol 6.3 recovery. Earlier Review-PASS attempts made before this blocker was discovered are superseded. Fresh R2 Review must assess the assembled repaired state. Until R2 PASS and separate Stage G recovery lifecycle complete, accepted current remains Protocol 6.2; recovery is unavailable; the workplan stays active; `main` cutover is not authorized.'
+          if old not in t: raise SystemExit('handoff lifecycle paragraph missing')
+          t=t.replace(old,new,1); p.write_text(t)
+
+          p=Path('workplans/active/PROTOCOL-6.3-EVIDENCE-BACKED-PROJECT-ENGINEERING-MEMORY-WORKPLAN.md'); t=p.read_text()
+          t=t.replace('implementation_review_state: reopened-after-independent-no-pass-4','implementation_review_state: r2-pending-after-bootstrap-publication-repair',1)
+          anchor=f'current_f5_qualification: qualification/ssdp6/RESULTS-GPT-5.6-SOL-2026-09-12-PROTOCOL-6.3-F5.md\n'
+          if anchor not in t: raise SystemExit('workplan metadata anchor missing')
+          t=t.replace(anchor,anchor+f'current_public_bootstrap: {BNEW}\ncurrent_public_bootstrap_mapping: {BPUB}\n',1)
+          t=t.replace('stage_g_recovery_gate: blocked-repair-and-fresh-independent-review','stage_g_recovery_gate: blocked-pending-fresh-r2-review',1)
+          disposition='Protocol 6.3 remains **NO-PASS** and proposed. Accepted-current authority remains Protocol 6.2 recovery `b59adc77efe6951912cfd705cc43830c58ca27d0`. Stage G, recovery mapping, workplan archive, and `main` cutover remain blocked.'
+          addition=disposition+f'\n\nA later promotion audit exposed an additional lifecycle blocker after F5: semantic candidate `{SEM}` had been labeled as the replacement public bootstrap although it still embedded historical D4R3 fallback `{OLD}`. This was repaired without changing the reviewed D9 semantic source by creating qualified self-reference-safe bootstrap `{BNEW}` and publishing it only from later descendant `{BPUB}`. Two inherited-contract losses found while constructing that snapshot (the 5.16 self-reference-safe-source wording and exact accepted-6.2 fallback wording) plus a publication false-compaction that dropped historical bootstrap identities were repaired at their existing publication owners and discriminated by the full regression. Fresh independent Review R2 is now required; prior PASS attempts are superseded by the later-discovered blocker.'
+          if disposition not in t: raise SystemExit('workplan disposition anchor missing')
+          t=t.replace(disposition,addition,1); p.write_text(t)
+
+          Path('qualification/ssdp6/BOOTSTRAP-REPAIR-RECONCILIATION-PROTOCOL-6.3.md').write_text(f'''---\nkind: ssdp63-bootstrap-repair-reconciliation\nprotocol_version: 6.3.0\nauthority: non-normative-lifecycle-evidence\nsemantic_candidate: {SEM}\nhistorical_d4r3_bootstrap: {OLD}\nreplacement_bootstrap: {BNEW}\nreplacement_bootstrap_publication: {BPUB}\naccepted_current_protocol: 6.2.0\nrecovery: unavailable_pending_r2_review\n---\n\n# Protocol 6.3 Replacement-Bootstrap Reconciliation\n\nPromotion review discovered that F5-era evidence had conflated semantic candidate `{SEM}` with a valid public bootstrap. The candidate still embedded `{OLD}` as its public fallback and therefore could not satisfy the repository's self-reference-safe replacement-bootstrap lifecycle.\n\nThe repair created immutable snapshot `{BNEW}` with public fallback deliberately unavailable, retained exact version-bound 6.2 fallback semantics and inherited self-reference-safe-source wording, and ran focused bootstrap/D8-D9 tests, complete unittest discovery, PEM validation, package/dist parity, Protocol snapshot parity, Orchestrator Core, and whitespace checks before committing that snapshot. Publication descendant `{BPUB}` then named `{BNEW}` and repeated the exact-ref bootstrap realization plus the full assembled acceptance surface before committing the mapping. Historical invalidated bootstrap identities were retained rather than compacted away.\n\nThis repair changes publication/lifecycle state and generated descendants only; it does not replace semantic candidate `{SEM}`. The earlier Review-PASS records are historical attempts superseded by the blocker found during promotion. A fresh independent R2 Review is required before recovery or accepted-current promotion.\n''')
+          PY
+      - name: Validate evidence reconciliation
+        run: |
+          python -m unittest discover -s tests -v
+          python source/project_engineering_memory.py PROJECT-ENGINEERING-MEMORY.md
+          git diff --check
+      - name: Commit reconciliation
+        run: |
+          git config user.name 'Protocol 6.3 lifecycle automation'
+          git config user.email 'protocol63-lifecycle@users.noreply.github.com'
+          git rm .github/workflows/temporary-protocol63-evidence-reconciliation.yml
+          git add -A
+          git diff --cached --check
+          git commit -m 'Reconcile Protocol 6.3 bootstrap repair evidence'
+          git push origin HEAD:ssdp-6.3-engineering-memory
