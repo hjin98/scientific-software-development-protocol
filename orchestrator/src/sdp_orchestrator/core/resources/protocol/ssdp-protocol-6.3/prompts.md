@@ -15,11 +15,11 @@ With `PROTOCOL_SOURCE = AUTO_LOCAL_FIRST`, use a governing-version-compatible in
 ```text
 PUBLIC_REPOSITORY = https://github.com/hjin98/scientific-software-development-protocol
 CURRENT_PROTOCOL = 6.3.0
-CURRENT_PUBLIC_REF = 5ee4b3ac3ca1666b0499f7a72f55adcc411bf4bb
+CURRENT_PUBLIC_REF = UNAVAILABLE_PENDING_REPLACEMENT_BOOTSTRAP
 ACCEPTED_6_2_PUBLIC_REF = 5a062ebc472755607b9dc66d33a5ebbc4b7429aa
 ```
 
-**Protocol 6.3 bootstrap state:** pre-repair bootstrap `1484c1d3caa49d87cc15bc52a5e775399c1dae1b` is invalidated historical evidence only. `CURRENT_PUBLIC_REF` above is the sole current 6.3 public-fallback mapping. An unavailable sentinel means no replacement public fallback is authorized; an immutable Git SHA means that already-existing self-reference-safe source snapshot passed bootstrap-readiness and exact-ref remote route realization before a later descendant published the mapping. Never use repository default/latest, a guessed semantic-version ref, the current candidate branch, an invalidated bootstrap, or the accepted 6.2 bootstrap as a substitute. Version-bound 6.2 work continues to use exactly `5a062ebc472755607b9dc66d33a5ebbc4b7429aa`; historical 5.16/6.0/6.1 resolution remains version-bound to its own immutable mapping.
+**Protocol 6.3 bootstrap state:** all pre-repair 6.3 bootstrap snapshots are invalidated historical evidence only. `CURRENT_PUBLIC_REF` is `UNAVAILABLE_PENDING_REPLACEMENT_BOOTSTRAP`, so no current 6.3 public fallback is authorized until an already-existing repaired self-reference-safe source snapshot passes bootstrap readiness and exact-ref realization and a later descendant publishes that exact SHA. Never use repository default/latest, a guessed semantic-version ref, the current candidate branch, an invalidated bootstrap, or the accepted 6.2 bootstrap as a substitute. Version-bound 6.2 work continues to use exactly `5a062ebc472755607b9dc66d33a5ebbc4b7429aa`; historical 5.16/6.0/6.1 resolution remains version-bound to its own immutable mapping.
 
 `AUTO_EXECUTE` means inspect the real target, infer ordinary discoverable context, and perform every authorized action rather than stopping at commands/snippets/next steps. Prefer action over clarification when context is discoverable; ask only when proceeding would require guessing consequential authority, semantics, target, or irreversible action.
 

@@ -35,6 +35,22 @@ For a memory-triggering task:
 1. resolve the **accepted/base PEM** from project integration/Git policy, never from default/latest/timestamp/self-declaration;
 2. validate the supported schema and compose any explicit validated same-branch candidate overlay;
 3. record the exact accepted/base and overlay identities used for the current decision;
+
+The canonical session-local HAS interface is exact and executable:
+
+```yaml
+pem_basis:
+  accepted_project_state: <exact accepted project state>
+  accepted_pem: <exact accepted PEM publication or NONE_PROTOCOL_6.2_PRE_PEM>
+  candidate_overlay_semantic_candidate: <exact candidate overlay or NONE>
+has:
+  - id: <family/capability/notice id>
+    disposition: APPLICABLE | NOT_APPLICABLE | REVIEW_REQUIRED
+    reason: <bounded rationale>
+```
+
+Do not substitute aliases such as `accepted_base` or `candidate_overlay`; the workflow, canonical template, and executable validator use this one shape without translation glue. Keep the HAS session-local unless the governed work explicitly requires a durable handoff/record.
+
 4. read the compact active summary, then perform bounded metadata-level applicability matching across canonical current entries, not only `HOT` or summary-visible entries;
 5. record a HAS entry for every materially relevant family/capability/notice surfaced or independently known, with `APPLICABLE`, `NOT_APPLICABLE`, or `REVIEW_REQUIRED` plus reason;
 6. load raw family/evidence detail only where needed to decide or falsify the disposition;

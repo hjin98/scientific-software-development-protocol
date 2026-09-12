@@ -9,8 +9,9 @@ import urllib.request
 from pathlib import Path
 
 
-BOOTSTRAP = "5ee4b3ac3ca1666b0499f7a72f55adcc411bf4bb"
+BOOTSTRAP = "UNAVAILABLE_PENDING_REPLACEMENT_BOOTSTRAP"
 INVALIDATED_BOOTSTRAP = "1484c1d3caa49d87cc15bc52a5e775399c1dae1b"
+INVALIDATED_SECOND_BOOTSTRAP = "5ee4b3ac3ca1666b0499f7a72f55adcc411bf4bb"
 PUBLIC_ROOT = "https://raw.githubusercontent.com/hjin98/scientific-software-development-protocol"
 LOCAL_MD_RE = re.compile(r"\[[^\]]+\]\(([^)]+\.md(?:#[^)]*)?)\)")
 
@@ -24,12 +25,16 @@ class Protocol63BootstrapTests(unittest.TestCase):
         readme = (root / 'README.md').read_text(encoding='utf-8')
         self.assertIn(f'6.3.0 public-source bootstrap -> {BOOTSTRAP}', versioning)
         self.assertIn(f'6.3.0 invalidated bootstrap attempt -> {INVALIDATED_BOOTSTRAP}', versioning)
+        self.assertIn(f'6.3.0 invalidated second bootstrap -> {INVALIDATED_SECOND_BOOTSTRAP}', versioning)
         self.assertNotIn(f'CURRENT_PUBLIC_REF = {INVALIDATED_BOOTSTRAP}', prompts)
+        self.assertNotIn(f'CURRENT_PUBLIC_REF = {INVALIDATED_SECOND_BOOTSTRAP}', prompts)
         self.assertIn(f'CURRENT_PUBLIC_REF = {BOOTSTRAP}', prompts)
         self.assertIn(f'6.3.0 public bootstrap -> {BOOTSTRAP}', portability)
+        self.assertIn(f'6.3.0 invalidated second bootstrap -> {INVALIDATED_SECOND_BOOTSTRAP}', portability)
         self.assertIn(BOOTSTRAP, readme)
+        self.assertIn(INVALIDATED_SECOND_BOOTSTRAP, readme)
         self.assertIn('6.3.0 recovery -> UNAVAILABLE_PENDING_6.3_ACCEPTANCE', portability)
-        self.assertNotIn('6.3.0  -> ' + BOOTSTRAP, versioning)
+        self.assertNotIn('6.3.0  -> ' + INVALIDATED_SECOND_BOOTSTRAP, versioning)
 
     def test_published_bootstrap_snapshot_is_real_self_reference_safe_and_route_complete(self) -> None:
         if BOOTSTRAP.startswith("UNAVAILABLE_"):
@@ -57,7 +62,7 @@ class Protocol63BootstrapTests(unittest.TestCase):
         prompts = fetch("source/shared/references/development-workflow-prompts.md")
         self.assertNotIn(BOOTSTRAP, versioning)
         self.assertNotIn(BOOTSTRAP, prompts)
-        self.assertIn("UNAVAILABLE_PENDING_6.3_BOOTSTRAP_QUALIFICATION", prompts)
+        self.assertIn("UNAVAILABLE_PENDING_REPLACEMENT_BOOTSTRAP", prompts)
 
         self.assertIn("memory_schema_version: 1", fetch("source/shared/references/project-engineering-memory.md"))
         self.assertIn("memory_schema_version: 1", fetch("source/shared/templates/project_engineering_memory_template.md"))

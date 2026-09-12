@@ -122,35 +122,38 @@ When a later assessment replaces an earlier current interpretation, append it wi
 
 ## Current notices
 
-Use notices only for high-impact current facts that are not yet honest generalized families.
+Use notices only for high-impact current facts that are not yet honest generalized families. Current notices use typed, evaluable triggers. For an accepted-base/owner/binding-change trigger, capture the admitted basis when the notice is created; do not replace it with opaque prose.
 
 ### NT-001 — Example current notice
 
 ```yaml pem-notice
 id: NT-001
-state: CURRENT
+state: REVIEW_REQUIRED
 summary: Replace with bounded current fact.
 normative_status: NON_AUTHORITATIVE
 owner: NONE
 applicability:
   - replace-with-applicability-cue
-binding_health: HEALTHY
+binding_health: REVIEW_REQUIRED
 evidence:
   - REPLACE_WITH_IMMUTABLE_EVIDENCE_ROUTE
-review_or_expiry: Replace with event/condition that forces review.
+review_trigger:
+  type: accepted_base_change
+  basis: REPLACE_WITH_EXACT_ACCEPTED_BASE_AT_NOTICE_ADMISSION
 ```
 
 ## Historical Applicability Set handoff shape
 
-A workplan that triggers PEM records the exact basis used; this block normally belongs in that workplan/handoff rather than in the project memory itself.
+A workplan that triggers PEM records the exact basis used; this block normally belongs in that workplan/handoff rather than in the project memory itself. These three basis fields are the canonical executable interface; do not substitute `accepted_base`, `candidate_overlay`, or another translation alias.
 
-```yaml
+```yaml pem-has
 pem_basis:
-  accepted_base: REPLACE_WITH_EXACT_ACCEPTED_PROJECT_MEMORY_BASIS
-  candidate_overlay: NONE
+  accepted_project_state: REPLACE_WITH_EXACT_ACCEPTED_PROJECT_STATE
+  accepted_pem: REPLACE_WITH_EXACT_ACCEPTED_PEM_PUBLICATION_OR_NONE
+  candidate_overlay_semantic_candidate: REPLACE_WITH_EXACT_CANDIDATE_OR_NONE
 has:
   - id: FF-001
-    disposition: APPLICABLE | NOT_APPLICABLE | REVIEW_REQUIRED
+    disposition: REVIEW_REQUIRED
     reason: Replace with bounded current-task reason.
 ```
 

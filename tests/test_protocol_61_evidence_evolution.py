@@ -91,7 +91,7 @@ class Protocol61EvidenceEvolutionTests(unittest.TestCase):
                 self.assertIsNotNone(current)
                 current_ref = current.group(1)
                 self.assertNotEqual(current_ref, "1484c1d3caa49d87cc15bc52a5e775399c1dae1b")
-                self.assertTrue(current_ref == "UNAVAILABLE_PENDING_6.3_BOOTSTRAP_QUALIFICATION" or re.fullmatch(r"[0-9a-f]{40}", current_ref))
+                self.assertTrue(current_ref == "UNAVAILABLE_PENDING_REPLACEMENT_BOOTSTRAP" or re.fullmatch(r"[0-9a-f]{40}", current_ref))
                 self.assertIn("version-bound 6.2 work continues to use exactly", lower)
 
     def test_accepted_61_recovery_and_bootstrap_remain_immutable(self) -> None:
