@@ -1,0 +1,265 @@
+name: Protocol 6.3 replacement bootstrap reconciliation
+
+on:
+  push:
+    branches:
+      - ssdp-6.3-engineering-memory
+
+permissions:
+  contents: write
+
+concurrency:
+  group: ssdp63-replacement-bootstrap
+  cancel-in-progress: false
+
+jobs:
+  reconcile:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install validation dependencies
+        run: |
+          python -m pip install -r source/requirements-validation.txt
+          python -m pip install ./orchestrator -r orchestrator/requirements-dev.txt
+      - name: Configure publication identity
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          echo "START_SHA=$(git rev-parse HEAD)" >> "$GITHUB_ENV"
+      - name: Assemble self-reference-safe replacement bootstrap candidate
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+
+          OLD = "1484c1d3caa49d87cc15bc52a5e775399c1dae1b"
+          PENDING = "UNAVAILABLE_PENDING_6.3_BOOTSTRAP_QUALIFICATION"
+
+          def rewrite(path: str, replacements: list[tuple[str, str]]) -> None:
+              p = Path(path)
+              text = p.read_text(encoding="utf-8")
+              for old, new in replacements:
+                  if old not in text:
+                      raise SystemExit(f"expected text not found in {path}: {old[:120]!r}")
+                  text = text.replace(old, new, 1)
+              p.write_text(text, encoding="utf-8")
+
+          rewrite(
+              "source/shared/references/protocol-versioning-and-compatibility.md",
+              [
+                  (
+                      f"Protocol 6.3 public-source bootstrap is likewise distinct from future recovery:\n\n```text\n6.3.0 public-source bootstrap -> {OLD}\n```\n\nThat immutable ancestor passed repository regression, canonical package build, independent package validation and committed-distribution parity, Protocol 6.3 profile/snapshot parity, the full Orchestrator Core acceptance suite, and an exact-ref remote source/route/bootstrap realization before this descendant published the mapping. The bootstrap snapshot intentionally does not self-name; this later mapping supplies the version-to-ref authority. Protocol 6.3 recovery remains unavailable until complete qualification and independent Review close.",
+                      f"Protocol 6.3 replacement public-source bootstrap is likewise distinct from future recovery:\n\n```text\n6.3.0 invalidated bootstrap attempt -> {OLD}\n6.3.0 public-source bootstrap -> {PENDING}\n```\n\nThe pre-repair Protocol 6.3 bootstrap remains immutable historical evidence only and must not be used as current fallback. The value on the `public-source bootstrap` line is the sole current 6.3 fallback mapping: an unavailable sentinel means no replacement fallback is published, while an immutable Git SHA means the already-existing self-reference-safe snapshot passed repository regression, canonical package build, independent package validation and committed-distribution parity, Protocol 6.3 profile/snapshot parity, the full Orchestrator Core acceptance suite, and exact-ref remote source/route realization before a later descendant published it. Protocol 6.3 recovery remains unavailable until complete qualification and independent Review close."
+                  ),
+                  (
+                      f"3. use public-source bootstrap `{OLD}` for version-bound 6.3 public fallback; that already-existing source state passed bootstrap-readiness checks before this later descendant published the exact mapping—never substitute `main`/latest/guessed version;",
+                      "3. qualify an already-existing self-reference-safe replacement public-source snapshot before publishing its exact immutable identity from a later descendant; never substitute `main`/latest/guessed version or an invalidated attempt;"
+                  ),
+                  (
+                      f"The exact 6.3 public-source bootstrap is now `{OLD}` and is usable only as the version-bound 6.3 public fallback. Recovery is still unavailable: **do not insert placeholders or guessed SHAs into recovery mappings** and do not treat the candidate profile as accepted-current. The accepted 6.2 mappings above remain operative for 6.2.",
+                      f"The pre-repair Protocol 6.3 bootstrap `{OLD}` is invalidated. The current 6.3 public-source bootstrap mapping is `{PENDING}`; an unavailable sentinel means no public fallback is currently authorized, while an immutable Git SHA on that mapping is usable only as the version-bound 6.3 public fallback after its readiness and exact-ref realization have passed. Recovery is still unavailable: **do not insert placeholders or guessed SHAs into recovery mappings** and do not treat the candidate profile as accepted-current. The accepted 6.2 mappings above remain operative for 6.2."
+                  ),
+              ],
+          )
+
+          rewrite(
+              "source/shared/references/development-workflow-prompts.md",
+              [
+                  (f"CURRENT_PUBLIC_REF = {OLD}", f"CURRENT_PUBLIC_REF = {PENDING}"),
+                  (
+                      f"**Protocol 6.3 bootstrap state:** automatic public fallback for current version-bound 6.3 uses exactly immutable ref `{OLD}`. That self-reference-safe source snapshot passed bootstrap-readiness and exact-ref remote route realization before a later descendant published this mapping; the bootstrap source intentionally does not self-name. Never use repository default/latest, a guessed semantic-version ref, the current candidate branch, or the accepted 6.2 bootstrap as a substitute for the 6.3 ref. Version-bound 6.2 work continues to use exactly `5a062ebc472755607b9dc66d33a5ebbc4b7429aa`; historical 5.16/6.0/6.1 resolution remains version-bound to its own immutable mapping.",
+                      f"**Protocol 6.3 bootstrap state:** pre-repair bootstrap `{OLD}` is invalidated historical evidence only. `CURRENT_PUBLIC_REF` above is the sole current 6.3 public-fallback mapping. An unavailable sentinel means no replacement public fallback is authorized; an immutable Git SHA means that already-existing self-reference-safe source snapshot passed bootstrap-readiness and exact-ref remote route realization before a later descendant published the mapping. Never use repository default/latest, a guessed semantic-version ref, the current candidate branch, an invalidated bootstrap, or the accepted 6.2 bootstrap as a substitute. Version-bound 6.2 work continues to use exactly `5a062ebc472755607b9dc66d33a5ebbc4b7429aa`; historical 5.16/6.0/6.1 resolution remains version-bound to its own immutable mapping."
+                  ),
+              ],
+          )
+
+          rewrite(
+              "PORTABILITY.md",
+              [
+                  (
+                      f"6.3.0 public bootstrap -> {OLD}\n6.3.0 recovery -> UNAVAILABLE_PENDING_6.3_ACCEPTANCE",
+                      f"6.3.0 invalidated bootstrap attempt -> {OLD}\n6.3.0 public bootstrap -> {PENDING}\n6.3.0 recovery -> UNAVAILABLE_PENDING_6.3_ACCEPTANCE"
+                  ),
+                  (
+                      f"For Protocol 6.3, version-bound public fallback now uses exactly `{OLD}`. Do **not** substitute the 6.2 bootstrap, current branch, repository default/latest, or a guessed `6.3.0` ref. This immutable source ancestor passed bootstrap-readiness and exact-ref remote route realization before a later descendant published the mapping. Recovery remains later and requires complete qualification plus independent Review. If neither compatible local source nor mapped compatible immutable public source can be read, report truthful non-closure.",
+                      f"For Protocol 6.3, pre-repair bootstrap `{OLD}` is invalidated historical evidence only. The `6.3.0 public bootstrap` mapping above is the sole current fallback identity: an unavailable sentinel means no replacement fallback is authorized; an immutable Git SHA means the already-existing source snapshot passed bootstrap-readiness and exact-ref route realization before a later descendant published it. Do **not** substitute the 6.2 bootstrap, current branch, repository default/latest, a guessed `6.3.0` ref, or an invalidated bootstrap. Recovery remains later and requires complete qualification plus independent Review. If neither compatible local source nor mapped compatible immutable public source can be read, report truthful non-closure."
+                  ),
+                  (
+                      f"Protocol 6.2 remains accepted-current while 6.3 is a candidate. Version-bound 6.2 public fallback remains exact bootstrap `5a062ebc472755607b9dc66d33a5ebbc4b7429aa` and accepted recovery remains `b59adc77efe6951912cfd705cc43830c58ca27d0`. Version-bound 6.3 public fallback is now exact bootstrap `{OLD}`, but this does not make 6.3 accepted-current. Protocol 6.3 cannot displace the 6.2 baseline until complete qualification, independent Review, recovery mapping, regenerated parity, and lifecycle gates close.",
+                      "Protocol 6.2 remains accepted-current while 6.3 is a candidate. Version-bound 6.2 public fallback remains exact bootstrap `5a062ebc472755607b9dc66d33a5ebbc4b7429aa` and accepted recovery remains `b59adc77efe6951912cfd705cc43830c58ca27d0`. Version-bound 6.3 public fallback is usable only when the `6.3.0 public bootstrap` mapping above contains an immutable Git SHA; an unavailable sentinel means no 6.3 fallback is currently authorized. This does not make 6.3 accepted-current. Protocol 6.3 cannot displace the 6.2 baseline until complete qualification, independent Review, recovery mapping, regenerated parity, and lifecycle gates close."
+                  ),
+              ],
+          )
+
+          rewrite(
+              "README.md",
+              [
+                  (
+                      f"**Protocol 6.3 public-source bootstrap is `{OLD}`; Protocol 6.3 recovery remains unavailable.** The bootstrap is an already-existing self-reference-safe source snapshot that passed repository/package/profile/Core bootstrap-readiness plus exact-ref remote route realization before this later descendant published its identity. It is only the version-bound public fallback and does not make 6.3 accepted-current. Recovery remains later, after complete qualification and independent Review.",
+                      f"**Protocol 6.3 pre-repair bootstrap `{OLD}` is invalidated; the current replacement public-source bootstrap identity is `{PENDING}`; Protocol 6.3 recovery remains unavailable.** An unavailable sentinel means no replacement public fallback is authorized; an immutable Git SHA means the already-existing self-reference-safe source snapshot passed repository/package/profile/Core bootstrap-readiness plus exact-ref remote route realization before a later descendant published its identity. A mapped bootstrap is only the version-bound public fallback and does not make 6.3 accepted-current. Recovery remains later, after complete qualification and independent Review."
+                  ),
+              ],
+          )
+
+          test_path = Path("tests/test_protocol_63_bootstrap.py")
+          test = test_path.read_text(encoding="utf-8")
+          old_const = f'BOOTSTRAP = "{OLD}"\n'
+          if old_const not in test:
+              raise SystemExit("bootstrap test constant not found")
+          test = test.replace(
+              old_const,
+              f'BOOTSTRAP = "{PENDING}"\nINVALIDATED_BOOTSTRAP = "{OLD}"\n',
+              1,
+          )
+          anchor = "        self.assertIn(f'6.3.0 public-source bootstrap -> {BOOTSTRAP}', versioning)\n"
+          if anchor not in test:
+              raise SystemExit("bootstrap mapping assertion anchor not found")
+          test = test.replace(
+              anchor,
+              anchor
+              + "        self.assertIn(f'6.3.0 invalidated bootstrap attempt -> {INVALIDATED_BOOTSTRAP}', versioning)\n"
+              + "        self.assertNotIn(f'CURRENT_PUBLIC_REF = {INVALIDATED_BOOTSTRAP}', prompts)\n",
+              1,
+          )
+          remote_anchor = "    def test_published_bootstrap_snapshot_is_real_self_reference_safe_and_route_complete(self) -> None:\n"
+          if remote_anchor not in test:
+              raise SystemExit("remote bootstrap test anchor not found")
+          test = test.replace(
+              remote_anchor,
+              remote_anchor
+              + "        if BOOTSTRAP.startswith(\"UNAVAILABLE_\"):\n"
+              + "            self.skipTest(\"replacement Protocol 6.3 bootstrap is not published yet\")\n",
+              1,
+          )
+          test_path.write_text(test, encoding="utf-8")
+          PY
+
+          rm .github/workflows/ssdp63-bootstrap-reconcile.yml
+          python source/build_skills.py --output dist
+          python orchestrator/scripts/generate_protocol_snapshot.py
+
+      - name: Qualify replacement bootstrap candidate before publication
+        shell: bash
+        run: |
+          set -euo pipefail
+          CI=1 python -m unittest discover -s tests -v
+          python source/project_engineering_memory.py PROJECT-ENGINEERING-MEMORY.md
+          rm -rf /tmp/protocol-dist
+          python source/build_skills.py --output /tmp/protocol-dist
+          python source/validate_packages.py --dist /tmp/protocol-dist
+          python source/check_dist.py --expected /tmp/protocol-dist --committed dist
+          python orchestrator/scripts/generate_protocol_snapshot.py --check
+          python orchestrator/scripts/run_core_tests.py
+          git diff --check
+          git diff --exit-code "$START_SHA" -- \
+            orchestrator/src/sdp_orchestrator/core/resources/protocol/sdp-protocol-5.16 \
+            orchestrator/src/sdp_orchestrator/core/resources/protocol/ssdp-protocol-6.0 \
+            orchestrator/src/sdp_orchestrator/core/resources/protocol/ssdp-protocol-6.1 \
+            orchestrator/src/sdp_orchestrator/core/resources/protocol/ssdp-protocol-6.2
+
+      - name: Commit and publish self-reference-safe replacement snapshot
+        shell: bash
+        run: |
+          set -euo pipefail
+          git add -A
+          git commit -m "Assemble Protocol 6.3 replacement bootstrap candidate"
+          BOOTSTRAP_SHA=$(git rev-parse HEAD)
+          echo "BOOTSTRAP_SHA=$BOOTSTRAP_SHA" >> "$GITHUB_ENV"
+          git push origin "HEAD:${GITHUB_REF_NAME}"
+
+      - name: Realize replacement snapshot from exact public ref
+        shell: bash
+        run: |
+          set -euo pipefail
+          CI=1 BOOTSTRAP_SHA="$BOOTSTRAP_SHA" python - <<'PY'
+          import importlib.util
+          import os
+          import unittest
+          from pathlib import Path
+
+          path = Path("tests/test_protocol_63_bootstrap.py")
+          spec = importlib.util.spec_from_file_location("bootstrap_test", path)
+          module = importlib.util.module_from_spec(spec)
+          assert spec.loader is not None
+          spec.loader.exec_module(module)
+          module.BOOTSTRAP = os.environ["BOOTSTRAP_SHA"]
+          suite = unittest.TestSuite([
+              module.Protocol63BootstrapTests(
+                  "test_published_bootstrap_snapshot_is_real_self_reference_safe_and_route_complete"
+              )
+          ])
+          result = unittest.TextTestRunner(verbosity=2).run(suite)
+          if not result.wasSuccessful():
+              raise SystemExit(1)
+          PY
+
+      - name: Publish exact replacement mapping from a later descendant
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import os
+          from pathlib import Path
+
+          pending = "UNAVAILABLE_PENDING_6.3_BOOTSTRAP_QUALIFICATION"
+          replacement = os.environ["BOOTSTRAP_SHA"]
+          paths = [
+              "source/shared/references/protocol-versioning-and-compatibility.md",
+              "source/shared/references/development-workflow-prompts.md",
+              "PORTABILITY.md",
+              "README.md",
+              "tests/test_protocol_63_bootstrap.py",
+          ]
+          for raw in paths:
+              path = Path(raw)
+              text = path.read_text(encoding="utf-8")
+              if pending not in text:
+                  raise SystemExit(f"replacement sentinel missing from {raw}")
+              path.write_text(text.replace(pending, replacement), encoding="utf-8")
+          PY
+          git add source/shared/references/protocol-versioning-and-compatibility.md \
+            source/shared/references/development-workflow-prompts.md \
+            PORTABILITY.md README.md tests/test_protocol_63_bootstrap.py
+          git commit -m "Publish Protocol 6.3 replacement bootstrap mapping"
+          echo "MAPPING_SHA=$(git rev-parse HEAD)" >> "$GITHUB_ENV"
+
+      - name: Regenerate mapping-bearing descendants and final qualification
+        shell: bash
+        run: |
+          set -euo pipefail
+          python source/build_skills.py --output dist
+          python orchestrator/scripts/generate_protocol_snapshot.py
+          git add dist orchestrator/src/sdp_orchestrator/core/resources/protocol/ssdp-protocol-6.3
+          git commit -m "Regenerate Protocol 6.3 mapped descendants"
+          GENERATED_SHA=$(git rev-parse HEAD)
+          echo "GENERATED_SHA=$GENERATED_SHA" >> "$GITHUB_ENV"
+
+          CI=1 python -m unittest discover -s tests -v
+          python source/project_engineering_memory.py PROJECT-ENGINEERING-MEMORY.md
+          rm -rf /tmp/protocol-dist
+          python source/build_skills.py --output /tmp/protocol-dist
+          python source/validate_packages.py --dist /tmp/protocol-dist
+          python source/check_dist.py --expected /tmp/protocol-dist --committed dist
+          python orchestrator/scripts/generate_protocol_snapshot.py --check
+          python orchestrator/scripts/run_core_tests.py
+          git diff --check
+          git diff --exit-code "$START_SHA" -- \
+            orchestrator/src/sdp_orchestrator/core/resources/protocol/sdp-protocol-5.16 \
+            orchestrator/src/sdp_orchestrator/core/resources/protocol/ssdp-protocol-6.0 \
+            orchestrator/src/sdp_orchestrator/core/resources/protocol/ssdp-protocol-6.1 \
+            orchestrator/src/sdp_orchestrator/core/resources/protocol/ssdp-protocol-6.2
+          git status --porcelain
+          test -z "$(git status --porcelain)"
+          git push origin "HEAD:${GITHUB_REF_NAME}"
+
+      - name: Record publication identities
+        run: |
+          echo "replacement_bootstrap=$BOOTSTRAP_SHA"
+          echo "mapping_commit=$MAPPING_SHA"
+          echo "generated_reconciliation=$GENERATED_SHA"
