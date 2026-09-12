@@ -15,7 +15,7 @@ With `PROTOCOL_SOURCE = AUTO_LOCAL_FIRST`, use a governing-version-compatible in
 ```text
 PUBLIC_REPOSITORY = https://github.com/hjin98/scientific-software-development-protocol
 CURRENT_PROTOCOL = 6.3.0
-CURRENT_PUBLIC_REF = UNAVAILABLE_PENDING_6.3_BOOTSTRAP_QUALIFICATION
+CURRENT_PUBLIC_REF = 5ee4b3ac3ca1666b0499f7a72f55adcc411bf4bb
 ACCEPTED_6_2_PUBLIC_REF = 5a062ebc472755607b9dc66d33a5ebbc4b7429aa
 ```
 
