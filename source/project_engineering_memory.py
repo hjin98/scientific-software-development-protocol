@@ -892,6 +892,9 @@ def _material_routes(family: dict[str, Any]) -> list[str]:
     counterevidence = family.get("counterevidence_search")
     if isinstance(counterevidence, dict):
         routes.extend(str(v) for v in counterevidence.get("evidence", []) if isinstance(v, str))
+    reconciliation = family.get("semantic_reconciliation")
+    if isinstance(reconciliation, dict):
+        routes.extend(str(v) for v in reconciliation.get("evidence", []) if isinstance(v, str))
     return routes
 
 
@@ -1258,6 +1261,21 @@ def _semantic_identity_signature(family: dict[str, Any]) -> str:
     return hashlib.sha256(yaml.safe_dump(payload, sort_keys=True).encode("utf-8")).hexdigest()
 
 
+def _normalized_semantic_text(value: Any) -> str:
+    """Normalize presentation-only text differences without inferring semantic equivalence."""
+    if isinstance(value, str):
+        return re.sub(r"[\W_]+", " ", value, flags=re.UNICODE).strip().casefold()
+    return yaml.safe_dump(value, sort_keys=True).strip().casefold()
+
+
+def _normalized_applicability(value: Any) -> set[str] | None:
+    if not isinstance(value, list):
+        return None
+    normalized = {_normalized_semantic_text(item) for item in value}
+    normalized.discard("")
+    return normalized
+
+
 def validate_reconciliation(previous: PemDocument, current: PemDocument) -> list[str]:
     """Reject silent accepted semantic drift and observation rewriting across representations."""
     errors: list[str] = []
@@ -1267,12 +1285,20 @@ def validate_reconciliation(previous: PemDocument, current: PemDocument) -> list
         if old_sig != new_sig:
             old_semantic = old_family.get("semantic_identity") if isinstance(old_family.get("semantic_identity"), dict) else {}
             new_semantic = new_family.get("semantic_identity") if isinstance(new_family.get("semantic_identity"), dict) else {}
-            mechanically_material = []
+            mechanically_material: list[str] = []
             if old_family.get("kind") != new_family.get("kind"):
                 mechanically_material.append("kind")
             for key in ("owner_class", "mechanism_family"):
                 if old_semantic.get(key) != new_semantic.get(key):
                     mechanically_material.append(key)
+            if _normalized_semantic_text(old_semantic.get("invariant_or_claim")) != _normalized_semantic_text(new_semantic.get("invariant_or_claim")):
+                mechanically_material.append("invariant_or_claim")
+            if _normalized_semantic_text(old_semantic.get("applicability_dimensions")) != _normalized_semantic_text(new_semantic.get("applicability_dimensions")):
+                mechanically_material.append("applicability_dimensions")
+            old_app = _normalized_applicability(old_family.get("applicability"))
+            new_app = _normalized_applicability(new_family.get("applicability"))
+            if old_app is None or new_app is None or not new_app or not new_app.issubset(old_app):
+                mechanically_material.append("applicability")
             if mechanically_material:
                 errors.append(
                     f"{fid}: accepted family changed mechanically material semantic identity field(s) under the same ID: "
@@ -1289,8 +1315,13 @@ def validate_reconciliation(previous: PemDocument, current: PemDocument) -> list
                     errors.append(f"{fid}: same-ID semantic reconciliation must bind the previous envelope, WITHIN_ENVELOPE classification, reason, and evidence")
                 else:
                     for raw in evidence:
-                        try: parse_evidence_route(raw, f"{fid}:semantic reconciliation evidence")
-                        except PemError as exc: errors.append(str(exc))
+                        try:
+                            route = parse_evidence_route(raw, f"{fid}:semantic reconciliation evidence")
+                            health, reason = evidence_route_health(route, current)
+                            if health != "HEALTHY":
+                                errors.append(f"{fid}: same-ID semantic reconciliation evidence is not mechanically healthy: {health}: {reason}")
+                        except PemError as exc:
+                            errors.append(str(exc))
     old_rows = _all_event_rows(previous); new_rows = _all_event_rows(current)
     for identity in old_rows.keys() & new_rows.keys():
         error = _validate_observation_correction(identity, old_rows[identity], new_rows[identity])

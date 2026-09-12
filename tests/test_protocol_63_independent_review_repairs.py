@@ -12,18 +12,51 @@ def success(fid="SP-001"):
     return {"id": fid, "kind": "SUCCESS_PATTERN", "state": "CURRENT", "maturity": "SUPPORTED", "temperature": "UNASSESSED", "summary": "bounded success", "semantic_identity": {"invariant_or_claim": "claim", "owner_class": "D3/D4", "mechanism_family": "mechanism", "applicability_dimensions": "regime"}, "aggregation_scope": "scope", "coverage_state": "PARTIAL", "coverage_basis": "bounded", "applicability": ["x"], "authority_binding": "EVIDENCE_ONLY", "binding_health": "HEALTHY", "guidance_level": "OBSERVED", "positive_guidance_eligible": False, "relations": [], "applications": [{"id": "A01", "episode_identity": "episode-1", "lifecycle_context": "qualification", "source_project": "local", "surfaces": ["x"], "provenance_cluster": "cluster-1", "outcome": "SUPPORTING", "observation": "worked", "assessments": [{"id": "AS01", "state": "ADMISSIBLE", "conclusion": "SUPPORTS_BOUNDED_CLAIM", "evidence": ["repo@1111111:path#finding"]}]}]}
 
 class IndependentReviewRepairTests(unittest.TestCase):
-    def test_d8_01_same_id_semantic_drift_rejected(self):
-        old = success(); new = copy.deepcopy(old); new["semantic_identity"]["mechanism_family"] = "different"
-        errors = pem.validate_reconciliation(doc([old]), doc([new]))
-        self.assertTrue(any("mechanically material semantic identity" in e for e in errors))
-        laundering = copy.deepcopy(new)
-        laundering["semantic_reconciliation"] = {
+    def _reconciliation_route(self, locator="def validate_reconciliation"):
+        rev = subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=ROOT, text=True).strip()
+        return f"hjin98/scientific-software-development-protocol@{rev}:source/project_engineering_memory.py#{locator}"
+
+    def _within_envelope(self, previous, current, *, evidence=None, reason="bounded same-ID reconciliation"):
+        current["semantic_reconciliation"] = {
             "classification": "WITHIN_ENVELOPE",
-            "previous_identity_sha256": pem._semantic_identity_signature(old),
-            "reason": "claim that the changed mechanism is merely editorial",
-            "evidence": ["repo@1111111:path#review"],
+            "previous_identity_sha256": pem._semantic_identity_signature(previous),
+            "reason": reason,
+            "evidence": evidence or [self._reconciliation_route()],
         }
+        return current
+
+    def test_d8_01_same_id_semantic_drift_rejected(self):
+        old = success()
+        mechanism = copy.deepcopy(old); mechanism["semantic_identity"]["mechanism_family"] = "different"
+        self.assertTrue(any("mechanically material semantic identity" in e for e in pem.validate_reconciliation(doc([old]), doc([mechanism]))))
+        laundering = self._within_envelope(old, copy.deepcopy(mechanism), reason="claim changed mechanism is editorial")
         self.assertTrue(any("mechanically material semantic identity" in e for e in pem.validate_reconciliation(doc([old]), doc([laundering]))))
+
+        claim = copy.deepcopy(old); claim["semantic_identity"]["invariant_or_claim"] = "different governing claim"
+        claim = self._within_envelope(old, claim, reason="claim replacement asserted within envelope")
+        self.assertTrue(any("invariant_or_claim" in e and "mechanically material" in e for e in pem.validate_reconciliation(doc([old]), doc([claim]))))
+
+        broad = copy.deepcopy(old); broad["applicability"] = ["x", "y"]
+        broad = self._within_envelope(old, broad, reason="broadened applicability asserted within envelope")
+        self.assertTrue(any("applicability" in e and "mechanically material" in e for e in pem.validate_reconciliation(doc([old]), doc([broad]))))
+
+        dimensions = copy.deepcopy(old); dimensions["semantic_identity"]["applicability_dimensions"] = "different regime"
+        dimensions = self._within_envelope(old, dimensions, reason="changed regime asserted within envelope")
+        self.assertTrue(any("applicability_dimensions" in e and "mechanically material" in e for e in pem.validate_reconciliation(doc([old]), doc([dimensions]))))
+
+        old_narrow = success(); old_narrow["applicability"] = ["x", "y"]
+        narrow = copy.deepcopy(old_narrow); narrow["applicability"] = ["x"]
+        narrow = self._within_envelope(old_narrow, narrow)
+        self.assertEqual(pem.validate_reconciliation(doc([old_narrow]), doc([narrow])), [])
+        self.assertIn(narrow["semantic_reconciliation"]["evidence"][0], pem._material_routes(narrow))
+
+        broken = copy.deepcopy(narrow)
+        broken["semantic_reconciliation"]["evidence"] = [self._reconciliation_route("THIS-RECONCILIATION-LOCATOR-DOES-NOT-EXIST")]
+        self.assertTrue(any("not mechanically healthy" in e for e in pem.validate_reconciliation(doc([old_narrow]), doc([broken]))))
+
+        editorial = copy.deepcopy(old); editorial["semantic_identity"]["invariant_or_claim"] = "Claim."
+        editorial = self._within_envelope(old, editorial)
+        self.assertEqual(pem.validate_reconciliation(doc([old]), doc([editorial])), [])
         self.assertEqual(pem.validate_reconciliation(doc([old]), doc([copy.deepcopy(old)])), [])
     def test_d8_02_overlay_uses_exact_accepted_pem_publication(self):
         base = success(); good = doc([copy.deepcopy(base)], overlay={"identity": "C", "based_on_accepted_pem": "M"}, accepted_base="P"); bad = doc([copy.deepcopy(base)], overlay={"identity": "C", "based_on_accepted_pem": "P"}, accepted_base="P")
