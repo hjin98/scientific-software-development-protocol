@@ -14,12 +14,12 @@ stage_f_static_sensor_commit: 092c784383868081e9dee2081e3895f3d1263630
 stage_f_qualification_commit: 092c784383868081e9dee2081e3895f3d1263630
 independent_review_handoff: qualification/ssdp6/INDEPENDENT-REVIEW-HANDOFF-PROTOCOL-6.3.md
 workplan: workplans/active/PROTOCOL-6.3-EVIDENCE-BACKED-PROJECT-ENGINEERING-MEMORY-WORKPLAN.md
-status: f5-qualified-independent-review-pending
+status: f5-qualified-evidence-reconciled-independent-review-pending
 ---
 
 # Protocol 6.3 Preservation Census
 
-This file is implementation and Review evidence, not semantic authority. Accepted Protocol 6.2 owners define the inherited contract; the active Protocol 6.3 workplan defines the bounded proposed change. The census preserves the finite pre-mutation surface and the independently reconstructed T01-T39 baseline while recording the repaired candidate's T40-T120 closure state. A row that belongs to independent Review or Stage G remains open until that event actually occurs.
+This file is implementation and Review evidence, not semantic authority. Accepted Protocol 6.2 owners define the inherited contract; the active Protocol 6.3 workplan defines the bounded proposed change. The census preserves the finite pre-mutation surface and the independently reconstructed T01-T39 baseline while recording the exact repaired candidate's T40-T120 closure state. A row that belongs to independent Review or Stage G remains open until that event actually occurs.
 
 ## Baseline, repaired candidate, and frozen identities
 
@@ -32,7 +32,12 @@ accepted-main branch point:                bf856f742d1744a8ff50f300ee6493fb93e5c
 
 historical invalidated chain 1:             1484c1d3... -> 8d0ad239...
 historical invalidated chain 2:             5ee4b3ac... -> 1bfb7894... -> 7f677415... -> 5f52fbdf...
-latest reviewed NO-PASS candidate:             42eb89388dc96879157ba92db9e7f3c59f2c0b36
+historical F2 semantic candidate:           3bbbdfa8120646d76336c7b916e6a891c9ed38f2
+historical F2 public bootstrap:              e12572c021087308570abfa41657a910c6896457
+historical F2 public mapping descendant:    e6a8c12f065c3d25a41da804c129d6bc0a4f7b50
+historical F2 qualification commit:         6fc26ce374b5346495782871d5d7241de5b90071
+historical F3 semantic candidate:           026eecf6ce382c3445ed218aeca80dcf2fb9a426
+historical reviewed F4 NO-PASS candidate:   42eb89388dc96879157ba92db9e7f3c59f2c0b36
 
 current repaired public bootstrap:          190c8b4d352c203ef74c94d57c4f18d30eb7186d
 later public mapping descendant:            092c784383868081e9dee2081e3895f3d1263630
@@ -58,8 +63,7 @@ prompts.md:   159c58cbac0a8cf66311ddf7e11ad8eb03644e8c
 profile.json: 6f21ad0592da343db951ffd56d25aa74a881bd8c
 ```
 
-Earlier 6.3 chains are preserved as historical evidence and negative fixtures only; no current PASS disposition relies on them as acceptance identities.
-
+Earlier 6.3 candidates, bootstraps, mapping descendants, and qualification publications remain historical provenance and negative fixtures only. They may explain how current evidence was reached, but no current closure row treats any pre-D9 candidate as the accepted 6.3 semantic subject.
 
 ## Finite durable and generative surface
 
@@ -95,6 +99,7 @@ Earlier 6.3 chains are preserved as historical evidence and negative fixtures on
 | `source/project_engineering_memory.py` | new D4 validation utility | deterministic schema/semantic validation; no DB/index authority/daemon |
 | `tests/test_protocol_63_engineering_memory.py` | executable qualification | original 6.3 counterfactual coverage |
 | `tests/test_protocol_63_reopened_repairs.py` | executable qualification | reopened D1-D7 discriminators |
+| `tests/test_protocol_63_independent_review_repairs.py` | executable qualification | D8/D9 independent-review discriminators, including overlay-basis/self-ratification cases |
 | `tests/test_protocol_63_bootstrap.py` | executable qualification | self-reference-safe exact-fallback lifecycle |
 | inherited tests including `test_protocol_62_*` | affected regression | accepted 6.2 behavior remains required |
 | inherited scenario files through 6.2 | frozen evidence | scenarios 1-115 |
@@ -150,28 +155,27 @@ Later discovery of a materially affected current surface expands this evidence m
 | T33 | root/source docs are navigation/derived views, not authority/activation | navigation; PRESERVED | representation tests |
 | T34 | 6.x machine profile topology + immutable historical resources | profile owner; PRESERVED | orchestrator/frozen-resource tests |
 | T35 | canonical source -> generated dist/profile reproducibility | generators; PRESERVED | build/validate/dist/snapshot |
-| T36 | behavioral scenario surface 1-115 remains required | qualification; PRESERVED | replacement 260-decision Stage-F result |
+| T36 | behavioral scenario surface 1-115 remains required | qualification; PRESERVED | inherited scenario corpus plus exact-candidate F5 regression |
 | T37 | documentation cold routes to security/performance/storage/release remain packaged/reachable | documentation root; PRESERVED | route/package tests |
 | T38 | current terminology while frozen historical lexemes remain unchanged | current owners + frozen resources; PRESERVED | nomenclature/frozen tests |
-| T39 | compatible local/public fallback uses exact validated immutable bootstrap; never default/latest | version owner; PRESERVED | replacement exact-ref bootstrap qualification |
+| T39 | compatible local/public fallback uses exact validated immutable bootstrap; never default/latest | version owner; PRESERVED | replacement bootstrap `190c8b4d...` published by later descendant `092c7843...` |
 
 ## Protocol 6.3 T40-T120 closure map
 
-`QUALIFICATION_CLOSED` means candidate semantics plus discriminating implementation-context evidence are closed. It does not mean independent Review, recovery, accepted-current state, or Stage G is closed.
+`QUALIFICATION_CLOSED` means the exact current semantic candidate plus applicable discriminating implementation-context evidence are closed. It does not mean independent Review, recovery, accepted-current state, or Stage G is closed. Earlier F2/F3/F4 artifacts are historical provenance only; when cited below, they are background for an unchanged owner surface, never the current semantic subject or acceptance identity.
 
 | IDs | Target semantic group | Current disposition | Current evidence / remaining gate |
 | --- | --- | --- | --- |
-| T40-T61 | authority separation through logical canonical memory, evidence/statistics/temperature/HAS/capability/coverage/progressive disclosure/package separation | QUALIFICATION_CLOSED | final candidate `3bbbdfa81206...`; focused Protocol 6.3 counterfactuals; F2 result `6fc26ce374b5...`; rebound static sensors at the same evidence commit |
-| T62 | 6.3 bootstrap/profile/recovery/version staging | PARTIAL_STAGE_G | bootstrap `e12572c02108...`, later mapping `e6a8c12f065c...`, candidate `3bbbdfa81206...` qualified; immutable recovery selection/mapping remains Stage G after independent Review |
-| T63-T65 | frozen prior resources; source/generated/package parity; static-vs-live claim discipline | QUALIFICATION_CLOSED | fresh F2 assembled gates at `6fc26ce374b5...`; static evidence explicitly makes no live-telemetry claim |
+| T40-T61 | authority separation through logical canonical memory, evidence/statistics/temperature/HAS/capability/coverage/progressive disclosure/package separation | QUALIFICATION_CLOSED | semantic subject `190c8b4d...`; F5 run `34693272199` re-executed focused D9 tests, complete repository regression, self-hosted PEM validation, package/dist checks, profile/snapshot and Core checks; static activation evidence is independently rebound to `190c8b4d...` |
+| T62 | 6.3 bootstrap/profile/recovery/version staging | PARTIAL_STAGE_G | current source fallback is immutable candidate `190c8b4d...`, published only by later descendant `092c7843...`; Protocol 6.3 recovery selection/mapping remains unavailable until independent Review PASS and Stage G |
+| T63-T65 | frozen prior resources; source/generated/package parity; static-vs-live claim discipline | QUALIFICATION_CLOSED | exact-candidate F5 source/package/dist/profile/Core/frozen-resource acceptance plus static sensor record bound to `190c8b4d...`; no live-telemetry claim |
 | T66 | Protocol 7 inheritance/current-lifecycle reconciliation | OPEN_STAGE_G | no silent Protocol-7 D3 change; accepted-current/history/authority-index reconciliation remains post-Review/recovery |
-| T67 | human-facing background/terminology/abbreviation completeness | QUALIFICATION_CLOSED | inherited documentation/orchestration regression plus full source/package pass |
-| T68 | independent assembled-candidate qualification/Review | OPEN_INDEPENDENT_REVIEW | handoff targets `3bbbdfa81206...`; implementation-context 260/260 cannot satisfy independent Review |
-| T69 | anti-scope-laundering/lower-salience mandatory preservation | QUALIFICATION_CLOSED | fresh Scope/materiality laundering + Priority inversion Challenge dispositions in F2 evidence |
-| T70-T120 | recursive-warrant prevention through watermark/coverage separation, including authority binding, atomic publication, base/overlay, trust, provenance, immutable observation/correction, recurrence lineage, semantic identity, maturity/comparative guidance, salience and HAS-basis rules | QUALIFICATION_CLOSED | current owners + focused executable PEM tests + final assembled regression + exact Q63/F63 accounting in `6fc26ce374b5...` |
+| T67 | human-facing background/terminology/abbreviation completeness | QUALIFICATION_CLOSED | exact-candidate F5 full repository/package regression rechecks current documentation surfaces; inherited documentation evidence remains applicable provenance only |
+| T68 | independent assembled-candidate qualification/Review | OPEN_INDEPENDENT_REVIEW | current handoff targets `190c8b4d352c203ef74c94d57c4f18d30eb7186d`; implementation-context qualification cannot satisfy independent Review |
+| T69 | anti-scope-laundering/lower-salience mandatory preservation | QUALIFICATION_CLOSED | `190c8b4d...` retains the already-qualified owner semantics; exact-candidate F5 full regression and D9 discriminator run recheck the affected executable surfaces; prior Challenge records remain historical provenance |
+| T70-T120 | recursive-warrant prevention through watermark/coverage separation, including authority binding, atomic publication, base/overlay, trust, provenance, immutable observation/correction, recurrence lineage, semantic identity, maturity/comparative guidance, salience and HAS-basis rules | QUALIFICATION_CLOSED | semantic subject `190c8b4d...`; current executable PEM/D8/D9 tests plus exact-candidate F5 full regression are the current mechanical evidence; earlier Q63/F63/F2/F3/F4 records are retained only as historical provenance for unchanged requirements |
 
-The surviving review defects are closed in implementation context: D4R2 binds accepted-repair evidence to the exact repair subject/state/owner rather than chronology; D5R2 derives replication/independence obligations for `PROVEN SUCCESS_PATTERN` rather than trusting claimant flags. D1/D2/D3/D6/D7 remain reverified preserved repairs.
-
+D4R2/D5R2 and D4R3 remain historical repair provenance for monotonic owner strengthening. D9 is the current semantic delta: it mechanically closes same-ID governing-claim/applicability laundering and realizes reconciliation evidence through ordinary health logic without changing D1-D3 authority, accepted Protocol 6.2 T01-T39 semantics, cold-route topology, frozen prior resources, or package/profile ownership.
 
 ## Source-generation and lifecycle boundary
 
@@ -180,20 +184,20 @@ Completed implementation-side sequence:
 ```text
 canonical 6.3 doctrine/routes/template + PEM validator/tests
  -> reviewed D1-D7 repair state and NO-PASS at 100cbde...
- -> D4R2/D5R2 owner-level false-pass repair
- -> self-reference-safe immutable public bootstrap e12572c02108...
- -> later exact public mapping e6a8c12f065c...
- -> final semantic candidate 3bbbdfa81206...
- -> full source/package/profile/Core/frozen-resource acceptance
- -> final static-sensor recomputation
- -> exact 260-case F2 qualification 6fc26ce374b5...
- -> current independent assembled-candidate Review handoff
+ -> historical D4R2/D5R2 repair
+ -> historical F2 candidate 3bbbdfa... and F2 qualification 6fc26ce...
+ -> historical D4R3/F3 repair candidate 026eecf...
+ -> reviewed F4 candidate 42eb893... NO-PASS
+ -> D9 semantic candidate 190c8b4d352c203ef74c94d57c4f18d30eb7186d
+ -> exact-candidate F5 regression/static-sensor qualification
+ -> later replacement-bootstrap publication/mapping descendant 092c784383868081e9dee2081e3895f3d1263630
+ -> current preservation-census reconciliation and explicit overlay self-ratification discriminator
 ```
 
 Still-open lifecycle:
 
 ```text
-fresh independent assembled-candidate Review of 3bbbdfa81206...
+fresh independent assembled-candidate Review of 190c8b4d352c203ef74c94d57c4f18d30eb7186d
  -> immutable recovery descendant only after Review PASS
  -> later recovery mapping + mapping-bearing regeneration
  -> targeted recovery/profile/package/Core acceptance
@@ -203,23 +207,23 @@ fresh independent assembled-candidate Review of 3bbbdfa81206...
 
 `PROJECT-ENGINEERING-MEMORY.md` remains project-local PARTIAL candidate-overlay state and is never copied into generic `dist/` packages or protocol profile snapshots.
 
-
 ## Current gate disposition
 
 ```text
 SERIOUS CHALLENGE: NONE IDENTIFIED IN IMPLEMENTATION-CONTEXT QUALIFICATION
 INHERITED T01-T39: RECONSTRUCTED, PRESERVED, AND REQUALIFIED
 T40-T61: QUALIFICATION_CLOSED
-T62: PARTIAL_STAGE_G — public bootstrap/profile leg closed; recovery leg intentionally open
+T62: PARTIAL_STAGE_G — replacement public bootstrap/profile leg closed; recovery leg intentionally open
 T63-T65: QUALIFICATION_CLOSED
 T66: OPEN_STAGE_G — final Protocol-7/current-lifecycle reconciliation
 T67: QUALIFICATION_CLOSED
 T68: OPEN_INDEPENDENT_REVIEW
 T69-T120: QUALIFICATION_CLOSED
-SEMANTIC CANDIDATE: 3bbbdfa8120646d76336c7b916e6a891c9ed38f2
-PUBLIC BOOTSTRAP: e12572c021087308570abfa41657a910c6896457
-PUBLIC MAPPING DESCENDANT: e6a8c12f065c3d25a41da804c129d6bc0a4f7b50
-F2 260-CASE RESULT COMMIT: 6fc26ce374b5346495782871d5d7241de5b90071
+SEMANTIC CANDIDATE: 190c8b4d352c203ef74c94d57c4f18d30eb7186d
+PUBLIC BOOTSTRAP: 190c8b4d352c203ef74c94d57c4f18d30eb7186d
+PUBLIC MAPPING DESCENDANT: 092c784383868081e9dee2081e3895f3d1263630
+CURRENT F5 QUALIFICATION PUBLICATION: 092c784383868081e9dee2081e3895f3d1263630
+HISTORICAL F2 260-CASE RESULT COMMIT: 6fc26ce374b5346495782871d5d7241de5b90071
 INDEPENDENT REVIEW: PENDING
 PROTOCOL 6.3 RECOVERY: UNAVAILABLE
 ACCEPTED CURRENT PROTOCOL: 6.2.0
@@ -227,12 +231,12 @@ WORKPLAN: ACTIVE
 MAIN CUTOVER: NOT AUTHORIZED
 ```
 
+## Historical F3 owner-binding preservation delta
 
-## F3 owner-binding preservation delta
-
-Candidate `026eecf6ce382c3445ed218aeca80dcf2fb9a426` preserves the prior census except where D4R3 deliberately strengthens authority/acceptance concretization. T45/T46/T67/T75-class owner-bearing paths now require accepted-state governing-owner binding; this is a monotonic repair of the reviewed false-pass, not a relaxation. Frozen Protocol 5.16/6.0/6.1/6.2 resources were rechecked by the fresh candidate package/profile/Core gates. Prior F2 labels remain historical evidence; affected authority/recurrence cases are rebound to fresh F3 discriminators and full candidate regression. Independent Review remains open.
-
+Historical candidate `026eecf6ce382c3445ed218aeca80dcf2fb9a426` strengthened authority/acceptance concretization so T45/T46/T67/T75-class owner-bearing paths require accepted-state governing-owner binding. That result is retained as repair provenance only. It is not the current semantic candidate, bootstrap, or qualification subject; current closure is assessed on `190c8b4d...` and the F5 exact-candidate evidence.
 
 ## F5 / D9 preservation refresh
 
-Exact repaired semantic candidate: `190c8b4d352c203ef74c94d57c4f18d30eb7186d`. D9 narrows same-ID reconciliation validation and adds reconciliation evidence to the existing material-route health path; it does not alter D1-D3 authority, accepted Protocol 6.2 T01-T39 semantics, cold-route activation topology, frozen 5.16/6.0/6.1/6.2 resources, or package/profile ownership. F2/F3/F4 candidate identities remain historical evidence only. Static activation active sets were mechanically rechecked against this exact candidate with all documented candidate-side byte totals unchanged. Stage G and Protocol 6.3 recovery remain blocked pending fresh independent Review.
+Exact repaired semantic candidate: `190c8b4d352c203ef74c94d57c4f18d30eb7186d`. D9 narrows same-ID reconciliation validation and adds reconciliation evidence to the existing material-route health path; it does not alter D1-D3 authority, accepted Protocol 6.2 T01-T39 semantics, cold-route activation topology, frozen 5.16/6.0/6.1/6.2 resources, or package/profile ownership. Static activation active sets were mechanically rechecked against this exact candidate with all documented candidate-side byte totals unchanged. Earlier F2/F3/F4 candidates and their qualification publications remain historical evidence only.
+
+This census refresh corrects the prior current-facing body that still named `3bbbdfa...`/F2-era identities as current. Those identities are now confined to explicit historical provenance. The current semantic subject, replacement public bootstrap, static-sensor subject, and independent-review target are consistently `190c8b4d...`; Protocol 6.3 recovery remains unavailable pending fresh independent Review.

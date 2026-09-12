@@ -59,9 +59,10 @@ class IndependentReviewRepairTests(unittest.TestCase):
         self.assertEqual(pem.validate_reconciliation(doc([old]), doc([editorial])), [])
         self.assertEqual(pem.validate_reconciliation(doc([old]), doc([copy.deepcopy(old)])), [])
     def test_d8_02_overlay_uses_exact_accepted_pem_publication(self):
-        base = success(); good = doc([copy.deepcopy(base)], overlay={"identity": "C", "based_on_accepted_pem": "M"}, accepted_base="P"); bad = doc([copy.deepcopy(base)], overlay={"identity": "C", "based_on_accepted_pem": "P"}, accepted_base="P")
+        base = success(); good = doc([copy.deepcopy(base)], overlay={"identity": "C", "based_on_accepted_pem": "M"}, accepted_base="P"); bad = doc([copy.deepcopy(base)], overlay={"identity": "C", "based_on_accepted_pem": "P"}, accepted_base="P"); self_ratifying = doc([copy.deepcopy(base)], overlay={"identity": "M", "based_on_accepted_pem": "M"}, accepted_base="P")
         self.assertEqual(pem.validate_overlay(doc([base]), good, overlay_identity="C", accepted_pem_identity="M"), [])
         self.assertTrue(any("accepted PEM publication" in e for e in pem.validate_overlay(doc([base]), bad, overlay_identity="C", accepted_pem_identity="M")))
+        self.assertTrue(any("self-ratify" in e for e in pem.validate_overlay(doc([base]), self_ratifying, overlay_identity="M", accepted_pem_identity="M")))
     def test_d8_03_missing_stable_locator_is_not_healthy(self):
         rev = subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=ROOT, text=True).strip(); route = pem.parse_evidence_route(f"hjin98/scientific-software-development-protocol@{rev}:source/project_engineering_memory.py#THIS-LOCATOR-DOES-NOT-EXIST")
         self.assertEqual(pem.evidence_route_health(route, doc())[0], "UNAVAILABLE")
