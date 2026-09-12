@@ -1,0 +1,60 @@
+name: Temporary Protocol 6.3 evidence reconciliation diagnostic
+
+on:
+  push:
+    branches: [ssdp-6.3-engineering-memory]
+
+permissions:
+  contents: write
+
+jobs:
+  diagnose:
+    if: github.event.head_commit.message == 'Capture Protocol 6.3 evidence reconciliation failure'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ssdp-6.3-engineering-memory
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install validation dependencies
+        run: python -m pip install -r source/requirements-validation.txt
+      - name: Reapply proposed reconciliation and capture failures
+        shell: bash
+        run: |
+          set -u
+          python - <<'PY'
+          from pathlib import Path
+          import textwrap
+          workflow = Path('.github/workflows/temporary-protocol63-evidence-reconciliation.yml').read_text()
+          marker = "python - <<'PY'\n"
+          if marker not in workflow:
+              raise SystemExit('embedded reconciliation script not found')
+          script = workflow.split(marker, 1)[1].split('\n          PY', 1)[0]
+          exec(textwrap.dedent(script), {})
+          PY
+          {
+            echo '=== unittest discovery ==='
+            python -m unittest discover -s tests -v
+            echo unittest_rc=$?
+            echo '=== PEM validation ==='
+            python source/project_engineering_memory.py PROJECT-ENGINEERING-MEMORY.md
+            echo pem_rc=$?
+            echo '=== diff check ==='
+            git diff --check
+            echo diff_rc=$?
+          } > qualification/ssdp6/TEMP-PROTOCOL63-EVIDENCE-RECONCILIATION-DIAGNOSTIC.log 2>&1
+          git reset --hard HEAD
+          git clean -fd --exclude=qualification/ssdp6/TEMP-PROTOCOL63-EVIDENCE-RECONCILIATION-DIAGNOSTIC.log
+      - name: Commit diagnostic only
+        run: |
+          git config user.name 'Protocol 6.3 lifecycle automation'
+          git config user.email 'protocol63-lifecycle@users.noreply.github.com'
+          git rm .github/workflows/temporary-protocol63-evidence-reconciliation.yml
+          git rm .github/workflows/temporary-protocol63-evidence-reconciliation-diagnostic.yml
+          git add qualification/ssdp6/TEMP-PROTOCOL63-EVIDENCE-RECONCILIATION-DIAGNOSTIC.log
+          git diff --cached --check
+          git commit -m 'Capture Protocol 6.3 evidence reconciliation diagnostic'
+          git push origin HEAD:ssdp-6.3-engineering-memory
