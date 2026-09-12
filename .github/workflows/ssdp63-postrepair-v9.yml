@@ -1,0 +1,106 @@
+name: SSDP 6.3 post-repair assembly v9
+
+on:
+  push:
+    branches: [ssdp-6.3-engineering-memory]
+    paths: [.github/workflows/ssdp63-postrepair-v9.yml]
+
+permissions:
+  contents: write
+
+jobs:
+  assemble:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: {fetch-depth: 0}
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+
+      - name: Reapply already-green v8 reconciliation
+        shell: bash
+        run: |
+          set -euo pipefail
+          awk '
+            /python - <<'"'"'PY'"'"'/ {capture=1; next}
+            capture && /^          PY$/ {exit}
+            capture {sub(/^          /, ""); print}
+          ' .github/workflows/ssdp63-postrepair-v8.yml > /tmp/ssdp63-reconcile.py
+          test -s /tmp/ssdp63-reconcile.py
+          python /tmp/ssdp63-reconcile.py
+          git diff --check
+
+      - name: Install validation and Orchestrator dependencies
+        run: |
+          python -m pip install -r source/requirements-validation.txt
+          python -m pip install ./orchestrator -r orchestrator/requirements-dev.txt
+
+      - name: Validate PEM and regenerate all descendants
+        shell: bash
+        run: |
+          set -euo pipefail
+          python source/project_engineering_memory.py PROJECT-ENGINEERING-MEMORY.md --write-summary
+          rm -rf /tmp/protocol-dist /tmp/protocol-dist-check
+          python source/build_skills.py --output /tmp/protocol-dist
+          python source/validate_packages.py --dist /tmp/protocol-dist
+          rm -rf dist
+          cp -a /tmp/protocol-dist dist
+          python orchestrator/scripts/generate_protocol_snapshot.py
+
+      - name: Reopened and fallback-state discriminators
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m unittest discover -s tests -p 'test_protocol_63_engineering_memory.py' -v
+          python -m unittest discover -s tests -p 'test_protocol_63_reopened_repairs.py' -v
+          python -m unittest discover -s tests -p 'test_protocol_63_bootstrap.py' -v
+          python -m unittest discover -s tests -p 'test_protocol_516_orchestration.py' -v
+          python -m unittest discover -s tests -p 'test_protocol_61_evidence_evolution.py' -v
+          python -m unittest discover -s tests -p 'test_protocol_62_representation.py' -v
+
+      - name: Full repository acceptance
+        run: python -m unittest discover -s tests -v
+
+      - name: Canonical generated distribution parity
+        shell: bash
+        run: |
+          set -euo pipefail
+          python source/build_skills.py --output /tmp/protocol-dist-check
+          python source/validate_packages.py --dist /tmp/protocol-dist-check
+          python source/check_dist.py --expected /tmp/protocol-dist-check --committed dist
+
+      - name: Orchestrator snapshot parity
+        run: python orchestrator/scripts/generate_protocol_snapshot.py --check
+
+      - name: Patch whitespace
+        run: git diff --check
+
+      - name: Orchestrator Core acceptance
+        run: python orchestrator/scripts/run_core_tests.py
+
+      - name: Remove repair transport and diagnostics, then commit assembled candidate
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -f .ssdp63-stale-ref.txt .ssdp63-snapshot-error.txt .ssdp63-fulltest-tail.txt
+          rm -f .github/workflows/ssdp63-repair-transport.yml \
+                .github/workflows/ssdp63-materialize.yml \
+                .github/workflows/ssdp63-postrepair.yml \
+                .github/workflows/ssdp63-postrepair-v2.yml \
+                .github/workflows/ssdp63-locate-stale-ref.yml \
+                .github/workflows/ssdp63-postrepair-v3.yml \
+                .github/workflows/ssdp63-postrepair-v4.yml \
+                .github/workflows/ssdp63-postrepair-v5.yml \
+                .github/workflows/ssdp63-snapshot-diagnostic.yml \
+                .github/workflows/ssdp63-postrepair-v6.yml \
+                .github/workflows/ssdp63-fulltest-diagnostic.yml \
+                .github/workflows/ssdp63-postrepair-v7.yml \
+                .github/workflows/ssdp63-postrepair-v8.yml \
+                .github/workflows/ssdp63-postrepair-v9.yml
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -A
+          git diff --cached --check
+          git commit -m 'Assemble repaired Protocol 6.3 candidate'
+          git push origin HEAD:ssdp-6.3-engineering-memory
