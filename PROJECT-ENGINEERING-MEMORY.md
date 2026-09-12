@@ -7,7 +7,9 @@ scope: repository
 coverage_state: PARTIAL
 coverage_basis: "Bounded bootstrap from accepted Protocol 6.2 qualification/requalification, independent Review, frozen-profile evidence, and the accepted 6.2 recovery lineage. Earlier project history and unrelated development episodes are not claimed exhaustive."
 reconciled_through: b59adc77efe6951912cfd705cc43830c58ca27d0
-accepted_base: "Protocol 6.2 accepted recovery b59adc77efe6951912cfd705cc43830c58ca27d0; no prior accepted PEM exists because 6.3 introduces PEM."
+accepted_base:
+  project_state: b59adc77efe6951912cfd705cc43830c58ca27d0
+  basis: "Protocol 6.2 accepted recovery; no prior accepted PEM exists because 6.3 introduces PEM."
 candidate_overlay: "ssdp-6.3-engineering-memory candidate overlay; publication identity is the containing Git commit and is not self-declared accepted."
 detail_files: []
 ---
@@ -105,7 +107,9 @@ applicability:
   - successor profile generation
   - generated snapshot parity
 authority_binding: AUTHORITY_BOUND
-authority_owner: source/shared/references/protocol-versioning-and-compatibility.md
+authority_owner: "hjin98/scientific-software-development-protocol@b59adc77efe6951912cfd705cc43830c58ca27d0:source/shared/references/protocol-versioning-and-compatibility.md#Capability preservation across versions"
+authority_evidence:
+  - "hjin98/scientific-software-development-protocol@b59adc77efe6951912cfd705cc43830c58ca27d0:source/shared/references/protocol-versioning-and-compatibility.md#Capability preservation across versions"
 binding_health: HEALTHY
 guidance_level: OBSERVED
 relations: []

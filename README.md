@@ -62,7 +62,7 @@ Frozen accepted historical mappings remain immutable:
 
 Protocol 6.2 public-source bootstrap remains **`5a062ebc472755607b9dc66d33a5ebbc4b7429aa`** for version-bound 6.2 work. The earlier `1181c2031710c5d343194d87d08543290fded0ab` attempt remains invalidated historical evidence only. Bootstrap and recovery identities are intentionally distinct.
 
-**Protocol 6.3 pre-repair bootstrap `1484c1d3caa49d87cc15bc52a5e775399c1dae1b` and second bootstrap `5ee4b3ac3ca1666b0499f7a72f55adcc411bf4bb` are invalidated; the current public-source bootstrap identity is `e12572c021087308570abfa41657a910c6896457`; Protocol 6.3 recovery remains unavailable.** The repaired immutable snapshot passed repository/package/profile/Core bootstrap readiness plus exact-ref remote route realization and was published by a later mapping descendant, so it is the authorized version-bound 6.3 public fallback. A mapped bootstrap does not make 6.3 accepted-current. Recovery remains later, after complete qualification and independent Review.
+**Protocol 6.3 bootstrap attempts `1484c1d3caa49d87cc15bc52a5e775399c1dae1b`, `5ee4b3ac3ca1666b0499f7a72f55adcc411bf4bb`, and owner-binding-invalidated `e12572c021087308570abfa41657a910c6896457` are historical only; the current public-source bootstrap is unavailable pending a D4R3-repaired replacement; Protocol 6.3 recovery remains unavailable.** A replacement must be an already-existing self-reference-safe repaired snapshot validated before a later descendant publishes its exact SHA. Protocol 6.2 remains accepted-current.
 
 ## Canonical source and acceptance
 

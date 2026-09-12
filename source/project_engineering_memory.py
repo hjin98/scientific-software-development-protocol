@@ -207,8 +207,75 @@ def _git_text(root: Path, *args: str) -> str | None:
     return proc.stdout.strip() if proc.returncode == 0 else None
 
 
+def _accepted_project_commit(doc: PemDocument, where: str) -> tuple[Path, str]:
+    raw: Any = doc.metadata.get("accepted_base")
+    if isinstance(raw, dict):
+        raw = raw.get("project_state") or raw.get("identity")
+    commit = _git_commit_from_identity(raw)
+    if not commit:
+        raise PemError(
+            f"{where}: authority-bearing validation requires accepted_base.project_state to expose an exact immutable project commit"
+        )
+    root = _git_root(doc.root)
+    if root is None or not _git_ok(root, "cat-file", "-e", f"{commit}^{{commit}}"):
+        raise PemError(f"{where}: accepted project state {commit!r} is not a resolvable local commit")
+    return root, commit
+
+
+def _validate_accepted_project_route(
+    route: EvidenceRoute, doc: PemDocument, where: str, *, target_revision: str | None = None,
+    require_same_path_content: bool = False,
+) -> tuple[Path, str]:
+    health, reason = evidence_route_health(route, doc)
+    if health != "HEALTHY":
+        raise PemError(f"{where}: route is not mechanically healthy: {health}: {reason}")
+    if not _route_is_local(route, doc):
+        raise PemError(f"{where}: no source-specific resolver can establish this non-local owner as accepted project authority")
+    root = _git_root(doc.root)
+    if root is None:
+        raise PemError(f"{where}: local Git repository is unavailable for accepted-project binding")
+    if target_revision is None:
+        _, target = _accepted_project_commit(doc, where)
+    else:
+        target = target_revision
+        if not _git_ok(root, "cat-file", "-e", f"{target}^{{commit}}"):
+            raise PemError(f"{where}: binding target revision {target!r} is not a resolvable commit")
+    if not _git_ok(root, "merge-base", "--is-ancestor", route.revision, target):
+        raise PemError(f"{where}: route revision is not contained by the governing accepted project state")
+    if require_same_path_content:
+        cited_blob = _git_text(root, "rev-parse", f"{route.revision}:{route.path}")
+        target_blob = _git_text(root, "rev-parse", f"{target}:{route.path}")
+        if target_blob is None:
+            raise PemError(f"{where}: owner path is absent from the governing accepted project state")
+        if cited_blob != target_blob:
+            raise PemError(f"{where}: owner content changed before the governing accepted project state; binding requires review/remap")
+    return root, target
+
+
+def _validate_owner_binding(
+    value: Any, doc: PemDocument, where: str, *, target_revision: str | None = None
+) -> EvidenceRoute:
+    route = parse_evidence_route(value, where)
+    _validate_accepted_project_route(
+        route, doc, where, target_revision=target_revision, require_same_path_content=True
+    )
+    return route
+
+
+def _validate_accepted_authority_evidence(values: Any, doc: PemDocument, where: str) -> list[EvidenceRoute]:
+    raw_routes = _list(values, where)
+    if not raw_routes:
+        raise PemError(f"{where}: accepted authority requires at least one explicit accepted-state authority-evidence route")
+    routes: list[EvidenceRoute] = []
+    for raw in raw_routes:
+        route = parse_evidence_route(raw, where)
+        _validate_accepted_project_route(route, doc, where)
+        routes.append(route)
+    return routes
+
+
 def _validate_repair_acceptance_artifact(
-    root: Path, route: EvidenceRoute, repair_identity: str, where: str
+    root: Path, route: EvidenceRoute, repair_identity: str, where: str, doc: PemDocument
 ) -> None:
     text = _git_text(root, "show", f"{route.revision}:{route.path}")
     if text is None:
@@ -228,12 +295,14 @@ def _validate_repair_acceptance_artifact(
     record = matches[0]
     if record.get("state") != "ACCEPTED":
         raise PemError(f"{where}: repair acceptance record for the claimed repair is not ACCEPTED")
-    _required_text(record.get("owner"), f"{where}:repair acceptance owner")
+    owner = _required_text(record.get("owner"), f"{where}:repair acceptance owner")
+    _validate_owner_binding(owner, doc, f"{where}:repair acceptance owner", target_revision=route.revision)
 
 
 def _validate_repair_acceptance_routes(
     routes: list[EvidenceRoute], doc: PemDocument, root: Path, repair_identity: str, where: str
 ) -> list[str]:
+    _, accepted_project = _accepted_project_commit(doc, f"{where}:repair acceptance")
     revisions: list[str] = []
     for route in routes:
         health, reason = evidence_route_health(route, doc)
@@ -241,7 +310,9 @@ def _validate_repair_acceptance_routes(
             raise PemError(f"{where}: recurrence acceptance route is not resolvable: {health}: {reason}")
         if not _route_is_local(route, doc):
             raise PemError(f"{where}: recurrence acceptance must be established by a resolvable project-local immutable artifact")
-        _validate_repair_acceptance_artifact(root, route, repair_identity, where)
+        if not _git_ok(root, "merge-base", "--is-ancestor", route.revision, accepted_project):
+            raise PemError(f"{where}: repair acceptance artifact is not contained by accepted project state")
+        _validate_repair_acceptance_artifact(root, route, repair_identity, where, doc)
         revisions.append(route.revision)
     return revisions
 
@@ -698,7 +769,7 @@ def _validate_maturity_basis(family: dict[str, Any], errors: list[str]) -> None:
         errors.append(f"{fid}: PROVEN maturity_basis omits required typed obligation(s): {', '.join(sorted(missing))}")
 
 
-def _validate_comparative_basis(family: dict[str, Any], errors: list[str]) -> None:
+def _validate_comparative_basis(family: dict[str, Any], errors: list[str], doc: PemDocument | None = None) -> None:
     fid = str(family.get("id", ""))
     if family.get("guidance_level") not in COMPARATIVE_GUIDANCE:
         return
@@ -709,13 +780,25 @@ def _validate_comparative_basis(family: dict[str, Any], errors: list[str]) -> No
             return
         if not authority.get("owner") or not authority.get("decision"):
             errors.append(f"{fid}: comparative_authority requires current owner and explicit decision/tradeoff")
+        elif doc is None:
+            errors.append(f"{fid}: comparative owner priority cannot be established without accepted project context")
+        else:
+            try:
+                _validate_owner_binding(authority.get("owner"), doc, f"{fid}:comparative authority owner")
+            except PemError as exc:
+                errors.append(str(exc))
         evidence = authority.get("evidence")
         if not isinstance(evidence, list) or not evidence:
             errors.append(f"{fid}: comparative_authority requires applicable evidence")
+        elif doc is None:
+            errors.append(f"{fid}: comparative owner decision evidence cannot be established without accepted project context")
         else:
-            for route in evidence:
-                try: parse_evidence_route(route, f"{fid}:comparative authority evidence")
-                except PemError as exc: errors.append(str(exc))
+            for raw in evidence:
+                try:
+                    route = parse_evidence_route(raw, f"{fid}:comparative authority evidence")
+                    _validate_accepted_project_route(route, doc, f"{fid}:comparative authority evidence")
+                except PemError as exc:
+                    errors.append(str(exc))
         return
     basis = family.get("comparative_basis")
     if not isinstance(basis, dict) or not basis:
@@ -778,7 +861,10 @@ def _material_routes(family: dict[str, Any]) -> list[str]:
         routes.extend(str(v) for v in comparative.get("evidence", []) if isinstance(v, str))
     authority = family.get("comparative_authority")
     if isinstance(authority, dict):
+        if isinstance(authority.get("owner"), str): routes.append(str(authority["owner"]))
         routes.extend(str(v) for v in authority.get("evidence", []) if isinstance(v, str))
+    if isinstance(family.get("authority_owner"), str): routes.append(str(family["authority_owner"]))
+    routes.extend(str(v) for v in family.get("authority_evidence", []) if isinstance(v, str))
     return routes
 
 
@@ -842,10 +928,19 @@ def _validate_family(family: dict[str, Any], doc: PemDocument | None = None) -> 
             if counts.get("contradicting", 0): errors.append(f"{fid}: positive guidance eligibility hides admissible contradiction")
             if binding_health != "HEALTHY": errors.append(f"{fid}: positive guidance eligibility requires explicit HEALTHY binding_health")
         if guidance in ({"RECOMMENDED"} | COMPARATIVE_GUIDANCE) and not eligible: errors.append(f"{fid}: positive recommendation is not eligible")
-        _validate_comparative_basis(family, errors)
+        _validate_comparative_basis(family, errors, doc=doc)
     elif guidance != "OBSERVED": errors.append(f"{fid}: only SUCCESS_PATTERN may carry positive guidance levels")
     if family.get("authority_binding") == "AUTHORITY_BOUND":
-        if not family.get("authority_owner"): errors.append(f"{fid}: AUTHORITY_BOUND requires authority_owner")
+        if not family.get("authority_owner"):
+            errors.append(f"{fid}: AUTHORITY_BOUND requires authority_owner")
+        elif doc is None:
+            errors.append(f"{fid}: AUTHORITY_BOUND owner cannot be established without accepted project context")
+        else:
+            try:
+                _validate_owner_binding(family.get("authority_owner"), doc, f"{fid}:authority_owner")
+                _validate_accepted_authority_evidence(family.get("authority_evidence"), doc, f"{fid}:authority_evidence")
+            except PemError as exc:
+                errors.append(str(exc))
         if family.get("state") == "CURRENT" and binding_health != "HEALTHY": errors.append(f"{fid}: CURRENT AUTHORITY_BOUND family requires explicit HEALTHY binding_health")
     relations = family.get("relations", [])
     if not isinstance(relations, list): errors.append(f"{fid}: relations must be a list")
@@ -942,7 +1037,15 @@ def _validate_notices(doc: PemDocument) -> list[str]:
             for route in evidence:
                 try: parse_evidence_route(route, f"{nid}:evidence route")
                 except PemError as exc: errors.append(str(exc))
-        if notice.get("normative_status") != "NON_AUTHORITATIVE" and notice.get("owner") in (None, "", "NONE"): errors.append(f"{nid}: normative notice requires governing owner")
+        if notice.get("normative_status") != "NON_AUTHORITATIVE":
+            if notice.get("owner") in (None, "", "NONE"):
+                errors.append(f"{nid}: normative notice requires governing owner")
+            else:
+                try:
+                    _validate_owner_binding(notice.get("owner"), doc, f"{nid}:normative owner")
+                    _validate_accepted_authority_evidence(notice.get("evidence"), doc, f"{nid}:normative evidence")
+                except PemError as exc:
+                    errors.append(str(exc))
         if notice.get("state") == "CURRENT" and notice.get("binding_health") != "HEALTHY": errors.append(f"{nid}: unhealthy notice cannot remain unqualified CURRENT")
         trigger_state, reason = _notice_trigger_state(notice, doc)
         if notice.get("state") == "CURRENT" and trigger_state != "CLEAR": errors.append(f"{nid}: current notice trigger is {trigger_state}: {reason}; route to REVIEW_REQUIRED/RETIRED reconciliation")
@@ -985,6 +1088,8 @@ def _validate_binding_health(doc: PemDocument) -> list[str]:
                 errors.append(f"{fid}: declared binding_health {declared} overstates realized route health {actual}")
     for nid, notice in doc.notices.items():
         routes = [str(v) for v in notice.get("evidence", []) if isinstance(v, str)]
+        if notice.get("normative_status") != "NON_AUTHORITATIVE" and isinstance(notice.get("owner"), str):
+            routes.append(str(notice["owner"]))
         trigger = notice.get("review_trigger")
         if isinstance(trigger, dict):
             routes.extend(str(v) for v in trigger.get("assessed_evidence", []) if isinstance(v, str))

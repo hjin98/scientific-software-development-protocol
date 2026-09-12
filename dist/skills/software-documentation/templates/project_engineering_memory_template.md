@@ -7,7 +7,9 @@ scope: repository
 coverage_state: UNINITIALIZED
 coverage_basis: "No historical backfill has been claimed."
 reconciled_through: REPLACE_WITH_ALREADY_EXISTING_ACCEPTED_PROJECT_IDENTITY
-accepted_base: REPLACE_WITH_ACCEPTED_PROJECT_MEMORY_BASIS
+accepted_base:
+  project_state: REPLACE_WITH_EXACT_ACCEPTED_PROJECT_COMMIT
+  basis: REPLACE_WITH_ACCEPTED_PROJECT_MEMORY_BASIS_DESCRIPTION
 candidate_overlay: NONE
 detail_files: []
 ---
@@ -46,6 +48,10 @@ coverage_basis: Replace with reviewed sources/surfaces/range and material blind 
 applicability:
   - replace-with-searchable-owner-surface-mechanism-or-regime-cue
 authority_binding: EVIDENCE_ONLY
+# If changed to AUTHORITY_BOUND, also provide:
+# authority_owner: owner/project@IMMUTABLE_OWNER_REVISION:path/to/governing-owner.md#stable-section
+# authority_evidence:
+#   - owner/project@ACCEPTED_PROJECT_REVISION:path/to/authority-evidence.md#stable-section
 guidance_level: OBSERVED
 relations: []
 occurrences:
@@ -90,6 +96,10 @@ coverage_basis: Replace with favorable and unfavorable history searched plus bli
 applicability:
   - replace-with-searchable-applicability-cue
 authority_binding: EVIDENCE_ONLY
+# If changed to AUTHORITY_BOUND, also provide:
+# authority_owner: owner/project@IMMUTABLE_OWNER_REVISION:path/to/governing-owner.md#stable-section
+# authority_evidence:
+#   - owner/project@ACCEPTED_PROJECT_REVISION:path/to/authority-evidence.md#stable-section
 guidance_level: OBSERVED
 positive_guidance_eligible: false
 comparative_basis: NONE
@@ -122,7 +132,7 @@ When a later assessment replaces an earlier current interpretation, append it wi
 
 ## Current notices
 
-Use notices only for high-impact current facts that are not yet honest generalized families. Current notices use typed, evaluable triggers. For an accepted-base/owner/binding-change trigger, capture the admitted basis when the notice is created; do not replace it with opaque prose.
+Use notices only for high-impact current facts that are not yet honest generalized families. Current notices use typed, evaluable triggers. For an accepted-base/owner/binding-change trigger, capture the admitted basis when the notice is created; do not replace it with opaque prose. If `normative_status` is authority-bound, `owner` is an immutable governing-owner route and the notice evidence must resolve inside the accepted project state; otherwise keep the notice non-authoritative/review-required.
 
 ### NT-001 — Example current notice
 

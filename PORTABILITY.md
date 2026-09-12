@@ -38,7 +38,8 @@ Accepted immutable mappings:
 6.2.0 recovery -> b59adc77efe6951912cfd705cc43830c58ca27d0
 6.3.0 invalidated bootstrap attempt -> 1484c1d3caa49d87cc15bc52a5e775399c1dae1b
 6.3.0 invalidated second bootstrap -> 5ee4b3ac3ca1666b0499f7a72f55adcc411bf4bb
-6.3.0 public bootstrap -> e12572c021087308570abfa41657a910c6896457
+6.3.0 invalidated owner-binding bootstrap -> e12572c021087308570abfa41657a910c6896457
+6.3.0 public bootstrap -> UNAVAILABLE_PENDING_REPLACEMENT_BOOTSTRAP
 6.3.0 recovery -> UNAVAILABLE_PENDING_6.3_ACCEPTANCE
 ```
 
@@ -46,7 +47,7 @@ Canonical repository: `https://github.com/hjin98/scientific-software-development
 
 The first Protocol 6.2 bootstrap attempt `1181c2031710c5d343194d87d08543290fded0ab` remains invalidated historical evidence. Version-bound 6.2 public fallback uses exactly `5a062ebc472755607b9dc66d33a5ebbc4b7429aa`; accepted 6.2 recovery is separately `b59adc77efe6951912cfd705cc43830c58ca27d0`.
 
-For Protocol 6.3, pre-repair bootstrap `1484c1d3caa49d87cc15bc52a5e775399c1dae1b` and second bootstrap `5ee4b3ac3ca1666b0499f7a72f55adcc411bf4bb` are invalidated historical evidence only. The repaired immutable snapshot `e12572c021087308570abfa41657a910c6896457` passed bootstrap readiness and exact-ref route realization and was published by a later mapping descendant, so the `6.3.0 public bootstrap` mapping above is the sole authorized version-bound 6.3 public fallback. Do **not** substitute the 6.2 bootstrap, current branch, repository default/latest, a guessed `6.3.0` ref, or an invalidated bootstrap. This public fallback does not make 6.3 accepted-current; recovery remains unavailable and requires complete qualification plus independent Review. If neither compatible local source nor mapped compatible immutable public source can be read, report truthful non-closure.
+For Protocol 6.3, pre-repair bootstrap `1484c1d3caa49d87cc15bc52a5e775399c1dae1b`, second bootstrap `5ee4b3ac3ca1666b0499f7a72f55adcc411bf4bb`, and owner-binding-invalidated bootstrap `e12572c021087308570abfa41657a910c6896457` are historical evidence only. The `6.3.0 public bootstrap` mapping above is unavailable until the D4R3-repaired immutable snapshot is independently exact-ref validated and a later descendant publishes its SHA. Do **not** substitute the 6.2 bootstrap, current branch, repository default/latest, a guessed `6.3.0` ref, or an invalidated bootstrap. Recovery remains unavailable and requires complete qualification plus independent Review. If neither compatible local source nor mapped compatible immutable public source can be read, report truthful non-closure.
 
 ## Version-bound profiles
 

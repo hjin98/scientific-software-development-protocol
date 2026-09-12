@@ -29,6 +29,8 @@ A test, benchmark, commit, review, count, temperature, or repeated historical su
 - `AUTHORITY_BOUND` — exact current owner independently requires the capability; mandatory because that owner requires it;
 - `PROPOSED_FOR_PROMOTION` — evidence suggests the real owner may need amendment; not mandatory until that owner accepts it.
 
+An authority-bearing owner is not free text. Schema 1 represents a mechanically healthy governing-owner binding as an immutable evidence route to the owner artifact plus accepted-state authority evidence. The route must resolve in the project-governed accepted state; candidate-only owner text/artifacts cannot create authority. When the generic validator cannot establish that accepted-state provenance, current normative use is `REVIEW_REQUIRED`. Structural resolution does not replace semantic Review: the reviewer still verifies that the cited accepted artifact is the real D1-D4/project/external owner for the exact claim.
+
 When a project lesson becomes generic accepted doctrine at its actual owner, PEM retains only project-specific evidence/context that still improves decisions or retires redundant active guidance. It must not become a competing restatement of the current rule.
 
 ## Project-local canonical memory
@@ -133,12 +135,12 @@ A failure record uses `occurrences`, each with a stable family-scoped ID and, wh
       evidence: [...]
 ```
 
-One causal episode producing many failing tests is normally one occurrence. A later independent reintroduction after an actually accepted repair is another occurrence and recurrence. Commit/file/issue timestamps or rebase order alone cannot establish recurrence chronology. For Git-native recurrence, a repair-acceptance evidence route must resolve to immutable content containing a typed `pem-repair-acceptance` record that names the exact `repair_identity`, declares `state: ACCEPTED`, and names the governing accepting `owner`; an arbitrary descendant commit/file is not acceptance evidence. Non-Git recurrence requires a durable equivalent binding the same repair identity plus independently warrantable ordering.
+One causal episode producing many failing tests is normally one occurrence. A later independent reintroduction after an actually accepted repair is another occurrence and recurrence. Commit/file/issue timestamps or rebase order alone cannot establish recurrence chronology. For Git-native recurrence, a repair-acceptance evidence route must resolve to immutable content contained by the exact accepted project state. Its typed `pem-repair-acceptance` record names the exact `repair_identity`, declares `state: ACCEPTED`, and binds `owner` to an immutable owner route whose content is unchanged at that acceptance event. An arbitrary descendant commit/file, candidate-only acceptance artifact, free-text owner, or owner route that changed before acceptance is not acceptance evidence. Non-Git recurrence requires an equivalent durable accepted-state relation binding the same repair identity plus independently warrantable ordering; unresolved ownership remains review-required and cannot increment recurrence.
 
 ```yaml pem-repair-acceptance
 repair_identity: commit:<immutable-repair-identity>
 state: ACCEPTED
-owner: project-defined-acceptance-owner
+owner: owner/project@<immutable-owner-revision>:path/to/governing-owner.md#stable-section
 ```
 
 Safe/disconfirming evidence that shows a family cause/regime is too broad narrows, splits, or reclassifies the family; it does not erase the real historical occurrence.
@@ -247,7 +249,7 @@ Temporary high-impact state that is not yet a generalized family may use `NT-###
 
 ## Branch overlays, HAS, and publication
 
-The accepted/base memory is selected by project workflow/Git acceptance semantics, never simply `main`, default/latest, timestamp, or self-declaration. Same-branch candidate memory composes explicitly:
+The accepted/base memory is selected by project workflow/Git acceptance semantics, never simply `main`, default/latest, timestamp, or self-declaration. For schema-1 authority-bearing structural validation, `accepted_base` exposes the exact immutable accepted `project_state` separately from explanatory basis text; opaque prose cannot be used to self-ratify a current owner. Same-branch candidate memory composes explicitly:
 
 ```text
 accepted/base PEM + validated branch candidate overlay -> effective branch-local decision support
