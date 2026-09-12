@@ -9,7 +9,7 @@ import urllib.request
 from pathlib import Path
 
 
-BOOTSTRAP = "UNAVAILABLE_PENDING_REPLACEMENT_BOOTSTRAP"
+BOOTSTRAP = "86c13cab6bdd1991dffa94e277db8eacf87e2e11"
 INVALIDATED_D4R3_BOOTSTRAP = "dc22f09fd38dbbfeaeb0160152da9b284654f66e"
 INVALIDATED_BOOTSTRAP = "1484c1d3caa49d87cc15bc52a5e775399c1dae1b"
 INVALIDATED_SECOND_BOOTSTRAP = "5ee4b3ac3ca1666b0499f7a72f55adcc411bf4bb"
@@ -56,9 +56,9 @@ class Protocol63BootstrapTests(unittest.TestCase):
             self.assertIn("No current 6.3 public fallback is authorized", prompts)
             self.assertIn("current 6.3 public-source fallback is unavailable", versioning)
         else:
-            self.assertIn(f'The immutable D4R3-repaired self-reference-safe source snapshot `{BOOTSTRAP}`', prompts)
+            self.assertIn(f'Replacement self-reference-safe source snapshot `{BOOTSTRAP}`', prompts)
             self.assertIn('sole current Protocol 6.3 public-source fallback', prompts)
-            self.assertIn(f'The immutable D4R3-repaired snapshot `{BOOTSTRAP}`', versioning)
+            self.assertIn(f'Replacement self-reference-safe source snapshot `{BOOTSTRAP}`', versioning)
             self.assertIn('sole current 6.3 public-source fallback', versioning)
             self.assertIn('authorized version-bound 6.3 public fallback', readme)
             self.assertIn('sole authorized version-bound 6.3 public fallback', portability)

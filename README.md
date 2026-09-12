@@ -62,7 +62,7 @@ Frozen accepted historical mappings remain immutable:
 
 Protocol 6.2 public-source bootstrap remains **`5a062ebc472755607b9dc66d33a5ebbc4b7429aa`** for version-bound 6.2 work. The earlier `1181c2031710c5d343194d87d08543290fded0ab` attempt remains invalidated historical evidence only. Bootstrap and recovery identities are intentionally distinct.
 
-**Protocol 6.3 bootstrap attempts `1484c1d3caa49d87cc15bc52a5e775399c1dae1b`, `5ee4b3ac3ca1666b0499f7a72f55adcc411bf4bb`, owner-binding-invalidated `e12572c021087308570abfa41657a910c6896457`, and D4R3 snapshot `dc22f09fd38dbbfeaeb0160152da9b284654f66e` are historical only; current 6.3 public-source fallback is unavailable while a new self-reference-safe source snapshot is qualified; Protocol 6.3 recovery remains unavailable.**
+**Earlier Protocol 6.3 bootstrap attempts `1484c1d3caa49d87cc15bc52a5e775399c1dae1b`, `5ee4b3ac3ca1666b0499f7a72f55adcc411bf4bb`, owner-binding-invalidated `e12572c021087308570abfa41657a910c6896457`, and D4R3 snapshot `dc22f09fd38dbbfeaeb0160152da9b284654f66e` are historical only; current public-source bootstrap is `86c13cab6bdd1991dffa94e277db8eacf87e2e11`; Protocol 6.3 recovery remains unavailable pending Stage G.** Replacement self-reference-safe source snapshot `86c13cab6bdd1991dffa94e277db8eacf87e2e11` was qualified before this later descendant published the exact mapping as the sole authorized version-bound 6.3 public fallback.
 
 ## Canonical source and acceptance
 
