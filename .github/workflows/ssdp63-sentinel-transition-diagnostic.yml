@@ -1,0 +1,68 @@
+name: Diagnose Protocol 6.3 bootstrap sentinel transition
+
+on:
+  push:
+    branches: [ssdp-6.3-engineering-memory]
+    paths: [.github/workflows/ssdp63-sentinel-transition-diagnostic.yml]
+
+permissions:
+  contents: write
+
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: {fetch-depth: 0}
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - name: Install dependencies
+        run: |
+          python -m pip install -r source/requirements-validation.txt
+          python -m pip install ./orchestrator -r orchestrator/requirements-dev.txt
+      - name: Reproduce exact sentinel transition and capture failure
+        shell: bash
+        run: |
+          set +e
+          out=qualification/ssdp6/DIAGNOSTIC-PROTOCOL-6.3-BOOTSTRAP-SENTINEL-TRANSITION.txt
+          : > "$out"
+          python - <<'PY'
+          from pathlib import Path
+          old = 'UNAVAILABLE_PENDING_REPLACEMENT_BOOTSTRAP'
+          canonical = 'UNAVAILABLE_PENDING_6.3_BOOTSTRAP_QUALIFICATION'
+          paths = [
+              'source/shared/references/protocol-versioning-and-compatibility.md',
+              'source/shared/references/development-workflow-prompts.md',
+              'PORTABILITY.md',
+              'README.md',
+              'tests/test_protocol_63_bootstrap.py',
+              'tests/test_protocol_516_orchestration.py',
+              'tests/test_protocol_61_evidence_evolution.py',
+              'tests/test_protocol_62_representation.py',
+          ]
+          for raw in paths:
+              p = Path(raw)
+              t = p.read_text(encoding='utf-8')
+              if old in t:
+                  t = t.replace(old, canonical)
+              p.write_text(t, encoding='utf-8')
+          PY
+          python source/project_engineering_memory.py PROJECT-ENGINEERING-MEMORY.md --write-summary >> "$out" 2>&1
+          rm -rf /tmp/protocol-dist
+          python source/build_skills.py --output /tmp/protocol-dist >> "$out" 2>&1
+          python source/validate_packages.py --dist /tmp/protocol-dist >> "$out" 2>&1
+          rm -rf dist && cp -a /tmp/protocol-dist dist
+          python orchestrator/scripts/generate_protocol_snapshot.py >> "$out" 2>&1
+          python -m unittest discover -s tests -v >> "$out" 2>&1
+          rc=$?
+          echo "FULL_TEST_EXIT=$rc" >> "$out"
+          git diff --check >> "$out" 2>&1
+          echo "DIFF_CHECK_EXIT=$?" >> "$out"
+          git checkout -- source/shared/references/protocol-versioning-and-compatibility.md source/shared/references/development-workflow-prompts.md PORTABILITY.md README.md tests/test_protocol_63_bootstrap.py tests/test_protocol_516_orchestration.py tests/test_protocol_61_evidence_evolution.py tests/test_protocol_62_representation.py PROJECT-ENGINEERING-MEMORY.md dist orchestrator/src/sdp_orchestrator/core/resources/protocol/ssdp-protocol-6.3
+          rm -f .github/workflows/ssdp63-sentinel-transition-diagnostic.yml
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -A
+          git commit -m 'Record Protocol 6.3 bootstrap sentinel transition diagnostic'
+          git push origin HEAD:ssdp-6.3-engineering-memory
+          exit "$rc"
