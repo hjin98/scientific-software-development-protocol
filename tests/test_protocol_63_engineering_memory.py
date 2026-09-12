@@ -375,6 +375,7 @@ class Protocol63EngineeringMemoryTests(unittest.TestCase):
                 "source_project": "local",
                 "surfaces": ["module-a"],
                 "recurrence_after_accepted_repair": True,
+                "observation": "the failure recurred after a claimed accepted repair",
                 "assessments": [
                     {
                         "id": "AS01",
@@ -410,6 +411,7 @@ class Protocol63EngineeringMemoryTests(unittest.TestCase):
             "source_project": "local",
             "surfaces": ["module-a"],
             "recurrence_after_accepted_repair": False,
+            "observation": "the bounded failure was observed on module-a",
             "assessments": [
                 {
                     "id": "AS01",
