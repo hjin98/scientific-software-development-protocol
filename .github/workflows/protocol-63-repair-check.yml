@@ -25,7 +25,7 @@ jobs:
       - name: Run complete repository regression
         run: python -m unittest discover -s tests -v
       - name: Validate self-hosted project engineering memory
-        run: python source/project_engineering_memory.py validate PROJECT-ENGINEERING-MEMORY.md
+        run: python source/project_engineering_memory.py PROJECT-ENGINEERING-MEMORY.md
       - name: Build canonical skill packages once
         run: python source/build_skills.py --output /tmp/protocol-dist
       - name: Validate generated skill packages independently
