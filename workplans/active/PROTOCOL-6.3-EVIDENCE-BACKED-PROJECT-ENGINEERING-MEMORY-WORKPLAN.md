@@ -8,15 +8,18 @@ created_date: 2026-09-11
 reviewed_date: 2026-09-12
 design_closure_status: preserved-from-5de67c6a9509c1ede9104badc3ddae468c988311
 implementation_handoff: authorized
-implementation_review_state: reopened-after-independent-no-pass
+implementation_review_state: reopened-after-independent-no-pass-4
 reviewed_candidate_no_pass: 100cbde296de6c1a8db14151f34cfacfebc90eb3
 reviewed_candidate_no_pass_2: 3bbbdfa8120646d76336c7b916e6a891c9ed38f2
 reviewed_candidate_no_pass_3: 026eecf6ce382c3445ed218aeca80dcf2fb9a426
+reviewed_candidate_no_pass_4: 42eb89388dc96879157ba92db9e7f3c59f2c0b36
 prior_current_workplan_state: 5de67c6a9509c1ede9104badc3ddae468c988311:workplans/active/PROTOCOL-6.3-EVIDENCE-BACKED-PROJECT-ENGINEERING-MEMORY-WORKPLAN.md
-prior_public_bootstrap: dc22f09fd38dbbfeaeb0160152da9b284654f66e
-prior_semantic_candidate: 026eecf6ce382c3445ed218aeca80dcf2fb9a426
+prior_public_bootstrap: 42eb89388dc96879157ba92db9e7f3c59f2c0b36
+prior_semantic_candidate: 42eb89388dc96879157ba92db9e7f3c59f2c0b36
 prior_f3_qualification_commit: 5362f39107aa3f5760f501c02c66e3d25434cac7
 prior_f3_qualification: qualification/ssdp6/RESULTS-GPT-5.6-SOL-2026-09-12-PROTOCOL-6.3-F3.md
+prior_f4_qualification_commit: a2ac5de1928bbfc8e7bf5fb6e1f285ac2b13f3ae
+prior_f4_qualification: qualification/ssdp6/RESULTS-GPT-5.6-SOL-2026-09-12-PROTOCOL-6.3-F4.md
 reopened_stages: B,D,F
 stage_g_recovery_gate: blocked-repair-and-fresh-independent-review
 active_serious_challenge: none
@@ -34,7 +37,7 @@ branch_point: bf856f742d1744a8ff50f300ee6493fb93e5c9d0
 
 Protocol 6.3 remains **NO-PASS** and proposed. Accepted-current authority remains Protocol 6.2 recovery `b59adc77efe6951912cfd705cc43830c58ca27d0`. Stage G, recovery mapping, workplan archive, and `main` cutover remain blocked.
 
-The independent assembled-candidate review of semantic candidate `026eecf6ce382c3445ed218aeca80dcf2fb9a426` found seven genuine D4/schema-validation and Stage-F oracle blockers and **no Serious Challenge** to accepted Protocol 6.2 or to the established Protocol 6.3 design. This workplan therefore reopens only Stages B, D, and F at the owning surfaces identified below.
+Independent review subsequently falsified candidates `026eecf6ce382c3445ed218aeca80dcf2fb9a426` and `42eb89388dc96879157ba92db9e7f3c59f2c0b36`. The latest review of `42eb89388dc96879157ba92db9e7f3c59f2c0b36` found two remaining blockers: D8-01 still permits same-ID governing-claim/applicability laundering under claimant-authored `WITHIN_ENVELOPE` reconciliation, and current-facing Stage-F preservation/static-sensor evidence is not bound to the exact reviewed candidate. There is **no Serious Challenge** to accepted Protocol 6.2 or to the established Protocol 6.3 design. Stages B, D, and F remain reopened only at these owning surfaces.
 
 ## Lossless design basis
 
@@ -183,6 +186,34 @@ Do not broaden this repair into Protocol 7, a general evidence database, global 
 
 **NO-PASS** includes any remaining silent same-ID semantic drift, overlay basis conflation, path-only locator health, unsupported mechanism causality, wins-only positive guidance, unresolved-notice starvation, nominal temperature-override evidence, stale/non-discriminating Stage-F PASS mapping, package/profile/frozen drift, or use of earlier qualification as current acceptance after the candidate changes.
 
+## D9 independent-review repair delta — candidate `42eb8938...`
+
+The D8 repair is retained except where this section strengthens D8-01 and Stage-F candidate binding. F2/F3/F4 records remain immutable historical evidence; none may be treated as current acceptance after the semantic candidate changes.
+
+### B4.8 Same-ID reconciliation must be mechanically bounded and health-realized
+
+Owner: the existing `source/project_engineering_memory.py` semantic-reconciliation and material-route path. Do not add a second registry/resolver/compliance layer.
+
+A claimant-authored `classification: WITHIN_ENVELOPE` is not evidence that a materially changed family retained identity. Schema-1 same-ID continuation is mechanically admissible only for changes that are demonstrably non-material at the supported representation boundary: editorial normalization of the governing claim that preserves normalized meaning, or applicability narrowing whose normalized new applicability set is a subset of the previous set. Changes to kind, owner class, mechanism family, normalized governing claim, applicability dimensions, or applicability broadening/change-of-regime are mechanically material and require a new/successor/split/merge/reclassified identity with lineage.
+
+Even mechanically admissible editorial/narrowing continuation still requires `semantic_reconciliation` to bind the previous semantic signature, `WITHIN_ENVELOPE`, a reason, and durable evidence. Reconciliation evidence is a material family warrant: it SHALL use the ordinary evidence-route realization path, SHALL be `HEALTHY` for a passing same-ID reconciliation, and SHALL participate in family-level binding-health realization through the existing material-route set. Syntax-only evidence is insufficient.
+
+**Required discriminators:** same-ID mechanism/owner/kind changes fail; governing-claim replacement fails even with a self-authored `WITHIN_ENVELOPE` record; applicability broadening fails even with that record; normalized editorial-only claim change with healthy evidence may pass; true applicability narrowing with healthy evidence may pass; allowed narrowing/editorial reconciliation with an absent/unhealthy locator fails; reconciliation evidence appears in ordinary material-route/binding-health evaluation.
+
+Owning rows: Q63-71, F63-BB, T112, plus Q63-06/T86 where reconciliation warrant health is material.
+
+### D9.1 Repair the false-positive D8-01 qualification oracle
+
+Expand the existing independent-review repair test rather than adding parallel qualification machinery. The executable D8-01 discriminator SHALL directly exercise governing-claim replacement, applicability broadening, valid narrowing/editorial continuation, and unhealthy reconciliation evidence in addition to the already-covered kind/owner/mechanism class. Q63-71/F63-BB cannot inherit F4 PASS unless these counterfactuals discriminate against the exact repaired candidate.
+
+### F4.8 Exact candidate binding for current-facing Stage-F evidence
+
+After the repaired semantic candidate is committed, refresh the current-facing Protocol 6.3 preservation census, static activation sensor record, implementation-state record, F5 qualification result, and independent-review handoff to that exact immutable candidate. Recompute or mechanically recheck static active-set bytes against the exact candidate; do not merely relabel old measurements. Prior candidate identities remain historical provenance only. The qualification publication must distinguish semantic candidate, replacement public bootstrap, later publication/qualification descendant, and unavailable Protocol 6.3 recovery.
+
+Because this D9 repair changes canonical validator semantics after bootstrap `42eb89388dc96879157ba92db9e7f3c59f2c0b36`, that bootstrap becomes historical. Apply the existing self-reference-safe replacement rule: first create and validate the new immutable candidate, then publish that exact already-existing snapshot only from a later descendant. Recovery, accepted-current promotion, workplan archive, and `main` cutover remain Stage-G-blocked.
+
+**Gate D9/F5:** focused D9 discriminators pass; full repository regression, self-hosted PEM validation, source/package/dist checks, Protocol 6.3 profile/snapshot parity, Orchestrator Core acceptance, frozen prior-resource checks, and candidate-bound static sensor verification pass; current-facing evidence names one exact candidate; fresh independent assembled-candidate Review remains the next gate.
+
 ## Current next action
 
-Implement B4.1-B4.7 in the existing PEM validator/reconciliation/renderer, add D8.1-D8.7 executable discriminators, run the affected/full acceptance surface, then bind a repaired immutable candidate. Stage G remains blocked until the resulting candidate passes fresh independent Review.
+Implement B4.8/D9.1 in the existing reconciliation/material-route path, rerun the affected/full acceptance surface, bind a new immutable candidate, publish candidate-bound F5 evidence from a later descendant, and hand that exact candidate to fresh independent Review. Stage G remains blocked until that Review passes.
