@@ -1,0 +1,55 @@
+name: Diagnose Protocol 6.3 repaired bootstrap readiness
+
+on:
+  push:
+    branches: [ssdp-6.3-engineering-memory]
+    paths: [.github/workflows/ssdp63-repair-diagnostic.yml]
+
+permissions:
+  contents: write
+
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: {fetch-depth: 0}
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - name: Install dependencies
+        run: |
+          python -m pip install -r source/requirements-validation.txt
+          python -m pip install ./orchestrator -r orchestrator/requirements-dev.txt
+      - name: Capture readiness diagnostics
+        shell: bash
+        run: |
+          set +e
+          out=qualification/ssdp6/DIAGNOSTIC-PROTOCOL-6.3-D4R2-D5R2-BOOTSTRAP-READINESS.txt
+          : > "$out"
+          rc=0
+          run_cmd() {
+            echo "===== $* =====" >> "$out"
+            "$@" >> "$out" 2>&1
+            x=$?
+            echo "EXIT=$x" >> "$out"
+            echo >> "$out"
+            if [ "$x" -ne 0 ] && [ "$rc" -eq 0 ]; then rc=$x; fi
+          }
+          run_cmd python source/project_engineering_memory.py PROJECT-ENGINEERING-MEMORY.md --write-summary
+          rm -rf /tmp/protocol-dist
+          run_cmd python source/build_skills.py --output /tmp/protocol-dist
+          run_cmd python source/validate_packages.py --dist /tmp/protocol-dist
+          if [ -d /tmp/protocol-dist ]; then rm -rf dist && cp -a /tmp/protocol-dist dist; fi
+          run_cmd python orchestrator/scripts/generate_protocol_snapshot.py
+          run_cmd python -m unittest -v tests.test_protocol_63_reopened_repairs
+          run_cmd python -m unittest -v tests.test_protocol_63_engineering_memory
+          run_cmd python -m unittest -v tests.test_protocol_63_bootstrap
+          run_cmd python -m unittest discover -s tests -v
+          echo "DIAGNOSTIC_EXIT=$rc" >> "$out"
+          rm -f .github/workflows/ssdp63-repair-diagnostic.yml
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -A
+          git commit -m 'Record Protocol 6.3 repaired bootstrap readiness diagnostic'
+          git push origin HEAD:ssdp-6.3-engineering-memory
+          exit "$rc"
