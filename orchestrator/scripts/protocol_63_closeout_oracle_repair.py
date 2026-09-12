@@ -12,17 +12,25 @@ def replace_once(path: Path, old: str, new: str) -> None:
 
 
 ROOT = Path(__file__).resolve().parents[2]
+BOOTSTRAP = "86c13cab6bdd1991dffa94e277db8eacf87e2e11"
 
 versioning = ROOT / "source/shared/references/protocol-versioning-and-compatibility.md"
 replace_once(
     versioning,
-    "so replacement self-reference-safe source snapshot `86c13cab6bdd1991dffa94e277db8eacf87e2e11`",
-    "so Replacement self-reference-safe source snapshot `86c13cab6bdd1991dffa94e277db8eacf87e2e11`",
+    f"so replacement self-reference-safe source snapshot `{BOOTSTRAP}`",
+    f"so Replacement self-reference-safe source snapshot `{BOOTSTRAP}`",
 )
 replace_once(
     versioning,
     "sole 6.3 public-source fallback",
     "sole current 6.3 public-source fallback",
+)
+
+readme = ROOT / "README.md"
+replace_once(
+    readme,
+    f"Current 6.3 public-source bootstrap is `{BOOTSTRAP}`; accepted recovery is",
+    f"Current authorized version-bound 6.3 public fallback is bootstrap `{BOOTSTRAP}`; accepted recovery is",
 )
 
 protocol62_test = ROOT / "tests/test_protocol_62_closeout.py"
