@@ -1,6 +1,6 @@
 # Scientific Software Development Protocol
 
-Current accepted document-controlled release: **Protocol 6.2**. This branch contains the **Protocol 6.3 candidate implementation** and does not make 6.3 accepted-current by repository presence. Protocol 6.2 remains the immutable rollback/current authority for version-bound 6.2 work until the 6.3 qualification, bootstrap/profile/package, independent Review, recovery, and lifecycle gates close. Protocol 7 remains a proposed deterministic-control-plane successor and is not cut over.
+Current accepted document-controlled release: **Protocol 6.3**. Accepted recovery is `9f353097fab36e325a325f1c2f9d9cec32e86177` and the distinct immutable public-source bootstrap is `86c13cab6bdd1991dffa94e277db8eacf87e2e11`. Protocol 6.2 recovery `b59adc77efe6951912cfd705cc43830c58ca27d0` remains immutable historical rollback for explicitly version-bound 6.2 work. Protocol 7 remains a proposed deterministic-control-plane successor and is not cut over.
 
 ## Core model
 
@@ -15,7 +15,7 @@ D1 scientific/mathematical formulation
 
 This is a semantic hierarchy, not a mandatory waterfall. A child concretization must preserve every applicable parent abstraction and directly governed external constraint. Among admissible concretizations prefer domain engineering fitness, then minimum justified total complexity, then development economy.
 
-The universal current-candidate kernel is `source/shared/references/abstraction-and-concretization.md`. Role entrypoints route progressively to concern owners rather than loading the complete reference library up front.
+The universal current kernel is `source/shared/references/abstraction-and-concretization.md`. Role entrypoints route progressively to concern owners rather than loading the complete reference library up front.
 
 ## Protocol 6.3 project engineering memory
 
@@ -58,11 +58,12 @@ Frozen accepted historical mappings remain immutable:
 6.0.0  -> 21d5188f5bd9a0270d7a2ebf93d41a6b7842ccd2
 6.1.0  -> 802e75af261efb4f70d71284d860613a2197b639
 6.2.0  -> b59adc77efe6951912cfd705cc43830c58ca27d0
+6.3.0  -> 9f353097fab36e325a325f1c2f9d9cec32e86177
 ```
 
 Protocol 6.2 public-source bootstrap remains **`5a062ebc472755607b9dc66d33a5ebbc4b7429aa`** for version-bound 6.2 work. The earlier `1181c2031710c5d343194d87d08543290fded0ab` attempt remains invalidated historical evidence only. Bootstrap and recovery identities are intentionally distinct.
 
-**Earlier Protocol 6.3 bootstrap attempts `1484c1d3caa49d87cc15bc52a5e775399c1dae1b`, `5ee4b3ac3ca1666b0499f7a72f55adcc411bf4bb`, owner-binding-invalidated `e12572c021087308570abfa41657a910c6896457`, and D4R3 snapshot `dc22f09fd38dbbfeaeb0160152da9b284654f66e` are historical only; current public-source bootstrap is `86c13cab6bdd1991dffa94e277db8eacf87e2e11`; Protocol 6.3 recovery is mapped to `9f353097fab36e325a325f1c2f9d9cec32e86177` after R2 Review PASS; Protocol 6.2 remains accepted-current until the remaining Stage G generated-reconciliation and lifecycle gates close.** Replacement self-reference-safe source snapshot `86c13cab6bdd1991dffa94e277db8eacf87e2e11` was qualified before this later descendant published the exact mapping as the sole authorized version-bound 6.3 public fallback.
+**Earlier Protocol 6.3 bootstrap attempts `1484c1d3caa49d87cc15bc52a5e775399c1dae1b`, `5ee4b3ac3ca1666b0499f7a72f55adcc411bf4bb`, owner-binding-invalidated `e12572c021087308570abfa41657a910c6896457`, and D4R3 snapshot `dc22f09fd38dbbfeaeb0160152da9b284654f66e` are historical only. Current authorized version-bound 6.3 public fallback is bootstrap `86c13cab6bdd1991dffa94e277db8eacf87e2e11`; accepted recovery is `9f353097fab36e325a325f1c2f9d9cec32e86177`; bootstrap and recovery are intentionally distinct.** Bootstrap mapping descendant `a8dac814cc2813b3bb336e5b6abde5fbcf44949e`, recovery mapping descendant `0c76c0461b7376f17182d29ba145a198a092463c`, and generated reconciliation `e75282ae850b774a9466902f4c74ba6a179116bd` preserve self-reference-safe publication. Stage G acceptance passed in run `34699052516`.
 
 ## Canonical source and acceptance
 

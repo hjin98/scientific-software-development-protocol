@@ -1,6 +1,6 @@
-# Scientific Software Development Protocol 6.3 Candidate Source
+# Scientific Software Development Protocol 6.3 Source
 
-`source/` is the canonical Protocol 6.3 candidate source on the 6.3 implementation branch. Protocol 6.2 remains accepted-current until the 6.3 qualification, bootstrap/profile/package, independent Review, recovery, and lifecycle gates close. Generated distributions and orchestrator snapshots are derivatives; frozen historical/version-bound resources remain immutable.
+`source/` is the canonical accepted-current Protocol 6.3 source. Accepted recovery is `9f353097fab36e325a325f1c2f9d9cec32e86177` and public-source bootstrap is separately `86c13cab6bdd1991dffa94e277db8eacf87e2e11`. Protocol 6.2 recovery `b59adc77efe6951912cfd705cc43830c58ca27d0` remains immutable historical rollback for version-bound 6.2 work. Generated distributions and orchestrator snapshots are derivatives; frozen historical/version-bound resources remain immutable.
 
 ## Governing model
 
@@ -56,7 +56,7 @@ Stable family IDs represent semantic identities, not line numbers. Current stati
 
 Protocol 6.3 preserves every accepted Protocol 6.2 doctrine and still-valid historical capability while adding project-learning support. Completeness is prerequisite; compactness never permits scope narrowing or information loss. Current documents state present truth; PEM summarizes evidence-backed reusable local learning; semantic history explains material change; Git preserves chronology.
 
-Current path uses `abstraction-and-concretization.md`. Frozen 5.16/6.0/6.1/6.2 files/profiles retain their version-faithful identifiers/bytes. Protocol 6.2 accepted recovery remains `b59adc77efe6951912cfd705cc43830c58ca27d0` and public bootstrap remains `5a062ebc472755607b9dc66d33a5ebbc4b7429aa` for version-bound 6.2 work. Current Protocol 6.3 public fallback is exact bootstrap `86c13cab6bdd1991dffa94e277db8eacf87e2e11`. Stage-G recovery is separately mapped to `9f353097fab36e325a325f1c2f9d9cec32e86177` after R2 Review PASS; Protocol 6.2 remains accepted-current until mapping-bearing generated artifacts and lifecycle closeout pass.
+Current path uses `abstraction-and-concretization.md`. Frozen 5.16/6.0/6.1/6.2 files/profiles retain their version-faithful identifiers/bytes. Protocol 6.2 recovery `b59adc77efe6951912cfd705cc43830c58ca27d0` and public bootstrap `5a062ebc472755607b9dc66d33a5ebbc4b7429aa` remain historical resources for version-bound 6.2 work. Accepted-current Protocol 6.3 public fallback is exact bootstrap `86c13cab6bdd1991dffa94e277db8eacf87e2e11` and accepted recovery is separately `9f353097fab36e325a325f1c2f9d9cec32e86177`; mapping-bearing generated reconciliation `e75282ae850b774a9466902f4c74ba6a179116bd` passed Stage G acceptance in run `34699052516`.
 
 ## Build and acceptance
 

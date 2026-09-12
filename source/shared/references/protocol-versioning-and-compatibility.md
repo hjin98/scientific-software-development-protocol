@@ -72,7 +72,7 @@ Protocol 6.3 replacement public-source bootstrap is likewise distinct from futur
 6.3.0 public-source bootstrap -> 86c13cab6bdd1991dffa94e277db8eacf87e2e11
 ```
 
-The pre-repair Protocol 6.3 bootstrap remains immutable historical evidence only and must not be used as current fallback. The value on the `public-source bootstrap` line is the sole current 6.3 fallback mapping: an unavailable sentinel means no replacement fallback is published, while an immutable Git SHA means the already-existing self-reference-safe snapshot passed repository regression, canonical package build, independent package validation and committed-distribution parity, Protocol 6.3 profile/snapshot parity, the full Orchestrator Core acceptance suite, and exact-ref remote source/route realization before a later descendant published it. Protocol 6.3 recovery is separately mapped to `9f353097fab36e325a325f1c2f9d9cec32e86177` after independent Review R2 PASS. Bootstrap and recovery identities are distinct. Protocol 6.2 remains accepted-current until mapping-bearing generated descendants and Stage G lifecycle closeout pass.
+The pre-repair Protocol 6.3 bootstrap remains immutable historical evidence only and must not be used as current fallback. The value on the `public-source bootstrap` line is the sole current 6.3 fallback mapping: an unavailable sentinel means no replacement fallback is published, while an immutable Git SHA means the already-existing self-reference-safe snapshot passed repository regression, canonical package build, independent package validation and committed-distribution parity, Protocol 6.3 profile/snapshot parity, the full Orchestrator Core acceptance suite, and exact-ref remote source/route realization before a later descendant published it. Protocol 6.3 recovery is separately mapped to `9f353097fab36e325a325f1c2f9d9cec32e86177` after independent Review R2 PASS. Bootstrap and recovery identities are distinct. Mapping-bearing generated descendants were regenerated at `e75282ae850b774a9466902f4c74ba6a179116bd`, and Stage G recovery/parity/package/profile/Core acceptance passed in GitHub Actions run `34699052516`. Protocol 6.3 is accepted-current after lifecycle closeout; Protocol 6.2 remains immutable historical rollback authority for version-bound 6.2 work.
 
 The repository default branch is never a protocol-version oracle and a semantic version string is not assumed to be a Git ref.
 
@@ -85,10 +85,10 @@ Profiles remain independently version-bound:
 | `sdp-protocol-5.16` | 5.16.0 | 1 | frozen historical |
 | `ssdp-protocol-6.0` | 6.0.0 | 2 | frozen historical |
 | `ssdp-protocol-6.1` | 6.1.0 | 2 | frozen historical rollback |
-| `ssdp-protocol-6.2` | 6.2.0 | 2 | accepted current |
-| `ssdp-protocol-6.3` | 6.3.0 | 2 | candidate; generated and independently parity-checked |
+| `ssdp-protocol-6.2` | 6.2.0 | 2 | frozen historical rollback |
+| `ssdp-protocol-6.3` | 6.3.0 | 2 | accepted current |
 
-During 6.3 qualification, the 6.2 profile bytes are frozen as the immutable predecessor resource while 6.2 remains accepted-current until 6.3 cutover. Schema v2 remains unless an actual machine profile contract changes. Core selects by declared protocol/profile identity, not one global latest constant. Frozen profile bytes/behavior remain independently testable. A generic profile/package may include 6.3 PEM doctrine/template but never a live project's `PROJECT-ENGINEERING-MEMORY.md` or derived local project summary.
+Protocol 6.3 is accepted-current. The 6.2 profile bytes remain frozen as an immutable predecessor/rollback resource. Schema v2 remains because no machine profile contract changed. Core selects by declared protocol/profile identity, not one global latest constant. Frozen profile bytes/behavior remain independently testable. A generic profile/package may include 6.3 PEM doctrine/template but never a live project's `PROJECT-ENGINEERING-MEMORY.md` or derived local project summary.
 
 ## Protocol 6.2 public-source and recovery staging
 
@@ -106,7 +106,7 @@ Git commits cannot self-name, so the recovery mapping was published only by late
 
 Protocol 6.2 is accepted-current after qualification, independent Review, immutable recovery mapping, generated-artifact reconciliation, semantic-evolution/Protocol-7 handoff reconciliation, and lifecycle closeout. Protocol 6.1 remains immutable historical rollback authority at `802e75af261efb4f70d71284d860613a2197b639` for version-bound 6.1 work.
 
-## Protocol 6.3 candidate/bootstrap/recovery staging
+## Protocol 6.3 accepted bootstrap/recovery lifecycle
 
 Protocol 6.3 follows the same self-reference-safe separation learned from 6.2, with stronger memory/version separation:
 
@@ -118,7 +118,7 @@ Protocol 6.3 follows the same self-reference-safe separation learned from 6.2, w
 6. only after all required acceptance/Review/impact items pass, establish an immutable 6.3 recovery target and publish its mapping from a descendant commit because a commit cannot self-name;
 7. regenerate mapping-bearing descendants and rerun recovery/parity/package/Core acceptance before any accepted-current cutover.
 
-The pre-repair Protocol 6.3 bootstrap `1484c1d3caa49d87cc15bc52a5e775399c1dae1b`, second bootstrap `5ee4b3ac3ca1666b0499f7a72f55adcc411bf4bb`, owner-binding bootstrap `e12572c021087308570abfa41657a910c6896457`, and D4R3 bootstrap `dc22f09fd38dbbfeaeb0160152da9b284654f66e` are immutable historical evidence only. D9 changed canonical validator semantics, so Replacement self-reference-safe source snapshot `86c13cab6bdd1991dffa94e277db8eacf87e2e11` passed source regression, package/profile integrity, Orchestrator Core, and bootstrap readiness before this later descendant published its exact SHA as the sole current 6.3 public-source fallback. Protocol 6.3 recovery is separately pinned to `9f353097fab36e325a325f1c2f9d9cec32e86177` after R2 Review PASS; the accepted 6.2 mappings remain operative while Protocol 6.2 is accepted-current until mapping-bearing generated descendants and Stage G lifecycle closeout pass. The Protocol 6.3 public bootstrap remains `86c13cab6bdd1991dffa94e277db8eacf87e2e11` and is not recovery.
+The pre-repair Protocol 6.3 bootstrap `1484c1d3caa49d87cc15bc52a5e775399c1dae1b`, second bootstrap `5ee4b3ac3ca1666b0499f7a72f55adcc411bf4bb`, owner-binding bootstrap `e12572c021087308570abfa41657a910c6896457`, and D4R3 bootstrap `dc22f09fd38dbbfeaeb0160152da9b284654f66e` remain immutable historical evidence only. D9 changed canonical validator semantics, so Replacement self-reference-safe source snapshot `86c13cab6bdd1991dffa94e277db8eacf87e2e11` passed source regression, package/profile integrity, Orchestrator Core, and bootstrap readiness before descendant `a8dac814cc2813b3bb336e5b6abde5fbcf44949e` published its exact SHA as the sole current 6.3 public-source fallback. Independent Review R2/recovery target `9f353097fab36e325a325f1c2f9d9cec32e86177` is intentionally distinct; descendant `0c76c0461b7376f17182d29ba145a198a092463c` published the recovery mapping, mapping-bearing descendants were regenerated at `e75282ae850b774a9466902f4c74ba6a179116bd`, and Stage G acceptance passed in run `34699052516`. Protocol 6.3 is accepted-current; version-bound 6.2 recovery `b59adc77efe6951912cfd705cc43830c58ca27d0` remains immutable historical rollback. The public bootstrap is not recovery.
 
 ## Candidate identity and compatibility
 

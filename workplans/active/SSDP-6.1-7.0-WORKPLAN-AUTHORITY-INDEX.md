@@ -1,14 +1,14 @@
 ---
 kind: protocol-workplan-authority-index
 workplan_id: SSDP-6.1-7.0-WORKPLAN-AUTHORITY-INDEX
-protocol_version: 6.2.0
+protocol_version: 6.3.0
 status: active
 created_date: 2026-09-09
-reviewed_date: 2026-09-11
+reviewed_date: 2026-09-12
 active_serious_challenge: none
 ---
 
-# SSDP 6.1 / 6.2 / 7.0 Workplan Authority Index
+# SSDP 6.1 / 6.2 / 6.3 / 7.0 Workplan Authority Index
 
 ## Background and terminology
 
@@ -82,6 +82,32 @@ CURRENT ACCEPTED DOCUMENT-CONTROLLED BASELINE: Protocol 6.2
 
 The public-source bootstrap and accepted recovery remain intentionally distinct. Static activation sensors remain structural evidence only; no live token, latency, cache, or model-performance claim was accepted without corresponding live telemetry.
 
+## Protocol 6.3 completed handoff
+
+Protocol 6.3 evidence-backed project-engineering-memory implementation, qualification, repaired bootstrap publication, independent Review R2, recovery, mapping-bearing regeneration, and Stage G closeout are complete. Its governing workplan is preserved as reviewed historical evidence at:
+
+1. `workplans/archive/PROTOCOL-6.3-EVIDENCE-BACKED-PROJECT-ENGINEERING-MEMORY-WORKPLAN.md`
+
+Current disposition:
+
+```text
+SERIOUS CHALLENGE: NONE
+SEMANTIC CANDIDATE: 190c8b4d352c203ef74c94d57c4f18d30eb7186d
+PUBLIC BOOTSTRAP: 86c13cab6bdd1991dffa94e277db8eacf87e2e11
+BOOTSTRAP PUBLICATION DESCENDANT: a8dac814cc2813b3bb336e5b6abde5fbcf44949e
+QUALIFICATION: F5 + D9 repair + bootstrap/publication affected requalification PASS
+INDEPENDENT REVIEW R2: PASS — qualification/ssdp6/FINAL-REVIEW-R2-GPT-5.6-SOL-2026-09-12-PROTOCOL-6.3.md
+RECOVERY: 9f353097fab36e325a325f1c2f9d9cec32e86177
+RECOVERY MAPPING COMMIT: 0c76c0461b7376f17182d29ba145a198a092463c
+MAPPING-BEARING GENERATED COMMIT: e75282ae850b774a9466902f4c74ba6a179116bd
+STAGE G ACCEPTANCE: PASS — GITHUB ACTIONS RUN 34699052516
+LIFECYCLE STATUS: COMPLETED / ARCHIVED
+PARENT ACCEPTED BASELINE: Protocol 6.2 recovery b59adc77efe6951912cfd705cc43830c58ca27d0
+CURRENT ACCEPTED DOCUMENT-CONTROLLED BASELINE: Protocol 6.3
+```
+
+The public-source bootstrap and accepted recovery remain intentionally distinct. Historical invalidated 6.3 bootstrap/candidate attempts remain immutable negative evidence rather than current fallback. PEM remains non-authoritative project-local decision support; no D5 or parallel control plane was accepted.
+
 ## Protocol 7.0 current design handoff
 
 Protocol 7.0 design/implementation/review SHALL read and satisfy, as one composed handoff:
@@ -90,12 +116,14 @@ Protocol 7.0 design/implementation/review SHALL read and satisfy, as one compose
 2. `workplans/active/SSDP-7.0-DETERMINISTIC-CONTROL-PLANE-AND-MANDATORY-ORCHESTRATOR-MIGRATION-REVISION-1-SECOND-REVIEW-CLOSURE.md`
 3. `workplans/active/SSDP-7.0-DETERMINISTIC-CONTROL-PLANE-AND-MANDATORY-ORCHESTRATOR-MIGRATION-REVISION-2-DETERMINISM-AND-RECOVERY-CLOSURE.md`
 4. `workplans/active/SSDP-7.0-DETERMINISTIC-CONTROL-PLANE-AND-MANDATORY-ORCHESTRATOR-MIGRATION-REVISION-3-PROTOCOL-6.2-INHERITANCE-RECONCILIATION.md`
+5. `workplans/active/SSDP-7.0-DETERMINISTIC-CONTROL-PLANE-AND-MANDATORY-ORCHESTRATOR-MIGRATION-REVISION-4-PROTOCOL-6.3-INHERITANCE-RECONCILIATION.md`
 
 Precedence:
 
 - Revision 1 closes ownership, semantic/control binding, storage/transport, cutover, lifecycle-migration, graph-completeness, and compatibility gaps and corrects Scheduler/control-kernel ownership;
 - Revision 2 closes reducer-purity, ambient-state, external-effect, deterministic replay, and canonical recovery gaps;
-- Revision 3 changes only representation/version inheritance after Protocol 6.2 acceptance: current pre-cutover document-controlled baseline and fallback/rollback become Protocol 6.2, while the parent/Revisions 1-2 D3 architecture semantics remain unchanged;
+- Revision 3 changes only representation/version inheritance after Protocol 6.2 acceptance: current pre-cutover document-controlled baseline and fallback/rollback became Protocol 6.2, while the parent/Revisions 1-2 D3 architecture semantics remained unchanged;
+- Revision 4 changes only project-learning/version inheritance after Protocol 6.3 acceptance: current pre-cutover document-controlled baseline and fallback/rollback become Protocol 6.3, while the parent/Revisions 1-3 D3 architecture semantics remain unchanged;
 - every parent requirement not explicitly changed by a later revision remains binding.
 
 Current disposition:
@@ -107,23 +135,25 @@ IMPLEMENTATION STATUS: PROPOSED
 PROTOCOL 6.1 HISTORICAL COMPLETION/RECOVERY: SATISFIED
 PROTOCOL 6.2 COMPLETION/QUALIFICATION/RECOVERY PREREQUISITE: SATISFIED
 PROTOCOL 6.2 REPRESENTATION-INHERITANCE RECONCILIATION: SATISFIED
-CURRENT PRE-CUTOVER FALLBACK/ROLLBACK BASELINE: Protocol 6.2 recovery b59adc77efe6951912cfd705cc43830c58ca27d0
+PROTOCOL 6.3 COMPLETION/QUALIFICATION/R2-REVIEW/RECOVERY PREREQUISITE: SATISFIED
+PROTOCOL 6.3 INHERITANCE RECONCILIATION: SATISFIED
+CURRENT PRE-CUTOVER FALLBACK/ROLLBACK BASELINE: Protocol 6.3 recovery 9f353097fab36e325a325f1c2f9d9cec32e86177
 REMAINING PROTOCOL-7-SPECIFIC PRE-D4 REQUIREMENT:
   1. DELIBERATE D3 ORCHESTRATOR ARCHITECTURE REOPEN/SUPERSESSION
 PROTOCOL 7 D4: NOT AUTHORIZED
 ```
 
-Protocol 7 D4 remains unauthorized until the existing deliberate D3 Orchestrator architecture reopen/supersession requirement closes. Revision 3 does not perform that reopen and no `main` cutover is implied.
+Protocol 7 D4 remains unauthorized until the existing deliberate D3 Orchestrator architecture reopen/supersession requirement closes. Revisions 3-4 do not perform that reopen and no `main` or Protocol 7 cutover is implied.
 
 ## Version/cutover rule
 
 There is exactly one canonical workflow-control authority for any current run.
 
-- Protocol 6.2 is the accepted-current document-controlled baseline; version-bound 6.1 work may still resolve immutable historical recovery `802e75af261efb4f70d71284d860613a2197b639`.
-- Protocol 7 remains proposed/pre-cutover. Its current fallback/rollback baseline is Protocol 6.2 recovery `b59adc77efe6951912cfd705cc43830c58ca27d0` until Protocol 7 itself completes the outstanding D3 architecture reopen and subsequent D4/Review/qualification/recovery/cutover gates.
+- Protocol 6.3 is the accepted-current document-controlled baseline; version-bound 6.2 work may still resolve immutable historical recovery `b59adc77efe6951912cfd705cc43830c58ca27d0` and older declared versions retain their own mappings.
+- Protocol 7 remains proposed/pre-cutover. Its current fallback/rollback baseline is Protocol 6.3 recovery `9f353097fab36e325a325f1c2f9d9cec32e86177` until Protocol 7 itself completes the outstanding D3 architecture reopen and subsequent D4/Review/qualification/recovery/cutover gates.
 - Under Protocol 7 after qualified cutover, the deterministic orchestrator control plane owns machine lifecycle transitions while workplans/skills/documents remain semantic artifacts.
 - Shadow comparison is permitted only while one side remains explicitly non-authoritative.
-- No `main` merge/cutover is authorized by Protocol 6.2 closeout.
+- No `main` merge or Protocol 7 cutover is authorized by Protocol 6.3 closeout.
 
 ## Historical discipline
 

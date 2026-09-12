@@ -14,7 +14,7 @@ stage_f_static_sensor_commit: 092c784383868081e9dee2081e3895f3d1263630
 stage_f_qualification_commit: 092c784383868081e9dee2081e3895f3d1263630
 independent_review_handoff: qualification/ssdp6/INDEPENDENT-REVIEW-HANDOFF-PROTOCOL-6.3.md
 workplan: workplans/active/PROTOCOL-6.3-EVIDENCE-BACKED-PROJECT-ENGINEERING-MEMORY-WORKPLAN.md
-status: bootstrap-repaired-evidence-reconciled-independent-review-r2-pending
+status: stage-g-complete-accepted-current
 ---
 
 # Protocol 6.3 Preservation Census
@@ -44,8 +44,11 @@ current repaired public bootstrap:          86c13cab6bdd1991dffa94e277db8eacf87e
 later public mapping descendant:            a8dac814cc2813b3bb336e5b6abde5fbcf44949e
 final implementation semantic candidate:    190c8b4d352c203ef74c94d57c4f18d30eb7186d
 fresh F5/static-sensor evidence:             092c784383868081e9dee2081e3895f3d1263630
-independent Review R2:                       PENDING
-Protocol 6.3 recovery:                       UNAVAILABLE
+independent Review R2:                       PASS / recovery commit 9f353097fab36e325a325f1c2f9d9cec32e86177
+Protocol 6.3 recovery:                       9f353097fab36e325a325f1c2f9d9cec32e86177
+recovery mapping descendant:                 0c76c0461b7376f17182d29ba145a198a092463c
+mapping-bearing generated descendant:        e75282ae850b774a9466902f4c74ba6a179116bd
+Stage G acceptance run:                       34699052516
 ```
 
 Frozen orchestrator resource trees retained across 6.3 implementation:
@@ -243,3 +246,9 @@ Historical candidate `026eecf6ce382c3445ed218aeca80dcf2fb9a426` strengthened aut
 Exact repaired semantic candidate: `190c8b4d352c203ef74c94d57c4f18d30eb7186d`. D9 narrows same-ID reconciliation validation and adds reconciliation evidence to the existing material-route health path; it does not alter D1-D3 authority, accepted Protocol 6.2 T01-T39 semantics, cold-route activation topology, frozen 5.16/6.0/6.1/6.2 resources, or package/profile ownership. Static activation active sets were mechanically rechecked against this exact candidate with all documented candidate-side byte totals unchanged. Earlier F2/F3/F4 candidates and their qualification publications remain historical evidence only.
 
 This census refresh corrects the prior current-facing body that still named `3bbbdfa...`/F2-era identities as current. Those identities are now confined to explicit historical provenance. The current semantic subject, replacement public bootstrap, static-sensor subject, and independent-review target are consistently `190c8b4d...`; Protocol 6.3 recovery remains unavailable pending fresh independent Review.
+
+## Stage G final disposition
+
+Independent Review R2 passed with zero blockers and zero Serious Challenges and is frozen at recovery commit `9f353097fab36e325a325f1c2f9d9cec32e86177`. Descendant `0c76c0461b7376f17182d29ba145a198a092463c` publishes the exact recovery mapping while keeping public bootstrap `86c13cab6bdd1991dffa94e277db8eacf87e2e11` distinct. Mapping-bearing generated descendant `e75282ae850b774a9466902f4c74ba6a179116bd` passed the complete Stage G repository/PEM/package/dist/profile/Core/whitespace acceptance surface in GitHub Actions run `34699052516`.
+
+The T01-T39 inherited preservation set and T40-T120 Protocol 6.3 extension remain closed without a discovered loss, scope/materiality laundering defect, priority inversion, false compaction, or frozen-resource mutation. Protocol 6.3 is accepted-current after current-authority/history/Protocol-7 reconciliation and workplan archival. Protocol 6.2 recovery `b59adc77efe6951912cfd705cc43830c58ca27d0` remains immutable historical rollback.

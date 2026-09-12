@@ -1,6 +1,6 @@
 # SSDP Current Semantic Dependency View
 
-This is a bounded human/agent-readable view of material **current Protocol 6.3 candidate** relationships. It supports impact analysis; it is not a universal claim/source-code graph, activation registry, Project Engineering Memory (PEM) index, or independent authority. Absence of an edge outside explicitly complete mapped scope is not evidence of independence.
+This is a bounded human/agent-readable view of material **current accepted Protocol 6.3** relationships. It supports impact analysis; it is not a universal claim/source-code graph, activation registry, Project Engineering Memory (PEM) index, or independent authority. Absence of an edge outside explicitly complete mapped scope is not evidence of independence.
 
 ## Semantic authority chain
 
@@ -61,12 +61,12 @@ A memory-triggering route uses progressive disclosure: exact base/overlay -> sch
 
 ```text
 ssdp-protocol-6.1 CONSTRAINED_BY -> immutable historical Protocol 6.1 rollback semantics
-ssdp-protocol-6.2 CONSTRAINED_BY -> accepted-current Protocol 6.2 semantics
-ssdp-protocol-6.3 CONSTRAINED_BY -> Protocol 6.3 candidate semantics until qualification/Review/recovery cutover
+ssdp-protocol-6.2 CONSTRAINED_BY -> immutable historical Protocol 6.2 rollback semantics
+ssdp-protocol-6.3 CONSTRAINED_BY -> accepted-current Protocol 6.3 semantics
 PEM schema 1 VERSIONED_INDEPENDENTLY_OF -> SSDP protocol/profile schema
 ```
 
-Frozen 5.16/6.0/6.1/6.2 profiles remain independent compatibility/rollback resources during 6.3 implementation. Protocol 6.2 remains accepted-current until Protocol 6.3 completes qualification, immutable bootstrap/profile generation, independent Review, recovery mapping, generated-artifact/Core parity, and lifecycle closeout. Unsupported PEM schemas fail safe for memory-dependent decisions without breaking unrelated protocol routes.
+Frozen 5.16/6.0/6.1/6.2 profiles remain independent compatibility/rollback resources. Protocol 6.3 is accepted-current after qualification, immutable bootstrap/profile generation, independent Review R2, recovery mapping, generated-artifact/Core parity, Protocol 7 inheritance reconciliation, and lifecycle closeout. Unsupported PEM schemas fail safe for memory-dependent decisions without breaking unrelated protocol routes.
 
 ## Source/generated relationships
 
