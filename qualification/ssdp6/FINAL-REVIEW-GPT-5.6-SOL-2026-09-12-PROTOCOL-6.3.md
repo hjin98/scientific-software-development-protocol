@@ -10,7 +10,7 @@ accepted_baseline_recovery: b59adc77efe6951912cfd705cc43830c58ca27d0
 accepted_baseline_semantic_candidate: ebbc4591bdfed039512026b8acb3a6749475c1c5
 accepted_baseline_public_bootstrap: 5a062ebc472755607b9dc66d33a5ebbc4b7429aa
 semantic_candidate: 190c8b4d352c203ef74c94d57c4f18d30eb7186d
-public_source_bootstrap: 190c8b4d352c203ef74c94d57c4f18d30eb7186d
+public_source_bootstrap: dc22f09fd38dbbfeaeb0160152da9b284654f66e
 f5_qualification_commit: 092c784383868081e9dee2081e3895f3d1263630
 stage_f_evidence_reconciliation_descendant: f8b0c0705afec7fd97a38a6eed090714ae53beb7
 reviewed_branch_head_before_review: df779ac21bf113d83b21f2f677a284e76e7db962
@@ -49,7 +49,7 @@ The semantic subject is the immutable candidate `190c8b4d352c203ef74c94d57c4f18d
 | Accepted Protocol 6.2 public bootstrap | `5a062ebc472755607b9dc66d33a5ebbc4b7429aa` |
 | Historical F4 NO-PASS candidate | `42eb89388dc96879157ba92db9e7f3c59f2c0b36` |
 | Reviewed Protocol 6.3 semantic candidate | `190c8b4d352c203ef74c94d57c4f18d30eb7186d` |
-| Protocol 6.3 public-source bootstrap | `190c8b4d352c203ef74c94d57c4f18d30eb7186d` |
+| Protocol 6.3 public-source bootstrap | `dc22f09fd38dbbfeaeb0160152da9b284654f66e` |
 | F5 qualification publication | `092c784383868081e9dee2081e3895f3d1263630` |
 | Stage-F evidence reconciliation descendant | `f8b0c0705afec7fd97a38a6eed090714ae53beb7` |
 | Clean branch head reviewed as assembled descendant | `df779ac21bf113d83b21f2f677a284e76e7db962` |
@@ -102,9 +102,9 @@ The final clean PR workflow run `34695322057` passed full protocol regression, c
 
 ## Lifecycle boundary
 
-The public-source fallback is the already-existing immutable candidate `190c8b4d352c203ef74c94d57c4f18d30eb7186d`, published by a later descendant. It is not recovery.
+The public-source fallback is the already-existing immutable bootstrap `dc22f09fd38dbbfeaeb0160152da9b284654f66e`, published by a later descendant. It is distinct from the reviewed semantic candidate `190c8b4d352c203ef74c94d57c4f18d30eb7186d` and is not recovery.
 
-Under the established Protocol 6.2 precedent, this Review PASS commit may be selected as the immutable Protocol 6.3 recovery target because it contains the reviewed semantic candidate and required qualification/evidence/Review record through ancestry. Git commits cannot self-name, so any `6.3.0 -> <recovery SHA>` mapping must be published only by a later descendant.
+Under the established Protocol 6.2 precedent, the final corrected Review PASS commit may be selected as the immutable Protocol 6.3 recovery target because it contains the reviewed semantic candidate and required qualification/evidence/Review record through ancestry. Git commits cannot self-name, so any `6.3.0 -> <recovery SHA>` mapping must be published only by a later descendant.
 
 Stage G must then regenerate mapping-bearing descendants, run targeted recovery/bootstrap-distinction/parity/package/profile/Core checks, reconcile Protocol 7 and semantic history, and only after those gates pass may Protocol 6.3 become accepted-current, the workplan be archived, and `main` be cut over.
 
