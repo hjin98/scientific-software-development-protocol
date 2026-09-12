@@ -8,13 +8,13 @@ accepted_protocol_62_semantic_candidate: ebbc4591bdfed039512026b8acb3a6749475c1c
 accepted_protocol_62_public_bootstrap: 5a062ebc472755607b9dc66d33a5ebbc4b7429aa
 implementation_branch_start: 5508911f3227c7bcb7e38b0c74a7a37f13fd6b7c
 semantic_candidate: 190c8b4d352c203ef74c94d57c4f18d30eb7186d
-public_source_bootstrap: 190c8b4d352c203ef74c94d57c4f18d30eb7186d
-public_source_mapping_commit: 092c784383868081e9dee2081e3895f3d1263630
+public_source_bootstrap: 86c13cab6bdd1991dffa94e277db8eacf87e2e11
+public_source_mapping_commit: a8dac814cc2813b3bb336e5b6abde5fbcf44949e
 stage_f_static_sensor_commit: 092c784383868081e9dee2081e3895f3d1263630
 stage_f_qualification_commit: 092c784383868081e9dee2081e3895f3d1263630
 independent_review_handoff: qualification/ssdp6/INDEPENDENT-REVIEW-HANDOFF-PROTOCOL-6.3.md
 workplan: workplans/active/PROTOCOL-6.3-EVIDENCE-BACKED-PROJECT-ENGINEERING-MEMORY-WORKPLAN.md
-status: f5-qualified-evidence-reconciled-independent-review-pending
+status: bootstrap-repaired-evidence-reconciled-independent-review-r2-pending
 ---
 
 # Protocol 6.3 Preservation Census
@@ -39,11 +39,12 @@ historical F2 qualification commit:         6fc26ce374b5346495782871d5d7241de5b9
 historical F3 semantic candidate:           026eecf6ce382c3445ed218aeca80dcf2fb9a426
 historical reviewed F4 NO-PASS candidate:   42eb89388dc96879157ba92db9e7f3c59f2c0b36
 
-current repaired public bootstrap:          190c8b4d352c203ef74c94d57c4f18d30eb7186d
-later public mapping descendant:            092c784383868081e9dee2081e3895f3d1263630
+historical D4R3 public bootstrap:            dc22f09fd38dbbfeaeb0160152da9b284654f66e
+current repaired public bootstrap:          86c13cab6bdd1991dffa94e277db8eacf87e2e11
+later public mapping descendant:            a8dac814cc2813b3bb336e5b6abde5fbcf44949e
 final implementation semantic candidate:    190c8b4d352c203ef74c94d57c4f18d30eb7186d
 fresh F5/static-sensor evidence:             092c784383868081e9dee2081e3895f3d1263630
-independent Review:                          PENDING
+independent Review R2:                       PENDING
 Protocol 6.3 recovery:                       UNAVAILABLE
 ```
 
@@ -62,6 +63,8 @@ Accepted 6.2 packaged blobs remain:
 prompts.md:   159c58cbac0a8cf66311ddf7e11ad8eb03644e8c
 profile.json: 6f21ad0592da343db951ffd56d25aa74a881bd8c
 ```
+
+F5 publication `092c784383868081e9dee2081e3895f3d1263630` and later evidence reconciliation did not complete replacement-bootstrap publication correctly: they described semantic candidate `190c8b4d352c203ef74c94d57c4f18d30eb7186d` as the current bootstrap even though that candidate still named `dc22f09fd38dbbfeaeb0160152da9b284654f66e` as fallback. Promotion review exposed the defect. Qualified immutable bootstrap `86c13cab6bdd1991dffa94e277db8eacf87e2e11` and publication descendant `a8dac814cc2813b3bb336e5b6abde5fbcf44949e` supersede that current-facing bootstrap claim without rewriting F5 as if it had been correct.
 
 Earlier 6.3 candidates, bootstraps, mapping descendants, and qualification publications remain historical provenance and negative fixtures only. They may explain how current evidence was reached, but no current closure row treats any pre-D9 candidate as the accepted 6.3 semantic subject.
 

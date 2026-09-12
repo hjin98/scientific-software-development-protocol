@@ -8,7 +8,7 @@ created_date: 2026-09-11
 reviewed_date: 2026-09-12
 design_closure_status: preserved-from-5de67c6a9509c1ede9104badc3ddae468c988311
 implementation_handoff: authorized
-implementation_review_state: reopened-after-independent-no-pass-4
+implementation_review_state: r2-pending-after-bootstrap-publication-repair
 reviewed_candidate_no_pass: 100cbde296de6c1a8db14151f34cfacfebc90eb3
 reviewed_candidate_no_pass_2: 3bbbdfa8120646d76336c7b916e6a891c9ed38f2
 reviewed_candidate_no_pass_3: 026eecf6ce382c3445ed218aeca80dcf2fb9a426
@@ -23,8 +23,10 @@ prior_f4_qualification: qualification/ssdp6/RESULTS-GPT-5.6-SOL-2026-09-12-PROTO
 current_f5_semantic_candidate: 190c8b4d352c203ef74c94d57c4f18d30eb7186d
 current_f5_qualification_commit: 092c784383868081e9dee2081e3895f3d1263630
 current_f5_qualification: qualification/ssdp6/RESULTS-GPT-5.6-SOL-2026-09-12-PROTOCOL-6.3-F5.md
+current_public_bootstrap: 86c13cab6bdd1991dffa94e277db8eacf87e2e11
+current_public_bootstrap_mapping: a8dac814cc2813b3bb336e5b6abde5fbcf44949e
 reopened_stages: B,D,F
-stage_g_recovery_gate: blocked-repair-and-fresh-independent-review
+stage_g_recovery_gate: blocked-pending-fresh-r2-review
 active_serious_challenge: none
 parent_protocol_62_recovery: b59adc77efe6951912cfd705cc43830c58ca27d0
 parent_protocol_62_semantic_candidate: ebbc4591bdfed039512026b8acb3a6749475c1c5
@@ -39,6 +41,8 @@ branch_point: bf856f742d1744a8ff50f300ee6493fb93e5c9d0
 ## Current disposition
 
 Protocol 6.3 remains **NO-PASS** and proposed. Accepted-current authority remains Protocol 6.2 recovery `b59adc77efe6951912cfd705cc43830c58ca27d0`. Stage G, recovery mapping, workplan archive, and `main` cutover remain blocked.
+
+A later promotion audit exposed an additional lifecycle blocker after F5: semantic candidate `190c8b4d352c203ef74c94d57c4f18d30eb7186d` had been labeled as the replacement public bootstrap although it still embedded historical D4R3 fallback `dc22f09fd38dbbfeaeb0160152da9b284654f66e`. This was repaired without changing the reviewed D9 semantic source by creating qualified self-reference-safe bootstrap `86c13cab6bdd1991dffa94e277db8eacf87e2e11` and publishing it only from later descendant `a8dac814cc2813b3bb336e5b6abde5fbcf44949e`. Two inherited-contract losses found while constructing that snapshot (the 5.16 self-reference-safe-source wording and exact accepted-6.2 fallback wording) plus a publication false-compaction that dropped historical bootstrap identities were repaired at their existing publication owners and discriminated by the full regression. Fresh independent Review R2 is now required; prior PASS attempts are superseded by the later-discovered blocker.
 
 Independent review subsequently falsified candidates `026eecf6ce382c3445ed218aeca80dcf2fb9a426` and `42eb89388dc96879157ba92db9e7f3c59f2c0b36`. The latest review of `42eb89388dc96879157ba92db9e7f3c59f2c0b36` found two remaining blockers: D8-01 still permits same-ID governing-claim/applicability laundering under claimant-authored `WITHIN_ENVELOPE` reconciliation, and current-facing Stage-F preservation/static-sensor evidence is not bound to the exact reviewed candidate. There is **no Serious Challenge** to accepted Protocol 6.2 or to the established Protocol 6.3 design. Stages B, D, and F remain reopened only at these owning surfaces.
 

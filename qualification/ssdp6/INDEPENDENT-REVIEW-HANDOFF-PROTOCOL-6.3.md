@@ -5,14 +5,14 @@ authority: non-normative-review-handoff
 semantic_candidate: 190c8b4d352c203ef74c94d57c4f18d30eb7186d
 qualification_result_commit: 092c784383868081e9dee2081e3895f3d1263630
 qualification_result: qualification/ssdp6/RESULTS-GPT-5.6-SOL-2026-09-12-PROTOCOL-6.3-F5.md
-public_source_bootstrap: 190c8b4d352c203ef74c94d57c4f18d30eb7186d
-public_source_mapping_commit: 092c784383868081e9dee2081e3895f3d1263630
+public_source_bootstrap: 86c13cab6bdd1991dffa94e277db8eacf87e2e11
+public_source_mapping_commit: a8dac814cc2813b3bb336e5b6abde5fbcf44949e
 replaced_public_source_bootstrap: 42eb89388dc96879157ba92db9e7f3c59f2c0b36
 accepted_protocol_62_recovery: b59adc77efe6951912cfd705cc43830c58ca27d0
 accepted_protocol_62_public_bootstrap: 5a062ebc472755607b9dc66d33a5ebbc4b7429aa
 accepted_protocol_62_semantic_candidate: ebbc4591bdfed039512026b8acb3a6749475c1c5
-independent_review: required_fresh_context
-protocol_63_recovery: unavailable_pending_review
+independent_review: required_fresh_r2_context
+protocol_63_recovery: unavailable_pending_r2_review
 accepted_current_protocol: 6.2.0
 stage_g: blocked
 ---
@@ -43,4 +43,4 @@ Reconstruct the still-binding complete design through the active workplan's immu
 
 ## Lifecycle boundary
 
-The new public source bootstrap is the already-existing candidate `190c8b4d352c203ef74c94d57c4f18d30eb7186d`, published only by later descendant `092c784383868081e9dee2081e3895f3d1263630`. It is not Protocol 6.3 recovery. Until fresh independent Review PASS and separate Stage G recovery lifecycle complete, accepted current remains Protocol 6.2; recovery is unavailable; the workplan stays active; `main` cutover is not authorized.
+F5 incorrectly treated semantic candidate `190c8b4d352c203ef74c94d57c4f18d30eb7186d` as the replacement public bootstrap even though that immutable candidate still embedded historical fallback `dc22f09fd38dbbfeaeb0160152da9b284654f66e`. Promotion review caught the defect. The repaired public source bootstrap is instead self-reference-safe immutable snapshot `86c13cab6bdd1991dffa94e277db8eacf87e2e11`, qualified before publication and named only by later descendant `a8dac814cc2813b3bb336e5b6abde5fbcf44949e`. It is not Protocol 6.3 recovery. Earlier Review-PASS attempts made before this blocker was discovered are superseded. Fresh R2 Review must assess the assembled repaired state. Until R2 PASS and separate Stage G recovery lifecycle complete, accepted current remains Protocol 6.2; recovery is unavailable; the workplan stays active; `main` cutover is not authorized.
