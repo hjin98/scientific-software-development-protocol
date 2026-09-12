@@ -1,4 +1,4 @@
-# trigger: repaired D4R2/D5R2 candidate is ready for replacement-bootstrap qualification
+# repaired lifecycle: preserve the established unavailable sentinel until exact immutable mapping
 name: Finalize Protocol 6.3 replacement bootstrap
 
 on:
@@ -18,32 +18,6 @@ jobs:
         with: {fetch-depth: 0}
       - uses: actions/setup-python@v5
         with: {python-version: '3.12'}
-
-      - name: Restore inherited unavailable-bootstrap contract
-        shell: bash
-        run: |
-          set -euo pipefail
-          python - <<'PY'
-          from pathlib import Path
-          old = 'UNAVAILABLE_PENDING_REPLACEMENT_BOOTSTRAP'
-          canonical = 'UNAVAILABLE_PENDING_6.3_BOOTSTRAP_QUALIFICATION'
-          paths = [
-              'source/shared/references/protocol-versioning-and-compatibility.md',
-              'source/shared/references/development-workflow-prompts.md',
-              'PORTABILITY.md',
-              'README.md',
-              'tests/test_protocol_63_bootstrap.py',
-              'tests/test_protocol_516_orchestration.py',
-              'tests/test_protocol_61_evidence_evolution.py',
-              'tests/test_protocol_62_representation.py',
-          ]
-          for raw in paths:
-              p = Path(raw)
-              t = p.read_text(encoding='utf-8')
-              if old in t:
-                  t = t.replace(old, canonical)
-              p.write_text(t, encoding='utf-8')
-          PY
 
       - name: Install validation and Orchestrator dependencies
         run: |
@@ -95,7 +69,7 @@ jobs:
           candidate = sys.argv[1]
           p = Path('tests/test_protocol_63_bootstrap.py')
           t = p.read_text(encoding='utf-8')
-          sentinel = 'UNAVAILABLE_PENDING_6.3_BOOTSTRAP_QUALIFICATION'
+          sentinel = 'UNAVAILABLE_PENDING_REPLACEMENT_BOOTSTRAP'
           needle = f'BOOTSTRAP = "{sentinel}"'
           if needle not in t:
               raise SystemExit('bootstrap test sentinel missing')
@@ -113,7 +87,7 @@ jobs:
           from pathlib import Path
           import sys
           candidate = sys.argv[1]
-          sentinel = 'UNAVAILABLE_PENDING_6.3_BOOTSTRAP_QUALIFICATION'
+          sentinel = 'UNAVAILABLE_PENDING_REPLACEMENT_BOOTSTRAP'
           paths = [
               'source/shared/references/protocol-versioning-and-compatibility.md',
               'source/shared/references/development-workflow-prompts.md',
