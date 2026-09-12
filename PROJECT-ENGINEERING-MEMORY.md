@@ -110,7 +110,7 @@ guidance_level: OBSERVED
 relations: []
 evidence:
   - "hjin98/scientific-software-development-protocol@8553b40a240042ef37eb693a14b5e1ddac464ef2:qualification/ssdp6/FINAL-REVIEW-GPT-5.6-SOL-2026-09-10-PROTOCOL-6.2.md"
-  - "hjin98/scientific-software-development-protocol@a9bfa4c8ade4ead8ab1820dc18d2f64e86ecd098:qualification/ssdp6/SSDP-6.3-PRESERVATION-CENSUS.md"
+  - "hjin98/scientific-software-development-protocol@82e6e1badf2c88c00967155bb9d30c773b80d1ef:qualification/ssdp6/SSDP-6.3-PRESERVATION-CENSUS.md"
 ```
 
 ### SP-001 — Owner-layer route repair with derived regeneration

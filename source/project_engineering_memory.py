@@ -9,7 +9,10 @@ from __future__ import annotations
 
 import argparse
 import dataclasses
+import datetime as dt
+import hashlib
 import re
+import subprocess
 import sys
 from pathlib import Path
 from typing import Any, Iterable
@@ -23,27 +26,24 @@ MATURITIES = {"PROVISIONAL", "SUPPORTED", "PROVEN"}
 TEMPERATURES = {"HOT", "WARM", "COLD", "UNASSESSED"}
 AUTHORITY_BINDINGS = {"EVIDENCE_ONLY", "AUTHORITY_BOUND", "PROPOSED_FOR_PROMOTION"}
 ASSESSMENT_STATES = {
-    "ADMISSIBLE",
-    "REVIEW_REQUIRED",
-    "INCONCLUSIVE",
-    "CHALLENGED",
-    "REJECTED_OR_INVALID",
-    "STALE_OR_INAPPLICABLE",
-    "RETIRED",
+    "ADMISSIBLE", "REVIEW_REQUIRED", "INCONCLUSIVE", "CHALLENGED",
+    "REJECTED_OR_INVALID", "STALE_OR_INAPPLICABLE", "RETIRED",
 }
 APPLICATION_OUTCOMES = {"SUPPORTING", "NEUTRAL", "CONTRADICTING", "INCONCLUSIVE"}
 GUIDANCE_LEVELS = {"OBSERVED", "RECOMMENDED", "PREFERRED", "DEFAULT", "BEST"}
 BINDING_HEALTH = {"HEALTHY", "REVIEW_REQUIRED", "UNAVAILABLE", "RETIRED"}
 LINEAGE_RELATIONS = {"SUPERSEDES", "SPLIT_FROM", "MERGED_FROM", "REPLACES"}
 RELATION_TYPES = LINEAGE_RELATIONS | {
-    "LED_TO",
-    "NARROWS",
-    "GENERALIZES",
-    "SUPPORTS_LEARNING_FROM",
-    "CONFLICTS_WITH",
+    "LED_TO", "NARROWS", "GENERALIZES", "SUPPORTS_LEARNING_FROM", "CONFLICTS_WITH",
 }
+HAS_DISPOSITIONS = {"APPLICABLE", "NOT_APPLICABLE", "REVIEW_REQUIRED"}
+TRIGGER_TYPES = {"deadline", "accepted_base_change", "owner_change", "binding_change", "manual_external"}
 ID_RE = re.compile(r"^(FF|SP|DS|PC)-[0-9]+$")
 NOTICE_ID_RE = re.compile(r"^NT-[0-9]+$")
+ROUTE_RE = re.compile(
+    r"^(?P<source>[^@\s:]+(?:/[^@\s:]+)*)@(?P<revision>[^:\s]+):(?P<path>[^#\s]+)(?:#(?P<locator>.+))?$"
+)
+HEX_OBJECT_RE = re.compile(r"^[0-9a-fA-F]{40,64}$")
 FRONT_RE = re.compile(r"\A---\n(?P<yaml>.*?)\n---\n", re.DOTALL)
 FAMILY_RE = re.compile(
     r"^###\s+(?P<heading_id>(?:FF|SP|DS|PC)-[0-9]+)\s+(?:—|-)\s+.*?\n"
@@ -75,6 +75,15 @@ class PemDocument:
     root_text: str
 
 
+@dataclasses.dataclass(frozen=True)
+class EvidenceRoute:
+    raw: str
+    source: str
+    revision: str
+    path: str
+    locator: str | None = None
+
+
 def _mapping(value: Any, where: str) -> dict[str, Any]:
     if not isinstance(value, dict):
         raise PemError(f"{where} must be a mapping")
@@ -93,16 +102,6 @@ def _required_text(value: Any, where: str) -> str:
     if not isinstance(value, str) or not value.strip():
         raise PemError(f"{where} must be non-empty text")
     return value.strip()
-
-
-def _validate_source_project(row: dict[str, Any], where: str) -> str:
-    source_project = _required_text(row.get("source_project"), f"{where}:source_project")
-    if source_project.lower() in {"external", "remote", "other", "unknown", "non-local", "nonlocal"}:
-        raise PemError(
-            f"{where}: non-local source_project must be an unambiguous project/repository identity, "
-            f"not {source_project!r}"
-        )
-    return source_project
 
 
 def _frontmatter(text: str, path: Path) -> dict[str, Any]:
@@ -135,18 +134,114 @@ def _parse_blocks(text: str, path: Path) -> tuple[dict[str, dict[str, Any]], dic
     return families, notices
 
 
-def _safe_detail_path(root: Path, raw: Any) -> Path:
-    if not isinstance(raw, str) or not raw or raw.startswith(("/", "~")):
+def _validate_source_project(row: dict[str, Any], where: str) -> str:
+    source_project = _required_text(row.get("source_project"), f"{where}:source_project")
+    if source_project.lower() in {"external", "remote", "other", "unknown", "non-local", "nonlocal"}:
+        raise PemError(
+            f"{where}: non-local source_project must be an unambiguous project/repository identity, not {source_project!r}"
+        )
+    return source_project
+
+
+def parse_evidence_route(value: Any, where: str = "evidence") -> EvidenceRoute:
+    raw = _required_text(value, where)
+    match = ROUTE_RE.fullmatch(raw)
+    if not match:
+        raise PemError(
+            f"{where}: evidence route must be SOURCE@IMMUTABLE_ID:path[#stable-locator], got {raw!r}"
+        )
+    source = match.group("source")
+    if source.lower() in {"external", "remote", "other", "unknown", "non-local", "nonlocal"}:
+        raise PemError(f"{where}: evidence source identity is ambiguous: {source!r}")
+    path = match.group("path")
+    if path.startswith(("/", "~")) or ".." in Path(path).parts:
+        raise PemError(f"{where}: evidence path must be repository-relative: {path!r}")
+    locator = match.group("locator")
+    if locator is not None and not locator.strip():
+        raise PemError(f"{where}: evidence locator must be non-empty when present")
+    return EvidenceRoute(raw, source, match.group("revision"), path, locator.strip() if locator else None)
+
+
+def _git_root(path: Path) -> Path | None:
+    start = path if path.is_dir() else path.parent
+    try:
+        proc = subprocess.run(
+            ["git", "-C", str(start), "rev-parse", "--show-toplevel"],
+            check=False, capture_output=True, text=True, timeout=5,
+        )
+    except (OSError, subprocess.TimeoutExpired):
+        return None
+    if proc.returncode != 0:
+        return None
+    return Path(proc.stdout.strip()).resolve()
+
+
+def _git_ok(root: Path, *args: str) -> bool:
+    try:
+        proc = subprocess.run(
+            ["git", "-C", str(root), *args], check=False, capture_output=True, text=True, timeout=8,
+        )
+    except (OSError, subprocess.TimeoutExpired):
+        return False
+    return proc.returncode == 0
+
+
+def _route_is_local(route: EvidenceRoute, doc: PemDocument) -> bool:
+    repository = str(doc.metadata.get("repository", "")).strip().lower()
+    source = route.source.lower()
+    if repository and source == repository:
+        return True
+    if source in {"local", "repo", "repository"}:
+        return _git_root(doc.root) is not None
+    return False
+
+
+def evidence_route_health(route: EvidenceRoute, doc: PemDocument) -> tuple[str, str]:
+    """Resolve repository-path evidence when it names this repository.
+
+    Non-local evidence is validated structurally and remains event-driven. A local path-qualified
+    route is HEALTHY only when its revision is a commit/tree-ish containing that exact path;
+    blob IDs are deliberately rejected as publication revisions.
+    """
+    if not _route_is_local(route, doc):
+        return "HEALTHY", "non-local route has explicit source identity; external realization is event-driven"
+    root = _git_root(doc.root)
+    if root is None:
+        return "REVIEW_REQUIRED", "local Git repository is unavailable for route realization"
+    if not _git_ok(root, "cat-file", "-e", f"{route.revision}^{{commit}}"):
+        if _git_ok(root, "cat-file", "-e", f"{route.revision}^{{blob}}"):
+            return "UNAVAILABLE", "revision is a blob object, not a repository publication commit"
+        return "UNAVAILABLE", "repository revision is not resolvable as a commit"
+    if not _git_ok(root, "cat-file", "-e", f"{route.revision}:{route.path}"):
+        return "UNAVAILABLE", "declared path is absent from the immutable repository revision"
+    return "HEALTHY", "commit and repository path resolve"
+
+
+def _safe_detail_path(root: Path, raw: Any) -> tuple[Path, str | None]:
+    expected_digest: str | None = None
+    if isinstance(raw, dict):
+        item = _mapping(raw, "detail_files entry")
+        raw_path = item.get("path")
+        expected_digest = _required_text(item.get("sha256"), "detail_files entry sha256")
+        if not re.fullmatch(r"[0-9a-f]{64}", expected_digest):
+            raise PemError(f"detail_files entry sha256 must be a lowercase 64-hex digest: {expected_digest!r}")
+    else:
+        raw_path = raw
+    if not isinstance(raw_path, str) or not raw_path or raw_path.startswith(("/", "~")):
         raise PemError(f"invalid detail_files entry: {raw!r}")
-    candidate = (root.parent / raw).resolve()
+    candidate = (root.parent / raw_path).resolve()
     base = root.parent.resolve()
     try:
         candidate.relative_to(base)
     except ValueError as exc:
-        raise PemError(f"detail file escapes project memory root: {raw}") from exc
+        raise PemError(f"detail file escapes project memory root: {raw_path}") from exc
     if candidate.suffix.lower() != ".md":
-        raise PemError(f"detail file must be Markdown: {raw}")
-    return candidate
+        raise PemError(f"detail file must be Markdown: {raw_path}")
+    return candidate, expected_digest
+
+
+def _same_basis(a: Any, b: Any) -> bool:
+    return yaml.safe_dump(a, sort_keys=True) == yaml.safe_dump(b, sort_keys=True)
 
 
 def load_memory(root: Path | str) -> PemDocument:
@@ -155,21 +250,13 @@ def load_memory(root: Path | str) -> PemDocument:
     metadata = _frontmatter(text, root)
     if metadata.get("memory_schema_version") != SCHEMA_VERSION:
         raise PemError(
-            f"{root}: unsupported memory_schema_version {metadata.get('memory_schema_version')!r}; "
-            f"supported={SCHEMA_VERSION}"
+            f"{root}: unsupported memory_schema_version {metadata.get('memory_schema_version')!r}; supported={SCHEMA_VERSION}"
         )
     required_meta = {
-        "maintained_under_protocol",
-        "project_id",
-        "repository",
-        "scope",
-        "coverage_state",
-        "coverage_basis",
-        "reconciled_through",
-        "accepted_base",
-        "candidate_overlay",
+        "maintained_under_protocol", "project_id", "repository", "scope", "coverage_state",
+        "coverage_basis", "reconciled_through", "accepted_base", "candidate_overlay",
     }
-    missing = sorted(k for k in required_meta if not metadata.get(k))
+    missing = sorted(k for k in required_meta if metadata.get(k) in (None, "", []))
     if missing:
         raise PemError(f"{root}: missing required metadata: {', '.join(missing)}")
     if metadata["coverage_state"] not in {"UNINITIALIZED", "PARTIAL", "RECONCILED_FOR_DECLARED_SCOPE"}:
@@ -177,34 +264,45 @@ def load_memory(root: Path | str) -> PemDocument:
 
     families, notices = _parse_blocks(text, root)
     sources: dict[str, Path] = {**{k: root for k in families}, **{k: root for k in notices}}
-    for raw in _list(metadata.get("detail_files", []), f"{root}:detail_files"):
-        detail = _safe_detail_path(root, raw)
+    details = _list(metadata.get("detail_files", []), f"{root}:detail_files")
+    for raw in details:
+        detail, expected_digest = _safe_detail_path(root, raw)
         if not detail.is_file():
-            raise PemError(f"declared detail file is missing: {raw}")
-        detail_text = detail.read_text(encoding="utf-8")
+            raise PemError(f"declared detail file is missing: {raw!r}")
+        detail_bytes = detail.read_bytes()
+        if expected_digest is not None:
+            actual_digest = hashlib.sha256(detail_bytes).hexdigest()
+            if actual_digest != expected_digest:
+                raise PemError(
+                    f"{detail}: partition digest mismatch; expected {expected_digest}, observed {actual_digest}"
+                )
+        detail_text = detail_bytes.decode("utf-8")
         detail_meta = _frontmatter(detail_text, detail)
         if detail_meta.get("memory_schema_version") != SCHEMA_VERSION or detail_meta.get("pem_partition") is not True:
             raise PemError(f"{detail}: invalid PEM partition metadata")
-        if detail_meta.get("project_id") != metadata["project_id"]:
-            raise PemError(f"{detail}: project_id differs from root")
+        for key in ("project_id", "repository", "scope", "accepted_base", "candidate_overlay"):
+            if not _same_basis(detail_meta.get(key), metadata.get(key)):
+                raise PemError(f"{detail}: {key} differs from root publication basis")
         if SUMMARY_RE.search(detail_text):
             raise PemError(f"{detail}: only the PEM root may own the active summary")
         part_families, part_notices = _parse_blocks(detail_text, detail)
-        for row_id, row in {**part_families, **part_notices}.items():
+        for row_id in {**part_families, **part_notices}:
             if row_id in sources:
                 raise PemError(f"duplicate canonical PEM ID {row_id} in {sources[row_id]} and {detail}")
             sources[row_id] = detail
+        if expected_digest is None:
+            raise PemError(
+                f"{root}: partitioned schema-1 memory requires root-declared immutable sha256 for {detail.name}"
+            )
         families.update(part_families)
         notices.update(part_notices)
     return PemDocument(root, metadata, families, notices, sources, text)
 
 
 def _current_assessment(row: dict[str, Any], where: str) -> dict[str, Any] | None:
-    """Resolve current assessment from explicit supersession, never serialized row order."""
     assessments = _list(row.get("assessments", []), f"{where}:assessments")
     if not assessments:
         return None
-
     parsed: dict[str, dict[str, Any]] = {}
     for raw in assessments:
         item = _mapping(raw, f"{where}:assessment")
@@ -218,14 +316,12 @@ def _current_assessment(row: dict[str, Any], where: str) -> dict[str, Any] | Non
         if not evidence:
             raise PemError(f"{where}:{aid}: assessment requires non-empty evidence route(s)")
         for route in evidence:
-            _required_text(route, f"{where}:{aid}:evidence route")
+            parse_evidence_route(route, f"{where}:{aid}:evidence route")
         parsed[aid] = item
-
     graph: dict[str, set[str]] = {aid: set() for aid in parsed}
     superseded: set[str] = set()
     for aid, item in parsed.items():
-        targets = _list(item.get("supersedes", []), f"{where}:{aid}:supersedes")
-        for raw_target in targets:
+        for raw_target in _list(item.get("supersedes", []), f"{where}:{aid}:supersedes"):
             target = _required_text(raw_target, f"{where}:{aid}:supersedes target")
             if target == aid:
                 raise PemError(f"{where}:{aid}: assessment cannot supersede itself")
@@ -233,10 +329,8 @@ def _current_assessment(row: dict[str, Any], where: str) -> dict[str, Any] | Non
                 raise PemError(f"{where}:{aid}: supersedes unknown assessment {target!r}")
             graph[aid].add(target)
             superseded.add(target)
-
     visiting: set[str] = set()
     done: set[str] = set()
-
     def visit(aid: str) -> None:
         if aid in done:
             return
@@ -247,25 +341,49 @@ def _current_assessment(row: dict[str, Any], where: str) -> dict[str, Any] | Non
             visit(target)
         visiting.remove(aid)
         done.add(aid)
-
     for aid in graph:
         visit(aid)
-
     live = [item for aid, item in parsed.items() if aid not in superseded]
     if not live:
         raise PemError(f"{where}: assessment supersession leaves no current assessment")
     signatures = {(str(item.get("state")), str(item.get("conclusion"))) for item in live}
     if len(signatures) != 1:
         raise PemError(
-            f"{where}: conflicting live assessments require explicit adjudication/supersession; "
-            "serialized order, reviewer count, or latest-editor position cannot select current truth"
+            f"{where}: conflicting live assessments require explicit adjudication/supersession; serialized order, reviewer count, or latest-editor position cannot select current truth"
         )
     return live[0]
 
 
-def _admissible(row: dict[str, Any], where: str) -> bool:
+def _require_observation(row: dict[str, Any], where: str) -> None:
     current = _current_assessment(row, where)
-    return bool(current and current.get("state") == "ADMISSIBLE")
+    if current and current.get("state") == "ADMISSIBLE":
+        _required_text(row.get("observation"), f"{where}:observation")
+
+
+def _validate_recurrence_structure(
+    row: dict[str, Any], where: str, occurrence_ids: set[str], event_identity: str
+) -> bool:
+    if row.get("recurrence_after_accepted_repair") is not True:
+        return False
+    basis = row.get("recurrence_basis")
+    if not isinstance(basis, dict):
+        raise PemError(f"{where}: recurrence requires prior_accepted_repair structured recurrence_basis")
+    prior_id = _required_text(basis.get("prior_occurrence_id"), f"{where}:recurrence_basis:prior_occurrence_id")
+    if prior_id not in occurrence_ids:
+        raise PemError(f"{where}: recurrence prior occurrence {prior_id!r} must precede the current occurrence")
+    _required_text(basis.get("repair_identity"), f"{where}:recurrence_basis:repair_identity")
+    evidence = _list(basis.get("repair_acceptance_evidence"), f"{where}:recurrence_basis:repair_acceptance_evidence")
+    if not evidence:
+        raise PemError(f"{where}: recurrence requires actual repair-acceptance evidence")
+    for route in evidence:
+        parse_evidence_route(route, f"{where}:recurrence_basis:repair_acceptance_evidence")
+    later = _required_text(basis.get("later_event_identity"), f"{where}:recurrence_basis:later_event_identity")
+    if later != event_identity:
+        raise PemError(f"{where}: recurrence later_event_identity must equal the current independent event identity")
+    _required_text(basis.get("independence_basis"), f"{where}:recurrence_basis:independence_basis")
+    if basis.get("alias_of"):
+        raise PemError(f"{where}: copied/rebased/cherry-picked alias cannot count as recurrence")
+    return True
 
 
 def derived_counts(family: dict[str, Any]) -> dict[str, int]:
@@ -273,8 +391,7 @@ def derived_counts(family: dict[str, Any]) -> dict[str, int]:
     kind = family.get("kind")
     if kind == "FAILURE_FAMILY":
         occurrences = _list(family.get("occurrences", []), f"{family_id}:occurrences")
-        confirmed = 0
-        recurrence = 0
+        confirmed = recurrence = 0
         surfaces: set[str] = set()
         occurrence_ids: set[str] = set()
         episode_ids: set[str] = set()
@@ -286,18 +403,18 @@ def derived_counts(family: dict[str, Any]) -> dict[str, int]:
                 raise PemError(f"{family_id}: occurrence IDs must be non-empty and unique within the family")
             if not episode or episode in episode_ids:
                 raise PemError(f"{family_id}: occurrence event identities must be non-empty and unique within the family")
-            occurrence_ids.add(oid)
-            episode_ids.add(episode)
             _required_text(row.get("lifecycle_context"), f"{family_id}:{oid}:lifecycle_context")
             _validate_source_project(row, f"{family_id}:{oid}")
             surfaces.update(str(v) for v in _list(row.get("surfaces", []), f"{family_id}:{oid}:surfaces"))
             current = _current_assessment(row, f"{family_id}:{oid}")
             if current and current.get("state") == "ADMISSIBLE" and current.get("conclusion") == "CONFIRMED":
-                confirmed += 1
-                if row.get("recurrence_after_accepted_repair") is True:
-                    if not row.get("prior_accepted_repair"):
-                        raise PemError(f"{family_id}:{oid}: recurrence requires prior_accepted_repair identity")
+                if _validate_recurrence_structure(row, f"{family_id}:{oid}", occurrence_ids, episode):
                     recurrence += 1
+                confirmed += 1
+            if current and current.get("state") == "ADMISSIBLE":
+                _required_text(row.get("observation"), f"{family_id}:{oid}:observation")
+            occurrence_ids.add(oid)
+            episode_ids.add(episode)
         return {"confirmed": confirmed, "affected_surfaces": len(surfaces), "recurrence": recurrence}
     if kind == "SUCCESS_PATTERN":
         applications = _list(family.get("applications", []), f"{family_id}:applications")
@@ -317,10 +434,12 @@ def derived_counts(family: dict[str, Any]) -> dict[str, int]:
             episodes.add(episode)
             _required_text(row.get("lifecycle_context"), f"{family_id}:{aid}:lifecycle_context")
             _validate_source_project(row, f"{family_id}:{aid}")
+            _required_text(row.get("provenance_cluster"), f"{family_id}:{aid}:provenance_cluster")
             surfaces.update(str(v) for v in _list(row.get("surfaces", []), f"{family_id}:{aid}:surfaces"))
             outcome = row.get("outcome")
             if outcome not in APPLICATION_OUTCOMES:
                 raise PemError(f"{family_id}:{aid}: invalid outcome {outcome!r}")
+            _require_observation(row, f"{family_id}:{aid}")
             current = _current_assessment(row, f"{family_id}:{aid}")
             if current and current.get("state") == "ADMISSIBLE":
                 counts[outcome.lower()] += 1
@@ -328,7 +447,7 @@ def derived_counts(family: dict[str, Any]) -> dict[str, int]:
         return counts
     evidence = _list(family.get("evidence", []), f"{family_id}:evidence")
     for route in evidence:
-        _required_text(route, f"{family_id}:evidence route")
+        parse_evidence_route(route, f"{family_id}:evidence route")
     return {"evidence": len(evidence)}
 
 
@@ -347,6 +466,72 @@ def base_temperature(family: dict[str, Any], counts: dict[str, int]) -> str:
     if n == 1:
         return "COLD" if coverage == "RECONCILED_FOR_DECLARED_SCOPE" else "UNASSESSED"
     return "UNASSESSED"
+
+
+def _supporting_clusters(family: dict[str, Any]) -> set[str]:
+    clusters: set[str] = set()
+    for raw in _list(family.get("applications", []), f"{family.get('id', '?')}:applications"):
+        row = _mapping(raw, f"{family.get('id', '?')}:application")
+        current = _current_assessment(row, f"{family.get('id', '?')}:{row.get('id', '?')}")
+        if current and current.get("state") == "ADMISSIBLE" and row.get("outcome") == "SUPPORTING":
+            cluster = str(row.get("provenance_cluster", "")).strip()
+            if cluster and cluster != "NONE":
+                clusters.add(cluster)
+    return clusters
+
+
+def _validate_maturity_basis(family: dict[str, Any], errors: list[str]) -> None:
+    fid = str(family.get("id", ""))
+    if family.get("maturity") != "PROVEN":
+        return
+    basis = family.get("maturity_basis")
+    if not isinstance(basis, dict):
+        errors.append(f"{fid}: PROVEN requires claim-relative structured maturity_basis")
+        return
+    claim = basis.get("claim")
+    obligations = basis.get("obligations")
+    if not isinstance(claim, str) or not claim.strip() or not isinstance(obligations, list) or not obligations:
+        errors.append(f"{fid}: PROVEN requires claim-relative maturity_basis with explicit evidence obligations")
+        return
+    clusters = _supporting_clusters(family) if family.get("kind") == "SUCCESS_PATTERN" else set()
+    for raw in obligations:
+        if not isinstance(raw, dict):
+            errors.append(f"{fid}: maturity obligation must be a mapping")
+            continue
+        otype = str(raw.get("type", ""))
+        if raw.get("status") != "CLOSED":
+            errors.append(f"{fid}: PROVEN obligation {otype or '<unnamed>'} is not CLOSED")
+        evidence = raw.get("evidence")
+        if not isinstance(evidence, list) or not evidence:
+            errors.append(f"{fid}: PROVEN obligation {otype or '<unnamed>'} lacks evidence")
+        else:
+            for route in evidence:
+                try:
+                    parse_evidence_route(route, f"{fid}:maturity obligation evidence")
+                except PemError as exc:
+                    errors.append(str(exc))
+        if otype in {"independent_replication", "replication", "comparative_independence"}:
+            minimum = raw.get("minimum_independent_clusters")
+            if not isinstance(minimum, int) or minimum < 2:
+                errors.append(f"{fid}: independence-sensitive obligation must declare minimum_independent_clusters >= 2")
+            elif len(clusters) < minimum:
+                errors.append(
+                    f"{fid}: independence-sensitive PROVEN claim has {len(clusters)} supporting provenance cluster(s), requires {minimum}"
+                )
+
+
+def _material_routes(family: dict[str, Any]) -> list[str]:
+    routes: list[str] = []
+    routes.extend(str(v) for v in family.get("evidence", []) if isinstance(v, str))
+    for bucket in ("occurrences", "applications"):
+        for raw in family.get(bucket, []) if isinstance(family.get(bucket, []), list) else []:
+            if not isinstance(raw, dict):
+                continue
+            for assessment in raw.get("assessments", []) if isinstance(raw.get("assessments", []), list) else []:
+                if isinstance(assessment, dict):
+                    routes.extend(str(v) for v in assessment.get("evidence", []) if isinstance(v, str))
+            routes.extend(str(v) for v in raw.get("cause_evidence", []) if isinstance(v, str))
+    return routes
 
 
 def _validate_family(family: dict[str, Any]) -> list[str]:
@@ -388,7 +573,6 @@ def _validate_family(family: dict[str, Any]) -> list[str]:
         override = family.get("temperature_override")
         if not isinstance(override, dict) or override.get("final") != declared or not override.get("reason") or not override.get("evidence"):
             errors.append(f"{fid}: temperature {declared!r} differs from derived base {base!r} without evidence-bound override")
-
     if family.get("maturity") == "SUPPORTED":
         if family.get("kind") == "FAILURE_FAMILY" and counts.get("confirmed", 0) < 1:
             errors.append(f"{fid}: SUPPORTED failure family has no admissible confirmed occurrence")
@@ -397,14 +581,11 @@ def _validate_family(family: dict[str, Any]) -> list[str]:
         elif family.get("kind") in {"DISCOVERY", "PRESERVATION_CAPABILITY"} and counts.get("evidence", 0) < 1:
             errors.append(f"{fid}: SUPPORTED finding requires evidence")
     if family.get("maturity") == "PROVEN":
-        basis = family.get("maturity_basis")
-        if not isinstance(basis, dict) or basis.get("all_obligations_closed") is not True or not basis.get("evidence"):
-            errors.append(f"{fid}: PROVEN requires claim-relative maturity_basis with all obligations closed and evidence")
+        _validate_maturity_basis(family, errors)
         if family.get("state") != "CURRENT":
             errors.append(f"{fid}: non-current family cannot remain PROVEN current guidance")
         if family.get("kind") == "SUCCESS_PATTERN" and counts.get("contradicting", 0):
             errors.append(f"{fid}: PROVEN success pattern has unresolved admissible contradiction")
-
     guidance = family.get("guidance_level", "OBSERVED")
     if guidance not in GUIDANCE_LEVELS:
         errors.append(f"{fid}: invalid guidance_level {guidance!r}")
@@ -426,15 +607,17 @@ def _validate_family(family: dict[str, Any]) -> list[str]:
             authority_basis = family.get("comparative_authority")
             if comparative in (None, "", "NONE") and not authority_basis:
                 errors.append(f"{fid}: comparative/default/best guidance lacks comparative evidence or current-owner priority")
+            if isinstance(comparative, dict) and comparative.get("requires_independent_clusters"):
+                minimum = comparative.get("minimum_independent_clusters", 2)
+                if not isinstance(minimum, int) or len(_supporting_clusters(family)) < minimum:
+                    errors.append(f"{fid}: comparative/default/best guidance lacks required independent provenance clusters")
     elif guidance != "OBSERVED":
         errors.append(f"{fid}: only SUCCESS_PATTERN may carry positive guidance levels")
-
     if family.get("authority_binding") == "AUTHORITY_BOUND":
         if not family.get("authority_owner"):
             errors.append(f"{fid}: AUTHORITY_BOUND requires authority_owner")
         if family.get("state") == "CURRENT" and binding_health != "HEALTHY":
             errors.append(f"{fid}: CURRENT AUTHORITY_BOUND family requires explicit HEALTHY binding_health")
-
     relations = family.get("relations", [])
     if not isinstance(relations, list):
         errors.append(f"{fid}: relations must be a list")
@@ -458,57 +641,125 @@ def _validate_lineage(doc: PemDocument) -> list[str]:
                 continue
             if relation.get("type") in LINEAGE_RELATIONS:
                 graph[fid].add(str(target))
-                target_family = doc.families[str(target)]
-                if target_family.get("state") == "CURRENT":
-                    errors.append(
-                        f"{fid}: lineage target {target} cannot remain CURRENT while superseded/replaced/split/merged lineage is active"
-                    )
+                if doc.families[str(target)].get("state") == "CURRENT":
+                    errors.append(f"{fid}: lineage target {target} cannot remain CURRENT while superseded/replaced/split/merged lineage is active")
             if relation.get("type") == "CONFLICTS_WITH":
                 other = doc.families[str(target)]
-                active_guidance = family.get("guidance_level") in {"RECOMMENDED", "PREFERRED", "DEFAULT", "BEST"}
-                other_guidance = other.get("guidance_level") in {"RECOMMENDED", "PREFERRED", "DEFAULT", "BEST"}
-                if active_guidance and other_guidance and family.get("state") == other.get("state") == "CURRENT":
+                active = family.get("guidance_level") in {"RECOMMENDED", "PREFERRED", "DEFAULT", "BEST"}
+                other_active = other.get("guidance_level") in {"RECOMMENDED", "PREFERRED", "DEFAULT", "BEST"}
+                if active and other_active and family.get("state") == other.get("state") == "CURRENT":
                     if not family.get("decision_boundary") and not other.get("decision_boundary"):
                         errors.append(f"{fid}: current conflicting guidance with {target} lacks decision boundary/tradeoff")
-    visiting: set[str] = set()
-    done: set[str] = set()
-
+    visiting: set[str] = set(); done: set[str] = set()
     def visit(node: str) -> None:
-        if node in done:
-            return
+        if node in done: return
         if node in visiting:
-            errors.append(f"lineage cycle includes {node}")
-            return
+            errors.append(f"lineage cycle includes {node}"); return
         visiting.add(node)
-        for target in graph[node]:
-            visit(target)
-        visiting.remove(node)
-        done.add(node)
-
-    for node in graph:
-        visit(node)
+        for target in graph[node]: visit(target)
+        visiting.remove(node); done.add(node)
+    for node in graph: visit(node)
     return errors
+
+
+def _accepted_base_identity(value: Any) -> str:
+    if isinstance(value, dict):
+        for key in ("pem_identity", "project_state", "identity"):
+            if value.get(key): return str(value[key])
+    return str(value)
+
+
+def _notice_trigger_state(notice: dict[str, Any], doc: PemDocument, today: dt.date | None = None) -> tuple[str, str]:
+    trigger = notice.get("review_trigger")
+    if trigger is None and notice.get("review_or_expiry") == "review on next accepted-base change":
+        return "CLEAR", "legacy deterministic accepted-base trigger; migrate to typed review_trigger on material edit"
+    if not isinstance(trigger, dict):
+        return "INDETERMINATE", "opaque or missing review trigger"
+    ttype = trigger.get("type")
+    if ttype not in TRIGGER_TYPES:
+        return "INDETERMINATE", f"unsupported trigger type {ttype!r}"
+    if ttype == "deadline":
+        raw = trigger.get("at")
+        try:
+            deadline = dt.date.fromisoformat(str(raw))
+        except ValueError:
+            return "INDETERMINATE", "deadline trigger is not an ISO date"
+        return ("FIRED", "deadline reached") if (today or dt.date.today()) >= deadline else ("CLEAR", "deadline not reached")
+    if ttype == "accepted_base_change":
+        basis = trigger.get("basis")
+        if basis in (None, ""):
+            return "INDETERMINATE", "accepted-base trigger lacks admitted basis"
+        current = _accepted_base_identity(doc.metadata.get("accepted_base"))
+        return ("FIRED", "accepted base changed") if str(basis) != current else ("CLEAR", "accepted base unchanged")
+    if ttype == "binding_change":
+        basis = trigger.get("basis")
+        current = notice.get("binding_health")
+        if basis not in BINDING_HEALTH:
+            return "INDETERMINATE", "binding trigger lacks valid admitted basis"
+        return ("FIRED", "binding health changed") if basis != current else ("CLEAR", "binding health unchanged")
+    if ttype == "owner_change":
+        basis = trigger.get("basis")
+        current = trigger.get("current")
+        if not basis or not current:
+            return "INDETERMINATE", "owner trigger requires admitted basis and current resolved owner"
+        return ("FIRED", "owner changed") if basis != current else ("CLEAR", "owner unchanged")
+    state = trigger.get("assessed_state")
+    if state not in {"CLEAR", "FIRED", "INDETERMINATE"} or not trigger.get("assessed_evidence"):
+        return "INDETERMINATE", "manual/external trigger lacks explicit current assessment and evidence"
+    return str(state), "explicit external/manual assessment"
 
 
 def _validate_notices(doc: PemDocument) -> list[str]:
     errors: list[str] = []
     for nid, notice in doc.notices.items():
-        if not NOTICE_ID_RE.fullmatch(nid):
-            errors.append(f"{nid}: invalid notice ID")
-        if notice.get("state") not in FAMILY_STATES:
-            errors.append(f"{nid}: invalid state")
-        if notice.get("binding_health") not in BINDING_HEALTH:
-            errors.append(f"{nid}: invalid binding_health")
-        for key in ("summary", "applicability", "review_or_expiry", "normative_status"):
-            if not notice.get(key):
-                errors.append(f"{nid}: missing {key}")
+        if not NOTICE_ID_RE.fullmatch(nid): errors.append(f"{nid}: invalid notice ID")
+        if notice.get("state") not in FAMILY_STATES: errors.append(f"{nid}: invalid state")
+        if notice.get("binding_health") not in BINDING_HEALTH: errors.append(f"{nid}: invalid binding_health")
+        for key in ("summary", "applicability", "normative_status"):
+            if not notice.get(key): errors.append(f"{nid}: missing {key}")
+        if not notice.get("review_trigger") and not notice.get("review_or_expiry"):
+            errors.append(f"{nid}: missing typed review_trigger/review_or_expiry")
         evidence = notice.get("evidence")
-        if not isinstance(evidence, list) or not evidence or any(not isinstance(route, str) or not route.strip() for route in evidence):
+        if not isinstance(evidence, list) or not evidence:
             errors.append(f"{nid}: evidence must contain at least one non-empty route")
+        else:
+            for route in evidence:
+                try: parse_evidence_route(route, f"{nid}:evidence route")
+                except PemError as exc: errors.append(str(exc))
         if notice.get("normative_status") != "NON_AUTHORITATIVE" and notice.get("owner") in (None, "", "NONE"):
             errors.append(f"{nid}: normative notice requires governing owner")
         if notice.get("state") == "CURRENT" and notice.get("binding_health") != "HEALTHY":
             errors.append(f"{nid}: unhealthy notice cannot remain unqualified CURRENT")
+        trigger_state, reason = _notice_trigger_state(notice, doc)
+        if notice.get("state") == "CURRENT" and trigger_state != "CLEAR":
+            errors.append(f"{nid}: current notice trigger is {trigger_state}: {reason}; route to REVIEW_REQUIRED/RETIRED reconciliation")
+    return errors
+
+
+def _validate_binding_health(doc: PemDocument) -> list[str]:
+    errors: list[str] = []
+    for fid, family in doc.families.items():
+        if family.get("binding_health") != "HEALTHY":
+            continue
+        for raw in _material_routes(family):
+            try:
+                route = parse_evidence_route(raw, f"{fid}:material evidence")
+            except PemError as exc:
+                errors.append(str(exc)); continue
+            health, reason = evidence_route_health(route, doc)
+            if health != "HEALTHY":
+                errors.append(f"{fid}: binding_health HEALTHY is false for {raw!r}: {health}: {reason}")
+    for nid, notice in doc.notices.items():
+        if notice.get("binding_health") != "HEALTHY":
+            continue
+        for raw in notice.get("evidence", []) if isinstance(notice.get("evidence", []), list) else []:
+            try:
+                route = parse_evidence_route(raw, f"{nid}:material evidence")
+            except PemError as exc:
+                errors.append(str(exc)); continue
+            health, reason = evidence_route_health(route, doc)
+            if health != "HEALTHY":
+                errors.append(f"{nid}: binding_health HEALTHY is false for {raw!r}: {health}: {reason}")
     return errors
 
 
@@ -522,22 +773,16 @@ def _salience_key(family: dict[str, Any]) -> tuple[int, int, str]:
 def render_summary(doc: PemDocument) -> str:
     rows: list[str] = []
     for family in sorted(doc.families.values(), key=_salience_key):
-        if family.get("state") not in {"CURRENT", "REVIEW_REQUIRED"}:
-            continue
+        if family.get("state") not in {"CURRENT", "REVIEW_REQUIRED"}: continue
         counts = derived_counts(family)
-        if family.get("kind") == "FAILURE_FAMILY":
-            count_text = f"{counts.get('confirmed', 0)} confirmed"
+        if family.get("kind") == "FAILURE_FAMILY": count_text = f"{counts.get('confirmed', 0)} confirmed"
         elif family.get("kind") == "SUCCESS_PATTERN":
-            count_text = (
-                f"{counts.get('supporting', 0)} supporting / {counts.get('neutral', 0)} neutral / "
-                f"{counts.get('contradicting', 0)} contradicting / {counts.get('inconclusive', 0)} inconclusive"
-            )
-        else:
-            count_text = f"{counts.get('evidence', 0)} evidence route(s)"
+            count_text = f"{counts.get('supporting', 0)} supporting / {counts.get('neutral', 0)} neutral / {counts.get('contradicting', 0)} contradicting / {counts.get('inconclusive', 0)} inconclusive"
+        else: count_text = f"{counts.get('evidence', 0)} evidence route(s)"
         guidance = family.get("guidance_level", "OBSERVED")
         authority_binding = family.get("authority_binding", "EVIDENCE_ONLY")
-        binding_health = family.get("binding_health")
-        binding = f"{authority_binding}/{binding_health}" if binding_health else str(authority_binding)
+        health = family.get("binding_health")
+        binding = f"{authority_binding}/{health}" if health else str(authority_binding)
         rows.append(
             "| {id} | {kind} | {temp} | {maturity}/{state} | {binding} | {guidance} | {count} | {summary} |".format(
                 id=family["id"], kind=family["kind"], temp=family["temperature"], maturity=family["maturity"],
@@ -545,73 +790,135 @@ def render_summary(doc: PemDocument) -> str:
                 summary=str(family["summary"]).replace("|", "\\|"),
             )
         )
-    notice_rows: list[str] = []
-    for notice in sorted(doc.notices.values(), key=lambda n: (0 if n.get("state") == "REVIEW_REQUIRED" else 1, str(n.get("id")))):
-        if notice.get("state") in {"CURRENT", "REVIEW_REQUIRED"}:
-            notice_rows.append(f"- **{notice['id']}** [{notice['state']}/{notice['binding_health']}]: {notice['summary']}")
+    notice_rows = [
+        f"- **{notice['id']}** [{notice['state']}/{notice['binding_health']}]: {notice['summary']}"
+        for notice in sorted(doc.notices.values(), key=lambda n: (0 if n.get("state") == "REVIEW_REQUIRED" else 1, str(n.get("id"))))
+        if notice.get("state") in {"CURRENT", "REVIEW_REQUIRED"}
+    ]
     parts: list[str] = []
     if rows:
-        parts.extend([
-            "| ID | Kind | Temperature | Maturity/state | Binding | Guidance | Current evidence | Bounded lesson |",
-            "| --- | --- | --- | --- | --- | --- | --- | --- |",
-            *rows,
-        ])
-    else:
-        parts.append("_No current learning families._")
-    if notice_rows:
-        parts.extend(["", "Current notices:", "", *notice_rows])
+        parts.extend(["| ID | Kind | Temperature | Maturity/state | Binding | Guidance | Current evidence | Bounded lesson |", "| --- | --- | --- | --- | --- | --- | --- | --- |", *rows])
+    else: parts.append("_No current learning families._")
+    if notice_rows: parts.extend(["", "Current notices:", "", *notice_rows])
     return "\n".join(parts).rstrip() + "\n"
 
 
 def validate_memory(doc: PemDocument, *, check_summary: bool = True) -> list[str]:
     errors: list[str] = []
-    for family in doc.families.values():
-        errors.extend(_validate_family(family))
+    for family in doc.families.values(): errors.extend(_validate_family(family))
     errors.extend(_validate_lineage(doc))
     errors.extend(_validate_notices(doc))
+    errors.extend(_validate_binding_health(doc))
     if check_summary:
         match = SUMMARY_RE.search(doc.root_text)
-        if not match:
-            errors.append("PEM root is missing derived active-summary markers")
-        else:
-            actual = match.group("body")
-            expected = render_summary(doc)
-            if actual != expected:
-                errors.append("derived active summary is stale; run --write-summary")
+        if not match: errors.append("PEM root is missing derived active-summary markers")
+        elif match.group("body") != render_summary(doc): errors.append("derived active summary is stale; run --write-summary")
+    return errors
+
+
+def _event_rows(family: dict[str, Any]) -> dict[tuple[str, str], dict[str, Any]]:
+    rows: dict[tuple[str, str], dict[str, Any]] = {}
+    for bucket, identity_field in (("occurrences", "event_identity"), ("applications", "episode_identity")):
+        for raw in family.get(bucket, []) if isinstance(family.get(bucket, []), list) else []:
+            if isinstance(raw, dict) and raw.get("id") and raw.get(identity_field):
+                rows[(str(raw["id"]), str(raw[identity_field]))] = raw
+    return rows
+
+
+def validate_reconciliation(previous: PemDocument, current: PemDocument) -> list[str]:
+    """Reject silent rewriting of an accepted event/application observation across memory revisions."""
+    errors: list[str] = []
+    for fid in previous.families.keys() & current.families.keys():
+        old_rows = _event_rows(previous.families[fid]); new_rows = _event_rows(current.families[fid])
+        for key in old_rows.keys() & new_rows.keys():
+            old_obs = old_rows[key].get("observation")
+            new_obs = new_rows[key].get("observation")
+            if old_obs == new_obs: continue
+            correction = new_rows[key].get("observation_correction")
+            old_hash = hashlib.sha256(str(old_obs).encode("utf-8")).hexdigest()
+            if not isinstance(correction, dict):
+                errors.append(f"{fid}:{key[0]}: observation changed without clerical-correction provenance")
+                continue
+            if correction.get("previous_sha256") != old_hash or not correction.get("reason") or not correction.get("evidence"):
+                errors.append(f"{fid}:{key[0]}: observation correction does not preserve previous record hash, reason, and evidence")
+    return errors
+
+
+def validate_has(
+    record: dict[str, Any], *, accepted_project_state: str, accepted_pem: str,
+    candidate_overlay_identity: str, accepted_ids: Iterable[str], current_accepted_project_state: str | None = None,
+) -> list[str]:
+    """Validate the documented Historical Applicability Set (HAS) at the workflow/PEM seam."""
+    errors: list[str] = []
+    basis = record.get("pem_basis")
+    rows = record.get("has")
+    if not isinstance(basis, dict): return ["HAS pem_basis must be a mapping"]
+    expected = {
+        "accepted_project_state": accepted_project_state,
+        "accepted_pem": accepted_pem,
+        "candidate_overlay_semantic_candidate": candidate_overlay_identity,
+    }
+    for key, value in expected.items():
+        if basis.get(key) != value: errors.append(f"HAS basis {key} does not match the exact workflow-selected identity")
+    if candidate_overlay_identity in {accepted_project_state, accepted_pem}:
+        errors.append("candidate overlay cannot self-ratify as the accepted project/memory basis")
+    if current_accepted_project_state and current_accepted_project_state != accepted_project_state:
+        errors.append("accepted project-memory basis advanced; HAS is REVIEW_REQUIRED until reconciled")
+    if not isinstance(rows, list): return errors + ["HAS has must be a list"]
+    seen: set[str] = set()
+    for raw in rows:
+        if not isinstance(raw, dict): errors.append("HAS row must be a mapping"); continue
+        item_id = str(raw.get("id", ""))
+        if not item_id or item_id in seen: errors.append("HAS row IDs must be non-empty and unique"); continue
+        seen.add(item_id)
+        if raw.get("disposition") not in HAS_DISPOSITIONS: errors.append(f"HAS {item_id}: invalid disposition")
+        if not raw.get("reason"): errors.append(f"HAS {item_id}: disposition requires reason")
+    omitted = set(str(v) for v in accepted_ids) - seen
+    if omitted: errors.append(f"candidate overlay/HAS cannot delete accepted entries by omission: {', '.join(sorted(omitted))}")
+    return errors
+
+
+def validate_overlay(base: PemDocument, candidate: PemDocument, *, overlay_identity: str) -> list[str]:
+    errors: list[str] = []
+    declared = candidate.metadata.get("candidate_overlay")
+    if isinstance(declared, dict):
+        identity = str(declared.get("identity", ""))
+        based_on = str(declared.get("based_on_accepted_pem", ""))
+    else:
+        identity = str(declared)
+        based_on = ""
+    if identity != overlay_identity: errors.append("candidate overlay identity does not match the selected overlay")
+    base_identity = _accepted_base_identity(base.metadata.get("accepted_base"))
+    if based_on != base_identity: errors.append("candidate overlay is not explicitly based on the declared accepted memory state")
+    if identity == base_identity: errors.append("candidate overlay cannot self-ratify as accepted memory")
+    omitted = set(base.families) | set(base.notices)
+    omitted -= set(candidate.families) | set(candidate.notices)
+    if omitted: errors.append(f"candidate overlay cannot delete accepted entries by omission: {', '.join(sorted(omitted))}")
     return errors
 
 
 def select_applicable(doc: PemDocument, terms: Iterable[str]) -> list[str]:
-    """Return canonical candidate IDs; never use active-summary/index presence as the search boundary."""
     needles = {str(term).strip().lower() for term in terms if str(term).strip()}
-    if not needles:
-        return []
+    if not needles: return []
     hits: list[str] = []
     for fid, family in doc.families.items():
-        if family.get("state") == "RETIRED":
-            continue
+        if family.get("state") == "RETIRED": continue
         identity = family.get("semantic_identity", {}) if isinstance(family.get("semantic_identity"), dict) else {}
         fields = [fid, family.get("summary", ""), family.get("aggregation_scope", ""), *family.get("applicability", [])]
         fields.extend(identity.values())
-        haystack = " ".join(str(value).lower() for value in fields)
-        if any(needle in haystack for needle in needles):
-            hits.append(fid)
+        if any(needle in " ".join(str(v).lower() for v in fields) for needle in needles): hits.append(fid)
     for nid, notice in doc.notices.items():
-        if notice.get("state") == "RETIRED":
-            continue
+        if notice.get("state") == "RETIRED": continue
         haystack = " ".join(str(v).lower() for v in [nid, notice.get("summary", ""), *notice.get("applicability", [])])
-        if any(needle in haystack for needle in needles):
-            hits.append(nid)
+        if any(needle in haystack for needle in needles): hits.append(nid)
     return sorted(hits)
 
 
 def write_summary(doc: PemDocument) -> None:
     match = SUMMARY_RE.search(doc.root_text)
-    if not match:
-        raise PemError("PEM root is missing derived active-summary markers")
+    if not match: raise PemError("PEM root is missing derived active-summary markers")
     replacement = match.group("start") + render_summary(doc) + match.group("end")
-    updated = doc.root_text[: match.start()] + replacement + doc.root_text[match.end() :]
-    doc.root.write_text(updated, encoding="utf-8")
+    doc.root.write_text(doc.root_text[:match.start()] + replacement + doc.root_text[match.end():], encoding="utf-8")
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -622,15 +929,12 @@ def main(argv: list[str] | None = None) -> int:
     try:
         doc = load_memory(args.path)
         if args.write_summary:
-            write_summary(doc)
-            doc = load_memory(args.path)
+            write_summary(doc); doc = load_memory(args.path)
         errors = validate_memory(doc)
     except (OSError, UnicodeDecodeError, PemError) as exc:
-        print(f"PEM validation failed: {exc}", file=sys.stderr)
-        return 1
+        print(f"PEM validation failed: {exc}", file=sys.stderr); return 1
     if errors:
-        for error in errors:
-            print(f"PEM validation failed: {error}", file=sys.stderr)
+        for error in errors: print(f"PEM validation failed: {error}", file=sys.stderr)
         return 1
     print(f"PEM schema {SCHEMA_VERSION} valid: {len(doc.families)} families, {len(doc.notices)} notices")
     return 0
