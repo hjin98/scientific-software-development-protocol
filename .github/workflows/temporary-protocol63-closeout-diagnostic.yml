@@ -1,0 +1,47 @@
+name: Temporary Protocol 6.3 closeout diagnostic
+
+on:
+  push:
+    branches: [ssdp-6.3-engineering-memory]
+
+permissions:
+  contents: read
+
+jobs:
+  diagnose:
+    if: github.event.head_commit.message == 'Diagnose Protocol 6.3 closeout acceptance'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ssdp-6.3-engineering-memory
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install dependencies
+        run: |
+          python -m pip install -r source/requirements-validation.txt
+          python -m pip install ./orchestrator -r orchestrator/requirements-dev.txt
+      - name: Apply closeout candidate
+        run: python orchestrator/scripts/protocol_63_closeout.py
+      - name: Regenerate packages and snapshot
+        run: |
+          python source/build_skills.py --output dist
+          python orchestrator/scripts/generate_protocol_snapshot.py
+          rm -rf /tmp/protocol-dist
+          python source/build_skills.py --output /tmp/protocol-dist
+      - name: Repository unittest discovery
+        run: python -m unittest discover -s tests -v
+      - name: Project Engineering Memory validation
+        run: python source/project_engineering_memory.py PROJECT-ENGINEERING-MEMORY.md
+      - name: Independent package validation
+        run: python source/validate_packages.py --dist /tmp/protocol-dist
+      - name: Committed distribution parity
+        run: python source/check_dist.py --expected /tmp/protocol-dist --committed dist
+      - name: Protocol snapshot parity
+        run: python orchestrator/scripts/generate_protocol_snapshot.py --check
+      - name: Orchestrator Core acceptance
+        run: python orchestrator/scripts/run_core_tests.py
+      - name: Whitespace validation
+        run: git diff --check
