@@ -26,8 +26,15 @@ jobs:
         shell: bash
         run: |
           set +e
-          python qualification/ssdp6/temporary_d9_repair.py 2>&1 | tee /tmp/protocol63-d9.log
-          status=${PIPESTATUS[0]}
+          python qualification/ssdp6/patch_d9_runner.py
+          patch_status=$?
+          if [ "$patch_status" -eq 0 ]; then
+            python qualification/ssdp6/temporary_d9_repair.py 2>&1 | tee /tmp/protocol63-d9.log
+            status=${PIPESTATUS[0]}
+          else
+            status=$patch_status
+            echo "runner patch failed" | tee /tmp/protocol63-d9.log
+          fi
           if [ "$status" -ne 0 ]; then
             git reset --hard origin/ssdp-6.3-engineering-memory
             git config user.name "Protocol 6.3 D9 diagnostic automation"
