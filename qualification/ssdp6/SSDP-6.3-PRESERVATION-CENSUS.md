@@ -7,14 +7,14 @@ accepted_protocol_62_recovery: b59adc77efe6951912cfd705cc43830c58ca27d0
 accepted_protocol_62_semantic_candidate: ebbc4591bdfed039512026b8acb3a6749475c1c5
 accepted_protocol_62_public_bootstrap: 5a062ebc472755607b9dc66d33a5ebbc4b7429aa
 implementation_branch_start: 5508911f3227c7bcb7e38b0c74a7a37f13fd6b7c
-semantic_candidate: 3bbbdfa8120646d76336c7b916e6a891c9ed38f2
+semantic_candidate: 190c8b4d352c203ef74c94d57c4f18d30eb7186d
 public_source_bootstrap: e12572c021087308570abfa41657a910c6896457
 public_source_mapping_commit: e6a8c12f065c3d25a41da804c129d6bc0a4f7b50
 stage_f_static_sensor_commit: 6fc26ce374b5346495782871d5d7241de5b90071
 stage_f_qualification_commit: 6fc26ce374b5346495782871d5d7241de5b90071
 independent_review_handoff: qualification/ssdp6/INDEPENDENT-REVIEW-HANDOFF-PROTOCOL-6.3.md
 workplan: workplans/active/PROTOCOL-6.3-EVIDENCE-BACKED-PROJECT-ENGINEERING-MEMORY-WORKPLAN.md
-status: f2-qualified-independent-review-pending
+status: f5-qualified-independent-review-pending
 ---
 
 # Protocol 6.3 Preservation Census
@@ -231,3 +231,8 @@ MAIN CUTOVER: NOT AUTHORIZED
 ## F3 owner-binding preservation delta
 
 Candidate `026eecf6ce382c3445ed218aeca80dcf2fb9a426` preserves the prior census except where D4R3 deliberately strengthens authority/acceptance concretization. T45/T46/T67/T75-class owner-bearing paths now require accepted-state governing-owner binding; this is a monotonic repair of the reviewed false-pass, not a relaxation. Frozen Protocol 5.16/6.0/6.1/6.2 resources were rechecked by the fresh candidate package/profile/Core gates. Prior F2 labels remain historical evidence; affected authority/recurrence cases are rebound to fresh F3 discriminators and full candidate regression. Independent Review remains open.
+
+
+## F5 / D9 preservation refresh
+
+Exact repaired semantic candidate: `190c8b4d352c203ef74c94d57c4f18d30eb7186d`. D9 narrows same-ID reconciliation validation and adds reconciliation evidence to the existing material-route health path; it does not alter D1-D3 authority, accepted Protocol 6.2 T01-T39 semantics, cold-route activation topology, frozen 5.16/6.0/6.1/6.2 resources, or package/profile ownership. F2/F3/F4 candidate identities remain historical evidence only. Static activation active sets were mechanically rechecked against this exact candidate with all documented candidate-side byte totals unchanged. Stage G and Protocol 6.3 recovery remain blocked pending fresh independent Review.

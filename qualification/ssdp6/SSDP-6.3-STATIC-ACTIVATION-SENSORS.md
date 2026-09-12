@@ -2,7 +2,7 @@
 kind: ssdp63-static-activation-sensor-evidence
 protocol_version: 6.3.0
 accepted_baseline_commit: b59adc77efe6951912cfd705cc43830c58ca27d0
-semantic_candidate: 026eecf6ce382c3445ed218aeca80dcf2fb9a426
+semantic_candidate: 190c8b4d352c203ef74c94d57c4f18d30eb7186d
 authority: non-normative-qualification-evidence
 status: measured
 live_telemetry: unavailable
@@ -16,7 +16,7 @@ This is deterministic static source measurement, not live model/harness telemetr
 
 The sensor specifically falsifies the two opposite 6.3 routing errors: eager PEM activation on ordinary work, and failure to make PEM reachable when demonstrated project history can materially change a mature replacement/recovery decision. Byte deltas have no acceptance threshold and establish no latency, cache, attention, tokenization, productivity, or model-quality claim.
 
-F3 owner-binding refresh: the active-set predicates/topology were rechecked against repaired semantic candidate `026eecf6ce382c3445ed218aeca80dcf2fb9a426` and remain unchanged. Every 6.3 byte total below was recomputed from the exact candidate files named by that fixed active set; no F2 candidate-side byte total is carried forward as current evidence.
+F5/D9 candidate-binding refresh: the active-set predicates/topology were rechecked against repaired semantic candidate `190c8b4d352c203ef74c94d57c4f18d30eb7186d` and remain unchanged. Every 6.3 byte total below was mechanically recomputed from the exact candidate files named by that fixed active set; the table and per-trace records below publish those exact measurements. No F2/F3/F4 candidate-side identity is carried forward as current evidence.
 
 ## Fixed-predicate sensor table
 
@@ -30,9 +30,9 @@ F3 owner-binding refresh: the active-set predicates/topology were rechecked agai
 | Documentation reconciliation | 28,522 | 34,563 | +6,041 | 3/0 | NO |
 | Maintenance audit without admitted reusable-learning predicate | 94,848 | 136,608 | +41,760 | 2/9 | NO |
 | Release/package reconciliation | 60,953 | 86,873 | +25,920 | 2/5 | NO |
-| Historical recovery/migration where prior choices matter | 50,187 | 99,559 | +49,372 | 2/4 | YES |
+| Historical recovery/migration where prior choices matter | 50,187 | 100,561 | +50,374 | 2/4 | YES |
 | Closeout without material learning update | 54,702 | 79,342 | +24,640 | 3/4 | NO |
-| Mature D3 replacement with demonstrated project history | 61,543 | 113,178 | +51,635 | 2/5 | YES |
+| Mature D3 replacement with demonstrated project history | 61,543 | 114,180 | +52,637 | 2/5 | YES |
 
 ## 6.3 active sets
 
@@ -78,7 +78,7 @@ F3 owner-binding refresh: the active-set predicates/topology were rechecked agai
 
 ### Historical recovery/migration where prior choices matter
 
-- active bytes: 99,559; unconditional=2; conditional=4; repeated owner loads=0; PEM=active
+- active bytes: 100,561; unconditional=2; conditional=4; repeated owner loads=0; PEM=active
 - active: `source/roles/software-design/SKILL.md`, `source/shared/references/abstraction-and-concretization.md`, `source/shared/references/architecture-and-design.md`, `source/shared/references/workflow-and-workplans.md`, `source/shared/references/evidence-evolution-and-dependencies.md`, `source/shared/references/protocol-versioning-and-compatibility.md`, `source/shared/references/project-engineering-memory.md`
 
 ### Closeout without material learning update
@@ -88,7 +88,7 @@ F3 owner-binding refresh: the active-set predicates/topology were rechecked agai
 
 ### Mature D3 replacement with demonstrated project history
 
-- active bytes: 113,178; unconditional=2; conditional=5; repeated owner loads=0; PEM=active
+- active bytes: 114,180; unconditional=2; conditional=5; repeated owner loads=0; PEM=active
 - active: `source/roles/software-design/SKILL.md`, `source/shared/references/abstraction-and-concretization.md`, `source/shared/references/architecture-and-design.md`, `source/shared/references/workflow-and-workplans.md`, `source/shared/references/evidence-evolution-and-dependencies.md`, `source/shared/references/testing-and-validation.md`, `source/shared/references/convergence-and-cycle-economy.md`, `source/shared/references/project-engineering-memory.md`
 
 ## Interpretation
