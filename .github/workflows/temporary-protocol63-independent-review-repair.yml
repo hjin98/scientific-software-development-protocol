@@ -2,14 +2,15 @@ name: Temporary Protocol 6.3 independent-review repair
 
 on:
   push:
-    branches: [ssdp-6.3-engineering-memory]
+    branches:
+      - ssdp-6.3-engineering-memory
 
 permissions:
   contents: write
 
 jobs:
   repair:
-    if: github.event.head_commit.message == 'Reopen Protocol 6.3 after independent review'
+    if: github.event.head_commit.message == 'Fix Protocol 6.3 repair harness'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -20,176 +21,34 @@ jobs:
         with:
           python-version: '3.12'
       - name: Apply owner-layer repairs
-        run: |
-          set -euxo pipefail
-          git config user.name 'Protocol 6.3 repair automation'
-          git config user.email 'protocol63-repair@users.noreply.github.com'
-          python - <<'PY'
-          from pathlib import Path
-
-          p = Path('source/project_engineering_memory.py')
-          s = p.read_text(encoding='utf-8')
-
-          old = '''    if not _git_ok(root, "cat-file", "-e", f"{route.revision}:{route.path}"):\n        return "UNAVAILABLE", "declared path is absent from the immutable repository revision"\n    return "HEALTHY", "commit and repository path resolve"\n'''
-          new = '''    if not _git_ok(root, "cat-file", "-e", f"{route.revision}:{route.path}"):\n        return "UNAVAILABLE", "declared path is absent from the immutable repository revision"\n    if route.locator:\n        text = _git_text(root, "show", f"{route.revision}:{route.path}")\n        if text is None:\n            return "UNAVAILABLE", "declared path cannot be read for stable-locator realization"\n        locator = route.locator.strip()\n        # Schema-1 locators are deliberately conservative text anchors. Exact text,\n        # Markdown heading text, test/function names, and other literal stable labels\n        # are mechanically realizable. Opaque locator syntaxes require review rather\n        # than receiving HEALTHY from commit/path resolution alone.\n        if locator not in text:\n            normalized = re.sub(r"[-_]+", " ", locator).strip().lower()\n            normalized_text = re.sub(r"[-_]+", " ", text).lower()\n            if normalized and normalized in normalized_text:\n                return "HEALTHY", "commit, repository path, and normalized stable locator resolve"\n            if re.fullmatch(r"[A-Za-z0-9_.:/ -]+", locator):\n                return "UNAVAILABLE", "declared stable locator is absent from the immutable repository file"\n            return "REVIEW_REQUIRED", "stable locator syntax is not mechanically interpretable by schema-1 text-anchor realization"\n        return "HEALTHY", "commit, repository path, and stable locator resolve"\n    return "HEALTHY", "commit and repository path resolve"\n'''
-          if old not in s: raise SystemExit('locator patch anchor missing')
-          s = s.replace(old, new, 1)
-
-          old = '''    routes.extend(str(v) for v in family.get("authority_evidence", []) if isinstance(v, str))\n    return routes\n'''
-          new = '''    routes.extend(str(v) for v in family.get("authority_evidence", []) if isinstance(v, str))\n    override = family.get("temperature_override")\n    if isinstance(override, dict):\n        routes.extend(str(v) for v in override.get("evidence", []) if isinstance(v, str))\n    counterevidence = family.get("counterevidence_search")\n    if isinstance(counterevidence, dict):\n        routes.extend(str(v) for v in counterevidence.get("evidence", []) if isinstance(v, str))\n    return routes\n'''
-          if old not in s: raise SystemExit('material route patch anchor missing')
-          s = s.replace(old, new, 1)
-
-          old = '''    if declared != base:\n        override = family.get("temperature_override")\n        if not isinstance(override, dict) or override.get("final") != declared or not override.get("reason") or not override.get("evidence"):\n            errors.append(f"{fid}: temperature {declared!r} differs from derived base {base!r} without evidence-bound override")\n'''
-          new = '''    if declared != base:\n        override = family.get("temperature_override")\n        if not isinstance(override, dict) or override.get("final") != declared or not override.get("reason"):\n            errors.append(f"{fid}: temperature {declared!r} differs from derived base {base!r} without evidence-bound override")\n        else:\n            override_evidence = override.get("evidence")\n            if not isinstance(override_evidence, list) or not override_evidence:\n                errors.append(f"{fid}: temperature override requires non-empty evidence route(s)")\n            else:\n                for raw in override_evidence:\n                    try:\n                        parse_evidence_route(raw, f"{fid}:temperature override evidence")\n                    except PemError as exc:\n                        errors.append(str(exc))\n'''
-          if old not in s: raise SystemExit('temperature patch anchor missing')
-          s = s.replace(old, new, 1)
-
-          old = '''            current = _current_assessment(row, f"{family_id}:{oid}")\n            if current and current.get("state") == "ADMISSIBLE" and current.get("conclusion") == "CONFIRMED":\n'''
-          new = '''            current = _current_assessment(row, f"{family_id}:{oid}")\n            cause_claim = str(row.get("cause_claim", "")).strip()\n            cause_evidence = row.get("cause_evidence", [])\n            if cause_claim:\n                if not isinstance(cause_evidence, list) or not cause_evidence:\n                    raise PemError(f"{family_id}:{oid}: mechanism-specific cause_claim requires discriminating cause_evidence")\n                for raw in cause_evidence:\n                    parse_evidence_route(raw, f"{family_id}:{oid}:cause_evidence")\n            if current and current.get("state") == "ADMISSIBLE" and current.get("conclusion") == "CONFIRMED":\n'''
-          if old not in s: raise SystemExit('causal patch anchor missing')
-          s = s.replace(old, new, 1)
-
-          old = '''        if eligible:\n            if family.get("state") != "CURRENT" or family.get("maturity") not in {"SUPPORTED", "PROVEN"}: errors.append(f"{fid}: positive guidance eligibility requires CURRENT SUPPORTED/PROVEN state")\n            if counts.get("supporting", 0) < 1: errors.append(f"{fid}: positive guidance eligibility requires admissible supporting evidence")\n            if counts.get("contradicting", 0): errors.append(f"{fid}: positive guidance eligibility hides admissible contradiction")\n            if binding_health != "HEALTHY": errors.append(f"{fid}: positive guidance eligibility requires explicit HEALTHY binding_health")\n'''
-          new = '''        if eligible:\n            if family.get("state") != "CURRENT" or family.get("maturity") not in {"SUPPORTED", "PROVEN"}: errors.append(f"{fid}: positive guidance eligibility requires CURRENT SUPPORTED/PROVEN state")\n            if counts.get("supporting", 0) < 1: errors.append(f"{fid}: positive guidance eligibility requires admissible supporting evidence")\n            if counts.get("contradicting", 0): errors.append(f"{fid}: positive guidance eligibility hides admissible contradiction")\n            if binding_health != "HEALTHY": errors.append(f"{fid}: positive guidance eligibility requires explicit HEALTHY binding_health")\n            search = family.get("counterevidence_search")\n            if not isinstance(search, dict):\n                errors.append(f"{fid}: positive guidance eligibility requires structured bounded counterevidence_search")\n            else:\n                if search.get("state") != "COMPLETE_FOR_DECLARED_SCOPE":\n                    errors.append(f"{fid}: positive guidance counterevidence_search is not complete for the declared scope")\n                for key in ("scope", "search_basis", "blind_spots"):\n                    if key not in search or search.get(key) in (None, ""):\n                        errors.append(f"{fid}: counterevidence_search requires {key}")\n                outcomes = search.get("outcomes_reviewed")\n                required_outcomes = {"SUPPORTING", "NEUTRAL", "CONTRADICTING", "INCONCLUSIVE"}\n                if not isinstance(outcomes, list) or not required_outcomes.issubset({str(v) for v in outcomes}):\n                    errors.append(f"{fid}: counterevidence_search must review supporting, neutral, contradicting, and inconclusive outcomes")\n                evidence = search.get("evidence")\n                if not isinstance(evidence, list) or not evidence:\n                    errors.append(f"{fid}: counterevidence_search requires durable evidence")\n                else:\n                    for raw in evidence:\n                        try:\n                            parse_evidence_route(raw, f"{fid}:counterevidence search evidence")\n                        except PemError as exc:\n                            errors.append(str(exc))\n'''
-          if old not in s: raise SystemExit('counterevidence patch anchor missing')
-          s = s.replace(old, new, 1)
-
-          old = '''def render_summary(doc: PemDocument) -> str:\n    rows: list[str] = []\n    for family in sorted(doc.families.values(), key=_salience_key):\n'''
-          new = '''def _notice_is_unresolved(notice: dict[str, Any], doc: PemDocument) -> bool:\n    if notice.get("state") == "REVIEW_REQUIRED" or notice.get("binding_health") in {"REVIEW_REQUIRED", "UNAVAILABLE"}:\n        return True\n    trigger_state, _ = _notice_trigger_state(notice, doc)\n    return notice.get("state") == "CURRENT" and trigger_state != "CLEAR"\n\n\ndef render_summary(doc: PemDocument) -> str:\n    rows: list[str] = []\n    for family in sorted(doc.families.values(), key=_salience_key):\n'''
-          if old not in s: raise SystemExit('notice helper patch anchor missing')
-          s = s.replace(old, new, 1)
-
-          old = '''    notice_rows = [f"- **{n['id']}** [{n['state']}/{n['binding_health']}]: {n['summary']}" for n in sorted(doc.notices.values(), key=lambda n: (0 if n.get("state") == "REVIEW_REQUIRED" else 1, str(n.get("id")))) if n.get("state") in {"CURRENT", "REVIEW_REQUIRED"}]\n    parts: list[str] = []\n    if rows: parts.extend(["| ID | Kind | Temperature | Maturity/state | Binding | Guidance | Current evidence | Bounded lesson |", "| --- | --- | --- | --- | --- | --- | --- | --- |", *rows])\n    else: parts.append("_No current learning families._")\n    if notice_rows: parts.extend(["", "Current notices:", "", *notice_rows])\n'''
-          new = '''    active_notices = [n for n in doc.notices.values() if n.get("state") in {"CURRENT", "REVIEW_REQUIRED"}]\n    unresolved_notices = [n for n in active_notices if _notice_is_unresolved(n, doc)]\n    resolved_notices = [n for n in active_notices if n not in unresolved_notices]\n    def notice_rows(items: list[dict[str, Any]]) -> list[str]:\n        return [f"- **{n['id']}** [{n['state']}/{n['binding_health']}]: {n['summary']}" for n in sorted(items, key=lambda n: str(n.get("id")))]\n    parts: list[str] = []\n    if unresolved_notices:\n        parts.extend(["High-impact unresolved notices:", "", *notice_rows(unresolved_notices), ""])\n    if rows: parts.extend(["| ID | Kind | Temperature | Maturity/state | Binding | Guidance | Current evidence | Bounded lesson |", "| --- | --- | --- | --- | --- | --- | --- | --- |", *rows])\n    else: parts.append("_No current learning families._")\n    if resolved_notices: parts.extend(["", "Current notices:", "", *notice_rows(resolved_notices)])\n'''
-          if old not in s: raise SystemExit('summary order patch anchor missing')
-          s = s.replace(old, new, 1)
-
-          old = '''def validate_reconciliation(previous: PemDocument, current: PemDocument) -> list[str]:\n    """Reject silent observation rewriting across family moves, row re-IDs, splits, and merges."""\n    errors: list[str] = []\n    old_rows = _all_event_rows(previous); new_rows = _all_event_rows(current)\n    for identity in old_rows.keys() & new_rows.keys():\n        error = _validate_observation_correction(identity, old_rows[identity], new_rows[identity])\n        if error: errors.append(error)\n    return errors\n'''
-          new = '''def _semantic_identity_signature(family: dict[str, Any]) -> str:\n    payload = {\n        "kind": family.get("kind"),\n        "semantic_identity": family.get("semantic_identity"),\n        "applicability": family.get("applicability"),\n    }\n    return hashlib.sha256(yaml.safe_dump(payload, sort_keys=True).encode("utf-8")).hexdigest()\n\n\ndef validate_reconciliation(previous: PemDocument, current: PemDocument) -> list[str]:\n    """Reject silent accepted semantic drift and observation rewriting across representations."""\n    errors: list[str] = []\n    for fid in previous.families.keys() & current.families.keys():\n        old_family = previous.families[fid]; new_family = current.families[fid]\n        old_sig = _semantic_identity_signature(old_family); new_sig = _semantic_identity_signature(new_family)\n        if old_sig != new_sig:\n            record = new_family.get("semantic_reconciliation")\n            if not isinstance(record, dict):\n                errors.append(f"{fid}: accepted family semantic identity/applicability changed under the same ID without explicit reconciliation or lineage")\n            else:\n                evidence = record.get("evidence")\n                if (record.get("classification") != "WITHIN_ENVELOPE" or record.get("previous_identity_sha256") != old_sig\n                        or not record.get("reason") or not isinstance(evidence, list) or not evidence):\n                    errors.append(f"{fid}: same-ID semantic reconciliation must bind the previous envelope, WITHIN_ENVELOPE classification, reason, and evidence")\n                else:\n                    for raw in evidence:\n                        try:\n                            parse_evidence_route(raw, f"{fid}:semantic reconciliation evidence")\n                        except PemError as exc:\n                            errors.append(str(exc))\n    old_rows = _all_event_rows(previous); new_rows = _all_event_rows(current)\n    for identity in old_rows.keys() & new_rows.keys():\n        error = _validate_observation_correction(identity, old_rows[identity], new_rows[identity])\n        if error: errors.append(error)\n    return errors\n'''
-          if old not in s: raise SystemExit('reconciliation patch anchor missing')
-          s = s.replace(old, new, 1)
-
-          old = '''def validate_overlay(base: PemDocument, candidate: PemDocument, *, overlay_identity: str) -> list[str]:\n    errors: list[str] = []\n    declared = candidate.metadata.get("candidate_overlay")\n    if isinstance(declared, dict): identity = str(declared.get("identity", "")); based_on = str(declared.get("based_on_accepted_pem", ""))\n    else: identity = str(declared); based_on = ""\n    if identity != overlay_identity: errors.append("candidate overlay identity does not match the selected overlay")\n    base_identity = _accepted_base_identity(base.metadata.get("accepted_base"))\n    if based_on != base_identity: errors.append("candidate overlay is not explicitly based on the declared accepted memory state")\n    if identity == base_identity: errors.append("candidate overlay cannot self-ratify as accepted memory")\n    omitted = set(base.families) | set(base.notices); omitted -= set(candidate.families) | set(candidate.notices)\n    if omitted: errors.append(f"candidate overlay cannot delete accepted entries by omission: {', '.join(sorted(omitted))}")\n    return errors\n'''
-          new = '''def validate_overlay(\n    base: PemDocument, candidate: PemDocument, *, overlay_identity: str, accepted_pem_identity: str\n) -> list[str]:\n    errors: list[str] = []\n    declared = candidate.metadata.get("candidate_overlay")\n    if isinstance(declared, dict): identity = str(declared.get("identity", "")); based_on = str(declared.get("based_on_accepted_pem", ""))\n    else: identity = str(declared); based_on = ""\n    if identity != overlay_identity: errors.append("candidate overlay identity does not match the selected overlay")\n    if based_on != accepted_pem_identity: errors.append("candidate overlay is not explicitly based on the exact workflow-selected accepted PEM publication")\n    if identity == accepted_pem_identity: errors.append("candidate overlay cannot self-ratify as accepted memory")\n    omitted = set(base.families) | set(base.notices); omitted -= set(candidate.families) | set(candidate.notices)\n    if omitted: errors.append(f"candidate overlay cannot delete accepted entries by omission: {', '.join(sorted(omitted))}")\n    errors.extend(validate_reconciliation(base, candidate))\n    return errors\n'''
-          if old not in s: raise SystemExit('overlay patch anchor missing')
-          s = s.replace(old, new, 1)
-          p.write_text(s, encoding='utf-8')
-
-          # Update canonical PEM doctrine minimally at its existing owner.
-          p = Path('source/shared/references/project-engineering-memory.md')
-          d = p.read_text(encoding='utf-8')
-          marker = '## Evidence bindings and health\n'
-          if marker in d and 'Stable-locator realization' not in d:
-              d = d.replace(marker, marker + '\n### Stable-locator realization\n\nWhen an evidence route supplies `#stable-locator`, binding health includes that locator, not only the immutable revision and path. A mechanically absent locator is unavailable; an unsupported/opaque locator form is review-required until independently resolved. Authority-owner routes use the same realization rule.\n\n### Positive-guidance counterevidence admission\n\nCurrent positive guidance requires a bounded counterevidence-search record for the declared aggregation/coverage scope, covering supporting, neutral, contradicting, and inconclusive applicable outcomes, material blind spots, and durable search evidence. Partial search may support observation/provisional learning but not an unqualified project instinct.\n\n')
-          else:
-              d += '\n\n## Independent-review repair clarifications\n\n- Stable evidence locators participate in binding health; path-only realization cannot make a missing locator healthy.\n- Mechanism-specific failure cause claims require durable discriminating cause evidence; observation-only rows need not invent a cause.\n- Current positive guidance requires a bounded counterevidence-search disposition covering supporting, neutral, contradicting, and inconclusive outcomes plus blind spots and durable search evidence.\n- Candidate overlays bind the exact workflow-selected accepted PEM publication separately from accepted project state.\n- Same accepted family IDs cannot silently change kind, semantic identity envelope, or applicability meaning; within-envelope reconciliation is explicit and evidence-bound, while material change uses lineage/new identity.\n- Temperature override evidence uses ordinary evidence-route health.\n- High-impact unresolved notices precede optional positive guidance in the active summary.\n'
-          p.write_text(d, encoding='utf-8')
-
-          # Add direct independent-review discriminators.
-          test = r'''from __future__ import annotations
-
-import copy
-import subprocess
-import sys
-import tempfile
-import unittest
-from pathlib import Path
-
-ROOT = Path(__file__).resolve().parents[1]
-sys.path.insert(0, str(ROOT / "source"))
-import project_engineering_memory as pem
-
-
-def doc(families=None, notices=None, *, overlay="NONE", accepted_base="P"):
-    return pem.PemDocument(
-        root=ROOT / "PROJECT-ENGINEERING-MEMORY.md",
-        metadata={"repository": "hjin98/scientific-software-development-protocol", "accepted_base": accepted_base, "candidate_overlay": overlay},
-        families={f["id"]: f for f in (families or [])}, notices={n["id"]: n for n in (notices or [])}, sources={}, root_text="",
-    )
-
-
-def base_success(fid="SP-001"):
-    return {
-        "id": fid, "kind": "SUCCESS_PATTERN", "state": "CURRENT", "maturity": "SUPPORTED", "temperature": "UNASSESSED",
-        "summary": "bounded success", "semantic_identity": {"invariant_or_claim": "claim", "owner_class": "D3/D4", "mechanism_family": "mechanism", "applicability_dimensions": "regime"},
-        "aggregation_scope": "scope", "coverage_state": "PARTIAL", "coverage_basis": "bounded", "applicability": ["x"],
-        "authority_binding": "EVIDENCE_ONLY", "binding_health": "HEALTHY", "guidance_level": "OBSERVED", "positive_guidance_eligible": False,
-        "relations": [], "applications": [{"id": "A01", "episode_identity": "episode-1", "lifecycle_context": "qualification", "source_project": "local", "surfaces": ["x"], "provenance_cluster": "cluster-1", "outcome": "SUPPORTING", "observation": "worked", "assessments": [{"id": "AS01", "state": "ADMISSIBLE", "conclusion": "SUPPORTS_BOUNDED_CLAIM", "evidence": ["repo@1111111:path#finding"]}]}],
-    }
-
-
-class IndependentReviewRepairTests(unittest.TestCase):
-    def test_d8_01_same_id_semantic_drift_rejected(self):
-        old = base_success(); new = copy.deepcopy(old); new["semantic_identity"]["mechanism_family"] = "different"
-        errors = pem.validate_reconciliation(doc([old]), doc([new]))
-        self.assertTrue(any("semantic identity" in e for e in errors))
-        self.assertEqual(pem.validate_reconciliation(doc([old]), doc([copy.deepcopy(old)])), [])
-
-    def test_d8_02_overlay_uses_exact_accepted_pem_publication(self):
-        base = base_success(); candidate = copy.deepcopy(base)
-        good = doc([candidate], overlay={"identity": "C", "based_on_accepted_pem": "M"}, accepted_base="P")
-        bad = doc([copy.deepcopy(candidate)], overlay={"identity": "C", "based_on_accepted_pem": "P"}, accepted_base="P")
-        self.assertEqual(pem.validate_overlay(doc([base], accepted_base="P"), good, overlay_identity="C", accepted_pem_identity="M"), [])
-        self.assertTrue(any("accepted PEM publication" in e for e in pem.validate_overlay(doc([base], accepted_base="P"), bad, overlay_identity="C", accepted_pem_identity="M")))
-
-    def test_d8_03_missing_stable_locator_is_not_healthy(self):
-        rev = subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=ROOT, text=True).strip()
-        route = pem.parse_evidence_route(f"hjin98/scientific-software-development-protocol@{rev}:source/project_engineering_memory.py#THIS-LOCATOR-DOES-NOT-EXIST")
-        health, _ = pem.evidence_route_health(route, doc())
-        self.assertEqual(health, "UNAVAILABLE")
-
-    def test_d8_04_mechanism_cause_requires_cause_evidence(self):
-        family = {"id": "FF-001", "kind": "FAILURE_FAMILY", "state": "CURRENT", "maturity": "SUPPORTED", "temperature": "UNASSESSED", "summary": "failure", "semantic_identity": {"invariant_or_claim": "inv", "owner_class": "D4", "mechanism_family": "m", "applicability_dimensions": "r"}, "aggregation_scope": "s", "coverage_state": "PARTIAL", "coverage_basis": "b", "applicability": ["x"], "authority_binding": "EVIDENCE_ONLY", "binding_health": "REVIEW_REQUIRED", "guidance_level": "OBSERVED", "relations": [], "occurrences": [{"id": "O01", "event_identity": "e1", "lifecycle_context": "qualification", "source_project": "local", "surfaces": ["x"], "observation": "failed", "cause_claim": "specific mechanism caused it", "assessments": [{"id": "AS01", "state": "ADMISSIBLE", "conclusion": "CONFIRMED", "evidence": ["repo@1111111:path#finding"]}]}]}
-        errors = pem._validate_family(family)
-        self.assertTrue(any("cause_claim requires" in e for e in errors))
-        del family["occurrences"][0]["cause_claim"]
-        self.assertFalse(any("cause_claim requires" in e for e in pem._validate_family(family)))
-
-    def test_d8_05_wins_only_positive_guidance_rejected(self):
-        family = base_success(); family.update(guidance_level="RECOMMENDED", positive_guidance_eligible=True)
-        errors = pem._validate_family(family)
-        self.assertTrue(any("counterevidence_search" in e for e in errors))
-        family["counterevidence_search"] = {"state": "COMPLETE_FOR_DECLARED_SCOPE", "scope": "scope", "search_basis": "bounded history", "blind_spots": "broader history not claimed", "outcomes_reviewed": ["SUPPORTING", "NEUTRAL", "CONTRADICTING", "INCONCLUSIVE"], "evidence": ["repo@1111111:path#search"]}
-        self.assertFalse(any("counterevidence_search" in e for e in pem._validate_family(family)))
-
-    def test_d8_06_unresolved_notice_precedes_optional_positive_guidance(self):
-        family = base_success(); family.update(guidance_level="RECOMMENDED", positive_guidance_eligible=True, counterevidence_search={"state": "COMPLETE_FOR_DECLARED_SCOPE", "scope": "scope", "search_basis": "bounded", "blind_spots": "none known", "outcomes_reviewed": ["SUPPORTING", "NEUTRAL", "CONTRADICTING", "INCONCLUSIVE"], "evidence": ["repo@1111111:path#search"]})
-        notice = {"id": "NT-001", "state": "REVIEW_REQUIRED", "binding_health": "REVIEW_REQUIRED", "summary": "unresolved risk", "applicability": ["x"], "normative_status": "NON_AUTHORITATIVE", "review_trigger": {"type": "manual_external", "assessed_state": "INDETERMINATE", "assessed_evidence": ["repo@1111111:path#notice"]}, "evidence": ["repo@1111111:path#notice"]}
-        text = pem.render_summary(doc([family], [notice]))
-        self.assertLess(text.index("NT-001"), text.index("SP-001"))
-
-    def test_d8_07_temperature_override_evidence_is_material(self):
-        family = base_success(); family["temperature"] = "HOT"; family["temperature_override"] = {"final": "HOT", "reason": "impact", "evidence": "not-a-list"}
-        errors = pem._validate_family(family)
-        self.assertTrue(any("temperature override requires" in e for e in errors))
-        family["temperature_override"]["evidence"] = ["repo@1111111:path#impact"]
-        self.assertIn("repo@1111111:path#impact", pem._material_routes(family))
-
-
-if __name__ == '__main__':
-    unittest.main()
-'''
-          Path('tests/test_protocol_63_independent_review_repairs.py').write_text(test, encoding='utf-8')
-          PY
+        run: python .github/protocol63_repair.py
       - name: Install validation dependencies
         run: python -m pip install -r source/requirements-validation.txt
-      - name: Focused review-repair discriminators
+      - name: Run focused repair discriminators
         run: python -m unittest tests.test_protocol_63_independent_review_repairs -v
-      - name: Protocol 6.3 PEM tests
+      - name: Run Protocol 6.3 PEM regression
         run: python -m unittest tests.test_protocol_63_engineering_memory tests.test_protocol_63_reopened_repairs tests.test_protocol_63_independent_review_repairs -v
-      - name: Full repository regression
+      - name: Run full repository regression
         run: python -m unittest discover -s tests -v
-      - name: Validate self-hosted PEM and packages
+      - name: Validate self-hosted PEM
+        run: python source/project_engineering_memory.py PROJECT-ENGINEERING-MEMORY.md
+      - name: Regenerate canonical distribution
+        run: python source/build_skills.py --output dist
+      - name: Validate canonical distribution
+        run: python source/validate_packages.py --dist dist
+      - name: Regenerate and validate orchestrator snapshot
         run: |
-          python source/project_engineering_memory.py PROJECT-ENGINEERING-MEMORY.md
-          python source/build_skills.py --output /tmp/protocol-dist
-          python source/validate_packages.py --dist /tmp/protocol-dist
-          python source/check_dist.py --expected /tmp/protocol-dist --committed dist
-          git diff --check
-      - name: Commit repaired semantic source
+          python orchestrator/scripts/generate_protocol_snapshot.py
+          python orchestrator/scripts/generate_protocol_snapshot.py --check
+          python -m pip install ./orchestrator -r orchestrator/requirements-dev.txt
+          python orchestrator/scripts/run_core_tests.py
+      - name: Check patch whitespace
+        run: git diff --check
+      - name: Commit repaired semantic candidate
         run: |
-          git add source/project_engineering_memory.py source/shared/references/project-engineering-memory.md tests/test_protocol_63_independent_review_repairs.py
+          git config user.name 'Protocol 6.3 repair automation'
+          git config user.email 'protocol63-repair@users.noreply.github.com'
+          git add -A
           git diff --cached --check
           git commit -m 'Repair Protocol 6.3 independent review blockers'
           git push origin HEAD:ssdp-6.3-engineering-memory
