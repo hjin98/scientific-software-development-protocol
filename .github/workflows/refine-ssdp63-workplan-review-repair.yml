@@ -1,0 +1,25 @@
+name: Refine SSDP 6.3 workplan repair scope
+on:
+  push:
+    branches: [ssdp-6.3-engineering-memory]
+    paths:
+      - .github/workflows/refine-ssdp63-workplan-review-repair.yml
+permissions:
+  contents: write
+jobs:
+  refine:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ssdp-6.3-engineering-memory
+          fetch-depth: 0
+      - run: python .github/scripts/refine_ssdp63_workplan.py
+      - run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git rm .github/workflows/refine-ssdp63-workplan-review-repair.yml .github/scripts/refine_ssdp63_workplan.py
+          git add workplans/active/PROTOCOL-6.3-EVIDENCE-BACKED-PROJECT-ENGINEERING-MEMORY-WORKPLAN.md
+          git diff --cached --check
+          git commit -m "Refine Protocol 6.3 review repair scope"
+          git push origin HEAD:ssdp-6.3-engineering-memory
