@@ -19,6 +19,11 @@ replace_once(
     "so replacement self-reference-safe source snapshot `86c13cab6bdd1991dffa94e277db8eacf87e2e11`",
     "so Replacement self-reference-safe source snapshot `86c13cab6bdd1991dffa94e277db8eacf87e2e11`",
 )
+replace_once(
+    versioning,
+    "sole 6.3 public-source fallback",
+    "sole current 6.3 public-source fallback",
+)
 
 protocol62_test = ROOT / "tests/test_protocol_62_closeout.py"
 replace_once(
