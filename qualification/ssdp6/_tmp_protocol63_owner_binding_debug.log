@@ -1,0 +1,9 @@
+Traceback (most recent call last):
+  File "/tmp/repair.py", line 8, in <module>
+    ROOT = Path(__file__).resolve().parents[2]
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^
+  File "/opt/hostedtoolcache/Python/3.11.16/x64/lib/python3.11/pathlib.py", line 445, in __getitem__
+    raise IndexError(idx)
+IndexError: 2
+
+EXIT=1
