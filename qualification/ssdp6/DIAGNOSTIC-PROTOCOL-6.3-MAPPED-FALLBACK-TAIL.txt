@@ -1,0 +1,36 @@
+
+===== core =====
+running 12 test modules across 4 workers
+    ok  tests.test_config_and_projects                     28 tests    1.1s
+    ok  tests.test_extension_composition                   30 tests    2.4s
+    ok  tests.test_git_observation                         44 tests    2.6s
+    ok  tests.test_input_binding                           31 tests    3.9s
+    ok  tests.test_installed_product                       32 tests   35.3s
+    ok  tests.test_layout_and_fitness                      21 tests    0.4s
+    ok  tests.test_privacy_and_remote_truth                31 tests    5.4s
+    ok  tests.test_protocol_source_and_profile             37 tests    1.2s
+    ok  tests.test_public_api_seam                         31 tests    2.6s
+    ok  tests.test_render_and_identity                     35 tests    4.5s
+    ok  tests.test_ssdp6_profiles                          30 tests    0.5s
+    ok  tests.test_workplan_resolution                     40 tests    1.3s
+
+390 tests across 12 modules in 36.4s -- OK
+EXIT=0
+
+===== frozen-sdp-protocol-5.16 =====
+EXIT=0
+
+===== frozen-ssdp-protocol-6.0 =====
+EXIT=0
+
+===== frozen-ssdp-protocol-6.1 =====
+EXIT=0
+
+===== frozen-ssdp-protocol-6.2 =====
+EXIT=0
+
+===== whitespace =====
+EXIT=0
+
+===== stale-prose-grep =====
+GREP_EXIT=1 (1 means clean)
