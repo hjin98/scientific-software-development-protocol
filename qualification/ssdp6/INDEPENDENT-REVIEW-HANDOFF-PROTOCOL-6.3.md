@@ -3,9 +3,9 @@ kind: ssdp63-independent-review-handoff
 protocol_version: 6.3.0
 authority: non-normative-review-handoff
 semantic_candidate: 026eecf6ce382c3445ed218aeca80dcf2fb9a426
-qualification_result_commit: PENDING_F3_EVIDENCE_COMMIT
+qualification_result_commit: 5362f39107aa3f5760f501c02c66e3d25434cac7
 qualification_result: qualification/ssdp6/RESULTS-GPT-5.6-SOL-2026-09-12-PROTOCOL-6.3-F3.md
-static_sensor_evidence_commit: PENDING_F3_EVIDENCE_COMMIT
+static_sensor_evidence_commit: 5362f39107aa3f5760f501c02c66e3d25434cac7
 public_source_bootstrap: dc22f09fd38dbbfeaeb0160152da9b284654f66e
 public_source_mapping_commit: 026eecf6ce382c3445ed218aeca80dcf2fb9a426
 accepted_protocol_62_recovery: b59adc77efe6951912cfd705cc43830c58ca27d0

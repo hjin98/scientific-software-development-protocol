@@ -16,6 +16,7 @@ f2_qualification_commit: 6fc26ce374b5346495782871d5d7241de5b90071
 f2_qualification: qualification/ssdp6/RESULTS-GPT-5.6-SOL-2026-09-12-PROTOCOL-6.3-F2.md
 f3_semantic_candidate: 026eecf6ce382c3445ed218aeca80dcf2fb9a426
 f3_public_bootstrap: dc22f09fd38dbbfeaeb0160152da9b284654f66e
+f3_qualification_commit: 5362f39107aa3f5760f501c02c66e3d25434cac7
 f3_qualification: qualification/ssdp6/RESULTS-GPT-5.6-SOL-2026-09-12-PROTOCOL-6.3-F3.md
 reopened_stages: none
 stage_g_recovery_gate: blocked-pending-independent-review
