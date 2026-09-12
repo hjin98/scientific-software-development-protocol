@@ -20,6 +20,9 @@ prior_f3_qualification_commit: 5362f39107aa3f5760f501c02c66e3d25434cac7
 prior_f3_qualification: qualification/ssdp6/RESULTS-GPT-5.6-SOL-2026-09-12-PROTOCOL-6.3-F3.md
 prior_f4_qualification_commit: a2ac5de1928bbfc8e7bf5fb6e1f285ac2b13f3ae
 prior_f4_qualification: qualification/ssdp6/RESULTS-GPT-5.6-SOL-2026-09-12-PROTOCOL-6.3-F4.md
+current_f5_semantic_candidate: 190c8b4d352c203ef74c94d57c4f18d30eb7186d
+current_f5_qualification_commit: 092c784383868081e9dee2081e3895f3d1263630
+current_f5_qualification: qualification/ssdp6/RESULTS-GPT-5.6-SOL-2026-09-12-PROTOCOL-6.3-F5.md
 reopened_stages: B,D,F
 stage_g_recovery_gate: blocked-repair-and-fresh-independent-review
 active_serious_challenge: none
@@ -216,4 +219,4 @@ Because this D9 repair changes canonical validator semantics after bootstrap `42
 
 ## Current next action
 
-Implement B4.8/D9.1 in the existing reconciliation/material-route path, rerun the affected/full acceptance surface, bind a new immutable candidate, publish candidate-bound F5 evidence from a later descendant, and hand that exact candidate to fresh independent Review. Stage G remains blocked until that Review passes.
+D9 implementation and F5 qualification are complete for immutable candidate `190c8b4d352c203ef74c94d57c4f18d30eb7186d` with publication evidence at `092c784383868081e9dee2081e3895f3d1263630`. Perform a fresh independent assembled-candidate Review of that exact candidate against accepted Protocol 6.2 and this active workplan. Stage G remains blocked until Review PASS.
