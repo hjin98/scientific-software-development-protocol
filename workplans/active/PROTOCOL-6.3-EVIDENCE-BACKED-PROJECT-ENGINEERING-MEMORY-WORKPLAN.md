@@ -8,14 +8,17 @@ created_date: 2026-09-11
 reviewed_date: 2026-09-12
 design_closure_status: pass-after-sixth-review-repair
 implementation_handoff: authorized
-implementation_review_state: independent-review-no-pass-owner-binding-repair-open
+implementation_review_state: repaired-qualified-independent-review-pending
 reviewed_candidate_no_pass: 100cbde296de6c1a8db14151f34cfacfebc90eb3
 reviewed_candidate_no_pass_2: 3bbbdfa8120646d76336c7b916e6a891c9ed38f2
-qualified_semantic_candidate: 3bbbdfa8120646d76336c7b916e6a891c9ed38f2
+qualified_semantic_candidate: 026eecf6ce382c3445ed218aeca80dcf2fb9a426
 f2_qualification_commit: 6fc26ce374b5346495782871d5d7241de5b90071
 f2_qualification: qualification/ssdp6/RESULTS-GPT-5.6-SOL-2026-09-12-PROTOCOL-6.3-F2.md
-reopened_stages: D4R3,E3,F3
-stage_g_recovery_gate: blocked-pending-D4R3-E3-F3-independent-review
+f3_semantic_candidate: 026eecf6ce382c3445ed218aeca80dcf2fb9a426
+f3_public_bootstrap: dc22f09fd38dbbfeaeb0160152da9b284654f66e
+f3_qualification: qualification/ssdp6/RESULTS-GPT-5.6-SOL-2026-09-12-PROTOCOL-6.3-F3.md
+reopened_stages: none
+stage_g_recovery_gate: blocked-pending-independent-review
 active_serious_challenge: none
 parent_protocol_62_recovery: b59adc77efe6951912cfd705cc43830c58ca27d0
 parent_protocol_62_semantic_candidate: ebbc4591bdfed039512026b8acb3a6749475c1c5
@@ -875,52 +878,13 @@ Do not introduce a second PEM database, resolver daemon, acceptance registry, qu
 
 ## 18. Current design closure state
 
-The fresh independent assembled-candidate Review of semantic candidate `3bbbdfa8120646d76336c7b916e6a891c9ed38f2` is **NO-PASS** with **no Serious Challenge** to accepted Protocol 6.2 authority or the Protocol 6.3 D3 design. The Review found one shared D4 false-pass family: owner-bearing records can establish acceptance or normative force from structurally healthy evidence plus a self-declared non-empty owner without binding that owner to accepted project authority.
+The independent Review of prior candidate `3bbbdfa8120646d76336c7b916e6a891c9ed38f2` remains a historical **NO-PASS** with no Serious Challenge. Its D4R3 owner-binding blocker has now been repaired in implementation context. D4R3 uses accepted-project-state owner routes rather than free-text/candidate-only ownership, requires explicit accepted authority evidence for `AUTHORITY_BOUND`, binds comparative owner priority and normative notices to accepted-state evidence, and prevents a branch-only repair-acceptance artifact from incrementing recurrence.
 
-The prior D4R2/D5R2/E2/F2 repair round remains useful historical evidence. D5R2 and the previously repaired D1/D2/D3/D6/D7 behaviors remain preserved unless affected evidence proves otherwise. However, D4R2 is incomplete at the real-owner boundary, and because the repair changes canonical 6.3 semantics the prior semantic candidate `3bbbdfa8120646d76336c7b916e6a891c9ed38f2`, public bootstrap `e12572c021087308570abfa41657a910c6896457`, mapping `e6a8c12f065c3d25a41da804c129d6bc0a4f7b50`, and F2 qualification are no longer current acceptance anchors. D4R3, E3, and F3 are reopened. Stage G, recovery, accepted-current status, workplan archive, and `main` cutover remain blocked.
+E3 is implementation-context closed by self-reference-safe replacement bootstrap `dc22f09fd38dbbfeaeb0160152da9b284654f66e` and later semantic/mapping candidate `026eecf6ce382c3445ed218aeca80dcf2fb9a426`. The earlier bootstrap `e12572c021087308570abfa41657a910c6896457` remains immutable invalidated historical evidence. F3 is implementation-context closed by focused D4R3 discriminators plus full repository/package/profile/Core/frozen-resource acceptance and an explicit applicability review of prior F2 evidence; see `qualification/ssdp6/RESULTS-GPT-5.6-SOL-2026-09-12-PROTOCOL-6.3-F3.md`.
 
-### 18.1 Repair D4R3 - authority and repair acceptance require accepted-state governing-owner binding
+The **only remaining Stage-F lifecycle gate is a fresh independent assembled-candidate Protocol/D3 Review of `026eecf6ce382c3445ed218aeca80dcf2fb9a426` against accepted Protocol 6.2 recovery `b59adc77efe6951912cfd705cc43830c58ca27d0`**. Implementation-context qualification is evidence to challenge, not authority. Protocol 6.3 remains proposed; Stage G, recovery, accepted-current status, workplan archive, and `main` cutover remain blocked until that independent Review passes and the separate recovery lifecycle completes.
 
-Owner: existing PEM evidence/authority-binding concretization plus Git accepted-base semantics. Strengthen the existing validator and schema-1 representation; do **not** add an authority registry, acceptance registry, daemon, shadow manifest, package-side patch, or parallel ownership database.
-
-- Any owner field relied upon to create normative force or accepted-repair recurrence is a durable owner binding, not descriptive prose. `AUTHORITY_BOUND` families, normative notices, comparative owner-priority decisions, and typed repair-acceptance records must route to an immutable owner artifact rather than accepting an arbitrary non-empty label.
-- Mechanical `HEALTHY` current-owner validation is grounded in the exact project-governed `accepted_base.project_state`. The owner route must resolve in the local accepted lineage, precede or equal that accepted state, and resolve to the same owner content at the accepted state. A candidate-only owner, missing owner, owner path removed or changed since the cited revision, non-local owner with no source-specific resolver, or unresolvable accepted base cannot silently become healthy current authority; current normative use becomes `REVIEW_REQUIRED`/invalid until independently resolved.
-- `AUTHORITY_BOUND` families additionally carry explicit authority evidence for the capability/claim. At least one authority-evidence route must be accepted-state-bound; ordinary observational evidence may remain candidate/historical evidence and cannot substitute for this authority relation.
-- Comparative owner priority must bind both the immutable owner and the evidence for the owner's explicit decision to accepted project state. A branch-local decision cannot manufacture `PREFERRED`/`DEFAULT`/`BEST` authority.
-- A normative current notice must bind its owner and normative evidence to accepted project state; otherwise it cannot remain an unqualified normative/current notice. Non-authoritative notices retain the existing evidence lifecycle.
-- A recurrence repair-acceptance artifact must itself be contained by accepted project state. Its typed record must still bind the exact repair, `state: ACCEPTED`, and an immutable owner route whose owner content is the same at the acceptance event. An arbitrary later descendant, branch-only acceptance file, free-text owner, wrong repair subject, owner-content drift, reversed chronology, or copied/rebased/cherry-picked alias cannot increment recurrence.
-- The structural validator establishes immutable accepted-state provenance and fails safe where it cannot. Semantic Review still independently verifies that the cited accepted owner is the **correct** governing owner for the exact claim; accepted-state containment is not permission to replace D1-D4 reasoning with filename matching.
-- Preserve candidate observational evidence, historical observations, provenance clusters, family identities, D5R2 maturity rules, and all unaffected 6.2/6.3 semantics. Route owner changes through bounded reverse impact closure rather than silently rewriting authority-bearing records.
-
-**Gate D4R3:** direct executable counterfactuals reject (1) branch-only repair acceptance, (2) free-text or candidate-only authority owner, (3) accepted owner whose content changed before the accepted base, (4) missing/unaccepted authority evidence, (5) candidate-only comparative owner decision, and (6) candidate-only normative notice authority. Re-run affected Q63-03/Q63-11/Q63-31/Q63-45/Q63-46/Q63-67/Q63-75 and corresponding F63 authority/recurrence/adversarial cases. Preserve still-applicable F2 evidence only with explicit applicability; do not label reused evidence as freshly executed.
-
-### 18.2 Repair E3 - replace the invalidated public bootstrap after D4R3
-
-The D4R3 semantic repair invalidates `e12572c021087308570abfa41657a910c6896457` as the current 6.3 fallback. Preserve it as historical evidence. Before choosing a replacement, restore the no-current-bootstrap sentinel in canonical source and generated descendants, complete D4R3 source/tests/doctrine/self-hosted-PEM repair, regenerate packages/profile, and run the repository/frozen/Core gates. Then choose an **already-existing** immutable repaired source snapshot that contains the sentinel, validate exact-ref public realization, and publish that exact SHA only from a later descendant mapping commit. Never make a bootstrap commit self-name.
-
-**Gate E3:** exact public fallback resolves only the new immutable repaired snapshot; `e12572c021087308570abfa41657a910c6896457` and all earlier 6.3 attempts remain invalidated historical fixtures; frozen 5.16/6.0/6.1/6.2 resources remain byte-identical.
-
-### 18.3 Repair F3 - candidate-bound affected qualification and independent re-review
-
-Bind one new semantic candidate after E3 publication/generation. Freshly execute D4R3 owner-binding discriminators, PEM validation, full source regression, public-bootstrap exact-ref realization, canonical build/package validation/committed parity, profile/snapshot parity, frozen-resource integrity, whitespace checks, and Orchestrator Core acceptance. Recompute static activation evidence where canonical routed bytes changed. Re-evaluate the affected Q63/F63/Challenge cases against the new candidate and explicitly carry forward only unaffected F2 cases whose claim/candidate-independent applicability remains intact. Refresh preservation census, implementation state, self-hosted PEM/HAS as affected, and independent-review handoff.
-
-**Gate F3:** no authority-bearing owner path can pass solely from a non-empty label or branch-local artifact; no stale F2 claim is represented as fresh execution; no required affected check is missing; a fresh independent assembled-candidate Review remains the final Stage-F lifecycle gate.
-
-### 18.4 Repair sequencing and preservation
-
-```text
-D4R3 accepted-state governing-owner binding + direct falsification fixtures
- -> preserve/reverify D1/D2/D3/D5R2/D6/D7 and unaffected evidence
- -> source/PEM/doctrine/template reconciliation
- -> full repository/build/package/profile/Core/frozen checks with no current 6.3 bootstrap
- -> E3 immutable replacement bootstrap + later exact mapping
- -> regenerate/check all affected descendants
- -> F3 candidate-bound affected qualification + evidence applicability map
- -> fresh independent assembled-candidate Review
- -> only then Stage G
-```
-
-No Serious Challenge is active. The intended design remains evidence-backed project-local memory with non-authoritative learning, exact durable warrants, immutable observations, stable semantic identity, provenance-aware episodes, claim-relative maturity, accepted-state-bounded authority, actual accepted-repair recurrence rather than chronology or self-attestation, one HAS/overlay interface, atomic publication, and lossless progressive disclosure.
+No Serious Challenge is active. The intended design remains evidence-backed project-local memory with non-authoritative learning, immutable observation and provenance, claim-relative maturity, accepted-state-bounded authority, actual accepted-repair recurrence, one HAS/overlay interface, atomic publication, and lossless progressive disclosure.
 
 ## 19. Intended end state
 

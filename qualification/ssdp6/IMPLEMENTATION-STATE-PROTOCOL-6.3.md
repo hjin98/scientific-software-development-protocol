@@ -65,3 +65,8 @@ Accepted-current protocol: 6.2.0
 Workplan: ACTIVE
 Main cutover: NOT AUTHORIZED
 ```
+
+
+## F3 D4R3 owner-binding repair refresh
+
+Independent Review of prior candidate `3bbbdfa8120646d76336c7b916e6a891c9ed38f2` was NO-PASS on accepted-state governing-owner binding. D4R3/E3/F3 repair that false-pass family. Current semantic candidate is `026eecf6ce382c3445ed218aeca80dcf2fb9a426`; replacement public bootstrap is `dc22f09fd38dbbfeaeb0160152da9b284654f66e`. Fresh executable evidence is `qualification/ssdp6/DIAGNOSTIC-PROTOCOL-6.3-F3-OWNER-BINDING.txt` and `qualification/ssdp6/RESULTS-GPT-5.6-SOL-2026-09-12-PROTOCOL-6.3-F3.md`. Independent assembled-candidate Review remains pending; Stage G, recovery, accepted-current status, archive, and main cutover remain blocked.

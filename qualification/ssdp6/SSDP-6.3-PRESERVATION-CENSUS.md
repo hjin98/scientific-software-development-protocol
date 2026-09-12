@@ -226,3 +226,8 @@ ACCEPTED CURRENT PROTOCOL: 6.2.0
 WORKPLAN: ACTIVE
 MAIN CUTOVER: NOT AUTHORIZED
 ```
+
+
+## F3 owner-binding preservation delta
+
+Candidate `026eecf6ce382c3445ed218aeca80dcf2fb9a426` preserves the prior census except where D4R3 deliberately strengthens authority/acceptance concretization. T45/T46/T67/T75-class owner-bearing paths now require accepted-state governing-owner binding; this is a monotonic repair of the reviewed false-pass, not a relaxation. Frozen Protocol 5.16/6.0/6.1/6.2 resources were rechecked by the fresh candidate package/profile/Core gates. Prior F2 labels remain historical evidence; affected authority/recurrence cases are rebound to fresh F3 discriminators and full candidate regression. Independent Review remains open.

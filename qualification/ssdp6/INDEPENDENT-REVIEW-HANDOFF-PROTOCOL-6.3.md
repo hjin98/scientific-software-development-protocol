@@ -2,12 +2,12 @@
 kind: ssdp63-independent-review-handoff
 protocol_version: 6.3.0
 authority: non-normative-review-handoff
-semantic_candidate: 3bbbdfa8120646d76336c7b916e6a891c9ed38f2
-qualification_result_commit: 6fc26ce374b5346495782871d5d7241de5b90071
-qualification_result: qualification/ssdp6/RESULTS-GPT-5.6-SOL-2026-09-12-PROTOCOL-6.3-F2.md
-static_sensor_evidence_commit: 6fc26ce374b5346495782871d5d7241de5b90071
-public_source_bootstrap: e12572c021087308570abfa41657a910c6896457
-public_source_mapping_commit: e6a8c12f065c3d25a41da804c129d6bc0a4f7b50
+semantic_candidate: 026eecf6ce382c3445ed218aeca80dcf2fb9a426
+qualification_result_commit: PENDING_F3_EVIDENCE_COMMIT
+qualification_result: qualification/ssdp6/RESULTS-GPT-5.6-SOL-2026-09-12-PROTOCOL-6.3-F3.md
+static_sensor_evidence_commit: PENDING_F3_EVIDENCE_COMMIT
+public_source_bootstrap: dc22f09fd38dbbfeaeb0160152da9b284654f66e
+public_source_mapping_commit: 026eecf6ce382c3445ed218aeca80dcf2fb9a426
 accepted_protocol_62_recovery: b59adc77efe6951912cfd705cc43830c58ca27d0
 accepted_protocol_62_public_bootstrap: 5a062ebc472755607b9dc66d33a5ebbc4b7429aa
 accepted_protocol_62_semantic_candidate: ebbc4591bdfed039512026b8acb3a6749475c1c5
@@ -20,7 +20,7 @@ accepted_current_protocol: 6.2.0
 
 ## Reviewer mandate
 
-Perform a **fresh independent assembled-candidate Protocol/D3 Review** of immutable semantic candidate `3bbbdfa8120646d76336c7b916e6a891c9ed38f2` against accepted Protocol 6.2 recovery `b59adc77efe6951912cfd705cc43830c58ca27d0` and the active Protocol 6.3 workplan. Do not inherit implementation conclusions, this handoff, green CI, preservation labels, or any 260/260 report as authority. Reconstruct the governing semantics and inspect the assembled candidate at the exact commit.
+Perform a **fresh independent assembled-candidate Protocol/D3 Review** of immutable semantic candidate `026eecf6ce382c3445ed218aeca80dcf2fb9a426` against accepted Protocol 6.2 recovery `b59adc77efe6951912cfd705cc43830c58ca27d0` and the active Protocol 6.3 workplan. Do not inherit implementation conclusions, this handoff, green CI, preservation labels, or any 260/260 report as authority. Reconstruct the governing semantics and inspect the assembled candidate at the exact commit.
 
 If a genuine blocker exists, identify the earliest owning layer and precise repair obligation and keep Stage G blocked. If none exists, record independent Review PASS as descendant evidence only. Review PASS itself does not establish recovery, accepted-current status, workplan archive, or `main` cutover.
 
@@ -31,9 +31,9 @@ accepted Protocol 6.2 recovery:            b59adc77efe6951912cfd705cc43830c58ca2
 accepted Protocol 6.2 semantic candidate:  ebbc4591bdfed039512026b8acb3a6749475c1c5
 accepted Protocol 6.2 public bootstrap:    5a062ebc472755607b9dc66d33a5ebbc4b7429aa
 
-current 6.3 public bootstrap:               e12572c021087308570abfa41657a910c6896457
-later 6.3 public mapping descendant:        e6a8c12f065c3d25a41da804c129d6bc0a4f7b50
-final 6.3 semantic candidate:               3bbbdfa8120646d76336c7b916e6a891c9ed38f2
+current 6.3 public bootstrap:               dc22f09fd38dbbfeaeb0160152da9b284654f66e
+later 6.3 public mapping descendant:        026eecf6ce382c3445ed218aeca80dcf2fb9a426
+final 6.3 semantic candidate:               026eecf6ce382c3445ed218aeca80dcf2fb9a426
 fresh F2/static-sensor evidence commit:     6fc26ce374b5346495782871d5d7241de5b90071
 Protocol 6.3 recovery:                       UNAVAILABLE
 ```
@@ -46,9 +46,9 @@ Review at minimum the active workplan; preservation census; implementation state
 
 ## Highest-risk falsification obligations
 
-### D4R2 — accepted-repair subject binding
+### D4R3 — accepted-state governing-owner binding
 
-Independently attempt all of the following: a real repair followed by an unrelated descendant file presented as acceptance; a typed acceptance artifact naming a different repair; missing/ambiguous acceptance state; missing accepting owner; reversed chronology; and copied/rebased/cherry-picked aliases. None may increment recurrence. A valid recurrence must establish a prior occurrence, exact accepted repair subject, durable accepted state/owner evidence, and materially later independent event.
+Independently attempt branch-only repair acceptance after accepted project state; wrong repair subject; missing/ambiguous acceptance state; free-text or candidate-only accepting owner; accepted owner-content drift; reversed chronology; and copied/rebased/cherry-picked aliases. None may increment recurrence. Also attempt AUTHORITY_BOUND, normative-notice, and comparative-priority laundering with a healthy candidate-only owner or authority-evidence route. Mechanical accepted-state provenance is necessary but does not replace semantic verification that the cited artifact is the real governing owner for the exact claim.
 
 ### D5R2 — derived `PROVEN` independence
 
@@ -56,7 +56,7 @@ Construct a `PROVEN SUCCESS_PATTERN` with multiple supporting episodes sharing o
 
 ### Public bootstrap/lifecycle
 
-Verify `e12572c021087308570abfa41657a910c6896457` is an already-existing self-reference-safe immutable source snapshot and does not self-name; `e6a8c12f065c3d25a41da804c129d6bc0a4f7b50` later publishes that exact snapshot; candidate `3bbbdfa8120646d76336c7b916e6a891c9ed38f2` realizes the mapped fallback without conflating fallback with recovery or accepted-current state. Recheck the inherited Protocol 5.16 self-reference-safe source-resolution capability and frozen 5.16/6.0/6.1/6.2 resource bytes.
+Verify `dc22f09fd38dbbfeaeb0160152da9b284654f66e` is an already-existing self-reference-safe immutable source snapshot and does not self-name; `026eecf6ce382c3445ed218aeca80dcf2fb9a426` later publishes that exact snapshot; candidate `026eecf6ce382c3445ed218aeca80dcf2fb9a426` realizes the mapped fallback without conflating fallback with recovery or accepted-current state. Recheck the inherited Protocol 5.16 self-reference-safe source-resolution capability and frozen 5.16/6.0/6.1/6.2 resource bytes.
 
 ### D1/D2/D3/D6/D7 preservation
 
@@ -66,9 +66,9 @@ Re-falsify durable binding/path resolution, atomic root/partition publication, i
 
 Run Loss, Scope/materiality laundering, Priority inversion, and False compaction independently against the assembled candidate. In particular, ensure positive/Hot memory cannot hide unresolved higher-impact or mandatory lower-salience state and that compaction never becomes duplicate authority, stale-index authority, eager history loading, or collapsed provenance/lineage.
 
-## F2 evidence to challenge
+## F3 evidence to challenge
 
-`qualification/ssdp6/RESULTS-GPT-5.6-SOL-2026-09-12-PROTOCOL-6.3-F2.md` at `6fc26ce374b5346495782871d5d7241de5b90071` is implementation-context evidence only. It freshly accounts for exactly 260 cases: 115 inherited scenarios, Q63-01..79, F63-A..BJ, and four Challenge passes. Sample the D4R2/D5R2 rows first, then verify complete accounting and that semantic-paired rows actually discriminate the stated counterfactual rather than merely restating doctrine.
+`qualification/ssdp6/RESULTS-GPT-5.6-SOL-2026-09-12-PROTOCOL-6.3-F3.md` is implementation-context evidence only. It binds repaired candidate `026eecf6ce382c3445ed218aeca80dcf2fb9a426` to fresh D4R3 direct discriminators, exact public-fallback realization, full source regression, package/profile parity, and Core acceptance. Prior F2 conclusions are historical evidence and are carried forward only where applicability is unchanged. Sample D4R3 owner/authority/recurrence paths first, then D5R2 and the inherited four Challenge dimensions.
 
 ## Review output contract
 
