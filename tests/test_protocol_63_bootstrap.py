@@ -9,7 +9,7 @@ import urllib.request
 from pathlib import Path
 
 
-BOOTSTRAP = "UNAVAILABLE_PENDING_REPLACEMENT_BOOTSTRAP"
+BOOTSTRAP = "e12572c021087308570abfa41657a910c6896457"
 INVALIDATED_BOOTSTRAP = "1484c1d3caa49d87cc15bc52a5e775399c1dae1b"
 INVALIDATED_SECOND_BOOTSTRAP = "5ee4b3ac3ca1666b0499f7a72f55adcc411bf4bb"
 PUBLIC_ROOT = "https://raw.githubusercontent.com/hjin98/scientific-software-development-protocol"

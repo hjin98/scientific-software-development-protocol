@@ -15,11 +15,11 @@ With `PROTOCOL_SOURCE = AUTO_LOCAL_FIRST`, use a governing-version-compatible in
 ```text
 PUBLIC_REPOSITORY = https://github.com/hjin98/scientific-software-development-protocol
 CURRENT_PROTOCOL = 6.3.0
-CURRENT_PUBLIC_REF = UNAVAILABLE_PENDING_REPLACEMENT_BOOTSTRAP
+CURRENT_PUBLIC_REF = e12572c021087308570abfa41657a910c6896457
 ACCEPTED_6_2_PUBLIC_REF = 5a062ebc472755607b9dc66d33a5ebbc4b7429aa
 ```
 
-**Protocol 6.3 bootstrap state:** all pre-repair 6.3 bootstrap snapshots are invalidated historical evidence only. `CURRENT_PUBLIC_REF` is `UNAVAILABLE_PENDING_REPLACEMENT_BOOTSTRAP`, so no current 6.3 public fallback is authorized until an already-existing repaired self-reference-safe source snapshot passes bootstrap readiness and exact-ref realization and a later descendant publishes that exact SHA. Never use repository default/latest, a guessed semantic-version ref, the current candidate branch, an invalidated bootstrap, or the accepted 6.2 bootstrap as a substitute. Version-bound 6.2 work continues to use exactly `5a062ebc472755607b9dc66d33a5ebbc4b7429aa`; historical 5.16/6.0/6.1 resolution remains version-bound to its own immutable mapping.
+**Protocol 6.3 bootstrap state:** all pre-repair 6.3 bootstrap snapshots are invalidated historical evidence only. `CURRENT_PUBLIC_REF` is `e12572c021087308570abfa41657a910c6896457`, so no current 6.3 public fallback is authorized until an already-existing repaired self-reference-safe source snapshot passes bootstrap readiness and exact-ref realization and a later descendant publishes that exact SHA. Never use repository default/latest, a guessed semantic-version ref, the current candidate branch, an invalidated bootstrap, or the accepted 6.2 bootstrap as a substitute. Version-bound 6.2 work continues to use exactly `5a062ebc472755607b9dc66d33a5ebbc4b7429aa`; historical 5.16/6.0/6.1 resolution remains version-bound to its own immutable mapping.
 
 `AUTO_EXECUTE` means inspect the real target, infer ordinary discoverable context, and perform every authorized action rather than stopping at commands/snippets/next steps. Prefer action over clarification when context is discoverable; ask only when proceeding would require guessing consequential authority, semantics, target, or irreversible action.
 
