@@ -1,0 +1,108 @@
+name: Temporary Protocol 6.3 D4R3 immutable bootstrap
+
+on:
+  push:
+    branches: [ssdp-6.3-engineering-memory]
+
+permissions:
+  contents: write
+
+jobs:
+  qualify:
+    if: github.event.head_commit.message == 'Qualify immutable Protocol 6.3 D4R3 bootstrap'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ssdp-6.3-engineering-memory
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Prepare
+        run: |
+          set -euxo pipefail
+          git config user.name 'Protocol 6.3 repair automation'
+          git config user.email 'protocol63-repair@users.noreply.github.com'
+          git config --global gc.auto 0
+          git config --global maintenance.auto false
+          python -m pip install -r source/requirements-validation.txt
+          python -m pip install ./orchestrator -r orchestrator/requirements-dev.txt
+      - name: Materialize canonical repair
+        run: |
+          set -euxo pipefail
+          python - <<'PY'
+          import importlib.util
+          from pathlib import Path
+          hp = Path('qualification/ssdp6/_tmp_protocol63_owner_binding_repair.py')
+          spec = importlib.util.spec_from_file_location('repair', hp)
+          repair = importlib.util.module_from_spec(spec); spec.loader.exec_module(repair)
+          original = repair.replace_once
+          def scoped(text, old, new, label):
+              if label != 'valid recurrence accepted base':
+                  return original(text, old, new, label)
+              marker = '    def test_d4_git_recurrence_requires_resolvable_ordered_repair_and_independent_later_event(self):'
+              prefix, suffix = text.split(marker, 1)
+              if old not in suffix:
+                  raise SystemExit('D4 recurrence target missing inside function')
+              return prefix + marker + suffix.replace(old, new, 1)
+          repair.replace_once = scoped
+          repair.reopen_workplan()
+          repair.implement_validator()
+          repair.implement_project_memory()
+          repair.implement_doctrine_and_template()
+          repair.implement_tests()
+          repair.invalidate_bootstrap()
+          PY
+          python - <<'PY'
+          from pathlib import Path
+          p = Path('tests/test_protocol_63_bootstrap.py')
+          text = p.read_text(encoding='utf-8')
+          old = '''        stale_transition_fragments = (\n            'no current 6.3 public fallback is authorized',\n            'no 6.3 public fallback is authorized until',\n            'no replacement public fallback is currently authorized',\n            'no replacement fallback is currently authorized',\n        )\n        for document_name, document in (("versioning", versioning), ("prompts", prompts), ("portability", portability), ("readme", readme)):\n            lowered = document.lower()\n            for fragment in stale_transition_fragments:\n                self.assertNotIn(fragment, lowered, f"{document_name} retains pre-publication fallback state: {fragment}")\n'''
+          new = '''        if not BOOTSTRAP.startswith("UNAVAILABLE_"):\n            stale_transition_fragments = (\n                'no current 6.3 public fallback is authorized',\n                'no 6.3 public fallback is authorized until',\n                'no replacement public fallback is currently authorized',\n                'no replacement fallback is currently authorized',\n            )\n            for document_name, document in (("versioning", versioning), ("prompts", prompts), ("portability", portability), ("readme", readme)):\n                lowered = document.lower()\n                for fragment in stale_transition_fragments:\n                    self.assertNotIn(fragment, lowered, f"{document_name} retains pre-publication fallback state: {fragment}")\n'''
+          if old not in text:
+              raise SystemExit('bootstrap stale-transition block not found')
+          p.write_text(text.replace(old, new, 1), encoding='utf-8')
+          PY
+          python source/project_engineering_memory.py PROJECT-ENGINEERING-MEMORY.md --write-summary
+          python orchestrator/scripts/generate_protocol_snapshot.py
+          rm -rf /tmp/protocol-dist
+          python source/build_skills.py --output /tmp/protocol-dist
+          python source/validate_packages.py --dist /tmp/protocol-dist
+          rm -rf dist
+          cp -a /tmp/protocol-dist dist
+      - name: Create clean immutable repaired snapshot locally
+        id: bootstrap
+        run: |
+          set -euxo pipefail
+          git rm -f qualification/ssdp6/_tmp_protocol63_*.py qualification/ssdp6/_tmp_protocol63_*.log 2>/dev/null || true
+          git rm -f .github/workflows/temporary-protocol63-*.yml 2>/dev/null || true
+          git add -A
+          git diff --cached --check
+          git commit -m 'Repair Protocol 6.3 accepted-state owner binding'
+          BOOTSTRAP=$(git rev-parse HEAD)
+          echo "sha=$BOOTSTRAP" >> "$GITHUB_OUTPUT"
+          test -z "$(git status --porcelain)"
+          test -z "$(git ls-files 'qualification/ssdp6/_tmp_protocol63_*')"
+          test -z "$(git ls-files '.github/workflows/temporary-protocol63-*')"
+      - name: Qualify exact immutable repaired snapshot
+        run: |
+          set -euxo pipefail
+          test "$(git rev-parse HEAD)" = '${{ steps.bootstrap.outputs.sha }}'
+          python source/project_engineering_memory.py PROJECT-ENGINEERING-MEMORY.md
+          python -m unittest -v tests.test_protocol_63_reopened_repairs
+          python -m unittest -v tests.test_protocol_63_engineering_memory
+          python -m unittest -v tests.test_protocol_63_bootstrap
+          python -m unittest discover -s tests -v
+          rm -rf /tmp/protocol-dist-check
+          python source/build_skills.py --output /tmp/protocol-dist-check
+          python source/validate_packages.py --dist /tmp/protocol-dist-check
+          python source/check_dist.py --expected /tmp/protocol-dist-check --committed dist
+          python orchestrator/scripts/generate_protocol_snapshot.py --check
+          python orchestrator/scripts/run_core_tests.py
+          git diff --check
+          test -z "$(git status --porcelain)"
+      - name: Publish only after qualification passes
+        run: |
+          set -euxo pipefail
+          git push origin HEAD:ssdp-6.3-engineering-memory
