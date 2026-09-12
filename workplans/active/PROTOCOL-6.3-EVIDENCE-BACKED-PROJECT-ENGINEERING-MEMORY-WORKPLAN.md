@@ -10,7 +10,7 @@ design_closure_status: pass-after-sixth-review-repair
 implementation_handoff: authorized
 implementation_review_state: reopened-no-pass
 reviewed_candidate_no_pass: 8d0ad2395ccd126c133d8aad206cfc859f660124
-reopened_stages: D,E,F
+reopened_stages: B,C,D,E,F
 stage_g_recovery_gate: blocked-pending-repair-requalification-independent-review
 active_serious_challenge: none
 parent_protocol_62_recovery: b59adc77efe6951912cfd705cc43830c58ca27d0
@@ -811,7 +811,7 @@ If implementation or independent Review finds a genuine blocker, route to the ea
 
 ### 17.1 Current Protocol 6.3 implementation-review repair contract
 
-The Protocol 6.2-governed implementation Review of semantic candidate `8d0ad2395ccd126c133d8aad206cfc859f660124` is **NO-PASS** with **no Serious Challenge** to the accepted 6.2 parent or the 6.3 design contract. The architectural design remains implementation-authorized; Stages D, E, and F are reopened because the candidate's D4 Project Engineering Memory (PEM) validation/representation and Stage-F qualification can accept invalid states. Stage G recovery/cutover is blocked until all items below close on one replacement semantic candidate and a fresh independent assembled-candidate Review passes.
+The Protocol 6.2-governed implementation Review of semantic candidate `8d0ad2395ccd126c133d8aad206cfc859f660124` is **NO-PASS** with **no Serious Challenge** to the accepted 6.2 parent or the 6.3 design contract. The architectural design remains implementation-authorized; the affected portions of Stages B and C, and Stages D, E, and F are reopened because the candidate's PEM schema/workflow concretization, D4 validation/representation, and Stage-F qualification can accept invalid states. Stage G recovery/cutover is blocked until all items below close on one replacement semantic candidate and a fresh independent assembled-candidate Review passes.
 
 `qualification/ssdp6/RESULTS-GPT-5.6-SOL-2026-09-11-PROTOCOL-6.3-260.md` remains historical qualification evidence but is **invalidated as Stage-F PASS evidence** for the reviewed candidate. A fresh result must not copy its PASS dispositions forward by default. In particular Q63-06, Q63-11/Q63-67, Q63-48, Q63-53/Q63-64/Q63-77, Q63-63, Q63-73, Q63-74/Q63-78 and their corresponding F63 attacks must be realized against repaired behavior; because the semantic candidate changes, final Stage F still accounts for the complete required matrix rather than reporting only this subset.
 
@@ -830,7 +830,7 @@ Owner: `source/project_engineering_memory.py` under `project-engineering-memory.
 
 Owner: PEM representation plus Git atomic-publication semantics. Keep one logical canonical memory; do not create a second index/manifest authority.
 
-- Introduce the minimum non-self-referential publication-coherence metadata needed to prove that root and declared canonical partitions belong to the same semantic update, for example a root-issued logical publication token carried by every partition and replaced for each semantic publication spanning the unit. The token is representation metadata, not semantic authority and not a Git self-SHA.
+- Introduce the minimum non-self-referential publication-coherence metadata needed to prove the exact canonical partition content expected by the root. Prefer root-declared immutable content identities/digests for each detail file, or an equivalently discriminating owner-layer mechanism, so a changed partition plus root can publish coherently without forcing unrelated unchanged partitions to churn. The binding metadata is representation metadata, not semantic authority and not a Git self-SHA.
 - A partition must also agree with root on schema/project identity and every basis field whose mismatch changes current meaning, including repository/scope and accepted-base/candidate-overlay state where applicable.
 - The loader must reject a stale partition spliced into a newer root even when project ID, schema, paths, and family IDs are otherwise valid. Derived-index failure remains non-authoritative and falls back to canonical search/uncertainty.
 - Add a direct mixed-revision root/partition counterfactual; the previous path-escape/duplicate-ID tests are insufficient for Q63-63/F63-AT.
@@ -958,7 +958,7 @@ This is the current-state workplan contract. Detailed review chronology remains 
 
 The design now preserves accepted 6.2 semantics while adding one evidence-backed, project-local learning layer with: balanced positive and negative evidence; exact admissible warrants; immutable observation/superseding-assessment provenance; explicit uncertainty/counterevidence; stable semantic family identity and acyclic lineage; causal application-episode counts with provenance dependence; claim-relative maturity; demonstrated-success versus comparative-preference discipline; overlapping-guidance decision boundaries; aggregation/lifecycle/project scope; authority-safe capability learning; current-owner deduplication; branch-safe overlay and merge semantics; HAS accepted-memory-basis pinning/reconciliation; self-reference-safe updates; schema/recovery behavior; lossless scalable canonical representation; typed non-recursive relations with transitive impact closure; atomic logical publication; co-evolving applicability metadata; observation-versus-causation discipline; accepted-lineage recurrence semantics; cross-repository source identity; coverage-watermark separation; consequence-aware active salience; and evidence-as-data trust boundaries.
 
-No Serious Challenge to accepted Protocol 6.2 authority is identified. Implementation remains authorized on the dedicated 6.3 branch only for the current repair contract: Stages D, E, and F are reopened, the reviewed candidate `8d0ad2395ccd126c133d8aad206cfc859f660124` is NO-PASS, and Stage G is blocked. Protocol 6.3 remains proposed until the replacement semantic candidate, replacement public bootstrap, complete fresh qualification, independent Review, immutable recovery, generated/profile/package reconciliation, lifecycle closeout, and separately authorized cutover pass.
+No Serious Challenge to accepted Protocol 6.2 authority is identified. Implementation remains authorized on the dedicated 6.3 branch only for the current repair contract: the affected portions of Stages B and C, and Stages D, E, and F are reopened; the reviewed candidate `8d0ad2395ccd126c133d8aad206cfc859f660124` is NO-PASS; and Stage G is blocked. Protocol 6.3 remains proposed until the replacement semantic candidate, replacement public bootstrap, complete fresh qualification, independent Review, immutable recovery, generated/profile/package reconciliation, lifecycle closeout, and separately authorized cutover pass.
 
 ## 19. Intended end state
 
