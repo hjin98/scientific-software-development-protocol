@@ -1,0 +1,232 @@
+name: SSDP 6.3 post-repair assembly v7
+
+on:
+  push:
+    branches: [ssdp-6.3-engineering-memory]
+    paths: [.github/workflows/ssdp63-postrepair-v7.yml]
+
+permissions:
+  contents: write
+
+jobs:
+  assemble:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: {fetch-depth: 0}
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+
+      - name: Reconcile reopened 6.3 owners, docs, and regression oracles
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+
+          old = '5ee4b3ac3ca1666b0499f7a72f55adcc411bf4bb'
+          first = '1484c1d3caa49d87cc15bc52a5e775399c1dae1b'
+          sentinel = 'UNAVAILABLE_PENDING_REPLACEMENT_BOOTSTRAP'
+
+          # D7: one exact session-local HAS interface at the workflow owner.
+          p = Path('source/shared/references/workflow-and-workplans.md')
+          t = p.read_text(encoding='utf-8')
+          marker = 'candidate_overlay_semantic_candidate: <exact candidate overlay or NONE>'
+          if marker not in t:
+              anchor = '3. record the exact accepted/base and overlay identities used for the current decision;\n'
+              if t.count(anchor) != 1:
+                  raise SystemExit(f'workflow HAS anchor mismatch: {t.count(anchor)}')
+              block = '''\nThe canonical session-local HAS interface is exact and executable:\n\n```yaml\npem_basis:\n  accepted_project_state: <exact accepted project state>\n  accepted_pem: <exact accepted PEM publication or NONE_PROTOCOL_6.2_PRE_PEM>\n  candidate_overlay_semantic_candidate: <exact candidate overlay or NONE>\nhas:\n  - id: <family/capability/notice id>\n    disposition: APPLICABLE | NOT_APPLICABLE | REVIEW_REQUIRED\n    reason: <bounded rationale>\n```\n\nDo not substitute aliases such as `accepted_base` or `candidate_overlay`; the workflow, canonical template, and executable validator use this one shape without translation glue. Keep the HAS session-local unless the governed work explicitly requires a durable handoff/record.\n\n'''
+              t = t.replace(anchor, anchor + block, 1)
+          p.write_text(t, encoding='utf-8')
+
+          # E1 owner: invalidate both pre-repair 6.3 bootstraps and withdraw current fallback.
+          p = Path('source/shared/references/protocol-versioning-and-compatibility.md')
+          t = p.read_text(encoding='utf-8')
+          current = f'6.3.0 public-source bootstrap -> {old}'
+          target = f'6.3.0 invalidated second bootstrap -> {old}\n6.3.0 public-source bootstrap -> {sentinel}'
+          if f'6.3.0 public-source bootstrap -> {sentinel}' not in t:
+              if t.count(current) != 1:
+                  raise SystemExit(f'versioning current-bootstrap mapping mismatch: {t.count(current)}')
+              t = t.replace(current, target, 1)
+          lines = t.splitlines()
+          if not any('both invalidated as current fallback by the reopened semantic repair' in x for x in lines):
+              for i, line in enumerate(lines):
+                  if line.startswith(f'The pre-repair Protocol 6.3 bootstrap `{first}`') and 'Recovery is still unavailable:' in line:
+                      suffix = line.split('Recovery is still unavailable:', 1)[1]
+                      lines[i] = (
+                          f'The pre-repair Protocol 6.3 bootstrap `{first}` and the second bootstrap `{old}` are immutable historical evidence only and are both invalidated as current fallback by the reopened semantic repair. '
+                          f'The current 6.3 public-source bootstrap mapping is `{sentinel}`; no 6.3 public fallback is authorized until an already-existing repaired snapshot passes bootstrap readiness and exact-ref realization and a later descendant publishes that exact SHA. '
+                          'Recovery is still unavailable:' + suffix
+                      )
+                      break
+              else:
+                  raise SystemExit('versioning 6.3 staging paragraph missing')
+          p.write_text('\n'.join(lines) + '\n', encoding='utf-8')
+
+          # Execution prompt consumes the exact current mapping, never an invalidated SHA.
+          p = Path('source/shared/references/development-workflow-prompts.md')
+          t = p.read_text(encoding='utf-8')
+          if f'CURRENT_PUBLIC_REF = {sentinel}' not in t:
+              needle = f'CURRENT_PUBLIC_REF = {old}'
+              if t.count(needle) != 1:
+                  raise SystemExit(f'CURRENT_PUBLIC_REF mapping mismatch: {t.count(needle)}')
+              t = t.replace(needle, f'CURRENT_PUBLIC_REF = {sentinel}', 1)
+          a = t.find('**Protocol 6.3 bootstrap state:** ')
+          b = t.find('\n\n`AUTO_EXECUTE` means', a)
+          if a < 0 or b < 0:
+              raise SystemExit('development workflow 6.3 bootstrap paragraph missing')
+          paragraph = (
+              f'**Protocol 6.3 bootstrap state:** all pre-repair 6.3 bootstrap snapshots are invalidated historical evidence only. '
+              f'`CURRENT_PUBLIC_REF` is `{sentinel}`, so no current 6.3 public fallback is authorized until a repaired immutable snapshot passes bootstrap readiness and exact-ref realization and a later descendant publishes that exact SHA. '
+              'Never use repository default/latest, a guessed semantic-version ref, the current candidate branch, an invalidated bootstrap, or the accepted 6.2 bootstrap as a substitute. '
+              'Version-bound 6.2 work continues to use exactly `5a062ebc472755607b9dc66d33a5ebbc4b7429aa`; historical 5.16/6.0/6.1 resolution remains version-bound to its own immutable mapping.'
+          )
+          t = t[:a] + paragraph + t[b:]
+          p.write_text(t, encoding='utf-8')
+
+          # Human-facing portability route must expose the same current state.
+          p = Path('PORTABILITY.md')
+          t = p.read_text(encoding='utf-8')
+          mapping = f'6.3.0 public bootstrap -> {old}'
+          replacement = f'6.3.0 invalidated second bootstrap -> {old}\n6.3.0 public bootstrap -> {sentinel}'
+          if f'6.3.0 public bootstrap -> {sentinel}' not in t:
+              if t.count(mapping) != 1:
+                  raise SystemExit(f'PORTABILITY 6.3 mapping mismatch: {t.count(mapping)}')
+              t = t.replace(mapping, replacement, 1)
+          old_para = (
+              f'For Protocol 6.3, pre-repair bootstrap `{first}` is invalidated historical evidence only. '
+              'The `6.3.0 public bootstrap` mapping above is the sole current fallback identity: an unavailable sentinel means no replacement fallback is authorized; an immutable Git SHA means the already-existing source snapshot passed bootstrap-readiness and exact-ref route realization before a later descendant published it.'
+          )
+          new_para = (
+              f'For Protocol 6.3, pre-repair bootstrap `{first}` and second bootstrap `{old}` are invalidated historical evidence only. '
+              f'The `6.3.0 public bootstrap` mapping above is `{sentinel}`, so no replacement fallback is currently authorized; only after an already-existing repaired source snapshot passes bootstrap-readiness and exact-ref route realization may a later descendant publish its immutable Git SHA as the new mapping.'
+          )
+          if new_para not in t:
+              if old_para not in t:
+                  raise SystemExit('PORTABILITY current 6.3 fallback paragraph missing')
+              t = t.replace(old_para, new_para, 1)
+          p.write_text(t, encoding='utf-8')
+
+          # Repository README must not advertise an invalidated bootstrap as current.
+          p = Path('README.md')
+          t = p.read_text(encoding='utf-8')
+          old_para = (
+              f'**Protocol 6.3 pre-repair bootstrap `{first}` is invalidated; the current replacement public-source bootstrap identity is `{old}`; Protocol 6.3 recovery remains unavailable.** '
+              'An unavailable sentinel means no replacement public fallback is authorized; an immutable Git SHA means the already-existing self-reference-safe source snapshot passed repository/package/profile/Core bootstrap-readiness plus exact-ref remote route realization before a later descendant published its identity.'
+          )
+          new_para = (
+              f'**Protocol 6.3 pre-repair bootstrap `{first}` and second bootstrap `{old}` are invalidated; the current public-source bootstrap identity is `{sentinel}`; Protocol 6.3 recovery remains unavailable.** '
+              'No replacement public fallback is currently authorized. A later descendant may publish an immutable Git SHA only after the already-existing repaired self-reference-safe source snapshot passes repository/package/profile/Core bootstrap-readiness plus exact-ref remote route realization.'
+          )
+          if new_para not in t:
+              if old_para not in t:
+                  raise SystemExit('README current 6.3 fallback paragraph missing')
+              t = t.replace(old_para, new_para, 1)
+          p.write_text(t, encoding='utf-8')
+
+          # Legacy regression oracles follow the current 6.3 unavailable state without weakening exact-ref discipline.
+          replacements = {
+              'tests/test_protocol_516_orchestration.py': [
+                  ('current_ref == "unavailable_pending_6.3_bootstrap_qualification"', 'current_ref == "unavailable_pending_replacement_bootstrap"'),
+              ],
+              'tests/test_protocol_61_evidence_evolution.py': [
+                  ('current_ref == "UNAVAILABLE_PENDING_6.3_BOOTSTRAP_QUALIFICATION"', 'current_ref == "UNAVAILABLE_PENDING_REPLACEMENT_BOOTSTRAP"'),
+              ],
+              'tests/test_protocol_62_representation.py': [
+                  ('current_ref == "unavailable_pending_6.3_bootstrap_qualification"', 'current_ref == "unavailable_pending_replacement_bootstrap"'),
+              ],
+          }
+          for raw, pairs in replacements.items():
+              p = Path(raw); t = p.read_text(encoding='utf-8')
+              for before, after in pairs:
+                  if after not in t:
+                      if t.count(before) != 1:
+                          raise SystemExit(f'{raw}: stale-sentinel assertion mismatch for {before!r}')
+                      t = t.replace(before, after, 1)
+              p.write_text(t, encoding='utf-8')
+
+          p = Path('tests/test_protocol_63_bootstrap.py')
+          t = p.read_text(encoding='utf-8')
+          t = t.replace(f'BOOTSTRAP = "{old}"', f'BOOTSTRAP = "{sentinel}"', 1)
+          t = t.replace(f'INVALIDATED_BOOTSTRAP = "{first}"', f'INVALIDATED_BOOTSTRAP = "{first}"\nINVALIDATED_SECOND_BOOTSTRAP = "{old}"', 1)
+          old_body = '''        self.assertIn(f'6.3.0 public-source bootstrap -> {BOOTSTRAP}', versioning)\n        self.assertIn(f'6.3.0 invalidated bootstrap attempt -> {INVALIDATED_BOOTSTRAP}', versioning)\n        self.assertNotIn(f'CURRENT_PUBLIC_REF = {INVALIDATED_BOOTSTRAP}', prompts)\n        self.assertIn(f'CURRENT_PUBLIC_REF = {BOOTSTRAP}', prompts)\n        self.assertIn(f'6.3.0 public bootstrap -> {BOOTSTRAP}', portability)\n        self.assertIn(BOOTSTRAP, readme)\n        self.assertIn('6.3.0 recovery -> UNAVAILABLE_PENDING_6.3_ACCEPTANCE', portability)\n        self.assertNotIn('6.3.0  -> ' + BOOTSTRAP, versioning)\n'''
+          new_body = '''        self.assertIn(f'6.3.0 public-source bootstrap -> {BOOTSTRAP}', versioning)\n        self.assertIn(f'6.3.0 invalidated bootstrap attempt -> {INVALIDATED_BOOTSTRAP}', versioning)\n        self.assertIn(f'6.3.0 invalidated second bootstrap -> {INVALIDATED_SECOND_BOOTSTRAP}', versioning)\n        self.assertNotIn(f'CURRENT_PUBLIC_REF = {INVALIDATED_BOOTSTRAP}', prompts)\n        self.assertNotIn(f'CURRENT_PUBLIC_REF = {INVALIDATED_SECOND_BOOTSTRAP}', prompts)\n        self.assertIn(f'CURRENT_PUBLIC_REF = {BOOTSTRAP}', prompts)\n        self.assertIn(f'6.3.0 public bootstrap -> {BOOTSTRAP}', portability)\n        self.assertIn(f'6.3.0 invalidated second bootstrap -> {INVALIDATED_SECOND_BOOTSTRAP}', portability)\n        self.assertIn(BOOTSTRAP, readme)\n        self.assertIn(INVALIDATED_SECOND_BOOTSTRAP, readme)\n        self.assertIn('6.3.0 recovery -> UNAVAILABLE_PENDING_6.3_ACCEPTANCE', portability)\n        self.assertNotIn('6.3.0  -> ' + INVALIDATED_SECOND_BOOTSTRAP, versioning)\n'''
+          if new_body not in t:
+              if old_body not in t:
+                  raise SystemExit('Protocol 6.3 bootstrap state test body mismatch')
+              t = t.replace(old_body, new_body, 1)
+          # This exact-ref realization test must skip while no replacement bootstrap is published.
+          t = t.replace('self.assertIn("UNAVAILABLE_PENDING_6.3_BOOTSTRAP_QUALIFICATION", prompts)', 'self.assertIn("UNAVAILABLE_PENDING_REPLACEMENT_BOOTSTRAP", prompts)', 1)
+          p.write_text(t, encoding='utf-8')
+          PY
+
+          # Old bootstrap may remain only as historical evidence, never a current route.
+          grep -F 'CURRENT_PUBLIC_REF = UNAVAILABLE_PENDING_REPLACEMENT_BOOTSTRAP' source/shared/references/development-workflow-prompts.md
+          grep -F '6.3.0 public-source bootstrap -> UNAVAILABLE_PENDING_REPLACEMENT_BOOTSTRAP' source/shared/references/protocol-versioning-and-compatibility.md
+          grep -F '6.3.0 public bootstrap -> UNAVAILABLE_PENDING_REPLACEMENT_BOOTSTRAP' PORTABILITY.md
+          git diff --check
+
+      - name: Install validation and Orchestrator dependencies
+        run: |
+          python -m pip install -r source/requirements-validation.txt
+          python -m pip install ./orchestrator -r orchestrator/requirements-dev.txt
+
+      - name: Validate PEM and regenerate all descendants
+        shell: bash
+        run: |
+          set -euo pipefail
+          python source/project_engineering_memory.py PROJECT-ENGINEERING-MEMORY.md --write-summary
+          rm -rf /tmp/protocol-dist /tmp/protocol-dist-check
+          python source/build_skills.py --output /tmp/protocol-dist
+          python source/validate_packages.py --dist /tmp/protocol-dist
+          rm -rf dist
+          cp -a /tmp/protocol-dist dist
+          python orchestrator/scripts/generate_protocol_snapshot.py
+
+      - name: Reopened Protocol 6.3 discriminators
+        run: |
+          python -m unittest discover -s tests -p 'test_protocol_63_engineering_memory.py' -v
+          python -m unittest discover -s tests -p 'test_protocol_63_reopened_repairs.py' -v
+          python -m unittest tests.test_protocol_63_bootstrap tests.test_protocol_516_orchestration tests.test_protocol_61_evidence_evolution tests.test_protocol_62_representation -v
+
+      - name: Full repository acceptance
+        run: python -m unittest discover -s tests -v
+
+      - name: Generated parity and whitespace
+        run: |
+          python source/build_skills.py --output /tmp/protocol-dist-check
+          python source/validate_packages.py --dist /tmp/protocol-dist-check
+          diff -ru dist /tmp/protocol-dist-check
+          python orchestrator/scripts/generate_protocol_snapshot.py --check
+          git diff --check
+
+      - name: Orchestrator Core acceptance
+        run: |
+          python orchestrator/scripts/generate_protocol_snapshot.py --check
+          python orchestrator/scripts/run_core_tests.py
+
+      - name: Remove repair transport and diagnostics, then commit assembled candidate
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -f .ssdp63-stale-ref.txt .ssdp63-snapshot-error.txt .ssdp63-fulltest-tail.txt
+          rm -f .github/workflows/ssdp63-repair-transport.yml \
+                .github/workflows/ssdp63-materialize.yml \
+                .github/workflows/ssdp63-postrepair.yml \
+                .github/workflows/ssdp63-postrepair-v2.yml \
+                .github/workflows/ssdp63-locate-stale-ref.yml \
+                .github/workflows/ssdp63-postrepair-v3.yml \
+                .github/workflows/ssdp63-postrepair-v4.yml \
+                .github/workflows/ssdp63-postrepair-v5.yml \
+                .github/workflows/ssdp63-snapshot-diagnostic.yml \
+                .github/workflows/ssdp63-postrepair-v6.yml \
+                .github/workflows/ssdp63-fulltest-diagnostic.yml \
+                .github/workflows/ssdp63-postrepair-v7.yml
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -A
+          git diff --cached --check
+          git commit -m 'Assemble repaired Protocol 6.3 candidate'
+          git push origin HEAD:ssdp-6.3-engineering-memory
