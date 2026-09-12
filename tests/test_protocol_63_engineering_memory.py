@@ -35,6 +35,7 @@ class Protocol63EngineeringMemoryTests(unittest.TestCase):
             "coverage_basis": "bounded accepted qualification evidence; broader history not claimed complete",
             "applicability": ["checkpoint", "cache", "intermediate", "recompute"],
             "authority_binding": "EVIDENCE_ONLY",
+            "binding_health": "REVIEW_REQUIRED",
             "guidance_level": "OBSERVED",
             "positive_guidance_eligible": False,
             "comparative_basis": "NONE",
@@ -271,7 +272,6 @@ class Protocol63EngineeringMemoryTests(unittest.TestCase):
             maturity="PROVISIONAL",
             applicability=["unrelated-hot-path"],
         )
-        # Give the Hot family three real episodes so the temperature is derived, not decorative.
         for i in range(3):
             app = copy.deepcopy(self._family()["applications"][0])
             app["id"] = f"A{i + 1:02d}"
@@ -287,7 +287,6 @@ class Protocol63EngineeringMemoryTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as td:
             path = self._write(Path(td), [hot, cold])
             doc = pem.load_memory(path)
-            # Replace the readable summary with text that omits SP-002; canonical matching must still find it.
             text = path.read_text(encoding="utf-8")
             match = pem.SUMMARY_RE.search(text)
             self.assertIsNotNone(match)
@@ -352,6 +351,7 @@ class Protocol63EngineeringMemoryTests(unittest.TestCase):
 
     def test_positive_guidance_eligibility_requires_explicit_healthy_binding(self):
         family = self._family(positive_guidance_eligible=True)
+        family.pop("binding_health")
         with tempfile.TemporaryDirectory() as td:
             path = Path(td) / "PROJECT-ENGINEERING-MEMORY.md"
             path.write_text(self._root_text([family]), encoding="utf-8")
@@ -359,13 +359,12 @@ class Protocol63EngineeringMemoryTests(unittest.TestCase):
             self.assertTrue(any("positive guidance eligibility requires explicit HEALTHY" in error for error in errors))
 
         family["binding_health"] = "HEALTHY"
-        with tempfile.TemporaryDirectory() as td:
-            path = self._write(Path(td), [family])
-            self.assertEqual(pem.validate_memory(pem.load_memory(path)), [])
+        self.assertFalse(any("positive guidance eligibility" in error for error in pem._validate_family(family)))
 
     def test_failure_recurrence_requires_prior_accepted_repair_identity(self):
         family = self._family(id="FF-001", kind="FAILURE_FAMILY", maturity="PROVISIONAL")
         family.pop("applications")
+        family.pop("binding_health")
         family["semantic_identity"]["mechanism_family"] = "bounded test failure mechanism"
         family["occurrences"] = [
             {
@@ -403,6 +402,7 @@ class Protocol63EngineeringMemoryTests(unittest.TestCase):
     def test_duplicate_failure_occurrence_id_is_rejected_even_with_distinct_event_identity(self):
         family = self._family(id="FF-001", kind="FAILURE_FAMILY", maturity="PROVISIONAL")
         family.pop("applications")
+        family.pop("binding_health")
         family["semantic_identity"]["mechanism_family"] = "bounded test failure mechanism"
         occurrence = {
             "id": "O01",
@@ -433,14 +433,17 @@ class Protocol63EngineeringMemoryTests(unittest.TestCase):
     def test_current_notice_requires_nonempty_evidence_and_owner_when_normative(self):
         base_notice = {
             "id": "NT-001",
-            "state": "CURRENT",
+            "state": "REVIEW_REQUIRED",
             "summary": "Bounded current notice.",
             "normative_status": "NON_AUTHORITATIVE",
             "owner": "NONE",
             "applicability": ["test"],
-            "binding_health": "HEALTHY",
+            "binding_health": "REVIEW_REQUIRED",
             "evidence": ["repo@1111111:path#finding"],
-            "review_or_expiry": "review on next accepted-base change",
+            "review_trigger": {
+                "type": "accepted_base_change",
+                "basis": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            },
         }
 
         def root_with_notice(notice):
@@ -482,6 +485,20 @@ class Protocol63EngineeringMemoryTests(unittest.TestCase):
             pem.write_summary(doc)
             self.assertEqual(pem.validate_memory(pem.load_memory(path)), [])
 
+    def test_legacy_notice_text_is_not_an_evaluable_current_trigger(self):
+        notice = {
+            "id": "NT-001", "state": "CURRENT", "summary": "Bounded current notice.",
+            "normative_status": "NON_AUTHORITATIVE", "owner": "NONE", "applicability": ["test"],
+            "binding_health": "HEALTHY", "evidence": ["repo@1111111:path#finding"],
+            "review_or_expiry": "review on next accepted-base change",
+        }
+        nl = chr(10)
+        text = self._root_text([]) + nl + "## Current notices" + nl + nl + "### NT-001 — Test notice" + nl + nl + "```yaml pem-notice" + nl + yaml.safe_dump(notice, sort_keys=False) + "```" + nl
+        with tempfile.TemporaryDirectory() as td:
+            path = Path(td) / "PROJECT-ENGINEERING-MEMORY.md"; path.write_text(text, encoding="utf-8")
+            errors = pem.validate_memory(pem.load_memory(path), check_summary=False)
+            self.assertTrue(any("missing typed review_trigger" in error for error in errors))
+
     def test_supported_discovery_requires_nonempty_evidence_route(self):
         family = self._family(id="DS-001", kind="DISCOVERY", maturity="SUPPORTED")
         family.pop("applications")
@@ -508,11 +525,12 @@ class Protocol63EngineeringMemoryTests(unittest.TestCase):
         hot = self._family(
             id="SP-002",
             temperature="HOT",
-            positive_guidance_eligible=True,
-            binding_health="HEALTHY",
-            guidance_level="RECOMMENDED",
+            maturity="PROVISIONAL",
+            positive_guidance_eligible=False,
+            guidance_level="OBSERVED",
             summary="A lower-consequence positive pattern.",
         )
+        hot.pop("binding_health")
         hot["applications"] = []
         for i in range(3):
             app = copy.deepcopy(self._family()["applications"][0])

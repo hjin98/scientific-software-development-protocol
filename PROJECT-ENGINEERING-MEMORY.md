@@ -21,9 +21,9 @@ This is the Scientific Software Development Protocol (SSDP) repository's project
 <!-- BEGIN DERIVED PEM SUMMARY -->
 | ID | Kind | Temperature | Maturity/state | Binding | Guidance | Current evidence | Bounded lesson |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| FF-001 | FAILURE_FAMILY | UNASSESSED | SUPPORTED/CURRENT | EVIDENCE_ONLY | OBSERVED | 1 confirmed | Publishing an immutable public-source fallback before the source state contains all required repaired routes can freeze a semantically stale bootstrap even when the branch later becomes correct. |
+| FF-001 | FAILURE_FAMILY | UNASSESSED | SUPPORTED/CURRENT | EVIDENCE_ONLY/HEALTHY | OBSERVED | 1 confirmed | Publishing an immutable public-source fallback before the source state contains all required repaired routes can freeze a semantically stale bootstrap even when the branch later becomes correct. |
 | PC-001 | PRESERVATION_CAPABILITY | UNASSESSED | SUPPORTED/CURRENT | AUTHORITY_BOUND/HEALTHY | OBSERVED | 2 evidence route(s) | Successor protocol work must preserve version-bound frozen historical profiles/resources independently; adding a new profile is not permission to mutate prior-version bytes or recovery semantics. |
-| SP-001 | SUCCESS_PATTERN | UNASSESSED | SUPPORTED/CURRENT | EVIDENCE_ONLY | OBSERVED | 1 supporting / 0 neutral / 0 contradicting / 0 inconclusive | For source-to-package routing defects, repairing the canonical router first and regenerating derived packages restored both activation semantics and transport reachability without creating package-side shadow authority. |
+| SP-001 | SUCCESS_PATTERN | UNASSESSED | SUPPORTED/CURRENT | EVIDENCE_ONLY/HEALTHY | OBSERVED | 1 supporting / 0 neutral / 0 contradicting / 0 inconclusive | For source-to-package routing defects, repairing the canonical router first and regenerating derived packages restored both activation semantics and transport reachability without creating package-side shadow authority. |
 <!-- END DERIVED PEM SUMMARY -->
 
 ## Families
@@ -52,6 +52,7 @@ applicability:
   - replacement bootstrap
   - route repair before publication
 authority_binding: EVIDENCE_ONLY
+binding_health: HEALTHY
 guidance_level: OBSERVED
 relations: []
 occurrences:
@@ -66,7 +67,7 @@ occurrences:
     observation: The first Protocol 6.2 bootstrap was published from a snapshot predating the later documentation cold-route repair and was subsequently invalidated rather than retained as current fallback.
     cause_claim: The bootstrap designation occurred before the source snapshot contained the required repaired cold routes, so later branch correctness could not make that already-immutable snapshot satisfy the current fallback contract.
     cause_evidence:
-      - "hjin98/scientific-software-development-protocol@0a7f7559c771aae00367941e9fe7d0205a5965a1:qualification/ssdp6/RESULTS-GPT-5.6-SOL-2026-09-10-PROTOCOL-6.2-BOOTSTRAP-REQUALIFICATION.md"
+      - "hjin98/scientific-software-development-protocol@b59adc77efe6951912cfd705cc43830c58ca27d0:qualification/ssdp6/RESULTS-GPT-5.6-SOL-2026-09-10-PROTOCOL-6.2-BOOTSTRAP-REQUALIFICATION.md"
       - "hjin98/scientific-software-development-protocol@b59adc77efe6951912cfd705cc43830c58ca27d0:qualification/ssdp6/FINAL-REVIEW-GPT-5.6-SOL-2026-09-10-PROTOCOL-6.2.md"
     repair: "replacement bootstrap 5a062ebc472755607b9dc66d33a5ebbc4b7429aa; descendant semantic candidate ebbc4591bdfed039512026b8acb3a6749475c1c5 published that exact identity after validation"
     repair_acceptance: "Protocol 6.2 accepted recovery b59adc77efe6951912cfd705cc43830c58ca27d0"
@@ -76,7 +77,7 @@ occurrences:
         state: ADMISSIBLE
         conclusion: CONFIRMED
         evidence:
-          - "hjin98/scientific-software-development-protocol@0a7f7559c771aae00367941e9fe7d0205a5965a1:qualification/ssdp6/RESULTS-GPT-5.6-SOL-2026-09-10-PROTOCOL-6.2-BOOTSTRAP-REQUALIFICATION.md"
+          - "hjin98/scientific-software-development-protocol@b59adc77efe6951912cfd705cc43830c58ca27d0:qualification/ssdp6/RESULTS-GPT-5.6-SOL-2026-09-10-PROTOCOL-6.2-BOOTSTRAP-REQUALIFICATION.md"
           - "hjin98/scientific-software-development-protocol@b59adc77efe6951912cfd705cc43830c58ca27d0:qualification/ssdp6/FINAL-REVIEW-GPT-5.6-SOL-2026-09-10-PROTOCOL-6.2.md"
 ```
 
@@ -137,6 +138,7 @@ applicability:
   - regenerate dist
   - cold route repair
 authority_binding: EVIDENCE_ONLY
+binding_health: HEALTHY
 guidance_level: OBSERVED
 positive_guidance_eligible: false
 comparative_basis: NONE
@@ -165,7 +167,7 @@ applications:
         state: ADMISSIBLE
         conclusion: SUPPORTS_BOUNDED_CLAIM
         evidence:
-          - "hjin98/scientific-software-development-protocol@1a997bbc485c899c4a352a58ab60fb0e7d1eb8fe:qualification/ssdp6/RESULTS-GPT-5.6-SOL-2026-09-10-PROTOCOL-6.2-ROUTING-REQUALIFICATION.md"
+          - "hjin98/scientific-software-development-protocol@b59adc77efe6951912cfd705cc43830c58ca27d0:qualification/ssdp6/RESULTS-GPT-5.6-SOL-2026-09-10-PROTOCOL-6.2-ROUTING-REQUALIFICATION.md"
           - "hjin98/scientific-software-development-protocol@b59adc77efe6951912cfd705cc43830c58ca27d0:qualification/ssdp6/FINAL-REVIEW-GPT-5.6-SOL-2026-09-10-PROTOCOL-6.2.md"
 ```
 
