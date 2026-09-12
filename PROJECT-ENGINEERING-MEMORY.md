@@ -67,7 +67,7 @@ occurrences:
     cause_claim: The bootstrap designation occurred before the source snapshot contained the required repaired cold routes, so later branch correctness could not make that already-immutable snapshot satisfy the current fallback contract.
     cause_evidence:
       - "hjin98/scientific-software-development-protocol@0a7f7559c771aae00367941e9fe7d0205a5965a1:qualification/ssdp6/RESULTS-GPT-5.6-SOL-2026-09-10-PROTOCOL-6.2-BOOTSTRAP-REQUALIFICATION.md"
-      - "hjin98/scientific-software-development-protocol@8553b40a240042ef37eb693a14b5e1ddac464ef2:qualification/ssdp6/FINAL-REVIEW-GPT-5.6-SOL-2026-09-10-PROTOCOL-6.2.md"
+      - "hjin98/scientific-software-development-protocol@b59adc77efe6951912cfd705cc43830c58ca27d0:qualification/ssdp6/FINAL-REVIEW-GPT-5.6-SOL-2026-09-10-PROTOCOL-6.2.md"
     repair: "replacement bootstrap 5a062ebc472755607b9dc66d33a5ebbc4b7429aa; descendant semantic candidate ebbc4591bdfed039512026b8acb3a6749475c1c5 published that exact identity after validation"
     repair_acceptance: "Protocol 6.2 accepted recovery b59adc77efe6951912cfd705cc43830c58ca27d0"
     provenance_cluster: ssdp62-bootstrap-repair
@@ -77,7 +77,7 @@ occurrences:
         conclusion: CONFIRMED
         evidence:
           - "hjin98/scientific-software-development-protocol@0a7f7559c771aae00367941e9fe7d0205a5965a1:qualification/ssdp6/RESULTS-GPT-5.6-SOL-2026-09-10-PROTOCOL-6.2-BOOTSTRAP-REQUALIFICATION.md"
-          - "hjin98/scientific-software-development-protocol@8553b40a240042ef37eb693a14b5e1ddac464ef2:qualification/ssdp6/FINAL-REVIEW-GPT-5.6-SOL-2026-09-10-PROTOCOL-6.2.md"
+          - "hjin98/scientific-software-development-protocol@b59adc77efe6951912cfd705cc43830c58ca27d0:qualification/ssdp6/FINAL-REVIEW-GPT-5.6-SOL-2026-09-10-PROTOCOL-6.2.md"
 ```
 
 ### PC-001 — Frozen prior-version profile/resource preservation
@@ -109,7 +109,7 @@ binding_health: HEALTHY
 guidance_level: OBSERVED
 relations: []
 evidence:
-  - "hjin98/scientific-software-development-protocol@8553b40a240042ef37eb693a14b5e1ddac464ef2:qualification/ssdp6/FINAL-REVIEW-GPT-5.6-SOL-2026-09-10-PROTOCOL-6.2.md"
+  - "hjin98/scientific-software-development-protocol@b59adc77efe6951912cfd705cc43830c58ca27d0:qualification/ssdp6/FINAL-REVIEW-GPT-5.6-SOL-2026-09-10-PROTOCOL-6.2.md"
   - "hjin98/scientific-software-development-protocol@82e6e1badf2c88c00967155bb9d30c773b80d1ef:qualification/ssdp6/SSDP-6.3-PRESERVATION-CENSUS.md"
 ```
 
@@ -166,7 +166,7 @@ applications:
         conclusion: SUPPORTS_BOUNDED_CLAIM
         evidence:
           - "hjin98/scientific-software-development-protocol@1a997bbc485c899c4a352a58ab60fb0e7d1eb8fe:qualification/ssdp6/RESULTS-GPT-5.6-SOL-2026-09-10-PROTOCOL-6.2-ROUTING-REQUALIFICATION.md"
-          - "hjin98/scientific-software-development-protocol@8553b40a240042ef37eb693a14b5e1ddac464ef2:qualification/ssdp6/FINAL-REVIEW-GPT-5.6-SOL-2026-09-10-PROTOCOL-6.2.md"
+          - "hjin98/scientific-software-development-protocol@b59adc77efe6951912cfd705cc43830c58ca27d0:qualification/ssdp6/FINAL-REVIEW-GPT-5.6-SOL-2026-09-10-PROTOCOL-6.2.md"
 ```
 
 ## Current notices

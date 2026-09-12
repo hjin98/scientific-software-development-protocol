@@ -61,13 +61,14 @@ The first Protocol 6.2 pre-acceptance bootstrap attempt was later invalidated by
 
 The invalidated SHA remains historical implementation evidence only and **must not** be used as current Protocol 6.2 public fallback. The replacement SHA is the immutable self-reference-safe source snapshot whose source regression, canonical package build, and independent standalone package/link validation passed before this descendant published it.
 
-Protocol 6.3 public-source bootstrap is likewise distinct from future recovery:
+Protocol 6.3 replacement public-source bootstrap is likewise distinct from future recovery:
 
 ```text
-6.3.0 public-source bootstrap -> 1484c1d3caa49d87cc15bc52a5e775399c1dae1b
+6.3.0 invalidated bootstrap attempt -> 1484c1d3caa49d87cc15bc52a5e775399c1dae1b
+6.3.0 public-source bootstrap -> UNAVAILABLE_PENDING_6.3_BOOTSTRAP_QUALIFICATION
 ```
 
-That immutable ancestor passed repository regression, canonical package build, independent package validation and committed-distribution parity, Protocol 6.3 profile/snapshot parity, the full Orchestrator Core acceptance suite, and an exact-ref remote source/route/bootstrap realization before this descendant published the mapping. The bootstrap snapshot intentionally does not self-name; this later mapping supplies the version-to-ref authority. Protocol 6.3 recovery remains unavailable until complete qualification and independent Review close.
+The pre-repair Protocol 6.3 bootstrap remains immutable historical evidence only and must not be used as current fallback. The value on the `public-source bootstrap` line is the sole current 6.3 fallback mapping: an unavailable sentinel means no replacement fallback is published, while an immutable Git SHA means the already-existing self-reference-safe snapshot passed repository regression, canonical package build, independent package validation and committed-distribution parity, Protocol 6.3 profile/snapshot parity, the full Orchestrator Core acceptance suite, and exact-ref remote source/route realization before a later descendant published it. Protocol 6.3 recovery remains unavailable until complete qualification and independent Review close.
 
 The repository default branch is never a protocol-version oracle and a semantic version string is not assumed to be a Git ref.
 
@@ -107,13 +108,13 @@ Protocol 6.3 follows the same self-reference-safe separation learned from 6.2, w
 
 1. build the semantic/source candidate and self-hosted **candidate** PEM without claiming recovery;
 2. run source regression, 6.3 schema/route/counterfactual tests, inherited qualification, package/profile/Core integrity, static sensors and required falsification passes on the assembled candidate;
-3. use public-source bootstrap `1484c1d3caa49d87cc15bc52a5e775399c1dae1b` for version-bound 6.3 public fallback; that already-existing source state passed bootstrap-readiness checks before this later descendant published the exact mapping—never substitute `main`/latest/guessed version;
+3. qualify an already-existing self-reference-safe replacement public-source snapshot before publishing its exact immutable identity from a later descendant; never substitute `main`/latest/guessed version or an invalidated attempt;
 4. generate a new `ssdp-protocol-6.3` profile/prompts/snapshots without altering frozen 6.2 bytes;
 5. perform independent Protocol 6.3 Review against the assembled candidate and accepted 6.2 baseline;
 6. only after all required acceptance/Review/impact items pass, establish an immutable 6.3 recovery target and publish its mapping from a descendant commit because a commit cannot self-name;
 7. regenerate mapping-bearing descendants and rerun recovery/parity/package/Core acceptance before any accepted-current cutover.
 
-The exact 6.3 public-source bootstrap is now `1484c1d3caa49d87cc15bc52a5e775399c1dae1b` and is usable only as the version-bound 6.3 public fallback. Recovery is still unavailable: **do not insert placeholders or guessed SHAs into recovery mappings** and do not treat the candidate profile as accepted-current. The accepted 6.2 mappings above remain operative for 6.2.
+The pre-repair Protocol 6.3 bootstrap `1484c1d3caa49d87cc15bc52a5e775399c1dae1b` is invalidated. The current 6.3 public-source bootstrap mapping is `UNAVAILABLE_PENDING_6.3_BOOTSTRAP_QUALIFICATION`; an unavailable sentinel means no public fallback is currently authorized, while an immutable Git SHA on that mapping is usable only as the version-bound 6.3 public fallback after its readiness and exact-ref realization have passed. Recovery is still unavailable: **do not insert placeholders or guessed SHAs into recovery mappings** and do not treat the candidate profile as accepted-current. The accepted 6.2 mappings above remain operative for 6.2.
 
 ## Candidate identity and compatibility
 

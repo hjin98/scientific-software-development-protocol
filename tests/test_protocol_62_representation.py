@@ -133,7 +133,11 @@ class Protocol62RepresentationTests(unittest.TestCase):
                 self.assertNotIn("automatic current-6.2 public fallback is unavailable", prompt)
             else:
                 self.assertIn(f"accepted_6_2_public_ref = {bootstrap}", prompt)
-                self.assertIn("current_public_ref = 1484c1d3caa49d87cc15bc52a5e775399c1dae1b", prompt)
+                current = re.search(r"current_public_ref = ([^\s]+)", prompt)
+                self.assertIsNotNone(current)
+                current_ref = current.group(1)
+                self.assertNotEqual(current_ref, "1484c1d3caa49d87cc15bc52a5e775399c1dae1b")
+                self.assertTrue(current_ref == "unavailable_pending_6.3_bootstrap_qualification" or re.fullmatch(r"[0-9a-f]{40}", current_ref))
             self.assertNotIn("automatic current-6.2 public fallback is unavailable", portability)
             self.assertIn("repository-default bytes are never a substitute", prompt)
 
