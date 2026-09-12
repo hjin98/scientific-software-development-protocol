@@ -9,7 +9,8 @@ import urllib.request
 from pathlib import Path
 
 
-BOOTSTRAP = "dc22f09fd38dbbfeaeb0160152da9b284654f66e"
+BOOTSTRAP = "UNAVAILABLE_PENDING_REPLACEMENT_BOOTSTRAP"
+INVALIDATED_D4R3_BOOTSTRAP = "dc22f09fd38dbbfeaeb0160152da9b284654f66e"
 INVALIDATED_BOOTSTRAP = "1484c1d3caa49d87cc15bc52a5e775399c1dae1b"
 INVALIDATED_SECOND_BOOTSTRAP = "5ee4b3ac3ca1666b0499f7a72f55adcc411bf4bb"
 INVALIDATED_OWNER_BINDING_BOOTSTRAP = "e12572c021087308570abfa41657a910c6896457"
@@ -28,12 +29,14 @@ class Protocol63BootstrapTests(unittest.TestCase):
         self.assertIn(f'6.3.0 invalidated bootstrap attempt -> {INVALIDATED_BOOTSTRAP}', versioning)
         self.assertIn(f'6.3.0 invalidated second bootstrap -> {INVALIDATED_SECOND_BOOTSTRAP}', versioning)
         self.assertIn(f'6.3.0 invalidated owner-binding bootstrap -> {INVALIDATED_OWNER_BINDING_BOOTSTRAP}', versioning)
+        self.assertIn(f'6.3.0 invalidated D4R3 bootstrap -> {INVALIDATED_D4R3_BOOTSTRAP}', versioning)
         self.assertNotIn(f'CURRENT_PUBLIC_REF = {INVALIDATED_BOOTSTRAP}', prompts)
         self.assertNotIn(f'CURRENT_PUBLIC_REF = {INVALIDATED_SECOND_BOOTSTRAP}', prompts)
         self.assertNotIn(f'CURRENT_PUBLIC_REF = {INVALIDATED_OWNER_BINDING_BOOTSTRAP}', prompts)
         self.assertIn(f'CURRENT_PUBLIC_REF = {BOOTSTRAP}', prompts)
         self.assertIn(f'6.3.0 public bootstrap -> {BOOTSTRAP}', portability)
         self.assertIn(f'6.3.0 invalidated owner-binding bootstrap -> {INVALIDATED_OWNER_BINDING_BOOTSTRAP}', portability)
+        self.assertIn(f'6.3.0 invalidated D4R3 bootstrap -> {INVALIDATED_D4R3_BOOTSTRAP}', portability)
         self.assertIn(INVALIDATED_OWNER_BINDING_BOOTSTRAP, readme)
         self.assertIn(INVALIDATED_SECOND_BOOTSTRAP, readme)
         self.assertIn('6.3.0 recovery -> UNAVAILABLE_PENDING_6.3_ACCEPTANCE', portability)
