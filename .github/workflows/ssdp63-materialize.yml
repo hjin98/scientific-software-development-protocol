@@ -1,0 +1,70 @@
+name: Materialize Protocol 6.3 repair
+
+on:
+  push:
+    branches:
+      - ssdp-6.3-engineering-memory
+    paths:
+      - .github/workflows/ssdp63-materialize.yml
+
+permissions:
+  contents: write
+
+jobs:
+  materialize:
+    if: github.event.head_commit.message == 'Materialize Protocol 6.3 repair payload'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install validation dependencies
+        run: python -m pip install -r source/requirements-validation.txt
+      - name: Materialize staged canonical repair
+        shell: bash
+        run: |
+          set -euo pipefail
+          cat .ssdp63-repair/payload-1.b64 .ssdp63-repair/payload-2.b64 .ssdp63-repair/payload-3.b64 \
+            | tr -d '\n\r ' \
+            | base64 -d \
+            | gzip -dc \
+            | tar -xf -
+          python - <<'PY'
+          from pathlib import Path
+          path = Path('PROJECT-ENGINEERING-MEMORY.md')
+          text = path.read_text(encoding='utf-8')
+          text = text.replace(
+              'authority_binding: EVIDENCE_ONLY\nguidance_level: OBSERVED',
+              'authority_binding: EVIDENCE_ONLY\nbinding_health: HEALTHY\nguidance_level: OBSERVED',
+          )
+          text = text.replace(
+              '@0a7f7559c771aae00367941e9fe7d0205a5965a1:',
+              '@b59adc77efe6951912cfd705cc43830c58ca27d0:',
+          )
+          text = text.replace(
+              '@1a997bbc485c899c4a352a58ab60fb0e7d1eb8fe:',
+              '@b59adc77efe6951912cfd705cc43830c58ca27d0:',
+          )
+          path.write_text(text, encoding='utf-8')
+          PY
+          python source/project_engineering_memory.py PROJECT-ENGINEERING-MEMORY.md --write-summary
+          python -m unittest discover -s tests -p 'test_protocol_63*.py' -v
+          git diff --check
+      - name: Commit canonical repair
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git rm .ssdp63-repair/payload-1.b64 .ssdp63-repair/payload-2.b64 .ssdp63-repair/payload-3.b64
+          git add source/project_engineering_memory.py \
+                  source/shared/templates/project_engineering_memory_template.md \
+                  tests/test_protocol_63_engineering_memory.py \
+                  tests/test_protocol_63_reopened_repairs.py \
+                  PROJECT-ENGINEERING-MEMORY.md
+          git diff --cached --check
+          git commit -m 'Repair Protocol 6.3 PEM evidence contracts'
+          git push origin HEAD:ssdp-6.3-engineering-memory
