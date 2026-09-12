@@ -35,6 +35,22 @@ class Protocol63BootstrapTests(unittest.TestCase):
         self.assertIn(INVALIDATED_SECOND_BOOTSTRAP, readme)
         self.assertIn('6.3.0 recovery -> UNAVAILABLE_PENDING_6.3_ACCEPTANCE', portability)
         self.assertNotIn('6.3.0  -> ' + INVALIDATED_SECOND_BOOTSTRAP, versioning)
+        stale_transition_fragments = (
+            'no current 6.3 public fallback is authorized',
+            'no 6.3 public fallback is authorized until',
+            'no replacement public fallback is currently authorized',
+            'no replacement fallback is currently authorized',
+        )
+        for document_name, document in (("versioning", versioning), ("prompts", prompts), ("portability", portability), ("readme", readme)):
+            lowered = document.lower()
+            for fragment in stale_transition_fragments:
+                self.assertNotIn(fragment, lowered, f"{document_name} retains pre-publication fallback state: {fragment}")
+        self.assertIn(f'The immutable repaired self-reference-safe source snapshot `{BOOTSTRAP}`', prompts)
+        self.assertIn('sole current Protocol 6.3 public-source fallback', prompts)
+        self.assertIn(f'The immutable repaired snapshot `{BOOTSTRAP}`', versioning)
+        self.assertIn('sole current 6.3 public-source fallback', versioning)
+        self.assertIn('authorized version-bound 6.3 public fallback', readme)
+        self.assertIn('sole authorized version-bound 6.3 public fallback', portability)
 
     def test_published_bootstrap_snapshot_is_real_self_reference_safe_and_route_complete(self) -> None:
         if BOOTSTRAP.startswith("UNAVAILABLE_"):
