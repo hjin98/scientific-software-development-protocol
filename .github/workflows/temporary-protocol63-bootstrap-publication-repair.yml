@@ -1,4 +1,4 @@
-name: Temporary Protocol 6.3 bootstrap publication repair
+name: Temporary Protocol 6.3 replacement bootstrap lifecycle
 
 on:
   push:
@@ -9,7 +9,7 @@ permissions:
 
 jobs:
   repair:
-    if: github.event.head_commit.message == 'Repair Protocol 6.3 bootstrap publication binding'
+    if: github.event.head_commit.message == 'Repair Protocol 6.3 replacement bootstrap lifecycle'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -23,7 +23,7 @@ jobs:
         run: |
           python -m pip install -r source/requirements-validation.txt
           python -m pip install ./orchestrator -r orchestrator/requirements-dev.txt
-      - name: Repair exact bootstrap publication owners
+      - name: Create and validate self-reference-safe replacement snapshot
         shell: bash
         run: |
           set -euxo pipefail
@@ -33,95 +33,126 @@ jobs:
           from pathlib import Path
 
           OLD = 'dc22f09fd38dbbfeaeb0160152da9b284654f66e'
-          NEW = '190c8b4d352c203ef74c94d57c4f18d30eb7186d'
+          SENT = 'UNAVAILABLE_PENDING_REPLACEMENT_BOOTSTRAP'
 
-          def rw(path, fn):
+          def replace(path, old, new):
               p = Path(path)
               t = p.read_text(encoding='utf-8')
-              n = fn(t)
-              if n == t:
-                  raise SystemExit(f'no repair applied to {path}')
-              p.write_text(n, encoding='utf-8')
+              if old not in t:
+                  raise SystemExit(f'missing anchor in {path}: {old!r}')
+              p.write_text(t.replace(old, new, 1), encoding='utf-8')
 
-          def versioning(t):
-              old = f'6.3.0 public-source bootstrap -> {OLD}'
-              new = f'6.3.0 invalidated D4R3 bootstrap -> {OLD}\n6.3.0 public-source bootstrap -> {NEW}'
-              if old not in t: raise SystemExit('versioning mapping anchor missing')
-              t = t.replace(old, new, 1)
-              oldp = f'The immutable D4R3-repaired snapshot `{OLD}` passed bootstrap readiness and exact-ref realization and a later mapping descendant published that exact SHA, so it is now the sole current 6.3 public-source fallback.'
-              newp = f'The immutable D4R3-repaired snapshot `{OLD}` was valid for its candidate but became historical when D9 changed canonical validator semantics. D9 candidate `{NEW}` then passed the assembled acceptance surface before publication, and its later F5 descendant published that already-existing exact SHA; `{NEW}` is therefore the sole current 6.3 public-source fallback.'
-              if oldp not in t: raise SystemExit('versioning staging paragraph missing')
-              return t.replace(oldp, newp, 1)
+          replace('source/shared/references/protocol-versioning-and-compatibility.md',
+                  f'6.3.0 public-source bootstrap -> {OLD}',
+                  f'6.3.0 invalidated D4R3 bootstrap -> {OLD}\n6.3.0 public-source bootstrap -> {SENT}')
+          replace('source/shared/references/protocol-versioning-and-compatibility.md',
+                  f'The immutable D4R3-repaired snapshot `{OLD}` passed bootstrap readiness and exact-ref realization and a later mapping descendant published that exact SHA, so it is now the sole current 6.3 public-source fallback.',
+                  f'The D4R3 snapshot `{OLD}` became historical when D9 changed canonical validator semantics. A replacement self-reference-safe snapshot is being qualified; until its exact immutable SHA is published by a later descendant, current 6.3 public-source fallback is unavailable.')
 
-          def portability(t):
-              old = f'6.3.0 public bootstrap -> {OLD}'
-              new = f'6.3.0 invalidated D4R3 bootstrap -> {OLD}\n6.3.0 public bootstrap -> {NEW}'
-              if old not in t: raise SystemExit('portability mapping anchor missing')
-              t = t.replace(old, new, 1)
-              oldp = f'The repaired immutable snapshot `{OLD}` passed bootstrap readiness and exact-ref route realization and was published by a later mapping descendant, so the `6.3.0 public bootstrap` mapping above is the sole authorized version-bound 6.3 public fallback.'
-              newp = f'The D4R3 snapshot `{OLD}` is historical after the D9 validator-semantic repair. The already-existing D9 candidate `{NEW}` passed the assembled acceptance surface before its later F5 descendant published that exact SHA, so the `6.3.0 public bootstrap` mapping above is the sole authorized version-bound 6.3 public fallback.'
-              if oldp not in t: raise SystemExit('portability paragraph missing')
-              return t.replace(oldp, newp, 1)
+          replace('PORTABILITY.md',
+                  f'6.3.0 public bootstrap -> {OLD}',
+                  f'6.3.0 invalidated D4R3 bootstrap -> {OLD}\n6.3.0 public bootstrap -> {SENT}')
+          replace('PORTABILITY.md',
+                  f'The repaired immutable snapshot `{OLD}` passed bootstrap readiness and exact-ref route realization and was published by a later mapping descendant, so the `6.3.0 public bootstrap` mapping above is the sole authorized version-bound 6.3 public fallback.',
+                  f'The D4R3 snapshot `{OLD}` became historical after the D9 validator-semantic repair. A replacement self-reference-safe snapshot is being qualified; until a later descendant publishes its exact immutable SHA, no current 6.3 public fallback is authorized.')
 
-          def prompts(t):
-              if f'CURRENT_PUBLIC_REF = {OLD}' not in t: raise SystemExit('prompt ref missing')
-              t = t.replace(f'CURRENT_PUBLIC_REF = {OLD}', f'CURRENT_PUBLIC_REF = {NEW}', 1)
-              oldp = f'**Protocol 6.3 bootstrap state:** all earlier 6.3 bootstrap snapshots, including owner-binding-invalidated `e12572c021087308570abfa41657a910c6896457`, are historical evidence only. The immutable D4R3-repaired self-reference-safe source snapshot `{OLD}` passed bootstrap readiness and exact-ref realization and was published by a later mapping descendant, so it is the sole current Protocol 6.3 public-source fallback.'
-              newp = f'**Protocol 6.3 bootstrap state:** all earlier 6.3 bootstrap snapshots, including owner-binding-invalidated `e12572c021087308570abfa41657a910c6896457` and D4R3 snapshot `{OLD}`, are historical evidence only. D9 candidate `{NEW}` changed canonical validator semantics, passed the assembled acceptance surface as an already-existing self-reference-safe snapshot, and was published only by its later F5 descendant; it is the sole current Protocol 6.3 public-source fallback.'
-              if oldp not in t: raise SystemExit('prompt bootstrap paragraph missing')
-              return t.replace(oldp, newp, 1)
+          replace('source/shared/references/development-workflow-prompts.md',
+                  f'CURRENT_PUBLIC_REF = {OLD}', f'CURRENT_PUBLIC_REF = {SENT}')
+          replace('source/shared/references/development-workflow-prompts.md',
+                  f'**Protocol 6.3 bootstrap state:** all earlier 6.3 bootstrap snapshots, including owner-binding-invalidated `e12572c021087308570abfa41657a910c6896457`, are historical evidence only. The immutable D4R3-repaired self-reference-safe source snapshot `{OLD}` passed bootstrap readiness and exact-ref realization and was published by a later mapping descendant, so it is the sole current Protocol 6.3 public-source fallback. This mapping does not make Protocol 6.3 accepted-current and does not establish recovery; recovery remains unavailable pending complete qualification and independent Review.',
+                  f'**Protocol 6.3 bootstrap state:** all earlier 6.3 bootstrap snapshots, including owner-binding-invalidated `e12572c021087308570abfa41657a910c6896457` and D4R3 snapshot `{OLD}`, are historical evidence only. D9 changed canonical validator semantics, so no current 6.3 public fallback is authorized until a newly qualified self-reference-safe snapshot is published by a later descendant. Recovery remains unavailable pending complete qualification and independent Review.')
 
-          def readme(t):
-              oldp = f'**Protocol 6.3 bootstrap attempts `1484c1d3caa49d87cc15bc52a5e775399c1dae1b`, `5ee4b3ac3ca1666b0499f7a72f55adcc411bf4bb`, and owner-binding-invalidated `e12572c021087308570abfa41657a910c6896457` are historical only; the current public-source bootstrap identity is `{OLD}`; Protocol 6.3 recovery remains unavailable.** The D4R3-repaired immutable snapshot passed repository/package/profile/Core bootstrap readiness plus exact-ref remote route realization and was published by a later mapping descendant, so it is the authorized version-bound 6.3 public fallback.'
-              newp = f'**Protocol 6.3 bootstrap attempts `1484c1d3caa49d87cc15bc52a5e775399c1dae1b`, `5ee4b3ac3ca1666b0499f7a72f55adcc411bf4bb`, owner-binding-invalidated `e12572c021087308570abfa41657a910c6896457`, and D4R3 snapshot `{OLD}` are historical only; the current public-source bootstrap identity is `{NEW}`; Protocol 6.3 recovery remains unavailable.** D9 changed canonical validator semantics, so the already-existing D9 candidate was requalified before its later F5 descendant published that exact SHA as the authorized version-bound 6.3 public fallback.'
-              if oldp not in t: raise SystemExit('README bootstrap paragraph missing')
-              return t.replace(oldp, newp, 1)
+          replace('README.md',
+                  f'**Protocol 6.3 bootstrap attempts `1484c1d3caa49d87cc15bc52a5e775399c1dae1b`, `5ee4b3ac3ca1666b0499f7a72f55adcc411bf4bb`, and owner-binding-invalidated `e12572c021087308570abfa41657a910c6896457` are historical only; the current public-source bootstrap identity is `{OLD}`; Protocol 6.3 recovery remains unavailable.** The D4R3-repaired immutable snapshot passed repository/package/profile/Core bootstrap readiness plus exact-ref remote route realization and was published by a later mapping descendant, so it is the authorized version-bound 6.3 public fallback.',
+                  f'**Protocol 6.3 bootstrap attempts `1484c1d3caa49d87cc15bc52a5e775399c1dae1b`, `5ee4b3ac3ca1666b0499f7a72f55adcc411bf4bb`, owner-binding-invalidated `e12572c021087308570abfa41657a910c6896457`, and D4R3 snapshot `{OLD}` are historical only; current Protocol 6.3 public-source fallback is temporarily unavailable while the D9 replacement bootstrap is qualified; Protocol 6.3 recovery remains unavailable.**')
 
-          def test(t):
-              if f'BOOTSTRAP = "{OLD}"' not in t: raise SystemExit('bootstrap test constant missing')
-              t = t.replace(f'BOOTSTRAP = "{OLD}"', f'BOOTSTRAP = "{NEW}"\nINVALIDATED_D4R3_BOOTSTRAP = "{OLD}"', 1)
-              anchor = "        self.assertIn(f'6.3.0 invalidated owner-binding bootstrap -> {INVALIDATED_OWNER_BINDING_BOOTSTRAP}', versioning)\n"
-              add = anchor + "        self.assertIn(f'6.3.0 invalidated D4R3 bootstrap -> {INVALIDATED_D4R3_BOOTSTRAP}', versioning)\n"
-              if anchor not in t: raise SystemExit('bootstrap test assertion anchor missing')
-              t = t.replace(anchor, add, 1)
-              anchor2 = "        self.assertIn(f'6.3.0 invalidated owner-binding bootstrap -> {INVALIDATED_OWNER_BINDING_BOOTSTRAP}', portability)\n"
-              add2 = anchor2 + "        self.assertIn(f'6.3.0 invalidated D4R3 bootstrap -> {INVALIDATED_D4R3_BOOTSTRAP}', portability)\n"
-              if anchor2 not in t: raise SystemExit('portability test assertion anchor missing')
-              return t.replace(anchor2, add2, 1)
-
-          rw('source/shared/references/protocol-versioning-and-compatibility.md', versioning)
-          rw('PORTABILITY.md', portability)
-          rw('source/shared/references/development-workflow-prompts.md', prompts)
-          rw('README.md', readme)
-          rw('tests/test_protocol_63_bootstrap.py', test)
+          p = Path('tests/test_protocol_63_bootstrap.py')
+          t = p.read_text(encoding='utf-8')
+          t = t.replace(f'BOOTSTRAP = "{OLD}"', f'BOOTSTRAP = "{SENT}"\nINVALIDATED_D4R3_BOOTSTRAP = "{OLD}"', 1)
+          a = "        self.assertIn(f'6.3.0 invalidated owner-binding bootstrap -> {INVALIDATED_OWNER_BINDING_BOOTSTRAP}', versioning)\n"
+          if a not in t: raise SystemExit('versioning assertion anchor missing')
+          t = t.replace(a, a + "        self.assertIn(f'6.3.0 invalidated D4R3 bootstrap -> {INVALIDATED_D4R3_BOOTSTRAP}', versioning)\n", 1)
+          a = "        self.assertIn(f'6.3.0 invalidated owner-binding bootstrap -> {INVALIDATED_OWNER_BINDING_BOOTSTRAP}', portability)\n"
+          if a not in t: raise SystemExit('portability assertion anchor missing')
+          t = t.replace(a, a + "        self.assertIn(f'6.3.0 invalidated D4R3 bootstrap -> {INVALIDATED_D4R3_BOOTSTRAP}', portability)\n", 1)
+          p.write_text(t, encoding='utf-8')
           PY
           python source/project_engineering_memory.py PROJECT-ENGINEERING-MEMORY.md --write-summary
           python orchestrator/scripts/generate_protocol_snapshot.py
           rm -rf /tmp/protocol-dist
           python source/build_skills.py --output /tmp/protocol-dist
           python source/validate_packages.py --dist /tmp/protocol-dist
-          rm -rf dist
-          cp -a /tmp/protocol-dist dist
-      - name: Validate repaired publication
-        shell: bash
-        run: |
-          set -euxo pipefail
+          rm -rf dist && cp -a /tmp/protocol-dist dist
           python -m unittest -v tests.test_protocol_63_bootstrap
           python -m unittest -v tests.test_protocol_63_independent_review_repairs
           python -m unittest discover -s tests -v
           python source/project_engineering_memory.py PROJECT-ENGINEERING-MEMORY.md
-          rm -rf /tmp/protocol-dist-check
-          python source/build_skills.py --output /tmp/protocol-dist-check
-          python source/validate_packages.py --dist /tmp/protocol-dist-check
-          python source/check_dist.py --expected /tmp/protocol-dist-check --committed dist
+          python source/check_dist.py --expected /tmp/protocol-dist --committed dist
           python orchestrator/scripts/generate_protocol_snapshot.py --check
           python orchestrator/scripts/run_core_tests.py
           git diff --check
-      - name: Publish repaired owners and remove temporary workflow
+          git rm .github/workflows/temporary-protocol63-bootstrap-publication-repair.yml
+          git add -A
+          git diff --cached --check
+          git commit -m 'Create self-reference-safe Protocol 6.3 D9 bootstrap'
+          BOOTSTRAP=$(git rev-parse HEAD)
+          git push origin HEAD:ssdp-6.3-engineering-memory
+          printf '%s' "$BOOTSTRAP" > /tmp/protocol63-bootstrap-sha
+      - name: Publish exact replacement bootstrap and validate exact ref
         shell: bash
         run: |
           set -euxo pipefail
-          git rm .github/workflows/temporary-protocol63-bootstrap-publication-repair.yml
+          BOOTSTRAP=$(cat /tmp/protocol63-bootstrap-sha)
+          export BOOTSTRAP
+          python - <<'PY'
+          import os
+          from pathlib import Path
+          B = os.environ['BOOTSTRAP']
+          SENT = 'UNAVAILABLE_PENDING_REPLACEMENT_BOOTSTRAP'
+
+          def replace(path, old, new):
+              p = Path(path)
+              t = p.read_text(encoding='utf-8')
+              if old not in t: raise SystemExit(f'missing publication anchor in {path}: {old!r}')
+              p.write_text(t.replace(old, new, 1), encoding='utf-8')
+
+          replace('source/shared/references/protocol-versioning-and-compatibility.md',
+                  f'6.3.0 public-source bootstrap -> {SENT}', f'6.3.0 public-source bootstrap -> {B}')
+          replace('source/shared/references/protocol-versioning-and-compatibility.md',
+                  'A replacement self-reference-safe snapshot is being qualified; until its exact immutable SHA is published by a later descendant, current 6.3 public-source fallback is unavailable.',
+                  f'Replacement self-reference-safe snapshot `{B}` passed source regression, package/profile/Core integrity, and bootstrap readiness before publication. This later descendant publishes that exact immutable SHA as the sole current 6.3 public-source fallback.')
+          replace('PORTABILITY.md', f'6.3.0 public bootstrap -> {SENT}', f'6.3.0 public bootstrap -> {B}')
+          replace('PORTABILITY.md',
+                  'A replacement self-reference-safe snapshot is being qualified; until a later descendant publishes its exact immutable SHA, no current 6.3 public fallback is authorized.',
+                  f'Replacement self-reference-safe snapshot `{B}` passed bootstrap readiness before publication; this later descendant publishes that exact immutable SHA as the sole authorized version-bound 6.3 public fallback.')
+          replace('source/shared/references/development-workflow-prompts.md', f'CURRENT_PUBLIC_REF = {SENT}', f'CURRENT_PUBLIC_REF = {B}')
+          replace('source/shared/references/development-workflow-prompts.md',
+                  'D9 changed canonical validator semantics, so no current 6.3 public fallback is authorized until a newly qualified self-reference-safe snapshot is published by a later descendant.',
+                  f'D9 changed canonical validator semantics; replacement self-reference-safe snapshot `{B}` passed bootstrap readiness before this later descendant published its exact SHA, so it is the sole current Protocol 6.3 public-source fallback.')
+          replace('README.md',
+                  'current Protocol 6.3 public-source fallback is temporarily unavailable while the D9 replacement bootstrap is qualified; Protocol 6.3 recovery remains unavailable.',
+                  f'the current public-source bootstrap identity is `{B}`; Protocol 6.3 recovery remains unavailable.')
+
+          p = Path('tests/test_protocol_63_bootstrap.py')
+          t = p.read_text(encoding='utf-8')
+          if f'BOOTSTRAP = "{SENT}"' not in t: raise SystemExit('bootstrap sentinel constant missing')
+          t = t.replace(f'BOOTSTRAP = "{SENT}"', f'BOOTSTRAP = "{B}"', 1)
+          p.write_text(t, encoding='utf-8')
+          PY
+          python source/project_engineering_memory.py PROJECT-ENGINEERING-MEMORY.md --write-summary
+          python orchestrator/scripts/generate_protocol_snapshot.py
+          rm -rf /tmp/protocol-dist
+          python source/build_skills.py --output /tmp/protocol-dist
+          python source/validate_packages.py --dist /tmp/protocol-dist
+          rm -rf dist && cp -a /tmp/protocol-dist dist
+          CI=1 python -m unittest -v tests.test_protocol_63_bootstrap
+          python -m unittest -v tests.test_protocol_63_independent_review_repairs
+          python -m unittest discover -s tests -v
+          python source/project_engineering_memory.py PROJECT-ENGINEERING-MEMORY.md
+          python source/check_dist.py --expected /tmp/protocol-dist --committed dist
+          python orchestrator/scripts/generate_protocol_snapshot.py --check
+          python orchestrator/scripts/run_core_tests.py
+          git diff --check
           git add -A
           git diff --cached --check
           git commit -m 'Publish Protocol 6.3 D9 replacement bootstrap mapping'
