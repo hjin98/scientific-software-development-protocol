@@ -2,248 +2,207 @@
 kind: ssdp63-independent-review-handoff
 protocol_version: 6.3.0
 authority: non-normative-review-handoff
-semantic_candidate: 8d0ad2395ccd126c133d8aad206cfc859f660124
-qualification_result_commit: 7ddd3c87b822c3f28bf674f999202e8cd2406aba
-qualification_result: qualification/ssdp6/RESULTS-GPT-5.6-SOL-2026-09-11-PROTOCOL-6.3-260.md
-implementation_stage_f_closure_commit: 82e6e1badf2c88c00967155bb9d30c773b80d1ef
-implementation_stage_f_closure_ci_run: 34623553593
-public_source_bootstrap: 1484c1d3caa49d87cc15bc52a5e775399c1dae1b
+semantic_candidate: 7f6774156e8595ac9a04227e1c0be30783525a67
+qualification_result_commit: 5f52fbdf05c62b307b5627d99989209578d1d95a
+qualification_result: qualification/ssdp6/RESULTS-GPT-5.6-SOL-2026-09-11-PROTOCOL-6.3-REOPENED-STAGE-F.md
+static_sensor_evidence_commit: be4cfc1692a64d6bfb69841fb2eac383cc260ad2
+public_source_bootstrap: 5ee4b3ac3ca1666b0499f7a72f55adcc411bf4bb
+public_source_mapping_commit: 1bfb78947eb0b94a58ec8ff4f2828538f3d4702f
 accepted_protocol_62_recovery: b59adc77efe6951912cfd705cc43830c58ca27d0
 accepted_protocol_62_public_bootstrap: 5a062ebc472755607b9dc66d33a5ebbc4b7429aa
 accepted_protocol_62_semantic_candidate: ebbc4591bdfed039512026b8acb3a6749475c1c5
-candidate_to_evidence_descendant_head: 82e6e1badf2c88c00967155bb9d30c773b80d1ef
 independent_review: required_fresh_context
 protocol_63_recovery: unavailable_pending_review
 accepted_current_protocol: 6.2.0
 ---
 
-# Independent Protocol/D3 Review Handoff — Protocol 6.3
+# Independent Protocol/D3 Review Handoff — Protocol 6.3 Reopened Candidate
 
 ## Reviewer mandate
 
-Perform a **fresh independent assembled-candidate Protocol/D3 Review** of semantic candidate `8d0ad2395ccd126c133d8aad206cfc859f660124` against accepted Protocol 6.2 recovery `b59adc77efe6951912cfd705cc43830c58ca27d0` and the active Protocol 6.3 workplan.
+Perform a **fresh independent assembled-candidate Protocol/D3 Review** of semantic candidate `7f6774156e8595ac9a04227e1c0be30783525a67` against accepted Protocol 6.2 recovery `b59adc77efe6951912cfd705cc43830c58ca27d0` and the active Protocol 6.3 workplan.
 
-Do not inherit the implementation context's PASS conclusions. Do not review only the PR diff, this handoff, green CI status, the preservation labels, or the 260-case qualification summary. Reconstruct the governing semantics and inspect the assembled candidate at the exact candidate commit. Treat all qualification artifacts below as evidence to challenge, not authority.
+Do not inherit implementation conclusions from the authoring context. Do not review only the PR diff, this handoff, green CI, preservation labels, the old 260/260 report, or the replacement 260/260 report. Reconstruct the governing semantics and inspect the assembled candidate at the exact candidate commit. Treat all qualification artifacts as evidence to challenge, not authority.
 
-If a genuine blocker or Serious Challenge exists, identify the earliest owning layer and precise repair obligation. If no genuine blocker exists, record an independent Review PASS as a new descendant evidence commit. Do **not** establish Protocol 6.3 recovery or accepted-current status during the Review itself.
+If a genuine blocker exists, identify the earliest owning layer and precise repair obligation and keep Stage G blocked. If none exists, record an independent Review PASS as a new descendant evidence commit. The Review itself must **not** establish recovery, accepted-current status, workplan archive, or `main` cutover.
 
 ## Immutable identity set
 
 ```text
-accepted Protocol 6.2 recovery:          b59adc77efe6951912cfd705cc43830c58ca27d0
-accepted Protocol 6.2 semantic candidate: ebbc4591bdfed039512026b8acb3a6749475c1c5
-accepted Protocol 6.2 public bootstrap:   5a062ebc472755607b9dc66d33a5ebbc4b7429aa
-Protocol 6.3 public bootstrap:            1484c1d3caa49d87cc15bc52a5e775399c1dae1b
-Protocol 6.3 semantic candidate:          8d0ad2395ccd126c133d8aad206cfc859f660124
-Stage-F static sensor evidence descendant: 6d234e583a93a413894393aa2b5ffb8cbbe8ac50
-260-decision qualification commit:        7ddd3c87b822c3f28bf674f999202e8cd2406aba
-implementation Stage-F closure commit:    82e6e1badf2c88c00967155bb9d30c773b80d1ef
-closure PR CI run:                        34623553593
-Protocol 6.3 recovery:                    UNAVAILABLE
+accepted Protocol 6.2 recovery:           b59adc77efe6951912cfd705cc43830c58ca27d0
+accepted Protocol 6.2 semantic candidate:  ebbc4591bdfed039512026b8acb3a6749475c1c5
+accepted Protocol 6.2 public bootstrap:    5a062ebc472755607b9dc66d33a5ebbc4b7429aa
+
+invalidated historical 6.3 bootstrap:       1484c1d3caa49d87cc15bc52a5e775399c1dae1b
+invalidated historical 6.3 candidate:       8d0ad2395ccd126c133d8aad206cfc859f660124
+
+replacement 6.3 public bootstrap:          5ee4b3ac3ca1666b0499f7a72f55adcc411bf4bb
+later bootstrap mapping commit:             1bfb78947eb0b94a58ec8ff4f2828538f3d4702f
+repaired mapped semantic candidate:         7f6774156e8595ac9a04227e1c0be30783525a67
+refreshed static-sensor evidence:            be4cfc1692a64d6bfb69841fb2eac383cc260ad2
+replacement Stage-F qualification commit:   5f52fbdf05c62b307b5627d99989209578d1d95a
+Protocol 6.3 recovery:                       UNAVAILABLE
 ```
 
-The semantic candidate is `8d0ad239...`. Descendants through `82e6e1ba...` are qualification/evidence/control-state only and contain no canonical source, validator, test, package, profile, or project-PEM semantic mutation. Commit comparison from candidate to the original handoff shows only final static-sensor evidence, the 260-decision qualification, and this Review handoff; `82e6e1ba...` then changes only the preservation census and implementation-state evidence. Confirm that independently rather than trusting this statement.
+The old `8d0ad239...`/`1484c1d...` qualification chain is historical only because independent review falsified owner/oracle behavior and forced D1-D7 plus replacement-bootstrap repair. The replacement report does not rehabilitate those identities.
 
 ## Governing surfaces
 
 Review at minimum:
 
-- active workplan: `workplans/active/PROTOCOL-6.3-EVIDENCE-BACKED-PROJECT-ENGINEERING-MEMORY-WORKPLAN.md`;
-- preservation census: `qualification/ssdp6/SSDP-6.3-PRESERVATION-CENSUS.md`;
-- implementation-state evidence: `qualification/ssdp6/IMPLEMENTATION-STATE-PROTOCOL-6.3.md`;
-- PEM owner: `source/shared/references/project-engineering-memory.md`;
-- evidence owner: `source/shared/references/evidence-evolution-and-dependencies.md`;
-- workflow/HAS owner: `source/shared/references/workflow-and-workplans.md`;
-- convergence/family/episode owner: `source/shared/references/convergence-and-cycle-economy.md`;
-- D3 capability binding/transfer: `source/shared/references/architecture-and-design.md`;
-- testing/validation: `source/shared/references/testing-and-validation.md`;
-- repository intake/progressive disclosure: `source/shared/references/repository-intake.md`;
-- Git accepted-base/overlay/publication rules: `source/shared/references/git-and-version-control.md`;
-- trust/evidence-as-data boundary: `source/shared/references/security-and-trust-boundaries.md`;
-- version/bootstrap/profile/recovery owner: `source/shared/references/protocol-versioning-and-compatibility.md`;
-- D1/D2/D3/D4 and specialist `SKILL.md` routers;
-- template: `source/shared/templates/project_engineering_memory_template.md`;
-- executable validator: `source/project_engineering_memory.py`;
-- self-hosted project memory: `PROJECT-ENGINEERING-MEMORY.md`;
-- 6.3 scenario definitions and validator/bootstrap tests;
-- generated `dist/`, 6.3 profile/prompts/snapshot, and frozen prior profile trees.
+- `workplans/active/PROTOCOL-6.3-EVIDENCE-BACKED-PROJECT-ENGINEERING-MEMORY-WORKPLAN.md`;
+- `qualification/ssdp6/SSDP-6.3-PRESERVATION-CENSUS.md`;
+- `qualification/ssdp6/IMPLEMENTATION-STATE-PROTOCOL-6.3.md`;
+- `qualification/ssdp6/RESULTS-GPT-5.6-SOL-2026-09-11-PROTOCOL-6.3-REOPENED-STAGE-F.md`;
+- `qualification/ssdp6/SSDP-6.3-STATIC-ACTIVATION-SENSORS.md`;
+- PEM owner `source/shared/references/project-engineering-memory.md`;
+- evidence owner `source/shared/references/evidence-evolution-and-dependencies.md`;
+- workflow/HAS owner `source/shared/references/workflow-and-workplans.md`;
+- convergence/family/recurrence owner `source/shared/references/convergence-and-cycle-economy.md`;
+- D3 capability owner `source/shared/references/architecture-and-design.md`;
+- testing/validation, repository-intake, Git/version-control, trust-boundary and versioning owners;
+- D1/D2/D3/D4 and specialist routers;
+- PEM template and executable validator `source/project_engineering_memory.py`;
+- self-hosted `PROJECT-ENGINEERING-MEMORY.md`;
+- `tests/test_protocol_63_engineering_memory.py`, `tests/test_protocol_63_reopened_repairs.py`, `tests/test_protocol_63_bootstrap.py`;
+- generated `dist/`, Protocol 6.3 profile/prompts/snapshot, and frozen prior version resources.
 
-## Preservation and candidate contract
+## Reopened repair obligations to falsify independently
 
-Protocol 6.3 is a backward-compatible project-learning strengthening. It must preserve every accepted 6.2 semantic/routing/package/profile behavior while adding a project-local non-authoritative Project Engineering Memory (PEM) concern. PEM is **not D5** and cannot mint or override D1–D4/current project/external authority.
+### D1 — durable evidence resolution
 
-The inherited T01–T39 map is preservation evidence, not proof by label. Independently sample/reconstruct the accepted 6.2 capabilities most exposed to 6.3 change: domain/authority routing, Challenge, evidence lifecycle, stage/final acceptance, active simplicity, progressive disclosure, version-bound frozen recovery, exact-ref public fallback, package/profile integrity, and manual/document-controlled operation.
+Material evidence routes are structured as source identity + immutable revision/artifact identity + path/artifact + optional stable locator. For the current repository, a material route claiming repository-path semantics must resolve the revision as a commit/tree-ish and the path at that revision; a blob SHA cannot masquerade as a repository revision. Non-local evidence needs unambiguous source repository/project identity.
 
-For T40–T120, distinguish semantic-qualification closure from later lifecycle/Review obligations. The current census at `82e6e1ba...` closes the implementation-context semantic obligations except T62's recovery leg, T66's final Protocol-7/current-lifecycle reconciliation, and T68 independent Review. Those three remain open for their actual owning stage; do not manufacture closure from the implementation-context qualification.
+Attempt at least: nonexistent revision, blob-as-revision path binding, missing path, ambiguous non-local source identity, and previously healthy material evidence becoming unavailable. Inspect self-hosted `PC-001`; every route currently classified healthy must actually be resolvable under its declared semantics.
 
-## Supported PEM representation
+### D2 — atomic logical publication
 
-Protocol 6.3 supports **PEM schema 1**, independently versioned from SSDP 6.3 and Orchestrator profile schema 2. Canonical memory is human-editable Markdown with YAML data blocks. Optional cold partitions are canonical only when declared from one root; derived summary/index views are subordinate and rebuildable.
+Optional partitioned PEM remains one logical canonical memory. Root declarations bind exact partition content with SHA-256 and require agreement on schema/project/repository/scope/accepted-base/candidate-overlay meaning. A stale partition spliced into a newer root must fail even when family IDs and paths still look plausible.
 
-Expected family classes:
+Attempt a mixed-revision root/partition assembly and verify derived-index failure cannot become a second authority or hide canonical entries.
 
-- `FAILURE_FAMILY` (`FF-*`)
-- `SUCCESS_PATTERN` (`SP-*`)
-- `DISCOVERY` (`DS-*`)
-- `PRESERVATION_CAPABILITY` (`PC-*`)
+### D3 — immutable observation/assessment lineage
 
-Current notices (`NT-*`) are separate temporary high-impact facts, not occurrence/application families.
+Every admissible occurrence/application that contributes current evidence requires a preserved observation/realization result. Reassessment/invalidation changes assessment/admissibility, not historical observation. Same accepted identity with changed observation requires explicit clerical-correction provenance preserving the previous observation hash, reason and evidence.
 
-Accepted family identity is a stable semantic envelope: invariant/claim, owner class, causal/mechanistic family, and material applicability dimensions. Accepted IDs are not recycled. Split/merge/supersession/replacement lineage must be explicit, acyclic, and leave unambiguous current disposition; the validator now rejects an active lineage target that still claims unqualified `CURRENT` state.
+Attempt missing observation and silent same-identity observation mutation. Confirm causal interpretation remains separately warrantable.
 
-## Observation, assessment, and admissibility
+### D4 — accepted-repair recurrence
 
-Observation/realization history is immutable evidence. Later invalidation/reassessment changes assessment/admissibility rather than rewriting the original observation.
+`recurrence_after_accepted_repair` requires a prior occurrence, an identifiable accepted repair with evidence, a materially later independent event matching the current event, and an explicit independence basis. A truthy label, timestamp order, rebase order, alias, copy or cherry-pick cannot manufacture recurrence.
 
-The Stage-F implementation found and repaired a real pre-freeze defect: assessment current state had been chosen from list position. Candidate `8d0ad239...` now uses explicit assessment-supersession lineage (`supersedes: [AS01, ...]`) and resolves current assessment from the supersession graph, not serialized order. Unknown/self/cyclic supersession is rejected. Multiple still-live materially conflicting assessments cannot be resolved by vote, reviewer prestige or latest-editor position; they require explicit adjudication/discriminating evidence and remain review-required/contested.
+Attempt recurrence without accepted repair and recurrence via copy/common event.
 
-Independently falsify this with reordered conflicting assessments and a later explicit invalidation/adjudication. Confirm historical observation bytes/meaning need not be rewritten for the current state to change.
+### D5 — provenance-aware claim maturity and comparative guidance
 
-## Counting, recurrence, application episodes, and provenance
+`PROVEN` is claim-relative and obligation-backed. Every required obligation must be CLOSED with evidence; independence-sensitive obligations require at least two independent provenance clusters. Count, temperature, reviewer vote, repeated use or shared policy/implementation/harness does not establish independence.
 
-Failure occurrence = one independently introduced/existing causal episode, not one file/test/symptom. `recurrence_after_accepted_repair` requires an identifiable accepted prior repair plus a materially independent later causal event; timestamp/rebase/cherry-pick order is insufficient.
+Absolute success remains distinct from `PREFERRED`, `DEFAULT`, or `BEST`; comparative/default guidance requires comparative warrant or accepted owner priority. Overlapping incompatible guidance needs explicit regime/tradeoff/owner boundary or remains contested.
 
-Positive application episode = one materially distinct engineering intervention, not each touched file, rerun, benchmark sample, deployment surface, or generated descendant. A coordinated intervention over many surfaces counts once; surface breadth is separate.
+Attempt three supporting rows from one provenance cluster and attempt works-to-best/default laundering.
 
-Evidence/application provenance clusters preserve common policy, copied implementation, shared oracle/data/harness, or other common-mode dependence. Multiple rows in one cluster cannot masquerade as independent comparative proof.
+### D6 — notice trigger evaluation
 
-Independently inspect the validator tests for duplicate occurrence IDs/event identities, duplicate application IDs/episode identities, accepted-repair recurrence identity, and multi-surface application counting. Also challenge whether any semantic claim remains stronger than the executable guard can establish.
+Current notices use evaluable trigger semantics. A fired trigger or indeterminate trigger cannot remain silently CURRENT. The compatibility phrase for accepted-base change is only an interpreted legacy route, not permission for arbitrary opaque notice text.
 
-## Maturity and positive/comparative guidance
+Attempt an expired/deadline notice, an accepted-base-change notice after basis advance, and an opaque trigger. Each must route to review/fail closed rather than stale active guidance.
 
-Maturity is claim-relative: `PROVISIONAL`, `SUPPORTED`, `PROVEN`. Counts, temperature, reviewer votes, or repeated use cannot automatically promote `PROVEN`. The validator requires explicit claim-relative maturity basis with all obligations closed for `PROVEN` and rejects unresolved contradiction for proven positive patterns.
+### D7 — accepted-base/HAS/candidate-overlay seam
 
-Absolute success and comparative preference are distinct. `PREFERRED`, `DEFAULT`, or `BEST` needs comparative evidence or accepted current-owner priority; evidence that a technique merely worked is insufficient. Overlapping current patterns giving incompatible guidance require a regime/tradeoff/owner-priority decision boundary or contested state.
+Historical Applicability Set (HAS) and branch overlay validation pin exact accepted project state, accepted PEM identity and candidate overlay. Same-branch candidate memory cannot ratify itself as accepted base. Candidate omission cannot silently delete an accepted family. A material accepted-basis advance requires reconciliation before closeout.
 
-Positive guidance eligibility requires current supported/proven state, admissible supporting evidence, no admissible contradiction, and explicit healthy binding. Review counterexamples where temperature is high but binding/counterevidence is unhealthy.
+Attempt self-ratification, deletion-by-omission, wrong overlay base and unreconciled basis advance.
 
-## Authority binding and capability transfer
+## Replacement public bootstrap
 
-Learned capability state is classified as `EVIDENCE_ONLY`, `AUTHORITY_BOUND`, or `PROPOSED_FOR_PROMOTION`. Only the real current owner gives normative force. `AUTHORITY_BOUND` current families require exact owner and healthy binding; current-owner change requires reverse impact/reconciliation.
+The original public bootstrap `1484c1d...` was invalidated because it lacked repaired required semantics. The replacement lifecycle must satisfy the same self-reference discipline as accepted 6.2:
 
-When mature machinery is replaced, Historical Applicability Set (HAS) + capability-transfer reasoning must preserve owner-required properties while permitting obsolete mechanisms to disappear. Do not interpret historical architecture survival or PEM temperature as authority.
+1. repaired source/profile/package state validates before a replacement SHA is named;
+2. immutable replacement snapshot `5ee4b3ac...` already exists and intentionally does not self-name;
+3. later descendant `1bfb789...` publishes the exact version-to-ref mapping;
+4. mapping-bearing generated descendant `7f677415...` is regenerated from canonical source;
+5. exact-ref remote realization, full repository regression, package/dist/snapshot parity, Core, whitespace and frozen prior-resource checks pass.
 
-## Temperature, coverage, applicability, and salience
-
-Temperature (`HOT`/`WARM`/`COLD`/`UNASSESSED`) is salience only. It is derived from current admissible episode counts plus coverage, unless an evidence-bound impact override exists. It does not decide authority, maturity, applicability, activation, acceptance, or HAS membership.
-
-`reconciled_through` is an identity horizon, not exhaustive-coverage proof. `PARTIAL` coverage remains partial even when the watermark advances. Missing/partial memory, stale summary/index, absent dependency edge, or stale applicability metadata cannot prove absence/non-applicability.
-
-The active summary is derived. Candidate `8d0ad239...` preserves family ID, kind, temperature, maturity/state, authority binding/binding health, guidance, current evidence count and bounded lesson in each row. Current unavailable/review-required binding risk is prioritized ahead of lower-consequence positive temperature ordering. Canonical detail remains the source for scope, counterevidence, limits, relations and cold routes.
-
-Independently attempt the F63-AZ priority-inversion attack: abundant positive/HOT patterns must not crowd out a current high-impact unavailable warrant.
-
-## Accepted base, branch overlay, HAS, and logical publication
-
-Accepted/base PEM is selected by project integration semantics, **not** default branch, latest timestamp, newest file, branch self-declaration, or editor preference. A same-branch memory is an explicit candidate overlay until the normal integration/acceptance event. Candidate omission cannot silently delete an accepted entry.
-
-A memory-triggering workplan records exact accepted-base + overlay identities and a HAS disposition for every materially relevant current memory item: `APPLICABLE`, `NOT_APPLICABLE`, or `REVIEW_REQUIRED` with reason. If the accepted memory basis or governing owner materially advances before closeout, affected HAS dispositions must be refreshed.
-
-Root + declared canonical partitions are one logical publication state. A mixed semantic revision is invalid. Derived index failure cannot hide canonical entries. Routine memory publication never requires the containing commit to know its own SHA.
+Independently inspect the bootstrap snapshot and later mapping. Reject any circular/self-ratifying reading where publication success is inferred from the mapping that only exists later.
 
 ## Self-hosted PEM state
 
-`PROJECT-ENGINEERING-MEMORY.md` is deliberately **PARTIAL**, not an exhaustive repository-history claim. At semantic candidate `8d0ad239...`, reconstruct the rows rather than trusting this summary:
+`PROJECT-ENGINEERING-MEMORY.md` remains deliberately `PARTIAL`; no exhaustive-history claim is allowed. Reconstruct current rows from the file and validator rather than trusting this handoff.
 
-- `FF-001`: premature immutable-bootstrap publication; 1 admissible confirmed occurrence; no accepted-repair recurrence; derived temperature `UNASSESSED` under partial coverage.
-- `SP-001`: canonical-router-first repair/regeneration lesson; 1 admissible supporting application episode, no neutral/contradicting/inconclusive episode; `EVIDENCE_ONLY`; positive-guidance eligibility false; temperature `UNASSESSED`.
-- `PC-001`: frozen prior-version resource preservation; 2 durable evidence routes; `AUTHORITY_BOUND/HEALTHY` to current version/frozen-resource authority.
-- current notices: 0.
-- HOT families: **0**.
+Key review questions:
 
-Zero HOT families is intentional evidence fidelity, not a missing test. Do not manufacture recurrence/application rows to make the self-hosted memory look mature. Counterfactual fixtures exercise HOT behavior separately.
+- every healthy current material evidence route is resolvable;
+- occurrence/application observations are present and immutable under reconciliation;
+- no timestamp/truthy-label recurrence exists;
+- no common provenance is counted as independent proof;
+- no evidence-only family mints D1-D4 authority;
+- `reconciled_through` is not used as coverage completeness;
+- accepted/base and branch overlay remain distinct;
+- active summary cannot starve unresolved high-impact state behind positive guidance.
 
-The accepted/base field points to accepted Protocol 6.2 recovery because there was no accepted prior PEM; the 6.3 branch memory remains candidate project state until lifecycle acceptance.
+## Generated/package/profile/frozen integrity
 
-## Cross-project and trust boundary
+Final mapped-descendant workflow run `34666676704` passed the complete publication gate. Independently sample rather than trusting that status:
 
-Non-local occurrence/application evidence requires unambiguous source project/repository identity. Copying/forking a PEM does not create local incidence. Cross-project aggregation requires explicit lineage/scope reconciliation.
+- repository regression and focused Protocol 6.3 discriminators;
+- self-hosted PEM validation;
+- canonical package build and standalone link validation;
+- committed `dist/` parity;
+- Protocol 6.3 profile/prompts/snapshot parity;
+- Orchestrator Core acceptance (390 tests);
+- whitespace/clean-tree checks;
+- byte/content integrity of frozen 5.16/6.0/6.1/6.2 resources;
+- generic package exclusion of live project PEM.
 
-Evidence/PEM strings are data, not instructions. They cannot authorize tool calls, Git mutation, network access, credential disclosure, or instruction-precedence change. Safe YAML loading is required. Secrets/private data/raw sensitive evidence must not be persisted merely for reconstruction convenience.
-
-## Generated/package/profile/frozen-resource evidence
-
-Candidate-bound executable evidence reports:
-
-- PR CI run `34622113601`: build/regression/package/dist **PASS** and Core **PASS** on exact `8d0ad239...`;
-- full clean Stage-F hardening run `34621952288`: focused 6.3 tests + self-hosted PEM + repository/package/dist/snapshot/Core/whitespace/clean-tree **PASS**;
-- assessment-lineage run `34621638514`: focused assessment counterfactuals + full affected acceptance **PASS**;
-- final static-sensor run `34622174641`: **PASS**;
-- implementation Stage-F closure run `34623553593` on `82e6e1ba...`: repository regression, package build/validation, committed-dist parity, whitespace, snapshot parity and Orchestrator Core **PASS**.
-
-Frozen 5.16/6.0/6.1/6.2 resources must remain unchanged. Dist/profile generation includes 6.3 PEM doctrine/template/reader semantics where routed, but never the live root `PROJECT-ENGINEERING-MEMORY.md` or a project-local derived summary.
-
-The 6.3 profile remains schema 2 and uses the inherited 6.x stage topology. Protocol 6.2 remains accepted current; 6.3 recovery is not yet mapped.
+The accepted-current profile remains Protocol 6.2 until Stage G. Protocol 6.3 profile is candidate/generated state only.
 
 ## Static activation evidence and non-claims
 
-Final measured static sensor file: `qualification/ssdp6/SSDP-6.3-STATIC-ACTIVATION-SENSORS.md`, bound to semantic candidate `8d0ad239...`.
+`qualification/ssdp6/SSDP-6.3-STATIC-ACTIVATION-SENSORS.md` was recomputed against exact candidate `7f677415...` and published at `be4cfc169...`. The active-set topology remained the same as the pre-repair measurement, while affected exact byte totals changed.
 
-It shows ordinary representative D1/D2/D3/D4/documentation/audit/release/closeout traces keep PEM cold, while historical recovery/migration where prior choices matter and mature D3 replacement with demonstrated project history activate the PEM owner. The exact byte table is diagnostic only.
+The evidence is deterministic static structure only. It does not prove live token count, attention, cache behavior, latency, productivity or model quality. Attempt both polarity failures: eager PEM activation for ordinary work and failure to activate PEM when demonstrated project history materially changes a mature recovery/replacement decision.
 
-Do not convert those static source-byte/active-set measurements into claims about live token counts, latency, attention, cache reuse, productivity or model performance. Live telemetry is unavailable.
+## Replacement Stage-F evidence to challenge
 
-## Qualification evidence to challenge
+`qualification/ssdp6/RESULTS-GPT-5.6-SOL-2026-09-11-PROTOCOL-6.3-REOPENED-STAGE-F.md` at commit `5f52fbdf05c62b307b5627d99989209578d1d95a` records implementation-context 260/260:
 
-Fresh implementation-context result: `qualification/ssdp6/RESULTS-GPT-5.6-SOL-2026-09-11-PROTOCOL-6.3-260.md` at commit `7ddd3c87b822c3f28bf674f999202e8cd2406aba`.
-
-It records 260/260 decisions:
-
-- inherited scenarios 1–115;
+- inherited scenarios 1-115;
 - Q63-01 through Q63-79;
 - F63-A through F63-BJ;
-- Loss, Scope/materiality laundering, Priority inversion, False compaction.
+- Loss, Scope/materiality laundering, Priority inversion and False compaction.
 
-The reviewer must not accept `260/260` as proof by count. Sample the highest-risk rows and reconstruct their counterfactuals from the candidate owners and executable representation.
+Do not accept `260/260` by count. Sample the reopened/high-risk rows first: Q63-06, Q63-11, Q63-45, Q63-48, Q63-53, Q63-63, Q63-64, Q63-67, Q63-68, Q63-73, Q63-74, Q63-77, Q63-78 and corresponding F63-AB, F63-AE, F63-AT, F63-AU, F63-AX, F63-AY, F63-BD, F63-BE, F63-BH, F63-BI. Then verify complete-matrix accounting and inherited 6.2 preservation.
 
-## Required independent falsification emphasis
+## Four mandatory falsification dimensions
 
-At minimum independently attempt to falsify:
+Run all four independently against the assembled candidate:
 
-1. **Loss / preservation:** a 6.2 capability disappeared behind 6.3 memory language or generated descendants.
-2. **Scope/materiality laundering:** affected routing/Git/security/package/profile/HAS surface was omitted from the declared implementation scope.
-3. **Priority inversion:** high-temperature/positive memory hides lower-salience mandatory authority or unavailable warrant.
-4. **False compaction:** summary/index/partitioning/eager loading collapses provenance, lineage, counterevidence, or creates duplicate authority.
-5. **Assessment chronology laundering:** reordering live competent assessments changes current truth.
-6. **Positive-count inflation:** one intervention across files/runs/surfaces becomes multiple applications.
-7. **Recurrence laundering:** timestamps/rebase/cherry-pick create fake recurrence after repair.
-8. **Family overbreadth / semantic-ID drift:** textual similarity expands a family beyond invariant+owner+mechanism envelope or an accepted ID is reused.
-9. **Works-to-preference laundering:** absolute success is promoted to preferred/default/best without comparator/current-owner warrant.
-10. **Provenance fake independence:** common policy/implementation/oracle/harness rows are treated as independent evidence.
-11. **Causal overclaim:** assembled A+B+C outcome is attributed to A without discriminating evidence.
-12. **Non-Hot applicability:** a relevant Cold/Warm/summary-omitted item is missed by HAS/search.
-13. **Base/overlay/HAS drift:** same-branch candidate self-ratifies, accepted entry disappears by omission, or a late base advance leaves stale HAS.
-14. **Logical publication:** root/partition/index mixed revision masquerades as current coherent memory.
-15. **Cross-repository source ambiguity:** non-local evidence lacks durable source identity.
-16. **Watermark/coverage laundering:** `reconciled_through` is used as exhaustive history proof.
-17. **Trust-boundary failure:** instruction-like evidence becomes executable authorization or sensitive evidence is persisted improperly.
-18. **Package/profile drift:** live project PEM enters generic artifacts, old resources change, or Core resolves wrong version/profile/fallback.
-
-## Known red, unavailable, contested, and residual items
-
-No known executable or semantic red remains in the implementation-context qualification after the candidate-bound hardening passes. The following are intentionally **unavailable/pending**, not PASS:
-
-- live model/harness context-efficiency telemetry;
-- independent assembled-candidate Review;
-- Protocol 6.3 recovery identity/mapping;
-- recovery-mapping descendant regeneration/requalification;
-- final accepted PEM/HAS basis reconciliation;
-- final semantic-evolution/workplan-authority-index/Protocol-7 lifecycle reconciliation;
-- any separately authorized `main` cutover.
-
-These pending lifecycle items do not authorize a reviewer to mark Protocol 6.3 accepted-current. Conversely, do not fail the semantic candidate merely because Stage G actions correctly have not happened yet unless the candidate itself makes those later actions impossible or contradictory.
+1. **Loss:** remove a distinction needed for a future decision and verify preservation/owners reject the loss.
+2. **Scope/materiality laundering:** shrink governed scope or omit a lower-salience requirement and verify it cannot manufacture PASS.
+3. **Priority inversion:** let Hot/positive memory crowd out mandatory current constraints or unresolved high-impact evidence and verify it fails.
+4. **False compaction:** replace progressive disclosure with recursive summaries, stale/incomplete indexes, eager history, collapsed provenance/lineage or duplicate authority and verify it fails.
 
 ## Review output contract
 
-Produce a durable independent Review record under `qualification/ssdp6/` that states:
+A valid independent result must state:
 
-- exact semantic candidate and accepted baseline inspected;
-- evidence/qualification descendant identities consulted, including Stage-F closure `82e6e1ba...`;
-- preservation/candidate semantic disposition;
-- executable/package/profile/frozen-resource disposition;
-- sampled Q63/F63/falsification findings;
-- any Serious Challenge first;
-- genuine blockers with earliest owning-layer repair instructions, or explicit PASS if none;
-- explicit statement that recovery remains unavailable until a later Stage-G commit.
+- exact candidate and accepted baseline reviewed;
+- preservation reconstruction and sampled frozen/generated/package integrity;
+- D1-D7 and replacement-bootstrap disposition;
+- all four falsification-pass disposition;
+- any genuine blockers with earliest owning-layer repair instructions;
+- whether the replacement implementation-context evidence remains applicable;
+- PASS/NO-PASS and Serious Challenge status.
 
-Do not close/archive the active workplan or publish a recovery mapping as part of Review.
+If PASS, commit the independent Review result as descendant evidence only. Stage G is still a separate lifecycle step: choose a recovery descendant only after Review PASS, publish its mapping from a later commit, regenerate mapping-bearing descendants, rerun targeted recovery/profile/package/Core acceptance, reconcile accepted PEM/HAS/semantic-evolution/Protocol-7 lifecycle state, and archive the workplan only when those actions are complete.
+
+Until then:
+
+```text
+independent Review: PENDING
+Protocol 6.3 recovery: UNAVAILABLE
+Stage G: BLOCKED
+accepted current: Protocol 6.2
+workplan: ACTIVE
+main cutover: NOT AUTHORIZED
+```
