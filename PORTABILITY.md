@@ -37,7 +37,7 @@ Accepted immutable mappings:
 6.2.0 public bootstrap -> 5a062ebc472755607b9dc66d33a5ebbc4b7429aa
 6.2.0 recovery -> b59adc77efe6951912cfd705cc43830c58ca27d0
 6.3.0 invalidated bootstrap attempt -> 1484c1d3caa49d87cc15bc52a5e775399c1dae1b
-6.3.0 public bootstrap -> UNAVAILABLE_PENDING_6.3_BOOTSTRAP_QUALIFICATION
+6.3.0 public bootstrap -> 5ee4b3ac3ca1666b0499f7a72f55adcc411bf4bb
 6.3.0 recovery -> UNAVAILABLE_PENDING_6.3_ACCEPTANCE
 ```
 

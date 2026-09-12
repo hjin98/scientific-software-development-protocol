@@ -9,7 +9,7 @@ import urllib.request
 from pathlib import Path
 
 
-BOOTSTRAP = "UNAVAILABLE_PENDING_6.3_BOOTSTRAP_QUALIFICATION"
+BOOTSTRAP = "5ee4b3ac3ca1666b0499f7a72f55adcc411bf4bb"
 INVALIDATED_BOOTSTRAP = "1484c1d3caa49d87cc15bc52a5e775399c1dae1b"
 PUBLIC_ROOT = "https://raw.githubusercontent.com/hjin98/scientific-software-development-protocol"
 LOCAL_MD_RE = re.compile(r"\[[^\]]+\]\(([^)]+\.md(?:#[^)]*)?)\)")
