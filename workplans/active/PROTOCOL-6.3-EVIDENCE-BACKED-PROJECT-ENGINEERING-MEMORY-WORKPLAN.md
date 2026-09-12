@@ -8,10 +8,13 @@ created_date: 2026-09-11
 reviewed_date: 2026-09-12
 design_closure_status: pass-after-sixth-review-repair
 implementation_handoff: authorized
-implementation_review_state: reopened-no-pass
+implementation_review_state: repaired-qualified-independent-review-pending
 reviewed_candidate_no_pass: 100cbde296de6c1a8db14151f34cfacfebc90eb3
-reopened_stages: D,E,F
-stage_g_recovery_gate: blocked-pending-repair-requalification-independent-review
+qualified_semantic_candidate: 3bbbdfa8120646d76336c7b916e6a891c9ed38f2
+f2_qualification_commit: 6fc26ce374b5346495782871d5d7241de5b90071
+f2_qualification: qualification/ssdp6/RESULTS-GPT-5.6-SOL-2026-09-12-PROTOCOL-6.3-F2.md
+reopened_stages: none
+stage_g_recovery_gate: blocked-pending-independent-review
 active_serious_challenge: none
 parent_protocol_62_recovery: b59adc77efe6951912cfd705cc43830c58ca27d0
 parent_protocol_62_semantic_candidate: ebbc4591bdfed039512026b8acb3a6749475c1c5
@@ -808,11 +811,13 @@ NO-PASS includes any material violation of those requirements, especially: loss 
 
 If implementation or independent Review finds a genuine blocker, route to the earliest owning D1/D2/D3/D4 or concern layer; reopen this workplan only when its cycle contract must change; give precise owner-layer repair instructions; prefer removal/narrowing/rewiring/consolidation/re-derivation over compensating wrappers; rerun only affected evidence while preserving demonstrably unaffected admissible evidence and historical observations; recompute affected PEM state; preserve semantic-ID/application/provenance integrity; and use the Git owner for repository/history operations. Raise Serious Challenge only when accepted governing authority may itself be defective.
 
-### 17.1 Current Protocol 6.3 implementation-review repair contract
+### 17.1 Completed Protocol 6.3 implementation-review repair contract
 
-The Protocol 6.2-governed assembled-candidate Review of branch state `100cbde296de6c1a8db14151f34cfacfebc90eb3` is **NO-PASS** with **no Serious Challenge** to accepted Protocol 6.2 authority or the Protocol 6.3 D3 design contract. D1 binding-health, D2 logical-publication, D3 observation-identity, D6 typed-notice, and D7 HAS/template repairs in that state are preserved as closed unless a new discriminator falsifies them. The remaining semantic blockers are D4 accepted-repair recurrence and D5 `PROVEN` maturity-obligation derivation. Those semantic repairs invalidate the prior 6.3 bootstrap/candidate acceptance chain and require fresh E/F lifecycle evidence. Stage G remains blocked.
+The Protocol 6.2-governed assembled-candidate Review of branch state `100cbde296de6c1a8db14151f34cfacfebc90eb3` was **NO-PASS** with **no Serious Challenge** to accepted Protocol 6.2 authority or the Protocol 6.3 D3 design contract. That Review opened D4R2, D5R2, E2, and F2 while preserving the repaired D1 binding-health, D2 logical-publication, D3 observation-identity, D6 typed-notice, and D7 HAS/template behavior.
 
-Earlier 6.3 candidates, bootstraps, mappings, and Stage-F result sets remain immutable historical evidence only; none may serve as the current acceptance anchor after these repairs begin.
+Those implementation-context repairs are now closed by immutable semantic candidate `3bbbdfa8120646d76336c7b916e6a891c9ed38f2` and fresh F2 evidence `6fc26ce374b5346495782871d5d7241de5b90071` / `qualification/ssdp6/RESULTS-GPT-5.6-SOL-2026-09-12-PROTOCOL-6.3-F2.md`. D4R2 binds accepted-repair evidence to the exact repair subject, explicit accepted state, and accepting owner; D5R2 derives replication and independent-replication obligations for every schema-1 `PROVEN SUCCESS_PATTERN` rather than trusting claimant omission. E2 publishes self-reference-safe bootstrap `e12572c021087308570abfa41657a910c6896457` only through later mapping descendant `e6a8c12f065c3d25a41da804c129d6bc0a4f7b50`. F2 freshly accounts for all 260 required inherited/Q63/F63/Challenge cases and reruns the assembled source/package/profile/Core/frozen-resource gates.
+
+Earlier 6.3 candidates, bootstraps, mappings, and Stage-F result sets remain immutable historical evidence only. They remain useful falsification fixtures but are not current acceptance anchors. The repair specifications below are retained as the auditable contract that the current candidate was required to satisfy; they are no longer open implementation blockers. Stage G remains blocked on the fresh independent assembled-candidate Review and the separate recovery lifecycle.
 
 #### Repair D4R2 - acceptance evidence must establish acceptance of the same repair
 
@@ -868,9 +873,11 @@ Do not introduce a second PEM database, resolver daemon, acceptance registry, qu
 
 ## 18. Current design closure state
 
-This is the current-state workplan contract. Detailed superseded review chronology remains in non-authoritative qualification/review records.
+This is the current-state workplan contract. Detailed NO-PASS chronology and the completed D4R2/D5R2/E2/F2 repair specification remain in §17.1 and qualification records as non-authoritative historical/audit evidence.
 
-No Serious Challenge is active. Branch state `100cbde296de6c1a8db14151f34cfacfebc90eb3` is NO-PASS. D1, D2, D3, D6, and D7 are preserved closed; D4R2, D5R2, E2, and F2 are active. Protocol 6.3 remains proposed and Stage G/recovery/accepted-current/archive/`main` cutover remain blocked until a new bootstrap/mapping/candidate, complete fresh Stage-F qualification, and independent assembled-candidate Review pass.
+No Serious Challenge is active. The final immutable implementation semantic candidate is `3bbbdfa8120646d76336c7b916e6a891c9ed38f2`. D1/D2/D3/D6/D7 remain preserved and reverified; D4R2 and D5R2 are implementation-context closed; E2 is closed through exact public bootstrap `e12572c021087308570abfa41657a910c6896457` and later mapping `e6a8c12f065c3d25a41da804c129d6bc0a4f7b50`; F2 is closed by candidate-bound 260/260 evidence `6fc26ce374b5346495782871d5d7241de5b90071` / `qualification/ssdp6/RESULTS-GPT-5.6-SOL-2026-09-12-PROTOCOL-6.3-F2.md` plus the assembled source/package/profile/Core/frozen-resource gates.
+
+The only remaining Stage-F lifecycle gate is a **fresh independent assembled-candidate Protocol/D3 Review**. Implementation-context qualification is evidence to challenge, not authority. Protocol 6.3 remains proposed; Stage G, recovery, accepted-current status, workplan archive, and `main` cutover remain blocked until that independent Review passes and the separate recovery lifecycle is completed.
 
 The intended design remains evidence-backed project-local memory with non-authoritative evidence, exact durable warrants, immutable observations, stable semantic identity, provenance-aware application episodes, claim-relative maturity, actual accepted-repair recurrence rather than chronology inference, one HAS/overlay interface, basis-bound notices, atomic publication, and lossless progressive disclosure.
 

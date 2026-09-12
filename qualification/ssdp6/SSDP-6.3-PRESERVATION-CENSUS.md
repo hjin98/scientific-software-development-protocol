@@ -7,14 +7,14 @@ accepted_protocol_62_recovery: b59adc77efe6951912cfd705cc43830c58ca27d0
 accepted_protocol_62_semantic_candidate: ebbc4591bdfed039512026b8acb3a6749475c1c5
 accepted_protocol_62_public_bootstrap: 5a062ebc472755607b9dc66d33a5ebbc4b7429aa
 implementation_branch_start: 5508911f3227c7bcb7e38b0c74a7a37f13fd6b7c
-semantic_candidate: 7f6774156e8595ac9a04227e1c0be30783525a67
-public_source_bootstrap: 5ee4b3ac3ca1666b0499f7a72f55adcc411bf4bb
-public_source_mapping_commit: 1bfb78947eb0b94a58ec8ff4f2828538f3d4702f
-stage_f_static_sensor_commit: be4cfc1692a64d6bfb69841fb2eac383cc260ad2
-stage_f_qualification_commit: 5f52fbdf05c62b307b5627d99989209578d1d95a
+semantic_candidate: 3bbbdfa8120646d76336c7b916e6a891c9ed38f2
+public_source_bootstrap: e12572c021087308570abfa41657a910c6896457
+public_source_mapping_commit: e6a8c12f065c3d25a41da804c129d6bc0a4f7b50
+stage_f_static_sensor_commit: 6fc26ce374b5346495782871d5d7241de5b90071
+stage_f_qualification_commit: 6fc26ce374b5346495782871d5d7241de5b90071
 independent_review_handoff: qualification/ssdp6/INDEPENDENT-REVIEW-HANDOFF-PROTOCOL-6.3.md
 workplan: workplans/active/PROTOCOL-6.3-EVIDENCE-BACKED-PROJECT-ENGINEERING-MEMORY-WORKPLAN.md
-status: reopened-stage-f-qualification-closed-independent-review-pending
+status: f2-qualified-independent-review-pending
 ---
 
 # Protocol 6.3 Preservation Census
@@ -24,20 +24,22 @@ This file is implementation and Review evidence, not semantic authority. Accepte
 ## Baseline, repaired candidate, and frozen identities
 
 ```text
-accepted Protocol 6.2 recovery:           b59adc77efe6951912cfd705cc43830c58ca27d0
+accepted Protocol 6.2 recovery:            b59adc77efe6951912cfd705cc43830c58ca27d0
 accepted Protocol 6.2 semantic candidate:  ebbc4591bdfed039512026b8acb3a6749475c1c5
 accepted Protocol 6.2 public bootstrap:    5a062ebc472755607b9dc66d33a5ebbc4b7429aa
-6.3 implementation branch start:          5508911f3227c7bcb7e38b0c74a7a37f13fd6b7c
-accepted-main branch point:               bf856f742d1744a8ff50f300ee6493fb93e5c9d0
-invalidated 6.3 semantic candidate:        8d0ad2395ccd126c133d8aad206cfc859f660124
-invalidated 6.3 public bootstrap:          1484c1d3caa49d87cc15bc52a5e775399c1dae1b
-repaired 6.3 public bootstrap:             5ee4b3ac3ca1666b0499f7a72f55adcc411bf4bb
-later bootstrap mapping commit:            1bfb78947eb0b94a58ec8ff4f2828538f3d4702f
-repaired 6.3 semantic candidate:            7f6774156e8595ac9a04227e1c0be30783525a67
-refreshed Stage-F static sensors:           be4cfc1692a64d6bfb69841fb2eac383cc260ad2
-replacement Stage-F qualification:         5f52fbdf05c62b307b5627d99989209578d1d95a
-independent Review:                         PENDING
-Protocol 6.3 recovery:                      UNAVAILABLE
+6.3 implementation branch start:           5508911f3227c7bcb7e38b0c74a7a37f13fd6b7c
+accepted-main branch point:                bf856f742d1744a8ff50f300ee6493fb93e5c9d0
+
+historical invalidated chain 1:             1484c1d3... -> 8d0ad239...
+historical invalidated chain 2:             5ee4b3ac... -> 1bfb7894... -> 7f677415... -> 5f52fbdf...
+reviewed NO-PASS repair state:              100cbde296de6c1a8db14151f34cfacfebc90eb3
+
+current repaired public bootstrap:          e12572c021087308570abfa41657a910c6896457
+later public mapping descendant:            e6a8c12f065c3d25a41da804c129d6bc0a4f7b50
+final implementation semantic candidate:    3bbbdfa8120646d76336c7b916e6a891c9ed38f2
+fresh F2/static-sensor evidence:             6fc26ce374b5346495782871d5d7241de5b90071
+independent Review:                          PENDING
+Protocol 6.3 recovery:                       UNAVAILABLE
 ```
 
 Frozen orchestrator resource trees retained across 6.3 implementation:
@@ -49,14 +51,15 @@ ssdp-protocol-6.1:  437f95bf15fb8f9ec430fa5e6de221c9a99af299
 ssdp-protocol-6.2:  b111f80e39ace08e3888530277ce89743461329d
 ```
 
-Accepted 6.2 packaged prompt/profile blobs remain:
+Accepted 6.2 packaged blobs remain:
 
 ```text
 prompts.md:   159c58cbac0a8cf66311ddf7e11ad8eb03644e8c
 profile.json: 6f21ad0592da343db951ffd56d25aa74a881bd8c
 ```
 
-The old `8d0ad239...`/`1484c1d...` chain is preserved as historical evidence only. Independent Review falsified Stage-F acceptance for that state; no PASS disposition below relies on it as the current candidate.
+Earlier 6.3 chains are preserved as historical evidence and negative fixtures only; no current PASS disposition relies on them as acceptance identities.
+
 
 ## Finite durable and generative surface
 
@@ -158,16 +161,17 @@ Later discovery of a materially affected current surface expands this evidence m
 
 | IDs | Target semantic group | Current disposition | Current evidence / remaining gate |
 | --- | --- | --- | --- |
-| T40-T61 | authority separation through logical canonical memory, evidence/statistics/temperature/HAS/capability/coverage/progressive disclosure/package separation | QUALIFICATION_CLOSED | repaired candidate `7f677415...`; original + reopened focused PEM counterfactuals; replacement Stage-F result `5f52fbdf...`; refreshed sensors `be4cfc16...` where structural routing is material |
-| T62 | 6.3 bootstrap/profile/recovery/version staging | PARTIAL_STAGE_G | replacement bootstrap `5ee4b3ac...`, later mapping `1bfb7894...`, mapped candidate `7f677415...` qualified; immutable recovery selection/mapping intentionally remains Stage G after independent Review |
-| T63-T65 | frozen prior resources; source/generated/package parity; static-vs-live claim discipline | QUALIFICATION_CLOSED | mapped-descendant run `34666676704`; refreshed sensors `be4cfc16...`; live telemetry deliberately unclaimed |
-| T66 | Protocol 7 inheritance/current-lifecycle reconciliation | OPEN_STAGE_G | no silent Protocol-7 D3 change; final accepted-current/history/authority-index reconciliation belongs after Review/recovery |
-| T67 | human-facing background/terminology/abbreviation completeness | QUALIFICATION_CLOSED | inherited documentation scenarios + full source/package regression |
-| T68 | independent assembled-candidate qualification/Review | OPEN_INDEPENDENT_REVIEW | refreshed handoff targets `7f677415...`; implementation-context 260/260 cannot satisfy independent Review |
-| T69 | anti-scope-laundering/lower-salience mandatory preservation | QUALIFICATION_CLOSED | replacement Stage-F Scope/materiality laundering + Priority inversion Challenge passes |
-| T70-T120 | recursive-warrant prevention through watermark/coverage separation, including authority binding, atomic publication, base/overlay, trust, provenance, immutable observation/correction, recurrence lineage, semantic identity, maturity/comparative guidance, salience and HAS-basis rules | QUALIFICATION_CLOSED | current owners + executable original/reopened PEM tests + mapped-candidate regression + replacement Q63/F63 accounting in `5f52fbdf...` |
+| T40-T61 | authority separation through logical canonical memory, evidence/statistics/temperature/HAS/capability/coverage/progressive disclosure/package separation | QUALIFICATION_CLOSED | final candidate `3bbbdfa81206...`; focused Protocol 6.3 counterfactuals; F2 result `6fc26ce374b5...`; rebound static sensors at the same evidence commit |
+| T62 | 6.3 bootstrap/profile/recovery/version staging | PARTIAL_STAGE_G | bootstrap `e12572c02108...`, later mapping `e6a8c12f065c...`, candidate `3bbbdfa81206...` qualified; immutable recovery selection/mapping remains Stage G after independent Review |
+| T63-T65 | frozen prior resources; source/generated/package parity; static-vs-live claim discipline | QUALIFICATION_CLOSED | fresh F2 assembled gates at `6fc26ce374b5...`; static evidence explicitly makes no live-telemetry claim |
+| T66 | Protocol 7 inheritance/current-lifecycle reconciliation | OPEN_STAGE_G | no silent Protocol-7 D3 change; accepted-current/history/authority-index reconciliation remains post-Review/recovery |
+| T67 | human-facing background/terminology/abbreviation completeness | QUALIFICATION_CLOSED | inherited documentation/orchestration regression plus full source/package pass |
+| T68 | independent assembled-candidate qualification/Review | OPEN_INDEPENDENT_REVIEW | handoff targets `3bbbdfa81206...`; implementation-context 260/260 cannot satisfy independent Review |
+| T69 | anti-scope-laundering/lower-salience mandatory preservation | QUALIFICATION_CLOSED | fresh Scope/materiality laundering + Priority inversion Challenge dispositions in F2 evidence |
+| T70-T120 | recursive-warrant prevention through watermark/coverage separation, including authority binding, atomic publication, base/overlay, trust, provenance, immutable observation/correction, recurrence lineage, semantic identity, maturity/comparative guidance, salience and HAS-basis rules | QUALIFICATION_CLOSED | current owners + focused executable PEM tests + final assembled regression + exact Q63/F63 accounting in `6fc26ce374b5...` |
 
-The reopened owner/oracle defects are specifically closed by current behavior: evidence paths resolve real publication revisions; partition coherence uses root-declared content identity; admissible evidence preserves observation/correction provenance; recurrence requires accepted repair plus later independent event; PROVEN/independence is obligation/provenance-cluster aware; notices use evaluable triggers; and HAS/overlay validation pins exact accepted basis without self-ratification or omission deletion.
+The surviving review defects are closed in implementation context: D4R2 binds accepted-repair evidence to the exact repair subject/state/owner rather than chronology; D5R2 derives replication/independence obligations for `PROVEN SUCCESS_PATTERN` rather than trusting claimant flags. D1/D2/D3/D6/D7 remain reverified preserved repairs.
+
 
 ## Source-generation and lifecycle boundary
 
@@ -175,20 +179,21 @@ Completed implementation-side sequence:
 
 ```text
 canonical 6.3 doctrine/routes/template + PEM validator/tests
- -> reopened D1-D7 owner/oracle repair
- -> replacement self-reference-safe source snapshot 5ee4b3ac...
- -> later exact bootstrap mapping 1bfb7894...
- -> regenerated mapping-bearing candidate 7f677415...
- -> full mapped-descendant package/profile/Core/frozen-resource acceptance
- -> refreshed static activation evidence be4cfc16...
- -> replacement Stage-F 260-decision qualification 5f52fbdf...
- -> refreshed independent assembled-candidate Review handoff
+ -> reviewed D1-D7 repair state and NO-PASS at 100cbde...
+ -> D4R2/D5R2 owner-level false-pass repair
+ -> self-reference-safe immutable public bootstrap e12572c02108...
+ -> later exact public mapping e6a8c12f065c...
+ -> final semantic candidate 3bbbdfa81206...
+ -> full source/package/profile/Core/frozen-resource acceptance
+ -> final static-sensor recomputation
+ -> exact 260-case F2 qualification 6fc26ce374b5...
+ -> current independent assembled-candidate Review handoff
 ```
 
 Still-open lifecycle:
 
 ```text
-fresh independent assembled-candidate Review of 7f677415...
+fresh independent assembled-candidate Review of 3bbbdfa81206...
  -> immutable recovery descendant only after Review PASS
  -> later recovery mapping + mapping-bearing regeneration
  -> targeted recovery/profile/package/Core acceptance
@@ -196,7 +201,8 @@ fresh independent assembled-candidate Review of 7f677415...
  -> workplan archive / separately authorized cutover
 ```
 
-`PROJECT-ENGINEERING-MEMORY.md` is project-local state and is never copied into generic `dist/` packages or protocol profile snapshots.
+`PROJECT-ENGINEERING-MEMORY.md` remains project-local PARTIAL candidate-overlay state and is never copied into generic `dist/` packages or protocol profile snapshots.
+
 
 ## Current gate disposition
 
@@ -204,15 +210,16 @@ fresh independent assembled-candidate Review of 7f677415...
 SERIOUS CHALLENGE: NONE IDENTIFIED IN IMPLEMENTATION-CONTEXT QUALIFICATION
 INHERITED T01-T39: RECONSTRUCTED, PRESERVED, AND REQUALIFIED
 T40-T61: QUALIFICATION_CLOSED
-T62: PARTIAL_STAGE_G — replacement bootstrap/profile leg closed; recovery leg intentionally open
+T62: PARTIAL_STAGE_G — public bootstrap/profile leg closed; recovery leg intentionally open
 T63-T65: QUALIFICATION_CLOSED
 T66: OPEN_STAGE_G — final Protocol-7/current-lifecycle reconciliation
 T67: QUALIFICATION_CLOSED
 T68: OPEN_INDEPENDENT_REVIEW
 T69-T120: QUALIFICATION_CLOSED
-SEMANTIC CANDIDATE: 7f6774156e8595ac9a04227e1c0be30783525a67
-PUBLIC BOOTSTRAP: 5ee4b3ac3ca1666b0499f7a72f55adcc411bf4bb
-STAGE-F 260-DECISION RESULT: 5f52fbdf05c62b307b5627d99989209578d1d95a
+SEMANTIC CANDIDATE: 3bbbdfa8120646d76336c7b916e6a891c9ed38f2
+PUBLIC BOOTSTRAP: e12572c021087308570abfa41657a910c6896457
+PUBLIC MAPPING DESCENDANT: e6a8c12f065c3d25a41da804c129d6bc0a4f7b50
+F2 260-CASE RESULT COMMIT: 6fc26ce374b5346495782871d5d7241de5b90071
 INDEPENDENT REVIEW: PENDING
 PROTOCOL 6.3 RECOVERY: UNAVAILABLE
 ACCEPTED CURRENT PROTOCOL: 6.2.0
