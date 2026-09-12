@@ -1,3 +1,4 @@
+# trigger: repaired D4R2/D5R2 candidate is ready for replacement-bootstrap qualification
 name: Finalize Protocol 6.3 replacement bootstrap
 
 on:
