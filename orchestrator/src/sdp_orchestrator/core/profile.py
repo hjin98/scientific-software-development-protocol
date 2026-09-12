@@ -1,9 +1,9 @@
 """Versioned Protocol workflow profiles.
 
-Profile metadata is control-plane data only.  Canonical prompt prose remains in
-its version-bound prompt document.  Protocol 5.16 schema-v1 is preserved as a
-frozen compatibility definition while Protocol 6.0, 6.1, and 6.2 use independent
-schema-v2 profiles selected by declared protocol/profile identity.
+Profile metadata is control-plane data only. Canonical prompt prose remains in
+its version-bound prompt document. Protocol 5.16 schema-v1 is preserved as a
+frozen compatibility definition while Protocol 6.0, 6.1, 6.2, and 6.3 use
+independent schema-v2 profiles selected by declared protocol/profile identity.
 """
 
 from __future__ import annotations
@@ -19,6 +19,7 @@ from .canonical import (
     SSDP6_PROFILE_ID,
     SSDP61_PROFILE_ID,
     SSDP62_PROFILE_ID,
+    SSDP63_PROFILE_ID,
     SSDP6_STAGES,
     CanonicalDocument,
     stages_for_profile,
@@ -52,7 +53,11 @@ SSDP61_COMPATIBLE_PROTOCOL_VERSIONS: tuple[str, ...] = ("6.1.0", "6.1")
 SSDP62_PROFILE_SCHEMA_VERSION = 2
 SSDP62_PROTOCOL_VERSION = "6.2.0"
 SSDP62_COMPATIBLE_PROTOCOL_VERSIONS: tuple[str, ...] = ("6.2.0", "6.2")
-DEFAULT_PROFILE_ID = SSDP62_PROFILE_ID
+
+SSDP63_PROFILE_SCHEMA_VERSION = 2
+SSDP63_PROTOCOL_VERSION = "6.3.0"
+SSDP63_COMPATIBLE_PROTOCOL_VERSIONS: tuple[str, ...] = ("6.3.0", "6.3")
+DEFAULT_PROFILE_ID = SSDP63_PROFILE_ID
 RESULT_SCHEMA_ID = "sdp.stage-result-envelope"
 RESULT_SCHEMA_VERSION = 1
 
@@ -254,9 +259,14 @@ _SSDP61_TRANSITIONS: tuple[TransitionRow, ...] = tuple(
     for source, trigger, target, explanation in _SSDP6_TRANSITIONS
 )
 
-# Protocol 6.2 changes representation, not the schema-v2 routing contract.
+# Protocol 6.2 changed representation without changing the schema-v2 stage graph.
 _SSDP62_STAGE_TABLE: dict[str, StageRow] = dict(_SSDP61_STAGE_TABLE)
 _SSDP62_TRANSITIONS: tuple[TransitionRow, ...] = tuple(_SSDP61_TRANSITIONS)
+
+# Protocol 6.3 adds project-memory semantics in canonical prompt bodies without
+# changing the machine stage graph or result-envelope schema.
+_SSDP63_STAGE_TABLE: dict[str, StageRow] = dict(_SSDP62_STAGE_TABLE)
+_SSDP63_TRANSITIONS: tuple[TransitionRow, ...] = tuple(_SSDP62_TRANSITIONS)
 
 
 @dataclass(frozen=True)
@@ -274,6 +284,7 @@ _DEFINITIONS = {
     SSDP6_PROFILE_ID: ProfileDefinition(SSDP6_PROFILE_ID, SSDP6_PROFILE_SCHEMA_VERSION, SSDP6_PROTOCOL_VERSION, SSDP6_COMPATIBLE_PROTOCOL_VERSIONS, _SSDP6_STAGE_TABLE, _SSDP6_TRANSITIONS),
     SSDP61_PROFILE_ID: ProfileDefinition(SSDP61_PROFILE_ID, SSDP61_PROFILE_SCHEMA_VERSION, SSDP61_PROTOCOL_VERSION, SSDP61_COMPATIBLE_PROTOCOL_VERSIONS, _SSDP61_STAGE_TABLE, _SSDP61_TRANSITIONS),
     SSDP62_PROFILE_ID: ProfileDefinition(SSDP62_PROFILE_ID, SSDP62_PROFILE_SCHEMA_VERSION, SSDP62_PROTOCOL_VERSION, SSDP62_COMPATIBLE_PROTOCOL_VERSIONS, _SSDP62_STAGE_TABLE, _SSDP62_TRANSITIONS),
+    SSDP63_PROFILE_ID: ProfileDefinition(SSDP63_PROFILE_ID, SSDP63_PROFILE_SCHEMA_VERSION, SSDP63_PROTOCOL_VERSION, SSDP63_COMPATIBLE_PROTOCOL_VERSIONS, _SSDP63_STAGE_TABLE, _SSDP63_TRANSITIONS),
 }
 
 

@@ -1,6 +1,6 @@
 ---
 name: numerical-algorithm-design
-description: Design, review, challenge, and maintain D2 algorithm/numerical-method authority under Protocol 6.2, including approximation, error/convergence/conditioning/precision/stochastic semantics, numerical uncertainty, evidence impact, and D2->D3 handoff.
+description: Design, review, challenge, and maintain D2 algorithm/numerical-method authority under Protocol 6.3, including approximation, error/convergence/conditioning/precision/stochastic semantics, numerical uncertainty, evidence impact, and D2->D3 handoff.
 ---
 
 # Numerical Algorithm Design
@@ -15,6 +15,7 @@ Then load only triggered concerns:
 
 - change plan, D1->D2/D2->D3 handoff, lifecycle/invalidation/impact closure -> [Workflow and workplans](references/workflow-and-workplans.md);
 - evidence applicability/dependency/evolution -> [Evidence, evolution, and semantic dependencies](references/evidence-evolution-and-dependencies.md); numerical oracle/tolerance/differential/metamorphic/qualification method -> [Testing and validation](references/testing-and-validation.md) and [Scientific software](references/scientific-software.md) when cross-domain scientific evidence is material;
+- mature algorithm/method rework, substantial optimization/scaling, suspected recurrence, recovery/revert, or an active workplan whose decision can materially depend on demonstrated project history -> [Project Engineering Memory](references/project-engineering-memory.md); resolve the accepted/base memory plus any validated branch overlay and include every materially relevant family/capability/notice in the workplan/Historical Applicability Set (HAS), independent of memory temperature;
 - scaling/resource/hardware tradeoff -> [Performance and parallelism](references/performance-and-parallelism.md);
 - protocol-version/historical recovery -> [Protocol versioning and compatibility](references/protocol-versioning-and-compatibility.md);
 - human-facing D2 paper -> [Scientific and technical writing](references/scientific-technical-writing.md).

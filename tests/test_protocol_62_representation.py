@@ -29,7 +29,9 @@ def current_public_bootstrap() -> str | None:
 
 class Protocol62RepresentationTests(unittest.TestCase):
     def test_current_version_and_nomenclature(self):
-        self.assertEqual((SOURCE / "PROTOCOL_VERSION").read_text().strip(), "6.2.0")
+        version = tuple(int(part) for part in (SOURCE / "PROTOCOL_VERSION").read_text().strip().split("."))
+        self.assertEqual(version[0], 6)
+        self.assertGreaterEqual(version, (6, 2, 0))
         self.assertTrue((REFERENCES / "abstraction-and-concretization.md").is_file())
         self.assertFalse((REFERENCES / "abstraction-and-realization.md").exists())
         self.assertTrue((TEMPLATES / "abstraction_concretization_change_plan_template.md").is_file())
@@ -125,8 +127,17 @@ class Protocol62RepresentationTests(unittest.TestCase):
             self.assertNotEqual(bootstrap, INVALIDATED_BOOTSTRAP)
             for text in surfaces:
                 self.assertIn(bootstrap, text)
-            self.assertIn(f"public_ref = {bootstrap}", prompt)
-            self.assertNotIn("automatic current-6.2 public fallback is unavailable", prompt)
+            current_version = (SOURCE / "PROTOCOL_VERSION").read_text().strip()
+            if current_version == "6.2.0":
+                self.assertIn(f"public_ref = {bootstrap}", prompt)
+                self.assertNotIn("automatic current-6.2 public fallback is unavailable", prompt)
+            else:
+                self.assertIn(f"accepted_6_2_public_ref = {bootstrap}", prompt)
+                current = re.search(r"current_public_ref = ([^\s]+)", prompt)
+                self.assertIsNotNone(current)
+                current_ref = current.group(1)
+                self.assertNotEqual(current_ref, "1484c1d3caa49d87cc15bc52a5e775399c1dae1b")
+                self.assertTrue(current_ref == "unavailable_pending_replacement_bootstrap" or re.fullmatch(r"[0-9a-f]{40}", current_ref))
             self.assertNotIn("automatic current-6.2 public fallback is unavailable", portability)
             self.assertIn("repository-default bytes are never a substitute", prompt)
 
@@ -214,9 +225,11 @@ class Protocol62RepresentationTests(unittest.TestCase):
         self.assertIn("Protocol 5.0", text)
         self.assertIn("6.1", text)
         self.assertNotIn("| BLOCKING |", text)
-        for name in sorted(path.name for path in REFERENCES.glob("*.md")):
+        baseline_references = {path.name for path in REFERENCES.glob("*.md")} - {"project-engineering-memory.md"}
+        baseline_templates = {path.name for path in TEMPLATES.glob("*.md")} - {"project_engineering_memory_template.md"}
+        for name in sorted(baseline_references):
             self.assertIn(f"`{name}`", text, name)
-        for name in sorted(path.name for path in TEMPLATES.glob("*.md")):
+        for name in sorted(baseline_templates):
             self.assertIn(f"`{name}`", text, name)
 
     def test_current_navigation_uses_new_kernel_path(self):

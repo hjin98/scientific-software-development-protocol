@@ -1,6 +1,6 @@
 ---
 name: scientific-formulation
-description: Formulate, review, challenge, and maintain D1 scientific/mathematical authority under Protocol 6.2, including observables, models, assumptions, validity, uncertainty, external adequacy, evidence impact, human adjudication, and D1->D2 handoff.
+description: Formulate, review, challenge, and maintain D1 scientific/mathematical authority under Protocol 6.3, including observables, models, assumptions, validity, uncertainty, external adequacy, evidence impact, human adjudication, and D1->D2 handoff.
 ---
 
 # Scientific Formulation
@@ -15,6 +15,7 @@ Then load only the concern whose predicate fires:
 
 - change plan, handoff, acceptance state, invalidation, resumability or impact closure -> [Workflow and workplans](references/workflow-and-workplans.md);
 - evidence design/applicability/dependency/evolution -> [Evidence, evolution, and semantic dependencies](references/evidence-evolution-and-dependencies.md); testing/oracle method only when required -> [Testing and validation](references/testing-and-validation.md) and, for executable scientific evidence, [Scientific software](references/scientific-software.md);
+- substantial rework of mature D1 meaning, suspected recurrence, recovery/revert, or an active workplan whose decision can materially depend on demonstrated project history -> [Project Engineering Memory](references/project-engineering-memory.md); resolve its accepted/base memory and any validated same-branch overlay, then record materially relevant entries in the workplan/Historical Applicability Set (HAS); a first clean local issue or unrelated task does not activate memory;
 - protocol-version/historical recovery -> [Protocol versioning and compatibility](references/protocol-versioning-and-compatibility.md);
 - human-facing scientific writing -> [Scientific and technical writing](references/scientific-technical-writing.md); document/evidence communication when material -> [Documentation and evidence](references/documentation-and-evidence.md).
 

@@ -12,7 +12,9 @@ class Protocol61EvidenceEvolutionTests(unittest.TestCase):
         return (ROOT / rel).read_text(encoding="utf-8")
 
     def test_current_version_and_concretization_vocabulary(self) -> None:
-        self.assertEqual(self.read("source/PROTOCOL_VERSION").strip(), "6.2.0")
+        version = tuple(int(part) for part in self.read("source/PROTOCOL_VERSION").strip().split("."))
+        self.assertEqual(version[0], 6)
+        self.assertGreaterEqual(version, (6, 2, 0))
         authority = self.read("source/shared/references/abstraction-and-concretization.md")
         self.assertIn("A **concretization** is a lower-level choice", authority)
         self.assertIn("**Realization** is reserved for concrete evidence execution", authority)
@@ -78,9 +80,19 @@ class Protocol61EvidenceEvolutionTests(unittest.TestCase):
         else:
             bootstrap = published.group(1)
             self.assertNotEqual(bootstrap, invalidated)
-            self.assertIn(f"PUBLIC_REF = {bootstrap}", prompts)
-            self.assertIn("current 6.2 may fall back", lower)
-            self.assertNotIn("automatic current-6.2 public fallback is unavailable", lower)
+            current_version = self.read("source/PROTOCOL_VERSION").strip()
+            if current_version == "6.2.0":
+                self.assertIn(f"PUBLIC_REF = {bootstrap}", prompts)
+                self.assertIn("current 6.2 may fall back", lower)
+                self.assertNotIn("automatic current-6.2 public fallback is unavailable", lower)
+            else:
+                self.assertIn(f"ACCEPTED_6_2_PUBLIC_REF = {bootstrap}", prompts)
+                current = re.search(r"^CURRENT_PUBLIC_REF = (\S+)$", prompts, re.MULTILINE)
+                self.assertIsNotNone(current)
+                current_ref = current.group(1)
+                self.assertNotEqual(current_ref, "1484c1d3caa49d87cc15bc52a5e775399c1dae1b")
+                self.assertTrue(current_ref == "UNAVAILABLE_PENDING_REPLACEMENT_BOOTSTRAP" or re.fullmatch(r"[0-9a-f]{40}", current_ref))
+                self.assertIn("version-bound 6.2 work continues to use exactly", lower)
 
     def test_accepted_61_recovery_and_bootstrap_remain_immutable(self) -> None:
         recovery = "802e75af261efb4f70d71284d860613a2197b639"
