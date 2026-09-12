@@ -10,6 +10,7 @@ from pathlib import Path
 
 
 BOOTSTRAP = "86c13cab6bdd1991dffa94e277db8eacf87e2e11"
+RECOVERY = "9f353097fab36e325a325f1c2f9d9cec32e86177"
 INVALIDATED_D4R3_BOOTSTRAP = "dc22f09fd38dbbfeaeb0160152da9b284654f66e"
 INVALIDATED_BOOTSTRAP = "1484c1d3caa49d87cc15bc52a5e775399c1dae1b"
 INVALIDATED_SECOND_BOOTSTRAP = "5ee4b3ac3ca1666b0499f7a72f55adcc411bf4bb"
@@ -19,7 +20,7 @@ LOCAL_MD_RE = re.compile(r"\[[^\]]+\]\(([^)]+\.md(?:#[^)]*)?)\)")
 
 
 class Protocol63BootstrapTests(unittest.TestCase):
-    def test_current_public_mapping_is_exact_and_recovery_remains_unavailable(self) -> None:
+    def test_current_public_and_recovery_mappings_are_exact_and_distinct(self) -> None:
         root = Path(__file__).resolve().parents[1]
         versioning = (root / 'source/shared/references/protocol-versioning-and-compatibility.md').read_text(encoding='utf-8')
         prompts = (root / 'source/shared/references/development-workflow-prompts.md').read_text(encoding='utf-8')
@@ -39,7 +40,9 @@ class Protocol63BootstrapTests(unittest.TestCase):
         self.assertIn(f'6.3.0 invalidated D4R3 bootstrap -> {INVALIDATED_D4R3_BOOTSTRAP}', portability)
         self.assertIn(INVALIDATED_OWNER_BINDING_BOOTSTRAP, readme)
         self.assertIn(INVALIDATED_SECOND_BOOTSTRAP, readme)
-        self.assertIn('6.3.0 recovery -> UNAVAILABLE_PENDING_6.3_ACCEPTANCE', portability)
+        self.assertIn(f'6.3.0 recovery -> {RECOVERY}', portability)
+        self.assertIn(f'6.3.0  -> {RECOVERY}', versioning)
+        self.assertNotEqual(RECOVERY, BOOTSTRAP)
         self.assertNotIn('6.3.0  -> ' + INVALIDATED_SECOND_BOOTSTRAP, versioning)
         if not BOOTSTRAP.startswith("UNAVAILABLE_"):
             stale_transition_fragments = (

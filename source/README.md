@@ -56,7 +56,7 @@ Stable family IDs represent semantic identities, not line numbers. Current stati
 
 Protocol 6.3 preserves every accepted Protocol 6.2 doctrine and still-valid historical capability while adding project-learning support. Completeness is prerequisite; compactness never permits scope narrowing or information loss. Current documents state present truth; PEM summarizes evidence-backed reusable local learning; semantic history explains material change; Git preserves chronology.
 
-Current path uses `abstraction-and-concretization.md`. Frozen 5.16/6.0/6.1/6.2 files/profiles retain their version-faithful identifiers/bytes. Protocol 6.2 accepted recovery remains `b59adc77efe6951912cfd705cc43830c58ca27d0` and public bootstrap remains `5a062ebc472755607b9dc66d33a5ebbc4b7429aa` for version-bound 6.2 work. Current 6.3 public fallback remains intentionally unavailable until an already validated immutable 6.3 bootstrap is created and named by a later descendant.
+Current path uses `abstraction-and-concretization.md`. Frozen 5.16/6.0/6.1/6.2 files/profiles retain their version-faithful identifiers/bytes. Protocol 6.2 accepted recovery remains `b59adc77efe6951912cfd705cc43830c58ca27d0` and public bootstrap remains `5a062ebc472755607b9dc66d33a5ebbc4b7429aa` for version-bound 6.2 work. Current Protocol 6.3 public fallback is exact bootstrap `86c13cab6bdd1991dffa94e277db8eacf87e2e11`. Stage-G recovery is separately mapped to `9f353097fab36e325a325f1c2f9d9cec32e86177` after R2 Review PASS; Protocol 6.2 remains accepted-current until mapping-bearing generated artifacts and lifecycle closeout pass.
 
 ## Build and acceptance
 

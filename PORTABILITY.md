@@ -41,14 +41,14 @@ Accepted immutable mappings:
 6.3.0 invalidated owner-binding bootstrap -> e12572c021087308570abfa41657a910c6896457
 6.3.0 invalidated D4R3 bootstrap -> dc22f09fd38dbbfeaeb0160152da9b284654f66e
 6.3.0 public bootstrap -> 86c13cab6bdd1991dffa94e277db8eacf87e2e11
-6.3.0 recovery -> UNAVAILABLE_PENDING_6.3_ACCEPTANCE
+6.3.0 recovery -> 9f353097fab36e325a325f1c2f9d9cec32e86177
 ```
 
 Canonical repository: `https://github.com/hjin98/scientific-software-development-protocol`.
 
 The first Protocol 6.2 bootstrap attempt `1181c2031710c5d343194d87d08543290fded0ab` remains invalidated historical evidence. Version-bound 6.2 public fallback uses exactly `5a062ebc472755607b9dc66d33a5ebbc4b7429aa`; accepted 6.2 recovery is separately `b59adc77efe6951912cfd705cc43830c58ca27d0`.
 
-For Protocol 6.3, pre-repair bootstrap `1484c1d3caa49d87cc15bc52a5e775399c1dae1b`, second bootstrap `5ee4b3ac3ca1666b0499f7a72f55adcc411bf4bb`, owner-binding bootstrap `e12572c021087308570abfa41657a910c6896457`, and D4R3 bootstrap `dc22f09fd38dbbfeaeb0160152da9b284654f66e` are historical evidence only. D9 changed canonical validator semantics. Replacement self-reference-safe source snapshot `86c13cab6bdd1991dffa94e277db8eacf87e2e11` passed bootstrap readiness before this later descendant published its exact SHA as the sole authorized version-bound 6.3 public fallback; recovery remains unavailable. If neither compatible local source nor mapped compatible immutable public source can be read, report truthful non-closure.
+For Protocol 6.3, pre-repair bootstrap `1484c1d3caa49d87cc15bc52a5e775399c1dae1b`, second bootstrap `5ee4b3ac3ca1666b0499f7a72f55adcc411bf4bb`, owner-binding bootstrap `e12572c021087308570abfa41657a910c6896457`, and D4R3 bootstrap `dc22f09fd38dbbfeaeb0160152da9b284654f66e` are historical evidence only. D9 changed canonical validator semantics. Replacement self-reference-safe source snapshot `86c13cab6bdd1991dffa94e277db8eacf87e2e11` passed bootstrap readiness before a later descendant published its exact SHA as the sole authorized version-bound 6.3 public fallback. Recovery is separately mapped to `9f353097fab36e325a325f1c2f9d9cec32e86177` after R2 Review PASS; Protocol 6.2 remains accepted-current until Stage G generated reconciliation and lifecycle closeout pass. If neither compatible local source nor mapped compatible immutable public source can be read, report truthful non-closure.
 
 ## Version-bound profiles
 
@@ -89,4 +89,4 @@ For live routing, use normal supported entrypoints and fresh sessions; do not pr
 
 Compact routing/handoffs remain complete for governed scope. A reference can replace local repetition only when the receiving environment can resolve the version-bound owner; otherwise carry the minimum necessary semantics locally. Cold historical/specialized/project-memory detail must remain discoverable through visible triggers. Generated routing graphs/matrices/traces and derived PEM summaries/indexes are diagnostic/derived evidence, not second routing/memory authority.
 
-Protocol 6.2 remains accepted-current while 6.3 is a candidate. Version-bound 6.2 public fallback remains exact bootstrap `5a062ebc472755607b9dc66d33a5ebbc4b7429aa` and accepted recovery remains `b59adc77efe6951912cfd705cc43830c58ca27d0`. Version-bound 6.3 public fallback is usable only when the `6.3.0 public bootstrap` mapping above contains an immutable Git SHA; an unavailable sentinel means no 6.3 fallback is currently authorized. This does not make 6.3 accepted-current. Protocol 6.3 cannot displace the 6.2 baseline until complete qualification, independent Review, recovery mapping, regenerated parity, and lifecycle gates close.
+Protocol 6.2 remains accepted-current while 6.3 is a candidate. Version-bound 6.2 public fallback remains exact bootstrap `5a062ebc472755607b9dc66d33a5ebbc4b7429aa` and accepted recovery remains `b59adc77efe6951912cfd705cc43830c58ca27d0`. Version-bound 6.3 public fallback is usable only when the `6.3.0 public bootstrap` mapping above contains an immutable Git SHA; an unavailable sentinel means no 6.3 fallback is currently authorized. This does not make 6.3 accepted-current. Protocol 6.3 recovery is now mapped to `9f353097fab36e325a325f1c2f9d9cec32e86177`, distinct from public bootstrap `86c13cab6bdd1991dffa94e277db8eacf87e2e11`, but Protocol 6.3 cannot displace the 6.2 baseline until regenerated parity and the remaining Stage G lifecycle gates close.
