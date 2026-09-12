@@ -1,0 +1,60 @@
+name: Reconcile Protocol 6.3 F2 lifecycle v2 once
+
+on:
+  push:
+    branches:
+      - ssdp-6.3-engineering-memory
+    paths:
+      - .github/workflows/ssdp63-reconcile-f2-lifecycle-v2-once.yml
+      - .github/scripts/reconcile_ssdp63_f2_lifecycle.py
+
+permissions:
+  contents: write
+
+jobs:
+  reconcile:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ssdp-6.3-engineering-memory
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install validation dependencies
+        run: |
+          python -m pip install -r source/requirements-validation.txt
+          python -m pip install ./orchestrator -r orchestrator/requirements-dev.txt
+      - name: Reconcile lifecycle evidence
+        run: python .github/scripts/reconcile_ssdp63_f2_lifecycle.py
+      - name: Validate reconciled assembled state
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm .github/workflows/ssdp63-reconcile-f2-lifecycle-once.yml
+          rm .github/workflows/ssdp63-reconcile-f2-lifecycle-v2-once.yml
+          rm .github/scripts/reconcile_ssdp63_f2_lifecycle.py
+          python source/project_engineering_memory.py PROJECT-ENGINEERING-MEMORY.md --write-summary
+          python -m unittest -v tests.test_protocol_63_reopened_repairs tests.test_protocol_63_engineering_memory tests.test_protocol_63_bootstrap
+          env SSDP_VALIDATE_PUBLIC_FALLBACK=1 python -m unittest discover -s tests -v
+          python orchestrator/scripts/generate_protocol_snapshot.py --check
+          python orchestrator/scripts/run_core_tests.py
+          git diff --check
+          test "$(find .github/workflows -maxdepth 1 -type f | wc -l)" -eq 1
+          test -f .github/workflows/protocol-check.yml
+          grep -F 'semantic_candidate: 3bbbdfa8120646d76336c7b916e6a891c9ed38f2' qualification/ssdp6/IMPLEMENTATION-STATE-PROTOCOL-6.3.md
+          grep -F 'candidate_under_test: 3bbbdfa8120646d76336c7b916e6a891c9ed38f2' qualification/ssdp6/RESULTS-GPT-5.6-SOL-2026-09-12-PROTOCOL-6.3-F2.md
+          grep -F 'implementation_review_state: repaired-qualified-independent-review-pending' workplans/active/PROTOCOL-6.3-EVIDENCE-BACKED-PROJECT-ENGINEERING-MEMORY-WORKPLAN.md
+          grep -F 'stage_g_recovery_gate: blocked-pending-independent-review' workplans/active/PROTOCOL-6.3-EVIDENCE-BACKED-PROJECT-ENGINEERING-MEMORY-WORKPLAN.md
+          grep -F 'independent_review: required_fresh_context' qualification/ssdp6/INDEPENDENT-REVIEW-HANDOFF-PROTOCOL-6.3.md
+          grep -F 'Protocol 6.3 recovery: UNAVAILABLE' qualification/ssdp6/SSDP-6.3-PRESERVATION-CENSUS.md
+      - name: Commit reconciled lifecycle evidence
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "Reconcile Protocol 6.3 F2 lifecycle evidence"
+          git push origin HEAD:ssdp-6.3-engineering-memory
