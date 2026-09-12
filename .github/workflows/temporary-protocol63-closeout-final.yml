@@ -54,6 +54,8 @@ jobs:
           git rm .github/workflows/temporary-protocol63-closeout-retry.yml
           git rm .github/workflows/temporary-protocol63-closeout-final.yml
           git rm qualification/ssdp6/TEMP-PROTOCOL63-CLOSEOUT-TEST.log
+          git rm qualification/ssdp6/TEMP-PROTOCOL63-CLOSEOUT-TEST-2.log
+          git rm qualification/ssdp6/TEMP-PROTOCOL63-CLOSEOUT-TEST-FULL.log
           git add -A
           git diff --cached --check
           git commit -m 'Close Protocol 6.3 lifecycle'
