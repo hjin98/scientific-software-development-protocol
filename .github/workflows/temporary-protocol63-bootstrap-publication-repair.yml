@@ -1,4 +1,4 @@
-name: Temporary Protocol 6.3 replacement bootstrap test split
+name: Temporary Protocol 6.3 replacement bootstrap full-suite replay
 
 on:
   push:
@@ -6,7 +6,7 @@ on:
 
 jobs:
   diagnose:
-    if: github.event.head_commit.message == 'Split Protocol 6.3 replacement bootstrap regression'
+    if: github.event.head_commit.message == 'Replay Protocol 6.3 replacement bootstrap full suite'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -45,24 +45,9 @@ jobs:
           a="        self.assertIn(f'6.3.0 invalidated owner-binding bootstrap -> {INVALIDATED_OWNER_BINDING_BOOTSTRAP}', portability)\n"; t=t.replace(a,a+"        self.assertIn(f'6.3.0 invalidated D4R3 bootstrap -> {INVALIDATED_D4R3_BOOTSTRAP}', portability)\n",1)
           p.write_text(t,encoding='utf-8')
           PY
-      - name: Protocol 6.3 bootstrap and independent repair
+      - name: Full discovery replay A
         continue-on-error: true
-        run: python -m unittest -v tests.test_protocol_63_bootstrap tests.test_protocol_63_independent_review_repairs
-      - name: Protocol 6.3 engineering-memory suites
+        run: python -m unittest discover -s tests -v
+      - name: Full discovery replay B
         continue-on-error: true
-        run: python -m unittest -v tests.test_protocol_63_engineering_memory tests.test_protocol_63_reopened_repairs
-      - name: General protocol contracts and portability
-        continue-on-error: true
-        run: python -m unittest -v tests.test_protocol_contracts tests.test_protocol_portability tests.test_package_reference_closure tests.test_build_index_contract
-      - name: Protocol 6.2 suites
-        continue-on-error: true
-        run: python -m unittest -v tests.test_protocol_62_closeout tests.test_protocol_62_representation
-      - name: Protocol 5.16 lifecycle and orchestration suites
-        continue-on-error: true
-        run: python -m unittest -v tests.test_protocol_516_lifecycle_closeout tests.test_protocol_516_long_horizon_quality tests.test_protocol_516_orchestration
-      - name: Protocol 5.13 and 5.15 suites
-        continue-on-error: true
-        run: python -m unittest -v tests.test_protocol_513_counterfactual_oracles tests.test_protocol_513_live_tool_qualification tests.test_protocol_513_oracle_family_closure tests.test_protocol_513_tool_routing_codeql_compression tests.test_protocol_515_language_profiles
-      - name: Remaining protocol suites
-        continue-on-error: true
-        run: python -m unittest -v tests.test_protocol_511_tool_assistance tests.test_protocol_512_convergence tests.test_protocol_59_review_rework tests.test_protocol_59_route_uri_safety tests.test_protocol_61_evidence_evolution tests.test_protocol_effective_compression tests.test_protocol_engineering_stewardship tests.test_protocol_proxy_proof_acceptance tests.test_protocol_tooling
+        run: python -m unittest discover -s tests -v
