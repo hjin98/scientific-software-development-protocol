@@ -14,6 +14,19 @@ for temporary_path in (
     "qualification/ssdp6/DIAGNOSTIC-PROTOCOL-6.3-D9-EXECUTION.txt",
 ):
     if (ROOT / temporary_path).exists():
+        run("git", "rm", "-f", temporary_path)
+run("git", "add", "source/project_engineering_memory.py", "tests/test_protocol_63_independent_review_repairs.py")
+'''
+if old_rm not in s:
+    # Previous patcher may already have expanded this block; normalize that form too.
+    old_rm = '''run("git", "diff", "--check")
+for temporary_path in (
+    ".github/workflows/temporary-protocol63-d9-repair.yml",
+    "qualification/ssdp6/temporary_d9_repair.py",
+    "qualification/ssdp6/patch_d9_runner.py",
+    "qualification/ssdp6/DIAGNOSTIC-PROTOCOL-6.3-D9-EXECUTION.txt",
+):
+    if (ROOT / temporary_path).exists():
         run("git", "rm", temporary_path)
 run("git", "add", "source/project_engineering_memory.py", "tests/test_protocol_63_independent_review_repairs.py")
 '''
@@ -59,9 +72,8 @@ if len(measurements) != 11:
 for heading, actual in measurements.items():
     print(f"measured {heading}: {actual} bytes")
 '''
-if old_measure not in s:
-    raise SystemExit("static measurement anchor missing")
-s = s.replace(old_measure, new_measure, 1)
+if old_measure in s:
+    s = s.replace(old_measure, new_measure, 1)
 
 old_publish = '''sensor_text = replace_once(sensor_text, "semantic_candidate: 026eecf6ce382c3445ed218aeca80dcf2fb9a426", f"semantic_candidate: {candidate}", "sensor candidate")
 sensor_text = replace_once(sensor_text, "F3 owner-binding refresh: the active-set predicates/topology were rechecked against repaired semantic candidate `026eecf6ce382c3445ed218aeca80dcf2fb9a426` and remain unchanged. Every 6.3 byte total below was recomputed from the exact candidate files named by that fixed active set; no F2 candidate-side byte total is carried forward as current evidence.", f"F5/D9 candidate-binding refresh: the active-set predicates/topology were rechecked against repaired semantic candidate `{candidate}` and remain unchanged. Every 6.3 byte total below was mechanically remeasured from the exact candidate files named by that fixed active set; all eleven totals match the table. No F2/F3/F4 candidate-side identity is carried forward as current evidence.", "sensor refresh paragraph")
@@ -90,7 +102,6 @@ for heading, actual in measurements.items():
         raise SystemExit(f"failed to publish exact active bytes for {heading}")
 sensor.write_text(sensor_text)
 '''
-if old_publish not in s:
-    raise SystemExit("sensor publication anchor missing")
-s = s.replace(old_publish, new_publish, 1)
+if old_publish in s:
+    s = s.replace(old_publish, new_publish, 1)
 p.write_text(s)
