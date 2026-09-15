@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import re
+import subprocess
 import unittest
 from pathlib import Path
 
@@ -13,6 +14,19 @@ def read(rel: str) -> str:
 
 def norm(text: str) -> str:
     return text.lower().replace("`", "").replace("**", "")
+
+
+def front_matter(text: str) -> dict[str, str]:
+    if not text.startswith("---\n"):
+        return {}
+    block = text.split("---\n", 2)[1]
+    result: dict[str, str] = {}
+    for line in block.splitlines():
+        if not line.strip() or line.lstrip().startswith("#") or ":" not in line:
+            continue
+        key, value = line.split(":", 1)
+        result[key.strip()] = value.strip().strip('"').strip("'")
+    return result
 
 
 def markdown_fences_well_formed(text: str) -> bool:
@@ -122,7 +136,15 @@ def qf_o(c):
 
 
 def qf_p(c):
-    return bool(c.get("snapshot_complete") and c.get("history") and not c.get("amendment_replay"))
+    return bool(
+        c.get("snapshot_complete")
+        and c.get("history")
+        and c.get("current_handoff")
+        and c.get("baseline_consistent")
+        and c.get("target_binding")
+        and c.get("qualification_binding")
+        and not c.get("amendment_replay")
+    )
 
 
 RULES = {
@@ -148,7 +170,7 @@ BASE = {
     "M": {"source": True, "loaded": True},
     "N": {"rendered": True},
     "O": {"parity": True},
-    "P": {"snapshot_complete": True, "history": True},
+    "P": {"snapshot_complete": True, "history": True, "current_handoff": True, "baseline_consistent": True, "target_binding": True, "qualification_binding": True},
 }
 
 NEGATIVE = {
@@ -167,7 +189,7 @@ NEGATIVE = {
     "M": ({"loaded": False}, {"edge_activates": True}),
     "N": ({"term": True, "defined": False}, {"abbrev": True, "expanded": False}, {"rendered": False}, {"example_authority": True}),
     "O": ({"frozen_mutation": True}, {"generated_mismatch": True}, {"bootstrap_self_name": True}, {"schema_bump": True}, {"early_recovery": True}, {"protocol7_d3": True}),
-    "P": ({"amendment_replay": True}, {"snapshot_complete": False}),
+    "P": ({"amendment_replay": True}, {"snapshot_complete": False}, {"current_handoff": False}, {"baseline_consistent": False}, {"target_binding": False}, {"qualification_binding": False}),
 }
 
 
@@ -264,9 +286,47 @@ class Protocol64AxiomaticTraceabilityQualificationTests(unittest.TestCase):
         active = sorted((ROOT / "workplans/active").glob("SSDP-6.4*.md"))
         self.assertEqual(len(active), 1, active)
         workplan = active[0].read_text(encoding="utf-8")
+        handoff_rel = "qualification/ssdp6/INDEPENDENT-REVIEW-HANDOFF-PROTOCOL-6.4.md"
+        handoff = read(handoff_rel)
+        workplan_meta = front_matter(workplan)
+        handoff_meta = front_matter(handoff)
+        baseline = "0928accd337a13f864b292ed81c36372828cfb4c"
+
         self.assertIn("QF64-A", workplan)
         self.assertIn("QF64-P", workplan)
         self.assertIn("snapshot-complete", workplan.lower())
+        self.assertEqual(workplan_meta.get("independent_review_target_owner"), handoff_rel)
+        self.assertEqual(workplan_meta.get("independent_review_target"), "HANDOFF_BOUND_AFTER_CANDIDATE")
+        self.assertEqual(workplan_meta.get("independent_review_baseline"), baseline)
+        self.assertEqual(workplan_meta.get("review_target_binding_protocol"), "descendant-handoff-exact-target")
+        self.assertEqual(handoff_meta.get("accepted_protocol_63_repository_state"), baseline)
+        self.assertEqual(handoff_meta.get("accepted_current_protocol"), "6.3.0")
+        self.assertEqual(handoff_meta.get("protocol_64_recovery"), "unavailable_pending_independent_review")
+        self.assertEqual(handoff_meta.get("stage_f"), "blocked_pending_independent_review")
+
+        state = handoff_meta.get("review_target_binding_state")
+        target = handoff_meta.get("assembled_review_target")
+        qualification = handoff_meta.get("assembled_review_target_ci")
+        self.assertIn(state, {"pending-descendant-handoff", "bound"})
+        if state == "pending-descendant-handoff":
+            self.assertEqual(target, "PENDING_DESCENDANT_HANDOFF")
+            self.assertEqual(qualification, "PENDING_EXACT_TARGET_CI")
+            self.assertIn("must be finalized by a later descendant", handoff.lower())
+        else:
+            self.assertRegex(target or "", r"^[0-9a-f]{40}$")
+            self.assertNotEqual(target, baseline)
+            self.assertRegex(qualification or "", r"^[0-9]+$")
+            self.assertIn(f"Review immutable assembled target `{target}`", handoff)
+            if (ROOT / ".git").exists():
+                ancestor = subprocess.run(
+                    ["git", "merge-base", "--is-ancestor", target, "HEAD"],
+                    cwd=ROOT,
+                    check=False,
+                )
+                self.assertEqual(ancestor.returncode, 0, f"review target {target} is not an ancestor of HEAD")
+                head = subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=ROOT, text=True).strip()
+                self.assertNotEqual(head, target, "handoff commit must descend from, not equal, the review target")
+
         self.assertIn("Protocol 6.4 is the current candidate under qualification", self.readme)
 
     def test_automation_boundary_does_not_counterfeit_semantic_review(self) -> None:

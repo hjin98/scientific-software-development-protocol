@@ -8,12 +8,14 @@ created_date: 2026-09-15
 reviewed_date: 2026-09-15
 design_review_state: pass-after-sixth-review
 independent_review_state: repaired-awaiting-fresh-review
-implementation_handoff: repair-complete-awaiting-fresh-review
+implementation_handoff: lifecycle-binding-repair-complete-awaiting-descendant-handoff
 active_serious_challenge: none
 branch: ssdp-6.4-axiomatic-definition-traceability
 reviewed_input_head: 4974058020cdda1325ef899c04b3cd13d5ae44c2
-independent_review_target: 0377e798fbbb1054badd1193950d9c10f723be75
+independent_review_target: HANDOFF_BOUND_AFTER_CANDIDATE
+independent_review_target_owner: qualification/ssdp6/INDEPENDENT-REVIEW-HANDOFF-PROTOCOL-6.4.md
 independent_review_baseline: 0928accd337a13f864b292ed81c36372828cfb4c
+review_target_binding_protocol: descendant-handoff-exact-target
 stage_f: blocked
 branch_point: 0928accd337a13f864b292ed81c36372828cfb4c
 accepted_parent_protocol: 6.3.0
@@ -25,7 +27,7 @@ accepted_parent_public_bootstrap: 86c13cab6bdd1991dffa94e277db8eacf87e2e11
 
 ## Current disposition
 
-**STAGE-E REPAIR COMPLETE; FRESH INDEPENDENT RE-REVIEW REQUIRED.** The NO-PASS on immutable assembled target `0377e798fbbb1054badd1193950d9c10f723be75` remains historical Review evidence, while its three owning-layer repairs are now integrated under Section 27. The `USES_DEFINITION` direction is explicitly adjudicated as subject -> prerequisite with prerequisite-change impact using reverse traversal; the QF64-H oracle discriminates reversed edges and wrong impact traversal; and the canonical Markdown fence defect is repaired with a real structural presentation oracle. Protocol 6.3 remains accepted-current. Protocol 6.4 recovery remains unavailable and Stage F remains blocked until a fresh independent Review passes a new immutable assembled target. The sixth design-review disposition below records the pre-implementation design acceptance that authorized the original implementation.
+**STAGE-E REPAIR COMPLETE; REVIEW-TARGET BINDING IS DESCENDANT-OWNED.** The NO-PASS on immutable assembled target `0377e798fbbb1054badd1193950d9c10f723be75` remains historical Review evidence, and its owning-layer repairs are integrated under Section 27. The active workplan deliberately does not self-name the next assembled candidate SHA: `independent_review_target_owner` routes to the descendant independent-review handoff, which must bind the already-existing immutable candidate and exact-target qualification evidence before a fresh Review begins. Protocol 6.3 remains accepted-current. Protocol 6.4 recovery remains unavailable and Stage F remains blocked until that binding exists and a fresh independent Review passes the bound target. The sixth design-review disposition below records the pre-implementation design acceptance that authorized the original implementation.
 
 **SIXTH DESIGN REVIEW: PASS AFTER GAP CLOSURE.** This file is the single current implementation/review handoff for Protocol 6.4. Earlier design-review workplans and the fifth-review consolidated snapshot are historical evidence only; implementation and independent Review SHALL reconstruct the current contract from this file plus accepted Protocol 6.3 owners, not by replaying amendment chronology.
 
@@ -643,9 +645,9 @@ Fail specialized core terminology or non-obvious abbreviations used before expla
 
 Fail frozen predecessor mutation, generated-source mismatch, invalid/mutable/self-naming public bootstrap, schema bump solely for prose doctrine, recovery published before independent PASS, or Protocol-7 D3 mutation through inheritance reconciliation. Pass exact frozen-resource, package/profile/Core, bootstrap/recovery, and inheritance checks.
 
-### QF64-P — Current-contract representation
+### QF64-P — Current-contract representation and review-target binding
 
-Fail a live 6.4 handoff that requires replaying superseded review amendments or embeds old review chronology as current obligations after the same semantics are integrated. Pass one current snapshot-complete workplan while exact prior designs remain recoverable from archive/Git.
+Fail a live 6.4 handoff that requires replaying superseded review amendments, embeds old review chronology as current obligations after the same semantics are integrated, disagrees with the workplan about the accepted baseline, points Review at a superseded assembled candidate, or claims review readiness without an exact immutable target plus applicable exact-target qualification evidence. Because an assembled candidate cannot self-name its own commit identity, the candidate tree may carry only an explicit pending descendant-binding sentinel while Stage F remains blocked; the later handoff descendant must replace that sentinel with the already-existing candidate SHA and its exact-target qualification evidence before Review begins. Pass one current snapshot-complete workplan plus one current handoff whose baseline, target-binding state, immutable target, qualification binding, and blocked lifecycle state are mutually coherent, while exact prior designs remain recoverable from archive/Git.
 
 ## 23. Independent falsification passes
 
@@ -782,4 +784,4 @@ The D3 direction repair is a clarification of the already-implemented subject-to
 
 ### Fresh Stage-E re-entry gate
 
-Before Stage F, freeze a new immutable assembled review target containing these repairs and fresh applicable qualification evidence, then perform a fresh independent Stage-E Review against accepted Protocol 6.3 repository state `0928accd337a13f864b292ed81c36372828cfb4c`. The re-review SHALL cover all P64-A..P64-O, QF64-A..QF64-P and F64-A..F64-L obligations, not only the three repaired findings. Until that Review passes, Protocol 6.3 remains accepted-current, Protocol 6.4 recovery remains absent, and Stage F remains blocked.
+Before Stage F, freeze a new immutable assembled review target containing these repairs and fresh applicable qualification evidence. The candidate commit does not self-name. A later descendant updates `qualification/ssdp6/INDEPENDENT-REVIEW-HANDOFF-PROTOCOL-6.4.md` to bind the exact candidate SHA and exact-target qualification run; the workplan routes to that handoff instead of duplicating an independently editable target SHA. Only after that binding exists may a fresh independent Stage-E Review begin against accepted Protocol 6.3 repository state `0928accd337a13f864b292ed81c36372828cfb4c`. The re-review SHALL cover all P64-A..P64-O, QF64-A..QF64-P and F64-A..F64-L obligations, not only repaired findings. Until that Review passes, Protocol 6.3 remains accepted-current, Protocol 6.4 recovery remains absent, and Stage F remains blocked.
