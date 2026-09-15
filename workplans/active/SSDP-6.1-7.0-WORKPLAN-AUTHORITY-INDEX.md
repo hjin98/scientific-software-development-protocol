@@ -114,20 +114,22 @@ Protocol 6.4 axiomatic/formal-definition and semantic-traceability design/implem
 
 1. `workplans/active/SSDP-6.4-AXIOMATIC-FORMAL-DEFINITION-AND-SEMANTIC-TRACEABILITY.md`
 2. `workplans/active/SSDP-6.4-AXIOMATIC-FORMAL-DEFINITION-AND-SEMANTIC-TRACEABILITY-REVISION-1-SECOND-DESIGN-REVIEW-CLOSURE.md`
+3. `workplans/active/SSDP-6.4-AXIOMATIC-FORMAL-DEFINITION-AND-SEMANTIC-TRACEABILITY-REVISION-2-THIRD-DESIGN-REVIEW-CLOSURE.md`
 
 Precedence and preservation:
 
 - the parent introduces the 6.4 formal-first/definition-before-use doctrine, strict semantic traceability, D1-D4 local consequences, preservation matrix, qualification, falsification, and inherited 6.3 bootstrap/recovery lifecycle;
 - Revision 1 supersedes only the parent's defective single provenance enum, broad/untyped dependency edge, raw-cycle exception, incomplete import/source binding, incomplete cross-domain traceability, and missing bounded-adoption semantics;
-- Revision 1 requires source provenance to remain orthogonal to semantic/epistemic role, a true acyclic external definition-use DAG with composite recursive nodes, typed cross-domain relations, exact external-source support/notation mapping, anti-laundering foundational boundaries, semantic-identity/alias discipline, and bounded 6.4 adoption;
-- every parent requirement not explicitly changed by Revision 1 remains binding;
-- neither artifact changes accepted Protocol 6.3 authority merely by existing on this branch.
+- Revision 1 requires source/availability classification to remain orthogonal to semantic/epistemic role, a true acyclic external definition-use DAG with composite recursive nodes, typed cross-domain relations, exact external-source support/notation mapping, anti-laundering foundational boundaries, semantic-identity/alias discipline, and bounded 6.4 adoption;
+- Revision 2 further corrects the availability/role model, admits explicit project primitives and local binders, separates definitions from axioms/assumptions/truth claims, requires mathematical well-definedness and use-site hypothesis/validity discharge, closes derivation circularity, assigns `USES_DEFINITION` to the existing semantic-dependency owner, requires trace completeness over declared scope, governs material definition/source evolution, and preserves profile-schema independence;
+- every earlier requirement not explicitly changed by a later revision remains binding;
+- none of these artifacts changes accepted Protocol 6.3 authority merely by existing on this branch.
 
 Current disposition:
 
 ```text
 SERIOUS CHALLENGE: NONE
-SECOND DESIGN REVIEW: PASS AFTER GAP CLOSURE
+THIRD DESIGN REVIEW: PASS AFTER GAP CLOSURE
 IMPLEMENTATION HANDOFF: AUTHORIZED
 IMPLEMENTATION STATUS: PROPOSED / NOT YET QUALIFIED
 ACCEPTED PARENT: Protocol 6.3 recovery 9f353097fab36e325a325f1c2f9d9cec32e86177
@@ -137,7 +139,7 @@ CURRENT ACCEPTED DOCUMENT-CONTROLLED BASELINE: Protocol 6.3
 PROTOCOL 7 INHERITANCE OF 6.4: DEFERRED UNTIL 6.4 ACCEPTANCE
 ```
 
-Protocol 6.4 is a proposed backward-compatible minor strengthening. No `main` cutover or reinterpretation of version-bound 6.3 work is implied. A 6.4 adoption must use the bounded migration rule in Revision 1 rather than globally rewriting unrelated authority or silently inheriting ambiguous predecessor prose.
+Protocol 6.4 is a proposed backward-compatible minor strengthening. No `main` cutover or reinterpretation of version-bound 6.3 work is implied. A 6.4 adoption must use the bounded migration rule in Revision 1 together with Revision 2's primitive/well-definedness/applicability/evolution rules rather than globally rewriting unrelated authority or silently inheriting ambiguous predecessor prose.
 
 ## Protocol 7.0 current design handoff
 
