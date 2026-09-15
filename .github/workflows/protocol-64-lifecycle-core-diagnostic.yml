@@ -1,0 +1,48 @@
+name: Protocol 6.4 lifecycle Core diagnostic
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - .github/workflows/protocol-64-lifecycle-core-diagnostic.yml
+
+permissions:
+  contents: write
+
+jobs:
+  diagnose:
+    if: github.head_ref == 'ssdp-6.4-axiomatic-definition-traceability'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ssdp-6.4-axiomatic-definition-traceability
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install validation and Core dependencies
+        run: python -m pip install -r source/requirements-validation.txt ./orchestrator -r orchestrator/requirements-dev.txt
+      - name: Apply lifecycle binding repair and remove temporary machinery
+        run: |
+          python .github/scripts/protocol64_lifecycle_binding_repair.py
+          rm -f .github/workflows/protocol-64-lifecycle-binding-repair.yml
+          rm -f .github/workflows/protocol-64-lifecycle-binding-diagnostic.yml
+          rm -f .github/workflows/protocol-64-lifecycle-core-diagnostic.yml
+          rm -f .github/scripts/protocol64_lifecycle_binding_repair.py
+      - name: Run Core and persist exact failure
+        run: |
+          set +e
+          python orchestrator/scripts/run_core_tests.py > /tmp/core-acceptance.log 2>&1
+          rc=$?
+          cat /tmp/core-acceptance.log
+          if [ "$rc" -ne 0 ]; then
+            cp /tmp/core-acceptance.log qualification/ssdp6/STAGE-E-LIFECYCLE-BINDING-CORE-DIAGNOSTIC.txt
+            git config user.name "hjin98"
+            git config user.email "86921078+hjin98@users.noreply.github.com"
+            git add qualification/ssdp6/STAGE-E-LIFECYCLE-BINDING-CORE-DIAGNOSTIC.txt
+            git commit -m "Capture Protocol 6.4 lifecycle binding Core failure"
+            git push origin HEAD:ssdp-6.4-axiomatic-definition-traceability
+            exit "$rc"
+          fi
