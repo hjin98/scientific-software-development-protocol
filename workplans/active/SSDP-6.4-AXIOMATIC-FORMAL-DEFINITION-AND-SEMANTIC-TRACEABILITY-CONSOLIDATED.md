@@ -7,8 +7,8 @@ status: active
 created_date: 2026-09-15
 reviewed_date: 2026-09-15
 design_review_state: pass-after-sixth-review
-independent_review_state: repaired-awaiting-fresh-review
-implementation_handoff: repair-complete-fresh-review-required
+independent_review_state: no-pass-reopened
+implementation_handoff: repair-required
 active_serious_challenge: none
 branch: ssdp-6.4-axiomatic-definition-traceability
 reviewed_input_head: 4974058020cdda1325ef899c04b3cd13d5ae44c2
@@ -27,7 +27,7 @@ accepted_parent_public_bootstrap: 86c13cab6bdd1991dffa94e277db8eacf87e2e11
 
 ## Current disposition
 
-**B64-R4/B64-R5 REPAIR COMPLETE; FRESH STAGE-E REVIEW REQUIRED.** The active lifecycle index now reflects completed Stage C qualification and the authorized Protocol 6.4 public bootstrap, and QF64-P now validates that real current index with discriminating stale-state counterfactuals. No Serious Challenge is active. The repair does not change the published public-source semantics or bootstrap identity. Protocol 6.3 remains accepted-current; Protocol 6.4 recovery remains unavailable; Stage F remains blocked. The next immutable assembled target is bound only from the descendant Stage-E handoff after exact-target ordinary PR CI; a fresh independent full Stage-E Review is still required before Stage F.
+**FRESH STAGE-E REVIEW: NO-PASS — REOPENED.** Independent Review of immutable assembled target `05b6d821dcdb885c86db79e38ce1e23a24863b3f`, bound by descendant handoff `34434c2e0ab6bdc5b69acaff56b1357677d28c85` and exact-target ordinary PR qualification run `34994976466`, found two blocking D4 qualification/current-lifecycle-oracle defects: B64-R6 and B64-R7. No Serious Challenge is active. Detailed findings and owner-layer repair instructions are in `qualification/ssdp6/INDEPENDENT-REVIEW-2026-09-15-PROTOCOL-6.4-05B6-NO-PASS.md`. Protocol 6.3 remains accepted-current; Protocol 6.4 recovery remains unavailable; Stage F remains blocked. After repair, freeze a new immutable assembled target, obtain exact-target ordinary PR CI, bind it from a later descendant handoff, and perform another fresh full Stage-E Review of all P64-A..P64-O, QF64-A..QF64-P and F64-A..F64-L.
 
 **SIXTH DESIGN REVIEW: PASS AFTER GAP CLOSURE.** This file is the single current implementation/review handoff for Protocol 6.4. Earlier design-review workplans and the fifth-review consolidated snapshot are historical evidence only; implementation and independent Review SHALL reconstruct the current contract from this file plus accepted Protocol 6.3 owners, not by replaying amendment chronology.
 
