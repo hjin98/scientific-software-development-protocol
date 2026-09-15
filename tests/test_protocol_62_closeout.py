@@ -12,10 +12,12 @@ class Protocol62CloseoutTests(unittest.TestCase):
         portability = (ROOT / "PORTABILITY.md").read_text()
         self.assertIn("| `ssdp-protocol-6.1` | 6.1.0 | 2 | frozen historical rollback |", versioning)
         self.assertIn("| `ssdp-protocol-6.2` | 6.2.0 | 2 | frozen historical rollback |", versioning)
-        self.assertIn("| `ssdp-protocol-6.3` | 6.3.0 | 2 | accepted current |", versioning)
+        self.assertIn("| `ssdp-protocol-6.3` | 6.3.0 | 2 | accepted current / frozen predecessor for 6.4 candidate |", versioning)
+        self.assertIn("| `ssdp-protocol-6.4` | 6.4.0 | 2 | proposed candidate |", versioning)
         self.assertIn("| `ssdp-protocol-6.1` | 6.1.0 | 2 | frozen historical rollback |", portability)
         self.assertIn("| `ssdp-protocol-6.2` | 6.2.0 | 2 | frozen historical rollback |", portability)
         self.assertIn("| `ssdp-protocol-6.3` | 6.3.0 | 2 | accepted current |", portability)
+        self.assertIn("| `ssdp-protocol-6.4` | 6.4.0 | 2 | candidate under qualification |", portability)
 
     def test_recovery_bootstrap_and_archive_closeout(self):
         versioning = (ROOT / "source/shared/references/protocol-versioning-and-compatibility.md").read_text()

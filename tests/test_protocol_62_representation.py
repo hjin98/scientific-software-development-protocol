@@ -131,13 +131,20 @@ class Protocol62RepresentationTests(unittest.TestCase):
             if current_version == "6.2.0":
                 self.assertIn(f"public_ref = {bootstrap}", prompt)
                 self.assertNotIn("automatic current-6.2 public fallback is unavailable", prompt)
-            else:
+            elif current_version == "6.3.0":
                 self.assertIn(f"accepted_6_2_public_ref = {bootstrap}", prompt)
                 current = re.search(r"current_public_ref = ([^\s]+)", prompt)
                 self.assertIsNotNone(current)
                 current_ref = current.group(1)
                 self.assertNotEqual(current_ref, "1484c1d3caa49d87cc15bc52a5e775399c1dae1b")
                 self.assertTrue(current_ref == "unavailable_pending_replacement_bootstrap" or re.fullmatch(r"[0-9a-f]{40}", current_ref))
+            else:
+                self.assertEqual(current_version, "6.4.0")
+                self.assertIn(f"accepted_6_2_public_ref = {bootstrap}", prompt)
+                self.assertIn("current_protocol = 6.4.0", prompt)
+                self.assertIn("current_public_ref = unavailable_pending_6_4_bootstrap", prompt)
+                self.assertIn("accepted_6_3_public_ref = 86c13cab6bdd1991dffa94e277db8eacf87e2e11", prompt)
+                self.assertIn("accepted_6_3_recovery = 9f353097fab36e325a325f1c2f9d9cec32e86177", prompt)
             self.assertNotIn("automatic current-6.2 public fallback is unavailable", portability)
             self.assertIn("repository-default bytes are never a substitute", prompt)
 
@@ -245,7 +252,6 @@ class Protocol62RepresentationTests(unittest.TestCase):
             with self.subTest(path=path):
                 self.assertIn("abstraction-and-concretization.md", text)
                 self.assertNotIn("source/shared/references/abstraction-and-realization.md", text)
-
 
     def test_accepted_62_recovery_and_bootstrap_remain_distinct(self):
         recovery = "b59adc77efe6951912cfd705cc43830c58ca27d0"

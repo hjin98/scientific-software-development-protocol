@@ -64,7 +64,7 @@ class Protocol6OrchestrationTests(unittest.TestCase):
             else:
                 self.assertNotEqual(published.group(1), "1181c2031710c5d343194d87d08543290fded0ab")
                 self.assertNotIn("automatic current-6.2 public fallback is unavailable", self.lower)
-        else:
+        elif current_version == "6.3.0":
             self.assertIn("current_protocol = 6.3.0", self.lower)
             current = re.search(r"current_public_ref = ([^\s]+)", self.lower)
             self.assertIsNotNone(current)
@@ -72,6 +72,16 @@ class Protocol6OrchestrationTests(unittest.TestCase):
             self.assertNotEqual(current_ref, "1484c1d3caa49d87cc15bc52a5e775399c1dae1b")
             self.assertTrue(current_ref == "unavailable_pending_replacement_bootstrap" or re.fullmatch(r"[0-9a-f]{40}", current_ref))
             self.assertIn("accepted_6_2_public_ref = 5a062ebc472755607b9dc66d33a5ebbc4b7429aa", self.lower)
+            self.assertIn("self-reference-safe source snapshot", self.lower)
+        else:
+            self.assertEqual(current_version, "6.4.0")
+            self.assertIn("current_protocol = 6.4.0", self.lower)
+            self.assertIn("current_public_ref = unavailable_pending_6_4_bootstrap", self.lower)
+            self.assertIn("accepted_6_3_public_ref = 86c13cab6bdd1991dffa94e277db8eacf87e2e11", self.lower)
+            self.assertIn("accepted_6_3_recovery = 9f353097fab36e325a325f1c2f9d9cec32e86177", self.lower)
+            self.assertIn("accepted_6_2_public_ref = 5a062ebc472755607b9dc66d33a5ebbc4b7429aa", self.lower)
+            self.assertIn("protocol 6.3 remains accepted-current while 6.4 is proposed/under qualification", self.lower)
+            self.assertIn("no 6.4 public-source fallback or recovery mapping is authorized yet", self.lower)
             self.assertIn("self-reference-safe source snapshot", self.lower)
 
     def test_execution_contract_prefers_action_and_resolves_inferable_context(self) -> None:

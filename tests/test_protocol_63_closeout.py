@@ -12,13 +12,17 @@ class Protocol63CloseoutTests(unittest.TestCase):
         versioning = (ROOT / "source/shared/references/protocol-versioning-and-compatibility.md").read_text()
         portability = (ROOT / "PORTABILITY.md").read_text()
         readme = (ROOT / "README.md").read_text()
-        self.assertIn("| `ssdp-protocol-6.3` | 6.3.0 | 2 | accepted current |", versioning)
+        self.assertIn("| `ssdp-protocol-6.3` | 6.3.0 | 2 | accepted current / frozen predecessor for 6.4 candidate |", versioning)
+        self.assertIn("| `ssdp-protocol-6.4` | 6.4.0 | 2 | proposed candidate |", versioning)
+        self.assertIn("| `ssdp-protocol-6.3` | 6.3.0 | 2 | accepted current |", portability)
+        self.assertIn("| `ssdp-protocol-6.4` | 6.4.0 | 2 | candidate under qualification |", portability)
         self.assertIn("| `ssdp-protocol-6.2` | 6.2.0 | 2 | frozen historical rollback |", versioning)
         self.assertIn(f"6.3.0  -> {RECOVERY}", versioning)
         self.assertIn(f"6.3.0 public bootstrap -> {BOOTSTRAP}", portability)
         self.assertIn(f"6.3.0 recovery -> {RECOVERY}", portability)
         self.assertNotEqual(RECOVERY, BOOTSTRAP)
         self.assertIn("Current accepted document-controlled release: **Protocol 6.3**", readme)
+        self.assertIn("Protocol 6.4 is a proposed candidate", readme)
         self.assertIn(BASE62, readme)
 
     def test_workplan_archived_and_protocol7_inheritance_reconciled(self) -> None:
