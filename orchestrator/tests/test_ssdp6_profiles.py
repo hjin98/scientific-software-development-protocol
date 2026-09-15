@@ -2,9 +2,8 @@
 
 from __future__ import annotations
 
-import json
+import hashlib
 import unittest
-from pathlib import Path
 
 from sdp_orchestrator.core import errors as E
 from sdp_orchestrator.core import profile as P
@@ -24,10 +23,10 @@ class SSDP6CanonicalProfileTests(unittest.TestCase):
         cls.snapshot = P.build_profile(cls.document, P.DEFAULT_PROFILE_ID)
         cls.descriptor = cls.snapshot.descriptor
 
-    def test_current_profile_is_schema_v2_protocol_6(self) -> None:
-        self.assertEqual(P.DEFAULT_PROFILE_ID, "ssdp-protocol-6.3")
+    def test_current_profile_is_schema_v2_protocol_64(self) -> None:
+        self.assertEqual(P.DEFAULT_PROFILE_ID, "ssdp-protocol-6.4")
         self.assertEqual(self.descriptor.profile.profile_id, P.DEFAULT_PROFILE_ID)
-        self.assertEqual(self.descriptor.profile.protocol_version, "6.3.0")
+        self.assertEqual(self.descriptor.profile.protocol_version, "6.4.0")
         self.assertEqual(self.descriptor.profile.profile_schema_version, 2)
         self.assertEqual(self.descriptor.schema_version, 2)
 
@@ -47,8 +46,10 @@ class SSDP6CanonicalProfileTests(unittest.TestCase):
         self.assertEqual(P.profile_id_for_version("6.1"), P.SSDP61_PROFILE_ID)
         self.assertEqual(P.profile_id_for_version("6.2.0"), P.SSDP62_PROFILE_ID)
         self.assertEqual(P.profile_id_for_version("6.2"), P.SSDP62_PROFILE_ID)
-        self.assertEqual(P.profile_id_for_version("6.3.0"), P.DEFAULT_PROFILE_ID)
-        self.assertEqual(P.profile_id_for_version("6.3"), P.DEFAULT_PROFILE_ID)
+        self.assertEqual(P.profile_id_for_version("6.3.0"), P.SSDP63_PROFILE_ID)
+        self.assertEqual(P.profile_id_for_version("6.3"), P.SSDP63_PROFILE_ID)
+        self.assertEqual(P.profile_id_for_version("6.4.0"), P.DEFAULT_PROFILE_ID)
+        self.assertEqual(P.profile_id_for_version("6.4"), P.DEFAULT_PROFILE_ID)
 
     def test_every_current_input_is_classified(self) -> None:
         for stage in self.descriptor.stages:
@@ -63,7 +64,15 @@ class SSDP6CanonicalProfileTests(unittest.TestCase):
 
     def test_task_is_not_re_requested_by_downstream_governed_stages(self) -> None:
         by_key = {stage.stage.stage_key: stage for stage in self.descriptor.stages}
-        for key in ("software-implementation", "review", "verification", "stabilization", "alignment", "health-audit", "closeout"):
+        for key in (
+            "software-implementation",
+            "review",
+            "verification",
+            "stabilization",
+            "alignment",
+            "health-audit",
+            "closeout",
+        ):
             self.assertNotIn("TASK", {item.name for item in by_key[key].inputs}, key)
         for key in ("intake", "scientific-formulation", "numerical-algorithm-design", "software-design"):
             self.assertIn("TASK", {item.name for item in by_key[key].inputs}, key)
@@ -82,7 +91,7 @@ class SSDP6CanonicalProfileTests(unittest.TestCase):
                 workplan=None,
                 first_task=None,
                 overrides={},
-                governing_protocol_version="6.3.0",
+                governing_protocol_version="6.4.0",
             )
         }
         self.assertEqual(values["CHANGE_PLAN"], "NONE")
@@ -93,9 +102,9 @@ class SSDP6CanonicalProfileTests(unittest.TestCase):
 
         def plan(*, lifecycle_state=LifecycleState.ACTIVE, lifecycle_consistent=True, semantic_identity_complete=True):
             return WorkplanRef(
-                workplan_id="WP63-AUTHORITY",
-                protocol_version="6.3.0",
-                path="workplans/active/WP63-AUTHORITY.md",
+                workplan_id="WP64-AUTHORITY",
+                protocol_version="6.4.0",
+                path="workplans/active/WP64-AUTHORITY.md",
                 artifact_digest=DigestRef(algorithm="sha256", value="a" * 64),
                 semantic_digest=DigestRef(algorithm="sha256", value="b" * 64),
                 semantic_identity_complete=semantic_identity_complete,
@@ -110,10 +119,10 @@ class SSDP6CanonicalProfileTests(unittest.TestCase):
                 workplan=plan(),
                 first_task=None,
                 overrides={},
-                governing_protocol_version="6.3.0",
+                governing_protocol_version="6.4.0",
             )
         }
-        self.assertEqual(active["CHANGE_PLAN"], "workplans/active/WP63-AUTHORITY.md")
+        self.assertEqual(active["CHANGE_PLAN"], "workplans/active/WP64-AUTHORITY.md")
 
         for invalid in (
             plan(lifecycle_state=LifecycleState.ARCHIVE),
@@ -127,7 +136,7 @@ class SSDP6CanonicalProfileTests(unittest.TestCase):
                         workplan=invalid,
                         first_task=None,
                         overrides={},
-                        governing_protocol_version="6.3.0",
+                        governing_protocol_version="6.4.0",
                     )
                 self.assertEqual(caught.exception.code, E.WORKPLAN_NOT_FOUND)
 
@@ -187,6 +196,7 @@ class SSDP6CanonicalProfileTests(unittest.TestCase):
                 and t.trigger_key == "risk_override"
                 and t.to_stage is not None
             }
+
         self.assertTrue({"numerical-algorithm-design", "software-design", "software-implementation"}.issubset(destinations("scientific-formulation")))
         self.assertTrue({"software-design", "software-implementation"}.issubset(destinations("numerical-algorithm-design")))
         self.assertTrue({"numerical-algorithm-design", "software-design", "software-implementation"}.issubset(destinations("review")))
@@ -204,8 +214,23 @@ class SSDP6CanonicalProfileTests(unittest.TestCase):
         self.assertEqual(destinations, {"software-implementation", "review", "closeout"})
 
     def test_serious_challenge_stops_automatic_routing(self) -> None:
-        for stage_key in ("scientific-formulation", "numerical-algorithm-design", "software-design", "software-implementation", "review", "verification", "stabilization", "alignment", "health-audit", "closeout"):
-            matches = [t for t in self.descriptor.transitions if t.from_stage.stage_key == stage_key and t.trigger_key == "serious_challenge"]
+        for stage_key in (
+            "scientific-formulation",
+            "numerical-algorithm-design",
+            "software-design",
+            "software-implementation",
+            "review",
+            "verification",
+            "stabilization",
+            "alignment",
+            "health-audit",
+            "closeout",
+        ):
+            matches = [
+                t
+                for t in self.descriptor.transitions
+                if t.from_stage.stage_key == stage_key and t.trigger_key == "serious_challenge"
+            ]
             self.assertTrue(matches, stage_key)
             self.assertTrue(all(t.terminal and t.to_stage is None for t in matches), stage_key)
 
@@ -218,82 +243,66 @@ class SSDP6CanonicalProfileTests(unittest.TestCase):
         self.assertEqual(P.profile_from_json(P.profile_to_json(self.descriptor)), self.descriptor)
 
 
-class FrozenProtocol62ProfileTests(unittest.TestCase):
-    def test_protocol62_profile_stays_schema_v2_and_version_bound(self) -> None:
-        frozen = PS.resolve_packaged(P.SSDP62_PROFILE_ID).snapshot.descriptor
-        self.assertEqual(frozen.profile.profile_id, "ssdp-protocol-6.2")
-        self.assertEqual(frozen.profile.protocol_version, "6.2.0")
-        self.assertEqual(frozen.profile.profile_schema_version, 2)
-        self.assertEqual(frozen.schema_version, 2)
-        self.assertEqual([s.stage.stage_key for s in frozen.stages], [key for _, key, _ in SSDP6_STAGES])
+class FrozenProtocolProfilesTests(unittest.TestCase):
+    FROZEN = (
+        (
+            P.SSDP63_PROFILE_ID,
+            "ssdp-protocol-6.3",
+            "6.3.0",
+            {
+                "prompts.md": "67f3784dcc7ae259472d176498cc9e4556292898",
+                "profile.json": "bef61c9ed9e1f273770feb01704e648d1fa0720b",
+            },
+        ),
+        (
+            P.SSDP62_PROFILE_ID,
+            "ssdp-protocol-6.2",
+            "6.2.0",
+            {
+                "prompts.md": "159c58cbac0a8cf66311ddf7e11ad8eb03644e8c",
+                "profile.json": "6f21ad0592da343db951ffd56d25aa74a881bd8c",
+            },
+        ),
+        (
+            P.SSDP61_PROFILE_ID,
+            "ssdp-protocol-6.1",
+            "6.1.0",
+            {
+                "prompts.md": "4e79f1c5c10fb4f867595ba6ade391a6d97020dc",
+                "profile.json": "c74b4e0f4cc40530710fea21c83268d917f03612",
+            },
+        ),
+        (
+            P.SSDP6_PROFILE_ID,
+            "ssdp-protocol-6.0",
+            "6.0.0",
+            {
+                "prompts.md": "d127b9eb8da165afd905d4c35cc8b7572b201d56",
+                "profile.json": "76c53539a985bc8408f8432932e91e5477696db9",
+            },
+        ),
+    )
 
-    def test_protocol62_packaged_bytes_are_frozen(self) -> None:
-        import hashlib
-        root = REPO_ROOT / "orchestrator/src/sdp_orchestrator/core/resources/protocol/ssdp-protocol-6.2"
-        expected = {"prompts.md": "159c58cbac0a8cf66311ddf7e11ad8eb03644e8c", "profile.json": "6f21ad0592da343db951ffd56d25aa74a881bd8c"}
-        for name, sha in expected.items():
-            data = (root / name).read_bytes()
-            actual = hashlib.sha1(f"blob {len(data)}\0".encode("ascii") + data).hexdigest()  # noqa: S324
-            self.assertEqual(actual, sha, name)
+    def test_frozen_protocol_profiles_remain_byte_stable_version_bound_and_derived(self) -> None:
+        for profile_id, expected_id, version, expected_hashes in self.FROZEN:
+            with self.subTest(profile=expected_id):
+                frozen = PS.resolve_packaged(profile_id).snapshot.descriptor
+                self.assertEqual(frozen.profile.profile_id, expected_id)
+                self.assertEqual(frozen.profile.protocol_version, version)
+                self.assertEqual(frozen.profile.profile_schema_version, 2)
+                self.assertEqual(frozen.schema_version, 2)
+                self.assertEqual([s.stage.stage_key for s in frozen.stages], [key for _, key, _ in SSDP6_STAGES])
 
-    def test_protocol62_profile_is_still_derived_from_protocol62_prompts(self) -> None:
-        root = REPO_ROOT / "orchestrator/src/sdp_orchestrator/core/resources/protocol/ssdp-protocol-6.2"
-        text = (root / "prompts.md").read_text(encoding="utf-8")
-        document = parse_document(text, profile_id=P.SSDP62_PROFILE_ID)
-        expected = P.profile_to_json(P.build_profile(document, P.SSDP62_PROFILE_ID).descriptor)
-        self.assertEqual((root / "profile.json").read_text(encoding="utf-8"), expected)
+                root = REPO_ROOT / "orchestrator/src/sdp_orchestrator/core/resources/protocol" / expected_id
+                for name, expected_sha in expected_hashes.items():
+                    data = (root / name).read_bytes()
+                    actual = hashlib.sha1(f"blob {len(data)}\0".encode("ascii") + data).hexdigest()  # noqa: S324
+                    self.assertEqual(actual, expected_sha, f"{expected_id}:{name}")
 
-
-class FrozenProtocol61ProfileTests(unittest.TestCase):
-    def test_protocol61_profile_stays_schema_v2_and_version_bound(self) -> None:
-        frozen = PS.resolve_packaged(P.SSDP61_PROFILE_ID).snapshot.descriptor
-        self.assertEqual(frozen.profile.profile_id, "ssdp-protocol-6.1")
-        self.assertEqual(frozen.profile.protocol_version, "6.1.0")
-        self.assertEqual(frozen.profile.profile_schema_version, 2)
-        self.assertEqual(frozen.schema_version, 2)
-        self.assertEqual([s.stage.stage_key for s in frozen.stages], [key for _, key, _ in SSDP6_STAGES])
-
-    def test_protocol61_packaged_bytes_are_frozen(self) -> None:
-        import hashlib
-        root = REPO_ROOT / "orchestrator/src/sdp_orchestrator/core/resources/protocol/ssdp-protocol-6.1"
-        expected = {"prompts.md": "4e79f1c5c10fb4f867595ba6ade391a6d97020dc", "profile.json": "c74b4e0f4cc40530710fea21c83268d917f03612"}
-        for name, sha in expected.items():
-            data = (root / name).read_bytes()
-            actual = hashlib.sha1(f"blob {len(data)}\0".encode("ascii") + data).hexdigest()  # noqa: S324
-            self.assertEqual(actual, sha, name)
-
-    def test_protocol61_profile_is_still_derived_from_protocol61_prompts(self) -> None:
-        root = REPO_ROOT / "orchestrator/src/sdp_orchestrator/core/resources/protocol/ssdp-protocol-6.1"
-        text = (root / "prompts.md").read_text(encoding="utf-8")
-        document = parse_document(text, profile_id=P.SSDP61_PROFILE_ID)
-        expected = P.profile_to_json(P.build_profile(document, P.SSDP61_PROFILE_ID).descriptor)
-        self.assertEqual((root / "profile.json").read_text(encoding="utf-8"), expected)
-
-
-class FrozenProtocol60ProfileTests(unittest.TestCase):
-    def test_protocol60_profile_stays_schema_v2_and_version_bound(self) -> None:
-        frozen = PS.resolve_packaged(P.SSDP6_PROFILE_ID).snapshot.descriptor
-        self.assertEqual(frozen.profile.profile_id, "ssdp-protocol-6.0")
-        self.assertEqual(frozen.profile.protocol_version, "6.0.0")
-        self.assertEqual(frozen.profile.profile_schema_version, 2)
-        self.assertEqual(frozen.schema_version, 2)
-        self.assertEqual([s.stage.stage_key for s in frozen.stages], [key for _, key, _ in SSDP6_STAGES])
-
-    def test_protocol60_packaged_bytes_are_frozen(self) -> None:
-        import hashlib
-        root = REPO_ROOT / "orchestrator/src/sdp_orchestrator/core/resources/protocol/ssdp-protocol-6.0"
-        expected = {"prompts.md": "d127b9eb8da165afd905d4c35cc8b7572b201d56", "profile.json": "76c53539a985bc8408f8432932e91e5477696db9"}
-        for name, sha in expected.items():
-            data = (root / name).read_bytes()
-            actual = hashlib.sha1(f"blob {len(data)}\0".encode("ascii") + data).hexdigest()  # noqa: S324
-            self.assertEqual(actual, sha, name)
-
-    def test_protocol60_profile_is_still_derived_from_protocol60_prompts(self) -> None:
-        root = REPO_ROOT / "orchestrator/src/sdp_orchestrator/core/resources/protocol/ssdp-protocol-6.0"
-        text = (root / "prompts.md").read_text(encoding="utf-8")
-        document = parse_document(text, profile_id=P.SSDP6_PROFILE_ID)
-        expected = P.profile_to_json(P.build_profile(document, P.SSDP6_PROFILE_ID).descriptor)
-        self.assertEqual((root / "profile.json").read_text(encoding="utf-8"), expected)
+                text = (root / "prompts.md").read_text(encoding="utf-8")
+                document = parse_document(text, profile_id=profile_id)
+                expected = P.profile_to_json(P.build_profile(document, profile_id).descriptor)
+                self.assertEqual((root / "profile.json").read_text(encoding="utf-8"), expected)
 
 
 class FrozenLegacyProfileTests(unittest.TestCase):
@@ -306,17 +315,15 @@ class FrozenLegacyProfileTests(unittest.TestCase):
         self.assertEqual([s.stage.stage_key for s in legacy.stages], [key for _, key, _ in CANONICAL_STAGES])
 
     def test_legacy_packaged_bytes_keep_pre_transition_git_blob_identity(self) -> None:
-        import hashlib
-
         root = REPO_ROOT / "orchestrator/src/sdp_orchestrator/core/resources/protocol/sdp-protocol-5.16"
         expected = {
             "prompts.md": "3730b06393843e9c24406a324f981ab4481858da",
             "profile.json": "b3d4257fcd18af7bdb1799b2db742659bb2403fc",
         }
-        for name, sha in expected.items():
+        for name, expected_sha in expected.items():
             data = (root / name).read_bytes()
             actual = hashlib.sha1(f"blob {len(data)}\0".encode("ascii") + data).hexdigest()  # noqa: S324
-            self.assertEqual(actual, sha, name)
+            self.assertEqual(actual, expected_sha, name)
 
     def test_legacy_alignment_retains_frozen_parent_input(self) -> None:
         legacy = PS.resolve_packaged(P.PROFILE_ID).snapshot.descriptor
