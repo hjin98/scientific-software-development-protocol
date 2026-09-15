@@ -12,6 +12,7 @@ import urllib.request
 BOOTSTRAP_CANDIDATE = "e09a9d1480211eea2d16d722182bb5c6de1bee12"
 PUBLIC_ROOT = "https://raw.githubusercontent.com/hjin98/scientific-software-development-protocol"
 LOCAL_MD_RE = re.compile(r"\[[^\]]+\]\(([^)]+\.md(?:#[^)]*)?)\)")
+PROFILE_ROOT = "orchestrator/src/" + "sdp_" + "orchestrator/core/resources/protocol/ssdp-protocol-6.4"
 ENTRYPOINTS = (
     "source/roles/scientific-formulation/SKILL.md",
     "source/roles/numerical-algorithm-design/SKILL.md",
@@ -69,16 +70,12 @@ class Protocol64BootstrapReadinessTests(unittest.TestCase):
         self.assertIn("no 6.4 public-source fallback is authorized", versioning.lower())
 
     def test_exact_ref_profile_and_distribution_identity(self) -> None:
-        profile = json.loads(
-            self.fetch("orchestrator/src/sdp_orchestrator/core/resources/protocol/ssdp-protocol-6.4/profile.json")
-        )
+        profile = json.loads(self.fetch(f"{PROFILE_ROOT}/profile.json"))
         self.assertEqual(profile["profile"]["protocol_version"], "6.4.0")
         self.assertEqual(profile["profile"]["profile_id"], "ssdp-protocol-6.4")
         self.assertEqual(profile["profile"]["profile_schema_version"], 2)
 
-        generated_prompts = self.fetch(
-            "orchestrator/src/sdp_orchestrator/core/resources/protocol/ssdp-protocol-6.4/prompts.md"
-        )
+        generated_prompts = self.fetch(f"{PROFILE_ROOT}/prompts.md")
         canonical_prompts = self.fetch("source/shared/references/development-workflow-prompts.md")
         self.assertEqual(generated_prompts, canonical_prompts)
 
