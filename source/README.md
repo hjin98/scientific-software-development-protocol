@@ -1,14 +1,22 @@
-# Scientific Software Development Protocol 6.3 Source
+# Scientific Software Development Protocol 6.4 Candidate Source
 
-`source/` is the canonical accepted-current Protocol 6.3 source. Accepted recovery is `9f353097fab36e325a325f1c2f9d9cec32e86177` and public-source bootstrap is separately `86c13cab6bdd1991dffa94e277db8eacf87e2e11`. Protocol 6.2 recovery `b59adc77efe6951912cfd705cc43830c58ca27d0` remains immutable historical rollback for version-bound 6.2 work. Generated distributions and orchestrator snapshots are derivatives; frozen historical/version-bound resources remain immutable.
+`source/` is the canonical **Protocol 6.4 candidate** source on this development branch. Protocol 6.3 remains accepted-current with recovery `9f353097fab36e325a325f1c2f9d9cec32e86177` and distinct public-source bootstrap `86c13cab6bdd1991dffa94e277db8eacf87e2e11` until the 6.4 qualification, independent Review, recovery-publication and cutover lifecycle completes. Protocol 6.4 has no authorized public-source bootstrap or recovery mapping yet. Generated distributions and orchestrator snapshots are derivatives; frozen historical/version-bound resources remain immutable.
 
 ## Governing model
 
-The Scientific Software Development Protocol (SSDP) separates D1 scientific/mathematical formulation, D2 algorithm/numerical method, D3 software architecture, and D4 specification/implementation. Read `shared/references/abstraction-and-concretization.md` for universal authority, Challenge, and Lossless Representation rules.
+The Scientific Software Development Protocol (SSDP) separates D1 scientific/mathematical formulation, D2 algorithm/numerical method, D3 software architecture, and D4 specification/implementation. Read `shared/references/abstraction-and-concretization.md` for universal authority, Challenge, Lossless Representation, semantic-definition/source-availability and abstraction-adequacy rules.
 
 A concretization is admissible only when it satisfies every applicable parent abstraction and directly governed constraint. Within the admissible set optimize domain engineering fitness, then minimum justified concretization complexity, then development economy. D1->D4 is semantic ordering, not a mandatory waterfall; reduced routes are normal when higher/intermediate semantics are unaffected.
 
-Protocol 6.3 adds **Project Engineering Memory (PEM)**: compact evidence-backed project-local learning that can preserve demonstrated failure lessons, successful patterns, discoveries, preservation capabilities, and current notices without creating D5 or acquiring authority through history/frequency. PEM is conditionally activated only when project history can materially change the decision. `shared/references/project-engineering-memory.md` is the canonical concern owner; `../PROJECT-ENGINEERING-MEMORY.md` is this repository's self-hosted project state and is never generic package/profile content.
+Protocol 6.4 preserves Protocol 6.3 **Project Engineering Memory (PEM)** semantics unchanged as compact evidence-backed project-local learning that can preserve demonstrated failure lessons, successful patterns, discoveries, preservation capabilities, and current notices without creating D5 or acquiring authority through history/frequency. PEM is conditionally activated only when project history can materially change the decision. `shared/references/project-engineering-memory.md` is the canonical concern owner; `../PROJECT-ENGINEERING-MEMORY.md` is this repository's self-hosted project state and is never generic package/profile content.
+
+## Protocol 6.4 formal-definition boundary
+
+A materially governed specialized semantic object must have a recoverable canonical definition/import/primitive/derived path before substantive reuse. Use the strongest practical exact representation that reduces material interpretive freedom, but do not add decorative mathematics or freeze delegated lower-level mechanisms merely for formality.
+
+Define material domains/types/shapes/units, binders/scope, relation direction, validity assumptions, stochastic semantics, parameterized family/instance/default binding, and external source variant/locator/transformation lineage where applicable. A definition does not establish existence, uniqueness, convergence, adequacy, empirical truth or normative force; those require their own warrant. A discoverable source is also not automatically available to an inference: the exact version-bound semantics needed by the reasoning must actually be supplied/loaded.
+
+Typed semantic-use traces such as `USES_DEFINITION` are bounded derived evidence for impact/review. They are not authority, they do not recursively warrant endpoints, and absence of an edge establishes independence only when the relevant mapped scope was explicitly reviewed complete for that exclusion.
 
 ## Authority-bearing roles
 
@@ -21,9 +29,9 @@ Optional specialists: `software-documentation`, `software-maintenance-audit`, `r
 
 ## Progressive-disclosure owner map
 
-Load the role entrypoint plus universal kernel/owning domain, then only concern owners whose decision predicates fire. Ordinary hyperlinks, semantic dependencies, PEM relations/indexes, and package membership do not imply activation.
+Load the role entrypoint plus universal kernel/owning domain, then only concern owners whose decision predicates fire. Ordinary hyperlinks, semantic dependencies/definition traces, PEM relations/indexes, and package membership do not imply activation.
 
-- universal authority / Challenge / representation -> `shared/references/abstraction-and-concretization.md`
+- universal authority / Challenge / representation / definition closure -> `shared/references/abstraction-and-concretization.md`
 - D1 -> `shared/references/scientific-formulation.md`
 - D2 -> `shared/references/numerical-algorithm-design.md`
 - D3 -> `shared/references/architecture-and-design.md`
@@ -54,9 +62,9 @@ Stable family IDs represent semantic identities, not line numbers. Current stati
 
 ## Lossless representation and compatibility
 
-Protocol 6.3 preserves every accepted Protocol 6.2 doctrine and still-valid historical capability while adding project-learning support. Completeness is prerequisite; compactness never permits scope narrowing or information loss. Current documents state present truth; PEM summarizes evidence-backed reusable local learning; semantic history explains material change; Git preserves chronology.
+Protocol 6.4 preserves every accepted Protocol 6.3 doctrine and still-valid historical capability while strengthening formal definition/import/provenance/dependency precision. Completeness is prerequisite; compactness never permits scope narrowing or information loss. Current documents state present truth; PEM summarizes evidence-backed reusable local learning; semantic history explains material change; Git preserves chronology.
 
-Current path uses `abstraction-and-concretization.md`. Frozen 5.16/6.0/6.1/6.2 files/profiles retain their version-faithful identifiers/bytes. Protocol 6.2 recovery `b59adc77efe6951912cfd705cc43830c58ca27d0` and public bootstrap `5a062ebc472755607b9dc66d33a5ebbc4b7429aa` remain historical resources for version-bound 6.2 work. Accepted-current Protocol 6.3 public fallback is exact bootstrap `86c13cab6bdd1991dffa94e277db8eacf87e2e11` and accepted recovery is separately `9f353097fab36e325a325f1c2f9d9cec32e86177`; mapping-bearing generated reconciliation `e75282ae850b774a9466902f4c74ba6a179116bd` passed Stage G acceptance in run `34699052516`.
+Current candidate path uses `abstraction-and-concretization.md`. Frozen 5.16/6.0/6.1/6.2/6.3 files/profiles retain their version-faithful identifiers/bytes. Accepted-current Protocol 6.3 public fallback is exact bootstrap `86c13cab6bdd1991dffa94e277db8eacf87e2e11` and accepted recovery is separately `9f353097fab36e325a325f1c2f9d9cec32e86177`. Candidate profile `ssdp-protocol-6.4` remains schema v2 and uses the same 11-stage Protocol 6 machine graph; its distinct snapshot is generated from this source without mutating frozen predecessor resources.
 
 ## Build and acceptance
 
@@ -68,6 +76,10 @@ python source/build_skills.py --output /tmp/protocol-dist
 python source/validate_packages.py --dist /tmp/protocol-dist
 python source/check_dist.py --expected /tmp/protocol-dist --committed dist
 git diff --check
+
+python -m pip install ./orchestrator -r orchestrator/requirements-dev.txt
+python orchestrator/scripts/generate_protocol_snapshot.py --check
+python orchestrator/scripts/run_core_tests.py
 ```
 
-When orchestrator/profile resources change, also run snapshot parity and the Orchestrator Core suite. Protocol 6.3 additionally requires inherited scenarios 1-115, Q63/F63 counterfactual qualification, static activation/package sensors, all required falsification/Challenge passes, and independent assembled-candidate Review before recovery/cutover. A required check that did not execute is blocking, not a pass.
+Protocol 6.4 candidate qualification additionally requires QF64-A..QF64-P positive/negative counterfactual families, inherited 6.3 preservation/routing/PEM/package/profile/bootstrap/recovery/Challenge oracles, frozen-predecessor identity checks, self-hosting/presentation/security falsification, and independent package/profile/Core validation. A distinct self-reference-safe public bootstrap may be published only after it exists and passes qualification. Independent assembled-candidate Review is a later separate gate; only after Review PASS may recovery publication and accepted-current cutover proceed. A required check that did not execute is blocking, not a pass.
