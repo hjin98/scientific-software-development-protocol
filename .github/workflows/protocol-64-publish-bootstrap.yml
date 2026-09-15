@@ -1,0 +1,190 @@
+name: Protocol 6.4 Publish Bootstrap
+
+on:
+  push:
+    branches:
+      - ssdp-6.4-axiomatic-definition-traceability
+    paths:
+      - .github/workflows/protocol-64-publish-bootstrap.yml
+
+permissions:
+  contents: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ssdp-6.4-axiomatic-definition-traceability
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install validation and Core dependencies
+        run: >-
+          python -m pip install -r source/requirements-validation.txt
+          ./orchestrator -r orchestrator/requirements-dev.txt
+      - name: Publish exact Protocol 6.4 bootstrap in canonical source
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          BOOTSTRAP = "e09a9d1480211eea2d16d722182bb5c6de1bee12"
+
+          def replace_once(path: str, old: str, new: str) -> None:
+              p = Path(path)
+              text = p.read_text(encoding="utf-8")
+              count = text.count(old)
+              if count != 1:
+                  raise SystemExit(f"{path}: expected exactly one occurrence, found {count}: {old!r}")
+              p.write_text(text.replace(old, new, 1), encoding="utf-8")
+
+          prompts = "source/shared/references/development-workflow-prompts.md"
+          replace_once(prompts, "CURRENT_PUBLIC_REF = UNAVAILABLE_PENDING_6_4_BOOTSTRAP", f"CURRENT_PUBLIC_REF = {BOOTSTRAP}")
+          replace_once(
+              prompts,
+              "No 6.4 public-source fallback or recovery mapping is authorized yet.",
+              f"Exact immutable public-source bootstrap `{BOOTSTRAP}` is now the sole authorized version-bound 6.4 public fallback; no 6.4 recovery mapping is authorized yet.",
+          )
+          replace_once(
+              prompts,
+              "Candidate/self-hosted 6.4 work may use a readable compatible local/installed source; if that is unavailable, do not substitute the candidate branch, repository default/latest, a guessed semantic-version ref, the accepted 6.3 bootstrap, or any earlier version.",
+              f"Candidate/self-hosted 6.4 work should use a readable compatible local/installed source when available; otherwise it may use the canonical repository only at exact immutable public bootstrap `{BOOTSTRAP}`. Do not substitute the candidate branch, repository default/latest, a guessed semantic-version ref, the accepted 6.3 bootstrap, or any earlier version.",
+          )
+          replace_once(
+              prompts,
+              "A self-reference-safe 6.4 bootstrap must first exist and pass qualification; its exact immutable identity may be published only by a later descendant.",
+              f"The self-reference-safe bootstrap `{BOOTSTRAP}` passed Stage D pre-publication qualification and is named only by this later descendant.",
+          )
+
+          versioning = "source/shared/references/protocol-versioning-and-compatibility.md"
+          replace_once(
+              versioning,
+              "Protocol 6.4 is **proposed, not accepted-current**. Until an exact self-reference-safe 6.4 public bootstrap has been qualified and published by a later descendant, no 6.4 public-source fallback is authorized.",
+              f"Protocol 6.4 is **proposed, not accepted-current**. Qualified self-reference-safe public bootstrap `{BOOTSTRAP}` is now the sole authorized version-bound 6.4 public fallback; this publication does not make 6.4 accepted-current and does not authorize recovery.\n\nThe public-source mapping is:\n\n```text\n6.4.0 public-source bootstrap -> {BOOTSTRAP}\n```",
+          )
+          replace_once(
+              versioning,
+              "`AUTO_LOCAL_FIRST` may use a compatible readable local/installed 6.4 source during candidate work; otherwise it must report truthful non-closure rather than substitute the candidate branch, default branch, semantic-version guess, or 6.3 bootstrap as if those were 6.4.",
+              f"`AUTO_LOCAL_FIRST` may use a compatible readable local/installed 6.4 source during candidate work; otherwise it may use the canonical repository only at exact immutable bootstrap `{BOOTSTRAP}`. It must not substitute the candidate branch, default branch, semantic-version guess, or 6.3 bootstrap as if those were 6.4.",
+          )
+
+          portability = "PORTABILITY.md"
+          replace_once(portability, "6.4.0 public bootstrap -> UNAVAILABLE_PENDING_QUALIFICATION", f"6.4.0 public bootstrap -> {BOOTSTRAP}")
+          replace_once(
+              portability,
+              "For a candidate version whose public bootstrap is not yet published, a readable version-compatible local/installed source may support candidate/self-hosting work; absence of that source is non-closure, not permission to use default/latest or an older bootstrap.",
+              f"For a candidate version whose public bootstrap is not yet published, a readable version-compatible local/installed source may support candidate/self-hosting work; absence of that source is non-closure, not permission to use default/latest or an older bootstrap. Protocol 6.4 has now published exact bootstrap `{BOOTSTRAP}`; when compatible local 6.4 source is unavailable, only that immutable ref is an authorized public fallback.",
+          )
+          replace_once(
+              portability,
+              "Protocol 6.4 must follow the same self-reference-safe lifecycle. Its bootstrap must first exist with no need to self-name, pass repository/package/profile/Core and exact-source qualification, then be named only by a later descendant. Recovery remains a separate later identity and cannot be published before independent assembled-candidate Review PASS.",
+              f"Protocol 6.4 followed the same self-reference-safe lifecycle: immutable bootstrap `{BOOTSTRAP}` existed without self-naming, passed repository/package/profile/Core and exact-source qualification, and is named only by a later descendant. It is the sole authorized version-bound 6.4 public fallback. Recovery remains a separate later identity and cannot be published before independent assembled-candidate Review PASS.",
+          )
+          replace_once(
+              portability,
+              "Protocol 6.4 remains candidate-only until its own qualification, immutable bootstrap publication, independent assembled-candidate Review, recovery publication and lifecycle closeout complete.",
+              f"Protocol 6.4 remains candidate-only after qualification and immutable bootstrap publication at `{BOOTSTRAP}`; independent assembled-candidate Review, recovery publication and lifecycle closeout remain outstanding.",
+          )
+
+          readme = "README.md"
+          replace_once(
+              readme,
+              "**Protocol 6.4 is the current candidate under qualification on its development branch; it is not accepted-current and has no authorized public-source bootstrap or recovery mapping yet.**",
+              f"**Protocol 6.4 is the current candidate under qualification on its development branch; it is not accepted-current. Its sole authorized version-bound public-source bootstrap is `{BOOTSTRAP}`; it has no recovery mapping yet.**",
+          )
+          replace_once(readme, "6.4.0  -> UNAVAILABLE_PENDING_QUALIFICATION_AND_INDEPENDENT_REVIEW", "6.4.0  -> UNAVAILABLE_PENDING_INDEPENDENT_REVIEW")
+          replace_once(
+              readme,
+              "Protocol 6.4 currently has **no** public bootstrap and **no** recovery identity. Candidate/self-hosted work may use its readable local version-bound source. The immutable self-reference-safe public bootstrap must first exist and pass qualification; a later descendant may then publish its exact SHA. Independent assembled-candidate Review must pass before a distinct recovery identity can be established and later published.",
+              f"Protocol 6.4 now has immutable public bootstrap **`{BOOTSTRAP}`** and still has **no** recovery identity. Candidate/self-hosted work should use readable local version-bound source when available and may otherwise use only that exact public ref. The bootstrap was qualified before this later descendant published its SHA. Independent assembled-candidate Review must still pass before a distinct recovery identity can be established and later published.",
+          )
+
+          source_readme = "source/README.md"
+          replace_once(
+              source_readme,
+              "Protocol 6.4 has no authorized public-source bootstrap or recovery mapping yet.",
+              f"Protocol 6.4 now has authorized immutable public-source bootstrap `{BOOTSTRAP}` but no recovery mapping yet.",
+          )
+          replace_once(
+              source_readme,
+              "Candidate profile `ssdp-protocol-6.4` remains schema v2 and uses the same 11-stage Protocol 6 machine graph; its distinct snapshot is generated from this source without mutating frozen predecessor resources.",
+              f"Candidate profile `ssdp-protocol-6.4` remains schema v2 and uses the same 11-stage Protocol 6 machine graph; its distinct snapshot is generated from this source without mutating frozen predecessor resources. Version-bound Protocol 6.4 public fallback is exact bootstrap `{BOOTSTRAP}` while recovery remains unpublished pending independent Review.",
+          )
+          replace_once(
+              source_readme,
+              "A distinct self-reference-safe public bootstrap may be published only after it exists and passes qualification. Independent assembled-candidate Review is a later separate gate; only after Review PASS may recovery publication and accepted-current cutover proceed.",
+              f"The distinct self-reference-safe public bootstrap `{BOOTSTRAP}` exists, passed qualification, and has now been published by a later descendant. Independent assembled-candidate Review is the next separate gate; only after Review PASS may recovery publication and accepted-current cutover proceed.",
+          )
+
+          agents = "AGENTS.md"
+          replace_once(
+              agents,
+              "Protocol 6.4 is **not** accepted-current and has no authorized bootstrap/recovery SHA yet; never guess or self-declare one.",
+              f"Protocol 6.4 is **not** accepted-current; its sole authorized version-bound public bootstrap is `{BOOTSTRAP}` and it has no recovery SHA yet. Never guess or self-declare an alternate bootstrap or a recovery identity.",
+          )
+
+          deps = "source/SEMANTIC_DEPENDENCIES.md"
+          replace_once(
+              deps,
+              "Protocol 6.3 remains accepted-current until 6.4 qualification, independent assembled-candidate Review, bootstrap/recovery publication, generated reconciliation, impact closure and lifecycle cutover all pass.",
+              f"Protocol 6.4 qualification and immutable public-bootstrap publication at `{BOOTSTRAP}` are complete. Protocol 6.3 remains accepted-current until independent assembled-candidate Review, distinct recovery publication, generated reconciliation, impact closure and lifecycle cutover all pass.",
+          )
+
+          test516 = "tests/test_protocol_516_orchestration.py"
+          replace_once(test516, "self.assertIn(\"current_public_ref = unavailable_pending_6_4_bootstrap\", self.lower)", f"self.assertIn(\"current_public_ref = {BOOTSTRAP}\", self.lower)")
+
+          test63 = "tests/test_protocol_63_bootstrap.py"
+          replace_once(test63, "self.assertIn('CURRENT_PUBLIC_REF = UNAVAILABLE_PENDING_6_4_BOOTSTRAP', prompts)", f"self.assertIn('CURRENT_PUBLIC_REF = {BOOTSTRAP}', prompts)")
+
+          test63close = "tests/test_protocol_63_closeout.py"
+          replace_once(
+              test63close,
+              "self.assertIn(\"has no authorized public-source bootstrap or recovery mapping yet\", readme)",
+              f"self.assertIn(\"Its sole authorized version-bound public-source bootstrap is `{BOOTSTRAP}`\", readme)\n        self.assertIn(\"it has no recovery mapping yet\", readme)",
+          )
+
+          test64 = "tests/test_protocol_64_axiomatic_traceability.py"
+          replace_once(test64, "def test_qf64_o_candidate_lifecycle_is_not_prematurely_published(self) -> None:", "def test_qf64_o_candidate_lifecycle_preserves_bootstrap_recovery_separation(self) -> None:")
+          replace_once(test64, "self.assertIn(\"no 6.4 public-source fallback is authorized\", versioning)", f"self.assertIn(\"6.4.0 public-source bootstrap -> {BOOTSTRAP}\", versioning)")
+          replace_once(test64, "self.assertIn(\"CURRENT_PUBLIC_REF = UNAVAILABLE_PENDING_6_4_BOOTSTRAP\", self.prompts)", f"self.assertIn(\"CURRENT_PUBLIC_REF = {BOOTSTRAP}\", self.prompts)")
+
+          readiness = "tests/test_protocol_64_bootstrap_readiness.py"
+          replace_once(readiness, "import urllib.request\n", "import urllib.request\nfrom pathlib import Path\n")
+          replace_once(readiness, "BOOTSTRAP_CANDIDATE = \"e09a9d1480211eea2d16d722182bb5c6de1bee12\"", f"BOOTSTRAP = \"{BOOTSTRAP}\"\nROOT = Path(__file__).resolve().parents[1]")
+          p = Path(readiness)
+          text = p.read_text(encoding="utf-8").replace("BOOTSTRAP_CANDIDATE", "BOOTSTRAP")
+          text = text.replace("Qualify an existing immutable 6.4 snapshot before its public mapping exists.", "Verify the published immutable 6.4 bootstrap and its self-reference-safe snapshot.")
+          anchor = '        self.assertIn("no 6.4 public-source fallback is authorized", versioning.lower())\n'
+          addition = anchor + f'''\n        local_prompts = (ROOT / "source/shared/references/development-workflow-prompts.md").read_text(encoding="utf-8")\n        local_versioning = (ROOT / "source/shared/references/protocol-versioning-and-compatibility.md").read_text(encoding="utf-8")\n        self.assertIn(f"CURRENT_PUBLIC_REF = {{BOOTSTRAP}}", local_prompts)\n        self.assertIn(f"6.4.0 public-source bootstrap -> {{BOOTSTRAP}}", local_versioning)\n        self.assertNotIn("6.4.0  -> ", local_versioning)\n'''
+          if text.count(anchor) != 1:
+              raise SystemExit(f"{readiness}: expected exact self-reference anchor once")
+          p.write_text(text.replace(anchor, addition, 1), encoding="utf-8")
+          PY
+      - name: Regenerate canonical descendants
+        run: |
+          python source/build_skills.py
+          python orchestrator/scripts/generate_protocol_snapshot.py
+      - name: Validate publication candidate
+        shell: bash
+        run: |
+          python -m unittest discover -s tests -v
+          python source/project_engineering_memory.py PROJECT-ENGINEERING-MEMORY.md
+          python source/validate_packages.py --dist dist
+          python source/build_skills.py --output /tmp/protocol-dist
+          python source/check_dist.py --expected /tmp/protocol-dist --committed dist
+          python orchestrator/scripts/generate_protocol_snapshot.py --check
+          python orchestrator/scripts/run_core_tests.py
+          git diff --check
+      - name: Commit publication and remove one-shot workflow
+        shell: bash
+        run: |
+          rm .github/workflows/protocol-64-publish-bootstrap.yml
+          git config user.name "hjin98"
+          git config user.email "86921078+hjin98@users.noreply.github.com"
+          git add -A
+          git diff --cached --check
+          git commit -m "Publish Protocol 6.4 public-source bootstrap"
+          git push origin HEAD:ssdp-6.4-axiomatic-definition-traceability
