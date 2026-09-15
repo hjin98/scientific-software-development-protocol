@@ -7,8 +7,8 @@ status: active
 created_date: 2026-09-15
 reviewed_date: 2026-09-15
 design_review_state: pass-after-sixth-review
-independent_review_state: repaired-awaiting-fresh-review
-implementation_handoff: lifecycle-binding-repair-complete-awaiting-descendant-handoff
+independent_review_state: no-pass-reopened
+implementation_handoff: repair-required
 active_serious_challenge: none
 branch: ssdp-6.4-axiomatic-definition-traceability
 reviewed_input_head: 4974058020cdda1325ef899c04b3cd13d5ae44c2
@@ -27,7 +27,7 @@ accepted_parent_public_bootstrap: 86c13cab6bdd1991dffa94e277db8eacf87e2e11
 
 ## Current disposition
 
-**STAGE-E REPAIR COMPLETE; REVIEW-TARGET BINDING IS DESCENDANT-OWNED.** The NO-PASS on immutable assembled target `0377e798fbbb1054badd1193950d9c10f723be75` remains historical Review evidence, and its owning-layer repairs are integrated under Section 27. The active workplan deliberately does not self-name the next assembled candidate SHA: `independent_review_target_owner` routes to the descendant independent-review handoff, which must bind the already-existing immutable candidate and exact-target qualification evidence before a fresh Review begins. Protocol 6.3 remains accepted-current. Protocol 6.4 recovery remains unavailable and Stage F remains blocked until that binding exists and a fresh independent Review passes the bound target. The sixth design-review disposition below records the pre-implementation design acceptance that authorized the original implementation.
+**FRESH STAGE-E REVIEW: NO-PASS — REOPENED.** A fresh independent Review of immutable assembled target `ced6a352fbe84e8ed5e698d2ab133d4c5bb0f152`, bound by the later handoff and exact-target CI, found two blocking lifecycle/qualification defects: B64-R4 and B64-R5 in Section 28. No Serious Challenge is active. Protocol 6.3 remains accepted-current; Protocol 6.4 recovery remains unavailable; Stage F remains blocked. Repair the earliest owning current-state and qualification surfaces, freeze a new immutable assembled target, bind exact-target qualification from a later descendant, and perform another fresh full Stage-E Review before Stage F.
 
 **SIXTH DESIGN REVIEW: PASS AFTER GAP CLOSURE.** This file is the single current implementation/review handoff for Protocol 6.4. Earlier design-review workplans and the fifth-review consolidated snapshot are historical evidence only; implementation and independent Review SHALL reconstruct the current contract from this file plus accepted Protocol 6.3 owners, not by replaying amendment chronology.
 
@@ -785,3 +785,40 @@ The D3 direction repair is a clarification of the already-implemented subject-to
 ### Fresh Stage-E re-entry gate
 
 Before Stage F, freeze a new immutable assembled review target containing these repairs and fresh applicable qualification evidence. The candidate commit does not self-name. A later descendant updates `qualification/ssdp6/INDEPENDENT-REVIEW-HANDOFF-PROTOCOL-6.4.md` to bind the exact candidate SHA and exact-target qualification run; the workplan routes to that handoff instead of duplicating an independently editable target SHA. Only after that binding exists may a fresh independent Stage-E Review begin against accepted Protocol 6.3 repository state `0928accd337a13f864b292ed81c36372828cfb4c`. The re-review SHALL cover all P64-A..P64-O, QF64-A..QF64-P and F64-A..F64-L obligations, not only repaired findings. Until that Review passes, Protocol 6.3 remains accepted-current, Protocol 6.4 recovery remains absent, and Stage F remains blocked.
+
+## 28. Fresh Stage-E Review NO-PASS — 2026-09-15
+
+Fresh independent Review record: `qualification/ssdp6/INDEPENDENT-REVIEW-2026-09-15-PROTOCOL-6.4-CED6-NO-PASS.md`.
+
+Reviewed immutable target: `ced6a352fbe84e8ed5e698d2ab133d4c5bb0f152` against accepted baseline `0928accd337a13f864b292ed81c36372828cfb4c`, with exact-target ordinary PR qualification run `34980323042` and bound handoff descendant `a30e1776fb18152df5e20edc60755ada78f4a6a7` treated as evidence rather than authority.
+
+**Verdict: NO-PASS — blockers 2; Serious Challenges 0.**
+
+### B64-R4 — active authority-index lifecycle drift
+
+Earliest owner: current documentation/lifecycle routing state in `workplans/active/SSDP-6.1-7.0-WORKPLAN-AUTHORITY-INDEX.md`.
+
+The index presents a current Protocol 6.4 disposition while still claiming implementation is `PROPOSED / NOT YET QUALIFIED` and the Protocol 6.4 public bootstrap is `NOT YET PUBLISHED`. Those claims are stale after Stage C qualification and Stage D publication of exact bootstrap `e09a9d1480211eea2d16d722182bb5c6de1bee12`. This violates P64-K/P64-O and F64-K/F64-L current-vs-history/lifecycle coherence.
+
+Repair the current index without rewriting frozen history. It SHALL state that implementation/Stage C qualification and Stage D bootstrap publication are complete, bootstrap `e09a9d1480211eea2d16d722182bb5c6de1bee12` is authorized, Stage E is reopened after NO-PASS, Protocol 6.4 recovery is unavailable, Protocol 6.3 remains accepted-current, and Stage F remains blocked.
+
+### B64-R5 — QF64-P misses the active current authority index
+
+Earliest owner: Protocol 6.4 qualification contract/oracle, concretized by `tests/test_protocol_64_axiomatic_traceability.py::test_qf64_p_one_current_snapshot_complete_handoff`.
+
+The implemented QF64-P checks the consolidated workplan, Stage-E handoff, accepted baseline, target/CI binding, ancestry and root README, but does not inspect the active authority index even though Section 18 explicitly places that current surface inside 6.4 implementation scope. Exact-target CI therefore passed while a current lifecycle surface remained false.
+
+Repair QF64-P, or the narrowly owning lifecycle qualification family, so the real current authority index participates in current-state coherence. Positive assertions SHALL discriminate the exact public bootstrap, completed qualification/publication state, accepted-current Protocol 6.3, absent Protocol 6.4 recovery and blocked Stage F. Pair these with a stale-state negative fixture. Do not create a second lifecycle authority or replace semantic/editorial Review with a broad grep.
+
+### Re-entry contract
+
+After B64-R4/B64-R5 repair:
+
+1. rerun focused Protocol 6.4 qualification and full inherited repository regression;
+2. retain PEM validation, independent build/package validation, committed-dist parity, snapshot parity, full Orchestrator Core and whitespace/index integrity;
+3. freeze a new immutable assembled candidate because the assembled tree has changed;
+4. obtain applicable exact-target ordinary PR CI for that immutable target;
+5. from a later descendant, bind the already-existing target SHA and exact-target CI in the Stage-E handoff without candidate self-reference;
+6. perform another fresh independent full Stage-E Review over all P64-A..P64-O, QF64-A..QF64-P and F64-A..F64-L.
+
+The published public bootstrap `e09a9d1480211eea2d16d722182bb5c6de1bee12` remains authorized unless the repair changes its public-source semantics. No new bootstrap or recovery identity is authorized by this Review. Protocol 6.3 remains accepted-current and Stage F remains blocked.
