@@ -1,0 +1,76 @@
+name: Protocol 6.4 Stage-E review record v2
+
+on:
+  push:
+    branches:
+      - ssdp-6.4-axiomatic-definition-traceability
+    paths:
+      - .github/workflows/protocol-64-stage-e-review-record-v2.yml
+
+permissions:
+  contents: write
+
+jobs:
+  record:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Reopen workplan and lifecycle index
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          def replace_once(path, old, new, label):
+              p = Path(path)
+              text = p.read_text(encoding="utf-8")
+              if old not in text:
+                  raise SystemExit(f"missing {label} anchor in {path}")
+              p.write_text(text.replace(old, new, 1), encoding="utf-8")
+
+          wp = Path("workplans/active/SSDP-6.4-AXIOMATIC-FORMAL-DEFINITION-AND-SEMANTIC-TRACEABILITY-CONSOLIDATED.md")
+          replace_once(wp, "independent_review_state: repaired-awaiting-fresh-review", "independent_review_state: no-pass-reopened", "review state")
+          replace_once(wp, "implementation_handoff: repair-complete-fresh-review-required", "implementation_handoff: repair-required", "implementation handoff")
+          old = "**B64-R4/B64-R5 REPAIR COMPLETE; FRESH STAGE-E REVIEW REQUIRED.** The active lifecycle index now reflects completed Stage C qualification and the authorized Protocol 6.4 public bootstrap, and QF64-P now validates that real current index with discriminating stale-state counterfactuals. No Serious Challenge is active. The repair does not change the published public-source semantics or bootstrap identity. Protocol 6.3 remains accepted-current; Protocol 6.4 recovery remains unavailable; Stage F remains blocked. The next immutable assembled target is bound only from the descendant Stage-E handoff after exact-target ordinary PR CI; a fresh independent full Stage-E Review is still required before Stage F."
+          new = "**FRESH STAGE-E REVIEW: NO-PASS — REOPENED.** Independent Review of immutable assembled target `05b6d821dcdb885c86db79e38ce1e23a24863b3f`, bound by descendant handoff `34434c2e0ab6bdc5b69acaff56b1357677d28c85` and exact-target ordinary PR qualification run `34994976466`, found two blocking D4 qualification/current-lifecycle-oracle defects: B64-R6 and B64-R7 in Section 30. No Serious Challenge is active. Protocol 6.3 remains accepted-current; Protocol 6.4 recovery remains unavailable; Stage F remains blocked."
+          replace_once(wp, old, new, "current disposition")
+
+          text = wp.read_text(encoding="utf-8")
+          marker = "## 30. Fresh Stage-E Review NO-PASS — QF64-H/QF64-P oracle closure"
+          if marker not in text:
+              text = text.rstrip() + """
+
+## 30. Fresh Stage-E Review NO-PASS — QF64-H/QF64-P oracle closure — 2026-09-15
+
+Authoritative review evidence for this cycle is `qualification/ssdp6/INDEPENDENT-REVIEW-2026-09-15-PROTOCOL-6.4-05B6-NO-PASS.md`.
+
+**B64-R6 — QF64-H theorem/result blind spot.** The canonical semantic owners correctly allow a `USES_DEFINITION` subject to be a definition, theorem/result, assumption, algorithm, D3 rule, or D4 contract, but `qf_h` currently requires only `definition`, `assumption`, `algorithm`, and `contract` relation families. Repair the existing bounded QF64-H fixture/oracle by adding a theorem/result representative subject class and a known-broken counterfactual that omits only theorem/result uses while the remaining required classes stay valid. The mutant must fail. Do not add a universal graph/checker subsystem.
+
+**B64-R7 — QF64-P transient incident text is not a lifecycle invariant.** `protocol64_lifecycle_state_ok` currently requires the exact prior incident text `B64-R4/B64-R5 REPAIRED; FRESH REVIEW REQUIRED`, so a truthful later NO-PASS or PASS either fails the checker or leaves the active authority index stale. Repair the existing lifecycle oracle to encode stable lifecycle invariants plus a small explicit state relation, with current Review disposition bound to current handoff/review evidence where needed. Prior finding IDs are history/evidence, not executable invariant semantics. Retain counterfactual rejection of stale Stage C/bootstrap/baseline/recovery/Stage-F states; do not weaken current-state checking.
+
+### Re-entry contract
+
+After B64-R6/B64-R7 repair: update the active authority index truthfully; rerun focused QF64-H/QF64-P and full inherited regression; retain Project Engineering Memory validation, independent package build/validation/parity, snapshot parity, full Orchestrator Core and whitespace/index integrity; freeze a new immutable assembled candidate; obtain exact-target ordinary PR CI; bind the already-existing candidate and CI from a later handoff descendant; then perform another fresh full Stage-E Review of all P64-A..P64-O, QF64-A..QF64-P and F64-A..F64-L.
+
+These findings do not identify a public-source semantic mutation. Public bootstrap `e09a9d1480211eea2d16d722182bb5c6de1bee12` remains authorized. Protocol 6.3 remains accepted-current, Protocol 6.4 recovery remains unavailable, and Stage F remains blocked.
+"""
+              wp.write_text(text, encoding="utf-8")
+
+          idx = Path("workplans/active/SSDP-6.1-7.0-WORKPLAN-AUTHORITY-INDEX.md")
+          replace_once(
+              idx,
+              "STAGE E INDEPENDENT REVIEW: NO-PASS - B64-R4/B64-R5 REPAIRED; FRESH REVIEW REQUIRED",
+              "STAGE E INDEPENDENT REVIEW: NO-PASS - B64-R6/B64-R7 REPAIR REQUIRED; FRESH REVIEW REQUIRED",
+              "authority-index Stage E disposition",
+          )
+          PY
+          rm -f .github/workflows/protocol-64-stage-e-review-record.yml
+          rm -f .github/workflows/protocol-64-stage-e-review-record-v2.yml
+          git add -A
+          git diff --cached --check
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git commit -m 'Reopen Protocol 6.4 Stage-E on R6 R7'
+          git push
