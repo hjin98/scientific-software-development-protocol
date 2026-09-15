@@ -65,8 +65,8 @@ class Protocol63BootstrapTests(unittest.TestCase):
         else:
             self.assertIn(f'Replacement self-reference-safe source snapshot `{BOOTSTRAP}`', prompts)
             self.assertIn('sole current Protocol 6.3 public-source fallback', prompts)
-            self.assertIn(f'Replacement self-reference-safe source snapshot `{BOOTSTRAP}`', versioning)
-            self.assertIn('sole current 6.3 public-source fallback', versioning)
+            self.assertIn(f'6.3.0 public-source bootstrap -> {BOOTSTRAP}', versioning)
+            self.assertIn('sole current 6.3 fallback mapping', versioning)
             self.assertIn('authorized version-bound 6.3 public fallback', readme)
             self.assertIn('sole authorized version-bound 6.3 public fallback', portability)
 

@@ -22,7 +22,9 @@ class Protocol63CloseoutTests(unittest.TestCase):
         self.assertIn(f"6.3.0 recovery -> {RECOVERY}", portability)
         self.assertNotEqual(RECOVERY, BOOTSTRAP)
         self.assertIn("Current accepted document-controlled release: **Protocol 6.3**", readme)
-        self.assertIn("Protocol 6.4 is a proposed candidate", readme)
+        self.assertIn("Protocol 6.4 is the current candidate under qualification", readme)
+        self.assertIn("it is not accepted-current", readme)
+        self.assertIn("has no authorized public-source bootstrap or recovery mapping yet", readme)
         self.assertIn(BASE62, readme)
 
     def test_workplan_archived_and_protocol7_inheritance_reconciled(self) -> None:
