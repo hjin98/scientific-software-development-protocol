@@ -49,15 +49,37 @@ def protocol64_authority_index_state(text: str) -> dict[str, str]:
     return state
 
 
+def protocol64_stage_e_phase(state: dict[str, str]) -> str | None:
+    review = state.get("STAGE E INDEPENDENT REVIEW", "")
+    if review.startswith("NO-PASS") and "REPAIR REQUIRED" in review and "FRESH REVIEW REQUIRED" in review:
+        return "repair-required"
+    if review == "REPAIR COMPLETE / EXACT-TARGET QUALIFICATION REQUIRED":
+        return "repair-complete"
+    if review == "REVIEW READY / FRESH REVIEW REQUIRED":
+        return "review-ready"
+    if review == "PASS / STAGE F AUTHORIZED":
+        return "pass"
+    return None
+
+
 def protocol64_lifecycle_state_ok(state: dict[str, str]) -> bool:
-    return bool(
+    phase = protocol64_stage_e_phase(state)
+    stable = bool(
         state.get("IMPLEMENTATION / STAGE C QUALIFICATION") == "COMPLETE / QUALIFIED"
         and state.get("STAGE D PUBLIC BOOTSTRAP")
         == "PUBLISHED / AUTHORIZED - e09a9d1480211eea2d16d722182bb5c6de1bee12"
-        and state.get("STAGE E INDEPENDENT REVIEW")
-        == "NO-PASS - B64-R4/B64-R5 REPAIRED; FRESH REVIEW REQUIRED"
-        and state.get("PROTOCOL 6.4 RECOVERY") == "UNAVAILABLE PENDING INDEPENDENT REVIEW PASS"
         and state.get("CURRENT ACCEPTED DOCUMENT-CONTROLLED BASELINE") == "Protocol 6.3"
+        and phase is not None
+    )
+    if not stable:
+        return False
+    if phase == "pass":
+        return bool(
+            state.get("PROTOCOL 6.4 RECOVERY") == "UNAVAILABLE PENDING STAGE F RECOVERY PUBLICATION"
+            and state.get("STAGE F") == "AUTHORIZED"
+        )
+    return bool(
+        state.get("PROTOCOL 6.4 RECOVERY") == "UNAVAILABLE PENDING INDEPENDENT REVIEW PASS"
         and state.get("STAGE F") == "BLOCKED"
     )
 
@@ -125,10 +147,10 @@ def qf_g(c):
 
 
 def qf_h(c):
-    families = {"definition", "assumption", "algorithm", "contract"}
+    required_subject_classes = {"definition", "theorem_result", "assumption", "algorithm", "contract"}
     if not bool(c.get("endpoints") and c.get("direct_complete")):
         return False
-    if families - set(c.get("relations", ())):
+    if required_subject_classes - set(c.get("subject_classes", ())):
         return False
     if c.get("uses_definition") != (c.get("subject"), c.get("prerequisite")):
         return False
@@ -197,7 +219,7 @@ BASE = {
     "E": {"domain": True, "relation": True, "logic": True, "totality": True},
     "F": {"family": "F", "parameter_domain": True, "binding": True, "instance": "F_theta"},
     "G": {"hypotheses": ("H1",), "discharged": ("H1",)},
-    "H": {"endpoints": True, "direct_complete": True, "relations": ("definition", "assumption", "algorithm", "contract"), "subject": "algorithm-A", "prerequisite": "definition-X", "uses_definition": ("algorithm-A", "definition-X"), "impact_from": "definition-X", "impact_dependents": ("algorithm-A",)},
+    "H": {"endpoints": True, "direct_complete": True, "subject_classes": ("definition", "theorem_result", "assumption", "algorithm", "contract"), "subject": "algorithm-A", "prerequisite": "definition-X", "uses_definition": ("algorithm-A", "definition-X"), "impact_from": "definition-X", "impact_dependents": ("algorithm-A",)},
     "I": {"roots": ("premise",)},
     "J": {"source": True, "support_not_force": True},
     "K": {"snapshot": True},
@@ -216,7 +238,7 @@ NEGATIVE = {
     "E": ({"choice": True, "selection": False}, {"piecewise": True, "piecewise_closed": False}, {"physical": True, "units": False}),
     "F": ({"instance": "F"}, {"default": True, "default_owner": None, "default_semantics": True}, {"binding_changed": True, "evidence_reconciled": False}),
     "G": ({"stochastic": True, "law": True, "dependence": False, "conditioning": True}, {"discharged": (), "propagated": ()}, {"approximate": True, "exact": True}),
-    "H": ({"relations": ("definition",)}, {"uses_definition": ("definition-X", "algorithm-A")}, {"impact_dependents": ()}, {"independence": True, "scope_complete": False}, {"cycle": True, "composite": False}),
+    "H": ({"subject_classes": ("definition", "assumption", "algorithm", "contract")}, {"subject_classes": ("definition",)}, {"uses_definition": ("definition-X", "algorithm-A")}, {"impact_dependents": ()}, {"independence": True, "scope_complete": False}, {"cycle": True, "composite": False}),
     "I": ({"cycle": True}, {"empirical_as_proof": True}, {"citation_authority": True}, {"evidence_from_use_only": True}),
     "J": ({"binding": True, "authority": False}, {"transformed": True, "lineage": False}, {"floating_latest": True}, {"external_instruction": True}),
     "K": ({"snapshot": False}, {"label_equivalence": True}, {"editable_alias": True}, {"changed": True, "impact": False}),
@@ -336,6 +358,24 @@ class Protocol64AxiomaticTraceabilityQualificationTests(unittest.TestCase):
         stale_qualification = dict(lifecycle)
         stale_qualification["IMPLEMENTATION / STAGE C QUALIFICATION"] = "PROPOSED / NOT YET QUALIFIED"
         self.assertFalse(protocol64_lifecycle_state_ok(stale_qualification))
+        stale_incident = dict(lifecycle)
+        stale_incident["STAGE E INDEPENDENT REVIEW"] = "NO-PASS - B64-R4/B64-R5 REPAIRED; FRESH REVIEW REQUIRED"
+        self.assertFalse(protocol64_lifecycle_state_ok(stale_incident))
+
+        repair_complete = dict(lifecycle)
+        repair_complete["STAGE E INDEPENDENT REVIEW"] = "REPAIR COMPLETE / EXACT-TARGET QUALIFICATION REQUIRED"
+        self.assertTrue(protocol64_lifecycle_state_ok(repair_complete))
+        review_ready = dict(lifecycle)
+        review_ready["STAGE E INDEPENDENT REVIEW"] = "REVIEW READY / FRESH REVIEW REQUIRED"
+        self.assertTrue(protocol64_lifecycle_state_ok(review_ready))
+        review_pass = dict(lifecycle)
+        review_pass["STAGE E INDEPENDENT REVIEW"] = "PASS / STAGE F AUTHORIZED"
+        review_pass["PROTOCOL 6.4 RECOVERY"] = "UNAVAILABLE PENDING STAGE F RECOVERY PUBLICATION"
+        review_pass["STAGE F"] = "AUTHORIZED"
+        self.assertTrue(protocol64_lifecycle_state_ok(review_pass))
+        bad_pass = dict(lifecycle)
+        bad_pass["STAGE E INDEPENDENT REVIEW"] = "PASS / STAGE F AUTHORIZED"
+        self.assertFalse(protocol64_lifecycle_state_ok(bad_pass))
 
         self.assertIn("QF64-A", workplan)
         self.assertIn("QF64-P", workplan)
@@ -349,10 +389,17 @@ class Protocol64AxiomaticTraceabilityQualificationTests(unittest.TestCase):
         self.assertEqual(handoff_meta.get("protocol_64_recovery"), "unavailable_pending_independent_review")
         self.assertEqual(handoff_meta.get("stage_f"), "blocked_pending_independent_review")
 
+        phase = protocol64_stage_e_phase(lifecycle)
         state = handoff_meta.get("review_target_binding_state")
         target = handoff_meta.get("assembled_review_target")
         qualification = handoff_meta.get("assembled_review_target_ci")
+        self.assertIn(phase, {"repair-required", "repair-complete", "review-ready", "pass"})
         self.assertIn(state, {"pending-descendant-handoff", "bound"})
+        if phase == "repair-complete":
+            self.assertEqual(state, "pending-descendant-handoff")
+        elif phase in {"repair-required", "review-ready", "pass"}:
+            self.assertEqual(state, "bound")
+
         if state == "pending-descendant-handoff":
             self.assertEqual(target, "PENDING_DESCENDANT_HANDOFF")
             self.assertEqual(qualification, "PENDING_EXACT_TARGET_CI")
