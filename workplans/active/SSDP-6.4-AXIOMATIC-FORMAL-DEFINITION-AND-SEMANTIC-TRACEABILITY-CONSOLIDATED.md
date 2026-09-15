@@ -7,8 +7,8 @@ status: active
 created_date: 2026-09-15
 reviewed_date: 2026-09-15
 design_review_state: pass-after-sixth-review
-independent_review_state: no-pass-reopened
-implementation_handoff: repair-required
+independent_review_state: repaired-awaiting-fresh-review
+implementation_handoff: repair-complete-fresh-review-required
 active_serious_challenge: none
 branch: ssdp-6.4-axiomatic-definition-traceability
 reviewed_input_head: 4974058020cdda1325ef899c04b3cd13d5ae44c2
@@ -27,7 +27,7 @@ accepted_parent_public_bootstrap: 86c13cab6bdd1991dffa94e277db8eacf87e2e11
 
 ## Current disposition
 
-**FRESH STAGE-E REVIEW: NO-PASS — REOPENED.** A fresh independent Review of immutable assembled target `ced6a352fbe84e8ed5e698d2ab133d4c5bb0f152`, bound by the later handoff and exact-target CI, found two blocking lifecycle/qualification defects: B64-R4 and B64-R5 in Section 28. No Serious Challenge is active. Protocol 6.3 remains accepted-current; Protocol 6.4 recovery remains unavailable; Stage F remains blocked. Repair the earliest owning current-state and qualification surfaces, freeze a new immutable assembled target, bind exact-target qualification from a later descendant, and perform another fresh full Stage-E Review before Stage F.
+**B64-R4/B64-R5 REPAIR COMPLETE; FRESH STAGE-E REVIEW REQUIRED.** The active lifecycle index now reflects completed Stage C qualification and the authorized Protocol 6.4 public bootstrap, and QF64-P now validates that real current index with discriminating stale-state counterfactuals. No Serious Challenge is active. The repair does not change the published public-source semantics or bootstrap identity. Protocol 6.3 remains accepted-current; Protocol 6.4 recovery remains unavailable; Stage F remains blocked. The next immutable assembled target is bound only from the descendant Stage-E handoff after exact-target ordinary PR CI; a fresh independent full Stage-E Review is still required before Stage F.
 
 **SIXTH DESIGN REVIEW: PASS AFTER GAP CLOSURE.** This file is the single current implementation/review handoff for Protocol 6.4. Earlier design-review workplans and the fifth-review consolidated snapshot are historical evidence only; implementation and independent Review SHALL reconstruct the current contract from this file plus accepted Protocol 6.3 owners, not by replaying amendment chronology.
 
@@ -822,3 +822,14 @@ After B64-R4/B64-R5 repair:
 6. perform another fresh independent full Stage-E Review over all P64-A..P64-O, QF64-A..QF64-P and F64-A..F64-L.
 
 The published public bootstrap `e09a9d1480211eea2d16d722182bb5c6de1bee12` remains authorized unless the repair changes its public-source semantics. No new bootstrap or recovery identity is authorized by this Review. Protocol 6.3 remains accepted-current and Stage F remains blocked.
+
+## 29. B64-R4/B64-R5 repair closure — 2026-09-15
+
+- **B64-R4 — RESOLVED at the owning current lifecycle index.** `workplans/active/SSDP-6.1-7.0-WORKPLAN-AUTHORITY-INDEX.md` now states completed implementation/Stage C qualification, the authorized Stage D public bootstrap `e09a9d1480211eea2d16d722182bb5c6de1bee12`, the repaired-but-not-yet-passed Stage-E state, unavailable Protocol 6.4 recovery, accepted-current Protocol 6.3, and blocked Stage F. Frozen historical records were not rewritten.
+- **B64-R5 — RESOLVED at D4 qualification.** QF64-P now parses the Protocol 6.4 current-disposition block from the real active authority index and requires the exact lifecycle tuple above. Counterfactual fixtures explicitly replace the bootstrap with `NOT YET PUBLISHED` and Stage C with `PROPOSED / NOT YET QUALIFIED` and must fail, in addition to the synthetic current-index/stale-state polarity cases.
+
+These repairs change current lifecycle representation and its oracle only. They do not alter D1/D2/D3 semantic doctrine, the Protocol 6.4 public-source snapshot, or Protocol 7 D3/control-plane semantics. The authorized public bootstrap remains `e09a9d1480211eea2d16d722182bb5c6de1bee12`.
+
+### Fresh review re-entry after this repair
+
+Freeze an immutable assembled candidate containing this repair and applicable qualification evidence. The candidate handoff carries the explicit pending descendant-binding sentinel because a commit cannot self-name. After exact-target ordinary PR CI succeeds for the already-existing candidate, a later descendant SHALL bind that candidate SHA and CI run in `qualification/ssdp6/INDEPENDENT-REVIEW-HANDOFF-PROTOCOL-6.4.md`. Only then may a fresh independent full Stage-E Review begin over all P64-A..P64-O, QF64-A..QF64-P and F64-A..F64-L. Until a genuine independent PASS, Protocol 6.3 remains accepted-current, Protocol 6.4 recovery remains unavailable, and Stage F remains blocked.

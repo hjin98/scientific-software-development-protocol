@@ -8,10 +8,11 @@ accepted_protocol_63_public_bootstrap: 86c13cab6bdd1991dffa94e277db8eacf87e2e11
 semantic_candidate: e09a9d1480211eea2d16d722182bb5c6de1bee12
 public_source_bootstrap: e09a9d1480211eea2d16d722182bb5c6de1bee12
 public_source_mapping_commit: 142992f6f77025be938376b0fbd680ce9851edb9
-assembled_review_target: ced6a352fbe84e8ed5e698d2ab133d4c5bb0f152
-review_target_binding_state: bound
-assembled_review_target_ci: 34980323042
-prior_stage_e_no_pass_target: 0377e798fbbb1054badd1193950d9c10f723be75
+assembled_review_target: PENDING_DESCENDANT_HANDOFF
+review_target_binding_state: pending-descendant-handoff
+assembled_review_target_ci: PENDING_EXACT_TARGET_CI
+earlier_stage_e_no_pass_target: 0377e798fbbb1054badd1193950d9c10f723be75
+prior_stage_e_no_pass_target: ced6a352fbe84e8ed5e698d2ab133d4c5bb0f152
 prior_stage_e_repair_target: 0f9197207929702920efeab5e11f28ed938ed551
 stage_c_record: qualification/ssdp6/STAGE-C-QUALIFICATION-PROTOCOL-6.4.md
 stage_d_prepublication_record: qualification/ssdp6/STAGE-D-PREPUBLICATION-BOOTSTRAP-READINESS-PROTOCOL-6.4.md
@@ -32,9 +33,9 @@ stage_f: blocked_pending_independent_review
 
 Use the `software-design` skill in a **fresh independent context** and perform the assembled-candidate Protocol/D3 Review required by Stage E of `workplans/active/SSDP-6.4-AXIOMATIC-FORMAL-DEFINITION-AND-SEMANTIC-TRACEABILITY-CONSOLIDATED.md`.
 
-This handoff is the sole current Stage-E target-binding surface routed from the workplan. Its binding state is **bound**: this descendant names already-existing immutable assembled target `ced6a352fbe84e8ed5e698d2ab133d4c5bb0f152` and its exact-target ordinary PR qualification run `34980323042`. The candidate does not and cannot self-name; this later handoff commit is therefore not the Review target.
+This handoff is the sole current Stage-E target-binding surface routed from the workplan. Its binding state is **pending-descendant-handoff** after the B64-R4/B64-R5 repair. The repaired assembled candidate cannot self-name, so this handoff **must be finalized by a later descendant** only after an already-existing immutable candidate and its exact-target ordinary PR qualification run exist.
 
-Review immutable assembled target `ced6a352fbe84e8ed5e698d2ab133d4c5bb0f152` against accepted Protocol 6.3 repository state `0928accd337a13f864b292ed81c36372828cfb4c`, accepted 6.3 recovery `9f353097fab36e325a325f1c2f9d9cec32e86177`, and the active consolidated 6.4 workplan. Treat `assembled_review_target_ci: 34980323042` as evidence to challenge, not authority. Do **not** inherit implementation/authoring conclusions, green CI, this handoff, or prior Protocol 6.x Review verdicts as authority. Reconstruct the obligations independently from accepted authority and the workplan, then use implementation/qualification artifacts only as evidence to challenge.
+The immediately preceding bound Stage-E target `ced6a352fbe84e8ed5e698d2ab133d4c5bb0f152`, qualified by run `34980323042`, is historical NO-PASS evidence because B64-R4/B64-R5 were found against it. Do not begin the next independent Review while `assembled_review_target` or `assembled_review_target_ci` remains pending. After descendant binding, review the newly named immutable target against accepted Protocol 6.3 repository state `0928accd337a13f864b292ed81c36372828cfb4c` and accepted 6.3 recovery `9f353097fab36e325a325f1c2f9d9cec32e86177`; treat exact-target CI as evidence to challenge, not authority.
 
 The review target is deliberately **not** this handoff's later descendant commit. The immutable identities have different roles:
 
@@ -42,7 +43,7 @@ The review target is deliberately **not** this handoff's later descendant commit
 - descendant that first publishes that bootstrap mapping: `142992f6f77025be938376b0fbd680ce9851edb9`;
 - prior assembled Stage-E target `0377e798fbbb1054badd1193950d9c10f723be75`: historical NO-PASS evidence only;
 - prior repair target `0f9197207929702920efeab5e11f28ed938ed551`: closed SC64-R1/B64-R2/B64-R3 but was NO-PASS on lifecycle binding;
-- current assembled Stage-E review target: `ced6a352fbe84e8ed5e698d2ab133d4c5bb0f152`, qualified by exact-target CI `34980323042`.
+- most recent failed assembled Stage-E target: `ced6a352fbe84e8ed5e698d2ab133d4c5bb0f152`, qualified by exact-target CI `34980323042`; the repaired successor target is pending descendant binding.
 
 Do not collapse bootstrap, mapping descendant, assembled review target, handoff descendant, or eventual recovery into one identity.
 
@@ -73,7 +74,7 @@ Independently evaluate the complete current Protocol 6.4 implementation against 
 - Stage D publication record: `qualification/ssdp6/PROTOCOL-6.4-STAGE-D-PUBLIC-BOOTSTRAP.md`.
 - Post-publication assembled target `0377e798fbbb1054badd1193950d9c10f723be75`; ordinary PR CI `34968829366` passed both build and Orchestrator Core jobs, but the later independent Stage-E Review returned NO-PASS.
 - Repair target `0f9197207929702920efeab5e11f28ed938ed551`; closed the relation-direction, QF64-H, and Markdown-fence blockers but the subsequent independent Review found stale review-target authority/QF64-P lifecycle binding.
-- Current assembled target `ced6a352fbe84e8ed5e698d2ab133d4c5bb0f152`; exact-target ordinary PR CI `34980323042` passed. This bound handoff now makes that immutable target the sole current Stage-E Review target.
+- Most recent failed assembled target `ced6a352fbe84e8ed5e698d2ab133d4c5bb0f152`; exact-target ordinary PR CI `34980323042` passed, but fresh independent Review returned NO-PASS on B64-R4/B64-R5. The repaired successor target and exact-target CI remain pending until a later descendant binds them.
 
 Treat all of these as evidence whose claim, candidate, oracle and environment applicability must be checked. Green automation cannot substitute for the required semantic/editorial/Challenge falsification.
 

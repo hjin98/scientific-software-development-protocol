@@ -29,6 +29,39 @@ def front_matter(text: str) -> dict[str, str]:
     return result
 
 
+def protocol64_authority_index_state(text: str) -> dict[str, str]:
+    start_marker = "## Protocol 6.4 current design handoff"
+    end_marker = "## Protocol 7.0 current design handoff"
+    start = text.find(start_marker)
+    end = text.find(end_marker, start + len(start_marker)) if start >= 0 else -1
+    if start < 0 or end < 0:
+        return {}
+    section = text[start:end]
+    match = re.search(r"Current disposition:\s*```text\n(.*?)\n```", section, re.DOTALL)
+    if not match:
+        return {}
+    state: dict[str, str] = {}
+    for line in match.group(1).splitlines():
+        if ":" not in line:
+            continue
+        key, value = line.split(":", 1)
+        state[key.strip()] = value.strip()
+    return state
+
+
+def protocol64_lifecycle_state_ok(state: dict[str, str]) -> bool:
+    return bool(
+        state.get("IMPLEMENTATION / STAGE C QUALIFICATION") == "COMPLETE / QUALIFIED"
+        and state.get("STAGE D PUBLIC BOOTSTRAP")
+        == "PUBLISHED / AUTHORIZED - e09a9d1480211eea2d16d722182bb5c6de1bee12"
+        and state.get("STAGE E INDEPENDENT REVIEW")
+        == "NO-PASS - B64-R4/B64-R5 REPAIRED; FRESH REVIEW REQUIRED"
+        and state.get("PROTOCOL 6.4 RECOVERY") == "UNAVAILABLE PENDING INDEPENDENT REVIEW PASS"
+        and state.get("CURRENT ACCEPTED DOCUMENT-CONTROLLED BASELINE") == "Protocol 6.3"
+        and state.get("STAGE F") == "BLOCKED"
+    )
+
+
 def markdown_fences_well_formed(text: str) -> bool:
     active: tuple[str, int] | None = None
     for line in text.splitlines():
@@ -143,6 +176,8 @@ def qf_p(c):
         and c.get("baseline_consistent")
         and c.get("target_binding")
         and c.get("qualification_binding")
+        and c.get("lifecycle_index_current")
+        and not c.get("stale_lifecycle_state")
         and not c.get("amendment_replay")
     )
 
@@ -170,7 +205,7 @@ BASE = {
     "M": {"source": True, "loaded": True},
     "N": {"rendered": True},
     "O": {"parity": True},
-    "P": {"snapshot_complete": True, "history": True, "current_handoff": True, "baseline_consistent": True, "target_binding": True, "qualification_binding": True},
+    "P": {"snapshot_complete": True, "history": True, "current_handoff": True, "baseline_consistent": True, "target_binding": True, "qualification_binding": True, "lifecycle_index_current": True},
 }
 
 NEGATIVE = {
@@ -189,7 +224,7 @@ NEGATIVE = {
     "M": ({"loaded": False}, {"edge_activates": True}),
     "N": ({"term": True, "defined": False}, {"abbrev": True, "expanded": False}, {"rendered": False}, {"example_authority": True}),
     "O": ({"frozen_mutation": True}, {"generated_mismatch": True}, {"bootstrap_self_name": True}, {"schema_bump": True}, {"early_recovery": True}, {"protocol7_d3": True}),
-    "P": ({"amendment_replay": True}, {"snapshot_complete": False}, {"current_handoff": False}, {"baseline_consistent": False}, {"target_binding": False}, {"qualification_binding": False}),
+    "P": ({"amendment_replay": True}, {"snapshot_complete": False}, {"current_handoff": False}, {"baseline_consistent": False}, {"target_binding": False}, {"qualification_binding": False}, {"lifecycle_index_current": False}, {"stale_lifecycle_state": True}),
 }
 
 
@@ -202,6 +237,7 @@ class Protocol64AxiomaticTraceabilityQualificationTests(unittest.TestCase):
         self.prompts = read("source/shared/references/development-workflow-prompts.md")
         self.semantic_dependencies = read("source/SEMANTIC_DEPENDENCIES.md")
         self.readme = read("README.md")
+        self.authority_index = read("workplans/active/SSDP-6.1-7.0-WORKPLAN-AUTHORITY-INDEX.md")
 
     def test_qf64_a_through_p_counterfactual_polarity(self) -> None:
         for family, rule in RULES.items():
@@ -291,6 +327,15 @@ class Protocol64AxiomaticTraceabilityQualificationTests(unittest.TestCase):
         workplan_meta = front_matter(workplan)
         handoff_meta = front_matter(handoff)
         baseline = "0928accd337a13f864b292ed81c36372828cfb4c"
+
+        lifecycle = protocol64_authority_index_state(self.authority_index)
+        self.assertTrue(protocol64_lifecycle_state_ok(lifecycle), lifecycle)
+        stale_bootstrap = dict(lifecycle)
+        stale_bootstrap["STAGE D PUBLIC BOOTSTRAP"] = "NOT YET PUBLISHED"
+        self.assertFalse(protocol64_lifecycle_state_ok(stale_bootstrap))
+        stale_qualification = dict(lifecycle)
+        stale_qualification["IMPLEMENTATION / STAGE C QUALIFICATION"] = "PROPOSED / NOT YET QUALIFIED"
+        self.assertFalse(protocol64_lifecycle_state_ok(stale_qualification))
 
         self.assertIn("QF64-A", workplan)
         self.assertIn("QF64-P", workplan)
