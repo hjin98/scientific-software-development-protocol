@@ -7,10 +7,14 @@ status: active
 created_date: 2026-09-15
 reviewed_date: 2026-09-15
 design_review_state: pass-after-sixth-review
-implementation_handoff: authorized
-active_serious_challenge: none
+independent_review_state: no-pass-reopened
+implementation_handoff: repair-required
+active_serious_challenge: SC64-R1-USES-DEFINITION-DIRECTION
 branch: ssdp-6.4-axiomatic-definition-traceability
 reviewed_input_head: 4974058020cdda1325ef899c04b3cd13d5ae44c2
+independent_review_target: 0377e798fbbb1054badd1193950d9c10f723be75
+independent_review_baseline: 0928accd337a13f864b292ed81c36372828cfb4c
+stage_f: blocked
 branch_point: 0928accd337a13f864b292ed81c36372828cfb4c
 accepted_parent_protocol: 6.3.0
 accepted_parent_recovery: 9f353097fab36e325a325f1c2f9d9cec32e86177
@@ -20,6 +24,8 @@ accepted_parent_public_bootstrap: 86c13cab6bdd1991dffa94e277db8eacf87e2e11
 # SSDP 6.4 — Axiomatic Formal Definition and Semantic Traceability — Consolidated Workplan
 
 ## Current disposition
+
+**STAGE-E INDEPENDENT ASSEMBLED-CANDIDATE REVIEW: NO-PASS.** Fresh independent Review of immutable assembled target `0377e798fbbb1054badd1193950d9c10f723be75` against accepted Protocol 6.3 repository state `0928accd337a13f864b292ed81c36372828cfb4c` found one active Serious Challenge and two additional blocking findings. Protocol 6.3 remains accepted-current. Protocol 6.4 recovery remains unavailable and Stage F remains blocked. The sixth design-review disposition below records the pre-implementation design acceptance that authorized the original implementation; it does not override this Stage-E result. Section 27 is the current repair/re-entry contract.
 
 **SIXTH DESIGN REVIEW: PASS AFTER GAP CLOSURE.** This file is the single current implementation/review handoff for Protocol 6.4. Earlier design-review workplans and the fifth-review consolidated snapshot are historical evidence only; implementation and independent Review SHALL reconstruct the current contract from this file plus accepted Protocol 6.3 owners, not by replaying amendment chronology.
 
@@ -759,3 +765,76 @@ Reopen the earliest affected owner when:
 - Protocol 7 cannot inherit accepted 6.4 without genuine D3 architecture mutation.
 
 **SIXTH DESIGN REVIEW VERDICT: PASS — blockers 0; Serious Challenges 0.**
+
+## 27. Stage-E independent Review reopen — 2026-09-15
+
+### Review identity and disposition
+
+Fresh independent assembled-candidate Review examined immutable target `0377e798fbbb1054badd1193950d9c10f723be75` against accepted Protocol 6.3 repository state `0928accd337a13f864b292ed81c36372828cfb4c`, using `qualification/ssdp6/INDEPENDENT-REVIEW-HANDOFF-PROTOCOL-6.4.md` and this consolidated workplan without inheriting authoring/implementation conclusions.
+
+Disposition: **NO-PASS.** One governing-contract Serious Challenge and two additional blocking findings remain. Protocol 6.3 remains accepted-current; Protocol 6.4 remains candidate-current with public bootstrap `e09a9d1480211eea2d16d722182bb5c6de1bee12`, no Protocol 6.4 recovery mapping, and Stage F blocked. Do not create an independent Review PASS record, recovery target, accepted-current cutover, or Protocol-7 6.4 inheritance revision until the repair/requalification/re-review sequence below closes.
+
+### SC64-R1 — `USES_DEFINITION` graph direction is internally contradictory
+
+**Owning layer:** D3/current change-plan semantic contract, with downstream D4 qualification impact. **Affected obligations:** P64-I, QF64-H, F64-A, F64-F, and the protected typed-impact outcome.
+
+Section 11 currently defines
+
+\[
+(x,y)\in E_D^{\mathrm{def}}
+\iff
+\text{the canonical semantic statement of }y\text{ directly requires the canonical meaning of }x,
+\]
+
+which under ordinary directed-graph ordered-pair convention denotes a prerequisite-to-subject edge `x -> y`. The immediately following retained relation states `subject USES_DEFINITION -> prerequisite`, and Section 12 likewise draws D2/D3/D4 subjects toward upstream prerequisites. The canonical 6.4 dependency owner follows the latter subject-to-prerequisite convention. These are not safely interchangeable because relation direction governs trace interpretation and impact traversal.
+
+**Required repair:**
+
+1. The Design/change-plan owner SHALL explicitly adjudicate one canonical orientation before implementation repair. The minimum coherent resolution appears to be `subject -> prerequisite`, because the canonical dependency owner and cross-domain examples already use it, but implementation SHALL not silently assume that resolution.
+2. If `subject -> prerequisite` is retained, rewrite the graph definition explicitly as `(subject, prerequisite) in E_D^def` iff the subject directly requires the prerequisite, or use equivalent unambiguous notation. State impact traversal separately: mutation of a prerequisite discovers dependent subjects by reverse traversal of that stored relation. Do not conflate semantic-relation direction with impact-propagation traversal direction.
+3. Reconcile `abstraction-and-concretization.md`, `evidence-evolution-and-dependencies.md`, `scientific-technical-writing.md`, `source/SEMANTIC_DEPENDENCIES.md`, workflow prompts, and any other current 6.4 surface that encodes or describes the relation. Preserve one owner and subordinate derived views.
+4. Classify whether the repair changes candidate semantic meaning or only removes an erroneous workplan formalization. Any material semantic-source mutation reopens the affected Stage C/D qualification/bootstrap boundary and requires a new qualified semantic/bootstrap snapshot; a workplan-only clarification that is independently shown equivalent to the already-implemented canonical relation need not rewrite the immutable `e09a9d1480211eea2d16d722182bb5c6de1bee12` bootstrap.
+
+This Serious Challenge must be resolved before an unqualified Stage-E PASS is possible.
+
+### B64-R2 — QF64-H does not discriminate relation orientation
+
+**Owning layer:** D4 qualification/test realization after SC64-R1 is resolved. **Affected obligations:** QF64-H and F64-F.
+
+`tests/test_protocol_64_axiomatic_traceability.py` checks relation families, endpoint presence, completeness, cycle/composite behavior, and bounded independence, but its QF64-H representation does not encode or test which endpoint is the subject and which is the prerequisite. A trace implementation with every `USES_DEFINITION` edge reversed can therefore satisfy the current QF64-H oracle.
+
+**Required repair:**
+
+1. After SC64-R1 fixes the canonical orientation, extend QF64-H fixtures/oracle so endpoint roles and direction are explicit.
+2. Add at least one positive direct-use case in the canonical orientation and a discriminating negative case containing the same endpoints and relation family with the edge reversed.
+3. Add an impact-direction counterfactual proving that a prerequisite mutation reaches dependent subjects by the correct traversal without redefining the stored semantic relation.
+4. Preserve the existing theorem/assumption/algorithm/contract coverage, completeness/absence, endpoint, cycle and composite-recursion cases; do not replace them with the direction check.
+5. Rerun QF64-A..P, inherited Protocol 6 regression, generated/package parity, profile/snapshot checks, and Orchestrator Core acceptance on the repaired assembled candidate.
+
+### B64-R3 — canonical Markdown presentation integrity is broken and untested by the real qualification path
+
+**Owning layer:** canonical versioning/documentation source plus D4 qualification realization. **Affected obligations:** P64-M, QF64-N, F64-K, and Stage C step 8.
+
+At reviewed target `0377e798fbbb1054badd1193950d9c10f723be75`, `source/shared/references/protocol-versioning-and-compatibility.md` places prose on the same line as the intended closing triple-backtick fence after the Protocol 6.4 public-bootstrap mapping. Under GitHub-Flavored Markdown/CommonMark-compatible fenced-code parsing this is not a valid closing fence, so the following `AUTO_LOCAL_FIRST` and Protocol 6.4 lifecycle text is rendered inside the code block rather than as prose. The malformed canonical source is then faithfully propagated into generated skill/package descendants.
+
+The ordinary `protocol-check.yml` installs only the current validation dependencies and runs the synthetic QF64 fixture plus build/package/parity/Core checks; QF64-N's synthetic `rendered` flag does not parse the real current Markdown. Thus green Stage C/post-publication CI does not establish the required source-to-render presentation invariant.
+
+**Required repair:**
+
+1. Repair the canonical `source/shared/references/protocol-versioning-and-compatibility.md` first: the closing fence SHALL occupy its own line and the following prose SHALL begin outside the fenced block.
+2. Regenerate every affected `dist/`, package, prompt/profile/snapshot descendant from canonical source. Do not hand-edit generated copies.
+3. Add a bounded mechanically discriminating presentation check over current canonical Markdown surfaces sufficient to reject a closing-fence-plus-prose case of this form and to establish that the lifecycle prose is outside the code block. A lightweight structural fence oracle is acceptable if it faithfully enforces the supported Markdown contract; a renderer dependency is not required merely for symmetry.
+4. Pair that positive check with a negative malformed-fence fixture so the oracle demonstrates discrimination rather than a hard-coded PASS flag.
+5. Rerun full repository regression, package build/validation/parity, profile/snapshot validation, frozen-predecessor checks, and Orchestrator Core acceptance on the repaired assembled candidate.
+
+### Stage-E re-entry gate
+
+Before re-review:
+
+1. resolve SC64-R1 at the owning Design/change-plan layer;
+2. implement B64-R2 and B64-R3 without wrappers, duplicate authorities, or generated-source hand edits;
+3. preserve Protocol 6.3 accepted-current state, frozen predecessor identities, `e09a9d1480211eea2d16d722182bb5c6de1bee12` as the published 6.4 public bootstrap unless a material semantic-source change requires requalification, and keep Protocol 6.4 recovery absent;
+4. produce a new immutable assembled review target containing all applicable repairs and fresh real-owner qualification evidence;
+5. perform a fresh independent Stage-E Review of that new target against the same accepted Protocol 6.3 baseline, including all P64-A..P64-O, QF64-A..QF64-P and F64-A..F64-L obligations rather than reviewing only these findings.
+
+No Stage-F recovery selection/publication or accepted-current cutover is authorized by this NO-PASS.
