@@ -16,7 +16,7 @@ The **Scientific Software Development Protocol (SSDP)** uses D1 scientific/mathe
 
 ## Purpose
 
-Do not copy substantive requirements into this index. Read the listed governing artifacts themselves. Archived workplans preserve the exact historical handoff that governed completed cycles; later work may supersede current release/closeout disposition without rewriting those historical artifacts.
+Do not copy substantive requirements into this index. Read the listed governing artifacts themselves. Archived workplans preserve the exact historical handoff that governed completed cycles or design-review snapshots; later work may supersede current release/closeout disposition without rewriting those historical artifacts.
 
 ## Protocol 6.1 completed handoff
 
@@ -114,13 +114,13 @@ Protocol 6.4 design/implementation/review SHALL use the single current consolida
 
 1. `workplans/active/SSDP-6.4-AXIOMATIC-FORMAL-DEFINITION-AND-SEMANTIC-TRACEABILITY-CONSOLIDATED.md`
 
-The earlier parent, Revision 1, and Revision 2 are archived design-review evidence. They preserve how gaps were discovered and closed but are not required to reconstruct the current implementation contract. The consolidated file losslessly carries their still-binding requirements plus fourth- and fifth-review closures for dimensional/type consistency, quantifier/relation semantics, stochastic closure, cross-domain direction, coherent versioned composition, empirical-import provenance and transformation lineage, semantic equivalence/split-merge-retirement, source-vs-runtime availability, widened semantic-definition-use tracing, typed warrant closure, definitional conservativity, external support-vs-authority separation, progressive-disclosure availability, self-hosting, presentation integrity, and consolidated routing.
+Earlier parent/Revisions 1-2 and the fifth-review consolidated snapshot are archived design-review evidence. They preserve how the design evolved but are not required to reconstruct the current implementation contract. The current consolidated workplan integrates the still-binding prior semantics plus sixth-review closure for unique canonical-owner conflict handling, extensible semantic-role status, parameterized-family/instance/default semantics, parameter-sensitive evidence applicability, external-content trust/instruction separation, and current-vs-history cleanup.
 
 Current disposition:
 
 ```text
 SERIOUS CHALLENGE: NONE
-FIFTH DESIGN REVIEW: PASS AFTER GAP CLOSURE
+SIXTH DESIGN REVIEW: PASS AFTER GAP CLOSURE
 IMPLEMENTATION HANDOFF: AUTHORIZED — CONSOLIDATED
 IMPLEMENTATION STATUS: PROPOSED / NOT YET QUALIFIED
 ACCEPTED PARENT: Protocol 6.3 recovery 9f353097fab36e325a325f1c2f9d9cec32e86177
@@ -130,7 +130,7 @@ CURRENT ACCEPTED DOCUMENT-CONTROLLED BASELINE: Protocol 6.3
 PROTOCOL 7 INHERITANCE OF 6.4: DEFERRED UNTIL 6.4 ACCEPTANCE
 ```
 
-Protocol 6.4 remains a proposed backward-compatible minor strengthening. No `main` cutover or reinterpretation of version-bound 6.3 work is implied. Bounded 6.4 adoption follows the consolidated workplan; ambiguous predecessor semantics must be reconciled/challenged rather than silently inherited.
+Protocol 6.4 remains a proposed backward-compatible minor strengthening. No `main` cutover or reinterpretation of version-bound 6.3 work is implied. Bounded 6.4 adoption follows the consolidated workplan; ambiguous or conflicting predecessor semantics must be reconciled/challenged rather than silently inherited.
 
 ## Protocol 7.0 current design handoff
 
@@ -176,7 +176,7 @@ Protocol 7 D4 remains unauthorized until the existing deliberate D3 Orchestrator
 There is exactly one canonical workflow-control authority for any current run.
 
 - Protocol 6.3 is the accepted-current document-controlled baseline; version-bound 6.2 work may still resolve immutable historical recovery `b59adc77efe6951912cfd705cc43830c58ca27d0` and older declared versions retain their own mappings.
-- Protocol 6.4 is proposed on its dedicated branch. It does not become accepted-current until its qualification, independent Review, bootstrap/recovery publication, generated reconciliation, impact closure, and lifecycle cutover all pass.
+- Protocol 6.4 is proposed on its dedicated branch. It does not become accepted-current until qualification, independent Review, bootstrap/recovery publication, generated reconciliation, impact closure, and lifecycle cutover all pass.
 - Protocol 7 remains proposed/pre-cutover. Its current fallback/rollback baseline is Protocol 6.3 recovery `9f353097fab36e325a325f1c2f9d9cec32e86177` until a later accepted successor is explicitly reconciled into the Protocol-7 handoff.
 - Under Protocol 7 after qualified cutover, the deterministic orchestrator control plane owns machine lifecycle transitions while workplans/skills/documents remain semantic artifacts.
 - Shadow comparison is permitted only while one side remains explicitly non-authoritative.
