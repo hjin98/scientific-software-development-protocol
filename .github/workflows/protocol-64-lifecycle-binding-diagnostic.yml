@@ -1,0 +1,61 @@
+name: Protocol 6.4 lifecycle binding diagnostic
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - .github/workflows/protocol-64-lifecycle-binding-diagnostic.yml
+
+permissions:
+  contents: write
+
+jobs:
+  repair:
+    if: github.head_ref == 'ssdp-6.4-axiomatic-definition-traceability'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ssdp-6.4-axiomatic-definition-traceability
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install validation and Core dependencies
+        run: python -m pip install -r source/requirements-validation.txt ./orchestrator -r orchestrator/requirements-dev.txt
+      - name: Apply lifecycle binding repair
+        run: |
+          python -m py_compile .github/scripts/protocol64_lifecycle_binding_repair.py
+          python .github/scripts/protocol64_lifecycle_binding_repair.py
+      - name: Remove temporary repair machinery before qualification
+        run: |
+          rm -f .github/workflows/protocol-64-lifecycle-binding-repair.yml
+          rm -f .github/workflows/protocol-64-lifecycle-binding-diagnostic.yml
+          rm -f .github/scripts/protocol64_lifecycle_binding_repair.py
+      - name: Focused Protocol 6.4 qualification
+        run: python -m unittest tests.test_protocol_64_axiomatic_traceability -v
+      - name: Full repository regression
+        run: python -m unittest discover -s tests -v
+      - name: Project Engineering Memory validation
+        run: python source/project_engineering_memory.py PROJECT-ENGINEERING-MEMORY.md
+      - name: Independent distribution build
+        run: python source/build_skills.py --output /tmp/protocol-dist
+      - name: Package validation
+        run: python source/validate_packages.py --dist /tmp/protocol-dist
+      - name: Committed distribution parity
+        run: python source/check_dist.py --expected /tmp/protocol-dist --committed dist
+      - name: Orchestrator snapshot parity
+        run: python orchestrator/scripts/generate_protocol_snapshot.py --check
+      - name: Orchestrator Core acceptance
+        run: python orchestrator/scripts/run_core_tests.py
+      - name: Whitespace
+        run: git diff --check
+      - name: Commit clean assembled candidate
+        run: |
+          git config user.name "hjin98"
+          git config user.email "86921078+hjin98@users.noreply.github.com"
+          git add -A
+          git diff --cached --check
+          git commit -m "Repair Protocol 6.4 Stage-E lifecycle binding"
+          git push origin HEAD:ssdp-6.4-axiomatic-definition-traceability
