@@ -23,32 +23,27 @@ jobs:
         with:
           python-version: '3.12'
       - name: Install validation and Core dependencies
-        run: >-
-          python -m pip install -r source/requirements-validation.txt
-          ./orchestrator -r orchestrator/requirements-dev.txt
+        run: python -m pip install -r source/requirements-validation.txt ./orchestrator -r orchestrator/requirements-dev.txt
+      - name: Validate repair script syntax
+        run: python -m py_compile .github/scripts/protocol64_review_repair.py
       - name: Apply Stage-E review repairs
-        shell: bash
-        run: |
-          python - <<'PY'
-          from pathlib import Path
-
-          workflow = Path('.github/workflows/protocol-64-review-repair.yml').read_text(encoding='utf-8')
-          start_marker = "          python - <<'PY'\n"
-          end_marker = "\n          PY\n      - name: Regenerate canonical descendants"
-          start = workflow.index(start_marker) + len(start_marker)
-          end = workflow.index(end_marker, start)
-          code = workflow[start:end]
-          lines = code.splitlines()
-          indent = min(len(line) - len(line.lstrip()) for line in lines if line.strip())
-          code = '\n'.join(line[indent:] for line in lines)
-          exec(compile(code, '<stage-e-review-repair>', 'exec'), {})
-          PY
+        run: python .github/scripts/protocol64_review_repair.py
       - name: Regenerate canonical descendants
         run: |
           python source/build_skills.py
           python orchestrator/scripts/generate_protocol_snapshot.py
+      - name: Remove temporary repair machinery before qualification
+        run: |
+          git checkout 0377e798fbbb1054badd1193950d9c10f723be75 -- .github/workflows/protocol-check.yml
+          rm -f .github/workflows/protocol-64-review-repair.yml
+          rm -f .github/workflows/protocol-64-review-repair-pr.yml
+          rm -f .github/workflows/protocol-64-review-repair-exec.yml
+          rm -f .github/workflows/protocol-check-repair-trigger.yml
+          rm -f .github/workflows/protocol-check-repair-note.yml
+          rm -f .github/workflows/protocol-check-patched-source.txt
+          rm -f .github/repair.READY
+          rm -f .github/scripts/protocol64_review_repair.py
       - name: Validate repaired assembled candidate
-        shell: bash
         run: |
           python -m unittest discover -s tests -v
           python source/project_engineering_memory.py PROJECT-ENGINEERING-MEMORY.md
@@ -58,11 +53,8 @@ jobs:
           python orchestrator/scripts/generate_protocol_snapshot.py --check
           python orchestrator/scripts/run_core_tests.py
           git diff --check
-      - name: Commit repair and remove one-shot workflows
-        shell: bash
+      - name: Commit repaired assembled candidate
         run: |
-          rm -f .github/workflows/protocol-64-review-repair.yml
-          rm -f .github/workflows/protocol-64-review-repair-pr.yml
           git config user.name "hjin98"
           git config user.email "86921078+hjin98@users.noreply.github.com"
           git add -A
