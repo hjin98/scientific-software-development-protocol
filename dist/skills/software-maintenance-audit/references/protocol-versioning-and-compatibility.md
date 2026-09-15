@@ -135,7 +135,9 @@ The public-source mapping is:
 
 ```text
 6.4.0 public-source bootstrap -> e09a9d1480211eea2d16d722182bb5c6de1bee12
-``` `AUTO_LOCAL_FIRST` may use a compatible readable local/installed 6.4 source during candidate work; otherwise it may use the canonical repository only at exact immutable bootstrap `e09a9d1480211eea2d16d722182bb5c6de1bee12`. It must not substitute the candidate branch, default branch, semantic-version guess, or 6.3 bootstrap as if those were 6.4.
+```
+
+`AUTO_LOCAL_FIRST` may use a compatible readable local/installed 6.4 source during candidate work; otherwise it may use the canonical repository only at exact immutable bootstrap `e09a9d1480211eea2d16d722182bb5c6de1bee12`. It must not substitute the candidate branch, default branch, semantic-version guess, or 6.3 bootstrap as if those were 6.4.
 
 The 6.4 lifecycle is:
 

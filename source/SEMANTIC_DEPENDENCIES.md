@@ -33,7 +33,7 @@ imported specialized object DERIVED_FROM -> exact external source/version/locato
 claim ASSUMES -> material hypotheses/validity conditions
 ```
 
-`USES_DEFINITION` is a direct semantic relation only: ordinary hyperlinks, package/import graphs, call graphs, evidence execution dependencies and incidental prose mentions are not definition edges. A generated dependency trace or strongly connected component condensation is a derived review/impact view and never supplies semantic meaning or warrant. Completeness/absence claims apply only to an explicitly declared reviewed scope.
+`USES_DEFINITION` is a direct semantic relation only and is stored as `subject -> prerequisite`: ordinary hyperlinks, package/import graphs, call graphs, evidence execution dependencies and incidental prose mentions are not definition edges. When a prerequisite changes, reverse traversal over stored `USES_DEFINITION` edges finds dependent subjects for impact review; that inverse query does not change the semantic relation direction. A generated dependency trace or strongly connected component condensation is a derived review/impact view and never supplies semantic meaning or warrant. Completeness/absence claims apply only to an explicitly declared reviewed scope.
 
 Source-level availability and runtime context availability are distinct. A route to an exact owner may establish source availability while a runtime inference still requires that exact owner meaning to be loaded/supplied in the active context. Conflicting simultaneously applicable owners keep the object review-required until explicitly reconciled; file order, newest-version preference or route priority does not decide meaning.
 

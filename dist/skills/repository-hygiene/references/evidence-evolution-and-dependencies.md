@@ -150,7 +150,7 @@ Add the typed relation:
 subject USES_DEFINITION -> direct material prerequisite semantic object
 ```
 
-Use `USES_DEFINITION` only for direct semantic prerequisites whose materially different meaning can alter the subject's denotation, admissible domain, validity, parameterization, contract or accepted interpretation. Do not use it for ordinary hyperlinks, imports/call graphs, prose mentions, evidence execution dependencies or every transitive ancestor. A semantic trace may compute transitive closure from direct edges, but the trace is a derived review/impact view rather than authority.
+Use `USES_DEFINITION` only for direct semantic prerequisites whose materially different meaning can alter the subject's denotation, admissible domain, validity, parameterization, contract or accepted interpretation. Stored edge direction is `subject -> prerequisite`. A prerequisite-change impact query finds dependent subjects by reverse traversal over those stored edges; the reverse traversal is impact analysis, not a second semantic relation. Do not use `USES_DEFINITION` for ordinary hyperlinks, imports/call graphs, prose mentions, evidence execution dependencies or every transitive ancestor. A semantic trace may compute transitive closure from direct edges, but the trace is a derived review/impact view rather than authority.
 
 A durable endpoint for a material semantic relation must resolve to the exact owner/object without hidden chat using the cheapest stable identity: versioned owner/path plus heading/anchor/object ID, protocol/release/Git identity when needed, and external source/version/locator for imported roots. Alias/equivalence mappings must be explicit enough to show that two names denote one compatible object rather than hiding an owner conflict.
 

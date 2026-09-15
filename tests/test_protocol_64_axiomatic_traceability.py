@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import re
 import unittest
 from pathlib import Path
 
@@ -12,6 +13,26 @@ def read(rel: str) -> str:
 
 def norm(text: str) -> str:
     return text.lower().replace("`", "").replace("**", "")
+
+
+def markdown_fences_well_formed(text: str) -> bool:
+    active: tuple[str, int] | None = None
+    for line in text.splitlines():
+        if active is None:
+            match = re.match(r"^ {0,3}(`{3,}|~{3,})(.*)$", line)
+            if match:
+                fence = match.group(1)
+                active = (fence[0], len(fence))
+            continue
+
+        char, minimum = active
+        candidate = re.match(rf"^ {{0,3}}({re.escape(char)}{{{minimum},}})(.*)$", line)
+        if not candidate:
+            continue
+        if candidate.group(2).strip():
+            return False
+        active = None
+    return active is None
 
 
 def qf_a(c):
@@ -58,7 +79,17 @@ def qf_g(c):
 
 def qf_h(c):
     families = {"definition", "assumption", "algorithm", "contract"}
-    return bool(c.get("endpoints") and c.get("direct_complete")) and families <= set(c.get("relations", ())) and not (c.get("independence") and not c.get("scope_complete")) and not (c.get("cycle") and not c.get("composite"))
+    if not bool(c.get("endpoints") and c.get("direct_complete")):
+        return False
+    if families - set(c.get("relations", ())):
+        return False
+    if c.get("uses_definition") != (c.get("subject"), c.get("prerequisite")):
+        return False
+    if c.get("impact_from") != c.get("prerequisite"):
+        return False
+    if c.get("subject") not in set(c.get("impact_dependents", ())):
+        return False
+    return not (c.get("independence") and not c.get("scope_complete")) and not (c.get("cycle") and not c.get("composite"))
 
 
 def qf_i(c):
@@ -109,7 +140,7 @@ BASE = {
     "E": {"domain": True, "relation": True, "logic": True, "totality": True},
     "F": {"family": "F", "parameter_domain": True, "binding": True, "instance": "F_theta"},
     "G": {"hypotheses": ("H1",), "discharged": ("H1",)},
-    "H": {"endpoints": True, "direct_complete": True, "relations": ("definition", "assumption", "algorithm", "contract")},
+    "H": {"endpoints": True, "direct_complete": True, "relations": ("definition", "assumption", "algorithm", "contract"), "subject": "algorithm-A", "prerequisite": "definition-X", "uses_definition": ("algorithm-A", "definition-X"), "impact_from": "definition-X", "impact_dependents": ("algorithm-A",)},
     "I": {"roots": ("premise",)},
     "J": {"source": True, "support_not_force": True},
     "K": {"snapshot": True},
@@ -128,7 +159,7 @@ NEGATIVE = {
     "E": ({"choice": True, "selection": False}, {"piecewise": True, "piecewise_closed": False}, {"physical": True, "units": False}),
     "F": ({"instance": "F"}, {"default": True, "default_owner": None, "default_semantics": True}, {"binding_changed": True, "evidence_reconciled": False}),
     "G": ({"stochastic": True, "law": True, "dependence": False, "conditioning": True}, {"discharged": (), "propagated": ()}, {"approximate": True, "exact": True}),
-    "H": ({"relations": ("definition",)}, {"independence": True, "scope_complete": False}, {"cycle": True, "composite": False}),
+    "H": ({"relations": ("definition",)}, {"uses_definition": ("definition-X", "algorithm-A")}, {"impact_dependents": ()}, {"independence": True, "scope_complete": False}, {"cycle": True, "composite": False}),
     "I": ({"cycle": True}, {"empirical_as_proof": True}, {"citation_authority": True}, {"evidence_from_use_only": True}),
     "J": ({"binding": True, "authority": False}, {"transformed": True, "lineage": False}, {"floating_latest": True}, {"external_instruction": True}),
     "K": ({"snapshot": False}, {"label_equivalence": True}, {"editable_alias": True}, {"changed": True, "impact": False}),
@@ -147,6 +178,7 @@ class Protocol64AxiomaticTraceabilityQualificationTests(unittest.TestCase):
         self.evidence = read("source/shared/references/evidence-evolution-and-dependencies.md")
         self.versioning = read("source/shared/references/protocol-versioning-and-compatibility.md")
         self.prompts = read("source/shared/references/development-workflow-prompts.md")
+        self.semantic_dependencies = read("source/SEMANTIC_DEPENDENCIES.md")
         self.readme = read("README.md")
 
     def test_qf64_a_through_p_counterfactual_polarity(self) -> None:
@@ -188,8 +220,33 @@ class Protocol64AxiomaticTraceabilityQualificationTests(unittest.TestCase):
             "floating latest link", "external-source evolution is a binding event",
             "absence/completeness claims remain bounded",
             "the semantic dependency graph widens impact discovery; it does not recursively warrant endpoints",
+            "stored edge direction is subject -> prerequisite",
+            "reverse traversal",
         ):
             self.assertIn(phrase, evidence)
+        self.assertIn("stored relation direction is therefore subject -> prerequisite", kernel)
+        self.assertIn("stored relation as subject -> prerequisite", writing)
+        semantic_dependencies = norm(self.semantic_dependencies)
+        self.assertIn("stored as subject -> prerequisite", semantic_dependencies)
+        self.assertIn("reverse traversal", semantic_dependencies)
+        self.assertIn("stored uses_definition direction is subject -> prerequisite", norm(self.prompts))
+
+    def test_qf64_n_real_markdown_fence_integrity(self) -> None:
+        surfaces = [
+            ROOT / "source/shared/references/abstraction-and-concretization.md",
+            ROOT / "source/shared/references/evidence-evolution-and-dependencies.md",
+            ROOT / "source/shared/references/scientific-technical-writing.md",
+            ROOT / "source/shared/references/protocol-versioning-and-compatibility.md",
+            ROOT / "source/shared/references/development-workflow-prompts.md",
+            ROOT / "source/SEMANTIC_DEPENDENCIES.md",
+            ROOT / "workplans/active/SSDP-6.4-AXIOMATIC-FORMAL-DEFINITION-AND-SEMANTIC-TRACEABILITY-CONSOLIDATED.md",
+        ]
+        for path in surfaces:
+            with self.subTest(path=str(path.relative_to(ROOT))):
+                self.assertTrue(markdown_fences_well_formed(path.read_text(encoding="utf-8")))
+
+        malformed = "before\n```text\nvalue\n``` trailing prose\nafter\n"
+        self.assertFalse(markdown_fences_well_formed(malformed))
 
     def test_qf64_o_candidate_lifecycle_preserves_bootstrap_recovery_separation(self) -> None:
         versioning = norm(self.versioning)
