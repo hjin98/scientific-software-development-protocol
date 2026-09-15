@@ -27,7 +27,7 @@ Static package/routing validation can establish declared route/resource integrit
 
 ## Compatible source resolution
 
-Resolve declared-version-compatible skills local first, canonical public source second. Never reinterpret an older workplan under the newest installed skill merely because it is available. For a candidate version whose public bootstrap is not yet published, a readable version-compatible local/installed source may support candidate/self-hosting work; absence of that source is non-closure, not permission to use default/latest or an older bootstrap.
+Resolve declared-version-compatible skills local first, canonical public source second. Never reinterpret an older workplan under the newest installed skill merely because it is available. For a candidate version whose public bootstrap is not yet published, a readable version-compatible local/installed source may support candidate/self-hosting work; absence of that source is non-closure, not permission to use default/latest or an older bootstrap. Protocol 6.4 has now published exact bootstrap `e09a9d1480211eea2d16d722182bb5c6de1bee12`; when compatible local 6.4 source is unavailable, only that immutable ref is an authorized public fallback.
 
 Accepted immutable mappings:
 
@@ -44,7 +44,7 @@ Accepted immutable mappings:
 6.3.0 invalidated D4R3 bootstrap -> dc22f09fd38dbbfeaeb0160152da9b284654f66e
 6.3.0 public bootstrap -> 86c13cab6bdd1991dffa94e277db8eacf87e2e11
 6.3.0 recovery -> 9f353097fab36e325a325f1c2f9d9cec32e86177
-6.4.0 public bootstrap -> UNAVAILABLE_PENDING_QUALIFICATION
+6.4.0 public bootstrap -> e09a9d1480211eea2d16d722182bb5c6de1bee12
 6.4.0 recovery -> UNAVAILABLE_PENDING_INDEPENDENT_REVIEW
 ```
 
@@ -54,7 +54,7 @@ The first Protocol 6.2 bootstrap attempt `1181c2031710c5d343194d87d08543290fded0
 
 For Protocol 6.3, pre-repair bootstrap `1484c1d3caa49d87cc15bc52a5e775399c1dae1b`, second bootstrap `5ee4b3ac3ca1666b0499f7a72f55adcc411bf4bb`, owner-binding bootstrap `e12572c021087308570abfa41657a910c6896457`, and D4R3 bootstrap `dc22f09fd38dbbfeaeb0160152da9b284654f66e` are historical evidence only. D9 changed canonical validator semantics. Replacement self-reference-safe source snapshot `86c13cab6bdd1991dffa94e277db8eacf87e2e11` passed bootstrap readiness before descendant `a8dac814cc2813b3bb336e5b6abde5fbcf44949e` published its exact SHA as the sole authorized version-bound 6.3 public fallback. Recovery is separately mapped to `9f353097fab36e325a325f1c2f9d9cec32e86177` after R2 Review PASS; descendant `0c76c0461b7376f17182d29ba145a198a092463c` published that mapping and mapping-bearing generated state `e75282ae850b774a9466902f4c74ba6a179116bd` passed Stage G acceptance in run `34699052516`. Protocol 6.3 remains accepted-current while 6.4 is a candidate.
 
-Protocol 6.4 must follow the same self-reference-safe lifecycle. Its bootstrap must first exist with no need to self-name, pass repository/package/profile/Core and exact-source qualification, then be named only by a later descendant. Recovery remains a separate later identity and cannot be published before independent assembled-candidate Review PASS. Repository default/latest, the candidate branch name, a guessed semantic-version ref, or the accepted 6.3 bootstrap are not substitutes.
+Protocol 6.4 followed the same self-reference-safe lifecycle: immutable bootstrap `e09a9d1480211eea2d16d722182bb5c6de1bee12` existed without self-naming, passed repository/package/profile/Core and exact-source qualification, and is named only by a later descendant. It is the sole authorized version-bound 6.4 public fallback. Recovery remains a separate later identity and cannot be published before independent assembled-candidate Review PASS. Repository default/latest, the candidate branch name, a guessed semantic-version ref, or the accepted 6.3 bootstrap are not substitutes.
 
 ## Version-bound profiles
 
@@ -104,4 +104,4 @@ For live routing, use normal supported entrypoints and fresh sessions; do not pr
 
 Compact routing/handoffs remain complete for governed scope. A reference can replace local repetition only when the receiving environment can resolve and load the version-bound owner before dependent reasoning; otherwise carry the minimum necessary semantics locally. Cold historical/specialized/project-memory detail must remain discoverable through visible triggers. Generated routing graphs/matrices/traces and derived PEM summaries/indexes are diagnostic/derived evidence, not second routing/memory authority.
 
-Protocol 6.3 remains accepted-current after independent Review R2, exact recovery mapping, regenerated package/profile parity, and Stage G lifecycle closeout. Version-bound 6.3 public fallback is exact bootstrap `86c13cab6bdd1991dffa94e277db8eacf87e2e11` and accepted recovery is separately `9f353097fab36e325a325f1c2f9d9cec32e86177`. Protocol 6.4 remains candidate-only until its own qualification, immutable bootstrap publication, independent assembled-candidate Review, recovery publication and lifecycle closeout complete. Repository default/latest remains forbidden as a version oracle.
+Protocol 6.3 remains accepted-current after independent Review R2, exact recovery mapping, regenerated package/profile parity, and Stage G lifecycle closeout. Version-bound 6.3 public fallback is exact bootstrap `86c13cab6bdd1991dffa94e277db8eacf87e2e11` and accepted recovery is separately `9f353097fab36e325a325f1c2f9d9cec32e86177`. Protocol 6.4 remains candidate-only after qualification and immutable bootstrap publication at `e09a9d1480211eea2d16d722182bb5c6de1bee12`; independent assembled-candidate Review, recovery publication and lifecycle closeout remain outstanding. Repository default/latest remains forbidden as a version oracle.

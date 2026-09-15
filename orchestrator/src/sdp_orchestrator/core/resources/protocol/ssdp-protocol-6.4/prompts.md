@@ -15,13 +15,13 @@ With `PROTOCOL_SOURCE = AUTO_LOCAL_FIRST`, use a governing-version-compatible in
 ```text
 PUBLIC_REPOSITORY = https://github.com/hjin98/scientific-software-development-protocol
 CURRENT_PROTOCOL = 6.4.0
-CURRENT_PUBLIC_REF = UNAVAILABLE_PENDING_6_4_BOOTSTRAP
+CURRENT_PUBLIC_REF = e09a9d1480211eea2d16d722182bb5c6de1bee12
 ACCEPTED_6_3_PUBLIC_REF = 86c13cab6bdd1991dffa94e277db8eacf87e2e11
 ACCEPTED_6_3_RECOVERY = 9f353097fab36e325a325f1c2f9d9cec32e86177
 ACCEPTED_6_2_PUBLIC_REF = 5a062ebc472755607b9dc66d33a5ebbc4b7429aa
 ```
 
-**Protocol 6.4 candidate state:** Protocol 6.3 remains accepted-current while 6.4 is proposed/under qualification. No 6.4 public-source fallback or recovery mapping is authorized yet. Candidate/self-hosted 6.4 work may use a readable compatible local/installed source; if that is unavailable, do not substitute the candidate branch, repository default/latest, a guessed semantic-version ref, the accepted 6.3 bootstrap, or any earlier version. A self-reference-safe 6.4 bootstrap must first exist and pass qualification; its exact immutable identity may be published only by a later descendant. Independent assembled-candidate Review and distinct recovery publication remain later lifecycle gates.
+**Protocol 6.4 candidate state:** Protocol 6.3 remains accepted-current while 6.4 is proposed/under qualification. Exact immutable public-source bootstrap `e09a9d1480211eea2d16d722182bb5c6de1bee12` is now the sole authorized version-bound 6.4 public fallback; no 6.4 recovery mapping is authorized yet. Candidate/self-hosted 6.4 work should use a readable compatible local/installed source when available; otherwise it may use the canonical repository only at exact immutable public bootstrap `e09a9d1480211eea2d16d722182bb5c6de1bee12`. Do not substitute the candidate branch, repository default/latest, a guessed semantic-version ref, the accepted 6.3 bootstrap, or any earlier version. The self-reference-safe bootstrap `e09a9d1480211eea2d16d722182bb5c6de1bee12` passed Stage D pre-publication qualification and is named only by this later descendant. Independent assembled-candidate Review and distinct recovery publication remain later lifecycle gates.
 
 **Accepted Protocol 6.3 baseline:** earlier 6.3 bootstrap snapshots, including `1484c1d3caa49d87cc15bc52a5e775399c1dae1b`, `5ee4b3ac3ca1666b0499f7a72f55adcc411bf4bb`, owner-binding-invalidated `e12572c021087308570abfa41657a910c6896457`, and D4R3 snapshot `dc22f09fd38dbbfeaeb0160152da9b284654f66e`, remain historical evidence only. Replacement self-reference-safe source snapshot `86c13cab6bdd1991dffa94e277db8eacf87e2e11` is the sole current Protocol 6.3 public-source fallback, while recovery is separately mapped to `9f353097fab36e325a325f1c2f9d9cec32e86177`. Version-bound 6.2 work continues to use exactly `5a062ebc472755607b9dc66d33a5ebbc4b7429aa`; historical 5.16/6.0/6.1 resolution remains version-bound to its own immutable mapping.
 

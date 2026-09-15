@@ -191,13 +191,13 @@ class Protocol64AxiomaticTraceabilityQualificationTests(unittest.TestCase):
         ):
             self.assertIn(phrase, evidence)
 
-    def test_qf64_o_candidate_lifecycle_is_not_prematurely_published(self) -> None:
+    def test_qf64_o_candidate_lifecycle_preserves_bootstrap_recovery_separation(self) -> None:
         versioning = norm(self.versioning)
         self.assertIn("protocol 6.4 is proposed, not accepted-current", versioning)
-        self.assertIn("no 6.4 public-source fallback is authorized", versioning)
+        self.assertIn("6.4.0 public-source bootstrap -> e09a9d1480211eea2d16d722182bb5c6de1bee12", versioning)
         self.assertIn("independent assembled-candidate review", versioning)
         self.assertIn("CURRENT_PROTOCOL = 6.4.0", self.prompts)
-        self.assertIn("CURRENT_PUBLIC_REF = UNAVAILABLE_PENDING_6_4_BOOTSTRAP", self.prompts)
+        self.assertIn("CURRENT_PUBLIC_REF = e09a9d1480211eea2d16d722182bb5c6de1bee12", self.prompts)
         self.assertNotIn("6.4.0  -> ", self.versioning)
         rev4 = read("workplans/active/SSDP-7.0-DETERMINISTIC-CONTROL-PLANE-AND-MANDATORY-ORCHESTRATOR-MIGRATION-REVISION-4-PROTOCOL-6.3-INHERITANCE-RECONCILIATION.md")
         self.assertIn("d3_architecture_mutation: none", rev4)

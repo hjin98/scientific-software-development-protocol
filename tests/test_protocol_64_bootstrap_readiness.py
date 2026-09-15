@@ -7,9 +7,11 @@ import re
 import unittest
 import urllib.error
 import urllib.request
+from pathlib import Path
 
 
-BOOTSTRAP_CANDIDATE = "e09a9d1480211eea2d16d722182bb5c6de1bee12"
+BOOTSTRAP = "e09a9d1480211eea2d16d722182bb5c6de1bee12"
+ROOT = Path(__file__).resolve().parents[1]
 PUBLIC_ROOT = "https://raw.githubusercontent.com/hjin98/scientific-software-development-protocol"
 LOCAL_MD_RE = re.compile(r"\[[^\]]+\]\(([^)]+\.md(?:#[^)]*)?)\)")
 PROFILE_ROOT = "orchestrator/src/" + "sdp_" + "orchestrator/core/resources/protocol/ssdp-protocol-6.4"
@@ -25,7 +27,7 @@ ENTRYPOINTS = (
 
 
 class Protocol64BootstrapReadinessTests(unittest.TestCase):
-    """Qualify an existing immutable 6.4 snapshot before its public mapping exists."""
+    """Verify the published immutable 6.4 bootstrap and its self-reference-safe snapshot."""
 
     @classmethod
     def setUpClass(cls) -> None:
@@ -37,13 +39,13 @@ class Protocol64BootstrapReadinessTests(unittest.TestCase):
     def fetch_bytes(cls, path: str) -> bytes:
         if path in cls.cache:
             return cls.cache[path]
-        url = f"{PUBLIC_ROOT}/{BOOTSTRAP_CANDIDATE}/{path}"
+        url = f"{PUBLIC_ROOT}/{BOOTSTRAP}/{path}"
         try:
             with urllib.request.urlopen(url, timeout=20) as response:
                 data = response.read()
         except urllib.error.URLError as exc:
             raise AssertionError(
-                f"Protocol 6.4 bootstrap candidate cannot resolve {path} at exact ref {BOOTSTRAP_CANDIDATE}: {exc}"
+                f"Protocol 6.4 bootstrap candidate cannot resolve {path} at exact ref {BOOTSTRAP}: {exc}"
             ) from exc
         cls.cache[path] = data
         return data
@@ -63,11 +65,17 @@ class Protocol64BootstrapReadinessTests(unittest.TestCase):
 
         self.assertIn("CURRENT_PROTOCOL = 6.4.0", prompts)
         self.assertIn("CURRENT_PUBLIC_REF = UNAVAILABLE_PENDING_6_4_BOOTSTRAP", prompts)
-        self.assertNotIn(BOOTSTRAP_CANDIDATE, prompts)
-        self.assertNotIn(BOOTSTRAP_CANDIDATE, versioning)
-        self.assertNotIn(BOOTSTRAP_CANDIDATE, readme)
+        self.assertNotIn(BOOTSTRAP, prompts)
+        self.assertNotIn(BOOTSTRAP, versioning)
+        self.assertNotIn(BOOTSTRAP, readme)
         self.assertIn("Protocol 6.4 is **proposed, not accepted-current**", versioning)
         self.assertIn("no 6.4 public-source fallback is authorized", versioning.lower())
+
+        local_prompts = (ROOT / "source/shared/references/development-workflow-prompts.md").read_text(encoding="utf-8")
+        local_versioning = (ROOT / "source/shared/references/protocol-versioning-and-compatibility.md").read_text(encoding="utf-8")
+        self.assertIn(f"CURRENT_PUBLIC_REF = {BOOTSTRAP}", local_prompts)
+        self.assertIn(f"6.4.0 public-source bootstrap -> {BOOTSTRAP}", local_versioning)
+        self.assertNotIn("6.4.0  -> ", local_versioning)
 
     def test_exact_ref_profile_and_distribution_identity(self) -> None:
         profile = json.loads(self.fetch(f"{PROFILE_ROOT}/profile.json"))

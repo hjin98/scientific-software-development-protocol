@@ -129,7 +129,13 @@ The pre-repair Protocol 6.3 bootstrap `1484c1d3caa49d87cc15bc52a5e775399c1dae1b`
 
 ## Protocol 6.4 candidate bootstrap/recovery lifecycle
 
-Protocol 6.4 is **proposed, not accepted-current**. Until an exact self-reference-safe 6.4 public bootstrap has been qualified and published by a later descendant, no 6.4 public-source fallback is authorized. `AUTO_LOCAL_FIRST` may use a compatible readable local/installed 6.4 source during candidate work; otherwise it must report truthful non-closure rather than substitute the candidate branch, default branch, semantic-version guess, or 6.3 bootstrap as if those were 6.4.
+Protocol 6.4 is **proposed, not accepted-current**. Qualified self-reference-safe public bootstrap `e09a9d1480211eea2d16d722182bb5c6de1bee12` is now the sole authorized version-bound 6.4 public fallback; this publication does not make 6.4 accepted-current and does not authorize recovery.
+
+The public-source mapping is:
+
+```text
+6.4.0 public-source bootstrap -> e09a9d1480211eea2d16d722182bb5c6de1bee12
+``` `AUTO_LOCAL_FIRST` may use a compatible readable local/installed 6.4 source during candidate work; otherwise it may use the canonical repository only at exact immutable bootstrap `e09a9d1480211eea2d16d722182bb5c6de1bee12`. It must not substitute the candidate branch, default branch, semantic-version guess, or 6.3 bootstrap as if those were 6.4.
 
 The 6.4 lifecycle is:
 

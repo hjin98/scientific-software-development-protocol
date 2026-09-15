@@ -24,7 +24,8 @@ class Protocol63CloseoutTests(unittest.TestCase):
         self.assertIn("Current accepted document-controlled release: **Protocol 6.3**", readme)
         self.assertIn("Protocol 6.4 is the current candidate under qualification", readme)
         self.assertIn("it is not accepted-current", readme)
-        self.assertIn("has no authorized public-source bootstrap or recovery mapping yet", readme)
+        self.assertIn("Its sole authorized version-bound public-source bootstrap is `e09a9d1480211eea2d16d722182bb5c6de1bee12`", readme)
+        self.assertIn("it has no recovery mapping yet", readme)
         self.assertIn(BASE62, readme)
 
     def test_workplan_archived_and_protocol7_inheritance_reconciled(self) -> None:

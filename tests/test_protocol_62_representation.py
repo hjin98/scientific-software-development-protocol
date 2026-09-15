@@ -142,7 +142,7 @@ class Protocol62RepresentationTests(unittest.TestCase):
                 self.assertEqual(current_version, "6.4.0")
                 self.assertIn(f"accepted_6_2_public_ref = {bootstrap}", prompt)
                 self.assertIn("current_protocol = 6.4.0", prompt)
-                self.assertIn("current_public_ref = unavailable_pending_6_4_bootstrap", prompt)
+                self.assertIn("current_public_ref = e09a9d1480211eea2d16d722182bb5c6de1bee12", prompt)
                 self.assertIn("accepted_6_3_public_ref = 86c13cab6bdd1991dffa94e277db8eacf87e2e11", prompt)
                 self.assertIn("accepted_6_3_recovery = 9f353097fab36e325a325f1c2f9d9cec32e86177", prompt)
             self.assertNotIn("automatic current-6.2 public fallback is unavailable", portability)

@@ -1,6 +1,6 @@
 # Scientific Software Development Protocol
 
-Current accepted document-controlled release: **Protocol 6.3**. Accepted recovery is `9f353097fab36e325a325f1c2f9d9cec32e86177` and the distinct immutable public-source bootstrap is `86c13cab6bdd1991dffa94e277db8eacf87e2e11`. Protocol 6.2 recovery `b59adc77efe6951912cfd705cc43830c58ca27d0` remains immutable historical rollback for explicitly version-bound 6.2 work. **Protocol 6.4 is the current candidate under qualification on its development branch; it is not accepted-current and has no authorized public-source bootstrap or recovery mapping yet.** Protocol 7 remains a proposed deterministic-control-plane successor and is not cut over.
+Current accepted document-controlled release: **Protocol 6.3**. Accepted recovery is `9f353097fab36e325a325f1c2f9d9cec32e86177` and the distinct immutable public-source bootstrap is `86c13cab6bdd1991dffa94e277db8eacf87e2e11`. Protocol 6.2 recovery `b59adc77efe6951912cfd705cc43830c58ca27d0` remains immutable historical rollback for explicitly version-bound 6.2 work. **Protocol 6.4 is the current candidate under qualification on its development branch; it is not accepted-current. Its sole authorized version-bound public-source bootstrap is `e09a9d1480211eea2d16d722182bb5c6de1bee12`; it has no recovery mapping yet.** Protocol 7 remains a proposed deterministic-control-plane successor and is not cut over.
 
 ## Core model
 
@@ -71,14 +71,14 @@ Frozen accepted historical mappings remain immutable:
 6.1.0  -> 802e75af261efb4f70d71284d860613a2197b639
 6.2.0  -> b59adc77efe6951912cfd705cc43830c58ca27d0
 6.3.0  -> 9f353097fab36e325a325f1c2f9d9cec32e86177
-6.4.0  -> UNAVAILABLE_PENDING_QUALIFICATION_AND_INDEPENDENT_REVIEW
+6.4.0  -> UNAVAILABLE_PENDING_INDEPENDENT_REVIEW
 ```
 
 Protocol 6.2 public-source bootstrap remains **`5a062ebc472755607b9dc66d33a5ebbc4b7429aa`** for version-bound 6.2 work. The earlier `1181c2031710c5d343194d87d08543290fded0ab` attempt remains invalidated historical evidence only. Bootstrap and recovery identities are intentionally distinct.
 
 **Earlier Protocol 6.3 bootstrap attempts `1484c1d3caa49d87cc15bc52a5e775399c1dae1b`, `5ee4b3ac3ca1666b0499f7a72f55adcc411bf4bb`, owner-binding-invalidated `e12572c021087308570abfa41657a910c6896457`, and D4R3 snapshot `dc22f09fd38dbbfeaeb0160152da9b284654f66e` are historical only. Current authorized version-bound 6.3 public fallback is bootstrap `86c13cab6bdd1991dffa94e277db8eacf87e2e11`; accepted recovery is `9f353097fab36e325a325f1c2f9d9cec32e86177`; bootstrap and recovery are intentionally distinct.** Bootstrap mapping descendant `a8dac814cc2813b3bb336e5b6abde5fbcf44949e`, recovery mapping descendant `0c76c0461b7376f17182d29ba145a198a092463c`, and generated reconciliation `e75282ae850b774a9466902f4c74ba6a179116bd` preserve self-reference-safe publication. Stage G acceptance passed in run `34699052516`.
 
-Protocol 6.4 currently has **no** public bootstrap and **no** recovery identity. Candidate/self-hosted work may use its readable local version-bound source. The immutable self-reference-safe public bootstrap must first exist and pass qualification; a later descendant may then publish its exact SHA. Independent assembled-candidate Review must pass before a distinct recovery identity can be established and later published.
+Protocol 6.4 now has immutable public bootstrap **`e09a9d1480211eea2d16d722182bb5c6de1bee12`** and still has **no** recovery identity. Candidate/self-hosted work should use readable local version-bound source when available and may otherwise use only that exact public ref. The bootstrap was qualified before this later descendant published its SHA. Independent assembled-candidate Review must still pass before a distinct recovery identity can be established and later published.
 
 ## Canonical source and acceptance
 

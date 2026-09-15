@@ -97,7 +97,7 @@ class Protocol61EvidenceEvolutionTests(unittest.TestCase):
                 self.assertEqual(current_version, "6.4.0")
                 self.assertIn(f"ACCEPTED_6_2_PUBLIC_REF = {bootstrap}", prompts)
                 self.assertIn("CURRENT_PROTOCOL = 6.4.0", prompts)
-                self.assertIn("CURRENT_PUBLIC_REF = UNAVAILABLE_PENDING_6_4_BOOTSTRAP", prompts)
+                self.assertIn("CURRENT_PUBLIC_REF = e09a9d1480211eea2d16d722182bb5c6de1bee12", prompts)
                 self.assertIn("ACCEPTED_6_3_PUBLIC_REF = 86c13cab6bdd1991dffa94e277db8eacf87e2e11", prompts)
                 self.assertIn("version-bound 6.2 work continues to use exactly", lower)
 

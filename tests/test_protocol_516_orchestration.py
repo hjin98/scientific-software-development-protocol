@@ -76,12 +76,12 @@ class Protocol6OrchestrationTests(unittest.TestCase):
         else:
             self.assertEqual(current_version, "6.4.0")
             self.assertIn("current_protocol = 6.4.0", self.lower)
-            self.assertIn("current_public_ref = unavailable_pending_6_4_bootstrap", self.lower)
+            self.assertIn("current_public_ref = e09a9d1480211eea2d16d722182bb5c6de1bee12", self.lower)
             self.assertIn("accepted_6_3_public_ref = 86c13cab6bdd1991dffa94e277db8eacf87e2e11", self.lower)
             self.assertIn("accepted_6_3_recovery = 9f353097fab36e325a325f1c2f9d9cec32e86177", self.lower)
             self.assertIn("accepted_6_2_public_ref = 5a062ebc472755607b9dc66d33a5ebbc4b7429aa", self.lower)
             self.assertIn("protocol 6.3 remains accepted-current while 6.4 is proposed/under qualification", self.lower)
-            self.assertIn("no 6.4 public-source fallback or recovery mapping is authorized yet", self.lower)
+            self.assertIn("no 6.4 recovery mapping is authorized yet", self.lower)
             self.assertIn("self-reference-safe source snapshot", self.lower)
 
     def test_execution_contract_prefers_action_and_resolves_inferable_context(self) -> None:

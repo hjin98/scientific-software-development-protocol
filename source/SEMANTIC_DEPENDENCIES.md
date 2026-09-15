@@ -83,7 +83,7 @@ ssdp-protocol-6.4 PRESERVES -> frozen Protocol 6.3 profile/schema-v2 stage-graph
 PEM schema 1 VERSIONED_INDEPENDENTLY_OF -> SSDP protocol/profile schema
 ```
 
-Frozen 5.16/6.0/6.1/6.2 profiles remain independent compatibility/rollback resources, and 6.3 becomes the immediate frozen predecessor oracle for candidate 6.4 profile generation. Protocol 6.3 remains accepted-current until 6.4 qualification, independent assembled-candidate Review, bootstrap/recovery publication, generated reconciliation, impact closure and lifecycle cutover all pass. Unsupported PEM schemas fail safe for memory-dependent decisions without breaking unrelated protocol routes.
+Frozen 5.16/6.0/6.1/6.2 profiles remain independent compatibility/rollback resources, and 6.3 becomes the immediate frozen predecessor oracle for candidate 6.4 profile generation. Protocol 6.4 qualification and immutable public-bootstrap publication at `e09a9d1480211eea2d16d722182bb5c6de1bee12` are complete. Protocol 6.3 remains accepted-current until independent assembled-candidate Review, distinct recovery publication, generated reconciliation, impact closure and lifecycle cutover all pass. Unsupported PEM schemas fail safe for memory-dependent decisions without breaking unrelated protocol routes.
 
 ## Source/generated relationships
 
