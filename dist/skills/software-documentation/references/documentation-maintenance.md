@@ -62,6 +62,16 @@ Use bounded Markdown dependency views only when ordinary links/anchors/workplan 
 
 Preserve concise semantic-evolution reasoning when a material model/method/architecture/concretization/evidence choice is replaced/generalized/rejected/retired/restored and future rediscovery is plausible. Current owners explain what; PEM summarizes bounded evidence-backed project learning; history explains why; Git preserves detailed chronology. Resolved Challenge rationale should be only the concise material reasoning needed to prevent recurrence, not a debate transcript/database.
 
+## Protocol 6.4 semantic-source maintenance
+
+For Protocol 6.4 current authority, documentation maintenance additionally preserves the semantic-definition/source-availability contract owned by [Abstraction, concretization, authority, challenge, and representation](abstraction-and-concretization.md) and its human-facing specialization in [Scientific and technical writing](scientific-technical-writing.md).
+
+When a current authority family is split across files, the composition must expose enough routing that a competent reader can reconstruct the canonical semantic statement, its owner, and its direct specialized prerequisites without amendment history or hidden chat. A later explanatory clause cannot retroactively supply meaning required by an earlier substantive inference. If two simultaneously applicable owner statements materially disagree, documentation must surface the owner conflict as review-required rather than choosing by file order, newest revision, route priority, or editorial preference.
+
+A current-vs-history cleanup may relocate rationale/review chronology to history only after every still-binding definition, assumption, validity restriction, parameter/default binding, external-source mapping, and direct semantic dependency remains recoverable from current owners. Frozen prior-version material remains byte/historically stable and is not rewritten into 6.4 terminology.
+
+Generated glossaries, indexes, dependency graphs and semantic traces remain subordinate derivatives. Regenerate them from canonical owners when used; never repair an owner conflict by editing a derivative. A completeness/absence claim from a derived view is valid only for the explicitly reviewed bounded scope declared by its owner/evidence.
+
 ## Documentation impact closure
 
 A local code refactor with no contract/explanation/evidence-applicability/project-learning impact need not trigger broad documentation work. A material authority change must reconcile its current normative owner plus materially affected explanation/navigation, evidence/dependency records, authority-bound PEM capabilities/notices, and semantic history.

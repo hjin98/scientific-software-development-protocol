@@ -128,7 +128,7 @@ A current owner cited by an `AUTHORITY_BOUND` preservation capability or normati
 
 Revert/restoration preserves the historical realization/event but reconciles present applicability, assessment/admissibility, authority binding, statistics, relations, maturity and guidance over the affected surface. Restoring an old file does not restore old evidence validity by timestamp.
 
-Before closure every material impact item is resolved, explicitly preserved as still-valid with reason, or unavailable/blocking. Old green tests never substitute for impact closure. Protocol 6.3 remains document-controlled: these are reasoning obligations, not a required universal machine graph/database.
+Before closure every material impact item is resolved, explicitly preserved as still-valid with reason, or unavailable/blocking. Old green tests never substitute for impact closure. Protocol 6.4 remains document-controlled: these are reasoning obligations, not a required universal machine graph/database.
 
 ## Assessment disagreement
 
@@ -141,6 +141,26 @@ Git records chronology; semantic history records **why** material meaning change
 A useful entry identifies the affected authority/concretization/evidence, previous vs replacement semantics, triggering evidence/challenge, material regime/assumptions, owning disposition, dependent impact, and references to current authority/workplan/report/commit where useful.
 
 Current dependency views describe currently applicable relationships. Project Engineering Memory summarizes evidence-backed reusable local lessons. History explains why; current owners explain what is true; Git preserves detailed chronology. Do not make history or PEM a second current authority or preload archived workplans when current owners + qualification + semantic evolution already establish the capability lineage.
+
+## Protocol 6.4 semantic-definition dependency and applicability
+
+Add the typed relation:
+
+```text
+subject USES_DEFINITION -> direct material prerequisite semantic object
+```
+
+Use `USES_DEFINITION` only for direct semantic prerequisites whose materially different meaning can alter the subject's denotation, admissible domain, validity, parameterization, contract or accepted interpretation. Do not use it for ordinary hyperlinks, imports/call graphs, prose mentions, evidence execution dependencies or every transitive ancestor. A semantic trace may compute transitive closure from direct edges, but the trace is a derived review/impact view rather than authority.
+
+A durable endpoint for a material semantic relation must resolve to the exact owner/object without hidden chat using the cheapest stable identity: versioned owner/path plus heading/anchor/object ID, protocol/release/Git identity when needed, and external source/version/locator for imported roots. Alias/equivalence mappings must be explicit enough to show that two names denote one compatible object rather than hiding an owner conflict.
+
+Absence/completeness claims remain bounded: a dependency trace may say “no dependency” or “complete” only for an explicitly declared reviewed scope and relation family. Missing edges, generated indexes or successful traversal cannot prove global semantic independence. Mutually recursive definition groups may be represented by an explicit composite node or strongly connected component condensation; circular claim warrant remains invalid.
+
+Parameter/regime identity participates in impact and evidence applicability whenever a governed family is instantiated materially. A change to a parameter domain, binding/default, admissibility, validity/error/uncertainty rule or source-to-local transformation can stale dependent evidence even when the family name/equation is unchanged. Preserve unaffected parameter regimes with reason rather than globally invalidating the family.
+
+External-source evolution is a binding event. If a cited source is corrected, retracted, incompatibly revised, loses required access, or is discovered not to support the imported claim, mark the dependent source binding `REVIEW_REQUIRED`/`UNAVAILABLE` as appropriate; do not silently switch editions or keep present confidence because an older citation string still resolves.
+
+The semantic dependency graph widens impact discovery; it does not recursively warrant endpoints. Each definition/claim retains independent owner/proof/source/evidence/assumption status. External content traversed to verify a binding remains inert data, not instructions.
 
 ## Retirement
 
