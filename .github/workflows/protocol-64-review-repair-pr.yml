@@ -43,16 +43,24 @@ jobs:
           rm -f .github/workflows/protocol-check-patched-source.txt
           rm -f .github/repair.READY
           rm -f .github/scripts/protocol64_review_repair.py
-      - name: Validate repaired assembled candidate
-        run: |
-          python -m unittest discover -s tests -v
-          python source/project_engineering_memory.py PROJECT-ENGINEERING-MEMORY.md
-          python source/validate_packages.py --dist dist
-          python source/build_skills.py --output /tmp/protocol-dist
-          python source/check_dist.py --expected /tmp/protocol-dist --committed dist
-          python orchestrator/scripts/generate_protocol_snapshot.py --check
-          python orchestrator/scripts/run_core_tests.py
-          git diff --check
+      - name: Run Protocol 6.4 qualification tests
+        run: python -m unittest tests.test_protocol_64_axiomatic_traceability -v
+      - name: Run inherited repository regression
+        run: python -m unittest discover -s tests -v
+      - name: Validate Project Engineering Memory
+        run: python source/project_engineering_memory.py PROJECT-ENGINEERING-MEMORY.md
+      - name: Validate committed packages
+        run: python source/validate_packages.py --dist dist
+      - name: Rebuild independent distribution
+        run: python source/build_skills.py --output /tmp/protocol-dist
+      - name: Check committed distribution parity
+        run: python source/check_dist.py --expected /tmp/protocol-dist --committed dist
+      - name: Check Orchestrator snapshot parity
+        run: python orchestrator/scripts/generate_protocol_snapshot.py --check
+      - name: Run Orchestrator Core acceptance
+        run: python orchestrator/scripts/run_core_tests.py
+      - name: Check whitespace
+        run: git diff --check
       - name: Commit repaired assembled candidate
         run: |
           git config user.name "hjin98"
