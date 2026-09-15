@@ -4,11 +4,11 @@ workplan_id: SSDP-6.1-7.0-WORKPLAN-AUTHORITY-INDEX
 protocol_version: 6.3.0
 status: active
 created_date: 2026-09-09
-reviewed_date: 2026-09-12
+reviewed_date: 2026-09-15
 active_serious_challenge: none
 ---
 
-# SSDP 6.1 / 6.2 / 6.3 / 7.0 Workplan Authority Index
+# SSDP 6.1 / 6.2 / 6.3 / 6.4 / 7.0 Workplan Authority Index
 
 ## Background and terminology
 
@@ -108,6 +108,37 @@ CURRENT ACCEPTED DOCUMENT-CONTROLLED BASELINE: Protocol 6.3
 
 The public-source bootstrap and accepted recovery remain intentionally distinct. Historical invalidated 6.3 bootstrap/candidate attempts remain immutable negative evidence rather than current fallback. PEM remains non-authoritative project-local decision support; no D5 or parallel control plane was accepted.
 
+## Protocol 6.4 current design handoff
+
+Protocol 6.4 axiomatic/formal-definition and semantic-traceability design/implementation/review SHALL read and satisfy, as one composed handoff:
+
+1. `workplans/active/SSDP-6.4-AXIOMATIC-FORMAL-DEFINITION-AND-SEMANTIC-TRACEABILITY.md`
+2. `workplans/active/SSDP-6.4-AXIOMATIC-FORMAL-DEFINITION-AND-SEMANTIC-TRACEABILITY-REVISION-1-SECOND-DESIGN-REVIEW-CLOSURE.md`
+
+Precedence and preservation:
+
+- the parent introduces the 6.4 formal-first/definition-before-use doctrine, strict semantic traceability, D1-D4 local consequences, preservation matrix, qualification, falsification, and inherited 6.3 bootstrap/recovery lifecycle;
+- Revision 1 supersedes only the parent's defective single provenance enum, broad/untyped dependency edge, raw-cycle exception, incomplete import/source binding, incomplete cross-domain traceability, and missing bounded-adoption semantics;
+- Revision 1 requires source provenance to remain orthogonal to semantic/epistemic role, a true acyclic external definition-use DAG with composite recursive nodes, typed cross-domain relations, exact external-source support/notation mapping, anti-laundering foundational boundaries, semantic-identity/alias discipline, and bounded 6.4 adoption;
+- every parent requirement not explicitly changed by Revision 1 remains binding;
+- neither artifact changes accepted Protocol 6.3 authority merely by existing on this branch.
+
+Current disposition:
+
+```text
+SERIOUS CHALLENGE: NONE
+SECOND DESIGN REVIEW: PASS AFTER GAP CLOSURE
+IMPLEMENTATION HANDOFF: AUTHORIZED
+IMPLEMENTATION STATUS: PROPOSED / NOT YET QUALIFIED
+ACCEPTED PARENT: Protocol 6.3 recovery 9f353097fab36e325a325f1c2f9d9cec32e86177
+PROTOCOL 6.4 PUBLIC BOOTSTRAP: NOT YET PUBLISHED
+PROTOCOL 6.4 RECOVERY: NOT YET ESTABLISHED
+CURRENT ACCEPTED DOCUMENT-CONTROLLED BASELINE: Protocol 6.3
+PROTOCOL 7 INHERITANCE OF 6.4: DEFERRED UNTIL 6.4 ACCEPTANCE
+```
+
+Protocol 6.4 is a proposed backward-compatible minor strengthening. No `main` cutover or reinterpretation of version-bound 6.3 work is implied. A 6.4 adoption must use the bounded migration rule in Revision 1 rather than globally rewriting unrelated authority or silently inheriting ambiguous predecessor prose.
+
 ## Protocol 7.0 current design handoff
 
 Protocol 7.0 design/implementation/review SHALL read and satisfy, as one composed handoff:
@@ -124,6 +155,7 @@ Precedence:
 - Revision 2 closes reducer-purity, ambient-state, external-effect, deterministic replay, and canonical recovery gaps;
 - Revision 3 changes only representation/version inheritance after Protocol 6.2 acceptance: current pre-cutover document-controlled baseline and fallback/rollback became Protocol 6.2, while the parent/Revisions 1-2 D3 architecture semantics remained unchanged;
 - Revision 4 changes only project-learning/version inheritance after Protocol 6.3 acceptance: current pre-cutover document-controlled baseline and fallback/rollback become Protocol 6.3, while the parent/Revisions 1-3 D3 architecture semantics remain unchanged;
+- Protocol 6.4 is not yet accepted and therefore does not amend the Protocol-7 handoff at this time;
 - every parent requirement not explicitly changed by a later revision remains binding.
 
 Current disposition:
@@ -137,6 +169,7 @@ PROTOCOL 6.2 COMPLETION/QUALIFICATION/RECOVERY PREREQUISITE: SATISFIED
 PROTOCOL 6.2 REPRESENTATION-INHERITANCE RECONCILIATION: SATISFIED
 PROTOCOL 6.3 COMPLETION/QUALIFICATION/R2-REVIEW/RECOVERY PREREQUISITE: SATISFIED
 PROTOCOL 6.3 INHERITANCE RECONCILIATION: SATISFIED
+PROTOCOL 6.4 INHERITANCE RECONCILIATION: NOT APPLICABLE UNTIL 6.4 ACCEPTANCE
 CURRENT PRE-CUTOVER FALLBACK/ROLLBACK BASELINE: Protocol 6.3 recovery 9f353097fab36e325a325f1c2f9d9cec32e86177
 REMAINING PROTOCOL-7-SPECIFIC PRE-D4 REQUIREMENT:
   1. DELIBERATE D3 ORCHESTRATOR ARCHITECTURE REOPEN/SUPERSESSION
@@ -150,11 +183,12 @@ Protocol 7 D4 remains unauthorized until the existing deliberate D3 Orchestrator
 There is exactly one canonical workflow-control authority for any current run.
 
 - Protocol 6.3 is the accepted-current document-controlled baseline; version-bound 6.2 work may still resolve immutable historical recovery `b59adc77efe6951912cfd705cc43830c58ca27d0` and older declared versions retain their own mappings.
-- Protocol 7 remains proposed/pre-cutover. Its current fallback/rollback baseline is Protocol 6.3 recovery `9f353097fab36e325a325f1c2f9d9cec32e86177` until Protocol 7 itself completes the outstanding D3 architecture reopen and subsequent D4/Review/qualification/recovery/cutover gates.
+- Protocol 6.4 is proposed on its dedicated branch. It does not become accepted-current until its qualification, independent Review, bootstrap/recovery publication, generated reconciliation, impact closure, and lifecycle cutover all pass.
+- Protocol 7 remains proposed/pre-cutover. Its current fallback/rollback baseline is Protocol 6.3 recovery `9f353097fab36e325a325f1c2f9d9cec32e86177` until a later accepted successor is explicitly reconciled into the Protocol-7 handoff.
 - Under Protocol 7 after qualified cutover, the deterministic orchestrator control plane owns machine lifecycle transitions while workplans/skills/documents remain semantic artifacts.
 - Shadow comparison is permitted only while one side remains explicitly non-authoritative.
-- No `main` merge or Protocol 7 cutover is authorized by Protocol 6.3 closeout.
+- No `main`, Protocol 6.4, or Protocol 7 cutover is authorized merely by these active design workplans.
 
 ## Historical discipline
 
-Do not edit archived/version-pinned Protocol 5.x/6.0/6.1 records merely to adopt later terminology or presentation rules. Current 6.2 work must preserve historical capability while expressing current doctrine directly and compactly; detailed history remains recoverable without becoming parallel current authority.
+Do not edit archived/version-pinned Protocol 5.x/6.0/6.1/6.2/6.3 records merely to adopt later terminology or presentation rules. Current successor work must preserve historical capability while expressing current doctrine directly and compactly; detailed history remains recoverable without becoming parallel current authority.
