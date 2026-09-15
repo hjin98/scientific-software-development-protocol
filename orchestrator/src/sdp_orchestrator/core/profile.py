@@ -2,8 +2,8 @@
 
 Profile metadata is control-plane data only. Canonical prompt prose remains in
 its version-bound prompt document. Protocol 5.16 schema-v1 is preserved as a
-frozen compatibility definition while Protocol 6.0, 6.1, 6.2, and 6.3 use
-independent schema-v2 profiles selected by declared protocol/profile identity.
+frozen compatibility definition while Protocol 6.0 through 6.4 use independent
+schema-v2 profiles selected by declared protocol/profile identity.
 """
 
 from __future__ import annotations
@@ -20,6 +20,7 @@ from .canonical import (
     SSDP61_PROFILE_ID,
     SSDP62_PROFILE_ID,
     SSDP63_PROFILE_ID,
+    SSDP64_PROFILE_ID,
     SSDP6_STAGES,
     CanonicalDocument,
     stages_for_profile,
@@ -57,7 +58,11 @@ SSDP62_COMPATIBLE_PROTOCOL_VERSIONS: tuple[str, ...] = ("6.2.0", "6.2")
 SSDP63_PROFILE_SCHEMA_VERSION = 2
 SSDP63_PROTOCOL_VERSION = "6.3.0"
 SSDP63_COMPATIBLE_PROTOCOL_VERSIONS: tuple[str, ...] = ("6.3.0", "6.3")
-DEFAULT_PROFILE_ID = SSDP63_PROFILE_ID
+
+SSDP64_PROFILE_SCHEMA_VERSION = 2
+SSDP64_PROTOCOL_VERSION = "6.4.0"
+SSDP64_COMPATIBLE_PROTOCOL_VERSIONS: tuple[str, ...] = ("6.4.0", "6.4")
+DEFAULT_PROFILE_ID = SSDP64_PROFILE_ID
 RESULT_SCHEMA_ID = "sdp.stage-result-envelope"
 RESULT_SCHEMA_VERSION = 1
 
@@ -268,6 +273,11 @@ _SSDP62_TRANSITIONS: tuple[TransitionRow, ...] = tuple(_SSDP61_TRANSITIONS)
 _SSDP63_STAGE_TABLE: dict[str, StageRow] = dict(_SSDP62_STAGE_TABLE)
 _SSDP63_TRANSITIONS: tuple[TransitionRow, ...] = tuple(_SSDP62_TRANSITIONS)
 
+# Protocol 6.4 strengthens semantic definition/traceability representation without
+# changing the machine stage graph or result-envelope schema.
+_SSDP64_STAGE_TABLE: dict[str, StageRow] = dict(_SSDP63_STAGE_TABLE)
+_SSDP64_TRANSITIONS: tuple[TransitionRow, ...] = tuple(_SSDP63_TRANSITIONS)
+
 
 @dataclass(frozen=True)
 class ProfileDefinition:
@@ -285,6 +295,7 @@ _DEFINITIONS = {
     SSDP61_PROFILE_ID: ProfileDefinition(SSDP61_PROFILE_ID, SSDP61_PROFILE_SCHEMA_VERSION, SSDP61_PROTOCOL_VERSION, SSDP61_COMPATIBLE_PROTOCOL_VERSIONS, _SSDP61_STAGE_TABLE, _SSDP61_TRANSITIONS),
     SSDP62_PROFILE_ID: ProfileDefinition(SSDP62_PROFILE_ID, SSDP62_PROFILE_SCHEMA_VERSION, SSDP62_PROTOCOL_VERSION, SSDP62_COMPATIBLE_PROTOCOL_VERSIONS, _SSDP62_STAGE_TABLE, _SSDP62_TRANSITIONS),
     SSDP63_PROFILE_ID: ProfileDefinition(SSDP63_PROFILE_ID, SSDP63_PROFILE_SCHEMA_VERSION, SSDP63_PROTOCOL_VERSION, SSDP63_COMPATIBLE_PROTOCOL_VERSIONS, _SSDP63_STAGE_TABLE, _SSDP63_TRANSITIONS),
+    SSDP64_PROFILE_ID: ProfileDefinition(SSDP64_PROFILE_ID, SSDP64_PROFILE_SCHEMA_VERSION, SSDP64_PROTOCOL_VERSION, SSDP64_COMPATIBLE_PROTOCOL_VERSIONS, _SSDP64_STAGE_TABLE, _SSDP64_TRANSITIONS),
 }
 
 
