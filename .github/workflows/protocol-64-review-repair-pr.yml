@@ -57,8 +57,22 @@ jobs:
         run: python source/check_dist.py --expected /tmp/protocol-dist --committed dist
       - name: Check Orchestrator snapshot parity
         run: python orchestrator/scripts/generate_protocol_snapshot.py --check
-      - name: Run Orchestrator Core acceptance
-        run: python orchestrator/scripts/run_core_tests.py
+      - name: Run Orchestrator Core acceptance and persist failure
+        shell: bash
+        run: |
+          set +e
+          python orchestrator/scripts/run_core_tests.py > /tmp/core-acceptance.log 2>&1
+          code=$?
+          set -e
+          if [ "$code" -ne 0 ]; then
+            cp /tmp/core-acceptance.log qualification/ssdp6/STAGE-E-REPAIR-CORE-DIAGNOSTIC.txt
+            git config user.name "hjin98"
+            git config user.email "86921078+hjin98@users.noreply.github.com"
+            git add qualification/ssdp6/STAGE-E-REPAIR-CORE-DIAGNOSTIC.txt
+            git commit -m "Capture Protocol 6.4 repair Core failure"
+            git push origin HEAD:ssdp-6.4-axiomatic-definition-traceability
+            exit "$code"
+          fi
       - name: Check whitespace
         run: git diff --check
       - name: Commit repaired assembled candidate
