@@ -1,0 +1,103 @@
+name: Protocol 6.4 Retry Bootstrap Publication
+
+on:
+  push:
+    branches:
+      - ssdp-6.4-axiomatic-definition-traceability
+    paths:
+      - .github/workflows/protocol-64-retry-bootstrap.yml
+
+permissions:
+  contents: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ssdp-6.4-axiomatic-definition-traceability
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install validation and Core dependencies
+        run: >-
+          python -m pip install -r source/requirements-validation.txt
+          ./orchestrator -r orchestrator/requirements-dev.txt
+      - name: Reproduce qualified publication mutation
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          workflow = Path('.github/workflows/protocol-64-publish-bootstrap.yml').read_text(encoding='utf-8')
+          start_marker = "          python - <<'PY'\n"
+          end_marker = "\n          PY\n      - name: Regenerate canonical descendants"
+          start = workflow.index(start_marker) + len(start_marker)
+          end = workflow.index(end_marker, start)
+          code = workflow[start:end]
+          lines = code.splitlines()
+          indent = min(len(line) - len(line.lstrip()) for line in lines if line.strip())
+          code = '\n'.join(line[indent:] for line in lines)
+          exec(compile(code, '<publication-mutation>', 'exec'), {})
+          PY
+      - name: Rebind inherited lifecycle oracles
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          BOOTSTRAP = 'e09a9d1480211eea2d16d722182bb5c6de1bee12'
+
+          def replace_once(path: str, old: str, new: str) -> None:
+              p = Path(path)
+              text = p.read_text(encoding='utf-8')
+              count = text.count(old)
+              if count != 1:
+                  raise SystemExit(f'{path}: expected exactly one occurrence, found {count}: {old!r}')
+              p.write_text(text.replace(old, new, 1), encoding='utf-8')
+
+          replace_once(
+              'tests/test_protocol_516_orchestration.py',
+              'self.assertIn("no 6.4 public-source fallback or recovery mapping is authorized yet", self.lower)',
+              'self.assertIn("no 6.4 recovery mapping is authorized yet", self.lower)',
+          )
+          replace_once(
+              'tests/test_protocol_61_evidence_evolution.py',
+              'self.assertIn("CURRENT_PUBLIC_REF = UNAVAILABLE_PENDING_6_4_BOOTSTRAP", prompts)',
+              f'self.assertIn("CURRENT_PUBLIC_REF = {BOOTSTRAP}", prompts)',
+          )
+          replace_once(
+              'tests/test_protocol_62_representation.py',
+              'self.assertIn("current_public_ref = unavailable_pending_6_4_bootstrap", prompt)',
+              f'self.assertIn("current_public_ref = {BOOTSTRAP}", prompt)',
+          )
+          PY
+      - name: Regenerate canonical descendants
+        run: |
+          python source/build_skills.py
+          python orchestrator/scripts/generate_protocol_snapshot.py
+      - name: Validate publication candidate
+        shell: bash
+        run: |
+          python -m unittest discover -s tests -v
+          python source/project_engineering_memory.py PROJECT-ENGINEERING-MEMORY.md
+          python source/validate_packages.py --dist dist
+          python source/build_skills.py --output /tmp/protocol-dist
+          python source/check_dist.py --expected /tmp/protocol-dist --committed dist
+          python orchestrator/scripts/generate_protocol_snapshot.py --check
+          python orchestrator/scripts/run_core_tests.py
+          git diff --check
+      - name: Commit publication and remove one-shot workflows
+        shell: bash
+        run: |
+          rm -f .github/workflows/protocol-64-publish-bootstrap.yml
+          rm -f .github/workflows/protocol-64-publication-diagnostic.yml
+          rm -f .github/workflows/protocol-64-retry-bootstrap.yml
+          git config user.name "hjin98"
+          git config user.email "86921078+hjin98@users.noreply.github.com"
+          git add -A
+          git diff --cached --check
+          git commit -m "Publish Protocol 6.4 public-source bootstrap"
+          git push origin HEAD:ssdp-6.4-axiomatic-definition-traceability
