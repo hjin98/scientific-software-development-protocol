@@ -10,11 +10,11 @@ target_protocol_version: 6.4.0
 status: active
 created_date: 2026-09-15
 reviewed_date: 2026-09-15
-design_review_state: pass-after-fourth-review
+design_review_state: pass-after-fifth-review
 implementation_handoff: authorized
 active_serious_challenge: none
 branch: ssdp-6.4-axiomatic-definition-traceability
-reviewed_composed_head: 8cc4469befee549897a0ca70542d2fbd73e657e6
+reviewed_composed_head: f94723215dc0ed9eeadf0bc298e4cce579fab810
 branch_point: 0928accd337a13f864b292ed81c36372828cfb4c
 accepted_parent_protocol: 6.3.0
 accepted_parent_recovery: 9f353097fab36e325a325f1c2f9d9cec32e86177
@@ -25,13 +25,29 @@ accepted_parent_public_bootstrap: 86c13cab6bdd1991dffa94e277db8eacf87e2e11
 
 ## Current disposition
 
-**FOURTH DESIGN REVIEW: PASS AFTER GAP CLOSURE.** This file is the single current implementation/review handoff for Protocol 6.4. The original parent and Revisions 1-2 remain immutable design-review history and Git evidence, but implementation and independent Review SHALL NOT need to replay their amendment precedence to reconstruct the current contract.
+**FIFTH DESIGN REVIEW: PASS AFTER GAP CLOSURE.** This file is the single current implementation/review handoff for Protocol 6.4. The original parent and Revisions 1-2 remain immutable design-review history and Git evidence, but implementation and independent Review SHALL NOT need to replay their amendment precedence to reconstruct the current contract.
 
 Protocol 6.3 remains accepted-current until Protocol 6.4 completes implementation, qualification, independent assembled-candidate Review, self-reference-safe public-bootstrap publication, immutable recovery mapping, mapping-bearing generated reconciliation, Protocol-7 inheritance-only reconciliation, and lifecycle closeout.
 
 The protected outcome is not “more equations.” It is:
 
-> Every materially governed technical concept can be reconstructed by a competent intended reader or downstream agent with minimum interpretive freedom; specialized prerequisites, assumptions, validity, provenance/support, and direct semantic dependencies are recoverable; formal expressions are well-defined; and changes can be propagated through bounded typed impact closure without prose inference, hidden context, or lower-domain semantic leakage.
+> Every materially governed technical concept can be reconstructed by a competent intended reader or downstream agent with minimum interpretive freedom; specialized prerequisites, assumptions, validity, provenance/support, authority force, and direct semantic dependencies are recoverable; formal expressions are well-defined; claim warrant is non-circular; and changes can be propagated through bounded typed impact closure without prose inference, hidden context, mixed-version meaning, or lower-domain semantic leakage.
+
+## Background and formal terminology
+
+The **Scientific Software Development Protocol (SSDP)** separates four semantic authority domains: **D1 scientific and mathematical formulation**, **D2 algorithm and numerical method**, **D3 software architecture**, and **D4 specification and implementation**. **Project Engineering Memory (PEM)** is project-local evidence-backed decision support and is not a fifth authority domain. A **Historical Applicability Set (HAS)** is the session-local workflow record of materially relevant PEM items and their applicability dispositions.
+
+For a governed scope `S`, a **semantic object/unit** is a materially governed term, symbol, quantity, operator, relation, state, proposition, algorithmic object, invariant, or contract whose meaning or conditions can alter governed interpretation, admissible concretization, evidence applicability, or acceptance if changed. This is a semantic identity, not merely a spelling, symbol, anchor, or file location.
+
+A **canonical semantic statement** of object `x` is the one current owner statement that establishes the project-visible meaning of `x` for the governed scope. Depending on role it may be a primitive declaration, explicit/implicit definition, proposition/theorem statement, assumption/premise statement, algorithmic contract, or D3/D4 contract. For externally imported knowledge, the canonical project-visible statement includes the precise local statement plus its exact source route; the external source does not thereby become project authority.
+
+A **substantive semantic use** of `x` is an occurrence whose meaning participates in a declaration/definition, premise, inference, constraint, theorem/result statement, algorithm, contract, acceptance decision, or interpretation. A harmless forward name in an abstract/summary that supports no inference is not a substantive use.
+
+A **material direct prerequisite** `x` of semantic unit `y` is one whose meaning is directly invoked by the canonical semantic statement of `y`, and for which a materially different admissible meaning of `x` can change the denotation, admissible domain, validity, governed contract, or accepted interpretation of `y`. Materiality is bound by the existing governed scope; an author may not narrow it merely to make a trace appear complete.
+
+A **directed acyclic graph (DAG)** is a directed graph with no directed cycle. A **strongly connected component (SCC)** is a maximal set of nodes mutually reachable by directed paths; legitimate mutually recursive definitions may be represented as one composite node or by condensation of such a component.
+
+The rest of this workplan uses these terms normatively. Where a generic predicate such as `available(x)` would be ambiguous, it distinguishes source-level semantic availability from runtime-context availability explicitly.
 
 ## 1. Parent authority and compatibility
 
@@ -40,7 +56,8 @@ Protocol 6.4 is a backward-compatible **minor** strengthening over accepted Prot
 The following remain invariant:
 
 - D1-D4 remain the only semantic authority domains; no D5, documentation authority plane, ontology authority, or traceability authority is created.
-- Accepted current authority defines what must be true; literature, tests, evidence, documentation, Project Engineering Memory (PEM), generated graphs, and historical frequency cannot silently mint authority.
+- Accepted current authority defines what must be true; literature, tests, evidence, documentation, PEM, generated graphs, and historical frequency cannot silently mint authority.
+- Applicable external contracts, standards, regulations, or stakeholder constraints retain whatever normative force their real governing authority supplies; citation/import alone does not create that force.
 - Concretization fidelity and abstraction adequacy remain distinct.
 - One detailed owner per generic rule, progressive disclosure, explicit typed routing, cold-path discoverability, and derived-view subordination remain binding.
 - Evidence specification -> realization -> observation -> assessment remains binding.
@@ -52,13 +69,47 @@ The following remain invariant:
 
 ## 2. Governing semantic-availability invariant
 
-For every governed semantic object `x`, any substantive use that depends on its meaning requires `x` to be semantically available in the current scope:
+For a version-coherent composed authority family `D`, define **source-level semantic availability**:
 
 \[
-\operatorname{use}(x)\Rightarrow\operatorname{available}(x).
+\operatorname{source\_available}_D(x)
 \]
 
-Availability is context- and scope-relative. Its basis is:
+iff the canonical semantic statement of `x` is reconstructible within `D` from the declared foundational envelope, an exact external import, a project declaration/definition, or a valid local binder whose referenced domain/type is already source-available.
+
+For an actual agent/reader runtime context `C`, define **context availability**:
+
+\[
+\operatorname{context\_available}_C(x)
+\]
+
+iff the exact canonical meaning required for the current inference is actually supplied/loaded in `C` under the governing version/snapshot.
+
+The authoring/document invariant is:
+
+\[
+\boxed{
+\operatorname{use}_D(x)
+\Rightarrow
+\operatorname{source\_available}_D(x)
+}
+\]
+
+and the runtime inference invariant is:
+
+\[
+\boxed{
+\operatorname{infer}_C(x)
+\Rightarrow
+\operatorname{context\_available}_C(x)
+\Rightarrow
+\operatorname{source\_available}_D(x)
+}
+\]
+
+A route can make an object source-available without loading it into a particular runtime context. Conversely, runtime prose or hidden chat cannot make an object source-available when no canonical version-bound owner/source exists.
+
+The source-availability basis is:
 
 \[
 \operatorname{availability\_basis}(x)
@@ -66,9 +117,9 @@ Availability is context- and scope-relative. Its basis is:
 \{\mathrm{FOUNDATIONAL\_ASSUMED},\mathrm{EXTERNAL\_IMPORTED},\mathrm{PROJECT\_DECLARED}\},
 \]
 
-or a local binder/declaration whose referenced domain/type is already available.
+or a scope-local binder/declaration whose referenced domain/type is already available at the corresponding layer.
 
-This is an availability classification, not a claim of historical discovery or intellectual provenance.
+This is an availability classification, not a claim of historical discovery, intellectual provenance, evidence strength, or normative force.
 
 Semantic/epistemic roles are non-exclusive:
 
@@ -117,22 +168,25 @@ A genuine common theorem/axiom may be invoked without local proof/citation when 
 
 Changing the foundational envelope materially for a current authority family is itself a representation-scope change and receives bounded review; it cannot be silently widened to make unresolved definitions disappear.
 
-## 5. External specialized imports
+## 5. External specialized imports, support, and authority force
 
-A specialized external theorem, model, algorithm, method, physical approximation/law, software/engineering standard, empirical constant, reference value, table, dataset, or other external result is `EXTERNAL_IMPORTED` when the project relies on external authority/evidence rather than deriving/declaring it independently.
+A specialized external theorem, model, algorithm, method, physical approximation/law, software/engineering standard, empirical constant, reference value, table, dataset, or other external result is `EXTERNAL_IMPORTED` when the project relies on external knowledge/evidence/constraint rather than deriving/declaring it independently.
 
 Before normative reuse, supply:
 
 1. a precise local statement sufficient to determine the exact imported meaning/variant;
 2. material symbols/domains/assumptions/conventions/validity restrictions;
-3. authoritative source identity, preferring primary literature or canonical standard/official reference;
+3. authoritative source identity, preferring primary literature or a canonical standard/official reference where appropriate;
 4. edition/version/revision and theorem/section/equation/clause/dataset release or equivalent stable locator when variants matter;
 5. explicit source-to-local notation/unit/sign/frame/normalization mapping when they differ;
-6. for empirical constants/data/reference values, material reference conditions, units, uncertainty/error, calibration/version/date/regime, or other qualifiers needed for correct use.
+6. for empirical constants/data/reference values, material reference conditions, units, uncertainty/error, calibration/version/date/regime, or other qualifiers needed for correct use;
+7. when the imported data/value is filtered, transformed, calibrated, aggregated, nondimensionalized, unit-converted, or otherwise changed before local use, the material source-to-local transformation and parameters/selection rules needed to reconstruct the local semantic input.
 
 Citation presence is not source support. Independent Review must establish that the cited source actually supports the imported claim under the stated assumptions and regime.
 
-Background normally introduces specialized imported prerequisites for D1/D2 human-facing papers, but Background does not create project authority. When an imported result is a normative premise, the owning D1-D4 formulation explicitly invokes/assumes it under stated conditions.
+External **semantic support** and external **normative force** are separate. Scientific literature, datasets, measurements, and explanatory standards references may supply knowledge/evidence without becoming project authority. An applicable contract, regulation, mandatory standard, stakeholder rule, or other external constraint can govern because the real external/project authority makes it binding; the local document must route that force to the actual owner/constraint rather than infer it from citation prestige or publication status.
+
+Background normally introduces specialized imported prerequisites for D1/D2 human-facing papers, but Background does not create project authority. When an imported result is a normative premise, the owning D1-D4 formulation explicitly invokes/assumes it under stated conditions. When an imported external constraint is itself binding, its binding route remains explicit and separate from the citation used to state it.
 
 A floating `latest` source is inadequate when later changes could alter meaning. Retraction, correction, incompatible revision, loss of required access, or discovery that the source does not support the claim is a current binding/applicability event: review dependent use; do not silently switch editions. Semantically equivalent source remapping may be accepted through normal review without manufacturing a semantic change.
 
@@ -153,7 +207,7 @@ For a primitive, state as applicable:
 
 Anything beyond the declared signature and axioms/constraints remains unavailable.
 
-Definition closure may terminate in:
+Definition closure may therefore terminate in:
 
 ```text
 FOUNDATIONAL_ASSUMED reader knowledge
@@ -168,7 +222,7 @@ Local variables introduced by a binder/declaration become available within that 
 \forall x\in X:P(x),\qquad \sum_{i=1}^{N}a_i.
 \]
 
-Here `x` and `i` are locally bound; `X`, `P`, `N`, and the indexed family `a_i` must already be available. Scope-local shadowing is allowed only when unmistakable and non-ambiguous.
+Here `x` and `i` are locally bound; `X`, `P`, `N`, and the indexed family `a_i` must already be available at the corresponding source/context layer. Scope-local shadowing is allowed only when unmistakable and non-ambiguous.
 
 ## 7. Definition, premise, assumption, claim, and example discipline
 
@@ -183,9 +237,19 @@ Here `x` and `i` are locally bound; `X`, `P`, `N`, and the indexed family `a_i` 
 
 Writing `:=` cannot manufacture a proposition. A name such as “stable method” may be defined, but applying that name to a method requires the stability property to be separately established/assumed/contracted. Existence, uniqueness, causal, empirical, comparative, convergence, safety, and adequacy claims embedded inside apparent definitions must be exposed separately with appropriate warrant.
 
+For an **explicit definitional extension** that merely introduces a new symbol/name in prior vocabulary `T`, the definition is conservative: it must not create a new proposition about the pre-existing vocabulary merely by being called a definition. Conceptually, if `d` is only a definition and `\varphi` contains no newly defined symbol,
+
+\[
+T\cup\{d\}\vdash\varphi\quad\Rightarrow\quad T\vdash\varphi.
+\]
+
+When a proposed “definition” also asserts existence, uniqueness, admissibility, causal/empirical truth, comparison, convergence, safety, or normative requirement, separate that additional claim as an assumption/axiom/result/empirical claim/contract and warrant it appropriately. Implicit/recursive definitions may constrain a jointly introduced object, but their existence/well-posedness is separately assumed or established as required.
+
+Semantic roles may be non-exclusive, but that is not permission to collapse logically different claim units. If one sentence/formula contains a definitional statement plus an empirical, derived, approximate, or normative assertion, make the separable claims recoverable with their own status/warrant.
+
 Project-local axiom/assumption sets must be coherent enough for governed use. When non-emptiness, consistency, realizability, or existence of admissible states is material, provide a construction/model/witness/derivation or mark the condition explicitly unresolved; do not claim substantive conclusions solely by vacuity. Protocol 6.4 does not require foundational consistency proofs for ordinary mathematics.
 
-## 8. Formal well-definedness, notation, type, and dimension discipline
+## 8. Formal well-definedness, notation, type, dimension, and logical direction
 
 Formal appearance is insufficient. A governed definition/contract must be well-defined over its intended scope.
 
@@ -200,9 +264,10 @@ State when material:
 - piecewise coverage/overlap/precedence;
 - boundary/initial conditions and validity interval/regime;
 - undefined/singular/degenerate cases;
-- exact equality, definitional equality, equivalence, approximation, asymptotic relation, assignment/update, membership, implication, distributional relation, or other materially distinct relation actually intended.
+- exact equality, definitional equality, equivalence, approximation, asymptotic relation, assignment/update, membership, implication, distributional relation, or other materially distinct relation actually intended;
+- necessary, sufficient, necessary-and-sufficient/biconditional direction when changing that direction changes the conclusion or admissible set.
 
-Use relation/operator notation consistently enough that a competent reader cannot confuse, for example, mathematical equality with assignment, approximation with identity, or equality in distribution with pointwise equality. Define nonstandard operators before reuse.
+Use relation/operator notation consistently enough that a competent reader cannot confuse, for example, mathematical equality with assignment, approximation with identity, equality in distribution with pointwise equality, or a sufficient condition with a necessary one. Define nonstandard operators before reuse.
 
 Where physical/typed quantities are involved, expressions and mappings must be dimensionally/type consistent. A declared unit does not rescue a dimensionally inconsistent equation. Nontrivial unit conversions, affine/logarithmic units, nondimensionalization, or coordinate transforms that can change interpretation must be explicit.
 
@@ -218,6 +283,8 @@ if later reasoning treats `x*` as one deterministic object, establish/assume uni
 
 A fixed-point/implicit definition must identify the intended solution set and required selection/uniqueness semantics. D3/D4 cannot silently strengthen a set-valued/approximate D1/D2 object into a unique/exact one.
 
+If the strongest practical formal/structured representation still leaves two materially different interpretations that can change governed meaning, the ambiguity is not excused merely because fuller formalization is inconvenient. Preserve the ambiguity explicitly as `REVIEW_REQUIRED`/Challenge or refine the owning abstraction until the protected outcome is unambiguous enough for its intended descendants.
+
 ## 9. Stochastic semantic closure
 
 When randomness materially affects scientific/numerical meaning, define enough stochastic structure to distinguish materially different interpretations. As applicable state:
@@ -231,7 +298,7 @@ When randomness materially affects scientific/numerical meaning, define enough s
 - almost-sure/in-probability/in-distribution/mean-square or other convergence mode;
 - stochastic seed/reproducibility policy when it is part of D2/D4 governed behavior.
 
-Do not require a full measure-theory restatement when common probability foundations suffice. Do require the distinctions that can change the result. A phrase such as “draw random samples” is inadequate when IID versus correlated sampling materially changes the estimator or guarantee.
+Do not require a full measure-theory restatement when common probability foundations suffice. Do require the distinctions that can change the result. A phrase such as “draw random samples” is inadequate when **independent and identically distributed (IID)** versus correlated sampling materially changes the estimator or guarantee.
 
 ## 10. Assumption, validity, applicability, and approximation closure
 
@@ -247,11 +314,11 @@ Each material condition is either:
 2. explicitly adopted as an assumption by the owning formulation; or
 3. explicitly propagated as a condition on the dependent result/concretization.
 
-A citation or definition edge does not discharge hypotheses. Known-false conditions invalidate the use. Materially uncertain satisfaction is `REVIEW_REQUIRED`/challenged as appropriate.
+A citation or definition-use edge does not discharge hypotheses. Known-false conditions invalidate the use. Materially uncertain satisfaction is `REVIEW_REQUIRED`/challenged as appropriate.
 
 Validity, uncertainty, approximation, and assumption relations remain typed rather than being collapsed into `USES_DEFINITION`. Descendants may narrow a validity regime but cannot silently broaden it or promote an approximation/empirical relationship into an exact unconditional identity.
 
-## 11. Derivation and proof dependencies
+## 11. Derivation, proof, and warrant closure
 
 For material `DERIVED_RESULT` claims, expose direct proof/premise dependencies proportionately to risk via `DERIVED_FROM` or an equivalent explicit route.
 
@@ -259,29 +326,46 @@ A derivation cannot obtain warrant from a live dependency chain that materially 
 
 A project-local claim without an adequate derivation/proof may remain a conjecture/hypothesis/proposed claim where allowed, but not an established theorem/result. Empirical evidence may warrant empirical claims or motivate conjectures but does not silently become deductive proof.
 
-## 12. Definition-use DAG and typed dependency ownership
+More generally, an established material claim `c` must have bounded **typed warrant closure** appropriate to its claim class. Conceptually:
 
-For a composed authority family `D`, define the direct definition-use graph
+\[
+\operatorname{established}(c)
+\Rightarrow
+\operatorname{warrant\_closure}(c)
+\text{ terminates in admissible roots and contains no self-supporting warrant cycle.}
+\]
+
+Admissible roots include, as applicable: foundational knowledge; explicit accepted axioms/assumptions whose conditional status is propagated; exact source-supported imported premises; admissible empirical evidence for empirical claims; and current project/external authority for normative contracts. A derived claim terminates through a valid derivation at such roots. No combination of `DERIVED_FROM`, hypothesis-discharge reasoning, citation/source support, evidence interpretation, or authority reference may bootstrap a claim by ultimately relying on that same claim as its warrant.
+
+This is a bounded Review obligation over existing typed relations, not a new universal `warrant` database or untyped edge class.
+
+## 12. Semantic-definition-use DAG and typed dependency ownership
+
+For a composed authority family `D`, define the direct semantic-definition-use graph
 
 \[
 G_D^{\mathrm{def}}=(V_D,E_D^{\mathrm{def}}),
 \]
 
-where
+where each node is a material semantic object/unit and
 
 \[
 (x,y)\in E_D^{\mathrm{def}}
 \iff
-\text{the canonical definition of }y\text{ directly uses semantic object }x.
+\text{the canonical semantic statement of }y\text{ directly requires the canonical meaning of }x.
 \]
 
-The relation is:
+The retained relation name is:
 
 ```text
-subject USES_DEFINITION -> exact semantic object whose canonical definition is directly used
+subject USES_DEFINITION -> exact semantic object whose canonical declaration/definition/semantic statement is directly required to interpret the subject's own canonical semantic statement
 ```
 
-`G_D^def` is acyclic. A legitimate recurrence/fixed-point/simultaneous definition/mutually recursive grammar is one composite semantic node, or equivalently its raw strongly connected component is condensed into one node in the reviewable DAG.
+Thus `USES_DEFINITION` is not limited to definition-to-definition edges. A theorem/result statement, assumption, algorithm, D3 rule, or D4 contract may use a definition even though the subject is not itself a definition. A project primitive may be a root with a canonical declaration rather than a constructive definition and can still be the endpoint of another unit's `USES_DEFINITION` edge.
+
+A direct edge is material when varying the prerequisite's admissible meaning can change the subject's denotation, admissible domain, validity, governed contract, or accepted interpretation. An incidental mention that cannot change those semantics is not an edge merely because the same word appears.
+
+`G_D^def` is a DAG. A legitimate recurrence/fixed-point/simultaneous definition/mutually recursive grammar is one composite semantic node, or equivalently its raw SCC is condensed into one node in the reviewable DAG.
 
 Other relations stay typed and separate:
 
@@ -300,10 +384,12 @@ Canonical ownership:
 - `abstraction-and-concretization.md`: universal definition/prerequisite closure requirement;
 - `evidence-evolution-and-dependencies.md`: `USES_DEFINITION` direction, durable endpoint identity, declared-scope completeness/absence semantics, and impact behavior;
 - `scientific-technical-writing.md`: human-facing definition/dependency/import/alias/scope presentation;
-- D1-D4 owners: their actual semantic definitions and local consequences;
+- D1-D4 owners: their actual semantic declarations/definitions/statements/contracts and local consequences;
 - `source/SEMANTIC_DEPENDENCIES.md`: subordinate derived current relationship view only.
 
-For the declared canonical scope, direct `USES_DEFINITION` edges are materially complete. A derived partial view may be marked partial, but missing edges cannot prove independence. No repository-wide ontology/graph/database is required.
+For the declared canonical scope, direct `USES_DEFINITION` edges are materially complete under the criterion above. A derived partial view may be marked partial, but missing edges cannot prove independence. No repository-wide ontology/graph/database is required.
+
+A material cross-document endpoint must be recoverable by the cheapest sufficient durable identity: semantic owner plus version/snapshot identity and a stable logical locator such as a definition/claim label, section/anchor, or exact path location. A repository-global ID registry is not required; an ambiguous floating locator is insufficient when ordinary document movement or version advancement could retarget the edge silently.
 
 For object `z`, a complete bounded trace permits recovery of direct/transitive ancestors and descendants. Descendant closure is a candidate impact set, not proof that every descendant changes.
 
@@ -360,12 +446,12 @@ When one object splits into several, several merge, or a current definition is r
 
 `USES_DEFINITION` is a semantic dependency relation, **not an activation edge**. Ordinary Markdown links and dependency graphs still do not automatically load context.
 
-However, when a role/agent is about to make a substantive inference whose correctness depends on semantic object `x`, `available(x)` requires either:
+When a role/agent is about to make a substantive inference whose correctness depends on semantic object `x`, the runtime condition is `context_available_C(x)`, not merely source discoverability. It is satisfied when:
 
-- the canonical definition is already supplied in current context; or
-- the active router/concern owner follows a supported route and loads the canonical owner before that inference.
+- the canonical definition/declaration/semantic statement is already supplied in the governing runtime context; or
+- the active router/concern owner follows a supported version-bound route and loads the canonical owner before that inference.
 
-A discoverable-but-unloaded definition is not semantically available for reasoning merely because a link exists somewhere. Progressive disclosure therefore delays loading until the dependency becomes material; it does not authorize reasoning from an unloaded prerequisite.
+A discoverable-but-unloaded definition can be `source_available_D(x)` while remaining unavailable in the current runtime context. Progressive disclosure delays loading until the dependency becomes material; it does not authorize inference from an unloaded prerequisite.
 
 Generated activation graphs remain diagnostic evidence. Do not convert every `USES_DEFINITION` edge into eager activation.
 
@@ -380,7 +466,7 @@ D1 must make recoverable without reverse-engineering D2/code:
 - primitives/definitions/assumptions/derived vs observed status;
 - model/validity/excluded regimes and uncertainty/limitations;
 - specialized external prerequisites and source support;
-- material definition/derivation dependencies;
+- material semantic-use and derivation dependencies;
 - dimensional and stochastic semantics when scientifically material.
 
 Do not import lower-domain implementation detail upward unless it is genuinely scientific meaning or a directly governed external constraint entering D1.
@@ -416,15 +502,17 @@ Private implementation remains delegated unless current authority makes it contr
 - project primitive/local-binder discipline;
 - formal-first definition followed by assumptions/validity/provenance/interpretation;
 - distinction among definitions, axioms, assumptions, derived/empirical/approximate claims, normative contracts, examples, and explanations;
+- definitional conservativity and separable claim-unit status;
 - well-definedness, notation/relation/type/dimension/quantifier/stochastic rules;
 - first-use abbreviation expansion and explicit aliases;
-- direct definition-dependency exposure/routing;
-- source lifecycle and source-to-local mapping;
+- source-level vs context-level availability distinction where agent/runtime reasoning is discussed;
+- direct semantic-definition-use dependency exposure/routing;
+- source lifecycle, external normative-force separation, and source-to-local transformation mapping;
 - natural-language interpretation sufficient for intended reader.
 
-Formalism does not excuse opacity. Mathematical notation that hides assumptions, validity, uncertainty, units, provenance, failure cases, or interpretation is lossy.
+Formalism does not excuse opacity. Mathematical notation that hides assumptions, validity, uncertainty, units, provenance, failure cases, authority force, or interpretation is lossy.
 
-Current 6.4 canonical human-facing protocol/reference documents SHALL themselves satisfy the 6.4 rules proportionately. Frozen historical artifacts/workplans are not retroactively rewritten merely to match current style.
+Current 6.4 canonical human-facing protocol/reference documents, including this current workplan where applicable, SHALL themselves satisfy the 6.4 rules proportionately. Frozen historical artifacts/workplans are not retroactively rewritten merely to match current style.
 
 ## 22. Documentation/evidence/dependency integration
 
@@ -432,7 +520,7 @@ Current 6.4 canonical human-facing protocol/reference documents SHALL themselves
 - `documentation-and-evidence.md`: preserve document authority/evidence communication boundaries.
 - `evidence-evolution-and-dependencies.md`: canonical owner of `USES_DEFINITION` typed relation semantics, endpoint durability, completeness/absence semantics, source-binding-health interaction, and impact closure.
 - `workflow-and-workplans.md`: version-bound/snapshot-complete handoff, 6.4 adoption, current-context loading obligations, and closeout.
-- `testing-and-validation.md`: structural/static qualification only for mechanically decidable properties; independent semantic Review for mathematical/scientific adequacy.
+- `testing-and-validation.md`: structural/static qualification only for mechanically decidable properties; independent semantic Review for mathematical/scientific adequacy; rendered/source integrity checks where they actually establish availability/readability rather than semantic truth.
 - `source/SEMANTIC_DEPENDENCIES.md`: subordinate derived current view.
 
 ## 23. Protocol 6.4 adoption
@@ -441,12 +529,13 @@ Version-bound 6.3 work remains governed by 6.3. A newer installed/latest skill n
 
 When project/workplan explicitly adopts 6.4 over a bounded task scope:
 
-1. identify materially relied-upon D1-D4 definitions/invariants;
-2. confirm 6.4 definition/availability/provenance/validity closure or repair representation at canonical owner without changing meaning;
+1. identify materially relied-upon D1-D4 semantic objects/definitions/invariants;
+2. confirm 6.4 source-availability, definition/provenance/validity/warrant closure or repair representation at the canonical owner without changing meaning;
 3. preserve unrelated authority and historical artifacts;
 4. if representation repair exposes multiple materially different meanings, stop editorial repair and reopen/challenge owning D1-D4 authority;
 5. reconcile only materially dependent evidence/concretizations;
-6. ensure composed owner versions are mutually compatible under Section 14.
+6. ensure composed owner versions are mutually compatible under Section 14;
+7. ensure any agent/runtime making dependent inferences actually loads the required canonical owner under Section 16.
 
 Adoption is neither a global rewrite mandate nor permission to rely indefinitely on ambiguous predecessor prose.
 
@@ -483,19 +572,23 @@ Edit canonical source first; regenerate descendants. Do not independently hand-e
 
 Protocol 7 active parent/Revisions 1-4 remain semantically untouched during 6.4 implementation. Only after 6.4 acceptance add a narrow inheritance-only Protocol-7 revision.
 
-## 25. Mechanization constraint
+## 25. Mechanization and presentation-integrity constraint
 
 Prefer documentation convention plus bounded structural/static sensors over a persistent subsystem. Automated checks may honestly verify such properties as:
 
 - required labels/fields under an explicitly structured canonical format;
-- cross-reference and local dependency-ID resolution;
+- cross-reference, stable logical locator, and local dependency-ID resolution;
 - duplicate IDs or unresolved labels;
 - generated trace parity with canonical source;
 - frozen prior-version byte stability;
 - profile/schema/version consistency;
-- obvious type/unit metadata consistency where explicitly machine-encoded.
+- obvious type/unit metadata consistency where explicitly machine-encoded;
+- Markdown link/anchor integrity and LaTeX/delimiter/parser integrity where the repository has a supported checker/renderer;
+- source-to-render parity and absence of broken/clipped/unreadable equations/tables on supported rendered documentation surfaces, using human/visual review where automation cannot decide presentation quality.
 
-Automation SHALL NOT claim to prove arbitrary natural-language mathematics, scientific truth, theorem applicability, semantic equivalence, dimensional validity hidden in prose, literature support, audience expertise, or complete dependency discovery. Human/independent Review remains responsible for those semantic questions.
+Automation SHALL NOT claim to prove arbitrary natural-language mathematics, scientific truth, theorem applicability, semantic equivalence, dimensional validity hidden in prose, literature support, audience expertise, complete dependency discovery, or whether an acronym is truly obvious to every intended reader. Human/independent Review remains responsible for those semantic questions.
+
+A mechanically valid source file is not sufficient if a supported rendered/publication surface makes a material definition unreadable or changes its apparent notation. Conversely, no rendered-output ceremony is required for a source-only surface that has no supported renderer.
 
 No theorem prover, ontology service, citation database, semantic hash registry, shadow definition store, or universal dependency graph is required by 6.4.
 
@@ -510,7 +603,7 @@ No theorem prover, ontology service, citation database, semantic hash registry, 
 
 ## 27. PEM/HAS basis for this mature protocol revision
 
-PEM remains activated as decision support because this is mature protocol rework.
+PEM remains activated as decision support because this is mature protocol rework. The Historical Applicability Set (HAS) for this design is:
 
 ```yaml
 pem_basis:
@@ -553,9 +646,9 @@ The following are explicit acceptance obligations in addition to all inherited P
 | T64-14 | Require specialized external prerequisites to be precisely stated and source-bound. |
 | T64-15 | Distinguish imported/base knowledge, project declarations/modifications, derivation, and novelty claims. |
 | T64-16 | Require symbol/domain/unit/convention/assumption/validity closure at first formal occurrence when material. |
-| T64-17 | Use a true acyclic direct definition-use DAG; valid recursive systems are composite nodes/SCC condensation. |
-| T64-18 | Include definition descendants in bounded semantic impact analysis after material change. |
-| T64-19 | Keep canonical definitions in D1-D4 owners; traceability artifacts remain subordinate. |
+| T64-17 | Use a true acyclic direct semantic-definition-use DAG; valid recursive systems are composite nodes/SCC condensation. |
+| T64-18 | Include definition/semantic-use descendants in bounded semantic impact analysis after material change. |
+| T64-19 | Keep canonical semantic statements in D1-D4 owners; traceability artifacts remain subordinate. |
 | T64-20 | Apply strongest practical mathematical/axiomatic form to D1/D2 while preserving delegation. |
 | T64-21 | Apply formal relations/contracts to D3/D4 where ambiguity reduction is material without freezing private mechanics. |
 | T64-22 | Preserve background terminology and first-use abbreviation rules. |
@@ -567,15 +660,15 @@ The following are explicit acceptance obligations in addition to all inherited P
 | T64-28 | Reconcile README/AGENTS/version/history/authority index from canonical semantics only. |
 | T64-29 | After 6.4 acceptance, reconcile Protocol 7 inheritance only; do not authorize Protocol-7 D4 through that revision. |
 | T64-30 | Preserve minimum justified mechanism; no ontology/shadow database/compliance wrapper absent demonstrated need. |
-| T64-31 | Keep availability/source support orthogonal to semantic/epistemic role and novelty. |
-| T64-32 | Restrict `USES_DEFINITION` to direct definition prerequisites; keep other relations typed separately. |
+| T64-31 | Keep availability/source support orthogonal to semantic/epistemic role, novelty, and normative force. |
+| T64-32 | Restrict `USES_DEFINITION` to direct semantic-meaning prerequisites; keep derivation, assumption, validity, evidence, execution, and concretization relations typed separately. |
 | T64-33 | Represent legitimate recursive/simultaneous definitions as composite nodes so external trace remains acyclic. |
 | T64-34 | Require exact typed cross-domain routes for material lower-domain semantics to upstream definitions/invariants. |
 | T64-35 | Bind imported specialized knowledge to exact source/version/locator when variants matter and verify support. |
 | T64-36 | Define source-to-local notation/unit/convention mapping when materially different. |
 | T64-37 | Prevent foundational-scope laundering. |
 | T64-38 | Keep semantic identity distinct from symbols/labels/anchors and map aliases explicitly. |
-| T64-39 | Preserve one canonical definition across secondary artifacts; exact supplied/version-bound routing satisfies availability without duplication. |
+| T64-39 | Preserve one canonical semantic statement across secondary artifacts; exact supplied/version-bound routing satisfies source availability without duplication. |
 | T64-40 | Apply bounded 6.4 adoption over materially depended-on authority, not global rewrite. |
 | T64-41 | Keep Background import exposition subordinate to owning D1-D4 normative invocation. |
 | T64-42 | Keep 6.4 discoverable through active authority routing while 6.3 remains accepted-current. |
@@ -588,8 +681,8 @@ The following are explicit acceptance obligations in addition to all inherited P
 | T64-49 | Preserve approximation/empirical/uncertainty status downstream. |
 | T64-50 | Require material derivations to expose direct proof/premise dependencies and reject circular warrant. |
 | T64-51 | Make `evidence-evolution-and-dependencies.md` canonical owner of `USES_DEFINITION` relation semantics. |
-| T64-52 | Require material completeness of direct definition-use edges over declared canonical scope. |
-| T64-53 | Treat material definition change as owner-level semantic mutation; stable labels do not preserve applicability. |
+| T64-52 | Require material completeness of direct semantic-definition-use edges over declared canonical scope. |
+| T64-53 | Treat material semantic-definition change as owner-level mutation; stable labels do not preserve applicability. |
 | T64-54 | Treat source correction/retraction/incompatible revision as present-use binding/applicability event. |
 | T64-55 | Keep profile schema v2 unless machine-readable profile contract actually changes. |
 | T64-56 | Preserve PEM schema independence and avoid memory churn absent admitted learning. |
@@ -607,6 +700,19 @@ The following are explicit acceptance obligations in addition to all inherited P
 | T64-68 | Keep `USES_DEFINITION` distinct from activation while requiring prerequisite owner loading before substantive inference. |
 | T64-69 | Self-host the new doctrine on current 6.4 canonical protocol/reference documents proportionately. |
 | T64-70 | Use this consolidated file as the sole current 6.4 implementation/review handoff; parent/Revisions 1-2 remain design-history evidence. |
+| T64-71 | Define the core 6.4 terms `semantic object/unit`, canonical semantic statement, substantive semantic use, and material direct prerequisite before relying on them. |
+| T64-72 | Separate source-level semantic availability from runtime-context availability and enforce both invariants at their proper layer. |
+| T64-73 | Make `USES_DEFINITION` cover any governed semantic unit whose canonical statement directly requires another object's meaning, including primitive declarations, theorem/result statements, assumptions, algorithms, and contracts; do not restrict it to definition-to-definition edges. |
+| T64-74 | Bind direct-edge materiality to a falsifiable semantic-change criterion and to the inherited governed scope; author convenience cannot narrow trace completeness. |
+| T64-75 | Require explicit definitions intended as definitional extensions to be conservative over prior vocabulary; separate any additional existence/empirical/normative claim. |
+| T64-76 | Require bounded typed warrant closure for established material claims and reject self-supporting cycles across mixed relation types. |
+| T64-77 | Keep external semantic/evidentiary support separate from external normative force; binding standards/contracts/regulations govern only through their real authority route. |
+| T64-78 | Preserve source-to-local transformation lineage for imported empirical data/reference values when preprocessing/selection/calibration/conversion materially changes meaning. |
+| T64-79 | Make necessary/sufficient/biconditional direction explicit when it can change the conclusion or admissible set. |
+| T64-80 | Give material cross-document semantic endpoints a durable owner + version/snapshot + logical locator sufficient to survive ordinary movement without a global registry. |
+| T64-81 | If the strongest practical formal representation still leaves material alternative interpretations, preserve `REVIEW_REQUIRED`/Challenge rather than declaring prose adequate by convenience. |
+| T64-82 | Self-host first-use expansion/background requirements in current 6.4 documents, including this workplan; non-obvious abbreviations must not remain unexplained. |
+| T64-83 | Preserve source/render/link/formula integrity on supported documentation surfaces so a formally correct source cannot become semantically unavailable through broken presentation. |
 
 ## 29. Required qualification/counterfactual catalog
 
@@ -703,9 +809,31 @@ Q64-87 router loads required owner before substantive dependent inference -> PAS
 Q64-88 semantic object splits/merges but current consumers remain bound to ambiguous old identity -> FAIL
 Q64-89 retired definition has no supported current consumers, material history/lineage remains recoverable -> PASS
 Q64-90 implementation/reviewer must replay parent+multiple amendments because no single current 6.4 handoff exists -> FAIL
+Q64-91 specialized core term such as `semantic object` is used normatively before its meaning is established -> FAIL
+Q64-92 object is source-available by route but agent performs dependent inference without loading the exact canonical meaning into runtime context -> FAIL
+Q64-93 router loads the version-bound canonical owner before dependent inference, preserving source/context availability distinction -> PASS
+Q64-94 project primitive has no constructive definition but its canonical declaration is traced as a root used by downstream semantic units -> PASS
+Q64-95 theorem/assumption/algorithm/contract uses a definition materially but is omitted because trace implementation only records definition-to-definition edges -> FAIL
+Q64-96 author labels a direct prerequisite “immaterial” even though changing its admissible meaning changes the subject's denotation/domain/validity/contract -> FAIL
+Q64-97 explicit “definition” adds a new property of prior vocabulary without exposing the additional assumption/result/contract -> FAIL
+Q64-98 conservative definitional extension plus separately classified/warranted additional proposition -> PASS
+Q64-99 claim appears supported only through a mixed circular chain of derivation, hypothesis discharge, citation/evidence interpretation, or authority references that ultimately depends on the same claim -> FAIL
+Q64-100 material established claim has bounded typed warrant closure terminating in admissible independent roots -> PASS
+Q64-101 scientific literature citation is treated as a binding project contract solely because it is authoritative literature -> FAIL
+Q64-102 applicable external standard/contract/regulation is explicitly bound through the real governing authority while its source citation separately states its content -> PASS
+Q64-103 imported dataset/reference value is materially filtered/transformed/calibrated locally but only raw-source provenance is recorded -> FAIL
+Q64-104 source identity plus material source-to-local transformation/selection/calibration mapping is recoverable -> PASS
+Q64-105 necessary and sufficient conditions are reversed or left ambiguous and the distinction changes admissibility/conclusion -> FAIL
+Q64-106 implication/biconditional direction is explicit and matches the governed claim -> PASS
+Q64-107 material cross-document semantic dependency uses a floating/ambiguous locator that can retarget silently under ordinary movement/version change -> FAIL
+Q64-108 strongest practical formalization still admits materially different interpretations but document declares closure instead of `REVIEW_REQUIRED`/Challenge -> FAIL
+Q64-109 unresolved formalization boundary is made explicit and routed as `REVIEW_REQUIRED`/Challenge rather than hidden -> PASS
+Q64-110 current 6.4 human-facing document uses a non-obvious abbreviation such as IID/SCC/HAS before first-use expansion -> FAIL
+Q64-111 supported rendered/source surface breaks or alters a material formula/link/anchor so the canonical meaning cannot be recovered reliably -> FAIL
+Q64-112 supported source/render/link checks pass and independent inspection finds material equations/tables/definitions readable and notation-preserving -> PASS
 ```
 
-Semantic cases such as Q64-16, 33-35, 39, 43, 50, 56, 59, 63-66, 70-89 rely on independent Review or deliberately bounded objective fixtures where lexical/static checking cannot honestly decide the claim.
+Semantic cases such as Q64-16, 33-35, 39, 43, 50, 56, 59, 63-66, 70-89, and 91-112 rely on independent Review or deliberately bounded objective fixtures where lexical/static checking cannot honestly decide the claim.
 
 ## 30. Independent falsification passes
 
@@ -750,17 +878,26 @@ Attempt dimensionally invalid but well-typeset equations, quantifier swaps, unde
 ### F64-M — Composition / self-hosting / routing / consolidation challenge
 Attempt incompatible mixed-version authority composition, semantic-equivalence laundering, example-to-authority promotion, unloaded-prerequisite reasoning under progressive disclosure, definition split/merge/retirement drift, or violation of 6.4 by its own current canonical documentation. Confirm this consolidated workplan alone reconstructs the current 6.4 implementation contract.
 
+### F64-N — Core-term / availability / semantic-use challenge
+Attempt to use undefined core 6.4 terminology, conflate source availability with runtime loading, omit primitive/theorem/assumption/algorithm/contract uses from `USES_DEFINITION`, or manipulate “materiality” to hide a meaning-changing direct prerequisite.
+
+### F64-O — Warrant / authority-force / import-transformation challenge
+Attempt mixed-relation circular warrant, citation-to-authority laundering, external-binding ambiguity, or use of transformed empirical inputs whose local semantic lineage cannot be reconstructed from their source.
+
+### F64-P — Definitional-conservativity / logical-direction / presentation-integrity challenge
+Attempt to introduce new truth through a definition, reverse necessary/sufficient conditions, close materially ambiguous under-formalized prose, leave non-obvious abbreviations undefined, or render/break a source-valid formal statement so the intended reader cannot recover its canonical meaning.
+
 ## 31. Implementation stages
 
 ### Stage A — Canonical doctrine
 
-1. Amend `abstraction-and-concretization.md` with scope-aware semantic availability, definition/provenance closure, primitive roots, and derived-trace subordination.
-2. Rewrite `scientific-technical-writing.md` around the consolidated formal-first/axiomatic doctrine while preserving readability/background/progressive disclosure.
+1. Amend `abstraction-and-concretization.md` with the core semantic-unit terminology, source-level semantic availability, definition/provenance closure, primitive roots, direct-prerequisite materiality, and derived-trace subordination.
+2. Rewrite `scientific-technical-writing.md` around the consolidated formal-first/axiomatic doctrine while preserving readability/background/progressive disclosure, including definitional conservativity, external-support/authority-force separation, and first-use abbreviation discipline.
 3. Add D1/D2 mathematical consequences and D3/D4 formal-contract consequences without domain leakage.
-4. Mandatorily amend `evidence-evolution-and-dependencies.md` to own `USES_DEFINITION` direction, durable endpoints, bounded completeness/absence, source-binding/evolution interaction, and impact closure.
-5. Reconcile documentation/workflow/testing/versioning owners only for their local consequences.
+4. Mandatorily amend `evidence-evolution-and-dependencies.md` to own widened `USES_DEFINITION` direction, durable endpoints, bounded completeness/absence, source-binding/evolution interaction, and impact closure.
+5. Reconcile documentation/workflow/testing/versioning owners only for their local consequences, including source-vs-context availability and bounded warrant closure.
 6. Reconcile `source/SEMANTIC_DEPENDENCIES.md` as a derived current view.
-7. Apply the new doctrine to current 6.4 canonical protocol/reference prose itself proportionately; frozen predecessors remain untouched.
+7. Apply the new doctrine to current 6.4 canonical protocol/reference prose and this current workplan proportionately; frozen predecessors remain untouched.
 
 ### Stage B — Versioned profile/source integration
 
@@ -772,12 +909,13 @@ Attempt incompatible mixed-version authority composition, semantic-equivalence l
 
 ### Stage C — Qualification
 
-1. Implement Q64-01..Q64-90 with semantic review fixtures and machine checks only where honest.
+1. Implement Q64-01..Q64-112 with semantic review fixtures and machine checks only where honest.
 2. Re-run complete inherited repository regression and applicable 6.3 qualification/preservation oracles.
 3. Independently build/validate packages and committed distribution parity.
 4. Verify orchestrator profile/snapshot/Core acceptance when affected.
 5. Verify prior frozen trees byte-identically.
-6. Execute self-hosting review over current 6.4 canonical references.
+6. Execute self-hosting review over current 6.4 canonical references and this workplan.
+7. Execute supported Markdown/link/anchor/LaTeX/source-to-render integrity checks and human presentation inspection where a supported rendered surface exists; do not claim these prove semantic correctness.
 
 ### Stage D — Semantic candidate and bootstrap
 
@@ -789,7 +927,7 @@ Attempt incompatible mixed-version authority composition, semantic-equivalence l
 
 ### Stage E — Independent assembled-candidate Review
 
-Reviewer reconstructs from accepted Protocol 6.3 plus this consolidated handoff, not implementer conclusions or superseded amendment text. Review T64-01..T64-70, Q64-01..Q64-90, F64-A..F64-M, frozen resources, definition/type/validity/trace semantics, generated/profile/schema surface, exact-ref bootstrap, self-hosting, and compatibility.
+Reviewer reconstructs from accepted Protocol 6.3 plus this consolidated handoff, not implementer conclusions or superseded amendment text. Review T64-01..T64-83, Q64-01..Q64-112, F64-A..F64-P, frozen resources, source/context availability, semantic-use/definition/type/validity/warrant/trace semantics, external support/authority force, generated/profile/schema surface, exact-ref bootstrap, self-hosting, presentation integrity, and compatibility.
 
 Any material semantic mutation after reviewed candidate reopens affected qualification/Review.
 
@@ -814,14 +952,16 @@ Protocol 6.4 does not:
 - classify all graduate-level knowledge as foundational;
 - replace natural-language explanation/motivation/interpretation/rationale/limitations;
 - require theorem proving, symbolic-math checking, global ontology, citation database, semantic hash registry, or universal dependency database;
-- claim automated proof of scientific/mathematical correctness;
+- claim automated proof of scientific/mathematical correctness, warrant sufficiency, or semantic equivalence;
 - turn literature/background/evidence/examples into project authority;
+- deny the normative force of genuinely applicable external contracts/standards/regulations merely because they are external; their force remains owned by the actual governing constraint;
 - change existing projects' scientific/numerical meaning merely to improve representation;
 - retroactively rewrite frozen historical protocol artifacts;
 - change PEM schema solely for definition traceability;
 - mutate Protocol-7 D3/control-plane semantics or authorize its implementation/cutover;
 - force a full project documentation rewrite on bounded 6.4 adoption;
-- force formalization beyond the owning domain's abstraction boundary.
+- force formalization beyond the owning domain's abstraction boundary;
+- permit materially ambiguous semantics to be declared closed merely because a stronger formalization is inconvenient.
 
 ## 33. Reopen / Challenge triggers
 
@@ -829,12 +969,17 @@ Reopen the earliest affected owner when:
 
 - strict traceability requires materially changing D1-D4 semantics rather than representing them;
 - foundational/imported/project-declared boundaries remain materially ambiguous;
+- source-level semantic availability cannot be established from a coherent canonical owner/source;
 - a proposed formal definition is not well-defined or requires unresolved existence/uniqueness/consistency assumptions that matter to outcome;
 - theorem/result hypotheses cannot be discharged/assumed/propagated coherently;
-- typed definition/derivation/validity relations conflict with existing semantic-dependency authority;
+- an established claim's warrant is circular, unavailable, or incompatible with its claim class;
+- typed semantic-definition-use/derivation/validity relations conflict with existing semantic-dependency authority;
 - cross-domain definition dependencies create an unjustified upstream back-edge;
 - current composed authority cannot be made version-coherent without semantic migration;
+- external support and normative-force routing conflict or cannot be resolved;
+- imported data transformation prevents recoverable source-to-local semantic identity;
 - formal representation freezes delegated lower-level mechanisms;
+- the strongest practical formalization still leaves materially different interpretations without an accepted uncertainty/Challenge treatment;
 - 6.4 cannot preserve frozen 6.3 capability/profile/recovery contract;
 - a validator would need to adjudicate scientific truth rather than structural well-formedness;
 - a profile/schema change is actually required, in which case its machine-contract owner must explicitly justify it;
@@ -842,20 +987,39 @@ Reopen the earliest affected owner when:
 
 ## 34. Fourth-review gap closure
 
-This fourth review added the following closures beyond the third-review state:
+The fourth review added these closures beyond the third-review state:
 
-1. **Dimensional/type consistency:** declaring units is insufficient; formal equations/contracts must be type/dimension coherent where meaningful.
-2. **Relation/operator semantics:** equality, definition, assignment, approximation, equivalence, distributional relation, implication, etc. cannot be silently conflated.
-3. **Quantifier order:** scope/order are explicit when swapping them changes meaning.
-4. **Stochastic closure:** probability/dependence/conditioning/convergence distinctions are required when they can change scientific/numerical meaning.
-5. **Layer-direction protection:** formal traceability cannot let D3/D4 incidental mechanics leak upward into D1/D2 authority.
-6. **Coherent authority composition:** cross-file definitions resolve under one compatible version/snapshot; floating mixed revisions are not silently composed.
-7. **Empirical imports:** constants/reference data/datasets receive the same exact provenance/conditions/uncertainty discipline as imported theorems/methods.
-8. **Semantic-equivalence criterion:** editorial/notation changes preserve identity only when governed denotation/contracts/conditions are independently shown equivalent.
-9. **Split/merge/retirement:** semantic lineage and all current consumers are reconciled explicitly.
-10. **Example status:** illustrative examples/counterexamples do not become authority by appearing in a formal document.
-11. **Progressive-disclosure reconciliation:** semantic dependency is not activation, but an unloaded prerequisite cannot be used for inference merely because it is discoverable.
-12. **Self-hosting:** current 6.4 canonical doctrine must satisfy its own formal-definition rules proportionately.
-13. **Workplan consolidation:** the parent + two amendment chain is no longer the current implementation contract; this snapshot-complete consolidated file is.
+1. dimensional/type consistency;
+2. relation/operator semantics;
+3. quantifier order;
+4. stochastic closure;
+5. layer-direction protection;
+6. coherent authority composition;
+7. empirical imports;
+8. semantic-equivalence criterion;
+9. split/merge/retirement;
+10. example status;
+11. progressive-disclosure reconciliation;
+12. self-hosting;
+13. workplan consolidation.
 
-**FOURTH DESIGN REVIEW VERDICT: PASS — blockers 0; Serious Challenges 0.**
+## 35. Fifth-review gap closure
+
+The fifth review found and closed fourteen additional gaps in the single consolidated contract:
+
+1. **Core-term self-definition:** `semantic object/unit`, canonical semantic statement, substantive semantic use, and material direct prerequisite are now defined before normative reuse.
+2. **Two availability layers:** source/document semantic availability is distinct from runtime-context loading; authoring and agent inference have separate explicit invariants.
+3. **Trace subject completeness:** `USES_DEFINITION` now covers governed semantic units generally, not only definition-to-definition dependencies.
+4. **Primitive-root semantics:** canonical declarations can be dependency roots even when no constructive definition exists.
+5. **Materiality criterion:** direct-edge omission is no longer author-discretionary when changing the prerequisite can change governed meaning.
+6. **Mixed-relation warrant closure:** established claims cannot acquire warrant through a circular combination of derivation, hypothesis discharge, citation/evidence interpretation, or authority reference.
+7. **Definitional conservativity:** a true definitional extension cannot create new truth about prior vocabulary; additional claims are separated and warranted.
+8. **Support vs authority:** imported knowledge/evidence is distinct from genuinely binding external constraints, whose force comes from the real governing authority.
+9. **Empirical transformation lineage:** transformed/filtered/calibrated imported data preserve a reconstructible source-to-local semantic mapping.
+10. **Logical direction:** necessary, sufficient, and biconditional conditions are explicit when material.
+11. **Durable semantic locators:** cross-document endpoints bind owner + version/snapshot + stable logical location without requiring a global ID registry.
+12. **No under-formalization escape hatch:** if strongest practical formalization still leaves material alternatives, closure becomes `REVIEW_REQUIRED`/Challenge rather than assumed adequacy.
+13. **Self-hosting abbreviations/background:** Scientific Software Development Protocol, D1-D4, Project Engineering Memory, Historical Applicability Set, directed acyclic graph, strongly connected component, and independent and identically distributed are defined/expanded before non-obvious shorthand is relied upon.
+14. **Presentation integrity:** supported source/render/link/formula failures that make canonical meaning unreadable are now explicit qualification failures without pretending rendering proves mathematical truth.
+
+**FIFTH DESIGN REVIEW VERDICT: PASS — blockers 0; Serious Challenges 0.**

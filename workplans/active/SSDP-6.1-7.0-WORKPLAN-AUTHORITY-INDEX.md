@@ -114,13 +114,13 @@ Protocol 6.4 design/implementation/review SHALL use the single current consolida
 
 1. `workplans/active/SSDP-6.4-AXIOMATIC-FORMAL-DEFINITION-AND-SEMANTIC-TRACEABILITY-CONSOLIDATED.md`
 
-The earlier parent, Revision 1, and Revision 2 are archived design-review evidence. They preserve how gaps were discovered and closed but are not required to reconstruct the current implementation contract. The consolidated file losslessly carries their still-binding requirements plus fourth-review closures for dimensional/type consistency, quantifier/relation semantics, stochastic closure, cross-domain direction, coherent versioned composition, empirical-import provenance, semantic equivalence/split-merge-retirement, progressive-disclosure availability, self-hosting, and consolidated routing.
+The earlier parent, Revision 1, and Revision 2 are archived design-review evidence. They preserve how gaps were discovered and closed but are not required to reconstruct the current implementation contract. The consolidated file losslessly carries their still-binding requirements plus fourth- and fifth-review closures for dimensional/type consistency, quantifier/relation semantics, stochastic closure, cross-domain direction, coherent versioned composition, empirical-import provenance and transformation lineage, semantic equivalence/split-merge-retirement, source-vs-runtime availability, widened semantic-definition-use tracing, typed warrant closure, definitional conservativity, external support-vs-authority separation, progressive-disclosure availability, self-hosting, presentation integrity, and consolidated routing.
 
 Current disposition:
 
 ```text
 SERIOUS CHALLENGE: NONE
-FOURTH DESIGN REVIEW: PASS AFTER GAP CLOSURE
+FIFTH DESIGN REVIEW: PASS AFTER GAP CLOSURE
 IMPLEMENTATION HANDOFF: AUTHORIZED — CONSOLIDATED
 IMPLEMENTATION STATUS: PROPOSED / NOT YET QUALIFIED
 ACCEPTED PARENT: Protocol 6.3 recovery 9f353097fab36e325a325f1c2f9d9cec32e86177
