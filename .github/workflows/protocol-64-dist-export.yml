@@ -1,0 +1,36 @@
+name: Protocol 6.4 Distribution Export
+
+on:
+  push:
+    branches:
+      - ssdp-6.4-axiomatic-definition-traceability
+    paths:
+      - .github/workflows/protocol-64-dist-export.yml
+
+permissions:
+  contents: read
+
+jobs:
+  export:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ssdp-6.4-axiomatic-definition-traceability
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Build distribution
+        run: python source/build_skills.py --output /tmp/protocol-dist
+      - name: Emit ZIP chunks as annotations
+        shell: python
+        run: |
+          import base64
+          from pathlib import Path
+          root = Path('/tmp/protocol-dist')
+          width = 40000
+          for path in sorted(root.glob('*.zip')):
+              encoded = base64.b64encode(path.read_bytes()).decode('ascii')
+              chunks = [encoded[i:i+width] for i in range(0, len(encoded), width)]
+              for index, chunk in enumerate(chunks, 1):
+                  print(f'::notice title=SSDP64ZIP::{path.name}|{index}|{len(chunks)}|{chunk}')
