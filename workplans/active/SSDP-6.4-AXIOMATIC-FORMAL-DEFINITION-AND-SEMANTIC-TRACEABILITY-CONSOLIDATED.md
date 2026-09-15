@@ -7,8 +7,8 @@ status: active
 created_date: 2026-09-15
 reviewed_date: 2026-09-15
 design_review_state: pass-after-sixth-review
-independent_review_state: repaired-awaiting-exact-target-qualification
-implementation_handoff: repair-complete
+independent_review_state: fresh-review-required
+implementation_handoff: repair-complete-bound
 active_serious_challenge: none
 branch: ssdp-6.4-axiomatic-definition-traceability
 reviewed_input_head: 4974058020cdda1325ef899c04b3cd13d5ae44c2
@@ -27,7 +27,7 @@ accepted_parent_public_bootstrap: 86c13cab6bdd1991dffa94e277db8eacf87e2e11
 
 ## Current disposition
 
-**B64-R6/B64-R7 REPAIR: COMPLETE — NEW ASSEMBLED TARGET QUALIFICATION REQUIRED.** Repair commit `7ca12ac7784d1ca9f4a1107320dd1dcd8574434a` closes the two D4 qualification/current-lifecycle-oracle blockers found by independent Review of `05b6d821dcdb885c86db79e38ce1e23a24863b3f`: QF64-H now includes theorem/result semantic-use coverage with a discriminating omission mutant, and QF64-P now models stable Stage-E lifecycle phases rather than a historical blocker-specific literal. Ordinary PR run `35035003776` passed on the repair commit as stage-local evidence. This assembled candidate intentionally carries a pending descendant handoff sentinel and must receive its own exact-target ordinary PR qualification before a later descendant binds the candidate SHA/CI and fresh Stage-E Review begins. No Serious Challenge is active. Protocol 6.3 remains accepted-current; Protocol 6.4 recovery remains unavailable; Stage F remains blocked.
+**FRESH STAGE-E REVIEW: READY — IMMUTABLE TARGET BOUND.** B64-R6/B64-R7 repair commit `7ca12ac7784d1ca9f4a1107320dd1dcd8574434a` passed stage-local ordinary PR run `35035003776`. New immutable assembled target `31818ca1c64548abda355d9be03fb5b353f5a43a` carries the repaired qualification oracle plus truthful repair-complete lifecycle state and passed exact-target ordinary PR run `35037085174`, including inherited protocol regression, package build/independent validation, committed-dist parity, packaged-snapshot parity, full Orchestrator Core, and whitespace. The current descendant handoff binds that already-existing target and exact-target CI for a fresh independent Stage-E Review. No semantic/source doctrine changed during this lifecycle binding. No Serious Challenge is active. Protocol 6.3 remains accepted-current; Protocol 6.4 recovery remains unavailable; Stage F remains blocked until a genuine fresh-context independent Review PASS.
 
 **SIXTH DESIGN REVIEW: PASS AFTER GAP CLOSURE.** This file is the single current implementation/review handoff for Protocol 6.4. Earlier design-review workplans and the fifth-review consolidated snapshot are historical evidence only; implementation and independent Review SHALL reconstruct the current contract from this file plus accepted Protocol 6.3 owners, not by replaying amendment chronology.
 
