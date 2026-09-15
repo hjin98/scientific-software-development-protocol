@@ -73,7 +73,7 @@ Independently evaluate the complete current Protocol 6.4 implementation against 
 - Stage D publication record: `qualification/ssdp6/PROTOCOL-6.4-STAGE-D-PUBLIC-BOOTSTRAP.md`.
 - Post-publication assembled target `0377e798fbbb1054badd1193950d9c10f723be75`; ordinary PR CI `34968829366` passed both build and Orchestrator Core jobs, but the later independent Stage-E Review returned NO-PASS.
 - Repair target `0f9197207929702920efeab5e11f28ed938ed551`; closed the relation-direction, QF64-H, and Markdown-fence blockers but the subsequent independent Review found stale review-target authority/QF64-P lifecycle binding.
-- Current assembled target `ced6a352fbe84e8ed5e698d2ab133d4c5bb0f152`; exact-target PR CI `34980323042`. This row is unusable for Review while the binding state remains pending.
+- Current assembled target `ced6a352fbe84e8ed5e698d2ab133d4c5bb0f152`; exact-target ordinary PR CI `34980323042` passed. This bound handoff now makes that immutable target the sole current Stage-E Review target.
 
 Treat all of these as evidence whose claim, candidate, oracle and environment applicability must be checked. Green automation cannot substitute for the required semantic/editorial/Challenge falsification.
 
