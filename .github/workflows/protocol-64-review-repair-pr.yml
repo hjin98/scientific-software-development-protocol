@@ -35,14 +35,26 @@ jobs:
       - name: Remove temporary repair machinery before qualification
         run: |
           git checkout 0377e798fbbb1054badd1193950d9c10f723be75 -- .github/workflows/protocol-check.yml
-          rm -f .github/workflows/protocol-64-review-repair.yml
-          rm -f .github/workflows/protocol-64-review-repair-pr.yml
-          rm -f .github/workflows/protocol-64-review-repair-exec.yml
-          rm -f .github/workflows/protocol-check-repair-trigger.yml
-          rm -f .github/workflows/protocol-check-repair-note.yml
-          rm -f .github/workflows/protocol-check-patched-source.txt
-          rm -f .github/repair.READY
-          rm -f .github/scripts/protocol64_review_repair.py
+          git rm -f --ignore-unmatch \
+            .github/workflows/protocol-64-review-repair.yml \
+            .github/workflows/protocol-64-review-repair-pr.yml \
+            .github/workflows/protocol-64-review-repair-exec.yml \
+            .github/workflows/protocol-check-repair-trigger.yml \
+            .github/workflows/protocol-check-repair-note.yml \
+            .github/workflows/protocol-check-patched-source.txt \
+            .github/repair.READY \
+            .github/scripts/protocol64_review_repair.py \
+            qualification/ssdp6/STAGE-E-REPAIR-CORE-DIAGNOSTIC.txt
+          rm -f \
+            .github/workflows/protocol-64-review-repair.yml \
+            .github/workflows/protocol-64-review-repair-pr.yml \
+            .github/workflows/protocol-64-review-repair-exec.yml \
+            .github/workflows/protocol-check-repair-trigger.yml \
+            .github/workflows/protocol-check-repair-note.yml \
+            .github/workflows/protocol-check-patched-source.txt \
+            .github/repair.READY \
+            .github/scripts/protocol64_review_repair.py \
+            qualification/ssdp6/STAGE-E-REPAIR-CORE-DIAGNOSTIC.txt
       - name: Run Protocol 6.4 qualification tests
         run: python -m unittest tests.test_protocol_64_axiomatic_traceability -v
       - name: Run inherited repository regression
