@@ -1,0 +1,58 @@
+name: Temporary Protocol 6.4 current-state reconciliation rerun
+on:
+  push:
+    branches: [ssdp-6.4-axiomatic-definition-traceability]
+permissions:
+  contents: write
+jobs:
+  reconcile:
+    if: github.event.head_commit.message == 'Rerun final Protocol 6.4 current-state reconciliation'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ssdp-6.4-axiomatic-definition-traceability
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install qualification dependencies
+        run: |
+          python -m pip install pyyaml -r source/requirements-validation.txt
+          python -m pip install ./orchestrator -r orchestrator/requirements-dev.txt
+      - name: Reapply the already-qualified reconciliation patch
+        run: |
+          set -euxo pipefail
+          git show 5b25be2408d35d9ed621c36b6bddafc2d24439a2:.github/workflows/temporary-protocol64-stage-f-current-state-reconcile.yml > /tmp/original-reconcile.yml
+          python - <<'PY'
+          from pathlib import Path
+          import yaml
+          data = yaml.safe_load(Path('/tmp/original-reconcile.yml').read_text())
+          steps = data['jobs']['reconcile']['steps']
+          script = next(s['run'] for s in steps if s.get('name') == 'Reconcile accepted-current surfaces and strengthen QF64-P')
+          Path('/tmp/reconcile.sh').write_text(script)
+          PY
+          bash /tmp/reconcile.sh
+          rm -f qualification/ssdp6/STAGE-F-CURRENT-STATE-RECONCILIATION-DIAGNOSTIC-PROTOCOL-6.4.txt
+          git add -A
+          git diff --cached --check
+      - name: Full terminal qualification
+        run: |
+          set -euxo pipefail
+          python -m unittest discover -s tests -v
+          python source/project_engineering_memory.py PROJECT-ENGINEERING-MEMORY.md
+          rm -rf /tmp/protocol-dist && python source/build_skills.py --output /tmp/protocol-dist
+          python source/validate_packages.py --dist /tmp/protocol-dist
+          python source/check_dist.py --expected /tmp/protocol-dist --committed dist
+          python orchestrator/scripts/generate_protocol_snapshot.py --check
+          python orchestrator/scripts/run_core_tests.py
+          git diff --check
+      - name: Publish reconciled terminal tree
+        run: |
+          set -euxo pipefail
+          git config user.name 'Protocol 6.4 lifecycle automation'
+          git config user.email 'protocol64-lifecycle@users.noreply.github.com'
+          git add -A
+          git diff --cached --check
+          git commit -m 'Reconcile Protocol 6.4 accepted-current closeout surfaces'
+          git push origin HEAD:ssdp-6.4-axiomatic-definition-traceability
