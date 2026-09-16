@@ -74,7 +74,10 @@ jobs:
           set -euxo pipefail
           git config user.name 'Protocol 6.4 lifecycle automation'
           git config user.email 'protocol64-lifecycle@users.noreply.github.com'
-          find .github/workflows -maxdepth 1 -type f -name 'temporary-protocol64-stage-f-*.yml' -print0 | xargs -0 -r git rm
+          git checkout 50a7158f7757c8f2cb2be7baa82d7a11537dde85 -- .github/workflows/protocol-check.yml
+          find .github/workflows -maxdepth 1 -type f -name 'temporary-protocol64-stage-f-*' -print0 | xargs -0 -r git rm
+          git rm --ignore-unmatch .github/workflows/protocol-check-stage-f-bootstrap.yml
+          git rm --ignore-unmatch .github/workflows/protocol-check-instrumented.tmp
           find qualification/ssdp6 -maxdepth 1 -type f -name 'STAGE-F-DIAGNOSTIC*PROTOCOL-6.4.txt' -print0 | xargs -0 -r git rm --ignore-unmatch
           git add -A
           git diff --cached --check
