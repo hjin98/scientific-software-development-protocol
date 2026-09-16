@@ -7,8 +7,8 @@ status: active
 created_date: 2026-09-15
 reviewed_date: 2026-09-15
 design_review_state: pass-after-sixth-review
-independent_review_state: no-pass-reopened
-implementation_handoff: repair-required
+independent_review_state: repaired-awaiting-exact-target
+implementation_handoff: repair-complete-pending-descendant-handoff
 active_serious_challenge: none
 branch: ssdp-6.4-axiomatic-definition-traceability
 reviewed_input_head: 4974058020cdda1325ef899c04b3cd13d5ae44c2
@@ -27,7 +27,7 @@ accepted_parent_public_bootstrap: 86c13cab6bdd1991dffa94e277db8eacf87e2e11
 
 ## Current disposition
 
-**FRESH STAGE-E REVIEW: NO-PASS — REOPENED.** Independent Review of immutable assembled target `31818ca1c64548abda355d9be03fb5b353f5a43a`, bound by descendant handoff `718747381f1ff8c483c7af1556d1704911fa68cb` and exact-target ordinary PR qualification run `35037085174`, found two blocking D4 qualification/current-lifecycle-oracle defects: B64-R8 and B64-R9. No Serious Challenge is active. Detailed findings and owner-layer repair instructions are in `qualification/ssdp6/INDEPENDENT-REVIEW-2026-09-15-PROTOCOL-6.4-31818-NO-PASS.md`. Protocol 6.3 remains accepted-current; Protocol 6.4 public bootstrap `e09a9d1480211eea2d16d722182bb5c6de1bee12` remains authorized because no public-source semantic mutation is required by these findings; Protocol 6.4 recovery remains unavailable; Stage F remains blocked. After repair, freeze a new immutable assembled target, obtain exact-target ordinary PR CI, bind it from a later descendant handoff, and perform another fresh full Stage-E Review of all P64-A..P64-O, QF64-A..QF64-P and F64-A..F64-L.
+**STAGE-E REPAIR: COMPLETE — EXACT-TARGET QUALIFICATION REQUIRED.** B64-R8/B64-R9 were repaired at the existing D4 qualification/lifecycle surface by commit `4991b293432708956f8cb6e6daf917ff82511669`. Ordinary PR run `35072567095` passed protocol regression, canonical package build, independent package validation, committed-distribution parity, whitespace, packaged-snapshot parity, and the full Orchestrator Core suite. The assembled candidate carrying this repair-complete lifecycle state uses the required pending descendant-binding sentinel because it cannot self-name; it must pass exact-target ordinary PR qualification before a later descendant binds its SHA and CI for fresh Stage-E Review. No D1/D2/D3 semantic doctrine, Protocol-7 D3 architecture, profile schema, or public-source semantics changed. Protocol 6.3 remains accepted-current; Protocol 6.4 public bootstrap `e09a9d1480211eea2d16d722182bb5c6de1bee12` remains authorized; Protocol 6.4 recovery remains unavailable; Stage F remains blocked.
 
 **SIXTH DESIGN REVIEW: PASS AFTER GAP CLOSURE.** This file is the single current implementation/review handoff for Protocol 6.4. Earlier design-review workplans and the fifth-review consolidated snapshot are historical evidence only; implementation and independent Review SHALL reconstruct the current contract from this file plus accepted Protocol 6.3 owners, not by replaying amendment chronology.
 
