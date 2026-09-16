@@ -1,0 +1,41 @@
+name: Temporary Protocol 6.4 Stage F debug
+on:
+  push:
+    branches: [ssdp-6.4-axiomatic-definition-traceability]
+permissions:
+  contents: read
+jobs:
+  diagnose:
+    if: github.event.head_commit.message == 'Diagnose Protocol 6.4 Stage F transaction'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ssdp-6.4-axiomatic-definition-traceability
+          fetch-depth: 0
+      - name: Diagnose recovery and mapping anchors
+        shell: bash
+        run: |
+          set -euxo pipefail
+          git merge-base --is-ancestor f1e0ca95f4d1895e3497e155105468fa73f47827 74bc572ef516cae417437a2027eeff52a2e25c15
+          git merge-base --is-ancestor 0928accd337a13f864b292ed81c36372828cfb4c 74bc572ef516cae417437a2027eeff52a2e25c15
+          python - <<'PY'
+          from pathlib import Path
+          checks={
+          'wp-review':('workplans/active/SSDP-6.4-AXIOMATIC-FORMAL-DEFINITION-AND-SEMANTIC-TRACEABILITY-CONSOLIDATED.md','independent_review_state: fresh-review-required'),
+          'wp-handoff':('workplans/active/SSDP-6.4-AXIOMATIC-FORMAL-DEFINITION-AND-SEMANTIC-TRACEABILITY-CONSOLIDATED.md','implementation_handoff: repair-complete-bound'),
+          'wp-stagef':('workplans/active/SSDP-6.4-AXIOMATIC-FORMAL-DEFINITION-AND-SEMANTIC-TRACEABILITY-CONSOLIDATED.md','stage_f: blocked'),
+          'handoff-review':('qualification/ssdp6/INDEPENDENT-REVIEW-HANDOFF-PROTOCOL-6.4.md','independent_review: required_fresh_context'),
+          'handoff-recovery':('qualification/ssdp6/INDEPENDENT-REVIEW-HANDOFF-PROTOCOL-6.4.md','protocol_64_recovery: unavailable_pending_independent_review'),
+          'handoff-stagef':('qualification/ssdp6/INDEPENDENT-REVIEW-HANDOFF-PROTOCOL-6.4.md','stage_f: blocked_pending_independent_review'),
+          'version-map':('source/shared/references/protocol-versioning-and-compatibility.md','6.3.0  -> 9f353097fab36e325a325f1c2f9d9cec32e86177\n```'),
+          'version-no64':('source/shared/references/protocol-versioning-and-compatibility.md','There is deliberately no 6.4 recovery entry while 6.4 remains a proposed candidate. Recovery is published only after qualification, independent assembled-candidate Review, bootstrap/publication sequencing, generated reconciliation, and lifecycle acceptance establish an immutable recovery target.'),
+          'version-proposed':('source/shared/references/protocol-versioning-and-compatibility.md','Protocol 6.4 is **proposed, not accepted-current**. Qualified self-reference-safe public bootstrap `e09a9d1480211eea2d16d722182bb5c6de1bee12` is now the sole authorized version-bound 6.4 public fallback; this publication does not make 6.4 accepted-current and does not authorize recovery.'),
+          }
+          bad=[]
+          for name,(path,needle) in checks.items():
+              n=Path(path).read_text().count(needle)
+              print(name,n)
+              if n != 1: bad.append((name,n))
+          if bad: raise SystemExit(f'bad anchors: {bad}')
+          PY
