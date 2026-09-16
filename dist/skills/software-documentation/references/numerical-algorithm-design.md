@@ -35,3 +35,13 @@ Hand D3 only the computational semantics architecture must preserve: governed op
 D3 must be faithful to D2 and abstractly adequate: omitting ordering, precision, state or reduction semantics can make a locally coherent architecture numerically wrong. On accepted D2 change, close dependent D3/D4, evidence, documentation/dependency views, required re-ratification and semantic history while preserving unaffected siblings/still-valid evidence.
 
 Material Review seeks wrong limiting behavior, degraded convergence, hidden normalization, instability/ill-conditioning, estimator/stochastic bias, precision bias, non-equivalent restart and parallel/reordered arithmetic outside the accepted envelope. If accepted D2 itself may be materially false, contradictory, ambiguous or unrealizable, raise **SERIOUS CHALLENGE** instead of patching D3/D4 around it.
+
+## Protocol 6.4 D2 formal-definition consequences
+
+D2 must state the governed numerical method in a definition-closed form sufficient to distinguish materially different algorithms. Introduce operators, estimators, recurrences, update maps, optimization problems, discretizations, residual/error measures, stopping predicates, normalization/reduction/order rules, precision policy, stochastic variables/laws and uncertainty semantics before later claims use them. Define material input/output spaces, types/shapes/units, indexing/order, initialization, termination and partial/failure domains.
+
+For stochastic methods, close the material probability semantics: random objects/sample law or mechanism, dependence/independence/conditioning assumptions, estimator/statistic, finite-sample versus asymptotic status, convergence mode, and governed seed/reproducibility behavior. “Random” or “IID” prose is insufficient when alternatives alter the estimator or guarantee.
+
+For a parameterized numerical family, distinguish the family from an instance and from defaults such as tolerance, order, timestep, cutoff, sample count or solver option. Identify the binding source and owning layer of each governed default; characterize parameter-dependent validity, error, convergence, stability and evidence applicability. Evidence from one material parameter regime cannot silently establish another.
+
+Derived numerical theorems/guarantees must expose their material prerequisites and warrant; imported algorithms/results obey the exact-source/variant rule. Definition alone does not prove convergence, stability, existence/uniqueness, unbiasedness, accuracy or computational complexity. Formal expressions must use the correct relation kind and logical direction rather than conflating definitional equality, approximation, assignment, implication or equivalence.

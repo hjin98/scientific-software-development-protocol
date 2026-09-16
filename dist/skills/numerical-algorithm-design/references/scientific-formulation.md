@@ -33,3 +33,13 @@ A D2 child must be faithful to accepted D1 and abstractly adequate: it must pres
 On accepted D1 change, perform bounded impact closure over dependent D2-D4, evidence, documentation/dependency views, re-ratification and semantic history; preserve unaffected siblings/still-valid evidence.
 
 Material D1 Review seeks the smallest credible counterexample, hidden assumption, inconsistent equation/definition, dimensional/interpretive error, calibration-validation leakage, or wrong-problem formulation. If accepted D1 itself may be materially false, contradictory, ambiguous, inadequate or unrealizable, raise **SERIOUS CHALLENGE** rather than rewriting it to fit downstream behavior.
+
+## Protocol 6.4 D1 formal-definition consequences
+
+D1 authority uses formal-first, definition-before-substantive-use semantics for materially governed scientific/mathematical objects. Define or exactly import observables, estimands, states, distributions, fields, parameters, equations/models, constitutive/closure relations, predicates, assumptions and validity conditions before downstream inference depends on them. Every material symbol resolves to its domain/type/shape/unit and scope; physical equations are dimensionally coherent; bound/free-variable and quantifier direction are explicit when material.
+
+For parameterized scientific families distinguish the family, concrete parameter binding, and any governed default. State whether parameters are fixed, free, derived, estimated or externally constrained, plus the regime/uncertainty/validity attached to the binding actually used. A software default cannot silently become D1 meaning.
+
+Specialized external scientific results follow the exact-import rule: identify the intended theorem/model/law/data/value variant, material hypotheses and regime, stable source/version/locator, notation/unit/frame transformation, and empirical conditions/uncertainty when applicable. Citation supports a claim only to the extent the source actually does so and never mints project authority by itself.
+
+Separate definitions from existence/uniqueness claims, assumptions, derived propositions, empirical observations, approximations and conclusions. A definition may conservatively extend vocabulary but cannot by notation prove scientific truth, adequacy or external validity. For every imported/derived result used normatively, discharge or propagate its material hypotheses. Ambiguous or conflicting current meanings that could change scientific interpretation are D1 Review/Challenge issues, not editorial choices.

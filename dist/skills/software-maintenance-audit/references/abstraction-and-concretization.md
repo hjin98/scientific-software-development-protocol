@@ -1,6 +1,6 @@
 # Abstraction, Concretization, Authority, Challenge, and Representation
 
-Protocol 6.3 governs scientific-software work through recursively constrained abstraction/concretization. This is the universal semantic kernel; detailed workflow, evidence, testing, project engineering memory, domain, language, tool, history, and release rules live with their canonical owners and are loaded only when their decision predicates fire.
+Protocol 6.4 governs scientific-software work through recursively constrained abstraction/concretization. This is the universal semantic kernel; detailed workflow, evidence, testing, project engineering memory, domain, language, tool, history, and release rules live with their canonical owners and are loaded only when their decision predicates fire.
 
 ## Background and terminology
 
@@ -131,7 +131,36 @@ Operational consequences:
 11. **Do not deduplicate by adjudicating semantics.** If apparent duplicates materially disagree in scope, threshold, authority, family identity, applicability, or meaning, stop editorial compaction and route the conflict to its owner/explicit split-merge reconciliation.
 12. **Keep derivatives subordinate.** Compact prompts, handoffs, summaries, indexes, records and generated representations do not replace canonical authority or canonical project memory.
 
-Historical identifiers may retain old lexemes inside frozen/version-pinned artifacts. Current Protocol 6.3 prose uses **concretization** for D1-D4 descent and **realization** for evidence execution.
+Historical identifiers may retain old lexemes inside frozen/version-pinned artifacts. Current Protocol 6.4 prose uses **concretization** for D1-D4 descent and **realization** for evidence execution.
+
+## Protocol 6.4 semantic-definition and traceability strengthening
+
+A **semantic object/unit** is a materially governed term, symbol, quantity, operator, relation, state, proposition, algorithmic object, invariant, parameterized family, instantiated object, or contract whose meaning or conditions can alter governed interpretation, admissible concretization, evidence applicability, or acceptance if changed. A **canonical semantic statement** is the one current owner statement, or explicitly coordinated owner-local statement set, that establishes that object's project-visible meaning. A **substantive semantic use** is an occurrence that participates in a declaration/definition, premise, inference, constraint, theorem/result, algorithm, contract, acceptance decision, or governed interpretation. A harmless forward name supports no inference and is not substantive use.
+
+For a version-coherent composed authority family `D`, `source_available_D(x)` holds only when the exact meaning of `x` is reconstructible from a bounded foundational envelope, an exact external import, an explicit project declaration/definition, or a valid scope-local binder whose referenced domain/type is already available; the current semantic owner is recoverable; and no simultaneously applicable owner statements materially conflict without an accepted compatibility/equivalence/adjudication mapping. Routing order, file order, aliasing, or newest-version preference cannot turn conflicting meanings into one canonical object.
+
+For actual runtime context `C`, `context_available_C(x)` additionally requires the exact canonical meaning needed for the current inference to have been supplied/loaded in that context. Therefore:
+
+```text
+substantive_use_D(x) -> source_available_D(x)
+infer_C(x) -> context_available_C(x) -> source_available_D(x)
+```
+
+The source-availability basis is `FOUNDATIONAL_ASSUMED`, `EXTERNAL_IMPORTED`, or `PROJECT_DECLARED`, plus scope-local binders/declarations whose referenced domain/type is already available. This basis is orthogonal to novelty, semantic role, historical provenance, evidence strength, and normative force.
+
+Semantic/epistemic roles are non-exclusive and extensible. Representative roles include `PRIMITIVE`, `DEFINITION`, `AXIOM`, `PREMISE`, `ASSUMPTION`, `DERIVED_RESULT`, `CONJECTURE`/`HYPOTHESIS`, `OBSERVATION`/`EMPIRICAL_RELATION`, `APPROXIMATION`/`HEURISTIC`, `NORMATIVE_CONTRACT`/`EXTERNAL_CONSTRAINT`, and `EXAMPLE`/`COUNTEREXAMPLE`. This is not a closed ontology and a validator must not reject a valid status merely because it is absent from the illustrative list.
+
+Axiomatic dependency order is semantic, not merely typographic. Specialized substantive use requires prior source availability. A non-foundational project root may be an explicit primitive when its signature/constraints bound meaning. A local binder introduces its variable only within scope and may reference only already available domains/types. A definition stipulates meaning relative to available objects; it does not by notation alone establish existence, uniqueness, empirical truth, convergence, optimality, safety, adequacy, or authority. Those are separate claims requiring the appropriate premise, proof, evidence, or owner.
+
+A formal-looking statement is admissible only when well-defined enough for its governed use. State when material: bound/free-variable scope and quantifier order; domain/codomain/type/shape/unit; total versus partial behavior; branch/sign/order/normalization/frame conventions; deterministic/stochastic/set-valued semantics; existence/uniqueness; piecewise precedence; boundary/initial conditions; singular/undefined cases; relation kind (`=`, definitional equality, equivalence, approximation, asymptotic relation, assignment, membership, implication, distributional relation); logical direction; and state/time/concurrency semantics needed to distinguish outcomes. Equations and mappings over physical/typed quantities must be dimensionally/type consistent.
+
+For a material parameterized family distinguish family, instance, and default explicitly. Schematically `F: Theta -> O`, `theta -> F_theta`: define the parameter domain and admissibility, which parameters are free/fixed/derived/estimated/externally constrained/defaulted, the binding source for a concrete `F_theta0`, the owning layer of a governed default, and parameter-dependent validity/error/uncertainty/equivalence. A default supplied by software is not intrinsic mathematical meaning unless its owner makes it so. Evidence/quantitative claims bind to the material parameter/regime identity actually exercised.
+
+For every imported or derived result `r` with material hypotheses/validity conditions `H(r)`, substantive use requires each condition to be discharged or explicitly propagated. A claim warrant is not closed by citation count, test count, reviewer count, or a generated trace; each normative claim remains owner-bound and each factual/empirical/mathematical claim must retain the appropriate source, proof, observation, assumption, or uncertainty chain without circular self-support.
+
+A material direct prerequisite relation may be represented as `x USES_DEFINITION -> y` when the canonical meaning of subject `x` directly depends on prerequisite `y`. The stored relation direction is therefore `subject -> prerequisite`. If prerequisite `y` changes, dependent subjects are discovered by reverse traversal over stored `USES_DEFINITION` edges; reverse impact traversal is a query, not a second relation or a change in canonical direction. Dependency traces/graphs are derived review and impact aids, not authority, and may claim completeness/absence only for an explicitly bounded reviewed scope. Mutually recursive definitions use an explicit simultaneous definition/composite node or strongly connected component (SCC) condensation; accidental circular warrant remains invalid.
+
+The formal-first rule is therefore not “more equations.” It is: use the strongest practical exact representation that materially reduces interpretive freedom, then explain it in natural language. Do not create decorative mathematics, a fifth semantic authority plane, or a universal ontology/database/checker merely for protocol symmetry.
 
 ## Universal invariant
 
@@ -145,5 +174,8 @@ evidence and project memory may support, challenge, or guide work but never sile
 accepted change invalidates only materially dependent descendants/evidence/derived learning bindings;
 Serious Challenge stops counterfeit closure when accepted authority itself may be defective;
 representation must preserve complete governed meaning before optimizing attention/context cost;
+specialized substantive use requires a coherent definition/import/declaration path and exact owner;
+formal statements must be well-defined, parameter bindings explicit when material, and claims separately warranted;
+derived semantic traces remain subordinate evidence for review/impact rather than parallel authority;
 project learning stays evidence-backed, applicability-bounded, conditionally loaded, and non-authoritative.
 ```

@@ -95,6 +95,16 @@ Executable D4 stage-local/final acceptance is owned by [Testing and validation](
 
 Every material Review/Verification/acceptance boundary applies the universal Challenge rule. Surface an active Serious Challenge before ordinary blockers or Pass/No-Pass and route it to the earliest affected semantic owner.
 
+## Protocol 6.4 semantic-definition workflow consequence
+
+Protocol 6.4 does not add a semantic-traceability stage. At intake/design/review, activate definition/source-availability analysis only when the governed work materially introduces, changes, imports, reuses, or depends on specialized semantic objects. The canonical D1-D4 owner remains the authority; `USES_DEFINITION` traces, definition tables and dependency graphs are derived coordination/review evidence.
+
+A material handoff identifies enough exact owner/object/source identity that the receiver can resolve specialized prerequisites without hidden chat. If runtime work requires an exact definition/import, load that owner before making the dependent inference; a discoverable route alone establishes source availability, not runtime context availability. If the required owner/source is unavailable or conflicting, preserve `REVIEW_REQUIRED`/Challenge rather than guessing from a similarly named object.
+
+When a parameterized family or governed default changes, workplan impact/acceptance scope follows the material instance/regime and owner of the binding. Preserve unaffected instances/evidence with reason; do not invalidate or validate an entire family solely by name. External-source correction/retraction/incompatible revision is likewise a binding/applicability event routed through the affected semantic/evidence owner.
+
+Independent Review reconstructs definition/import/assumption/validity/warrant paths from current owners and attempts counterexamples; it does not inherit an implementer-generated trace as proof of completeness. A generated trace may reduce search cost only within its declared bounded reviewed scope.
+
 ## Human gates and closeout learning
 
 Human gates attach to governed semantic risk, not every transition. The designated human authority is required where project/domain policy assigns ratification/adjudication. Orchestration may represent pending/accepted/rejected state but cannot self-approve it. A visible risk override authorizes only bounded continuation where allowed; dependent outputs remain provisional and cannot close the challenged claim unqualified.

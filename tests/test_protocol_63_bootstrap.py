@@ -34,7 +34,11 @@ class Protocol63BootstrapTests(unittest.TestCase):
         self.assertNotIn(f'CURRENT_PUBLIC_REF = {INVALIDATED_BOOTSTRAP}', prompts)
         self.assertNotIn(f'CURRENT_PUBLIC_REF = {INVALIDATED_SECOND_BOOTSTRAP}', prompts)
         self.assertNotIn(f'CURRENT_PUBLIC_REF = {INVALIDATED_OWNER_BINDING_BOOTSTRAP}', prompts)
-        self.assertIn(f'CURRENT_PUBLIC_REF = {BOOTSTRAP}', prompts)
+        self.assertIn('CURRENT_PROTOCOL = 6.4.0', prompts)
+        self.assertIn('CURRENT_PUBLIC_REF = e09a9d1480211eea2d16d722182bb5c6de1bee12', prompts)
+        self.assertIn(f'ACCEPTED_6_3_PUBLIC_REF = {BOOTSTRAP}', prompts)
+        self.assertIn(f'ACCEPTED_6_3_RECOVERY = {RECOVERY}', prompts)
+        self.assertNotIn(f'CURRENT_PUBLIC_REF = {BOOTSTRAP}', prompts)
         self.assertIn(f'6.3.0 public bootstrap -> {BOOTSTRAP}', portability)
         self.assertIn(f'6.3.0 invalidated owner-binding bootstrap -> {INVALIDATED_OWNER_BINDING_BOOTSTRAP}', portability)
         self.assertIn(f'6.3.0 invalidated D4R3 bootstrap -> {INVALIDATED_D4R3_BOOTSTRAP}', portability)
@@ -61,8 +65,8 @@ class Protocol63BootstrapTests(unittest.TestCase):
         else:
             self.assertIn(f'Replacement self-reference-safe source snapshot `{BOOTSTRAP}`', prompts)
             self.assertIn('sole current Protocol 6.3 public-source fallback', prompts)
-            self.assertIn(f'Replacement self-reference-safe source snapshot `{BOOTSTRAP}`', versioning)
-            self.assertIn('sole current 6.3 public-source fallback', versioning)
+            self.assertIn(f'6.3.0 public-source bootstrap -> {BOOTSTRAP}', versioning)
+            self.assertIn('sole current 6.3 fallback mapping', versioning)
             self.assertIn('authorized version-bound 6.3 public fallback', readme)
             self.assertIn('sole authorized version-bound 6.3 public fallback', portability)
 

@@ -76,3 +76,13 @@ D3 Review reconstructs governing D1/D2/D3/side constraints and actual D4 behavio
 At a convergence boundary, Stabilization asks whether the architecture would still be deliberately chosen today for the same governing contract. It is non-mutating; required change returns through the owning domain.
 
 Apply the Lossless Representation Rule to architecture documents: current topology/ownership and decision-critical constraints stay prominent; generic protocol doctrine and historical amendment narrative belong to their owners/cold history rather than being copied into every Architecture Manual.
+
+## Protocol 6.4 D3 formal-contract consequences
+
+D3 inherits the universal definition/source-availability discipline without turning architecture into pseudo-mathematics. When an architectural concept carries normative meaning, define it before dependent invariants use it: component/state ownership, allowed/forbidden dependency relations, lifecycle states and transitions, interface/cardinality constraints, concurrency/order/atomicity relations, resource bounds, persistence/recovery invariants, trust boundaries and compatibility relations.
+
+Use the strongest practical structured representation that reduces architectural ambiguity—tables, typed interface contracts, state-transition systems, dependency graphs/relations, resource inequalities, ownership maps or schemas—while leaving ordinary explanatory engineering prose as prose. Derived diagrams/graphs remain subordinate views of the canonical Architecture Manual, not parallel authority.
+
+D3 must not redefine D1/D2 symbols or methods to make an architecture self-contained. Instead route/load their canonical owners and define only the architecture-local consequences. If two current architecture owners materially disagree about one concept, file order, route priority or “latest” cannot resolve the conflict; mark it Review-required/Challenge as appropriate.
+
+For parameterized architecture families or deployment profiles, distinguish the family from a concrete instance and from defaults. Identify which configuration/resource/backend/topology bindings are D3 constraints, which are D4 public contracts, and which remain delegated implementation choices. Parameter-sensitive evidence/qualification must bind to the actual material architecture instance exercised.

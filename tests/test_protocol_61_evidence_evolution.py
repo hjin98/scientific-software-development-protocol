@@ -85,13 +85,20 @@ class Protocol61EvidenceEvolutionTests(unittest.TestCase):
                 self.assertIn(f"PUBLIC_REF = {bootstrap}", prompts)
                 self.assertIn("current 6.2 may fall back", lower)
                 self.assertNotIn("automatic current-6.2 public fallback is unavailable", lower)
-            else:
+            elif current_version == "6.3.0":
                 self.assertIn(f"ACCEPTED_6_2_PUBLIC_REF = {bootstrap}", prompts)
                 current = re.search(r"^CURRENT_PUBLIC_REF = (\S+)$", prompts, re.MULTILINE)
                 self.assertIsNotNone(current)
                 current_ref = current.group(1)
                 self.assertNotEqual(current_ref, "1484c1d3caa49d87cc15bc52a5e775399c1dae1b")
                 self.assertTrue(current_ref == "UNAVAILABLE_PENDING_REPLACEMENT_BOOTSTRAP" or re.fullmatch(r"[0-9a-f]{40}", current_ref))
+                self.assertIn("version-bound 6.2 work continues to use exactly", lower)
+            else:
+                self.assertEqual(current_version, "6.4.0")
+                self.assertIn(f"ACCEPTED_6_2_PUBLIC_REF = {bootstrap}", prompts)
+                self.assertIn("CURRENT_PROTOCOL = 6.4.0", prompts)
+                self.assertIn("CURRENT_PUBLIC_REF = e09a9d1480211eea2d16d722182bb5c6de1bee12", prompts)
+                self.assertIn("ACCEPTED_6_3_PUBLIC_REF = 86c13cab6bdd1991dffa94e277db8eacf87e2e11", prompts)
                 self.assertIn("version-bound 6.2 work continues to use exactly", lower)
 
     def test_accepted_61_recovery_and_bootstrap_remain_immutable(self) -> None:

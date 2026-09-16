@@ -95,6 +95,16 @@ actual D4 executable behavior
 
 Do not force this onto a local software refactor with no plausible upstream semantic impact.
 
+## Protocol 6.4 qualification consequence
+
+Protocol 6.4 qualification pairs every material semantic-definition/traceability claim with discriminating positive and negative cases. Static sensors may verify mechanically decidable structure—required fields/routes, resolvable locators, profile/version identity, exact frozen bytes, generated parity, or a declared bounded dependency graph—but must not claim to prove arbitrary mathematics, dimensional validity, theorem applicability, source support, owner equivalence, audience expertise, semantic completeness, or warrant sufficiency.
+
+Counterfactuals must include semantically wrong cases that shallow word-presence checks would accept: specialized use before definition/import; two conflicting applicable owners with a deterministic file-order winner; undeclared primitive or ambiguous binder shadowing; a definition that smuggles existence/convergence/truth; wrong relation/logical direction or type/unit mismatch; parameter family evidence reused across a materially different binding/default; stochastic semantics missing dependence/conditioning; imported result with unmet hypotheses or unsupported/wrong-version citation; circular claim warrant; a `USES_DEFINITION` trace that mistakes hyperlinks/call graphs for semantic dependency or claims global completeness from a partial map; runtime inference without loading the exact owner; and external evidence text attempting to authorize an action.
+
+Positive fixtures distinguish genuinely foundational objects, exact imported prerequisites, explicit primitives/binders, conservative definitions, well-formed parameterized families/instances, properly discharged/propagated validity conditions, legitimate mutually recursive definition groups, and bounded traces whose scope/completeness claim matches what was actually reviewed.
+
+For parameter-sensitive evidence, vary the material parameter/regime so the oracle proves it rejects stale reuse rather than merely recording a parameter field. For external-source trust, prove instruction-like content remains inert data while the supported semantic claim/source locator can still be inspected. Human semantic review remains required where no honest mechanical discriminator exists.
+
 ## Final assembled acceptance
 
 Before implementation completion: reconcile every accepted governing obligation and material structural/absence claim; re-derive the final affected semantic/behavioral/evidence/documentation/memory surface; account for each affected path with executed coverage or unavailable/blocking state; run complete affected regression after all material executable edits; run assembled real-boundary integration/end-to-end; run repository/project-required build/lint/type/package checks; and close material evidence/dependency/history/PEM impact under their owners.

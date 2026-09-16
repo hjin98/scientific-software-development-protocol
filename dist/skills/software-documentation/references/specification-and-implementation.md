@@ -38,3 +38,15 @@ Before D4 acceptance, compare actual behavior with accepted D4, D3, and directly
 A local D4 refactor needs a proportionate upstream-impact exclusion plus remap/rerun of invalidated owner-specific evidence. If implementation evidence reveals a parent defect, challenge the earliest affected abstraction rather than forcing code to preserve a wrong contract.
 
 For material contract/concretization changes, close dependent consumers, evidence, docs/dependency records, compatibility/persistence consequences and semantic history where triggered. Apply the Lossless Representation Rule to D4 specifications: state each stable contract once, avoid freezing incidental code detail, keep exceptions/failure semantics explicit, and make critical behavior salient without dropping lower-salience mandatory constraints.
+
+## Protocol 6.4 D4 formal-contract consequences
+
+A governed D4 contract uses the strongest practical exact representation needed to distinguish externally observable behavior: types/schemas, domains/ranges, public configuration and default semantics, preconditions/postconditions, observable state transitions, units/shapes/order/precision, tolerance/equivalence relations, durable error/failure predicates, serialization grammar, persisted-state invariants, authorization/security behavior and public parameter binding.
+
+Every specialized contract object used substantively must resolve to its current canonical definition/import/declaration. Concrete executable types, schemas, tests and code can realize or verify the contract but do not silently replace an ambiguous specification. Generated API/schema documentation is a derivative unless explicitly designated as the canonical stable contract.
+
+For parameterized software behavior distinguish the family/API capability from one configured instance and from defaults. Identify whether a default is D1/D2 method semantics, D3 deployment/architecture, D4 public/configuration contract, or delegated internal choice. A change to a governed default/binding triggers bounded consumer/evidence/compatibility impact even if the underlying family remains unchanged.
+
+State relation and failure semantics precisely enough that `equal`, `equivalent within tolerance`, `assigned`, `accepted`, `retryable`, `unsupported`, `undefined`, `invalid` and other materially distinct outcomes cannot be conflated. For stateful/concurrent behavior define initialization, allowed transitions/order, atomicity/commit visibility, terminal states and recovery/restart semantics where they affect supported behavior.
+
+D4 Review treats duplicate/conflicting current contract statements as a real owner conflict rather than choosing whichever source is latest/easier to load. Derived traces, generated manifests and tests may help locate the conflict but cannot adjudicate it.
