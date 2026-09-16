@@ -7,8 +7,8 @@ status: active
 created_date: 2026-09-15
 reviewed_date: 2026-09-15
 design_review_state: pass-after-sixth-review
-independent_review_state: repaired-awaiting-exact-target
-implementation_handoff: repair-complete-pending-descendant-handoff
+independent_review_state: fresh-review-required
+implementation_handoff: repair-complete-bound
 active_serious_challenge: none
 branch: ssdp-6.4-axiomatic-definition-traceability
 reviewed_input_head: 4974058020cdda1325ef899c04b3cd13d5ae44c2
@@ -27,7 +27,7 @@ accepted_parent_public_bootstrap: 86c13cab6bdd1991dffa94e277db8eacf87e2e11
 
 ## Current disposition
 
-**STAGE-E REPAIR: COMPLETE — EXACT-TARGET QUALIFICATION REQUIRED.** B64-R8/B64-R9 were repaired at the existing D4 qualification/lifecycle surface by commit `4991b293432708956f8cb6e6daf917ff82511669`. Ordinary PR run `35072567095` passed protocol regression, canonical package build, independent package validation, committed-distribution parity, whitespace, packaged-snapshot parity, and the full Orchestrator Core suite. The assembled candidate carrying this repair-complete lifecycle state uses the required pending descendant-binding sentinel because it cannot self-name; it must pass exact-target ordinary PR qualification before a later descendant binds its SHA and CI for fresh Stage-E Review. No D1/D2/D3 semantic doctrine, Protocol-7 D3 architecture, profile schema, or public-source semantics changed. Protocol 6.3 remains accepted-current; Protocol 6.4 public bootstrap `e09a9d1480211eea2d16d722182bb5c6de1bee12` remains authorized; Protocol 6.4 recovery remains unavailable; Stage F remains blocked.
+**FRESH STAGE-E REVIEW: READY — IMMUTABLE TARGET BOUND.** B64-R8/B64-R9 were repaired at the existing D4 qualification/lifecycle surface. Immutable assembled target `f1e0ca95f4d1895e3497e155105468fa73f47827` carries the repaired qualification oracle plus repair-complete pending-binding lifecycle state and passed exact-target ordinary PR run `35073930076`, including inherited protocol regression, package build/independent validation, committed-dist parity, packaged-snapshot parity, full Orchestrator Core, and whitespace. The current descendant handoff binds that already-existing target and exact-target CI for a fresh independent Stage-E Review. No D1/D2/D3 semantic doctrine, Protocol-7 D3 architecture, profile schema, or public-source semantics changed. Protocol 6.3 remains accepted-current; Protocol 6.4 public bootstrap `e09a9d1480211eea2d16d722182bb5c6de1bee12` remains authorized; Protocol 6.4 recovery remains unavailable; Stage F remains blocked until a genuine fresh-context independent Review PASS.
 
 **SIXTH DESIGN REVIEW: PASS AFTER GAP CLOSURE.** This file is the single current implementation/review handoff for Protocol 6.4. Earlier design-review workplans and the fifth-review consolidated snapshot are historical evidence only; implementation and independent Review SHALL reconstruct the current contract from this file plus accepted Protocol 6.3 owners, not by replaying amendment chronology.
 
@@ -828,7 +828,7 @@ The published public bootstrap `e09a9d1480211eea2d16d722182bb5c6de1bee12` remain
 - **B64-R4 — RESOLVED at the owning current lifecycle index.** `workplans/active/SSDP-6.1-7.0-WORKPLAN-AUTHORITY-INDEX.md` now states completed implementation/Stage C qualification, the authorized Stage D public bootstrap `e09a9d1480211eea2d16d722182bb5c6de1bee12`, the repaired-but-not-yet-passed Stage-E state, unavailable Protocol 6.4 recovery, accepted-current Protocol 6.3, and blocked Stage F. Frozen historical records were not rewritten.
 - **B64-R5 — RESOLVED at D4 qualification.** QF64-P now parses the Protocol 6.4 current-disposition block from the real active authority index and requires the exact lifecycle tuple above. Counterfactual fixtures explicitly replace the bootstrap with `NOT YET PUBLISHED` and Stage C with `PROPOSED / NOT YET QUALIFIED` and must fail, in addition to the synthetic current-index/stale-state polarity cases.
 
-These repairs change current lifecycle representation and its oracle only. They do not alter D1/D2/D3 semantic doctrine, the Protocol 6.4 public-source snapshot, or Protocol 7 D3/control-plane semantics. The authorized public bootstrap remains `e09a9d1480211eea2d16d722182bb5c6de1bee12`.
+These repairs change current lifecycle representation and its oracle only. They do not alter D1/D2/D3 semantic doctrine, the Protocol 6.4 public-source snapshot, or Protocol 7 D3/control-plane semantics. The authorized public bootstrap remains `e09a9d1480211eea2d16d722182bb5b6de1bee12`.
 
 ### Fresh review re-entry after this repair
 
