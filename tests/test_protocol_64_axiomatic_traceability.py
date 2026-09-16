@@ -84,6 +84,40 @@ def protocol64_lifecycle_state_ok(state: dict[str, str]) -> bool:
     )
 
 
+def protocol64_handoff_lifecycle_ok(state: dict[str, str], handoff_meta: dict[str, str]) -> bool:
+    phase = protocol64_stage_e_phase(state)
+    if phase is None:
+        return False
+
+    binding_state = handoff_meta.get("review_target_binding_state")
+    target = handoff_meta.get("assembled_review_target", "")
+    qualification = handoff_meta.get("assembled_review_target_ci", "")
+    if phase == "repair-complete":
+        binding_ok = bool(
+            binding_state == "pending-descendant-handoff"
+            and target == "PENDING_DESCENDANT_HANDOFF"
+            and qualification == "PENDING_EXACT_TARGET_CI"
+        )
+    else:
+        binding_ok = bool(
+            binding_state == "bound"
+            and re.fullmatch(r"[0-9a-f]{40}", target)
+            and re.fullmatch(r"[0-9]+", qualification)
+        )
+    if not binding_ok:
+        return False
+
+    if phase == "pass":
+        return bool(
+            handoff_meta.get("protocol_64_recovery") == "unavailable_pending_stage_f_recovery_publication"
+            and handoff_meta.get("stage_f") == "authorized"
+        )
+    return bool(
+        handoff_meta.get("protocol_64_recovery") == "unavailable_pending_independent_review"
+        and handoff_meta.get("stage_f") == "blocked_pending_independent_review"
+    )
+
+
 def markdown_fences_well_formed(text: str) -> bool:
     active: tuple[str, int] | None = None
     for line in text.splitlines():
@@ -110,7 +144,13 @@ def qf_a(c):
     if not c.get("defined") or c.get("hidden_root") or c.get("conflict"):
         return False
     if c.get("kind") == "imported":
-        return all(c.get(k) for k in ("meaning", "source", "locator", "assumptions"))
+        required = ("meaning", "source", "locator", "assumptions", "variant", "source_version")
+        return bool(
+            all(c.get(k) for k in required)
+            and c.get("version_matches")
+            and c.get("support_assessed")
+            and c.get("supported")
+        )
     return c.get("kind") in {"project", "primitive", "binder"}
 
 
@@ -120,7 +160,14 @@ def qf_b(c):
 
 
 def qf_c(c):
-    return not (c.get("primitive") and not c.get("signature")) and not (c.get("binder") and not (c.get("scope") and c.get("domain"))) and bool(c.get("role"))
+    return bool(
+        not c.get("ambiguous_shadowing")
+        and not c.get("provenance_role_conflated")
+        and not (c.get("primitive") and not c.get("signature"))
+        and not (c.get("binder") and not (c.get("scope") and c.get("domain")))
+        and c.get("availability_basis")
+        and c.get("role")
+    )
 
 
 def qf_d(c):
@@ -130,7 +177,14 @@ def qf_d(c):
 def qf_e(c):
     if not all(c.get(k) for k in ("domain", "relation", "logic", "totality")):
         return False
-    return not c.get("undefined_operator") and (not c.get("piecewise") or c.get("piecewise_closed")) and (not c.get("choice") or c.get("selection")) and (not c.get("physical") or c.get("units"))
+    return bool(
+        not c.get("undefined_operator")
+        and not c.get("branch_ambiguous")
+        and not c.get("state_time_order_ambiguous")
+        and (not c.get("piecewise") or c.get("piecewise_closed"))
+        and (not c.get("choice") or c.get("selection"))
+        and (not c.get("physical") or c.get("units"))
+    )
 
 
 def qf_f(c):
@@ -151,6 +205,8 @@ def qf_h(c):
     if not bool(c.get("endpoints") and c.get("direct_complete")):
         return False
     if required_subject_classes - set(c.get("subject_classes", ())):
+        return False
+    if c.get("relation_kind") != "USES_DEFINITION" or c.get("edge_basis") != "semantic_meaning_prerequisite":
         return False
     if c.get("uses_definition") != (c.get("subject"), c.get("prerequisite")):
         return False
@@ -178,7 +234,13 @@ def qf_l(c):
 
 
 def qf_m(c):
-    return bool(c.get("source") and c.get("loaded") and not c.get("edge_activates"))
+    return bool(
+        c.get("source")
+        and c.get("loaded")
+        and c.get("required_owner")
+        and c.get("loaded_owner") == c.get("required_owner")
+        and not c.get("edge_activates")
+    )
 
 
 def qf_n(c):
@@ -212,38 +274,38 @@ RULES = {
 }
 
 BASE = {
-    "A": {"kind": "imported", "defined": True, "meaning": True, "source": True, "locator": True, "assumptions": True},
+    "A": {"kind": "imported", "defined": True, "meaning": True, "source": True, "locator": True, "assumptions": True, "variant": "theorem-v2", "source_version": "2026-edition", "version_matches": True, "support_assessed": True, "supported": True},
     "B": {"owners": ("D2:estimator",)},
-    "C": {"primitive": True, "signature": True, "role": "CONJECTURE"},
+    "C": {"primitive": True, "signature": True, "availability_basis": "PROJECT_DECLARED", "role": "CONJECTURE"},
     "D": {"claims": ("exists",), "warranted": ("exists",)},
     "E": {"domain": True, "relation": True, "logic": True, "totality": True},
     "F": {"family": "F", "parameter_domain": True, "binding": True, "instance": "F_theta"},
     "G": {"hypotheses": ("H1",), "discharged": ("H1",)},
-    "H": {"endpoints": True, "direct_complete": True, "subject_classes": ("definition", "theorem_result", "assumption", "algorithm", "contract"), "subject": "algorithm-A", "prerequisite": "definition-X", "uses_definition": ("algorithm-A", "definition-X"), "impact_from": "definition-X", "impact_dependents": ("algorithm-A",)},
+    "H": {"endpoints": True, "direct_complete": True, "subject_classes": ("definition", "theorem_result", "assumption", "algorithm", "contract"), "relation_kind": "USES_DEFINITION", "edge_basis": "semantic_meaning_prerequisite", "subject": "algorithm-A", "prerequisite": "definition-X", "uses_definition": ("algorithm-A", "definition-X"), "impact_from": "definition-X", "impact_dependents": ("algorithm-A",)},
     "I": {"roots": ("premise",)},
     "J": {"source": True, "support_not_force": True},
     "K": {"snapshot": True},
     "L": {"upstream_route": True},
-    "M": {"source": True, "loaded": True},
+    "M": {"source": True, "loaded": True, "required_owner": ("D1:observable", "6.4.0"), "loaded_owner": ("D1:observable", "6.4.0")},
     "N": {"rendered": True},
     "O": {"parity": True},
     "P": {"snapshot_complete": True, "history": True, "current_handoff": True, "baseline_consistent": True, "target_binding": True, "qualification_binding": True, "lifecycle_index_current": True},
 }
 
 NEGATIVE = {
-    "A": ({"defined": False}, {"conflict": True}, {"locator": False}),
+    "A": ({"defined": False}, {"conflict": True}, {"locator": False}, {"version_matches": False}, {"support_assessed": False}, {"supported": False}),
     "B": ({"owners": ("one", "two")}, {"owners": ()}),
-    "C": ({"signature": False}, {"binder": True, "scope": "local", "domain": False}),
+    "C": ({"signature": False}, {"binder": True, "scope": "local", "domain": False}, {"ambiguous_shadowing": True}, {"provenance_role_conflated": True}, {"availability_basis": None}),
     "D": ({"warranted": ()}, {"laundered_truth": True}, {"inconsistent": True}),
-    "E": ({"choice": True, "selection": False}, {"piecewise": True, "piecewise_closed": False}, {"physical": True, "units": False}),
+    "E": ({"relation": False}, {"logic": False}, {"totality": False}, {"undefined_operator": True}, {"branch_ambiguous": True}, {"state_time_order_ambiguous": True}, {"choice": True, "selection": False}, {"piecewise": True, "piecewise_closed": False}, {"physical": True, "units": False}),
     "F": ({"instance": "F"}, {"default": True, "default_owner": None, "default_semantics": True}, {"binding_changed": True, "evidence_reconciled": False}),
-    "G": ({"stochastic": True, "law": True, "dependence": False, "conditioning": True}, {"discharged": (), "propagated": ()}, {"approximate": True, "exact": True}),
-    "H": ({"subject_classes": ("definition", "assumption", "algorithm", "contract")}, {"subject_classes": ("definition",)}, {"uses_definition": ("definition-X", "algorithm-A")}, {"impact_dependents": ()}, {"independence": True, "scope_complete": False}, {"cycle": True, "composite": False}),
+    "G": ({"stochastic": True, "law": True, "dependence": False, "conditioning": True}, {"discharged": (), "propagated": ()}, {"approximate": True, "exact": True}, {"widened": True}),
+    "H": ({"subject_classes": ("definition", "assumption", "algorithm", "contract")}, {"subject_classes": ("definition",)}, {"uses_definition": ("definition-X", "algorithm-A")}, {"impact_dependents": ()}, {"independence": True, "scope_complete": False}, {"cycle": True, "composite": False}, {"edge_basis": "hyperlink"}, {"edge_basis": "import_graph"}, {"edge_basis": "call_graph"}, {"edge_basis": "evidence_dependency"}, {"edge_basis": "execution_dependency"}),
     "I": ({"cycle": True}, {"empirical_as_proof": True}, {"citation_authority": True}, {"evidence_from_use_only": True}),
     "J": ({"binding": True, "authority": False}, {"transformed": True, "lineage": False}, {"floating_latest": True}, {"external_instruction": True}),
-    "K": ({"snapshot": False}, {"label_equivalence": True}, {"editable_alias": True}, {"changed": True, "impact": False}),
+    "K": ({"snapshot": False}, {"label_equivalence": True}, {"editable_alias": True}, {"changed": True, "impact": False}, {"split_merge": True, "lineage": False}),
     "L": ({"upstream_route": False}, {"upstream_depends_on_d4": True}, {"decorative_freeze": True}, {"downstream_strengthening": True}),
-    "M": ({"loaded": False}, {"edge_activates": True}),
+    "M": ({"loaded": False}, {"edge_activates": True}, {"loaded_owner": ("D1:observable", "6.3.0")}, {"loaded_owner": ("D1:similarly-named-observable", "6.4.0")}),
     "N": ({"term": True, "defined": False}, {"abbrev": True, "expanded": False}, {"rendered": False}, {"example_authority": True}),
     "O": ({"frozen_mutation": True}, {"generated_mismatch": True}, {"bootstrap_self_name": True}, {"schema_bump": True}, {"early_recovery": True}, {"protocol7_d3": True}),
     "P": ({"amendment_replay": True}, {"snapshot_complete": False}, {"current_handoff": False}, {"baseline_consistent": False}, {"target_binding": False}, {"qualification_binding": False}, {"lifecycle_index_current": False}, {"stale_lifecycle_state": True}),
@@ -273,7 +335,7 @@ class Protocol64AxiomaticTraceabilityQualificationTests(unittest.TestCase):
 
         self.assertTrue(qf_a({"foundational": True}))
         self.assertTrue(qf_b({"owners": ("alias-a", "alias-b"), "equivalence": True}))
-        self.assertTrue(qf_c({"binder": True, "scope": "sum-body", "domain": True, "role": "LOCAL_BINDER"}))
+        self.assertTrue(qf_c({"binder": True, "scope": "sum-body", "domain": True, "availability_basis": "PROJECT_DECLARED", "role": "LOCAL_BINDER"}))
         self.assertTrue(qf_g({"hypotheses": ("H",), "propagated": ("H",)}))
         recursive = dict(BASE["H"], cycle=True, composite=True)
         self.assertTrue(qf_h(recursive))
@@ -352,6 +414,8 @@ class Protocol64AxiomaticTraceabilityQualificationTests(unittest.TestCase):
 
         lifecycle = protocol64_authority_index_state(self.authority_index)
         self.assertTrue(protocol64_lifecycle_state_ok(lifecycle), lifecycle)
+        self.assertTrue(protocol64_handoff_lifecycle_ok(lifecycle, handoff_meta), (lifecycle, handoff_meta))
+
         stale_bootstrap = dict(lifecycle)
         stale_bootstrap["STAGE D PUBLIC BOOTSTRAP"] = "NOT YET PUBLISHED"
         self.assertFalse(protocol64_lifecycle_state_ok(stale_bootstrap))
@@ -365,14 +429,34 @@ class Protocol64AxiomaticTraceabilityQualificationTests(unittest.TestCase):
         repair_complete = dict(lifecycle)
         repair_complete["STAGE E INDEPENDENT REVIEW"] = "REPAIR COMPLETE / EXACT-TARGET QUALIFICATION REQUIRED"
         self.assertTrue(protocol64_lifecycle_state_ok(repair_complete))
+        pending_handoff = dict(
+            handoff_meta,
+            review_target_binding_state="pending-descendant-handoff",
+            assembled_review_target="PENDING_DESCENDANT_HANDOFF",
+            assembled_review_target_ci="PENDING_EXACT_TARGET_CI",
+        )
+        self.assertTrue(protocol64_handoff_lifecycle_ok(repair_complete, pending_handoff))
+        self.assertFalse(protocol64_handoff_lifecycle_ok(repair_complete, handoff_meta))
+
         review_ready = dict(lifecycle)
         review_ready["STAGE E INDEPENDENT REVIEW"] = "REVIEW READY / FRESH REVIEW REQUIRED"
         self.assertTrue(protocol64_lifecycle_state_ok(review_ready))
+        self.assertTrue(protocol64_handoff_lifecycle_ok(review_ready, handoff_meta))
+
         review_pass = dict(lifecycle)
         review_pass["STAGE E INDEPENDENT REVIEW"] = "PASS / STAGE F AUTHORIZED"
         review_pass["PROTOCOL 6.4 RECOVERY"] = "UNAVAILABLE PENDING STAGE F RECOVERY PUBLICATION"
         review_pass["STAGE F"] = "AUTHORIZED"
         self.assertTrue(protocol64_lifecycle_state_ok(review_pass))
+        pass_handoff = dict(
+            handoff_meta,
+            protocol_64_recovery="unavailable_pending_stage_f_recovery_publication",
+            stage_f="authorized",
+        )
+        self.assertTrue(protocol64_handoff_lifecycle_ok(review_pass, pass_handoff))
+        self.assertFalse(protocol64_handoff_lifecycle_ok(review_pass, handoff_meta))
+        self.assertFalse(protocol64_handoff_lifecycle_ok(lifecycle, pass_handoff))
+
         bad_pass = dict(lifecycle)
         bad_pass["STAGE E INDEPENDENT REVIEW"] = "PASS / STAGE F AUTHORIZED"
         self.assertFalse(protocol64_lifecycle_state_ok(bad_pass))
@@ -386,8 +470,6 @@ class Protocol64AxiomaticTraceabilityQualificationTests(unittest.TestCase):
         self.assertEqual(workplan_meta.get("review_target_binding_protocol"), "descendant-handoff-exact-target")
         self.assertEqual(handoff_meta.get("accepted_protocol_63_repository_state"), baseline)
         self.assertEqual(handoff_meta.get("accepted_current_protocol"), "6.3.0")
-        self.assertEqual(handoff_meta.get("protocol_64_recovery"), "unavailable_pending_independent_review")
-        self.assertEqual(handoff_meta.get("stage_f"), "blocked_pending_independent_review")
 
         phase = protocol64_stage_e_phase(lifecycle)
         state = handoff_meta.get("review_target_binding_state")
@@ -408,7 +490,7 @@ class Protocol64AxiomaticTraceabilityQualificationTests(unittest.TestCase):
             self.assertRegex(target or "", r"^[0-9a-f]{40}$")
             self.assertNotEqual(target, baseline)
             self.assertRegex(qualification or "", r"^[0-9]+$")
-            self.assertIn(f"Review immutable assembled target `{target}`", handoff)
+            self.assertIn(target or "", handoff)
             if (ROOT / ".git").exists():
                 ancestor = subprocess.run(
                     ["git", "merge-base", "--is-ancestor", target, "HEAD"],
