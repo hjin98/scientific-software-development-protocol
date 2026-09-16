@@ -426,22 +426,34 @@ class Protocol64AxiomaticTraceabilityQualificationTests(unittest.TestCase):
         stale_incident["STAGE E INDEPENDENT REVIEW"] = "NO-PASS - B64-R4/B64-R5 REPAIRED; FRESH REVIEW REQUIRED"
         self.assertFalse(protocol64_lifecycle_state_ok(stale_incident))
 
-        repair_complete = dict(lifecycle)
-        repair_complete["STAGE E INDEPENDENT REVIEW"] = "REPAIR COMPLETE / EXACT-TARGET QUALIFICATION REQUIRED"
-        self.assertTrue(protocol64_lifecycle_state_ok(repair_complete))
         pending_handoff = dict(
             handoff_meta,
             review_target_binding_state="pending-descendant-handoff",
             assembled_review_target="PENDING_DESCENDANT_HANDOFF",
             assembled_review_target_ci="PENDING_EXACT_TARGET_CI",
+            protocol_64_recovery="unavailable_pending_independent_review",
+            stage_f="blocked_pending_independent_review",
         )
+        bound_handoff = dict(
+            handoff_meta,
+            review_target_binding_state="bound",
+            assembled_review_target="a" * 40,
+            assembled_review_target_ci="123456789",
+            protocol_64_recovery="unavailable_pending_independent_review",
+            stage_f="blocked_pending_independent_review",
+        )
+
+        repair_complete = dict(lifecycle)
+        repair_complete["STAGE E INDEPENDENT REVIEW"] = "REPAIR COMPLETE / EXACT-TARGET QUALIFICATION REQUIRED"
+        self.assertTrue(protocol64_lifecycle_state_ok(repair_complete))
         self.assertTrue(protocol64_handoff_lifecycle_ok(repair_complete, pending_handoff))
-        self.assertFalse(protocol64_handoff_lifecycle_ok(repair_complete, handoff_meta))
+        self.assertFalse(protocol64_handoff_lifecycle_ok(repair_complete, bound_handoff))
 
         review_ready = dict(lifecycle)
         review_ready["STAGE E INDEPENDENT REVIEW"] = "REVIEW READY / FRESH REVIEW REQUIRED"
         self.assertTrue(protocol64_lifecycle_state_ok(review_ready))
-        self.assertTrue(protocol64_handoff_lifecycle_ok(review_ready, handoff_meta))
+        self.assertTrue(protocol64_handoff_lifecycle_ok(review_ready, bound_handoff))
+        self.assertFalse(protocol64_handoff_lifecycle_ok(review_ready, pending_handoff))
 
         review_pass = dict(lifecycle)
         review_pass["STAGE E INDEPENDENT REVIEW"] = "PASS / STAGE F AUTHORIZED"
@@ -449,12 +461,12 @@ class Protocol64AxiomaticTraceabilityQualificationTests(unittest.TestCase):
         review_pass["STAGE F"] = "AUTHORIZED"
         self.assertTrue(protocol64_lifecycle_state_ok(review_pass))
         pass_handoff = dict(
-            handoff_meta,
+            bound_handoff,
             protocol_64_recovery="unavailable_pending_stage_f_recovery_publication",
             stage_f="authorized",
         )
         self.assertTrue(protocol64_handoff_lifecycle_ok(review_pass, pass_handoff))
-        self.assertFalse(protocol64_handoff_lifecycle_ok(review_pass, handoff_meta))
+        self.assertFalse(protocol64_handoff_lifecycle_ok(review_pass, bound_handoff))
         self.assertFalse(protocol64_handoff_lifecycle_ok(lifecycle, pass_handoff))
 
         bad_pass = dict(lifecycle)
