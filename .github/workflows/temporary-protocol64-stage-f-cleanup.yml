@@ -1,0 +1,108 @@
+name: Temporary Protocol 6.4 Stage F cleanup
+on:
+  push:
+    branches: [ssdp-6.4-axiomatic-definition-traceability]
+permissions:
+  contents: write
+jobs:
+  cleanup:
+    if: github.event.head_commit.message == 'Finalize Protocol 6.4 Stage F hygiene'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ssdp-6.4-axiomatic-definition-traceability
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install qualification dependencies
+        run: |
+          python -m pip install pyyaml -r source/requirements-validation.txt
+          python -m pip install ./orchestrator -r orchestrator/requirements-dev.txt
+      - name: Reconcile final Stage-F lifecycle text and remove temporary residue
+        run: |
+          set -euxo pipefail
+          python - <<'PY'
+          from pathlib import Path
+
+          R = '74bc572ef516cae417437a2027eeff52a2e25c15'
+          M = '6e66478f37de197b6d28707e087c61d687fcfa41'
+          B = 'e09a9d1480211eea2d16d722182bb5c6de1bee12'
+
+          def replace_exact(path, old, new):
+              p = Path(path)
+              text = p.read_text()
+              if old not in text:
+                  raise SystemExit(f'missing expected text in {path}: {old!r}')
+              p.write_text(text.replace(old, new, 1))
+
+          dep = 'source/SEMANTIC_DEPENDENCIES.md'
+          replace_exact(
+              dep,
+              'material **accepted Protocol 6.3 plus proposed Protocol 6.4 candidate** relationships',
+              'material **accepted Protocol 6.4 plus frozen historical Protocol 6.3 rollback** relationships',
+          )
+          replace_exact(
+              dep,
+              'current 6.2/6.3 and proposed 6.4 use `abstraction-and-concretization.md`',
+              'Protocol 6.2/6.3/6.4 use `abstraction-and-concretization.md`',
+          )
+          replace_exact(
+              dep,
+              'Frozen 5.16/6.0/6.1/6.2 profiles remain independent compatibility/rollback resources, and 6.3 becomes the immediate frozen predecessor oracle for candidate 6.4 profile generation. Protocol 6.4 qualification and immutable public-bootstrap publication at `e09a9d1480211eea2d16d722182bb5c6de1bee12` are complete. Protocol 6.3 remains accepted-current until independent assembled-candidate Review, distinct recovery publication, generated reconciliation, impact closure and lifecycle cutover all pass.',
+              f'Frozen 5.16/6.0/6.1/6.2/6.3 profiles remain independent compatibility/rollback resources, with 6.3 the immediate frozen predecessor oracle for accepted Protocol 6.4. Protocol 6.4 qualification, independent assembled-candidate Review, immutable public-bootstrap publication at `{B}`, distinct recovery publication at `{R}`, generated reconciliation, impact closure, and lifecycle cutover are complete; Protocol 6.3 remains immutable historical rollback.',
+          )
+
+          handoff = 'qualification/ssdp6/INDEPENDENT-REVIEW-HANDOFF-PROTOCOL-6.4.md'
+          replace_exact(
+              handoff,
+              '**FRESH INDEPENDENT STAGE-E REVIEW: READY — IMMUTABLE TARGET BOUND.**',
+              '**STAGE F: COMPLETE — PROTOCOL 6.4 ACCEPTED-CURRENT.**',
+          )
+          replace_exact(
+              handoff,
+              'Protocol 6.3 remains accepted-current. Protocol 6.4 recovery remains unavailable. Stage F remains blocked pending a genuine fresh-context independent Review PASS. The authorized Protocol 6.4 public bootstrap remains `e09a9d1480211eea2d16d722182bb5c6de1bee12`; R8/R9 repairs did not alter D1-D3 or public-source semantics.',
+              f'Protocol 6.4 is accepted-current after fresh independent Review PASS and Stage-F closeout. Recovery `{R}` was published by mapping descendant `{M}` and remains distinct from authorized public bootstrap `{B}`. Protocol 6.3 remains immutable historical rollback. The remaining Stage-E mandate and repair provenance below are preserved as historical review evidence, not current lifecycle instructions.',
+          )
+          replace_exact(
+              handoff,
+              '## Reviewer mandate',
+              '## Historical Stage-E reviewer mandate (satisfied)',
+          )
+
+          wp = 'workplans/archive/SSDP-6.4-AXIOMATIC-FORMAL-DEFINITION-AND-SEMANTIC-TRACEABILITY-CONSOLIDATED.md'
+          replace_exact(wp, 'implementation_handoff: stage-f-recovery-mapped', 'implementation_handoff: stage-f-complete')
+          replace_exact(
+              wp,
+              'Protocol 6.3 remains accepted-current until Protocol 6.4 completes implementation, qualification, independent assembled-candidate Review, self-reference-safe public-bootstrap publication, immutable recovery mapping, mapping-bearing generated reconciliation, Protocol-7 inheritance-only reconciliation, and lifecycle closeout.',
+              'Protocol 6.4 is accepted-current after completing implementation, qualification, independent assembled-candidate Review, self-reference-safe public-bootstrap publication, immutable recovery mapping, mapping-bearing generated reconciliation, Protocol-7 inheritance-only reconciliation, and lifecycle closeout. Protocol 6.3 remains immutable historical rollback.',
+          )
+
+          for d in Path('qualification/ssdp6').glob('STAGE-F-DIAGNOSTIC*PROTOCOL-6.4.txt'):
+              d.unlink()
+          PY
+          python source/build_skills.py --output dist
+          python orchestrator/scripts/generate_protocol_snapshot.py
+          git rm .github/workflows/temporary-protocol64-stage-f.yml
+          git rm .github/workflows/temporary-protocol64-stage-f-cleanup.yml
+      - name: Full post-closeout qualification
+        run: |
+          set -euxo pipefail
+          python -m unittest discover -s tests -v
+          python source/project_engineering_memory.py PROJECT-ENGINEERING-MEMORY.md
+          rm -rf /tmp/protocol-dist && python source/build_skills.py --output /tmp/protocol-dist
+          python source/validate_packages.py --dist /tmp/protocol-dist
+          python source/check_dist.py --expected /tmp/protocol-dist --committed dist
+          python orchestrator/scripts/generate_protocol_snapshot.py --check
+          python orchestrator/scripts/run_core_tests.py
+          git diff --check
+      - name: Publish clean Stage-F terminal tree
+        run: |
+          set -euxo pipefail
+          git config user.name 'Protocol 6.4 lifecycle automation'
+          git config user.email 'protocol64-lifecycle@users.noreply.github.com'
+          git add -A
+          git diff --cached --check
+          git commit -m 'Finalize Protocol 6.4 Stage F terminal state'
+          git push origin HEAD:ssdp-6.4-axiomatic-definition-traceability
