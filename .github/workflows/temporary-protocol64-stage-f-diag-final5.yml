@@ -1,0 +1,38 @@
+name: Temporary Protocol 6.4 Stage F diagnose final5
+on:
+  push:
+    branches: [ssdp-6.4-axiomatic-definition-traceability]
+permissions:
+  contents: write
+jobs:
+  diagnose-final5:
+    if: github.event.head_commit.message == 'Diagnose Protocol 6.4 Stage F final5'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: {ref: ssdp-6.4-axiomatic-definition-traceability, fetch-depth: 0}
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: |
+          python -m pip install pyyaml -r source/requirements-validation.txt
+          python -m pip install ./orchestrator -r orchestrator/requirements-dev.txt
+      - name: Reconstruct exact final5 candidate
+        run: |
+          python - <<'PY'
+          import yaml
+          from pathlib import Path
+          d=yaml.safe_load(Path('.github/workflows/temporary-protocol64-stage-f-final5.yml').read_text())
+          Path('/tmp/final5.sh').write_text(next(s['run'] for s in d['jobs']['final5']['steps'] if s.get('name')=='Construct final4 tree and close remaining successor oracles'))
+          PY
+          bash /tmp/final5.sh
+      - name: Capture failing unit-test evidence
+        run: |
+          set +e
+          python -m unittest discover -s tests -v > qualification/ssdp6/STAGE-F-DIAGNOSTIC-FINAL5-PROTOCOL-6.4.txt 2>&1
+          rc=$?
+          echo "UNITTEST_EXIT=$rc" >> qualification/ssdp6/STAGE-F-DIAGNOSTIC-FINAL5-PROTOCOL-6.4.txt
+          git config user.name 'Protocol 6.4 lifecycle automation'
+          git config user.email 'protocol64-lifecycle@users.noreply.github.com'
+          git add qualification/ssdp6/STAGE-F-DIAGNOSTIC-FINAL5-PROTOCOL-6.4.txt
+          git commit -m 'Capture Protocol 6.4 Stage F final5 diagnostic'
+          git push origin HEAD:ssdp-6.4-axiomatic-definition-traceability
