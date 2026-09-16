@@ -13,7 +13,7 @@ class Protocol62CloseoutTests(unittest.TestCase):
         self.assertIn("| `ssdp-protocol-6.1` | 6.1.0 | 2 | frozen historical rollback |", versioning)
         self.assertIn("| `ssdp-protocol-6.2` | 6.2.0 | 2 | frozen historical rollback |", versioning)
         self.assertIn("| `ssdp-protocol-6.3` | 6.3.0 | 2 | accepted current / frozen predecessor for 6.4 candidate |", versioning)
-        self.assertIn("| `ssdp-protocol-6.4` | 6.4.0 | 2 | proposed candidate |", versioning)
+        self.assertIn("| `ssdp-protocol-6.4` | 6.4.0 | 2 | accepted current |", versioning)
         self.assertIn("| `ssdp-protocol-6.1` | 6.1.0 | 2 | frozen historical rollback |", portability)
         self.assertIn("| `ssdp-protocol-6.2` | 6.2.0 | 2 | frozen historical rollback |", portability)
         self.assertIn("| `ssdp-protocol-6.3` | 6.3.0 | 2 | accepted current |", portability)
