@@ -132,3 +132,8 @@ Protocol 6.4 strengthens semantic definition, import, provenance and dependency 
 - **Compatibility:** orchestration profile schema remains v2 and the 11-stage Protocol 6 graph is unchanged. `ssdp-protocol-6.4` is a distinct candidate profile/snapshot; accepted 6.3 and earlier packaged profile/prompt bytes remain frozen. Protocol 6.3 stays accepted-current during 6.4 qualification.
 - **Lifecycle state:** CANDIDATE / UNDER QUALIFICATION. No Protocol 6.4 public-source bootstrap or recovery mapping is authorized yet. The self-reference-safe bootstrap must first exist and pass qualification before a later descendant may publish its immutable identity; recovery remains separately gated on independent assembled-candidate Review PASS and subsequent publication.
 - **Current implementation evidence:** canonical 6.4 source/profile generation completed through the repository generator, with schema-v2 snapshot verification, while 6.3 is treated as a frozen predecessor oracle. This generation evidence establishes source/profile reproducibility only; it is not Protocol 6.4 qualification, independent Review, bootstrap approval or release acceptance.
+
+
+## 2026-09-16 — Protocol 6.4 accepted-current
+
+Protocol 6.4 completed Review, recovery publication, Stage-F acceptance and closeout. Recovery `74bc572ef516cae417437a2027eeff52a2e25c15` is distinct from bootstrap `e09a9d1480211eea2d16d722182bb5c6de1bee12`; mapping descendant `6e66478f37de197b6d28707e087c61d687fcfa41` published recovery. Protocol 7 inherited 6.4 through Revision 5 with `d3_architecture_mutation: none`; D4 remained unauthorized.

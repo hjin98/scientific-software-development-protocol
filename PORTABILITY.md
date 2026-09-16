@@ -6,9 +6,9 @@ The supported portable runtime unit is the self-contained directory `dist/skills
 
 Authority roles: `scientific-formulation`, `numerical-algorithm-design`, `software-design`, `software-implementation`. Optional non-authoritative specialists: `software-documentation`, `software-maintenance-audit`, `repository-hygiene`.
 
-## Protocol 6.4 candidate routing contract
+## Protocol 6.4 routing contract
 
-Protocol 6.4 is the current development candidate; Protocol 6.3 remains accepted-current until 6.4 qualification, independent Review, recovery publication and cutover complete. The active role/specialist `SKILL.md` owns **root activation**. It routes to the universal kernel/owning concern; a canonical concern owner may conditionally dispatch to a narrower leaf only within that concern. Each activation edge states a decision predicate and resolvable resource, remains acyclic, adds/narrows material semantics, and reuses already-loaded applicable owners rather than reloading them.
+Protocol 6.4 is accepted-current; Protocol 6.3 is frozen historical rollback for explicitly version-bound 6.3 work. The active role/specialist `SKILL.md` owns **root activation**. It routes to the universal kernel/owning concern; a canonical concern owner may conditionally dispatch to a narrower leaf only within that concern. Each activation edge states a decision predicate and resolvable resource, remains acyclic, adds/narrows material semantics, and reuses already-loaded applicable owners rather than reloading them.
 
 The canonical universal-kernel source is `source/shared/references/abstraction-and-concretization.md`; inside a packaged skill it is reached as `references/abstraction-and-concretization.md`.
 
@@ -45,16 +45,16 @@ Accepted immutable mappings:
 6.3.0 public bootstrap -> 86c13cab6bdd1991dffa94e277db8eacf87e2e11
 6.3.0 recovery -> 9f353097fab36e325a325f1c2f9d9cec32e86177
 6.4.0 public bootstrap -> e09a9d1480211eea2d16d722182bb5c6de1bee12
-6.4.0 recovery -> UNAVAILABLE_PENDING_INDEPENDENT_REVIEW
+6.4.0 recovery -> 74bc572ef516cae417437a2027eeff52a2e25c15
 ```
 
 Canonical repository: `https://github.com/hjin98/scientific-software-development-protocol`.
 
 The first Protocol 6.2 bootstrap attempt `1181c2031710c5d343194d87d08543290fded0ab` remains invalidated historical evidence. Version-bound 6.2 public fallback uses exactly `5a062ebc472755607b9dc66d33a5ebbc4b7429aa`; accepted 6.2 recovery is separately `b59adc77efe6951912cfd705cc43830c58ca27d0`.
 
-For Protocol 6.3, pre-repair bootstrap `1484c1d3caa49d87cc15bc52a5e775399c1dae1b`, second bootstrap `5ee4b3ac3ca1666b0499f7a72f55adcc411bf4bb`, owner-binding bootstrap `e12572c021087308570abfa41657a910c6896457`, and D4R3 bootstrap `dc22f09fd38dbbfeaeb0160152da9b284654f66e` are historical evidence only. D9 changed canonical validator semantics. Replacement self-reference-safe source snapshot `86c13cab6bdd1991dffa94e277db8eacf87e2e11` passed bootstrap readiness before descendant `a8dac814cc2813b3bb336e5b6abde5fbcf44949e` published its exact SHA as the sole authorized version-bound 6.3 public fallback. Recovery is separately mapped to `9f353097fab36e325a325f1c2f9d9cec32e86177` after R2 Review PASS; descendant `0c76c0461b7376f17182d29ba145a198a092463c` published that mapping and mapping-bearing generated state `e75282ae850b774a9466902f4c74ba6a179116bd` passed Stage G acceptance in run `34699052516`. Protocol 6.3 remains accepted-current while 6.4 is a candidate.
+For Protocol 6.3, pre-repair bootstrap `1484c1d3caa49d87cc15bc52a5e775399c1dae1b`, second bootstrap `5ee4b3ac3ca1666b0499f7a72f55adcc411bf4bb`, owner-binding bootstrap `e12572c021087308570abfa41657a910c6896457`, and D4R3 bootstrap `dc22f09fd38dbbfeaeb0160152da9b284654f66e` are historical evidence only. D9 changed canonical validator semantics. Replacement self-reference-safe source snapshot `86c13cab6bdd1991dffa94e277db8eacf87e2e11` passed bootstrap readiness before descendant `a8dac814cc2813b3bb336e5b6abde5fbcf44949e` published its exact SHA as the sole authorized version-bound 6.3 public fallback. Recovery is separately mapped to `9f353097fab36e325a325f1c2f9d9cec32e86177` after R2 Review PASS; descendant `0c76c0461b7376f17182d29ba145a198a092463c` published that mapping and mapping-bearing generated state `e75282ae850b774a9466902f4c74ba6a179116bd` passed Stage G acceptance in run `34699052516`. Protocol 6.3 remains immutable historical rollback after Protocol 6.4 acceptance.
 
-Protocol 6.4 followed the same self-reference-safe lifecycle: immutable bootstrap `e09a9d1480211eea2d16d722182bb5c6de1bee12` existed without self-naming, passed repository/package/profile/Core and exact-source qualification, and is named only by a later descendant. It is the sole authorized version-bound 6.4 public fallback. Recovery remains a separate later identity and cannot be published before independent assembled-candidate Review PASS. Repository default/latest, the candidate branch name, a guessed semantic-version ref, or the accepted 6.3 bootstrap are not substitutes.
+Protocol 6.4 followed the same self-reference-safe lifecycle: immutable bootstrap `e09a9d1480211eea2d16d722182bb5c6de1bee12` existed without self-naming, passed repository/package/profile/Core and exact-source qualification, and is named only by a later descendant. It is the sole authorized version-bound 6.4 public fallback. Recovery is separately mapped to `74bc572ef516cae417437a2027eeff52a2e25c15` after independent assembled-candidate Review PASS and remains distinct from bootstrap `e09a9d1480211eea2d16d722182bb5c6de1bee12`. Repository default/latest, the branch name, a guessed semantic-version ref, or the accepted 6.3 bootstrap are not substitutes.
 
 ## Version-bound profiles
 
@@ -64,10 +64,10 @@ Protocol 6.4 followed the same self-reference-safe lifecycle: immutable bootstra
 | `ssdp-protocol-6.0` | 6.0.0 | 2 | frozen |
 | `ssdp-protocol-6.1` | 6.1.0 | 2 | frozen historical rollback |
 | `ssdp-protocol-6.2` | 6.2.0 | 2 | frozen historical rollback |
-| `ssdp-protocol-6.3` | 6.3.0 | 2 | accepted current |
-| `ssdp-protocol-6.4` | 6.4.0 | 2 | candidate under qualification |
+| `ssdp-protocol-6.3` | 6.3.0 | 2 | frozen historical rollback |
+| `ssdp-protocol-6.4` | 6.4.0 | 2 | accepted current |
 
-The 6.4 profile remains schema v2 because semantic-definition/traceability doctrine does not change the machine stage graph or result-envelope schema. The 6.3 resource is now a frozen predecessor/rollback snapshot and its prompt/profile bytes must remain immutable. Workplan `protocol_version` selects compatible semantics before stage interpretation. Serious Challenge/human-pending state stops ordinary automatic closure; orchestration represents/routes state but never decides scientific truth. PEM schema versioning is independent of orchestration profile schema; Protocol 6.4 inherits supported PEM schema 1 and fails safe for unsupported memory-dependent decisions.
+The 6.4 profile uses schema v2 because semantic-definition/traceability doctrine does not change the machine stage graph or result-envelope schema. The 6.3 resource is now a frozen predecessor/rollback snapshot and its prompt/profile bytes must remain immutable. Workplan `protocol_version` selects compatible semantics before stage interpretation. Serious Challenge/human-pending state stops ordinary automatic closure; orchestration represents/routes state but never decides scientific truth. PEM schema versioning is independent of orchestration profile schema; Protocol 6.4 inherits supported PEM schema 1 and fails safe for unsupported memory-dependent decisions.
 
 ## Axiomatic/definition portability boundary
 

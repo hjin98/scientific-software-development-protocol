@@ -3,7 +3,7 @@ kind: abstraction-concretization-change-plan-consolidated
 workplan_id: SSDP-6.4-AXIOMATIC-FORMAL-DEFINITION-AND-SEMANTIC-TRACEABILITY-CONSOLIDATED
 protocol_version: 6.3.0
 target_protocol_version: 6.4.0
-status: active
+status: archived
 created_date: 2026-09-15
 reviewed_date: 2026-09-15
 design_review_state: pass-after-sixth-review
@@ -16,7 +16,7 @@ independent_review_target: HANDOFF_BOUND_AFTER_CANDIDATE
 independent_review_target_owner: qualification/ssdp6/INDEPENDENT-REVIEW-HANDOFF-PROTOCOL-6.4.md
 independent_review_baseline: 0928accd337a13f864b292ed81c36372828cfb4c
 review_target_binding_protocol: descendant-handoff-exact-target
-stage_f: recovery-mapped-acceptance-pending
+stage_f: pass
 branch_point: 0928accd337a13f864b292ed81c36372828cfb4c
 accepted_parent_protocol: 6.3.0
 accepted_parent_recovery: 9f353097fab36e325a325f1c2f9d9cec32e86177
@@ -27,7 +27,7 @@ accepted_parent_public_bootstrap: 86c13cab6bdd1991dffa94e277db8eacf87e2e11
 
 ## Current disposition
 
-**FRESH STAGE-E REVIEW: READY — IMMUTABLE TARGET BOUND.** B64-R8/B64-R9 were repaired at the existing D4 qualification/lifecycle surface. Immutable assembled target `f1e0ca95f4d1895e3497e155105468fa73f47827` carries the repaired qualification oracle plus repair-complete pending-binding lifecycle state and passed exact-target ordinary PR run `35073930076`, including inherited protocol regression, package build/independent validation, committed-dist parity, packaged-snapshot parity, full Orchestrator Core, and whitespace. The current descendant handoff binds that already-existing target and exact-target CI for a fresh independent Stage-E Review. No D1/D2/D3 semantic doctrine, Protocol-7 D3 architecture, profile schema, or public-source semantics changed. Protocol 6.3 remains accepted-current; Protocol 6.4 public bootstrap `e09a9d1480211eea2d16d722182bb5c6de1bee12` remains authorized; Protocol 6.4 recovery remains unavailable; Stage F remains blocked until a genuine fresh-context independent Review PASS.
+**STAGE F: PASS — PROTOCOL 6.4 LIFECYCLE CLOSED.** Recovery `74bc572ef516cae417437a2027eeff52a2e25c15` is distinct from bootstrap `e09a9d1480211eea2d16d722182bb5c6de1bee12`; mapping descendant `6e66478f37de197b6d28707e087c61d687fcfa41` was followed by Stage-F acceptance run `35153901722`. Protocol 7 inheritance is Revision 5 only.
 
 **SIXTH DESIGN REVIEW: PASS AFTER GAP CLOSURE.** This file is the single current implementation/review handoff for Protocol 6.4. Earlier design-review workplans and the fifth-review consolidated snapshot are historical evidence only; implementation and independent Review SHALL reconstruct the current contract from this file plus accepted Protocol 6.3 owners, not by replaying amendment chronology.
 

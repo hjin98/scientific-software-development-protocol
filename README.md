@@ -1,6 +1,6 @@
 # Scientific Software Development Protocol
 
-Current accepted document-controlled release: **Protocol 6.3**. Accepted recovery is `9f353097fab36e325a325f1c2f9d9cec32e86177` and the distinct immutable public-source bootstrap is `86c13cab6bdd1991dffa94e277db8eacf87e2e11`. Protocol 6.2 recovery `b59adc77efe6951912cfd705cc43830c58ca27d0` remains immutable historical rollback for explicitly version-bound 6.2 work. **Protocol 6.4 is the current candidate under qualification on its development branch; it is not accepted-current. Its sole authorized version-bound public-source bootstrap is `e09a9d1480211eea2d16d722182bb5c6de1bee12`; it has no recovery mapping yet.** Protocol 7 remains a proposed deterministic-control-plane successor and is not cut over.
+Current accepted document-controlled release: **Protocol 6.4**. Accepted recovery is `74bc572ef516cae417437a2027eeff52a2e25c15` and the distinct immutable public-source bootstrap is `e09a9d1480211eea2d16d722182bb5c6de1bee12`. Protocol 6.3 recovery `9f353097fab36e325a325f1c2f9d9cec32e86177` remains immutable historical rollback for explicitly version-bound 6.3 work. Protocol 7 remains proposed and is not cut over.
 
 ## Core model
 
@@ -15,7 +15,7 @@ D1 scientific/mathematical formulation
 
 This is a semantic hierarchy, not a mandatory waterfall. A child concretization must preserve every applicable parent abstraction and directly governed external constraint. Among admissible concretizations prefer domain engineering fitness, then minimum justified total complexity, then development economy.
 
-The universal current candidate kernel is `source/shared/references/abstraction-and-concretization.md`. Role entrypoints route progressively to concern owners rather than loading the complete reference library up front. Version-bound work is always interpreted under its declared Protocol version; candidate 6.4 source does not silently reinterpret accepted 6.3 or frozen historical work.
+The universal current kernel is `source/shared/references/abstraction-and-concretization.md`. Role entrypoints route progressively to concern owners rather than loading the complete reference library up front. Version-bound work is always interpreted under its declared Protocol version; candidate 6.4 source does not silently reinterpret accepted 6.3 or frozen historical work.
 
 ## Protocol 6.4 axiomatic definition traceability
 
@@ -71,7 +71,7 @@ Frozen accepted historical mappings remain immutable:
 6.1.0  -> 802e75af261efb4f70d71284d860613a2197b639
 6.2.0  -> b59adc77efe6951912cfd705cc43830c58ca27d0
 6.3.0  -> 9f353097fab36e325a325f1c2f9d9cec32e86177
-6.4.0  -> UNAVAILABLE_PENDING_INDEPENDENT_REVIEW
+6.4.0  -> 74bc572ef516cae417437a2027eeff52a2e25c15
 ```
 
 Protocol 6.2 public-source bootstrap remains **`5a062ebc472755607b9dc66d33a5ebbc4b7429aa`** for version-bound 6.2 work. The earlier `1181c2031710c5d343194d87d08543290fded0ab` attempt remains invalidated historical evidence only. Bootstrap and recovery identities are intentionally distinct.
@@ -98,4 +98,4 @@ python orchestrator/scripts/generate_protocol_snapshot.py --check
 python orchestrator/scripts/run_core_tests.py
 ```
 
-Protocol 6.4 candidate acceptance additionally requires the workplan's QF64-A..QF64-P positive/negative qualification families, inherited 6.3 preservation/routing/PEM/package/profile/bootstrap/recovery/Challenge oracles, frozen-predecessor identity checks, self-hosting/presentation/security falsification, independent package/profile/Core validation, then a separate independent assembled-candidate Review. Only after that Review may recovery publication and accepted-current cutover proceed. A governing Serious Challenge, stale/inapplicable required evidence, or required unexecuted check blocks closure.
+Protocol 6.4 acceptance required the workplan's QF64-A..QF64-P positive/negative qualification families, inherited 6.3 preservation/routing/PEM/package/profile/bootstrap/recovery/Challenge oracles, frozen-predecessor identity checks, self-hosting/presentation/security falsification, independent package/profile/Core validation, then a separate independent assembled-candidate Review. After that Review, Stage-F recovery publication, mapping-bearing acceptance, successor reconciliation, and accepted-current cutover completed. A governing Serious Challenge, stale/inapplicable required evidence, or required unexecuted check blocks closure.

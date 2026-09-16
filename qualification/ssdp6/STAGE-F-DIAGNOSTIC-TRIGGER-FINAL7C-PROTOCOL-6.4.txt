@@ -1,1 +1,0 @@
-Temporary trigger for the registered Protocol 6.4 Stage-F final7 executor. Removed by successful closeout before durable publication.

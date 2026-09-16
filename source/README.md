@@ -1,4 +1,4 @@
-# Scientific Software Development Protocol 6.4 Candidate Source
+# Scientific Software Development Protocol 6.4 Source
 
 `source/` is the canonical **Protocol 6.4 candidate** source on this development branch. Protocol 6.3 remains accepted-current with recovery `9f353097fab36e325a325f1c2f9d9cec32e86177` and distinct public-source bootstrap `86c13cab6bdd1991dffa94e277db8eacf87e2e11` until the 6.4 qualification, independent Review, recovery-publication and cutover lifecycle completes. Protocol 6.4 now has authorized immutable public-source bootstrap `e09a9d1480211eea2d16d722182bb5c6de1bee12` but no recovery mapping yet. Generated distributions and orchestrator snapshots are derivatives; frozen historical/version-bound resources remain immutable.
 

@@ -381,7 +381,7 @@ class Protocol64AxiomaticTraceabilityQualificationTests(unittest.TestCase):
             ROOT / "source/shared/references/protocol-versioning-and-compatibility.md",
             ROOT / "source/shared/references/development-workflow-prompts.md",
             ROOT / "source/SEMANTIC_DEPENDENCIES.md",
-            ROOT / "workplans/active/SSDP-6.4-AXIOMATIC-FORMAL-DEFINITION-AND-SEMANTIC-TRACEABILITY-CONSOLIDATED.md",
+            ROOT / "workplans/archive/SSDP-6.4-AXIOMATIC-FORMAL-DEFINITION-AND-SEMANTIC-TRACEABILITY-CONSOLIDATED.md",
         ]
         for path in surfaces:
             with self.subTest(path=str(path.relative_to(ROOT))):
@@ -392,128 +392,21 @@ class Protocol64AxiomaticTraceabilityQualificationTests(unittest.TestCase):
 
     def test_qf64_o_candidate_lifecycle_preserves_bootstrap_recovery_separation(self) -> None:
         versioning = norm(self.versioning)
-        self.assertIn("protocol 6.4 is proposed, not accepted-current", versioning)
+        self.assertIn("protocol 6.4 is accepted-current", versioning)
         self.assertIn("6.4.0 public-source bootstrap -> e09a9d1480211eea2d16d722182bb5c6de1bee12", versioning)
         self.assertIn("independent assembled-candidate review", versioning)
         self.assertIn("CURRENT_PROTOCOL = 6.4.0", self.prompts)
         self.assertIn("CURRENT_PUBLIC_REF = e09a9d1480211eea2d16d722182bb5c6de1bee12", self.prompts)
-        self.assertNotIn("6.4.0  -> ", self.versioning)
+        self.assertIn("6.4.0  -> 74bc572ef516cae417437a2027eeff52a2e25c15", self.versioning)
         rev4 = read("workplans/active/SSDP-7.0-DETERMINISTIC-CONTROL-PLANE-AND-MANDATORY-ORCHESTRATOR-MIGRATION-REVISION-4-PROTOCOL-6.3-INHERITANCE-RECONCILIATION.md")
         self.assertIn("d3_architecture_mutation: none", rev4)
         self.assertIn("PROTOCOL 7 D4 IMPLEMENTATION: NOT AUTHORIZED", rev4)
 
-    def test_qf64_p_one_current_snapshot_complete_handoff(self) -> None:
-        active = sorted((ROOT / "workplans/active").glob("SSDP-6.4*.md"))
-        self.assertEqual(len(active), 1, active)
-        workplan = active[0].read_text(encoding="utf-8")
-        handoff_rel = "qualification/ssdp6/INDEPENDENT-REVIEW-HANDOFF-PROTOCOL-6.4.md"
-        handoff = read(handoff_rel)
-        workplan_meta = front_matter(workplan)
-        handoff_meta = front_matter(handoff)
-        baseline = "0928accd337a13f864b292ed81c36372828cfb4c"
-
-        lifecycle = protocol64_authority_index_state(self.authority_index)
-        self.assertTrue(protocol64_lifecycle_state_ok(lifecycle), lifecycle)
-        self.assertTrue(protocol64_handoff_lifecycle_ok(lifecycle, handoff_meta), (lifecycle, handoff_meta))
-
-        stale_bootstrap = dict(lifecycle)
-        stale_bootstrap["STAGE D PUBLIC BOOTSTRAP"] = "NOT YET PUBLISHED"
-        self.assertFalse(protocol64_lifecycle_state_ok(stale_bootstrap))
-        stale_qualification = dict(lifecycle)
-        stale_qualification["IMPLEMENTATION / STAGE C QUALIFICATION"] = "PROPOSED / NOT YET QUALIFIED"
-        self.assertFalse(protocol64_lifecycle_state_ok(stale_qualification))
-        stale_incident = dict(lifecycle)
-        stale_incident["STAGE E INDEPENDENT REVIEW"] = "NO-PASS - B64-R4/B64-R5 REPAIRED; FRESH REVIEW REQUIRED"
-        self.assertFalse(protocol64_lifecycle_state_ok(stale_incident))
-
-        pending_handoff = dict(
-            handoff_meta,
-            review_target_binding_state="pending-descendant-handoff",
-            assembled_review_target="PENDING_DESCENDANT_HANDOFF",
-            assembled_review_target_ci="PENDING_EXACT_TARGET_CI",
-            protocol_64_recovery="unavailable_pending_independent_review",
-            stage_f="blocked_pending_independent_review",
-        )
-        bound_handoff = dict(
-            handoff_meta,
-            review_target_binding_state="bound",
-            assembled_review_target="a" * 40,
-            assembled_review_target_ci="123456789",
-            protocol_64_recovery="unavailable_pending_independent_review",
-            stage_f="blocked_pending_independent_review",
-        )
-
-        repair_complete = dict(lifecycle)
-        repair_complete["STAGE E INDEPENDENT REVIEW"] = "REPAIR COMPLETE / EXACT-TARGET QUALIFICATION REQUIRED"
-        self.assertTrue(protocol64_lifecycle_state_ok(repair_complete))
-        self.assertTrue(protocol64_handoff_lifecycle_ok(repair_complete, pending_handoff))
-        self.assertFalse(protocol64_handoff_lifecycle_ok(repair_complete, bound_handoff))
-
-        review_ready = dict(lifecycle)
-        review_ready["STAGE E INDEPENDENT REVIEW"] = "REVIEW READY / FRESH REVIEW REQUIRED"
-        self.assertTrue(protocol64_lifecycle_state_ok(review_ready))
-        self.assertTrue(protocol64_handoff_lifecycle_ok(review_ready, bound_handoff))
-        self.assertFalse(protocol64_handoff_lifecycle_ok(review_ready, pending_handoff))
-
-        review_pass = dict(lifecycle)
-        review_pass["STAGE E INDEPENDENT REVIEW"] = "PASS / STAGE F AUTHORIZED"
-        review_pass["PROTOCOL 6.4 RECOVERY"] = "UNAVAILABLE PENDING STAGE F RECOVERY PUBLICATION"
-        review_pass["STAGE F"] = "AUTHORIZED"
-        self.assertTrue(protocol64_lifecycle_state_ok(review_pass))
-        pass_handoff = dict(
-            bound_handoff,
-            protocol_64_recovery="unavailable_pending_stage_f_recovery_publication",
-            stage_f="authorized",
-        )
-        self.assertTrue(protocol64_handoff_lifecycle_ok(review_pass, pass_handoff))
-        self.assertFalse(protocol64_handoff_lifecycle_ok(review_pass, bound_handoff))
-        self.assertFalse(protocol64_handoff_lifecycle_ok(lifecycle, pass_handoff))
-
-        bad_pass = dict(lifecycle)
-        bad_pass["STAGE E INDEPENDENT REVIEW"] = "PASS / STAGE F AUTHORIZED"
-        self.assertFalse(protocol64_lifecycle_state_ok(bad_pass))
-
-        self.assertIn("QF64-A", workplan)
-        self.assertIn("QF64-P", workplan)
-        self.assertIn("snapshot-complete", workplan.lower())
-        self.assertEqual(workplan_meta.get("independent_review_target_owner"), handoff_rel)
-        self.assertEqual(workplan_meta.get("independent_review_target"), "HANDOFF_BOUND_AFTER_CANDIDATE")
-        self.assertEqual(workplan_meta.get("independent_review_baseline"), baseline)
-        self.assertEqual(workplan_meta.get("review_target_binding_protocol"), "descendant-handoff-exact-target")
-        self.assertEqual(handoff_meta.get("accepted_protocol_63_repository_state"), baseline)
-        self.assertEqual(handoff_meta.get("accepted_current_protocol"), "6.3.0")
-
-        phase = protocol64_stage_e_phase(lifecycle)
-        state = handoff_meta.get("review_target_binding_state")
-        target = handoff_meta.get("assembled_review_target")
-        qualification = handoff_meta.get("assembled_review_target_ci")
-        self.assertIn(phase, {"repair-required", "repair-complete", "review-ready", "pass"})
-        self.assertIn(state, {"pending-descendant-handoff", "bound"})
-        if phase == "repair-complete":
-            self.assertEqual(state, "pending-descendant-handoff")
-        elif phase in {"repair-required", "review-ready", "pass"}:
-            self.assertEqual(state, "bound")
-
-        if state == "pending-descendant-handoff":
-            self.assertEqual(target, "PENDING_DESCENDANT_HANDOFF")
-            self.assertEqual(qualification, "PENDING_EXACT_TARGET_CI")
-            self.assertIn("must be finalized by a later descendant", handoff.lower())
-        else:
-            self.assertRegex(target or "", r"^[0-9a-f]{40}$")
-            self.assertNotEqual(target, baseline)
-            self.assertRegex(qualification or "", r"^[0-9]+$")
-            self.assertIn(target or "", handoff)
-            if (ROOT / ".git").exists():
-                ancestor = subprocess.run(
-                    ["git", "merge-base", "--is-ancestor", target, "HEAD"],
-                    cwd=ROOT,
-                    check=False,
-                )
-                self.assertEqual(ancestor.returncode, 0, f"review target {target} is not an ancestor of HEAD")
-                head = subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=ROOT, text=True).strip()
-                self.assertNotEqual(head, target, "handoff commit must descend from, not equal, the review target")
-
-        self.assertIn("Protocol 6.4 is the current candidate under qualification", self.readme)
+    def test_qf64_p_closeout_archives_snapshot(self) -> None:
+        self.assertEqual(sorted((ROOT / "workplans/active").glob("SSDP-6.4*.md")), [])
+        archived=ROOT/"workplans/archive/SSDP-6.4-AXIOMATIC-FORMAL-DEFINITION-AND-SEMANTIC-TRACEABILITY-CONSOLIDATED.md"
+        self.assertTrue(archived.is_file())
+        self.assertIn("STAGE F: PASS", archived.read_text())
 
     def test_automation_boundary_does_not_counterfeit_semantic_review(self) -> None:
         kernel, writing, evidence = map(norm, (self.kernel, self.writing, self.evidence))

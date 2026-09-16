@@ -32,7 +32,7 @@ Every workplan that inherits protocol behavior binds to its declared `protocol_v
 
 For 6.2-bound work, any 6.3 `PROJECT-ENGINEERING-MEMORY.md` is inert protocol-wise: do not delete it, reinterpret it under 6.2, or let it modify 6.2 acceptance. Explicit adoption of 6.3 validates a supported memory schema, resolves the project-governed accepted/base memory, and reconciles materially relevant memory/HAS obligations from the bounded adoption scope. Protocol 6.4 retains PEM schema 1 and the 6.3 memory authority model; adopting 6.4 adds only the 6.4 semantic-definition/source/traceability obligations applicable to the bounded work.
 
-PEM `memory_schema_version` is independent of SSDP protocol version and orchestration workflow-profile schema. Protocol 6.3 and candidate 6.4 support PEM schema 1. Unknown/newer/incompatible schemas fail safe for memory-dependent decisions: only explicitly forward-readable identity metadata may be inspected, and the memory-dependent decision becomes `REVIEW_REQUIRED` until a compatible reader or explicit lossless migration exists. Unsupported memory does not block unrelated protocol routes.
+PEM `memory_schema_version` is independent of SSDP protocol version and orchestration workflow-profile schema. Protocol 6.3 and 6.4 support PEM schema 1. Unknown/newer/incompatible schemas fail safe for memory-dependent decisions: only explicitly forward-readable identity metadata may be inspected, and the memory-dependent decision becomes `REVIEW_REQUIRED` until a compatible reader or explicit lossless migration exists. Unsupported memory does not block unrelated protocol routes.
 
 A restored old PEM snapshot is not current merely because it parses. Re-adoption/recovery reconciles schema, project/scope identity, accepted base, candidate overlay, owners, evidence/binding health, and the uncovered project interval. `reconciled_through` is an identity horizon, not proof of exhaustive historical coverage.
 
@@ -46,11 +46,12 @@ Previously executed evidence remains reusable only while no changed protocol obl
 6.1.0  -> 802e75af261efb4f70d71284d860613a2197b639
 6.2.0  -> b59adc77efe6951912cfd705cc43830c58ca27d0
 6.3.0  -> 9f353097fab36e325a325f1c2f9d9cec32e86177
+6.4.0  -> 74bc572ef516cae417437a2027eeff52a2e25c15
 ```
 
-There is deliberately no 6.4 recovery entry while 6.4 remains a proposed candidate. Recovery is published only after qualification, independent assembled-candidate Review, bootstrap/publication sequencing, generated reconciliation, and lifecycle acceptance establish an immutable recovery target.
+Protocol 6.4 recovery target `74bc572ef516cae417437a2027eeff52a2e25c15` was selected after independent assembled-candidate Review PASS. This later descendant publishes `6.4.0 -> 74bc572ef516cae417437a2027eeff52a2e25c15`. Protocol 6.4 is accepted-current after Stage-F acceptance and lifecycle closeout; Protocol 6.3 remains immutable historical rollback.
 
-Resolve historical work through immutable version-specific source/profile semantics, never `main`/latest. Frozen source/publication/profile artifacts remain historical truth and are not rewritten to current terminology. Candidate Protocol 6.4 must not mutate any frozen 5.16/6.0/6.1/6.2/6.3 profile resource; it receives new versioned resources after source/profile generation and qualification.
+Resolve historical work through immutable version-specific source/profile semantics, never `main`/latest. Frozen source/publication/profile artifacts remain historical truth and are not rewritten to current terminology. Accepted Protocol 6.4 did not mutate any frozen 5.16/6.0/6.1/6.2/6.3 profile resource; it receives new versioned resources after source/profile generation and qualification.
 
 Protocol 6.1 public-source bootstrap is distinct from recovery:
 
@@ -92,10 +93,10 @@ Profiles remain independently version-bound:
 | `ssdp-protocol-6.0` | 6.0.0 | 2 | frozen historical |
 | `ssdp-protocol-6.1` | 6.1.0 | 2 | frozen historical rollback |
 | `ssdp-protocol-6.2` | 6.2.0 | 2 | frozen historical rollback |
-| `ssdp-protocol-6.3` | 6.3.0 | 2 | accepted current / frozen predecessor for 6.4 candidate |
-| `ssdp-protocol-6.4` | 6.4.0 | 2 | proposed candidate |
+| `ssdp-protocol-6.3` | 6.3.0 | 2 | frozen historical rollback |
+| `ssdp-protocol-6.4` | 6.4.0 | 2 | accepted current |
 
-Protocol 6.3 remains accepted-current while 6.4 is being implemented/qualified/reviewed. The 6.3 profile bytes are frozen as the immediate predecessor oracle. Candidate 6.4 intentionally retains schema v2 because the machine stage graph/result-envelope contract is unchanged; the semantic strengthening lives in canonical source and owner documents. Core selects by declared protocol/profile identity, not one global latest constant. Frozen profile bytes/behavior remain independently testable. A generic profile/package may include PEM doctrine/template but never a live project's `PROJECT-ENGINEERING-MEMORY.md` or derived local project summary.
+Protocol 6.4 is accepted-current. The 6.3 profile bytes remain frozen as the immediate historical rollback oracle. Protocol 6.4 retains schema v2 because the machine stage graph/result-envelope contract is unchanged; the semantic strengthening lives in canonical source and owner documents. Core selects by declared protocol/profile identity, not one global latest constant. Frozen profile bytes/behavior remain independently testable. A generic profile/package may include PEM doctrine/template but never a live project's `PROJECT-ENGINEERING-MEMORY.md` or derived local project summary.
 
 ## Protocol 6.2 public-source and recovery staging
 
@@ -127,14 +128,20 @@ Protocol 6.3 follows the same self-reference-safe separation learned from 6.2, w
 
 The pre-repair Protocol 6.3 bootstrap `1484c1d3caa49d87cc15bc52a5e775399c1dae1b`, second bootstrap `5ee4b3ac3ca1666b0499f7a72f55adcc411bf4bb`, owner-binding bootstrap `e12572c021087308570abfa41657a910c6896457`, and D4R3 bootstrap `dc22f09fd38dbbfeaeb0160152da9b284654f66e` remain immutable historical evidence only. D9 changed canonical validator semantics, so replacement self-reference-safe source snapshot `86c13cab6bdd1991dffa94e277db8eacf87e2e11` passed source regression, package/profile integrity, Orchestrator Core, and bootstrap readiness before descendant `a8dac814cc2813b3bb336e5b6abde5fbcf44949e` published its exact SHA as the sole current 6.3 public-source fallback. Independent Review R2/recovery target `9f353097fab36e325a325f1c2f9d9cec32e86177` is intentionally distinct; descendant `0c76c0461b7376f17182d29ba145a198a092463c` published the recovery mapping, mapping-bearing descendants were regenerated at `e75282ae850b774a9466902f4c74ba6a179116bd`, and Stage G acceptance passed in run `34699052516`. Protocol 6.3 is accepted-current; version-bound 6.2 recovery `b59adc77efe6951912cfd705cc43830c58ca27d0` remains immutable historical rollback. The public bootstrap is not recovery.
 
-## Protocol 6.4 candidate bootstrap/recovery lifecycle
+## Protocol 6.4 accepted bootstrap/recovery lifecycle
 
-Protocol 6.4 is **proposed, not accepted-current**. Qualified self-reference-safe public bootstrap `e09a9d1480211eea2d16d722182bb5c6de1bee12` is now the sole authorized version-bound 6.4 public fallback; this publication does not make 6.4 accepted-current and does not authorize recovery.
+Protocol 6.4 is **accepted-current** after independent Review PASS, recovery publication, mapping-bearing acceptance, Protocol-7 inheritance reconciliation, and lifecycle closeout. Qualified self-reference-safe public bootstrap `e09a9d1480211eea2d16d722182bb5c6de1bee12` is now the sole authorized version-bound 6.4 public fallback; this publication does not make 6.4 accepted-current and does not authorize recovery.
 
 The public-source mapping is:
 
 ```text
 6.4.0 public-source bootstrap -> e09a9d1480211eea2d16d722182bb5c6de1bee12
+```
+
+The recovery mapping is:
+
+```text
+6.4.0  -> 74bc572ef516cae417437a2027eeff52a2e25c15
 ```
 
 `AUTO_LOCAL_FIRST` may use a compatible readable local/installed 6.4 source during candidate work; otherwise it may use the canonical repository only at exact immutable bootstrap `e09a9d1480211eea2d16d722182bb5c6de1bee12`. It must not substitute the candidate branch, default branch, semantic-version guess, or 6.3 bootstrap as if those were 6.4.
@@ -158,3 +165,6 @@ For normal Git repositories, semantic candidate commit plus absence of unintende
 Preserve API/data/runtime/profile compatibility only where an actual supported contract requires it. Historical machinery does not become compatibility authority through existence or PEM recording. Retain compatibility layers only for a supported version/migration window or while they remain the minimum justified concretization.
 
 Apply the Lossless Representation Rule: keep current operational version/recovery decisions hot and exact; keep detailed historical chronology cold but discoverable through semantic history and immutable recovery sources.
+
+
+Protocol 6.4 accepted recovery is `74bc572ef516cae417437a2027eeff52a2e25c15`; recovery mapping descendant is `6e66478f37de197b6d28707e087c61d687fcfa41`; public bootstrap remains distinct at `e09a9d1480211eea2d16d722182bb5c6de1bee12`. Stage-F acceptance run `35153901722`.

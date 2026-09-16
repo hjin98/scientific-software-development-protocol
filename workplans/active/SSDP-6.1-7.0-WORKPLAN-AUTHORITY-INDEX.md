@@ -108,11 +108,11 @@ CURRENT ACCEPTED DOCUMENT-CONTROLLED BASELINE: Protocol 6.3
 
 The public-source bootstrap and accepted recovery remain intentionally distinct. Historical invalidated 6.3 bootstrap/candidate attempts remain immutable negative evidence rather than current fallback. PEM remains non-authoritative project-local decision support; no D5 or parallel control plane was accepted.
 
-## Protocol 6.4 current design handoff
+## Protocol 6.4 completed handoff
 
 Protocol 6.4 design/implementation/review SHALL use the single current consolidated handoff:
 
-1. `workplans/active/SSDP-6.4-AXIOMATIC-FORMAL-DEFINITION-AND-SEMANTIC-TRACEABILITY-CONSOLIDATED.md`
+1. `workplans/archive/SSDP-6.4-AXIOMATIC-FORMAL-DEFINITION-AND-SEMANTIC-TRACEABILITY-CONSOLIDATED.md`
 
 Earlier parent/Revisions 1-2 and the fifth-review consolidated snapshot are archived design-review evidence. They preserve how the design evolved but are not required to reconstruct the current implementation contract. The current consolidated workplan integrates the still-binding prior semantics plus sixth-review closure for unique canonical-owner conflict handling, extensible semantic-role status, parameterized-family/instance/default semantics, parameter-sensitive evidence applicability, external-content trust/instruction separation, and current-vs-history cleanup.
 
@@ -120,16 +120,14 @@ Current disposition:
 
 ```text
 SERIOUS CHALLENGE: NONE
-SIXTH DESIGN REVIEW: PASS AFTER GAP CLOSURE
-IMPLEMENTATION HANDOFF: AUTHORIZED — CONSOLIDATED
-IMPLEMENTATION / STAGE C QUALIFICATION: COMPLETE / QUALIFIED
-ACCEPTED PARENT: Protocol 6.3 recovery 9f353097fab36e325a325f1c2f9d9cec32e86177
-STAGE D PUBLIC BOOTSTRAP: PUBLISHED / AUTHORIZED - e09a9d1480211eea2d16d722182bb5c6de1bee12
-STAGE E INDEPENDENT REVIEW: REVIEW READY / FRESH REVIEW REQUIRED
-PROTOCOL 6.4 RECOVERY: UNAVAILABLE PENDING INDEPENDENT REVIEW PASS
-CURRENT ACCEPTED DOCUMENT-CONTROLLED BASELINE: Protocol 6.3
-STAGE F: BLOCKED
-PROTOCOL 7 INHERITANCE OF 6.4: DEFERRED UNTIL 6.4 ACCEPTANCE
+STAGE E INDEPENDENT REVIEW: PASS
+PUBLIC BOOTSTRAP: e09a9d1480211eea2d16d722182bb5c6de1bee12
+RECOVERY: 74bc572ef516cae417437a2027eeff52a2e25c15
+RECOVERY MAPPING COMMIT: 6e66478f37de197b6d28707e087c61d687fcfa41
+STAGE F: PASS / LIFECYCLE CLOSED
+CURRENT ACCEPTED DOCUMENT-CONTROLLED BASELINE: Protocol 6.4
+PROTOCOL 7 INHERITANCE OF 6.4: RECONCILED / REVISION 5
+LIFECYCLE STATUS: COMPLETED / ARCHIVED
 ```
 
 Protocol 6.4 remains a proposed backward-compatible minor strengthening. No `main` cutover or reinterpretation of version-bound 6.3 work is implied. Bounded 6.4 adoption follows the consolidated workplan; ambiguous or conflicting predecessor semantics must be reconciled/challenged rather than silently inherited.
@@ -164,8 +162,9 @@ PROTOCOL 6.2 COMPLETION/QUALIFICATION/RECOVERY PREREQUISITE: SATISFIED
 PROTOCOL 6.2 REPRESENTATION-INHERITANCE RECONCILIATION: SATISFIED
 PROTOCOL 6.3 COMPLETION/QUALIFICATION/R2-REVIEW/RECOVERY PREREQUISITE: SATISFIED
 PROTOCOL 6.3 INHERITANCE RECONCILIATION: SATISFIED
-PROTOCOL 6.4 INHERITANCE RECONCILIATION: NOT APPLICABLE UNTIL 6.4 ACCEPTANCE
-CURRENT PRE-CUTOVER FALLBACK/ROLLBACK BASELINE: Protocol 6.3 recovery 9f353097fab36e325a325f1c2f9d9cec32e86177
+PROTOCOL 6.4 COMPLETION/REVIEW/RECOVERY PREREQUISITE: SATISFIED
+PROTOCOL 6.4 INHERITANCE RECONCILIATION: SATISFIED
+CURRENT PRE-CUTOVER FALLBACK/ROLLBACK BASELINE: Protocol 6.4 recovery 74bc572ef516cae417437a2027eeff52a2e25c15
 REMAINING PROTOCOL-7-SPECIFIC PRE-D4 REQUIREMENT:
   1. DELIBERATE D3 ORCHESTRATOR ARCHITECTURE REOPEN/SUPERSESSION
 PROTOCOL 7 D4: NOT AUTHORIZED

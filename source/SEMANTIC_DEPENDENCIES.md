@@ -77,8 +77,8 @@ A memory-triggering route uses progressive disclosure: exact base/overlay -> sch
 ```text
 ssdp-protocol-6.1 CONSTRAINED_BY -> immutable historical Protocol 6.1 rollback semantics
 ssdp-protocol-6.2 CONSTRAINED_BY -> immutable historical Protocol 6.2 rollback semantics
-ssdp-protocol-6.3 CONSTRAINED_BY -> accepted-current Protocol 6.3 semantics
-ssdp-protocol-6.4 CONSTRAINED_BY -> proposed Protocol 6.4 candidate semantics
+ssdp-protocol-6.3 CONSTRAINED_BY -> immutable historical Protocol 6.3 rollback semantics
+ssdp-protocol-6.4 CONSTRAINED_BY -> accepted-current Protocol 6.4 semantics
 ssdp-protocol-6.4 PRESERVES -> frozen Protocol 6.3 profile/schema-v2 stage-graph capability
 PEM schema 1 VERSIONED_INDEPENDENTLY_OF -> SSDP protocol/profile schema
 ```

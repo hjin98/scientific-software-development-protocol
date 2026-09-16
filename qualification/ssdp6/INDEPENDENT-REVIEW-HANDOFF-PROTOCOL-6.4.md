@@ -31,8 +31,8 @@ stage_d_publication_transaction: 34968628368
 stage_d_postpublication_ci: 34968829366
 independent_review: pass
 protocol_64_recovery: 74bc572ef516cae417437a2027eeff52a2e25c15
-accepted_current_protocol: 6.3.0
-stage_f: recovery_mapping_published_acceptance_pending
+accepted_current_protocol: 6.4.0
+stage_f: complete
 ---
 
 # Independent Protocol/D3 Review Handoff — Protocol 6.4

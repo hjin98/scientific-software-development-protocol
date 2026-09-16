@@ -11,6 +11,7 @@ from pathlib import Path
 
 
 BOOTSTRAP = "e09a9d1480211eea2d16d722182bb5c6de1bee12"
+RECOVERY = "74bc572ef516cae417437a2027eeff52a2e25c15"
 ROOT = Path(__file__).resolve().parents[1]
 PUBLIC_ROOT = "https://raw.githubusercontent.com/hjin98/scientific-software-development-protocol"
 LOCAL_MD_RE = re.compile(r"\[[^\]]+\]\(([^)]+\.md(?:#[^)]*)?)\)")
@@ -75,7 +76,7 @@ class Protocol64BootstrapReadinessTests(unittest.TestCase):
         local_versioning = (ROOT / "source/shared/references/protocol-versioning-and-compatibility.md").read_text(encoding="utf-8")
         self.assertIn(f"CURRENT_PUBLIC_REF = {BOOTSTRAP}", local_prompts)
         self.assertIn(f"6.4.0 public-source bootstrap -> {BOOTSTRAP}", local_versioning)
-        self.assertNotIn("6.4.0  -> ", local_versioning)
+        self.assertIn(f"6.4.0  -> {RECOVERY}", local_versioning)
 
     def test_exact_ref_profile_and_distribution_identity(self) -> None:
         profile = json.loads(self.fetch(f"{PROFILE_ROOT}/profile.json"))
