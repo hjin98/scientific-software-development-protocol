@@ -1,7 +1,7 @@
 ---
 kind: protocol-workplan-authority-index
 workplan_id: SSDP-6.1-7.0-WORKPLAN-AUTHORITY-INDEX
-protocol_version: 6.3.0
+protocol_version: 6.4.0
 status: active
 created_date: 2026-09-09
 reviewed_date: 2026-09-15
@@ -130,7 +130,7 @@ PROTOCOL 7 INHERITANCE OF 6.4: RECONCILED / REVISION 5
 LIFECYCLE STATUS: COMPLETED / ARCHIVED
 ```
 
-Protocol 6.4 remains a proposed backward-compatible minor strengthening. No `main` cutover or reinterpretation of version-bound 6.3 work is implied. Bounded 6.4 adoption follows the consolidated workplan; ambiguous or conflicting predecessor semantics must be reconciled/challenged rather than silently inherited.
+Protocol 6.4 is the accepted-current backward-compatible minor strengthening. Its accepted release identity is recovery `74bc572ef516cae417437a2027eeff52a2e25c15` with distinct public bootstrap `e09a9d1480211eea2d16d722182bb5c6de1bee12`. The repository default branch is not a protocol-version oracle, so no `main` merge is required to make that version-bound acceptance true; version-bound 6.3 and older work retains its immutable historical semantics.
 
 ## Protocol 7.0 current design handoff
 
@@ -141,6 +141,7 @@ Protocol 7.0 design/implementation/review SHALL read and satisfy, as one compose
 3. `workplans/active/SSDP-7.0-DETERMINISTIC-CONTROL-PLANE-AND-MANDATORY-ORCHESTRATOR-MIGRATION-REVISION-2-DETERMINISM-AND-RECOVERY-CLOSURE.md`
 4. `workplans/active/SSDP-7.0-DETERMINISTIC-CONTROL-PLANE-AND-MANDATORY-ORCHESTRATOR-MIGRATION-REVISION-3-PROTOCOL-6.2-INHERITANCE-RECONCILIATION.md`
 5. `workplans/active/SSDP-7.0-DETERMINISTIC-CONTROL-PLANE-AND-MANDATORY-ORCHESTRATOR-MIGRATION-REVISION-4-PROTOCOL-6.3-INHERITANCE-RECONCILIATION.md`
+6. `workplans/active/SSDP-7.0-DETERMINISTIC-CONTROL-PLANE-AND-MANDATORY-ORCHESTRATOR-MIGRATION-REVISION-5-PROTOCOL-6.4-INHERITANCE-RECONCILIATION.md`
 
 Precedence:
 
@@ -148,7 +149,7 @@ Precedence:
 - Revision 2 closes reducer-purity, ambient-state, external-effect, deterministic replay, and canonical recovery gaps;
 - Revision 3 changes only representation/version inheritance after Protocol 6.2 acceptance: current pre-cutover document-controlled baseline and fallback/rollback became Protocol 6.2, while the parent/Revisions 1-2 D3 architecture semantics remained unchanged;
 - Revision 4 changes only project-learning/version inheritance after Protocol 6.3 acceptance: current pre-cutover document-controlled baseline and fallback/rollback become Protocol 6.3, while the parent/Revisions 1-3 D3 architecture semantics remain unchanged;
-- Protocol 6.4 is not yet accepted and therefore does not amend the Protocol-7 handoff at this time;
+- Revision 5 changes only version/representation inheritance after Protocol 6.4 acceptance: the current pre-cutover fallback/rollback baseline becomes Protocol 6.4 recovery `74bc572ef516cae417437a2027eeff52a2e25c15`, while parent/Revisions 1-4 D3 architecture semantics remain unchanged and Protocol 7 D4 remains unauthorized;
 - every parent requirement not explicitly changed by a later revision remains binding.
 
 Current disposition:
@@ -176,12 +177,12 @@ Protocol 7 D4 remains unauthorized until the existing deliberate D3 Orchestrator
 
 There is exactly one canonical workflow-control authority for any current run.
 
-- Protocol 6.3 is the accepted-current document-controlled baseline; version-bound 6.2 work may still resolve immutable historical recovery `b59adc77efe6951912cfd705cc43830c58ca27d0` and older declared versions retain their own mappings.
-- Protocol 6.4 is proposed on its dedicated branch. It does not become accepted-current until qualification, independent Review, bootstrap/recovery publication, generated reconciliation, impact closure, and lifecycle cutover all pass.
-- Protocol 7 remains proposed/pre-cutover. Its current fallback/rollback baseline is Protocol 6.3 recovery `9f353097fab36e325a325f1c2f9d9cec32e86177` until a later accepted successor is explicitly reconciled into the Protocol-7 handoff.
+- Protocol 6.4 is the accepted-current document-controlled baseline with recovery `74bc572ef516cae417437a2027eeff52a2e25c15` and distinct public bootstrap `e09a9d1480211eea2d16d722182bb5c6de1bee12`; version-bound 6.3 and older work retain their own immutable historical mappings.
+- The repository default branch is never a protocol-version oracle; Protocol 6.4 acceptance follows its completed qualification/Review/publication/recovery/reconciliation lifecycle rather than a `main` merge.
+- Protocol 7 remains proposed/pre-cutover. Its current fallback/rollback baseline is Protocol 6.4 recovery `74bc572ef516cae417437a2027eeff52a2e25c15` through Revision 5; Revision 5 changes inheritance identity only and does not mutate Protocol 7 D3 architecture or authorize D4.
 - Under Protocol 7 after qualified cutover, the deterministic orchestrator control plane owns machine lifecycle transitions while workplans/skills/documents remain semantic artifacts.
 - Shadow comparison is permitted only while one side remains explicitly non-authoritative.
-- No `main`, Protocol 6.4, or Protocol 7 cutover is authorized merely by these active design workplans.
+- No `main` merge or Protocol 7 D4 cutover is authorized merely by these active design workplans; Protocol 6.4 acceptance is established by its completed lifecycle, not by this index.
 
 ## Historical discipline
 

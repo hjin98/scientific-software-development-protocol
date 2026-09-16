@@ -15,7 +15,7 @@ D1 scientific/mathematical formulation
 
 This is a semantic hierarchy, not a mandatory waterfall. A child concretization must preserve every applicable parent abstraction and directly governed external constraint. Among admissible concretizations prefer domain engineering fitness, then minimum justified total complexity, then development economy.
 
-The universal current kernel is `source/shared/references/abstraction-and-concretization.md`. Role entrypoints route progressively to concern owners rather than loading the complete reference library up front. Version-bound work is always interpreted under its declared Protocol version; candidate 6.4 source does not silently reinterpret accepted 6.3 or frozen historical work.
+The universal current kernel is `source/shared/references/abstraction-and-concretization.md`. Role entrypoints route progressively to concern owners rather than loading the complete reference library up front. Version-bound work is always interpreted under its declared Protocol version; current accepted 6.4 source does not silently reinterpret version-bound 6.3 or other frozen historical work.
 
 ## Protocol 6.4 axiomatic definition traceability
 
@@ -27,7 +27,7 @@ Definitions do not manufacture truth. Existence, uniqueness, convergence, adequa
 
 Parameterized methods distinguish family, instance, parameter domain/binding and governed defaults. Definition/source changes participate in bounded impact and evidence-applicability review when they can change exercised semantics. Derived `USES_DEFINITION` or similar dependency traces are review/impact aids only: their declared mapped scope matters, absence in a partial trace cannot prove independence, and they never become a second semantic owner.
 
-The candidate keeps orchestration profile schema v2 because no machine stage/result-envelope contract changed. `ssdp-protocol-6.4` is a distinct candidate profile/snapshot; frozen 6.3 and earlier profile bytes remain immutable test oracles.
+Protocol 6.4 keeps orchestration profile schema v2 because no machine stage/result-envelope contract changed. `ssdp-protocol-6.4` is the distinct accepted-current profile/snapshot; frozen 6.3 and earlier profile bytes remain immutable test oracles.
 
 ## Project Engineering Memory
 
@@ -35,7 +35,7 @@ Protocol 6.4 inherits Protocol 6.3 **Project Engineering Memory (PEM)** unchange
 
 PEM is conditionally activated only when demonstrated project history can materially change the decision—for example substantial mature rework/replacement, suspected recurrence, substantial optimization/scaling, or migration/recovery/revert/restoration. A first clean local defect or unrelated task keeps memory cold. When activated, the workflow resolves the exact accepted/base memory and validated branch overlay, searches canonical metadata for applicable entries regardless of temperature, and records task-local dispositions in a Historical Applicability Set (HAS).
 
-The canonical doctrine owner is `source/shared/references/project-engineering-memory.md`; the human-editable schema-1 template is `source/shared/templates/project_engineering_memory_template.md`. This repository's self-hosted `PROJECT-ENGINEERING-MEMORY.md` is deliberately partial candidate project state backed by immutable evidence and is **not** copied into generic skills, distributions, profiles, or snapshots.
+The canonical doctrine owner is `source/shared/references/project-engineering-memory.md`; the human-editable schema-1 template is `source/shared/templates/project_engineering_memory_template.md`. This repository's self-hosted `PROJECT-ENGINEERING-MEMORY.md` is deliberately partial project-local state backed by immutable evidence and is **not** copied into generic skills, distributions, profiles, or snapshots.
 
 Current statistics are derived from current admissible assessments while historical observations remain recoverable. Stable family IDs represent semantic identity; temperature is salience rather than applicability/authority; maturity is claim-relative evidence strength; comparative/default/best guidance requires genuine comparator evidence or real-owner priority. Evidence and memory text are data, not instruction/authorization channels.
 
@@ -78,7 +78,7 @@ Protocol 6.2 public-source bootstrap remains **`5a062ebc472755607b9dc66d33a5ebbc
 
 **Earlier Protocol 6.3 bootstrap attempts `1484c1d3caa49d87cc15bc52a5e775399c1dae1b`, `5ee4b3ac3ca1666b0499f7a72f55adcc411bf4bb`, owner-binding-invalidated `e12572c021087308570abfa41657a910c6896457`, and D4R3 snapshot `dc22f09fd38dbbfeaeb0160152da9b284654f66e` are historical only. Current authorized version-bound 6.3 public fallback is bootstrap `86c13cab6bdd1991dffa94e277db8eacf87e2e11`; accepted recovery is `9f353097fab36e325a325f1c2f9d9cec32e86177`; bootstrap and recovery are intentionally distinct.** Bootstrap mapping descendant `a8dac814cc2813b3bb336e5b6abde5fbcf44949e`, recovery mapping descendant `0c76c0461b7376f17182d29ba145a198a092463c`, and generated reconciliation `e75282ae850b774a9466902f4c74ba6a179116bd` preserve self-reference-safe publication. Stage G acceptance passed in run `34699052516`.
 
-Protocol 6.4 now has immutable public bootstrap **`e09a9d1480211eea2d16d722182bb5c6de1bee12`** and still has **no** recovery identity. Candidate/self-hosted work should use readable local version-bound source when available and may otherwise use only that exact public ref. The bootstrap was qualified before this later descendant published its SHA. Independent assembled-candidate Review must still pass before a distinct recovery identity can be established and later published.
+Protocol 6.4 accepted-current publication uses immutable public bootstrap **`e09a9d1480211eea2d16d722182bb5c6de1bee12`** and distinct accepted recovery **`74bc572ef516cae417437a2027eeff52a2e25c15`**. Recovery mapping descendant `6e66478f37de197b6d28707e087c61d687fcfa41` publishes the recovery identity after the immutable target already existed. Version-bound 6.4 work should use readable local 6.4 source when available and may otherwise use only the exact authorized bootstrap; bootstrap and recovery remain intentionally distinct.
 
 ## Canonical source and acceptance
 

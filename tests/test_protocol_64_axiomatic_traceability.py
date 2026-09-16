@@ -404,9 +404,33 @@ class Protocol64AxiomaticTraceabilityQualificationTests(unittest.TestCase):
 
     def test_qf64_p_closeout_archives_snapshot(self) -> None:
         self.assertEqual(sorted((ROOT / "workplans/active").glob("SSDP-6.4*.md")), [])
-        archived=ROOT/"workplans/archive/SSDP-6.4-AXIOMATIC-FORMAL-DEFINITION-AND-SEMANTIC-TRACEABILITY-CONSOLIDATED.md"
+        archived = ROOT / "workplans/archive/SSDP-6.4-AXIOMATIC-FORMAL-DEFINITION-AND-SEMANTIC-TRACEABILITY-CONSOLIDATED.md"
         self.assertTrue(archived.is_file())
         self.assertIn("STAGE F: PASS", archived.read_text())
+
+        index = norm(self.authority_index)
+        self.assertIn("stage f: pass / lifecycle closed", index)
+        self.assertIn("current accepted document-controlled baseline: protocol 6.4", index)
+        self.assertIn("revision-5-protocol-6.4-inheritance-reconciliation.md", index)
+        self.assertNotIn("protocol 6.4 remains a proposed", index)
+        self.assertNotIn("protocol 6.4 is not yet accepted", index)
+        self.assertNotIn("protocol 6.3 is the accepted-current document-controlled baseline", index)
+
+        readme = norm(self.readme)
+        self.assertIn("accepted recovery is 74bc572ef516cae417437a2027eeff52a2e25c15", readme)
+        self.assertNotIn("still has no recovery identity", readme)
+        self.assertNotIn("independent assembled-candidate review must still pass", readme)
+
+        agents = norm(read("AGENTS.md"))
+        self.assertIn("protocol 6.4 is accepted-current", agents)
+        self.assertIn("74bc572ef516cae417437a2027eeff52a2e25c15", agents)
+        self.assertNotIn("protocol 6.4 is not accepted-current", agents)
+        self.assertNotIn("it has no recovery sha yet", agents)
+
+        self.assertEqual(
+            sorted(p.name for p in (ROOT / ".github/workflows").glob("temporary-protocol64-stage-f*.yml")),
+            [],
+        )
 
     def test_automation_boundary_does_not_counterfeit_semantic_review(self) -> None:
         kernel, writing, evidence = map(norm, (self.kernel, self.writing, self.evidence))
