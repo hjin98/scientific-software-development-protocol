@@ -56,17 +56,34 @@ jobs:
 
       - name: Full Stage-F acceptance
         if: steps.gate.outputs.run == 'true'
+        shell: bash
         run: |
-          set -euxo pipefail
-          python -m unittest discover -s tests -v
-          python source/project_engineering_memory.py PROJECT-ENGINEERING-MEMORY.md
-          rm -rf /tmp/protocol-dist
-          python source/build_skills.py --output /tmp/protocol-dist
-          python source/validate_packages.py --dist /tmp/protocol-dist
-          python source/check_dist.py --expected /tmp/protocol-dist --committed dist
-          python orchestrator/scripts/generate_protocol_snapshot.py --check
-          python orchestrator/scripts/run_core_tests.py
-          git diff --check
+          set +e
+          LOG=/tmp/stage-f-acceptance.log
+          (
+            set -euxo pipefail
+            python -m unittest discover -s tests -v
+            python source/project_engineering_memory.py PROJECT-ENGINEERING-MEMORY.md
+            rm -rf /tmp/protocol-dist
+            python source/build_skills.py --output /tmp/protocol-dist
+            python source/validate_packages.py --dist /tmp/protocol-dist
+            python source/check_dist.py --expected /tmp/protocol-dist --committed dist
+            python orchestrator/scripts/generate_protocol_snapshot.py --check
+            python orchestrator/scripts/run_core_tests.py
+            git diff --check
+          ) >"$LOG" 2>&1
+          rc=$?
+          cat "$LOG"
+          if [ "$rc" -ne 0 ]; then
+            mkdir -p qualification/ssdp6
+            cp "$LOG" qualification/ssdp6/STAGE-F-DIAGNOSTIC-LATEST-PROTOCOL-6.4.txt
+            git config user.name 'Protocol 6.4 lifecycle automation'
+            git config user.email 'protocol64-lifecycle@users.noreply.github.com'
+            git add qualification/ssdp6/STAGE-F-DIAGNOSTIC-LATEST-PROTOCOL-6.4.txt
+            git commit -m 'Record Protocol 6.4 Stage F acceptance failure'
+            git push origin HEAD:ssdp-6.4-axiomatic-definition-traceability
+            exit "$rc"
+          fi
 
       - name: Publish verified Stage-F closeout
         if: steps.gate.outputs.run == 'true'
