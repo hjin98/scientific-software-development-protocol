@@ -1,0 +1,42 @@
+name: Temporary Protocol 6.4 Stage F diagnostic 5
+on:
+  push:
+    branches: [ssdp-6.4-axiomatic-definition-traceability]
+permissions:
+  contents: write
+jobs:
+  diagnose:
+    if: github.event.head_commit.message == 'Capture final Protocol 6.4 Stage F tests v2'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: {ref: ssdp-6.4-axiomatic-definition-traceability, fetch-depth: 0}
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: |
+          python -m pip install pyyaml -r source/requirements-validation.txt
+          python -m pip install ./orchestrator -r orchestrator/requirements-dev.txt
+      - env: {R: 74bc572ef516cae417437a2027eeff52a2e25c15, B: e09a9d1480211eea2d16d722182bb5c6de1bee12, M: 6e66478f37de197b6d28707e087c61d687fcfa41}
+        run: |
+          python - <<'PY'
+          import yaml
+          from pathlib import Path
+          d=yaml.safe_load(Path('.github/workflows/temporary-protocol64-stage-f-finalize.yml').read_text())
+          Path('/tmp/build.sh').write_text(next(s['run'] for s in d['jobs']['finalize']['steps'] if s.get('name')=='Build final Stage-F tree'))
+          PY
+          bash /tmp/build.sh
+          python - <<'PY'
+          from pathlib import Path
+          for f in ['tests/test_protocol_62_closeout.py','tests/test_protocol_63_closeout.py']:
+              p=Path(f); p.write_text(p.read_text().replace('| `ssdp-protocol-6.4` | 6.4.0 | 2 | proposed candidate |','| `ssdp-protocol-6.4` | 6.4.0 | 2 | accepted current |'))
+          PY
+          set +e
+          python -m unittest discover -s tests -v > /tmp/out.txt 2>&1
+          rc=$?
+          git reset --hard HEAD
+          cp /tmp/out.txt qualification/ssdp6/STAGE-F-DIAGNOSTIC-PROTOCOL-6.4.txt
+          git config user.name 'Protocol 6.4 lifecycle automation'; git config user.email 'protocol64-lifecycle@users.noreply.github.com'
+          git add qualification/ssdp6/STAGE-F-DIAGNOSTIC-PROTOCOL-6.4.txt
+          git commit -m 'Capture final Protocol 6.4 Stage F tests v2'
+          git push origin HEAD:ssdp-6.4-axiomatic-definition-traceability
+          exit $rc
