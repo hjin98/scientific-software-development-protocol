@@ -1,0 +1,82 @@
+name: Temporary Protocol 6.4 Stage F final 4
+on:
+  push:
+    branches: [ssdp-6.4-axiomatic-definition-traceability]
+permissions:
+  contents: write
+jobs:
+  final4:
+    if: github.event.head_commit.message == 'Complete Protocol 6.4 Stage F final'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: {ref: ssdp-6.4-axiomatic-definition-traceability, fetch-depth: 0}
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: |
+          python -m pip install pyyaml -r source/requirements-validation.txt
+          python -m pip install ./orchestrator -r orchestrator/requirements-dev.txt
+      - name: Construct accepted-current tree and reconcile successor representations
+        env: {R: 74bc572ef516cae417437a2027eeff52a2e25c15, B: e09a9d1480211eea2d16d722182bb5c6de1bee12, M: 6e66478f37de197b6d28707e087c61d687fcfa41}
+        run: |
+          python - <<'PY'
+          import yaml
+          from pathlib import Path
+          d=yaml.safe_load(Path('.github/workflows/temporary-protocol64-stage-f-finalize.yml').read_text())
+          Path('/tmp/build.sh').write_text(next(s['run'] for s in d['jobs']['finalize']['steps'] if s.get('name')=='Build final Stage-F tree'))
+          PY
+          bash /tmp/build.sh
+          python - <<'PY'
+          from pathlib import Path
+          R='74bc572ef516cae417437a2027eeff52a2e25c15'; B='e09a9d1480211eea2d16d722182bb5c6de1bee12'
+          p=Path('PORTABILITY.md'); t=p.read_text()
+          t=t.replace('## Protocol 6.4 candidate routing contract','## Protocol 6.4 routing contract')
+          t=t.replace('Protocol 6.4 is the current development candidate; Protocol 6.3 remains accepted-current until 6.4 qualification, independent Review, recovery publication and cutover complete.','Protocol 6.4 is accepted-current; Protocol 6.3 is frozen historical rollback for explicitly version-bound 6.3 work.')
+          t=t.replace('6.4.0 recovery -> UNAVAILABLE_PENDING_INDEPENDENT_REVIEW',f'6.4.0 recovery -> {R}')
+          t=t.replace('Protocol 6.3 remains accepted-current while 6.4 is a candidate.','Protocol 6.3 remains immutable historical rollback after Protocol 6.4 acceptance.')
+          t=t.replace('Recovery remains a separate later identity and cannot be published before independent assembled-candidate Review PASS. Repository default/latest, the candidate branch name, a guessed semantic-version ref, or the accepted 6.3 bootstrap are not substitutes.',f'Recovery is separately mapped to `{R}` after independent assembled-candidate Review PASS and remains distinct from bootstrap `{B}`. Repository default/latest, the branch name, a guessed semantic-version ref, or the accepted 6.3 bootstrap are not substitutes.')
+          t=t.replace('| `ssdp-protocol-6.3` | 6.3.0 | 2 | accepted current |','| `ssdp-protocol-6.3` | 6.3.0 | 2 | frozen historical rollback |')
+          t=t.replace('| `ssdp-protocol-6.4` | 6.4.0 | 2 | candidate under qualification |','| `ssdp-protocol-6.4` | 6.4.0 | 2 | accepted current |')
+          t=t.replace('The 6.4 profile remains schema v2','The 6.4 profile uses schema v2')
+          p.write_text(t)
+
+          p=Path('tests/test_protocol_62_closeout.py'); t=p.read_text()
+          t=t.replace('| `ssdp-protocol-6.3` | 6.3.0 | 2 | accepted current |','| `ssdp-protocol-6.3` | 6.3.0 | 2 | frozen historical rollback |')
+          t=t.replace('| `ssdp-protocol-6.4` | 6.4.0 | 2 | candidate under qualification |','| `ssdp-protocol-6.4` | 6.4.0 | 2 | accepted current |')
+          p.write_text(t)
+
+          p=Path('tests/test_protocol_63_closeout.py'); t=p.read_text()
+          t=t.replace('| `ssdp-protocol-6.3` | 6.3.0 | 2 | accepted current |','| `ssdp-protocol-6.3` | 6.3.0 | 2 | frozen historical rollback |')
+          t=t.replace('| `ssdp-protocol-6.4` | 6.4.0 | 2 | candidate under qualification |','| `ssdp-protocol-6.4` | 6.4.0 | 2 | accepted current |')
+          t=t.replace('Current accepted document-controlled release: **Protocol 6.3**','Current accepted document-controlled release: **Protocol 6.4**')
+          t=t.replace('Protocol 6.4 is the current candidate under qualification','Protocol 6.4 is accepted-current')
+          t=t.replace('it is not accepted-current','Protocol 6.3 is frozen historical rollback')
+          t=t.replace('it has no recovery mapping yet',f'accepted recovery is `{R}`')
+          p.write_text(t)
+
+          d=Path('qualification/ssdp6/STAGE-F-DIAGNOSTIC-PROTOCOL-6.4.txt')
+          if d.exists(): d.unlink()
+          PY
+          python source/build_skills.py --output dist
+          python orchestrator/scripts/generate_protocol_snapshot.py
+      - name: Full Stage-F acceptance
+        run: |
+          set -euxo pipefail
+          python -m unittest discover -s tests -v
+          python source/project_engineering_memory.py PROJECT-ENGINEERING-MEMORY.md
+          rm -rf /tmp/protocol-dist && python source/build_skills.py --output /tmp/protocol-dist
+          python source/validate_packages.py --dist /tmp/protocol-dist
+          python source/check_dist.py --expected /tmp/protocol-dist --committed dist
+          python orchestrator/scripts/generate_protocol_snapshot.py --check
+          python orchestrator/scripts/run_core_tests.py
+          git diff --check
+      - name: Publish final closeout
+        run: |
+          set -euxo pipefail
+          git config user.name 'Protocol 6.4 lifecycle automation'
+          git config user.email 'protocol64-lifecycle@users.noreply.github.com'
+          find .github/workflows -maxdepth 1 -type f -name 'temporary-protocol64-stage-f-*.yml' -print0 | xargs -0 git rm
+          git add -A
+          git diff --cached --check
+          git commit -m 'Close Protocol 6.4 lifecycle'
+          git push origin HEAD:ssdp-6.4-axiomatic-definition-traceability
