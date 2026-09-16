@@ -1,6 +1,6 @@
 # SSDP Current Semantic Dependency View
 
-This is a bounded human/agent-readable view of material **accepted Protocol 6.3 plus proposed Protocol 6.4 candidate** relationships. It supports impact analysis; it is not a universal claim/source-code graph, activation registry, Project Engineering Memory (PEM) index, semantic-definition authority, or independent authority. Absence of an edge outside explicitly complete mapped scope is not evidence of independence.
+This is a bounded human/agent-readable view of material **accepted Protocol 6.4 plus frozen historical Protocol 6.3 rollback** relationships. It supports impact analysis; it is not a universal claim/source-code graph, activation registry, Project Engineering Memory (PEM) index, semantic-definition authority, or independent authority. Absence of an edge outside explicitly complete mapped scope is not evidence of independence.
 
 ## Semantic authority chain
 
@@ -20,7 +20,7 @@ Current owners:
 - D3: `source/shared/references/architecture-and-design.md` + project Architecture Manual family;
 - D4: `source/shared/references/specification-and-implementation.md` + accepted D4 Specification/executable implementation.
 
-Frozen historical Protocol 6.0/6.1 sources may retain `abstraction-and-realization.md`; current 6.2/6.3 and proposed 6.4 use `abstraction-and-concretization.md` and do not create a current compatibility alias.
+Frozen historical Protocol 6.0/6.1 sources may retain `abstraction-and-realization.md`; Protocol 6.2/6.3/6.4 use `abstraction-and-concretization.md` and do not create a current compatibility alias.
 
 ## Protocol 6.4 semantic-definition relationships
 
@@ -83,7 +83,7 @@ ssdp-protocol-6.4 PRESERVES -> frozen Protocol 6.3 profile/schema-v2 stage-graph
 PEM schema 1 VERSIONED_INDEPENDENTLY_OF -> SSDP protocol/profile schema
 ```
 
-Frozen 5.16/6.0/6.1/6.2 profiles remain independent compatibility/rollback resources, and 6.3 becomes the immediate frozen predecessor oracle for candidate 6.4 profile generation. Protocol 6.4 qualification and immutable public-bootstrap publication at `e09a9d1480211eea2d16d722182bb5c6de1bee12` are complete. Protocol 6.3 remains accepted-current until independent assembled-candidate Review, distinct recovery publication, generated reconciliation, impact closure and lifecycle cutover all pass. Unsupported PEM schemas fail safe for memory-dependent decisions without breaking unrelated protocol routes.
+Frozen 5.16/6.0/6.1/6.2/6.3 profiles remain independent compatibility/rollback resources, with 6.3 the immediate frozen predecessor oracle for accepted Protocol 6.4. Protocol 6.4 qualification, independent assembled-candidate Review, immutable public-bootstrap publication at `e09a9d1480211eea2d16d722182bb5c6de1bee12`, distinct recovery publication at `74bc572ef516cae417437a2027eeff52a2e25c15`, generated reconciliation, impact closure, and lifecycle cutover are complete; Protocol 6.3 remains immutable historical rollback. Unsupported PEM schemas fail safe for memory-dependent decisions without breaking unrelated protocol routes.
 
 ## Source/generated relationships
 

@@ -39,13 +39,13 @@ stage_f: complete
 
 ## Current disposition
 
-**FRESH INDEPENDENT STAGE-E REVIEW: READY — IMMUTABLE TARGET BOUND.**
+**STAGE F: COMPLETE — PROTOCOL 6.4 ACCEPTED-CURRENT.**
 
 The already-existing assembled candidate `f1e0ca95f4d1895e3497e155105468fa73f47827` is the sole current Stage-E review target. Exact-target ordinary PR run `35073930076` passed both jobs: repository protocol regression, canonical package build, independent package validation, committed-distribution parity, whitespace, packaged Protocol snapshot parity, and the full Orchestrator Core acceptance suite.
 
 This descendant handoff binds that immutable candidate after qualification. The candidate itself contains the self-reference-safe pending descendant-binding sentinel and does not self-name. Do not review this descendant commit in place of the bound candidate.
 
-Protocol 6.3 remains accepted-current. Protocol 6.4 recovery remains unavailable. Stage F remains blocked pending a genuine fresh-context independent Review PASS. The authorized Protocol 6.4 public bootstrap remains `e09a9d1480211eea2d16d722182bb5c6de1bee12`; R8/R9 repairs did not alter D1-D3 or public-source semantics.
+Protocol 6.4 is accepted-current after fresh independent Review PASS and Stage-F closeout. Recovery `74bc572ef516cae417437a2027eeff52a2e25c15` was published by mapping descendant `6e66478f37de197b6d28707e087c61d687fcfa41` and remains distinct from authorized public bootstrap `e09a9d1480211eea2d16d722182bb5c6de1bee12`. Protocol 6.3 remains immutable historical rollback. The Stage-E mandate and repair provenance below are preserved as historical review evidence, not current lifecycle instructions.
 
 ## Repair provenance to challenge, not inherit
 
