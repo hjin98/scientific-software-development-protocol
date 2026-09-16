@@ -29,10 +29,10 @@ stage_c_ci: 34966389062
 stage_d_prepublication_ci: 34967422929
 stage_d_publication_transaction: 34968628368
 stage_d_postpublication_ci: 34968829366
-independent_review: required_fresh_context
-protocol_64_recovery: unavailable_pending_independent_review
+independent_review: pass
+protocol_64_recovery: 74bc572ef516cae417437a2027eeff52a2e25c15
 accepted_current_protocol: 6.3.0
-stage_f: blocked_pending_independent_review
+stage_f: recovery_mapping_published_acceptance_pending
 ---
 
 # Independent Protocol/D3 Review Handoff — Protocol 6.4

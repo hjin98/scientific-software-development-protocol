@@ -46,9 +46,10 @@ Previously executed evidence remains reusable only while no changed protocol obl
 6.1.0  -> 802e75af261efb4f70d71284d860613a2197b639
 6.2.0  -> b59adc77efe6951912cfd705cc43830c58ca27d0
 6.3.0  -> 9f353097fab36e325a325f1c2f9d9cec32e86177
+6.4.0  -> 74bc572ef516cae417437a2027eeff52a2e25c15
 ```
 
-There is deliberately no 6.4 recovery entry while 6.4 remains a proposed candidate. Recovery is published only after qualification, independent assembled-candidate Review, bootstrap/publication sequencing, generated reconciliation, and lifecycle acceptance establish an immutable recovery target.
+Protocol 6.4 recovery target `74bc572ef516cae417437a2027eeff52a2e25c15` was selected after independent assembled-candidate Review PASS. This later descendant publishes `6.4.0 -> 74bc572ef516cae417437a2027eeff52a2e25c15`. Protocol 6.3 remains accepted-current until Stage-F acceptance and lifecycle closeout pass.
 
 Resolve historical work through immutable version-specific source/profile semantics, never `main`/latest. Frozen source/publication/profile artifacts remain historical truth and are not rewritten to current terminology. Candidate Protocol 6.4 must not mutate any frozen 5.16/6.0/6.1/6.2/6.3 profile resource; it receives new versioned resources after source/profile generation and qualification.
 
@@ -129,12 +130,18 @@ The pre-repair Protocol 6.3 bootstrap `1484c1d3caa49d87cc15bc52a5e775399c1dae1b`
 
 ## Protocol 6.4 candidate bootstrap/recovery lifecycle
 
-Protocol 6.4 is **proposed, not accepted-current**. Qualified self-reference-safe public bootstrap `e09a9d1480211eea2d16d722182bb5c6de1bee12` is now the sole authorized version-bound 6.4 public fallback; this publication does not make 6.4 accepted-current and does not authorize recovery.
+Protocol 6.4 has independent Review PASS and mapped recovery `74bc572ef516cae417437a2027eeff52a2e25c15`, but is **not yet accepted-current** until Stage-F acceptance and lifecycle closeout pass. Qualified self-reference-safe public bootstrap `e09a9d1480211eea2d16d722182bb5c6de1bee12` is now the sole authorized version-bound 6.4 public fallback; this publication does not make 6.4 accepted-current and does not authorize recovery.
 
 The public-source mapping is:
 
 ```text
 6.4.0 public-source bootstrap -> e09a9d1480211eea2d16d722182bb5c6de1bee12
+```
+
+The recovery mapping is:
+
+```text
+6.4.0  -> 74bc572ef516cae417437a2027eeff52a2e25c15
 ```
 
 `AUTO_LOCAL_FIRST` may use a compatible readable local/installed 6.4 source during candidate work; otherwise it may use the canonical repository only at exact immutable bootstrap `e09a9d1480211eea2d16d722182bb5c6de1bee12`. It must not substitute the candidate branch, default branch, semantic-version guess, or 6.3 bootstrap as if those were 6.4.
