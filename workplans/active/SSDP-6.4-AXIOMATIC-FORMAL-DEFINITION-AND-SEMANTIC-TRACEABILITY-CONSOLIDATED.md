@@ -7,8 +7,8 @@ status: active
 created_date: 2026-09-15
 reviewed_date: 2026-09-15
 design_review_state: pass-after-sixth-review
-independent_review_state: fresh-review-required
-implementation_handoff: repair-complete-bound
+independent_review_state: no-pass-reopened
+implementation_handoff: repair-required
 active_serious_challenge: none
 branch: ssdp-6.4-axiomatic-definition-traceability
 reviewed_input_head: 4974058020cdda1325ef899c04b3cd13d5ae44c2
@@ -27,7 +27,7 @@ accepted_parent_public_bootstrap: 86c13cab6bdd1991dffa94e277db8eacf87e2e11
 
 ## Current disposition
 
-**FRESH STAGE-E REVIEW: READY — IMMUTABLE TARGET BOUND.** B64-R6/B64-R7 repair commit `7ca12ac7784d1ca9f4a1107320dd1dcd8574434a` passed stage-local ordinary PR run `35035003776`. New immutable assembled target `31818ca1c64548abda355d9be03fb5b353f5a43a` carries the repaired qualification oracle plus truthful repair-complete lifecycle state and passed exact-target ordinary PR run `35037085174`, including inherited protocol regression, package build/independent validation, committed-dist parity, packaged-snapshot parity, full Orchestrator Core, and whitespace. The current descendant handoff binds that already-existing target and exact-target CI for a fresh independent Stage-E Review. No semantic/source doctrine changed during this lifecycle binding. No Serious Challenge is active. Protocol 6.3 remains accepted-current; Protocol 6.4 recovery remains unavailable; Stage F remains blocked until a genuine fresh-context independent Review PASS.
+**FRESH STAGE-E REVIEW: NO-PASS — REOPENED.** Independent Review of immutable assembled target `31818ca1c64548abda355d9be03fb5b353f5a43a`, bound by descendant handoff `718747381f1ff8c483c7af1556d1704911fa68cb` and exact-target ordinary PR qualification run `35037085174`, found two blocking D4 qualification/current-lifecycle-oracle defects: B64-R8 and B64-R9. No Serious Challenge is active. Detailed findings and owner-layer repair instructions are in `qualification/ssdp6/INDEPENDENT-REVIEW-2026-09-15-PROTOCOL-6.4-31818-NO-PASS.md`. Protocol 6.3 remains accepted-current; Protocol 6.4 public bootstrap `e09a9d1480211eea2d16d722182bb5c6de1bee12` remains authorized because no public-source semantic mutation is required by these findings; Protocol 6.4 recovery remains unavailable; Stage F remains blocked. After repair, freeze a new immutable assembled target, obtain exact-target ordinary PR CI, bind it from a later descendant handoff, and perform another fresh full Stage-E Review of all P64-A..P64-O, QF64-A..QF64-P and F64-A..F64-L.
 
 **SIXTH DESIGN REVIEW: PASS AFTER GAP CLOSURE.** This file is the single current implementation/review handoff for Protocol 6.4. Earlier design-review workplans and the fifth-review consolidated snapshot are historical evidence only; implementation and independent Review SHALL reconstruct the current contract from this file plus accepted Protocol 6.3 owners, not by replaying amendment chronology.
 
@@ -833,3 +833,46 @@ These repairs change current lifecycle representation and its oracle only. They 
 ### Fresh review re-entry after this repair
 
 Freeze an immutable assembled candidate containing this repair and applicable qualification evidence. The candidate handoff carries the explicit pending descendant-binding sentinel because a commit cannot self-name. After exact-target ordinary PR CI succeeds for the already-existing candidate, a later descendant SHALL bind that candidate SHA and CI run in `qualification/ssdp6/INDEPENDENT-REVIEW-HANDOFF-PROTOCOL-6.4.md`. Only then may a fresh independent full Stage-E Review begin over all P64-A..P64-O, QF64-A..QF64-P and F64-A..F64-L. Until a genuine independent PASS, Protocol 6.3 remains accepted-current, Protocol 6.4 recovery remains unavailable, and Stage F remains blocked.
+
+## 30. Fresh Stage-E Review NO-PASS — target 31818 — 2026-09-15
+
+Fresh independent Review record: `qualification/ssdp6/INDEPENDENT-REVIEW-2026-09-15-PROTOCOL-6.4-31818-NO-PASS.md`.
+
+Reviewed immutable target: `31818ca1c64548abda355d9be03fb5b353f5a43a` against accepted baseline `0928accd337a13f864b292ed81c36372828cfb4c`, with exact-target ordinary PR qualification run `35037085174` and bound handoff descendant `718747381f1ff8c483c7af1556d1704911fa68cb` treated as evidence rather than authority.
+
+**Verdict: NO-PASS — blockers 2; Serious Challenges 0.**
+
+### B64-R8 — QF64-P pass-state handoff contradiction
+
+Earliest owner: D4 Protocol 6.4 qualification/current-lifecycle oracle.
+
+The generalized authority-index lifecycle helper can represent `PASS / STAGE F AUTHORIZED`, recovery unavailable pending Stage-F recovery publication, and authorized Stage F. But the real-handoff assertions in `test_qf64_p_one_current_snapshot_complete_handoff` still unconditionally require `protocol_64_recovery: unavailable_pending_independent_review` and `stage_f: blocked_pending_independent_review` before phase handling. A truthful PASS transition therefore necessarily fails the oracle; retaining the pre-Review metadata instead makes the current handoff stale.
+
+Repair QF64-P as one coherent phase relation over **both** authority-index state and handoff metadata. Pre-PASS phases remain blocked with recovery pending independent Review. PASS keeps the reviewed target/CI bound, changes recovery state only to unavailable pending Stage-F recovery publication, and authorizes Stage F without inventing a recovery SHA. Add mismatched index/handoff counterfactuals in both directions. Do not add another lifecycle owner.
+
+### B64-R9 — mandatory QF64 counterfactual matrix incomplete
+
+Earliest owner: D4 Protocol 6.4 qualification oracle in `tests/test_protocol_64_axiomatic_traceability.py`.
+
+The testing owner requires every material 6.4 semantic-definition/traceability claim to have discriminating positive and negative cases and names specific mandatory counterfactual classes. The current helper/fixture matrix does not cover that complete contract. Repair the existing bounded matrix, without creating a semantic registry/parser/database, so at minimum it discriminates:
+
+- QF64-A wrong-version/source-variant and explicitly unsupported import fixtures while preserving the checker boundary that real source support remains semantic Review;
+- QF64-C ambiguous binder shadowing and provenance/role conflation while keeping the role vocabulary open;
+- QF64-E direct relation/logical-direction, partial-as-total, branch, undefined-operator and material state/time/order ambiguity negatives;
+- QF64-G widened-validity negative already represented by the helper but currently unexercised;
+- QF64-H hyperlink/import/call-graph/evidence-execution edges falsely labeled `USES_DEFINITION`, in addition to the now-correct theorem/result, direction, impact, completeness and recursion mutants;
+- QF64-K unreconciled split/merge lineage negative already represented by the helper but currently unexercised;
+- QF64-M exact required-owner/version identity versus actually loaded-owner identity, rejecting a similarly named or wrong-version loaded prerequisite.
+
+For every mandatory QF64 subcase, either execute a discriminating negative or state an explicit human-semantic-review boundary when mechanization would be dishonest. Green word-presence or unused helper branches are not evidence of the required counterfactual.
+
+### Re-entry contract after B64-R8/B64-R9
+
+1. Keep repairs at the existing D4 qualification/lifecycle surfaces unless implementation discovers a genuine public-source semantic defect; these findings do not require changing the authorized public bootstrap `e09a9d1480211eea2d16d722182bb5c6de1bee12`.
+2. Rerun focused Protocol 6.4 qualification plus complete inherited repository regression, applicable PEM validation, canonical package build, independent package validation, committed-dist parity, frozen-resource checks, packaged-snapshot parity, full Orchestrator Core, and whitespace/index integrity.
+3. Freeze a new immutable assembled candidate because the qualification/lifecycle tree changes.
+4. Obtain exact-target ordinary PR CI for that immutable target.
+5. Bind the already-existing target SHA and exact-target CI from a later descendant; the candidate does not self-name.
+6. Perform another fresh independent full Stage-E Review of all P64-A..P64-O, QF64-A..QF64-P and F64-A..F64-L; do not limit re-review to R8/R9.
+
+Protocol 6.3 remains accepted-current. Protocol 6.4 recovery remains unavailable. Stage F remains blocked.
