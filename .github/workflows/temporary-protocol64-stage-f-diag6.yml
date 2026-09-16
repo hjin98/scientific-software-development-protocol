@@ -1,0 +1,45 @@
+name: Temporary Protocol 6.4 Stage F diagnostic 6
+on:
+  push:
+    branches: [ssdp-6.4-axiomatic-definition-traceability]
+permissions:
+  contents: write
+jobs:
+  diagnose:
+    if: github.event.head_commit.message == 'Diagnose Protocol 6.4 Stage F acceptance command'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: {ref: ssdp-6.4-axiomatic-definition-traceability, fetch-depth: 0}
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: |
+          python -m pip install pyyaml -r source/requirements-validation.txt
+          python -m pip install ./orchestrator -r orchestrator/requirements-dev.txt
+      - env: {R: 74bc572ef516cae417437a2027eeff52a2e25c15, B: e09a9d1480211eea2d16d722182bb5c6de1bee12, M: 6e66478f37de197b6d28707e087c61d687fcfa41}
+        run: |
+          python - <<'PY'
+          import yaml
+          from pathlib import Path
+          d=yaml.safe_load(Path('.github/workflows/temporary-protocol64-stage-f-final2.yml').read_text())
+          Path('/tmp/construct.sh').write_text(next(s['run'] for s in d['jobs']['final2']['steps'] if s.get('name')=='Construct accepted-current tree'))
+          PY
+          bash /tmp/construct.sh
+          set +e
+          : > /tmp/out.txt
+          runcheck(){ echo "=== $1 ===" >> /tmp/out.txt; shift; "$@" >> /tmp/out.txt 2>&1; rc=$?; echo "RC=$rc" >> /tmp/out.txt; return $rc; }
+          runcheck unittest python -m unittest discover -s tests -v || true
+          runcheck pem python source/project_engineering_memory.py PROJECT-ENGINEERING-MEMORY.md || true
+          rm -rf /tmp/protocol-dist
+          runcheck build-temp python source/build_skills.py --output /tmp/protocol-dist || true
+          runcheck validate-packages python source/validate_packages.py --dist /tmp/protocol-dist || true
+          runcheck check-dist python source/check_dist.py --expected /tmp/protocol-dist --committed dist || true
+          runcheck snapshot-check python orchestrator/scripts/generate_protocol_snapshot.py --check || true
+          runcheck core python orchestrator/scripts/run_core_tests.py || true
+          runcheck diff-check git diff --check || true
+          git reset --hard HEAD
+          cp /tmp/out.txt qualification/ssdp6/STAGE-F-DIAGNOSTIC-PROTOCOL-6.4.txt
+          git config user.name 'Protocol 6.4 lifecycle automation'; git config user.email 'protocol64-lifecycle@users.noreply.github.com'
+          git add qualification/ssdp6/STAGE-F-DIAGNOSTIC-PROTOCOL-6.4.txt
+          git commit -m 'Diagnose Protocol 6.4 Stage F acceptance command'
+          git push origin HEAD:ssdp-6.4-axiomatic-definition-traceability
