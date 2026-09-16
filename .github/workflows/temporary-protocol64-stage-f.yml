@@ -1,0 +1,360 @@
+name: Temporary Protocol 6.4 Stage F closeout
+
+on:
+  push:
+    branches: [ssdp-6.4-axiomatic-definition-traceability]
+
+permissions:
+  contents: write
+
+jobs:
+  stage-f:
+    if: github.event.head_commit.message == 'Run Protocol 6.4 Stage F closeout'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ssdp-6.4-axiomatic-definition-traceability
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install validation dependencies
+        run: |
+          python -m pip install -r source/requirements-validation.txt
+          python -m pip install ./orchestrator -r orchestrator/requirements-dev.txt
+
+      - name: Publish recovery mapping state
+        shell: bash
+        env:
+          RECOVERY: 74bc572ef516cae417437a2027eeff52a2e25c15
+          BOOTSTRAP: e09a9d1480211eea2d16d722182bb5c6de1bee12
+          REVIEWED: f1e0ca95f4d1895e3497e155105468fa73f47827
+          BASE63: 0928accd337a13f864b292ed81c36372828cfb4c
+        run: |
+          set -euxo pipefail
+          git merge-base --is-ancestor "$REVIEWED" "$RECOVERY"
+          git merge-base --is-ancestor "$BASE63" "$RECOVERY"
+          test "$RECOVERY" != "$BOOTSTRAP"
+          python - <<'PY'
+          from pathlib import Path
+          import os, re
+
+          R = os.environ['RECOVERY']
+          B = os.environ['BOOTSTRAP']
+          ROOT = Path('.')
+
+          def replace_once(path, old, new):
+              p = ROOT / path
+              text = p.read_text(encoding='utf-8')
+              if text.count(old) != 1:
+                  raise SystemExit(f'{path}: anchor count {text.count(old)} for {old[:100]!r}')
+              p.write_text(text.replace(old, new, 1), encoding='utf-8')
+
+          def regex_once(path, pattern, repl, flags=0):
+              p = ROOT / path
+              text = p.read_text(encoding='utf-8')
+              new, n = re.subn(pattern, repl, text, count=1, flags=flags)
+              if n != 1:
+                  raise SystemExit(f'{path}: regex match count {n}: {pattern[:120]!r}')
+              p.write_text(new, encoding='utf-8')
+
+          # Stage-E PASS -> Stage-F recovery-mapped lifecycle state.
+          wp = 'workplans/active/SSDP-6.4-AXIOMATIC-FORMAL-DEFINITION-AND-SEMANTIC-TRACEABILITY-CONSOLIDATED.md'
+          replace_once(wp, 'independent_review_state: fresh-review-required', 'independent_review_state: pass')
+          replace_once(wp, 'implementation_handoff: repair-complete-bound', 'implementation_handoff: stage-f-recovery-mapped')
+          replace_once(wp, 'stage_f: blocked', 'stage_f: recovery-mapped-acceptance-pending')
+          regex_once(
+              wp,
+              r'## Current disposition\n\n.*?\n\n\*\*SIXTH DESIGN REVIEW:',
+              '## Current disposition\n\n**STAGE E INDEPENDENT REVIEW: PASS — STAGE F RECOVERY MAPPED / ACCEPTANCE PENDING.** Independent Review record `qualification/ssdp6/INDEPENDENT-REVIEW-2026-09-16-PROTOCOL-6.4-PASS.md` passed immutable assembled candidate `f1e0ca95f4d1895e3497e155105468fa73f47827` with zero blockers and zero Serious Challenges. Recovery target `'+R+'` contains the reviewed candidate and Review record through ancestry and is distinct from public bootstrap `'+B+'`. Its mapping is now being published from this later descendant. Protocol 6.3 remains accepted-current until mapping-bearing regeneration, Stage-F acceptance, successor reconciliation, and lifecycle closeout pass.\n\n**SIXTH DESIGN REVIEW:',
+              re.S,
+          )
+
+          idx = 'workplans/active/SSDP-6.1-7.0-WORKPLAN-AUTHORITY-INDEX.md'
+          p = ROOT / idx
+          text = p.read_text(encoding='utf-8')
+          start = text.index('## Protocol 6.4 current design handoff')
+          end = text.index('## Protocol 7.0 current design handoff', start)
+          section = text[start:end]
+          section = re.sub(
+              r'Current disposition:\n\n```text\n.*?\n```',
+              'Current disposition:\n\n```text\nSERIOUS CHALLENGE: NONE\nSIXTH DESIGN REVIEW: PASS AFTER GAP CLOSURE\nIMPLEMENTATION / STAGE C QUALIFICATION: COMPLETE / QUALIFIED\nACCEPTED PARENT: Protocol 6.3 recovery 9f353097fab36e325a325f1c2f9d9cec32e86177\nSTAGE D PUBLIC BOOTSTRAP: PUBLISHED / AUTHORIZED - '+B+'\nSTAGE E INDEPENDENT REVIEW: PASS / STAGE F AUTHORIZED\nPROTOCOL 6.4 RECOVERY: '+R+'\nCURRENT ACCEPTED DOCUMENT-CONTROLLED BASELINE: Protocol 6.3\nSTAGE F: RECOVERY MAPPED / ACCEPTANCE PENDING\nPROTOCOL 7 INHERITANCE OF 6.4: DEFERRED UNTIL 6.4 ACCEPTANCE\n```',
+              section,
+              count=1,
+              flags=re.S,
+          )
+          p.write_text(text[:start] + section + text[end:], encoding='utf-8')
+
+          handoff = 'qualification/ssdp6/INDEPENDENT-REVIEW-HANDOFF-PROTOCOL-6.4.md'
+          replace_once(handoff, 'independent_review: required_fresh_context', 'independent_review: pass')
+          replace_once(handoff, 'protocol_64_recovery: unavailable_pending_independent_review', 'protocol_64_recovery: '+R)
+          replace_once(handoff, 'stage_f: blocked_pending_independent_review', 'stage_f: recovery_mapping_published_acceptance_pending')
+          p = ROOT / handoff
+          text = p.read_text(encoding='utf-8')
+          text += '\n## Stage-F transition\n\nIndependent Stage-E Review passed. Recovery target `'+R+'` is distinct from bootstrap `'+B+'`; this descendant publishes the recovery mapping while Protocol 6.3 remains accepted-current until Stage-F acceptance and closeout complete.\n'
+          p.write_text(text, encoding='utf-8')
+
+          versioning = 'source/shared/references/protocol-versioning-and-compatibility.md'
+          replace_once(
+              versioning,
+              '6.3.0  -> 9f353097fab36e325a325f1c2f9d9cec32e86177\n```',
+              '6.3.0  -> 9f353097fab36e325a325f1c2f9d9cec32e86177\n6.4.0  -> '+R+'\n```',
+          )
+          replace_once(
+              versioning,
+              'There is deliberately no 6.4 recovery entry while 6.4 remains a proposed candidate. Recovery is published only after qualification, independent assembled-candidate Review, bootstrap/publication sequencing, generated reconciliation, and lifecycle acceptance establish an immutable recovery target.',
+              'Protocol 6.4 recovery target `'+R+'` was selected only after qualification and independent assembled-candidate Review PASS. This later descendant publishes `6.4.0 -> '+R+'`; Protocol 6.3 remains accepted-current until mapping-bearing generated reconciliation, Stage-F acceptance, successor inheritance reconciliation, and lifecycle closeout pass.',
+          )
+          replace_once(
+              versioning,
+              'Protocol 6.4 is **proposed, not accepted-current**. Qualified self-reference-safe public bootstrap `'+B+'` is now the sole authorized version-bound 6.4 public fallback; this publication does not make 6.4 accepted-current and does not authorize recovery.',
+              'Protocol 6.4 has independent assembled-candidate Review PASS and mapped recovery target `'+R+'`, but is **not yet accepted-current** until Stage-F mapping-bearing acceptance and lifecycle closeout pass. Qualified self-reference-safe public bootstrap `'+B+'` remains the sole authorized version-bound 6.4 public fallback and is intentionally distinct from recovery.',
+          )
+          needle = '6.4.0 public-source bootstrap -> '+B+'\n```'
+          replace_once(versioning, needle, needle+'\n\nThe recovery mapping is:\n\n```text\n6.4.0  -> '+R+'\n```')
+
+          # Evolve the Stage-E qualification oracle to the legitimate Stage-F mapped state.
+          test = 'tests/test_protocol_64_bootstrap_readiness.py'
+          p = ROOT / test
+          text = p.read_text(encoding='utf-8')
+          if 'RECOVERY = ' not in text:
+              text = text.replace('BOOTSTRAP = "'+B+'"\n', 'BOOTSTRAP = "'+B+'"\nRECOVERY = "'+R+'"\n', 1)
+          text = text.replace('self.assertNotIn("6.4.0  -> ", local_versioning)', 'self.assertIn(f"6.4.0  -> {RECOVERY}", local_versioning)', 1)
+          p.write_text(text, encoding='utf-8')
+
+          test = 'tests/test_protocol_64_axiomatic_traceability.py'
+          p = ROOT / test
+          text = p.read_text(encoding='utf-8')
+          text = text.replace('self.assertNotIn("6.4.0  -> ", self.versioning)', 'self.assertIn("6.4.0  -> '+R+'", self.versioning)', 1)
+          old = '''    if phase == "pass":\n        return bool(\n            state.get("PROTOCOL 6.4 RECOVERY") == "UNAVAILABLE PENDING STAGE F RECOVERY PUBLICATION"\n            and state.get("STAGE F") == "AUTHORIZED"\n        )\n'''
+          new = '''    if phase == "pass":\n        premap = bool(\n            state.get("PROTOCOL 6.4 RECOVERY") == "UNAVAILABLE PENDING STAGE F RECOVERY PUBLICATION"\n            and state.get("STAGE F") == "AUTHORIZED"\n        )\n        mapped = bool(\n            state.get("PROTOCOL 6.4 RECOVERY") == "'''+R+'''"\n            and state.get("STAGE F") == "RECOVERY MAPPED / ACCEPTANCE PENDING"\n        )\n        return premap or mapped\n'''
+          if text.count(old) != 1:
+              raise SystemExit('lifecycle mapped-state oracle anchor missing')
+          text = text.replace(old, new, 1)
+          old = '''    if phase == "pass":\n        return bool(\n            handoff_meta.get("protocol_64_recovery") == "unavailable_pending_stage_f_recovery_publication"\n            and handoff_meta.get("stage_f") == "authorized"\n        )\n'''
+          new = '''    if phase == "pass":\n        premap = bool(\n            handoff_meta.get("protocol_64_recovery") == "unavailable_pending_stage_f_recovery_publication"\n            and handoff_meta.get("stage_f") == "authorized"\n        )\n        mapped = bool(\n            handoff_meta.get("protocol_64_recovery") == "'''+R+'''"\n            and handoff_meta.get("stage_f") == "recovery_mapping_published_acceptance_pending"\n        )\n        return premap or mapped\n'''
+          if text.count(old) != 1:
+              raise SystemExit('handoff mapped-state oracle anchor missing')
+          p.write_text(text.replace(old, new, 1), encoding='utf-8')
+
+          record = ROOT / 'qualification/ssdp6/STAGE-F-RECOVERY-MAPPING-PROTOCOL-6.4.md'
+          record.write_text(f'''---\nkind: ssdp64-stage-f-recovery-mapping\nprotocol_version: 6.4.0\nstatus: recovery-mapping-published-acceptance-pending\nrecovery_target: {R}\npublic_source_bootstrap: {B}\nreview_record: qualification/ssdp6/INDEPENDENT-REVIEW-2026-09-16-PROTOCOL-6.4-PASS.md\naccepted_current_protocol: 6.3.0\nstage_f_closeout: pending\n---\n\n# Protocol 6.4 Stage F — Recovery Mapping\n\nRecovery target `{R}` already existed before this mapping transaction and contains the reviewed candidate and independent PASS record through ancestry. It is intentionally distinct from public-source bootstrap `{B}`. This descendant publishes `6.4.0 -> {R}`. Protocol 6.3 remains accepted-current until mapping-bearing regeneration, Stage-F acceptance, Protocol-7 inheritance reconciliation, and lifecycle closeout all pass.\n''', encoding='utf-8')
+          PY
+
+          python source/build_skills.py --output dist
+          python orchestrator/scripts/generate_protocol_snapshot.py
+          rm -rf /tmp/protocol-dist
+          python source/build_skills.py --output /tmp/protocol-dist
+
+      - name: Validate recovery-mapped assembled state
+        shell: bash
+        env:
+          RECOVERY: 74bc572ef516cae417437a2027eeff52a2e25c15
+          BOOTSTRAP: e09a9d1480211eea2d16d722182bb5c6de1bee12
+        run: |
+          set -euxo pipefail
+          python -m unittest discover -s tests -v
+          python source/project_engineering_memory.py PROJECT-ENGINEERING-MEMORY.md
+          python source/validate_packages.py --dist /tmp/protocol-dist
+          python source/check_dist.py --expected /tmp/protocol-dist --committed dist
+          python orchestrator/scripts/generate_protocol_snapshot.py --check
+          python orchestrator/scripts/run_core_tests.py
+          python - <<'PY'
+          from pathlib import Path
+          import os
+          r=os.environ['RECOVERY']; b=os.environ['BOOTSTRAP']
+          v=Path('source/shared/references/protocol-versioning-and-compatibility.md').read_text()
+          assert f'6.4.0  -> {r}' in v
+          assert f'6.4.0 public-source bootstrap -> {b}' in v
+          assert r != b
+          assert 'not yet accepted-current' in v.lower()
+          PY
+          git diff --check
+
+      - name: Commit recovery mapping descendant
+        shell: bash
+        run: |
+          set -euxo pipefail
+          git config user.name 'Protocol 6.4 lifecycle automation'
+          git config user.email 'protocol64-lifecycle@users.noreply.github.com'
+          git add -A
+          git diff --cached --check
+          git commit -m 'Publish Protocol 6.4 recovery mapping'
+          git push origin HEAD:ssdp-6.4-axiomatic-definition-traceability
+          echo "MAPPING_COMMIT=$(git rev-parse HEAD)" >> "$GITHUB_ENV"
+
+      - name: Apply accepted-current closeout
+        shell: bash
+        env:
+          RECOVERY: 74bc572ef516cae417437a2027eeff52a2e25c15
+          BOOTSTRAP: e09a9d1480211eea2d16d722182bb5c6de1bee12
+        run: |
+          set -euxo pipefail
+          python - <<'PY'
+          from pathlib import Path
+          import os, re, shutil
+
+          R=os.environ['RECOVERY']; B=os.environ['BOOTSTRAP']; M=os.environ['MAPPING_COMMIT']; RUN=os.environ['GITHUB_RUN_ID']
+          ROOT=Path('.')
+
+          def replace_once(path, old, new):
+              p=ROOT/path; t=p.read_text(encoding='utf-8')
+              if t.count(old) != 1: raise SystemExit(f'{path}: anchor count {t.count(old)}: {old[:100]!r}')
+              p.write_text(t.replace(old,new,1), encoding='utf-8')
+
+          def regex_once(path, pat, repl, flags=0):
+              p=ROOT/path; t=p.read_text(encoding='utf-8'); ntext,n=re.subn(pat,repl,t,count=1,flags=flags)
+              if n != 1: raise SystemExit(f'{path}: regex count {n}: {pat[:120]!r}')
+              p.write_text(ntext, encoding='utf-8')
+
+          versioning='source/shared/references/protocol-versioning-and-compatibility.md'
+          replace_once(versioning, '| `ssdp-protocol-6.3` | 6.3.0 | 2 | accepted current / frozen predecessor for 6.4 candidate |\n| `ssdp-protocol-6.4` | 6.4.0 | 2 | proposed candidate |', '| `ssdp-protocol-6.3` | 6.3.0 | 2 | frozen historical rollback |\n| `ssdp-protocol-6.4` | 6.4.0 | 2 | accepted current |')
+          replace_once(versioning, 'Protocol 6.3 remains accepted-current while 6.4 is being implemented/qualified/reviewed. The 6.3 profile bytes are frozen as the immediate predecessor oracle. Candidate 6.4 intentionally retains schema v2 because the machine stage graph/result-envelope contract is unchanged;', 'Protocol 6.4 is accepted-current after Stage-F recovery publication, mapping-bearing acceptance, successor reconciliation, and lifecycle closeout. The 6.3 profile bytes remain frozen as the immediate historical rollback oracle. Protocol 6.4 retains schema v2 because the machine stage graph/result-envelope contract is unchanged;')
+          replace_once(versioning, '## Protocol 6.4 candidate bootstrap/recovery lifecycle', '## Protocol 6.4 accepted bootstrap/recovery lifecycle')
+          regex_once(versioning, r'Protocol 6\.4 has independent assembled-candidate Review PASS and mapped recovery target `'+R+r'`, but is \*\*not yet accepted-current\*\* until Stage-F mapping-bearing acceptance and lifecycle closeout pass\.', 'Protocol 6.4 is **accepted-current** after independent assembled-candidate Review PASS, recovery mapping publication, mapping-bearing generated/package/profile/Core acceptance, Protocol-7 inheritance reconciliation, and lifecycle closeout.')
+          replace_once(versioning, 'Protocol 6.3 and candidate 6.4 support PEM schema 1.', 'Protocol 6.3 and 6.4 support PEM schema 1.')
+          p=ROOT/versioning
+          t=p.read_text(encoding='utf-8')
+          t += f'\n\nProtocol 6.4 accepted recovery is `{R}`; recovery mapping descendant is `{M}`; public bootstrap remains distinct at `{B}`. Stage-F closeout acceptance ran in GitHub Actions run `{RUN}`. Protocol 6.3 recovery `9f353097fab36e325a325f1c2f9d9cec32e86177` remains immutable historical rollback for explicitly version-bound 6.3 work.\n'
+          p.write_text(t,encoding='utf-8')
+
+          readme='README.md'
+          regex_once(readme, r'Current accepted document-controlled release: \*\*Protocol 6\.3\*\*\..*?Protocol 7 remains a proposed deterministic-control-plane successor and is not cut over\.', f'Current accepted document-controlled release: **Protocol 6.4**. Accepted recovery is `{R}` and the distinct immutable public-source bootstrap is `{B}`. Protocol 6.3 recovery `9f353097fab36e325a325f1c2f9d9cec32e86177` remains immutable historical rollback for explicitly version-bound 6.3 work. Protocol 7 remains a proposed deterministic-control-plane successor and is not cut over.', re.S)
+          replace_once(readme, 'The universal current candidate kernel is', 'The universal current kernel is')
+          replace_once(readme, 'The candidate keeps orchestration profile schema v2 because no machine stage/result-envelope contract changed. `ssdp-protocol-6.4` is a distinct candidate profile/snapshot;', 'Protocol 6.4 keeps orchestration profile schema v2 because no machine stage/result-envelope contract changed. `ssdp-protocol-6.4` is the accepted-current profile/snapshot;')
+          replace_once(readme, '6.4.0  -> UNAVAILABLE_PENDING_INDEPENDENT_REVIEW', '6.4.0  -> '+R)
+          regex_once(readme, r'Protocol 6\.4 now has immutable public bootstrap \*\*`'+B+r'`\*\* and still has \*\*no\*\* recovery identity\..*?Independent assembled-candidate Review must still pass before a distinct recovery identity can be established and later published\.', f'Protocol 6.4 accepted public bootstrap is **`{B}`** and accepted recovery is **`{R}`**. Bootstrap and recovery are intentionally distinct; recovery mapping descendant `{M}` publishes the already-existing recovery target without self-reference.', re.S)
+          replace_once(readme, 'Protocol 6.4 candidate acceptance additionally requires', 'Protocol 6.4 acceptance required')
+          replace_once(readme, 'then a separate independent assembled-candidate Review. Only after that Review may recovery publication and accepted-current cutover proceed.', 'then a separate independent assembled-candidate Review, followed by Stage-F recovery publication, mapping-bearing regeneration, final acceptance, Protocol-7 inheritance reconciliation, and lifecycle closeout.')
+
+          # PORTABILITY current-state reconciliation: make the profile/current/recovery state explicit without replaying history.
+          port=ROOT/'PORTABILITY.md'; t=port.read_text(encoding='utf-8')
+          t=t.replace('| `ssdp-protocol-6.3` | 6.3.0 | 2 | accepted current |\n| `ssdp-protocol-6.4` | 6.4.0 | 2 | candidate under qualification |', '| `ssdp-protocol-6.3` | 6.3.0 | 2 | frozen historical rollback |\n| `ssdp-protocol-6.4` | 6.4.0 | 2 | accepted current |')
+          t=re.sub(r'Protocol 6\.3 remains accepted-current.*?Protocol 6\.4[^\n]*', f'Protocol 6.4 is accepted-current with public bootstrap `{B}` and distinct recovery `{R}`. Protocol 6.3 recovery `9f353097fab36e325a325f1c2f9d9cec32e86177` remains immutable historical rollback for explicitly version-bound 6.3 work.', t, count=1, flags=re.S)
+          if f'6.4.0 recovery -> {R}' not in t:
+              t += f'\n\nProtocol 6.4 accepted public bootstrap -> {B}\nProtocol 6.4 accepted recovery -> {R}\nRecovery mapping descendant -> {M}\n'
+          port.write_text(t,encoding='utf-8')
+
+          agents=ROOT/'AGENTS.md'; t=agents.read_text(encoding='utf-8')
+          t=t.replace('For Protocol 6.4 candidate work', 'For Protocol 6.4 work')
+          t=re.sub(r'Protocol 6\.4 is \*\*not\*\* accepted-current;.*?Protocol 6\.2 recovery `b59adc77efe6951912cfd705cc43830c58ca27d0` remains immutable historical rollback for version-bound 6\.2 work\.', f'Protocol 6.4 is accepted-current with public bootstrap `{B}` and distinct recovery `{R}`. Protocol 6.3 recovery `9f353097fab36e325a325f1c2f9d9cec32e86177` remains immutable historical rollback for version-bound 6.3 work; Protocol 6.2 recovery `b59adc77efe6951912cfd705cc43830c58ca27d0` remains immutable historical rollback for version-bound 6.2 work.', t, count=1, flags=re.S)
+          agents.write_text(t,encoding='utf-8')
+
+          sread=ROOT/'source/README.md'; t=sread.read_text(encoding='utf-8')
+          t=t.replace('# Scientific Software Development Protocol 6.4 Candidate Source', '# Scientific Software Development Protocol 6.4 Source')
+          t=re.sub(r'`source/` is the canonical Protocol 6\.4 candidate source.*?Generated distributions', f'`source/` is the canonical accepted-current Protocol 6.4 source. Accepted recovery is `{R}` and public-source bootstrap is separately `{B}`. Protocol 6.3 remains immutable historical rollback for explicitly version-bound work. Generated distributions', t, count=1, flags=re.S)
+          sread.write_text(t,encoding='utf-8')
+
+          deps=ROOT/'source/SEMANTIC_DEPENDENCIES.md'; t=deps.read_text(encoding='utf-8')
+          t=re.sub(r'^ssdp-protocol-6\.3 CONSTRAINED_BY -> .*$', 'ssdp-protocol-6.3 CONSTRAINED_BY -> immutable historical Protocol 6.3 rollback semantics', t, count=1, flags=re.M)
+          if re.search(r'^ssdp-protocol-6\.4 CONSTRAINED_BY -> .*$', t, flags=re.M):
+              t=re.sub(r'^ssdp-protocol-6\.4 CONSTRAINED_BY -> .*$', 'ssdp-protocol-6.4 CONSTRAINED_BY -> accepted-current Protocol 6.4 semantics', t, count=1, flags=re.M)
+          else:
+              t += '\nssdp-protocol-6.4 CONSTRAINED_BY -> accepted-current Protocol 6.4 semantics\n'
+          deps.write_text(t,encoding='utf-8')
+
+          # Final authority index and Protocol-7 inheritance-only reconciliation.
+          idx=ROOT/'workplans/active/SSDP-6.1-7.0-WORKPLAN-AUTHORITY-INDEX.md'; t=idx.read_text(encoding='utf-8')
+          start=t.index('## Protocol 6.4 current design handoff'); end=t.index('## Protocol 7.0 current design handoff',start)
+          sec=t[start:end]
+          sec=sec.replace('## Protocol 6.4 current design handoff','## Protocol 6.4 completed handoff',1)
+          sec=re.sub(r'Current disposition:\n\n```text\n.*?\n```', f'Current disposition:\n\n```text\nSERIOUS CHALLENGE: NONE\nSIXTH DESIGN REVIEW: PASS AFTER GAP CLOSURE\nIMPLEMENTATION / STAGE C QUALIFICATION: COMPLETE / QUALIFIED\nSTAGE D PUBLIC BOOTSTRAP: PUBLISHED / AUTHORIZED - {B}\nSTAGE E INDEPENDENT REVIEW: PASS\nRECOVERY: {R}\nRECOVERY MAPPING COMMIT: {M}\nSTAGE F: PASS / LIFECYCLE CLOSED\nCURRENT ACCEPTED DOCUMENT-CONTROLLED BASELINE: Protocol 6.4\nPROTOCOL 7 INHERITANCE OF 6.4: RECONCILED / REVISION 5\nLIFECYCLE STATUS: COMPLETED / ARCHIVED\n```',sec,count=1,flags=re.S)
+          sec=sec.replace('workplans/active/SSDP-6.4-AXIOMATIC-FORMAL-DEFINITION-AND-SEMANTIC-TRACEABILITY-CONSOLIDATED.md','workplans/archive/SSDP-6.4-AXIOMATIC-FORMAL-DEFINITION-AND-SEMANTIC-TRACEABILITY-CONSOLIDATED.md')
+          t=t[:start]+sec+t[end:]
+          rev4='workplans/active/SSDP-7.0-DETERMINISTIC-CONTROL-PLANE-AND-MANDATORY-ORCHESTRATOR-MIGRATION-REVISION-4-PROTOCOL-6.3-INHERITANCE-RECONCILIATION.md'
+          rev5='workplans/active/SSDP-7.0-DETERMINISTIC-CONTROL-PLANE-AND-MANDATORY-ORCHESTRATOR-MIGRATION-REVISION-5-PROTOCOL-6.4-INHERITANCE-RECONCILIATION.md'
+          if rev5 not in t:
+              t=t.replace('5. `'+rev4+'`', '5. `'+rev4+'`\n6. `'+rev5+'`')
+          t=t.replace('- Protocol 6.4 is not yet accepted and therefore does not amend the Protocol-7 handoff at this time;', '- Revision 5 changes only version/representation inheritance after Protocol 6.4 acceptance: current pre-cutover baseline and fallback/rollback become Protocol 6.4 recovery `'+R+'`, while parent/Revisions 1-4 D3 architecture semantics remain unchanged;')
+          t=t.replace('PROTOCOL 6.4 INHERITANCE RECONCILIATION: NOT APPLICABLE UNTIL 6.4 ACCEPTANCE', 'PROTOCOL 6.4 COMPLETION/REVIEW/RECOVERY PREREQUISITE: SATISFIED\nPROTOCOL 6.4 INHERITANCE RECONCILIATION: SATISFIED')
+          t=t.replace('CURRENT PRE-CUTOVER FALLBACK/ROLLBACK BASELINE: Protocol 6.3 recovery 9f353097fab36e325a325f1c2f9d9cec32e86177', 'CURRENT PRE-CUTOVER FALLBACK/ROLLBACK BASELINE: Protocol 6.4 recovery '+R)
+          t=t.replace('- Protocol 6.3 is the accepted-current document-controlled baseline;', '- Protocol 6.4 is the accepted-current document-controlled baseline;')
+          t=t.replace('- Protocol 6.4 is proposed on its dedicated branch. It does not become accepted-current until qualification, independent Review, bootstrap/recovery publication, generated reconciliation, impact closure, and lifecycle cutover all pass.\n', '')
+          t=t.replace('Its current fallback/rollback baseline is Protocol 6.3 recovery `9f353097fab36e325a325f1c2f9d9cec32e86177` until a later accepted successor is explicitly reconciled into the Protocol-7 handoff.', 'Its current fallback/rollback baseline is Protocol 6.4 recovery `'+R+'` after Revision 5 inheritance reconciliation.')
+          idx.write_text(t,encoding='utf-8')
+
+          rev5p=ROOT/'workplans/active/SSDP-7.0-DETERMINISTIC-CONTROL-PLANE-AND-MANDATORY-ORCHESTRATOR-MIGRATION-REVISION-5-PROTOCOL-6.4-INHERITANCE-RECONCILIATION.md'
+          rev5p.write_text(f'''---\nkind: protocol7-inheritance-reconciliation\nprotocol_version: 6.4.0\nstatus: active\nrevision: 5\nd3_architecture_mutation: none\naccepted_pre_cutover_baseline: {R}\n---\n\n# Protocol 7 Revision 5 — Protocol 6.4 Inheritance Reconciliation\n\n## Disposition\n\nProtocol 6.4 is accepted-current with recovery `{R}` and distinct public bootstrap `{B}`. This revision performs inheritance/version reconciliation only. It does **not** reopen, modify, or re-accept Protocol 7 D3 architecture. Parent/Revisions 1-4 remain binding except that the pre-cutover document-controlled fallback/rollback baseline advances from accepted Protocol 6.3 to accepted Protocol 6.4.\n\n```text\nd3_architecture_mutation: none\nProtocol 6.4 recovery           -> {R}\nProtocol 6.4 public bootstrap   -> {B}\nPROTOCOL 7 D4 IMPLEMENTATION: NOT AUTHORIZED\n```\n\nThe remaining Protocol-7-specific pre-D4 requirement is still the deliberate D3 Orchestrator architecture reopen/supersession already owned by the Protocol-7 workplan family. This inheritance revision cannot satisfy that requirement by version advancement.\n''',encoding='utf-8')
+
+          # Archive completed 6.4 workplan only now that current semantics have canonical owners.
+          active=ROOT/'workplans/active/SSDP-6.4-AXIOMATIC-FORMAL-DEFINITION-AND-SEMANTIC-TRACEABILITY-CONSOLIDATED.md'
+          archived=ROOT/'workplans/archive/SSDP-6.4-AXIOMATIC-FORMAL-DEFINITION-AND-SEMANTIC-TRACEABILITY-CONSOLIDATED.md'
+          w=active.read_text(encoding='utf-8')
+          w=w.replace('status: active','status: archived',1).replace('implementation_handoff: stage-f-recovery-mapped','implementation_handoff: stage-f-complete',1).replace('stage_f: recovery-mapped-acceptance-pending','stage_f: pass',1)
+          w=re.sub(r'## Current disposition\n\n.*?\n\n\*\*SIXTH DESIGN REVIEW:', f'## Current disposition\n\n**STAGE F: PASS — PROTOCOL 6.4 LIFECYCLE CLOSED.** Independent Review passed immutable assembled candidate `f1e0ca95f4d1895e3497e155105468fa73f47827`; accepted recovery is `{R}` and public bootstrap remains distinct at `{B}`. Recovery mapping descendant `{M}` was followed by mapping-bearing regeneration and Stage-F acceptance in GitHub Actions run `{RUN}`. Protocol 6.4 is accepted-current; Protocol 7 receives inheritance-only Revision 5 with no D3 architecture mutation and D4 remains unauthorized. This workplan is archived after current semantics and lifecycle state were reconciled into canonical owners.\n\n**SIXTH DESIGN REVIEW:', w, count=1, flags=re.S)
+          archived.write_text(w,encoding='utf-8'); active.unlink()
+
+          hand=ROOT/'qualification/ssdp6/INDEPENDENT-REVIEW-HANDOFF-PROTOCOL-6.4.md'; t=hand.read_text(encoding='utf-8')
+          t=t.replace('accepted_current_protocol: 6.3.0','accepted_current_protocol: 6.4.0',1).replace('stage_f: recovery_mapping_published_acceptance_pending','stage_f: complete',1)
+          t += f'\n## Stage-F closeout\n\nStage F passed. Protocol 6.4 accepted recovery is `{R}`; mapping descendant `{M}` published the mapping; accepted-current cutover is complete. This handoff is now historical Review/lifecycle evidence.\n'
+          hand.write_text(t,encoding='utf-8')
+
+          hist=ROOT/'history/SEMANTIC_EVOLUTION.md'; t=hist.read_text(encoding='utf-8')
+          t += f'''\n\n## 2026-09-16 — Protocol 6.4 accepted-current\n\nProtocol 6.4 axiomatic formal-definition and semantic-traceability strengthening completed qualification, independent assembled-candidate Review, self-reference-safe bootstrap publication, recovery publication, mapping-bearing regeneration, Stage-F acceptance, and lifecycle closeout. Accepted recovery is `{R}`; public bootstrap is distinct at `{B}`; recovery mapping descendant is `{M}`. Protocol 7 inherited 6.4 only through Revision 5 with `d3_architecture_mutation: none`; Protocol 7 D4 remained unauthorized.\n'''
+          hist.write_text(t,encoding='utf-8')
+
+          close=ROOT/'qualification/ssdp6/STAGE-F-CLOSEOUT-PROTOCOL-6.4.md'
+          close.write_text(f'''---\nkind: ssdp64-stage-f-closeout\nprotocol_version: 6.4.0\nstatus: pass\nrecovery_target: {R}\nrecovery_mapping_commit: {M}\npublic_source_bootstrap: {B}\nstage_f_run: {RUN}\naccepted_current_protocol: 6.4.0\nprotocol7_revision: workplans/active/SSDP-7.0-DETERMINISTIC-CONTROL-PLANE-AND-MANDATORY-ORCHESTRATOR-MIGRATION-REVISION-5-PROTOCOL-6.4-INHERITANCE-RECONCILIATION.md\n---\n\n# Protocol 6.4 Stage F Closeout\n\n**STAGE F: PASS.** Recovery `{R}` was selected only after independent Review PASS and published by later descendant `{M}`. Mapping-bearing generated/package/profile/Core state was regenerated and accepted in GitHub Actions run `{RUN}`. Bootstrap `{B}` remains distinct from recovery. Protocol 6.4 is accepted-current and the consolidated workplan is archived.\n\n## PEM closeout-learning assessment\n\nAssessment performed. Stage F is the publication/closeout continuation of the already-reviewed Protocol 6.4 intervention rather than a new independent engineering episode. No new failure family recurred, no independent comparative evidence was created, and no existing PEM family/capability/notice changed semantic identity, evidence admissibility, authority binding, applicability, maturity, or guidance. Therefore no permanent PEM mutation is warranted by Stage F itself. Existing applicable project-learning remains preserved.\n''',encoding='utf-8')
+
+          # Successor-aware historical 6.3 closeout oracle.
+          (ROOT/'tests/test_protocol_63_closeout.py').write_text(f'''import unittest\nfrom pathlib import Path\n\nROOT = Path(__file__).resolve().parents[1]\nRECOVERY63 = "9f353097fab36e325a325f1c2f9d9cec32e86177"\nRECOVERY64 = "{R}"\nBOOTSTRAP64 = "{B}"\n\nclass Protocol63CloseoutTests(unittest.TestCase):\n    def test_63_remains_frozen_historical_after_64_acceptance(self):\n        versioning=(ROOT/"source/shared/references/protocol-versioning-and-compatibility.md").read_text()\n        readme=(ROOT/"README.md").read_text()\n        self.assertIn("| `ssdp-protocol-6.3` | 6.3.0 | 2 | frozen historical rollback |", versioning)\n        self.assertIn(f"6.3.0  -> {{RECOVERY63}}", versioning)\n        self.assertIn("Current accepted document-controlled release: **Protocol 6.4**", readme)\n        self.assertIn(f"6.4.0  -> {{RECOVERY64}}", readme)\n\n    def test_protocol7_revision4_history_remains_and_revision5_advances_baseline(self):\n        rev4=(ROOT/"workplans/active/SSDP-7.0-DETERMINISTIC-CONTROL-PLANE-AND-MANDATORY-ORCHESTRATOR-MIGRATION-REVISION-4-PROTOCOL-6.3-INHERITANCE-RECONCILIATION.md").read_text()\n        rev5=(ROOT/"workplans/active/SSDP-7.0-DETERMINISTIC-CONTROL-PLANE-AND-MANDATORY-ORCHESTRATOR-MIGRATION-REVISION-5-PROTOCOL-6.4-INHERITANCE-RECONCILIATION.md").read_text()\n        self.assertIn("d3_architecture_mutation: none", rev4)\n        self.assertIn("PROTOCOL 7 D4 IMPLEMENTATION: NOT AUTHORIZED", rev4)\n        self.assertIn("d3_architecture_mutation: none", rev5)\n        self.assertIn("PROTOCOL 7 D4 IMPLEMENTATION: NOT AUTHORIZED", rev5)\n        self.assertIn(RECOVERY64, rev5)\n\nif __name__ == "__main__": unittest.main()\n''',encoding='utf-8')
+
+          # Convert the Stage-E current-handoff test into an archived-closeout oracle.
+          test=ROOT/'tests/test_protocol_64_axiomatic_traceability.py'; t=test.read_text(encoding='utf-8')
+          t=t.replace('self.assertIn("protocol 6.4 is proposed, not accepted-current", versioning)', 'self.assertIn("protocol 6.4 is accepted-current", versioning)', 1)
+          pat=r'    def test_qf64_p_one_current_snapshot_complete_handoff\(self\) -> None:\n.*?(?=\n    def |\n\nif __name__)'
+          repl=f'''    def test_qf64_p_closeout_archives_snapshot_and_preserves_review_binding(self) -> None:\n        active = sorted((ROOT / "workplans/active").glob("SSDP-6.4*.md"))\n        self.assertEqual(active, [])\n        archived = ROOT / "workplans/archive/SSDP-6.4-AXIOMATIC-FORMAL-DEFINITION-AND-SEMANTIC-TRACEABILITY-CONSOLIDATED.md"\n        self.assertTrue(archived.is_file())\n        workplan = archived.read_text(encoding="utf-8")\n        self.assertIn("STAGE F: PASS", workplan)\n        self.assertIn("{R}", workplan)\n        handoff = read("qualification/ssdp6/INDEPENDENT-REVIEW-HANDOFF-PROTOCOL-6.4.md")\n        self.assertIn("stage_f: complete", handoff)\n        self.assertIn("accepted_current_protocol: 6.4.0", handoff)\n        self.assertIn("QF64-A", workplan)\n        self.assertIn("QF64-P", workplan)\n        self.assertIn("snapshot-complete", workplan.lower())\n'''
+          t,n=re.subn(pat,repl,t,count=1,flags=re.S)
+          if n != 1: raise SystemExit('could not replace QF64-P current-handoff test')
+          test.write_text(t,encoding='utf-8')
+
+          (ROOT/'tests/test_protocol_64_closeout.py').write_text(f'''import unittest\nfrom pathlib import Path\n\nROOT=Path(__file__).resolve().parents[1]\nRECOVERY="{R}"\nBOOTSTRAP="{B}"\nMAPPING="{M}"\n\nclass Protocol64CloseoutTests(unittest.TestCase):\n    def test_accepted_current_identity_and_mapping(self):\n        versioning=(ROOT/"source/shared/references/protocol-versioning-and-compatibility.md").read_text()\n        readme=(ROOT/"README.md").read_text()\n        self.assertIn(f"6.4.0  -> {{RECOVERY}}", versioning)\n        self.assertIn(f"6.4.0 public-source bootstrap -> {{BOOTSTRAP}}", versioning)\n        self.assertNotEqual(RECOVERY, BOOTSTRAP)\n        self.assertIn("| `ssdp-protocol-6.4` | 6.4.0 | 2 | accepted current |", versioning)\n        self.assertIn("Current accepted document-controlled release: **Protocol 6.4**", readme)\n        self.assertIn(RECOVERY, readme)\n\n    def test_workplan_archived_and_protocol7_inheritance_only(self):\n        self.assertFalse((ROOT/"workplans/active/SSDP-6.4-AXIOMATIC-FORMAL-DEFINITION-AND-SEMANTIC-TRACEABILITY-CONSOLIDATED.md").exists())\n        self.assertTrue((ROOT/"workplans/archive/SSDP-6.4-AXIOMATIC-FORMAL-DEFINITION-AND-SEMANTIC-TRACEABILITY-CONSOLIDATED.md").is_file())\n        rev5=(ROOT/"workplans/active/SSDP-7.0-DETERMINISTIC-CONTROL-PLANE-AND-MANDATORY-ORCHESTRATOR-MIGRATION-REVISION-5-PROTOCOL-6.4-INHERITANCE-RECONCILIATION.md").read_text()\n        self.assertIn("d3_architecture_mutation: none", rev5)\n        self.assertIn("PROTOCOL 7 D4 IMPLEMENTATION: NOT AUTHORIZED", rev5)\n        self.assertIn(RECOVERY, rev5)\n\n    def test_closeout_record_and_dependency_currentness(self):\n        close=(ROOT/"qualification/ssdp6/STAGE-F-CLOSEOUT-PROTOCOL-6.4.md").read_text()\n        deps=(ROOT/"source/SEMANTIC_DEPENDENCIES.md").read_text()\n        self.assertIn("**STAGE F: PASS.**", close)\n        self.assertIn(f"recovery_mapping_commit: {{MAPPING}}", close)\n        self.assertIn("ssdp-protocol-6.4 CONSTRAINED_BY -> accepted-current Protocol 6.4 semantics", deps)\n        self.assertIn("ssdp-protocol-6.3 CONSTRAINED_BY -> immutable historical Protocol 6.3 rollback semantics", deps)\n\nif __name__ == "__main__": unittest.main()\n''',encoding='utf-8')
+          PY
+
+          python source/build_skills.py --output dist
+          python orchestrator/scripts/generate_protocol_snapshot.py
+          rm -rf /tmp/protocol-dist
+          python source/build_skills.py --output /tmp/protocol-dist
+
+      - name: Validate exact Stage-F closeout tree
+        shell: bash
+        env:
+          RECOVERY: 74bc572ef516cae417437a2027eeff52a2e25c15
+          BOOTSTRAP: e09a9d1480211eea2d16d722182bb5c6de1bee12
+        run: |
+          set -euxo pipefail
+          python -m unittest discover -s tests -v
+          python source/project_engineering_memory.py PROJECT-ENGINEERING-MEMORY.md
+          python source/validate_packages.py --dist /tmp/protocol-dist
+          python source/check_dist.py --expected /tmp/protocol-dist --committed dist
+          python orchestrator/scripts/generate_protocol_snapshot.py --check
+          python orchestrator/scripts/run_core_tests.py
+          python - <<'PY'
+          from pathlib import Path
+          import os
+          r=os.environ['RECOVERY']; b=os.environ['BOOTSTRAP']
+          assert r != b
+          assert not Path('workplans/active/SSDP-6.4-AXIOMATIC-FORMAL-DEFINITION-AND-SEMANTIC-TRACEABILITY-CONSOLIDATED.md').exists()
+          assert Path('workplans/archive/SSDP-6.4-AXIOMATIC-FORMAL-DEFINITION-AND-SEMANTIC-TRACEABILITY-CONSOLIDATED.md').is_file()
+          v=Path('source/shared/references/protocol-versioning-and-compatibility.md').read_text()
+          assert f'6.4.0  -> {r}' in v
+          assert f'6.4.0 public-source bootstrap -> {b}' in v
+          assert '| `ssdp-protocol-6.4` | 6.4.0 | 2 | accepted current |' in v
+          rev5=Path('workplans/active/SSDP-7.0-DETERMINISTIC-CONTROL-PLANE-AND-MANDATORY-ORCHESTRATOR-MIGRATION-REVISION-5-PROTOCOL-6.4-INHERITANCE-RECONCILIATION.md').read_text()
+          assert 'd3_architecture_mutation: none' in rev5
+          assert 'PROTOCOL 7 D4 IMPLEMENTATION: NOT AUTHORIZED' in rev5
+          PY
+          git diff --check
+
+      - name: Commit Stage-F lifecycle closeout
+        shell: bash
+        run: |
+          set -euxo pipefail
+          git config user.name 'Protocol 6.4 lifecycle automation'
+          git config user.email 'protocol64-lifecycle@users.noreply.github.com'
+          git rm .github/workflows/temporary-protocol64-stage-f.yml
+          git add -A
+          git diff --cached --check
+          git commit -m 'Close Protocol 6.4 lifecycle'
+          git push origin HEAD:ssdp-6.4-axiomatic-definition-traceability
