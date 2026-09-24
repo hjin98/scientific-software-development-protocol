@@ -164,7 +164,8 @@ def validate_release_state(data: Any, *, repo_root: Path | None = None) -> list[
     root = _mapping(data, "release state", errors)
     if root.get("schema_version") != 1:
         errors.append("schema_version must equal 1")
-    if root.get("project") != "hjin98/scientific-software-development-protocol":
+    project = str(root.get("project") or "")
+    if project != "hjin98/scientific-software-development-protocol":
         errors.append("project identity is not the SSDP repository")
 
     accepted = _mapping(root.get("accepted_current"), "accepted_current", errors)
@@ -206,13 +207,18 @@ def validate_release_state(data: Any, *, repo_root: Path | None = None) -> list[
     review_state = str(review.get("state") or "")
     if review_state not in REVIEW_STATES:
         errors.append(f"candidate.review.state must be one of {sorted(REVIEW_STATES)}")
-    review_evidence = _evidence(\n        review.get("evidence_ref"),\n        "candidate.review.evidence_ref",\n        errors,\n        required=review_state in {"NO_PASS", "PASS"},\n    )
+    review_evidence = _evidence(
+        review.get("evidence_ref"),
+        "candidate.review.evidence_ref",
+        errors,
+        required=review_state in {"NO_PASS", "PASS"},
+    )
 
     ratification = _mapping(candidate.get("ratification"), "candidate.ratification", errors)
     ratification_state = str(ratification.get("state") or "")
     if ratification_state not in RATIFICATION_STATES:
         errors.append(f"candidate.ratification.state must be one of {sorted(RATIFICATION_STATES)}")
-    _evidence(
+    ratification_evidence = _evidence(
         ratification.get("evidence_ref"),
         "candidate.ratification.evidence_ref",
         errors,
@@ -251,6 +257,32 @@ def validate_release_state(data: Any, *, repo_root: Path | None = None) -> list[
             )
 
     if repo_root is not None:
+        if (
+            review_state in {"NO_PASS", "PASS"}
+            and semantic_ref != "UNFROZEN"
+            and EVIDENCE_RE.fullmatch(review_evidence)
+        ):
+            _check_review_evidence(
+                repo_root,
+                project,
+                review_evidence,
+                semantic_ref,
+                review_state,
+                "candidate.review.evidence_ref",
+                errors,
+            )
+        if (
+            ratification_state in {"RATIFIED", "REJECTED"}
+            and EVIDENCE_RE.fullmatch(ratification_evidence)
+        ):
+            _resolve_evidence_route(
+                repo_root,
+                project,
+                ratification_evidence,
+                "candidate.ratification.evidence_ref",
+                errors,
+            )
+
         _check_version_ref(repo_root, accepted_version, accepted_public, "accepted_current.public_source_ref", errors)
         _check_version_ref(repo_root, accepted_version, accepted_recovery, "accepted_current.recovery_ref", errors)
         if semantic_ref != "UNFROZEN":
