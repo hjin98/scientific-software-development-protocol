@@ -53,13 +53,13 @@ The packaged protocol contains this doctrine and the [Project Engineering Memory
 
 ## Schema 1
 
-Protocol 6.3 supports `memory_schema_version: 1`. Schema identity is distinct from SSDP protocol version and Orchestrator workflow-profile schema.
+Current SSDP supports `memory_schema_version: 1`; schema identity is independent of the protocol version that maintains a project memory. Schema identity is distinct from SSDP protocol version and Orchestrator workflow-profile schema.
 
 The root front matter carries at least:
 
 ```yaml
 memory_schema_version: 1
-maintained_under_protocol: 6.3.0
+maintained_under_protocol: <governing SSDP version>
 project_id: stable-project-identity
 repository: owner/name-or-project-defined-equivalent
 scope: repository-or-bounded-project-scope
@@ -184,7 +184,7 @@ PROVEN      -> every owner/workplan evidence obligation for that exact claim is 
                replication/comparator, and contradiction closure
 ```
 
-For schema-1 Protocol 6.3 `SUCCESS_PATTERN` records, `PROVEN` is the generalized transferable pattern claim: replication and independent replication are therefore derived obligations even if claimant-supplied `requires_*` flags are absent or false. Independent replication requires at least two admissible supporting provenance clusters. Claimant flags may add detail but cannot waive obligations implied by the claim/family class.
+For schema-1 `SUCCESS_PATTERN` records, `PROVEN` is the generalized transferable pattern claim: replication and independent replication are therefore derived obligations even if claimant-supplied `requires_*` flags are absent or false. Independent replication requires at least two admissible supporting provenance clusters. Claimant flags may add detail but cannot waive obligations implied by the claim/family class.
 
 Count, temperature, age, reviewer vote, or repeated assertion cannot auto-promote maturity.
 
@@ -213,6 +213,22 @@ Only rows whose current explicitly resolved applicable assessment is admissible 
 Material evidence routes prefer immutable repository/project identity + revision + path + stable section/test/finding. A bare branch/default path is not a durable warrant. For non-local evidence, include source repository/project identity; a commit SHA alone is not globally unambiguous. If a material binding becomes unavailable/uninterpretable, current use degrades to `REVIEW_REQUIRED`/`UNAVAILABLE` and unsupported positive guidance is withdrawn.
 
 Distinct application episodes may still share a material provenance cluster. That is compatible with counting distinct applications, but independence-sensitive maturity or comparative claims must not treat shared policy/implementation/oracle/dataset/harness dependence as independent corroboration.
+
+## Structured schema fields and executable guardrails
+
+The Markdown/schema owner, not the validator implementation, defines the meaning of mechanically enforced schema-1 fields.
+
+For a failure occurrence marked `recurrence_after_accepted_repair: true`, `recurrence_basis` is structured evidence, not free chronology prose. It identifies the earlier occurrence, exact repair identity, immutable repair-acceptance evidence, the later event identity, and the basis for treating the later event as independent. Git-native validation may use replaceable implementation heuristics such as stable patch identity to reject copied/rebased/cherry-picked aliases; that heuristic is not schema authority. Optional `alias_of` metadata may make a known alias explicit but is never required to establish independence. Non-Git chronology requires an equivalent durable verified chronology assessment.
+
+A `PROVEN` family carries claim-relative `maturity_basis`: the exact claim plus typed evidence obligations closed for that claim. Success patterns require replication and independent replication; additional claim classes require those obligations only when their claim-relative basis says so. No top-level compatibility flag may waive or silently add claim-relative independence requirements.
+
+Comparative guidance (`PREFERRED`, `DEFAULT`, `BEST`) uses either a structured `comparative_basis` over viable alternatives/objective/constraints/evidence/provenance, or a structured `comparative_authority` binding to an accepted current-owner decision. Absolute success evidence alone cannot establish comparative guidance.
+
+When declared memory temperature differs from the count/coverage-derived base temperature, `temperature_override` records final temperature, reason, and immutable evidence. Temperature remains salience only.
+
+Before `positive_guidance_eligible: true`, a bounded `counterevidence_search` records declared scope, search basis, outcome classes reviewed, blind spots, and evidence. This is a bounded search obligation, not a claim that all project history was exhaustively crawled.
+
+Current supported/guidance/authority-bound records expose `binding_health` when their warrant is materially depended upon. Assessment succession uses explicit `supersedes` lineage; list order or reviewer count never decides current interpretation.
 
 ## Derived statistics and temperature
 
@@ -281,7 +297,7 @@ Missing, malformed, unsupported, or partial PEM cannot prove no relevant lesson 
 
 Copying/forking a PEM does not manufacture local incidence. Preserve source-project identity and treat inherited entries as external/historical evidence until project governance declares lineage continuity/reconciliation. Cross-project aggregation requires an explicit multi-project scope and compatible evidence.
 
-Restoring an older PEM snapshot does not make it current merely because it parses. Reconcile its schema, scope, accepted basis, owners, evidence, and uncovered project interval. Version-bound Protocol 6.2 work leaves a 6.3 PEM inert rather than deleting/reinterpreting it. Re-adoption of 6.3 validates supported schema and reconciles from the last covered accepted identity.
+Restoring an older PEM snapshot does not make it current merely because it parses. Reconcile its schema, scope, accepted basis, owners, evidence, and uncovered project interval. Version-bound work governed by a protocol that predates PEM leaves a later PEM inert rather than deleting or retroactively reinterpreting it. Explicit adoption of a PEM-capable protocol validates the supported schema and reconciles from the last covered accepted identity.
 
 ## Maintenance and closeout
 

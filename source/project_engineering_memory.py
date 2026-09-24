@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Validate and render Protocol 6.3 Project Engineering Memory (PEM) schema 1.
+"""Validate and render Project Engineering Memory (PEM) schema 1.
 
 Markdown remains the canonical project memory. This utility is deliberately a
 small structural validator/derived-view renderer, not a database, authority
@@ -724,7 +724,7 @@ def _required_maturity_obligations(family: dict[str, Any], basis: dict[str, Any]
     else:
         if basis.get("requires_replication"):
             required.add("replication")
-        if basis.get("requires_independence") or family.get("provenance_independence_required"):
+        if basis.get("requires_independence"):
             required.add("independent_replication")
     if family.get("guidance_level") in COMPARATIVE_GUIDANCE:
         required.add("comparator")
