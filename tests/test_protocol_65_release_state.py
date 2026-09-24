@@ -140,7 +140,7 @@ p1: {candidate}
         )
         review = f"""---
 status: pass
-p3: {candidate}
+p5: {candidate}
 ---
 # Review
 """
@@ -231,6 +231,92 @@ semantic_ref: {"c" * 40}
             git_results=[(0, ""), (0, review)],
         )
         self.assertTrue(any("conflicting explicit candidate subject fields" in error for error in errors))
+
+    def test_review_evidence_rejects_duplicate_front_matter_keys(self) -> None:
+        candidate = "a" * 40
+        evidence_ref = (
+            "hjin98/scientific-software-development-protocol@"
+            + "b" * 40
+            + ":qualification/review.md"
+        )
+        records = (
+            f"""---
+status: pass
+candidate_ref: {"c" * 40}
+candidate_ref: {candidate}
+---
+# Review
+""",
+            f"""---
+status: pass
+semantic_ref: {"c" * 40}
+semantic_ref: {candidate}
+---
+# Review
+""",
+            f"""---
+status: no-pass
+status: pass
+candidate_ref: {candidate}
+---
+# Review
+""",
+        )
+        for review in records:
+            with self.subTest(review=review):
+                errors = self._review_evidence_errors(
+                    evidence_ref=evidence_ref,
+                    semantic_ref=candidate,
+                    review_state="PASS",
+                    git_results=[(0, ""), (0, review)],
+                )
+                self.assertTrue(any("duplicate key" in error for error in errors))
+
+    def test_review_evidence_rejects_present_invalid_explicit_subject_before_legacy_fallback(self) -> None:
+        candidate = "a" * 40
+        evidence_ref = (
+            "hjin98/scientific-software-development-protocol@"
+            + "b" * 40
+            + ":qualification/review.md"
+        )
+        for field, value in (("candidate_ref", ""), ("semantic_ref", "null"), ("candidate_ref", "not-a-sha")):
+            with self.subTest(field=field, value=value):
+                review = f"""---
+status: pass
+{field}: {value}
+p4: {candidate}
+---
+# Review
+"""
+                errors = self._review_evidence_errors(
+                    evidence_ref=evidence_ref,
+                    semantic_ref=candidate,
+                    review_state="PASS",
+                    git_results=[(0, ""), (0, review)],
+                )
+                self.assertTrue(any("explicit" in error and "40-hex" in error for error in errors))
+
+    def test_review_evidence_rejects_empty_higher_legacy_generation(self) -> None:
+        candidate = "a" * 40
+        evidence_ref = (
+            "hjin98/scientific-software-development-protocol@"
+            + "b" * 40
+            + ":qualification/review.md"
+        )
+        review = f"""---
+status: pass
+p4: {candidate}
+p5:
+---
+# Review
+"""
+        errors = self._review_evidence_errors(
+            evidence_ref=evidence_ref,
+            semantic_ref=candidate,
+            review_state="PASS",
+            git_results=[(0, ""), (0, review)],
+        )
+        self.assertTrue(any("legacy candidate subject field p5" in error for error in errors))
 
     def test_review_evidence_rejects_wrong_repository(self) -> None:
         errors: list[str] = []
@@ -438,6 +524,93 @@ p4: {p4}
             ),
             [],
         )
+
+    def test_ratification_evidence_accepts_future_legacy_generation(self) -> None:
+        candidate = "a" * 40
+        evidence_ref = (
+            "hjin98/scientific-software-development-protocol@"
+            + "b" * 40
+            + ":qualification/ratification.md"
+        )
+        ratification = f"""---
+status: ratified
+p5: {candidate}
+---
+# Stakeholder ratification
+"""
+        self.assertEqual(
+            self._ratification_evidence_errors(
+                evidence_ref=evidence_ref,
+                semantic_ref=candidate,
+                ratification_state="RATIFIED",
+                git_results=[(0, ""), (0, ratification)],
+            ),
+            [],
+        )
+
+    def test_ratification_evidence_rejects_duplicate_front_matter_keys(self) -> None:
+        candidate = "a" * 40
+        evidence_ref = (
+            "hjin98/scientific-software-development-protocol@"
+            + "b" * 40
+            + ":qualification/ratification.md"
+        )
+        records = (
+            f"""---
+status: ratified
+candidate_ref: {"c" * 40}
+candidate_ref: {candidate}
+---
+# Stakeholder ratification
+""",
+            f"""---
+status: ratified
+semantic_ref: {"c" * 40}
+semantic_ref: {candidate}
+---
+# Stakeholder ratification
+""",
+            f"""---
+status: rejected
+status: ratified
+candidate_ref: {candidate}
+---
+# Stakeholder ratification
+""",
+        )
+        for ratification in records:
+            with self.subTest(ratification=ratification):
+                errors = self._ratification_evidence_errors(
+                    evidence_ref=evidence_ref,
+                    semantic_ref=candidate,
+                    ratification_state="RATIFIED",
+                    git_results=[(0, ""), (0, ratification)],
+                )
+                self.assertTrue(any("duplicate key" in error for error in errors))
+
+    def test_ratification_evidence_rejects_present_invalid_explicit_subject_before_legacy_fallback(self) -> None:
+        candidate = "a" * 40
+        evidence_ref = (
+            "hjin98/scientific-software-development-protocol@"
+            + "b" * 40
+            + ":qualification/ratification.md"
+        )
+        for field, value in (("candidate_ref", ""), ("semantic_ref", "null"), ("semantic_ref", "not-a-sha")):
+            with self.subTest(field=field, value=value):
+                ratification = f"""---
+status: ratified
+{field}: {value}
+p4: {candidate}
+---
+# Stakeholder ratification
+"""
+                errors = self._ratification_evidence_errors(
+                    evidence_ref=evidence_ref,
+                    semantic_ref=candidate,
+                    ratification_state="RATIFIED",
+                    git_results=[(0, ""), (0, ratification)],
+                )
+                self.assertTrue(any("explicit" in error and "40-hex" in error for error in errors))
 
     def test_ratification_evidence_rejects_conflicting_explicit_subject_fields(self) -> None:
         candidate = "a" * 40

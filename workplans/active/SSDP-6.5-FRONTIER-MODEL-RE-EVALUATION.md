@@ -5,8 +5,8 @@ protocol_version: 6.4.0
 target_protocol_version: 6.5.0
 subject_baseline: P0 = Protocol 6.4 at 55c085261eb827e3047637d045a8e6917ea6b962 (recovery 74bc572ef516cae417437a2027eeff52a2e25c15)
 diagnostic_commit: 81375d8142a8130b80cd82f2304d3e16bc3fc390
-status: reopened-p4-no-pass-repair-required
-current_phase: PHASE VII P4 REVIEW NO-PASS / D4 REPAIR REQUIRED / NEW CANDIDATE REQUIRED
+status: p4-repair-implemented-replacement-freeze-pending
+current_phase: PHASE VI P4 REPAIR IMPLEMENTED / REPLACEMENT CANDIDATE FREEZE AND QUALIFICATION PENDING
 branch: ssdp-6.5-frontier-model-re-evaluation
 created_date: 2026-09-24
 adjudication: qualification/ssdp65/CROSS-MODEL-ADJUDICATION-2026-09-24.md
@@ -674,3 +674,20 @@ Rerun:
 P4 runs 36041360949, 36042040459, and 36042262606 remain valid historical observations for the exact properties/subjects they exercised, but they do not close B65-P4-1 and do not transfer whole-candidate acceptance to the replacement candidate.
 
 No stakeholder ratification, public-fallback publication, recovery establishment, accepted-current cutover, PR merge, or Protocol 7 D3/D4 mutation is authorized.
+
+
+## 23. B65-P4-1 repair implementation
+
+The P4 Review blocker is implemented at the existing D4 release-state evidence owner.
+
+- evidence front matter now uses a SafeLoader subclass that rejects duplicate mapping keys before semantic binding;
+- explicit candidate subject intent is determined by key presence, not value truthiness;
+- present explicit candidate_ref / semantic_ref values must be lowercase 40-hex commit identities and must agree;
+- invalid/empty/null explicit fields reject and cannot fall back to legacy pN;
+- the highest present legacy pN generation is authoritative only when no explicit subject key exists, and an invalid/empty highest generation rejects rather than falling back lower;
+- Review and terminal ratification continue to share the same binder;
+- arbitrary prose remains outside mechanical semantic judgment.
+
+Focused tests add duplicate candidate/status keys, empty/null/malformed explicit subjects, empty higher-generation legacy metadata, and future p5 coverage for Review and ratification.
+
+This commit also binds the already-completed P4 NO-PASS Review in the sole mutable release-state owner. It does not bind the replacement candidate to itself. The exact replacement candidate identity must be taken from this immutable commit and published only from a later descendant after exact-candidate qualification.

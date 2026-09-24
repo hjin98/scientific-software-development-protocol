@@ -22,6 +22,31 @@ REVIEW_STATES = {"NOT_RUN", "NO_PASS", "PASS"}
 RATIFICATION_STATES = {"NOT_REQUESTED", "PENDING", "RATIFIED", "REJECTED"}
 
 
+class _UniqueKeySafeLoader(yaml.SafeLoader):
+    """Safe YAML loader that rejects duplicate mapping keys."""
+
+
+def _construct_unique_mapping(loader, node, deep=False):
+    mapping = {}
+    for key_node, value_node in node.value:
+        key = loader.construct_object(key_node, deep=deep)
+        if key in mapping:
+            raise yaml.constructor.ConstructorError(
+                "while constructing a mapping",
+                node.start_mark,
+                f"found duplicate key {key!r}",
+                key_node.start_mark,
+            )
+        mapping[key] = loader.construct_object(value_node, deep=deep)
+    return mapping
+
+
+_UniqueKeySafeLoader.add_constructor(
+    yaml.resolver.BaseResolver.DEFAULT_MAPPING_TAG,
+    _construct_unique_mapping,
+)
+
+
 def _mapping(value: Any, where: str, errors: list[str]) -> dict[str, Any]:
     if not isinstance(value, dict):
         errors.append(f"{where} must be a mapping")
@@ -68,7 +93,7 @@ def _front_matter(text: str, where: str, errors: list[str]) -> dict[str, Any]:
         errors.append(f"{where} YAML front matter is unterminated")
         return {}
     try:
-        data = yaml.safe_load("\n".join(lines[1:end]))
+        data = yaml.load("\n".join(lines[1:end]), Loader=_UniqueKeySafeLoader)
     except yaml.YAMLError as exc:
         errors.append(f"{where} YAML front matter is invalid: {exc}")
         return {}
@@ -115,12 +140,19 @@ def _bound_candidate_ref(
     where: str,
     errors: list[str],
 ) -> str | None:
-    explicit = {
-        key: str(metadata[key])
-        for key in ("candidate_ref", "semantic_ref")
-        if metadata.get(key)
-    }
-    if explicit:
+    explicit_keys = [
+        key for key in ("candidate_ref", "semantic_ref") if key in metadata
+    ]
+    if explicit_keys:
+        explicit: dict[str, str] = {}
+        for key in explicit_keys:
+            value = str(metadata[key] or "")
+            if not SHA_RE.fullmatch(value):
+                errors.append(
+                    f"{where} explicit {key} must be a lowercase 40-hex candidate commit"
+                )
+                return None
+            explicit[key] = value
         values = set(explicit.values())
         if len(values) != 1:
             rendered = ", ".join(
@@ -135,8 +167,8 @@ def _bound_candidate_ref(
     legacy: list[tuple[int, str, str]] = []
     for key, value in metadata.items():
         match = re.fullmatch(r"p(?P<index>\d+)", str(key).lower())
-        if match and value:
-            legacy.append((int(match.group("index")), str(key), str(value)))
+        if match:
+            legacy.append((int(match.group("index")), str(key), str(value or "")))
 
     if not legacy:
         errors.append(
@@ -151,6 +183,12 @@ def _bound_candidate_ref(
         for index, key, value in legacy
         if index == highest
     ]
+    for key, value in highest_fields:
+        if not SHA_RE.fullmatch(value):
+            errors.append(
+                f"{where} legacy candidate subject field {key} must be a lowercase 40-hex candidate commit"
+            )
+            return None
     values = {value for _, value in highest_fields}
     if len(values) != 1:
         rendered = ", ".join(

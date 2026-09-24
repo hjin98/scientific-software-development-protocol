@@ -3,7 +3,7 @@ kind: implementation-workplan
 workplan_id: SSDP-6.5-D3-D4-IMPLEMENTATION-HANDOFF
 protocol_version: 6.4.0
 target_protocol_version: 6.5.0
-status: reopened-p4-review-no-pass
+status: p4-repair-implemented-freeze-pending
 parent_workplan: workplans/active/SSDP-6.5-FRONTIER-MODEL-RE-EVALUATION.md
 design_authority: qualification/ssdp65/PHASE-IV-V-DESIGN-CLOSURE.md
 baseline: 55c085261eb827e3047637d045a8e6917ea6b962
@@ -448,3 +448,18 @@ Repair only the existing D4 owner in source/release_state.py and its focused tes
 Add duplicate-candidate-key, duplicate-status, empty/null explicit-subject negatives to the full existing Review/ratification matrix. Preserve future candidate-generation behavior and do not add candidate-specific logic.
 
 P4 is immutable and failed Review. The repair must freeze a new candidate and rerun affected exact-candidate qualification plus fresh independent Review.
+
+
+## 16. B65-P4-1 implementation closure
+
+Implemented by direct alteration of the existing D4 parser/binder:
+
+- strict duplicate-key rejection in evidence YAML front matter;
+- explicit subject-field presence is authoritative even for invalid/empty/null values;
+- present explicit subjects require exact lowercase 40-hex commit identities and agreement;
+- legacy highest-generation pN fallback applies only when explicit subject fields are absent;
+- invalid/empty highest legacy generation rejects instead of falling back to a lower historical candidate.
+
+No registry, mirror, compatibility subsystem, candidate-specific table, prose parser, or D3 change was added.
+
+Focused tests cover the P4 holdouts for both Review and terminal ratification plus future p5 behavior. Exact replacement-candidate identity and CI are pending freeze from this implementation commit; a later descendant must bind that immutable identity with Review reset to NOT_RUN.
