@@ -80,7 +80,7 @@ Frozen historical source/profile/publication/recovery artifacts remain historica
 
 ## Workplan binding, PEM adoption, and evidence reuse
 
-Every workplan inheriting protocol behavior binds its declared `protocol_version`. Older active work may continue under that version or explicitly adopt a compatible successor after changed obligations are reconciled.
+Every workplan inheriting protocol behavior binds its declared `protocol_version`. Older active work may continue under its declared version or explicitly adopt a compatible successor after changed obligations are reconciled.
 
 PEM `memory_schema_version` is independent of SSDP protocol version and orchestration profile schema. A compatible protocol successor may retain a memory schema while clarifying its documented semantics. Unknown/newer/incompatible schemas fail safe for memory-dependent decisions; unsupported memory does not block unrelated protocol routes.
 
@@ -98,7 +98,7 @@ Invalidated bootstrap attempts remain historical evidence only and must not be s
 
 ## Orchestration profiles
 
-Profiles remain independently version-bound. Schema identity is separate from protocol version. Supported profile identities include `sdp-protocol-5.16` and `ssdp-protocol-6.0` through `ssdp-protocol-6.5`. The 6.x profile family may reuse the same machine stage/result schema while carrying distinct version-intrinsic prompt semantics.
+Profiles remain independently version-bound. Schema identity is separate from protocol version. Supported profile identities include `sdp-protocol-5.16`, `ssdp-protocol-6.0`, `ssdp-protocol-6.1`, `ssdp-protocol-6.2`, `ssdp-protocol-6.3`, `ssdp-protocol-6.4`, and `ssdp-protocol-6.5`. The 6.x profile family may reuse the same machine stage/result schema while carrying distinct version-intrinsic prompt semantics.
 
 Core selects by declared protocol/profile identity, not a global semantic "latest". When a new profile becomes current, every older supported profile remains frozen and independently testable. Generic packages/profiles may include PEM doctrine/templates but never a live project's `PROJECT-ENGINEERING-MEMORY.md` or mutable project release-state file.
 

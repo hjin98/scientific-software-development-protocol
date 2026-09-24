@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 import unittest
+
+import yaml
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -38,7 +40,8 @@ class Protocol6LongHorizonQualityTests(unittest.TestCase):
         versioning = read("source/shared/references/protocol-versioning-and-compatibility.md")
         self.assertIn("protocol 6.2 is a backward-compatible representation/progressive-disclosure strengthening", versioning)
         self.assertIn("5.16 long-horizon health/verification/stabilization/maintenance audit/workflow prompts/public fallback", versioning)
-        self.assertIn("5.16.0 -> e151daaf5c8eebb351a85cfed86170fda80fb5e3", versioning)
+        state = yaml.safe_load((ROOT / "PROTOCOL-RELEASE-STATE.yaml").read_text(encoding="utf-8"))
+        self.assertEqual(state["historical"]["5.16.0"]["recovery_ref"], "e151daaf5c8eebb351a85cfed86170fda80fb5e3")
         self.assertIn("d1 scientific formulation -> d2 numerical method -> d3 architecture -> d4 specification/implementation", self.workflow)
         self.assertIn("supporting specialists", self.workflow)
         self.assertIn("non-authoritative capabilities, not approval stages", self.workflow)
