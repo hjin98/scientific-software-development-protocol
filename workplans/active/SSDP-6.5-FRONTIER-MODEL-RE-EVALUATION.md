@@ -5,8 +5,8 @@ protocol_version: 6.4.0
 target_protocol_version: 6.5.0
 subject_baseline: P0 = Protocol 6.4 at 55c085261eb827e3047637d045a8e6917ea6b962 (recovery 74bc572ef516cae417437a2027eeff52a2e25c15)
 diagnostic_commit: 81375d8142a8130b80cd82f2304d3e16bc3fc390
-status: ready-p8-independent-review
-current_phase: PHASE VII P7 FROZEN / FRESH INDEPENDENT REVIEW REQUIRED
+status: p8-no-pass-repair-required
+current_phase: PHASE VII P8 NO-PASS / D4 TRANSITION-HISTORY RESOLUTION REPAIR REQUIRED
 branch: ssdp-6.5-frontier-model-re-evaluation
 created_date: 2026-09-24
 adjudication: qualification/ssdp65/CROSS-MODEL-ADJUDICATION-2026-09-24.md
@@ -14,7 +14,7 @@ active_serious_challenge: none against accepted D1-D4 doctrine
 second_frontier_diagnostic: waived-for-this-cycle-by-stakeholder-resource-constraint
 design_closure: qualification/ssdp65/PHASE-IV-V-DESIGN-CLOSURE.md
 implementation_handoff: workplans/active/SSDP-6.5-D3-D4-IMPLEMENTATION-HANDOFF.md
-independent_review: qualification/ssdp65/INDEPENDENT-REVIEW-2026-09-24-PROTOCOL-6.5-P6-NO-PASS.md
+independent_review: qualification/ssdp65/INDEPENDENT-REVIEW-2026-09-24-PROTOCOL-6.5-P8-NO-PASS.md
 ---
 
 # Protocol 6.5 Frontier-Model Re-evaluation and Successor Workplan
@@ -23,11 +23,12 @@ independent_review: qualification/ssdp65/INDEPENDENT-REVIEW-2026-09-24-PROTOCOL-
 
 ```text
 P0 CONTROL:                         FROZEN — 55c085261eb827e3047637d045a8e6917ea6b962
-P1-P6:                              FROZEN / FAILED INDEPENDENT REVIEW
-P6 REVIEW:                          NO-PASS — qualification/ssdp65/INDEPENDENT-REVIEW-2026-09-24-PROTOCOL-6.5-P6-NO-PASS.md
-P7 CANDIDATE:                       FROZEN — 133c747a1f9ab4372c9e1af7a7e9666316dc892b
-P7 EXACT PR QUALIFICATION:          PASS — run 36058860629
-PHASE VII QUALIFICATION/REVIEW:     READY FOR FRESH P7 REVIEW
+P1-P8:                              FROZEN / FAILED INDEPENDENT REVIEW
+P8 CANDIDATE:                       FROZEN — ed782ccad73b43c9052ecc926177c36846b9328d
+P8 EXACT PR QUALIFICATION:          PASS — run 36067942018
+P8 INDEPENDENT REVIEW:              NO-PASS — qualification/ssdp65/INDEPENDENT-REVIEW-2026-09-24-PROTOCOL-6.5-P8-NO-PASS.md
+SURVIVING BLOCKER:                  B65-P8-1 transition-history resolution
+PHASE VII:                          D4 REPAIR REQUIRED / NEW CANDIDATE AFTER REPAIR
 PUBLIC 6.5 FALLBACK:                UNAVAILABLE
 6.5 RECOVERY:                       UNAVAILABLE
 6.5 RATIFICATION:                   NOT REQUESTED
@@ -924,3 +925,26 @@ Binding descendant `65cd5da2d6793733e87d0b97f9ccce23d22b9154` passed normal work
 The durable independent-Review handoff now targets P8. P1-P7 remain immutable failed candidates.
 
 The next authorized step is a fresh independent assembled-candidate Review of exact P8.
+
+
+## 36. P8 independent Review NO-PASS — transition-history resolution
+
+Fresh independent assembled-candidate Review of immutable P8 ed782ccad73b43c9052ecc926177c36846b9328d is **NO-PASS**.
+
+Durable Review:
+
+qualification/ssdp65/INDEPENDENT-REVIEW-2026-09-24-PROTOCOL-6.5-P8-NO-PASS.md
+
+One semantic blocker survives:
+
+**B65-P8-1 — production transition-history resolution can select a sibling merge-parent state instead of the actual governed predecessor.**
+
+The P8 transition predicate correctly rejects historical deletion/rewrite, accepted-current discontinuity, incomplete cutover, and stale recovery when it is given the correct previous/current pair. The blocker is the production pair resolver: default path-history ordering is not a governed ancestry relation and can choose the wrong prior state under a merge DAG.
+
+Repair only source/release_state.py at the existing D4 transaction owner. Do not reopen D3 and do not add a second state file, registry, transition mirror, compatibility subsystem, candidate table, or semantic parser.
+
+The repair must qualify real history resolution for linear commits, working-tree changes, evidence-only descendants, consecutive transitions, synthetic PR merges, divergent merge parents, and date-reordered sibling histories. It must fail closed rather than validate against an arbitrary sibling state.
+
+P8 remains immutable failed Review evidence. Any semantic repair requires a new candidate identity, exact-candidate qualification, binding, and another fresh independent assembled-candidate Review.
+
+No stakeholder ratification, public-fallback publication, recovery establishment, accepted-current cutover, PR merge, or Protocol 7 D3/D4 mutation is authorized.

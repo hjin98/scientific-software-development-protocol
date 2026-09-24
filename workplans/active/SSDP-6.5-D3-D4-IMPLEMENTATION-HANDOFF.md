@@ -3,7 +3,7 @@ kind: implementation-workplan
 workplan_id: SSDP-6.5-D3-D4-IMPLEMENTATION-HANDOFF
 protocol_version: 6.4.0
 target_protocol_version: 6.5.0
-status: ready-p8-independent-review
+status: reopened-p8-no-pass-d4-repair
 parent_workplan: workplans/active/SSDP-6.5-FRONTIER-MODEL-RE-EVALUATION.md
 design_authority: qualification/ssdp65/PHASE-IV-V-DESIGN-CLOSURE.md
 baseline: 55c085261eb827e3047637d045a8e6917ea6b962
@@ -674,3 +674,48 @@ Lifecycle descendant `65cd5da2d6793733e87d0b97f9ccce23d22b9154` binds exact P8 `
 Normal workflow run `36068315599` passed the complete build and Orchestrator Core jobs, including the new release-state transition validator.
 
 B65-P7-1 is mechanically repaired and qualified at the existing D4 owner. The next stage is a genuinely fresh independent assembled-candidate Review of exact P8. Accepted P65 D3 remains closed.
+
+
+## 29. B65-P8-1 D4 repair contract — transition-history resolution
+
+P8 independent Review found one surviving D4 blocker. Accepted P65 D3 remains closed.
+
+**Owner:** source/release_state.py::_previous_governed_release_state and its direct integration with root release-state validation.
+
+**Failure:** the current resolver uses ordinary path history and can select a sibling merge-parent state as the previous governed release state. A fresh merge-DAG holdout demonstrates a false pass: sibling S1 -> merge M2 passes while actual first-parent F1 -> M2 rejects deletion of an immutable historical mapping.
+
+Repair the existing owner only.
+
+Required behavior:
+
+1. derive the prior governed state from Git ancestry/parent topology, not default path-log ordering;
+2. when the working tree differs from HEAD, compare against committed HEAD state;
+3. on a linear committed transition, compare against the actual parent-line governed predecessor;
+4. on merge/synthetic-PR checkouts, inspect materially relevant parent release states;
+5. if divergent parent states make the governed predecessor ambiguous, validate against every materially applicable parent state or fail closed under the existing integration-line authority;
+6. retain correct evidence-only-descendant and consecutive-transition behavior;
+7. preserve generic patch/minor/major and multi-digit semver behavior;
+8. do not add a second registry, state mirror, transition table, candidate-specific branch, or compatibility subsystem.
+
+Mandatory fresh negatives/holdouts:
+
+- date-reordered merge parents where path log lists the sibling before the governed parent;
+- divergent parent state where one parent would pass and the other rejects historical deletion/rewrite;
+- synthetic PR merge topology;
+- sibling/non-fast-forward recovery;
+- recovery with correct protocol version but wrong ancestry.
+
+Mandatory positives:
+
+- working tree change against HEAD;
+- linear root-state transition;
+- evidence-only descendants;
+- transition followed by unrelated commits;
+- consecutive legal transitions;
+- equivalent merge-parent state;
+- legal future patch/minor/major and 6.10 controls;
+- complete recovery-target lineage.
+
+After repair, rerun the complete release-state suite, full repository build/Core, preservation and parity checks, freeze a new immutable candidate, bind it from a later descendant, and perform a fresh independent assembled-candidate Review.
+
+P8 is immutable and remains NO-PASS.

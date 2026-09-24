@@ -1,7 +1,7 @@
 ---
 kind: independent-review-handoff
 protocol_under_review: 6.5.0
-status: ready-p8
+status: p8-no-pass-repair-required
 accepted_control_p0: 55c085261eb827e3047637d045a8e6917ea6b962
 failed_candidate_p1: b565e28aeacea002cefe27e6b9594fe99d653c0a
 failed_candidate_p2: e8edb353e172aef933ed5e58eeabe897d0cc98d1
@@ -20,6 +20,8 @@ p8_binding_qualification: qualification/ssdp65/P8-BINDING-QUALIFICATION.md
 p7_review: qualification/ssdp65/INDEPENDENT-REVIEW-2026-09-24-PROTOCOL-6.5-P7-NO-PASS.md
 p8_repair_qualification: qualification/ssdp65/P8-REPAIR-QUALIFICATION.md
 authoring_context_verdict: none
+p8_review: qualification/ssdp65/INDEPENDENT-REVIEW-2026-09-24-PROTOCOL-6.5-P8-NO-PASS.md
+p8_review_status: NO_PASS
 stakeholder_ratification: NOT_REQUESTED
 ---
 
@@ -151,3 +153,20 @@ It does not ratify Protocol 6.5, publish public fallback, establish recovery, ch
 If blockers remain, preserve P8 immutably, reopen the existing workplan at the earliest owning layer, and require a new candidate identity for semantic repair.
 
 This repair/authoring context is not eligible to self-issue the independent P8 Review verdict.
+
+
+## P8 independent Review result
+
+Fresh independent Review of exact P8 ed782ccad73b43c9052ecc926177c36846b9328d is **NO-PASS**.
+
+Review record:
+
+qualification/ssdp65/INDEPENDENT-REVIEW-2026-09-24-PROTOCOL-6.5-P8-NO-PASS.md
+
+Surviving blocker:
+
+**B65-P8-1 — transition-history resolution can select a sibling merge-parent release-state snapshot rather than the actual prior governed state.**
+
+The existing D4 transition predicate is retained. Repair only the Git-history predecessor resolver in the sole release-state owner, with explicit merge/synthetic-PR topology holdouts. No D3 redesign, second state authority, stakeholder ratification, publication, recovery, accepted-current cutover, PR merge, or Protocol 7 D3/D4 mutation is authorized.
+
+Any semantic repair creates a new candidate identity.
