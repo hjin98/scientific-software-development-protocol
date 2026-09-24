@@ -3,12 +3,18 @@ from __future__ import annotations
 import os
 import posixpath
 import re
+import sys
 import unittest
 import urllib.error
 import urllib.request
 
 import yaml
 from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[1]
+SOURCE = ROOT / "source"
+sys.path.insert(0, str(SOURCE))
+import release_state  # noqa: E402
 
 
 BOOTSTRAP = "86c13cab6bdd1991dffa94e277db8eacf87e2e11"
@@ -24,7 +30,7 @@ LOCAL_MD_RE = re.compile(r"\[[^\]]+\]\(([^)]+\.md(?:#[^)]*)?)\)")
 class Protocol63BootstrapTests(unittest.TestCase):
     def test_current_public_and_recovery_mappings_are_exact_and_distinct(self) -> None:
         root = Path(__file__).resolve().parents[1]
-        state = yaml.safe_load((root / "PROTOCOL-RELEASE-STATE.yaml").read_text(encoding="utf-8"))
+        state = release_state.load(root / "PROTOCOL-RELEASE-STATE.yaml")
         p63 = state["historical"]["6.3.0"]
         self.assertEqual(p63["public_source_ref"], BOOTSTRAP)
         self.assertEqual(p63["recovery_ref"], RECOVERY)

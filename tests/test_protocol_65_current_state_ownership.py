@@ -1,12 +1,16 @@
 from __future__ import annotations
 
 import re
+import sys
 import unittest
 from pathlib import Path
 
 import yaml
 
 ROOT = Path(__file__).resolve().parents[1]
+SOURCE = ROOT / "source"
+sys.path.insert(0, str(SOURCE))
+import release_state  # noqa: E402
 P0_KERNEL_WORDS = 2642
 HOT_CURRENT_SURFACES = (
     "README.md",
@@ -23,7 +27,7 @@ HOT_CURRENT_SURFACES = (
 class Protocol65CurrentStateOwnershipTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
-        cls.state = yaml.safe_load((ROOT / "PROTOCOL-RELEASE-STATE.yaml").read_text(encoding="utf-8"))
+        cls.state = release_state.load(ROOT / "PROTOCOL-RELEASE-STATE.yaml")
 
     def test_mutable_release_refs_have_one_hot_owner(self) -> None:
         values = (

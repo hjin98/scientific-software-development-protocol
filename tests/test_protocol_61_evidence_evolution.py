@@ -2,12 +2,16 @@ from __future__ import annotations
 
 import copy
 import re
+import sys
 import unittest
 
 import yaml
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
+SOURCE = ROOT / "source"
+sys.path.insert(0, str(SOURCE))
+import release_state  # noqa: E402
 
 
 class Protocol61EvidenceEvolutionTests(unittest.TestCase):
@@ -67,7 +71,7 @@ class Protocol61EvidenceEvolutionTests(unittest.TestCase):
     def test_current_prompt_uses_release_state_owner_for_public_source_resolution(self) -> None:
         prompts = self.read("source/shared/references/development-workflow-prompts.md")
         lower = prompts.lower()
-        state = yaml.safe_load(self.read("PROTOCOL-RELEASE-STATE.yaml"))
+        state = release_state.load(ROOT / "PROTOCOL-RELEASE-STATE.yaml")
         self.assertIn("designated project release-state owner", lower)
         self.assertIn("repository-default bytes are never a substitute", lower)
         self.assertNotIn("CURRENT_PROTOCOL =", prompts)
@@ -86,7 +90,7 @@ class Protocol61EvidenceEvolutionTests(unittest.TestCase):
             )
 
     def test_accepted_61_recovery_and_bootstrap_remain_immutable(self) -> None:
-        state = yaml.safe_load(self.read("PROTOCOL-RELEASE-STATE.yaml"))
+        state = release_state.load(ROOT / "PROTOCOL-RELEASE-STATE.yaml")
         p61 = state["historical"]["6.1.0"]
         self.assertEqual(p61["public_source_ref"], "47e9155632c44493644b0b02fa1fa625703cf480")
         self.assertEqual(p61["recovery_ref"], "802e75af261efb4f70d71284d860613a2197b639")

@@ -1,11 +1,15 @@
 from __future__ import annotations
 
+import sys
 import unittest
 
 import yaml
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
+SOURCE = ROOT / "source"
+sys.path.insert(0, str(SOURCE))
+import release_state  # noqa: E402
 
 
 def read(path: str) -> str:
@@ -28,7 +32,7 @@ class Protocol6ContractTests(unittest.TestCase):
         version = tuple(int(part) for part in read("source/PROTOCOL_VERSION").strip().split("."))
         self.assertEqual(version[0], 6)
         self.assertGreaterEqual(version, (6, 2, 0))
-        state = yaml.safe_load(read("PROTOCOL-RELEASE-STATE.yaml"))
+        state = release_state.load(ROOT / "PROTOCOL-RELEASE-STATE.yaml")
         self.assertIn("6.2.0", state["historical"])
         for skill in ("scientific-formulation", "numerical-algorithm-design", "software-design", "software-implementation"):
             self.assertTrue((ROOT / f"source/roles/{skill}/SKILL.md").is_file(), skill)
@@ -111,7 +115,7 @@ class Protocol6ContractTests(unittest.TestCase):
         self.assertIn("risk override", self.workflow)
 
     def test_historical_versions_are_immutable_and_not_silently_upgraded(self) -> None:
-        state = yaml.safe_load(read("PROTOCOL-RELEASE-STATE.yaml"))
+        state = release_state.load(ROOT / "PROTOCOL-RELEASE-STATE.yaml")
         self.assertEqual(state["historical"]["5.16.0"]["recovery_ref"], "e151daaf5c8eebb351a85cfed86170fda80fb5e3")
         self.assertEqual(state["historical"]["6.0.0"]["recovery_ref"], "21d5188f5bd9a0270d7a2ebf93d41a6b7842ccd2")
         self.assertEqual(state["historical"]["6.1.0"]["recovery_ref"], "802e75af261efb4f70d71284d860613a2197b639")

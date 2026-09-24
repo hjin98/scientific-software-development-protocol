@@ -791,8 +791,61 @@ semantic_ref: {"c" * 40}
         self.assertTrue(any("must be newer than accepted_current.version" in error for error in errors))
         self.assertFalse(any("duplicates a historical version" in error for error in errors))
 
+    def test_historical_versions_must_precede_accepted_current(self) -> None:
+        data = copy.deepcopy(self.data)
+        data["historical"]["6.5.0"] = {
+            "public_source_ref": "dd06da8136416e67644586c44880b466f982b8ff",
+            "recovery_ref": "758490c11f90b587c7dfaadddab958751f2881c9",
+        }
+        data["candidate"] = {
+            "version": "6.6.0",
+            "semantic_ref": "UNFROZEN",
+            "review": {"state": "NOT_RUN", "evidence_ref": "NONE"},
+            "ratification": {"state": "NOT_REQUESTED", "evidence_ref": "NONE"},
+            "public_source_ref": "UNAVAILABLE",
+            "recovery_ref": "UNAVAILABLE",
+        }
+        errors = release_state.validate_release_state(data, repo_root=ROOT)
+        self.assertTrue(
+            any(
+                "historical[6.5.0] must be older than accepted_current.version 6.4.0" in error
+                for error in errors
+            )
+        )
+        self.assertFalse(
+            any("historical[6.5.0].public_source_ref maps" in error for error in errors)
+        )
+        self.assertFalse(
+            any("historical[6.5.0].recovery_ref maps" in error for error in errors)
+        )
+
+    def test_version_identity_requires_canonical_ascii_semver(self) -> None:
+        candidate_forms = ("06.5.0", "6.05.0", "6.5.00", "٦.٥.٠")
+        for version in candidate_forms:
+            with self.subTest(surface="candidate", version=version):
+                data = copy.deepcopy(self.data)
+                data["candidate"]["version"] = version
+                errors = release_state.validate_release_state(data)
+                self.assertTrue(any("candidate.version must be semantic x.y.z" in error for error in errors))
+
+        for version in ("06.3.0", "6.03.0", "٦.٣.٠"):
+            with self.subTest(surface="historical", version=version):
+                data = copy.deepcopy(self.data)
+                data["historical"][version] = data["historical"].pop("6.3.0")
+                errors = release_state.validate_release_state(data)
+                self.assertTrue(any("historical version key" in error for error in errors))
+
+        for version in ("06.4.0", "6.04.0", "٦.٤.٠"):
+            with self.subTest(surface="accepted_current", version=version):
+                data = copy.deepcopy(self.data)
+                data["accepted_current"]["version"] = version
+                errors = release_state.validate_release_state(data)
+                self.assertTrue(
+                    any("accepted_current.version must be semantic x.y.z" in error for error in errors)
+                )
+
     def test_active_candidate_accepts_patch_minor_and_major_successors(self) -> None:
-        for version in ("6.4.1", "6.5.0", "7.0.0"):
+        for version in ("6.4.1", "6.5.0", "6.10.0", "7.0.0"):
             with self.subTest(version=version):
                 data = copy.deepcopy(self.data)
                 data["candidate"] = {
@@ -839,15 +892,18 @@ semantic_ref: {"c" * 40}
         }
         self.assertEqual(release_state.validate_release_state(data), [])
 
-        data["candidate"] = {
-            "version": "6.6.0",
-            "semantic_ref": "UNFROZEN",
-            "review": {"state": "NOT_RUN", "evidence_ref": "NONE"},
-            "ratification": {"state": "NOT_REQUESTED", "evidence_ref": "NONE"},
-            "public_source_ref": "UNAVAILABLE",
-            "recovery_ref": "UNAVAILABLE",
-        }
-        self.assertEqual(release_state.validate_release_state(data), [])
+        for version in ("6.5.1", "6.6.0", "7.0.0"):
+            successor = copy.deepcopy(data)
+            successor["candidate"] = {
+                "version": version,
+                "semantic_ref": "UNFROZEN",
+                "review": {"state": "NOT_RUN", "evidence_ref": "NONE"},
+                "ratification": {"state": "NOT_REQUESTED", "evidence_ref": "NONE"},
+                "public_source_ref": "UNAVAILABLE",
+                "recovery_ref": "UNAVAILABLE",
+            }
+            with self.subTest(next_successor=version):
+                self.assertEqual(release_state.validate_release_state(successor), [])
 
     def test_historical_state_cannot_duplicate_accepted_current_version(self) -> None:
         data = copy.deepcopy(self.data)

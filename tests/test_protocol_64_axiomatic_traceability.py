@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import sys
 import unittest
 from pathlib import Path
 
@@ -7,13 +8,15 @@ import yaml
 
 ROOT = Path(__file__).resolve().parents[1]
 SOURCE = ROOT / "source"
+sys.path.insert(0, str(SOURCE))
+import release_state  # noqa: E402
 
 
 class Protocol64PreservationAndStructureTests(unittest.TestCase):
     """Preserve real Protocol 6.4 structural contracts without proxying prose semantics."""
 
     def test_historical_64_release_identity_is_owned_by_release_state(self) -> None:
-        state = yaml.safe_load((ROOT / "PROTOCOL-RELEASE-STATE.yaml").read_text(encoding="utf-8"))
+        state = release_state.load(ROOT / "PROTOCOL-RELEASE-STATE.yaml")
         if state["accepted_current"]["version"] == "6.4.0":
             p64 = state["accepted_current"]
         else:

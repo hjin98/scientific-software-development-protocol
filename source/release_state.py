@@ -14,7 +14,7 @@ import yaml
 ROOT = Path(__file__).resolve().parent.parent
 DEFAULT_PATH = ROOT / "PROTOCOL-RELEASE-STATE.yaml"
 SHA_RE = re.compile(r"^[0-9a-f]{40}$")
-SEMVER_RE = re.compile(r"^\d+\.\d+\.\d+$")
+SEMVER_RE = re.compile(r"^(?:0|[1-9][0-9]*)\.(?:0|[1-9][0-9]*)\.(?:0|[1-9][0-9]*)$")
 EVIDENCE_RE = re.compile(
     r"^(?P<source>[^@\s]+)@(?P<sha>[0-9a-f]{40}):(?P<path>[^#\s]+)(?:#(?P<locator>.+))?$"
 )
@@ -309,8 +309,15 @@ def validate_release_state(data: Any, *, repo_root: Path | None = None) -> list[
         if not isinstance(version, str) or not SEMVER_RE.fullmatch(version):
             errors.append(f"historical version key {version!r} is not semantic x.y.z")
             continue
-        if version == accepted_version:
-            errors.append(f"historical[{version}] duplicates accepted_current.version")
+        if accepted_version_valid:
+            historical_order = _semver_tuple(version)
+            accepted_order = _semver_tuple(accepted_version)
+            if historical_order == accepted_order:
+                errors.append(f"historical[{version}] duplicates accepted_current.version")
+            elif historical_order > accepted_order:
+                errors.append(
+                    f"historical[{version}] must be older than accepted_current.version {accepted_version}"
+                )
         item = _mapping(record, f"historical[{version}]", errors)
         public = _sha_or(item.get("public_source_ref"), {"NONE"}, f"historical[{version}].public_source_ref", errors)
         recovery = _sha_or(item.get("recovery_ref"), {"NONE"}, f"historical[{version}].recovery_ref", errors)
@@ -327,7 +334,12 @@ def validate_release_state(data: Any, *, repo_root: Path | None = None) -> list[
     candidate_version_valid = SEMVER_RE.fullmatch(candidate_version) is not None
     if not candidate_version_valid:
         errors.append("candidate.version must be semantic x.y.z")
-    if candidate_version_valid and candidate_version in historical:
+    historical_versions = {
+        _semver_tuple(version)
+        for version in historical
+        if isinstance(version, str) and SEMVER_RE.fullmatch(version)
+    }
+    if candidate_version_valid and _semver_tuple(candidate_version) in historical_versions:
         errors.append(f"candidate.version {candidate_version} duplicates a historical version")
     if (
         candidate_version_valid

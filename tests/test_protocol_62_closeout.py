@@ -1,17 +1,21 @@
 from __future__ import annotations
 
+import sys
 import unittest
 from pathlib import Path
 
 import yaml
 
 ROOT = Path(__file__).resolve().parents[1]
+SOURCE = ROOT / "source"
+sys.path.insert(0, str(SOURCE))
+import release_state  # noqa: E402
 
 
 class Protocol62CloseoutTests(unittest.TestCase):
     def test_historical_profile_and_release_state_are_preserved(self):
         portability = (ROOT / "PORTABILITY.md").read_text()
-        state = yaml.safe_load((ROOT / "PROTOCOL-RELEASE-STATE.yaml").read_text())
+        state = release_state.load(ROOT / "PROTOCOL-RELEASE-STATE.yaml")
         self.assertIn("| `ssdp-protocol-6.2` | 6.2.0 | 2 | frozen historical |", portability)
         self.assertEqual(state["historical"]["6.2.0"]["public_source_ref"], "5a062ebc472755607b9dc66d33a5ebbc4b7429aa")
         self.assertEqual(state["historical"]["6.2.0"]["recovery_ref"], "b59adc77efe6951912cfd705cc43830c58ca27d0")

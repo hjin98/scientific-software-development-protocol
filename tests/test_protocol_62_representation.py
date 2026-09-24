@@ -3,6 +3,7 @@ from __future__ import annotations
 import os
 import posixpath
 import re
+import sys
 import unittest
 
 import yaml
@@ -13,6 +14,8 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 SOURCE = ROOT / "source"
+sys.path.insert(0, str(SOURCE))
+import release_state  # noqa: E402
 REFERENCES = SOURCE / "shared" / "references"
 TEMPLATES = SOURCE / "shared" / "templates"
 ROLES = SOURCE / "roles"
@@ -24,7 +27,7 @@ PUBLIC_ROOT = "https://raw.githubusercontent.com/hjin98/scientific-software-deve
 
 
 def current_public_bootstrap() -> str | None:
-    state = yaml.safe_load((ROOT / "PROTOCOL-RELEASE-STATE.yaml").read_text(encoding="utf-8"))
+    state = release_state.load(ROOT / "PROTOCOL-RELEASE-STATE.yaml")
     value = state["historical"]["6.2.0"]["public_source_ref"]
     return None if value == "NONE" else value
 
@@ -110,7 +113,7 @@ class Protocol62RepresentationTests(unittest.TestCase):
             self.assertIn("activation", text)
 
     def test_protocol_62_public_fallback_state_is_coherent(self):
-        state = yaml.safe_load((ROOT / "PROTOCOL-RELEASE-STATE.yaml").read_text(encoding="utf-8"))
+        state = release_state.load(ROOT / "PROTOCOL-RELEASE-STATE.yaml")
         p62 = state["historical"]["6.2.0"]
         self.assertEqual(p62["public_source_ref"], "5a062ebc472755607b9dc66d33a5ebbc4b7429aa")
         self.assertEqual(p62["recovery_ref"], "b59adc77efe6951912cfd705cc43830c58ca27d0")
@@ -228,7 +231,7 @@ class Protocol62RepresentationTests(unittest.TestCase):
         recovery = "b59adc77efe6951912cfd705cc43830c58ca27d0"
         bootstrap = "5a062ebc472755607b9dc66d33a5ebbc4b7429aa"
         invalidated = "1181c2031710c5d343194d87d08543290fded0ab"
-        state = yaml.safe_load((ROOT / "PROTOCOL-RELEASE-STATE.yaml").read_text(encoding="utf-8"))
+        state = release_state.load(ROOT / "PROTOCOL-RELEASE-STATE.yaml")
         p62 = state["historical"]["6.2.0"]
         self.assertEqual(p62["recovery_ref"], recovery)
         self.assertEqual(p62["public_source_ref"], bootstrap)

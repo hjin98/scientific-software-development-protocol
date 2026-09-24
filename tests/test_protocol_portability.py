@@ -11,6 +11,7 @@ ROOT = Path(__file__).resolve().parents[1]
 SOURCE = ROOT / "source"
 sys.path.insert(0, str(SOURCE))
 import build_skills  # noqa: E402
+import release_state  # noqa: E402
 
 LINK_RE = re.compile(r"\[[^\]]+\]\(((?:references|templates)/[A-Za-z0-9_.-]+\.md)\)")
 TOOL_LEAVES = {"tool-serena.md", "tool-semgrep.md", "tool-hypothesis.md", "tool-codeql.md"}
@@ -90,7 +91,7 @@ class ProtocolPortabilityTests(unittest.TestCase):
         self.assertNotIn("templates/abstraction_realization_change_plan_template.md", d1 | d2)
 
     def test_historical_resolution_is_explicit(self) -> None:
-        state = yaml.safe_load((ROOT / "PROTOCOL-RELEASE-STATE.yaml").read_text(encoding="utf-8"))
+        state = release_state.load(ROOT / "PROTOCOL-RELEASE-STATE.yaml")
         self.assertEqual(state["historical"]["5.16.0"]["recovery_ref"], "e151daaf5c8eebb351a85cfed86170fda80fb5e3")
         self.assertEqual(state["historical"]["6.0.0"]["recovery_ref"], "21d5188f5bd9a0270d7a2ebf93d41a6b7842ccd2")
         self.assertEqual(state["historical"]["6.1.0"]["recovery_ref"], "802e75af261efb4f70d71284d860613a2197b639")

@@ -5,6 +5,7 @@ import json
 import os
 import posixpath
 import re
+import sys
 import unittest
 import urllib.error
 import urllib.request
@@ -16,6 +17,9 @@ from pathlib import Path
 BOOTSTRAP = "e09a9d1480211eea2d16d722182bb5c6de1bee12"
 RECOVERY = "74bc572ef516cae417437a2027eeff52a2e25c15"
 ROOT = Path(__file__).resolve().parents[1]
+SOURCE = ROOT / "source"
+sys.path.insert(0, str(SOURCE))
+import release_state  # noqa: E402
 PUBLIC_ROOT = "https://raw.githubusercontent.com/hjin98/scientific-software-development-protocol"
 LOCAL_MD_RE = re.compile(r"\[[^\]]+\]\(([^)]+\.md(?:#[^)]*)?)\)")
 PROFILE_ROOT = "orchestrator/src/" + "sdp_" + "orchestrator/core/resources/protocol/ssdp-protocol-6.4"
@@ -76,7 +80,7 @@ class Protocol64BootstrapReadinessTests(unittest.TestCase):
         self.assertIn("no 6.4 public-source fallback is authorized", versioning.lower())
 
         local_prompts = (ROOT / "source/shared/references/development-workflow-prompts.md").read_text(encoding="utf-8")
-        local_state = yaml.safe_load((ROOT / "PROTOCOL-RELEASE-STATE.yaml").read_text(encoding="utf-8"))
+        local_state = release_state.load(ROOT / "PROTOCOL-RELEASE-STATE.yaml")
         self.assertNotIn("CURRENT_PUBLIC_REF =", local_prompts)
         p64 = (
             local_state["accepted_current"]
@@ -87,7 +91,7 @@ class Protocol64BootstrapReadinessTests(unittest.TestCase):
         self.assertEqual(p64["recovery_ref"], RECOVERY)
 
     def test_local_64_identity_survives_successor_cutover_shape(self) -> None:
-        state = yaml.safe_load((ROOT / "PROTOCOL-RELEASE-STATE.yaml").read_text(encoding="utf-8"))
+        state = release_state.load(ROOT / "PROTOCOL-RELEASE-STATE.yaml")
         successor = copy.deepcopy(state)
         successor["historical"]["6.4.0"] = copy.deepcopy(successor["accepted_current"])
         successor["accepted_current"] = {

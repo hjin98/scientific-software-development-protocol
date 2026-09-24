@@ -1,11 +1,15 @@
 from __future__ import annotations
 
+import sys
 import unittest
 
 import yaml
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
+SOURCE = ROOT / "source"
+sys.path.insert(0, str(SOURCE))
+import release_state  # noqa: E402
 
 
 def read(path: str) -> str:
@@ -38,7 +42,7 @@ class Protocol6LongHorizonQualityTests(unittest.TestCase):
         self.assertEqual(version[0], 6)
         self.assertGreaterEqual(version, (6, 2, 0))
         versioning = read("source/shared/references/protocol-versioning-and-compatibility.md")
-        release_state = yaml.safe_load((ROOT / "PROTOCOL-RELEASE-STATE.yaml").read_text(encoding="utf-8"))
+        release_state = release_state.load(ROOT / "PROTOCOL-RELEASE-STATE.yaml")
         self.assertIn("protocol 6.2 is a backward-compatible representation/progressive-disclosure strengthening", versioning)
         self.assertIn("5.16 long-horizon health/verification/stabilization/maintenance audit/workflow prompts/public fallback", versioning)
         self.assertEqual(release_state["historical"]["5.16.0"]["recovery_ref"], "e151daaf5c8eebb351a85cfed86170fda80fb5e3")
