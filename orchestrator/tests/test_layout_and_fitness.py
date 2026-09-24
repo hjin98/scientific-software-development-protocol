@@ -94,13 +94,19 @@ class ContainmentTests(unittest.TestCase):
                     f"{path} must not host or import orchestrator implementation",
                 )
 
-    def test_every_orchestrator_python_file_lives_under_the_containment_root(self) -> None:
-        for path in _tracked_files():
-            if not path.endswith(".py"):
+    def test_python_outside_containment_does_not_host_or_import_orchestrator_code(self) -> None:
+        """Qualification/repository tools may be Python; orchestrator implementation may not escape its root."""
+
+        for tracked in _tracked_files():
+            if not tracked.endswith(".py") or tracked.startswith("orchestrator/"):
                 continue
-            if path.startswith(("orchestrator/", "source/", "tests/")):
-                continue
-            self.fail(f"unexpected top-level Python file outside the containment boundary: {path}")
+            path = REPO_ROOT / tracked
+            text = path.read_text(encoding="utf-8")
+            self.assertNotIn(
+                "sdp_orchestrator",
+                text,
+                f"{tracked} must not host or import orchestrator implementation outside orchestrator/",
+            )
 
     def test_repository_ci_only_invokes_orchestrator_commands(self) -> None:
         """CI may call into ``orchestrator/``; it must not host orchestrator logic."""
