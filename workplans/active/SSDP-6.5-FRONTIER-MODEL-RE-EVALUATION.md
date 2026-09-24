@@ -6,12 +6,12 @@ target_protocol_version: 6.5.0
 subject_baseline: P0 = Protocol 6.4 at 55c085261eb827e3047637d045a8e6917ea6b962 (recovery 74bc572ef516cae417437a2027eeff52a2e25c15)
 diagnostic_commit: 81375d8142a8130b80cd82f2304d3e16bc3fc390
 status: active
-current_phase: CROSS-MODEL ADJUDICATION COMPLETE / PHASE IV PRINCIPLE EXTRACTION AND PHASE V DESIGN AUTHORIZED
+current_phase: PHASE IV-V DESIGN COMPLETE / PHASE VI IMPLEMENTATION AUTHORIZED
 branch: ssdp-6.5-frontier-model-re-evaluation
 created_date: 2026-09-24
 adjudication: qualification/ssdp65/CROSS-MODEL-ADJUDICATION-2026-09-24.md
 active_serious_challenge: none against accepted D1-D4 doctrine
-second_frontier_diagnostic: waived-for-this-cycle-by-stakeholder-resource-constraint
+second_frontier_diagnostic: waived-for-this-cycle-by-stakeholder-resource-constraint\ndesign_closure: qualification/ssdp65/PHASE-IV-V-DESIGN-CLOSURE.md\nimplementation_handoff: workplans/active/SSDP-6.5-D3-D4-IMPLEMENTATION-HANDOFF.md
 ---
 
 # Protocol 6.5 Frontier-Model Re-evaluation and Successor Workplan
@@ -26,9 +26,9 @@ CROSS-MODEL ADJUDICATION:           COMPLETE — qualification/ssdp65/CROSS-MODE
 SECOND FRONTIER DIAGNOSTIC:         WAIVED FOR THIS CYCLE; CLEAN BRANCH RESERVED FOR FUTURE REPLICATION
 SUCCESSOR DECISION:                 PROTOCOL 6.5 WARRANTED
 D1-D4 DOMAIN MODEL:                 PRESERVE
-PHASE IV PRINCIPLE EXTRACTION:      AUTHORIZED
-PHASE V CANDIDATE DESIGN:           AUTHORIZED
-PHASE VI IMPLEMENTATION:            NOT AUTHORIZED UNTIL DESIGN CONTRACT BELOW IS CLOSED
+PHASE IV PRINCIPLE EXTRACTION:      COMPLETE — qualification/ssdp65/PHASE-IV-V-DESIGN-CLOSURE.md
+PHASE V CANDIDATE DESIGN:           COMPLETE — DESIGN PASS
+PHASE VI IMPLEMENTATION:            AUTHORIZED — workplans/active/SSDP-6.5-D3-D4-IMPLEMENTATION-HANDOFF.md
 P1 CANDIDATE:                       NOT YET FROZEN
 PROTOCOL 7 D3/D4:                   OUT OF SCOPE / UNCHANGED
 ```
@@ -167,7 +167,7 @@ For each principle record:
 - evidence required for qualification;
 - ablation case that should regress if the principle is removed.
 
-Gate: Phase VI implementation is not authorized until all six principles have this record and no unresolved owner conflict remains.
+Gate status: **SATISFIED.** All six principles are closed in `qualification/ssdp65/PHASE-IV-V-DESIGN-CLOSURE.md`; no unresolved owner conflict or Serious Challenge remains. Phase VI is authorized under `workplans/active/SSDP-6.5-D3-D4-IMPLEMENTATION-HANDOFF.md`.
 
 ## 6. Phase V — Candidate design contract
 
