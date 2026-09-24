@@ -10,6 +10,8 @@ immutable_candidate_p4: 43ff4273fbdaf46b9677cffdb091b741ce754a7d
 candidate_branch: ssdp-6.5-frontier-model-re-evaluation
 draft_pr: 33
 p4_mechanical_qualification_run: 36041360949
+p4_binding_descendant: ad9f0fab85fce9cd841f1578b6499712bb732764
+p4_binding_qualification_run: 36042040459
 p1_review: qualification/ssdp65/INDEPENDENT-REVIEW-2026-09-24-PROTOCOL-6.5-NO-PASS.md
 p2_review: qualification/ssdp65/INDEPENDENT-REVIEW-2026-09-24-PROTOCOL-6.5-P2-NO-PASS.md
 p3_review: qualification/ssdp65/INDEPENDENT-REVIEW-2026-09-24-PROTOCOL-6.5-P3-NO-PASS.md
