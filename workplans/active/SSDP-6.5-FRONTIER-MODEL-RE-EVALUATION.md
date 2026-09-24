@@ -1,119 +1,369 @@
 ---
-kind: protocol-investigation-workplan
+kind: protocol-successor-workplan
 workplan_id: SSDP-6.5-FRONTIER-MODEL-RE-EVALUATION
 protocol_version: 6.4.0
+target_protocol_version: 6.5.0
 subject_baseline: P0 = Protocol 6.4 at 55c085261eb827e3047637d045a8e6917ea6b962 (recovery 74bc572ef516cae417437a2027eeff52a2e25c15)
-subject_candidate: P1 = NOT DESIGNED (no successor assumed)
+diagnostic_commit: 81375d8142a8130b80cd82f2304d3e16bc3fc390
 status: active
-current_phase: PHASE III COMPLETE (reviewer A) / AWAITING INDEPENDENT REVIEWER B
+current_phase: CROSS-MODEL ADJUDICATION COMPLETE / PHASE IV PRINCIPLE EXTRACTION AND PHASE V DESIGN AUTHORIZED
 branch: ssdp-6.5-frontier-model-re-evaluation
 created_date: 2026-09-24
-active_serious_challenge: none raised against accepted 6.4 D1-D4 doctrine; see defect model for lifecycle/qualification defects
-normative_protocol_mutation_in_this_pass: none
+adjudication: qualification/ssdp65/CROSS-MODEL-ADJUDICATION-2026-09-24.md
+active_serious_challenge: none against accepted D1-D4 doctrine
+second_frontier_diagnostic: waived-for-this-cycle-by-stakeholder-resource-constraint
 ---
 
-# Protocol 6.5 Frontier-Model Re-evaluation Workplan
+# Protocol 6.5 Frontier-Model Re-evaluation and Successor Workplan
 
-## Current disposition
+## 1. Current disposition
 
 ```text
-P0 BINDING:                       FROZEN — qualification/ssdp65/P0-BASELINE-BINDING-PROTOCOL-6.4.md
-EVALUATION DESIGN:                PRE-REGISTERED — qualification/ssdp65/BENCHMARK-AND-EVALUATION-DESIGN.md
-PHASE I  RECONSTRUCTION:          COMPLETE (reviewer A)
-PHASE II FALSIFICATION:           COMPLETE (reviewer A)
-PHASE III DEFECT MODEL:           FROZEN (reviewer A) — qualification/ssdp65/reviewer-a/PHASE-III-DEFECT-MODEL.md
-INDEPENDENT REVIEWER B:           NOT STARTED — handoff qualification/ssdp65/INDEPENDENT-DIAGNOSTIC-HANDOFF.md
-CROSS-EXAMINATION:                BLOCKED until reviewer B's findings are frozen
-PHASE IV-VIII:                    NOT AUTHORIZED
-SUCCESSOR VERSION:                NOT ASSUMED; "6.4 survives" and "6.4.x patch" remain admissible outcomes
-NORMATIVE SOURCE CHANGES:         NONE in this pass
+P0 CONTROL:                         FROZEN — 55c085261eb827e3047637d045a8e6917ea6b962
+OPUS 5.5 PHASE I-III DIAGNOSTIC:    FROZEN — 81375d8142a8130b80cd82f2304d3e16bc3fc390
+GPT-5.6 SOL HISTORICAL CROSS-CHECK: COMPLETE
+CROSS-MODEL ADJUDICATION:           COMPLETE — qualification/ssdp65/CROSS-MODEL-ADJUDICATION-2026-09-24.md
+SECOND FRONTIER DIAGNOSTIC:         WAIVED FOR THIS CYCLE; CLEAN BRANCH RESERVED FOR FUTURE REPLICATION
+SUCCESSOR DECISION:                 PROTOCOL 6.5 WARRANTED
+D1-D4 DOMAIN MODEL:                 PRESERVE
+PHASE IV PRINCIPLE EXTRACTION:      AUTHORIZED
+PHASE V CANDIDATE DESIGN:           AUTHORIZED
+PHASE VI IMPLEMENTATION:            NOT AUTHORIZED UNTIL DESIGN CONTRACT BELOW IS CLOSED
+P1 CANDIDATE:                       NOT YET FROZEN
+PROTOCOL 7 D3/D4:                   OUT OF SCOPE / UNCHANGED
 ```
 
-## Background and terminology
+The frozen Opus findings remain evidence, not successor authority. The admitted defect set is the adjudicated four-family model below.
 
-The **Scientific Software Development Protocol (SSDP)** separates D1 scientific/mathematical formulation, D2 algorithm/numerical method, D3 software architecture and D4 specification/implementation authority. **P0** is the frozen accepted Protocol 6.4 control; **P1** is any later candidate. **Reviewer A** is the diagnostic author of this branch; **reviewer B** is an independent frontier-model reviewer who has not seen reviewer A's findings. **Project Engineering Memory (PEM)** is project-local evidence-backed decision support; a **Historical Applicability Set (HAS)** records task-local dispositions of relevant PEM entries.
+## 2. Governing objective
 
-## Governing authority and scope
+Produce a backward-compatible Protocol 6.5 that improves SSDP's reliable engineering intelligence by making the protocol obey its own ownership, evidence, convergence and representation principles.
 
-1. Task authority: the stakeholder's re-evaluation brief of 2026-09-24 (objective: maximize reliable development intelligence subject to preservation of validated invariants; quality vector `Q = (C, F, A, E, G, U, S, K)`; mandatory phase separation I–VIII).
-2. Governing protocol for conducting this work: accepted Protocol 6.4 (`protocol_version: 6.4.0`). This workplan does not reinterpret 6.4 or any version-bound 6.3-or-older work.
-3. Subject of evaluation: the assembled accepted 6.4 system at P0, including canonical `source/`, generated descendants, lifecycle/qualification practice and self-hosted PEM.
-4. Protocol 7 workplans remain governed by their own index entries and are not modified by this investigation.
+The target is not more process. The target is fewer, stronger self-governance invariants with better evidence binding and lower accidental complexity.
 
-## Non-goals of the current pass
+Quality remains multidimensional: correctness, defect discovery, authority preservation, evidence quality, generalization, useful autonomy, structural simplicity and resource cost.
 
-- No edit to normative 6.4 authority (`source/`, generated `dist/`, orchestrator resources, frozen profiles, `AGENTS.md`, `README.md`, `PROJECT-ENGINEERING-MEMORY.md`, archived artifacts).
-- No Protocol 6.5 design, and no assumption that a successor is necessary.
-- No reading of any other frontier-model review of this investigation (none existed at creation).
-- No simulated second reviewer.
+## 3. Accepted and preserved authority
 
-## Phase plan and gates
+6.5 SHALL preserve unless explicitly strengthened without semantic loss:
 
-| Phase | Output | Gate to enter next phase |
-| --- | --- | --- |
-| I Reconstruction | `reviewer-a/PHASE-I-RECONSTRUCTION.md` | complete authority/invariant map; deliberate doctrine distinguished from candidate defects |
-| II Falsification | `reviewer-a/PHASE-II-FALSIFICATION.md`, `reviewer-a/tools/*`, `reviewer-a/evidence/*` | counterexamples in trajectory form; historical replay; executed experiments recorded |
-| III Defect model | `reviewer-a/PHASE-III-DEFECT-MODEL.md` | every material finding as `(O, E, I, R, C, S)`; stop-condition decision recorded; findings committed immutably |
-| — Independent reviewer B | `reviewer-b/` (to be created by reviewer B) | reviewer B freezes findings without reading `reviewer-a/` |
-| — Cross-examination | `CROSS-EXAMINATION.md` | per disputed finding: strongest argument, counterargument, discriminating evidence, status |
-| IV Principle extraction | coverage/exclusion/generalization arguments for any compression | admitted defects only |
-| V Candidate design | minimal repair per defect at highest correct owning layer (remove > rewire > modify > add) | traceability chain complete |
-| VI Implementation | canonical source + regenerated descendants on this branch | accepted design only |
-| VII Qualification | pre-registered A/B, holdout, ablation, mutation (see design) | trial infrastructure available; required checks executed |
-| VIII Independent assembled-candidate Review | fresh-context Review record | no author conclusions inherited |
+- D1 scientific/mathematical authority;
+- D2 numerical/algorithm authority;
+- D3 software-architecture authority;
+- D4 specification/implementation authority;
+- abstraction adequacy versus concretization fidelity;
+- Serious Challenge as the route for materially defective accepted authority;
+- evidence specification/realization/observation/assessment separation;
+- stale-evidence and proxy-proof rules;
+- PEM as non-authoritative project learning rather than D5;
+- conditional PEM/HAS activation;
+- frozen historical version/recovery/profile identity;
+- public-source fallback distinct from recovery;
+- progressive disclosure and Lossless Representation;
+- bounded impact closure and preservation of unaffected siblings/evidence.
 
-A phase may not be entered because a plausible idea exists; it is entered only when its gate is met.
+No Protocol 7 architecture change is authorized.
 
-## Independence and contamination protocol
+## 4. Admitted defect families
 
-- Reviewer A's artifacts live only under `qualification/ssdp65/reviewer-a/`. They are committed before reviewer B starts, so their content is fixed.
-- Shared, finding-free inputs for reviewer B: `P0-BASELINE-BINDING-PROTOCOL-6.4.md`, `BENCHMARK-AND-EVALUATION-DESIGN.md`, `INDEPENDENT-DIAGNOSTIC-HANDOFF.md`, this workplan's non-disposition sections, and the P0 repository itself.
-- Reviewer B must not open `qualification/ssdp65/reviewer-a/` (or this branch's commit messages describing it) until reviewer B's own findings are committed under `qualification/ssdp65/reviewer-b/`.
-- Disagreements are resolved by evidence, counterexample, formal argument or qualification — never by model prestige, majority or confidence.
+### DF-1 — Release-state/version lifecycle ownership
 
-## Project Engineering Memory activation and HAS
+Current mutable lifecycle truth is copied into immutable/versioned semantic artifacts and many secondary surfaces. The same defect family was seen by historical Sol reviews and remains in accepted P0.
 
-PEM is activated: this is mature protocol rework with suspected recurrence. The self-hosted memory's accepted-base selection policy is not declared by the project (see reviewer A's defect model); the basis below is therefore recorded with explicit uncertainty.
+Required end state:
 
-```yaml
-pem_basis:
-  accepted_project_state: 55c085261eb827e3047637d045a8e6917ea6b962
-  accepted_pem: 55c085261eb827e3047637d045a8e6917ea6b962:PROJECT-ENGINEERING-MEMORY.md
-  candidate_overlay_semantic_candidate: NONE
-has:
-  - id: FF-001
-    disposition: APPLICABLE
-    reason: Any successor lifecycle must not publish immutable fallback source before its semantics are final.
-  - id: PC-001
-    disposition: APPLICABLE
-    reason: Frozen 5.16-6.4 profiles/resources and recovery semantics must remain byte/behavior stable under any candidate.
-  - id: SP-001
-    disposition: APPLICABLE
-    reason: Repairs to routing/representation should occur at canonical owners followed by regeneration, never by editing derivatives.
-```
+1. Separate **version-intrinsic semantics** from **mutable repository release state**.
+2. Establish one current release-state owner for accepted-current version, ratification state, public fallback mapping and recovery mapping.
+3. Version-bound immutable source/package/profile SHALL NOT assert mutable current lifecycle truth except explicitly time-scoped historical snapshot facts.
+4. Secondary current surfaces SHALL reference or be generated from the owner rather than hand-copy values.
+5. Preserve bootstrap/recovery distinction.
+6. Reorder successor publication so the final public fallback source is not published until the exact semantic candidate has passed independent assembled-candidate Review and required stakeholder ratification.
+7. Publish mapping identities only from later descendants when Git self-reference requires it.
+8. Recovery remains a distinct later immutable acceptance/rollback identity.
+9. Protocol-version acceptance requires explicit stakeholder ratification; Review PASS establishes technical eligibility only.
+10. If 6.5 is materially delayed, repair P0 A-01 current-state contradictions as a separate 6.4.x patch rather than leaving known false current surfaces indefinitely.
 
-The memory front matter still reads `maintained_under_protocol: 6.3.0`, `reconciled_through` = Protocol 6.2 recovery and a Protocol 6.3 candidate-overlay label; `coverage_state: PARTIAL`. Absence of an entry is therefore not evidence of absence, and bounded historical intake was performed in Phase II.
+Design constraint: prefer an existing owner plus generated/reference projections. If one small machine-readable release-state artifact is necessary to eliminate multiple hand-maintained owners, it is allowed only if it becomes the single current owner rather than another mirror.
 
-## Acceptance for this workplan
+### DF-2 — Qualification and Review epistemology
 
-This workplan may close only when one of the following is established and recorded:
+Required end state:
 
-1. **6.4 survives** — the frozen, cross-examined defect model contains no blocking or material defect warranting a protocol change; or
-2. **Patch route** — admitted defects are corrections within 6.4 semantics and are delivered as a version-bound 6.4.x patch through the owner's normal process; or
-3. **Successor accepted** — P1 satisfies every criterion in `BENCHMARK-AND-EVALUATION-DESIGN.md` §4, including independent assembled-candidate Review PASS and human acceptance where the project assigns it.
+1. Distinguish three evidence classes:
+   - structural/executable consistency;
+   - semantic adequacy/conformance;
+   - engineering-outcome improvement.
+2. Every qualification result names its exact subject and property.
+3. Mechanical tests SHALL NOT claim arbitrary prose semantic correctness.
+4. Exact wording pins are retained only for actual syntax/public/machine contracts.
+5. Synthetic QF-style fixtures may test executable predicates, but passing their own fixture matrix cannot qualify the prose authority they model.
+6. Semantic qualification is performed by independent Review of the assembled candidate, including concrete counterexamples and actual owner/consumer paths.
+7. Every protocol Review includes an **out-of-matrix abstraction-adequacy pass**: search for a locally compliant/global-failure trajectory not represented by the author workplan, obligation matrix or tests.
+8. Review must explicitly challenge the adequacy of the qualification method itself.
+9. Claims that 6.5 improves engineering behavior require targeted matched P0/P1 task evidence; ordinary patch releases do not inherit a mandatory large A/B benchmark program.
+10. Protocol-level semantic mutation evaluation is split: machine-readable/state/schema mutants go to executable tests; prose semantic mutants go to fresh independent semantic Review.
 
-A required check that did not execute blocks closure. Unresolved Serious Challenge blocks unqualified closure.
+Forbidden solution: universal prose theorem prover, ontology database, semantic registry, or broad exact-string pinning introduced merely to raise a mutation-detection percentage.
 
-## Open decisions requiring the human stakeholder
+### DF-3 — Meta-control semantics and governance
 
-1. **Protocol-version acceptor.** Confirm who ratifies acceptance of an SSDP protocol version (human stakeholder, merge to `main`, or Review PASS alone).
-2. **Supported model envelope** `M` for Phase VII.
-3. **Downstream-project access** for holdout HO3 (for example `hjin98/mdstats`).
-4. **Trial infrastructure** for matched A/B agent trials.
-5. Whether admitted current-state defects in accepted 6.4 should be corrected immediately as a 6.4.x patch independent of the successor investigation.
+Add one canonical, compact definition for each high-leverage control predicate and route all domain-local consequences to it.
 
-## Reopen triggers
+Required definitions/contracts:
 
-- Reviewer B produces a finding that contradicts a reviewer-A blocking or material finding with admissible evidence.
-- A benchmark element is shown defective (apply design §8).
-- Accepted 6.4 source changes on `main` before cross-examination (rebind P0 explicitly; do not silently rebase).
+- **material/materially**: decision-local significance where a plausible change under the governed scope can alter interpretation, admissibility, evidence applicability, acceptance/reopen state, protected risk or outcome; remote speculative possibility alone is insufficient.
+- **independent Review/falsification**: context/reviewer did not author the candidate and does not inherit author conclusions; different model family is stronger corroboration but not mandatory.
+- **Serious Challenge threshold**: requires concrete contradiction, counterexample, materially consequential ambiguity/incompatibility, or admissible evidence that accepted authority may be inadequate; mere possibility does not qualify.
+- **Challenge resolution**: the owning authority resolves/adjudicates; ambiguity-narrowing clarification is semantic when it narrows materially admissible behavior and therefore triggers applicable impact/evidence closure.
+- **protocol-version acceptance**: independent Review PASS -> technically eligible; explicit stakeholder ratification -> accepted decision; publication automation represents but does not manufacture acceptance.
+- **accepted PEM base/publication policy**: explicit project integration identity; never default/latest/file-presence/self-declaration.
+
+Do not create a closed ontology of all protocol predicates. Define only predicates that materially gate behavior.
+
+### DF-4 — Representation/schema/convergence self-application
+
+Required end state:
+
+1. Add the invariant that SSDP development is itself governed by accepted SSDP ownership/evidence/representation/convergence rules, except explicit bounded version-bootstrap exceptions.
+2. Integrate current 6.4 release-labelled amendment sections into their canonical owner sections; move historical rationale to history rather than keeping amendment replay in hot current doctrine.
+3. Remove stale predecessor version labels from current role metadata, templates and current navigation.
+4. Avoid hardcoded current-version labels in generic role descriptions when protocol/profile identity already carries the version.
+5. Collapse duplicated generic PEM activation/routing predicates to canonical owner + local consequence where possible.
+6. Reconcile PEM doctrine, template, validator and tests. Executable-required fields/relations either become documented schema semantics or are removed/narrowed from executable enforcement.
+7. Reconcile the repository's self-hosted PEM from its stale 6.2/6.3 basis through the accepted 6.4 interval and the 6.5 work, including applicable positive and negative learning.
+8. Cross-workplan current-version/fallback copies are replaced by owner references where the consumer does not semantically require a frozen value.
+9. Measure always-loaded context and duplication before/after. Target no increase in the always-loaded kernel relative to P0; any necessary added definition must be paid for by integration/removal of equal-or-larger duplicate/amendment text unless losslessness proves otherwise.
+10. Do not remove PEM temperature/maturity machinery in 6.5 solely because this repository has not exercised it; A-13 remains deferred pending downstream evidence.
+
+## 5. Phase IV — Principle extraction and design closure
+
+Before normative source mutation, produce a design record that proves coverage/exclusion/generalization for these principles:
+
+### P65-1 — Self-application
+The protocol's own release engineering is subject to the same owner/evidence/representation/convergence rules it imposes downstream.
+
+### P65-2 — State/semantics separation
+Mutable release state is not version-intrinsic protocol semantics.
+
+### P65-3 — Evidence-claim congruence
+No evidence class may claim more than the property and subject it actually discriminates.
+
+### P65-4 — Review abstraction adequacy
+Independent Review tests both candidate conformance and whether the author's decomposition/qualification is itself strong enough.
+
+### P65-5 — Minimal meta-governance
+Materiality, independence, Challenge resolution, acceptance authority and accepted-memory publication are explicit; no unnecessary new control ontology is introduced.
+
+### P65-6 — Integrated current representation
+Accepted release amendments are folded into current owners; history remains cold/discoverable; generated/executable schema cannot become a second owner.
+
+For each principle record:
+- admitted findings covered;
+- old rules subsumed;
+- counterexamples excluded;
+- newly permitted behavior;
+- compatibility consequences;
+- affected canonical owners;
+- evidence required for qualification;
+- ablation case that should regress if the principle is removed.
+
+Gate: Phase VI implementation is not authorized until all six principles have this record and no unresolved owner conflict remains.
+
+## 6. Phase V — Candidate design contract
+
+The design SHALL map changes to canonical owners before implementation.
+
+Expected affected owners/surfaces:
+
+- universal kernel / abstraction-concretization owner;
+- protocol versioning/compatibility owner;
+- workflow/workplan/Challenge lifecycle owner;
+- testing/validation owner;
+- evidence owner where qualification terminology requires alignment;
+- convergence/cycle-economy owner;
+- PEM owner + template + validator;
+- development workflow prompts;
+- role/specialist frontmatter/routing text;
+- generic plan/handoff templates whose current labels/contracts are stale;
+- build/generation/parity tests and current protocol snapshot;
+- root project routing/current-state surfaces only as derived/reference projections;
+- self-hosted PEM and semantic history;
+- Protocol 7 inheritance identity only after 6.5 acceptance, with no D3 architecture mutation.
+
+A 6.4 -> 6.5 preservation/supersession map is mandatory before candidate freeze.
+
+## 7. Phase VI — Implementation order
+
+Implement in dependency order, preferring removal/rewiring over additive machinery:
+
+1. canonical definitions/self-application and owner boundaries;
+2. release-state/versioning lifecycle architecture;
+3. Challenge/acceptance/PEM-basis governance;
+4. qualification/Review semantics and executable oracle cleanup;
+5. PEM schema/template/validator reconciliation;
+6. representation integration/compression and template/role cleanup;
+7. generator/package/profile updates from canonical sources;
+8. self-hosted PEM + history reconciliation;
+9. tests/qualification instruments at real owners;
+10. generated descendants only after canonical source is coherent.
+
+Do not edit generated artifacts as independent fixes.
+
+## 8. Phase VII — Qualification
+
+### 8.1 Mandatory structural/current-state evidence
+
+- inherited repository regression;
+- PEM validator after schema reconciliation;
+- canonical package build + independent validation;
+- committed distribution parity;
+- generated current snapshot parity;
+- frozen 5.16-6.4 historical profile/resource identity;
+- full Orchestrator Core affected regression;
+- whitespace/presentation checks;
+- one-current-release-state coherence across every declared projection;
+- negative fixtures proving stale/contradictory lifecycle projections fail;
+- PEM doctrine/template/validator parity checks;
+- no exact-wording false-positive test for meaning-preserving paraphrases unless wording is itself contract.
+
+### 8.2 Semantic falsification
+
+Use a fresh context that did not author P1.
+
+Required passes:
+
+1. all four admitted defect families;
+2. locally-compliant/global-failure counterexamples;
+3. owner-conflict and current-vs-history;
+4. semantic Review of a fresh post-freeze mutation/counterexample set authored by a non-P1-author context;
+5. explicit attempt to find a defect outside the workplan/qualification matrix;
+6. preservation map falsification;
+7. ablation of each major P65 principle on at least its motivating counterexample.
+
+The semantic reviewer, not the ordinary mechanical suite, decides arbitrary prose semantic mutations.
+
+### 8.3 Targeted P0/P1 behavior comparison
+
+Because 6.5 is explicitly an intelligence-uplift release, run matched P0/P1 trials on at least four representative difficult tasks spanning:
+
+- lifecycle/current-state drift;
+- proxy/oracle adequacy;
+- authority/Challenge routing;
+- mature-system simplification/review convergence.
+
+Use the same task/model/tool budget per pair. GPT-5.6 Sol is the historical control model. Opus 5.5 is the frontier evaluator when budget permits; if frontier paired trials cannot be completed, report that limitation and do not make quantitative frontier-performance claims.
+
+Replicate only stochastic/ambiguous cases where another realization can change the bounded decision. Do not mechanically require three repeats of deterministic or already decisive cases.
+
+Reserve at least one historical/novel task family not used to design P1.
+
+### 8.4 Simplicity evidence
+
+Compare P0/P1:
+
+- always-loaded kernel/context words;
+- duplicated generic rule/value copies;
+- number of release lifecycle stages and hand-maintained state projections;
+- exact-string semantic pins;
+- current-owner/schema duplications.
+
+6.5 must not solve the defects by net proliferation of parallel authorities.
+
+## 9. Phase VIII — Independent assembled-candidate Review and ratification
+
+Final Review must be performed in a fresh context that did not author P1. Opus 5.5 is preferred when resource is available because it supplied the frontier diagnostic; GPT-5.6 Sol may provide an additional historical/control review but is not a substitute for labeling the evidence honestly.
+
+Review receives:
+- P0;
+- immutable P1;
+- preservation/supersession map;
+- adjudication record;
+- qualification evidence;
+- holdout/ablation evidence;
+- exact known limitations.
+
+It must not inherit author conclusions.
+
+A PASS means technically eligible for acceptance. Protocol 6.5 becomes accepted only after explicit stakeholder ratification.
+
+## 10. Publication/cutover lifecycle for 6.5
+
+The 6.5 lifecycle SHALL avoid the pre-Review immutable-fallback trap:
+
+1. implement and qualify a self-reference-safe semantic candidate;
+2. freeze exact P1;
+3. perform independent assembled-candidate Review;
+4. obtain explicit stakeholder ratification of the reviewed semantics;
+5. only then publish the exact reviewed source candidate as the version-bound public fallback from a later descendant;
+6. establish a distinct immutable recovery target containing the required accepted review/ratification/publication lineage;
+7. publish recovery mapping from a later descendant;
+8. regenerate/reconcile current mutable release-state projections and packages;
+9. rerun affected recovery/package/profile/Core/current-state acceptance;
+10. update Protocol 7 inheritance identity only, preserving Protocol 7 D3 architecture;
+11. closeout learning and archive the 6.5 workplan only after the current-state repository is coherent.
+
+Any material semantic change after Review reopens Review and invalidates the would-be public fallback candidate.
+
+## 11. Benchmark design correction
+
+The original preregistration remains preserved, but its §4.6/§6.4 interpretation is repaired before P1 design:
+
+- arbitrary prose semantic mutants are not required to be detected by the ordinary mechanical test suite;
+- mechanical mutation detection is required for machine-readable/state/schema/generated invariants;
+- arbitrary semantic mutants are evaluated by independent semantic Review of the assembled candidate;
+- paraphrase false positives remain defects when exact wording is not a contract;
+- fixed three-fold replication is replaced by proportional replication of stochastic/ambiguous paired trials.
+
+See the dated amendment appended to `qualification/ssdp65/BENCHMARK-AND-EVALUATION-DESIGN.md`.
+
+## 12. Project Engineering Memory / HAS
+
+PEM remains activated for this mature rework.
+
+Current applicable lessons:
+
+- FF-001: premature immutable fallback publication — applicable, but 6.5 repairs the structural cause by moving final fallback publication after semantic Review/ratification.
+- PC-001: frozen predecessor preservation — binding capability to preserve.
+- SP-001: repair canonical owners then regenerate derivatives — binding as evidence-backed engineering guidance.
+
+The self-hosted PEM itself is stale and must be reconciled during implementation. Until then, absence remains non-evidence and the current HAS retains explicit basis uncertainty.
+
+## 13. Non-goals
+
+- no redesign of D1-D4 scientific/software authority;
+- no Protocol 7 architecture or D4 implementation;
+- no universal semantic parser, theorem prover, registry or ontology;
+- no requirement that mechanical tests understand arbitrary prose;
+- no merge of public fallback and recovery identities merely for simplicity;
+- no removal of PEM maturity/temperature machinery without downstream evidence;
+- no rewriting of frozen historical artifacts;
+- no broad unrelated repository refactor;
+- no permanent large multi-model benchmark mandate for ordinary patch releases.
+
+## 14. Closure criteria
+
+This workplan closes only when:
+
+1. P65-1..P65-6 are implemented losslessly;
+2. all admitted DF-1..DF-4 defects are closed or explicitly narrowed with evidence;
+3. A-13 remains explicitly deferred rather than accidentally removed;
+4. preservation/supersession mapping is complete;
+5. structural/current-state/schema/generated/frozen-resource evidence passes;
+6. semantic falsification and out-of-matrix Review pass;
+7. targeted P0/P1 evidence supports at least one material improvement without unacceptable correctness/authority regression;
+8. final fresh assembled-candidate Review passes;
+9. stakeholder explicitly ratifies 6.5;
+10. public fallback/recovery/cutover are published in the corrected order;
+11. current release-state projections and self-hosted PEM are reconciled;
+12. Protocol 7 inheritance is updated without D3 mutation;
+13. remaining limitations are recorded honestly.
+
+## 15. Reopen triggers
+
+- a proposed simplification loses an accepted 6.4 capability;
+- lifecycle design reintroduces mutable current-state claims into immutable fallback payload;
+- mechanical qualification again becomes the de facto semantic owner;
+- implementation introduces a parallel release-state/schema authority;
+- evidence shows a P65 principle increases authority violations or false blockers;
+- a fresh semantic mutation/counterexample defeats P1;
+- accepted P0/main materially changes before candidate comparison and applicability is not explicitly rebound.

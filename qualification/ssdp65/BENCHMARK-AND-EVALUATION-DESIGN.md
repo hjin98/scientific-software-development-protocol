@@ -131,3 +131,33 @@ A benchmark element may not be removed or re-scored because P1 fails it.
 4. Reviewer A has read the development-set history; reviewer A cannot be blind to it. Generalization claims must therefore rest on HO1–HO5.
 5. Trial infrastructure (agent runner, redaction, grading) does not exist in the repository and must be built or supplied before Phase VII; its absence is a blocking unavailable check for any P1 acceptance claim.
 6. Agent behavior is stochastic and model-version dependent; results are bound to the exact model identifiers and dates used.
+
+
+## 10. 2026-09-24 adjudication amendment — benchmark defects repaired before P1 design
+
+This amendment is entered under §8 before any P1 candidate has been designed or observed. It does not remove a benchmark because P1 failed it.
+
+### BDR-1 — Mechanical semantic-mutant detection was the wrong acceptance objective
+
+**Benchmark defect:** §4.6 and §6.4 could be read to require the ordinary mechanical acceptance workflow to detect arbitrary prose semantic inversions. Reviewer A's P0 probe showed that phrase-pinned wording can increase this metric while rejecting lossless paraphrases. Optimizing the metric would therefore reward exact-string coupling or a new semantic-parser authority, contrary to the Lossless Representation Rule and to the admitted A-02 defect.
+
+**Repair:** split oracle classes.
+
+- Machine-readable/current-state/schema/generated/package mutants are evaluated by executable acceptance tests.
+- Arbitrary prose semantic mutants/counterexamples are evaluated by a fresh independent semantic Review of the assembled candidate.
+- Lossless paraphrase false positives remain a mechanical defect where wording is not itself a syntax/public contract.
+- Acceptance requires better binding between each evidence class and its actual subject, not a universal increase in mechanical detection of prose mutations.
+
+**Affected results:** P0 E2 remains valid evidence that the old mechanical suite was weakly bound and wording-sensitive. Its 20% semantic-mutation detection rate is not a target metric that P1 must mechanically exceed. P1 must instead close the admitted defect with correctly scoped structural tests plus independent semantic falsification.
+
+### BDR-2 — Fixed three-fold replication was not a claim-relative evidence rule
+
+**Benchmark defect:** §6.1 mandated three independent replicates for every task/arm/model regardless of whether the task was deterministic, the first pair was decisive, or repeated stochastic realizations could change the bounded decision. A fixed repetition count is not a statistical precision rule and conflicts with SSDP's own evidence-value/development-economy doctrine.
+
+**Repair:** matched P0/P1 trials remain required for the 6.5 intelligence-uplift claim, but replication is proportional. Repeat stochastic or ambiguous cases when another realization can materially change the conclusion; do not mechanically repeat deterministic or already-decisive cases. Record exact model/version/date and every realization used.
+
+**Affected results:** no prior A/B result exists, so no score changes.
+
+### BDR-3 — Second-frontier diagnostic unavailable in this cycle
+
+The stakeholder has explicitly chosen to proceed without a second contemporary frontier diagnostic because of resource limits. The clean independent-review branch remains reserved for future replication. For this cycle, cross-model evidence consists of the frozen Opus 5.5 diagnostic, the historical GPT-5.6 Sol Review corpus, a fresh cross-check/adjudication, and a fresh final assembled-candidate Review. This limitation must remain visible in final evidence and forbids claiming two-frontier-model replication.

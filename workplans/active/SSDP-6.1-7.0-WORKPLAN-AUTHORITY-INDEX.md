@@ -173,23 +173,26 @@ PROTOCOL 7 D4: NOT AUTHORIZED
 
 Protocol 7 D4 remains unauthorized until the existing deliberate D3 Orchestrator architecture reopen/supersession requirement closes. Revisions 3-4 do not perform that reopen and no `main` or Protocol 7 cutover is implied.
 
-## Protocol 6.5 frontier-model re-evaluation (investigation; no successor assumed)
+## Protocol 6.5 frontier-model re-evaluation and successor work
 
 Governing workplan, on branch `ssdp-6.5-frontier-model-re-evaluation` only:
 
 1. `workplans/active/SSDP-6.5-FRONTIER-MODEL-RE-EVALUATION.md`
 
-Evidence lives under `qualification/ssdp65/`. This investigation is bound to accepted Protocol 6.4 as its frozen control and governing process; it creates no Protocol 6.5 authority, changes no accepted 6.4 source, and does not alter Protocol 7 inheritance.
+Diagnostic/adjudication evidence lives under `qualification/ssdp65/`. The frozen P0 control remains accepted Protocol 6.4 at `55c085261eb827e3047637d045a8e6917ea6b962`; successor work creates no Protocol 6.5 accepted authority until final Review and explicit stakeholder ratification. Protocol 7 architecture remains untouched.
 
 Current disposition:
 
 ```text
 SUBJECT BASELINE (P0): Protocol 6.4 at 55c085261eb827e3047637d045a8e6917ea6b962 / recovery 74bc572ef516cae417437a2027eeff52a2e25c15
-PHASE I-III (REVIEWER A): COMPLETE / FROZEN
-INDEPENDENT REVIEWER B: PENDING
-PHASE IV-VIII: NOT AUTHORIZED
-SUCCESSOR VERSION: NOT ASSUMED
-CURRENT ACCEPTED DOCUMENT-CONTROLLED BASELINE: UNCHANGED
+OPUS 5.5 PHASE I-III: COMPLETE / FROZEN AT 81375d8142a8130b80cd82f2304d3e16bc3fc390
+GPT-5.6 SOL HISTORICAL CROSS-CHECK: COMPLETE
+CROSS-MODEL ADJUDICATION: COMPLETE
+SECOND FRONTIER DIAGNOSTIC: WAIVED FOR THIS CYCLE / CLEAN BRANCH RESERVED
+SUCCESSOR: PROTOCOL 6.5 WARRANTED
+PHASE IV-V DESIGN: AUTHORIZED
+PHASE VI IMPLEMENTATION: BLOCKED PENDING DESIGN CLOSURE
+CURRENT ACCEPTED DOCUMENT-CONTROLLED BASELINE: Protocol 6.4 / UNCHANGED
 ```
 
 ## Version/cutover rule
