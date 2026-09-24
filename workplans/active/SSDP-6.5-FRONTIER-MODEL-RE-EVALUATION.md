@@ -5,8 +5,8 @@ protocol_version: 6.4.0
 target_protocol_version: 6.5.0
 subject_baseline: P0 = Protocol 6.4 at 55c085261eb827e3047637d045a8e6917ea6b962 (recovery 74bc572ef516cae417437a2027eeff52a2e25c15)
 diagnostic_commit: 81375d8142a8130b80cd82f2304d3e16bc3fc390
-status: active-p2-review-ready
-current_phase: PHASE VII P2 FROZEN / FRESH INDEPENDENT REVIEW REQUIRED
+status: reopened-p2-independent-review-no-pass
+current_phase: PHASE VII P2 INDEPENDENT REVIEW NO-PASS / D4 REPAIR REQUIRED
 branch: ssdp-6.5-frontier-model-re-evaluation
 created_date: 2026-09-24
 adjudication: qualification/ssdp65/CROSS-MODEL-ADJUDICATION-2026-09-24.md
@@ -14,7 +14,7 @@ active_serious_challenge: none against accepted D1-D4 doctrine
 second_frontier_diagnostic: waived-for-this-cycle-by-stakeholder-resource-constraint
 design_closure: qualification/ssdp65/PHASE-IV-V-DESIGN-CLOSURE.md
 implementation_handoff: workplans/active/SSDP-6.5-D3-D4-IMPLEMENTATION-HANDOFF.md
-independent_review: qualification/ssdp65/INDEPENDENT-REVIEW-2026-09-24-PROTOCOL-6.5-NO-PASS.md
+independent_review: qualification/ssdp65/INDEPENDENT-REVIEW-2026-09-24-PROTOCOL-6.5-P2-NO-PASS.md
 ---
 
 # Protocol 6.5 Frontier-Model Re-evaluation and Successor Workplan
@@ -31,11 +31,11 @@ SUCCESSOR DECISION:                 PROTOCOL 6.5 WARRANTED
 D1-D4 DOMAIN MODEL:                 PRESERVE
 PHASE IV PRINCIPLE EXTRACTION:      COMPLETE — qualification/ssdp65/PHASE-IV-V-DESIGN-CLOSURE.md
 PHASE V CANDIDATE DESIGN:           COMPLETE — DESIGN PASS
-PHASE VI IMPLEMENTATION:            REPAIR COMPLETE — B65-R1..R3 + sibling phase-oracle closure
+PHASE VI IMPLEMENTATION:            REOPENED AT D4 — P2 REVIEW BLOCKERS
 P1 CANDIDATE:                       FROZEN / FAILED REVIEW — b565e28aeacea002cefe27e6b9594fe99d653c0a
 P2 CANDIDATE:                       FROZEN — e8edb353e172aef933ed5e58eeabe897d0cc98d1
 P2 EXACT PR QUALIFICATION:          PASS — run 35996488794
-PHASE VII QUALIFICATION/REVIEW:     READY FOR FRESH P2 REVIEW
+PHASE VII QUALIFICATION/REVIEW:     NO-PASS — P2 independent Review
 PROTOCOL 7 D3/D4:                   OUT OF SCOPE / UNCHANGED
 ```
 
@@ -436,3 +436,44 @@ Freeze binding: `qualification/ssdp65/P2-FREEZE-BINDING.md`.
 Current Review handoff: `qualification/ssdp65/INDEPENDENT-REVIEW-HANDOFF-PROTOCOL-6.5.md`.
 
 P1 remains an immutable failed candidate. A fresh non-authoring context must independently Review P2 before any stakeholder ratification/publication/recovery/cutover action.
+
+
+## 18. 2026-09-24 fresh independent P2 Review reopen
+
+Fresh assembled-candidate Review of immutable P2 \`e8edb353e172aef933ed5e58eeabe897d0cc98d1\` issued **NO-PASS** with no Serious Challenge. P2 remains immutable and is now historical failed-candidate evidence.
+
+Durable Review:
+\`qualification/ssdp65/INDEPENDENT-REVIEW-2026-09-24-PROTOCOL-6.5-P2-NO-PASS.md\`
+
+### R65-P2-1 — finish removal of mutable lifecycle values from inherited tests
+
+Owner: D4 testing/qualification.
+
+The P2 repair changed the direct Protocol 6.5 phase oracle and one Protocol 6.4 sibling, but the same family remains in:
+
+- \`tests/test_protocol_64_bootstrap_readiness.py\`: live \`accepted_current == 6.4.0\` plus current 6.4 public/recovery assertions;
+- \`tests/test_protocol_61_evidence_evolution.py\`: live \`accepted_current == 6.4.0\` and \`candidate.version == 6.5.0\`.
+
+Remove only mutable phase copies. Preserve immutable historical release identities and generic release-state-owner routing. Add legal transition fixtures that advance accepted-current to 6.5 and later candidate identity without requiring inherited test edits. Perform a bounded test census for equivalent live current/candidate values. Do not add a synchronized phase table or wrapper.
+
+### R65-P2-2 — bind terminal ratification evidence to exact candidate/disposition
+
+Owner: D4 release-state validation.
+
+The accepted P65 design requires RATIFIED only from explicit stakeholder evidence for the exact reviewed semantic ref. P2 validates only immutable route existence for terminal ratification evidence.
+
+Extend the existing validator with minimal structured binding: terminal RATIFIED/REJECTED evidence must resolve in the project and bind exact \`candidate.semantic_ref\` plus matching terminal disposition. Actual stakeholder authorization remains a human/semantic decision; do not machine-judge arbitrary prose. Add valid binding and wrong-candidate/disposition/repository/commit/path negatives. Do not add a registry, mirror, semantic parser, or new authority.
+
+### Candidate/evidence reset
+
+Any repair changes executable/semantic acceptance behavior and therefore requires a new immutable candidate identity; never mutate P2 and continue calling it P2.
+
+Rerun:
+1. focused lifecycle/release-state tests including legal transition counterexamples;
+2. complete repository build and Orchestrator Core workflow on the new candidate;
+3. affected Phase VII lifecycle mutation set, P65 ablations, and P0/new-candidate matched lifecycle/oracle comparison;
+4. simplicity/preservation applicability checks;
+5. new freeze/binding qualification with Review reset to NOT_RUN;
+6. fresh independent assembled-candidate Review.
+
+Exact-P2 runs \`35996488794\`, \`35996817388\`, and \`35996964858\` remain historical evidence for their exact subjects only. Frozen-resource and unchanged D1/D2/formal-definition evidence may be reused only after applicability is re-established.

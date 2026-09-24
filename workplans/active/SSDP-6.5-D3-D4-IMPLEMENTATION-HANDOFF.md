@@ -3,7 +3,7 @@ kind: implementation-workplan
 workplan_id: SSDP-6.5-D3-D4-IMPLEMENTATION-HANDOFF
 protocol_version: 6.4.0
 target_protocol_version: 6.5.0
-status: repair-complete-p2-frozen
+status: reopened-d4-after-p2-independent-review-no-pass
 parent_workplan: workplans/active/SSDP-6.5-FRONTIER-MODEL-RE-EVALUATION.md
 design_authority: qualification/ssdp65/PHASE-IV-V-DESIGN-CLOSURE.md
 baseline: 55c085261eb827e3047637d045a8e6917ea6b962
@@ -328,7 +328,7 @@ Raise Serious Challenge if accepted D1-D4/formal-definition doctrine itself is s
 
 ```text
 D3 DESIGN: PASS / NOT REOPENED
-PHASE VI IMPLEMENTATION: REPAIR COMPLETE
+PHASE VI IMPLEMENTATION: REOPENED AT D4 — P2 REVIEW BLOCKERS
 P1: FROZEN / FAILED REVIEW — b565e28aeacea002cefe27e6b9594fe99d653c0a
 P2: FROZEN — e8edb353e172aef933ed5e58eeabe897d0cc98d1
 P2 NORMAL PR QUALIFICATION: 35996488794 / PASS
@@ -362,3 +362,32 @@ The repair also removed the sibling live-phase oracle in `tests/test_protocol_64
 Exact P2 is `e8edb353e172aef933ed5e58eeabe897d0cc98d1`; normal repository qualification run `35996488794` passed both build and Orchestrator Core jobs.
 
 Implementation is complete for the bounded repair. The next stage is a fresh independent assembled-candidate Review of P2 by a non-authoring context.
+
+
+## 12. P2 independent Review repair delta — 2026-09-24
+
+Fresh independent assembled-candidate Review of P2 issued **NO-PASS** without reopening D3.
+
+### B65-P2-1 — inherited lifecycle-value copies remain
+
+Repair at D4 testing/qualification only:
+
+- remove live \`accepted_current == 6.4.0\` / current 6.4 mapping assertions from \`tests/test_protocol_64_bootstrap_readiness.py\`; preserve the immutable Protocol 6.4 bootstrap/recovery contract independent of whether 6.4 is current or historical;
+- remove live \`accepted_current == 6.4.0\` and \`candidate.version == 6.5.0\` assertions from \`tests/test_protocol_61_evidence_evolution.py\`; preserve historical 6.1/6.2 identity and generic release-state-owner routing;
+- perform a bounded census for equivalent mutable phase values in long-lived tests;
+- add legal lifecycle-transition fixtures so current-owner advancement does not require test edits.
+
+Prefer direct alteration/removal. No synchronized phase table, compatibility wrapper, or second state owner.
+
+### B65-P2-2 — terminal ratification binding is incomplete
+
+Repair in existing \`source/release_state.py\` and focused tests:
+
+- keep immutable repository/path resolution;
+- for terminal RATIFIED/REJECTED evidence require minimal machine-readable binding to the exact current \`candidate.semantic_ref\` and matching disposition;
+- keep actual stakeholder authorization outside machine prose interpretation;
+- add wrong candidate, wrong disposition, wrong repository, missing commit/path, and valid exact binding cases.
+
+No new registry/service/parser is authorized.
+
+P2 \`e8edb353e172aef933ed5e58eeabe897d0cc98d1\` is immutable and failed Review. Repairs create a new candidate identity and require exact-candidate requalification plus fresh independent Review.
