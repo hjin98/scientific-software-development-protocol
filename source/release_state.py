@@ -6,7 +6,7 @@ from __future__ import annotations
 import argparse
 import re
 import subprocess
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 from typing import Any
 
 import yaml
@@ -53,6 +53,96 @@ def _git(root: Path, *args: str) -> tuple[int, str]:
         timeout=10,
     )
     return result.returncode, result.stdout.strip()
+
+
+def _front_matter(text: str, where: str, errors: list[str]) -> dict[str, Any]:
+    lines = text.splitlines()
+    if not lines or lines[0].strip() != "---":
+        errors.append(f"{where} must begin with YAML front matter")
+        return {}
+    try:
+        end = next(index for index, line in enumerate(lines[1:], start=1) if line.strip() == "---")
+    except StopIteration:
+        errors.append(f"{where} YAML front matter is unterminated")
+        return {}
+    try:
+        data = yaml.safe_load("\n".join(lines[1:end]))
+    except yaml.YAMLError as exc:
+        errors.append(f"{where} YAML front matter is invalid: {exc}")
+        return {}
+    return _mapping(data, f"{where} YAML front matter", errors)
+
+
+def _resolve_evidence_route(
+    root: Path,
+    project: str,
+    value: str,
+    where: str,
+    errors: list[str],
+) -> str | None:
+    match = EVIDENCE_RE.fullmatch(value)
+    if match is None:
+        return None
+
+    source = match.group("source")
+    sha = match.group("sha")
+    path = match.group("path")
+    if source != project:
+        errors.append(f"{where} must identify evidence in project {project}, not {source}")
+        return None
+
+    pure = PurePosixPath(path)
+    if pure.is_absolute() or ".." in pure.parts:
+        errors.append(f"{where} path must be repository-relative without parent traversal")
+        return None
+
+    code, _ = _git(root, "cat-file", "-e", f"{sha}^{{commit}}")
+    if code:
+        errors.append(f"{where} commit {sha} is not resolvable")
+        return None
+
+    code, content = _git(root, "show", f"{sha}:{path}")
+    if code:
+        errors.append(f"{where} path {path!r} is not readable at commit {sha}")
+        return None
+    return content
+
+
+def _check_review_evidence(
+    root: Path,
+    project: str,
+    value: str,
+    semantic_ref: str,
+    review_state: str,
+    where: str,
+    errors: list[str],
+) -> None:
+    content = _resolve_evidence_route(root, project, value, where, errors)
+    if content is None:
+        return
+
+    metadata = _front_matter(content, where, errors)
+    if not metadata:
+        return
+
+    bound_refs = {
+        str(metadata[key])
+        for key in ("candidate_ref", "semantic_ref", "p1", "p2")
+        if metadata.get(key)
+    }
+    if semantic_ref not in bound_refs:
+        rendered = ", ".join(sorted(bound_refs)) if bound_refs else "NONE"
+        errors.append(
+            f"{where} does not bind candidate.semantic_ref {semantic_ref}; "
+            f"review record binds {rendered}"
+        )
+
+    expected_status = {"PASS": "pass", "NO_PASS": "no-pass"}[review_state]
+    actual_status = str(metadata.get("status") or "").strip().lower().replace("_", "-")
+    if actual_status != expected_status:
+        errors.append(
+            f"{where} disposition {actual_status or 'MISSING'} does not match candidate.review.state {review_state}"
+        )
 
 
 def _check_version_ref(root: Path, version: str, ref: str, where: str, errors: list[str]) -> None:
@@ -116,7 +206,7 @@ def validate_release_state(data: Any, *, repo_root: Path | None = None) -> list[
     review_state = str(review.get("state") or "")
     if review_state not in REVIEW_STATES:
         errors.append(f"candidate.review.state must be one of {sorted(REVIEW_STATES)}")
-    _evidence(review.get("evidence_ref"), "candidate.review.evidence_ref", errors, required=review_state in {"NO_PASS", "PASS"})
+    review_evidence = _evidence(\n        review.get("evidence_ref"),\n        "candidate.review.evidence_ref",\n        errors,\n        required=review_state in {"NO_PASS", "PASS"},\n    )
 
     ratification = _mapping(candidate.get("ratification"), "candidate.ratification", errors)
     ratification_state = str(ratification.get("state") or "")

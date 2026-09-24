@@ -43,6 +43,10 @@ class Protocol65CurrentStateOwnershipTests(unittest.TestCase):
         for token in ("CURRENT_PROTOCOL =", "CURRENT_PUBLIC_REF =", "ACCEPTED_6_3_PUBLIC_REF ="):
             self.assertNotIn(token, canonical)
 
+    def test_current_workflow_prompt_has_no_predecessor_version_gate(self) -> None:
+        canonical = (ROOT / "source/shared/references/development-workflow-prompts.md").read_text(encoding="utf-8")
+        self.assertNotIn("Protocol 6.4", canonical)
+
     def test_stale_current_version_labels_are_absent_from_current_entrypoints(self) -> None:
         for path in sorted((ROOT / "source/roles").glob("*/SKILL.md")) + sorted((ROOT / "source/specialists").glob("*/SKILL.md")):
             text = path.read_text(encoding="utf-8")

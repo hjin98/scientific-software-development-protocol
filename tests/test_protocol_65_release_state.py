@@ -24,19 +24,126 @@ class Protocol65ReleaseStateTests(unittest.TestCase):
     def test_repository_release_state_is_coherent_and_refs_realize(self) -> None:
         self.assertEqual(release_state.validate_release_state(self.data, repo_root=ROOT), [])
 
-    def test_current_state_has_one_owner_and_candidate_is_not_prematurely_accepted(self) -> None:
-        self.assertEqual(self.data["accepted_current"]["version"], "6.4.0")
-        candidate = self.data["candidate"]
-        self.assertEqual(candidate["version"], "6.5.0")
-        semantic_ref = candidate["semantic_ref"]
-        self.assertTrue(
-            semantic_ref == "UNFROZEN" or re.fullmatch(r"[0-9a-f]{40}", semantic_ref),
-            semantic_ref,
+    def _review_evidence_errors(
+        self,
+        *,
+        evidence_ref: str,
+        semantic_ref: str,
+        review_state: str,
+        git_results: list[tuple[int, str]],
+    ) -> list[str]:
+        errors: list[str] = []
+        with mock.patch.object(release_state, "_git", side_effect=git_results):
+            release_state._check_review_evidence(
+                ROOT,
+                "hjin98/scientific-software-development-protocol",
+                evidence_ref,
+                semantic_ref,
+                review_state,
+                "candidate.review.evidence_ref",
+                errors,
+            )
+        return errors
+
+    def test_review_evidence_binds_exact_candidate_and_disposition(self) -> None:
+        candidate = "a" * 40
+        evidence_ref = (
+            "hjin98/scientific-software-development-protocol@"
+            + "b" * 40
+            + ":qualification/review.md"
         )
-        self.assertEqual(candidate["review"]["state"], "NOT_RUN")
-        self.assertEqual(candidate["ratification"]["state"], "NOT_REQUESTED")
-        self.assertEqual(candidate["public_source_ref"], "UNAVAILABLE")
-        self.assertEqual(candidate["recovery_ref"], "UNAVAILABLE")
+        review = f"""---
+status: pass
+p1: {candidate}
+---
+# Review
+"""
+        self.assertEqual(
+            self._review_evidence_errors(
+                evidence_ref=evidence_ref,
+                semantic_ref=candidate,
+                review_state="PASS",
+                git_results=[(0, ""), (0, review)],
+            ),
+            [],
+        )
+
+    def test_review_evidence_rejects_wrong_candidate(self) -> None:
+        candidate = "a" * 40
+        evidence_ref = (
+            "hjin98/scientific-software-development-protocol@"
+            + "b" * 40
+            + ":qualification/review.md"
+        )
+        review = f"""---
+status: pass
+p1: {"c" * 40}
+---
+# Review
+"""
+        errors = self._review_evidence_errors(
+            evidence_ref=evidence_ref,
+            semantic_ref=candidate,
+            review_state="PASS",
+            git_results=[(0, ""), (0, review)],
+        )
+        self.assertTrue(any("does not bind candidate.semantic_ref" in error for error in errors))
+
+    def test_review_evidence_rejects_disposition_mismatch(self) -> None:
+        candidate = "a" * 40
+        evidence_ref = (
+            "hjin98/scientific-software-development-protocol@"
+            + "b" * 40
+            + ":qualification/review.md"
+        )
+        review = f"""---
+status: no-pass
+p1: {candidate}
+---
+# Review
+"""
+        errors = self._review_evidence_errors(
+            evidence_ref=evidence_ref,
+            semantic_ref=candidate,
+            review_state="PASS",
+            git_results=[(0, ""), (0, review)],
+        )
+        self.assertTrue(any("does not match candidate.review.state PASS" in error for error in errors))
+
+    def test_review_evidence_rejects_wrong_repository(self) -> None:
+        errors: list[str] = []
+        release_state._check_review_evidence(
+            ROOT,
+            "hjin98/scientific-software-development-protocol",
+            "other/project@" + "b" * 40 + ":qualification/review.md",
+            "a" * 40,
+            "PASS",
+            "candidate.review.evidence_ref",
+            errors,
+        )
+        self.assertTrue(any("must identify evidence in project" in error for error in errors))
+
+    def test_review_evidence_rejects_missing_commit_or_path(self) -> None:
+        evidence_ref = (
+            "hjin98/scientific-software-development-protocol@"
+            + "b" * 40
+            + ":qualification/review.md"
+        )
+        errors = self._review_evidence_errors(
+            evidence_ref=evidence_ref,
+            semantic_ref="a" * 40,
+            review_state="PASS",
+            git_results=[(1, "")],
+        )
+        self.assertTrue(any("commit" in error and "not resolvable" in error for error in errors))
+
+        errors = self._review_evidence_errors(
+            evidence_ref=evidence_ref,
+            semantic_ref="a" * 40,
+            review_state="PASS",
+            git_results=[(0, ""), (1, "")],
+        )
+        self.assertTrue(any("is not readable at commit" in error for error in errors))
 
     def test_review_pass_requires_frozen_semantic_candidate(self) -> None:
         data = copy.deepcopy(self.data)
