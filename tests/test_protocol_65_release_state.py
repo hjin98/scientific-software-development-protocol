@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import copy
 import sys
+import tempfile
 import unittest
 from unittest import mock
 from pathlib import Path
@@ -19,10 +20,49 @@ class Protocol65ReleaseStateTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
         cls.path = ROOT / "PROTOCOL-RELEASE-STATE.yaml"
-        cls.data = yaml.safe_load(cls.path.read_text(encoding="utf-8"))
+        cls.data = release_state.load(cls.path)
 
     def test_repository_release_state_is_coherent_and_refs_realize(self) -> None:
         self.assertEqual(release_state.validate_release_state(self.data, repo_root=ROOT), [])
+
+
+    def test_release_state_load_rejects_duplicate_mapping_keys(self) -> None:
+        records = (
+            """schema_version: 1
+schema_version: 1
+""",
+            """candidate:
+  version: "6.5.0"
+  semantic_ref: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+  semantic_ref: bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+""",
+            """candidate:
+  review:
+    state: NOT_RUN
+    state: PASS
+""",
+            """accepted_current:
+  version: "6.4.0"
+  public_source_ref: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+  public_source_ref: bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+""",
+            """historical:
+  "6.3.0":
+    public_source_ref: NONE
+  "6.3.0":
+    public_source_ref: NONE
+""",
+        )
+        for record in records:
+            with self.subTest(record=record):
+                with tempfile.TemporaryDirectory() as tmpdir:
+                    path = Path(tmpdir) / "state.yaml"
+                    path.write_text(record, encoding="utf-8")
+                    with self.assertRaisesRegex(
+                        yaml.constructor.ConstructorError,
+                        "found duplicate key",
+                    ):
+                        release_state.load(path)
 
     def _review_evidence_errors(
         self,
@@ -723,6 +763,47 @@ semantic_ref: {"c" * 40}
         }
         errors = release_state.validate_release_state(data)
         self.assertTrue(any("accepted_current cannot equal candidate.version" in error for error in errors))
+
+    def test_active_candidate_rejects_historical_or_older_version(self) -> None:
+        data = copy.deepcopy(self.data)
+        data["candidate"] = {
+            "version": "6.3.0",
+            "semantic_ref": "9f353097fab36e325a325f1c2f9d9cec32e86177",
+            "review": {"state": "NOT_RUN", "evidence_ref": "NONE"},
+            "ratification": {"state": "NOT_REQUESTED", "evidence_ref": "NONE"},
+            "public_source_ref": "UNAVAILABLE",
+            "recovery_ref": "UNAVAILABLE",
+        }
+        errors = release_state.validate_release_state(data, repo_root=ROOT)
+        self.assertTrue(any("duplicates a historical version" in error for error in errors))
+        self.assertTrue(any("must be newer than accepted_current.version" in error for error in errors))
+
+        data = copy.deepcopy(self.data)
+        data["candidate"] = {
+            "version": "6.3.1",
+            "semantic_ref": "UNFROZEN",
+            "review": {"state": "NOT_RUN", "evidence_ref": "NONE"},
+            "ratification": {"state": "NOT_REQUESTED", "evidence_ref": "NONE"},
+            "public_source_ref": "UNAVAILABLE",
+            "recovery_ref": "UNAVAILABLE",
+        }
+        errors = release_state.validate_release_state(data)
+        self.assertTrue(any("must be newer than accepted_current.version" in error for error in errors))
+        self.assertFalse(any("duplicates a historical version" in error for error in errors))
+
+    def test_active_candidate_accepts_patch_minor_and_major_successors(self) -> None:
+        for version in ("6.4.1", "6.5.0", "7.0.0"):
+            with self.subTest(version=version):
+                data = copy.deepcopy(self.data)
+                data["candidate"] = {
+                    "version": version,
+                    "semantic_ref": "UNFROZEN",
+                    "review": {"state": "NOT_RUN", "evidence_ref": "NONE"},
+                    "ratification": {"state": "NOT_REQUESTED", "evidence_ref": "NONE"},
+                    "public_source_ref": "UNAVAILABLE",
+                    "recovery_ref": "UNAVAILABLE",
+                }
+                self.assertEqual(release_state.validate_release_state(data), [])
 
     def test_terminal_cutover_and_next_candidate_are_legal_state_transitions(self) -> None:
         data = copy.deepcopy(self.data)

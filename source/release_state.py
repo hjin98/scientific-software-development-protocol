@@ -71,6 +71,11 @@ def _evidence(value: Any, where: str, errors: list[str], *, required: bool) -> s
     return text
 
 
+def _semver_tuple(value: str) -> tuple[int, int, int]:
+    major, minor, patch = value.split(".")
+    return int(major), int(minor), int(patch)
+
+
 def _git(root: Path, *args: str) -> tuple[int, str]:
     result = subprocess.run(
         ["git", "-C", str(root), *args],
@@ -291,7 +296,8 @@ def validate_release_state(data: Any, *, repo_root: Path | None = None) -> list[
 
     accepted = _mapping(root.get("accepted_current"), "accepted_current", errors)
     accepted_version = str(accepted.get("version") or "")
-    if not SEMVER_RE.fullmatch(accepted_version):
+    accepted_version_valid = SEMVER_RE.fullmatch(accepted_version) is not None
+    if not accepted_version_valid:
         errors.append("accepted_current.version must be semantic x.y.z")
     accepted_public = _sha_or(accepted.get("public_source_ref"), set(), "accepted_current.public_source_ref", errors)
     accepted_recovery = _sha_or(accepted.get("recovery_ref"), set(), "accepted_current.recovery_ref", errors)
@@ -318,8 +324,20 @@ def validate_release_state(data: Any, *, repo_root: Path | None = None) -> list[
 
     candidate = _mapping(root.get("candidate"), "candidate", errors)
     candidate_version = str(candidate.get("version") or "")
-    if not SEMVER_RE.fullmatch(candidate_version):
+    candidate_version_valid = SEMVER_RE.fullmatch(candidate_version) is not None
+    if not candidate_version_valid:
         errors.append("candidate.version must be semantic x.y.z")
+    if candidate_version_valid and candidate_version in historical:
+        errors.append(f"candidate.version {candidate_version} duplicates a historical version")
+    if (
+        candidate_version_valid
+        and accepted_version_valid
+        and candidate_version != accepted_version
+        and _semver_tuple(candidate_version) <= _semver_tuple(accepted_version)
+    ):
+        errors.append(
+            "candidate.version must be newer than accepted_current.version while it is the active successor"
+        )
     semantic_ref = _sha_or(candidate.get("semantic_ref"), {"UNFROZEN"}, "candidate.semantic_ref", errors)
     public_ref = _sha_or(candidate.get("public_source_ref"), {"UNAVAILABLE"}, "candidate.public_source_ref", errors)
     recovery_ref = _sha_or(candidate.get("recovery_ref"), {"UNAVAILABLE"}, "candidate.recovery_ref", errors)
@@ -420,7 +438,7 @@ def validate_release_state(data: Any, *, repo_root: Path | None = None) -> list[
 
 
 def load(path: Path) -> Any:
-    return yaml.safe_load(path.read_text(encoding="utf-8"))
+    return yaml.load(path.read_text(encoding="utf-8"), Loader=_UniqueKeySafeLoader)
 
 
 def main() -> int:

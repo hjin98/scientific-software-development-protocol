@@ -3,7 +3,7 @@ kind: implementation-workplan
 workplan_id: SSDP-6.5-D3-D4-IMPLEMENTATION-HANDOFF
 protocol_version: 6.4.0
 target_protocol_version: 6.5.0
-status: reopened-p5-review-repair-required
+status: repair-implemented-replacement-candidate-pending
 parent_workplan: workplans/active/SSDP-6.5-FRONTIER-MODEL-RE-EVALUATION.md
 design_authority: qualification/ssdp65/PHASE-IV-V-DESIGN-CLOSURE.md
 baseline: 55c085261eb827e3047637d045a8e6917ea6b962
@@ -500,3 +500,15 @@ Alter only the existing D4 state validator:
 - add lower/equal/historical negative fixtures and patch/minor/major successor positives.
 
 P5 `d2d672a3e814438fb618f901137f88c8698a205d` remains immutable. Repair must freeze a new candidate and rerun affected exact-candidate qualification plus fresh independent Review. No registry, mirror, compatibility subsystem, synchronized phase table, or D3 redesign is authorized.
+
+
+## 19. B65-P5-1 / B65-P5-2 D4 repair closure
+
+Implemented by direct alteration inside the existing release-state owner:
+
+- root state YAML now rejects duplicate mappings before semantic validation using the same strict loader already used for evidence front matter;
+- active pre-cutover candidate versions must be newer than accepted-current and cannot collide with historical versions;
+- terminal accepted-current == candidate remains legal only through the existing fully closed terminal predicate;
+- focused tests exercise the actual root load boundary, a real historical-ref collision, a lower non-historical candidate, and patch/minor/major successor controls.
+
+P5 remains immutable and is now bound to its durable NO-PASS evidence in mutable lifecycle state. The replacement semantic candidate is the implementation commit containing these changes; its exact SHA must be frozen and qualified from a later descendant before fresh independent Review.

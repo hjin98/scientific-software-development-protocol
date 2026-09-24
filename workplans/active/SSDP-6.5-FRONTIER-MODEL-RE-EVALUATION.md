@@ -5,8 +5,8 @@ protocol_version: 6.4.0
 target_protocol_version: 6.5.0
 subject_baseline: P0 = Protocol 6.4 at 55c085261eb827e3047637d045a8e6917ea6b962 (recovery 74bc572ef516cae417437a2027eeff52a2e25c15)
 diagnostic_commit: 81375d8142a8130b80cd82f2304d3e16bc3fc390
-status: active-p5-review-no-pass-repair-required
-current_phase: PHASE VII P5 NO-PASS / D4 REPAIR REQUIRED
+status: active-p5-review-repair-implemented
+current_phase: PHASE VI P5 REVIEW REPAIR IMPLEMENTED / REPLACEMENT CANDIDATE FREEZE
 branch: ssdp-6.5-frontier-model-re-evaluation
 created_date: 2026-09-24
 adjudication: qualification/ssdp65/CROSS-MODEL-ADJUDICATION-2026-09-24.md
@@ -761,3 +761,27 @@ Rerun the two focused blocker matrices, the complete Review/ratification evidenc
 P5 runs `36047926253`, `36048168248`, and `36048331437` remain historical observations for the exact subjects/oracles they exercised; they do not transfer whole-candidate acceptance.
 
 No stakeholder ratification, public-fallback publication, recovery establishment, accepted-current cutover, PR merge, or Protocol 7 D3/D4 mutation is authorized.
+
+
+## 26. B65-P5-1 / B65-P5-2 implementation closure
+
+The two P5 Review blockers are repaired at the existing D4 release-state owner without reopening accepted P65 D3.
+
+### B65-P5-1
+
+`source/release_state.py` now applies the already-existing duplicate-rejecting SafeLoader to the authoritative root `PROTOCOL-RELEASE-STATE.yaml` load boundary as well as Review/ratification evidence front matter. Focused tests exercise duplicate top-level and nested lifecycle mappings through the real `load()` path rather than pre-normalizing them with `yaml.safe_load`.
+
+### B65-P5-2
+
+The existing release-state validator now requires any active pre-cutover candidate version to be strictly newer than `accepted_current.version` under semantic-version tuple ordering and rejects collision with historical version keys. The already-valid terminal state where accepted-current equals the fully reviewed/ratified/published/recovered candidate remains governed by the existing terminal predicate.
+
+Focused tests include:
+
+- a real immutable Protocol 6.3 ref used as an invalid historical active candidate under accepted-current 6.4;
+- a non-historical lower-version negative;
+- patch, minor, and major successor positives;
+- the existing terminal cutover and next-successor controls.
+
+No state mirror, candidate registry, synchronized phase table, compatibility subsystem, semantic parser, new dependency, or D3 change was introduced.
+
+This implementation commit also records the already-issued P5 NO-PASS in the sole mutable release-state owner. P5 remains immutable. The exact replacement candidate identity is this implementation commit and must be named/bound only from a later descendant after exact-candidate qualification.
