@@ -5,8 +5,8 @@ protocol_version: 6.4.0
 target_protocol_version: 6.5.0
 subject_baseline: P0 = Protocol 6.4 at 55c085261eb827e3047637d045a8e6917ea6b962 (recovery 74bc572ef516cae417437a2027eeff52a2e25c15)
 diagnostic_commit: 81375d8142a8130b80cd82f2304d3e16bc3fc390
-status: reopened-independent-review-no-pass
-current_phase: PHASE VII INDEPENDENT REVIEW NO-PASS / D4 REPAIR REQUIRED
+status: active-p2-review-ready
+current_phase: PHASE VII P2 FROZEN / FRESH INDEPENDENT REVIEW REQUIRED
 branch: ssdp-6.5-frontier-model-re-evaluation
 created_date: 2026-09-24
 adjudication: qualification/ssdp65/CROSS-MODEL-ADJUDICATION-2026-09-24.md
@@ -31,9 +31,11 @@ SUCCESSOR DECISION:                 PROTOCOL 6.5 WARRANTED
 D1-D4 DOMAIN MODEL:                 PRESERVE
 PHASE IV PRINCIPLE EXTRACTION:      COMPLETE — qualification/ssdp65/PHASE-IV-V-DESIGN-CLOSURE.md
 PHASE V CANDIDATE DESIGN:           COMPLETE — DESIGN PASS
-PHASE VI IMPLEMENTATION:            REOPENED AT D4 — independent Review blockers B65-R1..R3
+PHASE VI IMPLEMENTATION:            REPAIR COMPLETE — B65-R1..R3 + sibling phase-oracle closure
 P1 CANDIDATE:                       FROZEN / FAILED REVIEW — b565e28aeacea002cefe27e6b9594fe99d653c0a
-PHASE VII QUALIFICATION/REVIEW:     NO-PASS — qualification/ssdp65/INDEPENDENT-REVIEW-2026-09-24-PROTOCOL-6.5-NO-PASS.md
+P2 CANDIDATE:                       FROZEN — e8edb353e172aef933ed5e58eeabe897d0cc98d1
+P2 EXACT PR QUALIFICATION:          PASS — run 35996488794
+PHASE VII QUALIFICATION/REVIEW:     READY FOR FRESH P2 REVIEW
 PROTOCOL 7 D3/D4:                   OUT OF SCOPE / UNCHANGED
 ```
 
@@ -409,3 +411,28 @@ After R65-1..R65-3:
 7. perform a new fresh independent assembled-candidate Review.
 
 Exact-P1 runs 35985539212 / 35985871148 and descendant run 35986452433 remain historical evidence for their exact subjects only.
+
+
+## 17. P2 repair closure and handoff
+
+The D4 repair ordered by the P1 independent Review is complete.
+
+- B65-R1: closed by real immutable Review-evidence route resolution and exact candidate/disposition binding in the existing release-state validator.
+- B65-R2: closed by removing live candidate-phase copies from long-lived tests; the inherited Protocol 6.4 sibling phase oracle was repaired under the same defect family.
+- B65-R3: closed by removing predecessor-version gates from current workflow semantics and regenerating the 6.5 prompt/profile from canonical source.
+- D3: not reopened.
+- Serious Challenge: none.
+
+Exact replacement candidate:
+
+`e8edb353e172aef933ed5e58eeabe897d0cc98d1`
+
+Exact normal PR qualification:
+
+`35996488794` — PASS.
+
+Durable repair evidence: `qualification/ssdp65/P2-REPAIR-QUALIFICATION.md`.
+Freeze binding: `qualification/ssdp65/P2-FREEZE-BINDING.md`.
+Current Review handoff: `qualification/ssdp65/INDEPENDENT-REVIEW-HANDOFF-PROTOCOL-6.5.md`.
+
+P1 remains an immutable failed candidate. A fresh non-authoring context must independently Review P2 before any stakeholder ratification/publication/recovery/cutover action.

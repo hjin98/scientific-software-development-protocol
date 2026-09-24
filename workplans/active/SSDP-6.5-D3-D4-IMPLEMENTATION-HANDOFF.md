@@ -3,7 +3,7 @@ kind: implementation-workplan
 workplan_id: SSDP-6.5-D3-D4-IMPLEMENTATION-HANDOFF
 protocol_version: 6.4.0
 target_protocol_version: 6.5.0
-status: reopened-d4-after-independent-review-no-pass
+status: repair-complete-p2-frozen
 parent_workplan: workplans/active/SSDP-6.5-FRONTIER-MODEL-RE-EVALUATION.md
 design_authority: qualification/ssdp65/PHASE-IV-V-DESIGN-CLOSURE.md
 baseline: 55c085261eb827e3047637d045a8e6917ea6b962
@@ -328,10 +328,10 @@ Raise Serious Challenge if accepted D1-D4/formal-definition doctrine itself is s
 
 ```text
 D3 DESIGN: PASS / NOT REOPENED
-PHASE VI IMPLEMENTATION: REOPENED AT D4 — B65-R1..R3
-FINAL PRE-FREEZE FULL RUN: 35985539212 / PASS
-P1 NORMAL PR QUALIFICATION: 35985871148 / PASS
-P1: FROZEN — b565e28aeacea002cefe27e6b9594fe99d653c0a
+PHASE VI IMPLEMENTATION: REPAIR COMPLETE
+P1: FROZEN / FAILED REVIEW — b565e28aeacea002cefe27e6b9594fe99d653c0a
+P2: FROZEN — e8edb353e172aef933ed5e58eeabe897d0cc98d1
+P2 NORMAL PR QUALIFICATION: 35996488794 / PASS
 PUBLIC 6.5 FALLBACK: UNAVAILABLE
 6.5 RECOVERY: UNAVAILABLE
 6.5 RATIFICATION: NOT REQUESTED
@@ -351,3 +351,14 @@ The accepted D3 design remains valid. Fresh independent Review found three D4/cu
 Repair by alteration/removal inside existing owners. Do not add a state mirror, semantic parser, compatibility wrapper or prose theorem prover.
 
 P1 b565e28aeacea002cefe27e6b9594fe99d653c0a is immutable and failed Review. The repaired implementation must freeze a new semantic candidate and rerun affected Phase VII evidence plus fresh independent Review.
+
+
+## 11. P2 D4 repair closure
+
+B65-R1 through B65-R3 are implemented at their existing D4/current-representation owners with no P65 D3 redesign.
+
+The repair also removed the sibling live-phase oracle in `tests/test_protocol_64_axiomatic_traceability.py`, because it encoded the same duplicated mutable lifecycle truth as B65-R2.
+
+Exact P2 is `e8edb353e172aef933ed5e58eeabe897d0cc98d1`; normal repository qualification run `35996488794` passed both build and Orchestrator Core jobs.
+
+Implementation is complete for the bounded repair. The next stage is a fresh independent assembled-candidate Review of P2 by a non-authoring context.

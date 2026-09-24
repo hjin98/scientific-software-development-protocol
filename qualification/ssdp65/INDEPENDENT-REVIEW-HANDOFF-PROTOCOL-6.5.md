@@ -1,24 +1,27 @@
 ---
 kind: independent-review-handoff
 protocol_under_review: 6.5.0
-status: ready
+status: ready-p2
 accepted_control_p0: 55c085261eb827e3047637d045a8e6917ea6b962
-immutable_candidate_p1: b565e28aeacea002cefe27e6b9594fe99d653c0a
+failed_candidate_p1: b565e28aeacea002cefe27e6b9594fe99d653c0a
+immutable_candidate_p2: e8edb353e172aef933ed5e58eeabe897d0cc98d1
 candidate_branch: ssdp-6.5-frontier-model-re-evaluation
 draft_pr: 33
-p1_mechanical_qualification_run: 35985871148
+p2_mechanical_qualification_run: 35996488794
+p1_review: qualification/ssdp65/INDEPENDENT-REVIEW-2026-09-24-PROTOCOL-6.5-NO-PASS.md
+p2_repair_qualification: qualification/ssdp65/P2-REPAIR-QUALIFICATION.md
 authoring_context_verdict: none
 stakeholder_ratification: NOT_REQUESTED
 ---
 
-# Independent Review Handoff — Protocol 6.5
+# Independent Review Handoff — Protocol 6.5 P2
 
-## 1. Review target and independence contract
+## 1. Immutable Review target
 
-Perform a **fresh independent assembled-candidate Review** of immutable Protocol 6.5 candidate:
+Perform a fresh independent assembled-candidate Review of:
 
 ```text
-P1 = b565e28aeacea002cefe27e6b9594fe99d653c0a
+P2 = e8edb353e172aef933ed5e58eeabe897d0cc98d1
 ```
 
 against accepted Protocol 6.4 control:
@@ -27,186 +30,124 @@ against accepted Protocol 6.4 control:
 P0 = 55c085261eb827e3047637d045a8e6917ea6b962
 ```
 
-Review P1 itself, not the mutable branch head, PR diff, implementation summary, prior diagnostic verdicts, CI status, or author conclusions.
+P1 `b565e28aeacea002cefe27e6b9594fe99d653c0a` is the prior immutable candidate that received NO-PASS. It is historical evidence, not the current Review target.
 
-The reviewer/context MUST NOT have authored P1. Reconstruct applicable authority independently. Prior Opus 5.5 diagnostic, GPT-5.6 Sol historical Review corpus, cross-model adjudication, workplans, preservation map, CI and this handoff are evidence to challenge, not conclusions to inherit.
+Do not review the mutable branch head as candidate semantics. Resolve mutable lifecycle state only from a later descendant that binds P2.
 
-Different model-family evidence is useful corroboration but does not replace authorship/conclusion independence.
+The reviewer/context MUST NOT have authored P2 or inherit the repair author’s conclusions. Reconstruct authority independently from the assembled P2 owners. P1 Review findings, repair qualification, workplans, preservation map, CI, prior Sol/Opus diagnostics and this handoff are evidence to challenge, not authority for the verdict.
 
-## 2. Governing materials to reconstruct
+## 2. Required authority reconstruction
 
-At minimum read/reconstruct from P1:
+Reconstruct at least:
 
-1. current D1-D4 role owners and universal kernel;
-2. `workplans/active/SSDP-6.5-FRONTIER-MODEL-RE-EVALUATION.md`;
-3. `workplans/active/SSDP-6.5-D3-D4-IMPLEMENTATION-HANDOFF.md`;
-4. `qualification/ssdp65/PHASE-IV-V-DESIGN-CLOSURE.md`;
-5. `qualification/ssdp65/BENCHMARK-AND-EVALUATION-DESIGN.md`;
-6. `qualification/ssdp65/PROTOCOL-6.4-TO-6.5-PRESERVATION-MAP.md`;
-7. `qualification/ssdp65/P1-PREFREEZE-READINESS.md`;
-8. `PROTOCOL-RELEASE-STATE.yaml` from the binding descendant only for mutable lifecycle state; candidate semantics remain P1;
-9. self-hosted `PROJECT-ENGINEERING-MEMORY.md` and `history/SEMANTIC_EVOLUTION.md`;
-10. accepted Protocol 6.4 consolidated workplan and final Review evidence as preservation baseline.
+- universal abstraction/concretization kernel;
+- D1/D2/D3/D4 owners;
+- evidence/evolution/dependency doctrine;
+- testing/qualification doctrine;
+- workflow/workplan/Review doctrine;
+- PEM doctrine and current applicable HAS;
+- versioning/recovery/publication doctrine;
+- Lossless Representation/progressive disclosure;
+- accepted 6.4 P64-A..P64-O, QF64-A..QF64-P semantic capabilities and F64-A..F64-L falsification protections;
+- Protocol 7 isolation.
 
-Do not use repository default/latest as a semantic-version oracle.
+Also inspect the active 6.5 workplans, Phase IV-V design closure, benchmark design, preservation map, P1 NO-PASS Review, P2 repair qualification/freeze binding, PEM, semantic history and accepted 6.4 final Review evidence.
 
-## 3. Evidence already available, with bounded claims
+## 3. P1 failure and P2 repair evidence to falsify
 
-### Exact P1 mechanical qualification
+Do not assume these are closed merely because exact-P2 CI is green.
 
-Draft PR #33 evaluated exact P1 in normal repository workflow run `35985871148` after the branch-only implementation workflow had been removed.
+### B65-R1
+P1 accepted syntactically valid Review evidence without proving that the immutable route existed or bound the exact candidate/disposition.
 
-Observed:
-- build job PASS;
-- release-state validation PASS;
-- PEM validation PASS;
-- inherited protocol regression PASS;
-- canonical package build + independent validation PASS;
-- committed distribution parity PASS;
-- whitespace PASS;
-- packaged 6.5 snapshot parity PASS;
-- Orchestrator Core PASS.
+P2 claims to repair this in the existing release-state validator through immutable route resolution, repository/path safety, Review-frontmatter candidate binding and disposition matching.
 
-This establishes the properties those executable oracles discriminate. It does **not** establish arbitrary prose semantic adequacy or engineering-outcome superiority.
+Attempt at least:
+- nonexistent commit;
+- nonexistent path;
+- wrong repository;
+- wrong candidate;
+- wrong Review disposition;
+- valid exact binding;
+- a superficially well-formed route that should not establish semantic Review truth beyond its machine-readable binding.
 
-### Earlier implementation evidence
+### B65-R2
+P1 had live tests that duplicated the mutable Review phase. Repair also found the same family in inherited Protocol 6.4 tests.
 
-Run `35985539212` is the final full branch implementation run immediately before freeze and also passed all implementation gates. Earlier failed runs are retained as development evidence and must not be rewritten into passes.
+P2 claims to remove phase copies and retain only lifecycle/state-machine invariants plus immutable historical release identity.
 
-## 4. Mandatory Phase VII semantic falsification
+Attempt a legal lifecycle transition and check whether any current test/document must be edited merely to follow the owner.
 
-Use fresh reasoning rather than the author's obligation matrix as your search boundary.
+### B65-R3
+P1’s current 6.5 operational workflow predecessor-gated inherited safeguards using `Protocol 6.4`.
 
-### 4.1 Admitted defect families
+P2 claims to generalize those duties at the canonical prompt and regenerate the 6.5 snapshot.
 
-Attempt to falsify closure of all four:
+Attempt a literal 6.5 execution interpretation and search current non-historical operational source for equivalent version-conditioned inherited obligations, not only the exact old phrase.
 
-- **DF-1** release-state/version lifecycle ownership;
-- **DF-2** qualification/Review epistemology;
-- **DF-3** meta-control semantics/governance;
-- **DF-4** representation/schema/convergence self-application.
+## 4. Exact-P2 mechanical evidence
 
-For each, inspect actual owners and actual assembled behavior. A local test that passes its own model is not enough.
+Normal repository pull-request run `35996488794` evaluated exact P2 and passed:
 
-### 4.2 Local-compliance/global-failure search
+- release-state validation;
+- PEM validation;
+- complete protocol regression tests;
+- canonical package build;
+- independent package validation;
+- committed distribution parity;
+- whitespace;
+- current 6.5 snapshot parity;
+- Orchestrator Core.
 
-Construct plausible trajectories where every obvious local rule appears satisfied while a protected global invariant fails. Include at least:
+Use this only for properties those oracles discriminate.
 
-- conflicting or stale lifecycle projections;
-- exact-wording/proxy oracle that passes while canonical meaning is defective;
-- false Serious Challenge or missed Serious Challenge;
-- semantic mutation disguised as clarification;
-- accepted PEM/history/derived view acting as hidden authority;
-- lower-layer implementation strengthening or narrowing upstream meaning;
-- generated/profile/package consistency masking wrong canonical semantics.
+Intermediate repair commits failed before the final repair converged. Preserve those failures as development evidence; do not rewrite them as passes.
 
-Record either surviving counterexamples or the exact falsification attempt and why none survived.
+## 5. Full Phase VII obligations remain
 
-### 4.3 Out-of-matrix abstraction-adequacy pass
+The P2 Review is not a patch-only re-review. Re-execute the required assembled-candidate falsification proportionately:
 
-Temporarily ignore the author workplan, preservation matrix and known defect list. Reconstruct global invariants from current owners and search for at least one material defect class not represented by the author's matrix. The requirement is to attempt the search, not to invent a finding.
+1. Serious Challenge pass.
+2. DF-1 through DF-4.
+3. local-compliance/global-failure trajectories.
+4. out-of-matrix abstraction-adequacy and qualification-method challenge.
+5. fresh post-P2 semantic mutation/counterexample set with prose versus executable oracle separation and paraphrase controls.
+6. P65-1..P65-6 causal ablation, reusing prior evidence only when candidate applicability genuinely survives.
+7. preservation-map falsification across P64/QF64/F64 capabilities.
+8. simplicity/ownership/compression review.
+9. mechanical evidence applicability.
+10. targeted P0/P2 comparison on lifecycle drift, proxy-oracle adequacy, Challenge routing and mature-system simplification, retaining at least one historical/novel holdout family.
 
-Explicitly challenge the **qualification method itself**: identify any claim that exceeds what its oracle/method can discriminate.
+Replication remains proportional to uncertainty. Do not manufacture a second frontier result.
 
-### 4.4 Fresh post-freeze semantic mutation/counterexample set
+## 6. Repair-era simplicity evidence
 
-Author a fresh set after seeing P1, independent of P1 authoring. Arbitrary prose semantic mutants are judged by semantic Review; machine-readable/state/schema/generated mutants use executable oracles. Include meaning-preserving paraphrase controls where wording is not itself a contract.
+Author-side measurement, to be independently verified:
 
-Do not optimize for a mutation-detection percentage by inventing a prose theorem prover or exact-string pins.
+- universal kernel: P0 2,642 words; P2 2,642;
+- D1-D4 hot owner contexts remain three words below P0 as in P1;
+- defined hot-current projection: P0 10,540 -> P2 7,354 words;
+- accepted-6.4 public fallback SHA copies in that scope: 20 -> 0;
+- accepted-6.4 recovery SHA copies: 12 -> 0;
+- frozen Protocol 5.16 and 6.0–6.4 orchestrator resource paths: 12 compared P0/P2, zero object differences.
 
-## 5. P65-1..P65-6 ablation obligations
+Compression is evidence only if capability remains lossless.
 
-For each principle, remove/weaken only that principle conceptually or in an isolated test candidate and ask whether its motivating counterexample reappears.
+## 7. Review disposition
 
-- **P65-1 Self-application:** can SSDP exempt its own qualification/release artifacts and thereby admit proxy/self-approval failure?
-- **P65-2 State/semantics separation:** can immutable versioned semantics become stale after lifecycle transition while package parity stays green?
-- **P65-3 Evidence-claim congruence:** can a fixture/phrase oracle pass while the claimed canonical semantic property is false?
-- **P65-4 Review abstraction adequacy:** can the author matrix pass while an unmodeled global invariant fails?
-- **P65-5 Minimal meta-governance:** can materiality/Challenge/independence/ratification/accepted-PEM ambiguity change disposition?
-- **P65-6 Integrated current representation:** can amendment replay, stale labels or duplicated current truth create conflicting owners or unnecessary hot context?
+PASS only if no genuine blocker survives all required falsification and evidence obligations.
 
-An ablation PASS means the principle is causally useful on its motivating case or a holdout; otherwise recommend removal/compression.
+PASS means technical eligibility for stakeholder ratification only. It does not ratify 6.5, publish fallback, establish recovery, change accepted-current, merge PR #33 or mutate Protocol 7.
 
-## 6. Targeted P0/P1 behavior comparison
+If a blocker survives:
+- issue NO-PASS;
+- preserve P2 immutably;
+- reopen the owning layer;
+- require a new candidate identity for semantic repair;
+- identify stale evidence precisely.
 
-Because 6.5 is an intelligence-uplift release, execute matched P0/P1 trials on at least four difficult tasks spanning:
+## 8. Known limitation
 
-1. lifecycle/current-state drift;
-2. proxy/oracle adequacy;
-3. authority/Challenge routing;
-4. mature-system simplification/review convergence.
+The second contemporary frontier diagnostic remains waived for this cycle because of resource limits. Do not describe the evidence as two-frontier-model replication.
 
-Use identical task, repository snapshot, model, tools and budget per pair. Record exact model identifier/date and trajectory evidence. Replicate only stochastic/ambiguous cases where another realization can change the bounded conclusion.
-
-Use GPT-5.6 Sol as historical/control model when available. Opus 5.5/frontier paired trials are valuable when resource permits; if unavailable, state that limitation and make no quantitative cross-frontier performance claim.
-
-Reserve at least one holdout/novel task family not used to design P1. Follow the preregistration and its dated benchmark-defect amendment; do not move criteria because P1 performs poorly.
-
-## 7. Simplicity and preservation falsification
-
-Independently verify rather than merely trust reported counts:
-
-- P0/P1 always-loaded kernel/context words;
-- duplicated generic rule/value copies;
-- release lifecycle/state projections;
-- exact-string semantic pins;
-- current-owner/schema duplications;
-- frozen 5.16-6.4 profile/resource identities;
-- full 6.4 -> 6.5 preservation/supersession map, including P64-A..P64-O, QF64 semantic capabilities and F64 falsification capabilities.
-
-A smaller representation is not automatically better; any compression that loses a validated protection is a blocker.
-
-## 8. Review disposition
-
-### Serious Challenge
-
-Raise **SERIOUS CHALLENGE** first only if accepted P0/upstream authority itself has a concrete materially consequential contradiction, ambiguity, inadequacy, incompatibility or unrealizability. Do not use Challenge for ordinary P1 defects.
-
-### Blocking finding
-
-A genuine P1 blocker must identify:
-
-```text
-finding
--> exact owner
--> violated invariant
--> counterexample/evidence
--> consequence
--> smallest owning-layer repair
--> affected qualification to rerun
-```
-
-Prefer removal/rewiring/owner correction over patches, wrappers, duplicate state or special-case machinery.
-
-### PASS
-
-PASS only if:
-- no genuine blocking semantic/preservation/qualification defect survives;
-- required Phase VII checks are executed rather than assumed;
-- P1 preservation is lossless or explicitly justified where superseded;
-- P0/P1 comparison satisfies the preregistered acceptance rule;
-- limitations are stated honestly.
-
-A Review PASS means **technical eligibility only**. Do not ratify Protocol 6.5, publish its public fallback, establish recovery, change accepted-current, merge the draft PR, or update Protocol 7 inheritance. Those are later lifecycle steps.
-
-## 9. Required outputs
-
-Write durable evidence under `qualification/ssdp65/`:
-
-1. Phase VII qualification/results record with exact P0/P1/model/tool identities and limitations;
-2. fresh mutation/counterexample set and outcomes;
-3. P65-1..P65-6 ablation record;
-4. targeted P0/P1 behavior-comparison record;
-5. independent assembled-candidate Review with PASS / NO-PASS and precise blockers if any.
-
-If blockers exist, reopen the active 6.5 workplan with exact owning-layer repair instructions and do not mutate P1; repairs create a new candidate identity.
-
-If no blocker remains, leave `PROTOCOL-RELEASE-STATE.yaml` candidate Review state ready for a later binding descendant to publish the Review evidence. Do not self-ratify.
-
-## 10. Known limitations carried into Review
-
-- second contemporary frontier diagnostic was waived for this cycle due resource limits; do not claim two-frontier diagnostic replication;
-- authoring context cannot serve as the independent final reviewer;
-- downstream mdstats history HO3 was not available during the preregistration unless separately supplied now;
-- mechanical CI cannot establish arbitrary prose semantics;
-- branch head after this handoff is a lifecycle descendant, not P1.
+This repair/authoring context is not eligible to self-issue the independent P2 Review verdict.
