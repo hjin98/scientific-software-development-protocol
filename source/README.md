@@ -38,6 +38,8 @@ Key owners:
 - workflow/HAS/Review/closeout -> `shared/references/workflow-and-workplans.md`
 - evidence/dependency/applicability -> `shared/references/evidence-evolution-and-dependencies.md`
 - testing/qualification -> `shared/references/testing-and-validation.md`
+- relation-first optional engineering tools -> `shared/references/tool-assisted-engineering.md`
+- language/runtime routing -> `shared/references/language-profiles.md`
 - PEM schema/representation -> `shared/references/project-engineering-memory.md`
 - version/fallback/recovery/acceptance semantics -> `shared/references/protocol-versioning-and-compatibility.md`
 - Git accepted-base/overlay/publication -> `shared/references/git-and-version-control.md`

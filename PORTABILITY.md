@@ -8,6 +8,8 @@ Authority roles are `scientific-formulation`, `numerical-algorithm-design`, `sof
 
 ## Routing contract
 
+The universal routing/representation kernel is `source/shared/references/abstraction-and-concretization.md`. Package membership is not activation.
+
 The active role/specialist `SKILL.md` owns root activation. It routes to the universal kernel/owning concern; a concern owner may conditionally dispatch to a narrower leaf only within that concern.
 
 ```text
@@ -46,6 +48,14 @@ Portable packages carry enough canonical owner routes to recover materially requ
 ## Project-memory portability boundary
 
 PEM remains conditionally activated. Generic packages include schema/doctrine/template only; project-local memory stays with the governed project. Missing/partial memory cannot prove historical absence.
+
+## Optional environment capabilities and live tool qualification
+
+External analyzers and tool integrations are **optional environment capabilities**, not generic agent skill validity requirements. Install a skill as a direct child of the supported skills root independently of whether optional external tools are installed.
+
+A **reference-routing sentinel** and other static package/routing validation can establish that the correct reference path is packaged and discoverable. Static package/routing validation cannot prove live tool availability, invocation, behavioral correctness, or model/harness routing behavior.
+
+Tool-routing qualification is bound to the **named harness/model/install mode** and tool environment actually exercised. Record named harness/model/tool evidence and concrete fallback behavior. Do not infer another environment from one run, and do not generalize one live result to an untested harness/model/tool combination.
 
 ## Packaging and qualification
 

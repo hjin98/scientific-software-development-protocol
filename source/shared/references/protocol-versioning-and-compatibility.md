@@ -63,9 +63,18 @@ A material semantic mutation after Review invalidates Review/ratification for th
 
 ## Capability preservation across versions
 
+Protocol 6 generalizes Protocol 5 capability rather than invalidating supported version-bound semantics, and recovers the former software-local design->implementation specialization inside the broader D1->D4 abstraction/concretization system.
+
+Historical capability lineage includes:
+- **5.13 deterministic tool entry/CodeQL/progressive disclosure**;
+- **5.14 solution-boundary/active simplicity**;
+- **5.15 language profiles/cross-language performance**;
+- **5.16 long-horizon health/verification/stabilization/maintenance audit/workflow prompts/public fallback**;
+- **Protocol 6.2 is a backward-compatible representation/progressive-disclosure strengthening** over the accepted Protocol 6 line.
+
 Capability, not obsolete wording, is the compatibility oracle. A successor must preserve every still-valid accepted capability or explicitly classify and justify its supersession/removal. Compression that loses behavior is a defect; historical terms need not remain hot when an equal-or-stronger current invariant preserves their meaning.
 
-Version-bound work remains interpreted under its declared `protocol_version`. A newer installed/default profile never silently reinterprets older work. Adoption of a compatible newer version reconciles only newly applicable obligations and materially affected evidence/dependencies.
+Version-bound work remains interpreted under its declared `protocol_version`. A newer installed/latest skill or default profile never silently reinterprets older work. Adoption of a compatible newer version reconciles only newly applicable obligations and materially affected evidence/dependencies.
 
 Frozen historical source/profile/publication/recovery artifacts remain historical truth and are never rewritten to current terminology. Current release mappings are resolved from the project release-state owner rather than replayed from this semantic owner.
 
@@ -89,7 +98,7 @@ Invalidated bootstrap attempts remain historical evidence only and must not be s
 
 ## Orchestration profiles
 
-Profiles remain independently version-bound. Schema identity is separate from protocol version. The 6.x profile family may reuse the same machine stage/result schema while carrying distinct version-intrinsic prompt semantics.
+Profiles remain independently version-bound. Schema identity is separate from protocol version. Supported profile identities include `sdp-protocol-5.16` and `ssdp-protocol-6.0` through `ssdp-protocol-6.5`. The 6.x profile family may reuse the same machine stage/result schema while carrying distinct version-intrinsic prompt semantics.
 
 Core selects by declared protocol/profile identity, not a global semantic "latest". When a new profile becomes current, every older supported profile remains frozen and independently testable. Generic packages/profiles may include PEM doctrine/templates but never a live project's `PROJECT-ENGINEERING-MEMORY.md` or mutable project release-state file.
 

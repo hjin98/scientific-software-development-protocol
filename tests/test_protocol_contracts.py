@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 import unittest
+
+import yaml
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -26,7 +28,8 @@ class Protocol6ContractTests(unittest.TestCase):
         version = tuple(int(part) for part in read("source/PROTOCOL_VERSION").strip().split("."))
         self.assertEqual(version[0], 6)
         self.assertGreaterEqual(version, (6, 2, 0))
-        self.assertIn("protocol 6.2", read("README.md").lower())
+        state = yaml.safe_load(read("PROTOCOL-RELEASE-STATE.yaml"))
+        self.assertIn("6.2.0", state["historical"])
         for skill in ("scientific-formulation", "numerical-algorithm-design", "software-design", "software-implementation"):
             self.assertTrue((ROOT / f"source/roles/{skill}/SKILL.md").is_file(), skill)
 
@@ -108,10 +111,12 @@ class Protocol6ContractTests(unittest.TestCase):
         self.assertIn("risk override", self.workflow)
 
     def test_historical_versions_are_immutable_and_not_silently_upgraded(self) -> None:
-        self.assertIn("5.16.0 -> e151daaf5c8eebb351a85cfed86170fda80fb5e3", self.versioning)
-        self.assertIn("6.0.0  -> 21d5188f5bd9a0270d7a2ebf93d41a6b7842ccd2", self.versioning)
-        self.assertIn("6.1.0  -> 802e75af261efb4f70d71284d860613a2197b639", self.versioning)
-        self.assertIn("newer installed/latest skill never silently reinterprets older work", self.versioning)
+        state = yaml.safe_load(read("PROTOCOL-RELEASE-STATE.yaml"))
+        self.assertEqual(state["historical"]["5.16.0"]["recovery_ref"], "e151daaf5c8eebb351a85cfed86170fda80fb5e3")
+        self.assertEqual(state["historical"]["6.0.0"]["recovery_ref"], "21d5188f5bd9a0270d7a2ebf93d41a6b7842ccd2")
+        self.assertEqual(state["historical"]["6.1.0"]["recovery_ref"], "802e75af261efb4f70d71284d860613a2197b639")
+        self.assertIn("newer installed/latest skill", self.versioning)
+        self.assertIn("never silently reinterprets older work", self.versioning)
 
     def test_build_registry_contains_four_roles_and_three_specialists(self) -> None:
         build = read("source/build_skills.py")

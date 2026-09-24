@@ -3,6 +3,8 @@ from __future__ import annotations
 import re
 import sys
 import unittest
+
+import yaml
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -88,13 +90,11 @@ class ProtocolPortabilityTests(unittest.TestCase):
         self.assertNotIn("templates/abstraction_realization_change_plan_template.md", d1 | d2)
 
     def test_historical_resolution_is_explicit(self) -> None:
+        state = yaml.safe_load((ROOT / "PROTOCOL-RELEASE-STATE.yaml").read_text(encoding="utf-8"))
+        self.assertEqual(state["historical"]["5.16.0"]["recovery_ref"], "e151daaf5c8eebb351a85cfed86170fda80fb5e3")
+        self.assertEqual(state["historical"]["6.0.0"]["recovery_ref"], "21d5188f5bd9a0270d7a2ebf93d41a6b7842ccd2")
+        self.assertEqual(state["historical"]["6.1.0"]["recovery_ref"], "802e75af261efb4f70d71284d860613a2197b639")
         versioning = (SOURCE / "shared/references/protocol-versioning-and-compatibility.md").read_text(encoding="utf-8").lower()
-        for mapping in (
-            "5.16.0 -> e151daaf5c8eebb351a85cfed86170fda80fb5e3",
-            "6.0.0  -> 21d5188f5bd9a0270d7a2ebf93d41a6b7842ccd2",
-            "6.1.0  -> 802e75af261efb4f70d71284d860613a2197b639",
-        ):
-            self.assertIn(mapping, versioning)
         self.assertIn("sdp-protocol-5.16", versioning)
         self.assertIn("ssdp-protocol-6.2", versioning)
 

@@ -29,7 +29,7 @@ Project Engineering Memory (PEM) is evidence-backed, project-local decision supp
 
 ## Lossless representation and routing
 
-Roles and specialists route progressively to canonical owners. Ordinary Markdown links, semantic dependencies, generated traces, PEM relations/indexes and package membership do not activate context. Source availability is distinct from runtime context availability.
+Roles and specialists route progressively to canonical owners. Ordinary Markdown links, semantic dependencies, generated traces, PEM relations/indexes and package membership do not activate context. **Package membership is not activation.** Source availability is distinct from runtime context availability.
 
 Authority roles: `scientific-formulation`, `numerical-algorithm-design`, `software-design`, `software-implementation`. Optional non-authoritative specialists: `software-documentation`, `software-maintenance-audit`, `repository-hygiene`.
 

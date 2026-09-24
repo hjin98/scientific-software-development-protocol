@@ -7,6 +7,8 @@ import re
 import unittest
 import urllib.error
 import urllib.request
+
+import yaml
 from pathlib import Path
 
 
@@ -73,10 +75,11 @@ class Protocol64BootstrapReadinessTests(unittest.TestCase):
         self.assertIn("no 6.4 public-source fallback is authorized", versioning.lower())
 
         local_prompts = (ROOT / "source/shared/references/development-workflow-prompts.md").read_text(encoding="utf-8")
-        local_versioning = (ROOT / "source/shared/references/protocol-versioning-and-compatibility.md").read_text(encoding="utf-8")
-        self.assertIn(f"CURRENT_PUBLIC_REF = {BOOTSTRAP}", local_prompts)
-        self.assertIn(f"6.4.0 public-source bootstrap -> {BOOTSTRAP}", local_versioning)
-        self.assertIn(f"6.4.0  -> {RECOVERY}", local_versioning)
+        local_state = yaml.safe_load((ROOT / "PROTOCOL-RELEASE-STATE.yaml").read_text(encoding="utf-8"))
+        self.assertNotIn("CURRENT_PUBLIC_REF =", local_prompts)
+        self.assertEqual(local_state["accepted_current"]["version"], "6.4.0")
+        self.assertEqual(local_state["accepted_current"]["public_source_ref"], BOOTSTRAP)
+        self.assertEqual(local_state["accepted_current"]["recovery_ref"], RECOVERY)
 
     def test_exact_ref_profile_and_distribution_identity(self) -> None:
         profile = json.loads(self.fetch(f"{PROFILE_ROOT}/profile.json"))
