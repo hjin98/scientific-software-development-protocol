@@ -173,6 +173,25 @@ PROTOCOL 7 D4: NOT AUTHORIZED
 
 Protocol 7 D4 remains unauthorized until the existing deliberate D3 Orchestrator architecture reopen/supersession requirement closes. Revisions 3-4 do not perform that reopen and no `main` or Protocol 7 cutover is implied.
 
+## Protocol 6.5 frontier-model re-evaluation (investigation; no successor assumed)
+
+Governing workplan, on branch `ssdp-6.5-frontier-model-re-evaluation` only:
+
+1. `workplans/active/SSDP-6.5-FRONTIER-MODEL-RE-EVALUATION.md`
+
+Evidence lives under `qualification/ssdp65/`. This investigation is bound to accepted Protocol 6.4 as its frozen control and governing process; it creates no Protocol 6.5 authority, changes no accepted 6.4 source, and does not alter Protocol 7 inheritance.
+
+Current disposition:
+
+```text
+SUBJECT BASELINE (P0): Protocol 6.4 at 55c085261eb827e3047637d045a8e6917ea6b962 / recovery 74bc572ef516cae417437a2027eeff52a2e25c15
+PHASE I-III (REVIEWER A): COMPLETE / FROZEN
+INDEPENDENT REVIEWER B: PENDING
+PHASE IV-VIII: NOT AUTHORIZED
+SUCCESSOR VERSION: NOT ASSUMED
+CURRENT ACCEPTED DOCUMENT-CONTROLLED BASELINE: UNCHANGED
+```
+
 ## Version/cutover rule
 
 There is exactly one canonical workflow-control authority for any current run.

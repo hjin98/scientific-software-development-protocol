@@ -1,0 +1,34 @@
+++ <scratch>/venv/bin/python -m unittest discover -s tests
+++ tail -8
+......................................................................................................................s...s............................................................s..................................................................
+----------------------------------------------------------------------
+Ran 249 tests in 6.666s
+
+OK (skipped=3)
+++ <scratch>/venv/bin/python source/project_engineering_memory.py PROJECT-ENGINEERING-MEMORY.md
+++ tail -3
+PEM schema 1 valid: 3 families, 0 notices
+++ rm -rf <scratch>/dist-out
+++ <scratch>/venv/bin/python source/build_skills.py --output <scratch>/dist-out
+++ tail -2
+<scratch>/dist-out/skills/software-maintenance-audit
+<scratch>/dist-out/software-maintenance-audit.zip
+++ <scratch>/venv/bin/python source/validate_packages.py --dist <scratch>/dist-out
+++ tail -2
+all generated Protocol skill directory bundles and ZIPs are structurally valid
+++ <scratch>/venv/bin/python source/check_dist.py --expected <scratch>/dist-out --committed dist
+++ tail -2
+committed dist matches the fresh canonical build semantically
+++ git diff --check
+++ echo diffcheck-ok
+diffcheck-ok
+++ <scratch>/venv/bin/python orchestrator/scripts/generate_protocol_snapshot.py --check
+++ tail -2
+current Protocol 6.4 snapshot matches canonical source; Protocol 5.16, 6.0, 6.1, 6.2, and 6.3 snapshots are immutable and coherent
+++ <scratch>/venv/bin/python orchestrator/scripts/run_core_tests.py
+++ tail -5
+    ok  tests.test_render_and_identity                     35 tests    4.7s
+    ok  tests.test_ssdp6_profiles                          22 tests    0.3s
+    ok  tests.test_workplan_resolution                     40 tests    1.7s
+
+382 tests across 12 modules in 39.2s -- OK

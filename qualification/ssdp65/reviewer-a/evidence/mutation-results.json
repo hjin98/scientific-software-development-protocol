@@ -1,0 +1,477 @@
+{
+  "baseline": "55c085261eb827e3047637d045a8e6917ea6b962",
+  "python": "3.11.15",
+  "runs": [
+    {
+      "run": 1,
+      "results": [
+        {
+          "mutant": "M01",
+          "kind": "SEMANTIC",
+          "path": "source/shared/references/abstraction-and-concretization.md",
+          "doctrine": "owner-conflict adjudication (QF64-B family)",
+          "steps": {
+            "regenerate_dist": 0,
+            "regenerate_snapshot": 0,
+            "unittest": 0,
+            "pem_validate": 0,
+            "build": 0,
+            "validate_packages": 0,
+            "check_dist": 0,
+            "snapshot_check": 0,
+            "core_tests": 0
+          },
+          "detected": false,
+          "failing_steps": [],
+          "seconds": 49.1
+        },
+        {
+          "mutant": "M02",
+          "kind": "SEMANTIC",
+          "path": "source/shared/references/evidence-evolution-and-dependencies.md",
+          "doctrine": "stale-pass inadmissibility (evidence core rule)",
+          "steps": {
+            "regenerate_dist": 0,
+            "regenerate_snapshot": 0,
+            "unittest": 0,
+            "pem_validate": 0,
+            "build": 0,
+            "validate_packages": 0,
+            "check_dist": 0,
+            "snapshot_check": 0,
+            "core_tests": 0
+          },
+          "detected": false,
+          "failing_steps": [],
+          "seconds": 51.3
+        },
+        {
+          "mutant": "M03",
+          "kind": "SEMANTIC",
+          "path": "source/shared/references/abstraction-and-concretization.md",
+          "doctrine": "Serious Challenge baseline preservation",
+          "steps": {
+            "regenerate_dist": 0,
+            "regenerate_snapshot": 0,
+            "unittest": 0,
+            "pem_validate": 0,
+            "build": 0,
+            "validate_packages": 0,
+            "check_dist": 0,
+            "snapshot_check": 0,
+            "core_tests": 0
+          },
+          "detected": false,
+          "failing_steps": [],
+          "seconds": 49.9
+        },
+        {
+          "mutant": "M04",
+          "kind": "SEMANTIC",
+          "path": "source/shared/references/specification-and-implementation.md",
+          "doctrine": "specification-over-code authority direction (D4)",
+          "steps": {
+            "regenerate_dist": 0,
+            "regenerate_snapshot": 0,
+            "unittest": 0,
+            "pem_validate": 0,
+            "build": 0,
+            "validate_packages": 0,
+            "check_dist": 0,
+            "snapshot_check": 0,
+            "core_tests": 0
+          },
+          "detected": false,
+          "failing_steps": [],
+          "seconds": 48.4
+        },
+        {
+          "mutant": "M05",
+          "kind": "SEMANTIC",
+          "path": "source/shared/references/numerical-algorithm-design.md",
+          "doctrine": "tolerance ownership (D2)",
+          "steps": {
+            "regenerate_dist": 0,
+            "regenerate_snapshot": 0,
+            "unittest": 0,
+            "pem_validate": 0,
+            "build": 0,
+            "validate_packages": 0,
+            "check_dist": 0,
+            "snapshot_check": 0,
+            "core_tests": 0
+          },
+          "detected": false,
+          "failing_steps": [],
+          "seconds": 51.2
+        },
+        {
+          "mutant": "M06",
+          "kind": "SEMANTIC",
+          "path": "source/shared/references/abstraction-and-concretization.md",
+          "doctrine": "parameter-sensitive evidence applicability (QF64-F family)",
+          "steps": {
+            "regenerate_dist": 0,
+            "regenerate_snapshot": 0,
+            "unittest": 0,
+            "pem_validate": 0,
+            "build": 0,
+            "validate_packages": 0,
+            "check_dist": 0,
+            "snapshot_check": 0,
+            "core_tests": 0
+          },
+          "detected": false,
+          "failing_steps": [],
+          "seconds": 52.6
+        },
+        {
+          "mutant": "M07",
+          "kind": "SEMANTIC",
+          "path": "source/shared/references/abstraction-and-concretization.md",
+          "doctrine": "source vs runtime-context availability (QF64-M family)",
+          "steps": {
+            "regenerate_dist": 0,
+            "regenerate_snapshot": 0,
+            "unittest": 0,
+            "pem_validate": 0,
+            "build": 0,
+            "validate_packages": 0,
+            "check_dist": 0,
+            "snapshot_check": 0,
+            "core_tests": 0
+          },
+          "detected": false,
+          "failing_steps": [],
+          "seconds": 49.7
+        },
+        {
+          "mutant": "M08",
+          "kind": "SEMANTIC",
+          "path": "source/shared/references/scientific-formulation.md",
+          "doctrine": "human ratification gate (D1)",
+          "steps": {
+            "regenerate_dist": 0,
+            "regenerate_snapshot": 0,
+            "unittest": 0,
+            "pem_validate": 0,
+            "build": 0,
+            "validate_packages": 0,
+            "check_dist": 0,
+            "snapshot_check": 0,
+            "core_tests": 0
+          },
+          "detected": false,
+          "failing_steps": [],
+          "seconds": 50.3
+        },
+        {
+          "mutant": "M09",
+          "kind": "SEMANTIC",
+          "path": "source/roles/software-implementation/SKILL.md",
+          "doctrine": "proxy-proof real-owner acceptance (D4 role)",
+          "steps": {
+            "regenerate_dist": 0,
+            "regenerate_snapshot": 0,
+            "unittest": 1,
+            "pem_validate": 0,
+            "build": 0,
+            "validate_packages": 0,
+            "check_dist": 0,
+            "snapshot_check": 0,
+            "core_tests": 0
+          },
+          "failure_tail": {
+            "unittest": " may be wrong -> serious challenge at earliest affected owner\\n```\\n\\n## completion\\n\\nreport material implementation/reconciliation, final semantic owner, evidence used and applicability, checks actually executed, unavailable/blocking checks, upstream challenge if any, documentation/dependency/history impact, and unresolved risk. lead with any serious challenge or blocker; omit empty process categories. keep the report compact but complete for the governed scope.\\n\"\n\n----------------------------------------------------------------------\nRan 249 tests in 7.221s\n\nFAILED (failures=1, skipped=3)\n"
+          },
+          "detected": true,
+          "failing_steps": [
+            "unittest"
+          ],
+          "seconds": 47.7
+        },
+        {
+          "mutant": "M10",
+          "kind": "SEMANTIC",
+          "path": "source/shared/references/abstraction-and-concretization.md",
+          "doctrine": "PEM non-authority (no D5)",
+          "steps": {
+            "regenerate_dist": 0,
+            "regenerate_snapshot": 0,
+            "unittest": 0,
+            "pem_validate": 0,
+            "build": 0,
+            "validate_packages": 0,
+            "check_dist": 0,
+            "snapshot_check": 0,
+            "core_tests": 0
+          },
+          "detected": false,
+          "failing_steps": [],
+          "seconds": 48.5
+        },
+        {
+          "mutant": "M11",
+          "kind": "SEMANTIC",
+          "path": "source/shared/references/testing-and-validation.md",
+          "doctrine": "tolerance derivation (testing owner)",
+          "steps": {
+            "regenerate_dist": 0,
+            "regenerate_snapshot": 0,
+            "unittest": 0,
+            "pem_validate": 0,
+            "build": 0,
+            "validate_packages": 0,
+            "check_dist": 0,
+            "snapshot_check": 0,
+            "core_tests": 0
+          },
+          "detected": false,
+          "failing_steps": [],
+          "seconds": 50.4
+        },
+        {
+          "mutant": "M12",
+          "kind": "SEMANTIC",
+          "path": "source/shared/references/development-workflow-prompts.md",
+          "doctrine": "risk-accepted provisional propagation (orchestration prompt)",
+          "steps": {
+            "regenerate_dist": 0,
+            "regenerate_snapshot": 0,
+            "unittest": 1,
+            "pem_validate": 0,
+            "build": 0,
+            "validate_packages": 0,
+            "check_dist": 0,
+            "snapshot_check": 0,
+            "core_tests": 0
+          },
+          "failure_tail": {
+            "unittest": "e bindings, pem/has/binding state when triggered, semantic-evolution history and completed/superseded workplan state; perform conservative hygiene where justified. preserve release-pinned truth. archive transition artifacts only after their still-current semantics live in canonical owners. closeout cannot change product semantics, self-ratify branch memory, self-issue an independent review pass, or turn unresolved acceptance/serious challenge into completion.\\n```\\n\"\n\n----------------------------------------------------------------------\nRan 249 tests in 7.308s\n\nFAILED (failures=1, skipped=3)\n"
+          },
+          "detected": true,
+          "failing_steps": [
+            "unittest"
+          ],
+          "seconds": 47.6
+        },
+        {
+          "mutant": "M13",
+          "kind": "SEMANTIC",
+          "path": "source/shared/references/abstraction-and-concretization.md",
+          "doctrine": "abstraction adequacy (kernel)",
+          "steps": {
+            "regenerate_dist": 0,
+            "regenerate_snapshot": 0,
+            "unittest": 0,
+            "pem_validate": 0,
+            "build": 0,
+            "validate_packages": 0,
+            "check_dist": 0,
+            "snapshot_check": 0,
+            "core_tests": 0
+          },
+          "detected": false,
+          "failing_steps": [],
+          "seconds": 50.0
+        },
+        {
+          "mutant": "M14",
+          "kind": "SEMANTIC",
+          "path": "source/shared/references/project-engineering-memory.md",
+          "doctrine": "absence-is-not-evidence (PEM)",
+          "steps": {
+            "regenerate_dist": 0,
+            "regenerate_snapshot": 0,
+            "unittest": 0,
+            "pem_validate": 0,
+            "build": 0,
+            "validate_packages": 0,
+            "check_dist": 0,
+            "snapshot_check": 0,
+            "core_tests": 0
+          },
+          "detected": false,
+          "failing_steps": [],
+          "seconds": 51.1
+        },
+        {
+          "mutant": "M15",
+          "kind": "SEMANTIC",
+          "path": "source/shared/references/workflow-and-workplans.md",
+          "doctrine": "Review readiness (workflow)",
+          "steps": {
+            "regenerate_dist": 0,
+            "regenerate_snapshot": 0,
+            "unittest": 1,
+            "pem_validate": 0,
+            "build": 0,
+            "validate_packages": 0,
+            "check_dist": 0,
+            "snapshot_check": 0,
+            "core_tests": 0
+          },
+          "failure_tail": {
+            "unittest": "e-backed project learning; history explains why. archive/supersede transition artifacts only after their still-current semantics reside in canonical current authority/state.\\n\\napply the lossless representation rule to workflow artifacts: lead with disposition/challenge/blockers/current decisions, avoid amendment replay and generic doctrine duplication, keep historical/raw detail cold but discoverable, and preserve every mandatory lower-salience closure condition.\\n'\n\n----------------------------------------------------------------------\nRan 249 tests in 7.566s\n\nFAILED (failures=1, skipped=3)\n"
+          },
+          "detected": true,
+          "failing_steps": [
+            "unittest"
+          ],
+          "seconds": 49.3
+        },
+        {
+          "mutant": "C01-invalid",
+          "kind": "CONTROL",
+          "path": "source/shared/references/abstraction-and-concretization.md",
+          "doctrine": "control: asserted phrase deleted",
+          "steps": {
+            "regenerate_dist": 0,
+            "regenerate_snapshot": 0,
+            "unittest": 0,
+            "pem_validate": 0,
+            "build": 0,
+            "validate_packages": 0,
+            "check_dist": 0,
+            "snapshot_check": 0,
+            "core_tests": 0
+          },
+          "detected": false,
+          "failing_steps": [],
+          "seconds": 49.9,
+          "note": "invalid control: asserted token also present in kernel code block; superseded by rerun C01"
+        },
+        {
+          "mutant": "C02",
+          "kind": "CONTROL",
+          "path": "source/shared/references/development-workflow-prompts.md",
+          "doctrine": "control: asserted current-version identity changed",
+          "steps": {
+            "regenerate_dist": 0,
+            "regenerate_snapshot": 0,
+            "unittest": 1,
+            "pem_validate": 0,
+            "build": 0,
+            "validate_packages": 0,
+            "check_dist": 0,
+            "snapshot_check": 0,
+            "core_tests": 0
+          },
+          "failure_tail": {
+            "unittest": "e bindings, PEM/HAS/binding state when triggered, semantic-evolution history and completed/superseded workplan state; perform conservative hygiene where justified. Preserve release-pinned truth. Archive transition artifacts only after their still-current semantics live in canonical owners. Closeout cannot change product semantics, self-ratify branch memory, self-issue an independent Review PASS, or turn unresolved acceptance/Serious Challenge into completion.\\n```\\n\"\n\n----------------------------------------------------------------------\nRan 249 tests in 7.223s\n\nFAILED (failures=5, skipped=3)\n"
+          },
+          "detected": true,
+          "failing_steps": [
+            "unittest"
+          ],
+          "seconds": 49.4
+        }
+      ]
+    },
+    {
+      "run": 2,
+      "results": [
+        {
+          "mutant": "L01",
+          "kind": "PARAPHRASE",
+          "path": "source/shared/references/abstraction-and-concretization.md",
+          "doctrine": "lossless paraphrase of unique-ownership sentence",
+          "steps": {
+            "regenerate_dist": 0,
+            "regenerate_snapshot": 0,
+            "unittest": 1,
+            "pem_validate": 0,
+            "build": 0,
+            "validate_packages": 0,
+            "check_dist": 0,
+            "snapshot_check": 0,
+            "core_tests": 0
+          },
+          "failure_tail": {
+            "unittest": "e optimizing attention/context cost;\\nspecialized substantive use requires a coherent definition/import/declaration path and exact owner;\\nformal statements must be well-defined, parameter bindings explicit when material, and claims separately warranted;\\nderived semantic traces remain subordinate evidence for review/impact rather than parallel authority;\\nproject learning stays evidence-backed, applicability-bounded, conditionally loaded, and non-authoritative.\\n\\n\"\n\n----------------------------------------------------------------------\nRan 249 tests in 7.040s\n\nFAILED (failures=1, skipped=3)\n"
+          },
+          "detected": true,
+          "failing_steps": [
+            "unittest"
+          ],
+          "seconds": 48.0
+        },
+        {
+          "mutant": "L02",
+          "kind": "PARAPHRASE",
+          "path": "source/shared/references/evidence-evolution-and-dependencies.md",
+          "doctrine": "lossless paraphrase of dependency-graph warrant sentence",
+          "steps": {
+            "regenerate_dist": 0,
+            "regenerate_snapshot": 0,
+            "unittest": 1,
+            "pem_validate": 0,
+            "build": 0,
+            "validate_packages": 0,
+            "check_dist": 0,
+            "snapshot_check": 0,
+            "core_tests": 0
+          },
+          "failure_tail": {
+            "unittest": "ly depends on it, and material historical rationale remains recoverable. stale tests should be retired/remapped/clearly marked rather than retained as apparent confidence.\\n\\napply the lossless representation rule: keep current applicability/impact decisions and contradictory evidence salient; keep raw realizations/history cold when their provenance and retrieval route remain adequate; never compact away a condition needed to decide whether evidence is admissible.\\n\"\n\n----------------------------------------------------------------------\nRan 249 tests in 6.187s\n\nFAILED (failures=1, skipped=3)\n"
+          },
+          "detected": true,
+          "failing_steps": [
+            "unittest"
+          ],
+          "seconds": 48.1
+        },
+        {
+          "mutant": "L03",
+          "kind": "PARAPHRASE",
+          "path": "source/shared/references/development-workflow-prompts.md",
+          "doctrine": "lossless paraphrase of stored-direction sentence",
+          "steps": {
+            "regenerate_dist": 0,
+            "regenerate_snapshot": 0,
+            "unittest": 1,
+            "pem_validate": 0,
+            "build": 0,
+            "validate_packages": 0,
+            "check_dist": 0,
+            "snapshot_check": 0,
+            "core_tests": 0
+          },
+          "failure_tail": {
+            "unittest": "urce bindings, pem/has/binding state when triggered, semantic-evolution history and completed/superseded workplan state; perform conservative hygiene where justified. preserve release-pinned truth. archive transition artifacts only after their still-current semantics live in canonical owners. closeout cannot change product semantics, self-ratify branch memory, self-issue an independent review pass, or turn unresolved acceptance/serious challenge into completion.\\n\\n\"\n\n----------------------------------------------------------------------\nRan 249 tests in 8.008s\n\nFAILED (failures=1, skipped=3)\n"
+          },
+          "detected": true,
+          "failing_steps": [
+            "unittest"
+          ],
+          "seconds": 51.4
+        },
+        {
+          "mutant": "C01",
+          "kind": "CONTROL",
+          "path": "source/shared/references/abstraction-and-concretization.md",
+          "doctrine": "control: asserted phrase inverted",
+          "steps": {
+            "regenerate_dist": 0,
+            "regenerate_snapshot": 0,
+            "unittest": 1,
+            "pem_validate": 0,
+            "build": 0,
+            "validate_packages": 0,
+            "check_dist": 0,
+            "snapshot_check": 0,
+            "core_tests": 0
+          },
+          "failure_tail": {
+            "unittest": "e optimizing attention/context cost;\\nspecialized substantive use requires a coherent definition/import/declaration path and exact owner;\\nformal statements must be well-defined, parameter bindings explicit when material, and claims separately warranted;\\nderived semantic traces remain subordinate evidence for review/impact rather than parallel authority;\\nproject learning stays evidence-backed, applicability-bounded, conditionally loaded, and non-authoritative.\\n\\n\"\n\n----------------------------------------------------------------------\nRan 249 tests in 7.902s\n\nFAILED (failures=1, skipped=3)\n"
+          },
+          "detected": true,
+          "failing_steps": [
+            "unittest"
+          ],
+          "seconds": 51.3
+        }
+      ]
+    }
+  ]
+}

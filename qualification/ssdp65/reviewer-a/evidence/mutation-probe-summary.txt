@@ -1,0 +1,21 @@
+M01 SEMANTIC UNDETECTED -                                        owner-conflict adjudication (QF64-B family)
+M02 SEMANTIC UNDETECTED -                                        stale-pass inadmissibility (evidence core rule)
+M03 SEMANTIC UNDETECTED -                                        Serious Challenge baseline preservation
+M04 SEMANTIC UNDETECTED -                                        specification-over-code authority direction (D4)
+M05 SEMANTIC UNDETECTED -                                        tolerance ownership (D2)
+M06 SEMANTIC UNDETECTED -                                        parameter-sensitive evidence applicability (QF64-F family)
+M07 SEMANTIC UNDETECTED -                                        source vs runtime-context availability (QF64-M family)
+M08 SEMANTIC UNDETECTED -                                        human ratification gate (D1)
+M09 SEMANTIC DETECTED   unittest                                 proxy-proof real-owner acceptance (D4 role)
+M10 SEMANTIC UNDETECTED -                                        PEM non-authority (no D5)
+M11 SEMANTIC UNDETECTED -                                        tolerance derivation (testing owner)
+M12 SEMANTIC DETECTED   unittest                                 risk-accepted provisional propagation (orchestration prompt)
+M13 SEMANTIC UNDETECTED -                                        abstraction adequacy (kernel)
+M14 SEMANTIC UNDETECTED -                                        absence-is-not-evidence (PEM)
+M15 SEMANTIC DETECTED   unittest                                 Review readiness (workflow)
+C01 CONTROL  UNDETECTED -                                        control: asserted phrase deleted
+C02 CONTROL  DETECTED   unittest                                 control: asserted current-version identity changed
+L01 PARAPHRASE DETECTED   unittest                                 lossless paraphrase of unique-ownership sentence
+L02 PARAPHRASE DETECTED   unittest                                 lossless paraphrase of dependency-graph warrant sentence
+L03 PARAPHRASE DETECTED   unittest                                 lossless paraphrase of stored-direction sentence
+C01 CONTROL  DETECTED   unittest                                 control: asserted phrase inverted
