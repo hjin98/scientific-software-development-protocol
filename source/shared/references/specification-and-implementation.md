@@ -39,7 +39,7 @@ A local D4 refactor needs a proportionate upstream-impact exclusion plus remap/r
 
 For material contract/concretization changes, close dependent consumers, evidence, docs/dependency records, compatibility/persistence consequences and semantic history where triggered. Apply the Lossless Representation Rule to D4 specifications: state each stable contract once, avoid freezing incidental code detail, keep exceptions/failure semantics explicit, and make critical behavior salient without dropping lower-salience mandatory constraints.
 
-## Protocol 6.4 D4 formal-contract consequences
+## D4 formal-contract discipline
 
 A governed D4 contract uses the strongest practical exact representation needed to distinguish externally observable behavior: types/schemas, domains/ranges, public configuration and default semantics, preconditions/postconditions, observable state transitions, units/shapes/order/precision, tolerance/equivalence relations, durable error/failure predicates, serialization grammar, persisted-state invariants, authorization/security behavior and public parameter binding.
 

@@ -34,7 +34,7 @@ On accepted D1 change, perform bounded impact closure over dependent D2-D4, evid
 
 Material D1 Review seeks the smallest credible counterexample, hidden assumption, inconsistent equation/definition, dimensional/interpretive error, calibration-validation leakage, or wrong-problem formulation. If accepted D1 itself may be materially false, contradictory, ambiguous, inadequate or unrealizable, raise **SERIOUS CHALLENGE** rather than rewriting it to fit downstream behavior.
 
-## Protocol 6.4 D1 formal-definition consequences
+## D1 formal-definition discipline
 
 D1 authority uses formal-first, definition-before-substantive-use semantics for materially governed scientific/mathematical objects. Define or exactly import observables, estimands, states, distributions, fields, parameters, equations/models, constitutive/closure relations, predicates, assumptions and validity conditions before downstream inference depends on them. Every material symbol resolves to its domain/type/shape/unit and scope; physical equations are dimensionally coherent; bound/free-variable and quantifier direction are explicit when material.
 
