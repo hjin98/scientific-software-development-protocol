@@ -1,0 +1,68 @@
+from __future__ import annotations
+
+import re
+import unittest
+from pathlib import Path
+
+import yaml
+
+ROOT = Path(__file__).resolve().parents[1]
+P0_KERNEL_WORDS = 2642
+HOT_CURRENT_SURFACES = (
+    "README.md",
+    "AGENTS.md",
+    "PORTABILITY.md",
+    "source/README.md",
+    "source/SEMANTIC_DEPENDENCIES.md",
+    "source/shared/references/development-workflow-prompts.md",
+    "source/shared/references/protocol-versioning-and-compatibility.md",
+    "orchestrator/src/sdp_orchestrator/core/resources/protocol/ssdp-protocol-6.5/prompts.md",
+)
+
+
+class Protocol65CurrentStateOwnershipTests(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls) -> None:
+        cls.state = yaml.safe_load((ROOT / "PROTOCOL-RELEASE-STATE.yaml").read_text(encoding="utf-8"))
+
+    def test_mutable_release_refs_have_one_hot_owner(self) -> None:
+        values = (
+            self.state["accepted_current"]["public_source_ref"],
+            self.state["accepted_current"]["recovery_ref"],
+        )
+        for rel in HOT_CURRENT_SURFACES:
+            text = (ROOT / rel).read_text(encoding="utf-8")
+            for value in values:
+                self.assertNotIn(value, text, f"{rel} duplicates mutable release-state value {value}")
+
+    def test_current_prompt_semantics_do_not_embed_release_state_variables(self) -> None:
+        canonical = (ROOT / "source/shared/references/development-workflow-prompts.md").read_text(encoding="utf-8")
+        generated = (ROOT / "orchestrator/src/sdp_orchestrator/core/resources/protocol/ssdp-protocol-6.5/prompts.md").read_text(encoding="utf-8")
+        self.assertEqual(canonical, generated)
+        for token in ("CURRENT_PROTOCOL =", "CURRENT_PUBLIC_REF =", "ACCEPTED_6_3_PUBLIC_REF ="):
+            self.assertNotIn(token, canonical)
+
+    def test_stale_current_version_labels_are_absent_from_current_entrypoints(self) -> None:
+        for path in sorted((ROOT / "source/roles").glob("*/SKILL.md")) + sorted((ROOT / "source/specialists").glob("*/SKILL.md")):
+            text = path.read_text(encoding="utf-8")
+            self.assertIsNone(re.search(r"under Protocol 6\.[1234]\b", text), str(path.relative_to(ROOT)))
+        self.assertNotIn(
+            "Canonical D1 document-family template for Protocol 6.1",
+            (ROOT / "source/shared/templates/scientific_method_paper_template.md").read_text(encoding="utf-8"),
+        )
+        self.assertNotIn(
+            "Canonical D2 document-family template for Protocol 6.1",
+            (ROOT / "source/shared/templates/numerical_algorithmic_method_paper_template.md").read_text(encoding="utf-8"),
+        )
+        self.assertNotIn(
+            "Current Protocol 6.2 shared domain doctrine is authoritative",
+            (ROOT / "source/shared/references/language-profiles.md").read_text(encoding="utf-8"),
+        )
+
+    def test_universal_kernel_does_not_exceed_frozen_p0_word_count(self) -> None:
+        text = (ROOT / "source/shared/references/abstraction-and-concretization.md").read_text(encoding="utf-8")
+        self.assertLessEqual(len(re.findall(r"\S+", text)), P0_KERNEL_WORDS)
+
+
+if __name__ == "__main__":
+    unittest.main()

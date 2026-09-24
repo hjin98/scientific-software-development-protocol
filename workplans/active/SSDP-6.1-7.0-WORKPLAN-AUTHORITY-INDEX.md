@@ -178,34 +178,35 @@ Protocol 7 D4 remains unauthorized until the existing deliberate D3 Orchestrator
 Governing workplan, on branch `ssdp-6.5-frontier-model-re-evaluation` only:
 
 1. `workplans/active/SSDP-6.5-FRONTIER-MODEL-RE-EVALUATION.md`
+2. `workplans/active/SSDP-6.5-D3-D4-IMPLEMENTATION-HANDOFF.md`
 
-Diagnostic/adjudication evidence lives under `qualification/ssdp65/`. The frozen P0 control remains accepted Protocol 6.4 at `55c085261eb827e3047637d045a8e6917ea6b962`; successor work creates no Protocol 6.5 accepted authority until final Review and explicit stakeholder ratification. Protocol 7 architecture remains untouched.
+Diagnostic/adjudication evidence lives under `qualification/ssdp65/`. The frozen P0 control is Protocol 6.4 repository state `55c085261eb827e3047637d045a8e6917ea6b962`; this is a cycle input, not the mutable repository release-state owner. Protocol 7 architecture remains untouched.
 
-Current disposition:
+Current repository accepted/candidate/public-fallback/recovery/Review/ratification state MUST be resolved from root `PROTOCOL-RELEASE-STATE.yaml`. This index does not duplicate those mutable values.
+
+Current successor disposition:
 
 ```text
-SUBJECT BASELINE (P0): Protocol 6.4 at 55c085261eb827e3047637d045a8e6917ea6b962 / recovery 74bc572ef516cae417437a2027eeff52a2e25c15
-OPUS 5.5 PHASE I-III: COMPLETE / FROZEN AT 81375d8142a8130b80cd82f2304d3e16bc3fc390
+P0 CONTROL: FROZEN
+OPUS 5.5 PHASE I-III: COMPLETE / FROZEN
 GPT-5.6 SOL HISTORICAL CROSS-CHECK: COMPLETE
 CROSS-MODEL ADJUDICATION: COMPLETE
 SECOND FRONTIER DIAGNOSTIC: WAIVED FOR THIS CYCLE / CLEAN BRANCH RESERVED
-SUCCESSOR: PROTOCOL 6.5 WARRANTED
 PHASE IV-V DESIGN: COMPLETE / PASS
-PHASE VI IMPLEMENTATION: AUTHORIZED — SSDP-6.5-D3-D4-IMPLEMENTATION-HANDOFF.md
+PHASE VI IMPLEMENTATION: ACTIVE
 P1: NOT YET FROZEN
-CURRENT ACCEPTED DOCUMENT-CONTROLLED BASELINE: Protocol 6.4 / UNCHANGED
+PROTOCOL 7 D3/D4: UNCHANGED
 ```
 
 ## Version/cutover rule
 
-There is exactly one canonical workflow-control authority for any current run.
+There is exactly one mutable repository release-state owner: `PROTOCOL-RELEASE-STATE.yaml`.
 
-- Protocol 6.4 is the accepted-current document-controlled baseline with recovery `74bc572ef516cae417437a2027eeff52a2e25c15` and distinct public bootstrap `e09a9d1480211eea2d16d722182bb5c6de1bee12`; version-bound 6.3 and older work retain their own immutable historical mappings.
-- The repository default branch is never a protocol-version oracle; Protocol 6.4 acceptance follows its completed qualification/Review/publication/recovery/reconciliation lifecycle rather than a `main` merge.
-- Protocol 7 remains proposed/pre-cutover. Its current fallback/rollback baseline is Protocol 6.4 recovery `74bc572ef516cae417437a2027eeff52a2e25c15` through Revision 5; Revision 5 changes inheritance identity only and does not mutate Protocol 7 D3 architecture or authorize D4.
+- Repository default/latest is never a protocol-version oracle.
+- Protocol 7 remains proposed/pre-cutover. Its Revision-5 pre-cutover fallback/rollback binding is a frozen Protocol-7 design input; changing that binding requires the narrow post-acceptance inheritance reconciliation already specified by the Protocol 6.5 workplan.
 - Under Protocol 7 after qualified cutover, the deterministic orchestrator control plane owns machine lifecycle transitions while workplans/skills/documents remain semantic artifacts.
 - Shadow comparison is permitted only while one side remains explicitly non-authoritative.
-- No `main` merge or Protocol 7 D4 cutover is authorized merely by these active design workplans; Protocol 6.4 acceptance is established by its completed lifecycle, not by this index.
+- No `main` merge or Protocol 7 D4 cutover is authorized merely by these active design workplans.
 
 ## Historical discipline
 
