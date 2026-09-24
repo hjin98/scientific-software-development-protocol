@@ -1,6 +1,6 @@
 # Abstraction, Concretization, Authority, Challenge, and Representation
 
-The Scientific Software Development Protocol (SSDP) governs scientific-software work through recursively constrained abstraction/concretization. This is the universal semantic kernel; detailed workflow, evidence, testing, project engineering memory, domain, language, tool, history, and release rules live with their canonical owners and are loaded only when their decision predicates fire.
+The Scientific Software Development Protocol (SSDP) governs scientific-software work by recursively constrained abstraction/concretization. This universal kernel owns cross-domain semantics; workflow, evidence, testing, Project Engineering Memory (PEM), domain, language, tool, history, and release details remain with conditionally loaded canonical owners.
 
 ## Background and terminology
 
@@ -10,7 +10,7 @@ An **abstraction** is an intentionally incomplete normative contract: the materi
 
 **Project Engineering Memory (PEM)** is optional-to-activate, project-local, evidence-backed engineering learning intended to reduce rediscovery and preserve both failure lessons and demonstrated successful patterns. It is **not a fifth authority domain**: when substantial work can materially benefit from project history, route to [Project Engineering Memory](project-engineering-memory.md) and the workflow owner; otherwise keep it cold.
 
-For a governed decision `d`, a difference, claim, dependency, uncertainty, or risk `x` is **material** when a plausible path grounded in current authority, dependency, evidence, or a concrete counterexample can make changing or omitting `x` alter governed interpretation, admissible concretization, evidence applicability/obligation, acceptance/reopen/Challenge disposition, protected risk, or the protected stakeholder/product/scientific outcome. Pure wording difference and remote ungrounded possibility are not material merely because they can be imagined.
+For governed decision `d`, `x` is **material** when a plausible path grounded in current authority, dependencies, evidence, or a concrete counterexample can make changing/omitting `x` alter governed meaning, admissible concretization, evidence applicability/obligation, disposition, protected risk, or protected outcome. Wording-only differences and ungrounded remote possibilities are not material.
 
 ## Feasibility, authority, and delegation
 
@@ -32,24 +32,17 @@ Stop when further search has lower expected engineering value than proceeding wi
 
 Semantic level and authority provenance are independent. Preserve applicable safety, explicit stakeholder/project authority, external contracts/standards, and accepted current domain authority before delegated implementation preference. A security, reliability, performance, compatibility, hardware, regulatory, or public-contract constraint may enter at the domain where it semantically applies.
 
-Steward the stakeholder's governed durable product/outcome rather than the process artifacts used to reach it. Workplans, tests, gates, metrics, reviews, reports, and implementation machinery are constraints, evidence, or concretizations—not objectives. Historical frequency and project memory are likewise decision inputs or coordination state, not self-authorizing rules. Interpret stakeholder and governed requirements non-adversarially according to their protected purpose. This stewardship is bounded by the governed task/contracts/affected surfaces and does not authorize unrelated enhancement, opportunistic redesign, or speculative future-proofing.
+Steward the governed durable product/outcome, not process artifacts. Workplans, tests, gates, metrics, reviews, reports, implementation machinery, history, and PEM are constraints/evidence/coordination state, not objectives or self-authorizing rules. Interpret requirements by their protected purpose within governed task/contracts/affected surfaces; this does not authorize unrelated enhancement, opportunistic redesign, or speculative future-proofing.
 
 Each material normative claim has one current semantic owner, while one concretization may satisfy several parents/side constraints. Current normative ownership must remain acyclic. Materially conflicting applicable authorities are not silently prioritized: expose the conflict and route adjudication.
 
-SSDP development and release are themselves governed work. The protocol repository applies the same ownership, evidence, Challenge, convergence, impact, and representation rules to its own workplans, qualification, generated artifacts, release state, Review, and project memory, except for an explicitly bounded version-bootstrap exception owned by the versioning authority. Self-application does not create a recursive fifth authority plane.
+SSDP self-development/release obeys these same ownership, evidence, Challenge, convergence, impact, and representation rules, including for workplans, qualification, generated artifacts, release state, Review, and PEM, except explicit bounded version-bootstrap exceptions owned by versioning. Self-application creates no fifth authority plane.
 
-The four domains are:
+D1-D4 form a layered directed acyclic graph (DAG), not a mandatory waterfall. Start at the earliest/highest domain whose semantics may change and preserve unaffected parents/siblings; detailed domain scope belongs to each canonical owner.
 
-- **D1 — Scientific & Mathematical Formulation:** question, observable/estimand, model/equations, assumptions, validity regime, interpretation, external adequacy.
-- **D2 — Algorithm & Numerical Method:** discrete/stochastic method, approximation/error/convergence/conditioning/precision semantics, numerical uncertainty.
-- **D3 — Software Architecture:** component/state/interface ownership, data/control flow, persistence, concurrency, security, resources, deployment and compatibility architecture.
-- **D4 — Specification & Implementation:** accepted concrete software behavior plus executable concretization, tests, packaging and operations.
+A lower-level mechanism gains no authority from existence, dependency, tests, documentation, review survival, prior plans, recurrence, success, or PEM prominence. Promotion requires material acceptance by its owning abstraction. When delegated machinery causes problems, prefer removal, narrowing, alteration, consolidation, re-derivation, or replacement before durable compensation. Never simplify by weakening governing semantics.
 
-This is a layered directed acyclic graph (DAG), not a mandatory four-stage waterfall. Start at the earliest/highest domain whose semantics may change and preserve unaffected parents/siblings.
-
-A lower-level mechanism does not acquire authority because it exists, is depended upon, is tested, is documented, survived review, appeared in an earlier plan, repeatedly failed, repeatedly succeeded, or is prominent in project memory. Promote it only through explicit acceptance by the owning abstraction for a material reason. When delegated machinery creates its own problems, prefer removing, narrowing, altering, consolidating, re-deriving, or replacing it before adding durable compensating machinery. Never simplify by weakening governing semantics.
-
-PEM may classify a learned capability as `EVIDENCE_ONLY`, `AUTHORITY_BOUND`, or `PROPOSED_FOR_PROMOTION`; only the independently resolved real current owner can supply normative force. Frequency, memory temperature, maturity, qualification, documentation, or historical survival cannot mint an invariant. A proposed promotion remains non-mandatory until accepted through the owner’s normal process.
+PEM classifications such as `EVIDENCE_ONLY`, `AUTHORITY_BOUND`, or `PROPOSED_FOR_PROMOTION` do not supply normative force; only the independently resolved current owner can. Frequency, temperature, maturity, qualification, documentation, or survival cannot mint an invariant, and proposed promotion remains non-mandatory until owner acceptance.
 
 ## Design, verification, and lifecycle state
 
@@ -95,9 +88,9 @@ actual D4 behavior
 
 Every material Review/Verification/acceptance boundary includes a bounded **Challenge Pass**. For tiny low-risk work it may be implicit. Ask whether accepted authority is internally coherent, sufficiently unambiguous, jointly concretizable under simultaneous constraints, adequate for its protected outcome, and free of a known material counterexample.
 
-A coherent parent with a wrong child is an ordinary blocker. Raise **SERIOUS CHALLENGE** only on a credible basis that accepted authority itself may be materially false, contradictory, materially ambiguous, inadequate, mutually incompatible, or impossible to concretize: a concrete contradiction/counterexample, materially consequential ambiguity, incompatible applicable constraints, or admissible evidence of inadequacy. Mere possibility, reviewer discomfort, or a wording preference is insufficient. Surface the Challenge before ordinary blockers/Pass language; identify the challenged owner/scope, basis, consequence, assumptions, and discriminating evidence that could resolve or falsify it. Preserve the challenged authority as the explicit baseline rather than silently editing it to fit downstream behavior.
+A coherent parent with a wrong child is an ordinary blocker. Raise **SERIOUS CHALLENGE** only on credible evidence that accepted authority may itself be materially false, contradictory, ambiguous, inadequate, mutually incompatible, or unrealizable: concrete counterexample/contradiction, consequential ambiguity, incompatible applicable constraints, or admissible inadequacy evidence. Mere possibility, discomfort, or wording preference is insufficient. Surface it before ordinary blocker/Pass language; name owner/scope, basis, consequence, assumptions, and discriminating evidence. Preserve challenged authority as the explicit baseline.
 
-The owning authority resolves a Serious Challenge through its normal acceptance route. A purported clarification that materially narrows or changes the admissible interpretation/concretization set is a semantic mutation for dependency, evidence, and version-impact purposes unless the owner establishes that the change is representation-only.
+The owning authority resolves a Serious Challenge through normal acceptance. A clarification that materially narrows/changes admissible interpretation or concretization is a semantic mutation for dependency/evidence/version impact unless established representation-only.
 
 PEM is a high-information hypothesis index during Review, not proof. Historical recurrence, successful prior patterns, temperature, counts, or previous review outcomes may guide falsification effort but cannot replace independent reconstruction of current authority, current applicability, evidence quality, and assembled candidate behavior.
 
