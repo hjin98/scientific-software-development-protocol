@@ -16,10 +16,10 @@ class EngineeringStewardshipContractTests(unittest.TestCase):
     def test_product_truth_is_owned_by_universal_kernel(self) -> None:
         kernel = read("source/shared/references/abstraction-and-concretization.md").lower()
         for phrase in (
-            "stakeholder's governed durable product/outcome",
-            "constraints, evidence, or concretizations—not objectives",
-            "non-adversarially according to their protected purpose",
-            "bounded by the governed task/contracts/affected surfaces",
+            "steward the governed durable product/outcome, not process artifacts",
+            "not objectives or self-authorizing rules",
+            "interpret requirements by their protected purpose",
+            "within governed task/contracts/affected surfaces",
             "does not authorize unrelated enhancement",
             "speculative future-proofing",
         ):
@@ -64,8 +64,8 @@ class EngineeringStewardshipContractTests(unittest.TestCase):
         workflow = read("source/shared/references/workflow-and-workplans.md").lower()
         kernel = read("source/shared/references/abstraction-and-concretization.md").lower()
         self.assertIn("workplans are coordination/authority for the bounded cycle, not terminal objectives", workflow)
-        self.assertIn("workplans, tests, gates, metrics, reviews, reports, and implementation machinery", kernel)
-        self.assertIn("not objectives", kernel)
+        self.assertIn("workplans, tests, gates, metrics, reviews, reports, implementation machinery, history, and pem", kernel)
+        self.assertIn("not objectives or self-authorizing rules", kernel)
 
     def test_root_agents_is_compact_router_not_duplicate_manual(self) -> None:
         agents = read("AGENTS.md")
