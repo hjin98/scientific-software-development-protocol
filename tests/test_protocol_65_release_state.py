@@ -40,6 +40,7 @@ class Protocol65ReleaseStateTests(unittest.TestCase):
 
     def test_review_pass_requires_frozen_semantic_candidate(self) -> None:
         data = copy.deepcopy(self.data)
+        data["candidate"]["semantic_ref"] = "UNFROZEN"
         data["candidate"]["review"] = {
             "state": "PASS",
             "evidence_ref": "hjin98/scientific-software-development-protocol@" + "a" * 40 + ":qualification/review.md",
@@ -73,6 +74,7 @@ class Protocol65ReleaseStateTests(unittest.TestCase):
 
     def test_no_pass_review_also_requires_frozen_semantic_candidate(self) -> None:
         data = copy.deepcopy(self.data)
+        data["candidate"]["semantic_ref"] = "UNFROZEN"
         data["candidate"]["review"] = {
             "state": "NO_PASS",
             "evidence_ref": "hjin98/scientific-software-development-protocol@" + "a" * 40 + ":qualification/review.md",
