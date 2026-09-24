@@ -1,10 +1,10 @@
 # Scientific Software Development Protocol
 
-Current accepted document-controlled release: **Protocol 6.4**. Accepted recovery is `74bc572ef516cae417437a2027eeff52a2e25c15` and the distinct immutable public-source bootstrap is `e09a9d1480211eea2d16d722182bb5c6de1bee12`. Protocol 6.3 recovery `9f353097fab36e325a325f1c2f9d9cec32e86177` remains immutable historical rollback for explicitly version-bound 6.3 work. Protocol 7 remains proposed and is not cut over.
+The Scientific Software Development Protocol (SSDP) is a recursive D1-D4 authority/concretization system for scientific software engineering.
+
+**Current mutable release state is owned only by [`PROTOCOL-RELEASE-STATE.yaml`](PROTOCOL-RELEASE-STATE.yaml).** Do not infer accepted-current, public fallback, recovery, candidate Review, or ratification state from this README, branch position, repository default/latest, or immutable versioned source.
 
 ## Core model
-
-The Scientific Software Development Protocol (SSDP) separates four semantic authority domains:
 
 ```text
 D1 scientific/mathematical formulation
@@ -13,80 +13,54 @@ D1 scientific/mathematical formulation
  -> D4 specification/implementation
 ```
 
-This is a semantic hierarchy, not a mandatory waterfall. A child concretization must preserve every applicable parent abstraction and directly governed external constraint. Among admissible concretizations prefer domain engineering fitness, then minimum justified total complexity, then development economy.
+This is semantic ordering, not a mandatory waterfall. A child concretization preserves every applicable parent abstraction and directly governed external constraint. Among admissible concretizations prefer domain engineering fitness, minimum justified total complexity, then development economy.
 
-The universal current kernel is `source/shared/references/abstraction-and-concretization.md`. Role entrypoints route progressively to concern owners rather than loading the complete reference library up front. Version-bound work is always interpreted under its declared Protocol version; current accepted 6.4 source does not silently reinterpret version-bound 6.3 or other frozen historical work.
+The universal kernel is `source/shared/references/abstraction-and-concretization.md`. It owns materiality, authority, Challenge, self-application, semantic-definition/source-availability, abstraction adequacy and Lossless Representation.
 
-## Protocol 6.4 axiomatic definition traceability
+## Formal definition and traceability
 
-Protocol 6.4 strengthens representation without changing the D1-D4 authority model or the schema-v2 orchestration stage graph. For a materially governed specialized semantic object, substantive use must resolve to one coherent canonical definition, import, primitive declaration, or explicitly justified derived construction before later reasoning depends on it.
+Materially governed specialized semantic objects resolve to coherent canonical definitions, imports, primitives or justified derivations before substantive dependent reasoning. Formalization is proportional: equations/mappings for scientific/numerical objects, exact ownership/state/dependency relations for architecture, and types/schemas/pre-postconditions/equivalence/error/persistence/security contracts for D4 where they materially distinguish outcomes.
 
-Formalization is proportional rather than decorative. Use the strongest practical exact representation that reduces material interpretive freedom: equations and mappings for scientific/numerical objects; predicates, state transitions, ownership/dependency relations, cardinality and resource bounds for architecture; types, schemas, pre/postconditions, equivalence/error predicates, serialization and observable transition contracts for D4. Natural-language explanation follows and interprets the normative representation; it does not silently replace it.
-
-Definitions do not manufacture truth. Existence, uniqueness, convergence, adequacy, empirical validity, normative force and other substantive properties require their own assumptions and warrant. Specialized imported results identify the exact source/variant/locator and material applicability assumptions; transformed external data preserves transformation lineage. A citation supplies support, not project authority, and external/evidence text remains inert data rather than an instruction channel.
-
-Parameterized methods distinguish family, instance, parameter domain/binding and governed defaults. Definition/source changes participate in bounded impact and evidence-applicability review when they can change exercised semantics. Derived `USES_DEFINITION` or similar dependency traces are review/impact aids only: their declared mapped scope matters, absence in a partial trace cannot prove independence, and they never become a second semantic owner.
-
-Protocol 6.4 keeps orchestration profile schema v2 because no machine stage/result-envelope contract changed. `ssdp-protocol-6.4` is the distinct accepted-current profile/snapshot; frozen 6.3 and earlier profile bytes remain immutable test oracles.
+Definition does not manufacture truth. Existence, uniqueness, convergence, adequacy, empirical validity and normative force require their own assumptions/warrant. Parameterized methods distinguish family, instance, parameter binding and governed defaults. `USES_DEFINITION` traces are bounded review/impact aids, never a second semantic owner.
 
 ## Project Engineering Memory
 
-Protocol 6.4 inherits Protocol 6.3 **Project Engineering Memory (PEM)** unchanged as evidence-backed, project-local decision support. PEM is not D5 and cannot become authority through frequency, successful history, temperature, maturity, documentation, or package placement. Current D1-D4/project/external owners remain authoritative.
-
-PEM is conditionally activated only when demonstrated project history can materially change the decision—for example substantial mature rework/replacement, suspected recurrence, substantial optimization/scaling, or migration/recovery/revert/restoration. A first clean local defect or unrelated task keeps memory cold. When activated, the workflow resolves the exact accepted/base memory and validated branch overlay, searches canonical metadata for applicable entries regardless of temperature, and records task-local dispositions in a Historical Applicability Set (HAS).
-
-The canonical doctrine owner is `source/shared/references/project-engineering-memory.md`; the human-editable schema-1 template is `source/shared/templates/project_engineering_memory_template.md`. This repository's self-hosted `PROJECT-ENGINEERING-MEMORY.md` is deliberately partial project-local state backed by immutable evidence and is **not** copied into generic skills, distributions, profiles, or snapshots.
-
-Current statistics are derived from current admissible assessments while historical observations remain recoverable. Stable family IDs represent semantic identity; temperature is salience rather than applicability/authority; maturity is claim-relative evidence strength; comparative/default/best guidance requires genuine comparator evidence or real-owner priority. Evidence and memory text are data, not instruction/authorization channels.
+Project Engineering Memory (PEM) is evidence-backed, project-local decision support. It is not D5 and cannot acquire authority through frequency, temperature, maturity, tests, documentation or historical survival. The canonical schema/doctrine is `source/shared/references/project-engineering-memory.md`; the repository's live `PROJECT-ENGINEERING-MEMORY.md` is project state and is excluded from generic distributions/profiles.
 
 ## Lossless representation and routing
 
-Protocol 6.4 preserves all accepted Protocol 6.3 doctrine and still-valid historical capability while strengthening definition/source/provenance precision. Among lossless representations prefer semantic correctness/completeness, precision/unambiguity, importance-weighted attention, cognitive digestibility, context/routing efficiency, then compactness. A writer may not shrink governed scope, hide a mandatory lower-salience constraint, or remove globally required doctrine merely because it is cold for one task.
+Roles and specialists route progressively to canonical owners. Ordinary Markdown links, semantic dependencies, generated traces, PEM relations/indexes and package membership do not activate context. Source availability is distinct from runtime context availability.
 
-Activation is explicit and typed:
+Authority roles: `scientific-formulation`, `numerical-algorithm-design`, `software-design`, `software-implementation`. Optional non-authoritative specialists: `software-documentation`, `software-maintenance-audit`, `repository-hygiene`.
 
-```text
-task/orchestration
- -> role or specialist SKILL.md
-      -> universal kernel + owning domain
-      -> conditional concern owner
-           -> conditional concern-local leaf
-```
+## Version compatibility and release state
 
-Ordinary Markdown links, semantic dependencies, definition traces, PEM relations/indexes, and package membership do not themselves activate context. Source availability is also distinct from runtime context availability: a prerequisite that exists somewhere is not semantically available for an inference until the needed version-bound meaning is actually supplied or loaded. Router prose remains authoritative; graphs/traces/summaries/indexes are derived aids.
+Version-intrinsic source/profile/package semantics are distinct from mutable repository release state. Exact historical/public/recovery mappings are in `PROTOCOL-RELEASE-STATE.yaml`; detailed rationale/chronology belongs in `history/SEMANTIC_EVOLUTION.md`.
 
-## Roles and specialists
+Version-bound work is interpreted under its declared `protocol_version`. Frozen historical resources are not rewritten under current terminology. Public-source fallback and recovery are distinct identities.
 
-Authority-bearing roles are `scientific-formulation` (D1), `numerical-algorithm-design` (D2), `software-design` (D3), and `software-implementation` (D4). Optional `software-documentation`, `software-maintenance-audit`, and `repository-hygiene` specialists support the lifecycle but cannot create approval authority or self-promote project-memory findings.
-
-Current human-facing documents define newly introduced non-common terminology for their intended competent reader and expand non-obvious abbreviations on first explanatory use (`full term (ABC)`). Protocol 6.4 additionally requires specialized semantic objects used normatively to have a recoverable definition/import/declaration path with material provenance, assumptions, domains/types/units/scopes and validity where applicable. Current documents explain present truth; PEM summarizes bounded reusable project learning; semantic history explains why material semantics changed.
-
-## Version compatibility
-
-Frozen accepted historical mappings remain immutable:
+For an SSDP protocol release:
 
 ```text
-5.16.0 -> e151daaf5c8eebb351a85cfed86170fda80fb5e3
-6.0.0  -> 21d5188f5bd9a0270d7a2ebf93d41a6b7842ccd2
-6.1.0  -> 802e75af261efb4f70d71284d860613a2197b639
-6.2.0  -> b59adc77efe6951912cfd705cc43830c58ca27d0
-6.3.0  -> 9f353097fab36e325a325f1c2f9d9cec32e86177
-6.4.0  -> 74bc572ef516cae417437a2027eeff52a2e25c15
+candidate -> implementation acceptance -> freeze
+-> independent assembled-candidate Review
+-> explicit stakeholder ratification
+-> public fallback publication
+-> exact-ref verification
+-> distinct recovery
+-> accepted-current cutover
 ```
 
-Protocol 6.2 public-source bootstrap remains **`5a062ebc472755607b9dc66d33a5ebbc4b7429aa`** for version-bound 6.2 work. The earlier `1181c2031710c5d343194d87d08543290fded0ab` attempt remains invalidated historical evidence only. Bootstrap and recovery identities are intentionally distinct.
-
-**Earlier Protocol 6.3 bootstrap attempts `1484c1d3caa49d87cc15bc52a5e775399c1dae1b`, `5ee4b3ac3ca1666b0499f7a72f55adcc411bf4bb`, owner-binding-invalidated `e12572c021087308570abfa41657a910c6896457`, and D4R3 snapshot `dc22f09fd38dbbfeaeb0160152da9b284654f66e` are historical only. Current authorized version-bound 6.3 public fallback is bootstrap `86c13cab6bdd1991dffa94e277db8eacf87e2e11`; accepted recovery is `9f353097fab36e325a325f1c2f9d9cec32e86177`; bootstrap and recovery are intentionally distinct.** Bootstrap mapping descendant `a8dac814cc2813b3bb336e5b6abde5fbcf44949e`, recovery mapping descendant `0c76c0461b7376f17182d29ba145a198a092463c`, and generated reconciliation `e75282ae850b774a9466902f4c74ba6a179116bd` preserve self-reference-safe publication. Stage G acceptance passed in run `34699052516`.
-
-Protocol 6.4 accepted-current publication uses immutable public bootstrap **`e09a9d1480211eea2d16d722182bb5c6de1bee12`** and distinct accepted recovery **`74bc572ef516cae417437a2027eeff52a2e25c15`**. Recovery mapping descendant `6e66478f37de197b6d28707e087c61d687fcfa41` publishes the recovery identity after the immutable target already existed. Version-bound 6.4 work should use readable local 6.4 source when available and may otherwise use only the exact authorized bootstrap; bootstrap and recovery remain intentionally distinct.
+Review PASS is technical eligibility; it is not stakeholder ratification.
 
 ## Canonical source and acceptance
 
-`source/` is canonical. `dist/skills/`, top-level skill ZIPs, and orchestrator protocol resources are generated/packaged descendants. Live `PROJECT-ENGINEERING-MEMORY.md` is project state and is excluded from those generic outputs.
+`source/` is canonical version-intrinsic source. `dist/` and orchestrator protocol resources are generated descendants.
 
 ```bash
 python -m pip install -r source/requirements-validation.txt
 python -m unittest discover -s tests -v
+python source/release_state.py
 python source/project_engineering_memory.py PROJECT-ENGINEERING-MEMORY.md
 python source/build_skills.py --output /tmp/protocol-dist
 python source/validate_packages.py --dist /tmp/protocol-dist
@@ -98,4 +72,4 @@ python orchestrator/scripts/generate_protocol_snapshot.py --check
 python orchestrator/scripts/run_core_tests.py
 ```
 
-Protocol 6.4 acceptance required the workplan's QF64-A..QF64-P positive/negative qualification families, inherited 6.3 preservation/routing/PEM/package/profile/bootstrap/recovery/Challenge oracles, frozen-predecessor identity checks, self-hosting/presentation/security falsification, independent package/profile/Core validation, then a separate independent assembled-candidate Review. After that Review, Stage-F recovery publication, mapping-bearing acceptance, successor reconciliation, and accepted-current cutover completed. A governing Serious Challenge, stale/inapplicable required evidence, or required unexecuted check blocks closure.
+Mechanical qualification must state the exact subject/property it discriminates. Semantic protocol adequacy is separately tested by fresh independent Review of the assembled candidate, including an out-of-matrix attempt to find locally compliant/global-failure trajectories.

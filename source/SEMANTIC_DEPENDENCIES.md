@@ -1,6 +1,6 @@
 # SSDP Current Semantic Dependency View
 
-This is a bounded human/agent-readable view of material **accepted Protocol 6.4 plus frozen historical Protocol 6.3 rollback** relationships. It supports impact analysis; it is not a universal claim/source-code graph, activation registry, Project Engineering Memory (PEM) index, semantic-definition authority, or independent authority. Absence of an edge outside explicitly complete mapped scope is not evidence of independence.
+This is a bounded human/agent-readable view of material relationships for the **declared current source version plus frozen historical protocol resources**. It supports impact analysis; it is not a universal claim/source-code graph, activation registry, Project Engineering Memory (PEM) index, semantic-definition authority, or independent authority. Absence of an edge outside explicitly complete mapped scope is not evidence of independence.
 
 ## Semantic authority chain
 
@@ -14,15 +14,15 @@ D4 CONSTRAINED_BY -> applicable D1/D2/external constraints entering D4 directly
 
 Current owners:
 
-- universal relation/Challenge/representation/Protocol-6.4 source-availability semantics: `source/shared/references/abstraction-and-concretization.md`;
+- universal relation/Challenge/representation/source-availability semantics: `source/shared/references/abstraction-and-concretization.md`;
 - D1: `source/shared/references/scientific-formulation.md` + project Scientific Method Paper family;
 - D2: `source/shared/references/numerical-algorithm-design.md` + project Numerical & Algorithmic Method Paper family;
 - D3: `source/shared/references/architecture-and-design.md` + project Architecture Manual family;
 - D4: `source/shared/references/specification-and-implementation.md` + accepted D4 Specification/executable implementation.
 
-Frozen historical Protocol 6.0/6.1 sources may retain `abstraction-and-realization.md`; Protocol 6.2/6.3/6.4 use `abstraction-and-concretization.md` and do not create a current compatibility alias.
+Frozen historical Protocol 6.0/6.1 sources may retain `abstraction-and-realization.md`; Protocol 6.2 and later use `abstraction-and-concretization.md` and do not create a current compatibility alias.
 
-## Protocol 6.4 semantic-definition relationships
+## Semantic-definition relationships
 
 ```text
 material semantic object USES_DEFINITION -> direct material prerequisite semantic object
@@ -75,15 +75,12 @@ A memory-triggering route uses progressive disclosure: exact base/overlay -> sch
 ## Version/profile relationships
 
 ```text
-ssdp-protocol-6.1 CONSTRAINED_BY -> immutable historical Protocol 6.1 rollback semantics
-ssdp-protocol-6.2 CONSTRAINED_BY -> immutable historical Protocol 6.2 rollback semantics
-ssdp-protocol-6.3 CONSTRAINED_BY -> immutable historical Protocol 6.3 rollback semantics
-ssdp-protocol-6.4 CONSTRAINED_BY -> accepted-current Protocol 6.4 semantics
-ssdp-protocol-6.4 PRESERVES -> frozen Protocol 6.3 profile/schema-v2 stage-graph capability
+version-intrinsic source/profile semantics DISTINCT_FROM -> mutable repository release state
+ssdp-protocol-6.5 PRESERVES -> frozen Protocol 6.4 profile/schema-v2 stage-graph capability
 PEM schema 1 VERSIONED_INDEPENDENTLY_OF -> SSDP protocol/profile schema
 ```
 
-Frozen 5.16/6.0/6.1/6.2/6.3 profiles remain independent compatibility/rollback resources, with 6.3 the immediate frozen predecessor oracle for accepted Protocol 6.4. Protocol 6.4 qualification, independent assembled-candidate Review, immutable public-bootstrap publication at `e09a9d1480211eea2d16d722182bb5c6de1bee12`, distinct recovery publication at `74bc572ef516cae417437a2027eeff52a2e25c15`, generated reconciliation, impact closure, and lifecycle cutover are complete; Protocol 6.3 remains immutable historical rollback. Unsupported PEM schemas fail safe for memory-dependent decisions without breaking unrelated protocol routes.
+All previously published 5.16/6.0/6.1/6.2/6.3/6.4 profile resources remain frozen historical/version-bound or predecessor resources. Current accepted/public/recovery/candidate mappings are not owned by this view; repository `PROTOCOL-RELEASE-STATE.yaml` owns those mutable facts. Unsupported PEM schemas fail safe for memory-dependent decisions without breaking unrelated protocol routes.
 
 ## Source/generated relationships
 
@@ -91,6 +88,7 @@ Frozen 5.16/6.0/6.1/6.2/6.3 profiles remain independent compatibility/rollback r
 source/ -> source/build_skills.py -> dist/skills/* + dist/*.zip
 source/ + current protocol prompt/profile inputs -> orchestrator current profile/snapshot resources
 PROJECT-ENGINEERING-MEMORY.md -X-> generic dist/profile/snapshot
+PROTOCOL-RELEASE-STATE.yaml -X-> versioned generic dist/profile/snapshot
 ```
 
 Generated descendants are not independent authority. Package transport closure and runtime activation are separate relationships. A partitioned PEM root + canonical cold partitions form one logical publication; any optional active index/summary is derived from canonical memory and cannot become a second owner.
