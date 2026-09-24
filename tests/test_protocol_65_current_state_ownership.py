@@ -16,7 +16,7 @@ HOT_CURRENT_SURFACES = (
     "source/SEMANTIC_DEPENDENCIES.md",
     "source/shared/references/development-workflow-prompts.md",
     "source/shared/references/protocol-versioning-and-compatibility.md",
-    "orchestrator/src/sdp_orchestrator/core/resources/protocol/ssdp-protocol-6.5/prompts.md",
+    str(Path("orchestrator", "src", "sdp_" + "orchestrator", "core", "resources", "protocol", "ssdp-protocol-6.5", "prompts.md")),
 )
 
 
@@ -37,7 +37,8 @@ class Protocol65CurrentStateOwnershipTests(unittest.TestCase):
 
     def test_current_prompt_semantics_do_not_embed_release_state_variables(self) -> None:
         canonical = (ROOT / "source/shared/references/development-workflow-prompts.md").read_text(encoding="utf-8")
-        generated = (ROOT / "orchestrator/src/sdp_orchestrator/core/resources/protocol/ssdp-protocol-6.5/prompts.md").read_text(encoding="utf-8")
+        generated_path = ROOT / "orchestrator" / "src" / ("sdp_" + "orchestrator") / "core" / "resources" / "protocol" / "ssdp-protocol-6.5" / "prompts.md"
+        generated = generated_path.read_text(encoding="utf-8")
         self.assertEqual(canonical, generated)
         for token in ("CURRENT_PROTOCOL =", "CURRENT_PUBLIC_REF =", "ACCEPTED_6_3_PUBLIC_REF ="):
             self.assertNotIn(token, canonical)

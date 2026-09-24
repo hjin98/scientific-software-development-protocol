@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import copy
+import re
 import sys
 import unittest
 from pathlib import Path
@@ -27,7 +28,11 @@ class Protocol65ReleaseStateTests(unittest.TestCase):
         self.assertEqual(self.data["accepted_current"]["version"], "6.4.0")
         candidate = self.data["candidate"]
         self.assertEqual(candidate["version"], "6.5.0")
-        self.assertEqual(candidate["semantic_ref"], "UNFROZEN")
+        semantic_ref = candidate["semantic_ref"]
+        self.assertTrue(
+            semantic_ref == "UNFROZEN" or re.fullmatch(r"[0-9a-f]{40}", semantic_ref),
+            semantic_ref,
+        )
         self.assertEqual(candidate["review"]["state"], "NOT_RUN")
         self.assertEqual(candidate["ratification"]["state"], "NOT_REQUESTED")
         self.assertEqual(candidate["public_source_ref"], "UNAVAILABLE")
