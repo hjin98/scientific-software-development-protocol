@@ -5,8 +5,8 @@ protocol_version: 6.4.0
 target_protocol_version: 6.5.0
 subject_baseline: P0 = Protocol 6.4 at 55c085261eb827e3047637d045a8e6917ea6b962 (recovery 74bc572ef516cae417437a2027eeff52a2e25c15)
 diagnostic_commit: 81375d8142a8130b80cd82f2304d3e16bc3fc390
-status: active-p3-review-ready
-current_phase: PHASE VII P3 FROZEN / FRESH INDEPENDENT REVIEW REQUIRED
+status: active-p3-review-no-pass-repair-required
+current_phase: PHASE VII P3 NO-PASS / D4 REPAIR REQUIRED / NEW CANDIDATE REQUIRED
 branch: ssdp-6.5-frontier-model-re-evaluation
 created_date: 2026-09-24
 adjudication: qualification/ssdp65/CROSS-MODEL-ADJUDICATION-2026-09-24.md
@@ -14,7 +14,7 @@ active_serious_challenge: none against accepted D1-D4 doctrine
 second_frontier_diagnostic: waived-for-this-cycle-by-stakeholder-resource-constraint
 design_closure: qualification/ssdp65/PHASE-IV-V-DESIGN-CLOSURE.md
 implementation_handoff: workplans/active/SSDP-6.5-D3-D4-IMPLEMENTATION-HANDOFF.md
-independent_review: qualification/ssdp65/INDEPENDENT-REVIEW-2026-09-24-PROTOCOL-6.5-P2-NO-PASS.md
+independent_review: qualification/ssdp65/INDEPENDENT-REVIEW-2026-09-24-PROTOCOL-6.5-P3-NO-PASS.md
 ---
 
 # Protocol 6.5 Frontier-Model Re-evaluation and Successor Workplan
@@ -31,11 +31,11 @@ SUCCESSOR DECISION:                 PROTOCOL 6.5 WARRANTED
 D1-D4 DOMAIN MODEL:                 PRESERVE
 PHASE IV PRINCIPLE EXTRACTION:      COMPLETE — qualification/ssdp65/PHASE-IV-V-DESIGN-CLOSURE.md
 PHASE V CANDIDATE DESIGN:           COMPLETE — DESIGN PASS
-PHASE VI IMPLEMENTATION:            REPAIR COMPLETE — P2 REVIEW BLOCKERS CLOSED
+PHASE VI IMPLEMENTATION:            REOPENED — P3 REVIEW BLOCKERS REQUIRE D4 REPAIR
 P1 CANDIDATE:                       FROZEN / FAILED REVIEW — b565e28aeacea002cefe27e6b9594fe99d653c0a
 P2 CANDIDATE:                       FROZEN / FAILED REVIEW — e8edb353e172aef933ed5e58eeabe897d0cc98d1
 P2 EXACT PR QUALIFICATION:          PASS — run 35996488794\nP3 CANDIDATE:                       FROZEN — 89ccc71a7b0e9458a3e77306be2a773d4059f0f2\nP3 EXACT PR QUALIFICATION:          PASS — run 36018551068
-PHASE VII QUALIFICATION/REVIEW:     READY FOR FRESH P3 REVIEW
+PHASE VII QUALIFICATION/REVIEW:     NO-PASS — P3 IMMUTABLE / NEW CANDIDATE REQUIRED
 PROTOCOL 7 D3/D4:                   OUT OF SCOPE / UNCHANGED
 ```
 
@@ -526,3 +526,66 @@ P3 remains immutable. This later lifecycle descendant binds P3 with Review \`NOT
 Binding descendant `c3df40cdb144c66a390b5d69b49e6fe8a81ad825` passed normal workflow run `36018970303`; this confirms the mutable P3 binding representation is mechanically coherent without altering P3.
 
 The next step is a fresh independent assembled-candidate Review of P3. P1 and P2 NO-PASS conclusions remain historical evidence only and must not be inherited as the P3 verdict.
+
+
+## 20. 2026-09-24 fresh independent P3 Review reopen
+
+Fresh independent assembled-candidate Review of immutable P3 `89ccc71a7b0e9458a3e77306be2a773d4059f0f2` issued **NO-PASS** with no Serious Challenge.
+
+Durable Review:
+
+`qualification/ssdp65/INDEPENDENT-REVIEW-2026-09-24-PROTOCOL-6.5-P3-NO-PASS.md`
+
+P3 remains immutable. B65-P2-1/B65-R2 lifecycle-copy repair is closed, and the original B65-R3 workflow predecessor gate is closed. Two blockers remain at existing D4/current-representation owners.
+
+### R65-P3-1 — make evidence subject identity unambiguous
+
+Owner: existing D4 release-state evidence validation in `source/release_state.py`.
+
+The shared `_bound_candidate_refs` set-membership rule is too permissive. If the target candidate appears in any `candidate_ref`, `semantic_ref` or `pN` field, the record is accepted even when another field identifies a different actual subject. This affects both Review and terminal ratification.
+
+Repair by altering the existing binder only:
+
+- resolve exactly one machine-readable evidence subject;
+- when `candidate_ref` and/or `semantic_ref` are present, require all explicit subject fields to agree and equal the state `candidate.semantic_ref`;
+- keep legacy `pN` compatibility only through a bounded unambiguous rule; comparator/control/history `pN` metadata must not become alternate reviewed subjects;
+- reject ambiguous multiple candidate-subject fields instead of accepting set membership;
+- do not inspect arbitrary Review/ratification prose and do not add a registry, mirror, compatibility subsystem or semantic parser.
+
+Required focused cases:
+
+- exact candidate + PASS/NO-PASS;
+- exact candidate + RATIFIED/REJECTED;
+- wrong candidate;
+- disposition mismatch;
+- explicit `candidate_ref` conflict with matching historical `p3`;
+- explicit `semantic_ref` conflict with matching historical `p3`;
+- multi-`pN` record where historical P3 and future P4 coexist;
+- future P4 as the sole/unambiguous subject;
+- wrong repository, unsafe path, missing commit/path and malformed front matter.
+
+### R65-P3-2 — remove predecessor scope from the current evidence owner
+
+Owner: current canonical `source/shared/references/evidence-evolution-and-dependencies.md` representation under accepted P65-6.
+
+Replace the residual current statement `Protocol 6.4 remains document-controlled` with protocol-current/generic wording that preserves the same no-universal-graph meaning. Perform a bounded sibling scan for predecessor-qualified normative scope in current non-historical canonical source. Do not add a new section/table/version adapter.
+
+Regenerate affected package descendants from canonical source and rerun parity. Frozen 5.16-6.4 resources must remain byte-identical.
+
+### Candidate/evidence reset
+
+Any repair changes current executable/semantic representation and therefore requires a new immutable candidate identity. Never mutate P3 and continue calling it P3.
+
+Rerun, proportionately:
+
+1. focused release-state/evidence-binding tests including the new ambiguity negatives;
+2. current-representation/predecessor-scope census;
+3. source -> generated/package/profile parity and full inherited regression;
+4. Orchestrator Core acceptance;
+5. affected preservation/P65-3/P65-6 ablations and fresh semantic mutants;
+6. hot-current measurement after the one-line owner repair;
+7. exact-new-candidate normal PR CI;
+8. new freeze/binding qualification with Review reset to NOT_RUN and ratification NOT_REQUESTED;
+9. a new fresh independent assembled-candidate Review.
+
+Exact P3 runs `36018551068`, `36018970303` and `36019184556` remain historical evidence for their exact subjects/properties only. No stakeholder ratification/publication/recovery/cutover/merge/Protocol-7 mutation is authorized.
