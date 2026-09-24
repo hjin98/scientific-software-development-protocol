@@ -1,9 +1,9 @@
 from __future__ import annotations
 
 import copy
-import re
 import sys
 import unittest
+from unittest import mock
 from pathlib import Path
 
 import yaml

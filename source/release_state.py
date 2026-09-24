@@ -15,7 +15,9 @@ ROOT = Path(__file__).resolve().parent.parent
 DEFAULT_PATH = ROOT / "PROTOCOL-RELEASE-STATE.yaml"
 SHA_RE = re.compile(r"^[0-9a-f]{40}$")
 SEMVER_RE = re.compile(r"^\d+\.\d+\.\d+$")
-EVIDENCE_RE = re.compile(r"^[^@\s]+@[0-9a-f]{40}:[^#\s]+(?:#.+)?$")
+EVIDENCE_RE = re.compile(
+    r"^(?P<source>[^@\s]+)@(?P<sha>[0-9a-f]{40}):(?P<path>[^#\s]+)(?:#(?P<locator>.+))?$"
+)
 REVIEW_STATES = {"NOT_RUN", "NO_PASS", "PASS"}
 RATIFICATION_STATES = {"NOT_REQUESTED", "PENDING", "RATIFIED", "REJECTED"}
 
