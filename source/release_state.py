@@ -110,16 +110,57 @@ def _resolve_evidence_route(
     return content
 
 
-def _bound_candidate_refs(metadata: dict[str, Any]) -> set[str]:
-    return {
-        str(value)
-        for key, value in metadata.items()
-        if value
-        and (
-            key in {"candidate_ref", "semantic_ref"}
-            or re.fullmatch(r"p\d+", str(key).lower())
-        )
+def _bound_candidate_ref(
+    metadata: dict[str, Any],
+    where: str,
+    errors: list[str],
+) -> str | None:
+    explicit = {
+        key: str(metadata[key])
+        for key in ("candidate_ref", "semantic_ref")
+        if metadata.get(key)
     }
+    if explicit:
+        values = set(explicit.values())
+        if len(values) != 1:
+            rendered = ", ".join(
+                f"{key}={value}" for key, value in sorted(explicit.items())
+            )
+            errors.append(
+                f"{where} has conflicting explicit candidate subject fields: {rendered}"
+            )
+            return None
+        return next(iter(values))
+
+    legacy: list[tuple[int, str, str]] = []
+    for key, value in metadata.items():
+        match = re.fullmatch(r"p(?P<index>\d+)", str(key).lower())
+        if match and value:
+            legacy.append((int(match.group("index")), str(key), str(value)))
+
+    if not legacy:
+        errors.append(
+            f"{where} does not declare a candidate subject in "
+            "candidate_ref, semantic_ref, or legacy pN metadata"
+        )
+        return None
+
+    highest = max(index for index, _, _ in legacy)
+    highest_fields = [
+        (key, value)
+        for index, key, value in legacy
+        if index == highest
+    ]
+    values = {value for _, value in highest_fields}
+    if len(values) != 1:
+        rendered = ", ".join(
+            f"{key}={value}" for key, value in sorted(highest_fields)
+        )
+        errors.append(
+            f"{where} has ambiguous legacy candidate subject fields: {rendered}"
+        )
+        return None
+    return next(iter(values))
 
 
 def _check_review_evidence(
@@ -139,12 +180,11 @@ def _check_review_evidence(
     if not metadata:
         return
 
-    bound_refs = _bound_candidate_refs(metadata)
-    if semantic_ref not in bound_refs:
-        rendered = ", ".join(sorted(bound_refs)) if bound_refs else "NONE"
+    bound_ref = _bound_candidate_ref(metadata, where, errors)
+    if bound_ref is not None and semantic_ref != bound_ref:
         errors.append(
             f"{where} does not bind candidate.semantic_ref {semantic_ref}; "
-            f"review record binds {rendered}"
+            f"review record subject is {bound_ref}"
         )
 
     expected_status = {"PASS": "pass", "NO_PASS": "no-pass"}[review_state]
@@ -172,12 +212,11 @@ def _check_ratification_evidence(
     if not metadata:
         return
 
-    bound_refs = _bound_candidate_refs(metadata)
-    if semantic_ref not in bound_refs:
-        rendered = ", ".join(sorted(bound_refs)) if bound_refs else "NONE"
+    bound_ref = _bound_candidate_ref(metadata, where, errors)
+    if bound_ref is not None and semantic_ref != bound_ref:
         errors.append(
             f"{where} does not bind candidate.semantic_ref {semantic_ref}; "
-            f"ratification record binds {rendered}"
+            f"ratification record subject is {bound_ref}"
         )
 
     expected_status = {"RATIFIED": "ratified", "REJECTED": "rejected"}[ratification_state]

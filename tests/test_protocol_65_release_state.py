@@ -154,6 +154,84 @@ p3: {candidate}
             [],
         )
 
+    def test_review_evidence_rejects_explicit_subject_hidden_by_historical_pn(self) -> None:
+        candidate = "a" * 40
+        evidence_ref = (
+            "hjin98/scientific-software-development-protocol@"
+            + "b" * 40
+            + ":qualification/review.md"
+        )
+        for field in ("candidate_ref", "semantic_ref"):
+            with self.subTest(field=field):
+                review = f"""---
+status: pass
+{field}: {"c" * 40}
+p3: {candidate}
+---
+# Review
+"""
+                errors = self._review_evidence_errors(
+                    evidence_ref=evidence_ref,
+                    semantic_ref=candidate,
+                    review_state="PASS",
+                    git_results=[(0, ""), (0, review)],
+                )
+                self.assertTrue(any("does not bind candidate.semantic_ref" in error for error in errors))
+
+    def test_review_evidence_uses_highest_legacy_candidate_generation(self) -> None:
+        p3 = "a" * 40
+        p4 = "c" * 40
+        evidence_ref = (
+            "hjin98/scientific-software-development-protocol@"
+            + "b" * 40
+            + ":qualification/review.md"
+        )
+        review = f"""---
+status: pass
+p3: {p3}
+p4: {p4}
+---
+# Review
+"""
+        errors = self._review_evidence_errors(
+            evidence_ref=evidence_ref,
+            semantic_ref=p3,
+            review_state="PASS",
+            git_results=[(0, ""), (0, review)],
+        )
+        self.assertTrue(any("does not bind candidate.semantic_ref" in error for error in errors))
+        self.assertEqual(
+            self._review_evidence_errors(
+                evidence_ref=evidence_ref,
+                semantic_ref=p4,
+                review_state="PASS",
+                git_results=[(0, ""), (0, review)],
+            ),
+            [],
+        )
+
+    def test_review_evidence_rejects_conflicting_explicit_subject_fields(self) -> None:
+        candidate = "a" * 40
+        evidence_ref = (
+            "hjin98/scientific-software-development-protocol@"
+            + "b" * 40
+            + ":qualification/review.md"
+        )
+        review = f"""---
+status: pass
+candidate_ref: {candidate}
+semantic_ref: {"c" * 40}
+---
+# Review
+"""
+        errors = self._review_evidence_errors(
+            evidence_ref=evidence_ref,
+            semantic_ref=candidate,
+            review_state="PASS",
+            git_results=[(0, ""), (0, review)],
+        )
+        self.assertTrue(any("conflicting explicit candidate subject fields" in error for error in errors))
+
     def test_review_evidence_rejects_wrong_repository(self) -> None:
         errors: list[str] = []
         release_state._check_review_evidence(
@@ -306,6 +384,82 @@ semantic_ref: {candidate}
             git_results=[(0, ""), (1, "")],
         )
         self.assertTrue(any("is not readable at commit" in error for error in errors))
+
+    def test_ratification_evidence_rejects_explicit_subject_hidden_by_historical_pn(self) -> None:
+        candidate = "a" * 40
+        evidence_ref = (
+            "hjin98/scientific-software-development-protocol@"
+            + "b" * 40
+            + ":qualification/ratification.md"
+        )
+        ratification = f"""---
+status: ratified
+candidate_ref: {"c" * 40}
+p3: {candidate}
+---
+# Stakeholder ratification
+"""
+        errors = self._ratification_evidence_errors(
+            evidence_ref=evidence_ref,
+            semantic_ref=candidate,
+            ratification_state="RATIFIED",
+            git_results=[(0, ""), (0, ratification)],
+        )
+        self.assertTrue(any("does not bind candidate.semantic_ref" in error for error in errors))
+
+    def test_ratification_evidence_uses_highest_legacy_candidate_generation(self) -> None:
+        p3 = "a" * 40
+        p4 = "c" * 40
+        evidence_ref = (
+            "hjin98/scientific-software-development-protocol@"
+            + "b" * 40
+            + ":qualification/ratification.md"
+        )
+        ratification = f"""---
+status: ratified
+p3: {p3}
+p4: {p4}
+---
+# Stakeholder ratification
+"""
+        errors = self._ratification_evidence_errors(
+            evidence_ref=evidence_ref,
+            semantic_ref=p3,
+            ratification_state="RATIFIED",
+            git_results=[(0, ""), (0, ratification)],
+        )
+        self.assertTrue(any("does not bind candidate.semantic_ref" in error for error in errors))
+        self.assertEqual(
+            self._ratification_evidence_errors(
+                evidence_ref=evidence_ref,
+                semantic_ref=p4,
+                ratification_state="RATIFIED",
+                git_results=[(0, ""), (0, ratification)],
+            ),
+            [],
+        )
+
+    def test_ratification_evidence_rejects_conflicting_explicit_subject_fields(self) -> None:
+        candidate = "a" * 40
+        evidence_ref = (
+            "hjin98/scientific-software-development-protocol@"
+            + "b" * 40
+            + ":qualification/ratification.md"
+        )
+        ratification = f"""---
+status: ratified
+candidate_ref: {candidate}
+semantic_ref: {"c" * 40}
+---
+# Stakeholder ratification
+"""
+        errors = self._ratification_evidence_errors(
+            evidence_ref=evidence_ref,
+            semantic_ref=candidate,
+            ratification_state="RATIFIED",
+            git_results=[(0, ""), (0, ratification)],
+        )
+        self.assertTrue(any("conflicting explicit candidate subject fields" in error for error in errors))
 
     def test_review_pass_requires_frozen_semantic_candidate(self) -> None:
         data = copy.deepcopy(self.data)

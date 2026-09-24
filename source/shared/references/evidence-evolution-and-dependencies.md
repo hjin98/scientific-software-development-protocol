@@ -128,7 +128,7 @@ A current owner cited by an `AUTHORITY_BOUND` preservation capability or normati
 
 Revert/restoration preserves the historical realization/event but reconciles present applicability, assessment/admissibility, authority binding, statistics, relations, maturity and guidance over the affected surface. Restoring an old file does not restore old evidence validity by timestamp.
 
-Before closure every material impact item is resolved, explicitly preserved as still-valid with reason, or unavailable/blocking. Old green tests never substitute for impact closure. Protocol 6.4 remains document-controlled: these are reasoning obligations, not a required universal machine graph/database.
+Before closure every material impact item is resolved, explicitly preserved as still-valid with reason, or unavailable/blocking. Old green tests never substitute for impact closure. These remain document-controlled reasoning obligations, not a required universal machine graph/database.
 
 ## Assessment disagreement
 
