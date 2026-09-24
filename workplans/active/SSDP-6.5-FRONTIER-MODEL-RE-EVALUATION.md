@@ -5,13 +5,16 @@ protocol_version: 6.4.0
 target_protocol_version: 6.5.0
 subject_baseline: P0 = Protocol 6.4 at 55c085261eb827e3047637d045a8e6917ea6b962 (recovery 74bc572ef516cae417437a2027eeff52a2e25c15)
 diagnostic_commit: 81375d8142a8130b80cd82f2304d3e16bc3fc390
-status: active
-current_phase: PHASE IV-V DESIGN COMPLETE / PHASE VI IMPLEMENTATION AUTHORIZED
+status: reopened-independent-review-no-pass
+current_phase: PHASE VII INDEPENDENT REVIEW NO-PASS / D4 REPAIR REQUIRED
 branch: ssdp-6.5-frontier-model-re-evaluation
 created_date: 2026-09-24
 adjudication: qualification/ssdp65/CROSS-MODEL-ADJUDICATION-2026-09-24.md
 active_serious_challenge: none against accepted D1-D4 doctrine
-second_frontier_diagnostic: waived-for-this-cycle-by-stakeholder-resource-constraint\ndesign_closure: qualification/ssdp65/PHASE-IV-V-DESIGN-CLOSURE.md\nimplementation_handoff: workplans/active/SSDP-6.5-D3-D4-IMPLEMENTATION-HANDOFF.md
+second_frontier_diagnostic: waived-for-this-cycle-by-stakeholder-resource-constraint
+design_closure: qualification/ssdp65/PHASE-IV-V-DESIGN-CLOSURE.md
+implementation_handoff: workplans/active/SSDP-6.5-D3-D4-IMPLEMENTATION-HANDOFF.md
+independent_review: qualification/ssdp65/INDEPENDENT-REVIEW-2026-09-24-PROTOCOL-6.5-NO-PASS.md
 ---
 
 # Protocol 6.5 Frontier-Model Re-evaluation and Successor Workplan
@@ -28,9 +31,9 @@ SUCCESSOR DECISION:                 PROTOCOL 6.5 WARRANTED
 D1-D4 DOMAIN MODEL:                 PRESERVE
 PHASE IV PRINCIPLE EXTRACTION:      COMPLETE — qualification/ssdp65/PHASE-IV-V-DESIGN-CLOSURE.md
 PHASE V CANDIDATE DESIGN:           COMPLETE — DESIGN PASS
-PHASE VI IMPLEMENTATION:            COMPLETE — workplans/active/SSDP-6.5-D3-D4-IMPLEMENTATION-HANDOFF.md
-P1 CANDIDATE:                       FROZEN — b565e28aeacea002cefe27e6b9594fe99d653c0a
-PHASE VII QUALIFICATION/REVIEW:     READY — qualification/ssdp65/INDEPENDENT-REVIEW-HANDOFF-PROTOCOL-6.5.md
+PHASE VI IMPLEMENTATION:            REOPENED AT D4 — independent Review blockers B65-R1..R3
+P1 CANDIDATE:                       FROZEN / FAILED REVIEW — b565e28aeacea002cefe27e6b9594fe99d653c0a
+PHASE VII QUALIFICATION/REVIEW:     NO-PASS — qualification/ssdp65/INDEPENDENT-REVIEW-2026-09-24-PROTOCOL-6.5-NO-PASS.md
 PROTOCOL 7 D3/D4:                   OUT OF SCOPE / UNCHANGED
 ```
 
@@ -368,3 +371,41 @@ This workplan closes only when:
 - evidence shows a P65 principle increases authority violations or false blockers;
 - a fresh semantic mutation/counterexample defeats P1;
 - accepted P0/main materially changes before candidate comparison and applicability is not explicitly rebound.
+
+
+## 16. 2026-09-24 fresh independent Review reopen
+
+Fresh assembled-candidate Review of immutable P1 b565e28aeacea002cefe27e6b9594fe99d653c0a issued NO-PASS with no Serious Challenge. P1 remains immutable and is the failed Review subject.
+
+### R65-1 — bind Review evidence to the exact candidate in the real state validator
+
+Owner: D4 release-state validation.
+
+Repair source/release_state.py and focused tests so PASS/NO_PASS evidence is not accepted by regex shape alone. Resolve the immutable evidence route in this repository, require commit/path existence, require the Review record’s machine-readable candidate identity to equal candidate.semantic_ref, and require disposition/state agreement. Add wrong-candidate, nonexistent-path/commit, wrong-repository and state-mismatch negatives plus a valid exact binding. Do not machine-judge arbitrary Review prose and do not add a parallel evidence registry.
+
+### R65-2 — remove live mutable phase values from long-lived tests
+
+Owner: D4 testing/qualification.
+
+Remove hardcoded live assertions that Review is NOT_RUN, ratification NOT_REQUESTED and publication/recovery UNAVAILABLE from tests that read the mutable owner. Keep state-machine legality and current-file coherence at the release_state owner; exercise legal/illegal transitions using copied lifecycle-independent fixtures. Freeze-time phase facts remain in immutable qualification records. No synchronized phase table or compatibility wrapper.
+
+### R65-3 — remove predecessor-version gates from current 6.5 workflow semantics
+
+Owner: D4/current workflow representation.
+
+In source/shared/references/development-workflow-prompts.md, remove predecessor-only “Protocol 6.4” conditions from inherited D4 exact-contract, Review, Verification, Stabilization, audit and closeout duties. State them as current/generic obligations with the existing materiality triggers. Perform a bounded search of current non-historical operational source for equivalent predecessor-version guards. Regenerate the 6.5 prompt/profile from canonical source. Preserve history in history/archive only.
+
+### Candidate/evidence reset
+
+These repairs change the reviewed semantic/qualification representation. They MUST NOT modify P1 and continue calling it P1.
+
+After R65-1..R65-3:
+1. run focused D4 tests and full affected repository acceptance;
+2. reconcile preservation/current-state/simplicity evidence;
+3. freeze a new semantic candidate SHA;
+4. bind that new SHA from a later lifecycle descendant;
+5. reset candidate Review to NOT_RUN for the new candidate; ratification remains NOT_REQUESTED; public fallback/recovery remain UNAVAILABLE;
+6. rerun fresh post-freeze mutation/counterexample evidence, affected matched P0/new-candidate comparison and exact-candidate normal PR CI;
+7. perform a new fresh independent assembled-candidate Review.
+
+Exact-P1 runs 35985539212 / 35985871148 and descendant run 35986452433 remain historical evidence for their exact subjects only.

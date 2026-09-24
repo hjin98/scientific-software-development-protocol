@@ -3,7 +3,7 @@ kind: implementation-workplan
 workplan_id: SSDP-6.5-D3-D4-IMPLEMENTATION-HANDOFF
 protocol_version: 6.4.0
 target_protocol_version: 6.5.0
-status: implementation-complete-p1-frozen
+status: reopened-d4-after-independent-review-no-pass
 parent_workplan: workplans/active/SSDP-6.5-FRONTIER-MODEL-RE-EVALUATION.md
 design_authority: qualification/ssdp65/PHASE-IV-V-DESIGN-CLOSURE.md
 baseline: 55c085261eb827e3047637d045a8e6917ea6b962
@@ -327,8 +327,8 @@ Raise Serious Challenge if accepted D1-D4/formal-definition doctrine itself is s
 ## 9. Final handoff state
 
 ```text
-D3 DESIGN: PASS
-PHASE VI IMPLEMENTATION: COMPLETE / STAGE E CLOSED
+D3 DESIGN: PASS / NOT REOPENED
+PHASE VI IMPLEMENTATION: REOPENED AT D4 — B65-R1..R3
 FINAL PRE-FREEZE FULL RUN: 35985539212 / PASS
 P1 NORMAL PR QUALIFICATION: 35985871148 / PASS
 P1: FROZEN — b565e28aeacea002cefe27e6b9594fe99d653c0a
@@ -338,3 +338,16 @@ PUBLIC 6.5 FALLBACK: UNAVAILABLE
 ACCEPTED CURRENT: resolve from PROTOCOL-RELEASE-STATE.yaml
 PROTOCOL 7 D3/D4: UNCHANGED
 ```
+
+
+## 10. Independent Review repair delta — 2026-09-24
+
+The accepted D3 design remains valid. Fresh independent Review found three D4/current-representation nonconformances; do not redesign P65-1..P65-6.
+
+- B65-R1: release_state.py must resolve immutable Review evidence and bind exact candidate/disposition rather than accepting regex shape alone.
+- B65-R2: long-lived release-state tests must not copy the live lifecycle phase; move freeze-time observations back to qualification evidence and test invariant transitions with lifecycle-independent fixtures.
+- B65-R3: canonical/current 6.5 workflow prompts must not predecessor-gate inherited 6.4 obligations. Remove those operational version qualifiers and regenerate descendants.
+
+Repair by alteration/removal inside existing owners. Do not add a state mirror, semantic parser, compatibility wrapper or prose theorem prover.
+
+P1 b565e28aeacea002cefe27e6b9594fe99d653c0a is immutable and failed Review. The repaired implementation must freeze a new semantic candidate and rerun affected Phase VII evidence plus fresh independent Review.
