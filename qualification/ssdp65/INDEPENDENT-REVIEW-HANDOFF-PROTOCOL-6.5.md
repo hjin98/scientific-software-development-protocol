@@ -13,6 +13,9 @@ immutable_candidate_p7: 133c747a1f9ab4372c9e1af7a7e9666316dc892b
 candidate_branch: ssdp-6.5-frontier-model-re-evaluation
 draft_pr: 33
 p7_mechanical_qualification_run: 36058860629
+p7_binding_descendant: a0ee73af1b2d6af1cdd42533ca007e8a99073ef9
+p7_binding_qualification_run: 36059112506
+p7_binding_qualification: qualification/ssdp65/P7-BINDING-QUALIFICATION.md
 p6_review: qualification/ssdp65/INDEPENDENT-REVIEW-2026-09-24-PROTOCOL-6.5-P6-NO-PASS.md
 p7_repair_qualification: qualification/ssdp65/P7-REPAIR-QUALIFICATION.md
 authoring_context_verdict: none
@@ -80,7 +83,7 @@ Use at least one new holdout not used to design P7. Green author-side tests are 
 
 ## Lifecycle boundary
 
-Resolve lifecycle state from the later P7 binding descendant rather than P7 itself.
+Resolve lifecycle state from later P7 binding descendant `a0ee73af1b2d6af1cdd42533ca007e8a99073ef9` rather than P7 itself. Binding workflow run `36059112506` passed the complete build and Orchestrator Core jobs.
 
 Expected entering Review:
 

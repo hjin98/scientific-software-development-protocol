@@ -854,3 +854,12 @@ The existing validator now requires canonical ASCII numeric x.y.z identities, co
 Exact replacement candidate P7 is `133c747a1f9ab4372c9e1af7a7e9666316dc892b`. Normal PR workflow run `36058860629` passed the complete build and Orchestrator Core jobs.
 
 P7 is immutable. A later descendant binds P7 with Review reset to `NOT_RUN`. Fresh independent assembled-candidate Review is required before stakeholder ratification or publication.
+
+
+## 31. P7 binding qualification
+
+Lifecycle descendant `a0ee73af1b2d6af1cdd42533ca007e8a99073ef9` binds exact P7 `133c747a1f9ab4372c9e1af7a7e9666316dc892b` with Review `NOT_RUN`, ratification `NOT_REQUESTED`, public fallback/recovery `UNAVAILABLE`, and accepted-current Protocol 6.4.
+
+Normal workflow run `36059112506` passed the complete build and Orchestrator Core jobs. This is lifecycle/mechanical evidence only.
+
+The next authorized step is a genuinely fresh independent assembled-candidate Review of exact P7. No stakeholder ratification, publication, recovery, accepted-current cutover, PR merge, or Protocol 7 D3/D4 mutation is authorized.

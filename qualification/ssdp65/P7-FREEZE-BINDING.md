@@ -1,12 +1,14 @@
 ---
 kind: ssdp65-p7-freeze-binding
-status: frozen-candidate-ready-for-binding
+status: frozen-candidate-bound
 protocol_version: 6.4.0
 target_protocol_version: 6.5.0
 p0: 55c085261eb827e3047637d045a8e6917ea6b962
 failed_p6: dd06da8136416e67644586c44880b466f982b8ff
 p7: 133c747a1f9ab4372c9e1af7a7e9666316dc892b
 p7_pr_qualification_run: 36058860629
+binding_descendant: a0ee73af1b2d6af1cdd42533ca007e8a99073ef9
+binding_run: 36059112506
 review_state: NOT_RUN
 ratification_state: NOT_REQUESTED
 public_source_ref: UNAVAILABLE
@@ -24,3 +26,10 @@ Exact-P7 ordinary PR qualification run `36058860629` passed the complete build a
 P6 remains immutable and failed Review. The descendant containing this record binds the already-existing P7 identity in the sole mutable release-state owner with Review reset to `NOT_RUN`. It does not perform stakeholder ratification, publication, recovery establishment, accepted-current cutover, PR merge, or Protocol 7 mutation.
 
 Any material semantic mutation after P7 requires a new candidate identity and affected requalification.
+
+
+## Binding qualification
+
+Lifecycle descendant `a0ee73af1b2d6af1cdd42533ca007e8a99073ef9` binds exact P7 with Review `NOT_RUN`, ratification `NOT_REQUESTED`, public fallback/recovery `UNAVAILABLE`, and accepted-current Protocol 6.4.
+
+Normal workflow run `36059112506` passed the complete build and Orchestrator Core jobs. This is lifecycle/mechanical evidence only and does not manufacture independent Review PASS.
