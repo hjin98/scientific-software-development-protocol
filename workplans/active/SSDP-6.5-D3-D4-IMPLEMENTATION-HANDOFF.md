@@ -404,4 +404,6 @@ P2 Review blockers B65-P2-1 and B65-P2-2 are repaired at the existing D4 owners.
 
 Exact P3 is \`89ccc71a7b0e9458a3e77306be2a773d4059f0f2\`. Exact-P3 normal PR workflow \`36018551068\` passed the complete build and Orchestrator Core jobs.
 
+Binding descendant `c3df40cdb144c66a390b5d69b49e6fe8a81ad825` passed normal workflow run `36018970303` with Review still `NOT_RUN` and no ratification/publication/recovery advancement.
+
 D3 remains closed. P3 must now receive a fresh independent assembled-candidate Review before stakeholder ratification or publication.

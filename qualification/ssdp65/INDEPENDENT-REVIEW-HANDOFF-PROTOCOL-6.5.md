@@ -1,7 +1,7 @@
 ---
 kind: independent-review-handoff
 protocol_under_review: 6.5.0
-status: ready-p3-binding
+status: ready-p3
 accepted_control_p0: 55c085261eb827e3047637d045a8e6917ea6b962
 failed_candidate_p1: b565e28aeacea002cefe27e6b9594fe99d653c0a
 failed_candidate_p2: e8edb353e172aef933ed5e58eeabe897d0cc98d1
@@ -9,6 +9,8 @@ immutable_candidate_p3: 89ccc71a7b0e9458a3e77306be2a773d4059f0f2
 candidate_branch: ssdp-6.5-frontier-model-re-evaluation
 draft_pr: 33
 p3_mechanical_qualification_run: 36018551068
+p3_binding_descendant: c3df40cdb144c66a390b5d69b49e6fe8a81ad825
+p3_binding_qualification_run: 36018970303
 p1_review: qualification/ssdp65/INDEPENDENT-REVIEW-2026-09-24-PROTOCOL-6.5-NO-PASS.md
 p2_review: qualification/ssdp65/INDEPENDENT-REVIEW-2026-09-24-PROTOCOL-6.5-P2-NO-PASS.md
 p3_repair_qualification: qualification/ssdp65/P3-REPAIR-QUALIFICATION.md

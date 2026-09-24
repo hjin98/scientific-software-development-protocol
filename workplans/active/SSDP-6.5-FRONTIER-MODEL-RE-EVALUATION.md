@@ -523,4 +523,6 @@ Normal PR workflow run \`36018551068\` evaluated exact P3 and passed:
 
 P3 remains immutable. This later lifecycle descendant binds P3 with Review \`NOT_RUN\`, ratification \`NOT_REQUESTED\`, public fallback \`UNAVAILABLE\`, recovery \`UNAVAILABLE\`, and accepted-current Protocol 6.4.
 
+Binding descendant `c3df40cdb144c66a390b5d69b49e6fe8a81ad825` passed normal workflow run `36018970303`; this confirms the mutable P3 binding representation is mechanically coherent without altering P3.
+
 The next step is a fresh independent assembled-candidate Review of P3. P1 and P2 NO-PASS conclusions remain historical evidence only and must not be inherited as the P3 verdict.
