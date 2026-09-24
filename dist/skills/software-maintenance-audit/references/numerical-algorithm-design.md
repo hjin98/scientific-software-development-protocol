@@ -36,7 +36,7 @@ D3 must be faithful to D2 and abstractly adequate: omitting ordering, precision,
 
 Material Review seeks wrong limiting behavior, degraded convergence, hidden normalization, instability/ill-conditioning, estimator/stochastic bias, precision bias, non-equivalent restart and parallel/reordered arithmetic outside the accepted envelope. If accepted D2 itself may be materially false, contradictory, ambiguous or unrealizable, raise **SERIOUS CHALLENGE** instead of patching D3/D4 around it.
 
-## Protocol 6.4 D2 formal-definition consequences
+## D2 formal-definition discipline
 
 D2 must state the governed numerical method in a definition-closed form sufficient to distinguish materially different algorithms. Introduce operators, estimators, recurrences, update maps, optimization problems, discretizations, residual/error measures, stopping predicates, normalization/reduction/order rules, precision policy, stochastic variables/laws and uncertainty semantics before later claims use them. Define material input/output spaces, types/shapes/units, indexing/order, initialization, termination and partial/failure domains.
 

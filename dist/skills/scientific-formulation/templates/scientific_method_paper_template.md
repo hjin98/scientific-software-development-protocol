@@ -1,6 +1,6 @@
 # Scientific Method Paper
 
-> Canonical D1 document-family template for Protocol 6.1. Adapt structure to the project; one physical file is not mandatory.
+> Canonical D1 document-family template for current SSDP. Adapt structure to the project; one physical file is not mandatory.
 
 ## Authority metadata
 

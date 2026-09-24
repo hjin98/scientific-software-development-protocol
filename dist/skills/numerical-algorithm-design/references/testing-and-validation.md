@@ -10,6 +10,12 @@ Test/fixture/threshold/specification changes are legitimate when governing autho
 
 A required check that did not execute is not a pass. Green tests do not establish omitted workplan/conformance obligations. A generated/static sensor establishes only the structural property it actually measures; it does not establish live latency, attention, cache, memory, productivity, or model behavior without live evidence.
 
+## Evidence classes and claim scope
+
+For every material qualification claim make the tuple recoverable: `(subject, property, oracle/method, result, limitations)`. Distinguish three evidence classes: **structural/executable consistency** (schemas, exact refs, generated parity, state transitions, package structure and other mechanically decidable properties); **semantic adequacy/conformance** (the assembled normative owners and their consequences); and **engineering-outcome improvement** (whether protocol-guided work improves correctness, autonomy, simplicity, cost or another declared outcome). No class may claim a stronger property or different subject than its method discriminates. Structural tests do not prove arbitrary prose semantics; semantic Review does not establish outcome superiority; outcome evidence does not prove implementation fidelity.
+
+For protocol releases, arbitrary prose-semantic mutations and counterexamples belong to independent semantic Review of the assembled candidate unless the affected meaning is represented by a genuinely machine-readable contract. Exact wording pins are acceptance evidence only when that exact token/grammar is itself governed.
+
 ## Oracle strength and counterfactuals
 
 For important changed logic ask: **What is the smallest plausible semantically wrong concretization that could still pass this evidence?** Strengthen economically with exact/reference cases, properties/stateful tests, known-broken counterfactuals, mutation/semantic perturbation, differential comparison, metamorphic relations, or real-owner integration. Coverage/mutation/complexity scores are sensors unless project authority adopts a threshold; do not optimize the score instead of the governed behavior.
@@ -95,15 +101,15 @@ actual D4 executable behavior
 
 Do not force this onto a local software refactor with no plausible upstream semantic impact.
 
-## Protocol 6.4 qualification consequence
+## Qualification of semantic-definition and traceability claims
 
-Protocol 6.4 qualification pairs every material semantic-definition/traceability claim with discriminating positive and negative cases. Static sensors may verify mechanically decidable structure—required fields/routes, resolvable locators, profile/version identity, exact frozen bytes, generated parity, or a declared bounded dependency graph—but must not claim to prove arbitrary mathematics, dimensional validity, theorem applicability, source support, owner equivalence, audience expertise, semantic completeness, or warrant sufficiency.
+For mechanically decidable semantic-definition/traceability structure, qualification pairs material positive claims with discriminating negative cases. Static sensors may verify mechanically decidable structure—required fields/routes, resolvable locators, profile/version identity, exact frozen bytes, generated parity, or a declared bounded dependency graph—but must not claim to prove arbitrary mathematics, dimensional validity, theorem applicability, source support, owner equivalence, audience expertise, semantic completeness, or warrant sufficiency.
 
 Counterfactuals must include semantically wrong cases that shallow word-presence checks would accept: specialized use before definition/import; two conflicting applicable owners with a deterministic file-order winner; undeclared primitive or ambiguous binder shadowing; a definition that smuggles existence/convergence/truth; wrong relation/logical direction or type/unit mismatch; parameter family evidence reused across a materially different binding/default; stochastic semantics missing dependence/conditioning; imported result with unmet hypotheses or unsupported/wrong-version citation; circular claim warrant; a `USES_DEFINITION` trace that mistakes hyperlinks/call graphs for semantic dependency or claims global completeness from a partial map; runtime inference without loading the exact owner; and external evidence text attempting to authorize an action.
 
 Positive fixtures distinguish genuinely foundational objects, exact imported prerequisites, explicit primitives/binders, conservative definitions, well-formed parameterized families/instances, properly discharged/propagated validity conditions, legitimate mutually recursive definition groups, and bounded traces whose scope/completeness claim matches what was actually reviewed.
 
-For parameter-sensitive evidence, vary the material parameter/regime so the oracle proves it rejects stale reuse rather than merely recording a parameter field. For external-source trust, prove instruction-like content remains inert data while the supported semantic claim/source locator can still be inspected. Human semantic review remains required where no honest mechanical discriminator exists.
+For parameter-sensitive evidence, vary the material parameter/regime so the oracle proves it rejects stale reuse rather than merely recording a parameter field. For external-source trust, prove instruction-like content remains inert data while the supported semantic claim/source locator can still be inspected. Human or agent semantic Review remains required where no honest mechanical discriminator exists. Synthetic fixture dictionaries may exercise a real executable predicate, but passing a self-contained fixture matrix cannot by itself qualify the prose authority the fixture was designed to model.
 
 ## Final assembled acceptance
 

@@ -62,9 +62,9 @@ Use bounded Markdown dependency views only when ordinary links/anchors/workplan 
 
 Preserve concise semantic-evolution reasoning when a material model/method/architecture/concretization/evidence choice is replaced/generalized/rejected/retired/restored and future rediscovery is plausible. Current owners explain what; PEM summarizes bounded evidence-backed project learning; history explains why; Git preserves detailed chronology. Resolved Challenge rationale should be only the concise material reasoning needed to prevent recurrence, not a debate transcript/database.
 
-## Protocol 6.4 semantic-source maintenance
+## Semantic-source maintenance
 
-For Protocol 6.4 current authority, documentation maintenance additionally preserves the semantic-definition/source-availability contract owned by [Abstraction, concretization, authority, challenge, and representation](abstraction-and-concretization.md) and its human-facing specialization in [Scientific and technical writing](scientific-technical-writing.md).
+Documentation maintenance preserves the semantic-definition/source-availability contract owned by [Abstraction, concretization, authority, challenge, and representation](abstraction-and-concretization.md) and its human-facing specialization in [Scientific and technical writing](scientific-technical-writing.md).
 
 When a current authority family is split across files, the composition must expose enough routing that a competent reader can reconstruct the canonical semantic statement, its owner, and its direct specialized prerequisites without amendment history or hidden chat. A later explanatory clause cannot retroactively supply meaning required by an earlier substantive inference. If two simultaneously applicable owner statements materially disagree, documentation must surface the owner conflict as review-required rather than choosing by file order, newest revision, route priority, or editorial preference.
 

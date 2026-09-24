@@ -85,7 +85,9 @@ Executable D4 stage-local/final acceptance is owned by [Testing and validation](
 
 ## Review, Verification, Stabilization, and Audit
 
-**Review** independently reconstructs governing authority/candidate/evidence applicability and attempts targeted falsification. Missing required pre-Review acceptance remains a blocker; Review does not move those checks later. When PEM is material, Review treats it as a high-information hypothesis index and independently verifies current owners/assembled behavior rather than inheriting its conclusions.
+**Review** independently reconstructs governing authority/candidate/evidence applicability and attempts targeted falsification. Review independence means the reviewing context did not author the candidate and does not inherit author conclusions; model-family diversity can strengthen corroboration but is not required for ordinary independence. Missing required pre-Review acceptance remains a blocker; Review does not move those checks later. When PEM is material, Review treats it as a high-information hypothesis index and independently verifies current owners/assembled behavior rather than inheriting its conclusions.
+
+For a substantial protocol/authority Review, also perform an **out-of-matrix abstraction-adequacy pass**: reconstruct global invariants from current owners, temporarily ignore the author's workplan/obligation matrix/test decomposition, inspect the assembled candidate, and attempt a locally-compliant trajectory that still violates a material global invariant. Record when no such trajectory survives; do not invent a defect merely to satisfy the pass. Challenge the adequacy of the qualification method itself rather than assuming that green author-supplied checks are sufficient.
 
 **Verification** is a deeper risk-triggered falsification mode for materially high-risk claims; it may reconcile multiple authorities, construct counterexamples, or trace composed D4->D1 behavior. It is not a routine duplicate Review.
 
@@ -95,9 +97,9 @@ Executable D4 stage-local/final acceptance is owned by [Testing and validation](
 
 Every material Review/Verification/acceptance boundary applies the universal Challenge rule. Surface an active Serious Challenge before ordinary blockers or Pass/No-Pass and route it to the earliest affected semantic owner.
 
-## Protocol 6.4 semantic-definition workflow consequence
+## Semantic-definition workflow
 
-Protocol 6.4 does not add a semantic-traceability stage. At intake/design/review, activate definition/source-availability analysis only when the governed work materially introduces, changes, imports, reuses, or depends on specialized semantic objects. The canonical D1-D4 owner remains the authority; `USES_DEFINITION` traces, definition tables and dependency graphs are derived coordination/review evidence.
+Semantic-definition/traceability does not add a separate workflow stage. At intake/design/review, activate definition/source-availability analysis only when the governed work materially introduces, changes, imports, reuses, or depends on specialized semantic objects. The canonical D1-D4 owner remains the authority; `USES_DEFINITION` traces, definition tables and dependency graphs are derived coordination/review evidence.
 
 A material handoff identifies enough exact owner/object/source identity that the receiver can resolve specialized prerequisites without hidden chat. If runtime work requires an exact definition/import, load that owner before making the dependent inference; a discoverable route alone establishes source availability, not runtime context availability. If the required owner/source is unavailable or conflicting, preserve `REVIEW_REQUIRED`/Challenge rather than guessing from a similarly named object.
 

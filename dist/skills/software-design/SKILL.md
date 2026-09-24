@@ -1,6 +1,6 @@
 ---
 name: software-design
-description: Design, review, challenge, and maintain D3 software architecture under Protocol 6.3; create D3->D4 implementation contracts, preserve applicable D1/D2 and external constraints, track evidence/dependency impact, and route upstream scientific/numerical defects to their owners.
+description: Design, review, challenge, and maintain D3 software architecture under SSDP; create D3->D4 implementation contracts, preserve applicable D1/D2 and external constraints, track evidence/dependency impact, and route upstream scientific/numerical defects to their owners.
 ---
 
 # Software Design

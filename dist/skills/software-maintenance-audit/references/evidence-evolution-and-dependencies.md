@@ -142,7 +142,7 @@ A useful entry identifies the affected authority/concretization/evidence, previo
 
 Current dependency views describe currently applicable relationships. Project Engineering Memory summarizes evidence-backed reusable local lessons. History explains why; current owners explain what is true; Git preserves detailed chronology. Do not make history or PEM a second current authority or preload archived workplans when current owners + qualification + semantic evolution already establish the capability lineage.
 
-## Protocol 6.4 semantic-definition dependency and applicability
+## Semantic-definition dependency and applicability
 
 Add the typed relation:
 

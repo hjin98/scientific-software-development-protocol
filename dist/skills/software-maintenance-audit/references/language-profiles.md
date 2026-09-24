@@ -1,6 +1,6 @@
 # Language Engineering Profiles
 
-Current Protocol 6.2 shared domain doctrine is authoritative. This reference is the **language concern router**: identify affected runtime/build surfaces, then activate only the matching language profile(s). Profiles specialize execution/type/lifetime/build/packaging/performance semantics; they do not duplicate lifecycle, testing, evidence, scientific, security, performance or representation policy.
+Current shared domain doctrine remains authoritative; this reference specializes only the language/runtime/build concern. This reference is the **language concern router**: identify affected runtime/build surfaces, then activate only the matching language profile(s). Profiles specialize execution/type/lifetime/build/packaging/performance semantics; they do not duplicate lifecycle, testing, evidence, scientific, security, performance or representation policy.
 
 ```text
 shared domain rule -> language router -> active language profile(s) -> implementation-local concretization

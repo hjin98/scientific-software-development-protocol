@@ -77,7 +77,7 @@ At a convergence boundary, Stabilization asks whether the architecture would sti
 
 Apply the Lossless Representation Rule to architecture documents: current topology/ownership and decision-critical constraints stay prominent; generic protocol doctrine and historical amendment narrative belong to their owners/cold history rather than being copied into every Architecture Manual.
 
-## Protocol 6.4 D3 formal-contract consequences
+## D3 formal-contract discipline
 
 D3 inherits the universal definition/source-availability discipline without turning architecture into pseudo-mathematics. When an architectural concept carries normative meaning, define it before dependent invariants use it: component/state ownership, allowed/forbidden dependency relations, lifecycle states and transitions, interface/cardinality constraints, concurrency/order/atomicity relations, resource bounds, persistence/recovery invariants, trust boundaries and compatibility relations.
 

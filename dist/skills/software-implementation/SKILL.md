@@ -1,6 +1,6 @@
 ---
 name: software-implementation
-description: Implement, refactor, test, package, and validate D4 concretizations under Protocol 6.3 while preserving accepted D1-D3/D4 authority, affected regression/integration, evidence applicability, project learning, active simplicity, and upward Challenge routing.
+description: Implement, refactor, test, package, and validate D4 concretizations under SSDP while preserving accepted D1-D3/D4 authority, affected regression/integration, evidence applicability, project learning, active simplicity, and upward Challenge routing.
 ---
 
 # Software Implementation

@@ -1,6 +1,6 @@
 ---
 name: repository-hygiene
-description: Perform conservative post-stage repository cleanup under Protocol 6.3 by classifying residue, archiving genuinely completed workplans, repairing clear structural drift, and retiring proven disposable branches/artifacts while preserving recoverable work, evidence, compatibility, project engineering memory, history, and protected refs.
+description: Perform conservative post-stage repository cleanup under SSDP by classifying residue, archiving genuinely completed workplans, repairing clear structural drift, and retiring proven disposable branches/artifacts while preserving recoverable work, evidence, compatibility, project engineering memory, history, and protected refs.
 ---
 
 # Repository Hygiene

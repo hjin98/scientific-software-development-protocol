@@ -1,6 +1,6 @@
 # Numerical & Algorithmic Method Paper
 
-> Canonical D2 document-family template for Protocol 6.1. Adapt structure to the project; one physical file is not mandatory.
+> Canonical D2 document-family template for current SSDP. Adapt structure to the project; one physical file is not mandatory.
 
 ## Authority metadata
 

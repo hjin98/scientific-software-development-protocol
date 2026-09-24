@@ -1,6 +1,6 @@
 ---
 name: software-documentation
-description: Reconcile, refactor, explain, and publish current documentation under Protocol 6.3 while preserving D1-D4 ownership, lossless representation, human-facing context, project-memory provenance, and canonical-source/generated-output integrity without becoming an approval role.
+description: Reconcile, refactor, explain, and publish current documentation under SSDP while preserving D1-D4 ownership, lossless representation, human-facing context, project-memory provenance, and canonical-source/generated-output integrity without becoming an approval role.
 ---
 
 # Software Documentation

@@ -1,6 +1,6 @@
 ---
 name: software-maintenance-audit
-description: Audit long-lived repositories for architectural entropy, maintainability deterioration, weak test oracles, change-risk concentration, duplicated authority, dependency drift, stale compatibility/evidence, and related temporal risks under Protocol 6.3; route evidence-backed findings and project-memory candidates without becoming an approval or refactoring authority.
+description: Audit long-lived repositories for architectural entropy, maintainability deterioration, weak test oracles, change-risk concentration, duplicated authority, dependency drift, stale compatibility/evidence, and related temporal risks under SSDP; route evidence-backed findings and project-memory candidates without becoming an approval or refactoring authority.
 ---
 
 # Software Maintenance Audit

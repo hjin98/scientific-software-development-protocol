@@ -1,21 +1,11 @@
 ---
 memory_schema_version: 1
-maintained_under_protocol: 6.3.0
+maintained_under_protocol: REPLACE_WITH_GOVERNING_PROTOCOL_VERSION
 project_id: REPLACE_WITH_STABLE_PROJECT_ID
 repository: REPLACE_WITH_REPOSITORY_OR_PROJECT_IDENTITY
 scope: repository
 coverage_state: UNINITIALIZED
 coverage_basis: "No historical backfill has been claimed."
-
-  # Required before positive_guidance_eligible may be true. This is bounded to the declared scope; it is not a global-history crawl.
-  counterevidence_search:
-    state: COMPLETE_FOR_DECLARED_SCOPE
-    scope: "Replace with the aggregation/coverage scope searched"
-    search_basis: "Replace with the bounded history/evidence search performed"
-    outcomes_reviewed: [SUPPORTING, NEUTRAL, CONTRADICTING, INCONCLUSIVE]
-    blind_spots: "Replace with material unsearched history or 'none known within declared scope'"
-    evidence:
-      - SOURCE@IMMUTABLE_ID:path#stable-locator
 reconciled_through: REPLACE_WITH_ALREADY_EXISTING_ACCEPTED_PROJECT_IDENTITY
 accepted_base:
   project_state: REPLACE_WITH_EXACT_ACCEPTED_PROJECT_COMMIT
@@ -36,7 +26,7 @@ _No current entries._
 
 ## Families
 
-Add a family only when the Protocol 6.3 admission threshold is met. Keep one canonical fenced `yaml pem-family` record beneath each family heading. Do not copy this explanatory example into a live memory unchanged.
+Add a family only when the current PEM admission threshold is met. Keep one canonical fenced `yaml pem-family` record beneath each family heading. Do not copy this explanatory example into a live memory unchanged.
 
 ### FF-001 — Example failure family
 
@@ -78,6 +68,15 @@ occurrences:
     repair: REPLACE_WITH_IMMUTABLE_REPAIR_IDENTITY_OR_NONE
     repair_acceptance: REPLACE_WITH_ACCEPTANCE_IDENTITY_OR_NONE
     provenance_cluster: REPLACE_WITH_CLUSTER_OR_NONE
+    # When recurrence_after_accepted_repair is true, add:
+    # recurrence_after_accepted_repair: true
+    # recurrence_basis:
+    #   prior_occurrence_id: O00
+    #   repair_identity: commit:IMMUTABLE_REPAIR_SHA
+    #   repair_acceptance_evidence: [SOURCE@IMMUTABLE_ID:path#stable-locator]
+    #   later_event_identity: commit:IMMUTABLE_LATER_EVENT_SHA
+    #   independence_basis: "Why this is a materially independent later event"
+    #   # alias_of: optional-known-alias-identity
     assessments:
       - id: AS01
         state: ADMISSIBLE
@@ -120,6 +119,25 @@ authority_binding: EVIDENCE_ONLY
 #   - owner/project@ACCEPTED_PROJECT_REVISION:path/to/authority-evidence.md#stable-section
 guidance_level: OBSERVED
 positive_guidance_eligible: false
+# Required before positive_guidance_eligible becomes true:
+# counterevidence_search:
+#   state: COMPLETE_FOR_DECLARED_SCOPE
+#   scope: "Bounded aggregation/coverage scope searched"
+#   search_basis: "History/evidence search performed"
+#   outcomes_reviewed: [SUPPORTING, NEUTRAL, CONTRADICTING, INCONCLUSIVE]
+#   blind_spots: "Material unsearched history or 'none known within declared scope'"
+#   evidence: [SOURCE@IMMUTABLE_ID:path#stable-locator]
+#
+# For PREFERRED/DEFAULT/BEST use either a typed comparative_basis:
+# comparative_basis:
+#   comparison_set: [technique-a, technique-b]
+#   comparator: technique-b
+#   objective: governing objective
+#   constraints: [material constraint]
+#   evidence: [SOURCE@IMMUTABLE_ID:path#stable-locator]
+#   provenance_state: INDEPENDENT
+#   minimum_independent_clusters: 2
+# or accepted-owner comparative_authority.
 comparative_basis: NONE
 relations: []
 applications:
@@ -186,3 +204,32 @@ has:
 ```
 
 If the accepted memory basis materially advances before integration/closeout, reconcile the changed interval/surfaces and refresh the HAS rather than silently keeping the old decision.
+
+
+## Claim-relative maturity and temperature examples
+
+A `PROVEN` record includes structured `maturity_basis`; do not use a top-level independence flag to change claim obligations.
+
+```yaml
+maturity_basis:
+  claim: "Exact bounded claim asserted as PROVEN"
+  obligations:
+    - type: claim_support
+      status: CLOSED
+      evidence: [SOURCE@IMMUTABLE_ID:path#stable-locator]
+    - type: applicability
+      status: CLOSED
+      evidence: [SOURCE@IMMUTABLE_ID:path#stable-locator]
+    - type: contradiction_resolution
+      status: CLOSED
+      evidence: [SOURCE@IMMUTABLE_ID:path#stable-locator]
+```
+
+When declared temperature intentionally differs from its derived base:
+
+```yaml
+temperature_override:
+  final: HOT
+  reason: "Evidence-backed impact/salience reason"
+  evidence: [SOURCE@IMMUTABLE_ID:path#stable-locator]
+```

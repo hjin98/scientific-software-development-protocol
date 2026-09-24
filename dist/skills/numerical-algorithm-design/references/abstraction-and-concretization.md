@@ -1,6 +1,6 @@
 # Abstraction, Concretization, Authority, Challenge, and Representation
 
-Protocol 6.4 governs scientific-software work through recursively constrained abstraction/concretization. This is the universal semantic kernel; detailed workflow, evidence, testing, project engineering memory, domain, language, tool, history, and release rules live with their canonical owners and are loaded only when their decision predicates fire.
+The Scientific Software Development Protocol (SSDP) governs scientific-software work through recursively constrained abstraction/concretization. This is the universal semantic kernel; detailed workflow, evidence, testing, project engineering memory, domain, language, tool, history, and release rules live with their canonical owners and are loaded only when their decision predicates fire.
 
 ## Background and terminology
 
@@ -9,6 +9,8 @@ The **Scientific Software Development Protocol (SSDP)** separates four semantic 
 An **abstraction** is an intentionally incomplete normative contract: the material invariants, required outcomes, assumptions, validity conditions, observables, bounds, and governed relations descendants must preserve. A **concretization** is a lower-level choice that satisfies applicable parent abstractions and governed side constraints. An interior D1-D4 artifact may concretize its parent while abstracting its descendants. **Realization** is reserved for concrete evidence execution; see [Evidence, evolution, and semantic dependencies](evidence-evolution-and-dependencies.md) when evidence lifecycle or applicability is material.
 
 **Project Engineering Memory (PEM)** is optional-to-activate, project-local, evidence-backed engineering learning intended to reduce rediscovery and preserve both failure lessons and demonstrated successful patterns. It is **not a fifth authority domain**: when substantial work can materially benefit from project history, route to [Project Engineering Memory](project-engineering-memory.md) and the workflow owner; otherwise keep it cold.
+
+For a governed decision `d`, a difference, claim, dependency, uncertainty, or risk `x` is **material** when a plausible path grounded in current authority, dependency, evidence, or a concrete counterexample can make changing or omitting `x` alter governed interpretation, admissible concretization, evidence applicability/obligation, acceptance/reopen/Challenge disposition, protected risk, or the protected stakeholder/product/scientific outcome. Pure wording difference and remote ungrounded possibility are not material merely because they can be imagined.
 
 ## Feasibility, authority, and delegation
 
@@ -33,6 +35,8 @@ Semantic level and authority provenance are independent. Preserve applicable saf
 Steward the stakeholder's governed durable product/outcome rather than the process artifacts used to reach it. Workplans, tests, gates, metrics, reviews, reports, and implementation machinery are constraints, evidence, or concretizations—not objectives. Historical frequency and project memory are likewise decision inputs or coordination state, not self-authorizing rules. Interpret stakeholder and governed requirements non-adversarially according to their protected purpose. This stewardship is bounded by the governed task/contracts/affected surfaces and does not authorize unrelated enhancement, opportunistic redesign, or speculative future-proofing.
 
 Each material normative claim has one current semantic owner, while one concretization may satisfy several parents/side constraints. Current normative ownership must remain acyclic. Materially conflicting applicable authorities are not silently prioritized: expose the conflict and route adjudication.
+
+SSDP development and release are themselves governed work. The protocol repository applies the same ownership, evidence, Challenge, convergence, impact, and representation rules to its own workplans, qualification, generated artifacts, release state, Review, and project memory, except for an explicitly bounded version-bootstrap exception owned by the versioning authority. Self-application does not create a recursive fifth authority plane.
 
 The four domains are:
 
@@ -91,7 +95,9 @@ actual D4 behavior
 
 Every material Review/Verification/acceptance boundary includes a bounded **Challenge Pass**. For tiny low-risk work it may be implicit. Ask whether accepted authority is internally coherent, sufficiently unambiguous, jointly concretizable under simultaneous constraints, adequate for its protected outcome, and free of a known material counterexample.
 
-A coherent parent with a wrong child is an ordinary blocker. Raise **SERIOUS CHALLENGE** only when accepted authority itself may be materially false, contradictory, ambiguous, inadequate, mutually incompatible, or impossible to concretize. Surface it before ordinary blockers/Pass language; identify the challenged owner/scope, concrete contradiction/evidence, consequence, assumptions, and what could resolve or falsify it. Preserve the challenged authority as the explicit baseline rather than silently editing it to fit downstream behavior.
+A coherent parent with a wrong child is an ordinary blocker. Raise **SERIOUS CHALLENGE** only on a credible basis that accepted authority itself may be materially false, contradictory, materially ambiguous, inadequate, mutually incompatible, or impossible to concretize: a concrete contradiction/counterexample, materially consequential ambiguity, incompatible applicable constraints, or admissible evidence of inadequacy. Mere possibility, reviewer discomfort, or a wording preference is insufficient. Surface the Challenge before ordinary blockers/Pass language; identify the challenged owner/scope, basis, consequence, assumptions, and discriminating evidence that could resolve or falsify it. Preserve the challenged authority as the explicit baseline rather than silently editing it to fit downstream behavior.
+
+The owning authority resolves a Serious Challenge through its normal acceptance route. A purported clarification that materially narrows or changes the admissible interpretation/concretization set is a semantic mutation for dependency, evidence, and version-impact purposes unless the owner establishes that the change is representation-only.
 
 PEM is a high-information hypothesis index during Review, not proof. Historical recurrence, successful prior patterns, temperature, counts, or previous review outcomes may guide falsification effort but cannot replace independent reconstruction of current authority, current applicability, evidence quality, and assembled candidate behavior.
 
@@ -131,9 +137,9 @@ Operational consequences:
 11. **Do not deduplicate by adjudicating semantics.** If apparent duplicates materially disagree in scope, threshold, authority, family identity, applicability, or meaning, stop editorial compaction and route the conflict to its owner/explicit split-merge reconciliation.
 12. **Keep derivatives subordinate.** Compact prompts, handoffs, summaries, indexes, records and generated representations do not replace canonical authority or canonical project memory.
 
-Historical identifiers may retain old lexemes inside frozen/version-pinned artifacts. Current Protocol 6.4 prose uses **concretization** for D1-D4 descent and **realization** for evidence execution.
+Historical identifiers may retain old lexemes inside frozen/version-pinned artifacts. Current prose uses **concretization** for D1-D4 descent and **realization** for evidence execution.
 
-## Protocol 6.4 semantic-definition and traceability strengthening
+## Semantic-definition and traceability discipline
 
 A **semantic object/unit** is a materially governed term, symbol, quantity, operator, relation, state, proposition, algorithmic object, invariant, parameterized family, instantiated object, or contract whose meaning or conditions can alter governed interpretation, admissible concretization, evidence applicability, or acceptance if changed. A **canonical semantic statement** is the one current owner statement, or explicitly coordinated owner-local statement set, that establishes that object's project-visible meaning. A **substantive semantic use** is an occurrence that participates in a declaration/definition, premise, inference, constraint, theorem/result, algorithm, contract, acceptance decision, or governed interpretation. A harmless forward name supports no inference and is not substantive use.
 
@@ -177,5 +183,6 @@ representation must preserve complete governed meaning before optimizing attenti
 specialized substantive use requires a coherent definition/import/declaration path and exact owner;
 formal statements must be well-defined, parameter bindings explicit when material, and claims separately warranted;
 derived semantic traces remain subordinate evidence for review/impact rather than parallel authority;
-project learning stays evidence-backed, applicability-bounded, conditionally loaded, and non-authoritative.
+project learning stays evidence-backed, applicability-bounded, conditionally loaded, and non-authoritative;
+SSDP self-development obeys these same ownership/evidence/representation rules except explicit bounded bootstrap exceptions.
 ```
