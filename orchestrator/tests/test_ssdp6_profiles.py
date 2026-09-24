@@ -23,10 +23,10 @@ class SSDP6CanonicalProfileTests(unittest.TestCase):
         cls.snapshot = P.build_profile(cls.document, P.DEFAULT_PROFILE_ID)
         cls.descriptor = cls.snapshot.descriptor
 
-    def test_current_profile_is_schema_v2_protocol_64(self) -> None:
-        self.assertEqual(P.DEFAULT_PROFILE_ID, "ssdp-protocol-6.4")
+    def test_current_profile_is_schema_v2_protocol_65(self) -> None:
+        self.assertEqual(P.DEFAULT_PROFILE_ID, "ssdp-protocol-6.5")
         self.assertEqual(self.descriptor.profile.profile_id, P.DEFAULT_PROFILE_ID)
-        self.assertEqual(self.descriptor.profile.protocol_version, "6.4.0")
+        self.assertEqual(self.descriptor.profile.protocol_version, "6.5.0")
         self.assertEqual(self.descriptor.profile.profile_schema_version, 2)
         self.assertEqual(self.descriptor.schema_version, 2)
 
@@ -48,8 +48,10 @@ class SSDP6CanonicalProfileTests(unittest.TestCase):
         self.assertEqual(P.profile_id_for_version("6.2"), P.SSDP62_PROFILE_ID)
         self.assertEqual(P.profile_id_for_version("6.3.0"), P.SSDP63_PROFILE_ID)
         self.assertEqual(P.profile_id_for_version("6.3"), P.SSDP63_PROFILE_ID)
-        self.assertEqual(P.profile_id_for_version("6.4.0"), P.DEFAULT_PROFILE_ID)
-        self.assertEqual(P.profile_id_for_version("6.4"), P.DEFAULT_PROFILE_ID)
+        self.assertEqual(P.profile_id_for_version("6.4.0"), P.SSDP64_PROFILE_ID)
+        self.assertEqual(P.profile_id_for_version("6.4"), P.SSDP64_PROFILE_ID)
+        self.assertEqual(P.profile_id_for_version("6.5.0"), P.DEFAULT_PROFILE_ID)
+        self.assertEqual(P.profile_id_for_version("6.5"), P.DEFAULT_PROFILE_ID)
 
     def test_every_current_input_is_classified(self) -> None:
         for stage in self.descriptor.stages:
@@ -91,7 +93,7 @@ class SSDP6CanonicalProfileTests(unittest.TestCase):
                 workplan=None,
                 first_task=None,
                 overrides={},
-                governing_protocol_version="6.4.0",
+                governing_protocol_version="6.5.0",
             )
         }
         self.assertEqual(values["CHANGE_PLAN"], "NONE")
@@ -102,9 +104,9 @@ class SSDP6CanonicalProfileTests(unittest.TestCase):
 
         def plan(*, lifecycle_state=LifecycleState.ACTIVE, lifecycle_consistent=True, semantic_identity_complete=True):
             return WorkplanRef(
-                workplan_id="WP64-AUTHORITY",
-                protocol_version="6.4.0",
-                path="workplans/active/WP64-AUTHORITY.md",
+                workplan_id="WP65-AUTHORITY",
+                protocol_version="6.5.0",
+                path="workplans/active/WP65-AUTHORITY.md",
                 artifact_digest=DigestRef(algorithm="sha256", value="a" * 64),
                 semantic_digest=DigestRef(algorithm="sha256", value="b" * 64),
                 semantic_identity_complete=semantic_identity_complete,
@@ -119,10 +121,10 @@ class SSDP6CanonicalProfileTests(unittest.TestCase):
                 workplan=plan(),
                 first_task=None,
                 overrides={},
-                governing_protocol_version="6.4.0",
+                governing_protocol_version="6.5.0",
             )
         }
-        self.assertEqual(active["CHANGE_PLAN"], "workplans/active/WP64-AUTHORITY.md")
+        self.assertEqual(active["CHANGE_PLAN"], "workplans/active/WP65-AUTHORITY.md")
 
         for invalid in (
             plan(lifecycle_state=LifecycleState.ARCHIVE),
@@ -136,7 +138,7 @@ class SSDP6CanonicalProfileTests(unittest.TestCase):
                         workplan=invalid,
                         first_task=None,
                         overrides={},
-                        governing_protocol_version="6.4.0",
+                        governing_protocol_version="6.5.0",
                     )
                 self.assertEqual(caught.exception.code, E.WORKPLAN_NOT_FOUND)
 
@@ -245,6 +247,15 @@ class SSDP6CanonicalProfileTests(unittest.TestCase):
 
 class FrozenProtocolProfilesTests(unittest.TestCase):
     FROZEN = (
+        (
+            P.SSDP64_PROFILE_ID,
+            "ssdp-protocol-6.4",
+            "6.4.0",
+            {
+                "prompts.md": "148c719aaf0d41f2c4b89ab0e5bcb8922196177f",
+                "profile.json": "a31330f4e39ba6780942dc6d55e597c3582c3936",
+            },
+        ),
         (
             P.SSDP63_PROFILE_ID,
             "ssdp-protocol-6.3",
