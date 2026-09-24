@@ -5,8 +5,8 @@ protocol_version: 6.4.0
 target_protocol_version: 6.5.0
 subject_baseline: P0 = Protocol 6.4 at 55c085261eb827e3047637d045a8e6917ea6b962 (recovery 74bc572ef516cae417437a2027eeff52a2e25c15)
 diagnostic_commit: 81375d8142a8130b80cd82f2304d3e16bc3fc390
-status: active-p5-review-ready
-current_phase: PHASE VII P5 FROZEN / FRESH INDEPENDENT REVIEW REQUIRED
+status: active-p5-review-no-pass-repair-required
+current_phase: PHASE VII P5 NO-PASS / D4 REPAIR REQUIRED
 branch: ssdp-6.5-frontier-model-re-evaluation
 created_date: 2026-09-24
 adjudication: qualification/ssdp65/CROSS-MODEL-ADJUDICATION-2026-09-24.md
@@ -14,7 +14,7 @@ active_serious_challenge: none against accepted D1-D4 doctrine
 second_frontier_diagnostic: waived-for-this-cycle-by-stakeholder-resource-constraint
 design_closure: qualification/ssdp65/PHASE-IV-V-DESIGN-CLOSURE.md
 implementation_handoff: workplans/active/SSDP-6.5-D3-D4-IMPLEMENTATION-HANDOFF.md
-independent_review: qualification/ssdp65/INDEPENDENT-REVIEW-2026-09-24-PROTOCOL-6.5-P4-NO-PASS.md
+independent_review: qualification/ssdp65/INDEPENDENT-REVIEW-2026-09-24-PROTOCOL-6.5-P5-NO-PASS.md
 ---
 
 # Protocol 6.5 Frontier-Model Re-evaluation and Successor Workplan
@@ -717,3 +717,47 @@ Exact-P5 normal PR workflow run 36047926253 passed the complete build and Orches
 This later descendant binds P5 in the sole mutable release-state owner with Review NOT_RUN, ratification NOT_REQUESTED, public fallback UNAVAILABLE, recovery UNAVAILABLE, and accepted-current Protocol 6.4.
 
 The next authorized step is a genuinely fresh independent assembled-candidate Review of P5. P1-P4 remain immutable failed candidates and historical evidence only.
+
+
+## 25. 2026-09-24 fresh independent P5 Review reopen
+
+Fresh independent assembled-candidate Review of immutable P5 `d2d672a3e814438fb618f901137f88c8698a205d` issued **NO-PASS** with no Serious Challenge.
+
+Durable Review:
+
+`qualification/ssdp65/INDEPENDENT-REVIEW-2026-09-24-PROTOCOL-6.5-P5-NO-PASS.md`
+
+B65-P4-1 is independently closed. Two fresh D4 blockers remain; accepted P65 D3 is not reopened.
+
+### B65-P5-1 — reject duplicate keys in the sole mutable release-state owner
+
+Owner: existing `source/release_state.py` root-state loading/validation.
+
+The evidence front-matter loader is now strict, but `load()` still uses ordinary `yaml.safe_load` for `PROTOCOL-RELEASE-STATE.yaml`. Duplicate top-level or nested lifecycle keys can therefore be normalized last-key-wins before validation.
+
+Repair by reusing/consolidating the existing duplicate-rejecting SafeLoader for the root state document. Add negative fixtures at the actual load boundary for duplicate candidate semantic refs, Review/ratification states/evidence, accepted-current mappings/refs, and duplicate top-level state sections. No second parser/schema authority is authorized.
+
+### B65-P5-2 — enforce active successor version identity
+
+Owner: existing `source/release_state.py` lifecycle validator.
+
+The current validator does not require the active candidate version to be a successor of accepted-current and does not reject collision with a historical version. A real immutable 6.3 commit can therefore satisfy ref/version validation while 6.3 simultaneously remains historical and occupies the active candidate slot under accepted-current 6.4.
+
+Repair in the existing validator:
+
+- pre-cutover active candidate version must be strictly later than accepted-current under semantic-version ordering;
+- active candidate version must not collide with historical version keys;
+- preserve the explicit coherent terminal state where accepted-current equals the fully reviewed/ratified/published/recovered candidate;
+- add negative lower/equal/historical cases and positive patch/minor/major successor controls.
+
+Do not add a candidate registry, synchronized phase table, compatibility layer, or general version service.
+
+### Candidate/evidence reset
+
+P5 is immutable and failed Review. Any semantic repair creates a new candidate identity.
+
+Rerun the two focused blocker matrices, the complete Review/ratification evidence matrix, lifecycle/current-owner regression, inherited repository regression, package/profile/generated parity, Orchestrator Core, exact-new-candidate PR CI, preservation/evidence-applicability assessment, fresh mutation holdouts, replacement freeze/binding qualification, and a fresh independent assembled-candidate Review.
+
+P5 runs `36047926253`, `36048168248`, and `36048331437` remain historical observations for the exact subjects/oracles they exercised; they do not transfer whole-candidate acceptance.
+
+No stakeholder ratification, public-fallback publication, recovery establishment, accepted-current cutover, PR merge, or Protocol 7 D3/D4 mutation is authorized.

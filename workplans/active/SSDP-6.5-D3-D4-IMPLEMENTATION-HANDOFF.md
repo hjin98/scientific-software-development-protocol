@@ -3,7 +3,7 @@ kind: implementation-workplan
 workplan_id: SSDP-6.5-D3-D4-IMPLEMENTATION-HANDOFF
 protocol_version: 6.4.0
 target_protocol_version: 6.5.0
-status: repair-complete-p5-frozen
+status: reopened-p5-review-repair-required
 parent_workplan: workplans/active/SSDP-6.5-FRONTIER-MODEL-RE-EVALUATION.md
 design_authority: qualification/ssdp65/PHASE-IV-V-DESIGN-CLOSURE.md
 baseline: 55c085261eb827e3047637d045a8e6917ea6b962
@@ -476,3 +476,27 @@ Exact P5 is d2d672a3e814438fb618f901137f88c8698a205d. Exact-P5 normal PR workflo
 A later descendant now binds P5 with Review reset to NOT_RUN and no ratification/publication/recovery advancement.
 
 D3 remains closed. P5 must receive fresh independent assembled-candidate Review before stakeholder ratification or publication.
+
+
+## 18. P5 independent Review repair delta — 2026-09-24
+
+Fresh independent assembled-candidate Review of exact P5 issued **NO-PASS** without reopening D3.
+
+### B65-P5-1 — root release-state duplicate-key ambiguity
+
+Alter only the existing D4 root-state loader/validator:
+
+- apply the existing duplicate-rejecting YAML loader to `PROTOCOL-RELEASE-STATE.yaml`, not only Review/ratification evidence front matter;
+- reject duplicate top-level and nested lifecycle keys before `validate_release_state()`;
+- make focused tests exercise the real load boundary rather than pre-normalizing with `yaml.safe_load`.
+
+### B65-P5-2 — candidate succession underconstrained
+
+Alter only the existing D4 state validator:
+
+- require a pre-cutover active candidate version to be a semantic-version successor of accepted-current;
+- reject active candidate collision with any historical version;
+- retain the already-authorized coherent terminal accepted-current == candidate state;
+- add lower/equal/historical negative fixtures and patch/minor/major successor positives.
+
+P5 `d2d672a3e814438fb618f901137f88c8698a205d` remains immutable. Repair must freeze a new candidate and rerun affected exact-candidate qualification plus fresh independent Review. No registry, mirror, compatibility subsystem, synchronized phase table, or D3 redesign is authorized.
