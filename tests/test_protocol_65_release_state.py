@@ -1058,6 +1058,7 @@ candidate:
                 (0, ""),
                 (0, ""),
                 (0, ""),
+                (0, ""),
                 (0, complete_snapshot),
             ],
         ):
@@ -1079,6 +1080,7 @@ candidate:
             release_state,
             "_git",
             side_effect=[
+                (0, ""),
                 (0, ""),
                 (0, ""),
                 (0, ""),
