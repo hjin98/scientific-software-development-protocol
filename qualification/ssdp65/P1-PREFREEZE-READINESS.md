@@ -1,8 +1,8 @@
 ---
 kind: ssdp65-pre-freeze-readiness
-status: implementation-stage-e-in-progress
+status: stage-e-complete-p1-freeze-prepared
 p0: 55c085261eb827e3047637d045a8e6917ea6b962
-latest_stage_d_green_run: 35981310875
+latest_full_green_run: 35985539212
 ---
 
 # Protocol 6.5 P1 Pre-freeze Readiness and Current-state Census
@@ -11,7 +11,7 @@ latest_stage_d_green_run: 35981310875
 
 This record is implementation evidence only. It does not claim semantic Review PASS, stakeholder ratification, public fallback, recovery or accepted-current Protocol 6.5.
 
-Stage-D executable acceptance reached green in GitHub Actions run `35981310875`: release-state validation, PEM validation, inherited repository regression, canonical skill generation, independent package validation, fresh distribution parity, current snapshot parity, Orchestrator Core acceptance, frozen-resource checks and whitespace passed before generated descendants were published.
+Final pre-freeze executable acceptance reached green in GitHub Actions run `35985539212`: release-state validation, PEM validation, inherited repository regression, canonical skill generation, independent package validation, fresh distribution parity, current 6.5 snapshot parity, Orchestrator Core acceptance including containment/frozen-resource checks, and whitespace all passed; generated descendants were then published.
 
 ## 2. P0/P1 representation measurements
 
@@ -96,14 +96,18 @@ Current acceptance retains executable oracles for machine-decidable properties:
 
 The former QF64 self-contained dictionary predicate matrix is not a current semantic oracle. Arbitrary prose adequacy, alternate interpretations and locally-compliant/global-failure trajectories are assigned to independent assembled-candidate Review.
 
-## 6. Remaining pre-freeze obligations
+## 6. Stage-E closure and freeze boundary
 
-Before P1 freeze:
-- complete PEM/history reconciliation;
-- ensure preservation map remains aligned after those documentation/project-state edits;
-- obtain a green full branch implementation run after final canonical changes;
-- remove temporary `.github/workflows/ssdp65-implementation.yml`;
-- regenerate descendants after the last canonical semantic edit;
-- bind the resulting immutable P1 SHA only from a later descendant.
+Stage E is complete for freeze:
+
+- PEM/history reconciliation is current and schema-1 validation passes;
+- the 6.4 -> 6.5 preservation/supersession map is aligned to the assembled candidate;
+- full branch implementation acceptance is green in run `35985539212`;
+- generated descendants are current after the last canonical semantic edit;
+- current-state projection and stale-label censuses are complete;
+- the branch-only implementation workflow is removed in the freeze-preparation commit so it is not part of the frozen long-lived protocol machinery;
+- no unresolved material implementation impact is known.
+
+The immutable P1 SHA cannot be self-declared inside P1. A later descendant must bind the exact P1 commit in `PROTOCOL-RELEASE-STATE.yaml` and the independent-Review handoff. That binding is publication of candidate identity, not Review PASS, ratification, public fallback, recovery, or accepted-current cutover.
 
 Stakeholder ratification is explicitly **not requested** at this stage.

@@ -3,7 +3,7 @@ kind: implementation-workplan
 workplan_id: SSDP-6.5-D3-D4-IMPLEMENTATION-HANDOFF
 protocol_version: 6.4.0
 target_protocol_version: 6.5.0
-status: authorized
+status: implementation-complete-p1-freeze-prepared
 parent_workplan: workplans/active/SSDP-6.5-FRONTIER-MODEL-RE-EVALUATION.md
 design_authority: qualification/ssdp65/PHASE-IV-V-DESIGN-CLOSURE.md
 baseline: 55c085261eb827e3047637d045a8e6917ea6b962
@@ -328,11 +328,12 @@ Raise Serious Challenge if accepted D1-D4/formal-definition doctrine itself is s
 
 ```text
 D3 DESIGN: PASS
-PHASE VI IMPLEMENTATION: AUTHORIZED
-P1: NOT YET FROZEN
+PHASE VI IMPLEMENTATION: COMPLETE / STAGE E CLOSED
+FINAL PRE-FREEZE FULL RUN: 35985539212 / PASS
+P1: FREEZE PREPARED — exact SHA to be bound only by a later descendant
 PUBLIC 6.5 FALLBACK: UNAVAILABLE
 6.5 RECOVERY: UNAVAILABLE
 6.5 RATIFICATION: NOT REQUESTED
-ACCEPTED CURRENT: Protocol 6.4
+ACCEPTED CURRENT: resolve from PROTOCOL-RELEASE-STATE.yaml
 PROTOCOL 7 D3/D4: UNCHANGED
 ```
