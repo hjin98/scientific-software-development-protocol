@@ -3,6 +3,8 @@ from __future__ import annotations
 import re
 import subprocess
 import unittest
+
+import yaml
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -323,7 +325,7 @@ class Protocol64AxiomaticTraceabilityQualificationTests(unittest.TestCase):
         self.readme = read("README.md")
         self.authority_index = read("workplans/active/SSDP-6.1-7.0-WORKPLAN-AUTHORITY-INDEX.md")
 
-    def test_qf64_a_through_p_counterfactual_polarity(self) -> None:
+    def historical_qf64_a_through_p_counterfactual_polarity(self) -> None:
         for family, rule in RULES.items():
             with self.subTest(family=family, case="positive"):
                 self.assertTrue(rule(dict(BASE[family])))
@@ -390,19 +392,25 @@ class Protocol64AxiomaticTraceabilityQualificationTests(unittest.TestCase):
         malformed = "before\n```text\nvalue\n``` trailing prose\nafter\n"
         self.assertFalse(markdown_fences_well_formed(malformed))
 
-    def test_qf64_o_candidate_lifecycle_preserves_bootstrap_recovery_separation(self) -> None:
-        versioning = norm(self.versioning)
-        self.assertIn("protocol 6.4 is accepted-current", versioning)
-        self.assertIn("6.4.0 public-source bootstrap -> e09a9d1480211eea2d16d722182bb5c6de1bee12", versioning)
-        self.assertIn("independent assembled-candidate review", versioning)
-        self.assertIn("CURRENT_PROTOCOL = 6.4.0", self.prompts)
-        self.assertIn("CURRENT_PUBLIC_REF = e09a9d1480211eea2d16d722182bb5c6de1bee12", self.prompts)
-        self.assertIn("6.4.0  -> 74bc572ef516cae417437a2027eeff52a2e25c15", self.versioning)
+    def test_qf64_o_release_state_preserves_bootstrap_recovery_separation(self) -> None:
+        state = yaml.safe_load(read("PROTOCOL-RELEASE-STATE.yaml"))
+        current = state["accepted_current"]
+        self.assertEqual(current["version"], "6.4.0")
+        self.assertEqual(current["public_source_ref"], "e09a9d1480211eea2d16d722182bb5c6de1bee12")
+        self.assertEqual(current["recovery_ref"], "74bc572ef516cae417437a2027eeff52a2e25c15")
+        self.assertNotEqual(current["public_source_ref"], current["recovery_ref"])
+        candidate = state["candidate"]
+        self.assertEqual(candidate["version"], "6.5.0")
+        self.assertEqual(candidate["semantic_ref"], "UNFROZEN")
+        self.assertEqual(candidate["review"]["state"], "NOT_RUN")
+        self.assertEqual(candidate["ratification"]["state"], "NOT_REQUESTED")
+        self.assertEqual(candidate["public_source_ref"], "UNAVAILABLE")
+        self.assertEqual(candidate["recovery_ref"], "UNAVAILABLE")
         rev4 = read("workplans/active/SSDP-7.0-DETERMINISTIC-CONTROL-PLANE-AND-MANDATORY-ORCHESTRATOR-MIGRATION-REVISION-4-PROTOCOL-6.3-INHERITANCE-RECONCILIATION.md")
         self.assertIn("d3_architecture_mutation: none", rev4)
         self.assertIn("PROTOCOL 7 D4 IMPLEMENTATION: NOT AUTHORIZED", rev4)
 
-    def test_qf64_p_closeout_archives_snapshot(self) -> None:
+    def test_qf64_p_closeout_archives_snapshot_and_current_state_routes(self) -> None:
         self.assertEqual(sorted((ROOT / "workplans/active").glob("SSDP-6.4*.md")), [])
         archived = ROOT / "workplans/archive/SSDP-6.4-AXIOMATIC-FORMAL-DEFINITION-AND-SEMANTIC-TRACEABILITY-CONSOLIDATED.md"
         self.assertTrue(archived.is_file())
@@ -412,25 +420,14 @@ class Protocol64AxiomaticTraceabilityQualificationTests(unittest.TestCase):
         self.assertIn("stage f: pass / lifecycle closed", index)
         self.assertIn("current accepted document-controlled baseline: protocol 6.4", index)
         self.assertIn("revision-5-protocol-6.4-inheritance-reconciliation.md", index)
-        self.assertNotIn("protocol 6.4 remains a proposed", index)
-        self.assertNotIn("protocol 6.4 is not yet accepted", index)
-        self.assertNotIn("protocol 6.3 is the accepted-current document-controlled baseline", index)
 
         readme = norm(self.readme)
-        self.assertIn("accepted recovery is 74bc572ef516cae417437a2027eeff52a2e25c15", readme)
-        self.assertNotIn("still has no recovery identity", readme)
-        self.assertNotIn("independent assembled-candidate review must still pass", readme)
-
         agents = norm(read("AGENTS.md"))
-        self.assertIn("protocol 6.4 is accepted-current", agents)
-        self.assertIn("74bc572ef516cae417437a2027eeff52a2e25c15", agents)
-        self.assertNotIn("protocol 6.4 is not accepted-current", agents)
-        self.assertNotIn("it has no recovery sha yet", agents)
-
-        self.assertEqual(
-            sorted(p.name for p in (ROOT / ".github/workflows").glob("temporary-protocol64-stage-f*.yml")),
-            [],
-        )
+        self.assertIn("protocol-release-state.yaml", readme)
+        self.assertIn("protocol-release-state.yaml", agents)
+        self.assertNotIn("current accepted document-controlled release: **protocol 6.4**", readme)
+        self.assertNotIn("current_protocol =", norm(self.prompts))
+        self.assertNotIn("current_public_ref =", norm(self.prompts))
 
     def test_automation_boundary_does_not_counterfeit_semantic_review(self) -> None:
         kernel, writing, evidence = map(norm, (self.kernel, self.writing, self.evidence))
