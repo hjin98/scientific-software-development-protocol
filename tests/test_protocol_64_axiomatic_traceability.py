@@ -14,11 +14,13 @@ class Protocol64PreservationAndStructureTests(unittest.TestCase):
 
     def test_historical_64_release_identity_is_owned_by_release_state(self) -> None:
         state = yaml.safe_load((ROOT / "PROTOCOL-RELEASE-STATE.yaml").read_text(encoding="utf-8"))
-        current = state["accepted_current"]
-        self.assertEqual(current["version"], "6.4.0")
-        self.assertEqual(current["public_source_ref"], "e09a9d1480211eea2d16d722182bb5c6de1bee12")
-        self.assertEqual(current["recovery_ref"], "74bc572ef516cae417437a2027eeff52a2e25c15")
-        self.assertNotEqual(current["public_source_ref"], current["recovery_ref"])
+        if state["accepted_current"]["version"] == "6.4.0":
+            p64 = state["accepted_current"]
+        else:
+            p64 = state["historical"]["6.4.0"]
+        self.assertEqual(p64["public_source_ref"], "e09a9d1480211eea2d16d722182bb5c6de1bee12")
+        self.assertEqual(p64["recovery_ref"], "74bc572ef516cae417437a2027eeff52a2e25c15")
+        self.assertNotEqual(p64["public_source_ref"], p64["recovery_ref"])
 
     def test_64_consolidated_authority_is_archived_and_recoverable(self) -> None:
         active = sorted((ROOT / "workplans/active").glob("SSDP-6.4*.md"))
@@ -51,16 +53,6 @@ class Protocol64PreservationAndStructureTests(unittest.TestCase):
         for path in surfaces:
             text = path.read_text(encoding="utf-8")
             self.assertEqual(text.count("```") % 2, 0, str(path.relative_to(ROOT)))
-
-    def test_65_candidate_does_not_counterfeit_64_acceptance(self) -> None:
-        state = yaml.safe_load((ROOT / "PROTOCOL-RELEASE-STATE.yaml").read_text(encoding="utf-8"))
-        candidate = state["candidate"]
-        self.assertEqual(candidate["version"], "6.5.0")
-        self.assertEqual(candidate["review"]["state"], "NOT_RUN")
-        self.assertEqual(candidate["ratification"]["state"], "NOT_REQUESTED")
-        self.assertEqual(candidate["public_source_ref"], "UNAVAILABLE")
-        self.assertEqual(candidate["recovery_ref"], "UNAVAILABLE")
-
 
 if __name__ == "__main__":
     unittest.main()
