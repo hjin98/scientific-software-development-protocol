@@ -3,7 +3,7 @@ kind: implementation-workplan
 workplan_id: SSDP-6.5-D3-D4-IMPLEMENTATION-HANDOFF
 protocol_version: 6.4.0
 target_protocol_version: 6.5.0
-status: p8-frozen-binding-pending-qualification
+status: ready-p8-independent-review
 parent_workplan: workplans/active/SSDP-6.5-FRONTIER-MODEL-RE-EVALUATION.md
 design_authority: qualification/ssdp65/PHASE-IV-V-DESIGN-CLOSURE.md
 baseline: 55c085261eb827e3047637d045a8e6917ea6b962
@@ -665,3 +665,12 @@ Immutable replacement candidate:
 This later descendant binds P8 in the sole mutable release-state owner with Review `NOT_RUN`, ratification `NOT_REQUESTED`, public fallback/recovery `UNAVAILABLE`, and accepted-current Protocol 6.4.
 
 The binding descendant must pass the normal workflow before a fresh independent assembled-candidate Review begins. No D3 reopening or acceptance/publication action is authorized.
+
+
+## 28. P8 binding qualification complete
+
+Lifecycle descendant `65cd5da2d6793733e87d0b97f9ccce23d22b9154` binds exact P8 `ed782ccad73b43c9052ecc926177c36846b9328d` with Review `NOT_RUN`, ratification `NOT_REQUESTED`, public fallback/recovery `UNAVAILABLE`, and accepted-current Protocol 6.4.
+
+Normal workflow run `36068315599` passed the complete build and Orchestrator Core jobs, including the new release-state transition validator.
+
+B65-P7-1 is mechanically repaired and qualified at the existing D4 owner. The next stage is a genuinely fresh independent assembled-candidate Review of exact P8. Accepted P65 D3 remains closed.

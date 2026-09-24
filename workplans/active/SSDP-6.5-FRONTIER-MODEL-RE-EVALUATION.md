@@ -5,7 +5,7 @@ protocol_version: 6.4.0
 target_protocol_version: 6.5.0
 subject_baseline: P0 = Protocol 6.4 at 55c085261eb827e3047637d045a8e6917ea6b962 (recovery 74bc572ef516cae417437a2027eeff52a2e25c15)
 diagnostic_commit: 81375d8142a8130b80cd82f2304d3e16bc3fc390
-status: p8-frozen-binding-pending-qualification
+status: ready-p8-independent-review
 current_phase: PHASE VII P7 FROZEN / FRESH INDEPENDENT REVIEW REQUIRED
 branch: ssdp-6.5-frontier-model-re-evaluation
 created_date: 2026-09-24
@@ -913,3 +913,14 @@ Exact-P8 normal PR workflow run `36067942018` passed the complete build and Orch
 A later descendant now binds P8 with Review reset to `NOT_RUN`. Stakeholder ratification remains `NOT_REQUESTED`; public fallback and recovery remain `UNAVAILABLE`; accepted-current remains Protocol 6.4.
 
 Binding workflow qualification is required before fresh independent Review.
+
+
+## 35. P8 binding qualification and fresh-Review readiness
+
+P8 `ed782ccad73b43c9052ecc926177c36846b9328d` passed exact-candidate workflow run `36067942018`.
+
+Binding descendant `65cd5da2d6793733e87d0b97f9ccce23d22b9154` passed normal workflow run `36068315599` with Review `NOT_RUN` and no ratification/publication/recovery/cutover advancement.
+
+The durable independent-Review handoff now targets P8. P1-P7 remain immutable failed candidates.
+
+The next authorized step is a fresh independent assembled-candidate Review of exact P8.
