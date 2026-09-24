@@ -45,6 +45,27 @@ class Protocol65ReleaseStateTests(unittest.TestCase):
             )
         return errors
 
+    def _ratification_evidence_errors(
+        self,
+        *,
+        evidence_ref: str,
+        semantic_ref: str,
+        ratification_state: str,
+        git_results: list[tuple[int, str]],
+    ) -> list[str]:
+        errors: list[str] = []
+        with mock.patch.object(release_state, "_git", side_effect=git_results):
+            release_state._check_ratification_evidence(
+                ROOT,
+                "hjin98/scientific-software-development-protocol",
+                evidence_ref,
+                semantic_ref,
+                ratification_state,
+                "candidate.ratification.evidence_ref",
+                errors,
+            )
+        return errors
+
     def test_review_evidence_binds_exact_candidate_and_disposition(self) -> None:
         candidate = "a" * 40
         evidence_ref = (
@@ -110,6 +131,29 @@ p1: {candidate}
         )
         self.assertTrue(any("does not match candidate.review.state PASS" in error for error in errors))
 
+    def test_review_evidence_accepts_generic_future_candidate_key(self) -> None:
+        candidate = "a" * 40
+        evidence_ref = (
+            "hjin98/scientific-software-development-protocol@"
+            + "b" * 40
+            + ":qualification/review.md"
+        )
+        review = f"""---
+status: pass
+p3: {candidate}
+---
+# Review
+"""
+        self.assertEqual(
+            self._review_evidence_errors(
+                evidence_ref=evidence_ref,
+                semantic_ref=candidate,
+                review_state="PASS",
+                git_results=[(0, ""), (0, review)],
+            ),
+            [],
+        )
+
     def test_review_evidence_rejects_wrong_repository(self) -> None:
         errors: list[str] = []
         release_state._check_review_evidence(
@@ -141,6 +185,124 @@ p1: {candidate}
             evidence_ref=evidence_ref,
             semantic_ref="a" * 40,
             review_state="PASS",
+            git_results=[(0, ""), (1, "")],
+        )
+        self.assertTrue(any("is not readable at commit" in error for error in errors))
+
+    def test_evidence_routes_reject_unsafe_paths(self) -> None:
+        for path in ("../qualification/review.md", "/qualification/review.md"):
+            with self.subTest(path=path):
+                errors: list[str] = []
+                release_state._check_review_evidence(
+                    ROOT,
+                    "hjin98/scientific-software-development-protocol",
+                    "hjin98/scientific-software-development-protocol@"
+                    + "b" * 40
+                    + ":"
+                    + path,
+                    "a" * 40,
+                    "PASS",
+                    "candidate.review.evidence_ref",
+                    errors,
+                )
+                self.assertTrue(any("repository-relative" in error for error in errors))
+
+    def test_ratification_evidence_binds_exact_candidate_and_disposition(self) -> None:
+        candidate = "a" * 40
+        evidence_ref = (
+            "hjin98/scientific-software-development-protocol@"
+            + "b" * 40
+            + ":qualification/ratification.md"
+        )
+        ratification = f"""---
+status: ratified
+candidate_ref: {candidate}
+---
+# Stakeholder ratification
+"""
+        self.assertEqual(
+            self._ratification_evidence_errors(
+                evidence_ref=evidence_ref,
+                semantic_ref=candidate,
+                ratification_state="RATIFIED",
+                git_results=[(0, ""), (0, ratification)],
+            ),
+            [],
+        )
+
+    def test_ratification_evidence_rejects_wrong_candidate(self) -> None:
+        candidate = "a" * 40
+        evidence_ref = (
+            "hjin98/scientific-software-development-protocol@"
+            + "b" * 40
+            + ":qualification/ratification.md"
+        )
+        ratification = f"""---
+status: ratified
+candidate_ref: {"c" * 40}
+---
+# Stakeholder ratification
+"""
+        errors = self._ratification_evidence_errors(
+            evidence_ref=evidence_ref,
+            semantic_ref=candidate,
+            ratification_state="RATIFIED",
+            git_results=[(0, ""), (0, ratification)],
+        )
+        self.assertTrue(any("does not bind candidate.semantic_ref" in error for error in errors))
+
+    def test_ratification_evidence_rejects_disposition_mismatch(self) -> None:
+        candidate = "a" * 40
+        evidence_ref = (
+            "hjin98/scientific-software-development-protocol@"
+            + "b" * 40
+            + ":qualification/ratification.md"
+        )
+        ratification = f"""---
+status: rejected
+semantic_ref: {candidate}
+---
+# Stakeholder ratification
+"""
+        errors = self._ratification_evidence_errors(
+            evidence_ref=evidence_ref,
+            semantic_ref=candidate,
+            ratification_state="RATIFIED",
+            git_results=[(0, ""), (0, ratification)],
+        )
+        self.assertTrue(any("does not match candidate.ratification.state RATIFIED" in error for error in errors))
+
+    def test_ratification_evidence_rejects_wrong_repository(self) -> None:
+        errors: list[str] = []
+        release_state._check_ratification_evidence(
+            ROOT,
+            "hjin98/scientific-software-development-protocol",
+            "other/project@" + "b" * 40 + ":qualification/ratification.md",
+            "a" * 40,
+            "RATIFIED",
+            "candidate.ratification.evidence_ref",
+            errors,
+        )
+        self.assertTrue(any("must identify evidence in project" in error for error in errors))
+
+    def test_ratification_evidence_rejects_missing_commit_or_path(self) -> None:
+        evidence_ref = (
+            "hjin98/scientific-software-development-protocol@"
+            + "b" * 40
+            + ":qualification/ratification.md"
+        )
+        errors = self._ratification_evidence_errors(
+            evidence_ref=evidence_ref,
+            semantic_ref="a" * 40,
+            ratification_state="RATIFIED",
+            git_results=[(1, "")],
+        )
+        self.assertTrue(any("commit" in error and "not resolvable" in error for error in errors))
+
+        errors = self._ratification_evidence_errors(
+            evidence_ref=evidence_ref,
+            semantic_ref="a" * 40,
+            ratification_state="RATIFIED",
             git_results=[(0, ""), (1, "")],
         )
         self.assertTrue(any("is not readable at commit" in error for error in errors))
@@ -234,6 +396,50 @@ p1: {candidate}
         }
         errors = release_state.validate_release_state(data)
         self.assertTrue(any("accepted_current cannot equal candidate.version" in error for error in errors))
+
+    def test_terminal_cutover_and_next_candidate_are_legal_state_transitions(self) -> None:
+        data = copy.deepcopy(self.data)
+        data["historical"]["6.4.0"] = copy.deepcopy(data["accepted_current"])
+        candidate = "a" * 40
+        recovery = "b" * 40
+        data["accepted_current"] = {
+            "version": "6.5.0",
+            "public_source_ref": candidate,
+            "recovery_ref": recovery,
+        }
+        data["candidate"] = {
+            "version": "6.5.0",
+            "semantic_ref": candidate,
+            "review": {
+                "state": "PASS",
+                "evidence_ref": (
+                    "hjin98/scientific-software-development-protocol@"
+                    + "c" * 40
+                    + ":qualification/review.md"
+                ),
+            },
+            "ratification": {
+                "state": "RATIFIED",
+                "evidence_ref": (
+                    "hjin98/scientific-software-development-protocol@"
+                    + "d" * 40
+                    + ":qualification/ratification.md"
+                ),
+            },
+            "public_source_ref": candidate,
+            "recovery_ref": recovery,
+        }
+        self.assertEqual(release_state.validate_release_state(data), [])
+
+        data["candidate"] = {
+            "version": "6.6.0",
+            "semantic_ref": "UNFROZEN",
+            "review": {"state": "NOT_RUN", "evidence_ref": "NONE"},
+            "ratification": {"state": "NOT_REQUESTED", "evidence_ref": "NONE"},
+            "public_source_ref": "UNAVAILABLE",
+            "recovery_ref": "UNAVAILABLE",
+        }
+        self.assertEqual(release_state.validate_release_state(data), [])
 
     def test_historical_state_cannot_duplicate_accepted_current_version(self) -> None:
         data = copy.deepcopy(self.data)

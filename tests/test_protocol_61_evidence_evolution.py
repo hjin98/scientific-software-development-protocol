@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import copy
 import re
 import unittest
 
@@ -71,10 +72,18 @@ class Protocol61EvidenceEvolutionTests(unittest.TestCase):
         self.assertIn("repository-default bytes are never a substitute", lower)
         self.assertNotIn("CURRENT_PROTOCOL =", prompts)
         self.assertNotIn("CURRENT_PUBLIC_REF =", prompts)
-        self.assertEqual(state["historical"]["6.2.0"]["public_source_ref"], "5a062ebc472755607b9dc66d33a5ebbc4b7429aa")
-        self.assertEqual(state["historical"]["6.2.0"]["recovery_ref"], "b59adc77efe6951912cfd705cc43830c58ca27d0")
-        self.assertEqual(state["accepted_current"]["version"], "6.4.0")
-        self.assertEqual(state["candidate"]["version"], "6.5.0")
+        future_state = copy.deepcopy(state)
+        future_state["accepted_current"]["version"] = "6.5.0"
+        future_state["candidate"]["version"] = "6.6.0"
+        for observed in (state, future_state):
+            self.assertEqual(
+                observed["historical"]["6.2.0"]["public_source_ref"],
+                "5a062ebc472755607b9dc66d33a5ebbc4b7429aa",
+            )
+            self.assertEqual(
+                observed["historical"]["6.2.0"]["recovery_ref"],
+                "b59adc77efe6951912cfd705cc43830c58ca27d0",
+            )
 
     def test_accepted_61_recovery_and_bootstrap_remain_immutable(self) -> None:
         state = yaml.safe_load(self.read("PROTOCOL-RELEASE-STATE.yaml"))

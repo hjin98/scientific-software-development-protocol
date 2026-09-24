@@ -110,6 +110,18 @@ def _resolve_evidence_route(
     return content
 
 
+def _bound_candidate_refs(metadata: dict[str, Any]) -> set[str]:
+    return {
+        str(value)
+        for key, value in metadata.items()
+        if value
+        and (
+            key in {"candidate_ref", "semantic_ref"}
+            or re.fullmatch(r"p\d+", str(key).lower())
+        )
+    }
+
+
 def _check_review_evidence(
     root: Path,
     project: str,
@@ -127,11 +139,7 @@ def _check_review_evidence(
     if not metadata:
         return
 
-    bound_refs = {
-        str(metadata[key])
-        for key in ("candidate_ref", "semantic_ref", "p1", "p2")
-        if metadata.get(key)
-    }
+    bound_refs = _bound_candidate_refs(metadata)
     if semantic_ref not in bound_refs:
         rendered = ", ".join(sorted(bound_refs)) if bound_refs else "NONE"
         errors.append(
@@ -144,6 +152,40 @@ def _check_review_evidence(
     if actual_status != expected_status:
         errors.append(
             f"{where} disposition {actual_status or 'MISSING'} does not match candidate.review.state {review_state}"
+        )
+
+
+def _check_ratification_evidence(
+    root: Path,
+    project: str,
+    value: str,
+    semantic_ref: str,
+    ratification_state: str,
+    where: str,
+    errors: list[str],
+) -> None:
+    content = _resolve_evidence_route(root, project, value, where, errors)
+    if content is None:
+        return
+
+    metadata = _front_matter(content, where, errors)
+    if not metadata:
+        return
+
+    bound_refs = _bound_candidate_refs(metadata)
+    if semantic_ref not in bound_refs:
+        rendered = ", ".join(sorted(bound_refs)) if bound_refs else "NONE"
+        errors.append(
+            f"{where} does not bind candidate.semantic_ref {semantic_ref}; "
+            f"ratification record binds {rendered}"
+        )
+
+    expected_status = {"RATIFIED": "ratified", "REJECTED": "rejected"}[ratification_state]
+    actual_status = str(metadata.get("status") or "").strip().lower().replace("_", "-")
+    if actual_status != expected_status:
+        errors.append(
+            f"{where} disposition {actual_status or 'MISSING'} "
+            f"does not match candidate.ratification.state {ratification_state}"
         )
 
 
@@ -275,12 +317,15 @@ def validate_release_state(data: Any, *, repo_root: Path | None = None) -> list[
             )
         if (
             ratification_state in {"RATIFIED", "REJECTED"}
+            and semantic_ref != "UNFROZEN"
             and EVIDENCE_RE.fullmatch(ratification_evidence)
         ):
-            _resolve_evidence_route(
+            _check_ratification_evidence(
                 repo_root,
                 project,
                 ratification_evidence,
+                semantic_ref,
+                ratification_state,
                 "candidate.ratification.evidence_ref",
                 errors,
             )

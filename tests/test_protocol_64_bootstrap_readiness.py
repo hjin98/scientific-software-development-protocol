@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import copy
 import json
 import os
 import posixpath
@@ -77,9 +78,33 @@ class Protocol64BootstrapReadinessTests(unittest.TestCase):
         local_prompts = (ROOT / "source/shared/references/development-workflow-prompts.md").read_text(encoding="utf-8")
         local_state = yaml.safe_load((ROOT / "PROTOCOL-RELEASE-STATE.yaml").read_text(encoding="utf-8"))
         self.assertNotIn("CURRENT_PUBLIC_REF =", local_prompts)
-        self.assertEqual(local_state["accepted_current"]["version"], "6.4.0")
-        self.assertEqual(local_state["accepted_current"]["public_source_ref"], BOOTSTRAP)
-        self.assertEqual(local_state["accepted_current"]["recovery_ref"], RECOVERY)
+        p64 = (
+            local_state["accepted_current"]
+            if local_state["accepted_current"]["version"] == "6.4.0"
+            else local_state["historical"]["6.4.0"]
+        )
+        self.assertEqual(p64["public_source_ref"], BOOTSTRAP)
+        self.assertEqual(p64["recovery_ref"], RECOVERY)
+
+    def test_local_64_identity_survives_successor_cutover_shape(self) -> None:
+        state = yaml.safe_load((ROOT / "PROTOCOL-RELEASE-STATE.yaml").read_text(encoding="utf-8"))
+        successor = copy.deepcopy(state)
+        successor["historical"]["6.4.0"] = copy.deepcopy(successor["accepted_current"])
+        successor["accepted_current"] = {
+            "version": "6.5.0",
+            "public_source_ref": "a" * 40,
+            "recovery_ref": "b" * 40,
+        }
+
+        for observed in (state, successor):
+            with self.subTest(accepted=observed["accepted_current"]["version"]):
+                p64 = (
+                    observed["accepted_current"]
+                    if observed["accepted_current"]["version"] == "6.4.0"
+                    else observed["historical"]["6.4.0"]
+                )
+                self.assertEqual(p64["public_source_ref"], BOOTSTRAP)
+                self.assertEqual(p64["recovery_ref"], RECOVERY)
 
     def test_exact_ref_profile_and_distribution_identity(self) -> None:
         profile = json.loads(self.fetch(f"{PROFILE_ROOT}/profile.json"))
