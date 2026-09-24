@@ -1,6 +1,6 @@
 ---
 kind: ssdp65-pre-freeze-readiness
-status: stage-e-complete-p1-freeze-prepared
+status: stage-e-complete-p1-frozen
 p0: 55c085261eb827e3047637d045a8e6917ea6b962
 latest_full_green_run: 35985539212
 ---
@@ -108,6 +108,6 @@ Stage E is complete for freeze:
 - the branch-only implementation workflow is removed in the freeze-preparation commit so it is not part of the frozen long-lived protocol machinery;
 - no unresolved material implementation impact is known.
 
-The immutable P1 SHA cannot be self-declared inside P1. A later descendant must bind the exact P1 commit in `PROTOCOL-RELEASE-STATE.yaml` and the independent-Review handoff. That binding is publication of candidate identity, not Review PASS, ratification, public fallback, recovery, or accepted-current cutover.
+The immutable P1 SHA is `b565e28aeacea002cefe27e6b9594fe99d653c0a`. Exact P1 passed the repository's normal pull-request workflow in run `35985871148` after temporary implementation-only workflow removal. This later descendant binds P1 in `PROTOCOL-RELEASE-STATE.yaml` and the independent-Review handoff. That binding is publication of candidate identity, not Review PASS, ratification, public fallback, recovery, or accepted-current cutover.
 
 Stakeholder ratification is explicitly **not requested** at this stage.
