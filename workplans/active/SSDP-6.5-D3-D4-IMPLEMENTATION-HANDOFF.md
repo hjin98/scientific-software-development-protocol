@@ -3,7 +3,7 @@ kind: implementation-workplan
 workplan_id: SSDP-6.5-D3-D4-IMPLEMENTATION-HANDOFF
 protocol_version: 6.4.0
 target_protocol_version: 6.5.0
-status: repair-complete-p3-frozen
+status: repair-complete-p4-frozen
 parent_workplan: workplans/active/SSDP-6.5-FRONTIER-MODEL-RE-EVALUATION.md
 design_authority: qualification/ssdp65/PHASE-IV-V-DESIGN-CLOSURE.md
 baseline: 55c085261eb827e3047637d045a8e6917ea6b962
@@ -328,10 +328,12 @@ Raise Serious Challenge if accepted D1-D4/formal-definition doctrine itself is s
 
 ```text
 D3 DESIGN: PASS / NOT REOPENED
-PHASE VI IMPLEMENTATION: REPAIR COMPLETE — P3 FROZEN
+PHASE VI IMPLEMENTATION: REPAIR COMPLETE — P4 FROZEN
 P1: FROZEN / FAILED REVIEW — b565e28aeacea002cefe27e6b9594fe99d653c0a
 P2: FROZEN / FAILED REVIEW — e8edb353e172aef933ed5e58eeabe897d0cc98d1
 P2 NORMAL PR QUALIFICATION: 35996488794 / PASS\nP3: FROZEN — 89ccc71a7b0e9458a3e77306be2a773d4059f0f2\nP3 NORMAL PR QUALIFICATION: 36018551068 / PASS
+P4: FROZEN — 43ff4273fbdaf46b9677cffdb091b741ce754a7d
+P4 NORMAL PR QUALIFICATION: 36041360949 / PASS
 PUBLIC 6.5 FALLBACK: UNAVAILABLE
 6.5 RECOVERY: UNAVAILABLE
 6.5 RATIFICATION: NOT REQUESTED
@@ -407,3 +409,22 @@ Exact P3 is \`89ccc71a7b0e9458a3e77306be2a773d4059f0f2\`. Exact-P3 normal PR wor
 Binding descendant `c3df40cdb144c66a390b5d69b49e6fe8a81ad825` passed normal workflow run `36018970303` with Review still `NOT_RUN` and no ratification/publication/recovery advancement.
 
 D3 remains closed. P3 must now receive a fresh independent assembled-candidate Review before stakeholder ratification or publication.
+
+
+## 14. P4 D4 repair closure
+
+Fresh independent P3 Review found two remaining D4/current-representation blockers. Both are repaired by alteration inside existing owners.
+
+### B65-P3-1
+
+`source/release_state.py` no longer accepts set membership across all candidate-like metadata. It resolves one evidence subject: agreeing explicit `candidate_ref`/`semantic_ref` when present, otherwise the highest legacy `pN` candidate generation. Historical/lower `pN` fields cannot rescue a wrong explicit subject or let P3 borrow P4 disposition.
+
+Focused Review and ratification counterexamples cover explicit-vs-historical conflict, conflicting explicit fields, and P3/P4 legacy coexistence. No registry, wrapper or prose semantic parser was added.
+
+### B65-P3-2
+
+The current canonical evidence owner no longer scopes impact-closure semantics to Protocol 6.4. A fresh 34-file current shared-reference census found no remaining predecessor-scoped labels. Generated package descendants were regenerated; frozen historical profiles were not edited.
+
+Exact replacement candidate P4 is `43ff4273fbdaf46b9677cffdb091b741ce754a7d`; normal repository qualification run `36041360949` passed both build and Orchestrator Core jobs.
+
+D3 remains closed. P4 must receive fresh independent assembled-candidate Review before any stakeholder ratification or publication.

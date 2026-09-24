@@ -1,136 +1,133 @@
 ---
 kind: independent-review-handoff
 protocol_under_review: 6.5.0
-status: ready-p3
+status: ready-p4
 accepted_control_p0: 55c085261eb827e3047637d045a8e6917ea6b962
 failed_candidate_p1: b565e28aeacea002cefe27e6b9594fe99d653c0a
 failed_candidate_p2: e8edb353e172aef933ed5e58eeabe897d0cc98d1
-immutable_candidate_p3: 89ccc71a7b0e9458a3e77306be2a773d4059f0f2
+failed_candidate_p3: 89ccc71a7b0e9458a3e77306be2a773d4059f0f2
+immutable_candidate_p4: 43ff4273fbdaf46b9677cffdb091b741ce754a7d
 candidate_branch: ssdp-6.5-frontier-model-re-evaluation
 draft_pr: 33
-p3_mechanical_qualification_run: 36018551068
-p3_binding_descendant: c3df40cdb144c66a390b5d69b49e6fe8a81ad825
-p3_binding_qualification_run: 36018970303
+p4_mechanical_qualification_run: 36041360949
 p1_review: qualification/ssdp65/INDEPENDENT-REVIEW-2026-09-24-PROTOCOL-6.5-NO-PASS.md
 p2_review: qualification/ssdp65/INDEPENDENT-REVIEW-2026-09-24-PROTOCOL-6.5-P2-NO-PASS.md
-p3_repair_qualification: qualification/ssdp65/P3-REPAIR-QUALIFICATION.md
+p3_review: qualification/ssdp65/INDEPENDENT-REVIEW-2026-09-24-PROTOCOL-6.5-P3-NO-PASS.md
+p4_repair_qualification: qualification/ssdp65/P4-REPAIR-QUALIFICATION.md
 authoring_context_verdict: none
 stakeholder_ratification: NOT_REQUESTED
 ---
 
-# Independent Review Handoff — Protocol 6.5 P3
+# Independent Review Handoff — Protocol 6.5 P4
 
 ## 1. Immutable Review target
 
 Perform a fresh independent assembled-candidate Review of:
 
-\`\`\`text
-P3 = 89ccc71a7b0e9458a3e77306be2a773d4059f0f2
-\`\`\`
+```text
+P4 = 43ff4273fbdaf46b9677cffdb091b741ce754a7d
+```
 
 against accepted Protocol 6.4 control:
 
-\`\`\`text
+```text
 P0 = 55c085261eb827e3047637d045a8e6917ea6b962
-\`\`\`
+```
 
-P1 \`b565e28aeacea002cefe27e6b9594fe99d653c0a\` and P2 \`e8edb353e172aef933ed5e58eeabe897d0cc98d1\` are immutable failed candidates and historical evidence only.
+P1, P2 and P3 are immutable failed candidates and historical evidence only.
 
-Do not review the mutable branch head as candidate semantics. Resolve mutable lifecycle state only from a later descendant that binds P3.
+Do not review the mutable branch head as candidate semantics. Resolve mutable lifecycle state only from a later descendant that binds P4.
 
-The reviewer/context MUST NOT have authored P3 or inherit P1/P2 Review conclusions or the repair author's claim that the blockers are closed. Reconstruct authority independently from P3 and P0 before consulting repair evidence.
+The reviewer/context MUST NOT have authored P4 or inherit P1/P2/P3 Review conclusions or the repair author's claim that the blockers are closed. Reconstruct authority independently from P4 and P0 before consulting repair evidence.
 
 ## 2. Required authority reconstruction
 
-Reconstruct at least:
+Reconstruct the universal kernel; D1-D4 owners; workflow/Review; evidence/evolution/testing; PEM/HAS; versioning/recovery; Lossless Representation/progressive disclosure; accepted P64/QF64/F64 capability; and Protocol 7 isolation.
 
-- universal abstraction/concretization kernel;
-- D1/D2/D3/D4 owners;
-- evidence/evolution/dependency doctrine;
-- testing/qualification doctrine;
-- workflow/workplan/Review doctrine;
-- PEM doctrine and current applicable HAS;
-- versioning/recovery/publication doctrine;
-- Lossless Representation/progressive disclosure;
-- accepted 6.4 P64-A..P64-O, QF64-A..QF64-P semantic capabilities and F64-A..F64-L falsification protections;
-- Protocol 7 isolation.
+Treat workplans, preservation maps, CI, prior Reviews, repair qualification and this handoff as evidence to challenge, never authority for the verdict.
 
-Treat workplans, preservation maps, CI, prior Reviews and this handoff as evidence to challenge, never authority for the verdict.
+## 3. Mandatory P3-blocker repair falsification
 
-## 3. Mandatory P2-blocker repair falsification
+### B65-P3-1 — exact evidence subject identity
 
-### B65-P2-1 — lifecycle-value duplication
+Against the real shared Review/ratification binder attempt at minimum:
 
-Independently attempt:
-
-- legal 6.4 -> 6.5 accepted-current transition with immutable 6.4 identity moving to historical;
-- next-successor candidate transition after accepted 6.5;
-- bounded census of long-lived current tests/docs for live accepted-current/candidate phase copies.
-
-Verify no executable invariant/current operational document needs manual editing merely because the sole mutable lifecycle owner advances. Preserve immutable historical release identities.
-
-### B65-P2-2 — terminal ratification evidence binding
-
-Against the real release-state owner attempt:
-
-- valid exact candidate + RATIFIED binding;
-- valid exact candidate + REJECTED binding;
+- valid exact candidate + PASS / NO-PASS;
+- valid exact candidate + RATIFIED / REJECTED;
 - wrong candidate;
-- terminal disposition mismatch;
-- wrong repository;
-- unsafe path;
-- nonexistent commit;
-- nonexistent path;
-- structurally valid binding whose prose still must not be interpreted as arbitrary semantic stakeholder truth.
+- disposition mismatch;
+- explicit `candidate_ref` wrong while historical `p3` matches the state candidate;
+- explicit `semantic_ref` wrong while historical `p3` matches;
+- conflicting `candidate_ref` and `semantic_ref`;
+- `p3` + `p4` metadata while validating P3 and while validating P4;
+- a future `p5` legacy subject;
+- wrong repository, unsafe path, nonexistent commit/path and malformed/missing front matter;
+- structurally valid evidence whose prose is false/unrelated beyond machine metadata.
 
-Verify no second evidence/state authority or semantic prose parser was introduced.
+Verify that explicit subject fields are unambiguous, legacy `pN` support cannot let a historical candidate borrow a newer disposition, and arbitrary prose remains outside machine semantic judgment.
 
-Also re-falsify P1 blocker closures B65-R1..R3 because P3 changes the shared evidence-binding owner.
+### B65-P3-2 — current representation convergence
 
-## 4. Exact-P3 mechanical evidence
+Search current non-historical canonical source for predecessor-qualified normative scope, not only the repaired sentence. Verify current doctrine is written as current doctrine and generated packages reproduce the canonical meaning without frozen predecessor mutation.
 
-Normal repository pull-request run \`36018551068\` evaluated exact P3 and passed the complete repository build plus Orchestrator Core workflow.
+## 4. Re-falsify earlier repair families
 
-Use that only for properties those executable oracles discriminate.
+Re-falsify B65-P2-1/B65-R2 lifecycle ownership, B65-P2-2/B65-R1 evidence applicability, and B65-R3 predecessor-gated workflow obligations because P4 changes the shared evidence binder and current evidence owner.
 
-The later P3 binding descendant and its normal workflow run will be recorded in \`qualification/ssdp65/P3-BINDING-QUALIFICATION.md\`. They are mutable lifecycle evidence and do not alter P3.
+Do not assume the earlier closures survive merely because P4's exact CI is green.
 
-## 5. Full Phase VII obligations remain
+## 5. Full assembled-candidate Review
 
-This is not a patch-only re-review. Re-execute proportionately:
+Re-run proportionately:
 
 1. Serious Challenge pass first.
 2. DF-1 through DF-4.
 3. local-compliance/global-failure trajectories.
 4. out-of-matrix abstraction-adequacy pass.
 5. qualification-method challenge.
-6. fresh post-P3 semantic mutation/counterexample set, separating executable state/schema/generated mutants from prose semantic Review and including paraphrase controls.
+6. fresh post-P4 machine/schema/generated mutants versus prose semantic mutants, with paraphrase controls.
 7. P65-1..P65-6 causal ablation.
-8. preservation-map falsification across P64/QF64/F64 capabilities and D1-D4 formal-definition doctrine.
+8. Protocol 6.4 -> 6.5 preservation-map falsification.
 9. simplicity/ownership/compression review.
-10. mechanical evidence applicability.
-11. targeted P0/P3 comparison on lifecycle drift, proxy/oracle adequacy, Challenge routing and mature-system simplification, with at least one holdout not used to design the repair.
+10. exact-candidate evidence applicability.
+11. targeted P0/P4 comparison on lifecycle drift, oracle adequacy, Challenge routing and mature-system simplification, with at least one holdout not used to design this repair.
 
-The second contemporary frontier-model diagnostic remains explicitly waived for this cycle; do not claim two-frontier replication.
+The second contemporary frontier-model diagnostic remains explicitly waived for this cycle.
 
-## 6. Repair-era simplicity/preservation evidence to challenge
+## 6. Repair-era measurements to challenge
 
-Author-side applicability claim:
+Author-side measurements independently reproduced before handoff:
 
-- universal kernel P0/P3: 2,642 / 2,642 words;
-- defined hot-current projection P0/P3: 10,540 / 7,354 words;
+- universal kernel P0/P4: 2642 / 2642 words;
+- defined hot-current projection P0/P4: 10540 / 7354 words;
 - accepted-6.4 public fallback SHA copies in that scope: 20 -> 0;
 - accepted-6.4 recovery SHA copies: 12 -> 0;
-- P3 changes no frozen Protocol 5.16 or 6.0-6.4 profile/prompt resource relative to P2, whose 12 frozen objects were independently verified identical to P0.
+- frozen Protocol 5.16 and 6.0-6.4 profile/prompt resource objects: 12 compared, zero differences;
+- current canonical shared-reference predecessor-scope census: 34 files, zero `Protocol 6.4` / `6.4.0` / `predecessor` matches.
 
-Compression is beneficial only if capability preservation remains lossless.
+Exact P4 normal PR qualification run `36041360949` passed the complete repository build and Orchestrator Core workflow. Use it only for properties those executable oracles discriminate.
 
-## 7. Review disposition
+## 7. Lifecycle state entering Review
+
+Resolve from the later P4 binding descendant, not P4 itself. Expected state:
+
+- accepted-current: Protocol 6.4;
+- candidate: Protocol 6.5 P4;
+- candidate semantic ref: `43ff4273fbdaf46b9677cffdb091b741ce754a7d`;
+- Review: `NOT_RUN`;
+- ratification: `NOT_REQUESTED`;
+- public fallback: `UNAVAILABLE`;
+- recovery: `UNAVAILABLE`;
+- Protocol 7 D3/D4: unchanged.
+
+Independently verify it.
+
+## 8. Disposition
 
 PASS only if no genuine blocking semantic, preservation, ownership, qualification, evidence-applicability, lifecycle or representation defect survives.
 
-PASS means only that P3 is technically eligible for stakeholder ratification. It does not ratify 6.5, publish fallback, establish recovery, change accepted-current, merge PR #33, or mutate Protocol 7.
+PASS means only P4 is technically eligible for stakeholder ratification. It does not ratify 6.5, publish fallback, establish recovery, change accepted-current, merge PR #33 or mutate Protocol 7.
 
-If blockers survive, preserve P3 immutably, reopen the earliest owning layer, require a new candidate identity for semantic repair, and identify stale evidence precisely.
+If blockers survive, preserve P4 immutably, reopen the earliest owning layer and require another candidate identity.
 
-This repair/authoring context is not eligible to self-issue the independent P3 Review verdict.
+This repair/authoring context is not eligible to self-issue the independent P4 Review verdict.

@@ -5,8 +5,8 @@ protocol_version: 6.4.0
 target_protocol_version: 6.5.0
 subject_baseline: P0 = Protocol 6.4 at 55c085261eb827e3047637d045a8e6917ea6b962 (recovery 74bc572ef516cae417437a2027eeff52a2e25c15)
 diagnostic_commit: 81375d8142a8130b80cd82f2304d3e16bc3fc390
-status: active-p3-review-no-pass-repair-required
-current_phase: PHASE VII P3 NO-PASS / D4 REPAIR REQUIRED / NEW CANDIDATE REQUIRED
+status: active-p4-review-ready
+current_phase: PHASE VII P4 FROZEN / FRESH INDEPENDENT REVIEW REQUIRED
 branch: ssdp-6.5-frontier-model-re-evaluation
 created_date: 2026-09-24
 adjudication: qualification/ssdp65/CROSS-MODEL-ADJUDICATION-2026-09-24.md
@@ -31,11 +31,13 @@ SUCCESSOR DECISION:                 PROTOCOL 6.5 WARRANTED
 D1-D4 DOMAIN MODEL:                 PRESERVE
 PHASE IV PRINCIPLE EXTRACTION:      COMPLETE — qualification/ssdp65/PHASE-IV-V-DESIGN-CLOSURE.md
 PHASE V CANDIDATE DESIGN:           COMPLETE — DESIGN PASS
-PHASE VI IMPLEMENTATION:            REOPENED — P3 REVIEW BLOCKERS REQUIRE D4 REPAIR
+PHASE VI IMPLEMENTATION:            REPAIR COMPLETE — P4 FROZEN
 P1 CANDIDATE:                       FROZEN / FAILED REVIEW — b565e28aeacea002cefe27e6b9594fe99d653c0a
 P2 CANDIDATE:                       FROZEN / FAILED REVIEW — e8edb353e172aef933ed5e58eeabe897d0cc98d1
 P2 EXACT PR QUALIFICATION:          PASS — run 35996488794\nP3 CANDIDATE:                       FROZEN — 89ccc71a7b0e9458a3e77306be2a773d4059f0f2\nP3 EXACT PR QUALIFICATION:          PASS — run 36018551068
-PHASE VII QUALIFICATION/REVIEW:     NO-PASS — P3 IMMUTABLE / NEW CANDIDATE REQUIRED
+P4 CANDIDATE:                       FROZEN — 43ff4273fbdaf46b9677cffdb091b741ce754a7d
+P4 EXACT PR QUALIFICATION:          PASS — run 36041360949
+PHASE VII QUALIFICATION/REVIEW:     READY FOR FRESH P4 REVIEW
 PROTOCOL 7 D3/D4:                   OUT OF SCOPE / UNCHANGED
 ```
 
@@ -589,3 +591,24 @@ Rerun, proportionately:
 9. a new fresh independent assembled-candidate Review.
 
 Exact P3 runs `36018551068`, `36018970303` and `36019184556` remain historical evidence for their exact subjects/properties only. No stakeholder ratification/publication/recovery/cutover/merge/Protocol-7 mutation is authorized.
+
+
+## 21. P4 repair closure and fresh-Review handoff
+
+Fresh independent P3 Review blockers B65-P3-1 and B65-P3-2 are repaired at their existing D4/current-representation owners without reopening D3.
+
+- exact evidence subject binding now resolves one unambiguous subject; explicit subject fields dominate legacy context and must agree;
+- legacy `pN` compatibility resolves to the highest candidate generation, so historical P3 cannot borrow P4 disposition;
+- Review and terminal ratification share the corrected owner without a registry or semantic prose parser;
+- the residual predecessor-scoped evidence-owner sentence is now protocol-current;
+- a fresh scan of all 34 current canonical shared references found no predecessor-scope matches;
+- generated package descendants were reconciled from canonical source;
+- P0/P4 kernel/hot-context/SHA-copy measurements remain 2642/2642, 10540/7354, 20->0 and 12->0;
+- 12/12 frozen 5.16-6.4 profile/prompt objects remain identical to P0;
+- exact P4 run `36041360949` passed complete repository build and Orchestrator Core acceptance.
+
+P4 is immutable at `43ff4273fbdaf46b9677cffdb091b741ce754a7d`. Any further semantic repair requires a new candidate identity.
+
+A later descendant binds P4 with Review `NOT_RUN`, ratification `NOT_REQUESTED`, public fallback/recovery `UNAVAILABLE`, and accepted-current Protocol 6.4. The next stage is a genuinely fresh independent assembled-candidate Review of P4.
+
+No stakeholder ratification, public-fallback publication, recovery establishment, accepted-current cutover, PR merge or Protocol 7 D3/D4 mutation is authorized.
