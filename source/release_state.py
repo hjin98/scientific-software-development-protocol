@@ -83,15 +83,21 @@ def validate_release_state(data: Any, *, repo_root: Path | None = None) -> list[
         errors.append("accepted_current.version must be semantic x.y.z")
     accepted_public = _sha_or(accepted.get("public_source_ref"), set(), "accepted_current.public_source_ref", errors)
     accepted_recovery = _sha_or(accepted.get("recovery_ref"), set(), "accepted_current.recovery_ref", errors)
+    if SHA_RE.fullmatch(accepted_public) and accepted_public == accepted_recovery:
+        errors.append("accepted_current public_source_ref and recovery_ref must be distinct")
 
     historical = _mapping(root.get("historical"), "historical", errors)
     for version, record in historical.items():
         if not isinstance(version, str) or not SEMVER_RE.fullmatch(version):
             errors.append(f"historical version key {version!r} is not semantic x.y.z")
             continue
+        if version == accepted_version:
+            errors.append(f"historical[{version}] duplicates accepted_current.version")
         item = _mapping(record, f"historical[{version}]", errors)
         public = _sha_or(item.get("public_source_ref"), {"NONE"}, f"historical[{version}].public_source_ref", errors)
         recovery = _sha_or(item.get("recovery_ref"), {"NONE"}, f"historical[{version}].recovery_ref", errors)
+        if SHA_RE.fullmatch(public) and public == recovery:
+            errors.append(f"historical[{version}] public_source_ref and recovery_ref must be distinct")
         if repo_root is not None:
             if public != "NONE":
                 _check_version_ref(repo_root, version, public, f"historical[{version}].public_source_ref", errors)
@@ -123,12 +129,12 @@ def validate_release_state(data: Any, *, repo_root: Path | None = None) -> list[
         required=ratification_state in {"RATIFIED", "REJECTED"},
     )
 
-    if review_state == "PASS" and semantic_ref == "UNFROZEN":
-        errors.append("Review PASS requires a frozen candidate.semantic_ref")
-    if ratification_state == "RATIFIED" and review_state != "PASS":
-        errors.append("RATIFIED requires Review PASS for the same candidate")
-    if ratification_state == "RATIFIED" and semantic_ref == "UNFROZEN":
-        errors.append("RATIFIED requires a frozen candidate.semantic_ref")
+    if review_state in {"NO_PASS", "PASS"} and semantic_ref == "UNFROZEN":
+        errors.append(f"Review {review_state} requires a frozen candidate.semantic_ref")
+    if ratification_state in {"PENDING", "RATIFIED", "REJECTED"} and review_state != "PASS":
+        errors.append(f"{ratification_state} ratification state requires Review PASS for the same candidate")
+    if ratification_state in {"PENDING", "RATIFIED", "REJECTED"} and semantic_ref == "UNFROZEN":
+        errors.append(f"{ratification_state} ratification state requires a frozen candidate.semantic_ref")
     if public_ref != "UNAVAILABLE":
         if review_state != "PASS" or ratification_state != "RATIFIED":
             errors.append("candidate.public_source_ref requires Review PASS and RATIFIED state")
@@ -136,6 +142,23 @@ def validate_release_state(data: Any, *, repo_root: Path | None = None) -> list[
             errors.append("candidate.public_source_ref must equal the exact reviewed/ratified candidate.semantic_ref")
     if recovery_ref != "UNAVAILABLE" and public_ref == "UNAVAILABLE":
         errors.append("candidate.recovery_ref requires an already published public_source_ref")
+    if SHA_RE.fullmatch(public_ref) and public_ref == recovery_ref:
+        errors.append("candidate.public_source_ref and candidate.recovery_ref must be distinct")
+
+    if accepted_version == candidate_version:
+        terminal = (
+            review_state == "PASS"
+            and ratification_state == "RATIFIED"
+            and SHA_RE.fullmatch(public_ref) is not None
+            and SHA_RE.fullmatch(recovery_ref) is not None
+            and accepted_public == public_ref
+            and accepted_recovery == recovery_ref
+        )
+        if not terminal:
+            errors.append(
+                "accepted_current cannot equal candidate.version until Review PASS, RATIFIED state, "
+                "published exact candidate fallback, distinct recovery, and accepted mapping agreement are complete"
+            )
 
     if repo_root is not None:
         _check_version_ref(repo_root, accepted_version, accepted_public, "accepted_current.public_source_ref", errors)
