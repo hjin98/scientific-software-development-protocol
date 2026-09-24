@@ -35,7 +35,29 @@ jobs:
       - name: Regenerate current orchestrator protocol snapshot
         run: python orchestrator/scripts/generate_protocol_snapshot.py
       - name: Run protocol regression
-        run: python -m unittest discover -s tests -v
+        id: regression
+        shell: bash
+        run: |
+          set +e
+          python -m unittest discover -s tests -v > /tmp/protocol-regression.log 2>&1
+          code=$?
+          cat /tmp/protocol-regression.log
+          echo "exit_code=$code" >> "$GITHUB_OUTPUT"
+          exit 0
+      - name: Persist failing regression evidence
+        if: steps.regression.outputs.exit_code != '0'
+        shell: bash
+        run: |
+          mkdir -p qualification/ssdp65/evidence
+          cp /tmp/protocol-regression.log qualification/ssdp65/evidence/LATEST-IMPLEMENTATION-REGRESSION.txt
+          git add qualification/ssdp65/evidence/LATEST-IMPLEMENTATION-REGRESSION.txt
+          if ! git diff --cached --quiet; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git commit -m "Record Protocol 6.5 implementation regression evidence"
+            git push origin HEAD:ssdp-6.5-frontier-model-re-evaluation
+          fi
+          exit 1
       - name: Validate generated packages
         run: python source/validate_packages.py --dist dist
       - name: Verify fresh distribution parity
