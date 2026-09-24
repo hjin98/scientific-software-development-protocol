@@ -3,7 +3,7 @@ kind: implementation-workplan
 workplan_id: SSDP-6.5-D3-D4-IMPLEMENTATION-HANDOFF
 protocol_version: 6.4.0
 target_protocol_version: 6.5.0
-status: repair-complete-p7-frozen
+status: reopened-p7-review-no-pass
 parent_workplan: workplans/active/SSDP-6.5-FRONTIER-MODEL-RE-EVALUATION.md
 design_authority: qualification/ssdp65/PHASE-IV-V-DESIGN-CLOSURE.md
 baseline: 55c085261eb827e3047637d045a8e6917ea6b962
@@ -577,3 +577,48 @@ P7 must receive fresh independent assembled-candidate Review before any stakehol
 P7 `133c747a1f9ab4372c9e1af7a7e9666316dc892b` remains immutable. Binding descendant `a0ee73af1b2d6af1cdd42533ca007e8a99073ef9` passed normal workflow run `36059112506` with Review `NOT_RUN` and no ratification/publication/recovery advancement.
 
 Implementation repair is mechanically closed. The next stage is fresh independent assembled-candidate Review of P7.
+
+
+## 25. P7 independent Review repair delta — 2026-09-24
+
+Fresh independent assembled-candidate Review of exact P7 `133c747a1f9ab4372c9e1af7a7e9666316dc892b` issued **NO-PASS** with no Serious Challenge. Accepted P65 D3 remains closed.
+
+Governing Review:
+
+`qualification/ssdp65/INDEPENDENT-REVIEW-2026-09-24-PROTOCOL-6.5-P7-NO-PASS.md`
+
+### B65-P7-1 — release-state transition and recovery lineage are under-enforced
+
+The existing D4 release-state validator proves snapshot coherence but does not generically prove the accepted temporal transaction.
+
+Repair only the existing release-state owner/validator and focused consumers:
+
+1. validate release-state transitions against the immediately prior governed state when the root state changes;
+2. preserve all prior historical mappings unchanged unless an explicitly authorized correction exists;
+3. when accepted-current advances, require the previously accepted mapping to move unchanged into historical;
+4. when candidate recovery becomes available, require a genuine later recovery target that:
+   - is distinct from semantic/public fallback;
+   - descends from the semantic candidate;
+   - already contains the same exact candidate subject, Review PASS evidence, RATIFIED evidence, and public fallback mapping required by the accepted release sequence;
+5. keep accepted-current cutover illegal until those temporal predicates hold;
+6. keep patch/minor/major and multi-digit future progression generic.
+
+Mandatory fresh negatives include:
+
+- exact P7 public fallback with stale P6 as the alleged 6.5 recovery target;
+- a same-version recovery commit that lacks P7 Review/ratification/publication state;
+- terminal 6.5 cutover omitting historical 6.4;
+- terminal cutover mutating the 6.4 public or recovery mapping;
+- deletion or rewrite of an already historical mapping.
+
+Mandatory positives include:
+
+- a later recovery descendant containing the complete reviewed/ratified/published lifecycle state;
+- legal 6.4 -> 6.5 cutover preserving exact 6.4 historical identity;
+- equivalent future 6.5 -> 6.6 and patch/major controls.
+
+Do not add a transition registry, second state file, state mirror, compatibility subsystem, candidate-specific table, semantic prose parser, or synchronized phase table. Reuse the existing release-state owner and its existing Git/ref boundary.
+
+P7 remains immutable and failed Review. Any semantic repair creates a new candidate identity and requires affected exact-candidate qualification, freeze/binding, and another fresh independent assembled-candidate Review.
+
+No stakeholder ratification, public-fallback publication, recovery establishment, accepted-current cutover, PR merge, or Protocol 7 D3/D4 mutation is authorized.

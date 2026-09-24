@@ -1,7 +1,7 @@
 ---
 kind: independent-review-handoff
 protocol_under_review: 6.5.0
-status: ready-p7
+status: p7-no-pass-repair-required
 accepted_control_p0: 55c085261eb827e3047637d045a8e6917ea6b962
 failed_candidate_p1: b565e28aeacea002cefe27e6b9594fe99d653c0a
 failed_candidate_p2: e8edb353e172aef933ed5e58eeabe897d0cc98d1
@@ -19,6 +19,8 @@ p7_binding_qualification: qualification/ssdp65/P7-BINDING-QUALIFICATION.md
 p6_review: qualification/ssdp65/INDEPENDENT-REVIEW-2026-09-24-PROTOCOL-6.5-P6-NO-PASS.md
 p7_repair_qualification: qualification/ssdp65/P7-REPAIR-QUALIFICATION.md
 authoring_context_verdict: none
+p7_review: qualification/ssdp65/INDEPENDENT-REVIEW-2026-09-24-PROTOCOL-6.5-P7-NO-PASS.md
+p7_review_status: NO_PASS
 stakeholder_ratification: NOT_REQUESTED
 ---
 
@@ -99,3 +101,12 @@ Expected entering Review:
 PASS means only technical eligibility for stakeholder ratification. It does not ratify, publish, establish recovery, cut over accepted-current, merge PR #33, or mutate Protocol 7.
 
 This repair/authoring context is not eligible to self-issue the independent P7 Review verdict.
+
+
+## P7 Review result
+
+Fresh independent assembled-candidate Review of exact P7 issued **NO-PASS**.
+
+The P6 repair families are independently closed. The surviving blocker is B65-P7-1: the sole release-state owner validates snapshot coherence but does not yet enforce generic transition continuity and later recovery lineage.
+
+Use the durable Review and reopened workplan for the next repair. P7 remains immutable. Any semantic repair must freeze a new candidate identity and return to fresh independent Review.

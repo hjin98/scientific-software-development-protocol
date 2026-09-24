@@ -5,7 +5,7 @@ protocol_version: 6.4.0
 target_protocol_version: 6.5.0
 subject_baseline: P0 = Protocol 6.4 at 55c085261eb827e3047637d045a8e6917ea6b962 (recovery 74bc572ef516cae417437a2027eeff52a2e25c15)
 diagnostic_commit: 81375d8142a8130b80cd82f2304d3e16bc3fc390
-status: active-p7-review-ready
+status: reopened-p7-review-no-pass
 current_phase: PHASE VII P7 FROZEN / FRESH INDEPENDENT REVIEW REQUIRED
 branch: ssdp-6.5-frontier-model-re-evaluation
 created_date: 2026-09-24
@@ -863,3 +863,20 @@ Lifecycle descendant `a0ee73af1b2d6af1cdd42533ca007e8a99073ef9` binds exact P7 `
 Normal workflow run `36059112506` passed the complete build and Orchestrator Core jobs. This is lifecycle/mechanical evidence only.
 
 The next authorized step is a genuinely fresh independent assembled-candidate Review of exact P7. No stakeholder ratification, publication, recovery, accepted-current cutover, PR merge, or Protocol 7 D3/D4 mutation is authorized.
+
+
+## 32. P7 independent Review NO-PASS — transition-lineage repair
+
+Fresh independent Review of immutable P7 `133c747a1f9ab4372c9e1af7a7e9666316dc892b` found the P6 parser/version blocker families closed but identified one fresh D4 sibling blocker:
+
+**B65-P7-1 — snapshot-valid release state does not enforce the accepted temporal transition/recovery-lineage contract.**
+
+The root owner can currently admit a same-version recovery SHA that predates the reviewed candidate and therefore cannot contain candidate + Review + stakeholder-ratification + public-fallback lineage. The same missing transition relation also permits accepted-current advancement without generically proving that the previous accepted mapping moved unchanged into historical, and permits silent rewrite/deletion of already historical mappings unless a release-specific test happens to pin them.
+
+Repair at the existing `source/release_state.py` transaction owner only. The exact repair contract is in the D3->D4 handoff §25 and the durable P7 Review:
+
+`qualification/ssdp65/INDEPENDENT-REVIEW-2026-09-24-PROTOCOL-6.5-P7-NO-PASS.md`
+
+P7 is immutable historical evidence. Exact-P7 CI remains applicable only to the properties its existing oracles discriminate. Freeze a new semantic candidate after repair and rerun the affected transition/recovery matrix, full repository build/Core, preservation checks, exact-candidate qualification, binding, and fresh independent Review.
+
+No D3 redesign, stakeholder ratification, publication, recovery establishment, accepted-current cutover, PR merge, or Protocol 7 D3/D4 mutation is authorized.
