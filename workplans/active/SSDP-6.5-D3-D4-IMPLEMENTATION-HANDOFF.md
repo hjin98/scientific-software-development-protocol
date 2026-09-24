@@ -3,7 +3,7 @@ kind: implementation-workplan
 workplan_id: SSDP-6.5-D3-D4-IMPLEMENTATION-HANDOFF
 protocol_version: 6.4.0
 target_protocol_version: 6.5.0
-status: repair-implemented-replacement-candidate-pending
+status: repair-complete-p6-frozen
 parent_workplan: workplans/active/SSDP-6.5-FRONTIER-MODEL-RE-EVALUATION.md
 design_authority: qualification/ssdp65/PHASE-IV-V-DESIGN-CLOSURE.md
 baseline: 55c085261eb827e3047637d045a8e6917ea6b962
@@ -512,3 +512,14 @@ Implemented by direct alteration inside the existing release-state owner:
 - focused tests exercise the actual root load boundary, a real historical-ref collision, a lower non-historical candidate, and patch/minor/major successor controls.
 
 P5 remains immutable and is now bound to its durable NO-PASS evidence in mutable lifecycle state. The replacement semantic candidate is the implementation commit containing these changes; its exact SHA must be frozen and qualified from a later descendant before fresh independent Review.
+
+
+## 20. P6 D4 repair closure
+
+B65-P5-1 and B65-P5-2 are implemented at their existing D4 owner.
+
+Exact P6 is `dd06da8136416e67644586c44880b466f982b8ff`; normal repository qualification run `36051369390` passed both build and Orchestrator Core jobs.
+
+A later descendant binds P6 with Review reset to `NOT_RUN` and no ratification/publication/recovery advancement.
+
+D3 remains closed. P6 must now receive a fresh independent assembled-candidate Review before stakeholder ratification or publication.

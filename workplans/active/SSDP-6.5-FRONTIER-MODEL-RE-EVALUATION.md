@@ -5,8 +5,8 @@ protocol_version: 6.4.0
 target_protocol_version: 6.5.0
 subject_baseline: P0 = Protocol 6.4 at 55c085261eb827e3047637d045a8e6917ea6b962 (recovery 74bc572ef516cae417437a2027eeff52a2e25c15)
 diagnostic_commit: 81375d8142a8130b80cd82f2304d3e16bc3fc390
-status: active-p5-review-repair-implemented
-current_phase: PHASE VI P5 REVIEW REPAIR IMPLEMENTED / REPLACEMENT CANDIDATE FREEZE
+status: active-p6-review-ready
+current_phase: PHASE VII P6 FROZEN / FRESH INDEPENDENT REVIEW REQUIRED
 branch: ssdp-6.5-frontier-model-re-evaluation
 created_date: 2026-09-24
 adjudication: qualification/ssdp65/CROSS-MODEL-ADJUDICATION-2026-09-24.md
@@ -785,3 +785,18 @@ Focused tests include:
 No state mirror, candidate registry, synchronized phase table, compatibility subsystem, semantic parser, new dependency, or D3 change was introduced.
 
 This implementation commit also records the already-issued P5 NO-PASS in the sole mutable release-state owner. P5 remains immutable. The exact replacement candidate identity is this implementation commit and must be named/bound only from a later descendant after exact-candidate qualification.
+
+
+## 27. P6 repair closure and fresh-Review handoff
+
+B65-P5-1 and B65-P5-2 are repaired at the existing D4 release-state owner without reopening D3.
+
+Immutable replacement candidate:
+
+`P6 = dd06da8136416e67644586c44880b466f982b8ff`
+
+Exact-P6 normal PR workflow run `36051369390` passed the complete build and Orchestrator Core jobs.
+
+This descendant binds P6 in the sole mutable release-state owner with Review `NOT_RUN`, ratification `NOT_REQUESTED`, public fallback `UNAVAILABLE`, recovery `UNAVAILABLE`, and accepted-current Protocol 6.4.
+
+The next authorized step is a genuinely fresh independent assembled-candidate Review of exact P6. P1-P5 remain immutable failed candidates and historical evidence only.
