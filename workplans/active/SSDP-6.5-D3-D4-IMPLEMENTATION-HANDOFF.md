@@ -3,7 +3,7 @@ kind: implementation-workplan
 workplan_id: SSDP-6.5-D3-D4-IMPLEMENTATION-HANDOFF
 protocol_version: 6.4.0
 target_protocol_version: 6.5.0
-status: reopened-p6-review-repair-required
+status: repair-complete-p7-frozen
 parent_workplan: workplans/active/SSDP-6.5-FRONTIER-MODEL-RE-EVALUATION.md
 design_authority: qualification/ssdp65/PHASE-IV-V-DESIGN-CLOSURE.md
 baseline: 55c085261eb827e3047637d045a8e6917ea6b962
@@ -557,3 +557,16 @@ Alter the existing validator only:
 No D3 redesign, registry, mirror, wrapper, compatibility subsystem, candidate-specific table, semantic parser, or synchronized phase table is authorized.
 
 Freeze a new immutable candidate after repair; rerun affected exact-candidate qualification and fresh independent Review.
+
+
+## 23. P7 D4 repair closure
+
+B65-P6-1 and B65-P6-2 are implemented by direct alteration/rewiring at existing D4 owners.
+
+- Root release-state consumers route through existing strict `release_state.load()`; no second parser/wrapper was introduced.
+- Version identity is canonical ASCII x.y.z; history is strictly older than accepted-current; candidate/history disjointness and ordering remain generic.
+- Focused qualification covers real-ref future-history rejection, canonical-spelling negatives, `6.10.0`, patch/minor/major successors, terminal equality, and post-cutover successors.
+- Exact P7 `133c747a1f9ab4372c9e1af7a7e9666316dc892b` passed normal workflow run `36058860629` across full build and Orchestrator Core.
+- D3 remains closed; no registry, mirror, compatibility subsystem, candidate-specific table, semantic parser, or synchronized phase table was added.
+
+P7 must receive fresh independent assembled-candidate Review before any stakeholder ratification or publication.

@@ -5,8 +5,8 @@ protocol_version: 6.4.0
 target_protocol_version: 6.5.0
 subject_baseline: P0 = Protocol 6.4 at 55c085261eb827e3047637d045a8e6917ea6b962 (recovery 74bc572ef516cae417437a2027eeff52a2e25c15)
 diagnostic_commit: 81375d8142a8130b80cd82f2304d3e16bc3fc390
-status: active-p6-no-pass-repair-required
-current_phase: PHASE VI P6 REVIEW REPAIR / NEW CANDIDATE REQUIRED
+status: active-p7-review-ready
+current_phase: PHASE VII P7 FROZEN / FRESH INDEPENDENT REVIEW REQUIRED
 branch: ssdp-6.5-frontier-model-re-evaluation
 created_date: 2026-09-24
 adjudication: qualification/ssdp65/CROSS-MODEL-ADJUDICATION-2026-09-24.md
@@ -23,23 +23,15 @@ independent_review: qualification/ssdp65/INDEPENDENT-REVIEW-2026-09-24-PROTOCOL-
 
 ```text
 P0 CONTROL:                         FROZEN — 55c085261eb827e3047637d045a8e6917ea6b962
-OPUS 5.5 PHASE I-III DIAGNOSTIC:    FROZEN — 81375d8142a8130b80cd82f2304d3e16bc3fc390
-GPT-5.6 SOL HISTORICAL CROSS-CHECK: COMPLETE
-CROSS-MODEL ADJUDICATION:           COMPLETE — qualification/ssdp65/CROSS-MODEL-ADJUDICATION-2026-09-24.md
-SECOND FRONTIER DIAGNOSTIC:         WAIVED FOR THIS CYCLE; CLEAN BRANCH RESERVED FOR FUTURE REPLICATION
-SUCCESSOR DECISION:                 PROTOCOL 6.5 WARRANTED
-D1-D4 DOMAIN MODEL:                 PRESERVE
-PHASE IV PRINCIPLE EXTRACTION:      COMPLETE — qualification/ssdp65/PHASE-IV-V-DESIGN-CLOSURE.md
-PHASE V CANDIDATE DESIGN:           COMPLETE — DESIGN PASS
-PHASE VI IMPLEMENTATION:            REPAIR COMPLETE — P5 FROZEN
-P1 CANDIDATE:                       FROZEN / FAILED REVIEW — b565e28aeacea002cefe27e6b9594fe99d653c0a
-P2 CANDIDATE:                       FROZEN / FAILED REVIEW — e8edb353e172aef933ed5e58eeabe897d0cc98d1
-P2 EXACT PR QUALIFICATION:          PASS — run 35996488794\nP3 CANDIDATE:                       FROZEN — 89ccc71a7b0e9458a3e77306be2a773d4059f0f2\nP3 EXACT PR QUALIFICATION:          PASS — run 36018551068
-P4 CANDIDATE:                       FROZEN / FAILED REVIEW — 43ff4273fbdaf46b9677cffdb091b741ce754a7d
-P5 CANDIDATE:                       FROZEN — d2d672a3e814438fb618f901137f88c8698a205d
-P5 EXACT PR QUALIFICATION:          PASS — run 36047926253
-P4 EXACT PR QUALIFICATION:          PASS — run 36041360949
-PHASE VII QUALIFICATION/REVIEW:     READY FOR FRESH P5 REVIEW
+P1-P6:                              FROZEN / FAILED INDEPENDENT REVIEW
+P6 REVIEW:                          NO-PASS — qualification/ssdp65/INDEPENDENT-REVIEW-2026-09-24-PROTOCOL-6.5-P6-NO-PASS.md
+P7 CANDIDATE:                       FROZEN — 133c747a1f9ab4372c9e1af7a7e9666316dc892b
+P7 EXACT PR QUALIFICATION:          PASS — run 36058860629
+PHASE VII QUALIFICATION/REVIEW:     READY FOR FRESH P7 REVIEW
+PUBLIC 6.5 FALLBACK:                UNAVAILABLE
+6.5 RECOVERY:                       UNAVAILABLE
+6.5 RATIFICATION:                   NOT REQUESTED
+ACCEPTED CURRENT:                   Protocol 6.4
 PROTOCOL 7 D3/D4:                   OUT OF SCOPE / UNCHANGED
 ```
 
@@ -845,3 +837,20 @@ Do not add a version registry, candidate table, history mirror, synchronized pha
 P6 remains immutable. Any semantic repair creates a new candidate identity. Exact-P6 runs remain historical evidence only for their exact subjects/oracles. Replacement-candidate CI, affected state/lifecycle matrices, preservation applicability, freeze/binding, and fresh independent Review must be rerun.
 
 No stakeholder ratification, public fallback, recovery, accepted-current cutover, PR merge, or Protocol 7 D3/D4 mutation is authorized.
+
+
+## 30. B65-P6-1 / B65-P6-2 implementation closure
+
+Fresh P6 Review blockers are repaired at existing D4 owners without reopening P65 D3.
+
+### B65-P6-1
+
+All mechanical root-state consumers identified by the P6 Review now use the existing strict `release_state.load()` owner path. Exact-P7 Python census found no ordinary `yaml.safe_load` of root `PROTOCOL-RELEASE-STATE.yaml`. Alias/anchor/merge structural holdouts remain fail-safe without a second parser.
+
+### B65-P6-2
+
+The existing validator now requires canonical ASCII numeric x.y.z identities, compares semantic-version components numerically, treats candidate/history identity consistently, and requires every historical version to be strictly older than accepted-current. The real-ref future-history trajectory is rejected while `6.10.0`, patch/minor/major successors, terminal equality, and post-cutover successors remain generic.
+
+Exact replacement candidate P7 is `133c747a1f9ab4372c9e1af7a7e9666316dc892b`. Normal PR workflow run `36058860629` passed the complete build and Orchestrator Core jobs.
+
+P7 is immutable. A later descendant binds P7 with Review reset to `NOT_RUN`. Fresh independent assembled-candidate Review is required before stakeholder ratification or publication.
