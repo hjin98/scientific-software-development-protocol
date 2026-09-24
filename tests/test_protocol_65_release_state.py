@@ -915,5 +915,191 @@ semantic_ref: {"c" * 40}
         self.assertTrue(any("duplicates accepted_current.version" in error for error in errors))
 
 
+    def test_transition_preserves_accepted_and_historical_identity(self) -> None:
+        previous = copy.deepcopy(self.data)
+
+        rewritten = copy.deepcopy(previous)
+        rewritten["accepted_current"]["recovery_ref"] = "a" * 40
+        errors = release_state.validate_release_transition(previous, rewritten)
+        self.assertTrue(any("cannot rewrite accepted_current identity" in error for error in errors))
+
+        deleted = copy.deepcopy(previous)
+        deleted["historical"].pop("6.3.0")
+        errors = release_state.validate_release_transition(previous, deleted)
+        self.assertTrue(any("cannot delete historical[6.3.0]" in error for error in errors))
+
+        changed = copy.deepcopy(previous)
+        changed["historical"]["6.3.0"]["recovery_ref"] = "a" * 40
+        errors = release_state.validate_release_transition(previous, changed)
+        self.assertTrue(any("cannot rewrite historical[6.3.0]" in error for error in errors))
+
+        inserted = copy.deepcopy(previous)
+        inserted["historical"]["5.15.0"] = {
+            "public_source_ref": "NONE",
+            "recovery_ref": "a" * 40,
+        }
+        errors = release_state.validate_release_transition(previous, inserted)
+        self.assertTrue(any("cannot add historical versions" in error for error in errors))
+
+    def test_accepted_cutover_requires_exact_previous_candidate_and_history_transfer(self) -> None:
+        previous = copy.deepcopy(self.data)
+        candidate = "a" * 40
+        recovery = "b" * 40
+        previous["candidate"] = {
+            "version": "6.5.0",
+            "semantic_ref": candidate,
+            "review": {
+                "state": "PASS",
+                "evidence_ref": (
+                    "hjin98/scientific-software-development-protocol@"
+                    + "c" * 40
+                    + ":qualification/review.md"
+                ),
+            },
+            "ratification": {
+                "state": "RATIFIED",
+                "evidence_ref": (
+                    "hjin98/scientific-software-development-protocol@"
+                    + "d" * 40
+                    + ":qualification/ratification.md"
+                ),
+            },
+            "public_source_ref": candidate,
+            "recovery_ref": recovery,
+        }
+
+        current = copy.deepcopy(previous)
+        current["historical"]["6.4.0"] = copy.deepcopy(previous["accepted_current"])
+        current["accepted_current"] = {
+            "version": "6.5.0",
+            "public_source_ref": candidate,
+            "recovery_ref": recovery,
+        }
+        self.assertEqual(
+            release_state.validate_release_transition(previous, current),
+            [],
+        )
+
+        missing_history = copy.deepcopy(current)
+        missing_history["historical"].pop("6.4.0")
+        errors = release_state.validate_release_transition(previous, missing_history)
+        self.assertTrue(any("add exactly the previous accepted_current version" in error for error in errors))
+        self.assertTrue(any("move the previous accepted_current mapping unchanged" in error for error in errors))
+
+        mutated_history = copy.deepcopy(current)
+        mutated_history["historical"]["6.4.0"]["recovery_ref"] = "e" * 40
+        errors = release_state.validate_release_transition(previous, mutated_history)
+        self.assertTrue(any("move the previous accepted_current mapping unchanged" in error for error in errors))
+
+        wrong_accepted = copy.deepcopy(current)
+        wrong_accepted["accepted_current"]["recovery_ref"] = "e" * 40
+        errors = release_state.validate_release_transition(previous, wrong_accepted)
+        self.assertTrue(any("must equal the previous candidate recovery" in error for error in errors))
+
+        incomplete = copy.deepcopy(previous)
+        incomplete["candidate"]["review"] = {"state": "NOT_RUN", "evidence_ref": "NONE"}
+        errors = release_state.validate_release_transition(incomplete, current)
+        self.assertTrue(any("requires previous candidate Review PASS" in error for error in errors))
+
+    def test_recovery_lineage_rejects_real_stale_p6_for_p7(self) -> None:
+        errors: list[str] = []
+        release_state._check_recovery_lineage(
+            ROOT,
+            "6.5.0",
+            "133c747a1f9ab4372c9e1af7a7e9666316dc892b",
+            "NONE",
+            "NONE",
+            "133c747a1f9ab4372c9e1af7a7e9666316dc892b",
+            "dd06da8136416e67644586c44880b466f982b8ff",
+            errors,
+        )
+        self.assertTrue(any("recovery_ref lineage" in error for error in errors))
+
+    def test_recovery_lineage_requires_complete_pre_mapping_snapshot(self) -> None:
+        candidate = "a" * 40
+        review_commit = "b" * 40
+        ratification_commit = "c" * 40
+        recovery = "d" * 40
+        review_evidence = (
+            "hjin98/scientific-software-development-protocol@"
+            + review_commit
+            + ":qualification/review.md"
+        )
+        ratification_evidence = (
+            "hjin98/scientific-software-development-protocol@"
+            + ratification_commit
+            + ":qualification/ratification.md"
+        )
+        complete_snapshot = f"""schema_version: 1
+project: hjin98/scientific-software-development-protocol
+accepted_current:
+  version: "6.4.0"
+  public_source_ref: {"e" * 40}
+  recovery_ref: {"f" * 40}
+historical: {{}}
+candidate:
+  version: "6.5.0"
+  semantic_ref: {candidate}
+  review:
+    state: PASS
+    evidence_ref: {review_evidence}
+  ratification:
+    state: RATIFIED
+    evidence_ref: {ratification_evidence}
+  public_source_ref: {candidate}
+  recovery_ref: UNAVAILABLE
+"""
+        with mock.patch.object(
+            release_state,
+            "_git",
+            side_effect=[
+                (0, ""),
+                (0, ""),
+                (0, ""),
+                (0, ""),
+                (0, ""),
+                (0, complete_snapshot),
+            ],
+        ):
+            errors: list[str] = []
+            release_state._check_recovery_lineage(
+                ROOT,
+                "6.5.0",
+                candidate,
+                review_evidence,
+                ratification_evidence,
+                candidate,
+                recovery,
+                errors,
+            )
+        self.assertEqual(errors, [])
+
+        stale_snapshot = complete_snapshot.replace("state: RATIFIED", "state: NOT_REQUESTED")
+        with mock.patch.object(
+            release_state,
+            "_git",
+            side_effect=[
+                (0, ""),
+                (0, ""),
+                (0, ""),
+                (0, ""),
+                (0, ""),
+                (0, stale_snapshot),
+            ],
+        ):
+            errors = []
+            release_state._check_recovery_lineage(
+                ROOT,
+                "6.5.0",
+                candidate,
+                review_evidence,
+                ratification_evidence,
+                candidate,
+                recovery,
+                errors,
+            )
+        self.assertTrue(any("later immutable target" in error for error in errors))
+
+
 if __name__ == "__main__":
     unittest.main()

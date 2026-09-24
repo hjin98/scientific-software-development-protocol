@@ -47,6 +47,10 @@ _UniqueKeySafeLoader.add_constructor(
 )
 
 
+def _load_yaml_text(text: str) -> Any:
+    return yaml.load(text, Loader=_UniqueKeySafeLoader)
+
+
 def _mapping(value: Any, where: str, errors: list[str]) -> dict[str, Any]:
     if not isinstance(value, dict):
         errors.append(f"{where} must be a mapping")
@@ -98,7 +102,7 @@ def _front_matter(text: str, where: str, errors: list[str]) -> dict[str, Any]:
         errors.append(f"{where} YAML front matter is unterminated")
         return {}
     try:
-        data = yaml.load("\n".join(lines[1:end]), Loader=_UniqueKeySafeLoader)
+        data = _load_yaml_text("\n".join(lines[1:end]))
     except yaml.YAMLError as exc:
         errors.append(f"{where} YAML front matter is invalid: {exc}")
         return {}
@@ -285,6 +289,298 @@ def _check_version_ref(root: Path, version: str, ref: str, where: str, errors: l
         errors.append(f"{where} maps {version} to commit declaring {declared.strip()!r}")
 
 
+def _evidence_commit(value: str) -> str | None:
+    match = EVIDENCE_RE.fullmatch(value)
+    return None if match is None else match.group("sha")
+
+
+def _check_ancestor(
+    root: Path,
+    ancestor: str,
+    descendant: str,
+    where: str,
+    errors: list[str],
+) -> None:
+    if not SHA_RE.fullmatch(ancestor):
+        return
+    code, _ = _git(root, "merge-base", "--is-ancestor", ancestor, descendant)
+    if code:
+        errors.append(f"{where} requires {descendant} to descend from {ancestor}")
+
+
+def _check_recovery_lineage(
+    root: Path,
+    candidate_version: str,
+    semantic_ref: str,
+    review_evidence: str,
+    ratification_evidence: str,
+    public_ref: str,
+    recovery_ref: str,
+    errors: list[str],
+) -> None:
+    if not (
+        SHA_RE.fullmatch(semantic_ref)
+        and SHA_RE.fullmatch(public_ref)
+        and SHA_RE.fullmatch(recovery_ref)
+    ):
+        return
+
+    review_commit = _evidence_commit(review_evidence)
+    ratification_commit = _evidence_commit(ratification_evidence)
+
+    _check_ancestor(
+        root,
+        semantic_ref,
+        recovery_ref,
+        "candidate.recovery_ref lineage",
+        errors,
+    )
+    if review_commit is not None:
+        _check_ancestor(
+            root,
+            semantic_ref,
+            review_commit,
+            "candidate.review evidence lineage",
+            errors,
+        )
+        _check_ancestor(
+            root,
+            review_commit,
+            recovery_ref,
+            "candidate.recovery_ref Review lineage",
+            errors,
+        )
+    if review_commit is not None and ratification_commit is not None:
+        _check_ancestor(
+            root,
+            review_commit,
+            ratification_commit,
+            "candidate.ratification evidence lineage",
+            errors,
+        )
+    if ratification_commit is not None:
+        _check_ancestor(
+            root,
+            ratification_commit,
+            recovery_ref,
+            "candidate.recovery_ref ratification lineage",
+            errors,
+        )
+    _check_ancestor(
+        root,
+        recovery_ref,
+        "HEAD",
+        "candidate.recovery_ref publication lineage",
+        errors,
+    )
+
+    code, content = _git(root, "show", f"{recovery_ref}:PROTOCOL-RELEASE-STATE.yaml")
+    if code:
+        errors.append(
+            f"candidate.recovery_ref commit {recovery_ref} has no readable PROTOCOL-RELEASE-STATE.yaml"
+        )
+        return
+    try:
+        recovery_data = _load_yaml_text(content)
+    except yaml.YAMLError as exc:
+        errors.append(
+            f"candidate.recovery_ref commit {recovery_ref} has invalid release state: {exc}"
+        )
+        return
+
+    recovery_root = _mapping(
+        recovery_data,
+        "candidate.recovery_ref release state",
+        errors,
+    )
+    recovery_candidate = _mapping(
+        recovery_root.get("candidate"),
+        "candidate.recovery_ref release state candidate",
+        errors,
+    )
+
+    expected_review = {"state": "PASS", "evidence_ref": review_evidence}
+    expected_ratification = {
+        "state": "RATIFIED",
+        "evidence_ref": ratification_evidence,
+    }
+    expected = {
+        "version": candidate_version,
+        "semantic_ref": semantic_ref,
+        "review": expected_review,
+        "ratification": expected_ratification,
+        "public_source_ref": public_ref,
+        "recovery_ref": "UNAVAILABLE",
+    }
+    if recovery_candidate != expected:
+        errors.append(
+            "candidate.recovery_ref must identify a later immutable target whose release state "
+            "already contains the exact candidate, Review PASS, RATIFIED evidence, and published "
+            "public fallback, with recovery still UNAVAILABLE before descendant mapping publication"
+        )
+
+
+def validate_release_transition(previous: Any, current: Any) -> list[str]:
+    errors: list[str] = []
+    previous_root = _mapping(previous, "previous release state", errors)
+    current_root = _mapping(current, "current release state", errors)
+
+    if previous_root.get("project") != current_root.get("project"):
+        errors.append("release-state transition cannot change project identity")
+    if previous_root.get("schema_version") != current_root.get("schema_version"):
+        errors.append("release-state transition cannot change schema_version without explicit migration authority")
+
+    previous_historical = _mapping(
+        previous_root.get("historical"),
+        "previous historical",
+        errors,
+    )
+    current_historical = _mapping(
+        current_root.get("historical"),
+        "current historical",
+        errors,
+    )
+    for version, record in previous_historical.items():
+        if version not in current_historical:
+            errors.append(
+                f"release-state transition cannot delete historical[{version}]"
+            )
+        elif current_historical[version] != record:
+            errors.append(
+                f"release-state transition cannot rewrite historical[{version}]"
+            )
+
+    previous_accepted = _mapping(
+        previous_root.get("accepted_current"),
+        "previous accepted_current",
+        errors,
+    )
+    current_accepted = _mapping(
+        current_root.get("accepted_current"),
+        "current accepted_current",
+        errors,
+    )
+    previous_version = str(previous_accepted.get("version") or "")
+    current_version = str(current_accepted.get("version") or "")
+
+    if previous_version == current_version:
+        if current_accepted != previous_accepted:
+            errors.append(
+                "release-state transition cannot rewrite accepted_current identity without a version advance"
+            )
+        added_history = sorted(set(current_historical) - set(previous_historical))
+        if added_history:
+            errors.append(
+                "release-state transition cannot add historical versions without accepted_current advancement: "
+                + ", ".join(added_history)
+            )
+        return errors
+
+    if SEMVER_RE.fullmatch(previous_version) and SEMVER_RE.fullmatch(current_version):
+        if _semver_tuple(current_version) <= _semver_tuple(previous_version):
+            errors.append("accepted_current.version must advance monotonically")
+
+    expected_history = set(previous_historical) | {previous_version}
+    if set(current_historical) != expected_history:
+        errors.append(
+            "accepted_current advancement must preserve prior history and add exactly the previous accepted_current version"
+        )
+    if current_historical.get(previous_version) != previous_accepted:
+        errors.append(
+            "accepted_current advancement must move the previous accepted_current mapping unchanged into historical"
+        )
+
+    previous_candidate = _mapping(
+        previous_root.get("candidate"),
+        "previous candidate",
+        errors,
+    )
+    previous_review = _mapping(
+        previous_candidate.get("review"),
+        "previous candidate.review",
+        errors,
+    )
+    previous_ratification = _mapping(
+        previous_candidate.get("ratification"),
+        "previous candidate.ratification",
+        errors,
+    )
+    previous_public = str(previous_candidate.get("public_source_ref") or "")
+    previous_recovery = str(previous_candidate.get("recovery_ref") or "")
+
+    if str(previous_candidate.get("version") or "") != current_version:
+        errors.append(
+            "accepted_current advancement must promote the immediately previous candidate.version"
+        )
+    if previous_review.get("state") != "PASS":
+        errors.append("accepted_current advancement requires previous candidate Review PASS")
+    if previous_ratification.get("state") != "RATIFIED":
+        errors.append("accepted_current advancement requires previous candidate RATIFIED state")
+    if not SHA_RE.fullmatch(previous_public):
+        errors.append("accepted_current advancement requires previous candidate public fallback")
+    if not SHA_RE.fullmatch(previous_recovery):
+        errors.append("accepted_current advancement requires previous candidate recovery")
+    if current_accepted.get("public_source_ref") != previous_public:
+        errors.append(
+            "accepted_current.public_source_ref must equal the previous candidate public fallback"
+        )
+    if current_accepted.get("recovery_ref") != previous_recovery:
+        errors.append(
+            "accepted_current.recovery_ref must equal the previous candidate recovery"
+        )
+
+    return errors
+
+
+def _previous_governed_release_state(
+    root: Path,
+    current: Any,
+    errors: list[str],
+) -> Any | None:
+    code, output = _git(
+        root,
+        "log",
+        "-2",
+        "--format=%H",
+        "--",
+        "PROTOCOL-RELEASE-STATE.yaml",
+    )
+    if code:
+        errors.append("cannot resolve release-state transition history")
+        return None
+    commits = [line.strip() for line in output.splitlines() if line.strip()]
+    if not commits:
+        return None
+
+    def read_state(commit: str) -> Any | None:
+        show_code, content = _git(
+            root,
+            "show",
+            f"{commit}:PROTOCOL-RELEASE-STATE.yaml",
+        )
+        if show_code:
+            errors.append(
+                f"cannot read PROTOCOL-RELEASE-STATE.yaml at transition commit {commit}"
+            )
+            return None
+        try:
+            return _load_yaml_text(content)
+        except yaml.YAMLError as exc:
+            errors.append(
+                f"PROTOCOL-RELEASE-STATE.yaml at transition commit {commit} is invalid: {exc}"
+            )
+            return None
+
+    latest = read_state(commits[0])
+    if latest is None:
+        return None
+    if latest != current:
+        return latest
+    if len(commits) < 2:
+        return None
+    return read_state(commits[1])
+
+
 def validate_release_state(data: Any, *, repo_root: Path | None = None) -> list[str]:
     errors: list[str] = []
     root = _mapping(data, "release state", errors)
@@ -446,11 +742,64 @@ def validate_release_state(data: Any, *, repo_root: Path | None = None) -> list[
         if recovery_ref != "UNAVAILABLE":
             _check_version_ref(repo_root, candidate_version, recovery_ref, "candidate.recovery_ref", errors)
 
+        review_commit = _evidence_commit(review_evidence)
+        ratification_commit = _evidence_commit(ratification_evidence)
+        if review_commit is not None and SHA_RE.fullmatch(semantic_ref):
+            _check_ancestor(
+                repo_root,
+                semantic_ref,
+                review_commit,
+                "candidate.review evidence lineage",
+                errors,
+            )
+            _check_ancestor(
+                repo_root,
+                review_commit,
+                "HEAD",
+                "candidate.review evidence publication",
+                errors,
+            )
+        if review_commit is not None and ratification_commit is not None:
+            _check_ancestor(
+                repo_root,
+                review_commit,
+                ratification_commit,
+                "candidate.ratification evidence lineage",
+                errors,
+            )
+        if ratification_commit is not None:
+            _check_ancestor(
+                repo_root,
+                ratification_commit,
+                "HEAD",
+                "candidate.ratification evidence publication",
+                errors,
+            )
+        if public_ref != "UNAVAILABLE" and SHA_RE.fullmatch(semantic_ref):
+            _check_ancestor(
+                repo_root,
+                semantic_ref,
+                "HEAD",
+                "candidate.public_source_ref publication",
+                errors,
+            )
+        if recovery_ref != "UNAVAILABLE":
+            _check_recovery_lineage(
+                repo_root,
+                candidate_version,
+                semantic_ref,
+                review_evidence,
+                ratification_evidence,
+                public_ref,
+                recovery_ref,
+                errors,
+            )
+
     return errors
 
 
 def load(path: Path) -> Any:
-    return yaml.load(path.read_text(encoding="utf-8"), Loader=_UniqueKeySafeLoader)
+    return _load_yaml_text(path.read_text(encoding="utf-8"))
 
 
 def main() -> int:
@@ -465,6 +814,12 @@ def main() -> int:
         print(f"{path}: {exc}")
         return 1
     errors = validate_release_state(data, repo_root=None if args.no_git else ROOT)
+    if not args.no_git and path == DEFAULT_PATH.resolve():
+        transition_errors: list[str] = []
+        previous = _previous_governed_release_state(ROOT, data, transition_errors)
+        errors.extend(transition_errors)
+        if previous is not None:
+            errors.extend(validate_release_transition(previous, data))
     if errors:
         for error in errors:
             print(error)

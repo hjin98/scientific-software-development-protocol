@@ -3,7 +3,7 @@ kind: implementation-workplan
 workplan_id: SSDP-6.5-D3-D4-IMPLEMENTATION-HANDOFF
 protocol_version: 6.4.0
 target_protocol_version: 6.5.0
-status: reopened-p7-review-no-pass
+status: repair-implemented-p8-pending-qualification
 parent_workplan: workplans/active/SSDP-6.5-FRONTIER-MODEL-RE-EVALUATION.md
 design_authority: qualification/ssdp65/PHASE-IV-V-DESIGN-CLOSURE.md
 baseline: 55c085261eb827e3047637d045a8e6917ea6b962
@@ -622,3 +622,33 @@ Do not add a transition registry, second state file, state mirror, compatibility
 P7 remains immutable and failed Review. Any semantic repair creates a new candidate identity and requires affected exact-candidate qualification, freeze/binding, and another fresh independent assembled-candidate Review.
 
 No stakeholder ratification, public-fallback publication, recovery establishment, accepted-current cutover, PR merge, or Protocol 7 D3/D4 mutation is authorized.
+
+
+## 26. B65-P7-1 D4 repair implementation
+
+B65-P7-1 is repaired by direct strengthening of the existing `source/release_state.py` transaction owner. Accepted P65 D3 remains closed.
+
+The owner now enforces two relations in addition to snapshot coherence:
+
+1. **release-state transition continuity**
+   - accepted-current identity cannot be rewritten while its version is unchanged;
+   - existing historical mappings cannot be deleted or rewritten;
+   - history cannot grow unless accepted-current advances;
+   - accepted-current advancement must promote the immediately previous fully closed candidate;
+   - the previous accepted-current mapping must move unchanged into history;
+   - no unrelated historical insertion is admitted during cutover.
+
+2. **recovery lineage**
+   - recovery must descend from the semantic candidate;
+   - Review evidence must descend from the semantic candidate;
+   - ratification evidence must follow Review evidence;
+   - recovery must follow the Review/ratification lineage and be an ancestor of the mapping-publishing state;
+   - the recovery target's own root release state must already contain the exact candidate, PASS evidence, RATIFIED evidence, and exact public fallback while its own recovery field is still UNAVAILABLE.
+
+Transition validation resolves the prior governed state from the repository history of the sole root state file, so PR merge-checkout shape does not create a second transition authority.
+
+Focused tests include the exact stale P6-as-P7-recovery holdout, accepted-current cutover without 6.4 history transfer, mutated historical identity, accepted-current identity rewrite, and a positive complete recovery snapshot.
+
+No second release-state file, registry, mirror, transition service, compatibility subsystem, semantic prose parser, candidate-specific table, or synchronized phase table was introduced.
+
+The semantic replacement candidate is the implementation commit containing this repair. Its exact SHA must be frozen only after exact-candidate normal CI passes. P7 remains immutable and failed Review.

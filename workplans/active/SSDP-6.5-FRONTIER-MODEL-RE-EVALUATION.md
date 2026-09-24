@@ -5,7 +5,7 @@ protocol_version: 6.4.0
 target_protocol_version: 6.5.0
 subject_baseline: P0 = Protocol 6.4 at 55c085261eb827e3047637d045a8e6917ea6b962 (recovery 74bc572ef516cae417437a2027eeff52a2e25c15)
 diagnostic_commit: 81375d8142a8130b80cd82f2304d3e16bc3fc390
-status: reopened-p7-review-no-pass
+status: repair-implemented-p8-pending-qualification
 current_phase: PHASE VII P7 FROZEN / FRESH INDEPENDENT REVIEW REQUIRED
 branch: ssdp-6.5-frontier-model-re-evaluation
 created_date: 2026-09-24
@@ -880,3 +880,23 @@ Repair at the existing `source/release_state.py` transaction owner only. The exa
 P7 is immutable historical evidence. Exact-P7 CI remains applicable only to the properties its existing oracles discriminate. Freeze a new semantic candidate after repair and rerun the affected transition/recovery matrix, full repository build/Core, preservation checks, exact-candidate qualification, binding, and fresh independent Review.
 
 No D3 redesign, stakeholder ratification, publication, recovery establishment, accepted-current cutover, PR merge, or Protocol 7 D3/D4 mutation is authorized.
+
+
+## 33. B65-P7-1 implementation closure
+
+The P7 Review blocker is implemented at the existing D4 release-state transaction owner without D3 redesign.
+
+The repair changes the owner from snapshot-only validation to snapshot + transition/lineage validation. It preserves historical identities across state transitions, requires accepted-current cutover to promote the immediately previous completed candidate, and requires recovery to be a genuine later lineage target containing the exact reviewed/ratified/published candidate state before its mapping is published from a descendant.
+
+Fresh focused qualification includes:
+
+- stale real P6 used as alleged P7 recovery;
+- missing/mutated previous accepted mapping at cutover;
+- historical deletion/rewrite;
+- accepted-current same-version identity rewrite;
+- positive complete recovery-target snapshot;
+- existing canonical-version/history/succession/terminal controls.
+
+No new state authority or compatibility machinery is introduced.
+
+The implementation commit is the replacement semantic candidate pending exact-candidate normal CI. After that CI passes, freeze its exact SHA as P8 from a later descendant, bind P8 with Review reset to NOT_RUN, and rerun binding/full workflow qualification before fresh independent Review.
