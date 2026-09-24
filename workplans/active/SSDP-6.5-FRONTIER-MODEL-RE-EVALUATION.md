@@ -5,7 +5,7 @@ protocol_version: 6.4.0
 target_protocol_version: 6.5.0
 subject_baseline: P0 = Protocol 6.4 at 55c085261eb827e3047637d045a8e6917ea6b962 (recovery 74bc572ef516cae417437a2027eeff52a2e25c15)
 diagnostic_commit: 81375d8142a8130b80cd82f2304d3e16bc3fc390
-status: repair-implemented-p8-pending-qualification
+status: p8-frozen-binding-pending-qualification
 current_phase: PHASE VII P7 FROZEN / FRESH INDEPENDENT REVIEW REQUIRED
 branch: ssdp-6.5-frontier-model-re-evaluation
 created_date: 2026-09-24
@@ -900,3 +900,16 @@ Fresh focused qualification includes:
 No new state authority or compatibility machinery is introduced.
 
 The implementation commit is the replacement semantic candidate pending exact-candidate normal CI. After that CI passes, freeze its exact SHA as P8 from a later descendant, bind P8 with Review reset to NOT_RUN, and rerun binding/full workflow qualification before fresh independent Review.
+
+
+## 34. P8 freeze / binding
+
+The B65-P7-1 replacement candidate is frozen as:
+
+`P8 = ed782ccad73b43c9052ecc926177c36846b9328d`
+
+Exact-P8 normal PR workflow run `36067942018` passed the complete build and Orchestrator Core jobs.
+
+A later descendant now binds P8 with Review reset to `NOT_RUN`. Stakeholder ratification remains `NOT_REQUESTED`; public fallback and recovery remain `UNAVAILABLE`; accepted-current remains Protocol 6.4.
+
+Binding workflow qualification is required before fresh independent Review.

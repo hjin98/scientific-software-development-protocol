@@ -3,7 +3,7 @@ kind: implementation-workplan
 workplan_id: SSDP-6.5-D3-D4-IMPLEMENTATION-HANDOFF
 protocol_version: 6.4.0
 target_protocol_version: 6.5.0
-status: repair-implemented-p8-pending-qualification
+status: p8-frozen-binding-pending-qualification
 parent_workplan: workplans/active/SSDP-6.5-FRONTIER-MODEL-RE-EVALUATION.md
 design_authority: qualification/ssdp65/PHASE-IV-V-DESIGN-CLOSURE.md
 baseline: 55c085261eb827e3047637d045a8e6917ea6b962
@@ -652,3 +652,16 @@ Focused tests include the exact stale P6-as-P7-recovery holdout, accepted-curren
 No second release-state file, registry, mirror, transition service, compatibility subsystem, semantic prose parser, candidate-specific table, or synchronized phase table was introduced.
 
 The semantic replacement candidate is the implementation commit containing this repair. Its exact SHA must be frozen only after exact-candidate normal CI passes. P7 remains immutable and failed Review.
+
+
+## 27. P8 freeze and binding handoff
+
+B65-P7-1 repair passed exact-candidate normal workflow run `36067942018`.
+
+Immutable replacement candidate:
+
+`P8 = ed782ccad73b43c9052ecc926177c36846b9328d`
+
+This later descendant binds P8 in the sole mutable release-state owner with Review `NOT_RUN`, ratification `NOT_REQUESTED`, public fallback/recovery `UNAVAILABLE`, and accepted-current Protocol 6.4.
+
+The binding descendant must pass the normal workflow before a fresh independent assembled-candidate Review begins. No D3 reopening or acceptance/publication action is authorized.
