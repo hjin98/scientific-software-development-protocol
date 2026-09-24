@@ -523,3 +523,10 @@ Exact P6 is `dd06da8136416e67644586c44880b466f982b8ff`; normal repository qualif
 A later descendant binds P6 with Review reset to `NOT_RUN` and no ratification/publication/recovery advancement.
 
 D3 remains closed. P6 must now receive a fresh independent assembled-candidate Review before stakeholder ratification or publication.
+
+
+## 21. P6 binding qualification
+
+P6 `dd06da8136416e67644586c44880b466f982b8ff` remains immutable. Binding descendant `758490c11f90b587c7dfaadddab958751f2881c9` passed normal workflow run `36051619464` with Review `NOT_RUN` and no ratification/publication/recovery advancement.
+
+Implementation repair is mechanically closed. The next stage is fresh independent assembled-candidate Review of P6.

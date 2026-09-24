@@ -800,3 +800,12 @@ Exact-P6 normal PR workflow run `36051369390` passed the complete build and Orch
 This descendant binds P6 in the sole mutable release-state owner with Review `NOT_RUN`, ratification `NOT_REQUESTED`, public fallback `UNAVAILABLE`, recovery `UNAVAILABLE`, and accepted-current Protocol 6.4.
 
 The next authorized step is a genuinely fresh independent assembled-candidate Review of exact P6. P1-P5 remain immutable failed candidates and historical evidence only.
+
+
+## 28. P6 binding qualification
+
+Lifecycle descendant `758490c11f90b587c7dfaadddab958751f2881c9` binds exact P6 `dd06da8136416e67644586c44880b466f982b8ff` with Review `NOT_RUN`, ratification `NOT_REQUESTED`, public fallback/recovery `UNAVAILABLE`, and accepted-current Protocol 6.4.
+
+Normal workflow run `36051619464` passed the complete build and Orchestrator Core jobs. This is lifecycle/mechanical evidence only and does not transfer or manufacture independent Review PASS.
+
+Fresh independent assembled-candidate Review of exact P6 is now the next authorized step.

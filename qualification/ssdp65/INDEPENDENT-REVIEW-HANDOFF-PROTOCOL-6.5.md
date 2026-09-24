@@ -12,12 +12,15 @@ immutable_candidate_p6: dd06da8136416e67644586c44880b466f982b8ff
 candidate_branch: ssdp-6.5-frontier-model-re-evaluation
 draft_pr: 33
 p6_mechanical_qualification_run: 36051369390
+p6_binding_descendant: 758490c11f90b587c7dfaadddab958751f2881c9
+p6_binding_qualification_run: 36051619464
 p1_review: qualification/ssdp65/INDEPENDENT-REVIEW-2026-09-24-PROTOCOL-6.5-NO-PASS.md
 p2_review: qualification/ssdp65/INDEPENDENT-REVIEW-2026-09-24-PROTOCOL-6.5-P2-NO-PASS.md
 p3_review: qualification/ssdp65/INDEPENDENT-REVIEW-2026-09-24-PROTOCOL-6.5-P3-NO-PASS.md
 p4_review: qualification/ssdp65/INDEPENDENT-REVIEW-2026-09-24-PROTOCOL-6.5-P4-NO-PASS.md
 p5_review: qualification/ssdp65/INDEPENDENT-REVIEW-2026-09-24-PROTOCOL-6.5-P5-NO-PASS.md
 p6_repair_qualification: qualification/ssdp65/P6-REPAIR-QUALIFICATION.md
+p6_binding_qualification: qualification/ssdp65/P6-BINDING-QUALIFICATION.md
 authoring_context_verdict: none
 stakeholder_ratification: NOT_REQUESTED
 ---
