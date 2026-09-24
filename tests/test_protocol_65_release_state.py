@@ -55,7 +55,7 @@ class Protocol65ReleaseStateTests(unittest.TestCase):
             "evidence_ref": "hjin98/scientific-software-development-protocol@" + "b" * 40 + ":qualification/ratification.md",
         }
         errors = release_state.validate_release_state(data)
-        self.assertTrue(any("RATIFIED requires Review PASS" in error for error in errors))
+        self.assertTrue(any("RATIFIED" in error and "requires Review PASS" in error for error in errors))
 
     def test_public_fallback_requires_review_ratification_and_exact_candidate(self) -> None:
         data = copy.deepcopy(self.data)
