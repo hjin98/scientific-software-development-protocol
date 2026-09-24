@@ -8,6 +8,8 @@ immutable_candidate_p2: e8edb353e172aef933ed5e58eeabe897d0cc98d1
 candidate_branch: ssdp-6.5-frontier-model-re-evaluation
 draft_pr: 33
 p2_mechanical_qualification_run: 35996488794
+p2_binding_descendant: 25db78239aed6ba581df53aa225cdb0a50b402e6
+p2_binding_qualification_run: 35996817388
 p1_review: qualification/ssdp65/INDEPENDENT-REVIEW-2026-09-24-PROTOCOL-6.5-NO-PASS.md
 p2_repair_qualification: qualification/ssdp65/P2-REPAIR-QUALIFICATION.md
 authoring_context_verdict: none
@@ -100,6 +102,8 @@ Normal repository pull-request run `35996488794` evaluated exact P2 and passed:
 - Orchestrator Core.
 
 Use this only for properties those oracles discriminate.
+
+The later lifecycle descendant `25db78239aed6ba581df53aa225cdb0a50b402e6` binds P2 in `PROTOCOL-RELEASE-STATE.yaml` with Review reset to `NOT_RUN` and passed the same normal repository workflow in run `35996817388`. That is evidence that the binding representation is mechanically coherent; it does not alter P2.
 
 Intermediate repair commits failed before the final repair converged. Preserve those failures as development evidence; do not rewrite them as passes.
 
