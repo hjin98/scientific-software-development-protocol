@@ -5,8 +5,8 @@ protocol_version: 6.4.0
 target_protocol_version: 6.5.0
 subject_baseline: P0 = Protocol 6.4 at 55c085261eb827e3047637d045a8e6917ea6b962 (recovery 74bc572ef516cae417437a2027eeff52a2e25c15)
 diagnostic_commit: 81375d8142a8130b80cd82f2304d3e16bc3fc390
-status: p4-repair-implemented-replacement-freeze-pending
-current_phase: PHASE VI P4 REPAIR IMPLEMENTED / REPLACEMENT CANDIDATE FREEZE AND QUALIFICATION PENDING
+status: active-p5-review-ready
+current_phase: PHASE VII P5 FROZEN / FRESH INDEPENDENT REVIEW REQUIRED
 branch: ssdp-6.5-frontier-model-re-evaluation
 created_date: 2026-09-24
 adjudication: qualification/ssdp65/CROSS-MODEL-ADJUDICATION-2026-09-24.md
@@ -31,13 +31,15 @@ SUCCESSOR DECISION:                 PROTOCOL 6.5 WARRANTED
 D1-D4 DOMAIN MODEL:                 PRESERVE
 PHASE IV PRINCIPLE EXTRACTION:      COMPLETE — qualification/ssdp65/PHASE-IV-V-DESIGN-CLOSURE.md
 PHASE V CANDIDATE DESIGN:           COMPLETE — DESIGN PASS
-PHASE VI IMPLEMENTATION:            REOPENED — P4 REVIEW NO-PASS; D4 REPAIR REQUIRED
+PHASE VI IMPLEMENTATION:            REPAIR COMPLETE — P5 FROZEN
 P1 CANDIDATE:                       FROZEN / FAILED REVIEW — b565e28aeacea002cefe27e6b9594fe99d653c0a
 P2 CANDIDATE:                       FROZEN / FAILED REVIEW — e8edb353e172aef933ed5e58eeabe897d0cc98d1
 P2 EXACT PR QUALIFICATION:          PASS — run 35996488794\nP3 CANDIDATE:                       FROZEN — 89ccc71a7b0e9458a3e77306be2a773d4059f0f2\nP3 EXACT PR QUALIFICATION:          PASS — run 36018551068
 P4 CANDIDATE:                       FROZEN / FAILED REVIEW — 43ff4273fbdaf46b9677cffdb091b741ce754a7d
+P5 CANDIDATE:                       FROZEN — d2d672a3e814438fb618f901137f88c8698a205d
+P5 EXACT PR QUALIFICATION:          PASS — run 36047926253
 P4 EXACT PR QUALIFICATION:          PASS — run 36041360949
-PHASE VII QUALIFICATION/REVIEW:     P4 NO-PASS — B65-P4-1; NEW CANDIDATE REQUIRED
+PHASE VII QUALIFICATION/REVIEW:     READY FOR FRESH P5 REVIEW
 PROTOCOL 7 D3/D4:                   OUT OF SCOPE / UNCHANGED
 ```
 
@@ -691,3 +693,27 @@ The P4 Review blocker is implemented at the existing D4 release-state evidence o
 Focused tests add duplicate candidate/status keys, empty/null/malformed explicit subjects, empty higher-generation legacy metadata, and future p5 coverage for Review and ratification.
 
 This commit also binds the already-completed P4 NO-PASS Review in the sole mutable release-state owner. It does not bind the replacement candidate to itself. The exact replacement candidate identity must be taken from this immutable commit and published only from a later descendant after exact-candidate qualification.
+
+
+## 24. P5 repair closure and fresh-Review handoff
+
+B65-P4-1 is repaired at the existing D4 release-state evidence owner without reopening D3.
+
+- duplicate YAML mapping keys reject before candidate/disposition binding;
+- explicit candidate subject fields are governed by key presence, not truthiness;
+- present explicit subjects must be exact lowercase 40-hex commit identities and must agree;
+- invalid/empty/null explicit subjects cannot fall back to legacy metadata;
+- highest present legacy pN generation remains generic and future-compatible, but an invalid/empty highest generation rejects rather than borrowing a lower historical subject;
+- Review and terminal ratification still share one binder;
+- arbitrary prose remains outside machine semantic judgment;
+- no registry, mirror, compatibility subsystem, candidate-specific table, or semantic prose parser was introduced.
+
+Immutable replacement candidate:
+
+P5 = d2d672a3e814438fb618f901137f88c8698a205d
+
+Exact-P5 normal PR workflow run 36047926253 passed the complete build and Orchestrator Core jobs.
+
+This later descendant binds P5 in the sole mutable release-state owner with Review NOT_RUN, ratification NOT_REQUESTED, public fallback UNAVAILABLE, recovery UNAVAILABLE, and accepted-current Protocol 6.4.
+
+The next authorized step is a genuinely fresh independent assembled-candidate Review of P5. P1-P4 remain immutable failed candidates and historical evidence only.
