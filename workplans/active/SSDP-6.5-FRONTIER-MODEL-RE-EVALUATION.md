@@ -5,8 +5,8 @@ protocol_version: 6.4.0
 target_protocol_version: 6.5.0
 subject_baseline: P0 = Protocol 6.4 at 55c085261eb827e3047637d045a8e6917ea6b962 (recovery 74bc572ef516cae417437a2027eeff52a2e25c15)
 diagnostic_commit: 81375d8142a8130b80cd82f2304d3e16bc3fc390
-status: active-p6-review-ready
-current_phase: PHASE VII P6 FROZEN / FRESH INDEPENDENT REVIEW REQUIRED
+status: active-p6-no-pass-repair-required
+current_phase: PHASE VI P6 REVIEW REPAIR / NEW CANDIDATE REQUIRED
 branch: ssdp-6.5-frontier-model-re-evaluation
 created_date: 2026-09-24
 adjudication: qualification/ssdp65/CROSS-MODEL-ADJUDICATION-2026-09-24.md
@@ -14,7 +14,7 @@ active_serious_challenge: none against accepted D1-D4 doctrine
 second_frontier_diagnostic: waived-for-this-cycle-by-stakeholder-resource-constraint
 design_closure: qualification/ssdp65/PHASE-IV-V-DESIGN-CLOSURE.md
 implementation_handoff: workplans/active/SSDP-6.5-D3-D4-IMPLEMENTATION-HANDOFF.md
-independent_review: qualification/ssdp65/INDEPENDENT-REVIEW-2026-09-24-PROTOCOL-6.5-P5-NO-PASS.md
+independent_review: qualification/ssdp65/INDEPENDENT-REVIEW-2026-09-24-PROTOCOL-6.5-P6-NO-PASS.md
 ---
 
 # Protocol 6.5 Frontier-Model Re-evaluation and Successor Workplan
@@ -809,3 +809,39 @@ Lifecycle descendant `758490c11f90b587c7dfaadddab958751f2881c9` binds exact P6 `
 Normal workflow run `36051619464` passed the complete build and Orchestrator Core jobs. This is lifecycle/mechanical evidence only and does not transfer or manufacture independent Review PASS.
 
 Fresh independent assembled-candidate Review of exact P6 is now the next authorized step.
+
+
+## 29. P6 independent Review repair delta — 2026-09-24
+
+Fresh independent assembled-candidate Review of exact P6 \`dd06da8136416e67644586c44880b466f982b8ff\` issued **NO-PASS** without reopening accepted P65 D3.
+
+Governing Review record:
+
+\`qualification/ssdp65/INDEPENDENT-REVIEW-2026-09-24-PROTOCOL-6.5-P6-NO-PASS.md\`
+
+### B65-P6-1 — root-state parser semantics are split across qualification consumers
+
+Repair at existing D4 parser/consumer ownership only:
+
+- keep \`source/release_state.py::_UniqueKeySafeLoader\` and \`load()\` as the sole root-state parser semantics;
+- replace ordinary \`yaml.safe_load\` reads of root \`PROTOCOL-RELEASE-STATE.yaml\` in current/inherited tests with the existing owner \`release_state.load()\`;
+- leave unrelated YAML fixture parsing unchanged;
+- rerun the complete duplicate-key matrix plus alias/anchor/merge holdouts and all affected state-consuming tests.
+
+Do not add a wrapper, second parser, registry, mirror, or compatibility layer.
+
+### B65-P6-2 — historical release relation / version identity underconstrained
+
+Repair in the existing D4 release-state validator:
+
+- use one canonical ASCII three-component numeric version identity for accepted, historical, and candidate state;
+- require every historical version to be strictly older than \`accepted_current.version\`;
+- retain numeric multi-digit ordering, generic patch/minor/major successors, and the existing complete terminal-equality predicate;
+- add a negative fixture that attempts to place a real 6.5 ref pair in historical while accepted-current is still 6.4;
+- add canonical-spelling negatives plus post-cutover successor controls.
+
+Do not add a version registry, candidate table, history mirror, synchronized phase table, or new service.
+
+P6 remains immutable. Any semantic repair creates a new candidate identity. Exact-P6 runs remain historical evidence only for their exact subjects/oracles. Replacement-candidate CI, affected state/lifecycle matrices, preservation applicability, freeze/binding, and fresh independent Review must be rerun.
+
+No stakeholder ratification, public fallback, recovery, accepted-current cutover, PR merge, or Protocol 7 D3/D4 mutation is authorized.

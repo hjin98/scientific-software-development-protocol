@@ -3,7 +3,7 @@ kind: implementation-workplan
 workplan_id: SSDP-6.5-D3-D4-IMPLEMENTATION-HANDOFF
 protocol_version: 6.4.0
 target_protocol_version: 6.5.0
-status: repair-complete-p6-frozen
+status: reopened-p6-review-repair-required
 parent_workplan: workplans/active/SSDP-6.5-FRONTIER-MODEL-RE-EVALUATION.md
 design_authority: qualification/ssdp65/PHASE-IV-V-DESIGN-CLOSURE.md
 baseline: 55c085261eb827e3047637d045a8e6917ea6b962
@@ -530,3 +530,30 @@ D3 remains closed. P6 must now receive a fresh independent assembled-candidate R
 P6 `dd06da8136416e67644586c44880b466f982b8ff` remains immutable. Binding descendant `758490c11f90b587c7dfaadddab958751f2881c9` passed normal workflow run `36051619464` with Review `NOT_RUN` and no ratification/publication/recovery advancement.
 
 Implementation repair is mechanically closed. The next stage is fresh independent assembled-candidate Review of P6.
+
+
+## 22. P6 independent Review repair delta — 2026-09-24
+
+Exact P6 \`dd06da8136416e67644586c44880b466f982b8ff\` received fresh independent **NO-PASS**. Accepted P65 D3 remains closed.
+
+### B65-P6-1 — strict root-state parser must own every root-state read
+
+Alter existing D4 consumers only:
+
+- route every read of root \`PROTOCOL-RELEASE-STATE.yaml\` used for mechanical qualification through existing \`release_state.load()\`;
+- eliminate direct ordinary \`yaml.safe_load\` pre-normalization of that authoritative root file;
+- preserve unrelated YAML parsing and all immutable historical assertions;
+- rerun all affected inherited/current state tests and full duplicate/alias structural falsification.
+
+### B65-P6-2 — historical state must be temporally behind accepted-current
+
+Alter the existing validator only:
+
+- establish one canonical ASCII x.y.z numeric identity;
+- require each historical version to be strictly older than accepted-current;
+- preserve numeric \`6.10.0\` ordering, patch/minor/major successors, terminal equality, and next-successor behavior;
+- add the real-ref unsuperseded-history negative and canonical-version spelling negatives.
+
+No D3 redesign, registry, mirror, wrapper, compatibility subsystem, candidate-specific table, semantic parser, or synchronized phase table is authorized.
+
+Freeze a new immutable candidate after repair; rerun affected exact-candidate qualification and fresh independent Review.
