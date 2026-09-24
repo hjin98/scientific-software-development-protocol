@@ -3,7 +3,7 @@ kind: implementation-workplan
 workplan_id: SSDP-6.5-D3-D4-IMPLEMENTATION-HANDOFF
 protocol_version: 6.4.0
 target_protocol_version: 6.5.0
-status: reopened-d4-after-p2-independent-review-no-pass
+status: repair-complete-p3-frozen
 parent_workplan: workplans/active/SSDP-6.5-FRONTIER-MODEL-RE-EVALUATION.md
 design_authority: qualification/ssdp65/PHASE-IV-V-DESIGN-CLOSURE.md
 baseline: 55c085261eb827e3047637d045a8e6917ea6b962
@@ -328,10 +328,10 @@ Raise Serious Challenge if accepted D1-D4/formal-definition doctrine itself is s
 
 ```text
 D3 DESIGN: PASS / NOT REOPENED
-PHASE VI IMPLEMENTATION: REOPENED AT D4 — P2 REVIEW BLOCKERS
+PHASE VI IMPLEMENTATION: REPAIR COMPLETE — P3 FROZEN
 P1: FROZEN / FAILED REVIEW — b565e28aeacea002cefe27e6b9594fe99d653c0a
-P2: FROZEN — e8edb353e172aef933ed5e58eeabe897d0cc98d1
-P2 NORMAL PR QUALIFICATION: 35996488794 / PASS
+P2: FROZEN / FAILED REVIEW — e8edb353e172aef933ed5e58eeabe897d0cc98d1
+P2 NORMAL PR QUALIFICATION: 35996488794 / PASS\nP3: FROZEN — 89ccc71a7b0e9458a3e77306be2a773d4059f0f2\nP3 NORMAL PR QUALIFICATION: 36018551068 / PASS
 PUBLIC 6.5 FALLBACK: UNAVAILABLE
 6.5 RECOVERY: UNAVAILABLE
 6.5 RATIFICATION: NOT REQUESTED
@@ -391,3 +391,17 @@ Repair in existing \`source/release_state.py\` and focused tests:
 No new registry/service/parser is authorized.
 
 P2 \`e8edb353e172aef933ed5e58eeabe897d0cc98d1\` is immutable and failed Review. Repairs create a new candidate identity and require exact-candidate requalification plus fresh independent Review.
+
+
+## 13. P3 D4 repair closure
+
+P2 Review blockers B65-P2-1 and B65-P2-2 are repaired at the existing D4 owners.
+
+- Lifecycle-value duplication was removed/rebound in the two surviving inherited tests, with explicit successor transition fixtures and a bounded current test census.
+- Terminal ratification evidence now binds immutable route + exact candidate + matching terminal disposition in the existing release-state validator.
+- Review/ratification candidate metadata no longer hard-codes P1/P2 labels; generic candidate fields and historical \`pN\` compatibility are accepted.
+- No state mirror, compatibility wrapper, semantic registry, prose parser, or generated-source edit was introduced.
+
+Exact P3 is \`89ccc71a7b0e9458a3e77306be2a773d4059f0f2\`. Exact-P3 normal PR workflow \`36018551068\` passed the complete build and Orchestrator Core jobs.
+
+D3 remains closed. P3 must now receive a fresh independent assembled-candidate Review before stakeholder ratification or publication.

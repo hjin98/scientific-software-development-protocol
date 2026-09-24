@@ -5,8 +5,8 @@ protocol_version: 6.4.0
 target_protocol_version: 6.5.0
 subject_baseline: P0 = Protocol 6.4 at 55c085261eb827e3047637d045a8e6917ea6b962 (recovery 74bc572ef516cae417437a2027eeff52a2e25c15)
 diagnostic_commit: 81375d8142a8130b80cd82f2304d3e16bc3fc390
-status: reopened-p2-independent-review-no-pass
-current_phase: PHASE VII P2 INDEPENDENT REVIEW NO-PASS / D4 REPAIR REQUIRED
+status: active-p3-review-ready
+current_phase: PHASE VII P3 FROZEN / FRESH INDEPENDENT REVIEW REQUIRED
 branch: ssdp-6.5-frontier-model-re-evaluation
 created_date: 2026-09-24
 adjudication: qualification/ssdp65/CROSS-MODEL-ADJUDICATION-2026-09-24.md
@@ -31,11 +31,11 @@ SUCCESSOR DECISION:                 PROTOCOL 6.5 WARRANTED
 D1-D4 DOMAIN MODEL:                 PRESERVE
 PHASE IV PRINCIPLE EXTRACTION:      COMPLETE — qualification/ssdp65/PHASE-IV-V-DESIGN-CLOSURE.md
 PHASE V CANDIDATE DESIGN:           COMPLETE — DESIGN PASS
-PHASE VI IMPLEMENTATION:            REOPENED AT D4 — P2 REVIEW BLOCKERS
+PHASE VI IMPLEMENTATION:            REPAIR COMPLETE — P2 REVIEW BLOCKERS CLOSED
 P1 CANDIDATE:                       FROZEN / FAILED REVIEW — b565e28aeacea002cefe27e6b9594fe99d653c0a
-P2 CANDIDATE:                       FROZEN — e8edb353e172aef933ed5e58eeabe897d0cc98d1
-P2 EXACT PR QUALIFICATION:          PASS — run 35996488794
-PHASE VII QUALIFICATION/REVIEW:     NO-PASS — P2 independent Review
+P2 CANDIDATE:                       FROZEN / FAILED REVIEW — e8edb353e172aef933ed5e58eeabe897d0cc98d1
+P2 EXACT PR QUALIFICATION:          PASS — run 35996488794\nP3 CANDIDATE:                       FROZEN — 89ccc71a7b0e9458a3e77306be2a773d4059f0f2\nP3 EXACT PR QUALIFICATION:          PASS — run 36018551068
+PHASE VII QUALIFICATION/REVIEW:     READY FOR FRESH P3 REVIEW
 PROTOCOL 7 D3/D4:                   OUT OF SCOPE / UNCHANGED
 ```
 
@@ -477,3 +477,50 @@ Rerun:
 6. fresh independent assembled-candidate Review.
 
 Exact-P2 runs \`35996488794\`, \`35996817388\`, and \`35996964858\` remain historical evidence for their exact subjects only. Frozen-resource and unchanged D1/D2/formal-definition evidence may be reused only after applicability is re-established.
+
+
+## 19. P3 repair closure and fresh-Review handoff
+
+The D4 repair ordered by the P2 independent Review is complete without reopening D3.
+
+### B65-P2-1 closure — lifecycle test ownership
+
+- \`tests/test_protocol_64_bootstrap_readiness.py\` now resolves immutable Protocol 6.4 release identity from \`accepted_current\` while 6.4 is current and from \`historical["6.4.0"]\` after succession.
+- The same test includes a successor-cutover fixture proving the 6.4 identity survives an owner-only 6.5 cutover shape.
+- \`tests/test_protocol_61_evidence_evolution.py\` no longer pins live accepted-current or candidate versions; its historical 6.2 assertions are explicitly exercised under a future accepted/candidate version shape.
+- A bounded census of all current \`tests/*.py\` found no other invalid live \`accepted_current\` / \`candidate\` version copies. Remaining 6.4/6.5 literals are version-intrinsic, frozen historical, synthetic state-machine fixtures, or current source-version checks.
+
+No synchronized lifecycle table/helper/state mirror was added.
+
+### B65-P2-2 closure — terminal ratification evidence binding
+
+The existing \`source/release_state.py\` owner now uses the same immutable route/front-matter mechanism for terminal stakeholder-ratification evidence and requires:
+
+- same-repository immutable commit/path resolution;
+- safe repository-relative path;
+- exact candidate semantic-ref binding;
+- terminal disposition agreement for \`RATIFIED\` versus \`REJECTED\`.
+
+Actual stakeholder authorization remains a human/semantic decision; the validator does not parse arbitrary ratification prose or infer intent.
+
+Candidate binding metadata is generalized to \`candidate_ref\` / \`semantic_ref\` plus historical \`pN\` compatibility rather than hard-coding P1/P2 names.
+
+### Exact P3 evidence
+
+P3 = \`89ccc71a7b0e9458a3e77306be2a773d4059f0f2\`.
+
+Normal PR workflow run \`36018551068\` evaluated exact P3 and passed:
+
+- repository release-state validation;
+- PEM validation;
+- complete protocol regression;
+- canonical package build;
+- independent package validation;
+- committed distribution parity;
+- whitespace;
+- packaged Protocol 6.5 snapshot parity;
+- Orchestrator Core acceptance.
+
+P3 remains immutable. This later lifecycle descendant binds P3 with Review \`NOT_RUN\`, ratification \`NOT_REQUESTED\`, public fallback \`UNAVAILABLE\`, recovery \`UNAVAILABLE\`, and accepted-current Protocol 6.4.
+
+The next step is a fresh independent assembled-candidate Review of P3. P1 and P2 NO-PASS conclusions remain historical evidence only and must not be inherited as the P3 verdict.
