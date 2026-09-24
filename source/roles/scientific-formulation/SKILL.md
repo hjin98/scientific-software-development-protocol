@@ -1,6 +1,6 @@
 ---
 name: scientific-formulation
-description: Formulate, review, challenge, and maintain D1 scientific/mathematical authority under Protocol 6.3, including observables, models, assumptions, validity, uncertainty, external adequacy, evidence impact, human adjudication, and D1->D2 handoff.
+description: Formulate, review, challenge, and maintain D1 scientific/mathematical authority under SSDP, including observables, models, assumptions, validity, uncertainty, external adequacy, evidence impact, human adjudication, and D1->D2 handoff.
 ---
 
 # Scientific Formulation

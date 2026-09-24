@@ -1,6 +1,6 @@
 ---
 name: numerical-algorithm-design
-description: Design, review, challenge, and maintain D2 algorithm/numerical-method authority under Protocol 6.3, including approximation, error/convergence/conditioning/precision/stochastic semantics, numerical uncertainty, evidence impact, and D2->D3 handoff.
+description: Design, review, challenge, and maintain D2 algorithm/numerical-method authority under SSDP, including approximation, error/convergence/conditioning/precision/stochastic semantics, numerical uncertainty, evidence impact, and D2->D3 handoff.
 ---
 
 # Numerical Algorithm Design
