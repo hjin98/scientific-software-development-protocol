@@ -5,8 +5,8 @@ protocol_version: 6.4.0
 target_protocol_version: 6.5.0
 subject_baseline: P0 = Protocol 6.4 at 55c085261eb827e3047637d045a8e6917ea6b962 (recovery 74bc572ef516cae417437a2027eeff52a2e25c15)
 diagnostic_commit: 81375d8142a8130b80cd82f2304d3e16bc3fc390
-status: active-p4-review-ready
-current_phase: PHASE VII P4 FROZEN / FRESH INDEPENDENT REVIEW REQUIRED
+status: reopened-p4-no-pass-repair-required
+current_phase: PHASE VII P4 REVIEW NO-PASS / D4 REPAIR REQUIRED / NEW CANDIDATE REQUIRED
 branch: ssdp-6.5-frontier-model-re-evaluation
 created_date: 2026-09-24
 adjudication: qualification/ssdp65/CROSS-MODEL-ADJUDICATION-2026-09-24.md
@@ -14,7 +14,7 @@ active_serious_challenge: none against accepted D1-D4 doctrine
 second_frontier_diagnostic: waived-for-this-cycle-by-stakeholder-resource-constraint
 design_closure: qualification/ssdp65/PHASE-IV-V-DESIGN-CLOSURE.md
 implementation_handoff: workplans/active/SSDP-6.5-D3-D4-IMPLEMENTATION-HANDOFF.md
-independent_review: qualification/ssdp65/INDEPENDENT-REVIEW-2026-09-24-PROTOCOL-6.5-P3-NO-PASS.md
+independent_review: qualification/ssdp65/INDEPENDENT-REVIEW-2026-09-24-PROTOCOL-6.5-P4-NO-PASS.md
 ---
 
 # Protocol 6.5 Frontier-Model Re-evaluation and Successor Workplan
@@ -31,13 +31,13 @@ SUCCESSOR DECISION:                 PROTOCOL 6.5 WARRANTED
 D1-D4 DOMAIN MODEL:                 PRESERVE
 PHASE IV PRINCIPLE EXTRACTION:      COMPLETE — qualification/ssdp65/PHASE-IV-V-DESIGN-CLOSURE.md
 PHASE V CANDIDATE DESIGN:           COMPLETE — DESIGN PASS
-PHASE VI IMPLEMENTATION:            REPAIR COMPLETE — P4 FROZEN
+PHASE VI IMPLEMENTATION:            REOPENED — P4 REVIEW NO-PASS; D4 REPAIR REQUIRED
 P1 CANDIDATE:                       FROZEN / FAILED REVIEW — b565e28aeacea002cefe27e6b9594fe99d653c0a
 P2 CANDIDATE:                       FROZEN / FAILED REVIEW — e8edb353e172aef933ed5e58eeabe897d0cc98d1
 P2 EXACT PR QUALIFICATION:          PASS — run 35996488794\nP3 CANDIDATE:                       FROZEN — 89ccc71a7b0e9458a3e77306be2a773d4059f0f2\nP3 EXACT PR QUALIFICATION:          PASS — run 36018551068
-P4 CANDIDATE:                       FROZEN — 43ff4273fbdaf46b9677cffdb091b741ce754a7d
+P4 CANDIDATE:                       FROZEN / FAILED REVIEW — 43ff4273fbdaf46b9677cffdb091b741ce754a7d
 P4 EXACT PR QUALIFICATION:          PASS — run 36041360949
-PHASE VII QUALIFICATION/REVIEW:     READY FOR FRESH P4 REVIEW
+PHASE VII QUALIFICATION/REVIEW:     P4 NO-PASS — B65-P4-1; NEW CANDIDATE REQUIRED
 PROTOCOL 7 D3/D4:                   OUT OF SCOPE / UNCHANGED
 ```
 
@@ -612,3 +612,65 @@ P4 is immutable at `43ff4273fbdaf46b9677cffdb091b741ce754a7d`. Any further seman
 A later descendant binds P4 with Review `NOT_RUN`, ratification `NOT_REQUESTED`, public fallback/recovery `UNAVAILABLE`, and accepted-current Protocol 6.4. The next stage is a genuinely fresh independent assembled-candidate Review of P4.
 
 No stakeholder ratification, public-fallback publication, recovery establishment, accepted-current cutover, PR merge or Protocol 7 D3/D4 mutation is authorized.
+
+
+## 22. 2026-09-24 fresh independent P4 Review reopen
+
+Fresh independent assembled-candidate Review of immutable P4 43ff4273fbdaf46b9677cffdb091b741ce754a7d issued **NO-PASS** with no Serious Challenge.
+
+Durable Review:
+
+qualification/ssdp65/INDEPENDENT-REVIEW-2026-09-24-PROTOCOL-6.5-P4-NO-PASS.md
+
+P4 remains immutable. The current-representation/predecessor-scope repair B65-P3-2 is independently closed, and earlier lifecycle/predecessor-gating repairs remain closed on the reviewed surface. One D4 evidence-binding blocker survives.
+
+### R65-P4-1 — reject structurally ambiguous evidence front matter
+
+Owner: existing D4 release-state evidence validation in source/release_state.py.
+
+P4 correctly moved from candidate set-membership to one resolved evidence subject, but its front-matter normalization can erase ambiguity before the subject/disposition checks run:
+
+- duplicate YAML keys are silently last-wins under yaml.safe_load;
+- duplicate candidate_ref can therefore hide a conflicting candidate;
+- duplicate status can hide a conflicting disposition;
+- explicitly present empty/null candidate_ref or semantic_ref is ignored by truthiness and can fall back to legacy pN.
+
+Repair by altering the existing parser/binder only:
+
+1. reject duplicate mapping keys in evidence front matter rather than silently normalizing them;
+2. detect explicit subject-field presence by key membership, not truthiness;
+3. when an explicit subject key is present, require a nonempty valid exact candidate SHA and reject malformed/empty/null values;
+4. when both explicit fields are present, require exact agreement;
+5. use the generic highest-generation legacy pN rule only when no explicit subject key is present;
+6. keep arbitrary Review/ratification prose outside machine semantic judgment;
+7. do not add a registry, state mirror, candidate-specific table, compatibility layer, or semantic prose parser.
+
+Required fresh focused cases include the complete P4 matrix plus:
+
+- duplicate candidate_ref;
+- duplicate semantic_ref;
+- duplicate status;
+- present-empty candidate_ref + matching legacy pN;
+- present-null semantic_ref + matching legacy pN;
+- future p5/later numeric generation;
+- meaning-preserving/unrelated prose controls that remain outside machine semantic judgment.
+
+### Candidate/evidence reset
+
+Any repair changes the D4 evidence validator and therefore requires a new immutable semantic candidate identity. Never mutate P4 and continue calling it P4.
+
+Rerun:
+
+1. focused Review/ratification structural-binding tests;
+2. lifecycle transition/current-owner tests;
+3. complete repository regression and package/profile parity;
+4. Orchestrator Core acceptance;
+5. exact-new-candidate normal PR CI;
+6. changed-surface preservation/evidence-applicability assessment;
+7. fresh post-freeze mutation/counterexample set including the P4 holdouts;
+8. new freeze/binding qualification with Review reset to NOT_RUN;
+9. a new fresh independent assembled-candidate Review.
+
+P4 runs 36041360949, 36042040459, and 36042262606 remain valid historical observations for the exact properties/subjects they exercised, but they do not close B65-P4-1 and do not transfer whole-candidate acceptance to the replacement candidate.
+
+No stakeholder ratification, public-fallback publication, recovery establishment, accepted-current cutover, PR merge, or Protocol 7 D3/D4 mutation is authorized.

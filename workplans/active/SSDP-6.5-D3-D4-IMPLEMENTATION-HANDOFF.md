@@ -3,7 +3,7 @@ kind: implementation-workplan
 workplan_id: SSDP-6.5-D3-D4-IMPLEMENTATION-HANDOFF
 protocol_version: 6.4.0
 target_protocol_version: 6.5.0
-status: repair-complete-p4-frozen
+status: reopened-p4-review-no-pass
 parent_workplan: workplans/active/SSDP-6.5-FRONTIER-MODEL-RE-EVALUATION.md
 design_authority: qualification/ssdp65/PHASE-IV-V-DESIGN-CLOSURE.md
 baseline: 55c085261eb827e3047637d045a8e6917ea6b962
@@ -328,11 +328,11 @@ Raise Serious Challenge if accepted D1-D4/formal-definition doctrine itself is s
 
 ```text
 D3 DESIGN: PASS / NOT REOPENED
-PHASE VI IMPLEMENTATION: REPAIR COMPLETE — P4 FROZEN
+PHASE VI IMPLEMENTATION: REOPENED — P4 REVIEW NO-PASS; NEW CANDIDATE REQUIRED
 P1: FROZEN / FAILED REVIEW — b565e28aeacea002cefe27e6b9594fe99d653c0a
 P2: FROZEN / FAILED REVIEW — e8edb353e172aef933ed5e58eeabe897d0cc98d1
 P2 NORMAL PR QUALIFICATION: 35996488794 / PASS\nP3: FROZEN — 89ccc71a7b0e9458a3e77306be2a773d4059f0f2\nP3 NORMAL PR QUALIFICATION: 36018551068 / PASS
-P4: FROZEN — 43ff4273fbdaf46b9677cffdb091b741ce754a7d
+P4: FROZEN / FAILED REVIEW — 43ff4273fbdaf46b9677cffdb091b741ce754a7d
 P4 NORMAL PR QUALIFICATION: 36041360949 / PASS
 PUBLIC 6.5 FALLBACK: UNAVAILABLE
 6.5 RECOVERY: UNAVAILABLE
@@ -428,3 +428,23 @@ The current canonical evidence owner no longer scopes impact-closure semantics t
 Exact replacement candidate P4 is `43ff4273fbdaf46b9677cffdb091b741ce754a7d`; normal repository qualification run `36041360949` passed both build and Orchestrator Core jobs.
 
 D3 remains closed. P4 must receive fresh independent assembled-candidate Review before any stakeholder ratification or publication.
+
+
+## 15. P4 independent Review repair delta — 2026-09-24
+
+Fresh independent assembled-candidate Review of P4 issued **NO-PASS** without reopening D3.
+
+### B65-P4-1 — structural evidence-front-matter ambiguity
+
+Repair only the existing D4 owner in source/release_state.py and its focused tests:
+
+- reject duplicate YAML mapping keys in evidence front matter;
+- treat candidate_ref / semantic_ref key presence as explicit binding intent even when the parsed value is empty/null;
+- require present explicit subject fields to be nonempty valid exact candidate SHAs and to agree;
+- never let legacy pN rescue a present-but-invalid explicit subject field;
+- retain the generic highest-generation legacy pN rule only when explicit subject keys are absent;
+- retain arbitrary prose outside machine semantic judgment.
+
+Add duplicate-candidate-key, duplicate-status, empty/null explicit-subject negatives to the full existing Review/ratification matrix. Preserve future candidate-generation behavior and do not add candidate-specific logic.
+
+P4 is immutable and failed Review. The repair must freeze a new candidate and rerun affected exact-candidate qualification plus fresh independent Review.

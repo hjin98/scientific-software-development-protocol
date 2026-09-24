@@ -1,7 +1,7 @@
 ---
 kind: independent-review-handoff
 protocol_under_review: 6.5.0
-status: ready-p4
+status: p4-no-pass-repair-required
 accepted_control_p0: 55c085261eb827e3047637d045a8e6917ea6b962
 failed_candidate_p1: b565e28aeacea002cefe27e6b9594fe99d653c0a
 failed_candidate_p2: e8edb353e172aef933ed5e58eeabe897d0cc98d1
@@ -15,12 +15,15 @@ p4_binding_qualification_run: 36042040459
 p1_review: qualification/ssdp65/INDEPENDENT-REVIEW-2026-09-24-PROTOCOL-6.5-NO-PASS.md
 p2_review: qualification/ssdp65/INDEPENDENT-REVIEW-2026-09-24-PROTOCOL-6.5-P2-NO-PASS.md
 p3_review: qualification/ssdp65/INDEPENDENT-REVIEW-2026-09-24-PROTOCOL-6.5-P3-NO-PASS.md
+p4_review: qualification/ssdp65/INDEPENDENT-REVIEW-2026-09-24-PROTOCOL-6.5-P4-NO-PASS.md
 p4_repair_qualification: qualification/ssdp65/P4-REPAIR-QUALIFICATION.md
 authoring_context_verdict: none
 stakeholder_ratification: NOT_REQUESTED
 ---
 
-# Independent Review Handoff — Protocol 6.5 P4
+# Independent Review Handoff — Protocol 6.5 P4 (Reviewed / NO-PASS)
+
+> **Current lifecycle note:** P4 has now received fresh independent Review and is **NO-PASS**. The review request below is retained as the exact historical review contract. The authorized next action is the bounded D4 repair in the active workplans, followed by a new immutable candidate identity and a new fresh independent Review. Do not re-run acceptance actions against P4 as though it were still review-pending.
 
 ## 1. Immutable Review target
 
@@ -133,3 +136,18 @@ PASS means only P4 is technically eligible for stakeholder ratification. It does
 If blockers survive, preserve P4 immutably, reopen the earliest owning layer and require another candidate identity.
 
 This repair/authoring context is not eligible to self-issue the independent P4 Review verdict.
+
+
+## 9. P4 Review result
+
+Fresh independent Review is complete:
+
+qualification/ssdp65/INDEPENDENT-REVIEW-2026-09-24-PROTOCOL-6.5-P4-NO-PASS.md
+
+Disposition: **NO-PASS**.
+
+Surviving blocker: B65-P4-1, structural ambiguity in the existing Review/ratification front-matter parser. Duplicate YAML keys and present-but-empty/null explicit subject fields can be normalized before exact subject/disposition validation.
+
+P4 remains immutable. D3 is not reopened. Repair the existing D4 binder/parser only, freeze a new candidate, rerun affected qualification, and issue a new fresh independent Review.
+
+Stakeholder ratification remains NOT_REQUESTED; public fallback and recovery remain UNAVAILABLE; accepted-current remains Protocol 6.4.
