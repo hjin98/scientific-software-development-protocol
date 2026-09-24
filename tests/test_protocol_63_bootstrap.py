@@ -6,6 +6,8 @@ import re
 import unittest
 import urllib.error
 import urllib.request
+
+import yaml
 from pathlib import Path
 
 
@@ -22,53 +24,14 @@ LOCAL_MD_RE = re.compile(r"\[[^\]]+\]\(([^)]+\.md(?:#[^)]*)?)\)")
 class Protocol63BootstrapTests(unittest.TestCase):
     def test_current_public_and_recovery_mappings_are_exact_and_distinct(self) -> None:
         root = Path(__file__).resolve().parents[1]
-        versioning = (root / 'source/shared/references/protocol-versioning-and-compatibility.md').read_text(encoding='utf-8')
-        prompts = (root / 'source/shared/references/development-workflow-prompts.md').read_text(encoding='utf-8')
-        portability = (root / 'PORTABILITY.md').read_text(encoding='utf-8')
-        readme = (root / 'README.md').read_text(encoding='utf-8')
-        self.assertIn(f'6.3.0 public-source bootstrap -> {BOOTSTRAP}', versioning)
-        self.assertIn(f'6.3.0 invalidated bootstrap attempt -> {INVALIDATED_BOOTSTRAP}', versioning)
-        self.assertIn(f'6.3.0 invalidated second bootstrap -> {INVALIDATED_SECOND_BOOTSTRAP}', versioning)
-        self.assertIn(f'6.3.0 invalidated owner-binding bootstrap -> {INVALIDATED_OWNER_BINDING_BOOTSTRAP}', versioning)
-        self.assertIn(f'6.3.0 invalidated D4R3 bootstrap -> {INVALIDATED_D4R3_BOOTSTRAP}', versioning)
-        self.assertNotIn(f'CURRENT_PUBLIC_REF = {INVALIDATED_BOOTSTRAP}', prompts)
-        self.assertNotIn(f'CURRENT_PUBLIC_REF = {INVALIDATED_SECOND_BOOTSTRAP}', prompts)
-        self.assertNotIn(f'CURRENT_PUBLIC_REF = {INVALIDATED_OWNER_BINDING_BOOTSTRAP}', prompts)
-        self.assertIn('CURRENT_PROTOCOL = 6.4.0', prompts)
-        self.assertIn('CURRENT_PUBLIC_REF = e09a9d1480211eea2d16d722182bb5c6de1bee12', prompts)
-        self.assertIn(f'ACCEPTED_6_3_PUBLIC_REF = {BOOTSTRAP}', prompts)
-        self.assertIn(f'ACCEPTED_6_3_RECOVERY = {RECOVERY}', prompts)
-        self.assertNotIn(f'CURRENT_PUBLIC_REF = {BOOTSTRAP}', prompts)
-        self.assertIn(f'6.3.0 public bootstrap -> {BOOTSTRAP}', portability)
-        self.assertIn(f'6.3.0 invalidated owner-binding bootstrap -> {INVALIDATED_OWNER_BINDING_BOOTSTRAP}', portability)
-        self.assertIn(f'6.3.0 invalidated D4R3 bootstrap -> {INVALIDATED_D4R3_BOOTSTRAP}', portability)
-        self.assertIn(INVALIDATED_OWNER_BINDING_BOOTSTRAP, readme)
-        self.assertIn(INVALIDATED_SECOND_BOOTSTRAP, readme)
-        self.assertIn(f'6.3.0 recovery -> {RECOVERY}', portability)
-        self.assertIn(f'6.3.0  -> {RECOVERY}', versioning)
+        state = yaml.safe_load((root / "PROTOCOL-RELEASE-STATE.yaml").read_text(encoding="utf-8"))
+        p63 = state["historical"]["6.3.0"]
+        self.assertEqual(p63["public_source_ref"], BOOTSTRAP)
+        self.assertEqual(p63["recovery_ref"], RECOVERY)
         self.assertNotEqual(RECOVERY, BOOTSTRAP)
-        self.assertNotIn('6.3.0  -> ' + INVALIDATED_SECOND_BOOTSTRAP, versioning)
-        if not BOOTSTRAP.startswith("UNAVAILABLE_"):
-            stale_transition_fragments = (
-                'no current 6.3 public fallback is authorized',
-                'no 6.3 public fallback is authorized until',
-                'no replacement public fallback is currently authorized',
-                'no replacement fallback is currently authorized',
-            )
-            for document_name, document in (("versioning", versioning), ("prompts", prompts), ("portability", portability), ("readme", readme)):
-                lowered = document.lower()
-                for fragment in stale_transition_fragments:
-                    self.assertNotIn(fragment, lowered, f"{document_name} retains pre-publication fallback state: {fragment}")
-        if BOOTSTRAP.startswith("UNAVAILABLE_"):
-            self.assertIn("No current 6.3 public fallback is authorized", prompts)
-            self.assertIn("current 6.3 public-source fallback is unavailable", versioning)
-        else:
-            self.assertIn(f'Replacement self-reference-safe source snapshot `{BOOTSTRAP}`', prompts)
-            self.assertIn('sole current Protocol 6.3 public-source fallback', prompts)
-            self.assertIn(f'6.3.0 public-source bootstrap -> {BOOTSTRAP}', versioning)
-            self.assertIn('sole current 6.3 fallback mapping', versioning)
-            self.assertIn('authorized version-bound 6.3 public fallback', readme)
-            self.assertIn('sole authorized version-bound 6.3 public fallback', portability)
+        prompts = (root / "source/shared/references/development-workflow-prompts.md").read_text(encoding="utf-8")
+        self.assertNotIn("CURRENT_PUBLIC_REF =", prompts)
+        self.assertNotIn(INVALIDATED_BOOTSTRAP, prompts)
 
     def test_published_bootstrap_snapshot_is_real_self_reference_safe_and_route_complete(self) -> None:
         if BOOTSTRAP.startswith("UNAVAILABLE_"):

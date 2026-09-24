@@ -2,6 +2,8 @@ from __future__ import annotations
 
 import re
 import unittest
+
+import yaml
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -61,57 +63,25 @@ class Protocol61EvidenceEvolutionTests(unittest.TestCase):
         self.assertLess(d1.index("## Background and terminology"), d1.index("## Normative scientific / mathematical formulation"))
         self.assertLess(d2.index("## Background and terminology"), d2.index("## Governing numerical / algorithmic formulation"))
 
-    def test_current_prompt_preserves_public_source_discipline_during_and_after_62_bootstrap(self) -> None:
-        invalidated = "1181c2031710c5d343194d87d08543290fded0ab"
+    def test_current_prompt_uses_release_state_owner_for_public_source_resolution(self) -> None:
         prompts = self.read("source/shared/references/development-workflow-prompts.md")
         lower = prompts.lower()
-        versioning = self.read("source/shared/references/protocol-versioning-and-compatibility.md")
-        published = re.search(r"6\.2\.0 public-source bootstrap -> ([0-9a-f]{40})", versioning)
-
-        self.assertIn("https://github.com/hjin98/scientific-software-development-protocol", prompts)
-        self.assertNotIn("https://github.com/hjin98/software-development-protocol", prompts)
+        state = yaml.safe_load(self.read("PROTOCOL-RELEASE-STATE.yaml"))
+        self.assertIn("designated project release-state owner", lower)
         self.assertIn("repository-default bytes are never a substitute", lower)
-        self.assertNotIn(f"PUBLIC_REF = {invalidated}", prompts)
-
-        if published is None:
-            self.assertIn("bootstrap self-reference rule", lower)
-            self.assertIn("automatic current-6.2 public fallback is unavailable", lower)
-            self.assertNotIn("current 6.2 may fall back", lower)
-        else:
-            bootstrap = published.group(1)
-            self.assertNotEqual(bootstrap, invalidated)
-            current_version = self.read("source/PROTOCOL_VERSION").strip()
-            if current_version == "6.2.0":
-                self.assertIn(f"PUBLIC_REF = {bootstrap}", prompts)
-                self.assertIn("current 6.2 may fall back", lower)
-                self.assertNotIn("automatic current-6.2 public fallback is unavailable", lower)
-            elif current_version == "6.3.0":
-                self.assertIn(f"ACCEPTED_6_2_PUBLIC_REF = {bootstrap}", prompts)
-                current = re.search(r"^CURRENT_PUBLIC_REF = (\S+)$", prompts, re.MULTILINE)
-                self.assertIsNotNone(current)
-                current_ref = current.group(1)
-                self.assertNotEqual(current_ref, "1484c1d3caa49d87cc15bc52a5e775399c1dae1b")
-                self.assertTrue(current_ref == "UNAVAILABLE_PENDING_REPLACEMENT_BOOTSTRAP" or re.fullmatch(r"[0-9a-f]{40}", current_ref))
-                self.assertIn("version-bound 6.2 work continues to use exactly", lower)
-            else:
-                self.assertEqual(current_version, "6.4.0")
-                self.assertIn(f"ACCEPTED_6_2_PUBLIC_REF = {bootstrap}", prompts)
-                self.assertIn("CURRENT_PROTOCOL = 6.4.0", prompts)
-                self.assertIn("CURRENT_PUBLIC_REF = e09a9d1480211eea2d16d722182bb5c6de1bee12", prompts)
-                self.assertIn("ACCEPTED_6_3_PUBLIC_REF = 86c13cab6bdd1991dffa94e277db8eacf87e2e11", prompts)
-                self.assertIn("version-bound 6.2 work continues to use exactly", lower)
+        self.assertNotIn("CURRENT_PROTOCOL =", prompts)
+        self.assertNotIn("CURRENT_PUBLIC_REF =", prompts)
+        self.assertEqual(state["historical"]["6.2.0"]["public_source_ref"], "5a062ebc472755607b9dc66d33a5ebbc4b7429aa")
+        self.assertEqual(state["historical"]["6.2.0"]["recovery_ref"], "b59adc77efe6951912cfd705cc43830c58ca27d0")
+        self.assertEqual(state["accepted_current"]["version"], "6.4.0")
+        self.assertEqual(state["candidate"]["version"], "6.5.0")
 
     def test_accepted_61_recovery_and_bootstrap_remain_immutable(self) -> None:
-        recovery = "802e75af261efb4f70d71284d860613a2197b639"
-        bootstrap = "47e9155632c44493644b0b02fa1fa625703cf480"
-        versioning = self.read("source/shared/references/protocol-versioning-and-compatibility.md")
-        portability = self.read("PORTABILITY.md")
-        self.assertIn(f"6.1.0  -> {recovery}", versioning)
-        self.assertIn(recovery, portability)
-        self.assertIn(f"6.1.0 public-source bootstrap -> {bootstrap}", versioning)
-        self.assertIn(bootstrap, portability)
-        self.assertNotEqual(recovery, bootstrap)
-        self.assertIn("historical", versioning.lower())
+        state = yaml.safe_load(self.read("PROTOCOL-RELEASE-STATE.yaml"))
+        p61 = state["historical"]["6.1.0"]
+        self.assertEqual(p61["public_source_ref"], "47e9155632c44493644b0b02fa1fa625703cf480")
+        self.assertEqual(p61["recovery_ref"], "802e75af261efb4f70d71284d860613a2197b639")
+        self.assertNotEqual(p61["public_source_ref"], p61["recovery_ref"])
 
 
 if __name__ == "__main__":

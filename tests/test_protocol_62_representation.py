@@ -4,6 +4,8 @@ import os
 import posixpath
 import re
 import unittest
+
+import yaml
 import urllib.error
 import urllib.request
 from pathlib import Path
@@ -108,45 +110,14 @@ class Protocol62RepresentationTests(unittest.TestCase):
             self.assertIn("activation", text)
 
     def test_protocol_62_public_fallback_state_is_coherent(self):
-        bootstrap = current_public_bootstrap()
-        versioning = (REFERENCES / "protocol-versioning-and-compatibility.md").read_text().lower()
+        state = yaml.safe_load((ROOT / "PROTOCOL-RELEASE-STATE.yaml").read_text(encoding="utf-8"))
+        p62 = state["historical"]["6.2.0"]
+        self.assertEqual(p62["public_source_ref"], "5a062ebc472755607b9dc66d33a5ebbc4b7429aa")
+        self.assertEqual(p62["recovery_ref"], "b59adc77efe6951912cfd705cc43830c58ca27d0")
         prompt = (REFERENCES / "development-workflow-prompts.md").read_text().lower()
-        portability = (ROOT / "PORTABILITY.md").read_text().lower()
-        readme = (ROOT / "README.md").read_text().lower()
-        surfaces = (versioning, prompt, portability, readme)
-
-        self.assertIn(f"invalidated bootstrap attempt -> {INVALIDATED_BOOTSTRAP}", versioning)
-        self.assertNotIn(f"6.2.0 public-source bootstrap -> {INVALIDATED_BOOTSTRAP}", versioning)
-
-        if bootstrap is None:
-            for text in surfaces:
-                self.assertIn("automatic current-6.2 public fallback is unavailable", text)
-            self.assertIn("bootstrap self-reference rule", prompt)
-            self.assertNotIn("current 6.2 may fall back", prompt)
-        else:
-            self.assertNotEqual(bootstrap, INVALIDATED_BOOTSTRAP)
-            for text in surfaces:
-                self.assertIn(bootstrap, text)
-            current_version = (SOURCE / "PROTOCOL_VERSION").read_text().strip()
-            if current_version == "6.2.0":
-                self.assertIn(f"public_ref = {bootstrap}", prompt)
-                self.assertNotIn("automatic current-6.2 public fallback is unavailable", prompt)
-            elif current_version == "6.3.0":
-                self.assertIn(f"accepted_6_2_public_ref = {bootstrap}", prompt)
-                current = re.search(r"current_public_ref = ([^\s]+)", prompt)
-                self.assertIsNotNone(current)
-                current_ref = current.group(1)
-                self.assertNotEqual(current_ref, "1484c1d3caa49d87cc15bc52a5e775399c1dae1b")
-                self.assertTrue(current_ref == "unavailable_pending_replacement_bootstrap" or re.fullmatch(r"[0-9a-f]{40}", current_ref))
-            else:
-                self.assertEqual(current_version, "6.4.0")
-                self.assertIn(f"accepted_6_2_public_ref = {bootstrap}", prompt)
-                self.assertIn("current_protocol = 6.4.0", prompt)
-                self.assertIn("current_public_ref = e09a9d1480211eea2d16d722182bb5c6de1bee12", prompt)
-                self.assertIn("accepted_6_3_public_ref = 86c13cab6bdd1991dffa94e277db8eacf87e2e11", prompt)
-                self.assertIn("accepted_6_3_recovery = 9f353097fab36e325a325f1c2f9d9cec32e86177", prompt)
-            self.assertNotIn("automatic current-6.2 public fallback is unavailable", portability)
-            self.assertIn("repository-default bytes are never a substitute", prompt)
+        self.assertIn("designated project release-state owner", prompt)
+        self.assertNotIn("current_public_ref =", prompt)
+        self.assertIn("repository-default bytes are never a substitute", prompt)
 
     def test_published_protocol_62_bootstrap_remote_snapshot_is_real_and_route_complete(self):
         bootstrap = current_public_bootstrap()

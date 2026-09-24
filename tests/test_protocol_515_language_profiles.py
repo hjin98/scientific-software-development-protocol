@@ -35,7 +35,7 @@ class Protocol515LanguageProfileTests(unittest.TestCase):
     def test_shared_profile_direction_rejects_global_language_precedence(self) -> None:
         self.assertRegex(self.router, r"shared domain rule\s*->\s*language router\s*->\s*active language profile\(s\)\s*->\s*implementation-local concretization")
         self.assertIn("shared owners remain canonical", self.router)
-        self.assertIn("current protocol 6.2 shared domain doctrine is authoritative", self.router)
+        self.assertIn("current shared domain doctrine remains authoritative", self.router)
         self.assertNotIn("shared protocol 5 doctrine remains authoritative", self.router)
         forbidden = (
             r"python(?: profile)?\s+(?:globally\s+)?(?:outranks|overrides|takes precedence over)\s+c\+\+",
