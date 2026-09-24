@@ -65,9 +65,36 @@ jobs:
           python source/build_skills.py --output /tmp/protocol-dist
           python source/check_dist.py --expected /tmp/protocol-dist --committed dist
       - name: Verify orchestrator snapshot and Core
+        id: core
+        shell: bash
         run: |
-          python orchestrator/scripts/generate_protocol_snapshot.py --check
-          python orchestrator/scripts/run_core_tests.py
+          set +e
+          {
+            python orchestrator/scripts/generate_protocol_snapshot.py --check
+            snapshot_code=$?
+            if [ "$snapshot_code" -ne 0 ]; then
+              exit "$snapshot_code"
+            fi
+            python orchestrator/scripts/run_core_tests.py
+          } > /tmp/orchestrator-core.log 2>&1
+          code=$?
+          cat /tmp/orchestrator-core.log
+          echo "exit_code=$code" >> "$GITHUB_OUTPUT"
+          exit 0
+      - name: Persist failing Core evidence
+        if: steps.core.outputs.exit_code != '0'
+        shell: bash
+        run: |
+          mkdir -p qualification/ssdp65/evidence
+          cp /tmp/orchestrator-core.log qualification/ssdp65/evidence/LATEST-ORCHESTRATOR-CORE-REGRESSION.txt
+          git add qualification/ssdp65/evidence/LATEST-ORCHESTRATOR-CORE-REGRESSION.txt
+          if ! git diff --cached --quiet; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git commit -m "Record Protocol 6.5 Orchestrator Core regression evidence"
+            git push origin HEAD:ssdp-6.5-frontier-model-re-evaluation
+          fi
+          exit 1
       - name: Check whitespace
         run: git diff --check
       - name: Commit generated descendants when qualification passes
