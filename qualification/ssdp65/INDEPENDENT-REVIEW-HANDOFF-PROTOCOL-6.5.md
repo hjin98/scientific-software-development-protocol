@@ -1,147 +1,98 @@
 ---
 kind: independent-review-handoff
 protocol_under_review: 6.5.0
-status: ready-p15
+status: review-passed-awaiting-stakeholder-ratification
 accepted_control_p0: 55c085261eb827e3047637d045a8e6917ea6b962
-failed_candidate_p14: d792f219ad361b6acb2663833beec1c179ea5793
 immutable_candidate_p15: 4fced41c4d8cc7af02938334f7cd1d0b587c408a
 candidate_branch: ssdp-6.5-frontier-model-re-evaluation
 draft_pr: 33
 p15_mechanical_qualification_run: 36138585609
 p15_binding_descendant: acdf2afcdf9387a073219a29625f2d9180ee78ce
 p15_binding_qualification_run: 36139016587
-p15_repair_qualification: qualification/ssdp65/P15-REPAIR-QUALIFICATION.md
-p15_freeze_binding: qualification/ssdp65/P15-FREEZE-BINDING.md
-p15_binding_qualification: qualification/ssdp65/P15-BINDING-QUALIFICATION.md
-p14_review: qualification/ssdp65/INDEPENDENT-REVIEW-2026-09-25-PROTOCOL-6.5-P14-NO-PASS.md
+p15_readiness_descendant: 258a57d02a51f1cbe09d2c4b7a26e80c1b3e1f6a
+p15_readiness_run: 36139299965
+p15_review_record: qualification/ssdp65/INDEPENDENT-REVIEW-2026-09-25-PROTOCOL-6.5-P15-PASS.md
+p15_review_evidence_commit: 5a27173d3b91a96461ecffd7402cd8adad0eafaf
+p15_review_evidence_ref: hjin98/scientific-software-development-protocol@5a27173d3b91a96461ecffd7402cd8adad0eafaf:qualification/ssdp65/INDEPENDENT-REVIEW-2026-09-25-PROTOCOL-6.5-P15-PASS.md
+review_state: PASS
 stakeholder_ratification: NOT_REQUESTED
+public_source_ref: UNAVAILABLE
+recovery_ref: UNAVAILABLE
 ---
 
-# Independent Review Handoff — Protocol 6.5 P15
+# Protocol 6.5 P15 — Review Complete, Awaiting Stakeholder Ratification
 
-## Immutable Review target
+## Current disposition
 
-Perform one genuinely fresh independent assembled-candidate Review of exact immutable:
+The immutable Protocol 6.5 semantic candidate remains:
 
 `P15 = 4fced41c4d8cc7af02938334f7cd1d0b587c408a`
 
 against accepted Protocol 6.4 control:
 
-`P0 = 55c085261eb827e3047637d045a8e6917ea6b962`
+`P0 = 55c085261eb827e3047637d045a8e6917ea6b962`.
 
-P1-P14 are immutable failed candidates/historical evidence only. Do not substitute the mutable branch head or any
-later lifecycle descendant for P15.
+Fresh independent assembled-candidate Review is complete with **PASS** and no Serious Challenge or blocking finding.
 
-## Entering lifecycle state
+The durable Review record is:
 
-Binding descendant:
+`qualification/ssdp65/INDEPENDENT-REVIEW-2026-09-25-PROTOCOL-6.5-P15-PASS.md`
 
-`acdf2afcdf9387a073219a29625f2d9180ee78ce`
+published at immutable descendant:
 
-Binding workflow:
+`5a27173d3b91a96461ecffd7402cd8adad0eafaf`.
 
-`36139016587`
+The exact evidence route is:
 
-Expected state:
+`hjin98/scientific-software-development-protocol@5a27173d3b91a96461ecffd7402cd8adad0eafaf:qualification/ssdp65/INDEPENDENT-REVIEW-2026-09-25-PROTOCOL-6.5-P15-PASS.md`.
+
+## Meaning of PASS
+
+The Review disposition is exactly:
+
+`P15 is technically eligible for stakeholder ratification.`
+
+This is a technical eligibility result only. It is not stakeholder ratification.
+
+## Current lifecycle state
+
+The sole mutable owner `PROTOCOL-RELEASE-STATE.yaml` now binds:
 
 - accepted-current: Protocol 6.4;
 - candidate version: `6.5.0`;
 - candidate semantic ref: exact P15;
-- Review: `NOT_RUN`;
+- Review: `PASS`, bound to the immutable Review record above;
 - stakeholder ratification: `NOT_REQUESTED`;
 - public fallback: `UNAVAILABLE`;
-- recovery: `UNAVAILABLE`;
-- Protocol 7 D3/D4: unchanged.
+- recovery: `UNAVAILABLE`.
 
-Verify this independently rather than inheriting the handoff assertion.
+Later documentation/review/lifecycle descendants do not replace P15 as the semantic candidate.
 
-## Independence
+## Evidence already complete
 
-This context must not have authored the P15 stabilization repair.
+Mechanical qualification remains bounded evidence:
 
-Reconstruct applicable D1-D4/current project authority independently before relying on prior Reviews, P15 repair
-qualification, workplan closure assertions, or green CI. Treat those only as bounded evidence/hypotheses.
+- exact P15 workflow `36138585609`: PASS;
+- initial P15 binding workflow `36139016587`: PASS;
+- readiness workflow `36139299965`: PASS;
+- post-Review documentation repair and Review-publication descendants: complete repository acceptance PASS before this binding.
 
-Perform the Serious Challenge pass first. Reopen D3 only if accepted authority itself is materially contradictory,
-ambiguous, inadequate, or unrealizable.
+The independent Review separately performed the Serious Challenge pass, complete assembled-candidate semantic
+falsification, historical capability preservation checks, Protocol 7 isolation checks, and a fresh out-of-matrix Git
+holdout.
 
-## Final stabilization falsification
+## Next authorized gate
 
-P15 is intentionally a systemic closure candidate rather than another one-counterexample repair. Independently
-falsify the complete current D4 evidence-realization boundary:
+The next release action is **explicit stakeholder ratification of exact P15**.
 
-1. local durable evidence requires immutable full Git object identity; branch/tag/default/latest/abbreviated/revision
-   expressions cannot become HEALTHY merely because they currently resolve;
-2. active `git replace` and deprecated grafts cannot rewrite accepted-project ancestry or immutable evidence bytes;
-3. exact SHA owner/evidence routes remain valid positive controls;
-4. evidence paths resolve to exact Git blob/file artifacts, not directory/tree/submodule objects;
-5. repository path syntax is unambiguous and repository-relative;
-6. missing canonical parent/tree/blob/path objects fail closed;
-7. readable alternate/promisor-backed canonical objects remain usable;
-8. repair-acceptance containment and Git-native recurrence chronology use canonical topology and durable identities;
-9. canonical patch-ID/copy-equivalence evidence is replacement-independent;
-10. PEM root/family/notice/repair-acceptance YAML rejects duplicate keys;
-11. canonical family/notice records cannot hide in orphan fenced blocks;
-12. exactly one active-summary marker pair exists;
-13. release-state Review/ratification/publication/recovery ancestry remains canonical;
-14. owner deletion/reintroduction, genuine pre-owner classification, merge predecessor selection, parent-order and
-    timestamp independence remain correct;
-15. strict root/evidence parsing, semantic-version/history ordering, candidate succession, exact Review/ratification
-    subject binding, mutable-state uniqueness and fail-closed behavior remain closed.
+Until that human decision is supplied, do not:
 
-Construct at least one fresh holdout beyond the authored P15 tests, but classify only material violations of accepted
-authority as blockers. Do not manufacture a new candidate cycle from an implementation curiosity outside the protected
-outcome.
+- publish a Protocol 6.5 public fallback;
+- establish Protocol 6.5 recovery;
+- change `accepted_current`;
+- merge PR #33 as release cutover;
+- archive the 6.5 lifecycle as complete;
+- mutate Protocol 7 D3/D4.
 
-## Full assembled-candidate Review
-
-Independently re-establish:
-
-- Serious Challenge status;
-- DF-1 through DF-4;
-- P65-1 through P65-6 causal usefulness;
-- local-compliance/global-failure trajectories;
-- qualification-method limits and real-owner coverage;
-- Protocol 6.4 -> 6.5 capability preservation;
-- historical capability preservation from 5.13-5.16 and 6.0-6.4;
-- frozen historical profile/prompt identity;
-- source/generated/package/reference convergence;
-- evidence applicability/staleness;
-- simplicity and total-system complexity;
-- Protocol 7 D3/D4 isolation;
-- SSDP self-application.
-
-Use capability preservation, not obsolete wording/mechanism identity, as the preservation oracle.
-
-## Bounded evidence
-
-Exact P15 normal workflow:
-
-`36138585609`
-
-Binding workflow:
-
-`36139016587`
-
-Both completed successfully. They establish only their mechanical oracle scope and do not establish semantic Review
-PASS.
-
-Durable evidence includes:
-
-- `qualification/ssdp65/P15-REPAIR-QUALIFICATION.md`;
-- `qualification/ssdp65/P15-FREEZE-BINDING.md`;
-- `qualification/ssdp65/P15-BINDING-QUALIFICATION.md`;
-- `qualification/ssdp65/INDEPENDENT-REVIEW-2026-09-25-PROTOCOL-6.5-P14-NO-PASS.md`.
-
-## Disposition boundary
-
-PASS means only:
-
-`P15 is technically eligible for stakeholder ratification.`
-
-PASS does not ratify Protocol 6.5, publish the public fallback, establish recovery, change accepted-current, merge PR
-#33, or mutate Protocol 7 D3/D4.
-
-If a genuine semantic blocker survives, preserve P15 immutably and reopen at the earliest owning domain. If none
-survives, publish and bind the exact P15 Review result from a later lifecycle descendant, leaving stakeholder
-ratification as the next separate human gate.
+If P15 is ratified, publication/recovery/cutover must proceed through later descendants so immutable commits do not
+self-name future lifecycle mappings.
