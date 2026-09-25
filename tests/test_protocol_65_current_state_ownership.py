@@ -72,7 +72,7 @@ class Protocol65CurrentStateOwnershipTests(unittest.TestCase):
         version = (ROOT / "source/PROTOCOL_VERSION").read_text(encoding="utf-8").strip()
         changelog = (ROOT / "CHANGELOG.md").read_text(encoding="utf-8")
         readme = (ROOT / "README.md").read_text(encoding="utf-8")
-        self.assertRegex(changelog, rf"(?m)^###\\s+{re.escape(version)}\\b")
+        self.assertRegex(changelog, rf"(?m)^###\s+{re.escape(version)}\b")
         self.assertIn("[CHANGELOG.md](CHANGELOG.md)", readme)
         self.assertIn("[PROTOCOL-RELEASE-STATE.yaml](PROTOCOL-RELEASE-STATE.yaml)", readme)
 
