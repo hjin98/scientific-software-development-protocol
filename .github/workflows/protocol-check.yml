@@ -25,12 +25,10 @@ jobs:
         run: python source/release_state.py
       - name: Validate project engineering memory
         run: python source/project_engineering_memory.py PROJECT-ENGINEERING-MEMORY.md
-      - name: Diag discovery-path release-state alone
-        run: cd tests && python -m unittest test_protocol_65_release_state -v
-      - name: Diag discovery-path prefix through release-state
-        if: always()
+      - name: Diag exact discovery release-state only
         run: >-
-          cd tests && python -m unittest test_build_index_contract test_package_reference_closure test_protocol_511_tool_assistance test_protocol_512_convergence test_protocol_513_counterfactual_oracles test_protocol_513_live_tool_qualification test_protocol_513_oracle_family_closure test_protocol_513_tool_routing_codeql_compression test_protocol_515_language_profiles test_protocol_516_lifecycle_closeout test_protocol_516_long_horizon_quality test_protocol_516_orchestration test_protocol_59_review_rework test_protocol_59_route_uri_safety test_protocol_61_evidence_evolution test_protocol_62_closeout test_protocol_62_representation test_protocol_63_bootstrap test_protocol_63_closeout test_protocol_63_engineering_memory test_protocol_63_independent_review_repairs test_protocol_63_reopened_repairs test_protocol_64_axiomatic_traceability test_protocol_64_bootstrap_readiness test_protocol_65_current_state_ownership test_protocol_65_pem_canonical_git test_protocol_65_pem_parser_strictness test_protocol_65_pem_reconciliation test_protocol_65_pem_schema_parity test_protocol_65_release_state -v
+          python -m unittest discover -s tests
+          -p test_protocol_65_release_state.py -v
       - name: Run protocol regression tests
         if: always()
         run: python -m unittest discover -s tests -v
