@@ -1,7 +1,7 @@
 ---
 kind: independent-review-handoff
 protocol_under_review: 6.5.0
-status: ready-p13
+status: p13-no-pass-repair-open
 accepted_control_p0: 55c085261eb827e3047637d045a8e6917ea6b962
 failed_candidate_p1: b565e28aeacea002cefe27e6b9594fe99d653c0a
 failed_candidate_p2: e8edb353e172aef933ed5e58eeabe897d0cc98d1
@@ -183,3 +183,25 @@ or mutate Protocol 7 D3/D4.
 
 If a genuine semantic blocker survives, preserve P13 immutably, publish NO-PASS, reopen at the earliest owner, and
 require another candidate identity for semantic repair.
+
+
+## P13 Review completed — NO-PASS
+
+The fresh independent assembled-candidate Review of exact immutable P13
+`05a2b62550adadf271a27f6555da7173902c491c` completed with **NO-PASS** and no Serious Challenge.
+
+Durable Review evidence:
+
+`qualification/ssdp65/INDEPENDENT-REVIEW-2026-09-25-PROTOCOL-6.5-P13-NO-PASS.md`
+
+Blocking finding: **B65-P13-1 — self-hosted PEM accepted-base/evidence realization remains local-Git-overlay-sensitive.**
+
+The P12 release-state blocker families are repaired at `source/release_state.py`; the newly exposed defect is owned by
+D4 `source/project_engineering_memory.py`. The bounded repair contract is in the active D3->D4 implementation
+handoff §55.
+
+This handoff is no longer an authorization to repeat Review of P13. P13 is immutable failed Review evidence. The next
+authorized action is bounded D4 repair, followed by exact-candidate qualification of a new immutable candidate identity
+and a later fresh independent Review handoff.
+
+Stakeholder ratification remains not requested and is not authorized by this Review.

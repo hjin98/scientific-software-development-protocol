@@ -5,8 +5,8 @@ protocol_version: 6.4.0
 target_protocol_version: 6.5.0
 subject_baseline: P0 = Protocol 6.4 at 55c085261eb827e3047637d045a8e6917ea6b962 (recovery 74bc572ef516cae417437a2027eeff52a2e25c15)
 diagnostic_commit: 81375d8142a8130b80cd82f2304d3e16bc3fc390
-status: ready-p11-independent-review
-current_phase: PHASE VII P11 FROZEN / FRESH INDEPENDENT REVIEW REQUIRED
+status: p13-no-pass-pem-canonical-git-repair-open
+current_phase: PHASE VII P13 NO-PASS / BOUNDED PEM D4 REPAIR
 branch: ssdp-6.5-frontier-model-re-evaluation
 created_date: 2026-09-24
 adjudication: qualification/ssdp65/CROSS-MODEL-ADJUDICATION-2026-09-24.md
@@ -14,7 +14,7 @@ active_serious_challenge: none against accepted D1-D4 doctrine
 second_frontier_diagnostic: waived-for-this-cycle-by-stakeholder-resource-constraint
 design_closure: qualification/ssdp65/PHASE-IV-V-DESIGN-CLOSURE.md
 implementation_handoff: workplans/active/SSDP-6.5-D3-D4-IMPLEMENTATION-HANDOFF.md
-independent_review: qualification/ssdp65/INDEPENDENT-REVIEW-2026-09-25-PROTOCOL-6.5-P10-NO-PASS.md
+independent_review: qualification/ssdp65/INDEPENDENT-REVIEW-2026-09-25-PROTOCOL-6.5-P13-NO-PASS.md
 ---
 
 # Protocol 6.5 Frontier-Model Re-evaluation and Successor Workplan
@@ -1173,3 +1173,27 @@ The durable independent-Review handoff now targets exact P13. P1-P12 remain immu
 evidence.
 
 The next authorized action is a genuinely fresh independent assembled-candidate Review of exact P13.
+
+
+## 49. P13 independent Review NO-PASS and bounded PEM D4 reopen
+
+Fresh independent assembled-candidate Review of exact P13
+`05a2b62550adadf271a27f6555da7173902c491c` is **NO-PASS**.
+
+Durable Review:
+
+`qualification/ssdp65/INDEPENDENT-REVIEW-2026-09-25-PROTOCOL-6.5-P13-NO-PASS.md`
+
+Serious Challenge: none. Accepted Protocol 6.5 D3 remains closed.
+
+The P12 release-state repairs re-falsify successfully at their current owner. The surviving blocker is a distinct
+out-of-matrix self-application defect, **B65-P13-1**: the current PEM validator still lets local replace/graft state
+rewrite accepted-project ancestry and immutable authority/evidence content.
+
+The exact repair contract is owned by
+`workplans/active/SSDP-6.5-D3-D4-IMPLEMENTATION-HANDOFF.md` §55. Reopen only that bounded D4 PEM validation scope.
+
+P13 remains immutable. Any semantic repair requires a new candidate identity and fresh qualification/review.
+
+No stakeholder ratification, public fallback, recovery, accepted-current cutover, PR merge, or Protocol 7 mutation is
+authorized.

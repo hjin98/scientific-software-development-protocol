@@ -3,7 +3,7 @@ kind: implementation-workplan
 workplan_id: SSDP-6.5-D3-D4-IMPLEMENTATION-HANDOFF
 protocol_version: 6.4.0
 target_protocol_version: 6.5.0
-status: ready-p11-independent-review
+status: p13-no-pass-pem-canonical-git-repair-open
 parent_workplan: workplans/active/SSDP-6.5-FRONTIER-MODEL-RE-EVALUATION.md
 design_authority: qualification/ssdp65/PHASE-IV-V-DESIGN-CLOSURE.md
 baseline: 55c085261eb827e3047637d045a8e6917ea6b962
@@ -1349,3 +1349,40 @@ The next authorized stage is a genuinely fresh independent assembled-candidate R
 
 No stakeholder ratification, public-fallback publication, recovery establishment, accepted-current cutover, PR merge,
 or Protocol 7 D3/D4 mutation is authorized.
+
+
+## 55. P13 independent Review NO-PASS — PEM canonical-Git realization repair
+
+Fresh independent assembled-candidate Review of exact immutable P13
+`05a2b62550adadf271a27f6555da7173902c491c` issues **NO-PASS** with no Serious Challenge.
+
+Durable Review evidence:
+
+`qualification/ssdp65/INDEPENDENT-REVIEW-2026-09-25-PROTOCOL-6.5-P13-NO-PASS.md`
+
+One new out-of-matrix D4 blocker survives: **B65-P13-1**.
+
+`source/project_engineering_memory.py` still uses ordinary Git revision traversal/content reads to establish
+accepted-project containment, authority/evidence bindings, repair-acceptance chronology, recurrence chronology, and
+patch-identity evidence. Fresh real-Git holdouts show:
+
+- `git replace` can make canonical siblings satisfy the ordinary `merge-base --is-ancestor` predicate;
+- deprecated `.git/info/grafts` can do the same even when `--no-replace-objects` is added to `merge-base`;
+- ordinary `git show <immutable-sha>:<path>` reads replacement-object bytes rather than canonical bytes.
+
+This violates P65-1 self-application, P65-3 evidence-claim congruence, and P65-5 exact accepted/base PEM semantics at
+D4. Accepted D3 remains closed.
+
+Reopen only the PEM validator and directly affected test/qualification surface. Canonical immutable reads must defeat
+replacement objects; ancestry must use raw canonical commit-parent authority and therefore also defeat grafts; missing
+required canonical objects must fail closed. Preserve readable alternate/promisor-backed canonical objects.
+
+Prefer consolidation/reuse of the existing P13 raw-parent canonical Git mechanism over introducing a second durable
+topology authority. If a shared implementation helper is extracted, it is a bounded D4 Git utility, not a new
+semantic owner.
+
+P13 remains immutable failed Review evidence. Any semantic repair requires a new candidate identity, exact-candidate
+normal CI, later Review-NOT_RUN binding, and another fresh independent assembled-candidate Review.
+
+No stakeholder ratification, public fallback, recovery, accepted-current cutover, PR merge, or Protocol 7 mutation is
+authorized.
