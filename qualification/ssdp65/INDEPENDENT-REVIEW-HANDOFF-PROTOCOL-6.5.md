@@ -1,7 +1,7 @@
 ---
 kind: independent-review-handoff
 protocol_under_review: 6.5.0
-status: p13-no-pass-repair-open
+status: p14-binding-qualification-pending
 accepted_control_p0: 55c085261eb827e3047637d045a8e6917ea6b962
 failed_candidate_p1: b565e28aeacea002cefe27e6b9594fe99d653c0a
 failed_candidate_p2: e8edb353e172aef933ed5e58eeabe897d0cc98d1
@@ -217,3 +217,17 @@ The current lifecycle owner binds exact P13 to `NO_PASS` with:
 
 The next handoff must target a newly frozen replacement candidate after the bounded PEM canonical-Git repair. Do not
 reuse P13 as a semantic Review target.
+
+
+## P14 candidate frozen; binding qualification pending
+
+Exact immutable replacement candidate:
+
+`P14 = d792f219ad361b6acb2663833beec1c179ea5793`
+
+Exact-candidate normal workflow:
+
+`36133381631` — PASS.
+
+This lifecycle descendant binds P14 at Review `NOT_RUN`. Do not begin independent Review until the binding descendant
+itself passes the normal workflow and the handoff is refreshed with that immutable binding identity.

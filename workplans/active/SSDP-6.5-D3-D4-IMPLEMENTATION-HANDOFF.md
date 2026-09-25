@@ -3,7 +3,7 @@ kind: implementation-workplan
 workplan_id: SSDP-6.5-D3-D4-IMPLEMENTATION-HANDOFF
 protocol_version: 6.4.0
 target_protocol_version: 6.5.0
-status: p13-repair-implemented-awaiting-exact-ci
+status: p14-bound-awaiting-binding-ci
 parent_workplan: workplans/active/SSDP-6.5-FRONTIER-MODEL-RE-EVALUATION.md
 design_authority: qualification/ssdp65/PHASE-IV-V-DESIGN-CLOSURE.md
 baseline: 55c085261eb827e3047637d045a8e6917ea6b962
@@ -1434,3 +1434,19 @@ and readable alternate object stores.
 
 This commit is only a prospective replacement semantic candidate. P13 remains immutable NO-PASS evidence. Do not
 assign the next candidate identity until exact-commit normal CI passes.
+
+
+## 58. P14 freeze and lifecycle binding
+
+Exact repair commit `d792f219ad361b6acb2663833beec1c179ea5793` passed the complete normal workflow `36133381631`.
+
+The immutable replacement semantic candidate is therefore frozen as:
+
+`P14 = d792f219ad361b6acb2663833beec1c179ea5793`
+
+This descendant changes only lifecycle/evidence state: root `PROTOCOL-RELEASE-STATE.yaml` now binds exact P14 with
+Review `NOT_RUN`, ratification `NOT_REQUESTED`, and public fallback/recovery `UNAVAILABLE`. Accepted-current
+remains Protocol 6.4 and Protocol 7 D3/D4 remains unchanged.
+
+P13 remains immutable NO-PASS evidence. No stakeholder ratification, publication, recovery, accepted-current cutover,
+PR merge, or Protocol 7 mutation is authorized.

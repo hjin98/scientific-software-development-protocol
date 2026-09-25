@@ -5,8 +5,8 @@ protocol_version: 6.4.0
 target_protocol_version: 6.5.0
 subject_baseline: P0 = Protocol 6.4 at 55c085261eb827e3047637d045a8e6917ea6b962 (recovery 74bc572ef516cae417437a2027eeff52a2e25c15)
 diagnostic_commit: 81375d8142a8130b80cd82f2304d3e16bc3fc390
-status: p13-repair-implemented-awaiting-exact-ci
-current_phase: PHASE VII B65-P13-1 REPAIR / EXACT-CANDIDATE CI REQUIRED
+status: p14-bound-awaiting-binding-ci
+current_phase: PHASE VII P14 FROZEN / BINDING QUALIFICATION REQUIRED
 branch: ssdp-6.5-frontier-model-re-evaluation
 created_date: 2026-09-24
 adjudication: qualification/ssdp65/CROSS-MODEL-ADJUDICATION-2026-09-24.md
@@ -1217,3 +1217,11 @@ immutable reads into one D4 utility shared by release-state and PEM validation.
 
 P13 remains immutable NO-PASS evidence. The repaired commit is not assigned the next candidate identity until its exact
 normal workflow passes. No ratification, publication, recovery, cutover, PR merge, or Protocol 7 mutation is authorized.
+
+
+## 52. P14 frozen and bound for qualification
+
+The B65-P13-1 repair commit `d792f219ad361b6acb2663833beec1c179ea5793` passed exact-candidate workflow `36133381631` and is frozen as P14.
+
+A later lifecycle descendant binds exact P14 at Review `NOT_RUN`; binding qualification must pass before a fresh
+independent assembled-candidate Review is authorized.
