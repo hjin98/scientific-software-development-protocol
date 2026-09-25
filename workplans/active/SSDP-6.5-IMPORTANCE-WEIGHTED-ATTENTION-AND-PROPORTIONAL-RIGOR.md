@@ -3,7 +3,7 @@ kind: protocol-doctrine-workplan
 workplan_id: SSDP-6.5-IMPORTANCE-WEIGHTED-ATTENTION-AND-PROPORTIONAL-RIGOR
 protocol_version: 6.4.0
 target_protocol_version: 6.5.0
-status: design-reviewed-ready-for-implementation
+status: implementation-in-progress
 branch: ssdp-6.5-frontier-model-re-evaluation
 accepted_control: 55c085261eb827e3047637d045a8e6917ea6b962
 superseded_review_ready_candidate: a2e5f01e258f249f74d1eda74b883efb98fd7d59
@@ -17,7 +17,7 @@ created_date: 2026-09-25
 
 ## 1. Disposition
 
-**D3/protocol-doctrine reopen — reviewed and implementation-ready.**
+**D3/protocol-doctrine reopen — reviewed; D4 implementation in progress.**
 
 P18 `a2e5f01e258f249f74d1eda74b883efb98fd7d59` remains immutable mechanically qualified historical evidence.
 Its planned independent Review is suspended because P18 repaired the release-state defect B65-P17-1 but did not address

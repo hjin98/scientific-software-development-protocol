@@ -5,8 +5,8 @@ protocol_version: 6.4.0
 target_protocol_version: 6.5.0
 subject_baseline: P0 = Protocol 6.4 at 55c085261eb827e3047637d045a8e6917ea6b962 (recovery 74bc572ef516cae417437a2027eeff52a2e25c15)
 diagnostic_commit: 81375d8142a8130b80cd82f2304d3e16bc3fc390
-status: d3-workplan-reviewed-implementation-ready
-current_phase: PHASE V D3 DOCTRINE REOPEN — WORKPLAN REVIEW COMPLETE / IMPLEMENTATION READY
+status: proportional-rigor-implementation-in-progress
+current_phase: PHASE VI D4 IMPLEMENTATION — IMPORTANCE-WEIGHTED ATTENTION / PROPORTIONAL RIGOR
 branch: ssdp-6.5-frontier-model-re-evaluation
 created_date: 2026-09-24
 adjudication: qualification/ssdp65/CROSS-MODEL-ADJUDICATION-2026-09-24.md
@@ -1484,3 +1484,9 @@ authority.
 Prior workplan-review chronology remains Git/history evidence rather than appended current authority. Implementation
 must now produce and qualify a replacement Protocol 6.5 semantic candidate. No ratification, publication, recovery,
 accepted-current cutover, PR #33 merge, or Protocol 7 D3/D4 mutation is authorized.
+
+## 67. Proportional-rigor implementation started
+
+D4 implementation is executing the reviewed proportional-rigor contract at existing canonical owners. The change is intentionally mechanism-light: no priority engine, scoring database, evidence registry, lifecycle role, or new control plane. Canonical doctrine/roles/templates, focused persistence tests, user-facing README/CHANGELOG/history, generated packages, and final assembled qualification are the affected surfaces.
+
+P18 remains immutable historical mechanical evidence; no release-state candidate binding changes until a replacement assembled semantic candidate passes exact-candidate qualification.
