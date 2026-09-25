@@ -1555,3 +1555,18 @@ Focused regressions cover valid stale-sibling merge, illegal sibling ancestry, a
 replacement semantic candidate is the contents commit containing this repair after exact-candidate qualification.
 
 No ratification, publication, recovery, accepted-current cutover, PR #33 merge, or Protocol 7 mutation is authorized.
+
+
+## 70. P21 replacement-candidate freeze
+
+The bounded B65-P20-1 merge-parent repair is frozen as immutable replacement candidate:
+
+`P21 = 7f7b5e24858e813e45ace867a7f8ea5180f43bf0`
+
+Exact-P21 workflow `36202537899` passed both complete jobs. The repair keeps normal inherited-state merges from falsely
+treating stale siblings as independent promotions while preserving recursive sibling-history validation, historical
+mapping continuity, accepted-current monotonicity, and P20's exact-parent predecessor-evidence checks.
+
+This lifecycle descendant binds exact P21 with Review `NOT_RUN`, ratification `NOT_REQUESTED`, public fallback/recovery
+`UNAVAILABLE`, accepted-current Protocol 6.4, and Protocol 7 D3/D4 unchanged. Binding workflow qualification is the
+next gate.

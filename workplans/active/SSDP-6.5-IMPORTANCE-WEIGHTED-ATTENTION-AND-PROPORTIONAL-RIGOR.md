@@ -691,3 +691,10 @@ transition.
 
 The implementation adds no registry, replay engine, topology service, compatibility plane, priority machinery, or new
 lifecycle role. Exact-candidate CI is required before freeze binding.
+
+
+## 21. P21 repair freeze
+
+The B65-P20-1 D4 repair is frozen as exact P21 `7f7b5e24858e813e45ace867a7f8ea5180f43bf0`, with exact-candidate workflow `36202537899` PASS. The
+proportional-rigor D1-D3 contract remains unchanged. The binding descendant changes lifecycle/evidence coordination only
+and requires its own workflow before fresh Review.

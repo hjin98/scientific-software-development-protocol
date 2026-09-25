@@ -1,6 +1,6 @@
 ---
 kind: blocking-repair-qualification
-status: implementation-complete-awaiting-exact-candidate-ci
+status: exact-candidate-qualified-binding-pending
 protocol_version: 6.4.0
 target_protocol_version: 6.5.0
 source_review: qualification/ssdp65/INDEPENDENT-REVIEW-2026-09-25-PROTOCOL-6.5-P20-NO-PASS.md
@@ -10,6 +10,9 @@ repair_owner: source/release_state.py
 serious_challenge: none
 preservation_review: pass
 stakeholder_ratification: not_authorized
+exact_candidate: 7f7b5e24858e813e45ace867a7f8ea5180f43bf0
+exact_candidate_workflow: 36202537899
+exact_candidate_workflow_result: PASS
 date: 2026-09-25
 ---
 
@@ -60,3 +63,10 @@ identity is known. It requires exact-candidate mechanical qualification before a
 
 No stakeholder ratification, publication, recovery, accepted-current cutover, PR #33 merge, or Protocol 7 mutation is
 authorized.
+
+
+## Exact-candidate qualification
+
+Replacement candidate `7f7b5e24858e813e45ace867a7f8ea5180f43bf0` passed ordinary workflow `36202537899` with both build and Orchestrator Core jobs successful.
+The release-state binding descendant is lifecycle/evidence-only and requires its own ordinary workflow before fresh
+independent Review.
