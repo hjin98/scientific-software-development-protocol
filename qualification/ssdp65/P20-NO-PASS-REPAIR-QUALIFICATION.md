@@ -1,6 +1,6 @@
 ---
 kind: blocking-repair-qualification
-status: exact-candidate-qualified-binding-pending
+status: repair-qualified-review-ready
 protocol_version: 6.4.0
 target_protocol_version: 6.5.0
 source_review: qualification/ssdp65/INDEPENDENT-REVIEW-2026-09-25-PROTOCOL-6.5-P20-NO-PASS.md
@@ -13,6 +13,9 @@ stakeholder_ratification: not_authorized
 exact_candidate: 7f7b5e24858e813e45ace867a7f8ea5180f43bf0
 exact_candidate_workflow: 36202537899
 exact_candidate_workflow_result: PASS
+binding_descendant: e70d5331c658cc135bd8bc5d4dc6d18e52018e8e
+binding_workflow: 36202638294
+binding_workflow_result: PASS
 date: 2026-09-25
 ---
 
@@ -70,3 +73,12 @@ authorized.
 Replacement candidate `7f7b5e24858e813e45ace867a7f8ea5180f43bf0` passed ordinary workflow `36202537899` with both build and Orchestrator Core jobs successful.
 The release-state binding descendant is lifecycle/evidence-only and requires its own ordinary workflow before fresh
 independent Review.
+
+
+## Binding qualification
+
+Binding descendant `e70d5331c658cc135bd8bc5d4dc6d18e52018e8e` passed ordinary workflow `36202638294` with both complete jobs. It binds exact P21
+while leaving Review `NOT_RUN`, ratification `NOT_REQUESTED`, public fallback/recovery `UNAVAILABLE`,
+accepted-current Protocol 6.4, and Protocol 7 D3/D4 unchanged.
+
+The bounded repair is mechanically qualified and ready for fresh independent assembled-candidate Review.

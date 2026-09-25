@@ -1,6 +1,6 @@
 ---
 kind: semantic-candidate-freeze-binding
-status: binding-awaiting-qualification
+status: review-ready
 protocol_version: 6.4.0
 target_protocol_version: 6.5.0
 p0: 55c085261eb827e3047637d045a8e6917ea6b962
@@ -10,6 +10,8 @@ repaired_blocker: B65-P20-1
 candidate_ref: 7f7b5e24858e813e45ace867a7f8ea5180f43bf0
 semantic_ref: 7f7b5e24858e813e45ace867a7f8ea5180f43bf0
 exact_candidate_workflow: 36202537899
+binding_descendant: e70d5331c658cc135bd8bc5d4dc6d18e52018e8e
+binding_workflow: 36202638294
 review_state: NOT_RUN
 stakeholder_ratification: NOT_REQUESTED
 public_source_ref: UNAVAILABLE
@@ -27,3 +29,12 @@ accepted-current. Review remains `NOT_RUN`; stakeholder ratification remains `NO
 recovery remain `UNAVAILABLE`.
 
 No ratification, publication, recovery, accepted-current cutover, PR #33 merge, or Protocol 7 mutation is authorized.
+
+
+## Binding qualification
+
+Binding descendant `e70d5331c658cc135bd8bc5d4dc6d18e52018e8e` passed workflow `36202638294` with the same complete build and Orchestrator Core jobs.
+Relative to exact P21, this descendant changes lifecycle/evidence coordination only.
+
+P21 is ready for one fresh independent assembled-candidate Review. Review remains `NOT_RUN`; this record does not
+ratify, publish, establish recovery, advance accepted-current, merge PR #33, or mutate Protocol 7.

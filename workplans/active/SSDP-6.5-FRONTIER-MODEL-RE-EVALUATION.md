@@ -1570,3 +1570,15 @@ mapping continuity, accepted-current monotonicity, and P20's exact-parent predec
 This lifecycle descendant binds exact P21 with Review `NOT_RUN`, ratification `NOT_REQUESTED`, public fallback/recovery
 `UNAVAILABLE`, accepted-current Protocol 6.4, and Protocol 7 D3/D4 unchanged. Binding workflow qualification is the
 next gate.
+
+
+## 71. P21 binding qualification — fresh Review ready
+
+Exact P21 `7f7b5e24858e813e45ace867a7f8ea5180f43bf0` passed workflow `36202537899`; binding descendant `e70d5331c658cc135bd8bc5d4dc6d18e52018e8e` passed workflow
+`36202638294`.
+
+P21 is now the sole semantic Review target with Review `NOT_RUN`, ratification `NOT_REQUESTED`, public
+fallback/recovery `UNAVAILABLE`, accepted-current Protocol 6.4, and Protocol 7 D3/D4 unchanged.
+
+P20's NO-PASS Review remains immutable historical evidence. The next gate is one genuinely fresh independent
+assembled-candidate Review of exact P21.

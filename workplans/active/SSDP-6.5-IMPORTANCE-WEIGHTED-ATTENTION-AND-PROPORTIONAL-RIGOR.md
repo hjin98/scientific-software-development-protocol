@@ -698,3 +698,10 @@ lifecycle role. Exact-candidate CI is required before freeze binding.
 The B65-P20-1 D4 repair is frozen as exact P21 `7f7b5e24858e813e45ace867a7f8ea5180f43bf0`, with exact-candidate workflow `36202537899` PASS. The
 proportional-rigor D1-D3 contract remains unchanged. The binding descendant changes lifecycle/evidence coordination only
 and requires its own workflow before fresh Review.
+
+
+## 22. P21 binding qualification — fresh Review ready
+
+Exact P21 `7f7b5e24858e813e45ace867a7f8ea5180f43bf0` passed workflow `36202537899`; binding descendant `e70d5331c658cc135bd8bc5d4dc6d18e52018e8e` passed workflow
+`36202638294`. B65-P20-1 is closed at implementation/qualification scope without reopening the proportional-rigor
+D1-D3 contract. Fresh independent assembled-candidate Review is the next gate.
