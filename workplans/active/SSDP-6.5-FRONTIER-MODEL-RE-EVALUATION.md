@@ -21,7 +21,7 @@ independent_review: qualification/ssdp65/INDEPENDENT-REVIEW-2026-09-24-PROTOCOL-
 
 ## 1. Current disposition
 
-\`\`\`text
+```text
 P0 CONTROL:                         FROZEN — 55c085261eb827e3047637d045a8e6917ea6b962
 P1-P9:                              FROZEN / FAILED INDEPENDENT REVIEW
 P9 CANDIDATE:                       FROZEN — fb347272c70b6225743fdc99e9bec8b4197aad49
@@ -36,7 +36,7 @@ PUBLIC 6.5 FALLBACK:                UNAVAILABLE
 6.5 RATIFICATION:                   NOT REQUESTED
 ACCEPTED CURRENT:                   Protocol 6.4
 PROTOCOL 7 D3/D4:                   OUT OF SCOPE / UNCHANGED
-\`\`\`
+```
 
 The frozen Opus findings remain evidence, not successor authority. The admitted defect set is the adjudicated four-family model below.
 
