@@ -3,7 +3,7 @@ kind: protocol-doctrine-workplan
 workplan_id: SSDP-6.5-IMPORTANCE-WEIGHTED-ATTENTION-AND-PROPORTIONAL-RIGOR
 protocol_version: 6.4.0
 target_protocol_version: 6.5.0
-status: implementation-in-progress
+status: p19-frozen-binding-qualification-pending
 branch: ssdp-6.5-frontier-model-re-evaluation
 accepted_control: 55c085261eb827e3047637d045a8e6917ea6b962
 superseded_review_ready_candidate: a2e5f01e258f249f74d1eda74b883efb98fd7d59
@@ -17,7 +17,7 @@ created_date: 2026-09-25
 
 ## 1. Disposition
 
-**D3/protocol-doctrine reopen — reviewed; D4 implementation in progress.**
+**D3/protocol-doctrine reopen — P19 implementation complete; binding qualification pending.**
 
 P18 `a2e5f01e258f249f74d1eda74b883efb98fd7d59` remains immutable mechanically qualified historical evidence.
 Its planned independent Review is suspended because P18 repaired the release-state defect B65-P17-1 but did not address
@@ -603,3 +603,21 @@ Reopen if implementation shows that:
 
 Do not reopen because an old fixture/test encodes superseded uniform-rigor behavior; reconcile it against this current
 contract.
+
+
+## 16. P19 implementation freeze
+
+The reviewed proportional-rigor implementation is frozen as immutable semantic candidate:
+
+`P19 = b38f2525677888956c4802afd758c98c65b79f1c`
+
+Exact-P19 ordinary workflow `36195532806` passed both complete jobs, including inherited regression, release-state/PEM
+validation, package build/independent validation, committed distribution parity, documentation persistence,
+whitespace, Protocol snapshot parity, and Orchestrator Core.
+
+P19 contains the completed documentation closeout and regenerated generic distributions. The temporary one-shot
+distribution-regeneration helper is absent from the P19 tree; it was implementation tooling only.
+
+This descendant binds exact P19 in the sole mutable release-state owner with Review `NOT_RUN`, stakeholder
+ratification `NOT_REQUESTED`, public fallback/recovery `UNAVAILABLE`, accepted-current Protocol 6.4, and Protocol 7
+D3/D4 unchanged. Binding workflow qualification is required before independent Review is authorized.

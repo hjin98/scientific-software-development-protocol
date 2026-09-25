@@ -1,11 +1,13 @@
 ---
 kind: ssdp65-proportional-rigor-implementation-qualification
-status: prefreeze-semantic-qualification
+status: p19-frozen-binding-pending
 protocol_version: 6.4.0
 target_protocol_version: 6.5.0
 accepted_control_p0: 55c085261eb827e3047637d045a8e6917ea6b962
 superseded_candidate_p18: a2e5f01e258f249f74d1eda74b883efb98fd7d59
 date: 2026-09-25
+immutable_candidate_p19: b38f2525677888956c4802afd758c98c65b79f1c
+exact_p19_workflow: 36195532806
 independent_review: not-performed
 serious_challenge: none-to-reviewed-workplan
 ---
@@ -14,8 +16,8 @@ serious_challenge: none-to-reviewed-workplan
 
 ## Scope
 
-This is **implementation-authored pre-freeze qualification**, not independent semantic Review and not stakeholder
-ratification. It records the decision behavior the assembled replacement candidate must exhibit under the reviewed
+This is **implementation-authored qualification of frozen P19**, not independent semantic Review and not stakeholder
+ratification. Exact P19 `b38f2525677888956c4802afd758c98c65b79f1c` passed ordinary workflow `36195532806` across both complete jobs. It records the decision behavior the assembled replacement candidate must exhibit under the reviewed
 workplan:
 
 `workplans/active/SSDP-6.5-IMPORTANCE-WEIGHTED-ATTENTION-AND-PROPORTIONAL-RIGOR.md`
@@ -82,15 +84,22 @@ This strengthening must preserve:
 It introduces no priority engine, numeric risk score, evidence registry, deferred-work ledger, additional lifecycle role,
 or prose-quality parser.
 
-## Pre-freeze completion conditions
+## Freeze result
 
-Before the replacement semantic candidate is frozen:
+P19 is frozen at `b38f2525677888956c4802afd758c98c65b79f1c`.
 
-1. canonical source/role/template changes are complete;
-2. generated skills/profile descendants are regenerated from canonical source;
-3. README/CHANGELOG/history closeout is complete;
-4. objective documentation persistence checks pass;
-5. inherited regression, release-state/PEM validation, package parity, frozen-resource checks and Orchestrator Core pass;
-6. the final diff is inspected for unintended bureaucracy or weakening of mandatory acceptance.
+Exact workflow `36195532806` passed:
 
-The exact candidate SHA and exact workflow run are recorded only after that immutable commit exists.
+- release-state and PEM validation;
+- complete protocol regression;
+- canonical skill build and independent package validation;
+- committed distribution parity, including regenerated ZIP transports;
+- patch whitespace;
+- Protocol snapshot parity and the Orchestrator Core acceptance suite.
+
+README/CHANGELOG/history closeout and the bounded release-document persistence check are included in P19. The final
+implementation adds no priority engine, numeric score, evidence registry, deferred-work ledger, lifecycle role, or
+prose-quality parser.
+
+The next gate is mechanical qualification of a later lifecycle descendant binding this exact P19 with Review
+`NOT_RUN`, ratification `NOT_REQUESTED`, and publication/recovery unavailable.
