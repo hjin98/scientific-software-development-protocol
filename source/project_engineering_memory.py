@@ -449,12 +449,12 @@ def evidence_route_health(route: EvidenceRoute, doc: PemDocument) -> tuple[str, 
             normalized = re.sub(r"[-_]+", " ", locator).strip().lower()
             normalized_text = re.sub(r"[-_]+", " ", text).lower()
             if normalized and normalized in normalized_text:
-                return "HEALTHY", "immutable commit, file path, and normalized stable locator resolve"
+                return "HEALTHY", "commit, repository path, and normalized stable locator resolve"
             if re.fullmatch(r"[A-Za-z0-9_.:/ -]+", locator):
                 return "UNAVAILABLE", "declared stable locator is absent from the immutable repository file"
             return "REVIEW_REQUIRED", "stable locator syntax is not mechanically interpretable by schema-1 text-anchor realization"
-        return "HEALTHY", "immutable commit, file path, and stable locator resolve"
-    return "HEALTHY", "immutable commit and file path resolve"
+        return "HEALTHY", "commit, repository path, and stable locator resolve"
+    return "HEALTHY", "commit and repository path resolve"
 
 def _safe_detail_path(root: Path, raw: Any) -> tuple[Path, str | None]:
     expected_digest: str | None = None
