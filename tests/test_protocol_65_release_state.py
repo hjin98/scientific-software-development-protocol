@@ -1286,16 +1286,25 @@ candidate:
             )
             self._run_topology_git(root, "reset", "--hard", merge_ref)
 
-            old_order = self._run_topology_git(
-                root,
-                "log",
-                "-3",
-                "--format=%H",
-                "--",
-                "PROTOCOL-RELEASE-STATE.yaml",
-            ).splitlines()
-            self.assertGreaterEqual(len(old_order), 2)
-            self.assertEqual(old_order[1], sibling_ref)
+            governed_time = int(
+                self._run_topology_git(
+                    root,
+                    "show",
+                    "-s",
+                    "--format=%ct",
+                    governed_ref,
+                )
+            )
+            sibling_time = int(
+                self._run_topology_git(
+                    root,
+                    "show",
+                    "-s",
+                    "--format=%ct",
+                    sibling_ref,
+                )
+            )
+            self.assertGreater(sibling_time, governed_time)
 
             errors: list[str] = []
             states = release_state._previous_governed_release_states(
