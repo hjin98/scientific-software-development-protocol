@@ -182,3 +182,32 @@ or mutate Protocol 7 D3/D4.
 
 If a genuine semantic blocker survives, preserve P11 immutably, publish NO-PASS, reopen at the earliest owner, and
 require another candidate identity for semantic repair.
+
+
+## P11 independent Review disposition — 2026-09-25
+
+Fresh independent assembled-candidate Review of exact P11
+`6352accc7962fc188976fc1bcea5e081681d99c5` is **NO-PASS**.
+
+Durable Review:
+
+`qualification/ssdp65/INDEPENDENT-REVIEW-2026-09-25-PROTOCOL-6.5-P11-NO-PASS.md`
+
+One genuine D4 blocker survives:
+
+**B65-P11-1 — non-shallow Git state can still be mistaken for complete canonical ancestry.**
+
+P11's shallow guard does not cover non-shallow repositories in which required historical owner objects are
+unreadable/unavailable, and ordinary Git ancestry can be locally rewritten by replace/graft overlays. In both cases
+the production negative ancestry proof can erase a governed owner interval while authored tests and normal CI remain
+green.
+
+Serious Challenge: none. Accepted Protocol 6.5 D3 remains closed.
+
+P11 is immutable failed Review evidence and is not technically eligible for stakeholder ratification. The existing
+D3->D4 workplan is reopened at the release-state ancestry classifier. Any semantic repair requires a new immutable
+candidate identity, exact-candidate qualification, later lifecycle binding, and another fresh independent assembled-
+candidate Review.
+
+No stakeholder ratification, public fallback, recovery, accepted-current cutover, PR merge, or Protocol 7 D3/D4
+mutation is authorized.

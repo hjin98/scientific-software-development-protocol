@@ -1071,3 +1071,58 @@ Durable qualification records:
 
 The next authorized stage is a genuinely fresh independent assembled-candidate Review of exact P11. No stakeholder
 ratification, publication, recovery, accepted-current cutover, PR merge, or Protocol 7 D3/D4 mutation is authorized.
+
+
+## 48. P11 independent Review NO-PASS — canonical ancestry completeness remains unsound
+
+Fresh independent assembled-candidate Review of immutable P11
+`6352accc7962fc188976fc1bcea5e081681d99c5` issues **NO-PASS**.
+
+Durable Review:
+
+`qualification/ssdp65/INDEPENDENT-REVIEW-2026-09-25-PROTOCOL-6.5-P11-NO-PASS.md`
+
+### B65-P11-1 — non-shallow Git state can still be mistaken for complete canonical ancestry
+
+P11 correctly fails closed for the authored shallow-history cases, but its negative ancestry proof remains too weak.
+
+Two fresh real-Git holdouts falsify it:
+
+1. a historical governed owner exists, but its historical blob is unavailable while commit/tree traversal remains
+   non-shallow; `_release_state_at_ref(..., missing_ok=True)` converts the failed content read to
+   `_MISSING_RELEASE_STATE`, and P11 returns "pre-owner";
+2. a local Git replacement ref rewrites effective parents so the governed owner-introduction commit disappears from
+   ordinary path-history traversal while `--is-shallow-repository` remains `false`.
+
+Both are one causal defect: "no readable owner + non-shallow" is not proof of complete canonical pre-owner ancestry.
+
+Accepted Protocol 6.5 D3 remains closed. Serious Challenge: none.
+
+### Earliest owner and minimal repair boundary
+
+Earliest owner: **D4 `source/release_state.py`**, at
+`_release_state_at_ref(..., missing_ok=True)` and
+`_lineage_has_governed_release_state()`.
+
+Repair the existing classifier only:
+
+- distinguish genuine path absence from unreadable/unavailable tree/blob/object state;
+- fail closed whenever an object needed by the negative ancestry proof cannot be established;
+- retain the shallow check as one incompleteness signal, not proof that a non-shallow repository is complete;
+- make the negative proof use canonical ancestry rather than silently honoring local replace/graft overlays, or
+  explicitly reject/fail closed when such an overlay is active;
+- preserve all existing complete-history and shallow-history controls;
+- do not add a second state owner, registry, transition mirror, topology service, compatibility layer,
+  branch/default/latest/timestamp policy, candidate-specific logic, or universal history framework.
+
+Required fresh production-resolver holdouts include non-shallow missing historical owner object, unreadable tree/path
+object, partial/promisor/alternate object availability where supported, and replace/graft ancestry rewriting, in
+addition to all P11 shallow and complete-history controls.
+
+P11 remains immutable failed Review evidence. Any semantic repair creates a new candidate identity. Do not assign the
+next P-number until the repair commit exists and exact-candidate normal CI passes. After that pass, a later descendant
+may bind the new candidate with Review reset to `NOT_RUN`, rerun binding qualification, and require a fresh
+independent assembled-candidate Review.
+
+No stakeholder ratification, public-fallback publication, recovery establishment, accepted-current cutover, PR merge,
+or Protocol 7 D3/D4 mutation is authorized.
