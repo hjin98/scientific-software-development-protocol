@@ -82,6 +82,36 @@ jobs:
           -k deduplicate_equivalent_merge_lineages
           -k handle_synthetic_pr_merge
           -v
+      - name: Diag exact use_head_for_working_tree_change
+        if: always()
+        run: >-
+          python -m unittest discover -s tests -p test_protocol_65_release_state.py
+          -k use_head_for_working_tree_change -v
+      - name: Diag exact use_linear_parent_boundary
+        if: always()
+        run: >-
+          python -m unittest discover -s tests -p test_protocol_65_release_state.py
+          -k use_linear_parent_boundary -v
+      - name: Diag exact cross_evidence_only_descendants
+        if: always()
+        run: >-
+          python -m unittest discover -s tests -p test_protocol_65_release_state.py
+          -k cross_evidence_only_descendants -v
+      - name: Diag exact cover_date_reordered_merge_parents
+        if: always()
+        run: >-
+          python -m unittest discover -s tests -p test_protocol_65_release_state.py
+          -k cover_date_reordered_merge_parents -v
+      - name: Diag exact deduplicate_equivalent_merge_lineages
+        if: always()
+        run: >-
+          python -m unittest discover -s tests -p test_protocol_65_release_state.py
+          -k deduplicate_equivalent_merge_lineages -v
+      - name: Diag exact handle_synthetic_pr_merge
+        if: always()
+        run: >-
+          python -m unittest discover -s tests -p test_protocol_65_release_state.py
+          -k handle_synthetic_pr_merge -v
       - name: Diag governed topology second quarter
         if: always()
         run: >-
