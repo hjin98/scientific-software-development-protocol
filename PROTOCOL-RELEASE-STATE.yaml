@@ -22,10 +22,10 @@ historical:
     recovery_ref: 9f353097fab36e325a325f1c2f9d9cec32e86177
 candidate:
   version: "6.5.0"
-  semantic_ref: d792f219ad361b6acb2663833beec1c179ea5793
+  semantic_ref: 4fced41c4d8cc7af02938334f7cd1d0b587c408a
   review:
-    state: NO_PASS
-    evidence_ref: hjin98/scientific-software-development-protocol@671bfd2870415db561d6a34a930e604c5f53beb0:qualification/ssdp65/INDEPENDENT-REVIEW-2026-09-25-PROTOCOL-6.5-P14-NO-PASS.md
+    state: NOT_RUN
+    evidence_ref: NONE
   ratification:
     state: NOT_REQUESTED
     evidence_ref: NONE
