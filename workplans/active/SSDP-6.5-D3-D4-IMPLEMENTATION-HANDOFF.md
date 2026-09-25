@@ -1193,3 +1193,67 @@ The next authorized stage is a genuinely fresh independent assembled-candidate R
 
 No stakeholder ratification, public-fallback publication, recovery establishment, accepted-current cutover, PR merge,
 or Protocol 7 D3/D4 mutation is authorized.
+
+
+## 51. P12 independent Review NO-PASS — bounded D4 reopen
+
+Fresh independent assembled-candidate Review of exact immutable P12
+`c6a0e9b2ad54fd2cea39bc9a4a1a480c0b9c25f6` issues **NO-PASS**.
+
+Durable Review evidence:
+
+`qualification/ssdp65/INDEPENDENT-REVIEW-2026-09-25-PROTOCOL-6.5-P12-NO-PASS.md`
+
+Immutable Review publication commit:
+
+`042256b8ecfa390c58764ad6e795a39db231aab3`
+
+Serious Challenge: **none**. Accepted Protocol 6.5 D3 remains closed. Reopen only the existing D4
+`source/release_state.py` implementation scope for the two independently reproduced blockers below.
+
+### B65-P12-1 — canonical ancestry authority is inconsistent across release-history predicates
+
+P12 repairs canonical ancestry in the predecessor resolver, but `_check_ancestor()` still delegates to ordinary
+`git merge-base --is-ancestor`. Fresh real-Git replace-ref and `info/grafts` holdouts show that a canonically false
+Review/ratification/recovery/publication lineage can be made to appear true.
+
+Repair contract:
+
+- make all release-history ancestry predicates use the same canonical raw commit-parent authority already introduced
+  by P12, or an equally bounded canonical helper;
+- replacement refs and deprecated grafts must not redefine release-history ancestry;
+- fail closed if required canonical commit objects are unavailable;
+- preserve readable alternate/promisor-backed object use when required evidence resolves;
+- add direct production holdouts for both `git replace` and `info/grafts` against the ancestor predicate and at
+  least one real recovery/evidence lineage consumer;
+- do not create a second topology registry, service, mirror, or branch/default/latest/timestamp authority.
+
+### B65-P12-2 — governed owner deletion/reintroduction can be laundered by a later material transition
+
+Fresh real-Git trajectory:
+
+```text
+A(owner/state A) -> D(owner absent) -> B(owner reintroduced/state B) -> C(later legal state C)
+```
+
+P12 rejects B when B is current, but at C it selects B as the immediate differing predecessor and stops that lineage.
+The malformed A -> D -> B interval is therefore no longer inspected, and C validates with no ancestry error.
+
+Repair contract:
+
+- preserve immediate material-predecessor semantics for transition validation;
+- independently establish history integrity behind every selected predecessor so no post-introduction owner-absence
+  interval can be hidden by a later state transition;
+- the A -> D -> B -> C trajectory above must fail at C;
+- genuine pre-owner first introduction/merge, evidence-only descendants, ordinary consecutive transitions, equivalent
+  and divergent merge parents, and parent-order/timestamp independence must remain valid;
+- reuse P12's canonical raw-parent/path-presence machinery rather than adding a historical transaction registry or
+  replay subsystem.
+
+P12 remains immutable failed Review evidence. Any semantic repair creates a new immutable candidate identity. Do not
+assign the next candidate number until the repair commit exists and exact-candidate normal CI passes. After that pass,
+a later descendant may bind the new exact candidate at Review `NOT_RUN` and a genuinely fresh independent assembled-
+candidate Review is required.
+
+No stakeholder ratification, public-fallback publication, recovery establishment, accepted-current cutover, PR #33
+merge, or Protocol 7 D3/D4 mutation is authorized.

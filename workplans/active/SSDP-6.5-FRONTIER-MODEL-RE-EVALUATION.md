@@ -1124,3 +1124,35 @@ The durable independent-Review handoff now targets exact P11. P1-P10 remain immu
 evidence.
 
 The next authorized action is a genuinely fresh independent assembled-candidate Review of exact P11.
+
+
+## 47. P12 independent Review NO-PASS and bounded D4 reopen
+
+Fresh independent assembled-candidate Review of exact P12
+`c6a0e9b2ad54fd2cea39bc9a4a1a480c0b9c25f6` is **NO-PASS**.
+
+Durable Review:
+
+`qualification/ssdp65/INDEPENDENT-REVIEW-2026-09-25-PROTOCOL-6.5-P12-NO-PASS.md`
+
+Immutable Review publication commit:
+
+`042256b8ecfa390c58764ad6e795a39db231aab3`
+
+Two independently reproduced D4 blockers survive:
+
+- **B65-P12-1:** the repaired predecessor resolver uses canonical raw-parent ancestry, but
+  `_check_ancestor()` remains overlay-sensitive, so `git replace` / `info/grafts` can redefine
+  Review/ratification/recovery/publication lineage.
+- **B65-P12-2:** a governed owner deletion/reintroduction that is rejected when directly current can be hidden after one
+  later material transition because predecessor traversal stops at the first differing state boundary.
+
+Accepted Protocol 6.5 D3 remains closed; Serious Challenge is none. The exact repair contract is owned by
+`workplans/active/SSDP-6.5-D3-D4-IMPLEMENTATION-HANDOFF.md` §51. Reopen only that D4 release-state implementation
+scope.
+
+P12 remains immutable. Any semantic repair requires a new immutable candidate identity, exact-candidate qualification,
+later lifecycle binding at Review `NOT_RUN`, and another fresh independent assembled-candidate Review.
+
+No stakeholder ratification, public fallback, recovery, accepted-current cutover, PR merge, or Protocol 7 mutation is
+authorized.
