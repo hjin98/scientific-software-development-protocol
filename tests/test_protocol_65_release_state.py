@@ -1427,5 +1427,213 @@ candidate:
             self.assertEqual(states, [previous])
 
 
+    def _build_deleted_owner_merge(
+        self,
+        root: Path,
+        *,
+        reverse_parents: bool = False,
+        reverse_dates: bool = False,
+        absent_commits: int = 1,
+    ) -> tuple[dict, dict]:
+        base = self._topology_state("a")
+        self._write_topology_state(root, base)
+        base_ref = self._commit_topology_repo(
+            root,
+            "governed base",
+            date="2026-01-01T00:00:00+00:00",
+        )
+
+        self._run_topology_git(root, "checkout", "-q", "-b", "good")
+        current = self._topology_state("b")
+        self._write_topology_state(root, current)
+        good_ref = self._commit_topology_repo(
+            root,
+            "good current",
+            date=(
+                "2026-01-04T00:00:00+00:00"
+                if reverse_dates
+                else "2026-01-02T00:00:00+00:00"
+            ),
+        )
+
+        self._run_topology_git(
+            root,
+            "checkout",
+            "-q",
+            "-b",
+            "deleted",
+            base_ref,
+        )
+        (root / "PROTOCOL-RELEASE-STATE.yaml").unlink()
+        deleted_ref = self._commit_topology_repo(
+            root,
+            "delete governed owner",
+            date=(
+                "2026-01-02T00:00:00+00:00"
+                if reverse_dates
+                else "2026-01-03T00:00:00+00:00"
+            ),
+        )
+        for index in range(1, absent_commits):
+            (root / f"absent-{index}.txt").write_text(
+                f"still absent {index}\n",
+                encoding="utf-8",
+            )
+            deleted_ref = self._commit_topology_repo(
+                root,
+                f"owner still absent {index}",
+            )
+
+        tree_ref = self._run_topology_git(
+            root,
+            "rev-parse",
+            f"{good_ref}^{{tree}}",
+        )
+        parents = [good_ref, deleted_ref]
+        if reverse_parents:
+            parents.reverse()
+        args = ["commit-tree", tree_ref]
+        for parent in parents:
+            args.extend(["-p", parent])
+        args.extend(["-m", "restore owner by merge"])
+        merge_ref = self._run_topology_git(root, *args)
+        self._run_topology_git(root, "reset", "--hard", merge_ref)
+        return base, current
+
+    def test_previous_governed_states_reject_deleted_owner_merge_lineage(self) -> None:
+        for reverse_parents in (False, True):
+            for reverse_dates in (False, True):
+                with self.subTest(
+                    reverse_parents=reverse_parents,
+                    reverse_dates=reverse_dates,
+                ):
+                    with tempfile.TemporaryDirectory() as tmpdir:
+                        root = Path(tmpdir)
+                        self._init_topology_repo(root)
+                        previous, current = self._build_deleted_owner_merge(
+                            root,
+                            reverse_parents=reverse_parents,
+                            reverse_dates=reverse_dates,
+                        )
+
+                        errors: list[str] = []
+                        states = release_state._previous_governed_release_states(
+                            root,
+                            current,
+                            errors,
+                        )
+                        self.assertEqual(states, [previous])
+                        self.assertTrue(
+                            any(
+                                "owner deletion/reintroduction cannot be treated as pre-owner ancestry"
+                                in error
+                                for error in errors
+                            )
+                        )
+
+    def test_previous_governed_states_reject_long_owner_absence(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            root = Path(tmpdir)
+            self._init_topology_repo(root)
+            previous, current = self._build_deleted_owner_merge(
+                root,
+                absent_commits=4,
+            )
+
+            errors: list[str] = []
+            states = release_state._previous_governed_release_states(
+                root,
+                current,
+                errors,
+            )
+            self.assertEqual(states, [previous])
+            self.assertTrue(
+                any(
+                    "owner deletion/reintroduction cannot be treated as pre-owner ancestry"
+                    in error
+                    for error in errors
+                )
+            )
+
+    def test_previous_governed_states_reject_same_lineage_reintroduction(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            root = Path(tmpdir)
+            self._init_topology_repo(root)
+            previous = self._topology_state("a")
+            self._write_topology_state(root, previous)
+            self._commit_topology_repo(root, "governed state")
+
+            (root / "PROTOCOL-RELEASE-STATE.yaml").unlink()
+            self._commit_topology_repo(root, "delete owner")
+
+            current = self._topology_state("b")
+            self._write_topology_state(root, current)
+            self._commit_topology_repo(root, "reintroduce owner")
+
+            errors: list[str] = []
+            states = release_state._previous_governed_release_states(
+                root,
+                current,
+                errors,
+            )
+            self.assertEqual(states, [])
+            self.assertTrue(
+                any(
+                    "owner deletion/reintroduction cannot be treated as pre-owner ancestry"
+                    in error
+                    for error in errors
+                )
+            )
+
+    def test_previous_governed_states_allow_long_genuine_pre_owner_lineage(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            root = Path(tmpdir)
+            self._init_topology_repo(root)
+            for index in range(3):
+                (root / f"pre-owner-{index}.txt").write_text(
+                    f"pre-owner {index}\n",
+                    encoding="utf-8",
+                )
+                base_ref = self._commit_topology_repo(
+                    root,
+                    f"pre-owner {index}",
+                )
+
+            self._run_topology_git(root, "checkout", "-q", "-b", "feature")
+            previous = self._topology_state("a")
+            self._write_topology_state(root, previous)
+            self._commit_topology_repo(root, "introduce release state")
+            current = self._topology_state("b")
+            self._write_topology_state(root, current)
+            feature_ref = self._commit_topology_repo(root, "feature transition")
+
+            tree_ref = self._run_topology_git(
+                root,
+                "rev-parse",
+                f"{feature_ref}^{{tree}}",
+            )
+            merge_ref = self._run_topology_git(
+                root,
+                "commit-tree",
+                tree_ref,
+                "-p",
+                base_ref,
+                "-p",
+                feature_ref,
+                "-m",
+                "long pre-owner pull request merge",
+            )
+            self._run_topology_git(root, "reset", "--hard", merge_ref)
+
+            errors: list[str] = []
+            states = release_state._previous_governed_release_states(
+                root,
+                current,
+                errors,
+            )
+            self.assertEqual(errors, [])
+            self.assertEqual(states, [previous])
+
+
 if __name__ == "__main__":
     unittest.main()

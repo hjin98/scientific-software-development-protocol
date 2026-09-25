@@ -840,3 +840,32 @@ The replacement candidate qualification must preserve this transitive capability
 Also re-establish exact frozen Protocol 5.16 and 6.0-6.4 profile/prompt identity, source/generated current-prompt parity, Protocol 7 D3/D4 isolation, and the current-owner semantic presence of D1-D4 authority, evidence lifecycle, Lossless Representation/progressive disclosure, PEM/HAS non-authority, exact fallback/recovery/version binding, and Protocol 6.4 formal-definition/source-availability doctrine.
 
 Do not restore old amendment prose, proxy-only QF machinery, duplicated release-state values, or historical implementation mechanisms merely to make preservation more visible. Capability, not old representation, is the preservation oracle.
+
+
+## 35. B65-P9-1 implementation closure — prospective P10
+
+B65-P9-1 is repaired at the existing D4 release-state ancestry owner without reopening P65 D3.
+
+The production resolver now distinguishes three outcomes when reading a historical release-state path:
+
+- a valid parsed governed state;
+- explicit path absence;
+- malformed/unreadable state that already emits validation error.
+
+Path absence no longer means pre-owner by assumption. For any absent HEAD/parent boundary, the resolver performs a bounded ancestry-history query for the exact sole owner path. If that lineage has any ancestor commit containing a parseable release-state owner, the absence is rejected as a governed deletion/reintroduction. Only a lineage with no such ancestor is treated as genuinely pre-owner and ignored.
+
+This ancestry query is existential only. It does not select a predecessor state, does not use timestamp ordering, branch names, default/latest refs, sibling order, or traversal-stack order, and therefore does not reintroduce B65-P8-1.
+
+Fresh real-Git qualification added at the production resolver covers:
+
+- governed owner -> sibling deletion -> owner-restoring merge: reject;
+- reversed merge-parent order: reject;
+- reversed parent timestamps: reject;
+- multiple commits while the governed owner is absent: reject;
+- delete then reintroduce on the same governed lineage: reject;
+- long genuinely pre-owner ancestry merged with a governed feature lineage: pass;
+- all P9 owner-present topology controls remain active.
+
+The accepted PEM basis remains P0 `55c085261eb827e3047637d045a8e6917ea6b962` with the current branch overlay. SP-002 and FF-001 remain release-lifecycle evidence, PC-001 remains an authority-bound frozen-resource preservation obligation, and DS-001 requires real-owner qualification rather than proxy-only closure. No PEM item requires preserving the P9 mechanism itself.
+
+The implementation commit produced by this section is only the **prospective P10** semantic candidate. P9 remains immutable NO-PASS evidence and remains the root release-state candidate until the implementation commit passes exact-candidate normal CI. After that pass, a later descendant may freeze/bind the exact implementation SHA as P10 with Review reset to `NOT_RUN`.

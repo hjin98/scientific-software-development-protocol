@@ -20,6 +20,7 @@ EVIDENCE_RE = re.compile(
 )
 REVIEW_STATES = {"NOT_RUN", "NO_PASS", "PASS"}
 RATIFICATION_STATES = {"NOT_REQUESTED", "PENDING", "RATIFIED", "REJECTED"}
+_MISSING_RELEASE_STATE = object()
 
 
 class _UniqueKeySafeLoader(yaml.SafeLoader):
@@ -545,10 +546,11 @@ def _release_state_at_ref(
         f"{ref}:PROTOCOL-RELEASE-STATE.yaml",
     )
     if code:
-        if not missing_ok:
-            errors.append(
-                f"cannot read PROTOCOL-RELEASE-STATE.yaml at transition ref {ref}"
-            )
+        if missing_ok:
+            return _MISSING_RELEASE_STATE
+        errors.append(
+            f"cannot read PROTOCOL-RELEASE-STATE.yaml at transition ref {ref}"
+        )
         return None
     try:
         data = _load_yaml_text(content)
@@ -585,6 +587,54 @@ def _commit_and_parents(
     return parts[0], parts[1:]
 
 
+def _lineage_has_governed_release_state(
+    root: Path,
+    ref: str,
+    errors: list[str],
+) -> bool | None:
+    """Return whether ref descends from any commit containing the release-state owner."""
+    code, output = _git(
+        root,
+        "rev-list",
+        "--full-history",
+        ref,
+        "--",
+        "PROTOCOL-RELEASE-STATE.yaml",
+    )
+    if code:
+        errors.append(f"cannot inspect release-state ownership history at {ref}")
+        return None
+
+    for candidate in output.splitlines():
+        state = _release_state_at_ref(
+            root,
+            candidate,
+            errors,
+            missing_ok=True,
+        )
+        if state is _MISSING_RELEASE_STATE:
+            continue
+        if state is None:
+            return None
+        return True
+    return False
+
+
+def _reject_governed_owner_absence(
+    root: Path,
+    ref: str,
+    errors: list[str],
+) -> None:
+    governed = _lineage_has_governed_release_state(root, ref, errors)
+    if governed:
+        errors.append(
+            "release-state ancestry at "
+            f"{ref} is missing PROTOCOL-RELEASE-STATE.yaml after the lineage "
+            "was already governed; owner deletion/reintroduction cannot be "
+            "treated as pre-owner ancestry"
+        )
+
+
 def _previous_governed_release_states(
     root: Path,
     current: Any,
@@ -596,6 +646,12 @@ def _previous_governed_release_states(
         errors,
         missing_ok=True,
     )
+    if head_state is _MISSING_RELEASE_STATE:
+        # A genuinely pre-owner HEAD may introduce the owner in the working
+        # tree.  If the owner existed anywhere in HEAD ancestry, however, this
+        # is a governed deletion/reintroduction and must fail closed.
+        _reject_governed_owner_absence(root, "HEAD", errors)
+        return []
     if head_state is None:
         return []
 
@@ -628,9 +684,13 @@ def _previous_governed_release_states(
                 errors,
                 missing_ok=True,
             )
+            if parent_state is _MISSING_RELEASE_STATE:
+                # Absence is admissible only when the lineage genuinely
+                # predates the owner.  A post-introduction deletion is a
+                # malformed governed transition, not a pre-owner boundary.
+                _reject_governed_owner_absence(root, parent, errors)
+                continue
             if parent_state is None:
-                # A lineage predating introduction of the root state has no
-                # governed predecessor to validate.
                 continue
             if parent_state == current:
                 stack.append(parent)
@@ -638,7 +698,6 @@ def _previous_governed_release_states(
                 predecessors.append(parent_state)
 
     return predecessors
-
 
 def validate_release_state(data: Any, *, repo_root: Path | None = None) -> list[str]:
     errors: list[str] = []

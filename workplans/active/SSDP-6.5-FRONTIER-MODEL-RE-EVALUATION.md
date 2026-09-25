@@ -5,8 +5,8 @@ protocol_version: 6.4.0
 target_protocol_version: 6.5.0
 subject_baseline: P0 = Protocol 6.4 at 55c085261eb827e3047637d045a8e6917ea6b962 (recovery 74bc572ef516cae417437a2027eeff52a2e25c15)
 diagnostic_commit: 81375d8142a8130b80cd82f2304d3e16bc3fc390
-status: p9-no-pass-d4-repair-required
-current_phase: PHASE VII P9 NO-PASS / B65-P9-1 D4 REPAIR REQUIRED
+status: prospective-p10-exact-ci-required
+current_phase: PHASE VII B65-P9-1 REPAIRED / PROSPECTIVE P10 EXACT CI REQUIRED
 branch: ssdp-6.5-frontier-model-re-evaluation
 created_date: 2026-09-24
 adjudication: qualification/ssdp65/CROSS-MODEL-ADJUDICATION-2026-09-24.md
@@ -1024,3 +1024,16 @@ The accepted Protocol 6.5 D3 design remains closed. Repair only the existing `so
 P9 remains immutable. The repair must freeze a new candidate identity after exact-candidate CI; do not predeclare P10 before a semantic repair commit exists. The replacement must then be bound from a later lifecycle descendant with Review `NOT_RUN` and undergo a new fresh independent assembled-candidate Review.
 
 No ratification, publication, recovery, accepted-current cutover, PR merge, or Protocol 7 D3/D4 mutation is authorized.
+
+
+## 41. B65-P9-1 repair implemented — prospective P10
+
+The sole P9 blocker is repaired at the existing D4 release-state ancestry classifier.
+
+The repair no longer equates missing owner state with pre-owner history. Missing state is classified explicitly; the lineage is treated as genuinely pre-owner only when bounded ancestry inspection finds no prior commit containing the sole release-state owner. Post-introduction deletion/reintroduction now fails closed.
+
+Fresh production-resolver tests cover parent-order independence, timestamp independence, prolonged owner absence, same-lineage deletion/reintroduction, and a long genuine pre-owner positive control. Existing P9 owner-present topology/recovery tests remain active.
+
+No D3 authority changed. No new registry, mirror, topology service, compatibility layer, candidate-specific branch, or semantic parser was introduced.
+
+This implementation commit is prospective P10 only. Exact-candidate normal CI must pass before its SHA is frozen/bound from a later descendant.
