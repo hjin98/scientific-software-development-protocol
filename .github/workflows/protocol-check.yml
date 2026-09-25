@@ -34,26 +34,27 @@ jobs:
           status=$?
           exit "$status"
       - name: Diag release-state module failure
-        continue-on-error: true
+        if: always()
         run: >-
           grep -Eq '^(FAIL|ERROR): .*test_protocol_65_release_state' /tmp/discover.log
       - name: Diag other Protocol 6.5 module failure
-        continue-on-error: true
+        if: always()
         run: >-
           grep -Eq '^(FAIL|ERROR): .*test_protocol_65_(current_state_ownership|pem_)' /tmp/discover.log
       - name: Diag pre-6.5 module failure
-        continue-on-error: true
+        if: always()
         run: >-
           grep -Eq '^(FAIL|ERROR): .*test_protocol_(511|512|513|515|516|59|61|62|63|64)' /tmp/discover.log
       - name: Diag generic module failure
-        continue-on-error: true
+        if: always()
         run: >-
           grep -Eq '^(FAIL|ERROR): .*test_(build_index_contract|package_reference_closure|protocol_contracts|protocol_effective_compression|protocol_engineering_stewardship|protocol_portability|protocol_proxy_proof_acceptance|protocol_tooling)' /tmp/discover.log
       - name: Diag discovery import failure
-        continue-on-error: true
+        if: always()
         run: >-
           grep -Eq 'Failed to import test module|ImportError|ModuleNotFoundError' /tmp/discover.log
       - name: Run protocol regression tests
+        if: always()
         run: python -m unittest discover -s tests -v
       - name: Build canonical skill packages once
         run: python source/build_skills.py --output /tmp/protocol-dist
