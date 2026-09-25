@@ -1,0 +1,39 @@
+name: Protocol regression diagnostic
+
+on:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  module:
+    name: diag (${{ matrix.module }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        module:
+          - tests.test_protocol_516_long_horizon_quality
+          - tests.test_protocol_61_evidence_evolution
+          - tests.test_protocol_62_closeout
+          - tests.test_protocol_62_representation
+          - tests.test_protocol_63_bootstrap
+          - tests.test_protocol_63_closeout
+          - tests.test_protocol_64_axiomatic_traceability
+          - tests.test_protocol_64_bootstrap_readiness
+          - tests.test_protocol_65_current_state_ownership
+          - tests.test_protocol_65_release_state
+          - tests.test_protocol_contracts
+          - tests.test_protocol_portability
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install validation dependencies
+        run: python -m pip install -r source/requirements-validation.txt
+      - name: Run module
+        run: python -m unittest -v ${{ matrix.module }}
