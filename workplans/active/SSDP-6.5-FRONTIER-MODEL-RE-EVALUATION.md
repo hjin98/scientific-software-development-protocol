@@ -5,8 +5,8 @@ protocol_version: 6.4.0
 target_protocol_version: 6.5.0
 subject_baseline: P0 = Protocol 6.4 at 55c085261eb827e3047637d045a8e6917ea6b962 (recovery 74bc572ef516cae417437a2027eeff52a2e25c15)
 diagnostic_commit: 81375d8142a8130b80cd82f2304d3e16bc3fc390
-status: p18-binding-qualification-pending
-current_phase: PHASE VII MECHANICAL BINDING QUALIFICATION — P18
+status: p18-review-ready
+current_phase: PHASE VII FRESH INDEPENDENT REVIEW — P18
 branch: ssdp-6.5-frontier-model-re-evaluation
 created_date: 2026-09-24
 adjudication: qualification/ssdp65/CROSS-MODEL-ADJUDICATION-2026-09-24.md
@@ -1447,5 +1447,19 @@ were not frozen and carry no candidate authority.
 This lifecycle descendant binds exact P18 in the sole mutable release-state owner with Review `NOT_RUN`,
 ratification `NOT_REQUESTED`, public fallback/recovery `UNAVAILABLE`, accepted-current Protocol 6.4, and
 Protocol 7 D3/D4 unchanged. Mechanical qualification of this binding is the next gate.
+
+No ratification, publication, recovery, accepted-current cutover, PR merge, or Protocol 7 mutation is authorized.
+
+
+## 65. P18 binding qualification — fresh Review ready
+
+Exact P18 `a2e5f01e258f249f74d1eda74b883efb98fd7d59` passed workflow `36179328663`; binding descendant
+`6a90ba22b298e51b5de83c532159190a06757192` passed workflow `36179591776`.
+
+P18 is now the sole semantic Review target with Review `NOT_RUN`, ratification `NOT_REQUESTED`, public
+fallback/recovery `UNAVAILABLE`, accepted-current Protocol 6.4, and Protocol 7 D3/D4 unchanged.
+
+P17's NO-PASS Review remains immutable historical evidence only. The next gate is one genuinely fresh independent
+assembled-candidate Review of exact P18. This repair context must not self-issue that Review result.
 
 No ratification, publication, recovery, accepted-current cutover, PR merge, or Protocol 7 mutation is authorized.
