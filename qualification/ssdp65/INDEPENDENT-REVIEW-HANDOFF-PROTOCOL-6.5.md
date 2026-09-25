@@ -1,7 +1,7 @@
 ---
 kind: independent-review-handoff
 protocol_under_review: 6.5.0
-status: ready-p11
+status: ready-p12
 accepted_control_p0: 55c085261eb827e3047637d045a8e6917ea6b962
 failed_candidate_p1: b565e28aeacea002cefe27e6b9594fe99d653c0a
 failed_candidate_p2: e8edb353e172aef933ed5e58eeabe897d0cc98d1
@@ -13,52 +13,53 @@ failed_candidate_p7: 133c747a1f9ab4372c9e1af7a7e9666316dc892b
 failed_candidate_p8: ed782ccad73b43c9052ecc926177c36846b9328d
 failed_candidate_p9: fb347272c70b6225743fdc99e9bec8b4197aad49
 failed_candidate_p10: 275b23bfa45cc72145d2079c8d945a6ff5a5c216
-immutable_candidate_p11: 6352accc7962fc188976fc1bcea5e081681d99c5
+failed_candidate_p11: 6352accc7962fc188976fc1bcea5e081681d99c5
+immutable_candidate_p12: c6a0e9b2ad54fd2cea39bc9a4a1a480c0b9c25f6
 candidate_branch: ssdp-6.5-frontier-model-re-evaluation
 draft_pr: 33
-p11_mechanical_qualification_run: 36103358186
-p11_binding_descendant: 0490ecb0c685b403df78f62f143896c44c078d68
-p11_binding_qualification_run: 36103484871
-p11_repair_qualification: qualification/ssdp65/P11-REPAIR-QUALIFICATION.md
-p11_freeze_binding: qualification/ssdp65/P11-FREEZE-BINDING.md
-p11_binding_qualification: qualification/ssdp65/P11-BINDING-QUALIFICATION.md
-p10_review: qualification/ssdp65/INDEPENDENT-REVIEW-2026-09-25-PROTOCOL-6.5-P10-NO-PASS.md
+p12_mechanical_qualification_run: 36121450601
+p12_binding_descendant: dc1595219ebfd76ee2451b406a549a4a012370e0
+p12_binding_qualification_run: 36121601230
+p12_repair_qualification: qualification/ssdp65/P12-REPAIR-QUALIFICATION.md
+p12_freeze_binding: qualification/ssdp65/P12-FREEZE-BINDING.md
+p12_binding_qualification: qualification/ssdp65/P12-BINDING-QUALIFICATION.md
+p11_review: qualification/ssdp65/INDEPENDENT-REVIEW-2026-09-25-PROTOCOL-6.5-P11-NO-PASS.md
 historical_capability_preservation_review: qualification/ssdp65/HISTORICAL-CAPABILITY-PRESERVATION-REVIEW-2026-09-25-P9.md
 authoring_context_verdict: none
 stakeholder_ratification: NOT_REQUESTED
 ---
 
-# Independent Review Handoff — Protocol 6.5 P11
+# Independent Review Handoff — Protocol 6.5 P12
 
 ## Immutable Review target
 
 Perform a genuinely fresh independent assembled-candidate Review of:
 
-`P11 = 6352accc7962fc188976fc1bcea5e081681d99c5`
+`P12 = c6a0e9b2ad54fd2cea39bc9a4a1a480c0b9c25f6`
 
 against accepted Protocol 6.4 control:
 
 `P0 = 55c085261eb827e3047637d045a8e6917ea6b962`
 
-P1-P10 are immutable failed candidates and historical evidence only. P11 itself is the semantic Review target.
-Do not substitute the mutable branch head or binding descendant for P11. Later descendants are qualification/lifecycle
+P1-P11 are immutable failed candidates and historical evidence only. P12 itself is the semantic Review target.
+Do not substitute the mutable branch head or binding descendant for P12. Later descendants are qualification/lifecycle
 evidence only.
 
 ## Current lifecycle boundary
 
 Binding descendant:
 
-`0490ecb0c685b403df78f62f143896c44c078d68`
+`dc1595219ebfd76ee2451b406a549a4a012370e0`
 
 Binding workflow:
 
-`36103484871`
+`36121601230`
 
 Expected entering Review:
 
 - accepted-current: Protocol 6.4;
 - candidate version: 6.5.0;
-- candidate semantic ref: exact P11;
+- candidate semantic ref: exact P12;
 - Review: `NOT_RUN`;
 - stakeholder ratification: `NOT_REQUESTED`;
 - public fallback: `UNAVAILABLE`;
@@ -72,58 +73,68 @@ Independently verify this state.
 Reconstruct applicable D1-D4/current project authority independently. Use prior Reviews, workplans, qualification
 records, preservation maps, historical-capability records, and PEM only as evidence/hypothesis inputs.
 
-Do not inherit P10 NO-PASS closure claims, P11 repair-author conclusions, obligation matrices, or green CI as semantic
-acceptance.
+Do not inherit P11 NO-PASS conclusions, P12 repair-author conclusions, obligation matrices, test decomposition, or
+green CI as semantic acceptance.
 
 Perform the Serious Challenge pass before ordinary D4 findings. Reopen D3 only for a true accepted-authority defect.
 
-## Mandatory B65-P10-1 repair falsification
+## Mandatory B65-P11-1 repair falsification
 
-P11 was created to repair:
+P12 was created to repair:
 
-**B65-P10-1 — incomplete Git ancestry can be mistaken for genuine pre-owner ancestry.**
+**B65-P11-1 — non-shallow Git state can still be mistaken for complete canonical ancestry.**
 
-Inspect the real production resolver and actual call path in exact P11.
+Inspect the real production resolver and actual call path in exact P12. Do not rely only on authored tests.
+
+P12's intended repair is:
+
+- historical path absence is distinguished from unreadable/unavailable object state;
+- replacement refs do not redefine release-history authority;
+- deprecated graft traversal overlays do not redefine release-history authority;
+- canonical parent identities come from raw commit objects;
+- missing commit/tree/blob/path evidence needed by a negative ancestry claim fails closed;
+- readable alternates/promisor-backed objects may remain usable when Git can actually resolve them;
+- a genuine pre-owner conclusion is allowed only after the complete canonical parent graph has been traversed.
 
 At minimum independently falsify:
 
-1. governed owner introduction hidden beyond a shallow boundary -> visible deletion -> working-tree reintroduction;
-2. governed owner introduction hidden beyond a shallow boundary on a missing merge-parent lineage;
-3. complete-history genuine first owner introduction from pre-owner HEAD;
-4. complete-history genuine pre-owner merge parent plus governed feature lineage;
-5. visible post-introduction deletion/restoration;
-6. reversed merge-parent order;
-7. reversed relevant timestamps;
-8. multiple commits while owner absent;
-9. same-lineage deletion followed by committed reintroduction;
-10. working-tree transition against committed owner-present HEAD;
-11. linear committed transition;
-12. evidence-only descendants;
-13. consecutive material transitions;
-14. equivalent and divergent owner-present parents;
-15. traversal-stack/sibling-enumeration independence;
-16. stale/sibling/wrong-ancestry recovery;
-17. complete later recovery followed by legal descendant mapping.
+1. non-shallow missing historical owner blob;
+2. non-shallow missing historical owner tree/path object;
+3. standard shallow boundary hiding owner introduction;
+4. shallow missing merge-parent lineage;
+5. active replacement ref hiding owner introduction;
+6. deprecated graft hiding owner introduction;
+7. readable alternate object store;
+8. partial/promisor object availability where supported;
+9. complete-history genuine first owner introduction;
+10. complete-history genuine pre-owner merge parent plus governed feature lineage;
+11. visible post-introduction deletion/restoration;
+12. reversed merge-parent order;
+13. reversed relevant timestamps;
+14. multiple commits while owner absent;
+15. same-lineage deletion followed by committed reintroduction;
+16. working-tree transition against committed owner-present HEAD;
+17. linear committed transition;
+18. evidence-only descendants;
+19. consecutive material transitions;
+20. equivalent and divergent owner-present parents;
+21. traversal-stack/sibling-enumeration independence;
+22. stale/sibling/wrong-ancestry recovery;
+23. complete later recovery followed by legal descendant mapping.
 
-The negative history conclusion must be evidence-bounded:
+Construct at least one fresh holdout beyond the authored P12 tests.
 
-- visible owner ancestor -> governed;
-- no visible owner in complete ancestry -> genuine pre-owner may be admissible;
-- no visible owner in incomplete/shallow ancestry -> fail closed;
-- inability to establish ancestry completeness -> fail closed.
+Explicitly answer whether all P12 tests and normal CI could remain green while the production resolver still
+overclaims a negative ancestry result, omits a governed lineage, or validates the wrong temporal transaction.
 
-Do not let timestamps, branch names, default/latest refs, parent order, traversal order, or candidate identities become
-authority.
-
-Construct at least one fresh holdout beyond the authored P11 tests.
-
-Explicitly answer whether all P11 tests and normal CI could stay green while production still overclaims a negative
-ancestry result or otherwise omits a governed lineage.
+Do not introduce branch/default/latest/timestamp/parent-order/traversal-order/candidate-identity authority.
 
 ## Re-falsify historical blocker families
 
-Proportionately re-falsify the current owners for:
+Proportionately re-falsify current owners for:
 
+- B65-P11-1 canonical ancestry/readability completeness;
+- B65-P10-1 incomplete ancestry vs genuine pre-owner;
 - B65-P9-1 governed deletion vs pre-owner ancestry;
 - B65-P8-1 predecessor resolution / merge ordering;
 - B65-P7-1 transition continuity and recovery lineage;
@@ -138,76 +149,61 @@ Proportionately re-falsify the current owners for:
 - B65-P2-2/B65-R1 immutable evidence applicability;
 - B65-R3 predecessor-version gating.
 
-## Historical capability preservation and assembled Review
+## Full assembled-candidate Review
 
-Independently re-establish the historical capability lineage, including Protocol 5.13-5.16 and 6.0-6.4, frozen
-historical profile/prompt identities, transitive package/reference closure, current source/generated convergence,
-Protocol 7 isolation, P65-1..P65-6 causal usefulness, DF-1..DF-4, out-of-matrix abstraction adequacy, qualification
-method challenge, fresh machine/state/topology/schema/generated and prose-semantic mutants, simplicity, evidence
-applicability, and SSDP self-application.
+Independently re-establish:
 
-Capability, not obsolete wording or mechanism identity, is the preservation oracle.
+- Serious Challenge status;
+- DF-1 through DF-4;
+- local-compliance/global-failure trajectories;
+- out-of-matrix abstraction adequacy;
+- qualification-method limits;
+- fresh machine/state/topology/schema/generated and prose-semantic mutants;
+- P65-1 through P65-6 causal usefulness;
+- Protocol 6.4 -> 6.5 preservation;
+- historical capability preservation from Protocol 5.13-5.16 and 6.0-6.4;
+- frozen historical profile/prompt identity;
+- current source/generated/package/reference convergence;
+- evidence applicability/staleness;
+- simplicity/total-system complexity;
+- Protocol 7 D3/D4 isolation;
+- SSDP self-application.
+
+Capability, not obsolete wording or historical mechanism identity, is the preservation oracle.
 
 ## Evidence boundaries
 
-Exact P11 normal workflow:
+Exact P12 normal workflow:
 
-`36103358186`
+`36121450601`
 
 Binding descendant:
 
-`0490ecb0c685b403df78f62f143896c44c078d68`
+`dc1595219ebfd76ee2451b406a549a4a012370e0`
 
 Binding workflow:
 
-`36103484871`
+`36121601230`
 
 Durable bounded evidence:
 
-- `qualification/ssdp65/P11-REPAIR-QUALIFICATION.md`
-- `qualification/ssdp65/P11-FREEZE-BINDING.md`
-- `qualification/ssdp65/P11-BINDING-QUALIFICATION.md`
-- `qualification/ssdp65/INDEPENDENT-REVIEW-2026-09-25-PROTOCOL-6.5-P10-NO-PASS.md`
+- `qualification/ssdp65/P12-REPAIR-QUALIFICATION.md`
+- `qualification/ssdp65/P12-FREEZE-BINDING.md`
+- `qualification/ssdp65/P12-BINDING-QUALIFICATION.md`
+- `qualification/ssdp65/INDEPENDENT-REVIEW-2026-09-25-PROTOCOL-6.5-P11-NO-PASS.md`
+- `qualification/ssdp65/HISTORICAL-CAPABILITY-PRESERVATION-REVIEW-2026-09-25-P9.md`
 
-These do not establish semantic Review PASS.
+These establish only their discriminated mechanical/lifecycle/historical properties. They do not establish semantic
+Review PASS.
 
 ## Disposition boundary
 
 PASS means only:
 
-`P11 is technically eligible for stakeholder ratification.`
+`P12 is technically eligible for stakeholder ratification.`
 
 PASS does not ratify Protocol 6.5, publish public fallback, establish recovery, change accepted-current, merge PR #33,
 or mutate Protocol 7 D3/D4.
 
-If a genuine semantic blocker survives, preserve P11 immutably, publish NO-PASS, reopen at the earliest owner, and
+If a genuine semantic blocker survives, preserve P12 immutably, publish NO-PASS, reopen at the earliest owner, and
 require another candidate identity for semantic repair.
-
-
-## P11 independent Review disposition — 2026-09-25
-
-Fresh independent assembled-candidate Review of exact P11
-`6352accc7962fc188976fc1bcea5e081681d99c5` is **NO-PASS**.
-
-Durable Review:
-
-`qualification/ssdp65/INDEPENDENT-REVIEW-2026-09-25-PROTOCOL-6.5-P11-NO-PASS.md`
-
-One genuine D4 blocker survives:
-
-**B65-P11-1 — non-shallow Git state can still be mistaken for complete canonical ancestry.**
-
-P11's shallow guard does not cover non-shallow repositories in which required historical owner objects are
-unreadable/unavailable, and ordinary Git ancestry can be locally rewritten by replace/graft overlays. In both cases
-the production negative ancestry proof can erase a governed owner interval while authored tests and normal CI remain
-green.
-
-Serious Challenge: none. Accepted Protocol 6.5 D3 remains closed.
-
-P11 is immutable failed Review evidence and is not technically eligible for stakeholder ratification. The existing
-D3->D4 workplan is reopened at the release-state ancestry classifier. Any semantic repair requires a new immutable
-candidate identity, exact-candidate qualification, later lifecycle binding, and another fresh independent assembled-
-candidate Review.
-
-No stakeholder ratification, public fallback, recovery, accepted-current cutover, PR merge, or Protocol 7 D3/D4
-mutation is authorized.

@@ -1164,3 +1164,32 @@ This commit is only the **prospective replacement semantic candidate**. P11 rema
 assign the next P-number until exact-candidate normal CI passes. After that pass, bind the exact repair SHA from a later
 lifecycle descendant with Review reset to `NOT_RUN`, rerun binding qualification, and require another fresh
 independent assembled-candidate Review.
+
+
+## 50. P12 freeze and binding qualification complete
+
+Prospective repair commit `c6a0e9b2ad54fd2cea39bc9a4a1a480c0b9c25f6` passed exact-candidate normal workflow run `36121450601` across the complete
+build and Orchestrator Core jobs.
+
+The immutable replacement semantic candidate is therefore frozen as:
+
+`P12 = c6a0e9b2ad54fd2cea39bc9a4a1a480c0b9c25f6`
+
+Later lifecycle descendant `dc1595219ebfd76ee2451b406a549a4a012370e0` binds exact P12 in root `PROTOCOL-RELEASE-STATE.yaml` with Review
+`NOT_RUN`, stakeholder ratification `NOT_REQUESTED`, public fallback/recovery `UNAVAILABLE`, and accepted-current
+Protocol 6.4.
+
+Binding workflow run `36121601230` passed both jobs completely.
+
+Durable qualification records:
+
+- `qualification/ssdp65/P12-REPAIR-QUALIFICATION.md`;
+- `qualification/ssdp65/P12-FREEZE-BINDING.md`;
+- `qualification/ssdp65/P12-BINDING-QUALIFICATION.md`.
+
+B65-P11-1 is mechanically repaired and qualified at the existing D4 owner. Accepted Protocol 6.5 D3 remains closed.
+
+The next authorized stage is a genuinely fresh independent assembled-candidate Review of exact P12.
+
+No stakeholder ratification, public-fallback publication, recovery establishment, accepted-current cutover, PR merge,
+or Protocol 7 D3/D4 mutation is authorized.
