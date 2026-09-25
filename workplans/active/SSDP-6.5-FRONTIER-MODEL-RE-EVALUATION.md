@@ -5,8 +5,8 @@ protocol_version: 6.4.0
 target_protocol_version: 6.5.0
 subject_baseline: P0 = Protocol 6.4 at 55c085261eb827e3047637d045a8e6917ea6b962 (recovery 74bc572ef516cae417437a2027eeff52a2e25c15)
 diagnostic_commit: 81375d8142a8130b80cd82f2304d3e16bc3fc390
-status: p14-bound-awaiting-binding-ci
-current_phase: PHASE VII P14 FROZEN / BINDING QUALIFICATION REQUIRED
+status: ready-p14-independent-review
+current_phase: PHASE VII P14 FROZEN / FRESH INDEPENDENT REVIEW REQUIRED
 branch: ssdp-6.5-frontier-model-re-evaluation
 created_date: 2026-09-24
 adjudication: qualification/ssdp65/CROSS-MODEL-ADJUDICATION-2026-09-24.md
@@ -14,7 +14,7 @@ active_serious_challenge: none against accepted D1-D4 doctrine
 second_frontier_diagnostic: waived-for-this-cycle-by-stakeholder-resource-constraint
 design_closure: qualification/ssdp65/PHASE-IV-V-DESIGN-CLOSURE.md
 implementation_handoff: workplans/active/SSDP-6.5-D3-D4-IMPLEMENTATION-HANDOFF.md
-independent_review: qualification/ssdp65/INDEPENDENT-REVIEW-2026-09-25-PROTOCOL-6.5-P13-NO-PASS.md
+independent_review: NOT_RUN
 ---
 
 # Protocol 6.5 Frontier-Model Re-evaluation and Successor Workplan
@@ -1225,3 +1225,16 @@ The B65-P13-1 repair commit `d792f219ad361b6acb2663833beec1c179ea5793` passed ex
 
 A later lifecycle descendant binds exact P14 at Review `NOT_RUN`; binding qualification must pass before a fresh
 independent assembled-candidate Review is authorized.
+
+
+## 53. P14 binding qualification and fresh-Review readiness
+
+Immutable P14 `d792f219ad361b6acb2663833beec1c179ea5793` passed exact-candidate workflow `36133381631`.
+
+Binding descendant `c2c6baab291c22591c9ddc82eb0378fd3c92b264` passed workflow `36133589027` with Review `NOT_RUN`, ratification
+`NOT_REQUESTED`, public fallback/recovery `UNAVAILABLE`, accepted-current Protocol 6.4, and Protocol 7 unchanged.
+
+The durable independent-Review handoff now targets exact P14. P1-P13 remain immutable failed candidates/historical
+evidence.
+
+The next authorized action is a genuinely fresh independent assembled-candidate Review of exact P14.
