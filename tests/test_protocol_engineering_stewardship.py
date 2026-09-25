@@ -17,10 +17,10 @@ class EngineeringStewardshipContractTests(unittest.TestCase):
         kernel = read("source/shared/references/abstraction-and-concretization.md").lower()
         for phrase in (
             "steward the governed durable product/outcome, not process artifacts",
-            "not objectives or self-authorizing rules",
-            "interpret requirements by their protected purpose",
-            "within governed task/contracts/affected surfaces",
-            "does not authorize unrelated enhancement",
+            "non-self-authorizing constraints/evidence/coordination state",
+            "interpret requirements by protected purpose",
+            "within governed scope",
+            "do not infer unrelated enhancement",
             "speculative future-proofing",
         ):
             self.assertIn(phrase, kernel)
@@ -65,7 +65,7 @@ class EngineeringStewardshipContractTests(unittest.TestCase):
         kernel = read("source/shared/references/abstraction-and-concretization.md").lower()
         self.assertIn("workplans are coordination/authority for the bounded cycle, not terminal objectives", workflow)
         self.assertIn("workplans, tests, gates, metrics, reviews, reports, implementation machinery, history, and pem", kernel)
-        self.assertIn("not objectives or self-authorizing rules", kernel)
+        self.assertIn("non-self-authorizing constraints/evidence/coordination state", kernel)
 
     def test_root_agents_is_compact_router_not_duplicate_manual(self) -> None:
         agents = read("AGENTS.md")
