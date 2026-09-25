@@ -700,6 +700,8 @@ semantic_ref: {"c" * 40}
     def test_public_fallback_requires_review_ratification_and_exact_candidate(self) -> None:
         data = copy.deepcopy(self.data)
         data["candidate"]["semantic_ref"] = "a" * 40
+        data["candidate"]["review"] = {"state": "NOT_RUN", "evidence_ref": "NONE"}
+        data["candidate"]["ratification"] = {"state": "NOT_REQUESTED", "evidence_ref": "NONE"}
         data["candidate"]["public_source_ref"] = "b" * 40
         errors = release_state.validate_release_state(data)
         self.assertTrue(any("requires Review PASS and RATIFIED" in error for error in errors))
@@ -707,6 +709,7 @@ semantic_ref: {"c" * 40}
 
     def test_recovery_cannot_precede_public_fallback(self) -> None:
         data = copy.deepcopy(self.data)
+        data["candidate"]["public_source_ref"] = "UNAVAILABLE"
         data["candidate"]["recovery_ref"] = "a" * 40
         errors = release_state.validate_release_state(data)
         self.assertTrue(any("recovery_ref requires" in error for error in errors))
@@ -718,6 +721,9 @@ semantic_ref: {"c" * 40}
             "state": "NO_PASS",
             "evidence_ref": "hjin98/scientific-software-development-protocol@" + "a" * 40 + ":qualification/review.md",
         }
+        data["candidate"]["ratification"] = {"state": "NOT_REQUESTED", "evidence_ref": "NONE"}
+        data["candidate"]["public_source_ref"] = "UNAVAILABLE"
+        data["candidate"]["recovery_ref"] = "UNAVAILABLE"
         errors = release_state.validate_release_state(data)
         self.assertTrue(any("Review NO_PASS requires" in error for error in errors))
 
@@ -727,6 +733,8 @@ semantic_ref: {"c" * 40}
                 data = copy.deepcopy(self.data)
                 data["candidate"]["semantic_ref"] = "a" * 40
                 data["candidate"]["review"] = {"state": "NOT_RUN", "evidence_ref": "NONE"}
+                data["candidate"]["public_source_ref"] = "UNAVAILABLE"
+                data["candidate"]["recovery_ref"] = "UNAVAILABLE"
                 data["candidate"]["ratification"] = {
                     "state": state,
                     "evidence_ref": (
@@ -760,6 +768,9 @@ semantic_ref: {"c" * 40}
 
     def test_accepted_current_cannot_cut_over_to_unratified_candidate(self) -> None:
         data = copy.deepcopy(self.data)
+        data["candidate"]["ratification"] = {"state": "NOT_REQUESTED", "evidence_ref": "NONE"}
+        data["candidate"]["public_source_ref"] = "UNAVAILABLE"
+        data["candidate"]["recovery_ref"] = "UNAVAILABLE"
         data["accepted_current"] = {
             "version": "6.5.0",
             "public_source_ref": "a" * 40,
@@ -797,31 +808,27 @@ semantic_ref: {"c" * 40}
 
     def test_historical_versions_must_precede_accepted_current(self) -> None:
         data = copy.deepcopy(self.data)
-        data["historical"]["6.5.0"] = {
-            "public_source_ref": "dd06da8136416e67644586c44880b466f982b8ff",
-            "recovery_ref": "758490c11f90b587c7dfaadddab958751f2881c9",
+        major, minor, _ = map(int, data["accepted_current"]["version"].split("."))
+        future_version = f"{major}.{minor + 1}.0"
+        later_candidate = f"{major}.{minor + 2}.0"
+        data["historical"][future_version] = {
+            "public_source_ref": "a" * 40,
+            "recovery_ref": "b" * 40,
         }
         data["candidate"] = {
-            "version": "6.6.0",
+            "version": later_candidate,
             "semantic_ref": "UNFROZEN",
             "review": {"state": "NOT_RUN", "evidence_ref": "NONE"},
             "ratification": {"state": "NOT_REQUESTED", "evidence_ref": "NONE"},
             "public_source_ref": "UNAVAILABLE",
             "recovery_ref": "UNAVAILABLE",
         }
-        errors = release_state.validate_release_state(data, repo_root=ROOT)
-        self.assertTrue(
-            any(
-                "historical[6.5.0] must be older than accepted_current.version 6.4.0" in error
-                for error in errors
-            )
+        errors = release_state.validate_release_state(data)
+        expected = (
+            f"historical[{future_version}] must be older than "
+            f"accepted_current.version {data['accepted_current']['version']}"
         )
-        self.assertFalse(
-            any("historical[6.5.0].public_source_ref maps" in error for error in errors)
-        )
-        self.assertFalse(
-            any("historical[6.5.0].recovery_ref maps" in error for error in errors)
-        )
+        self.assertTrue(any(expected in error for error in errors))
 
     def test_version_identity_requires_canonical_ascii_semver(self) -> None:
         candidate_forms = ("06.5.0", "6.05.0", "6.5.00", "٦.٥.٠")
@@ -849,7 +856,14 @@ semantic_ref: {"c" * 40}
                 )
 
     def test_active_candidate_accepts_patch_minor_and_major_successors(self) -> None:
-        for version in ("6.4.1", "6.5.0", "6.10.0", "7.0.0"):
+        major, minor, patch = map(int, self.data["accepted_current"]["version"].split("."))
+        successors = (
+            f"{major}.{minor}.{patch + 1}",
+            f"{major}.{minor + 1}.0",
+            f"{major}.{minor + 6}.0",
+            f"{major + 1}.0.0",
+        )
+        for version in successors:
             with self.subTest(version=version):
                 data = copy.deepcopy(self.data)
                 data["candidate"] = {
@@ -864,16 +878,23 @@ semantic_ref: {"c" * 40}
 
     def test_terminal_cutover_and_next_candidate_are_legal_state_transitions(self) -> None:
         data = copy.deepcopy(self.data)
-        data["historical"]["6.4.0"] = copy.deepcopy(data["accepted_current"])
+        accepted = copy.deepcopy(data["accepted_current"])
+        accepted_version = accepted["version"]
+        major, minor, _ = map(int, accepted_version.split("."))
+        terminal_version = f"{major}.{minor + 1}.0"
+        data["historical"][accepted_version] = {
+            "public_source_ref": accepted["public_source_ref"],
+            "recovery_ref": accepted["recovery_ref"],
+        }
         candidate = "a" * 40
         recovery = "b" * 40
         data["accepted_current"] = {
-            "version": "6.5.0",
+            "version": terminal_version,
             "public_source_ref": candidate,
             "recovery_ref": recovery,
         }
         data["candidate"] = {
-            "version": "6.5.0",
+            "version": terminal_version,
             "semantic_ref": candidate,
             "review": {
                 "state": "PASS",
@@ -896,7 +917,13 @@ semantic_ref: {"c" * 40}
         }
         self.assertEqual(release_state.validate_release_state(data), [])
 
-        for version in ("6.5.1", "6.6.0", "7.0.0"):
+        next_major, next_minor, next_patch = map(int, terminal_version.split("."))
+        successors = (
+            f"{next_major}.{next_minor}.{next_patch + 1}",
+            f"{next_major}.{next_minor + 1}.0",
+            f"{next_major + 1}.0.0",
+        )
+        for version in successors:
             successor = copy.deepcopy(data)
             successor["candidate"] = {
                 "version": version,
@@ -911,7 +938,8 @@ semantic_ref: {"c" * 40}
 
     def test_historical_state_cannot_duplicate_accepted_current_version(self) -> None:
         data = copy.deepcopy(self.data)
-        data["historical"]["6.4.0"] = {
+        accepted_version = data["accepted_current"]["version"]
+        data["historical"][accepted_version] = {
             "public_source_ref": data["accepted_current"]["public_source_ref"],
             "recovery_ref": data["accepted_current"]["recovery_ref"],
         }
@@ -947,10 +975,14 @@ semantic_ref: {"c" * 40}
 
     def test_accepted_cutover_requires_exact_previous_candidate_and_history_transfer(self) -> None:
         previous = copy.deepcopy(self.data)
+        previous_accepted = copy.deepcopy(previous["accepted_current"])
+        previous_version = previous_accepted["version"]
+        major, minor, _ = map(int, previous_version.split("."))
+        promoted_version = f"{major}.{minor + 1}.0"
         candidate = "a" * 40
         recovery = "b" * 40
         previous["candidate"] = {
-            "version": "6.5.0",
+            "version": promoted_version,
             "semantic_ref": candidate,
             "review": {
                 "state": "PASS",
@@ -973,9 +1005,12 @@ semantic_ref: {"c" * 40}
         }
 
         current = copy.deepcopy(previous)
-        current["historical"]["6.4.0"] = copy.deepcopy(previous["accepted_current"])
+        current["historical"][previous_version] = {
+            "public_source_ref": previous_accepted["public_source_ref"],
+            "recovery_ref": previous_accepted["recovery_ref"],
+        }
         current["accepted_current"] = {
-            "version": "6.5.0",
+            "version": promoted_version,
             "public_source_ref": candidate,
             "recovery_ref": recovery,
         }
@@ -985,13 +1020,13 @@ semantic_ref: {"c" * 40}
         )
 
         missing_history = copy.deepcopy(current)
-        missing_history["historical"].pop("6.4.0")
+        missing_history["historical"].pop(previous_version)
         errors = release_state.validate_release_transition(previous, missing_history)
         self.assertTrue(any("add exactly the previous accepted_current version" in error for error in errors))
         self.assertTrue(any("move the previous accepted_current mapping unchanged" in error for error in errors))
 
         mutated_history = copy.deepcopy(current)
-        mutated_history["historical"]["6.4.0"]["recovery_ref"] = "e" * 40
+        mutated_history["historical"][previous_version]["recovery_ref"] = "e" * 40
         errors = release_state.validate_release_transition(previous, mutated_history)
         self.assertTrue(any("move the previous accepted_current mapping unchanged" in error for error in errors))
 
