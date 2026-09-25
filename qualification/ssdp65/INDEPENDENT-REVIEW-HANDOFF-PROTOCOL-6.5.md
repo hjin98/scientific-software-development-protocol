@@ -1,7 +1,7 @@
 ---
 kind: independent-review-handoff
 protocol_under_review: 6.5.0
-status: p9-no-pass-repair-required
+status: ready-p10
 accepted_control_p0: 55c085261eb827e3047637d045a8e6917ea6b962
 failed_candidate_p1: b565e28aeacea002cefe27e6b9594fe99d653c0a
 failed_candidate_p2: e8edb353e172aef933ed5e58eeabe897d0cc98d1
@@ -12,143 +12,180 @@ failed_candidate_p6: dd06da8136416e67644586c44880b466f982b8ff
 failed_candidate_p7: 133c747a1f9ab4372c9e1af7a7e9666316dc892b
 failed_candidate_p8: ed782ccad73b43c9052ecc926177c36846b9328d
 failed_candidate_p9: fb347272c70b6225743fdc99e9bec8b4197aad49
+immutable_candidate_p10: 275b23bfa45cc72145d2079c8d945a6ff5a5c216
 candidate_branch: ssdp-6.5-frontier-model-re-evaluation
 draft_pr: 33
-p9_mechanical_qualification_run: 36091484812
-p9_binding_descendant: 69f7cda3bd9bdfdbc113b4ec5ac6da044a7d46ab
-p9_binding_qualification_run: 36091605214
+p10_mechanical_qualification_run: 36098785911
+p10_binding_descendant: 82949a0c8325fce602c39fb3dfdab56352d94b73
+p10_binding_qualification_run: 36098950938
+p10_repair_qualification: qualification/ssdp65/P10-REPAIR-QUALIFICATION.md
+p10_freeze_binding: qualification/ssdp65/P10-FREEZE-BINDING.md
+p10_binding_qualification: qualification/ssdp65/P10-BINDING-QUALIFICATION.md
 p9_review: qualification/ssdp65/INDEPENDENT-REVIEW-2026-09-24-PROTOCOL-6.5-P9-NO-PASS.md
-p9_review_commit: 98fcef496f10d4980d97099ea4607d60ef3e812a
-p9_review_status: NO_PASS
 historical_capability_preservation_review: qualification/ssdp65/HISTORICAL-CAPABILITY-PRESERVATION-REVIEW-2026-09-25-P9.md
-blocking_finding: B65-P9-1
-serious_challenge: none
-d3_reopened: false
+authoring_context_verdict: none
 stakeholder_ratification: NOT_REQUESTED
-public_fallback: UNAVAILABLE
-recovery: UNAVAILABLE
 ---
 
-# Protocol 6.5 Lifecycle Handoff — After P9 NO-PASS
+# Independent Review Handoff — Protocol 6.5 P10
 
-## Current boundary
+## Immutable Review target
 
-Accepted control remains:
+Perform a genuinely fresh independent assembled-candidate Review of:
+
+`P10 = 275b23bfa45cc72145d2079c8d945a6ff5a5c216`
+
+against accepted Protocol 6.4 control:
 
 `P0 = 55c085261eb827e3047637d045a8e6917ea6b962`
 
-Immutable failed Review subject:
+P1-P9 are immutable failed candidates and historical evidence only. P10 itself is the semantic Review target. **Do not substitute the mutable branch head or binding descendant for P10.** Use later descendants only for qualification/lifecycle evidence.
 
-`P9 = fb347272c70b6225743fdc99e9bec8b4197aad49`
+Do not inherit the P9 Review conclusion, repair-author closure claims, or CI conclusions beyond the exact properties their oracles discriminate.
 
-Durable independent Review:
+## Current lifecycle boundary
 
-`qualification/ssdp65/INDEPENDENT-REVIEW-2026-09-24-PROTOCOL-6.5-P9-NO-PASS.md`
+Binding descendant:
 
-Review publication commit:
+`82949a0c8325fce602c39fb3dfdab56352d94b73`
 
-`98fcef496f10d4980d97099ea4607d60ef3e812a`
+Binding workflow:
 
-P1-P9 are immutable historical Review subjects. **Do not repair P9 in place.** Any semantic repair creates a new candidate identity.
+`36098950938`
 
-Current release state:
+Expected entering Review:
 
 - accepted-current: Protocol 6.4;
-- candidate semantic ref: exact P9;
-- Review: `NO_PASS`;
+- candidate version: 6.5.0;
+- candidate semantic ref: exact P10;
+- Review: `NOT_RUN`;
 - stakeholder ratification: `NOT_REQUESTED`;
 - public fallback: `UNAVAILABLE`;
 - recovery: `UNAVAILABLE`;
 - Protocol 7 D3/D4: unchanged.
 
-## Surviving blocker
+Independently verify this state.
 
-**B65-P9-1 — governed release-state owner deletion is conflated with genuine pre-owner ancestry in production predecessor resolution.**
+## Governing authority and independence
 
-Exact owner: D4 `source/release_state.py`, in the ancestry/predecessor classifier used by the real release-state validation path.
+Start from accepted P0, accepted Protocol 6.5 Phase IV-V D3 design, active D3->D4 handoff/workplan, exact P10 source, Protocol 6.4 -> 6.5 preservation map, the P9 historical-capability review, and applicable accepted/base PEM plus candidate overlay.
 
-P9 correctly traverses owner-present Git ancestry without making timestamp/path-log/sibling ordering authoritative. The remaining defect is that a parent lacking `PROTOCOL-RELEASE-STATE.yaml` is unconditionally treated as genuinely pre-owner.
+Reconstruct authority independently before using repair-side summaries. PEM is evidence-backed hypothesis input, not authority.
 
-That assumption is false when a lineage:
+This repair/authoring context cannot self-issue the P10 Review verdict.
 
-1. already contained the governed root owner;
-2. later deletes that owner;
-3. continues for one or more commits;
-4. later merges into a branch whose tree restores the owner.
+## Mandatory P9-repair falsification
 
-In that topology, P9 can silently omit the malformed governed lineage and validate only the other predecessor boundary.
+### B65-P9-1 — distinguish genuine pre-owner ancestry from governed owner deletion
 
-## Authorized D4 repair
+Inspect the real production resolver in exact P10 and challenge at least:
 
-Alter the existing ancestry classifier only.
+- owner introduced -> sibling deletes owner -> merge restores owner: must reject;
+- reverse merge-parent order: same rejection;
+- reverse relevant parent timestamps: same rejection;
+- multiple commits while owner absent: reject;
+- same-lineage delete -> reintroduce -> current state: reject;
+- working-tree reintroduction after governed deletion: reject;
+- genuine first owner introduction from pre-owner HEAD: remain legal;
+- long genuinely pre-owner ancestry + governed feature merge: remain legal;
+- owner-present linear/evidence-only/consecutive/equivalent/divergent merge topologies: remain correct;
+- stale/sibling/wrong-ancestry recovery and complete later recovery: preserve P7/P8/P9 lineage behavior;
+- no timestamp, default `git log`, branch name, newest/default ref, sibling enumeration or traversal-stack order becomes authority.
 
-Required behavior:
+Use at least one fresh P10 holdout not used to design the repair.
 
-1. Distinguish a valid parsed release state from path absence.
-2. When a traversed parent lacks the owner, inspect that lineage's ancestry to determine whether the owner genuinely never existed.
-3. If no governed ancestor exists, the lineage is genuinely pre-owner and may contribute no predecessor state.
-4. If a governed ancestor exists, owner deletion/reintroduction is a malformed governed transition and must fail validation rather than being ignored.
-5. The result must remain independent of commit timestamps, default `git log` ordering, branch names, default/latest refs, sibling enumeration, and traversal stack order.
-6. Preserve working-tree-vs-HEAD, linear transition, evidence-only descendants, consecutive transitions, equivalent owner-present parents, divergent owner-present parents, genuine pre-owner PR merges, and recovery-lineage behavior.
+Challenge the qualification method directly:
 
-Do not add:
+> Could all P10 authored tests remain green while production resolution still treats a post-introduction missing owner as genuinely pre-owner or otherwise validates the wrong temporal transaction?
 
-- a second release-state file;
-- an owner/topology registry;
-- a transition mirror/database;
-- branch-name or timestamp policy;
-- compatibility machinery;
-- candidate-specific P9/P10 branches;
-- a semantic prose parser.
+Do not answer from test count. Inspect the production call path and construct a discriminating counterexample if one exists.
 
-Accepted Protocol 6.5 D3 remains closed.
+## Re-falsify prior repaired families
 
-## Mandatory repair qualification
+Proportionately re-falsify:
 
-At minimum add real-Git production-resolver cases for:
+- B65-P8-1 ancestry/topology predecessor resolution;
+- B65-P7-1 transition continuity and recovery lineage;
+- B65-P6-1 strict root-state parser convergence;
+- B65-P6-2 canonical semantic-version/history ordering;
+- B65-P5-1 duplicate-key root ambiguity;
+- B65-P5-2 active candidate/history succession;
+- B65-P4-1 evidence-front-matter ambiguity;
+- B65-P3-1 exact Review/ratification evidence subject binding;
+- B65-P3-2 current representation convergence;
+- B65-P2-1/B65-R2 lifecycle-value duplication;
+- B65-P2-2/B65-R1 evidence applicability;
+- B65-R3 predecessor-version gating.
 
-- owner introduced -> sibling deletes owner -> merge restores owner: reject;
-- same topology with merge-parent order reversed: reject;
-- same topology with timestamps reversed: reject;
-- multiple owner-absent commits after a governed ancestor: reject;
-- owner deleted then reintroduced on the same governed lineage: enforce the governed deletion/reintroduction rule explicitly;
-- genuine pre-owner base parent + governed feature lineage: pass;
-- long genuine pre-owner ancestry: pass;
-- all P9 owner-present topology controls: remain passing;
-- transition-history and recovery-lineage controls: remain passing.
+Do not infer closure merely from green CI.
 
-Then rerun:
+## Historical capability preservation
 
-- complete release-state suite;
-- full repository regression;
-- package/profile/generated parity;
-- frozen 5.16 and 6.0-6.4 resource preservation;
-- current representation/predecessor-scope census as affected;
-- complete Orchestrator Core acceptance;
-- exact replacement-candidate normal PR workflow.
+Independently re-establish that P10 still preserves the historical capability lineage summarized in:
 
-## Replacement-candidate lifecycle
+`qualification/ssdp65/HISTORICAL-CAPABILITY-PRESERVATION-REVIEW-2026-09-25-P9.md`
 
-Do not predeclare a replacement SHA.
+At minimum inspect capability preservation for:
 
-After semantic repair and exact-candidate CI:
+- Protocol 5.13 relation-first tools/CodeQL;
+- 5.14 active simplicity;
+- 5.15 language profiles/cross-language performance;
+- 5.16 Verification/Stabilization/Health Audit and workflow/fallback discipline;
+- Protocol 6.0 D1-D4 authority/Challenge/human adjudication;
+- Protocol 6.1 evidence evolution, human-facing terminology, exact fallback and transitive package closure;
+- Protocol 6.2 Lossless Representation/progressive disclosure/current-vs-history separation;
+- Protocol 6.3 PEM/HAS/non-authority/binding-health/counterevidence semantics;
+- Protocol 6.4 formal-definition/source-availability/parameter/import/warrant/typed-dependency semantics;
+- frozen 5.16 and 6.0-6.4 resources;
+- Protocol 7 D3/D4 isolation.
 
-1. freeze the repair commit as the next immutable candidate identity (sequence P10);
-2. bind it only from a later lifecycle descendant;
-3. set its Review to `NOT_RUN`;
-4. keep stakeholder ratification `NOT_REQUESTED`, public fallback/recovery `UNAVAILABLE`, accepted-current Protocol 6.4;
-5. qualify the binding descendant;
-6. perform a genuinely fresh independent assembled-candidate Review against exact P10.
+Capability, not obsolete wording or mechanism identity, is the preservation oracle.
 
-P9 CI and Review evidence remain applicable only to their exact subjects/properties. They do not transfer whole-candidate acceptance to P10.
+## Full assembled-candidate Review
 
-No stakeholder ratification, publication, recovery, accepted-current cutover, PR #33 merge, or Protocol 7 D3/D4 mutation is authorized before a replacement candidate independently passes Review.
+Perform:
 
+1. Serious Challenge pass first.
+2. DF-1 through DF-4.
+3. Local-compliance/global-failure trajectories.
+4. Out-of-matrix abstraction-adequacy search.
+5. Qualification-method challenge for material oracles.
+6. Fresh machine/state/topology/schema/generated mutants and prose-semantic mutants.
+7. P65-1 through P65-6 causal ablation.
+8. Protocol 6.4 -> 6.5 preservation-map falsification plus historical capability transfer.
+9. Simplicity/total-complexity inspection.
+10. Exact evidence-applicability assessment.
 
-## Historical capability preservation requirement for the replacement candidate
+Do not fabricate a defect if none survives falsification.
 
-The P9 historical-capability review found no additional lost doctrine beyond B65-P9-1.
+## Evidence boundaries
 
-The replacement candidate must preserve the accepted capability lineage in modern form, not original wording/mechanisms. Re-establish the bounded cross-generation matrix in `qualification/ssdp65/HISTORICAL-CAPABILITY-PRESERVATION-REVIEW-2026-09-25-P9.md`, including active historical regression, package closure, exact version/fallback/recovery discipline, frozen prior profiles/prompts, Protocol 7 isolation, PEM/HAS, progressive disclosure/Lossless Representation, long-horizon quality, relation-first tool/language routing, and Protocol 6.4 formal-definition/traceability semantics.
+Exact P10 normal workflow:
 
-Do not infer preservation from the map alone; inspect the current owners and assembled replacement. Do not reintroduce obsolete proxy machinery or version-labelled amendment replay merely for historical resemblance.
+`36098785911`
+
+Binding descendant:
+
+`82949a0c8325fce602c39fb3dfdab56352d94b73`
+
+Binding workflow:
+
+`36098950938`
+
+Durable repair evidence:
+
+- `qualification/ssdp65/P10-REPAIR-QUALIFICATION.md`
+- `qualification/ssdp65/P10-FREEZE-BINDING.md`
+- `qualification/ssdp65/P10-BINDING-QUALIFICATION.md`
+
+These establish only their discriminated structural/executable/lifecycle properties. They are not semantic Review PASS.
+
+## Disposition boundary
+
+PASS means only:
+
+`P10 is technically eligible for stakeholder ratification.`
+
+It does not ratify Protocol 6.5, publish public fallback, establish recovery, change accepted-current, merge PR #33, or mutate Protocol 7 D3/D4.
+
+If a semantic blocker remains, preserve P10 immutably, reopen at the earliest owning layer, and require a new candidate identity.

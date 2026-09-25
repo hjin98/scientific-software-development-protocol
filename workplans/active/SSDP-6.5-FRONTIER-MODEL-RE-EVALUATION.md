@@ -5,8 +5,8 @@ protocol_version: 6.4.0
 target_protocol_version: 6.5.0
 subject_baseline: P0 = Protocol 6.4 at 55c085261eb827e3047637d045a8e6917ea6b962 (recovery 74bc572ef516cae417437a2027eeff52a2e25c15)
 diagnostic_commit: 81375d8142a8130b80cd82f2304d3e16bc3fc390
-status: p10-binding-qualification-required
-current_phase: PHASE VII P10 FROZEN / BINDING QUALIFICATION REQUIRED
+status: ready-p10-independent-review
+current_phase: PHASE VII P10 FROZEN / FRESH INDEPENDENT REVIEW REQUIRED
 branch: ssdp-6.5-frontier-model-re-evaluation
 created_date: 2026-09-24
 adjudication: qualification/ssdp65/CROSS-MODEL-ADJUDICATION-2026-09-24.md
@@ -1048,3 +1048,14 @@ Exact-candidate workflow run `36098785911` passed on semantic repair commit:
 That commit is frozen as immutable P10. This descendant binds P10 with Review `NOT_RUN`, ratification `NOT_REQUESTED`, public fallback/recovery `UNAVAILABLE`, and accepted-current Protocol 6.4.
 
 The binding descendant also adds two evidence-only working-tree topology controls for first introduction versus post-governance reintroduction. Binding/full workflow qualification must pass before the fresh independent Review handoff is advanced to P10.
+
+
+## 43. P10 binding qualification and fresh-Review readiness
+
+Immutable P10 `275b23bfa45cc72145d2079c8d945a6ff5a5c216` passed exact-candidate run `36098785911`.
+
+Binding descendant `82949a0c8325fce602c39fb3dfdab56352d94b73` passed run `36098950938` with Review `NOT_RUN`, ratification `NOT_REQUESTED`, public fallback/recovery `UNAVAILABLE`, accepted-current Protocol 6.4, and Protocol 7 unchanged.
+
+B65-P9-1 is mechanically closed at the existing D4 owner. Historical capability preservation obligations remain explicitly carried into the fresh P10 Review handoff.
+
+The next authorized action is a genuinely fresh independent assembled-candidate Review of exact P10.

@@ -3,7 +3,7 @@ kind: implementation-workplan
 workplan_id: SSDP-6.5-D3-D4-IMPLEMENTATION-HANDOFF
 protocol_version: 6.4.0
 target_protocol_version: 6.5.0
-status: p10-binding-qualification-required
+status: ready-p10-independent-review
 parent_workplan: workplans/active/SSDP-6.5-FRONTIER-MODEL-RE-EVALUATION.md
 design_authority: qualification/ssdp65/PHASE-IV-V-DESIGN-CLOSURE.md
 baseline: 55c085261eb827e3047637d045a8e6917ea6b962
@@ -887,3 +887,29 @@ Two additional evidence-only topology tests are added in this binding descendant
 - working-tree owner reintroduction after a governed deletion is rejected.
 
 These tests do not mutate P10 production semantics. Normal workflow qualification of this binding descendant is required before fresh independent Review handoff.
+
+
+## 37. P10 binding qualification complete
+
+Immutable P10 `275b23bfa45cc72145d2079c8d945a6ff5a5c216` passed exact-candidate normal workflow run `36098785911` across the complete build and Orchestrator Core jobs.
+
+Binding descendant `82949a0c8325fce602c39fb3dfdab56352d94b73` passed normal workflow run `36098950938` with:
+
+- candidate semantic ref: exact P10;
+- Review: `NOT_RUN`;
+- stakeholder ratification: `NOT_REQUESTED`;
+- public fallback/recovery: `UNAVAILABLE`;
+- accepted-current: Protocol 6.4;
+- Protocol 7 D3/D4: unchanged.
+
+The binding run also exercised the evidence-only working-tree first-introduction versus governed-reintroduction controls added after P10 freeze.
+
+Durable qualification records:
+
+- `qualification/ssdp65/P10-REPAIR-QUALIFICATION.md`;
+- `qualification/ssdp65/P10-FREEZE-BINDING.md`;
+- `qualification/ssdp65/P10-BINDING-QUALIFICATION.md`.
+
+B65-P9-1 is mechanically repaired and qualified at the existing D4 owner. Accepted P65 D3 remains closed.
+
+The next authorized stage is a genuinely fresh independent assembled-candidate Review of exact P10.
