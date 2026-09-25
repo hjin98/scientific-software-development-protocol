@@ -8,7 +8,7 @@ branch: ssdp-6.5-frontier-model-re-evaluation
 accepted_control: 55c085261eb827e3047637d045a8e6917ea6b962
 superseded_review_ready_candidate: a2e5f01e258f249f74d1eda74b883efb98fd7d59
 serious_challenge: active-against-current-doctrine
-workplan_review: pass-after-second-adversarial-review
+workplan_review: pass-after-third-adversarial-review
 workplan_review_date: 2026-09-25
 created_date: 2026-09-25
 ---
@@ -27,6 +27,11 @@ This workplan does not authorize ratification, publication, recovery, accepted-c
 Protocol 7 D3/D4 mutation.
 
 The next semantic candidate must incorporate this workplan before Protocol 6.5 can return to independent Review.
+
+**Design-review disposition: PASS after three adversarial pre-implementation passes.** The active file is the single
+current implementation contract; prior review chronology is Git/qualification evidence rather than appended authority.
+Further design review should be driven by a concrete new counterexample or materially changed premise, not amendment
+accumulation.
 
 ## 2. Serious Challenge
 
@@ -214,6 +219,11 @@ uncertain dimension until it is bounded. Unknown impact is not evidence of low i
 Conversely, do not retain a provisional high class after a cheap discriminating result has bounded the consequence.
 Uncertainty about importance is a reason for targeted discrimination, not permanent caution.
 
+Importance/rigor labels are **coordination metadata, not semantic authority**. Reuse a still-applicable prior
+classification as a working hypothesis to avoid repeated reclassification, but revise it freely when consequence,
+scope, evidence, or dependencies change. Changing a priority label alone does not require a D1-D4 redesign or
+workplan revision.
+
 ### 5.2 Obligation status is orthogonal to importance
 
 Before DEFER/OMIT, distinguish:
@@ -226,6 +236,11 @@ Before DEFER/OMIT, distinguish:
 
 Do not create a persistent obligation ledger or classify every tiny issue. This distinction may remain implicit for
 small work.
+
+Priority may reorder a mandatory obligation **within** a cycle, but may not starve it past the acceptance boundary that
+owns it. A deferred mandatory item remains visibly open and must be closed before that boundary can claim PASS unless
+the real governing owner explicitly supports a provisional/risk-accepted continuation. Priority classification itself
+cannot mint such an override.
 
 ### 5.3 Ordinal importance classes
 
@@ -286,9 +301,13 @@ Choose the next action using, qualitatively:
 
 - mandatory dependency/gate status;
 - unresolved decision sensitivity and unblocking value;
+- critical-path/deadline relevance where a real schedule or external dependency exists;
 - expected information or repair value;
 - reversibility and failure cost;
 - effort/opportunity cost relative to other live problems.
+
+Do not optimize only for the cheapest available action: an expensive necessary critical-path action can outrank many
+cheap peripheral tasks.
 
 A CRITICAL issue already settled by strong applicable evidence should not keep consuming attention. A MATERIAL issue
 that blocks the user and has a cheap decisive action may deserve the next action before an unrelated CRITICAL question
@@ -306,6 +325,11 @@ or machinery than its consequence justified, stop at the next safe boundary and 
   discretionary, or accept the bounded uncertainty where allowed.
 
 Prior effort already spent is never justification for continuing a low-value path.
+
+Repeated rediscovery of the same deferred/discretionary issue is itself evidence that the original economy judgment may
+be wrong. Reassess when cumulative rediscovery, workaround, or interruption cost becomes material; either fix the shared
+cause, record a reusable bounded lesson when PEM admission is justified, or continue to omit it if the cumulative cost
+still does not matter. Do not create a general deferred-issue backlog merely for compliance.
 
 ## 6. Attention and rigor modes
 
@@ -492,14 +516,18 @@ highest-value unresolved governed outcome
 ```
 
 A stage gate may block progression, but work should remain attached to the blocked outcome rather than drifting into
-later stages whose completion does not unblock it.
+dependent later stages whose completion does not unblock it.
+
+If the active blocker depends on an actually unavailable external input, service, hardware resource, approval, or human
+decision, independent work may proceed when it does not assume the blocker passed, does not invalidate later evidence,
+and has higher value than idling. Preserve the blocker as explicitly unresolved; parallel progress is not acceptance.
 
 For a doctor -> prepare -> production pipeline, a failing doctor remains the active objective until:
 
 - the doctor is repaired; or
 - the doctor is independently shown to be a stale/invalid gate and the governing owner authorizes its correction.
 
-Do not advance merely to accumulate downstream evidence.
+Do not advance into dependent work merely to accumulate downstream evidence.
 
 When deciding the next action, compare the value of **investigating**, **repairing/experimenting**, and **deferring**.
 For a cheap reversible local defect, direct repair plus a discriminating check may be more rational than proving the
@@ -528,7 +556,8 @@ A reviewer should:
 
 Review sufficiency is not proof that no conceivable defect exists. An implementer-supplied low-priority label is a
 hypothesis, not authority; a reviewer must escalate it when a credible causal path to a material governed outcome is
-found, and must likewise avoid preserving a high-priority label after the causal path is falsified.
+found, and must likewise avoid preserving a high-priority label after the causal path is falsified. Priority changes
+**investigation effort, not the acceptance threshold** for an applicable requirement.
 
 ## 12. Workplan attention budget
 
@@ -561,6 +590,11 @@ Substantial workplans should add a compact section:
 
 This is an attention map, not a ledger. Do not require per-issue numeric scores, token budgets, or exhaustive
 classification tables.
+
+When a material priority judgment changes scope, evidence depth, defers a nontrivial issue, or permits bounded
+approximation/omission, preserve the **smallest useful rationale** in the workplan/handoff: consequence, mandatory vs
+discretionary status, decisive uncertainty/evidence, chosen rigor mode, and escalation/stop trigger. This makes the
+decision reviewable without turning every issue into permanent process state.
 
 For small local work, do not require this section at all.
 
@@ -766,6 +800,23 @@ Qualification must test decisions, not wording.
     A protocol version advances without a corresponding CHANGELOG capability entry, or README loses its release-state/
     changelog routes. The cheap objective repository check fails; prose quality remains outside that check.
 
+19. **Mandatory low-salience starvation.**
+    A mandatory but low-consequence obligation is repeatedly deprioritized. The task may schedule it late, but the
+    owning acceptance boundary cannot PASS until it is closed or the real owner explicitly authorizes provisional/risk-
+    accepted continuation.
+
+20. **Externally blocked critical path.**
+    The highest-priority task waits on unavailable hardware/approval. Independent useful work may continue without
+    pretending the blocker passed or collecting dependent evidence that assumes it did.
+
+21. **Priority label persistence without authority.**
+    A handoff reuses a prior ROUTINE/MATERIAL classification to avoid rediscovery, but new evidence changes consequence.
+    The next agent revises the label without D3 reopening and preserves only the material rationale.
+
+22. **Repeated deferred rediscovery.**
+    An INCIDENTAL issue is rediscovered across several cycles. Cumulative interruption cost becomes material and
+    triggers reassessment/shared repair or bounded PEM learning rather than endless re-deferral.
+
 ## 15. Acceptance
 
 The redesign is successful only if an agent can reliably distinguish:
@@ -780,7 +831,11 @@ The redesign is successful only if an agent can reliably distinguish:
 - uncertain importance from genuinely low importance;
 - problem importance from next-action priority;
 - applicable evidence from stale evidence that is merely cheap to reuse;
-- semantic mutation from an evidence-only descendant.
+- semantic mutation from an evidence-only descendant;
+- scheduling a mandatory low-salience obligation from waiving it;
+- a reusable priority judgment from a new authority;
+- productive work around an external blocker from falsely advancing a dependent gate;
+- genuinely cheap omission from repeated rediscovery whose cumulative cost has become material.
 
 Repository qualification should include focused semantic counterfactuals plus the ordinary assembled repository build.
 It must also demonstrate that evidence-only/fixture corrections can be requalified without unnecessary semantic
@@ -850,6 +905,7 @@ Do not encode model-specific behavior.
 - Applicability/mandatory obligation is orthogonal to importance; priority never waives a binding requirement.
 - Safety/security/external/regulatory obligations cannot be downgraded by local priority judgments.
 - Importance is consequence-based and decision-local; unknown impact is not evidence of low impact.
+- Importance/rigor labels are coordination metadata, not D1-D4 authority or acceptance thresholds.
 - Attention intensity also depends on unresolved decision-relevant uncertainty and irreversibility; CRITICAL does not
   mechanically imply DEEP when a cheap strong oracle already settles the issue.
 - Subproblems do not inherit parent priority automatically.
@@ -858,7 +914,8 @@ Do not encode model-specific behavior.
 - Bounded engineering judgment, estimation, deferral, and omission are legitimate for low-consequence non-mandatory
   uncertainty.
 - Full scientific/statistical qualification is reserved for claims whose uncertainty justifies it.
-- Development economy includes real human/model/token/tool/compute/I/O/wall-time opportunity cost.
+- Development economy includes real human/model/token/tool/compute/I/O/wall-time opportunity cost, critical-path
+  opportunity cost, and cumulative rediscovery cost where material.
 - Evidence applicability remains mandatory: priority cannot revive stale/inapplicable evidence.
 - Evidence-instrument correction must not automatically mint a replacement semantic candidate when D1-D4/product
   semantics are unchanged; same-candidate requalification binds semantic subject and evidence realization identities
@@ -891,55 +948,3 @@ Reopen this design only if:
 
 Do not reopen merely because an existing test or fixture encodes uniform-rigor behavior. Such a test is evidence to
 reconcile against the new accepted doctrine if this workplan is ratified.
-
-
-## 19. Pre-implementation design review closure — 2026-09-25
-
-**Disposition: PASS — ready for implementation under this amended workplan.**
-
-The review closed these material gaps before D4 work begins:
-
-1. **Mandatory-obligation ambiguity** — fixed by making applicability/mandatory status orthogonal to importance.
-2. **Importance = DEEP overreach** — fixed by separating consequence from unresolved uncertainty and allowing cheap
-   strong oracles to close even high-consequence questions without ceremonial analysis.
-3. **No repair-vs-analysis decision rule** — fixed with reversible experiment/repair preference and explicit
-   escalation/de-escalation/stop conditions.
-4. **Semantic-candidate churn** — fixed by requiring evidence-only/fixture corrections to requalify the same semantic
-   subject when semantics are unchanged.
-5. **History use not explicitly bound** — fixed with the accepted PEM basis and bounded HAS above.
-6. **README/CHANGELOG drift risk** — fixed with a release documentation closeout before candidate freeze and a durable
-   root `AGENTS.md` persistence instruction, while deliberately rejecting a brittle prose validator.
-
-No remaining pre-implementation D3 blocker is known. The Serious Challenge remains directed at the currently accepted
-Protocol 6.4 / pre-repair Protocol 6.5 doctrine until the implementation is qualified; it is not a challenge to this
-reviewed repair contract.
-
-
-## 20. Second pre-implementation adversarial review closure — 2026-09-25
-
-**Disposition: PASS — no remaining known D3 blocker; implementation may proceed.**
-
-This second review treated the first closure as untrusted and found these remaining gaps:
-
-1. **Importance-classification uncertainty** could permit optimistic downgrade. Closed with targeted bounding and
-   provisional consequence handling.
-2. **Problem importance vs action priority** was conflated. Closed with separate next-action value and dependency/
-   unblocking criteria.
-3. **Sunk-cost continuation** was not explicitly prevented. Closed with attention-overrun reclassification.
-4. **Evidence applicability** could be misread as economizable. Closed by retaining applicability as a feasibility
-   condition.
-5. **Same-candidate evidence repair** lacked exact realization identity. Closed by binding semantic subject and
-   evidence-realization descendant/run separately and requiring the intervening delta to be non-semantic.
-6. **Reviewer priority independence** was implicit. Closed by requiring Review to reconstruct consequence independently
-   of implementer labels.
-7. **Public scientific claim wording** could trigger DEEP treatment merely because a result is public. Closed by tying
-   escalation to decision-relevant uncertainty.
-8. **README "well-written" polishing** lacked a stop condition. Closed with a sufficient-quality stopping boundary.
-9. **Documentation persistence** relied only on agent instruction. Closed with a deliberately tiny objective
-   current-version/changelog + README-route check, while preserving semantic writing review outside automation.
-10. **6.5 compatibility posture** was implicit. Closed by requiring this change to remain a backward-compatible minor
-    strengthening unless a material 6.4 obligation/authority must actually be weakened.
-
-The reviewed workplan now contains both the economy mechanism and its guardrails against under-rigor. Additional
-pre-implementation review should be triggered by a concrete new counterexample, not by the existence of further
-conceivable wording refinements.

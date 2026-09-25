@@ -1464,59 +1464,23 @@ assembled-candidate Review of exact P18. This repair context must not self-issue
 
 No ratification, publication, recovery, accepted-current cutover, PR merge, or Protocol 7 mutation is authorized.
 
+## 66. Stakeholder-directed D3 reopen — proportional rigor implementation-ready
 
-## 66. Stakeholder-directed D3 reopen — importance-weighted attention and proportional rigor
+The planned P18 Review remains suspended. P18
+`a2e5f01e258f249f74d1eda74b883efb98fd7d59` is immutable mechanically qualified historical evidence, but it does not
+close the stakeholder-identified protocol-level resource-allocation defect.
 
-The planned fresh independent Review of P18 is suspended before execution.
-
-P18 `a2e5f01e258f249f74d1eda74b883efb98fd7d59` remains immutable and mechanically qualified, but the stakeholder
-identified a broader protocol-level convergence defect not closed by P18: SSDP contains simplicity/development-economy
-principles yet lacks an operational mechanism for ranking problem importance and allocating attention/evidence cost
-proportionally.
-
-The new governing proposal is:
+The single current implementation contract is:
 
 `workplans/active/SSDP-6.5-IMPORTANCE-WEIGHTED-ATTENTION-AND-PROPORTIONAL-RIGOR.md`
 
-This is a genuine D3/protocol-doctrine reopen, not a P18 D4 repair. No P18 Review result should be issued while this
-reopen is active. The next replacement semantic candidate must implement and qualify the accepted outcome of the new
-workplan before Protocol 6.5 returns to independent Review.
+After three adversarial pre-implementation design passes, that workplan is **PASS / implementation-ready**. It
+operationalizes importance-weighted attention and proportional rigor while preserving mandatory acceptance,
+evidence applicability, independent Review, safety/security/external floors, exact release integrity, and Protocol 7
+isolation. It also distinguishes semantic-candidate identity from evidence-only requalification, requires release
+README/CHANGELOG closeout with a small objective persistence assertion, and prevents priority labels from becoming
+authority.
 
-
-## 67. Proportional-rigor workplan review complete — implementation ready
-
-The stakeholder-directed D3 reopen workplan was independently checked against current abstraction/concretization,
-simplicity, convergence, evidence, workflow, testing, PEM, documentation, release, and versioning doctrine before D4
-implementation.
-
-The reviewed plan closes mandatory-obligation ambiguity, separates consequence from unresolved uncertainty, adds
-repair/experiment-vs-analysis and explicit stopping rules, prevents evidence-only fixture/oracle repairs from
-automatically creating replacement semantic candidates, binds a bounded project-memory/HAS basis, and adds protocol
-release documentation closeout.
-
-Root `AGENTS.md` now persistently requires every successor cycle to recompile/review the user-facing `README.md`
-and update `CHANGELOG.md` after semantic stabilization and before semantic-candidate freeze. The design deliberately
-does not add a prose-quality parser or another CI bureaucracy; a mechanical docs validator remains contingent on a
-future demonstrated objective drift mode.
-
-The active implementation contract is:
-
-`workplans/active/SSDP-6.5-IMPORTANCE-WEIGHTED-ATTENTION-AND-PROPORTIONAL-RIGOR.md`
-
-P18 remains immutable historical mechanical evidence. Its suspended Review does not resume; implementation must produce
-and qualify a replacement semantic candidate under the reviewed doctrine.
-
-
-## 68. Second adversarial proportional-rigor workplan review — PASS
-
-A second pre-implementation Review treated the first workplan closure as untrusted. It closed remaining ambiguity around
-unknown importance, independent reviewer reclassification, problem-importance versus next-action priority, sunk-cost
-continuation, evidence applicability, same-semantic-candidate requalification identity, version compatibility, and
-documentation persistence.
-
-The workplan now requires same-candidate evidence repair to bind the immutable semantic subject separately from the
-exact evidence-realization descendant/run and to establish that intervening changes are non-semantic. It also adds a
-minimal objective release-document persistence check while keeping README prose quality outside mechanical parsing.
-
-No new role, registry, priority score, evidence database, or prose-quality framework is authorized. Further D3 review
-should be driven by a concrete counterexample rather than indefinite polishing. Implementation remains the next gate.
+Prior workplan-review chronology remains Git/history evidence rather than appended current authority. Implementation
+must now produce and qualify a replacement Protocol 6.5 semantic candidate. No ratification, publication, recovery,
+accepted-current cutover, PR #33 merge, or Protocol 7 D3/D4 mutation is authorized.
