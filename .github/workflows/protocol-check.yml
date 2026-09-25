@@ -25,7 +25,58 @@ jobs:
         run: python source/release_state.py
       - name: Validate project engineering memory
         run: python source/project_engineering_memory.py PROJECT-ENGINEERING-MEMORY.md
+      - name: Diag release-state family review evidence
+        if: always()
+        run: >-
+          python -m unittest discover -s tests
+          -p test_protocol_65_release_state.py -k review_evidence -v
+      - name: Diag release-state family ratification evidence
+        if: always()
+        run: >-
+          python -m unittest discover -s tests
+          -p test_protocol_65_release_state.py -k ratification -v
+      - name: Diag release-state family public recovery
+        if: always()
+        run: >-
+          python -m unittest discover -s tests
+          -p test_protocol_65_release_state.py -k recovery -v
+      - name: Diag release-state family accepted cutover
+        if: always()
+        run: >-
+          python -m unittest discover -s tests
+          -p test_protocol_65_release_state.py -k accepted_cutover -v
+      - name: Diag release-state family transition
+        if: always()
+        run: >-
+          python -m unittest discover -s tests
+          -p test_protocol_65_release_state.py -k transition -v
+      - name: Diag release-state family governed topology
+        if: always()
+        run: >-
+          python -m unittest discover -s tests
+          -p test_protocol_65_release_state.py -k previous_governed -v
+      - name: Diag release-state family canonical ancestry
+        if: always()
+        run: >-
+          python -m unittest discover -s tests
+          -p test_protocol_65_release_state.py -k canonical -v
+      - name: Diag release-state family version semantics
+        if: always()
+        run: >-
+          python -m unittest discover -s tests
+          -p test_protocol_65_release_state.py -k version -v
+      - name: Diag release-state family repository coherence
+        if: always()
+        run: >-
+          python -m unittest discover -s tests
+          -p test_protocol_65_release_state.py -k repository_release_state -v
+      - name: Diag release-state family load parser
+        if: always()
+        run: >-
+          python -m unittest discover -s tests
+          -p test_protocol_65_release_state.py -k release_state_load -v
       - name: Diag exact discovery release-state only
+        if: always()
         run: >-
           python -m unittest discover -s tests
           -p test_protocol_65_release_state.py -v
