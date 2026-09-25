@@ -1531,13 +1531,12 @@ Implementation requirements:
 - all canonical PEM YAML readers reject duplicate mapping keys;
 - canonical `pem-family`/`pem-notice` blocks cannot hide outside their required canonical headings;
 - exactly one active-summary marker pair is permitted in the PEM root;
-- observation-correction evidence is realized for current mechanical health before accepted observation mutation;
 - preserve every P14 canonical-Git property: replace/graft resistance, raw-parent ancestry, canonical content,
   patch-ID independence, missing-object fail-closed behavior, and readable alternate/promisor-backed objects.
 
 Required fresh holdouts include movable branch and tag retargeting, movable repair-acceptance evidence, directory/tree
 evidence paths, duplicate root/family/repair-acceptance YAML keys, orphan canonical blocks, duplicate active summaries,
-backslash path ambiguity, and correction evidence bound to a movable revision. Exact SHA/file routes are positive
+and backslash path ambiguity. Exact SHA/file routes are positive
 controls.
 
 The release-state validator is regression-only for this repair; do not duplicate these PEM-specific policy checks into

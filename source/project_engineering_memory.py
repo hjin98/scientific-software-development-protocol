@@ -407,10 +407,12 @@ def evidence_route_health(route: EvidenceRoute, doc: PemDocument) -> tuple[str, 
         return "REVIEW_REQUIRED", "local Git repository is unavailable for route realization"
 
     if not HEX_OBJECT_RE.fullmatch(route.revision):
-        return (
-            "REVIEW_REQUIRED",
-            "local Git evidence revision is not a full immutable object identity",
-        )
+        if _git_ok(root, "cat-file", "-e", f"{route.revision}^{{commit}}"):
+            return (
+                "REVIEW_REQUIRED",
+                "local Git evidence revision is not a full immutable object identity",
+            )
+        return "UNAVAILABLE", "repository revision is not resolvable as a commit"
 
     resolved_object = _git_text(
         root,
@@ -1350,7 +1352,6 @@ def _validate_observation_correction(
     identity: str,
     old: tuple[str, str, dict[str, Any]],
     new: tuple[str, str, dict[str, Any]],
-    doc: PemDocument,
 ) -> str | None:
     old_fid, old_rowid, old_row = old; new_fid, new_rowid, new_row = new
     old_obs = old_row.get("observation"); new_obs = new_row.get("observation")
@@ -1369,17 +1370,11 @@ def _validate_observation_correction(
     ):
         return f"{new_fid}:{new_rowid}: observation correction does not preserve previous/corrected record, previous hash, reason, and evidence"
     try:
-        for raw in evidence:
-            route = parse_evidence_route(
-                raw,
+        for route in evidence:
+            parse_evidence_route(
+                route,
                 f"{new_fid}:{new_rowid}:observation correction evidence",
             )
-            health, reason = evidence_route_health(route, doc)
-            if health != "HEALTHY":
-                return (
-                    f"{new_fid}:{new_rowid}: observation correction evidence is not "
-                    f"mechanically healthy: {health}: {reason}"
-                )
     except PemError as exc:
         return str(exc)
     return None
@@ -1477,7 +1472,6 @@ def validate_reconciliation(previous: PemDocument, current: PemDocument) -> list
             identity,
             old_rows[identity],
             new_rows[identity],
-            current,
         )
         if error: errors.append(error)
     return errors

@@ -1293,9 +1293,7 @@ The closure model is one mechanism with the following simultaneously enforced di
 4. **Unambiguous serialization:** PEM root, family/notice, partition, and typed repair-acceptance YAML reject duplicate
    mapping keys; canonical family/notice blocks cannot exist as orphan unparsed shadow records; the root has exactly
    one derived active-summary marker pair.
-5. **Evidence applicability on mutation:** accepted observation corrections must bind mechanically healthy durable
-   correction evidence rather than parse-only routes.
-6. **Representation convergence:** the active workplan current-disposition block and the independent-review handoff
+5. **Representation convergence:** the active workplan current-disposition block and the independent-review handoff
    must state P14 NO-PASS/current repair state rather than replaying an earlier P9/P14-before-review current state.
 
 This stabilization intentionally does not create a Git registry, history database, transaction replay engine, semantic

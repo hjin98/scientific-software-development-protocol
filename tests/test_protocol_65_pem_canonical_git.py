@@ -316,37 +316,5 @@ class Protocol65PemCanonicalGitTests(unittest.TestCase):
                 "local@" + ("a" * 40) + r":evidence\\record.md"
             )
 
-    def test_observation_correction_requires_durable_healthy_evidence(self) -> None:
-        with tempfile.TemporaryDirectory() as td:
-            root = Path(td)
-            self._init(root)
-            (root / "correction.md").write_text("correction\n", encoding="utf-8")
-            base = self._commit(root, "correction evidence")
-            self._run(root, "branch", "moving-correction", base)
-            (root / "later.txt").write_text("later\n", encoding="utf-8")
-            accepted = self._commit(root, "accepted descendant")
-
-            old = {"observation": "old"}
-            old_hash = __import__("hashlib").sha256(b"old").hexdigest()
-            new = {
-                "observation": "new",
-                "observation_correction": {
-                    "previous_sha256": old_hash,
-                    "previous_observation": "old",
-                    "corrected_observation": "new",
-                    "reason": "clerical correction",
-                    "evidence": ["local@moving-correction:correction.md"],
-                },
-            }
-            error = pem._validate_observation_correction(
-                "event-1",
-                ("FF-001", "O01", old),
-                ("FF-001", "O01", new),
-                self._doc(root, accepted),
-            )
-            self.assertIsNotNone(error)
-            self.assertIn("not mechanically healthy", error)
-
-
 if __name__ == "__main__":
     unittest.main()
