@@ -1103,5 +1103,318 @@ candidate:
         self.assertTrue(any("later immutable target" in error for error in errors))
 
 
+    def _run_topology_git(
+        self,
+        root: Path,
+        *args: str,
+        env: dict[str, str] | None = None,
+    ) -> str:
+        result = subprocess.run(
+            ["git", "-C", str(root), *args],
+            check=True,
+            capture_output=True,
+            text=True,
+            env=env,
+        )
+        return result.stdout.strip()
+
+    def _init_topology_repo(self, root: Path) -> None:
+        subprocess.run(["git", "init", "-q", str(root)], check=True)
+        self._run_topology_git(root, "config", "user.email", "ssdp-test@example.com")
+        self._run_topology_git(root, "config", "user.name", "SSDP Test")
+
+    def _topology_state(
+        self,
+        marker: str,
+        *,
+        protected_history: bool = False,
+    ) -> dict:
+        data = copy.deepcopy(self.data)
+        data["candidate"] = {
+            "version": "6.5.0",
+            "semantic_ref": marker * 40,
+            "review": {"state": "NOT_RUN", "evidence_ref": "NONE"},
+            "ratification": {"state": "NOT_REQUESTED", "evidence_ref": "NONE"},
+            "public_source_ref": "UNAVAILABLE",
+            "recovery_ref": "UNAVAILABLE",
+        }
+        if protected_history:
+            data["historical"]["6.3.5"] = {
+                "public_source_ref": "5" * 40,
+                "recovery_ref": "6" * 40,
+            }
+        else:
+            data["historical"].pop("6.3.5", None)
+        return data
+
+    def _write_topology_state(self, root: Path, data: dict) -> None:
+        (root / "PROTOCOL-RELEASE-STATE.yaml").write_text(
+            yaml.safe_dump(data, sort_keys=False),
+            encoding="utf-8",
+        )
+
+    def _commit_topology_repo(
+        self,
+        root: Path,
+        message: str,
+        *,
+        date: str | None = None,
+    ) -> str:
+        self._run_topology_git(root, "add", "-A")
+        env = None
+        if date is not None:
+            env = os.environ.copy()
+            env["GIT_AUTHOR_DATE"] = date
+            env["GIT_COMMITTER_DATE"] = date
+        self._run_topology_git(root, "commit", "-m", message, env=env)
+        return self._run_topology_git(root, "rev-parse", "HEAD")
+
+    def test_previous_governed_states_use_head_for_working_tree_change(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            root = Path(tmpdir)
+            self._init_topology_repo(root)
+            previous = self._topology_state("a")
+            self._write_topology_state(root, previous)
+            self._commit_topology_repo(root, "previous")
+
+            current = self._topology_state("b")
+            self._write_topology_state(root, current)
+            errors: list[str] = []
+            states = release_state._previous_governed_release_states(
+                root,
+                current,
+                errors,
+            )
+            self.assertEqual(errors, [])
+            self.assertEqual(states, [previous])
+
+    def test_previous_governed_states_use_linear_parent_boundary(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            root = Path(tmpdir)
+            self._init_topology_repo(root)
+            previous = self._topology_state("a")
+            self._write_topology_state(root, previous)
+            self._commit_topology_repo(root, "previous")
+
+            current = self._topology_state("b")
+            self._write_topology_state(root, current)
+            self._commit_topology_repo(root, "current")
+
+            errors: list[str] = []
+            states = release_state._previous_governed_release_states(
+                root,
+                current,
+                errors,
+            )
+            self.assertEqual(errors, [])
+            self.assertEqual(states, [previous])
+
+    def test_previous_governed_states_cross_evidence_only_descendants(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            root = Path(tmpdir)
+            self._init_topology_repo(root)
+            previous = self._topology_state("a")
+            self._write_topology_state(root, previous)
+            self._commit_topology_repo(root, "previous")
+
+            current = self._topology_state("b")
+            self._write_topology_state(root, current)
+            self._commit_topology_repo(root, "transition")
+            (root / "evidence.txt").write_text("evidence\n", encoding="utf-8")
+            self._commit_topology_repo(root, "evidence only")
+
+            errors: list[str] = []
+            states = release_state._previous_governed_release_states(
+                root,
+                current,
+                errors,
+            )
+            self.assertEqual(errors, [])
+            self.assertEqual(states, [previous])
+
+    def test_previous_governed_states_cover_date_reordered_merge_parents(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            root = Path(tmpdir)
+            self._init_topology_repo(root)
+            base = self._topology_state("a")
+            self._write_topology_state(root, base)
+            base_ref = self._commit_topology_repo(
+                root,
+                "base",
+                date="2026-01-01T00:00:00+00:00",
+            )
+
+            self._run_topology_git(root, "checkout", "-q", "-b", "governed")
+            governed = self._topology_state("b", protected_history=True)
+            self._write_topology_state(root, governed)
+            governed_ref = self._commit_topology_repo(
+                root,
+                "governed parent",
+                date="2026-01-02T00:00:00+00:00",
+            )
+
+            self._run_topology_git(
+                root,
+                "checkout",
+                "-q",
+                "-b",
+                "sibling",
+                base_ref,
+            )
+            sibling = self._topology_state("c")
+            self._write_topology_state(root, sibling)
+            sibling_ref = self._commit_topology_repo(
+                root,
+                "later-dated sibling",
+                date="2026-01-03T00:00:00+00:00",
+            )
+
+            current = self._topology_state("d")
+            self._write_topology_state(root, current)
+            self._run_topology_git(root, "add", "PROTOCOL-RELEASE-STATE.yaml")
+            tree_ref = self._run_topology_git(root, "write-tree")
+            merge_ref = self._run_topology_git(
+                root,
+                "commit-tree",
+                tree_ref,
+                "-p",
+                governed_ref,
+                "-p",
+                sibling_ref,
+                "-m",
+                "synthetic merge",
+            )
+            self._run_topology_git(root, "reset", "--hard", merge_ref)
+
+            old_order = self._run_topology_git(
+                root,
+                "log",
+                "-3",
+                "--format=%H",
+                "--",
+                "PROTOCOL-RELEASE-STATE.yaml",
+            ).splitlines()
+            self.assertGreaterEqual(len(old_order), 2)
+            self.assertEqual(old_order[1], sibling_ref)
+
+            errors: list[str] = []
+            states = release_state._previous_governed_release_states(
+                root,
+                current,
+                errors,
+            )
+            self.assertEqual(errors, [])
+            self.assertEqual(len(states), 2)
+            self.assertIn(governed, states)
+            self.assertIn(sibling, states)
+
+            results = [
+                release_state.validate_release_transition(previous, current)
+                for previous in states
+            ]
+            self.assertTrue(any(result == [] for result in results))
+            self.assertTrue(
+                any(
+                    any(
+                        "cannot delete historical[6.3.5]" in error
+                        for error in result
+                    )
+                    for result in results
+                )
+            )
+
+    def test_previous_governed_states_deduplicate_equivalent_merge_lineages(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            root = Path(tmpdir)
+            self._init_topology_repo(root)
+            previous = self._topology_state("a")
+            self._write_topology_state(root, previous)
+            previous_ref = self._commit_topology_repo(root, "previous")
+
+            self._run_topology_git(root, "checkout", "-q", "-b", "left")
+            current = self._topology_state("b")
+            self._write_topology_state(root, current)
+            left_ref = self._commit_topology_repo(root, "left")
+
+            self._run_topology_git(
+                root,
+                "checkout",
+                "-q",
+                "-b",
+                "right",
+                previous_ref,
+            )
+            self._write_topology_state(root, current)
+            right_ref = self._commit_topology_repo(root, "right")
+            tree_ref = self._run_topology_git(
+                root,
+                "rev-parse",
+                f"{left_ref}^{{tree}}",
+            )
+            merge_ref = self._run_topology_git(
+                root,
+                "commit-tree",
+                tree_ref,
+                "-p",
+                left_ref,
+                "-p",
+                right_ref,
+                "-m",
+                "equivalent merge",
+            )
+            self._run_topology_git(root, "reset", "--hard", merge_ref)
+
+            errors: list[str] = []
+            states = release_state._previous_governed_release_states(
+                root,
+                current,
+                errors,
+            )
+            self.assertEqual(errors, [])
+            self.assertEqual(states, [previous])
+
+    def test_previous_governed_states_handle_synthetic_pr_merge(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            root = Path(tmpdir)
+            self._init_topology_repo(root)
+            (root / "base.txt").write_text("base\n", encoding="utf-8")
+            base_ref = self._commit_topology_repo(root, "pre-owner base")
+
+            self._run_topology_git(root, "checkout", "-q", "-b", "feature")
+            previous = self._topology_state("a")
+            self._write_topology_state(root, previous)
+            self._commit_topology_repo(root, "introduce release state")
+
+            current = self._topology_state("b")
+            self._write_topology_state(root, current)
+            feature_ref = self._commit_topology_repo(root, "feature transition")
+            tree_ref = self._run_topology_git(
+                root,
+                "rev-parse",
+                f"{feature_ref}^{{tree}}",
+            )
+            merge_ref = self._run_topology_git(
+                root,
+                "commit-tree",
+                tree_ref,
+                "-p",
+                base_ref,
+                "-p",
+                feature_ref,
+                "-m",
+                "pull request merge",
+            )
+            self._run_topology_git(root, "reset", "--hard", merge_ref)
+
+            errors: list[str] = []
+            states = release_state._previous_governed_release_states(
+                root,
+                current,
+                errors,
+            )
+            self.assertEqual(errors, [])
+            self.assertEqual(states, [previous])
+
+
 if __name__ == "__main__":
     unittest.main()

@@ -3,7 +3,7 @@ kind: implementation-workplan
 workplan_id: SSDP-6.5-D3-D4-IMPLEMENTATION-HANDOFF
 protocol_version: 6.4.0
 target_protocol_version: 6.5.0
-status: reopened-p8-no-pass-d4-repair
+status: p8-repair-implemented-p9-qualification-pending
 parent_workplan: workplans/active/SSDP-6.5-FRONTIER-MODEL-RE-EVALUATION.md
 design_authority: qualification/ssdp65/PHASE-IV-V-DESIGN-CLOSURE.md
 baseline: 55c085261eb827e3047637d045a8e6917ea6b962
@@ -719,3 +719,35 @@ Mandatory positives:
 After repair, rerun the complete release-state suite, full repository build/Core, preservation and parity checks, freeze a new immutable candidate, bind it from a later descendant, and perform a fresh independent assembled-candidate Review.
 
 P8 is immutable and remains NO-PASS.
+
+
+## 30. B65-P8-1 implementation closure — ancestry-boundary resolver
+
+B65-P8-1 is repaired at the existing D4 release-state owner without reopening P65 D3.
+
+The former global path-log resolver is removed. The owner now derives predecessor state from Git ancestry:
+
+- an uncommitted root-state edit is compared directly with committed HEAD;
+- for a committed state, direct parents are inspected;
+- ancestry is traversed only through parents whose parsed root release state is semantically equal to the current state;
+- the first differing release-state snapshot on each parent lineage is a governed predecessor boundary;
+- equivalent predecessor states are deduplicated;
+- merge/synthetic-PR states therefore validate against every materially divergent parent boundary instead of whichever path commit Git lists second;
+- parent lineages predating introduction of the root release-state owner contribute no predecessor state.
+
+This preserves evidence-only descendants and consecutive transitions while eliminating date/topology ordering as an authority mechanism.
+
+Fresh real-Git resolver tests cover:
+
+- working-tree change versus HEAD;
+- linear committed transition;
+- evidence-only descendant after a transition;
+- date-reordered divergent merge parents, including the exact false-pass shape from the P8 Review;
+- equivalent merge-parent lineages;
+- synthetic PR merge with a pre-owner base parent.
+
+The P8 NO-PASS evidence is also bound in the root release state from immutable Review commit 39f3703ad1e07457d5fcc9b2dc6f39c55c69fc98.
+
+No second release-state registry, mirror, transition table, compatibility subsystem, candidate-specific branch, or D3 mechanism is introduced.
+
+The implementation commit produced by this section is the prospective P9 semantic candidate. It must pass exact-candidate normal CI before its SHA is frozen/bound as P9.

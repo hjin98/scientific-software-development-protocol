@@ -5,8 +5,8 @@ protocol_version: 6.4.0
 target_protocol_version: 6.5.0
 subject_baseline: P0 = Protocol 6.4 at 55c085261eb827e3047637d045a8e6917ea6b962 (recovery 74bc572ef516cae417437a2027eeff52a2e25c15)
 diagnostic_commit: 81375d8142a8130b80cd82f2304d3e16bc3fc390
-status: p8-no-pass-repair-required
-current_phase: PHASE VII P8 NO-PASS / D4 TRANSITION-HISTORY RESOLUTION REPAIR REQUIRED
+status: p8-repair-implemented-p9-qualification-pending
+current_phase: PHASE VII B65-P8-1 REPAIRED / P9 EXACT-CANDIDATE QUALIFICATION PENDING
 branch: ssdp-6.5-frontier-model-re-evaluation
 created_date: 2026-09-24
 adjudication: qualification/ssdp65/CROSS-MODEL-ADJUDICATION-2026-09-24.md
@@ -948,3 +948,16 @@ The repair must qualify real history resolution for linear commits, working-tree
 P8 remains immutable failed Review evidence. Any semantic repair requires a new candidate identity, exact-candidate qualification, binding, and another fresh independent assembled-candidate Review.
 
 No stakeholder ratification, public-fallback publication, recovery establishment, accepted-current cutover, PR merge, or Protocol 7 D3/D4 mutation is authorized.
+
+
+## 37. B65-P8-1 implementation closure — prospective P9
+
+The P8 blocker is repaired at the existing D4 transaction owner by replacing global path-log predecessor selection with ancestry-boundary traversal.
+
+The production resolver now distinguishes uncommitted state from committed state, follows direct Git parents, traverses only through unchanged release-state snapshots, and returns every first differing predecessor boundary across merge lineages. The transition predicate is applied to each returned predecessor state. This closes the date-reordered sibling-parent false pass while preserving linear, evidence-only-descendant, consecutive-transition, and synthetic-PR behavior.
+
+The focused real-Git qualification directly exercises the production resolver rather than mocking or reconstructing it.
+
+P8 remains immutable NO-PASS evidence. The repair commit is only a prospective P9 until exact-candidate normal CI passes. After that pass, freeze its exact SHA as P9 from a later lifecycle descendant, reset Review to NOT_RUN for P9, rerun binding qualification, and perform a fresh independent assembled-candidate Review.
+
+No ratification, publication, recovery, cutover, PR merge, or Protocol 7 D3/D4 mutation is authorized.

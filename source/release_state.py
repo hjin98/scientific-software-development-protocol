@@ -532,53 +532,112 @@ def validate_release_transition(previous: Any, current: Any) -> list[str]:
     return errors
 
 
-def _previous_governed_release_state(
+def _release_state_at_ref(
+    root: Path,
+    ref: str,
+    errors: list[str],
+    *,
+    missing_ok: bool,
+) -> Any | None:
+    code, content = _git(
+        root,
+        "show",
+        f"{ref}:PROTOCOL-RELEASE-STATE.yaml",
+    )
+    if code:
+        if not missing_ok:
+            errors.append(
+                f"cannot read PROTOCOL-RELEASE-STATE.yaml at transition ref {ref}"
+            )
+        return None
+    try:
+        data = _load_yaml_text(content)
+    except yaml.YAMLError as exc:
+        errors.append(
+            f"PROTOCOL-RELEASE-STATE.yaml at transition ref {ref} is invalid: {exc}"
+        )
+        return None
+    if not isinstance(data, dict):
+        errors.append(
+            f"PROTOCOL-RELEASE-STATE.yaml at transition ref {ref} must be a mapping"
+        )
+        return None
+    return data
+
+
+def _commit_and_parents(
+    root: Path,
+    ref: str,
+    errors: list[str],
+) -> tuple[str, list[str]] | None:
+    code, output = _git(
+        root,
+        "rev-list",
+        "--parents",
+        "-n",
+        "1",
+        ref,
+    )
+    if code or not output:
+        errors.append(f"cannot resolve release-state ancestry at {ref}")
+        return None
+    parts = output.split()
+    return parts[0], parts[1:]
+
+
+def _previous_governed_release_states(
     root: Path,
     current: Any,
     errors: list[str],
-) -> Any | None:
-    code, output = _git(
+) -> list[Any]:
+    head_state = _release_state_at_ref(
         root,
-        "log",
-        "-2",
-        "--format=%H",
-        "--",
-        "PROTOCOL-RELEASE-STATE.yaml",
+        "HEAD",
+        errors,
+        missing_ok=True,
     )
-    if code:
-        errors.append("cannot resolve release-state transition history")
-        return None
-    commits = [line.strip() for line in output.splitlines() if line.strip()]
-    if not commits:
-        return None
+    if head_state is None:
+        return []
 
-    def read_state(commit: str) -> Any | None:
-        show_code, content = _git(
-            root,
-            "show",
-            f"{commit}:PROTOCOL-RELEASE-STATE.yaml",
-        )
-        if show_code:
-            errors.append(
-                f"cannot read PROTOCOL-RELEASE-STATE.yaml at transition commit {commit}"
-            )
-            return None
-        try:
-            return _load_yaml_text(content)
-        except yaml.YAMLError as exc:
-            errors.append(
-                f"PROTOCOL-RELEASE-STATE.yaml at transition commit {commit} is invalid: {exc}"
-            )
-            return None
+    # An uncommitted root-state edit is a transition from the committed HEAD state.
+    if head_state != current:
+        return [head_state]
 
-    latest = read_state(commits[0])
-    if latest is None:
-        return None
-    if latest != current:
-        return latest
-    if len(commits) < 2:
-        return None
-    return read_state(commits[1])
+    # For a committed state, walk direct ancestry only while the governed state is
+    # unchanged.  The first differing state on each parent lineage is a material
+    # predecessor boundary.  This preserves evidence-only descendants while
+    # preventing Git's default date/topology ordering from substituting a sibling
+    # merge parent for the actual transition history.
+    predecessors: list[Any] = []
+    visited: set[str] = set()
+    stack = ["HEAD"]
+
+    while stack:
+        topology = _commit_and_parents(root, stack.pop(), errors)
+        if topology is None:
+            continue
+        commit, parents = topology
+        if commit in visited:
+            continue
+        visited.add(commit)
+
+        for parent in parents:
+            parent_state = _release_state_at_ref(
+                root,
+                parent,
+                errors,
+                missing_ok=True,
+            )
+            if parent_state is None:
+                # A lineage predating introduction of the root state has no
+                # governed predecessor to validate.
+                continue
+            if parent_state == current:
+                stack.append(parent)
+            elif parent_state not in predecessors:
+                predecessors.append(parent_state)
+
+    return predecessors
 
 
 def validate_release_state(data: Any, *, repo_root: Path | None = None) -> list[str]:
@@ -816,9 +875,13 @@ def main() -> int:
     errors = validate_release_state(data, repo_root=None if args.no_git else ROOT)
     if not args.no_git and path == DEFAULT_PATH.resolve():
         transition_errors: list[str] = []
-        previous = _previous_governed_release_state(ROOT, data, transition_errors)
+        previous_states = _previous_governed_release_states(
+            ROOT,
+            data,
+            transition_errors,
+        )
         errors.extend(transition_errors)
-        if previous is not None:
+        for previous in previous_states:
             errors.extend(validate_release_transition(previous, data))
     if errors:
         for error in errors:
