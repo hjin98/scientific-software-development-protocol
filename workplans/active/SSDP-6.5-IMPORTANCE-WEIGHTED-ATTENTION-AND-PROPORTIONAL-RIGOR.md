@@ -3,7 +3,7 @@ kind: protocol-doctrine-workplan
 workplan_id: SSDP-6.5-IMPORTANCE-WEIGHTED-ATTENTION-AND-PROPORTIONAL-RIGOR
 protocol_version: 6.4.0
 target_protocol_version: 6.5.0
-status: p20-repair-implemented-awaiting-freeze
+status: p20-binding-awaiting-qualification
 branch: ssdp-6.5-frontier-model-re-evaluation
 accepted_control: 55c085261eb827e3047637d045a8e6917ea6b962
 superseded_review_ready_candidate: a2e5f01e258f249f74d1eda74b883efb98fd7d59
@@ -639,3 +639,23 @@ unchanged.
 
 The implementation stage has no known surviving blocker. The durable independent-Review handoff now targets exact P19.
 This implementation context must not self-issue that Review.
+
+
+## 18. P20 replacement-candidate freeze
+
+P19 NO-PASS blocker B65-P19-1 is repaired without reopening D1-D3 or the proportional-rigor doctrine.
+
+The replacement immutable semantic candidate is:
+
+`P20 = 142eb22376270af6155657dcbf150112f3871cb2`
+
+Exact-P20 ordinary workflow `36200125907` passed both complete jobs, including repository release-state validation,
+PEM validation, inherited protocol regression (including the cross-generation promotion-source holdout), canonical
+package build and independent validation, committed distribution parity, whitespace, packaged Protocol snapshot parity,
+and Orchestrator Core acceptance.
+
+This binding descendant changes lifecycle/evidence state only: accepted-current remains Protocol 6.4; candidate
+Protocol 6.5 now names exact P20 with Review `NOT_RUN`, stakeholder ratification `NOT_REQUESTED`, public fallback
+`UNAVAILABLE`, and recovery `UNAVAILABLE`. Protocol 7 D3/D4 remains unchanged.
+
+Binding workflow qualification is required before the independent Review handoff is refreshed.

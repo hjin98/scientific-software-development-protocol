@@ -22,7 +22,7 @@ historical:
     recovery_ref: 9f353097fab36e325a325f1c2f9d9cec32e86177
 candidate:
   version: "6.5.0"
-  semantic_ref: b38f2525677888956c4802afd758c98c65b79f1c
+  semantic_ref: 142eb22376270af6155657dcbf150112f3871cb2
   review:
     state: NOT_RUN
     evidence_ref: NONE
