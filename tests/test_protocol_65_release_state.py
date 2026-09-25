@@ -689,6 +689,7 @@ semantic_ref: {"c" * 40}
     def test_ratification_cannot_self_promote_without_review(self) -> None:
         data = copy.deepcopy(self.data)
         data["candidate"]["semantic_ref"] = "a" * 40
+        data["candidate"]["review"] = {"state": "NOT_RUN", "evidence_ref": "NONE"}
         data["candidate"]["ratification"] = {
             "state": "RATIFIED",
             "evidence_ref": "hjin98/scientific-software-development-protocol@" + "b" * 40 + ":qualification/ratification.md",
@@ -725,6 +726,7 @@ semantic_ref: {"c" * 40}
             with self.subTest(state=state):
                 data = copy.deepcopy(self.data)
                 data["candidate"]["semantic_ref"] = "a" * 40
+                data["candidate"]["review"] = {"state": "NOT_RUN", "evidence_ref": "NONE"}
                 data["candidate"]["ratification"] = {
                     "state": state,
                     "evidence_ref": (
