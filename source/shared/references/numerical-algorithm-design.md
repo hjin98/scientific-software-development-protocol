@@ -28,6 +28,8 @@ Tolerance/equivalence derives from accepted conditioning/precision/stochastic/er
 
 D2 uncertainty includes discretization/truncation, iterative, stochastic sampling, conditioning/sensitivity, finite precision, approximation and backend/precision variation. Characterize/propagate what can materially change D1 interpretation; keep D1 model/data/parameter uncertainty separate.
 
+Numerical rigor is decision-sensitive. Use deep statistical/convergence/conditioning/precision treatment when plausible uncertainty can change a scientific or engineering decision, when behavior is near a validity/stability boundary, or when materially plausible methods disagree. A local reversible tolerance/detail that is demonstrably far inside the accepted error/equivalence envelope normally needs a focused reference/invariant check, not an independent research campaign. If consequence or blast radius is unclear, first run the cheapest discriminator that can bound it.
+
 ## D2 -> D3 handoff and Review
 
 Hand D3 only the computational semantics architecture must preserve: governed operations/data dependencies, precision/reproducibility, error/tolerance, numerically meaningful state/restart, and resource/hardware constraints that shape architecture. Do not freeze software decomposition/library choice without numerical need.
