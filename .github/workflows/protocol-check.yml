@@ -25,6 +25,20 @@ jobs:
         run: python source/release_state.py
       - name: Validate project engineering memory
         run: python source/project_engineering_memory.py PROJECT-ENGINEERING-MEMORY.md
+      - name: Diagnose resolver working-tree boundary
+        run: python -m unittest tests.test_protocol_65_release_state.Protocol65ReleaseStateTests.test_previous_governed_states_use_head_for_working_tree_change -v
+      - name: Diagnose resolver linear boundary
+        run: python -m unittest tests.test_protocol_65_release_state.Protocol65ReleaseStateTests.test_previous_governed_states_use_linear_parent_boundary -v
+      - name: Diagnose resolver evidence descendant
+        run: python -m unittest tests.test_protocol_65_release_state.Protocol65ReleaseStateTests.test_previous_governed_states_cross_evidence_only_descendants -v
+      - name: Diagnose resolver divergent merge
+        run: python -m unittest tests.test_protocol_65_release_state.Protocol65ReleaseStateTests.test_previous_governed_states_cover_date_reordered_merge_parents -v
+      - name: Diagnose resolver equivalent merge
+        run: python -m unittest tests.test_protocol_65_release_state.Protocol65ReleaseStateTests.test_previous_governed_states_deduplicate_equivalent_merge_lineages -v
+      - name: Diagnose resolver synthetic PR merge
+        run: python -m unittest tests.test_protocol_65_release_state.Protocol65ReleaseStateTests.test_previous_governed_states_handle_synthetic_pr_merge -v
+      - name: Diagnose full release-state module
+        run: python -m unittest tests.test_protocol_65_release_state -v
       - name: Run protocol regression tests
         run: python -m unittest discover -s tests -v
       - name: Build canonical skill packages once
