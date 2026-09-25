@@ -3,7 +3,7 @@ kind: implementation-workplan
 workplan_id: SSDP-6.5-D3-D4-IMPLEMENTATION-HANDOFF
 protocol_version: 6.4.0
 target_protocol_version: 6.5.0
-status: implementation-complete-p15-ratified
+status: p16-repair-frozen-awaiting-independent-review
 parent_workplan: workplans/active/SSDP-6.5-FRONTIER-MODEL-RE-EVALUATION.md
 design_authority: qualification/ssdp65/PHASE-IV-V-DESIGN-CLOSURE.md
 baseline: 55c085261eb827e3047637d045a8e6917ea6b962
@@ -1555,3 +1555,20 @@ accepted-current Protocol 6.4, and Protocol 7 D3/D4 unchanged.
 The bounded D4 implementation/stabilization work is complete with no known surviving implementation blocker. Any
 semantic mutation after this point requires a new candidate identity. The next gate is fresh independent assembled-
 candidate Review; stakeholder ratification remains separate and unauthorized until Review PASS.
+
+
+## 64. Post-ratification cutover-validator repair — P16
+
+The first authorized release-cutover preparation after P15 ratification exposed a genuine D4 defect in
+`validate_release_transition()`: canonical historical records are keyed by version and contain only public/recovery
+identity, while the validator compared them to the former accepted-current mapping including its `version` field.
+
+P15 remains immutable and its Review/ratification evidence remains historical, but that approval cannot transfer to
+changed P16 semantics.
+
+The minimal repair is exact P16 `f7874aa1fcaef04429fe4725d3ba20e570f9326d`, qualified by workflow `36157280206`. It projects the previous
+accepted-current mapping to canonical historical payload before exact comparison, strengthens phase-independent
+transition tests, and adds no new owner or machinery.
+
+D3 remains closed. P16 must be bound at Review `NOT_RUN` and receive a genuinely fresh independent assembled-candidate
+Review followed by new stakeholder ratification before publication.

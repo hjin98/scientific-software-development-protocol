@@ -1,109 +1,64 @@
 ---
 kind: independent-review-handoff
 protocol_under_review: 6.5.0
-status: ratified-awaiting-publication
+status: p16-bound-awaiting-qualification
 accepted_control_p0: 55c085261eb827e3047637d045a8e6917ea6b962
-immutable_candidate_p15: 4fced41c4d8cc7af02938334f7cd1d0b587c408a
+superseded_ratified_p15: 4fced41c4d8cc7af02938334f7cd1d0b587c408a
+immutable_candidate_p16: f7874aa1fcaef04429fe4725d3ba20e570f9326d
 candidate_branch: ssdp-6.5-frontier-model-re-evaluation
 draft_pr: 33
-p15_mechanical_qualification_run: 36138585609
-p15_binding_descendant: acdf2afcdf9387a073219a29625f2d9180ee78ce
-p15_binding_qualification_run: 36139016587
-p15_readiness_descendant: 258a57d02a51f1cbe09d2c4b7a26e80c1b3e1f6a
-p15_readiness_run: 36139299965
-p15_review_record: qualification/ssdp65/INDEPENDENT-REVIEW-2026-09-25-PROTOCOL-6.5-P15-PASS.md
-p15_review_evidence_commit: 5a27173d3b91a96461ecffd7402cd8adad0eafaf
-p15_review_evidence_ref: hjin98/scientific-software-development-protocol@5a27173d3b91a96461ecffd7402cd8adad0eafaf:qualification/ssdp65/INDEPENDENT-REVIEW-2026-09-25-PROTOCOL-6.5-P15-PASS.md
-review_state: PASS
-stakeholder_ratification: RATIFIED
-ratification_evidence_ref: hjin98/scientific-software-development-protocol@443294bfe7a7a979a5d194bfdf79a733b96575fc:qualification/ssdp65/STAKEHOLDER-RATIFICATION-2026-09-25-PROTOCOL-6.5-P15.md
+p16_mechanical_qualification_run: 36157280206
+p16_repair_qualification: qualification/ssdp65/P16-REPAIR-QUALIFICATION.md
+review_state: NOT_RUN
+stakeholder_ratification: NOT_REQUESTED
 public_source_ref: UNAVAILABLE
 recovery_ref: UNAVAILABLE
 ---
 
-# Protocol 6.5 P15 — Ratified, Awaiting Publication
+# Independent Review Handoff — Protocol 6.5 P16
 
-## Current disposition
+## Immutable Review target
 
-The immutable Protocol 6.5 semantic candidate remains:
+After binding qualification passes, perform one genuinely fresh independent assembled-candidate Review of exact:
 
-`P15 = 4fced41c4d8cc7af02938334f7cd1d0b587c408a`
+`P16 = f7874aa1fcaef04429fe4725d3ba20e570f9326d`
 
 against accepted Protocol 6.4 control:
 
 `P0 = 55c085261eb827e3047637d045a8e6917ea6b962`.
 
-Fresh independent assembled-candidate Review is complete with **PASS** and no Serious Challenge or blocking finding.
+P15 was independently reviewed and stakeholder-ratified, but a real release-cutover D4 defect was discovered before
+publication. P15 remains immutable historical evidence and must not be released or substituted for P16.
 
-The durable Review record is:
+## P16 repair delta
 
-`qualification/ssdp65/INDEPENDENT-REVIEW-2026-09-25-PROTOCOL-6.5-P15-PASS.md`
+The only version-intrinsic semantic delta from P15 is the release-state cutover-history projection repair in
+`source/release_state.py`, plus directly affected regression tests.
 
-published at immutable descendant:
+Independently falsify at least:
 
-`5a27173d3b91a96461ecffd7402cd8adad0eafaf`.
+1. exact valid accepted-current -> historical transfer uses the keyed historical payload without a redundant version;
+2. missing previous-version history fails;
+3. changed public/recovery identity fails;
+4. redundant or shape-divergent history cannot masquerade as the exact transfer;
+5. accepted-current promotion still requires exact prior candidate, Review PASS, RATIFIED state, public fallback, and
+   distinct recovery;
+6. owner continuity, merge predecessor selection, replacement/graft resistance, Review/ratification subject binding,
+   recovery-lineage checks, semantic-version ordering, and candidate succession remain intact;
+7. P15's complete PEM canonical-Git/evidence-realization closure remains unchanged;
+8. historical 5.13-5.16 and 6.0-6.4 capability/resource preservation and Protocol 7 D3/D4 isolation remain intact.
 
-The exact evidence route is:
+Construct at least one fresh holdout beyond the authored P16 tests. Perform the Serious Challenge pass first.
 
-`hjin98/scientific-software-development-protocol@5a27173d3b91a96461ecffd7402cd8adad0eafaf:qualification/ssdp65/INDEPENDENT-REVIEW-2026-09-25-PROTOCOL-6.5-P15-PASS.md`.
+## Lifecycle boundary
 
-## Meaning of PASS
+Exact P16 workflow `36157280206` passed both complete jobs before candidate freeze.
 
-The Review disposition is exactly:
+This context authored the P16 repair and must not self-issue the independent Review result.
 
-`P15 is technically eligible for stakeholder ratification.`
+PASS means only:
 
-This is a technical eligibility result only. It is not stakeholder ratification.
+`P16 is technically eligible for stakeholder ratification.`
 
-## Current lifecycle state
-
-The sole mutable owner `PROTOCOL-RELEASE-STATE.yaml` now binds:
-
-- accepted-current: Protocol 6.4;
-- candidate version: `6.5.0`;
-- candidate semantic ref: exact P15;
-- Review: `PASS`, bound to the immutable Review record above;
-- stakeholder ratification: `RATIFIED`, bound to the explicit immutable stakeholder record;
-- public fallback: `UNAVAILABLE`;
-- recovery: `UNAVAILABLE`.
-
-Later documentation/review/lifecycle descendants do not replace P15 as the semantic candidate.
-
-## Evidence already complete
-
-Mechanical qualification remains bounded evidence:
-
-- exact P15 workflow `36138585609`: PASS;
-- initial P15 binding workflow `36139016587`: PASS;
-- readiness workflow `36139299965`: PASS;
-- post-Review documentation repair and Review-publication descendants: complete repository acceptance PASS before this binding.
-
-The independent Review separately performed the Serious Challenge pass, complete assembled-candidate semantic
-falsification, historical capability preservation checks, Protocol 7 isolation checks, and a fresh out-of-matrix Git
-holdout.
-
-## Next authorized gate
-
-The next release action is **explicit stakeholder ratification of exact P15**.
-
-Until that human decision is supplied, do not:
-
-- publish a Protocol 6.5 public fallback;
-- establish Protocol 6.5 recovery;
-- change `accepted_current`;
-- merge PR #33 as release cutover;
-- archive the 6.5 lifecycle as complete;
-- mutate Protocol 7 D3/D4.
-
-If P15 is ratified, publication/recovery/cutover must proceed through later descendants so immutable commits do not
-self-name future lifecycle mappings.
-
-
-## Stakeholder ratification
-
-The stakeholder explicitly ratified exact P15. Durable ratification evidence is:
-
-`hjin98/scientific-software-development-protocol@443294bfe7a7a979a5d194bfdf79a733b96575fc:qualification/ssdp65/STAKEHOLDER-RATIFICATION-2026-09-25-PROTOCOL-6.5-P15.md`.
-
-This human gate is now closed. Public fallback and recovery remain unavailable until their later lifecycle descendants
-are published and qualified.
+No publication, recovery, accepted-current cutover, PR merge, or Protocol 7 mutation is authorized before fresh
+independent Review PASS and new explicit stakeholder ratification of exact P16.

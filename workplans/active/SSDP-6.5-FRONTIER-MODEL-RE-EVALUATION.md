@@ -5,8 +5,8 @@ protocol_version: 6.4.0
 target_protocol_version: 6.5.0
 subject_baseline: P0 = Protocol 6.4 at 55c085261eb827e3047637d045a8e6917ea6b962 (recovery 74bc572ef516cae417437a2027eeff52a2e25c15)
 diagnostic_commit: 81375d8142a8130b80cd82f2304d3e16bc3fc390
-status: p15-ratified-awaiting-publication
-current_phase: PHASE X PUBLICATION / RECOVERY / CUTOVER
+status: p16-awaiting-independent-review
+current_phase: PHASE VII FRESH INDEPENDENT REVIEW — P16
 branch: ssdp-6.5-frontier-model-re-evaluation
 created_date: 2026-09-24
 adjudication: qualification/ssdp65/CROSS-MODEL-ADJUDICATION-2026-09-24.md
@@ -14,7 +14,7 @@ active_serious_challenge: none against accepted D1-D4 doctrine
 second_frontier_diagnostic: waived-for-this-cycle-by-stakeholder-resource-constraint
 design_closure: qualification/ssdp65/PHASE-IV-V-DESIGN-CLOSURE.md
 implementation_handoff: workplans/active/SSDP-6.5-D3-D4-IMPLEMENTATION-HANDOFF.md
-independent_review: PASS
+independent_review: NOT_RUN_FOR_P16
 ---
 
 # Protocol 6.5 Frontier-Model Re-evaluation and Successor Workplan
@@ -1329,3 +1329,22 @@ Durable qualification records:
 The implementation/stabilization stage has no known surviving blocker. The next lifecycle gate is one genuinely fresh
 independent assembled-candidate Review of exact P15. This context authored the final repair and therefore must not
 self-issue that independent Review result.
+
+
+## 58. P15 ratification superseded for release by P16 cutover repair
+
+P15 `4fced41c4d8cc7af02938334f7cd1d0b587c408a` passed independent Review and was explicitly stakeholder-ratified. Before any public fallback was
+published, release-cutover preparation exposed a real D4 transition-validator defect: accepted-current state and
+historical state use intentionally different shapes, but the validator required direct mapping equality.
+
+No publication, recovery, accepted-current cutover, or PR merge occurred under P15.
+
+The minimal repair is frozen as P16:
+
+`f7874aa1fcaef04429fe4725d3ba20e570f9326d`
+
+Exact-P16 workflow `36157280206` passed both complete jobs. Accepted Protocol 6.5 D3 remains unchanged; the repair is
+owned by D4 release-state validation.
+
+P15 Review/ratification evidence remains immutable historical evidence only. P16 requires fresh independent Review
+and new explicit stakeholder ratification before release publication can resume.
