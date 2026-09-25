@@ -71,6 +71,27 @@ jobs:
           -k allow_long_genuine_pre_owner_lineage
           -k fail_closed_on_shallow_working_tree_reintroduction
           -v
+      - name: Diag governed topology first quarter
+        if: always()
+        run: >-
+          python -m unittest discover -s tests -p test_protocol_65_release_state.py
+          -k use_head_for_working_tree_change
+          -k use_linear_parent_boundary
+          -k cross_evidence_only_descendants
+          -k cover_date_reordered_merge_parents
+          -k deduplicate_equivalent_merge_lineages
+          -k handle_synthetic_pr_merge
+          -v
+      - name: Diag governed topology second quarter
+        if: always()
+        run: >-
+          python -m unittest discover -s tests -p test_protocol_65_release_state.py
+          -k reject_deleted_owner_merge_lineage
+          -k reject_long_owner_absence
+          -k reject_same_lineage_reintroduction
+          -k allow_long_genuine_pre_owner_lineage
+          -k fail_closed_on_shallow_working_tree_reintroduction
+          -v
       - name: Diag governed topology second half
         if: always()
         run: >-
