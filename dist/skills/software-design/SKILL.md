@@ -28,7 +28,7 @@ For a substantial executable handoff use [D3->D4 implementation workplan](templa
 
 ## D3 design method
 
-1. Classify the earliest affected semantic domain and all directly applicable side constraints.
+1. Classify the earliest affected semantic domain and all directly applicable side constraints; before broadening scope, bound the consequence/importance of the problem and separate mandatory acceptance floors from discretionary work.
 2. Reconstruct accepted D3 authority independently of current implementation where practical; distinguish durable architecture from cycle-scoped workplan freeze and delegated D4 machinery.
 3. Test D3 abstraction adequacy against D2: preserve ordering/reduction, precision, state/restart, reproducibility, data dependencies, failure/fallback, resource/hardware semantics when material.
 4. Compare admissible architectures. Prefer cohesive ownership, direct flow, one authoritative representation/state, acyclic understandable dependencies, and the fewest necessary components/interfaces/synchronization/compatibility paths.
@@ -37,11 +37,11 @@ For a substantial executable handoff use [D3->D4 implementation workplan](templa
 7. State what evidence reopens D3 versus what remains equivalent D4 local reconciliation.
 8. Durable D3 authority mutation requires its owning acceptance process, including independent falsification before accepted-current promotion. A later implementation Review cannot retroactively legitimize prematurely promoted architecture.
 
-A first clean local defect remains local. When recurrence plus wrappers/fallbacks/duplicated state/competing owners/reconciliation or another clear complexity signal points to a shared mechanism, simplify/re-derive delegated concretization before another additive durable repair. If the simpler solution changes accepted D3, reopen D3; if the defect is D2/D1, route upstream.
+A first clean local defect remains local. Allocate attention by consequence and unresolved decision-sensitive uncertainty; a child issue does not inherit its project's importance without causal linkage, and priority labels are coordination metadata rather than authority. When recurrence plus wrappers/fallbacks/duplicated state/competing owners/reconciliation or another clear complexity signal points to a shared mechanism, simplify/re-derive delegated concretization before another additive durable repair. If the simpler solution changes accepted D3, reopen D3; if the defect is D2/D1, route upstream.
 
 ## Independent Review and Challenge
 
-Independent D4 Review reconstructs applicable parent semantics, D3/workplan authority, actual candidate behavior, and material evidence applicability rather than replaying implementer rationale. Attempt falsification of conformance, abstraction adequacy, ownership, affected surfaces, testing, reliability/security, scaling/resources, compatibility, complexity, stale evidence, and impact closure.
+Independent D4 Review reconstructs applicable parent semantics, D3/workplan authority, actual candidate behavior, material evidence applicability, and finding consequence rather than replaying implementer rationale or inheriting its priority labels. Attempt falsification of conformance, abstraction adequacy, ownership, affected surfaces, testing, reliability/security, scaling/resources, compatibility, complexity, stale evidence, and impact closure. Priority changes investigation effort, not the pass threshold for applicable requirements.
 
 Literal workplan compliance is insufficient when the workplan/architecture itself is too weak for the protected outcome: classify the deficiency at the earliest owning domain.
 

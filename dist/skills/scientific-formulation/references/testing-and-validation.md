@@ -8,6 +8,8 @@ Tests, proofs, benchmarks, metrics, literature, memory records and runtime obser
 
 Test/fixture/threshold/specification changes are legitimate when governing authority genuinely changed, the old oracle is independently shown wrong, or a stronger oracle preserves the same claim. For material completion, ask whether an independent evaluator of the same accepted outcome/engineering envelope would still consider the candidate correct.
 
+Allocate verification effort by consequence and remaining decision-sensitive uncertainty. A high-consequence claim with a cheap exact oracle may close economically; a low-looking issue with unknown blast radius first needs the cheapest impact discriminator. A test/fixture failure does not automatically inherit the importance of its parent project: identify the protected owner claim, decide whether production or the evidence instrument is wrong, then repair the stale instrument locally when appropriate. Priority changes investigation effort, not the pass threshold for an applicable requirement.
+
 A required check that did not execute is not a pass. Green tests do not establish omitted workplan/conformance obligations. A generated/static sensor establishes only the structural property it actually measures; it does not establish live latency, attention, cache, memory, productivity, or model behavior without live evidence.
 
 ## Evidence classes and claim scope
@@ -28,7 +30,7 @@ Use differential testing only when independently justified concretizations shoul
 
 Internal D2-D4 correctness cannot prove D1 adequacy. Use problem-appropriate evidence: empirical independent observations for empirical claims; proof/axiomatic consistency/limiting or reference theory for mathematical claims; standards/qualification experiments/safety margins/stakeholder context for engineering claims. Conversely, external agreement does not prove faithful numerical/software concretization.
 
-For D2 use the cheapest sufficiently strong authority-backed combination, as applicable: analytical/exact/limiting/manufactured cases, residuals/conservation/invariants, refinement and observed convergence order, extrapolation, conditioning/sensitivity, forward/backward error, precision/range/cancellation, trusted reference comparison, independent implementations/backends, stochastic bias/variance/convergence, and seed/backend/precision robustness. Tolerance derives from accepted D2 error/equivalence semantics, never from the backend result that happened to fail.
+For D2 use the cheapest sufficiently strong **applicable** authority-backed combination: analytical/exact/limiting/manufactured cases, residuals/conservation/invariants, refinement/observed convergence order, extrapolation, conditioning/sensitivity, forward/backward error, precision/range/cancellation, trusted reference comparison, independent implementations/backends, stochastic bias/variance/convergence, and seed/backend/precision robustness. Escalate to full statistical/convergence/conditioning qualification when plausible numerical uncertainty can change scientific interpretation or acceptance; do not launch a research-grade campaign for an implementation tolerance already well inside an accepted D2 envelope. Tolerance derives from accepted D2 error/equivalence semantics, never from the backend result that happened to fail.
 
 ## D3 architecture verification
 

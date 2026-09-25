@@ -102,13 +102,19 @@ Concrete new sites, call stacks, examples, failing inputs, or sibling manifestat
 
 **No recurrence count, review count, cycle budget, or convergence target can force acceptance**; memory temperature cannot force acceptance either; escalation changes the engineering method, **not the pass threshold**.
 
-## Development-cycle economy
+## Importance-weighted attention and development-cycle economy
 
-After fidelity and concretization simplicity are protected, minimize total cycle cost: diagnose before broad editing; search obvious variants before repeated instance patching; consolidate coherent edits before broad reruns; run cheap discriminating checks before broader regression/integration; reuse evidence whose claim/applicability cannot plausibly change; consult material project learning rather than replaying cold history; review deltas rather than settled archaeology; and avoid requesting another comprehensive closure review until identified blocker families and material impact items are closed where dependencies permit.
+After governing applicability is known, classify the consequence of being wrong before escalating analysis. Use qualitative `CRITICAL`, `MATERIAL`, `ROUTINE`, or `INCIDENTAL` labels only as coordination metadata; they are not authority or pass thresholds. Assess consequence, affected scope, reversibility, decision sensitivity, recurrence/systemic signal, and opportunity cost. Unknown impact is not low impact: use the cheapest discriminating action that can bound it, then escalate or de-escalate.
 
-PEM should reduce repeated rediscovery, not create mandatory scan cost. Normal routes use compact summary + bounded applicability metadata when triggered and load only matched detail. Raw cold-history growth should not proportionally increase ordinary active context or maintenance work. Missing/partial memory cannot prove absence, so bounded historical intake remains available when the decision requires stronger exclusion.
+A child issue does not inherit a high-stakes parent's importance without a credible causal path to the protected outcome. Conversely, repeated ROUTINE manifestations can reveal a MATERIAL shared owner. Distinguish problem importance from **next-action priority**: dependency/gate status, unblocking value, critical-path/deadline relevance, expected information/repair value, reversibility, and opportunity cost determine what to do next. An expensive necessary critical-path action can outrank many cheap peripheral tasks.
 
-Optional Serena/Semgrep/CodeQL/Hypothesis use can reduce rediscovery when their relation matches the claim. Tool absence does not relax required closure, and tool presence does not create a mandatory multi-tool census.
+Choose the least expensive rigor capable of resolving the decision: `DEEP` for consequential unresolved uncertainty/irreversibility/adversarial or fixed external floors; `STANDARD` for focused owner analysis and strong discriminating evidence; `LIGHT` for direct local repair plus focused affected checks; `DEFER/OMIT` only for non-mandatory low-consequence work. Mandatory low-salience obligations may be scheduled late but cannot survive their owning PASS boundary unless the real owner explicitly supports provisional/risk-accepted continuation.
+
+Minimize total cycle cost: prefer cheap reversible repair/experiment when it settles the same decision; consolidate coherent edits before broad reruns; reuse only applicable evidence; consult material project learning rather than replay cold history; review deltas rather than settled archaeology. Stop when remaining uncertainty cannot plausibly change the governed decision or a cheaper reversible action can establish it. Do not spend resources merely to convert sufficient confidence into psychological certainty.
+
+If a supposedly LIGHT/ROUTINE path starts accumulating diagnostics, candidate churn, wrappers, or repeated Review, stop at the next safe boundary. Either new evidence justifies escalation at the real owner, or simplify/defer/omit where allowed. Sunk cost is never a reason to continue. Repeated rediscovery of deferred work is evidence that cumulative interruption/workaround cost may have become material; reassess rather than endlessly re-defer it.
+
+PEM should reduce rediscovery, not create mandatory scan cost. Load only materially matched detail. Optional Serena/Semgrep/CodeQL/Hypothesis use may reduce uncertainty when its relation matches the claim; tool absence does not relax required closure and tool presence does not create a mandatory census.
 
 ## Semantic evolution history and project engineering memory
 

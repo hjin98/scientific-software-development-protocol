@@ -26,6 +26,8 @@ Empirical/model-based science uses independent observation/experiment appropriat
 
 D1 owns model/data/parameter/assumption uncertainty and structural/model discrepancy. D2 numerical uncertainty is distinct and should be propagated into D1 observables when material.
 
+Scrutiny scales with consequence and decision sensitivity, not with the mere presence of a scientific claim. Durable/public conclusions deserve deeper adequacy or uncertainty work when plausible unresolved uncertainty can change interpretation, validity, acceptance, safety, or another protected outcome. When an already accepted envelope makes the conclusion insensitive to the questioned detail, use the cheapest sufficiently strong applicable check and proceed.
+
 ## D1 -> D2 handoff and Review
 
 A D2 child must be faithful to accepted D1 and abstractly adequate: it must preserve enough D1 meaning that downstream software cannot satisfy D2 while solving a scientifically different problem. Hand D2 only the minimum material invariants, assumptions, observables, conventions, validity conditions and uncertainty/error expectations; do not prescribe numerical machinery without scientific need.

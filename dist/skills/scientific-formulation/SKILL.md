@@ -29,8 +29,8 @@ Ordinary hyperlinks in routed references are navigation, not additional activati
 2. Separate observed facts, external-source claims, derivations, assumptions, uncertainty, and counterevidence.
 3. Define the minimum normative D1 semantic core downstream must preserve; keep rationale/literature/pedagogy distinguishable from that core.
 4. Challenge ambiguity, hidden assumptions, contradictory equations/definitions, wrong estimands, dimensional/interpretive errors, and context-of-use mismatch.
-5. Define problem-appropriate adequacy/falsification: empirical validation for empirical claims; proof/reference theory for mathematical claims; standards/qualification/safety/stakeholder evidence for engineering claims.
-6. Define material evidence targets and their execution/validity dependencies without treating evidence as authority.
+5. Define problem-appropriate adequacy/falsification and allocate scrutiny by consequence plus decision-sensitive uncertainty; a public/durable claim does not by itself require maximal evidence when the questioned uncertainty cannot change its interpretation or acceptance.
+6. Define material evidence targets and their execution/validity dependencies; choose the cheapest sufficiently strong applicable route without treating evidence as authority.
 7. Draft proposed authority. A consequential D1 mutation requires the owning acceptance process, including independent falsification and designated human ratification where required; until then it remains proposed.
 8. After acceptance, perform bounded impact closure over materially dependent D2-D4 concretizations, evidence, documentation/dependency views, and semantic history; preserve unaffected siblings/still-valid evidence.
 9. Hand D2 only the minimum necessary accepted invariants, uncertainty/validity semantics, constraints, and reopen conditions.

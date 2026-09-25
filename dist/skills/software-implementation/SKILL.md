@@ -30,13 +30,13 @@ Ordinary hyperlinks/package membership are not activation commands.
 ## Implementation method
 
 1. Reconstruct the complete accepted contract: upstream invariants/constraints, D3 architecture, D4 specification/workplan cycle decisions, and delegated space.
-2. Inspect the actual affected surface. Implement the simplest admissible concretization at the owning layer; remove/narrow/alter/consolidate/refactor lower-level cause before adding durable wrappers/fallbacks/special cases.
+2. Inspect the actual affected surface and bound consequence before broadening scope. Keep mandatory obligations mandatory; for ROUTINE/INCIDENTAL delegated defects prefer direct owning-layer repair plus focused affected evidence. Implement the simplest admissible concretization; remove/narrow/alter/consolidate/refactor lower-level cause before adding durable wrappers/fallbacks/special cases.
 3. An equivalent local concretization is D4 reconciliation, not redesign. Reopen D3/D2/D1 only when the governing abstraction/cycle decision must change.
 4. For each coherent material executable stage, close semantic/conformance obligations plus focused checks and stage-local affected regression before dependent executable work continues. Tightly coupled edits may form one stage; file count does not define stage count.
 5. Track evidence target separately from harness/fixture/backend/implementation dependencies. Remap/rerun still-valid evidence specifications after owner replacement rather than preserving obsolete product machinery for the test.
 6. Before final completion, reconcile every accepted obligation; inspect obsolete/bypassed/duplicate ownership and complexity drift; re-derive the complete final affected semantic/behavioral/evidence/documentation surface; run complete affected regression, real-boundary integration/end-to-end, and repository/project-required checks; close each material impact item or report unavailable/blocking.
 
-A required check that did not execute is not a pass. Green tests do not prove omitted workplan obligations. Production qualification is separate from functional regression/integration.
+A required check that did not execute is not a pass. Green tests do not prove omitted workplan obligations. Use the cheapest sufficiently strong applicable evidence and stop when remaining uncertainty cannot change the governed decision; priority may reduce investigation depth but never the acceptance threshold. Production qualification is separate from functional regression/integration.
 
 ## Evidence and real-owner acceptance
 

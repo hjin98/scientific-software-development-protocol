@@ -21,6 +21,8 @@ Specify only stable consumer/automation/persistence/scientific-interpretation co
 
 Within the feasible specification/architecture/upstream/external envelope, D4 remains adaptive. Prefer direct flow, cohesive ownership, one authoritative state/representation, established language/library mechanisms, and deletion/consolidation over compensating wrappers. Existing tests/docs/helpers/caches/retries/state machines/patches do not promote machinery into authority.
 
+A first clean local defect stays local. Before broadening analysis, classify the consequence of being wrong and whether the obligation is mandatory. For ROUTINE/INCIDENTAL delegated defects, prefer direct owning-layer repair plus the cheapest sufficient affected check. Escalate only when uncertainty, recurrence, blast radius, or a governing floor makes deeper scrutiny decision-relevant; never use priority to waive an applicable D4/D3/D2/D1 contract.
+
 A contract-changing implementation requires deliberate specification change, affected-consumer/persisted-state/compatibility/evidence/documentation/dependency/history analysis, implementation, affected regression + real integration, evidence applicability review/remap/rerun, and impact closure. Specification mutation and implementation repair are distinct semantic actions even when one commit contains both.
 
 ## Evidence, compatibility, errors, state

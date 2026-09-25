@@ -26,6 +26,20 @@ The accepted plan is the minimum known contract, not a ceiling on newly discover
 
 Accepted-current D1-D4 authority is durable semantic ownership. A workplan may freeze lower choices for one cycle without promoting them into durable authority. Conversely, a workplan cannot omit already-current authority merely because it does not restate it. Ordinary implementation/review iterations do not need numbered authority revisions unless accepted task semantics actually change.
 
+## Importance and attention allocation
+
+For substantial work, keep a compact attention map rather than an exhaustive priority ledger:
+
+- highest-value governed outcomes and mandatory acceptance floors;
+- critical/material uncertainties;
+- routine/incidental surfaces;
+- intended `DEEP` / `STANDARD` / `LIGHT` / `DEFER-OMIT` treatment;
+- escalation, de-escalation and stop triggers.
+
+Applicability comes before importance. Priority may reorder a mandatory obligation but cannot waive or starve it beyond the acceptance boundary that owns it. Importance labels are revisable coordination state, not D1-D4 authority. Preserve only the smallest useful rationale when a material priority judgment changes scope/evidence depth, defers nontrivial work, or permits bounded approximation/omission: consequence, mandatory/discretionary status, decisive uncertainty/evidence, chosen rigor, and reopen/stop trigger. Tiny/local work needs no attention-map ceremony.
+
+Stay attached to the highest-value unresolved governed outcome rather than process-completion activity. If its critical path genuinely waits on unavailable hardware, service, external input, approval, or human decision, independent work may proceed only when it does not assume the blocker passed or invalidate later evidence. Keep the blocker explicitly open; parallel progress is not acceptance.
+
 ## Conditional project-memory activation and HAS
 
 PEM is decision support, not a mandatory workflow stage. Activate it only when demonstrated project history can materially change the decision: substantial rework of mature D1-D4 semantics/concretization; replacement/consolidation of mature machinery; suspected recurrence; substantial optimization/scaling; migration/recovery/revert/restoration where prior choices matter; or an active workplan explicitly binding relevant memory. A first clean local defect, trivial/unrelated work, or mere presence of a PEM file does not trigger substantive memory loading.

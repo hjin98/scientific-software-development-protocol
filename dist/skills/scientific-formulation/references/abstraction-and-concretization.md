@@ -1,6 +1,6 @@
 # Abstraction, Concretization, Authority, Challenge, and Representation
 
-The Scientific Software Development Protocol (SSDP) governs scientific-software work by recursively constrained abstraction/concretization. This universal kernel owns cross-domain semantics; workflow, evidence, testing, Project Engineering Memory (PEM), domain, language, tool, history, and release details remain with conditionally loaded canonical owners.
+The Scientific Software Development Protocol (SSDP) governs scientific software through recursively constrained abstraction/concretization. This kernel owns cross-domain semantics; workflow, evidence, testing, Project Engineering Memory (PEM), domain, language, tool, history, and release details remain with canonical conditional owners.
 
 ## Background and terminology
 
@@ -8,7 +8,7 @@ The **Scientific Software Development Protocol (SSDP)** separates four semantic 
 
 An **abstraction** is an intentionally incomplete normative contract: the material invariants, required outcomes, assumptions, validity conditions, observables, bounds, and governed relations descendants must preserve. A **concretization** is a lower-level choice that satisfies applicable parent abstractions and governed side constraints. An interior D1-D4 artifact may concretize its parent while abstracting its descendants. **Realization** is reserved for concrete evidence execution; see [Evidence, evolution, and semantic dependencies](evidence-evolution-and-dependencies.md) when evidence lifecycle or applicability is material.
 
-**Project Engineering Memory (PEM)** is optional-to-activate, project-local, evidence-backed engineering learning intended to reduce rediscovery and preserve both failure lessons and demonstrated successful patterns. It is **not a fifth authority domain**: when substantial work can materially benefit from project history, route to [Project Engineering Memory](project-engineering-memory.md) and the workflow owner; otherwise keep it cold.
+**Project Engineering Memory (PEM)** is optional, project-local, evidence-backed learning for reducing rediscovery and preserving demonstrated lessons. It is **not a fifth authority domain**: activate its owner only when project history can materially change the decision.
 
 For governed decision `d`, `x` is **material** when a plausible path grounded in current authority, dependencies, evidence, or a concrete counterexample can make changing/omitting `x` alter governed meaning, admissible concretization, evidence applicability/obligation, disposition, protected risk, or protected outcome. Wording-only differences and ungrounded remote possibilities are not material.
 
@@ -28,11 +28,11 @@ domain engineering fitness
 > development economy
 ```
 
-Stop when further search has lower expected engineering value than proceeding with the best justified admissible option; exhaustive global optimization is not required.
+After applicability is fixed, allocate rigor by consequence, decision-sensitive uncertainty, irreversibility, and opportunity cost. Mandatory obligations stay mandatory; priority only schedules them. Use the cheapest sufficiently strong applicable action/evidence, escalate only when it can change the decision, and stop when it cannot. Priority labels are metadata, not authority/pass thresholds; child issues inherit no parent importance without credible causal linkage.
 
 Semantic level and authority provenance are independent. Preserve applicable safety, explicit stakeholder/project authority, external contracts/standards, and accepted current domain authority before delegated implementation preference. A security, reliability, performance, compatibility, hardware, regulatory, or public-contract constraint may enter at the domain where it semantically applies.
 
-Steward the governed durable product/outcome, not process artifacts. Workplans, tests, gates, metrics, reviews, reports, implementation machinery, history, and PEM are constraints/evidence/coordination state, not objectives or self-authorizing rules. Interpret requirements by their protected purpose within governed task/contracts/affected surfaces; this does not authorize unrelated enhancement, opportunistic redesign, or speculative future-proofing.
+Steward the governed durable product/outcome, not process artifacts. Workplans, tests, gates, metrics, reviews, reports, implementation machinery, history, and PEM are non-self-authorizing constraints/evidence/coordination state. Interpret requirements by protected purpose within governed scope; do not infer unrelated enhancement, redesign, or speculative future-proofing.
 
 Each material normative claim has one current semantic owner, while one concretization may satisfy several parents/side constraints. Current normative ownership must remain acyclic. Materially conflicting applicable authorities are not silently prioritized: expose the conflict and route adjudication.
 
@@ -68,7 +68,7 @@ At every material boundary distinguish:
 
 A child can perfectly satisfy a too-weak abstraction and still be wrong; that is an upstream abstraction defect.
 
-Projects may encode lifecycle locally, but must distinguish enough state to prevent speculative or stale material from becoming current authority: proposed; accepted-current; challenged; risk-accepted/provisional; stale-dependent; superseded/historical; release-pinned/publication. Human-ratification state is orthogonal. Non-authoritative project memory has its own evidence/coverage/maturity/accepted-base/candidate-overlay lifecycle and must not be confused with D1-D4 acceptance state.
+Projects may encode lifecycle locally but must distinguish enough state to prevent speculative/stale material becoming current authority: proposed; accepted-current; challenged; risk-accepted/provisional; stale-dependent; superseded/historical; release-pinned/publication. Human ratification is orthogonal. PEM has separate evidence/coverage/maturity/base/overlay lifecycle and is not D1-D4 acceptance.
 
 A durable authority mutation follows the owning domain's acceptance contract: proposal -> independent falsification where required -> required human ratification -> acceptance -> bounded dependent impact -> reconcretization/revalidation. Repository presence alone does not promote a proposal. A PEM record may support/challenge/propose such a change, but cannot perform the acceptance step itself.
 
