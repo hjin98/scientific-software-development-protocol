@@ -1051,18 +1051,17 @@ candidate:
   public_source_ref: {candidate}
   recovery_ref: UNAVAILABLE
 """
-        with mock.patch.object(
-            release_state,
-            "_git",
-            side_effect=[
-                (0, ""),
-                (0, ""),
-                (0, ""),
-                (0, ""),
-                (0, ""),
-                (0, ""),
-                (0, complete_snapshot),
-            ],
+        with (
+            mock.patch.object(
+                release_state,
+                "_canonical_is_ancestor",
+                return_value=True,
+            ),
+            mock.patch.object(
+                release_state,
+                "_git",
+                return_value=(0, complete_snapshot),
+            ),
         ):
             errors: list[str] = []
             release_state._check_recovery_lineage(
@@ -1078,18 +1077,17 @@ candidate:
         self.assertEqual(errors, [])
 
         stale_snapshot = complete_snapshot.replace("state: RATIFIED", "state: NOT_REQUESTED")
-        with mock.patch.object(
-            release_state,
-            "_git",
-            side_effect=[
-                (0, ""),
-                (0, ""),
-                (0, ""),
-                (0, ""),
-                (0, ""),
-                (0, ""),
-                (0, stale_snapshot),
-            ],
+        with (
+            mock.patch.object(
+                release_state,
+                "_canonical_is_ancestor",
+                return_value=True,
+            ),
+            mock.patch.object(
+                release_state,
+                "_git",
+                return_value=(0, stale_snapshot),
+            ),
         ):
             errors = []
             release_state._check_recovery_lineage(
@@ -2061,6 +2059,276 @@ candidate:
                     for error in errors
                 )
             )
+
+
+    def _build_sibling_commits(self, root: Path) -> tuple[str, str, str]:
+        (root / "base.txt").write_text("base\n", encoding="utf-8")
+        base_ref = self._commit_topology_repo(root, "base")
+
+        self._run_topology_git(root, "checkout", "-q", "-b", "left")
+        (root / "left.txt").write_text("left\n", encoding="utf-8")
+        left_ref = self._commit_topology_repo(root, "left")
+
+        self._run_topology_git(root, "checkout", "-q", "-b", "right", base_ref)
+        (root / "right.txt").write_text("right\n", encoding="utf-8")
+        right_ref = self._commit_topology_repo(root, "right")
+        return base_ref, left_ref, right_ref
+
+    def test_check_ancestor_uses_canonical_parents_under_replace_ref(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            root = Path(tmpdir)
+            self._init_topology_repo(root)
+            _, left_ref, right_ref = self._build_sibling_commits(root)
+
+            tree_ref = self._run_topology_git(
+                root,
+                "rev-parse",
+                f"{right_ref}^{{tree}}",
+            )
+            replacement_ref = self._run_topology_git(
+                root,
+                "commit-tree",
+                tree_ref,
+                "-p",
+                left_ref,
+                "-m",
+                "replacement makes sibling look ancestral",
+            )
+            self._run_topology_git(root, "replace", right_ref, replacement_ref)
+
+            self.assertEqual(
+                self._run_topology_git(
+                    root,
+                    "merge-base",
+                    "--is-ancestor",
+                    left_ref,
+                    right_ref,
+                ),
+                "",
+            )
+
+            errors: list[str] = []
+            release_state._check_ancestor(
+                root,
+                left_ref,
+                right_ref,
+                "replacement-overlay lineage",
+                errors,
+            )
+            self.assertTrue(
+                any(
+                    "replacement-overlay lineage requires" in error
+                    for error in errors
+                )
+            )
+
+    def test_check_ancestor_uses_canonical_parents_under_graft(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            root = Path(tmpdir)
+            self._init_topology_repo(root)
+            _, left_ref, right_ref = self._build_sibling_commits(root)
+
+            git_dir_text = self._run_topology_git(
+                root,
+                "rev-parse",
+                "--git-dir",
+            )
+            git_dir = Path(git_dir_text)
+            if not git_dir.is_absolute():
+                git_dir = root / git_dir
+            grafts = git_dir / "info" / "grafts"
+            grafts.parent.mkdir(parents=True, exist_ok=True)
+            grafts.write_text(
+                f"{right_ref} {left_ref}\n",
+                encoding="utf-8",
+            )
+
+            self.assertEqual(
+                self._run_topology_git(
+                    root,
+                    "merge-base",
+                    "--is-ancestor",
+                    left_ref,
+                    right_ref,
+                ),
+                "",
+            )
+
+            errors: list[str] = []
+            release_state._check_ancestor(
+                root,
+                left_ref,
+                right_ref,
+                "graft-overlay lineage",
+                errors,
+            )
+            self.assertTrue(
+                any(
+                    "graft-overlay lineage requires" in error
+                    for error in errors
+                )
+            )
+
+    def test_recovery_lineage_rejects_replace_rewritten_sibling(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            root = Path(tmpdir)
+            self._init_topology_repo(root)
+
+            (root / "base.txt").write_text("base\n", encoding="utf-8")
+            base_ref = self._commit_topology_repo(root, "base")
+
+            self._run_topology_git(root, "checkout", "-q", "-b", "semantic")
+            (root / "semantic.txt").write_text("semantic\n", encoding="utf-8")
+            semantic_ref = self._commit_topology_repo(root, "semantic candidate")
+
+            self._run_topology_git(
+                root,
+                "checkout",
+                "-q",
+                "-b",
+                "recovery",
+                base_ref,
+            )
+            recovery_state = copy.deepcopy(self.data)
+            recovery_state["candidate"] = {
+                "version": "6.5.0",
+                "semantic_ref": semantic_ref,
+                "review": {"state": "PASS", "evidence_ref": "NONE"},
+                "ratification": {"state": "RATIFIED", "evidence_ref": "NONE"},
+                "public_source_ref": semantic_ref,
+                "recovery_ref": "UNAVAILABLE",
+            }
+            self._write_topology_state(root, recovery_state)
+            recovery_ref = self._commit_topology_repo(root, "sibling recovery")
+
+            tree_ref = self._run_topology_git(
+                root,
+                "rev-parse",
+                f"{recovery_ref}^{{tree}}",
+            )
+            replacement_ref = self._run_topology_git(
+                root,
+                "commit-tree",
+                tree_ref,
+                "-p",
+                semantic_ref,
+                "-m",
+                "replacement launders recovery ancestry",
+            )
+            self._run_topology_git(
+                root,
+                "replace",
+                recovery_ref,
+                replacement_ref,
+            )
+            self.assertEqual(
+                self._run_topology_git(
+                    root,
+                    "merge-base",
+                    "--is-ancestor",
+                    semantic_ref,
+                    recovery_ref,
+                ),
+                "",
+            )
+
+            errors: list[str] = []
+            release_state._check_recovery_lineage(
+                root,
+                "6.5.0",
+                semantic_ref,
+                "NONE",
+                "NONE",
+                semantic_ref,
+                recovery_ref,
+                errors,
+            )
+            self.assertTrue(
+                any(
+                    "candidate.recovery_ref lineage requires" in error
+                    for error in errors
+                )
+            )
+            self.assertFalse(
+                any("later immutable target" in error for error in errors)
+            )
+
+    def test_review_evidence_reads_canonical_commit_under_replace_ref(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            root = Path(tmpdir)
+            self._init_topology_repo(root)
+            candidate = "a" * 40
+            evidence_path = Path("qualification") / "review.md"
+            (root / evidence_path).parent.mkdir(parents=True, exist_ok=True)
+            (root / evidence_path).write_text(
+                f"---\nstatus: pass\ncandidate_ref: {candidate}\n---\n# Review\n",
+                encoding="utf-8",
+            )
+            evidence_commit = self._commit_topology_repo(root, "canonical evidence")
+
+            (root / evidence_path).write_text(
+                f"---\nstatus: no-pass\ncandidate_ref: {'b' * 40}\n---\n# Forged\n",
+                encoding="utf-8",
+            )
+            forged_commit = self._commit_topology_repo(root, "replacement evidence")
+            self._run_topology_git(
+                root,
+                "replace",
+                evidence_commit,
+                forged_commit,
+            )
+
+            errors: list[str] = []
+            release_state._check_review_evidence(
+                root,
+                "hjin98/scientific-software-development-protocol",
+                "hjin98/scientific-software-development-protocol@"
+                + evidence_commit
+                + ":qualification/review.md",
+                candidate,
+                "PASS",
+                "candidate.review.evidence_ref",
+                errors,
+            )
+            self.assertEqual(errors, [])
+
+    def test_previous_governed_states_reject_laundered_reintroduction_after_later_transition(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            root = Path(tmpdir)
+            self._init_topology_repo(root)
+
+            first = self._topology_state("a")
+            self._write_topology_state(root, first)
+            self._commit_topology_repo(root, "governed A")
+
+            (root / "PROTOCOL-RELEASE-STATE.yaml").unlink()
+            self._commit_topology_repo(root, "delete governed owner")
+
+            reintroduced = self._topology_state("b")
+            self._write_topology_state(root, reintroduced)
+            self._commit_topology_repo(root, "reintroduce as B")
+
+            current = self._topology_state("c")
+            self._write_topology_state(root, current)
+            self._commit_topology_repo(root, "later material C")
+            (root / "evidence.txt").write_text("evidence only\n", encoding="utf-8")
+            self._commit_topology_repo(root, "later evidence only")
+
+            errors: list[str] = []
+            states = release_state._previous_governed_release_states(
+                root,
+                current,
+                errors,
+            )
+            self.assertEqual(states, [])
+            self.assertTrue(
+                any(
+                    "owner deletion/reintroduction cannot be hidden by a later material transition"
+                    in error
+                    for error in errors
+                )
+            )
+
 
 
 if __name__ == "__main__":

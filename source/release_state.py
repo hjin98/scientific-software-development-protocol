@@ -133,12 +133,12 @@ def _resolve_evidence_route(
         errors.append(f"{where} path must be repository-relative without parent traversal")
         return None
 
-    code, _ = _git(root, "cat-file", "-e", f"{sha}^{{commit}}")
+    code, _ = _git(root, "--no-replace-objects", "cat-file", "-e", f"{sha}^{{commit}}")
     if code:
         errors.append(f"{where} commit {sha} is not resolvable")
         return None
 
-    code, content = _git(root, "show", f"{sha}:{path}")
+    code, content = _git(root, "--no-replace-objects", "show", f"{sha}:{path}")
     if code:
         errors.append(f"{where} path {path!r} is not readable at commit {sha}")
         return None
@@ -279,11 +279,11 @@ def _check_ratification_evidence(
 def _check_version_ref(root: Path, version: str, ref: str, where: str, errors: list[str]) -> None:
     if not SHA_RE.fullmatch(ref):
         return
-    code, _ = _git(root, "cat-file", "-e", f"{ref}^{{commit}}")
+    code, _ = _git(root, "--no-replace-objects", "cat-file", "-e", f"{ref}^{{commit}}")
     if code:
         errors.append(f"{where} commit {ref} is not resolvable")
         return
-    code, declared = _git(root, "show", f"{ref}:source/PROTOCOL_VERSION")
+    code, declared = _git(root, "--no-replace-objects", "show", f"{ref}:source/PROTOCOL_VERSION")
     if code:
         errors.append(f"{where} commit {ref} has no readable source/PROTOCOL_VERSION")
     elif declared.strip() != version:
@@ -295,6 +295,39 @@ def _evidence_commit(value: str) -> str | None:
     return None if match is None else match.group("sha")
 
 
+def _canonical_is_ancestor(
+    root: Path,
+    ancestor: str,
+    descendant: str,
+    errors: list[str],
+) -> bool | None:
+    """Resolve ancestry from raw canonical commit parents, ignoring local overlays."""
+    ancestor_topology = _commit_and_parents(root, ancestor, errors)
+    descendant_topology = _commit_and_parents(root, descendant, errors)
+    if ancestor_topology is None or descendant_topology is None:
+        return None
+
+    target = ancestor_topology[0]
+    descendant_commit, descendant_parents = descendant_topology
+    if descendant_commit == target:
+        return True
+
+    visited = {descendant_commit}
+    stack = list(descendant_parents)
+    while stack:
+        topology = _commit_and_parents(root, stack.pop(), errors)
+        if topology is None:
+            return None
+        commit, parents = topology
+        if commit in visited:
+            continue
+        if commit == target:
+            return True
+        visited.add(commit)
+        stack.extend(parents)
+    return False
+
+
 def _check_ancestor(
     root: Path,
     ancestor: str,
@@ -304,8 +337,12 @@ def _check_ancestor(
 ) -> None:
     if not SHA_RE.fullmatch(ancestor):
         return
-    code, _ = _git(root, "merge-base", "--is-ancestor", ancestor, descendant)
-    if code:
+    canonical = _canonical_is_ancestor(root, ancestor, descendant, errors)
+    if canonical is None:
+        errors.append(
+            f"{where} cannot establish canonical ancestry from {ancestor} to {descendant}"
+        )
+    elif not canonical:
         errors.append(f"{where} requires {descendant} to descend from {ancestor}")
 
 
@@ -375,7 +412,7 @@ def _check_recovery_lineage(
         errors,
     )
 
-    code, content = _git(root, "show", f"{recovery_ref}:PROTOCOL-RELEASE-STATE.yaml")
+    code, content = _git(root, "--no-replace-objects", "show", f"{recovery_ref}:PROTOCOL-RELEASE-STATE.yaml")
     if code:
         errors.append(
             f"candidate.recovery_ref commit {recovery_ref} has no readable PROTOCOL-RELEASE-STATE.yaml"
@@ -533,16 +570,12 @@ def validate_release_transition(previous: Any, current: Any) -> list[str]:
     return errors
 
 
-def _release_state_at_ref(
+def _release_state_path_present(
     root: Path,
     ref: str,
     errors: list[str],
-    *,
-    missing_ok: bool,
-) -> Any | None:
-    # Inspect canonical tree membership separately from content readability.
-    # A failed content read must never be collapsed into "path absent": a
-    # missing/unavailable blob or tree cannot prove genuine pre-owner history.
+) -> bool | None:
+    """Return canonical owner-path presence, or None when the tree is unreadable."""
     code, entry = _git(
         root,
         "--no-replace-objects",
@@ -556,7 +589,23 @@ def _release_state_at_ref(
             f"cannot inspect PROTOCOL-RELEASE-STATE.yaml at transition ref {ref}"
         )
         return None
-    if not entry:
+    return bool(entry)
+
+
+def _release_state_at_ref(
+    root: Path,
+    ref: str,
+    errors: list[str],
+    *,
+    missing_ok: bool,
+) -> Any | None:
+    # Inspect canonical tree membership separately from content readability.
+    # A failed content read must never be collapsed into "path absent": a
+    # missing/unavailable blob or tree cannot prove genuine pre-owner history.
+    present = _release_state_path_present(root, ref, errors)
+    if present is None:
+        return None
+    if not present:
         if missing_ok:
             return _MISSING_RELEASE_STATE
         errors.append(
@@ -678,6 +727,83 @@ def _lineage_has_governed_release_state(
     return False
 
 
+def _governed_owner_history_is_continuous(
+    root: Path,
+    ref: str,
+    errors: list[str],
+) -> bool:
+    """Reject any reachable lineage that deletes the owner after governance begins."""
+    records: dict[str, tuple[bool, list[str]]] = {}
+    children: dict[str, list[str]] = {}
+    stack = [ref]
+
+    while stack:
+        topology = _commit_and_parents(root, stack.pop(), errors)
+        if topology is None:
+            errors.append(
+                "cannot establish continuous release-state ownership because "
+                "canonical Git ancestry is incomplete or unreadable"
+            )
+            return False
+        commit, parents = topology
+        if commit in records:
+            continue
+
+        present = _release_state_path_present(root, commit, errors)
+        if present is None:
+            errors.append(
+                "cannot establish continuous release-state ownership because "
+                f"the tree at {commit} is unreadable"
+            )
+            return False
+
+        records[commit] = (present, parents)
+        for parent in parents:
+            children.setdefault(parent, []).append(commit)
+        stack.extend(parents)
+
+    unresolved = {
+        commit: len(parents)
+        for commit, (_, parents) in records.items()
+    }
+    ready = [
+        commit
+        for commit, parent_count in unresolved.items()
+        if parent_count == 0
+    ]
+    governed_through: dict[str, bool] = {}
+    valid = True
+
+    while ready:
+        commit = ready.pop()
+        present, parents = records[commit]
+        governed_parent = any(governed_through[parent] for parent in parents)
+
+        if not present and governed_parent:
+            errors.append(
+                "release-state ancestry at "
+                f"{commit} is missing PROTOCOL-RELEASE-STATE.yaml after the lineage "
+                "was already governed; owner deletion/reintroduction cannot be "
+                "hidden by a later material transition"
+            )
+            valid = False
+
+        governed_through[commit] = present or governed_parent
+        for child in children.get(commit, []):
+            unresolved[child] -= 1
+            if unresolved[child] == 0:
+                ready.append(child)
+
+    if len(governed_through) != len(records):
+        errors.append(
+            "cannot establish continuous release-state ownership because "
+            "canonical Git ancestry could not be fully ordered"
+        )
+        return False
+
+    return valid
+
+
 def _reject_governed_owner_absence(
     root: Path,
     ref: str,
@@ -711,6 +837,9 @@ def _previous_governed_release_states(
         _reject_governed_owner_absence(root, "HEAD", errors)
         return []
     if head_state is None:
+        return []
+
+    if not _governed_owner_history_is_continuous(root, "HEAD", errors):
         return []
 
     # An uncommitted root-state edit is a transition from the committed HEAD state.

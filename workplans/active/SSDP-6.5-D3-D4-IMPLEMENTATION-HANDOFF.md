@@ -1257,3 +1257,43 @@ candidate Review is required.
 
 No stakeholder ratification, public-fallback publication, recovery establishment, accepted-current cutover, PR #33
 merge, or Protocol 7 D3/D4 mutation is authorized.
+
+
+## 52. B65-P12-1 / B65-P12-2 implementation — prospective replacement
+
+The bounded P12 NO-PASS repair is implemented at the existing D4 owner without reopening accepted Protocol 6.5 D3.
+
+### Canonical release-history ancestry
+
+`_check_ancestor()` no longer delegates release authority to overlay-sensitive
+`git merge-base --is-ancestor`. It now traverses the same raw canonical commit-parent graph used by the P12
+predecessor resolver. Replacement refs and deprecated `info/grafts` therefore cannot redefine Review,
+ratification, fallback, recovery, or publication ancestry.
+
+Exact immutable evidence/version/recovery content reads now also use `--no-replace-objects`, preventing a local
+replacement object from changing the bytes attributed to an immutable SHA.
+
+### Continuous owner history
+
+The predecessor resolver now performs one canonical path-presence continuity pass over reachable HEAD ancestry before
+accepting an owner-present transition. The pass computes governance forward over the canonical DAG and rejects any
+reachable commit that lacks `PROTOCOL-RELEASE-STATE.yaml` after at least one parent lineage was already governed.
+This preserves genuine pre-owner branches while ensuring a malformed A(owner) -> D(absent) -> B(reintroduced) interval
+cannot be hidden by a later material state C or evidence-only descendants.
+
+No transition registry, replay engine, topology service, branch/default/latest/timestamp policy, candidate-specific
+table, or second state owner is introduced.
+
+Fresh real-Git production holdouts cover:
+
+- replacement-ref sibling ancestry rejected by the canonical ancestor predicate;
+- graft-rewritten sibling ancestry rejected by the canonical ancestor predicate;
+- replacement-rewritten sibling recovery rejected by the real recovery-lineage consumer;
+- immutable Review evidence content remains bound to the canonical commit under a replacement ref;
+- governed A -> deletion -> reintroduced B -> later C -> evidence-only descendant remains rejected.
+
+All prior P12 shallow/object-readability/alternate-store/topology/transition/recovery/parser/semver/evidence-binding
+controls remain in the affected regression surface.
+
+This commit is only a **prospective replacement semantic candidate**. P12 remains immutable NO-PASS evidence. Do not
+assign the next candidate number until exact-candidate normal CI passes.
