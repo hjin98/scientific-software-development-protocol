@@ -354,6 +354,8 @@ def _check_recovery_lineage(
     public_ref: str,
     recovery_ref: str,
     errors: list[str],
+    *,
+    publication_ref: str = "HEAD",
 ) -> None:
     if not (
         SHA_RE.fullmatch(semantic_ref)
@@ -406,7 +408,7 @@ def _check_recovery_lineage(
     _check_ancestor(
         root,
         recovery_ref,
-        "HEAD",
+        publication_ref,
         "candidate.recovery_ref publication lineage",
         errors,
     )
@@ -457,7 +459,13 @@ def _check_recovery_lineage(
         )
 
 
-def validate_release_transition(previous: Any, current: Any) -> list[str]:
+def validate_release_transition(
+    previous: Any,
+    current: Any,
+    *,
+    repo_root: Path | None = None,
+    previous_ref: str = "HEAD",
+) -> list[str]:
     errors: list[str] = []
     previous_root = _mapping(previous, "previous release state", errors)
     current_root = _mapping(current, "current release state", errors)
@@ -546,6 +554,7 @@ def validate_release_transition(previous: Any, current: Any) -> list[str]:
         "previous candidate.ratification",
         errors,
     )
+    previous_semantic = str(previous_candidate.get("semantic_ref") or "")
     previous_public = str(previous_candidate.get("public_source_ref") or "")
     previous_recovery = str(previous_candidate.get("recovery_ref") or "")
 
@@ -559,6 +568,10 @@ def validate_release_transition(previous: Any, current: Any) -> list[str]:
         errors.append("accepted_current advancement requires previous candidate RATIFIED state")
     if not SHA_RE.fullmatch(previous_public):
         errors.append("accepted_current advancement requires previous candidate public fallback")
+    if previous_public != previous_semantic:
+        errors.append(
+            "accepted_current advancement requires previous candidate public fallback to equal its semantic_ref"
+        )
     if not SHA_RE.fullmatch(previous_recovery):
         errors.append("accepted_current advancement requires previous candidate recovery")
     if current_accepted.get("public_source_ref") != previous_public:
@@ -568,6 +581,15 @@ def validate_release_transition(previous: Any, current: Any) -> list[str]:
     if current_accepted.get("recovery_ref") != previous_recovery:
         errors.append(
             "accepted_current.recovery_ref must equal the previous candidate recovery"
+        )
+
+    if repo_root is not None:
+        errors.extend(
+            validate_release_state(
+                previous_root,
+                repo_root=repo_root,
+                publication_ref=previous_ref,
+            )
         )
 
     return errors
@@ -791,11 +813,11 @@ def _reject_governed_owner_absence(
         )
 
 
-def _previous_governed_release_states(
+def _previous_governed_release_state_records(
     root: Path,
     current: Any,
     errors: list[str],
-) -> list[Any]:
+) -> list[tuple[str, Any]]:
     head_state = _release_state_at_ref(
         root,
         "HEAD",
@@ -815,14 +837,15 @@ def _previous_governed_release_states(
 
     # An uncommitted root-state edit is a transition from the committed HEAD state.
     if head_state != current:
-        return [head_state]
+        return [("HEAD", head_state)]
 
     # For a committed state, walk direct ancestry only while the governed state is
     # unchanged.  The first differing state on each parent lineage is a material
     # predecessor boundary.  This preserves evidence-only descendants while
     # preventing Git's default date/topology ordering from substituting a sibling
     # merge parent for the actual transition history.
-    predecessors: list[Any] = []
+    predecessors: list[tuple[str, Any]] = []
+    boundary_refs: set[str] = set()
     visited: set[str] = set()
     stack = ["HEAD"]
 
@@ -852,12 +875,31 @@ def _previous_governed_release_states(
                 continue
             if parent_state == current:
                 stack.append(parent)
-            elif parent_state not in predecessors:
-                predecessors.append(parent_state)
+            elif parent not in boundary_refs:
+                predecessors.append((parent, parent_state))
+                boundary_refs.add(parent)
 
     return predecessors
 
-def validate_release_state(data: Any, *, repo_root: Path | None = None) -> list[str]:
+
+def _previous_governed_release_states(
+    root: Path,
+    current: Any,
+    errors: list[str],
+) -> list[Any]:
+    states: list[Any] = []
+    for _, state in _previous_governed_release_state_records(root, current, errors):
+        if state not in states:
+            states.append(state)
+    return states
+
+
+def validate_release_state(
+    data: Any,
+    *,
+    repo_root: Path | None = None,
+    publication_ref: str = "HEAD",
+) -> list[str]:
     errors: list[str] = []
     root = _mapping(data, "release state", errors)
     if root.get("schema_version") != 1:
@@ -1031,7 +1073,7 @@ def validate_release_state(data: Any, *, repo_root: Path | None = None) -> list[
             _check_ancestor(
                 repo_root,
                 review_commit,
-                "HEAD",
+                publication_ref,
                 "candidate.review evidence publication",
                 errors,
             )
@@ -1047,7 +1089,7 @@ def validate_release_state(data: Any, *, repo_root: Path | None = None) -> list[
             _check_ancestor(
                 repo_root,
                 ratification_commit,
-                "HEAD",
+                publication_ref,
                 "candidate.ratification evidence publication",
                 errors,
             )
@@ -1055,7 +1097,7 @@ def validate_release_state(data: Any, *, repo_root: Path | None = None) -> list[
             _check_ancestor(
                 repo_root,
                 semantic_ref,
-                "HEAD",
+                publication_ref,
                 "candidate.public_source_ref publication",
                 errors,
             )
@@ -1069,6 +1111,7 @@ def validate_release_state(data: Any, *, repo_root: Path | None = None) -> list[
                 public_ref,
                 recovery_ref,
                 errors,
+                publication_ref=publication_ref,
             )
 
     return errors
@@ -1092,14 +1135,21 @@ def main() -> int:
     errors = validate_release_state(data, repo_root=None if args.no_git else ROOT)
     if not args.no_git and path == DEFAULT_PATH.resolve():
         transition_errors: list[str] = []
-        previous_states = _previous_governed_release_states(
+        previous_records = _previous_governed_release_state_records(
             ROOT,
             data,
             transition_errors,
         )
         errors.extend(transition_errors)
-        for previous in previous_states:
-            errors.extend(validate_release_transition(previous, data))
+        for previous_ref, previous in previous_records:
+            errors.extend(
+                validate_release_transition(
+                    previous,
+                    data,
+                    repo_root=ROOT,
+                    previous_ref=previous_ref,
+                )
+            )
     if errors:
         for error in errors:
             print(error)

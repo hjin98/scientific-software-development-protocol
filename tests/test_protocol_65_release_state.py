@@ -1072,6 +1072,40 @@ semantic_ref: {"c" * 40}
         errors = release_state.validate_release_transition(incomplete, current)
         self.assertTrue(any("requires previous candidate Review PASS" in error for error in errors))
 
+    def test_accepted_cutover_requires_exact_candidate_public_fallback(self) -> None:
+        previous, current, _ = self._accepted_cutover_fixture()
+        wrong_public = "e" * 40
+        previous["candidate"]["public_source_ref"] = wrong_public
+        current["accepted_current"]["public_source_ref"] = wrong_public
+        errors = release_state.validate_release_transition(previous, current)
+        self.assertTrue(
+            any(
+                "public fallback to equal its semantic_ref" in error
+                for error in errors
+            )
+        )
+
+    def test_accepted_cutover_revalidates_previous_candidate_at_exact_predecessor(self) -> None:
+        previous, current, _ = self._accepted_cutover_fixture()
+        predecessor = "f" * 40
+        with mock.patch.object(
+            release_state,
+            "validate_release_state",
+            return_value=["promotion source invalid"],
+        ) as validate_previous:
+            errors = release_state.validate_release_transition(
+                previous,
+                current,
+                repo_root=ROOT,
+                previous_ref=predecessor,
+            )
+        self.assertIn("promotion source invalid", errors)
+        validate_previous.assert_called_once_with(
+            previous,
+            repo_root=ROOT,
+            publication_ref=predecessor,
+        )
+
     def test_recovery_lineage_rejects_real_stale_p6_for_p7(self) -> None:
         errors: list[str] = []
         release_state._check_recovery_lineage(
@@ -1263,7 +1297,7 @@ candidate:
             self._init_topology_repo(root)
             previous = self._topology_state("a")
             self._write_topology_state(root, previous)
-            self._commit_topology_repo(root, "previous")
+            previous_ref = self._commit_topology_repo(root, "previous")
 
             current = self._topology_state("b")
             self._write_topology_state(root, current)
@@ -1277,6 +1311,15 @@ candidate:
             )
             self.assertEqual(errors, [])
             self.assertEqual(states, [previous])
+
+            record_errors: list[str] = []
+            records = release_state._previous_governed_release_state_records(
+                root,
+                current,
+                record_errors,
+            )
+            self.assertEqual(record_errors, [])
+            self.assertEqual(records, [(previous_ref, previous)])
 
     def test_previous_governed_states_cross_evidence_only_descendants(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
