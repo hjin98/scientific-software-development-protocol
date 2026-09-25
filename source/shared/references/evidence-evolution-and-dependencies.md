@@ -74,6 +74,20 @@ A rerun on a changed candidate creates a new realization; it does not rewrite th
 
 For PEM-derived current counts/maturity/temperature/guidance, use only rows whose latest applicable assessment is admissible for the bounded claim. Invalidated, stale, rejected, retired, challenged or inconclusive rows remain historically recoverable when material but cannot silently continue as present support.
 
+## Proportional evidence and evidence-instrument correction
+
+Evidence burden follows the governed decision:
+
+```text
+claim consequence + unresolved decision-sensitive uncertainty + irreversibility
+    -> required confidence
+    -> cheapest sufficiently strong applicable evidence
+```
+
+Applicability is a feasibility condition, not an economy variable. Proportional rigor may reduce evidence quantity/depth but cannot make stale, wrong-subject, wrong-regime, wrong-parameter, invalid-oracle or otherwise inapplicable evidence current. Stop recursive evidence inflation when the material claim and its evidence-route integrity are sufficiently established; add another binding/provenance layer only when a concrete failure/adversary model makes it capable of changing acceptance.
+
+Tests, fixtures, qualification scripts, review records, lifecycle bindings and diagnostic workflow instrumentation are evidence/coordination surfaces unless they themselves define accepted D4 semantics. If an evidence-instrument correction leaves the immutable D1-D4/product semantic subject unchanged, requalify the same semantic candidate when the lifecycle can represent that honestly. Bind the result separately to the immutable semantic-subject ref, the exact evidence-realization descendant ref, and any external workflow/run identity; inspect the intervening delta sufficiently to establish it is non-semantic. Do not mint a new semantic candidate or repeat unaffected semantic Review solely for an oracle/fixture correction. If governed semantic source/product/public contract changed, freeze a replacement semantic candidate instead.
+
 ## Durable evidence binding and binding health
 
 A material evidence route should identify the evidence unambiguously enough to survive ordinary branch movement: repository/project identity when non-local, immutable revision/release/incident identity, path/artifact, and stable section/test/finding where useful. A bare branch/default path, floating latest link, or commit SHA without source repository identity for cross-repository evidence is not a durable warrant.
