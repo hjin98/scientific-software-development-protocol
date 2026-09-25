@@ -1126,3 +1126,41 @@ independent assembled-candidate Review.
 
 No stakeholder ratification, public-fallback publication, recovery establishment, accepted-current cutover, PR merge,
 or Protocol 7 D3/D4 mutation is authorized.
+
+
+## 49. B65-P11-1 implementation — prospective replacement candidate
+
+B65-P11-1 is repaired at the existing D4 release-state ancestry classifier without reopening accepted Protocol 6.5
+D3.
+
+The repair removes the unsound negative-proof shortcut rather than adding another completeness heuristic.
+
+- Historical path membership is first inspected with canonical-tree `git --no-replace-objects ls-tree`. Only a
+  successful tree lookup with no path entry means the owner is genuinely absent at that commit.
+- If the path entry exists but its content cannot be read, validation fails closed. Unreadable/missing tree or blob
+  objects are never converted to `_MISSING_RELEASE_STATE`.
+- Canonical ancestry is walked from raw commit-object parent headers using
+  `git --no-replace-objects cat-file -p`, rather than revision traversal affected by replacement refs or deprecated
+  `info/grafts` overlays.
+- A negative genuine-pre-owner conclusion is emitted only after the complete canonical parent graph has been traversed
+  and every inspected historical state is either readable or structurally proven to lack the owner.
+- Standard shallow clones now fail closed because raw boundary commits still name parent object IDs whose commit
+  objects are unavailable. This retains the P11 shallow behavior without treating
+  `--is-shallow-repository=false` as a universal completeness proof.
+
+No registry, mirror, topology service, compatibility layer, branch/default/latest/timestamp policy, candidate-specific
+identity, or second state owner is introduced.
+
+Fresh real-Git production-resolver holdouts cover:
+
+- non-shallow missing historical owner blob: fail closed;
+- non-shallow missing historical tree: fail closed;
+- replacement-ref ancestry that hides owner introduction: canonical history still rejects reintroduction;
+- deprecated graft ancestry that hides owner introduction: canonical raw-parent history still rejects reintroduction;
+- readable alternate object store: canonical ancestry remains usable and governed reintroduction is rejected;
+- both existing P11 shallow-history negatives and all prior complete-history topology/recovery controls remain active.
+
+This commit is only the **prospective replacement semantic candidate**. P11 remains immutable NO-PASS evidence. Do not
+assign the next P-number until exact-candidate normal CI passes. After that pass, bind the exact repair SHA from a later
+lifecycle descendant with Review reset to `NOT_RUN`, rerun binding qualification, and require another fresh
+independent assembled-candidate Review.

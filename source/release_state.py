@@ -540,14 +540,37 @@ def _release_state_at_ref(
     *,
     missing_ok: bool,
 ) -> Any | None:
+    # Inspect canonical tree membership separately from content readability.
+    # A failed content read must never be collapsed into "path absent": a
+    # missing/unavailable blob or tree cannot prove genuine pre-owner history.
+    code, entry = _git(
+        root,
+        "--no-replace-objects",
+        "ls-tree",
+        ref,
+        "--",
+        "PROTOCOL-RELEASE-STATE.yaml",
+    )
+    if code:
+        errors.append(
+            f"cannot inspect PROTOCOL-RELEASE-STATE.yaml at transition ref {ref}"
+        )
+        return None
+    if not entry:
+        if missing_ok:
+            return _MISSING_RELEASE_STATE
+        errors.append(
+            f"cannot read PROTOCOL-RELEASE-STATE.yaml at transition ref {ref}"
+        )
+        return None
+
     code, content = _git(
         root,
+        "--no-replace-objects",
         "show",
         f"{ref}:PROTOCOL-RELEASE-STATE.yaml",
     )
     if code:
-        if missing_ok:
-            return _MISSING_RELEASE_STATE
         errors.append(
             f"cannot read PROTOCOL-RELEASE-STATE.yaml at transition ref {ref}"
         )
@@ -572,19 +595,44 @@ def _commit_and_parents(
     ref: str,
     errors: list[str],
 ) -> tuple[str, list[str]] | None:
-    code, output = _git(
+    # Read the raw commit object with replacement refs disabled. Parsing raw
+    # parent headers also bypasses deprecated info/grafts traversal overlays,
+    # so local Git history rewrites cannot become release-state authority.
+    code, commit = _git(
         root,
-        "rev-list",
-        "--parents",
-        "-n",
-        "1",
-        ref,
+        "--no-replace-objects",
+        "rev-parse",
+        "--verify",
+        f"{ref}^{{commit}}",
     )
-    if code or not output:
+    if code or not SHA_RE.fullmatch(commit):
         errors.append(f"cannot resolve release-state ancestry at {ref}")
         return None
-    parts = output.split()
-    return parts[0], parts[1:]
+
+    code, raw = _git(
+        root,
+        "--no-replace-objects",
+        "cat-file",
+        "-p",
+        commit,
+    )
+    if code or not raw:
+        errors.append(f"cannot read release-state ancestry commit {commit}")
+        return None
+
+    header = raw.split("\n\n", 1)[0]
+    parents: list[str] = []
+    for line in header.splitlines():
+        if not line.startswith("parent "):
+            continue
+        parent = line.removeprefix("parent ").strip()
+        if not SHA_RE.fullmatch(parent):
+            errors.append(
+                f"release-state ancestry commit {commit} has invalid parent {parent!r}"
+            )
+            return None
+        parents.append(parent)
+    return commit, parents
 
 
 def _lineage_has_governed_release_state(
@@ -592,46 +640,41 @@ def _lineage_has_governed_release_state(
     ref: str,
     errors: list[str],
 ) -> bool | None:
-    """Return whether ref descends from any commit containing the release-state owner."""
-    code, output = _git(
-        root,
-        "rev-list",
-        "--full-history",
-        ref,
-        "--",
-        "PROTOCOL-RELEASE-STATE.yaml",
-    )
-    if code:
-        errors.append(f"cannot inspect release-state ownership history at {ref}")
-        return None
+    """Return whether complete canonical ancestry contains the release-state owner."""
+    visited: set[str] = set()
+    stack = [ref]
 
-    for candidate in output.splitlines():
+    while stack:
+        topology = _commit_and_parents(root, stack.pop(), errors)
+        if topology is None:
+            errors.append(
+                "cannot establish genuine pre-owner release-state ancestry at "
+                f"{ref} because canonical Git ancestry is incomplete or unreadable"
+            )
+            return None
+
+        commit, parents = topology
+        if commit in visited:
+            continue
+        visited.add(commit)
+
         state = _release_state_at_ref(
             root,
-            candidate,
+            commit,
             errors,
             missing_ok=True,
         )
-        if state is _MISSING_RELEASE_STATE:
-            continue
         if state is None:
+            errors.append(
+                "cannot establish genuine pre-owner release-state ancestry at "
+                f"{ref} because a historical owner state is unreadable"
+            )
             return None
-        return True
+        if state is not _MISSING_RELEASE_STATE:
+            return True
 
-    code, shallow = _git(
-        root,
-        "rev-parse",
-        "--is-shallow-repository",
-    )
-    if code or shallow not in {"true", "false"}:
-        errors.append(f"cannot determine release-state ancestry completeness at {ref}")
-        return None
-    if shallow == "true":
-        errors.append(
-            "cannot establish genuine pre-owner release-state ancestry at "
-            f"{ref} from incomplete/shallow Git history"
-        )
-        return None
+        stack.extend(parents)
+
     return False
 
 

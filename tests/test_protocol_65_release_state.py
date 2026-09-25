@@ -1824,5 +1824,244 @@ candidate:
             )
 
 
+    def test_previous_governed_states_fail_closed_on_unreadable_historical_owner_objects(self) -> None:
+        for missing_object in ("blob", "tree"):
+            with self.subTest(missing_object=missing_object):
+                with tempfile.TemporaryDirectory() as tmpdir:
+                    root = Path(tmpdir)
+                    self._init_topology_repo(root)
+
+                    (root / "pre-owner.txt").write_text(
+                        "pre-owner\n",
+                        encoding="utf-8",
+                    )
+                    self._commit_topology_repo(root, "pre-owner")
+
+                    previous = self._topology_state("a")
+                    self._write_topology_state(root, previous)
+                    owner_ref = self._commit_topology_repo(
+                        root,
+                        "introduce governed owner",
+                    )
+                    if missing_object == "blob":
+                        object_ref = self._run_topology_git(
+                            root,
+                            "rev-parse",
+                            f"{owner_ref}:PROTOCOL-RELEASE-STATE.yaml",
+                        )
+                    else:
+                        object_ref = self._run_topology_git(
+                            root,
+                            "rev-parse",
+                            f"{owner_ref}^{{tree}}",
+                        )
+
+                    (root / "PROTOCOL-RELEASE-STATE.yaml").unlink()
+                    self._commit_topology_repo(root, "delete governed owner")
+
+                    git_dir_text = self._run_topology_git(
+                        root,
+                        "rev-parse",
+                        "--git-dir",
+                    )
+                    git_dir = Path(git_dir_text)
+                    if not git_dir.is_absolute():
+                        git_dir = root / git_dir
+                    object_path = (
+                        git_dir
+                        / "objects"
+                        / object_ref[:2]
+                        / object_ref[2:]
+                    )
+                    self.assertTrue(object_path.is_file())
+                    object_path.unlink()
+
+                    self.assertEqual(
+                        self._run_topology_git(
+                            root,
+                            "rev-parse",
+                            "--is-shallow-repository",
+                        ),
+                        "false",
+                    )
+
+                    current = self._topology_state("b")
+                    self._write_topology_state(root, current)
+
+                    errors: list[str] = []
+                    states = release_state._previous_governed_release_states(
+                        root,
+                        current,
+                        errors,
+                    )
+                    self.assertEqual(states, [])
+                    self.assertTrue(
+                        any(
+                            "cannot establish genuine pre-owner release-state ancestry"
+                            in error
+                            for error in errors
+                        )
+                    )
+
+    def test_previous_governed_states_use_canonical_ancestry_under_replace_ref(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            root = Path(tmpdir)
+            self._init_topology_repo(root)
+
+            (root / "pre-owner.txt").write_text("pre-owner\n", encoding="utf-8")
+            pre_ref = self._commit_topology_repo(root, "pre-owner")
+
+            previous = self._topology_state("a")
+            self._write_topology_state(root, previous)
+            self._commit_topology_repo(root, "introduce governed owner")
+
+            (root / "PROTOCOL-RELEASE-STATE.yaml").unlink()
+            deleted_ref = self._commit_topology_repo(root, "delete governed owner")
+            tree_ref = self._run_topology_git(
+                root,
+                "rev-parse",
+                f"{deleted_ref}^{{tree}}",
+            )
+            replacement_ref = self._run_topology_git(
+                root,
+                "commit-tree",
+                tree_ref,
+                "-p",
+                pre_ref,
+                "-m",
+                "replacement hides governed owner",
+            )
+            self._run_topology_git(
+                root,
+                "replace",
+                deleted_ref,
+                replacement_ref,
+            )
+            self.assertEqual(
+                self._run_topology_git(
+                    root,
+                    "rev-list",
+                    "--full-history",
+                    "HEAD",
+                    "--",
+                    "PROTOCOL-RELEASE-STATE.yaml",
+                ),
+                "",
+            )
+
+            current = self._topology_state("b")
+            self._write_topology_state(root, current)
+
+            errors: list[str] = []
+            states = release_state._previous_governed_release_states(
+                root,
+                current,
+                errors,
+            )
+            self.assertEqual(states, [])
+            self.assertTrue(
+                any(
+                    "owner deletion/reintroduction cannot be treated as pre-owner ancestry"
+                    in error
+                    for error in errors
+                )
+            )
+
+    def test_previous_governed_states_use_canonical_ancestry_under_graft(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            root = Path(tmpdir)
+            self._init_topology_repo(root)
+
+            (root / "pre-owner.txt").write_text("pre-owner\n", encoding="utf-8")
+            pre_ref = self._commit_topology_repo(root, "pre-owner")
+
+            previous = self._topology_state("a")
+            self._write_topology_state(root, previous)
+            self._commit_topology_repo(root, "introduce governed owner")
+
+            (root / "PROTOCOL-RELEASE-STATE.yaml").unlink()
+            deleted_ref = self._commit_topology_repo(root, "delete governed owner")
+
+            git_dir_text = self._run_topology_git(
+                root,
+                "rev-parse",
+                "--git-dir",
+            )
+            git_dir = Path(git_dir_text)
+            if not git_dir.is_absolute():
+                git_dir = root / git_dir
+            grafts = git_dir / "info" / "grafts"
+            grafts.parent.mkdir(parents=True, exist_ok=True)
+            grafts.write_text(
+                f"{deleted_ref} {pre_ref}\n",
+                encoding="utf-8",
+            )
+
+            current = self._topology_state("b")
+            self._write_topology_state(root, current)
+
+            errors: list[str] = []
+            states = release_state._previous_governed_release_states(
+                root,
+                current,
+                errors,
+            )
+            self.assertEqual(states, [])
+            self.assertTrue(
+                any(
+                    "owner deletion/reintroduction cannot be treated as pre-owner ancestry"
+                    in error
+                    for error in errors
+                )
+            )
+
+    def test_previous_governed_states_follow_readable_alternate_object_store(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            source = Path(tmpdir) / "source"
+            shared = Path(tmpdir) / "shared"
+            source.mkdir()
+            self._init_topology_repo(source)
+
+            (source / "pre-owner.txt").write_text("pre-owner\n", encoding="utf-8")
+            self._commit_topology_repo(source, "pre-owner")
+
+            previous = self._topology_state("a")
+            self._write_topology_state(source, previous)
+            self._commit_topology_repo(source, "introduce governed owner")
+
+            (source / "PROTOCOL-RELEASE-STATE.yaml").unlink()
+            self._commit_topology_repo(source, "delete governed owner")
+
+            subprocess.run(
+                [
+                    "git",
+                    "clone",
+                    "-q",
+                    "--shared",
+                    str(source),
+                    str(shared),
+                ],
+                check=True,
+            )
+
+            current = self._topology_state("b")
+            self._write_topology_state(shared, current)
+
+            errors: list[str] = []
+            states = release_state._previous_governed_release_states(
+                shared,
+                current,
+                errors,
+            )
+            self.assertEqual(states, [])
+            self.assertTrue(
+                any(
+                    "owner deletion/reintroduction cannot be treated as pre-owner ancestry"
+                    in error
+                    for error in errors
+                )
+            )
+
+
 if __name__ == "__main__":
     unittest.main()
