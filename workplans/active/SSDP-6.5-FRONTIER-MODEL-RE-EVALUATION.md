@@ -5,8 +5,8 @@ protocol_version: 6.4.0
 target_protocol_version: 6.5.0
 subject_baseline: P0 = Protocol 6.4 at 55c085261eb827e3047637d045a8e6917ea6b962 (recovery 74bc572ef516cae417437a2027eeff52a2e25c15)
 diagnostic_commit: 81375d8142a8130b80cd82f2304d3e16bc3fc390
-status: p14-no-pass-repair-required
-current_phase: PHASE VII B65-P14-1 D4 REPAIR REQUIRED / P14 IMMUTABLE NO-PASS
+status: p14-final-d4-stabilization-repair
+current_phase: PHASE VII FINAL D4 EVIDENCE-REALIZATION STABILIZATION / P14 IMMUTABLE NO-PASS
 branch: ssdp-6.5-frontier-model-re-evaluation
 created_date: 2026-09-24
 adjudication: qualification/ssdp65/CROSS-MODEL-ADJUDICATION-2026-09-24.md
@@ -23,14 +23,15 @@ independent_review: qualification/ssdp65/INDEPENDENT-REVIEW-2026-09-25-PROTOCOL-
 
 ```text
 P0 CONTROL:                         FROZEN — 55c085261eb827e3047637d045a8e6917ea6b962
-P1-P9:                              FROZEN / FAILED INDEPENDENT REVIEW
-P9 CANDIDATE:                       FROZEN — fb347272c70b6225743fdc99e9bec8b4197aad49
-P9 EXACT PR QUALIFICATION:          PASS — run 36091484812
-P9 BINDING DESCENDANT:              69f7cda3bd9bdfdbc113b4ec5ac6da044a7d46ab
-P9 BINDING QUALIFICATION:           PASS — run 36091605214
-P9 INDEPENDENT REVIEW:              NO-PASS — 98fcef496f10d4980d97099ea4607d60ef3e812a
-SURVIVING BLOCKER:                  B65-P9-1
-PHASE VII:                          D4 REPAIR REQUIRED; REPLACEMENT CANDIDATE NOT YET FROZEN
+P1-P13:                             FROZEN / FAILED INDEPENDENT REVIEW
+P14 CANDIDATE:                      FROZEN — d792f219ad361b6acb2663833beec1c179ea5793
+P14 EXACT PR QUALIFICATION:         PASS — run 36133381631
+P14 BINDING DESCENDANT:             c2c6baab291c22591c9ddc82eb0378fd3c92b264
+P14 BINDING QUALIFICATION:          PASS — run 36133589027
+P14 INDEPENDENT REVIEW:             NO-PASS — publication 671bfd2870415db561d6a34a930e604c5f53beb0
+P14 NO-PASS BINDING:                e836e199020c5e17f75e63b4c775969cd7d7dcec
+SURVIVING REVIEW BLOCKER:           B65-P14-1
+CURRENT REPAIR MODE:                one bounded D4 evidence-realization stabilization; no serial point-fix loop
 PUBLIC 6.5 FALLBACK:                UNAVAILABLE
 6.5 RECOVERY:                       UNAVAILABLE
 6.5 RATIFICATION:                   NOT REQUESTED
@@ -1272,3 +1273,36 @@ assembled-candidate Review.
 
 Stakeholder ratification remains `NOT_REQUESTED`; public fallback and recovery remain `UNAVAILABLE`;
 accepted-current remains Protocol 6.4; Protocol 7 D3/D4 remains unchanged.
+
+
+## 55. Final D4 evidence-realization stabilization closure
+
+The stakeholder directed one exhaustive convergence pass rather than another serial point repair. The accepted D3
+design remains coherent; this is a bounded D4 stabilization over the complete self-hosted PEM evidence-realization
+boundary.
+
+The closure model is one mechanism with the following simultaneously enforced dimensions:
+
+1. **Temporal identity:** a local durable evidence route must carry a full immutable Git object identity; branch, tag,
+   default/latest, abbreviated SHA, reflog, and revision-expression aliases cannot become HEALTHY merely because they
+   resolve at the moment of validation.
+2. **Canonical topology/content:** preserve P14 raw-parent ancestry, replacement-disabled content, replace/graft
+   resistance, canonical patch identity, and fail-closed missing canonical objects.
+3. **Artifact type/path semantics:** repository evidence routes name repository-relative POSIX file/blob artifacts;
+   trees/directories and ambiguous backslash traversal syntax are not mechanically healthy evidence artifacts.
+4. **Unambiguous serialization:** PEM root, family/notice, partition, and typed repair-acceptance YAML reject duplicate
+   mapping keys; canonical family/notice blocks cannot exist as orphan unparsed shadow records; the root has exactly
+   one derived active-summary marker pair.
+5. **Evidence applicability on mutation:** accepted observation corrections must bind mechanically healthy durable
+   correction evidence rather than parse-only routes.
+6. **Representation convergence:** the active workplan current-disposition block and the independent-review handoff
+   must state P14 NO-PASS/current repair state rather than replaying an earlier P9/P14-before-review current state.
+
+This stabilization intentionally does not create a Git registry, history database, transaction replay engine, semantic
+parser, second topology service, or new authority domain. It narrows the existing validator to the semantics already
+owned by current PEM/evidence doctrine.
+
+Freeze no replacement candidate until the entire repository workflow passes on the prospective repair commit. A later
+descendant may then bind that exact commit as the next immutable candidate with Review reset to NOT_RUN. Any further
+blocker must demonstrate a material accepted invariant violation outside this now-explicit closure model rather than
+merely another unenumerated spelling of the same Git/evidence mechanism.

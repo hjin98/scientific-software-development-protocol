@@ -14,7 +14,7 @@ import hashlib
 import re
 import subprocess
 import sys
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 from typing import Any, Iterable
 
 import yaml
@@ -52,7 +52,7 @@ NOTICE_ID_RE = re.compile(r"^NT-[0-9]+$")
 ROUTE_RE = re.compile(
     r"^(?P<source>[^@\s:]+(?:/[^@\s:]+)*)@(?P<revision>[^:\s]+):(?P<path>[^#\s]+)(?:#(?P<locator>.+))?$"
 )
-HEX_OBJECT_RE = re.compile(r"^[0-9a-fA-F]{40,64}$")
+HEX_OBJECT_RE = re.compile(r"^[0-9a-fA-F]{40}(?:[0-9a-fA-F]{24})?$")
 FRONT_RE = re.compile(r"\A---\n(?P<yaml>.*?)\n---\n", re.DOTALL)
 FAMILY_RE = re.compile(
     r"^###\s+(?P<heading_id>(?:FF|SP|DS|PC)-[0-9]+)\s+(?:—|-)\s+.*?\n"
@@ -72,6 +72,35 @@ REPAIR_ACCEPTANCE_RE = re.compile(
     r"^```yaml pem-repair-acceptance\s*\n(?P<yaml>.*?)^```\s*$",
     re.MULTILINE | re.DOTALL,
 )
+
+
+class _UniqueKeySafeLoader(yaml.SafeLoader):
+    """Safe YAML loader that rejects duplicate mapping keys."""
+
+
+def _construct_unique_mapping(loader, node, deep=False):
+    mapping = {}
+    for key_node, value_node in node.value:
+        key = loader.construct_object(key_node, deep=deep)
+        if key in mapping:
+            raise yaml.constructor.ConstructorError(
+                "while constructing a mapping",
+                node.start_mark,
+                f"found duplicate key {key!r}",
+                key_node.start_mark,
+            )
+        mapping[key] = loader.construct_object(value_node, deep=deep)
+    return mapping
+
+
+_UniqueKeySafeLoader.add_constructor(
+    yaml.resolver.BaseResolver.DEFAULT_MAPPING_TAG,
+    _construct_unique_mapping,
+)
+
+
+def _load_yaml_text(text: str) -> Any:
+    return yaml.load(text, Loader=_UniqueKeySafeLoader)
 
 
 class PemError(ValueError):
@@ -122,7 +151,7 @@ def _frontmatter(text: str, path: Path) -> dict[str, Any]:
     if not match:
         raise PemError(f"{path}: missing YAML front matter")
     try:
-        data = yaml.safe_load(match.group("yaml")) or {}
+        data = _load_yaml_text(match.group("yaml")) or {}
     except yaml.YAMLError as exc:
         raise PemError(f"{path}: invalid front matter: {exc}") from exc
     return _mapping(data, f"{path}: front matter")
@@ -134,7 +163,7 @@ def _parse_blocks(text: str, path: Path) -> tuple[dict[str, dict[str, Any]], dic
     for regex, target, label in ((FAMILY_RE, families, "family"), (NOTICE_RE, notices, "notice")):
         for match in regex.finditer(text):
             try:
-                row = yaml.safe_load(match.group("yaml")) or {}
+                row = _load_yaml_text(match.group("yaml")) or {}
             except yaml.YAMLError as exc:
                 raise PemError(f"{path}: invalid {label} YAML under {match.group('heading_id')}: {exc}") from exc
             row = _mapping(row, f"{path}:{match.group('heading_id')}")
@@ -144,6 +173,18 @@ def _parse_blocks(text: str, path: Path) -> tuple[dict[str, dict[str, Any]], dic
             if row_id in target:
                 raise PemError(f"{path}: duplicate {label} ID {row_id}")
             target[row_id] = row
+    family_blocks = len(re.findall(r"^```yaml pem-family\s*$", text, re.MULTILINE))
+    notice_blocks = len(re.findall(r"^```yaml pem-notice\s*$", text, re.MULTILINE))
+    if family_blocks != len(families):
+        raise PemError(
+            f"{path}: every yaml pem-family block must have exactly one canonical family heading; "
+            f"parsed={len(families)} blocks={family_blocks}"
+        )
+    if notice_blocks != len(notices):
+        raise PemError(
+            f"{path}: every yaml pem-notice block must have exactly one canonical notice heading; "
+            f"parsed={len(notices)} blocks={notice_blocks}"
+        )
     return families, notices
 
 
@@ -167,8 +208,9 @@ def parse_evidence_route(value: Any, where: str = "evidence") -> EvidenceRoute:
     if source.lower() in {"external", "remote", "other", "unknown", "non-local", "nonlocal"}:
         raise PemError(f"{where}: evidence source identity is ambiguous: {source!r}")
     path = match.group("path")
-    if path.startswith(("/", "~")) or ".." in Path(path).parts:
-        raise PemError(f"{where}: evidence path must be repository-relative: {path!r}")
+    pure_path = PurePosixPath(path)
+    if pure_path.is_absolute() or path.startswith("~") or "\\" in path or ".." in pure_path.parts:
+        raise PemError(f"{where}: evidence path must be repository-relative POSIX syntax: {path!r}")
     locator = match.group("locator")
     if locator is not None and not locator.strip():
         raise PemError(f"{where}: evidence locator must be non-empty when present")
@@ -307,7 +349,7 @@ def _validate_repair_acceptance_artifact(
     records: list[dict[str, Any]] = []
     for match in REPAIR_ACCEPTANCE_RE.finditer(text):
         try:
-            record = yaml.safe_load(match.group("yaml")) or {}
+            record = _load_yaml_text(match.group("yaml")) or {}
         except yaml.YAMLError as exc:
             raise PemError(f"{where}: invalid typed repair-acceptance YAML: {exc}") from exc
         records.append(_mapping(record, f"{where}:repair acceptance record"))
@@ -350,24 +392,54 @@ def _route_is_local(route: EvidenceRoute, doc: PemDocument) -> bool:
 
 
 def evidence_route_health(route: EvidenceRoute, doc: PemDocument) -> tuple[str, str]:
-    """Realize an evidence binding at the route's owning source when possible.
+    """Realize a durable evidence binding at the route's owning source when possible.
 
-    Local repository routes are HEALTHY only when a commit/tree-ish publication and exact path
-    resolve. A blob cannot masquerade as a publication revision. Non-local routes are never
-    promoted to HEALTHY from syntax alone; absent a source-specific resolver in this validator
-    they remain REVIEW_REQUIRED for an external/event-driven assessment.
+    Local repository routes become HEALTHY only when the serialized revision is
+    itself a full immutable Git object identity, peels to a commit, and names an
+    exact file/blob path. A movable branch/tag/revision expression may resolve
+    today but cannot serve as a durable warrant. Non-local routes remain
+    REVIEW_REQUIRED without a source-specific resolver.
     """
     if not _route_is_local(route, doc):
         return "REVIEW_REQUIRED", "non-local route has explicit source identity but no route-specific external realization"
     root = _git_root(doc.root)
     if root is None:
         return "REVIEW_REQUIRED", "local Git repository is unavailable for route realization"
+
+    if not HEX_OBJECT_RE.fullmatch(route.revision):
+        return (
+            "REVIEW_REQUIRED",
+            "local Git evidence revision is not a full immutable object identity",
+        )
+
+    resolved_object = _git_text(
+        root,
+        "rev-parse",
+        "--verify",
+        f"{route.revision}^{{object}}",
+    )
+    if resolved_object is None:
+        return "UNAVAILABLE", "repository revision is not resolvable as an immutable object"
+    if resolved_object.lower() != route.revision.lower():
+        return (
+            "REVIEW_REQUIRED",
+            "local Git evidence revision does not resolve to its own immutable object identity",
+        )
+
     if not _git_ok(root, "cat-file", "-e", f"{route.revision}^{{commit}}"):
         if _git_ok(root, "cat-file", "-e", f"{route.revision}^{{blob}}"):
             return "UNAVAILABLE", "revision is a blob object, not a repository publication commit"
         return "UNAVAILABLE", "repository revision is not resolvable as a commit"
-    if not _git_ok(root, "cat-file", "-e", f"{route.revision}:{route.path}"):
+
+    object_type = _git_text(root, "cat-file", "-t", f"{route.revision}:{route.path}")
+    if object_type is None:
         return "UNAVAILABLE", "declared path is absent from the immutable repository revision"
+    if object_type != "blob":
+        return (
+            "UNAVAILABLE",
+            f"declared path resolves to Git object type {object_type!r}, not a file/blob evidence artifact",
+        )
+
     if route.locator:
         text = _git_text(root, "show", f"{route.revision}:{route.path}")
         if text is None:
@@ -377,13 +449,12 @@ def evidence_route_health(route: EvidenceRoute, doc: PemDocument) -> tuple[str, 
             normalized = re.sub(r"[-_]+", " ", locator).strip().lower()
             normalized_text = re.sub(r"[-_]+", " ", text).lower()
             if normalized and normalized in normalized_text:
-                return "HEALTHY", "commit, repository path, and normalized stable locator resolve"
+                return "HEALTHY", "immutable commit, file path, and normalized stable locator resolve"
             if re.fullmatch(r"[A-Za-z0-9_.:/ -]+", locator):
                 return "UNAVAILABLE", "declared stable locator is absent from the immutable repository file"
             return "REVIEW_REQUIRED", "stable locator syntax is not mechanically interpretable by schema-1 text-anchor realization"
-        return "HEALTHY", "commit, repository path, and stable locator resolve"
-    return "HEALTHY", "commit and repository path resolve"
-
+        return "HEALTHY", "immutable commit, file path, and stable locator resolve"
+    return "HEALTHY", "immutable commit and file path resolve"
 
 def _safe_detail_path(root: Path, raw: Any) -> tuple[Path, str | None]:
     expected_digest: str | None = None
@@ -1275,7 +1346,12 @@ def _all_event_rows(doc: PemDocument) -> dict[str, tuple[str, str, dict[str, Any
     return rows
 
 
-def _validate_observation_correction(identity: str, old: tuple[str, str, dict[str, Any]], new: tuple[str, str, dict[str, Any]]) -> str | None:
+def _validate_observation_correction(
+    identity: str,
+    old: tuple[str, str, dict[str, Any]],
+    new: tuple[str, str, dict[str, Any]],
+    doc: PemDocument,
+) -> str | None:
     old_fid, old_rowid, old_row = old; new_fid, new_rowid, new_row = new
     old_obs = old_row.get("observation"); new_obs = new_row.get("observation")
     if old_obs == new_obs: return None
@@ -1293,7 +1369,17 @@ def _validate_observation_correction(identity: str, old: tuple[str, str, dict[st
     ):
         return f"{new_fid}:{new_rowid}: observation correction does not preserve previous/corrected record, previous hash, reason, and evidence"
     try:
-        for route in evidence: parse_evidence_route(route, f"{new_fid}:{new_rowid}:observation correction evidence")
+        for raw in evidence:
+            route = parse_evidence_route(
+                raw,
+                f"{new_fid}:{new_rowid}:observation correction evidence",
+            )
+            health, reason = evidence_route_health(route, doc)
+            if health != "HEALTHY":
+                return (
+                    f"{new_fid}:{new_rowid}: observation correction evidence is not "
+                    f"mechanically healthy: {health}: {reason}"
+                )
     except PemError as exc:
         return str(exc)
     return None
@@ -1304,9 +1390,18 @@ def validate_memory(doc: PemDocument, *, check_summary: bool = True) -> list[str
     for family in doc.families.values(): errors.extend(_validate_family(family, doc=doc))
     errors.extend(_validate_lineage(doc)); errors.extend(_validate_notices(doc)); errors.extend(_validate_binding_health(doc))
     if check_summary:
-        match = SUMMARY_RE.search(doc.root_text)
-        if not match: errors.append("PEM root is missing derived active-summary markers")
-        elif match.group("body") != render_summary(doc): errors.append("derived active summary is stale; run --write-summary")
+        starts = doc.root_text.count("<!-- BEGIN DERIVED PEM SUMMARY -->")
+        ends = doc.root_text.count("<!-- END DERIVED PEM SUMMARY -->")
+        if starts != 1 or ends != 1:
+            errors.append(
+                "PEM root must contain exactly one derived active-summary marker pair"
+            )
+        else:
+            match = SUMMARY_RE.search(doc.root_text)
+            if not match:
+                errors.append("PEM root is missing derived active-summary markers")
+            elif match.group("body") != render_summary(doc):
+                errors.append("derived active summary is stale; run --write-summary")
     return errors
 
 
@@ -1378,7 +1473,12 @@ def validate_reconciliation(previous: PemDocument, current: PemDocument) -> list
                             errors.append(str(exc))
     old_rows = _all_event_rows(previous); new_rows = _all_event_rows(current)
     for identity in old_rows.keys() & new_rows.keys():
-        error = _validate_observation_correction(identity, old_rows[identity], new_rows[identity])
+        error = _validate_observation_correction(
+            identity,
+            old_rows[identity],
+            new_rows[identity],
+            current,
+        )
         if error: errors.append(error)
     return errors
 
@@ -1445,8 +1545,13 @@ def select_applicable(doc: PemDocument, terms: Iterable[str]) -> list[str]:
 
 
 def write_summary(doc: PemDocument) -> None:
+    starts = doc.root_text.count("<!-- BEGIN DERIVED PEM SUMMARY -->")
+    ends = doc.root_text.count("<!-- END DERIVED PEM SUMMARY -->")
+    if starts != 1 or ends != 1:
+        raise PemError("PEM root must contain exactly one derived active-summary marker pair")
     match = SUMMARY_RE.search(doc.root_text)
-    if not match: raise PemError("PEM root is missing derived active-summary markers")
+    if not match:
+        raise PemError("PEM root is missing derived active-summary markers")
     replacement = match.group("start") + render_summary(doc) + match.group("end")
     doc.root.write_text(doc.root_text[:match.start()] + replacement + doc.root_text[match.end():], encoding="utf-8")
 

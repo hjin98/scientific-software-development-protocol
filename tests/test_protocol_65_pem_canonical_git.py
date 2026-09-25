@@ -233,5 +233,120 @@ class Protocol65PemCanonicalGitTests(unittest.TestCase):
             )
 
 
+    def test_movable_branch_revision_never_becomes_durable_evidence(self) -> None:
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            self._init(root)
+            (root / "owner.md").write_text("owner\nanchor\n", encoding="utf-8")
+            base = self._commit(root, "base owner")
+            self._run(root, "branch", "durable-owner", base)
+            (root / "later.txt").write_text("later\n", encoding="utf-8")
+            accepted = self._commit(root, "accepted descendant")
+
+            raw = "local@durable-owner:owner.md#anchor"
+            route = pem.parse_evidence_route(raw)
+            self.assertEqual(
+                pem.evidence_route_health(route, self._doc(root, accepted))[0],
+                "REVIEW_REQUIRED",
+            )
+            with self.assertRaisesRegex(pem.PemError, "not mechanically healthy"):
+                pem._validate_owner_binding(raw, self._doc(root, accepted), "authority owner")
+
+            self._run(root, "branch", "-f", "durable-owner", accepted)
+            self.assertEqual(
+                pem.evidence_route_health(route, self._doc(root, accepted))[0],
+                "REVIEW_REQUIRED",
+            )
+
+    def test_movable_tag_revision_never_becomes_durable_evidence(self) -> None:
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            self._init(root)
+            (root / "evidence.md").write_text("evidence\nanchor\n", encoding="utf-8")
+            base = self._commit(root, "base evidence")
+            self._run(root, "tag", "moving-evidence", base)
+            (root / "later.txt").write_text("later\n", encoding="utf-8")
+            accepted = self._commit(root, "accepted descendant")
+
+            route = pem.parse_evidence_route("local@moving-evidence:evidence.md#anchor")
+            self.assertEqual(
+                pem.evidence_route_health(route, self._doc(root, accepted))[0],
+                "REVIEW_REQUIRED",
+            )
+            self._run(root, "tag", "-f", "moving-evidence", accepted)
+            self.assertEqual(
+                pem.evidence_route_health(route, self._doc(root, accepted))[0],
+                "REVIEW_REQUIRED",
+            )
+
+    def test_repair_acceptance_rejects_movable_revision(self) -> None:
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            self._init(root)
+            (root / "acceptance.md").write_text("placeholder\n", encoding="utf-8")
+            base = self._commit(root, "acceptance base")
+            self._run(root, "branch", "moving-acceptance", base)
+            (root / "later.txt").write_text("later\n", encoding="utf-8")
+            accepted = self._commit(root, "accepted descendant")
+            route = pem.parse_evidence_route("local@moving-acceptance:acceptance.md")
+            with self.assertRaisesRegex(pem.PemError, "not resolvable"):
+                pem._validate_repair_acceptance_routes(
+                    [route],
+                    self._doc(root, accepted),
+                    root,
+                    "commit:" + ("a" * 40),
+                    "recurrence",
+                )
+
+    def test_directory_path_is_not_a_file_evidence_artifact(self) -> None:
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            self._init(root)
+            (root / "evidence").mkdir()
+            (root / "evidence" / "record.md").write_text("record\n", encoding="utf-8")
+            accepted = self._commit(root, "directory evidence")
+            route = pem.parse_evidence_route(f"local@{accepted}:evidence")
+            health, reason = pem.evidence_route_health(route, self._doc(root, accepted))
+            self.assertEqual(health, "UNAVAILABLE")
+            self.assertIn("not a file/blob", reason)
+
+    def test_repository_route_rejects_backslash_path_syntax(self) -> None:
+        with self.assertRaisesRegex(pem.PemError, "POSIX syntax"):
+            pem.parse_evidence_route(
+                "local@" + ("a" * 40) + r":evidence\\record.md"
+            )
+
+    def test_observation_correction_requires_durable_healthy_evidence(self) -> None:
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            self._init(root)
+            (root / "correction.md").write_text("correction\n", encoding="utf-8")
+            base = self._commit(root, "correction evidence")
+            self._run(root, "branch", "moving-correction", base)
+            (root / "later.txt").write_text("later\n", encoding="utf-8")
+            accepted = self._commit(root, "accepted descendant")
+
+            old = {"observation": "old"}
+            old_hash = __import__("hashlib").sha256(b"old").hexdigest()
+            new = {
+                "observation": "new",
+                "observation_correction": {
+                    "previous_sha256": old_hash,
+                    "previous_observation": "old",
+                    "corrected_observation": "new",
+                    "reason": "clerical correction",
+                    "evidence": ["local@moving-correction:correction.md"],
+                },
+            }
+            error = pem._validate_observation_correction(
+                "event-1",
+                ("FF-001", "O01", old),
+                ("FF-001", "O01", new),
+                self._doc(root, accepted),
+            )
+            self.assertIsNotNone(error)
+            self.assertIn("not mechanically healthy", error)
+
+
 if __name__ == "__main__":
     unittest.main()

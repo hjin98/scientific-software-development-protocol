@@ -3,7 +3,7 @@ kind: implementation-workplan
 workplan_id: SSDP-6.5-D3-D4-IMPLEMENTATION-HANDOFF
 protocol_version: 6.4.0
 target_protocol_version: 6.5.0
-status: p14-no-pass-repair-required
+status: p14-final-d4-stabilization-repair
 parent_workplan: workplans/active/SSDP-6.5-FRONTIER-MODEL-RE-EVALUATION.md
 design_authority: qualification/ssdp65/PHASE-IV-V-DESIGN-CLOSURE.md
 baseline: 55c085261eb827e3047637d045a8e6917ea6b962
@@ -1514,3 +1514,31 @@ subject without any replace/graft overlay.
 
 No stakeholder ratification, public-fallback publication, recovery establishment, accepted-current cutover, PR merge,
 or Protocol 7 D3/D4 mutation is authorized.
+
+
+## 61. Final systemic D4 repair — evidence identity, parser and artifact closure
+
+Do not repair B65-P14-1 as a branch-name special case. Close the complete existing D4 evidence-realization mechanism in
+one bounded change.
+
+Implementation requirements:
+
+- local HEALTHY evidence requires a full immutable Git object identity that resolves to that exact object;
+- movable branch/tag/revision expressions and abbreviated identifiers remain parseable as opaque syntax where needed
+  for non-local/history representation but cannot become HEALTHY local durable evidence;
+- a local repository evidence path must resolve to a Git blob/file, not merely any tree-ish object;
+- repository evidence paths use unambiguous repository-relative POSIX syntax;
+- all canonical PEM YAML readers reject duplicate mapping keys;
+- canonical `pem-family`/`pem-notice` blocks cannot hide outside their required canonical headings;
+- exactly one active-summary marker pair is permitted in the PEM root;
+- observation-correction evidence is realized for current mechanical health before accepted observation mutation;
+- preserve every P14 canonical-Git property: replace/graft resistance, raw-parent ancestry, canonical content,
+  patch-ID independence, missing-object fail-closed behavior, and readable alternate/promisor-backed objects.
+
+Required fresh holdouts include movable branch and tag retargeting, movable repair-acceptance evidence, directory/tree
+evidence paths, duplicate root/family/repair-acceptance YAML keys, orphan canonical blocks, duplicate active summaries,
+backslash path ambiguity, and correction evidence bound to a movable revision. Exact SHA/file routes are positive
+controls.
+
+The release-state validator is regression-only for this repair; do not duplicate these PEM-specific policy checks into
+`canonical_git.py` or create another semantic owner.
