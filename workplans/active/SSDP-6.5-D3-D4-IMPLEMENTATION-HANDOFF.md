@@ -3,7 +3,7 @@ kind: implementation-workplan
 workplan_id: SSDP-6.5-D3-D4-IMPLEMENTATION-HANDOFF
 protocol_version: 6.4.0
 target_protocol_version: 6.5.0
-status: p8-repair-implemented-p9-qualification-pending
+status: p9-bound-binding-qualification-pending
 parent_workplan: workplans/active/SSDP-6.5-FRONTIER-MODEL-RE-EVALUATION.md
 design_authority: qualification/ssdp65/PHASE-IV-V-DESIGN-CLOSURE.md
 baseline: 55c085261eb827e3047637d045a8e6917ea6b962
@@ -751,3 +751,16 @@ The P8 NO-PASS evidence is also bound in the root release state from immutable R
 No second release-state registry, mirror, transition table, compatibility subsystem, candidate-specific branch, or D3 mechanism is introduced.
 
 The implementation commit produced by this section is the prospective P9 semantic candidate. It must pass exact-candidate normal CI before its SHA is frozen/bound as P9.
+
+
+## 31. P9 freeze and binding handoff
+
+Exact prospective-P9 workflow run `36091484812` passed the complete build and Orchestrator Core jobs.
+
+The replacement semantic candidate is therefore frozen as:
+
+`P9 = fb347272c70b6225743fdc99e9bec8b4197aad49`
+
+This descendant binds the already-existing P9 identity in root `PROTOCOL-RELEASE-STATE.yaml` with Review `NOT_RUN`, ratification `NOT_REQUESTED`, public fallback/recovery `UNAVAILABLE`, and accepted-current Protocol 6.4.
+
+Binding qualification must pass before the fresh independent assembled-candidate Review handoff is advanced to P9.

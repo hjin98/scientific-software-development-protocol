@@ -5,8 +5,8 @@ protocol_version: 6.4.0
 target_protocol_version: 6.5.0
 subject_baseline: P0 = Protocol 6.4 at 55c085261eb827e3047637d045a8e6917ea6b962 (recovery 74bc572ef516cae417437a2027eeff52a2e25c15)
 diagnostic_commit: 81375d8142a8130b80cd82f2304d3e16bc3fc390
-status: p8-repair-implemented-p9-qualification-pending
-current_phase: PHASE VII B65-P8-1 REPAIRED / P9 EXACT-CANDIDATE QUALIFICATION PENDING
+status: p9-bound-binding-qualification-pending
+current_phase: PHASE VII P9 FROZEN / BINDING QUALIFICATION PENDING
 branch: ssdp-6.5-frontier-model-re-evaluation
 created_date: 2026-09-24
 adjudication: qualification/ssdp65/CROSS-MODEL-ADJUDICATION-2026-09-24.md
@@ -961,3 +961,16 @@ The focused real-Git qualification directly exercises the production resolver ra
 P8 remains immutable NO-PASS evidence. The repair commit is only a prospective P9 until exact-candidate normal CI passes. After that pass, freeze its exact SHA as P9 from a later lifecycle descendant, reset Review to NOT_RUN for P9, rerun binding qualification, and perform a fresh independent assembled-candidate Review.
 
 No ratification, publication, recovery, cutover, PR merge, or Protocol 7 D3/D4 mutation is authorized.
+
+
+## 38. P9 freeze and binding
+
+B65-P8-1 repair candidate passed exact-candidate normal workflow run `36091484812` across both build and Orchestrator Core jobs.
+
+Immutable replacement candidate:
+
+`P9 = fb347272c70b6225743fdc99e9bec8b4197aad49`
+
+This later descendant binds P9 in the sole mutable release-state owner with Review reset to `NOT_RUN`, stakeholder ratification `NOT_REQUESTED`, public fallback/recovery `UNAVAILABLE`, and accepted-current Protocol 6.4.
+
+P8 remains immutable NO-PASS evidence. The next gate is normal workflow qualification of this binding descendant. No independent Review, ratification, publication, recovery, cutover, PR merge, or Protocol 7 mutation is authorized until that gate passes.
