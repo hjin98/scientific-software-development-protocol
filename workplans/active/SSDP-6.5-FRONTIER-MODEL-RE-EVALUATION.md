@@ -5,8 +5,8 @@ protocol_version: 6.4.0
 target_protocol_version: 6.5.0
 subject_baseline: P0 = Protocol 6.4 at 55c085261eb827e3047637d045a8e6917ea6b962 (recovery 74bc572ef516cae417437a2027eeff52a2e25c15)
 diagnostic_commit: 81375d8142a8130b80cd82f2304d3e16bc3fc390
-status: p14-final-d4-stabilization-repair
-current_phase: PHASE VII FINAL D4 EVIDENCE-REALIZATION STABILIZATION / P14 IMMUTABLE NO-PASS
+status: ready-p15-independent-review
+current_phase: PHASE VIII P15 FRESH INDEPENDENT ASSEMBLED-CANDIDATE REVIEW
 branch: ssdp-6.5-frontier-model-re-evaluation
 created_date: 2026-09-24
 adjudication: qualification/ssdp65/CROSS-MODEL-ADJUDICATION-2026-09-24.md
@@ -14,7 +14,7 @@ active_serious_challenge: none against accepted D1-D4 doctrine
 second_frontier_diagnostic: waived-for-this-cycle-by-stakeholder-resource-constraint
 design_closure: qualification/ssdp65/PHASE-IV-V-DESIGN-CLOSURE.md
 implementation_handoff: workplans/active/SSDP-6.5-D3-D4-IMPLEMENTATION-HANDOFF.md
-independent_review: qualification/ssdp65/INDEPENDENT-REVIEW-2026-09-25-PROTOCOL-6.5-P14-NO-PASS.md
+independent_review: NOT_RUN
 ---
 
 # Protocol 6.5 Frontier-Model Re-evaluation and Successor Workplan
@@ -23,18 +23,16 @@ independent_review: qualification/ssdp65/INDEPENDENT-REVIEW-2026-09-25-PROTOCOL-
 
 ```text
 P0 CONTROL:                         FROZEN — 55c085261eb827e3047637d045a8e6917ea6b962
-P1-P13:                             FROZEN / FAILED INDEPENDENT REVIEW
-P14 CANDIDATE:                      FROZEN — d792f219ad361b6acb2663833beec1c179ea5793
-P14 EXACT PR QUALIFICATION:         PASS — run 36133381631
-P14 BINDING DESCENDANT:             c2c6baab291c22591c9ddc82eb0378fd3c92b264
-P14 BINDING QUALIFICATION:          PASS — run 36133589027
-P14 INDEPENDENT REVIEW:             NO-PASS — publication 671bfd2870415db561d6a34a930e604c5f53beb0
-P14 NO-PASS BINDING:                e836e199020c5e17f75e63b4c775969cd7d7dcec
-SURVIVING REVIEW BLOCKER:           B65-P14-1
-CURRENT REPAIR MODE:                one bounded D4 evidence-realization stabilization; no serial point-fix loop
+P1-P14:                             FROZEN / FAILED INDEPENDENT REVIEW
+P15 CANDIDATE:                      FROZEN — 4fced41c4d8cc7af02938334f7cd1d0b587c408a
+P15 EXACT PR QUALIFICATION:         PASS — run 36138585609
+P15 BINDING DESCENDANT:             acdf2afcdf9387a073219a29625f2d9180ee78ce
+P15 BINDING QUALIFICATION:          PASS — run 36139016587
+P15 INDEPENDENT REVIEW:             NOT_RUN
+SURVIVING IMPLEMENTATION BLOCKER:   NONE KNOWN AFTER FINAL STABILIZATION
 PUBLIC 6.5 FALLBACK:                UNAVAILABLE
 6.5 RECOVERY:                       UNAVAILABLE
-6.5 RATIFICATION:                   NOT REQUESTED
+6.5 RATIFICATION:                   NOT_REQUESTED
 ACCEPTED CURRENT:                   Protocol 6.4
 PROTOCOL 7 D3/D4:                   OUT OF SCOPE / UNCHANGED
 ```
@@ -1304,3 +1302,30 @@ Freeze no replacement candidate until the entire repository workflow passes on t
 descendant may then bind that exact commit as the next immutable candidate with Review reset to NOT_RUN. Any further
 blocker must demonstrate a material accepted invariant violation outside this now-explicit closure model rather than
 merely another unenumerated spelling of the same Git/evidence mechanism.
+
+
+## 57. P15 binding qualification complete — fresh independent Review ready
+
+Exact immutable P15:
+
+`4fced41c4d8cc7af02938334f7cd1d0b587c408a`
+
+passed exact-candidate workflow `36138585609`.
+
+Later lifecycle descendant:
+
+`acdf2afcdf9387a073219a29625f2d9180ee78ce`
+
+binds exact P15 with Review `NOT_RUN`, ratification `NOT_REQUESTED`, public fallback/recovery `UNAVAILABLE`,
+accepted-current Protocol 6.4, and Protocol 7 D3/D4 unchanged. Binding workflow `36139016587` passed both complete
+jobs.
+
+Durable qualification records:
+
+- `qualification/ssdp65/P15-REPAIR-QUALIFICATION.md`;
+- `qualification/ssdp65/P15-FREEZE-BINDING.md`;
+- `qualification/ssdp65/P15-BINDING-QUALIFICATION.md`.
+
+The implementation/stabilization stage has no known surviving blocker. The next lifecycle gate is one genuinely fresh
+independent assembled-candidate Review of exact P15. This context authored the final repair and therefore must not
+self-issue that independent Review result.
