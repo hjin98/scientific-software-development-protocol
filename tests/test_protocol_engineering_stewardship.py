@@ -50,7 +50,8 @@ class EngineeringStewardshipContractTests(unittest.TestCase):
 
     def test_owning_layer_repair_and_truthful_nonclosure_remain_direct(self) -> None:
         implementation = read("source/roles/software-implementation/SKILL.md").lower()
-        self.assertIn("simplest admissible concretization at the owning layer", implementation)
+        self.assertIn("direct owning-layer repair", implementation)
+        self.assertIn("simplest admissible concretization", implementation)
         self.assertIn("remove/narrow/alter/consolidate/refactor", implementation)
         self.assertIn("a required check that did not execute is not a pass", implementation)
         self.assertIn("report unavailable/blocking rather than proxy-passing it", implementation)

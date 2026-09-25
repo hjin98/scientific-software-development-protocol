@@ -25,22 +25,6 @@ jobs:
         run: python source/release_state.py
       - name: Validate project engineering memory
         run: python source/project_engineering_memory.py PROJECT-ENGINEERING-MEMORY.md
-      - name: Diagnostic contracts
-        run: python -m unittest tests.test_protocol_contracts -v
-      - name: Diagnostic stewardship
-        run: python -m unittest tests.test_protocol_engineering_stewardship -v
-      - name: Diagnostic effective compression
-        run: python -m unittest tests.test_protocol_effective_compression -v
-      - name: Diagnostic convergence
-        run: python -m unittest tests.test_protocol_512_convergence -v
-      - name: Diagnostic evidence evolution
-        run: python -m unittest tests.test_protocol_61_evidence_evolution -v
-      - name: Diagnostic representation
-        run: python -m unittest tests.test_protocol_62_representation -v
-      - name: Diagnostic axiomatic traceability
-        run: python -m unittest tests.test_protocol_64_axiomatic_traceability -v
-      - name: Diagnostic current state
-        run: python -m unittest tests.test_protocol_65_current_state_ownership -v
       - name: Run protocol regression tests
         run: python -m unittest discover -s tests -v
       - name: Build canonical skill packages once
