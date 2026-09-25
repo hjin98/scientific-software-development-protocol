@@ -3,7 +3,7 @@ kind: protocol-doctrine-workplan
 workplan_id: SSDP-6.5-IMPORTANCE-WEIGHTED-ATTENTION-AND-PROPORTIONAL-RIGOR
 protocol_version: 6.4.0
 target_protocol_version: 6.5.0
-status: p19-review-ready
+status: p20-repair-implemented-awaiting-freeze
 branch: ssdp-6.5-frontier-model-re-evaluation
 accepted_control: 55c085261eb827e3047637d045a8e6917ea6b962
 superseded_review_ready_candidate: a2e5f01e258f249f74d1eda74b883efb98fd7d59
@@ -17,7 +17,7 @@ created_date: 2026-09-25
 
 ## 1. Disposition
 
-**D3/protocol-doctrine reopen — P19 implementation complete and fresh-Review ready.**
+**D4 release-integrity repair implemented after P19 NO-PASS; replacement candidate awaiting freeze and exact-candidate qualification.**
 
 P18 `a2e5f01e258f249f74d1eda74b883efb98fd7d59` remains immutable mechanically qualified historical evidence.
 Its planned independent Review is suspended because P18 repaired the release-state defect B65-P17-1 but did not address
@@ -28,6 +28,12 @@ evidence and is not appended as authority.
 
 No ratification, publication, recovery, accepted-current cutover, PR #33 merge, or Protocol 7 D3/D4 mutation is
 authorized by this workplan.
+
+P19 `b38f2525677888956c4802afd758c98c65b79f1c` remains immutable and NO-PASS due to B65-P19-1.
+The bounded repair keeps D1-D3 and the proportional-rigor doctrine closed: historical owner-present
+release-state transitions now reuse the existing repository-backed transition validator at the exact
+historical parent boundary, with a focused cross-generation regression. No new authority plane,
+registry, replay engine, evidence database, lifecycle role, or compatibility mechanism is introduced.
 
 Design-review disposition: **PASS after three adversarial pre-implementation passes.** Further D3 review should be
 driven by a concrete counterexample or materially changed premise, not amendment accumulation.

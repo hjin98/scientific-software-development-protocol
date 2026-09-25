@@ -800,6 +800,8 @@ def _governed_owner_history_is_continuous(
                 transition_errors = validate_release_transition(
                     parent_state,
                     state,
+                    repo_root=root,
+                    previous_ref=parent,
                 )
                 if transition_errors:
                     errors.append(

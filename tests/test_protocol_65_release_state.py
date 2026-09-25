@@ -2526,6 +2526,83 @@ candidate:
                 )
             )
 
+    def test_previous_governed_states_revalidate_hidden_promotion_source_at_exact_parent(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            root = Path(tmpdir)
+            self._init_topology_repo(root)
+
+            promotion_source, promoted, _ = self._accepted_cutover_fixture()
+            self._write_topology_state(root, promotion_source)
+            promotion_source_ref = self._commit_topology_repo(
+                root,
+                "promotion source with forged evidence",
+            )
+
+            self._write_topology_state(root, promoted)
+            self._commit_topology_repo(root, "accepted-current promotion")
+
+            current = copy.deepcopy(promoted)
+            current["candidate"] = {
+                "version": "6.6.0",
+                "semantic_ref": "e" * 40,
+                "review": {"state": "NOT_RUN", "evidence_ref": "NONE"},
+                "ratification": {"state": "NOT_REQUESTED", "evidence_ref": "NONE"},
+                "public_source_ref": "UNAVAILABLE",
+                "recovery_ref": "UNAVAILABLE",
+            }
+            self._write_topology_state(root, current)
+            self._commit_topology_repo(root, "later material transition")
+
+            real_validate_release_state = release_state.validate_release_state
+
+            def validate_with_forged_source_detection(
+                data,
+                *,
+                repo_root=None,
+                publication_ref="HEAD",
+            ):
+                if (
+                    repo_root == root
+                    and publication_ref == promotion_source_ref
+                ):
+                    return [
+                        "candidate.review.evidence_ref does not bind "
+                        "candidate.semantic_ref"
+                    ]
+                return real_validate_release_state(
+                    data,
+                    repo_root=repo_root,
+                    publication_ref=publication_ref,
+                )
+
+            with mock.patch.object(
+                release_state,
+                "validate_release_state",
+                side_effect=validate_with_forged_source_detection,
+            ):
+                errors: list[str] = []
+                states = release_state._previous_governed_release_states(
+                    root,
+                    current,
+                    errors,
+                )
+
+            self.assertEqual(states, [promoted])
+            self.assertTrue(
+                any(
+                    "a later material transition cannot hide it" in error
+                    for error in errors
+                )
+            )
+            self.assertTrue(
+                any(
+                    "candidate.review.evidence_ref does not bind "
+                    "candidate.semantic_ref" in error
+                    for error in errors
+                )
+            )
+
+
     def test_previous_governed_states_allow_multiple_legal_owner_present_transitions(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             root = Path(tmpdir)
