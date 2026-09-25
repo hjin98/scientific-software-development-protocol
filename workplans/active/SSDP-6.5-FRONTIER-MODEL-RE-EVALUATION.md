@@ -5,8 +5,8 @@ protocol_version: 6.4.0
 target_protocol_version: 6.5.0
 subject_baseline: P0 = Protocol 6.4 at 55c085261eb827e3047637d045a8e6917ea6b962 (recovery 74bc572ef516cae417437a2027eeff52a2e25c15)
 diagnostic_commit: 81375d8142a8130b80cd82f2304d3e16bc3fc390
-status: p16-review-ready
-current_phase: PHASE VII FRESH INDEPENDENT REVIEW — P16
+status: p17-binding-qualification
+current_phase: PHASE VI REPLACEMENT CANDIDATE BINDING — P17
 branch: ssdp-6.5-frontier-model-re-evaluation
 created_date: 2026-09-24
 adjudication: qualification/ssdp65/CROSS-MODEL-ADJUDICATION-2026-09-24.md
@@ -14,7 +14,7 @@ active_serious_challenge: none against accepted D1-D4 doctrine
 second_frontier_diagnostic: waived-for-this-cycle-by-stakeholder-resource-constraint
 design_closure: qualification/ssdp65/PHASE-IV-V-DESIGN-CLOSURE.md
 implementation_handoff: workplans/active/SSDP-6.5-D3-D4-IMPLEMENTATION-HANDOFF.md
-independent_review: NOT_RUN_FOR_P16
+independent_review: NO_PASS_FOR_P16
 ---
 
 # Protocol 6.5 Frontier-Model Re-evaluation and Successor Workplan
@@ -1359,3 +1359,46 @@ P16 is now the sole semantic Review target with Review `NOT_RUN` and ratificatio
 ratification remain immutable historical evidence only.
 
 Next gate: genuinely fresh independent assembled-candidate Review of exact P16.
+
+
+## 60. 2026-09-25 fresh independent P16 Review reopen
+
+Fresh independent assembled-candidate Review of immutable P16 `f7874aa1fcaef04429fe4725d3ba20e570f9326d`
+issued **NO-PASS** with no Serious Challenge.
+
+Durable Review:
+
+`qualification/ssdp65/INDEPENDENT-REVIEW-2026-09-25-PROTOCOL-6.5-P16-NO-PASS.md`
+
+The surviving blocker is **B65-P16-1** at the existing D4 release-state transition owner. Accepted-current advancement
+checked predecessor candidate labels and SHA-shaped mappings but did not fully re-realize the predecessor candidate's
+Review subject/disposition, ratification subject/disposition, public-fallback identity, and recovery lineage at the
+exact predecessor boundary. A simultaneous candidate rollover could therefore hide an invalid promotion source from
+the current-snapshot validator.
+
+P16 remains immutable failed Review evidence. Accepted Protocol 6.5 D3 is unchanged.
+
+## 61. P17 cutover-closure repair
+
+The B65-P16-1 repair is frozen as immutable replacement candidate:
+
+`P17 = feca003e577fdfa2ae4219e0df2a2cdb38e5d757`
+
+Exact-P17 workflow `36167091971` passed the complete repository build and Orchestrator Core jobs.
+
+The repair stays inside the existing D4 release-state owner:
+
+- accepted-current advancement now revalidates the complete predecessor release-state snapshot rather than trusting
+  predecessor lifecycle labels alone;
+- evidence/publication/recovery ancestry is checked relative to the exact material predecessor boundary rather than a
+  later mutable `HEAD`;
+- predecessor-boundary discovery preserves the exact canonical commit ref while retaining the prior state-only helper;
+- accepted-current advancement independently requires predecessor public fallback to equal its semantic candidate;
+- focused regressions cover predecessor revalidation, exact-boundary propagation, and public/semantic mismatch.
+
+No new registry, state owner, compatibility layer, or topology service was added. P16's NO-PASS disposition is
+historical evidence only and does not transfer to P17.
+
+This descendant binds exact P17 in the sole mutable release-state owner with Review `NOT_RUN`, ratification
+`NOT_REQUESTED`, public fallback/recovery `UNAVAILABLE`, accepted-current Protocol 6.4, and Protocol 7 D3/D4
+unchanged. Mechanical qualification of this binding is the next gate.
