@@ -1505,3 +1505,18 @@ The active implementation contract is:
 
 P18 remains immutable historical mechanical evidence. Its suspended Review does not resume; implementation must produce
 and qualify a replacement semantic candidate under the reviewed doctrine.
+
+
+## 68. Second adversarial proportional-rigor workplan review — PASS
+
+A second pre-implementation Review treated the first workplan closure as untrusted. It closed remaining ambiguity around
+unknown importance, independent reviewer reclassification, problem-importance versus next-action priority, sunk-cost
+continuation, evidence applicability, same-semantic-candidate requalification identity, version compatibility, and
+documentation persistence.
+
+The workplan now requires same-candidate evidence repair to bind the immutable semantic subject separately from the
+exact evidence-realization descendant/run and to establish that intervening changes are non-semantic. It also adds a
+minimal objective release-document persistence check while keeping README prose quality outside mechanical parsing.
+
+No new role, registry, priority score, evidence database, or prose-quality framework is authorized. Further D3 review
+should be driven by a concrete counterexample rather than indefinite polishing. Implementation remains the next gate.

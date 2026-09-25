@@ -17,7 +17,7 @@ created_date: 2026-09-25
 
 ## 1. Status and disposition
 
-**PROPOSED D3 / protocol-doctrine reopen.**
+**REVIEWED D3 / protocol-doctrine reopen — implementation-ready.**
 
 Protocol 6.5 P18 remains an immutable mechanically qualified historical candidate, but its fresh independent Review
 gate is suspended. P18 repaired B65-P17-1 correctly; it did **not** close the broader development-economy defect exposed
@@ -169,6 +169,20 @@ material unresolved uncertainty, irreversibility, adversarial exposure, or a fix
 A low-importance issue does not become high-importance merely because it appears during high-importance work.
 A high-importance issue does not become low-importance merely because the cheap fix is attractive.
 
+### 4.1 Version/compatibility posture
+
+This change is intended to remain a backward-compatible Protocol **6.5 minor strengthening** over accepted 6.4:
+
+- it changes how attention and evidence effort are allocated, not which applicable governing obligations are true;
+- it preserves D1-D4 ownership, Challenge, independent Review, evidence applicability, affected acceptance, safety/security,
+  release integrity, and historical recovery;
+- it may eliminate process that was never independently required by those owners.
+
+If implementation can achieve proportional rigor only by waiving a mandatory 6.4 obligation, changing D1-D4 authority,
+making independent Review optional for a boundary where it is currently required, or weakening a fixed
+safety/security/external evidence floor, stop and reopen the version/doctrine decision rather than silently calling the
+change backward-compatible.
+
 ## 5. Importance assessment
 
 ### 5.1 Required question before escalation
@@ -192,6 +206,14 @@ Assess the answer using the following dimensions:
 
 Do not require numeric scoring.
 
+If importance itself is uncertain, do **not** resolve the uncertainty by simply choosing a lower class. First take the
+cheapest action that can bound consequence, affected scope, or decision sensitivity. If a plausible MATERIAL/CRITICAL
+consequence cannot yet be ruled out at reasonable cost, use a provisional higher-attention posture only for the
+uncertain dimension until it is bounded. Unknown impact is not evidence of low impact.
+
+Conversely, do not retain a provisional high class after a cheap discriminating result has bounded the consequence.
+Uncertainty about importance is a reason for targeted discrimination, not permanent caution.
+
 ### 5.2 Obligation status is orthogonal to importance
 
 Before DEFER/OMIT, distinguish:
@@ -214,7 +236,8 @@ Use four default classes. For tiny work the classification may remain implicit.
 Wrongness can materially corrupt a scientific conclusion, safety/security boundary, durable data, accepted authority,
 public release/recovery identity, or another high-consequence irreversible outcome.
 
-Default: deep scrutiny.
+Default: STANDARD-to-DEEP only while decision-relevant uncertainty, irreversibility, adversarial exposure, or an
+external evidence floor justifies it; a cheap decisive oracle may close it more lightly.
 
 #### MATERIAL
 
@@ -253,6 +276,36 @@ Examples:
 - a plotting label around that analysis is INCIDENTAL;
 - a numerical tolerance near a scientific acceptance boundary may be MATERIAL/CRITICAL;
 - a tolerance well inside an accepted analytical error envelope may be ROUTINE.
+
+### 5.5 Problem importance is not the same as next-action priority
+
+**Importance** asks what happens if a claim/problem is wrong. **Action priority** asks where the next unit of engineering
+effort has the highest governed value.
+
+Choose the next action using, qualitatively:
+
+- mandatory dependency/gate status;
+- unresolved decision sensitivity and unblocking value;
+- expected information or repair value;
+- reversibility and failure cost;
+- effort/opportunity cost relative to other live problems.
+
+A CRITICAL issue already settled by strong applicable evidence should not keep consuming attention. A MATERIAL issue
+that blocks the user and has a cheap decisive action may deserve the next action before an unrelated CRITICAL question
+that is already bounded or externally blocked.
+
+Do not require a numeric priority score.
+
+### 5.6 Sunk-cost and attention-overrun guard
+
+If a supposedly LIGHT/ROUTINE investigation starts consuming materially more reasoning, test cycles, candidate churn,
+or machinery than its consequence justified, stop at the next safe boundary and reassess. Either:
+
+- new evidence has revealed a genuinely more important/systemic problem -> escalate at the real owner; or
+- the problem remains low consequence -> simplify the approach, use a cheaper reversible action, defer it if
+  discretionary, or accept the bounded uncertainty where allowed.
+
+Prior effort already spent is never justification for continuing a low-value path.
 
 ## 6. Attention and rigor modes
 
@@ -312,6 +365,11 @@ Do not keep spending resources to convert sufficient confidence into psychologic
 
 Evidence exists to change or justify a decision. Do not gather evidence merely because another evidence artifact exists.
 
+**Evidence applicability remains a feasibility condition.** Proportional rigor may reduce how much evidence is needed;
+it cannot make stale, wrong-subject, wrong-regime, wrong-parameter, invalid-oracle, or otherwise inapplicable evidence
+count as current support for a mandatory claim. Reuse evidence aggressively only while the existing evidence owner says
+its material applicability dimensions remain unchanged.
+
 Use:
 
 ```text
@@ -365,6 +423,10 @@ If an evidence-instrument correction leaves the immutable D1-D4/product semantic
 - repair/remap the evidence at its own owner;
 - rerun the affected qualification against the **same semantic candidate** when the release lifecycle can represent
   that honestly;
+- bind the qualification to both the exact immutable **semantic subject ref** and the exact **evidence realization
+  ref/run** containing the corrected oracle/harness;
+- inspect the delta between those identities far enough to establish that no governed semantic source/product/public
+  contract changed under the label "evidence-only";
 - do not mint a replacement semantic candidate solely because an oracle, fixture, diagnostic, or evidence route was
   repaired;
 - do not restart an otherwise applicable independent semantic Review merely to replay unaffected candidate semantics.
@@ -375,7 +437,9 @@ against the same semantic subject or repeat the full Review only when its indepe
 compromised.
 
 Implementation must reconcile the release-state/workflow machinery to express this distinction without adding a
-second candidate registry or parallel lifecycle.
+second candidate registry or parallel lifecycle. Prefer existing immutable workflow/run head identity plus compact
+qualification metadata over a new persistent state plane. If the evidence correction also changes governed semantic
+source or product behavior, the "same candidate" route is invalid and a replacement semantic candidate is required.
 
 ## 8. Fixture and test authority
 
@@ -402,7 +466,8 @@ D1/D2 rigor must scale with **decision sensitivity**, not merely with the presen
 - uncertainty can change a scientific conclusion or ranking;
 - a numerical method is near its validity/stability/convergence boundary;
 - conditioning, stochastic uncertainty, bias, precision, or discretization error is material to interpretation;
-- the result will become a durable/public scientific claim;
+- the result will become a durable/public scientific claim **and** unresolved numerical/statistical uncertainty can
+  materially affect its interpretation, validity, or acceptance;
 - materially different plausible methods disagree.
 
 ### Lightweight treatment is justified when
@@ -447,6 +512,8 @@ enumeration.
 
 A reviewer should:
 
+- independently reconstruct finding importance/consequence rather than inherit the implementer's CRITICAL/MATERIAL/
+  ROUTINE/INCIDENTAL label;
 - rank findings by consequence before expanding them;
 - investigate cheap sibling variants far enough to identify a material family;
 - stop sibling search when additional findings are low-consequence duplicates or implementation-like exploration;
@@ -459,7 +526,9 @@ A reviewer should:
   governed decision, not merely because another low-value imperfection can be imagined;
 - reopen upstream doctrine only when the abstraction itself is materially inadequate, as in this workplan.
 
-Review sufficiency is not proof that no conceivable defect exists.
+Review sufficiency is not proof that no conceivable defect exists. An implementer-supplied low-priority label is a
+hypothesis, not authority; a reviewer must escalate it when a credible causal path to a material governed outcome is
+found, and must likewise avoid preserving a high-priority label after the causal path is falsified.
 
 ## 12. Workplan attention budget
 
@@ -505,7 +574,8 @@ Make importance-weighted attention operational:
 
 - correctness/authority remains a feasibility condition;
 - required confidence/evidence intensity is consequence-sensitive;
-- low-consequence delegated uncertainties may use bounded engineering judgment or omission;
+- low-consequence **non-mandatory** uncertainties may use bounded engineering judgment, estimation, deferral, or
+  omission;
 - high-consequence claims retain strong closure;
 - stop-search/development-economy semantics apply before evidence proliferation, not only after.
 
@@ -527,7 +597,9 @@ escalation triggers. Preserve lightweight local routes.
 Prevent recursive evidence inflation. Evidence dependencies are followed to the depth needed to establish the material
 decision, not to an unbounded proof graph.
 
-Reuse still-applicable evidence aggressively when its uncertainty cannot change the current decision.
+Reuse still-applicable evidence aggressively when its uncertainty cannot change the current decision. Importance must
+not be used to relabel stale/inapplicable evidence as current. Same-semantic-candidate requalification after an
+evidence-only correction must bind the exact semantic subject and exact realization descendant/run separately.
 
 ### E. `testing-and-validation.md`
 
@@ -586,6 +658,9 @@ General writing guidance:
 This is a semantic writing review, not a requirement that every release mechanically rewrite every paragraph. If a
 section is already the clearest accurate statement of current doctrine, preserving it is preferable to churn.
 
+Stop the writing pass when the guide is accurate, newcomer-comprehensible, current, navigable, and free of material
+redundancy or misleading historical residue. Do not turn "well written" into an open-ended polishing campaign.
+
 #### CHANGELOG
 
 Update root `CHANGELOG.md` for every new protocol version with a concise user-facing summary of capabilities added,
@@ -599,9 +674,15 @@ Keep `source/README.md` a concise source/contributor map. Do not duplicate the f
 #### Persistence mechanism
 
 Persist this obligation in root `AGENTS.md` so future protocol work cannot silently omit documentation closeout.
-Do **not** add a brittle prose-quality/keyword validator merely to police writing style. Existing CI remains responsible
-for objective build/package/parity checks. Add a mechanical documentation checker only if a cheap, stable objective
-invariant later demonstrates recurrent drift; semantic README quality remains a human/agent review responsibility.
+Also add one **small objective release-document persistence check** to the existing repository acceptance path during
+implementation:
+
+- the version declared by `source/PROTOCOL_VERSION` has a corresponding capability entry in root `CHANGELOG.md`;
+- root `README.md` retains routes to `CHANGELOG.md` and `PROTOCOL-RELEASE-STATE.yaml`.
+
+This check must establish presence/routing only. Do **not** make it score prose quality, require feature keywords, parse
+doctrine meaning, or force paragraph churn. Semantic README quality remains a human/agent review responsibility.
+Prefer an existing test/check surface over a new framework.
 
 Explain proportional rigor in the final README as the operational completion of development economy and active
 simplicity. Preserve frozen historical resources and regenerate derived/package surfaces only through the canonical
@@ -658,6 +739,33 @@ Qualification must test decisions, not wording.
     A reviewer stops low-value sibling enumeration after the material family is characterized; another independent
     full review is not demanded merely to search for more inconsequential variants.
 
+13. **Uncertain importance.**
+    A defect has unclear blast radius. The agent performs the cheapest bounded impact/discriminating check rather than
+    defaulting it to INCIDENTAL or launching a whole-system campaign; the class then de-escalates or escalates from
+    evidence.
+
+14. **Implementer misclassification.**
+    Implementation labels a finding ROUTINE, but independent Review identifies a credible path to a material governed
+    outcome and escalates it. The reverse case also de-escalates a disproven high-priority label.
+
+15. **Stale evidence cannot be cheapened into applicability.**
+    A low-priority mandatory claim has stale wrong-regime evidence. The agent must obtain current applicable evidence
+    or otherwise satisfy the owner; proportional rigor may choose a cheap oracle but may not reuse the stale pass.
+
+16. **Same semantic subject, corrected evidence instrument.**
+    A frozen candidate's test fixture is wrong but product semantics are unchanged. Requalification binds the original
+    semantic subject plus the exact descendant/run containing the corrected fixture, verifies the intervening delta is
+    evidence-only, and does not mint a replacement semantic candidate.
+
+17. **Attention overrun / sunk cost.**
+    A ROUTINE investigation starts accumulating repeated diagnostics and machinery without revealing higher
+    consequence. The agent reclassifies at the safe boundary and simplifies/stops rather than continuing because of
+    prior effort.
+
+18. **Release-document persistence.**
+    A protocol version advances without a corresponding CHANGELOG capability entry, or README loses its release-state/
+    changelog routes. The cheap objective repository check fails; prose quality remains outside that check.
+
 ## 15. Acceptance
 
 The redesign is successful only if an agent can reliably distinguish:
@@ -668,7 +776,11 @@ The redesign is successful only if an agent can reliably distinguish:
 - high-value next action from process-completion activity;
 - necessary evidence integrity from recursive provenance bureaucracy;
 - justified deep scientific qualification from a routine numerical implementation check;
-- a genuine blocker from an imperfection that can be tolerated, estimated, deferred, or omitted.
+- a genuine blocker from an imperfection that can be tolerated, estimated, deferred, or omitted;
+- uncertain importance from genuinely low importance;
+- problem importance from next-action priority;
+- applicable evidence from stale evidence that is merely cheap to reuse;
+- semantic mutation from an evidence-only descendant.
 
 Repository qualification should include focused semantic counterfactuals plus the ordinary assembled repository build.
 It must also demonstrate that evidence-only/fixture corrections can be requalified without unnecessary semantic
@@ -676,7 +788,8 @@ candidate churn when the semantic subject is unchanged.
 
 Before freeze, documentation closeout must confirm that root `README.md` accurately explains the current protocol to
 a new user and that `CHANGELOG.md` contains the target-version capability summary without duplicating mutable release
-state. This is semantic inspection, not a word-presence score.
+state. The small objective release-document persistence check must also pass. Semantic writing quality remains
+inspection, not a word-presence score.
 
 Do **not** create a large new validator framework, scoring engine, attention database, mandatory telemetry system, or
 prose-quality checker.
@@ -720,7 +833,8 @@ Do not encode model-specific behavior.
    prior-version resources.
 7. **Documentation closeout.**
    After semantic content stabilizes, recompile/review root `README.md`, update `CHANGELOG.md`, reconcile concise
-   versioning/history text as needed, and confirm `AGENTS.md` retains this closeout obligation.
+   versioning/history text as needed, confirm `AGENTS.md` retains this closeout obligation, and add/run the small
+   objective current-version/changelog + README-route persistence check in the existing repository acceptance path.
 8. **Stabilization.**
    Inspect the final design specifically for a new bureaucracy that would defeat its own purpose and for any
    high-consequence requirement accidentally weakened by priority language.
@@ -735,7 +849,7 @@ Do not encode model-specific behavior.
 - Engineering/scientific correctness and governing authority remain protected.
 - Applicability/mandatory obligation is orthogonal to importance; priority never waives a binding requirement.
 - Safety/security/external/regulatory obligations cannot be downgraded by local priority judgments.
-- Importance is consequence-based and decision-local.
+- Importance is consequence-based and decision-local; unknown impact is not evidence of low impact.
 - Attention intensity also depends on unresolved decision-relevant uncertainty and irreversibility; CRITICAL does not
   mechanically imply DEEP when a cheap strong oracle already settles the issue.
 - Subproblems do not inherit parent priority automatically.
@@ -745,10 +859,13 @@ Do not encode model-specific behavior.
   uncertainty.
 - Full scientific/statistical qualification is reserved for claims whose uncertainty justifies it.
 - Development economy includes real human/model/token/tool/compute/I/O/wall-time opportunity cost.
+- Evidence applicability remains mandatory: priority cannot revive stale/inapplicable evidence.
 - Evidence-instrument correction must not automatically mint a replacement semantic candidate when D1-D4/product
-  semantics are unchanged.
+  semantics are unchanged; same-candidate requalification binds semantic subject and evidence realization identities
+  separately and verifies the intervening change is non-semantic.
 - Every protocol successor performs README/CHANGELOG documentation closeout before semantic-candidate freeze, with the
-  persistent repository instruction owned by `AGENTS.md`.
+  persistent repository instruction owned by `AGENTS.md` and a minimal objective version/route persistence check in
+  repository acceptance.
 - No new role, gate, registry, scoring engine, telemetry bureaucracy, or prose-quality parser.
 
 ### Delegated
@@ -770,7 +887,7 @@ Reopen this design only if:
 - the proposed attention mechanism itself adds more process cost than it removes;
 - the release lifecycle cannot safely distinguish semantic mutation from evidence-only correction without introducing
   more complexity than it saves; or
-- documentation closeout cannot remain persistent without a stronger objective repository check.
+- the minimal release-document persistence check cannot be implemented without becoming a semantic/prose parser.
 
 Do not reopen merely because an existing test or fixture encodes uniform-rigor behavior. Such a test is evidence to
 reconcile against the new accepted doctrine if this workplan is ratified.
@@ -796,3 +913,33 @@ The review closed these material gaps before D4 work begins:
 No remaining pre-implementation D3 blocker is known. The Serious Challenge remains directed at the currently accepted
 Protocol 6.4 / pre-repair Protocol 6.5 doctrine until the implementation is qualified; it is not a challenge to this
 reviewed repair contract.
+
+
+## 20. Second pre-implementation adversarial review closure — 2026-09-25
+
+**Disposition: PASS — no remaining known D3 blocker; implementation may proceed.**
+
+This second review treated the first closure as untrusted and found these remaining gaps:
+
+1. **Importance-classification uncertainty** could permit optimistic downgrade. Closed with targeted bounding and
+   provisional consequence handling.
+2. **Problem importance vs action priority** was conflated. Closed with separate next-action value and dependency/
+   unblocking criteria.
+3. **Sunk-cost continuation** was not explicitly prevented. Closed with attention-overrun reclassification.
+4. **Evidence applicability** could be misread as economizable. Closed by retaining applicability as a feasibility
+   condition.
+5. **Same-candidate evidence repair** lacked exact realization identity. Closed by binding semantic subject and
+   evidence-realization descendant/run separately and requiring the intervening delta to be non-semantic.
+6. **Reviewer priority independence** was implicit. Closed by requiring Review to reconstruct consequence independently
+   of implementer labels.
+7. **Public scientific claim wording** could trigger DEEP treatment merely because a result is public. Closed by tying
+   escalation to decision-relevant uncertainty.
+8. **README "well-written" polishing** lacked a stop condition. Closed with a sufficient-quality stopping boundary.
+9. **Documentation persistence** relied only on agent instruction. Closed with a deliberately tiny objective
+   current-version/changelog + README-route check, while preserving semantic writing review outside automation.
+10. **6.5 compatibility posture** was implicit. Closed by requiring this change to remain a backward-compatible minor
+    strengthening unless a material 6.4 obligation/authority must actually be weakened.
+
+The reviewed workplan now contains both the economy mechanism and its guardrails against under-rigor. Additional
+pre-implementation review should be triggered by a concrete new counterexample, not by the existence of further
+conceivable wording refinements.
