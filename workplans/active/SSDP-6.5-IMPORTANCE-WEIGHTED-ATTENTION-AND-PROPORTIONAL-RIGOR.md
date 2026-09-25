@@ -3,7 +3,7 @@ kind: protocol-doctrine-workplan
 workplan_id: SSDP-6.5-IMPORTANCE-WEIGHTED-ATTENTION-AND-PROPORTIONAL-RIGOR
 protocol_version: 6.4.0
 target_protocol_version: 6.5.0
-status: p20-binding-awaiting-qualification
+status: p20-review-ready
 branch: ssdp-6.5-frontier-model-re-evaluation
 accepted_control: 55c085261eb827e3047637d045a8e6917ea6b962
 superseded_review_ready_candidate: a2e5f01e258f249f74d1eda74b883efb98fd7d59
@@ -659,3 +659,18 @@ Protocol 6.5 now names exact P20 with Review `NOT_RUN`, stakeholder ratification
 `UNAVAILABLE`, and recovery `UNAVAILABLE`. Protocol 7 D3/D4 remains unchanged.
 
 Binding workflow qualification is required before the independent Review handoff is refreshed.
+
+
+## 19. P20 binding qualification — fresh Review ready
+
+Exact P20 `142eb22376270af6155657dcbf150112f3871cb2` passed workflow `36200125907`.
+
+Binding descendant `4332a7d86736ca44f5d4f79e7fc35c6a53982694` passed workflow `36200251361` with Review `NOT_RUN`, ratification
+`NOT_REQUESTED`, public fallback/recovery `UNAVAILABLE`, accepted-current Protocol 6.4, and Protocol 7 D3/D4
+unchanged.
+
+B65-P19-1 is closed at D4 by restoring exact-parent repository-backed predecessor validation on every owner-present
+material historical release-state edge. The proportional-rigor D1-D3 contract remains unchanged.
+
+The implementation stage has no known surviving blocker. The durable independent-Review handoff now targets exact P20.
+This implementation context must not self-issue that Review.

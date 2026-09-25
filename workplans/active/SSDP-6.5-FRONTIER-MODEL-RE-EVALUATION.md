@@ -1510,3 +1510,25 @@ adds no priority engine, scoring service, evidence registry, deferred-work ledge
 
 The durable independent-Review handoff now targets exact P19. No ratification, publication, recovery, accepted-current
 cutover, PR #33 merge, or Protocol 7 mutation is authorized.
+
+
+## 68. P20 release-state repair complete — fresh Review ready
+
+P19 Review found one bounded D4 release-state blocker, B65-P19-1: historical owner-present transition traversal reused
+the transition validator without the exact-parent repository realization required to preserve P17's predecessor-evidence
+closure behind later material transitions.
+
+The repair is frozen as immutable replacement candidate:
+
+`P20 = 142eb22376270af6155657dcbf150112f3871cb2`
+
+Exact-P20 workflow `36200125907` passed. Binding descendant `4332a7d86736ca44f5d4f79e7fc35c6a53982694` passed workflow
+`36200251361` with Review `NOT_RUN`, stakeholder ratification `NOT_REQUESTED`, public fallback/recovery
+`UNAVAILABLE`, accepted-current Protocol 6.4, and Protocol 7 D3/D4 unchanged.
+
+The D4 repair only supplies `repo_root=root` and exact `previous_ref=parent` to the existing historical-edge transition
+validation and adds a focused A -> B -> C laundering regression. No new release owner, registry, replay engine, evidence
+database, topology service, compatibility layer, or lifecycle role was introduced.
+
+The durable independent-Review handoff now targets exact P20. No ratification, publication, recovery, accepted-current
+cutover, PR #33 merge, or Protocol 7 mutation is authorized.
