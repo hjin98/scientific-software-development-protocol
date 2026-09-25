@@ -5,8 +5,8 @@ protocol_version: 6.4.0
 target_protocol_version: 6.5.0
 subject_baseline: P0 = Protocol 6.4 at 55c085261eb827e3047637d045a8e6917ea6b962 (recovery 74bc572ef516cae417437a2027eeff52a2e25c15)
 diagnostic_commit: 81375d8142a8130b80cd82f2304d3e16bc3fc390
-status: p17-review-ready
-current_phase: PHASE VII FRESH INDEPENDENT REVIEW — P17
+status: p18-binding-qualification-pending
+current_phase: PHASE VII MECHANICAL BINDING QUALIFICATION — P18
 branch: ssdp-6.5-frontier-model-re-evaluation
 created_date: 2026-09-24
 adjudication: qualification/ssdp65/CROSS-MODEL-ADJUDICATION-2026-09-24.md
@@ -14,7 +14,7 @@ active_serious_challenge: none against accepted D1-D4 doctrine
 second_frontier_diagnostic: waived-for-this-cycle-by-stakeholder-resource-constraint
 design_closure: qualification/ssdp65/PHASE-IV-V-DESIGN-CLOSURE.md
 implementation_handoff: workplans/active/SSDP-6.5-D3-D4-IMPLEMENTATION-HANDOFF.md
-independent_review: NOT_RUN_FOR_P17
+independent_review: NOT_RUN_FOR_P18
 ---
 
 # Protocol 6.5 Frontier-Model Re-evaluation and Successor Workplan
@@ -1414,3 +1414,38 @@ fallback/recovery `UNAVAILABLE`, accepted-current Protocol 6.4, and Protocol 7 D
 
 P16's NO-PASS Review remains immutable historical evidence only. Next gate: one genuinely fresh independent
 assembled-candidate Review of exact P17.
+
+
+## 63. P17 independent Review NO-PASS and bounded D4 reopen
+
+Fresh independent assembled-candidate Review of exact P17
+`feca003e577fdfa2ae4219e0df2a2cdb38e5d757` issued **NO-PASS** with no Serious Challenge.
+
+Durable Review:
+
+`qualification/ssdp65/INDEPENDENT-REVIEW-2026-09-25-PROTOCOL-6.5-P17-NO-PASS.md`
+
+The surviving blocker is **B65-P17-1** at the existing D4 release-state transition owner: an owner-present illegal
+transition behind the selected nearest material predecessor could be hidden by a later material transition. Existing
+owner-presence continuity detects deletion/reintroduction but does not establish semantic transition integrity for
+owner-present history.
+
+Accepted Protocol 6.5 D3 remains closed. P17 remains immutable failed Review evidence.
+
+## 64. P18 governed-history repair frozen; binding qualification pending
+
+The bounded B65-P17-1 repair is frozen as immutable replacement candidate:
+
+`P18 = a2e5f01e258f249f74d1eda74b883efb98fd7d59`
+
+Exact-P18 workflow `36179328663` passed both complete jobs under the restored canonical workflow.
+
+The repair reuses the existing canonical ancestry walk and transition validator to validate every owner-present material
+historical edge while preserving nearest-predecessor and exact-boundary semantics. Intermediate diagnostic descendants
+were not frozen and carry no candidate authority.
+
+This lifecycle descendant binds exact P18 in the sole mutable release-state owner with Review `NOT_RUN`,
+ratification `NOT_REQUESTED`, public fallback/recovery `UNAVAILABLE`, accepted-current Protocol 6.4, and
+Protocol 7 D3/D4 unchanged. Mechanical qualification of this binding is the next gate.
+
+No ratification, publication, recovery, accepted-current cutover, PR merge, or Protocol 7 mutation is authorized.
