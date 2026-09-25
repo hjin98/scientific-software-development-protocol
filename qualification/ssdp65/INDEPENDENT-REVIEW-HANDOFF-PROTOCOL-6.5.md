@@ -1,7 +1,7 @@
 ---
 kind: independent-review-handoff
 protocol_under_review: 6.5.0
-status: ready-p9
+status: p9-no-pass-repair-required
 accepted_control_p0: 55c085261eb827e3047637d045a8e6917ea6b962
 failed_candidate_p1: b565e28aeacea002cefe27e6b9594fe99d653c0a
 failed_candidate_p2: e8edb353e172aef933ed5e58eeabe897d0cc98d1
@@ -20,25 +20,34 @@ p9_binding_qualification_run: 36091605214
 p9_binding_qualification: qualification/ssdp65/P9-BINDING-QUALIFICATION.md
 p8_review: qualification/ssdp65/INDEPENDENT-REVIEW-2026-09-24-PROTOCOL-6.5-P8-NO-PASS.md
 p9_repair_qualification: qualification/ssdp65/P9-REPAIR-QUALIFICATION.md
+p9_review: qualification/ssdp65/INDEPENDENT-REVIEW-2026-09-24-PROTOCOL-6.5-P9-NO-PASS.md
+p9_review_commit: 98fcef496f10d4980d97099ea4607d60ef3e812a
+p9_review_status: NO_PASS
+blocking_finding: B65-P9-1
 authoring_context_verdict: none
 stakeholder_ratification: NOT_REQUESTED
 ---
 
 # Independent Review Handoff — Protocol 6.5 P9
 
-## Immutable Review target
+## Current disposition — P9 NO-PASS
 
-Perform a genuinely fresh independent assembled-candidate Review of:
+Fresh independent assembled-candidate Review of immutable P9 is complete.
 
-`P9 = fb347272c70b6225743fdc99e9bec8b4197aad49`
+- P9: `fb347272c70b6225743fdc99e9bec8b4197aad49` — immutable / failed Review.
+- Review: `qualification/ssdp65/INDEPENDENT-REVIEW-2026-09-24-PROTOCOL-6.5-P9-NO-PASS.md`.
+- Review publication commit: `98fcef496f10d4980d97099ea4607d60ef3e812a`.
+- Disposition: `NO_PASS`.
+- Surviving blocker: **B65-P9-1 — governed release-state owner deletion is conflated with genuine pre-owner ancestry in production predecessor resolution.**
+- Serious Challenge: none.
+- Accepted Protocol 6.5 D3: not reopened.
+- Stakeholder ratification: not requested.
+- Public fallback / recovery: unavailable.
+- Accepted-current: Protocol 6.4.
 
-against accepted Protocol 6.4 control:
+The next authorized semantic work is a bounded D4 repair in the existing `source/release_state.py` ancestry classifier. P9 must not be mutated. Any semantic repair creates a new candidate identity (next sequence identity P10) and requires affected exact-candidate qualification, later binding with Review reset to `NOT_RUN`, and another genuinely fresh independent assembled-candidate Review.
 
-`P0 = 55c085261eb827e3047637d045a8e6917ea6b962`
-
-P1-P8 are immutable failed candidates and historical evidence only. P9 itself is the semantic Review target. **Do not substitute the mutable branch head for P9.** Use later descendants only for mutable lifecycle state and qualification evidence.
-
-Do not inherit the P8 Review conclusion, the repair author's closure conclusion, earlier Phase VII conclusions, or CI conclusions beyond the exact properties their oracles discriminate.
+The repair must distinguish genuine pre-owner ancestry from a lineage that was already governed and subsequently deleted `PROTOCOL-RELEASE-STATE.yaml`. Do not add a second release-state file, registry, topology database, branch/timestamp policy, compatibility subsystem, candidate-specific exception, or semantic prose parser.
 
 ## Governing authority and independence
 

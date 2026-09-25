@@ -5,8 +5,8 @@ protocol_version: 6.4.0
 target_protocol_version: 6.5.0
 subject_baseline: P0 = Protocol 6.4 at 55c085261eb827e3047637d045a8e6917ea6b962 (recovery 74bc572ef516cae417437a2027eeff52a2e25c15)
 diagnostic_commit: 81375d8142a8130b80cd82f2304d3e16bc3fc390
-status: ready-p9-independent-review
-current_phase: PHASE VII P9 FROZEN / FRESH INDEPENDENT REVIEW REQUIRED
+status: p9-no-pass-d4-repair-required
+current_phase: PHASE VII P9 NO-PASS / B65-P9-1 D4 REPAIR REQUIRED
 branch: ssdp-6.5-frontier-model-re-evaluation
 created_date: 2026-09-24
 adjudication: qualification/ssdp65/CROSS-MODEL-ADJUDICATION-2026-09-24.md
@@ -14,27 +14,29 @@ active_serious_challenge: none against accepted D1-D4 doctrine
 second_frontier_diagnostic: waived-for-this-cycle-by-stakeholder-resource-constraint
 design_closure: qualification/ssdp65/PHASE-IV-V-DESIGN-CLOSURE.md
 implementation_handoff: workplans/active/SSDP-6.5-D3-D4-IMPLEMENTATION-HANDOFF.md
-independent_review: qualification/ssdp65/INDEPENDENT-REVIEW-2026-09-24-PROTOCOL-6.5-P8-NO-PASS.md
+independent_review: qualification/ssdp65/INDEPENDENT-REVIEW-2026-09-24-PROTOCOL-6.5-P9-NO-PASS.md
 ---
 
 # Protocol 6.5 Frontier-Model Re-evaluation and Successor Workplan
 
 ## 1. Current disposition
 
-```text
+\`\`\`text
 P0 CONTROL:                         FROZEN — 55c085261eb827e3047637d045a8e6917ea6b962
-P1-P8:                              FROZEN / FAILED INDEPENDENT REVIEW
+P1-P9:                              FROZEN / FAILED INDEPENDENT REVIEW
 P9 CANDIDATE:                       FROZEN — fb347272c70b6225743fdc99e9bec8b4197aad49
 P9 EXACT PR QUALIFICATION:          PASS — run 36091484812
 P9 BINDING DESCENDANT:              69f7cda3bd9bdfdbc113b4ec5ac6da044a7d46ab
 P9 BINDING QUALIFICATION:           PASS — run 36091605214
-PHASE VII:                          READY FOR FRESH P9 REVIEW
+P9 INDEPENDENT REVIEW:              NO-PASS — 98fcef496f10d4980d97099ea4607d60ef3e812a
+SURVIVING BLOCKER:                  B65-P9-1
+PHASE VII:                          D4 REPAIR REQUIRED; REPLACEMENT CANDIDATE NOT YET FROZEN
 PUBLIC 6.5 FALLBACK:                UNAVAILABLE
 6.5 RECOVERY:                       UNAVAILABLE
 6.5 RATIFICATION:                   NOT REQUESTED
 ACCEPTED CURRENT:                   Protocol 6.4
 PROTOCOL 7 D3/D4:                   OUT OF SCOPE / UNCHANGED
-```
+\`\`\`
 
 The frozen Opus findings remain evidence, not successor authority. The admitted defect set is the adjudicated four-family model below.
 
@@ -997,3 +999,28 @@ Durable qualification records:
 - `qualification/ssdp65/P9-BINDING-QUALIFICATION.md`
 
 The next authorized step is a genuinely fresh independent assembled-candidate Review of exact P9. P1-P8 remain immutable failed candidates/historical evidence. No stakeholder ratification, public-fallback publication, recovery establishment, accepted-current cutover, PR merge, or Protocol 7 D3/D4 mutation is authorized.
+
+
+## 40. P9 independent Review NO-PASS and bounded repair reopen
+
+Fresh independent assembled-candidate Review of immutable P9 `fb347272c70b6225743fdc99e9bec8b4197aad49` is **NO-PASS**.
+
+Durable Review:
+
+`qualification/ssdp65/INDEPENDENT-REVIEW-2026-09-24-PROTOCOL-6.5-P9-NO-PASS.md`
+
+Immutable Review publication commit:
+
+`98fcef496f10d4980d97099ea4607d60ef3e812a`
+
+The Review independently closes the earlier parser, semantic-version/history, evidence-subject, representation-convergence, transition-predicate, recovery-lineage, and owner-present topology families on their bounded current surfaces. One new out-of-matrix D4 sibling blocker survives:
+
+**B65-P9-1 — governed release-state owner deletion is conflated with genuine pre-owner ancestry.**
+
+A missing `PROTOCOL-RELEASE-STATE.yaml` on a traversed parent is currently skipped as pre-owner without proving that the lineage actually predates owner introduction. A lineage that was already governed can therefore delete the sole release-state owner and later merge into an owner-restoring branch without that malformed interval entering transition validation.
+
+The accepted Protocol 6.5 D3 design remains closed. Repair only the existing `source/release_state.py` ancestry classifier and its focused tests. The D3->D4 handoff contains the exact repair contract.
+
+P9 remains immutable. The repair must freeze a new candidate identity after exact-candidate CI; do not predeclare P10 before a semantic repair commit exists. The replacement must then be bound from a later lifecycle descendant with Review `NOT_RUN` and undergo a new fresh independent assembled-candidate Review.
+
+No ratification, publication, recovery, accepted-current cutover, PR merge, or Protocol 7 D3/D4 mutation is authorized.

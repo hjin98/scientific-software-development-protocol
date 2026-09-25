@@ -3,7 +3,7 @@ kind: implementation-workplan
 workplan_id: SSDP-6.5-D3-D4-IMPLEMENTATION-HANDOFF
 protocol_version: 6.4.0
 target_protocol_version: 6.5.0
-status: ready-p9-independent-review
+status: p9-no-pass-b65-p9-1-repair-required
 parent_workplan: workplans/active/SSDP-6.5-FRONTIER-MODEL-RE-EVALUATION.md
 design_authority: qualification/ssdp65/PHASE-IV-V-DESIGN-CLOSURE.md
 baseline: 55c085261eb827e3047637d045a8e6917ea6b962
@@ -775,3 +775,48 @@ Normal workflow run `36091605214` passed the complete build and Orchestrator Cor
 B65-P8-1 is mechanically repaired and qualified at the existing D4 owner. Accepted P65 D3 remains closed.
 
 The next stage is a genuinely fresh independent assembled-candidate Review of exact P9. This repair/authoring context is not eligible to self-issue that verdict.
+
+
+## 33. P9 independent Review NO-PASS — governed-owner deletion topology
+
+Fresh independent assembled-candidate Review of immutable P9 `fb347272c70b6225743fdc99e9bec8b4197aad49` issued **NO-PASS**.
+
+Durable Review:
+
+`qualification/ssdp65/INDEPENDENT-REVIEW-2026-09-24-PROTOCOL-6.5-P9-NO-PASS.md`
+
+Review publication commit:
+
+`98fcef496f10d4980d97099ea4607d60ef3e812a`
+
+One D4 blocker survives:
+
+**B65-P9-1 — governed release-state owner deletion is conflated with genuine pre-owner ancestry in production predecessor resolution.**
+
+The exact P9 resolver correctly removes date/path-log ordering as authority for owner-present ancestry, but `_previous_governed_release_states()` treats every parent lacking `PROTOCOL-RELEASE-STATE.yaml` as if the lineage genuinely predates owner introduction. A fresh holdout demonstrated that a branch can contain the governed owner, delete it, and later merge into an owner-restoring branch; the deleted parent is silently skipped and the malformed governed interval is never validated.
+
+Repair only the existing D4 release-state ancestry classifier:
+
+1. Preserve an explicit distinction between a valid parsed state and path absence.
+2. For a missing parent state, inspect that lineage's ancestry to determine whether the owner genuinely never existed.
+3. Ignore a missing lineage only when no governed ancestor exists.
+4. If a governed ancestor exists, post-introduction owner deletion/reintroduction must fail rather than masquerade as pre-owner history.
+5. Keep behavior independent of timestamps, default `git log` ordering, branch names, newest/default refs, sibling enumeration, and traversal-stack order.
+6. Preserve current working-tree, linear, evidence-only, consecutive-transition, equivalent-parent, divergent-owner-present-parent, genuine-pre-owner PR-merge, and recovery-lineage behavior.
+
+Mandatory fresh repair controls:
+
+- owner introduced -> sibling deletes owner -> merge restores owner: reject;
+- same topology with reversed parent order: reject;
+- same topology with reversed timestamps: reject;
+- multiple commits while owner absent: reject;
+- delete then reintroduce on the same governed lineage: enforce the explicit governed deletion/reintroduction rule rather than silently classifying it pre-owner;
+- genuine pre-owner base + governed feature lineage: continue to pass;
+- long genuine pre-owner ancestry: continue to pass;
+- all P9 owner-present topology and recovery controls: continue to pass.
+
+Do not reopen accepted P65 D3. Do not add a second state authority, registry, transition mirror, compatibility layer, topology service, or candidate-specific branch.
+
+P9 remains immutable failed Review evidence. Any semantic repair creates a new candidate identity. After repair: rerun the focused topology/transition/recovery suite, full repository build/Core, preservation/parity evidence, exact replacement-candidate CI, freeze/binding, then a new fresh independent assembled-candidate Review.
+
+No stakeholder ratification, public-fallback publication, recovery establishment, accepted-current cutover, PR merge, or Protocol 7 D3/D4 mutation is authorized.
