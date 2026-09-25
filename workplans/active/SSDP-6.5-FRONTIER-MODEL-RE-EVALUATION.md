@@ -5,8 +5,8 @@ protocol_version: 6.4.0
 target_protocol_version: 6.5.0
 subject_baseline: P0 = Protocol 6.4 at 55c085261eb827e3047637d045a8e6917ea6b962 (recovery 74bc572ef516cae417437a2027eeff52a2e25c15)
 diagnostic_commit: 81375d8142a8130b80cd82f2304d3e16bc3fc390
-status: ready-p15-independent-review
-current_phase: PHASE VIII P15 FRESH INDEPENDENT ASSEMBLED-CANDIDATE REVIEW
+status: p15-ratified-awaiting-publication
+current_phase: PHASE X PUBLICATION / RECOVERY / CUTOVER
 branch: ssdp-6.5-frontier-model-re-evaluation
 created_date: 2026-09-24
 adjudication: qualification/ssdp65/CROSS-MODEL-ADJUDICATION-2026-09-24.md
@@ -14,7 +14,7 @@ active_serious_challenge: none against accepted D1-D4 doctrine
 second_frontier_diagnostic: waived-for-this-cycle-by-stakeholder-resource-constraint
 design_closure: qualification/ssdp65/PHASE-IV-V-DESIGN-CLOSURE.md
 implementation_handoff: workplans/active/SSDP-6.5-D3-D4-IMPLEMENTATION-HANDOFF.md
-independent_review: NOT_RUN
+independent_review: PASS
 ---
 
 # Protocol 6.5 Frontier-Model Re-evaluation and Successor Workplan
@@ -28,11 +28,11 @@ P15 CANDIDATE:                      FROZEN — 4fced41c4d8cc7af02938334f7cd1d0b5
 P15 EXACT PR QUALIFICATION:         PASS — run 36138585609
 P15 BINDING DESCENDANT:             acdf2afcdf9387a073219a29625f2d9180ee78ce
 P15 BINDING QUALIFICATION:          PASS — run 36139016587
-P15 INDEPENDENT REVIEW:             NOT_RUN
-SURVIVING IMPLEMENTATION BLOCKER:   NONE KNOWN AFTER FINAL STABILIZATION
+P15 INDEPENDENT REVIEW:             PASS — 5a27173d3b91a96461ecffd7402cd8adad0eafaf
+SURVIVING IMPLEMENTATION BLOCKER:   NONE
 PUBLIC 6.5 FALLBACK:                UNAVAILABLE
 6.5 RECOVERY:                       UNAVAILABLE
-6.5 RATIFICATION:                   NOT_REQUESTED
+6.5 RATIFICATION:                   RATIFIED — 443294bfe7a7a979a5d194bfdf79a733b96575fc
 ACCEPTED CURRENT:                   Protocol 6.4
 PROTOCOL 7 D3/D4:                   OUT OF SCOPE / UNCHANGED
 ```

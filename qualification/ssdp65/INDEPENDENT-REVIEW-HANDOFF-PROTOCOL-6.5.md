@@ -1,7 +1,7 @@
 ---
 kind: independent-review-handoff
 protocol_under_review: 6.5.0
-status: review-passed-awaiting-stakeholder-ratification
+status: ratified-awaiting-publication
 accepted_control_p0: 55c085261eb827e3047637d045a8e6917ea6b962
 immutable_candidate_p15: 4fced41c4d8cc7af02938334f7cd1d0b587c408a
 candidate_branch: ssdp-6.5-frontier-model-re-evaluation
@@ -15,12 +15,13 @@ p15_review_record: qualification/ssdp65/INDEPENDENT-REVIEW-2026-09-25-PROTOCOL-6
 p15_review_evidence_commit: 5a27173d3b91a96461ecffd7402cd8adad0eafaf
 p15_review_evidence_ref: hjin98/scientific-software-development-protocol@5a27173d3b91a96461ecffd7402cd8adad0eafaf:qualification/ssdp65/INDEPENDENT-REVIEW-2026-09-25-PROTOCOL-6.5-P15-PASS.md
 review_state: PASS
-stakeholder_ratification: NOT_REQUESTED
+stakeholder_ratification: RATIFIED
+ratification_evidence_ref: hjin98/scientific-software-development-protocol@443294bfe7a7a979a5d194bfdf79a733b96575fc:qualification/ssdp65/STAKEHOLDER-RATIFICATION-2026-09-25-PROTOCOL-6.5-P15.md
 public_source_ref: UNAVAILABLE
 recovery_ref: UNAVAILABLE
 ---
 
-# Protocol 6.5 P15 — Review Complete, Awaiting Stakeholder Ratification
+# Protocol 6.5 P15 — Ratified, Awaiting Publication
 
 ## Current disposition
 
@@ -62,7 +63,7 @@ The sole mutable owner `PROTOCOL-RELEASE-STATE.yaml` now binds:
 - candidate version: `6.5.0`;
 - candidate semantic ref: exact P15;
 - Review: `PASS`, bound to the immutable Review record above;
-- stakeholder ratification: `NOT_REQUESTED`;
+- stakeholder ratification: `RATIFIED`, bound to the explicit immutable stakeholder record;
 - public fallback: `UNAVAILABLE`;
 - recovery: `UNAVAILABLE`.
 
@@ -96,3 +97,13 @@ Until that human decision is supplied, do not:
 
 If P15 is ratified, publication/recovery/cutover must proceed through later descendants so immutable commits do not
 self-name future lifecycle mappings.
+
+
+## Stakeholder ratification
+
+The stakeholder explicitly ratified exact P15. Durable ratification evidence is:
+
+`hjin98/scientific-software-development-protocol@443294bfe7a7a979a5d194bfdf79a733b96575fc:qualification/ssdp65/STAKEHOLDER-RATIFICATION-2026-09-25-PROTOCOL-6.5-P15.md`.
+
+This human gate is now closed. Public fallback and recovery remain unavailable until their later lifecycle descendants
+are published and qualified.
