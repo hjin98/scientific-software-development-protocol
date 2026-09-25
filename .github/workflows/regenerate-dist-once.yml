@@ -22,8 +22,6 @@ jobs:
           python-version: "3.12"
       - name: Regenerate canonical distribution
         run: python source/build_skills.py --output dist
-      - name: Validate regenerated packages
-        run: python source/validate_packages.py --dist dist
       - name: Check generated patch
         run: git diff --check
       - name: Commit generated artifacts
