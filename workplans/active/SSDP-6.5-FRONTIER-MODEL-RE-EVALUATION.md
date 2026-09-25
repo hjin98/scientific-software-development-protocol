@@ -5,8 +5,8 @@ protocol_version: 6.4.0
 target_protocol_version: 6.5.0
 subject_baseline: P0 = Protocol 6.4 at 55c085261eb827e3047637d045a8e6917ea6b962 (recovery 74bc572ef516cae417437a2027eeff52a2e25c15)
 diagnostic_commit: 81375d8142a8130b80cd82f2304d3e16bc3fc390
-status: p17-binding-qualification
-current_phase: PHASE VI REPLACEMENT CANDIDATE BINDING — P17
+status: p17-review-ready
+current_phase: PHASE VII FRESH INDEPENDENT REVIEW — P17
 branch: ssdp-6.5-frontier-model-re-evaluation
 created_date: 2026-09-24
 adjudication: qualification/ssdp65/CROSS-MODEL-ADJUDICATION-2026-09-24.md
@@ -14,7 +14,7 @@ active_serious_challenge: none against accepted D1-D4 doctrine
 second_frontier_diagnostic: waived-for-this-cycle-by-stakeholder-resource-constraint
 design_closure: qualification/ssdp65/PHASE-IV-V-DESIGN-CLOSURE.md
 implementation_handoff: workplans/active/SSDP-6.5-D3-D4-IMPLEMENTATION-HANDOFF.md
-independent_review: NO_PASS_FOR_P16
+independent_review: NOT_RUN_FOR_P17
 ---
 
 # Protocol 6.5 Frontier-Model Re-evaluation and Successor Workplan
@@ -1402,3 +1402,15 @@ historical evidence only and does not transfer to P17.
 This descendant binds exact P17 in the sole mutable release-state owner with Review `NOT_RUN`, ratification
 `NOT_REQUESTED`, public fallback/recovery `UNAVAILABLE`, accepted-current Protocol 6.4, and Protocol 7 D3/D4
 unchanged. Mechanical qualification of this binding is the next gate.
+
+
+## 62. P17 binding qualification — fresh Review ready
+
+Exact P17 `feca003e577fdfa2ae4219e0df2a2cdb38e5d757` passed workflow `36167091971`; binding descendant
+`30c7793f80dd99702608ae6e7f8cba9bab0c3b6c` passed workflow `36167377663`.
+
+P17 is now the sole semantic Review target with Review `NOT_RUN`, ratification `NOT_REQUESTED`, public
+fallback/recovery `UNAVAILABLE`, accepted-current Protocol 6.4, and Protocol 7 D3/D4 unchanged.
+
+P16's NO-PASS Review remains immutable historical evidence only. Next gate: one genuinely fresh independent
+assembled-candidate Review of exact P17.
