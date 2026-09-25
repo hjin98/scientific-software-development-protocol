@@ -1490,3 +1490,23 @@ accepted-current cutover, PR #33 merge, or Protocol 7 D3/D4 mutation is authoriz
 D4 implementation is executing the reviewed proportional-rigor contract at existing canonical owners. The change is intentionally mechanism-light: no priority engine, scoring database, evidence registry, lifecycle role, or new control plane. Canonical doctrine/roles/templates, focused persistence tests, user-facing README/CHANGELOG/history, generated packages, and final assembled qualification are the affected surfaces.
 
 P18 remains immutable historical mechanical evidence; no release-state candidate binding changes until a replacement assembled semantic candidate passes exact-candidate qualification.
+
+
+## 67. P19 proportional-rigor implementation complete — fresh Review ready
+
+Immutable replacement semantic candidate:
+
+`P19 = b38f2525677888956c4802afd758c98c65b79f1c`
+
+passed exact-candidate workflow `36195532806`.
+
+Binding descendant `d4bfb9032612395ed3d5dbff462acb86ed538944` passed workflow `36195685076` with Review `NOT_RUN`, stakeholder ratification
+`NOT_REQUESTED`, public fallback/recovery `UNAVAILABLE`, accepted-current Protocol 6.4, and Protocol 7 D3/D4
+unchanged.
+
+P19 implements the stakeholder-directed importance/attention/proportional-rigor reopen, completes README/CHANGELOG
+release-document closeout, preserves the P18 release-state repair family and prior 6.5 self-application safeguards, and
+adds no priority engine, scoring service, evidence registry, deferred-work ledger, new lifecycle role, or prose parser.
+
+The durable independent-Review handoff now targets exact P19. No ratification, publication, recovery, accepted-current
+cutover, PR #33 merge, or Protocol 7 mutation is authorized.

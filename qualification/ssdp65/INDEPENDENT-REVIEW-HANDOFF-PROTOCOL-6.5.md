@@ -1,118 +1,129 @@
 ---
 kind: independent-review-handoff
 protocol_under_review: 6.5.0
-status: suspended-d3-reopen
+status: ready-p19
 accepted_control_p0: 55c085261eb827e3047637d045a8e6917ea6b962
-failed_p17: feca003e577fdfa2ae4219e0df2a2cdb38e5d757
-immutable_candidate_p18: a2e5f01e258f249f74d1eda74b883efb98fd7d59
+superseded_p18: a2e5f01e258f249f74d1eda74b883efb98fd7d59
+immutable_candidate_p19: b38f2525677888956c4802afd758c98c65b79f1c
 candidate_branch: ssdp-6.5-frontier-model-re-evaluation
 draft_pr: 33
-p18_mechanical_qualification_run: 36179328663
-p18_binding_descendant: 6a90ba22b298e51b5de83c532159190a06757192
-p18_binding_qualification_run: 36179591776
-p18_repair_qualification: qualification/ssdp65/P18-REPAIR-QUALIFICATION.md
-p18_freeze_binding: qualification/ssdp65/P18-FREEZE-BINDING.md
-p18_binding_qualification: qualification/ssdp65/P18-BINDING-QUALIFICATION.md
-p17_no_pass_review: qualification/ssdp65/INDEPENDENT-REVIEW-2026-09-25-PROTOCOL-6.5-P17-NO-PASS.md
-review_state: SUSPENDED_FOR_D3_REOPEN
+p19_exact_workflow: 36195532806
+p19_binding_descendant: d4bfb9032612395ed3d5dbff462acb86ed538944
+p19_binding_workflow: 36195685076
+p19_implementation_qualification: qualification/ssdp65/PROPORTIONAL-RIGOR-IMPLEMENTATION-QUALIFICATION.md
+p19_freeze_binding: qualification/ssdp65/P19-FREEZE-BINDING.md
+p19_binding_qualification: qualification/ssdp65/P19-BINDING-QUALIFICATION.md
+review_state: NOT_RUN
 stakeholder_ratification: NOT_REQUESTED
 public_source_ref: UNAVAILABLE
 recovery_ref: UNAVAILABLE
 ---
 
-# Independent Review Handoff — Protocol 6.5 P18
-
-> **SUSPENDED — DO NOT START P18 REVIEW.**
->
-> Stakeholder-directed D3/protocol-doctrine reopening is active under
-> `workplans/active/SSDP-6.5-IMPORTANCE-WEIGHTED-ATTENTION-AND-PROPORTIONAL-RIGOR.md`.
-> P18 remains immutable mechanical evidence, but it is no longer the active Review gate. A replacement semantic
-> candidate must implement the accepted proportional-rigor design before fresh independent Review resumes.
-
+# Independent Review Handoff — Protocol 6.5 P19
 
 ## Immutable Review target
 
 Perform one genuinely fresh independent assembled-candidate Review of exact immutable:
 
-`P18 = a2e5f01e258f249f74d1eda74b883efb98fd7d59`
+`P19 = b38f2525677888956c4802afd758c98c65b79f1c`
 
 against accepted Protocol 6.4 control:
 
 `P0 = 55c085261eb827e3047637d045a8e6917ea6b962`.
 
-P17 `feca003e577fdfa2ae4219e0df2a2cdb38e5d757` failed fresh independent Review on B65-P17-1.
-Its disposition is historical evidence only and must not transfer to P18.
+P18 `a2e5f01e258f249f74d1eda74b883efb98fd7d59` was mechanically qualified but its Review was suspended by the
+stakeholder-directed D3/doctrine reopen. P19 supersedes P18 as the sole semantic Review target.
 
-P18 itself is the semantic Review target. Do not substitute the binding descendant or mutable branch head for P18.
+Do **not** substitute the binding/readiness descendant or mutable branch head for P19. Later descendants are lifecycle
+and evidence state only.
 
 ## Entering lifecycle state
 
-Binding descendant:
+Exact-candidate workflow: `36195532806`
 
-`6a90ba22b298e51b5de83c532159190a06757192`
+Binding descendant: `d4bfb9032612395ed3d5dbff462acb86ed538944`
 
-Binding workflow:
+Binding workflow: `36195685076`
 
-`36179591776`
-
-Exact-candidate workflow:
-
-`36179328663`
-
-Expected state:
+Expected lifecycle state:
 
 - accepted-current: Protocol 6.4;
-- candidate version: `6.5.0`;
-- candidate semantic ref: exact P18;
+- candidate: Protocol `6.5.0`, semantic ref exact P19;
 - Review: `NOT_RUN`;
 - stakeholder ratification: `NOT_REQUESTED`;
 - public fallback: `UNAVAILABLE`;
 - recovery: `UNAVAILABLE`;
 - Protocol 7 D3/D4: unchanged.
 
-Verify this independently.
+Verify these independently.
 
-## Repair delta that must be falsified
+## What P19 changes
 
-P18 closes B65-P17-1 by strengthening the existing canonical governed-history pass so every readable owner-present
-material parent -> child transition in reachable canonical ancestry is checked with the existing pure
-`validate_release_transition()` contract. Genuine pre-owner history remains exempt.
+P19 operationalizes development economy and active simplicity as finite-resource allocation doctrine rather than
+engineering aesthetics.
 
-The P17 nearest-material-predecessor resolver and exact-boundary predecessor snapshot/evidence revalidation remain
-separate and intact.
+The current contract must preserve mandatory authority while allocating analysis, evidence, search, and review effort
+according to consequence and decision-relevant uncertainty. It distinguishes problem importance from next-action
+priority; prevents automatic priority inheritance; permits bounded LIGHT/DEFER treatment only where governing
+obligations allow it; preserves evidence applicability; stops recursive evidence inflation; treats fixtures/tests as
+instruments; makes D1/D2 rigor decision-sensitive; and makes reviewer consequence assessment independent of implementer
+labels.
 
-Independently falsify:
+P19 also completes protocol-release documentation closeout: root README is the current user guide, CHANGELOG owns
+user-facing capability history, semantic history owns detailed rationale, release state owns mutable identities, and a
+small objective test protects version/changelog and README routing without attempting to score prose.
 
-1. `valid A -> illegal owner-present B -> later material C` cannot hide the A -> B violation when C's nearest
-   material predecessor is B;
-2. protected historical mapping rewrite or deletion behind a later material transition fails;
-3. same-version accepted-current identity rewrite behind a later material transition fails;
-4. multiple legal owner-present transitions remain accepted;
-5. genuine pre-owner ancestry remains exempt while owner deletion/reintroduction still fails;
-6. merge-parent order/date, evidence-only descendants, raw canonical ancestry, replace/graft resistance, shallow or
-   missing objects, alternate object stores, and fail-closed behavior remain intact;
-7. P17 exact-predecessor candidate closure revalidation remains exact-boundary-scoped and is not weakened or replaced;
-8. P15/P16/P17 PEM canonical-Git/evidence-realization closure remains preserved;
-9. Protocol 6.4 -> 6.5 capability preservation, frozen historical resources, source/generated/package convergence,
-   active simplicity, self-application, and Protocol 7 isolation remain intact.
+## Required fresh falsification
 
-Construct at least one fresh holdout beyond the authored P18 tests. Perform the Serious Challenge pass first.
+Perform the Serious Challenge pass first. Reconstruct current authority independently and construct fresh holdouts
+beyond the authored 22-case implementation matrix.
 
-## Independence
+At minimum attempt to falsify:
 
-This context authored or coordinated the P18 repair lifecycle and therefore cannot self-issue the independent Review
-result.
+1. **mandatory floor:** a low-salience mandatory obligation cannot be waived or starved past its owning PASS boundary
+   merely by labeling it ROUTINE/INCIDENTAL;
+2. **unknown importance:** unknown blast radius cannot be treated as low impact; the cheapest useful discriminator may
+   bound and then de-escalate it;
+3. **no containment inheritance:** a trivial child inside a critical project remains low-attention absent causal linkage,
+   while repeated local failures may still expose a material shared owner;
+4. **importance vs action priority:** consequence classification does not force next-action ordering; dependency,
+   unblocking value and real critical path can dominate;
+5. **rigor proportionality:** DEEP/STANDARD/LIGHT/DEFER-OMIT preserve applicable obligations and do not create a score,
+   ledger, fixed budget, or new approval role;
+6. **evidence floor:** stale/wrong-subject/wrong-regime evidence cannot become applicable because replacement evidence is
+   expensive; sufficient evidence does not recursively require evidence-for-evidence without a material failure model;
+7. **fixture authority:** a stale fixture can be repaired locally without changing product semantics, while a real owner
+   failure cannot be dismissed as harness noise;
+8. **same-subject requalification:** evidence-only correction can reuse an immutable semantic candidate only when the
+   exact semantic subject, realization descendant/run and non-semantic intervening delta are established; semantic
+   mutation cannot be laundered as evidence-only;
+9. **D1/D2 proportionality:** an in-envelope tolerance does not trigger research-grade qualification, but
+   boundary-sensitive scientific/numerical uncertainty still escalates appropriately;
+10. **Review independence:** Review may independently raise or lower a priority classification, while priority changes
+    investigation effort rather than the pass threshold;
+11. **external blockers:** useful independent work may continue around unavailable hardware/input/approval without
+    treating a dependent gate as passed;
+12. **convergence economy:** attention overrun, sunk cost and repeated deferred rediscovery trigger reassessment rather
+    than permanent low-value iteration;
+13. **documentation closeout:** README/CHANGELOG/current-release ownership remains clear and the objective persistence
+    check does not become a prose/doctrine parser;
+14. **capability preservation:** P18 release-state historical-transition closure, PEM canonical-Git/evidence-realization
+    safeguards, 6.4->6.5 capability preservation, frozen historical resources, source/generated/package parity,
+    self-application, active simplicity and Protocol 7 isolation remain intact.
 
-A fresh reviewer must reconstruct applicable D1-D4/current project authority independently before relying on this
-handoff, P18 qualification, prior Reviews, or green CI. Treat them only as bounded evidence/hypotheses.
+## Independence and evidence limits
+
+This implementation context authored/coordinated P19 and cannot self-issue its independent Review result.
+
+Treat the workplan, implementation qualification, authored counterfactual matrix, handoff and green CI as bounded
+evidence/hypotheses. Mechanical checks establish only the properties their oracles discriminate. A PASS requires
+independent assembled semantic adequacy/conformance, not word presence or replay of implementer reasoning.
 
 ## Disposition boundary
 
-PASS means only:
+Independent Review **PASS** means only that P19 is technically eligible for explicit stakeholder ratification.
 
-`P18 is technically eligible for stakeholder ratification.`
+It does not ratify, publish a public fallback, establish recovery, change accepted-current, merge PR #33, or mutate
+Protocol 7 D3/D4.
 
-PASS does not ratify P18, publish a public fallback, establish recovery, change accepted-current, merge PR #33, or
-mutate Protocol 7 D3/D4.
-
-If a genuine semantic blocker survives, preserve P18 immutably and reopen at the earliest owning domain.
+A surviving genuine blocker keeps P19 immutable and reopens the earliest affected owner.

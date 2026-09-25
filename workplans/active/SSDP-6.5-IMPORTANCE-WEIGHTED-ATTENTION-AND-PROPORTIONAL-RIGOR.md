@@ -3,7 +3,7 @@ kind: protocol-doctrine-workplan
 workplan_id: SSDP-6.5-IMPORTANCE-WEIGHTED-ATTENTION-AND-PROPORTIONAL-RIGOR
 protocol_version: 6.4.0
 target_protocol_version: 6.5.0
-status: p19-frozen-binding-qualification-pending
+status: p19-review-ready
 branch: ssdp-6.5-frontier-model-re-evaluation
 accepted_control: 55c085261eb827e3047637d045a8e6917ea6b962
 superseded_review_ready_candidate: a2e5f01e258f249f74d1eda74b883efb98fd7d59
@@ -17,7 +17,7 @@ created_date: 2026-09-25
 
 ## 1. Disposition
 
-**D3/protocol-doctrine reopen — P19 implementation complete; binding qualification pending.**
+**D3/protocol-doctrine reopen — P19 implementation complete and fresh-Review ready.**
 
 P18 `a2e5f01e258f249f74d1eda74b883efb98fd7d59` remains immutable mechanically qualified historical evidence.
 Its planned independent Review is suspended because P18 repaired the release-state defect B65-P17-1 but did not address
@@ -621,3 +621,15 @@ distribution-regeneration helper is absent from the P19 tree; it was implementat
 This descendant binds exact P19 in the sole mutable release-state owner with Review `NOT_RUN`, stakeholder
 ratification `NOT_REQUESTED`, public fallback/recovery `UNAVAILABLE`, accepted-current Protocol 6.4, and Protocol 7
 D3/D4 unchanged. Binding workflow qualification is required before independent Review is authorized.
+
+
+## 17. P19 binding qualification — fresh Review ready
+
+Exact P19 `b38f2525677888956c4802afd758c98c65b79f1c` passed workflow `36195532806`.
+
+Binding descendant `d4bfb9032612395ed3d5dbff462acb86ed538944` passed workflow `36195685076` with Review `NOT_RUN`, ratification
+`NOT_REQUESTED`, public fallback/recovery `UNAVAILABLE`, accepted-current Protocol 6.4, and Protocol 7 D3/D4
+unchanged.
+
+The implementation stage has no known surviving blocker. The durable independent-Review handoff now targets exact P19.
+This implementation context must not self-issue that Review.
