@@ -3,7 +3,7 @@ kind: implementation-workplan
 workplan_id: SSDP-6.5-D3-D4-IMPLEMENTATION-HANDOFF
 protocol_version: 6.4.0
 target_protocol_version: 6.5.0
-status: p13-no-pass-pem-canonical-git-repair-open
+status: p13-repair-implemented-awaiting-exact-ci
 parent_workplan: workplans/active/SSDP-6.5-FRONTIER-MODEL-RE-EVALUATION.md
 design_authority: qualification/ssdp65/PHASE-IV-V-DESIGN-CLOSURE.md
 baseline: 55c085261eb827e3047637d045a8e6917ea6b962
@@ -1406,3 +1406,31 @@ Ratification remains `NOT_REQUESTED`; public fallback and recovery remain `UNAVA
 Protocol 6.4; Protocol 7 D3/D4 remains unchanged.
 
 This binding is lifecycle representation only. It does not mutate P13 or authorize any acceptance/publication action.
+
+
+## 57. B65-P13-1 implementation — prospective replacement
+
+The P13 NO-PASS repair is implemented at D4 without reopening accepted Protocol 6.5 D3.
+
+The repair consolidates canonical local-Git semantics in `source/canonical_git.py` and routes both release-state and
+self-hosted PEM ancestry through that one raw commit-parent mechanism.
+
+PEM changes:
+
+- local immutable object/content reads now run with replacement objects disabled;
+- accepted-project containment, repair-acceptance containment, and recurrence chronology use raw canonical parent
+  ancestry rather than `merge-base --is-ancestor`;
+- canonical ancestry fails closed when a required raw commit object is unavailable or unreadable;
+- patch-id independence evidence is derived from an explicit canonical-parent/tree diff rather than replacement-object
+  `git show` bytes;
+- readable alternate object stores remain supported through Git's ordinary object-resolution layer.
+
+Release-state behavior is not redesigned. Its proven raw-parent algorithm is routed through the same shared helper
+while preserving the existing release-state error and fail-closed contract.
+
+Fresh real-Git production tests cover replace-ref and graft-rewritten sibling authority binding, canonical immutable
+evidence content under replacement refs, a repair-acceptance consumer under an overlay, canonical patch-id stability,
+and readable alternate object stores.
+
+This commit is only a prospective replacement semantic candidate. P13 remains immutable NO-PASS evidence. Do not
+assign the next candidate identity until exact-commit normal CI passes.

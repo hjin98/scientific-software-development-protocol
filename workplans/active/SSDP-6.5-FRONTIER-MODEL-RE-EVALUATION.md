@@ -5,8 +5,8 @@ protocol_version: 6.4.0
 target_protocol_version: 6.5.0
 subject_baseline: P0 = Protocol 6.4 at 55c085261eb827e3047637d045a8e6917ea6b962 (recovery 74bc572ef516cae417437a2027eeff52a2e25c15)
 diagnostic_commit: 81375d8142a8130b80cd82f2304d3e16bc3fc390
-status: p13-no-pass-pem-canonical-git-repair-open
-current_phase: PHASE VII P13 NO-PASS / BOUNDED PEM D4 REPAIR
+status: p13-repair-implemented-awaiting-exact-ci
+current_phase: PHASE VII B65-P13-1 REPAIR / EXACT-CANDIDATE CI REQUIRED
 branch: ssdp-6.5-frontier-model-re-evaluation
 created_date: 2026-09-24
 adjudication: qualification/ssdp65/CROSS-MODEL-ADJUDICATION-2026-09-24.md
@@ -1208,3 +1208,12 @@ The immutable P13 Review was published at `3c851d33f0473b8b38940d01eafed3f545b63
 
 The next semantic candidate must have a new identity after B65-P13-1 is repaired and exact-candidate qualification
 passes. No ratification, publication, recovery, cutover, PR merge, or Protocol 7 mutation is authorized.
+
+
+## 51. B65-P13-1 repair implemented — prospective replacement
+
+The bounded PEM canonical-Git repair is implemented by consolidating raw commit-parent ancestry and replacement-disabled
+immutable reads into one D4 utility shared by release-state and PEM validation.
+
+P13 remains immutable NO-PASS evidence. The repaired commit is not assigned the next candidate identity until its exact
+normal workflow passes. No ratification, publication, recovery, cutover, PR merge, or Protocol 7 mutation is authorized.

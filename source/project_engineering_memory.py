@@ -19,6 +19,8 @@ from typing import Any, Iterable
 
 import yaml
 
+from canonical_git import CanonicalGitError, commit_and_parents as _canonical_commit_and_parents, is_ancestor as _canonical_is_ancestor
+
 SCHEMA_VERSION = 1
 FAMILY_KINDS = {"FAILURE_FAMILY", "SUCCESS_PATTERN", "DISCOVERY", "PRESERVATION_CAPABILITY"}
 FAMILY_STATES = {"CURRENT", "REVIEW_REQUIRED", "STALE_OR_INAPPLICABLE", "RETIRED"}
@@ -190,7 +192,11 @@ def _git_root(path: Path) -> Path | None:
 def _git_ok(root: Path, *args: str) -> bool:
     try:
         proc = subprocess.run(
-            ["git", "-C", str(root), *args], check=False, capture_output=True, text=True, timeout=8,
+            ["git", "-C", str(root), "--no-replace-objects", *args],
+            check=False,
+            capture_output=True,
+            text=True,
+            timeout=8,
         )
     except (OSError, subprocess.TimeoutExpired):
         return False
@@ -200,11 +206,29 @@ def _git_ok(root: Path, *args: str) -> bool:
 def _git_text(root: Path, *args: str) -> str | None:
     try:
         proc = subprocess.run(
-            ["git", "-C", str(root), *args], check=False, capture_output=True, text=True, timeout=8,
+            ["git", "-C", str(root), "--no-replace-objects", *args],
+            check=False,
+            capture_output=True,
+            text=True,
+            timeout=8,
         )
     except (OSError, subprocess.TimeoutExpired):
         return None
     return proc.stdout.strip() if proc.returncode == 0 else None
+
+
+def _canonical_contains(
+    root: Path,
+    ancestor: str,
+    descendant: str,
+    where: str,
+) -> bool:
+    try:
+        return _canonical_is_ancestor(root, ancestor, descendant)
+    except CanonicalGitError as exc:
+        raise PemError(
+            f"{where}: cannot establish canonical Git ancestry: {exc}"
+        ) from exc
 
 
 def _accepted_project_commit(doc: PemDocument, where: str) -> tuple[Path, str]:
@@ -240,7 +264,7 @@ def _validate_accepted_project_route(
         target = target_revision
         if not _git_ok(root, "cat-file", "-e", f"{target}^{{commit}}"):
             raise PemError(f"{where}: binding target revision {target!r} is not a resolvable commit")
-    if not _git_ok(root, "merge-base", "--is-ancestor", route.revision, target):
+    if not _canonical_contains(root, route.revision, target, where):
         raise PemError(f"{where}: route revision is not contained by the governing accepted project state")
     if require_same_path_content:
         cited_blob = _git_text(root, "rev-parse", f"{route.revision}:{route.path}")
@@ -310,7 +334,7 @@ def _validate_repair_acceptance_routes(
             raise PemError(f"{where}: recurrence acceptance route is not resolvable: {health}: {reason}")
         if not _route_is_local(route, doc):
             raise PemError(f"{where}: recurrence acceptance must be established by a resolvable project-local immutable artifact")
-        if not _git_ok(root, "merge-base", "--is-ancestor", route.revision, accepted_project):
+        if not _canonical_contains(root, route.revision, accepted_project, where):
             raise PemError(f"{where}: repair acceptance artifact is not contained by accepted project state")
         _validate_repair_acceptance_artifact(root, route, repair_identity, where, doc)
         revisions.append(route.revision)
@@ -515,17 +539,47 @@ def _git_commit_from_identity(value: Any) -> str | None:
 
 def _git_patch_id(root: Path, commit: str) -> str | None:
     try:
+        canonical_commit, parents = _canonical_commit_and_parents(root, commit)
+        if parents:
+            base = parents[0]
+        else:
+            empty_tree = subprocess.run(
+                ["git", "-C", str(root), "hash-object", "-t", "tree", "--stdin"],
+                input=b"",
+                check=False,
+                capture_output=True,
+                timeout=8,
+            )
+            if empty_tree.returncode != 0:
+                return None
+            base = empty_tree.stdout.decode("ascii", errors="strict").strip()
+
         show = subprocess.run(
-            ["git", "-C", str(root), "show", "--pretty=format:", "--no-ext-diff", commit],
-            check=False, capture_output=True, timeout=8,
+            [
+                "git",
+                "-C",
+                str(root),
+                "--no-replace-objects",
+                "diff",
+                "--no-ext-diff",
+                base,
+                canonical_commit,
+                "--",
+            ],
+            check=False,
+            capture_output=True,
+            timeout=8,
         )
         if show.returncode != 0 or not show.stdout:
             return None
         patch = subprocess.run(
-            ["git", "patch-id", "--stable"], input=show.stdout,
-            check=False, capture_output=True, timeout=8,
+            ["git", "patch-id", "--stable"],
+            input=show.stdout,
+            check=False,
+            capture_output=True,
+            timeout=8,
         )
-    except (OSError, subprocess.TimeoutExpired):
+    except (OSError, subprocess.TimeoutExpired, UnicodeDecodeError, CanonicalGitError):
         return None
     if patch.returncode != 0 or not patch.stdout.strip():
         return None
@@ -572,12 +626,12 @@ def _validate_recurrence_structure(
         acceptance_commits = _validate_repair_acceptance_routes(
             parsed_evidence, doc, root, repair_identity, where
         )
-        if not _git_ok(root, "merge-base", "--is-ancestor", prior_commit, repair_commit):
+        if not _canonical_contains(root, prior_commit, repair_commit, where):
             raise PemError(f"{where}: prior occurrence does not precede the claimed repair in project lineage")
         for accepted in acceptance_commits:
-            if not _git_ok(root, "merge-base", "--is-ancestor", repair_commit, accepted):
+            if not _canonical_contains(root, repair_commit, accepted, where):
                 raise PemError(f"{where}: repair acceptance evidence does not contain/follow the claimed repair")
-            if not _git_ok(root, "merge-base", "--is-ancestor", accepted, later_commit):
+            if not _canonical_contains(root, accepted, later_commit, where):
                 raise PemError(f"{where}: accepted repair does not precede the later recurrence event")
         if prior_commit == later_commit or repair_commit == later_commit:
             raise PemError(f"{where}: same event/repair identity cannot count as independent recurrence")

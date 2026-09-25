@@ -11,6 +11,8 @@ from typing import Any
 
 import yaml
 
+from canonical_git import CanonicalGitError, commit_and_parents as _canonical_commit_and_parents, is_ancestor as _shared_canonical_is_ancestor
+
 ROOT = Path(__file__).resolve().parent.parent
 DEFAULT_PATH = ROOT / "PROTOCOL-RELEASE-STATE.yaml"
 SHA_RE = re.compile(r"^[0-9a-f]{40}$")
@@ -295,37 +297,34 @@ def _evidence_commit(value: str) -> str | None:
     return None if match is None else match.group("sha")
 
 
+def _append_canonical_git_error(errors: list[str], exc: CanonicalGitError) -> None:
+    if exc.kind == "resolve":
+        errors.append(f"cannot resolve release-state ancestry at {exc.subject}")
+    elif exc.kind == "read":
+        errors.append(
+            f"cannot read release-state ancestry commit {exc.commit or exc.subject}"
+        )
+    elif exc.kind == "parent":
+        errors.append(
+            "release-state ancestry commit "
+            f"{exc.commit or exc.subject} has invalid parent {exc.detail!r}"
+        )
+    else:
+        errors.append(str(exc))
+
+
 def _canonical_is_ancestor(
     root: Path,
     ancestor: str,
     descendant: str,
     errors: list[str],
 ) -> bool | None:
-    """Resolve ancestry from raw canonical commit parents, ignoring local overlays."""
-    ancestor_topology = _commit_and_parents(root, ancestor, errors)
-    descendant_topology = _commit_and_parents(root, descendant, errors)
-    if ancestor_topology is None or descendant_topology is None:
+    """Resolve ancestry through the shared raw canonical Git authority."""
+    try:
+        return _shared_canonical_is_ancestor(root, ancestor, descendant)
+    except CanonicalGitError as exc:
+        _append_canonical_git_error(errors, exc)
         return None
-
-    target = ancestor_topology[0]
-    descendant_commit, descendant_parents = descendant_topology
-    if descendant_commit == target:
-        return True
-
-    visited = {descendant_commit}
-    stack = list(descendant_parents)
-    while stack:
-        topology = _commit_and_parents(root, stack.pop(), errors)
-        if topology is None:
-            return None
-        commit, parents = topology
-        if commit in visited:
-            continue
-        if commit == target:
-            return True
-        visited.add(commit)
-        stack.extend(parents)
-    return False
 
 
 def _check_ancestor(
@@ -644,44 +643,13 @@ def _commit_and_parents(
     ref: str,
     errors: list[str],
 ) -> tuple[str, list[str]] | None:
-    # Read the raw commit object with replacement refs disabled. Parsing raw
-    # parent headers also bypasses deprecated info/grafts traversal overlays,
-    # so local Git history rewrites cannot become release-state authority.
-    code, commit = _git(
-        root,
-        "--no-replace-objects",
-        "rev-parse",
-        "--verify",
-        f"{ref}^{{commit}}",
-    )
-    if code or not SHA_RE.fullmatch(commit):
-        errors.append(f"cannot resolve release-state ancestry at {ref}")
+    # Shared raw-object authority keeps release state and self-hosted PEM on
+    # the same canonical Git graph despite replace refs or deprecated grafts.
+    try:
+        return _canonical_commit_and_parents(root, ref)
+    except CanonicalGitError as exc:
+        _append_canonical_git_error(errors, exc)
         return None
-
-    code, raw = _git(
-        root,
-        "--no-replace-objects",
-        "cat-file",
-        "-p",
-        commit,
-    )
-    if code or not raw:
-        errors.append(f"cannot read release-state ancestry commit {commit}")
-        return None
-
-    header = raw.split("\n\n", 1)[0]
-    parents: list[str] = []
-    for line in header.splitlines():
-        if not line.startswith("parent "):
-            continue
-        parent = line.removeprefix("parent ").strip()
-        if not SHA_RE.fullmatch(parent):
-            errors.append(
-                f"release-state ancestry commit {commit} has invalid parent {parent!r}"
-            )
-            return None
-        parents.append(parent)
-    return commit, parents
 
 
 def _lineage_has_governed_release_state(
