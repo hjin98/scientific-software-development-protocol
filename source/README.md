@@ -6,7 +6,7 @@
 
 SSDP separates D1 scientific/mathematical formulation, D2 algorithm/numerical method, D3 software architecture, and D4 specification/implementation. Read `shared/references/abstraction-and-concretization.md` for universal authority, materiality, Challenge, self-application, Lossless Representation, semantic-definition/source-availability and abstraction-adequacy rules.
 
-A concretization is admissible only when it satisfies every applicable parent abstraction and directly governed constraint. Within the admissible set optimize domain engineering fitness, minimum justified total complexity, then development economy. D1->D4 is semantic ordering, not a mandatory waterfall.
+A concretization is admissible only when it satisfies every applicable parent abstraction and directly governed constraint. Within the admissible set optimize domain engineering fitness, minimum justified total complexity, then development economy. Development economy is operational: allocate analysis/evidence by consequence and decision-sensitive uncertainty, use the cheapest sufficiently strong applicable route, and stop when further certainty cannot change the governed decision. Mandatory obligations remain closure conditions. D1->D4 is semantic ordering, not a mandatory waterfall.
 
 Project Engineering Memory (PEM) remains evidence-backed project-local decision support, not D5. Its canonical owner is `shared/references/project-engineering-memory.md`; this repository's live `../PROJECT-ENGINEERING-MEMORY.md` is project state and is never generic package/profile content.
 

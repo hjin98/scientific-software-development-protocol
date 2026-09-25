@@ -17,6 +17,7 @@ If you remember only five ideas, remember these:
 3. **Design downward, verify upward.** Lower layers must preserve higher-layer meaning; review reconstructs what the implementation actually does.
 4. **Challenge a bad contract instead of patching around it.** If the governing model, method, or architecture is wrong, ambiguous, or unrealizable, route the problem to its real owner.
 5. **Prefer the simplest admissible system.** Remove, narrow, consolidate, or redesign delegated machinery before adding wrappers, fallback paths, duplicated state, or special cases.
+6. **Spend rigor where it changes the decision.** Mandatory obligations stay mandatory, but analysis/evidence depth should track consequence and unresolved uncertainty rather than treating every detail like a research problem.
 
 A useful rule of thumb is:
 
@@ -151,9 +152,20 @@ rather than only the diff, falsify conformance and abstraction adequacy, and iss
 Pass/No-Pass only on genuine blockers.
 ```
 
-### 3. Stop when the governed problem is closed
+### 3. Allocate attention before escalating rigor
 
-A task is not improved merely by adding more process. Once the accepted contract is satisfied, affected evidence is current, real integration is checked, material impacts are closed, and no governing Challenge remains, stop.
+Ask two separate questions:
+
+1. **How important is being wrong here?** Consider consequence, blast radius, reversibility, decision sensitivity, and whether the issue is isolated or systemic.
+2. **What should I do next?** Consider mandatory dependencies, unblock value, critical path, information/repair value, and opportunity cost.
+
+Use `DEEP` treatment for consequential unresolved uncertainty; `STANDARD` for focused owner analysis and strong discriminating evidence; `LIGHT` for direct local repair plus focused affected checks; and `DEFER/OMIT` only for non-mandatory low-consequence work.
+
+A high-stakes project does not make every fixture, diagnostic, tolerance, or helper high-stakes. Conversely, a cheap-looking issue should escalate when evidence shows it can materially affect the governing outcome. Use the cheapest sufficiently strong **applicable** evidence and stop when remaining uncertainty cannot change the decision.
+
+### 4. Stop when the governed problem is closed
+
+A task is not improved merely by adding more process. Once the accepted contract is satisfied, affected evidence is current, real integration is checked, material impacts are closed, and no governing Challenge remains, stop. Do not spend resources merely to convert sufficient confidence into psychological certainty.
 
 ## The development cycle
 
@@ -267,6 +279,7 @@ Keep PEM cold for a first clean local bug or unrelated task. Memory is a hypothe
 - **Lossless representation beats amendment accumulation.** Rewrite current guidance coherently instead of stacking exceptions and historical patches.
 - **Progressive disclosure beats loading everything.** The active skill loads the concern owners needed for the decision, not the entire protocol library.
 - **Simple is not the same as weak.** Simplify mechanisms aggressively; never simplify by weakening governing semantics.
+- **Development economy is resource allocation, not aesthetics.** Spend model/human time, tokens, tools, compute, CI, and wall time where uncertainty can change the governed decision; low-value details do not inherit the parent project's scrutiny.
 
 ## How the protocol evolved
 
@@ -283,7 +296,7 @@ SSDP began as a software-engineering protocol and grew into a scientific-softwar
 | **6.2** | Lossless Representation and progressive-disclosure strengthening |
 | **6.3** | Project Engineering Memory and Historical Applicability Sets |
 | **6.4** | semantic definition/source availability, well-defined formal contracts, parameter binding, exact imports, typed semantic dependencies, and claim/warrant discipline |
-| **6.5** | self-governance and release-state strengthening; sharper Review/ratification boundaries, evidence-claim congruence, out-of-matrix Review, and hardened durable Git/evidence realization |
+| **6.5** | self-governance/release-state strengthening plus importance-weighted attention, proportional rigor/evidence, evidence-only requalification economy, and release-documentation closeout |
 
 For the full user-facing capability history, see [CHANGELOG.md](CHANGELOG.md). For detailed semantic rationale and superseded release attempts, see [history/SEMANTIC_EVOLUTION.md](history/SEMANTIC_EVOLUTION.md). Exact mutable release mappings remain in [PROTOCOL-RELEASE-STATE.yaml](PROTOCOL-RELEASE-STATE.yaml).
 

@@ -10,7 +10,7 @@ Older README files accumulated release mappings, bootstrap attempts, and version
 
 ## Protocol 6.x
 
-### 6.5.0 — self-governance, release-state, and evidence-realization strengthening
+### 6.5.0 — self-governance, proportional rigor, and release-state strengthening
 
 Protocol 6.5 preserves the accepted D1-D4 model while tightening how the protocol governs its own development and release lifecycle.
 
@@ -24,7 +24,12 @@ Main improvements:
 - makes out-of-matrix abstraction-adequacy falsification a first-class independent-Review obligation for substantial protocol work;
 - integrates current doctrine instead of replaying predecessor-numbered amendment sections;
 - hardens self-hosted Project Engineering Memory evidence realization around canonical Git ancestry/content, immutable durable identities, exact file/blob artifacts, parser strictness, and fail-closed missing evidence;
-- preserves frozen historical profiles/resources rather than rewriting them under new terminology.
+- preserves frozen historical profiles/resources rather than rewriting them under new terminology;
+- operationalizes **importance-weighted attention**: mandatory obligations remain mandatory while analysis/evidence depth follows consequence, decision-sensitive uncertainty, irreversibility, and opportunity cost;
+- separates problem importance from next-action priority, prevents automatic parent-to-child priority inheritance, and adds escalation/de-escalation/stop and sunk-cost/rediscovery safeguards;
+- makes scientific/numerical rigor decision-sensitive so trivial in-envelope numerical details do not automatically trigger research-grade qualification while boundary-sensitive uncertainty still escalates;
+- treats fixtures/tests as evidence instruments rather than product authority and allows corrected evidence instruments to requalify the same immutable semantic candidate when the intervening change is demonstrably non-semantic;
+- adds protocol-release documentation closeout: the root README is recompiled as a current user guide, CHANGELOG records capability evolution, and a small objective repository check preserves version/changelog and README routing without attempting to score prose quality.
 
 Release status is deliberately not stated here; resolve it from `PROTOCOL-RELEASE-STATE.yaml`.
 

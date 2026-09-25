@@ -22,7 +22,34 @@ Define newly introduced non-common project/domain terms needed by the intended c
 - Explicit non-goals:
 - If D4-only, upstream-impact exclusion where scientific/numerical risk is plausible:
 
-## 2. Cycle decisions and delegated D4 space
+## 2. Importance and attention allocation
+
+Use this section only for substantial work. Do not create per-issue numeric scores or a permanent priority ledger.
+
+### Highest-value outcomes
+- 
+
+### Mandatory acceptance floors
+- 
+
+### Critical/material uncertainties
+- 
+
+### Routine/incidental surfaces
+- 
+
+### Rigor plan
+- DEEP:
+- STANDARD:
+- LIGHT:
+- DEFER/OMIT:
+
+### Escalation / de-escalation / stop triggers
+- 
+
+For any nontrivial deferral, bounded approximation/omission, or reduced evidence depth, preserve only the smallest useful rationale: consequence, mandatory/discretionary status, decisive uncertainty/evidence, chosen rigor mode, and reopen/stop trigger. Priority schedules mandatory work but cannot waive it.
+
+## 3. Cycle decisions and delegated D4 space
 
 ### Frozen for this cycle
 List only material architecture/ownership/interface/data-flow/resource/security/compatibility choices needed to bound implementation. Cycle freeze is not automatically durable Architecture Manual authority.
@@ -33,7 +60,7 @@ List implementation-local mechanisms that remain replaceable: helpers/internal A
 ### Simplification target
 State existing machinery/state/path to remove, narrow, alter, consolidate or replace. New durable machinery must protect a governing capability the simpler system cannot provide or replace broader complexity.
 
-## 3. Material implementation obligations
+## 4. Material implementation obligations
 
 For each obligation record only material fields:
 
@@ -46,11 +73,11 @@ For each obligation record only material fields:
 
 Green tests do not prove omitted obligations.
 
-## 4. Evidence and dependencies
+## 5. Evidence and dependencies
 
 For material claims identify evidence specification/target proposition, current real semantic owner, execution dependencies, applicability identity dimensions, prior evidence expected to remain admissible/review-required/stale, and independent evidence routes when common-mode risk matters. A rerun against a changed candidate is a new evidence realization; stale pass/fail cannot confirm/refute current authority.
 
-## 5. Affected surface and acceptance
+## 6. Affected surface and acceptance
 
 Initial affected surface may include callers/consumers, shared utilities, public interfaces, configuration, persistence/restart, orchestration/concurrency, packaging/entrypoints, compatibility, documentation/specification, semantic dependencies/history, evidence, and transitive scientific/numerical behavior. Re-derive it from the final assembled candidate.
 
@@ -67,7 +94,7 @@ Required executable acceptance, proportionate to scope:
 
 Production qualification: <required / deferred / unnecessary with reason when material>.
 
-## 6. Authority/documentation/history impact
+## 7. Authority/documentation/history impact
 
 - D4 Specification change? Distinguish contract mutation from implementation repair.
 - D3 Architecture Manual change?
@@ -78,11 +105,11 @@ Production qualification: <required / deferred / unnecessary with reason when ma
 
 Do not rewrite owners/oracles merely to match unintended code.
 
-## 7. Stages and reuse
+## 8. Stages and reuse
 
 Use coherent behavior/risk stages only when sequencing reduces risk. Several tightly coupled files may form one stage. Reuse established evidence/context only while authority/workplan/candidate/regime/source applicability holds. If a bounded dependency map supports non-impact, state whether its relevant scope is complete.
 
-## 8. Reopen / Challenge triggers
+## 9. Reopen / Challenge triggers
 
 - D4-local blockers:
 - Evidence requiring D3 reopen:
@@ -90,6 +117,6 @@ Use coherent behavior/risk stages only when sequencing reduces risk. Several tig
 - Structural complexity requiring simplification before another additive repair:
 - Accepted-authority contradiction requiring `SERIOUS CHALLENGE`:
 
-## 9. Final handoff
+## 10. Final handoff
 
 Before closure every material obligation/descendant/evidence/documentation/dependency/re-ratification/retirement/history item is resolved, preserved as still-valid with reason, or unavailable/blocking. Lead the final handoff with Serious Challenge/blockers/current disposition, then concise supporting evidence; do not replay routine implementation chronology.
