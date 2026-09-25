@@ -1635,6 +1635,146 @@ candidate:
             self.assertEqual(states, [previous])
 
 
+    def test_previous_governed_states_fail_closed_on_shallow_working_tree_reintroduction(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            source = Path(tmpdir) / "source"
+            shallow = Path(tmpdir) / "shallow"
+            source.mkdir()
+            self._init_topology_repo(source)
+
+            (source / "pre-owner.txt").write_text("pre-owner\n", encoding="utf-8")
+            self._commit_topology_repo(source, "pre-owner")
+
+            previous = self._topology_state("a")
+            self._write_topology_state(source, previous)
+            self._commit_topology_repo(source, "introduce governed owner")
+
+            (source / "PROTOCOL-RELEASE-STATE.yaml").unlink()
+            self._commit_topology_repo(source, "delete governed owner")
+
+            subprocess.run(
+                [
+                    "git",
+                    "clone",
+                    "-q",
+                    "--depth",
+                    "1",
+                    source.resolve().as_uri(),
+                    str(shallow),
+                ],
+                check=True,
+            )
+            self.assertEqual(
+                self._run_topology_git(
+                    shallow,
+                    "rev-parse",
+                    "--is-shallow-repository",
+                ),
+                "true",
+            )
+
+            current = self._topology_state("b")
+            self._write_topology_state(shallow, current)
+
+            errors: list[str] = []
+            states = release_state._previous_governed_release_states(
+                shallow,
+                current,
+                errors,
+            )
+            self.assertEqual(states, [])
+            self.assertTrue(
+                any(
+                    "cannot establish genuine pre-owner release-state ancestry"
+                    in error
+                    for error in errors
+                )
+            )
+
+    def test_previous_governed_states_fail_closed_on_shallow_missing_merge_parent(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            source = Path(tmpdir) / "source"
+            shallow = Path(tmpdir) / "shallow"
+            source.mkdir()
+            self._init_topology_repo(source)
+
+            base = self._topology_state("a")
+            self._write_topology_state(source, base)
+            base_ref = self._commit_topology_repo(source, "governed base")
+
+            self._run_topology_git(source, "checkout", "-q", "-b", "good")
+            current = self._topology_state("b")
+            self._write_topology_state(source, current)
+            good_ref = self._commit_topology_repo(source, "good current")
+
+            self._run_topology_git(
+                source,
+                "checkout",
+                "-q",
+                "-b",
+                "deleted",
+                base_ref,
+            )
+            (source / "PROTOCOL-RELEASE-STATE.yaml").unlink()
+            deleted_ref = self._commit_topology_repo(
+                source,
+                "delete governed owner",
+            )
+
+            tree_ref = self._run_topology_git(
+                source,
+                "rev-parse",
+                f"{good_ref}^{{tree}}",
+            )
+            merge_ref = self._run_topology_git(
+                source,
+                "commit-tree",
+                tree_ref,
+                "-p",
+                good_ref,
+                "-p",
+                deleted_ref,
+                "-m",
+                "restore owner by merge",
+            )
+            self._run_topology_git(source, "reset", "--hard", merge_ref)
+
+            subprocess.run(
+                [
+                    "git",
+                    "clone",
+                    "-q",
+                    "--depth",
+                    "2",
+                    source.resolve().as_uri(),
+                    str(shallow),
+                ],
+                check=True,
+            )
+            self.assertEqual(
+                self._run_topology_git(
+                    shallow,
+                    "rev-parse",
+                    "--is-shallow-repository",
+                ),
+                "true",
+            )
+
+            errors: list[str] = []
+            states = release_state._previous_governed_release_states(
+                shallow,
+                current,
+                errors,
+            )
+            self.assertEqual(states, [])
+            self.assertTrue(
+                any(
+                    "cannot establish genuine pre-owner release-state ancestry"
+                    in error
+                    for error in errors
+                )
+            )
+
     def test_previous_governed_states_allow_working_tree_first_owner_introduction(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             root = Path(tmpdir)

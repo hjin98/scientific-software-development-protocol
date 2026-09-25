@@ -999,3 +999,32 @@ binding qualification, and perform a new fresh independent assembled-candidate R
 
 No stakeholder ratification, public fallback, recovery, accepted-current cutover, PR merge, or Protocol 7 D3/D4
 mutation is authorized.
+
+
+## 45. B65-P10-1 implementation — prospective replacement candidate
+
+B65-P10-1 is repaired at the existing D4 release-state ancestry classifier without reopening accepted Protocol 6.5 D3.
+
+The existing positive existential owner-history query remains unchanged. The repair narrows only the former negative
+conclusion: after an exact-path ancestry search finds no visible governed owner, the resolver now verifies Git ancestry
+completeness with `git rev-parse --is-shallow-repository`. A shallow/incomplete repository cannot prove that the
+lineage never previously contained the owner, so the resolver fails closed instead of classifying the lineage as
+genuinely pre-owner. A failure or unrecognized result from the ancestry-completeness query also fails closed.
+
+No registry, mirror, topology service, compatibility layer, branch-name/default/latest policy, timestamp policy,
+candidate-specific identity, or second state owner is introduced.
+
+Fresh real-Git holdouts exercise the production resolver for:
+
+- governed owner introduction hidden beyond a depth-1 shallow boundary, followed by visible deletion and working-tree
+  reintroduction: fail closed;
+- governed owner introduction hidden beyond a depth-2 shallow boundary on a missing merge-parent lineage: fail closed;
+- existing complete-history genuine pre-owner working-tree introduction: remains legal;
+- existing complete-history genuine pre-owner merge lineage: remains legal;
+- all prior P10 complete-history topology, transition, recovery, schema, and evidence-binding controls remain in the
+  affected regression surface.
+
+This commit is only the **prospective replacement semantic candidate**. P10 remains immutable NO-PASS evidence.
+Do not assign the next P-number until exact-candidate normal CI passes. After that pass, bind the exact repair SHA from
+a later lifecycle descendant with Review reset to `NOT_RUN`, rerun binding qualification, and require another fresh
+independent assembled-candidate Review.

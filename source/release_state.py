@@ -617,6 +617,21 @@ def _lineage_has_governed_release_state(
         if state is None:
             return None
         return True
+
+    code, shallow = _git(
+        root,
+        "rev-parse",
+        "--is-shallow-repository",
+    )
+    if code or shallow not in {"true", "false"}:
+        errors.append(f"cannot determine release-state ancestry completeness at {ref}")
+        return None
+    if shallow == "true":
+        errors.append(
+            "cannot establish genuine pre-owner release-state ancestry at "
+            f"{ref} from incomplete/shallow Git history"
+        )
+        return None
     return False
 
 
