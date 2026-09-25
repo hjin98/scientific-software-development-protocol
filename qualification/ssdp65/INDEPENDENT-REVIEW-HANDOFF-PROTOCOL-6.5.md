@@ -1,7 +1,7 @@
 ---
 kind: independent-review-handoff
 protocol_under_review: 6.5.0
-status: p8-no-pass-repair-required
+status: ready-p9
 accepted_control_p0: 55c085261eb827e3047637d045a8e6917ea6b962
 failed_candidate_p1: b565e28aeacea002cefe27e6b9594fe99d653c0a
 failed_candidate_p2: e8edb353e172aef933ed5e58eeabe897d0cc98d1
@@ -10,69 +10,78 @@ failed_candidate_p4: 43ff4273fbdaf46b9677cffdb091b741ce754a7d
 failed_candidate_p5: d2d672a3e814438fb618f901137f88c8698a205d
 failed_candidate_p6: dd06da8136416e67644586c44880b466f982b8ff
 failed_candidate_p7: 133c747a1f9ab4372c9e1af7a7e9666316dc892b
-immutable_candidate_p8: ed782ccad73b43c9052ecc926177c36846b9328d
+failed_candidate_p8: ed782ccad73b43c9052ecc926177c36846b9328d
+immutable_candidate_p9: fb347272c70b6225743fdc99e9bec8b4197aad49
 candidate_branch: ssdp-6.5-frontier-model-re-evaluation
 draft_pr: 33
-p8_mechanical_qualification_run: 36067942018
-p8_binding_descendant: 65cd5da2d6793733e87d0b97f9ccce23d22b9154
-p8_binding_qualification_run: 36068315599
-p8_binding_qualification: qualification/ssdp65/P8-BINDING-QUALIFICATION.md
-p7_review: qualification/ssdp65/INDEPENDENT-REVIEW-2026-09-24-PROTOCOL-6.5-P7-NO-PASS.md
-p8_repair_qualification: qualification/ssdp65/P8-REPAIR-QUALIFICATION.md
-authoring_context_verdict: none
+p9_mechanical_qualification_run: 36091484812
+p9_binding_descendant: 69f7cda3bd9bdfdbc113b4ec5ac6da044a7d46ab
+p9_binding_qualification_run: 36091605214
+p9_binding_qualification: qualification/ssdp65/P9-BINDING-QUALIFICATION.md
 p8_review: qualification/ssdp65/INDEPENDENT-REVIEW-2026-09-24-PROTOCOL-6.5-P8-NO-PASS.md
-p8_review_status: NO_PASS
+p9_repair_qualification: qualification/ssdp65/P9-REPAIR-QUALIFICATION.md
+authoring_context_verdict: none
 stakeholder_ratification: NOT_REQUESTED
 ---
 
-# Independent Review Handoff — Protocol 6.5 P8
+# Independent Review Handoff — Protocol 6.5 P9
 
 ## Immutable Review target
 
 Perform a genuinely fresh independent assembled-candidate Review of:
 
-`P8 = ed782ccad73b43c9052ecc926177c36846b9328d`
+`P9 = fb347272c70b6225743fdc99e9bec8b4197aad49`
 
 against accepted Protocol 6.4 control:
 
 `P0 = 55c085261eb827e3047637d045a8e6917ea6b962`
 
-P1-P7 are immutable failed candidates and historical evidence only. Do not substitute the mutable branch head for P8. Use later descendants only for lifecycle/evidence state.
+P1-P8 are immutable failed candidates and historical evidence only. P9 itself is the semantic Review target. **Do not substitute the mutable branch head for P9.** Use later descendants only for mutable lifecycle state and qualification evidence.
 
-Do not inherit the P7 Review conclusion, the repair author's closure conclusion, prior Phase VII conclusions, or CI conclusions beyond the exact properties their oracles discriminate.
+Do not inherit the P8 Review conclusion, the repair author's closure conclusion, earlier Phase VII conclusions, or CI conclusions beyond the exact properties their oracles discriminate.
 
-## Mandatory P7-repair falsification
+## Governing authority and independence
 
-### B65-P7-1 — transition continuity and recovery lineage
+Start from accepted Protocol 6.4, the accepted Protocol 6.5 Phase IV-V D3 design, the active D3->D4 handoff/workplan, the Protocol 6.4 -> 6.5 preservation map, and the exact assembled P9 source. Reconstruct current authority independently before using repair-side summaries.
 
-Independently challenge the new transition/lineage owner. At minimum attempt:
+This repair/authoring context cannot self-issue the independent P9 Review verdict. Different-model corroboration is useful but not required for independence; the reviewer must not have authored P9 and must not inherit author conclusions.
 
-- same accepted version with changed public/recovery identity;
-- deletion or rewrite of an existing historical mapping;
-- insertion of history without accepted-current advancement;
-- accepted-current advance without carrying the previous accepted mapping unchanged into history;
-- accepted-current advance that does not promote the immediately previous completed candidate;
-- stale same-version recovery that predates the semantic candidate;
-- recovery on a sibling/non-descendant line;
-- Review evidence that does not descend from the semantic candidate;
-- ratification evidence that does not follow Review evidence;
-- recovery target lacking exact PASS, RATIFIED, or public-fallback state;
-- recovery mapping published from a state that is not a descendant of the recovery target;
-- valid complete recovery target followed by a legal mapping publication and accepted-current cutover;
-- equivalent future patch/minor/major transitions.
+PEM is material because this is repeated mature self-governance/release-state rework. Resolve the project-governed accepted/base PEM and validated same-branch overlay, build the bounded HAS, and treat memory as evidence-backed hypothesis input rather than authority.
 
-Use the real P6-as-P7 stale-recovery holdout plus at least one fresh P8 holdout not used to design the repair.
+## Mandatory P8-repair falsification
+
+### B65-P8-1 — ancestry/topology-correct transition-history resolution
+
+Independently challenge the repaired production resolver at the real owner boundary. At minimum attempt:
+
+- working-tree root-state change differing from committed HEAD: predecessor must be committed HEAD state;
+- committed linear transition: predecessor must come from the actual parent lineage;
+- evidence-only descendants after a state transition: walk through unchanged snapshots to the latest material predecessor boundary;
+- consecutive state transitions;
+- date-reordered merge parents;
+- divergent merge parents where one parent transition would pass and another would expose historical deletion/rewrite or accepted-current discontinuity;
+- equivalent merge-parent release states: no false ambiguity and no lost transition;
+- synthetic pull-request merge where one parent predates introduction of the root release-state owner;
+- a parent lineage lacking root release state because the owner did not yet exist;
+- multiple same-state ancestors followed by the first differing boundary;
+- proof that default `git log` ordering, commit timestamp, branch position, newest/default ref, or sibling traversal order cannot become transition authority;
+- stale/sibling/non-descendant recovery;
+- recovery with the right protocol version but wrong ancestry;
+- complete later recovery target followed by legal mapping publication/cutover.
+
+Use at least one fresh P9 topology holdout not used to design the repair.
 
 Challenge the qualification method directly:
 
-> Could all P8 tests remain green while a locally valid release-state snapshot still represents a temporal transaction that did not occur?
+> Could all P9 tests remain green while production predecessor resolution still validates the wrong temporal transaction?
 
-Verify transition history is resolved from the sole root state owner rather than a mirror or release-specific table.
+Do not answer from unit-test count. Inspect whether the actual production resolver and integration path discriminate the counterexample.
 
 ## Re-falsify prior repaired families
 
 Proportionately re-falsify:
 
+- B65-P7-1 transition continuity and recovery lineage;
 - B65-P6-1 strict root-state parser convergence;
 - B65-P6-2 canonical version/history ordering;
 - B65-P5-1 duplicate-key root ambiguity;
@@ -84,30 +93,28 @@ Proportionately re-falsify:
 - B65-P2-2/B65-R1 Review/ratification evidence applicability;
 - B65-R3 predecessor-version gating.
 
-Do not infer closure from green tests.
+Do not infer closure merely from green CI.
 
 ## Full assembled-candidate Review
 
-Perform the complete Protocol 6.5 Phase VII Review against P8 itself:
+Perform the complete Protocol 6.5 Phase VII Review against P9 itself:
 
 1. Serious Challenge pass first.
 2. DF-1 through DF-4.
 3. Local-compliance/global-failure trajectories.
 4. Out-of-matrix abstraction-adequacy search for a fresh sibling defect class.
-5. Qualification-method challenge: ask whether each oracle could stay green while its claimed property is broken.
+5. Qualification-method challenge for every material oracle.
 6. Fresh machine/state/schema/generated mutants and independent prose-semantic mutants.
 7. P65-1 through P65-6 causal ablation.
 8. Protocol 6.4 -> 6.5 preservation-map falsification.
 9. Simplicity/total-complexity inspection.
-10. Exact evidence applicability to P8.
+10. Exact evidence applicability to P9 and later lifecycle descendants.
 
-Retain at least one holdout not used to design P8. Do not fabricate a new defect if none survives falsification.
+Retain at least one holdout not used to design P9. Do not fabricate a defect if none survives falsification.
 
 ## Preservation and matched comparison
 
-Re-establish applicability for unchanged surfaces rather than inheriting it blindly.
-
-At minimum recheck or justify unchanged applicability for:
+Re-establish applicability for unchanged surfaces rather than inheriting it blindly. At minimum recheck or justify unchanged applicability for:
 
 - universal kernel word count;
 - defined hot-current projection;
@@ -117,56 +124,58 @@ At minimum recheck or justify unchanged applicability for:
 - Protocol 7 D3/D4 isolation;
 - source/generated current-prompt parity.
 
-Compare P0 versus P8 proportionately on lifecycle/current-state drift, proxy/oracle adequacy, authority/Serious-Challenge routing, and mature-system simplification/Review convergence.
+Compare P0 versus P9 proportionately on lifecycle/current-state drift, proxy/oracle adequacy, authority/Serious-Challenge routing, and mature-system simplification/Review convergence.
+
+## Evidence boundaries
+
+Exact P9 normal workflow:
+
+`36091484812`
+
+P9 binding descendant:
+
+`69f7cda3bd9bdfdbc113b4ec5ac6da044a7d46ab`
+
+Binding workflow:
+
+`36091605214`
+
+These are structural/executable/lifecycle evidence only. They establish only the properties actually discriminated by their oracles; they are not semantic Review PASS.
+
+The repair record is:
+
+`qualification/ssdp65/P9-REPAIR-QUALIFICATION.md`
+
+The binding records are:
+
+- `qualification/ssdp65/P9-FREEZE-BINDING.md`
+- `qualification/ssdp65/P9-BINDING-QUALIFICATION.md`
 
 ## Lifecycle boundary
 
 Resolve current lifecycle state from binding descendant:
 
-`65cd5da2d6793733e87d0b97f9ccce23d22b9154`
-
-Binding workflow run:
-
-`36068315599`
+`69f7cda3bd9bdfdbc113b4ec5ac6da044a7d46ab`
 
 Expected entering Review:
 
 - accepted-current: Protocol 6.4;
-- candidate: Protocol 6.5 P8;
-- semantic ref: `ed782ccad73b43c9052ecc926177c36846b9328d`;
+- candidate: Protocol 6.5 P9;
+- semantic ref: `fb347272c70b6225743fdc99e9bec8b4197aad49`;
 - Review: `NOT_RUN`;
 - ratification: `NOT_REQUESTED`;
 - public fallback: `UNAVAILABLE`;
 - recovery: `UNAVAILABLE`;
 - Protocol 7 D3/D4: unchanged.
 
-Independently verify this state.
+Independently verify this state rather than trusting the handoff.
 
 ## Disposition boundary
 
 PASS means only:
 
-`P8 is technically eligible for stakeholder ratification.`
+`P9 is technically eligible for stakeholder ratification.`
 
-It does not ratify Protocol 6.5, publish public fallback, establish recovery, change accepted-current, merge PR #33, or mutate Protocol 7 D3/D4.
+It does not ratify Protocol 6.5, publish the public fallback, establish recovery, change accepted-current, merge PR #33, or mutate Protocol 7 D3/D4.
 
-If blockers remain, preserve P8 immutably, reopen the existing workplan at the earliest owning layer, and require a new candidate identity for semantic repair.
-
-This repair/authoring context is not eligible to self-issue the independent P8 Review verdict.
-
-
-## P8 independent Review result
-
-Fresh independent Review of exact P8 ed782ccad73b43c9052ecc926177c36846b9328d is **NO-PASS**.
-
-Review record:
-
-qualification/ssdp65/INDEPENDENT-REVIEW-2026-09-24-PROTOCOL-6.5-P8-NO-PASS.md
-
-Surviving blocker:
-
-**B65-P8-1 — transition-history resolution can select a sibling merge-parent release-state snapshot rather than the actual prior governed state.**
-
-The existing D4 transition predicate is retained. Repair only the Git-history predecessor resolver in the sole release-state owner, with explicit merge/synthetic-PR topology holdouts. No D3 redesign, second state authority, stakeholder ratification, publication, recovery, accepted-current cutover, PR merge, or Protocol 7 D3/D4 mutation is authorized.
-
-Any semantic repair creates a new candidate identity.
+If blockers remain, preserve P9 immutably, reopen the existing workplan at the earliest owning layer, and require a new candidate identity for semantic repair.

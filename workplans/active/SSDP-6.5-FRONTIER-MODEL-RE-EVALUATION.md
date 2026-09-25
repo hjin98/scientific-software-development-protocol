@@ -5,8 +5,8 @@ protocol_version: 6.4.0
 target_protocol_version: 6.5.0
 subject_baseline: P0 = Protocol 6.4 at 55c085261eb827e3047637d045a8e6917ea6b962 (recovery 74bc572ef516cae417437a2027eeff52a2e25c15)
 diagnostic_commit: 81375d8142a8130b80cd82f2304d3e16bc3fc390
-status: p9-bound-binding-qualification-pending
-current_phase: PHASE VII P9 FROZEN / BINDING QUALIFICATION PENDING
+status: ready-p9-independent-review
+current_phase: PHASE VII P9 FROZEN / FRESH INDEPENDENT REVIEW REQUIRED
 branch: ssdp-6.5-frontier-model-re-evaluation
 created_date: 2026-09-24
 adjudication: qualification/ssdp65/CROSS-MODEL-ADJUDICATION-2026-09-24.md
@@ -24,11 +24,11 @@ independent_review: qualification/ssdp65/INDEPENDENT-REVIEW-2026-09-24-PROTOCOL-
 ```text
 P0 CONTROL:                         FROZEN — 55c085261eb827e3047637d045a8e6917ea6b962
 P1-P8:                              FROZEN / FAILED INDEPENDENT REVIEW
-P8 CANDIDATE:                       FROZEN — ed782ccad73b43c9052ecc926177c36846b9328d
-P8 EXACT PR QUALIFICATION:          PASS — run 36067942018
-P8 INDEPENDENT REVIEW:              NO-PASS — qualification/ssdp65/INDEPENDENT-REVIEW-2026-09-24-PROTOCOL-6.5-P8-NO-PASS.md
-SURVIVING BLOCKER:                  B65-P8-1 transition-history resolution
-PHASE VII:                          D4 REPAIR REQUIRED / NEW CANDIDATE AFTER REPAIR
+P9 CANDIDATE:                       FROZEN — fb347272c70b6225743fdc99e9bec8b4197aad49
+P9 EXACT PR QUALIFICATION:          PASS — run 36091484812
+P9 BINDING DESCENDANT:              69f7cda3bd9bdfdbc113b4ec5ac6da044a7d46ab
+P9 BINDING QUALIFICATION:           PASS — run 36091605214
+PHASE VII:                          READY FOR FRESH P9 REVIEW
 PUBLIC 6.5 FALLBACK:                UNAVAILABLE
 6.5 RECOVERY:                       UNAVAILABLE
 6.5 RATIFICATION:                   NOT REQUESTED
@@ -974,3 +974,26 @@ Immutable replacement candidate:
 This later descendant binds P9 in the sole mutable release-state owner with Review reset to `NOT_RUN`, stakeholder ratification `NOT_REQUESTED`, public fallback/recovery `UNAVAILABLE`, and accepted-current Protocol 6.4.
 
 P8 remains immutable NO-PASS evidence. The next gate is normal workflow qualification of this binding descendant. No independent Review, ratification, publication, recovery, cutover, PR merge, or Protocol 7 mutation is authorized until that gate passes.
+
+
+## 39. P9 binding qualification and fresh-Review readiness
+
+Immutable P9 `fb347272c70b6225743fdc99e9bec8b4197aad49` passed exact-candidate normal workflow run `36091484812` across the complete build and Orchestrator Core jobs.
+
+Binding descendant `69f7cda3bd9bdfdbc113b4ec5ac6da044a7d46ab` passed normal workflow run `36091605214` with:
+
+- candidate semantic ref: exact P9;
+- Review: `NOT_RUN`;
+- stakeholder ratification: `NOT_REQUESTED`;
+- public fallback: `UNAVAILABLE`;
+- recovery: `UNAVAILABLE`;
+- accepted-current: Protocol 6.4;
+- Protocol 7 D3/D4: unchanged.
+
+Durable qualification records:
+
+- `qualification/ssdp65/P9-REPAIR-QUALIFICATION.md`
+- `qualification/ssdp65/P9-FREEZE-BINDING.md`
+- `qualification/ssdp65/P9-BINDING-QUALIFICATION.md`
+
+The next authorized step is a genuinely fresh independent assembled-candidate Review of exact P9. P1-P8 remain immutable failed candidates/historical evidence. No stakeholder ratification, public-fallback publication, recovery establishment, accepted-current cutover, PR merge, or Protocol 7 D3/D4 mutation is authorized.
