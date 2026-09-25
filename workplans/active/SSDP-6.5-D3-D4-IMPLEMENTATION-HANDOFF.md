@@ -3,7 +3,7 @@ kind: implementation-workplan
 workplan_id: SSDP-6.5-D3-D4-IMPLEMENTATION-HANDOFF
 protocol_version: 6.4.0
 target_protocol_version: 6.5.0
-status: reopened-p10-no-pass
+status: ready-p11-independent-review
 parent_workplan: workplans/active/SSDP-6.5-FRONTIER-MODEL-RE-EVALUATION.md
 design_authority: qualification/ssdp65/PHASE-IV-V-DESIGN-CLOSURE.md
 baseline: 55c085261eb827e3047637d045a8e6917ea6b962
@@ -1048,3 +1048,26 @@ advancing the independent Review handoff to P11.
 
 No independent Review, stakeholder ratification, public-fallback publication, recovery establishment, accepted-current
 cutover, PR merge, or Protocol 7 mutation is authorized by this binding.
+
+
+## 47. P11 binding qualification complete
+
+Immutable P11 `6352accc7962fc188976fc1bcea5e081681d99c5` passed exact-candidate workflow run `36103358186`.
+
+Binding descendant `0490ecb0c685b403df78f62f143896c44c078d68` passed normal workflow run `36103484871` with:
+
+- candidate semantic ref: exact P11;
+- Review: `NOT_RUN`;
+- stakeholder ratification: `NOT_REQUESTED`;
+- public fallback/recovery: `UNAVAILABLE`;
+- accepted-current: Protocol 6.4;
+- Protocol 7 D3/D4: unchanged.
+
+Durable qualification records:
+
+- `qualification/ssdp65/P11-REPAIR-QUALIFICATION.md`;
+- `qualification/ssdp65/P11-FREEZE-BINDING.md`;
+- `qualification/ssdp65/P11-BINDING-QUALIFICATION.md`.
+
+The next authorized stage is a genuinely fresh independent assembled-candidate Review of exact P11. No stakeholder
+ratification, publication, recovery, accepted-current cutover, PR merge, or Protocol 7 D3/D4 mutation is authorized.

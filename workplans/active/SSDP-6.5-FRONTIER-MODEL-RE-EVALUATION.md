@@ -5,8 +5,8 @@ protocol_version: 6.4.0
 target_protocol_version: 6.5.0
 subject_baseline: P0 = Protocol 6.4 at 55c085261eb827e3047637d045a8e6917ea6b962 (recovery 74bc572ef516cae417437a2027eeff52a2e25c15)
 diagnostic_commit: 81375d8142a8130b80cd82f2304d3e16bc3fc390
-status: p11-binding-qualification-required
-current_phase: PHASE VII P11 FROZEN / BINDING QUALIFICATION REQUIRED
+status: ready-p11-independent-review
+current_phase: PHASE VII P11 FROZEN / FRESH INDEPENDENT REVIEW REQUIRED
 branch: ssdp-6.5-frontier-model-re-evaluation
 created_date: 2026-09-24
 adjudication: qualification/ssdp65/CROSS-MODEL-ADJUDICATION-2026-09-24.md
@@ -1111,3 +1111,16 @@ ratification `NOT_REQUESTED`, public fallback/recovery `UNAVAILABLE`, and accept
 Binding workflow qualification is required before fresh independent Review readiness. P10 remains immutable NO-PASS
 evidence. No ratification, publication, recovery, accepted-current cutover, PR merge, or Protocol 7 mutation is
 authorized.
+
+
+## 46. P11 binding qualification and fresh-Review readiness
+
+Immutable P11 `6352accc7962fc188976fc1bcea5e081681d99c5` passed exact-candidate workflow `36103358186`.
+
+Binding descendant `0490ecb0c685b403df78f62f143896c44c078d68` passed workflow `36103484871` with Review `NOT_RUN`, ratification
+`NOT_REQUESTED`, public fallback/recovery `UNAVAILABLE`, accepted-current Protocol 6.4, and Protocol 7 unchanged.
+
+The durable independent-Review handoff now targets exact P11. P1-P10 remain immutable failed candidates/historical
+evidence.
+
+The next authorized action is a genuinely fresh independent assembled-candidate Review of exact P11.
