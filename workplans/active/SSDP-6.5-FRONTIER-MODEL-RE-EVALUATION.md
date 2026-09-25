@@ -5,8 +5,8 @@ protocol_version: 6.4.0
 target_protocol_version: 6.5.0
 subject_baseline: P0 = Protocol 6.4 at 55c085261eb827e3047637d045a8e6917ea6b962 (recovery 74bc572ef516cae417437a2027eeff52a2e25c15)
 diagnostic_commit: 81375d8142a8130b80cd82f2304d3e16bc3fc390
-status: d3-reopened-importance-attention-economy
-current_phase: PHASE V D3 DOCTRINE REOPEN — IMPORTANCE / ATTENTION / PROPORTIONAL RIGOR
+status: d3-workplan-reviewed-implementation-ready
+current_phase: PHASE V D3 DOCTRINE REOPEN — WORKPLAN REVIEW COMPLETE / IMPLEMENTATION READY
 branch: ssdp-6.5-frontier-model-re-evaluation
 created_date: 2026-09-24
 adjudication: qualification/ssdp65/CROSS-MODEL-ADJUDICATION-2026-09-24.md
@@ -1481,3 +1481,27 @@ The new governing proposal is:
 This is a genuine D3/protocol-doctrine reopen, not a P18 D4 repair. No P18 Review result should be issued while this
 reopen is active. The next replacement semantic candidate must implement and qualify the accepted outcome of the new
 workplan before Protocol 6.5 returns to independent Review.
+
+
+## 67. Proportional-rigor workplan review complete — implementation ready
+
+The stakeholder-directed D3 reopen workplan was independently checked against current abstraction/concretization,
+simplicity, convergence, evidence, workflow, testing, PEM, documentation, release, and versioning doctrine before D4
+implementation.
+
+The reviewed plan closes mandatory-obligation ambiguity, separates consequence from unresolved uncertainty, adds
+repair/experiment-vs-analysis and explicit stopping rules, prevents evidence-only fixture/oracle repairs from
+automatically creating replacement semantic candidates, binds a bounded project-memory/HAS basis, and adds protocol
+release documentation closeout.
+
+Root `AGENTS.md` now persistently requires every successor cycle to recompile/review the user-facing `README.md`
+and update `CHANGELOG.md` after semantic stabilization and before semantic-candidate freeze. The design deliberately
+does not add a prose-quality parser or another CI bureaucracy; a mechanical docs validator remains contingent on a
+future demonstrated objective drift mode.
+
+The active implementation contract is:
+
+`workplans/active/SSDP-6.5-IMPORTANCE-WEIGHTED-ATTENTION-AND-PROPORTIONAL-RIGOR.md`
+
+P18 remains immutable historical mechanical evidence. Its suspended Review does not resume; implementation must produce
+and qualify a replacement semantic candidate under the reviewed doctrine.
