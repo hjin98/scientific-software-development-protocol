@@ -22,10 +22,23 @@ class Protocol65ReleaseStateTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
         cls.path = ROOT / "PROTOCOL-RELEASE-STATE.yaml"
-        cls.data = release_state.load(cls.path)
+        cls.live_data = release_state.load(cls.path)
+        cls.data = copy.deepcopy(cls.live_data)
+        major, minor, _ = map(int, cls.data["accepted_current"]["version"].split("."))
+        cls.data["candidate"] = {
+            "version": f"{major}.{minor + 1}.0",
+            "semantic_ref": "UNFROZEN",
+            "review": {"state": "NOT_RUN", "evidence_ref": "NONE"},
+            "ratification": {"state": "NOT_REQUESTED", "evidence_ref": "NONE"},
+            "public_source_ref": "UNAVAILABLE",
+            "recovery_ref": "UNAVAILABLE",
+        }
 
     def test_repository_release_state_is_coherent_and_refs_realize(self) -> None:
-        self.assertEqual(release_state.validate_release_state(self.data, repo_root=ROOT), [])
+        self.assertEqual(
+            release_state.validate_release_state(self.live_data, repo_root=ROOT),
+            [],
+        )
 
 
     def test_release_state_load_rejects_duplicate_mapping_keys(self) -> None:
