@@ -3,7 +3,7 @@ kind: implementation-workplan
 workplan_id: SSDP-6.5-D3-D4-IMPLEMENTATION-HANDOFF
 protocol_version: 6.4.0
 target_protocol_version: 6.5.0
-status: p16-repair-frozen-awaiting-independent-review
+status: implementation-complete-p16-review-ready
 parent_workplan: workplans/active/SSDP-6.5-FRONTIER-MODEL-RE-EVALUATION.md
 design_authority: qualification/ssdp65/PHASE-IV-V-DESIGN-CLOSURE.md
 baseline: 55c085261eb827e3047637d045a8e6917ea6b962
@@ -1572,3 +1572,13 @@ transition tests, and adds no new owner or machinery.
 
 D3 remains closed. P16 must be bound at Review `NOT_RUN` and receive a genuinely fresh independent assembled-candidate
 Review followed by new stakeholder ratification before publication.
+
+
+## 65. P16 binding qualification complete
+
+Exact P16 `f7874aa1fcaef04429fe4725d3ba20e570f9326d` passed workflow `36157280206`.
+
+Binding descendant `21689d27793ebe12cfecce0af74849abf5654461` passed workflow `36157584333` with Review `NOT_RUN`, ratification
+`NOT_REQUESTED`, public fallback/recovery `UNAVAILABLE`, accepted-current Protocol 6.4, and Protocol 7 unchanged.
+
+The implementation repair is complete. This context authored P16 and must not self-issue its independent Review.

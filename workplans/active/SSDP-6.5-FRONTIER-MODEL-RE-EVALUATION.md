@@ -5,7 +5,7 @@ protocol_version: 6.4.0
 target_protocol_version: 6.5.0
 subject_baseline: P0 = Protocol 6.4 at 55c085261eb827e3047637d045a8e6917ea6b962 (recovery 74bc572ef516cae417437a2027eeff52a2e25c15)
 diagnostic_commit: 81375d8142a8130b80cd82f2304d3e16bc3fc390
-status: p16-awaiting-independent-review
+status: p16-review-ready
 current_phase: PHASE VII FRESH INDEPENDENT REVIEW — P16
 branch: ssdp-6.5-frontier-model-re-evaluation
 created_date: 2026-09-24
@@ -1348,3 +1348,14 @@ owned by D4 release-state validation.
 
 P15 Review/ratification evidence remains immutable historical evidence only. P16 requires fresh independent Review
 and new explicit stakeholder ratification before release publication can resume.
+
+
+## 59. P16 binding qualification — fresh Review ready
+
+Exact P16 `f7874aa1fcaef04429fe4725d3ba20e570f9326d` passed workflow `36157280206`; binding descendant `21689d27793ebe12cfecce0af74849abf5654461` passed workflow
+`36157584333`.
+
+P16 is now the sole semantic Review target with Review `NOT_RUN` and ratification `NOT_REQUESTED`. P15 Review and
+ratification remain immutable historical evidence only.
+
+Next gate: genuinely fresh independent assembled-candidate Review of exact P16.
