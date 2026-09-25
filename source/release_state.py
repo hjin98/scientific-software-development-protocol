@@ -783,8 +783,8 @@ def _governed_owner_history_is_continuous(
             errors.append(
                 "release-state ancestry at "
                 f"{commit} is missing PROTOCOL-RELEASE-STATE.yaml after the lineage "
-                "was already governed; owner deletion/reintroduction cannot be "
-                "hidden by a later material transition"
+                "was already governed; owner deletion/reintroduction cannot be treated "
+                "as pre-owner ancestry or hidden by a later material transition"
             )
             valid = False
 
@@ -839,8 +839,7 @@ def _previous_governed_release_states(
     if head_state is None:
         return []
 
-    if not _governed_owner_history_is_continuous(root, "HEAD", errors):
-        return []
+    _governed_owner_history_is_continuous(root, "HEAD", errors)
 
     # An uncommitted root-state edit is a transition from the committed HEAD state.
     if head_state != current:

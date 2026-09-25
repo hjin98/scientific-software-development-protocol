@@ -1297,3 +1297,26 @@ controls remain in the affected regression surface.
 
 This commit is only a **prospective replacement semantic candidate**. P12 remains immutable NO-PASS evidence. Do not
 assign the next candidate number until exact-candidate normal CI passes.
+
+
+## 53. Prospective repair regression reconciliation
+
+The first prospective B65-P12 repair commit
+`e01a1e7e63072b15ddbe72a226f3a4deffafc9f7` passed the real repository release-state validator and Orchestrator Core
+but failed full protocol regression.
+
+The failure exposed an unnecessary concretization change: the new continuity guard short-circuited predecessor
+discovery for an already-invalid history, whereas prior production behavior preserved any independently discoverable
+material predecessor while also emitting a fatal owner-deletion error.
+
+The repair is narrowed accordingly:
+
+- canonical history continuity remains a fatal validation error;
+- predecessor discovery still proceeds so existing transition diagnostics/evidence remain available;
+- the continuity error retains the established
+  `owner deletion/reintroduction cannot be treated as pre-owner ancestry` family wording and adds the later-transition
+  laundering consequence;
+- no governing semantic requirement is weakened.
+
+The failed prospective commit is not a frozen candidate. The reconciled descendant must pass exact-commit normal CI
+before any new candidate identity is assigned.

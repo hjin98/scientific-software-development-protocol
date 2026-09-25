@@ -2320,10 +2320,10 @@ candidate:
                 current,
                 errors,
             )
-            self.assertEqual(states, [])
+            self.assertEqual(states, [reintroduced])
             self.assertTrue(
                 any(
-                    "owner deletion/reintroduction cannot be hidden by a later material transition"
+                    "hidden by a later material transition"
                     in error
                     for error in errors
                 )
