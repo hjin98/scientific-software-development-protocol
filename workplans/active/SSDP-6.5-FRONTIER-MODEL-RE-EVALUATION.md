@@ -5,8 +5,8 @@ protocol_version: 6.4.0
 target_protocol_version: 6.5.0
 subject_baseline: P0 = Protocol 6.4 at 55c085261eb827e3047637d045a8e6917ea6b962 (recovery 74bc572ef516cae417437a2027eeff52a2e25c15)
 diagnostic_commit: 81375d8142a8130b80cd82f2304d3e16bc3fc390
-status: prospective-p10-exact-ci-required
-current_phase: PHASE VII B65-P9-1 REPAIRED / PROSPECTIVE P10 EXACT CI REQUIRED
+status: p10-binding-qualification-required
+current_phase: PHASE VII P10 FROZEN / BINDING QUALIFICATION REQUIRED
 branch: ssdp-6.5-frontier-model-re-evaluation
 created_date: 2026-09-24
 adjudication: qualification/ssdp65/CROSS-MODEL-ADJUDICATION-2026-09-24.md
@@ -1037,3 +1037,14 @@ Fresh production-resolver tests cover parent-order independence, timestamp indep
 No D3 authority changed. No new registry, mirror, topology service, compatibility layer, candidate-specific branch, or semantic parser was introduced.
 
 This implementation commit is prospective P10 only. Exact-candidate normal CI must pass before its SHA is frozen/bound from a later descendant.
+
+
+## 42. P10 frozen and bound for qualification
+
+Exact-candidate workflow run `36098785911` passed on semantic repair commit:
+
+`275b23bfa45cc72145d2079c8d945a6ff5a5c216`
+
+That commit is frozen as immutable P10. This descendant binds P10 with Review `NOT_RUN`, ratification `NOT_REQUESTED`, public fallback/recovery `UNAVAILABLE`, and accepted-current Protocol 6.4.
+
+The binding descendant also adds two evidence-only working-tree topology controls for first introduction versus post-governance reintroduction. Binding/full workflow qualification must pass before the fresh independent Review handoff is advanced to P10.

@@ -3,7 +3,7 @@ kind: implementation-workplan
 workplan_id: SSDP-6.5-D3-D4-IMPLEMENTATION-HANDOFF
 protocol_version: 6.4.0
 target_protocol_version: 6.5.0
-status: p9-no-pass-b65-p9-1-repair-required
+status: p10-binding-qualification-required
 parent_workplan: workplans/active/SSDP-6.5-FRONTIER-MODEL-RE-EVALUATION.md
 design_authority: qualification/ssdp65/PHASE-IV-V-DESIGN-CLOSURE.md
 baseline: 55c085261eb827e3047637d045a8e6917ea6b962
@@ -869,3 +869,21 @@ Fresh real-Git qualification added at the production resolver covers:
 The accepted PEM basis remains P0 `55c085261eb827e3047637d045a8e6917ea6b962` with the current branch overlay. SP-002 and FF-001 remain release-lifecycle evidence, PC-001 remains an authority-bound frozen-resource preservation obligation, and DS-001 requires real-owner qualification rather than proxy-only closure. No PEM item requires preserving the P9 mechanism itself.
 
 The implementation commit produced by this section is only the **prospective P10** semantic candidate. P9 remains immutable NO-PASS evidence and remains the root release-state candidate until the implementation commit passes exact-candidate normal CI. After that pass, a later descendant may freeze/bind the exact implementation SHA as P10 with Review reset to `NOT_RUN`.
+
+
+## 36. P10 freeze and lifecycle binding
+
+Exact prospective-P10 workflow run `36098785911` passed the complete build and Orchestrator Core jobs.
+
+The immutable replacement semantic candidate is therefore frozen as:
+
+`P10 = 275b23bfa45cc72145d2079c8d945a6ff5a5c216`
+
+This later descendant binds exact P10 in root `PROTOCOL-RELEASE-STATE.yaml` with Review reset to `NOT_RUN`, stakeholder ratification `NOT_REQUESTED`, public fallback/recovery `UNAVAILABLE`, and accepted-current Protocol 6.4.
+
+Two additional evidence-only topology tests are added in this binding descendant to exercise the new explicit HEAD-missing branch:
+
+- genuine first owner introduction from pre-owner HEAD remains legal;
+- working-tree owner reintroduction after a governed deletion is rejected.
+
+These tests do not mutate P10 production semantics. Normal workflow qualification of this binding descendant is required before fresh independent Review handoff.

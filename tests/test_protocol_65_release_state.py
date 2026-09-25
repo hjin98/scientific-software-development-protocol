@@ -1635,5 +1635,54 @@ candidate:
             self.assertEqual(states, [previous])
 
 
+    def test_previous_governed_states_allow_working_tree_first_owner_introduction(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            root = Path(tmpdir)
+            self._init_topology_repo(root)
+            (root / "pre-owner.txt").write_text("pre-owner\n", encoding="utf-8")
+            self._commit_topology_repo(root, "pre-owner")
+
+            current = self._topology_state("b")
+            self._write_topology_state(root, current)
+
+            errors: list[str] = []
+            states = release_state._previous_governed_release_states(
+                root,
+                current,
+                errors,
+            )
+            self.assertEqual(errors, [])
+            self.assertEqual(states, [])
+
+    def test_previous_governed_states_reject_working_tree_reintroduction(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            root = Path(tmpdir)
+            self._init_topology_repo(root)
+            previous = self._topology_state("a")
+            self._write_topology_state(root, previous)
+            self._commit_topology_repo(root, "governed state")
+
+            (root / "PROTOCOL-RELEASE-STATE.yaml").unlink()
+            self._commit_topology_repo(root, "delete owner")
+
+            current = self._topology_state("b")
+            self._write_topology_state(root, current)
+
+            errors: list[str] = []
+            states = release_state._previous_governed_release_states(
+                root,
+                current,
+                errors,
+            )
+            self.assertEqual(states, [])
+            self.assertTrue(
+                any(
+                    "owner deletion/reintroduction cannot be treated as pre-owner ancestry"
+                    in error
+                    for error in errors
+                )
+            )
+
+
 if __name__ == "__main__":
     unittest.main()
