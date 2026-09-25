@@ -82,6 +82,8 @@ Use the smallest set of skills that covers the semantics you are actually changi
 
 The first four are authority-bearing D1-D4 roles. The last three are supporting specialists.
 
+The active skill entrypoint controls what context is loaded. Ordinary links and **package membership do not imply activation**; they make material discoverable, not automatically active. The universal routing and authority kernel is [`source/shared/references/abstraction-and-concretization.md`](source/shared/references/abstraction-and-concretization.md).
+
 The portable runtime unit is `dist/skills/<skill-name>/`; top-level ZIPs contain the same bundles for transport. See [PORTABILITY.md](PORTABILITY.md) for installation and routing details.
 
 ## Quick start
