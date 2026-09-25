@@ -1348,11 +1348,10 @@ candidate:
         with tempfile.TemporaryDirectory() as tmpdir:
             root = Path(tmpdir)
             self._init_topology_repo(root)
-            base = self._topology_state("a")
-            self._write_topology_state(root, base)
+            (root / "pre-owner.txt").write_text("pre-owner\n", encoding="utf-8")
             base_ref = self._commit_topology_repo(
                 root,
-                "base",
+                "pre-owner base",
                 date="2026-01-01T00:00:00+00:00",
             )
 
