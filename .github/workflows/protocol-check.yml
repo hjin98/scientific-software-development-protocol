@@ -135,7 +135,27 @@ jobs:
         continue-on-error: true
         run: >-
           PYTHONPATH=tests python -m unittest test_build_index_contract test_package_reference_closure test_protocol_511_tool_assistance test_protocol_512_convergence test_protocol_513_counterfactual_oracles test_protocol_513_live_tool_qualification test_protocol_513_oracle_family_closure test_protocol_513_tool_routing_codeql_compression test_protocol_515_language_profiles test_protocol_516_lifecycle_closeout test_protocol_516_long_horizon_quality test_protocol_516_orchestration test_protocol_59_review_rework test_protocol_59_route_uri_safety test_protocol_61_evidence_evolution test_protocol_62_closeout test_protocol_62_representation test_protocol_63_bootstrap test_protocol_63_closeout test_protocol_63_engineering_memory test_protocol_63_independent_review_repairs test_protocol_63_reopened_repairs test_protocol_64_axiomatic_traceability test_protocol_64_bootstrap_readiness test_protocol_65_current_state_ownership test_protocol_65_pem_canonical_git test_protocol_65_pem_parser_strictness test_protocol_65_pem_reconciliation test_protocol_65_pem_schema_parity test_protocol_65_release_state test_protocol_contracts test_protocol_effective_compression test_protocol_engineering_stewardship test_protocol_portability test_protocol_proxy_proof_acceptance test_protocol_tooling -v
-      - name: Run protocol regression tests
+      - name: Capture discover regression
+        continue-on-error: true
+        shell: bash
+        run: |
+          set +e
+          python -m unittest discover -s tests -v > /tmp/discover.log 2>&1
+          status=$?
+          exit "$status"
+      - name: Diag failure in release-state module
+        continue-on-error: true
+        run: grep -Eq '^(FAIL|ERROR): .*test_protocol_65_release_state' /tmp/discover.log
+      - name: Diag failure in other Protocol 6.5 module
+        continue-on-error: true
+        run: grep -Eq '^(FAIL|ERROR): .*test_protocol_65_(current_state_ownership|pem_)' /tmp/discover.log
+      - name: Diag failure in pre-6.5 module
+        continue-on-error: true
+        run: grep -Eq '^(FAIL|ERROR): .*test_protocol_(5|6[1-4]|51|52|59|61|62|63|64)' /tmp/discover.log
+      - name: Diag failure in generic module
+        continue-on-error: true
+        run: grep -Eq '^(FAIL|ERROR): .*test_(build_index_contract|package_reference_closure|protocol_contracts|protocol_effective_compression|protocol_engineering_stewardship|protocol_portability|protocol_proxy_proof_acceptance|protocol_tooling)' /tmp/discover.log
+      - name: Preserve canonical failing gate
         run: python -m unittest discover -s tests -v
       - name: Build canonical skill packages once
         run: python source/build_skills.py --output /tmp/protocol-dist
