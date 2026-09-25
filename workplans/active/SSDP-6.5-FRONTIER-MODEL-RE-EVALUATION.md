@@ -5,8 +5,8 @@ protocol_version: 6.4.0
 target_protocol_version: 6.5.0
 subject_baseline: P0 = Protocol 6.4 at 55c085261eb827e3047637d045a8e6917ea6b962 (recovery 74bc572ef516cae417437a2027eeff52a2e25c15)
 diagnostic_commit: 81375d8142a8130b80cd82f2304d3e16bc3fc390
-status: reopened-p10-no-pass
-current_phase: PHASE VII P10 NO-PASS / D4 REPAIR REQUIRED
+status: p11-binding-qualification-required
+current_phase: PHASE VII P11 FROZEN / BINDING QUALIFICATION REQUIRED
 branch: ssdp-6.5-frontier-model-re-evaluation
 created_date: 2026-09-24
 adjudication: qualification/ssdp65/CROSS-MODEL-ADJUDICATION-2026-09-24.md
@@ -1093,4 +1093,21 @@ P10 remains immutable failed Review evidence. Any semantic repair requires a new
 exact-candidate qualification, later lifecycle binding, and another fresh independent assembled-candidate Review.
 
 No stakeholder ratification, publication, recovery, accepted-current cutover, PR merge, or Protocol 7 mutation is
+authorized.
+
+
+## 45. B65-P10-1 repair qualified and P11 frozen
+
+The minimal D4 repair for B65-P10-1 is exact commit:
+
+`6352accc7962fc188976fc1bcea5e081681d99c5`
+
+Exact-candidate normal workflow run `36103358186` passed the complete build and Orchestrator Core jobs, including the
+fresh shallow-history production-resolver holdouts.
+
+The repair commit is frozen as immutable P11. A later lifecycle descendant binds P11 with Review `NOT_RUN`,
+ratification `NOT_REQUESTED`, public fallback/recovery `UNAVAILABLE`, and accepted-current Protocol 6.4.
+
+Binding workflow qualification is required before fresh independent Review readiness. P10 remains immutable NO-PASS
+evidence. No ratification, publication, recovery, accepted-current cutover, PR merge, or Protocol 7 mutation is
 authorized.

@@ -1028,3 +1028,23 @@ This commit is only the **prospective replacement semantic candidate**. P10 rema
 Do not assign the next P-number until exact-candidate normal CI passes. After that pass, bind the exact repair SHA from
 a later lifecycle descendant with Review reset to `NOT_RUN`, rerun binding qualification, and require another fresh
 independent assembled-candidate Review.
+
+
+## 46. P11 freeze and lifecycle binding
+
+The B65-P10-1 repair commit passed exact-candidate normal workflow run `36103358186` across both complete build and
+Orchestrator Core jobs.
+
+The immutable replacement semantic candidate is therefore frozen as:
+
+`P11 = 6352accc7962fc188976fc1bcea5e081681d99c5`
+
+This later lifecycle descendant binds exact P11 in root `PROTOCOL-RELEASE-STATE.yaml` with Review reset to
+`NOT_RUN`, stakeholder ratification `NOT_REQUESTED`, public fallback/recovery `UNAVAILABLE`, and accepted-current
+Protocol 6.4.
+
+P10 remains immutable NO-PASS evidence. Binding/full workflow qualification of this descendant is required before
+advancing the independent Review handoff to P11.
+
+No independent Review, stakeholder ratification, public-fallback publication, recovery establishment, accepted-current
+cutover, PR merge, or Protocol 7 mutation is authorized by this binding.
