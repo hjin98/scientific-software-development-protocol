@@ -522,7 +522,11 @@ def validate_release_transition(previous: Any, current: Any) -> list[str]:
         errors.append(
             "accepted_current advancement must preserve prior history and add exactly the previous accepted_current version"
         )
-    if current_historical.get(previous_version) != previous_accepted:
+    previous_accepted_historical = {
+        "public_source_ref": previous_accepted.get("public_source_ref"),
+        "recovery_ref": previous_accepted.get("recovery_ref"),
+    }
+    if current_historical.get(previous_version) != previous_accepted_historical:
         errors.append(
             "accepted_current advancement must move the previous accepted_current mapping unchanged into historical"
         )

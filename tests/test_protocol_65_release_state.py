@@ -1044,6 +1044,13 @@ semantic_ref: {"c" * 40}
         self.assertTrue(any("add exactly the previous accepted_current version" in error for error in errors))
         self.assertTrue(any("move the previous accepted_current mapping unchanged" in error for error in errors))
 
+    def test_accepted_cutover_rejects_redundant_version_in_history_transfer(self) -> None:
+        previous, current, previous_version = self._accepted_cutover_fixture()
+        redundant = copy.deepcopy(current)
+        redundant["historical"][previous_version]["version"] = previous_version
+        errors = release_state.validate_release_transition(previous, redundant)
+        self.assertTrue(any("move the previous accepted_current mapping unchanged" in error for error in errors))
+
     def test_accepted_cutover_rejects_mutated_history_transfer(self) -> None:
         previous, current, previous_version = self._accepted_cutover_fixture()
         mutated_history = copy.deepcopy(current)
