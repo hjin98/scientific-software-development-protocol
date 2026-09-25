@@ -25,116 +25,6 @@ jobs:
         run: python source/release_state.py
       - name: Validate project engineering memory
         run: python source/project_engineering_memory.py PROJECT-ENGINEERING-MEMORY.md
-      - name: Diag topology basics
-        continue-on-error: true
-        run: >-
-          python -m unittest
-          tests.test_protocol_65_release_state.Protocol65ReleaseStateTests.test_previous_governed_states_use_head_for_working_tree_change
-          tests.test_protocol_65_release_state.Protocol65ReleaseStateTests.test_previous_governed_states_use_linear_parent_boundary
-          tests.test_protocol_65_release_state.Protocol65ReleaseStateTests.test_previous_governed_states_cross_evidence_only_descendants
-          tests.test_protocol_65_release_state.Protocol65ReleaseStateTests.test_previous_governed_states_cover_date_reordered_merge_parents
-          tests.test_protocol_65_release_state.Protocol65ReleaseStateTests.test_previous_governed_states_deduplicate_equivalent_merge_lineages
-          tests.test_protocol_65_release_state.Protocol65ReleaseStateTests.test_previous_governed_states_handle_synthetic_pr_merge
-      - name: Diag topology owner continuity
-        continue-on-error: true
-        run: >-
-          python -m unittest
-          tests.test_protocol_65_release_state.Protocol65ReleaseStateTests.test_previous_governed_states_reject_deleted_owner_merge_lineage
-          tests.test_protocol_65_release_state.Protocol65ReleaseStateTests.test_previous_governed_states_reject_long_owner_absence
-          tests.test_protocol_65_release_state.Protocol65ReleaseStateTests.test_previous_governed_states_reject_same_lineage_reintroduction
-          tests.test_protocol_65_release_state.Protocol65ReleaseStateTests.test_previous_governed_states_allow_long_genuine_pre_owner_lineage
-          tests.test_protocol_65_release_state.Protocol65ReleaseStateTests.test_previous_governed_states_fail_closed_on_shallow_working_tree_reintroduction
-          tests.test_protocol_65_release_state.Protocol65ReleaseStateTests.test_previous_governed_states_fail_closed_on_shallow_missing_merge_parent
-          tests.test_protocol_65_release_state.Protocol65ReleaseStateTests.test_previous_governed_states_allow_working_tree_first_owner_introduction
-          tests.test_protocol_65_release_state.Protocol65ReleaseStateTests.test_previous_governed_states_reject_working_tree_reintroduction
-      - name: Diag topology canonical storage
-        continue-on-error: true
-        run: >-
-          python -m unittest
-          tests.test_protocol_65_release_state.Protocol65ReleaseStateTests.test_previous_governed_states_fail_closed_on_unreadable_historical_owner_objects
-          tests.test_protocol_65_release_state.Protocol65ReleaseStateTests.test_previous_governed_states_use_canonical_ancestry_under_replace_ref
-          tests.test_protocol_65_release_state.Protocol65ReleaseStateTests.test_previous_governed_states_use_canonical_ancestry_under_graft
-          tests.test_protocol_65_release_state.Protocol65ReleaseStateTests.test_previous_governed_states_follow_readable_alternate_object_store
-          tests.test_protocol_65_release_state.Protocol65ReleaseStateTests.test_previous_governed_states_reject_laundered_reintroduction_after_later_transition
-      - name: Diag new owner-present holdouts
-        continue-on-error: true
-        run: >-
-          python -m unittest
-          tests.test_protocol_65_release_state.Protocol65ReleaseStateTests.test_previous_governed_states_reject_laundered_owner_present_history_rewrite
-          tests.test_protocol_65_release_state.Protocol65ReleaseStateTests.test_previous_governed_states_reject_laundered_owner_present_accepted_rewrite
-          tests.test_protocol_65_release_state.Protocol65ReleaseStateTests.test_previous_governed_states_allow_multiple_legal_owner_present_transitions
-      - name: Diag full release-state module
-        continue-on-error: true
-        run: python -m unittest tests.test_protocol_65_release_state -v
-      - name: Diag other Protocol 6.5 modules
-        continue-on-error: true
-        run: >-
-          python -m unittest
-          tests.test_protocol_65_current_state_ownership
-          tests.test_protocol_65_pem_canonical_git
-          tests.test_protocol_65_pem_parser_strictness
-          tests.test_protocol_65_pem_reconciliation
-          tests.test_protocol_65_pem_schema_parity
-          -v
-      - name: Diag pre-6.5 modules
-        continue-on-error: true
-        run: >-
-          python -m unittest
-          tests.test_build_index_contract
-          tests.test_package_reference_closure
-          tests.test_protocol_511_tool_assistance
-          tests.test_protocol_512_convergence
-          tests.test_protocol_513_counterfactual_oracles
-          tests.test_protocol_513_live_tool_qualification
-          tests.test_protocol_513_oracle_family_closure
-          tests.test_protocol_513_tool_routing_codeql_compression
-          tests.test_protocol_515_language_profiles
-          tests.test_protocol_516_lifecycle_closeout
-          tests.test_protocol_516_long_horizon_quality
-          tests.test_protocol_516_orchestration
-          tests.test_protocol_59_review_rework
-          tests.test_protocol_59_route_uri_safety
-          tests.test_protocol_61_evidence_evolution
-          tests.test_protocol_62_closeout
-          tests.test_protocol_62_representation
-          tests.test_protocol_63_bootstrap
-          tests.test_protocol_63_closeout
-          tests.test_protocol_63_engineering_memory
-          tests.test_protocol_63_independent_review_repairs
-          tests.test_protocol_63_reopened_repairs
-          tests.test_protocol_64_axiomatic_traceability
-          tests.test_protocol_64_bootstrap_readiness
-          -v
-      - name: Diag generic protocol modules
-        continue-on-error: true
-        run: >-
-          python -m unittest
-          tests.test_protocol_contracts
-          tests.test_protocol_effective_compression
-          tests.test_protocol_engineering_stewardship
-          tests.test_protocol_portability
-          tests.test_protocol_proxy_proof_acceptance
-          tests.test_protocol_tooling
-          -v
-      - name: Diag canonical prefix through release-state
-        continue-on-error: true
-        run: >-
-          python -m unittest tests.test_build_index_contract tests.test_package_reference_closure tests.test_protocol_511_tool_assistance tests.test_protocol_512_convergence tests.test_protocol_513_counterfactual_oracles tests.test_protocol_513_live_tool_qualification tests.test_protocol_513_oracle_family_closure tests.test_protocol_513_tool_routing_codeql_compression tests.test_protocol_515_language_profiles tests.test_protocol_516_lifecycle_closeout tests.test_protocol_516_long_horizon_quality tests.test_protocol_516_orchestration tests.test_protocol_59_review_rework tests.test_protocol_59_route_uri_safety tests.test_protocol_61_evidence_evolution tests.test_protocol_62_closeout tests.test_protocol_62_representation tests.test_protocol_63_bootstrap tests.test_protocol_63_closeout tests.test_protocol_63_engineering_memory tests.test_protocol_63_independent_review_repairs tests.test_protocol_63_reopened_repairs tests.test_protocol_64_axiomatic_traceability tests.test_protocol_64_bootstrap_readiness tests.test_protocol_65_current_state_ownership tests.test_protocol_65_pem_canonical_git tests.test_protocol_65_pem_parser_strictness tests.test_protocol_65_pem_reconciliation tests.test_protocol_65_pem_schema_parity tests.test_protocol_65_release_state -v
-      - name: Diag canonical explicit full order
-        continue-on-error: true
-        run: >-
-          python -m unittest tests.test_build_index_contract tests.test_package_reference_closure tests.test_protocol_511_tool_assistance tests.test_protocol_512_convergence tests.test_protocol_513_counterfactual_oracles tests.test_protocol_513_live_tool_qualification tests.test_protocol_513_oracle_family_closure tests.test_protocol_513_tool_routing_codeql_compression tests.test_protocol_515_language_profiles tests.test_protocol_516_lifecycle_closeout tests.test_protocol_516_long_horizon_quality tests.test_protocol_516_orchestration tests.test_protocol_59_review_rework tests.test_protocol_59_route_uri_safety tests.test_protocol_61_evidence_evolution tests.test_protocol_62_closeout tests.test_protocol_62_representation tests.test_protocol_63_bootstrap tests.test_protocol_63_closeout tests.test_protocol_63_engineering_memory tests.test_protocol_63_independent_review_repairs tests.test_protocol_63_reopened_repairs tests.test_protocol_64_axiomatic_traceability tests.test_protocol_64_bootstrap_readiness tests.test_protocol_65_current_state_ownership tests.test_protocol_65_pem_canonical_git tests.test_protocol_65_pem_parser_strictness tests.test_protocol_65_pem_reconciliation tests.test_protocol_65_pem_schema_parity tests.test_protocol_65_release_state tests.test_protocol_contracts tests.test_protocol_effective_compression tests.test_protocol_engineering_stewardship tests.test_protocol_portability tests.test_protocol_proxy_proof_acceptance tests.test_protocol_tooling -v
-      - name: Diag top-level release-state module
-        continue-on-error: true
-        run: PYTHONPATH=tests python -m unittest test_protocol_65_release_state -v
-      - name: Diag top-level prefix through release-state
-        continue-on-error: true
-        run: >-
-          PYTHONPATH=tests python -m unittest test_build_index_contract test_package_reference_closure test_protocol_511_tool_assistance test_protocol_512_convergence test_protocol_513_counterfactual_oracles test_protocol_513_live_tool_qualification test_protocol_513_oracle_family_closure test_protocol_513_tool_routing_codeql_compression test_protocol_515_language_profiles test_protocol_516_lifecycle_closeout test_protocol_516_long_horizon_quality test_protocol_516_orchestration test_protocol_59_review_rework test_protocol_59_route_uri_safety test_protocol_61_evidence_evolution test_protocol_62_closeout test_protocol_62_representation test_protocol_63_bootstrap test_protocol_63_closeout test_protocol_63_engineering_memory test_protocol_63_independent_review_repairs test_protocol_63_reopened_repairs test_protocol_64_axiomatic_traceability test_protocol_64_bootstrap_readiness test_protocol_65_current_state_ownership test_protocol_65_pem_canonical_git test_protocol_65_pem_parser_strictness test_protocol_65_pem_reconciliation test_protocol_65_pem_schema_parity test_protocol_65_release_state -v
-      - name: Diag top-level explicit full order
-        continue-on-error: true
-        run: >-
-          PYTHONPATH=tests python -m unittest test_build_index_contract test_package_reference_closure test_protocol_511_tool_assistance test_protocol_512_convergence test_protocol_513_counterfactual_oracles test_protocol_513_live_tool_qualification test_protocol_513_oracle_family_closure test_protocol_513_tool_routing_codeql_compression test_protocol_515_language_profiles test_protocol_516_lifecycle_closeout test_protocol_516_long_horizon_quality test_protocol_516_orchestration test_protocol_59_review_rework test_protocol_59_route_uri_safety test_protocol_61_evidence_evolution test_protocol_62_closeout test_protocol_62_representation test_protocol_63_bootstrap test_protocol_63_closeout test_protocol_63_engineering_memory test_protocol_63_independent_review_repairs test_protocol_63_reopened_repairs test_protocol_64_axiomatic_traceability test_protocol_64_bootstrap_readiness test_protocol_65_current_state_ownership test_protocol_65_pem_canonical_git test_protocol_65_pem_parser_strictness test_protocol_65_pem_reconciliation test_protocol_65_pem_schema_parity test_protocol_65_release_state test_protocol_contracts test_protocol_effective_compression test_protocol_engineering_stewardship test_protocol_portability test_protocol_proxy_proof_acceptance test_protocol_tooling -v
       - name: Capture discover regression
         continue-on-error: true
         shell: bash
@@ -143,19 +33,27 @@ jobs:
           python -m unittest discover -s tests -v > /tmp/discover.log 2>&1
           status=$?
           exit "$status"
-      - name: Diag failure in release-state module
+      - name: Diag release-state module failure
         continue-on-error: true
-        run: grep -Eq '^(FAIL|ERROR): .*test_protocol_65_release_state' /tmp/discover.log
-      - name: Diag failure in other Protocol 6.5 module
+        run: >-
+          grep -Eq '^(FAIL|ERROR): .*test_protocol_65_release_state' /tmp/discover.log
+      - name: Diag other Protocol 6.5 module failure
         continue-on-error: true
-        run: grep -Eq '^(FAIL|ERROR): .*test_protocol_65_(current_state_ownership|pem_)' /tmp/discover.log
-      - name: Diag failure in pre-6.5 module
+        run: >-
+          grep -Eq '^(FAIL|ERROR): .*test_protocol_65_(current_state_ownership|pem_)' /tmp/discover.log
+      - name: Diag pre-6.5 module failure
         continue-on-error: true
-        run: grep -Eq '^(FAIL|ERROR): .*test_protocol_(5|6[1-4]|51|52|59|61|62|63|64)' /tmp/discover.log
-      - name: Diag failure in generic module
+        run: >-
+          grep -Eq '^(FAIL|ERROR): .*test_protocol_(511|512|513|515|516|59|61|62|63|64)' /tmp/discover.log
+      - name: Diag generic module failure
         continue-on-error: true
-        run: grep -Eq '^(FAIL|ERROR): .*test_(build_index_contract|package_reference_closure|protocol_contracts|protocol_effective_compression|protocol_engineering_stewardship|protocol_portability|protocol_proxy_proof_acceptance|protocol_tooling)' /tmp/discover.log
-      - name: Preserve canonical failing gate
+        run: >-
+          grep -Eq '^(FAIL|ERROR): .*test_(build_index_contract|package_reference_closure|protocol_contracts|protocol_effective_compression|protocol_engineering_stewardship|protocol_portability|protocol_proxy_proof_acceptance|protocol_tooling)' /tmp/discover.log
+      - name: Diag discovery import failure
+        continue-on-error: true
+        run: >-
+          grep -Eq 'Failed to import test module|ImportError|ModuleNotFoundError' /tmp/discover.log
+      - name: Run protocol regression tests
         run: python -m unittest discover -s tests -v
       - name: Build canonical skill packages once
         run: python source/build_skills.py --output /tmp/protocol-dist
