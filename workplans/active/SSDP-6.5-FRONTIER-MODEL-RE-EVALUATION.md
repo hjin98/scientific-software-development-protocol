@@ -1156,3 +1156,20 @@ later lifecycle binding at Review `NOT_RUN`, and another fresh independent assem
 
 No stakeholder ratification, public fallback, recovery, accepted-current cutover, PR merge, or Protocol 7 mutation is
 authorized.
+
+
+## 48. P13 binding qualification and fresh-Review readiness
+
+Immutable P13 `05a2b62550adadf271a27f6555da7173902c491c` passed exact-candidate workflow `36127313841`.
+
+Binding descendant `7e5e5fa68179f9b1d85ed7ab672e6333d99a1e67` passed workflow `36127440732` with Review `NOT_RUN`, ratification `NOT_REQUESTED`,
+public fallback/recovery `UNAVAILABLE`, accepted-current Protocol 6.4, and Protocol 7 unchanged.
+
+The first prospective P12 repair `e01a1e7e63072b15ddbe72a226f3a4deffafc9f7` was not frozen because full protocol
+regression failed; its reconciled descendant P13 preserves the fatal continuity invariant while retaining predecessor
+diagnostics.
+
+The durable independent-Review handoff now targets exact P13. P1-P12 remain immutable failed candidates/historical
+evidence.
+
+The next authorized action is a genuinely fresh independent assembled-candidate Review of exact P13.
