@@ -26,7 +26,19 @@ jobs:
       - name: Validate project engineering memory
         run: python source/project_engineering_memory.py PROJECT-ENGINEERING-MEMORY.md
       - name: Run protocol regression tests
-        run: python -m unittest discover -s tests -v
+        shell: bash
+        run: |
+          set -o pipefail
+          python -m unittest discover -s tests -v 2>&1 | tee /tmp/protocol-tests.log
+          status=${PIPESTATUS[0]}
+          {
+            echo '### Protocol regression diagnostic'
+            echo
+            echo '\`\`\`text'
+            tail -n 200 /tmp/protocol-tests.log
+            echo '\`\`\`'
+          } >> "$GITHUB_STEP_SUMMARY"
+          exit "$status"
       - name: Build canonical skill packages once
         run: python source/build_skills.py --output /tmp/protocol-dist
       - name: Validate generated skill packages independently
