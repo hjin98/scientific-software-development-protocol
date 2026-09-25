@@ -1,7 +1,7 @@
 ---
 kind: independent-review-handoff
 protocol_under_review: 6.5.0
-status: ready-p14
+status: p14-no-pass-repair-required
 accepted_control_p0: 55c085261eb827e3047637d045a8e6917ea6b962
 failed_candidate_p1: b565e28aeacea002cefe27e6b9594fe99d653c0a
 failed_candidate_p2: e8edb353e172aef933ed5e58eeabe897d0cc98d1
@@ -27,6 +27,7 @@ p14_freeze_binding: qualification/ssdp65/P14-FREEZE-BINDING.md
 p14_binding_qualification: qualification/ssdp65/P14-BINDING-QUALIFICATION.md
 p13_review: qualification/ssdp65/INDEPENDENT-REVIEW-2026-09-25-PROTOCOL-6.5-P13-NO-PASS.md
 historical_capability_preservation_review: qualification/ssdp65/HISTORICAL-CAPABILITY-PRESERVATION-REVIEW-2026-09-25-P9.md
+p14_review: qualification/ssdp65/INDEPENDENT-REVIEW-2026-09-25-PROTOCOL-6.5-P14-NO-PASS.md
 stakeholder_ratification: NOT_REQUESTED
 ---
 
@@ -173,3 +174,30 @@ or mutate Protocol 7 D3/D4.
 
 If a genuine semantic blocker survives, preserve P14 immutably, publish NO-PASS, reopen at the earliest owner, and
 require another candidate identity for semantic repair.
+
+
+## P14 Review outcome and repair handoff
+
+Exact immutable P14
+`d792f219ad361b6acb2663833beec1c179ea5793` received **NO-PASS** in the fresh independent assembled-candidate
+Review published at:
+
+`671bfd2870415db561d6a34a930e604c5f53beb0`
+
+Review artifact:
+
+`qualification/ssdp65/INDEPENDENT-REVIEW-2026-09-25-PROTOCOL-6.5-P14-NO-PASS.md`
+
+Serious Challenge: none.
+
+The P13 overlay repair is retained. The surviving D4 blocker is **B65-P14-1**: local PEM authority/evidence routes can
+use a movable Git branch/tag token and still be marked HEALTHY, so the same serialized route can silently resolve to a
+different temporal subject after ref movement.
+
+Repair only the PEM route-realization/validation scope specified in the active implementation handoff. Preserve exact
+P14 as immutable failed evidence. Any semantic repair must receive a new immutable candidate identity after exact
+normal CI succeeds, followed by a later lifecycle binding with Review `NOT_RUN` and another fresh independent
+assembled-candidate Review.
+
+Stakeholder ratification remains `NOT_REQUESTED`; public fallback and recovery remain `UNAVAILABLE`;
+accepted-current remains Protocol 6.4; Protocol 7 D3/D4 remains unchanged.

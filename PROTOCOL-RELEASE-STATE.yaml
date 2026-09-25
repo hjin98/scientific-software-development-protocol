@@ -24,8 +24,8 @@ candidate:
   version: "6.5.0"
   semantic_ref: d792f219ad361b6acb2663833beec1c179ea5793
   review:
-    state: NOT_RUN
-    evidence_ref: NONE
+    state: NO_PASS
+    evidence_ref: hjin98/scientific-software-development-protocol@671bfd2870415db561d6a34a930e604c5f53beb0:qualification/ssdp65/INDEPENDENT-REVIEW-2026-09-25-PROTOCOL-6.5-P14-NO-PASS.md
   ratification:
     state: NOT_REQUESTED
     evidence_ref: NONE

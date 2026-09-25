@@ -3,7 +3,7 @@ kind: implementation-workplan
 workplan_id: SSDP-6.5-D3-D4-IMPLEMENTATION-HANDOFF
 protocol_version: 6.4.0
 target_protocol_version: 6.5.0
-status: ready-p14-independent-review
+status: p14-no-pass-repair-required
 parent_workplan: workplans/active/SSDP-6.5-FRONTIER-MODEL-RE-EVALUATION.md
 design_authority: qualification/ssdp65/PHASE-IV-V-DESIGN-CLOSURE.md
 baseline: 55c085261eb827e3047637d045a8e6917ea6b962
@@ -1468,3 +1468,49 @@ B65-P13-1 is mechanically repaired and qualified at D4. Accepted Protocol 6.5 D3
 The next authorized stage is a genuinely fresh independent assembled-candidate Review of exact P14. No stakeholder
 ratification, public-fallback publication, recovery establishment, accepted-current cutover, PR merge, or Protocol 7
 D3/D4 mutation is authorized.
+
+
+## 60. P14 independent Review NO-PASS — immutable PEM route identity repair
+
+Fresh independent assembled-candidate Review of exact P14
+`d792f219ad361b6acb2663833beec1c179ea5793` issues **NO-PASS** with no Serious Challenge.
+
+Durable Review evidence:
+
+`qualification/ssdp65/INDEPENDENT-REVIEW-2026-09-25-PROTOCOL-6.5-P14-NO-PASS.md`
+
+Surviving blocker: **B65-P14-1**.
+
+The P14 canonical-Git consolidation correctly closes replacement-ref/graft ancestry rewriting, replacement-object
+content rewriting, canonical patch-ID derivation, missing-object fail-closed behavior, and shared canonical ancestry
+for release-state/PEM consumers. The new failure is orthogonal: `source/project_engineering_memory.py` accepts a
+generic Git revision token in local evidence routes and can mark a branch/tag route HEALTHY without establishing that
+the route itself is immutable.
+
+A fresh production-predicate holdout showed the same
+`local@durable-owner:owner.md#anchor` route remained accepted after `durable-owner` moved from one ancestor commit
+to another while owner content stayed unchanged. Thus the serialized evidence identity can silently change temporal
+subject without any replace/graft overlay.
+
+### B65-P14-1 D4 repair contract
+
+1. Local routes used as immutable/durable material evidence must establish immutable revision identity, not merely
+   resolve a movable branch/tag at validation time.
+2. `AUTHORITY_BOUND` `authority_owner` and accepted authority evidence must reject or downgrade movable local refs.
+3. Repair-acceptance evidence and its owner binding must use durable immutable identity before it can establish
+   Git-native recurrence chronology.
+4. Ordinary material evidence whose current use requires branch-movement-resistant identity must not be labeled
+   HEALTHY from a bare branch/default/latest ref; use existing `REVIEW_REQUIRED`/`UNAVAILABLE` semantics as
+   appropriate.
+5. Exact immutable SHA routes remain valid positive controls.
+6. Preserve the P14 shared raw-parent mechanism, replacement-disabled content, fail-closed missing canonical objects,
+   and readable alternate/promisor-backed object stores.
+7. Do not introduce a ref registry, branch-history database, timestamp oracle, topology service, or new semantic owner.
+8. Add production tests for: movable branch owner route, branch retargeting with unchanged owner content, movable tag
+   where accepted by the route grammar, exact-SHA positive control, movable repair-acceptance route, and regression of
+   P14 replace/graft/content/missing-object/alternate/promisor cases.
+9. Preserve P14 immutably. Any semantic repair receives a new candidate identity only after exact-candidate normal CI
+   passes; a later descendant must bind that new candidate at Review `NOT_RUN` before fresh independent Review.
+
+No stakeholder ratification, public-fallback publication, recovery establishment, accepted-current cutover, PR merge,
+or Protocol 7 D3/D4 mutation is authorized.

@@ -5,8 +5,8 @@ protocol_version: 6.4.0
 target_protocol_version: 6.5.0
 subject_baseline: P0 = Protocol 6.4 at 55c085261eb827e3047637d045a8e6917ea6b962 (recovery 74bc572ef516cae417437a2027eeff52a2e25c15)
 diagnostic_commit: 81375d8142a8130b80cd82f2304d3e16bc3fc390
-status: ready-p14-independent-review
-current_phase: PHASE VII P14 FROZEN / FRESH INDEPENDENT REVIEW REQUIRED
+status: p14-no-pass-repair-required
+current_phase: PHASE VII B65-P14-1 D4 REPAIR REQUIRED / P14 IMMUTABLE NO-PASS
 branch: ssdp-6.5-frontier-model-re-evaluation
 created_date: 2026-09-24
 adjudication: qualification/ssdp65/CROSS-MODEL-ADJUDICATION-2026-09-24.md
@@ -14,7 +14,7 @@ active_serious_challenge: none against accepted D1-D4 doctrine
 second_frontier_diagnostic: waived-for-this-cycle-by-stakeholder-resource-constraint
 design_closure: qualification/ssdp65/PHASE-IV-V-DESIGN-CLOSURE.md
 implementation_handoff: workplans/active/SSDP-6.5-D3-D4-IMPLEMENTATION-HANDOFF.md
-independent_review: NOT_RUN
+independent_review: qualification/ssdp65/INDEPENDENT-REVIEW-2026-09-25-PROTOCOL-6.5-P14-NO-PASS.md
 ---
 
 # Protocol 6.5 Frontier-Model Re-evaluation and Successor Workplan
@@ -1238,3 +1238,37 @@ The durable independent-Review handoff now targets exact P14. P1-P13 remain immu
 evidence.
 
 The next authorized action is a genuinely fresh independent assembled-candidate Review of exact P14.
+
+
+## 54. P14 independent Review NO-PASS and bounded D4 reopen
+
+Fresh independent assembled-candidate Review of exact immutable P14
+`d792f219ad361b6acb2663833beec1c179ea5793` is **NO-PASS**.
+
+Durable Review:
+
+`qualification/ssdp65/INDEPENDENT-REVIEW-2026-09-25-PROTOCOL-6.5-P14-NO-PASS.md`
+
+Review publication commit:
+
+`671bfd2870415db561d6a34a930e604c5f53beb0`
+
+Serious Challenge remains **none**. The P13 replace/graft canonical-Git repair re-falsifies successfully at its current
+owners. The surviving blocker is a distinct D4 durability defect, **B65-P14-1**: the PEM route grammar and production
+resolver can certify a movable local Git branch/tag revision as a mechanically healthy "immutable" authority/evidence
+route. A fresh holdout moved the referenced branch between two contained commits with unchanged owner content; the
+same serialized route remained HEALTHY while its temporal subject changed.
+
+Reopen only the current D4 PEM validation owner and its directly affected tests/qualification evidence. The repair
+must require an actually immutable/durable local revision identity wherever authority/evidence semantics require one,
+including `AUTHORITY_BOUND` owner/evidence and repair-acceptance/recurrence routes. Bare movable refs must not become
+durable warrant merely because they currently resolve. Preserve P14's raw-parent ancestry, replacement-disabled
+content, missing-object fail-closed behavior, alternate/promisor support, and release-state behavior. Do not add a ref
+registry, topology service, transaction database, or second authority plane.
+
+P14 remains immutable failed Review evidence. Any semantic repair requires a new immutable candidate identity,
+exact-candidate normal CI, a later Review-`NOT_RUN` lifecycle binding, and another genuinely fresh independent
+assembled-candidate Review.
+
+Stakeholder ratification remains `NOT_REQUESTED`; public fallback and recovery remain `UNAVAILABLE`;
+accepted-current remains Protocol 6.4; Protocol 7 D3/D4 remains unchanged.
