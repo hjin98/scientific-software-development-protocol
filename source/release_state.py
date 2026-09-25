@@ -726,8 +726,8 @@ def _governed_owner_history_is_continuous(
     ref: str,
     errors: list[str],
 ) -> bool:
-    """Reject any reachable lineage that deletes the owner after governance begins."""
-    records: dict[str, tuple[bool, list[str]]] = {}
+    """Reject owner deletion and incoherent owner-present transitions in ancestry."""
+    records: dict[str, tuple[Any, list[str]]] = {}
     children: dict[str, list[str]] = {}
     stack = [ref]
 
@@ -743,15 +743,20 @@ def _governed_owner_history_is_continuous(
         if commit in records:
             continue
 
-        present = _release_state_path_present(root, commit, errors)
-        if present is None:
+        state = _release_state_at_ref(
+            root,
+            commit,
+            errors,
+            missing_ok=True,
+        )
+        if state is None:
             errors.append(
                 "cannot establish continuous release-state ownership because "
-                f"the tree at {commit} is unreadable"
+                f"the release state at {commit} is unreadable"
             )
             return False
 
-        records[commit] = (present, parents)
+        records[commit] = (state, parents)
         for parent in parents:
             children.setdefault(parent, []).append(commit)
         stack.extend(parents)
@@ -770,7 +775,8 @@ def _governed_owner_history_is_continuous(
 
     while ready:
         commit = ready.pop()
-        present, parents = records[commit]
+        state, parents = records[commit]
+        present = state is not _MISSING_RELEASE_STATE
         governed_parent = any(governed_through[parent] for parent in parents)
 
         if not present and governed_parent:
@@ -781,6 +787,30 @@ def _governed_owner_history_is_continuous(
                 "as pre-owner ancestry or hidden by a later material transition"
             )
             valid = False
+
+        if present:
+            for parent in parents:
+                parent_state = records[parent][0]
+                if (
+                    parent_state is _MISSING_RELEASE_STATE
+                    or parent_state == state
+                ):
+                    continue
+
+                transition_errors = validate_release_transition(
+                    parent_state,
+                    state,
+                    repo_root=root,
+                    previous_ref=parent,
+                )
+                if transition_errors:
+                    errors.append(
+                        "release-state ancestry contains an incoherent governed "
+                        f"transition {parent} -> {commit}; a later material "
+                        "transition cannot hide it"
+                    )
+                    errors.extend(transition_errors)
+                    valid = False
 
         governed_through[commit] = present or governed_parent
         for child in children.get(commit, []):

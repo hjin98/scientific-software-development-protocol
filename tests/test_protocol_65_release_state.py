@@ -2443,5 +2443,105 @@ candidate:
 
 
 
+    def test_previous_governed_states_reject_laundered_owner_present_history_rewrite(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            root = Path(tmpdir)
+            self._init_topology_repo(root)
+
+            first = self._topology_state("a")
+            self._write_topology_state(root, first)
+            self._commit_topology_repo(root, "valid governed A")
+
+            malformed = copy.deepcopy(first)
+            malformed["historical"]["6.3.0"]["public_source_ref"] = "0" * 40
+            self._write_topology_state(root, malformed)
+            self._commit_topology_repo(root, "rewrite protected history")
+
+            current = copy.deepcopy(malformed)
+            current["candidate"]["semantic_ref"] = "c" * 40
+            self._write_topology_state(root, current)
+            self._commit_topology_repo(root, "later material C")
+
+            errors: list[str] = []
+            states = release_state._previous_governed_release_states(
+                root,
+                current,
+                errors,
+            )
+            self.assertEqual(states, [malformed])
+            self.assertTrue(
+                any(
+                    "cannot rewrite historical[6.3.0]" in error
+                    for error in errors
+                )
+            )
+            self.assertTrue(
+                any(
+                    "a later material transition cannot hide it" in error
+                    for error in errors
+                )
+            )
+
+    def test_previous_governed_states_reject_laundered_owner_present_accepted_rewrite(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            root = Path(tmpdir)
+            self._init_topology_repo(root)
+
+            first = self._topology_state("a")
+            self._write_topology_state(root, first)
+            self._commit_topology_repo(root, "valid governed A")
+
+            malformed = copy.deepcopy(first)
+            malformed["accepted_current"]["public_source_ref"] = "1" * 40
+            self._write_topology_state(root, malformed)
+            self._commit_topology_repo(root, "rewrite accepted identity")
+
+            current = copy.deepcopy(malformed)
+            current["candidate"]["semantic_ref"] = "c" * 40
+            self._write_topology_state(root, current)
+            self._commit_topology_repo(root, "later material C")
+
+            errors: list[str] = []
+            states = release_state._previous_governed_release_states(
+                root,
+                current,
+                errors,
+            )
+            self.assertEqual(states, [malformed])
+            self.assertTrue(
+                any(
+                    "cannot rewrite accepted_current identity without a version advance"
+                    in error
+                    for error in errors
+                )
+            )
+
+    def test_previous_governed_states_allow_multiple_legal_owner_present_transitions(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            root = Path(tmpdir)
+            self._init_topology_repo(root)
+
+            first = self._topology_state("a")
+            self._write_topology_state(root, first)
+            self._commit_topology_repo(root, "valid governed A")
+
+            second = self._topology_state("b")
+            self._write_topology_state(root, second)
+            self._commit_topology_repo(root, "legal material B")
+
+            current = self._topology_state("c")
+            self._write_topology_state(root, current)
+            self._commit_topology_repo(root, "legal material C")
+
+            errors: list[str] = []
+            states = release_state._previous_governed_release_states(
+                root,
+                current,
+                errors,
+            )
+            self.assertEqual(errors, [])
+            self.assertEqual(states, [second])
+
+
 if __name__ == "__main__":
     unittest.main()
