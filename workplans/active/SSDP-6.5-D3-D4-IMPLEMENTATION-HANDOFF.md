@@ -1386,3 +1386,23 @@ normal CI, later Review-NOT_RUN binding, and another fresh independent assembled
 
 No stakeholder ratification, public fallback, recovery, accepted-current cutover, PR merge, or Protocol 7 mutation is
 authorized.
+
+
+## 56. P13 NO-PASS lifecycle binding
+
+Fresh independent Review publication commit:
+
+`3c851d33f0473b8b38940d01eafed3f545b63576`
+
+Exact immutable P13 remains:
+
+`05a2b62550adadf271a27f6555da7173902c491c`
+
+A later lifecycle descendant binds P13 Review state to `NO_PASS` using immutable evidence:
+
+`hjin98/scientific-software-development-protocol@3c851d33f0473b8b38940d01eafed3f545b63576:qualification/ssdp65/INDEPENDENT-REVIEW-2026-09-25-PROTOCOL-6.5-P13-NO-PASS.md`
+
+Ratification remains `NOT_REQUESTED`; public fallback and recovery remain `UNAVAILABLE`; accepted-current remains
+Protocol 6.4; Protocol 7 D3/D4 remains unchanged.
+
+This binding is lifecycle representation only. It does not mutate P13 or authorize any acceptance/publication action.

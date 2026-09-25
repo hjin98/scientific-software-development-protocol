@@ -205,3 +205,15 @@ authorized action is bounded D4 repair, followed by exact-candidate qualificatio
 and a later fresh independent Review handoff.
 
 Stakeholder ratification remains not requested and is not authorized by this Review.
+
+
+## P13 NO-PASS lifecycle binding
+
+Review publication commit: `3c851d33f0473b8b38940d01eafed3f545b63576`.
+
+The current lifecycle owner binds exact P13 to `NO_PASS` with:
+
+`hjin98/scientific-software-development-protocol@3c851d33f0473b8b38940d01eafed3f545b63576:qualification/ssdp65/INDEPENDENT-REVIEW-2026-09-25-PROTOCOL-6.5-P13-NO-PASS.md`
+
+The next handoff must target a newly frozen replacement candidate after the bounded PEM canonical-Git repair. Do not
+reuse P13 as a semantic Review target.

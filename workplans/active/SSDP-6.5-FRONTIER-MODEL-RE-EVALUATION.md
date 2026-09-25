@@ -1197,3 +1197,14 @@ P13 remains immutable. Any semantic repair requires a new candidate identity and
 
 No stakeholder ratification, public fallback, recovery, accepted-current cutover, PR merge, or Protocol 7 mutation is
 authorized.
+
+
+## 50. P13 NO-PASS binding
+
+The immutable P13 Review was published at `3c851d33f0473b8b38940d01eafed3f545b63576` and is bound from a later lifecycle descendant as
+`NO_PASS` with exact immutable evidence route:
+
+`hjin98/scientific-software-development-protocol@3c851d33f0473b8b38940d01eafed3f545b63576:qualification/ssdp65/INDEPENDENT-REVIEW-2026-09-25-PROTOCOL-6.5-P13-NO-PASS.md`
+
+The next semantic candidate must have a new identity after B65-P13-1 is repaired and exact-candidate qualification
+passes. No ratification, publication, recovery, cutover, PR merge, or Protocol 7 mutation is authorized.
