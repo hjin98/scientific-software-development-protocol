@@ -5,16 +5,16 @@ protocol_version: 6.4.0
 target_protocol_version: 6.5.0
 subject_baseline: P0 = Protocol 6.4 at 55c085261eb827e3047637d045a8e6917ea6b962 (recovery 74bc572ef516cae417437a2027eeff52a2e25c15)
 diagnostic_commit: 81375d8142a8130b80cd82f2304d3e16bc3fc390
-status: p18-review-ready
-current_phase: PHASE VII FRESH INDEPENDENT REVIEW — P18
+status: d3-reopened-importance-attention-economy
+current_phase: PHASE V D3 DOCTRINE REOPEN — IMPORTANCE / ATTENTION / PROPORTIONAL RIGOR
 branch: ssdp-6.5-frontier-model-re-evaluation
 created_date: 2026-09-24
 adjudication: qualification/ssdp65/CROSS-MODEL-ADJUDICATION-2026-09-24.md
-active_serious_challenge: none against accepted D1-D4 doctrine
+active_serious_challenge: importance-weighted attention / proportional-rigor inadequacy
 second_frontier_diagnostic: waived-for-this-cycle-by-stakeholder-resource-constraint
 design_closure: qualification/ssdp65/PHASE-IV-V-DESIGN-CLOSURE.md
 implementation_handoff: workplans/active/SSDP-6.5-D3-D4-IMPLEMENTATION-HANDOFF.md
-independent_review: NOT_RUN_FOR_P18
+independent_review: SUSPENDED_FOR_D3_REOPEN
 ---
 
 # Protocol 6.5 Frontier-Model Re-evaluation and Successor Workplan
@@ -1463,3 +1463,21 @@ P17's NO-PASS Review remains immutable historical evidence only. The next gate i
 assembled-candidate Review of exact P18. This repair context must not self-issue that Review result.
 
 No ratification, publication, recovery, accepted-current cutover, PR merge, or Protocol 7 mutation is authorized.
+
+
+## 66. Stakeholder-directed D3 reopen — importance-weighted attention and proportional rigor
+
+The planned fresh independent Review of P18 is suspended before execution.
+
+P18 `a2e5f01e258f249f74d1eda74b883efb98fd7d59` remains immutable and mechanically qualified, but the stakeholder
+identified a broader protocol-level convergence defect not closed by P18: SSDP contains simplicity/development-economy
+principles yet lacks an operational mechanism for ranking problem importance and allocating attention/evidence cost
+proportionally.
+
+The new governing proposal is:
+
+`workplans/active/SSDP-6.5-IMPORTANCE-WEIGHTED-ATTENTION-AND-PROPORTIONAL-RIGOR.md`
+
+This is a genuine D3/protocol-doctrine reopen, not a P18 D4 repair. No P18 Review result should be issued while this
+reopen is active. The next replacement semantic candidate must implement and qualify the accepted outcome of the new
+workplan before Protocol 6.5 returns to independent Review.

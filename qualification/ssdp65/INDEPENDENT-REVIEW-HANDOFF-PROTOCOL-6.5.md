@@ -1,7 +1,7 @@
 ---
 kind: independent-review-handoff
 protocol_under_review: 6.5.0
-status: ready-p18
+status: suspended-d3-reopen
 accepted_control_p0: 55c085261eb827e3047637d045a8e6917ea6b962
 failed_p17: feca003e577fdfa2ae4219e0df2a2cdb38e5d757
 immutable_candidate_p18: a2e5f01e258f249f74d1eda74b883efb98fd7d59
@@ -14,13 +14,21 @@ p18_repair_qualification: qualification/ssdp65/P18-REPAIR-QUALIFICATION.md
 p18_freeze_binding: qualification/ssdp65/P18-FREEZE-BINDING.md
 p18_binding_qualification: qualification/ssdp65/P18-BINDING-QUALIFICATION.md
 p17_no_pass_review: qualification/ssdp65/INDEPENDENT-REVIEW-2026-09-25-PROTOCOL-6.5-P17-NO-PASS.md
-review_state: NOT_RUN
+review_state: SUSPENDED_FOR_D3_REOPEN
 stakeholder_ratification: NOT_REQUESTED
 public_source_ref: UNAVAILABLE
 recovery_ref: UNAVAILABLE
 ---
 
 # Independent Review Handoff — Protocol 6.5 P18
+
+> **SUSPENDED — DO NOT START P18 REVIEW.**
+>
+> Stakeholder-directed D3/protocol-doctrine reopening is active under
+> `workplans/active/SSDP-6.5-IMPORTANCE-WEIGHTED-ATTENTION-AND-PROPORTIONAL-RIGOR.md`.
+> P18 remains immutable mechanical evidence, but it is no longer the active Review gate. A replacement semantic
+> candidate must implement the accepted proportional-rigor design before fresh independent Review resumes.
+
 
 ## Immutable Review target
 
