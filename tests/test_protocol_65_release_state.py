@@ -1423,7 +1423,18 @@ candidate:
                 current,
                 errors,
             )
-            self.assertEqual(errors, [])
+            self.assertTrue(
+                any(
+                    "cannot delete historical[6.3.5]" in error
+                    for error in errors
+                )
+            )
+            self.assertTrue(
+                any(
+                    "a later material transition cannot hide it" in error
+                    for error in errors
+                )
+            )
             self.assertEqual(len(states), 2)
             self.assertIn(governed, states)
             self.assertIn(sibling, states)
