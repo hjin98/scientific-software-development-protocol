@@ -1532,3 +1532,26 @@ database, topology service, compatibility layer, or lifecycle role was introduce
 
 The durable independent-Review handoff now targets exact P20. No ratification, publication, recovery, accepted-current
 cutover, PR #33 merge, or Protocol 7 mutation is authorized.
+
+
+## 69. P20 independent Review NO-PASS; merge-parent D4 repair implemented
+
+Fresh independent assembled-candidate Review of exact P20
+`142eb22376270af6155657dcbf150112f3871cb2` issued **NO-PASS** with no Serious Challenge.
+
+Durable Review:
+
+`qualification/ssdp65/INDEPENDENT-REVIEW-2026-09-25-PROTOCOL-6.5-P20-NO-PASS.md`
+
+The independent preservation pass is PASS: core doctrine and historical Protocol 5/6 capabilities remain intact.
+
+The sole blocker B65-P20-1 is a D4 merge interpretation defect. Normal merges that retain one parent's release-state
+snapshot must not treat stale valid siblings as independent accepted-current promotion sources. The bounded repair
+retains the existing canonical Git walker and transition validator, separates inherited-merge sibling compatibility from
+actual transition edges, preserves historical/accepted-current rollback protection, and keeps recursive sibling ancestry
+validation so P20's exact-parent anti-laundering repair remains effective.
+
+Focused regressions cover valid stale-sibling merge, illegal sibling ancestry, and newer-sibling rollback. The
+replacement semantic candidate is the contents commit containing this repair after exact-candidate qualification.
+
+No ratification, publication, recovery, accepted-current cutover, PR #33 merge, or Protocol 7 mutation is authorized.

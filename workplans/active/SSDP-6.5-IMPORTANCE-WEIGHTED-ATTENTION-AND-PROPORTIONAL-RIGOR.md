@@ -674,3 +674,20 @@ material historical release-state edge. The proportional-rigor D1-D3 contract re
 
 The implementation stage has no known surviving blocker. The durable independent-Review handoff now targets exact P20.
 This implementation context must not self-issue that Review.
+
+
+## 20. P20 Review repair — inherited merge-state semantics
+
+P20 Review found only B65-P20-1 at the D4 release-state validator. The proportional-rigor D1-D3 contract and historical
+capability preservation remain unchanged.
+
+The repair is intentionally local. A merge that exactly retains one parent's release-state snapshot follows that parent
+as the transition lineage; differing siblings are checked only for protected release-state compatibility while their own
+ancestry remains fully validated. Novel merge resolutions still receive full transition scrutiny.
+
+This prevents a stale unrelated branch from being falsely required to contain a promotion that occurred on another
+lineage, without permitting accepted-current rollback, historical loss/rewrite, or laundering an illegal sibling
+transition.
+
+The implementation adds no registry, replay engine, topology service, compatibility plane, priority machinery, or new
+lifecycle role. Exact-candidate CI is required before freeze binding.

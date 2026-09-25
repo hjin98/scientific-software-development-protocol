@@ -459,17 +459,19 @@ def _check_recovery_lineage(
         )
 
 
-def validate_release_transition(
-    previous: Any,
-    current: Any,
-    *,
-    repo_root: Path | None = None,
-    previous_ref: str = "HEAD",
-) -> list[str]:
-    errors: list[str] = []
-    previous_root = _mapping(previous, "previous release state", errors)
-    current_root = _mapping(current, "current release state", errors)
-
+def _validate_release_identity_continuity(
+    previous_root: dict[str, Any],
+    current_root: dict[str, Any],
+    errors: list[str],
+) -> tuple[
+    dict[str, Any],
+    dict[str, Any],
+    dict[str, Any],
+    dict[str, Any],
+    str,
+    str,
+]:
+    """Validate release identities that every governed lineage must preserve."""
     if previous_root.get("project") != current_root.get("project"):
         errors.append("release-state transition cannot change project identity")
     if previous_root.get("schema_version") != current_root.get("schema_version"):
@@ -513,6 +515,84 @@ def validate_release_transition(
             errors.append(
                 "release-state transition cannot rewrite accepted_current identity without a version advance"
             )
+    elif SEMVER_RE.fullmatch(previous_version) and SEMVER_RE.fullmatch(current_version):
+        if _semver_tuple(current_version) <= _semver_tuple(previous_version):
+            errors.append("accepted_current.version must advance monotonically")
+
+    return (
+        previous_historical,
+        current_historical,
+        previous_accepted,
+        current_accepted,
+        previous_version,
+        current_version,
+    )
+
+
+def _validate_inherited_merge_parent(
+    previous: Any,
+    current: Any,
+) -> list[str]:
+    """Validate a non-owning sibling when a merge inherits another parent's state."""
+    errors: list[str] = []
+    previous_root = _mapping(previous, "merge parent release state", errors)
+    current_root = _mapping(current, "merge release state", errors)
+    (
+        _,
+        current_historical,
+        previous_accepted,
+        _,
+        previous_version,
+        current_version,
+    ) = _validate_release_identity_continuity(
+        previous_root,
+        current_root,
+        errors,
+    )
+
+    if (
+        previous_version != current_version
+        and SEMVER_RE.fullmatch(previous_version)
+        and SEMVER_RE.fullmatch(current_version)
+        and _semver_tuple(current_version) > _semver_tuple(previous_version)
+    ):
+        previous_mapping = {
+            "public_source_ref": previous_accepted.get("public_source_ref"),
+            "recovery_ref": previous_accepted.get("recovery_ref"),
+        }
+        if current_historical.get(previous_version) != previous_mapping:
+            errors.append(
+                "release-state merge must preserve an older sibling "
+                "accepted_current mapping unchanged in historical"
+            )
+
+    return errors
+
+
+def validate_release_transition(
+    previous: Any,
+    current: Any,
+    *,
+    repo_root: Path | None = None,
+    previous_ref: str = "HEAD",
+) -> list[str]:
+    errors: list[str] = []
+    previous_root = _mapping(previous, "previous release state", errors)
+    current_root = _mapping(current, "current release state", errors)
+    (
+        previous_historical,
+        current_historical,
+        previous_accepted,
+        current_accepted,
+        previous_version,
+        current_version,
+    ) = _validate_release_identity_continuity(
+        previous_root,
+        current_root,
+        errors,
+    )
+
+    if previous_version == current_version:
         added_history = sorted(set(current_historical) - set(previous_historical))
         if added_history:
             errors.append(
@@ -520,10 +600,6 @@ def validate_release_transition(
                 + ", ".join(added_history)
             )
         return errors
-
-    if SEMVER_RE.fullmatch(previous_version) and SEMVER_RE.fullmatch(current_version):
-        if _semver_tuple(current_version) <= _semver_tuple(previous_version):
-            errors.append("accepted_current.version must advance monotonically")
 
     expected_history = set(previous_historical) | {previous_version}
     if set(current_historical) != expected_history:
@@ -789,26 +865,45 @@ def _governed_owner_history_is_continuous(
             valid = False
 
         if present:
-            for parent in parents:
-                parent_state = records[parent][0]
-                if (
-                    parent_state is _MISSING_RELEASE_STATE
-                    or parent_state == state
-                ):
+            owner_present_parents = [
+                (parent, records[parent][0])
+                for parent in parents
+                if records[parent][0] is not _MISSING_RELEASE_STATE
+            ]
+            inherits_parent_state = (
+                len(parents) > 1
+                and any(parent_state == state for _, parent_state in owner_present_parents)
+            )
+
+            for parent, parent_state in owner_present_parents:
+                if parent_state == state:
                     continue
 
-                transition_errors = validate_release_transition(
-                    parent_state,
-                    state,
-                    repo_root=root,
-                    previous_ref=parent,
-                )
-                if transition_errors:
-                    errors.append(
+                if inherits_parent_state:
+                    transition_errors = _validate_inherited_merge_parent(
+                        parent_state,
+                        state,
+                    )
+                    context = (
+                        "release-state ancestry contains an incompatible governed "
+                        f"merge parent {parent} -> {commit}; inherited release state "
+                        "cannot discard protected sibling state"
+                    )
+                else:
+                    transition_errors = validate_release_transition(
+                        parent_state,
+                        state,
+                        repo_root=root,
+                        previous_ref=parent,
+                    )
+                    context = (
                         "release-state ancestry contains an incoherent governed "
                         f"transition {parent} -> {commit}; a later material "
                         "transition cannot hide it"
                     )
+
+                if transition_errors:
+                    errors.append(context)
                     errors.extend(transition_errors)
                     valid = False
 
@@ -869,11 +964,12 @@ def _previous_governed_release_state_records(
     if head_state != current:
         return [("HEAD", head_state)]
 
-    # For a committed state, walk direct ancestry only while the governed state is
-    # unchanged.  The first differing state on each parent lineage is a material
-    # predecessor boundary.  This preserves evidence-only descendants while
-    # preventing Git's default date/topology ordering from substituting a sibling
-    # merge parent for the actual transition history.
+    # For a committed state, walk direct ancestry while the governed state is
+    # unchanged.  A normal merge that exactly inherits one parent's release-state
+    # snapshot follows only the inheriting parent lineage here; differing sibling
+    # snapshots are compatibility inputs already checked by the complete ancestry
+    # pass, not independent transitions.  Otherwise the first differing state on
+    # each parent lineage is a material predecessor boundary.
     predecessors: list[tuple[str, Any]] = []
     boundary_refs: set[str] = set()
     visited: set[str] = set()
@@ -888,6 +984,7 @@ def _previous_governed_release_state_records(
             continue
         visited.add(commit)
 
+        parent_states: list[tuple[str, Any]] = []
         for parent in parents:
             parent_state = _release_state_at_ref(
                 root,
@@ -903,6 +1000,18 @@ def _previous_governed_release_state_records(
                 continue
             if parent_state is None:
                 continue
+            parent_states.append((parent, parent_state))
+
+        inherited_parents = [
+            parent
+            for parent, parent_state in parent_states
+            if parent_state == current
+        ]
+        if len(parents) > 1 and inherited_parents:
+            stack.extend(inherited_parents)
+            continue
+
+        for parent, parent_state in parent_states:
             if parent_state == current:
                 stack.append(parent)
             elif parent not in boundary_refs:

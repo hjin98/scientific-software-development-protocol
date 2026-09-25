@@ -2603,6 +2603,215 @@ candidate:
             )
 
 
+    def test_previous_governed_states_allow_stale_merge_sibling_after_valid_promotion(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            root = Path(tmpdir)
+            self._init_topology_repo(root)
+
+            stale = self._topology_state("a")
+            self._write_topology_state(root, stale)
+            base_ref = self._commit_topology_repo(root, "governed stale base")
+
+            self._run_topology_git(root, "checkout", "-q", "-b", "feature")
+            (root / "feature.txt").write_text("unrelated feature\n", encoding="utf-8")
+            feature_ref = self._commit_topology_repo(root, "unrelated stale feature")
+
+            self._run_topology_git(
+                root,
+                "checkout",
+                "-q",
+                "-b",
+                "release",
+                base_ref,
+            )
+            promotion_source, promoted, _ = self._accepted_cutover_fixture()
+            self._write_topology_state(root, promotion_source)
+            promotion_source_ref = self._commit_topology_repo(
+                root,
+                "valid promotion source",
+            )
+            self._write_topology_state(root, promoted)
+            promoted_ref = self._commit_topology_repo(
+                root,
+                "accepted-current promotion",
+            )
+
+            tree_ref = self._run_topology_git(
+                root,
+                "rev-parse",
+                f"{promoted_ref}^{{tree}}",
+            )
+            merge_ref = self._run_topology_git(
+                root,
+                "commit-tree",
+                tree_ref,
+                "-p",
+                promoted_ref,
+                "-p",
+                feature_ref,
+                "-m",
+                "merge stale unrelated feature after promotion",
+            )
+            self._run_topology_git(root, "reset", "--hard", merge_ref)
+
+            with mock.patch.object(
+                release_state,
+                "validate_release_state",
+                return_value=[],
+            ):
+                errors: list[str] = []
+                records = release_state._previous_governed_release_state_records(
+                    root,
+                    promoted,
+                    errors,
+                )
+
+            self.assertEqual(errors, [])
+            self.assertEqual(records, [(promotion_source_ref, promotion_source)])
+
+    def test_previous_governed_states_reject_illegal_transition_inside_stale_merge_sibling(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            root = Path(tmpdir)
+            self._init_topology_repo(root)
+
+            base = self._topology_state("a")
+            self._write_topology_state(root, base)
+            base_ref = self._commit_topology_repo(root, "governed base")
+
+            self._run_topology_git(root, "checkout", "-q", "-b", "mainline")
+            current = self._topology_state("b")
+            self._write_topology_state(root, current)
+            current_ref = self._commit_topology_repo(root, "mainline candidate update")
+
+            self._run_topology_git(
+                root,
+                "checkout",
+                "-q",
+                "-b",
+                "broken-sibling",
+                base_ref,
+            )
+            malformed = copy.deepcopy(base)
+            malformed["historical"]["6.3.0"]["public_source_ref"] = "0" * 40
+            self._write_topology_state(root, malformed)
+            sibling_ref = self._commit_topology_repo(
+                root,
+                "illegal protected-history rewrite",
+            )
+
+            tree_ref = self._run_topology_git(
+                root,
+                "rev-parse",
+                f"{current_ref}^{{tree}}",
+            )
+            merge_ref = self._run_topology_git(
+                root,
+                "commit-tree",
+                tree_ref,
+                "-p",
+                current_ref,
+                "-p",
+                sibling_ref,
+                "-m",
+                "merge broken stale sibling",
+            )
+            self._run_topology_git(root, "reset", "--hard", merge_ref)
+
+            errors: list[str] = []
+            states = release_state._previous_governed_release_states(
+                root,
+                current,
+                errors,
+            )
+
+            self.assertEqual(states, [base])
+            self.assertTrue(
+                any(
+                    "cannot rewrite historical[6.3.0]" in error
+                    for error in errors
+                )
+            )
+            self.assertTrue(
+                any(
+                    "a later material transition cannot hide it" in error
+                    for error in errors
+                )
+            )
+
+    def test_previous_governed_states_reject_merge_that_discards_newer_sibling_acceptance(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            root = Path(tmpdir)
+            self._init_topology_repo(root)
+
+            stale = self._topology_state("a")
+            self._write_topology_state(root, stale)
+            base_ref = self._commit_topology_repo(root, "governed stale base")
+
+            self._run_topology_git(root, "checkout", "-q", "-b", "stale-main")
+            (root / "stale.txt").write_text("stale branch\n", encoding="utf-8")
+            stale_ref = self._commit_topology_repo(root, "stale mainline")
+
+            self._run_topology_git(
+                root,
+                "checkout",
+                "-q",
+                "-b",
+                "release",
+                base_ref,
+            )
+            promotion_source, promoted, _ = self._accepted_cutover_fixture()
+            self._write_topology_state(root, promotion_source)
+            self._commit_topology_repo(root, "valid promotion source")
+            self._write_topology_state(root, promoted)
+            promoted_ref = self._commit_topology_repo(
+                root,
+                "accepted-current promotion",
+            )
+
+            tree_ref = self._run_topology_git(
+                root,
+                "rev-parse",
+                f"{stale_ref}^{{tree}}",
+            )
+            merge_ref = self._run_topology_git(
+                root,
+                "commit-tree",
+                tree_ref,
+                "-p",
+                stale_ref,
+                "-p",
+                promoted_ref,
+                "-m",
+                "merge while retaining stale accepted state",
+            )
+            self._run_topology_git(root, "reset", "--hard", merge_ref)
+
+            with mock.patch.object(
+                release_state,
+                "validate_release_state",
+                return_value=[],
+            ):
+                errors: list[str] = []
+                release_state._previous_governed_release_states(
+                    root,
+                    stale,
+                    errors,
+                )
+
+            self.assertTrue(
+                any(
+                    "incompatible governed merge parent" in error
+                    for error in errors
+                )
+            )
+            self.assertTrue(
+                any(
+                    "accepted_current.version must advance monotonically" in error
+                    for error in errors
+                )
+            )
+
+
     def test_previous_governed_states_allow_multiple_legal_owner_present_transitions(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             root = Path(tmpdir)
