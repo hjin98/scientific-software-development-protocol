@@ -1,7 +1,7 @@
 ---
 kind: independent-review-handoff
 protocol_under_review: 6.5.0
-status: ready-p10
+status: p10-no-pass-repair-required
 accepted_control_p0: 55c085261eb827e3047637d045a8e6917ea6b962
 failed_candidate_p1: b565e28aeacea002cefe27e6b9594fe99d653c0a
 failed_candidate_p2: e8edb353e172aef933ed5e58eeabe897d0cc98d1
@@ -21,6 +21,9 @@ p10_binding_qualification_run: 36098950938
 p10_repair_qualification: qualification/ssdp65/P10-REPAIR-QUALIFICATION.md
 p10_freeze_binding: qualification/ssdp65/P10-FREEZE-BINDING.md
 p10_binding_qualification: qualification/ssdp65/P10-BINDING-QUALIFICATION.md
+p10_review: qualification/ssdp65/INDEPENDENT-REVIEW-2026-09-25-PROTOCOL-6.5-P10-NO-PASS.md
+p10_review_commit: 964815e81c3ea538ba01789ca54d12e284fd14e2
+p10_review_disposition: NO_PASS
 p9_review: qualification/ssdp65/INDEPENDENT-REVIEW-2026-09-24-PROTOCOL-6.5-P9-NO-PASS.md
 historical_capability_preservation_review: qualification/ssdp65/HISTORICAL-CAPABILITY-PRESERVATION-REVIEW-2026-09-25-P9.md
 authoring_context_verdict: none
@@ -189,3 +192,35 @@ PASS means only:
 It does not ratify Protocol 6.5, publish public fallback, establish recovery, change accepted-current, merge PR #33, or mutate Protocol 7 D3/D4.
 
 If a semantic blocker remains, preserve P10 immutably, reopen at the earliest owning layer, and require a new candidate identity.
+
+
+## P10 independent Review disposition — 2026-09-25
+
+Fresh independent assembled-candidate Review of exact P10
+`275b23bfa45cc72145d2079c8d945a6ff5a5c216` is **NO-PASS**.
+
+Durable Review:
+
+`qualification/ssdp65/INDEPENDENT-REVIEW-2026-09-25-PROTOCOL-6.5-P10-NO-PASS.md`
+
+Immutable Review publication commit:
+
+`964815e81c3ea538ba01789ca54d12e284fd14e2`
+
+One genuine D4 blocker survives:
+
+**B65-P10-1 — incomplete Git ancestry can be mistaken for genuine pre-owner ancestry.**
+
+The production resolver may treat an empty exact-path history result as proof that a lineage never contained
+`PROTOCOL-RELEASE-STATE.yaml`. In a shallow/incomplete repository, owner introduction can lie beyond the visible
+history boundary. A later governed deletion followed by owner reintroduction can therefore be misclassified as a
+genuine first introduction and bypass transition validation.
+
+Accepted Protocol 6.5 D3 remains closed. Serious Challenge: none.
+
+P10 is immutable failed Review evidence and is not technically eligible for stakeholder ratification. The existing
+D3->D4 handoff is reopened at the release-state ancestry classifier. Any semantic repair requires a new immutable
+candidate identity, exact-candidate qualification, later binding, and a new fresh independent assembled-candidate Review.
+
+No stakeholder ratification, public-fallback publication, recovery establishment, accepted-current cutover, PR merge,
+or Protocol 7 D3/D4 mutation is authorized.

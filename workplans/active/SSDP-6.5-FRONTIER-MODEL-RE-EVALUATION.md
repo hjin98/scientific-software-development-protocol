@@ -5,8 +5,8 @@ protocol_version: 6.4.0
 target_protocol_version: 6.5.0
 subject_baseline: P0 = Protocol 6.4 at 55c085261eb827e3047637d045a8e6917ea6b962 (recovery 74bc572ef516cae417437a2027eeff52a2e25c15)
 diagnostic_commit: 81375d8142a8130b80cd82f2304d3e16bc3fc390
-status: ready-p10-independent-review
-current_phase: PHASE VII P10 FROZEN / FRESH INDEPENDENT REVIEW REQUIRED
+status: reopened-p10-no-pass
+current_phase: PHASE VII P10 NO-PASS / D4 REPAIR REQUIRED
 branch: ssdp-6.5-frontier-model-re-evaluation
 created_date: 2026-09-24
 adjudication: qualification/ssdp65/CROSS-MODEL-ADJUDICATION-2026-09-24.md
@@ -14,7 +14,7 @@ active_serious_challenge: none against accepted D1-D4 doctrine
 second_frontier_diagnostic: waived-for-this-cycle-by-stakeholder-resource-constraint
 design_closure: qualification/ssdp65/PHASE-IV-V-DESIGN-CLOSURE.md
 implementation_handoff: workplans/active/SSDP-6.5-D3-D4-IMPLEMENTATION-HANDOFF.md
-independent_review: qualification/ssdp65/INDEPENDENT-REVIEW-2026-09-24-PROTOCOL-6.5-P9-NO-PASS.md
+independent_review: qualification/ssdp65/INDEPENDENT-REVIEW-2026-09-25-PROTOCOL-6.5-P10-NO-PASS.md
 ---
 
 # Protocol 6.5 Frontier-Model Re-evaluation and Successor Workplan
@@ -1059,3 +1059,38 @@ Binding descendant `82949a0c8325fce602c39fb3dfdab56352d94b73` passed run `360989
 B65-P9-1 is mechanically closed at the existing D4 owner. Historical capability preservation obligations remain explicitly carried into the fresh P10 Review handoff.
 
 The next authorized action is a genuinely fresh independent assembled-candidate Review of exact P10.
+
+
+## 44. P10 independent Review NO-PASS and bounded D4 reopen
+
+Fresh independent assembled-candidate Review of exact P10
+`275b23bfa45cc72145d2079c8d945a6ff5a5c216` is **NO-PASS**.
+
+Governing Review record:
+
+`qualification/ssdp65/INDEPENDENT-REVIEW-2026-09-25-PROTOCOL-6.5-P10-NO-PASS.md`
+
+Immutable Review publication commit:
+
+`964815e81c3ea538ba01789ca54d12e284fd14e2`
+
+The Review found no Serious Challenge and did not reopen accepted Protocol 6.5 D3. Historical doctrine/resources,
+current owner convergence, frozen Protocol 5.16/6.0-6.4 resources, and Protocol 7 isolation were preserved on the
+reviewed surfaces.
+
+One out-of-matrix D4 blocker survives:
+
+**B65-P10-1 — incomplete Git ancestry can be mistaken for genuine pre-owner ancestry.**
+
+A shallow-history holdout showed that owner introduction can lie beyond the visible ancestry boundary; after a visible
+governed deletion, P10's empty exact-path history query can then misclassify a working-tree reintroduction as the
+first owner introduction and omit the malformed governed interval from transition validation.
+
+The detailed minimum repair contract is owned by
+`workplans/active/SSDP-6.5-D3-D4-IMPLEMENTATION-HANDOFF.md` §44. Do not duplicate or broaden the mechanism here.
+
+P10 remains immutable failed Review evidence. Any semantic repair requires a new immutable candidate identity,
+exact-candidate qualification, later lifecycle binding, and another fresh independent assembled-candidate Review.
+
+No stakeholder ratification, publication, recovery, accepted-current cutover, PR merge, or Protocol 7 mutation is
+authorized.

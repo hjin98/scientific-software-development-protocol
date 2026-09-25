@@ -3,7 +3,7 @@ kind: implementation-workplan
 workplan_id: SSDP-6.5-D3-D4-IMPLEMENTATION-HANDOFF
 protocol_version: 6.4.0
 target_protocol_version: 6.5.0
-status: ready-p10-independent-review
+status: reopened-p10-no-pass
 parent_workplan: workplans/active/SSDP-6.5-FRONTIER-MODEL-RE-EVALUATION.md
 design_authority: qualification/ssdp65/PHASE-IV-V-DESIGN-CLOSURE.md
 baseline: 55c085261eb827e3047637d045a8e6917ea6b962
@@ -913,3 +913,89 @@ Durable qualification records:
 B65-P9-1 is mechanically repaired and qualified at the existing D4 owner. Accepted P65 D3 remains closed.
 
 The next authorized stage is a genuinely fresh independent assembled-candidate Review of exact P10.
+
+
+## 44. P10 independent Review NO-PASS — incomplete-ancestry repair
+
+Fresh independent assembled-candidate Review of immutable P10
+`275b23bfa45cc72145d2079c8d945a6ff5a5c216` issued **NO-PASS**.
+
+Durable Review:
+
+`qualification/ssdp65/INDEPENDENT-REVIEW-2026-09-25-PROTOCOL-6.5-P10-NO-PASS.md`
+
+Immutable Review publication commit:
+
+`964815e81c3ea538ba01789ca54d12e284fd14e2`
+
+### B65-P10-1 — incomplete ancestry is conflated with genuine pre-owner ancestry
+
+The P10 repair is correct when the relevant Git ancestry is complete: visible post-introduction owner deletion is
+rejected, and parent order, timestamps, sibling enumeration, and traversal-stack order do not select authority.
+
+The remaining D4 defect is the negative inference in the existing release-state ancestry classifier. An empty
+`git rev-list --full-history <ref> -- PROTOCOL-RELEASE-STATE.yaml` result proves only that no owner-bearing commit is
+visible in the searched object graph. In a shallow/incomplete repository, it does not prove that the lineage never
+previously contained the governed owner.
+
+A fresh real-Git holdout demonstrated:
+
+```text
+pre-owner
+-> owner introduced
+-> owner deleted
+-> depth-1 shallow checkout at deletion
+-> working-tree owner reintroduction
+-> visible exact-path history is empty
+-> P10 classifies the lineage as pre-owner
+-> no deletion/reintroduction error
+```
+
+This violates the existing D3 contract that a missing owner may be ignored only when ancestry establishes genuine
+pre-owner history.
+
+### Earliest owner and repair boundary
+
+Earliest owner: **D4 `source/release_state.py`**, specifically the negative-result semantics of
+`_lineage_has_governed_release_state()` / `_reject_governed_owner_absence()`.
+
+Do **not** reopen P65 D3.
+
+Do **not** add a second state owner, registry, transition mirror, topology service, compatibility layer, branch-name
+policy, timestamp policy, candidate-specific branch, or semantic parser.
+
+### Minimum repair contract
+
+1. Preserve the current positive existential rule: if any visible ancestor contains a valid governed owner, the
+   lineage is governed.
+2. A negative owner-history result may mean "genuinely pre-owner" only when the ancestry searched is known complete
+   enough to support that negative claim.
+3. If the repository is shallow/incomplete and no governed owner has been found, fail closed with an explicit
+   incomplete-ancestry validation error rather than classifying the lineage as pre-owner.
+4. Preserve existing fail-closed behavior for an ancestry query that itself fails.
+5. Keep timestamps, default `git log` order, branch names, repository default/latest, sibling-parent order,
+   traversal-stack order, and candidate identities non-authoritative.
+6. Preserve all complete-history P10 positives/negatives: working-tree vs HEAD, linear transitions, evidence-only
+   descendants, consecutive material transitions, equivalent/divergent parents, genuine pre-owner history, visible
+   deletion/reintroduction, recovery lineage, canonical semver, and evidence binding.
+
+### Mandatory fresh holdouts
+
+Exercise the real production resolver with real Git repositories:
+
+- owner introduction hidden beyond a shallow boundary -> visible owner deletion -> working-tree reintroduction:
+  **reject/fail closed**;
+- owner introduction hidden beyond a shallow boundary on a missing merge-parent lineage: **reject/fail closed**;
+- complete-history genuine pre-owner HEAD -> first working-tree introduction: **pass**;
+- complete-history genuine pre-owner merge parent + governed feature lineage: **pass**;
+- rerun all P10 complete-history topology/recovery controls.
+
+### Replacement-candidate rule
+
+P10 remains immutable. Any semantic change implementing this repair creates a **new candidate identity**. Do not
+predeclare that identity before the repair commit exists and exact-candidate normal CI passes. After exact-candidate
+qualification, bind the new candidate from a later lifecycle descendant with Review reset to `NOT_RUN`, rerun
+binding qualification, and perform a new fresh independent assembled-candidate Review.
+
+No stakeholder ratification, public fallback, recovery, accepted-current cutover, PR merge, or Protocol 7 D3/D4
+mutation is authorized.
