@@ -8,7 +8,7 @@ branch: ssdp-6.5-frontier-model-re-evaluation
 accepted_control: 55c085261eb827e3047637d045a8e6917ea6b962
 superseded_review_ready_candidate: a2e5f01e258f249f74d1eda74b883efb98fd7d59
 serious_challenge: active-against-current-doctrine
-workplan_review: pass
+workplan_review: pass-after-second-adversarial-review
 workplan_review_date: 2026-09-25
 created_date: 2026-09-25
 ---
@@ -423,8 +423,8 @@ If an evidence-instrument correction leaves the immutable D1-D4/product semantic
 - repair/remap the evidence at its own owner;
 - rerun the affected qualification against the **same semantic candidate** when the release lifecycle can represent
   that honestly;
-- bind the qualification to both the exact immutable **semantic subject ref** and the exact **evidence realization
-  ref/run** containing the corrected oracle/harness;
+- bind the qualification to both the exact immutable **semantic subject ref** and the exact **evidence-realization
+  descendant ref**, plus the exact workflow/run identity when execution is external to that commit;
 - inspect the delta between those identities far enough to establish that no governed semantic source/product/public
   contract changed under the label "evidence-only";
 - do not mint a replacement semantic candidate solely because an oracle, fixture, diagnostic, or evidence route was
@@ -866,7 +866,7 @@ Do not encode model-specific behavior.
 - Every protocol successor performs README/CHANGELOG documentation closeout before semantic-candidate freeze, with the
   persistent repository instruction owned by `AGENTS.md` and a minimal objective version/route persistence check in
   repository acceptance.
-- No new role, gate, registry, scoring engine, telemetry bureaucracy, or prose-quality parser.
+- No new lifecycle role, separate approval gate, registry, scoring engine, telemetry bureaucracy, or prose-quality parser; bounded assertions may be added inside the existing repository acceptance path when they protect stable objective invariants.
 
 ### Delegated
 
