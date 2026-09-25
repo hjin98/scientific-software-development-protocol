@@ -20,6 +20,7 @@ p9_binding_qualification_run: 36091605214
 p9_review: qualification/ssdp65/INDEPENDENT-REVIEW-2026-09-24-PROTOCOL-6.5-P9-NO-PASS.md
 p9_review_commit: 98fcef496f10d4980d97099ea4607d60ef3e812a
 p9_review_status: NO_PASS
+historical_capability_preservation_review: qualification/ssdp65/HISTORICAL-CAPABILITY-PRESERVATION-REVIEW-2026-09-25-P9.md
 blocking_finding: B65-P9-1
 serious_challenge: none
 d3_reopened: false
@@ -142,3 +143,12 @@ After semantic repair and exact-candidate CI:
 P9 CI and Review evidence remain applicable only to their exact subjects/properties. They do not transfer whole-candidate acceptance to P10.
 
 No stakeholder ratification, publication, recovery, accepted-current cutover, PR #33 merge, or Protocol 7 D3/D4 mutation is authorized before a replacement candidate independently passes Review.
+
+
+## Historical capability preservation requirement for the replacement candidate
+
+The P9 historical-capability review found no additional lost doctrine beyond B65-P9-1.
+
+The replacement candidate must preserve the accepted capability lineage in modern form, not original wording/mechanisms. Re-establish the bounded cross-generation matrix in `qualification/ssdp65/HISTORICAL-CAPABILITY-PRESERVATION-REVIEW-2026-09-25-P9.md`, including active historical regression, package closure, exact version/fallback/recovery discipline, frozen prior profiles/prompts, Protocol 7 isolation, PEM/HAS, progressive disclosure/Lossless Representation, long-horizon quality, relation-first tool/language routing, and Protocol 6.4 formal-definition/traceability semantics.
+
+Do not infer preservation from the map alone; inspect the current owners and assembled replacement. Do not reintroduce obsolete proxy machinery or version-labelled amendment replay merely for historical resemblance.

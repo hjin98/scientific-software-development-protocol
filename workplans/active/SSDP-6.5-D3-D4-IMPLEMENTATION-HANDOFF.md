@@ -820,3 +820,23 @@ Do not reopen accepted P65 D3. Do not add a second state authority, registry, tr
 P9 remains immutable failed Review evidence. Any semantic repair creates a new candidate identity. After repair: rerun the focused topology/transition/recovery suite, full repository build/Core, preservation/parity evidence, exact replacement-candidate CI, freeze/binding, then a new fresh independent assembled-candidate Review.
 
 No stakeholder ratification, public-fallback publication, recovery establishment, accepted-current cutover, PR merge, or Protocol 7 D3/D4 mutation is authorized.
+
+
+## 34. Historical capability preservation obligation for the P9 replacement
+
+A dedicated historical-capability preservation review of exact P9 is recorded at:
+
+`qualification/ssdp65/HISTORICAL-CAPABILITY-PRESERVATION-REVIEW-2026-09-25-P9.md`
+
+Disposition:
+
+- no additional historical doctrine loss was found;
+- P9's compression preserves the inspected accepted Protocol 5.13-6.4 capability lineage in modern owners/concretizations;
+- B65-P9-1 is also the sole surviving historical-capability nonconformance because it can erase a post-introduction governed release-state interval;
+- no D3 reopen is required.
+
+The replacement candidate qualification must preserve this transitive capability closure. In addition to the B65-P9-1 focused topology matrix, rerun the active historical regression modules for convergence/simplicity, relation-first tools/CodeQL, language profiles, long-horizon quality/orchestration, Protocol 6.1 evidence evolution and package closure, Protocol 6.2 representation, Protocol 6.3 PEM, and Protocol 6.4 structural traceability.
+
+Also re-establish exact frozen Protocol 5.16 and 6.0-6.4 profile/prompt identity, source/generated current-prompt parity, Protocol 7 D3/D4 isolation, and the current-owner semantic presence of D1-D4 authority, evidence lifecycle, Lossless Representation/progressive disclosure, PEM/HAS non-authority, exact fallback/recovery/version binding, and Protocol 6.4 formal-definition/source-availability doctrine.
+
+Do not restore old amendment prose, proxy-only QF machinery, duplicated release-state values, or historical implementation mechanisms merely to make preservation more visible. Capability, not old representation, is the preservation oracle.
