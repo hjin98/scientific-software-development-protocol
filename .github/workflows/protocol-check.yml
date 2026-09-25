@@ -25,20 +25,46 @@ jobs:
         run: python source/release_state.py
       - name: Validate project engineering memory
         run: python source/project_engineering_memory.py PROJECT-ENGINEERING-MEMORY.md
+      - name: Diag topology basics
+        continue-on-error: true
+        run: >-
+          python -m unittest
+          tests.test_protocol_65_release_state.Protocol65ReleaseStateTests.test_previous_governed_states_use_head_for_working_tree_change
+          tests.test_protocol_65_release_state.Protocol65ReleaseStateTests.test_previous_governed_states_use_linear_parent_boundary
+          tests.test_protocol_65_release_state.Protocol65ReleaseStateTests.test_previous_governed_states_cross_evidence_only_descendants
+          tests.test_protocol_65_release_state.Protocol65ReleaseStateTests.test_previous_governed_states_cover_date_reordered_merge_parents
+          tests.test_protocol_65_release_state.Protocol65ReleaseStateTests.test_previous_governed_states_deduplicate_equivalent_merge_lineages
+          tests.test_protocol_65_release_state.Protocol65ReleaseStateTests.test_previous_governed_states_handle_synthetic_pr_merge
+      - name: Diag topology owner continuity
+        continue-on-error: true
+        run: >-
+          python -m unittest
+          tests.test_protocol_65_release_state.Protocol65ReleaseStateTests.test_previous_governed_states_reject_deleted_owner_merge_lineage
+          tests.test_protocol_65_release_state.Protocol65ReleaseStateTests.test_previous_governed_states_reject_long_owner_absence
+          tests.test_protocol_65_release_state.Protocol65ReleaseStateTests.test_previous_governed_states_reject_same_lineage_reintroduction
+          tests.test_protocol_65_release_state.Protocol65ReleaseStateTests.test_previous_governed_states_allow_long_genuine_pre_owner_lineage
+          tests.test_protocol_65_release_state.Protocol65ReleaseStateTests.test_previous_governed_states_fail_closed_on_shallow_working_tree_reintroduction
+          tests.test_protocol_65_release_state.Protocol65ReleaseStateTests.test_previous_governed_states_fail_closed_on_shallow_missing_merge_parent
+          tests.test_protocol_65_release_state.Protocol65ReleaseStateTests.test_previous_governed_states_allow_working_tree_first_owner_introduction
+          tests.test_protocol_65_release_state.Protocol65ReleaseStateTests.test_previous_governed_states_reject_working_tree_reintroduction
+      - name: Diag topology canonical storage
+        continue-on-error: true
+        run: >-
+          python -m unittest
+          tests.test_protocol_65_release_state.Protocol65ReleaseStateTests.test_previous_governed_states_fail_closed_on_unreadable_historical_owner_objects
+          tests.test_protocol_65_release_state.Protocol65ReleaseStateTests.test_previous_governed_states_use_canonical_ancestry_under_replace_ref
+          tests.test_protocol_65_release_state.Protocol65ReleaseStateTests.test_previous_governed_states_use_canonical_ancestry_under_graft
+          tests.test_protocol_65_release_state.Protocol65ReleaseStateTests.test_previous_governed_states_follow_readable_alternate_object_store
+          tests.test_protocol_65_release_state.Protocol65ReleaseStateTests.test_previous_governed_states_reject_laundered_reintroduction_after_later_transition
+      - name: Diag new owner-present holdouts
+        continue-on-error: true
+        run: >-
+          python -m unittest
+          tests.test_protocol_65_release_state.Protocol65ReleaseStateTests.test_previous_governed_states_reject_laundered_owner_present_history_rewrite
+          tests.test_protocol_65_release_state.Protocol65ReleaseStateTests.test_previous_governed_states_reject_laundered_owner_present_accepted_rewrite
+          tests.test_protocol_65_release_state.Protocol65ReleaseStateTests.test_previous_governed_states_allow_multiple_legal_owner_present_transitions
       - name: Run protocol regression tests
-        shell: bash
-        run: |
-          set -o pipefail
-          python -m unittest discover -s tests -v 2>&1 | tee /tmp/protocol-tests.log
-          status=${PIPESTATUS[0]}
-          {
-            echo '### Protocol regression diagnostic'
-            echo
-            echo '\`\`\`text'
-            tail -n 200 /tmp/protocol-tests.log
-            echo '\`\`\`'
-          } >> "$GITHUB_STEP_SUMMARY"
-          exit "$status"
+        run: python -m unittest discover -s tests -v
       - name: Build canonical skill packages once
         run: python source/build_skills.py --output /tmp/protocol-dist
       - name: Validate generated skill packages independently
