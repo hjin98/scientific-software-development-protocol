@@ -10,7 +10,7 @@ That distinction is the core of the protocol. Scientific models, numerical metho
 
 ## Start here
 
-If you remember only five ideas, remember these:
+If you remember only six ideas, remember these:
 
 1. **Start at the earliest layer whose meaning changes.** A code change is not always just a code change.
 2. **Write down the contract before choosing the mechanism.** Protect scientific, numerical, architectural, and behavioral invariants explicitly.

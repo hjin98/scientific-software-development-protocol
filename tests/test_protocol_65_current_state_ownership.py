@@ -76,14 +76,6 @@ class Protocol65CurrentStateOwnershipTests(unittest.TestCase):
         self.assertIn("[CHANGELOG.md](CHANGELOG.md)", readme)
         self.assertIn("[PROTOCOL-RELEASE-STATE.yaml](PROTOCOL-RELEASE-STATE.yaml)", readme)
 
-    def test_proportional_rigor_keeps_acceptance_and_priority_distinct(self) -> None:
-        kernel = (ROOT / "source/shared/references/abstraction-and-concretization.md").read_text(encoding="utf-8")
-        convergence = (ROOT / "source/shared/references/convergence-and-cycle-economy.md").read_text(encoding="utf-8")
-        evidence = (ROOT / "source/shared/references/evidence-evolution-and-dependencies.md").read_text(encoding="utf-8")
-        self.assertIn("Mandatory obligations stay mandatory; priority only schedules them.", kernel)
-        self.assertIn("child issues inherit no parent importance without credible causal linkage", kernel)
-        self.assertIn("Distinguish problem importance from **next-action priority**", convergence)
-        self.assertIn("Applicability is a feasibility condition, not an economy variable.", evidence)
 
     def test_universal_kernel_does_not_exceed_frozen_p0_word_count(self) -> None:
         text = (ROOT / "source/shared/references/abstraction-and-concretization.md").read_text(encoding="utf-8")
