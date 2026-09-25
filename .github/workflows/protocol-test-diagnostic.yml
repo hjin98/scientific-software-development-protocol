@@ -14,25 +14,11 @@ jobs:
       fail-fast: false
       matrix:
         method:
-          - test_repository_release_state_is_coherent_and_refs_realize
-          - test_review_pass_requires_frozen_semantic_candidate
-          - test_ratification_cannot_self_promote_without_review
-          - test_public_fallback_requires_review_ratification_and_exact_candidate
-          - test_recovery_cannot_precede_public_fallback
-          - test_no_pass_review_also_requires_frozen_semantic_candidate
-          - test_ratification_cannot_be_pending_or_rejected_before_review_pass
-          - test_public_fallback_and_recovery_are_always_distinct
-          - test_accepted_current_cannot_cut_over_to_unratified_candidate
-          - test_active_candidate_rejects_historical_or_older_version
-          - test_historical_versions_must_precede_accepted_current
-          - test_version_identity_requires_canonical_ascii_semver
-          - test_active_candidate_accepts_patch_minor_and_major_successors
-          - test_terminal_cutover_and_next_candidate_are_legal_state_transitions
-          - test_historical_state_cannot_duplicate_accepted_current_version
-          - test_transition_preserves_accepted_and_historical_identity
-          - test_accepted_cutover_requires_exact_previous_candidate_and_history_transfer
-          - test_recovery_lineage_requires_complete_pre_mapping_snapshot
-          - test_recovery_lineage_rejects_replace_rewritten_sibling
+          - test_accepted_cutover_allows_exact_previous_candidate_and_history_transfer
+          - test_accepted_cutover_rejects_missing_history_transfer
+          - test_accepted_cutover_rejects_mutated_history_transfer
+          - test_accepted_cutover_rejects_wrong_accepted_recovery
+          - test_accepted_cutover_requires_previous_review_pass
     steps:
       - uses: actions/checkout@v4
         with:

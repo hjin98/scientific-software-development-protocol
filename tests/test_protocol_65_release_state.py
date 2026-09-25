@@ -986,7 +986,7 @@ semantic_ref: {"c" * 40}
         errors = release_state.validate_release_transition(previous, inserted)
         self.assertTrue(any("cannot add historical versions" in error for error in errors))
 
-    def test_accepted_cutover_requires_exact_previous_candidate_and_history_transfer(self) -> None:
+    def _accepted_cutover_fixture(self):
         previous = copy.deepcopy(self.data)
         previous_accepted = copy.deepcopy(previous["accepted_current"])
         previous_version = previous_accepted["version"]
@@ -1027,27 +1027,39 @@ semantic_ref: {"c" * 40}
             "public_source_ref": candidate,
             "recovery_ref": recovery,
         }
+        return previous, current, previous_version
+
+    def test_accepted_cutover_allows_exact_previous_candidate_and_history_transfer(self) -> None:
+        previous, current, _ = self._accepted_cutover_fixture()
         self.assertEqual(
             release_state.validate_release_transition(previous, current),
             [],
         )
 
+    def test_accepted_cutover_rejects_missing_history_transfer(self) -> None:
+        previous, current, previous_version = self._accepted_cutover_fixture()
         missing_history = copy.deepcopy(current)
         missing_history["historical"].pop(previous_version)
         errors = release_state.validate_release_transition(previous, missing_history)
         self.assertTrue(any("add exactly the previous accepted_current version" in error for error in errors))
         self.assertTrue(any("move the previous accepted_current mapping unchanged" in error for error in errors))
 
+    def test_accepted_cutover_rejects_mutated_history_transfer(self) -> None:
+        previous, current, previous_version = self._accepted_cutover_fixture()
         mutated_history = copy.deepcopy(current)
         mutated_history["historical"][previous_version]["recovery_ref"] = "e" * 40
         errors = release_state.validate_release_transition(previous, mutated_history)
         self.assertTrue(any("move the previous accepted_current mapping unchanged" in error for error in errors))
 
+    def test_accepted_cutover_rejects_wrong_accepted_recovery(self) -> None:
+        previous, current, _ = self._accepted_cutover_fixture()
         wrong_accepted = copy.deepcopy(current)
         wrong_accepted["accepted_current"]["recovery_ref"] = "e" * 40
         errors = release_state.validate_release_transition(previous, wrong_accepted)
         self.assertTrue(any("must equal the previous candidate recovery" in error for error in errors))
 
+    def test_accepted_cutover_requires_previous_review_pass(self) -> None:
+        previous, current, _ = self._accepted_cutover_fixture()
         incomplete = copy.deepcopy(previous)
         incomplete["candidate"]["review"] = {"state": "NOT_RUN", "evidence_ref": "NONE"}
         errors = release_state.validate_release_transition(incomplete, current)
