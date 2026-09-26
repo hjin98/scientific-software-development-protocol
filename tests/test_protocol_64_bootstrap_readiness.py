@@ -93,9 +93,11 @@ class Protocol64BootstrapReadinessTests(unittest.TestCase):
     def test_local_64_identity_survives_successor_cutover_shape(self) -> None:
         state = release_state.load(ROOT / "PROTOCOL-RELEASE-STATE.yaml")
         successor = copy.deepcopy(state)
-        successor["historical"]["6.4.0"] = copy.deepcopy(successor["accepted_current"])
+        current_version = successor["accepted_current"]["version"]
+        successor["historical"][current_version] = copy.deepcopy(successor["accepted_current"])
+        major, minor, _ = map(int, current_version.split("."))
         successor["accepted_current"] = {
-            "version": "6.5.0",
+            "version": f"{major}.{minor + 1}.0",
             "public_source_ref": "a" * 40,
             "recovery_ref": "b" * 40,
         }
