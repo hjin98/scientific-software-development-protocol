@@ -325,7 +325,9 @@ def assess(run_dir: Path, fixture: Path, rubric: str, model: str) -> dict:
     for path in sorted(fixture.rglob("*.md")):
         if path.name != "TASK.md":
             docs.append(f"--- {path.relative_to(fixture)}\n{path.read_text(encoding='utf-8')}")
-    redact = lambda s: re.sub(r"\b6\.[0-9](?:\.[0-9])?\b", "6.x", s)  # noqa: E731
+    # Blind the evaluator to the protocol variant: redact only the two compared package
+    # versions, keeping other versions (e.g. a workplan's own binding) visible.
+    redact = lambda s: re.sub(r"\b6\.[56](?:\.0)?\b", "<installed-version>", s)  # noqa: E731
     final = redact(summary.get("final", ""))
     # Keep the governing workplan's own declared version visible; only executor text is redacted.
     prompt = ASSESS_PROMPT.format(

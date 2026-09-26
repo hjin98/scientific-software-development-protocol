@@ -200,8 +200,10 @@ class SelectionMetadataTests(unittest.TestCase):
         for name in (*ROLES, *SPECIALISTS):
             text = skill(name)
             with self.subTest(skill=name):
+                body = text.split("\n---\n", 1)[1]
+                first_paragraph = body.strip().split("\n\n")[1]
+                self.assertTrue(first_paragraph.startswith("**Version entry check.** This package is SSDP `REPLACE_WITH_SKILL_PROTOCOL_VERSION`"))
                 head, _, _ = text.partition("## Routing")
-                self.assertIn("**Version entry check.** This package is SSDP `REPLACE_WITH_SKILL_PROTOCOL_VERSION`", head)
                 self.assertIn("references/protocol-versioning-and-compatibility.md", head)
                 built = (ROOT / "dist" / "skills" / name / "SKILL.md").read_text(encoding="utf-8")
                 self.assertIn(f"This package is SSDP `{version}`", built)

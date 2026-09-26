@@ -5,9 +5,9 @@ description: Use to choose, design, review, or challenge a numerical method or a
 
 # Numerical Algorithm Design
 
-Own **D2 algorithm and numerical-method semantics**: discretization, estimator/solver/approximation, convergence/error/conditioning/stability, precision and stochastic behavior, and numerical uncertainty. D2 concretizes D1 but does not own scientific meaning; it constrains D3 without owning ordinary software decomposition.
-
 **Version entry check.** This package is SSDP `REPLACE_WITH_SKILL_PROTOCOL_VERSION`. If the task or its governing workplan declares a different SSDP `protocol_version`, say so and resolve that version's compatible source before protocol-dependent reasoning ([Protocol versioning and compatibility](references/protocol-versioning-and-compatibility.md)); never apply this package's doctrine to other-version work. No declared version: continue.
+
+Own **D2 algorithm and numerical-method semantics**: discretization, estimator/solver/approximation, convergence/error/conditioning/stability, precision and stochastic behavior, and numerical uncertainty. D2 concretizes D1 but does not own scientific meaning; it constrains D3 without owning ordinary software decomposition.
 
 ## Routing
 

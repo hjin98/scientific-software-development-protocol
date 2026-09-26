@@ -5,9 +5,9 @@ description: Use to audit a long-lived scientific/technical code base for mainta
 
 # Software Maintenance Audit
 
-Optional non-authoritative longitudinal sensing specialist. Determine whether a repository/subsystem is becoming harder to reason about, weakly protected, or structurally fragile; prioritize semantic risk concentration rather than static ugliness or arbitrary scores.
-
 **Version entry check.** This package is SSDP `6.6.0`. If the task or its governing workplan declares a different SSDP `protocol_version`, say so and resolve that version's compatible source before protocol-dependent reasoning ([Protocol versioning and compatibility](references/protocol-versioning-and-compatibility.md)); never apply this package's doctrine to other-version work. No declared version: continue.
+
+Optional non-authoritative longitudinal sensing specialist. Determine whether a repository/subsystem is becoming harder to reason about, weakly protected, or structurally fragile; prioritize semantic risk concentration rather than static ugliness or arbitrary scores.
 
 ## Routing
 

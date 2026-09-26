@@ -5,9 +5,9 @@ description: Use to write or reconcile documentation of scientific/technical sof
 
 # Software Documentation
 
-Optional editorial/publication specialist. Improve truthful communication of the accepted system; do not create a fifth authority domain or use prose changes to legitimize defective code, evidence, memory, or a convenient concretization.
-
 **Version entry check.** This package is SSDP `6.6.0`. If the task or its governing workplan declares a different SSDP `protocol_version`, say so and resolve that version's compatible source before protocol-dependent reasoning ([Protocol versioning and compatibility](references/protocol-versioning-and-compatibility.md)); never apply this package's doctrine to other-version work. No declared version: continue.
+
+Optional editorial/publication specialist. Improve truthful communication of the accepted system; do not create a fifth authority domain or use prose changes to legitimize defective code, evidence, memory, or a convenient concretization.
 
 ## Routing
 
