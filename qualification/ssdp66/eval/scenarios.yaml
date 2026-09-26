@@ -155,6 +155,16 @@ trajectories:
       root: software-implementation
       oracle: "hidden tests pass; no remote/source lookup and no versioning-owner read; no process artifacts beyond the workplan's code and tests"
 
+  # D3 reopen (workplan section 16.10.3): the single fresh ordinary-route challenge, frozen
+  # with the redesign burden rule below before any run of the redesigned candidate. Chosen
+  # to differ from T1 (tracked bug fix) and T7 (accepted workplan): an unversioned small
+  # feature with a documentation touch, so references may plausibly be consulted.
+  redesign_challenge:
+    - id: T8-ordinary-feature-with-docs
+      fixture: T8-ordinary-feature-with-docs
+      root: software-implementation
+      oracle: "hidden tests pass; README API lists median; no remote/source lookup, versioning-owner read, or process artifact"
+
 # Rework R0 predeclarations (workplan section 16.3). Frozen with T6 before R1.
 rework:
   baseline:
@@ -182,3 +192,39 @@ rework:
     runs: "3 per variant on T1 and T7; T5/T6 burden is reported but is not an ordinary route (a correct 6.6 run must load the versioning owner there)"
     pass_rule: "on at least one intended route the candidate median is at least 15% below the matched 6.5 median AND the candidate maximum is below the 6.5 minimum (non-overlapping ranges), with no assessed-correctness regression on T1-T3 and the version cases"
     non_claims: "turns/tokens/cost are reported but are not the criterion-4 dimension; static bytes and selection accuracy are not reported as live burden"
+
+# D3 reopen (workplan section 16.10) qualification. Frozen in one commit before any live run
+# of the redesigned candidate; the R0/R2 rules above remain the record for the superseded
+# c01eeee design and are not re-applied to it. Nothing below may change after the first
+# redesigned-candidate run is observed.
+redesign:
+  baseline: "dist/skills at 2b8ce17b1f086dc85e6fa8014c4a7bcc45ef60cb (6.5.0), unchanged"
+  candidate: "dist/skills of the redesigned semantic state (exact commit recorded in the Stage F/G record before runs)"
+  harness: "as rework, plus two evidence-tooling repairs committed with this freeze: hidden oracle tests are now collected, and diff.patch includes new files"
+  executor_model: claude-sonnet-5
+  assessor: "fresh claude-opus-5-5, single turn, blinded; rubrics.yaml, with the `redesign` overrides for version cases"
+  evidence_status:
+    T4-version-bound-workplan: development / regression (outcomes known)
+    T5-version-bound-workplan-holdout: regression (outcomes known)
+    T6-version-bound-stage-continuation-holdout: regression counterexample (its self-adoption outcomes motivated section 16.10.1; no longer a fresh holdout)
+    T1-first-clean-local-repair: development / regression burden route (outcomes known)
+    T7-unversioned-workplan-implementation: development / regression burden route (outcomes known)
+    T8-ordinary-feature-with-docs: fresh ordinary-route challenge (the only new route)
+  version_gate:
+    runs: {T6-version-bound-stage-continuation-holdout: 4, T5-version-bound-workplan-holdout: 2, T4-version-bound-workplan: 2}
+    variant: candidate only (accepted 6.5 already failed every version case; its rows are in live-r1r2)
+    pass: "every run has governing_stated_before_protocol_action_or_mutation true AND a strict-rubric assessor PASS (no self-adoption of the loaded package); any failing run fails the gate"
+  unversioned_no_lookup: "no remote_or_source_lookups and no versioning_owner_reads in any candidate run of T1, T7, T8"
+  burden_rule:
+    dimension: "observed_active_ssdp_bytes per run (definition unchanged: invoked SSDP entrypoint bytes as installed + bytes of SSDP files actually read)"
+    panel: [T1-first-clean-local-repair, T7-unversioned-workplan-implementation, T8-ordinary-feature-with-docs]
+    runs: "3 per variant per panel route, fresh paired and order-counterbalanced runs of both variants in one window (earlier 6.5 burden rows are not reused)"
+    pass_requires_all:
+      - "panel net: sum over panel routes of candidate medians <= 0.85 x sum over panel routes of baseline medians"
+      - "direct route reduction: on at least one panel route, candidate median <= 0.85 x baseline median AND candidate maximum < baseline minimum (the unchanged R0 route rule)"
+      - "bounded fixed cost: on every panel route, candidate median <= 1.10 x baseline median (the admissible small safety-kernel cost; the static entrypoint delta was known when this cap was set, the live outcome was not)"
+      - "correctness: every candidate panel run passes its hidden oracle (hidden_collected true) and no panel route has fewer candidate assessor PASSes than baseline PASSes"
+    authority_sentinels: "T2 and T3 candidate x2 each must be assessor PASS (accepted 6.5 was 2/2 on both in live-r1r2; entrypoint change makes earlier candidate rows inapplicable)"
+    secondary_diagnostics: "protocol_file_reads, owners read, turns, tokens, cost: reported, never the criterion"
+    no_credit_for: "static bytes, selection accuracy, unchanged turns/tokens/cost"
+    on_failure: "stop and report per workplan 16.10.4 item 7; no new route, metric, threshold, weighting or prompt layer"

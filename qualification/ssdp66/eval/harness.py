@@ -411,8 +411,10 @@ def run_live(dist: Path, prompt: str, fixture: Path | None, out: Path, model: st
         summary["wall_s"] = round(time.time() - started, 1)
         summary["entry_and_burden"] = entry_and_burden(reduced, governing, dist)
         if fixture is not None:
-            diff = subprocess.run(["git", "diff", "--", ".", ":(exclude).claude"], cwd=project, capture_output=True, text=True).stdout
             untracked = subprocess.run(["git", "ls-files", "--others", "--exclude-standard", "--", ".", ":(exclude).claude"], cwd=project, capture_output=True, text=True).stdout
+            # Intent-to-add new files so the assessor sees their content, not only their names.
+            subprocess.run(["git", "add", "-A", "-N", "--", ".", ":(exclude).claude"], cwd=project, capture_output=True)
+            diff = subprocess.run(["git", "diff", "--", ".", ":(exclude).claude"], cwd=project, capture_output=True, text=True).stdout
             (out / "diff.patch").write_text(diff, encoding="utf-8")
             summary["untracked"] = [p for p in untracked.splitlines() if not p.startswith(".claude/")]
             summary["oracle"] = run_oracle(fixture.name, project)
@@ -426,11 +428,17 @@ def run_oracle(fixture_id: str, project: Path) -> dict:
     oracle_dir = HERE / "oracles" / fixture_id
     results = {}
     for hidden in sorted(oracle_dir.glob("test_*.py")):
-        shutil.copy(hidden, project / "tests" / f"zz_{hidden.name}")
-        proc = subprocess.run([sys.executable, "-m", "unittest", "discover", "-s", "tests"], cwd=project, capture_output=True, text=True)
+        # The copy must match unittest's default ``test*.py`` discovery pattern. Before the D3
+        # reopen it was named ``zz_test_*.py`` and was never collected, so earlier
+        # ``tests_pass`` values reflect only the fixture's visible tests (see
+        # D3-REOPEN-QUALIFICATION-FREEZE.md).
+        target = project / "tests" / f"test_zz_oracle_{hidden.name}"
+        shutil.copy(hidden, target)
+        proc = subprocess.run([sys.executable, "-m", "unittest", "discover", "-s", "tests", "-v"], cwd=project, capture_output=True, text=True)
         results["tests_pass"] = proc.returncode == 0
         results["tests_tail"] = proc.stderr.strip().splitlines()[-1:] if proc.stderr else []
-        (project / "tests" / f"zz_{hidden.name}").unlink()
+        results["hidden_collected"] = target.stem in proc.stderr
+        target.unlink()
     for check in sorted(oracle_dir.glob("check_*.py")):
         proc = subprocess.run([sys.executable, str(check), str(project)], capture_output=True, text=True)
         results[check.stem] = {"pass": proc.returncode == 0, "detail": proc.stdout.strip()}

@@ -207,6 +207,21 @@ class ActivationTransportDiscoveryTests(unittest.TestCase):
                 result = harness.entry_and_burden(trace, "6.2.0", None)
                 self.assertIs(result["governing_stated_before_protocol_action_or_mutation"], expected)
 
+    def test_hidden_oracle_is_collected_and_discriminates_the_unfixed_fixture(self) -> None:
+        """D3-reopen harness repair: the hidden oracle must actually run (it was never collected before)."""
+        import harness
+
+        for fixture in ("T1-first-clean-local-repair", "T8-ordinary-feature-with-docs"):
+            with self.subTest(fixture=fixture):
+                tmp = Path(tempfile.mkdtemp())
+                self.addCleanup(shutil.rmtree, tmp)
+                project = tmp / "p"
+                shutil.copytree(ROOT / "qualification/ssdp66/eval/fixtures" / fixture, project)
+                result = harness.run_oracle(fixture, project)
+                self.assertIs(result["hidden_collected"], True)
+                self.assertIs(result["tests_pass"], False)
+
+
 class SelectionMetadataTests(unittest.TestCase):
     def test_descriptions_are_selection_interfaces_without_release_state(self) -> None:
         for name in (*ROLES, *SPECIALISTS):

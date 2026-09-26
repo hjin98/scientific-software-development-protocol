@@ -31,7 +31,7 @@ def jobs(scenarios: dict, layer: str, reps: int, variants: dict[str, Path], only
                     run_id = f"{item['id']}-{variant}-r{rep}"
                     out.append((run_id, ["live", "--dist", str(variants[variant]), "--prompt", item["task"], "--max-turns", "3", "--mode", "select"]))
     else:
-        items = [(s, split) for split in ("development", "holdout", "rework_holdout") for s in scenarios["trajectories"].get(split, [])]
+        items = [(s, split) for split in ("development", "holdout", "rework_holdout", "redesign_challenge") for s in scenarios["trajectories"].get(split, [])]
         items = [(s, split) for s, split in items if not only or s["id"] in only]
         for index, (item, split) in enumerate(items):
             fixture = HERE / "fixtures" / item["fixture"]
