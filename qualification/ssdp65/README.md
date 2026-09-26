@@ -1,27 +1,49 @@
-# Protocol 6.5 Frontier-Model Re-evaluation — Evidence Directory
+# Protocol 6.5 Frontier-Model Re-evaluation — Historical Evidence Directory
 
-Non-normative investigation/design evidence for `workplans/active/SSDP-6.5-FRONTIER-MODEL-RE-EVALUATION.md`. Nothing in this directory is accepted Protocol 6.5 authority. Accepted-current remains Protocol 6.4 until final Review, explicit stakeholder ratification, publication/recovery and cutover complete.
+This directory preserves the non-normative investigation, qualification, Review, and release evidence for the Protocol 6.5 cycle. It is historical evidence, not a mutable release-state owner.
 
-## Current evidence chain
+Protocol 6.5.0 is now accepted-current. The authoritative current/candidate/public/recovery identities are owned only by [`PROTOCOL-RELEASE-STATE.yaml`](../../PROTOCOL-RELEASE-STATE.yaml).
+
+## Release outcome
+
+The accepted semantic candidate is exact immutable:
+
+`P21 = 7f7b5e24858e813e45ace867a7f8ea5180f43bf0`
+
+The completed release chain is:
+
+- independent assembled-candidate Review PASS: `INDEPENDENT-REVIEW-2026-09-25-PROTOCOL-6.5-P21-PASS.md`;
+- explicit stakeholder ratification: `STAKEHOLDER-RATIFICATION-2026-09-25-PROTOCOL-6.5-P21.md`;
+- exact-P21 public-source fallback publication;
+- distinct recovery target/publication: `PROTOCOL-6.5-P21-RECOVERY-TARGET.md`;
+- accepted-current cutover and closeout: `PROTOCOL-6.5-RELEASE-CLOSEOUT.md`.
+
+Earlier P1-P20 candidates, NO-PASS records, repair qualifications, freeze/binding records, and handoffs remain immutable historical evidence for how the final P21 candidate was reached. Their entering-state statements must not be read as current release state.
+
+## Governing workplans
+
+The three Protocol 6.5 workplans are complete and archived under `workplans/archive/`:
+
+- `SSDP-6.5-FRONTIER-MODEL-RE-EVALUATION.md`;
+- `SSDP-6.5-D3-D4-IMPLEMENTATION-HANDOFF.md`;
+- `SSDP-6.5-IMPORTANCE-WEIGHTED-ATTENTION-AND-PROPORTIONAL-RIGOR.md`.
+
+Protocol 7 remains separately governed. The Protocol 6.5 closeout added only its inheritance-reconciliation revision; it did not authorize Protocol 7 D4 or mutate Protocol 7 D3 architecture.
+
+## Key historical evidence
 
 | Path | Status | Content |
 | --- | --- | --- |
 | `P0-BASELINE-BINDING-PROTOCOL-6.4.md` | frozen | exact Protocol 6.4 control and baseline acceptance realization |
-| `BENCHMARK-AND-EVALUATION-DESIGN.md` | preregistered + dated benchmark repairs | P0/P1 dimensions, holdouts, evidence-class corrections |
-| `reviewer-a/` | frozen at diagnostic commit | Opus 5.5 Phase I-III reconstruction, falsification, defect model, mutation probe |
-| `CROSS-MODEL-ADJUDICATION-2026-09-24.md` | complete | Opus findings cross-checked against GPT-5.6 Sol history/current P0 and narrowed to four defect families |
-| `PHASE-IV-V-DESIGN-CLOSURE.md` | **PASS** | P65-1..P65-6 principle extraction, D3 architecture and implementation boundary |
-| `INDEPENDENT-DIAGNOSTIC-HANDOFF.md` | reserved | original clean second-frontier handoff; waived for this cycle but retained for future replication |
+| `BENCHMARK-AND-EVALUATION-DESIGN.md` | frozen historical design | P0/candidate dimensions, holdouts, and evidence-class corrections |
+| `reviewer-a/` | frozen diagnostic evidence | frontier-model reconstruction, falsification, defect model, and mutation probe |
+| `CROSS-MODEL-ADJUDICATION-2026-09-24.md` | complete | cross-model adjudication of the initial diagnostic findings |
+| `PHASE-IV-V-DESIGN-CLOSURE.md` | PASS | principle extraction, D3 architecture, and implementation boundary |
+| `PROTOCOL-6.4-TO-6.5-PRESERVATION-MAP.md` | complete evidence | preservation trace for core doctrine and historical capabilities |
+| `INDEPENDENT-REVIEW-HANDOFF-PROTOCOL-6.5.md` | historical handoff | entering-state handoff for the final P21 independent Review |
+| `PROTOCOL-6.5-RELEASE-CLOSEOUT.md` | accepted-current closeout | final lifecycle identities and closeout state |
 
-The clean branch `ssdp-6.5-frontier-model-independent-review-b` remains reserved for a later genuinely independent frontier replication. It is not treated as completed evidence in the current cycle.
-
-## Current execution authority
-
-Implementation is governed by:
-
-`workplans/active/SSDP-6.5-D3-D4-IMPLEMENTATION-HANDOFF.md`
-
-P1 has not yet been frozen. No 6.5 public fallback, recovery, Review PASS or stakeholder ratification exists yet.
+The clean branch `ssdp-6.5-frontier-model-independent-review-b` remains only as an unused reserved surface for any future replication; it was not counted as completed qualification evidence for this release.
 
 ## Reproducing reviewer A's P0 mutation probe
 
