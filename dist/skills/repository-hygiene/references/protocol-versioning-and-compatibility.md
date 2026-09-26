@@ -10,7 +10,7 @@ Own protocol/workplan/profile version binding, immutable historical recovery, pu
 - **minor** — backward-compatible capability/doctrine/control strengthening;
 - **patch** — clarification or defect correction.
 
-Protocol 6.0 introduced first-class D1-D4 authority. Protocol 6.1 strengthened terminology/evidence/handoff/documentation; 6.2 strengthened lossless representation/progressive disclosure; 6.3 added evidence-backed non-authoritative project engineering memory; 6.4 strengthened definition/source availability, well-definedness, parameterization, typed semantic dependencies, imported-source discipline and claim warrant. A compatible successor preserves those accepted capabilities unless an explicit stronger authority supersedes them.
+Protocol 6.0 introduced first-class D1-D4 authority. Protocol 6.1 strengthened terminology/evidence/handoff/documentation; 6.2 strengthened lossless representation/progressive disclosure; 6.3 added evidence-backed non-authoritative project engineering memory; 6.4 strengthened definition/source availability, well-definedness, parameterization, typed semantic dependencies, imported-source discipline and claim warrant; 6.5 strengthened release-state ownership, Review epistemology and proportional rigor; 6.6 reorganized the same capabilities for lower active-context/trajectory cost (tiny kernel, conditional semantic-definition and PEM-schema owners, operational working state, cognitive-resource escalation, entry version check). A compatible successor preserves those accepted capabilities unless an explicit stronger authority supersedes them.
 
 ## Version-intrinsic semantics versus mutable release state
 
@@ -87,6 +87,20 @@ PEM `memory_schema_version` is independent of SSDP protocol version and orchestr
 A restored old PEM snapshot is not current merely because it parses. Re-adoption/recovery reconciles schema, project/scope identity, accepted base, candidate overlay, owners, evidence/binding health, and the uncovered project interval. `reconciled_through` is an identity horizon, not proof of exhaustive history.
 
 Previously executed evidence remains reusable only while no changed protocol obligation, claim/concretization, evidence specification/oracle, candidate, material parameter/regime/source binding, or material environment dimension can plausibly alter applicability.
+
+### Version check at execution entry
+
+When a task or its governing workplan declares a `protocol_version`, compare it with the loaded package `PROTOCOL_VERSION` (and `protocol-manifest.json`) before protocol-dependent reasoning:
+
+```text
+governing == loaded (or X.Y naming the loaded minor line) -> continue
+governing != loaded -> use a compatible installed/local source, else the exact immutable
+                       public-source ref mapped for that version by the project release-state
+                       owner; if neither exists, report truthful non-closure
+no declared version and not version-bound -> installed skill, no remote lookup
+```
+
+The check reuses existing identity owners and creates no second version authority, runtime service or control plane. In this repository `source/version_preflight.py` performs it offline; it is a convenience whose absence changes nothing about the rule.
 
 ## Immutable historical recovery
 

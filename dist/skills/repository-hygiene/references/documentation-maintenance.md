@@ -64,7 +64,7 @@ Preserve concise semantic-evolution reasoning when a material model/method/archi
 
 ## Semantic-source maintenance
 
-Documentation maintenance preserves the semantic-definition/source-availability contract owned by [Abstraction, concretization, authority, challenge, and representation](abstraction-and-concretization.md) and its human-facing specialization in [Scientific and technical writing](scientific-technical-writing.md).
+Documentation maintenance preserves the semantic-definition/source-availability contract owned by [Semantic definition and traceability](semantic-definition-and-traceability.md) and its human-facing specialization in [Scientific and technical writing](scientific-technical-writing.md).
 
 When a current authority family is split across files, the composition must expose enough routing that a competent reader can reconstruct the canonical semantic statement, its owner, and its direct specialized prerequisites without amendment history or hidden chat. A later explanatory clause cannot retroactively supply meaning required by an earlier substantive inference. If two simultaneously applicable owner statements materially disagree, documentation must surface the owner conflict as review-required rather than choosing by file order, newest revision, route priority, or editorial preference.
 

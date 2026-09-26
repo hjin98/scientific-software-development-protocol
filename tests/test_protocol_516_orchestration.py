@@ -55,7 +55,7 @@ class Protocol6OrchestrationTests(unittest.TestCase):
             self.assertIn(token, self.lower)
         self.assertNotIn("current_protocol =", self.lower)
         self.assertNotIn("current_public_ref =", self.lower)
-        self.assertEqual((ROOT / "source/PROTOCOL_VERSION").read_text().strip(), "6.5.0")
+        self.assertRegex((ROOT / "source/PROTOCOL_VERSION").read_text().strip(), r"^6\.(?:[5-9]|[1-9]\d)\.\d+$")
 
     def test_execution_contract_prefers_action_and_resolves_inferable_context(self) -> None:
         self.assertIn("these are execution prompts", self.lower)

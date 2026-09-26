@@ -74,7 +74,7 @@ For rendered PDF/site outputs, materially changed pages should preserve readable
 
 ## Formal-first and axiomatic writing discipline
 
-Human-facing authority is written in dependency order rather than relying on later prose to backfill meaning. For every materially governed specialized object, the first substantive use must resolve to a coherent canonical definition/import/declaration path under [Abstraction, concretization, authority, challenge, and representation](abstraction-and-concretization.md). Brief forward naming is allowed only when no inference depends on the undeclared meaning and the route to the exact owner is explicit.
+Human-facing authority is written in dependency order rather than relying on later prose to backfill meaning. For every materially governed specialized object, the first substantive use must resolve to a coherent canonical definition/import/declaration path under [Semantic definition and traceability](semantic-definition-and-traceability.md). Brief forward naming is allowed only when no inference depends on the undeclared meaning and the route to the exact owner is explicit.
 
 The default first-definition sequence is:
 

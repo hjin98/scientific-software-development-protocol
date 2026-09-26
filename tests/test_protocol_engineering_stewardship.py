@@ -78,7 +78,12 @@ class EngineeringStewardshipContractTests(unittest.TestCase):
         self.assertIn("stakeholder's durable product", lower)
         self.assertIn("role/specialist entrypoint owns root routing", lower)
         self.assertIn("lossless representation rule", lower)
-        self.assertLess(len(agents), len(implementation))
+        # AGENTS.md must stay a compact router rather than a duplicate manual: smaller than
+        # the universal kernel it routes to and free of its section structure.
+        kernel = read("source/shared/references/abstraction-and-concretization.md")
+        self.assertLess(len(agents), len(kernel))
+        self.assertNotIn("## lossless representation rule", lower)
+        self.assertIn("## implementation contract", implementation.lower())
         self.assertNotIn("## governing doctrine", lower)
 
     def test_optional_specialists_remain_non_authoritative_and_product_safe(self) -> None:

@@ -19,25 +19,7 @@ Context economy never permits omission of required affected behavior, failure ev
 
 ## Conditional project-memory intake
 
-PEM is not a universal intake step. Activate it under the predicates owned by [Workflow and workplans](workflow-and-workplans.md): substantial mature rework/replacement, suspected recurrence, substantial optimization/scaling, migration/recovery/revert/restoration where prior choices matter, or an active workplan that explicitly binds relevant project learning. Mere presence of `PROJECT-ENGINEERING-MEMORY.md`, a repository with long history, or a first clean local defect does not justify eager memory/history preparation.
-
-When triggered, use progressive disclosure:
-
-```text
-resolve accepted/base memory + explicit candidate overlay
- -> validate schema/publication state
- -> read active summary
- -> search canonical family/notice metadata for affected owner/mechanism/regime/applicability cues
- -> construct/refresh Historical Applicability Set (HAS)
- -> open matched family/detail rows
- -> follow raw evidence/history only where needed
-```
-
-Temperature and active-summary presence are salience aids, never the applicability search boundary. A relevant `COLD`, `UNASSESSED`, review-required, or summary-omitted canonical entry remains reachable. Conversely, a `HOT` entry outside the current semantic owner/mechanism/regime is not applicable merely because it is prominent.
-
-Missing/partial/unsupported/corrupt memory, stale derived index, stale applicability tags, absent dependency edges, or an advanced `reconciled_through` watermark cannot prove no relevant lesson exists. Use bounded historical intake over the affected project scope where the decision needs stronger exclusion; otherwise preserve explicit uncertainty/`REVIEW_REQUIRED`. Do not turn that fallback into mandatory full-repository archaeology.
-
-For established projects first adopting PEM, historical backfill may be bounded by the material affected scope and declared coverage basis rather than exhaustive global reconstruction. Report blind spots honestly; partial coverage is a first-class state.
+Project Engineering Memory is not a universal intake step. Its activation predicate, progressive retrieval, Historical Applicability Set (HAS) and missing-memory rules are owned by [Project Engineering Memory](project-engineering-memory.md); load it only when that predicate fires. Mere presence of `PROJECT-ENGINEERING-MEMORY.md`, a repository with long history, or a first clean local defect does not justify eager memory/history preparation, and a missing or partial memory never becomes a mandatory full-repository archaeology task.
 
 ## Affected surface
 
@@ -55,8 +37,6 @@ Progressive inspection remains default. Switch to a bounded census only when the
 
 State the completeness basis and material blind spots of symbol/static tools, dynamic registration/configuration, generated code, external consumers and runtime-only behavior. Cross-check where those can hide material members. If the family cannot be bounded confidently, do not present a partial search as exhaustive; reconsider ownership or use broader executable/property/integration evidence appropriate to the claim. Temporary closure maps are derived coordination evidence, not permanent authority.
 
-A PEM canonical family/partition/index is likewise a bounded representation, not proof the repository has no other relevant history unless its declared coverage truly supports that exclusion. Prefer canonical metadata and project-local search to proportional loading of raw historical corpus as it grows.
-
 ## Evidence applicability and history
 
 A test file/historical result is not automatically current evidence. When reusing prior evidence, confirm its specification still targets the claim and the realization remains applicable to candidate/regime/oracle/environment. Stale pass is not confirmation; stale fail is not refutation.
@@ -68,8 +48,6 @@ For positive-pattern admission or material strengthening, search bounded applica
 ## Existing patterns, simplification, generated artifacts
 
 Inspect adjacent implementation before inventing a new abstraction and reuse existing ownership when clean. Do not split modules/add frameworks/reorganize unrelated areas merely because the repository could be cleaner. Refactor when it materially improves the requested change, removes a failure surface, or collapses duplicated authority/machinery. When the current concretization creates the problem, consider removal/narrowing/alteration/consolidation rather than preserving it by default.
-
-A project memory pattern is a design prior, not an instruction to copy the old implementation. Recover the bounded learned capability/cause and current authority binding, then choose the simplest current concretization. Evidence-only historical machinery remains replaceable.
 
 Determine canonical source vs generated output before editing. Edit source and regenerate required descendants. When generated output is shipped/committed, validate both consumer-facing validity and source parity; do not commit transient caches/analysis data unless policy makes them durable. A live project PEM is project state, not a generated generic skill/profile asset and must not be copied into portable packages.
 

@@ -10,6 +10,25 @@ Older README files accumulated release mappings, bootstrap attempts, and version
 
 ## Protocol 6.x
 
+### 6.6.0 — cognitive and operational optimization
+
+Protocol 6.6 preserves every accepted 6.5 engineering capability while reducing how much protocol machinery an agent must keep active, reconstruct, or replay during ordinary work.
+
+Main improvements:
+
+- a smaller universal kernel that keeps only cross-domain semantics (D1-D4 ownership, abstraction/concretization, authority vs evidence, materiality, feasibility before simplicity, Challenge, proportional rigor, Lossless Representation, and the hard specialized-semantics availability invariant);
+- specialized semantic-definition/traceability detail moved to its own risk-triggered owner: ordinary engineering meaning stays lightweight, while specialized objects, parameter/default bindings, imports and formal claims still require the exact owner meaning before inference;
+- authority lifecycle states and the mutation/acceptance sequence moved to the workflow owner, loaded when authority actually changes;
+- Project Engineering Memory split into a compact agent-facing contract (when memory activates, retrieval, Historical Applicability Set, authority binding, counterevidence, when to update) and a cold schema/governance owner; duplicated retrieval procedures now route to the one owner;
+- decision-sufficient handoffs and an operational, explicitly non-authoritative Working State for long or interruption-prone work, plus a clear rule that transient progress does not mutate workplans;
+- vendor-neutral cognitive-resource escalation (model, reasoning, context, tool breadth, independent trajectories, subagents) under the existing proportional-rigor rule, without duplicating host routing;
+- optional independent review trajectories with explicit common-mode limits, and a Review strategy switch after related repeated findings;
+- a cheap entry-time version check that reuses `PROTOCOL_VERSION`, manifests and release state (with an offline repository helper) so version-bound work is never silently reinterpreted;
+- thinner skill descriptions written as selection interfaces (task class plus exclusions) rather than compressed doctrine, with generic package validity kept independent of vendor adapters;
+- a small, removable empirical evaluation harness comparing 6.5 and 6.6 on selection, declared and observed protocol context, and trajectory outcomes under a named reference harness.
+
+The Orchestrator gains a 6.6 profile that rebinds version-bound prompts only; the machine lifecycle, transition graph and profile schema are unchanged. Release status is deliberately not stated here; resolve it from `PROTOCOL-RELEASE-STATE.yaml`.
+
 ### 6.5.0 — self-governance, proportional rigor, and release-state strengthening
 
 Protocol 6.5 preserves the accepted D1-D4 model while tightening how the protocol governs its own development and release lifecycle.

@@ -1,12 +1,22 @@
 # Workflow, Change Plans, Handoffs, and Review
 
-Own workflow/lifecycle, workplan, handoff, review sequencing, resumability, Historical Applicability Set (HAS), project-learning closeout, and closeout semantics. Universal authority/Challenge/representation rules are in [Abstraction, concretization, authority, challenge, and representation](abstraction-and-concretization.md); evidence applicability/dependency/evolution is owned by [Evidence, evolution, and semantic dependencies](evidence-evolution-and-dependencies.md); testing/acceptance methods are owned by [Testing and validation](testing-and-validation.md); Project Engineering Memory (PEM) representation is owned by [Project Engineering Memory](project-engineering-memory.md).
+Own workflow/lifecycle, authority mutation and acceptance sequencing, workplan, handoff, working state, review sequencing, resumability, and closeout semantics. Universal authority/Challenge/representation rules are in [Abstraction, concretization, authority, challenge, and representation](abstraction-and-concretization.md); evidence applicability/dependency/evolution is owned by [Evidence, evolution, and semantic dependencies](evidence-evolution-and-dependencies.md); testing/acceptance methods by [Testing and validation](testing-and-validation.md); Project Engineering Memory (PEM) use, Historical Applicability Set (HAS) and closeout learning by [Project Engineering Memory](project-engineering-memory.md); recurrence/rigor economy by [Convergence and development-cycle economy](convergence-and-cycle-economy.md).
 
 ## Semantic routing, not a waterfall
 
 D1 scientific formulation -> D2 numerical method -> D3 architecture -> D4 specification/implementation is semantic ordering, not a mandatory four-stage pipeline. Before mutation classify the earliest/highest accepted abstraction whose semantics may materially change, directly applicable side constraints, and materially dependent descendants/evidence. Start there; preserve unaffected parents/siblings. File count or implementation breadth does not itself raise the domain.
 
 Supporting specialists (`software-documentation`, `software-maintenance-audit`, `repository-hygiene`) are non-authoritative capabilities, not approval stages.
+
+## Authority lifecycle, mutation, and impact closure
+
+Projects may encode lifecycle locally but must distinguish enough state to prevent speculative/stale material becoming current authority: proposed; accepted-current; challenged; risk-accepted/provisional; stale-dependent; superseded/historical; release-pinned/publication. Human ratification is orthogonal. PEM has separate evidence/coverage/maturity/base/overlay lifecycle and is not D1-D4 acceptance.
+
+A durable authority mutation follows the owning domain's acceptance contract: proposal -> independent falsification where required -> required human ratification -> acceptance -> bounded dependent impact -> reconcretization/revalidation. Repository presence alone does not promote a proposal. A PEM record may support/challenge/propose such a change, but cannot perform the acceptance step itself. A clarification that materially narrows/changes admissible interpretation or concretization is a semantic mutation for dependency/evidence/version impact unless established representation-only.
+
+When accepted authority changes, review only materially dependent descendants/evidence and preserve unaffected siblings/still-valid evidence. A bounded dependency view is an aid, not proof of independence unless its relevant scope was explicitly reviewed complete. Detailed evidence/dependency rules are owned by [Evidence, evolution, and semantic dependencies](evidence-evolution-and-dependencies.md). When the changed owner is cited by an authority-bound learned capability/current notice, reconcile that non-authoritative binding as a dependent representation rather than allowing memory to preserve obsolete force. For high-risk scientific/numerical claims, trace composed D4 -> D2 -> D1 -> external-adequacy closure when material (method owned by [Testing and validation](testing-and-validation.md)).
+
+An unresolved Serious Challenge under an allowed explicit human risk override leaves dependent results `risk-accepted/provisional`; descendants must not reset that state to accepted-current or emit unqualified Pass/closure while the challenge remains unresolved.
 
 ## Workplans as bounded contracts
 
@@ -40,48 +50,38 @@ Applicability comes before importance. Priority may reorder a mandatory obligati
 
 Stay attached to the highest-value unresolved governed outcome rather than process-completion activity. If its critical path genuinely waits on unavailable hardware, service, external input, approval, or human decision, independent work may proceed only when it does not assume the blocker passed or invalidate later evidence. Keep the blocker explicitly open; parallel progress is not acceptance.
 
-## Conditional project-memory activation and HAS
+## Conditional project-memory activation
 
-PEM is decision support, not a mandatory workflow stage. Activate it only when demonstrated project history can materially change the decision: substantial rework of mature D1-D4 semantics/concretization; replacement/consolidation of mature machinery; suspected recurrence; substantial optimization/scaling; migration/recovery/revert/restoration where prior choices matter; or an active workplan explicitly binding relevant memory. A first clean local defect, trivial/unrelated work, or mere presence of a PEM file does not trigger substantive memory loading.
+PEM is decision support, not a mandatory workflow stage. Activate it only when demonstrated project history can materially change the decision: substantial rework of mature D1-D4 semantics/concretization, replacement/consolidation of mature machinery, suspected recurrence, substantial optimization/scaling, migration/recovery/revert/restoration where prior choices matter, or an active workplan explicitly binding relevant memory. A first clean local defect, trivial/unrelated work, or mere presence of a PEM file does not load memory. When it fires, follow the retrieval and HAS contract in [Project Engineering Memory](project-engineering-memory.md); a memory-triggering workplan or handoff records the exact accepted/base memory, candidate overlay and HAS dispositions it relied on, and refreshes them if that basis advances before integration/closeout.
 
-For a memory-triggering task:
-
-1. resolve the **accepted/base PEM** from project integration/Git policy, never from default/latest/timestamp/self-declaration;
-2. validate the supported schema and compose any explicit validated same-branch candidate overlay;
-3. record the exact accepted/base and overlay identities used for the current decision;
-
-The canonical session-local HAS interface is exact and executable:
-
-```yaml
-pem_basis:
-  accepted_project_state: <exact accepted project state>
-  accepted_pem: <exact accepted PEM publication or NONE_PROTOCOL_6.2_PRE_PEM>
-  candidate_overlay_semantic_candidate: <exact candidate overlay or NONE>
-has:
-  - id: <family/capability/notice id>
-    disposition: APPLICABLE | NOT_APPLICABLE | REVIEW_REQUIRED
-    reason: <bounded rationale>
-```
-
-Do not substitute aliases such as `accepted_base` or `candidate_overlay`; the workflow, canonical template, and executable validator use this one shape without translation glue. Keep the HAS session-local unless the governed work explicitly requires a durable handoff/record.
-
-4. read the compact active summary, then perform bounded metadata-level applicability matching across canonical current entries, not only `HOT` or summary-visible entries;
-5. record a HAS entry for every materially relevant family/capability/notice surfaced or independently known, with `APPLICABLE`, `NOT_APPLICABLE`, or `REVIEW_REQUIRED` plus reason;
-6. load raw family/evidence detail only where needed to decide or falsify the disposition;
-7. identify overlapping incompatible guidance and preserve the governing regime/tradeoff/current-owner priority or contested state;
-8. when mature machinery is replaced, map demonstrated learned capabilities to the current authority binding and new mechanism/justified omission.
-
-Missing/partial PEM, a stale/missing derived index, an absent dependency edge, or stale applicability metadata cannot prove historical absence/non-applicability. Perform bounded historical intake over the affected scope when necessary or preserve explicit `REVIEW_REQUIRED` uncertainty. Memory temperature is salience only and cannot determine HAS applicability.
-
-If the target accepted memory, candidate overlay, or a governing current owner materially advances before integration/closeout, reconcile the changed interval/affected surface and refresh materially affected HAS dispositions. A HAS derived from an obsolete basis cannot silently close current work.
-
-## Lossless handoff and resumable state
+## Decision-sufficient handoffs and working state
 
 A current handoff must be snapshot-complete for its **governed task scope**: recover still-binding task-specific invariants/constraints, cycle decisions, non-goals, material acceptance/evidence obligations, authority state, unresolved blockers/Challenge and genuine reopen triggers without hidden chat or unavailable history. A memory-triggering handoff additionally records its exact PEM basis/overlay and current HAS dispositions; it does not replay the project-memory corpus.
 
-Do **not** copy generic protocol doctrine into every handoff. Point to resolvable version-bound owners and state only the local delta. When the receiver cannot resolve a referenced owner/version, carry the minimum required semantics locally rather than assuming shared hidden context.
+Prefer a decision-sufficient projection over replay. The hot representation leads with:
 
-For long/interruption-prone work, keep compact temporary working state: governing snapshot identity, open/closed material obligations, applicable evidence/results and invalidations, blockers/risks/Challenge, and next action. It is derived coordination state, not authority, and should disappear when no longer useful. Reuse it only while its protocol/authority/workplan/candidate/regime/scope remain applicable.
+```text
+governed objective
+exact protocol / authority / workplan / candidate identities
+local decisions and delegated space
+open blockers, material uncertainty, Challenge
+applicable evidence state (including failed / unavailable / stale)
+next action
+genuine reopen and stop conditions
+```
+
+Do **not** copy generic protocol doctrine, settled rationale, raw chronology or long evidence logs into a handoff: point to resolvable version-bound owners/records and state only the local delta. When the receiver cannot resolve a referenced owner/version, carry the minimum required semantics locally rather than assuming shared hidden context. Dropping an open blocker, required check, uncertainty or reopen condition is a Lossless Representation defect, not compression.
+
+**Working State** (context checkpoint): for long/interruption-prone work, keep compact temporary working state—the same projection, anchored by governing snapshot identity—so compaction/resume does not re-derive settled context. It may be Markdown, YAML, JSON, host session/task state or an equivalent form; no schema, file, tool or Orchestrator is required. It:
+
+- is derived coordination state, not authority: it cannot create or mutate D1-D4 authority, declare acceptance or Review outcome, or replace a canonical workplan/evidence record;
+- is never a required repository artifact for local work and should disappear when no longer useful;
+- is valid only for the exact protocol/authority/workplan/candidate/regime/scope and accepted-memory basis it records; after any of those change it is stale and must be re-derived from canonical owners, never patched forward by assertion;
+- yields to canonical sources whenever they disagree or exact wording is needed.
+
+### Workplan contract versus transient progress
+
+A workplan is a bounded semantic/cycle contract. Change it when its governed contract changes: a material cycle decision, a newly binding obligation, a genuine reopen, or acceptance/lifecycle state the project deliberately records there. Do not amend it merely because a task completed, a command ran, a test passed, a transient blocker cleared, the next action changed, or an implementation-local repair stayed inside delegated space; that progress belongs in Working State, native issue/task/agent state, commits or evidence records.
 
 ## Local reconciliation, simplification, and urgency
 
@@ -99,7 +99,9 @@ Executable D4 stage-local/final acceptance is owned by [Testing and validation](
 
 ## Review, Verification, Stabilization, and Audit
 
-**Review** independently reconstructs governing authority/candidate/evidence applicability and attempts targeted falsification. Review independence means the reviewing context did not author the candidate and does not inherit author conclusions; model-family diversity can strengthen corroboration but is not required for ordinary independence. Missing required pre-Review acceptance remains a blocker; Review does not move those checks later. When PEM is material, Review treats it as a high-information hypothesis index and independently verifies current owners/assembled behavior rather than inheriting its conclusions.
+**Review** independently reconstructs governing authority/candidate/evidence applicability and attempts targeted falsification. Review independence means the reviewing context did not author the candidate and does not inherit author conclusions; model-family diversity can strengthen corroboration but is not required for ordinary independence. Missing required pre-Review acceptance remains a blocker; Review does not move those checks later. When PEM is material, Review treats it as a high-information hypothesis index and independently verifies current owners/assembled behavior rather than inheriting its conclusions. After repeated related findings, the next Review changes strategy as owned by the convergence reference rather than repeating narrow isolated discovery.
+
+**Optional independent cognitive trajectories.** For substantial/high-risk work whose review questions are loosely coupled, separate agents/contexts may falsify distinct questions—conformance/affected surface, abstraction adequacy/Challenge, simplification/complexity, scientific/numerical specialist review, evidence/oracle challenge. Use them only when expected information gain exceeds decomposition and synthesis cost; not for local/trivial work, questions tightly coupled to one live execution state, or hosts that cannot provide separate contexts. Multi-agent execution is never required. A subagent that receives the author's conclusions is not independent. Separate context improves process independence but not epistemic independence when agents share model, source corpus, toolchain or oracle; when a claim relies on independence, record material common-mode dependencies and add a distinct evidence route or perspective only where it materially reduces that risk. A synthesizer reconciles findings through evidence and owner adjudication; it cannot erase unresolved contradictory material evidence by vote.
 
 For a substantial protocol/authority Review, also perform an **out-of-matrix abstraction-adequacy pass**: reconstruct global invariants from current owners, temporarily ignore the author's workplan/obligation matrix/test decomposition, inspect the assembled candidate, and attempt a locally-compliant trajectory that still violates a material global invariant. Record when no such trajectory survives; do not invent a defect merely to satisfy the pass. Challenge the adequacy of the qualification method itself rather than assuming that green author-supplied checks are sufficient.
 
@@ -111,23 +113,15 @@ For a substantial protocol/authority Review, also perform an **out-of-matrix abs
 
 Every material Review/Verification/acceptance boundary applies the universal Challenge rule. Surface an active Serious Challenge before ordinary blockers or Pass/No-Pass and route it to the earliest affected semantic owner.
 
-## Semantic-definition workflow
+## Specialized semantic definitions
 
-Semantic-definition/traceability does not add a separate workflow stage. At intake/design/review, activate definition/source-availability analysis only when the governed work materially introduces, changes, imports, reuses, or depends on specialized semantic objects. The canonical D1-D4 owner remains the authority; `USES_DEFINITION` traces, definition tables and dependency graphs are derived coordination/review evidence.
-
-A material handoff identifies enough exact owner/object/source identity that the receiver can resolve specialized prerequisites without hidden chat. If runtime work requires an exact definition/import, load that owner before making the dependent inference; a discoverable route alone establishes source availability, not runtime context availability. If the required owner/source is unavailable or conflicting, preserve `REVIEW_REQUIRED`/Challenge rather than guessing from a similarly named object.
-
-When a parameterized family or governed default changes, workplan impact/acceptance scope follows the material instance/regime and owner of the binding. Preserve unaffected instances/evidence with reason; do not invalidate or validate an entire family solely by name. External-source correction/retraction/incompatible revision is likewise a binding/applicability event routed through the affected semantic/evidence owner.
-
-Independent Review reconstructs definition/import/assumption/validity/warrant paths from current owners and attempts counterexamples; it does not inherit an implementer-generated trace as proof of completeness. A generated trace may reduce search cost only within its declared bounded reviewed scope.
+Semantic-definition/traceability adds no workflow stage. At intake/design/review it activates only when the governed work materially introduces, changes, imports, reuses, or depends on specialized semantic objects or parameter/default bindings; then [Semantic definition and traceability](semantic-definition-and-traceability.md) owns handoff identity, binding-impact scope and Review reconstruction.
 
 ## Human gates and closeout learning
 
 Human gates attach to governed semantic risk, not every transition. The designated human authority is required where project/domain policy assigns ratification/adjudication. Orchestration may represent pending/accepted/rejected state but cannot self-approve it. A visible risk override authorizes only bounded continuation where allowed; dependent outputs remain provisional and cannot close the challenged claim unqualified.
 
-After every accepted material repair/rework/optimization/revert/restoration, perform a **closeout learning assessment** before declaring repository/lifecycle closure. Ask whether a known failure family genuinely recurred after accepted repair; a success pattern gained a supporting, neutral, contradicting, inconclusive, rejected/invalid application episode; an episode is genuinely new rather than another surface/run of one coordinated intervention; a material evidence provenance cluster limits independence; a reusable discovery/capability emerged; evidence narrowed/retired/invalidated an existing lesson; maturity/comparative claim strength changed; overlapping guidance acquired a conflict/tradeoff boundary; coverage/aggregation/project scope or binding health changed; a notice expired; causal attribution changed; a PEM dependency or accepted-memory basis advanced; or schema/base/overlay reconciliation is needed.
-
-Update PEM only when its admission threshold is met or an existing current entry materially changes. Ordinary fix chronology and first-clean local defects remain out of permanent memory. Documentation/audit/orchestration may surface candidates, but the appropriate current owner and admissible evidence govern the update; no specialist can self-promote findings into authority.
+After every accepted material repair/rework/optimization/revert/restoration, perform the **closeout learning assessment** owned by [Project Engineering Memory](project-engineering-memory.md) before declaring repository/lifecycle closure. Ordinary fix chronology and first-clean local defects stay out of permanent memory; no specialist can self-promote findings into authority.
 
 After semantic/functional closure, reconcile only affected current normative documents, guides, generated artifacts, evidence/dependency views, PEM when triggered, semantic history, workplan state and repository hygiene. Current owners explain what is true; PEM summarizes evidence-backed project learning; history explains why. Archive/supersede transition artifacts only after their still-current semantics reside in canonical current authority/state.
 

@@ -4,6 +4,8 @@ Serena, Semgrep, Hypothesis, CodeQL, compiler/debugger/sanitizer/profiler/fuzzin
 
 Detailed methods are owned by [Serena](tool-serena.md), [Semgrep](tool-semgrep.md), [Hypothesis](tool-hypothesis.md), and [CodeQL](tool-codeql.md). Language-specific compiler/debugger/sanitizer/profiler/fuzz mappings live in the active [language engineering profile](language-profiles.md). Underlying doctrine remains owned by repository intake, testing/validation, workflow/workplans, security/trust, performance, and release references.
 
+Agent/subagent decomposition, model or reasoning-budget choice, and protocol-evaluation harnesses are cognitive resources, not engineering-relation instruments: their escalation rule is owned by [Convergence and development-cycle economy](convergence-and-cycle-economy.md) and independent-trajectory limits by [Workflow and workplans](workflow-and-workplans.md). Tool or subagent availability never makes them mandatory.
+
 ## Per-question capability selection
 
 Classify the **relation under the current material claim**, not the task's broad topic or repository language.

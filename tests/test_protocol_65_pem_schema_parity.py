@@ -8,7 +8,8 @@ ROOT = Path(__file__).resolve().parents[1]
 
 class Protocol65PemSchemaParityTests(unittest.TestCase):
     def test_schema_owner_template_and_validator_share_structured_field_contract(self) -> None:
-        owner = (ROOT / "source/shared/references/project-engineering-memory.md").read_text(encoding="utf-8")
+        # Protocol 6.6: schema-1 field semantics live in the cold schema/governance owner.
+        owner = (ROOT / "source/shared/references/project-engineering-memory-schema.md").read_text(encoding="utf-8")
         template = (ROOT / "source/shared/templates/project_engineering_memory_template.md").read_text(encoding="utf-8")
         validator = (ROOT / "source/project_engineering_memory.py").read_text(encoding="utf-8")
         for field in (
@@ -29,6 +30,7 @@ class Protocol65PemSchemaParityTests(unittest.TestCase):
     def test_redundant_top_level_independence_flag_is_not_current_schema_authority(self) -> None:
         for rel in (
             "source/shared/references/project-engineering-memory.md",
+            "source/shared/references/project-engineering-memory-schema.md",
             "source/shared/templates/project_engineering_memory_template.md",
             "source/project_engineering_memory.py",
         ):

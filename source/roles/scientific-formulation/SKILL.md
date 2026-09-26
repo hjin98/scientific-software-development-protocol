@@ -1,6 +1,6 @@
 ---
 name: scientific-formulation
-description: Formulate, review, challenge, and maintain D1 scientific/mathematical authority under SSDP, including observables, models, assumptions, validity, uncertainty, external adequacy, evidence impact, human adjudication, and D1->D2 handoff.
+description: Use for defining, reviewing, or challenging the scientific or mathematical problem behind scientific software - the question, observables/estimands, model equations, assumptions, validity regime, interpretation, model-level uncertainty, and external validation - and for its handoff to numerical-method design. Not for numerical method, architecture, or code work that leaves the scientific meaning unchanged.
 ---
 
 # Scientific Formulation
@@ -9,21 +9,21 @@ Own **D1 scientific/mathematical meaning**: the question, observable/estimand, m
 
 ## Routing
 
-Before substantive D1 reasoning, read [Abstraction, concretization, authority, challenge, and representation](references/abstraction-and-concretization.md) and [Scientific and mathematical formulation](references/scientific-formulation.md).
+Before substantive D1 reasoning, read [Abstraction, concretization, authority, challenge, and representation](references/abstraction-and-concretization.md) (the universal kernel, including the version check at entry) and [Scientific and mathematical formulation](references/scientific-formulation.md).
 
 Then load only the concern whose predicate fires:
 
-- change plan, handoff, acceptance state, invalidation, resumability or impact closure -> [Workflow and workplans](references/workflow-and-workplans.md);
+- change plan, handoff, working state, acceptance state, authority lifecycle, invalidation or impact closure -> [Workflow and workplans](references/workflow-and-workplans.md);
+- a specialized symbol/quantity/relation, parameter family/instance/default binding, imported external result, formal claim/warrant, definition-dependency impact, or material ambiguity -> [Semantic definition and traceability](references/semantic-definition-and-traceability.md);
 - evidence design/applicability/dependency/evolution -> [Evidence, evolution, and semantic dependencies](references/evidence-evolution-and-dependencies.md); testing/oracle method only when required -> [Testing and validation](references/testing-and-validation.md) and, for executable scientific evidence, [Scientific software](references/scientific-software.md);
-- substantial rework of mature D1 meaning, suspected recurrence, recovery/revert, or an active workplan whose decision can materially depend on demonstrated project history -> [Project Engineering Memory](references/project-engineering-memory.md); resolve its accepted/base memory and any validated same-branch overlay, then record materially relevant entries in the workplan/Historical Applicability Set (HAS); a first clean local issue or unrelated task does not activate memory;
-- protocol-version/historical recovery -> [Protocol versioning and compatibility](references/protocol-versioning-and-compatibility.md);
+- project history can change the decision (substantial rework of mature D1 meaning, suspected recurrence, recovery/revert, memory-bound workplan) -> [Project Engineering Memory](references/project-engineering-memory.md);
+- rigor or cognitive-resource escalation -> [Convergence and development-cycle economy](references/convergence-and-cycle-economy.md);
+- protocol-version mismatch or historical recovery -> [Protocol versioning and compatibility](references/protocol-versioning-and-compatibility.md);
 - human-facing scientific writing -> [Scientific and technical writing](references/scientific-technical-writing.md); document/evidence communication when material -> [Documentation and evidence](references/documentation-and-evidence.md).
 
-For a material D1 authority mutation use [Abstraction-concretization change plan](templates/abstraction_concretization_change_plan_template.md). Use the [Scientific Method Paper template](templates/scientific_method_paper_template.md) when a canonical D1 paper is useful.
+For a material D1 authority mutation use the [Abstraction-concretization change plan](templates/abstraction_concretization_change_plan_template.md); use the [Scientific Method Paper template](templates/scientific_method_paper_template.md) when a canonical D1 paper is useful. A first clean local issue or unrelated task loads none of the conditional owners merely because they exist; ordinary hyperlinks and package membership are not activation commands.
 
-Ordinary hyperlinks in routed references are navigation, not additional activation unless that owner states an explicit decision predicate.
-
-## D1 method
+## D1 contract
 
 1. Recover the actual scientific/theoretical/engineering question and accepted current D1 independently of current code.
 2. Separate observed facts, external-source claims, derivations, assumptions, uncertainty, and counterevidence.
@@ -31,15 +31,13 @@ Ordinary hyperlinks in routed references are navigation, not additional activati
 4. Challenge ambiguity, hidden assumptions, contradictory equations/definitions, wrong estimands, dimensional/interpretive errors, and context-of-use mismatch.
 5. Define problem-appropriate adequacy/falsification and allocate scrutiny by consequence plus decision-sensitive uncertainty; a public/durable claim does not by itself require maximal evidence when the questioned uncertainty cannot change its interpretation or acceptance.
 6. Define material evidence targets and their execution/validity dependencies; choose the cheapest sufficiently strong applicable route without treating evidence as authority.
-7. Draft proposed authority. A consequential D1 mutation requires the owning acceptance process, including independent falsification and designated human ratification where required; until then it remains proposed.
-8. After acceptance, perform bounded impact closure over materially dependent D2-D4 concretizations, evidence, documentation/dependency views, and semantic history; preserve unaffected siblings/still-valid evidence.
-9. Hand D2 only the minimum necessary accepted invariants, uncertainty/validity semantics, constraints, and reopen conditions.
+7. Draft proposed authority. A consequential D1 mutation requires the owning acceptance process, including independent falsification and designated human ratification where required; afterwards perform bounded impact closure and hand D2 only the minimum accepted invariants, uncertainty/validity semantics, constraints, and reopen conditions.
 
-When creating or materially refactoring human-facing D1 material, give the intended competent reader sufficient background for newly introduced non-common terminology and expand non-obvious abbreviations at first explanatory use (`full term (ABC)`). Explanatory context never silently redefines the normative D1 owner.
+When creating human-facing D1 material, give the intended competent reader sufficient background for newly introduced non-common terminology and expand non-obvious abbreviations at first explanatory use (`full term (ABC)`). Explanatory context never silently redefines the normative D1 owner.
 
 ## Evidence and Challenge
 
-Evidence specification, realization, observation, assessment, applicability, stale-state, independence/common-mode risk, and semantic-evolution rules are owned by the evidence reference. A stale pass is not current confirmation; a stale fail is not current refutation. Important/high-risk claims should use independent evidence routes when they materially reduce common-mode risk.
+A stale pass is not current confirmation; a stale fail is not current refutation. Important/high-risk claims should use independent evidence routes when they materially reduce common-mode risk.
 
 Every material D1 Review includes the bounded Challenge Pass. If accepted D1 may be materially false, contradictory, ambiguous, inadequate, or impossible to concretize, raise **SERIOUS CHALLENGE** before ordinary findings and route human adjudication. Literature or implementation output is evidence, not authority to silently rewrite accepted formulation. A sound rebuttal must be genuinely reconsidered.
 

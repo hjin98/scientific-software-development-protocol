@@ -23,10 +23,10 @@ class SSDP6CanonicalProfileTests(unittest.TestCase):
         cls.snapshot = P.build_profile(cls.document, P.DEFAULT_PROFILE_ID)
         cls.descriptor = cls.snapshot.descriptor
 
-    def test_current_profile_is_schema_v2_protocol_65(self) -> None:
-        self.assertEqual(P.DEFAULT_PROFILE_ID, "ssdp-protocol-6.5")
+    def test_current_profile_is_schema_v2_protocol_66(self) -> None:
+        self.assertEqual(P.DEFAULT_PROFILE_ID, "ssdp-protocol-6.6")
         self.assertEqual(self.descriptor.profile.profile_id, P.DEFAULT_PROFILE_ID)
-        self.assertEqual(self.descriptor.profile.protocol_version, "6.5.0")
+        self.assertEqual(self.descriptor.profile.protocol_version, "6.6.0")
         self.assertEqual(self.descriptor.profile.profile_schema_version, 2)
         self.assertEqual(self.descriptor.schema_version, 2)
 
@@ -50,8 +50,10 @@ class SSDP6CanonicalProfileTests(unittest.TestCase):
         self.assertEqual(P.profile_id_for_version("6.3"), P.SSDP63_PROFILE_ID)
         self.assertEqual(P.profile_id_for_version("6.4.0"), P.SSDP64_PROFILE_ID)
         self.assertEqual(P.profile_id_for_version("6.4"), P.SSDP64_PROFILE_ID)
-        self.assertEqual(P.profile_id_for_version("6.5.0"), P.DEFAULT_PROFILE_ID)
-        self.assertEqual(P.profile_id_for_version("6.5"), P.DEFAULT_PROFILE_ID)
+        self.assertEqual(P.profile_id_for_version("6.5.0"), P.SSDP65_PROFILE_ID)
+        self.assertEqual(P.profile_id_for_version("6.5"), P.SSDP65_PROFILE_ID)
+        self.assertEqual(P.profile_id_for_version("6.6.0"), P.DEFAULT_PROFILE_ID)
+        self.assertEqual(P.profile_id_for_version("6.6"), P.DEFAULT_PROFILE_ID)
 
     def test_every_current_input_is_classified(self) -> None:
         for stage in self.descriptor.stages:
@@ -93,7 +95,7 @@ class SSDP6CanonicalProfileTests(unittest.TestCase):
                 workplan=None,
                 first_task=None,
                 overrides={},
-                governing_protocol_version="6.5.0",
+                governing_protocol_version="6.6.0",
             )
         }
         self.assertEqual(values["CHANGE_PLAN"], "NONE")
@@ -104,9 +106,9 @@ class SSDP6CanonicalProfileTests(unittest.TestCase):
 
         def plan(*, lifecycle_state=LifecycleState.ACTIVE, lifecycle_consistent=True, semantic_identity_complete=True):
             return WorkplanRef(
-                workplan_id="WP65-AUTHORITY",
-                protocol_version="6.5.0",
-                path="workplans/active/WP65-AUTHORITY.md",
+                workplan_id="WP66-AUTHORITY",
+                protocol_version="6.6.0",
+                path="workplans/active/WP66-AUTHORITY.md",
                 artifact_digest=DigestRef(algorithm="sha256", value="a" * 64),
                 semantic_digest=DigestRef(algorithm="sha256", value="b" * 64),
                 semantic_identity_complete=semantic_identity_complete,
@@ -121,10 +123,10 @@ class SSDP6CanonicalProfileTests(unittest.TestCase):
                 workplan=plan(),
                 first_task=None,
                 overrides={},
-                governing_protocol_version="6.5.0",
+                governing_protocol_version="6.6.0",
             )
         }
-        self.assertEqual(active["CHANGE_PLAN"], "workplans/active/WP65-AUTHORITY.md")
+        self.assertEqual(active["CHANGE_PLAN"], "workplans/active/WP66-AUTHORITY.md")
 
         for invalid in (
             plan(lifecycle_state=LifecycleState.ARCHIVE),
@@ -138,7 +140,7 @@ class SSDP6CanonicalProfileTests(unittest.TestCase):
                         workplan=invalid,
                         first_task=None,
                         overrides={},
-                        governing_protocol_version="6.5.0",
+                        governing_protocol_version="6.6.0",
                     )
                 self.assertEqual(caught.exception.code, E.WORKPLAN_NOT_FOUND)
 
@@ -244,9 +246,40 @@ class SSDP6CanonicalProfileTests(unittest.TestCase):
     def test_profile_json_round_trips(self) -> None:
         self.assertEqual(P.profile_from_json(P.profile_to_json(self.descriptor)), self.descriptor)
 
+    def test_protocol_66_preserves_pre7_lifecycle_control_schema(self) -> None:
+        """6.6 may rebind version-bound prompts, never the machine lifecycle/control schema."""
+        current = P.definition(P.SSDP66_PROFILE_ID)
+        previous = P.definition(P.SSDP65_PROFILE_ID)
+        self.assertEqual(current.schema_version, previous.schema_version)
+        self.assertEqual(current.stage_table, previous.stage_table)
+        self.assertEqual(current.transitions, previous.transitions)
+        frozen = PS.resolve_packaged(P.SSDP65_PROFILE_ID).snapshot.descriptor
+
+        def shape(descriptor):
+            stages = tuple(
+                (stage.stage.stage_key, tuple(sorted(stage.recognized_outcomes)))
+                for stage in descriptor.stages
+            )
+            transitions = tuple(
+                (t.from_stage.stage_key, t.trigger_key, t.to_stage.stage_key if t.to_stage else None, t.terminal)
+                for t in descriptor.transitions
+            )
+            return descriptor.schema_version, stages, transitions
+
+        self.assertEqual(shape(self.descriptor), shape(frozen))
+
 
 class FrozenProtocolProfilesTests(unittest.TestCase):
     FROZEN = (
+        (
+            P.SSDP65_PROFILE_ID,
+            "ssdp-protocol-6.5",
+            "6.5.0",
+            {
+                "prompts.md": "3779f69ec5d4a0ca435b4d1f364a3783a5f4f592",
+                "profile.json": "711f563ecb8e2b7ffe78806474f55f9f971366e4",
+            },
+        ),
         (
             P.SSDP64_PROFILE_ID,
             "ssdp-protocol-6.4",

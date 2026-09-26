@@ -206,7 +206,13 @@ class Protocol62RepresentationTests(unittest.TestCase):
         self.assertIn("Protocol 5.0", text)
         self.assertIn("6.1", text)
         self.assertNotIn("| BLOCKING |", text)
-        baseline_references = {path.name for path in REFERENCES.glob("*.md")} - {"project-engineering-memory.md"}
+        # Owners introduced after the 6.2 census (6.3 PEM; 6.6 extractions) are covered by
+        # their own cycle's preservation evidence, not by the frozen 6.2 census.
+        baseline_references = {path.name for path in REFERENCES.glob("*.md")} - {
+            "project-engineering-memory.md",
+            "project-engineering-memory-schema.md",
+            "semantic-definition-and-traceability.md",
+        }
         baseline_templates = {path.name for path in TEMPLATES.glob("*.md")} - {"project_engineering_memory_template.md"}
         for name in sorted(baseline_references):
             self.assertIn(f"`{name}`", text, name)

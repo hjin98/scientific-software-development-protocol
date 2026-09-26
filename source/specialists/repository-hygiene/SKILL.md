@@ -1,6 +1,6 @@
 ---
 name: repository-hygiene
-description: Perform conservative post-stage repository cleanup under SSDP by classifying residue, archiving genuinely completed workplans, repairing clear structural drift, and retiring proven disposable branches/artifacts while preserving recoverable work, evidence, compatibility, project engineering memory, history, and protected refs.
+description: Use after development closes, or when explicitly asked, for conservative repository cleanup - classifying residue, archiving completed workplans, retiring proven-disposable branches, caches, and accidentally committed artifacts - while preserving recoverable work, evidence, and history. Not for product changes.
 ---
 
 # Repository Hygiene

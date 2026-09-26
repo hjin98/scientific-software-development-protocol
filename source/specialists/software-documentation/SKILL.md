@@ -1,6 +1,6 @@
 ---
 name: software-documentation
-description: Reconcile, refactor, explain, and publish current documentation under SSDP while preserving D1-D4 ownership, lossless representation, human-facing context, project-memory provenance, and canonical-source/generated-output integrity without becoming an approval role.
+description: Use for writing, reconciling, or restructuring documentation of scientific or technical software - user guides, method papers, architecture documents, READMEs, runbooks, generated docs - so it truthfully explains accepted behavior and authority without becoming new authority. Not for changing the documented behavior itself.
 ---
 
 # Software Documentation

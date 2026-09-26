@@ -84,6 +84,10 @@ Missing required closure/evidence is implementation nonconformance, not an autom
 
 When a blocker implicates a semantic family, the reviewer should proportionately inspect cheap, high-information sibling variants far enough to characterize the shared issue, then route one family-level problem rather than intentionally returning one cheap sibling per review cycle. Stop when further discovery becomes implementation-like, expensive/unavailable, mainly duplicates the systematic work Implementation must perform, or lacks an evidence-driven affected chain. Review sufficiency is not proof of zero conceivable defects.
 
+### Review strategy after recurrence
+
+Repeated related Review failures change the search strategy before another narrow repair/review loop. When evidence shows a shared family, review saturation, or repeated candidate churn, the next Review/reconsideration proportionately shifts from isolated finding discovery toward bounded sibling/family closure, simplification/re-derivation, evidence-method challenge, upstream abstraction adequacy, and common-mode cause analysis. A clean local repair that genuinely closes the cause remains sufficient; recurrence does not automatically force redesign. No numeric review count changes the pass threshold; a small repeated count may trigger the strategy switch only when evidence already indicates a common cause.
+
 A materially relevant PEM family is a high-information hypothesis source, not a verdict. The reviewer independently verifies current owner, applicability, assembled candidate and evidence; neither family temperature nor historical recurrence substitutes for current conformance evidence.
 
 ## Finding routing and revision economy
@@ -115,6 +119,10 @@ Minimize total cycle cost: prefer cheap reversible repair/experiment when it set
 If a supposedly LIGHT/ROUTINE path starts accumulating diagnostics, candidate churn, wrappers, or repeated Review, stop at the next safe boundary. Either new evidence justifies escalation at the real owner, or simplify/defer/omit where allowed. Sunk cost is never a reason to continue. Repeated rediscovery of deferred work is evidence that cumulative interruption/workaround cost may have become material; reassess rather than endlessly re-defer it.
 
 PEM should reduce rediscovery, not create mandatory scan cost. Load only materially matched detail. Optional Serena/Semgrep/CodeQL/Hypothesis use may reduce uncertainty when its relation matches the claim; tool absence does not relax required closure and tool presence does not create a mandatory census.
+
+### Cognitive-resource escalation
+
+The same rule governs cognitive resources when the host exposes them: model capability, reasoning budget, context budget, tool breadth, an independent review trajectory, or specialist/subagent decomposition. Use the least expensive cognitive configuration that can reliably resolve the governed decision; escalate one of those resources only on concrete risk, a failed or ambiguous attempt, or a known capability requirement where remaining uncertainty/consequence justifies it; de-escalate/stop once it does not. Use the host/project default when adequate and do not duplicate trustworthy host automatic resource routing with a parallel SSDP scheduler or turn resource selection into its own optimization problem. No vendor/model name is normative and hosts without such controls remain conforming. Model tier, reasoning budget, token budget or subagent count is execution policy, never authority or a pass threshold; a stronger model does not substitute for independently required Review, and a high-stakes parent does not force the strongest configuration onto every child detail. Optional independent review trajectories and their common-mode limits are owned by [Workflow and workplans](workflow-and-workplans.md).
 
 ## Semantic evolution history and project engineering memory
 

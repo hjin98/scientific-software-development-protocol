@@ -72,10 +72,13 @@ class Protocol6ContractTests(unittest.TestCase):
         self.assertIn("composed closure", self.testing)
 
     def test_authority_states_and_bounded_invalidation_exist(self) -> None:
+        # Protocol 6.6 moved lifecycle/mutation detail from the universal kernel to its
+        # conditional workflow owner; the capability sentinel follows the owner.
         for phrase in ("proposed", "accepted-current", "challenged", "risk-accepted/provisional", "stale-dependent", "superseded/historical", "release-pinned/publication"):
-            self.assertIn(phrase, self.foundation)
-        self.assertIn("review only materially dependent descendants/evidence", self.foundation)
-        self.assertIn("preserve unaffected siblings/still-valid evidence", self.foundation)
+            self.assertIn(phrase, self.workflow)
+        self.assertIn("review only materially dependent descendants/evidence", self.workflow)
+        self.assertIn("preserve unaffected siblings/still-valid evidence", self.workflow)
+        self.assertIn("workflow-and-workplans.md", self.foundation)
 
     def test_serious_challenge_is_mandatory_material_review_semantics(self) -> None:
         self.assertIn("every material review/verification/acceptance boundary", self.foundation)
