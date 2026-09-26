@@ -785,7 +785,7 @@ semantic_ref: {"c" * 40}
         data["candidate"]["public_source_ref"] = "UNAVAILABLE"
         data["candidate"]["recovery_ref"] = "UNAVAILABLE"
         data["accepted_current"] = {
-            "version": "6.5.0",
+            "version": data["candidate"]["version"],
             "public_source_ref": "a" * 40,
             "recovery_ref": "b" * 40,
         }
@@ -1233,8 +1233,9 @@ candidate:
         protected_history: bool = False,
     ) -> dict:
         data = copy.deepcopy(self.data)
+        major, minor, _ = map(int, data["accepted_current"]["version"].split("."))
         data["candidate"] = {
-            "version": "6.5.0",
+            "version": f"{major}.{minor + 1}.0",
             "semantic_ref": marker * 40,
             "review": {"state": "NOT_RUN", "evidence_ref": "NONE"},
             "ratification": {"state": "NOT_REQUESTED", "evidence_ref": "NONE"},
