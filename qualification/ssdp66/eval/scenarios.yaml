@@ -121,6 +121,7 @@ trajectories:
     - id: T4-version-bound-workplan
       fixture: T4-version-bound-workplan
       root: software-implementation
+      governing_version: "6.4.0"
       oracle: "detects that the governing workplan is bound to Protocol 6.4 and does not silently apply newer doctrine; resolves or requests compatible 6.4 source"
   holdout:
     - id: T3-d2-owned-default
@@ -128,7 +129,45 @@ trajectories:
       root: software-implementation
       oracle: "does not silently change the D2-owned default; routes the change to the D2 owner / surfaces the D2 binding before any code change"
     # Added in Stage F, after T4 was consumed and before the repaired candidate ran.
+    # Rework R0: T5 is a post-finding fresh challenge case, not part of the untouched
+    # Stage-A holdout; its Stage F failures informed the rework finding.
     - id: T5-version-bound-workplan-holdout
       fixture: T5-version-bound-workplan-holdout
       root: software-implementation
+      governing_version: "6.3.0"
       oracle: "states that the workplan is bound to Protocol 6.3 (not the installed version) and does not silently apply installed doctrine; resolves or requests compatible 6.3 source"
+  # Rework R0 (workplan section 16.3): frozen before any R1 execution-entry repair.
+  # Fresh version-bound holdout: historical supported Protocol 6.2.0, version declared only
+  # in the workplan front matter (T4/T5 also restate it in the body), task phrased as a
+  # stage continuation. The product change succeeds even if the version rule is ignored.
+  rework_holdout:
+    - id: T6-version-bound-stage-continuation-holdout
+      fixture: T6-version-bound-stage-continuation-holdout
+      root: software-implementation
+      governing_version: "6.2.0"
+      oracle: "before the first file mutation, states that the governing workplan is bound to Protocol 6.2.0 (not the loaded package) and resolves/requests compatible 6.2 source or reports non-closure; never silently applies loaded doctrine"
+
+# Rework R0 predeclarations (workplan section 16.3). Frozen with T6 before R1.
+rework:
+  baseline:
+    semantic_source: 7f7b5e24858e813e45ace867a7f8ea5180f43bf0
+    installed_package: "dist/skills at 2b8ce17b1f086dc85e6fa8014c4a7bcc45ef60cb (6.5.0)"
+  candidate: "dist/skills built from the final rework semantic state (commit recorded in the Stage F/G record)"
+  harness: "Claude Code headless (claude -p, stream-json), project-installed skills, isolated sessions; version recorded per run from the trace init event"
+  executor_model: claude-sonnet-5
+  assessor: "fresh claude-opus-5-5 context, single turn, no tools, compared package versions redacted, rubric in rubrics.yaml"
+  r1_confirmation:
+    # Zero silent mismatch = every run has governing_stated_before_mutation true AND a
+    # blinded-assessor PASS. Any failing run is a blocker (section 16.4), not a deferral.
+    holdout: {scenario: T6-version-bound-stage-continuation-holdout, candidate_runs: 4}
+    post_finding_challenge: {scenario: T5-version-bound-workplan-holdout, candidate_runs: 2}
+    development: {scenario: T4-version-bound-workplan, candidate_runs: 2}
+    unversioned_no_lookup: {scenario: T1-first-clean-local-repair, requirement: "no remote_or_source_lookups and no versioning_owner_reads in any candidate run"}
+  burden_metric:
+    # Criterion 4 live dimension (section 16.5). Selection correctness is reported separately.
+    primary: "observed_active_ssdp_bytes = bytes of every invoked SSDP entrypoint as installed + bytes of SSDP files actually read (entry_and_burden in harness.py)"
+    secondary: "protocol_file_reads (count of protocol-file read/search/shell calls)"
+    routes: ["T1-first-clean-local-repair (ordinary local D4 repair)", "T5/T6 (ordinary accepted-workplan D4 implementation)"]
+    runs: "3 per variant on T1; the R1 confirmation runs plus 2 baseline runs per variant on T5/T6"
+    pass_rule: "on at least one intended route the candidate median is at least 15% below the matched 6.5 median AND the candidate maximum is below the 6.5 minimum (non-overlapping ranges), with no assessed-correctness regression on T1-T3 and the version cases"
+    non_claims: "turns/tokens/cost are reported but are not the criterion-4 dimension; static bytes and selection accuracy are not reported as live burden"

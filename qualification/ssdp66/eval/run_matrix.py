@@ -19,7 +19,7 @@ import yaml
 HERE = Path(__file__).resolve().parent
 
 
-def jobs(scenarios: dict, layer: str, reps: int, variants: dict[str, Path]) -> list[tuple[str, list[str]]]:
+def jobs(scenarios: dict, layer: str, reps: int, variants: dict[str, Path], only: set[str] | None = None) -> list[tuple[str, list[str]]]:
     out = []
     names = list(variants)
     if layer == "selection":
@@ -31,7 +31,8 @@ def jobs(scenarios: dict, layer: str, reps: int, variants: dict[str, Path]) -> l
                     run_id = f"{item['id']}-{variant}-r{rep}"
                     out.append((run_id, ["live", "--dist", str(variants[variant]), "--prompt", item["task"], "--max-turns", "3", "--mode", "select"]))
     else:
-        items = [(s, split) for split in ("development", "holdout") for s in scenarios["trajectories"][split]]
+        items = [(s, split) for split in ("development", "holdout", "rework_holdout") for s in scenarios["trajectories"].get(split, [])]
+        items = [(s, split) for s, split in items if not only or s["id"] in only]
         for index, (item, split) in enumerate(items):
             fixture = HERE / "fixtures" / item["fixture"]
             prompt = f"Use the {item['root']} skill. " + (fixture / "TASK.md").read_text(encoding="utf-8").strip()
@@ -39,7 +40,10 @@ def jobs(scenarios: dict, layer: str, reps: int, variants: dict[str, Path]) -> l
                 order = names if (index + rep) % 2 == 0 else names[::-1]
                 for variant in order:
                     run_id = f"{item['id']}-{variant}-r{rep}"
-                    out.append((run_id, ["live", "--dist", str(variants[variant]), "--fixture", str(fixture), "--prompt", prompt, "--max-turns", "60", "--mode", "trajectory"]))
+                    cmd = ["live", "--dist", str(variants[variant]), "--fixture", str(fixture), "--prompt", prompt, "--max-turns", "60", "--mode", "trajectory"]
+                    if item.get("governing_version"):
+                        cmd += ["--governing-version", str(item["governing_version"])]
+                    out.append((run_id, cmd))
     return out
 
 
@@ -58,7 +62,8 @@ def summarize(out: Path, layer: str) -> dict:
         row = {"scenario": scenario, "variant": variant, "rep": rep, "ssdp_skills": ssdp,
                "protocol_reads": data.get("protocol_reads", []), "protocol_read_bytes": data.get("protocol_read_bytes_on_disk", 0),
                "num_turns": data.get("num_turns"), "cost_usd": data.get("total_cost_usd"), "input_tokens": data.get("input_tokens_total"),
-               "output_tokens": data.get("output_tokens"), "oracle": data.get("oracle")}
+               "output_tokens": data.get("output_tokens"), "oracle": data.get("oracle"),
+               "entry_and_burden": data.get("entry_and_burden")}
         if layer == "selection":
             allowed = admissible[scenario]
             row["outcome"] = (
@@ -84,6 +89,7 @@ def main() -> int:
     parser.add_argument("--out", type=Path, required=True)
     parser.add_argument("--parallel", type=int, default=4)
     parser.add_argument("--model", default="claude-sonnet-5")
+    parser.add_argument("--only", action="append", default=[], help="restrict to these scenario ids")
     args = parser.parse_args()
     if args.summarize:
         print(json.dumps(summarize(args.out, args.layer), indent=1, sort_keys=True))
@@ -91,7 +97,7 @@ def main() -> int:
     variants = dict(v.split("=", 1) for v in args.variant)
     variants = {k: Path(v) for k, v in variants.items()}
     scenarios = yaml.safe_load((HERE / "scenarios.yaml").read_text(encoding="utf-8"))
-    todo = jobs(scenarios, args.layer, args.reps, variants)
+    todo = jobs(scenarios, args.layer, args.reps, variants, set(args.only))
 
     def run(job: tuple[str, list[str]]) -> tuple[str, int]:
         run_id, cmd = job

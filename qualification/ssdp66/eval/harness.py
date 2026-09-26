@@ -234,7 +234,61 @@ def parse_trace(lines: list[str]) -> dict:
     }
 
 
-def run_live(dist: Path, prompt: str, fixture: Path | None, out: Path, model: str, max_turns: int, mode: str) -> dict:
+MUTATING_TOOLS = {"Edit", "Write", "NotebookEdit", "MultiEdit"}
+LOOKUP_RE = re.compile(r"git (?:fetch|clone|ls-remote|pull)|curl |wget |pip (?:download|install)")
+SSDP_SKILLS = {name for name, _ in SKILLS}
+
+
+def entry_and_burden(reduced: list[dict], governing: str | None, dist: Path | None) -> dict:
+    """Rework R0 deterministic trace checks (frozen before the R1 repair).
+
+    entry: for a version-bound task, does an assistant text naming the governing version
+    precede the first file mutation? For any task, did the run perform a remote/source
+    lookup or open the versioning owner?
+    burden: observed active SSDP material = bytes of every invoked SSDP entrypoint as
+    installed + bytes of SSDP files actually read, plus the count of protocol-file reads.
+    """
+    first_mutation = next((i for i, e in enumerate(reduced) if e.get("tool") in MUTATING_TOOLS), None)
+    stated_at = None
+    if governing:
+        pattern = re.compile(r"(?<![\d.])" + re.escape(governing.rsplit(".0", 1)[0] if governing.endswith(".0") else governing) + r"(?:\.0)?(?!\d|\.\d)")
+        stated_at = next((i for i, e in enumerate(reduced) if "text" in e and pattern.search(e["text"])), None)
+    lookups, versioning_reads, protocol_reads, protocol_bytes, skills = [], 0, 0, 0, []
+    for e in reduced:
+        tool, raw = e.get("tool"), e.get("input", "")
+        if tool in {"WebFetch", "WebSearch"} or (tool == "Bash" and LOOKUP_RE.search(raw)):
+            lookups.append(raw[:120])
+        if tool == "Skill":
+            name = json.loads(raw).get("skill") if raw.startswith("{") else None
+            if name in SSDP_SKILLS:
+                skills.append(name)
+        if tool in {"Read", "Grep", "Glob", "Bash"} and ".claude/skills/" in raw:
+            protocol_reads += 1
+            if "protocol-versioning-and-compatibility" in raw:
+                versioning_reads += 1
+            if tool == "Read":
+                try:
+                    rel = json.loads(raw)["file_path"].split(".claude/skills/", 1)[1]
+                    protocol_bytes += (dist / rel).stat().st_size if dist else 0
+                except (ValueError, KeyError, IndexError, OSError):
+                    pass
+    entry_bytes = sum((dist / name / "SKILL.md").stat().st_size for name in skills) if dist else 0
+    return {
+        "governing_version": governing,
+        "first_mutation_index": first_mutation,
+        "governing_stated_index": stated_at,
+        "governing_stated_before_mutation": None if not governing else (
+            stated_at is not None and (first_mutation is None or stated_at < first_mutation)),
+        "remote_or_source_lookups": lookups,
+        "versioning_owner_reads": versioning_reads,
+        "ssdp_entrypoint_bytes": entry_bytes,
+        "ssdp_reference_read_bytes": protocol_bytes,
+        "observed_active_ssdp_bytes": entry_bytes + protocol_bytes,
+        "protocol_file_reads": protocol_reads,
+    }
+
+
+def run_live(dist: Path, prompt: str, fixture: Path | None, out: Path, model: str, max_turns: int, mode: str, governing: str | None = None) -> dict:
     if out.exists():
         shutil.rmtree(out)
     out.mkdir(parents=True)
@@ -262,11 +316,13 @@ def run_live(dist: Path, prompt: str, fixture: Path | None, out: Path, model: st
         started = time.time()
         proc = subprocess.run(cmd, cwd=project, capture_output=True, text=True, env=_clean_env(), timeout=1800, stdin=subprocess.DEVNULL)
         (out / "trace.jsonl").write_text(proc.stdout, encoding="utf-8")
-        (out / "trace-reduced.json").write_text(json.dumps(reduce_trace(proc.stdout.splitlines()), indent=1) + "\n", encoding="utf-8")
+        reduced = reduce_trace(proc.stdout.splitlines())
+        (out / "trace-reduced.json").write_text(json.dumps(reduced, indent=1) + "\n", encoding="utf-8")
         if proc.stderr:
             (out / "stderr.txt").write_text(proc.stderr, encoding="utf-8")
         summary = parse_trace(proc.stdout.splitlines())
         summary["wall_s"] = round(time.time() - started, 1)
+        summary["entry_and_burden"] = entry_and_burden(reduced, governing, dist)
         if fixture is not None:
             diff = subprocess.run(["git", "diff", "--", ".", ":(exclude).claude"], cwd=project, capture_output=True, text=True).stdout
             untracked = subprocess.run(["git", "ls-files", "--others", "--exclude-standard", "--", ".", ":(exclude).claude"], cwd=project, capture_output=True, text=True).stdout
@@ -333,7 +389,9 @@ def assess(run_dir: Path, fixture: Path, rubric: str, model: str) -> dict:
     prompt = ASSESS_PROMPT.format(
         rubric=rubric, task=(fixture / "TASK.md").read_text(encoding="utf-8"), docs="\n".join(docs) or "NONE",
         diff=redact((run_dir / "diff.patch").read_text(encoding="utf-8"))[:20000], untracked=summary.get("untracked"),
-        final=final[:6000], oracle=json.dumps(summary.get("oracle")),
+        final=final[:6000], oracle=json.dumps({**(summary.get("oracle") or {}), **{
+            k: v for k, v in (summary.get("entry_and_burden") or {}).items()
+            if k in {"governing_version", "governing_stated_before_mutation", "remote_or_source_lookups"}}}),
     )
     with tempfile.TemporaryDirectory(prefix="ssdp66-assess-") as tmp:
         proc = subprocess.run(["claude", "-p", prompt, "--output-format", "json", "--model", model, "--max-turns", "1", "--disallowedTools", "Bash Edit Write Read Glob Grep Skill Agent"], cwd=tmp, capture_output=True, text=True, env=_clean_env(), timeout=600, stdin=subprocess.DEVNULL)
@@ -359,6 +417,7 @@ def main(argv: list[str] | None = None) -> int:
     lv.add_argument("--model", default="claude-sonnet-5")
     lv.add_argument("--max-turns", type=int, default=4)
     lv.add_argument("--mode", choices=("select", "trajectory"), default="select")
+    lv.add_argument("--governing-version", default=None, help="version declared by the task/workplan (rework R0 entry check)")
     asx = sub.add_parser("assess")
     asx.add_argument("--run", type=Path, required=True)
     asx.add_argument("--fixture", type=Path, required=True)
@@ -368,7 +427,7 @@ def main(argv: list[str] | None = None) -> int:
     if args.cmd == "static":
         print(json.dumps(static_report(args.ref), indent=2, sort_keys=True))
     elif args.cmd == "live":
-        print(json.dumps(run_live(args.dist, args.prompt, args.fixture, args.out, args.model, args.max_turns, args.mode), indent=2, sort_keys=True))
+        print(json.dumps(run_live(args.dist, args.prompt, args.fixture, args.out, args.model, args.max_turns, args.mode, args.governing_version), indent=2, sort_keys=True))
     else:
         print(json.dumps(assess(args.run, args.fixture, args.rubric, args.model), indent=2, sort_keys=True))
     return 0

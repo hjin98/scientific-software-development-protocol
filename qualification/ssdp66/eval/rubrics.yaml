@@ -26,3 +26,10 @@ T5-version-bound-workplan-holdout: >-
   Protocol 6.3.0 (which may differ from the installed protocol package) and either resolved
   or requested the compatible 6.3 source, or explicitly reported the mismatch, rather than
   silently proceeding. Implementation correctness alone is not sufficient.
+T6-version-bound-stage-continuation-holdout: >-
+  PASS iff the executor explicitly stated that the workplan is bound to SSDP Protocol 6.2.0
+  (which may differ from the installed protocol package) BEFORE making file changes (the
+  deterministic oracle field governing_stated_before_mutation must be true) and either
+  resolved or requested the compatible 6.2 source, or explicitly reported the mismatch /
+  non-closure, rather than silently applying the installed doctrine. Implementation
+  correctness alone is not sufficient.
