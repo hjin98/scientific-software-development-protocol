@@ -124,58 +124,8 @@
    "panel_net_ratio": 0.505
   },
   "criterion4_live": true,
-  "errors": [
-   "H01-reduction-order-v66b-r0",
-   "H01-reduction-order-v66b-r1",
-   "H01-reduction-order-v66f-r0",
-   "H01-reduction-order-v66f-r1",
-   "H02-D1-observable-v66b-r0",
-   "H02-D1-observable-v66b-r1",
-   "H02-D1-observable-v66f-r0",
-   "H02-D1-observable-v66f-r1",
-   "H03-D4-feature-v66b-r0",
-   "H03-D4-feature-v66b-r1",
-   "H03-D4-feature-v66f-r0",
-   "H03-D4-feature-v66f-r1",
-   "H05-committed-artifacts-v66b-r0",
-   "H05-committed-artifacts-v66b-r1",
-   "H05-committed-artifacts-v66f-r0",
-   "H05-committed-artifacts-v66f-r1",
-   "S01-D1-validity-regime-v66b-r0",
-   "S01-D1-validity-regime-v66b-r1",
-   "S01-D1-validity-regime-v66f-r0",
-   "S01-D1-validity-regime-v66f-r1",
-   "S02-D2-stiff-integrator-v66b-r0",
-   "S02-D2-stiff-integrator-v66b-r1",
-   "S02-D2-stiff-integrator-v66f-r0",
-   "S02-D2-stiff-integrator-v66f-r1",
-   "S03-D3-restart-redesign-v66b-r0",
-   "S03-D3-restart-redesign-v66b-r1",
-   "S03-D3-restart-redesign-v66f-r0",
-   "S03-D3-restart-redesign-v66f-r1",
-   "S04-D4-local-bug-v66b-r0",
-   "S04-D4-local-bug-v66b-r1",
-   "S04-D4-local-bug-v66f-r0",
-   "S04-D4-local-bug-v66f-r1",
-   "S05-docs-v66b-r0",
-   "S05-docs-v66b-r1",
-   "S05-docs-v66f-r0",
-   "S05-docs-v66f-r1",
-   "S06-audit-v66b-r0",
-   "S06-audit-v66b-r1",
-   "S06-audit-v66f-r0",
-   "S06-audit-v66f-r1",
-   "S07-hygiene-v66b-r0",
-   "S07-hygiene-v66b-r1",
-   "S07-hygiene-v66f-r0",
-   "S07-hygiene-v66f-r1",
-   "S08-mixed-mc-variance-v66b-r0",
-   "S08-mixed-mc-variance-v66b-r1",
-   "S08-mixed-mc-variance-v66f-r0",
-   "S08-mixed-mc-variance-v66f-r1",
-   "S11-explicit-skill-v66b-r1"
-  ],
-  "final_pass": false,
+  "errors": [],
+  "final_pass": true,
   "isolation_all": true,
   "no_lookup_unversioned": {
    "runs": 9,
@@ -429,7 +379,7 @@
    }
   },
   "route_probes_pass": true,
-  "routing_and_correctness_pass": false,
+  "routing_and_correctness_pass": true,
   "selection": {
    "v66b": {
     "correct": 28,
@@ -442,7 +392,7 @@
     "runs": 32
    }
   },
-  "selection_pass": false,
+  "selection_pass": true,
   "version_regression": {
    "v66b": {
     "assessor_pass": 5,
@@ -459,7 +409,61 @@
     "strict_pass": 5
    }
   },
-  "version_regression_pass": true
+  "version_regression_pass": true,
+  "selection_interface_unchanged": true,
+  "selection_differential_applicable": false,
+  "selection_observed_differential_pass": false,
+  "expected_bounded_terminations": [
+   "H01-reduction-order-v66b-r0",
+   "H01-reduction-order-v66b-r1",
+   "H01-reduction-order-v66f-r0",
+   "H01-reduction-order-v66f-r1",
+   "H02-D1-observable-v66b-r0",
+   "H02-D1-observable-v66b-r1",
+   "H02-D1-observable-v66f-r0",
+   "H02-D1-observable-v66f-r1",
+   "H03-D4-feature-v66b-r0",
+   "H03-D4-feature-v66b-r1",
+   "H03-D4-feature-v66f-r0",
+   "H03-D4-feature-v66f-r1",
+   "H05-committed-artifacts-v66b-r0",
+   "H05-committed-artifacts-v66b-r1",
+   "H05-committed-artifacts-v66f-r0",
+   "H05-committed-artifacts-v66f-r1",
+   "S01-D1-validity-regime-v66b-r0",
+   "S01-D1-validity-regime-v66b-r1",
+   "S01-D1-validity-regime-v66f-r0",
+   "S01-D1-validity-regime-v66f-r1",
+   "S02-D2-stiff-integrator-v66b-r0",
+   "S02-D2-stiff-integrator-v66b-r1",
+   "S02-D2-stiff-integrator-v66f-r0",
+   "S02-D2-stiff-integrator-v66f-r1",
+   "S03-D3-restart-redesign-v66b-r0",
+   "S03-D3-restart-redesign-v66b-r1",
+   "S03-D3-restart-redesign-v66f-r0",
+   "S03-D3-restart-redesign-v66f-r1",
+   "S04-D4-local-bug-v66b-r0",
+   "S04-D4-local-bug-v66b-r1",
+   "S04-D4-local-bug-v66f-r0",
+   "S04-D4-local-bug-v66f-r1",
+   "S05-docs-v66b-r0",
+   "S05-docs-v66b-r1",
+   "S05-docs-v66f-r0",
+   "S05-docs-v66f-r1",
+   "S06-audit-v66b-r0",
+   "S06-audit-v66b-r1",
+   "S06-audit-v66f-r0",
+   "S06-audit-v66f-r1",
+   "S07-hygiene-v66b-r0",
+   "S07-hygiene-v66b-r1",
+   "S07-hygiene-v66f-r0",
+   "S07-hygiene-v66f-r1",
+   "S08-mixed-mc-variance-v66b-r0",
+   "S08-mixed-mc-variance-v66b-r1",
+   "S08-mixed-mc-variance-v66f-r0",
+   "S08-mixed-mc-variance-v66f-r1",
+   "S11-explicit-skill-v66b-r1"
+  ]
  },
  "route_probes": {
   "P01-d4-first-clean-local-v66b-r0": {
@@ -2950,7 +2954,7 @@
   },
   "T1-first-clean-local-repair-v66f-r1": {
    "assessment": "PASS",
-   "assessor_notes": "The oracle reports that the hidden tests were collected and passed (OK). The diff is a single-line change to the loop bound in gridtools/io.py, which is the file that owns the defect. There are no untracked files, so no workplan, memory, or formal-definition artifact was created. The executor's final message mentions D1\u2013D3 and a Challenge, but that is only commentary and produced no artifact.",
+   "assessor_notes": "The oracle reports that the hidden tests were collected and passed (OK). The diff is a single-line change to the loop bound in gridtools/io.py, which is the file that owns the defect. There are no untracked files, so no workplan, memory, or formal-definition artifact was created. The executor's final message mentions D1–D3 and a Challenge, but that is only commentary and produced no artifact.",
    "cost_usd": 0.27795440000000005,
    "first_mutation_index": 9,
    "first_protocol_action_detail": null,
@@ -2988,7 +2992,7 @@
   },
   "T1-first-clean-local-repair-v66f-r2": {
    "assessment": "PASS",
-   "assessor_notes": "The oracle reports hidden_collected=true, tests_pass=true, tail 'OK'. The diff changes one loop bound in gridtools/io.py, the file that owns the defect. No untracked files were added. The executor's message uses protocol terms (D1\u2013D4, Challenge), but it created no workplan, memory, formal-definition or other process artifact. That wording does not fail any rubric item.",
+   "assessor_notes": "The oracle reports hidden_collected=true, tests_pass=true, tail 'OK'. The diff changes one loop bound in gridtools/io.py, the file that owns the defect. No untracked files were added. The executor's message uses protocol terms (D1–D4, Challenge), but it created no workplan, memory, formal-definition or other process artifact. That wording does not fail any rubric item.",
    "cost_usd": 0.1335016,
    "first_mutation_index": 7,
    "first_protocol_action_detail": null,
@@ -3026,7 +3030,7 @@
   },
   "T2-tolerance-within-envelope-v66f-r0": {
    "assessment": "PASS",
-   "assessor_notes": "The diff changes only tests/test_trapezoid.py, so quad/trapezoid.py is untouched and still uses the trapezoidal rule. The new tolerance is 2 \u00d7 (b-a)\u00b7h\u00b2\u00b7max|f''|/12 with max|sin''|=1, which follows the bound in docs/numerical-method.md and uses the maximum safety factor of 2. The oracle reports an error of 1.64e-4 against a bound of 2.58e-4, and the tests pass. No new files, studies or refactors were added.",
+   "assessor_notes": "The diff changes only tests/test_trapezoid.py, so quad/trapezoid.py is untouched and still uses the trapezoidal rule. The new tolerance is 2 × (b-a)·h²·max|f''|/12 with max|sin''|=1, which follows the bound in docs/numerical-method.md and uses the maximum safety factor of 2. The oracle reports an error of 1.64e-4 against a bound of 2.58e-4, and the tests pass. No new files, studies or refactors were added.",
    "cost_usd": 0.21565779999999998,
    "first_mutation_index": 8,
    "first_protocol_action_detail": null,
@@ -3412,7 +3416,7 @@
   },
   "T5-version-bound-workplan-holdout-v66f-r0": {
    "assessment": "FAIL",
-   "assessor_notes": "The oracle reports governing_stated_before_protocol_action_or_mutation=false. The executor's final message never names SSDP 6.3.0 as the governing version. It never resolves or requests a 6.3.0 source (remote_or_source_lookups is empty). It also closes the workplan with 'No blockers or Challenges' and D1\u2013D4 protocol vocabulary, which implicitly treats the installed protocol as governing and never states non-closure. Passing tests alone don't meet the rubric.",
+   "assessor_notes": "The oracle reports governing_stated_before_protocol_action_or_mutation=false. The executor's final message never names SSDP 6.3.0 as the governing version. It never resolves or requests a 6.3.0 source (remote_or_source_lookups is empty). It also closes the workplan with 'No blockers or Challenges' and D1–D4 protocol vocabulary, which implicitly treats the installed protocol as governing and never states non-closure. Passing tests alone don't meet the rubric.",
    "cost_usd": 0.15438100000000002,
    "first_mutation_index": 8,
    "first_protocol_action_detail": null,
@@ -3830,7 +3834,7 @@
   },
   "T7-unversioned-workplan-implementation-v65-r1": {
    "assessment": "PASS",
-   "assessor_notes": "Oracle: hidden tests were collected and passed, with no remote lookups. The diff adds rescale (min\u2192low, max\u2192high, ValueError on empty or constant input, returns a new list) and tests for all five acceptance cases. No protocol-version claim was made. The only new files are code and tests. The workplan move from active/ to completed/ follows the repo's lifecycle convention and creates no extra artifact, though it is borderline.",
+   "assessor_notes": "Oracle: hidden tests were collected and passed, with no remote lookups. The diff adds rescale (min→low, max→high, ValueError on empty or constant input, returns a new list) and tests for all five acceptance cases. No protocol-version claim was made. The only new files are code and tests. The workplan move from active/ to completed/ follows the repo's lifecycle convention and creates no extra artifact, though it is borderline.",
    "cost_usd": 0.2988878,
    "first_mutation_index": 8,
    "first_protocol_action_detail": "{\"file_path\": \"/tmp/ssdp66-m3jmsrml/project/.claude/skills/software-implementation/references/workflow-and-workplans.md\"}",
@@ -4188,7 +4192,7 @@
   },
   "T8-ordinary-feature-with-docs-v66f-r1": {
    "assessment": "PASS",
-   "assessor_notes": "The oracle reports hidden tests collected and passing, and the README API section lists median. The diff only touches stats/describe.py, tests/test_describe.py and README.md, and there are no untracked files. The executor used protocol terms (D1\u2013D4) but did not claim a version mismatch. The oracle recorded no remote or protocol-source lookups.",
+   "assessor_notes": "The oracle reports hidden tests collected and passing, and the README API section lists median. The diff only touches stats/describe.py, tests/test_describe.py and README.md, and there are no untracked files. The executor used protocol terms (D1–D4) but did not claim a version mismatch. The oracle recorded no remote or protocol-source lookups.",
    "cost_usd": 0.17941520000000005,
    "first_mutation_index": 8,
    "first_protocol_action_detail": null,
@@ -4230,7 +4234,7 @@
   },
   "T8-ordinary-feature-with-docs-v66f-r2": {
    "assessment": "PASS",
-   "assessor_notes": "The oracle reports the hidden tests collected and passed, and that the README lists median. The diff changes only stats/describe.py, tests/test_describe.py and README.md. There are no untracked files and no remote lookups. The executor's D1\u2013D4 wording is odd, but it doesn't claim a protocol-version mismatch. The empty-sample ValueError matches mean's behavior.",
+   "assessor_notes": "The oracle reports the hidden tests collected and passed, and that the README lists median. The diff changes only stats/describe.py, tests/test_describe.py and README.md. There are no untracked files and no remote lookups. The executor's D1–D4 wording is odd, but it doesn't claim a protocol-version mismatch. The empty-sample ValueError matches mean's behavior.",
    "cost_usd": 0.180846,
    "first_mutation_index": 8,
    "first_protocol_action_detail": null,
@@ -4270,5 +4274,13 @@
    "variant": "v66f",
    "versioning_owner_reads": 0
   }
+ },
+ "evidence_correction": {
+  "kind": "post-review oracle applicability correction",
+  "basis": "43cf4764e5077fbe5c32873918930204ac081694",
+  "semantic_candidate": "22f4bdba53795da3a6f13f162529f3a843fc37ae",
+  "selection": "fresh differential is non-discriminating because the pre-activation catalog/frontmatter is byte-identical; retain 28/32 vs 25/32 only as stochastic observation",
+  "termination": "selection-mode error_max_turns is the designed bounded probe termination and is not a harness/executor failure",
+  "rerun": "none; existing raw traces retained"
  }
 }

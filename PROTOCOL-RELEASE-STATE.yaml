@@ -25,7 +25,7 @@ historical:
     recovery_ref: 74bc572ef516cae417437a2027eeff52a2e25c15
 candidate:
   version: "6.6.0"
-  semantic_ref: UNFROZEN
+  semantic_ref: 22f4bdba53795da3a6f13f162529f3a843fc37ae
   review:
     state: NOT_RUN
     evidence_ref: NONE

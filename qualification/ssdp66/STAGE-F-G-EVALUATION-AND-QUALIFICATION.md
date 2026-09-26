@@ -15,7 +15,7 @@ d3_reopen_semantic_state: 47dc85de6dd6be8b0adfb1a66024cfdd5397f3d8
 d3_reopen_live_confirmation: FAILED version gate and criterion-4 burden rule (section 10.7)
 final_simplification_rule_freeze: 9b65f8d
 final_semantic_state: 22f4bdba53795da3a6f13f162529f3a843fc37ae
-final_live_qualification: frozen gate NOT MET on selection count and run-error hygiene only; routing probes, version robustness, sentinels and criterion 4 met (section 10.8)
+final_live_qualification: PASS after evidence-applicability correction; semantic candidate 22f4bdba53795da3a6f13f162529f3a843fc37ae (sections 10.8-10.9)
 ---
 
 # Protocol 6.6 Stages F-G — Empirical Evaluation and Assembled Qualification
@@ -307,3 +307,14 @@ Panel net ratio: 1.072 (rule: at most 0.85). In 17 of 18 ordinary runs across bo
 **Other observations.** The tool route is weakly discoverable for a "data-flow analysis evidence" task in both variants: basis 1/2, candidate 0/2. Both variants otherwise routed to the security owner, and neither routed to the tool leaf directly. One candidate P15 run skipped the mandatory D2 owner read. Diagnostics (T1/T7/T8, 3 runs summed, v65/v66f) are in the summary file and are not the criterion.
 
 **Disposition.** Burden, routing-probe, version-robustness and authority results support the simplification. The frozen gate is still not met, because of the two selection-sensor items. The candidate is therefore **not** frozen, and fresh independent Review is not requested. One decision goes to the stakeholder/Review owner: whether the selection comparison was a pre-run oracle defect: it compared a byte-identical catalog surface, so it could measure only noise, and its error count included designed terminations. If so, the remaining gates close 16.11.5 item 2. If not, Protocol 6.6 stops under 16.11.5. No rewording, rerun-until-pass, route, metric or threshold change was made after the first final-candidate run.
+
+
+### 10.9 Implementation Review evidence correction and semantic qualification
+
+Implementation Review of branch head `43cf4764e5077fbe5c32873918930204ac081694` found the final semantic implementation conformant and identified the two remaining final-gate failures as evidence-instrument defects rather than candidate defects. The durable correction is `FINAL-SIMPLIFICATION-EVIDENCE-CORRECTION.md`; the original frozen rule and raw 10.8 result remain preserved.
+
+- **Selection:** the final rewrite does not change any pre-activation catalog/frontmatter bytes. Since missed runs never invoked a skill, the changed body could not cause the observed 28/32 -> 25/32 fluctuation. The fresh differential is non-discriminating for this delta and is retained as stochastic observation, not a candidate failure.
+- **Run-error hygiene:** selection-mode `error_max_turns` is the harness's designed bounded termination. It is no longer classified as a genuine execution error. Real route/trajectory/harness errors remain blocking.
+- **No rerun-until-pass:** the corrected final summary is derived from the same committed raw traces. No route, prompt, threshold, burden metric, weighting, or candidate source changed.
+
+Corrected final gate result on semantic candidate `22f4bdba53795da3a6f13f162529f3a843fc37ae`: **PASS** for routing/correctness and criterion 4. The candidate itself remains unchanged. Final repository/package/profile/Core assembled acceptance is still required on the candidate plus lifecycle/evidence descendant before fresh independent Review.

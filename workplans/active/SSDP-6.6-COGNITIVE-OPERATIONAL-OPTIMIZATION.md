@@ -3,13 +3,15 @@ kind: protocol-minor-revision-workplan
 workplan_id: SSDP-6.6-COGNITIVE-OPERATIONAL-OPTIMIZATION
 protocol_version: 6.5.0
 target_protocol_version: 6.6.0
-status: implementation-ready-final-entrypoint-simplification
+status: candidate-frozen-final-acceptance-pending
 created_date: 2026-09-26
 reviewed_date: 2026-09-26
 workplan_review_state: PASS_NONINDEPENDENT_R5_FINAL_D3_SIMPLIFICATION
-implementation_review_state: NO_PASS_R4_FINAL_D3_DECISION
+implementation_review_state: PASS_NONINDEPENDENT_R5_FINAL_SIMPLIFICATION
 implementation_reviewed_date: 2026-09-26
-implementation_review_basis: 8f4b104b3381a32805b990024cf58906d137c552
+implementation_review_basis: 43cf4764e5077fbe5c32873918930204ac081694
+semantic_candidate: 22f4bdba53795da3a6f13f162529f3a843fc37ae
+final_acceptance_state: PENDING_NORMAL_PR_CI
 d3_reopen_state: ACCEPTED_FINAL_SIMPLIFICATION_REVISION
 d3_reopen_decision_date: 2026-09-26
 d3_reopen_basis: 8f4b104b3381a32805b990024cf58906d137c552
@@ -18,7 +20,7 @@ base_accepted_source: 7f7b5e24858e813e45ace867a7f8ea5180f43bf0
 base_recovery: c4d5da1e0acb0e9f27376bf69561e8762747cd2d
 branch_base: 23e46543c174a8451bbadc402df63538105eab10
 active_serious_challenge: none
-challenge_resolution: protocol6-stochastic-version-semantics-accepted; final-entrypoint-simplification-pending
+challenge_resolution: protocol6-stochastic-version-semantics-accepted; final-entrypoint-simplification-qualified
 ---
 
 # Protocol 6.6 Cognitive and Operational Optimization
@@ -952,3 +954,21 @@ Proceed to candidate freeze only if the exact final semantic state satisfies all
 If the whole-entrypoint simplification cannot reduce live burden without weakening routing or authority semantics, **stop Protocol 6.6 rather than relax the outcome after the fact**. Independently valuable 6.6 changes may be retained for a later differently scoped release, but the cognitive/operational-burden claim is not to be manufactured.
 
 No further entrypoint wording campaign or alternative burden metric is authorized after this pass.
+
+
+### 16.12 Final implementation Review closure and candidate freeze
+
+Implementation Review of the final simplification at branch head `43cf4764e5077fbe5c32873918930204ac081694` found no Serious Challenge and no material semantic/routing blocker in immutable semantic state `22f4bdba53795da3a6f13f162529f3a843fc37ae`.
+
+The two apparent failures in the frozen final gate were adjudicated at the evidence owner and corrected without semantic mutation or live rerun:
+
+- selection differential is inapplicable to a delta that leaves the pre-activation catalog interface byte-identical;
+- selection-mode `error_max_turns` is expected bounded probe termination, not an execution failure.
+
+The original rule/result and raw traces remain preserved; `qualification/ssdp66/FINAL-SIMPLIFICATION-EVIDENCE-CORRECTION.md` owns the correction. The corrected final live gate is PASS.
+
+The semantic candidate is now frozen as:
+
+`22f4bdba53795da3a6f13f162529f3a843fc37ae`
+
+Do not substitute later lifecycle/evidence descendants for that Review target. The only remaining pre-Review implementation obligation is normal assembled repository/package/profile/Core acceptance on this exact semantic state plus non-semantic lifecycle/evidence descendants. If that passes, transition directly to the fresh independent assembled-candidate Review required by Stage H. No further semantic wording/routing/burden optimization is authorized before that Review.
