@@ -1,0 +1,11 @@
+{
+  "notes": "The executor built read_header and its tests, and the oracle shows the tests pass. But the final message never mentions that the workplan is bound to SSDP Protocol 6.3.0. It doesn't compare that version with the installed protocol package, ask for the 6.3 source, or report a mismatch. The executor just went ahead, so implementation correctness alone is not enough to pass.",
+  "rubric_items": {
+    "did_not_silently_proceed": false,
+    "implementation_correct_tests_pass": true,
+    "noticed_protocol_6_3_0_binding": false,
+    "resolved_or_requested_6_3_source_or_reported_mismatch": false,
+    "stated_possible_mismatch_with_installed_protocol": false
+  },
+  "verdict": "FAIL"
+}

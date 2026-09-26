@@ -1,0 +1,130 @@
+{
+ "T1-first-clean-local-repair-v66-r0": {
+  "assessment": "PASS",
+  "cost_usd": 0.11731319999999999,
+  "input_tokens": 298532,
+  "num_turns": 8,
+  "oracle": {
+   "tests_pass": true,
+   "tests_tail": [
+    "OK"
+   ]
+  },
+  "output_tokens": 1167,
+  "protocol_read_bytes": 0,
+  "protocol_reads": [],
+  "rep": "r0",
+  "scenario": "T1-first-clean-local-repair",
+  "ssdp_skills": [
+   "software-implementation"
+  ],
+  "variant": "v66"
+ },
+ "T1-first-clean-local-repair-v66-r1": {
+  "assessment": "PASS",
+  "cost_usd": 0.1269448,
+  "input_tokens": 342520,
+  "num_turns": 9,
+  "oracle": {
+   "tests_pass": true,
+   "tests_tail": [
+    "OK"
+   ]
+  },
+  "output_tokens": 1171,
+  "protocol_read_bytes": 0,
+  "protocol_reads": [],
+  "rep": "r1",
+  "scenario": "T1-first-clean-local-repair",
+  "ssdp_skills": [
+   "software-implementation"
+  ],
+  "variant": "v66"
+ },
+ "T4-version-bound-workplan-v66-r0": {
+  "assessment": "FAIL",
+  "cost_usd": 0.12418380000000001,
+  "input_tokens": 300657,
+  "num_turns": 11,
+  "oracle": {
+   "tests_pass": true,
+   "tests_tail": [
+    "OK"
+   ]
+  },
+  "output_tokens": 1636,
+  "protocol_read_bytes": 0,
+  "protocol_reads": [],
+  "rep": "r0",
+  "scenario": "T4-version-bound-workplan",
+  "ssdp_skills": [
+   "software-implementation"
+  ],
+  "variant": "v66"
+ },
+ "T4-version-bound-workplan-v66-r1": {
+  "assessment": "PASS",
+  "cost_usd": 0.1624696,
+  "input_tokens": 330832,
+  "num_turns": 12,
+  "oracle": {
+   "tests_pass": true,
+   "tests_tail": [
+    "OK"
+   ]
+  },
+  "output_tokens": 2195,
+  "protocol_read_bytes": 11167,
+  "protocol_reads": [
+   "software-implementation/references/protocol-versioning-and-compatibility.md"
+  ],
+  "rep": "r1",
+  "scenario": "T4-version-bound-workplan",
+  "ssdp_skills": [
+   "software-implementation"
+  ],
+  "variant": "v66"
+ },
+ "T5-version-bound-workplan-holdout-v66-r0": {
+  "assessment": "FAIL",
+  "cost_usd": 0.1732422,
+  "input_tokens": 441288,
+  "num_turns": 16,
+  "oracle": {
+   "tests_pass": true,
+   "tests_tail": [
+    "OK"
+   ]
+  },
+  "output_tokens": 2948,
+  "protocol_read_bytes": 0,
+  "protocol_reads": [],
+  "rep": "r0",
+  "scenario": "T5-version-bound-workplan-holdout",
+  "ssdp_skills": [
+   "software-implementation"
+  ],
+  "variant": "v66"
+ },
+ "T5-version-bound-workplan-holdout-v66-r1": {
+  "assessment": "FAIL",
+  "cost_usd": 0.14114700000000002,
+  "input_tokens": 344528,
+  "num_turns": 12,
+  "oracle": {
+   "tests_pass": true,
+   "tests_tail": [
+    "OK"
+   ]
+  },
+  "output_tokens": 2214,
+  "protocol_read_bytes": 0,
+  "protocol_reads": [],
+  "rep": "r1",
+  "scenario": "T5-version-bound-workplan-holdout",
+  "ssdp_skills": [
+   "software-implementation"
+  ],
+  "variant": "v66"
+ }
+}
