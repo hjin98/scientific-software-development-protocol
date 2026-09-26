@@ -27,7 +27,7 @@ candidate:
     state: PASS
     evidence_ref: hjin98/scientific-software-development-protocol@29077c564140d3902ac1764d8eb8acd0b9a6be2c:qualification/ssdp65/INDEPENDENT-REVIEW-2026-09-25-PROTOCOL-6.5-P21-PASS.md
   ratification:
-    state: NOT_REQUESTED
-    evidence_ref: NONE
+    state: RATIFIED
+    evidence_ref: hjin98/scientific-software-development-protocol@95f106558c0c046eb46bc1239cb511231c5cce07:qualification/ssdp65/STAKEHOLDER-RATIFICATION-2026-09-25-PROTOCOL-6.5-P21.md
   public_source_ref: UNAVAILABLE
   recovery_ref: UNAVAILABLE
