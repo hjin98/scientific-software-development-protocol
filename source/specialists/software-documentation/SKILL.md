@@ -1,6 +1,6 @@
 ---
 name: software-documentation
-description: Use for writing, reconciling, or restructuring documentation of scientific or technical software - user guides, method papers, architecture documents, READMEs, runbooks, generated docs - so it truthfully explains accepted behavior and authority without becoming new authority. Not for changing the documented behavior itself.
+description: Use to write or reconcile documentation of scientific/technical software (guides, method papers, architecture docs, READMEs) so it truthfully explains accepted behavior. Not for changing the documented behavior.
 ---
 
 # Software Documentation

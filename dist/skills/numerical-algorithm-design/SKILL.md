@@ -1,6 +1,6 @@
 ---
 name: numerical-algorithm-design
-description: Use for choosing, designing, reviewing, or challenging a numerical method or algorithm in scientific software - discretization, solver, estimator, optimizer, approximation, error/convergence/stability/conditioning, precision, stochastic behavior, and how test tolerances follow from the error model - and for its handoff to architecture. Not for ordinary code changes that leave the method unchanged.
+description: Use to choose, design, review, or challenge a numerical method or algorithm - discretization, solver, estimator, error/convergence/stability, precision, stochastic behavior, and tolerances derived from the error model. Not for code changes that keep the method.
 ---
 
 # Numerical Algorithm Design

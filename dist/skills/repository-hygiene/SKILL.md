@@ -1,6 +1,6 @@
 ---
 name: repository-hygiene
-description: Use after development closes, or when explicitly asked, for conservative repository cleanup - classifying residue, archiving completed workplans, retiring proven-disposable branches, caches, and accidentally committed artifacts - while preserving recoverable work, evidence, and history. Not for product changes.
+description: Use after development closes, or when asked, for conservative repository cleanup - classifying residue, archiving workplans, retiring proven-disposable branches, caches, and accidentally committed artifacts. Not for product changes.
 ---
 
 # Repository Hygiene

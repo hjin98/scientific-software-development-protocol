@@ -1,6 +1,6 @@
 ---
 name: software-maintenance-audit
-description: Use for auditing a long-lived scientific or technical code base for maintainability risk - architectural entropy, change hotspots, weak tests, duplicated authority, dependency or evidence drift - and routing evidence-backed findings to the owning skill. Reports findings; does not refactor or approve changes.
+description: Use to audit a long-lived scientific/technical code base for maintainability risk - hotspots, architectural entropy, weak tests, duplicated authority, dependency or evidence drift. Reports and routes findings; does not refactor.
 ---
 
 # Software Maintenance Audit

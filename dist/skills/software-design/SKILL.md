@@ -1,6 +1,6 @@
 ---
 name: software-design
-description: Use for designing, reviewing, or challenging the architecture of scientific or technical software - component ownership, interfaces, state, data/control flow, persistence, concurrency, resources, compatibility - for writing a D3->D4 implementation workplan, and for independent Review of an implementation against its plan. Routes scientific-meaning or numerical-method defects to the SSDP formulation or numerical skills.
+description: Use to design, review, or challenge scientific/technical software architecture (ownership, interfaces, state, data flow, persistence, concurrency, resources), write an implementation workplan, or independently review an implementation. Routes scientific or numerical defects upstream.
 ---
 
 # Software Design

@@ -193,7 +193,7 @@ class SelectionMetadataTests(unittest.TestCase):
                 self.assertIsNone(re.search(r"\b[0-9a-f]{40}\b", description))
                 for token in ("accepted-current", "Protocol 6", "USES_DEFINITION", "HAS", "PEM"):
                     self.assertNotIn(token, description)
-                self.assertRegex(description, r"\bUse (for|after)\b")
+                self.assertRegex(description, r"\bUse (to|for|after)\b")
                 self.assertRegex(description, r"\b(Not for|Routes|does not)\b")
 
     def test_generic_core_validity_does_not_require_vendor_adapter(self) -> None:

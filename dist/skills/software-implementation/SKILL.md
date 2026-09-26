@@ -1,6 +1,6 @@
 ---
 name: software-implementation
-description: Use for implementing, fixing, debugging, refactoring, testing, or packaging code in scientific or technical software when the accepted scientific, numerical, and architectural contracts are meant to stay unchanged. Routes changes to scientific meaning, numerical method, or architecture to the SSDP formulation, numerical, or design skills. Not for non-software tasks.
+description: Use to implement, fix, debug, refactor, test, or package scientific/technical code under unchanged scientific, numerical, and architectural contracts. Routes changes to those contracts to the SSDP formulation, numerical, or design skills.
 ---
 
 # Software Implementation

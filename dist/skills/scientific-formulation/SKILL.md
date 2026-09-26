@@ -1,6 +1,6 @@
 ---
 name: scientific-formulation
-description: Use for defining, reviewing, or challenging the scientific or mathematical problem behind scientific software - the question, observables/estimands, model equations, assumptions, validity regime, interpretation, model-level uncertainty, and external validation - and for its handoff to numerical-method design. Not for numerical method, architecture, or code work that leaves the scientific meaning unchanged.
+description: Use to define, review, or challenge the scientific or mathematical problem behind scientific software - question, observables, model equations, assumptions, validity regime, uncertainty, validation. Not for method, architecture, or code changes that keep the scientific meaning.
 ---
 
 # Scientific Formulation
