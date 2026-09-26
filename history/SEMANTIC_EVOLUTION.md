@@ -205,3 +205,17 @@ Protocol 6.6 proposes a backward-compatible cognitive/operational optimization o
 - **Evidence correction:** the final selection differential is non-discriminating because selection-visible frontmatter is byte-identical across the body-only simplification; selection-mode `error_max_turns` is designed bounded termination, not an execution failure. Raw observations are preserved and were not rerun to obtain a pass.
 - **Assembled acceptance:** workflow `36253556289` passed repository release-state/PEM/regression/build/package/parity/whitespace checks plus Protocol snapshot and Orchestrator Core acceptance on binding descendant `0dcec549e8fbc1628f03da04228eaced7f21bcde`.
 - **Lifecycle:** candidate is frozen for fresh independent Review only. Protocol 6.5 remains accepted-current; Review is `NOT_RUN`, ratification `NOT_REQUESTED`, and 6.6 public-source/recovery identities remain unavailable.
+
+
+## 2026-09-26 — Protocol 6.6 accepted-current
+
+Protocol 6.6 completed its cognitive/operational optimization lifecycle without changing frozen P66 semantics after independent Review.
+
+- **Semantic candidate:** P66 `22f4bdba53795da3a6f13f162529f3a843fc37ae`.
+- **Independent Review:** PASS recorded at `356d13f05ae56892dc1a75f1eae4c5d3d47881ee`; no Serious Challenge and no surviving blocker.
+- **Stakeholder ratification:** exact P66 ratified at `073aa74d0e786f8997d7a2885a67160000bd031c`.
+- **Public fallback:** exact P66 published by descendant `37b4fdbffea8706a759b76979a91bca20d5ab19b`.
+- **Recovery:** distinct immutable target `384666764da4c55b282e6b1595ab97e2f86e1dc4`, published by mapping descendant `777ae85ac5770ac67a2f85ad441e7b993babf65a`.
+- **Accepted-current cutover:** `8457fe9d3f30e7b21663f57645816cec8d0ef343` advances accepted-current to 6.6.0 and preserves the complete 6.5 public/recovery mapping as historical state.
+- **Operational result:** the final root-router simplification preserves the 122-route map and historical capabilities while reducing ordinary consumed entrypoint burden in the qualified reference regime; strict version binding/no-self-adoption remains normative while portable prose execution is explicitly treated as stochastic robustness.
+- **Protocol 7 boundary:** Protocol 6.6 evidence/capabilities become mandatory inputs to the existing deliberate Protocol-7 D3 Orchestrator architecture reassessment. No Protocol-7 architecture is selected here and D4 remains unauthorized.

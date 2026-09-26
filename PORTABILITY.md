@@ -48,8 +48,8 @@ For this repository, current exact public/recovery mappings are owned by `PROTOC
 | `ssdp-protocol-6.2` | 6.2.0 | 2 | frozen historical |
 | `ssdp-protocol-6.3` | 6.3.0 | 2 | frozen historical |
 | `ssdp-protocol-6.4` | 6.4.0 | 2 | frozen historical |
-| `ssdp-protocol-6.5` | 6.5.0 | 2 | frozen version-bound |
-| `ssdp-protocol-6.6` | 6.6.0 | 2 | current source profile |
+| `ssdp-protocol-6.5` | 6.5.0 | 2 | frozen historical |
+| `ssdp-protocol-6.6` | 6.6.0 | 2 | accepted-current profile |
 
 Which profile is accepted-current is release state, resolved from `PROTOCOL-RELEASE-STATE.yaml`. The 6.x family retains schema v2 because current semantic strengthening, including 6.6's representation changes, does not change the machine stage/result-envelope graph or lifecycle/control ownership. Every previously published profile remains byte-stable and independently testable.
 

@@ -1,7 +1,7 @@
 ---
 kind: protocol-workplan-authority-index
 workplan_id: SSDP-6.1-7.0-WORKPLAN-AUTHORITY-INDEX
-protocol_version: 6.5.0
+protocol_version: 6.6.0
 status: active
 created_date: 2026-09-09
 reviewed_date: 2026-09-26
@@ -132,27 +132,27 @@ LIFECYCLE STATUS: COMPLETED / ARCHIVED
 
 Protocol 6.4 is the accepted-current backward-compatible minor strengthening. Its accepted release identity is recovery `74bc572ef516cae417437a2027eeff52a2e25c15` with distinct public bootstrap `e09a9d1480211eea2d16d722182bb5c6de1bee12`. The repository default branch is not a protocol-version oracle, so no `main` merge is required to make that version-bound acceptance true; version-bound 6.3 and older work retains its immutable historical semantics.
 
-## Protocol 6.6 current design handoff
+## Protocol 6.6 completed handoff
 
-Protocol 6.6 cognitive/operational optimization design and implementation SHALL use:
+Protocol 6.6 cognitive/operational optimization is complete. Its governing workplan is preserved as historical evidence at:
 
-1. `workplans/active/SSDP-6.6-COGNITIVE-OPERATIONAL-OPTIMIZATION.md`
-
-The 6.6 workplan is governed by accepted Protocol 6.5. It preserves the 6.5 semantic model while reducing hot-path context, procedural replay, and other cognitive/trajectory burden. It explicitly does **not** implement Protocol 7's mandatory control plane or transfer workflow authority to an orchestrator.
+1. `workplans/archive/SSDP-6.6-COGNITIVE-OPERATIONAL-OPTIMIZATION.md`
 
 Current disposition:
 
 ```text
-SERIOUS CHALLENGE: NONE
-BASELINE: accepted Protocol 6.5
-WORKPLAN REVIEW: PASS_NONINDEPENDENT_R3 / IMPLEMENTATION-READY
-IMPLEMENTATION STATUS: STAGES A-G COMPLETE ON THE WORKPLAN BRANCH; READY FOR FRESH INDEPENDENT REVIEW (candidate not frozen)
-PEM ACCEPTED-BASE PUBLICATION: RECONCILED — branch overlay binds accepted 6.5 integrated state 23e46543c174a8451bbadc402df63538105eab10 (qualification/ssdp66/STAGE-A-BASELINE-AND-PRESERVATION.md)
-QUALIFICATION RECORD: qualification/ssdp66/STAGE-F-G-EVALUATION-AND-QUALIFICATION.md
-PROTOCOL 7 EFFECT: NONE YET — if 6.6 becomes accepted, its evidence/capabilities (including the Stage F finding that prose-only version/mandatory-read instructions were not followed by the reference harness) must feed Protocol 7's required deliberate D3 architecture reopen before Protocol 7 D4 authorization
+P66 SEMANTIC CANDIDATE: 22f4bdba53795da3a6f13f162529f3a843fc37ae
+INDEPENDENT REVIEW: PASS — 356d13f05ae56892dc1a75f1eae4c5d3d47881ee
+STAKEHOLDER RATIFICATION: RATIFIED — 073aa74d0e786f8997d7a2885a67160000bd031c
+PUBLIC FALLBACK: 22f4bdba53795da3a6f13f162529f3a843fc37ae
+RECOVERY: 384666764da4c55b282e6b1595ab97e2f86e1dc4
+RECOVERY MAPPING COMMIT: 777ae85ac5770ac67a2f85ad441e7b993babf65a
+ACCEPTED-CURRENT CUTOVER: 8457fe9d3f30e7b21663f57645816cec8d0ef343
+PROTOCOL 7 D3 REASSESSMENT INPUT: REVISION 7 / REQUIRED BEFORE D4
+LIFECYCLE STATUS: COMPLETED / ARCHIVED
 ```
 
-This entry is lifecycle/routing state only. It does not accept 6.6 semantics, authorize publication/cutover, or perform the future independent assembled-candidate Review.
+Protocol 6.6 is accepted-current. Its reduced-root-router, strict no-self-adoption version semantics, stochastic Protocol-6 robustness boundary, and bounded live trajectory evidence are inputs to Protocol 7's already-required deliberate D3 Orchestrator architecture reopen. They do not themselves select a Protocol 7 architecture or authorize Protocol 7 D4.
 
 ## Protocol 7.0 current design handoff
 
@@ -165,6 +165,7 @@ Protocol 7.0 design/implementation/review SHALL read and satisfy, as one compose
 5. `workplans/active/SSDP-7.0-DETERMINISTIC-CONTROL-PLANE-AND-MANDATORY-ORCHESTRATOR-MIGRATION-REVISION-4-PROTOCOL-6.3-INHERITANCE-RECONCILIATION.md`
 6. `workplans/active/SSDP-7.0-DETERMINISTIC-CONTROL-PLANE-AND-MANDATORY-ORCHESTRATOR-MIGRATION-REVISION-5-PROTOCOL-6.4-INHERITANCE-RECONCILIATION.md`
 7. `workplans/active/SSDP-7.0-DETERMINISTIC-CONTROL-PLANE-AND-MANDATORY-ORCHESTRATOR-MIGRATION-REVISION-6-PROTOCOL-6.5-INHERITANCE-RECONCILIATION.md`
+8. `workplans/active/SSDP-7.0-DETERMINISTIC-CONTROL-PLANE-AND-MANDATORY-ORCHESTRATOR-MIGRATION-REVISION-7-PROTOCOL-6.6-INHERITANCE-AND-D3-REASSESSMENT.md`
 
 Precedence:
 
@@ -174,6 +175,7 @@ Precedence:
 - Revision 4 changes only project-learning/version inheritance after Protocol 6.3 acceptance: current pre-cutover document-controlled baseline and fallback/rollback become Protocol 6.3, while the parent/Revisions 1-3 D3 architecture semantics remain unchanged;
 - Revision 5 changes only version/representation inheritance after Protocol 6.4 acceptance: the current pre-cutover fallback/rollback baseline becomes Protocol 6.4 recovery `74bc572ef516cae417437a2027eeff52a2e25c15`, while parent/Revisions 1-4 D3 architecture semantics remain unchanged and Protocol 7 D4 remains unauthorized;
 - Revision 6 changes only version/representation inheritance after Protocol 6.5 acceptance: the current pre-cutover fallback/rollback baseline becomes Protocol 6.5 recovery `c4d5da1e0acb0e9f27376bf69561e8762747cd2d`, while parent/Revisions 1-5 D3 architecture semantics remain unchanged and Protocol 7 D4 remains unauthorized;
+- Revision 7 advances the pre-cutover fallback/rollback baseline to Protocol 6.6 recovery `384666764da4c55b282e6b1595ab97e2f86e1dc4` and binds Protocol 6.6 operational evidence/capabilities as mandatory inputs to the already-required deliberate D3 Orchestrator architecture reassessment; it does not select the resulting architecture or authorize Protocol 7 D4;
 - every parent requirement not explicitly changed by a later revision remains binding.
 
 Current disposition:
@@ -191,13 +193,15 @@ PROTOCOL 6.4 COMPLETION/REVIEW/RECOVERY PREREQUISITE: SATISFIED
 PROTOCOL 6.4 INHERITANCE RECONCILIATION: SATISFIED
 PROTOCOL 6.5 COMPLETION/REVIEW/RATIFICATION/RECOVERY PREREQUISITE: SATISFIED
 PROTOCOL 6.5 INHERITANCE RECONCILIATION: SATISFIED
-CURRENT PRE-CUTOVER FALLBACK/ROLLBACK BASELINE: Protocol 6.5 recovery c4d5da1e0acb0e9f27376bf69561e8762747cd2d
+PROTOCOL 6.6 COMPLETION/REVIEW/RATIFICATION/RECOVERY PREREQUISITE: SATISFIED
+PROTOCOL 6.6 INHERITANCE/REASSESSMENT INPUT: SATISFIED / REVISION 7
+CURRENT PRE-CUTOVER FALLBACK/ROLLBACK BASELINE: Protocol 6.6 recovery 384666764da4c55b282e6b1595ab97e2f86e1dc4
 REMAINING PROTOCOL-7-SPECIFIC PRE-D4 REQUIREMENT:
   1. DELIBERATE D3 ORCHESTRATOR ARCHITECTURE REOPEN/SUPERSESSION
 PROTOCOL 7 D4: NOT AUTHORIZED
 ```
 
-Protocol 7 D4 remains unauthorized until the existing deliberate D3 Orchestrator architecture reopen/supersession requirement closes. Revisions 3-6 do not perform that reopen and no Protocol 7 cutover is implied.
+Protocol 7 D4 remains unauthorized until the existing deliberate D3 Orchestrator architecture reopen/supersession requirement closes. Revisions 3-7 do not perform that reopen and no Protocol 7 cutover is implied.
 
 ## Protocol 6.5 completed handoff
 
@@ -228,8 +232,8 @@ Protocol 6.5 is accepted-current. Mutable release identity remains owned only by
 There is exactly one mutable repository release-state owner: `PROTOCOL-RELEASE-STATE.yaml`.
 
 - Repository default/latest is never a protocol-version oracle.
-- Protocol 6.6 is proposed on its active workplan branch and is not accepted-current; no 6.6 publication/recovery/cutover identity exists yet.
-- Protocol 7 remains proposed/pre-cutover. Its Revision-6 pre-cutover fallback/rollback binding is Protocol 6.5 recovery `c4d5da1e0acb0e9f27376bf69561e8762747cd2d`; Revision 6 changes inheritance identity only and leaves Protocol 7 D3 architecture/D4 authorization unchanged. If 6.6 later becomes accepted before Protocol 7 cutover, 6.6 operational evidence and capability preservation become inputs to Protocol 7's required deliberate D3 architecture reopen rather than an automatic D4 authorization.
+- Protocol 6.6 is accepted-current with exact public fallback `22f4bdba53795da3a6f13f162529f3a843fc37ae` and recovery `384666764da4c55b282e6b1595ab97e2f86e1dc4`.
+- Protocol 7 remains proposed/pre-cutover. Revision 7 binds Protocol 6.6 recovery as the pre-cutover fallback/rollback baseline and makes 6.6 operational evidence/capabilities required inputs to the deliberate D3 architecture reopen; it does not perform that reopen or authorize D4.
 - Under Protocol 7 after qualified cutover, the deterministic orchestrator control plane owns machine lifecycle transitions while workplans/skills/documents remain semantic artifacts.
 - Shadow comparison is permitted only while one side remains explicitly non-authoritative.
 - No `main` merge or Protocol 7 D4 cutover is authorized merely by these active design workplans.
