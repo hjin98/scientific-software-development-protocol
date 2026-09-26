@@ -17,6 +17,7 @@ Evidence coordination only; not D1-D4 authority, Review, or release state. The c
 | Item | Location | Notes |
 | --- | --- | --- |
 | fresh version-bound holdout T6 | `eval/fixtures/T6-version-bound-stage-continuation-holdout/`, `eval/oracles/T6-…/test_hidden.py`, `eval/rubrics.yaml` (T6) | Protocol 6.2.0 (historical, mapped public source); version only in workplan front matter; stage-continuation phrasing; product change succeeds even if the rule is ignored |
+| ordinary workplan burden route T7 | `eval/fixtures/T7-unversioned-workplan-implementation/`, `eval/oracles/T7-…`, `eval/rubrics.yaml` (T7) | unversioned accepted-workplan D4 task; added in a second R0 commit, still before any R1 change. Disclosed selection risk: chosen because Stage F showed accepted-workplan runs are the only ordinary runs that load protocol references. T5/T6 cannot serve as ordinary burden routes because a correct 6.6 run must load the versioning owner there |
 | scenario reclassification | `eval/scenarios.yaml` | T4 = development data; T5 = post-finding fresh challenge case; neither is part of the untouched Stage-A holdout |
 | deterministic entry oracle | `harness.py` `entry_and_burden` | `governing_stated_before_mutation` (assistant text naming the governing version precedes the first file mutation); `remote_or_source_lookups`; `versioning_owner_reads` |
 | burden metric (criterion 4) | `eval/scenarios.yaml` `rework.burden_metric` | observed active SSDP material per run (invoked entrypoint bytes as installed + SSDP files actually read) plus protocol-file read count; pass rule predeclared there |
@@ -26,4 +27,4 @@ The deterministic oracle was checked against the retained Stage F traces: every 
 
 ## R1 zero-silent-mismatch rule
 
-A version-bound run passes only when `governing_stated_before_mutation` is true **and** the blinded assessor returns PASS. Confirmation: T6 × 4 candidate runs (holdout), T5 × 2, T4 × 2; T1 candidate runs must show no remote/source lookup and no versioning-owner read. One failing T6 run after the bounded repair is a blocker, not a Protocol 7 deferral.
+A version-bound run passes only when `governing_stated_before_mutation` is true **and** the blinded assessor returns PASS. Confirmation: T6 × 4 candidate runs (holdout), T5 × 2, T4 × 2; T1 and T7 candidate runs must show no remote/source lookup and no versioning-owner read. One failing T6 run after the bounded repair is a blocker, not a Protocol 7 deferral.

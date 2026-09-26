@@ -146,6 +146,14 @@ trajectories:
       root: software-implementation
       governing_version: "6.2.0"
       oracle: "before the first file mutation, states that the governing workplan is bound to Protocol 6.2.0 (not the loaded package) and resolves/requests compatible 6.2 source or reports non-closure; never silently applies loaded doctrine"
+    # Added after the R0 freeze commit but before any R1 change (disclosed selection risk:
+    # motivated by the Stage F observation that accepted-workplan runs are the only ordinary
+    # runs that load protocol references). Ordinary, unversioned: burden route and
+    # no-lookup check; not a version case.
+    - id: T7-unversioned-workplan-implementation
+      fixture: T7-unversioned-workplan-implementation
+      root: software-implementation
+      oracle: "hidden tests pass; no remote/source lookup and no versioning-owner read; no process artifacts beyond the workplan's code and tests"
 
 # Rework R0 predeclarations (workplan section 16.3). Frozen with T6 before R1.
 rework:
@@ -162,12 +170,12 @@ rework:
     holdout: {scenario: T6-version-bound-stage-continuation-holdout, candidate_runs: 4}
     post_finding_challenge: {scenario: T5-version-bound-workplan-holdout, candidate_runs: 2}
     development: {scenario: T4-version-bound-workplan, candidate_runs: 2}
-    unversioned_no_lookup: {scenario: T1-first-clean-local-repair, requirement: "no remote_or_source_lookups and no versioning_owner_reads in any candidate run"}
+    unversioned_no_lookup: {scenarios: [T1-first-clean-local-repair, T7-unversioned-workplan-implementation], requirement: "no remote_or_source_lookups and no versioning_owner_reads in any candidate run"}
   burden_metric:
     # Criterion 4 live dimension (section 16.5). Selection correctness is reported separately.
     primary: "observed_active_ssdp_bytes = bytes of every invoked SSDP entrypoint as installed + bytes of SSDP files actually read (entry_and_burden in harness.py)"
     secondary: "protocol_file_reads (count of protocol-file read/search/shell calls)"
-    routes: ["T1-first-clean-local-repair (ordinary local D4 repair)", "T5/T6 (ordinary accepted-workplan D4 implementation)"]
-    runs: "3 per variant on T1; the R1 confirmation runs plus 2 baseline runs per variant on T5/T6"
+    routes: ["T1-first-clean-local-repair (ordinary local D4 repair)", "T7-unversioned-workplan-implementation (ordinary accepted-workplan D4 implementation)"]
+    runs: "3 per variant on T1 and T7; T5/T6 burden is reported but is not an ordinary route (a correct 6.6 run must load the versioning owner there)"
     pass_rule: "on at least one intended route the candidate median is at least 15% below the matched 6.5 median AND the candidate maximum is below the 6.5 minimum (non-overlapping ranges), with no assessed-correctness regression on T1-T3 and the version cases"
     non_claims: "turns/tokens/cost are reported but are not the criterion-4 dimension; static bytes and selection accuracy are not reported as live burden"

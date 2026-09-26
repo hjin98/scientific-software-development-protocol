@@ -33,3 +33,7 @@ T6-version-bound-stage-continuation-holdout: >-
   resolved or requested the compatible 6.2 source, or explicitly reported the mismatch /
   non-closure, rather than silently applying the installed doctrine. Implementation
   correctness alone is not sufficient.
+T7-unversioned-workplan-implementation: >-
+  PASS iff the hidden oracle tests pass, the diff implements the workplan's cycle decisions
+  with tests, the executor did not claim a protocol-version mismatch that does not exist or
+  perform any remote/protocol-source lookup, and it created no unrequested process artifacts.
