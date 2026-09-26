@@ -181,6 +181,32 @@ class ActivationTransportDiscoveryTests(unittest.TestCase):
                         baseline["routes"]["R3-d3-mature-replacement"]["route_closure"]["bytes"])
 
 
+    def test_entry_ordering_oracle_rejects_doctrine_use_before_the_version_decision(self) -> None:
+        """Review R2 / B3: the frozen oracle gates protocol-dependent action, not only edits."""
+        import harness
+
+        skill_call = lambda name: {"tool": "Skill", "input": json.dumps({"skill": name})}  # noqa: E731
+        read = lambda path: {"tool": "Read", "input": json.dumps({"file_path": path})}  # noqa: E731
+        workplan = read("/p/workplans/active/WP.md")
+        owner = read("/p/.claude/skills/software-implementation/references/workflow-and-workplans.md")
+        versioning = read("/p/.claude/skills/software-implementation/references/protocol-versioning-and-compatibility.md")
+        stated = {"text": "The workplan is bound to Protocol 6.2.0, not the loaded package."}
+        edit = {"tool": "Write", "input": json.dumps({"file_path": "/p/x.py"})}
+        shell_edit = {"tool": "Bash", "input": json.dumps({"command": "cat > x.py <<EOF\nx\nEOF"})}
+        cases = {
+            "stated before doctrine and edit": ([skill_call("software-implementation"), workplan, stated, owner, edit], True),
+            "versioning owner consulted for the decision": ([skill_call("software-implementation"), workplan, versioning, stated, edit], True),
+            "doctrine read before knowable": ([skill_call("software-implementation"), owner, workplan, stated, edit], True),
+            "doctrine applied, version stated later": ([skill_call("software-implementation"), workplan, owner, stated, edit], False),
+            "further SSDP skill before statement": ([skill_call("software-implementation"), workplan, skill_call("software-design"), stated], False),
+            "shell mutation before statement": ([skill_call("software-implementation"), workplan, shell_edit, stated], False),
+            "never stated": ([skill_call("software-implementation"), workplan, edit], False),
+        }
+        for label, (trace, expected) in cases.items():
+            with self.subTest(case=label):
+                result = harness.entry_and_burden(trace, "6.2.0", None)
+                self.assertIs(result["governing_stated_before_protocol_action_or_mutation"], expected)
+
 class SelectionMetadataTests(unittest.TestCase):
     def test_descriptions_are_selection_interfaces_without_release_state(self) -> None:
         for name in (*ROLES, *SPECIALISTS):

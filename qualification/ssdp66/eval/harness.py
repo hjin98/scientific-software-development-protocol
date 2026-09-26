@@ -252,22 +252,83 @@ def parse_trace(lines: list[str]) -> dict:
 MUTATING_TOOLS = {"Edit", "Write", "NotebookEdit", "MultiEdit"}
 LOOKUP_RE = re.compile(r"git (?:fetch|clone|ls-remote|pull)|curl |wget |pip (?:download|install)")
 SSDP_SKILLS = {name for name, _ in SKILLS}
+# Implementation Review R2 (workplan section 16.9, B3) ordering-oracle correction; frozen
+# before any authenticated post-R1 run. Conservative by construction:
+#   knowable   - first Read/Grep/Bash that can expose the governing workplan (input names a
+#                workplan, or a repository-wide Grep/recursive shell search); 0 if never seen.
+#   protocol   - after knowable: any read/search/shell touching installed SSDP material or a
+#                further SSDP Skill invocation. Exempt: the single entry Skill invocation that
+#                loads the entry contract, and reads of the versioning owner/version helper,
+#                which are the version decision itself.
+#   mutation   - Edit/Write/NotebookEdit/MultiEdit or a mutating shell command, anywhere.
+BASH_MUTATION_RE = re.compile(
+    r"\bsed\s+-i|\btee\b|(?<![0-9&])>>?\s*(?!&|/dev/null)[\w./~\"'$-]|\b(?:mv|rm|cp|touch|mkdir)\s"
+    r"|git\s+(?:add|commit|apply|am|checkout|reset|restore|mv|rm|stash|merge|rebase)\b"
+    r"|\.write_text\(|\.write\(|open\([^)]*[\"'][wa]")
+KNOWABLE_SEARCH_RE = re.compile(r"grep\s+-\w*[rR]|\brg\s|git\s+grep")
+VERSION_DECISION_RE = re.compile(r"protocol-versioning-and-compatibility|version_preflight")
+
+
+def _shell(raw: str) -> str:
+    try:
+        return json.loads(raw).get("command", "") if raw.startswith("{") else raw
+    except json.JSONDecodeError:
+        return raw
+
+
+def ordering_events(reduced: list[dict]) -> dict:
+    """Indices (into ``reduced``) for the B3 ordering oracle; see the block comment above."""
+    knowable = first_protocol = first_mutation = None
+    protocol_detail = mutation_detail = None
+    entry_skill_seen = False
+    for i, e in enumerate(reduced):
+        tool, raw = e.get("tool"), e.get("input", "")
+        if tool is None:
+            continue
+        command = _shell(raw) if tool == "Bash" else ""
+        if knowable is None and tool in {"Read", "Grep", "Bash"} and (
+            "workplan" in raw.lower()
+            or (tool == "Grep" and '"path"' not in raw)
+            or (tool == "Bash" and KNOWABLE_SEARCH_RE.search(command))
+        ):
+            knowable = i
+        if first_mutation is None and (tool in MUTATING_TOOLS or (tool == "Bash" and BASH_MUTATION_RE.search(command))):
+            first_mutation, mutation_detail = i, raw[:160]
+        protocol = False
+        if tool == "Skill":
+            try:
+                name = json.loads(raw).get("skill") if raw.startswith("{") else None
+            except json.JSONDecodeError:
+                name = None
+            if name in SSDP_SKILLS:
+                protocol = entry_skill_seen
+                entry_skill_seen = True
+        elif ".claude/skills/" in raw and not VERSION_DECISION_RE.search(raw):
+            protocol = True
+        if protocol and knowable is not None and i > knowable and first_protocol is None:
+            first_protocol, protocol_detail = i, raw[:160]
+    return {"knowable": knowable, "first_protocol": first_protocol, "protocol_detail": protocol_detail,
+            "first_mutation": first_mutation, "mutation_detail": mutation_detail}
 
 
 def entry_and_burden(reduced: list[dict], governing: str | None, dist: Path | None) -> dict:
-    """Rework R0 deterministic trace checks (frozen before the R1 repair).
+    """Rework R0 deterministic trace checks (frozen before the R1 repair; the ordering
+    oracle was strengthened by Review R2 / section 16.9 before any valid post-R1 run).
 
     entry: for a version-bound task, does an assistant text naming the governing version
-    precede the first file mutation? For any task, did the run perform a remote/source
-    lookup or open the versioning owner?
+    precede (a) the first file mutation and (b) the first substantive SSDP/protocol-dependent
+    action after the governing version becomes knowable (``ordering_events``)? For any task,
+    did the run perform a remote/source lookup or open the versioning owner?
     burden: observed active SSDP material = bytes of every invoked SSDP entrypoint as
     installed + bytes of SSDP files actually read, plus the count of protocol-file reads.
     """
-    first_mutation = next((i for i, e in enumerate(reduced) if e.get("tool") in MUTATING_TOOLS), None)
+    order = ordering_events(reduced)
+    first_mutation = order["first_mutation"]
     stated_at = None
     if governing:
         pattern = re.compile(r"(?<![\d.])" + re.escape(governing.rsplit(".0", 1)[0] if governing.endswith(".0") else governing) + r"(?:\.0)?(?!\d|\.\d)")
         stated_at = next((i for i, e in enumerate(reduced) if "text" in e and pattern.search(e["text"])), None)
+    gate = min((i for i in (first_mutation, order["first_protocol"]) if i is not None), default=None)
     lookups, versioning_reads, protocol_reads, protocol_bytes, skills = [], 0, 0, 0, []
     for e in reduced:
         tool, raw = e.get("tool"), e.get("input", "")
@@ -291,9 +352,17 @@ def entry_and_burden(reduced: list[dict], governing: str | None, dist: Path | No
     return {
         "governing_version": governing,
         "first_mutation_index": first_mutation,
+        "first_mutation_detail": order["mutation_detail"],
+        "governing_knowable_index": order["knowable"],
+        "first_protocol_action_index": order["first_protocol"],
+        "first_protocol_action_detail": order["protocol_detail"],
         "governing_stated_index": stated_at,
+        # Frozen R0 field, retained for audit continuity; superseded as the R1 gate by the
+        # stronger field below.
         "governing_stated_before_mutation": None if not governing else (
             stated_at is not None and (first_mutation is None or stated_at < first_mutation)),
+        "governing_stated_before_protocol_action_or_mutation": None if not governing else (
+            stated_at is not None and (gate is None or stated_at < gate)),
         "remote_or_source_lookups": lookups,
         "versioning_owner_reads": versioning_reads,
         "ssdp_entrypoint_bytes": entry_bytes,
@@ -409,7 +478,7 @@ def assess(run_dir: Path, fixture: Path, rubric: str, model: str) -> dict:
         diff=redact((run_dir / "diff.patch").read_text(encoding="utf-8"))[:20000], untracked=summary.get("untracked"),
         final=final[:6000], oracle=json.dumps({**(summary.get("oracle") or {}), **{
             k: v for k, v in (summary.get("entry_and_burden") or {}).items()
-            if k in {"governing_version", "governing_stated_before_mutation", "remote_or_source_lookups"}}}),
+            if k in {"governing_version", "governing_stated_before_protocol_action_or_mutation", "remote_or_source_lookups"}}}),
     )
     with tempfile.TemporaryDirectory(prefix="ssdp66-assess-") as tmp:
         proc = subprocess.run(["claude", "-p", prompt, "--output-format", "json", "--model", model, "--max-turns", "1", "--disallowedTools", "Bash Edit Write Read Glob Grep Skill Agent"], cwd=tmp, capture_output=True, text=True, env=_clean_env(), timeout=600, stdin=subprocess.DEVNULL)

@@ -165,8 +165,11 @@ rework:
   executor_model: claude-sonnet-5
   assessor: "fresh claude-opus-5-5 context, single turn, no tools, compared package versions redacted, rubric in rubrics.yaml"
   r1_confirmation:
-    # Zero silent mismatch = every run has governing_stated_before_mutation true AND a
-    # blinded-assessor PASS. Any failing run is a blocker (section 16.4), not a deferral.
+    # Zero silent mismatch = every run has governing_stated_before_protocol_action_or_mutation
+    # true AND a blinded-assessor PASS. Any failing run is a blocker (section 16.4), not a
+    # deferral. (Review R2 / section 16.9 B3 replaced the weaker R0 field
+    # governing_stated_before_mutation before any authenticated post-R1 run; runs, scenarios,
+    # thresholds and the burden metric are unchanged.)
     holdout: {scenario: T6-version-bound-stage-continuation-holdout, candidate_runs: 4}
     post_finding_challenge: {scenario: T5-version-bound-workplan-holdout, candidate_runs: 2}
     development: {scenario: T4-version-bound-workplan, candidate_runs: 2}
