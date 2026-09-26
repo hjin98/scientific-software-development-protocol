@@ -9,6 +9,8 @@ Optional post-stage cleanup specialist. Use after formal development closure or 
 
 > **Inspect broadly; delete only with positive proof. When classification is uncertain, retain and report.**
 
+**Version entry check.** This package is SSDP `REPLACE_WITH_SKILL_PROTOCOL_VERSION`. If the task or its governing workplan declares a different SSDP `protocol_version`, say so and resolve that version's compatible source before protocol-dependent reasoning ([Protocol versioning and compatibility](references/protocol-versioning-and-compatibility.md)); never apply this package's doctrine to other-version work. No declared version: continue.
+
 ## Routing
 
 Before substantive reasoning read [Abstraction, concretization, authority, challenge, and representation](references/abstraction-and-concretization.md). Load only triggered concern owners:

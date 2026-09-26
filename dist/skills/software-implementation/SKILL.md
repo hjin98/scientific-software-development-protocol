@@ -7,9 +7,11 @@ description: Use to implement, fix, debug, refactor, test, or package scientific
 
 Own **D4 executable concretization**: implement accepted D4 specification and D3 architecture while satisfying every applicable upstream D1/D2 invariant and directly governed constraint. Code, tests, wrappers, helpers, caches, state machines and prior patches are delegated machinery unless authority explicitly requires them.
 
+**Version entry check.** This package is SSDP `6.6.0`. If the task or its governing workplan declares a different SSDP `protocol_version`, say so and resolve that version's compatible source before protocol-dependent reasoning ([Protocol versioning and compatibility](references/protocol-versioning-and-compatibility.md)); never apply this package's doctrine to other-version work. No declared version: continue.
+
 ## Routing
 
-Before substantive D4 implementation, read [Abstraction, concretization, authority, challenge, and representation](references/abstraction-and-concretization.md) (the universal kernel, including the version check at entry) and [Specification and implementation](references/specification-and-implementation.md).
+Before substantive D4 implementation, read [Abstraction, concretization, authority, challenge, and representation](references/abstraction-and-concretization.md) (the universal kernel) and [Specification and implementation](references/specification-and-implementation.md).
 
 Load only triggered concern owners:
 

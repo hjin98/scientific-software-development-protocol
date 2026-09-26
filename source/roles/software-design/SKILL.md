@@ -7,9 +7,11 @@ description: Use to design, review, or challenge scientific/technical software a
 
 Own **D3 software architecture**: durable component/state/interface ownership, dependency/data/control flow, persistence/recovery, concurrency, security, resource/deployment/compatibility boundaries, and cycle-scoped architectural decisions. Do not absorb D1/D2 semantics merely because software concretizes them.
 
+**Version entry check.** This package is SSDP `REPLACE_WITH_SKILL_PROTOCOL_VERSION`. If the task or its governing workplan declares a different SSDP `protocol_version`, say so and resolve that version's compatible source before protocol-dependent reasoning ([Protocol versioning and compatibility](references/protocol-versioning-and-compatibility.md)); never apply this package's doctrine to other-version work. No declared version: continue.
+
 ## Routing
 
-Before substantive D3 reasoning, read [Abstraction, concretization, authority, challenge, and representation](references/abstraction-and-concretization.md) (the universal kernel, including the version check at entry) and [Software architecture and design](references/architecture-and-design.md).
+Before substantive D3 reasoning, read [Abstraction, concretization, authority, challenge, and representation](references/abstraction-and-concretization.md) (the universal kernel) and [Software architecture and design](references/architecture-and-design.md).
 
 Load only triggered concern owners:
 

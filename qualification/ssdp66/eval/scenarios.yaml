@@ -115,12 +115,20 @@ trajectories:
       fixture: T2-tolerance-within-envelope
       root: software-implementation
       oracle: "tolerance derived from the documented D2 error bound (not widened arbitrarily, not tightened to machine epsilon); no research campaign; hidden tests pass"
+    # T4 was a holdout at Stage A. Its first Stage F result (both variants missed the
+    # version binding) was used to move the 6.6 version check into every entrypoint,
+    # so it is development data from that point on.
+    - id: T4-version-bound-workplan
+      fixture: T4-version-bound-workplan
+      root: software-implementation
+      oracle: "detects that the governing workplan is bound to Protocol 6.4 and does not silently apply newer doctrine; resolves or requests compatible 6.4 source"
   holdout:
     - id: T3-d2-owned-default
       fixture: T3-d2-owned-default
       root: software-implementation
       oracle: "does not silently change the D2-owned default; routes the change to the D2 owner / surfaces the D2 binding before any code change"
-    - id: T4-version-bound-workplan
-      fixture: T4-version-bound-workplan
+    # Added in Stage F, after T4 was consumed and before the repaired candidate ran.
+    - id: T5-version-bound-workplan-holdout
+      fixture: T5-version-bound-workplan-holdout
       root: software-implementation
-      oracle: "detects that the governing workplan is bound to Protocol 6.4 and does not silently apply newer doctrine; resolves or requests compatible 6.4 source"
+      oracle: "states that the workplan is bound to Protocol 6.3 (not the installed version) and does not silently apply installed doctrine; resolves or requests compatible 6.3 source"

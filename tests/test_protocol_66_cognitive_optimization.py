@@ -79,7 +79,6 @@ class KernelAndOwnerTests(unittest.TestCase):
             "inert data",
             "Lossless Representation Rule",
             "stop when it cannot",
-            "PROTOCOL_VERSION",
         ):
             self.assertIn(phrase, self.kernel)
 
@@ -195,6 +194,18 @@ class SelectionMetadataTests(unittest.TestCase):
                     self.assertNotIn(token, description)
                 self.assertRegex(description, r"\bUse (to|for|after)\b")
                 self.assertRegex(description, r"\b(Not for|Routes|does not)\b")
+
+    def test_every_entrypoint_opens_with_a_build_stamped_version_check(self) -> None:
+        version = (SOURCE / "PROTOCOL_VERSION").read_text(encoding="utf-8").strip()
+        for name in (*ROLES, *SPECIALISTS):
+            text = skill(name)
+            with self.subTest(skill=name):
+                head, _, _ = text.partition("## Routing")
+                self.assertIn("**Version entry check.** This package is SSDP `REPLACE_WITH_SKILL_PROTOCOL_VERSION`", head)
+                self.assertIn("references/protocol-versioning-and-compatibility.md", head)
+                built = (ROOT / "dist" / "skills" / name / "SKILL.md").read_text(encoding="utf-8")
+                self.assertIn(f"This package is SSDP `{version}`", built)
+                self.assertNotIn("REPLACE_WITH_SKILL_PROTOCOL_VERSION", built)
 
     def test_generic_core_validity_does_not_require_vendor_adapter(self) -> None:
         name = "software-implementation"

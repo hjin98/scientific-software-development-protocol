@@ -14,7 +14,8 @@ D4 CONSTRAINED_BY -> applicable D1/D2/external constraints entering D4 directly
 
 Current owners:
 
-- universal relation/Challenge/representation/source-availability semantics: `source/shared/references/abstraction-and-concretization.md`;
+- universal relation/Challenge/representation semantics and the hard source/context-availability invariant: `source/shared/references/abstraction-and-concretization.md`;
+- specialized semantic-definition/source-availability/parameter/import/warrant/trace detail: `source/shared/references/semantic-definition-and-traceability.md`;
 - D1: `source/shared/references/scientific-formulation.md` + project Scientific Method Paper family;
 - D2: `source/shared/references/numerical-algorithm-design.md` + project Numerical & Algorithmic Method Paper family;
 - D3: `source/shared/references/architecture-and-design.md` + project Architecture Manual family;
@@ -49,7 +50,7 @@ PEM capability AUTHORITY_BOUND -> exact current owner/claim when independently r
 active workplan HAS DERIVED_FROM -> exact accepted PEM base + validated candidate overlay
 ```
 
-`source/shared/references/evidence-evolution-and-dependencies.md` owns evidence lifecycle/applicability/dependency/evolution semantics, including parameter-sensitive evidence applicability and `USES_DEFINITION` trace semantics. `source/shared/references/project-engineering-memory.md` owns PEM representation, family/notice/schema/summary/partition semantics. `workflow-and-workplans.md` owns conditional activation, accepted-base/overlay use, Historical Applicability Set (HAS), and closeout learning. No PEM/definition-trace edge recursively proves an endpoint, and no memory/trace relation creates D1-D4 authority.
+`source/shared/references/evidence-evolution-and-dependencies.md` owns evidence lifecycle/applicability/dependency/evolution semantics, including parameter-sensitive evidence applicability and `USES_DEFINITION` trace semantics. `source/shared/references/project-engineering-memory.md` owns agent-facing PEM use: conditional activation, accepted-base/overlay use, Historical Applicability Set (HAS), applicability, authority binding and closeout learning. `source/shared/references/project-engineering-memory-schema.md` owns family/notice/schema/summary/partition/publication representation. `workflow-and-workplans.md` owns authority lifecycle/mutation, handoffs and Working State and routes memory questions to the PEM owner. No PEM/definition-trace edge recursively proves an endpoint, and no memory/trace relation creates D1-D4 authority.
 
 The self-hosted repository `PROJECT-ENGINEERING-MEMORY.md` is project-local candidate state and is not copied into generic `dist/` packages or protocol profile snapshots.
 
@@ -61,7 +62,9 @@ Representative concern routers:
 
 ```text
 role/specialist SKILL.md -> universal kernel + owning concern
-material mature rework/recurrence/replacement/recovery decision -> project-engineering-memory.md + workflow HAS rules
+material specialized object/binding/import/formal claim -> semantic-definition-and-traceability.md
+material mature rework/recurrence/replacement/recovery decision -> project-engineering-memory.md
+memory authoring/validation/publication/partition question -> project-engineering-memory.md -> project-engineering-memory-schema.md
 material language/runtime/build question -> language-profiles.md -> python-engineering.md / cpp-engineering.md
 material specialized engineering relation -> tool-assisted-engineering.md -> applicable tool-* method
 ```
@@ -76,11 +79,12 @@ A memory-triggering route uses progressive disclosure: exact base/overlay -> sch
 
 ```text
 version-intrinsic source/profile semantics DISTINCT_FROM -> mutable repository release state
+ssdp-protocol-6.6 PRESERVES -> frozen Protocol 6.5 profile/schema-v2 stage-graph and lifecycle/control capability
 ssdp-protocol-6.5 PRESERVES -> frozen Protocol 6.4 profile/schema-v2 stage-graph capability
 PEM schema 1 VERSIONED_INDEPENDENTLY_OF -> SSDP protocol/profile schema
 ```
 
-All previously published 5.16/6.0/6.1/6.2/6.3/6.4 profile resources remain frozen historical/version-bound or predecessor resources. Current accepted/public/recovery/candidate mappings are not owned by this view; repository `PROTOCOL-RELEASE-STATE.yaml` owns those mutable facts. Unsupported PEM schemas fail safe for memory-dependent decisions without breaking unrelated protocol routes.
+All previously published 5.16/6.0/6.1/6.2/6.3/6.4/6.5 profile resources remain frozen historical/version-bound or predecessor resources. Current accepted/public/recovery/candidate mappings are not owned by this view; repository `PROTOCOL-RELEASE-STATE.yaml` owns those mutable facts. Unsupported PEM schemas fail safe for memory-dependent decisions without breaking unrelated protocol routes.
 
 ## Source/generated relationships
 

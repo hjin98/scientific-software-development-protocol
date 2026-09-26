@@ -85,6 +85,16 @@ The first four are authority-bearing D1-D4 roles. The last three are supporting 
 
 The active skill entrypoint controls what context is loaded. Ordinary links and **package membership do not imply activation**; they make material discoverable, not automatically active. The universal routing and authority kernel is [`source/shared/references/abstraction-and-concretization.md`](source/shared/references/abstraction-and-concretization.md).
 
+### What the agent actually keeps in mind
+
+SSDP is written so an agent carries only what the current decision needs:
+
+- **A small universal kernel** holds the cross-domain rules: D1-D4 ownership, abstraction vs concretization, authority vs evidence, materiality, correctness before simplicity, Challenge, proportional rigor, and lossless representation.
+- **Conditional owners** load only when their trigger fires. Precise semantic-definition machinery is used when the work touches a specialized scientific/numerical object, a parameter or default binding, an external result, or a formal claim; ordinary engineering meaning needs only precise prose, types, contracts, and tests. Project memory and its storage schema, authority-lifecycle detail, language/tool profiles, and history stay cold otherwise.
+- **Handoffs and resumable state are decision-sufficient projections**: objective, exact identities, local decisions, open blockers and uncertainty, evidence state, next action, and reopen/stop conditions—never a replay of chronology or generic doctrine, and never a place where an open blocker quietly disappears.
+- **Working State** (a compact checkpoint for long or interruptible work) is optional coordination cache. It is not authority, is not a required file, and is stale as soon as its protocol, authority, workplan, candidate, or regime basis changes.
+- **Version check at entry.** When a task or workplan names an SSDP version, compare it with the installed package's `PROTOCOL_VERSION` first; version-bound work is never silently reinterpreted with newer doctrine.
+
 The portable runtime unit is `dist/skills/<skill-name>/`; top-level ZIPs contain the same bundles for transport. See [PORTABILITY.md](PORTABILITY.md) for installation and routing details.
 
 ## Quick start
@@ -160,6 +170,8 @@ Ask two separate questions:
 2. **What should I do next?** Consider mandatory dependencies, unblock value, critical path, information/repair value, and opportunity cost.
 
 Use `DEEP` treatment for consequential unresolved uncertainty; `STANDARD` for focused owner analysis and strong discriminating evidence; `LIGHT` for direct local repair plus focused affected checks; and `DEFER/OMIT` only for non-mandatory low-consequence work.
+
+The same rule applies to cognitive resources when your agent host exposes them (model tier, reasoning or context budget, tool breadth, a separate reviewer, subagents): use the cheapest configuration that reliably settles the decision and escalate only on concrete risk or a failed/ambiguous attempt. These are execution choices, never authority or pass thresholds; a stronger model does not replace a required independent Review, and SSDP does not duplicate a host's own trustworthy routing.
 
 A high-stakes project does not make every fixture, diagnostic, tolerance, or helper high-stakes. Conversely, a cheap-looking issue should escalate when evidence shows it can materially affect the governing outcome. Use the cheapest sufficiently strong **applicable** evidence and stop when remaining uncertainty cannot change the decision.
 
@@ -267,7 +279,7 @@ Project Engineering Memory (PEM) is evidence-backed, project-local engineering l
 
 Activate PEM only when demonstrated project history can materially change the current decision, such as substantial mature rework, suspected recurrence, major optimization/scaling, migration/recovery/revert/restoration, or a workplan explicitly bound to project history.
 
-Keep PEM cold for a first clean local bug or unrelated task. Memory is a hypothesis index and decision aid, not a vote for whatever succeeded most often in the past.
+Keep PEM cold for a first clean local bug or unrelated task. Memory is a hypothesis index and decision aid, not a vote for whatever succeeded most often in the past. Agents use a compact memory contract (when to activate, how to retrieve, how to record applicability, when an update is justified); the storage schema and publication mechanics load only when someone is actually maintaining the memory.
 
 ## Core doctrines
 
@@ -279,6 +291,7 @@ Keep PEM cold for a first clean local bug or unrelated task. Memory is a hypothe
 - **Lossless representation beats amendment accumulation.** Rewrite current guidance coherently instead of stacking exceptions and historical patches.
 - **Progressive disclosure beats loading everything.** The active skill loads the concern owners needed for the decision, not the entire protocol library.
 - **Simple is not the same as weak.** Simplify mechanisms aggressively; never simplify by weakening governing semantics.
+- **Independent review means independent reasoning.** Separate agents or contexts can help on substantial, loosely coupled review questions, but a subagent that sees the author's conclusions is not independent, shared models/tools/oracles are common-mode risk, and contradictions are settled by evidence and owners, not votes. Multi-agent execution is never required.
 - **Development economy is resource allocation, not aesthetics.** Spend model/human time, tokens, tools, compute, CI, and wall time where uncertainty can change the governed decision; low-value details do not inherit the parent project's scrutiny.
 
 ## How the protocol evolved
@@ -297,6 +310,7 @@ SSDP began as a software-engineering protocol and grew into a scientific-softwar
 | **6.3** | Project Engineering Memory and Historical Applicability Sets |
 | **6.4** | semantic definition/source availability, well-defined formal contracts, parameter binding, exact imports, typed semantic dependencies, and claim/warrant discipline |
 | **6.5** | self-governance/release-state strengthening plus importance-weighted attention, proportional rigor/evidence, evidence-only requalification economy, and release-documentation closeout |
+| **6.6** | cognitive/operational optimization: small universal kernel, conditional semantic-definition and memory-schema owners, decision-sufficient handoffs and Working State, cognitive-resource escalation, optional independent review trajectories, entry version check, and empirical trajectory evaluation |
 
 For the full user-facing capability history, see [CHANGELOG.md](CHANGELOG.md). For detailed semantic rationale and superseded release attempts, see [history/SEMANTIC_EVOLUTION.md](history/SEMANTIC_EVOLUTION.md). Exact mutable release mappings remain in [PROTOCOL-RELEASE-STATE.yaml](PROTOCOL-RELEASE-STATE.yaml).
 
@@ -309,7 +323,8 @@ For the full user-facing capability history, see [CHANGELOG.md](CHANGELOG.md). F
 | `source/specialists/` | optional documentation/audit/hygiene specialists |
 | `source/shared/references/` | canonical concern owners loaded by progressive disclosure |
 | `dist/skills/` | ready-to-install generated skill bundles |
-| `orchestrator/` | version-bound orchestration/profile implementation |
+| `orchestrator/` | optional version-bound orchestration/profile implementation |
+| `qualification/` | non-normative qualification, Review, and evaluation evidence per protocol cycle |
 | `PROJECT-ENGINEERING-MEMORY.md` | this repository's project-local memory; not generic protocol authority |
 | `PROTOCOL-RELEASE-STATE.yaml` | sole mutable release-state owner |
 | `CHANGELOG.md` | user-facing capability evolution |

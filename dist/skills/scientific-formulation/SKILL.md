@@ -7,9 +7,11 @@ description: Use to define, review, or challenge the scientific or mathematical 
 
 Own **D1 scientific/mathematical meaning**: the question, observable/estimand, model/equations, assumptions, validity regime, interpretation, model-level uncertainty, and external adequacy. Do not absorb D2 numerical method, D3 architecture, or D4 implementation merely because they affect results.
 
+**Version entry check.** This package is SSDP `6.6.0`. If the task or its governing workplan declares a different SSDP `protocol_version`, say so and resolve that version's compatible source before protocol-dependent reasoning ([Protocol versioning and compatibility](references/protocol-versioning-and-compatibility.md)); never apply this package's doctrine to other-version work. No declared version: continue.
+
 ## Routing
 
-Before substantive D1 reasoning, read [Abstraction, concretization, authority, challenge, and representation](references/abstraction-and-concretization.md) (the universal kernel, including the version check at entry) and [Scientific and mathematical formulation](references/scientific-formulation.md).
+Before substantive D1 reasoning, read [Abstraction, concretization, authority, challenge, and representation](references/abstraction-and-concretization.md) (the universal kernel) and [Scientific and mathematical formulation](references/scientific-formulation.md).
 
 Then load only the concern whose predicate fires:
 

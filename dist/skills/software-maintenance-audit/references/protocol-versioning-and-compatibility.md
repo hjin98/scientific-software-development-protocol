@@ -90,7 +90,7 @@ Previously executed evidence remains reusable only while no changed protocol obl
 
 ### Version check at execution entry
 
-When a task or its governing workplan declares a `protocol_version`, compare it with the loaded package `PROTOCOL_VERSION` (and `protocol-manifest.json`) before protocol-dependent reasoning:
+Every skill entrypoint opens with this check, stamped with its package version at build time. When a task or its governing workplan declares a `protocol_version`, compare it with the loaded package `PROTOCOL_VERSION` (and `protocol-manifest.json`) before protocol-dependent reasoning, and state a mismatch explicitly:
 
 ```text
 governing == loaded (or X.Y naming the loaded minor line) -> continue
