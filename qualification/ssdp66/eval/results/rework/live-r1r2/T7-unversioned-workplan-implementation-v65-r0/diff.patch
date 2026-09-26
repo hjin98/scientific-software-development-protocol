@@ -1,0 +1,13 @@
+diff --git a/workplans/completed/WP-SIGNAL-RESCALE.md b/workplans/completed/WP-SIGNAL-RESCALE.md
+index fa5eb7c..7b9c33e 100644
+--- a/workplans/completed/WP-SIGNAL-RESCALE.md
++++ b/workplans/completed/WP-SIGNAL-RESCALE.md
+@@ -1,7 +1,7 @@
+ ---
+ kind: d3-d4-implementation-workplan
+ workplan_id: WP-SIGNAL-RESCALE
+-status: accepted
++status: completed
+ ---
+ 
+ # Linear rescaling

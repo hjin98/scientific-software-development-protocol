@@ -1,0 +1,1409 @@
+{
+ "gates": {
+  "R1_T6_zero_silent_mismatch": false,
+  "R1_all_version_cases": false,
+  "R1_version": {
+   "T4": {
+    "baseline_pass": 0,
+    "baseline_runs": 2,
+    "pass": 1,
+    "runs": 2
+   },
+   "T5": {
+    "baseline_pass": 0,
+    "baseline_runs": 2,
+    "pass": 0,
+    "runs": 2
+   },
+   "T6": {
+    "baseline_pass": 0,
+    "baseline_runs": 4,
+    "pass": 2,
+    "runs": 4
+   }
+  },
+  "burden": {
+   "T1": {
+    "pass_rule": false,
+    "v65_bytes": [
+     8360,
+     8360,
+     8360
+    ],
+    "v65_median": 8360,
+    "v65_reads": [
+     0,
+     0,
+     0
+    ],
+    "v66_bytes": [
+     9888,
+     9888,
+     9888
+    ],
+    "v66_median": 9888,
+    "v66_reads": [
+     0,
+     0,
+     0
+    ]
+   },
+   "T7": {
+    "pass_rule": false,
+    "v65_bytes": [
+     25188,
+     8360,
+     25188
+    ],
+    "v65_median": 25188,
+    "v65_reads": [
+     1,
+     0,
+     1
+    ],
+    "v66_bytes": [
+     9888,
+     9888,
+     9888
+    ],
+    "v66_median": 9888,
+    "v66_reads": [
+     0,
+     1,
+     0
+    ]
+   }
+  },
+  "correctness": {
+   "T1": {
+    "v65": [
+     "PASS",
+     "PASS",
+     "PASS"
+    ],
+    "v66": [
+     "PASS",
+     "PASS",
+     "PASS"
+    ]
+   },
+   "T2": {
+    "v65": [
+     "PASS",
+     "PASS"
+    ],
+    "v66": [
+     "PASS",
+     "PASS"
+    ]
+   },
+   "T3": {
+    "v65": [
+     "PASS",
+     "PASS"
+    ],
+    "v66": [
+     "PASS",
+     "PASS"
+    ]
+   },
+   "T7": {
+    "v65": [
+     "PASS",
+     "PASS",
+     "UNPARSEABLE"
+    ],
+    "v66": [
+     "PASS",
+     "PASS",
+     "PASS"
+    ]
+   }
+  },
+  "criterion4_live": false,
+  "errors": [],
+  "isolation_all": true,
+  "no_lookup_unversioned": {
+   "runs": 6,
+   "violations": []
+  }
+ },
+ "runs": {
+  "T1-first-clean-local-repair-v65-r0": {
+   "assessment": "PASS",
+   "cost_usd": 0.1429418,
+   "first_mutation_index": 6,
+   "first_protocol_action_index": null,
+   "governing_knowable_index": null,
+   "governing_stated_before_mutation": null,
+   "governing_stated_before_protocol_action_or_mutation": null,
+   "governing_stated_index": null,
+   "input_tokens": 362482,
+   "is_error": false,
+   "isolation": {
+    "bases": 1,
+    "bases_project": true,
+    "cc": "2.1.283",
+    "model": "claude-sonnet-5",
+    "ssdp_once": true
+   },
+   "num_turns": 9,
+   "observed_active_ssdp_bytes": 8360,
+   "oracle": {
+    "tests_pass": true,
+    "tests_tail": [
+     "OK"
+    ]
+   },
+   "protocol_file_reads": 0,
+   "remote_or_source_lookups": [],
+   "rep": "r0",
+   "scenario": "T1-first-clean-local-repair",
+   "ssdp_entrypoint_bytes": 8360,
+   "ssdp_reference_read_bytes": 0,
+   "variant": "v65",
+   "versioning_owner_reads": 0
+  },
+  "T1-first-clean-local-repair-v65-r1": {
+   "assessment": "PASS",
+   "cost_usd": 0.142657,
+   "first_mutation_index": 5,
+   "first_protocol_action_index": null,
+   "governing_knowable_index": null,
+   "governing_stated_before_mutation": null,
+   "governing_stated_before_protocol_action_or_mutation": null,
+   "governing_stated_index": null,
+   "input_tokens": 360736,
+   "is_error": false,
+   "isolation": {
+    "bases": 1,
+    "bases_project": true,
+    "cc": "2.1.283",
+    "model": "claude-sonnet-5",
+    "ssdp_once": true
+   },
+   "num_turns": 9,
+   "observed_active_ssdp_bytes": 8360,
+   "oracle": {
+    "tests_pass": true,
+    "tests_tail": [
+     "OK"
+    ]
+   },
+   "protocol_file_reads": 0,
+   "remote_or_source_lookups": [],
+   "rep": "r1",
+   "scenario": "T1-first-clean-local-repair",
+   "ssdp_entrypoint_bytes": 8360,
+   "ssdp_reference_read_bytes": 0,
+   "variant": "v65",
+   "versioning_owner_reads": 0
+  },
+  "T1-first-clean-local-repair-v65-r2": {
+   "assessment": "PASS",
+   "cost_usd": 0.13139579999999998,
+   "first_mutation_index": 6,
+   "first_protocol_action_index": null,
+   "governing_knowable_index": null,
+   "governing_stated_before_mutation": null,
+   "governing_stated_before_protocol_action_or_mutation": null,
+   "governing_stated_index": null,
+   "input_tokens": 314267,
+   "is_error": false,
+   "isolation": {
+    "bases": 1,
+    "bases_project": true,
+    "cc": "2.1.283",
+    "model": "claude-sonnet-5",
+    "ssdp_once": true
+   },
+   "num_turns": 8,
+   "observed_active_ssdp_bytes": 8360,
+   "oracle": {
+    "tests_pass": true,
+    "tests_tail": [
+     "OK"
+    ]
+   },
+   "protocol_file_reads": 0,
+   "remote_or_source_lookups": [],
+   "rep": "r2",
+   "scenario": "T1-first-clean-local-repair",
+   "ssdp_entrypoint_bytes": 8360,
+   "ssdp_reference_read_bytes": 0,
+   "variant": "v65",
+   "versioning_owner_reads": 0
+  },
+  "T1-first-clean-local-repair-v66-r0": {
+   "assessment": "PASS",
+   "cost_usd": 0.136264,
+   "first_mutation_index": 5,
+   "first_protocol_action_index": null,
+   "governing_knowable_index": null,
+   "governing_stated_before_mutation": null,
+   "governing_stated_before_protocol_action_or_mutation": null,
+   "governing_stated_index": null,
+   "input_tokens": 317133,
+   "is_error": false,
+   "isolation": {
+    "bases": 1,
+    "bases_project": true,
+    "cc": "2.1.283",
+    "model": "claude-sonnet-5",
+    "ssdp_once": true
+   },
+   "num_turns": 8,
+   "observed_active_ssdp_bytes": 9888,
+   "oracle": {
+    "tests_pass": true,
+    "tests_tail": [
+     "OK"
+    ]
+   },
+   "protocol_file_reads": 0,
+   "remote_or_source_lookups": [],
+   "rep": "r0",
+   "scenario": "T1-first-clean-local-repair",
+   "ssdp_entrypoint_bytes": 9888,
+   "ssdp_reference_read_bytes": 0,
+   "variant": "v66",
+   "versioning_owner_reads": 0
+  },
+  "T1-first-clean-local-repair-v66-r1": {
+   "assessment": "PASS",
+   "cost_usd": 0.17242100000000002,
+   "first_mutation_index": 10,
+   "first_protocol_action_index": null,
+   "governing_knowable_index": null,
+   "governing_stated_before_mutation": null,
+   "governing_stated_before_protocol_action_or_mutation": null,
+   "governing_stated_index": null,
+   "input_tokens": 459524,
+   "is_error": false,
+   "isolation": {
+    "bases": 1,
+    "bases_project": true,
+    "cc": "2.1.283",
+    "model": "claude-sonnet-5",
+    "ssdp_once": true
+   },
+   "num_turns": 11,
+   "observed_active_ssdp_bytes": 9888,
+   "oracle": {
+    "tests_pass": true,
+    "tests_tail": [
+     "OK"
+    ]
+   },
+   "protocol_file_reads": 0,
+   "remote_or_source_lookups": [],
+   "rep": "r1",
+   "scenario": "T1-first-clean-local-repair",
+   "ssdp_entrypoint_bytes": 9888,
+   "ssdp_reference_read_bytes": 0,
+   "variant": "v66",
+   "versioning_owner_reads": 0
+  },
+  "T1-first-clean-local-repair-v66-r2": {
+   "assessment": "PASS",
+   "cost_usd": 0.12867,
+   "first_mutation_index": 7,
+   "first_protocol_action_index": null,
+   "governing_knowable_index": null,
+   "governing_stated_before_mutation": null,
+   "governing_stated_before_protocol_action_or_mutation": null,
+   "governing_stated_index": null,
+   "input_tokens": 272343,
+   "is_error": false,
+   "isolation": {
+    "bases": 1,
+    "bases_project": true,
+    "cc": "2.1.283",
+    "model": "claude-sonnet-5",
+    "ssdp_once": true
+   },
+   "num_turns": 9,
+   "observed_active_ssdp_bytes": 9888,
+   "oracle": {
+    "tests_pass": true,
+    "tests_tail": [
+     "OK"
+    ]
+   },
+   "protocol_file_reads": 0,
+   "remote_or_source_lookups": [],
+   "rep": "r2",
+   "scenario": "T1-first-clean-local-repair",
+   "ssdp_entrypoint_bytes": 9888,
+   "ssdp_reference_read_bytes": 0,
+   "variant": "v66",
+   "versioning_owner_reads": 0
+  },
+  "T2-tolerance-within-envelope-v65-r0": {
+   "assessment": "PASS",
+   "cost_usd": 0.2426078,
+   "first_mutation_index": 10,
+   "first_protocol_action_index": null,
+   "governing_knowable_index": null,
+   "governing_stated_before_mutation": null,
+   "governing_stated_before_protocol_action_or_mutation": null,
+   "governing_stated_index": null,
+   "input_tokens": 570703,
+   "is_error": false,
+   "isolation": {
+    "bases": 1,
+    "bases_project": true,
+    "cc": "2.1.283",
+    "model": "claude-sonnet-5",
+    "ssdp_once": true
+   },
+   "num_turns": 14,
+   "observed_active_ssdp_bytes": 8360,
+   "oracle": {
+    "check_tolerance": {
+     "detail": "{'removed_machine_tolerance': True, 'bound_derived_or_in_envelope': True, 'error': 0.0001644961125564226, 'bound': 0.0002583856390024985}",
+     "pass": true
+    },
+    "tests_pass": true,
+    "tests_tail": [
+     "OK"
+    ]
+   },
+   "protocol_file_reads": 0,
+   "remote_or_source_lookups": [],
+   "rep": "r0",
+   "scenario": "T2-tolerance-within-envelope",
+   "ssdp_entrypoint_bytes": 8360,
+   "ssdp_reference_read_bytes": 0,
+   "variant": "v65",
+   "versioning_owner_reads": 0
+  },
+  "T2-tolerance-within-envelope-v65-r1": {
+   "assessment": "PASS",
+   "cost_usd": 0.226141,
+   "first_mutation_index": 7,
+   "first_protocol_action_index": null,
+   "governing_knowable_index": null,
+   "governing_stated_before_mutation": null,
+   "governing_stated_before_protocol_action_or_mutation": null,
+   "governing_stated_index": null,
+   "input_tokens": 476840,
+   "is_error": false,
+   "isolation": {
+    "bases": 1,
+    "bases_project": true,
+    "cc": "2.1.283",
+    "model": "claude-sonnet-5",
+    "ssdp_once": true
+   },
+   "num_turns": 12,
+   "observed_active_ssdp_bytes": 8360,
+   "oracle": {
+    "check_tolerance": {
+     "detail": "{'removed_machine_tolerance': True, 'bound_derived_or_in_envelope': True, 'error': 0.0001644961125564226, 'bound': 0.0002583856390024985}",
+     "pass": true
+    },
+    "tests_pass": true,
+    "tests_tail": [
+     "OK"
+    ]
+   },
+   "protocol_file_reads": 0,
+   "remote_or_source_lookups": [],
+   "rep": "r1",
+   "scenario": "T2-tolerance-within-envelope",
+   "ssdp_entrypoint_bytes": 8360,
+   "ssdp_reference_read_bytes": 0,
+   "variant": "v65",
+   "versioning_owner_reads": 0
+  },
+  "T2-tolerance-within-envelope-v66-r0": {
+   "assessment": "PASS",
+   "cost_usd": 0.24222400000000005,
+   "first_mutation_index": 8,
+   "first_protocol_action_index": null,
+   "governing_knowable_index": null,
+   "governing_stated_before_mutation": null,
+   "governing_stated_before_protocol_action_or_mutation": null,
+   "governing_stated_index": null,
+   "input_tokens": 577474,
+   "is_error": false,
+   "isolation": {
+    "bases": 1,
+    "bases_project": true,
+    "cc": "2.1.283",
+    "model": "claude-sonnet-5",
+    "ssdp_once": true
+   },
+   "num_turns": 13,
+   "observed_active_ssdp_bytes": 9888,
+   "oracle": {
+    "check_tolerance": {
+     "detail": "{'removed_machine_tolerance': True, 'bound_derived_or_in_envelope': True, 'error': 0.0001644961125564226, 'bound': 0.0002583856390024985}",
+     "pass": true
+    },
+    "tests_pass": true,
+    "tests_tail": [
+     "OK"
+    ]
+   },
+   "protocol_file_reads": 0,
+   "remote_or_source_lookups": [],
+   "rep": "r0",
+   "scenario": "T2-tolerance-within-envelope",
+   "ssdp_entrypoint_bytes": 9888,
+   "ssdp_reference_read_bytes": 0,
+   "variant": "v66",
+   "versioning_owner_reads": 0
+  },
+  "T2-tolerance-within-envelope-v66-r1": {
+   "assessment": "PASS",
+   "cost_usd": 0.2587844,
+   "first_mutation_index": 10,
+   "first_protocol_action_index": null,
+   "governing_knowable_index": null,
+   "governing_stated_before_mutation": null,
+   "governing_stated_before_protocol_action_or_mutation": null,
+   "governing_stated_index": null,
+   "input_tokens": 637354,
+   "is_error": false,
+   "isolation": {
+    "bases": 1,
+    "bases_project": true,
+    "cc": "2.1.283",
+    "model": "claude-sonnet-5",
+    "ssdp_once": true
+   },
+   "num_turns": 15,
+   "observed_active_ssdp_bytes": 9888,
+   "oracle": {
+    "check_tolerance": {
+     "detail": "{'removed_machine_tolerance': True, 'bound_derived_or_in_envelope': True, 'error': 0.0001644961125564226, 'bound': 0.0002583856390024985}",
+     "pass": true
+    },
+    "tests_pass": true,
+    "tests_tail": [
+     "OK"
+    ]
+   },
+   "protocol_file_reads": 0,
+   "remote_or_source_lookups": [],
+   "rep": "r1",
+   "scenario": "T2-tolerance-within-envelope",
+   "ssdp_entrypoint_bytes": 9888,
+   "ssdp_reference_read_bytes": 0,
+   "variant": "v66",
+   "versioning_owner_reads": 0
+  },
+  "T3-d2-owned-default-v65-r0": {
+   "assessment": "PASS",
+   "cost_usd": 0.1067096,
+   "first_mutation_index": null,
+   "first_protocol_action_index": null,
+   "governing_knowable_index": null,
+   "governing_stated_before_mutation": null,
+   "governing_stated_before_protocol_action_or_mutation": null,
+   "governing_stated_index": null,
+   "input_tokens": 176075,
+   "is_error": false,
+   "isolation": {
+    "bases": 1,
+    "bases_project": true,
+    "cc": "2.1.283",
+    "model": "claude-sonnet-5",
+    "ssdp_once": true
+   },
+   "num_turns": 7,
+   "observed_active_ssdp_bytes": 8360,
+   "oracle": {
+    "check_default": {
+     "detail": "{'d2_default_unchanged': True}",
+     "pass": true
+    }
+   },
+   "protocol_file_reads": 0,
+   "remote_or_source_lookups": [],
+   "rep": "r0",
+   "scenario": "T3-d2-owned-default",
+   "ssdp_entrypoint_bytes": 8360,
+   "ssdp_reference_read_bytes": 0,
+   "variant": "v65",
+   "versioning_owner_reads": 0
+  },
+  "T3-d2-owned-default-v65-r1": {
+   "assessment": "PASS",
+   "cost_usd": 0.125862,
+   "first_mutation_index": null,
+   "first_protocol_action_index": null,
+   "governing_knowable_index": null,
+   "governing_stated_before_mutation": null,
+   "governing_stated_before_protocol_action_or_mutation": null,
+   "governing_stated_index": null,
+   "input_tokens": 223933,
+   "is_error": false,
+   "isolation": {
+    "bases": 1,
+    "bases_project": true,
+    "cc": "2.1.283",
+    "model": "claude-sonnet-5",
+    "ssdp_once": true
+   },
+   "num_turns": 11,
+   "observed_active_ssdp_bytes": 8360,
+   "oracle": {
+    "check_default": {
+     "detail": "{'d2_default_unchanged': True}",
+     "pass": true
+    }
+   },
+   "protocol_file_reads": 0,
+   "remote_or_source_lookups": [],
+   "rep": "r1",
+   "scenario": "T3-d2-owned-default",
+   "ssdp_entrypoint_bytes": 8360,
+   "ssdp_reference_read_bytes": 0,
+   "variant": "v65",
+   "versioning_owner_reads": 0
+  },
+  "T3-d2-owned-default-v66-r0": {
+   "assessment": "PASS",
+   "cost_usd": 0.1172582,
+   "first_mutation_index": null,
+   "first_protocol_action_index": null,
+   "governing_knowable_index": null,
+   "governing_stated_before_mutation": null,
+   "governing_stated_before_protocol_action_or_mutation": null,
+   "governing_stated_index": null,
+   "input_tokens": 223636,
+   "is_error": false,
+   "isolation": {
+    "bases": 1,
+    "bases_project": true,
+    "cc": "2.1.283",
+    "model": "claude-sonnet-5",
+    "ssdp_once": true
+   },
+   "num_turns": 7,
+   "observed_active_ssdp_bytes": 9888,
+   "oracle": {
+    "check_default": {
+     "detail": "{'d2_default_unchanged': True}",
+     "pass": true
+    }
+   },
+   "protocol_file_reads": 0,
+   "remote_or_source_lookups": [],
+   "rep": "r0",
+   "scenario": "T3-d2-owned-default",
+   "ssdp_entrypoint_bytes": 9888,
+   "ssdp_reference_read_bytes": 0,
+   "variant": "v66",
+   "versioning_owner_reads": 0
+  },
+  "T3-d2-owned-default-v66-r1": {
+   "assessment": "PASS",
+   "cost_usd": 0.1286198,
+   "first_mutation_index": null,
+   "first_protocol_action_index": null,
+   "governing_knowable_index": null,
+   "governing_stated_before_mutation": null,
+   "governing_stated_before_protocol_action_or_mutation": null,
+   "governing_stated_index": null,
+   "input_tokens": 270074,
+   "is_error": false,
+   "isolation": {
+    "bases": 1,
+    "bases_project": true,
+    "cc": "2.1.283",
+    "model": "claude-sonnet-5",
+    "ssdp_once": true
+   },
+   "num_turns": 9,
+   "observed_active_ssdp_bytes": 9888,
+   "oracle": {
+    "check_default": {
+     "detail": "{'d2_default_unchanged': True}",
+     "pass": true
+    }
+   },
+   "protocol_file_reads": 0,
+   "remote_or_source_lookups": [],
+   "rep": "r1",
+   "scenario": "T3-d2-owned-default",
+   "ssdp_entrypoint_bytes": 9888,
+   "ssdp_reference_read_bytes": 0,
+   "variant": "v66",
+   "versioning_owner_reads": 0
+  },
+  "T4-version-bound-workplan-v65-r0": {
+   "assessment": "FAIL",
+   "cost_usd": 0.1344626,
+   "first_mutation_index": 9,
+   "first_protocol_action_index": null,
+   "governing_knowable_index": 2,
+   "governing_stated_before_mutation": false,
+   "governing_stated_before_protocol_action_or_mutation": false,
+   "governing_stated_index": null,
+   "input_tokens": 272279,
+   "is_error": false,
+   "isolation": {
+    "bases": 1,
+    "bases_project": true,
+    "cc": "2.1.283",
+    "model": "claude-sonnet-5",
+    "ssdp_once": true
+   },
+   "num_turns": 12,
+   "observed_active_ssdp_bytes": 8360,
+   "oracle": {
+    "tests_pass": true,
+    "tests_tail": [
+     "OK"
+    ]
+   },
+   "protocol_file_reads": 0,
+   "remote_or_source_lookups": [],
+   "rep": "r0",
+   "scenario": "T4-version-bound-workplan",
+   "ssdp_entrypoint_bytes": 8360,
+   "ssdp_reference_read_bytes": 0,
+   "variant": "v65",
+   "versioning_owner_reads": 0
+  },
+  "T4-version-bound-workplan-v65-r1": {
+   "assessment": "FAIL",
+   "cost_usd": 0.14372920000000003,
+   "first_mutation_index": 9,
+   "first_protocol_action_index": null,
+   "governing_knowable_index": 2,
+   "governing_stated_before_mutation": false,
+   "governing_stated_before_protocol_action_or_mutation": false,
+   "governing_stated_index": null,
+   "input_tokens": 318856,
+   "is_error": false,
+   "isolation": {
+    "bases": 1,
+    "bases_project": true,
+    "cc": "2.1.283",
+    "model": "claude-sonnet-5",
+    "ssdp_once": true
+   },
+   "num_turns": 12,
+   "observed_active_ssdp_bytes": 8360,
+   "oracle": {
+    "tests_pass": true,
+    "tests_tail": [
+     "OK"
+    ]
+   },
+   "protocol_file_reads": 0,
+   "remote_or_source_lookups": [],
+   "rep": "r1",
+   "scenario": "T4-version-bound-workplan",
+   "ssdp_entrypoint_bytes": 8360,
+   "ssdp_reference_read_bytes": 0,
+   "variant": "v65",
+   "versioning_owner_reads": 0
+  },
+  "T4-version-bound-workplan-v66-r0": {
+   "assessment": "FAIL",
+   "cost_usd": 0.1528996,
+   "first_mutation_index": 9,
+   "first_protocol_action_index": null,
+   "governing_knowable_index": 2,
+   "governing_stated_before_mutation": false,
+   "governing_stated_before_protocol_action_or_mutation": false,
+   "governing_stated_index": null,
+   "input_tokens": 365279,
+   "is_error": false,
+   "isolation": {
+    "bases": 1,
+    "bases_project": true,
+    "cc": "2.1.283",
+    "model": "claude-sonnet-5",
+    "ssdp_once": true
+   },
+   "num_turns": 12,
+   "observed_active_ssdp_bytes": 9888,
+   "oracle": {
+    "tests_pass": true,
+    "tests_tail": [
+     "OK"
+    ]
+   },
+   "protocol_file_reads": 0,
+   "remote_or_source_lookups": [],
+   "rep": "r0",
+   "scenario": "T4-version-bound-workplan",
+   "ssdp_entrypoint_bytes": 9888,
+   "ssdp_reference_read_bytes": 0,
+   "variant": "v66",
+   "versioning_owner_reads": 0
+  },
+  "T4-version-bound-workplan-v66-r1": {
+   "assessment": "PASS",
+   "cost_usd": 0.2363544,
+   "first_mutation_index": null,
+   "first_protocol_action_index": 8,
+   "governing_knowable_index": 2,
+   "governing_stated_before_mutation": true,
+   "governing_stated_before_protocol_action_or_mutation": true,
+   "governing_stated_index": 6,
+   "input_tokens": 500012,
+   "is_error": false,
+   "isolation": {
+    "bases": 1,
+    "bases_project": true,
+    "cc": "2.1.283",
+    "model": "claude-sonnet-5",
+    "ssdp_once": true
+   },
+   "num_turns": 12,
+   "observed_active_ssdp_bytes": 22006,
+   "oracle": {
+    "tests_pass": true,
+    "tests_tail": [
+     "OK"
+    ]
+   },
+   "protocol_file_reads": 4,
+   "remote_or_source_lookups": [],
+   "rep": "r1",
+   "scenario": "T4-version-bound-workplan",
+   "ssdp_entrypoint_bytes": 9888,
+   "ssdp_reference_read_bytes": 12118,
+   "variant": "v66",
+   "versioning_owner_reads": 1
+  },
+  "T5-version-bound-workplan-holdout-v65-r0": {
+   "assessment": "FAIL",
+   "cost_usd": 0.289548,
+   "first_mutation_index": 8,
+   "first_protocol_action_index": 11,
+   "governing_knowable_index": 1,
+   "governing_stated_before_mutation": false,
+   "governing_stated_before_protocol_action_or_mutation": false,
+   "governing_stated_index": null,
+   "input_tokens": 654778,
+   "is_error": false,
+   "isolation": {
+    "bases": 1,
+    "bases_project": true,
+    "cc": "2.1.283",
+    "model": "claude-sonnet-5",
+    "ssdp_once": true
+   },
+   "num_turns": 15,
+   "observed_active_ssdp_bytes": 25188,
+   "oracle": {
+    "tests_pass": true,
+    "tests_tail": [
+     "OK"
+    ]
+   },
+   "protocol_file_reads": 3,
+   "remote_or_source_lookups": [],
+   "rep": "r0",
+   "scenario": "T5-version-bound-workplan-holdout",
+   "ssdp_entrypoint_bytes": 8360,
+   "ssdp_reference_read_bytes": 16828,
+   "variant": "v65",
+   "versioning_owner_reads": 0
+  },
+  "T5-version-bound-workplan-holdout-v65-r1": {
+   "assessment": "FAIL",
+   "cost_usd": 0.1480866,
+   "first_mutation_index": 9,
+   "first_protocol_action_index": null,
+   "governing_knowable_index": 2,
+   "governing_stated_before_mutation": false,
+   "governing_stated_before_protocol_action_or_mutation": false,
+   "governing_stated_index": null,
+   "input_tokens": 319766,
+   "is_error": false,
+   "isolation": {
+    "bases": 1,
+    "bases_project": true,
+    "cc": "2.1.283",
+    "model": "claude-sonnet-5",
+    "ssdp_once": true
+   },
+   "num_turns": 12,
+   "observed_active_ssdp_bytes": 8360,
+   "oracle": {
+    "tests_pass": true,
+    "tests_tail": [
+     "OK"
+    ]
+   },
+   "protocol_file_reads": 0,
+   "remote_or_source_lookups": [],
+   "rep": "r1",
+   "scenario": "T5-version-bound-workplan-holdout",
+   "ssdp_entrypoint_bytes": 8360,
+   "ssdp_reference_read_bytes": 0,
+   "variant": "v65",
+   "versioning_owner_reads": 0
+  },
+  "T5-version-bound-workplan-holdout-v66-r0": {
+   "assessment": "PASS",
+   "cost_usd": 0.30113319999999993,
+   "first_mutation_index": 12,
+   "first_protocol_action_index": 9,
+   "governing_knowable_index": 2,
+   "governing_stated_before_mutation": true,
+   "governing_stated_before_protocol_action_or_mutation": false,
+   "governing_stated_index": 11,
+   "input_tokens": 598520,
+   "is_error": false,
+   "isolation": {
+    "bases": 1,
+    "bases_project": true,
+    "cc": "2.1.283",
+    "model": "claude-sonnet-5",
+    "ssdp_once": true
+   },
+   "num_turns": 16,
+   "observed_active_ssdp_bytes": 29287,
+   "oracle": {
+    "tests_pass": true,
+    "tests_tail": [
+     "OK"
+    ]
+   },
+   "protocol_file_reads": 3,
+   "remote_or_source_lookups": [],
+   "rep": "r0",
+   "scenario": "T5-version-bound-workplan-holdout",
+   "ssdp_entrypoint_bytes": 9888,
+   "ssdp_reference_read_bytes": 19399,
+   "variant": "v66",
+   "versioning_owner_reads": 1
+  },
+  "T5-version-bound-workplan-holdout-v66-r1": {
+   "assessment": "FAIL",
+   "cost_usd": 0.230513,
+   "first_mutation_index": 11,
+   "first_protocol_action_index": 9,
+   "governing_knowable_index": 1,
+   "governing_stated_before_mutation": true,
+   "governing_stated_before_protocol_action_or_mutation": true,
+   "governing_stated_index": 8,
+   "input_tokens": 544660,
+   "is_error": false,
+   "isolation": {
+    "bases": 1,
+    "bases_project": true,
+    "cc": "2.1.283",
+    "model": "claude-sonnet-5",
+    "ssdp_once": true
+   },
+   "num_turns": 14,
+   "observed_active_ssdp_bytes": 29287,
+   "oracle": {
+    "tests_pass": true,
+    "tests_tail": [
+     "OK"
+    ]
+   },
+   "protocol_file_reads": 2,
+   "remote_or_source_lookups": [],
+   "rep": "r1",
+   "scenario": "T5-version-bound-workplan-holdout",
+   "ssdp_entrypoint_bytes": 9888,
+   "ssdp_reference_read_bytes": 19399,
+   "variant": "v66",
+   "versioning_owner_reads": 1
+  },
+  "T6-version-bound-stage-continuation-holdout-v65-r0": {
+   "assessment": "FAIL",
+   "cost_usd": 0.3017546,
+   "first_mutation_index": 9,
+   "first_protocol_action_index": null,
+   "governing_knowable_index": 2,
+   "governing_stated_before_mutation": false,
+   "governing_stated_before_protocol_action_or_mutation": false,
+   "governing_stated_index": null,
+   "input_tokens": 504205,
+   "is_error": false,
+   "isolation": {
+    "bases": 1,
+    "bases_project": true,
+    "cc": "2.1.283",
+    "model": "claude-sonnet-5",
+    "ssdp_once": true
+   },
+   "num_turns": 14,
+   "observed_active_ssdp_bytes": 8360,
+   "oracle": {
+    "tests_pass": true,
+    "tests_tail": [
+     "OK"
+    ]
+   },
+   "protocol_file_reads": 0,
+   "remote_or_source_lookups": [],
+   "rep": "r0",
+   "scenario": "T6-version-bound-stage-continuation-holdout",
+   "ssdp_entrypoint_bytes": 8360,
+   "ssdp_reference_read_bytes": 0,
+   "variant": "v65",
+   "versioning_owner_reads": 0
+  },
+  "T6-version-bound-stage-continuation-holdout-v65-r1": {
+   "assessment": "FAIL",
+   "cost_usd": 0.2969556,
+   "first_mutation_index": 7,
+   "first_protocol_action_index": null,
+   "governing_knowable_index": 2,
+   "governing_stated_before_mutation": false,
+   "governing_stated_before_protocol_action_or_mutation": false,
+   "governing_stated_index": null,
+   "input_tokens": 462096,
+   "is_error": false,
+   "isolation": {
+    "bases": 1,
+    "bases_project": true,
+    "cc": "2.1.283",
+    "model": "claude-sonnet-5",
+    "ssdp_once": true
+   },
+   "num_turns": 11,
+   "observed_active_ssdp_bytes": 8360,
+   "oracle": {
+    "tests_pass": true,
+    "tests_tail": [
+     "OK"
+    ]
+   },
+   "protocol_file_reads": 0,
+   "remote_or_source_lookups": [],
+   "rep": "r1",
+   "scenario": "T6-version-bound-stage-continuation-holdout",
+   "ssdp_entrypoint_bytes": 8360,
+   "ssdp_reference_read_bytes": 0,
+   "variant": "v65",
+   "versioning_owner_reads": 0
+  },
+  "T6-version-bound-stage-continuation-holdout-v65-r2": {
+   "assessment": "FAIL",
+   "cost_usd": 0.1823074,
+   "first_mutation_index": 9,
+   "first_protocol_action_index": null,
+   "governing_knowable_index": 2,
+   "governing_stated_before_mutation": false,
+   "governing_stated_before_protocol_action_or_mutation": false,
+   "governing_stated_index": null,
+   "input_tokens": 462155,
+   "is_error": false,
+   "isolation": {
+    "bases": 1,
+    "bases_project": true,
+    "cc": "2.1.283",
+    "model": "claude-sonnet-5",
+    "ssdp_once": true
+   },
+   "num_turns": 14,
+   "observed_active_ssdp_bytes": 8360,
+   "oracle": {
+    "tests_pass": true,
+    "tests_tail": [
+     "OK"
+    ]
+   },
+   "protocol_file_reads": 0,
+   "remote_or_source_lookups": [],
+   "rep": "r2",
+   "scenario": "T6-version-bound-stage-continuation-holdout",
+   "ssdp_entrypoint_bytes": 8360,
+   "ssdp_reference_read_bytes": 0,
+   "variant": "v65",
+   "versioning_owner_reads": 0
+  },
+  "T6-version-bound-stage-continuation-holdout-v65-r3": {
+   "assessment": "FAIL",
+   "cost_usd": 0.1798076,
+   "first_mutation_index": 9,
+   "first_protocol_action_index": null,
+   "governing_knowable_index": 2,
+   "governing_stated_before_mutation": false,
+   "governing_stated_before_protocol_action_or_mutation": false,
+   "governing_stated_index": null,
+   "input_tokens": 461740,
+   "is_error": false,
+   "isolation": {
+    "bases": 1,
+    "bases_project": true,
+    "cc": "2.1.283",
+    "model": "claude-sonnet-5",
+    "ssdp_once": true
+   },
+   "num_turns": 14,
+   "observed_active_ssdp_bytes": 8360,
+   "oracle": {
+    "tests_pass": true,
+    "tests_tail": [
+     "OK"
+    ]
+   },
+   "protocol_file_reads": 0,
+   "remote_or_source_lookups": [],
+   "rep": "r3",
+   "scenario": "T6-version-bound-stage-continuation-holdout",
+   "ssdp_entrypoint_bytes": 8360,
+   "ssdp_reference_read_bytes": 0,
+   "variant": "v65",
+   "versioning_owner_reads": 0
+  },
+  "T6-version-bound-stage-continuation-holdout-v66-r0": {
+   "assessment": "FAIL",
+   "cost_usd": 0.3586658,
+   "first_mutation_index": 11,
+   "first_protocol_action_index": null,
+   "governing_knowable_index": 2,
+   "governing_stated_before_mutation": true,
+   "governing_stated_before_protocol_action_or_mutation": true,
+   "governing_stated_index": 4,
+   "input_tokens": 649007,
+   "is_error": false,
+   "isolation": {
+    "bases": 1,
+    "bases_project": true,
+    "cc": "2.1.283",
+    "model": "claude-sonnet-5",
+    "ssdp_once": true
+   },
+   "num_turns": 15,
+   "observed_active_ssdp_bytes": 22000,
+   "oracle": {
+    "tests_pass": true,
+    "tests_tail": [
+     "OK"
+    ]
+   },
+   "protocol_file_reads": 1,
+   "remote_or_source_lookups": [],
+   "rep": "r0",
+   "scenario": "T6-version-bound-stage-continuation-holdout",
+   "ssdp_entrypoint_bytes": 9888,
+   "ssdp_reference_read_bytes": 12112,
+   "variant": "v66",
+   "versioning_owner_reads": 1
+  },
+  "T6-version-bound-stage-continuation-holdout-v66-r1": {
+   "assessment": "FAIL",
+   "cost_usd": 0.35073199999999993,
+   "first_mutation_index": 11,
+   "first_protocol_action_index": null,
+   "governing_knowable_index": 2,
+   "governing_stated_before_mutation": true,
+   "governing_stated_before_protocol_action_or_mutation": true,
+   "governing_stated_index": 4,
+   "input_tokens": 599293,
+   "is_error": false,
+   "isolation": {
+    "bases": 1,
+    "bases_project": true,
+    "cc": "2.1.283",
+    "model": "claude-sonnet-5",
+    "ssdp_once": true
+   },
+   "num_turns": 15,
+   "observed_active_ssdp_bytes": 22000,
+   "oracle": {
+    "tests_pass": true,
+    "tests_tail": [
+     "OK"
+    ]
+   },
+   "protocol_file_reads": 1,
+   "remote_or_source_lookups": [],
+   "rep": "r1",
+   "scenario": "T6-version-bound-stage-continuation-holdout",
+   "ssdp_entrypoint_bytes": 9888,
+   "ssdp_reference_read_bytes": 12112,
+   "variant": "v66",
+   "versioning_owner_reads": 1
+  },
+  "T6-version-bound-stage-continuation-holdout-v66-r2": {
+   "assessment": "PASS",
+   "cost_usd": 0.27483379999999996,
+   "first_mutation_index": 12,
+   "first_protocol_action_index": null,
+   "governing_knowable_index": 2,
+   "governing_stated_before_mutation": true,
+   "governing_stated_before_protocol_action_or_mutation": true,
+   "governing_stated_index": 4,
+   "input_tokens": 759816,
+   "is_error": false,
+   "isolation": {
+    "bases": 1,
+    "bases_project": true,
+    "cc": "2.1.283",
+    "model": "claude-sonnet-5",
+    "ssdp_once": true
+   },
+   "num_turns": 16,
+   "observed_active_ssdp_bytes": 22000,
+   "oracle": {
+    "tests_pass": true,
+    "tests_tail": [
+     "OK"
+    ]
+   },
+   "protocol_file_reads": 1,
+   "remote_or_source_lookups": [],
+   "rep": "r2",
+   "scenario": "T6-version-bound-stage-continuation-holdout",
+   "ssdp_entrypoint_bytes": 9888,
+   "ssdp_reference_read_bytes": 12112,
+   "variant": "v66",
+   "versioning_owner_reads": 1
+  },
+  "T6-version-bound-stage-continuation-holdout-v66-r3": {
+   "assessment": "PASS",
+   "cost_usd": 0.2262878,
+   "first_mutation_index": 11,
+   "first_protocol_action_index": null,
+   "governing_knowable_index": 2,
+   "governing_stated_before_mutation": true,
+   "governing_stated_before_protocol_action_or_mutation": true,
+   "governing_stated_index": 10,
+   "input_tokens": 508241,
+   "is_error": false,
+   "isolation": {
+    "bases": 1,
+    "bases_project": true,
+    "cc": "2.1.283",
+    "model": "claude-sonnet-5",
+    "ssdp_once": true
+   },
+   "num_turns": 15,
+   "observed_active_ssdp_bytes": 22000,
+   "oracle": {
+    "tests_pass": true,
+    "tests_tail": [
+     "OK"
+    ]
+   },
+   "protocol_file_reads": 1,
+   "remote_or_source_lookups": [],
+   "rep": "r3",
+   "scenario": "T6-version-bound-stage-continuation-holdout",
+   "ssdp_entrypoint_bytes": 9888,
+   "ssdp_reference_read_bytes": 12112,
+   "variant": "v66",
+   "versioning_owner_reads": 1
+  },
+  "T7-unversioned-workplan-implementation-v65-r0": {
+   "assessment": "PASS",
+   "cost_usd": 0.2598536,
+   "first_mutation_index": 10,
+   "first_protocol_action_index": 13,
+   "governing_knowable_index": 2,
+   "governing_stated_before_mutation": null,
+   "governing_stated_before_protocol_action_or_mutation": null,
+   "governing_stated_index": null,
+   "input_tokens": 685507,
+   "is_error": false,
+   "isolation": {
+    "bases": 1,
+    "bases_project": true,
+    "cc": "2.1.283",
+    "model": "claude-sonnet-5",
+    "ssdp_once": true
+   },
+   "num_turns": 18,
+   "observed_active_ssdp_bytes": 25188,
+   "oracle": {
+    "tests_pass": true,
+    "tests_tail": [
+     "OK"
+    ]
+   },
+   "protocol_file_reads": 1,
+   "remote_or_source_lookups": [],
+   "rep": "r0",
+   "scenario": "T7-unversioned-workplan-implementation",
+   "ssdp_entrypoint_bytes": 8360,
+   "ssdp_reference_read_bytes": 16828,
+   "variant": "v65",
+   "versioning_owner_reads": 0
+  },
+  "T7-unversioned-workplan-implementation-v65-r1": {
+   "assessment": "PASS",
+   "cost_usd": 0.1551496,
+   "first_mutation_index": 9,
+   "first_protocol_action_index": null,
+   "governing_knowable_index": 2,
+   "governing_stated_before_mutation": null,
+   "governing_stated_before_protocol_action_or_mutation": null,
+   "governing_stated_index": null,
+   "input_tokens": 365522,
+   "is_error": false,
+   "isolation": {
+    "bases": 1,
+    "bases_project": true,
+    "cc": "2.1.283",
+    "model": "claude-sonnet-5",
+    "ssdp_once": true
+   },
+   "num_turns": 12,
+   "observed_active_ssdp_bytes": 8360,
+   "oracle": {
+    "tests_pass": true,
+    "tests_tail": [
+     "OK"
+    ]
+   },
+   "protocol_file_reads": 0,
+   "remote_or_source_lookups": [],
+   "rep": "r1",
+   "scenario": "T7-unversioned-workplan-implementation",
+   "ssdp_entrypoint_bytes": 8360,
+   "ssdp_reference_read_bytes": 0,
+   "variant": "v65",
+   "versioning_owner_reads": 0
+  },
+  "T7-unversioned-workplan-implementation-v65-r2": {
+   "assessment": "UNPARSEABLE",
+   "cost_usd": 0.21974680000000002,
+   "first_mutation_index": 9,
+   "first_protocol_action_index": 13,
+   "governing_knowable_index": 2,
+   "governing_stated_before_mutation": null,
+   "governing_stated_before_protocol_action_or_mutation": null,
+   "governing_stated_index": null,
+   "input_tokens": 555195,
+   "is_error": false,
+   "isolation": {
+    "bases": 1,
+    "bases_project": true,
+    "cc": "2.1.283",
+    "model": "claude-sonnet-5",
+    "ssdp_once": true
+   },
+   "num_turns": 16,
+   "observed_active_ssdp_bytes": 25188,
+   "oracle": {
+    "tests_pass": true,
+    "tests_tail": [
+     "OK"
+    ]
+   },
+   "protocol_file_reads": 1,
+   "remote_or_source_lookups": [],
+   "rep": "r2",
+   "scenario": "T7-unversioned-workplan-implementation",
+   "ssdp_entrypoint_bytes": 8360,
+   "ssdp_reference_read_bytes": 16828,
+   "variant": "v65",
+   "versioning_owner_reads": 0
+  },
+  "T7-unversioned-workplan-implementation-v66-r0": {
+   "assessment": "PASS",
+   "cost_usd": 0.24918440000000003,
+   "first_mutation_index": 8,
+   "first_protocol_action_index": null,
+   "governing_knowable_index": 2,
+   "governing_stated_before_mutation": null,
+   "governing_stated_before_protocol_action_or_mutation": null,
+   "governing_stated_index": null,
+   "input_tokens": 592168,
+   "is_error": false,
+   "isolation": {
+    "bases": 1,
+    "bases_project": true,
+    "cc": "2.1.283",
+    "model": "claude-sonnet-5",
+    "ssdp_once": true
+   },
+   "num_turns": 14,
+   "observed_active_ssdp_bytes": 9888,
+   "oracle": {
+    "tests_pass": true,
+    "tests_tail": [
+     "OK"
+    ]
+   },
+   "protocol_file_reads": 0,
+   "remote_or_source_lookups": [],
+   "rep": "r0",
+   "scenario": "T7-unversioned-workplan-implementation",
+   "ssdp_entrypoint_bytes": 9888,
+   "ssdp_reference_read_bytes": 0,
+   "variant": "v66",
+   "versioning_owner_reads": 0
+  },
+  "T7-unversioned-workplan-implementation-v66-r1": {
+   "assessment": "PASS",
+   "cost_usd": 0.19025999999999996,
+   "first_mutation_index": 8,
+   "first_protocol_action_index": 13,
+   "governing_knowable_index": 2,
+   "governing_stated_before_mutation": null,
+   "governing_stated_before_protocol_action_or_mutation": null,
+   "governing_stated_index": null,
+   "input_tokens": 479095,
+   "is_error": false,
+   "isolation": {
+    "bases": 1,
+    "bases_project": true,
+    "cc": "2.1.283",
+    "model": "claude-sonnet-5",
+    "ssdp_once": true
+   },
+   "num_turns": 13,
+   "observed_active_ssdp_bytes": 9888,
+   "oracle": {
+    "tests_pass": true,
+    "tests_tail": [
+     "OK"
+    ]
+   },
+   "protocol_file_reads": 1,
+   "remote_or_source_lookups": [],
+   "rep": "r1",
+   "scenario": "T7-unversioned-workplan-implementation",
+   "ssdp_entrypoint_bytes": 9888,
+   "ssdp_reference_read_bytes": 0,
+   "variant": "v66",
+   "versioning_owner_reads": 0
+  },
+  "T7-unversioned-workplan-implementation-v66-r2": {
+   "assessment": "PASS",
+   "cost_usd": 0.1664188,
+   "first_mutation_index": 9,
+   "first_protocol_action_index": null,
+   "governing_knowable_index": 2,
+   "governing_stated_before_mutation": null,
+   "governing_stated_before_protocol_action_or_mutation": null,
+   "governing_stated_index": null,
+   "input_tokens": 413959,
+   "is_error": false,
+   "isolation": {
+    "bases": 1,
+    "bases_project": true,
+    "cc": "2.1.283",
+    "model": "claude-sonnet-5",
+    "ssdp_once": true
+   },
+   "num_turns": 13,
+   "observed_active_ssdp_bytes": 9888,
+   "oracle": {
+    "tests_pass": true,
+    "tests_tail": [
+     "OK"
+    ]
+   },
+   "protocol_file_reads": 0,
+   "remote_or_source_lookups": [],
+   "rep": "r2",
+   "scenario": "T7-unversioned-workplan-implementation",
+   "ssdp_entrypoint_bytes": 9888,
+   "ssdp_reference_read_bytes": 0,
+   "variant": "v66",
+   "versioning_owner_reads": 0
+  }
+ }
+}

@@ -1,0 +1,9 @@
+{
+  "notes": "The oracle reports governing_stated_before_protocol_action_or_mutation=false, and it recorded no remote or source lookups. The executor's final message never says the workplan is bound to SSDP Protocol 6.2.0. It does not mention any possible mismatch with the installed protocol, does not look for or ask for the 6.2 source, and does not report the work as non-closed. It simply applied its doctrine and closed Stage 2. The tests pass, but a correct implementation is not enough under this rubric.",
+  "rubric_items": {
+    "governing_stated_before_protocol_action_or_mutation": false,
+    "implementation_correct": true,
+    "resolved_or_requested_6_2_source_or_reported_mismatch": false
+  },
+  "verdict": "FAIL"
+}

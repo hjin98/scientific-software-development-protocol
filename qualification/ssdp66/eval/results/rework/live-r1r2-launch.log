@@ -1,0 +1,40 @@
++ M='python3 run_matrix.py --layer trajectory --variant v65=/tmp/claude-1000/-home-samjin-agent-skills-scientific-software-development-protocol/7af2808c-6809-44ab-a122-a702353fc44c/scratchpad/variants/v65/dist/skills --variant v66=/tmp/claude-1000/-home-samjin-agent-skills-scientific-software-development-protocol/7af2808c-6809-44ab-a122-a702353fc44c/scratchpad/variants/v66/dist/skills --out results/rework/live-r1r2 --parallel 4'
++ python3 run_matrix.py --layer trajectory --variant v65=/tmp/claude-1000/-home-samjin-agent-skills-scientific-software-development-protocol/7af2808c-6809-44ab-a122-a702353fc44c/scratchpad/variants/v65/dist/skills --variant v66=/tmp/claude-1000/-home-samjin-agent-skills-scientific-software-development-protocol/7af2808c-6809-44ab-a122-a702353fc44c/scratchpad/variants/v66/dist/skills --out results/rework/live-r1r2 --parallel 4 --reps 4 --only T6-version-bound-stage-continuation-holdout
+{"run": "T6-version-bound-stage-continuation-holdout-v65-r0", "exit": 0}
+{"run": "T6-version-bound-stage-continuation-holdout-v66-r0", "exit": 0}
+{"run": "T6-version-bound-stage-continuation-holdout-v66-r1", "exit": 0}
+{"run": "T6-version-bound-stage-continuation-holdout-v65-r1", "exit": 0}
+{"run": "T6-version-bound-stage-continuation-holdout-v65-r2", "exit": 0}
+{"run": "T6-version-bound-stage-continuation-holdout-v66-r2", "exit": 0}
+{"run": "T6-version-bound-stage-continuation-holdout-v66-r3", "exit": 0}
+{"run": "T6-version-bound-stage-continuation-holdout-v65-r3", "exit": 0}
++ python3 run_matrix.py --layer trajectory --variant v65=/tmp/claude-1000/-home-samjin-agent-skills-scientific-software-development-protocol/7af2808c-6809-44ab-a122-a702353fc44c/scratchpad/variants/v65/dist/skills --variant v66=/tmp/claude-1000/-home-samjin-agent-skills-scientific-software-development-protocol/7af2808c-6809-44ab-a122-a702353fc44c/scratchpad/variants/v66/dist/skills --out results/rework/live-r1r2 --parallel 4 --reps 3 --only T1-first-clean-local-repair --only T7-unversioned-workplan-implementation
+{"run": "T1-first-clean-local-repair-v65-r0", "exit": 0}
+{"run": "T1-first-clean-local-repair-v66-r0", "exit": 0}
+{"run": "T1-first-clean-local-repair-v66-r1", "exit": 0}
+{"run": "T1-first-clean-local-repair-v65-r1", "exit": 0}
+{"run": "T1-first-clean-local-repair-v65-r2", "exit": 0}
+{"run": "T1-first-clean-local-repair-v66-r2", "exit": 0}
+{"run": "T7-unversioned-workplan-implementation-v66-r0", "exit": 0}
+{"run": "T7-unversioned-workplan-implementation-v65-r0", "exit": 0}
+{"run": "T7-unversioned-workplan-implementation-v65-r1", "exit": 0}
+{"run": "T7-unversioned-workplan-implementation-v66-r1", "exit": 0}
+{"run": "T7-unversioned-workplan-implementation-v66-r2", "exit": 0}
+{"run": "T7-unversioned-workplan-implementation-v65-r2", "exit": 0}
++ python3 run_matrix.py --layer trajectory --variant v65=/tmp/claude-1000/-home-samjin-agent-skills-scientific-software-development-protocol/7af2808c-6809-44ab-a122-a702353fc44c/scratchpad/variants/v65/dist/skills --variant v66=/tmp/claude-1000/-home-samjin-agent-skills-scientific-software-development-protocol/7af2808c-6809-44ab-a122-a702353fc44c/scratchpad/variants/v66/dist/skills --out results/rework/live-r1r2 --parallel 4 --reps 2 --only T5-version-bound-workplan-holdout --only T4-version-bound-workplan --only T2-tolerance-within-envelope --only T3-d2-owned-default
+{"run": "T2-tolerance-within-envelope-v65-r0", "exit": 0}
+{"run": "T2-tolerance-within-envelope-v66-r0", "exit": 0}
+{"run": "T2-tolerance-within-envelope-v66-r1", "exit": 0}
+{"run": "T2-tolerance-within-envelope-v65-r1", "exit": 0}
+{"run": "T4-version-bound-workplan-v66-r0", "exit": 0}
+{"run": "T4-version-bound-workplan-v65-r0", "exit": 0}
+{"run": "T4-version-bound-workplan-v65-r1", "exit": 0}
+{"run": "T4-version-bound-workplan-v66-r1", "exit": 0}
+{"run": "T3-d2-owned-default-v65-r0", "exit": 0}
+{"run": "T3-d2-owned-default-v66-r0", "exit": 0}
+{"run": "T3-d2-owned-default-v66-r1", "exit": 0}
+{"run": "T3-d2-owned-default-v65-r1", "exit": 0}
+{"run": "T5-version-bound-workplan-holdout-v66-r0", "exit": 0}
+{"run": "T5-version-bound-workplan-holdout-v65-r0", "exit": 0}
+{"run": "T5-version-bound-workplan-holdout-v65-r1", "exit": 0}
+{"run": "T5-version-bound-workplan-holdout-v66-r1", "exit": 0}

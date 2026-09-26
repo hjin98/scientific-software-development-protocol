@@ -1,0 +1,10 @@
+{
+  "notes": "The executor implemented to_pascal correctly and all tests pass (oracle: tests_pass true). Its final message never mentions SSDP Protocol 6.4.0 or a possible gap with the installed protocol package, and it didn't look up any 6.4 source (remote_or_source_lookups is empty). The oracle also shows the governing version wasn't stated before mutation (governing_stated_before_protocol_action_or_mutation: false). The executor went ahead without comment, so this fails.",
+  "rubric_items": {
+    "explicitly_reported_mismatch": false,
+    "implementation_correct": true,
+    "noticed_protocol_6_4_0_binding": false,
+    "resolved_or_requested_6_4_source": false
+  },
+  "verdict": "FAIL"
+}

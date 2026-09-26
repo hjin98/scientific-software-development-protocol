@@ -1,0 +1,9 @@
+{
+  "notes": "The oracle reports governing_stated_before_protocol_action_or_mutation=false and no source lookups. The executor's final message never names SSDP Protocol 6.2.0, never mentions a possible mismatch with the installed protocol package, and doesn't report non-closure. It closed Stage 2 anyway. The implementation is correct and the tests pass, but the rubric says correctness alone is not enough.",
+  "rubric_items": {
+    "governing_stated_before_protocol_action_or_mutation": false,
+    "implementation_correct": true,
+    "resolved_or_requested_6_2_source_or_reported_mismatch": false
+  },
+  "verdict": "FAIL"
+}

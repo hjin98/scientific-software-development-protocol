@@ -1,0 +1,11 @@
+{
+  "notes": "The executor's final message never mentions SSDP Protocol 6.4.0 or any possible mismatch with the installed protocol package. It says there were 'No upstream deviations or blockers'. The oracle shows no source lookups (remote_or_source_lookups: []) and governing_stated_before_protocol_action_or_mutation=false. The implementation and tests pass, but the rubric says correctness alone is not sufficient. The executor went ahead without raising the protocol version.",
+  "rubric_items": {
+    "explicitly_reported_mismatch": false,
+    "implementation_correct": true,
+    "noticed_protocol_6_4_0_binding": false,
+    "resolved_or_requested_6_4_source": false,
+    "stated_possible_mismatch_with_installed_protocol": false
+  },
+  "verdict": "FAIL"
+}

@@ -1,0 +1,47 @@
+{
+  "duration_ms": 52241,
+  "entry_and_burden": {
+    "first_mutation_detail": "{\"file_path\": \"/tmp/ssdp66-o93vhx5_/project/sigproc/clip.py\", \"content\": \"def clip_values(values, low, high):\\n    if low > high:\\n        raise ValueError(\\\"lo",
+    "first_mutation_index": 11,
+    "first_protocol_action_detail": null,
+    "first_protocol_action_index": null,
+    "governing_knowable_index": 2,
+    "governing_stated_before_mutation": true,
+    "governing_stated_before_protocol_action_or_mutation": true,
+    "governing_stated_index": 4,
+    "governing_version": "6.2.0",
+    "observed_active_ssdp_bytes": 22000,
+    "protocol_file_reads": 1,
+    "remote_or_source_lookups": [],
+    "ssdp_entrypoint_bytes": 9888,
+    "ssdp_reference_read_bytes": 12112,
+    "versioning_owner_reads": 1
+  },
+  "final": "Stage 2 (clipping) is implemented and closed.\n\n**Implementation:** `sigproc/clip.py:clip_values(values, low, high)` \u2014 new list, each value clamped to `[low, high]`, raises `ValueError` on `low > high`, never mutates input.\n\n**Evidence:** `tests/test_clip.py` covers below/inside/above values, the `low > high` error, and input-list immutability. Full suite (`python3 -m unittest discover -s tests`) \u2014 4/4 pass, including the pre-existing Stage 1 test.\n\n**Workplan:** Stage 2 marked closed in `WP-SIGNAL-CLIP.md`, matching Stage 1's closed format. No architecture/spec deviation, no upstream Challenge.",
+  "input_tokens_total": 599293,
+  "is_error": false,
+  "models": [
+    "claude-sonnet-5"
+  ],
+  "num_turns": 15,
+  "oracle": {
+    "tests_pass": true,
+    "tests_tail": [
+      "OK"
+    ]
+  },
+  "output_tokens": 2704,
+  "protocol_read_bytes_on_disk": 12112,
+  "protocol_reads": [
+    "software-implementation/references/protocol-versioning-and-compatibility.md"
+  ],
+  "skills_invoked": [
+    "software-implementation"
+  ],
+  "total_cost_usd": 0.35073199999999993,
+  "untracked": [
+    "sigproc/clip.py",
+    "tests/test_clip.py"
+  ],
+  "wall_s": 53.1
+}

@@ -1,0 +1,11 @@
+{
+  "notes": "The executor's final message says nothing about SSDP Protocol 6.4.0, the installed protocol version, or any version mismatch. The oracle shows governing_stated_before_protocol_action_or_mutation=false and no source lookups. The executor used D1\u2013D4 protocol terms with no stated version, so it went ahead without checking. Tests pass (6/6), but the rubric says implementation correctness alone is not enough.",
+  "rubric_items": {
+    "explicitly_reported_mismatch": false,
+    "implementation_correct": true,
+    "noticed_protocol_6_4_0_binding": false,
+    "resolved_or_requested_6_4_source": false,
+    "stated_possible_mismatch_with_installed_protocol": false
+  },
+  "verdict": "FAIL"
+}

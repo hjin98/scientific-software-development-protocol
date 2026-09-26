@@ -7,7 +7,9 @@ target_protocol_version: 6.6.0
 stages: F, G
 evaluated_source: 3fac7d1c34822ba82785e0b41f6e340fd7cfa6d5
 rework_semantic_state: c01eeee47989cbbf9ed5e87df50756c23d912f79
-implementation_review: NO_PASS_R1 at 26059544204c65b1e0292cd229e95f61b5f970bb
+implementation_review: NO_PASS_R1 at 26059544204c65b1e0292cd229e95f61b5f970bb; NO_PASS_R2 at 390613b27d7304f08ee819d968a47119f48b57f9
+ordering_oracle_freeze: f34ffef46c8e1dd635affc60e719c9f7996a2123
+live_confirmation: R1/R2 matrix on dist/skills unchanged since c01eeee (FAILED both hard-stop gates; section 10.5)
 ---
 
 # Protocol 6.6 Stages F-G — Empirical Evaluation and Assembled Qualification
@@ -17,18 +19,19 @@ Evidence coordination under the [Protocol 6.6 Evaluation and Qualification Contr
 ## 1. Disposition
 
 ```text
-SERIOUS CHALLENGE (to accepted 6.5): NONE
-IMPLEMENTATION BLOCKERS: OPEN
-  B1 R1 real-boundary version/universal-contract confirmation: NOT YET OBSERVED
-     (repair implemented at c01eeee; live confirmation not executed - see section 10)
-  B2 criterion 4 direct live burden reduction: NOT DEMONSTRATED
-NEW CORRECTNESS REGRESSION vs 6.5 ON MATCHED CASES: none observed at 3fac7d1;
-  not yet re-established on the rework semantic state
+SERIOUS CHALLENGE: RAISED (candidate; section 10.6) - versioning adoption/compatible-source
+  semantics inherited from accepted 6.5 let executors self-adopt the loaded successor for
+  older version-bound work; adjudication belongs to the reopened D3 / versioning owner
+IMPLEMENTATION BLOCKERS: OPEN - D4 STOPPED; D3 REOPEN REQUIRED (workplan 16.8, 16.9 item 6)
+  B1 R1 fresh-holdout confirmation: FAILED - T6 2/4 (hard stop: any T6 failure)
+  B2 criterion 4 direct live burden reduction: FAILED on T1 and T7 (hard stop: both routes)
+  B3 entry-ordering oracle: CLOSED - strengthened and frozen at f34ffef before any valid run
+NEW CORRECTNESS REGRESSION vs 6.5 ON MATCHED CASES: none observed (T1-T3, T7; section 10.5)
 READY FOR FRESH INDEPENDENT REVIEW: NO
 CANDIDATE FREEZE / PUBLICATION / RATIFICATION / CUTOVER: NOT PERFORMED (Stage H)
 ```
 
-Sections 1-9 record the original Stage F/G evidence on `3fac7d1`; they are retained, not rewritten. The implementation Review (NO-PASS R1) rejected two of their conclusions, and section 10 carries the current rework state. Where sections 1-9 conflict with section 10 or with the corrections below, the later text governs.
+Sections 1-9 record the original Stage F/G evidence on `3fac7d1`; they are retained, not rewritten. The implementation Review (NO-PASS R1) rejected two of their conclusions, and section 10 carries the current rework state. Where sections 1-9 conflict with section 10 or with the corrections below, the later text governs. Section 10.3 records the failed first attempt; sections 10.5-10.6 carry the valid live confirmation and its stop disposition.
 
 Corrections required by the Review:
 
@@ -198,3 +201,41 @@ Required to close: re-authenticate the headless CLI, confirm that the session in
 ### 10.4 Criterion 4 outlook and reopen trigger
 
 If the live burden rule fails on both ordinary routes after this minimum repair, section 16.5/16.8 applies. Remove unjustified permanent machinery and reopen the D3 criterion-4 success condition. Do not re-shape entrypoints or metrics to manufacture a gain. The Stage F evidence already suggests the structural reduction sits almost entirely in material that live agents did not read.
+
+### 10.5 Valid R1/R2 live confirmation (Review R2, workplan section 16.9)
+
+**Identities.** Ordering oracle strengthened and frozen at `f34ffef` before any authenticated post-R1 run (`REWORK-R0-FREEZE.md`, Review R2 section). Candidate: `dist/skills` byte-identical to R1 `c01eeee` (later commits touch only contributor docs outside the package and evidence tooling). Baseline: `dist/skills` at `2b8ce17` (6.5.0). Executor: Claude Code 2.1.283 headless, `claude-sonnet-5`, `--setting-sources project,local`, project-installed variant. Assessor: blinded single-turn `claude-opus-5-5`, frozen rubrics. Matrix as predeclared in section 10.3; paired and order-counterbalanced; 36 runs, no executor errors. Raw runs: `eval/results/rework/live-r1r2/` (reduced and gzipped raw traces, diffs, summaries, assessments). Gate computation: `eval/rework_gates.py` -> `eval/results/rework/live-r1r2-summary.json`.
+
+**Isolation (B1 harness confounder): closed.** Every run's session init lists each of the 7 SSDP skills exactly once. Every consumed skill's base directory is the project-installed variant. Without `--setting-sources project,local`, the same probe listed every SSDP skill twice.
+
+**R1 version cases.** A pass requires `governing_stated_before_protocol_action_or_mutation` AND an assessor PASS.
+
+| Case | 6.6 pass | 6.5 pass | Observed 6.6 decision |
+| --- | ---: | ---: | --- |
+| T6 fresh 6.2.0 holdout | **2/4** | 0/4 | 4/4 stated 6.2.0 before any protocol action or edit, then 4/4 applied the loaded 6.6 package as a "backward-compatible successor". 2 assessed FAIL: the final message omits the mismatch. 2 assessed PASS through the rubric's "reported the mismatch" branch; the assessor called the compatibility claim unverified. |
+| T5 6.3.0 challenge | 0/2 | 0/2 | Both self-adopted 6.6 as a compatible successor. r0 stated it only after a protocol action (ordering FAIL, assessor PASS); r1 passed ordering but was assessed FAIL. |
+| T4 6.4.0 development | 1/2 | 0/2 | r1 declined to apply the package per the entry contract (the only run to do so); r0 never stated the version. |
+
+The zero-silent-mismatch rule fails on the holdout, so hard stop B1 applies. The entry step now reliably surfaces the governing version before protocol action (T6 4/4 by the strengthened oracle vs 6.5 0/4; in Stage F no T4/T5 run of either variant stated it before the first mutation). It does not produce the governed routing decision: in 5 of 8 version-bound candidate runs the executor read the versioning owner and then self-adopted the loaded successor.
+
+**Unversioned no-lookup.** T1 and T7 candidate runs: 0/6 remote/source lookups, 0/6 versioning-owner reads. Met.
+
+**Criterion 4 burden** (observed active SSDP bytes; frozen pass rule: candidate median at least 15% below the 6.5 median AND candidate maximum below the 6.5 minimum):
+
+| Route | 6.5 runs | 6.6 runs | Median change | Rule |
+| --- | --- | --- | ---: | --- |
+| T1 local repair | 8,360 ×3 (entrypoint only) | 9,888 ×3 (entrypoint only) | +18% | FAIL |
+| T7 unversioned workplan | 25,188 / 8,360 / 25,188 | 9,888 ×3 | −61% | FAIL (overlap: one 6.5 run read no reference) |
+
+The T1 increase is the inlined entry contract predicted in section 10.2. The T7 median reduction comes from 6.6 runs not reading the workflow owner that 2/3 of the 6.5 runs read. That cannot be read as a burden gain without also showing that nothing required was dropped, and the frozen rule is not met in any case. Both ordinary routes fail, so hard stop B2 applies. Turns/tokens/cost are in the summary file and are not the criterion.
+
+**Correctness (assessed).** T1 6.6 3/3 vs 6.5 3/3; T2 2/2 vs 2/2; T3 2/2 vs 2/2; T7 3/3 vs 2/2 parsed (one 6.5 assessment was unparseable on two attempts; one 6.6 T7 assessment was unparseable on the first attempt and PASS on retry; the first attempt is retained as `assessment-attempt1-unparseable.json`). Hidden oracle tests passed in every T1/T7 run. No correctness regression observed.
+
+### 10.6 Stop disposition and routed D3 reopen
+
+Per workplan section 16.9 item 6, D4 repair stops here. No entry wording, prompt mechanism, metric, route or threshold was changed after the first valid run, and R3/final assembled acceptance was **not** executed as a candidate-qualification step. Routed to the D3 owner (software-design) under section 16.8:
+
+1. **R1 routing decision (B1).** The entry step says "any other version -> say so and do not apply this package". The inherited versioning owner (unchanged in substance from accepted 6.5) says older work "may … explicitly adopt a compatible successor after changed obligations are reconciled", resolves `governing != loaded` to "a compatible installed/local source", and describes 6.6 as reorganizing "the same capabilities". It does not say who may authorize adoption, or whether the loaded successor itself counts as a compatible source. Executors consistently resolved that conflict in favor of self-adoption. **Candidate SERIOUS CHALLENGE:** the accepted adoption/compatible-source semantics are materially ambiguous at the execution boundary. The earliest affected owner is the versioning-compatibility doctrine (accepted since before 6.5), for which D3 section 5.11 is this cycle's owner. The alternative classification, a 6.6-only conflict between the new entry step and the inherited clause, also routes to D3 because it changes the cycle decision rather than D4 wording.
+2. **Criterion 4 (B2).** Reopen/simplify the section 16.5 success condition. The honest live measure shows the inlined universal contract costs about +1.5 KB on the minimal route, while the structural reduction lies in material live agents did not read. Under section 16.5, D3 should decide whether to keep the permanent 6.6 representation machinery, remove it, or restate criterion 4.
+
+Candidate freeze, independent Review, ratification, publication, recovery and accepted-current cutover remain blocked; 6.5 remains accepted-current.

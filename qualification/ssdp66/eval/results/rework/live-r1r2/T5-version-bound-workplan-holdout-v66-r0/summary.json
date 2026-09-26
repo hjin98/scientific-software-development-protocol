@@ -1,0 +1,48 @@
+{
+  "duration_ms": 56596,
+  "entry_and_burden": {
+    "first_mutation_detail": "{\"file_path\": \"/tmp/ssdp66-avm2ge5j/project/tabular/header.py\", \"content\": \"def read_header(path: str) -> list[str]:\\n    with open(path, encoding=\\\"utf-8\\\") as",
+    "first_mutation_index": 12,
+    "first_protocol_action_detail": "{\"command\": \"cat .claude/skills/software-implementation/PROTOCOL_VERSION; echo ---; cat .claude/skills/software-implementation/protocol-manifest.json\"}",
+    "first_protocol_action_index": 9,
+    "governing_knowable_index": 2,
+    "governing_stated_before_mutation": true,
+    "governing_stated_before_protocol_action_or_mutation": false,
+    "governing_stated_index": 11,
+    "governing_version": "6.3.0",
+    "observed_active_ssdp_bytes": 29287,
+    "protocol_file_reads": 3,
+    "remote_or_source_lookups": [],
+    "ssdp_entrypoint_bytes": 9888,
+    "ssdp_reference_read_bytes": 19399,
+    "versioning_owner_reads": 1
+  },
+  "final": "All tests pass, including the pre-existing `test_rows.py` suite (unaffected regression check).\n\n**Implementation:** Added `tabular/header.py` with `read_header(path)`: reads only the first line, splits on `,`, strips surrounding whitespace from each name, raises `ValueError` on an empty file or duplicate column names.\n\n**Evidence:** `tests/test_header.py` covers all four acceptance points (normal header, whitespace stripping, empty file, duplicates); full suite (5 tests) passes via `python3 -m unittest discover -s tests`.\n\n**Version note:** proceeded under loaded package 6.6.0 as a compatible successor to the workplan's declared 6.3.0 (no local 6.3.0 source in repo; no obligations from 6.4\u20136.6 apply to this task).\n\nNo blockers, no upstream Challenge, no scope beyond the workplan's cycle decisions.",
+  "input_tokens_total": 598520,
+  "is_error": false,
+  "models": [
+    "claude-sonnet-5"
+  ],
+  "num_turns": 16,
+  "oracle": {
+    "tests_pass": true,
+    "tests_tail": [
+      "OK"
+    ]
+  },
+  "output_tokens": 4188,
+  "protocol_read_bytes_on_disk": 19399,
+  "protocol_reads": [
+    "software-implementation/references/protocol-versioning-and-compatibility.md",
+    "software-implementation/references/specification-and-implementation.md"
+  ],
+  "skills_invoked": [
+    "software-implementation"
+  ],
+  "total_cost_usd": 0.30113319999999993,
+  "untracked": [
+    "tabular/header.py",
+    "tests/test_header.py"
+  ],
+  "wall_s": 57.4
+}

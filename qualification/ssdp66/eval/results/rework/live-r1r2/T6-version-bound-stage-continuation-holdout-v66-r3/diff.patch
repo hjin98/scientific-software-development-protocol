@@ -1,0 +1,13 @@
+diff --git a/workplans/active/WP-SIGNAL-CLIP.md b/workplans/active/WP-SIGNAL-CLIP.md
+index 086e137..4906f97 100644
+--- a/workplans/active/WP-SIGNAL-CLIP.md
++++ b/workplans/active/WP-SIGNAL-CLIP.md
+@@ -11,7 +11,7 @@ status: accepted
+ 
+ - `sigproc.smoothing.moving_average(values, window)` exists with tests.
+ 
+-## Stage 2 — clipping (ready)
++## Stage 2 — clipping (closed)
+ 
+ - Add `sigproc.clip.clip_values(values, low, high)` returning a new list in which each value is limited to the closed interval `[low, high]`.
+ - `low > high` raises `ValueError`.

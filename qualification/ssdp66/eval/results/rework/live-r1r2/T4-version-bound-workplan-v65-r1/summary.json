@@ -1,0 +1,45 @@
+{
+  "duration_ms": 21569,
+  "entry_and_burden": {
+    "first_mutation_detail": "{\"file_path\": \"/tmp/ssdp66-kiq3pue7/project/units/pressure.py\", \"content\": \"_FACTORS = {\\\"Pa\\\": 1.0, \\\"kPa\\\": 1000.0, \\\"bar\\\": 100000.0, \\\"atm\\\": 101325.0}\\n\\n\\",
+    "first_mutation_index": 9,
+    "first_protocol_action_detail": null,
+    "first_protocol_action_index": null,
+    "governing_knowable_index": 2,
+    "governing_stated_before_mutation": false,
+    "governing_stated_before_protocol_action_or_mutation": false,
+    "governing_stated_index": null,
+    "governing_version": "6.4.0",
+    "observed_active_ssdp_bytes": 8360,
+    "protocol_file_reads": 0,
+    "remote_or_source_lookups": [],
+    "ssdp_entrypoint_bytes": 8360,
+    "ssdp_reference_read_bytes": 0,
+    "versioning_owner_reads": 0
+  },
+  "final": "All 6 tests pass, including the pre-existing `test_length.py` regression.\n\n**Implementation:** Added `units/pressure.py` with `to_pascal(value, unit)` mirroring the existing `length.py` pattern (factor-dict lookup, `ValueError` on `KeyError`), supporting `Pa`, `kPa`, `bar`, `atm` (101325 Pa exactly per the cycle decision). Added `tests/test_pressure.py` covering all four units plus the unknown-unit error case.\n\n**Evidence:** `python3 -m unittest discover` \u2014 6/6 pass (1 pre-existing length test + 5 new pressure tests).\n\nNo deviations from the workplan; no upstream challenge needed.",
+  "input_tokens_total": 318856,
+  "is_error": false,
+  "models": [
+    "claude-sonnet-5"
+  ],
+  "num_turns": 12,
+  "oracle": {
+    "tests_pass": true,
+    "tests_tail": [
+      "OK"
+    ]
+  },
+  "output_tokens": 1626,
+  "protocol_read_bytes_on_disk": 0,
+  "protocol_reads": [],
+  "skills_invoked": [
+    "software-implementation"
+  ],
+  "total_cost_usd": 0.14372920000000003,
+  "untracked": [
+    "tests/test_pressure.py",
+    "units/pressure.py"
+  ],
+  "wall_s": 22.4
+}

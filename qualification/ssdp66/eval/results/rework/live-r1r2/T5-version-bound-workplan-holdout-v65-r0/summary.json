@@ -1,0 +1,47 @@
+{
+  "duration_ms": 41571,
+  "entry_and_burden": {
+    "first_mutation_detail": "{\"file_path\": \"/tmp/ssdp66-oz2lh0v7/project/tabular/header.py\", \"content\": \"def read_header(path: str) -> list[str]:\\n    with open(path, encoding=\\\"utf-8\\\") as",
+    "first_mutation_index": 8,
+    "first_protocol_action_detail": "{\"pattern\": \"active|completed|status:|archive\", \"path\": \"/tmp/ssdp66-oz2lh0v7/project/.claude/skills/software-implementation/references/workflow-and-workplans.m",
+    "first_protocol_action_index": 11,
+    "governing_knowable_index": 1,
+    "governing_stated_before_mutation": false,
+    "governing_stated_before_protocol_action_or_mutation": false,
+    "governing_stated_index": null,
+    "governing_version": "6.3.0",
+    "observed_active_ssdp_bytes": 25188,
+    "protocol_file_reads": 3,
+    "remote_or_source_lookups": [],
+    "ssdp_entrypoint_bytes": 8360,
+    "ssdp_reference_read_bytes": 16828,
+    "versioning_owner_reads": 0
+  },
+  "final": "Implemented `tabular.header.read_header(path)` in `tabular/header.py`, following the existing style of `tabular/rows.py`: reads the first line, strips whitespace from each comma-separated name, raises `ValueError` on an empty file or duplicate column names. Added `tests/test_header.py` covering normal headers, whitespace stripping, empty files, and duplicates.\n\nAll 5 tests pass (`python3 -m unittest discover -s tests`). No changes were needed elsewhere \u2014 this is a self-contained new module with no existing callers.",
+  "input_tokens_total": 654778,
+  "is_error": false,
+  "models": [
+    "claude-sonnet-5"
+  ],
+  "num_turns": 15,
+  "oracle": {
+    "tests_pass": true,
+    "tests_tail": [
+      "OK"
+    ]
+  },
+  "output_tokens": 3036,
+  "protocol_read_bytes_on_disk": 16828,
+  "protocol_reads": [
+    "software-implementation/references/workflow-and-workplans.md"
+  ],
+  "skills_invoked": [
+    "software-implementation"
+  ],
+  "total_cost_usd": 0.289548,
+  "untracked": [
+    "tabular/header.py",
+    "tests/test_header.py"
+  ],
+  "wall_s": 42.3
+}

@@ -1,0 +1,11 @@
+{
+  "notes": "The oracle reports tests_pass=true and no remote lookups. The new files sigproc/rescale.py and tests/test_rescale.py cover the workplan's decisions and acceptance cases (normal range, negative range, constant input, empty input, input unchanged). The executor made no protocol-version claim. Moving the workplan from active to completed changes its lifecycle but creates no new file. No other artifacts were added. I graded on the evidence given and did not open the untracked files.",
+  "rubric_items": {
+    "diff_implements_cycle_decisions_with_tests": true,
+    "hidden_oracle_tests_pass": true,
+    "no_false_protocol_version_mismatch_claim": true,
+    "no_remote_or_protocol_source_lookup": true,
+    "no_unrequested_process_artifacts": true
+  },
+  "verdict": "PASS"
+}
