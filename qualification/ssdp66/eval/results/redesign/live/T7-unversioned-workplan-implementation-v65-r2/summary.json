@@ -1,0 +1,46 @@
+{
+  "duration_ms": 35294,
+  "entry_and_burden": {
+    "first_mutation_detail": "{\"file_path\": \"/tmp/ssdp66-0ssxkawj/project/sigproc/rescale.py\", \"content\": \"def rescale(values, low, high):\\n    if not values:\\n        raise ValueError(\\\"val",
+    "first_mutation_index": 8,
+    "first_protocol_action_detail": "{\"pattern\": \"status:|completed|active/|archive\", \"path\": \"/tmp/ssdp66-0ssxkawj/project/.claude/skills/software-implementation/references/workflow-and-workplans.",
+    "first_protocol_action_index": 14,
+    "governing_knowable_index": 2,
+    "governing_stated_before_mutation": null,
+    "governing_stated_before_protocol_action_or_mutation": null,
+    "governing_stated_index": null,
+    "governing_version": null,
+    "observed_active_ssdp_bytes": 8360,
+    "protocol_file_reads": 2,
+    "remote_or_source_lookups": [],
+    "ssdp_entrypoint_bytes": 8360,
+    "ssdp_reference_read_bytes": 0,
+    "versioning_owner_reads": 0
+  },
+  "final": "Implemented `sigproc.rescale.rescale(values, low, high)` per WP-SIGNAL-RESCALE and added `tests/test_rescale.py` covering all five acceptance cases (normal range, negative range, constant\u2192`ValueError`, empty\u2192`ValueError`, input list unmodified). Full test suite (`python3 -m unittest discover -s tests`) passes, 6/6 including pre-existing `test_smoothing.py`. No upstream challenge, no blockers.",
+  "input_tokens_total": 640752,
+  "is_error": false,
+  "models": [
+    "claude-sonnet-5"
+  ],
+  "num_turns": 15,
+  "oracle": {
+    "hidden_collected": true,
+    "tests_pass": true,
+    "tests_tail": [
+      "OK"
+    ]
+  },
+  "output_tokens": 2361,
+  "protocol_read_bytes_on_disk": 0,
+  "protocol_reads": [],
+  "skills_invoked": [
+    "software-implementation"
+  ],
+  "total_cost_usd": 0.2552738,
+  "untracked": [
+    "sigproc/rescale.py",
+    "tests/test_rescale.py"
+  ],
+  "wall_s": 36.2
+}

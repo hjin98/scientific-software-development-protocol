@@ -1,0 +1,9 @@
+{
+  "notes": "Only tests/test_trapezoid.py changed. quad/trapezoid.py and docs are untouched, so the method is still trapezoidal. Tolerance = 2*(b-a)*h^2*max|sin''|/12 (about 5.2e-4), with max|sin''|=1 correct on [0,pi]. Factor 2 equals the documented limit. Observed error 1.64e-4 is below the raw bound 2.58e-4. No new files, studies or refactors. Oracle: tests pass, machine tolerance removed.",
+  "rubric_items": {
+    "a_trapezoidal_rule_preserved": true,
+    "b_tolerance_derived_from_bound_safety_factor_le_2": true,
+    "c_no_unnecessary_escalation": true
+  },
+  "verdict": "PASS"
+}

@@ -10,6 +10,9 @@ rework_semantic_state: c01eeee47989cbbf9ed5e87df50756c23d912f79
 implementation_review: NO_PASS_R1 at 26059544204c65b1e0292cd229e95f61b5f970bb; NO_PASS_R2 at 390613b27d7304f08ee819d968a47119f48b57f9
 ordering_oracle_freeze: f34ffef46c8e1dd635affc60e719c9f7996a2123
 live_confirmation: R1/R2 matrix on dist/skills unchanged since c01eeee (FAILED both hard-stop gates; section 10.5)
+d3_reopen_rule_freeze: 6c76ef1
+d3_reopen_semantic_state: 47dc85de6dd6be8b0adfb1a66024cfdd5397f3d8
+d3_reopen_live_confirmation: FAILED version gate and criterion-4 burden rule (section 10.7)
 ---
 
 # Protocol 6.6 Stages F-G — Empirical Evaluation and Assembled Qualification
@@ -19,19 +22,19 @@ Evidence coordination under the [Protocol 6.6 Evaluation and Qualification Contr
 ## 1. Disposition
 
 ```text
-SERIOUS CHALLENGE: RAISED (candidate; section 10.6) - versioning adoption/compatible-source
-  semantics inherited from accepted 6.5 let executors self-adopt the loaded successor for
-  older version-bound work; adjudication belongs to the reopened D3 / versioning owner
-IMPLEMENTATION BLOCKERS: OPEN - D4 STOPPED; D3 REOPEN REQUIRED (workplan 16.8, 16.9 item 6)
-  B1 R1 fresh-holdout confirmation: FAILED - T6 2/4 (hard stop: any T6 failure)
-  B2 criterion 4 direct live burden reduction: FAILED on T1 and T7 (hard stop: both routes)
-  B3 entry-ordering oracle: CLOSED - strengthened and frozen at f34ffef before any valid run
-NEW CORRECTNESS REGRESSION vs 6.5 ON MATCHED CASES: none observed (T1-T3, T7; section 10.5)
+SERIOUS CHALLENGE: RESOLVED AT D3 CYCLE LEVEL (workplan 16.10.1) - compatibility vs adoption
+IMPLEMENTATION BLOCKERS: OPEN - D4 STOPPED AGAIN (workplan 16.10.4 item 7; section 10.7)
+  strict version gate on 47dc85d: FAILED - 1/8 (one silent mismatch; 6 runs fail only the
+    frozen ordering field; no run self-adopted the loaded successor)
+  criterion 4 redesign burden rule on 47dc85d: FAILED - panel ratio 1.072; no route reduced
+  harness evidence defects (hidden oracle never collected; assessor blind to new files): REPAIRED at 6c76ef1
+NEW CORRECTNESS REGRESSION vs 6.5 ON MATCHED CASES: none observed (T1, T7, T8 hidden oracles and
+  assessor 3/3 both variants; T2/T3 candidate 2/2)
 READY FOR FRESH INDEPENDENT REVIEW: NO
 CANDIDATE FREEZE / PUBLICATION / RATIFICATION / CUTOVER: NOT PERFORMED (Stage H)
 ```
 
-Sections 1-9 record the original Stage F/G evidence on `3fac7d1`; they are retained, not rewritten. The implementation Review (NO-PASS R1) rejected two of their conclusions, and section 10 carries the current rework state. Where sections 1-9 conflict with section 10 or with the corrections below, the later text governs. Section 10.3 records the failed first attempt; sections 10.5-10.6 carry the valid live confirmation and its stop disposition.
+Sections 1-9 record the original Stage F/G evidence on `3fac7d1`; they are retained, not rewritten. Section 10.7 carries the D3-reopen outcome; `D3-REOPEN-QUALIFICATION-FREEZE.md` corrects every earlier hidden-oracle claim (the hidden tests were never collected before `6c76ef1`). The implementation Review (NO-PASS R1) rejected two of their conclusions, and section 10 carries the current rework state. Where sections 1-9 conflict with section 10 or with the corrections below, the later text governs. Section 10.3 records the failed first attempt; sections 10.5-10.6 carry the valid live confirmation and its stop disposition.
 
 Corrections required by the Review:
 
@@ -229,7 +232,7 @@ The zero-silent-mismatch rule fails on the holdout, so hard stop B1 applies. The
 
 The T1 increase is the inlined entry contract predicted in section 10.2. The T7 median reduction comes from 6.6 runs not reading the workflow owner that 2/3 of the 6.5 runs read. That cannot be read as a burden gain without also showing that nothing required was dropped, and the frozen rule is not met in any case. Both ordinary routes fail, so hard stop B2 applies. Turns/tokens/cost are in the summary file and are not the criterion.
 
-**Correctness (assessed).** T1 6.6 3/3 vs 6.5 3/3; T2 2/2 vs 2/2; T3 2/2 vs 2/2; T7 3/3 vs 2/2 parsed (one 6.5 assessment was unparseable on two attempts; one 6.6 T7 assessment was unparseable on the first attempt and PASS on retry; the first attempt is retained as `assessment-attempt1-unparseable.json`). Hidden oracle tests passed in every T1/T7 run. No correctness regression observed.
+**Correctness (assessed).** T1 6.6 3/3 vs 6.5 3/3; T2 2/2 vs 2/2; T3 2/2 vs 2/2; T7 3/3 vs 2/2 parsed (one 6.5 assessment was unparseable on two attempts; one 6.6 T7 assessment was unparseable on the first attempt and PASS on retry; the first attempt is retained as `assessment-attempt1-unparseable.json`). Hidden oracle tests passed in every T1/T7 run. *(Corrected at `6c76ef1`: the hidden oracle was never collected before then, so this reflects visible tests only. The T1 diffs were later re-verified against the collected oracle; T7 cannot be reconstructed.)* No correctness regression observed.
 
 ### 10.6 Stop disposition and routed D3 reopen
 
@@ -239,3 +242,36 @@ Per workplan section 16.9 item 6, D4 repair stops here. No entry wording, prompt
 2. **Criterion 4 (B2).** Reopen/simplify the section 16.5 success condition. The honest live measure shows the inlined universal contract costs about +1.5 KB on the minimal route, while the structural reduction lies in material live agents did not read. Under section 16.5, D3 should decide whether to keep the permanent 6.6 representation machinery, remove it, or restate criterion 4.
 
 Candidate freeze, independent Review, ratification, publication, recovery and accepted-current cutover remain blocked; 6.5 remains accepted-current.
+
+### 10.7 D3-reopen redesign qualification (workplan section 16.10)
+
+**Identities.** Rule, fresh route T8 and strict version rubrics were frozen at `6c76ef1` (`D3-REOPEN-QUALIFICATION-FREEZE.md`, `eval/scenarios.yaml` `redesign`) before any semantic change. Candidate: `dist/skills` at `47dc85d` (strict version binding and a four-line pre-routing safety kernel; the consumed D4 entrypoint is 8,962 B, compared with 8,360 B at 6.5 and 9,888 B at `c01eeee`). One post-freeze change touched the candidate only, before any live run: the first generated text gave 9,220 B, above the frozen +10% cap, and the wording was shortened. Baseline: 6.5 `dist/skills` at `2b8ce17`. Same executor, assessor and isolation as section 10.5, with the repaired harness. The 30 runs had no errors, every session listed each SSDP skill exactly once, and every skill resolved from the project install. Raw data: `eval/results/redesign/live/`; gates: `eval/rework_gates.py evaluate-redesign` -> `eval/results/redesign/live-summary.json`.
+
+**Strict version gate: FAILED (1/8).**
+
+| Case | Pass | Ordering field true | Strict-rubric PASS | Observed |
+| --- | ---: | ---: | ---: | --- |
+| T6 6.2.0 (regression) | 1/4 | 1/4 | 1/4 | 4/4 named 6.2.0, refused to adopt the loaded package, reported non-closure, made no edits |
+| T5 6.3.0 (regression) | 0/2 | 0/2 | 0/2 | r1 behaved as T6; **r0 implemented the workplan without ever naming 6.3.0 (silent mismatch)** |
+| T4 6.4.0 (development) | 0/2 | 0/2 | 0/2 | both named 6.4.0, did not adopt, asked for a source or an adoption decision, made no edits |
+
+The behavioral change against `c01eeee` is real but incomplete. Self-adoption fell from 5 of 8 version-bound runs to 0 of 8, and 7 of 8 runs made the governed non-closure decision. The gate still fails on its merits because of the T5 r0 silent mismatch. Six more runs fail only the frozen ordering field. In those runs the executor read the installed package's `PROTOCOL_VERSION`/manifest to identify the loaded version before stating the governing one. The frozen oracle exempts only the versioning owner and version helper, so it counts that read as protocol-dependent action. Whether the read is part of the version decision is a question for Review or D3. It was not re-adjudicated here, because changing the oracle after observing outcomes is forbidden.
+
+**Unversioned no-lookup:** 0/9 candidate violations on T1/T7/T8.
+
+**Criterion 4 redesign burden rule: FAILED.**
+
+| Route | 6.5 bytes | Candidate bytes | Median ratio | Direct reduction | Within +10% |
+| --- | --- | --- | ---: | --- | --- |
+| T1 local repair | 8,360 ×3 | 8,962 ×3 | 1.072 | no | yes |
+| T7 unversioned workplan | 8,360 / 25,188 / 8,360 | 26,705 / 8,962 / 8,962 | 1.072 | no | yes |
+| T8 fresh feature + docs | 8,360 ×3 | 8,962 ×3 | 1.072 | no | yes |
+
+Panel net ratio: 1.072 (rule: at most 0.85). In 17 of 18 ordinary runs across both variants, the executor loaded only the invoked entrypoint; the exceptions were one workflow-owner read per variant on T7. The live burden therefore equals entrypoint size. Relative to 6.5, 6.6 cannot reduce it unless it shrinks the consumed entrypoint, and the minimal safety kernel plus strict version step add a fixed ~600 B. Diagnostics (turns / cost / input tokens, three runs summed; not the criterion): T1 29/28, $0.46/$0.43, 1.14M/1.04M; T7 45/45, $0.74/$0.65, 1.81M/1.56M; T8 34/34, $0.53/$0.58, 1.20M/1.25M (6.5/6.6).
+
+**Correctness:** every T1/T7/T8 run of both variants passed its collected hidden oracle and assessor. T2 and T3 candidates were 2/2 PASS each. No regression was observed.
+
+**Stop disposition.** Per workplan 16.10.4 item 7 and the task instruction, D4 stops here. No rewording, prompt layer, metric, threshold or route change was made after the runs. Final assembled qualification and candidate freeze were not performed. The questions below are routed to the D3 owner:
+
+1. **Version.** The strict binding doctrine is effective against self-adoption: 0/8 runs self-adopted, compared with 5/8 before. Prose at the entrypoint still does not guarantee the statement ordering: one run never stated the version, and six stated it after inspecting package identity. D3 must decide one of two things. Either the governed "before protocol-dependent action" claim treats loaded-identity inspection as part of the version decision, which would mean re-qualifying under a newly frozen oracle on fresh cases. Or reliable ordering is not achievable by a portable prose entry contract, which is the section 16.8 first trigger and evidence for the Protocol 7 control-plane reopen.
+2. **Criterion 4.** With the reference harness, three ordinary routes and two protocol designs now show that ordinary live protocol burden equals the consumed entrypoint. 6.6's structural reductions lie in material that agents do not read. An honest criterion-4 pass would require materially smaller entrypoints. Otherwise D3 must restate criterion 4, for example by accepting a bounded small burden increase in exchange for the safety kernel and strict binding, or must remove permanent 6.6 machinery that is unjustified by burden. Selection improvement (section 4.1) remains a separate positive result.

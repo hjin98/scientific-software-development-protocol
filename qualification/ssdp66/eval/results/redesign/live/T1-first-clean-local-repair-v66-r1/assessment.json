@@ -1,0 +1,9 @@
+{
+  "notes": "The oracle reports that the hidden tests were collected and passed (\"OK\"). The diff changes one line in gridtools/io.py, the file that owns the defect: the off-by-one loop bound becomes range(len(edges)-1), which matches the docstring. There are no untracked files, so no workplan, project-memory, formal-definition or other process artifact was created. The executor's report mentions internal labels, but these produced no artifacts.",
+  "rubric_items": {
+    "diff_confined_to_defect_owner_and_tests": true,
+    "hidden_oracle_tests_pass": true,
+    "no_process_artifacts_created": true
+  },
+  "verdict": "PASS"
+}

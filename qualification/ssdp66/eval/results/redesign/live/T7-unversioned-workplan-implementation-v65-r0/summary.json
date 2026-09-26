@@ -1,0 +1,46 @@
+{
+  "duration_ms": 40293,
+  "entry_and_burden": {
+    "first_mutation_detail": "{\"file_path\": \"/tmp/ssdp66-1x8o9c_w/project/sigproc/rescale.py\", \"content\": \"def rescale(values, low, high):\\n    if not values:\\n        raise ValueError(\\\"val",
+    "first_mutation_index": 8,
+    "first_protocol_action_detail": "{\"pattern\": \"status:|active/|completed|implemented\", \"path\": \"/tmp/ssdp66-1x8o9c_w/project/.claude/skills/software-implementation/references/workflow-and-workpl",
+    "first_protocol_action_index": 14,
+    "governing_knowable_index": 2,
+    "governing_stated_before_mutation": null,
+    "governing_stated_before_protocol_action_or_mutation": null,
+    "governing_stated_index": null,
+    "governing_version": null,
+    "observed_active_ssdp_bytes": 8360,
+    "protocol_file_reads": 2,
+    "remote_or_source_lookups": [],
+    "ssdp_entrypoint_bytes": 8360,
+    "ssdp_reference_read_bytes": 0,
+    "versioning_owner_reads": 0
+  },
+  "final": "**Implementation complete.**\n\n- Added `sigproc/rescale.py`: `rescale(values, low, high)` \u2014 linear map of min\u2192`low`, max\u2192`high`; raises `ValueError` on empty or constant input; does not mutate the input list.\n- Added `tests/test_rescale.py` covering: normal range, negative range, constant input, empty input, input-list-unchanged \u2014 matching the workplan's acceptance criteria exactly.\n- Ran the full suite (`python3 -m unittest discover -s tests`): 6/6 pass, including the pre-existing `test_smoothing.py` (no regressions).\n- Updated `workplans/active/WP-SIGNAL-RESCALE.md` status from `accepted` \u2192 `implemented`.\n\nNo upstream (D1\u2013D3) authority was touched; no challenge needed \u2014 the spec was unambiguous and directly concretizable.",
+  "input_tokens_total": 702539,
+  "is_error": false,
+  "models": [
+    "claude-sonnet-5"
+  ],
+  "num_turns": 16,
+  "oracle": {
+    "hidden_collected": true,
+    "tests_pass": true,
+    "tests_tail": [
+      "OK"
+    ]
+  },
+  "output_tokens": 2803,
+  "protocol_read_bytes_on_disk": 0,
+  "protocol_reads": [],
+  "skills_invoked": [
+    "software-implementation"
+  ],
+  "total_cost_usd": 0.275965,
+  "untracked": [
+    "sigproc/rescale.py",
+    "tests/test_rescale.py"
+  ],
+  "wall_s": 41.1
+}

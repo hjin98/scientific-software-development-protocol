@@ -1,0 +1,47 @@
+{
+  "duration_ms": 31650,
+  "entry_and_burden": {
+    "first_mutation_detail": "{\"replace_all\": false, \"file_path\": \"/tmp/ssdp66-flvxxk5a/project/stats/describe.py\", \"old_string\": \"def mean(values):\\n    \\\"\\\"\\\"Arithmetic mean of ``values``;",
+    "first_mutation_index": 7,
+    "first_protocol_action_detail": null,
+    "first_protocol_action_index": null,
+    "governing_knowable_index": null,
+    "governing_stated_before_mutation": null,
+    "governing_stated_before_protocol_action_or_mutation": null,
+    "governing_stated_index": null,
+    "governing_version": null,
+    "observed_active_ssdp_bytes": 8962,
+    "protocol_file_reads": 0,
+    "remote_or_source_lookups": [],
+    "ssdp_entrypoint_bytes": 8962,
+    "ssdp_reference_read_bytes": 0,
+    "versioning_owner_reads": 0
+  },
+  "final": "All 6 tests pass.\n\n**Completion**\n\n- Added `median(values)` to `stats/describe.py:11`, sorting a copy of the input and averaging the two middle values on even-length samples; raises `ValueError(\"median of an empty sample\")` on empty input, mirroring `mean`'s contract.\n- Added `MedianTests` to `tests/test_describe.py` (odd/even length, non-mutation of input, empty-sample error).\n- Listed `stats.describe.median` in `README.md`'s API section.\n- Evidence: `python3 -m unittest discover -v` \u2014 6/6 pass, no other affected surface (single-module, no other callers of `mean`/`describe`).\n- No upstream (D1\u2013D3) reopening needed; this is a local, same-pattern D4 addition.",
+  "input_tokens_total": 427666,
+  "is_error": false,
+  "models": [
+    "claude-sonnet-5"
+  ],
+  "num_turns": 11,
+  "oracle": {
+    "check_readme": {
+      "detail": "README API lists median",
+      "pass": true
+    },
+    "hidden_collected": true,
+    "tests_pass": true,
+    "tests_tail": [
+      "OK"
+    ]
+  },
+  "output_tokens": 2254,
+  "protocol_read_bytes_on_disk": 0,
+  "protocol_reads": [],
+  "skills_invoked": [
+    "software-implementation"
+  ],
+  "total_cost_usd": 0.21280339999999998,
+  "untracked": [],
+  "wall_s": 32.5
+}

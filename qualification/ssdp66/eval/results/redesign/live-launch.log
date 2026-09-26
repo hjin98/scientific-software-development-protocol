@@ -1,0 +1,36 @@
++ M='python3 run_matrix.py --layer trajectory --out results/redesign/live --parallel 4'
++ V65='--variant v65=/tmp/claude-1000/-home-samjin-agent-skills-scientific-software-development-protocol/6815631b-522b-4cf4-916e-bb28923b20d8/scratchpad/variants/v65/dist/skills'
++ V66='--variant v66=/tmp/claude-1000/-home-samjin-agent-skills-scientific-software-development-protocol/6815631b-522b-4cf4-916e-bb28923b20d8/scratchpad/variants/v66/dist/skills'
++ python3 run_matrix.py --layer trajectory --out results/redesign/live --parallel 4 --variant v65=/tmp/claude-1000/-home-samjin-agent-skills-scientific-software-development-protocol/6815631b-522b-4cf4-916e-bb28923b20d8/scratchpad/variants/v65/dist/skills --variant v66=/tmp/claude-1000/-home-samjin-agent-skills-scientific-software-development-protocol/6815631b-522b-4cf4-916e-bb28923b20d8/scratchpad/variants/v66/dist/skills --reps 3 --only T1-first-clean-local-repair --only T7-unversioned-workplan-implementation --only T8-ordinary-feature-with-docs
+{"run": "T1-first-clean-local-repair-v65-r0", "exit": 0}
+{"run": "T1-first-clean-local-repair-v66-r0", "exit": 0}
+{"run": "T1-first-clean-local-repair-v66-r1", "exit": 0}
+{"run": "T1-first-clean-local-repair-v65-r1", "exit": 0}
+{"run": "T1-first-clean-local-repair-v65-r2", "exit": 0}
+{"run": "T1-first-clean-local-repair-v66-r2", "exit": 0}
+{"run": "T7-unversioned-workplan-implementation-v66-r0", "exit": 0}
+{"run": "T7-unversioned-workplan-implementation-v65-r0", "exit": 0}
+{"run": "T7-unversioned-workplan-implementation-v65-r1", "exit": 0}
+{"run": "T7-unversioned-workplan-implementation-v66-r1", "exit": 0}
+{"run": "T7-unversioned-workplan-implementation-v66-r2", "exit": 0}
+{"run": "T7-unversioned-workplan-implementation-v65-r2", "exit": 0}
+{"run": "T8-ordinary-feature-with-docs-v65-r0", "exit": 0}
+{"run": "T8-ordinary-feature-with-docs-v66-r0", "exit": 0}
+{"run": "T8-ordinary-feature-with-docs-v66-r1", "exit": 0}
+{"run": "T8-ordinary-feature-with-docs-v65-r1", "exit": 0}
+{"run": "T8-ordinary-feature-with-docs-v65-r2", "exit": 0}
+{"run": "T8-ordinary-feature-with-docs-v66-r2", "exit": 0}
++ python3 run_matrix.py --layer trajectory --out results/redesign/live --parallel 4 --variant v66=/tmp/claude-1000/-home-samjin-agent-skills-scientific-software-development-protocol/6815631b-522b-4cf4-916e-bb28923b20d8/scratchpad/variants/v66/dist/skills --reps 4 --only T6-version-bound-stage-continuation-holdout
+{"run": "T6-version-bound-stage-continuation-holdout-v66-r0", "exit": 0}
+{"run": "T6-version-bound-stage-continuation-holdout-v66-r1", "exit": 0}
+{"run": "T6-version-bound-stage-continuation-holdout-v66-r2", "exit": 0}
+{"run": "T6-version-bound-stage-continuation-holdout-v66-r3", "exit": 0}
++ python3 run_matrix.py --layer trajectory --out results/redesign/live --parallel 4 --variant v66=/tmp/claude-1000/-home-samjin-agent-skills-scientific-software-development-protocol/6815631b-522b-4cf4-916e-bb28923b20d8/scratchpad/variants/v66/dist/skills --reps 2 --only T5-version-bound-workplan-holdout --only T4-version-bound-workplan --only T2-tolerance-within-envelope --only T3-d2-owned-default
+{"run": "T2-tolerance-within-envelope-v66-r0", "exit": 0}
+{"run": "T2-tolerance-within-envelope-v66-r1", "exit": 0}
+{"run": "T4-version-bound-workplan-v66-r0", "exit": 0}
+{"run": "T4-version-bound-workplan-v66-r1", "exit": 0}
+{"run": "T3-d2-owned-default-v66-r0", "exit": 0}
+{"run": "T3-d2-owned-default-v66-r1", "exit": 0}
+{"run": "T5-version-bound-workplan-holdout-v66-r0", "exit": 0}
+{"run": "T5-version-bound-workplan-holdout-v66-r1", "exit": 0}

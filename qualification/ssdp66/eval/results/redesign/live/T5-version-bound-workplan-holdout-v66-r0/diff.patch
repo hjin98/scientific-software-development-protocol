@@ -1,0 +1,65 @@
+diff --git a/tabular/header.py b/tabular/header.py
+new file mode 100644
+index 0000000..a7d62a3
+--- /dev/null
++++ b/tabular/header.py
+@@ -0,0 +1,16 @@
++def read_header(path: str) -> list[str]:
++    with open(path, encoding="utf-8") as handle:
++        line = handle.readline()
++
++    if not line:
++        raise ValueError(f"empty file: {path}")
++
++    names = [name.strip() for name in line.rstrip("\n").split(",")]
++
++    seen = set()
++    for name in names:
++        if name in seen:
++            raise ValueError(f"duplicate column name: {name!r}")
++        seen.add(name)
++
++    return names
+diff --git a/tests/test_header.py b/tests/test_header.py
+new file mode 100644
+index 0000000..ea60481
+--- /dev/null
++++ b/tests/test_header.py
+@@ -0,0 +1,37 @@
++import tempfile
++import unittest
++from pathlib import Path
++
++from tabular.header import read_header
++
++
++class HeaderTests(unittest.TestCase):
++    def test_normal_header(self):
++        with tempfile.TemporaryDirectory() as tmp:
++            path = Path(tmp, "a.csv")
++            path.write_text("a,b,c\n1,2,3\n", encoding="utf-8")
++            self.assertEqual(read_header(str(path)), ["a", "b", "c"])
++
++    def test_whitespace_stripped(self):
++        with tempfile.TemporaryDirectory() as tmp:
++            path = Path(tmp, "a.csv")
++            path.write_text(" a , b,c \n1,2,3\n", encoding="utf-8")
++            self.assertEqual(read_header(str(path)), ["a", "b", "c"])
++
++    def test_empty_file_raises(self):
++        with tempfile.TemporaryDirectory() as tmp:
++            path = Path(tmp, "a.csv")
++            path.write_text("", encoding="utf-8")
++            with self.assertRaises(ValueError):
++                read_header(str(path))
++
++    def test_duplicate_names_raise(self):
++        with tempfile.TemporaryDirectory() as tmp:
++            path = Path(tmp, "a.csv")
++            path.write_text("a,b,a\n1,2,3\n", encoding="utf-8")
++            with self.assertRaises(ValueError):
++                read_header(str(path))
++
++
++if __name__ == "__main__":
++    unittest.main()
