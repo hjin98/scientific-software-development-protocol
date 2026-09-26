@@ -36,15 +36,27 @@ The corpus should include both simplification cases and preservation sentinels. 
 - specialized definition/import/parameter-binding;
 - representative security, recovery/concurrency, and release/version cases.
 
-Compare candidate 6.6 against exact accepted 6.5 source `7f7b5e24858e813e45ace867a7f8ea5180f43bf0`, not a stale installed approximation, under the same model identity/version, reasoning mode, tool permissions, task snapshot, and host configuration as practical. Record confounders and counterbalance run order when service/model drift could bias one variant.
+Bind the baseline at two identities:
+
+- canonical semantic source: `7f7b5e24858e813e45ace867a7f8ea5180f43bf0`;
+- accepted-current installed/generated package/profile surface: cutover `2b8ce17b1f086dc85e6fa8014c4a7bcc45ef60cb`.
+
+Use canonical source for semantic/source comparisons and the accepted-current generated package surface for discovery/selection/runtime-package comparisons. Do not substitute a stale locally installed approximation or mutable default branch.
+
+Compare candidate 6.6 against the corresponding 6.5 baseline under the same model identity/version, reasoning mode, tool permissions, task snapshot, harness/install mode, and host configuration as practical. Record confounders and counterbalance run order when service/model drift could bias one variant.
 
 Separate execution from assessment. Prefer deterministic owner/external oracles. Otherwise use an independent evaluator/reviewer that did not author the trajectory and, where practical, is blinded to protocol variant. The execution agent's own completion claim is never sufficient correctness evidence.
 
-Measure three layers separately:
+Measure four layers separately:
 
-1. static mandatory-read closure: source bytes/tokens and routing depth required by doctrine;
-2. observed active protocol context: protocol material actually loaded in a live run;
-3. total trajectory behavior: tool/agent steps, intervention, unnecessary evidence/tests, candidate/review churn, cost, stop behavior, and final outcome.
+0. **catalog discovery/selection**: total exposed skill metadata footprint plus whether the harness selects an admissible SSDP root, avoids materially irrelevant roots, and honors explicit skill selection where supported;
+1. **static mandatory-read closure after root selection**: source bytes/tokens and routing depth required by doctrine;
+2. **observed active protocol context**: protocol material actually loaded in a live run;
+3. **total trajectory behavior**: tool/agent steps, intervention, unnecessary evidence/tests, candidate/review churn, cost, stop behavior, and final outcome.
+
+Selection scenarios define an **admissible root set**, not always one gold label. Include clear D1/D2/D3/D4 tasks, each specialist, mixed-domain tasks where safe rerouting is possible, explicit-skill requests where the harness supports them, and negative/no-SSDP cases. Record missed activation, materially irrelevant activation, and unnecessary multi-skill activation separately.
+
+Static inspection of `description` text can establish size/content properties but cannot prove real harness selection. Live discovery/selection claims require the named harness/model/install mode actually exercised.
 
 Correctness/semantic protection is a feasibility gate. Track final governed outcome, missed authority/affected surface, false acceptance, false/missed Serious Challenge, inappropriate escalation, and historical-capability preservation. Operational and cost signals are optimization evidence only.
 
@@ -58,9 +70,16 @@ Preserve enough provenance to interpret live runs: exact protocol source, task s
 
 ## 2. Qualification counterfactuals
 
-### Kernel and routing
+### Discovery, selection, kernel, and routing
 
 Challenge at least:
+
+- a clear D1/D2/D3/D4/specialist task whose admissible root is not selected;
+- generic descriptions becoming so broad that unrelated/no-SSDP tasks spuriously activate skills;
+- mixed-domain task being falsely failed because the evaluator insists on one arbitrary root despite safe internal rerouting;
+- selection descriptions carrying detailed child doctrine or mutable accepted-version/release state;
+- OpenAI-specific adapter metadata accidentally becoming a generic package-validity requirement;
+- a live-selection claim inferred from static description inspection or from a different harness/model/install mode;
 
 - local D4 work accidentally loading formal-semantics/PEM/history detail;
 - specialized mathematical/import work whose cold semantic owner is unreachable;
@@ -107,9 +126,12 @@ Challenge:
 - recurrence automatically forcing redesign where a clean local repair remains sufficient;
 - family/review count used as pass/fail authority.
 
-### Version and profile/control boundary
+### Version, package, and profile/control boundary
 
 Challenge:
+
+- generic skill bundle being invalidated solely because a vendor adapter is absent/broken when the generic core remains valid;
+- a named vendor adapter silently changing generic semantic ownership instead of only discovery/interface behavior;
 
 - 6.5 skill used for explicit 6.6-bound work without resolving compatible source;
 - 6.6 silently reinterpreting frozen 6.4/6.5 work;
@@ -137,7 +159,10 @@ Challenge:
 Before independent Review, qualification must establish that:
 
 - every accepted 6.5 capability is preserved at a current owner/route or reviewed equal-or-stronger generalization;
+- accepted 6.5 discovery/selection portability capability is preserved: generic metadata remains sufficient for reliable root discovery in tested environments, live claims are environment-bound, and selection failure is distinguished from reference-routing failure;
 - inherited repository/package/profile/Core/frozen-history checks pass where applicable;
+- generic core validation remains distinct from named vendor-adapter validation;
+- discovery/selection, transport closure, and internal activation are qualified as distinct stages;
 - transport closure remains complete while membership/hyperlinks do not imply activation;
 - ordinary routes have a clear structural hot-path reduction plus bounded live evidence of real burden reduction;
 - specialized/high-risk sentinels still recover all applicable cold semantics, including source/context availability;

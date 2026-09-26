@@ -64,6 +64,8 @@ At minimum, 6.6 SHALL preserve:
 - convergence/review-saturation/family-level repair and Stabilization/maintenance-health capabilities;
 - language/tool specialization, security/trust boundaries, release/recovery, documentation, and repository hygiene;
 - immutable historical source/profile/recovery semantics and 6.5 release-state ownership;
+- portable skill discovery/activation versus post-selection reference-routing as distinct evidence boundaries: metadata that helps a harness choose a skill is not proof that the chosen skill loaded/applied its required owners, and internal routing correctness cannot repair a skill that was never selected;
+- generic Agent-Skills-style core validity versus vendor-adapter support as distinct contracts; vendor metadata may improve one harness but cannot define generic SSDP skill validity;
 - current pre-7 orchestration/profile control semantics: Protocol 6.6 may update version-bound prompt/source bindings and generated descendants, but SHALL NOT change machine lifecycle authority, transition semantics, or orchestration profile/control schema merely to realize cognitive optimization.
 
 Compression is acceptable only when the resulting current owner plus explicit retrieval routes preserves equal-or-stronger behavior. Protocol 6.6 must not obtain shorter prompts by weakening acceptance, hiding uncertainty, deleting an applicable cold path, or converting a specialized obligation into an optional suggestion.
@@ -168,7 +170,25 @@ Each entrypoint should preferentially contain:
 4. a short owner-specific method/invariants;
 5. completion/Challenge contract.
 
-Skill/frontmatter and host-adapter descriptions are activation interfaces, not miniature protocol summaries. Keep them sufficient to route correctly, but do not duplicate child doctrine there. Prefer direct role -> concern-owner activation when the predicate is already knowable; an added routing hop must narrow the question or add material semantics rather than exist for taxonomy alone.
+Skill/frontmatter and host-adapter descriptions are **pre-load discovery/selection interfaces**, not miniature protocol summaries. Keep them sufficient to make the skill's owned task class and important exclusions distinguishable without duplicating child doctrine or mutable release state.
+
+Treat selection and internal routing separately:
+
+```text
+catalog metadata exposed
+  -> zero/one/admissible skill root selected
+  -> SKILL.md loaded
+  -> conditional concern owners loaded
+  -> governed decision
+```
+
+A bad selection cannot be repaired by a perfect cold-reference graph that is never reached. Conversely, selecting the right root does not prove its conditional owners were read or applied. Optimize both boundaries independently.
+
+Do not overfit selection to a rigid single-label taxonomy. For mixed/ambiguous tasks define an **admissible root set** whose members can safely reconstruct/reroute to the earliest semantic owner; evaluate false activation, missed activation, and materially wasteful multi-activation rather than requiring one arbitrary exact root when several are semantically safe.
+
+Generic frontmatter `name`/`description` remains the portable core selection surface. `agents/openai.yaml` and future vendor adapters are separately scoped host interfaces: they may be optimized and qualified for their named harness but SHALL NOT become generic validity or hidden authority.
+
+Prefer direct role -> concern-owner activation when the predicate is already knowable; an added routing hop must narrow the question or add material semantics rather than exist for taxonomy alone.
 
 Long generic doctrine, duplicated evidence rules, repeated PEM schema mechanics, repeated workflow choreography, and examples that do not change routing should live at canonical conditional owners.
 
@@ -371,7 +391,8 @@ Implementation is expected to touch, as justified by final design:
 - `development-workflow-prompts.md` or its replacement representation, while preserving a complete manual/portable execution path that does not depend on hidden orchestrator state;
 - versioning/source-resolution surfaces needed for the cheap version handshake;
 - protocol self-evaluation fixtures/harness and tests;
-- build/package/profile/snapshot generation and corresponding tests, including `protocol-manifest.json`/host-adapter metadata and the distinction between transport closure and activation;
+- all role/specialist frontmatter `name`/`description` selection metadata and supported host adapters such as `agents/openai.yaml`, with generic-core versus adapter validation kept distinct;
+- build/package/profile/snapshot generation and corresponding tests, including `protocol-manifest.json`/host-adapter metadata and the distinction between discovery, activation, transport closure, and conditional reference loading;
 - root README/CHANGELOG and semantic history at closeout.
 
 This list is an initial affected surface, not a license to edit every file. Implementation should touch the smallest owner set that closes the accepted design.
@@ -402,8 +423,9 @@ Avoid new permanent frameworks when existing Markdown, Python validation/build s
 1. Freeze the exact 6.5 accepted source/recovery and current branch base.
 2. Reconcile the project-local PEM accepted/base/overlay state or retain explicit `REVIEW_REQUIRED`; construct the canonical HAS only after that basis is valid.
 3. Build a bounded capability-preservation map from current 6.5 and accepted historical lineage, with special attention to 6.2 progressive disclosure, 6.3 PEM, 6.4 semantic precision, and 6.5 proportional rigor. Treat the map as review evidence, not a new semantic registry; organize by capability family/current owner/activation/acceptance sentinel rather than replaying every historical clause.
-4. Measure current static mandatory-read closure and, where practical, observed active protocol context for representative routes.
-5. Load the cold evaluation/qualification contract and freeze the compact development and holdout/adversarial eval sets plus their claim boundaries before optimizing the protocol.
+4. Bind the exact accepted 6.5 behavioral baseline at both layers: canonical semantic source `7f7b5e24858e813e45ace867a7f8ea5180f43bf0` and accepted-current installed/generated package/profile surface at cutover `2b8ce17b1f086dc85e6fa8014c4a7bcc45ef60cb`.
+5. Measure current catalog-selection metadata footprint, static mandatory-read closure after root selection, and, where practical, observed live selection/active protocol context for representative routes.
+6. Load the cold evaluation/qualification contract and freeze the compact development and holdout/adversarial eval sets plus their claim boundaries before optimizing the protocol.
 
 **Gate:** no semantic source mutation until the memory-basis disposition, preservation obligations, baseline measurements, and eval-set identities are reviewable.
 
@@ -411,11 +433,12 @@ Avoid new permanent frameworks when existing Markdown, Python validation/build s
 
 1. Extract conditional semantic-definition/traceability material from the universal hot path.
 2. Reduce role/specialist entrypoints to bounded routers/contracts.
-3. Deduplicate generic doctrine to canonical owners plus local micro-invariants.
-4. Rework workflow prompt representation toward invariants/boundaries/acceptance/escalation rather than procedural itineraries while retaining a complete manual/portable route.
-5. Verify every moved capability remains discoverable from every materially applicable entrypoint.
-6. Verify **transport closure separately from activation**: cold referenced owners required by a packaged skill must remain present/reachable in the bundle, while package membership or ordinary hyperlinks must not make them eagerly active.
-7. Prefer deletion/extraction over adding new routing layers; a shorter file graph that requires more hops/inference is not an improvement.
+3. Refine generic skill descriptions and named host-adapter descriptions only as needed to improve discovery/selection while reducing metadata burden; do not encode mutable protocol lifecycle state or detailed child doctrine in selection metadata.
+4. Deduplicate generic doctrine to canonical owners plus local micro-invariants.
+5. Rework workflow prompt representation toward invariants/boundaries/acceptance/escalation rather than procedural itineraries while retaining a complete manual/portable route.
+6. Verify every moved capability remains discoverable from every materially applicable entrypoint.
+7. Verify **discovery, transport, and activation separately**: selection metadata must make the appropriate root reachable; cold owners required by that root must remain present/reachable in the bundle; package membership or ordinary hyperlinks must not make them eagerly active.
+8. Prefer deletion/extraction over adding new routing layers; a shorter file graph that requires more hops/inference is not an improvement.
 
 **Gate:** routing/closure tests plus semantic Review of capability preservation.
 
@@ -460,7 +483,9 @@ Additionally verify:
 
 - universal hot path is materially smaller than 6.5 for designated ordinary routes;
 - no accepted capability lacks a reachable activation path;
+- generic skill metadata preserves reliable discovery/selection for the declared task classes without bloating every prompt with child doctrine or mutable release state;
 - package transport closure remains complete while package membership/hyperlinks do not imply activation;
+- generic Agent Skill validity remains separable from vendor adapters, and any live host compatibility claim is bounded to the exact harness/model/install mode exercised;
 - local/simple tasks do not automatically activate semantic formalism, PEM, multi-agent review, deep evaluation, or Protocol 7 machinery;
 - substantial/high-risk tasks can still recover the full applicable doctrine;
 - Working State/derived summaries cannot self-promote into authority;
@@ -502,9 +527,11 @@ Protocol 6.6 is technically eligible for independent Review only when:
 10. the candidate remains a minimum-justified operational architecture rather than adding a second control framework beside Protocol 7;
 11. manual/portable skill use remains complete without hidden runtime state, hosted services, or mandatory Orchestrator participation;
 12. accepted 6.5 compact-working-state and version-source-resolution semantics have been consolidated rather than duplicated under new names;
-13. package transport closure and activation remain distinct and mechanically/semantically qualified after reference extraction;
-14. live evaluation uses durable scenario/provenance identities and an outcome assessment route independent enough that execution-agent self-assertion cannot manufacture non-regression;
-15. 6.6 profile/snapshot changes preserve current pre-7 lifecycle/control semantics and schema unless a reviewed D3 reopen explicitly changes the version boundary.
+13. discovery/selection, package transport closure, and post-selection activation remain distinct and mechanically/behaviorally qualified after metadata/reference optimization;
+14. selection qualification uses admissible-root semantics for mixed tasks and demonstrates no material increase in missed or wasteful activation on the tested reference environments;
+15. generic package validity remains independent of vendor adapters, while each claimed host adapter is qualified only for its named environment;
+16. live evaluation uses durable scenario/provenance identities and an outcome assessment route independent enough that execution-agent self-assertion cannot manufacture non-regression;
+17. 6.6 profile/snapshot changes preserve current pre-7 lifecycle/control semantics and schema unless a reviewed D3 reopen explicitly changes the version boundary.
 
 A smaller prompt/package is not sufficient. A candidate that is shorter but loses a materially applicable doctrine is No-Pass.
 
@@ -526,6 +553,8 @@ Reopen D3 design if implementation evidence shows any of the following:
 
 - the tiny-kernel split cannot preserve a mandatory cross-domain invariant without broad eager loading;
 - semantic-definition extraction creates ambiguous/conflicting ownership;
+- description/metadata compression causes materially worse skill discovery or selection, or reliable selection appears to require copying child doctrine into the catalog metadata;
+- portable selection behavior cannot be preserved without vendor-specific semantics becoming generic core requirements;
 - Working State requires workflow authority rather than remaining derived cache;
 - useful PEM simplification requires changing memory authority/evidence semantics rather than only its agent-facing interface;
 - empirical evaluation shows the proposed routing consistently increases substantive error or hidden-constraint loss;
