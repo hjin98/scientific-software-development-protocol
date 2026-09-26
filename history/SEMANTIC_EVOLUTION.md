@@ -164,3 +164,16 @@ Protocol 6.5 is a candidate self-governance/qualification/representation strengt
 - **Scientific/numerical consequence:** full statistical/convergence/conditioning treatment is reserved for uncertainty capable of changing scientific/engineering decisions or validity; clearly in-envelope local numerical details use focused applicable checks.
 - **Documentation consequence:** each protocol successor now recompiles/reviews the root README and updates CHANGELOG after semantic stabilization and before candidate freeze; a bounded mechanical check preserves current-version CHANGELOG coverage and README routing without attempting prose-quality scoring.
 - **Compatibility:** intended as a backward-compatible Protocol 6.5 strengthening. It does not waive accepted 6.4 D1-D4 authority, mandatory acceptance, safety/security/external floors, independent Review, frozen historical resources, or release-integrity requirements.
+
+## 2026-09-25 — Protocol 6.5 accepted-current
+
+Protocol 6.5 completed its corrected successor lifecycle without changing the frozen P21 semantics after Review.
+
+- **Semantic candidate:** P21 `7f7b5e24858e813e45ace867a7f8ea5180f43bf0`.
+- **Independent Review:** PASS recorded at `29077c564140d3902ac1764d8eb8acd0b9a6be2c`; no Serious Challenge and no surviving blocker.
+- **Stakeholder ratification:** exact P21 ratified at `95f106558c0c046eb46bc1239cb511231c5cce07`.
+- **Public fallback:** exact P21 was published by descendant `a5451f379f600a2bf14b5e982d39b136eabc666e`.
+- **Recovery:** distinct immutable target `c4d5da1e0acb0e9f27376bf69561e8762747cd2d`, published by mapping descendant `56381b89eb10d473fb6b1ef30c7c4ad14e825954`.
+- **Accepted-current cutover:** `2b8ce17b1f086dc85e6fa8014c4a7bcc45ef60cb` advances accepted-current to 6.5.0 and preserves the complete 6.4 public/recovery mapping in historical state.
+- **Preservation:** D1-D4 authority, minimum justified complexity, active simplicity, evidence applicability, independent Review, PEM safeguards, frozen historical resources, package/profile parity, and compatibility remain preserved. Protocol 7 receives only Revision 6 inheritance identity; its D3 architecture is unchanged and D4 remains unauthorized.
+- **Closeout:** the 6.5 workplans are archived after lifecycle coherence; README/CHANGELOG remain the user-facing guide/capability history while exact mutable release identities remain solely in `PROTOCOL-RELEASE-STATE.yaml`.

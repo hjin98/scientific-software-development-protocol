@@ -1,7 +1,7 @@
 ---
 kind: protocol-workplan-authority-index
 workplan_id: SSDP-6.1-7.0-WORKPLAN-AUTHORITY-INDEX
-protocol_version: 6.4.0
+protocol_version: 6.5.0
 status: active
 created_date: 2026-09-09
 reviewed_date: 2026-09-15
@@ -142,6 +142,7 @@ Protocol 7.0 design/implementation/review SHALL read and satisfy, as one compose
 4. `workplans/active/SSDP-7.0-DETERMINISTIC-CONTROL-PLANE-AND-MANDATORY-ORCHESTRATOR-MIGRATION-REVISION-3-PROTOCOL-6.2-INHERITANCE-RECONCILIATION.md`
 5. `workplans/active/SSDP-7.0-DETERMINISTIC-CONTROL-PLANE-AND-MANDATORY-ORCHESTRATOR-MIGRATION-REVISION-4-PROTOCOL-6.3-INHERITANCE-RECONCILIATION.md`
 6. `workplans/active/SSDP-7.0-DETERMINISTIC-CONTROL-PLANE-AND-MANDATORY-ORCHESTRATOR-MIGRATION-REVISION-5-PROTOCOL-6.4-INHERITANCE-RECONCILIATION.md`
+7. `workplans/active/SSDP-7.0-DETERMINISTIC-CONTROL-PLANE-AND-MANDATORY-ORCHESTRATOR-MIGRATION-REVISION-6-PROTOCOL-6.5-INHERITANCE-RECONCILIATION.md`
 
 Precedence:
 
@@ -150,6 +151,7 @@ Precedence:
 - Revision 3 changes only representation/version inheritance after Protocol 6.2 acceptance: current pre-cutover document-controlled baseline and fallback/rollback became Protocol 6.2, while the parent/Revisions 1-2 D3 architecture semantics remained unchanged;
 - Revision 4 changes only project-learning/version inheritance after Protocol 6.3 acceptance: current pre-cutover document-controlled baseline and fallback/rollback become Protocol 6.3, while the parent/Revisions 1-3 D3 architecture semantics remain unchanged;
 - Revision 5 changes only version/representation inheritance after Protocol 6.4 acceptance: the current pre-cutover fallback/rollback baseline becomes Protocol 6.4 recovery `74bc572ef516cae417437a2027eeff52a2e25c15`, while parent/Revisions 1-4 D3 architecture semantics remain unchanged and Protocol 7 D4 remains unauthorized;
+- Revision 6 changes only version/representation inheritance after Protocol 6.5 acceptance: the current pre-cutover fallback/rollback baseline becomes Protocol 6.5 recovery `c4d5da1e0acb0e9f27376bf69561e8762747cd2d`, while parent/Revisions 1-5 D3 architecture semantics remain unchanged and Protocol 7 D4 remains unauthorized;
 - every parent requirement not explicitly changed by a later revision remains binding.
 
 Current disposition:
@@ -165,46 +167,46 @@ PROTOCOL 6.3 COMPLETION/QUALIFICATION/R2-REVIEW/RECOVERY PREREQUISITE: SATISFIED
 PROTOCOL 6.3 INHERITANCE RECONCILIATION: SATISFIED
 PROTOCOL 6.4 COMPLETION/REVIEW/RECOVERY PREREQUISITE: SATISFIED
 PROTOCOL 6.4 INHERITANCE RECONCILIATION: SATISFIED
-CURRENT PRE-CUTOVER FALLBACK/ROLLBACK BASELINE: Protocol 6.4 recovery 74bc572ef516cae417437a2027eeff52a2e25c15
+PROTOCOL 6.5 COMPLETION/REVIEW/RATIFICATION/RECOVERY PREREQUISITE: SATISFIED
+PROTOCOL 6.5 INHERITANCE RECONCILIATION: SATISFIED
+CURRENT PRE-CUTOVER FALLBACK/ROLLBACK BASELINE: Protocol 6.5 recovery c4d5da1e0acb0e9f27376bf69561e8762747cd2d
 REMAINING PROTOCOL-7-SPECIFIC PRE-D4 REQUIREMENT:
   1. DELIBERATE D3 ORCHESTRATOR ARCHITECTURE REOPEN/SUPERSESSION
 PROTOCOL 7 D4: NOT AUTHORIZED
 ```
 
-Protocol 7 D4 remains unauthorized until the existing deliberate D3 Orchestrator architecture reopen/supersession requirement closes. Revisions 3-4 do not perform that reopen and no `main` or Protocol 7 cutover is implied.
+Protocol 7 D4 remains unauthorized until the existing deliberate D3 Orchestrator architecture reopen/supersession requirement closes. Revisions 3-6 do not perform that reopen and no Protocol 7 cutover is implied.
 
-## Protocol 6.5 frontier-model re-evaluation and successor work
+## Protocol 6.5 completed handoff
 
-Governing workplan, on branch `ssdp-6.5-frontier-model-re-evaluation` only:
+Protocol 6.5 self-governance, release-state, evidence-binding, representation, and proportional-rigor work is complete. The governing workplans are preserved as historical evidence at:
 
-1. `workplans/active/SSDP-6.5-FRONTIER-MODEL-RE-EVALUATION.md`
-2. `workplans/active/SSDP-6.5-D3-D4-IMPLEMENTATION-HANDOFF.md`
+1. `workplans/archive/SSDP-6.5-FRONTIER-MODEL-RE-EVALUATION.md`
+2. `workplans/archive/SSDP-6.5-D3-D4-IMPLEMENTATION-HANDOFF.md`
+3. `workplans/archive/SSDP-6.5-IMPORTANCE-WEIGHTED-ATTENTION-AND-PROPORTIONAL-RIGOR.md`
 
-Diagnostic/adjudication evidence lives under `qualification/ssdp65/`. The frozen P0 control is Protocol 6.4 repository state `55c085261eb827e3047637d045a8e6917ea6b962`; this is a cycle input, not the mutable repository release-state owner. Protocol 7 architecture remains untouched.
-
-Current repository accepted/candidate/public-fallback/recovery/Review/ratification state MUST be resolved from root `PROTOCOL-RELEASE-STATE.yaml`. This index does not duplicate those mutable values.
-
-Current successor disposition:
+Current disposition:
 
 ```text
-P0 CONTROL: FROZEN
-OPUS 5.5 PHASE I-III: COMPLETE / FROZEN
-GPT-5.6 SOL HISTORICAL CROSS-CHECK: COMPLETE
-CROSS-MODEL ADJUDICATION: COMPLETE
-SECOND FRONTIER DIAGNOSTIC: WAIVED FOR THIS CYCLE / CLEAN BRANCH RESERVED
-PHASE IV-V DESIGN: COMPLETE / PASS
-PHASE VI IMPLEMENTATION: COMPLETE / STAGE E CLOSED
-P1: FROZEN — b565e28aeacea002cefe27e6b9594fe99d653c0a
-PHASE VII QUALIFICATION / INDEPENDENT REVIEW: READY
-PROTOCOL 7 D3/D4: UNCHANGED
+P21 SEMANTIC CANDIDATE: 7f7b5e24858e813e45ace867a7f8ea5180f43bf0
+INDEPENDENT REVIEW: PASS — 29077c564140d3902ac1764d8eb8acd0b9a6be2c
+STAKEHOLDER RATIFICATION: RATIFIED — 95f106558c0c046eb46bc1239cb511231c5cce07
+PUBLIC FALLBACK: 7f7b5e24858e813e45ace867a7f8ea5180f43bf0
+RECOVERY: c4d5da1e0acb0e9f27376bf69561e8762747cd2d
+RECOVERY MAPPING COMMIT: 56381b89eb10d473fb6b1ef30c7c4ad14e825954
+ACCEPTED-CURRENT CUTOVER: 2b8ce17b1f086dc85e6fa8014c4a7bcc45ef60cb
+PROTOCOL 7 INHERITANCE OF 6.5: RECONCILED / REVISION 6
+LIFECYCLE STATUS: COMPLETED / ARCHIVED
 ```
+
+Protocol 6.5 is accepted-current. Mutable release identity remains owned only by `PROTOCOL-RELEASE-STATE.yaml`; the exact immutable public fallback and recovery remain distinct. Protocol 6.4 is preserved as historical rollback, and Protocol 7 D3 architecture/D4 authorization remain unchanged.
 
 ## Version/cutover rule
 
 There is exactly one mutable repository release-state owner: `PROTOCOL-RELEASE-STATE.yaml`.
 
 - Repository default/latest is never a protocol-version oracle.
-- Protocol 7 remains proposed/pre-cutover. Its Revision-5 pre-cutover fallback/rollback binding is a frozen Protocol-7 design input; changing that binding requires the narrow post-acceptance inheritance reconciliation already specified by the Protocol 6.5 workplan.
+- Protocol 7 remains proposed/pre-cutover. Its Revision-6 pre-cutover fallback/rollback binding is Protocol 6.5 recovery `c4d5da1e0acb0e9f27376bf69561e8762747cd2d`; Revision 6 changes inheritance identity only and leaves Protocol 7 D3 architecture/D4 authorization unchanged.
 - Under Protocol 7 after qualified cutover, the deterministic orchestrator control plane owns machine lifecycle transitions while workplans/skills/documents remain semantic artifacts.
 - Shadow comparison is permitted only while one side remains explicitly non-authoritative.
 - No `main` merge or Protocol 7 D4 cutover is authorized merely by these active design workplans.
