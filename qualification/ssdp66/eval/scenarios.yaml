@@ -1,0 +1,126 @@
+# Protocol 6.6 frozen evaluation scenario corpus (Stage A).
+#
+# Non-normative evidence coordination. This corpus is frozen before any Protocol 6.6
+# semantic-source optimization. A holdout scenario becomes development data once its
+# result is used to tune the candidate; record that transition in the results file.
+#
+# Layers (qualification contract section 1):
+#   0 selection  - catalog discovery/selection of an admissible SSDP root
+#   1 static     - declared mandatory-read closure after root selection
+#   2 context    - protocol material actually loaded in a live run
+#   3 trajectory - total trajectory behavior plus independently assessed outcome
+schema: ssdp66-eval-scenarios/1
+baseline:
+  semantic_source: 7f7b5e24858e813e45ace867a7f8ea5180f43bf0
+  generated_package_surface: 2b8ce17b1f086dc85e6fa8014c4a7bcc45ef60cb
+
+selection:
+  # admissible: every SSDP root that can safely reconstruct/reroute to the earliest owner.
+  # An empty admissible set means no SSDP skill should activate.
+  development:
+    - id: S01-D1-validity-regime
+      task: "Our stellar-atmosphere radiative transfer model assumes local thermodynamic equilibrium. Decide whether a non-LTE source function is required for the upper-atmosphere line observables we report, and define the validity regime and assumptions the model must state."
+      admissible: [scientific-formulation]
+    - id: S02-D2-stiff-integrator
+      task: "Choose a time-integration scheme for our stiff reaction-diffusion system, and define the expected error, convergence order and how test tolerances should be derived."
+      admissible: [numerical-algorithm-design]
+    - id: S03-D3-restart-redesign
+      task: "Redesign our simulation's checkpoint/restart subsystem so worker processes no longer share mutable state, and produce an implementation workplan for the team."
+      admissible: [software-design]
+    - id: S04-D4-local-bug
+      task: "parse_grid() in grid/io.py drops the last cell when the grid size is odd. Fix it; the existing tests show the failure."
+      admissible: [software-implementation]
+    - id: S05-docs
+      task: "Rewrite the user-guide section that explains the solver configuration options so it matches the current code and accepted method paper."
+      admissible: [software-documentation]
+    - id: S06-audit
+      task: "Assess whether the io/ subsystem of our simulation code has become harder to maintain over the last year, and report the risk hotspots."
+      admissible: [software-maintenance-audit]
+    - id: S07-hygiene
+      task: "The release is done. Clean up the merged feature branches and leftover scratch files and archive the completed workplan."
+      admissible: [repository-hygiene]
+    - id: S08-mixed-mc-variance
+      task: "After refactoring how random-number streams are split across threads, the Monte Carlo estimator's reported variance looks wrong. Investigate and fix it."
+      admissible: [software-implementation, numerical-algorithm-design]
+    - id: S09-negative-poem
+      task: "Write a four-line poem about autumn leaves."
+      admissible: []
+    - id: S10-negative-email
+      task: "Draft a short, polite email to my landlord about a leaking kitchen faucet."
+      admissible: []
+    - id: S11-explicit-skill
+      task: "Use the software-design skill to review the architecture proposal in docs/proposal.md for ownership and state problems."
+      admissible: [software-design]
+  holdout:
+    - id: H01-reduction-order
+      task: "Our summation reduction gives different results on GPU and CPU, beyond the test tolerance. Decide whether the reduction order is part of the numerical contract and what the tolerance should be."
+      admissible: [numerical-algorithm-design, software-implementation, software-design]
+    - id: H02-D1-observable
+      task: "Define the effective diffusion coefficient we report in the paper as an observable, including the assumptions under which it is meaningful."
+      admissible: [scientific-formulation]
+    - id: H03-D4-feature
+      task: "Add a --dry-run flag to our simulation CLI that prints the planned output files without writing them."
+      admissible: [software-implementation]
+    - id: H04-negative-books
+      task: "Recommend three good science-fiction novels for a long flight."
+      admissible: []
+    - id: H05-committed-artifacts
+      task: "Remove the build/ directory and stale .pyc files that were accidentally committed to the repository."
+      admissible: [repository-hygiene, software-implementation]
+
+routes:
+  # Post-selection activation expectations. concern keys resolve through
+  # harness.CONCERN_FILES for each protocol variant.
+  development:
+    - id: R1-local-d4-repair
+      root: software-implementation
+      fires: []
+      forbid: [pem, pem_schema, semantic_definition, workflow, history, prompts]
+    - id: R2-d4-with-workplan-and-tests
+      root: software-implementation
+      fires: [workflow, testing]
+      forbid: [pem, pem_schema, semantic_definition, history]
+    - id: R3-d3-mature-replacement
+      root: software-design
+      fires: [workflow, pem, convergence]
+      forbid: [pem_schema, history]
+    - id: R4-d2-specialized-import
+      root: numerical-algorithm-design
+      fires: [semantic_definition]
+      forbid: [pem, pem_schema, history]
+  holdout:
+    - id: R5-d1-parameter-default-binding
+      root: scientific-formulation
+      fires: [semantic_definition, workflow]
+      forbid: [pem_schema, history]
+    - id: R6-memory-governance-update
+      root: software-maintenance-audit
+      fires: [pem, pem_schema]
+      forbid: [semantic_definition, history]
+
+trajectories:
+  # Layer-3 tasks run in fixture repositories under eval/fixtures/<id>/.
+  # Prompt convention (frozen at Stage A after the baseline probe showed the harness
+  # does not self-activate SSDP for a trivial local fix): "Use the <root> skill. " +
+  # fixture TASK.md. Selection is measured separately in layer 0, so the trajectory
+  # comparison isolates post-selection behavior.
+  # The oracle is deterministic where possible; judgement items are assessed by an
+  # evaluator context that did not execute the trajectory and is blinded to variant.
+  development:
+    - id: T1-first-clean-local-repair
+      fixture: T1-first-clean-local-repair
+      root: software-implementation
+      oracle: "hidden tests pass; diff confined to the defect owner; no workplan/PEM/semantic-definition machinery created"
+    - id: T2-tolerance-within-envelope
+      fixture: T2-tolerance-within-envelope
+      root: software-implementation
+      oracle: "tolerance derived from the documented D2 error bound (not widened arbitrarily, not tightened to machine epsilon); no research campaign; hidden tests pass"
+  holdout:
+    - id: T3-d2-owned-default
+      fixture: T3-d2-owned-default
+      root: software-implementation
+      oracle: "does not silently change the D2-owned default; routes the change to the D2 owner / surfaces the D2 binding before any code change"
+    - id: T4-version-bound-workplan
+      fixture: T4-version-bound-workplan
+      root: software-implementation
+      oracle: "detects that the governing workplan is bound to Protocol 6.4 and does not silently apply newer doctrine; resolves or requests compatible 6.4 source"

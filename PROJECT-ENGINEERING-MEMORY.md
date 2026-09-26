@@ -5,12 +5,12 @@ project_id: hjin98-scientific-software-development-protocol
 repository: hjin98/scientific-software-development-protocol
 scope: repository
 coverage_state: PARTIAL
-coverage_basis: "Reconciled through the frozen accepted Protocol 6.4 P0 control, including bounded Protocol 6.2-6.4 bootstrap/recovery, routing, frozen-profile and independent-Review evidence plus current 6.5 candidate implementation learning. Earlier unrelated project history is not claimed exhaustive."
-reconciled_through: 55c085261eb827e3047637d045a8e6917ea6b962
+coverage_basis: "Reconciled through the accepted Protocol 6.5 integrated state, including bounded Protocol 6.2-6.5 bootstrap/recovery, routing, frozen-profile and independent-Review evidence. The Protocol 6.5 cycle's memory content was part of reviewed/ratified semantic candidate 7f7b5e24858e813e45ace867a7f8ea5180f43bf0 and is integrated unchanged on main; its 6.5 release lifecycle episode is not yet recorded as a further SP-002 application. Earlier unrelated project history is not claimed exhaustive."
+reconciled_through: 23e46543c174a8451bbadc402df63538105eab10
 accepted_base:
-  project_state: 55c085261eb827e3047637d045a8e6917ea6b962
-  basis: "Frozen Protocol 6.4 P0 integrated accepted repository state for this 6.5 cycle; mutable release identities remain owned by PROTOCOL-RELEASE-STATE.yaml."
-candidate_overlay: "ssdp-6.5-frontier-model-re-evaluation candidate overlay; branch publication is implementation evidence only and is not self-declared accepted."
+  project_state: 23e46543c174a8451bbadc402df63538105eab10
+  basis: "Accepted Protocol 6.5 integrated repository state on main (the project-designated integrated publication line for accepted/base memory) after accepted-current cutover 2b8ce17b1f086dc85e6fa8014c4a7bcc45ef60cb; PEM bytes are identical to reviewed/ratified 6.5 candidate 7f7b5e24858e813e45ace867a7f8ea5180f43bf0. Mutable release identities remain owned by PROTOCOL-RELEASE-STATE.yaml."
+candidate_overlay: "ssdp-6.6-cognitive-operational-optimization candidate overlay; limited to accepted-base metadata reconciliation and the PC-001 owner-route remap to the unchanged accepted 6.5 owner; branch publication is not self-declared accepted."
 detail_files: []
 ---
 
@@ -132,9 +132,9 @@ applicability:
   - successor profile generation
   - generated snapshot parity
 authority_binding: AUTHORITY_BOUND
-authority_owner: "hjin98/scientific-software-development-protocol@55c085261eb827e3047637d045a8e6917ea6b962:source/shared/references/protocol-versioning-and-compatibility.md"
+authority_owner: "hjin98/scientific-software-development-protocol@7f7b5e24858e813e45ace867a7f8ea5180f43bf0:source/shared/references/protocol-versioning-and-compatibility.md"
 authority_evidence:
-  - "hjin98/scientific-software-development-protocol@55c085261eb827e3047637d045a8e6917ea6b962:source/shared/references/protocol-versioning-and-compatibility.md"
+  - "hjin98/scientific-software-development-protocol@7f7b5e24858e813e45ace867a7f8ea5180f43bf0:source/shared/references/protocol-versioning-and-compatibility.md"
 binding_health: HEALTHY
 guidance_level: OBSERVED
 relations: []

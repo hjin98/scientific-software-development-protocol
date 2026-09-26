@@ -1,0 +1,227 @@
+{
+  "catalog": {
+    "numerical-algorithm-design": {
+      "frontmatter": {
+        "bytes": 285,
+        "tokens_proxy": 54
+      },
+      "openai_adapter": {
+        "bytes": 137,
+        "tokens_proxy": 22
+      }
+    },
+    "repository-hygiene": {
+      "frontmatter": {
+        "bytes": 365,
+        "tokens_proxy": 56
+      },
+      "openai_adapter": {
+        "bytes": 120,
+        "tokens_proxy": 19
+      }
+    },
+    "scientific-formulation": {
+      "frontmatter": {
+        "bytes": 276,
+        "tokens_proxy": 50
+      },
+      "openai_adapter": {
+        "bytes": 138,
+        "tokens_proxy": 21
+      }
+    },
+    "software-design": {
+      "frontmatter": {
+        "bytes": 302,
+        "tokens_proxy": 55
+      },
+      "openai_adapter": {
+        "bytes": 123,
+        "tokens_proxy": 20
+      }
+    },
+    "software-documentation": {
+      "frontmatter": {
+        "bytes": 307,
+        "tokens_proxy": 54
+      },
+      "openai_adapter": {
+        "bytes": 122,
+        "tokens_proxy": 18
+      }
+    },
+    "software-implementation": {
+      "frontmatter": {
+        "bytes": 291,
+        "tokens_proxy": 50
+      },
+      "openai_adapter": {
+        "bytes": 136,
+        "tokens_proxy": 20
+      }
+    },
+    "software-maintenance-audit": {
+      "frontmatter": {
+        "bytes": 404,
+        "tokens_proxy": 66
+      },
+      "openai_adapter": {
+        "bytes": 137,
+        "tokens_proxy": 23
+      }
+    }
+  },
+  "catalog_totals": {
+    "adapter_bytes": 913,
+    "frontmatter_bytes": 2230,
+    "frontmatter_tokens_proxy": 385
+  },
+  "ref": "7f7b5e24858e813e45ace867a7f8ea5180f43bf0",
+  "routes": {
+    "R1-local-d4-repair": {
+      "eager_forbidden_concerns": [],
+      "mandatory_closure": {
+        "bytes": 38187,
+        "tokens_proxy": 6821
+      },
+      "mandatory_files": [
+        "SKILL.md",
+        "abstraction-and-concretization.md",
+        "specification-and-implementation.md"
+      ],
+      "route_closure": {
+        "bytes": 38187,
+        "tokens_proxy": 6821
+      },
+      "route_files": [
+        "SKILL.md",
+        "abstraction-and-concretization.md",
+        "specification-and-implementation.md"
+      ],
+      "split": "development",
+      "unreachable_fired_concerns": []
+    },
+    "R2-d4-with-workplan-and-tests": {
+      "eager_forbidden_concerns": [],
+      "mandatory_closure": {
+        "bytes": 38187,
+        "tokens_proxy": 6821
+      },
+      "mandatory_files": [
+        "SKILL.md",
+        "abstraction-and-concretization.md",
+        "specification-and-implementation.md"
+      ],
+      "route_closure": {
+        "bytes": 72996,
+        "tokens_proxy": 12825
+      },
+      "route_files": [
+        "SKILL.md",
+        "abstraction-and-concretization.md",
+        "specification-and-implementation.md",
+        "workflow-and-workplans.md",
+        "testing-and-validation.md"
+      ],
+      "split": "development",
+      "unreachable_fired_concerns": []
+    },
+    "R3-d3-mature-replacement": {
+      "eager_forbidden_concerns": [],
+      "mandatory_closure": {
+        "bytes": 42030,
+        "tokens_proxy": 7433
+      },
+      "mandatory_files": [
+        "SKILL.md",
+        "abstraction-and-concretization.md",
+        "architecture-and-design.md"
+      ],
+      "route_closure": {
+        "bytes": 102594,
+        "tokens_proxy": 17916
+      },
+      "route_files": [
+        "SKILL.md",
+        "abstraction-and-concretization.md",
+        "architecture-and-design.md",
+        "workflow-and-workplans.md",
+        "project-engineering-memory.md",
+        "convergence-and-cycle-economy.md"
+      ],
+      "split": "development",
+      "unreachable_fired_concerns": []
+    },
+    "R4-d2-specialized-import": {
+      "eager_forbidden_concerns": [],
+      "mandatory_closure": {
+        "bytes": 36100,
+        "tokens_proxy": 6323
+      },
+      "mandatory_files": [
+        "SKILL.md",
+        "abstraction-and-concretization.md",
+        "numerical-algorithm-design.md"
+      ],
+      "route_closure": {
+        "bytes": 36100,
+        "tokens_proxy": 6323
+      },
+      "route_files": [
+        "SKILL.md",
+        "abstraction-and-concretization.md",
+        "numerical-algorithm-design.md"
+      ],
+      "split": "development",
+      "unreachable_fired_concerns": []
+    },
+    "R5-d1-parameter-default-binding": {
+      "eager_forbidden_concerns": [],
+      "mandatory_closure": {
+        "bytes": 35569,
+        "tokens_proxy": 6216
+      },
+      "mandatory_files": [
+        "SKILL.md",
+        "abstraction-and-concretization.md",
+        "scientific-formulation.md"
+      ],
+      "route_closure": {
+        "bytes": 52397,
+        "tokens_proxy": 9161
+      },
+      "route_files": [
+        "SKILL.md",
+        "abstraction-and-concretization.md",
+        "scientific-formulation.md",
+        "workflow-and-workplans.md"
+      ],
+      "split": "holdout",
+      "unreachable_fired_concerns": []
+    },
+    "R6-memory-governance-update": {
+      "eager_forbidden_concerns": [],
+      "mandatory_closure": {
+        "bytes": 33456,
+        "tokens_proxy": 5950
+      },
+      "mandatory_files": [
+        "SKILL.md",
+        "abstraction-and-concretization.md",
+        "long-horizon-code-health.md"
+      ],
+      "route_closure": {
+        "bytes": 61189,
+        "tokens_proxy": 10826
+      },
+      "route_files": [
+        "SKILL.md",
+        "abstraction-and-concretization.md",
+        "long-horizon-code-health.md",
+        "project-engineering-memory.md"
+      ],
+      "split": "holdout",
+      "unreachable_fired_concerns": []
+    }
+  }
+}
