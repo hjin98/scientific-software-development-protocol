@@ -74,6 +74,21 @@ def measure(text: str) -> dict[str, int]:
     return {"bytes": len(text.encode("utf-8")), "tokens_proxy": len(TOKEN_RE.findall(text))}
 
 
+def consumed_skill(tree: "Tree", name: str, kind: str) -> str:
+    """The entrypoint as a runtime consumes it: a build-inlined entry contract is expanded."""
+    text = tree.read(skill_path(name, kind)) or ""
+    placeholder = "<!-- SSDP-ENTRY-CONTRACT -->"
+    if placeholder in text:
+        sys.path.insert(0, str(REPO / "source"))
+        import build_skills  # current build owner; only refs carrying the placeholder reach here
+
+        text = text.replace(placeholder, build_skills.entry_contract(
+            tree.read("source/shared/references/abstraction-and-concretization.md") or "",
+            tree.read("source/shared/references/protocol-versioning-and-compatibility.md") or "",
+        ))
+    return text
+
+
 def skill_path(name: str, kind: str) -> str:
     return f"source/{kind}/{name}/SKILL.md"
 
@@ -106,7 +121,7 @@ def static_report(ref: str | None) -> dict:
     for split in ("development", "holdout"):
         for route in scenarios["routes"][split]:
             root = route["root"]
-            skill_text = tree.read(skill_path(root, kinds[root])) or ""
+            skill_text = consumed_skill(tree, root, kinds[root])
             mandatory = mandatory_refs(skill_text)
             direct = {m.group(2) for m in LINK_RE.finditer(skill_text)}
             hot = ["SKILL.md", *mandatory]

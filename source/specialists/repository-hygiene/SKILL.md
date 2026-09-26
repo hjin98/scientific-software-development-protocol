@@ -5,16 +5,17 @@ description: Use after development closes, or when asked, for conservative repos
 
 # Repository Hygiene
 
-**Version entry check.** This package is SSDP `REPLACE_WITH_SKILL_PROTOCOL_VERSION`; if the task or its workplan declares another SSDP `protocol_version`, say so and resolve that version's source ([Protocol versioning and compatibility](references/protocol-versioning-and-compatibility.md)) instead of applying this package.
-
 Optional post-stage cleanup specialist. Use after formal development closure or when explicitly requested; do not interrupt active engineering merely to make a tree look tidy. Repository safety/recoverability outrank cosmetic cleanliness.
 
 > **Inspect broadly; delete only with positive proof. When classification is uncertain, retain and report.**
 
+<!-- SSDP-ENTRY-CONTRACT -->
+
 ## Routing
 
-Before substantive reasoning read [Abstraction, concretization, authority, challenge, and representation](references/abstraction-and-concretization.md). Load only triggered concern owners:
+Load only triggered concern owners:
 
+- a materiality, authority/delegation, verification/Challenge or representation question the entry contract does not settle -> [universal kernel](references/abstraction-and-concretization.md);
 - branch/ref deletion or material Git operations -> [Git and version control](references/git-and-version-control.md);
 - workplan archive/lifecycle closure -> [Workflow and workplans](references/workflow-and-workplans.md);
 - broad inspection/context economy -> [Repository intake](references/repository-intake.md);

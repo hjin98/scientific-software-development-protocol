@@ -5,16 +5,17 @@ description: Use to design, review, or challenge scientific/technical software a
 
 # Software Design
 
-**Version entry check.** This package is SSDP `REPLACE_WITH_SKILL_PROTOCOL_VERSION`; if the task or its workplan declares another SSDP `protocol_version`, say so and resolve that version's source ([Protocol versioning and compatibility](references/protocol-versioning-and-compatibility.md)) instead of applying this package.
-
 Own **D3 software architecture**: durable component/state/interface ownership, dependency/data/control flow, persistence/recovery, concurrency, security, resource/deployment/compatibility boundaries, and cycle-scoped architectural decisions. Do not absorb D1/D2 semantics merely because software concretizes them.
+
+<!-- SSDP-ENTRY-CONTRACT -->
 
 ## Routing
 
-Before substantive D3 reasoning, read [Abstraction, concretization, authority, challenge, and representation](references/abstraction-and-concretization.md) (the universal kernel) and [Software architecture and design](references/architecture-and-design.md).
+Before substantive D3 reasoning, read [Software architecture and design](references/architecture-and-design.md).
 
 Load only triggered concern owners:
 
+- a materiality, authority/delegation, verification/Challenge or representation question the entry contract does not settle -> [universal kernel](references/abstraction-and-concretization.md);
 - D3->D4 workplan, handoff, working state, authority lifecycle/rework/impact closure, implementation Review or optional independent review trajectories -> [Workflow and workplans](references/workflow-and-workplans.md);
 - evidence applicability/dependency/evolution -> [Evidence, evolution, and semantic dependencies](references/evidence-evolution-and-dependencies.md); regression/integration/proxy-proof/oracle/qualification method -> [Testing and validation](references/testing-and-validation.md);
 - architecture-bearing formal semantics, a parameter/default binding, an external result/import, or a material definition ambiguity -> [Semantic definition and traceability](references/semantic-definition-and-traceability.md);

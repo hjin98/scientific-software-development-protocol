@@ -5,16 +5,17 @@ description: Use to choose, design, review, or challenge a numerical method or a
 
 # Numerical Algorithm Design
 
-**Version entry check.** This package is SSDP `REPLACE_WITH_SKILL_PROTOCOL_VERSION`; if the task or its workplan declares another SSDP `protocol_version`, say so and resolve that version's source ([Protocol versioning and compatibility](references/protocol-versioning-and-compatibility.md)) instead of applying this package.
-
 Own **D2 algorithm and numerical-method semantics**: discretization, estimator/solver/approximation, convergence/error/conditioning/stability, precision and stochastic behavior, and numerical uncertainty. D2 concretizes D1 but does not own scientific meaning; it constrains D3 without owning ordinary software decomposition.
+
+<!-- SSDP-ENTRY-CONTRACT -->
 
 ## Routing
 
-Before substantive D2 reasoning, read [Abstraction, concretization, authority, challenge, and representation](references/abstraction-and-concretization.md) (the universal kernel) and [Algorithm and numerical method design](references/numerical-algorithm-design.md).
+Before substantive D2 reasoning, read [Algorithm and numerical method design](references/numerical-algorithm-design.md).
 
 Then load only triggered concerns:
 
+- a materiality, authority/delegation, verification/Challenge or representation question the entry contract does not settle -> [universal kernel](references/abstraction-and-concretization.md);
 - change plan, D1->D2/D2->D3 handoff, working state, authority lifecycle/invalidation/impact closure -> [Workflow and workplans](references/workflow-and-workplans.md);
 - a specialized operator/estimator/recurrence/stochastic object, parameter family/instance/default binding, imported theorem/result with hypotheses, formal claim/warrant, or definition-dependency impact -> [Semantic definition and traceability](references/semantic-definition-and-traceability.md);
 - evidence applicability/dependency/evolution -> [Evidence, evolution, and semantic dependencies](references/evidence-evolution-and-dependencies.md); numerical oracle/tolerance/differential/metamorphic/qualification method -> [Testing and validation](references/testing-and-validation.md) and [Scientific software](references/scientific-software.md) when cross-domain scientific evidence is material;

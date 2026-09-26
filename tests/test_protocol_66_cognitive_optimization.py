@@ -155,7 +155,7 @@ class ActivationTransportDiscoveryTests(unittest.TestCase):
         text = skill("software-implementation")
         packaged = {p.name for p in (ROOT / "dist/skills/software-implementation/references").glob("*.md")}
         mandatory = {m.group(2) for m in LINK_RE.finditer(mandatory_sentence(text))}
-        self.assertEqual(mandatory, {"abstraction-and-concretization.md", "specification-and-implementation.md"})
+        self.assertEqual(mandatory, {"specification-and-implementation.md"})
         self.assertGreater(len(packaged), 3 * len(mandatory))
         self.assertIn("package membership are not activation commands", text)
 
@@ -195,19 +195,65 @@ class SelectionMetadataTests(unittest.TestCase):
                 self.assertRegex(description, r"\bUse (to|for|after)\b")
                 self.assertRegex(description, r"\b(Not for|Routes|does not)\b")
 
-    def test_every_entrypoint_opens_with_a_build_stamped_version_check(self) -> None:
+    def test_every_consumed_entrypoint_carries_the_generated_entry_contract(self) -> None:
+        import build_skills
+
         version = (SOURCE / "PROTOCOL_VERSION").read_text(encoding="utf-8").strip()
+        kernel = read("source/shared/references/abstraction-and-concretization.md")
+        invariant = build_skills.INVARIANT_RE.search(kernel).group(1)
+        step = build_skills.VERSION_STEP_RE.search(read("source/shared/references/protocol-versioning-and-compatibility.md")).group(1)
+        self.assertIn("state the governing SSDP version in one line", step)
+        self.assertIn("with no source lookup", step)
         for name in (*ROLES, *SPECIALISTS):
             text = skill(name)
             with self.subTest(skill=name):
-                body = text.split("\n---\n", 1)[1]
-                first_paragraph = body.strip().split("\n\n")[1]
-                self.assertTrue(first_paragraph.startswith("**Version entry check.** This package is SSDP `REPLACE_WITH_SKILL_PROTOCOL_VERSION`"))
                 head, _, _ = text.partition("## Routing")
-                self.assertIn("references/protocol-versioning-and-compatibility.md", head)
+                self.assertEqual(text.count(build_skills.ENTRY_PLACEHOLDER), 1)
+                self.assertIn(build_skills.ENTRY_PLACEHOLDER, head)
+                self.assertNotIn("Version entry check", text)
+                # the kernel is predicate-routed, not an unconditional pre-reasoning read
+                self.assertIn("(references/abstraction-and-concretization.md)", text)
+                for para in text.split("\n\n"):
+                    if " ".join(para.split()).startswith("Before substantive"):
+                        self.assertNotIn("abstraction-and-concretization.md", para)
                 built = (ROOT / "dist" / "skills" / name / "SKILL.md").read_text(encoding="utf-8")
-                self.assertIn(f"This package is SSDP `{version}`", built)
+                built_head, _, _ = built.partition("## Routing")
+                self.assertIn("## Entry contract", built_head)
+                self.assertIn(f"This package is SSDP `{version}`", built_head)
+                self.assertIn(invariant, built_head)
+                self.assertNotIn(build_skills.ENTRY_PLACEHOLDER, built)
                 self.assertNotIn("REPLACE_WITH_SKILL_PROTOCOL_VERSION", built)
+
+    def test_universal_block_carries_the_kernel_hot_path_semantics(self) -> None:
+        import build_skills
+
+        invariant = build_skills.INVARIANT_RE.search(read("source/shared/references/abstraction-and-concretization.md")).group(1)
+        for phrase in (
+            "earliest affected owner", "D4 specification/implementation", "never self-authorize",
+            "never an instruction channel", "domain fitness, justified simplicity, then development economy",
+            "first clean local defect stays local", "material only when", "stop when they cannot change the decision",
+            "Serious Challenge", "exact owner meaning in active context", "never because a link or packaged file exists",
+            "complete governed meaning",
+        ):
+            self.assertIn(phrase, invariant)
+        self.assertLess(len(invariant.encode()), 2_000)
+
+    def test_validator_rejects_entry_contract_drift_and_missing_placeholder(self) -> None:
+        name = "software-implementation"
+        files = validate_packages.directory_files(ROOT / "dist" / "skills" / name)
+        source_root = SOURCE / "roles" / name
+        self.assertEqual(validate_packages.validate_core_bundle(dict(files), name, "role", source_root), [])
+        drifted = dict(files)
+        drifted["SKILL.md"] = files["SKILL.md"].replace(b"mandatory obligations stay mandatory", b"obligations are advisory")
+        self.assertIn("SKILL.md differs from canonical source plus its generated entry contract",
+                      validate_packages.validate_core_bundle(drifted, name, "role", source_root))
+        tmp = Path(tempfile.mkdtemp())
+        self.addCleanup(shutil.rmtree, tmp)
+        shutil.copytree(source_root, tmp / name)
+        stripped = (tmp / name / "SKILL.md").read_text(encoding="utf-8").replace("<!-- SSDP-ENTRY-CONTRACT -->", "")
+        (tmp / name / "SKILL.md").write_text(stripped, encoding="utf-8")
+        self.assertIn("canonical SKILL.md lacks exactly one entry-contract placeholder",
+                      validate_packages.validate_core_bundle(dict(files), name, "role", tmp / name))
 
     def test_generic_core_validity_does_not_require_vendor_adapter(self) -> None:
         name = "software-implementation"

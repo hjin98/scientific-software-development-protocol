@@ -30,6 +30,30 @@ SPECIALIST_SPECS = {
     "software-maintenance-audit": {"specialty": "maintenance-audit"},
 }
 
+# The universal pre-action contract is owned by the kernel's "Universal invariant" block and
+# the versioning owner's marked entry step; the build inlines both into every entrypoint at
+# ENTRY_PLACEHOLDER so the surface a portable runtime actually consumes carries them.
+ENTRY_PLACEHOLDER = "<!-- SSDP-ENTRY-CONTRACT -->"
+ENTRY_REFERENCES = ("abstraction-and-concretization.md", "protocol-versioning-and-compatibility.md")
+VERSION_STEP_RE = re.compile(r"<!-- ssdp-entry-version-step:begin -->\n(.*?)\n<!-- ssdp-entry-version-step:end -->", re.S)
+INVARIANT_RE = re.compile(r"^## Universal invariant\n.*?^```text\n(.*?)^```", re.S | re.M)
+SIBLING_LINK_RE = re.compile(r"\]\(([A-Za-z0-9_.-]+\.md)\)")
+
+
+def entry_contract(kernel: str, versioning: str) -> str:
+    step, invariant = VERSION_STEP_RE.search(versioning), INVARIANT_RE.search(kernel)
+    if step is None or invariant is None:
+        raise SystemExit("entry contract owners lack the version step markers or the universal invariant block")
+    return (
+        "## Entry contract\n\n"
+        + SIBLING_LINK_RE.sub(r"](references/\1)", step.group(1))
+        + "\n\n**Universal pre-action contract** ([universal kernel](references/abstraction-and-concretization.md)"
+        " owns it; read the kernel when a question needs more than this block):\n\n```text\n"
+        + invariant.group(1)
+        + "```"
+    )
+
+
 DIRECT_ROUTE_RE = re.compile(r"\]\((?P<kind>references|templates)/(?P<name>[A-Za-z0-9_.-]+\.md)\)")
 LOCAL_MARKDOWN_LINK_RE = re.compile(r"\[[^\]]+\]\(([^)]+)\)")
 URI_SCHEME_RE = re.compile(r"^[A-Za-z][A-Za-z0-9+.-]*:")
@@ -40,6 +64,7 @@ def _direct_payload(root: Path, skill_name: str) -> tuple[list[str], list[str]]:
     text = (root / skill_name / "SKILL.md").read_text(encoding="utf-8")
     references: list[str] = []
     templates: list[str] = []
+    references.extend(ENTRY_REFERENCES)
     for match in DIRECT_ROUTE_RE.finditer(text):
         target = references if match.group("kind") == "references" else templates
         name = match.group("name")
@@ -133,6 +158,8 @@ def validate_registry(root: Path, specs: dict, kind: str) -> None:
         match = NAME_RE.search(skill.read_text(encoding="utf-8"))
         if match is None or match.group(1) != skill_name:
             raise SystemExit(f"{skill}: frontmatter name mismatch")
+        if skill.read_text(encoding="utf-8").count(ENTRY_PLACEHOLDER) != 1:
+            raise SystemExit(f"{skill}: entrypoint must contain exactly one {ENTRY_PLACEHOLDER}")
         for _, path in entries(skill_name, spec, kind):
             if not path.is_file():
                 raise SystemExit(f"missing package source: {path}")
@@ -151,9 +178,13 @@ def build_one(skill_name: str, spec: dict, kind: str, stage: Path) -> Path:
     for rel, src in entries(skill_name, spec, kind):
         dst = root / rel
         dst.parent.mkdir(parents=True, exist_ok=True)
-        text = src.read_text(encoding="utf-8").replace(
-            "REPLACE_WITH_SKILL_PROTOCOL_VERSION", PROTOCOL_VERSION
-        )
+        text = src.read_text(encoding="utf-8")
+        if rel == "SKILL.md":
+            text = text.replace(ENTRY_PLACEHOLDER, entry_contract(
+                (SHARED / "references" / ENTRY_REFERENCES[0]).read_text(encoding="utf-8"),
+                (SHARED / "references" / ENTRY_REFERENCES[1]).read_text(encoding="utf-8"),
+            ))
+        text = text.replace("REPLACE_WITH_SKILL_PROTOCOL_VERSION", PROTOCOL_VERSION)
         dst.write_text(text, encoding="utf-8")
 
     manifest = {"protocol_version": PROTOCOL_VERSION, "skill_name": skill_name}

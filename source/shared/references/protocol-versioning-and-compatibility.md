@@ -90,7 +90,13 @@ Previously executed evidence remains reusable only while no changed protocol obl
 
 ### Version check at execution entry
 
-Every skill entrypoint opens with this check, stamped with its package version at build time. When a task or its governing workplan declares a `protocol_version`, compare it with the loaded package `PROTOCOL_VERSION` (and `protocol-manifest.json`) before protocol-dependent reasoning, and state a mismatch explicitly:
+The package build inlines the step between the markers below, stamped with the package version, at the top of every skill entrypoint together with the kernel's universal pre-action contract. It is an unconditional, observable declaration rather than a conditional reminder: the governing version is usually known only after the task or workplan is read, so the step binds to the first file change or protocol-dependent decision instead of to skill load.
+
+<!-- ssdp-entry-version-step:begin -->
+**Governing version.** This package is SSDP `REPLACE_WITH_SKILL_PROTOCOL_VERSION`. Before the first file change or protocol-dependent decision, state the governing SSDP version in one line: the `protocol_version` declared in the task or in the front matter of a workplan the task names, else `none`. `none` or this package's version -> continue with this package, with no source lookup. Any other version -> say so and do not apply this package; resolve that version's compatible source per [Protocol versioning and compatibility](protocol-versioning-and-compatibility.md) or report non-closure.
+<!-- ssdp-entry-version-step:end -->
+
+Resolution rule behind the step:
 
 ```text
 governing == loaded (or X.Y naming the loaded minor line) -> continue
@@ -100,7 +106,7 @@ governing != loaded -> use a compatible installed/local source, else the exact i
 no declared version and not version-bound -> installed skill, no remote lookup
 ```
 
-The check reuses existing identity owners and creates no second version authority, runtime service or control plane. In this repository `source/version_preflight.py` performs it offline; it is a convenience whose absence changes nothing about the rule.
+The check reuses existing identity owners (`PROTOCOL_VERSION`, `protocol-manifest.json`, release state) and creates no second version authority, runtime service or control plane. Do not search for a workplan the task does not name. In this repository `source/version_preflight.py` performs the same comparison offline; it is a convenience whose absence changes nothing about the rule.
 
 ## Immutable historical recovery
 

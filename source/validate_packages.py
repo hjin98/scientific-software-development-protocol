@@ -233,6 +233,28 @@ def zip_files(path: Path, skill_name: str) -> tuple[dict[str, bytes], list[str]]
     return files, errors
 
 
+ENTRY_PLACEHOLDER = b"<!-- SSDP-ENTRY-CONTRACT -->"
+ENTRY_STEP_RE = re.compile(rb"<!-- ssdp-entry-version-step:begin -->\n(.*?)\n<!-- ssdp-entry-version-step:end -->", re.S)
+ENTRY_INVARIANT_RE = re.compile(rb"^## Universal invariant\n.*?^```text\n(.*?)^```", re.S | re.M)
+
+
+def expected_entry_contract(files: dict[str, bytes]) -> bytes | None:
+    """Re-derive the inlined entry contract from the owners packaged in this bundle."""
+    kernel = files.get("references/abstraction-and-concretization.md")
+    versioning = files.get("references/protocol-versioning-and-compatibility.md")
+    step = ENTRY_STEP_RE.search(versioning or b"")
+    invariant = ENTRY_INVARIANT_RE.search(kernel or b"")
+    if step is None or invariant is None:
+        return None
+    step_text = re.sub(rb"\]\(([A-Za-z0-9_.-]+\.md)\)", rb"](references/\1)", step.group(1))
+    return (
+        b"## Entry contract\n\n" + step_text
+        + b"\n\n**Universal pre-action contract** ([universal kernel](references/abstraction-and-concretization.md)"
+        b" owns it; read the kernel when a question needs more than this block):\n\n```text\n"
+        + invariant.group(1) + b"```"
+    )
+
+
 def expected_canonical_bytes(rel: str, source_root: Path) -> bytes | None:
     if rel == "SKILL.md":
         path = source_root / "SKILL.md"
@@ -265,8 +287,14 @@ def validate_core_bundle(files: dict[str, bytes], skill_name: str, kind: str, so
     errors.extend(f"SKILL.md: {error}" for error in fm_errors)
 
     canonical_skill = expected_canonical_bytes("SKILL.md", source_root)
-    if canonical_skill is None or files["SKILL.md"] != canonical_skill:
-        errors.append("SKILL.md differs from canonical source")
+    entry = expected_entry_contract(files)
+    if canonical_skill is None or canonical_skill.count(ENTRY_PLACEHOLDER) != 1:
+        errors.append("canonical SKILL.md lacks exactly one entry-contract placeholder")
+    elif entry is None:
+        errors.append("bundle lacks the packaged owners of the entry contract")
+    elif files["SKILL.md"] != canonical_skill.replace(ENTRY_PLACEHOLDER, entry.replace(
+            b"REPLACE_WITH_SKILL_PROTOCOL_VERSION", PROTOCOL_VERSION.encode("utf-8"))):
+        errors.append("SKILL.md differs from canonical source plus its generated entry contract")
 
     try:
         packaged_version = files["PROTOCOL_VERSION"].decode("utf-8").strip()

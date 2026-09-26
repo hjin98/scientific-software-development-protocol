@@ -5,16 +5,17 @@ description: Use to define, review, or challenge the scientific or mathematical 
 
 # Scientific Formulation
 
-**Version entry check.** This package is SSDP `REPLACE_WITH_SKILL_PROTOCOL_VERSION`; if the task or its workplan declares another SSDP `protocol_version`, say so and resolve that version's source ([Protocol versioning and compatibility](references/protocol-versioning-and-compatibility.md)) instead of applying this package.
-
 Own **D1 scientific/mathematical meaning**: the question, observable/estimand, model/equations, assumptions, validity regime, interpretation, model-level uncertainty, and external adequacy. Do not absorb D2 numerical method, D3 architecture, or D4 implementation merely because they affect results.
+
+<!-- SSDP-ENTRY-CONTRACT -->
 
 ## Routing
 
-Before substantive D1 reasoning, read [Abstraction, concretization, authority, challenge, and representation](references/abstraction-and-concretization.md) (the universal kernel) and [Scientific and mathematical formulation](references/scientific-formulation.md).
+Before substantive D1 reasoning, read [Scientific and mathematical formulation](references/scientific-formulation.md).
 
 Then load only the concern whose predicate fires:
 
+- a materiality, authority/delegation, verification/Challenge or representation question the entry contract does not settle -> [universal kernel](references/abstraction-and-concretization.md);
 - change plan, handoff, working state, acceptance state, authority lifecycle, invalidation or impact closure -> [Workflow and workplans](references/workflow-and-workplans.md);
 - a specialized symbol/quantity/relation, parameter family/instance/default binding, imported external result, formal claim/warrant, definition-dependency impact, or material ambiguity -> [Semantic definition and traceability](references/semantic-definition-and-traceability.md);
 - evidence design/applicability/dependency/evolution -> [Evidence, evolution, and semantic dependencies](references/evidence-evolution-and-dependencies.md); testing/oracle method only when required -> [Testing and validation](references/testing-and-validation.md) and, for executable scientific evidence, [Scientific software](references/scientific-software.md);
