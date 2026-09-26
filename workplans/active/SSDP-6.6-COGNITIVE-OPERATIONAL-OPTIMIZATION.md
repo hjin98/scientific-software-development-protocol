@@ -7,9 +7,9 @@ status: implementation-rework-required
 created_date: 2026-09-26
 reviewed_date: 2026-09-26
 workplan_review_state: PASS_NONINDEPENDENT_R3
-implementation_review_state: NO_PASS_R1
+implementation_review_state: NO_PASS_R2
 implementation_reviewed_date: 2026-09-26
-implementation_review_basis: 26059544204c65b1e0292cd229e95f61b5f970bb
+implementation_review_basis: 390613b27d7304f08ee819d968a47119f48b57f9
 base_protocol: Protocol 6.5
 base_accepted_source: 7f7b5e24858e813e45ace867a7f8ea5180f43bf0
 base_recovery: c4d5da1e0acb0e9f27376bf69561e8762747cd2d
@@ -593,12 +593,12 @@ Current disposition:
 ```text
 SERIOUS CHALLENGE: NONE
 WORKPLAN REVIEW: PASS_NONINDEPENDENT_R3
-IMPLEMENTATION REVIEW: NO_PASS_R1
+IMPLEMENTATION REVIEW: NO_PASS_R2
 IMPLEMENTATION: REWORK REQUIRED BEFORE CANDIDATE FREEZE
 FRESH INDEPENDENT ASSEMBLED-CANDIDATE REVIEW: BLOCKED PENDING REWORK
 ```
 
-The implementation Review at branch head `26059544204c65b1e0292cd229e95f61b5f970bb` found no Serious Challenge to accepted Protocol 6.5, but candidate freeze is blocked by the bounded rework cycle in section 16. This review does not substitute for the fresh independent assembled-candidate Review required after rework.
+The first implementation Review at branch head `26059544204c65b1e0292cd229e95f61b5f970bb` opened the bounded rework cycle in section 16. A second implementation Review at branch head `390613b27d7304f08ee819d968a47119f48b57f9` found the structural R1 repair plausible but still unqualified live, with criterion 4 still open and the frozen ordering oracle too weak for the governed `before substantive protocol-dependent action` claim. There is still no Serious Challenge to accepted Protocol 6.5. This review does not substitute for the fresh independent assembled-candidate Review required after rework.
 
 
 ## 16. Post-implementation Review rework cycle
@@ -660,7 +660,7 @@ Do not solve this by copying the entire kernel or conditional doctrine into ever
 
 **R1 acceptance:**
 
-- the frozen fresh version-bound holdout shows **zero silent mismatch** across the predeclared bounded confirmation runs and detects/resolves/reports the governing-version mismatch before substantive implementation;
+- the frozen fresh version-bound holdout shows **zero silent mismatch** across the predeclared bounded confirmation runs and detects/resolves/reports the governing-version mismatch before the first substantive protocol-dependent action or file mutation after the governing version becomes knowable;
 - at least one ordinary unversioned case proves no needless source lookup/control-plane activation;
 - historical exact-source resolution remains exact-ref and never default/latest;
 - the assembled package makes the universal pre-action contract mechanically recoverable from the actually consumed entry surface;
@@ -704,7 +704,7 @@ After the final semantic repair:
 
 The implementation becomes eligible for immutable candidate freeze only when all of the following hold on one final semantic state:
 
-1. R1 real-boundary version/source coherence passes the fresh untouched holdout with no silent mismatch.
+1. R1 real-boundary version/source coherence passes the fresh untouched holdout with no silent mismatch, with the governing-version declaration/decision occurring before the first substantive protocol-dependent action or file mutation after that version becomes knowable.
 2. The supported portable execution path actually consumes the minimum universal pre-action contract; declared mandatory reads are not used as proof when the runtime skips them.
 3. Criterion 4 has both structural reduction and a directly measured live burden reduction on at least one intended route; selection correctness is reported separately.
 4. No new substantive correctness/authority/evidence regression versus accepted 6.5 is observed on the bounded matched cases.
@@ -728,3 +728,31 @@ Reopen D3 before further implementation if any of these become true:
 - the simplest successful realization materially changes a cycle-scoped D3 decision rather than remaining equivalent D4 concretization.
 
 These triggers are intentionally narrow. Ordinary entrypoint generation, package plumbing, harness changes, qualification repair, or regenerated descendants remain delegated D4 work when they preserve the accepted D3 contract.
+
+
+### 16.9 Implementation Review R2 — bounded evidence/oracle correction
+
+Review of branch head `390613b27d7304f08ee819d968a47119f48b57f9` is **NO-PASS**. The R1 structural repair at `c01eeee47989cbbf9ed5e87df50756c23d912f79` is admissible as delegated D4 concretization: the entry contract is generated from canonical owners, validated against those owners, carried by the actual consumed entrypoint, and introduces no second authority/control plane. No further semantic/prompt repair is justified before live evidence.
+
+Three items remain:
+
+1. **B1 — live R1 confirmation unavailable.** The attempted post-repair matrix produced no agent behavior because the headless executor OAuth session expired. Duplicate user-level SSDP skills also confounded the attempted environment; the harness isolation change is not qualified until a successful run proves one installed SSDP root per skill.
+2. **B2 — criterion 4 remains unproven.** No post-repair T1/T7 live burden observations exist. Static evidence predicts the inlined entry contract can increase the simplest entrypoint-only route, so an actual reduction must be demonstrated honestly on at least one predeclared ordinary route rather than inferred from structural closure.
+3. **B3 — the R0 ordering oracle is weaker than the governed claim.** `governing_stated_before_mutation` proves only that a version statement precedes the first file edit. The workplan requires the governing version to be handled before substantive protocol-dependent action. A run could therefore consume/apply 6.6 doctrine, state the historical version later, and still satisfy the deterministic ordering field.
+
+#### Required next implementation cycle
+
+The next cycle is evidence/oracle closure, not another semantic rewrite.
+
+1. **Correct B3 before any valid post-repair live run.** Strengthen the deterministic trace oracle so that, once the governing task/workplan version is knowable, the governing-version statement/decision must precede the first substantive SSDP/protocol-dependent action **or** file mutation. The oracle may conservatively treat reads/invocations of SSDP owner material after the governing workplan is read as protocol-dependent actions. Preserve enough trace evidence to audit ordering.
+2. Update the T6 rubric/assessment input only as needed to consume that stronger deterministic fact. Do not change T6's task, governing version, product oracle, run count, burden metric, or pass threshold.
+3. This oracle repair is permitted without invalidating the fresh-holdout status because **no authenticated post-R1 behavioral run has yet produced evidence**. Record the correction and freeze its exact implementation before the next successful executor run. After the first valid post-repair run, do not tune this oracle/threshold from outcomes.
+4. Re-authenticate the headless executor; verify the session catalog exposes each intended SSDP skill exactly once and that user-level accepted-6.5 skills are excluded from the candidate session.
+5. Run only the already-predeclared compact R1/R2 matrix against the unchanged R1 semantic state (or an evidence-only descendant): T6×4 candidate confirmations, T5×2, T4×2, T1×3 per variant, T7×3 per variant, and the bounded T2/T3 correctness confirmations required by section 10.3 evidence. Run the blinded assessor with the corrected ordering fact.
+6. Apply hard stop rules:
+   - **any T6 confirmation failure** -> do not reword the entry contract or add another prompt mechanism; stop D4 repair and reopen D3 under section 16.8;
+   - **both T1 and T7 fail the predeclared burden pass rule** -> do not choose a new favorable metric or route; reopen/simplify the criterion-4 D3 success condition under sections 16.5/16.8;
+   - successful R1/R2 evidence -> proceed directly to R3/final assembled acceptance without another semantic optimization pass.
+7. On successful closure, rerun the final repository/PEM/build/package/dist/profile/snapshot/Core/whitespace acceptance on the exact semantic state, reconcile Stage F/G and documentation to that evidence, then freeze the immutable 6.6 candidate for fresh independent assembled-candidate Review.
+
+The current rework therefore has a deliberate stop boundary: **one oracle correction and one valid live confirmation cycle**. Failure at either governed behavioral gate routes upward; it does not authorize another sequence of wording candidates.
