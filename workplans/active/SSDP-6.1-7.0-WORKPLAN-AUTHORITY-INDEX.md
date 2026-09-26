@@ -125,12 +125,12 @@ PUBLIC BOOTSTRAP: e09a9d1480211eea2d16d722182bb5c6de1bee12
 RECOVERY: 74bc572ef516cae417437a2027eeff52a2e25c15
 RECOVERY MAPPING COMMIT: 6e66478f37de197b6d28707e087c61d687fcfa41
 STAGE F: PASS / LIFECYCLE CLOSED
-CURRENT ACCEPTED DOCUMENT-CONTROLLED BASELINE: Protocol 6.4
+HISTORICAL ACCEPTED DOCUMENT-CONTROLLED BASELINE FOR THIS CLOSED CYCLE: Protocol 6.4
 PROTOCOL 7 INHERITANCE OF 6.4: RECONCILED / REVISION 5
 LIFECYCLE STATUS: COMPLETED / ARCHIVED
 ```
 
-Protocol 6.4 is the accepted-current backward-compatible minor strengthening. Its accepted release identity is recovery `74bc572ef516cae417437a2027eeff52a2e25c15` with distinct public bootstrap `e09a9d1480211eea2d16d722182bb5c6de1bee12`. The repository default branch is not a protocol-version oracle, so no `main` merge is required to make that version-bound acceptance true; version-bound 6.3 and older work retains its immutable historical semantics.
+Protocol 6.4 was the accepted-current backward-compatible minor strengthening at this closed cycle boundary. Its immutable accepted release identity remains recovery `74bc572ef516cae417437a2027eeff52a2e25c15` with distinct public bootstrap `e09a9d1480211eea2d16d722182bb5c6de1bee12`. The repository default branch is not a protocol-version oracle, so no `main` merge is required to make that version-bound acceptance true; version-bound 6.3 and older work retains its immutable historical semantics.
 
 ## Protocol 6.6 completed handoff
 
@@ -225,7 +225,7 @@ PROTOCOL 7 INHERITANCE OF 6.5: RECONCILED / REVISION 6
 LIFECYCLE STATUS: COMPLETED / ARCHIVED
 ```
 
-Protocol 6.5 is accepted-current. Mutable release identity remains owned only by `PROTOCOL-RELEASE-STATE.yaml`; the exact immutable public fallback and recovery remain distinct. Protocol 6.4 is preserved as historical rollback, and Protocol 7 D3 architecture/D4 authorization remain unchanged.
+Protocol 6.5 was accepted-current at its closed cycle boundary. Mutable current release identity remains owned only by `PROTOCOL-RELEASE-STATE.yaml`; the exact immutable 6.5 public fallback and recovery remain distinct. Protocol 6.4 is preserved as historical rollback, and Protocol 7 D3 architecture/D4 authorization remain unchanged.
 
 ## Version/cutover rule
 
