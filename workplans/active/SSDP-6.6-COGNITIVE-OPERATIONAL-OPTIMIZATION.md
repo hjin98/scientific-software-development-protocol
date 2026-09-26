@@ -3,10 +3,13 @@ kind: protocol-minor-revision-workplan
 workplan_id: SSDP-6.6-COGNITIVE-OPERATIONAL-OPTIMIZATION
 protocol_version: 6.5.0
 target_protocol_version: 6.6.0
-status: reviewed-implementation-ready
+status: implementation-rework-required
 created_date: 2026-09-26
 reviewed_date: 2026-09-26
 workplan_review_state: PASS_NONINDEPENDENT_R3
+implementation_review_state: NO_PASS_R1
+implementation_reviewed_date: 2026-09-26
+implementation_review_basis: 26059544204c65b1e0292cd229e95f61b5f970bb
 base_protocol: Protocol 6.5
 base_accepted_source: 7f7b5e24858e813e45ace867a7f8ea5180f43bf0
 base_recovery: c4d5da1e0acb0e9f27376bf69561e8762747cd2d
@@ -590,7 +593,138 @@ Current disposition:
 ```text
 SERIOUS CHALLENGE: NONE
 WORKPLAN REVIEW: PASS_NONINDEPENDENT_R3
-IMPLEMENTATION: READY SUBJECT TO NORMAL IMPLEMENTATION-TIME DISCOVERY
+IMPLEMENTATION REVIEW: NO_PASS_R1
+IMPLEMENTATION: REWORK REQUIRED BEFORE CANDIDATE FREEZE
+FRESH INDEPENDENT ASSEMBLED-CANDIDATE REVIEW: BLOCKED PENDING REWORK
 ```
 
-This review does not substitute for the fresh independent assembled-candidate Review required before Protocol 6.6 acceptance.
+The implementation Review at branch head `26059544204c65b1e0292cd229e95f61b5f970bb` found no Serious Challenge to accepted Protocol 6.5, but candidate freeze is blocked by the bounded rework cycle in section 16. This review does not substitute for the fresh independent assembled-candidate Review required after rework.
+
+
+## 16. Post-implementation Review rework cycle
+
+### 16.1 Review disposition and governing problem
+
+Implementation Review of branch head `26059544204c65b1e0292cd229e95f61b5f970bb` is **NO-PASS** at the implementation-complete / candidate-freeze boundary. Accepted Protocol 6.5 remains coherent; the findings are 6.6 concretization/evidence nonconformance, not a Serious Challenge to the parent protocol.
+
+Three linked findings govern this rework:
+
+1. **Execution-entry/version-source coherence is not reliably realized in the portable skill path.** The repository-only `source/version_preflight.py` correctly discriminates version mismatch when invoked, but the live skill path silently proceeded on version-bound work in most final-candidate runs. A helper that is not executed at the real boundary is proxy evidence, not closure.
+2. **The declared universal hot path is not the observed hot path in the reference runtime.** Live trajectories often consumed the invoked `SKILL.md` but did not read the separately routed universal kernel/domain owner before acting. A smaller declared mandatory closure therefore proves structure only unless the required universal contract is actually present in the consumed execution surface.
+3. **Acceptance criterion 4 lacks a demonstrated live burden reduction.** Selection correctness improved, but turns/tokens/cost on full trajectories were within noise. Selection accuracy is a distinct quality metric and cannot be relabeled as user intervention or cognitive burden without measuring that consequence.
+
+Candidate freeze, independent assembled-candidate Review, ratification, publication/recovery and accepted-current cutover remain blocked until this bounded rework closes.
+
+### 16.2 Rework objective and non-goals
+
+The rework SHALL make the already-accepted 6.6 design effective at the real portable execution boundary and repair its evidence accounting with minimum justified change.
+
+Protected constraints:
+
+- do **not** add another control plane, mandatory Orchestrator/service, vendor dependency, model scheduler or permanent evaluation framework;
+- do **not** repeat stronger-imperative prompt wording experiments as the primary fix; the existing evidence already shows wording strength alone is not a reliable mechanism;
+- do **not** broaden this into Protocol 7 implementation or unrelated protocol redesign;
+- preserve the accepted 6.5 capability map and every already-valid 6.6 simplification;
+- preserve one canonical semantic owner for each invariant; generated/inlined derivatives must remain mechanically subordinate and parity-checkable;
+- keep ordinary unversioned/local work cheap and free of remote lookup.
+
+If these requirements cannot be realized in the generic portable skill architecture without hidden runtime control, duplicated authority, or broad eager loading, **stop and reopen D3** rather than layering more prose or machinery.
+
+### 16.3 Rework Stage R0 — freeze discriminating evidence before semantic repair
+
+Before changing the execution-entry/kernel realization:
+
+1. Add and freeze one **fresh version-bound holdout** distinct from T4/T5, using a historical supported Protocol 6 version and a task whose product implementation can succeed even if the version rule is silently ignored. Freeze its task snapshot, expected governing version, oracle/rubric and provenance before the repair is exercised against it.
+2. Record T4 as development evidence and T5 as a post-finding fresh challenge case; neither is to be represented as part of the untouched original Stage-A holdout after being introduced/reclassified during repair.
+3. Predeclare at least one direct live **burden** metric for criterion 4. Preferred low-noise measures are observed active SSDP material on an activated route (invoked entrypoint plus actually loaded SSDP references), protocol-specific read/tool turns, unnecessary protocol/evidence actions, or actual correction/intervention/rework. Selection correctness remains reported separately and does not satisfy criterion 4 by itself.
+4. Bind the exact 6.5 baseline, candidate source, harness/model/install mode and assessment route used for the rework comparison.
+
+Keep the corpus small. Add only evidence capable of changing the acceptance decision.
+
+**Gate R0:** no execution-entry/kernel semantic repair until the fresh holdout and burden metric are frozen.
+
+### 16.4 Rework Stage R1 — realize the execution-entry and universal contract
+
+Repair the real path consumed after a skill activates.
+
+Required behavior:
+
+- when a task or governing workplan declares an SSDP version, the loaded skill path must compare it with the loaded package/source identity **before substantive protocol-dependent action**;
+- mismatch must route to a compatible installed/local source or exact immutable mapped source, or report truthful non-closure; it must not silently apply the loaded/latest doctrine;
+- unversioned ordinary work must continue without remote lookup;
+- the minimum universal invariants needed before domain action must be in a surface that the supported portable execution path actually consumes, rather than depending solely on a prose instruction to read a reference that live agents routinely skip.
+
+D4 may choose the smallest realization consistent with section 8, including a generated/inlined micro-kernel or another mechanically subordinate entry surface, provided there is one canonical owner and generated derivatives cannot drift into parallel authority. The existing offline `version_preflight.py` may remain a convenience/testable realization, but it is not sufficient evidence unless the real path actually invokes or equivalently enforces the rule.
+
+Do not solve this by copying the entire kernel or conditional doctrine into every entrypoint. Preserve progressive disclosure and keep the universal contract minimal.
+
+**R1 acceptance:**
+
+- the frozen fresh version-bound holdout shows **zero silent mismatch** across the predeclared bounded confirmation runs and detects/resolves/reports the governing-version mismatch before substantive implementation;
+- at least one ordinary unversioned case proves no needless source lookup/control-plane activation;
+- historical exact-source resolution remains exact-ref and never default/latest;
+- the assembled package makes the universal pre-action contract mechanically recoverable from the actually consumed entry surface;
+- generic package validity remains independent of vendor adapters.
+
+A failure of the fresh holdout after the bounded repair is a blocker, not a finding to defer to Protocol 7.
+
+### 16.5 Rework Stage R2 — demonstrate an actual live burden gain
+
+Re-evaluate criterion 4 against the final repaired semantic state.
+
+The comparison SHALL distinguish:
+
+- selection/discovery correctness;
+- structural declared closure;
+- observed active protocol material/actions;
+- total trajectory behavior.
+
+At least one intended ordinary route must show a direct live burden reduction beyond measurement noise and large enough to justify the permanent 6.6 representation machinery, while semantic/correctness acceptance remains non-regressed. A deterministic active-context/read/action count may be preferable to noisy total-token/cost measurements when it more directly measures the protocol burden.
+
+Do not claim:
+
+- static byte reduction as live productivity;
+- improved selection accuracy as reduced intervention unless intervention was actually observed/measured;
+- unchanged turns/tokens/cost as an efficiency gain.
+
+If no live burden dimension improves after the minimum repair, remove unjustified permanent machinery where possible and reopen the affected D3 success criterion/design rather than manufacturing a favorable metric.
+
+### 16.6 Rework Stage R3 — repair evidence applicability and qualification state
+
+After the final semantic repair:
+
+1. Treat every changed `SKILL.md` entrypoint as part of any explicit-skill trajectory that consumed it, even when no changed reference file was separately read. Do not reuse T2/T3 or other prior trajectory evidence across an entrypoint mutation merely because the trace did not open a changed reference.
+2. Re-run only the compact affected final-candidate trajectory/selection set needed to close correctness, R1 and R2. Evidence from unchanged selection metadata may be reused only for the property it still discriminates.
+3. Regenerate static/package/profile evidence from the exact final semantic state.
+4. Rewrite `qualification/ssdp66/STAGE-F-G-EVALUATION-AND-QUALIFICATION.md` so its disposition follows the evidence. Until R1/R2 pass it must not state `IMPLEMENTATION BLOCKERS: NONE KNOWN` or `READY FOR FRESH INDEPENDENT REVIEW: YES`.
+5. Correct any README/CHANGELOG/semantic-history statement whose lifecycle or evidence claim became stale through this Review/rework.
+6. Preserve failed/superseded runs as evidence; do not rewrite them away.
+
+### 16.7 Final rework acceptance
+
+The implementation becomes eligible for immutable candidate freeze only when all of the following hold on one final semantic state:
+
+1. R1 real-boundary version/source coherence passes the fresh untouched holdout with no silent mismatch.
+2. The supported portable execution path actually consumes the minimum universal pre-action contract; declared mandatory reads are not used as proof when the runtime skips them.
+3. Criterion 4 has both structural reduction and a directly measured live burden reduction on at least one intended route; selection correctness is reported separately.
+4. No new substantive correctness/authority/evidence regression versus accepted 6.5 is observed on the bounded matched cases.
+5. The capability-preservation map remains closed; specialized/high-risk routes still recover their cold owners.
+6. All evidence used for final qualification remains applicable to the exact final semantic candidate; semantic entrypoint changes invalidate affected prior live runs.
+7. Repository regressions, PEM validation, canonical build, independent package validation, committed-dist parity, profile/snapshot frozen-history checks, Core acceptance and whitespace checks pass after the final semantic change.
+8. No mandatory Orchestrator/service/vendor/model/subagent dependency or second version/control authority has been introduced.
+9. Stage F/G evidence states no open implementation blocker and makes no claim stronger than its actual oracle/runtime supports.
+10. Documentation/release-state surfaces remain coherent, with 6.5 still accepted-current until the later governed Stage-H lifecycle.
+
+Only then freeze the immutable 6.6 semantic candidate and request the fresh independent assembled-candidate Review required by Stage H.
+
+### 16.8 Rework D3 reopen triggers
+
+Reopen D3 before further implementation if any of these become true:
+
+- a portable generic skill cannot make the version-entry/universal pre-action contract reliably effective without mandatory hidden host behavior or a new control plane;
+- guaranteeing the universal contract requires broad eager loading or duplicate semantic authority that defeats the 6.6 representation architecture;
+- criterion 4 cannot be satisfied by any honest direct burden measure without adding more machinery than the measured gain justifies;
+- the repair requires changing pre-7 Orchestrator transition authority/state graph/profile schema;
+- the simplest successful realization materially changes a cycle-scoped D3 decision rather than remaining equivalent D4 concretization.
+
+These triggers are intentionally narrow. Ordinary entrypoint generation, package plumbing, harness changes, qualification repair, or regenerated descendants remain delegated D4 work when they preserve the accepted D3 contract.
