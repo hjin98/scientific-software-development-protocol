@@ -41,7 +41,11 @@ class Protocol61EvidenceEvolutionTests(unittest.TestCase):
             self.assertNotIn("evidence specification, concretization", text, role)
         implementation = self.read("source/roles/software-implementation/SKILL.md").lower()
         evidence = self.read("source/shared/references/evidence-evolution-and-dependencies.md")
-        self.assertIn("evidence target separately from harness/fixture/backend/implementation dependencies", implementation)
+        # Protocol 6.6 (workplan 16.11): the generic rule lives at the D4 owner that the entrypoint
+        # reads before substantive implementation; the entrypoint keeps the remap hook.
+        specification = self.read("source/shared/references/specification-and-implementation.md").lower()
+        self.assertIn("keep evidence target separate from execution machinery", specification)
+        self.assertIn("remap/rerun evidence whose owner changed", implementation)
         self.assertIn("EXECUTION_DEPENDS_ON", evidence)
 
     def test_source_readme_canonical_routes_exist(self) -> None:

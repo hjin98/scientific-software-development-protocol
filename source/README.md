@@ -29,7 +29,7 @@ Optional specialists `software-documentation`, `software-maintenance-audit`, and
 
 ## Progressive-disclosure owner map
 
-The build inlines one generated entry contract into every `SKILL.md` (placeholder `<!-- SSDP-ENTRY-CONTRACT -->`): the versioning owner's marked governing-version step plus the kernel's minimal `Pre-routing safety kernel` block (not the full kernel or its `Universal invariant` summary); edit those owners, never the inlined copy, and `validate_packages.py` re-derives the block from each bundle's packaged owners. Load the entrypoint plus its owning domain, then only concern owners whose decision predicates fire, including the full kernel. Ordinary links, dependency traces, PEM relations/indexes, and package membership do not imply activation.
+The build inlines one generated entry contract into every `SKILL.md` (placeholder `<!-- SSDP-ENTRY-CONTRACT -->`): the versioning owner's marked governing-version step plus the kernel's minimal `Pre-routing safety kernel` block (not the full kernel or its `Universal invariant` summary), introduced by the single kernel route whose predicate is identical for every skill (`build_skills.KERNEL_ROUTE`; entrypoints do not copy it); edit those owners, never the inlined copy, and `validate_packages.py` re-derives the block from each bundle's packaged owners. Load the entrypoint plus its owning domain, then only concern owners whose decision predicates fire, including the full kernel. Ordinary links, dependency traces, PEM relations/indexes, and package membership do not imply activation.
 
 Key owners:
 

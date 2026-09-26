@@ -75,8 +75,11 @@ class HistoricalFailureModeScenarios(unittest.TestCase):
 
     def test_small_local_change_does_not_require_micro_gating(self) -> None:
         self.assertIn("a coherent material behavior/risk boundary is normally one implementation stage", self.workflow)
-        self.assertIn("tightly coupled edits may form one stage", self.implementation)
-        self.assertIn("file count does not define stage count", self.implementation)
+        # Protocol 6.6 (workplan 16.11): stage granularity lives at the workflow/testing owners the
+        # entrypoint routes by its stage/regression predicates; the entrypoint keeps the closure hook.
+        self.assertIn("even when several files/functions change", self.workflow)
+        self.assertIn("after each coherent material executable stage, run focused + stage-local affected regression", self.testing.lower())
+        self.assertIn("close each material stage with affected regression before dependent work", self.implementation.lower())
 
     def test_newly_discovered_affected_surface_is_incorporated_without_unrelated_redesign(self) -> None:
         self.assertIn("the accepted plan is the minimum known contract, not a ceiling on newly discovered affected behavior", self.workflow)

@@ -33,12 +33,18 @@ SPECIALIST_SPECS = {
 # The entry contract is owned by the kernel's "Pre-routing safety kernel" block and the
 # versioning owner's marked entry step; the build inlines only those two into every entrypoint
 # at ENTRY_PLACEHOLDER so the surface a portable runtime actually consumes carries them. The
-# rest of the universal kernel stays a conditional owner.
+# rest of the universal kernel stays a conditional owner, routed by KERNEL_ROUTE: its predicate
+# is identical for every skill, so it is generated here once instead of copied per skill.
 ENTRY_PLACEHOLDER = "<!-- SSDP-ENTRY-CONTRACT -->"
 ENTRY_REFERENCES = ("abstraction-and-concretization.md", "protocol-versioning-and-compatibility.md")
 VERSION_STEP_RE = re.compile(r"<!-- ssdp-entry-version-step:begin -->\n(.*?)\n<!-- ssdp-entry-version-step:end -->", re.S)
 INVARIANT_RE = re.compile(r"^## Pre-routing safety kernel\n.*?^```text\n(.*?)^```", re.S | re.M)
 SIBLING_LINK_RE = re.compile(r"\]\(([A-Za-z0-9_.-]+\.md)\)")
+KERNEL_ROUTE = (
+    "**Pre-routing safety kernel** ([universal kernel](references/abstraction-and-concretization.md) owns it and"
+    " any materiality, authority/delegation, simplicity, proportional-rigor, verification/Challenge,"
+    " representation or SSDP self-development question):"
+)
 
 
 def entry_contract(kernel: str, versioning: str) -> str:
@@ -48,8 +54,7 @@ def entry_contract(kernel: str, versioning: str) -> str:
     return (
         "## Entry contract\n\n"
         + SIBLING_LINK_RE.sub(r"](references/\1)", step.group(1))
-        + "\n\n**Pre-routing safety kernel** ([universal kernel](references/abstraction-and-concretization.md)"
-        " owns it and the rest of the universal doctrine):\n\n```text\n"
+        + "\n\n" + KERNEL_ROUTE + "\n\n```text\n"
         + invariant.group(1)
         + "```"
     )

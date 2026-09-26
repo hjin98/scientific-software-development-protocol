@@ -28,7 +28,8 @@ class EngineeringStewardshipContractTests(unittest.TestCase):
             self.assertIn(phrase, kernel)
 
     def test_d3_d4_entrypoints_load_the_stewardship_owner(self) -> None:
-        for path in ("source/roles/software-design/SKILL.md", "source/roles/software-implementation/SKILL.md"):
+        # consumed entrypoints: the kernel route is generated into their entry contract
+        for path in ("dist/skills/software-design/SKILL.md", "dist/skills/software-implementation/SKILL.md"):
             text = read(path).lower()
             self.assertIn("references/abstraction-and-concretization.md", text, path)
             self.assertIn("before substantive", text, path)

@@ -11,20 +11,16 @@ Own **D2 algorithm and numerical-method semantics**: discretization, estimator/s
 
 ## Routing
 
-Before substantive D2 reasoning, read [Algorithm and numerical method design](references/numerical-algorithm-design.md).
+Before substantive D2 reasoning, read [D2 method](references/numerical-algorithm-design.md). Then load only triggered concerns:
 
-Then load only triggered concerns:
+- change plan, D1->D2/D2->D3 handoff, working state, authority lifecycle/invalidation/impact closure -> [workflow](references/workflow-and-workplans.md)
+- a specialized operator/estimator/recurrence/stochastic object, parameter family/instance/default binding, imported theorem/result with hypotheses, formal claim/warrant, or definition-dependency impact -> [defs](references/semantic-definition-and-traceability.md)
+- evidence applicability/dependency/evolution -> [evidence](references/evidence-evolution-and-dependencies.md); numerical oracle/tolerance/differential/metamorphic/qualification method -> [testing](references/testing-and-validation.md), plus [science](references/scientific-software.md) when cross-domain scientific evidence is material
+- project history can change the decision (mature method rework, substantial optimization/scaling, suspected recurrence, recovery/revert, memory-bound workplan) -> [PEM](references/project-engineering-memory.md)
+- recurrence, rigor or cognitive-resource escalation -> [convergence](references/convergence-and-cycle-economy.md); scaling/resource/hardware tradeoff -> [performance](references/performance-and-parallelism.md)
+- protocol-version mismatch or historical recovery -> [versioning](references/protocol-versioning-and-compatibility.md); human-facing D2 paper -> [writing](references/scientific-technical-writing.md)
 
-- a materiality, authority/delegation, simplicity, proportional-rigor, verification/Challenge, representation or SSDP self-development question -> [universal kernel](references/abstraction-and-concretization.md);
-- change plan, D1->D2/D2->D3 handoff, working state, authority lifecycle/invalidation/impact closure -> [Workflow and workplans](references/workflow-and-workplans.md);
-- a specialized operator/estimator/recurrence/stochastic object, parameter family/instance/default binding, imported theorem/result with hypotheses, formal claim/warrant, or definition-dependency impact -> [Semantic definition and traceability](references/semantic-definition-and-traceability.md);
-- evidence applicability/dependency/evolution -> [Evidence, evolution, and semantic dependencies](references/evidence-evolution-and-dependencies.md); numerical oracle/tolerance/differential/metamorphic/qualification method -> [Testing and validation](references/testing-and-validation.md) and [Scientific software](references/scientific-software.md) when cross-domain scientific evidence is material;
-- project history can change the decision (mature method rework, substantial optimization/scaling, suspected recurrence, recovery/revert, memory-bound workplan) -> [Project Engineering Memory](references/project-engineering-memory.md);
-- recurrence, rigor or cognitive-resource escalation -> [Convergence and development-cycle economy](references/convergence-and-cycle-economy.md); scaling/resource/hardware tradeoff -> [Performance and parallelism](references/performance-and-parallelism.md);
-- protocol-version mismatch or historical recovery -> [Protocol versioning and compatibility](references/protocol-versioning-and-compatibility.md);
-- human-facing D2 paper -> [Scientific and technical writing](references/scientific-technical-writing.md).
-
-For material D2 authority mutation use the [Abstraction-concretization change plan](templates/abstraction_concretization_change_plan_template.md); use the [Numerical and Algorithmic Method Paper template](templates/numerical_algorithmic_method_paper_template.md) when useful. An in-envelope local tolerance question loads none of the conditional owners merely because they exist; ordinary hyperlinks and package membership are not activation commands.
+For material D2 authority mutation use the [change plan](templates/abstraction_concretization_change_plan_template.md); use the [method paper template](templates/numerical_algorithmic_method_paper_template.md) when useful. An in-envelope local tolerance question loads none of these owners; ordinary hyperlinks and package membership are not activation commands.
 
 ## D2 contract
 
@@ -32,16 +28,14 @@ For material D2 authority mutation use the [Abstraction-concretization change pl
 2. Define algorithmic semantics independently of current code: approximation sources, error budget, stability/conditioning, precision/range, stochastic properties, ordering/reduction/restart/reproducibility when material.
 3. Choose the minimum justified method inside the admissible set; delegate architecture/implementation identities not required by D2.
 4. Define independent oracles/counterexamples before optimization contaminates the reference. Tolerances come from accepted error semantics, never from observing a failing backend.
-5. Verify proportionately: first bound whether numerical uncertainty can change the governed decision, then use the cheapest sufficiently strong applicable exact/analytical/limiting/manufactured/reference, residual/invariant, convergence, conditioning, stochastic, precision/backend, differential or metamorphic evidence. Do not turn an in-envelope local tolerance into a research campaign.
+5. First bound whether numerical uncertainty can change the governed decision, then use the cheapest sufficiently strong exact/analytical/limiting/manufactured/reference, residual/invariant, convergence, conditioning, stochastic, precision/backend, differential or metamorphic evidence. Do not turn an in-envelope local tolerance into a research campaign.
 6. Distinguish evidentiary target from replaceable execution dependency; remap/rerun valid specifications when D4 machinery changes.
-7. Draft proposed D2 authority. Accepted-current mutation requires the owning acceptance process, including independent falsification and human adjudication when the change can alter scientific conclusions or a governing guarantee; afterwards perform bounded impact closure and hand D3 the minimum computational semantics and resource/compatibility constraints it must preserve.
+7. Draft proposed D2 authority. Accepted-current mutation requires the owning acceptance process, including independent falsification and human adjudication when the change can alter scientific conclusions or a governing guarantee; then perform bounded impact closure and hand D3 the minimum computational semantics and resource/compatibility constraints it must preserve.
 
 ## Evidence and Challenge
 
-A stale pass is not current confirmation and a stale fail is not current refutation. Tests sharing one expected-value generator, fixture, dataset defect, reference implementation or assumption are correlated even when separately executed.
-
-Material D2 Review seeks wrong normalization/limits, degraded convergence, unstable regimes, hidden estimator bias, precision-induced bias, non-equivalent restart, or reordered/parallel arithmetic outside the accepted envelope. If accepted D2 itself may be false, contradictory, materially ambiguous, or impossible to concretize, raise **SERIOUS CHALLENGE** to D2 rather than asking D3/D4 to work around it.
+Stale results neither confirm nor refute. Tests sharing one expected-value generator, fixture, dataset defect, reference implementation or assumption are correlated even when separately executed. Material D2 Review seeks wrong normalization/limits, degraded convergence, unstable regimes, hidden estimator bias, precision-induced bias, non-equivalent restart, or reordered/parallel arithmetic outside the accepted envelope. If accepted D2 itself may be false, contradictory, materially ambiguous or impossible to concretize, raise **SERIOUS CHALLENGE** to D2 rather than asking D3/D4 to work around it.
 
 ## Completion
 
-Report material D1 invariants concretized, D2 normative method/error/uncertainty semantics, evidence and applicability, required human state, D2->D3 handoff, affected descendants/documentation/dependencies/history, and unresolved blockers/Challenge. Keep architecture/code mechanisms delegated unless D2 authority actually requires them.
+Report D1 invariants concretized, D2 method/error/uncertainty semantics, evidence and applicability, required human state, D2->D3 handoff, affected descendants/documentation/dependencies/history and unresolved blockers/Challenge. Keep architecture/code mechanisms delegated unless D2 authority requires them.

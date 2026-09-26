@@ -19,8 +19,9 @@ LANGUAGE_LEAVES = {"python-engineering.md", "cpp-engineering.md"}
 
 
 def links_for(kind: str, name: str) -> set[str]:
-    parent = "roles" if kind == "role" else "specialists"
-    text = (SOURCE / parent / name / "SKILL.md").read_text(encoding="utf-8")
+    # Direct routes of the consumed entrypoint: canonical SKILL.md plus the generated entry
+    # contract, which carries the kernel and versioning routes (dist parity is checked separately).
+    text = (ROOT / "dist" / "skills" / name / "SKILL.md").read_text(encoding="utf-8")
     return set(LINK_RE.findall(text))
 
 

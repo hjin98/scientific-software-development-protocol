@@ -40,7 +40,8 @@ class Protocol64PreservationAndStructureTests(unittest.TestCase):
             "software-implementation": "references/specification-and-implementation.md",
         }
         for role, owner in expected.items():
-            text = (SOURCE / "roles" / role / "SKILL.md").read_text(encoding="utf-8")
+            # consumed entrypoint: the kernel route is generated into its entry contract
+            text = (ROOT / "dist" / "skills" / role / "SKILL.md").read_text(encoding="utf-8")
             self.assertIn("references/abstraction-and-concretization.md", text, role)
             self.assertIn(owner, text, role)
 

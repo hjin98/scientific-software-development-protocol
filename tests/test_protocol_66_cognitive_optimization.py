@@ -259,13 +259,15 @@ class SelectionMetadataTests(unittest.TestCase):
                 self.assertEqual(text.count(build_skills.ENTRY_PLACEHOLDER), 1)
                 self.assertIn(build_skills.ENTRY_PLACEHOLDER, head)
                 self.assertNotIn("Version entry check", text)
-                # the kernel is predicate-routed, not an unconditional pre-reasoning read
-                self.assertIn("(references/abstraction-and-concretization.md)", text)
-                for para in text.split("\n\n"):
-                    if " ".join(para.split()).startswith("Before substantive"):
-                        self.assertNotIn("abstraction-and-concretization.md", para)
+                # the kernel is predicate-routed by the generated entry contract, not an
+                # unconditional pre-reasoning read and not a per-skill copy (workplan 16.11)
+                self.assertNotIn("abstraction-and-concretization.md", text)
                 built = (ROOT / "dist" / "skills" / name / "SKILL.md").read_text(encoding="utf-8")
                 built_head, _, _ = built.partition("## Routing")
+                self.assertIn(build_skills.KERNEL_ROUTE, built_head)
+                for para in built.split("\n\n"):
+                    if " ".join(para.split()).startswith("Before substantive"):
+                        self.assertNotIn("abstraction-and-concretization.md", para)
                 self.assertIn("## Entry contract", built_head)
                 self.assertIn(f"This package is SSDP `{version}`", built_head)
                 self.assertIn(invariant, built_head)
@@ -303,10 +305,11 @@ class SelectionMetadataTests(unittest.TestCase):
         summary = re.search(r"^## Universal invariant\n.*?^```text\n(.*?)^```", kernel, re.S | re.M).group(1)
         self.assertEqual(old_block, summary)
         self.assertNotIn(summary, build_skills.entry_contract(kernel, read("source/shared/references/protocol-versioning-and-compatibility.md")))
+        self.assertIn("proportional-rigor, verification/Challenge, representation or SSDP self-development question", build_skills.KERNEL_ROUTE)
         for name in (*ROLES, *SPECIALISTS):
-            text = skill(name)
+            built = (ROOT / "dist" / "skills" / name / "SKILL.md").read_text(encoding="utf-8")
             with self.subTest(skill=name):
-                self.assertIn("proportional-rigor, verification/Challenge, representation or SSDP self-development question -> [universal kernel]", text)
+                self.assertIn(build_skills.KERNEL_ROUTE, built)
 
     def test_validator_rejects_entry_contract_drift_and_missing_placeholder(self) -> None:
         name = "software-implementation"

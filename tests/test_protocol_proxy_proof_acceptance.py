@@ -70,7 +70,10 @@ class ProxyProofAcceptanceContractTests(unittest.TestCase):
         testing = read("source/shared/references/testing-and-validation.md").lower()
         implementation = read("source/roles/software-implementation/SKILL.md").lower()
         self.assertIn("if delegated owner identity changes under equivalent semantics, remap/rerun owner-specific evidence rather than preserving the old owner", testing)
-        self.assertIn("remap/rerun still-valid evidence specifications after owner replacement rather than preserving obsolete product machinery for the test", implementation)
+        # Protocol 6.6 (workplan 16.11): detail at the D4 owner, compact hook in the entrypoint.
+        specification = read("source/shared/references/specification-and-implementation.md").lower()
+        self.assertIn("remap/rerun against the real current owner rather than preserving obsolete product machinery for test convenience", specification)
+        self.assertIn("remap/rerun evidence whose owner changed", implementation)
 
     def test_structural_guardrails_are_claim_triggered_not_global_frameworks(self) -> None:
         testing = read("source/shared/references/testing-and-validation.md").lower()

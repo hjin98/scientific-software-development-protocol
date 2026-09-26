@@ -249,8 +249,9 @@ def expected_entry_contract(files: dict[str, bytes]) -> bytes | None:
     step_text = re.sub(rb"\]\(([A-Za-z0-9_.-]+\.md)\)", rb"](references/\1)", step.group(1))
     return (
         b"## Entry contract\n\n" + step_text
-        + b"\n\n**Pre-routing safety kernel** ([universal kernel](references/abstraction-and-concretization.md)"
-        b" owns it and the rest of the universal doctrine):\n\n```text\n"
+        + b"\n\n**Pre-routing safety kernel** ([universal kernel](references/abstraction-and-concretization.md) owns it and"
+        b" any materiality, authority/delegation, simplicity, proportional-rigor, verification/Challenge,"
+        b" representation or SSDP self-development question):\n\n```text\n"
         + invariant.group(1) + b"```"
     )
 

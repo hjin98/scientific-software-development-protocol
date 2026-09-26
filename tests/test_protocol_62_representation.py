@@ -56,11 +56,12 @@ class Protocol62RepresentationTests(unittest.TestCase):
             self.assertIn(phrase, text)
 
     def test_every_entrypoint_routes_to_current_kernel(self):
+        # The kernel route is generated into every consumed entrypoint's entry contract.
         skill_paths = sorted(ROLES.glob("*/SKILL.md")) + sorted(SPECIALISTS.glob("*/SKILL.md"))
         self.assertEqual(len(skill_paths), 7)
         for path in skill_paths:
             with self.subTest(path=path):
-                text = path.read_text()
+                text = (ROOT / "dist" / "skills" / path.parent.name / "SKILL.md").read_text()
                 self.assertIn("references/abstraction-and-concretization.md", text)
                 self.assertNotIn("references/abstraction-and-realization.md", text)
 
