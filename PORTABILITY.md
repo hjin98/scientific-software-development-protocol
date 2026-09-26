@@ -21,7 +21,7 @@ package transport closure (every routed owner present in the bundle) is a fourth
 
 Frontmatter `name`/`description` is the portable selection surface: a short task-class plus exclusion interface, never compressed doctrine or mutable release state. `agents/openai.yaml` is a vendor adapter validated separately; a missing or broken adapter does not invalidate the generic core bundle. Selection metadata that finds the right root does not prove its conditional owners were read, and correct internal routing cannot repair a root that was never selected.
 
-The active role/specialist `SKILL.md` owns root activation and carries a build-inlined entry contract (governing-version step plus the kernel's universal invariant block), because the entrypoint is the surface a portable runtime reliably consumes. It routes to its owning concern and, when a question needs more than that block, the full universal kernel; a concern owner may conditionally dispatch to a narrower leaf only within that concern.
+The active role/specialist `SKILL.md` owns root activation and carries a build-inlined entry contract (governing-version step plus the kernel's minimal pre-routing safety kernel), because the entrypoint is the surface a portable runtime reliably consumes. It routes to its owning concern and, when a materiality, delegation, rigor, verification or representation question arises, the full universal kernel; a concern owner may conditionally dispatch to a narrower leaf only within that concern.
 
 ```text
 activation -> required source/package reachability
@@ -34,7 +34,7 @@ PEM doctrine/template may be packaged; live project `PROJECT-ENGINEERING-MEMORY.
 
 ## Compatible source resolution
 
-Resolve a declared-version-compatible local/installed source first. Remote fallback, when allowed, uses only an exact immutable ref supplied by task/project authority or the designated project release-state mapping. Never use default/latest or guess a semantic-version Git ref.
+Resolve a local/installed source of the declared version first; a newer installed successor is not that source and is never adopted without an explicit decision by the authority over the task/workplan. Remote fallback, when allowed, uses only an exact immutable ref supplied by task/project authority or the designated project release-state mapping. Never use default/latest or guess a semantic-version Git ref.
 
 For this repository, current exact public/recovery mappings are owned by `PROTOCOL-RELEASE-STATE.yaml`; detailed release chronology remains in semantic history. Immutable version-bound mappings remain distinct from the mutable accepted-current designation.
 
@@ -55,7 +55,7 @@ Which profile is accepted-current is release state, resolved from `PROTOCOL-RELE
 
 ## Manual operation and transient state
 
-Every skill is usable by hand from its installed files: no Orchestrator, hosted service, vendor model, multi-agent runtime, memory service or evaluation harness is required. Working State checkpoints, handoff projections, memory query/index output and evaluation results are derived coordination views, never hidden runtime authority. At entry, a task or workplan that declares a `protocol_version` is compared with the package `PROTOCOL_VERSION`; a mismatch resolves a compatible or exact immutable source rather than reinterpreting the work (this repository ships an offline helper, `source/version_preflight.py`).
+Every skill is usable by hand from its installed files: no Orchestrator, hosted service, vendor model, multi-agent runtime, memory service or evaluation harness is required. Working State checkpoints, handoff projections, memory query/index output and evaluation results are derived coordination views, never hidden runtime authority. At entry, a task or workplan that declares a `protocol_version` is compared with the package `PROTOCOL_VERSION`; a mismatch resolves a source of the declared version or its exact immutable source, else reports non-closure, rather than reinterpreting or self-adopting the loaded package (this repository ships an offline helper, `source/version_preflight.py`).
 
 ## Formal-definition portability boundary
 

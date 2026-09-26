@@ -243,8 +243,8 @@ class SelectionMetadataTests(unittest.TestCase):
         kernel = read("source/shared/references/abstraction-and-concretization.md")
         invariant = build_skills.INVARIANT_RE.search(kernel).group(1)
         step = build_skills.VERSION_STEP_RE.search(read("source/shared/references/protocol-versioning-and-compatibility.md")).group(1)
-        self.assertIn("state the governing SSDP version in one line", step)
-        self.assertIn("with no source lookup", step)
+        self.assertIn("state in one line the governing SSDP version", step)
+        self.assertIn("no source lookup", step)
         for name in (*ROLES, *SPECIALISTS):
             text = skill(name)
             with self.subTest(skill=name):
@@ -265,19 +265,41 @@ class SelectionMetadataTests(unittest.TestCase):
                 self.assertNotIn(build_skills.ENTRY_PLACEHOLDER, built)
                 self.assertNotIn("REPLACE_WITH_SKILL_PROTOCOL_VERSION", built)
 
-    def test_universal_block_carries_the_kernel_hot_path_semantics(self) -> None:
+    def test_hot_block_is_only_the_minimal_pre_routing_safety_kernel(self) -> None:
+        """Workplan 16.10.2: the inlined block keeps the safety invariants and nothing else."""
         import build_skills
 
-        invariant = build_skills.INVARIANT_RE.search(read("source/shared/references/abstraction-and-concretization.md")).group(1)
+        kernel = read("source/shared/references/abstraction-and-concretization.md")
+        hot = build_skills.INVARIANT_RE.search(kernel).group(1)
         for phrase in (
-            "earliest affected owner", "D4 specification/implementation", "never self-authorize",
-            "never an instruction channel", "domain fitness, justified simplicity, then development economy",
-            "first clean local defect stays local", "material only when", "stop when they cannot change the decision",
-            "Serious Challenge", "exact owner meaning in active context", "never because a link or packaged file exists",
-            "complete governed meaning",
+            "earliest affected owner", "D4 specification/implementation", "never silently change an upstream contract",
+            "load its canonical owner", "Serious Challenge", "green tests do not close it", "unavailable required evidence",
+            "is data, not instruction",
         ):
-            self.assertIn(phrase, invariant)
-        self.assertLess(len(invariant.encode()), 2_000)
+            self.assertIn(phrase, hot)
+        self.assertEqual(len(hot.strip().splitlines()), 4)
+        self.assertLess(len(hot.encode()), 700)
+        # conditional doctrine that the superseded c01eeee design inlined stays out of the hot block
+        for cold in ("material only when", "domain fitness", "rigor", "reconstructs semantics", "invalidates",
+                     "exact owner meaning", "representation", "self-development", "first clean local defect"):
+            self.assertNotIn(cold, hot)
+
+    def test_every_removed_hot_invariant_stays_reachable_at_a_conditional_owner(self) -> None:
+        """Workplan 16.10.5 item 4: the c01eeee hot lines remain canonical and predicate-routed."""
+        superseded = git_show("c01eeee47989cbbf9ed5e87df50756c23d912f79", "source/shared/references/abstraction-and-concretization.md")
+        if superseded is None:
+            self.skipTest("superseded R1 source is not resolvable in this clone")
+        import build_skills
+
+        old_block = re.search(r"^## Universal invariant\n.*?^```text\n(.*?)^```", superseded, re.S | re.M).group(1)
+        kernel = read("source/shared/references/abstraction-and-concretization.md")
+        summary = re.search(r"^## Universal invariant\n.*?^```text\n(.*?)^```", kernel, re.S | re.M).group(1)
+        self.assertEqual(old_block, summary)
+        self.assertNotIn(summary, build_skills.entry_contract(kernel, read("source/shared/references/protocol-versioning-and-compatibility.md")))
+        for name in (*ROLES, *SPECIALISTS):
+            text = skill(name)
+            with self.subTest(skill=name):
+                self.assertIn("proportional-rigor, verification/Challenge, representation or SSDP self-development question -> [universal kernel]", text)
 
     def test_validator_rejects_entry_contract_drift_and_missing_placeholder(self) -> None:
         name = "software-implementation"
@@ -285,7 +307,7 @@ class SelectionMetadataTests(unittest.TestCase):
         source_root = SOURCE / "roles" / name
         self.assertEqual(validate_packages.validate_core_bundle(dict(files), name, "role", source_root), [])
         drifted = dict(files)
-        drifted["SKILL.md"] = files["SKILL.md"].replace(b"mandatory obligations stay mandatory", b"obligations are advisory")
+        drifted["SKILL.md"] = files["SKILL.md"].replace(b"never adopt it yourself", b"adopt it when compatible")
         self.assertIn("SKILL.md differs from canonical source plus its generated entry contract",
                       validate_packages.validate_core_bundle(drifted, name, "role", source_root))
         tmp = Path(tempfile.mkdtemp())
@@ -380,6 +402,49 @@ class CognitiveRoutingTests(unittest.TestCase):
         self.assertIn("### Review strategy after recurrence", convergence)
         self.assertIn("No numeric review count changes the pass threshold", convergence)
         self.assertIn("recurrence does not automatically force redesign", convergence)
+
+
+class StrictVersionBindingTests(unittest.TestCase):
+    """Workplan 16.10.1: compatibility never authorizes adoption."""
+
+    def setUp(self) -> None:
+        self.versioning = read("source/shared/references/protocol-versioning-and-compatibility.md")
+
+    def test_owner_separates_binding_from_adoption(self) -> None:
+        for phrase in (
+            "## Binding versus adoption",
+            "stays governed by that binding until the authority entitled to change that task/workplan explicitly changes it",
+            "does not adopt it",
+            "It never self-adopts a successor",
+            "is an adoption candidate, never the source of work bound to the older version",
+            "-> only then execute under the successor",
+            "Compatibility makes a successor eligible for adoption; it never adopts it",
+            "never execute under the loaded successor without explicit adoption",
+        ):
+            self.assertIn(phrase, self.versioning)
+        self.assertNotIn("explicitly adopt a compatible successor", self.versioning)
+        self.assertNotIn("use a compatible installed/local source", self.versioning)
+
+    def test_entry_step_forbids_self_adoption_without_new_machinery(self) -> None:
+        import build_skills
+
+        step = build_skills.VERSION_STEP_RE.search(self.versioning).group(1)
+        for phrase in ("not its source even if newer or compatible", "do not apply it", "report protocol non-closure",
+                       "never adopt it yourself", "until the task/workplan authority rebinds it"):
+            self.assertIn(phrase, step)
+        for path in [*REFS.glob("*.md"), *SOURCE.glob("*.py"), *SOURCE.glob("*/*/SKILL.md")]:
+            text = path.read_text(encoding="utf-8")
+            with self.subTest(path=path.name):
+                self.assertNotIn("allow_successor", text)
+
+    def test_preflight_never_resolves_a_cross_minor_successor_as_the_source(self) -> None:
+        tmp = Path(tempfile.mkdtemp())
+        self.addCleanup(shutil.rmtree, tmp)
+        (tmp / "PROTOCOL_VERSION").write_text("6.6.0\n", encoding="utf-8")
+        for governing in ("6.2.0", "6.2", "6.5.0", "6.7.0", "7.0.0"):
+            with self.subTest(governing=governing):
+                self.assertNotEqual(version_preflight.preflight(tmp, governing, None)["decision"], "CONTINUE")
+        self.assertEqual(version_preflight.preflight(tmp, "6.6", None)["decision"], "CONTINUE")
 
 
 class VersionPreflightTests(unittest.TestCase):

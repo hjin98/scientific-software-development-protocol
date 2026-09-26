@@ -10,7 +10,7 @@ Own protocol/workplan/profile version binding, immutable historical recovery, pu
 - **minor** — backward-compatible capability/doctrine/control strengthening;
 - **patch** — clarification or defect correction.
 
-Protocol 6.0 introduced first-class D1-D4 authority. Protocol 6.1 strengthened terminology/evidence/handoff/documentation; 6.2 strengthened lossless representation/progressive disclosure; 6.3 added evidence-backed non-authoritative project engineering memory; 6.4 strengthened definition/source availability, well-definedness, parameterization, typed semantic dependencies, imported-source discipline and claim warrant; 6.5 strengthened release-state ownership, Review epistemology and proportional rigor; 6.6 reorganized the same capabilities for lower active-context/trajectory cost (tiny kernel, conditional semantic-definition and PEM-schema owners, operational working state, cognitive-resource escalation, entry version check). A compatible successor preserves those accepted capabilities unless an explicit stronger authority supersedes them.
+Protocol 6.0 introduced first-class D1-D4 authority. Protocol 6.1 strengthened terminology/evidence/handoff/documentation; 6.2 strengthened lossless representation/progressive disclosure; 6.3 added evidence-backed non-authoritative project engineering memory; 6.4 strengthened definition/source availability, well-definedness, parameterization, typed semantic dependencies, imported-source discipline and claim warrant; 6.5 strengthened release-state ownership, Review epistemology and proportional rigor; 6.6 reorganized the same capabilities for lower active-context/trajectory cost (minimal pre-routing safety kernel, conditional semantic-definition and PEM-schema owners, operational working state, cognitive-resource escalation, strict version binding at entry). A compatible successor preserves those accepted capabilities unless an explicit stronger authority supersedes them. Compatibility makes a successor eligible for adoption; it never adopts it.
 
 ## Version-intrinsic semantics versus mutable release state
 
@@ -78,9 +78,29 @@ Version-bound work remains interpreted under its declared `protocol_version`. A 
 
 Frozen historical source/profile/publication/recovery artifacts remain historical truth and are never rewritten to current terminology. Current release mappings are resolved from the project release-state owner rather than replayed from this semantic owner.
 
+## Binding versus adoption
+
+Compatibility and adoption are different facts:
+
+1. A task/workplan that declares `protocol_version` stays governed by that binding until the authority entitled to change that task/workplan explicitly changes it.
+2. A newer compatible protocol is **eligible** for adoption. Being installed, newer, backward-compatible or judged equivalent for the immediate task does not adopt it.
+3. An execution agent may identify and recommend a successor and list the obligations that would change. It never self-adopts a successor.
+4. A **source of the declared version** is one whose version equals the declaration, or lies in the `X.Y` line that a two-part declaration names. A cross-minor or cross-major successor (for example 6.2 -> 6.6) is an adoption candidate, never the source of work bound to the older version.
+5. Explicit adoption is a separate governed mutation:
+
+```text
+authorized adoption request/decision
+    -> identify old and proposed new protocol bindings
+    -> reconcile newly applicable obligations and materially affected evidence/dependencies
+    -> update the governing task/workplan binding through its normal authority process
+    -> only then execute under the successor
+```
+
+No flag, migration state machine or second version authority encodes this; the declared `protocol_version` and the authority that owns it are sufficient.
+
 ## Workplan binding, PEM adoption, and evidence reuse
 
-Every workplan inheriting protocol behavior binds its declared `protocol_version`. Older active work may continue under its declared version or explicitly adopt a compatible successor after changed obligations are reconciled.
+Every workplan inheriting protocol behavior binds its declared `protocol_version`. Older active work may continue under its declared version; only its owning authority can adopt a successor, through the sequence in the binding-versus-adoption section above.
 
 PEM `memory_schema_version` is independent of SSDP protocol version and orchestration profile schema. A compatible protocol successor may retain a memory schema while clarifying its documented semantics. Unknown/newer/incompatible schemas fail safe for memory-dependent decisions; unsupported memory does not block unrelated protocol routes.
 
@@ -90,19 +110,20 @@ Previously executed evidence remains reusable only while no changed protocol obl
 
 ### Version check at execution entry
 
-The package build inlines the step between the markers below, stamped with the package version, at the top of every skill entrypoint together with the kernel's universal pre-action contract. It is an unconditional, observable declaration rather than a conditional reminder: the governing version is usually known only after the task or workplan is read, so the step binds to the first file change or protocol-dependent decision instead of to skill load.
+The package build inlines the step between the markers below, stamped with the package version, at the top of every skill entrypoint together with the kernel's pre-routing safety kernel; it is the version-binding member of that minimal hot set. It is an unconditional, observable declaration rather than a conditional reminder: the governing version is usually known only after the task or workplan is read, so the step binds to the first file change or protocol-dependent decision instead of to skill load.
 
 <!-- ssdp-entry-version-step:begin -->
-**Governing version.** This package is SSDP `6.6.0`. Before the first file change or protocol-dependent decision, state the governing SSDP version in one line: the `protocol_version` declared in the task or in the front matter of a workplan the task names, else `none`. `none` or this package's version -> continue with this package, with no source lookup. Any other version -> say so and do not apply this package; resolve that version's compatible source per [Protocol versioning and compatibility](protocol-versioning-and-compatibility.md) or report non-closure.
+**Governing version.** This package is SSDP `6.6.0`. Before the first file change or protocol-dependent decision, state in one line the governing SSDP version: the `protocol_version` of the task or of a workplan it names, else `none`. `none` or `6.6.0` -> continue, no source lookup. Any other version governs until the task/workplan authority rebinds it; this package is not its source even if newer or compatible, so do not apply it: use an installed/local source of that version or its mapped immutable source ([versioning](protocol-versioning-and-compatibility.md)), else report protocol non-closure. You may recommend adopting this package, never adopt it yourself.
 <!-- ssdp-entry-version-step:end -->
 
 Resolution rule behind the step:
 
 ```text
 governing == loaded (or X.Y naming the loaded minor line) -> continue
-governing != loaded -> use a compatible installed/local source, else the exact immutable
-                       public-source ref mapped for that version by the project release-state
-                       owner; if neither exists, report truthful non-closure
+governing != loaded -> use an installed/local source of the declared version, else the exact
+                       immutable public-source ref mapped for that version by the project
+                       release-state owner; if neither exists, report truthful non-closure;
+                       never execute under the loaded successor without explicit adoption
 no declared version and not version-bound -> installed skill, no remote lookup
 ```
 
@@ -112,7 +133,7 @@ The check reuses existing identity owners (`PROTOCOL_VERSION`, `protocol-manifes
 
 Immutable historical mappings are retained in the project release-state owner and semantic history. Historical work resolves through its exact version-specific source/profile semantics, never by assuming repository default/latest or treating a semantic-version string as a Git ref.
 
-A **public-source fallback** is the exact immutable source snapshot authorized for version-bound remote bootstrap when no compatible installed/local source is available. A **recovery** target is a distinct immutable rollback/accepted lifecycle state. One does not imply the other.
+A **public-source fallback** is the exact immutable source snapshot authorized for version-bound remote bootstrap when no installed/local source of the declared version is available. A **recovery** target is a distinct immutable rollback/accepted lifecycle state. One does not imply the other.
 
 Invalidated bootstrap attempts remain historical evidence only and must not be silently reused. Replacement fallback publication follows exact-source qualification and descendant mapping publication.
 

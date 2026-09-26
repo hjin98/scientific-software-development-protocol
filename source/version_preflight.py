@@ -71,10 +71,10 @@ def preflight(skill_root: Path, governing: str | None, release_state: Path | Non
     if mapping and re.fullmatch(r"[0-9a-f]{40}", mapping["public_source_ref"]):
         return {"decision": "RESOLVE_COMPATIBLE_SOURCE", "loaded": loaded, "governing": governing,
                 "public_source_ref": mapping["public_source_ref"], "recovery_ref": mapping["recovery_ref"],
-                "reason": "use a compatible installed source, else this exact immutable public-source ref; never newer/default doctrine"}
+                "reason": "use an installed source of the governing version, else this exact immutable public-source ref; never execute under the loaded successor without an explicit authorized adoption"}
     return {"decision": "UNRESOLVED", "loaded": loaded, "governing": governing,
             "recovery_ref": mapping["recovery_ref"] if mapping else None,
-            "reason": "no compatible loaded source and no exact public-source mapping available; report truthful non-closure or obtain explicit authority"}
+            "reason": "no source of the governing version and no exact public-source mapping available; report truthful non-closure (adoption of the loaded successor needs an explicit authorized decision)"}
 
 
 def main(argv: list[str] | None = None) -> int:

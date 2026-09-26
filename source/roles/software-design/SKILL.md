@@ -15,7 +15,7 @@ Before substantive D3 reasoning, read [Software architecture and design](referen
 
 Load only triggered concern owners:
 
-- a materiality, authority/delegation, verification/Challenge or representation question the entry contract does not settle -> [universal kernel](references/abstraction-and-concretization.md);
+- a materiality, authority/delegation, simplicity, proportional-rigor, verification/Challenge, representation or SSDP self-development question -> [universal kernel](references/abstraction-and-concretization.md);
 - D3->D4 workplan, handoff, working state, authority lifecycle/rework/impact closure, implementation Review or optional independent review trajectories -> [Workflow and workplans](references/workflow-and-workplans.md);
 - evidence applicability/dependency/evolution -> [Evidence, evolution, and semantic dependencies](references/evidence-evolution-and-dependencies.md); regression/integration/proxy-proof/oracle/qualification method -> [Testing and validation](references/testing-and-validation.md);
 - architecture-bearing formal semantics, a parameter/default binding, an external result/import, or a material definition ambiguity -> [Semantic definition and traceability](references/semantic-definition-and-traceability.md);

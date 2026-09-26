@@ -15,7 +15,7 @@ Before substantive D1 reasoning, read [Scientific and mathematical formulation](
 
 Then load only the concern whose predicate fires:
 
-- a materiality, authority/delegation, verification/Challenge or representation question the entry contract does not settle -> [universal kernel](references/abstraction-and-concretization.md);
+- a materiality, authority/delegation, simplicity, proportional-rigor, verification/Challenge, representation or SSDP self-development question -> [universal kernel](references/abstraction-and-concretization.md);
 - change plan, handoff, working state, acceptance state, authority lifecycle, invalidation or impact closure -> [Workflow and workplans](references/workflow-and-workplans.md);
 - a specialized symbol/quantity/relation, parameter family/instance/default binding, imported external result, formal claim/warrant, definition-dependency impact, or material ambiguity -> [Semantic definition and traceability](references/semantic-definition-and-traceability.md);
 - evidence design/applicability/dependency/evolution -> [Evidence, evolution, and semantic dependencies](references/evidence-evolution-and-dependencies.md); testing/oracle method only when required -> [Testing and validation](references/testing-and-validation.md) and, for executable scientific evidence, [Scientific software](references/scientific-software.md);

@@ -15,7 +15,7 @@ Before substantive D2 reasoning, read [Algorithm and numerical method design](re
 
 Then load only triggered concerns:
 
-- a materiality, authority/delegation, verification/Challenge or representation question the entry contract does not settle -> [universal kernel](references/abstraction-and-concretization.md);
+- a materiality, authority/delegation, simplicity, proportional-rigor, verification/Challenge, representation or SSDP self-development question -> [universal kernel](references/abstraction-and-concretization.md);
 - change plan, D1->D2/D2->D3 handoff, working state, authority lifecycle/invalidation/impact closure -> [Workflow and workplans](references/workflow-and-workplans.md);
 - a specialized operator/estimator/recurrence/stochastic object, parameter family/instance/default binding, imported theorem/result with hypotheses, formal claim/warrant, or definition-dependency impact -> [Semantic definition and traceability](references/semantic-definition-and-traceability.md);
 - evidence applicability/dependency/evolution -> [Evidence, evolution, and semantic dependencies](references/evidence-evolution-and-dependencies.md); numerical oracle/tolerance/differential/metamorphic/qualification method -> [Testing and validation](references/testing-and-validation.md) and [Scientific software](references/scientific-software.md) when cross-domain scientific evidence is material;

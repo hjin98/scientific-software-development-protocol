@@ -15,7 +15,7 @@ Before substantive D4 implementation, read [Specification and implementation](re
 
 Load only triggered concern owners:
 
-- a materiality, authority/delegation, verification/Challenge or representation question the entry contract does not settle -> [universal kernel](references/abstraction-and-concretization.md);
+- a materiality, authority/delegation, simplicity, proportional-rigor, verification/Challenge, representation or SSDP self-development question -> [universal kernel](references/abstraction-and-concretization.md);
 - governing workplan, stage/handoff/rework, working state, authority lifecycle or impact closure -> [Workflow and workplans](references/workflow-and-workplans.md);
 - evidence applicability/dependency/evolution -> [Evidence, evolution, and semantic dependencies](references/evidence-evolution-and-dependencies.md); executable acceptance/regression/integration/proxy-proof/oracle/qualification -> [Testing and validation](references/testing-and-validation.md);
 - a specialized scientific/numerical object, parameter/default binding, external result/import, formal claim, or material ambiguity used by the change -> [Semantic definition and traceability](references/semantic-definition-and-traceability.md);

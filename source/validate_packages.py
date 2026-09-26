@@ -235,7 +235,7 @@ def zip_files(path: Path, skill_name: str) -> tuple[dict[str, bytes], list[str]]
 
 ENTRY_PLACEHOLDER = b"<!-- SSDP-ENTRY-CONTRACT -->"
 ENTRY_STEP_RE = re.compile(rb"<!-- ssdp-entry-version-step:begin -->\n(.*?)\n<!-- ssdp-entry-version-step:end -->", re.S)
-ENTRY_INVARIANT_RE = re.compile(rb"^## Universal invariant\n.*?^```text\n(.*?)^```", re.S | re.M)
+ENTRY_INVARIANT_RE = re.compile(rb"^## Pre-routing safety kernel\n.*?^```text\n(.*?)^```", re.S | re.M)
 
 
 def expected_entry_contract(files: dict[str, bytes]) -> bytes | None:
@@ -249,8 +249,8 @@ def expected_entry_contract(files: dict[str, bytes]) -> bytes | None:
     step_text = re.sub(rb"\]\(([A-Za-z0-9_.-]+\.md)\)", rb"](references/\1)", step.group(1))
     return (
         b"## Entry contract\n\n" + step_text
-        + b"\n\n**Universal pre-action contract** ([universal kernel](references/abstraction-and-concretization.md)"
-        b" owns it; read the kernel when a question needs more than this block):\n\n```text\n"
+        + b"\n\n**Pre-routing safety kernel** ([universal kernel](references/abstraction-and-concretization.md)"
+        b" owns it and the rest of the universal doctrine):\n\n```text\n"
         + invariant.group(1) + b"```"
     )
 

@@ -15,7 +15,7 @@ Optional post-stage cleanup specialist. Use after formal development closure or 
 
 Load only triggered concern owners:
 
-- a materiality, authority/delegation, verification/Challenge or representation question the entry contract does not settle -> [universal kernel](references/abstraction-and-concretization.md);
+- a materiality, authority/delegation, simplicity, proportional-rigor, verification/Challenge, representation or SSDP self-development question -> [universal kernel](references/abstraction-and-concretization.md);
 - branch/ref deletion or material Git operations -> [Git and version control](references/git-and-version-control.md);
 - workplan archive/lifecycle closure -> [Workflow and workplans](references/workflow-and-workplans.md);
 - broad inspection/context economy -> [Repository intake](references/repository-intake.md);

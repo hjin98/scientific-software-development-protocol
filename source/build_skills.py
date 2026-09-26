@@ -30,25 +30,26 @@ SPECIALIST_SPECS = {
     "software-maintenance-audit": {"specialty": "maintenance-audit"},
 }
 
-# The universal pre-action contract is owned by the kernel's "Universal invariant" block and
-# the versioning owner's marked entry step; the build inlines both into every entrypoint at
-# ENTRY_PLACEHOLDER so the surface a portable runtime actually consumes carries them.
+# The entry contract is owned by the kernel's "Pre-routing safety kernel" block and the
+# versioning owner's marked entry step; the build inlines only those two into every entrypoint
+# at ENTRY_PLACEHOLDER so the surface a portable runtime actually consumes carries them. The
+# rest of the universal kernel stays a conditional owner.
 ENTRY_PLACEHOLDER = "<!-- SSDP-ENTRY-CONTRACT -->"
 ENTRY_REFERENCES = ("abstraction-and-concretization.md", "protocol-versioning-and-compatibility.md")
 VERSION_STEP_RE = re.compile(r"<!-- ssdp-entry-version-step:begin -->\n(.*?)\n<!-- ssdp-entry-version-step:end -->", re.S)
-INVARIANT_RE = re.compile(r"^## Universal invariant\n.*?^```text\n(.*?)^```", re.S | re.M)
+INVARIANT_RE = re.compile(r"^## Pre-routing safety kernel\n.*?^```text\n(.*?)^```", re.S | re.M)
 SIBLING_LINK_RE = re.compile(r"\]\(([A-Za-z0-9_.-]+\.md)\)")
 
 
 def entry_contract(kernel: str, versioning: str) -> str:
     step, invariant = VERSION_STEP_RE.search(versioning), INVARIANT_RE.search(kernel)
     if step is None or invariant is None:
-        raise SystemExit("entry contract owners lack the version step markers or the universal invariant block")
+        raise SystemExit("entry contract owners lack the version step markers or the pre-routing safety kernel block")
     return (
         "## Entry contract\n\n"
         + SIBLING_LINK_RE.sub(r"](references/\1)", step.group(1))
-        + "\n\n**Universal pre-action contract** ([universal kernel](references/abstraction-and-concretization.md)"
-        " owns it; read the kernel when a question needs more than this block):\n\n```text\n"
+        + "\n\n**Pre-routing safety kernel** ([universal kernel](references/abstraction-and-concretization.md)"
+        " owns it and the rest of the universal doctrine):\n\n```text\n"
         + invariant.group(1)
         + "```"
     )
