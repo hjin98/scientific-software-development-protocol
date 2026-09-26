@@ -6,7 +6,7 @@ target_protocol_version: 6.6.0
 status: reviewed-implementation-ready
 created_date: 2026-09-26
 reviewed_date: 2026-09-26
-workplan_review_state: PASS_NONINDEPENDENT_R2
+workplan_review_state: PASS_NONINDEPENDENT_R3
 base_protocol: Protocol 6.5
 base_accepted_source: 7f7b5e24858e813e45ace867a7f8ea5180f43bf0
 base_recovery: c4d5da1e0acb0e9f27376bf69561e8762747cd2d
@@ -583,13 +583,13 @@ The implementer SHALL:
 
 ## 15. Workplan review disposition
 
-Two adversarial, non-independent workplan review passes have been incorporated into the current text. Review chronology remains recoverable in Git rather than accumulating as binding amendment prose here.
+Three adversarial, non-independent workplan review passes have been incorporated into the current text. Review chronology remains recoverable in Git rather than accumulating as binding amendment prose here.
 
 Current disposition:
 
 ```text
 SERIOUS CHALLENGE: NONE
-WORKPLAN REVIEW: PASS_NONINDEPENDENT_R2
+WORKPLAN REVIEW: PASS_NONINDEPENDENT_R3
 IMPLEMENTATION: READY SUBJECT TO NORMAL IMPLEMENTATION-TIME DISCOVERY
 ```
 
