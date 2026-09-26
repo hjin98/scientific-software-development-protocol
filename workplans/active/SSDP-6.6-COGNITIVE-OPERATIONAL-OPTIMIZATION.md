@@ -6,7 +6,7 @@ target_protocol_version: 6.6.0
 status: reviewed-implementation-ready
 created_date: 2026-09-26
 reviewed_date: 2026-09-26
-workplan_review_state: PASS_NONINDEPENDENT
+workplan_review_state: PASS_NONINDEPENDENT_R2
 base_protocol: Protocol 6.5
 base_accepted_source: 7f7b5e24858e813e45ace867a7f8ea5180f43bf0
 base_recovery: c4d5da1e0acb0e9f27376bf69561e8762747cd2d
@@ -338,98 +338,21 @@ A mismatch must not silently reinterpret version-bound work with latest/default 
 
 Mechanically checkable mismatch behavior SHOULD be tested. The preflight itself must stay cheap, reuse existing `PROTOCOL_VERSION`/manifest/release-state authority, and must not turn every ordinary repository task into a remote protocol lookup or a parallel control plane.
 
-## 6. Empirical protocol-evaluation flywheel
+## 6. Empirical protocol evaluation
 
-### 6.1 Purpose
+Protocol 6.6 requires bounded empirical evidence that operational changes help rather than merely making source files look smaller. Detailed scenario, matched-comparison, provenance, holdout, non-regression, anti-overfitting, and evaluation-economy semantics are owned by [Protocol 6.6 Evaluation and Qualification Contract](../../qualification/ssdp66/PROTOCOL-6.6-EVALUATION-AND-QUALIFICATION-CONTRACT.md).
 
-Protocol evolution SHALL gain bounded empirical evidence about whether protocol changes improve actual agent trajectories. Evaluation is evidence, never D1-D4 authority and never an automatic acceptance oracle.
+Keep these hot invariants:
 
-The initial 6.6 corpus should include representative immutable/reconstructible scenarios drawn from project history plus synthetic counterfactuals where useful:
+- evaluation is evidence, never D1-D4 authority or an automatic acceptance oracle;
+- compare against exact accepted 6.5 under matched conditions as practical;
+- execution-agent self-assertion is not sufficient correctness evidence;
+- semantic correctness/non-regression is a feasibility gate before operational optimization;
+- static context reduction does not prove live trajectory improvement;
+- claimed improvement remains bounded to tested task/model/runtime regimes;
+- evaluation infrastructure itself must satisfy minimum justified complexity.
 
-- first-clean local D4 defect;
-- numerical-tolerance/sanity-check defect where research-grade escalation is unnecessary;
-- genuine D2 semantic defect requiring escalation;
-- architecture redesign;
-- mature mechanism replacement;
-- defective/stale evidence instrument;
-- stale prior evidence;
-- recurrence/shared-family repair;
-- overengineering trap;
-- stop-condition/opportunity-cost trap;
-- protocol-version mismatch;
-- workplan with deliberately weak/incorrect abstraction;
-- PEM-applicable and PEM-not-applicable cases.
-
-Each eval scenario should have a durable manifest containing the initial repository/source snapshot, task statement, governing authority available to the agent, allowed tools/runtime constraints, intended evidence class, and outcome oracle/assessment route. Historical cases should use pre-solution snapshots and exclude later accepted repairs, workplans, review findings, or memory entries that would leak the answer where practical. Synthetic cases may test routing/behavior but cannot establish universal engineering-outcome superiority.
-
-The corpus should include both simplification opportunities and **preservation sentinels** where deep/cold doctrine is genuinely necessary, including representative semantic-definition/import/parameter-binding, scientific/numerical, security/recovery/concurrency, and release/version cases chosen from the preservation map. The goal is high-information coverage, not one fixture per clause.
-
-### 6.2 Comparison discipline
-
-Before semantic optimization begins, freeze a compact **development set** used for diagnosis/refinement and a smaller **holdout/adversarial set** used only after candidate behavior is substantially stable. Historical task snapshots should avoid later-solution leakage where practical.
-
-For claims about protocol-caused behavioral improvement, compare candidate 6.6 against the exact accepted 6.5 source identity `7f7b5e24858e813e45ace867a7f8ea5180f43bf0`, not a stale installed approximation, under the same model identity/version, reasoning mode, tool permissions, task snapshot, and host configuration as practical. Record deviations that can confound interpretation. Counterbalance/alternate run order when temporal service/model drift could bias one variant.
-
-Execution and outcome assessment must be separated enough to avoid self-confirmation. Prefer deterministic external/owner-based oracles where available; otherwise use an independent evaluator/reviewer that did not author the trajectory and, where practical, is blinded to which protocol variant produced it. The execution agent's own completion claim is never sufficient evidence of correctness.
-
-A holdout/adversarial case becomes development data once its result is used to tune the candidate; do not continue calling it holdout. Replace or reserve fresh cases when further unbiased discrimination is still needed.
-
-Use three distinct measurement layers:
-
-1. **static mandatory-read closure** — source bytes/tokens and routing depth required by doctrine for a declared task class;
-2. **observed active protocol context** — protocol material actually loaded during a live trajectory;
-3. **total trajectory behavior** — tool/agent steps, interventions, tests/evidence work, candidate/review churn, cost, and final outcome.
-
-Do not substitute layer 1 for layers 2-3 when claiming live behavioral improvement.
-
-Measure at least:
-
-**Correctness / semantic protection**
-- final governed outcome;
-- missed applicable authority;
-- false acceptance;
-- missed affected surface;
-- false/missed Serious Challenge;
-- inappropriate upward escalation;
-- preservation of historical capability.
-
-**Operational behavior**
-- active protocol context loaded;
-- routing/reference reads;
-- tool/agent steps;
-- unnecessary tests/evidence work;
-- workplan/review amendment churn;
-- candidate/review cycles;
-- unnecessary architecture/process introduced;
-- human interventions where measurable;
-- completion/stop behavior.
-
-**Cost signals where available**
-- model tokens/compute;
-- wall time;
-- external tool cost.
-
-No single score is protocol authority. Correctness/semantic preservation are feasibility gates; operational metrics are optimization evidence among semantically admissible candidates.
-
-**Behavioral non-regression rule:** a reproducible new substantive correctness/authority/evidence failure on a matched case that 6.5 correctly closes is a 6.6 blocker unless independent review establishes that the 6.5 result itself was invalid/inapplicable. Aggregate efficiency cannot average away a semantic regression.
-
-**Operational-improvement rule:** acceptance requires both (a) structural reduction of the declared ordinary hot path and (b) at least bounded live trajectory evidence that one or more intended burden dimensions actually improve without a new correctness failure in the evaluated regime. The improvement must be distinguishable from obvious measurement noise and large enough to justify any new permanent machinery it introduces. No universal percentage or composite score is authority; report per-case tradeoffs and uncertainty.
-
-### 6.3 Evaluation economy, reversibility, and anti-overfitting
-
-The eval system SHALL obey the same proportional-rigor doctrine it measures.
-
-- Prefer a compact high-information corpus over a huge benchmark campaign.
-- Separate qualification fixtures from at least some holdout/adversarial cases where practical.
-- Do not tune prose solely to a named model's quirks when the capability can be expressed portably.
-- Repeat stochastic runs only when variance can change the decision.
-- Do not claim universal productivity/intelligence improvement from static token/byte metrics.
-- A structural hot-path reduction claim requires structural evidence; a behavioral trajectory claim requires live agent evidence; an engineering-outcome claim requires outcome evidence.
-- Stop evaluation when remaining uncertainty cannot change acceptance or design choice.
-- Experimental helpers, indexes, memory-query commands, context tooling, or subagent orchestration SHALL remain removable until evidence shows they materially reduce burden or protect a governing capability. Delete/decline them when they merely move complexity from prose into machinery.
-- Evaluation infrastructure itself is subject to minimum justified complexity; prefer existing repository tests/scripts and small task fixtures before introducing a framework.
-- Release qualification may use one or more explicitly declared reference agent/runtime environments; this evidence is versioned evidence for the release, not a runtime dependency imposed on downstream SSDP users.
-- Preserve enough provenance to interpret live runs: exact protocol source, task snapshot, model/runtime identity as exposed, reasoning/configuration mode, tool permissions/versions where material, and trace/result artifacts or explicit limitations when the host does not expose them.
+Load the cold contract only when the evaluation/qualification decision is active.
 
 ## 7. Required implementation surfaces
 
@@ -480,7 +403,7 @@ Avoid new permanent frameworks when existing Markdown, Python validation/build s
 2. Reconcile the project-local PEM accepted/base/overlay state or retain explicit `REVIEW_REQUIRED`; construct the canonical HAS only after that basis is valid.
 3. Build a bounded capability-preservation map from current 6.5 and accepted historical lineage, with special attention to 6.2 progressive disclosure, 6.3 PEM, 6.4 semantic precision, and 6.5 proportional rigor. Treat the map as review evidence, not a new semantic registry; organize by capability family/current owner/activation/acceptance sentinel rather than replaying every historical clause.
 4. Measure current static mandatory-read closure and, where practical, observed active protocol context for representative routes.
-5. Freeze the compact development and holdout/adversarial eval sets plus their claim boundaries before optimizing the protocol.
+5. Load the cold evaluation/qualification contract and freeze the compact development and holdout/adversarial eval sets plus their claim boundaries before optimizing the protocol.
 
 **Gate:** no semantic source mutation until the memory-basis disposition, preservation obligations, baseline measurements, and eval-set identities are reviewable.
 
@@ -519,6 +442,8 @@ Avoid new permanent frameworks when existing Markdown, Python validation/build s
 
 ### Stage F — Empirical evaluation and refinement
 
+Load the cold evaluation/qualification contract.
+
 1. Run structural context/routing comparisons.
 2. Run selected live 6.5-vs-6.6 agent trajectory comparisons under matched environments where practical.
 3. Inspect failures qualitatively; do not optimize a scalar score.
@@ -526,6 +451,8 @@ Avoid new permanent frameworks when existing Markdown, Python validation/build s
 5. Repeat only the affected high-information cases after repair.
 
 ### Stage G — Final assembled acceptance
+
+Load the cold evaluation/qualification contract for its counterfactual/claim-scope obligations.
 
 Run the repository's inherited source tests, PEM checks when applicable, package validation, generated-dist parity, profile/snapshot/Core checks, exact-ref/source-resolution checks, and new 6.6 qualification.
 
@@ -551,65 +478,13 @@ Additionally verify:
 5. If 6.6 becomes accepted before Protocol 7 cutover, feed its operational evidence and accepted capabilities into Protocol 7's already-required deliberate D3 Orchestrator architecture reopen. Do not treat this as a mechanical inheritance-only update: the reopen must reconsider whether Protocol 7's mandatory control-plane/orchestrator design remains the minimum justified architecture in light of 6.6 evidence.
 6. Regenerate mapping-bearing descendants and complete release/documentation closeout.
 
-## 10. Qualification and falsification matrix
+## 10. Qualification and falsification
 
-At minimum include counterfactuals for:
+Detailed evaluation/qualification counterfactuals are owned by [Protocol 6.6 Evaluation and Qualification Contract](../../qualification/ssdp66/PROTOCOL-6.6-EVALUATION-AND-QUALIFICATION-CONTRACT.md).
 
-### Kernel/routing
-- a local D4 task that accidentally loads semantic-definition/PEM/history detail;
-- a specialized mathematical/import task whose cold semantic-definition owner becomes unreachable;
-- a specialized object that is discoverable but improperly used without loading the exact owner meaning required by the inference;
-- a route shortened by deleting a mandatory capability rather than moving it;
-- duplicate local doctrine disagreeing with its canonical owner;
-- a cold resource correctly packaged for transport but accidentally treated as active merely because bundle membership/linkage exists.
+Load that cold contract for Stage A evaluation design, Stage F live comparison, Stage G qualification, or Review of evidence adequacy. Ordinary implementation does not preload it.
 
-### Representation/state
-- a compact handoff that omits an open blocker/reopen condition;
-- Working State declaring acceptance without canonical authority;
-- a stale checkpoint reused after candidate/workplan/protocol change;
-- workplan churn caused only by transient progress.
-
-### PEM
-- local first defect incorrectly activating full PEM;
-- relevant COLD entry hidden by a compact summary;
-- query/index output treated as canonical memory;
-- authority-bound capability whose owner binding is stale;
-- simplified agent-facing memory guidance that loses counterevidence/base/overlay safety.
-
-### Cognitive-resource routing
-- high-stakes parent causing maximal reasoning/subagents for an incidental child;
-- materially uncertain high-consequence decision never escalating despite host capability;
-- SSDP duplicating a trustworthy host's automatic resource routing without decision value;
-- multiple subagents sharing author conclusions while being called independent;
-- separate-context agents sharing a common model/oracle being treated as fully independent when the claim depends on evidentiary independence;
-- contradictory independent findings resolved by vote rather than evidence/owner adjudication.
-
-### Review/convergence
-- repeated related findings emitted one per cycle despite clear family/common cause;
-- recurrence causing automatic architecture redesign where a clean local repair remains sufficient;
-- family/review count being used as pass/fail authority.
-
-### Version coherence
-- installed 6.5 skill used on explicit 6.6-bound work without resolving compatible source;
-- 6.6 skill reinterpreting frozen 6.4/6.5 work;
-- repository default/latest substituted for an exact version mapping;
-- unversioned ordinary task paying unnecessary remote lookup cost.
-
-### Evaluation epistemology
-- static byte/token reduction claimed as productivity improvement;
-- synthetic fixtures claimed as proof of semantic adequacy;
-- execution agent self-grading its own success with no independent/owner oracle;
-- later solution/review/memory leakage into a historical task snapshot;
-- a tuned holdout case still being represented as unbiased holdout evidence;
-- benchmark score used to waive a correctness blocker;
-- eval harness overfitted to one named model/runtime;
-- apparent efficiency gain smaller than obvious run variance or outweighed by new permanent machinery;
-- evaluation campaign continuing after remaining uncertainty cannot change the decision.
-
-### Profile/control-plane boundary
-- 6.6 prompt/profile regeneration changing orchestrator transition semantics or control schema without D3 reopen;
-- a generated runtime summary/checkpoint becoming required authority for manual/portable execution;
-- 6.6 introducing hidden state that Protocol 7 is supposed to own only after its separate major-version architecture acceptance.
+The hot invariant is simple: structural evidence proves structure, live trajectory evidence proves only the tested behavior/regime, semantic Review proves assembled semantic adequacy, and no benchmark/eval result can waive a correctness or authority blocker.
 
 ## 11. Acceptance criteria
 
