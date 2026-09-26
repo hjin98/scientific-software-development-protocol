@@ -497,7 +497,7 @@ class VersionPreflightTests(unittest.TestCase):
         self.assertEqual(version_preflight.preflight(self.skill, "6.6.0", self.state)["decision"], "PACKAGE_INCOHERENT")
 
     def test_governing_workplan_of_this_cycle_is_detected_as_65_bound(self) -> None:
-        governing = version_preflight.workplan_version(ROOT / "workplans/active/SSDP-6.6-COGNITIVE-OPERATIONAL-OPTIMIZATION.md")
+        governing = version_preflight.workplan_version(ROOT / "workplans/archive/SSDP-6.6-COGNITIVE-OPERATIONAL-OPTIMIZATION.md")
         self.assertEqual(governing, "6.5.0")
         result = version_preflight.preflight(self.skill, governing, self.state)
         self.assertEqual(result["decision"], "RESOLVE_COMPATIBLE_SOURCE")
