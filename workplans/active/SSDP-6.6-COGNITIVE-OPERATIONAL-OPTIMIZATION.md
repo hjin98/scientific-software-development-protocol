@@ -10,6 +10,7 @@ workplan_review_state: PASS_NONINDEPENDENT
 base_protocol: Protocol 6.5
 base_accepted_source: 7f7b5e24858e813e45ace867a7f8ea5180f43bf0
 base_recovery: c4d5da1e0acb0e9f27376bf69561e8762747cd2d
+branch_base: 23e46543c174a8451bbadc402df63538105eab10
 active_serious_challenge: none
 ---
 
@@ -57,12 +58,13 @@ At minimum, 6.6 SHALL preserve:
 - affected regression/integration and bounded impact closure;
 - Lossless Representation's protected property: no decision-changing governed semantic element may be silently lost through compression, routing, handoff, or generated views;
 - progressive disclosure, one current semantic owner, cold but discoverable specialized/history paths, and derived-view subordination;
-- semantic-definition/source-availability/parameter/import/warrant discipline where materially applicable;
+- semantic-definition/source-availability/parameter/import/warrant discipline where materially applicable, including the rule that a specialized substantive inference cannot use a merely discoverable definition/import until the exact needed owner meaning is available in the active reasoning context;
 - Project Engineering Memory (PEM) as evidence-backed, project-local, non-authoritative learning rather than D5;
 - Historical Applicability Set (HAS), capability-transfer, counterevidence, binding-health, and project-memory lifecycle protections where PEM is activated;
 - convergence/review-saturation/family-level repair and Stabilization/maintenance-health capabilities;
 - language/tool specialization, security/trust boundaries, release/recovery, documentation, and repository hygiene;
-- immutable historical source/profile/recovery semantics and 6.5 release-state ownership.
+- immutable historical source/profile/recovery semantics and 6.5 release-state ownership;
+- current pre-7 orchestration/profile control semantics: Protocol 6.6 may update version-bound prompt/source bindings and generated descendants, but SHALL NOT change machine lifecycle authority, transition semantics, or orchestration profile/control schema merely to realize cognitive optimization.
 
 Compression is acceptable only when the resulting current owner plus explicit retrieval routes preserves equal-or-stronger behavior. Protocol 6.6 must not obtain shorter prompts by weakening acceptance, hiding uncertainty, deleting an applicable cold path, or converting a specialized obligation into an optional suggestion.
 
@@ -78,7 +80,8 @@ Protocol 6.6 SHALL NOT:
 - require multi-agent execution for ordinary work;
 - require formal semantic machinery for ordinary local engineering merely because the machinery exists;
 - introduce a universal project ontology, universal dependency graph, or universal evidence database;
-- optimize token count, file size, tool-call count, latency, or benchmark score at the expense of governed correctness.
+- optimize token count, file size, tool-call count, latency, or benchmark score at the expense of governed correctness;
+- change the pre-7 orchestrator state machine/control ownership/profile schema as an incidental implementation detail. Evidence that such a change is necessary reopens D3 and the major-version boundary rather than being smuggled into 6.6.
 
 Protocol 7 remains separately proposed. If 6.6 is later accepted before Protocol 7 implementation, Protocol 7 must receive a bounded inheritance reconciliation analogous to prior 6.x inheritance revisions. That reconciliation may adopt 6.6 capabilities but must not be pre-implemented by this work.
 
@@ -124,6 +127,7 @@ The always-loaded cross-domain kernel SHALL contain only semantics needed for su
 - Challenge threshold;
 - proportional rigor/importance/stop principle;
 - progressive disclosure and one-current-owner rule;
+- decision-changing semantics must remain recoverable while active context/inferential cost is minimized;
 - external/evidence content not being instruction authority.
 
 The current large `abstraction-and-concretization.md` SHALL be decomposed so specialized semantic-definition/traceability, lifecycle, evidence, memory, or other conditional detail is loaded only through explicit predicates. The exact file partition is delegated D4 unless semantic ownership requires a particular split.
@@ -150,6 +154,8 @@ proof/publication/safety/interoperability/high-consequence ambiguity
 
 Precision is mandatory where semantics require it; formalization effort is not intrinsically mandatory.
 
+This routing change SHALL NOT weaken Protocol 6.4/6.5 source-availability or runtime-context-availability semantics. Conditional activation controls **when specialized detail is loaded**, not whether a materially used specialized semantic object needs a coherent canonical owner/import and the exact meaning required by the inference. "Ordinary engineering meaning" applies only when no materially specialized semantic object or ambiguity trigger exists.
+
 ### 5.3 Minimal role entrypoints
 
 D1-D4 and specialist `SKILL.md` entrypoints SHALL become routers and role contracts rather than compressed textbooks.
@@ -158,9 +164,11 @@ Each entrypoint should preferentially contain:
 
 1. owned semantic boundary;
 2. universal-kernel route;
-3. concern activation predicates;
+3. concern activation predicates, including material negative triggers where they prevent eager activation;
 4. a short owner-specific method/invariants;
 5. completion/Challenge contract.
+
+Skill/frontmatter and host-adapter descriptions are activation interfaces, not miniature protocol summaries. Keep them sufficient to route correctly, but do not duplicate child doctrine there. Prefer direct role -> concern-owner activation when the predicate is already knowable; an added routing hop must narrow the question or add material semantics rather than exist for taxonomy alone.
 
 Long generic doctrine, duplicated evidence rules, repeated PEM schema mechanics, repeated workflow choreography, and examples that do not change routing should live at canonical conditional owners.
 
@@ -172,7 +180,7 @@ Protocol 6.6 SHALL preserve the semantic guarantee of Lossless Representation wh
 
 > Minimize the active representation subject to preservation and recoverability of every decision-changing governed semantic element.
 
-A compact handoff/workplan/review MAY replace locally replayed detail with exact resolvable current-owner references when the consumer can retrieve them. The hot representation should prefer:
+A compact handoff/workplan/review MAY replace locally replayed detail with exact resolvable current-owner references when the consumer has a supported retrieval route. If the receiver cannot resolve the governing version/owner, the representation must carry the minimum semantics needed for the governed decision rather than relying on hidden context. The hot representation should prefer:
 
 - objective/governed outcome;
 - exact authority/workplan/candidate identities;
@@ -268,6 +276,10 @@ The escalation rule is:
 
 > Use the least expensive cognitive configuration that can reliably resolve the governed decision; escalate only when remaining uncertainty/consequence justifies it; de-escalate/stop once it does not.
 
+Do not turn resource selection into a new optimization subproblem. Use the host/project default when it is adequate; escalate on concrete risk, failed/ambiguous attempts, or known capability requirements. If the host already performs trustworthy automatic resource routing, do not duplicate it with a parallel SSDP scheduler.
+
+Model tier, reasoning budget, token budget, or subagent count is execution policy, never semantic authority or a pass threshold. A stronger model does not substitute for an independently required Review.
+
 A high-stakes parent does not force the strongest model/subagent path for every child detail.
 
 ### 5.9 Optional independent cognitive trajectories
@@ -280,7 +292,7 @@ For substantial/high-risk work with low coupling between review questions, Proto
 - scientific/numerical specialist review;
 - evidence/oracle challenge.
 
-Independence requires materially separate reasoning context; subagents that merely receive the author's conclusions do not qualify as independent.
+Independence requires materially separate reasoning context; subagents that merely receive the author's conclusions do not qualify as independent. Separate context improves process independence but does not by itself prove epistemic independence when agents share the same model, source corpus, toolchain, or oracle. Record material common-mode dependencies when the claim relies on independence, and add a distinct evidence route or perspective only when it materially reduces that risk.
 
 Multi-agent execution is not required when:
 
@@ -348,13 +360,19 @@ The initial 6.6 corpus should include representative immutable/reconstructible s
 - workplan with deliberately weak/incorrect abstraction;
 - PEM-applicable and PEM-not-applicable cases.
 
-Historical cases should use snapshots that prevent leakage from later accepted solutions where practical. Synthetic cases may test routing/behavior but cannot establish universal engineering-outcome superiority.
+Each eval scenario should have a durable manifest containing the initial repository/source snapshot, task statement, governing authority available to the agent, allowed tools/runtime constraints, intended evidence class, and outcome oracle/assessment route. Historical cases should use pre-solution snapshots and exclude later accepted repairs, workplans, review findings, or memory entries that would leak the answer where practical. Synthetic cases may test routing/behavior but cannot establish universal engineering-outcome superiority.
+
+The corpus should include both simplification opportunities and **preservation sentinels** where deep/cold doctrine is genuinely necessary, including representative semantic-definition/import/parameter-binding, scientific/numerical, security/recovery/concurrency, and release/version cases chosen from the preservation map. The goal is high-information coverage, not one fixture per clause.
 
 ### 6.2 Comparison discipline
 
 Before semantic optimization begins, freeze a compact **development set** used for diagnosis/refinement and a smaller **holdout/adversarial set** used only after candidate behavior is substantially stable. Historical task snapshots should avoid later-solution leakage where practical.
 
-For claims about protocol-caused behavioral improvement, compare candidate 6.6 against accepted 6.5 under the same model identity/version, reasoning mode, tool permissions, task snapshot, and host configuration as practical. Record deviations that can confound interpretation.
+For claims about protocol-caused behavioral improvement, compare candidate 6.6 against the exact accepted 6.5 source identity `7f7b5e24858e813e45ace867a7f8ea5180f43bf0`, not a stale installed approximation, under the same model identity/version, reasoning mode, tool permissions, task snapshot, and host configuration as practical. Record deviations that can confound interpretation. Counterbalance/alternate run order when temporal service/model drift could bias one variant.
+
+Execution and outcome assessment must be separated enough to avoid self-confirmation. Prefer deterministic external/owner-based oracles where available; otherwise use an independent evaluator/reviewer that did not author the trajectory and, where practical, is blinded to which protocol variant produced it. The execution agent's own completion claim is never sufficient evidence of correctness.
+
+A holdout/adversarial case becomes development data once its result is used to tune the candidate; do not continue calling it holdout. Replace or reserve fresh cases when further unbiased discrimination is still needed.
 
 Use three distinct measurement layers:
 
@@ -395,7 +413,7 @@ No single score is protocol authority. Correctness/semantic preservation are fea
 
 **Behavioral non-regression rule:** a reproducible new substantive correctness/authority/evidence failure on a matched case that 6.5 correctly closes is a 6.6 blocker unless independent review establishes that the 6.5 result itself was invalid/inapplicable. Aggregate efficiency cannot average away a semantic regression.
 
-**Operational-improvement rule:** acceptance requires both (a) structural reduction of the declared ordinary hot path and (b) at least bounded live trajectory evidence that one or more intended burden dimensions actually improve without a new correctness failure in the evaluated regime. No universal percentage or composite score is authority; report per-case tradeoffs and uncertainty.
+**Operational-improvement rule:** acceptance requires both (a) structural reduction of the declared ordinary hot path and (b) at least bounded live trajectory evidence that one or more intended burden dimensions actually improve without a new correctness failure in the evaluated regime. The improvement must be distinguishable from obvious measurement noise and large enough to justify any new permanent machinery it introduces. No universal percentage or composite score is authority; report per-case tradeoffs and uncertainty.
 
 ### 6.3 Evaluation economy, reversibility, and anti-overfitting
 
@@ -410,6 +428,8 @@ The eval system SHALL obey the same proportional-rigor doctrine it measures.
 - Stop evaluation when remaining uncertainty cannot change acceptance or design choice.
 - Experimental helpers, indexes, memory-query commands, context tooling, or subagent orchestration SHALL remain removable until evidence shows they materially reduce burden or protect a governing capability. Delete/decline them when they merely move complexity from prose into machinery.
 - Evaluation infrastructure itself is subject to minimum justified complexity; prefer existing repository tests/scripts and small task fixtures before introducing a framework.
+- Release qualification may use one or more explicitly declared reference agent/runtime environments; this evidence is versioned evidence for the release, not a runtime dependency imposed on downstream SSDP users.
+- Preserve enough provenance to interpret live runs: exact protocol source, task snapshot, model/runtime identity as exposed, reasoning/configuration mode, tool permissions/versions where material, and trace/result artifacts or explicit limitations when the host does not expose them.
 
 ## 7. Required implementation surfaces
 
@@ -428,7 +448,7 @@ Implementation is expected to touch, as justified by final design:
 - `development-workflow-prompts.md` or its replacement representation, while preserving a complete manual/portable execution path that does not depend on hidden orchestrator state;
 - versioning/source-resolution surfaces needed for the cheap version handshake;
 - protocol self-evaluation fixtures/harness and tests;
-- build/package/profile/snapshot generation and corresponding tests;
+- build/package/profile/snapshot generation and corresponding tests, including `protocol-manifest.json`/host-adapter metadata and the distinction between transport closure and activation;
 - root README/CHANGELOG and semantic history at closeout.
 
 This list is an initial affected surface, not a license to edit every file. Implementation should touch the smallest owner set that closes the accepted design.
@@ -448,6 +468,8 @@ Unless semantic Review shows otherwise, D4 may choose:
 - implementation of version preflight using existing manifests/release state;
 - generated package/profile mechanics consistent with current release architecture.
 
+A 6.6 version-bound profile/snapshot may bind updated 6.6 skills/prompts while retaining the current pre-7 machine lifecycle/control schema. Any required change to orchestrator transition authority, state graph, reducer/control ownership, or profile schema is outside delegated D4 space and reopens D3/major-version classification.
+
 Avoid new permanent frameworks when existing Markdown, Python validation/build scripts, and current package/profile machinery suffice.
 
 ## 9. Implementation stages
@@ -456,7 +478,7 @@ Avoid new permanent frameworks when existing Markdown, Python validation/build s
 
 1. Freeze the exact 6.5 accepted source/recovery and current branch base.
 2. Reconcile the project-local PEM accepted/base/overlay state or retain explicit `REVIEW_REQUIRED`; construct the canonical HAS only after that basis is valid.
-3. Build a capability-preservation map from current 6.5 and accepted historical lineage, with special attention to 6.2 progressive disclosure, 6.3 PEM, 6.4 semantic precision, and 6.5 proportional rigor.
+3. Build a bounded capability-preservation map from current 6.5 and accepted historical lineage, with special attention to 6.2 progressive disclosure, 6.3 PEM, 6.4 semantic precision, and 6.5 proportional rigor. Treat the map as review evidence, not a new semantic registry; organize by capability family/current owner/activation/acceptance sentinel rather than replaying every historical clause.
 4. Measure current static mandatory-read closure and, where practical, observed active protocol context for representative routes.
 5. Freeze the compact development and holdout/adversarial eval sets plus their claim boundaries before optimizing the protocol.
 
@@ -469,7 +491,8 @@ Avoid new permanent frameworks when existing Markdown, Python validation/build s
 3. Deduplicate generic doctrine to canonical owners plus local micro-invariants.
 4. Rework workflow prompt representation toward invariants/boundaries/acceptance/escalation rather than procedural itineraries while retaining a complete manual/portable route.
 5. Verify every moved capability remains discoverable from every materially applicable entrypoint.
-6. Prefer deletion/extraction over adding new routing layers; a shorter file graph that requires more hops/inference is not an improvement.
+6. Verify **transport closure separately from activation**: cold referenced owners required by a packaged skill must remain present/reachable in the bundle, while package membership or ordinary hyperlinks must not make them eagerly active.
+7. Prefer deletion/extraction over adding new routing layers; a shorter file graph that requires more hops/inference is not an improvement.
 
 **Gate:** routing/closure tests plus semantic Review of capability preservation.
 
@@ -483,7 +506,7 @@ Avoid new permanent frameworks when existing Markdown, Python validation/build s
 
 ### Stage D — Cognitive resource and independent-review routing
 
-1. Add vendor-neutral cognitive escalation/de-escalation semantics.
+1. Add vendor-neutral cognitive escalation/de-escalation semantics without duplicating trustworthy host automatic routing.
 2. Define optional independent subagent/reviewer decomposition predicates and common-mode limits.
 3. Strengthen recurrence/review-saturation strategy switching.
 4. Ensure ordinary/local work does not activate these capabilities merely because available.
@@ -510,11 +533,13 @@ Additionally verify:
 
 - universal hot path is materially smaller than 6.5 for designated ordinary routes;
 - no accepted capability lacks a reachable activation path;
+- package transport closure remains complete while package membership/hyperlinks do not imply activation;
 - local/simple tasks do not automatically activate semantic formalism, PEM, multi-agent review, deep evaluation, or Protocol 7 machinery;
 - substantial/high-risk tasks can still recover the full applicable doctrine;
 - Working State/derived summaries cannot self-promote into authority;
 - version mismatch is detected/resolved according to existing source authority;
-- live trajectory evidence supports any claimed behavioral efficiency gain;
+- 6.6 profile/snapshot generation has not changed pre-7 lifecycle/control schema or orchestrator authority without an explicit D3 reopen;
+- live trajectory evidence supports any claimed behavioral efficiency gain through an assessment route that is not merely the execution agent self-grading its own result;
 - no stronger engineering-outcome claim is made than evidence supports.
 
 ### Stage H — Independent assembled-candidate Review and release lifecycle
@@ -533,8 +558,10 @@ At minimum include counterfactuals for:
 ### Kernel/routing
 - a local D4 task that accidentally loads semantic-definition/PEM/history detail;
 - a specialized mathematical/import task whose cold semantic-definition owner becomes unreachable;
+- a specialized object that is discoverable but improperly used without loading the exact owner meaning required by the inference;
 - a route shortened by deleting a mandatory capability rather than moving it;
-- duplicate local doctrine disagreeing with its canonical owner.
+- duplicate local doctrine disagreeing with its canonical owner;
+- a cold resource correctly packaged for transport but accidentally treated as active merely because bundle membership/linkage exists.
 
 ### Representation/state
 - a compact handoff that omits an open blocker/reopen condition;
@@ -552,7 +579,9 @@ At minimum include counterfactuals for:
 ### Cognitive-resource routing
 - high-stakes parent causing maximal reasoning/subagents for an incidental child;
 - materially uncertain high-consequence decision never escalating despite host capability;
+- SSDP duplicating a trustworthy host's automatic resource routing without decision value;
 - multiple subagents sharing author conclusions while being called independent;
+- separate-context agents sharing a common model/oracle being treated as fully independent when the claim depends on evidentiary independence;
 - contradictory independent findings resolved by vote rather than evidence/owner adjudication.
 
 ### Review/convergence
@@ -569,9 +598,18 @@ At minimum include counterfactuals for:
 ### Evaluation epistemology
 - static byte/token reduction claimed as productivity improvement;
 - synthetic fixtures claimed as proof of semantic adequacy;
+- execution agent self-grading its own success with no independent/owner oracle;
+- later solution/review/memory leakage into a historical task snapshot;
+- a tuned holdout case still being represented as unbiased holdout evidence;
 - benchmark score used to waive a correctness blocker;
 - eval harness overfitted to one named model/runtime;
+- apparent efficiency gain smaller than obvious run variance or outweighed by new permanent machinery;
 - evaluation campaign continuing after remaining uncertainty cannot change the decision.
+
+### Profile/control-plane boundary
+- 6.6 prompt/profile regeneration changing orchestrator transition semantics or control schema without D3 reopen;
+- a generated runtime summary/checkpoint becoming required authority for manual/portable execution;
+- 6.6 introducing hidden state that Protocol 7 is supposed to own only after its separate major-version architecture acceptance.
 
 ## 11. Acceptance criteria
 
@@ -580,15 +618,18 @@ Protocol 6.6 is technically eligible for independent Review only when:
 1. all accepted 6.5 capabilities are mapped to preserved current owners/routes or an explicitly reviewed equal-or-stronger generalization;
 2. inherited repository regression/package/profile/Core/frozen-history checks pass where applicable;
 3. new routing/context/state/version/eval counterfactuals pass;
-4. designated ordinary task routes show a clear structural reduction in declared mandatory-read closure, and bounded matched live evidence demonstrates reduced actual burden on at least one intended operational dimension without weakening the acceptance contract;
-5. designated specialized/high-risk routes still recover every applicable cold capability;
+4. designated ordinary task routes show a clear structural reduction in declared mandatory-read closure, and bounded matched live evidence demonstrates reduced actual burden on at least one intended operational dimension by more than obvious measurement noise and enough to justify any new permanent machinery, without weakening the acceptance contract;
+5. designated specialized/high-risk preservation sentinels still recover every applicable cold capability, including specialized source/context availability semantics;
 6. no mandatory orchestrator/service/vendor/model/subagent requirement has been introduced;
 7. Working State, eval state, generated summaries, indexes, and memory-query views remain explicitly non-authoritative;
 8. empirical live evidence exists for any claim that agent trajectory behavior improved; claims remain bounded to tested task/model/runtime regimes;
 9. no open Serious Challenge or material preservation gap remains;
 10. the candidate remains a minimum-justified operational architecture rather than adding a second control framework beside Protocol 7;
 11. manual/portable skill use remains complete without hidden runtime state, hosted services, or mandatory Orchestrator participation;
-12. accepted 6.5 compact-working-state and version-source-resolution semantics have been consolidated rather than duplicated under new names.
+12. accepted 6.5 compact-working-state and version-source-resolution semantics have been consolidated rather than duplicated under new names;
+13. package transport closure and activation remain distinct and mechanically/semantically qualified after reference extraction;
+14. live evaluation uses durable scenario/provenance identities and an outcome assessment route independent enough that execution-agent self-assertion cannot manufacture non-regression;
+15. 6.6 profile/snapshot changes preserve current pre-7 lifecycle/control semantics and schema unless a reviewed D3 reopen explicitly changes the version boundary.
 
 A smaller prompt/package is not sufficient. A candidate that is shorter but loses a materially applicable doctrine is No-Pass.
 
@@ -636,20 +677,16 @@ The implementer SHALL:
 8. leave independent Review, stakeholder ratification, publication/recovery, and accepted-current cutover to their governed lifecycle.
 
 
-## 15. Workplan-level review closure
+## 15. Workplan review disposition
 
-A fresh adversarial **non-independent** workplan review was performed after the initial draft. It cannot substitute for the later independent assembled-candidate Review required for Protocol acceptance.
+Two adversarial, non-independent workplan review passes have been incorporated into the current text. Review chronology remains recoverable in Git rather than accumulating as binding amendment prose here.
 
-The review identified and this revision closes the following material planning defects:
+Current disposition:
 
-1. **PEM basis overclaim** — the initial plan treated current root PEM as a reconciled accepted/base publication even though its front matter still names 6.4 P0 plus a 6.5 candidate overlay. Closed by marking the basis `REVIEW_REQUIRED`, retaining only bounded historical hypotheses, and making accepted/base reconciliation a Stage-A prerequisite.
-2. **duplicate Working-State doctrine risk** — 6.5 already owns compact temporary working state. Closed by converting 6.6 from a new-state proposal into operationalization/simplification of the existing capability.
-3. **duplicate version-handshake doctrine risk** — 6.5 already owns exact governing-version source resolution. Closed by treating 6.6 as a cheap execution preflight over existing authority rather than a new source/version owner.
-4. **evaluation proxy/metric gaming** — the initial eval contract could overclaim from static footprint or aggregate efficiency. Closed by separating static/live/trajectory evidence, freezing development vs holdout cases, adding matched-run discipline, correctness non-regression, claim-bounded live evidence, and no scalar-score authority.
-5. **tooling migration of cognitive debt** — externalizing prose could merely create a new framework. Closed by adding reversibility/deletion gates and requiring permanent helper/query/subagent machinery to justify its total complexity.
-6. **Protocol 7 inheritance ambiguity** — simple inheritance could preserve a now-unjustified mandatory control-plane proposal. Closed by requiring 6.6 evidence to participate in Protocol 7's already-required deliberate D3 architecture reopen.
-7. **manual portability risk** — aggressively shrinking workflow prompts could make the runtime depend on hidden orchestrator state. Closed by making complete manual/portable operation an explicit preservation and acceptance requirement.
+```text
+SERIOUS CHALLENGE: NONE
+WORKPLAN REVIEW: PASS_NONINDEPENDENT_R2
+IMPLEMENTATION: READY SUBJECT TO NORMAL IMPLEMENTATION-TIME DISCOVERY
+```
 
-No Serious Challenge to accepted Protocol 6.5 is raised. The defect is principally operational representation/execution inefficiency in the successor design space, while accepted 6.5 already contains much of the correct doctrine.
-
-**Workplan disposition:** implementation-ready subject to normal implementation-time discovery. Newly discovered affected surfaces are incorporated under existing authority; a material change to the frozen D3 cycle decisions above requires workplan reconsideration rather than silent drift.
+This review does not substitute for the fresh independent assembled-candidate Review required before Protocol 6.6 acceptance.
