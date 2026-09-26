@@ -4,7 +4,7 @@ workplan_id: SSDP-6.1-7.0-WORKPLAN-AUTHORITY-INDEX
 protocol_version: 6.5.0
 status: active
 created_date: 2026-09-09
-reviewed_date: 2026-09-15
+reviewed_date: 2026-09-26
 active_serious_challenge: none
 ---
 
@@ -145,7 +145,7 @@ Current disposition:
 ```text
 SERIOUS CHALLENGE: NONE
 BASELINE: accepted Protocol 6.5
-WORKPLAN REVIEW: PASS_NONINDEPENDENT / IMPLEMENTATION-READY
+WORKPLAN REVIEW: PASS_NONINDEPENDENT_R2 / IMPLEMENTATION-READY
 IMPLEMENTATION STATUS: NOT STARTED
 PEM ACCEPTED-BASE PUBLICATION: REVIEW_REQUIRED — current root memory metadata still reflects 6.4 base + 6.5 candidate overlay
 PROTOCOL 7 EFFECT: NONE YET — if 6.6 becomes accepted, its evidence/capabilities must feed Protocol 7's required deliberate D3 architecture reopen before Protocol 7 D4 authorization
