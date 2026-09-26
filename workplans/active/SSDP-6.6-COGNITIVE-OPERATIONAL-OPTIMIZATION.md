@@ -3,8 +3,10 @@ kind: protocol-minor-revision-workplan
 workplan_id: SSDP-6.6-COGNITIVE-OPERATIONAL-OPTIMIZATION
 protocol_version: 6.5.0
 target_protocol_version: 6.6.0
-status: proposed
+status: reviewed-implementation-ready
 created_date: 2026-09-26
+reviewed_date: 2026-09-26
+workplan_review_state: PASS_NONINDEPENDENT
 base_protocol: Protocol 6.5
 base_accepted_source: 7f7b5e24858e813e45ace867a7f8ea5180f43bf0
 base_recovery: c4d5da1e0acb0e9f27376bf69561e8762747cd2d
@@ -80,36 +82,32 @@ Protocol 6.6 SHALL NOT:
 
 Protocol 7 remains separately proposed. If 6.6 is later accepted before Protocol 7 implementation, Protocol 7 must receive a bounded inheritance reconciliation analogous to prior 6.x inheritance revisions. That reconciliation may adopt 6.6 capabilities but must not be pre-implemented by this work.
 
-## 4. Project Engineering Memory / Historical Applicability Set
+## 4. Project Engineering Memory / historical intake
 
-This is substantial rework of mature protocol machinery and is explicitly memory-triggering.
+This is substantial rework of mature protocol machinery and is memory-triggering. However, the current root `PROJECT-ENGINEERING-MEMORY.md` cannot safely be asserted as a reconciled accepted/base PEM for this cycle: its front matter is maintained under Protocol 6.5 but still names Protocol 6.4 P0 as `accepted_base.project_state` and a 6.5 candidate overlay even though Protocol 6.5 is now accepted-current.
 
-PEM basis for plan design:
+Protocol 6.6 SHALL NOT guess the correct accepted-memory publication from `main`, latest, timestamps, or release-looking identities.
+
+Current memory disposition:
 
 ```yaml
 pem_basis:
   accepted_project_state: 23e46543c174a8451bbadc402df63538105eab10
-  accepted_pem: hjin98/scientific-software-development-protocol@23e46543c174a8451bbadc402df63538105eab10:PROJECT-ENGINEERING-MEMORY.md
+  accepted_pem: REVIEW_REQUIRED
   candidate_overlay_semantic_candidate: NONE
-has:
-  - id: FF-001
-    disposition: APPLICABLE
-    reason: 6.6 will create a successor immutable public-source lifecycle; premature immutable publication must not recur.
-  - id: PC-001
-    disposition: APPLICABLE
-    reason: 6.6 must preserve frozen 6.5 and older profiles/resources and recovery semantics.
-  - id: SP-001
-    disposition: APPLICABLE
-    reason: routing/representation repair should occur at canonical source owners with deterministic regeneration rather than package-side shadow fixes.
-  - id: SP-002
-    disposition: APPLICABLE
-    reason: any 6.6 public-source publication should retain the demonstrated self-reference-safe candidate -> descendant publication -> distinct recovery pattern.
-  - id: DS-001
-    disposition: APPLICABLE
-    reason: structural/context-footprint/eval fixtures may measure only the properties they actually discriminate; semantic adequacy and real engineering outcome require stronger evidence.
 ```
 
-Implementation SHALL refresh this HAS if the accepted project state or PEM materially advances before candidate freeze.
+Because missing/partial/stale memory metadata cannot prove absence, plan design performed bounded direct historical intake of every currently represented family/capability/discovery. These are **provisional applicability hypotheses**, not a canonical HAS until the accepted/base PEM is reconciled:
+
+- `FF-001` — applicable hypothesis: 6.6 successor publication must not repeat premature immutable fallback publication.
+- `PC-001` — applicable hypothesis: frozen 6.5 and older source/profile/recovery capability must be preserved.
+- `SP-001` — applicable hypothesis: routing/representation repair should occur at canonical owners followed by deterministic regeneration rather than package-side shadow fixes.
+- `SP-002` — applicable hypothesis: retain the demonstrated self-reference-safe candidate -> descendant publication -> distinct recovery pattern.
+- `DS-001` — applicable hypothesis: structural/context/eval fixtures may claim only the property their oracle discriminates; semantic adequacy and engineering-outcome claims require stronger evidence.
+
+**Stage-A prerequisite:** reconcile project-local PEM publication/base/overlay state under accepted 6.5 governance, then construct the exact canonical HAS before any 6.6 implementation decision relies normatively on project-memory applicability. If reconciliation remains unavailable, bounded historical intake may inform falsification but memory-dependent positive guidance remains `REVIEW_REQUIRED`.
+
+This prerequisite repairs project-memory coordination state; it does not alter D1-D4 Protocol 6.5 authority.
 
 ## 5. D3 cycle architecture
 
@@ -188,11 +186,11 @@ Raw chronology, generic doctrine, settled rationale, long evidence logs, and col
 
 This is an operational strengthening of Lossless Representation, not permission for lossy summarization.
 
-### 5.5 Transient Working State / Context Checkpoint
+### 5.5 Operationalize existing transient Working State / Context Checkpoint
 
-Protocol 6.6 SHALL explicitly distinguish a disposable **Working State** from durable authority/evidence/project memory.
+Protocol 6.5 already owns the concept of compact temporary working state for long/interruption-prone work. Protocol 6.6 SHALL **operationalize and simplify that existing capability**, not create a second lifecycle/state owner.
 
-Working State is derived, non-authoritative coordination cache for long or interruption-prone work. It may record:
+Working State remains derived, non-authoritative coordination cache for long or interruption-prone work. It may record:
 
 ```text
 governed objective
@@ -213,7 +211,9 @@ It SHALL NOT:
 - become a required repository artifact for local work;
 - remain current after its protocol/authority/workplan/candidate/regime basis changes.
 
-The representation may be Markdown, YAML, JSON, host session state, or another equivalent form. The protocol defines semantics; the host/runtime representation remains delegated.
+The representation may be Markdown, YAML, JSON, host session state, or another equivalent form. The protocol defines only the minimum semantics needed for safe compaction/resume; the host/runtime representation remains delegated.
+
+Do not add a permanent Working-State schema/tool merely for symmetry. Standardize additional structure only when baseline/evaluation evidence shows it materially reduces reconstruction cost or ambiguity.
 
 ### 5.6 Workplan/state separation
 
@@ -305,7 +305,9 @@ When evidence shows a shared family, review saturation, or repeated candidate ch
 
 No numeric review count changes the pass threshold. A small repeated count may be used only as an information-policy trigger when the evidence already indicates common cause.
 
-### 5.11 Version/source coherence handshake
+### 5.11 Operationalize existing version/source coherence rule
+
+Protocol 6.5 already requires governing-version-compatible source resolution and forbids silent latest/default reinterpretation. Protocol 6.6 SHALL make that existing rule cheap and explicit at execution entry rather than invent a second version authority.
 
 When a task declares or can cheaply resolve a governing SSDP version, the execution path SHALL compare that version with the loaded skill/source identity before substantive protocol-dependent reasoning.
 
@@ -322,7 +324,7 @@ version unavailable and task not version-bound
 
 A mismatch must not silently reinterpret version-bound work with latest/default doctrine. The handshake should reuse existing `PROTOCOL_VERSION`, manifests, release state, and source-resolution rules rather than create a second version authority.
 
-Mechanically checkable mismatch behavior SHOULD be tested. The handshake itself must stay cheap and must not turn every ordinary repository task into a remote protocol lookup.
+Mechanically checkable mismatch behavior SHOULD be tested. The preflight itself must stay cheap, reuse existing `PROTOCOL_VERSION`/manifest/release-state authority, and must not turn every ordinary repository task into a remote protocol lookup or a parallel control plane.
 
 ## 6. Empirical protocol-evaluation flywheel
 
@@ -350,7 +352,17 @@ Historical cases should use snapshots that prevent leakage from later accepted s
 
 ### 6.2 Comparison discipline
 
-For claims about protocol-caused behavioral improvement, compare candidate 6.6 against accepted 6.5 under as similar a model/runtime/tool configuration as practical.
+Before semantic optimization begins, freeze a compact **development set** used for diagnosis/refinement and a smaller **holdout/adversarial set** used only after candidate behavior is substantially stable. Historical task snapshots should avoid later-solution leakage where practical.
+
+For claims about protocol-caused behavioral improvement, compare candidate 6.6 against accepted 6.5 under the same model identity/version, reasoning mode, tool permissions, task snapshot, and host configuration as practical. Record deviations that can confound interpretation.
+
+Use three distinct measurement layers:
+
+1. **static mandatory-read closure** — source bytes/tokens and routing depth required by doctrine for a declared task class;
+2. **observed active protocol context** — protocol material actually loaded during a live trajectory;
+3. **total trajectory behavior** — tool/agent steps, interventions, tests/evidence work, candidate/review churn, cost, and final outcome.
+
+Do not substitute layer 1 for layers 2-3 when claiming live behavioral improvement.
 
 Measure at least:
 
@@ -381,7 +393,11 @@ Measure at least:
 
 No single score is protocol authority. Correctness/semantic preservation are feasibility gates; operational metrics are optimization evidence among semantically admissible candidates.
 
-### 6.3 Evaluation economy and anti-overfitting
+**Behavioral non-regression rule:** a reproducible new substantive correctness/authority/evidence failure on a matched case that 6.5 correctly closes is a 6.6 blocker unless independent review establishes that the 6.5 result itself was invalid/inapplicable. Aggregate efficiency cannot average away a semantic regression.
+
+**Operational-improvement rule:** acceptance requires both (a) structural reduction of the declared ordinary hot path and (b) at least bounded live trajectory evidence that one or more intended burden dimensions actually improve without a new correctness failure in the evaluated regime. No universal percentage or composite score is authority; report per-case tradeoffs and uncertainty.
+
+### 6.3 Evaluation economy, reversibility, and anti-overfitting
 
 The eval system SHALL obey the same proportional-rigor doctrine it measures.
 
@@ -392,6 +408,8 @@ The eval system SHALL obey the same proportional-rigor doctrine it measures.
 - Do not claim universal productivity/intelligence improvement from static token/byte metrics.
 - A structural hot-path reduction claim requires structural evidence; a behavioral trajectory claim requires live agent evidence; an engineering-outcome claim requires outcome evidence.
 - Stop evaluation when remaining uncertainty cannot change acceptance or design choice.
+- Experimental helpers, indexes, memory-query commands, context tooling, or subagent orchestration SHALL remain removable until evidence shows they materially reduce burden or protect a governing capability. Delete/decline them when they merely move complexity from prose into machinery.
+- Evaluation infrastructure itself is subject to minimum justified complexity; prefer existing repository tests/scripts and small task fixtures before introducing a framework.
 
 ## 7. Required implementation surfaces
 
@@ -407,7 +425,7 @@ Implementation is expected to touch, as justified by final design:
 - `project-engineering-memory.md`;
 - `testing-and-validation.md`;
 - `tool-assisted-engineering.md` where cognitive/subagent/eval tooling relations require routing;
-- `development-workflow-prompts.md` or its replacement representation;
+- `development-workflow-prompts.md` or its replacement representation, while preserving a complete manual/portable execution path that does not depend on hidden orchestrator state;
 - versioning/source-resolution surfaces needed for the cheap version handshake;
 - protocol self-evaluation fixtures/harness and tests;
 - build/package/profile/snapshot generation and corresponding tests;
@@ -437,27 +455,29 @@ Avoid new permanent frameworks when existing Markdown, Python validation/build s
 ### Stage A — Baseline and preservation map
 
 1. Freeze the exact 6.5 accepted source/recovery and current branch base.
-2. Build a capability-preservation map from current 6.5 and accepted historical lineage, with special attention to 6.2 progressive disclosure, 6.3 PEM, 6.4 semantic precision, and 6.5 proportional rigor.
-3. Measure current hot-path instruction/context footprint for representative routes.
-4. Define the first compact eval corpus and acceptance claims before optimizing the protocol.
+2. Reconcile the project-local PEM accepted/base/overlay state or retain explicit `REVIEW_REQUIRED`; construct the canonical HAS only after that basis is valid.
+3. Build a capability-preservation map from current 6.5 and accepted historical lineage, with special attention to 6.2 progressive disclosure, 6.3 PEM, 6.4 semantic precision, and 6.5 proportional rigor.
+4. Measure current static mandatory-read closure and, where practical, observed active protocol context for representative routes.
+5. Freeze the compact development and holdout/adversarial eval sets plus their claim boundaries before optimizing the protocol.
 
-**Gate:** no semantic source mutation until preservation obligations and baseline measurements are reviewable.
+**Gate:** no semantic source mutation until the memory-basis disposition, preservation obligations, baseline measurements, and eval-set identities are reviewable.
 
 ### Stage B — Kernel and routing reduction
 
 1. Extract conditional semantic-definition/traceability material from the universal hot path.
 2. Reduce role/specialist entrypoints to bounded routers/contracts.
 3. Deduplicate generic doctrine to canonical owners plus local micro-invariants.
-4. Rework workflow prompt representation toward invariants/boundaries/acceptance/escalation rather than procedural itineraries.
+4. Rework workflow prompt representation toward invariants/boundaries/acceptance/escalation rather than procedural itineraries while retaining a complete manual/portable route.
 5. Verify every moved capability remains discoverable from every materially applicable entrypoint.
+6. Prefer deletion/extraction over adding new routing layers; a shorter file graph that requires more hops/inference is not an improvement.
 
 **Gate:** routing/closure tests plus semantic Review of capability preservation.
 
 ### Stage C — Working-state and memory-use optimization
 
 1. Define Working State semantics and compaction/resume expectations.
-2. Separate workplan contract mutation from transient progress state.
-3. Expose compact PEM agent-facing usage and, if valuable, cheap query support.
+2. Make the already-accepted workplan-contract versus transient-working-state distinction operationally clear; do not create a competing state authority.
+3. Expose compact PEM agent-facing usage; add query support only if baseline/eval evidence justifies permanent machinery.
 4. Preserve full PEM governance/schema validation on cold paths.
 5. Add negative cases proving transient state/summary/index cannot become authority.
 
@@ -470,7 +490,7 @@ Avoid new permanent frameworks when existing Markdown, Python validation/build s
 
 ### Stage E — Version coherence
 
-1. Implement the cheapest version/source identity handshake consistent with current source-resolution authority.
+1. Implement the cheapest execution preflight for the already-accepted version/source identity rule, consistent with current source-resolution authority.
 2. Add positive/mismatch/offline/unversioned cases.
 3. Prove frozen historical work is not silently reinterpreted by 6.6/latest.
 
@@ -503,7 +523,7 @@ Additionally verify:
 2. Perform fresh independent Review against accepted 6.5 with explicit preservation, abstraction-adequacy, cognitive-debt, and operational-evidence challenge.
 3. Require stakeholder ratification under accepted release governance.
 4. Use the accepted self-reference-safe public-source/recovery lifecycle; do not repeat premature immutable bootstrap publication.
-5. Reconcile Protocol 7 inheritance if 6.6 becomes accepted before Protocol 7 cutover.
+5. If 6.6 becomes accepted before Protocol 7 cutover, feed its operational evidence and accepted capabilities into Protocol 7's already-required deliberate D3 Orchestrator architecture reopen. Do not treat this as a mechanical inheritance-only update: the reopen must reconsider whether Protocol 7's mandatory control-plane/orchestrator design remains the minimum justified architecture in light of 6.6 evidence.
 6. Regenerate mapping-bearing descendants and complete release/documentation closeout.
 
 ## 10. Qualification and falsification matrix
@@ -560,13 +580,15 @@ Protocol 6.6 is technically eligible for independent Review only when:
 1. all accepted 6.5 capabilities are mapped to preserved current owners/routes or an explicitly reviewed equal-or-stronger generalization;
 2. inherited repository regression/package/profile/Core/frozen-history checks pass where applicable;
 3. new routing/context/state/version/eval counterfactuals pass;
-4. designated ordinary task routes show a material reduction in always-loaded protocol context and/or routing/procedural burden without weakening their acceptance contract;
+4. designated ordinary task routes show a clear structural reduction in declared mandatory-read closure, and bounded matched live evidence demonstrates reduced actual burden on at least one intended operational dimension without weakening the acceptance contract;
 5. designated specialized/high-risk routes still recover every applicable cold capability;
 6. no mandatory orchestrator/service/vendor/model/subagent requirement has been introduced;
 7. Working State, eval state, generated summaries, indexes, and memory-query views remain explicitly non-authoritative;
 8. empirical live evidence exists for any claim that agent trajectory behavior improved; claims remain bounded to tested task/model/runtime regimes;
 9. no open Serious Challenge or material preservation gap remains;
-10. the candidate remains a minimum-justified operational architecture rather than adding a second control framework beside Protocol 7.
+10. the candidate remains a minimum-justified operational architecture rather than adding a second control framework beside Protocol 7;
+11. manual/portable skill use remains complete without hidden runtime state, hosted services, or mandatory Orchestrator participation;
+12. accepted 6.5 compact-working-state and version-source-resolution semantics have been consolidated rather than duplicated under new names.
 
 A smaller prompt/package is not sufficient. A candidate that is shorter but loses a materially applicable doctrine is No-Pass.
 
@@ -593,7 +615,8 @@ Reopen D3 design if implementation evidence shows any of the following:
 - empirical evaluation shows the proposed routing consistently increases substantive error or hidden-constraint loss;
 - cognitive-resource/multi-agent routing requires host-specific semantics that cannot be expressed portably;
 - version preflight cannot be made cheap without introducing a second version authority;
-- 6.6 overlaps Protocol 7's control-plane ownership rather than remaining a compatible pre-7 optimization.
+- 6.6 overlaps Protocol 7's control-plane ownership rather than remaining a compatible pre-7 optimization;
+- empirical 6.6 results materially undermine the assumptions supporting Protocol 7's currently proposed mandatory-control-plane architecture, in which case route that evidence into the required Protocol 7 D3 reopen rather than preserving the older proposal by inertia.
 
 Raise Serious Challenge to accepted 6.5 only if credible evidence shows an accepted 6.5 doctrine itself is materially false, contradictory, inadequate, or unrealizable. Mere verbosity/operational inefficiency is a successor-design problem, not by itself a Challenge to the truth of 6.5 authority.
 
@@ -611,3 +634,22 @@ The implementer SHALL:
 6. stop adding optimization machinery when the same decision can be achieved more simply;
 7. freeze a semantic candidate only after source semantics and documentation stabilize;
 8. leave independent Review, stakeholder ratification, publication/recovery, and accepted-current cutover to their governed lifecycle.
+
+
+## 15. Workplan-level review closure
+
+A fresh adversarial **non-independent** workplan review was performed after the initial draft. It cannot substitute for the later independent assembled-candidate Review required for Protocol acceptance.
+
+The review identified and this revision closes the following material planning defects:
+
+1. **PEM basis overclaim** — the initial plan treated current root PEM as a reconciled accepted/base publication even though its front matter still names 6.4 P0 plus a 6.5 candidate overlay. Closed by marking the basis `REVIEW_REQUIRED`, retaining only bounded historical hypotheses, and making accepted/base reconciliation a Stage-A prerequisite.
+2. **duplicate Working-State doctrine risk** — 6.5 already owns compact temporary working state. Closed by converting 6.6 from a new-state proposal into operationalization/simplification of the existing capability.
+3. **duplicate version-handshake doctrine risk** — 6.5 already owns exact governing-version source resolution. Closed by treating 6.6 as a cheap execution preflight over existing authority rather than a new source/version owner.
+4. **evaluation proxy/metric gaming** — the initial eval contract could overclaim from static footprint or aggregate efficiency. Closed by separating static/live/trajectory evidence, freezing development vs holdout cases, adding matched-run discipline, correctness non-regression, claim-bounded live evidence, and no scalar-score authority.
+5. **tooling migration of cognitive debt** — externalizing prose could merely create a new framework. Closed by adding reversibility/deletion gates and requiring permanent helper/query/subagent machinery to justify its total complexity.
+6. **Protocol 7 inheritance ambiguity** — simple inheritance could preserve a now-unjustified mandatory control-plane proposal. Closed by requiring 6.6 evidence to participate in Protocol 7's already-required deliberate D3 architecture reopen.
+7. **manual portability risk** — aggressively shrinking workflow prompts could make the runtime depend on hidden orchestrator state. Closed by making complete manual/portable operation an explicit preservation and acceptance requirement.
+
+No Serious Challenge to accepted Protocol 6.5 is raised. The defect is principally operational representation/execution inefficiency in the successor design space, while accepted 6.5 already contains much of the correct doctrine.
+
+**Workplan disposition:** implementation-ready subject to normal implementation-time discovery. Newly discovered affected surfaces are incorporated under existing authority; a material change to the frozen D3 cycle decisions above requires workplan reconsideration rather than silent drift.
