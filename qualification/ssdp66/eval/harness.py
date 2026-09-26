@@ -319,7 +319,10 @@ def run_live(dist: Path, prompt: str, fixture: Path | None, out: Path, model: st
         subprocess.run(["git", "add", "-A"], cwd=project, check=True)
         subprocess.run(["git", "-c", "user.email=eval@example.invalid", "-c", "user.name=eval", "commit", "-qm", "fixture", "--allow-empty"], cwd=project, check=True)
         install_variant(dist, project)
-        cmd = ["claude", "-p", prompt, "--output-format", "stream-json", "--verbose", "--model", model, "--max-turns", str(max_turns)]
+        # Load only project/local settings so user-level installed skills (for example an
+        # accepted SSDP package under ~/.claude/skills) cannot shadow the variant under test.
+        cmd = ["claude", "-p", prompt, "--output-format", "stream-json", "--verbose", "--model", model,
+               "--max-turns", str(max_turns), "--setting-sources", "project,local"]
         if mode == "select":
             cmd += ["--allowedTools", "Skill Read Glob Grep", "--disallowedTools", "Edit Write Bash NotebookEdit Agent WebFetch WebSearch"]
         else:

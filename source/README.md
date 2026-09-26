@@ -4,7 +4,7 @@
 
 ## Governing model
 
-SSDP separates D1 scientific/mathematical formulation, D2 algorithm/numerical method, D3 software architecture, and D4 specification/implementation. Read `shared/references/abstraction-and-concretization.md`, the small universal kernel, for authority, materiality, Challenge, proportional rigor, self-application, Lossless Representation, and the hard specialized-semantics availability invariant; everything else loads from conditional owners.
+SSDP separates D1 scientific/mathematical formulation, D2 algorithm/numerical method, D3 software architecture, and D4 specification/implementation. `shared/references/abstraction-and-concretization.md`, the small universal kernel, owns authority, materiality, Challenge, proportional rigor, self-application, Lossless Representation, and the hard specialized-semantics availability invariant; everything else loads from conditional owners.
 
 A concretization is admissible only when it satisfies every applicable parent abstraction and directly governed constraint. Within the admissible set optimize domain engineering fitness, minimum justified total complexity, then development economy. Development economy is operational: allocate analysis/evidence by consequence and decision-sensitive uncertainty, use the cheapest sufficiently strong applicable route, and stop when further certainty cannot change the governed decision. Mandatory obligations remain closure conditions. D1->D4 is semantic ordering, not a mandatory waterfall.
 
@@ -29,7 +29,7 @@ Optional specialists `software-documentation`, `software-maintenance-audit`, and
 
 ## Progressive-disclosure owner map
 
-Load the role entrypoint plus universal kernel/owning domain, then only concern owners whose decision predicates fire. Ordinary links, dependency traces, PEM relations/indexes, and package membership do not imply activation.
+The build inlines one generated entry contract into every `SKILL.md` (placeholder `<!-- SSDP-ENTRY-CONTRACT -->`): the versioning owner's marked governing-version step plus the kernel's `Universal invariant` block; edit those owners, never the inlined copy, and `validate_packages.py` re-derives the block from each bundle's packaged owners. Load the entrypoint plus its owning domain, then only concern owners whose decision predicates fire, including the full kernel. Ordinary links, dependency traces, PEM relations/indexes, and package membership do not imply activation.
 
 Key owners:
 

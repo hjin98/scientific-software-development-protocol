@@ -6,6 +6,8 @@ governing_protocol_version: 6.5.0
 target_protocol_version: 6.6.0
 stages: F, G
 evaluated_source: 3fac7d1c34822ba82785e0b41f6e340fd7cfa6d5
+rework_semantic_state: c01eeee47989cbbf9ed5e87df50756c23d912f79
+implementation_review: NO_PASS_R1 at 26059544204c65b1e0292cd229e95f61b5f970bb
 ---
 
 # Protocol 6.6 Stages F-G — Empirical Evaluation and Assembled Qualification
@@ -16,11 +18,23 @@ Evidence coordination under the [Protocol 6.6 Evaluation and Qualification Contr
 
 ```text
 SERIOUS CHALLENGE (to accepted 6.5): NONE
-IMPLEMENTATION BLOCKERS: NONE KNOWN
-NEW CORRECTNESS REGRESSION vs 6.5 ON MATCHED CASES: NONE OBSERVED
-READY FOR FRESH INDEPENDENT REVIEW: YES, with the two material findings below carried prominently
+IMPLEMENTATION BLOCKERS: OPEN
+  B1 R1 real-boundary version/universal-contract confirmation: NOT YET OBSERVED
+     (repair implemented at c01eeee; live confirmation not executed - see section 10)
+  B2 criterion 4 direct live burden reduction: NOT DEMONSTRATED
+NEW CORRECTNESS REGRESSION vs 6.5 ON MATCHED CASES: none observed at 3fac7d1;
+  not yet re-established on the rework semantic state
+READY FOR FRESH INDEPENDENT REVIEW: NO
 CANDIDATE FREEZE / PUBLICATION / RATIFICATION / CUTOVER: NOT PERFORMED (Stage H)
 ```
+
+Sections 1-9 record the original Stage F/G evidence on `3fac7d1`; they are retained, not rewritten. The implementation Review (NO-PASS R1) rejected two of their conclusions, and section 10 carries the current rework state. Where sections 1-9 conflict with section 10 or with the corrections below, the later text governs.
+
+Corrections required by the Review:
+
+- Finding 1 below treated manual-mode compliance as a shared weakness to route to Protocol 7. The Review classified it as 6.6 nonconformance: a check that is not effective at the real execution boundary is proxy evidence, not closure. It is blocker B1.
+- Finding 2 and criterion row 4 treated fewer missed selections as an intervention/activation burden gain. Selection accuracy is a separate quality metric; no intervention was measured. It is blocker B2.
+- Section 2 reused T2/T3 across the `4f566b6 -> 3fac7d1` entrypoint change because no run read a changed reference. That reasoning is invalid: the invoked `SKILL.md` is part of every explicit-skill trajectory. T2/T3 evidence does not apply to any later entrypoint state.
 
 **Material finding 1 — prose-only entry instructions are weakly followed (shared with 6.5).** In the reference harness no agent read the universal kernel or the D4 owner before acting, in any trajectory of either variant; the observed protocol context was the injected `SKILL.md`. Version-bound workplans (T4 6.4-bound, T5 6.3-bound holdout) were silently implemented by 6.5 in 4/4 runs; 6.6 stated the mismatch in 1/4 final-candidate runs (T4 1/2, T5 0/2) and 0/6 intermediate runs. The versioning doctrine is not false (the offline `version_preflight.py` and Orchestrator profile selection enforce it mechanically), so this is not a Serious Challenge to 6.5; it is not a 6.6 regression. It is material evidence that manual-mode compliance with prose entry checks is unreliable in this harness, routed to Review and to the required Protocol 7 D3 reopen (workplan §13, final trigger).
 
@@ -99,8 +113,8 @@ No 6.6 mechanism was retained whose only justification was a live gain it did no
 | --- | --- | --- | --- |
 | 1 | every accepted 6.5 capability mapped to a preserved owner/route | Stage A map (section 7 there) re-verified: section 6 below; sentence-level preservation tests for moved kernel sections | MET (structural); semantic adequacy for Review |
 | 2 | inherited regression/package/profile/Core/frozen-history checks pass | section 7 | MET |
-| 3 | new routing/context/state/version/eval counterfactuals pass | `tests/test_protocol_66_cognitive_optimization.py` (28 tests), Core 6.6 schema oracle | MET mechanically; live version counterfactual fails for both variants (finding 1) |
-| 4 | clear structural reduction + bounded live burden reduction beyond noise | −21…−27% mandatory closure; live: missed activations 9 -> 3 (intervention/activation dimension), trajectory tokens/turns unchanged | STRUCTURAL MET; LIVE MET ONLY ON THE ACTIVATION/INTERVENTION DIMENSION — Review to judge sufficiency |
+| 3 | new routing/context/state/version/eval counterfactuals pass | `tests/test_protocol_66_cognitive_optimization.py` (28 tests), Core 6.6 schema oracle | MET mechanically; live version counterfactual fails for both variants (finding 1) — superseded: blocker B1, section 10 |
+| 4 | clear structural reduction + bounded live burden reduction beyond noise | −21…−27% mandatory closure; live: missed activations 9 -> 3 (intervention/activation dimension), trajectory tokens/turns unchanged | STRUCTURAL MET; LIVE NOT MET — superseded: selection is not burden (blocker B2, section 10) |
 | 5 | specialized/high-risk sentinels recover cold capability | route tests R4/R5/R6; T3 PASS both, one live load of the semantic owner | MET within scope |
 | 6 | no mandatory orchestrator/service/vendor/model/subagent | doctrine + no-vendor-name test; harness optional/removable | MET |
 | 7 | Working State/eval/summaries/indexes non-authoritative | workflow owner + tests; no Working-State artifact exists | MET (structural) |
@@ -160,3 +174,27 @@ The closeout-learning assessment runs at lifecycle closure after acceptance, aga
 - `DS-001` — a further supporting application: static mandatory-closure structure did not predict observed context (agents loaded only entrypoints), reinforcing that structural evidence claims only structure;
 - possible new discovery — prose-only entry/mandatory-read instructions were not reliably followed by the reference harness in either protocol version; admission needs broader harness/model evidence and a counterevidence search;
 - `SP-002` — the accepted 6.5 release episode is a not-yet-recorded supporting application (noted in the memory front matter).
+
+## 10. Implementation-Review rework state (workplan section 16)
+
+### 10.1 R0 — frozen before repair
+
+`REWORK-R0-FREEZE.md` (commits `c73fdd3`, `07af511`, both before any R1 change): fresh 6.2.0-bound holdout T6; ordinary unversioned workplan route T7 (its disclosed selection risk is recorded there); T4 reclassified as development data and T5 as a post-finding challenge case; the deterministic `entry_and_burden` trace oracle; and the predeclared burden metric and pass rule (`eval/scenarios.yaml` `rework`).
+
+### 10.2 R1 — repair implemented (`c01eeee`)
+
+- Every generated entrypoint carries one `## Entry contract` block inlined by `build_skills.py` at `<!-- SSDP-ENTRY-CONTRACT -->`: the versioning owner's marked step, which is an unconditional one-line governing-version declaration before the first file change or protocol-dependent decision, with no lookup when the answer is `none`; plus the kernel's `Universal invariant` block, extended to carry every section 5.1 hot-path element.
+- One owner per element: the step lives only in `protocol-versioning-and-compatibility.md` and the invariant only in `abstraction-and-concretization.md`. `validate_packages.py` independently re-derives the block from each bundle's packaged owners and rejects drift or a missing placeholder (negative tests).
+- The full kernel changed from a declared unconditional pre-reasoning read, which live agents skipped, to a predicate-routed owner. **Review should challenge this first:** the D4 argument is that section 5.1 requires the universal semantics to be always loaded and section 8 delegates the file partition. The inlined block is now the always-loaded tiny kernel, and the kernel file is its canonical owner and elaboration. If Review judges this a D3 change, reverting it is a one-sentence restoration per entrypoint and does not affect the version step.
+- Structural effect (harness `static`, which now expands the inlined block): R1-route mandatory closure is 38,187 B at 6.5 and 17,205 B now. The consumed D4 entrypoint grows from 8,360 B (6.5) and 7,762 B (`3fac7d1`) to 9,816 B. That growth is the price of putting the universal contract in the consumed surface. Because observed Stage F runs loaded only the entrypoint, the T1 burden route is expected to **increase** under the frozen metric; this is stated before measurement and must not be explained away.
+- No control plane, service, vendor dependency, or Orchestrator/profile change was added. `version_preflight.py` is unchanged.
+
+### 10.3 Live confirmation — NOT EXECUTED (blocking)
+
+The matched R1/R2 matrix (T6×4, T1×3, T7×3, T5×2, T4×2, T2×2, T3×2 per variant, 6.5 package at `2b8ce17` vs candidate `c01eeee`) was launched in Claude Code 2.1.218 headless. Every executor session ended after one turn with `Failed to authenticate: OAuth session expired and could not be refreshed`. The runs contain no agent behavior, were discarded, and are not evidence in either direction. A second confounder surfaced in the same traces: user-level `~/.claude/skills` held the accepted 6.5 SSDP package, so each SSDP skill appeared twice in the session catalog. The harness now passes `--setting-sources project,local` to exclude user-level skills, but that isolation is unverified until a run authenticates.
+
+Required to close: re-authenticate the headless CLI, confirm that the session init lists each SSDP skill once, run `run_matrix.py` with the section 10.3 set against the then-current semantic state, run blinded `assess`, and apply the R0 rules. The rules are: zero silent mismatch on T6 (every run has `governing_stated_before_mutation` true and assessor PASS); no lookup and no versioning-owner read on T1/T7; the burden pass rule on T1 or T7; and no assessed-correctness regression on T1-T3 and T7.
+
+### 10.4 Criterion 4 outlook and reopen trigger
+
+If the live burden rule fails on both ordinary routes after this minimum repair, section 16.5/16.8 applies. Remove unjustified permanent machinery and reopen the D3 criterion-4 success condition. Do not re-shape entrypoints or metrics to manufacture a gain. The Stage F evidence already suggests the structural reduction sits almost entirely in material that live agents did not read.

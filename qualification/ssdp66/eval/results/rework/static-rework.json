@@ -1,0 +1,218 @@
+{
+  "catalog": {
+    "numerical-algorithm-design": {
+      "frontmatter": {
+        "bytes": 307,
+        "tokens_proxy": 59
+      },
+      "openai_adapter": {
+        "bytes": 137,
+        "tokens_proxy": 22
+      }
+    },
+    "repository-hygiene": {
+      "frontmatter": {
+        "bytes": 270,
+        "tokens_proxy": 45
+      },
+      "openai_adapter": {
+        "bytes": 120,
+        "tokens_proxy": 19
+      }
+    },
+    "scientific-formulation": {
+      "frontmatter": {
+        "bytes": 320,
+        "tokens_proxy": 55
+      },
+      "openai_adapter": {
+        "bytes": 138,
+        "tokens_proxy": 21
+      }
+    },
+    "software-design": {
+      "frontmatter": {
+        "bytes": 319,
+        "tokens_proxy": 55
+      },
+      "openai_adapter": {
+        "bytes": 123,
+        "tokens_proxy": 20
+      }
+    },
+    "software-documentation": {
+      "frontmatter": {
+        "bytes": 253,
+        "tokens_proxy": 43
+      },
+      "openai_adapter": {
+        "bytes": 122,
+        "tokens_proxy": 18
+      }
+    },
+    "software-implementation": {
+      "frontmatter": {
+        "bytes": 281,
+        "tokens_proxy": 51
+      },
+      "openai_adapter": {
+        "bytes": 136,
+        "tokens_proxy": 20
+      }
+    },
+    "software-maintenance-audit": {
+      "frontmatter": {
+        "bytes": 274,
+        "tokens_proxy": 50
+      },
+      "openai_adapter": {
+        "bytes": 137,
+        "tokens_proxy": 23
+      }
+    }
+  },
+  "catalog_totals": {
+    "adapter_bytes": 913,
+    "frontmatter_bytes": 2024,
+    "frontmatter_tokens_proxy": 358
+  },
+  "ref": "WORKTREE",
+  "routes": {
+    "R1-local-d4-repair": {
+      "eager_forbidden_concerns": [],
+      "mandatory_closure": {
+        "bytes": 17205,
+        "tokens_proxy": 3141
+      },
+      "mandatory_files": [
+        "SKILL.md",
+        "specification-and-implementation.md"
+      ],
+      "route_closure": {
+        "bytes": 17205,
+        "tokens_proxy": 3141
+      },
+      "route_files": [
+        "SKILL.md",
+        "specification-and-implementation.md"
+      ],
+      "split": "development",
+      "unreachable_fired_concerns": []
+    },
+    "R2-d4-with-workplan-and-tests": {
+      "eager_forbidden_concerns": [],
+      "mandatory_closure": {
+        "bytes": 17205,
+        "tokens_proxy": 3141
+      },
+      "mandatory_files": [
+        "SKILL.md",
+        "specification-and-implementation.md"
+      ],
+      "route_closure": {
+        "bytes": 52929,
+        "tokens_proxy": 9356
+      },
+      "route_files": [
+        "SKILL.md",
+        "specification-and-implementation.md",
+        "workflow-and-workplans.md",
+        "testing-and-validation.md"
+      ],
+      "split": "development",
+      "unreachable_fired_concerns": []
+    },
+    "R3-d3-mature-replacement": {
+      "eager_forbidden_concerns": [],
+      "mandatory_closure": {
+        "bytes": 21759,
+        "tokens_proxy": 3864
+      },
+      "mandatory_files": [
+        "SKILL.md",
+        "architecture-and-design.md"
+      ],
+      "route_closure": {
+        "bytes": 67184,
+        "tokens_proxy": 11767
+      },
+      "route_files": [
+        "SKILL.md",
+        "architecture-and-design.md",
+        "workflow-and-workplans.md",
+        "project-engineering-memory.md",
+        "convergence-and-cycle-economy.md"
+      ],
+      "split": "development",
+      "unreachable_fired_concerns": []
+    },
+    "R4-d2-specialized-import": {
+      "eager_forbidden_concerns": [],
+      "mandatory_closure": {
+        "bytes": 15851,
+        "tokens_proxy": 2771
+      },
+      "mandatory_files": [
+        "SKILL.md",
+        "numerical-algorithm-design.md"
+      ],
+      "route_closure": {
+        "bytes": 25991,
+        "tokens_proxy": 4608
+      },
+      "route_files": [
+        "SKILL.md",
+        "numerical-algorithm-design.md",
+        "semantic-definition-and-traceability.md"
+      ],
+      "split": "development",
+      "unreachable_fired_concerns": []
+    },
+    "R5-d1-parameter-default-binding": {
+      "eager_forbidden_concerns": [],
+      "mandatory_closure": {
+        "bytes": 15092,
+        "tokens_proxy": 2617
+      },
+      "mandatory_files": [
+        "SKILL.md",
+        "scientific-formulation.md"
+      ],
+      "route_closure": {
+        "bytes": 42975,
+        "tokens_proxy": 7610
+      },
+      "route_files": [
+        "SKILL.md",
+        "scientific-formulation.md",
+        "semantic-definition-and-traceability.md",
+        "workflow-and-workplans.md"
+      ],
+      "split": "holdout",
+      "unreachable_fired_concerns": []
+    },
+    "R6-memory-governance-update": {
+      "eager_forbidden_concerns": [],
+      "mandatory_closure": {
+        "bytes": 13177,
+        "tokens_proxy": 2376
+      },
+      "mandatory_files": [
+        "SKILL.md",
+        "long-horizon-code-health.md"
+      ],
+      "route_closure": {
+        "bytes": 48116,
+        "tokens_proxy": 8578
+      },
+      "route_files": [
+        "SKILL.md",
+        "long-horizon-code-health.md",
+        "project-engineering-memory.md",
+        "project-engineering-memory-schema.md"
+      ],
+      "split": "holdout",
+      "unreachable_fired_concerns": []
+    }
+  }
+}

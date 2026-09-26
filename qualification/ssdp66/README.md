@@ -6,5 +6,6 @@ Non-normative evidence for the Protocol 6.6 cognitive/operational optimization c
 | --- | --- |
 | `PROTOCOL-6.6-EVALUATION-AND-QUALIFICATION-CONTRACT.md` | cold evaluation/qualification contract (loaded for Stage A/F/G and evidence-adequacy Review) |
 | `STAGE-A-BASELINE-AND-PRESERVATION.md` | frozen baselines, PEM basis + HAS, capability-preservation map, evaluation freeze |
-| `STAGE-F-G-EVALUATION-AND-QUALIFICATION.md` | structural + live comparison, acceptance reconciliation, findings for Review |
+| `STAGE-F-G-EVALUATION-AND-QUALIFICATION.md` | structural + live comparison, acceptance reconciliation, findings for Review; section 10 holds the current implementation-Review rework state |
+| `REWORK-R0-FREEZE.md` | rework R0: fresh version-bound holdout, ordinary burden route, entry/burden oracle and pass rules frozen before the R1 repair |
 | `eval/` | removable harness (`harness.py`, `run_matrix.py`), frozen scenarios, fixtures, hidden oracles, rubrics, and reduced run records |

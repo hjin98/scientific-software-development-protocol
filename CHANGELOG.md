@@ -23,7 +23,7 @@ Main improvements:
 - decision-sufficient handoffs and an operational, explicitly non-authoritative Working State for long or interruption-prone work, plus a clear rule that transient progress does not mutate workplans;
 - vendor-neutral cognitive-resource escalation (model, reasoning, context, tool breadth, independent trajectories, subagents) under the existing proportional-rigor rule, without duplicating host routing;
 - optional independent review trajectories with explicit common-mode limits, and a Review strategy switch after related repeated findings;
-- a cheap entry-time version check that reuses `PROTOCOL_VERSION`, manifests and release state (with an offline repository helper) so version-bound work is never silently reinterpreted;
+- a generated entry contract inlined into every skill entrypoint—a one-line governing-version declaration before the first file change plus the kernel's universal invariant block—so the surface a portable runtime actually consumes carries the version rule and universal pre-action semantics; it reuses `PROTOCOL_VERSION`, manifests and release state (with an offline repository helper) and is re-derived from its owners during package validation;
 - thinner skill descriptions written as selection interfaces (task class plus exclusions) rather than compressed doctrine, with generic package validity kept independent of vendor adapters;
 - a small, removable empirical evaluation harness comparing 6.5 and 6.6 on selection, declared and observed protocol context, and trajectory outcomes under a named reference harness.
 

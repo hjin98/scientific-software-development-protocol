@@ -89,11 +89,11 @@ The active skill entrypoint controls what context is loaded. Ordinary links and 
 
 SSDP is written so an agent carries only what the current decision needs:
 
-- **A small universal kernel** holds the cross-domain rules: D1-D4 ownership, abstraction vs concretization, authority vs evidence, materiality, correctness before simplicity, Challenge, proportional rigor, and lossless representation.
+- **A small universal kernel** holds the cross-domain rules, and its compact invariant block is inlined into every skill entrypoint so it is present even when an agent reads nothing else: D1-D4 ownership, abstraction vs concretization, authority vs evidence, materiality, correctness before simplicity, Challenge, proportional rigor, and lossless representation.
 - **Conditional owners** load only when their trigger fires. Precise semantic-definition machinery is used when the work touches a specialized scientific/numerical object, a parameter or default binding, an external result, or a formal claim; ordinary engineering meaning needs only precise prose, types, contracts, and tests. Project memory and its storage schema, authority-lifecycle detail, language/tool profiles, and history stay cold otherwise.
 - **Handoffs and resumable state are decision-sufficient projections**: objective, exact identities, local decisions, open blockers and uncertainty, evidence state, next action, and reopen/stop conditions—never a replay of chronology or generic doctrine, and never a place where an open blocker quietly disappears.
 - **Working State** (a compact checkpoint for long or interruptible work) is optional coordination cache. It is not authority, is not a required file, and is stale as soon as its protocol, authority, workplan, candidate, or regime basis changes.
-- **Version check at entry.** When a task or workplan names an SSDP version, compare it with the installed package's `PROTOCOL_VERSION` first; version-bound work is never silently reinterpreted with newer doctrine.
+- **Version check at entry.** Before its first file change the agent states the governing SSDP version (from the task or a workplan it names, else `none`) and compares it with the installed package; version-bound work is never silently reinterpreted with newer doctrine.
 
 The portable runtime unit is `dist/skills/<skill-name>/`; top-level ZIPs contain the same bundles for transport. See [PORTABILITY.md](PORTABILITY.md) for installation and routing details.
 

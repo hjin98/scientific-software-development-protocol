@@ -21,7 +21,7 @@ package transport closure (every routed owner present in the bundle) is a fourth
 
 Frontmatter `name`/`description` is the portable selection surface: a short task-class plus exclusion interface, never compressed doctrine or mutable release state. `agents/openai.yaml` is a vendor adapter validated separately; a missing or broken adapter does not invalidate the generic core bundle. Selection metadata that finds the right root does not prove its conditional owners were read, and correct internal routing cannot repair a root that was never selected.
 
-The active role/specialist `SKILL.md` owns root activation. It routes to the universal kernel/owning concern; a concern owner may conditionally dispatch to a narrower leaf only within that concern.
+The active role/specialist `SKILL.md` owns root activation and carries a build-inlined entry contract (governing-version step plus the kernel's universal invariant block), because the entrypoint is the surface a portable runtime reliably consumes. It routes to its owning concern and, when a question needs more than that block, the full universal kernel; a concern owner may conditionally dispatch to a narrower leaf only within that concern.
 
 ```text
 activation -> required source/package reachability

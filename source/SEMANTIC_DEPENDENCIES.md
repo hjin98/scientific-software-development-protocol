@@ -61,7 +61,7 @@ Activation is intentionally distinct from this semantic view. Root role/speciali
 Representative concern routers:
 
 ```text
-role/specialist SKILL.md -> universal kernel + owning concern
+role/specialist SKILL.md (with build-inlined entry contract) -> owning concern; universal kernel when its predicate fires
 material specialized object/binding/import/formal claim -> semantic-definition-and-traceability.md
 material mature rework/recurrence/replacement/recovery decision -> project-engineering-memory.md
 memory authoring/validation/publication/partition question -> project-engineering-memory.md -> project-engineering-memory-schema.md
