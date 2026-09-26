@@ -3,22 +3,22 @@ kind: protocol-minor-revision-workplan
 workplan_id: SSDP-6.6-COGNITIVE-OPERATIONAL-OPTIMIZATION
 protocol_version: 6.5.0
 target_protocol_version: 6.6.0
-status: implementation-ready-after-d3-reopen
+status: implementation-ready-final-entrypoint-simplification
 created_date: 2026-09-26
 reviewed_date: 2026-09-26
-workplan_review_state: PASS_NONINDEPENDENT_R4_D3_REOPEN
-implementation_review_state: NO_PASS_R3_D3_REOPEN
+workplan_review_state: PASS_NONINDEPENDENT_R5_FINAL_D3_SIMPLIFICATION
+implementation_review_state: NO_PASS_R4_FINAL_D3_DECISION
 implementation_reviewed_date: 2026-09-26
-implementation_review_basis: 94743f56320701b3382e8ea9b66cbdc39cc19ab7
-d3_reopen_state: ACCEPTED_CYCLE_REVISION
+implementation_review_basis: 8f4b104b3381a32805b990024cf58906d137c552
+d3_reopen_state: ACCEPTED_FINAL_SIMPLIFICATION_REVISION
 d3_reopen_decision_date: 2026-09-26
-d3_reopen_basis: 94743f56320701b3382e8ea9b66cbdc39cc19ab7
+d3_reopen_basis: 8f4b104b3381a32805b990024cf58906d137c552
 base_protocol: Protocol 6.5
 base_accepted_source: 7f7b5e24858e813e45ace867a7f8ea5180f43bf0
 base_recovery: c4d5da1e0acb0e9f27376bf69561e8762747cd2d
 branch_base: 23e46543c174a8451bbadc402df63538105eab10
 active_serious_challenge: none
-challenge_resolution: successor-cycle-d3-adjudicated-pending-d4-concretization
+challenge_resolution: protocol6-stochastic-version-semantics-accepted; final-entrypoint-simplification-pending
 ---
 
 # Protocol 6.6 Cognitive and Operational Optimization
@@ -852,3 +852,103 @@ The implementation may return to final assembled qualification only when:
 
 If these hold, freeze a new immutable 6.6 semantic candidate and request fresh independent assembled-candidate Review. The failed `c01eeee` R1 design is not the candidate to revive.
 
+
+
+### 16.11 Final D3 decision — Protocol-6 stochastic robustness and whole-entrypoint simplification
+
+Review of the redesigned semantic state `47dc85de6dd6be8b0adfb1a66024cfdd5397f3d8`, with valid live evidence recorded through `8f4b104b3381a32805b990024cf58906d137c552`, closes the remaining D3 questions as follows.
+
+This section supersedes the parts of 16.10.4-16.10.5 that treated perfect portable prose compliance as a deterministic version gate or that limited optimization to the generated hot block. It does **not** weaken the strict version-binding semantics in 16.10.1, the minimum safety semantics in 16.10.2, or criterion 4's requirement for real operational-burden reduction.
+
+#### 16.11.1 Protocol 6 works with stochastic execution; Protocol 7 owns deterministic enforcement
+
+Protocol 6 and prior protocol lines govern nondeterministic LLM execution by making correct behavior materially more likely, recoverable, reviewable and convergent toward engineering robustness. Plain-language instruction is not a deterministic execution mechanism and SHALL NOT be qualified as though it were one.
+
+Accepted cycle decision:
+
+1. The strict version semantics from 16.10.1 remain normative: declared binding governs; compatibility never authorizes self-adoption; unresolved mismatch reports non-closure.
+2. Portable/manual skill mode SHALL expose this rule prominently and unambiguously but does not claim deterministic obedience from a stochastic model.
+3. Mechanical preflight/helper/Orchestrator paths SHALL obey the rule deterministically where those mechanisms are actually invoked.
+4. Deterministic pre-execution enforcement independent of model compliance is outside Protocol 6.6's portable-skill acceptance claim and belongs to the later Protocol-7 control-plane architecture.
+5. The final 6.6 live version evidence is **robustness evidence**, not a proof obligation that every bounded stochastic trajectory obeys prose. A single stochastic miss does not by itself falsify a coherent portable semantic contract; a systematic/recurrent pattern that erases the intended improvement remains a blocker.
+6. The redesigned `47dc85d` result is evidence of a real directional improvement: explicit/self-authorized successor adoption was eliminated in the observed matrix and silent mismatch fell sharply relative to accepted 6.5, while one genuine silent mismatch remained. Preserve that limitation rather than manufacturing deterministic closure.
+7. Future ordering evidence SHALL treat reads of `PROTOCOL_VERSION`, `protocol-manifest.json`, the versioning owner and the version helper that are used solely to determine governing/loaded identity as part of the **version decision itself**, not as prior application of protocol doctrine. Reading/applying unrelated protocol owners or mutating product/workplan state before the version decision remains a true ordering failure.
+
+For the final simplified entrypoint, run a bounded matched version regression only to detect material regression of this robustness. Do not tune wording to individual stochastic misses and do not require a mathematically impossible 100% language-obedience guarantee. The exact version semantics, deterministic helper behavior, no-self-adoption structure, and truthful non-closure remain hard correctness requirements.
+
+#### 16.11.2 Final optimization target — the complete consumed entrypoint
+
+The D3-reopen evidence falsified the assumption that reducing cold-reference size materially reduces ordinary live burden in the reference host. In 17/18 ordinary redesign runs, the executor consumed only the invoked `SKILL.md`; therefore ordinary live protocol burden is dominated by the **complete root entrypoint**, not its packaged cold references.
+
+One final architecture simplification is authorized:
+
+> Minimize the complete consumed `SKILL.md` entrypoint, including role-local prose, routing, exclusions, safety kernel and version step, while preserving every materially applicable routing/correctness capability.
+
+This is a re-derivation of the root routing interface, not a wording patch and not a license to delete doctrine.
+
+The implementation SHOULD aim with margin below the existing 6.5 D4 entrypoint burden (8,360 B); the existing criterion-4 15% reduction rule implies roughly 7.1 KB or less if entrypoint-only loading continues. A practical engineering target around 6-6.5 KB is preferred when achievable losslessly, but **no byte target overrides routing fidelity**.
+
+#### 16.11.3 Root-router preservation is a hard acceptance floor
+
+`SKILL.md` is the critical root router. Compression that makes a major canonical owner materially less discoverable, weakens its trigger, merges distinct predicates into an ambiguous route, or makes a necessary escalation less likely is a correctness regression even if live byte counts improve.
+
+Before mutating entrypoints, D4 SHALL freeze a **routing-preservation map** from the current redesigned semantic state `47dc85d` for every role/supporting skill:
+
+```text
+entrypoint capability / concern
+  -> current trigger predicate / exclusion
+  -> canonical target owner/template
+  -> positive counterfactual(s): task facts that must route there
+  -> negative counterfactual(s): nearby task facts that must not eagerly route there
+  -> preservation disposition in simplified entrypoint
+```
+
+At minimum the map SHALL cover every direct reference/template route currently reachable from each `SKILL.md`, plus the major cross-domain escalation classes: D1, D2, D3, D4, workflow/workplan, evidence/testing, PEM, versioning, semantic-definition/traceability, convergence/simplicity, repository intake, documentation, release/configuration/orchestration/security/performance/storage, language profiles, and tool-assisted leaves where the skill currently owns that route.
+
+Preservation rules:
+
+1. **Do not remove a direct route merely because the corresponding reference was rarely loaded in the burden harness.** Rare activation can still protect high-consequence work.
+2. Link-set equality is useful structural evidence but is insufficient by itself: trigger semantics and exclusions must remain materially equivalent.
+3. A route may be consolidated only when one remaining predicate still discriminates every materially distinct activation case and points to the same canonical owner chain.
+4. Generic explanatory prose may move cold when its decision predicate is still recoverable from the router; a root routing predicate itself may not be hidden behind the owner it is needed to discover.
+5. Preserve explicit negative routing where it prevents expensive or incorrect escalation (for example first-clean-local work, ordinary engineering meaning, and non-triggering PEM/history).
+6. Preserve the smallest sufficient role-local authority boundary: what the skill owns, what it does not own, and where materially adjacent authority routes.
+7. The generated version/safety contract may be compacted editorially but must retain the 16.10.1 and 16.10.2 semantics. Do not trade away safety/version meaning for the byte target.
+8. No new routing framework, manifest, state machine or runtime service is justified solely to prove compression. Use the existing canonical entrypoints, references, build/validation and compact qualification harness.
+
+#### 16.11.4 Qualification for the final simplification
+
+Freeze the final simplification evidence contract **before** executing the simplified candidate.
+
+It SHALL include:
+
+- exact pre-simplification semantic/root-router basis: `47dc85de6dd6be8b0adfb1a66024cfdd5397f3d8`;
+- the routing-preservation map above;
+- structural confirmation that every preserved direct route resolves in the assembled package and no forbidden eager route was introduced;
+- positive/negative routing counterfactuals broad enough to exercise every major direct concern family affected by the entrypoint rewrite;
+- the existing selection matrix plus any minimal targeted route cases needed to discriminate a compressed predicate; do not launch a broad new benchmark campaign;
+- unchanged hidden-oracle/assessor repairs from `6c76ef1`;
+- the existing criterion-4 primary burden dimension and threshold unless a pre-run D3 defect in that oracle is independently established;
+- a bounded matched version-regression sample interpreted under 16.11.1 as stochastic robustness evidence, not deterministic language proof;
+- T2/T3 or equivalent authority sentinels sufficient to detect loss of upstream-routing capability after entrypoint compression.
+
+**Routing/correctness is lexicographically prior to burden.** A burden pass is inadmissible if any major required route or authority boundary is lost.
+
+#### 16.11.5 Final stop boundary
+
+This is the last Protocol-6.6 architecture simplification attempt.
+
+Proceed to candidate freeze only if the exact final semantic state satisfies all of:
+
+1. route-preservation map closed with no material lost/ambiguous major route;
+2. selection and targeted routing counterfactuals show no material routing regression;
+3. strict version semantics remain intact structurally/mechanically and bounded live evidence shows no material robustness regression versus the redesigned state, with limitations reported honestly;
+4. authority/correctness sentinels and affected hidden-oracle checks pass;
+5. criterion 4 demonstrates genuine live burden reduction under its pre-frozen rule;
+6. package/build/dist/profile/Core/current-state checks pass and evidence is applicable to the exact semantic state;
+7. failed `c01eeee` and `47dc85d` experiments remain preserved as negative evidence;
+8. 6.5 remains accepted-current until normal independent Review, ratification, publication/recovery and cutover.
+
+If the whole-entrypoint simplification cannot reduce live burden without weakening routing or authority semantics, **stop Protocol 6.6 rather than relax the outcome after the fact**. Independently valuable 6.6 changes may be retained for a later differently scoped release, but the cognitive/operational-burden claim is not to be manufactured.
+
+No further entrypoint wording campaign or alternative burden metric is authorized after this pass.
