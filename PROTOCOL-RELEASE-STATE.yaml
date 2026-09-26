@@ -32,5 +32,5 @@ candidate:
   ratification:
     state: RATIFIED
     evidence_ref: hjin98/scientific-software-development-protocol@073aa74d0e786f8997d7a2885a67160000bd031c:qualification/ssdp66/STAKEHOLDER-RATIFICATION-2026-09-26-PROTOCOL-6.6.md
-  public_source_ref: UNAVAILABLE
+  public_source_ref: 22f4bdba53795da3a6f13f162529f3a843fc37ae
   recovery_ref: UNAVAILABLE
