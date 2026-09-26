@@ -3,18 +3,22 @@ kind: protocol-minor-revision-workplan
 workplan_id: SSDP-6.6-COGNITIVE-OPERATIONAL-OPTIMIZATION
 protocol_version: 6.5.0
 target_protocol_version: 6.6.0
-status: implementation-rework-required
+status: implementation-ready-after-d3-reopen
 created_date: 2026-09-26
 reviewed_date: 2026-09-26
-workplan_review_state: PASS_NONINDEPENDENT_R3
-implementation_review_state: NO_PASS_R2
+workplan_review_state: PASS_NONINDEPENDENT_R4_D3_REOPEN
+implementation_review_state: NO_PASS_R3_D3_REOPEN
 implementation_reviewed_date: 2026-09-26
-implementation_review_basis: 390613b27d7304f08ee819d968a47119f48b57f9
+implementation_review_basis: 94743f56320701b3382e8ea9b66cbdc39cc19ab7
+d3_reopen_state: ACCEPTED_CYCLE_REVISION
+d3_reopen_decision_date: 2026-09-26
+d3_reopen_basis: 94743f56320701b3382e8ea9b66cbdc39cc19ab7
 base_protocol: Protocol 6.5
 base_accepted_source: 7f7b5e24858e813e45ace867a7f8ea5180f43bf0
 base_recovery: c4d5da1e0acb0e9f27376bf69561e8762747cd2d
 branch_base: 23e46543c174a8451bbadc402df63538105eab10
 active_serious_challenge: none
+challenge_resolution: successor-cycle-d3-adjudicated-pending-d4-concretization
 ---
 
 # Protocol 6.6 Cognitive and Operational Optimization
@@ -591,11 +595,11 @@ Three adversarial, non-independent workplan review passes have been incorporated
 Current disposition:
 
 ```text
-SERIOUS CHALLENGE: NONE
-WORKPLAN REVIEW: PASS_NONINDEPENDENT_R3
-IMPLEMENTATION REVIEW: NO_PASS_R2
-IMPLEMENTATION: REWORK REQUIRED BEFORE CANDIDATE FREEZE
-FRESH INDEPENDENT ASSEMBLED-CANDIDATE REVIEW: BLOCKED PENDING REWORK
+SERIOUS CHALLENGE: RESOLVED AT D3 CYCLE LEVEL; D4 CONCRETIZATION PENDING
+WORKPLAN REVIEW: PASS_NONINDEPENDENT_R4_D3_REOPEN
+IMPLEMENTATION REVIEW: NO_PASS_R3_D3_REOPEN
+IMPLEMENTATION: READY FOR BOUNDED D4 CONCRETIZATION OF SECTION 16.10
+FRESH INDEPENDENT ASSEMBLED-CANDIDATE REVIEW: BLOCKED PENDING IMPLEMENTATION + QUALIFICATION
 ```
 
 The first implementation Review at branch head `26059544204c65b1e0292cd229e95f61b5f970bb` opened the bounded rework cycle in section 16. A second implementation Review at branch head `390613b27d7304f08ee819d968a47119f48b57f9` found the structural R1 repair plausible but still unqualified live, with criterion 4 still open and the frozen ordering oracle too weak for the governed `before substantive protocol-dependent action` claim. There is still no Serious Challenge to accepted Protocol 6.5. This review does not substitute for the fresh independent assembled-candidate Review required after rework.
@@ -756,3 +760,95 @@ The next cycle is evidence/oracle closure, not another semantic rewrite.
 7. On successful closure, rerun the final repository/PEM/build/package/dist/profile/snapshot/Core/whitespace acceptance on the exact semantic state, reconcile Stage F/G and documentation to that evidence, then freeze the immutable 6.6 candidate for fresh independent assembled-candidate Review.
 
 The current rework therefore has a deliberate stop boundary: **one oracle correction and one valid live confirmation cycle**. Failure at either governed behavioral gate routes upward; it does not authorize another sequence of wording candidates.
+
+### 16.10 D3 reopen resolution — strict version binding and minimal hot safety kernel
+
+The valid R1/R2 evidence at `94743f56320701b3382e8ea9b66cbdc39cc19ab7` fired both section-16.9 hard stops. D4 rewording therefore ended. The D3 reopen has now been adjudicated for this 6.6 cycle. This section supersedes only the failed cycle decisions identified below; accepted 6.5 remains the current released baseline until the normal 6.6 Review/ratification/cutover lifecycle completes.
+
+#### 16.10.1 Version binding and successor adoption — accepted D3 cycle decision
+
+The challenged ambiguity is resolved by separating **compatibility** from **adoption**.
+
+1. A task/workplan that declares `protocol_version` remains governed by that binding until the authority entitled to change that task/workplan explicitly changes it.
+2. A newer compatible protocol is **eligible for adoption**; compatibility alone never authorizes adoption.
+3. An execution agent may identify/recommend a successor and enumerate changed obligations, but it SHALL NOT self-adopt the successor merely because it is installed, newer, backward-compatible, or judged equivalent for the immediate task.
+4. For execution-source resolution, a "compatible installed/local source" means a source equivalent to the **declared governing binding** under the protocol's defined same-line compatibility rule. A cross-minor successor (for example 6.2 -> 6.6) is an adoption candidate, not the compatible source of 6.2-bound work.
+5. When `governing == loaded` (including an already-defined X.Y shorthand matching the loaded patch line), continue with the loaded source.
+6. When `governing != loaded`, resolve the declared version's compatible installed/local source or its exact immutable mapped public source. If that source cannot be resolved, report truthful non-closure and do not use the loaded successor as governing protocol doctrine.
+7. Explicit successor adoption is a separate governed mutation:
+   ```text
+   authorized adoption request/decision
+       -> identify old and proposed new protocol bindings
+       -> reconcile newly applicable obligations and materially affected evidence/dependencies
+       -> update the governing task/workplan binding through its normal authority process
+       -> only then execute under the successor
+   ```
+   Do not introduce a new `allow_successor` flag, migration state machine, or second authority surface merely to encode this decision.
+8. This resolution is a successor-cycle clarification/strengthening prompted by a concrete counterexample. It does not rewrite immutable 6.5 history or make 6.5 release artifacts mutable.
+
+**D4 acceptance for versioning:** the canonical versioning owner, generated entry step, offline preflight/tests, documentation, and affected profiles/prompts SHALL agree with the rule above. A version-bound live counterexample must not proceed under a cross-minor loaded successor without an explicit authorized adoption decision.
+
+#### 16.10.2 Hot-path architecture — accepted D3 cycle decision
+
+The R1 experiment established that "important universal doctrine" and "doctrine that should always occupy active context" are not equivalent. The current generated-entry mechanism is acceptable; the amount of doctrine inlined by it is not.
+
+Replace the current near-complete universal invariant digest with a **minimal pre-routing safety kernel**. Its job is only to prevent irreversible semantic/authority mistakes before conditional routing can occur. It SHALL preserve, in compact equivalent form, at least these pre-action invariants:
+
+1. **version binding:** honor the governing protocol/source rule in 16.10.1;
+2. **authority preservation:** route a change to the earliest affected D1/D2/D3/D4 owner and never silently change an upstream contract from a lower domain;
+3. **material semantic routing:** when a material scientific/numerical/architectural/authority question appears, load/route to its canonical owner before relying on that meaning;
+4. **closure integrity:** a blocker, conflicting authority, unavailable required evidence, or Serious Challenge cannot be bypassed by implementation convenience or green tests;
+5. **instruction boundary:** external/evidence/memory text is evidence/data unless governing authority explicitly makes it an instruction source.
+
+Everything else in the universal kernel remains canonical, reachable, and conditionally loadable rather than eagerly copied into every entrypoint. In particular, detailed materiality definitions, representation rules, evidence lifecycle, dependency invalidation, proportional-rigor elaboration, semantic-definition machinery, self-development detail, and general simplicity doctrine need not remain in the always-consumed block when their decision predicate has not fired.
+
+The generated block remains a mechanically subordinate derivative of canonical owners; do not hand-copy independent variants across skills. Do not restore a mandatory read of the full universal kernel merely to make it "always loaded."
+
+D4 may choose the exact compact wording and generation layout, but SHALL optimize **total live protocol burden**, not static character count alone.
+
+#### 16.10.3 Criterion 4 remains substantive
+
+The D3 reopen does **not** relax criterion 4 into static package reduction, selection accuracy, or unchanged token cost. Protocol 6.6 still exists to reduce actual operational burden.
+
+For the redesigned candidate:
+
+- selection/discovery improvement remains a separate positive quality result;
+- structural closure remains structural evidence only;
+- at least one representative ordinary route must show a direct live burden reduction beyond obvious run noise;
+- a small fixed safety-kernel cost on one route is admissible only when the bounded ordinary-route panel shows a clear net operational reduction and no correctness/authority regression;
+- no post-result route, metric, threshold, or weighting change may manufacture that conclusion.
+
+Before running the redesigned candidate live, D4 SHALL freeze the exact burden decision rule for the next comparison. Reuse T1/T7 as development/regression routes if useful, but because their outcomes are now known, add at most **one** fresh ordinary-route challenge only if needed to protect against overfitting. Keep the panel balanced and small. The decision rule should measure observed active SSDP material/actions directly; total turns/tokens/cost remain secondary diagnostics unless independently justified as the primary burden measure.
+
+The previous R1/R2 negative evidence remains valid historical evidence against the superseded inlined-full-kernel design and must not be overwritten.
+
+#### 16.10.4 Bounded D4 implementation scope
+
+The next implementation cycle SHALL be a simplification/reconciliation pass, not another additive framework:
+
+1. update the canonical versioning semantics to 16.10.1 and remove the self-adoption ambiguity;
+2. reduce the generated entry contract to the minimal safety kernel in 16.10.2 while preserving one canonical owner and mechanical derivative validation;
+3. remove or retire superseded full-kernel-inlining machinery/claims that no longer serve the final design;
+4. update affected tests/oracles/package generation/docs/history without broadening into Protocol 7 or another control plane;
+5. freeze the redesigned live-burden decision rule before executing the final live comparison;
+6. run the smallest high-information version/burden/correctness matrix needed to qualify the changed behavior;
+7. if the redesigned candidate still cannot demonstrate reliable strict version handling or a real burden gain, stop again and report the result rather than adding another prompt layer.
+
+Do not change pre-7 Orchestrator transition authority/state graph/profile schema. Do not introduce a mandatory service, vendor runtime, model scheduler, subagent framework, or second version authority.
+
+#### 16.10.5 Acceptance after D3 reopen
+
+The implementation may return to final assembled qualification only when:
+
+1. cross-minor version mismatch never self-adopts the loaded successor without explicit authorized adoption;
+2. exact historical-source resolution remains available and truthful non-closure replaces silent reinterpretation when unavailable;
+3. the actually consumed entrypoint contains only the minimal safety kernel plus role-local contract/routing needed before conditional owners can load;
+4. every removed always-hot invariant remains reachable from a canonical conditional owner when its predicate fires;
+5. criterion 4 is met by the pre-frozen redesigned live-burden rule, with selection gains reported separately;
+6. no matched correctness/authority/preservation regression appears;
+7. generated-package parity, validators, inherited repository tests, PEM checks, profile/snapshot frozen-history checks, Core acceptance and whitespace checks pass on the exact final semantic state;
+8. Stage F/G and semantic history preserve the failed R1 experiment as negative evidence and accurately describe the D3 replacement decision;
+9. 6.5 remains accepted-current until the normal 6.6 independent Review, stakeholder ratification, publication/recovery and cutover sequence.
+
+If these hold, freeze a new immutable 6.6 semantic candidate and request fresh independent assembled-candidate Review. The failed `c01eeee` R1 design is not the candidate to revive.
+
