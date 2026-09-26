@@ -193,6 +193,9 @@ class ActivationTransportDiscoveryTests(unittest.TestCase):
         stated = {"text": "The workplan is bound to Protocol 6.2.0, not the loaded package."}
         edit = {"tool": "Write", "input": json.dumps({"file_path": "/p/x.py"})}
         shell_edit = {"tool": "Bash", "input": json.dumps({"command": "cat > x.py <<EOF\nx\nEOF"})}
+        identity = {"tool": "Bash", "input": json.dumps({"command": "for f in .claude/skills/*/PROTOCOL_VERSION; do echo \"$f: $(cat $f)\"; done; cat .claude/skills/software-implementation/protocol-manifest.json"})}
+        identity_and_owner = {"tool": "Bash", "input": json.dumps({"command": "cat .claude/skills/software-implementation/PROTOCOL_VERSION .claude/skills/software-implementation/references/workflow-and-workplans.md"})}
+        listing = {"tool": "Glob", "input": json.dumps({"pattern": "**/*.claude/skills/**"})}
         cases = {
             "stated before doctrine and edit": ([skill_call("software-implementation"), workplan, stated, owner, edit], True),
             "versioning owner consulted for the decision": ([skill_call("software-implementation"), workplan, versioning, stated, edit], True),
@@ -201,6 +204,10 @@ class ActivationTransportDiscoveryTests(unittest.TestCase):
             "further SSDP skill before statement": ([skill_call("software-implementation"), workplan, skill_call("software-design"), stated], False),
             "shell mutation before statement": ([skill_call("software-implementation"), workplan, shell_edit, stated], False),
             "never stated": ([skill_call("software-implementation"), workplan, edit], False),
+            # workplan 16.11.1 item 7: loaded-identity inspection is part of the version decision
+            "package identity inspected for the decision": ([skill_call("software-implementation"), workplan, identity, stated, edit], True),
+            "identity inspection bundled with doctrine": ([skill_call("software-implementation"), workplan, identity_and_owner, stated, edit], False),
+            "whole package listed before statement": ([skill_call("software-implementation"), workplan, listing, stated], False),
         }
         for label, (trace, expected) in cases.items():
             with self.subTest(case=label):

@@ -228,3 +228,76 @@ redesign:
     secondary_diagnostics: "protocol_file_reads, owners read, turns, tokens, cost: reported, never the criterion"
     no_credit_for: "static bytes, selection accuracy, unchanged turns/tokens/cost"
     on_failure: "stop and report per workplan 16.10.4 item 7; no new route, metric, threshold, weighting or prompt layer"
+
+# Final whole-entrypoint simplification (workplan section 16.11). Frozen in one commit with
+# routing-preservation-map.yaml before any SKILL.md change of that pass and before any run of
+# the simplified candidate. Nothing below may change after the first final-candidate run.
+# Variants: v65 = accepted 6.5 dist/skills at 2b8ce17 (criterion-4 baseline, unchanged);
+# v66b = redesigned basis dist/skills at 47dc85d; v66f = simplified candidate (exact commit
+# recorded in the Stage F/G record before runs). Order: routing/correctness is
+# lexicographically prior to burden; a burden pass is inadmissible if any other item fails.
+final:
+  basis: 47dc85de6dd6be8b0adfb1a66024cfdd5397f3d8
+  executor_model: claude-sonnet-5
+  assessor: "fresh claude-opus-5-5, single turn, blinded; rubrics.yaml (strict `redesign` overrides for T4-T6), unchanged since 6c76ef1"
+  ordering_oracle: "harness.ordering_events with the 16.11.1 item 7 exemption (calls whose every installed-SSDP path is a version-identity file); applied identically to v66b and v66f"
+  structural: "tests/test_protocol_66_final_simplification.py passes on the exact candidate (routing-preservation map, frontmatter unchanged, no forbidden eager route), plus the full repository acceptance"
+  route_probes:
+    # Router-fidelity counterfactuals: the probe asks the agent to load exactly the owners its
+    # skill's routing requires, without doing the task. expect = owners that must all be read
+    # (all-of); forbid = owners that must not be read. Mode select (Skill Read Glob Grep only).
+    prompt: "Use the {root} skill. Routing check only: do not perform the task, do not edit anything and do not ask questions. Following the skill's own routing, Read each SSDP reference or template file that this task requires you to load before substantive work, and no others; then reply with one line listing the files you loaded. Task: {task}"
+    max_turns: 8
+    reps: 2
+    variants: [v66b, v66f]
+    cases:
+      - {id: P01-d4-first-clean-local, root: software-implementation, task: "parse_grid() in grid/io.py drops the last cell when the grid size is odd; the existing test shows the failure. Fix it.", expect: [], forbid: [project-engineering-memory.md, workflow-and-workplans.md, semantic-definition-and-traceability.md, convergence-and-cycle-economy.md, protocol-versioning-and-compatibility.md, abstraction-and-concretization.md]}
+      - {id: P02-d4-workplan-stage, root: software-implementation, task: "Continue with Stage 2 of the accepted implementation workplan docs/workplans/checkpoint-writer.md (it declares no protocol version); Stage 1 is closed and its handoff notes are in the workplan.", expect: [workflow-and-workplans.md], forbid: [project-engineering-memory.md, semantic-definition-and-traceability.md, protocol-versioning-and-compatibility.md]}
+      - {id: P03-d4-real-owner-testing, root: software-implementation, task: "Add acceptance tests proving the new checkpoint writer is exercised through the real restart path rather than a mocked writer, and qualify it for production use.", expect: [testing-and-validation.md], forbid: [project-engineering-memory.md, semantic-definition-and-traceability.md]}
+      - {id: P04-d4-mature-recurrence-pem, root: software-implementation, task: "Replace our mature caching layer for the third time: the two previous rewrites both regressed with the same invalidation bug, and the repository keeps a PROJECT-ENGINEERING-MEMORY.md recording those incidents.", expect: [project-engineering-memory.md], forbid: [semantic-definition-and-traceability.md]}
+      - {id: P05-d4-to-d2-escalation, root: software-implementation, task: "To speed up the solver, change the time integrator's default from the accepted second-order scheme to a first-order scheme with a larger step; the order and error tolerance come from the accepted numerical method paper.", expect: [numerical-algorithm-design.md], forbid: [project-engineering-memory.md]}
+      - {id: P06-d4-to-d1-escalation, root: software-implementation, task: "Change the pipeline so the reported observable is the median residence time instead of the mean residence time that the accepted scientific formulation defines.", expect: [scientific-formulation.md], forbid: [project-engineering-memory.md]}
+      - {id: P07-d4-semantic-definition, root: software-implementation, task: "Implement the Tsallis entropy estimator S_q in the analysis module; the parameter q and its default binding come from an imported published result whose hypotheses must hold for our data.", expect: [semantic-definition-and-traceability.md], forbid: [project-engineering-memory.md]}
+      - {id: P08-d4-to-d3-ownership, root: software-implementation, task: "The fix requires moving ownership of the job-queue state from the scheduler component to the worker processes and changing the interface between them.", expect: [architecture-and-design.md], forbid: [project-engineering-memory.md, semantic-definition-and-traceability.md]}
+      - {id: P09-d4-language-build, root: software-implementation, task: "Move the hot inner loop of kernel.py into a C++ extension built with pybind11, and make the build and ABI work across our supported Python versions.", expect: [language-profiles.md], forbid: [project-engineering-memory.md, semantic-definition-and-traceability.md]}
+      - {id: P10-d4-tool-relation, root: software-implementation, task: "Establish with data-flow analysis evidence that no user-controlled input can reach the subprocess call in runner.py.", expect: [tool-assisted-engineering.md], forbid: [project-engineering-memory.md]}
+      - {id: P11-d4-release, root: software-implementation, task: "Prepare the 2.3.0 release: bump the package version, build the wheels, update the changelog and publish to PyPI.", expect: [release-and-distribution.md], forbid: [project-engineering-memory.md, semantic-definition-and-traceability.md]}
+      - {id: P12-d4-kernel-authority, root: software-implementation, task: "Decide whether replacing our retry wrapper with a narrower fix in the owning layer is an equivalent D4 concretization or changes an accepted D3 authority boundary, and how much evidence that decision needs.", expect: [abstraction-and-concretization.md], forbid: [project-engineering-memory.md]}
+      - {id: P13-d3-mature-replacement, root: software-design, task: "Produce the implementation workplan for the third redesign of our checkpoint/restart subsystem; two earlier replacements of this mature subsystem failed with the same shared-state bug, recorded in PROJECT-ENGINEERING-MEMORY.md.", expect: [architecture-and-design.md, project-engineering-memory.md], forbid: [semantic-definition-and-traceability.md, protocol-versioning-and-compatibility.md]}
+      - {id: P14-d2-imported-theorem, root: numerical-algorithm-design, task: "Choose the control-variate coefficient for our Monte Carlo estimator; its default binding comes from an imported theorem whose hypotheses must be checked.", expect: [numerical-algorithm-design.md, semantic-definition-and-traceability.md], forbid: [project-engineering-memory.md]}
+      - {id: P15-d2-in-envelope-negative, root: numerical-algorithm-design, task: "Is a relative tolerance of 1e-8 inside the accepted error envelope for the existing trapezoid test? The documented error bound already covers it.", expect: [numerical-algorithm-design.md], forbid: [project-engineering-memory.md, semantic-definition-and-traceability.md, workflow-and-workplans.md, convergence-and-cycle-economy.md]}
+      - {id: P16-d1-parameter-binding, root: scientific-formulation, task: "Define the effective diffusion coefficient we report as an observable, including its validity assumptions; the model imports a parameter family from a published paper whose default binding is ambiguous.", expect: [scientific-formulation.md, semantic-definition-and-traceability.md], forbid: [project-engineering-memory.md]}
+      - {id: P17-docs-guide, root: software-documentation, task: "Rewrite the user-guide section that explains the solver configuration options so it matches the current code and the accepted method paper.", expect: [documentation-maintenance.md, documentation-and-evidence.md], forbid: [project-engineering-memory.md]}
+      - {id: P18-audit-recurring-family, root: software-maintenance-audit, task: "Audit the io/ subsystem: the same file-handle leak defect family has recurred three times this year and is recorded as a notice in project memory.", expect: [long-horizon-code-health.md, project-engineering-memory.md], forbid: [semantic-definition-and-traceability.md]}
+      - {id: P19-hygiene-branches-workplan, root: repository-hygiene, task: "The release is done: delete the merged feature branches and archive the completed workplan.", expect: [git-and-version-control.md, workflow-and-workplans.md], forbid: [semantic-definition-and-traceability.md]}
+    scoring: "a run hits iff the named root skill was invoked and every expect file was Read; a run violates iff any forbid file was Read"
+    pass_requires_all:
+      - "no clear per-case routing loss: no case with v66b 2/2 hits and v66f 0/2 hits"
+      - "no clear per-case eager-loading gain: no case with v66b 0/2 violations and v66f 2/2 violations"
+      - "aggregate hits: v66f hits >= v66b hits - 2 (38 runs per variant)"
+      - "aggregate violations: v66f violations <= v66b violations + 2"
+  selection:
+    corpus: "selection.development + selection.holdout, unchanged"
+    reps: 2
+    variants: [v66b, v66f]
+    pass_requires_all:
+      - "correct (admissible or correct-none) v66f >= v66b - 2 (32 runs per variant)"
+      - "false activations on negative scenarios v66f <= v66b + 1"
+  version_regression:
+    # Stochastic robustness evidence (16.11.1), not a deterministic language proof. The
+    # deterministic helper/preflight and no-self-adoption structure are hard repository tests.
+    runs: {T6-version-bound-stage-continuation-holdout: 4, T5-version-bound-workplan-holdout: 2, T4-version-bound-workplan: 2}
+    variants: [v66b, v66f]
+    strict_pass: "governing_stated_before_protocol_action_or_mutation true AND strict-rubric assessor PASS"
+    pass_requires_all:
+      - "strict passes v66f >= v66b - 1"
+      - "never-stated runs (no assistant text names the governing version) v66f <= v66b + 1"
+    report: "self-adoption / non-closure observations from assessor notes, and every failing run, with limitations"
+  authority_sentinels:
+    runs: {T2-tolerance-within-envelope: 2, T3-d2-owned-default: 2}
+    variant: v66f
+    pass: "every run assessor PASS AND hidden checks pass (collected hidden tests where the oracle has them, and every check_* script)"
+  burden_rule: "redesign.burden_rule, unchanged in dimension, panel (T1/T7/T8), runs (3 fresh paired, order-counterbalanced, v65 vs v66f), thresholds and correctness condition"
+  unversioned_no_lookup: "no remote_or_source_lookups and no versioning_owner_reads in any v66f run of T1, T7, T8"
+  isolation: "every run lists each SSDP skill exactly once and resolves every skill from the project install; no run errors"
+  on_failure: "stop Protocol 6.6 per workplan 16.11.5; no rewording, route, metric, threshold, weighting or prompt layer after the first final-candidate run"

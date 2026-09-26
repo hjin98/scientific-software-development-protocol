@@ -30,6 +30,17 @@ def jobs(scenarios: dict, layer: str, reps: int, variants: dict[str, Path], only
                 for variant in order:
                     run_id = f"{item['id']}-{variant}-r{rep}"
                     out.append((run_id, ["live", "--dist", str(variants[variant]), "--prompt", item["task"], "--max-turns", "3", "--mode", "select"]))
+    elif layer == "route":
+        probes = scenarios["final"]["route_probes"]
+        for index, item in enumerate(probes["cases"]):
+            if only and item["id"] not in only:
+                continue
+            prompt = probes["prompt"].format(root=item["root"], task=item["task"])
+            for rep in range(reps):
+                order = names if (index + rep) % 2 == 0 else names[::-1]
+                for variant in order:
+                    run_id = f"{item['id']}-{variant}-r{rep}"
+                    out.append((run_id, ["live", "--dist", str(variants[variant]), "--prompt", prompt, "--max-turns", str(probes["max_turns"]), "--mode", "select"]))
     else:
         items = [(s, split) for split in ("development", "holdout", "rework_holdout", "redesign_challenge") for s in scenarios["trajectories"].get(split, [])]
         items = [(s, split) for s, split in items if not only or s["id"] in only]
@@ -83,7 +94,7 @@ def summarize(out: Path, layer: str) -> dict:
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--summarize", action="store_true", help="aggregate existing runs instead of executing")
-    parser.add_argument("--layer", choices=("selection", "trajectory"), required=True)
+    parser.add_argument("--layer", choices=("selection", "route", "trajectory"), required=True)
     parser.add_argument("--variant", action="append", default=[], help="name=path/to/dist/skills")
     parser.add_argument("--reps", type=int, default=2)
     parser.add_argument("--out", type=Path, required=True)
@@ -92,7 +103,7 @@ def main() -> int:
     parser.add_argument("--only", action="append", default=[], help="restrict to these scenario ids")
     args = parser.parse_args()
     if args.summarize:
-        print(json.dumps(summarize(args.out, args.layer), indent=1, sort_keys=True))
+        print(json.dumps(summarize(args.out, "selection" if args.layer == "selection" else "trajectory"), indent=1, sort_keys=True))
         return 0
     variants = dict(v.split("=", 1) for v in args.variant)
     variants = {k: Path(v) for k, v in variants.items()}

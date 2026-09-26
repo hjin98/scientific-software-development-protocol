@@ -1,0 +1,354 @@
+# Protocol 6.6 final simplification: routing-preservation map (workplan section 16.11.3).
+#
+# Non-normative evidence coordination. Frozen from the redesigned semantic state
+# 47dc85de6dd6be8b0adfb1a66024cfdd5397f3d8 before any SKILL.md change of the final
+# simplification pass. The canonical route owners are the SKILL.md entrypoints and the
+# references they name; this file only records what the simplified entrypoints must keep.
+#
+# Structure (Lossless Representation: one detailed owner per concern, local deltas per skill):
+#   concerns: canonical target owner + positive/negative routing counterfactuals, shared by
+#             every skill that routes the concern.
+#   skills:   every direct reference/template route reachable from each consumed entrypoint
+#             at the basis (the generated entry contract included), with the basis trigger
+#             quoted, the discriminating predicate terms, the concern it realizes, any
+#             skill-local counterfactual delta, and its preservation disposition.
+#
+# Mechanical check (tests/test_protocol_66_final_simplification.py):
+#   * every basis route has a row; the consumed dist SKILL.md still links the same target;
+#   * some clause of the consumed entrypoint that links the target contains every `terms`
+#     entry after link markup is removed, so a route label can never stand in for its
+#     predicate (clause = one line, split at ";"; matching is case-insensitive and ignores
+#     `**` and backticks);
+#   * skill-level `gates`, `exclusions` and `authority` terms remain in the entrypoint;
+#   * no direct route is added or removed and the catalog frontmatter is byte-identical.
+# Structural equality of terms is necessary, not sufficient: materially equivalent trigger
+# semantics are reviewed against `basis_trigger`, and live route probes (scenarios.yaml
+# `final.route_probes`) exercise the major families.
+schema: ssdp66-routing-preservation/1
+basis: 47dc85de6dd6be8b0adfb1a66024cfdd5397f3d8
+dispositions:
+  PRESERVE: same canonical target; trigger/exclusion materially equivalent; terms kept
+  CONSOLIDATE: several basis clauses realized by one remaining clause whose predicate still discriminates every activation case and names the same owner chain (reason required)
+
+concerns:
+  kernel:
+    target: references/abstraction-and-concretization.md
+    positive: ["whether a proposed simplification delegates or changes an authority boundary", "how much evidence depth a low-consequence but irreversible change needs", "how to represent a lossy handoff without dropping a blocker", "SSDP self-development: editing the protocol's own sources"]
+    negative: ["first clean local defect under sufficient authority", "ordinary renaming inside one module"]
+  versioning:
+    target: references/protocol-versioning-and-compatibility.md
+    positive: ["workplan declares protocol_version 6.3.0 while 6.6.0 is loaded", "recover work from a historical recovery ref", "hygiene: retire artifacts whose protocol/candidate compatibility is supported"]
+    negative: ["unversioned task", "task bound to the loaded version (governing == loaded)"]
+  workflow:
+    target: references/workflow-and-workplans.md
+    positive: ["continue stage 2 of an accepted workplan", "write the D3->D4 handoff", "rework after a Review NO-PASS", "archive a completed workplan"]
+    negative: ["one-line local bug fix with no plan", "unrelated poem/email"]
+  evidence:
+    target: references/evidence-evolution-and-dependencies.md
+    positive: ["is a stale benchmark still applicable after the backend changed", "which evidence is invalidated by a changed definition"]
+    negative: ["run the existing unit test after a local fix"]
+  testing:
+    target: references/testing-and-validation.md
+    positive: ["prove a real restart path, not a mock, carries the acceptance claim", "choose a tolerance/metamorphic/differential oracle", "qualification of a production path"]
+    negative: ["run the fixture's existing test once"]
+  semantic_definition:
+    target: references/semantic-definition-and-traceability.md
+    positive: ["parameter family/instance/default binding from an imported paper", "imported theorem whose hypotheses must hold", "ambiguous specialized symbol used by the change"]
+    negative: ["ordinary engineering meaning (list, file, retry)", "first clean local defect"]
+  pem:
+    target: references/project-engineering-memory.md
+    positive: ["third replacement of a mature subsystem after recurring failures", "migration/revert/recovery", "memory-bound workplan", "audit: recurring failure family or notice"]
+    negative: ["first clean local defect", "unrelated task", "history exists but cannot change the decision"]
+  convergence:
+    target: references/convergence-and-cycle-economy.md
+    positive: ["same defect family recurring after wrappers/fallbacks", "review saturation", "escalate rigor or cognitive resources"]
+    negative: ["first occurrence of a local defect"]
+  long_horizon:
+    target: references/long-horizon-code-health.md
+    positive: ["Stabilization pass", "longitudinal structural/test risk", "maintenance audit (mandatory for the audit specialist)"]
+    negative: ["single local fix"]
+  architecture:
+    target: references/architecture-and-design.md
+    positive: ["fix requires moving state ownership between components", "D3 design work (mandatory for software-design)", "documenting D3", "audit ownership/complexity finding"]
+    negative: ["equivalent local D4 concretization"]
+  specification:
+    target: references/specification-and-implementation.md
+    positive: ["substantive D4 implementation (mandatory for software-implementation)", "D3 writing the D4 specification", "documenting D4"]
+    negative: ["D1/D2 reasoning with no D4 content"]
+  scientific_formulation:
+    target: references/scientific-formulation.md
+    positive: ["change alters which observable/estimand is reported", "D1 reasoning (mandatory for scientific-formulation)"]
+    negative: ["refactor preserving scientific meaning"]
+  numerical:
+    target: references/numerical-algorithm-design.md
+    positive: ["change alters discretization order, estimator, tolerance semantics, precision or RNG stream semantics", "D2 reasoning (mandatory for numerical-algorithm-design)"]
+    negative: ["tolerance question inside the accepted error envelope"]
+  scientific_software:
+    target: references/scientific-software.md
+    positive: ["cross-domain scientific/numerical evidence or oracle", "documenting scientific/numerical integration"]
+    negative: ["pure CLI flag"]
+  language:
+    target: references/language-profiles.md
+    positive: ["material Python/C++ language, runtime or build semantics (ABI, GIL, UB, packaging build)"]
+    negative: ["language-neutral logic fix"]
+  tool:
+    target: references/tool-assisted-engineering.md
+    positive: ["specialized relation such as data-flow, semantic references, property generation or analyzer evidence"]
+    negative: ["ordinary Read/Grep suffices; tool leaves are never root-routed"]
+  repository_intake:
+    target: references/repository-intake.md
+    positive: ["broad unfamiliar repository inspection / context economy"]
+    negative: ["one named file"]
+  debugging:
+    target: references/debugging-and-state-recovery.md
+    positive: ["non-obvious failure diagnosis or dirty state recovery"]
+    negative: ["failure already localized by the task"]
+  documentation:
+    target: references/documentation-and-evidence.md
+    positive: ["durable documentation/evidence record changes", "documentation work (mandatory for software-documentation)", "durable record vs disposable coordination material"]
+    negative: ["code-only fix with no documentation consequence"]
+  documentation_maintenance:
+    target: references/documentation-maintenance.md
+    positive: ["documentation work (mandatory for software-documentation)"]
+    negative: []
+  writing:
+    target: references/scientific-technical-writing.md
+    positive: ["human-facing scientific/technical paper, guide or explanation"]
+    negative: ["machine-only representation"]
+  release:
+    target: references/release-and-distribution.md
+    positive: ["build/publish a release or package", "tracked/generated/release artifacts"]
+    negative: ["unreleased local change"]
+  git:
+    target: references/git-and-version-control.md
+    positive: ["branch/ref deletion, history rewrite risk, churn/change-coupling analysis"]
+    negative: ["ordinary commit of the requested change"]
+  configuration:
+    target: references/configuration-and-policy.md
+    positive: ["configuration/policy surface or defaults precedence changes"]
+    negative: ["no configuration change"]
+  concurrency:
+    target: references/concurrency-and-orchestration.md
+    positive: ["threads/processes/async/orchestration semantics"]
+    negative: ["single-threaded local change"]
+  security:
+    target: references/security-and-trust-boundaries.md
+    positive: ["secrets, untrusted input, trust boundaries"]
+    negative: ["no trust boundary touched"]
+  performance:
+    target: references/performance-and-parallelism.md
+    positive: ["performance/scaling/resource/hardware tradeoff"]
+    negative: ["correctness-only change"]
+  storage:
+    target: references/storage-and-io.md
+    positive: ["storage format, I/O, cache/checkpoint/scratch ownership"]
+    negative: ["in-memory only change"]
+  change_plan_template:
+    target: templates/abstraction_concretization_change_plan_template.md
+    positive: ["material D1/D2 authority mutation"]
+    negative: ["local question inside accepted authority"]
+  implementation_workplan_template:
+    target: templates/implementation_workplan_template.md
+    positive: ["substantial executable D3->D4 handoff"]
+    negative: ["local design answer"]
+  scientific_paper_template:
+    target: templates/scientific_method_paper_template.md
+    positive: ["canonical D1 paper is useful"]
+    negative: ["D1 decision recorded in existing authority"]
+  numerical_paper_template:
+    target: templates/numerical_algorithmic_method_paper_template.md
+    positive: ["D2 method paper is useful"]
+    negative: ["in-envelope local tolerance"]
+
+# Routes realized by the generated entry contract (every skill). Terms must hold in every
+# consumed entrypoint because the build inlines the same block into each.
+entry_contract:
+  routes:
+  - target: references/protocol-versioning-and-compatibility.md
+    concern: versioning
+    basis_trigger: "Any other version governs until the task/workplan authority rebinds it; this package is not its source even if newer or compatible, so do not apply it: use an installed/local source of that version or its mapped immutable source ([versioning]), else report protocol non-closure."
+    terms: ["installed/local source", "immutable source", "non-closure"]
+    disposition: PRESERVE
+  - target: references/abstraction-and-concretization.md
+    concern: kernel
+    basis_trigger: "Pre-routing safety kernel ([universal kernel] owns it and the rest of the universal doctrine)"
+    terms: ["safety kernel"]
+    disposition: PRESERVE
+  # version-step semantics (16.10.1) that must survive any editorial compaction
+  version_semantics: ["protocol_version", "governs until", "rebinds", "newer or compatible", "non-closure", "recommend", "never adopt"]
+
+skills:
+  software-implementation:
+    gates: ["only triggered", "route when material"]
+    exclusions: ["first clean local defect", "loads none", "ordinary hyperlinks", "package membership", "not activation"]
+    authority: ["d4 executable concretization", "delegated machinery", "never change a d1/d2-owned", "d4 blocker", "serious challenge at earliest affected owner", "real semantic owner", "is not a pass", "green tests do not prove omitted workplan obligations"]
+    routes:
+      - {target: references/specification-and-implementation.md, concern: specification, basis_trigger: "Before substantive D4 implementation, read", terms: ["before substantive d4 implementation"], disposition: PRESERVE}
+      - {target: references/abstraction-and-concretization.md, concern: kernel, basis_trigger: "a materiality, authority/delegation, simplicity, proportional-rigor, verification/Challenge, representation or SSDP self-development question", terms: ["materiality", "authority/delegation", "simplicity", "proportional-rigor", "verification/challenge", "representation", "self-development"], disposition: CONSOLIDATE, reason: "the identical per-skill predicate moves into the generated entry-contract clause that already links the same kernel owner; one clause, same predicate, same owner, present in every consumed entrypoint"}
+      - {target: references/workflow-and-workplans.md, concern: workflow, basis_trigger: "governing workplan, stage/handoff/rework, working state, authority lifecycle or impact closure", terms: ["workplan", "handoff", "rework", "working state", "lifecycle", "impact closure"], disposition: PRESERVE}
+      - {target: references/evidence-evolution-and-dependencies.md, concern: evidence, basis_trigger: "evidence applicability/dependency/evolution", terms: ["evidence applicability", "dependency", "evolution"], disposition: PRESERVE}
+      - {target: references/testing-and-validation.md, concern: testing, basis_trigger: "executable acceptance/regression/integration/proxy-proof/oracle/qualification", terms: ["acceptance", "regression", "integration", "proxy-proof", "oracle", "qualification"], disposition: PRESERVE}
+      - {target: references/semantic-definition-and-traceability.md, concern: semantic_definition, basis_trigger: "a specialized scientific/numerical object, parameter/default binding, external result/import, formal claim, or material ambiguity used by the change", terms: ["specialized", "parameter/default binding", "external result", "formal claim", "ambiguity"], disposition: PRESERVE}
+      - {target: references/project-engineering-memory.md, concern: pem, basis_trigger: "project history can change the decision (mature rework/replacement, suspected recurrence, substantial optimization/scaling, migration/recovery/revert, memory-bound workplan)", terms: ["project history", "mature", "recurrence", "optimization/scaling", "migration/recovery/revert", "memory-bound"], disposition: PRESERVE}
+      - {target: references/architecture-and-design.md, concern: architecture, basis_trigger: "architecture/ownership/complexity/redesign question", terms: ["architecture", "ownership", "complexity", "redesign"], disposition: PRESERVE}
+      - {target: references/convergence-and-cycle-economy.md, concern: convergence, basis_trigger: "recurrence/simplification/rigor or cognitive-resource escalation", terms: ["recurrence", "simplification", "rigor", "cognitive-resource"], disposition: PRESERVE}
+      - {target: references/long-horizon-code-health.md, concern: long_horizon, basis_trigger: "long-horizon structural/test risk or Stabilization", terms: ["long-horizon", "stabilization"], disposition: PRESERVE}
+      - {target: references/protocol-versioning-and-compatibility.md, concern: versioning, basis_trigger: "protocol-version mismatch or historical recovery", terms: ["mismatch", "historical recovery"], disposition: PRESERVE}
+      - {target: references/language-profiles.md, concern: language, basis_trigger: "material executable language/runtime/build semantics -> ..., which dispatches to Python/C++ profiles", terms: ["language", "runtime", "build", "python/c++"], disposition: PRESERVE}
+      - {target: references/tool-assisted-engineering.md, concern: tool, basis_trigger: "specialized engineering relation -> ..., which owns analyzer/tool-leaf routing", terms: ["specialized engineering relation", "tool-leaf"], disposition: PRESERVE}
+      - {target: references/scientific-formulation.md, concern: scientific_formulation, basis_trigger: "the change can alter scientific meaning", terms: ["scientific meaning"], disposition: PRESERVE}
+      - {target: references/numerical-algorithm-design.md, concern: numerical, basis_trigger: "estimator/discretization/error/convergence/precision/stochastic semantics", terms: ["estimator", "discretization", "error", "convergence", "precision", "stochastic"], disposition: PRESERVE}
+      - {target: references/scientific-software.md, concern: scientific_software, basis_trigger: "cross-domain scientific evidence", terms: ["cross-domain scientific evidence"], disposition: PRESERVE}
+      - {target: references/repository-intake.md, concern: repository_intake, basis_trigger: "repository/context", terms: ["repository/context"], disposition: PRESERVE}
+      - {target: references/debugging-and-state-recovery.md, concern: debugging, basis_trigger: "debugging/recovery", terms: ["debugging/recovery"], disposition: PRESERVE}
+      - {target: references/documentation-and-evidence.md, concern: documentation, basis_trigger: "documentation", terms: ["documentation"], disposition: PRESERVE}
+      - {target: references/scientific-technical-writing.md, concern: writing, basis_trigger: "documentation", terms: ["documentation"], disposition: PRESERVE}
+      - {target: references/release-and-distribution.md, concern: release, basis_trigger: "release/package", terms: ["release/package"], disposition: PRESERVE}
+      - {target: references/git-and-version-control.md, concern: git, basis_trigger: "Git", terms: ["git"], disposition: PRESERVE}
+      - {target: references/configuration-and-policy.md, concern: configuration, basis_trigger: "configuration", terms: ["configuration"], disposition: PRESERVE}
+      - {target: references/concurrency-and-orchestration.md, concern: concurrency, basis_trigger: "concurrency", terms: ["concurrency"], disposition: PRESERVE}
+      - {target: references/security-and-trust-boundaries.md, concern: security, basis_trigger: "security", terms: ["security"], disposition: PRESERVE}
+      - {target: references/performance-and-parallelism.md, concern: performance, basis_trigger: "performance", terms: ["performance"], disposition: PRESERVE}
+      - {target: references/storage-and-io.md, concern: storage, basis_trigger: "storage/I/O", terms: ["storage/i/o"], disposition: PRESERVE}
+
+  software-design:
+    gates: ["only triggered", "route directly when material"]
+    exclusions: ["local design questions", "load none", "ordinary hyperlinks", "package membership", "not activation"]
+    authority: ["d3 software architecture", "do not absorb d1/d2", "delegate", "literal workplan compliance is insufficient", "too weak for the protected outcome", "serious challenge to d3", "serious challenge routed upstream", "priority changes investigation effort, not the pass threshold"]
+    routes:
+      - {target: references/architecture-and-design.md, concern: architecture, basis_trigger: "Before substantive D3 reasoning, read", terms: ["before substantive d3 reasoning"], disposition: PRESERVE}
+      - {target: references/abstraction-and-concretization.md, concern: kernel, basis_trigger: "a materiality, authority/delegation, simplicity, proportional-rigor, verification/Challenge, representation or SSDP self-development question", terms: ["materiality", "authority/delegation", "simplicity", "proportional-rigor", "verification/challenge", "representation", "self-development"], disposition: CONSOLIDATE, reason: "the identical per-skill predicate moves into the generated entry-contract clause that already links the same kernel owner; one clause, same predicate, same owner, present in every consumed entrypoint"}
+      - {target: references/workflow-and-workplans.md, concern: workflow, basis_trigger: "D3->D4 workplan, handoff, working state, authority lifecycle/rework/impact closure, implementation Review or optional independent review trajectories", terms: ["workplan", "handoff", "working state", "lifecycle", "rework", "impact closure", "implementation review", "independent review trajectories"], disposition: PRESERVE}
+      - {target: references/evidence-evolution-and-dependencies.md, concern: evidence, basis_trigger: "evidence applicability/dependency/evolution", terms: ["evidence applicability", "dependency", "evolution"], disposition: PRESERVE}
+      - {target: references/testing-and-validation.md, concern: testing, basis_trigger: "regression/integration/proxy-proof/oracle/qualification method", terms: ["regression", "integration", "proxy-proof", "oracle", "qualification"], disposition: PRESERVE}
+      - {target: references/semantic-definition-and-traceability.md, concern: semantic_definition, basis_trigger: "architecture-bearing formal semantics, a parameter/default binding, an external result/import, or a material definition ambiguity", terms: ["formal semantics", "parameter/default binding", "external result", "ambiguity"], disposition: PRESERVE}
+      - {target: references/project-engineering-memory.md, concern: pem, basis_trigger: "project history can change the decision (mature architecture rework, replacement/consolidation of mature machinery, suspected recurrence, substantial optimization/scaling, migration/recovery/revert, memory-bound workplan) ..., including the capability-transfer map for mature replacement", terms: ["project history", "mature", "replacement/consolidation", "recurrence", "optimization/scaling", "migration/recovery/revert", "memory-bound", "capability-transfer map"], disposition: PRESERVE}
+      - {target: references/convergence-and-cycle-economy.md, concern: convergence, basis_trigger: "recurrence/simplification/review saturation, rigor or cognitive-resource escalation", terms: ["recurrence", "simplification", "review saturation", "rigor", "cognitive-resource"], disposition: PRESERVE}
+      - {target: references/long-horizon-code-health.md, concern: long_horizon, basis_trigger: "longitudinal health/Stabilization", terms: ["longitudinal health", "stabilization"], disposition: PRESERVE}
+      - {target: references/protocol-versioning-and-compatibility.md, concern: versioning, basis_trigger: "protocol-version mismatch or historical recovery", terms: ["mismatch", "historical recovery"], disposition: PRESERVE}
+      - {target: references/scientific-formulation.md, concern: scientific_formulation, basis_trigger: "scientific meaning", terms: ["scientific meaning"], disposition: PRESERVE}
+      - {target: references/numerical-algorithm-design.md, concern: numerical, basis_trigger: "estimator/discretization/error/precision/stochastic meaning", terms: ["estimator", "discretization", "error", "precision", "stochastic"], disposition: PRESERVE}
+      - {target: references/scientific-software.md, concern: scientific_software, basis_trigger: "cross-domain scientific evidence", terms: ["cross-domain scientific evidence"], disposition: PRESERVE}
+      - {target: references/language-profiles.md, concern: language, basis_trigger: "material executable language/runtime/build semantics -> ..., which dispatches to Python/C++ profiles", terms: ["language", "runtime", "build", "python/c++"], disposition: PRESERVE}
+      - {target: references/tool-assisted-engineering.md, concern: tool, basis_trigger: "a specialized engineering relation where a tool may materially improve evidence -> ..., which owns analyzer/tool-leaf dispatch", terms: ["specialized engineering relation", "materially improve evidence", "tool-leaf"], disposition: PRESERVE}
+      - {target: references/repository-intake.md, concern: repository_intake, basis_trigger: "repository/context economy", terms: ["repository/context"], disposition: PRESERVE}
+      - {target: references/specification-and-implementation.md, concern: specification, basis_trigger: "D4 specification", terms: ["d4 specification"], disposition: PRESERVE}
+      - {target: references/documentation-and-evidence.md, concern: documentation, basis_trigger: "documentation", terms: ["documentation"], disposition: PRESERVE}
+      - {target: references/scientific-technical-writing.md, concern: writing, basis_trigger: "documentation", terms: ["documentation"], disposition: PRESERVE}
+      - {target: references/release-and-distribution.md, concern: release, basis_trigger: "release", terms: ["release"], disposition: PRESERVE}
+      - {target: references/configuration-and-policy.md, concern: configuration, basis_trigger: "configuration", terms: ["configuration"], disposition: PRESERVE}
+      - {target: references/concurrency-and-orchestration.md, concern: concurrency, basis_trigger: "orchestration", terms: ["orchestration"], disposition: PRESERVE}
+      - {target: references/security-and-trust-boundaries.md, concern: security, basis_trigger: "security", terms: ["security"], disposition: PRESERVE}
+      - {target: references/performance-and-parallelism.md, concern: performance, basis_trigger: "performance", terms: ["performance"], disposition: PRESERVE}
+      - {target: references/storage-and-io.md, concern: storage, basis_trigger: "storage/I/O", terms: ["storage/i/o"], disposition: PRESERVE}
+      - {target: templates/implementation_workplan_template.md, concern: implementation_workplan_template, basis_trigger: "For a substantial executable handoff use the", terms: ["substantial executable handoff"], disposition: PRESERVE}
+
+  scientific-formulation:
+    gates: ["only the concern whose predicate fires"]
+    exclusions: ["first clean local issue", "unrelated task", "loads none", "ordinary hyperlinks", "package membership", "not activation"]
+    authority: ["d1 scientific/mathematical meaning", "do not absorb d2", "serious challenge", "human", "evidence, not authority"]
+    routes:
+      - {target: references/scientific-formulation.md, concern: scientific_formulation, basis_trigger: "Before substantive D1 reasoning, read", terms: ["before substantive d1 reasoning"], disposition: PRESERVE}
+      - {target: references/abstraction-and-concretization.md, concern: kernel, basis_trigger: "a materiality, authority/delegation, simplicity, proportional-rigor, verification/Challenge, representation or SSDP self-development question", terms: ["materiality", "authority/delegation", "simplicity", "proportional-rigor", "verification/challenge", "representation", "self-development"], disposition: CONSOLIDATE, reason: "the identical per-skill predicate moves into the generated entry-contract clause that already links the same kernel owner; one clause, same predicate, same owner, present in every consumed entrypoint"}
+      - {target: references/workflow-and-workplans.md, concern: workflow, basis_trigger: "change plan, handoff, working state, acceptance state, authority lifecycle, invalidation or impact closure", terms: ["change plan", "handoff", "working state", "acceptance state", "lifecycle", "invalidation", "impact closure"], disposition: PRESERVE}
+      - {target: references/semantic-definition-and-traceability.md, concern: semantic_definition, basis_trigger: "a specialized symbol/quantity/relation, parameter family/instance/default binding, imported external result, formal claim/warrant, definition-dependency impact, or material ambiguity", terms: ["specialized", "parameter family", "default binding", "imported external result", "formal claim", "definition-dependency", "ambiguity"], disposition: PRESERVE}
+      - {target: references/evidence-evolution-and-dependencies.md, concern: evidence, basis_trigger: "evidence design/applicability/dependency/evolution", terms: ["evidence design", "applicability", "dependency", "evolution"], disposition: PRESERVE}
+      - {target: references/testing-and-validation.md, concern: testing, basis_trigger: "testing/oracle method only when required", terms: ["testing", "oracle", "only when required"], disposition: PRESERVE}
+      - {target: references/scientific-software.md, concern: scientific_software, basis_trigger: "for executable scientific evidence", terms: ["executable scientific evidence"], disposition: PRESERVE}
+      - {target: references/project-engineering-memory.md, concern: pem, basis_trigger: "project history can change the decision (substantial rework of mature D1 meaning, suspected recurrence, recovery/revert, memory-bound workplan)", terms: ["project history", "mature", "recurrence", "recovery/revert", "memory-bound"], disposition: PRESERVE}
+      - {target: references/convergence-and-cycle-economy.md, concern: convergence, basis_trigger: "rigor or cognitive-resource escalation", terms: ["rigor", "cognitive-resource"], disposition: PRESERVE}
+      - {target: references/protocol-versioning-and-compatibility.md, concern: versioning, basis_trigger: "protocol-version mismatch or historical recovery", terms: ["mismatch", "historical recovery"], disposition: PRESERVE}
+      - {target: references/scientific-technical-writing.md, concern: writing, basis_trigger: "human-facing scientific writing", terms: ["human-facing scientific writing"], disposition: PRESERVE}
+      - {target: references/documentation-and-evidence.md, concern: documentation, basis_trigger: "document/evidence communication when material", terms: ["communication"], disposition: PRESERVE}
+      - {target: templates/abstraction_concretization_change_plan_template.md, concern: change_plan_template, basis_trigger: "For a material D1 authority mutation use the", terms: ["material d1 authority mutation"], disposition: PRESERVE}
+      - {target: templates/scientific_method_paper_template.md, concern: scientific_paper_template, basis_trigger: "when a canonical D1 paper is useful", terms: ["canonical d1 paper", "useful"], disposition: PRESERVE}
+
+  numerical-algorithm-design:
+    gates: ["only triggered"]
+    exclusions: ["in-envelope local tolerance", "loads none", "ordinary hyperlinks", "package membership", "not activation"]
+    authority: ["d2 algorithm and numerical-method semantics", "does not own scientific meaning", "constrains d3", "never from observing a failing backend", "serious challenge"]
+    routes:
+      - {target: references/numerical-algorithm-design.md, concern: numerical, basis_trigger: "Before substantive D2 reasoning, read", terms: ["before substantive d2 reasoning"], disposition: PRESERVE}
+      - {target: references/abstraction-and-concretization.md, concern: kernel, basis_trigger: "a materiality, authority/delegation, simplicity, proportional-rigor, verification/Challenge, representation or SSDP self-development question", terms: ["materiality", "authority/delegation", "simplicity", "proportional-rigor", "verification/challenge", "representation", "self-development"], disposition: CONSOLIDATE, reason: "the identical per-skill predicate moves into the generated entry-contract clause that already links the same kernel owner; one clause, same predicate, same owner, present in every consumed entrypoint"}
+      - {target: references/workflow-and-workplans.md, concern: workflow, basis_trigger: "change plan, D1->D2/D2->D3 handoff, working state, authority lifecycle/invalidation/impact closure", terms: ["change plan", "handoff", "working state", "lifecycle", "invalidation", "impact closure"], disposition: PRESERVE}
+      - {target: references/semantic-definition-and-traceability.md, concern: semantic_definition, basis_trigger: "a specialized operator/estimator/recurrence/stochastic object, parameter family/instance/default binding, imported theorem/result with hypotheses, formal claim/warrant, or definition-dependency impact", terms: ["specialized", "parameter family", "default binding", "imported theorem", "hypotheses", "formal claim", "definition-dependency"], disposition: PRESERVE}
+      - {target: references/evidence-evolution-and-dependencies.md, concern: evidence, basis_trigger: "evidence applicability/dependency/evolution", terms: ["evidence applicability", "dependency", "evolution"], disposition: PRESERVE}
+      - {target: references/testing-and-validation.md, concern: testing, basis_trigger: "numerical oracle/tolerance/differential/metamorphic/qualification method", terms: ["oracle", "tolerance", "differential", "metamorphic", "qualification"], disposition: PRESERVE}
+      - {target: references/scientific-software.md, concern: scientific_software, basis_trigger: "when cross-domain scientific evidence is material", terms: ["cross-domain scientific evidence"], disposition: PRESERVE}
+      - {target: references/project-engineering-memory.md, concern: pem, basis_trigger: "project history can change the decision (mature method rework, substantial optimization/scaling, suspected recurrence, recovery/revert, memory-bound workplan)", terms: ["project history", "mature", "optimization/scaling", "recurrence", "recovery/revert", "memory-bound"], disposition: PRESERVE}
+      - {target: references/convergence-and-cycle-economy.md, concern: convergence, basis_trigger: "recurrence, rigor or cognitive-resource escalation", terms: ["recurrence", "rigor", "cognitive-resource"], disposition: PRESERVE}
+      - {target: references/performance-and-parallelism.md, concern: performance, basis_trigger: "scaling/resource/hardware tradeoff", terms: ["scaling", "resource", "hardware"], disposition: PRESERVE}
+      - {target: references/protocol-versioning-and-compatibility.md, concern: versioning, basis_trigger: "protocol-version mismatch or historical recovery", terms: ["mismatch", "historical recovery"], disposition: PRESERVE}
+      - {target: references/scientific-technical-writing.md, concern: writing, basis_trigger: "human-facing D2 paper", terms: ["human-facing d2 paper"], disposition: PRESERVE}
+      - {target: templates/abstraction_concretization_change_plan_template.md, concern: change_plan_template, basis_trigger: "For material D2 authority mutation use the", terms: ["material d2 authority mutation"], disposition: PRESERVE}
+      - {target: templates/numerical_algorithmic_method_paper_template.md, concern: numerical_paper_template, basis_trigger: "use the [Numerical and Algorithmic Method Paper template] when useful", terms: ["useful"], disposition: PRESERVE}
+
+  software-documentation:
+    gates: ["actually being represented"]
+    exclusions: ["ordinary hyperlinks", "navigation", "not activation", "decision predicate"]
+    authority: ["fifth authority domain", "cannot self-approve", "regenerate", "documentation repair", "d1 question", "d2 question", "serious challenge", "do not hand-edit generated"]
+    routes:
+      - {target: references/documentation-maintenance.md, concern: documentation_maintenance, basis_trigger: "Before substantive documentation work read", terms: ["before substantive documentation work"], disposition: PRESERVE}
+      - {target: references/documentation-and-evidence.md, concern: documentation, basis_trigger: "Before substantive documentation work read", terms: ["before substantive documentation work"], disposition: PRESERVE}
+      - {target: references/scientific-technical-writing.md, concern: writing, basis_trigger: "For human-facing scientific/technical material, read", terms: ["human-facing"], disposition: PRESERVE}
+      - {target: references/abstraction-and-concretization.md, concern: kernel, basis_trigger: "a materiality, authority/delegation, simplicity, proportional-rigor, verification/Challenge, representation or SSDP self-development question", terms: ["materiality", "authority/delegation", "simplicity", "proportional-rigor", "verification/challenge", "representation", "self-development"], disposition: CONSOLIDATE, reason: "the identical per-skill predicate moves into the generated entry-contract clause that already links the same kernel owner; one clause, same predicate, same owner, present in every consumed entrypoint"}
+      - {target: references/workflow-and-workplans.md, concern: workflow, basis_trigger: "workflow/lifecycle", terms: ["workflow/lifecycle"], disposition: PRESERVE}
+      - {target: references/evidence-evolution-and-dependencies.md, concern: evidence, basis_trigger: "evidence/acceptance", terms: ["evidence/acceptance"], disposition: PRESERVE}
+      - {target: references/testing-and-validation.md, concern: testing, basis_trigger: "when testing method matters", terms: ["testing method"], disposition: PRESERVE}
+      - {target: references/project-engineering-memory.md, concern: pem, basis_trigger: "project engineering memory reconciliation/representation when a material existing lesson, notice, or closeout update is in scope", terms: ["project engineering memory", "lesson", "notice", "closeout"], disposition: PRESERVE}
+      - {target: references/protocol-versioning-and-compatibility.md, concern: versioning, basis_trigger: "version/history", terms: ["version/history"], disposition: PRESERVE}
+      - {target: references/architecture-and-design.md, concern: architecture, basis_trigger: "D3", terms: ["d3"], disposition: PRESERVE}
+      - {target: references/specification-and-implementation.md, concern: specification, basis_trigger: "D4", terms: ["d4"], disposition: PRESERVE}
+      - {target: references/scientific-software.md, concern: scientific_software, basis_trigger: "scientific/numerical integration", terms: ["scientific/numerical integration"], disposition: PRESERVE}
+      - {target: references/security-and-trust-boundaries.md, concern: security, basis_trigger: "security/trust", terms: ["security/trust"], disposition: PRESERVE}
+      - {target: references/performance-and-parallelism.md, concern: performance, basis_trigger: "performance/parallelism", terms: ["performance/parallelism"], disposition: PRESERVE}
+      - {target: references/storage-and-io.md, concern: storage, basis_trigger: "storage/I/O", terms: ["storage/i/o"], disposition: PRESERVE}
+      - {target: references/release-and-distribution.md, concern: release, basis_trigger: "release/distribution", terms: ["release/distribution"], disposition: PRESERVE}
+
+  software-maintenance-audit:
+    gates: ["only triggered"]
+    exclusions: ["ordinary hyperlinks", "package membership", "not activation"]
+    authority: ["non-authoritative", "metrics are sensors, not verdicts", "software-implementation", "software-design", "route upstream", "software-documentation", "repository-hygiene", "watch", "do not redesign or broadly refactor", "admission threshold"]
+    routes:
+      - {target: references/long-horizon-code-health.md, concern: long_horizon, basis_trigger: "Before substantive audit reasoning read", terms: ["before substantive audit reasoning"], disposition: PRESERVE}
+      - {target: references/abstraction-and-concretization.md, concern: kernel, basis_trigger: "a materiality, authority/delegation, simplicity, proportional-rigor, verification/Challenge, representation or SSDP self-development question", terms: ["materiality", "authority/delegation", "simplicity", "proportional-rigor", "verification/challenge", "representation", "self-development"], disposition: CONSOLIDATE, reason: "the identical per-skill predicate moves into the generated entry-contract clause that already links the same kernel owner; one clause, same predicate, same owner, present in every consumed entrypoint"}
+      - {target: references/architecture-and-design.md, concern: architecture, basis_trigger: "architecture/ownership/complexity", terms: ["architecture/ownership/complexity"], disposition: PRESERVE}
+      - {target: references/testing-and-validation.md, concern: testing, basis_trigger: "testing/oracle strength", terms: ["testing/oracle strength"], disposition: PRESERVE}
+      - {target: references/evidence-evolution-and-dependencies.md, concern: evidence, basis_trigger: "evidence staleness/dependency/history", terms: ["evidence staleness", "dependency"], disposition: PRESERVE}
+      - {target: references/project-engineering-memory.md, concern: pem, basis_trigger: "materially recurring failure, demonstrated reusable success, preservation capability, discovery, or current notice whose project history may improve later decisions", terms: ["recurring failure", "reusable success", "preservation capability", "discovery", "notice", "project history"], disposition: PRESERVE}
+      - {target: references/workflow-and-workplans.md, concern: workflow, basis_trigger: "lifecycle/rework", terms: ["lifecycle/rework"], disposition: PRESERVE}
+      - {target: references/git-and-version-control.md, concern: git, basis_trigger: "history/churn/change coupling", terms: ["churn", "change coupling"], disposition: PRESERVE}
+      - {target: references/repository-intake.md, concern: repository_intake, basis_trigger: "repository inspection/context economy", terms: ["repository inspection", "context economy"], disposition: PRESERVE}
+      - {target: references/tool-assisted-engineering.md, concern: tool, basis_trigger: "specialized analyzer relation", terms: ["analyzer relation"], disposition: PRESERVE}
+      - {target: references/convergence-and-cycle-economy.md, concern: convergence, basis_trigger: "recurrence/family/revision economy", terms: ["recurrence", "family", "revision economy"], disposition: PRESERVE}
+      - {target: references/documentation-and-evidence.md, concern: documentation, basis_trigger: "documentation coherence", terms: ["documentation coherence"], disposition: PRESERVE}
+      - {target: references/scientific-software.md, concern: scientific_software, basis_trigger: "scientific/numerical correctness/oracles", terms: ["scientific/numerical correctness"], disposition: PRESERVE}
+      - {target: references/protocol-versioning-and-compatibility.md, concern: versioning, basis_trigger: "version-specific history", terms: ["version-specific history"], disposition: PRESERVE}
+
+  repository-hygiene:
+    gates: ["only triggered"]
+    exclusions: ["ordinary hyperlinks", "package membership", "not activation"]
+    authority: ["delete only with positive proof", "retain and report", "never delete/force-move", "rewrite history", "force-push", "deprecated", "not disposable", "a paused plan is not complete", "local and remote deletion are separate"]
+    routes:
+      - {target: references/abstraction-and-concretization.md, concern: kernel, basis_trigger: "a materiality, authority/delegation, simplicity, proportional-rigor, verification/Challenge, representation or SSDP self-development question", terms: ["materiality", "authority/delegation", "simplicity", "proportional-rigor", "verification/challenge", "representation", "self-development"], disposition: CONSOLIDATE, reason: "the identical per-skill predicate moves into the generated entry-contract clause that already links the same kernel owner; one clause, same predicate, same owner, present in every consumed entrypoint"}
+      - {target: references/git-and-version-control.md, concern: git, basis_trigger: "branch/ref deletion or material Git operations", terms: ["branch/ref deletion", "git operations"], disposition: PRESERVE}
+      - {target: references/workflow-and-workplans.md, concern: workflow, basis_trigger: "workplan archive/lifecycle closure", terms: ["workplan archive", "lifecycle closure"], disposition: PRESERVE}
+      - {target: references/repository-intake.md, concern: repository_intake, basis_trigger: "broad inspection/context economy", terms: ["broad inspection", "context economy"], disposition: PRESERVE}
+      - {target: references/project-engineering-memory.md, concern: pem, basis_trigger: "cleanup, archive, rename, partition, or evidence-retention operation that can affect project-memory discovery, canonical family identity, immutable evidence routes, accepted-base/overlay state, or a declared PEM partition/index -> ... plus the applicable Git/evidence owner", terms: ["project-memory discovery", "family identity", "immutable evidence routes", "accepted-base/overlay", "partition/index", "git/evidence owner"], disposition: PRESERVE}
+      - {target: references/testing-and-validation.md, concern: testing, basis_trigger: "cleanup affecting executable evidence", terms: ["executable evidence"], disposition: PRESERVE}
+      - {target: references/protocol-versioning-and-compatibility.md, concern: versioning, basis_trigger: "protocol/candidate compatibility", terms: ["protocol/candidate compatibility"], disposition: PRESERVE}
+      - {target: references/security-and-trust-boundaries.md, concern: security, basis_trigger: "secrets/trust", terms: ["secrets/trust"], disposition: PRESERVE}
+      - {target: references/storage-and-io.md, concern: storage, basis_trigger: "cache/checkpoint/scratch ownership", terms: ["cache/checkpoint/scratch"], disposition: PRESERVE}
+      - {target: references/release-and-distribution.md, concern: release, basis_trigger: "tracked/generated/release artifacts", terms: ["tracked/generated/release artifacts"], disposition: PRESERVE}
+      - {target: references/documentation-and-evidence.md, concern: documentation, basis_trigger: "durable record vs disposable coordination material", terms: ["durable record", "disposable coordination"], disposition: PRESERVE}
+
+# Direct routes that must never appear in a consumed entrypoint (eager leaves / schema / prompts).
+forbidden_direct_routes:
+  - references/project-engineering-memory-schema.md
+  - references/development-workflow-prompts.md
+  - references/python-engineering.md
+  - references/cpp-engineering.md
+  - references/tool-serena.md
+  - references/tool-semgrep.md
+  - references/tool-hypothesis.md
+  - references/tool-codeql.md

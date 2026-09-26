@@ -258,15 +258,25 @@ SSDP_SKILLS = {name for name, _ in SKILLS}
 #                workplan, or a repository-wide Grep/recursive shell search); 0 if never seen.
 #   protocol   - after knowable: any read/search/shell touching installed SSDP material or a
 #                further SSDP Skill invocation. Exempt: the single entry Skill invocation that
-#                loads the entry contract, and reads of the versioning owner/version helper,
-#                which are the version decision itself.
+#                loads the entry contract, and calls whose every installed-SSDP path is a
+#                version-identity file (PROTOCOL_VERSION, protocol-manifest.json, the
+#                versioning owner, the version helper): workplan 16.11.1 item 7 makes those
+#                reads part of the version decision itself. Frozen for the final
+#                simplification before any run of it; a call that also touches any other
+#                SSDP file is still protocol action.
 #   mutation   - Edit/Write/NotebookEdit/MultiEdit or a mutating shell command, anywhere.
 BASH_MUTATION_RE = re.compile(
     r"\bsed\s+-i|\btee\b|(?<![0-9&])>>?\s*(?!&|/dev/null)[\w./~\"'$-]|\b(?:mv|rm|cp|touch|mkdir)\s"
     r"|git\s+(?:add|commit|apply|am|checkout|reset|restore|mv|rm|stash|merge|rebase)\b"
     r"|\.write_text\(|\.write\(|open\([^)]*[\"'][wa]")
 KNOWABLE_SEARCH_RE = re.compile(r"grep\s+-\w*[rR]|\brg\s|git\s+grep")
-VERSION_DECISION_RE = re.compile(r"protocol-versioning-and-compatibility|version_preflight")
+SSDP_PATH_RE = re.compile(r"\.claude/skills/[^\s\"'\\;|&)]*")
+VERSION_IDENTITY_RE = re.compile(r"(?:PROTOCOL_VERSION|protocol-manifest\.json|protocol-versioning-and-compatibility(?:\.md)?|version_preflight(?:\.py)?)$")
+
+
+def version_decision_only(raw: str) -> bool:
+    paths = SSDP_PATH_RE.findall(raw)
+    return bool(paths) and all(VERSION_IDENTITY_RE.search(path) for path in paths)
 
 
 def _shell(raw: str) -> str:
@@ -303,7 +313,7 @@ def ordering_events(reduced: list[dict]) -> dict:
             if name in SSDP_SKILLS:
                 protocol = entry_skill_seen
                 entry_skill_seen = True
-        elif ".claude/skills/" in raw and not VERSION_DECISION_RE.search(raw):
+        elif ".claude/skills/" in raw and not version_decision_only(raw):
             protocol = True
         if protocol and knowable is not None and i > knowable and first_protocol is None:
             first_protocol, protocol_detail = i, raw[:160]
