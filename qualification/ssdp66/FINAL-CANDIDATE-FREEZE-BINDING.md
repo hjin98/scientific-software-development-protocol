@@ -10,7 +10,10 @@ review_state: NOT_RUN
 stakeholder_ratification: NOT_REQUESTED
 public_source_ref: UNAVAILABLE
 recovery_ref: UNAVAILABLE
-final_acceptance: PENDING_NORMAL_PR_CI
+final_acceptance: PASS
+binding_descendant: 0dcec549e8fbc1628f03da04228eaced7f21bcde
+binding_workflow: 36253556289
+draft_pr: 34
 ---
 
 # Protocol 6.6 Final Candidate Freeze Binding
@@ -30,4 +33,4 @@ Entering lifecycle state:
 - public source: `UNAVAILABLE`;
 - recovery: `UNAVAILABLE`.
 
-Final live qualification is PASS after the evidence-applicability correction documented in `FINAL-SIMPLIFICATION-EVIDENCE-CORRECTION.md`. Normal assembled repository/package/profile/Core CI remains required before the independent-Review handoff becomes ready.
+Final live qualification is PASS after the evidence-applicability correction documented in `FINAL-SIMPLIFICATION-EVIDENCE-CORRECTION.md`. Normal assembled repository/package/profile/Core CI passed in workflow `36253556289` on binding descendant `0dcec549e8fbc1628f03da04228eaced7f21bcde`. The candidate is ready for fresh independent assembled-candidate Review.

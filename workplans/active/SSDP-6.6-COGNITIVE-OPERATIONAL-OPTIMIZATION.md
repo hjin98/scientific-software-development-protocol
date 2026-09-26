@@ -3,7 +3,7 @@ kind: protocol-minor-revision-workplan
 workplan_id: SSDP-6.6-COGNITIVE-OPERATIONAL-OPTIMIZATION
 protocol_version: 6.5.0
 target_protocol_version: 6.6.0
-status: candidate-frozen-final-acceptance-pending
+status: independent-review-ready
 created_date: 2026-09-26
 reviewed_date: 2026-09-26
 workplan_review_state: PASS_NONINDEPENDENT_R5_FINAL_D3_SIMPLIFICATION
@@ -11,7 +11,7 @@ implementation_review_state: PASS_NONINDEPENDENT_R5_FINAL_SIMPLIFICATION
 implementation_reviewed_date: 2026-09-26
 implementation_review_basis: 43cf4764e5077fbe5c32873918930204ac081694
 semantic_candidate: 22f4bdba53795da3a6f13f162529f3a843fc37ae
-final_acceptance_state: PENDING_NORMAL_PR_CI
+final_acceptance_state: PASS_NORMAL_PR_CI_36253556289
 d3_reopen_state: ACCEPTED_FINAL_SIMPLIFICATION_REVISION
 d3_reopen_decision_date: 2026-09-26
 d3_reopen_basis: 8f4b104b3381a32805b990024cf58906d137c552
@@ -972,3 +972,14 @@ The semantic candidate is now frozen as:
 `22f4bdba53795da3a6f13f162529f3a843fc37ae`
 
 Do not substitute later lifecycle/evidence descendants for that Review target. The only remaining pre-Review implementation obligation is normal assembled repository/package/profile/Core acceptance on this exact semantic state plus non-semantic lifecycle/evidence descendants. If that passes, transition directly to the fresh independent assembled-candidate Review required by Stage H. No further semantic wording/routing/burden optimization is authorized before that Review.
+
+
+### 16.13 Final assembled acceptance and Stage-H handoff
+
+Normal PR workflow `36253556289` passed on lifecycle/evidence descendant `0dcec549e8fbc1628f03da04228eaced7f21bcde`, which binds immutable semantic candidate `22f4bdba53795da3a6f13f162529f3a843fc37ae` without changing version-intrinsic source or generated package semantics.
+
+The workflow passed release-state validation, PEM validation, full repository regression, canonical package build, independent package validation, committed-dist parity, whitespace, Protocol snapshot parity and Orchestrator Core acceptance.
+
+Implementation is closed for this candidate. The next governed action is one genuinely fresh independent assembled-candidate Review of exact `22f4bdba53795da3a6f13f162529f3a843fc37ae`. Later branch heads are lifecycle/evidence descendants only and must not be substituted for the semantic Review target.
+
+A PASS from that fresh Review makes the candidate technically eligible for explicit stakeholder ratification only. It does not itself ratify, publish public fallback/recovery, change accepted-current, merge the draft PR, or authorize Protocol 7 D4.

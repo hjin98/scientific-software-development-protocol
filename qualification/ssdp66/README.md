@@ -13,3 +13,4 @@ Non-normative evidence for the Protocol 6.6 cognitive/operational optimization c
 | `eval/` | removable harness (`harness.py`, `run_matrix.py`), frozen scenarios, fixtures, hidden oracles, rubrics, and reduced run records |
 | `FINAL-SIMPLIFICATION-EVIDENCE-CORRECTION.md` | post-Review correction of the non-discriminating selection differential and designed `error_max_turns` termination classification; no semantic mutation or rerun |
 | `FINAL-CANDIDATE-FREEZE-BINDING.md` | immutable Protocol 6.6 semantic candidate binding and entering Review/ratification/publication lifecycle state |
+| `INDEPENDENT-REVIEW-HANDOFF-PROTOCOL-6.6.md` | fresh assembled-candidate Review entrypoint for immutable semantic candidate `22f4bdba53795da3a6f13f162529f3a843fc37ae` after final live qualification and normal PR CI |

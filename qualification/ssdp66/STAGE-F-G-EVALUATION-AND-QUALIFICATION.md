@@ -26,18 +26,20 @@ Evidence coordination under the [Protocol 6.6 Evaluation and Qualification Contr
 
 ```text
 SERIOUS CHALLENGE: RESOLVED AT D3 CYCLE LEVEL (workplan 16.10.1) - compatibility vs adoption
-FINAL SIMPLIFICATION (workplan 16.11) on 22f4bdb, rule frozen at 9b65f8d: FROZEN GATE NOT MET
+FINAL SIMPLIFICATION semantic candidate 22f4bdb: QUALIFIED after evidence-applicability correction
   routing-preservation map (122 routes, structural): MET
   route probes (19 cases, basis vs candidate): MET - 35/38 vs 37/38 hits, 0 vs 0 violations, no clear loss
+  selection-visible interface: byte-identical; fresh 28/32 vs 25/32 differential retained as non-discriminating stochastic observation
   version robustness (T6x4, T5x2, T4x2): MET - strict pass 5/8 both, never-stated 1/8 both, 0 self-adoption
   authority sentinels T2/T3: MET - 4/4 assessor PASS with hidden checks
   criterion 4 burden rule: MET - panel ratio 0.505; T1 and T8 0.844 with non-overlapping ranges
-  selection count: NOT MET - 25/32 vs 28/32 (rule: >= 26); catalog byte-identical, see 10.8
-  run-error hygiene: NOT MET as computed - 49 selection runs end at the designed 3-turn cap
-BLOCKER: stakeholder/Review decision on the two selection-sensor items (section 10.8); not self-adjudicated
+  run-error hygiene: MET after evidence correction - selection error_max_turns is designed bounded termination; genuine errors none
+NORMAL PR ASSEMBLED ACCEPTANCE: PASS - workflow 36253556289 on binding descendant 0dcec549e8fbc1628f03da04228eaced7f21bcde
+IMPLEMENTATION BLOCKERS: NONE KNOWN
 NEW CORRECTNESS REGRESSION vs 6.5 ON MATCHED CASES: none observed
-READY FOR FRESH INDEPENDENT REVIEW: NO (pending the decision above)
-CANDIDATE FREEZE / PUBLICATION / RATIFICATION / CUTOVER: NOT PERFORMED (Stage H)
+READY FOR FRESH INDEPENDENT REVIEW: YES
+CANDIDATE FREEZE: 22f4bdba53795da3a6f13f162529f3a843fc37ae
+PUBLICATION / RATIFICATION / RECOVERY / ACCEPTED-CURRENT CUTOVER: NOT PERFORMED (Stage H)
 ```
 
 Sections 1-9 record the original Stage F/G evidence on `3fac7d1`; they are retained, not rewritten. Section 10.7 carries the D3-reopen outcome; `D3-REOPEN-QUALIFICATION-FREEZE.md` corrects every earlier hidden-oracle claim (the hidden tests were never collected before `6c76ef1`). The implementation Review (NO-PASS R1) rejected two of their conclusions, and section 10 carries the current rework state. Where sections 1-9 conflict with section 10 or with the corrections below, the later text governs. Section 10.3 records the failed first attempt; sections 10.5-10.6 carry the valid live confirmation and its stop disposition.
@@ -318,3 +320,24 @@ Implementation Review of branch head `43cf4764e5077fbe5c32873918930204ac081694` 
 - **No rerun-until-pass:** the corrected final summary is derived from the same committed raw traces. No route, prompt, threshold, burden metric, weighting, or candidate source changed.
 
 Corrected final gate result on semantic candidate `22f4bdba53795da3a6f13f162529f3a843fc37ae`: **PASS** for routing/correctness and criterion 4. The candidate itself remains unchanged. Final repository/package/profile/Core assembled acceptance is still required on the candidate plus lifecycle/evidence descendant before fresh independent Review.
+
+
+### 10.10 Final assembled acceptance and Review readiness
+
+The immutable semantic candidate remains `22f4bdba53795da3a6f13f162529f3a843fc37ae`. Evidence/lifecycle descendant `0dcec549e8fbc1628f03da04228eaced7f21bcde` changes no version-intrinsic source or generated skill package relative to that candidate; it binds the candidate in `PROTOCOL-RELEASE-STATE.yaml`, applies the evidence-owner correction in section 10.9, and records freeze state.
+
+Draft PR #34 triggered normal workflow `36253556289` on exact descendant `0dcec549e8fbc1628f03da04228eaced7f21bcde`. Both jobs passed:
+
+- repository release-state validation;
+- Project Engineering Memory validation;
+- complete protocol regression;
+- canonical package build;
+- independent generated-package validation;
+- committed-distribution parity;
+- whitespace;
+- packaged Protocol snapshot parity;
+- Orchestrator Core acceptance.
+
+No implementation blocker or active Serious Challenge remains. Protocol 6.6 is ready for a genuinely fresh independent assembled-candidate Review of exact semantic candidate `22f4bdba53795da3a6f13f162529f3a843fc37ae` against accepted Protocol 6.5 source `7f7b5e24858e813e45ace867a7f8ea5180f43bf0`.
+
+This readiness does not constitute the independent Review, stakeholder ratification, public-source publication, recovery publication, merge, or accepted-current cutover.
