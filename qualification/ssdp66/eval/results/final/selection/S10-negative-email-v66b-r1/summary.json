@@ -1,0 +1,33 @@
+{
+  "duration_ms": 5265,
+  "entry_and_burden": {
+    "first_mutation_detail": null,
+    "first_mutation_index": null,
+    "first_protocol_action_detail": null,
+    "first_protocol_action_index": null,
+    "governing_knowable_index": null,
+    "governing_stated_before_mutation": null,
+    "governing_stated_before_protocol_action_or_mutation": null,
+    "governing_stated_index": null,
+    "governing_version": null,
+    "observed_active_ssdp_bytes": 0,
+    "protocol_file_reads": 0,
+    "remote_or_source_lookups": [],
+    "ssdp_entrypoint_bytes": 0,
+    "ssdp_reference_read_bytes": 0,
+    "versioning_owner_reads": 0
+  },
+  "final": "Subject: Leaking Kitchen Faucet \u2013 Repair Request\n\nHi [Landlord's Name],\n\nI hope you're doing well. I wanted to let you know that the kitchen faucet in my unit has developed a leak. It's not an emergency, but I'd appreciate it if a repair could be scheduled sometime soon to prevent any further issues.\n\nPlease let me know what times would work for a plumber to stop by, or if you need any additional information from me.\n\nThank you for your help!\n\nBest regards,\n[Your Name]\n[Unit/Address, if needed]\n\nWant me to fill in any of the placeholders or adjust the tone?",
+  "input_tokens_total": 34908,
+  "is_error": false,
+  "models": [
+    "claude-sonnet-5"
+  ],
+  "num_turns": 1,
+  "output_tokens": 206,
+  "protocol_read_bytes_on_disk": 0,
+  "protocol_reads": [],
+  "skills_invoked": [],
+  "total_cost_usd": 0.0435302,
+  "wall_s": 6.2
+}

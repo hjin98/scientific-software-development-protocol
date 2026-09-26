@@ -1,0 +1,46 @@
+{
+  "duration_ms": 31905,
+  "entry_and_burden": {
+    "first_mutation_detail": "{\"file_path\": \"/tmp/ssdp66-enkdxiaz/project/tabular/header.py\", \"content\": \"def read_header(path: str) -> list[str]:\\n    with open(path, encoding=\\\"utf-8\\\") as",
+    "first_mutation_index": 8,
+    "first_protocol_action_detail": null,
+    "first_protocol_action_index": null,
+    "governing_knowable_index": 2,
+    "governing_stated_before_mutation": false,
+    "governing_stated_before_protocol_action_or_mutation": false,
+    "governing_stated_index": null,
+    "governing_version": "6.3.0",
+    "observed_active_ssdp_bytes": 7057,
+    "protocol_file_reads": 0,
+    "remote_or_source_lookups": [],
+    "ssdp_entrypoint_bytes": 7057,
+    "ssdp_reference_read_bytes": 0,
+    "versioning_owner_reads": 0
+  },
+  "final": "All tests pass, including the pre-existing `test_rows.py` regression.\n\n**Implementation:** Added `tabular/header.py` with `read_header(path)` \u2014 reads the first line, splits on `,`, strips whitespace per name, raises `ValueError` on an empty file or duplicate names. Added `tests/test_header.py` covering normal headers, whitespace stripping, empty files, and duplicates (all acceptance criteria from WP-CSV-HEADER).\n\n**Semantic owner:** D4 concretization only \u2014 no D1/D2/D3 contract touched; mirrors the existing `tabular/rows.py` style (plain function, `str` path, stdlib-only).\n\n**Checks executed:** full `unittest discover` \u2014 5/5 pass, no regression to `test_rows.py`.\n\nNo blockers or Challenges.",
+  "input_tokens_total": 361932,
+  "is_error": false,
+  "models": [
+    "claude-sonnet-5"
+  ],
+  "num_turns": 12,
+  "oracle": {
+    "hidden_collected": true,
+    "tests_pass": true,
+    "tests_tail": [
+      "OK"
+    ]
+  },
+  "output_tokens": 1949,
+  "protocol_read_bytes_on_disk": 0,
+  "protocol_reads": [],
+  "skills_invoked": [
+    "software-implementation"
+  ],
+  "total_cost_usd": 0.15438100000000002,
+  "untracked": [
+    "tabular/header.py",
+    "tests/test_header.py"
+  ],
+  "wall_s": 32.5
+}

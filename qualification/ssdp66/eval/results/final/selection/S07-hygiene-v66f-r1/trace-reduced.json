@@ -1,0 +1,95 @@
+[
+ {
+  "init": {
+   "model": "claude-sonnet-5",
+   "claude_code_version": "2.1.283",
+   "skills": [
+    "numerical-algorithm-design",
+    "repository-hygiene",
+    "scientific-formulation",
+    "software-design",
+    "software-documentation",
+    "software-implementation",
+    "software-maintenance-audit",
+    "deep-research",
+    "design",
+    "slides",
+    "design-sync",
+    "dataviz",
+    "artifact-diagramming",
+    "artifact-capabilities",
+    "update-config",
+    "verify",
+    "debug",
+    "code-review",
+    "simplify",
+    "batch",
+    "fewer-permission-prompts",
+    "doctor",
+    "loop",
+    "schedule",
+    "claude-api",
+    "workflow-authoring",
+    "run",
+    "run-skill-generator"
+   ]
+  }
+ },
+ {
+  "text": "This is exactly what the repository-hygiene skill covers, so I'll use it."
+ },
+ {
+  "tool": "Skill",
+  "input": "{\"skill\": \"repository-hygiene\"}"
+ },
+ {
+  "tool": "ToolSearch",
+  "input": "{\"query\": \"select:EnterWorktree,ExitWorktree\", \"max_results\": 2}"
+ },
+ {
+  "tool": "ToolSearch",
+  "input": "{\"query\": \"bash shell powershell execute command\", \"max_results\": 5}"
+ },
+ {
+  "result": {
+   "subtype": "error_max_turns",
+   "num_turns": 4,
+   "total_cost_usd": 0.0870872,
+   "duration_ms": 8709,
+   "usage": {
+    "input_tokens": 6,
+    "cache_creation_input_tokens": 15615,
+    "cache_read_input_tokens": 99676,
+    "output_tokens": 468,
+    "output_tokens_details": {
+     "thinking_tokens": 214
+    },
+    "server_tool_use": {
+     "web_search_requests": 0,
+     "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+     "ephemeral_1h_input_tokens": 15615,
+     "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+     {
+      "input_tokens": 2,
+      "output_tokens": 241,
+      "cache_read_input_tokens": 38926,
+      "cache_creation_input_tokens": 2520,
+      "cache_creation": {
+       "ephemeral_5m_input_tokens": 0,
+       "ephemeral_1h_input_tokens": 2520
+      },
+      "type": "message"
+     }
+    ],
+    "speed": "standard"
+   },
+   "is_error": true
+  }
+ }
+]

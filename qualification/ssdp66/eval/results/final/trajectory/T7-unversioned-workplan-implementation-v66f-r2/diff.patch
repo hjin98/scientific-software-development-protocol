@@ -1,0 +1,49 @@
+diff --git a/sigproc/rescale.py b/sigproc/rescale.py
+new file mode 100644
+index 0000000..cd4befe
+--- /dev/null
++++ b/sigproc/rescale.py
+@@ -0,0 +1,9 @@
++def rescale(values, low, high):
++    if not values:
++        raise ValueError("values must be non-empty")
++    lo = min(values)
++    hi = max(values)
++    if lo == hi:
++        raise ValueError("values must not be constant")
++    scale = (high - low) / (hi - lo)
++    return [low + (v - lo) * scale for v in values]
+diff --git a/tests/test_rescale.py b/tests/test_rescale.py
+new file mode 100644
+index 0000000..e7ab463
+--- /dev/null
++++ b/tests/test_rescale.py
+@@ -0,0 +1,28 @@
++import unittest
++
++from sigproc.rescale import rescale
++
++
++class RescaleTests(unittest.TestCase):
++    def test_normal_range(self):
++        self.assertEqual(rescale([1, 2, 3, 4], 0, 10), [0.0, 10.0 / 3, 20.0 / 3, 10.0])
++
++    def test_negative_range(self):
++        self.assertEqual(rescale([0, 5, 10], -1, 1), [-1.0, 0.0, 1.0])
++
++    def test_constant_input_raises(self):
++        with self.assertRaises(ValueError):
++            rescale([5, 5, 5], 0, 1)
++
++    def test_empty_input_raises(self):
++        with self.assertRaises(ValueError):
++            rescale([], 0, 1)
++
++    def test_input_unchanged(self):
++        values = [1, 2, 3]
++        rescale(values, 0, 1)
++        self.assertEqual(values, [1, 2, 3])
++
++
++if __name__ == "__main__":
++    unittest.main()

@@ -1,0 +1,43 @@
+{
+  "duration_ms": 40407,
+  "entry_and_burden": {
+    "first_mutation_detail": null,
+    "first_mutation_index": null,
+    "first_protocol_action_detail": null,
+    "first_protocol_action_index": null,
+    "governing_knowable_index": 2,
+    "governing_stated_before_mutation": true,
+    "governing_stated_before_protocol_action_or_mutation": true,
+    "governing_stated_index": 9,
+    "governing_version": "6.3.0",
+    "observed_active_ssdp_bytes": 7057,
+    "protocol_file_reads": 1,
+    "remote_or_source_lookups": [],
+    "ssdp_entrypoint_bytes": 7057,
+    "ssdp_reference_read_bytes": 0,
+    "versioning_owner_reads": 1
+  },
+  "final": "The workplan declares `protocol_version: 6.3.0`, but the installed software-implementation package is `6.6.0` \u2014 a different minor line, not just a compatible superset per the entry contract.\n\nI checked for a way to resolve this:\n- No installed/local source of protocol 6.3.0 exists in the repo (every skill under `.claude/skills/*/PROTOCOL_VERSION` reports `6.6.0`).\n- No `PROTOCOL-RELEASE-STATE.yaml` exists anywhere in the repo (checked root and full tree), so there's no mapped immutable public-source fallback for 6.3.0 either.\n- Git history is a single `fixture` commit \u2014 no other branches or historical snapshots to recover a 6.3.0 source from.\n\nPer this package's binding rule, a 6.6.0 package is not a source of work bound to 6.3.0, and I may not silently execute WP-CSV-HEADER under 6.6.0 without an explicit adoption decision. Since neither a local 6.3.0 source nor a mapped fallback exists, this is a **protocol non-closure**, not something I can route around.\n\nTo proceed I need one of:\n1. You (as the workplan's governing authority) explicitly adopt 6.6.0 for this workplan, or\n2. Point me to an installed/local 6.3.0 source or its mapped immutable public-source ref, or\n3. Confirm the `protocol_version: 6.3.0` in the workplan file is a mistake and should be corrected (e.g., to `6.6.0`).\n\nI haven't made any code changes yet \u2014 how would you like to resolve this?",
+  "input_tokens_total": 383959,
+  "is_error": false,
+  "models": [
+    "claude-sonnet-5"
+  ],
+  "num_turns": 10,
+  "oracle": {
+    "hidden_collected": true,
+    "tests_pass": false,
+    "tests_tail": [
+      "FAILED (errors=1)"
+    ]
+  },
+  "output_tokens": 3139,
+  "protocol_read_bytes_on_disk": 0,
+  "protocol_reads": [],
+  "skills_invoked": [
+    "software-implementation"
+  ],
+  "total_cost_usd": 0.1937372,
+  "untracked": [],
+  "wall_s": 41.3
+}

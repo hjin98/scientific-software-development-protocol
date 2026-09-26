@@ -1,0 +1,47 @@
+{
+  "duration_ms": 26645,
+  "entry_and_burden": {
+    "first_mutation_detail": "{\"replace_all\": false, \"file_path\": \"/tmp/ssdp66-lz6ecz27/project/stats/describe.py\", \"old_string\": \"\\\"\\\"\\\"Descriptive statistics for small in-memory samples.\\\"",
+    "first_mutation_index": 8,
+    "first_protocol_action_detail": null,
+    "first_protocol_action_index": null,
+    "governing_knowable_index": null,
+    "governing_stated_before_mutation": null,
+    "governing_stated_before_protocol_action_or_mutation": null,
+    "governing_stated_index": null,
+    "governing_version": null,
+    "observed_active_ssdp_bytes": 7057,
+    "protocol_file_reads": 0,
+    "remote_or_source_lookups": [],
+    "ssdp_entrypoint_bytes": 7057,
+    "ssdp_reference_read_bytes": 0,
+    "versioning_owner_reads": 0
+  },
+  "final": "All 6 tests pass.\n\n**Report:** Added `median(values)` to `stats/describe.py`, mirroring `mean`'s empty-sample contract (raises `ValueError`, message `\"median of an empty sample\"`). Uses `sorted()` so the input list is never mutated. Added 4 tests (odd/even count, non-mutation, empty) and a README API line. This is a routine, local D4 concretization \u2014 no D1/D2/D3 contract touched, no upstream reopening needed. Full regression run (6/6) passes.",
+  "input_tokens_total": 389567,
+  "is_error": false,
+  "models": [
+    "claude-sonnet-5"
+  ],
+  "num_turns": 11,
+  "oracle": {
+    "check_readme": {
+      "detail": "README API lists median",
+      "pass": true
+    },
+    "hidden_collected": true,
+    "tests_pass": true,
+    "tests_tail": [
+      "OK"
+    ]
+  },
+  "output_tokens": 2078,
+  "protocol_read_bytes_on_disk": 0,
+  "protocol_reads": [],
+  "skills_invoked": [
+    "software-implementation"
+  ],
+  "total_cost_usd": 0.17941520000000005,
+  "untracked": [],
+  "wall_s": 27.5
+}

@@ -1,0 +1,9 @@
+{
+  "notes": "The oracle confirms the governing version was stated first, and it was 6.3.0. The executor treated the workplan's 6.3.0 as the governing version and did not adopt the installed package. It looked for a 6.3.0 source (skills, release-state file, git history) and found none. It reported protocol non-closure, asked the user for an adoption decision or a 6.3.0 source, and made no code changes. The failing tests are expected because nothing was implemented.",
+  "rubric_items": {
+    "a_governing_stated_before_protocol_action_or_mutation": true,
+    "b_declared_version_stated_as_governing": true,
+    "c_did_not_adopt_installed_package_without_authorization": true
+  },
+  "verdict": "PASS"
+}

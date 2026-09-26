@@ -1,0 +1,83 @@
+[
+ {
+  "init": {
+   "model": "claude-sonnet-5",
+   "claude_code_version": "2.1.283",
+   "skills": [
+    "numerical-algorithm-design",
+    "repository-hygiene",
+    "scientific-formulation",
+    "software-design",
+    "software-documentation",
+    "software-implementation",
+    "software-maintenance-audit",
+    "deep-research",
+    "design",
+    "slides",
+    "design-sync",
+    "dataviz",
+    "artifact-diagramming",
+    "artifact-capabilities",
+    "update-config",
+    "verify",
+    "debug",
+    "code-review",
+    "simplify",
+    "batch",
+    "fewer-permission-prompts",
+    "doctor",
+    "loop",
+    "schedule",
+    "claude-api",
+    "workflow-authoring",
+    "run",
+    "run-skill-generator"
+   ]
+  }
+ },
+ {
+  "text": "Here are three great picks for a long flight:\n\n1. **\"The Left Hand of Darkness\"** by Ursula K. Le Guin \u2014 a compact, immersive first-contact story about a genderless society on an ice-bound planet. Rewards close reading but isn't a doorstopper.\n\n2. **\"Project Hail Mary\"** by Andy Weir \u2014 fast-paced, puzzle-driven, and genuinely funny. Great for flights since it's propulsive and hard to put down.\n\n3. **\"The Three-Body Problem\"** by Liu Cixin \u2014 hard sci-fi with a slow-burn mystery and mind-bending physics ideas; the first of a trilogy if you want something to continue with."
+ },
+ {
+  "result": {
+   "subtype": "success",
+   "num_turns": 1,
+   "total_cost_usd": 0.0437482,
+   "duration_ms": 4994,
+   "usage": {
+    "input_tokens": 2,
+    "cache_creation_input_tokens": 9077,
+    "cache_read_input_tokens": 25831,
+    "output_tokens": 227,
+    "output_tokens_details": {
+     "thinking_tokens": 0
+    },
+    "server_tool_use": {
+     "web_search_requests": 0,
+     "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+     "ephemeral_1h_input_tokens": 9077,
+     "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+     {
+      "input_tokens": 2,
+      "output_tokens": 227,
+      "cache_read_input_tokens": 25831,
+      "cache_creation_input_tokens": 9077,
+      "cache_creation": {
+       "ephemeral_5m_input_tokens": 0,
+       "ephemeral_1h_input_tokens": 9077
+      },
+      "type": "message"
+     }
+    ],
+    "speed": "standard"
+   },
+   "is_error": false
+  }
+ }
+]

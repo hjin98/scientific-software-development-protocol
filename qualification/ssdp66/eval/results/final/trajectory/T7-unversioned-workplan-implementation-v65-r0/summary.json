@@ -1,0 +1,48 @@
+{
+  "duration_ms": 40554,
+  "entry_and_burden": {
+    "first_mutation_detail": "{\"file_path\": \"/tmp/ssdp66-rtqvjyvl/project/sigproc/rescale.py\", \"content\": \"def rescale(values, low, high):\\n    if not values:\\n        raise ValueError(\\\"val",
+    "first_mutation_index": 10,
+    "first_protocol_action_detail": "{\"command\": \"find workplans -type d; ls .claude/skills/software-implementation/references/\", \"description\": \"Check workplan directory conventions\"}",
+    "first_protocol_action_index": 13,
+    "governing_knowable_index": 2,
+    "governing_stated_before_mutation": null,
+    "governing_stated_before_protocol_action_or_mutation": null,
+    "governing_stated_index": null,
+    "governing_version": null,
+    "observed_active_ssdp_bytes": 25188,
+    "protocol_file_reads": 2,
+    "remote_or_source_lookups": [],
+    "ssdp_entrypoint_bytes": 8360,
+    "ssdp_reference_read_bytes": 16828,
+    "versioning_owner_reads": 0
+  },
+  "final": "All tests pass (6/6, including the pre-existing smoothing test \u2014 no regression).\n\n**Implementation**: Added `sigproc/rescale.py` with `rescale(values, low, high)` \u2014 linear map of `min(values)\u2192low`, `max(values)\u2192high`, via list comprehension (no in-place mutation of input). Empty or constant input raises `ValueError`, per the workplan's cycle decisions.\n\n**Evidence**: `tests/test_rescale.py` covers all five workplan-mandated cases: normal range, negative range, constant input, empty input, and input-list immutability. Full suite run via `unittest discover`.\n\n**Workplan closure**: moved `WP-SIGNAL-RESCALE.md` from `active/` to `completed/`, status updated to `completed`.\n\nNo upstream challenge; scope was fully bounded by the accepted workplan.",
+  "input_tokens_total": 646168,
+  "is_error": false,
+  "models": [
+    "claude-sonnet-5"
+  ],
+  "num_turns": 19,
+  "oracle": {
+    "hidden_collected": true,
+    "tests_pass": true,
+    "tests_tail": [
+      "OK"
+    ]
+  },
+  "output_tokens": 2923,
+  "protocol_read_bytes_on_disk": 16828,
+  "protocol_reads": [
+    "software-implementation/references/workflow-and-workplans.md"
+  ],
+  "skills_invoked": [
+    "software-implementation"
+  ],
+  "total_cost_usd": 0.2547568,
+  "untracked": [
+    "sigproc/rescale.py",
+    "tests/test_rescale.py"
+  ],
+  "wall_s": 41.4
+}

@@ -1,0 +1,42 @@
+{
+  "duration_ms": 79930,
+  "entry_and_burden": {
+    "first_mutation_detail": null,
+    "first_mutation_index": null,
+    "first_protocol_action_detail": null,
+    "first_protocol_action_index": null,
+    "governing_knowable_index": null,
+    "governing_stated_before_mutation": null,
+    "governing_stated_before_protocol_action_or_mutation": null,
+    "governing_stated_index": null,
+    "governing_version": null,
+    "observed_active_ssdp_bytes": 56878,
+    "protocol_file_reads": 7,
+    "remote_or_source_lookups": [],
+    "ssdp_entrypoint_bytes": 8962,
+    "ssdp_reference_read_bytes": 47916,
+    "versioning_owner_reads": 0
+  },
+  "final": "Introducing a new C++/pybind11 extension boundary is explicitly D3 under `language-profiles.md` (changes ABI/packaging/portability), so the skill's routing required loading the architecture owner, both language leaf profiles (mixed Python/C++ boundary), and the release/packaging owner (cross-version build/ABI).\n\nFiles loaded: references/specification-and-implementation.md, references/language-profiles.md, references/python-engineering.md, references/cpp-engineering.md, references/architecture-and-design.md, references/release-and-distribution.md",
+  "input_tokens_total": 232483,
+  "is_error": false,
+  "models": [
+    "claude-sonnet-5"
+  ],
+  "num_turns": 10,
+  "output_tokens": 7097,
+  "protocol_read_bytes_on_disk": 47916,
+  "protocol_reads": [
+    "software-implementation/references/specification-and-implementation.md",
+    "software-implementation/references/language-profiles.md",
+    "software-implementation/references/architecture-and-design.md",
+    "software-implementation/references/release-and-distribution.md",
+    "software-implementation/references/python-engineering.md",
+    "software-implementation/references/cpp-engineering.md"
+  ],
+  "skills_invoked": [
+    "software-implementation"
+  ],
+  "total_cost_usd": 0.26349579999999995,
+  "wall_s": 80.7
+}

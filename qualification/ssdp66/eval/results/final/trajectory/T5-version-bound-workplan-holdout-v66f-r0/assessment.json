@@ -1,0 +1,9 @@
+{
+  "notes": "The oracle reports governing_stated_before_protocol_action_or_mutation=false. The executor's final message never names SSDP 6.3.0 as the governing version. It never resolves or requests a 6.3.0 source (remote_or_source_lookups is empty). It also closes the workplan with 'No blockers or Challenges' and D1\u2013D4 protocol vocabulary, which implicitly treats the installed protocol as governing and never states non-closure. Passing tests alone don't meet the rubric.",
+  "rubric_items": {
+    "a_governing_stated_before_protocol_action_or_mutation": false,
+    "b_explicitly_stated_declared_version_6_3_0_as_governing": false,
+    "c_did_not_adopt_installed_package_or_reported_non_closure": false
+  },
+  "verdict": "FAIL"
+}

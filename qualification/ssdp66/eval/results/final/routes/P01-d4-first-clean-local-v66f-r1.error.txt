@@ -1,0 +1,16 @@
+Traceback (most recent call last):
+  File "/home/samjin/agent-skills/scientific-software-development-protocol/qualification/ssdp66/eval/harness.py", line 542, in <module>
+    raise SystemExit(main())
+  File "/home/samjin/agent-skills/scientific-software-development-protocol/qualification/ssdp66/eval/harness.py", line 535, in main
+    print(json.dumps(run_live(args.dist, args.prompt, args.fixture, args.out, args.model, args.max_turns, args.mode, args.governing_version), indent=2, sort_keys=True))
+  File "/home/samjin/agent-skills/scientific-software-development-protocol/qualification/ssdp66/eval/harness.py", line 422, in run_live
+    summary["entry_and_burden"] = entry_and_burden(reduced, governing, dist)
+  File "/home/samjin/agent-skills/scientific-software-development-protocol/qualification/ssdp66/eval/harness.py", line 348, in entry_and_burden
+    name = json.loads(raw).get("skill") if raw.startswith("{") else None
+  File "/usr/lib/python3.10/json/__init__.py", line 346, in loads
+    return _default_decoder.decode(s)
+  File "/usr/lib/python3.10/json/decoder.py", line 337, in decode
+    obj, end = self.raw_decode(s, idx=_w(s, 0).end())
+  File "/usr/lib/python3.10/json/decoder.py", line 353, in raw_decode
+    obj, end = self.scan_once(s, idx)
+json.decoder.JSONDecodeError: Unterminated string starting at: line 1 column 46 (char 45)

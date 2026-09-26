@@ -1,0 +1,47 @@
+{
+  "duration_ms": 56843,
+  "entry_and_burden": {
+    "first_mutation_detail": null,
+    "first_mutation_index": null,
+    "first_protocol_action_detail": "{\"command\": \"find . -iname \\\"*PROTOCOL*\\\" -o -iname \\\"*protocol_version*\\\" -o -iname \\\"version_preflight*\\\" 2>/dev/null | grep -v node_modules | grep -v .claude",
+    "first_protocol_action_index": 4,
+    "governing_knowable_index": 2,
+    "governing_stated_before_mutation": true,
+    "governing_stated_before_protocol_action_or_mutation": false,
+    "governing_stated_index": 14,
+    "governing_version": "6.2.0",
+    "observed_active_ssdp_bytes": 22880,
+    "protocol_file_reads": 7,
+    "remote_or_source_lookups": [],
+    "ssdp_entrypoint_bytes": 8962,
+    "ssdp_reference_read_bytes": 13918,
+    "versioning_owner_reads": 1
+  },
+  "final": "**Governing version check.** The workplan `workplans/active/WP-SIGNAL-CLIP.md` declares `protocol_version: 6.2.0`. The installed software-implementation package is `6.6.0`. These don't match, and 6.2 doesn't name the 6.6 line, so per the entry contract I cannot execute this package's implementation process for that binding \u2014 I checked for an installed/local source of 6.2.0 (none: every `PROTOCOL_VERSION` file in `.claude/skills/*` reads 6.6.0) and for a mapped immutable public-source fallback (none: no `PROTOCOL-RELEASE-STATE.yaml` exists anywhere in the repo, and there's no other branch/tag in git history).\n\n**Result: protocol non-closure.** I can't apply the 6.6.0 package to work bound to 6.2.0, and there's no 6.2.0 source or fallback mapping to use instead.\n\nThis is a trivial, well-bounded task (one pure function + tests), so the blocker is purely procedural, not substantive. Two ways to unblock, your call:\n\n1. **Adopt 6.6.0 for this workplan** \u2014 if you (as the workplan's owning authority) want to bind it to the installed package, say so explicitly (e.g., update the workplan's `protocol_version` field to `6.6.0`), and I'll proceed under this package.\n2. **Provide a 6.2.0 source** \u2014 if one should exist locally or via a known fallback ref, point me to it and I'll use that instead.\n\nI haven't touched `sigproc/` or `tests/` yet. Let me know how you'd like to proceed.",
+  "input_tokens_total": 599905,
+  "is_error": false,
+  "models": [
+    "claude-sonnet-5"
+  ],
+  "num_turns": 15,
+  "oracle": {
+    "hidden_collected": true,
+    "tests_pass": false,
+    "tests_tail": [
+      "FAILED (errors=1)"
+    ]
+  },
+  "output_tokens": 4134,
+  "protocol_read_bytes_on_disk": 13918,
+  "protocol_reads": [
+    "software-implementation/references/protocol-versioning-and-compatibility.md",
+    "software-implementation/PROTOCOL_VERSION",
+    "software-design/PROTOCOL_VERSION"
+  ],
+  "skills_invoked": [
+    "software-implementation"
+  ],
+  "total_cost_usd": 0.25058440000000004,
+  "untracked": [],
+  "wall_s": 57.6
+}

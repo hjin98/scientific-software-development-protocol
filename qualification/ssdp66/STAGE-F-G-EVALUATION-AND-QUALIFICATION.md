@@ -13,6 +13,9 @@ live_confirmation: R1/R2 matrix on dist/skills unchanged since c01eeee (FAILED b
 d3_reopen_rule_freeze: 6c76ef1
 d3_reopen_semantic_state: 47dc85de6dd6be8b0adfb1a66024cfdd5397f3d8
 d3_reopen_live_confirmation: FAILED version gate and criterion-4 burden rule (section 10.7)
+final_simplification_rule_freeze: 9b65f8d
+final_semantic_state: 22f4bdba53795da3a6f13f162529f3a843fc37ae
+final_live_qualification: frozen gate NOT MET on selection count and run-error hygiene only; routing probes, version robustness, sentinels and criterion 4 met (section 10.8)
 ---
 
 # Protocol 6.6 Stages F-G — Empirical Evaluation and Assembled Qualification
@@ -23,14 +26,17 @@ Evidence coordination under the [Protocol 6.6 Evaluation and Qualification Contr
 
 ```text
 SERIOUS CHALLENGE: RESOLVED AT D3 CYCLE LEVEL (workplan 16.10.1) - compatibility vs adoption
-IMPLEMENTATION BLOCKERS: OPEN - D4 STOPPED AGAIN (workplan 16.10.4 item 7; section 10.7)
-  strict version gate on 47dc85d: FAILED - 1/8 (one silent mismatch; 6 runs fail only the
-    frozen ordering field; no run self-adopted the loaded successor)
-  criterion 4 redesign burden rule on 47dc85d: FAILED - panel ratio 1.072; no route reduced
-  harness evidence defects (hidden oracle never collected; assessor blind to new files): REPAIRED at 6c76ef1
-NEW CORRECTNESS REGRESSION vs 6.5 ON MATCHED CASES: none observed (T1, T7, T8 hidden oracles and
-  assessor 3/3 both variants; T2/T3 candidate 2/2)
-READY FOR FRESH INDEPENDENT REVIEW: NO
+FINAL SIMPLIFICATION (workplan 16.11) on 22f4bdb, rule frozen at 9b65f8d: FROZEN GATE NOT MET
+  routing-preservation map (122 routes, structural): MET
+  route probes (19 cases, basis vs candidate): MET - 35/38 vs 37/38 hits, 0 vs 0 violations, no clear loss
+  version robustness (T6x4, T5x2, T4x2): MET - strict pass 5/8 both, never-stated 1/8 both, 0 self-adoption
+  authority sentinels T2/T3: MET - 4/4 assessor PASS with hidden checks
+  criterion 4 burden rule: MET - panel ratio 0.505; T1 and T8 0.844 with non-overlapping ranges
+  selection count: NOT MET - 25/32 vs 28/32 (rule: >= 26); catalog byte-identical, see 10.8
+  run-error hygiene: NOT MET as computed - 49 selection runs end at the designed 3-turn cap
+BLOCKER: stakeholder/Review decision on the two selection-sensor items (section 10.8); not self-adjudicated
+NEW CORRECTNESS REGRESSION vs 6.5 ON MATCHED CASES: none observed
+READY FOR FRESH INDEPENDENT REVIEW: NO (pending the decision above)
 CANDIDATE FREEZE / PUBLICATION / RATIFICATION / CUTOVER: NOT PERFORMED (Stage H)
 ```
 
@@ -275,3 +281,29 @@ Panel net ratio: 1.072 (rule: at most 0.85). In 17 of 18 ordinary runs across bo
 
 1. **Version.** The strict binding doctrine is effective against self-adoption: 0/8 runs self-adopted, compared with 5/8 before. Prose at the entrypoint still does not guarantee the statement ordering: one run never stated the version, and six stated it after inspecting package identity. D3 must decide one of two things. Either the governed "before protocol-dependent action" claim treats loaded-identity inspection as part of the version decision, which would mean re-qualifying under a newly frozen oracle on fresh cases. Or reliable ordering is not achievable by a portable prose entry contract, which is the section 16.8 first trigger and evidence for the Protocol 7 control-plane reopen.
 2. **Criterion 4.** With the reference harness, three ordinary routes and two protocol designs now show that ordinary live protocol burden equals the consumed entrypoint. 6.6's structural reductions lie in material that agents do not read. An honest criterion-4 pass would require materially smaller entrypoints. Otherwise D3 must restate criterion 4, for example by accepting a bounded small burden increase in exchange for the safety kernel and strict binding, or must remove permanent 6.6 machinery that is unjustified by burden. Selection improvement (section 4.1) remains a separate positive result.
+
+### 10.8 Final whole-entrypoint simplification (workplan section 16.11)
+
+**Identities and freeze.** Routing-preservation map, ordering-oracle identity exemption and the final rule were committed at `9b65f8d` (`FINAL-SIMPLIFICATION-FREEZE.md`) before any `SKILL.md` change. Candidate `v66f`: `dist/skills` at `22f4bdb` (D4 entrypoint 7,057 B; all seven 47,801 B). Basis `v66b`: `47dc85d` (D4 8,962 B). Baseline `v65`: `2b8ce17` (D4 8,360 B). The version step and four-line safety kernel are byte-identical to the basis; the kernel route is generated once in the entry contract. 178 runs completed; every session listed each SSDP skill once and resolved it from the project install. Raw data: `eval/results/final/`; gates: `eval/rework_gates.py evaluate-final` -> `eval/results/final/final-summary.json`.
+
+**Harness incident (no metric change).** Two probe runs (`P01 v66f r1`, `P02 v66b r1`) crashed in `entry_and_burden` because a long Skill argument was truncated in the recorded input and parsed with a bare `json.loads`. The parse now uses the same guard as the ordering oracle; the crashed runs produced no observation, and their error files are retained. The same launch script refilled them.
+
+| Item | Candidate vs reference | Frozen rule | Result |
+| --- | --- | --- | --- |
+| structural routing map | 122/122 routes, predicate terms, gates, exclusions, authority, frontmatter | exact | MET |
+| route probes | hits 35/38 vs 37/38; violations 0 vs 0; no clear loss/eager gain | hits >= basis - 2 | MET |
+| selection | correct 25/32 vs 28/32; false activation 0 vs 0 | correct >= basis - 2 | **NOT MET** |
+| version robustness | strict pass 5/8 vs 5/8; never stated 1/8 vs 1/8 | >= basis - 1; <= basis + 1 | MET |
+| authority sentinels | T2 2/2, T3 2/2 assessor PASS, hidden checks pass | all | MET |
+| criterion 4 | T1 7,057 x3 vs 8,360 x3 (0.844); T8 same; T7 medians 7,057 vs 25,188 (one read of the workflow owner per variant); panel 0.505 | net <= 0.85; one direct reduction; <= 1.10 each; correctness | MET |
+| unversioned no-lookup | 0/9 violations | none | MET |
+| isolation / errors | isolation all; 49 runs flagged `is_error` | none | **NOT MET as computed** |
+
+**The two unmet items.**
+
+1. *Selection count.* Losses are S04 (candidate missed 2/2, basis admissible 2/2) and S11 r1 (the agent could not find `docs/proposal.md` and asked instead of invoking the named skill). Selection is decided from the catalog before any `SKILL.md` body loads. The catalog frontmatter of all seven skills is byte-identical to the basis (mechanically tested), and each run's session init differs only in temporary paths. Every missed run ended without invoking any skill, so the changed text was never read. The difference therefore has no causal path from this change. On this evidence it is sampling variation. The frozen rule nevertheless fails. Adjudicating it as noise after seeing the outcome is not mine to do (16.11.4-16.11.5).
+2. *Error hygiene.* All 49 flagged runs are selection runs ending with subtype `error_max_turns` under the harness's designed 3-turn selection cap (Stage F: 52/64 the same). No trajectory or probe run errored. The evaluator's `is_error` test was not specialized for select mode. That is an evaluator defect, but correcting it after outcomes is likewise a post-result change, so it is reported rather than applied.
+
+**Other observations.** The tool route is weakly discoverable for a "data-flow analysis evidence" task in both variants: basis 1/2, candidate 0/2. Both variants otherwise routed to the security owner, and neither routed to the tool leaf directly. One candidate P15 run skipped the mandatory D2 owner read. Diagnostics (T1/T7/T8, 3 runs summed, v65/v66f) are in the summary file and are not the criterion.
+
+**Disposition.** Burden, routing-probe, version-robustness and authority results support the simplification. The frozen gate is still not met, because of the two selection-sensor items. The candidate is therefore **not** frozen, and fresh independent Review is not requested. One decision goes to the stakeholder/Review owner: whether the selection comparison was a pre-run oracle defect: it compared a byte-identical catalog surface, so it could measure only noise, and its error count included designed terminations. If so, the remaining gates close 16.11.5 item 2. If not, Protocol 6.6 stops under 16.11.5. No rewording, rerun-until-pass, route, metric or threshold change was made after the first final-candidate run.

@@ -1,0 +1,38 @@
+{
+  "duration_ms": 47012,
+  "entry_and_burden": {
+    "first_mutation_detail": null,
+    "first_mutation_index": null,
+    "first_protocol_action_detail": null,
+    "first_protocol_action_index": null,
+    "governing_knowable_index": 5,
+    "governing_stated_before_mutation": null,
+    "governing_stated_before_protocol_action_or_mutation": null,
+    "governing_stated_index": null,
+    "governing_version": null,
+    "observed_active_ssdp_bytes": 41287,
+    "protocol_file_reads": 3,
+    "remote_or_source_lookups": [],
+    "ssdp_entrypoint_bytes": 7370,
+    "ssdp_reference_read_bytes": 33917,
+    "versioning_owner_reads": 0
+  },
+  "final": "Loaded per the skill's routing (branch deletion \u2192 git owner; workplan archive \u2192 workflow owner): `references/git-and-version-control.md`, `references/workflow-and-workplans.md`.",
+  "input_tokens_total": 171318,
+  "is_error": false,
+  "models": [
+    "claude-sonnet-5"
+  ],
+  "num_turns": 6,
+  "output_tokens": 3607,
+  "protocol_read_bytes_on_disk": 33917,
+  "protocol_reads": [
+    "repository-hygiene/references/git-and-version-control.md",
+    "repository-hygiene/references/workflow-and-workplans.md"
+  ],
+  "skills_invoked": [
+    "repository-hygiene"
+  ],
+  "total_cost_usd": 0.1791078,
+  "wall_s": 47.8
+}

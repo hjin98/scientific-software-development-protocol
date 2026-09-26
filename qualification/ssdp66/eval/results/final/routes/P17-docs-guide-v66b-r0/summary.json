@@ -1,0 +1,41 @@
+{
+  "duration_ms": 34856,
+  "entry_and_burden": {
+    "first_mutation_detail": null,
+    "first_mutation_index": null,
+    "first_protocol_action_detail": null,
+    "first_protocol_action_index": null,
+    "governing_knowable_index": null,
+    "governing_stated_before_mutation": null,
+    "governing_stated_before_protocol_action_or_mutation": null,
+    "governing_stated_index": null,
+    "governing_version": null,
+    "observed_active_ssdp_bytes": 52887,
+    "protocol_file_reads": 6,
+    "remote_or_source_lookups": [],
+    "ssdp_entrypoint_bytes": 6929,
+    "ssdp_reference_read_bytes": 45958,
+    "versioning_owner_reads": 0
+  },
+  "final": "Governing SSDP version: none \u2192 6.6.0 default, continuing without source lookup.\n\nFiles loaded (per this skill's own routing for a human-facing user-guide rewrite touching D4 code conformance and D2 method-paper alignment):\n- `.claude/skills/software-documentation/references/documentation-maintenance.md`\n- `.claude/skills/software-documentation/references/documentation-and-evidence.md`\n- `.claude/skills/software-documentation/references/scientific-technical-writing.md`\n- `.claude/skills/software-documentation/references/scientific-software.md`\n- `.claude/skills/software-documentation/references/specification-and-implementation.md`",
+  "input_tokens_total": 173154,
+  "is_error": false,
+  "models": [
+    "claude-sonnet-5"
+  ],
+  "num_turns": 9,
+  "output_tokens": 2706,
+  "protocol_read_bytes_on_disk": 45958,
+  "protocol_reads": [
+    "software-documentation/references/documentation-maintenance.md",
+    "software-documentation/references/documentation-and-evidence.md",
+    "software-documentation/references/scientific-technical-writing.md",
+    "software-documentation/references/scientific-software.md",
+    "software-documentation/references/specification-and-implementation.md"
+  ],
+  "skills_invoked": [
+    "software-documentation"
+  ],
+  "total_cost_usd": 0.1825452,
+  "wall_s": 35.7
+}

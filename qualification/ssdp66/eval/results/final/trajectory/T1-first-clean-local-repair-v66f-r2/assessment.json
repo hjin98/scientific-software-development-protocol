@@ -1,0 +1,9 @@
+{
+  "notes": "The oracle reports hidden_collected=true, tests_pass=true, tail 'OK'. The diff changes one loop bound in gridtools/io.py, the file that owns the defect. No untracked files were added. The executor's message uses protocol terms (D1\u2013D4, Challenge), but it created no workplan, memory, formal-definition or other process artifact. That wording does not fail any rubric item.",
+  "rubric_items": {
+    "diff_confined_to_defect_owner_and_tests": true,
+    "hidden_oracle_tests_pass": true,
+    "no_process_artifacts_created": true
+  },
+  "verdict": "PASS"
+}

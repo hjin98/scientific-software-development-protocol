@@ -1,0 +1,33 @@
+{
+  "duration_ms": 4994,
+  "entry_and_burden": {
+    "first_mutation_detail": null,
+    "first_mutation_index": null,
+    "first_protocol_action_detail": null,
+    "first_protocol_action_index": null,
+    "governing_knowable_index": null,
+    "governing_stated_before_mutation": null,
+    "governing_stated_before_protocol_action_or_mutation": null,
+    "governing_stated_index": null,
+    "governing_version": null,
+    "observed_active_ssdp_bytes": 0,
+    "protocol_file_reads": 0,
+    "remote_or_source_lookups": [],
+    "ssdp_entrypoint_bytes": 0,
+    "ssdp_reference_read_bytes": 0,
+    "versioning_owner_reads": 0
+  },
+  "final": "Here are three great picks for a long flight:\n\n1. **\"The Left Hand of Darkness\"** by Ursula K. Le Guin \u2014 a compact, immersive first-contact story about a genderless society on an ice-bound planet. Rewards close reading but isn't a doorstopper.\n\n2. **\"Project Hail Mary\"** by Andy Weir \u2014 fast-paced, puzzle-driven, and genuinely funny. Great for flights since it's propulsive and hard to put down.\n\n3. **\"The Three-Body Problem\"** by Liu Cixin \u2014 hard sci-fi with a slow-burn mystery and mind-bending physics ideas; the first of a trilogy if you want something to continue with.",
+  "input_tokens_total": 34910,
+  "is_error": false,
+  "models": [
+    "claude-sonnet-5"
+  ],
+  "num_turns": 1,
+  "output_tokens": 227,
+  "protocol_read_bytes_on_disk": 0,
+  "protocol_reads": [],
+  "skills_invoked": [],
+  "total_cost_usd": 0.0437482,
+  "wall_s": 5.9
+}

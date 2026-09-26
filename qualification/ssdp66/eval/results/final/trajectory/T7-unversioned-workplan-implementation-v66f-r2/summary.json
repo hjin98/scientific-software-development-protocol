@@ -1,0 +1,46 @@
+{
+  "duration_ms": 32756,
+  "entry_and_burden": {
+    "first_mutation_detail": "{\"file_path\": \"/tmp/ssdp66-ttes_d38/project/sigproc/rescale.py\", \"content\": \"def rescale(values, low, high):\\n    if not values:\\n        raise ValueError(\\\"val",
+    "first_mutation_index": 10,
+    "first_protocol_action_detail": null,
+    "first_protocol_action_index": null,
+    "governing_knowable_index": 3,
+    "governing_stated_before_mutation": null,
+    "governing_stated_before_protocol_action_or_mutation": null,
+    "governing_stated_index": null,
+    "governing_version": null,
+    "observed_active_ssdp_bytes": 7057,
+    "protocol_file_reads": 0,
+    "remote_or_source_lookups": [],
+    "ssdp_entrypoint_bytes": 7057,
+    "ssdp_reference_read_bytes": 0,
+    "versioning_owner_reads": 0
+  },
+  "final": "All tests pass, including regression on the existing `smoothing` module. Implementation matches the workplan exactly: `sigproc.rescale.rescale` does linear min\u2192low, max\u2192high mapping, raises `ValueError` on constant or empty input, and doesn't mutate the input list.\n\n**Report:**\n- Governing SSDP version: none specified \u2192 used package default 6.6.0.\n- Implementation: added `sigproc/rescale.py` (`rescale(values, low, high)`) and `tests/test_rescale.py`, following existing `sigproc`/`tests` conventions (no docstrings, plain `unittest`).\n- Final semantic owner: D4 (routine local addition, no D1/D2/D3 contract touched).\n- Evidence: new unit tests cover normal range, negative range, constant input, empty input, and input-list immutability, per acceptance criteria. Ran full suite (`python3 -m unittest discover`) \u2014 6/6 pass, no regression in `test_smoothing.py`.\n- No blockers, no Challenge.\n\nWorkplan `WP-SIGNAL-RESCALE.md` is fully implemented and green; let me know if you'd like it moved out of `workplans/active/`.",
+  "input_tokens_total": 390369,
+  "is_error": false,
+  "models": [
+    "claude-sonnet-5"
+  ],
+  "num_turns": 11,
+  "oracle": {
+    "hidden_collected": true,
+    "tests_pass": true,
+    "tests_tail": [
+      "OK"
+    ]
+  },
+  "output_tokens": 2107,
+  "protocol_read_bytes_on_disk": 0,
+  "protocol_reads": [],
+  "skills_invoked": [
+    "software-implementation"
+  ],
+  "total_cost_usd": 0.184437,
+  "untracked": [
+    "sigproc/rescale.py",
+    "tests/test_rescale.py"
+  ],
+  "wall_s": 33.5
+}

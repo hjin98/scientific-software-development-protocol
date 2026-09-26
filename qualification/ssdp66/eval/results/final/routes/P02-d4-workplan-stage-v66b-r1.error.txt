@@ -1,0 +1,16 @@
+Traceback (most recent call last):
+  File "/home/samjin/agent-skills/scientific-software-development-protocol/qualification/ssdp66/eval/harness.py", line 542, in <module>
+    else:
+  File "/home/samjin/agent-skills/scientific-software-development-protocol/qualification/ssdp66/eval/harness.py", line 535, in main
+    asx.add_argument("--rubric", required=True)
+  File "/home/samjin/agent-skills/scientific-software-development-protocol/qualification/ssdp66/eval/harness.py", line 422, in run_live
+    reduced = reduce_trace(proc.stdout.splitlines())
+  File "/home/samjin/agent-skills/scientific-software-development-protocol/qualification/ssdp66/eval/harness.py", line 348, in entry_and_burden
+    # recorded inputs are truncated at 400 chars; a long Skill argument must not crash
+  File "/usr/lib/python3.10/json/__init__.py", line 346, in loads
+    return _default_decoder.decode(s)
+  File "/usr/lib/python3.10/json/decoder.py", line 337, in decode
+    obj, end = self.raw_decode(s, idx=_w(s, 0).end())
+  File "/usr/lib/python3.10/json/decoder.py", line 353, in raw_decode
+    obj, end = self.scan_once(s, idx)
+json.decoder.JSONDecodeError: Unterminated string starting at: line 1 column 46 (char 45)

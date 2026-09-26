@@ -1,0 +1,62 @@
+diff --git a/sigproc/rescale.py b/sigproc/rescale.py
+new file mode 100644
+index 0000000..7af93c3
+--- /dev/null
++++ b/sigproc/rescale.py
+@@ -0,0 +1,9 @@
++def rescale(values, low, high):
++    if not values:
++        raise ValueError("values must not be empty")
++    minimum = min(values)
++    maximum = max(values)
++    if minimum == maximum:
++        raise ValueError("values must not be constant")
++    scale = (high - low) / (maximum - minimum)
++    return [low + (v - minimum) * scale for v in values]
+diff --git a/tests/test_rescale.py b/tests/test_rescale.py
+new file mode 100644
+index 0000000..6856cfe
+--- /dev/null
++++ b/tests/test_rescale.py
+@@ -0,0 +1,28 @@
++import unittest
++
++from sigproc.rescale import rescale
++
++
++class RescaleTests(unittest.TestCase):
++    def test_normal_range(self):
++        self.assertEqual(rescale([1, 2, 3], 0, 10), [0.0, 5.0, 10.0])
++
++    def test_negative_range(self):
++        self.assertEqual(rescale([1, 2, 3], -1, 1), [-1.0, 0.0, 1.0])
++
++    def test_constant_input_raises(self):
++        with self.assertRaises(ValueError):
++            rescale([5, 5, 5], 0, 1)
++
++    def test_empty_input_raises(self):
++        with self.assertRaises(ValueError):
++            rescale([], 0, 1)
++
++    def test_input_list_unchanged(self):
++        values = [1, 2, 3]
++        rescale(values, 0, 10)
++        self.assertEqual(values, [1, 2, 3])
++
++
++if __name__ == "__main__":
++    unittest.main()
+diff --git a/workplans/completed/WP-SIGNAL-RESCALE.md b/workplans/completed/WP-SIGNAL-RESCALE.md
+index fa5eb7c..7b9c33e 100644
+--- a/workplans/completed/WP-SIGNAL-RESCALE.md
++++ b/workplans/completed/WP-SIGNAL-RESCALE.md
+@@ -1,7 +1,7 @@
+ ---
+ kind: d3-d4-implementation-workplan
+ workplan_id: WP-SIGNAL-RESCALE
+-status: accepted
++status: completed
+ ---
+ 
+ # Linear rescaling

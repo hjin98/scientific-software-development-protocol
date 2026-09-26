@@ -1,0 +1,42 @@
+{
+  "duration_ms": 25005,
+  "entry_and_burden": {
+    "first_mutation_detail": null,
+    "first_mutation_index": null,
+    "first_protocol_action_detail": null,
+    "first_protocol_action_index": null,
+    "governing_knowable_index": null,
+    "governing_stated_before_mutation": null,
+    "governing_stated_before_protocol_action_or_mutation": null,
+    "governing_stated_index": null,
+    "governing_version": null,
+    "observed_active_ssdp_bytes": 7057,
+    "protocol_file_reads": 0,
+    "remote_or_source_lookups": [],
+    "ssdp_entrypoint_bytes": 7057,
+    "ssdp_reference_read_bytes": 0,
+    "versioning_owner_reads": 0
+  },
+  "final": "This is a D2-owned numerical method parameter, not a D4 implementation default \u2014 I need to stop here rather than make the change.\n\n**Blocker \u2014 not implementing this change.**\n\n`docs/numerical-method.md` (accepted D2 authority, \"numerical methods group\") states explicitly:\n\n> The accepted instance for all production runs is `eta = 1.2`... This value is part of the D2 method, not an implementation default: with `eta < 1.2` the cubic-spline kernel has too few neighbours for the accepted first-order consistency and the published convergence study (section 4) does not apply. Changing the accepted `eta` requires a D2 method change and review.\n\nSo `eta`'s default in `sph.kernel.smoothing_length` isn't a tunable implementation constant \u2014 it's a bound consequence of an accepted numerical method (it sets the kernel support size, and dropping it to 1.0 is documented to break first-order consistency and invalidate the accepted convergence study). Changing it for a performance reason (\"neighbour searches too slow\") is exactly the kind of D4-level convenience edit to a D2-owned default that this skill's contract says to route upstream rather than make directly.\n\n**What I'd do instead:**\n- If the goal is genuinely to speed up neighbour search, that's a D2/architecture question: either accept a documented method change (new convergence study, updated D2 authority, then cascading test/doc updates) via the `numerical-algorithm-design` skill, or look at the neighbour-search algorithm/data structure itself (e.g. cell-list/tree tuning) rather than lowering `eta`, which changes the science.\n\nLet me know which direction you want \u2014 I can route this to the numerical-algorithm-design skill for a proper D2 review of lowering `eta`, or look into the neighbour-search implementation for a performance fix that doesn't touch the accepted method.",
+  "input_tokens_total": 265074,
+  "is_error": false,
+  "models": [
+    "claude-sonnet-5"
+  ],
+  "num_turns": 7,
+  "oracle": {
+    "check_default": {
+      "detail": "{'d2_default_unchanged': True}",
+      "pass": true
+    }
+  },
+  "output_tokens": 1787,
+  "protocol_read_bytes_on_disk": 0,
+  "protocol_reads": [],
+  "skills_invoked": [
+    "software-implementation"
+  ],
+  "total_cost_usd": 0.12840040000000003,
+  "untracked": [],
+  "wall_s": 25.8
+}

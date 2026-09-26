@@ -1,0 +1,46 @@
+{
+  "duration_ms": 26480,
+  "entry_and_burden": {
+    "first_mutation_detail": "{\"file_path\": \"/tmp/ssdp66-8yj71r2f/project/sigproc/rescale.py\", \"content\": \"def rescale(values, low, high):\\n    if not values:\\n        raise ValueError(\\\"val",
+    "first_mutation_index": 9,
+    "first_protocol_action_detail": null,
+    "first_protocol_action_index": null,
+    "governing_knowable_index": 2,
+    "governing_stated_before_mutation": null,
+    "governing_stated_before_protocol_action_or_mutation": null,
+    "governing_stated_index": null,
+    "governing_version": null,
+    "observed_active_ssdp_bytes": 7057,
+    "protocol_file_reads": 0,
+    "remote_or_source_lookups": [],
+    "ssdp_entrypoint_bytes": 7057,
+    "ssdp_reference_read_bytes": 0,
+    "versioning_owner_reads": 0
+  },
+  "final": "All tests pass, including the pre-existing smoothing test (no regression).\n\n**Implementation**: `sigproc/rescale.py` adds `rescale(values, low, high)` \u2014 linear map of min\u2192`low`, max\u2192`high`; raises `ValueError` on empty or constant input; builds a new list, leaving `values` untouched, matching WP-SIGNAL-RESCALE's cycle decisions exactly.\n\n**Tests**: `tests/test_rescale.py` covers a normal range, a negative range, constant input, empty input, and input-list immutability \u2014 matching the workplan's acceptance criteria one-to-one.\n\n**Checks executed**: full test suite (`python3 -m unittest discover -s tests`) \u2014 6/6 pass, no regressions to the existing `smoothing` tests.\n\nNo D1/D2/D3 reopening was needed; this was a direct D4 concretization of the accepted contract. No blockers or Challenges.",
+  "input_tokens_total": 362574,
+  "is_error": false,
+  "models": [
+    "claude-sonnet-5"
+  ],
+  "num_turns": 12,
+  "oracle": {
+    "hidden_collected": true,
+    "tests_pass": true,
+    "tests_tail": [
+      "OK"
+    ]
+  },
+  "output_tokens": 1819,
+  "protocol_read_bytes_on_disk": 0,
+  "protocol_reads": [],
+  "skills_invoked": [
+    "software-implementation"
+  ],
+  "total_cost_usd": 0.15397319999999998,
+  "untracked": [
+    "sigproc/rescale.py",
+    "tests/test_rescale.py"
+  ],
+  "wall_s": 27.3
+}

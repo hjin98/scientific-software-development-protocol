@@ -1,0 +1,64 @@
+diff --git a/README.md b/README.md
+index 700e2ab..f0a1087 100644
+--- a/README.md
++++ b/README.md
+@@ -5,3 +5,4 @@ Small descriptive-statistics helpers.
+ ## API
+ 
+ - `stats.describe.mean(values)` — arithmetic mean; raises `ValueError` for an empty sample.
++- `stats.describe.median(values)` — median; raises `ValueError` for an empty sample.
+diff --git a/stats/describe.py b/stats/describe.py
+index b40ee45..e9928ad 100644
+--- a/stats/describe.py
++++ b/stats/describe.py
+@@ -6,3 +6,15 @@ def mean(values):
+     if not values:
+         raise ValueError("mean of an empty sample")
+     return sum(values) / len(values)
++
++
++def median(values):
++    """Median of ``values``; raises ``ValueError`` for an empty sample."""
++    if not values:
++        raise ValueError("median of an empty sample")
++    ordered = sorted(values)
++    n = len(ordered)
++    mid = n // 2
++    if n % 2:
++        return ordered[mid]
++    return (ordered[mid - 1] + ordered[mid]) / 2
+diff --git a/tests/test_describe.py b/tests/test_describe.py
+index 66cae7b..6976c8d 100644
+--- a/tests/test_describe.py
++++ b/tests/test_describe.py
+@@ -1,6 +1,6 @@
+ import unittest
+ 
+-from stats.describe import mean
++from stats.describe import mean, median
+ 
+ 
+ class MeanTests(unittest.TestCase):
+@@ -12,5 +12,22 @@ class MeanTests(unittest.TestCase):
+             mean([])
+ 
+ 
++class MedianTests(unittest.TestCase):
++    def test_median_odd(self):
++        self.assertEqual(median([1, 3, 2]), 2)
++
++    def test_median_even(self):
++        self.assertEqual(median([1, 2, 3, 4]), 2.5)
++
++    def test_median_unsorted_input_unchanged(self):
++        values = [5, 1, 3]
++        median(values)
++        self.assertEqual(values, [5, 1, 3])
++
++    def test_empty(self):
++        with self.assertRaises(ValueError):
++            median([])
++
++
+ if __name__ == "__main__":
+     unittest.main()

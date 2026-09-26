@@ -1,0 +1,45 @@
+{
+  "duration_ms": 42467,
+  "entry_and_burden": {
+    "first_mutation_detail": null,
+    "first_mutation_index": null,
+    "first_protocol_action_detail": null,
+    "first_protocol_action_index": null,
+    "governing_knowable_index": 2,
+    "governing_stated_before_mutation": true,
+    "governing_stated_before_protocol_action_or_mutation": true,
+    "governing_stated_index": 8,
+    "governing_version": "6.2.0",
+    "observed_active_ssdp_bytes": 22868,
+    "protocol_file_reads": 3,
+    "remote_or_source_lookups": [],
+    "ssdp_entrypoint_bytes": 8962,
+    "ssdp_reference_read_bytes": 13906,
+    "versioning_owner_reads": 1
+  },
+  "final": "Confirmed: the only installed source in this project is the `6.6.0` package; there's no `PROTOCOL-RELEASE-STATE.yaml` and no local 6.2.0 source anywhere in the repo.\n\nThis is a protocol-binding blocker, not just a formality:\n\n- WP-SIGNAL-CLIP.md declares `protocol_version: 6.2.0`.\n- The only installed skill package here is `6.6.0` \u2014 a cross-minor successor. Per this package's own versioning rules, a cross-minor successor is explicitly \"an adoption candidate, never the source of work bound to the older version\" (6.2 \u2192 6.6 is the literal example given).\n- Resolution requires either an installed/local source of 6.2.0, or an exact immutable public-source ref mapped for 6.2.0 in a project `PROTOCOL-RELEASE-STATE.yaml`. Neither exists in this repo.\n\nSo I can't execute Stage 2 under this package's authority without silently reinterpreting the workplan under a newer protocol than it's bound to \u2014 that's the thing the entry contract specifically forbids.\n\nTwo ways to close this, your call:\n\n1. **Explicit adoption** \u2014 you (as the authority owning WP-SIGNAL-CLIP) decide to rebind the workplan to 6.6.0. I'd update the workplan's `protocol_version` field to reflect that decision, then proceed.\n2. **Point me to a 6.2.0 source** \u2014 if one exists somewhere I haven't looked, I'll use that instead.\n\nGiven Stage 2 is a small, self-contained addition (`clip_values`) with no scientific/numerical/architectural content at stake, adoption is probably the pragmatic choice \u2014 but that's a call for you to make, not one I can make for you. How would you like to proceed?",
+  "input_tokens_total": 389490,
+  "is_error": false,
+  "models": [
+    "claude-sonnet-5"
+  ],
+  "num_turns": 9,
+  "oracle": {
+    "hidden_collected": true,
+    "tests_pass": false,
+    "tests_tail": [
+      "FAILED (errors=1)"
+    ]
+  },
+  "output_tokens": 3265,
+  "protocol_read_bytes_on_disk": 13906,
+  "protocol_reads": [
+    "software-implementation/references/protocol-versioning-and-compatibility.md"
+  ],
+  "skills_invoked": [
+    "software-implementation"
+  ],
+  "total_cost_usd": 0.19630860000000003,
+  "untracked": [],
+  "wall_s": 43.2
+}

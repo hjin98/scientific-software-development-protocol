@@ -1,0 +1,33 @@
+{
+  "duration_ms": 3726,
+  "entry_and_burden": {
+    "first_mutation_detail": null,
+    "first_mutation_index": null,
+    "first_protocol_action_detail": null,
+    "first_protocol_action_index": null,
+    "governing_knowable_index": null,
+    "governing_stated_before_mutation": null,
+    "governing_stated_before_protocol_action_or_mutation": null,
+    "governing_stated_index": null,
+    "governing_version": null,
+    "observed_active_ssdp_bytes": 0,
+    "protocol_file_reads": 0,
+    "remote_or_source_lookups": [],
+    "ssdp_entrypoint_bytes": 0,
+    "ssdp_reference_read_bytes": 0,
+    "versioning_owner_reads": 0
+  },
+  "final": "Golden leaves drift down through cooling air,\nPainting sidewalks with autumn's flair,\nCrimson, amber, and burnt orange hue,\nWhisper goodbye as summer withdrew.",
+  "input_tokens_total": 34904,
+  "is_error": false,
+  "models": [
+    "claude-sonnet-5"
+  ],
+  "num_turns": 1,
+  "output_tokens": 69,
+  "protocol_read_bytes_on_disk": 0,
+  "protocol_reads": [],
+  "skills_invoked": [],
+  "total_cost_usd": 0.0421442,
+  "wall_s": 5.0
+}

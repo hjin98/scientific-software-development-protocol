@@ -1,0 +1,47 @@
+{
+  "duration_ms": 63331,
+  "entry_and_burden": {
+    "first_mutation_detail": null,
+    "first_mutation_index": null,
+    "first_protocol_action_detail": null,
+    "first_protocol_action_index": null,
+    "governing_knowable_index": 2,
+    "governing_stated_before_mutation": true,
+    "governing_stated_before_protocol_action_or_mutation": true,
+    "governing_stated_index": 8,
+    "governing_version": "6.2.0",
+    "observed_active_ssdp_bytes": 22991,
+    "protocol_file_reads": 3,
+    "remote_or_source_lookups": [],
+    "ssdp_entrypoint_bytes": 8962,
+    "ssdp_reference_read_bytes": 14029,
+    "versioning_owner_reads": 1
+  },
+  "final": "No installed/local source of protocol `6.2.0` exists in this repo, and there's no `PROTOCOL-RELEASE-STATE.yaml` (or equivalent) mapping a public-source fallback for it either. That's the two things the entry-contract version check requires before I can execute a 6.2.0-bound workplan under the 6.6.0 package \u2014 neither exists, so per the entry contract this is a **protocol non-closure**, not something I can bypass by just using the loaded 6.6.0 doctrine.\n\nTo be clear on the substance (this isn't a scientific/numerical/architectural issue): Stage 2 itself is a plain, fully-specified D4 task \u2014 one pure function (`clip_values`) plus tests \u2014 and 6.6.0 is documented as a compatible reorganization that preserves 6.2.0's capabilities, so there's no known doctrine conflict that would actually change the outcome here. But the entry contract is explicit that compatibility/belief-it-doesn't-matter doesn't substitute for adoption, and I'm not permitted to self-adopt a successor version for someone else's workplan binding.\n\nOptions, your call:\n1. **Point me to an actual 6.2.0 source** (another checkout, package, or repo) if one exists, and I'll use that.\n2. **Explicitly authorize adoption**: update `WP-SIGNAL-CLIP.md`'s `protocol_version` to `6.6.0` (or add a note ratifying its use), which lets me proceed under the loaded package with no other changes needed.\n3. Tell me to proceed anyway on your authority as a one-off exception (I'll note this in the completion report as an explicit override rather than a self-adoption).\n\nWhich would you like?",
+  "input_tokens_total": 445406,
+  "is_error": false,
+  "models": [
+    "claude-sonnet-5"
+  ],
+  "num_turns": 10,
+  "oracle": {
+    "hidden_collected": true,
+    "tests_pass": false,
+    "tests_tail": [
+      "FAILED (errors=1)"
+    ]
+  },
+  "output_tokens": 4887,
+  "protocol_read_bytes_on_disk": 14029,
+  "protocol_reads": [
+    "software-implementation/references/protocol-versioning-and-compatibility.md",
+    "software-implementation/PROTOCOL_VERSION",
+    "software-implementation/protocol-manifest.json"
+  ],
+  "skills_invoked": [
+    "software-implementation"
+  ],
+  "total_cost_usd": 0.23236800000000002,
+  "untracked": [],
+  "wall_s": 64.2
+}

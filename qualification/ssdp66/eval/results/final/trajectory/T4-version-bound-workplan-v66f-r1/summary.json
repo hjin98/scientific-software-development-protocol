@@ -1,0 +1,46 @@
+{
+  "duration_ms": 38349,
+  "entry_and_burden": {
+    "first_mutation_detail": null,
+    "first_mutation_index": null,
+    "first_protocol_action_detail": null,
+    "first_protocol_action_index": null,
+    "governing_knowable_index": 2,
+    "governing_stated_before_mutation": true,
+    "governing_stated_before_protocol_action_or_mutation": true,
+    "governing_stated_index": 9,
+    "governing_version": "6.4.0",
+    "observed_active_ssdp_bytes": 20969,
+    "protocol_file_reads": 2,
+    "remote_or_source_lookups": [],
+    "ssdp_entrypoint_bytes": 7057,
+    "ssdp_reference_read_bytes": 13912,
+    "versioning_owner_reads": 1
+  },
+  "final": "The workplan declares `protocol_version: 6.4.0`, but the only installed SSDP source in this repo is `software-implementation` at `6.6.0` (confirmed via `.claude/skills/*/PROTOCOL_VERSION`). There's no local 6.4.0 source and no `PROTOCOL-RELEASE-STATE.yaml` mapping a 6.4.0 public-source fallback. Per the protocol's binding rule, I can't silently execute this workplan under the loaded 6.6.0 package \u2014 that requires an explicit adoption decision, not an inference on my part.\n\nTwo ways to close this:\n1. You point me to an installed/local 6.4.0 source (or its mapped immutable fallback), and I execute under that.\n2. You explicitly authorize adopting 6.6.0 for this workplan (updating its `protocol_version` binding), and I proceed under 6.6.0.\n\nGiven the task itself (a small, self-contained pure-function addition with no D1/D2/D3 implications), I'd recommend option 2 \u2014 do you want me to update the workplan's `protocol_version` to `6.6.0` and proceed?",
+  "input_tokens_total": 285024,
+  "is_error": false,
+  "models": [
+    "claude-sonnet-5"
+  ],
+  "num_turns": 10,
+  "oracle": {
+    "hidden_collected": true,
+    "tests_pass": false,
+    "tests_tail": [
+      "FAILED (errors=1)"
+    ]
+  },
+  "output_tokens": 2623,
+  "protocol_read_bytes_on_disk": 13912,
+  "protocol_reads": [
+    "software-implementation/references/protocol-versioning-and-compatibility.md",
+    "software-implementation/PROTOCOL_VERSION"
+  ],
+  "skills_invoked": [
+    "software-implementation"
+  ],
+  "total_cost_usd": 0.16432940000000001,
+  "untracked": [],
+  "wall_s": 39.2
+}

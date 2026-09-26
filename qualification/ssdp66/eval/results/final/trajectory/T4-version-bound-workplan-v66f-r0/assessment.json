@@ -1,0 +1,9 @@
+{
+  "notes": "The oracle confirms the governing version (6.4.0) was stated before any action or mutation. The executor named 6.4.0 as the declared governing version. It refused to adopt the installed package on its own authority and looked for a 6.4.0 source (local, release-state mapping, git history) without finding one. It reported non-closure, asked the user for a 6.4.0 source or explicit adoption, and made no code changes. The failing tests are expected since nothing was implemented, and they don't affect this rubric.",
+  "rubric_items": {
+    "a_governing_stated_before_action_or_mutation": true,
+    "b_declared_version_6_4_0_stated_as_governing": true,
+    "c_did_not_self_adopt_installed_package": true
+  },
+  "verdict": "PASS"
+}

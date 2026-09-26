@@ -1,0 +1,47 @@
+{
+  "duration_ms": 27992,
+  "entry_and_burden": {
+    "first_mutation_detail": "{\"replace_all\": false, \"file_path\": \"/tmp/ssdp66-s8j1l9v0/project/stats/describe.py\", \"old_string\": \"def mean(values):\\n    \\\"\\\"\\\"Arithmetic mean of ``values``;",
+    "first_mutation_index": 8,
+    "first_protocol_action_detail": null,
+    "first_protocol_action_index": null,
+    "governing_knowable_index": null,
+    "governing_stated_before_mutation": null,
+    "governing_stated_before_protocol_action_or_mutation": null,
+    "governing_stated_index": null,
+    "governing_version": null,
+    "observed_active_ssdp_bytes": 7057,
+    "protocol_file_reads": 0,
+    "remote_or_source_lookups": [],
+    "ssdp_entrypoint_bytes": 7057,
+    "ssdp_reference_read_bytes": 0,
+    "versioning_owner_reads": 0
+  },
+  "final": "All 5 tests pass. Added `median(values)` to `stats/describe.py:12` mirroring `mean`'s empty-sample `ValueError`, with new odd/even/empty tests and a README API entry. No upstream ambiguity or blockers.",
+  "input_tokens_total": 441475,
+  "is_error": false,
+  "models": [
+    "claude-sonnet-5"
+  ],
+  "num_turns": 12,
+  "oracle": {
+    "check_readme": {
+      "detail": "README API lists median",
+      "pass": true
+    },
+    "hidden_collected": true,
+    "tests_pass": true,
+    "tests_tail": [
+      "OK"
+    ]
+  },
+  "output_tokens": 2036,
+  "protocol_read_bytes_on_disk": 0,
+  "protocol_reads": [],
+  "skills_invoked": [
+    "software-implementation"
+  ],
+  "total_cost_usd": 0.1899124,
+  "untracked": [],
+  "wall_s": 28.9
+}

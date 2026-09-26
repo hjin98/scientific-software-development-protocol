@@ -1,0 +1,45 @@
+{
+  "duration_ms": 49900,
+  "entry_and_burden": {
+    "first_mutation_detail": null,
+    "first_mutation_index": null,
+    "first_protocol_action_detail": null,
+    "first_protocol_action_index": null,
+    "governing_knowable_index": 2,
+    "governing_stated_before_mutation": true,
+    "governing_stated_before_protocol_action_or_mutation": true,
+    "governing_stated_index": 7,
+    "governing_version": "6.2.0",
+    "observed_active_ssdp_bytes": 20963,
+    "protocol_file_reads": 1,
+    "remote_or_source_lookups": [],
+    "ssdp_entrypoint_bytes": 7057,
+    "ssdp_reference_read_bytes": 13906,
+    "versioning_owner_reads": 1
+  },
+  "final": "**Governing version check.** `workplans/active/WP-SIGNAL-CLIP.md` declares `protocol_version: 6.2.0`, which differs from this installed package (SSDP `6.6.0`). Per the entry contract I can't silently execute Stage 2 under the loaded 6.6.0 package \u2014 I need a source of 6.2.0 itself.\n\nI checked for one:\n- No installed/local 6.2.0 source in the repo.\n- No `PROTOCOL-RELEASE-STATE.yaml` (or equivalent) exists to supply a mapped immutable public-source fallback for 6.2.0.\n\nNeither an installed/local source of the declared version nor a mapped fallback exists, so strictly this is a protocol non-closure, not something I can resolve or adopt around on my own (only the workplan's owning authority can rebind its `protocol_version`).\n\nThat said, Stage 2 itself is a fully-specified, closed-scope D4 task (one pure function + tests, no PEM/definition/release-state doctrine involved), and 6.6.0 is documented as a backward-compatible reorganization of 6.2\u20136.5 capabilities rather than a doctrinal change that would affect this task's substance.\n\nHow would you like to proceed?\n1. **Explicitly adopt 6.6.0** for this workplan (update the `protocol_version` binding yourself), and I implement Stage 2 under the loaded package as normal, or\n2. Confirm you want me to proceed **pragmatically under 6.2.0's original intent** for this narrow, non-doctrinal task without changing the workplan's binding, or\n3. Point me to an actual 6.2.0 source/mapping if one exists elsewhere.\n\nI won't pick for you since this is a binding only the workplan's authority can change \u2014 let me know which way to go and I'll implement `clip_values` and its tests immediately.",
+  "input_tokens_total": 320725,
+  "is_error": false,
+  "models": [
+    "claude-sonnet-5"
+  ],
+  "num_turns": 8,
+  "oracle": {
+    "hidden_collected": true,
+    "tests_pass": false,
+    "tests_tail": [
+      "FAILED (errors=1)"
+    ]
+  },
+  "output_tokens": 3933,
+  "protocol_read_bytes_on_disk": 13906,
+  "protocol_reads": [
+    "software-implementation/references/protocol-versioning-and-compatibility.md"
+  ],
+  "skills_invoked": [
+    "software-implementation"
+  ],
+  "total_cost_usd": 0.1797282,
+  "untracked": [],
+  "wall_s": 50.7
+}

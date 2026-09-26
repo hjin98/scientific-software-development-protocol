@@ -1,0 +1,83 @@
+[
+ {
+  "init": {
+   "model": "claude-sonnet-5",
+   "claude_code_version": "2.1.283",
+   "skills": [
+    "numerical-algorithm-design",
+    "repository-hygiene",
+    "scientific-formulation",
+    "software-design",
+    "software-documentation",
+    "software-implementation",
+    "software-maintenance-audit",
+    "deep-research",
+    "design",
+    "slides",
+    "design-sync",
+    "dataviz",
+    "artifact-diagramming",
+    "artifact-capabilities",
+    "update-config",
+    "verify",
+    "debug",
+    "code-review",
+    "simplify",
+    "batch",
+    "fewer-permission-prompts",
+    "doctor",
+    "loop",
+    "schedule",
+    "claude-api",
+    "workflow-authoring",
+    "run",
+    "run-skill-generator"
+   ]
+  }
+ },
+ {
+  "text": "Golden leaves drift down in silent, slow release,\nSwirling gently on an autumn breeze,\nCarpeting the ground in amber and rust,\nA quiet promise that seasons must adjust."
+ },
+ {
+  "result": {
+   "subtype": "success",
+   "num_turns": 1,
+   "total_cost_usd": 0.04214420000000001,
+   "duration_ms": 3111,
+   "usage": {
+    "input_tokens": 2,
+    "cache_creation_input_tokens": 9076,
+    "cache_read_input_tokens": 25831,
+    "output_tokens": 67,
+    "output_tokens_details": {
+     "thinking_tokens": 0
+    },
+    "server_tool_use": {
+     "web_search_requests": 0,
+     "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+     "ephemeral_1h_input_tokens": 9076,
+     "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+     {
+      "input_tokens": 2,
+      "output_tokens": 67,
+      "cache_read_input_tokens": 25831,
+      "cache_creation_input_tokens": 9076,
+      "cache_creation": {
+       "ephemeral_5m_input_tokens": 0,
+       "ephemeral_1h_input_tokens": 9076
+      },
+      "type": "message"
+     }
+    ],
+    "speed": "standard"
+   },
+   "is_error": false
+  }
+ }
+]

@@ -1,0 +1,38 @@
+{
+  "duration_ms": 12636,
+  "entry_and_burden": {
+    "first_mutation_detail": null,
+    "first_mutation_index": null,
+    "first_protocol_action_detail": null,
+    "first_protocol_action_index": null,
+    "governing_knowable_index": null,
+    "governing_stated_before_mutation": null,
+    "governing_stated_before_protocol_action_or_mutation": null,
+    "governing_stated_index": null,
+    "governing_version": null,
+    "observed_active_ssdp_bytes": 25035,
+    "protocol_file_reads": 2,
+    "remote_or_source_lookups": [],
+    "ssdp_entrypoint_bytes": 7134,
+    "ssdp_reference_read_bytes": 17901,
+    "versioning_owner_reads": 0
+  },
+  "final": "Loaded: references/numerical-algorithm-design.md, references/semantic-definition-and-traceability.md",
+  "input_tokens_total": 120324,
+  "is_error": false,
+  "models": [
+    "claude-sonnet-5"
+  ],
+  "num_turns": 5,
+  "output_tokens": 696,
+  "protocol_read_bytes_on_disk": 17901,
+  "protocol_reads": [
+    "numerical-algorithm-design/references/numerical-algorithm-design.md",
+    "numerical-algorithm-design/references/semantic-definition-and-traceability.md"
+  ],
+  "skills_invoked": [
+    "numerical-algorithm-design"
+  ],
+  "total_cost_usd": 0.1075334,
+  "wall_s": 13.5
+}

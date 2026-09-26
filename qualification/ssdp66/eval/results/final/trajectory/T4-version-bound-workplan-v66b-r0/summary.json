@@ -1,0 +1,45 @@
+{
+  "duration_ms": 42604,
+  "entry_and_burden": {
+    "first_mutation_detail": null,
+    "first_mutation_index": null,
+    "first_protocol_action_detail": null,
+    "first_protocol_action_index": null,
+    "governing_knowable_index": 2,
+    "governing_stated_before_mutation": true,
+    "governing_stated_before_protocol_action_or_mutation": true,
+    "governing_stated_index": 9,
+    "governing_version": "6.4.0",
+    "observed_active_ssdp_bytes": 22868,
+    "protocol_file_reads": 3,
+    "remote_or_source_lookups": [],
+    "ssdp_entrypoint_bytes": 8962,
+    "ssdp_reference_read_bytes": 13906,
+    "versioning_owner_reads": 1
+  },
+  "final": "Before touching any files: the workplan declares `protocol_version: 6.4.0`, but the only SSDP source installed in this repo is `6.6.0` (a cross-minor successor, not a source of 6.4.0), and there's no local 6.4.0 source, no `PROTOCOL-RELEASE-STATE.yaml` mapping, and no git history containing an older protocol snapshot. Per the protocol's own binding rule, I can't silently execute this workplan under 6.6.0 \u2014 that would be a self-adoption, which the protocol explicitly forbids.\n\nThis is a procedural version-binding gap, not a substantive blocker on the actual work (the 6.4\u21926.6 diffs are about definition/source discipline, release-state ownership, and reorganization \u2014 not doctrine that would change what \"add a pressure conversion function with these acceptance criteria\" means). So rather than stall on it, I'll ask you directly:\n\nDo you want me to treat this as an explicit adoption of 6.6.0 for this workplan (I'll note that in the workplan/commit), or do you have a 6.4.0 protocol source you want me to use instead?",
+  "input_tokens_total": 290171,
+  "is_error": false,
+  "models": [
+    "claude-sonnet-5"
+  ],
+  "num_turns": 10,
+  "oracle": {
+    "hidden_collected": true,
+    "tests_pass": false,
+    "tests_tail": [
+      "FAILED (errors=1)"
+    ]
+  },
+  "output_tokens": 3304,
+  "protocol_read_bytes_on_disk": 13906,
+  "protocol_reads": [
+    "software-implementation/references/protocol-versioning-and-compatibility.md"
+  ],
+  "skills_invoked": [
+    "software-implementation"
+  ],
+  "total_cost_usd": 0.17742040000000003,
+  "untracked": [],
+  "wall_s": 43.3
+}

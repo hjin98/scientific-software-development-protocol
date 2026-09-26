@@ -345,7 +345,13 @@ def entry_and_burden(reduced: list[dict], governing: str | None, dist: Path | No
         if tool in {"WebFetch", "WebSearch"} or (tool == "Bash" and LOOKUP_RE.search(raw)):
             lookups.append(raw[:120])
         if tool == "Skill":
-            name = json.loads(raw).get("skill") if raw.startswith("{") else None
+            # recorded inputs are truncated at 400 chars; a long Skill argument must not crash
+            # the run (same guarded parse as ordering_events; the skill name comes first)
+            try:
+                name = json.loads(raw).get("skill") if raw.startswith("{") else None
+            except json.JSONDecodeError:
+                found = re.match(r'\{"skill": "([^"]+)"', raw)
+                name = found.group(1) if found else None
             if name in SSDP_SKILLS:
                 skills.append(name)
         if tool in {"Read", "Grep", "Glob", "Bash"} and ".claude/skills/" in raw:

@@ -1,0 +1,38 @@
+{
+  "duration_ms": 30852,
+  "entry_and_burden": {
+    "first_mutation_detail": null,
+    "first_mutation_index": null,
+    "first_protocol_action_detail": null,
+    "first_protocol_action_index": null,
+    "governing_knowable_index": null,
+    "governing_stated_before_mutation": null,
+    "governing_stated_before_protocol_action_or_mutation": null,
+    "governing_stated_index": null,
+    "governing_version": null,
+    "observed_active_ssdp_bytes": 31961,
+    "protocol_file_reads": 2,
+    "remote_or_source_lookups": [],
+    "ssdp_entrypoint_bytes": 7057,
+    "ssdp_reference_read_bytes": 24904,
+    "versioning_owner_reads": 0
+  },
+  "final": "This is a routing check only, so I loaded exactly the files the routing directs for this task: the mandatory D4 spec file plus the triggered security/trust-boundary owner (subprocess data-flow claim).\n\nFiles loaded: `references/specification-and-implementation.md`, `references/security-and-trust-boundaries.md`",
+  "input_tokens_total": 165995,
+  "is_error": false,
+  "models": [
+    "claude-sonnet-5"
+  ],
+  "num_turns": 5,
+  "output_tokens": 2177,
+  "protocol_read_bytes_on_disk": 24904,
+  "protocol_reads": [
+    "software-implementation/references/specification-and-implementation.md",
+    "software-implementation/references/security-and-trust-boundaries.md"
+  ],
+  "skills_invoked": [
+    "software-implementation"
+  ],
+  "total_cost_usd": 0.1448914,
+  "wall_s": 31.6
+}

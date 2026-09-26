@@ -1,0 +1,38 @@
+{
+  "duration_ms": 16892,
+  "entry_and_burden": {
+    "first_mutation_detail": null,
+    "first_mutation_index": null,
+    "first_protocol_action_detail": null,
+    "first_protocol_action_index": null,
+    "governing_knowable_index": null,
+    "governing_stated_before_mutation": null,
+    "governing_stated_before_protocol_action_or_mutation": null,
+    "governing_stated_index": null,
+    "governing_version": null,
+    "observed_active_ssdp_bytes": 21556,
+    "protocol_file_reads": 2,
+    "remote_or_source_lookups": [],
+    "ssdp_entrypoint_bytes": 7057,
+    "ssdp_reference_read_bytes": 14499,
+    "versioning_owner_reads": 0
+  },
+  "final": "Loaded: `references/specification-and-implementation.md`, `references/scientific-formulation.md`\n\nThis task changes the reported observable (mean \u2192 median residence time), which the routing table sends to D1 before any D4 work \u2014 so per the pre-routing kernel, it should not be implemented as a D4 change; it needs to be routed to the scientific-formulation skill as a potential D1 authority change (or Serious Challenge) first.",
+  "input_tokens_total": 118996,
+  "is_error": false,
+  "models": [
+    "claude-sonnet-5"
+  ],
+  "num_turns": 5,
+  "output_tokens": 971,
+  "protocol_read_bytes_on_disk": 14499,
+  "protocol_reads": [
+    "software-implementation/references/specification-and-implementation.md",
+    "software-implementation/references/scientific-formulation.md"
+  ],
+  "skills_invoked": [
+    "software-implementation"
+  ],
+  "total_cost_usd": 0.10526400000000001,
+  "wall_s": 17.7
+}
