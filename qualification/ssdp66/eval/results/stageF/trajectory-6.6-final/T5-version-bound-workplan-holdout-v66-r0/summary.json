@@ -1,0 +1,28 @@
+{
+  "duration_ms": 34247,
+  "final": "All tests pass.\n\n**Implementation**: Added `tabular/header.py` with `read_header(path)`, reading the first line, splitting on `,`, stripping whitespace from each name, raising `ValueError` on an empty file or duplicate column names \u2014 mirroring the existing style in `tabular/rows.py`.\n\n**Tests**: `tests/test_header.py` covers normal headers, whitespace stripping, empty files, and duplicates, per the workplan's acceptance criteria. Full suite (5 tests) passes.\n\nNo upstream contract issues encountered; this is a direct, self-contained D4 concretization of the accepted workplan.",
+  "input_tokens_total": 348451,
+  "is_error": false,
+  "models": [
+    "claude-sonnet-5"
+  ],
+  "num_turns": 14,
+  "oracle": {
+    "tests_pass": true,
+    "tests_tail": [
+      "OK"
+    ]
+  },
+  "output_tokens": 2179,
+  "protocol_read_bytes_on_disk": 0,
+  "protocol_reads": [],
+  "skills_invoked": [
+    "software-implementation"
+  ],
+  "total_cost_usd": 0.1430902,
+  "untracked": [
+    "tabular/header.py",
+    "tests/test_header.py"
+  ],
+  "wall_s": 35.8
+}

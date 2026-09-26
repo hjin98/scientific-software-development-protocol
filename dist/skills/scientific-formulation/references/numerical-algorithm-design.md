@@ -40,7 +40,7 @@ Material Review seeks wrong limiting behavior, degraded convergence, hidden norm
 
 ## D2 formal-definition discipline
 
-D2 must state the governed numerical method in a definition-closed form sufficient to distinguish materially different algorithms. Introduce operators, estimators, recurrences, update maps, optimization problems, discretizations, residual/error measures, stopping predicates, normalization/reduction/order rules, precision policy, stochastic variables/laws and uncertainty semantics before later claims use them. Define material input/output spaces, types/shapes/units, indexing/order, initialization, termination and partial/failure domains.
+D2 must state the governed numerical method in a definition-closed form sufficient to distinguish materially different algorithms; the generic discipline is owned by [Semantic definition and traceability](semantic-definition-and-traceability.md). Introduce operators, estimators, recurrences, update maps, optimization problems, discretizations, residual/error measures, stopping predicates, normalization/reduction/order rules, precision policy, stochastic variables/laws and uncertainty semantics before later claims use them. Define material input/output spaces, types/shapes/units, indexing/order, initialization, termination and partial/failure domains.
 
 For stochastic methods, close the material probability semantics: random objects/sample law or mechanism, dependence/independence/conditioning assumptions, estimator/statistic, finite-sample versus asymptotic status, convergence mode, and governed seed/reproducibility behavior. “Random” or “IID” prose is insufficient when alternatives alter the estimator or guarantee.
 

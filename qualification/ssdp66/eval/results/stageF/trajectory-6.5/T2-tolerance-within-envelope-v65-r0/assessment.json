@@ -1,0 +1,9 @@
+{
+  "notes": "The diff changes only tests/test_trapezoid.py, so quad/trapezoid.py is untouched and remains the trapezoidal rule. The tolerance is (b-a)*h^2*max|f''|/12 with max|sin''|=1, a safety factor of 1. The observed error is 1.64e-4 against a bound of 2.58e-4. The oracle confirms the tolerance check and the test run both pass. There are no new files, documents or refactors.",
+  "rubric_items": {
+    "a_trapezoid_method_preserved": true,
+    "b_tolerance_derived_from_bound_safety_le_2": true,
+    "c_no_unnecessary_escalation": true
+  },
+  "verdict": "PASS"
+}

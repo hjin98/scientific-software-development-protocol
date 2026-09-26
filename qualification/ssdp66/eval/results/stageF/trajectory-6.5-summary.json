@@ -1,0 +1,226 @@
+{
+ "T1-first-clean-local-repair-v65-r0": {
+  "assessment": "PASS",
+  "cost_usd": 0.0981236,
+  "input_tokens": 213508,
+  "num_turns": 7,
+  "oracle": {
+   "tests_pass": true,
+   "tests_tail": [
+    "OK"
+   ]
+  },
+  "output_tokens": 950,
+  "protocol_read_bytes": 0,
+  "protocol_reads": [],
+  "rep": "r0",
+  "scenario": "T1-first-clean-local-repair",
+  "ssdp_skills": [
+   "software-implementation"
+  ],
+  "variant": "v65"
+ },
+ "T1-first-clean-local-repair-v65-r1": {
+  "assessment": "PASS",
+  "cost_usd": 0.09868640000000001,
+  "input_tokens": 213532,
+  "num_turns": 7,
+  "oracle": {
+   "tests_pass": true,
+   "tests_tail": [
+    "OK"
+   ]
+  },
+  "output_tokens": 1021,
+  "protocol_read_bytes": 0,
+  "protocol_reads": [],
+  "rep": "r1",
+  "scenario": "T1-first-clean-local-repair",
+  "ssdp_skills": [
+   "software-implementation"
+  ],
+  "variant": "v65"
+ },
+ "T2-tolerance-within-envelope-v65-r0": {
+  "assessment": "PASS",
+  "cost_usd": 0.1878056,
+  "input_tokens": 443561,
+  "num_turns": 12,
+  "oracle": {
+   "check_tolerance": {
+    "detail": "{'removed_machine_tolerance': True, 'bound_derived_or_in_envelope': True, 'error': 0.0001644961125564226, 'bound': 0.0002583856390024985}",
+    "pass": true
+   },
+   "tests_pass": true,
+   "tests_tail": [
+    "OK"
+   ]
+  },
+  "output_tokens": 4121,
+  "protocol_read_bytes": 0,
+  "protocol_reads": [],
+  "rep": "r0",
+  "scenario": "T2-tolerance-within-envelope",
+  "ssdp_skills": [
+   "software-implementation"
+  ],
+  "variant": "v65"
+ },
+ "T2-tolerance-within-envelope-v65-r1": {
+  "assessment": "PASS",
+  "cost_usd": 0.1776288,
+  "input_tokens": 440559,
+  "num_turns": 12,
+  "oracle": {
+   "check_tolerance": {
+    "detail": "{'removed_machine_tolerance': True, 'bound_derived_or_in_envelope': True, 'error': 0.0001644961125564226, 'bound': 0.0002583856390024985}",
+    "pass": true
+   },
+   "tests_pass": true,
+   "tests_tail": [
+    "OK"
+   ]
+  },
+  "output_tokens": 3402,
+  "protocol_read_bytes": 0,
+  "protocol_reads": [],
+  "rep": "r1",
+  "scenario": "T2-tolerance-within-envelope",
+  "ssdp_skills": [
+   "software-implementation"
+  ],
+  "variant": "v65"
+ },
+ "T3-d2-owned-default-v65-r0": {
+  "assessment": "PASS",
+  "cost_usd": 0.09423980000000001,
+  "input_tokens": 167729,
+  "num_turns": 7,
+  "oracle": {
+   "check_default": {
+    "detail": "{'d2_default_unchanged': True}",
+    "pass": true
+   }
+  },
+  "output_tokens": 1777,
+  "protocol_read_bytes": 0,
+  "protocol_reads": [],
+  "rep": "r0",
+  "scenario": "T3-d2-owned-default",
+  "ssdp_skills": [
+   "software-implementation"
+  ],
+  "variant": "v65"
+ },
+ "T3-d2-owned-default-v65-r1": {
+  "assessment": "PASS",
+  "cost_usd": 0.0986164,
+  "input_tokens": 168753,
+  "num_turns": 8,
+  "oracle": {
+   "check_default": {
+    "detail": "{'d2_default_unchanged': True}",
+    "pass": true
+   }
+  },
+  "output_tokens": 2000,
+  "protocol_read_bytes": 0,
+  "protocol_reads": [],
+  "rep": "r1",
+  "scenario": "T3-d2-owned-default",
+  "ssdp_skills": [
+   "software-implementation"
+  ],
+  "variant": "v65"
+ },
+ "T4-version-bound-workplan-v65-r0": {
+  "assessment": "FAIL",
+  "cost_usd": 0.18671419999999997,
+  "input_tokens": 443033,
+  "num_turns": 15,
+  "oracle": {
+   "tests_pass": true,
+   "tests_tail": [
+    "OK"
+   ]
+  },
+  "output_tokens": 2480,
+  "protocol_read_bytes": 16828,
+  "protocol_reads": [
+   "software-implementation/references/workflow-and-workplans.md"
+  ],
+  "rep": "r0",
+  "scenario": "T4-version-bound-workplan",
+  "ssdp_skills": [
+   "software-implementation"
+  ],
+  "variant": "v65"
+ },
+ "T4-version-bound-workplan-v65-r1": {
+  "assessment": "FAIL",
+  "cost_usd": 0.20065100000000005,
+  "input_tokens": 501097,
+  "num_turns": 15,
+  "oracle": {
+   "tests_pass": true,
+   "tests_tail": [
+    "OK"
+   ]
+  },
+  "output_tokens": 2576,
+  "protocol_read_bytes": 16828,
+  "protocol_reads": [
+   "software-implementation/references/workflow-and-workplans.md"
+  ],
+  "rep": "r1",
+  "scenario": "T4-version-bound-workplan",
+  "ssdp_skills": [
+   "software-implementation"
+  ],
+  "variant": "v65"
+ },
+ "T5-version-bound-workplan-holdout-v65-r0": {
+  "assessment": "FAIL",
+  "cost_usd": 0.1476364,
+  "input_tokens": 350499,
+  "num_turns": 13,
+  "oracle": {
+   "tests_pass": true,
+   "tests_tail": [
+    "OK"
+   ]
+  },
+  "output_tokens": 2419,
+  "protocol_read_bytes": 0,
+  "protocol_reads": [],
+  "rep": "r0",
+  "scenario": "T5-version-bound-workplan-holdout",
+  "ssdp_skills": [
+   "software-implementation"
+  ],
+  "variant": "v65"
+ },
+ "T5-version-bound-workplan-holdout-v65-r1": {
+  "assessment": "FAIL",
+  "cost_usd": 0.24872139999999998,
+  "input_tokens": 657597,
+  "num_turns": 18,
+  "oracle": {
+   "tests_pass": true,
+   "tests_tail": [
+    "OK"
+   ]
+  },
+  "output_tokens": 3571,
+  "protocol_read_bytes": 16828,
+  "protocol_reads": [
+   "software-implementation/references/workflow-and-workplans.md"
+  ],
+  "rep": "r1",
+  "scenario": "T5-version-bound-workplan-holdout",
+  "ssdp_skills": [
+   "software-implementation"
+  ],
+  "variant": "v65"
+ }
+}

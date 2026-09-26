@@ -1,0 +1,13 @@
+diff --git a/workplans/completed/WP-CSV-HEADER.md b/workplans/completed/WP-CSV-HEADER.md
+index fa6b4e4..1b11096 100644
+--- a/workplans/completed/WP-CSV-HEADER.md
++++ b/workplans/completed/WP-CSV-HEADER.md
+@@ -2,7 +2,7 @@
+ kind: d3-d4-implementation-workplan
+ workplan_id: WP-CSV-HEADER
+ protocol_version: 6.3.0
+-status: accepted
++status: completed
+ ---
+ 
+ # Read CSV headers

@@ -1,0 +1,16 @@
+{
+  "duration_ms": 4174,
+  "final": "Three solid picks for a long flight:\n\n1. **Project Hail Mary** by Andy Weir \u2014 fast-paced, funny, puzzle-driven survival story in space. Very hard to put down, which is ideal for killing hours.\n2. **The Left Hand of Darkness** by Ursula K. Le Guin \u2014 slower and more literary, a great palate-cleanser if you want something thoughtful rather than plot-twisty.\n3. **Leviathan Wakes** by James S.A. Corey (first Expanse book) \u2014 noir-flavored space opera, page-turner with a big universe to get lost in, and it's the start of a series if you want more for the return flight.",
+  "input_tokens_total": 33969,
+  "is_error": false,
+  "models": [
+    "claude-sonnet-5"
+  ],
+  "num_turns": 1,
+  "output_tokens": 215,
+  "protocol_read_bytes_on_disk": 0,
+  "protocol_reads": [],
+  "skills_invoked": [],
+  "total_cost_usd": 0.034677200000000005,
+  "wall_s": 5.5
+}

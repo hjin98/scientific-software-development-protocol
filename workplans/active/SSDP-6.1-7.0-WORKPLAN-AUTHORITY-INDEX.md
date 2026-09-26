@@ -146,9 +146,10 @@ Current disposition:
 SERIOUS CHALLENGE: NONE
 BASELINE: accepted Protocol 6.5
 WORKPLAN REVIEW: PASS_NONINDEPENDENT_R3 / IMPLEMENTATION-READY
-IMPLEMENTATION STATUS: NOT STARTED
-PEM ACCEPTED-BASE PUBLICATION: REVIEW_REQUIRED — current root memory metadata still reflects 6.4 base + 6.5 candidate overlay
-PROTOCOL 7 EFFECT: NONE YET — if 6.6 becomes accepted, its evidence/capabilities must feed Protocol 7's required deliberate D3 architecture reopen before Protocol 7 D4 authorization
+IMPLEMENTATION STATUS: STAGES A-G COMPLETE ON THE WORKPLAN BRANCH; READY FOR FRESH INDEPENDENT REVIEW (candidate not frozen)
+PEM ACCEPTED-BASE PUBLICATION: RECONCILED — branch overlay binds accepted 6.5 integrated state 23e46543c174a8451bbadc402df63538105eab10 (qualification/ssdp66/STAGE-A-BASELINE-AND-PRESERVATION.md)
+QUALIFICATION RECORD: qualification/ssdp66/STAGE-F-G-EVALUATION-AND-QUALIFICATION.md
+PROTOCOL 7 EFFECT: NONE YET — if 6.6 becomes accepted, its evidence/capabilities (including the Stage F finding that prose-only version/mandatory-read instructions were not followed by the reference harness) must feed Protocol 7's required deliberate D3 architecture reopen before Protocol 7 D4 authorization
 ```
 
 This entry is lifecycle/routing state only. It does not accept 6.6 semantics, authorize publication/cutover, or perform the future independent assembled-candidate Review.

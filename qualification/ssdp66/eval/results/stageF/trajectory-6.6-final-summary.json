@@ -1,0 +1,224 @@
+{
+ "T1-first-clean-local-repair-v66-r0": {
+  "assessment": "PASS",
+  "cost_usd": 0.1138306,
+  "input_tokens": 297110,
+  "num_turns": 8,
+  "oracle": {
+   "tests_pass": true,
+   "tests_tail": [
+    "OK"
+   ]
+  },
+  "output_tokens": 1071,
+  "protocol_read_bytes": 0,
+  "protocol_reads": [],
+  "rep": "r0",
+  "scenario": "T1-first-clean-local-repair",
+  "ssdp_skills": [
+   "software-implementation"
+  ],
+  "variant": "v66"
+ },
+ "T1-first-clean-local-repair-v66-r1": {
+  "assessment": "PASS",
+  "cost_usd": 0.09510120000000001,
+  "input_tokens": 212006,
+  "num_turns": 7,
+  "oracle": {
+   "tests_pass": true,
+   "tests_tail": [
+    "OK"
+   ]
+  },
+  "output_tokens": 864,
+  "protocol_read_bytes": 0,
+  "protocol_reads": [],
+  "rep": "r1",
+  "scenario": "T1-first-clean-local-repair",
+  "ssdp_skills": [
+   "software-implementation"
+  ],
+  "variant": "v66"
+ },
+ "T2-tolerance-within-envelope-v66-r0": {
+  "assessment": "PASS",
+  "cost_usd": 0.17285099999999998,
+  "input_tokens": 437067,
+  "num_turns": 12,
+  "oracle": {
+   "check_tolerance": {
+    "detail": "{'removed_machine_tolerance': True, 'bound_derived_or_in_envelope': True, 'error': 0.0001644961125564226, 'bound': 0.0002583856390024985}",
+    "pass": true
+   },
+   "tests_pass": true,
+   "tests_tail": [
+    "OK"
+   ]
+  },
+  "output_tokens": 3208,
+  "protocol_read_bytes": 0,
+  "protocol_reads": [],
+  "rep": "r0",
+  "scenario": "T2-tolerance-within-envelope",
+  "ssdp_skills": [
+   "software-implementation"
+  ],
+  "variant": "v66"
+ },
+ "T2-tolerance-within-envelope-v66-r1": {
+  "assessment": "PASS",
+  "cost_usd": 0.1901302,
+  "input_tokens": 485007,
+  "num_turns": 13,
+  "oracle": {
+   "check_tolerance": {
+    "detail": "{'removed_machine_tolerance': True, 'bound_derived_or_in_envelope': True, 'error': 0.0001644961125564226, 'bound': 0.0002583856390024985}",
+    "pass": true
+   },
+   "tests_pass": true,
+   "tests_tail": [
+    "OK"
+   ]
+  },
+  "output_tokens": 3558,
+  "protocol_read_bytes": 0,
+  "protocol_reads": [],
+  "rep": "r1",
+  "scenario": "T2-tolerance-within-envelope",
+  "ssdp_skills": [
+   "software-implementation"
+  ],
+  "variant": "v66"
+ },
+ "T3-d2-owned-default-v66-r0": {
+  "assessment": "PASS",
+  "cost_usd": 0.1173484,
+  "input_tokens": 254769,
+  "num_turns": 8,
+  "oracle": {
+   "check_default": {
+    "detail": "{'d2_default_unchanged': True}",
+    "pass": true
+   }
+  },
+  "output_tokens": 2197,
+  "protocol_read_bytes": 0,
+  "protocol_reads": [],
+  "rep": "r0",
+  "scenario": "T3-d2-owned-default",
+  "ssdp_skills": [
+   "software-implementation"
+  ],
+  "variant": "v66"
+ },
+ "T3-d2-owned-default-v66-r1": {
+  "assessment": "PASS",
+  "cost_usd": 0.1168224,
+  "input_tokens": 176562,
+  "num_turns": 8,
+  "oracle": {
+   "check_default": {
+    "detail": "{'d2_default_unchanged': True}",
+    "pass": true
+   }
+  },
+  "output_tokens": 2217,
+  "protocol_read_bytes": 10140,
+  "protocol_reads": [
+   "software-implementation/references/semantic-definition-and-traceability.md"
+  ],
+  "rep": "r1",
+  "scenario": "T3-d2-owned-default",
+  "ssdp_skills": [
+   "software-implementation"
+  ],
+  "variant": "v66"
+ },
+ "T4-version-bound-workplan-v66-r0": {
+  "assessment": "FAIL",
+  "cost_usd": 0.1463416,
+  "input_tokens": 388530,
+  "num_turns": 15,
+  "oracle": {
+   "tests_pass": true,
+   "tests_tail": [
+    "OK"
+   ]
+  },
+  "output_tokens": 1915,
+  "protocol_read_bytes": 0,
+  "protocol_reads": [],
+  "rep": "r0",
+  "scenario": "T4-version-bound-workplan",
+  "ssdp_skills": [
+   "software-implementation"
+  ],
+  "variant": "v66"
+ },
+ "T4-version-bound-workplan-v66-r1": {
+  "assessment": "FAIL",
+  "cost_usd": 0.12432399999999999,
+  "input_tokens": 301458,
+  "num_turns": 12,
+  "oracle": {
+   "tests_pass": true,
+   "tests_tail": [
+    "OK"
+   ]
+  },
+  "output_tokens": 1577,
+  "protocol_read_bytes": 0,
+  "protocol_reads": [],
+  "rep": "r1",
+  "scenario": "T4-version-bound-workplan",
+  "ssdp_skills": [
+   "software-implementation"
+  ],
+  "variant": "v66"
+ },
+ "T5-version-bound-workplan-holdout-v66-r0": {
+  "assessment": "FAIL",
+  "cost_usd": 0.1430902,
+  "input_tokens": 348451,
+  "num_turns": 14,
+  "oracle": {
+   "tests_pass": true,
+   "tests_tail": [
+    "OK"
+   ]
+  },
+  "output_tokens": 2179,
+  "protocol_read_bytes": 0,
+  "protocol_reads": [],
+  "rep": "r0",
+  "scenario": "T5-version-bound-workplan-holdout",
+  "ssdp_skills": [
+   "software-implementation"
+  ],
+  "variant": "v66"
+ },
+ "T5-version-bound-workplan-holdout-v66-r1": {
+  "assessment": "FAIL",
+  "cost_usd": 0.2361358,
+  "input_tokens": 577034,
+  "num_turns": 16,
+  "oracle": {
+   "tests_pass": true,
+   "tests_tail": [
+    "OK"
+   ]
+  },
+  "output_tokens": 3218,
+  "protocol_read_bytes": 17743,
+  "protocol_reads": [
+   "software-implementation/references/workflow-and-workplans.md"
+  ],
+  "rep": "r1",
+  "scenario": "T5-version-bound-workplan-holdout",
+  "ssdp_skills": [
+   "software-implementation"
+  ],
+  "variant": "v66"
+ }
+}

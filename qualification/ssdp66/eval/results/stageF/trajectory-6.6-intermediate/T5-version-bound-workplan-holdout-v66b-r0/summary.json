@@ -1,0 +1,28 @@
+{
+  "duration_ms": 31355,
+  "final": "All tests pass, including the pre-existing `test_rows.py` suite (unaffected).\n\nImplemented `tabular.header.read_header(path)`: reads the first line, splits on `,`, strips whitespace from each name, raises `ValueError` on an empty file or duplicate column names. Added `tests/test_header.py` covering normal headers, whitespace stripping, empty files, and duplicates, matching the workplan's acceptance criteria. No changes to existing `tabular/rows.py`.",
+  "input_tokens_total": 364121,
+  "is_error": false,
+  "models": [
+    "claude-sonnet-5"
+  ],
+  "num_turns": 12,
+  "oracle": {
+    "tests_pass": true,
+    "tests_tail": [
+      "OK"
+    ]
+  },
+  "output_tokens": 2767,
+  "protocol_read_bytes_on_disk": 0,
+  "protocol_reads": [],
+  "skills_invoked": [
+    "software-implementation"
+  ],
+  "total_cost_usd": 0.1638994,
+  "untracked": [
+    "tabular/header.py",
+    "tests/test_header.py"
+  ],
+  "wall_s": 32.8
+}

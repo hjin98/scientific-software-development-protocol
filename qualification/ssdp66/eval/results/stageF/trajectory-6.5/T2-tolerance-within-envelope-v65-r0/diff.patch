@@ -1,0 +1,20 @@
+diff --git a/tests/test_trapezoid.py b/tests/test_trapezoid.py
+index d20b8e4..ffdca80 100644
+--- a/tests/test_trapezoid.py
++++ b/tests/test_trapezoid.py
+@@ -9,8 +9,13 @@ class TrapezoidTests(unittest.TestCase):
+         self.assertAlmostEqual(integrate(lambda x: 2 * x + 1, 0.0, 2.0, 7), 6.0, places=12)
+ 
+     def test_sin_integral(self):
+-        value = integrate(math.sin, 0.0, math.pi, 100)
+-        self.assertLess(abs(value - 2.0), 1e-12)
++        a, b, n = 0.0, math.pi, 100
++        value = integrate(math.sin, a, b, n)
++        # Error bound per docs/numerical-method.md: (b-a)*h**2*max|f''|/12,
++        # with max|sin''| = max|sin| = 1 on [0, pi].
++        h = (b - a) / n
++        error_bound = (b - a) * h**2 * 1 / 12
++        self.assertLess(abs(value - 2.0), error_bound)
+ 
+ 
+ if __name__ == "__main__":

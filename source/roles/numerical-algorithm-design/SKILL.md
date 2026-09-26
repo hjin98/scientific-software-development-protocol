@@ -5,7 +5,7 @@ description: Use to choose, design, review, or challenge a numerical method or a
 
 # Numerical Algorithm Design
 
-**Version entry check.** This package is SSDP `REPLACE_WITH_SKILL_PROTOCOL_VERSION`. If the task or its governing workplan declares a different SSDP `protocol_version`, say so and resolve that version's compatible source before protocol-dependent reasoning ([Protocol versioning and compatibility](references/protocol-versioning-and-compatibility.md)); never apply this package's doctrine to other-version work. No declared version: continue.
+**Version entry check.** This package is SSDP `REPLACE_WITH_SKILL_PROTOCOL_VERSION`; if the task or its workplan declares another SSDP `protocol_version`, say so and resolve that version's source ([Protocol versioning and compatibility](references/protocol-versioning-and-compatibility.md)) instead of applying this package.
 
 Own **D2 algorithm and numerical-method semantics**: discretization, estimator/solver/approximation, convergence/error/conditioning/stability, precision and stochastic behavior, and numerical uncertainty. D2 concretizes D1 but does not own scientific meaning; it constrains D3 without owning ordinary software decomposition.
 
@@ -34,8 +34,6 @@ For material D2 authority mutation use the [Abstraction-concretization change pl
 5. Verify proportionately: first bound whether numerical uncertainty can change the governed decision, then use the cheapest sufficiently strong applicable exact/analytical/limiting/manufactured/reference, residual/invariant, convergence, conditioning, stochastic, precision/backend, differential or metamorphic evidence. Do not turn an in-envelope local tolerance into a research campaign.
 6. Distinguish evidentiary target from replaceable execution dependency; remap/rerun valid specifications when D4 machinery changes.
 7. Draft proposed D2 authority. Accepted-current mutation requires the owning acceptance process, including independent falsification and human adjudication when the change can alter scientific conclusions or a governing guarantee; afterwards perform bounded impact closure and hand D3 the minimum computational semantics and resource/compatibility constraints it must preserve.
-
-When creating human-facing D2 prose, define newly introduced non-common terminology in background context and expand non-obvious abbreviations at first explanatory use.
 
 ## Evidence and Challenge
 

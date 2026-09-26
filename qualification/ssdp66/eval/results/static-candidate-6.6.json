@@ -81,8 +81,8 @@
     "R1-local-d4-repair": {
       "eager_forbidden_concerns": [],
       "mandatory_closure": {
-        "bytes": 28535,
-        "tokens_proxy": 5144
+        "bytes": 28463,
+        "tokens_proxy": 5140
       },
       "mandatory_files": [
         "SKILL.md",
@@ -90,8 +90,8 @@
         "specification-and-implementation.md"
       ],
       "route_closure": {
-        "bytes": 28535,
-        "tokens_proxy": 5144
+        "bytes": 28463,
+        "tokens_proxy": 5140
       },
       "route_files": [
         "SKILL.md",
@@ -104,8 +104,8 @@
     "R2-d4-with-workplan-and-tests": {
       "eager_forbidden_concerns": [],
       "mandatory_closure": {
-        "bytes": 28535,
-        "tokens_proxy": 5144
+        "bytes": 28463,
+        "tokens_proxy": 5140
       },
       "mandatory_files": [
         "SKILL.md",
@@ -113,8 +113,8 @@
         "specification-and-implementation.md"
       ],
       "route_closure": {
-        "bytes": 64259,
-        "tokens_proxy": 11359
+        "bytes": 64187,
+        "tokens_proxy": 11355
       },
       "route_files": [
         "SKILL.md",
@@ -129,8 +129,8 @@
     "R3-d3-mature-replacement": {
       "eager_forbidden_concerns": [],
       "mandatory_closure": {
-        "bytes": 33092,
-        "tokens_proxy": 5868
+        "bytes": 33017,
+        "tokens_proxy": 5863
       },
       "mandatory_files": [
         "SKILL.md",
@@ -138,8 +138,8 @@
         "architecture-and-design.md"
       ],
       "route_closure": {
-        "bytes": 78517,
-        "tokens_proxy": 13771
+        "bytes": 78442,
+        "tokens_proxy": 13766
       },
       "route_files": [
         "SKILL.md",
@@ -155,8 +155,8 @@
     "R4-d2-specialized-import": {
       "eager_forbidden_concerns": [],
       "mandatory_closure": {
-        "bytes": 27317,
-        "tokens_proxy": 4798
+        "bytes": 27279,
+        "tokens_proxy": 4799
       },
       "mandatory_files": [
         "SKILL.md",
@@ -164,8 +164,8 @@
         "numerical-algorithm-design.md"
       ],
       "route_closure": {
-        "bytes": 37457,
-        "tokens_proxy": 6635
+        "bytes": 37419,
+        "tokens_proxy": 6636
       },
       "route_files": [
         "SKILL.md",
@@ -179,8 +179,8 @@
     "R5-d1-parameter-default-binding": {
       "eager_forbidden_concerns": [],
       "mandatory_closure": {
-        "bytes": 26682,
-        "tokens_proxy": 4667
+        "bytes": 26644,
+        "tokens_proxy": 4668
       },
       "mandatory_files": [
         "SKILL.md",
@@ -188,8 +188,8 @@
         "scientific-formulation.md"
       ],
       "route_closure": {
-        "bytes": 54565,
-        "tokens_proxy": 9660
+        "bytes": 54527,
+        "tokens_proxy": 9661
       },
       "route_files": [
         "SKILL.md",
@@ -204,8 +204,8 @@
     "R6-memory-governance-update": {
       "eager_forbidden_concerns": [],
       "mandatory_closure": {
-        "bytes": 24530,
-        "tokens_proxy": 4387
+        "bytes": 24414,
+        "tokens_proxy": 4371
       },
       "mandatory_files": [
         "SKILL.md",
@@ -213,8 +213,8 @@
         "long-horizon-code-health.md"
       ],
       "route_closure": {
-        "bytes": 59469,
-        "tokens_proxy": 10589
+        "bytes": 59353,
+        "tokens_proxy": 10573
       },
       "route_files": [
         "SKILL.md",

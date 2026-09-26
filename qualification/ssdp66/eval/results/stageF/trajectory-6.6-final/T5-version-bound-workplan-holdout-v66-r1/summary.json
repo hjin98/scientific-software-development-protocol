@@ -1,0 +1,30 @@
+{
+  "duration_ms": 52255,
+  "final": "Implementation complete. I did not commit \u2014 let me know if you'd like these changes committed.\n\n**Summary:**\n- Added `tabular/header.py` with `read_header(path)`: reads the first line, splits on `,`, strips surrounding whitespace from each name, raises `ValueError` on an empty file or on duplicate names, and returns the names in original order.\n- Added `tests/test_header.py` covering normal headers, whitespace stripping, empty files, and duplicates, per the workplan's acceptance criteria.\n- Full test suite (`python3 -m unittest discover -s tests`) passes: 5/5, including the pre-existing `test_rows.py`.\n\nThis is a small, self-contained D4 concretization directly matching WP-CSV-HEADER's cycle decisions \u2014 no upstream D1\u2013D3 authority needed reopening.",
+  "input_tokens_total": 577034,
+  "is_error": false,
+  "models": [
+    "claude-sonnet-5"
+  ],
+  "num_turns": 16,
+  "oracle": {
+    "tests_pass": true,
+    "tests_tail": [
+      "OK"
+    ]
+  },
+  "output_tokens": 3218,
+  "protocol_read_bytes_on_disk": 17743,
+  "protocol_reads": [
+    "software-implementation/references/workflow-and-workplans.md"
+  ],
+  "skills_invoked": [
+    "software-implementation"
+  ],
+  "total_cost_usd": 0.2361358,
+  "untracked": [
+    "tabular/header.py",
+    "tests/test_header.py"
+  ],
+  "wall_s": 53.6
+}

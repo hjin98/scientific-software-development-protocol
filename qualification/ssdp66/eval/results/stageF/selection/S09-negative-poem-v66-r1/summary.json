@@ -1,0 +1,16 @@
+{
+  "duration_ms": 4831,
+  "final": "Golden leaves drift on autumn's breath,\nDancing down to a bed of rest,\nCrimson, amber, in gentle fall,\nWhispering the season's last call.",
+  "input_tokens_total": 33964,
+  "is_error": false,
+  "models": [
+    "claude-sonnet-5"
+  ],
+  "num_turns": 1,
+  "output_tokens": 59,
+  "protocol_read_bytes_on_disk": 0,
+  "protocol_reads": [],
+  "skills_invoked": [],
+  "total_cost_usd": 0.0330972,
+  "wall_s": 6.1
+}

@@ -1,0 +1,21 @@
+{
+  "duration_ms": 10977,
+  "final": "",
+  "input_tokens_total": 114036,
+  "is_error": true,
+  "models": [
+    "claude-sonnet-5"
+  ],
+  "num_turns": 4,
+  "output_tokens": 817,
+  "protocol_read_bytes_on_disk": 20922,
+  "protocol_reads": [
+    "scientific-formulation/references/abstraction-and-concretization.md",
+    "scientific-formulation/references/scientific-formulation.md"
+  ],
+  "skills_invoked": [
+    "scientific-formulation"
+  ],
+  "total_cost_usd": 0.0938514,
+  "wall_s": 12.5
+}

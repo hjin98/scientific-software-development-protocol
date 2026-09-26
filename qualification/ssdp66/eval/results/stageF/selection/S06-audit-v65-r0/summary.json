@@ -1,0 +1,26 @@
+{
+  "duration_ms": 13192,
+  "final": "",
+  "input_tokens_total": 124851,
+  "is_error": true,
+  "models": [
+    "claude-sonnet-5"
+  ],
+  "num_turns": 4,
+  "output_tokens": 1007,
+  "protocol_read_bytes_on_disk": 102417,
+  "protocol_reads": [
+    "software-maintenance-audit/references/abstraction-and-concretization.md",
+    "software-maintenance-audit/references/long-horizon-code-health.md",
+    "software-maintenance-audit/references/git-and-version-control.md",
+    "software-maintenance-audit/references/repository-intake.md",
+    "software-maintenance-audit/references/architecture-and-design.md",
+    "software-maintenance-audit/references/testing-and-validation.md",
+    "software-maintenance-audit/references/evidence-evolution-and-dependencies.md"
+  ],
+  "skills_invoked": [
+    "software-maintenance-audit"
+  ],
+  "total_cost_usd": 0.1397296,
+  "wall_s": 14.7
+}

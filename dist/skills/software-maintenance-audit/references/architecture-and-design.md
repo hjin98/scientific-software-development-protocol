@@ -79,7 +79,7 @@ Apply the Lossless Representation Rule to architecture documents: current topolo
 
 ## D3 formal-contract discipline
 
-D3 inherits the universal definition/source-availability discipline without turning architecture into pseudo-mathematics. When an architectural concept carries normative meaning, define it before dependent invariants use it: component/state ownership, allowed/forbidden dependency relations, lifecycle states and transitions, interface/cardinality constraints, concurrency/order/atomicity relations, resource bounds, persistence/recovery invariants, trust boundaries and compatibility relations.
+D3 inherits the definition/source-availability discipline owned by [Semantic definition and traceability](semantic-definition-and-traceability.md) without turning architecture into pseudo-mathematics. When an architectural concept carries normative meaning, define it before dependent invariants use it: component/state ownership, allowed/forbidden dependency relations, lifecycle states and transitions, interface/cardinality constraints, concurrency/order/atomicity relations, resource bounds, persistence/recovery invariants, trust boundaries and compatibility relations.
 
 Use the strongest practical structured representation that reduces architectural ambiguity—tables, typed interface contracts, state-transition systems, dependency graphs/relations, resource inequalities, ownership maps or schemas—while leaving ordinary explanatory engineering prose as prose. Derived diagrams/graphs remain subordinate views of the canonical Architecture Manual, not parallel authority.
 

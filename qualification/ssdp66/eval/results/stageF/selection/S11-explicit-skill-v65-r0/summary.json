@@ -1,0 +1,21 @@
+{
+  "duration_ms": 7085,
+  "final": "",
+  "input_tokens_total": 120021,
+  "is_error": true,
+  "models": [
+    "claude-sonnet-5"
+  ],
+  "num_turns": 4,
+  "output_tokens": 535,
+  "protocol_read_bytes_on_disk": 33917,
+  "protocol_reads": [
+    "software-design/references/abstraction-and-concretization.md",
+    "software-design/references/architecture-and-design.md"
+  ],
+  "skills_invoked": [
+    "software-design"
+  ],
+  "total_cost_usd": 0.1122544,
+  "wall_s": 8.5
+}

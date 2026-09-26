@@ -1,0 +1,16 @@
+{
+  "duration_ms": 5427,
+  "final": "Subject: Leaking Kitchen Faucet \u2013 Repair Request\n\nHi [Landlord's Name],\n\nI hope you're doing well. I wanted to let you know that the kitchen faucet in my unit has developed a leak. It's a steady drip that doesn't seem to stop even when fully closed.\n\nCould you let me know when someone might be available to take a look at it? I'm happy to work around your schedule and can provide access at a convenient time.\n\nThank you for your help, and please let me know if you need any more details.\n\nBest regards,\n[Your Name]\n[Address/Unit Number]\n[Phone Number]\n\n---\n\nJust fill in the bracketed details before sending. Want me to adjust the tone (more formal/casual) or add anything, like mentioning water damage concerns?",
+  "input_tokens_total": 34075,
+  "is_error": false,
+  "models": [
+    "claude-sonnet-5"
+  ],
+  "num_turns": 1,
+  "output_tokens": 250,
+  "protocol_read_bytes_on_disk": 0,
+  "protocol_reads": [],
+  "skills_invoked": [],
+  "total_cost_usd": 0.0354512,
+  "wall_s": 6.7
+}

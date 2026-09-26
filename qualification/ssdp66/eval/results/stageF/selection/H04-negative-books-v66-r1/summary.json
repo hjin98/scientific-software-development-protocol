@@ -1,0 +1,16 @@
+{
+  "duration_ms": 5004,
+  "final": "Here are three solid picks for a long flight:\n\n1. **\"Project Hail Mary\" by Andy Weir** \u2013 A lone astronaut wakes up with amnesia on a solo mission to save humanity. Fast-paced, funny, and packed with clever problem-solving \u2014 hard to put down.\n\n2. **\"The Martian\" by Andy Weir** \u2013 If you haven't read this one yet, it's the same author's earlier hit: an astronaut stranded on Mars MacGyvering his way to survival. Great tension, light tone, perfect for chunks of reading between distractions.\n\n3. **\"Children of Time\" by Adrian Tchaikovsky** \u2013 A more expansive, thoughtful epic about an uplifted spider civilization and the last remnants of humanity searching for a new home. Longer and richer \u2014 good for a longer haul flight where you want to sink into something meatier.\n\nAll three balance page-turning plots with self-contained arcs, so you're not left hanging if you only get through one.",
+  "input_tokens_total": 33966,
+  "is_error": false,
+  "models": [
+    "claude-sonnet-5"
+  ],
+  "num_turns": 1,
+  "output_tokens": 315,
+  "protocol_read_bytes_on_disk": 0,
+  "protocol_reads": [],
+  "skills_invoked": [],
+  "total_cost_usd": 0.0356652,
+  "wall_s": 6.3
+}

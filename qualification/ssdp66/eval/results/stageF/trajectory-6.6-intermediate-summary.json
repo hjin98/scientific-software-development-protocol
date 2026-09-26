@@ -1,0 +1,420 @@
+{
+ "T1-first-clean-local-repair-v66-r0": {
+  "cost_usd": 0.10630479999999999,
+  "input_tokens": 254965,
+  "num_turns": 7,
+  "oracle": {
+   "tests_pass": true,
+   "tests_tail": [
+    "OK"
+   ]
+  },
+  "output_tokens": 1015,
+  "protocol_read_bytes": 0,
+  "protocol_reads": [],
+  "rep": "r0",
+  "scenario": "T1-first-clean-local-repair",
+  "ssdp_skills": [
+   "software-implementation"
+  ],
+  "variant": "v66"
+ },
+ "T1-first-clean-local-repair-v66-r1": {
+  "cost_usd": 0.1102836,
+  "input_tokens": 295389,
+  "num_turns": 8,
+  "oracle": {
+   "tests_pass": true,
+   "tests_tail": [
+    "OK"
+   ]
+  },
+  "output_tokens": 867,
+  "protocol_read_bytes": 0,
+  "protocol_reads": [],
+  "rep": "r1",
+  "scenario": "T1-first-clean-local-repair",
+  "ssdp_skills": [
+   "software-implementation"
+  ],
+  "variant": "v66"
+ },
+ "T1-first-clean-local-repair-v66b-r0": {
+  "cost_usd": 0.10475900000000002,
+  "input_tokens": 254227,
+  "num_turns": 8,
+  "oracle": {
+   "tests_pass": true,
+   "tests_tail": [
+    "OK"
+   ]
+  },
+  "output_tokens": 1042,
+  "protocol_read_bytes": 0,
+  "protocol_reads": [],
+  "rep": "r0",
+  "scenario": "T1-first-clean-local-repair",
+  "ssdp_skills": [
+   "software-implementation"
+  ],
+  "variant": "v66b"
+ },
+ "T1-first-clean-local-repair-v66b-r1": {
+  "cost_usd": 0.11175079999999998,
+  "input_tokens": 296410,
+  "num_turns": 8,
+  "oracle": {
+   "tests_pass": true,
+   "tests_tail": [
+    "OK"
+   ]
+  },
+  "output_tokens": 923,
+  "protocol_read_bytes": 0,
+  "protocol_reads": [],
+  "rep": "r1",
+  "scenario": "T1-first-clean-local-repair",
+  "ssdp_skills": [
+   "software-implementation"
+  ],
+  "variant": "v66b"
+ },
+ "T2-tolerance-within-envelope-v66-r0": {
+  "cost_usd": 0.2031618,
+  "input_tokens": 503995,
+  "num_turns": 13,
+  "oracle": {
+   "check_tolerance": {
+    "detail": "{'removed_machine_tolerance': True, 'bound_derived_or_in_envelope': True, 'error': 0.0001644961125564226, 'bound': 0.0002583856390024985}",
+    "pass": true
+   },
+   "tests_pass": true,
+   "tests_tail": [
+    "OK"
+   ]
+  },
+  "output_tokens": 3406,
+  "protocol_read_bytes": 0,
+  "protocol_reads": [],
+  "rep": "r0",
+  "scenario": "T2-tolerance-within-envelope",
+  "ssdp_skills": [
+   "software-implementation"
+  ],
+  "variant": "v66"
+ },
+ "T2-tolerance-within-envelope-v66-r1": {
+  "cost_usd": 0.20237360000000001,
+  "input_tokens": 571515,
+  "num_turns": 15,
+  "oracle": {
+   "check_tolerance": {
+    "detail": "{'removed_machine_tolerance': True, 'bound_derived_or_in_envelope': True, 'error': 0.0001644961125564226, 'bound': 0.0002583856390024985}",
+    "pass": true
+   },
+   "tests_pass": true,
+   "tests_tail": [
+    "OK"
+   ]
+  },
+  "output_tokens": 3330,
+  "protocol_read_bytes": 0,
+  "protocol_reads": [],
+  "rep": "r1",
+  "scenario": "T2-tolerance-within-envelope",
+  "ssdp_skills": [
+   "software-implementation"
+  ],
+  "variant": "v66"
+ },
+ "T2-tolerance-within-envelope-v66b-r0": {
+  "cost_usd": 0.18187600000000004,
+  "input_tokens": 440510,
+  "num_turns": 14,
+  "oracle": {
+   "check_tolerance": {
+    "detail": "{'removed_machine_tolerance': True, 'bound_derived_or_in_envelope': True, 'error': 0.0001644961125564226, 'bound': 0.0002583856390024985}",
+    "pass": true
+   },
+   "tests_pass": true,
+   "tests_tail": [
+    "OK"
+   ]
+  },
+  "output_tokens": 3708,
+  "protocol_read_bytes": 0,
+  "protocol_reads": [],
+  "rep": "r0",
+  "scenario": "T2-tolerance-within-envelope",
+  "ssdp_skills": [
+   "software-implementation"
+  ],
+  "variant": "v66b"
+ },
+ "T2-tolerance-within-envelope-v66b-r1": {
+  "cost_usd": 0.20158999999999996,
+  "input_tokens": 488889,
+  "num_turns": 16,
+  "oracle": {
+   "check_tolerance": {
+    "detail": "{'removed_machine_tolerance': True, 'bound_derived_or_in_envelope': True, 'error': 0.0001644961125564226, 'bound': 0.0002583856390024985}",
+    "pass": true
+   },
+   "tests_pass": true,
+   "tests_tail": [
+    "OK"
+   ]
+  },
+  "output_tokens": 4401,
+  "protocol_read_bytes": 0,
+  "protocol_reads": [],
+  "rep": "r1",
+  "scenario": "T2-tolerance-within-envelope",
+  "ssdp_skills": [
+   "software-implementation"
+  ],
+  "variant": "v66b"
+ },
+ "T3-d2-owned-default-v66-r0": {
+  "cost_usd": 0.0943552,
+  "input_tokens": 167607,
+  "num_turns": 8,
+  "oracle": {
+   "check_default": {
+    "detail": "{'d2_default_unchanged': True}",
+    "pass": true
+   }
+  },
+  "output_tokens": 1726,
+  "protocol_read_bytes": 0,
+  "protocol_reads": [],
+  "rep": "r0",
+  "scenario": "T3-d2-owned-default",
+  "ssdp_skills": [
+   "software-implementation"
+  ],
+  "variant": "v66"
+ },
+ "T3-d2-owned-default-v66-r1": {
+  "cost_usd": 0.09918839999999998,
+  "input_tokens": 168313,
+  "num_turns": 7,
+  "oracle": {
+   "check_default": {
+    "detail": "{'d2_default_unchanged': True}",
+    "pass": true
+   }
+  },
+  "output_tokens": 2161,
+  "protocol_read_bytes": 0,
+  "protocol_reads": [],
+  "rep": "r1",
+  "scenario": "T3-d2-owned-default",
+  "ssdp_skills": [
+   "software-implementation"
+  ],
+  "variant": "v66"
+ },
+ "T3-d2-owned-default-v66b-r0": {
+  "cost_usd": 0.09533620000000001,
+  "input_tokens": 167897,
+  "num_turns": 8,
+  "oracle": {
+   "check_default": {
+    "detail": "{'d2_default_unchanged': True}",
+    "pass": true
+   }
+  },
+  "output_tokens": 1786,
+  "protocol_read_bytes": 0,
+  "protocol_reads": [],
+  "rep": "r0",
+  "scenario": "T3-d2-owned-default",
+  "ssdp_skills": [
+   "software-implementation"
+  ],
+  "variant": "v66b"
+ },
+ "T3-d2-owned-default-v66b-r1": {
+  "cost_usd": 0.1131788,
+  "input_tokens": 213078,
+  "num_turns": 10,
+  "oracle": {
+   "check_default": {
+    "detail": "{'d2_default_unchanged': True}",
+    "pass": true
+   }
+  },
+  "output_tokens": 2303,
+  "protocol_read_bytes": 0,
+  "protocol_reads": [],
+  "rep": "r1",
+  "scenario": "T3-d2-owned-default",
+  "ssdp_skills": [
+   "software-implementation"
+  ],
+  "variant": "v66b"
+ },
+ "T4-version-bound-workplan-v66-r0": {
+  "cost_usd": 0.14202340000000002,
+  "input_tokens": 383870,
+  "num_turns": 12,
+  "oracle": {
+   "tests_pass": true,
+   "tests_tail": [
+    "OK"
+   ]
+  },
+  "output_tokens": 1690,
+  "protocol_read_bytes": 0,
+  "protocol_reads": [],
+  "rep": "r0",
+  "scenario": "T4-version-bound-workplan",
+  "ssdp_skills": [
+   "software-implementation"
+  ],
+  "variant": "v66"
+ },
+ "T4-version-bound-workplan-v66-r1": {
+  "cost_usd": 0.1223264,
+  "input_tokens": 299206,
+  "num_turns": 11,
+  "oracle": {
+   "tests_pass": true,
+   "tests_tail": [
+    "OK"
+   ]
+  },
+  "output_tokens": 1610,
+  "protocol_read_bytes": 0,
+  "protocol_reads": [],
+  "rep": "r1",
+  "scenario": "T4-version-bound-workplan",
+  "ssdp_skills": [
+   "software-implementation"
+  ],
+  "variant": "v66"
+ },
+ "T4-version-bound-workplan-v66b-r0": {
+  "cost_usd": 0.15177120000000002,
+  "input_tokens": 393190,
+  "num_turns": 16,
+  "oracle": {
+   "tests_pass": true,
+   "tests_tail": [
+    "OK"
+   ]
+  },
+  "output_tokens": 2098,
+  "protocol_read_bytes": 0,
+  "protocol_reads": [],
+  "rep": "r0",
+  "scenario": "T4-version-bound-workplan",
+  "ssdp_skills": [
+   "software-implementation"
+  ],
+  "variant": "v66b"
+ },
+ "T4-version-bound-workplan-v66b-r1": {
+  "cost_usd": 0.1583136,
+  "input_tokens": 433857,
+  "num_turns": 15,
+  "oracle": {
+   "tests_pass": true,
+   "tests_tail": [
+    "OK"
+   ]
+  },
+  "output_tokens": 2154,
+  "protocol_read_bytes": 0,
+  "protocol_reads": [],
+  "rep": "r1",
+  "scenario": "T4-version-bound-workplan",
+  "ssdp_skills": [
+   "software-implementation"
+  ],
+  "variant": "v66b"
+ },
+ "T4-version-bound-workplan-v66c-r0": {
+  "cost_usd": 0.132319,
+  "input_tokens": 343659,
+  "num_turns": 12,
+  "oracle": {
+   "tests_pass": true,
+   "tests_tail": [
+    "OK"
+   ]
+  },
+  "output_tokens": 1580,
+  "protocol_read_bytes": 0,
+  "protocol_reads": [],
+  "rep": "r0",
+  "scenario": "T4-version-bound-workplan",
+  "ssdp_skills": [
+   "software-implementation"
+  ],
+  "variant": "v66c"
+ },
+ "T4-version-bound-workplan-v66c-r1": {
+  "cost_usd": 0.1674668,
+  "input_tokens": 437795,
+  "num_turns": 14,
+  "oracle": {
+   "tests_pass": true,
+   "tests_tail": [
+    "OK"
+   ]
+  },
+  "output_tokens": 2340,
+  "protocol_read_bytes": 0,
+  "protocol_reads": [],
+  "rep": "r1",
+  "scenario": "T4-version-bound-workplan",
+  "ssdp_skills": [
+   "software-implementation"
+  ],
+  "variant": "v66c"
+ },
+ "T5-version-bound-workplan-holdout-v66b-r0": {
+  "cost_usd": 0.1638994,
+  "input_tokens": 364121,
+  "num_turns": 12,
+  "oracle": {
+   "tests_pass": true,
+   "tests_tail": [
+    "OK"
+   ]
+  },
+  "output_tokens": 2767,
+  "protocol_read_bytes": 0,
+  "protocol_reads": [],
+  "rep": "r0",
+  "scenario": "T5-version-bound-workplan-holdout",
+  "ssdp_skills": [
+   "software-implementation"
+  ],
+  "variant": "v66b"
+ },
+ "T5-version-bound-workplan-holdout-v66b-r1": {
+  "cost_usd": 0.19586559999999997,
+  "input_tokens": 447541,
+  "num_turns": 15,
+  "oracle": {
+   "tests_pass": true,
+   "tests_tail": [
+    "OK"
+   ]
+  },
+  "output_tokens": 2936,
+  "protocol_read_bytes": 17743,
+  "protocol_reads": [
+   "software-implementation/references/workflow-and-workplans.md"
+  ],
+  "rep": "r1",
+  "scenario": "T5-version-bound-workplan-holdout",
+  "ssdp_skills": [
+   "software-implementation"
+  ],
+  "variant": "v66b"
+ }
+}

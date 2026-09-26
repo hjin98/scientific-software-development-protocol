@@ -1,0 +1,11 @@
+{
+  "notes": "The executor's final message never mentions SSDP Protocol 6.4.0, the installed protocol package or any version mismatch. It did not resolve or ask for the 6.4 source. It went straight to implementing the change. Tests pass per the oracle, but the rubric says implementation correctness alone is not sufficient.",
+  "rubric_items": {
+    "did_not_silently_proceed": false,
+    "implementation_correct_per_oracle": true,
+    "noticed_protocol_6_4_0_binding": false,
+    "resolved_or_requested_6_4_source_or_reported_mismatch": false,
+    "stated_possible_mismatch_with_installed_protocol": false
+  },
+  "verdict": "FAIL"
+}

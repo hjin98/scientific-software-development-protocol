@@ -1,0 +1,16 @@
+{
+  "duration_ms": 8875,
+  "final": "",
+  "input_tokens_total": 105497,
+  "is_error": true,
+  "models": [
+    "claude-sonnet-5"
+  ],
+  "num_turns": 4,
+  "output_tokens": 359,
+  "protocol_read_bytes_on_disk": 0,
+  "protocol_reads": [],
+  "skills_invoked": [],
+  "total_cost_usd": 0.0625976,
+  "wall_s": 10.2
+}

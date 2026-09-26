@@ -5,7 +5,7 @@ description: Use to design, review, or challenge scientific/technical software a
 
 # Software Design
 
-**Version entry check.** This package is SSDP `6.6.0`. If the task or its governing workplan declares a different SSDP `protocol_version`, say so and resolve that version's compatible source before protocol-dependent reasoning ([Protocol versioning and compatibility](references/protocol-versioning-and-compatibility.md)); never apply this package's doctrine to other-version work. No declared version: continue.
+**Version entry check.** This package is SSDP `6.6.0`; if the task or its workplan declares another SSDP `protocol_version`, say so and resolve that version's source ([Protocol versioning and compatibility](references/protocol-versioning-and-compatibility.md)) instead of applying this package.
 
 Own **D3 software architecture**: durable component/state/interface ownership, dependency/data/control flow, persistence/recovery, concurrency, security, resource/deployment/compatibility boundaries, and cycle-scoped architectural decisions. Do not absorb D1/D2 semantics merely because software concretizes them.
 

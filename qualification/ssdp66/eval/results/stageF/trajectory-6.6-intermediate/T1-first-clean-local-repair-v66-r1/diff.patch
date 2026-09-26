@@ -1,0 +1,13 @@
+diff --git a/gridtools/io.py b/gridtools/io.py
+index 445b277..a05157f 100644
+--- a/gridtools/io.py
++++ b/gridtools/io.py
+@@ -10,7 +10,7 @@ def parse_grid(text: str) -> list[tuple[float, float]]:
+     if len(edges) < 2:
+         raise ValueError("a grid needs at least two edges")
+     cells = []
+-    for i in range(0, len(edges) - 2):
++    for i in range(len(edges) - 1):
+         cells.append((edges[i], edges[i + 1]))
+     return cells
+ 

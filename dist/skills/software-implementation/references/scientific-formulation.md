@@ -38,7 +38,7 @@ Material D1 Review seeks the smallest credible counterexample, hidden assumption
 
 ## D1 formal-definition discipline
 
-D1 authority uses formal-first, definition-before-substantive-use semantics for materially governed scientific/mathematical objects. Define or exactly import observables, estimands, states, distributions, fields, parameters, equations/models, constitutive/closure relations, predicates, assumptions and validity conditions before downstream inference depends on them. Every material symbol resolves to its domain/type/shape/unit and scope; physical equations are dimensionally coherent; bound/free-variable and quantifier direction are explicit when material.
+D1 authority uses formal-first, definition-before-substantive-use semantics for materially governed scientific/mathematical objects; the generic discipline is owned by [Semantic definition and traceability](semantic-definition-and-traceability.md). Define or exactly import observables, estimands, states, distributions, fields, parameters, equations/models, constitutive/closure relations, predicates, assumptions and validity conditions before downstream inference depends on them. Every material symbol resolves to its domain/type/shape/unit and scope; physical equations are dimensionally coherent; bound/free-variable and quantifier direction are explicit when material.
 
 For parameterized scientific families distinguish the family, concrete parameter binding, and any governed default. State whether parameters are fixed, free, derived, estimated or externally constrained, plus the regime/uncertainty/validity attached to the binding actually used. A software default cannot silently become D1 meaning.
 

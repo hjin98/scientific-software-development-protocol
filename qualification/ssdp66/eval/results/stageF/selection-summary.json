@@ -1,0 +1,1091 @@
+{
+ "H01-reduction-order-v65-r0": {
+  "cost_usd": 0.1070374,
+  "input_tokens": 117649,
+  "num_turns": 4,
+  "oracle": null,
+  "outcome": "admissible",
+  "output_tokens": 755,
+  "protocol_read_bytes": 61228,
+  "protocol_reads": [
+   "numerical-algorithm-design/references/abstraction-and-concretization.md",
+   "numerical-algorithm-design/references/numerical-algorithm-design.md",
+   "numerical-algorithm-design/references/testing-and-validation.md",
+   "numerical-algorithm-design/references/performance-and-parallelism.md"
+  ],
+  "rep": "r0",
+  "scenario": "H01-reduction-order",
+  "ssdp_skills": [
+   "numerical-algorithm-design"
+  ],
+  "variant": "v65"
+ },
+ "H01-reduction-order-v65-r1": {
+  "cost_usd": 0.0769982,
+  "input_tokens": 110256,
+  "num_turns": 4,
+  "oracle": null,
+  "outcome": "admissible",
+  "output_tokens": 763,
+  "protocol_read_bytes": 0,
+  "protocol_reads": [],
+  "rep": "r1",
+  "scenario": "H01-reduction-order",
+  "ssdp_skills": [
+   "numerical-algorithm-design"
+  ],
+  "variant": "v65"
+ },
+ "H01-reduction-order-v66-r0": {
+  "cost_usd": 0.0949486,
+  "input_tokens": 114215,
+  "num_turns": 4,
+  "oracle": null,
+  "outcome": "admissible",
+  "output_tokens": 846,
+  "protocol_read_bytes": 21471,
+  "protocol_reads": [
+   "numerical-algorithm-design/references/abstraction-and-concretization.md",
+   "numerical-algorithm-design/references/numerical-algorithm-design.md"
+  ],
+  "rep": "r0",
+  "scenario": "H01-reduction-order",
+  "ssdp_skills": [
+   "numerical-algorithm-design"
+  ],
+  "variant": "v66"
+ },
+ "H01-reduction-order-v66-r1": {
+  "cost_usd": 0.0957404,
+  "input_tokens": 114192,
+  "num_turns": 4,
+  "oracle": null,
+  "outcome": "admissible",
+  "output_tokens": 934,
+  "protocol_read_bytes": 21471,
+  "protocol_reads": [
+   "numerical-algorithm-design/references/abstraction-and-concretization.md",
+   "numerical-algorithm-design/references/numerical-algorithm-design.md"
+  ],
+  "rep": "r1",
+  "scenario": "H01-reduction-order",
+  "ssdp_skills": [
+   "numerical-algorithm-design"
+  ],
+  "variant": "v66"
+ },
+ "H02-D1-observable-v65-r0": {
+  "cost_usd": 0.0770268,
+  "input_tokens": 110144,
+  "num_turns": 4,
+  "oracle": null,
+  "outcome": "admissible",
+  "output_tokens": 789,
+  "protocol_read_bytes": 0,
+  "protocol_reads": [],
+  "rep": "r0",
+  "scenario": "H02-D1-observable",
+  "ssdp_skills": [
+   "scientific-formulation"
+  ],
+  "variant": "v65"
+ },
+ "H02-D1-observable-v65-r1": {
+  "cost_usd": 0.073757,
+  "input_tokens": 109752,
+  "num_turns": 4,
+  "oracle": null,
+  "outcome": "admissible",
+  "output_tokens": 547,
+  "protocol_read_bytes": 0,
+  "protocol_reads": [],
+  "rep": "r1",
+  "scenario": "H02-D1-observable",
+  "ssdp_skills": [
+   "scientific-formulation"
+  ],
+  "variant": "v65"
+ },
+ "H02-D1-observable-v66-r0": {
+  "cost_usd": 0.0938514,
+  "input_tokens": 114036,
+  "num_turns": 4,
+  "oracle": null,
+  "outcome": "admissible",
+  "output_tokens": 817,
+  "protocol_read_bytes": 20922,
+  "protocol_reads": [
+   "scientific-formulation/references/abstraction-and-concretization.md",
+   "scientific-formulation/references/scientific-formulation.md"
+  ],
+  "rep": "r0",
+  "scenario": "H02-D1-observable",
+  "ssdp_skills": [
+   "scientific-formulation"
+  ],
+  "variant": "v66"
+ },
+ "H02-D1-observable-v66-r1": {
+  "cost_usd": 0.0930908,
+  "input_tokens": 113757,
+  "num_turns": 4,
+  "oracle": null,
+  "outcome": "admissible",
+  "output_tokens": 802,
+  "protocol_read_bytes": 31062,
+  "protocol_reads": [
+   "scientific-formulation/references/abstraction-and-concretization.md",
+   "scientific-formulation/references/scientific-formulation.md",
+   "scientific-formulation/references/semantic-definition-and-traceability.md"
+  ],
+  "rep": "r1",
+  "scenario": "H02-D1-observable",
+  "ssdp_skills": [
+   "scientific-formulation"
+  ],
+  "variant": "v66"
+ },
+ "H03-D4-feature-v65-r0": {
+  "cost_usd": 0.0645252,
+  "input_tokens": 105719,
+  "num_turns": 4,
+  "oracle": null,
+  "outcome": "missed",
+  "output_tokens": 504,
+  "protocol_read_bytes": 0,
+  "protocol_reads": [],
+  "rep": "r0",
+  "scenario": "H03-D4-feature",
+  "ssdp_skills": [],
+  "variant": "v65"
+ },
+ "H03-D4-feature-v65-r1": {
+  "cost_usd": 0.0625976,
+  "input_tokens": 105497,
+  "num_turns": 4,
+  "oracle": null,
+  "outcome": "missed",
+  "output_tokens": 359,
+  "protocol_read_bytes": 0,
+  "protocol_reads": [],
+  "rep": "r1",
+  "scenario": "H03-D4-feature",
+  "ssdp_skills": [],
+  "variant": "v65"
+ },
+ "H03-D4-feature-v66-r0": {
+  "cost_usd": 0.06405079999999999,
+  "input_tokens": 105309,
+  "num_turns": 4,
+  "oracle": null,
+  "outcome": "missed",
+  "output_tokens": 502,
+  "protocol_read_bytes": 0,
+  "protocol_reads": [],
+  "rep": "r0",
+  "scenario": "H03-D4-feature",
+  "ssdp_skills": [],
+  "variant": "v66"
+ },
+ "H03-D4-feature-v66-r1": {
+  "cost_usd": 0.06098340000000001,
+  "input_tokens": 107305,
+  "num_turns": 4,
+  "oracle": null,
+  "outcome": "admissible",
+  "output_tokens": 310,
+  "protocol_read_bytes": 0,
+  "protocol_reads": [],
+  "rep": "r1",
+  "scenario": "H03-D4-feature",
+  "ssdp_skills": [
+   "software-implementation"
+  ],
+  "variant": "v66"
+ },
+ "H04-negative-books-v65-r0": {
+  "cost_usd": 0.0357412,
+  "input_tokens": 34070,
+  "num_turns": 1,
+  "oracle": null,
+  "outcome": "correct-none",
+  "output_tokens": 281,
+  "protocol_read_bytes": 0,
+  "protocol_reads": [],
+  "rep": "r0",
+  "scenario": "H04-negative-books",
+  "ssdp_skills": [],
+  "variant": "v65"
+ },
+ "H04-negative-books-v65-r1": {
+  "cost_usd": 0.0349552,
+  "input_tokens": 34066,
+  "num_turns": 1,
+  "oracle": null,
+  "outcome": "correct-none",
+  "output_tokens": 204,
+  "protocol_read_bytes": 0,
+  "protocol_reads": [],
+  "rep": "r1",
+  "scenario": "H04-negative-books",
+  "ssdp_skills": [],
+  "variant": "v65"
+ },
+ "H04-negative-books-v66-r0": {
+  "cost_usd": 0.034677200000000005,
+  "input_tokens": 33969,
+  "num_turns": 1,
+  "oracle": null,
+  "outcome": "correct-none",
+  "output_tokens": 215,
+  "protocol_read_bytes": 0,
+  "protocol_reads": [],
+  "rep": "r0",
+  "scenario": "H04-negative-books",
+  "ssdp_skills": [],
+  "variant": "v66"
+ },
+ "H04-negative-books-v66-r1": {
+  "cost_usd": 0.0356652,
+  "input_tokens": 33966,
+  "num_turns": 1,
+  "oracle": null,
+  "outcome": "correct-none",
+  "output_tokens": 315,
+  "protocol_read_bytes": 0,
+  "protocol_reads": [],
+  "rep": "r1",
+  "scenario": "H04-negative-books",
+  "ssdp_skills": [],
+  "variant": "v66"
+ },
+ "H05-committed-artifacts-v65-r0": {
+  "cost_usd": 0.06519240000000001,
+  "input_tokens": 105784,
+  "num_turns": 4,
+  "oracle": null,
+  "outcome": "missed",
+  "output_tokens": 528,
+  "protocol_read_bytes": 0,
+  "protocol_reads": [],
+  "rep": "r0",
+  "scenario": "H05-committed-artifacts",
+  "ssdp_skills": [],
+  "variant": "v65"
+ },
+ "H05-committed-artifacts-v65-r1": {
+  "cost_usd": 0.055037600000000006,
+  "input_tokens": 103021,
+  "num_turns": 4,
+  "oracle": null,
+  "outcome": "missed",
+  "output_tokens": 620,
+  "protocol_read_bytes": 0,
+  "protocol_reads": [],
+  "rep": "r1",
+  "scenario": "H05-committed-artifacts",
+  "ssdp_skills": [],
+  "variant": "v65"
+ },
+ "H05-committed-artifacts-v66-r0": {
+  "cost_usd": 0.062627,
+  "input_tokens": 106776,
+  "num_turns": 4,
+  "oracle": null,
+  "outcome": "admissible",
+  "output_tokens": 575,
+  "protocol_read_bytes": 0,
+  "protocol_reads": [],
+  "rep": "r0",
+  "scenario": "H05-committed-artifacts",
+  "ssdp_skills": [
+   "repository-hygiene"
+  ],
+  "variant": "v66"
+ },
+ "H05-committed-artifacts-v66-r1": {
+  "cost_usd": 0.06175520000000001,
+  "input_tokens": 106711,
+  "num_turns": 4,
+  "oracle": null,
+  "outcome": "admissible",
+  "output_tokens": 499,
+  "protocol_read_bytes": 0,
+  "protocol_reads": [],
+  "rep": "r1",
+  "scenario": "H05-committed-artifacts",
+  "ssdp_skills": [
+   "repository-hygiene"
+  ],
+  "variant": "v66"
+ },
+ "S01-D1-validity-regime-v65-r0": {
+  "cost_usd": 0.1057256,
+  "input_tokens": 117495,
+  "num_turns": 4,
+  "oracle": null,
+  "outcome": "admissible",
+  "output_tokens": 720,
+  "protocol_read_bytes": 29718,
+  "protocol_reads": [
+   "scientific-formulation/references/abstraction-and-concretization.md",
+   "scientific-formulation/references/scientific-formulation.md"
+  ],
+  "rep": "r0",
+  "scenario": "S01-D1-validity-regime",
+  "ssdp_skills": [
+   "scientific-formulation"
+  ],
+  "variant": "v65"
+ },
+ "S01-D1-validity-regime-v65-r1": {
+  "cost_usd": 0.110925,
+  "input_tokens": 118359,
+  "num_turns": 4,
+  "oracle": null,
+  "outcome": "admissible",
+  "output_tokens": 1049,
+  "protocol_read_bytes": 29718,
+  "protocol_reads": [
+   "scientific-formulation/references/abstraction-and-concretization.md",
+   "scientific-formulation/references/scientific-formulation.md"
+  ],
+  "rep": "r1",
+  "scenario": "S01-D1-validity-regime",
+  "ssdp_skills": [
+   "scientific-formulation"
+  ],
+  "variant": "v65"
+ },
+ "S01-D1-validity-regime-v66-r0": {
+  "cost_usd": 0.0965614,
+  "input_tokens": 114125,
+  "num_turns": 4,
+  "oracle": null,
+  "outcome": "admissible",
+  "output_tokens": 1041,
+  "protocol_read_bytes": 31062,
+  "protocol_reads": [
+   "scientific-formulation/references/abstraction-and-concretization.md",
+   "scientific-formulation/references/scientific-formulation.md",
+   "scientific-formulation/references/semantic-definition-and-traceability.md"
+  ],
+  "rep": "r0",
+  "scenario": "S01-D1-validity-regime",
+  "ssdp_skills": [
+   "scientific-formulation"
+  ],
+  "variant": "v66"
+ },
+ "S01-D1-validity-regime-v66-r1": {
+  "cost_usd": 0.0967278,
+  "input_tokens": 114204,
+  "num_turns": 4,
+  "oracle": null,
+  "outcome": "admissible",
+  "output_tokens": 1080,
+  "protocol_read_bytes": 31062,
+  "protocol_reads": [
+   "scientific-formulation/references/abstraction-and-concretization.md",
+   "scientific-formulation/references/scientific-formulation.md",
+   "scientific-formulation/references/semantic-definition-and-traceability.md"
+  ],
+  "rep": "r1",
+  "scenario": "S01-D1-validity-regime",
+  "ssdp_skills": [
+   "scientific-formulation"
+  ],
+  "variant": "v66"
+ },
+ "S02-D2-stiff-integrator-v65-r0": {
+  "cost_usd": 0.07713020000000001,
+  "input_tokens": 110156,
+  "num_turns": 4,
+  "oracle": null,
+  "outcome": "admissible",
+  "output_tokens": 782,
+  "protocol_read_bytes": 0,
+  "protocol_reads": [],
+  "rep": "r0",
+  "scenario": "S02-D2-stiff-integrator",
+  "ssdp_skills": [
+   "numerical-algorithm-design"
+  ],
+  "variant": "v65"
+ },
+ "S02-D2-stiff-integrator-v65-r1": {
+  "cost_usd": 0.1052044,
+  "input_tokens": 117588,
+  "num_turns": 4,
+  "oracle": null,
+  "outcome": "admissible",
+  "output_tokens": 598,
+  "protocol_read_bytes": 48248,
+  "protocol_reads": [
+   "numerical-algorithm-design/references/abstraction-and-concretization.md",
+   "numerical-algorithm-design/references/numerical-algorithm-design.md",
+   "numerical-algorithm-design/references/testing-and-validation.md"
+  ],
+  "rep": "r1",
+  "scenario": "S02-D2-stiff-integrator",
+  "ssdp_skills": [
+   "numerical-algorithm-design"
+  ],
+  "variant": "v65"
+ },
+ "S02-D2-stiff-integrator-v66-r0": {
+  "cost_usd": 0.0925288,
+  "input_tokens": 114139,
+  "num_turns": 4,
+  "oracle": null,
+  "outcome": "admissible",
+  "output_tokens": 612,
+  "protocol_read_bytes": 39452,
+  "protocol_reads": [
+   "numerical-algorithm-design/references/abstraction-and-concretization.md",
+   "numerical-algorithm-design/references/numerical-algorithm-design.md",
+   "numerical-algorithm-design/references/testing-and-validation.md"
+  ],
+  "rep": "r0",
+  "scenario": "S02-D2-stiff-integrator",
+  "ssdp_skills": [
+   "numerical-algorithm-design"
+  ],
+  "variant": "v66"
+ },
+ "S02-D2-stiff-integrator-v66-r1": {
+  "cost_usd": 0.0941302,
+  "input_tokens": 114170,
+  "num_turns": 4,
+  "oracle": null,
+  "outcome": "admissible",
+  "output_tokens": 770,
+  "protocol_read_bytes": 39452,
+  "protocol_reads": [
+   "numerical-algorithm-design/references/abstraction-and-concretization.md",
+   "numerical-algorithm-design/references/numerical-algorithm-design.md",
+   "numerical-algorithm-design/references/testing-and-validation.md"
+  ],
+  "rep": "r1",
+  "scenario": "S02-D2-stiff-integrator",
+  "ssdp_skills": [
+   "numerical-algorithm-design"
+  ],
+  "variant": "v66"
+ },
+ "S03-D3-restart-redesign-v65-r0": {
+  "cost_usd": 0.067382,
+  "input_tokens": 106302,
+  "num_turns": 4,
+  "oracle": null,
+  "outcome": "missed",
+  "output_tokens": 672,
+  "protocol_read_bytes": 0,
+  "protocol_reads": [],
+  "rep": "r0",
+  "scenario": "S03-D3-restart-redesign",
+  "ssdp_skills": [],
+  "variant": "v65"
+ },
+ "S03-D3-restart-redesign-v65-r1": {
+  "cost_usd": 0.0821212,
+  "input_tokens": 111872,
+  "num_turns": 4,
+  "oracle": null,
+  "outcome": "admissible",
+  "output_tokens": 931,
+  "protocol_read_bytes": 0,
+  "protocol_reads": [],
+  "rep": "r1",
+  "scenario": "S03-D3-restart-redesign",
+  "ssdp_skills": [
+   "software-design"
+  ],
+  "variant": "v65"
+ },
+ "S03-D3-restart-redesign-v66-r0": {
+  "cost_usd": 0.1051464,
+  "input_tokens": 116885,
+  "num_turns": 4,
+  "oracle": null,
+  "outcome": "admissible",
+  "output_tokens": 1071,
+  "protocol_read_bytes": 53174,
+  "protocol_reads": [
+   "software-design/references/abstraction-and-concretization.md",
+   "software-design/references/architecture-and-design.md",
+   "software-design/references/workflow-and-workplans.md",
+   "software-design/references/concurrency-and-orchestration.md"
+  ],
+  "rep": "r0",
+  "scenario": "S03-D3-restart-redesign",
+  "ssdp_skills": [
+   "software-design"
+  ],
+  "variant": "v66"
+ },
+ "S03-D3-restart-redesign-v66-r1": {
+  "cost_usd": 0.1033616,
+  "input_tokens": 116872,
+  "num_turns": 4,
+  "oracle": null,
+  "outcome": "admissible",
+  "output_tokens": 881,
+  "protocol_read_bytes": 25121,
+  "protocol_reads": [
+   "software-design/references/abstraction-and-concretization.md",
+   "software-design/references/architecture-and-design.md"
+  ],
+  "rep": "r1",
+  "scenario": "S03-D3-restart-redesign",
+  "ssdp_skills": [
+   "software-design"
+  ],
+  "variant": "v66"
+ },
+ "S04-D4-local-bug-v65-r0": {
+  "cost_usd": 0.04969900000000001,
+  "input_tokens": 102730,
+  "num_turns": 4,
+  "oracle": null,
+  "outcome": "missed",
+  "output_tokens": 190,
+  "protocol_read_bytes": 0,
+  "protocol_reads": [],
+  "rep": "r0",
+  "scenario": "S04-D4-local-bug",
+  "ssdp_skills": [],
+  "variant": "v65"
+ },
+ "S04-D4-local-bug-v65-r1": {
+  "cost_usd": 0.0516344,
+  "input_tokens": 102848,
+  "num_turns": 4,
+  "oracle": null,
+  "outcome": "missed",
+  "output_tokens": 339,
+  "protocol_read_bytes": 0,
+  "protocol_reads": [],
+  "rep": "r1",
+  "scenario": "S04-D4-local-bug",
+  "ssdp_skills": [],
+  "variant": "v65"
+ },
+ "S04-D4-local-bug-v66-r0": {
+  "cost_usd": 0.0618472,
+  "input_tokens": 107457,
+  "num_turns": 4,
+  "oracle": null,
+  "outcome": "admissible",
+  "output_tokens": 377,
+  "protocol_read_bytes": 0,
+  "protocol_reads": [],
+  "rep": "r0",
+  "scenario": "S04-D4-local-bug",
+  "ssdp_skills": [
+   "software-implementation"
+  ],
+  "variant": "v66"
+ },
+ "S04-D4-local-bug-v66-r1": {
+  "cost_usd": 0.0633588,
+  "input_tokens": 107687,
+  "num_turns": 4,
+  "oracle": null,
+  "outcome": "admissible",
+  "output_tokens": 462,
+  "protocol_read_bytes": 0,
+  "protocol_reads": [],
+  "rep": "r1",
+  "scenario": "S04-D4-local-bug",
+  "ssdp_skills": [
+   "software-implementation"
+  ],
+  "variant": "v66"
+ },
+ "S05-docs-v65-r0": {
+  "cost_usd": 0.1290254,
+  "input_tokens": 122743,
+  "num_turns": 4,
+  "oracle": null,
+  "outcome": "admissible",
+  "output_tokens": 749,
+  "protocol_read_bytes": 39123,
+  "protocol_reads": [
+   "software-documentation/references/abstraction-and-concretization.md",
+   "software-documentation/references/documentation-maintenance.md",
+   "software-documentation/references/documentation-and-evidence.md"
+  ],
+  "rep": "r0",
+  "scenario": "S05-docs",
+  "ssdp_skills": [
+   "software-documentation"
+  ],
+  "variant": "v65"
+ },
+ "S05-docs-v65-r1": {
+  "cost_usd": 0.15155100000000002,
+  "input_tokens": 127474,
+  "num_turns": 4,
+  "oracle": null,
+  "outcome": "admissible",
+  "output_tokens": 1135,
+  "protocol_read_bytes": 52744,
+  "protocol_reads": [
+   "software-documentation/references/abstraction-and-concretization.md",
+   "software-documentation/references/documentation-maintenance.md",
+   "software-documentation/references/documentation-and-evidence.md",
+   "software-documentation/references/scientific-technical-writing.md"
+  ],
+  "rep": "r1",
+  "scenario": "S05-docs",
+  "ssdp_skills": [
+   "software-documentation"
+  ],
+  "variant": "v65"
+ },
+ "S05-docs-v66-r0": {
+  "cost_usd": 0.0709602,
+  "input_tokens": 108784,
+  "num_turns": 4,
+  "oracle": null,
+  "outcome": "admissible",
+  "output_tokens": 482,
+  "protocol_read_bytes": 0,
+  "protocol_reads": [],
+  "rep": "r0",
+  "scenario": "S05-docs",
+  "ssdp_skills": [
+   "software-documentation"
+  ],
+  "variant": "v66"
+ },
+ "S05-docs-v66-r1": {
+  "cost_usd": 0.07188539999999999,
+  "input_tokens": 108936,
+  "num_turns": 4,
+  "oracle": null,
+  "outcome": "admissible",
+  "output_tokens": 516,
+  "protocol_read_bytes": 0,
+  "protocol_reads": [],
+  "rep": "r1",
+  "scenario": "S05-docs",
+  "ssdp_skills": [
+   "software-documentation"
+  ],
+  "variant": "v66"
+ },
+ "S06-audit-v65-r0": {
+  "cost_usd": 0.1397296,
+  "input_tokens": 124851,
+  "num_turns": 4,
+  "oracle": null,
+  "outcome": "admissible",
+  "output_tokens": 1007,
+  "protocol_read_bytes": 102417,
+  "protocol_reads": [
+   "software-maintenance-audit/references/abstraction-and-concretization.md",
+   "software-maintenance-audit/references/long-horizon-code-health.md",
+   "software-maintenance-audit/references/git-and-version-control.md",
+   "software-maintenance-audit/references/repository-intake.md",
+   "software-maintenance-audit/references/architecture-and-design.md",
+   "software-maintenance-audit/references/testing-and-validation.md",
+   "software-maintenance-audit/references/evidence-evolution-and-dependencies.md"
+  ],
+  "rep": "r0",
+  "scenario": "S06-audit",
+  "ssdp_skills": [
+   "software-maintenance-audit"
+  ],
+  "variant": "v65"
+ },
+ "S06-audit-v65-r1": {
+  "cost_usd": 0.1032844,
+  "input_tokens": 116276,
+  "num_turns": 4,
+  "oracle": null,
+  "outcome": "admissible",
+  "output_tokens": 794,
+  "protocol_read_bytes": 64912,
+  "protocol_reads": [
+   "software-maintenance-audit/references/abstraction-and-concretization.md",
+   "software-maintenance-audit/references/long-horizon-code-health.md",
+   "software-maintenance-audit/references/git-and-version-control.md",
+   "software-maintenance-audit/references/architecture-and-design.md",
+   "software-maintenance-audit/references/repository-intake.md"
+  ],
+  "rep": "r1",
+  "scenario": "S06-audit",
+  "ssdp_skills": [
+   "software-maintenance-audit"
+  ],
+  "variant": "v65"
+ },
+ "S06-audit-v66-r0": {
+  "cost_usd": 0.123735,
+  "input_tokens": 120817,
+  "num_turns": 4,
+  "oracle": null,
+  "outcome": "admissible",
+  "output_tokens": 944,
+  "protocol_read_bytes": 72077,
+  "protocol_reads": [
+   "software-maintenance-audit/references/abstraction-and-concretization.md",
+   "software-maintenance-audit/references/long-horizon-code-health.md",
+   "software-maintenance-audit/references/git-and-version-control.md",
+   "software-maintenance-audit/references/repository-intake.md",
+   "software-maintenance-audit/references/architecture-and-design.md",
+   "software-maintenance-audit/references/testing-and-validation.md"
+  ],
+  "rep": "r0",
+  "scenario": "S06-audit",
+  "ssdp_skills": [
+   "software-maintenance-audit"
+  ],
+  "variant": "v66"
+ },
+ "S06-audit-v66-r1": {
+  "cost_usd": 0.1237844,
+  "input_tokens": 120673,
+  "num_turns": 4,
+  "oracle": null,
+  "outcome": "admissible",
+  "output_tokens": 994,
+  "protocol_read_bytes": 91601,
+  "protocol_reads": [
+   "software-maintenance-audit/references/abstraction-and-concretization.md",
+   "software-maintenance-audit/references/long-horizon-code-health.md",
+   "software-maintenance-audit/references/git-and-version-control.md",
+   "software-maintenance-audit/references/repository-intake.md",
+   "software-maintenance-audit/references/architecture-and-design.md",
+   "software-maintenance-audit/references/testing-and-validation.md",
+   "software-maintenance-audit/references/evidence-evolution-and-dependencies.md"
+  ],
+  "rep": "r1",
+  "scenario": "S06-audit",
+  "ssdp_skills": [
+   "software-maintenance-audit"
+  ],
+  "variant": "v66"
+ },
+ "S07-hygiene-v65-r0": {
+  "cost_usd": 0.12014440000000001,
+  "input_tokens": 121362,
+  "num_turns": 4,
+  "oracle": null,
+  "outcome": "admissible",
+  "output_tokens": 571,
+  "protocol_read_bytes": 42020,
+  "protocol_reads": [
+   "repository-hygiene/references/repository-intake.md",
+   "repository-hygiene/references/git-and-version-control.md",
+   "repository-hygiene/references/workflow-and-workplans.md"
+  ],
+  "rep": "r0",
+  "scenario": "S07-hygiene",
+  "ssdp_skills": [
+   "repository-hygiene"
+  ],
+  "variant": "v65"
+ },
+ "S07-hygiene-v65-r1": {
+  "cost_usd": 0.1397662,
+  "input_tokens": 125727,
+  "num_turns": 4,
+  "oracle": null,
+  "outcome": "admissible",
+  "output_tokens": 783,
+  "protocol_read_bytes": 53616,
+  "protocol_reads": [
+   "repository-hygiene/references/git-and-version-control.md",
+   "repository-hygiene/references/workflow-and-workplans.md",
+   "repository-hygiene/references/storage-and-io.md",
+   "repository-hygiene/references/repository-intake.md"
+  ],
+  "rep": "r1",
+  "scenario": "S07-hygiene",
+  "ssdp_skills": [
+   "repository-hygiene"
+  ],
+  "variant": "v65"
+ },
+ "S07-hygiene-v66-r0": {
+  "cost_usd": 0.1381822,
+  "input_tokens": 125064,
+  "num_turns": 4,
+  "oracle": null,
+  "outcome": "admissible",
+  "output_tokens": 829,
+  "protocol_read_bytes": 52511,
+  "protocol_reads": [
+   "repository-hygiene/references/repository-intake.md",
+   "repository-hygiene/references/git-and-version-control.md",
+   "repository-hygiene/references/workflow-and-workplans.md",
+   "repository-hygiene/references/storage-and-io.md"
+  ],
+  "rep": "r0",
+  "scenario": "S07-hygiene",
+  "ssdp_skills": [
+   "repository-hygiene"
+  ],
+  "variant": "v66"
+ },
+ "S07-hygiene-v66-r1": {
+  "cost_usd": 0.0622528,
+  "input_tokens": 106838,
+  "num_turns": 4,
+  "oracle": null,
+  "outcome": "admissible",
+  "output_tokens": 539,
+  "protocol_read_bytes": 0,
+  "protocol_reads": [],
+  "rep": "r1",
+  "scenario": "S07-hygiene",
+  "ssdp_skills": [
+   "repository-hygiene"
+  ],
+  "variant": "v66"
+ },
+ "S08-mixed-mc-variance-v65-r0": {
+  "cost_usd": 0.0637724,
+  "input_tokens": 108437,
+  "num_turns": 4,
+  "oracle": null,
+  "outcome": "missed",
+  "output_tokens": 366,
+  "protocol_read_bytes": 0,
+  "protocol_reads": [],
+  "rep": "r0",
+  "scenario": "S08-mixed-mc-variance",
+  "ssdp_skills": [],
+  "variant": "v65"
+ },
+ "S08-mixed-mc-variance-v65-r1": {
+  "cost_usd": 0.0651314,
+  "input_tokens": 105882,
+  "num_turns": 4,
+  "oracle": null,
+  "outcome": "missed",
+  "output_tokens": 534,
+  "protocol_read_bytes": 0,
+  "protocol_reads": [],
+  "rep": "r1",
+  "scenario": "S08-mixed-mc-variance",
+  "ssdp_skills": [],
+  "variant": "v65"
+ },
+ "S08-mixed-mc-variance-v66-r0": {
+  "cost_usd": 0.0630036,
+  "input_tokens": 105415,
+  "num_turns": 4,
+  "oracle": null,
+  "outcome": "missed",
+  "output_tokens": 402,
+  "protocol_read_bytes": 0,
+  "protocol_reads": [],
+  "rep": "r0",
+  "scenario": "S08-mixed-mc-variance",
+  "ssdp_skills": [],
+  "variant": "v66"
+ },
+ "S08-mixed-mc-variance-v66-r1": {
+  "cost_usd": 0.06557840000000001,
+  "input_tokens": 108448,
+  "num_turns": 4,
+  "oracle": null,
+  "outcome": "missed",
+  "output_tokens": 508,
+  "protocol_read_bytes": 0,
+  "protocol_reads": [],
+  "rep": "r1",
+  "scenario": "S08-mixed-mc-variance",
+  "ssdp_skills": [],
+  "variant": "v66"
+ },
+ "S09-negative-poem-v65-r0": {
+  "cost_usd": 0.033483200000000005,
+  "input_tokens": 34068,
+  "num_turns": 1,
+  "oracle": null,
+  "outcome": "correct-none",
+  "output_tokens": 56,
+  "protocol_read_bytes": 0,
+  "protocol_reads": [],
+  "rep": "r0",
+  "scenario": "S09-negative-poem",
+  "ssdp_skills": [],
+  "variant": "v65"
+ },
+ "S09-negative-poem-v65-r1": {
+  "cost_usd": 0.0335532,
+  "input_tokens": 34073,
+  "num_turns": 1,
+  "oracle": null,
+  "outcome": "correct-none",
+  "output_tokens": 61,
+  "protocol_read_bytes": 0,
+  "protocol_reads": [],
+  "rep": "r1",
+  "scenario": "S09-negative-poem",
+  "ssdp_skills": [],
+  "variant": "v65"
+ },
+ "S09-negative-poem-v66-r0": {
+  "cost_usd": 0.033121199999999996,
+  "input_tokens": 33965,
+  "num_turns": 1,
+  "oracle": null,
+  "outcome": "correct-none",
+  "output_tokens": 61,
+  "protocol_read_bytes": 0,
+  "protocol_reads": [],
+  "rep": "r0",
+  "scenario": "S09-negative-poem",
+  "ssdp_skills": [],
+  "variant": "v66"
+ },
+ "S09-negative-poem-v66-r1": {
+  "cost_usd": 0.0330972,
+  "input_tokens": 33964,
+  "num_turns": 1,
+  "oracle": null,
+  "outcome": "correct-none",
+  "output_tokens": 59,
+  "protocol_read_bytes": 0,
+  "protocol_reads": [],
+  "rep": "r1",
+  "scenario": "S09-negative-poem",
+  "ssdp_skills": [],
+  "variant": "v66"
+ },
+ "S10-negative-email-v65-r0": {
+  "cost_usd": 0.0354512,
+  "input_tokens": 34075,
+  "num_turns": 1,
+  "oracle": null,
+  "outcome": "correct-none",
+  "output_tokens": 250,
+  "protocol_read_bytes": 0,
+  "protocol_reads": [],
+  "rep": "r0",
+  "scenario": "S10-negative-email",
+  "ssdp_skills": [],
+  "variant": "v65"
+ },
+ "S10-negative-email-v65-r1": {
+  "cost_usd": 0.0355772,
+  "input_tokens": 34089,
+  "num_turns": 1,
+  "oracle": null,
+  "outcome": "correct-none",
+  "output_tokens": 257,
+  "protocol_read_bytes": 0,
+  "protocol_reads": [],
+  "rep": "r1",
+  "scenario": "S10-negative-email",
+  "ssdp_skills": [],
+  "variant": "v65"
+ },
+ "S10-negative-email-v66-r0": {
+  "cost_usd": 0.0352012,
+  "input_tokens": 33980,
+  "num_turns": 1,
+  "oracle": null,
+  "outcome": "correct-none",
+  "output_tokens": 263,
+  "protocol_read_bytes": 0,
+  "protocol_reads": [],
+  "rep": "r0",
+  "scenario": "S10-negative-email",
+  "ssdp_skills": [],
+  "variant": "v66"
+ },
+ "S10-negative-email-v66-r1": {
+  "cost_usd": 0.0344612,
+  "input_tokens": 33975,
+  "num_turns": 1,
+  "oracle": null,
+  "outcome": "correct-none",
+  "output_tokens": 191,
+  "protocol_read_bytes": 0,
+  "protocol_reads": [],
+  "rep": "r1",
+  "scenario": "S10-negative-email",
+  "ssdp_skills": [],
+  "variant": "v66"
+ },
+ "S11-explicit-skill-v65-r0": {
+  "cost_usd": 0.1122544,
+  "input_tokens": 120021,
+  "num_turns": 4,
+  "oracle": null,
+  "outcome": "admissible",
+  "output_tokens": 535,
+  "protocol_read_bytes": 33917,
+  "protocol_reads": [
+   "software-design/references/abstraction-and-concretization.md",
+   "software-design/references/architecture-and-design.md"
+  ],
+  "rep": "r0",
+  "scenario": "S11-explicit-skill",
+  "ssdp_skills": [
+   "software-design"
+  ],
+  "variant": "v65"
+ },
+ "S11-explicit-skill-v65-r1": {
+  "cost_usd": 0.1126346,
+  "input_tokens": 120035,
+  "num_turns": 4,
+  "oracle": null,
+  "outcome": "admissible",
+  "output_tokens": 564,
+  "protocol_read_bytes": 33917,
+  "protocol_reads": [
+   "software-design/references/abstraction-and-concretization.md",
+   "software-design/references/architecture-and-design.md"
+  ],
+  "rep": "r1",
+  "scenario": "S11-explicit-skill",
+  "ssdp_skills": [
+   "software-design"
+  ],
+  "variant": "v65"
+ },
+ "S11-explicit-skill-v66-r0": {
+  "cost_usd": 0.09894900000000001,
+  "input_tokens": 116464,
+  "num_turns": 4,
+  "oracle": null,
+  "outcome": "admissible",
+  "output_tokens": 522,
+  "protocol_read_bytes": 25121,
+  "protocol_reads": [
+   "software-design/references/abstraction-and-concretization.md",
+   "software-design/references/architecture-and-design.md"
+  ],
+  "rep": "r0",
+  "scenario": "S11-explicit-skill",
+  "ssdp_skills": [
+   "software-design"
+  ],
+  "variant": "v66"
+ },
+ "S11-explicit-skill-v66-r1": {
+  "cost_usd": 0.0640168,
+  "input_tokens": 108137,
+  "num_turns": 4,
+  "oracle": null,
+  "outcome": "admissible",
+  "output_tokens": 439,
+  "protocol_read_bytes": 0,
+  "protocol_reads": [],
+  "rep": "r1",
+  "scenario": "S11-explicit-skill",
+  "ssdp_skills": [
+   "software-design"
+  ],
+  "variant": "v66"
+ }
+}

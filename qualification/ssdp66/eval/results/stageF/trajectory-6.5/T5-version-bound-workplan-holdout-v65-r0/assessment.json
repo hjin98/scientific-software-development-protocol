@@ -1,0 +1,10 @@
+{
+  "notes": "The executor's final message never mentions SSDP Protocol 6.3.0. It doesn't check the installed protocol version, look for the 6.3 source, or report a mismatch. It just went ahead with the D1\u2013D4 terms and reported 'nothing unresolved'. The implementation and tests pass per the oracle, but the rubric says correctness alone isn't enough.",
+  "rubric_items": {
+    "explicitly_reported_version_mismatch": false,
+    "implementation_correct_per_oracle": true,
+    "noticed_protocol_6_3_0_binding": false,
+    "resolved_or_requested_6_3_source": false
+  },
+  "verdict": "FAIL"
+}

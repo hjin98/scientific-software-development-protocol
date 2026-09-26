@@ -1,0 +1,16 @@
+{
+  "duration_ms": 4767,
+  "final": "Here are three great picks for a long flight:\n\n1. **Project Hail Mary** by Andy Weir \u2014 a fast-paced, puzzle-driven survival story with humor and a satisfying mystery. Very hard to put down, which suits a long flight well.\n\n2. **The Left Hand of Darkness** by Ursula K. Le Guin \u2014 a slower, thoughtful classic about culture, gender, and diplomacy on an ice-bound planet. Great if you want something more literary and immersive.\n\n3. **Children of Time** by Adrian Tchaikovsky \u2014 an epic, multi-generational story about evolution and first contact, with alternating storylines that make it easy to read in chunks between naps or meals.\n\nIf you want something in a particular subgenre (space opera, dystopia, first contact, etc.) or a specific length/tone, let me know and I can narrow it down further.",
+  "input_tokens_total": 34070,
+  "is_error": false,
+  "models": [
+    "claude-sonnet-5"
+  ],
+  "num_turns": 1,
+  "output_tokens": 281,
+  "protocol_read_bytes_on_disk": 0,
+  "protocol_reads": [],
+  "skills_invoked": [],
+  "total_cost_usd": 0.0357412,
+  "wall_s": 6.0
+}

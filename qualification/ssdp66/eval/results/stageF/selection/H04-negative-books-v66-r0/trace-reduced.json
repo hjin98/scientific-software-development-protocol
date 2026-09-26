@@ -1,0 +1,95 @@
+[
+ {
+  "init": {
+   "model": "claude-sonnet-5",
+   "claude_code_version": "2.1.283",
+   "skills": [
+    "session-start-hook",
+    "numerical-algorithm-design",
+    "repository-hygiene",
+    "scientific-formulation",
+    "software-design",
+    "software-documentation",
+    "software-implementation",
+    "software-maintenance-audit",
+    "deep-research",
+    "design",
+    "slides",
+    "design-sync",
+    "dataviz",
+    "artifact-diagramming",
+    "artifact-capabilities",
+    "update-config",
+    "verify",
+    "debug",
+    "code-review",
+    "simplify",
+    "batch",
+    "fewer-permission-prompts",
+    "doctor",
+    "loop",
+    "claude-api",
+    "workflow-authoring",
+    "run",
+    "run-skill-generator",
+    "anthropic-skills:built-in-browser",
+    "anthropic-skills:chrome-browser",
+    "anthropic-skills:computer-use",
+    "anthropic-skills:deep-research",
+    "anthropic-skills:docs",
+    "anthropic-skills:docx",
+    "anthropic-skills:import-memory",
+    "anthropic-skills:morning",
+    "anthropic-skills:pdf",
+    "anthropic-skills:pptx",
+    "anthropic-skills:skill-creator",
+    "anthropic-skills:xlsx"
+   ]
+  }
+ },
+ {
+  "text": "Three solid picks for a long flight:\n\n1. **Project Hail Mary** by Andy Weir \u2014 fast-paced, funny, puzzle-driven survival story in space. Very hard to put down, which is ideal for killing hours.\n2. **The Left Hand of Darkness** by Ursula K. Le Guin \u2014 slower and more literary, a great palate-cleanser if you want something thoughtful rather than plot-twisty.\n3. **Leviathan Wakes** by James S.A. Corey (first Expanse book) \u2014 noir-flavored space opera, page-turner with a big universe to get lost in, and it's the start of a series if you want more for the return flight."
+ },
+ {
+  "result": {
+   "subtype": "success",
+   "num_turns": 1,
+   "total_cost_usd": 0.034677200000000005,
+   "duration_ms": 4174,
+   "usage": {
+    "input_tokens": 2,
+    "cache_creation_input_tokens": 6771,
+    "cache_read_input_tokens": 27196,
+    "output_tokens": 215,
+    "output_tokens_details": {
+     "thinking_tokens": 0
+    },
+    "server_tool_use": {
+     "web_search_requests": 0,
+     "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+     "ephemeral_1h_input_tokens": 6771,
+     "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "not_available",
+    "iterations": [
+     {
+      "input_tokens": 2,
+      "output_tokens": 215,
+      "cache_read_input_tokens": 27196,
+      "cache_creation_input_tokens": 6771,
+      "cache_creation": {
+       "ephemeral_5m_input_tokens": 0,
+       "ephemeral_1h_input_tokens": 6771
+      },
+      "type": "message"
+     }
+    ],
+    "speed": "standard"
+   },
+   "is_error": false
+  }
+ }
+]

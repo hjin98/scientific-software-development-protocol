@@ -5,7 +5,7 @@ description: Use to implement, fix, debug, refactor, test, or package scientific
 
 # Software Implementation
 
-**Version entry check.** This package is SSDP `REPLACE_WITH_SKILL_PROTOCOL_VERSION`. If the task or its governing workplan declares a different SSDP `protocol_version`, say so and resolve that version's compatible source before protocol-dependent reasoning ([Protocol versioning and compatibility](references/protocol-versioning-and-compatibility.md)); never apply this package's doctrine to other-version work. No declared version: continue.
+**Version entry check.** This package is SSDP `REPLACE_WITH_SKILL_PROTOCOL_VERSION`; if the task or its workplan declares another SSDP `protocol_version`, say so and resolve that version's source ([Protocol versioning and compatibility](references/protocol-versioning-and-compatibility.md)) instead of applying this package.
 
 Own **D4 executable concretization**: implement accepted D4 specification and D3 architecture while satisfying every applicable upstream D1/D2 invariant and directly governed constraint. Code, tests, wrappers, helpers, caches, state machines and prior patches are delegated machinery unless authority explicitly requires them.
 

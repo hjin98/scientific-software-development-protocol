@@ -1,0 +1,23 @@
+{
+  "duration_ms": 9563,
+  "final": "",
+  "input_tokens_total": 117649,
+  "is_error": true,
+  "models": [
+    "claude-sonnet-5"
+  ],
+  "num_turns": 4,
+  "output_tokens": 755,
+  "protocol_read_bytes_on_disk": 61228,
+  "protocol_reads": [
+    "numerical-algorithm-design/references/abstraction-and-concretization.md",
+    "numerical-algorithm-design/references/numerical-algorithm-design.md",
+    "numerical-algorithm-design/references/testing-and-validation.md",
+    "numerical-algorithm-design/references/performance-and-parallelism.md"
+  ],
+  "skills_invoked": [
+    "numerical-algorithm-design"
+  ],
+  "total_cost_usd": 0.1070374,
+  "wall_s": 11.1
+}

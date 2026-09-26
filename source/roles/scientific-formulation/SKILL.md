@@ -5,7 +5,7 @@ description: Use to define, review, or challenge the scientific or mathematical 
 
 # Scientific Formulation
 
-**Version entry check.** This package is SSDP `REPLACE_WITH_SKILL_PROTOCOL_VERSION`. If the task or its governing workplan declares a different SSDP `protocol_version`, say so and resolve that version's compatible source before protocol-dependent reasoning ([Protocol versioning and compatibility](references/protocol-versioning-and-compatibility.md)); never apply this package's doctrine to other-version work. No declared version: continue.
+**Version entry check.** This package is SSDP `REPLACE_WITH_SKILL_PROTOCOL_VERSION`; if the task or its workplan declares another SSDP `protocol_version`, say so and resolve that version's source ([Protocol versioning and compatibility](references/protocol-versioning-and-compatibility.md)) instead of applying this package.
 
 Own **D1 scientific/mathematical meaning**: the question, observable/estimand, model/equations, assumptions, validity regime, interpretation, model-level uncertainty, and external adequacy. Do not absorb D2 numerical method, D3 architecture, or D4 implementation merely because they affect results.
 
@@ -34,8 +34,6 @@ For a material D1 authority mutation use the [Abstraction-concretization change 
 5. Define problem-appropriate adequacy/falsification and allocate scrutiny by consequence plus decision-sensitive uncertainty; a public/durable claim does not by itself require maximal evidence when the questioned uncertainty cannot change its interpretation or acceptance.
 6. Define material evidence targets and their execution/validity dependencies; choose the cheapest sufficiently strong applicable route without treating evidence as authority.
 7. Draft proposed authority. A consequential D1 mutation requires the owning acceptance process, including independent falsification and designated human ratification where required; afterwards perform bounded impact closure and hand D2 only the minimum accepted invariants, uncertainty/validity semantics, constraints, and reopen conditions.
-
-When creating human-facing D1 material, give the intended competent reader sufficient background for newly introduced non-common terminology and expand non-obvious abbreviations at first explanatory use (`full term (ABC)`). Explanatory context never silently redefines the normative D1 owner.
 
 ## Evidence and Challenge
 
