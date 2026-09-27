@@ -30,10 +30,10 @@ It supersedes the earlier composition, now preserved as historical design-review
 2. `workplans/archive/SSDP-7.0-SCIENTIFIC-EPISTEMIC-CLOSURE-AND-DISCOVERY-REVISION-1-FIRST-REVIEW-CLOSURE.md`
 3. `workplans/archive/SSDP-7.0-SCIENTIFIC-EPISTEMIC-CLOSURE-AND-DISCOVERY-REVISION-2-FEEDBACK-AND-LONGITUDINAL-CLOSURE.md`
 
-The author-side review record `qualification/ssdp70/WORKPLAN-REVIEW-2026-09-27-PROTOCOL-7.0-PASS.md` applies only to that superseded composition, was not independent, and establishes no implementation-handoff readiness. A third-round workplan-level review of that composition returned NO-PASS; its findings are closed in design by the consolidated workplan (author-side closure).
+The author-side review record `qualification/ssdp70/WORKPLAN-REVIEW-2026-09-27-PROTOCOL-7.0-PASS.md` applies only to that superseded composition, was not independent, and establishes no implementation-handoff readiness. Fresh independent Review of the consolidated handoff at `781786339fd83401f9954e663244bc973b0de968` returned **NO-PASS**. The stakeholder authorized repairs, now proposed in that same handoff (§0.1); they require fresh independent review and do not establish closure of the binding/qualification Serious Challenges.
 
 ```text
-PROTOCOL 7 WORKPLAN DESIGN REVIEW: PENDING — fresh independent review of the consolidated workplan
+PROTOCOL 7 WORKPLAN DESIGN REVIEW: NO-PASS reviewed basis; proposed repair pending fresh independent review
 STAKEHOLDER CONFIRMATION: obligation-binding rule (consolidated workplan section 4) ACCEPTED 2026-09-27
 PROTOCOL 7 D4: NOT AUTHORIZED
 ```
