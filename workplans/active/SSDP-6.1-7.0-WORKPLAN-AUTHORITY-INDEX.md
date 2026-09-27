@@ -8,7 +8,7 @@ reviewed_date: 2026-09-26
 active_serious_challenge: none
 ---
 
-# SSDP 6.1 / 6.2 / 6.3 / 6.4 / 6.5 / 6.6 / 7.0 Workplan Authority Index
+# SSDP 6.1 / 6.2 / 6.3 / 6.4 / 6.5 / 6.6 / 7.0 / 8.0 Workplan Authority Index
 
 ## Background and terminology
 
@@ -17,6 +17,20 @@ The **Scientific Software Development Protocol (SSDP)** uses D1 scientific/mathe
 ## Purpose
 
 Do not copy substantive requirements into this index. Read the listed governing artifacts themselves. Archived workplans preserve the exact historical handoff that governed completed cycles or design-review snapshots; later work may supersede current release/closeout disposition without rewriting those historical artifacts.
+
+## Current major-version reassignment
+
+Protocol 7.0 is now the proposed **Scientific Epistemic Closure, Transparency, and Discovery** major revision. Its current planning handoff is:
+
+1. `workplans/active/SSDP-7.0-SCIENTIFIC-EPISTEMIC-CLOSURE-AND-DISCOVERY.md`
+2. `workplans/active/SSDP-7.0-SCIENTIFIC-EPISTEMIC-CLOSURE-AND-DISCOVERY-REVISION-1-FIRST-REVIEW-CLOSURE.md`
+3. `workplans/active/SSDP-7.0-SCIENTIFIC-EPISTEMIC-CLOSURE-AND-DISCOVERY-REVISION-2-FEEDBACK-AND-LONGITUDINAL-CLOSURE.md`
+
+The previously proposed deterministic control-plane / mandatory-orchestrator design is reassigned to **Protocol 8.0** by:
+
+- `workplans/active/SSDP-8.0-DETERMINISTIC-ORCHESTRATOR-VERSION-REBIND.md`
+
+Its older design artifacts retain their historical `SSDP-7.0-...` filenames and embedded target wording, but those target-version labels are superseded by the Protocol 8.0 rebind for all current/future planning. They do not compete with the new Protocol 7.0 target and still do not authorize D4 implementation.
 
 ## Protocol 6.1 completed handoff
 
@@ -154,11 +168,12 @@ LIFECYCLE STATUS: COMPLETED / ARCHIVED
 
 Protocol 6.6 is accepted-current. Its reduced-root-router, strict no-self-adoption version semantics, stochastic Protocol-6 robustness boundary, and bounded live trajectory evidence are inputs to Protocol 7's already-required deliberate D3 Orchestrator architecture reopen. They do not themselves select a Protocol 7 architecture or authorize Protocol 7 D4.
 
-## Protocol 7.0 current design handoff
+## Protocol 8.0 deterministic-orchestrator future design handoff
 
-Protocol 7.0 design/implementation/review SHALL read and satisfy, as one composed handoff:
+Protocol 8.0 deterministic-orchestrator design/review SHALL treat the following historically 7.0-labelled artifacts as its preserved substantive design family, preceded by the Protocol 8.0 version-rebind record:
 
-1. `workplans/active/SSDP-7.0-DETERMINISTIC-CONTROL-PLANE-AND-MANDATORY-ORCHESTRATOR-MIGRATION.md`
+1. `workplans/active/SSDP-8.0-DETERMINISTIC-ORCHESTRATOR-VERSION-REBIND.md`
+2. `workplans/active/SSDP-7.0-DETERMINISTIC-CONTROL-PLANE-AND-MANDATORY-ORCHESTRATOR-MIGRATION.md`
 2. `workplans/active/SSDP-7.0-DETERMINISTIC-CONTROL-PLANE-AND-MANDATORY-ORCHESTRATOR-MIGRATION-REVISION-1-SECOND-REVIEW-CLOSURE.md`
 3. `workplans/active/SSDP-7.0-DETERMINISTIC-CONTROL-PLANE-AND-MANDATORY-ORCHESTRATOR-MIGRATION-REVISION-2-DETERMINISM-AND-RECOVERY-CLOSURE.md`
 4. `workplans/active/SSDP-7.0-DETERMINISTIC-CONTROL-PLANE-AND-MANDATORY-ORCHESTRATOR-MIGRATION-REVISION-3-PROTOCOL-6.2-INHERITANCE-RECONCILIATION.md`
@@ -173,8 +188,8 @@ Precedence:
 - Revision 2 closes reducer-purity, ambient-state, external-effect, deterministic replay, and canonical recovery gaps;
 - Revision 3 changes only representation/version inheritance after Protocol 6.2 acceptance: current pre-cutover document-controlled baseline and fallback/rollback became Protocol 6.2, while the parent/Revisions 1-2 D3 architecture semantics remained unchanged;
 - Revision 4 changes only project-learning/version inheritance after Protocol 6.3 acceptance: current pre-cutover document-controlled baseline and fallback/rollback become Protocol 6.3, while the parent/Revisions 1-3 D3 architecture semantics remain unchanged;
-- Revision 5 changes only version/representation inheritance after Protocol 6.4 acceptance: the current pre-cutover fallback/rollback baseline becomes Protocol 6.4 recovery `74bc572ef516cae417437a2027eeff52a2e25c15`, while parent/Revisions 1-4 D3 architecture semantics remain unchanged and Protocol 7 D4 remains unauthorized;
-- Revision 6 changes only version/representation inheritance after Protocol 6.5 acceptance: the current pre-cutover fallback/rollback baseline becomes Protocol 6.5 recovery `c4d5da1e0acb0e9f27376bf69561e8762747cd2d`, while parent/Revisions 1-5 D3 architecture semantics remain unchanged and Protocol 7 D4 remains unauthorized;
+- Revision 5 changes only version/representation inheritance after Protocol 6.4 acceptance: the current pre-cutover fallback/rollback baseline becomes Protocol 6.4 recovery `74bc572ef516cae417437a2027eeff52a2e25c15`, while parent/Revisions 1-4 D3 architecture semantics remain unchanged and Protocol 8 D4 remains unauthorized;
+- Revision 6 changes only version/representation inheritance after Protocol 6.5 acceptance: the current pre-cutover fallback/rollback baseline becomes Protocol 6.5 recovery `c4d5da1e0acb0e9f27376bf69561e8762747cd2d`, while parent/Revisions 1-5 D3 architecture semantics remain unchanged and Protocol 8 D4 remains unauthorized;
 - Revision 7 advances the pre-cutover fallback/rollback baseline to Protocol 6.6 recovery `384666764da4c55b282e6b1595ab97e2f86e1dc4` and binds Protocol 6.6 operational evidence/capabilities as mandatory inputs to the already-required deliberate D3 Orchestrator architecture reassessment; it does not select the resulting architecture or authorize Protocol 7 D4;
 - every parent requirement not explicitly changed by a later revision remains binding.
 
@@ -198,10 +213,10 @@ PROTOCOL 6.6 INHERITANCE/REASSESSMENT INPUT: SATISFIED / REVISION 7
 CURRENT PRE-CUTOVER FALLBACK/ROLLBACK BASELINE: Protocol 6.6 recovery 384666764da4c55b282e6b1595ab97e2f86e1dc4
 REMAINING PROTOCOL-7-SPECIFIC PRE-D4 REQUIREMENT:
   1. DELIBERATE D3 ORCHESTRATOR ARCHITECTURE REOPEN/SUPERSESSION
-PROTOCOL 7 D4: NOT AUTHORIZED
+PROTOCOL 8 D4: NOT AUTHORIZED
 ```
 
-Protocol 7 D4 remains unauthorized until the existing deliberate D3 Orchestrator architecture reopen/supersession requirement closes. Revisions 3-7 do not perform that reopen and no Protocol 7 cutover is implied.
+Protocol 8 D4 remains unauthorized until the existing deliberate D3 Orchestrator architecture reopen/supersession requirement closes. Revisions 3-7 do not perform that reopen and no Protocol 8 cutover is implied.
 
 ## Protocol 6.5 completed handoff
 
@@ -233,8 +248,9 @@ There is exactly one mutable repository release-state owner: `PROTOCOL-RELEASE-S
 
 - Repository default/latest is never a protocol-version oracle.
 - Protocol 6.6 is accepted-current with exact public fallback `22f4bdba53795da3a6f13f162529f3a843fc37ae` and recovery `384666764da4c55b282e6b1595ab97e2f86e1dc4`.
-- Protocol 7 remains proposed/pre-cutover. Revision 7 binds Protocol 6.6 recovery as the pre-cutover fallback/rollback baseline and makes 6.6 operational evidence/capabilities required inputs to the deliberate D3 architecture reopen; it does not perform that reopen or authorize D4.
-- Under Protocol 7 after qualified cutover, the deterministic orchestrator control plane owns machine lifecycle transitions while workplans/skills/documents remain semantic artifacts.
+- Protocol 7 is the proposed scientific epistemic-closure/transparency/discovery revision governed by its active workplan family above.
+- The deterministic-orchestrator proposal is reassigned to Protocol 8.0; its Revision 7 still binds Protocol 6.6 recovery as the inherited pre-cutover baseline for that future design and does not authorize D4.
+- Under the future Protocol 8 deterministic-orchestrator proposal, after its own qualified cutover, the deterministic control plane would own machine lifecycle transitions while workplans/skills/documents remain semantic artifacts.
 - Shadow comparison is permitted only while one side remains explicitly non-authoritative.
 - No `main` merge or Protocol 7 D4 cutover is authorized merely by these active design workplans.
 
