@@ -38,4 +38,16 @@ DETERMINISTIC ORCHESTRATOR D3 REASSESSMENT: STILL REQUIRED BEFORE D4
 PROTOCOL 8 D4: NOT AUTHORIZED
 ```
 
+## Known Protocol 7 inputs to the Protocol 8 D3 reassessment
+
+These are recorded now so the Protocol 8 reassessment does not rediscover them. They are inputs, not Protocol 8 design decisions:
+
+- Protocol 7's human-gate evidence contract is a semantic adequacy judgment. A deterministic control plane may represent gate state, but a machine-checkable presence predicate (for example "evidence artifact attached") cannot satisfy it. Protocol 8 must not reduce gate-evidence adequacy to such a predicate.
+- Protocol 7 keeps realized-scientific-record and feedback-persistence state in existing project artifacts, not in control-plane state, and requires no orchestrator transition/control-semantics change.
+- If Protocol 7 is accepted, its closeout authors the Protocol 8 inheritance reconciliation (Revision 8). That reconciliation advances the pre-cutover fallback/rollback baseline from Protocol 6.6 recovery to Protocol 7 recovery. Until then, Revision 7's Protocol 6.6 baseline stands.
+
+Governing Protocol 7 handoff: `workplans/active/SSDP-7.0-SCIENTIFIC-EPISTEMIC-CLOSURE-AND-DISCOVERY-CONSOLIDATED.md`.
+
+## Stale-label rule
+
 Any current routing/index artifact that calls the deterministic-orchestrator family "Protocol 7" is stale with respect to target-version identity and must be reconciled during the Protocol 7 planning/implementation cycle without rewriting immutable historical release records.

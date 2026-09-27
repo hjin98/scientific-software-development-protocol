@@ -3,7 +3,8 @@ kind: protocol-major-revision-workplan-revision
 workplan_id: SSDP-7.0-SCIENTIFIC-EPISTEMIC-CLOSURE-AND-DISCOVERY-REVISION-1
 protocol_version: 6.6.0
 target_protocol_version: 7.0.0
-status: proposed
+status: superseded
+superseded_by: SSDP-7.0-SCIENTIFIC-EPISTEMIC-CLOSURE-AND-DISCOVERY-CONSOLIDATED
 created_date: 2026-09-27
 parent_workplan: SSDP-7.0-SCIENTIFIC-EPISTEMIC-CLOSURE-AND-DISCOVERY
 review_round: 1

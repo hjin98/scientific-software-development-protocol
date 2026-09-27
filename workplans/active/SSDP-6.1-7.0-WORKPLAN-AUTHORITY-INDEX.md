@@ -20,13 +20,23 @@ Do not copy substantive requirements into this index. Read the listed governing 
 
 ## Current major-version reassignment
 
-Protocol 7.0 is now the proposed **Scientific Epistemic Closure, Transparency, and Discovery** major revision. Its current planning handoff is:
+Protocol 7.0 is now the proposed **Scientific Inspectability, Epistemic Initiative, and Scientific Feedback Loop** major revision (workplan IDs retain the historical `EPISTEMIC-CLOSURE` lexeme). Its single current planning handoff is:
 
-1. `workplans/active/SSDP-7.0-SCIENTIFIC-EPISTEMIC-CLOSURE-AND-DISCOVERY.md`
-2. `workplans/active/SSDP-7.0-SCIENTIFIC-EPISTEMIC-CLOSURE-AND-DISCOVERY-REVISION-1-FIRST-REVIEW-CLOSURE.md`
-3. `workplans/active/SSDP-7.0-SCIENTIFIC-EPISTEMIC-CLOSURE-AND-DISCOVERY-REVISION-2-FEEDBACK-AND-LONGITUDINAL-CLOSURE.md`
+- `workplans/active/SSDP-7.0-SCIENTIFIC-EPISTEMIC-CLOSURE-AND-DISCOVERY-CONSOLIDATED.md`
 
-Workplan-level final falsification: **PASS** — `qualification/ssdp70/WORKPLAN-REVIEW-2026-09-27-PROTOCOL-7.0-PASS.md`. This establishes implementation-handoff readiness only; it does not substitute for the later fresh independent assembled-candidate Review or required human ratification.
+It supersedes the earlier composition, now preserved as historical design-review evidence only:
+
+1. `workplans/archive/SSDP-7.0-SCIENTIFIC-EPISTEMIC-CLOSURE-AND-DISCOVERY.md`
+2. `workplans/archive/SSDP-7.0-SCIENTIFIC-EPISTEMIC-CLOSURE-AND-DISCOVERY-REVISION-1-FIRST-REVIEW-CLOSURE.md`
+3. `workplans/archive/SSDP-7.0-SCIENTIFIC-EPISTEMIC-CLOSURE-AND-DISCOVERY-REVISION-2-FEEDBACK-AND-LONGITUDINAL-CLOSURE.md`
+
+The author-side review record `qualification/ssdp70/WORKPLAN-REVIEW-2026-09-27-PROTOCOL-7.0-PASS.md` applies only to that superseded composition, was not independent, and establishes no implementation-handoff readiness. A third-round workplan-level review of that composition returned NO-PASS; its findings are closed in design by the consolidated workplan (author-side closure).
+
+```text
+PROTOCOL 7 WORKPLAN DESIGN REVIEW: PENDING — fresh independent review of the consolidated workplan
+STAKEHOLDER CONFIRMATION: obligation-binding rule (consolidated workplan section 4) ACCEPTED 2026-09-27
+PROTOCOL 7 D4: NOT AUTHORIZED
+```
 
 The previously proposed deterministic control-plane / mandatory-orchestrator design is reassigned to **Protocol 8.0** by:
 
@@ -220,6 +230,8 @@ PROTOCOL 8 D4: NOT AUTHORIZED
 
 Protocol 8 D4 remains unauthorized until the existing deliberate D3 Orchestrator architecture reopen/supersession requirement closes. Revisions 3-7 do not perform that reopen and no Protocol 8 cutover is implied.
 
+If Protocol 7 is accepted, its closeout SHALL author a Protocol 8 inheritance reconciliation (deterministic-orchestrator Revision 8) that advances the pre-cutover baseline to Protocol 7 recovery and binds Protocol 7 inputs to the Protocol 8 D3 reassessment. Known Protocol 7 inputs are recorded in the Protocol 8 rebind record.
+
 ## Protocol 6.5 completed handoff
 
 Protocol 6.5 self-governance, release-state, evidence-binding, representation, and proportional-rigor work is complete. The governing workplans are preserved as historical evidence at:
@@ -250,7 +262,7 @@ There is exactly one mutable repository release-state owner: `PROTOCOL-RELEASE-S
 
 - Repository default/latest is never a protocol-version oracle.
 - Protocol 6.6 is accepted-current with exact public fallback `22f4bdba53795da3a6f13f162529f3a843fc37ae` and recovery `384666764da4c55b282e6b1595ab97e2f86e1dc4`.
-- Protocol 7 is the proposed scientific epistemic-closure/transparency/discovery revision governed by its active workplan family above.
+- Protocol 7 is the proposed scientific inspectability/epistemic-initiative/feedback-loop revision governed by its single consolidated workplan above; select its artifacts by exact ID, never by `SSDP-7.0*` globs, because the historical deterministic-orchestrator family shares that prefix.
 - The deterministic-orchestrator proposal is reassigned to Protocol 8.0; its Revision 7 still binds Protocol 6.6 recovery as the inherited pre-cutover baseline for that future design and does not authorize D4.
 - Under the future Protocol 8 deterministic-orchestrator proposal, after its own qualified cutover, the deterministic control plane would own machine lifecycle transitions while workplans/skills/documents remain semantic artifacts.
 - Shadow comparison is permitted only while one side remains explicitly non-authoritative.
