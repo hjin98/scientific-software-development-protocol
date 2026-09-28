@@ -244,7 +244,12 @@ def main(argv: list[str] | None = None) -> int:
 
     key_digest = core70.sha256_tree(args.keys)
     rubric_digest = core70.sha256_file(args.shared_rubric) if args.shared_rubric is not None else None
-    shutil.copy2(args.evaluator_admission, args.run / "assessment-profile-admission.json")
+    core70.snapshot_profile_admission(
+        args.evaluator_admission,
+        args.run,
+        role="evaluator",
+        prefix="assessment-profile-admission",
+    )
 
     with tempfile.TemporaryDirectory(prefix="ssdp70-assess-") as tmp:
         root = Path(tmp)

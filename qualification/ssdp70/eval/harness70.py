@@ -298,6 +298,11 @@ def run_episode(
     )
     if admission_errors:
         raise core70.ContractError("; ".join(admission_errors))
+    if admission is not None:
+        frozen_admission_sha = identity.get("profile_admission_sha256")
+        current_admission_sha = core70.admission_bundle_sha256(admission, role="executor")
+        if current_admission_sha != frozen_admission_sha:
+            raise core70.ContractError("executor profile-admission bundle changed after run identity was frozen")
 
     claims = episode.get("claims") or []
     if not isinstance(claims, list) or not all(isinstance(x, str) and x for x in claims):
@@ -314,7 +319,7 @@ def run_episode(
     (out / "capability-manifest-snapshot.json").write_text(json.dumps(profile_bundle.capabilities, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     (out / "requirements-snapshot.json").write_text(json.dumps(core70.requirements_snapshot(requirements), indent=2, sort_keys=True) + "\n", encoding="utf-8")
     if admission is not None:
-        shutil.copy2(admission, out / "profile-admission.json")
+        core70.snapshot_profile_admission(admission, out, role="executor", prefix="profile-admission")
 
     with tempfile.TemporaryDirectory(prefix="ssdp70-") as tmp_name:
         tmp = Path(tmp_name)
@@ -523,7 +528,7 @@ def main(argv: list[str] | None = None) -> int:
             pair_order=[arm_name],
         )
         target = args.out / f"{args.id}-{arm_name}-r{args.rep}"
-        if core70.cache_valid(target, identity, requirements):
+        if args.mode == "probe" and core70.cache_valid(target, identity, requirements):
             summary = core70.load_json(target / "summary.json")
         else:
             summary = run_episode(
@@ -589,7 +594,7 @@ def main(argv: list[str] | None = None) -> int:
                 rep=rep,
                 pair_order=item["order"],
             )
-            if core70.cache_valid(target, identity, requirements):
+            if args.mode == "probe" and core70.cache_valid(target, identity, requirements):
                 summary = core70.load_json(target / "summary.json")
                 results.append({"run": target.name, "evidence_state": summary["evidence_state"], "cache": "reused-exact"})
                 continue

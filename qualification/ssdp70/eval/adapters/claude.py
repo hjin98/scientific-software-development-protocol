@@ -474,8 +474,8 @@ def normalize(stdout: str, run_id: str, context: dict[str, Any] | None = None) -
             })
             mapped.append(usage["event_id"])
 
-        elif raw_type in {"stream_event", "rate_limit_event"}:
-            classification = f"explicit-benign-{raw_type}"
+        elif raw_type == "rate_limit_event":
+            classification = "explicit-benign-rate-limit-metadata"
             oracle_relevant = False
 
         else:

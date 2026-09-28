@@ -131,6 +131,19 @@ class PortableCoreTests(unittest.TestCase):
         )
         self.assertTrue(any("hash does not match" in error for error in errors))
 
+    def test_admission_snapshot_preserves_and_validates_all_proofs(self):
+        admission, _ = self.write_admission()
+        out = self.root / "run-admission"
+        out.mkdir()
+        bundle_sha = core70.admission_bundle_sha256(admission, role="executor")
+        core70.snapshot_profile_admission(admission, out, role="executor")
+        self.assertEqual(core70.validate_profile_admission_snapshot(
+            out, bundle_sha, role="executor"), [])
+        proof = out / "profile-admission-evidence" / f"{core70.EXECUTOR_ADMISSION_CHECKS[0]}.proof"
+        proof.write_text("tampered", encoding="utf-8")
+        self.assertTrue(core70.validate_profile_admission_snapshot(
+            out, bundle_sha, role="executor"))
+
     def test_runtime_observation_rejects_unfrozen_or_mismatched_runtime(self):
         bundle = core70.load_profile(self.profile, self.capabilities)
         self.assertEqual(core70.validate_runtime_observation(

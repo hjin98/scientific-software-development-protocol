@@ -99,6 +99,8 @@ EVIDENCE_INTEGRITY_ROOTS = (
     "profile-snapshot.json",
     "capability-manifest-snapshot.json",
     "profile-admission.json",
+    "profile-admission-snapshot.json",
+    "profile-admission-evidence",
     "requirements-snapshot.json",
     "final-report.md",
     "diff.patch",
@@ -708,6 +710,102 @@ def admission_bundle_sha256(admission_path: Path | None, *, role: str = "executo
     return stable_json_sha256({"record": payload, "evidence": evidence})
 
 
+def snapshot_profile_admission(
+    admission_path: Path,
+    out: Path,
+    *,
+    role: str,
+    prefix: str = "profile-admission",
+) -> dict[str, Any]:
+    payload = _require_object(load_json(admission_path), "profile admission")
+    checks = payload.get("checks")
+    if not isinstance(checks, dict):
+        raise ContractError("profile admission checks are malformed")
+    record_path = out / f"{prefix}.json"
+    record_path.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    evidence_root = out / f"{prefix}-evidence"
+    evidence_root.mkdir(exist_ok=True)
+    rows: list[dict[str, Any]] = []
+    for name in _admission_checks_for_role(role):
+        row = checks.get(name)
+        if not isinstance(row, dict):
+            raise ContractError(f"profile admission check {name!r} is missing")
+        source = _safe_relative_file(admission_path.parent, row.get("evidence_path"))
+        if source is None or not source.is_file():
+            raise ContractError(f"profile admission check {name!r} evidence is unavailable")
+        target = evidence_root / f"{name}.proof"
+        target.write_bytes(source.read_bytes())
+        rows.append({
+            "check": name,
+            "path": target.relative_to(out).as_posix(),
+            "sha256": sha256_file(target),
+            "bytes": target.stat().st_size,
+        })
+    snapshot = {
+        "schema": SCHEMA,
+        "role": role,
+        "admission_bundle_sha256": admission_bundle_sha256(admission_path, role=role),
+        "record_sha256": sha256_file(record_path),
+        "proofs": rows,
+    }
+    (out / f"{prefix}-snapshot.json").write_text(
+        json.dumps(snapshot, indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
+    return snapshot
+
+
+def validate_profile_admission_snapshot(
+    run: Path,
+    expected_bundle_sha256: str | None,
+    *,
+    role: str,
+    prefix: str = "profile-admission",
+) -> list[str]:
+    if expected_bundle_sha256 is None:
+        return [f"{role} admission bundle identity is missing"]
+    snapshot_path = run / f"{prefix}-snapshot.json"
+    record_path = run / f"{prefix}.json"
+    if not snapshot_path.is_file() or not record_path.is_file():
+        return [f"{role} profile-admission snapshot is missing"]
+    try:
+        snapshot = _require_object(load_json(snapshot_path), "profile admission snapshot")
+    except ContractError as exc:
+        return [str(exc)]
+    errors: list[str] = []
+    if snapshot.get("schema") != SCHEMA or snapshot.get("role") != role:
+        errors.append(f"{role} profile-admission snapshot identity is invalid")
+    if snapshot.get("admission_bundle_sha256") != expected_bundle_sha256:
+        errors.append(f"{role} profile-admission bundle does not match run identity")
+    if not _valid_sha256(snapshot.get("record_sha256")) or sha256_file(record_path) != snapshot.get("record_sha256"):
+        errors.append(f"{role} profile-admission record hash changed")
+    proofs = snapshot.get("proofs")
+    if not isinstance(proofs, list):
+        return errors + [f"{role} profile-admission proof list is malformed"]
+    expected_checks = set(_admission_checks_for_role(role))
+    seen: set[str] = set()
+    for index, row in enumerate(proofs):
+        if not isinstance(row, dict):
+            errors.append(f"{role} profile-admission proof {index} is malformed")
+            continue
+        name = row.get("check")
+        if not isinstance(name, str) or name not in expected_checks or name in seen:
+            errors.append(f"{role} profile-admission proof {index} has invalid check {name!r}")
+            continue
+        seen.add(name)
+        proof = _safe_relative_file(run, row.get("path"))
+        if proof is None or not proof.is_file():
+            errors.append(f"{role} profile-admission proof {name!r} is unavailable")
+            continue
+        if row.get("bytes") != proof.stat().st_size:
+            errors.append(f"{role} profile-admission proof {name!r} size changed")
+        if not _valid_sha256(row.get("sha256")) or sha256_file(proof) != row.get("sha256"):
+            errors.append(f"{role} profile-admission proof {name!r} hash changed")
+    if seen != expected_checks:
+        errors.append(f"{role} profile-admission snapshot does not contain the exact required check set")
+    return errors
+
+
 def validate_profile_admission(
     admission_path: Path | None,
     *,
@@ -1063,6 +1161,13 @@ def validate_complete_run(run: Path, identity: dict[str, Any], requirements: Req
         errors.append("run summary identity does not match current identity")
     if summary.get("evidence_state") != "COMPLETE_ADMISSIBLE" or summary.get("execution_ok") is not True:
         errors.append("run summary is not COMPLETE_ADMISSIBLE with successful execution")
+    if identity.get("execution_mode") == "qualification":
+        errors.extend(validate_profile_admission_snapshot(
+            run,
+            identity.get("profile_admission_sha256"),
+            role="executor",
+            prefix="profile-admission",
+        ))
     identity_requirements = identity.get("requirements") if isinstance(identity.get("requirements"), dict) else {}
     expected_manifest_digests = {
         "required_artifacts": identity_requirements.get("required_artifacts_sha256"),
