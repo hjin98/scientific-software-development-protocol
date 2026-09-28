@@ -28,16 +28,25 @@ class ActualTraceRegressionTests(unittest.TestCase):
         }
 
     def test_a4_retained_21283_system_subtypes_are_reviewed_non_oracle(self):
-        trace = (TRACE_ROOT / "init-probe.jsonl").read_text(encoding="utf-8")
+        retained = []
+        for name in ("init-probe.jsonl", "skill-probe.jsonl"):
+            for line in (TRACE_ROOT / name).read_text(encoding="utf-8").splitlines():
+                if not line.strip():
+                    continue
+                row = json.loads(line)
+                if row.get("type") == "system" and row.get("subtype") in {"thinking_tokens", "post_turn_summary"}:
+                    retained.append(row)
+        trace = "\n".join(json.dumps(row) for row in retained)
         with tempfile.TemporaryDirectory() as td:
             events, mapping, errors, count = claude.normalize(trace, "a4", self.package_context(Path(td)))
         self.assertEqual(errors, [])
         self.assertEqual(len(mapping), count)
         classes = {row["classification"] for row in mapping}
+        self.assertIn("reviewed-non-oracle-system:thinking_tokens", classes)
         self.assertIn("reviewed-non-oracle-system:post_turn_summary", classes)
-        post = [row for row in mapping if row["classification"] == "reviewed-non-oracle-system:post_turn_summary"]
-        self.assertTrue(post)
-        self.assertTrue(all(row["oracle_relevant"] is False and row["mapped_event_ids"] == [] for row in post))
+        reviewed = [row for row in mapping if row["classification"].startswith("reviewed-non-oracle-system:")]
+        self.assertTrue(reviewed)
+        self.assertTrue(all(row["oracle_relevant"] is False and row["mapped_event_ids"] == [] for row in reviewed))
 
     def test_a5_retained_skill_injection_binds_exact_installed_skill_bytes(self):
         trace = (TRACE_ROOT / "skill-probe.jsonl").read_text(encoding="utf-8")
@@ -118,6 +127,10 @@ class SurfaceAndContainmentHostileTests(unittest.TestCase):
             "LANG": "C.UTF-8",
             "CLAUDE_CODE_SUBPROCESS_ENV_SCRUB": "1",
             "DISABLE_AUTOUPDATER": "1",
+            "CLAUDE_CODE_DISABLE_AUTO_MEMORY": "1",
+            "CLAUDE_CODE_DISABLE_CRON": "1",
+            "CLAUDE_CODE_DISABLE_ARTIFACT": "1",
+            "CLAUDE_CODE_DISABLE_BACKGROUND_TASKS": "1",
         })
 
     def test_launch_refuses_missing_containment_configuration_before_subprocess(self):
@@ -133,6 +146,28 @@ class SurfaceAndContainmentHostileTests(unittest.TestCase):
             with self.assertRaises(RuntimeError) as caught:
                 claude.launch(profile, "x", root, env)
         self.assertIn("containment settings are absent", str(caught.exception))
+
+    def test_direct_stub_and_log_paths_are_not_exposed_to_executor(self):
+        profile = json.loads(self.profile_path.read_text(encoding="utf-8"))
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            project = root / "project"
+            stub = root / "stub"
+            log = root / "side-effects.jsonl"
+            runtime_home = root / "runtime-home"
+            for directory in (project, stub, runtime_home):
+                directory.mkdir()
+            log.write_text("", encoding="utf-8")
+            mediator = root / "mediator.sock"
+            env = claude.clean_env()
+            env.update({"HOME": str(runtime_home), "SSDP70_MEDIATOR_SOCKET": str(mediator), "SSDP70_ACCOUNT": "agent"})
+            document = claude.realize_containment(profile, project, env)
+            sandbox = document["settings"]["sandbox"]
+            self.assertNotIn("SSDP70_STUB_DIR", env)
+            self.assertNotIn("SSDP70_SIDE_EFFECT_LOG", env)
+            self.assertIn(str(root.resolve()), sandbox["filesystem"]["denyRead"])
+            self.assertIn(str(root.resolve()), sandbox["filesystem"]["denyWrite"])
+            self.assertEqual(sandbox["network"]["allowUnixSockets"], [str(mediator.resolve())])
 
     def test_realized_containment_exposes_only_mediator_not_stub_or_log_paths(self):
         profile = json.loads(self.profile_path.read_text(encoding="utf-8"))

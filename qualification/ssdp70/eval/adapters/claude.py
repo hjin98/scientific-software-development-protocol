@@ -32,6 +32,8 @@ DELEGATE_TOOLS = {"Agent"}
 SAFE_ENV_KEYS = {
     "PATH", "LANG", "LC_ALL", "LC_CTYPE", "TERM", "TMPDIR", "TMP", "TEMP",
     "SSL_CERT_FILE", "SSL_CERT_DIR", "CLAUDE_CODE_SUBPROCESS_ENV_SCRUB", "DISABLE_AUTOUPDATER",
+    "CLAUDE_CODE_DISABLE_AUTO_MEMORY", "CLAUDE_CODE_DISABLE_CRON",
+    "CLAUDE_CODE_DISABLE_ARTIFACT", "CLAUDE_CODE_DISABLE_BACKGROUND_TASKS",
 }
 
 
@@ -40,6 +42,10 @@ def clean_env() -> dict[str, str]:
     env = {key: os.environ[key] for key in SAFE_ENV_KEYS if key in os.environ}
     env["CLAUDE_CODE_SUBPROCESS_ENV_SCRUB"] = "1"
     env["DISABLE_AUTOUPDATER"] = "1"
+    env["CLAUDE_CODE_DISABLE_AUTO_MEMORY"] = "1"
+    env["CLAUDE_CODE_DISABLE_CRON"] = "1"
+    env["CLAUDE_CODE_DISABLE_ARTIFACT"] = "1"
+    env["CLAUDE_CODE_DISABLE_BACKGROUND_TASKS"] = "1"
     return env
 
 
@@ -96,6 +102,9 @@ def _containment_document(profile: dict[str, Any], project: Path, env: dict[str,
         },
         "env": {
             "CLAUDE_CODE_DISABLE_AUTO_MEMORY": "1",
+            "CLAUDE_CODE_DISABLE_CRON": "1",
+            "CLAUDE_CODE_DISABLE_ARTIFACT": "1",
+            "CLAUDE_CODE_DISABLE_BACKGROUND_TASKS": "1",
         },
     }
     return {
