@@ -30,11 +30,11 @@ It supersedes the earlier composition, now preserved as historical design-review
 2. `workplans/archive/SSDP-7.0-SCIENTIFIC-EPISTEMIC-CLOSURE-AND-DISCOVERY-REVISION-1-FIRST-REVIEW-CLOSURE.md`
 3. `workplans/archive/SSDP-7.0-SCIENTIFIC-EPISTEMIC-CLOSURE-AND-DISCOVERY-REVISION-2-FEEDBACK-AND-LONGITUDINAL-CLOSURE.md`
 
-The author-side review record `qualification/ssdp70/WORKPLAN-REVIEW-2026-09-27-PROTOCOL-7.0-PASS.md` applies only to that superseded composition, was not independent, and establishes no implementation-handoff readiness. Fresh independent Review of the consolidated handoff at `781786339fd83401f9954e663244bc973b0de968` returned **NO-PASS**. The stakeholder authorized repairs, now proposed in that same handoff (§0.1); they require fresh independent review and do not establish closure of the binding/qualification Serious Challenges.
+The author-side review record `qualification/ssdp70/WORKPLAN-REVIEW-2026-09-27-PROTOCOL-7.0-PASS.md` applies only to that superseded composition, was not independent, and establishes no implementation-handoff readiness. Fresh independent Review of the consolidated handoff at `781786339fd83401f9954e663244bc973b0de968` returned **NO-PASS** (no durable finding record). Review of the repaired handoff at `c50f2679ad8210632d8acfb1f4e61dfb979fff0c` also returned **NO-PASS**: `qualification/ssdp70/WORKPLAN-REVIEW-2026-09-27-PROTOCOL-7.0-C50F267-NO-PASS.md`. The stakeholder dispositioned its two Serious Challenges in `qualification/ssdp70/STAKEHOLDER-DECISION-2026-09-27-PROTOCOL-7.0-SC1-SC2.md`. The resulting repairs are in the same handoff (§0.1); the repairing context also performed the `c50f267` Review, so the repairs require fresh independent review by a context that authored neither.
 
 ```text
-PROTOCOL 7 WORKPLAN DESIGN REVIEW: NO-PASS reviewed basis; proposed repair pending fresh independent review
-STAKEHOLDER CONFIRMATION: obligation-binding rule (consolidated workplan section 4) ACCEPTED 2026-09-27
+PROTOCOL 7 WORKPLAN DESIGN REVIEW: NO-PASS (781786339, c50f267); proposed repair pending fresh independent review
+STAKEHOLDER DECISIONS: section 4 rule ACCEPTED; SC1 claim-integrity floor ACCEPTED; SC2 Option B SELECTED (2026-09-27)
 PROTOCOL 7 D4: NOT AUTHORIZED
 ```
 

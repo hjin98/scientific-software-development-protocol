@@ -44,6 +44,7 @@ These are recorded now so the Protocol 8 reassessment does not rediscover them. 
 
 - Protocol 7's human-gate evidence contract is a semantic adequacy judgment. A deterministic control plane may represent gate state, but a machine-checkable presence predicate (for example "evidence artifact attached") cannot satisfy it. Protocol 8 must not reduce gate-evidence adequacy to such a predicate.
 - Protocol 7 keeps realized-scientific-record and feedback-persistence state in existing project artifacts, not in control-plane state, and requires no orchestrator transition/control-semantics change.
+- Protocol 7 (as proposed) requires product-scope acceptance of marked product inspectability surfaces at existing human/task gates. A control plane may represent that pending/accepted state but cannot self-accept it or infer it from technical D3 Review.
 - If Protocol 7 is accepted, its closeout authors the Protocol 8 inheritance reconciliation (Revision 8). That reconciliation advances the pre-cutover fallback/rollback baseline from Protocol 6.6 recovery to Protocol 7 recovery. Until then, Revision 7's Protocol 6.6 baseline stands.
 
 Governing Protocol 7 handoff: `workplans/active/SSDP-7.0-SCIENTIFIC-EPISTEMIC-CLOSURE-AND-DISCOVERY-CONSOLIDATED.md`.
