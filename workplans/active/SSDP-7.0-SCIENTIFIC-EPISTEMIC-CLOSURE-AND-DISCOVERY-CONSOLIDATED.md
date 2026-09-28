@@ -97,6 +97,8 @@ DETERMINISTIC ORCHESTRATOR: Protocol 8.0 (unchanged by this work)
 
 ### 0.1 Current repair and Review boundary
 
+**Stage F portable-execution repair (2026-09-28).** The first portable execution amendment at `62aa1bbaa9d2d1dfef1b48cede6bc1500837658f` received a fresh independent **NO-PASS** in `qualification/ssdp70/STAGE-F-PORTABLE-EXECUTION-ARCHITECTURE-INDEPENDENT-REVIEW-NO-PASS-2026-09-28.md`. That Review accepted the portable-core + runtime-adapter boundary in principle but blocked D4 on five under-specified contracts: execution-profile equality under hidden provider state; semantic capability/containment/custody equivalence; normalized-trace completeness; exact required evidence/scoring closure; and full provenance/profile-scoped PASS semantics. The current Stage F portability clauses repair those five gaps without changing the immutable Protocol 7 semantic candidate. The repair is recorded in `qualification/ssdp70/STAGE-F-PORTABLE-EXECUTION-ARCHITECTURE-REPAIR-2026-09-28.md` and **awaits fresh independent Review**; dependent Stage F tooling repair and candidate runs remain unauthorized by this repair context.
+
 The independent workplan Review of `5a2f8c8` returned **PASS** with no Serious Challenge, no blocker, no material gap and five minor findings, and recommended fixing the first three before Stage A freezes the contract. Its record is `qualification/ssdp70/WORKPLAN-REVIEW-PROTOCOL-7.0-5A2F8C8-PASS.md`. At the stakeholder's instruction to continue the repair-review loop, the context that authored the `5a2f8c8` repair authored the minor repairs below; it cannot independently accept them, and the PASS binds `5a2f8c8` only. At `b2d1f4e`, the accepted §4 decisions, R1/R2, the frozen §8.3 elements and label table and the operative SD-B decision and confirmation remained unchanged (§4 sha256 `2bcc977c…` since `88a82b5`; §8.2 unchanged since `935a0bc`; §6.3.11 unchanged since `cb9542d`; elements 1-7 and the consumed-surface sufficiency paragraph unchanged since `31845d8`; the label table unchanged since `5cfaca7`; §8.3 and §14 unchanged since `3b12a83`). The later Stage A O1 exception below supersedes only the table and §8.3 byte-identity comparisons in that historical statement.
 
 | `5a2f8c8` minor finding | Proposed repair |
@@ -903,7 +905,7 @@ EXPECTED ESCALATION: the earlier D4 probe measured 10,415 B and the 67fb29d revi
   recorded, text not, so unreproducible) against the 9,196 B backstop; both predate this repair; Stage A drafts and measures the current D4 additions and routes a breach to the stakeholder before
   Stage B; no element dropped, backstop not relaxed by this repair
 ACTIVE SERIOUS CHALLENGE: none open; SC1/SC2 dispositioned
-STAGE F EXECUTION ARCHITECTURE: portable execution-profile amendment authored 2026-09-28; prior exact-byte workplan Reviews do not accept this amendment; fresh independent Review required before dependent Stage F tooling repair or candidate runs
+STAGE F EXECUTION ARCHITECTURE: 62aa1bb portable amendment received fresh independent NO-PASS; B1-B5 repaired in current clauses; repair PENDING FRESH INDEPENDENT REVIEW before dependent Stage F tooling repair or candidate runs
 PEM BASIS: 2585b73f integrated publication; 6.6 interval, front matter and PC-001 owner route unreconciled in memory,
   covered by bounded intake (§0.2); 6.6 versioning owner's profile list reconciled at Stage E
 NEXT ACTION: fresh independent workplan-level Review of this revised file by a context that authored

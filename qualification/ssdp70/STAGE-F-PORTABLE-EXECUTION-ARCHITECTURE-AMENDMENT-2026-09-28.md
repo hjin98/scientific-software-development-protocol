@@ -79,4 +79,4 @@ This amendment changes no Protocol 7 semantic candidate bytes, scientific doctri
 
 ## Review state
 
-This context authored the amendment and cannot independently accept it. Prior workplan and contract PASS records bind earlier exact bytes. A fresh independent Review must check this amendment against the governing workplan, frozen qualification intent and the Stage F STOP/BLOCKED findings before dependent tooling repair or candidate runs.
+The first amendment at `62aa1bbaa9d2d1dfef1b48cede6bc1500837658f` received fresh independent **NO-PASS** in `STAGE-F-PORTABLE-EXECUTION-ARCHITECTURE-INDEPENDENT-REVIEW-NO-PASS-2026-09-28.md`. The current bytes repair that Review's B1-B5 findings and are documented in `STAGE-F-PORTABLE-EXECUTION-ARCHITECTURE-REPAIR-2026-09-28.md`. This repair context cannot independently accept its own changes. Prior workplan/contract PASS records and the first portability Review bind earlier exact bytes only. Fresh independent Review of the repaired workplan, contract and amendment is required before dependent tooling repair or candidate runs.
