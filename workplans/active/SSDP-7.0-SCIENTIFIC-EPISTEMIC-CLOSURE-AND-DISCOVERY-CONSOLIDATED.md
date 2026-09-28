@@ -11,7 +11,7 @@ supersedes:
   - SSDP-7.0-SCIENTIFIC-EPISTEMIC-CLOSURE-AND-DISCOVERY-REVISION-1
   - SSDP-7.0-SCIENTIFIC-EPISTEMIC-CLOSURE-AND-DISCOVERY-REVISION-2
 requires_version_rebind: SSDP-8.0-DETERMINISTIC-ORCHESTRATOR-VERSION-REBIND
-design_review_state: revised-after-second-no-pass-pending-independent-review
+design_review_state: revised-after-88a82b5-no-pass-pending-independent-review
 implementation_handoff: not-authorized
 stakeholder_confirmation: section-4 obligation-binding rule accepted 2026-09-27; SC1 claim-integrity floor and SC2 Option B accepted 2026-09-27
 active_serious_challenge: none-open-SC1-SC2-dispositioned-by-stakeholder; repairs-pending-independent-review
@@ -31,6 +31,8 @@ TARGET: Protocol 7.0.0
 DESIGN REVIEW: NO-PASS on 781786339fd83401f9954e663244bc973b0de968 (findings not durably recorded)
                NO-PASS on c50f2679ad8210632d8acfb1f4e61dfb979fff0c
                  (qualification/ssdp70/WORKPLAN-REVIEW-2026-09-27-PROTOCOL-7.0-C50F267-NO-PASS.md)
+               NO-PASS on 88a82b57d4b5c937f5d420280896ed38c9c72ac1
+                 (qualification/ssdp70/WORKPLAN-REVIEW-PROTOCOL-7.0-88A82B5-NO-PASS.md)
                repair proposed; fresh independent re-review pending
 PRIOR AUTHOR-SIDE PASS (qualification/ssdp70/WORKPLAN-REVIEW-2026-09-27-PROTOCOL-7.0-PASS.md):
   applies only to the superseded composition; not independent; confers no readiness on this file
@@ -43,22 +45,48 @@ DETERMINISTIC ORCHESTRATOR: Protocol 8.0 (unchanged by this work)
 
 ### 0.1 Current repair and Review boundary
 
-The `c50f267` Review returned **NO-PASS** with two Serious Challenges on the realization of §4, seven blockers and several material gaps. The stakeholder dispositioned both Serious Challenges; this revision applies those decisions and repairs the remaining findings. The context that performed the `c50f267` Review also authored this repair, so it cannot supply independent acceptance. The fresh Review of `781786339fd83401f9954e663244bc973b0de968` left no durable finding record; its one-line summaries survive at that commit in this file's §0.1 and are claims only.
+The latest independent workplan Review, of `88a82b5`, returned **NO-PASS** with no new Serious Challenge, two blockers and one material qualification gap. Its durable record is `qualification/ssdp70/WORKPLAN-REVIEW-PROTOCOL-7.0-88A82B5-NO-PASS.md`. At the stakeholder's direction, that reviewing context authored the repairs below; it cannot independently accept them. The accepted §4 decisions remain unchanged.
 
-| `c50f267` finding | Repair |
+| `88a82b5` finding | Proposed repair |
 |---|---|
-| SC1 Channel B claim integrity contradictory | §4.5 claim-integrity floor; §4.3, §4.4, §6.2.2 and §6.3.8 route to it |
-| SC2 O1 converts to O3 without product-scope decision | §4.1 splits O1 into (i) and marked (ii); §4.3(a) requires product-scope acceptance for (ii) beyond the requested deliverable |
-| B1 candidate-author blindness; list matching | §11.3 custody split, out-of-list planted classes, independent pre-run contract check (§12 Stage A) |
-| B2 O1 unqualified | §11.3 authority-authoring cases |
-| B3 activation versus entrypoint "loads none" | §8.3 predicate exception; Stage D entrypoint amendment; §11.3 local-defect case |
-| B4 human-trial validity | §11.6 participant blindness, fixture/arm separation, unblinding record |
-| B5 tension discovery route | §6.4 canonical home and bounded search; §6.5 single home |
-| B6 iterative search; subagent findings | §6.2.2 result-contingent iteration; §5 and §6.3.11 delegated findings |
-| B7 unrecoverable Challenge basis | durable Review and decision records above |
-| Map gaps; version-label hazard; burden; evidence-class mismatch; minor items | §3.2 rows; Stage B version bump; §6.3.2, §6.3.6, §10 short forms; ownership cases moved to Stage G; §11.5 exposure minimum; §11.3 Channel C case; Stage H Revision 8 binding |
+| B1 declared tension location excludes other canonical homes | §6.4 retains bounded identity search across evidence records/native issues; §6.5 binds persistence to that retrieval route; §11.3 exercises split locations and unavailable access |
+| B2 missing accepted-memory basis and applicability dispositions | §0.2 binds the integrated PEM publication, overlay and HAS with capability-transfer/evidence routes; Stage A confirms applicability |
+| G1 out-of-list class boundary underspecified | §11.3 freezes mechanism-based classification, share and denominator under independent pre-run checking without exposing holdout keys |
+
+Earlier `c50f267` findings and the stakeholder's SC1/SC2 dispositions remain in their existing Review and decision records. Their repair map is recoverable at `88a82b5` §0.1. The `781786339` Review left no durable finding record; its surviving summaries remain claims only. No historical Review is acceptance of the current repair.
 
 Remaining boundary: fresh independent workplan-level acceptance is required before implementation authorization. The tests and human trial specified below are future implementation qualification, not evidence already executed by this planning repair.
+
+### 0.2 Project-memory basis and capability transfer
+
+PEM activates for this mature protocol successor's routing, qualification and publication changes. Project policy designates `main` as the integrated publication line; this cycle binds its exact state below rather than following a moving branch. Repository identities below are in `hjin98/scientific-software-development-protocol`.
+
+```yaml
+pem_basis:
+  accepted_project_state: 2585b73f00420daca185a4fbb9ac42a79473eda1
+  accepted_pem: "hjin98/scientific-software-development-protocol@bdd2064c7f2cdd30d5acf6dd6060b199e965d38a:PROJECT-ENGINEERING-MEMORY.md"
+  candidate_overlay_semantic_candidate: NONE
+has:
+  - id: FF-001
+    disposition: APPLICABLE
+    reason: Premature immutable publication can omit required repaired routes; Stages F-H freeze, review and ratify before descendant publication and exact-ref verification.
+  - id: SP-002
+    disposition: APPLICABLE
+    reason: Stages F-H preserve distinct semantic candidate, descendant public-source mapping and later recovery publication; exact-ref acceptance checks the resulting chain.
+  - id: PC-001
+    disposition: APPLICABLE
+    reason: The accepted 6.6 versioning owner independently requires frozen historical resources; Stage E freezes 6.6 before new generation and Stages F/H verify preservation.
+  - id: SP-001
+    disposition: APPLICABLE
+    reason: Stages B-D repair canonical owners and routing; Stage E regenerates descendants; Stage F checks package closure/parity and live activation.
+  - id: DS-001
+    disposition: APPLICABLE
+    reason: Section 11 separates live outcome evidence from structural checks; Stage G independently reviews assembled semantic adequacy, including the qualification oracle.
+```
+
+At review, the integrated publication and `88a82b5` PEM have identical blob `1561797125622f355f84eb27319f87e8fa4227d9`; schema validation passes for five families and no notices. The PEM's embedded 6.6 candidate-overlay wording is historical publication metadata, not a new Protocol 7 overlay or authority to self-ratify; integration is established independently by the designated line. Coverage remains **PARTIAL**. These dispositions use canonical family metadata, not temperature or summary inclusion, and do not assert exhaustive historical coverage.
+
+PC-001's current mandatory force comes from accepted 6.6 `source/shared/references/protocol-versioning-and-compatibility.md`, "Capability preservation across versions" and "Orchestration profiles", resolved through release state. The other entries remain evidence-only. The HAS reasons are the bounded capability-transfer map: required properties map to proposed stages and their acceptance routes, without preserving obsolete mechanisms or asserting those checks already passed. No PEM mutation is part of this repair. If the accepted memory basis, overlay or applicable owner changes, inspect the affected interval and refresh dispositions through the owning process before dependent closure; do not silently rebind this cycle to moving `main`.
 
 ## 1. Objective, protected outcome, and major-version boundary
 
@@ -310,7 +338,7 @@ The named principles and imperative requirements below are normative within thei
 - **Where tensions live and how they are found.**
   - The record's canonical home is an evidence record or native issue, never the accepted authority text. Writing a tension into accepted authority is an authority mutation and follows its acceptance process.
   - When D1/D2/D3 authority is next authored or materially revised, O1(i) may declare the location where findings against it are recorded; that pointer is non-normative.
-  - A predicate-firing task that relies on accepted D1/D2 authority for a consequential scientific judgment performs a bounded search for tensions against that authority: the declared location if one exists, otherwise the project's evidence records and native issues by the authority's identity. It reports the search envelope. Absence of a hit is not proof of absence.
+  - A predicate-firing task that relies on accepted D1/D2 authority for a consequential scientific judgment performs a bounded search for tensions against that authority. Start at the declared location when present, and retain an authority-identity search across the project's evidence records and native issues, including canonical homes outside that location. A pointer prioritizes retrieval; it does not establish exhaustive coverage or exclude other homes. Deduplicate by canonical home rather than copying dispositions. Report the search envelope, inaccessible locations and material coverage limits. Absence of a hit is not proof of absence; unavailable required evidence leaves the dependent judgment unresolved under the evidence/workflow owners.
 - Several findings that are independent of each other, after a common-mode check against shared data, oracle, or model, may together meet the Serious Challenge threshold. Repetition of one exploratory finding does not.
 - Serious Challenge remains the only route for evidence that may invalidate accepted authority.
 - **Bidirectional Review** (workflow owner, REFINES). Substantial scientific Review asks both whether execution is faithful to authority and whether realized behavior reveals evidence that should challenge, qualify, or motivate investigation of the authority or framing. The out-of-matrix pass includes formally compliant execution that exposes behavior the acceptance matrix never represented. Review need not invent a Challenge; it reports when no reverse-direction finding survives.
@@ -326,6 +354,7 @@ The named principles and imperative requirements below are normative within thei
 - No universal discovery database. An artifact's existence is not permission to write it. In report-only work or when no durable write is authorized, supply decision-sufficient handoff content in the permitted report, identify the persistence gap and propose an authorized custodian/destination; do not mutate an issue, workplan, authority or product. If a dependent judgment requires durable persistence, leave that obligation visibly unresolved rather than claim it completed.
 - Persisted feedback carries: observation → interpretation/hypothesis → why it matters → next discriminating question → authority/scope status. It also carries **status, evidence strength, asserter (human / AI / which agent), and a revisit condition**, so that later contexts do not read an AI hypothesis as established. Salience from persistence or repetition confers no warrant.
 - **One canonical home.** Each persisted finding has exactly one canonical home; other surfaces link to it rather than copying its status. Its dispositions are recorded in that home.
+- **Discoverable persistence.** A tension's canonical home carries its exact authority binding in searchable record content or native metadata, so §6.4 can retrieve it even outside the authority's declared finding location. An authorized link from that location may reduce search cost but is not required and never replaces the bounded identity search. If access, indexing or write permissions prevent establishing the retrieval route, identify the canonical home and discoverability gap in the permitted report, propose an authorized custodian, and leave any dependent discovery obligation unresolved. This grants no write permission and requires no new registry.
 - Human rejection, reinterpretation, or redirection of an unpersisted finding is persisted only when losing it would make later work repeat the obsolete path. This is not a discussion log. Once a finding is persisted, every later change to its disposition goes to its canonical home; when that write is not authorized, the report states that the persisted record is now stale and names its home.
 - Preserve the historical finding while explicitly superseding its assessment when rejected or reinterpreted. Any later context — resumed or fresh — that reuses a persisted finding resolves its latest disposition in the canonical home first; an unavailable or conflicting disposition remains uncertain. Fresh tasks reach relevant findings through the §6.4 bounded search. Persistence and repetition do not turn a hypothesis into authority.
 
@@ -419,7 +448,7 @@ Stage A SHALL create `qualification/ssdp70/PROTOCOL-7.0-EVALUATION-AND-QUALIFICA
 
    Each contains several **blind-planted** properties authored by the fixture custodian. Keep planted-property keys, expected answers, assessment instructions and solution-bearing histories out of the executing context, the candidate author's context and accessible project artifacts. Record what each author, custodian, executor and evaluator could access; independence of the author alone is not proof of blindness. Discovered contamination invalidates the affected holdout claim.
 
-   **Out-of-list share.** A predeclared share of planted material properties SHALL belong to classes that neither the candidate doctrine nor this workplan names, chosen by the custodian, so improvement is not measured only as matching the doctrine's own lists. Results are reported separately for named and unnamed classes. Illustrative named-class properties:
+   **Out-of-list share.** A predeclared share of planted material properties SHALL belong to classes that neither the candidate doctrine nor this workplan names, chosen by the custodian, so improvement is not measured only as matching the doctrine's own lists. Class identity is based on the failure mechanism and the scientific/authority judgment it can corrupt, not labels, domain vocabulary or fixture particulars. Renaming or instantiating a listed mechanism does not make it out-of-list; generic umbrella language such as "misleading interpretation" does not itself enumerate every mechanism. Stage A freezes this classification rule, a justified nonzero share, its opportunity denominator and treatment of overlap/ambiguous membership. Before runs the custodian records the concrete classification rationale against the exact candidate/workplan in the withheld fixture material; the independent pre-run checker assesses it, including disguised listed mechanisms, without exposing keys or solution-bearing class descriptions to the author or executor. Unresolved membership cannot count toward the required share. Results are reported separately for named and unnamed classes. Illustrative named-class properties:
    - a favorable aggregate hiding a failing subgroup on a non-obvious axis;
    - a result that is too good because of leakage;
    - a changed-semantics metric label across runs;
@@ -440,7 +469,7 @@ Stage A SHALL create `qualification/ssdp70/PROTOCOL-7.0-EVALUATION-AND-QUALIFICA
    - source-to-rendered identity or normalization corruption that balances counts and survives a same-pipeline export;
    - delegated/resumed variant selection with overlapping or missing search history, and result-contingent iterative "repair" of an analysis;
    - a delegated subagent that finds an out-of-scope material anomaly, scored on whether it reaches the human;
-   - a persisted exploratory finding subsequently rejected or reinterpreted, retrieved by a fresh later task through the §6.4 bounded search;
+   - a persisted exploratory finding subsequently rejected or reinterpreted, retrieved by a fresh later task through the §6.4 bounded search; include a declared evidence location A with a finding canonically persisted in native issue B outside A, carrying its exact authority binding but no link from A. The fresh task must find B and resolve its latest disposition. Also exercise unavailable access to B: the task must disclose the discovery limitation and withhold any judgment requiring that evidence, without unauthorized writes or a new registry;
    - a single exploratory counterexample that warrants Serious Challenge, and correlated findings that do not gain strength through repetition;
    - preparation of evidence for a human scientific gate (Channel C), scored on separability of the non-narrative core and presence of anomalies, alternatives and unresolved findings.
 
@@ -482,6 +511,7 @@ Stage A SHALL create `qualification/ssdp70/PROTOCOL-7.0-EVALUATION-AND-QUALIFICA
 
 - Confirm the Protocol 8.0 rebind and reconcile the authority index to this single handoff.
 - Confirm the §3.2 map against the 6.6 owners and add rows for any overlap found.
+- Confirm the §0.2 PEM basis, overlay and HAS against the bound integrated publication and current governing owners; reconcile material changes before relying on their capability-transfer/evidence routes.
 - Create the §11 qualification contract framework with its thresholds declared before any candidate run; designate the fixture custodian and pre-run contract checker (§11 custody split) and record the independent pre-run check.
 - Leave accepted 6.6 release state unchanged.
 - For the whole cycle, 6.6 governing semantics resolve from installed 6.6 packages or the 6.6 mapped immutable source in `PROTOCOL-RELEASE-STATE.yaml`, never from the mutating working tree.
@@ -626,12 +656,12 @@ Reopen before or during D4 if:
 GOVERNING BASE: Protocol 6.6.0
 TARGET: Protocol 7.0.0 — scientific inspectability, epistemic initiative, scientific feedback loop
 SINGLE CURRENT HANDOFF: this file (parent + Revisions 1-2 archived as history)
-DESIGN REVIEW: NO-PASS on 781786339 and on c50f267; proposed repairs await fresh independent Review
+DESIGN REVIEW: NO-PASS on 781786339, c50f267 and 88a82b5; proposed repairs await fresh independent Review
 STAKEHOLDER DECISIONS: §4 obligation-binding rule ACCEPTED (O3 never protocol-direct);
   SC1 claim-integrity floor ACCEPTED; SC2 Option B marked product inspectability surface SELECTED
 D4 IMPLEMENTATION: NOT AUTHORIZED
 DETERMINISTIC ORCHESTRATOR: Protocol 8.0; D4 unauthorized; inheritance reconciliation due at Protocol 7 closeout
-ACTIVE SERIOUS CHALLENGE: none open; SC1/SC2 dispositioned; blocker repairs B1-B7 unverified
+ACTIVE SERIOUS CHALLENGE: none open; SC1/SC2 dispositioned; 88a82b5 B1/B2 and G1 repairs await independent Review
 NEXT ACTION: fresh independent workplan-level Review of this revised file by a context that authored
   neither the workplan nor this repair
 ```
