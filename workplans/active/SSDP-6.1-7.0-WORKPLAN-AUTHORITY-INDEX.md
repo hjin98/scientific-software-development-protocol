@@ -5,7 +5,7 @@ protocol_version: 6.6.0
 status: active
 created_date: 2026-09-09
 reviewed_date: 2026-09-28
-active_serious_challenge: none
+active_serious_challenge: protocol-7-stage-a-consumed-surface-O1-meaning-vs-frozen-label-table
 ---
 
 # SSDP 6.1 / 6.2 / 6.3 / 6.4 / 6.5 / 6.6 / 7.0 / 8.0 Workplan Authority Index
@@ -32,14 +32,16 @@ It supersedes the earlier composition, now preserved as historical design-review
 
 The author-side review record `qualification/ssdp70/WORKPLAN-REVIEW-2026-09-27-PROTOCOL-7.0-PASS.md` applies only to the superseded composition, was not independent, and establishes no implementation-handoff readiness. The consolidated handoff's §0 routes prior NO-PASS records and the unchanged stakeholder SC1/SC2 decisions. Its latest independent Review, at `b2d1f4ef28705528406d0fc6e7abde7d6c6c8050`, returned **PASS** with four minor findings, binding that revision only: `qualification/ssdp70/WORKPLAN-REVIEW-PROTOCOL-7.0-B2D1F4E-PASS.md`. The handoff file is byte-identical to that revision; its own §0, §0.1 and §16 status lines, which still describe the minor repairs as awaiting Review, are superseded by that record (the preceding `5a2f8c8` PASS record is `qualification/ssdp70/WORKPLAN-REVIEW-PROTOCOL-7.0-5A2F8C8-PASS.md`, the `3baf279` NO-PASS record is `qualification/ssdp70/WORKPLAN-REVIEW-PROTOCOL-7.0-3BAF279-NO-PASS.md`, the `1b21b17` record is `qualification/ssdp70/WORKPLAN-REVIEW-PROTOCOL-7.0-1B21B17-NO-PASS.md`, the `3b12a83` record is `qualification/ssdp70/WORKPLAN-REVIEW-PROTOCOL-7.0-3B12A83-NO-PASS.md`, the `5cfaca7` record `qualification/ssdp70/WORKPLAN-REVIEW-PROTOCOL-7.0-5CFACA7-NO-PASS.md`, the `31845d8` record `qualification/ssdp70/WORKPLAN-REVIEW-PROTOCOL-7.0-31845D8-NO-PASS.md`, the `cb9542d` record `qualification/ssdp70/WORKPLAN-REVIEW-PROTOCOL-7.0-CB9542D-NO-PASS.md`, the `179c7e0` record `qualification/ssdp70/WORKPLAN-REVIEW-PROTOCOL-7.0-179C7E0-NO-PASS.md`, the `4e778e2` record `qualification/ssdp70/WORKPLAN-REVIEW-PROTOCOL-7.0-4E778E2-NO-PASS.md`, the `adaac7b` record `qualification/ssdp70/WORKPLAN-REVIEW-PROTOCOL-7.0-ADAAC7B-NO-PASS.md`, the `41434b1` record `qualification/ssdp70/WORKPLAN-REVIEW-PROTOCOL-7.0-41434B1-NO-PASS.md` and the `67fb29d` record `qualification/ssdp70/WORKPLAN-REVIEW-PROTOCOL-7.0-67FB29D-NO-PASS.md`; the `677a7a82` NO-PASS left no durable record). The reviewer recommends fixing its first three minor findings before Stage A freezes the §11 contract; implementation remains unauthorized until the stakeholder acts on the Review. Stakeholder decision SD-B (2026-09-27) superseded the 6.6 per-route burden cap with a compression target subordinate to lossless required elements: `qualification/ssdp70/STAKEHOLDER-DECISION-2026-09-27-PROTOCOL-7.0-SD-B.md`. The earlier `27fb2bd` Review (`qualification/ssdp70/WORKPLAN-REVIEW-PROTOCOL-7.0-27FB2BD-NO-PASS.md`) found SD-B's premise inaccurate (6.6's cap was relative to 6.5). The stakeholder confirmed SD-B with the corrected premise and retained 6.6's fixed-cost condition as a backstop and escalation trigger: `qualification/ssdp70/STAKEHOLDER-DECISION-2026-09-27-PROTOCOL-7.0-SD-B-CONFIRMATION.md`. Any semantic change to the handoff after `b2d1f4e` needs fresh independent Review by a context that authored neither the workplan nor that change.
 
+The stakeholder subsequently accepted the first three minor-wording repairs and authorized D4 Stages A–F. The revised handoff is independently reviewed at `qualification/ssdp70/WORKPLAN-REVIEW-PROTOCOL-7.0-AD0A441-PASS.md`. Stage A's static measurement and independent draft check stopped the cycle before Stage B; the current evidence and open challenge are in `qualification/ssdp70/STAGE-A-STOP-2026-09-28.md`. These current records supersede the preceding paragraph's readiness and authorization status, while its Review chronology remains historical.
+
 ```text
-PROTOCOL 7 WORKPLAN DESIGN REVIEW: PASS on b2d1f4e (latest; four minors); D4 not authorized pending stakeholder action
+PROTOCOL 7 WORKPLAN DESIGN REVIEW: PASS on revised handoff SHA-256 ad0a4414c6492ee865784dc9e669d1e21d9194ebb0dfe2cdb639106ff236eea4 (Minors 1-3 repaired; Minor 4 open)
+PROTOCOL 7 D4: stakeholder-authorized Stages A-F; Stage A STOPPED before Stage B on static backstop breach and consumed-surface O1 Serious Challenge
 PROTOCOL 7 SD-B: SUPERSEDE (2026-09-27); size budget is a compression target, never a reason to break a lossless condition;
   CONFIRMED with corrected premise; backstop median <= 1.10 x accepted 6.5 median on T1/T7/T8 (escalation trigger);
   the recorded D4 probe (10,415 B) and the 67fb29d reviewer's probe (11,121 B; measurement recorded, text not, so unreproducible) exceed the
   9,196 B backstop but predate the current wording, so a stakeholder escalation before Stage B is strongly expected
 STAKEHOLDER DECISIONS: section 4 rule ACCEPTED; SC1 claim-integrity floor ACCEPTED; SC2 Option B SELECTED (2026-09-27)
-PROTOCOL 7 D4: NOT AUTHORIZED
 ```
 
 The previously proposed deterministic control-plane / mandatory-orchestrator design was reassigned to **Protocol 8.0** (2026-09-27) and is now consolidated into one proposed handoff (section below). Its archived design artifacts retain their historical `SSDP-7.0-...` filenames and embedded target wording; those target-version labels mean Protocol 8.0. They do not compete with the Protocol 7.0 target and do not authorize D4 implementation.
