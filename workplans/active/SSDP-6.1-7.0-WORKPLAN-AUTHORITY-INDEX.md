@@ -4,7 +4,7 @@ workplan_id: SSDP-6.1-7.0-WORKPLAN-AUTHORITY-INDEX
 protocol_version: 6.6.0
 status: active
 created_date: 2026-09-09
-reviewed_date: 2026-09-27
+reviewed_date: 2026-09-28
 active_serious_challenge: none
 ---
 
@@ -30,22 +30,19 @@ It supersedes the earlier composition, now preserved as historical design-review
 2. `workplans/archive/SSDP-7.0-SCIENTIFIC-EPISTEMIC-CLOSURE-AND-DISCOVERY-REVISION-1-FIRST-REVIEW-CLOSURE.md`
 3. `workplans/archive/SSDP-7.0-SCIENTIFIC-EPISTEMIC-CLOSURE-AND-DISCOVERY-REVISION-2-FEEDBACK-AND-LONGITUDINAL-CLOSURE.md`
 
-The author-side review record `qualification/ssdp70/WORKPLAN-REVIEW-2026-09-27-PROTOCOL-7.0-PASS.md` applies only to the superseded composition, was not independent, and establishes no implementation-handoff readiness. The consolidated handoff's §0 routes prior NO-PASS records and the unchanged stakeholder SC1/SC2 decisions. Its latest independent Review, at `935a0bc14f141b05e0b09e4dd71b5e5e908aa35e`, returned **NO-PASS**: `qualification/ssdp70/WORKPLAN-REVIEW-PROTOCOL-7.0-935A0BC-NO-PASS.md`. Proposed repairs are in that same handoff (§0.1–§0.2). Stakeholder decision SD-B (2026-09-27) superseded the 6.6 per-route burden cap with a compression target subordinate to lossless required elements: `qualification/ssdp70/STAKEHOLDER-DECISION-2026-09-27-PROTOCOL-7.0-SD-B.md`. The earlier `27fb2bd` Review (`qualification/ssdp70/WORKPLAN-REVIEW-PROTOCOL-7.0-27FB2BD-NO-PASS.md`) found SD-B's premise inaccurate (6.6's cap was relative to 6.5). The stakeholder confirmed SD-B with the corrected premise and retained 6.6's fixed-cost condition as a backstop and escalation trigger: `qualification/ssdp70/STAKEHOLDER-DECISION-2026-09-27-PROTOCOL-7.0-SD-B-CONFIRMATION.md`. The repairing context also performed this latest Review, so fresh independent acceptance must come from a context that authored neither the workplan nor these repairs.
+The author-side review record `qualification/ssdp70/WORKPLAN-REVIEW-2026-09-27-PROTOCOL-7.0-PASS.md` applies only to the superseded composition, was not independent, and establishes no implementation-handoff readiness. The consolidated handoff's §0 routes prior NO-PASS records and the unchanged stakeholder SC1/SC2 decisions. Its latest independent Review, at `67fb29d8e5d581029aa6823523a006ae15d4bed0`, returned **NO-PASS**: `qualification/ssdp70/WORKPLAN-REVIEW-PROTOCOL-7.0-67FB29D-NO-PASS.md` (the preceding `677a7a82` NO-PASS left no durable record; the earlier `935a0bc` record is `qualification/ssdp70/WORKPLAN-REVIEW-PROTOCOL-7.0-935A0BC-NO-PASS.md`). Proposed repairs are in that same handoff (§0.1–§0.2). Stakeholder decision SD-B (2026-09-27) superseded the 6.6 per-route burden cap with a compression target subordinate to lossless required elements: `qualification/ssdp70/STAKEHOLDER-DECISION-2026-09-27-PROTOCOL-7.0-SD-B.md`. The earlier `27fb2bd` Review (`qualification/ssdp70/WORKPLAN-REVIEW-PROTOCOL-7.0-27FB2BD-NO-PASS.md`) found SD-B's premise inaccurate (6.6's cap was relative to 6.5). The stakeholder confirmed SD-B with the corrected premise and retained 6.6's fixed-cost condition as a backstop and escalation trigger: `qualification/ssdp70/STAKEHOLDER-DECISION-2026-09-27-PROTOCOL-7.0-SD-B-CONFIRMATION.md`. The repairing context also performed this latest Review, so fresh independent acceptance must come from a context that authored neither the workplan nor these repairs.
 
 ```text
-PROTOCOL 7 WORKPLAN DESIGN REVIEW: NO-PASS (latest 935a0bc); proposed repair pending fresh independent review
+PROTOCOL 7 WORKPLAN DESIGN REVIEW: NO-PASS (latest 67fb29d); proposed repair pending fresh independent review
 PROTOCOL 7 SD-B: SUPERSEDE (2026-09-27); size budget is a compression target, never a reason to break a lossless condition;
   CONFIRMED with corrected premise; backstop median <= 1.10 x accepted 6.5 median on T1/T7/T8 (escalation trigger);
-  the recorded D4 probe (10,415 B) exceeds the 9,196 B backstop, so a stakeholder escalation before Stage B is expected
+  recorded D4 probes (10,415 B; 67fb29d reviewer 11,121 B) exceed the 9,196 B backstop, so a stakeholder escalation
+  before Stage B is strongly expected
 STAKEHOLDER DECISIONS: section 4 rule ACCEPTED; SC1 claim-integrity floor ACCEPTED; SC2 Option B SELECTED (2026-09-27)
 PROTOCOL 7 D4: NOT AUTHORIZED
 ```
 
-The previously proposed deterministic control-plane / mandatory-orchestrator design is reassigned to **Protocol 8.0** by:
-
-- `workplans/active/SSDP-8.0-DETERMINISTIC-ORCHESTRATOR-VERSION-REBIND.md`
-
-Its older design artifacts retain their historical `SSDP-7.0-...` filenames and embedded target wording, but those target-version labels are superseded by the Protocol 8.0 rebind for all current/future planning. They do not compete with the new Protocol 7.0 target and still do not authorize D4 implementation.
+The previously proposed deterministic control-plane / mandatory-orchestrator design was reassigned to **Protocol 8.0** (2026-09-27) and is now consolidated into one proposed handoff (section below). Its archived design artifacts retain their historical `SSDP-7.0-...` filenames and embedded target wording; those target-version labels mean Protocol 8.0. They do not compete with the Protocol 7.0 target and do not authorize D4 implementation.
 
 ## Protocol 6.1 completed handoff
 
@@ -185,34 +182,30 @@ Protocol 6.6 is accepted-current. Its reduced-root-router, strict no-self-adopti
 
 ## Protocol 8.0 deterministic-orchestrator future design handoff
 
-Protocol 8.0 deterministic-orchestrator design/review SHALL treat the following historically 7.0-labelled artifacts as its preserved substantive design family, preceded by the Protocol 8.0 version-rebind record:
+Protocol 8.0 deterministic-orchestrator design/review SHALL use the single current consolidated handoff:
 
-1. `workplans/active/SSDP-8.0-DETERMINISTIC-ORCHESTRATOR-VERSION-REBIND.md`
-2. `workplans/active/SSDP-7.0-DETERMINISTIC-CONTROL-PLANE-AND-MANDATORY-ORCHESTRATOR-MIGRATION.md`
-3. `workplans/active/SSDP-7.0-DETERMINISTIC-CONTROL-PLANE-AND-MANDATORY-ORCHESTRATOR-MIGRATION-REVISION-1-SECOND-REVIEW-CLOSURE.md`
-4. `workplans/active/SSDP-7.0-DETERMINISTIC-CONTROL-PLANE-AND-MANDATORY-ORCHESTRATOR-MIGRATION-REVISION-2-DETERMINISM-AND-RECOVERY-CLOSURE.md`
-5. `workplans/active/SSDP-7.0-DETERMINISTIC-CONTROL-PLANE-AND-MANDATORY-ORCHESTRATOR-MIGRATION-REVISION-3-PROTOCOL-6.2-INHERITANCE-RECONCILIATION.md`
-6. `workplans/active/SSDP-7.0-DETERMINISTIC-CONTROL-PLANE-AND-MANDATORY-ORCHESTRATOR-MIGRATION-REVISION-4-PROTOCOL-6.3-INHERITANCE-RECONCILIATION.md`
-7. `workplans/active/SSDP-7.0-DETERMINISTIC-CONTROL-PLANE-AND-MANDATORY-ORCHESTRATOR-MIGRATION-REVISION-5-PROTOCOL-6.4-INHERITANCE-RECONCILIATION.md`
-8. `workplans/active/SSDP-7.0-DETERMINISTIC-CONTROL-PLANE-AND-MANDATORY-ORCHESTRATOR-MIGRATION-REVISION-6-PROTOCOL-6.5-INHERITANCE-RECONCILIATION.md`
-9. `workplans/active/SSDP-7.0-DETERMINISTIC-CONTROL-PLANE-AND-MANDATORY-ORCHESTRATOR-MIGRATION-REVISION-7-PROTOCOL-6.6-INHERITANCE-AND-D3-REASSESSMENT.md`
+- `workplans/active/SSDP-8.0-DETERMINISTIC-CONTROL-PLANE-AND-MANDATORY-ORCHESTRATOR-CONSOLIDATED.md`
 
-Precedence:
+It supersedes, as one composition, these archived byte-identical design and review records (its §37.4 maps each to the sections now carrying it):
 
-- Revision 1 closes ownership, semantic/control binding, storage/transport, cutover, lifecycle-migration, graph-completeness, and compatibility gaps and corrects Scheduler/control-kernel ownership;
-- Revision 2 closes reducer-purity, ambient-state, external-effect, deterministic replay, and canonical recovery gaps;
-- Revision 3 changes only representation/version inheritance after Protocol 6.2 acceptance: current pre-cutover document-controlled baseline and fallback/rollback became Protocol 6.2, while the parent/Revisions 1-2 D3 architecture semantics remained unchanged;
-- Revision 4 changes only project-learning/version inheritance after Protocol 6.3 acceptance: current pre-cutover document-controlled baseline and fallback/rollback become Protocol 6.3, while the parent/Revisions 1-3 D3 architecture semantics remain unchanged;
-- Revision 5 changes only version/representation inheritance after Protocol 6.4 acceptance: the current pre-cutover fallback/rollback baseline becomes Protocol 6.4 recovery `74bc572ef516cae417437a2027eeff52a2e25c15`, while parent/Revisions 1-4 D3 architecture semantics remain unchanged and Protocol 8 D4 remains unauthorized;
-- Revision 6 changes only version/representation inheritance after Protocol 6.5 acceptance: the current pre-cutover fallback/rollback baseline becomes Protocol 6.5 recovery `c4d5da1e0acb0e9f27376bf69561e8762747cd2d`, while parent/Revisions 1-5 D3 architecture semantics remain unchanged and Protocol 8 D4 remains unauthorized;
-- Revision 7 advances the pre-cutover fallback/rollback baseline to Protocol 6.6 recovery `384666764da4c55b282e6b1595ab97e2f86e1dc4` and binds Protocol 6.6 operational evidence/capabilities as mandatory inputs to the already-required deliberate D3 Orchestrator architecture reassessment; it does not select the resulting architecture or authorize Protocol 8 D4;
-- every parent requirement not explicitly changed by a later revision remains binding.
+1. `workplans/archive/SSDP-7.0-DETERMINISTIC-CONTROL-PLANE-AND-MANDATORY-ORCHESTRATOR-MIGRATION.md`
+2. `workplans/archive/SSDP-7.0-DETERMINISTIC-CONTROL-PLANE-AND-MANDATORY-ORCHESTRATOR-MIGRATION-REVISION-1-SECOND-REVIEW-CLOSURE.md`
+3. `workplans/archive/SSDP-7.0-DETERMINISTIC-CONTROL-PLANE-AND-MANDATORY-ORCHESTRATOR-MIGRATION-REVISION-2-DETERMINISM-AND-RECOVERY-CLOSURE.md`
+4. `workplans/archive/SSDP-7.0-DETERMINISTIC-CONTROL-PLANE-AND-MANDATORY-ORCHESTRATOR-MIGRATION-REVISION-3-PROTOCOL-6.2-INHERITANCE-RECONCILIATION.md`
+5. `workplans/archive/SSDP-7.0-DETERMINISTIC-CONTROL-PLANE-AND-MANDATORY-ORCHESTRATOR-MIGRATION-REVISION-4-PROTOCOL-6.3-INHERITANCE-RECONCILIATION.md`
+6. `workplans/archive/SSDP-7.0-DETERMINISTIC-CONTROL-PLANE-AND-MANDATORY-ORCHESTRATOR-MIGRATION-REVISION-5-PROTOCOL-6.4-INHERITANCE-RECONCILIATION.md`
+7. `workplans/archive/SSDP-7.0-DETERMINISTIC-CONTROL-PLANE-AND-MANDATORY-ORCHESTRATOR-MIGRATION-REVISION-6-PROTOCOL-6.5-INHERITANCE-RECONCILIATION.md`
+8. `workplans/archive/SSDP-7.0-DETERMINISTIC-CONTROL-PLANE-AND-MANDATORY-ORCHESTRATOR-MIGRATION-REVISION-7-PROTOCOL-6.6-INHERITANCE-AND-D3-REASSESSMENT.md`
+9. `workplans/archive/SSDP-8.0-DETERMINISTIC-ORCHESTRATOR-VERSION-REBIND.md`
+
+The consolidation is a representation and version-label change only. Revisions 1-2 closed ownership, semantic/control binding, storage/transport, cutover, determinism and recovery gaps; Revisions 3-7 advanced only inherited baseline identity (6.2 through 6.6), with Revision 7 binding Protocol 6.6 evidence as mandatory input to the deliberate D3 reassessment; the rebind reassigned the target from 7.0 to 8.0. If the consolidated file and the composed archived family disagree materially, the composed family governs until the consolidation is repaired.
 
 Current disposition:
 
 ```text
 SERIOUS CHALLENGE: NONE
-WORKPLAN DESIGN REVIEW: PASS
+WORKPLAN DESIGN REVIEW: PASS HISTORY (parent + Revisions 1-2, second review under 6.1; dispositions recorded in the archived revisions)
+CONSOLIDATION: PENDING INDEPENDENT LOSSLESSNESS CHECK AGAINST THE ARCHIVED FAMILY
 IMPLEMENTATION STATUS: PROPOSED
 PROTOCOL 6.1 HISTORICAL COMPLETION/RECOVERY: SATISFIED
 PROTOCOL 6.2 COMPLETION/QUALIFICATION/RECOVERY PREREQUISITE: SATISFIED
@@ -224,16 +217,16 @@ PROTOCOL 6.4 INHERITANCE RECONCILIATION: SATISFIED
 PROTOCOL 6.5 COMPLETION/REVIEW/RATIFICATION/RECOVERY PREREQUISITE: SATISFIED
 PROTOCOL 6.5 INHERITANCE RECONCILIATION: SATISFIED
 PROTOCOL 6.6 COMPLETION/REVIEW/RATIFICATION/RECOVERY PREREQUISITE: SATISFIED
-PROTOCOL 6.6 INHERITANCE/REASSESSMENT INPUT: SATISFIED / REVISION 7
+PROTOCOL 6.6 INHERITANCE/REASSESSMENT INPUT: SATISFIED / CONSOLIDATED §3.2, §28.1
 CURRENT PRE-CUTOVER FALLBACK/ROLLBACK BASELINE: Protocol 6.6 recovery 384666764da4c55b282e6b1595ab97e2f86e1dc4
 REMAINING PROTOCOL-8-SPECIFIC PRE-D4 REQUIREMENT:
   1. DELIBERATE D3 ORCHESTRATOR ARCHITECTURE REOPEN/SUPERSESSION
 PROTOCOL 8 D4: NOT AUTHORIZED
 ```
 
-Protocol 8 D4 remains unauthorized until the existing deliberate D3 Orchestrator architecture reopen/supersession requirement closes. Revisions 3-7 do not perform that reopen and no Protocol 8 cutover is implied.
+Protocol 8 D4 remains unauthorized until the deliberate D3 Orchestrator architecture reopen/supersession closes. No Protocol 8 cutover is implied.
 
-If Protocol 7 is accepted, its closeout SHALL author a Protocol 8 inheritance reconciliation (deterministic-orchestrator Revision 8) that advances the pre-cutover baseline to Protocol 7 recovery and binds Protocol 7 inputs to the Protocol 8 D3 reassessment. Known Protocol 7 inputs are recorded in the Protocol 8 rebind record.
+If Protocol 7 is accepted, its closeout SHALL author a Protocol 8 inheritance reconciliation of the consolidated workplan that advances the pre-cutover baseline to Protocol 7 recovery and binds Protocol 7 inputs to the Protocol 8 D3 reassessment. Known Protocol 7 inputs are recorded in the consolidated workplan's §37.2.
 
 ## Protocol 6.5 completed handoff
 
@@ -266,7 +259,7 @@ There is exactly one mutable repository release-state owner: `PROTOCOL-RELEASE-S
 - Repository default/latest is never a protocol-version oracle.
 - Protocol 6.6 is accepted-current with exact public fallback `22f4bdba53795da3a6f13f162529f3a843fc37ae` and recovery `384666764da4c55b282e6b1595ab97e2f86e1dc4`.
 - Protocol 7 is the proposed scientific inspectability/epistemic-initiative/feedback-loop revision governed by its single consolidated workplan above; select its artifacts by exact ID, never by `SSDP-7.0*` globs, because the historical deterministic-orchestrator family shares that prefix.
-- The deterministic-orchestrator proposal is reassigned to Protocol 8.0; its Revision 7 still binds Protocol 6.6 recovery as the inherited pre-cutover baseline for that future design and does not authorize D4.
+- The deterministic-orchestrator proposal targets Protocol 8.0 through its single consolidated workplan; that workplan binds Protocol 6.6 recovery as the inherited pre-cutover baseline and does not authorize D4. Select its artifacts by exact ID as well.
 - Under the future Protocol 8 deterministic-orchestrator proposal, after its own qualified cutover, the deterministic control plane would own machine lifecycle transitions while workplans/skills/documents remain semantic artifacts.
 - Shadow comparison is permitted only while one side remains explicitly non-authoritative.
 - No `main` merge or Protocol 7/8 D4 cutover is authorized merely by these active design workplans.

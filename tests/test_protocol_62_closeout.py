@@ -25,7 +25,7 @@ class Protocol62CloseoutTests(unittest.TestCase):
         self.assertTrue((ROOT / "workplans/archive/SSDP-6.2-LOSSLESS-REPRESENTATION-AND-PROGRESSIVE-DISCLOSURE-REFINEMENT.md").is_file())
 
     def test_protocol7_is_reconciled_but_d4_stays_blocked(self):
-        rev3 = (ROOT / "workplans/active/SSDP-7.0-DETERMINISTIC-CONTROL-PLANE-AND-MANDATORY-ORCHESTRATOR-MIGRATION-REVISION-3-PROTOCOL-6.2-INHERITANCE-RECONCILIATION.md").read_text()
+        rev3 = (ROOT / "workplans/archive/SSDP-7.0-DETERMINISTIC-CONTROL-PLANE-AND-MANDATORY-ORCHESTRATOR-MIGRATION-REVISION-3-PROTOCOL-6.2-INHERITANCE-RECONCILIATION.md").read_text()
         index = (ROOT / "workplans/active/SSDP-6.1-7.0-WORKPLAN-AUTHORITY-INDEX.md").read_text()
         self.assertIn("d3_architecture_mutation: none", rev3)
         self.assertIn("PROTOCOL 7 D4 IMPLEMENTATION: NOT AUTHORIZED", rev3)
