@@ -72,8 +72,38 @@ The pre-run checker uses the actual harness and records: every oracle/rubric col
 
 ## 7. Human legibility trial and ratification evidence
 
-Use the stakeholder or designated scientists representing the declared reader, **at least four independent participants**. **Every participant reviews exactly one fixture from each arm**, two different fixtures, so no participant sees the same fixture in both arms and **each arm has at least four independent participants**. Arm order is counterbalanced (at least two participants see the candidate arm first and at least two see it second), and fixture-to-arm assignment is rotated so that **each arm is exposed through at least two distinct fixtures**. The custodian freezes routine/critical questions, expected answers and permitted uncertainty before exposure; the author and executor do not read them before candidate freeze. Use delivered Channel A reports and independently O3-authorized Channel B projections without executor coaching. **Per participant and per arm**, at least five routine questions and at least one decision-critical question; hence at least **20 routine and 4 critical answer opportunities per arm**, each participant contributing equally to both arms. **No materially wrong critical answer caused by the material in either arm, ≥80% correct routine answers per arm (≥16/20 at minimum exposure), and median time to answer ≤2.0 × paired 6.6** are required; unanswered and misleading interpretations count as wrong. A participant who does not complete both arms is excluded from both arms' denominators and recorded; if exclusions leave either arm below four participants or 20/4 answer opportunities, the trial is underexposed and non-discriminating, never a pass. Record assistance, style unblinding and time. If a human trial cannot run, release acceptance remains blocked; no machine proxy or ratification narrative substitutes. The ratification package reports denominators, failures, comparator, limitations and residual findings, not a PASS label alone.
+**Participant (stakeholder decision 2026-09-28, `STAKEHOLDER-DECISION-2026-09-28-PROTOCOL-7.0-SINGLE-PARTICIPANT-HUMAN-TRIAL.md`).** The single participant is the stakeholder, as the reader the workplan's §11.6 minimum names. This replaces the earlier four-participant design. The stakeholder authors no fixture, key, expected answer or evaluator rubric. Because the custody directory is on the stakeholder's own machine, non-access is behavioural. The trial record therefore carries the stakeholder's attestation of what custody material, if any, they accessed before completing the trial.
+
+**Exposure.**
+
+- The stakeholder reviews **exactly one fixture per arm**. The two fixtures are different, so the same fixture is never seen in both arms, and the other arm's output on either fixture is never seen.
+- With one participant, counterbalancing is impossible. The custodian therefore fixes before exposure, by a recorded random draw, which fixture serves which arm and which arm comes first.
+- **Per arm, at least 20 routine and at least 4 decision-critical questions.** The custodian writes these on that arm's fixture from question templates matched across the two fixtures in count, type and difficulty class.
+- The custodian freezes questions, expected answers, permitted uncertainty, permitted assistance and the per-question time protocol before exposure. The author and executor do not read them before candidate freeze.
+
+**Material shown.** Use delivered Channel A reports and independently O3-authorized Channel B projections, without executor coaching.
+
+**Floors.**
+
+- **Per arm:** no materially wrong critical answer caused by the material, and at least 80% correct routine answers (≥16/20 at minimum exposure).
+- **Across arms:** candidate-arm median time to answer at most 2.0 × the baseline arm's median time.
+
+Unanswered questions and misleading interpretations count as wrong. A blinded independent evaluator scores the answers against the frozen expected answers.
+
+**Exposure accounting and non-completion.** Exposure is counted by questions **presented**, not questions answered.
+
+- An observed floor failure stands whether or not the trial is completed.
+- Non-completion makes the trial non-discriminating only when its recorded reason is unrelated to the material, such as unavailability or a harness fault. In that case it is never a pass.
+- Otherwise every presented question left unanswered is scored wrong.
+- A question set that presents fewer than 20 routine or 4 critical questions in either arm is underexposed and never a pass.
+- A non-discriminating trial may be repeated only on fixtures the stakeholder has not seen, under a fresh custodian draw. The earlier observations stay in the record.
+
+**Record** assistance, arm unblinding, the arm order and the time. Unblinding is near-certain, because the participant is also the ratifier and knows the Protocol 7 doctrine; the ratification package states this.
+
+**Stated limitation.** A pass establishes intended-reader legibility **for the stakeholder as reader only**, on the one drawn fixture per arm and the one drawn arm order. It makes no claim about other readers, other fixtures or a reader population. Fixture difficulty is confounded with arm, including in the time ratio, which compares different fixtures; matched question templates reduce but do not remove this. The ratification package states these limits.
+
+**If the trial cannot run,** release acceptance remains blocked; no machine proxy or ratification narrative substitutes. The ratification package reports denominators, failures, comparator, limitations and residual findings, not a PASS label alone.
 
 ## 8. Status and change control
 
-This framework contains no concrete fixture/answer data. The 2026-09-28 independent framework check returned NO-PASS on three gaps (`STAGE-A-INDEPENDENT-CONTRACT-CHECK-NO-PASS.md`); this revision repairs them in §3 (separate unnamed-class detection floor), §4 (per-R2-trigger-class owner-load exposure and floors) and §7 (per-arm human-trial exposure). Stage A still needs a fresh independent framework check of this exact revision and a designated separate fixture custodian. Candidate and fixture arms bind exact immutable identities before runs. Any changed threshold or case after exposure is a governed contract change with affected requalification; a tuned holdout becomes development data. Stage F records what ran, what did not, and the exact semantic subject. Stage G Review and Stage H release are outside the authorized task.
+This framework contains no concrete fixture/answer data. The 2026-09-28 independent framework check returned NO-PASS on three gaps (`STAGE-A-INDEPENDENT-CONTRACT-CHECK-NO-PASS.md`); this revision repairs them in §3 (separate unnamed-class detection floor), §4 (per-R2-trigger-class owner-load exposure and floors) and §7 (per-arm human-trial exposure). Stage A still needs a fresh independent framework check of this exact revision and a designated separate fixture custodian. A later governed revision, made on stakeholder decision after the Stage A PASS, replaces §7's four-participant design with the stakeholder as the single participant. It needs a fresh independent check before any run. Candidate and fixture arms bind exact immutable identities before runs. Any changed threshold or case after exposure is a governed contract change with affected requalification; a tuned holdout becomes development data. Stage F records what ran, what did not, and the exact semantic subject. Stage G Review and Stage H release are outside the authorized task.
