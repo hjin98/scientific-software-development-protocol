@@ -5,7 +5,7 @@ protocol_version: 6.6.0
 status: active
 created_date: 2026-09-09
 reviewed_date: 2026-09-28
-active_serious_challenge: protocol-7-stage-a-consumed-surface-O1-meaning-vs-frozen-label-table
+active_serious_challenge: none
 ---
 
 # SSDP 6.1 / 6.2 / 6.3 / 6.4 / 6.5 / 6.6 / 7.0 / 8.0 Workplan Authority Index
@@ -34,13 +34,15 @@ The author-side review record `qualification/ssdp70/WORKPLAN-REVIEW-2026-09-27-P
 
 The stakeholder subsequently accepted the first three minor-wording repairs and authorized D4 Stages A–F. The revised handoff is independently reviewed at `qualification/ssdp70/WORKPLAN-REVIEW-PROTOCOL-7.0-AD0A441-PASS.md`. Stage A's static measurement and independent draft check stopped the cycle before Stage B; the current evidence and open challenge are in `qualification/ssdp70/STAGE-A-STOP-2026-09-28.md`. These current records supersede the preceding paragraph's readiness and authorization status, while its Review chronology remains historical.
 
+The stakeholder then authorized one narrow §8.3 label-table exception for O1, and that exact workplan amendment passed fresh independent Review: `qualification/ssdp70/WORKPLAN-REVIEW-PROTOCOL-7.0-69C6383-PASS.md`. The O1 Challenge is resolved for this cycle. One bounded compressed D4 draft passed independent fidelity/attribution checking but still breached the static fixed-cost backstop; `qualification/ssdp70/STAGE-A-COMPRESSION-BACKSTOP-STOP-2026-09-28.md` is the current Stage A stop record. The preceding O1 stop record remains historical.
+
 ```text
-PROTOCOL 7 WORKPLAN DESIGN REVIEW: PASS on revised handoff SHA-256 ad0a4414c6492ee865784dc9e669d1e21d9194ebb0dfe2cdb639106ff236eea4 (Minors 1-3 repaired; Minor 4 open)
-PROTOCOL 7 D4: stakeholder-authorized Stages A-F; Stage A STOPPED before Stage B on static backstop breach and consumed-surface O1 Serious Challenge
+PROTOCOL 7 WORKPLAN DESIGN REVIEW: PASS on current handoff SHA-256 69c6383b65e2a2badbafe2a4f148d0aca1bce03cd7d09889b9a037e844b07abd (O1 label exception reviewed; earlier Minor 4 open)
+PROTOCOL 7 D4: stakeholder-authorized Stages A-F; Stage A STOPPED before Stage B on static fixed-cost backstop breach; no active Serious Challenge
 PROTOCOL 7 SD-B: SUPERSEDE (2026-09-27); size budget is a compression target, never a reason to break a lossless condition;
   CONFIRMED with corrected premise; backstop median <= 1.10 x accepted 6.5 median on T1/T7/T8 (escalation trigger);
-  the recorded D4 probe (10,415 B) and the 67fb29d reviewer's probe (11,121 B; measurement recorded, text not, so unreproducible) exceed the
-  9,196 B backstop but predate the current wording, so a stakeholder escalation before Stage B is strongly expected
+  current independently fidelity-checked compressed D4 draft 14,331 B exceeds the historical 9,196 B planning cap and predeclared margin;
+  stakeholder escalation is active before Stage B; fresh paired live medians remain unrun
 STAKEHOLDER DECISIONS: section 4 rule ACCEPTED; SC1 claim-integrity floor ACCEPTED; SC2 Option B SELECTED (2026-09-27)
 ```
 
