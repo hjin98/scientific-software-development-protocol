@@ -3,7 +3,7 @@ kind: protocol-stage-evidence
 governing_protocol_version: 6.6.0
 target_protocol_version: 7.0.0
 stage: A
-disposition: STOPPED-BEFORE-STAGE-B
+disposition: STOPPED-BEFORE-STAGE-B (historical; superseded by STAGE-A-CLOSURE-2026-09-28.md)
 active_serious_challenge: none-established
 ---
 
