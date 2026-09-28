@@ -30,10 +30,10 @@ It supersedes the earlier composition, now preserved as historical design-review
 2. `workplans/archive/SSDP-7.0-SCIENTIFIC-EPISTEMIC-CLOSURE-AND-DISCOVERY-REVISION-1-FIRST-REVIEW-CLOSURE.md`
 3. `workplans/archive/SSDP-7.0-SCIENTIFIC-EPISTEMIC-CLOSURE-AND-DISCOVERY-REVISION-2-FEEDBACK-AND-LONGITUDINAL-CLOSURE.md`
 
-The author-side review record `qualification/ssdp70/WORKPLAN-REVIEW-2026-09-27-PROTOCOL-7.0-PASS.md` applies only to the superseded composition, was not independent, and establishes no implementation-handoff readiness. The consolidated handoff's §0 routes prior NO-PASS records and the unchanged stakeholder SC1/SC2 decisions. Its latest independent Review, at `88a82b57d4b5c937f5d420280896ed38c9c72ac1`, returned **NO-PASS**: `qualification/ssdp70/WORKPLAN-REVIEW-PROTOCOL-7.0-88A82B5-NO-PASS.md`. Proposed repairs are in that same handoff (§0.1–§0.2). The repairing context also performed this latest Review, so fresh independent acceptance must come from a context that authored neither the workplan nor these repairs.
+The author-side review record `qualification/ssdp70/WORKPLAN-REVIEW-2026-09-27-PROTOCOL-7.0-PASS.md` applies only to the superseded composition, was not independent, and establishes no implementation-handoff readiness. The consolidated handoff's §0 routes prior NO-PASS records and the unchanged stakeholder SC1/SC2 decisions. Its latest independent Review, at `d255a9265aeb6aaf2432193b327beb07b9c4740c`, returned **NO-PASS**: `qualification/ssdp70/WORKPLAN-REVIEW-PROTOCOL-7.0-D255A92-NO-PASS.md`. Proposed repairs are in that same handoff (§0.1–§0.2). The repairing context also performed this latest Review, so fresh independent acceptance must come from a context that authored neither the workplan nor these repairs.
 
 ```text
-PROTOCOL 7 WORKPLAN DESIGN REVIEW: NO-PASS (latest 88a82b5); proposed repair pending fresh independent review
+PROTOCOL 7 WORKPLAN DESIGN REVIEW: NO-PASS (latest d255a92); proposed repair pending fresh independent review
 STAKEHOLDER DECISIONS: section 4 rule ACCEPTED; SC1 claim-integrity floor ACCEPTED; SC2 Option B SELECTED (2026-09-27)
 PROTOCOL 7 D4: NOT AUTHORIZED
 ```
