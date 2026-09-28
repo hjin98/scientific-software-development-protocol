@@ -8,6 +8,62 @@ This is the **user-facing capability history** of the Scientific Software Develo
 
 Older README files accumulated release mappings, bootstrap attempts, and version-specific narrative because the README was doing too many jobs. That material is now intentionally separated: this changelog keeps the **capability story**, semantic history keeps the **why**, and release state keeps the **current exact identities**.
 
+## Protocol 7.x
+
+### 7.0.0 — scientific inspectability, epistemic initiative, and the scientific feedback loop
+
+Protocol 7 is a major revision. It changes what counts as an adequately inspectable scientific computation, what agents must notice and report, and what human gates must receive. It keeps every accepted 6.6 capability unless a stakeholder decision explicitly superseded it. It adds no D5 layer and changes neither the pre-routing kernel nor the Orchestrator control semantics.
+
+Main improvements:
+
+- **One conditional owner** (`scientific-inspectability-and-initiative.md`) defines the realized scientific record, scientific inspectability, epistemic initiative, the three channels (task report, product inspection surface, governance gate), feedback persistence and the claim-integrity floor.
+- **An obligation-binding rule.**
+  - D1–D3 authors state the inspectability need and visibly mark product inspectability surfaces (O1).
+  - Agents perform a bounded inquiry and report findings and gaps (O2).
+  - Product retention, projection and exposure bind only through accepted authority, an explicit instruction or an existing contract (O3), never through the protocol alone. A marked surface beyond the requested deliverable binds only after stakeholder/task-authority acceptance.
+  - Without O1 content, an agent records its retention/projection choices as a visible proposed default.
+- **A claim-integrity floor** on every agent-authored assertion, including product content an agent writes. It covers selected or post hoc results, unqualified conclusions past known material limits, and interpretation laundered into fact. It never adds product capability.
+- **Inspectability doctrine.**
+  - Recoverability is not accessibility.
+  - Progressive disclosure, meaning preservation and a coverage envelope that includes the stratification axes examined.
+  - Faithful deterministic projection with lineage and source-to-rendered verification.
+  - Non-narrative and tool-independent routes.
+  - Retention and destructive boundaries with per-unit keys, and semantic stability across runs.
+  - Decision/trajectory/negative-result visibility, explicit insufficiency, interim visibility and privacy limits.
+- **Decision provenance and variant-search disclosure.** Effective choice, origin, actor and exact binding are separate facts. An instruction is not ratification. Disclosure covers result-contingent iteration, tool-launched searches, and delegated/resumed selection lineage with explicit unknown history.
+- **Bounded epistemic initiative.**
+  - An expectation record, and a too-good-to-be-true finding class.
+  - A fixed finding shape, and a null only with its search envelope.
+  - No manufactured novelty, and exploratory kept apart from confirmatory.
+  - Engineering-task and AI-consumer rules.
+  - An answerable-either-way delegate request, with unanswered parts reported as gaps.
+- **Data → authority feedback.**
+  - Tensions are recorded outside authority text and bound to every plausibly implicated authority and its subject.
+  - They are searched across revisions, former names and recorded predecessors before authority is relied on or revised, and reported with native asserters and per-binding status.
+  - D1/D2 revisions make revision-scoped applicability assessments that reach the revision gate.
+  - Inaccessible homes qualify or block only under stated conditions.
+- **Feedback persistence** goes to one existing authorized home when writable. Otherwise the report carries a non-writing fallback, and no universal discovery database exists.
+- **Consumed-surface placement.** Every D1–D4 entrypoint, plus the documentation and maintenance-audit specialists, carries the obligation predicate, the owner-load trigger and a completion clause with the minimum duties and their label meanings. The implementation skill's description now also selects scientific run/analysis, results-review and gate-evidence tasks.
+- **Local deltas.**
+  - D1/D2/D3 O1 content.
+  - Evidence: the realized-record/observation overlap, and exploratory/confirmatory inquiry status on `CHALLENGES`.
+  - Writing: recommendation/next-probe and authority-Challenge reporting roles.
+  - Workflow: bidirectional scientific Review, the Channel C gate-evidence contract and product-scope acceptance.
+  - Templates: O1, revision-record and variant-disclosure fields.
+  - Workflow prompts.
+  - A versioning note that the ratification package is decision-sufficient gate evidence.
+
+Stated limits:
+
+- The tension claim is a bounded disclosed search, not exhaustive retrieval.
+- Documentation and audit routes do not perform tension searches or ask delegates for variant/tension returns.
+- Delegate answers are reported as given.
+- Adoption is prospective, and version-bound 6.x work stays 6.x.
+
+The stakeholder superseded 6.6's per-route 1.10 burden cap with a 1,000 B-per-entrypoint compression target that is subordinate to lossless required elements. The retained fixed-cost backstop is 2.0 × the fresh paired accepted-6.5 median on the T1/T7/T8 reference routes.
+
+The Orchestrator gains a 7.0 profile with unchanged lifecycle, transition graph and profile schema. The 6.6 profile is frozen. The deterministic control plane remains Protocol 8. Release status is deliberately not stated here; resolve it from `PROTOCOL-RELEASE-STATE.yaml`.
+
 ## Protocol 6.x
 
 ### 6.6.0 — cognitive and operational optimization

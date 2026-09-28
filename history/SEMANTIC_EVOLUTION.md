@@ -219,3 +219,24 @@ Protocol 6.6 completed its cognitive/operational optimization lifecycle without 
 - **Accepted-current cutover:** `8457fe9d3f30e7b21663f57645816cec8d0ef343` advances accepted-current to 6.6.0 and preserves the complete 6.5 public/recovery mapping as historical state.
 - **Operational result:** the final root-router simplification preserves the 122-route map and historical capabilities while reducing ordinary consumed entrypoint burden in the qualified reference regime; strict version binding/no-self-adoption remains normative while portable prose execution is explicitly treated as stochastic robustness.
 - **Protocol 7 boundary:** Protocol 6.6 evidence/capabilities become mandatory inputs to the existing deliberate Protocol-7 D3 Orchestrator architecture reassessment. No Protocol-7 architecture is selected here and D4 remains unauthorized.
+
+
+## Protocol 6.6 -> Protocol 7.0 candidate — scientific inspectability, epistemic initiative and the scientific feedback loop
+
+- **Trigger:** a program can faithfully implement accepted D1/D2 authority, retain enough state and provenance to reconstruct everything, and pass qualification. Its scientist may still need code or storage archaeology, or an AI, to learn which checkpoint was selected, what was excluded, or how a subgroup behaved. When only the requested terminal result returns, what delegated work encountered leaves the human's field of view. Recoverability is not accessibility.
+- **Replacement:** one conditional owner, `scientific-inspectability-and-initiative.md`, defines the realized scientific record, inspectability, epistemic initiative, the three channels (task report, product surface, governance gate), feedback persistence and the claim-integrity floor. REFINES rows land as local deltas in the D1/D2/D3, evidence, writing and workflow owners and in two templates. ROUTES rows stay with their owners.
+- **Obligation binding (stakeholder-accepted 2026-09-27):** O1 (authoring) and O2 (surfacing) are protocol-direct; O3 (product) never is. Stakeholder decision SC1 added an always-binding claim-integrity floor on agent-authored assertions. Decision SC2 selected a *marked* product inspectability surface whose beyond-deliverable items bind only after product-scope acceptance. Together these resolved the risk that inspectability doctrine silently mandated unrequested product features.
+- **Placement lesson (6.6 intake I66-1, I66-3):** ordinary agents consume only the invoked entrypoint, and inlining doctrine raises ordinary-route cost without reliability. Protocol 7 therefore separates the obligation predicate (R1) from an owner-load trigger (R2). Each entrypoint carries a completion clause with the minimum duties and their label meanings. The owner loads only for consequential judgments over realized results, D1–D3 authority work or gate evidence. The kernel is unchanged, and the 6.6 local-work exemptions keep governing owner loading.
+- **Narrowing chronology (design Review):** the handoff went through twenty independent NO-PASS Reviews before PASS at `5a2f8c8`, `b2d1f4e` and later amendments. The two recurring families narrowed their claims rather than adding rules.
+  - *Tension retrieval* narrowed from broad retrieval to broad binding, a bounded disclosed search and no silent loss at revision. Ordinary routes report records as their homes attribute them and never close a tension themselves.
+  - *Delegate returns* became one answerable-either-way request covering launched work, with every unanswered part a gap and only evident null/variant exemptions.
+- **Size decision:** stakeholder decision SD-B (2026-09-27) superseded 6.6's per-route 1.10 burden cap with a 1,000 B compression target subordinate to lossless required elements, and kept a fixed-cost backstop. The Stage A draft (14,331 B for the D4 entrypoint, all attributable) breached that backstop. The stakeholder relaxed it to 2.0 × the fresh paired accepted-6.5 median (2026-09-28), preserving the 512 B static margin.
+- **Rejected alternatives:**
+  - a universal discovery database, metric registry or report template;
+  - kernel placement or inlined doctrine;
+  - a new specialist entrypoint in this candidate, kept as the first reopen candidate if selection misses;
+  - a hygiene clause, replaced by a preservation sentinel;
+  - exhaustive tension retrieval;
+  - Orchestrator control-semantics changes, which are deferred to Protocol 8.
+- **Profiles:** `ssdp-protocol-7.0` rebinds version-bound prompts over the unchanged schema-v2 stage table and transitions. The 6.6 prompts/profile bytes are frozen by blob hash, and the versioning owner's supported-profile list now names 6.6 and 7.0.
+- **Current lifecycle state:** candidate implementation under the 6.6-governed workplan. No 7.0 candidate is frozen, qualified, reviewed, ratified or published. Release identities resolve only from `PROTOCOL-RELEASE-STATE.yaml`.

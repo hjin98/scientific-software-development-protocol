@@ -38,6 +38,7 @@ Key owners:
 - D1/D2/D3/D4 -> their matching domain references
 - authority lifecycle / workplans / handoffs / Working State / Review / closeout -> `shared/references/workflow-and-workplans.md`
 - recurrence / rigor / cognitive-resource escalation -> `shared/references/convergence-and-cycle-economy.md`
+- scientific inspectability / epistemic initiative / tension binding / feedback persistence / claim-integrity floor -> `shared/references/scientific-inspectability-and-initiative.md` (entrypoints carry its predicate, load trigger and completion clause)
 - evidence/dependency/applicability -> `shared/references/evidence-evolution-and-dependencies.md`
 - testing/qualification -> `shared/references/testing-and-validation.md`
 - relation-first optional engineering tools -> `shared/references/tool-assisted-engineering.md`

@@ -1,7 +1,7 @@
 ---
 kind: implementation-workplan
 workplan_id: REPLACE_ME
-protocol_version: 6.6.0
+protocol_version: 7.0.0
 status: proposed
 ---
 
@@ -21,6 +21,14 @@ Define newly introduced non-common project/domain terms needed by the intended c
 - Stable D4 contracts/specification:
 - Explicit non-goals:
 - If D4-only, upstream-impact exclusion where scientific/numerical risk is plausible:
+
+## 1a. Scientific inspectability (O1)
+
+When the software produces scientific results:
+
+- Material realized record, intended reader and routine questions from accepted authority (or "None material, because …"):
+- Marked product inspectability surfaces: for each, within/beyond the requested deliverable. For each item beyond it, give its product-scope acceptance status and binding (accepted by whom, where) or "proposed"; proposed items are not built:
+- Variant-search disclosure (when variants are evaluated and a survivor delivered): count/kind, selection criterion, selection data including held-out reuse, result-contingent changes, delegated/resumed lineage, or known lower bound + unknown interval + claim limit:
 
 ## 2. Importance and attention allocation
 

@@ -15,6 +15,8 @@ Before designing persistence, classify each artifact as one of:
 
 For each nontrivial artifact define owner, schema/version, expected size, creation/update mode, validity/invalidation, retention/eviction, cleanup, and recovery role. Do not let a cache become an undocumented second source of truth.
 
+Before realized scientific results or retained evidence are irreversibly discarded, aggregated or overwritten, weigh what later scientific judgment needs; [Scientific inspectability and epistemic initiative](scientific-inspectability-and-initiative.md) owns that weighing and the retention-boundaries principle, while storage mechanics stay here.
+
 ## Optimization order for storage-heavy paths
 
 Prefer, in order:

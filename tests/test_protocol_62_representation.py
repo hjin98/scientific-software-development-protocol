@@ -35,7 +35,7 @@ def current_public_bootstrap() -> str | None:
 class Protocol62RepresentationTests(unittest.TestCase):
     def test_current_version_and_nomenclature(self):
         version = tuple(int(part) for part in (SOURCE / "PROTOCOL_VERSION").read_text().strip().split("."))
-        self.assertEqual(version[0], 6)
+        # Current source is a Protocol 6.2-or-later successor (Protocol 7.0 keeps this lineage).
         self.assertGreaterEqual(version, (6, 2, 0))
         self.assertTrue((REFERENCES / "abstraction-and-concretization.md").is_file())
         self.assertFalse((REFERENCES / "abstraction-and-realization.md").exists())
@@ -207,12 +207,14 @@ class Protocol62RepresentationTests(unittest.TestCase):
         self.assertIn("Protocol 5.0", text)
         self.assertIn("6.1", text)
         self.assertNotIn("| BLOCKING |", text)
-        # Owners introduced after the 6.2 census (6.3 PEM; 6.6 extractions) are covered by
-        # their own cycle's preservation evidence, not by the frozen 6.2 census.
+        # Owners introduced after the 6.2 census (6.3 PEM; 6.6 extractions; the 7.0
+        # scientific-inspectability owner) are covered by their own cycle's preservation
+        # evidence, not by the frozen 6.2 census.
         baseline_references = {path.name for path in REFERENCES.glob("*.md")} - {
             "project-engineering-memory.md",
             "project-engineering-memory-schema.md",
             "semantic-definition-and-traceability.md",
+            "scientific-inspectability-and-initiative.md",
         }
         baseline_templates = {path.name for path in TEMPLATES.glob("*.md")} - {"project_engineering_memory_template.md"}
         for name in sorted(baseline_references):

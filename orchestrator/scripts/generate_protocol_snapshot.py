@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Generate/check current Protocol 6.6 snapshot and prove frozen profile parity."""
+"""Generate/check current Protocol 7.0 snapshot and prove frozen profile parity."""
 from __future__ import annotations
 import argparse
 import hashlib
@@ -23,6 +23,7 @@ FROZEN = {
     P.SSDP63_PROFILE_ID: {PACKAGED_PROMPTS: "67f3784dcc7ae259472d176498cc9e4556292898", PACKAGED_PROFILE: "bef61c9ed9e1f273770feb01704e648d1fa0720b"},
     P.SSDP64_PROFILE_ID: {PACKAGED_PROMPTS: "148c719aaf0d41f2c4b89ab0e5bcb8922196177f", PACKAGED_PROFILE: "a31330f4e39ba6780942dc6d55e597c3582c3936"},
     P.SSDP65_PROFILE_ID: {PACKAGED_PROMPTS: "3779f69ec5d4a0ca435b4d1f364a3783a5f4f592", PACKAGED_PROFILE: "711f563ecb8e2b7ffe78806474f55f9f971366e4"},
+    P.SSDP66_PROFILE_ID: {PACKAGED_PROMPTS: "83a9bf1cff079b77aae63f69bf44f3b8ba052763", PACKAGED_PROFILE: "da5c4b5ae8526a3ea04f988066bf4a78f9a304e3"},
 }
 
 def _git_blob_sha(data: bytes) -> str:
@@ -82,13 +83,13 @@ def main() -> int:
         if stale:
             print(f"current packaged snapshot is stale: {', '.join(stale)}", file=sys.stderr)
             return 1
-        print("current Protocol 6.6 snapshot matches canonical source; Protocol 5.16, 6.0, 6.1, 6.2, 6.3, 6.4, and 6.5 snapshots are immutable and coherent")
+        print("current Protocol 7.0 snapshot matches canonical source; Protocol 5.16, 6.0, 6.1, 6.2, 6.3, 6.4, 6.5, and 6.6 snapshots are immutable and coherent")
         return 0
     CURRENT_TARGET_DIR.mkdir(parents=True, exist_ok=True)
     for name, text in expected.items():
         (CURRENT_TARGET_DIR / name).write_text(text, encoding="utf-8")
     print(f"wrote {len(expected)} current snapshot files to {CURRENT_TARGET_DIR.relative_to(REPO_ROOT)}")
-    print("validated frozen Protocol 5.16, 6.0, 6.1, 6.2, 6.3, 6.4, and 6.5 snapshots without rewriting them")
+    print("validated frozen Protocol 5.16, 6.0, 6.1, 6.2, 6.3, 6.4, 6.5, and 6.6 snapshots without rewriting them")
     return 0
 
 if __name__ == "__main__":

@@ -20,7 +20,7 @@ class Protocol61EvidenceEvolutionTests(unittest.TestCase):
 
     def test_current_version_and_concretization_vocabulary(self) -> None:
         version = tuple(int(part) for part in self.read("source/PROTOCOL_VERSION").strip().split("."))
-        self.assertEqual(version[0], 6)
+        # Current source is a Protocol 6.2-or-later successor (Protocol 7.0 keeps this lineage).
         self.assertGreaterEqual(version, (6, 2, 0))
         authority = self.read("source/shared/references/abstraction-and-concretization.md")
         self.assertIn("A **concretization** is a lower-level choice", authority)

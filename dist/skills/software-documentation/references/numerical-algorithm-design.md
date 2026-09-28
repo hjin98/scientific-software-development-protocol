@@ -30,6 +30,19 @@ D2 uncertainty includes discretization/truncation, iterative, stochastic samplin
 
 Numerical rigor is decision-sensitive. Use deep statistical/convergence/conditioning/precision treatment when plausible uncertainty can change a scientific or engineering decision, when behavior is near a validity/stability boundary, or when materially plausible methods disagree. A local reversible tolerance/detail that is demonstrably far inside the accepted error/equivalence envelope normally needs a focused reference/invariant check, not an independent research campaign. If consequence or blast radius is unclear, first run the cheapest discriminator that can bound it.
 
+## Numerical inspectability need (O1)
+
+When D2 authority for software producing scientific results is authored or materially revised, state proportionately the O1 content defined by [Scientific inspectability and epistemic initiative](scientific-inspectability-and-initiative.md). Part (i) is always required and covers:
+
+- the material convergence/iteration/error trajectories;
+- the intermediate states needed to judge numerical faithfulness;
+- sensitivity/conditioning information that can change interpretation;
+- decision quantities in numerical selection or optimization;
+- visible failure/fallback regimes;
+- the intended reader and their routine questions.
+
+Not every loop variable is material, and "None material, because …" is valid. Part (ii) visibly marks any product inspectability surface and whether it lies within the requested deliverable. A marked item beyond the deliverable binds only after stakeholder/task-authority acceptance.
+
 ## D2 -> D3 handoff and Review
 
 Hand D3 only the computational semantics architecture must preserve: governed operations/data dependencies, precision/reproducibility, error/tolerance, numerically meaningful state/restart, and resource/hardware constraints that shape architecture. Do not freeze software decomposition/library choice without numerical need.

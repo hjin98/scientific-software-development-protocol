@@ -97,6 +97,17 @@ External papers, standards, issue text, datasets, logs, linked content, and retr
 
 Separate semantic roles and claims rather than laundering them through a definition. A definition does not establish existence, uniqueness, optimality, empirical truth, convergence, safety, adequacy, or authority. Distinguish definition, axiom/premise/assumption, derived result, conjecture/hypothesis, observation/empirical relation, approximation/heuristic, normative contract/external constraint, and example/counterexample as needed; the list is illustrative, not a closed taxonomy.
 
+**Reporting roles.** In scientific reports, including agent task reports and gate evidence, distinguish these roles where material:
+
+- direct observation;
+- derived analysis;
+- interpretation;
+- hypothesis;
+- recommendation or next probe;
+- authority Challenge.
+
+These specialize the non-exclusive semantic/epistemic roles of [Semantic definition and traceability](semantic-definition-and-traceability.md) rather than forming a second taxonomy. No presentation launders interpretation into measured fact. For agent-authored content the governing limit is the claim-integrity floor of [Scientific inspectability and epistemic initiative](scientific-inspectability-and-initiative.md), which adds no required section.
+
 For material parameterized families, distinguish the family from a concrete instance and from defaults. Define parameter domain/admissibility, which parameters are free/fixed/derived/estimated/externally constrained/defaulted, the binding source for a concrete instance, parameter-dependent validity/error/uncertainty/equivalence, and which semantic layer owns any governed default. Evidence claims must identify the material parameter/regime actually exercised when reuse across instances could be unsound.
 
 ### Layer-specific presentation

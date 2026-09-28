@@ -64,8 +64,14 @@ class RoutingPreservationMap(unittest.TestCase):
                     self.assertIn(row["disposition"], MAP["dispositions"])
 
     def test_consumed_entrypoints_keep_exactly_the_basis_direct_routes(self) -> None:
+        # Protocol 7.0 adds exactly one direct route (its scientific-inspectability owner, frozen
+        # workplan section 8.3 placement) to every entrypoint except repository-hygiene; every
+        # 6.6 basis route stays and no other route is added.
+        protocol7 = {"references/scientific-inspectability-and-initiative.md"}
         for name, spec in MAP["skills"].items():
             mapped = {row["target"] for row in spec["routes"]} | {row["target"] for row in MAP["entry_contract"]["routes"]}
+            if name != "repository-hygiene":
+                mapped |= protocol7
             with self.subTest(skill=name):
                 self.assertEqual(set(LINK_RE.findall(consumed(name))), mapped)
 
@@ -99,6 +105,14 @@ class RoutingPreservationMap(unittest.TestCase):
             if basis is None:
                 self.skipTest("basis entrypoints are not resolvable in this clone")
             with self.subTest(skill=name):
+                if name == "software-implementation":
+                    # Protocol 7.0 section 8.3 selection-surface amendment: only the description may
+                    # change, and it keeps the 6.6 scientific/technical scope.
+                    current, previous = FRONT_RE.match(consumed(name)).group(0), FRONT_RE.match(basis).group(0)
+                    strip = lambda text: [line for line in text.splitlines() if not line.startswith("description: ")]  # noqa: E731
+                    self.assertEqual(strip(current), strip(previous))
+                    self.assertIn("scientific/technical", current)
+                    continue
                 self.assertEqual(FRONT_RE.match(consumed(name)).group(0), FRONT_RE.match(basis).group(0))
 
     def test_predicate_oracle_rejects_label_only_or_weakened_routes(self) -> None:

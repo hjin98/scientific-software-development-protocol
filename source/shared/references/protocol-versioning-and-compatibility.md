@@ -46,6 +46,8 @@ publication/cutover -> representation and distribution of that accepted decision
 
 An agent, CI system, merge, branch position, or Review PASS cannot infer or self-issue stakeholder ratification.
 
+The ratification package is decision-sufficient gate evidence under the [workflow](workflow-and-workplans.md) owner's Channel C contract. It reports measures with denominators, failures, comparison with the prior accepted version, limitations and residual findings, not a PASS label alone. This changes no acceptance sequence.
+
 For a successor release:
 
 1. implement and functionally qualify version-intrinsic semantics without claiming public fallback/recovery;
@@ -139,7 +141,7 @@ Invalidated bootstrap attempts remain historical evidence only and must not be s
 
 ## Orchestration profiles
 
-Profiles remain independently version-bound. Schema identity is separate from protocol version. Supported profile identities include `sdp-protocol-5.16`, `ssdp-protocol-6.0`, `ssdp-protocol-6.1`, `ssdp-protocol-6.2`, `ssdp-protocol-6.3`, `ssdp-protocol-6.4`, and `ssdp-protocol-6.5`. The 6.x profile family may reuse the same machine stage/result schema while carrying distinct version-intrinsic prompt semantics.
+Profiles remain independently version-bound. Schema identity is separate from protocol version. Supported profile identities include `sdp-protocol-5.16`, `ssdp-protocol-6.0`, `ssdp-protocol-6.1`, `ssdp-protocol-6.2`, `ssdp-protocol-6.3`, `ssdp-protocol-6.4`, `ssdp-protocol-6.5`, `ssdp-protocol-6.6`, and `ssdp-protocol-7.0`. The 6.x and 7.0 profiles may reuse the same machine stage/result schema while carrying distinct version-intrinsic prompt semantics; 7.0 changes no lifecycle/control semantics.
 
 Core selects by declared protocol/profile identity, not a global semantic "latest". When a new profile becomes current, every older supported profile remains frozen and independently testable. Generic packages/profiles may include PEM doctrine/templates but never a live project's `PROJECT-ENGINEERING-MEMORY.md` or mutable project release-state file.
 

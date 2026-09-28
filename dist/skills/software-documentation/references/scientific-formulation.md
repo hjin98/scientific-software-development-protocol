@@ -28,6 +28,20 @@ D1 owns model/data/parameter/assumption uncertainty and structural/model discrep
 
 Scrutiny scales with consequence and decision sensitivity, not with the mere presence of a scientific claim. Durable/public conclusions deserve deeper adequacy or uncertainty work when plausible unresolved uncertainty can change interpretation, validity, acceptance, safety, or another protected outcome. When an already accepted envelope makes the conclusion insensitive to the questioned detail, use the cheapest sufficiently strong applicable check and proceed.
 
+## Scientific inspectability need (O1)
+
+When D1 authority for software producing scientific results is authored or materially revised, state proportionately the O1 content defined by [Scientific inspectability and epistemic initiative](scientific-inspectability-and-initiative.md). Part (i) is always required and covers:
+
+- the material observables and realized evidence able to support or challenge the interpretation;
+- meaningful populations/regimes;
+- the uncertainty/discrepancy views that matter;
+- what could falsify or reopen the formulation;
+- human judgments needing evidence;
+- the intended reader and their routine scientific questions;
+- where cheap, expectation records for consequential runs.
+
+"None material, because …" is valid. Part (ii) visibly marks any product inspectability surface and whether it lies within the requested deliverable. A marked item beyond the deliverable binds only after stakeholder/task-authority acceptance, never through technical Review alone. D1 accounts proportionately for exploratory/confirmatory selection effects: data-dependent selection, population reuse, search breadth, leakage and common-mode dependence. It prescribes no plots or storage unless scientifically necessary.
+
 ## D1 -> D2 handoff and Review
 
 A D2 child must be faithful to accepted D1 and abstractly adequate: it must preserve enough D1 meaning that downstream software cannot satisfy D2 while solving a scientifically different problem. Hand D2 only the minimum material invariants, assumptions, observables, conventions, validity conditions and uncertainty/error expectations; do not prescribe numerical machinery without scientific need.
