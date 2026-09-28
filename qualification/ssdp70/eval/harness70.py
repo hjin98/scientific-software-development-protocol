@@ -33,7 +33,7 @@ def load_adapter(name: str):
     if not name or any(part in {"", ".", ".."} for part in name.split(".")):
         raise core70.ContractError(f"invalid adapter name {name!r}")
     module = importlib.import_module(f"adapters.{name}")
-    for attr in ("ADAPTER_ID", "install_skills", "launch", "normalize", "final_result", "catalog_isolation", "owner_reads", "prepare_prompt", "clean_env"):
+    for attr in ("ADAPTER_ID", "install_skills", "launch", "normalize", "final_result", "catalog_isolation", "owner_reads", "prepare_prompt", "clean_env", "runtime_observation"):
         if not hasattr(module, attr):
             raise core70.ContractError(f"adapter {name!r} is missing {attr}")
     return module
@@ -258,7 +258,7 @@ def run_identity(
         "adapter_normalizer_sha256": core70.sha256_file(Path(adapter_module.__file__).resolve()),
         "normalized_event_schema": core70.SCHEMA,
         "stub_tools_sha256": core70.sha256_tree(HERE / "stub_tools"),
-        "profile_admission_sha256": core70.sha256_file(admission) if admission is not None else None,
+        "profile_admission_sha256": core70.admission_bundle_sha256(admission, role="executor") if admission is not None else None,
         "dist_tree_sha256_verified": core70.sha256_tree(dist),
     }
     identity["identity_sha256"] = core70.stable_json_sha256(identity)
@@ -294,6 +294,7 @@ def run_episode(
         adapter_sha256=adapter_sha,
         core_sha256=core_sha,
         capability_manifest_sha256=profile_bundle.capability_manifest_sha256,
+        role="executor",
     )
     if admission_errors:
         raise core70.ContractError("; ".join(admission_errors))
@@ -302,6 +303,8 @@ def run_episode(
     if not isinstance(claims, list) or not all(isinstance(x, str) and x for x in claims):
         raise core70.ContractError(f"episode {episode['id']} claims must be a list of strings")
     profile_errors = core70.profile_claim_errors(profile_bundle, claims)
+    if mode == "qualification" and profile_errors:
+        raise core70.ContractError("; ".join(profile_errors))
 
     if out.exists():
         shutil.rmtree(out)
@@ -322,6 +325,12 @@ def run_episode(
             _yaml_tree_to_json(corpus / "stubs" / episode["stub"], stub)
         log.write_text("", encoding="utf-8")
         adapter_module.install_skills(dist, project)
+        installed_skills = project / ".claude" / "skills"
+        installed_digest = core70.sha256_tree(installed_skills)
+        if installed_digest != arm["dist_tree_sha256"]:
+            raise core70.ContractError(
+                f"installed protocol package digest mismatch: {installed_digest} != {arm['dist_tree_sha256']}"
+            )
         prompt = adapter_module.prepare_prompt(profile_bundle.profile, episode.get("entry", "ordinary"), episode["prompt"])
         env = adapter_module.clean_env()
         env.update({
@@ -337,7 +346,21 @@ def run_episode(
         else:
             (out / "stderr.txt").write_text("", encoding="utf-8")
 
-        events, completeness, normalization_errors, native_event_count = adapter_module.normalize(stdout, identity["identity_sha256"])
+        normalization_context = {
+            "project": str(project),
+            "skills_root": str(installed_skills),
+            "package_identity": dict(identity["subject"]),
+        }
+        events, completeness, normalization_errors, native_event_count = adapter_module.normalize(
+            stdout, identity["identity_sha256"], normalization_context
+        )
+        runtime_observation = adapter_module.runtime_observation(stdout)
+        profile_errors.extend(core70.validate_launch_identity(profile_bundle.profile, launched.get("command_identity")))
+        profile_errors.extend(core70.validate_runtime_observation(profile_bundle, runtime_observation))
+        profile_errors.extend(core70.validate_claim_observability(events, claims))
+        owner_read_sequences = adapter_module.owner_reads(events, OWNER)
+        if any("owner-read" in str(claim).lower() for claim in claims) and not owner_read_sequences:
+            profile_errors.append("owner-read claim has no successful read of the canonical owner resource")
         _write_normalized(events, out)
         (out / "normalization-map.json").write_text(
             json.dumps({"schema": 1, "native_event_count": native_event_count, "entries": completeness}, indent=2, sort_keys=True) + "\n",
@@ -383,13 +406,14 @@ def run_episode(
             "profile_key_sha256": profile_bundle.profile_key_sha256,
             "run_identity_sha256": identity["identity_sha256"],
             "catalog_isolation": catalog,
-            "owner_read_sequences": adapter_module.owner_reads(events, OWNER),
+            "owner_read_sequences": owner_read_sequences,
             "normalized_event_count": len(events),
             "native_event_count": native_event_count,
             "evidence_state": "UNRESOLVED",
             "qualification_outcome": "NOT_EVALUATED",
             "evidence_state_reasons": [],
             "adapter_command_identity": launched.get("command_identity"),
+            "runtime_observation": runtime_observation,
         }
         (out / "summary.json").write_text(json.dumps(preliminary, indent=2, sort_keys=True, default=str) + "\n", encoding="utf-8")
 
@@ -416,6 +440,8 @@ def run_episode(
             "normalization_completeness_errors": completeness_errors,
         })
         (out / "summary.json").write_text(json.dumps(preliminary, indent=2, sort_keys=True, default=str) + "\n", encoding="utf-8")
+        if state == "COMPLETE_ADMISSIBLE":
+            core70.write_evidence_integrity(out, requirements)
         return preliminary
 
 
@@ -497,7 +523,7 @@ def main(argv: list[str] | None = None) -> int:
             pair_order=[arm_name],
         )
         target = args.out / f"{args.id}-{arm_name}-r{args.rep}"
-        if core70.cache_valid(target, identity):
+        if core70.cache_valid(target, identity, requirements):
             summary = core70.load_json(target / "summary.json")
         else:
             summary = run_episode(
@@ -563,7 +589,7 @@ def main(argv: list[str] | None = None) -> int:
                 rep=rep,
                 pair_order=item["order"],
             )
-            if core70.cache_valid(target, identity):
+            if core70.cache_valid(target, identity, requirements):
                 summary = core70.load_json(target / "summary.json")
                 results.append({"run": target.name, "evidence_state": summary["evidence_state"], "cache": "reused-exact"})
                 continue

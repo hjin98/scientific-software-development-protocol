@@ -29,6 +29,7 @@ STANDARD_EVIDENCE = (
     "capability-manifest-snapshot.json",
     "profile-admission.json",
     "requirements-snapshot.json",
+    "evidence-integrity.json",
     "final-report.md",
     "diff.patch",
     "side-effects.jsonl",
@@ -62,7 +63,7 @@ def load_adapter(name: str):
     if not name or any(part in {"", ".", ".."} for part in name.split(".")):
         raise core70.ContractError(f"invalid evaluator adapter name {name!r}")
     module = importlib.import_module(f"adapters.{name}")
-    for attr in ("ADAPTER_ID", "launch", "clean_env"):
+    for attr in ("ADAPTER_ID", "launch", "clean_env", "runtime_observation"):
         if not hasattr(module, attr):
             raise core70.ContractError(f"evaluator adapter {name!r} is missing {attr}")
     return module
@@ -184,55 +185,66 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--shared-rubric", type=Path, default=None)
     parser.add_argument("--evaluator-profile", type=Path, required=True)
     parser.add_argument("--evaluator-capabilities", type=Path, required=True)
+    parser.add_argument("--evaluator-admission", type=Path, required=True)
     parser.add_argument("--adapter", default="claude")
     args = parser.parse_args(argv)
 
     summary = core70.load_json(args.run / "summary.json")
-    if not isinstance(summary, dict):
-        raise core70.ContractError("run summary is malformed")
+    run_identity = core70.load_json(args.run / "run-identity.json")
+    if not isinstance(summary, dict) or not isinstance(run_identity, dict):
+        raise core70.ContractError("run summary or identity is malformed")
     expected_episode = summary.get("episode")
-    if summary.get("evidence_state") != "COMPLETE_ADMISSIBLE":
+    req_payload = core70.load_json(args.run / "requirements-snapshot.json")
+    identity_requirements = run_identity.get("requirements") if isinstance(run_identity.get("requirements"), dict) else {}
+    expected_manifest_digests = {
+        "required_artifacts": identity_requirements.get("required_artifacts_sha256"),
+        "required_oracles": identity_requirements.get("required_oracles_sha256"),
+        "expected_scoring_items": identity_requirements.get("expected_scoring_items_sha256"),
+    }
+    try:
+        requirements = core70.requirements_from_snapshot(req_payload, expected_manifest_digests)
+        run_errors = core70.validate_complete_run(args.run, run_identity, requirements)
+    except core70.ContractError as exc:
+        requirements = None
+        run_errors = [str(exc)]
+    if summary.get("evidence_state") != "COMPLETE_ADMISSIBLE" or run_errors:
         output = {
             "assessment_status": "NOT_EVALUATED",
-            "evidence_state": summary.get("evidence_state"),
+            "evidence_state": "MALFORMED_EVIDENCE_OR_ASSESSMENT" if run_errors else summary.get("evidence_state"),
             "qualification_outcome": "NOT_EVALUATED",
-            "errors": ["only COMPLETE_ADMISSIBLE run evidence may enter assessment"],
+            "errors": run_errors or ["only COMPLETE_ADMISSIBLE run evidence may enter assessment"],
         }
         (args.run / "assessment.json").write_text(json.dumps(output, indent=2, sort_keys=True) + "\n", encoding="utf-8")
         print(json.dumps(output, indent=2))
         return 2
+    assert requirements is not None
 
-    req_payload = core70.load_json(args.run / "requirements-snapshot.json")
-    requirements = core70.requirements_from_snapshot(req_payload)
     evaluator_bundle = core70.load_profile(args.evaluator_profile, args.evaluator_capabilities)
+    evaluator_profile_errors = core70.profile_claim_errors(evaluator_bundle, [])
+    if evaluator_profile_errors:
+        raise core70.ContractError("; ".join(evaluator_profile_errors))
     adapter = load_adapter(args.adapter)
     if evaluator_bundle.profile["adapter_id"] != adapter.ADAPTER_ID:
         raise core70.ContractError(
             f"evaluator profile adapter_id {evaluator_bundle.profile['adapter_id']!r} != {adapter.ADAPTER_ID!r}"
         )
+    evaluator_adapter_sha = core70.sha256_file(Path(adapter.__file__).resolve())
+    core_sha = core70.sha256_file(Path(core70.__file__).resolve())
+    admission_errors = core70.validate_profile_admission(
+        args.evaluator_admission,
+        mode="qualification",
+        profile_key_sha256=evaluator_bundle.profile_key_sha256,
+        adapter_sha256=evaluator_adapter_sha,
+        core_sha256=core_sha,
+        capability_manifest_sha256=evaluator_bundle.capability_manifest_sha256,
+        role="evaluator",
+    )
+    if admission_errors:
+        raise core70.ContractError("; ".join(admission_errors))
 
-    run_identity = core70.load_json(args.run / "run-identity.json")
     key_digest = core70.sha256_tree(args.keys)
     rubric_digest = core70.sha256_file(args.shared_rubric) if args.shared_rubric is not None else None
-    assessment_identity = {
-        "schema": 1,
-        "run_identity_sha256": run_identity.get("identity_sha256") if isinstance(run_identity, dict) else None,
-        "run_evidence_state": summary["evidence_state"],
-        "evaluator_profile_key_sha256": evaluator_bundle.profile_key_sha256,
-        "evaluator_profile_document_sha256": core70.sha256_file(args.evaluator_profile),
-        "evaluator_capability_manifest_sha256": evaluator_bundle.capability_manifest_sha256,
-        "evaluator_adapter_sha256": core70.sha256_file(Path(adapter.__file__).resolve()),
-        "evaluator_wrapper_sha256": core70.sha256_file(Path(__file__).resolve()),
-        "qualification_core_sha256": core70.sha256_file(Path(core70.__file__).resolve()),
-        "custodian_key_tree_sha256": key_digest,
-        "rubric_sha256": rubric_digest,
-        "assessment_schema": 1,
-        "expected_scoring_items_sha256": requirements.scoring_manifest_digest,
-    }
-    assessment_identity["identity_sha256"] = core70.stable_json_sha256(assessment_identity)
-    (args.run / "assessment-identity.json").write_text(
-        json.dumps(assessment_identity, indent=2, sort_keys=True) + "\n", encoding="utf-8"
-    )
+    shutil.copy2(args.evaluator_admission, args.run / "assessment-profile-admission.json")
 
     with tempfile.TemporaryDirectory(prefix="ssdp70-assess-") as tmp:
         root = Path(tmp)
@@ -246,8 +258,34 @@ def main(argv: list[str] | None = None) -> int:
         (args.run / "assessment-stderr.txt").write_text(launched["stderr"], encoding="utf-8")
         text, final_event = result_text(launched["stdout"])
 
-    status = "VALID"
-    errors: list[str] = []
+    runtime_observation = adapter.runtime_observation(launched["stdout"])
+    runtime_errors = core70.validate_launch_identity(evaluator_bundle.profile, launched.get("command_identity"))
+    runtime_errors.extend(core70.validate_runtime_observation(evaluator_bundle, runtime_observation))
+    assessment_identity = {
+        "schema": 1,
+        "run_identity_sha256": run_identity.get("identity_sha256"),
+        "run_evidence_state": summary["evidence_state"],
+        "evaluator_profile_key_sha256": evaluator_bundle.profile_key_sha256,
+        "evaluator_profile_document_sha256": core70.sha256_file(args.evaluator_profile),
+        "evaluator_capability_manifest_sha256": evaluator_bundle.capability_manifest_sha256,
+        "evaluator_adapter_sha256": evaluator_adapter_sha,
+        "evaluator_wrapper_sha256": core70.sha256_file(Path(__file__).resolve()),
+        "qualification_core_sha256": core_sha,
+        "evaluator_admission_sha256": core70.admission_bundle_sha256(args.evaluator_admission, role="evaluator"),
+        "evaluator_runtime_observation": runtime_observation,
+        "evaluator_command_identity": launched.get("command_identity"),
+        "custodian_key_tree_sha256": key_digest,
+        "rubric_sha256": rubric_digest,
+        "assessment_schema": 1,
+        "expected_scoring_items_sha256": requirements.scoring_manifest_digest,
+    }
+    assessment_identity["identity_sha256"] = core70.stable_json_sha256(assessment_identity)
+    (args.run / "assessment-identity.json").write_text(
+        json.dumps(assessment_identity, indent=2, sort_keys=True) + "\n", encoding="utf-8"
+    )
+
+    status = "INADMISSIBLE" if runtime_errors else "VALID"
+    errors: list[str] = list(runtime_errors)
     verdict: Any = None
     if launched["returncode"] != 0 or final_event is None or final_event.get("is_error"):
         status = "EXECUTION_ERROR"
@@ -286,7 +324,11 @@ def main(argv: list[str] | None = None) -> int:
     else:
         output = {
             "assessment_status": status,
-            "evidence_state": "MALFORMED_EVIDENCE_OR_ASSESSMENT" if status != "EXECUTION_ERROR" else "EXECUTION_ERROR",
+            "evidence_state": (
+                "INADMISSIBLE" if status == "INADMISSIBLE"
+                else "MALFORMED_EVIDENCE_OR_ASSESSMENT" if status != "EXECUTION_ERROR"
+                else "EXECUTION_ERROR"
+            ),
             "qualification_outcome": "NOT_EVALUATED",
             "assessment_identity_sha256": assessment_identity["identity_sha256"],
             "errors": errors,
