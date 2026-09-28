@@ -97,7 +97,16 @@ def stable_json_sha256(value: object) -> str:
     return hashlib.sha256(payload).hexdigest()
 
 
-def run_identity(corpus: Path, episode: dict, arm: str, dist: Path, model: str, oracles: Path | None) -> dict:
+def run_identity(
+    corpus: Path,
+    episode: dict,
+    arm: str,
+    dist: Path,
+    model: str,
+    oracles: Path | None,
+    rep: int = 0,
+    pair_order: list[str] | None = None,
+) -> dict:
     fixture = corpus / "fixtures" / episode["fixture"]
     stub = corpus / "stubs" / episode["stub"] if episode.get("stub") else None
     episode_oracles = oracles / episode["id"] if oracles is not None else None
@@ -106,6 +115,8 @@ def run_identity(corpus: Path, episode: dict, arm: str, dist: Path, model: str, 
         "episode": episode["id"],
         "arm": arm,
         "model": model,
+        "rep": rep,
+        "pair_order": pair_order or [arm],
         "episode_config_sha256": stable_json_sha256(episode),
         "manifest_sha256": sha256_file(corpus / "manifest.yaml"),
         "fixture_tree_sha256": sha256_tree(fixture),
@@ -269,7 +280,7 @@ def run_episode(
     identity: dict | None = None,
     pair_order: list[str] | None = None,
 ) -> dict:
-    identity = identity or run_identity(corpus, episode, arm, dist, model, oracles)
+    identity = identity or run_identity(corpus, episode, arm, dist, model, oracles, pair_order=pair_order)
     if out.exists():
         shutil.rmtree(out)
     out.mkdir(parents=True)
@@ -428,7 +439,7 @@ def main(argv: list[str] | None = None) -> int:
     if args.cmd == "episode":
         (arm, dist), = arms.items()
         episode = episodes[args.id]
-        identity = run_identity(args.corpus, episode, arm, dist, args.model, args.oracles)
+        identity = run_identity(args.corpus, episode, arm, dist, args.model, args.oracles, rep=args.rep, pair_order=[arm])
         summary = run_episode(
             args.corpus,
             episode,
@@ -465,7 +476,10 @@ def main(argv: list[str] | None = None) -> int:
         # Sequential by construction: the next arm starts only after the prior arm completes.
         for arm in item["order"]:
             target = args.out / f"{episode['id']}-{arm}-r{rep}"
-            identity = run_identity(args.corpus, episode, arm, arms[arm], args.model, args.oracles)
+            identity = run_identity(
+                args.corpus, episode, arm, arms[arm], args.model, args.oracles,
+                rep=rep, pair_order=item["order"],
+            )
             if cache_valid(target, identity):
                 results.append((target.name, "cached-exact"))
                 continue
