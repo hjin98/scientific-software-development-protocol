@@ -935,8 +935,10 @@ def validate_launch_identity(profile: dict[str, Any], command_identity: Any) -> 
     if isinstance(containment, dict) and containment.get("kind") == "claude-code-restricted-sandbox-v1":
         if command_identity.get("restricted") is not True:
             errors.append("Claude launch did not assert restricted containment")
-        if command_identity.get("setting_sources") != ["project"]:
-            errors.append("Claude launch did not isolate settings to the run-owned project")
+        if not isinstance(command_identity.get("settings_file"), str) or not command_identity.get("settings_file"):
+            errors.append("Claude launch did not bind explicit run-owned settings")
+        if not _valid_sha256(command_identity.get("settings_file_sha256")):
+            errors.append("Claude launch did not bind the explicit settings bytes")
     if "native_allowed_tools" in profile and command_identity.get("allowed_tools") != profile.get("native_allowed_tools"):
         errors.append("launched allowed-tool set does not match frozen execution profile")
     if "native_disallowed_tools" in profile and command_identity.get("disallowed_tools") != profile.get("native_disallowed_tools"):

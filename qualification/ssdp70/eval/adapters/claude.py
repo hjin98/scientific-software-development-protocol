@@ -31,13 +31,16 @@ NETWORK_TOOLS = {"WebFetch", "WebSearch"}
 DELEGATE_TOOLS = {"Agent"}
 SAFE_ENV_KEYS = {
     "PATH", "LANG", "LC_ALL", "LC_CTYPE", "TERM", "TMPDIR", "TMP", "TEMP",
-    "SSL_CERT_FILE", "SSL_CERT_DIR",
+    "SSL_CERT_FILE", "SSL_CERT_DIR", "CLAUDE_CODE_SUBPROCESS_ENV_SCRUB", "DISABLE_AUTOUPDATER",
 }
 
 
 def clean_env() -> dict[str, str]:
     """Return an explicit non-credential allow-list; never inherit host HOME/tokens."""
-    return {key: os.environ[key] for key in SAFE_ENV_KEYS if key in os.environ}
+    env = {key: os.environ[key] for key in SAFE_ENV_KEYS if key in os.environ}
+    env["CLAUDE_CODE_SUBPROCESS_ENV_SCRUB"] = "1"
+    env["DISABLE_AUTOUPDATER"] = "1"
+    return env
 
 
 def _containment_document(profile: dict[str, Any], project: Path, env: dict[str, str]) -> dict[str, Any]:
@@ -55,19 +58,40 @@ def _containment_document(profile: dict[str, Any], project: Path, env: dict[str,
     allow_sockets = [str(Path(mediator).resolve())] if mediator else []
     write_policy = str(policy.get("filesystem_write") or "")
     allow_write = [] if write_policy.startswith("deny") else [str(project_resolved)]
+    host_home_raw = os.environ.get("HOME")
+    denied_roots = {str(project_resolved.parent), "/root", "/run/user"}
+    if host_home_raw:
+        denied_roots.add(str(Path(host_home_raw).resolve()))
+    deny_paths = sorted(path for path in denied_roots if path != str(project_resolved))
     settings = {
         "sandbox": {
             "enabled": True,
+            "failIfUnavailable": True,
             "autoAllowBashIfSandboxed": True,
             "allowUnsandboxedCommands": False,
+            "excludedCommands": [],
+            "enableWeakerNestedSandbox": False,
             "network": {
                 "allowedDomains": [],
                 "allowUnixSockets": allow_sockets,
+                "allowAllUnixSockets": False,
                 "allowLocalBinding": False,
             },
             "filesystem": {
+                "denyRead": deny_paths,
                 "allowRead": [str(project_resolved)],
+                "denyWrite": deny_paths,
                 "allowWrite": allow_write,
+            },
+            "credentials": {
+                "envVars": [
+                    {"name": name, "mode": "deny"}
+                    for name in (
+                        "ANTHROPIC_API_KEY", "ANTHROPIC_AUTH_TOKEN", "AWS_ACCESS_KEY_ID",
+                        "AWS_SECRET_ACCESS_KEY", "AWS_SESSION_TOKEN", "GITHUB_TOKEN",
+                        "GH_TOKEN", "SSH_AUTH_SOCK",
+                    )
+                ],
             },
         },
         "env": {
@@ -82,6 +106,7 @@ def _containment_document(profile: dict[str, Any], project: Path, env: dict[str,
             "runtime_home": str(home),
             "mediator_socket": allow_sockets[0] if allow_sockets else None,
             "native_network": "deny",
+            "filesystem_deny_roots": deny_paths,
             "filesystem_read": [str(project_resolved)],
             "filesystem_write": allow_write,
             "host_home_inherited": False,
@@ -160,8 +185,8 @@ def launch(profile: dict[str, Any], prompt: str, project: Path, env: dict[str, s
         str(model),
         "--max-turns",
         str(budgets.get("max_turns", 60)),
-        "--setting-sources",
-        "project",
+        "--settings",
+        str(project / ".claude" / "settings.json"),
         "--restricted",
         "--permission-mode",
         str(profile.get("permission_mode", "acceptEdits")),
@@ -196,7 +221,8 @@ def launch(profile: dict[str, Any], prompt: str, project: Path, env: dict[str, s
             "tools": tools,
             "allowed_tools": allowed_tools,
             "disallowed_tools": disallowed_tools,
-            "setting_sources": ["project"],
+            "settings_file": str((project / ".claude" / "settings.json").resolve()),
+            "settings_file_sha256": hashlib.sha256((project / ".claude" / "settings.json").read_bytes()).hexdigest(),
             "restricted": True,
         },
     }

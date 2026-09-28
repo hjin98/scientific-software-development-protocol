@@ -113,7 +113,12 @@ class SurfaceAndContainmentHostileTests(unittest.TestCase):
             "LANG": "C.UTF-8",
         }, clear=True):
             env = claude.clean_env()
-        self.assertEqual(env, {"PATH": "/bin", "LANG": "C.UTF-8"})
+        self.assertEqual(env, {
+            "PATH": "/bin",
+            "LANG": "C.UTF-8",
+            "CLAUDE_CODE_SUBPROCESS_ENV_SCRUB": "1",
+            "DISABLE_AUTOUPDATER": "1",
+        })
 
     def test_launch_refuses_missing_containment_configuration_before_subprocess(self):
         profile = json.loads(self.profile_path.read_text(encoding="utf-8"))
@@ -143,6 +148,8 @@ class SurfaceAndContainmentHostileTests(unittest.TestCase):
             document = claude.realize_containment(profile, project, env)
             self.assertEqual(document["settings"]["sandbox"]["filesystem"]["allowRead"], [str(project.resolve())])
             self.assertEqual(document["settings"]["sandbox"]["filesystem"]["allowWrite"], [str(project.resolve())])
+            self.assertIn(str(root.resolve()), document["settings"]["sandbox"]["filesystem"]["denyRead"])
+            self.assertIn(str(root.resolve()), document["settings"]["sandbox"]["filesystem"]["denyWrite"])
             self.assertEqual(document["settings"]["sandbox"]["network"]["allowedDomains"], [])
             self.assertEqual(document["settings"]["sandbox"]["network"]["allowUnixSockets"], [str(mediator.resolve())])
             self.assertNotIn("SSDP70_STUB_DIR", env)
