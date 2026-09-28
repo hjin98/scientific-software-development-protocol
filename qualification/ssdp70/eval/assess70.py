@@ -230,6 +230,7 @@ def main(argv: list[str] | None = None) -> int:
         )
     evaluator_adapter_sha = core70.sha256_file(Path(adapter.__file__).resolve())
     core_sha = core70.sha256_file(Path(core70.__file__).resolve())
+    evaluator_admission_before = core70.admission_bundle_sha256(args.evaluator_admission, role="evaluator")
     admission_errors = core70.validate_profile_admission(
         args.evaluator_admission,
         mode="qualification",
@@ -241,15 +242,20 @@ def main(argv: list[str] | None = None) -> int:
     )
     if admission_errors:
         raise core70.ContractError("; ".join(admission_errors))
+    evaluator_admission_after = core70.admission_bundle_sha256(args.evaluator_admission, role="evaluator")
+    if evaluator_admission_after != evaluator_admission_before:
+        raise core70.ContractError("evaluator profile-admission bundle changed during validation")
 
     key_digest = core70.sha256_tree(args.keys)
     rubric_digest = core70.sha256_file(args.shared_rubric) if args.shared_rubric is not None else None
-    core70.snapshot_profile_admission(
+    evaluator_admission_snapshot = core70.snapshot_profile_admission(
         args.evaluator_admission,
         args.run,
         role="evaluator",
         prefix="assessment-profile-admission",
     )
+    if evaluator_admission_snapshot.get("admission_bundle_sha256") != evaluator_admission_after:
+        raise core70.ContractError("evaluator profile-admission bundle changed before assessment launch")
 
     with tempfile.TemporaryDirectory(prefix="ssdp70-assess-") as tmp:
         root = Path(tmp)
@@ -276,7 +282,7 @@ def main(argv: list[str] | None = None) -> int:
         "evaluator_adapter_sha256": evaluator_adapter_sha,
         "evaluator_wrapper_sha256": core70.sha256_file(Path(__file__).resolve()),
         "qualification_core_sha256": core_sha,
-        "evaluator_admission_sha256": core70.admission_bundle_sha256(args.evaluator_admission, role="evaluator"),
+        "evaluator_admission_sha256": evaluator_admission_after,
         "evaluator_runtime_observation": runtime_observation,
         "evaluator_command_identity": launched.get("command_identity"),
         "custodian_key_tree_sha256": key_digest,
