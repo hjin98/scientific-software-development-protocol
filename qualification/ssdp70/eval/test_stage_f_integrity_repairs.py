@@ -147,6 +147,25 @@ class SurfaceAndContainmentHostileTests(unittest.TestCase):
                 claude.launch(profile, "x", root, env)
         self.assertIn("containment settings are absent", str(caught.exception))
 
+    def test_evaluator_realization_is_read_only_and_network_denied(self):
+        profile = json.loads((HERE / "profiles" / "claude-evaluator-readonly.template.json").read_text(encoding="utf-8"))
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            bundle = root / "bundle"
+            runtime_home = root / "runtime-home"
+            bundle.mkdir()
+            runtime_home.mkdir()
+            env = claude.clean_env()
+            env.update({"HOME": str(runtime_home)})
+            document = claude.realize_containment(profile, bundle, env)
+            sandbox = document["settings"]["sandbox"]
+            self.assertEqual(sandbox["filesystem"]["allowWrite"], [])
+            self.assertEqual(sandbox["network"]["allowedDomains"], [])
+            self.assertEqual(sandbox["network"]["allowUnixSockets"], [])
+            self.assertTrue(sandbox["failIfUnavailable"])
+            self.assertFalse(sandbox["allowUnsandboxedCommands"])
+            self.assertEqual(claude.validate_containment_realization(profile, bundle, env), [])
+
     def test_direct_stub_and_log_paths_are_not_exposed_to_executor(self):
         profile = json.loads(self.profile_path.read_text(encoding="utf-8"))
         with tempfile.TemporaryDirectory() as td:
