@@ -6,6 +6,7 @@ import argparse
 import hashlib
 import json
 import subprocess
+from decimal import Decimal
 from pathlib import Path
 
 
@@ -19,6 +20,7 @@ def main() -> None:
     parser.add_argument("--source-ref", required=True)
     parser.add_argument("--draft", type=Path, required=True)
     parser.add_argument("--assembled", type=Path, required=True)
+    parser.add_argument("--backstop-multiplier", type=Decimal, default=Decimal("1.10"))
     args = parser.parse_args()
 
     base = subprocess.check_output(
@@ -43,6 +45,9 @@ def main() -> None:
     addition_bytes = len((route + "\n\n" + clause + "\n\n").encode("utf-8"))
     description_delta = len(description.encode("utf-8")) - len(description_line.removeprefix("description: ").encode("utf-8"))
     assert len(payload) == base_bytes + addition_bytes + description_delta
+    historical_65_t1_t8_bytes = 8360
+    cap = Decimal(historical_65_t1_t8_bytes) * args.backstop_multiplier
+    margin = 512
     print(json.dumps({
         "source_ref": args.source_ref,
         "baseline_bytes": base_bytes,
@@ -56,9 +61,12 @@ def main() -> None:
         "gross_addition_bytes": addition_bytes,
         "assembled_bytes": len(payload),
         "assembled_sha256": hashlib.sha256(payload).hexdigest(),
-        "historical_t1_t8_planning_cap_bytes": 9196,
-        "predeclared_margin_bytes": 512,
-        "historical_t1_t8_planning_static_limit_bytes": 8684,
+        "historical_t1_t8_65_baseline_bytes": historical_65_t1_t8_bytes,
+        "backstop_multiplier": str(args.backstop_multiplier),
+        "historical_t1_t8_planning_cap_bytes": str(cap),
+        "predeclared_margin_bytes": margin,
+        "historical_t1_t8_planning_static_limit_bytes": str(cap - margin),
+        "historical_t1_t8_cap_headroom_bytes": str(cap - len(payload)),
     }, indent=2))
 
 

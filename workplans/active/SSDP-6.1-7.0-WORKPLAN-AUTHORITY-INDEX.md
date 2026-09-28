@@ -36,13 +36,17 @@ The stakeholder subsequently accepted the first three minor-wording repairs and 
 
 The stakeholder then authorized one narrow §8.3 label-table exception for O1, and that exact workplan amendment passed fresh independent Review: `qualification/ssdp70/WORKPLAN-REVIEW-PROTOCOL-7.0-69C6383-PASS.md`. The O1 Challenge is resolved for this cycle. One bounded compressed D4 draft passed independent fidelity/attribution checking but still breached the static fixed-cost backstop; `qualification/ssdp70/STAGE-A-COMPRESSION-BACKSTOP-STOP-2026-09-28.md` is the current Stage A stop record. The preceding O1 stop record remains historical.
 
+The stakeholder then relaxed only the Protocol 7 fixed-cost multiplier to 2.0 × fresh paired accepted-6.5 median on each T1/T7/T8 route, preserving the 512 B static margin and other conditions (`qualification/ssdp70/STAKEHOLDER-DECISION-2026-09-28-PROTOCOL-7.0-BACKSTOP-RELAXATION.md`). The substantive handoff overlay passed fresh independent Review at `qualification/ssdp70/WORKPLAN-REVIEW-PROTOCOL-7.0-66F2943-PASS.md`, binding handoff SHA-256 `66f29437af5bde3381a66c8a7609ef3ee87b230f32c210eb7fbf1858e22d78b1` and decision SHA-256 `b1ae718c37e17c085146eac085f69e3fc7b6ae5825003fe2c0be746d86cc85e2`. The prior static-cost stop is historical; Stage A is resumed but not closed. Fresh paired live measurements and all later stage gates remain open.
+
+The first Stage A qualification-framework draft failed its independent pre-run check on three material threshold/exposure gaps. `qualification/ssdp70/STAGE-A-CONTRACT-NO-PASS-STOP-2026-09-28.md` is the current stop record. Stage A's basis map and contract are drafts; no §11 freeze, candidate run or Stage B work has occurred. The workplan-level Review PASS above does not pass this later contract.
+
 ```text
-PROTOCOL 7 WORKPLAN DESIGN REVIEW: PASS on current handoff SHA-256 69c6383b65e2a2badbafe2a4f148d0aca1bce03cd7d09889b9a037e844b07abd (O1 label exception reviewed; earlier Minor 4 open)
-PROTOCOL 7 D4: stakeholder-authorized Stages A-F; Stage A STOPPED before Stage B on static fixed-cost backstop breach; no active Serious Challenge
+PROTOCOL 7 WORKPLAN DESIGN REVIEW: PASS on current handoff SHA-256 66f29437af5bde3381a66c8a7609ef3ee87b230f32c210eb7fbf1858e22d78b1 plus stakeholder decision SHA-256 b1ae718c37e17c085146eac085f69e3fc7b6ae5825003fe2c0be746d86cc85e2 (earlier Minor 4 open)
+PROTOCOL 7 D4: stakeholder-authorized Stages A-F; Stage A STOPPED before Stage B on independent qualification-framework NO-PASS; no active Serious Challenge
 PROTOCOL 7 SD-B: SUPERSEDE (2026-09-27); size budget is a compression target, never a reason to break a lossless condition;
-  CONFIRMED with corrected premise; backstop median <= 1.10 x accepted 6.5 median on T1/T7/T8 (escalation trigger);
-  current independently fidelity-checked compressed D4 draft 14,331 B exceeds the historical 9,196 B planning cap and predeclared margin;
-  stakeholder escalation is active before Stage B; fresh paired live medians remain unrun
+  2026-09-28 stakeholder decision supersedes the backstop multiplier with 2.0 x fresh paired accepted 6.5 median on T1/T7/T8;
+  current independently fidelity-checked compressed D4 draft 14,331 B is below the historical 16,720 B planning cap and leaves more than the predeclared 512 B margin;
+  fresh paired live medians remain unrun
 STAKEHOLDER DECISIONS: section 4 rule ACCEPTED; SC1 claim-integrity floor ACCEPTED; SC2 Option B SELECTED (2026-09-27)
 ```
 
