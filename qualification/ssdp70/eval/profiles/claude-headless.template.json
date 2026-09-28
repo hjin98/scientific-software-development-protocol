@@ -1,0 +1,78 @@
+{
+  "adapter_id": "claude-stream-json-v1",
+  "agent_model": "claude-sonnet-5",
+  "budgets": {
+    "max_turns": 60,
+    "timeout_s": 3600
+  },
+  "containment_policy": {
+    "kind": "requires-independent-pre-effect-admission",
+    "note": "Qualification admission must prove substrate enforcement; command-text inspection is not sufficient."
+  },
+  "credential_service_account_policy": {
+    "ambient_credentials": "deny-or-mediate-before-admission"
+  },
+  "install_mechanism": "project-local skill package",
+  "native_allowed_tools": [
+    "Skill",
+    "Read",
+    "Glob",
+    "Grep",
+    "Edit",
+    "Write",
+    "TodoWrite",
+    "Bash(python:*)",
+    "Bash(python3:*)",
+    "Bash(git:*)",
+    "Bash(ls:*)",
+    "Bash(cat:*)",
+    "Bash(grep:*)",
+    "Bash(find:*)",
+    "Bash(head:*)",
+    "Bash(tail:*)",
+    "Bash(wc:*)",
+    "Bash(sed -n:*)"
+  ],
+  "native_disallowed_tools": [
+    "Agent",
+    "WebFetch",
+    "WebSearch"
+  ],
+  "network_external_write_policy": {
+    "external_write": "sandbox-or-deny",
+    "network": "deny"
+  },
+  "permission_mode": "acceptEdits",
+  "pinned_root_instruction_template": "Use the {root} skill. {prompt}",
+  "profile_id": "claude-headless-reference-template",
+  "provider_managed_unknowns": [
+    {
+      "classification": "arm-neutral",
+      "name": "provider-backend-shard",
+      "sensitive_claims": [
+        "*"
+      ]
+    },
+    {
+      "classification": "uncontrolled",
+      "name": "runtime-build-until-frozen-by-environment",
+      "sensitive_claims": [
+        "*"
+      ]
+    }
+  ],
+  "provider_runtime": {
+    "executable": "claude",
+    "provider": "anthropic",
+    "runtime": "claude-code",
+    "version": "MUST-BE-FROZEN-BEFORE-QUALIFICATION"
+  },
+  "reasoning_configuration": {
+    "effort": null,
+    "source": "provider-default-until-frozen"
+  },
+  "schema": 1,
+  "workspace_realization": {
+    "kind": "fresh-temporary-project"
+  }
+}

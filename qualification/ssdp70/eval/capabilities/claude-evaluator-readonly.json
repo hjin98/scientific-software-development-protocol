@@ -1,0 +1,46 @@
+{
+  "capabilities": {
+    "catalog_root_activation": {
+      "decision": "DENY",
+      "scope": "no skills/root activation during assessment"
+    },
+    "credential_secret_service_account": {
+      "decision": "DENY",
+      "scope": "all ambient credentials"
+    },
+    "delegation": {
+      "decision": "DENY",
+      "scope": "all delegation"
+    },
+    "external_mutation": {
+      "decision": "DENY",
+      "scope": "all external mutation"
+    },
+    "issue_evidence_store": {
+      "decision": "ALLOW",
+      "scope": "read-only copied evidence bundle"
+    },
+    "network_remote_service": {
+      "decision": "DENY",
+      "scope": "all network access"
+    },
+    "process_execution": {
+      "decision": "DENY",
+      "scope": "all subprocess execution"
+    },
+    "repository_object_store": {
+      "decision": "DENY",
+      "scope": "no repository/object-store access"
+    },
+    "workspace_mutation": {
+      "decision": "DENY",
+      "scope": "all evidence-bundle mutation"
+    },
+    "workspace_read_search_list": {
+      "decision": "ALLOW",
+      "scope": "temporary copied evidence bundle only"
+    }
+  },
+  "manifest_id": "claude-evaluator-readonly-v1",
+  "schema": 1
+}
