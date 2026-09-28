@@ -61,7 +61,7 @@ class PortableCoreTests(unittest.TestCase):
         bundle = core70.load_profile(self.profile, self.capabilities)
         root = self.root / f"{role}-admission"
         evidence = root / "evidence"
-        evidence.mkdir(parents=True)
+        evidence.mkdir(parents=True, exist_ok=True)
         names = core70.EXECUTOR_ADMISSION_CHECKS if role == "executor" else core70.EVALUATOR_ADMISSION_CHECKS
         checks = {}
         for name in names:
