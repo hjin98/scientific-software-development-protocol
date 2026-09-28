@@ -120,16 +120,23 @@ def realize_containment(profile: dict[str, Any], project: Path, env: dict[str, s
     """Write run-owned sandbox settings before any executor/evaluator effect."""
     document = _containment_document(profile, project, env)
     settings = project / ".claude" / "settings.json"
+    mcp_config = project / ".claude" / "mcp-empty.json"
     settings.parent.mkdir(parents=True, exist_ok=True)
     settings.write_text(json.dumps(document["settings"], indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    mcp_config.write_text(json.dumps({"mcpServers": {}}, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    document["realization"]["mcp_config"] = str(mcp_config.resolve())
+    document["realization"]["mcp_servers"] = []
     return document
 
 
 def validate_containment_realization(profile: dict[str, Any], project: Path, env: dict[str, str]) -> list[str]:
     expected = _containment_document(profile, project, env)
     settings = project / ".claude" / "settings.json"
+    mcp_config = project / ".claude" / "mcp-empty.json"
     if not settings.is_file():
         return ["required project containment settings are absent"]
+    if not mcp_config.is_file():
+        return ["required empty MCP configuration is absent"]
     try:
         actual = json.loads(settings.read_text(encoding="utf-8"))
     except (OSError, json.JSONDecodeError):
@@ -137,6 +144,13 @@ def validate_containment_realization(profile: dict[str, Any], project: Path, env
     errors: list[str] = []
     if actual != expected["settings"]:
         errors.append("project containment settings do not match the frozen realization")
+    try:
+        mcp_actual = json.loads(mcp_config.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        errors.append("required empty MCP configuration is unreadable or malformed")
+    else:
+        if mcp_actual != {"mcpServers": {}}:
+            errors.append("MCP configuration is not empty")
     forbidden = [
         key for key in env
         if key not in SAFE_ENV_KEYS
@@ -187,6 +201,9 @@ def launch(profile: dict[str, Any], prompt: str, project: Path, env: dict[str, s
         str(budgets.get("max_turns", 60)),
         "--settings",
         str(project / ".claude" / "settings.json"),
+        "--mcp-config",
+        str(project / ".claude" / "mcp-empty.json"),
+        "--strict-mcp-config",
         "--restricted",
         "--permission-mode",
         str(profile.get("permission_mode", "acceptEdits")),
@@ -223,6 +240,9 @@ def launch(profile: dict[str, Any], prompt: str, project: Path, env: dict[str, s
             "disallowed_tools": disallowed_tools,
             "settings_file": str((project / ".claude" / "settings.json").resolve()),
             "settings_file_sha256": hashlib.sha256((project / ".claude" / "settings.json").read_bytes()).hexdigest(),
+            "mcp_config_file": str((project / ".claude" / "mcp-empty.json").resolve()),
+            "mcp_config_sha256": hashlib.sha256((project / ".claude" / "mcp-empty.json").read_bytes()).hexdigest(),
+            "strict_mcp_config": True,
             "restricted": True,
         },
     }

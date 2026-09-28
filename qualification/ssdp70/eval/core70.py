@@ -939,6 +939,12 @@ def validate_launch_identity(profile: dict[str, Any], command_identity: Any) -> 
             errors.append("Claude launch did not bind explicit run-owned settings")
         if not _valid_sha256(command_identity.get("settings_file_sha256")):
             errors.append("Claude launch did not bind the explicit settings bytes")
+        if command_identity.get("strict_mcp_config") is not True:
+            errors.append("Claude launch did not require strict MCP configuration")
+        if not isinstance(command_identity.get("mcp_config_file"), str) or not command_identity.get("mcp_config_file"):
+            errors.append("Claude launch did not bind an explicit empty MCP configuration")
+        if not _valid_sha256(command_identity.get("mcp_config_sha256")):
+            errors.append("Claude launch did not bind the empty MCP configuration bytes")
     if "native_allowed_tools" in profile and command_identity.get("allowed_tools") != profile.get("native_allowed_tools"):
         errors.append("launched allowed-tool set does not match frozen execution profile")
     if "native_disallowed_tools" in profile and command_identity.get("disallowed_tools") != profile.get("native_disallowed_tools"):

@@ -100,7 +100,7 @@
     "ReportFindings",
     "ShareOnboardingGuide"
   ],
-  "permission_mode": "acceptEdits",
+  "permission_mode": "dontAsk",
   "pinned_root_instruction_template": "Use the {root} skill. {prompt}",
   "provider_managed_unknowns": [
     {
