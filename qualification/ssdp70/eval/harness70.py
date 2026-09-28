@@ -15,6 +15,7 @@ import shutil
 import subprocess
 import sys
 import tempfile
+import time
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 from typing import Any
@@ -33,7 +34,7 @@ def load_adapter(name: str):
     if not name or any(part in {"", ".", ".."} for part in name.split(".")):
         raise core70.ContractError(f"invalid adapter name {name!r}")
     module = importlib.import_module(f"adapters.{name}")
-    for attr in ("ADAPTER_ID", "install_skills", "launch", "normalize", "final_result", "catalog_isolation", "owner_reads", "prepare_prompt", "clean_env", "runtime_observation"):
+    for attr in ("ADAPTER_ID", "install_skills", "launch", "normalize", "final_result", "catalog_isolation", "owner_reads", "prepare_prompt", "clean_env", "runtime_observation", "realize_containment"):
         if not hasattr(module, attr):
             raise core70.ContractError(f"adapter {name!r} is missing {attr}")
     return module
@@ -324,11 +325,14 @@ def run_episode(
     with tempfile.TemporaryDirectory(prefix="ssdp70-") as tmp_name:
         tmp = Path(tmp_name)
         project, stub, log = tmp / "project", tmp / "stub", tmp / "side-effects.jsonl"
+        mediator_socket = tmp / "mediator.sock"
+        runtime_home = tmp / "runtime-home"
         build_project(corpus, episode, project)
         stub.mkdir()
         if episode.get("stub"):
             _yaml_tree_to_json(corpus / "stubs" / episode["stub"], stub)
         log.write_text("", encoding="utf-8")
+        runtime_home.mkdir()
         adapter_module.install_skills(dist, project)
         installed_skills = project / ".claude" / "skills"
         installed_digest = core70.sha256_tree(installed_skills)
@@ -339,11 +343,45 @@ def run_episode(
         prompt = adapter_module.prepare_prompt(profile_bundle.profile, episode.get("entry", "ordinary"), episode["prompt"])
         env = adapter_module.clean_env()
         env.update({
-            "SSDP70_STUB_DIR": str(stub),
-            "SSDP70_SIDE_EFFECT_LOG": str(log),
+            "HOME": str(runtime_home),
+            "XDG_CONFIG_HOME": str(runtime_home / ".config"),
+            "XDG_CACHE_HOME": str(runtime_home / ".cache"),
+            "SSDP70_MEDIATOR_SOCKET": str(mediator_socket),
             "SSDP70_ACCOUNT": episode.get("account") or "agent-account",
         })
-        launched = adapter_module.launch(profile_bundle.profile, prompt, project, env)
+        mediator = subprocess.Popen(
+            [
+                sys.executable, str(HERE / "stub_tools" / "mediator.py"),
+                "--socket", str(mediator_socket),
+                "--stub-root", str(stub),
+                "--side-effect-log", str(log),
+                "--account", env["SSDP70_ACCOUNT"],
+            ],
+            cwd=tmp,
+            env=adapter_module.clean_env(),
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+        )
+        try:
+            deadline = time.monotonic() + 5.0
+            while not mediator_socket.exists() and mediator.poll() is None and time.monotonic() < deadline:
+                time.sleep(0.01)
+            if not mediator_socket.exists():
+                stderr = mediator.stderr.read() if mediator.stderr is not None else ""
+                raise core70.ContractError(f"qualification mediator failed to start: {stderr}")
+            containment = adapter_module.realize_containment(profile_bundle.profile, project, env)
+            (out / "containment-realization.json").write_text(
+                json.dumps(containment, indent=2, sort_keys=True) + "\n", encoding="utf-8"
+            )
+            launched = adapter_module.launch(profile_bundle.profile, prompt, project, env)
+        finally:
+            mediator.terminate()
+            try:
+                mediator.wait(timeout=5)
+            except subprocess.TimeoutExpired:
+                mediator.kill()
+                mediator.wait(timeout=5)
         stdout, stderr = launched["stdout"], launched["stderr"]
         (out / "trace.jsonl").write_text(stdout, encoding="utf-8")
         if stderr:
@@ -362,6 +400,12 @@ def run_episode(
         runtime_observation = adapter_module.runtime_observation(stdout)
         profile_errors.extend(core70.validate_launch_identity(profile_bundle.profile, launched.get("command_identity")))
         profile_errors.extend(core70.validate_runtime_observation(profile_bundle, runtime_observation))
+        auto_memory = (runtime_observation.get("memory_paths") or {}).get("auto") if isinstance(runtime_observation, dict) else None
+        if isinstance(auto_memory, str) and auto_memory:
+            try:
+                Path(auto_memory).resolve().relative_to(runtime_home.resolve())
+            except (OSError, ValueError):
+                profile_errors.append("runtime auto-memory path escapes the fresh run-owned HOME")
         profile_errors.extend(core70.validate_claim_observability(events, claims))
         owner_read_sequences = adapter_module.owner_reads(events, OWNER)
         if any("owner-read" in str(claim).lower() for claim in claims) and not owner_read_sequences:

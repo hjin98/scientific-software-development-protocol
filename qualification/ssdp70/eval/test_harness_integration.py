@@ -28,6 +28,10 @@ class FakeAdapter:
         return {}
 
     @staticmethod
+    def realize_containment(profile, project, env):
+        return {"fake": True}
+
+    @staticmethod
     def install_skills(dist, project):
         target = project / ".claude" / "skills"
         target.mkdir(parents=True)
@@ -57,6 +61,7 @@ class FakeAdapter:
                 "executable": None,
                 "model": "fake",
                 "reasoning_configuration": {"effort": "fixed"},
+                "tools": ["Read"],
                 "allowed_tools": None,
                 "disallowed_tools": None,
             },
@@ -64,7 +69,7 @@ class FakeAdapter:
 
     @staticmethod
     def runtime_observation(stdout):
-        return {"model": "fake", "runtime_version": "1"}
+        return {"model": "fake", "runtime_version": "1", "tools": ["Read"], "native_capabilities": [], "memory_paths": {}, "mcp_servers": []}
 
     normalize = staticmethod(claude.normalize)
     final_result = staticmethod(claude.final_result)
@@ -79,6 +84,10 @@ class FakeEvaluator:
     @staticmethod
     def clean_env():
         return {}
+
+    @staticmethod
+    def realize_containment(profile, project, env):
+        return {"fake": True}
 
     @staticmethod
     def launch(profile, prompt, project, env):
@@ -102,12 +111,13 @@ class FakeEvaluator:
                 "executable": None,
                 "model": "eval",
                 "reasoning_configuration": {"effort": "fixed"},
+                "tools": ["Read"],
             },
         }
 
     @staticmethod
     def runtime_observation(stdout):
-        return {"model": "eval", "runtime_version": "1"}
+        return {"model": "eval", "runtime_version": "1", "tools": ["Read"], "native_capabilities": [], "memory_paths": {}, "mcp_servers": []}
 
 
 class HarnessIntegration(unittest.TestCase):
@@ -136,11 +146,14 @@ class HarnessIntegration(unittest.TestCase):
             "containment_policy": {"kind": "fake-pre-effect"},
             "network_external_write_policy": {"network": "deny", "external_write": "sandbox"},
             "credential_service_account_policy": {"ambient": "deny"}, "provider_managed_unknowns": [],
+            "native_tools": ["Read"], "native_surface_requirements": [],
         }
         write_json(self.profile_path, profile)
         write_json(self.cap_path, {"schema": 1, "capabilities": {
             name: {"decision": "DENY" if name in {"delegation", "network_remote_service"} else "ALLOW", "scope": "*"}
             for name in core70.REQUIRED_CAPABILITY_CLASSES
+        }, "native_capabilities": {
+            "tool:Read": {"semantic_classes": ["workspace_read_search_list"], "scope": "test read"}
         }})
         self.bundle = core70.load_profile(self.profile_path, self.cap_path)
         self.req_root = self.root / "requirements"
@@ -202,6 +215,8 @@ class HarnessIntegration(unittest.TestCase):
             "network_external_write_policy": {"network": "deny", "external_write": "deny"},
             "credential_service_account_policy": {"ambient": "deny"},
             "provider_managed_unknowns": [],
+            "native_tools": ["Read"],
+            "native_surface_requirements": [],
         }
         write_json(profile_path, profile)
         capabilities = json.loads(self.cap_path.read_text(encoding="utf-8"))

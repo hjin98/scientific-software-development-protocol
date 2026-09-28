@@ -15,7 +15,7 @@ import time
 from pathlib import Path
 from typing import Any
 
-ADAPTER_ID = "claude-stream-json-v1"
+ADAPTER_ID = "claude-stream-json-v2"
 SSDP_SKILLS = {
     "scientific-formulation",
     "numerical-algorithm-design",
@@ -29,15 +29,101 @@ READ_TOOLS = {"Read", "Grep", "Glob"}
 MUTATION_TOOLS = {"Write", "Edit", "NotebookEdit", "MultiEdit"}
 NETWORK_TOOLS = {"WebFetch", "WebSearch"}
 DELEGATE_TOOLS = {"Agent"}
+SAFE_ENV_KEYS = {
+    "PATH", "LANG", "LC_ALL", "LC_CTYPE", "TERM", "TMPDIR", "TMP", "TEMP",
+    "SSL_CERT_FILE", "SSL_CERT_DIR",
+}
 
 
 def clean_env() -> dict[str, str]:
-    env = dict(os.environ)
-    for key in list(env):
-        if "SESSION" in key or key in {"CLAUDE_CODE_ADDITIONAL_DIRECTORIES_CLAUDE_MD", "CLAUDE_PID"}:
-            env.pop(key)
-    return env
+    """Return an explicit non-credential allow-list; never inherit host HOME/tokens."""
+    return {key: os.environ[key] for key in SAFE_ENV_KEYS if key in os.environ}
 
+
+def _containment_document(profile: dict[str, Any], project: Path, env: dict[str, str]) -> dict[str, Any]:
+    policy = profile.get("containment_policy") or {}
+    if policy.get("kind") != "claude-code-restricted-sandbox-v1":
+        raise RuntimeError("Claude profile lacks the required restricted-sandbox containment policy")
+    runtime_home = env.get("HOME")
+    if not runtime_home:
+        raise RuntimeError("contained Claude launch requires a run-owned HOME")
+    home = Path(runtime_home).resolve()
+    project_resolved = project.resolve()
+    mediator = env.get("SSDP70_MEDIATOR_SOCKET")
+    if policy.get("mediator_required") and not mediator:
+        raise RuntimeError("executor containment requires the harness mediator socket")
+    allow_sockets = [str(Path(mediator).resolve())] if mediator else []
+    write_policy = str(policy.get("filesystem_write") or "")
+    allow_write = [] if write_policy.startswith("deny") else [str(project_resolved)]
+    settings = {
+        "sandbox": {
+            "enabled": True,
+            "autoAllowBashIfSandboxed": True,
+            "allowUnsandboxedCommands": False,
+            "network": {
+                "allowedDomains": [],
+                "allowUnixSockets": allow_sockets,
+                "allowLocalBinding": False,
+            },
+            "filesystem": {
+                "allowRead": [str(project_resolved)],
+                "allowWrite": allow_write,
+            },
+        },
+        "env": {
+            "CLAUDE_CODE_DISABLE_AUTO_MEMORY": "1",
+        },
+    }
+    return {
+        "schema": 1,
+        "settings": settings,
+        "realization": {
+            "project": str(project_resolved),
+            "runtime_home": str(home),
+            "mediator_socket": allow_sockets[0] if allow_sockets else None,
+            "native_network": "deny",
+            "filesystem_read": [str(project_resolved)],
+            "filesystem_write": allow_write,
+            "host_home_inherited": False,
+            "ambient_credentials_inherited": False,
+            "exact_native_tools": list(profile.get("native_tools") or []),
+        },
+    }
+
+
+def realize_containment(profile: dict[str, Any], project: Path, env: dict[str, str]) -> dict[str, Any]:
+    """Write run-owned sandbox settings before any executor/evaluator effect."""
+    document = _containment_document(profile, project, env)
+    settings = project / ".claude" / "settings.json"
+    settings.parent.mkdir(parents=True, exist_ok=True)
+    settings.write_text(json.dumps(document["settings"], indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    return document
+
+
+def validate_containment_realization(profile: dict[str, Any], project: Path, env: dict[str, str]) -> list[str]:
+    expected = _containment_document(profile, project, env)
+    settings = project / ".claude" / "settings.json"
+    if not settings.is_file():
+        return ["required project containment settings are absent"]
+    try:
+        actual = json.loads(settings.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return ["required project containment settings are unreadable or malformed"]
+    errors: list[str] = []
+    if actual != expected["settings"]:
+        errors.append("project containment settings do not match the frozen realization")
+    forbidden = [
+        key for key in env
+        if key not in SAFE_ENV_KEYS
+        and key not in {"HOME", "XDG_CONFIG_HOME", "XDG_CACHE_HOME", "SSDP70_MEDIATOR_SOCKET", "SSDP70_ACCOUNT"}
+    ]
+    if forbidden:
+        errors.append(f"contained environment has undeclared variables: {sorted(forbidden)}")
+    for key in env:
+        upper = key.upper()
+        if any(token in upper for token in ("TOKEN", "SECRET", "PASSWORD", "API_KEY", "AWS_", "GITHUB_", "SSH_")):
+            errors.append(f"contained environment exposes credential-like variable {key!r}")
+    return errors
 
 def install_skills(dist: Path, project: Path) -> None:
     import shutil
@@ -59,6 +145,10 @@ def launch(profile: dict[str, Any], prompt: str, project: Path, env: dict[str, s
     budgets = profile["budgets"]
     allowed_tools = profile.get("native_allowed_tools", [])
     disallowed_tools = profile.get("native_disallowed_tools", [])
+    tools = profile.get("native_tools", [])
+    containment_errors = validate_containment_realization(profile, project, env)
+    if containment_errors:
+        raise RuntimeError("; ".join(containment_errors))
     cmd = [
         executable,
         "-p",
@@ -71,10 +161,12 @@ def launch(profile: dict[str, Any], prompt: str, project: Path, env: dict[str, s
         "--max-turns",
         str(budgets.get("max_turns", 60)),
         "--setting-sources",
-        "project,local",
+        "project",
+        "--restricted",
         "--permission-mode",
         str(profile.get("permission_mode", "acceptEdits")),
     ]
+    cmd.extend(["--tools", ",".join(tools)])
     if allowed_tools:
         cmd.extend(["--allowedTools", " ".join(allowed_tools)])
     if disallowed_tools:
@@ -101,8 +193,11 @@ def launch(profile: dict[str, Any], prompt: str, project: Path, env: dict[str, s
             "executable": executable,
             "model": model,
             "reasoning_configuration": reasoning,
+            "tools": tools,
             "allowed_tools": allowed_tools,
             "disallowed_tools": disallowed_tools,
+            "setting_sources": ["project"],
+            "restricted": True,
         },
     }
 
@@ -210,6 +305,11 @@ def runtime_observation(stdout: str) -> dict[str, Any]:
             return {
                 "model": raw.get("model"),
                 "runtime_version": raw.get("claude_code_version"),
+                "tools": raw.get("tools") or [],
+                "native_capabilities": raw.get("capabilities") or [],
+                "messaging_socket_path": raw.get("messaging_socket_path"),
+                "memory_paths": raw.get("memory_paths") or {},
+                "mcp_servers": raw.get("mcp_servers") or [],
             }
     return {}
 
@@ -221,6 +321,7 @@ def normalize(stdout: str, run_id: str, context: dict[str, Any] | None = None) -
     sequence = 0
     lines = stdout.splitlines()
     pending: dict[str, dict[str, Any]] = {}
+    selected_skill_roots: list[str] = []
     package_identity = _package_identity(context)
 
     def emit(kind: str, native_index: int, native_sha256: str, payload: dict[str, Any], status: str = "observed") -> dict[str, Any]:
@@ -242,6 +343,10 @@ def normalize(stdout: str, run_id: str, context: dict[str, Any] | None = None) -
         content = block.get("content")
         result_status = "error" if block.get("is_error") else "result"
         reference = f"trace:{native_index}:block:{block_index}"
+        if prior["kind"] == "root_selection" and result_status == "result":
+            logical_root = prior["payload"].get("logical_root")
+            if isinstance(logical_root, str) and logical_root:
+                selected_skill_roots.append(logical_root)
         if prior["kind"] == "delegate_call":
             payload = {
                 "delegate_id": prior["payload"]["delegate_id"],
@@ -291,6 +396,7 @@ def normalize(stdout: str, run_id: str, context: dict[str, Any] | None = None) -
                 "model": raw.get("model"),
                 "runtime_version": raw.get("claude_code_version"),
                 "resolved_package_identity": package_identity,
+                "native_tools": raw.get("tools") or [],
             })
             mapped.append(event["event_id"])
             classification = "catalog"
@@ -433,9 +539,65 @@ def normalize(stdout: str, run_id: str, context: dict[str, Any] | None = None) -
                     mapped.append(event["event_id"])
                     errors.append(f"native tool {tool!r} has no semantic capability mapping")
 
+        elif raw_type == "system" and raw.get("subtype") in {"thinking_tokens", "post_turn_summary"}:
+            classification = f"reviewed-non-oracle-system:{raw.get('subtype')}"
+            oracle_relevant = False
+
         elif raw_type == "user":
             classification = "user-message"
             content = raw.get("message", {}).get("content", raw.get("content", []))
+            if raw.get("isSynthetic") is True:
+                classification = "skill-injected-resource"
+                oracle_relevant = True
+                text_blocks = [
+                    block.get("text") for block in content
+                    if isinstance(block, dict) and block.get("type") == "text" and isinstance(block.get("text"), str)
+                ]
+                if not selected_skill_roots:
+                    errors.append(f"synthetic skill body at native event {native_index} has no successful root selection")
+                elif len(text_blocks) != 1 or "\n\n" not in text_blocks[0]:
+                    errors.append(f"synthetic skill body at native event {native_index} is malformed")
+                elif not isinstance(context, dict) or not isinstance(context.get("skills_root"), str):
+                    errors.append(f"synthetic skill body at native event {native_index} has no installed skills root")
+                else:
+                    logical_root = selected_skill_roots[-1]
+                    installed = Path(context["skills_root"]) / logical_root / "SKILL.md"
+                    try:
+                        installed_bytes = installed.read_bytes()
+                        installed_text = installed_bytes.decode("utf-8")
+                    except (OSError, UnicodeDecodeError) as exc:
+                        errors.append(f"cannot verify injected SKILL.md for {logical_root!r}: {exc}")
+                    else:
+                        prefix, injected = text_blocks[0].split("\n\n", 1)
+                        if not prefix.startswith("Base directory for this skill: "):
+                            errors.append(f"synthetic skill body at native event {native_index} lacks base-directory binding")
+                        elif injected != installed_text:
+                            errors.append(f"synthetic skill body for {logical_root!r} does not match installed SKILL.md bytes")
+                        else:
+                            payload = {
+                                "operation": "skill-injected-body",
+                                "resource_identity": str(installed),
+                                "input": {"logical_root": logical_root, "base_directory_declaration": prefix},
+                                "tool_use_id": f"skill-injected:{native_index}",
+                                "result_status": "result",
+                                "result_reference": f"trace:{native_index}:synthetic-skill-body",
+                                "result_sha256": _result_digest(injected),
+                                "result_content": injected,
+                                "resolved_package_identity": package_identity,
+                                "resource_sha256": hashlib.sha256(installed_bytes).hexdigest(),
+                                "resource_bytes": len(installed_bytes),
+                                "resolved_resource_path": str(installed.resolve()),
+                            }
+                            event = emit("resource_access", native_index, native_sha256, payload, status="result")
+                            mapped.append(event["event_id"])
+                completeness.append({
+                    "native_index": native_index,
+                    "native_sha256": native_sha256,
+                    "mapped_event_ids": mapped,
+                    "classification": classification,
+                    "oracle_relevant": oracle_relevant,
+                })
+                continue
             if not isinstance(content, list):
                 content = []
             for block_index, block in enumerate(content):

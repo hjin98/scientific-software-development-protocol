@@ -1,18 +1,61 @@
 {
-  "adapter_id": "claude-stream-json-v1",
+  "schema": 1,
+  "profile_id": "claude-headless-reference-template",
+  "adapter_id": "claude-stream-json-v2",
   "agent_model": "claude-sonnet-5",
+  "provider_runtime": {
+    "executable": "claude",
+    "provider": "anthropic",
+    "runtime": "claude-code",
+    "version": "MUST-BE-FROZEN-BEFORE-QUALIFICATION"
+  },
+  "reasoning_configuration": {
+    "effort": null,
+    "source": "provider-default-until-frozen"
+  },
+  "workspace_realization": {
+    "kind": "fresh-temporary-project"
+  },
+  "install_mechanism": "project-local skill package",
   "budgets": {
     "max_turns": 60,
     "timeout_s": 3600
   },
   "containment_policy": {
-    "kind": "requires-independent-pre-effect-admission",
-    "note": "Qualification admission must prove substrate enforcement; command-text inspection is not sufficient."
+    "kind": "claude-code-restricted-sandbox-v1",
+    "enforcement": "required-before-launch",
+    "filesystem_read": "run-owned project only",
+    "filesystem_write": "run-owned project only",
+    "native_network": "deny",
+    "mediator_required": true,
+    "ambient_host_home": "deny",
+    "ambient_credentials": "deny"
+  },
+  "network_external_write_policy": {
+    "external_write": "sandbox-or-mediate",
+    "network": "deny-native-executor-network"
   },
   "credential_service_account_policy": {
-    "ambient_credentials": "deny-or-mediate-before-admission"
+    "ambient_credentials": "deny"
   },
-  "install_mechanism": "project-local skill package",
+  "native_tools": [
+    "Skill",
+    "Read",
+    "Glob",
+    "Grep",
+    "Edit",
+    "Write",
+    "Bash"
+  ],
+  "native_surface_requirements": [
+    "runtime_capability:interrupt_receipt_v1",
+    "runtime_capability:interrupt_cancel_queued_v1",
+    "runtime_capability:msg_lifecycle_v1",
+    "runtime_capability:mcp_read_resource_v1",
+    "runtime_capability:mcp_tool_ui_meta_v1",
+    "messaging_socket_path",
+    "auto_memory_write"
+  ],
   "native_allowed_tools": [
     "Skill",
     "Read",
@@ -20,7 +63,6 @@
     "Grep",
     "Edit",
     "Write",
-    "TodoWrite",
     "Bash(python:*)",
     "Bash(python3:*)",
     "Bash(git:*)",
@@ -36,15 +78,30 @@
   "native_disallowed_tools": [
     "Agent",
     "WebFetch",
-    "WebSearch"
+    "WebSearch",
+    "SendMessage",
+    "ListAgents",
+    "RemoteTrigger",
+    "CronCreate",
+    "CronDelete",
+    "CronList",
+    "ScheduleWakeup",
+    "PushNotification",
+    "EnterWorktree",
+    "ExitWorktree",
+    "Artifact",
+    "ArtifactComments",
+    "ArtifactData",
+    "Workflow",
+    "Monitor",
+    "DesignSync",
+    "ToolSearch",
+    "TaskStop",
+    "ReportFindings",
+    "ShareOnboardingGuide"
   ],
-  "network_external_write_policy": {
-    "external_write": "sandbox-or-deny",
-    "network": "deny"
-  },
   "permission_mode": "acceptEdits",
   "pinned_root_instruction_template": "Use the {root} skill. {prompt}",
-  "profile_id": "claude-headless-reference-template",
   "provider_managed_unknowns": [
     {
       "classification": "arm-neutral",
@@ -60,19 +117,5 @@
         "*"
       ]
     }
-  ],
-  "provider_runtime": {
-    "executable": "claude",
-    "provider": "anthropic",
-    "runtime": "claude-code",
-    "version": "MUST-BE-FROZEN-BEFORE-QUALIFICATION"
-  },
-  "reasoning_configuration": {
-    "effort": null,
-    "source": "provider-default-until-frozen"
-  },
-  "schema": 1,
-  "workspace_realization": {
-    "kind": "fresh-temporary-project"
-  }
+  ]
 }

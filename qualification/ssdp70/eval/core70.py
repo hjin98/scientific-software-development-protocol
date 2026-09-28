@@ -101,6 +101,7 @@ EVIDENCE_INTEGRITY_ROOTS = (
     "profile-admission.json",
     "profile-admission-snapshot.json",
     "profile-admission-evidence",
+    "containment-realization.json",
     "requirements-snapshot.json",
     "final-report.md",
     "diff.patch",
@@ -201,6 +202,20 @@ def load_profile(profile_path: Path, capability_path: Path) -> ProfileBundle:
         if not isinstance(entry.get("scope"), (str, list, dict)):
             raise ContractError(f"capability {name} must declare scope")
 
+    native_map = capabilities.get("native_capabilities")
+    if not isinstance(native_map, dict):
+        raise ContractError("capability manifest.native_capabilities must be an object")
+    for native_name, entry in native_map.items():
+        if not isinstance(native_name, str) or not native_name or not isinstance(entry, dict):
+            raise ContractError("native capability classification is malformed")
+        classes = entry.get("semantic_classes")
+        if not isinstance(classes, list) or not classes or not all(
+            isinstance(item, str) and item in REQUIRED_CAPABILITY_CLASSES for item in classes
+        ):
+            raise ContractError(f"native capability {native_name!r} has invalid semantic classes")
+        if not isinstance(entry.get("scope"), (str, list, dict)):
+            raise ContractError(f"native capability {native_name!r} must declare scope")
+
     required_profile = (
         "profile_id",
         "adapter_id",
@@ -214,10 +229,31 @@ def load_profile(profile_path: Path, capability_path: Path) -> ProfileBundle:
         "network_external_write_policy",
         "credential_service_account_policy",
         "provider_managed_unknowns",
+        "native_tools",
+        "native_surface_requirements",
     )
     absent = [name for name in required_profile if name not in profile]
     if absent:
         raise ContractError(f"execution profile is missing fields: {absent}")
+    native_tools = profile["native_tools"]
+    if not isinstance(native_tools, list) or not all(isinstance(item, str) and item for item in native_tools):
+        raise ContractError("native_tools must be a list of non-empty strings")
+    if len(native_tools) != len(set(native_tools)):
+        raise ContractError("native_tools contains duplicates")
+    surface_requirements = profile["native_surface_requirements"]
+    if not isinstance(surface_requirements, list) or not all(
+        isinstance(item, str) and item for item in surface_requirements
+    ):
+        raise ContractError("native_surface_requirements must be a list of non-empty strings")
+    if len(surface_requirements) != len(set(surface_requirements)):
+        raise ContractError("native_surface_requirements contains duplicates")
+    for tool in native_tools:
+        if f"tool:{tool}" not in native_map:
+            raise ContractError(f"native tool {tool!r} has no semantic capability classification")
+    for surface in surface_requirements:
+        if surface not in native_map:
+            raise ContractError(f"native surface {surface!r} has no semantic capability classification")
+
     unknowns = profile["provider_managed_unknowns"]
     if not isinstance(unknowns, list):
         raise ContractError("provider_managed_unknowns must be a list")
@@ -248,6 +284,8 @@ def load_profile(profile_path: Path, capability_path: Path) -> ProfileBundle:
         "network_external_write_policy": profile["network_external_write_policy"],
         "credential_service_account_policy": profile["credential_service_account_policy"],
         "provider_managed_unknowns": unknowns,
+        "native_tools": native_tools,
+        "native_surface_requirements": surface_requirements,
     }
     return ProfileBundle(
         profile=profile,
@@ -891,6 +929,14 @@ def validate_launch_identity(profile: dict[str, Any], command_identity: Any) -> 
     if isinstance(runtime, dict) and runtime.get("executable") is not None:
         if command_identity.get("executable") != runtime.get("executable"):
             errors.append("launched executable does not match frozen execution profile")
+    if command_identity.get("tools") != profile.get("native_tools"):
+        errors.append("launched exact native-tool surface does not match frozen execution profile")
+    containment = profile.get("containment_policy")
+    if isinstance(containment, dict) and containment.get("kind") == "claude-code-restricted-sandbox-v1":
+        if command_identity.get("restricted") is not True:
+            errors.append("Claude launch did not assert restricted containment")
+        if command_identity.get("setting_sources") != ["project"]:
+            errors.append("Claude launch did not isolate settings to the run-owned project")
     if "native_allowed_tools" in profile and command_identity.get("allowed_tools") != profile.get("native_allowed_tools"):
         errors.append("launched allowed-tool set does not match frozen execution profile")
     if "native_disallowed_tools" in profile and command_identity.get("disallowed_tools") != profile.get("native_disallowed_tools"):
@@ -913,6 +959,45 @@ def validate_runtime_observation(bundle: ProfileBundle, observation: Any) -> lis
         errors.append("execution profile has no frozen provider/runtime version")
     elif observed_version != expected_version:
         errors.append("runtime-observed provider/runtime version does not match frozen execution profile")
+
+    declared_tools = bundle.profile.get("native_tools")
+    observed_tools = observation.get("tools")
+    if not isinstance(observed_tools, list) or not all(isinstance(item, str) and item for item in observed_tools):
+        errors.append("runtime init did not expose a valid native tools list")
+        observed_tools = []
+    elif len(observed_tools) != len(set(observed_tools)):
+        errors.append("runtime init native tools list contains duplicates")
+    if isinstance(declared_tools, list) and set(observed_tools) != set(declared_tools):
+        errors.append(
+            f"runtime native-tool surface differs from declared set: declared={sorted(declared_tools)}, "
+            f"observed={sorted(observed_tools)}"
+        )
+
+    native_map = bundle.capabilities.get("native_capabilities")
+    if not isinstance(native_map, dict):
+        errors.append("native capability classification map is missing")
+        native_map = {}
+    for tool in observed_tools:
+        if f"tool:{tool}" not in native_map:
+            errors.append(f"runtime exposed unclassified native tool {tool!r}")
+    observed_caps = observation.get("native_capabilities")
+    if not isinstance(observed_caps, list) or not all(isinstance(item, str) and item for item in observed_caps):
+        errors.append("runtime init native capabilities list is malformed")
+        observed_caps = []
+    for capability in observed_caps:
+        name = f"runtime_capability:{capability}"
+        if name not in native_map:
+            errors.append(f"runtime exposed unclassified native capability {capability!r}")
+    if observation.get("messaging_socket_path"):
+        if "messaging_socket_path" not in native_map:
+            errors.append("runtime exposed an unclassified messaging socket")
+    memory_paths = observation.get("memory_paths")
+    if isinstance(memory_paths, dict) and memory_paths.get("auto"):
+        if "auto_memory_write" not in native_map:
+            errors.append("runtime exposed unclassified auto-memory state")
+    mcp_servers = observation.get("mcp_servers")
+    if mcp_servers not in (None, []):
+        errors.append("runtime exposed undeclared MCP server capability")
     return errors
 
 

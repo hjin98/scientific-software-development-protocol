@@ -1,4 +1,6 @@
 {
+  "schema": 1,
+  "manifest_id": "claude-headless-stage-f-v2",
   "capabilities": {
     "catalog_root_activation": {
       "decision": "ALLOW",
@@ -6,31 +8,31 @@
     },
     "credential_secret_service_account": {
       "decision": "DENY",
-      "scope": "executor ambient credentials; admission must prove effective denial"
+      "scope": "executor ambient credentials; scrubbed environment plus admission proof"
     },
     "delegation": {
       "decision": "DENY",
-      "scope": "Agent/subagent launch"
+      "scope": "Agent/cross-session messaging/remote scheduling and trigger surfaces excluded"
     },
     "external_mutation": {
       "decision": "SANDBOX/MEDIATE",
-      "scope": "qualification-owned stand-ins only"
+      "scope": "qualification-owned mediator only; runtime state isolated and auto-memory disabled"
     },
     "issue_evidence_store": {
       "decision": "SANDBOX/MEDIATE",
-      "scope": "qualification-owned issue/evidence stand-ins"
+      "scope": "qualification-owned mediator; executor has no direct state/log path"
     },
     "network_remote_service": {
       "decision": "DENY",
-      "scope": "all external network access; admission must close process-level escape routes"
+      "scope": "native executor network denied by restricted sandbox; provider control plane is outside tool capability"
     },
     "process_execution": {
       "decision": "SANDBOX/MEDIATE",
-      "scope": "declared local command families under independently verified substrate containment"
+      "scope": "declared Bash families under restricted sandbox"
     },
     "repository_object_store": {
       "decision": "SANDBOX/MEDIATE",
-      "scope": "run-owned workspace repository only; no remote repository/object-store mutation"
+      "scope": "run-owned workspace repository only"
     },
     "workspace_mutation": {
       "decision": "ALLOW",
@@ -41,6 +43,99 @@
       "scope": "run-owned project workspace and installed protocol package"
     }
   },
-  "manifest_id": "claude-headless-stage-f-v1",
-  "schema": 1
+  "native_capabilities": {
+    "tool:Skill": {
+      "semantic_classes": [
+        "catalog_root_activation"
+      ],
+      "scope": "native Skill surface; governed by semantic capability decision and substrate containment"
+    },
+    "tool:Read": {
+      "semantic_classes": [
+        "workspace_read_search_list"
+      ],
+      "scope": "native Read surface; governed by semantic capability decision and substrate containment"
+    },
+    "tool:Glob": {
+      "semantic_classes": [
+        "workspace_read_search_list"
+      ],
+      "scope": "native Glob surface; governed by semantic capability decision and substrate containment"
+    },
+    "tool:Grep": {
+      "semantic_classes": [
+        "workspace_read_search_list"
+      ],
+      "scope": "native Grep surface; governed by semantic capability decision and substrate containment"
+    },
+    "tool:Edit": {
+      "semantic_classes": [
+        "workspace_mutation"
+      ],
+      "scope": "native Edit surface; governed by semantic capability decision and substrate containment"
+    },
+    "tool:Write": {
+      "semantic_classes": [
+        "workspace_mutation"
+      ],
+      "scope": "native Write surface; governed by semantic capability decision and substrate containment"
+    },
+    "tool:Bash": {
+      "semantic_classes": [
+        "process_execution",
+        "repository_object_store",
+        "network_remote_service",
+        "external_mutation",
+        "credential_secret_service_account",
+        "issue_evidence_store"
+      ],
+      "scope": "native Bash surface; governed by semantic capability decision and substrate containment"
+    },
+    "runtime_capability:interrupt_receipt_v1": {
+      "semantic_classes": [
+        "delegation"
+      ],
+      "scope": "runtime message/interrupt lifecycle support; no native messaging tool admitted"
+    },
+    "runtime_capability:interrupt_cancel_queued_v1": {
+      "semantic_classes": [
+        "delegation"
+      ],
+      "scope": "runtime queued-message cancellation support; no native messaging tool admitted"
+    },
+    "runtime_capability:msg_lifecycle_v1": {
+      "semantic_classes": [
+        "delegation",
+        "external_mutation"
+      ],
+      "scope": "runtime message lifecycle support; native messaging tools excluded"
+    },
+    "runtime_capability:mcp_read_resource_v1": {
+      "semantic_classes": [
+        "network_remote_service",
+        "workspace_read_search_list"
+      ],
+      "scope": "protocol support only; admitted profile requires zero MCP servers"
+    },
+    "runtime_capability:mcp_tool_ui_meta_v1": {
+      "semantic_classes": [
+        "catalog_root_activation"
+      ],
+      "scope": "tool metadata support; exact init tools still authoritative"
+    },
+    "messaging_socket_path": {
+      "semantic_classes": [
+        "delegation",
+        "network_remote_service",
+        "external_mutation"
+      ],
+      "scope": "runtime-created cross-session socket; restricted sandbox Unix-socket allow-list excludes it"
+    },
+    "auto_memory_write": {
+      "semantic_classes": [
+        "external_mutation"
+      ],
+      "scope": "runtime auto-memory surface; disabled and isolated to fresh run-owned HOME; admission must prove no external write"
+    }
+  }
 }

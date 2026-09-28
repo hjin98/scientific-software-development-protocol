@@ -24,6 +24,9 @@ class PortableCoreTests(unittest.TestCase):
                 name: {"decision": "ALLOW" if name not in {"delegation", "network_remote_service"} else "DENY", "scope": "*"}
                 for name in core70.REQUIRED_CAPABILITY_CLASSES
             },
+            "native_capabilities": {
+                "tool:Read": {"semantic_classes": ["workspace_read_search_list"], "scope": "test read"}
+            },
         })
         write_json(self.profile, {
             "schema": 1,
@@ -41,6 +44,8 @@ class PortableCoreTests(unittest.TestCase):
             "provider_managed_unknowns": [
                 {"name": "backend-shard", "classification": "arm-neutral", "sensitive_claims": ["*"]}
             ],
+            "native_tools": ["Read"],
+            "native_surface_requirements": [],
         })
 
     def tearDown(self):
@@ -147,15 +152,15 @@ class PortableCoreTests(unittest.TestCase):
     def test_runtime_observation_rejects_unfrozen_or_mismatched_runtime(self):
         bundle = core70.load_profile(self.profile, self.capabilities)
         self.assertEqual(core70.validate_runtime_observation(
-            bundle, {"model": "test-model", "runtime_version": "exposed-v1"}), [])
+            bundle, {"model": "test-model", "runtime_version": "exposed-v1", "tools": ["Read"], "native_capabilities": [], "memory_paths": {}, "mcp_servers": []}), [])
         self.assertTrue(core70.validate_runtime_observation(
-            bundle, {"model": "test-model", "runtime_version": "other"}))
+            bundle, {"model": "test-model", "runtime_version": "other", "tools": ["Read"], "native_capabilities": [], "memory_paths": {}, "mcp_servers": []}))
         profile = json.loads(self.profile.read_text())
         profile["provider_runtime"]["version"] = "MUST-BE-FROZEN-BEFORE-QUALIFICATION"
         write_json(self.profile, profile)
         frozen = core70.load_profile(self.profile, self.capabilities)
         self.assertTrue(core70.validate_runtime_observation(
-            frozen, {"model": "test-model", "runtime_version": "x"}))
+            frozen, {"model": "test-model", "runtime_version": "x", "tools": ["Read"], "native_capabilities": [], "memory_paths": {}, "mcp_servers": []}))
 
     def test_scoring_exact_closure_rejects_empty_and_duplicates(self):
         req = self.requirements()

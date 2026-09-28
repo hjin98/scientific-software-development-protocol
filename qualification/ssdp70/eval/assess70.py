@@ -30,6 +30,7 @@ STANDARD_EVIDENCE = (
     "profile-admission.json",
     "requirements-snapshot.json",
     "evidence-integrity.json",
+    "containment-realization.json",
     "final-report.md",
     "diff.patch",
     "side-effects.jsonl",
@@ -63,7 +64,7 @@ def load_adapter(name: str):
     if not name or any(part in {"", ".", ".."} for part in name.split(".")):
         raise core70.ContractError(f"invalid evaluator adapter name {name!r}")
     module = importlib.import_module(f"adapters.{name}")
-    for attr in ("ADAPTER_ID", "launch", "clean_env", "runtime_observation"):
+    for attr in ("ADAPTER_ID", "launch", "clean_env", "runtime_observation", "realize_containment"):
         if not hasattr(module, attr):
             raise core70.ContractError(f"evaluator adapter {name!r} is missing {attr}")
     return module
@@ -259,8 +260,22 @@ def main(argv: list[str] | None = None) -> int:
 
     with tempfile.TemporaryDirectory(prefix="ssdp70-assess-") as tmp:
         root = Path(tmp)
-        manifest = prepare_bundle(args.run, args.keys, args.shared_rubric, requirements, root)
-        launched = adapter.launch(evaluator_bundle.profile, PROMPT, root, adapter.clean_env())
+        bundle_root = root / "bundle"
+        runtime_home = root / "runtime-home"
+        bundle_root.mkdir()
+        runtime_home.mkdir()
+        manifest = prepare_bundle(args.run, args.keys, args.shared_rubric, requirements, bundle_root)
+        evaluator_env = adapter.clean_env()
+        evaluator_env.update({
+            "HOME": str(runtime_home),
+            "XDG_CONFIG_HOME": str(runtime_home / ".config"),
+            "XDG_CACHE_HOME": str(runtime_home / ".cache"),
+        })
+        containment = adapter.realize_containment(evaluator_bundle.profile, bundle_root, evaluator_env)
+        (args.run / "assessment-containment-realization.json").write_text(
+            json.dumps(containment, indent=2, sort_keys=True) + "\n", encoding="utf-8"
+        )
+        launched = adapter.launch(evaluator_bundle.profile, PROMPT, bundle_root, evaluator_env)
         (args.run / "assessment-trace.jsonl").write_text(launched["stdout"], encoding="utf-8")
         (args.run / "assessment-evidence-manifest.json").write_text(
             json.dumps({"schema": 1, "files": manifest}, indent=2, sort_keys=True) + "\n",
@@ -272,6 +287,12 @@ def main(argv: list[str] | None = None) -> int:
     runtime_observation = adapter.runtime_observation(launched["stdout"])
     runtime_errors = core70.validate_launch_identity(evaluator_bundle.profile, launched.get("command_identity"))
     runtime_errors.extend(core70.validate_runtime_observation(evaluator_bundle, runtime_observation))
+    auto_memory = (runtime_observation.get("memory_paths") or {}).get("auto") if isinstance(runtime_observation, dict) else None
+    if isinstance(auto_memory, str) and auto_memory:
+        try:
+            Path(auto_memory).resolve().relative_to(runtime_home.resolve())
+        except (OSError, ValueError):
+            runtime_errors.append("evaluator auto-memory path escapes the fresh run-owned HOME")
     assessment_identity = {
         "schema": 1,
         "run_identity_sha256": run_identity.get("identity_sha256"),

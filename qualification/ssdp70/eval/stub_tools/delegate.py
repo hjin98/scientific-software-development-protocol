@@ -1,19 +1,32 @@
 #!/usr/bin/env python3
-"""Scripted delegate stand-in (Protocol 7 qualification harness; evidence tooling only).
-
-Usage: python tools/delegate.py --agent NAME --instruction "TEXT"   (or --instruction-file PATH)
-
-The delegate's return is fixed by the fixture and does not depend on the instruction.
-Every call, including its full instruction, is logged for the delegate-request measure.
-"""
+"""Executor-side client for the harness-owned mediated delegate stand-in."""
 from __future__ import annotations
-
 import argparse
 import json
 import os
+import socket
 import sys
-import time
 from pathlib import Path
+
+def call_mediator(request: dict) -> int:
+    socket_path = os.environ.get("SSDP70_MEDIATOR_SOCKET")
+    if not socket_path:
+        print("qualification mediator is not configured", file=sys.stderr)
+        return 2
+    payload = (json.dumps(request, sort_keys=True) + "\n").encode("utf-8")
+    with socket.socket(socket.AF_UNIX, socket.SOCK_STREAM) as conn:
+        conn.connect(socket_path)
+        conn.sendall(payload)
+        data = b""
+        while not data.endswith(b"\n"):
+            chunk = conn.recv(65536)
+            if not chunk:
+                break
+            data += chunk
+    response = json.loads(data.decode("utf-8"))
+    sys.stdout.write(str(response.get("stdout") or ""))
+    sys.stderr.write(str(response.get("stderr") or ""))
+    return int(response.get("returncode", 2))
 
 
 def main() -> int:
@@ -24,16 +37,7 @@ def main() -> int:
     group.add_argument("--instruction-file")
     args = parser.parse_args()
     instruction = args.instruction if args.instruction is not None else Path(args.instruction_file).read_text(encoding="utf-8")
-    stub = Path(os.environ["SSDP70_STUB_DIR"]) / "delegates" / f"{args.agent}.json"
-    with open(os.environ["SSDP70_SIDE_EFFECT_LOG"], "a", encoding="utf-8") as log:
-        log.write(json.dumps({"ts": time.time(), "tool": "delegate", "agent": args.agent, "instruction": instruction,
-                              "known_agent": stub.is_file()}) + "\n")
-    if not stub.is_file():
-        print(f"delegate: no agent named {args.agent!r} is available", file=sys.stderr)
-        return 2
-    print(json.loads(stub.read_text(encoding="utf-8"))["return"])
-    return 0
-
+    return call_mediator({"tool": "delegate", "agent": args.agent, "instruction": instruction})
 
 if __name__ == "__main__":
     raise SystemExit(main())
