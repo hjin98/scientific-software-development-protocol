@@ -3,6 +3,7 @@ import shutil
 import tempfile
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
 import yaml
 
@@ -71,6 +72,44 @@ class FakeAdapter:
     owner_reads = staticmethod(claude.owner_reads)
 
 
+class FakeEvaluator:
+    ADAPTER_ID = "fake-evaluator-v1"
+    __file__ = __file__
+
+    @staticmethod
+    def clean_env():
+        return {}
+
+    @staticmethod
+    def launch(profile, prompt, project, env):
+        verdict = {
+            "episode": "E1",
+            "dispositions": [{
+                "item": "i1", "measure": "critical", "result": "pass",
+                "critical": True, "evidence": "complete evidence",
+            }],
+            "r2_point_index": None,
+            "owner_false_activation": None,
+            "notes": "",
+        }
+        stdout = json.dumps({
+            "type": "result", "subtype": "success", "is_error": False,
+            "result": json.dumps(verdict),
+        }) + "\n"
+        return {
+            "returncode": 0, "stdout": stdout, "stderr": "",
+            "command_identity": {
+                "executable": None,
+                "model": "eval",
+                "reasoning_configuration": {"effort": "fixed"},
+            },
+        }
+
+    @staticmethod
+    def runtime_observation(stdout):
+        return {"model": "eval", "runtime_version": "1"}
+
+
 class HarnessIntegration(unittest.TestCase):
     def setUp(self):
         self.td = tempfile.TemporaryDirectory()
@@ -134,6 +173,102 @@ class HarnessIntegration(unittest.TestCase):
             dist=self.dist, profile_bundle=self.bundle, profile_path=self.profile_path, capability_path=self.cap_path,
             requirements=self.requirements, requirements_root=self.req_root, adapter_module=FakeAdapter,
             oracles=self.oracles.parent, mode="probe", admission=None, rep=0, pair_order=["p70"])
+
+
+    def complete_run(self, name="run-assess"):
+        out = self.root / name
+        identity = self.identity()
+        summary = harness70.run_episode(
+            corpus=self.corpus, episode=self.episode, arm=self.arm, arms_manifest_sha256="arms",
+            dist=self.dist, out=out, profile_bundle=self.bundle, profile_path=self.profile_path,
+            capability_path=self.cap_path, requirements=self.requirements, requirements_root=self.req_root,
+            adapter_module=FakeAdapter, oracles=self.oracles.parent, mode="probe", admission=None,
+            identity=identity, pair_order=["p70"])
+        self.assertEqual(summary["evidence_state"], "COMPLETE_ADMISSIBLE")
+        return out
+
+    def evaluator_material(self, version="1"):
+        profile_path = self.root / f"evaluator-{version}.json"
+        capability_path = self.root / f"evaluator-{version}-cap.json"
+        profile = {
+            "schema": 1, "profile_id": f"eval-{version}", "adapter_id": FakeEvaluator.ADAPTER_ID,
+            "agent_model": "eval",
+            "provider_runtime": {"provider": "fake", "runtime": "fake", "version": version},
+            "reasoning_configuration": {"effort": "fixed"},
+            "workspace_realization": {"kind": "temporary-read-only-evidence-bundle"},
+            "install_mechanism": "none",
+            "budgets": {"max_turns": 2, "timeout_s": 10},
+            "containment_policy": {"kind": "read-only-evaluator"},
+            "network_external_write_policy": {"network": "deny", "external_write": "deny"},
+            "credential_service_account_policy": {"ambient": "deny"},
+            "provider_managed_unknowns": [],
+        }
+        write_json(profile_path, profile)
+        capabilities = json.loads(self.cap_path.read_text(encoding="utf-8"))
+        write_json(capability_path, capabilities)
+        bundle = core70.load_profile(profile_path, capability_path)
+        admission_root = self.root / f"eval-{version}-admission"
+        evidence = admission_root / "evidence"
+        evidence.mkdir(parents=True)
+        checks = {}
+        for name in core70.EVALUATOR_ADMISSION_CHECKS:
+            proof = evidence / f"{name}.json"
+            proof.write_text(json.dumps({"check": name, "pass": True}), encoding="utf-8")
+            checks[name] = {
+                "status": "PASS",
+                "evidence_path": f"evidence/{name}.json",
+                "evidence_sha256": core70.sha256_file(proof),
+            }
+        admission = admission_root / "admission.json"
+        write_json(admission, {
+            "schema": 1, "status": "ADMITTED", "role": "evaluator",
+            "profile_key_sha256": bundle.profile_key_sha256,
+            "adapter_sha256": core70.sha256_file(Path(FakeEvaluator.__file__).resolve()),
+            "core_sha256": core70.sha256_file(Path(core70.__file__).resolve()),
+            "capability_manifest_sha256": bundle.capability_manifest_sha256,
+            "checks": checks,
+        })
+        return profile_path, capability_path, admission
+
+    def test_assessor_requires_admitted_runtime_and_accepts_matching_runtime(self):
+        import assess70
+        out = self.complete_run()
+        keys = self.root / "keys"
+        keys.mkdir()
+        (keys / "key.txt").write_text("custodian", encoding="utf-8")
+        profile, capabilities, admission = self.evaluator_material("1")
+        with patch.object(assess70, "load_adapter", return_value=FakeEvaluator):
+            code = assess70.main([
+                "--run", str(out), "--keys", str(keys),
+                "--evaluator-profile", str(profile),
+                "--evaluator-capabilities", str(capabilities),
+                "--evaluator-admission", str(admission),
+                "--adapter", "fake",
+            ])
+        self.assertEqual(code, 0)
+        assessment = json.loads((out / "assessment.json").read_text(encoding="utf-8"))
+        self.assertEqual(assessment["qualification_outcome"], "PASS")
+        self.assertTrue((out / "assessment-profile-admission-snapshot.json").is_file())
+
+    def test_assessor_runtime_mismatch_is_inadmissible(self):
+        import assess70
+        out = self.complete_run("run-assess-mismatch")
+        keys = self.root / "keys-mismatch"
+        keys.mkdir()
+        (keys / "key.txt").write_text("custodian", encoding="utf-8")
+        profile, capabilities, admission = self.evaluator_material("2")
+        with patch.object(assess70, "load_adapter", return_value=FakeEvaluator):
+            code = assess70.main([
+                "--run", str(out), "--keys", str(keys),
+                "--evaluator-profile", str(profile),
+                "--evaluator-capabilities", str(capabilities),
+                "--evaluator-admission", str(admission),
+                "--adapter", "fake",
+            ])
+        self.assertEqual(code, 2)
+        assessment = json.loads((out / "assessment.json").read_text(encoding="utf-8"))
+        self.assertEqual(assessment["evidence_state"], "INADMISSIBLE")
+        self.assertEqual(assessment["qualification_outcome"], "NOT_EVALUATED")
 
     def test_probe_run_produces_complete_admissible_integrity_bound_evidence(self):
         out = self.root / "run"
