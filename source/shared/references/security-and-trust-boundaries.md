@@ -106,6 +106,10 @@ When fetching models, datasets, packages, schemas, toolchains, evidence, or othe
 
 Network availability must not silently change scientific semantics. Cache remote inputs only with explicit identity/invalidation rules.
 
+## Scientific inspection and export surfaces
+
+An inspection or export surface over realized scientific records, and a tension or disposition home that non-owners can write, are data-exposure and trust boundaries under this owner. Transparency does not override privacy, security or proprietary limits; provide the strongest safe aggregate and make the limitation visible ([Scientific inspectability and epistemic initiative](scientific-inspectability-and-initiative.md)).
+
 ## Credentials and sensitive data
 
 - Never hard-code secrets, tokens, passwords, private keys, or credentials in source, fixtures, docs, manifests, logs, command histories, benchmark/profiler output, PEM, generated packages, or binaries.

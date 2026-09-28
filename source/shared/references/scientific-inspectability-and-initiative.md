@@ -170,7 +170,7 @@ Rules below bind within the predicate and O1–O3 binding. Example lists are opt
 
 These are separate dimensions, not an enum or registry.
 
-- An agent-chosen value may later be accepted without erasing its origin.
+- A human's exploratory choice may be unaccepted, and an agent-chosen value may later be accepted without erasing its origin.
 - An instruction is not ratification. Ratification is a separate workflow fact, and `risk-accepted/provisional` keeps its workflow meaning.
 - Unknown origin is marked unknown, never guessed.
 - Channel A discloses consequential choices and gaps; product records gain these fields only through O3.
@@ -244,7 +244,7 @@ Data are evidence, not authority. No observation, plot, anomaly or AI interpreta
 **Tensions.** A **tension** is a recorded finding bearing on accepted D1/D2 authority that has not been raised as a Serious Challenge.
 
 - **Recording.** When persistence is authorized, record it with the evidence owner's `CHALLENGES` relation to the authorities it may concern, bound as below, plus its current non-blocking disposition.
-- **Inquiry status.** Keep exploratory/confirmatory inquiry status separate from evidence strength, applicability and Challenge disposition. One exploratory counterexample can already warrant Serious Challenge; a confirmatory label proves neither strength nor independence.
+- **Inquiry status.** Record the finding's exploratory/confirmatory inquiry status as the evidence owner defines it on `CHALLENGES`.
 - **Accumulation.** Findings that stay independent after a common-mode check against shared data, oracle or model may together meet the Serious Challenge threshold. Repetition of one exploratory finding does not.
 
 **Bounded claim.** SSDP does not promise exhaustive retrieval from homes it does not control. It guarantees broad binding when a tension is persisted, a bounded disclosed search over stated scopes when authority is relied on or revised, and no silent loss at a revision boundary.
@@ -346,14 +346,7 @@ With these, later contexts do not read an AI hypothesis as established. Persiste
 
 ## Human gate evidence
 
-The Channel C contract lives in the workflow owner. It requires:
-
-- a scientifically intelligible projection adequate to the decision, not only labels, digests, conclusions, locations or raw logs;
-- for consequential decisions, material anomalies, uncertainty, alternatives, variant-search disclosure and unresolved findings;
-- for a D1/D2 revision, the revising duty's applicability assessments with asserters. Acceptance of a revision does not ratify an assessment its gate was not shown;
-- a non-narrative evidence core separable from, and readable before, the AI's interpretation.
-
-Adequacy is a semantic judgment, not a presence predicate.
+The Channel C gate-evidence contract is owned by the [workflow](workflow-and-workplans.md) owner. That includes revision gates receiving applicability assessments. It is not restated here.
 
 ## Proportionality and non-goals
 
@@ -385,7 +378,8 @@ A small deterministic utility with material scientific effects stays in scope. A
 - replace provenance/evidence doctrine or the [science](scientific-software.md) provenance list;
 - weaken task fidelity;
 - authorize out-of-scope mutation or unrequested product features;
-- change the pre-routing kernel or Orchestrator control semantics;
+- change the pre-routing kernel, Orchestrator transition/control semantics or profile schema;
+- implement the Protocol 8 deterministic orchestrator;
 - prescribe project-specific reports as universal doctrine.
 
 Illustrative lists are never checklists.
