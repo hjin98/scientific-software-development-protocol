@@ -18,12 +18,13 @@
     "native_network": "deny",
     "protected_control_files": "settings and strict empty MCP config live under the denied evaluator-private/runtime area outside the evaluator working directory and are digest-checked across launch",
     "runtime_temp": "run-owned project temporary directory",
-    "setting_sources": "none"
+    "setting_sources": "none",
+    "subprocess_env_scrub": "disabled"
   },
   "credential_service_account_policy": {
     "ambient_credentials": "deny",
     "parent_authentication": "zero or one qualification-only auth source mapped explicitly for the Claude parent process",
-    "sandboxed_subprocess_credentials": "deny"
+    "sandboxed_subprocess_credentials": "deny (sandbox.credentials.envVars deny; explicit allow-list child environment)"
   },
   "install_mechanism": "none",
   "mcp_servers": [],

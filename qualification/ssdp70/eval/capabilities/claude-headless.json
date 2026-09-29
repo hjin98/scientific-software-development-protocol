@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "manifest_id": "claude-headless-stage-f-v4-stdio-mcp",
+  "manifest_id": "claude-headless-stage-f-v4b-stdio-mcp",
   "capabilities": {
     "catalog_root_activation": {
       "decision": "ALLOW",
@@ -8,7 +8,7 @@
     },
     "credential_secret_service_account": {
       "decision": "DENY",
-      "scope": "ambient credentials denied; at most one explicitly supplied qualification-only parent auth source is scrubbed/denied from sandboxed subprocesses"
+      "scope": "ambient credentials denied; at most one explicitly supplied qualification-only parent auth source, hidden from sandboxed subprocesses by sandbox.credentials.envVars deny (subprocess scrub mode is disabled)"
     },
     "delegation": {
       "decision": "SANDBOX/MEDIATE",

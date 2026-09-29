@@ -190,7 +190,7 @@ class SurfaceAndContainmentHostileTests(unittest.TestCase):
             env = claude.clean_env()
         self.assertEqual(env, {
             "PATH": "/bin", "LANG": "C.UTF-8",
-            "CLAUDE_CODE_SUBPROCESS_ENV_SCRUB": "1", "DISABLE_AUTOUPDATER": "1",
+            "DISABLE_AUTOUPDATER": "1",
             "CLAUDE_CODE_DISABLE_AUTO_MEMORY": "1", "CLAUDE_CODE_DISABLE_CRON": "1",
             "CLAUDE_CODE_DISABLE_ARTIFACT": "1", "CLAUDE_CODE_DISABLE_BACKGROUND_TASKS": "1",
         })

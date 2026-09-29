@@ -1,25 +1,25 @@
 {
   "evaluator": {
     "capability_manifest_sha256": "ccdf6bad6c06cb2be45c124f17ef49878f87ec0f3dc647638a505ffc022fc9c5",
-    "document_sha256": "72b69361c19d9f0c5921e5c71e7ec058775bf0bbde1814ea57ed7fc83afa8103",
+    "document_sha256": "b84d4dd2d5b9e589f4a6655d67088f4838ff0ddf318c62100d9bb6caa860f08d",
     "profile_id": "claude-code-2.1.284-sonnet5-high-local-samjin-evaluator-v4",
-    "profile_key_sha256": "4ab63ac89508abb3db1e3d3b8f977f110d5f75845c0f9429744e70e969c5884c"
+    "profile_key_sha256": "2e4264a2bb2872cb1927e5d8caf7666f8dc1ddcab8e396f59742f02e35d4160d"
   },
   "executor": {
-    "capability_manifest_sha256": "2bb6e91ea2aa6ef94260ce2b3c3d4b604c7d9f146c73d34c4bc65e779aa5f0e1",
-    "document_sha256": "b39b2ba86509b3ec302133955526f331e92ecf842b5b8c09ff3bf378f010cae7",
+    "capability_manifest_sha256": "f509666dd8ebafad9da4dc898e36c99245601d0f82f5d7bb39cbb85768fd838b",
+    "document_sha256": "da9325825bb854d7b9bdc0ef98ade92ae063fc957e0526ca1949bdcce9055a2c",
     "profile_id": "claude-code-2.1.284-sonnet5-high-local-samjin-executor-v4",
-    "profile_key_sha256": "b13eab77287c468842057003a5f097458070d9450f29d21062eeb513a0a3e6e2"
+    "profile_key_sha256": "c101c27eac27b12c374636cac1cedd54da66273c60d1d337f36e0bc59237aa29"
   },
   "files": {
-    "adapters/claude.py": "ade633d92c237424ef23c315724e702eaa8f28108dec2a11d0948dd8e7ef418d",
+    "adapters/claude.py": "17de1906bcb694d0a98d7401b4bae073a36a1ea4ab272e98b00f0e55953fc6ff",
     "assess70.py": "290cd862f0431ae79ae15bb93186fefbb6de7072c1cb83d68524d7fef86d30c6",
     "capabilities/claude-evaluator-readonly.json": "28f2f5e468a6dfccf833c6463e21e19ea59df9a1a9a44838e18077bf1226fc6a",
-    "capabilities/claude-headless.json": "6acb9ef01e44f8aad83ca918735e4c59644292367639281a28f0f7048ca38c41",
+    "capabilities/claude-headless.json": "78bcc5c76b0ade12d66cbfd5c73d2c84d15d05cc561862aaa405f2acad44877e",
     "core70.py": "52333a431f0a6cf249f0f9ef1c68b22d02f1a0225b66f0e5e571aa4cd64d5379",
     "harness70.py": "b879b6c1a388c5c2b1ba88bf7261f80d459d64d8902d3d80e51d016c9fcdb983",
-    "profiles/claude-evaluator-readonly.template.json": "1a4061aa31550c86d3f76c71784c96aae693f12181a588d1adf802bc802b285e",
-    "profiles/claude-headless.template.json": "f864466287b4616c44b13621bbde177b23fe7e0826a6c3429355c1146ee45e2f",
+    "profiles/claude-evaluator-readonly.template.json": "6ee293fa1b32111be4e96f0b64a14f2fc98768ce16b01a08affc9416ae3d3ae2",
+    "profiles/claude-headless.template.json": "25e99b118924db52d25e9c8210f211996535dbfb0fb161356e691875c2d7d07a",
     "stub_tools/mediator.py": "e51f0641907215c9d5a0acb607f967363fc7491fa572a70cfb8701acd2308c2e"
   },
   "runtime": {

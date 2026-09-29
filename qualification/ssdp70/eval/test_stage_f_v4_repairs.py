@@ -336,7 +336,8 @@ class BlockedAttemptTests(unittest.TestCase):
 
 
 class RuntimeCreatedEntriesTests(unittest.TestCase):
-    """D-C and D-E: exact, digest-bound, fail-closed handling of runtime-created project entries."""
+    """D-C and D-E after live evidence: scrub mode is disabled (no project stubs, no widened write policy);
+    `.claude/.cc-writes` is the only runtime-created entry and is accepted exactly."""
 
     def setUp(self):
         self.td = tempfile.TemporaryDirectory()
@@ -350,56 +351,43 @@ class RuntimeCreatedEntriesTests(unittest.TestCase):
 
     def fixture(self):
         (self.project / "README.md").write_text("fixture\n")
-        (self.project / "src").mkdir()
+        (self.project / "src").mkdir(exist_ok=True)
         (self.project / "src" / "a.py").write_text("x = 1\n")
-        (self.project / "data").mkdir()
-        (self.project / "data" / "d.csv").write_text("1,2\n")
-        (self.project / "tests").mkdir()
-        (self.project / "tests" / "t.py").write_text("pass\n")
-        (self.project / ".claude" / "skills").mkdir(parents=True)
+        (self.project / ".claude" / "skills").mkdir(parents=True, exist_ok=True)
         (self.project / ".claude" / "settings.json").write_bytes(claude.PROJECT_SETTINGS_BYTES)
 
-    def runtime_creates(self, skip=(), cc_writes=True):
-        for name in claude.RUNTIME_STUB_FILES:
-            if name not in skip:
-                (self.project / name).write_text("")
-        if "node_modules" not in skip:
-            (self.project / "node_modules" / ".bin").mkdir(parents=True)
-        for name in ("agents", "commands"):
-            (self.project / ".claude" / name).mkdir()
-        if cc_writes:
-            (self.project / ".claude" / ".cc-writes").mkdir(mode=0o700)
-
-    def inspect(self):
-        baseline = self.baseline
-        return claude.inspect_runtime_entries(self.profile, self.project, baseline)
+    def inspect(self, profile=None, baseline="unset"):
+        baseline = self.baseline if baseline == "unset" else baseline
+        return claude.inspect_runtime_entries(profile or self.profile, self.project, baseline)
 
     def prepared(self):
         self.fixture()
         self.baseline = claude.runtime_entry_baseline(self.profile, self.project)
-        self.runtime_creates()
 
-    def test_allowlist_is_exactly_the_observed_seventeen_files_and_directories(self):
-        self.assertEqual(len(claude.RUNTIME_STUB_FILES), 17)
-        self.assertEqual(
-            sorted(claude.RUNTIME_STUB_FILES),
-            sorted([".env", ".env.development", ".env.development.local", ".env.local", ".env.production",
-                    ".env.production.local", ".env.test", ".env.test.local", ".gitmodules", ".npmrc", ".yarnrc",
-                    ".yarnrc.yml", "bunfig.toml", "package.json", "package-lock.json", "pnpm-lock.yaml", "yarn.lock"]),
-        )
-        self.assertEqual(claude.PROJECT_CLAUDE_RUNTIME_EMPTY_DIRS, {".cc-writes", "agents", "commands"})
-        canonical = json.dumps(claude.RUNTIME_CREATED_ENTRIES, sort_keys=True, separators=(",", ":")).encode()
+    def test_allowlist_is_exactly_the_claude_directories_and_digest_bound(self):
         import hashlib
+        self.assertEqual(claude.PROJECT_CLAUDE_RUNTIME_EMPTY_DIRS, {".cc-writes", "agents", "commands"})
+        self.assertEqual(claude.RUNTIME_CREATED_ENTRIES["subprocess_env_scrub"], "disabled")
+        canonical = json.dumps(claude.RUNTIME_CREATED_ENTRIES, sort_keys=True, separators=(",", ":")).encode()
         self.assertEqual(claude.RUNTIME_CREATED_ENTRIES_SHA256, hashlib.sha256(canonical).hexdigest())
         self.assertEqual(self.profile["containment_policy"]["runtime_created_entries_sha256"], claude.RUNTIME_CREATED_ENTRIES_SHA256)
+        self.assertEqual(self.profile["containment_policy"]["subprocess_env_scrub"], "disabled")
+        self.assertEqual(len(claude.SCRUB_MODE_STUB_NAMES), 17)
 
-    def test_real_final_tree_listings_are_explained_by_the_allowlist(self):
-        visible_stub_names = {name for name in claude.RUNTIME_STUB_FILES if not name.startswith(".")} | {"node_modules"}
+    def test_real_v3_listings_show_the_scrub_mode_signature_that_v4_treats_as_inadmissible(self):
+        """The 27 live v3 runs carried the stubs because scrub mode was on; v4 rejects that signature."""
+        visible = {name for name in claude.SCRUB_MODE_STUB_NAMES if not name.startswith(".")} | {"node_modules"}
         for run in v4_support.RUNS:
             names = set((v4_support.INPUTS / run / "final-tree-listing.txt").read_text(encoding="utf-8").split())
-            self.assertEqual(names - FIXTURE_FILES, visible_stub_names & names, run)
-            self.assertEqual(names & visible_stub_names, visible_stub_names, run)  # all runs carried the full visible set
-            self.assertTrue(FIXTURE_FILES <= names, run)
+            self.assertEqual(names - FIXTURE_FILES, visible & names, run)
+            self.assertEqual(names & visible, visible, run)
+        self.prepared()
+        for name in claude.SCRUB_MODE_STUB_NAMES:
+            (self.project / name).write_text("")
+        (self.project / "node_modules" / ".bin").mkdir(parents=True)
+        result = self.inspect()
+        self.assertTrue(any("scrub-mode start-up signature" in e for e in result["errors"]), result["errors"])
+        self.assertEqual(result["exclude_paths"], [])
 
     def test_real_v3_cc_writes_failures_are_exactly_the_reviewed_entry(self):
         seen = 0
@@ -409,10 +397,8 @@ class RuntimeCreatedEntriesTests(unittest.TestCase):
             for reason in summary["profile_claim_errors"]:
                 prefix = "unexpected entries appeared in project .claude during execution: "
                 self.assertTrue(reason.startswith(prefix), reason)
-                extras = ast.literal_eval(reason[len(prefix):])
-                self.assertEqual(extras, [".cc-writes"])
+                self.assertEqual(ast.literal_eval(reason[len(prefix):]), [".cc-writes"])
                 seen += 1
-                # the same state is now the reviewed empty directory and is accepted
                 (self.project / ".claude" / ".cc-writes").mkdir(exist_ok=True)
                 self.assertEqual(claude.validate_post_run_project_state(self.profile, self.project), [])
         self.assertEqual(seen, 2)  # N06 and N20 in the staged set (11 in the full live set)
@@ -426,12 +412,12 @@ class RuntimeCreatedEntriesTests(unittest.TestCase):
         self.assertTrue(any("['.cc-writes']" in e for e in claude.validate_post_run_project_state(self.profile, self.project)))
         (cc / "leak").unlink()
         cc.rmdir()
-        (self.project / ".claude" / ".cc-writes").write_text("")  # a file, not the reviewed directory
+        cc.write_text("")  # a file, not the reviewed directory
         self.assertTrue(any("['.cc-writes']" in e for e in claude.validate_post_run_project_state(self.profile, self.project)))
-        (self.project / ".claude" / ".cc-writes").unlink()
+        cc.unlink()
         target = self.root / "elsewhere"
         target.mkdir()
-        os.symlink(target, self.project / ".claude" / ".cc-writes")
+        os.symlink(target, cc)
         self.assertTrue(any("['.cc-writes']" in e for e in claude.validate_post_run_project_state(self.profile, self.project)))
 
     def test_every_other_project_claude_change_stays_inadmissible(self):
@@ -446,133 +432,73 @@ class RuntimeCreatedEntriesTests(unittest.TestCase):
         (self.project / ".claude" / "settings.local.json").write_text("{}\n")
         self.assertTrue(any("unexpected entries" in e for e in claude.validate_post_run_project_state(self.profile, self.project)))
 
-    def test_exact_set_verifies_and_is_the_only_exclusion(self):
+    def test_clean_run_retains_raw_evidence_and_excludes_nothing(self):
         self.prepared()
-        (self.project / ".bashrc").write_text("")  # not part of the reviewed set
+        (self.project / ".claude" / ".cc-writes").mkdir()
+        (self.project / "package.json").write_text('{"created": "by the agent"}')  # visible, never hidden
         result = self.inspect()
         self.assertEqual(result["errors"], [])
-        self.assertEqual(result["exclude_paths"], sorted(list(claude.RUNTIME_STUB_FILES) + ["node_modules"]))
+        self.assertEqual(result["exclude_paths"], [])
         record = result["record"]
         self.assertEqual(record["allowlist_sha256"], claude.RUNTIME_CREATED_ENTRIES_SHA256)
-        self.assertEqual(record["frozen_allowlist_sha256"], claude.RUNTIME_CREATED_ENTRIES_SHA256)
-        self.assertEqual(len(record["project_root_placeholders"]), 18)
-        self.assertTrue(all(row["verified_runtime_placeholder"] for row in record["project_root_placeholders"].values()))
-        listing = {row["name"] for row in record["project_root_raw_listing"]}
-        self.assertTrue(set(claude.RUNTIME_STUB_FILES) <= listing and ".bashrc" in listing)  # raw list retained
-        self.assertNotIn(".bashrc", result["exclude_paths"])
+        self.assertEqual(sorted(record["scrub_mode_stub_entries_not_owned_by_fixture"]), ["package.json"])
         self.assertIn(".cc-writes", record["project_claude_entries"])
+        self.assertIn("package.json", {row["name"] for row in record["project_root_raw_listing"]})
 
-    def test_final_tree_and_diff_hide_only_the_verified_set(self):
+    def test_final_tree_and_diff_show_everything_and_ignore_runtime_exclude_edits(self):
         self.fixture()
         subprocess.run(["git", "init", "-q"], cwd=self.project, check=True)
         (self.project / ".git" / "info").mkdir(exist_ok=True)
         (self.project / ".git" / "info" / "exclude").write_text(harness70.PROJECT_GIT_EXCLUDE)
         subprocess.run(["git", "add", "-A"], cwd=self.project, check=True)
         subprocess.run(["git", "-c", "user.email=e@x.invalid", "-c", "user.name=e", "commit", "-qm", "fixture"], cwd=self.project, check=True)
-        self.baseline = claude.runtime_entry_baseline(self.profile, self.project)
-        self.runtime_creates()
-        # the runtime appended its stub names to .git/info/exclude, hiding files from git: restored before diff
+        # the executor (or a runtime) edits .git/info/exclude to hide a path: restored before the diff
         with (self.project / ".git" / "info" / "exclude").open("a") as handle:
-            handle.write("# claude-code scrub-mode stubs\n" + "".join(f"/{n}\n" for n in claude.RUNTIME_STUB_FILES))
-        (self.project / "src" / "a.py").write_text("x = 2\n")  # legitimate executor edit
-        (self.project / "src" / "new.py").write_text("y = 3\n")  # legitimate executor creation
-        (self.project / ".bashrc").write_text("")  # unreviewed entry stays visible to the oracles
-        result = self.inspect()
-        self.assertEqual(result["errors"], [])
+            handle.write("/hidden.txt\n")
+        (self.project / "hidden.txt").write_text("x")
+        (self.project / "src" / "a.py").write_text("x = 2\n")
         out = self.root / "out"
         out.mkdir()
-        diff = harness70.capture_project_state(self.project, out, result["exclude_paths"])
+        diff = harness70.capture_project_state(self.project, out, [])
         tree = {p.relative_to(out / "final-tree").as_posix() for p in (out / "final-tree").rglob("*")}
-        self.assertEqual(
-            tree,
-            {"README.md", "src", "src/a.py", "src/new.py", "data", "data/d.csv", "tests", "tests/t.py", ".bashrc"},
-        )
+        self.assertEqual(tree, {"README.md", "src", "src/a.py", "hidden.txt"})
+        self.assertIn("hidden.txt", diff)
         self.assertIn("src/a.py", diff)
-        self.assertIn("src/new.py", diff)
-        self.assertIn(".bashrc", diff)
-        for name in claude.RUNTIME_STUB_FILES:
-            self.assertNotIn(f"b/{name}\n", diff + "\n")
-            self.assertNotIn(f"b/{name} ", diff)
-        self.assertNotIn("node_modules", diff)
-        # raw evidence is unaffected by the exclusion
-        self.assertTrue((self.project / "package.json").exists())
 
-    def test_any_deviation_fails_closed_and_excludes_nothing(self):
-        cases = {}
-
-        def nonempty():
-            (self.project / "package.json").write_text("{}")
-        cases["non-empty stub"] = (nonempty, "'package.json' is not empty")
-
-        def as_dir():
-            (self.project / "yarn.lock").unlink()
-            (self.project / "yarn.lock").mkdir()
-        cases["stub replaced by directory"] = (as_dir, "'yarn.lock' is not a regular file")
-
-        def as_link():
-            (self.project / ".npmrc").unlink()
-            os.symlink(self.root, self.project / ".npmrc")
-        cases["stub replaced by symlink"] = (as_link, "'.npmrc' is not a regular file (symlink)")
-
-        def missing():
-            (self.project / ".env.local").unlink()
-        cases["stub missing"] = (missing, "'.env.local' is absent")
-
-        def extra_in_node_modules():
-            (self.project / "node_modules" / "evil").mkdir()
-        cases["unexpected node_modules child"] = (extra_in_node_modules, "unexpected entry node_modules/evil")
-
-        def bin_nonempty():
-            (self.project / "node_modules" / ".bin" / "x").write_text("")
-        cases["non-empty node_modules/.bin"] = (bin_nonempty, "unexpected entry node_modules/.bin")
-
-        def node_modules_link():
-            shutil.rmtree(self.project / "node_modules")
-            os.symlink(self.root, self.project / "node_modules")
-        cases["node_modules symlink"] = (node_modules_link, "'node_modules' is not a real directory (symlink)")
-
-        for label, (mutate, needle) in cases.items():
-            with self.subTest(label):
-                shutil.rmtree(self.project)
-                self.project.mkdir()
-                self.prepared()
-                mutate()
-                result = self.inspect()
-                self.assertTrue(any(needle in e for e in result["errors"]), (label, result["errors"]))
-                self.assertEqual(result["exclude_paths"], [])
-                self.assertEqual(result["record"]["verified_exclusions"], [])
-
-    def test_fixture_owned_entry_with_a_reviewed_name_is_never_excluded(self):
+    def test_missing_stub_entries_are_not_an_error_and_fixture_owned_names_are_ignored(self):
         self.fixture()
         (self.project / "package.json").write_text('{"name": "fixture"}\n')
         self.baseline = claude.runtime_entry_baseline(self.profile, self.project)
-        self.runtime_creates(skip={"package.json"})
         result = self.inspect()
         self.assertEqual(result["errors"], [])
-        self.assertNotIn("package.json", result["exclude_paths"])
-        self.assertTrue(result["record"]["project_root_placeholders"]["package.json"]["fixture_owned"])
+        self.assertEqual(result["record"]["scrub_mode_stub_entries_not_owned_by_fixture"], {})
 
-    def test_allowlist_digest_is_bound_to_the_frozen_profile(self):
+    def test_allowlist_digest_and_baseline_are_bound(self):
         tampered = copy.deepcopy(self.profile)
         tampered["containment_policy"]["runtime_created_entries_sha256"] = "0" * 64
-        self.fixture()
-        baseline = claude.runtime_entry_baseline(tampered, self.project)
-        self.runtime_creates()
-        result = claude.inspect_runtime_entries(tampered, self.project, baseline)
-        self.assertTrue(any("digest does not match" in e for e in result["errors"]))
-        self.assertEqual(result["exclude_paths"], [])
+        self.prepared()
+        self.assertTrue(any("digest does not match" in e for e in self.inspect(tampered)["errors"]))
         missing = copy.deepcopy(self.profile)
         missing["containment_policy"].pop("runtime_created_entries_sha256")
-        result = claude.inspect_runtime_entries(missing, self.project, baseline)
-        self.assertTrue(any("digest does not match" in e for e in result["errors"]))
+        self.assertTrue(any("digest does not match" in e for e in self.inspect(missing)["errors"]))
+        self.assertTrue(any("baseline is missing" in e for e in self.inspect(baseline=None)["errors"]))
 
-    def test_missing_baseline_fails_closed(self):
-        self.prepared()
-        result = claude.inspect_runtime_entries(self.profile, self.project, None)
-        self.assertTrue(any("baseline is missing" in e for e in result["errors"]))
+    def test_scrub_mode_can_neither_be_frozen_nor_inherited(self):
+        for value in ("enabled", None):
+            profile = copy.deepcopy(self.profile)
+            if value is None:
+                profile["containment_policy"].pop("subprocess_env_scrub")
+            else:
+                profile["containment_policy"]["subprocess_env_scrub"] = value
+            with self.assertRaises(RuntimeError) as caught:
+                claude._require_frozen_runtime_entries_digest(profile)
+            self.assertIn("subprocess_env_scrub", str(caught.exception))
+        with patch.dict(os.environ, {"CLAUDE_CODE_SUBPROCESS_ENV_SCRUB": "1", "PATH": "/bin"}, clear=True):
+            self.assertNotIn("CLAUDE_CODE_SUBPROCESS_ENV_SCRUB", claude.clean_env())
 
-    def test_evaluator_profile_is_not_subject_to_the_executor_placeholder_check(self):
+    def test_evaluator_profile_is_not_subject_to_the_executor_entry_check(self):
         evaluator = json.loads((HERE / "profiles" / "claude-evaluator-readonly.template.json").read_text(encoding="utf-8"))
+        self.assertEqual(evaluator["containment_policy"]["subprocess_env_scrub"], "disabled")
         self.assertIsNone(claude.runtime_entry_baseline(evaluator, self.project))
         self.assertEqual(claude.inspect_runtime_entries(evaluator, self.project, None), {"record": None, "exclude_paths": [], "errors": []})
 
@@ -717,7 +643,8 @@ class ScopedFilePermissionTests(unittest.TestCase):
         self.assertIn(str(self.private.resolve()), sandbox["filesystem"]["denyRead"])
         self.assertIn(str(self.host_home.resolve()), sandbox["filesystem"]["denyRead"])
         names = {row["name"] for row in sandbox["credentials"]["envVars"]}
-        self.assertTrue({"CLAUDE_CODE_OAUTH_TOKEN", "ANTHROPIC_API_KEY", "SSH_AUTH_SOCK"} <= names)
+        self.assertTrue({"CLAUDE_CODE_OAUTH_TOKEN", "ANTHROPIC_API_KEY", "SSH_AUTH_SOCK", "SSDP70_ANTHROPIC_API_KEY"} <= names)
+        self.assertNotIn("CLAUDE_CODE_SUBPROCESS_ENV_SCRUB", self.env)
         self.assertIs(self.settings["disableAllHooks"], True)
         self.assertEqual(self.document["realization"]["native_file_tool_scope"], "run-project-only")
 
@@ -925,10 +852,7 @@ class ReplayAdapter:
 
     def launch(self, profile, prompt, project, env):
         stdout = v4_support.trace_text(self.run).replace(v4_support.recorded_project(self.run), str(project))
-        if self.simulate:
-            for name in claude.RUNTIME_STUB_FILES:
-                (project / name).write_text("")
-            (project / "node_modules" / ".bin").mkdir(parents=True, exist_ok=True)
+        if self.simulate:  # what the runtime still creates with scrub disabled (Bash tool staging dir)
             for name in ("agents", "commands"):
                 (project / ".claude" / name).mkdir(exist_ok=True)
             if "Bash" in stdout:
@@ -1031,7 +955,8 @@ class RealTraceHarnessEndToEndTests(ReplayHarnessBase):
                 tree = {p.relative_to(out / "final-tree").as_posix() for p in (out / "final-tree").rglob("*")}
                 self.assertEqual(tree, {"README.md", "src", "src/a.py", "data", "data/d.csv", "tests", "tests/t.py"}, run)
                 record = json.loads((out / "runtime-created-entries.json").read_text(encoding="utf-8"))
-                self.assertEqual(record["verified_exclusions"], sorted(list(claude.RUNTIME_STUB_FILES) + ["node_modules"]), run)
+                self.assertEqual(record["errors"], [], run)
+                self.assertEqual(record["scrub_mode_stub_entries_not_owned_by_fixture"], {}, run)
                 self.assertEqual(core70.validate_evidence_integrity(out, self.requirements), [], run)
 
     def test_designed_turn_cap_stays_an_execution_error_with_clean_evidence(self):
@@ -1040,14 +965,22 @@ class RealTraceHarnessEndToEndTests(ReplayHarnessBase):
         self.assertEqual(summary["normalized_event_errors"], [])
         self.assertEqual(summary["normalization_completeness_errors"], [])
 
-    def test_a_dirty_runtime_placeholder_makes_the_real_run_inadmissible(self):
-        def dirty(project):
-            (project / "package.json").write_text("{}")
-        summary, out = self.replay("N20-ordinary-control-ls-p70-r0", extra=dirty)
+    def test_scrub_mode_signature_makes_the_real_run_inadmissible_and_stays_visible(self):
+        def scrub_mode(project):
+            for name in claude.SCRUB_MODE_STUB_NAMES:
+                (project / name).write_text("")
+        summary, out = self.replay("N20-ordinary-control-ls-p70-r0", extra=scrub_mode)
         self.assertEqual(summary["evidence_state"], "INADMISSIBLE")
-        self.assertTrue(any("'package.json' is not empty" in r for r in summary["evidence_state_reasons"]))
-        tree = {p.name for p in (out / "final-tree").iterdir()}
-        self.assertIn("package.json", tree)  # nothing hidden from the oracles when the evidence is suspect
+        self.assertTrue(any("scrub-mode start-up signature" in r for r in summary["evidence_state_reasons"]))
+        self.assertIn("package.json", {p.name for p in (out / "final-tree").iterdir()})
+
+    def test_a_file_the_agent_creates_with_a_stub_name_is_visible_and_admissible(self):
+        def created(project):
+            (project / "package.json").write_text("{}")
+        summary, out = self.replay("N20-ordinary-control-ls-p70-r0", extra=created)
+        self.assertEqual(summary["evidence_state"], "COMPLETE_ADMISSIBLE")
+        self.assertIn("package.json", {p.name for p in (out / "final-tree").iterdir()})
+        self.assertIn("package.json", (out / "diff.patch").read_text(encoding="utf-8"))
 
     def test_unexpected_project_claude_entry_still_inadmissible(self):
         def hook(project):

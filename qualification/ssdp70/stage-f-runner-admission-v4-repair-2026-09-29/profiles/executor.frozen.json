@@ -11,7 +11,7 @@
     "denied_read_roots": "harness-private/runtime state, host HOME, /home, /root, /run/user, /proc, /mnt, /media, /srv, /var/tmp",
     "enforcement": "required-before-launch",
     "filesystem_read": "native Read/Glob/Grep: run-owned project (including the installed package) only, refused elsewhere by permissions.blockReadsOutsideWorkingDirectories plus project-scoped permission rules and denied roots; Bash: sandboxed, host user/custody/run-state roots denied, immutable OS runtime reads only as needed by declared Bash families",
-    "filesystem_write": "run-owned project only for native Write/Edit (project-scoped permission rules, no bare allow) and for Bash (sandbox allowWrite); everything else, including /tmp outside the project, denied",
+    "filesystem_write": "run-owned project only for native Write/Edit (project-scoped permission rules, no bare allow) and for Bash (sandbox allowWrite; CLAUDE_CODE_SUBPROCESS_ENV_SCRUB is disabled because scrub mode adds allowWrite for /home /root /tmp /var /opt /run /mnt); everything else, including /tmp outside the project, denied",
     "kind": "claude-code-restricted-sandbox-v1",
     "mcp_stdio_required": true,
     "mediator_required": false,
@@ -19,15 +19,16 @@
     "native_file_tools": "run-project-scoped: the adapter alone grants Read/Edit/Write as permission rules scoped to the run project and sets permissions.blockReadsOutsideWorkingDirectories; a bare or path-argument Read/Glob/Grep/Edit/Write in native_allowed_tools is refused; a denied read root that contains the project is refused",
     "native_network": "deny",
     "protected_control_files": "settings and strict qualification-owned MCP config live under the denied harness-private/runtime area outside the executor working directory; settings, config, and private MCP server executable are digest-checked across launch; the loaded project settings source is a fixed empty document, hooks are disabled, project .claude is write-denied and re-verified after execution",
-    "runtime_created_entries": "reviewed exact digest-bound set of zero-size runtime-created project placeholders (17 root files, node_modules with only an empty .bin, .claude/.cc-writes, agents, commands empty directories): existence/type/zero-size verified after every run, retained raw in runtime-created-entries.json, excluded only as that exact set from the final tree and diff, any deviation is INADMISSIBLE",
-    "runtime_created_entries_sha256": "c82fac2d791de95b1a854110e5c8606ee685f56daedde05a89f05318c3b9adcf",
+    "runtime_created_entries": "reviewed exact digest-bound set of entries the runtime still creates with scrub disabled: an empty .claude/.cc-writes directory (plus empty agents/commands directories); retained raw in runtime-created-entries.json; nothing is excluded from the final tree or diff; the scrub-mode start-up stub signature (17 named files) is INADMISSIBLE",
+    "runtime_created_entries_sha256": "9522006cb3e934887955b50f03dc9849c6c6dc4fab2377c042707ea59d5529bf",
     "runtime_temp": "run-owned project temporary directory",
-    "setting_sources": "project"
+    "setting_sources": "project",
+    "subprocess_env_scrub": "disabled"
   },
   "credential_service_account_policy": {
     "ambient_credentials": "deny",
     "parent_authentication": "zero or one qualification-only auth source mapped explicitly for the Claude parent process",
-    "sandboxed_subprocess_credentials": "deny"
+    "sandboxed_subprocess_credentials": "deny (sandbox.credentials.envVars deny, enforced by the sandbox layer, including the SSDP70_* source names; child environment is an explicit allow-list; MCP server runs under env -i)"
   },
   "install_mechanism": "project-local skill package",
   "mcp_servers": [

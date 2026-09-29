@@ -46,7 +46,7 @@ MCP_ISSUE_MUTATION_TOOLS = {
 MCP_DELEGATE_TOOL = f"{MCP_TOOL_PREFIX}delegate"
 SAFE_ENV_KEYS = {
     "PATH", "LANG", "LC_ALL", "LC_CTYPE", "TERM",
-    "SSL_CERT_FILE", "SSL_CERT_DIR", "CLAUDE_CODE_SUBPROCESS_ENV_SCRUB", "DISABLE_AUTOUPDATER",
+    "SSL_CERT_FILE", "SSL_CERT_DIR", "DISABLE_AUTOUPDATER",
     "CLAUDE_CODE_DISABLE_AUTO_MEMORY", "CLAUDE_CODE_DISABLE_CRON",
     "CLAUDE_CODE_DISABLE_ARTIFACT", "CLAUDE_CODE_DISABLE_BACKGROUND_TASKS",
 }
@@ -68,25 +68,30 @@ PROJECT_CLAUDE_ALLOWED_ENTRIES = {"skills", "settings.json"}
 PATH_SCOPED_TOOLS = frozenset({"Read", "Glob", "Grep", "Edit", "Write", "NotebookEdit", "MultiEdit", "LSP"})
 PERMISSION_PATH_UNSAFE = frozenset("*?[]{}!\\\n\r\t\"'`$")
 
-# Reviewed, exact set of entries the Claude Code runtime itself creates in the run project. Observed in
-# 27 live episodes (Claude Code 2.1.284) and traced to runtime code: with CLAUDE_CODE_SUBPROCESS_ENV_SCRUB
-# set (kept for credential isolation) the runtime creates these zero-size stubs and directories in the
-# launch working directory as bubblewrap mount points; the Bash tool creates an empty `.claude/.cc-writes`
-# directory. The only runtime switch that skips the stubs is a "diskless" host launch option that also
-# removes shell execution, so prevention is not available for this profile and the set is allow-listed
-# instead. The digest of this document is frozen in the profile key (containment_policy).
-RUNTIME_STUB_FILES = (
+# CLAUDE_CODE_SUBPROCESS_ENV_SCRUB ("scrub mode") is NOT set (v4). Live evidence (operator run of
+# live_verify_v4.py) showed that scrub mode is the root cause of two defects, both traced to runtime code:
+#   * its start-up creates zero-size stubs (17 root files, node_modules/.bin, .claude/agents|commands) in
+#     the launch working directory (D-E), and
+#   * its sandbox profile adds `allowWrite` for /home /root /tmp /var /opt /run /mnt, which our
+#     denyWrite (project-local run roots live under /tmp) cannot subtract without shadowing the project:
+#     a shell `python3` write to /tmp persisted (C-1).
+# Credential isolation does not depend on scrub: `sandbox.credentials.envVars` deny is enforced by the
+# sandbox layer itself (runtime settings schema), the child environment is an explicit allow-list, and the
+# MCP server runs under `env -i`. The reviewed stub names are kept only as the *signature* of scrub mode:
+# if all of them appear although scrub is disabled, the run is INADMISSIBLE.
+SCRUB_MODE_STUB_NAMES = (
     ".env", ".env.development", ".env.development.local", ".env.local", ".env.production",
     ".env.production.local", ".env.test", ".env.test.local", ".gitmodules", ".npmrc", ".yarnrc",
     ".yarnrc.yml", "bunfig.toml", "package.json", "package-lock.json", "pnpm-lock.yaml", "yarn.lock",
 )
+SCRUB_ENV_VAR = "CLAUDE_CODE_SUBPROCESS_ENV_SCRUB"
+# Reviewed, exact set of entries the runtime still creates in the run project with scrub disabled: the Bash
+# tool's empty `.claude/.cc-writes` directory (a supported prevention was not found) plus the empty
+# `agents`/`commands` directories tolerated since v3. Its digest is frozen in the profile key.
 RUNTIME_CREATED_ENTRIES = {
-    "schema": 1,
+    "schema": 2,
     "runtime": "claude-code",
-    "project_root": {
-        "empty_regular_files": sorted(RUNTIME_STUB_FILES),
-        "directories": {"node_modules": {"empty_directories": [".bin"]}},
-    },
+    "subprocess_env_scrub": "disabled",
     "project_claude": {"empty_directories": [".cc-writes", "agents", "commands"]},
 }
 RUNTIME_CREATED_ENTRIES_SHA256 = hashlib.sha256(
@@ -110,7 +115,6 @@ def clean_env() -> dict[str, str]:
         _, target, value = supplied[0]
         env[target] = value
         env["SSDP70_AUTH_MODE"] = target
-    env["CLAUDE_CODE_SUBPROCESS_ENV_SCRUB"] = "1"
     env["DISABLE_AUTOUPDATER"] = "1"
     env["CLAUDE_CODE_DISABLE_AUTO_MEMORY"] = "1"
     env["CLAUDE_CODE_DISABLE_CRON"] = "1"
@@ -247,7 +251,13 @@ def _runtime_entries_applicable(profile: dict[str, Any]) -> bool:
 
 
 def _require_frozen_runtime_entries_digest(profile: dict[str, Any]) -> None:
-    """The reviewed runtime-created-entry allow-list is digest-bound to the frozen profile."""
+    """The reviewed runtime-created-entry allow-list is digest-bound to the frozen profile; scrub stays disabled."""
+    policy = profile.get("containment_policy") or {}
+    if policy.get("kind") == "claude-code-restricted-sandbox-v1" and policy.get("subprocess_env_scrub") != "disabled":
+        raise RuntimeError(
+            "containment_policy.subprocess_env_scrub must be frozen as 'disabled': scrub mode makes /tmp and other "
+            "trees writable to the sandboxed shell and creates runtime stubs in the project"
+        )
     if not _runtime_entries_applicable(profile):
         return
     frozen = (profile.get("containment_policy") or {}).get("runtime_created_entries_sha256")
@@ -386,7 +396,9 @@ def _containment_document(profile: dict[str, Any], project: Path, env: dict[str,
                 "envVars": [
                     {"name": name, "mode": "deny"}
                     for name in (
-                        "CLAUDE_CODE_OAUTH_TOKEN", "ANTHROPIC_API_KEY", "ANTHROPIC_AUTH_TOKEN", "AWS_ACCESS_KEY_ID",
+                        "CLAUDE_CODE_OAUTH_TOKEN", "ANTHROPIC_API_KEY", "ANTHROPIC_AUTH_TOKEN",
+                        "SSDP70_CLAUDE_CODE_OAUTH_TOKEN", "SSDP70_ANTHROPIC_API_KEY", "SSDP70_ANTHROPIC_AUTH_TOKEN",
+                        "AWS_ACCESS_KEY_ID",
                         "AWS_SECRET_ACCESS_KEY", "AWS_SESSION_TOKEN", "GITHUB_TOKEN",
                         "GH_TOKEN", "SSH_AUTH_SOCK",
                     )
@@ -500,6 +512,8 @@ def validate_containment_realization(profile: dict[str, Any], project: Path, env
     if forbidden:
         errors.append(f"contained environment has undeclared variables: {sorted(forbidden)}")
 
+    if SCRUB_ENV_VAR in env:
+        errors.append(f"{SCRUB_ENV_VAR} must not be set: scrub mode widens the sandbox write policy")
     auth_keys = [key for key in PARENT_AUTH_ENV if env.get(key)]
     if len(auth_keys) > 1:
         errors.append("contained environment exposes multiple parent authentication variables")
@@ -654,10 +668,9 @@ def _lstat_row(path: Path) -> dict[str, Any]:
 
 
 def _runtime_candidate_paths() -> list[str]:
-    root = RUNTIME_CREATED_ENTRIES["project_root"]
     return (
-        list(root["empty_regular_files"])
-        + list(root["directories"])
+        list(SCRUB_MODE_STUB_NAMES)
+        + ["node_modules"]
         + [f".claude/{name}" for name in RUNTIME_CREATED_ENTRIES["project_claude"]["empty_directories"]]
     )
 
@@ -686,12 +699,13 @@ def _raw_project_listing(project: Path) -> list[dict[str, Any]]:
 
 
 def inspect_runtime_entries(profile: dict[str, Any], project: Path, baseline: dict[str, Any] | None) -> dict[str, Any]:
-    """Verify the runtime-created placeholders after execution.
+    """Retain the raw runtime-created-entry evidence and fail closed on the scrub-mode signature.
 
-    Returns {"record", "exclude_paths", "errors"}. `record` is the raw evidence (retained verbatim). The
-    exact set of verified placeholders is returned in `exclude_paths` only when every listed entry
-    verifies; any deviation (non-empty, wrong type, symlink, missing, or unexpected child of a runtime
-    directory) is an error and nothing is excluded from what the oracles see.
+    Returns {"record", "exclude_paths", "errors"}. With scrub disabled the runtime creates no project stubs,
+    so nothing is excluded from the final tree or the diff (`exclude_paths` is always empty): whatever is
+    in the project is visible to the oracles. `record` keeps the raw listing, the `.claude` entries and any
+    scrub-mode stub-named entry that was not owned by the fixture. If all 17 stub names appear as
+    non-fixture entries, the runtime evidently ran in scrub mode (whose sandbox profile widens writes): INADMISSIBLE.
     """
     if not _runtime_entries_applicable(profile):
         return {"record": None, "exclude_paths": [], "errors": []}
@@ -704,56 +718,21 @@ def inspect_runtime_entries(profile: dict[str, Any], project: Path, baseline: di
     if not isinstance(prior, dict):
         errors.append("pre-launch runtime-entry baseline is missing")
         prior = {}
-    rows: dict[str, dict[str, Any]] = {}
-    verified: list[str] = []
 
     def prior_present(rel: str) -> bool:
         row = prior.get(rel)
         return isinstance(row, dict) and row.get("present") is True
 
-    root_spec = RUNTIME_CREATED_ENTRIES["project_root"]
-    for name in root_spec["empty_regular_files"]:
+    stub_entries: dict[str, dict[str, Any]] = {}
+    for name in (*SCRUB_MODE_STUB_NAMES, "node_modules"):
         now = _lstat_row(base / name)
-        row = {"observed": now, "fixture_owned": prior_present(name), "verified_runtime_placeholder": False}
-        rows[name] = row
-        if row["fixture_owned"]:
-            continue
-        if not now.get("present"):
-            errors.append(f"expected runtime placeholder {name!r} is absent after execution")
-        elif now.get("kind") != "file":
-            errors.append(f"runtime placeholder {name!r} is not a regular file ({now.get('kind')})")
-        elif now.get("size") != 0:
-            errors.append(f"runtime placeholder {name!r} is not empty (size {now.get('size')})")
-        else:
-            row["verified_runtime_placeholder"] = True
-            verified.append(name)
-    for name, spec in root_spec["directories"].items():
-        now = _lstat_row(base / name)
-        children: list[dict[str, Any]] = []
-        row = {"observed": now, "fixture_owned": prior_present(name), "children": children, "verified_runtime_placeholder": False}
-        rows[name] = row
-        if row["fixture_owned"]:
-            continue
-        if not now.get("present"):
-            errors.append(f"expected runtime directory {name!r} is absent after execution")
-            continue
-        if now.get("kind") != "directory":
-            errors.append(f"runtime directory {name!r} is not a real directory ({now.get('kind')})")
-            continue
-        allowed_children = set(spec["empty_directories"])
-        clean = True
-        for child in sorted(p.name for p in (base / name).iterdir()):
-            child_row = _lstat_row(base / name / child)
-            child_row["name"] = child
-            if child in allowed_children and child_row.get("kind") == "directory" and not any((base / name / child).iterdir()):
-                child_row["expected_empty_directory"] = True
-            else:
-                clean = False
-                errors.append(f"unexpected entry {name}/{child} inside runtime-created directory {name!r}")
-            children.append(child_row)
-        if clean:
-            row["verified_runtime_placeholder"] = True
-            verified.append(name)
+        if now.get("present") and not prior_present(name):
+            stub_entries[name] = now
+    if all(name in stub_entries for name in SCRUB_MODE_STUB_NAMES):
+        errors.append(
+            "the runtime's scrub-mode start-up signature (all 17 stub names) is present although "
+            "CLAUDE_CODE_SUBPROCESS_ENV_SCRUB is disabled; the sandbox write policy may be widened"
+        )
     claude_rows: dict[str, Any] = {}
     claude_dir = base / ".claude"
     try:
@@ -765,18 +744,17 @@ def inspect_runtime_entries(profile: dict[str, Any], project: Path, baseline: di
     except OSError as exc:
         errors.append(f"project .claude directory is unreadable after execution: {exc}")
     record = {
-        "schema": 1,
+        "schema": 2,
         "allowlist_sha256": RUNTIME_CREATED_ENTRIES_SHA256,
         "frozen_allowlist_sha256": frozen,
         "allowlist": RUNTIME_CREATED_ENTRIES,
         "baseline": prior,
-        "project_root_placeholders": rows,
+        "scrub_mode_stub_entries_not_owned_by_fixture": stub_entries,
         "project_claude_entries": claude_rows,
         "project_root_raw_listing": _raw_project_listing(base),
-        "verified_exclusions": sorted(verified) if not errors else [],
         "errors": list(errors),
     }
-    return {"record": record, "exclude_paths": sorted(verified) if not errors else [], "errors": errors}
+    return {"record": record, "exclude_paths": [], "errors": errors}
 
 
 def write_policy_stays_inside_project(filesystem: dict[str, Any], project: Path) -> bool:

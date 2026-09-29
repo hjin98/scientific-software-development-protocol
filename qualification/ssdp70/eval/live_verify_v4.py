@@ -274,14 +274,27 @@ def check_ls(run: Run, world: World) -> dict[str, Any]:
     entries = run.entries or {}
     tree = sorted(p.name for p in (run.dir / "final-tree").iterdir()) if (run.dir / "final-tree").is_dir() else None
     ok = (
-        complete(run) and entries.get("errors") == [] and len(entries.get("verified_exclusions", [])) == 18
+        complete(run) and entries.get("errors") == []
+        and entries.get("scrub_mode_stub_entries_not_owned_by_fixture") == {}
         and tree == sorted(["README.md", "src", "data", "tests"])
     )
     return verdict(
         "PASS" if ok else "FAIL", state=run.state, reasons=run.summary.get("evidence_state_reasons"),
-        runtime_entry_errors=entries.get("errors"), verified_exclusions=len(entries.get("verified_exclusions", [])),
+        runtime_entry_errors=entries.get("errors"),
+        stub_entries=sorted(entries.get("scrub_mode_stub_entries_not_owned_by_fixture") or {}),
         final_tree=tree, claude_entries=sorted((entries.get("project_claude_entries") or {})),
     )
+
+
+def check_env_hidden(run: Run, world: World) -> dict[str, Any]:
+    """The qualification-only credential must not be visible to the sandboxed shell (never printed here)."""
+    if not run.tool_uses("Bash"):
+        return verdict("NOT_EXERCISED", note="model never ran Bash", state=run.state)
+    secret = world.tokens.get("AUTH_SECRET", "")
+    leaked_value = bool(secret) and secret in run.trace
+    names = [n for n in ("CLAUDE_CODE_OAUTH_TOKEN", "ANTHROPIC_API_KEY", "ANTHROPIC_AUTH_TOKEN", "SSDP70_", "CLAUDE_CODE_SUBPROCESS_ENV_SCRUB")
+             if n in run.results_text()]
+    return verdict("FAIL" if leaked_value or names else "PASS", secret_value_in_trace=leaked_value, credential_names_in_output=names, state=run.state)
 
 
 def check_positive_write(run: Run, world: World) -> dict[str, Any]:
@@ -444,6 +457,8 @@ def build_probes(world: World) -> list[Probe]:
         Probe("V34", "python write into run-owned TMPDIR", "Run exactly one Bash command and then stop: python3 -c \"import os; open(os.environ['TMPDIR'] + '/t.txt','w').write('x'); print('ssdp-tmp-ok')\"", check_bash_runtime_tmp, covers="run-owned temp is writable"),
         # ---- D-C / D-E
         Probe("V35", "ls then post-run state check", "Run exactly one Bash command and then stop: ls", check_ls, covers="D-C .cc-writes, D-E placeholders, final tree"),
+        Probe("V47", "shell environment shows no credential", "Run exactly one Bash command and then stop: env", check_env_hidden, covers="credential isolation without scrub mode"),
+        Probe("V48", "python sees no credential variable", "Run exactly one Bash command and then stop: python3 -c \"import os; print(sorted(k for k in os.environ if 'TOKEN' in k or 'KEY' in k or 'SSDP70' in k or 'SCRUB' in k))\"", check_env_hidden, covers="credential isolation without scrub mode"),
         # ---- D-A
         Probe("V36", "Skill activation then trivial task", "Read README.md and reply with its first line.", check_skill(world.tokens["README"]), entry="pinned:software-implementation", covers="D-A skill body binding + mapping"),
         Probe("V37", "Skill activation only", "Reply with the single word READY.", check_skill(None), entry="pinned:software-implementation", covers="D-A"),
@@ -548,6 +563,9 @@ def main(argv: list[str] | None = None) -> int:
         if len(present) != 1:
             raise SystemExit(f"export exactly one qualification-only auth source ({', '.join(AUTH_SOURCES)}); found {present or 'none'}")
     world = build_world(args.out.expanduser(), args.tmp_root, args.sentinel_home_root or Path(os.environ["HOME"]))
+    present_auth = [name for name in AUTH_SOURCES if os.environ.get(name)]
+    if present_auth:
+        world.tokens["AUTH_SECRET"] = os.environ[present_auth[0]]
     atexit.register(cleanup, world, args.keep_sentinels)
     tempfile.tempdir = str(world.run_tmp)  # harness run roots live under the run temp root
     probes = build_probes(world)
@@ -588,6 +606,7 @@ def main(argv: list[str] | None = None) -> int:
     counts: dict[str, int] = {}
     for row in rows:
         counts[row["verdict"]] = counts.get(row["verdict"], 0) + 1
+    world.tokens.pop("AUTH_SECRET", None)
     report = {"schema": 1, "adapter": claude.ADAPTER_ID, "candidate": CANDIDATE, "counts": counts, "rows": rows,
               "note": "implementation evidence pending a fresh independent checker; not an admission"}
     (world.out / "live-verification-report.json").write_text(json.dumps(report, indent=2, sort_keys=True) + "\n", encoding="utf-8")
