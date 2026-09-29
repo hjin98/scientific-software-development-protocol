@@ -29,7 +29,13 @@ class FakeAdapter:
 
     @staticmethod
     def realize_containment(profile, project, env):
-        return {"fake": True}
+        return {
+            "fake": True,
+            "realization": {
+                "settings_sha256": "a" * 64,
+                "mcp_config_sha256": "b" * 64,
+            },
+        }
 
     @staticmethod
     def install_skills(dist, project):
@@ -64,6 +70,8 @@ class FakeAdapter:
                 "tools": ["Read"],
                 "allowed_tools": None,
                 "disallowed_tools": None,
+                "settings_file_sha256": "a" * 64,
+                "mcp_config_sha256": "b" * 64,
             },
         }
 
@@ -87,7 +95,13 @@ class FakeEvaluator:
 
     @staticmethod
     def realize_containment(profile, project, env):
-        return {"fake": True}
+        return {
+            "fake": True,
+            "realization": {
+                "settings_sha256": "a" * 64,
+                "mcp_config_sha256": "b" * 64,
+            },
+        }
 
     @staticmethod
     def launch(profile, prompt, project, env):
@@ -112,6 +126,8 @@ class FakeEvaluator:
                 "model": "eval",
                 "reasoning_configuration": {"effort": "fixed"},
                 "tools": ["Read"],
+                "settings_file_sha256": "a" * 64,
+                "mcp_config_sha256": "b" * 64,
             },
         }
 

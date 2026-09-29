@@ -24,19 +24,24 @@
   "containment_policy": {
     "kind": "claude-code-restricted-sandbox-v1",
     "enforcement": "required-before-launch",
-    "filesystem_read": "run-owned project only",
+    "filesystem_read": "run-owned project/package plus immutable OS runtime reads needed by declared Bash families; host user/custody/run-state roots denied",
     "filesystem_write": "run-owned project only",
     "native_network": "deny",
     "mediator_required": true,
     "ambient_host_home": "deny",
-    "ambient_credentials": "deny"
+    "ambient_credentials": "deny",
+    "runtime_temp": "run-owned project temporary directory",
+    "protected_control_files": "settings.json and .mcp.json deny-write and digest-checked across launch",
+    "denied_read_roots": "run parent, host HOME, /home, /root, /run/user, /proc, /mnt, /media, /srv, /var/tmp"
   },
   "network_external_write_policy": {
     "external_write": "sandbox-or-mediate",
     "network": "deny-native-executor-network"
   },
   "credential_service_account_policy": {
-    "ambient_credentials": "deny"
+    "ambient_credentials": "deny",
+    "parent_authentication": "zero or one qualification-only auth source mapped explicitly for the Claude parent process",
+    "sandboxed_subprocess_credentials": "deny"
   },
   "native_tools": [
     "Skill",
@@ -76,6 +81,7 @@
     "Bash(sed -n:*)"
   ],
   "native_disallowed_tools": [
+    "mcp__*",
     "Agent",
     "WebFetch",
     "WebSearch",

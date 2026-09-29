@@ -11,6 +11,7 @@ from __future__ import annotations
 import argparse
 import importlib
 import json
+import os
 import shutil
 import subprocess
 import sys
@@ -126,7 +127,10 @@ def build_project(corpus: Path, episode: dict[str, Any], project: Path) -> None:
         subprocess.run(["git", "init", "-q"], cwd=project, check=True)
     info = project / ".git" / "info"
     info.mkdir(parents=True, exist_ok=True)
-    (info / "exclude").write_text("__pycache__/\n*.pyc\n.claude/\n", encoding="utf-8")
+    (info / "exclude").write_text(
+        "__pycache__/\n*.pyc\n.claude/\n.mcp.json\n.qualification-tmp/\n",
+        encoding="utf-8",
+    )
     subprocess.run(["git", "add", "-A"], cwd=project, check=True)
     subprocess.run(
         ["git", "-c", "user.email=eval@example.invalid", "-c", "user.name=eval", "commit", "-qm", "fixture", "--allow-empty"],
@@ -327,12 +331,14 @@ def run_episode(
         project, stub, log = tmp / "project", tmp / "stub", tmp / "side-effects.jsonl"
         mediator_socket = tmp / "mediator.sock"
         runtime_home = tmp / "runtime-home"
+        runtime_tmp = project / ".qualification-tmp"
         build_project(corpus, episode, project)
         stub.mkdir()
         if episode.get("stub"):
             _yaml_tree_to_json(corpus / "stubs" / episode["stub"], stub)
         log.write_text("", encoding="utf-8")
         runtime_home.mkdir()
+        runtime_tmp.mkdir()
         adapter_module.install_skills(dist, project)
         installed_skills = project / ".claude" / "skills"
         installed_digest = core70.sha256_tree(installed_skills)
@@ -346,6 +352,9 @@ def run_episode(
             "HOME": str(runtime_home),
             "XDG_CONFIG_HOME": str(runtime_home / ".config"),
             "XDG_CACHE_HOME": str(runtime_home / ".cache"),
+            "TMPDIR": str(runtime_tmp),
+            "TMP": str(runtime_tmp),
+            "TEMP": str(runtime_tmp),
             "SSDP70_MEDIATOR_SOCKET": str(mediator_socket),
             "SSDP70_ACCOUNT": episode.get("account") or "agent-account",
         })
@@ -358,7 +367,11 @@ def run_episode(
                 "--account", env["SSDP70_ACCOUNT"],
             ],
             cwd=tmp,
-            env=adapter_module.clean_env(),
+            env={
+                key: os.environ[key]
+                for key in ("PATH", "LANG", "LC_ALL", "LC_CTYPE")
+                if key in os.environ
+            },
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
             text=True,
@@ -398,8 +411,17 @@ def run_episode(
             stdout, identity["identity_sha256"], normalization_context
         )
         runtime_observation = adapter_module.runtime_observation(stdout)
-        profile_errors.extend(core70.validate_launch_identity(profile_bundle.profile, launched.get("command_identity")))
+        command_identity = launched.get("command_identity")
+        profile_errors.extend(core70.validate_launch_identity(profile_bundle.profile, command_identity))
         profile_errors.extend(core70.validate_runtime_observation(profile_bundle, runtime_observation))
+        realization = containment.get("realization") if isinstance(containment, dict) else None
+        if not isinstance(realization, dict):
+            profile_errors.append("containment realization record is malformed")
+        elif isinstance(command_identity, dict):
+            if command_identity.get("settings_file_sha256") != realization.get("settings_sha256"):
+                profile_errors.append("launch settings bytes differ from retained containment realization")
+            if command_identity.get("mcp_config_sha256") != realization.get("mcp_config_sha256"):
+                profile_errors.append("launch MCP bytes differ from retained containment realization")
         auto_memory = (runtime_observation.get("memory_paths") or {}).get("auto") if isinstance(runtime_observation, dict) else None
         if isinstance(auto_memory, str) and auto_memory:
             try:
@@ -433,7 +455,13 @@ def run_episode(
             text=True,
         ).stdout
         (out / "diff.patch").write_text(diff, encoding="utf-8")
-        shutil.copytree(project, out / "final-tree", ignore=shutil.ignore_patterns(".git", ".claude", "__pycache__"))
+        shutil.copytree(
+            project,
+            out / "final-tree",
+            ignore=shutil.ignore_patterns(
+                ".git", ".claude", ".mcp.json", ".qualification-tmp", "__pycache__"
+            ),
+        )
 
         run_oracles(oracles, episode["id"], requirements, out)
 

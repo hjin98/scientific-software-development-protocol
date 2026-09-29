@@ -133,6 +133,25 @@ class SurfaceAndContainmentHostileTests(unittest.TestCase):
             "CLAUDE_CODE_DISABLE_BACKGROUND_TASKS": "1",
         })
 
+    def test_explicit_qualification_auth_is_the_only_parent_credential_route(self):
+        with patch.dict(os.environ, {
+            "PATH": "/bin",
+            "ANTHROPIC_API_KEY": "ambient-must-not-pass",
+            "SSDP70_ANTHROPIC_API_KEY": "qualification-only",
+        }, clear=True):
+            env = claude.clean_env()
+        self.assertEqual(env["ANTHROPIC_API_KEY"], "qualification-only")
+        self.assertEqual(env["SSDP70_AUTH_MODE"], "ANTHROPIC_API_KEY")
+        self.assertNotIn("SSDP70_ANTHROPIC_API_KEY", env)
+
+    def test_multiple_qualification_auth_sources_fail_closed(self):
+        with patch.dict(os.environ, {
+            "SSDP70_ANTHROPIC_API_KEY": "a",
+            "SSDP70_CLAUDE_CODE_OAUTH_TOKEN": "b",
+        }, clear=True):
+            with self.assertRaises(RuntimeError):
+                claude.clean_env()
+
     def test_launch_refuses_missing_containment_configuration_before_subprocess(self):
         profile = json.loads(self.profile_path.read_text(encoding="utf-8"))
         with tempfile.TemporaryDirectory() as td:
@@ -186,7 +205,66 @@ class SurfaceAndContainmentHostileTests(unittest.TestCase):
             self.assertNotIn("SSDP70_SIDE_EFFECT_LOG", env)
             self.assertIn(str(root.resolve()), sandbox["filesystem"]["denyRead"])
             self.assertIn(str(root.resolve()), sandbox["filesystem"]["denyWrite"])
+            self.assertIn("/proc", sandbox["filesystem"]["denyRead"])
+            self.assertIn(str((project / ".claude" / "settings.json").resolve()), sandbox["filesystem"]["denyWrite"])
+            self.assertIn(str((project / ".mcp.json").resolve()), sandbox["filesystem"]["denyWrite"])
             self.assertEqual(sandbox["network"]["allowUnixSockets"], [str(mediator.resolve())])
+
+    def test_control_file_mutation_during_launch_fails_closed(self):
+        profile = json.loads(self.profile_path.read_text(encoding="utf-8"))
+
+        class Proc:
+            returncode = 0
+            stdout = ""
+            stderr = ""
+
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            project = root / "project"
+            runtime_home = root / "runtime-home"
+            runtime_tmp = project / ".qualification-tmp"
+            project.mkdir()
+            runtime_home.mkdir()
+            runtime_tmp.mkdir()
+            env = claude.clean_env()
+            env.update({
+                "HOME": str(runtime_home),
+                "TMPDIR": str(runtime_tmp),
+                "TMP": str(runtime_tmp),
+                "TEMP": str(runtime_tmp),
+                "SSDP70_MEDIATOR_SOCKET": str(root / "mediator.sock"),
+                "SSDP70_ACCOUNT": "agent",
+            })
+            claude.realize_containment(profile, project, env)
+
+            def mutate_control(*args, **kwargs):
+                (project / ".mcp.json").write_text('{"mcpServers":{"forged":{}}}\n', encoding="utf-8")
+                return Proc()
+
+            with patch.object(claude.subprocess, "run", side_effect=mutate_control):
+                with self.assertRaises(RuntimeError) as caught:
+                    claude.launch(profile, "x", project, env)
+        self.assertIn("MCP configuration changed", str(caught.exception))
+
+    def test_missing_required_native_surface_fails_closed(self):
+        bundle = core70.load_profile(self.profile_path, self.capability_path)
+        capabilities = [
+            item.split(":", 1)[1]
+            for item in bundle.profile["native_surface_requirements"]
+            if item.startswith("runtime_capability:")
+            and item != "runtime_capability:mcp_tool_ui_meta_v1"
+        ]
+        observation = {
+            "model": bundle.profile["agent_model"],
+            "runtime_version": bundle.profile["provider_runtime"]["version"],
+            "tools": list(bundle.profile["native_tools"]),
+            "native_capabilities": capabilities,
+            "messaging_socket_path": "/run/user/test.sock",
+            "memory_paths": {"auto": "/tmp/run-owned-memory"},
+            "mcp_servers": [],
+        }
+        errors = core70.validate_runtime_observation(bundle, observation)
+        self.assertTrue(any("mcp_tool_ui_meta_v1" in error and "required classified native surface" in error for error in errors))
 
     def test_realized_containment_exposes_only_mediator_not_stub_or_log_paths(self):
         profile = json.loads(self.profile_path.read_text(encoding="utf-8"))

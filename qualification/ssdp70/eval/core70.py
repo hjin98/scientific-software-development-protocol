@@ -1006,6 +1006,16 @@ def validate_runtime_observation(bundle: ProfileBundle, observation: Any) -> lis
     mcp_servers = observation.get("mcp_servers")
     if mcp_servers not in (None, []):
         errors.append("runtime exposed undeclared MCP server capability")
+
+    exposed_surfaces = {f"tool:{tool}" for tool in observed_tools}
+    exposed_surfaces.update(f"runtime_capability:{capability}" for capability in observed_caps)
+    if observation.get("messaging_socket_path"):
+        exposed_surfaces.add("messaging_socket_path")
+    if isinstance(memory_paths, dict) and memory_paths.get("auto"):
+        exposed_surfaces.add("auto_memory_write")
+    for required in bundle.profile.get("native_surface_requirements", []):
+        if required not in exposed_surfaces:
+            errors.append(f"runtime did not expose required classified native surface {required!r}")
     return errors
 
 

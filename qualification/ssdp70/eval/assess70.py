@@ -262,14 +262,19 @@ def main(argv: list[str] | None = None) -> int:
         root = Path(tmp)
         bundle_root = root / "bundle"
         runtime_home = root / "runtime-home"
+        runtime_tmp = bundle_root / ".qualification-tmp"
         bundle_root.mkdir()
         runtime_home.mkdir()
+        runtime_tmp.mkdir()
         manifest = prepare_bundle(args.run, args.keys, args.shared_rubric, requirements, bundle_root)
         evaluator_env = adapter.clean_env()
         evaluator_env.update({
             "HOME": str(runtime_home),
             "XDG_CONFIG_HOME": str(runtime_home / ".config"),
             "XDG_CACHE_HOME": str(runtime_home / ".cache"),
+            "TMPDIR": str(runtime_tmp),
+            "TMP": str(runtime_tmp),
+            "TEMP": str(runtime_tmp),
         })
         containment = adapter.realize_containment(evaluator_bundle.profile, bundle_root, evaluator_env)
         (args.run / "assessment-containment-realization.json").write_text(
@@ -285,8 +290,17 @@ def main(argv: list[str] | None = None) -> int:
         text, final_event = result_text(launched["stdout"])
 
     runtime_observation = adapter.runtime_observation(launched["stdout"])
-    runtime_errors = core70.validate_launch_identity(evaluator_bundle.profile, launched.get("command_identity"))
+    command_identity = launched.get("command_identity")
+    runtime_errors = core70.validate_launch_identity(evaluator_bundle.profile, command_identity)
     runtime_errors.extend(core70.validate_runtime_observation(evaluator_bundle, runtime_observation))
+    realization = containment.get("realization") if isinstance(containment, dict) else None
+    if not isinstance(realization, dict):
+        runtime_errors.append("evaluator containment realization record is malformed")
+    elif isinstance(command_identity, dict):
+        if command_identity.get("settings_file_sha256") != realization.get("settings_sha256"):
+            runtime_errors.append("evaluator launch settings differ from retained containment realization")
+        if command_identity.get("mcp_config_sha256") != realization.get("mcp_config_sha256"):
+            runtime_errors.append("evaluator launch MCP bytes differ from retained containment realization")
     auto_memory = (runtime_observation.get("memory_paths") or {}).get("auto") if isinstance(runtime_observation, dict) else None
     if isinstance(auto_memory, str) and auto_memory:
         try:
@@ -305,7 +319,10 @@ def main(argv: list[str] | None = None) -> int:
         "qualification_core_sha256": core_sha,
         "evaluator_admission_sha256": evaluator_admission_after,
         "evaluator_runtime_observation": runtime_observation,
-        "evaluator_command_identity": launched.get("command_identity"),
+        "evaluator_command_identity": command_identity,
+        "evaluator_containment_realization_sha256": core70.sha256_file(
+            args.run / "assessment-containment-realization.json"
+        ),
         "custodian_key_tree_sha256": key_digest,
         "rubric_sha256": rubric_digest,
         "assessment_schema": 1,

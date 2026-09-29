@@ -8,7 +8,7 @@
     },
     "credential_secret_service_account": {
       "decision": "DENY",
-      "scope": "all ambient credentials; scrubbed environment"
+      "scope": "ambient credentials denied; at most one explicitly supplied qualification-only parent auth source is scrubbed/denied from evaluator tools/subprocesses"
     },
     "delegation": {
       "decision": "DENY",

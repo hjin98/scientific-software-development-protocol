@@ -30,16 +30,33 @@ MUTATION_TOOLS = {"Write", "Edit", "NotebookEdit", "MultiEdit"}
 NETWORK_TOOLS = {"WebFetch", "WebSearch"}
 DELEGATE_TOOLS = {"Agent"}
 SAFE_ENV_KEYS = {
-    "PATH", "LANG", "LC_ALL", "LC_CTYPE", "TERM", "TMPDIR", "TMP", "TEMP",
+    "PATH", "LANG", "LC_ALL", "LC_CTYPE", "TERM",
     "SSL_CERT_FILE", "SSL_CERT_DIR", "CLAUDE_CODE_SUBPROCESS_ENV_SCRUB", "DISABLE_AUTOUPDATER",
     "CLAUDE_CODE_DISABLE_AUTO_MEMORY", "CLAUDE_CODE_DISABLE_CRON",
     "CLAUDE_CODE_DISABLE_ARTIFACT", "CLAUDE_CODE_DISABLE_BACKGROUND_TASKS",
 }
+QUALIFICATION_AUTH_ENV = {
+    "SSDP70_CLAUDE_CODE_OAUTH_TOKEN": "CLAUDE_CODE_OAUTH_TOKEN",
+    "SSDP70_ANTHROPIC_API_KEY": "ANTHROPIC_API_KEY",
+    "SSDP70_ANTHROPIC_AUTH_TOKEN": "ANTHROPIC_AUTH_TOKEN",
+}
+PARENT_AUTH_ENV = set(QUALIFICATION_AUTH_ENV.values())
 
 
 def clean_env() -> dict[str, str]:
-    """Return an explicit non-credential allow-list; never inherit host HOME/tokens."""
+    """Return an explicit allow-list with no ambient HOME/tokens."""
     env = {key: os.environ[key] for key in SAFE_ENV_KEYS if key in os.environ}
+    supplied = [
+        (source, target, os.environ[source])
+        for source, target in QUALIFICATION_AUTH_ENV.items()
+        if os.environ.get(source)
+    ]
+    if len(supplied) > 1:
+        raise RuntimeError("multiple qualification authentication sources are configured")
+    if supplied:
+        _, target, value = supplied[0]
+        env[target] = value
+        env["SSDP70_AUTH_MODE"] = target
     env["CLAUDE_CODE_SUBPROCESS_ENV_SCRUB"] = "1"
     env["DISABLE_AUTOUPDATER"] = "1"
     env["CLAUDE_CODE_DISABLE_AUTO_MEMORY"] = "1"
@@ -65,10 +82,25 @@ def _containment_document(profile: dict[str, Any], project: Path, env: dict[str,
     write_policy = str(policy.get("filesystem_write") or "")
     allow_write = [] if write_policy.startswith("deny") else [str(project_resolved)]
     host_home_raw = os.environ.get("HOME")
-    denied_roots = {str(project_resolved.parent), "/root", "/run/user"}
+    denied_roots = {
+        str(project_resolved.parent),
+        "/home",
+        "/root",
+        "/run/user",
+        "/proc",
+        "/mnt",
+        "/media",
+        "/srv",
+        "/var/tmp",
+    }
     if host_home_raw:
         denied_roots.add(str(Path(host_home_raw).resolve()))
     deny_paths = sorted(path for path in denied_roots if path != str(project_resolved))
+    settings_path = project_resolved / ".claude" / "settings.json"
+    mcp_path = project_resolved / ".mcp.json"
+    deny_write_paths = sorted(set(deny_paths) | {str(settings_path), str(mcp_path)})
+    if write_policy.startswith("deny"):
+        deny_write_paths = sorted(set(deny_write_paths) | {str(project_resolved)})
     settings = {
         "sandbox": {
             "enabled": True,
@@ -86,14 +118,14 @@ def _containment_document(profile: dict[str, Any], project: Path, env: dict[str,
             "filesystem": {
                 "denyRead": deny_paths,
                 "allowRead": [str(project_resolved)],
-                "denyWrite": deny_paths,
+                "denyWrite": deny_write_paths,
                 "allowWrite": allow_write,
             },
             "credentials": {
                 "envVars": [
                     {"name": name, "mode": "deny"}
                     for name in (
-                        "ANTHROPIC_API_KEY", "ANTHROPIC_AUTH_TOKEN", "AWS_ACCESS_KEY_ID",
+                        "CLAUDE_CODE_OAUTH_TOKEN", "ANTHROPIC_API_KEY", "ANTHROPIC_AUTH_TOKEN", "AWS_ACCESS_KEY_ID",
                         "AWS_SECRET_ACCESS_KEY", "AWS_SESSION_TOKEN", "GITHUB_TOKEN",
                         "GH_TOKEN", "SSH_AUTH_SOCK",
                     )
@@ -129,19 +161,21 @@ def realize_containment(profile: dict[str, Any], project: Path, env: dict[str, s
     """Write run-owned sandbox settings before any executor/evaluator effect."""
     document = _containment_document(profile, project, env)
     settings = project / ".claude" / "settings.json"
-    mcp_config = project / ".claude" / "mcp-empty.json"
+    mcp_config = project / ".mcp.json"
     settings.parent.mkdir(parents=True, exist_ok=True)
     settings.write_text(json.dumps(document["settings"], indent=2, sort_keys=True) + "\n", encoding="utf-8")
     mcp_config.write_text(json.dumps({"mcpServers": {}}, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     document["realization"]["mcp_config"] = str(mcp_config.resolve())
     document["realization"]["mcp_servers"] = []
+    document["realization"]["settings_sha256"] = hashlib.sha256(settings.read_bytes()).hexdigest()
+    document["realization"]["mcp_config_sha256"] = hashlib.sha256(mcp_config.read_bytes()).hexdigest()
     return document
 
 
 def validate_containment_realization(profile: dict[str, Any], project: Path, env: dict[str, str]) -> list[str]:
     expected = _containment_document(profile, project, env)
     settings = project / ".claude" / "settings.json"
-    mcp_config = project / ".claude" / "mcp-empty.json"
+    mcp_config = project / ".mcp.json"
     if not settings.is_file():
         return ["required project containment settings are absent"]
     if not mcp_config.is_file():
@@ -160,17 +194,51 @@ def validate_containment_realization(profile: dict[str, Any], project: Path, env
     else:
         if mcp_actual != {"mcpServers": {}}:
             errors.append("MCP configuration is not empty")
-    forbidden = [
-        key for key in env
-        if key not in SAFE_ENV_KEYS
-        and key not in {"HOME", "XDG_CONFIG_HOME", "XDG_CACHE_HOME", "SSDP70_MEDIATOR_SOCKET", "SSDP70_ACCOUNT"}
-    ]
+    explicitly_allowed = {
+        "HOME", "XDG_CONFIG_HOME", "XDG_CACHE_HOME", "TMPDIR", "TMP", "TEMP",
+        "SSDP70_MEDIATOR_SOCKET", "SSDP70_ACCOUNT", "SSDP70_AUTH_MODE",
+    } | PARENT_AUTH_ENV
+    forbidden = [key for key in env if key not in SAFE_ENV_KEYS and key not in explicitly_allowed]
     if forbidden:
         errors.append(f"contained environment has undeclared variables: {sorted(forbidden)}")
+
+    auth_keys = [key for key in PARENT_AUTH_ENV if env.get(key)]
+    if len(auth_keys) > 1:
+        errors.append("contained environment exposes multiple parent authentication variables")
+    if auth_keys and env.get("SSDP70_AUTH_MODE") != auth_keys[0]:
+        errors.append("parent authentication variable lacks qualification-only source binding")
+    if not auth_keys and env.get("SSDP70_AUTH_MODE"):
+        errors.append("qualification auth mode is set without a parent authentication variable")
+    for source in QUALIFICATION_AUTH_ENV:
+        if source in env:
+            errors.append(f"qualification auth source {source!r} leaked into Claude environment")
+
     for key in env:
+        if key in PARENT_AUTH_ENV:
+            continue
         upper = key.upper()
         if any(token in upper for token in ("TOKEN", "SECRET", "PASSWORD", "API_KEY", "AWS_", "GITHUB_", "SSH_")):
             errors.append(f"contained environment exposes credential-like variable {key!r}")
+
+    run_root = project.resolve().parent
+    home_value = env.get("HOME")
+    if not isinstance(home_value, str) or not home_value:
+        errors.append("contained environment has no run-owned HOME")
+    else:
+        try:
+            Path(home_value).resolve().relative_to(run_root)
+        except (OSError, ValueError):
+            errors.append("contained environment HOME escapes the run-owned root")
+        host_home = os.environ.get("HOME")
+        if host_home and Path(home_value).resolve() == Path(host_home).resolve():
+            errors.append("contained environment reuses host HOME")
+    for key in ("TMPDIR", "TMP", "TEMP"):
+        value = env.get(key)
+        if value:
+            try:
+                Path(value).resolve().relative_to(project.resolve())
+            except (OSError, ValueError):
+                errors.append(f"contained environment {key} escapes the run-owned project")
     return errors
 
 def install_skills(dist: Path, project: Path) -> None:
@@ -197,6 +265,10 @@ def launch(profile: dict[str, Any], prompt: str, project: Path, env: dict[str, s
     containment_errors = validate_containment_realization(profile, project, env)
     if containment_errors:
         raise RuntimeError("; ".join(containment_errors))
+    settings_path = project / ".claude" / "settings.json"
+    mcp_config_path = project / ".mcp.json"
+    settings_sha256 = hashlib.sha256(settings_path.read_bytes()).hexdigest()
+    mcp_config_sha256 = hashlib.sha256(mcp_config_path.read_bytes()).hexdigest()
     cmd = [
         executable,
         "-p",
@@ -209,9 +281,9 @@ def launch(profile: dict[str, Any], prompt: str, project: Path, env: dict[str, s
         "--max-turns",
         str(budgets.get("max_turns", 60)),
         "--settings",
-        str(project / ".claude" / "settings.json"),
+        str(settings_path),
         "--mcp-config",
-        str(project / ".claude" / "mcp-empty.json"),
+        str(mcp_config_path),
         "--strict-mcp-config",
         "--restricted",
         "--permission-mode",
@@ -235,6 +307,10 @@ def launch(profile: dict[str, Any], prompt: str, project: Path, env: dict[str, s
         timeout=int(budgets.get("timeout_s", 3600)),
         stdin=subprocess.DEVNULL,
     )
+    if hashlib.sha256(settings_path.read_bytes()).hexdigest() != settings_sha256:
+        raise RuntimeError("containment settings changed during Claude execution")
+    if hashlib.sha256(mcp_config_path.read_bytes()).hexdigest() != mcp_config_sha256:
+        raise RuntimeError("strict MCP configuration changed during Claude execution")
     return {
         "returncode": proc.returncode,
         "stdout": proc.stdout,
@@ -247,10 +323,10 @@ def launch(profile: dict[str, Any], prompt: str, project: Path, env: dict[str, s
             "tools": tools,
             "allowed_tools": allowed_tools,
             "disallowed_tools": disallowed_tools,
-            "settings_file": str((project / ".claude" / "settings.json").resolve()),
-            "settings_file_sha256": hashlib.sha256((project / ".claude" / "settings.json").read_bytes()).hexdigest(),
-            "mcp_config_file": str((project / ".claude" / "mcp-empty.json").resolve()),
-            "mcp_config_sha256": hashlib.sha256((project / ".claude" / "mcp-empty.json").read_bytes()).hexdigest(),
+            "settings_file": str(settings_path.resolve()),
+            "settings_file_sha256": settings_sha256,
+            "mcp_config_file": str(mcp_config_path.resolve()),
+            "mcp_config_sha256": mcp_config_sha256,
             "strict_mcp_config": True,
             "restricted": True,
         },

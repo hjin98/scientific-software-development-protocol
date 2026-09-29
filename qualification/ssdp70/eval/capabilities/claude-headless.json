@@ -8,7 +8,7 @@
     },
     "credential_secret_service_account": {
       "decision": "DENY",
-      "scope": "executor ambient credentials; scrubbed environment plus admission proof"
+      "scope": "ambient credentials denied; at most one explicitly supplied qualification-only parent auth source is scrubbed/denied from sandboxed subprocesses"
     },
     "delegation": {
       "decision": "DENY",
@@ -28,7 +28,7 @@
     },
     "process_execution": {
       "decision": "SANDBOX/MEDIATE",
-      "scope": "declared Bash families under restricted sandbox"
+      "scope": "declared Bash families under fail-closed restricted sandbox; run-owned temp only"
     },
     "repository_object_store": {
       "decision": "SANDBOX/MEDIATE",
@@ -36,11 +36,11 @@
     },
     "workspace_mutation": {
       "decision": "ALLOW",
-      "scope": "run-owned project workspace only"
+      "scope": "run-owned project only; sandbox control files explicitly deny-write"
     },
     "workspace_read_search_list": {
       "decision": "ALLOW",
-      "scope": "run-owned project workspace and installed protocol package"
+      "scope": "run-owned project/package plus immutable OS runtime reads needed by declared sandboxed commands; host user, custody, run-state, and /proc roots denied"
     }
   },
   "native_capabilities": {
@@ -87,7 +87,9 @@
         "network_remote_service",
         "external_mutation",
         "credential_secret_service_account",
-        "issue_evidence_store"
+        "issue_evidence_store",
+        "workspace_read_search_list",
+        "workspace_mutation"
       ],
       "scope": "native Bash surface; governed by semantic capability decision and substrate containment"
     },
