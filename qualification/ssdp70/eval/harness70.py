@@ -194,6 +194,43 @@ def _write_normalized(events: list[dict[str, Any]], out: Path) -> None:
     )
 
 
+def _start_mediator(stub: Path, log: Path, socket_path: Path, account: str) -> subprocess.Popen[str]:
+    proc = subprocess.Popen(
+        [
+            sys.executable,
+            str(HERE / "stub_tools" / "mediator.py"),
+            "--socket", str(socket_path),
+            "--stub-root", str(stub),
+            "--side-effect-log", str(log),
+            "--account", account,
+        ],
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        text=True,
+    )
+    for _ in range(100):
+        if socket_path.exists():
+            return proc
+        if proc.poll() is not None:
+            stdout, stderr = proc.communicate()
+            raise core70.ContractError(f"qualification mediator failed to start: {stdout} {stderr}".strip())
+        import time
+        time.sleep(0.01)
+    proc.terminate()
+    proc.wait(timeout=5)
+    raise core70.ContractError("qualification mediator socket did not become ready")
+
+
+def _stop_mediator(proc: subprocess.Popen[str]) -> None:
+    if proc.poll() is None:
+        proc.terminate()
+        try:
+            proc.wait(timeout=5)
+        except subprocess.TimeoutExpired:
+            proc.kill()
+            proc.wait(timeout=5)
+
+
 def _termination_state(events: list[dict[str, Any]]) -> tuple[bool, bool]:
     terminations = [e for e in events if e.get("kind") == "termination"]
     if not terminations:
@@ -338,12 +375,27 @@ def run_episode(
             )
         prompt = adapter_module.prepare_prompt(profile_bundle.profile, episode.get("entry", "ordinary"), episode["prompt"])
         env = adapter_module.clean_env()
+        account = episode.get("account") or "agent-account"
+        mediator_socket = tmp / "mediator.sock"
+        mediator = _start_mediator(stub, log, mediator_socket, account)
         env.update({
-            "SSDP70_STUB_DIR": str(stub),
-            "SSDP70_SIDE_EFFECT_LOG": str(log),
-            "SSDP70_ACCOUNT": episode.get("account") or "agent-account",
+            "SSDP70_MEDIATOR_SOCKET": str(mediator_socket),
+            "SSDP70_ACCOUNT": account,
         })
-        launched = adapter_module.launch(profile_bundle.profile, prompt, project, env)
+        containment_realization = None
+        try:
+            if hasattr(adapter_module, "realize_containment"):
+                containment_realization = adapter_module.realize_containment(
+                    profile_bundle.profile, project, env
+                )
+            launched = adapter_module.launch(profile_bundle.profile, prompt, project, env)
+        finally:
+            _stop_mediator(mediator)
+        if containment_realization is not None:
+            (out / "containment-realization.json").write_text(
+                json.dumps(containment_realization, indent=2, sort_keys=True) + "\n",
+                encoding="utf-8",
+            )
         stdout, stderr = launched["stdout"], launched["stderr"]
         (out / "trace.jsonl").write_text(stdout, encoding="utf-8")
         if stderr:
@@ -419,6 +471,7 @@ def run_episode(
             "evidence_state_reasons": [],
             "adapter_command_identity": launched.get("command_identity"),
             "runtime_observation": runtime_observation,
+            "containment_realization": containment_realization,
         }
         (out / "summary.json").write_text(json.dumps(preliminary, indent=2, sort_keys=True, default=str) + "\n", encoding="utf-8")
 

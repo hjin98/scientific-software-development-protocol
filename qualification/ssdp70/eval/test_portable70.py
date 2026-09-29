@@ -24,6 +24,7 @@ class PortableCoreTests(unittest.TestCase):
                 name: {"decision": "ALLOW" if name not in {"delegation", "network_remote_service"} else "DENY", "scope": "*"}
                 for name in core70.REQUIRED_CAPABILITY_CLASSES
             },
+            "native_capabilities": {},
         })
         write_json(self.profile, {
             "schema": 1,
@@ -41,6 +42,8 @@ class PortableCoreTests(unittest.TestCase):
             "provider_managed_unknowns": [
                 {"name": "backend-shard", "classification": "arm-neutral", "sensitive_claims": ["*"]}
             ],
+            "native_tools": [],
+            "native_surface_requirements": [],
         })
 
     def tearDown(self):
@@ -147,15 +150,46 @@ class PortableCoreTests(unittest.TestCase):
     def test_runtime_observation_rejects_unfrozen_or_mismatched_runtime(self):
         bundle = core70.load_profile(self.profile, self.capabilities)
         self.assertEqual(core70.validate_runtime_observation(
-            bundle, {"model": "test-model", "runtime_version": "exposed-v1"}), [])
+            bundle, {
+                "model": "test-model", "runtime_version": "exposed-v1",
+                "tools": [], "native_capabilities": [], "messaging_socket_path": None,
+                "memory_paths": {}, "mcp_servers": [],
+            }), [])
         self.assertTrue(core70.validate_runtime_observation(
-            bundle, {"model": "test-model", "runtime_version": "other"}))
+            bundle, {
+                "model": "test-model", "runtime_version": "other",
+                "tools": [], "native_capabilities": [], "messaging_socket_path": None,
+                "memory_paths": {}, "mcp_servers": [],
+            }))
         profile = json.loads(self.profile.read_text())
         profile["provider_runtime"]["version"] = "MUST-BE-FROZEN-BEFORE-QUALIFICATION"
         write_json(self.profile, profile)
         frozen = core70.load_profile(self.profile, self.capabilities)
         self.assertTrue(core70.validate_runtime_observation(
-            frozen, {"model": "test-model", "runtime_version": "x"}))
+            frozen, {
+                "model": "test-model", "runtime_version": "x",
+                "tools": [], "native_capabilities": [], "messaging_socket_path": None,
+                "memory_paths": {}, "mcp_servers": [],
+            }))
+
+    def test_runtime_surface_mismatch_and_unclassified_tool_fail_closed(self):
+        profile = json.loads(self.profile.read_text())
+        profile["native_tools"] = ["Read"]
+        profile["native_surface_requirements"] = []
+        write_json(self.profile, profile)
+        caps = json.loads(self.capabilities.read_text())
+        caps["native_capabilities"] = {
+            "tool:Read": {"semantic_classes": ["workspace_read_search_list"], "scope": "*"}
+        }
+        write_json(self.capabilities, caps)
+        bundle = core70.load_profile(self.profile, self.capabilities)
+        mismatch = core70.validate_runtime_observation(bundle, {
+            "model": "test-model", "runtime_version": "exposed-v1",
+            "tools": ["Read", "RemoteTrigger"], "native_capabilities": [],
+            "messaging_socket_path": None, "memory_paths": {}, "mcp_servers": [],
+        })
+        self.assertTrue(any("differs from declared set" in error for error in mismatch))
+        self.assertTrue(any("unclassified native tool" in error for error in mismatch))
 
     def test_scoring_exact_closure_rejects_empty_and_duplicates(self):
         req = self.requirements()

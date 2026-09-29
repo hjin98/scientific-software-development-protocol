@@ -1,46 +1,113 @@
 {
+  "schema": 1,
+  "manifest_id": "claude-evaluator-readonly-v2",
   "capabilities": {
     "catalog_root_activation": {
       "decision": "DENY",
-      "scope": "no skills/root activation during assessment"
+      "scope": "no skill/root activation"
     },
-    "credential_secret_service_account": {
-      "decision": "DENY",
-      "scope": "all ambient credentials"
-    },
-    "delegation": {
-      "decision": "DENY",
-      "scope": "all delegation"
-    },
-    "external_mutation": {
-      "decision": "DENY",
-      "scope": "all external mutation"
-    },
-    "issue_evidence_store": {
+    "workspace_read_search_list": {
       "decision": "ALLOW",
-      "scope": "read-only copied evidence bundle"
+      "scope": "read-only evidence bundle plus immutable runtime/system files explicitly mounted read-only by bwrap; host HOME/custody absent"
     },
-    "network_remote_service": {
+    "workspace_mutation": {
       "decision": "DENY",
-      "scope": "all network access"
+      "scope": "evidence bundle is mounted read-only"
     },
     "process_execution": {
       "decision": "DENY",
-      "scope": "all subprocess execution"
+      "scope": "no Bash/process tool exposed"
+    },
+    "delegation": {
+      "decision": "DENY",
+      "scope": "no native Agent/cross-session delegation tool exposed"
+    },
+    "issue_evidence_store": {
+      "decision": "ALLOW",
+      "scope": "read-only copied run evidence only"
     },
     "repository_object_store": {
       "decision": "DENY",
       "scope": "no repository/object-store access"
     },
-    "workspace_mutation": {
+    "network_remote_service": {
       "decision": "DENY",
-      "scope": "all evidence-bundle mutation"
+      "scope": "no model-callable network/process tool; provider control-plane only; outer bwrap hides host sockets and credentials"
     },
-    "workspace_read_search_list": {
-      "decision": "ALLOW",
-      "scope": "temporary copied evidence bundle only"
+    "external_mutation": {
+      "decision": "DENY",
+      "scope": "evidence bundle read-only; ephemeral runtime state excluded"
+    },
+    "credential_secret_service_account": {
+      "decision": "DENY",
+      "scope": "explicit env allow-list; host HOME and credential stores absent from bwrap namespace"
     }
   },
-  "manifest_id": "claude-evaluator-readonly-v1",
-  "schema": 1
+  "native_capabilities": {
+    "tool:Read": {
+      "semantic_classes": [
+        "workspace_read_search_list",
+        "issue_evidence_store"
+      ],
+      "scope": "read-only evidence bundle"
+    },
+    "tool:Glob": {
+      "semantic_classes": [
+        "workspace_read_search_list",
+        "issue_evidence_store"
+      ],
+      "scope": "read-only evidence bundle"
+    },
+    "tool:Grep": {
+      "semantic_classes": [
+        "workspace_read_search_list",
+        "issue_evidence_store"
+      ],
+      "scope": "read-only evidence bundle"
+    },
+    "runtime_capability:interrupt_receipt_v1": {
+      "semantic_classes": [
+        "process_execution"
+      ],
+      "scope": "provider runtime session-control metadata; not model-callable"
+    },
+    "runtime_capability:interrupt_cancel_queued_v1": {
+      "semantic_classes": [
+        "process_execution"
+      ],
+      "scope": "provider runtime session-control metadata; not model-callable"
+    },
+    "runtime_capability:msg_lifecycle_v1": {
+      "semantic_classes": [
+        "delegation",
+        "external_mutation"
+      ],
+      "scope": "runtime lifecycle channel isolated from host filesystem by bwrap; not an exposed tool"
+    },
+    "runtime_capability:mcp_read_resource_v1": {
+      "semantic_classes": [
+        "workspace_read_search_list"
+      ],
+      "scope": "runtime capability only; admission requires mcp_servers=[]"
+    },
+    "runtime_capability:mcp_tool_ui_meta_v1": {
+      "semantic_classes": [
+        "catalog_root_activation"
+      ],
+      "scope": "runtime UI metadata only; admission requires mcp_servers=[]"
+    },
+    "messaging_socket_path": {
+      "semantic_classes": [
+        "delegation",
+        "external_mutation"
+      ],
+      "scope": "runtime-created socket is inside isolated mount namespace, not host messaging socket"
+    },
+    "auto_memory_write": {
+      "semantic_classes": [
+        "external_mutation"
+      ],
+      "scope": "disabled by CLAUDE_CODE_DISABLE_AUTO_MEMORY and confined to ephemeral HOME"
+    }
+  }
 }

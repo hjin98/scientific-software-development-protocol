@@ -260,7 +260,13 @@ def main(argv: list[str] | None = None) -> int:
     with tempfile.TemporaryDirectory(prefix="ssdp70-assess-") as tmp:
         root = Path(tmp)
         manifest = prepare_bundle(args.run, args.keys, args.shared_rubric, requirements, root)
-        launched = adapter.launch(evaluator_bundle.profile, PROMPT, root, adapter.clean_env())
+        evaluator_env = adapter.clean_env()
+        evaluator_containment = None
+        if hasattr(adapter, "realize_containment"):
+            evaluator_containment = adapter.realize_containment(
+                evaluator_bundle.profile, root, evaluator_env
+            )
+        launched = adapter.launch(evaluator_bundle.profile, PROMPT, root, evaluator_env)
         (args.run / "assessment-trace.jsonl").write_text(launched["stdout"], encoding="utf-8")
         (args.run / "assessment-evidence-manifest.json").write_text(
             json.dumps({"schema": 1, "files": manifest}, indent=2, sort_keys=True) + "\n",
@@ -285,12 +291,18 @@ def main(argv: list[str] | None = None) -> int:
         "evaluator_admission_sha256": evaluator_admission_after,
         "evaluator_runtime_observation": runtime_observation,
         "evaluator_command_identity": launched.get("command_identity"),
+        "evaluator_containment_realization": evaluator_containment,
         "custodian_key_tree_sha256": key_digest,
         "rubric_sha256": rubric_digest,
         "assessment_schema": 1,
         "expected_scoring_items_sha256": requirements.scoring_manifest_digest,
     }
     assessment_identity["identity_sha256"] = core70.stable_json_sha256(assessment_identity)
+    if evaluator_containment is not None:
+        (args.run / "assessment-containment-realization.json").write_text(
+            json.dumps(evaluator_containment, indent=2, sort_keys=True) + "\n",
+            encoding="utf-8",
+        )
     (args.run / "assessment-identity.json").write_text(
         json.dumps(assessment_identity, indent=2, sort_keys=True) + "\n", encoding="utf-8"
     )

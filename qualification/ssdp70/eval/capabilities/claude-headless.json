@@ -1,46 +1,138 @@
 {
+  "schema": 1,
+  "manifest_id": "claude-headless-stage-f-v2",
   "capabilities": {
     "catalog_root_activation": {
       "decision": "ALLOW",
-      "scope": "project-local installed skills"
+      "scope": "project-local installed SSDP skills"
     },
-    "credential_secret_service_account": {
-      "decision": "DENY",
-      "scope": "executor ambient credentials; admission must prove effective denial"
-    },
-    "delegation": {
-      "decision": "DENY",
-      "scope": "Agent/subagent launch"
-    },
-    "external_mutation": {
-      "decision": "SANDBOX/MEDIATE",
-      "scope": "qualification-owned stand-ins only"
-    },
-    "issue_evidence_store": {
-      "decision": "SANDBOX/MEDIATE",
-      "scope": "qualification-owned issue/evidence stand-ins"
-    },
-    "network_remote_service": {
-      "decision": "DENY",
-      "scope": "all external network access; admission must close process-level escape routes"
-    },
-    "process_execution": {
-      "decision": "SANDBOX/MEDIATE",
-      "scope": "declared local command families under independently verified substrate containment"
-    },
-    "repository_object_store": {
-      "decision": "SANDBOX/MEDIATE",
-      "scope": "run-owned workspace repository only; no remote repository/object-store mutation"
+    "workspace_read_search_list": {
+      "decision": "ALLOW",
+      "scope": "run-owned project/package plus immutable runtime/system files explicitly mounted read-only by bwrap; host HOME/custody absent"
     },
     "workspace_mutation": {
       "decision": "ALLOW",
       "scope": "run-owned project workspace only"
     },
-    "workspace_read_search_list": {
-      "decision": "ALLOW",
-      "scope": "run-owned project workspace and installed protocol package"
+    "process_execution": {
+      "decision": "SANDBOX/MEDIATE",
+      "scope": "Bash only; fail-closed Claude sandbox with strict empty network allowlist plus outer bwrap filesystem/custody containment"
+    },
+    "delegation": {
+      "decision": "DENY",
+      "scope": "no native Agent/cross-session delegation tool exposed"
+    },
+    "issue_evidence_store": {
+      "decision": "SANDBOX/MEDIATE",
+      "scope": "qualification-owned mediator socket; backing store not mounted"
+    },
+    "repository_object_store": {
+      "decision": "SANDBOX/MEDIATE",
+      "scope": "run-owned workspace repository only under bwrap"
+    },
+    "network_remote_service": {
+      "decision": "DENY",
+      "scope": "no Web tools; Bash strict empty network allowlist with failIfUnavailable; provider control-plane only"
+    },
+    "external_mutation": {
+      "decision": "SANDBOX/MEDIATE",
+      "scope": "project workspace or qualification mediator only"
+    },
+    "credential_secret_service_account": {
+      "decision": "DENY",
+      "scope": "explicit env allow-list; host HOME and credential stores absent from bwrap namespace"
     }
   },
-  "manifest_id": "claude-headless-stage-f-v1",
-  "schema": 1
+  "native_capabilities": {
+    "tool:Skill": {
+      "semantic_classes": [
+        "catalog_root_activation"
+      ],
+      "scope": "project-local explicit root activation"
+    },
+    "tool:Read": {
+      "semantic_classes": [
+        "workspace_read_search_list"
+      ],
+      "scope": "project/package reads"
+    },
+    "tool:Glob": {
+      "semantic_classes": [
+        "workspace_read_search_list"
+      ],
+      "scope": "project/package reads"
+    },
+    "tool:Grep": {
+      "semantic_classes": [
+        "workspace_read_search_list"
+      ],
+      "scope": "project/package reads"
+    },
+    "tool:Edit": {
+      "semantic_classes": [
+        "workspace_mutation"
+      ],
+      "scope": "run-owned project only"
+    },
+    "tool:Write": {
+      "semantic_classes": [
+        "workspace_mutation"
+      ],
+      "scope": "run-owned project only"
+    },
+    "tool:Bash": {
+      "semantic_classes": [
+        "process_execution",
+        "repository_object_store",
+        "issue_evidence_store",
+        "external_mutation",
+        "network_remote_service"
+      ],
+      "scope": "outer bwrap filesystem/custody isolation; fail-closed Bash sandbox denies IP network; Unix sockets only within bwrap namespace, where sole host-mounted socket is qualification mediator"
+    },
+    "runtime_capability:interrupt_receipt_v1": {
+      "semantic_classes": [
+        "process_execution"
+      ],
+      "scope": "provider runtime session-control metadata; not model-callable"
+    },
+    "runtime_capability:interrupt_cancel_queued_v1": {
+      "semantic_classes": [
+        "process_execution"
+      ],
+      "scope": "provider runtime session-control metadata; not model-callable"
+    },
+    "runtime_capability:msg_lifecycle_v1": {
+      "semantic_classes": [
+        "delegation",
+        "external_mutation"
+      ],
+      "scope": "runtime lifecycle channel isolated from host filesystem by bwrap; not an exposed tool"
+    },
+    "runtime_capability:mcp_read_resource_v1": {
+      "semantic_classes": [
+        "workspace_read_search_list"
+      ],
+      "scope": "runtime capability only; admission requires mcp_servers=[]"
+    },
+    "runtime_capability:mcp_tool_ui_meta_v1": {
+      "semantic_classes": [
+        "catalog_root_activation"
+      ],
+      "scope": "runtime UI metadata only; admission requires mcp_servers=[]"
+    },
+    "messaging_socket_path": {
+      "semantic_classes": [
+        "delegation",
+        "external_mutation"
+      ],
+      "scope": "runtime-created socket is inside isolated mount namespace, not host messaging socket"
+    },
+    "auto_memory_write": {
+      "semantic_classes": [
+        "external_mutation"
+      ],
+      "scope": "disabled by CLAUDE_CODE_DISABLE_AUTO_MEMORY and confined to ephemeral HOME"
+    }
+  }
 }
