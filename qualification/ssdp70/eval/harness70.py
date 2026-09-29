@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import argparse
 import importlib
+import inspect
 import json
 import os
 import shutil
@@ -70,6 +71,30 @@ def load_adapter(name: str):
         if not hasattr(module, attr):
             raise core70.ContractError(f"adapter {name!r} is missing {attr}")
     return module
+
+
+def _accepts(fn: Any, name: str) -> bool:
+    """True when an optional provider-neutral hook argument is declared by the adapter function."""
+    try:
+        return name in inspect.signature(fn).parameters
+    except (TypeError, ValueError):
+        return False
+
+
+def _control_snapshot(project: Path, control_names: list[str]) -> dict[str, Any]:
+    """Exact type + content/recursive digest of every adapter-declared project control path."""
+    rows: dict[str, Any] = {}
+    for name in control_names:
+        path = project / name
+        if path.is_symlink():
+            rows[name] = {"present": True, "type": "symlink", "target": os.readlink(path)}
+        elif path.is_file():
+            rows[name] = {"present": True, "type": "file", "sha256": core70.sha256_file(path)}
+        elif path.is_dir():
+            rows[name] = {"present": True, "type": "directory", "sha256": core70.sha256_tree(path)}
+        else:
+            rows[name] = {"present": False, "type": None}
+    return rows
 
 
 def load_manifest(corpus: Path) -> list[dict[str, Any]]:
@@ -327,6 +352,13 @@ def run_identity(
         "profile_admission_sha256": core70.admission_bundle_sha256(admission, role="executor") if admission is not None else None,
         "dist_tree_sha256_verified": core70.sha256_tree(dist),
     }
+    support_files = getattr(adapter_module, "support_files", None)
+    if support_files is not None:
+        # Provider principals (for example an observation/bridge process) are part of the
+        # execution profile's provenance identity. Adapters without any add nothing.
+        support = {name: core70.sha256_file(Path(path).resolve()) for name, path in sorted(support_files().items())}
+        if support:
+            identity["adapter_support_sha256"] = support
     identity["identity_sha256"] = core70.stable_json_sha256(identity)
     return identity
 
@@ -395,10 +427,18 @@ def run_episode(
         tmp = Path(tmp_name)
         project = tmp / "project"
         private = tmp / "harness-private"
-        stub, log = private / "stub", private / "side-effects.jsonl"
+        layout = core70.private_mcp_paths(private)
+        stub, log = layout["stub"], layout["log"]
         runtime_home = private / "runtime-home"
         runtime_tmp = project / ".qualification-tmp"
         build_project(corpus, episode, project, control_names)
+        # A provider control path may never shadow fixture content: it must be absent from the
+        # fixture baseline so that excluding it from the oracle views hides nothing the fixture owns.
+        shadowed = [name for name in control_names if os.path.lexists(project / name)]
+        if shadowed:
+            raise core70.ContractError(
+                f"adapter control path(s) {shadowed} already exist in the fixture baseline; refusing to hide fixture content"
+            )
         private.mkdir()
         stub.mkdir()
         if episode.get("stub"):
@@ -407,10 +447,10 @@ def run_episode(
         log.chmod(0o600)
         mcp_servers = profile_bundle.profile.get("mcp_servers") or []
         if mcp_servers:
-            mcp_server = private / "mcp-server.py"
+            mcp_server = layout["server"]
             shutil.copy2(HERE / "stub_tools" / "mediator.py", mcp_server)
             mcp_server.chmod(0o500)
-            account_file = private / "mcp-account.txt"
+            account_file = layout["account"]
             account_file.write_text((episode.get("account") or "agent-account") + "\n", encoding="utf-8")
             account_file.chmod(0o400)
         runtime_home.mkdir()
@@ -438,11 +478,23 @@ def run_episode(
         (out / "containment-realization.json").write_text(
             json.dumps(containment, indent=2, sort_keys=True) + "\n", encoding="utf-8"
         )
+        control_before = _control_snapshot(project, control_names)
         runtime_baseline_fn = getattr(adapter_module, "runtime_entry_baseline", None)
         runtime_baseline = runtime_baseline_fn(profile_bundle.profile, project) if runtime_baseline_fn is not None else None
         launched = adapter_module.launch(profile_bundle.profile, prompt, project, env)
         stdout, stderr = launched["stdout"], launched["stderr"]
         (out / "trace.jsonl").write_text(stdout, encoding="utf-8")
+        adapter_artifacts = launched.get("adapter_artifacts") or {}
+        if adapter_artifacts:
+            artifact_dir = out / "adapter-artifacts"
+            artifact_dir.mkdir()
+            for artifact_name, artifact_body in sorted(adapter_artifacts.items()):
+                if "/" in artifact_name or artifact_name in {"", ".", ".."}:
+                    raise core70.ContractError(f"invalid adapter artifact name {artifact_name!r}")
+                if isinstance(artifact_body, bytes):
+                    (artifact_dir / artifact_name).write_bytes(artifact_body)
+                else:
+                    (artifact_dir / artifact_name).write_text(str(artifact_body), encoding="utf-8")
         if stderr:
             (out / "stderr.txt").write_text(stderr, encoding="utf-8")
         else:
@@ -452,11 +504,22 @@ def run_episode(
             "project": str(project),
             "skills_root": str(installed_skills),
             "package_identity": dict(identity["subject"]),
+            "entry": episode.get("entry", "ordinary"),
+            "profile": profile_bundle.profile,
+            "adapter_artifacts": dict(adapter_artifacts),
+            "runtime_home": str(runtime_home),
         }
         events, completeness, normalization_errors, native_event_count = adapter_module.normalize(
             stdout, identity["identity_sha256"], normalization_context
         )
-        runtime_observation = adapter_module.runtime_observation(stdout)
+        if _accepts(adapter_module.runtime_observation, "context"):
+            runtime_observation = adapter_module.runtime_observation(stdout, normalization_context)
+        else:
+            runtime_observation = adapter_module.runtime_observation(stdout)
+        if isinstance(runtime_observation, dict):
+            # Adapters that assemble their observation from trusted principals report contradictory,
+            # missing or unbound observation here; the core treats each entry as a profile error.
+            profile_errors.extend(str(item) for item in runtime_observation.get("observation_errors") or [])
         command_identity = launched.get("command_identity")
         profile_errors.extend(core70.validate_launch_identity(profile_bundle.profile, command_identity))
         profile_errors.extend(core70.validate_runtime_observation(profile_bundle, runtime_observation))
@@ -478,6 +541,24 @@ def run_episode(
         post_run = getattr(adapter_module, "validate_post_run_project_state", None)
         if post_run is not None:
             profile_errors.extend(post_run(profile_bundle.profile, project))
+        control_after = _control_snapshot(project, control_names)
+        control_changes = sorted(name for name in control_names if control_before.get(name) != control_after.get(name))
+        (out / "project-control-record.json").write_text(
+            json.dumps({
+                "schema": 1,
+                "control_paths": control_names,
+                "before_launch": control_before,
+                "after_run": control_after,
+                "changed": control_changes,
+                "mutation_policy": getattr(adapter_module, "PROJECT_CONTROL_MUTATION_POLICY", "adapter-classified"),
+            }, indent=2, sort_keys=True) + "\n",
+            encoding="utf-8",
+        )
+        if control_changes and getattr(adapter_module, "PROJECT_CONTROL_MUTATION_POLICY", "adapter-classified") == "immutable":
+            profile_errors.append(f"immutable provider control path(s) changed during execution: {control_changes}")
+        post_integrity = getattr(adapter_module, "post_run_integrity", None)
+        if post_integrity is not None:
+            profile_errors.extend(post_integrity(profile_bundle.profile, project, env, containment))
         runtime_exclusions: list[str] = []
         inspect_entries = getattr(adapter_module, "inspect_runtime_entries", None)
         if inspect_entries is not None:

@@ -17,6 +17,11 @@ import time
 from pathlib import Path
 from typing import Any
 
+HERE = Path(__file__).resolve().parent
+if str(HERE.parent) not in sys.path:
+    sys.path.insert(0, str(HERE.parent))
+import core70  # noqa: E402
+
 ADAPTER_ID = "claude-stream-json-v4"
 SSDP_SKILLS = {
     "scientific-formulation",
@@ -150,12 +155,9 @@ def clean_env() -> dict[str, str]:
 
 
 def _private_mcp_paths(private_root: Path) -> dict[str, Path]:
-    return {
-        "server": private_root / "mcp-server.py",
-        "stub": private_root / "stub",
-        "log": private_root / "side-effects.jsonl",
-        "account": private_root / "mcp-account.txt",
-    }
+    # The harness-private MCP layout is owned by the shared core; the harness creates it and
+    # every provider adapter consumes the same layout.
+    return core70.private_mcp_paths(private_root)
 
 
 def _declared_mcp_servers(profile: dict[str, Any]) -> list[dict[str, Any]]:

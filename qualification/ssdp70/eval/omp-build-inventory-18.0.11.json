@@ -1,0 +1,4017 @@
+{
+ "build": {
+  "build_id": "2c2e51f3b6fae6722da4f7b69751a2e9467ab063",
+  "bytes": 194573512,
+  "sha256": "6054460b29e9bad5eba78336f291e1979c2fa0a5cd96fc2d92afd666cc681d26",
+  "version": "18.0.11"
+ },
+ "discovery": {},
+ "environment": {},
+ "provider_managed_state": [],
+ "purpose": "empirical exact-build inventory of OMP configuration, discovery and provider-managed state; evidence, not authority",
+ "schema": 1,
+ "settings": {
+  "count": 481,
+  "entries": [
+   {
+    "class": "frozen-closed",
+    "default": false,
+    "effective_under_frozen_profile": false,
+    "frozen_value": false,
+    "key": "advisor.enabled",
+    "type": "boolean"
+   },
+   {
+    "class": "default-retained-behaviour-visible-in-evidence",
+    "default": 3,
+    "effective_under_frozen_profile": 3,
+    "frozen_value": null,
+    "key": "advisor.immuneTurns",
+    "type": "number"
+   },
+   {
+    "class": "default-retained-behaviour-visible-in-evidence",
+    "default": "off",
+    "effective_under_frozen_profile": "off",
+    "frozen_value": null,
+    "key": "advisor.syncBacklog",
+    "type": "enum"
+   },
+   {
+    "class": "tool-not-exposed-by-frozen-tool-surface",
+    "default": true,
+    "effective_under_frozen_profile": true,
+    "frozen_value": null,
+    "key": "ask.enabled",
+    "type": "boolean"
+   },
+   {
+    "class": "frozen-closed",
+    "default": "on",
+    "effective_under_frozen_profile": "off",
+    "frozen_value": "off",
+    "key": "ask.notify",
+    "type": "enum"
+   },
+   {
+    "class": "default-retained-behaviour-visible-in-evidence",
+    "default": 0,
+    "effective_under_frozen_profile": 0,
+    "frozen_value": null,
+    "key": "ask.timeout",
+    "type": "number"
+   },
+   {
+    "class": "tool-not-exposed-by-frozen-tool-surface",
+    "default": true,
+    "effective_under_frozen_profile": true,
+    "frozen_value": null,
+    "key": "astEdit.enabled",
+    "type": "boolean"
+   },
+   {
+    "class": "tool-not-exposed-by-frozen-tool-surface",
+    "default": false,
+    "effective_under_frozen_profile": false,
+    "frozen_value": null,
+    "key": "astGrep.enabled",
+    "type": "boolean"
+   },
+   {
+    "class": "frozen-closed",
+    "default": true,
+    "effective_under_frozen_profile": false,
+    "frozen_value": false,
+    "key": "async.enabled",
+    "type": "boolean"
+   },
+   {
+    "class": "tool-not-exposed-by-frozen-tool-surface",
+    "default": 100,
+    "effective_under_frozen_profile": 100,
+    "frozen_value": null,
+    "key": "async.maxJobs",
+    "type": "number"
+   },
+   {
+    "class": "tool-not-exposed-by-frozen-tool-surface",
+    "default": "smart",
+    "effective_under_frozen_profile": "smart",
+    "frozen_value": null,
+    "key": "async.pollWaitDuration",
+    "type": "enum"
+   },
+   {
+    "class": "requires-network-or-service-unreachable-in-subject-netns",
+    "default": null,
+    "effective_under_frozen_profile": null,
+    "frozen_value": null,
+    "key": "auth.broker.token",
+    "type": "string"
+   },
+   {
+    "class": "requires-network-or-service-unreachable-in-subject-netns",
+    "default": null,
+    "effective_under_frozen_profile": null,
+    "frozen_value": null,
+    "key": "auth.broker.url",
+    "type": "string"
+   },
+   {
+    "class": "default-retained-behaviour-visible-in-evidence",
+    "default": false,
+    "effective_under_frozen_profile": false,
+    "frozen_value": null,
+    "key": "autoResume",
+    "type": "boolean"
+   },
+   {
+    "class": "ui-irrelevant-in-print-json-mode",
+    "default": 10,
+    "effective_under_frozen_profile": 10,
+    "frozen_value": null,
+    "key": "autocompleteMaxVisible",
+    "type": "number"
+   },
+   {
+    "class": "default-retained-behaviour-visible-in-evidence",
+    "default": false,
+    "effective_under_frozen_profile": false,
+    "frozen_value": null,
+    "key": "autolearn.autoContinue",
+    "type": "boolean"
+   },
+   {
+    "class": "frozen-closed",
+    "default": false,
+    "effective_under_frozen_profile": false,
+    "frozen_value": false,
+    "key": "autolearn.enabled",
+    "type": "boolean"
+   },
+   {
+    "class": "default-retained-behaviour-visible-in-evidence",
+    "default": 5,
+    "effective_under_frozen_profile": 5,
+    "frozen_value": null,
+    "key": "autolearn.minToolCalls",
+    "type": "number"
+   },
+   {
+    "class": "frozen-closed",
+    "default": true,
+    "effective_under_frozen_profile": false,
+    "frozen_value": false,
+    "key": "bash.autoBackground.enabled",
+    "type": "boolean"
+   },
+   {
+    "class": "default-retained-behaviour-visible-in-evidence",
+    "default": 60000,
+    "effective_under_frozen_profile": 60000,
+    "frozen_value": null,
+    "key": "bash.autoBackground.thresholdMs",
+    "type": "number"
+   },
+   {
+    "class": "frozen-closed",
+    "default": "auto",
+    "effective_under_frozen_profile": "off",
+    "frozen_value": "off",
+    "key": "bash.direnv",
+    "type": "enum"
+   },
+   {
+    "class": "default-retained-behaviour-visible-in-evidence",
+    "default": 30000,
+    "effective_under_frozen_profile": 30000,
+    "frozen_value": null,
+    "key": "bash.direnvLoadTimeoutMs",
+    "type": "number"
+   },
+   {
+    "class": "default-retained-behaviour-visible-in-evidence",
+    "default": true,
+    "effective_under_frozen_profile": true,
+    "frozen_value": null,
+    "key": "bash.enabled",
+    "type": "boolean"
+   },
+   {
+    "class": "default-retained-behaviour-visible-in-evidence",
+    "default": [],
+    "effective_under_frozen_profile": [],
+    "frozen_value": null,
+    "key": "bash.patterns",
+    "type": "array"
+   },
+   {
+    "class": "default-retained-behaviour-visible-in-evidence",
+    "default": false,
+    "effective_under_frozen_profile": false,
+    "frozen_value": null,
+    "key": "bashInterceptor.enabled",
+    "type": "boolean"
+   },
+   {
+    "class": "default-retained-behaviour-visible-in-evidence",
+    "default": [
+     {
+      "message": "Use the `read` tool instead of cat/head/tail. It provides better context and handles binary files.",
+      "pattern": "^\\s*(cat|head|tail|less|more)\\s+",
+      "tool": "read"
+     },
+     {
+      "message": "Use the `grep` tool instead of grep/rg. It respects .gitignore and provides structured output.",
+      "pattern": "^\\s*(grep|rg|ripgrep|ag|ack)\\s+",
+      "tool": "grep"
+     },
+     {
+      "message": "Use the `glob` tool instead of find/fd. It respects .gitignore and is faster for glob patterns.",
+      "pattern": "^\\s*(find|fd|locate)\\s+.*(-name|-iname|-type|--type|-glob)",
+      "tool": "glob"
+     },
+     {
+      "message": "Use the `edit` tool instead of sed -i. It provides diff preview and fuzzy matching.",
+      "pattern": "^\\s*sed\\s+(-i|--in-place)",
+      "tool": "edit"
+     },
+     {
+      "message": "Use the `edit` tool instead of perl -i. It provides diff preview and fuzzy matching.",
+      "pattern": "^\\s*perl\\s+.*-[pn]?i",
+      "tool": "edit"
+     },
+     {
+      "message": "Use the `edit` tool instead of awk -i inplace. It provides diff preview and fuzzy matching.",
+      "pattern": "^\\s*awk\\s+.*-i\\s+inplace",
+      "tool": "edit"
+     },
+     {
+      "message": "Use the `write` tool instead of echo/cat redirection. It handles encoding and provides confirmation.",
+      "pattern": "^\\s*(echo|printf|cat\\s*<<)\\s+(?:(?:[^\"'>]|\"[^\"]*\"|'[^']*')|(?<!\\|)>{1,2}\\|?\\s*(?:\"/dev/(?:null|tty|stdout|stderr)\"|'/dev/(?:null|tty|stdout|stderr)'|/dev/(?:null|tty|stdout|stderr))(?:[\\s;&|]|$))*(?<!\\|)>{1,2}\\|?\\s*(?!(?:\"/dev/(?:null|tty|stdout|stderr)\"|'/dev/(?:null|tty|stdout|stderr)'|/dev/(?:null|tty|stdout|stderr))(?:[\\s;&|]|$))[$\\w./~\"'-]",
+      "tool": "write"
+     },
+     {
+      "message": "Use the `hub` tool (`op:\"start\"`) instead of nohup or background shell syntax so the process stays observable and managed.",
+      "pattern": "^\\s*nohup\\s+|(?<!&)\\&\\s*$",
+      "tool": "hub"
+     },
+     {
+      "message": "Use the `hub` tool (`op:\"start\"`) for services, watchers, and debuggers so other omp instances can observe and control them.",
+      "pattern": "^\\s*(?:(?:bun|npm|pnpm|yarn)\\s+(?:run\\s+)?(?:dev|start)(?:\\s|$)|(?:vite|next\\s+dev|nuxt\\s+dev|nodemon|lldb|gdb|tail\\s+-f)(?:\\s|$)|docker\\s+compose\\s+up(?!.*(?:\\s-d(?:\\s|$)|--detach))(?:\\s|$))",
+      "tool": "hub"
+     },
+     {
+      "message": "Use the `hub` tool (`op:\"start\"`) for watch mode so its output, input, and lifecycle stay managed.",
+      "pattern": "^\\s*(?:(?:bun|npm|pnpm|yarn)\\s+(?:run\\s+)?\\S+|cargo\\s+watch|watchexec|pytest|vitest|jest|tsc)(?:.|\\n)*(?:--watch|-w)(?:\\s|$)",
+      "tool": "hub"
+     }
+    ],
+    "effective_under_frozen_profile": [
+     {
+      "message": "Use the `read` tool instead of cat/head/tail. It provides better context and handles binary files.",
+      "pattern": "^\\s*(cat|head|tail|less|more)\\s+",
+      "tool": "read"
+     },
+     {
+      "message": "Use the `grep` tool instead of grep/rg. It respects .gitignore and provides structured output.",
+      "pattern": "^\\s*(grep|rg|ripgrep|ag|ack)\\s+",
+      "tool": "grep"
+     },
+     {
+      "message": "Use the `glob` tool instead of find/fd. It respects .gitignore and is faster for glob patterns.",
+      "pattern": "^\\s*(find|fd|locate)\\s+.*(-name|-iname|-type|--type|-glob)",
+      "tool": "glob"
+     },
+     {
+      "message": "Use the `edit` tool instead of sed -i. It provides diff preview and fuzzy matching.",
+      "pattern": "^\\s*sed\\s+(-i|--in-place)",
+      "tool": "edit"
+     },
+     {
+      "message": "Use the `edit` tool instead of perl -i. It provides diff preview and fuzzy matching.",
+      "pattern": "^\\s*perl\\s+.*-[pn]?i",
+      "tool": "edit"
+     },
+     {
+      "message": "Use the `edit` tool instead of awk -i inplace. It provides diff preview and fuzzy matching.",
+      "pattern": "^\\s*awk\\s+.*-i\\s+inplace",
+      "tool": "edit"
+     },
+     {
+      "message": "Use the `write` tool instead of echo/cat redirection. It handles encoding and provides confirmation.",
+      "pattern": "^\\s*(echo|printf|cat\\s*<<)\\s+(?:(?:[^\"'>]|\"[^\"]*\"|'[^']*')|(?<!\\|)>{1,2}\\|?\\s*(?:\"/dev/(?:null|tty|stdout|stderr)\"|'/dev/(?:null|tty|stdout|stderr)'|/dev/(?:null|tty|stdout|stderr))(?:[\\s;&|]|$))*(?<!\\|)>{1,2}\\|?\\s*(?!(?:\"/dev/(?:null|tty|stdout|stderr)\"|'/dev/(?:null|tty|stdout|stderr)'|/dev/(?:null|tty|stdout|stderr))(?:[\\s;&|]|$))[$\\w./~\"'-]",
+      "tool": "write"
+     },
+     {
+      "message": "Use the `hub` tool (`op:\"start\"`) instead of nohup or background shell syntax so the process stays observable and managed.",
+      "pattern": "^\\s*nohup\\s+|(?<!&)\\&\\s*$",
+      "tool": "hub"
+     },
+     {
+      "message": "Use the `hub` tool (`op:\"start\"`) for services, watchers, and debuggers so other omp instances can observe and control them.",
+      "pattern": "^\\s*(?:(?:bun|npm|pnpm|yarn)\\s+(?:run\\s+)?(?:dev|start)(?:\\s|$)|(?:vite|next\\s+dev|nuxt\\s+dev|nodemon|lldb|gdb|tail\\s+-f)(?:\\s|$)|docker\\s+compose\\s+up(?!.*(?:\\s-d(?:\\s|$)|--detach))(?:\\s|$))",
+      "tool": "hub"
+     },
+     {
+      "message": "Use the `hub` tool (`op:\"start\"`) for watch mode so its output, input, and lifecycle stay managed.",
+      "pattern": "^\\s*(?:(?:bun|npm|pnpm|yarn)\\s+(?:run\\s+)?\\S+|cargo\\s+watch|watchexec|pytest|vitest|jest|tsc)(?:.|\\n)*(?:--watch|-w)(?:\\s|$)",
+      "tool": "hub"
+     }
+    ],
+    "frozen_value": null,
+    "key": "bashInterceptor.patterns",
+    "type": "array"
+   },
+   {
+    "class": "frozen-closed",
+    "default": false,
+    "effective_under_frozen_profile": false,
+    "frozen_value": false,
+    "key": "branchSummary.enabled",
+    "type": "boolean"
+   },
+   {
+    "class": "default-retained-behaviour-visible-in-evidence",
+    "default": 16384,
+    "effective_under_frozen_profile": 16384,
+    "frozen_value": null,
+    "key": "branchSummary.reserveTokens",
+    "type": "number"
+   },
+   {
+    "class": "requires-network-or-service-unreachable-in-subject-netns",
+    "default": null,
+    "effective_under_frozen_profile": null,
+    "frozen_value": null,
+    "key": "browser.cdpUrl",
+    "type": "string"
+   },
+   {
+    "class": "requires-network-or-service-unreachable-in-subject-netns",
+    "default": true,
+    "effective_under_frozen_profile": true,
+    "frozen_value": null,
+    "key": "browser.cmux",
+    "type": "boolean"
+   },
+   {
+    "class": "requires-network-or-service-unreachable-in-subject-netns",
+    "default": true,
+    "effective_under_frozen_profile": true,
+    "frozen_value": null,
+    "key": "browser.enabled",
+    "type": "boolean"
+   },
+   {
+    "class": "requires-network-or-service-unreachable-in-subject-netns",
+    "default": true,
+    "effective_under_frozen_profile": true,
+    "frozen_value": null,
+    "key": "browser.headless",
+    "type": "boolean"
+   },
+   {
+    "class": "requires-network-or-service-unreachable-in-subject-netns",
+    "default": false,
+    "effective_under_frozen_profile": false,
+    "frozen_value": null,
+    "key": "browser.relay",
+    "type": "boolean"
+   },
+   {
+    "class": "requires-network-or-service-unreachable-in-subject-netns",
+    "default": null,
+    "effective_under_frozen_profile": null,
+    "frozen_value": null,
+    "key": "browser.relayUrl",
+    "type": "string"
+   },
+   {
+    "class": "requires-network-or-service-unreachable-in-subject-netns",
+    "default": null,
+    "effective_under_frozen_profile": null,
+    "frozen_value": null,
+    "key": "browser.screenshotDir",
+    "type": "string"
+   },
+   {
+    "class": "tool-not-exposed-by-frozen-tool-surface",
+    "default": false,
+    "effective_under_frozen_profile": false,
+    "frozen_value": null,
+    "key": "checkpoint.enabled",
+    "type": "boolean"
+   },
+   {
+    "class": "requires-network-or-service-unreachable-in-subject-netns",
+    "default": "unset",
+    "effective_under_frozen_profile": "unset",
+    "frozen_value": null,
+    "key": "codexResets.autoRedeem",
+    "type": "enum"
+   },
+   {
+    "class": "requires-network-or-service-unreachable-in-subject-netns",
+    "default": 0,
+    "effective_under_frozen_profile": 0,
+    "frozen_value": null,
+    "key": "codexResets.keepCredits",
+    "type": "number"
+   },
+   {
+    "class": "requires-network-or-service-unreachable-in-subject-netns",
+    "default": 60,
+    "effective_under_frozen_profile": 60,
+    "frozen_value": null,
+    "key": "codexResets.minBlockedMinutes",
+    "type": "number"
+   },
+   {
+    "class": "requires-network-or-service-unreachable-in-subject-netns",
+    "default": 12,
+    "effective_under_frozen_profile": 12,
+    "frozen_value": null,
+    "key": "codexResets.salvageHorizonHours",
+    "type": "number"
+   },
+   {
+    "class": "requires-network-or-service-unreachable-in-subject-netns",
+    "default": "",
+    "effective_under_frozen_profile": "",
+    "frozen_value": null,
+    "key": "collab.displayName",
+    "type": "string"
+   },
+   {
+    "class": "requires-network-or-service-unreachable-in-subject-netns",
+    "default": "wss://my.omp.sh",
+    "effective_under_frozen_profile": "wss://my.omp.sh",
+    "frozen_value": null,
+    "key": "collab.relayUrl",
+    "type": "string"
+   },
+   {
+    "class": "requires-network-or-service-unreachable-in-subject-netns",
+    "default": "",
+    "effective_under_frozen_profile": "",
+    "frozen_value": null,
+    "key": "collab.webUrl",
+    "type": "string"
+   },
+   {
+    "class": "ui-irrelevant-in-print-json-mode",
+    "default": false,
+    "effective_under_frozen_profile": false,
+    "frozen_value": null,
+    "key": "colorBlindMode",
+    "type": "boolean"
+   },
+   {
+    "class": "frozen-closed",
+    "default": true,
+    "effective_under_frozen_profile": false,
+    "frozen_value": false,
+    "key": "commands.enableClaudeProject",
+    "type": "boolean"
+   },
+   {
+    "class": "frozen-closed",
+    "default": true,
+    "effective_under_frozen_profile": false,
+    "frozen_value": false,
+    "key": "commands.enableClaudeUser",
+    "type": "boolean"
+   },
+   {
+    "class": "frozen-closed",
+    "default": true,
+    "effective_under_frozen_profile": false,
+    "frozen_value": false,
+    "key": "commands.enableOpencodeProject",
+    "type": "boolean"
+   },
+   {
+    "class": "frozen-closed",
+    "default": true,
+    "effective_under_frozen_profile": false,
+    "frozen_value": false,
+    "key": "commands.enableOpencodeUser",
+    "type": "boolean"
+   },
+   {
+    "class": "requires-network-or-service-unreachable-in-subject-netns",
+    "default": true,
+    "effective_under_frozen_profile": true,
+    "frozen_value": null,
+    "key": "commit.cacheEnabled",
+    "type": "boolean"
+   },
+   {
+    "class": "requires-network-or-service-unreachable-in-subject-netns",
+    "default": 14,
+    "effective_under_frozen_profile": 14,
+    "frozen_value": null,
+    "key": "commit.cacheTtlDays",
+    "type": "number"
+   },
+   {
+    "class": "requires-network-or-service-unreachable-in-subject-netns",
+    "default": 120000,
+    "effective_under_frozen_profile": 120000,
+    "frozen_value": null,
+    "key": "commit.changelogMaxDiffChars",
+    "type": "number"
+   },
+   {
+    "class": "requires-network-or-service-unreachable-in-subject-netns",
+    "default": 16000,
+    "effective_under_frozen_profile": 16000,
+    "frozen_value": null,
+    "key": "commit.mapBatchTokenBudget",
+    "type": "number"
+   },
+   {
+    "class": "requires-network-or-service-unreachable-in-subject-netns",
+    "default": true,
+    "effective_under_frozen_profile": true,
+    "frozen_value": null,
+    "key": "commit.mapReduceEnabled",
+    "type": "boolean"
+   },
+   {
+    "class": "requires-network-or-service-unreachable-in-subject-netns",
+    "default": 5000,
+    "effective_under_frozen_profile": 5000,
+    "frozen_value": null,
+    "key": "commit.mapReduceThreshold",
+    "type": "number"
+   },
+   {
+    "class": "frozen-closed",
+    "default": true,
+    "effective_under_frozen_profile": false,
+    "frozen_value": false,
+    "key": "compaction.asyncEnabled",
+    "type": "boolean"
+   },
+   {
+    "class": "default-retained-behaviour-visible-in-evidence",
+    "default": true,
+    "effective_under_frozen_profile": true,
+    "frozen_value": null,
+    "key": "compaction.autoContinue",
+    "type": "boolean"
+   },
+   {
+    "class": "default-retained-behaviour-visible-in-evidence",
+    "default": true,
+    "effective_under_frozen_profile": true,
+    "frozen_value": null,
+    "key": "compaction.dropUseless",
+    "type": "boolean"
+   },
+   {
+    "class": "frozen-closed",
+    "default": true,
+    "effective_under_frozen_profile": false,
+    "frozen_value": false,
+    "key": "compaction.enabled",
+    "type": "boolean"
+   },
+   {
+    "class": "default-retained-behaviour-visible-in-evidence",
+    "default": false,
+    "effective_under_frozen_profile": false,
+    "frozen_value": null,
+    "key": "compaction.handoffSaveToDisk",
+    "type": "boolean"
+   },
+   {
+    "class": "frozen-closed",
+    "default": false,
+    "effective_under_frozen_profile": false,
+    "frozen_value": false,
+    "key": "compaction.idleEnabled",
+    "type": "boolean"
+   },
+   {
+    "class": "default-retained-behaviour-visible-in-evidence",
+    "default": 200000,
+    "effective_under_frozen_profile": 200000,
+    "frozen_value": null,
+    "key": "compaction.idleThresholdTokens",
+    "type": "number"
+   },
+   {
+    "class": "default-retained-behaviour-visible-in-evidence",
+    "default": 300,
+    "effective_under_frozen_profile": 300,
+    "frozen_value": null,
+    "key": "compaction.idleTimeoutSeconds",
+    "type": "number"
+   },
+   {
+    "class": "default-retained-behaviour-visible-in-evidence",
+    "default": 20000,
+    "effective_under_frozen_profile": 20000,
+    "frozen_value": null,
+    "key": "compaction.keepRecentTokens",
+    "type": "number"
+   },
+   {
+    "class": "default-retained-behaviour-visible-in-evidence",
+    "default": [
+     "remote",
+     "snapcompact",
+     "handoff",
+     "shake",
+     "soft"
+    ],
+    "effective_under_frozen_profile": [
+     "remote",
+     "snapcompact",
+     "handoff",
+     "shake",
+     "soft"
+    ],
+    "frozen_value": null,
+    "key": "compaction.methodOrder",
+    "type": "array"
+   },
+   {
+    "class": "frozen-closed",
+    "default": true,
+    "effective_under_frozen_profile": false,
+    "frozen_value": false,
+    "key": "compaction.midTurnEnabled",
+    "type": "boolean"
+   },
+   {
+    "class": "default-retained-behaviour-visible-in-evidence",
+    "default": null,
+    "effective_under_frozen_profile": null,
+    "frozen_value": null,
+    "key": "compaction.remoteEndpoint",
+    "type": "string"
+   },
+   {
+    "class": "default-retained-behaviour-visible-in-evidence",
+    "default": true,
+    "effective_under_frozen_profile": true,
+    "frozen_value": null,
+    "key": "compaction.remoteStreamingV2Enabled",
+    "type": "boolean"
+   },
+   {
+    "class": "default-retained-behaviour-visible-in-evidence",
+    "default": null,
+    "effective_under_frozen_profile": null,
+    "frozen_value": null,
+    "key": "compaction.reserveTokens",
+    "type": "number"
+   },
+   {
+    "class": "default-retained-behaviour-visible-in-evidence",
+    "default": true,
+    "effective_under_frozen_profile": true,
+    "frozen_value": null,
+    "key": "compaction.supersedeReads",
+    "type": "boolean"
+   },
+   {
+    "class": "default-retained-behaviour-visible-in-evidence",
+    "default": -1,
+    "effective_under_frozen_profile": -1,
+    "frozen_value": null,
+    "key": "compaction.thresholdPercent",
+    "type": "number"
+   },
+   {
+    "class": "default-retained-behaviour-visible-in-evidence",
+    "default": -1,
+    "effective_under_frozen_profile": -1,
+    "frozen_value": null,
+    "key": "compaction.thresholdTokens",
+    "type": "number"
+   },
+   {
+    "class": "default-retained-behaviour-visible-in-evidence",
+    "default": 64000,
+    "effective_under_frozen_profile": 64000,
+    "frozen_value": null,
+    "key": "compaction.v2RetainedMessageBudget",
+    "type": "number"
+   },
+   {
+    "class": "frozen-closed",
+    "default": "on",
+    "effective_under_frozen_profile": "off",
+    "frozen_value": "off",
+    "key": "completion.notify",
+    "type": "enum"
+   },
+   {
+    "class": "ui-irrelevant-in-print-json-mode",
+    "default": "band",
+    "effective_under_frozen_profile": "band",
+    "frozen_value": null,
+    "key": "composer.shape",
+    "type": "string"
+   },
+   {
+    "class": "requires-network-or-service-unreachable-in-subject-netns",
+    "default": "all",
+    "effective_under_frozen_profile": "all",
+    "frozen_value": null,
+    "key": "computer.display",
+    "type": "string"
+   },
+   {
+    "class": "requires-network-or-service-unreachable-in-subject-netns",
+    "default": false,
+    "effective_under_frozen_profile": false,
+    "frozen_value": null,
+    "key": "computer.enabled",
+    "type": "boolean"
+   },
+   {
+    "class": "requires-network-or-service-unreachable-in-subject-netns",
+    "default": 2400,
+    "effective_under_frozen_profile": 2400,
+    "frozen_value": null,
+    "key": "computer.maxHeight",
+    "type": "number"
+   },
+   {
+    "class": "requires-network-or-service-unreachable-in-subject-netns",
+    "default": 3840,
+    "effective_under_frozen_profile": 3840,
+    "frozen_value": null,
+    "key": "computer.maxWidth",
+    "type": "number"
+   },
+   {
+    "class": "frozen-closed",
+    "default": false,
+    "effective_under_frozen_profile": false,
+    "frozen_value": false,
+    "key": "contextPromotion.enabled",
+    "type": "boolean"
+   },
+   {
+    "class": "default-retained-behaviour-visible-in-evidence",
+    "default": [
+     "smol",
+     "default",
+     "slow"
+    ],
+    "effective_under_frozen_profile": [
+     "smol",
+     "default",
+     "slow"
+    ],
+    "frozen_value": null,
+    "key": "cycleOrder",
+    "type": "array"
+   },
+   {
+    "class": "tool-not-exposed-by-frozen-tool-surface",
+    "default": true,
+    "effective_under_frozen_profile": true,
+    "frozen_value": null,
+    "key": "debug.enabled",
+    "type": "boolean"
+   },
+   {
+    "class": "default-retained-behaviour-visible-in-evidence",
+    "default": "high",
+    "effective_under_frozen_profile": "high",
+    "frozen_value": null,
+    "key": "defaultThinkingLevel",
+    "type": "enum"
+   },
+   {
+    "class": "frozen-closed",
+    "default": true,
+    "effective_under_frozen_profile": false,
+    "frozen_value": false,
+    "key": "dev.autoqa",
+    "type": "boolean"
+   },
+   {
+    "class": "frozen-closed",
+    "default": "unset",
+    "effective_under_frozen_profile": "denied",
+    "frozen_value": "denied",
+    "key": "dev.autoqaConsent",
+    "type": "enum"
+   },
+   {
+    "class": "requires-network-or-service-unreachable-in-subject-netns",
+    "default": "https://qa.omp.sh/v1/grievances",
+    "effective_under_frozen_profile": "https://qa.omp.sh/v1/grievances",
+    "frozen_value": null,
+    "key": "dev.autoqaPush.endpoint",
+    "type": "string"
+   },
+   {
+    "class": "requires-network-or-service-unreachable-in-subject-netns",
+    "default": null,
+    "effective_under_frozen_profile": null,
+    "frozen_value": null,
+    "key": "dev.autoqaPush.token",
+    "type": "string"
+   },
+   {
+    "class": "default-retained-behaviour-visible-in-evidence",
+    "default": [],
+    "effective_under_frozen_profile": [],
+    "frozen_value": null,
+    "key": "disabledExtensions",
+    "type": "array"
+   },
+   {
+    "class": "default-retained-behaviour-visible-in-evidence",
+    "default": [],
+    "effective_under_frozen_profile": [],
+    "frozen_value": null,
+    "key": "disabledProviders",
+    "type": "array"
+   },
+   {
+    "class": "ui-irrelevant-in-print-json-mode",
+    "default": false,
+    "effective_under_frozen_profile": false,
+    "frozen_value": null,
+    "key": "display.cacheMissMarker",
+    "type": "boolean"
+   },
+   {
+    "class": "ui-irrelevant-in-print-json-mode",
+    "default": true,
+    "effective_under_frozen_profile": true,
+    "frozen_value": null,
+    "key": "display.collapseCompacted",
+    "type": "boolean"
+   },
+   {
+    "class": "ui-irrelevant-in-print-json-mode",
+    "default": false,
+    "effective_under_frozen_profile": false,
+    "frozen_value": null,
+    "key": "display.hideToolActivity",
+    "type": "boolean"
+   },
+   {
+    "class": "ui-irrelevant-in-print-json-mode",
+    "default": "classic",
+    "effective_under_frozen_profile": "classic",
+    "frozen_value": null,
+    "key": "display.shimmer",
+    "type": "enum"
+   },
+   {
+    "class": "ui-irrelevant-in-print-json-mode",
+    "default": false,
+    "effective_under_frozen_profile": false,
+    "frozen_value": null,
+    "key": "display.showTokenUsage",
+    "type": "boolean"
+   },
+   {
+    "class": "ui-irrelevant-in-print-json-mode",
+    "default": false,
+    "effective_under_frozen_profile": false,
+    "frozen_value": null,
+    "key": "display.showTurnTime",
+    "type": "boolean"
+   },
+   {
+    "class": "ui-irrelevant-in-print-json-mode",
+    "default": true,
+    "effective_under_frozen_profile": true,
+    "frozen_value": null,
+    "key": "display.smoothStreaming",
+    "type": "boolean"
+   },
+   {
+    "class": "ui-irrelevant-in-print-json-mode",
+    "default": "tree",
+    "effective_under_frozen_profile": "tree",
+    "frozen_value": null,
+    "key": "doubleEscapeAction",
+    "type": "enum"
+   },
+   {
+    "class": "default-retained-behaviour-visible-in-evidence",
+    "default": false,
+    "effective_under_frozen_profile": false,
+    "frozen_value": null,
+    "key": "edit.autoRepair.enabled",
+    "type": "boolean"
+   },
+   {
+    "class": "default-retained-behaviour-visible-in-evidence",
+    "default": false,
+    "effective_under_frozen_profile": false,
+    "frozen_value": null,
+    "key": "edit.blackbox.enabled",
+    "type": "boolean"
+   },
+   {
+    "class": "default-retained-behaviour-visible-in-evidence",
+    "default": true,
+    "effective_under_frozen_profile": true,
+    "frozen_value": null,
+    "key": "edit.blockAutoGenerated",
+    "type": "boolean"
+   },
+   {
+    "class": "default-retained-behaviour-visible-in-evidence",
+    "default": false,
+    "effective_under_frozen_profile": false,
+    "frozen_value": null,
+    "key": "edit.enforceSeenLines",
+    "type": "boolean"
+   },
+   {
+    "class": "default-retained-behaviour-visible-in-evidence",
+    "default": true,
+    "effective_under_frozen_profile": true,
+    "frozen_value": null,
+    "key": "edit.fuzzyMatch",
+    "type": "boolean"
+   },
+   {
+    "class": "default-retained-behaviour-visible-in-evidence",
+    "default": 0.95,
+    "effective_under_frozen_profile": 0.95,
+    "frozen_value": null,
+    "key": "edit.fuzzyThreshold",
+    "type": "number"
+   },
+   {
+    "class": "default-retained-behaviour-visible-in-evidence",
+    "default": "hashline",
+    "effective_under_frozen_profile": "hashline",
+    "frozen_value": null,
+    "key": "edit.mode",
+    "type": "enum"
+   },
+   {
+    "class": "default-retained-behaviour-visible-in-evidence",
+    "default": false,
+    "effective_under_frozen_profile": false,
+    "frozen_value": null,
+    "key": "edit.streamingAbort",
+    "type": "boolean"
+   },
+   {
+    "class": "ui-irrelevant-in-print-json-mode",
+    "default": true,
+    "effective_under_frozen_profile": true,
+    "frozen_value": null,
+    "key": "emojiAutocomplete",
+    "type": "boolean"
+   },
+   {
+    "class": "default-retained-behaviour-visible-in-evidence",
+    "default": [],
+    "effective_under_frozen_profile": [],
+    "frozen_value": null,
+    "key": "enabledModels",
+    "type": "array"
+   },
+   {
+    "class": "frozen-closed",
+    "default": "off",
+    "effective_under_frozen_profile": "off",
+    "frozen_value": "off",
+    "key": "error.notify",
+    "type": "enum"
+   },
+   {
+    "class": "default-retained-behaviour-visible-in-evidence",
+    "default": false,
+    "effective_under_frozen_profile": false,
+    "frozen_value": null,
+    "key": "eval.autoBackground.enabled",
+    "type": "boolean"
+   },
+   {
+    "class": "default-retained-behaviour-visible-in-evidence",
+    "default": 60000,
+    "effective_under_frozen_profile": 60000,
+    "frozen_value": null,
+    "key": "eval.autoBackground.thresholdMs",
+    "type": "number"
+   },
+   {
+    "class": "default-retained-behaviour-visible-in-evidence",
+    "default": false,
+    "effective_under_frozen_profile": false,
+    "frozen_value": null,
+    "key": "eval.jl",
+    "type": "boolean"
+   },
+   {
+    "class": "frozen-closed",
+    "default": true,
+    "effective_under_frozen_profile": false,
+    "frozen_value": false,
+    "key": "eval.js",
+    "type": "boolean"
+   },
+   {
+    "class": "frozen-closed",
+    "default": true,
+    "effective_under_frozen_profile": false,
+    "frozen_value": false,
+    "key": "eval.py",
+    "type": "boolean"
+   },
+   {
+    "class": "default-retained-behaviour-visible-in-evidence",
+    "default": false,
+    "effective_under_frozen_profile": false,
+    "frozen_value": null,
+    "key": "eval.rb",
+    "type": "boolean"
+   },
+   {
+    "class": "requires-network-or-service-unreachable-in-subject-netns",
+    "default": true,
+    "effective_under_frozen_profile": true,
+    "frozen_value": null,
+    "key": "exa.enabled",
+    "type": "boolean"
+   },
+   {
+    "class": "requires-network-or-service-unreachable-in-subject-netns",
+    "default": 1000,
+    "effective_under_frozen_profile": 1000,
+    "frozen_value": null,
+    "key": "exa.searchDelayMs",
+    "type": "number"
+   },
+   {
+    "class": "default-retained-behaviour-visible-in-evidence",
+    "default": false,
+    "effective_under_frozen_profile": false,
+    "frozen_value": null,
+    "key": "extendedContext",
+    "type": "boolean"
+   },
+   {
+    "class": "default-retained-behaviour-visible-in-evidence",
+    "default": 30000,
+    "effective_under_frozen_profile": 30000,
+    "frozen_value": null,
+    "key": "extensionHandlers.toolCallTimeoutMs",
+    "type": "number"
+   },
+   {
+    "class": "default-retained-behaviour-visible-in-evidence",
+    "default": [],
+    "effective_under_frozen_profile": [],
+    "frozen_value": null,
+    "key": "extensions",
+    "type": "array"
+   },
+   {
+    "class": "default-retained-behaviour-visible-in-evidence",
+    "default": false,
+    "effective_under_frozen_profile": false,
+    "frozen_value": null,
+    "key": "externalThinking",
+    "type": "boolean"
+   },
+   {
+    "class": "frozen-closed",
+    "default": "mechanical",
+    "effective_under_frozen_profile": "none",
+    "frozen_value": "none",
+    "key": "features.unexpectedStopDetection",
+    "type": "enum"
+   },
+   {
+    "class": "tool-not-exposed-by-frozen-tool-surface",
+    "default": true,
+    "effective_under_frozen_profile": true,
+    "frozen_value": null,
+    "key": "fetch.enabled",
+    "type": "boolean"
+   },
+   {
+    "class": "default-retained-behaviour-visible-in-evidence",
+    "default": "one-at-a-time",
+    "effective_under_frozen_profile": "one-at-a-time",
+    "frozen_value": null,
+    "key": "followUpMode",
+    "type": "enum"
+   },
+   {
+    "class": "requires-network-or-service-unreachable-in-subject-netns",
+    "default": true,
+    "effective_under_frozen_profile": true,
+    "frozen_value": null,
+    "key": "gc.archive",
+    "type": "boolean"
+   },
+   {
+    "class": "requires-network-or-service-unreachable-in-subject-netns",
+    "default": true,
+    "effective_under_frozen_profile": true,
+    "frozen_value": null,
+    "key": "gc.blobs",
+    "type": "boolean"
+   },
+   {
+    "class": "requires-network-or-service-unreachable-in-subject-netns",
+    "default": 30,
+    "effective_under_frozen_profile": 30,
+    "frozen_value": null,
+    "key": "gc.coldArchiveAfterDays",
+    "type": "number"
+   },
+   {
+    "class": "requires-network-or-service-unreachable-in-subject-netns",
+    "default": 20,
+    "effective_under_frozen_profile": 20,
+    "frozen_value": null,
+    "key": "gc.retainNewestGlobal",
+    "type": "number"
+   },
+   {
+    "class": "requires-network-or-service-unreachable-in-subject-netns",
+    "default": 10,
+    "effective_under_frozen_profile": 10,
+    "frozen_value": null,
+    "key": "gc.retainNewestPerCwd",
+    "type": "number"
+   },
+   {
+    "class": "requires-network-or-service-unreachable-in-subject-netns",
+    "default": true,
+    "effective_under_frozen_profile": true,
+    "frozen_value": null,
+    "key": "gc.wal",
+    "type": "boolean"
+   },
+   {
+    "class": "requires-network-or-service-unreachable-in-subject-netns",
+    "default": false,
+    "effective_under_frozen_profile": false,
+    "frozen_value": null,
+    "key": "generate_image.enabled",
+    "type": "boolean"
+   },
+   {
+    "class": "frozen-closed",
+    "default": true,
+    "effective_under_frozen_profile": false,
+    "frozen_value": false,
+    "key": "git.enabled",
+    "type": "boolean"
+   },
+   {
+    "class": "requires-network-or-service-unreachable-in-subject-netns",
+    "default": true,
+    "effective_under_frozen_profile": true,
+    "frozen_value": null,
+    "key": "github.cache.enabled",
+    "type": "boolean"
+   },
+   {
+    "class": "requires-network-or-service-unreachable-in-subject-netns",
+    "default": 604800,
+    "effective_under_frozen_profile": 604800,
+    "frozen_value": null,
+    "key": "github.cache.hardTtlSec",
+    "type": "number"
+   },
+   {
+    "class": "requires-network-or-service-unreachable-in-subject-netns",
+    "default": 300,
+    "effective_under_frozen_profile": 300,
+    "frozen_value": null,
+    "key": "github.cache.softTtlSec",
+    "type": "number"
+   },
+   {
+    "class": "requires-network-or-service-unreachable-in-subject-netns",
+    "default": false,
+    "effective_under_frozen_profile": false,
+    "frozen_value": null,
+    "key": "github.enabled",
+    "type": "boolean"
+   },
+   {
+    "class": "tool-not-exposed-by-frozen-tool-surface",
+    "default": true,
+    "effective_under_frozen_profile": true,
+    "frozen_value": null,
+    "key": "glob.enabled",
+    "type": "boolean"
+   },
+   {
+    "class": "default-retained-behaviour-visible-in-evidence",
+    "default": [
+     "interactive"
+    ],
+    "effective_under_frozen_profile": [
+     "interactive"
+    ],
+    "frozen_value": null,
+    "key": "goal.continuationModes",
+    "type": "array"
+   },
+   {
+    "class": "frozen-closed",
+    "default": true,
+    "effective_under_frozen_profile": false,
+    "frozen_value": false,
+    "key": "goal.enabled",
+    "type": "boolean"
+   },
+   {
+    "class": "default-retained-behaviour-visible-in-evidence",
+    "default": true,
+    "effective_under_frozen_profile": true,
+    "frozen_value": null,
+    "key": "goal.statusInFooter",
+    "type": "boolean"
+   },
+   {
+    "class": "tool-not-exposed-by-frozen-tool-surface",
+    "default": 3,
+    "effective_under_frozen_profile": 3,
+    "frozen_value": null,
+    "key": "grep.contextAfter",
+    "type": "number"
+   },
+   {
+    "class": "tool-not-exposed-by-frozen-tool-surface",
+    "default": 1,
+    "effective_under_frozen_profile": 1,
+    "frozen_value": null,
+    "key": "grep.contextBefore",
+    "type": "number"
+   },
+   {
+    "class": "tool-not-exposed-by-frozen-tool-surface",
+    "default": true,
+    "effective_under_frozen_profile": true,
+    "frozen_value": null,
+    "key": "grep.enabled",
+    "type": "boolean"
+   },
+   {
+    "class": "default-retained-behaviour-visible-in-evidence",
+    "default": false,
+    "effective_under_frozen_profile": false,
+    "frozen_value": null,
+    "key": "hideThinkingBlock",
+    "type": "boolean"
+   },
+   {
+    "class": "requires-network-or-service-unreachable-in-subject-netns",
+    "default": null,
+    "effective_under_frozen_profile": null,
+    "frozen_value": null,
+    "key": "hindsight.apiToken",
+    "type": "string"
+   },
+   {
+    "class": "requires-network-or-service-unreachable-in-subject-netns",
+    "default": "http://localhost:8888",
+    "effective_under_frozen_profile": "http://localhost:8888",
+    "frozen_value": null,
+    "key": "hindsight.apiUrl",
+    "type": "string"
+   },
+   {
+    "class": "requires-network-or-service-unreachable-in-subject-netns",
+    "default": true,
+    "effective_under_frozen_profile": true,
+    "frozen_value": null,
+    "key": "hindsight.autoRecall",
+    "type": "boolean"
+   },
+   {
+    "class": "requires-network-or-service-unreachable-in-subject-netns",
+    "default": true,
+    "effective_under_frozen_profile": true,
+    "frozen_value": null,
+    "key": "hindsight.autoRetain",
+    "type": "boolean"
+   },
+   {
+    "class": "requires-network-or-service-unreachable-in-subject-netns",
+    "default": null,
+    "effective_under_frozen_profile": null,
+    "frozen_value": null,
+    "key": "hindsight.bankId",
+    "type": "string"
+   },
+   {
+    "class": "requires-network-or-service-unreachable-in-subject-netns",
+    "default": null,
+    "effective_under_frozen_profile": null,
+    "frozen_value": null,
+    "key": "hindsight.bankIdPrefix",
+    "type": "string"
+   },
+   {
+    "class": "requires-network-or-service-unreachable-in-subject-netns",
+    "default": null,
+    "effective_under_frozen_profile": null,
+    "frozen_value": null,
+    "key": "hindsight.bankMission",
+    "type": "string"
+   },
+   {
+    "class": "requires-network-or-service-unreachable-in-subject-netns",
+    "default": false,
+    "effective_under_frozen_profile": false,
+    "frozen_value": null,
+    "key": "hindsight.debug",
+    "type": "boolean"
+   },
+   {
+    "class": "requires-network-or-service-unreachable-in-subject-netns",
+    "default": true,
+    "effective_under_frozen_profile": true,
+    "frozen_value": null,
+    "key": "hindsight.mentalModelAutoSeed",
+    "type": "boolean"
+   },
+   {
+    "class": "requires-network-or-service-unreachable-in-subject-netns",
+    "default": 16000,
+    "effective_under_frozen_profile": 16000,
+    "frozen_value": null,
+    "key": "hindsight.mentalModelMaxRenderChars",
+    "type": "number"
+   },
+   {
+    "class": "requires-network-or-service-unreachable-in-subject-netns",
+    "default": 300000,
+    "effective_under_frozen_profile": 300000,
+    "frozen_value": null,
+    "key": "hindsight.mentalModelRefreshIntervalMs",
+    "type": "number"
+   },
+   {
+    "class": "requires-network-or-service-unreachable-in-subject-netns",
+    "default": true,
+    "effective_under_frozen_profile": true,
+    "frozen_value": null,
+    "key": "hindsight.mentalModelsEnabled",
+    "type": "boolean"
+   },
+   {
+    "class": "requires-network-or-service-unreachable-in-subject-netns",
+    "default": "mid",
+    "effective_under_frozen_profile": "mid",
+    "frozen_value": null,
+    "key": "hindsight.recallBudget",
+    "type": "enum"
+   },
+   {
+    "class": "requires-network-or-service-unreachable-in-subject-netns",
+    "default": 1,
+    "effective_under_frozen_profile": 1,
+    "frozen_value": null,
+    "key": "hindsight.recallContextTurns",
+    "type": "number"
+   },
+   {
+    "class": "requires-network-or-service-unreachable-in-subject-netns",
+    "default": 800,
+    "effective_under_frozen_profile": 800,
+    "frozen_value": null,
+    "key": "hindsight.recallMaxQueryChars",
+    "type": "number"
+   },
+   {
+    "class": "requires-network-or-service-unreachable-in-subject-netns",
+    "default": 1024,
+    "effective_under_frozen_profile": 1024,
+    "frozen_value": null,
+    "key": "hindsight.recallMaxTokens",
+    "type": "number"
+   },
+   {
+    "class": "requires-network-or-service-unreachable-in-subject-netns",
+    "default": 30000,
+    "effective_under_frozen_profile": 30000,
+    "frozen_value": null,
+    "key": "hindsight.recallTimeoutMs",
+    "type": "number"
+   },
+   {
+    "class": "requires-network-or-service-unreachable-in-subject-netns",
+    "default": [
+     "world",
+     "experience"
+    ],
+    "effective_under_frozen_profile": [
+     "world",
+     "experience"
+    ],
+    "frozen_value": null,
+    "key": "hindsight.recallTypes",
+    "type": "array"
+   },
+   {
+    "class": "requires-network-or-service-unreachable-in-subject-netns",
+    "default": 120000,
+    "effective_under_frozen_profile": 120000,
+    "frozen_value": null,
+    "key": "hindsight.reflectTimeoutMs",
+    "type": "number"
+   },
+   {
+    "class": "requires-network-or-service-unreachable-in-subject-netns",
+    "default": 30000,
+    "effective_under_frozen_profile": 30000,
+    "frozen_value": null,
+    "key": "hindsight.requestTimeoutMs",
+    "type": "number"
+   },
+   {
+    "class": "requires-network-or-service-unreachable-in-subject-netns",
+    "default": "omp",
+    "effective_under_frozen_profile": "omp",
+    "frozen_value": null,
+    "key": "hindsight.retainContext",
+    "type": "string"
+   },
+   {
+    "class": "requires-network-or-service-unreachable-in-subject-netns",
+    "default": 3,
+    "effective_under_frozen_profile": 3,
+    "frozen_value": null,
+    "key": "hindsight.retainEveryNTurns",
+    "type": "number"
+   },
+   {
+    "class": "requires-network-or-service-unreachable-in-subject-netns",
+    "default": null,
+    "effective_under_frozen_profile": null,
+    "frozen_value": null,
+    "key": "hindsight.retainMission",
+    "type": "string"
+   },
+   {
+    "class": "requires-network-or-service-unreachable-in-subject-netns",
+    "default": "full-session",
+    "effective_under_frozen_profile": "full-session",
+    "frozen_value": null,
+    "key": "hindsight.retainMode",
+    "type": "enum"
+   },
+   {
+    "class": "requires-network-or-service-unreachable-in-subject-netns",
+    "default": 2,
+    "effective_under_frozen_profile": 2,
+    "frozen_value": null,
+    "key": "hindsight.retainOverlapTurns",
+    "type": "number"
+   },
+   {
+    "class": "requires-network-or-service-unreachable-in-subject-netns",
+    "default": 60000,
+    "effective_under_frozen_profile": 60000,
+    "frozen_value": null,
+    "key": "hindsight.retainTimeoutMs",
+    "type": "number"
+   },
+   {
+    "class": "requires-network-or-service-unreachable-in-subject-netns",
+    "default": "per-project-tagged",
+    "effective_under_frozen_profile": "per-project-tagged",
+    "frozen_value": null,
+    "key": "hindsight.scoping",
+    "type": "enum"
+   },
+   {
+    "class": "ui-irrelevant-in-print-json-mode",
+    "default": true,
+    "effective_under_frozen_profile": true,
+    "frozen_value": null,
+    "key": "images.autoResize",
+    "type": "boolean"
+   },
+   {
+    "class": "ui-irrelevant-in-print-json-mode",
+    "default": false,
+    "effective_under_frozen_profile": false,
+    "frozen_value": null,
+    "key": "images.blockImages",
+    "type": "boolean"
+   },
+   {
+    "class": "frozen-closed",
+    "default": true,
+    "effective_under_frozen_profile": false,
+    "frozen_value": false,
+    "key": "images.describeForTextModels",
+    "type": "boolean"
+   },
+   {
+    "class": "requires-network-or-service-unreachable-in-subject-netns",
+    "default": [
+     "provider-files",
+     "tailscale",
+     "cloudflared",
+     "litterbox"
+    ],
+    "effective_under_frozen_profile": [
+     "provider-files",
+     "tailscale",
+     "cloudflared",
+     "litterbox"
+    ],
+    "frozen_value": null,
+    "key": "images.urls.backends",
+    "type": "array"
+   },
+   {
+    "class": "requires-network-or-service-unreachable-in-subject-netns",
+    "default": "127.0.0.1",
+    "effective_under_frozen_profile": "127.0.0.1",
+    "frozen_value": null,
+    "key": "images.urls.bindHost",
+    "type": "string"
+   },
+   {
+    "class": "requires-network-or-service-unreachable-in-subject-netns",
+    "default": null,
+    "effective_under_frozen_profile": null,
+    "frozen_value": null,
+    "key": "images.urls.command",
+    "type": "string"
+   },
+   {
+    "class": "requires-network-or-service-unreachable-in-subject-netns",
+    "default": null,
+    "effective_under_frozen_profile": null,
+    "frozen_value": null,
+    "key": "images.urls.credentials",
+    "type": "record"
+   },
+   {
+    "class": "requires-network-or-service-unreachable-in-subject-netns",
+    "default": false,
+    "effective_under_frozen_profile": false,
+    "frozen_value": null,
+    "key": "images.urls.enabled",
+    "type": "boolean"
+   },
+   {
+    "class": "requires-network-or-service-unreachable-in-subject-netns",
+    "default": {},
+    "effective_under_frozen_profile": {},
+    "frozen_value": null,
+    "key": "images.urls.options",
+    "type": "record"
+   },
+   {
+    "class": "requires-network-or-service-unreachable-in-subject-netns",
+    "default": null,
+    "effective_under_frozen_profile": null,
+    "frozen_value": null,
+    "key": "images.urls.publicBaseUrl",
+    "type": "string"
+   },
+   {
+    "class": "requires-network-or-service-unreachable-in-subject-netns",
+    "default": 8787,
+    "effective_under_frozen_profile": 8787,
+    "frozen_value": null,
+    "key": "images.urls.sshRemotePort",
+    "type": "number"
+   },
+   {
+    "class": "requires-network-or-service-unreachable-in-subject-netns",
+    "default": null,
+    "effective_under_frozen_profile": null,
+    "frozen_value": null,
+    "key": "images.urls.sshTarget",
+    "type": "string"
+   },
+   {
+    "class": "requires-network-or-service-unreachable-in-subject-netns",
+    "default": 72,
+    "effective_under_frozen_profile": 72,
+    "frozen_value": null,
+    "key": "images.urls.ttlHours",
+    "type": "number"
+   },
+   {
+    "class": "default-retained-behaviour-visible-in-evidence",
+    "default": true,
+    "effective_under_frozen_profile": true,
+    "frozen_value": null,
+    "key": "includeModelInPrompt",
+    "type": "boolean"
+   },
+   {
+    "class": "default-retained-behaviour-visible-in-evidence",
+    "default": false,
+    "effective_under_frozen_profile": false,
+    "frozen_value": null,
+    "key": "includeWorkspaceTree",
+    "type": "boolean"
+   },
+   {
+    "class": "default-retained-behaviour-visible-in-evidence",
+    "default": "auto",
+    "effective_under_frozen_profile": "auto",
+    "frozen_value": null,
+    "key": "inlineToolDescriptors",
+    "type": "enum"
+   },
+   {
+    "class": "tool-not-exposed-by-frozen-tool-surface",
+    "default": false,
+    "effective_under_frozen_profile": false,
+    "frozen_value": null,
+    "key": "inspect_image.enabled",
+    "type": "boolean"
+   },
+   {
+    "class": "tool-not-exposed-by-frozen-tool-surface",
+    "default": "auto",
+    "effective_under_frozen_profile": "auto",
+    "frozen_value": null,
+    "key": "inspect_image.mode",
+    "type": "enum"
+   },
+   {
+    "class": "tool-not-exposed-by-frozen-tool-surface",
+    "default": 300000,
+    "effective_under_frozen_profile": 300000,
+    "frozen_value": null,
+    "key": "inspect_image.timeoutMs",
+    "type": "number"
+   },
+   {
+    "class": "default-retained-behaviour-visible-in-evidence",
+    "default": "immediate",
+    "effective_under_frozen_profile": "immediate",
+    "frozen_value": null,
+    "key": "interruptMode",
+    "type": "enum"
+   },
+   {
+    "class": "requires-network-or-service-unreachable-in-subject-netns",
+    "default": 120000,
+    "effective_under_frozen_profile": 120000,
+    "frozen_value": null,
+    "key": "irc.timeoutMs",
+    "type": "number"
+   },
+   {
+    "class": "default-retained-behaviour-visible-in-evidence",
+    "default": "",
+    "effective_under_frozen_profile": "",
+    "frozen_value": null,
+    "key": "julia.interpreter",
+    "type": "string"
+   },
+   {
+    "class": "tool-not-exposed-by-frozen-tool-surface",
+    "default": true,
+    "effective_under_frozen_profile": true,
+    "frozen_value": null,
+    "key": "launch.enabled",
+    "type": "boolean"
+   },
+   {
+    "class": "ui-irrelevant-in-print-json-mode",
+    "default": "sol",
+    "effective_under_frozen_profile": "sol",
+    "frozen_value": null,
+    "key": "live.voice",
+    "type": "enum"
+   },
+   {
+    "class": "default-retained-behaviour-visible-in-evidence",
+    "default": "prompt",
+    "effective_under_frozen_profile": "prompt",
+    "frozen_value": null,
+    "key": "loop.mode",
+    "type": "enum"
+   },
+   {
+    "class": "default-retained-behaviour-visible-in-evidence",
+    "default": true,
+    "effective_under_frozen_profile": true,
+    "frozen_value": null,
+    "key": "lsp.diagnosticsDeduplicate",
+    "type": "boolean"
+   },
+   {
+    "class": "default-retained-behaviour-visible-in-evidence",
+    "default": false,
+    "effective_under_frozen_profile": false,
+    "frozen_value": null,
+    "key": "lsp.diagnosticsOnEdit",
+    "type": "boolean"
+   },
+   {
+    "class": "default-retained-behaviour-visible-in-evidence",
+    "default": true,
+    "effective_under_frozen_profile": true,
+    "frozen_value": null,
+    "key": "lsp.diagnosticsOnWrite",
+    "type": "boolean"
+   },
+   {
+    "class": "frozen-closed",
+    "default": true,
+    "effective_under_frozen_profile": false,
+    "frozen_value": false,
+    "key": "lsp.enabled",
+    "type": "boolean"
+   },
+   {
+    "class": "default-retained-behaviour-visible-in-evidence",
+    "default": false,
+    "effective_under_frozen_profile": false,
+    "frozen_value": null,
+    "key": "lsp.formatOnWrite",
+    "type": "boolean"
+   },
+   {
+    "class": "default-retained-behaviour-visible-in-evidence",
+    "default": true,
+    "effective_under_frozen_profile": true,
+    "frozen_value": null,
+    "key": "lsp.lazy",
+    "type": "boolean"
+   },
+   {
+    "class": "default-retained-behaviour-visible-in-evidence",
+    "default": true,
+    "effective_under_frozen_profile": true,
+    "frozen_value": null,
+    "key": "lsp.shared",
+    "type": "boolean"
+   },
+   {
+    "class": "frozen-closed",
+    "default": true,
+    "effective_under_frozen_profile": false,
+    "frozen_value": false,
+    "key": "magicKeywords.enabled",
+    "type": "boolean"
+   },
+   {
+    "class": "default-retained-behaviour-visible-in-evidence",
+    "default": true,
+    "effective_under_frozen_profile": true,
+    "frozen_value": null,
+    "key": "magicKeywords.orchestrate",
+    "type": "boolean"
+   },
+   {
+    "class": "default-retained-behaviour-visible-in-evidence",
+    "default": true,
+    "effective_under_frozen_profile": true,
+    "frozen_value": null,
+    "key": "magicKeywords.ultrathink",
+    "type": "boolean"
+   },
+   {
+    "class": "default-retained-behaviour-visible-in-evidence",
+    "default": true,
+    "effective_under_frozen_profile": true,
+    "frozen_value": null,
+    "key": "magicKeywords.workflow",
+    "type": "boolean"
+   },
+   {
+    "class": "frozen-closed",
+    "default": "notify",
+    "effective_under_frozen_profile": "off",
+    "frozen_value": "off",
+    "key": "marketplace.autoUpdate",
+    "type": "enum"
+   },
+   {
+    "class": "frozen-closed",
+    "default": true,
+    "effective_under_frozen_profile": false,
+    "frozen_value": false,
+    "key": "mcp.enableProjectConfig",
+    "type": "boolean"
+   },
+   {
+    "class": "default-retained-behaviour-visible-in-evidence",
+    "default": 500,
+    "effective_under_frozen_profile": 500,
+    "frozen_value": null,
+    "key": "mcp.notificationDebounceMs",
+    "type": "number"
+   },
+   {
+    "class": "frozen-closed",
+    "default": false,
+    "effective_under_frozen_profile": false,
+    "frozen_value": false,
+    "key": "mcp.notifications",
+    "type": "boolean"
+   },
+   {
+    "class": "default-retained-behaviour-visible-in-evidence",
+    "default": true,
+    "effective_under_frozen_profile": true,
+    "frozen_value": null,
+    "key": "mcp.renderMarkdownResults",
+    "type": "boolean"
+   },
+   {
+    "class": "frozen-closed",
+    "default": false,
+    "effective_under_frozen_profile": false,
+    "frozen_value": false,
+    "key": "memories.enabled",
+    "type": "boolean"
+   },
+   {
+    "class": "default-retained-behaviour-visible-in-evidence",
+    "default": 16000,
+    "effective_under_frozen_profile": 16000,
+    "frozen_value": null,
+    "key": "memories.fallbackTokenLimit",
+    "type": "number"
+   },
+   {
+    "class": "default-retained-behaviour-visible-in-evidence",
+    "default": 200,
+    "effective_under_frozen_profile": 200,
+    "frozen_value": null,
+    "key": "memories.maxRawMemoriesForGlobal",
+    "type": "number"
+   },
+   {
+    "class": "default-retained-behaviour-visible-in-evidence",
+    "default": 30,
+    "effective_under_frozen_profile": 30,
+    "frozen_value": null,
+    "key": "memories.maxRolloutAgeDays",
+    "type": "number"
+   },
+   {
+    "class": "default-retained-behaviour-visible-in-evidence",
+    "default": 64,
+    "effective_under_frozen_profile": 64,
+    "frozen_value": null,
+    "key": "memories.maxRolloutsPerStartup",
+    "type": "number"
+   },
+   {
+    "class": "default-retained-behaviour-visible-in-evidence",
+    "default": 12,
+    "effective_under_frozen_profile": 12,
+    "frozen_value": null,
+    "key": "memories.minRolloutIdleHours",
+    "type": "number"
+   },
+   {
+    "class": "default-retained-behaviour-visible-in-evidence",
+    "default": 4000,
+    "effective_under_frozen_profile": 4000,
+    "frozen_value": null,
+    "key": "memories.phase1InputTokenLimit",
+    "type": "number"
+   },
+   {
+    "class": "default-retained-behaviour-visible-in-evidence",
+    "default": 30,
+    "effective_under_frozen_profile": 30,
+    "frozen_value": null,
+    "key": "memories.phase2HeartbeatSeconds",
+    "type": "number"
+   },
+   {
+    "class": "default-retained-behaviour-visible-in-evidence",
+    "default": 180,
+    "effective_under_frozen_profile": 180,
+    "frozen_value": null,
+    "key": "memories.phase2LeaseSeconds",
+    "type": "number"
+   },
+   {
+    "class": "default-retained-behaviour-visible-in-evidence",
+    "default": 180,
+    "effective_under_frozen_profile": 180,
+    "frozen_value": null,
+    "key": "memories.phase2RetryDelaySeconds",
+    "type": "number"
+   },
+   {
+    "class": "default-retained-behaviour-visible-in-evidence",
+    "default": 0.7,
+    "effective_under_frozen_profile": 0.7,
+    "frozen_value": null,
+    "key": "memories.rolloutPayloadPercent",
+    "type": "number"
+   },
+   {
+    "class": "default-retained-behaviour-visible-in-evidence",
+    "default": 8,
+    "effective_under_frozen_profile": 8,
+    "frozen_value": null,
+    "key": "memories.stage1Concurrency",
+    "type": "number"
+   },
+   {
+    "class": "default-retained-behaviour-visible-in-evidence",
+    "default": 120,
+    "effective_under_frozen_profile": 120,
+    "frozen_value": null,
+    "key": "memories.stage1LeaseSeconds",
+    "type": "number"
+   },
+   {
+    "class": "default-retained-behaviour-visible-in-evidence",
+    "default": 120,
+    "effective_under_frozen_profile": 120,
+    "frozen_value": null,
+    "key": "memories.stage1RetryDelaySeconds",
+    "type": "number"
+   },
+   {
+    "class": "default-retained-behaviour-visible-in-evidence",
+    "default": 5000,
+    "effective_under_frozen_profile": 5000,
+    "frozen_value": null,
+    "key": "memories.summaryInjectionTokenLimit",
+    "type": "number"
+   },
+   {
+    "class": "default-retained-behaviour-visible-in-evidence",
+    "default": 300,
+    "effective_under_frozen_profile": 300,
+    "frozen_value": null,
+    "key": "memories.threadScanLimit",
+    "type": "number"
+   },
+   {
+    "class": "frozen-closed",
+    "default": "off",
+    "effective_under_frozen_profile": "off",
+    "frozen_value": "off",
+    "key": "memory.backend",
+    "type": "enum"
+   },
+   {
+    "class": "default-retained-behaviour-visible-in-evidence",
+    "default": -1,
+    "effective_under_frozen_profile": -1,
+    "frozen_value": null,
+    "key": "minP",
+    "type": "number"
+   },
+   {
+    "class": "requires-network-or-service-unreachable-in-subject-netns",
+    "default": true,
+    "effective_under_frozen_profile": true,
+    "frozen_value": null,
+    "key": "mnemopi.autoRecall",
+    "type": "boolean"
+   },
+   {
+    "class": "requires-network-or-service-unreachable-in-subject-netns",
+    "default": true,
+    "effective_under_frozen_profile": true,
+    "frozen_value": null,
+    "key": "mnemopi.autoRetain",
+    "type": "boolean"
+   },
+   {
+    "class": "requires-network-or-service-unreachable-in-subject-netns",
+    "default": null,
+    "effective_under_frozen_profile": null,
+    "frozen_value": null,
+    "key": "mnemopi.bank",
+    "type": "string"
+   },
+   {
+    "class": "requires-network-or-service-unreachable-in-subject-netns",
+    "default": null,
+    "effective_under_frozen_profile": null,
+    "frozen_value": null,
+    "key": "mnemopi.dbPath",
+    "type": "string"
+   },
+   {
+    "class": "requires-network-or-service-unreachable-in-subject-netns",
+    "default": false,
+    "effective_under_frozen_profile": false,
+    "frozen_value": null,
+    "key": "mnemopi.debug",
+    "type": "boolean"
+   },
+   {
+    "class": "requires-network-or-service-unreachable-in-subject-netns",
+    "default": null,
+    "effective_under_frozen_profile": null,
+    "frozen_value": null,
+    "key": "mnemopi.embeddingApiKey",
+    "type": "string"
+   },
+   {
+    "class": "requires-network-or-service-unreachable-in-subject-netns",
+    "default": null,
+    "effective_under_frozen_profile": null,
+    "frozen_value": null,
+    "key": "mnemopi.embeddingApiUrl",
+    "type": "string"
+   },
+   {
+    "class": "requires-network-or-service-unreachable-in-subject-netns",
+    "default": null,
+    "effective_under_frozen_profile": null,
+    "frozen_value": null,
+    "key": "mnemopi.embeddingModel",
+    "type": "string"
+   },
+   {
+    "class": "requires-network-or-service-unreachable-in-subject-netns",
+    "default": "en",
+    "effective_under_frozen_profile": "en",
+    "frozen_value": null,
+    "key": "mnemopi.embeddingVariant",
+    "type": "enum"
+   },
+   {
+    "class": "requires-network-or-service-unreachable-in-subject-netns",
+    "default": false,
+    "effective_under_frozen_profile": false,
+    "frozen_value": null,
+    "key": "mnemopi.enhancedRecall",
+    "type": "boolean"
+   },
+   {
+    "class": "requires-network-or-service-unreachable-in-subject-netns",
+    "default": 5000,
+    "effective_under_frozen_profile": 5000,
+    "frozen_value": null,
+    "key": "mnemopi.injectionTokenLimit",
+    "type": "number"
+   },
+   {
+    "class": "requires-network-or-service-unreachable-in-subject-netns",
+    "default": null,
+    "effective_under_frozen_profile": null,
+    "frozen_value": null,
+    "key": "mnemopi.llmApiKey",
+    "type": "string"
+   },
+   {
+    "class": "requires-network-or-service-unreachable-in-subject-netns",
+    "default": null,
+    "effective_under_frozen_profile": null,
+    "frozen_value": null,
+    "key": "mnemopi.llmBaseUrl",
+    "type": "string"
+   },
+   {
+    "class": "requires-network-or-service-unreachable-in-subject-netns",
+    "default": "smol",
+    "effective_under_frozen_profile": "smol",
+    "frozen_value": null,
+    "key": "mnemopi.llmMode",
+    "type": "enum"
+   },
+   {
+    "class": "requires-network-or-service-unreachable-in-subject-netns",
+    "default": null,
+    "effective_under_frozen_profile": null,
+    "frozen_value": null,
+    "key": "mnemopi.llmModel",
+    "type": "string"
+   },
+   {
+    "class": "requires-network-or-service-unreachable-in-subject-netns",
+    "default": false,
+    "effective_under_frozen_profile": false,
+    "frozen_value": null,
+    "key": "mnemopi.noEmbeddings",
+    "type": "boolean"
+   },
+   {
+    "class": "requires-network-or-service-unreachable-in-subject-netns",
+    "default": false,
+    "effective_under_frozen_profile": false,
+    "frozen_value": null,
+    "key": "mnemopi.polyphonicRecall",
+    "type": "boolean"
+   },
+   {
+    "class": "requires-network-or-service-unreachable-in-subject-netns",
+    "default": false,
+    "effective_under_frozen_profile": false,
+    "frozen_value": null,
+    "key": "mnemopi.proactiveLinking",
+    "type": "boolean"
+   },
+   {
+    "class": "requires-network-or-service-unreachable-in-subject-netns",
+    "default": 3,
+    "effective_under_frozen_profile": 3,
+    "frozen_value": null,
+    "key": "mnemopi.recallContextTurns",
+    "type": "number"
+   },
+   {
+    "class": "requires-network-or-service-unreachable-in-subject-netns",
+    "default": 8,
+    "effective_under_frozen_profile": 8,
+    "frozen_value": null,
+    "key": "mnemopi.recallLimit",
+    "type": "number"
+   },
+   {
+    "class": "requires-network-or-service-unreachable-in-subject-netns",
+    "default": 4000,
+    "effective_under_frozen_profile": 4000,
+    "frozen_value": null,
+    "key": "mnemopi.recallMaxQueryChars",
+    "type": "number"
+   },
+   {
+    "class": "requires-network-or-service-unreachable-in-subject-netns",
+    "default": 4,
+    "effective_under_frozen_profile": 4,
+    "frozen_value": null,
+    "key": "mnemopi.retainEveryNTurns",
+    "type": "number"
+   },
+   {
+    "class": "requires-network-or-service-unreachable-in-subject-netns",
+    "default": "per-project",
+    "effective_under_frozen_profile": "per-project",
+    "frozen_value": null,
+    "key": "mnemopi.scoping",
+    "type": "enum"
+   },
+   {
+    "class": "default-retained-behaviour-visible-in-evidence",
+    "default": true,
+    "effective_under_frozen_profile": true,
+    "frozen_value": null,
+    "key": "model.loopGuard.checkAssistantContent",
+    "type": "boolean"
+   },
+   {
+    "class": "frozen-closed",
+    "default": true,
+    "effective_under_frozen_profile": false,
+    "frozen_value": false,
+    "key": "model.loopGuard.enabled",
+    "type": "boolean"
+   },
+   {
+    "class": "default-retained-behaviour-visible-in-evidence",
+    "default": true,
+    "effective_under_frozen_profile": true,
+    "frozen_value": null,
+    "key": "model.loopGuard.toolCallReminder",
+    "type": "boolean"
+   },
+   {
+    "class": "frozen-closed",
+    "default": true,
+    "effective_under_frozen_profile": false,
+    "frozen_value": false,
+    "key": "model.toolCallLoopGuard.enabled",
+    "type": "boolean"
+   },
+   {
+    "class": "default-retained-behaviour-visible-in-evidence",
+    "default": [
+     "hub"
+    ],
+    "effective_under_frozen_profile": [
+     "hub"
+    ],
+    "frozen_value": null,
+    "key": "model.toolCallLoopGuard.exemptTools",
+    "type": "array"
+   },
+   {
+    "class": "default-retained-behaviour-visible-in-evidence",
+    "default": 5,
+    "effective_under_frozen_profile": 5,
+    "frozen_value": null,
+    "key": "model.toolCallLoopGuard.threshold",
+    "type": "number"
+   },
+   {
+    "class": "default-retained-behaviour-visible-in-evidence",
+    "default": [],
+    "effective_under_frozen_profile": [],
+    "frozen_value": null,
+    "key": "modelProviderOrder",
+    "type": "array"
+   },
+   {
+    "class": "default-retained-behaviour-visible-in-evidence",
+    "default": "global",
+    "effective_under_frozen_profile": "global",
+    "frozen_value": null,
+    "key": "modelRoleStorage",
+    "type": "enum"
+   },
+   {
+    "class": "default-retained-behaviour-visible-in-evidence",
+    "default": {},
+    "effective_under_frozen_profile": {},
+    "frozen_value": null,
+    "key": "modelRoles",
+    "type": "record"
+   },
+   {
+    "class": "default-retained-behaviour-visible-in-evidence",
+    "default": {},
+    "effective_under_frozen_profile": {},
+    "frozen_value": null,
+    "key": "modelTags",
+    "type": "record"
+   },
+   {
+    "class": "default-retained-behaviour-visible-in-evidence",
+    "default": false,
+    "effective_under_frozen_profile": false,
+    "frozen_value": null,
+    "key": "omitThinking",
+    "type": "boolean"
+   },
+   {
+    "class": "ui-irrelevant-in-print-json-mode",
+    "default": 100,
+    "effective_under_frozen_profile": 100,
+    "frozen_value": null,
+    "key": "paste.largeMenuThreshold",
+    "type": "number"
+   },
+   {
+    "class": "default-retained-behaviour-visible-in-evidence",
+    "default": "default",
+    "effective_under_frozen_profile": "default",
+    "frozen_value": null,
+    "key": "personality",
+    "type": "enum"
+   },
+   {
+    "class": "default-retained-behaviour-visible-in-evidence",
+    "default": false,
+    "effective_under_frozen_profile": false,
+    "frozen_value": null,
+    "key": "plan.defaultOnStartup",
+    "type": "boolean"
+   },
+   {
+    "class": "frozen-closed",
+    "default": true,
+    "effective_under_frozen_profile": false,
+    "frozen_value": false,
+    "key": "plan.enabled",
+    "type": "boolean"
+   },
+   {
+    "class": "frozen-closed",
+    "default": "idle",
+    "effective_under_frozen_profile": "off",
+    "frozen_value": "off",
+    "key": "power.sleepPrevention",
+    "type": "enum"
+   },
+   {
+    "class": "default-retained-behaviour-visible-in-evidence",
+    "default": -1,
+    "effective_under_frozen_profile": -1,
+    "frozen_value": null,
+    "key": "presencePenalty",
+    "type": "number"
+   },
+   {
+    "class": "frozen-closed",
+    "default": false,
+    "effective_under_frozen_profile": false,
+    "frozen_value": false,
+    "key": "prewalk.enabled",
+    "type": "boolean"
+   },
+   {
+    "class": "default-retained-behaviour-visible-in-evidence",
+    "default": true,
+    "effective_under_frozen_profile": true,
+    "frozen_value": null,
+    "key": "proseOnlyThinking",
+    "type": "boolean"
+   },
+   {
+    "class": "default-retained-behaviour-visible-in-evidence",
+    "default": "auto",
+    "effective_under_frozen_profile": "auto",
+    "frozen_value": null,
+    "key": "provider.appendOnlyContext",
+    "type": "enum"
+   },
+   {
+    "class": "default-retained-behaviour-visible-in-evidence",
+    "default": false,
+    "effective_under_frozen_profile": false,
+    "frozen_value": null,
+    "key": "providers.anthropic.serverSideFallback",
+    "type": "boolean"
+   },
+   {
+    "class": "requires-network-or-service-unreachable-in-subject-netns",
+    "default": "auto",
+    "effective_under_frozen_profile": "auto",
+    "frozen_value": null,
+    "key": "providers.antigravityEndpoint",
+    "type": "enum"
+   },
+   {
+    "class": "default-retained-behaviour-visible-in-evidence",
+    "default": "xhigh",
+    "effective_under_frozen_profile": "xhigh",
+    "frozen_value": null,
+    "key": "providers.autoThinkingMaxEffort",
+    "type": "enum"
+   },
+   {
+    "class": "default-retained-behaviour-visible-in-evidence",
+    "default": "online",
+    "effective_under_frozen_profile": "online",
+    "frozen_value": null,
+    "key": "providers.autoThinkingModel",
+    "type": "enum"
+   },
+   {
+    "class": "requires-network-or-service-unreachable-in-subject-netns",
+    "default": "auto",
+    "effective_under_frozen_profile": "auto",
+    "frozen_value": null,
+    "key": "providers.cacheRetention",
+    "type": "enum"
+   },
+   {
+    "class": "requires-network-or-service-unreachable-in-subject-netns",
+    "default": "auto",
+    "effective_under_frozen_profile": "auto",
+    "frozen_value": null,
+    "key": "providers.fetch",
+    "type": "enum"
+   },
+   {
+    "class": "requires-network-or-service-unreachable-in-subject-netns",
+    "default": "standard",
+    "effective_under_frozen_profile": "standard",
+    "frozen_value": null,
+    "key": "providers.fireworksTier",
+    "type": "enum"
+   },
+   {
+    "class": "requires-network-or-service-unreachable-in-subject-netns",
+    "default": [],
+    "effective_under_frozen_profile": [],
+    "frozen_value": null,
+    "key": "providers.imageOrder",
+    "type": "array"
+   },
+   {
+    "class": "requires-network-or-service-unreachable-in-subject-netns",
+    "default": "auto",
+    "effective_under_frozen_profile": "auto",
+    "frozen_value": null,
+    "key": "providers.kimiApiFormat",
+    "type": "enum"
+   },
+   {
+    "class": "default-retained-behaviour-visible-in-evidence",
+    "default": {},
+    "effective_under_frozen_profile": {},
+    "frozen_value": null,
+    "key": "providers.maxInFlightRequests",
+    "type": "record"
+   },
+   {
+    "class": "default-retained-behaviour-visible-in-evidence",
+    "default": "online",
+    "effective_under_frozen_profile": "online",
+    "frozen_value": null,
+    "key": "providers.memoryModel",
+    "type": "enum"
+   },
+   {
+    "class": "requires-network-or-service-unreachable-in-subject-netns",
+    "default": 3,
+    "effective_under_frozen_profile": 3,
+    "frozen_value": null,
+    "key": "providers.ollama-cloud.maxConcurrency",
+    "type": "number"
+   },
+   {
+    "class": "default-retained-behaviour-visible-in-evidence",
+    "default": "off",
+    "effective_under_frozen_profile": "off",
+    "frozen_value": null,
+    "key": "providers.openai-codex.codeMode",
+    "type": "enum"
+   },
+   {
+    "class": "default-retained-behaviour-visible-in-evidence",
+    "default": [],
+    "effective_under_frozen_profile": [],
+    "frozen_value": null,
+    "key": "providers.openai-codex.codeModeDirectTools",
+    "type": "array"
+   },
+   {
+    "class": "frozen-closed",
+    "default": "auto",
+    "effective_under_frozen_profile": "off",
+    "frozen_value": "off",
+    "key": "providers.openaiWebsockets",
+    "type": "enum"
+   },
+   {
+    "class": "requires-network-or-service-unreachable-in-subject-netns",
+    "default": "default",
+    "effective_under_frozen_profile": "default",
+    "frozen_value": null,
+    "key": "providers.openrouterVariant",
+    "type": "enum"
+   },
+   {
+    "class": "default-retained-behaviour-visible-in-evidence",
+    "default": -1,
+    "effective_under_frozen_profile": -1,
+    "frozen_value": null,
+    "key": "providers.streamFirstEventTimeoutSeconds",
+    "type": "number"
+   },
+   {
+    "class": "default-retained-behaviour-visible-in-evidence",
+    "default": -1,
+    "effective_under_frozen_profile": -1,
+    "frozen_value": null,
+    "key": "providers.streamIdleTimeoutSeconds",
+    "type": "number"
+   },
+   {
+    "class": "default-retained-behaviour-visible-in-evidence",
+    "default": "online",
+    "effective_under_frozen_profile": "online",
+    "frozen_value": null,
+    "key": "providers.tinyModel",
+    "type": "enum"
+   },
+   {
+    "class": "default-retained-behaviour-visible-in-evidence",
+    "default": "default",
+    "effective_under_frozen_profile": "default",
+    "frozen_value": null,
+    "key": "providers.tinyModelDevice",
+    "type": "enum"
+   },
+   {
+    "class": "default-retained-behaviour-visible-in-evidence",
+    "default": "default",
+    "effective_under_frozen_profile": "default",
+    "frozen_value": null,
+    "key": "providers.tinyModelDtype",
+    "type": "enum"
+   },
+   {
+    "class": "ui-irrelevant-in-print-json-mode",
+    "default": "auto",
+    "effective_under_frozen_profile": "auto",
+    "frozen_value": null,
+    "key": "providers.tts",
+    "type": "enum"
+   },
+   {
+    "class": "default-retained-behaviour-visible-in-evidence",
+    "default": "online",
+    "effective_under_frozen_profile": "online",
+    "frozen_value": null,
+    "key": "providers.unexpectedStopModel",
+    "type": "enum"
+   },
+   {
+    "class": "requires-network-or-service-unreachable-in-subject-netns",
+    "default": [],
+    "effective_under_frozen_profile": [],
+    "frozen_value": null,
+    "key": "providers.webSearchExclude",
+    "type": "array"
+   },
+   {
+    "class": "requires-network-or-service-unreachable-in-subject-netns",
+    "default": null,
+    "effective_under_frozen_profile": null,
+    "frozen_value": null,
+    "key": "providers.webSearchGeminiModel",
+    "type": "string"
+   },
+   {
+    "class": "requires-network-or-service-unreachable-in-subject-netns",
+    "default": [],
+    "effective_under_frozen_profile": [],
+    "frozen_value": null,
+    "key": "providers.webSearchOrder",
+    "type": "array"
+   },
+   {
+    "class": "requires-network-or-service-unreachable-in-subject-netns",
+    "default": 60,
+    "effective_under_frozen_profile": 60,
+    "frozen_value": null,
+    "key": "providers.webSearchTimeoutSeconds",
+    "type": "number"
+   },
+   {
+    "class": "default-retained-behaviour-visible-in-evidence",
+    "default": "",
+    "effective_under_frozen_profile": "",
+    "frozen_value": null,
+    "key": "python.interpreter",
+    "type": "string"
+   },
+   {
+    "class": "default-retained-behaviour-visible-in-evidence",
+    "default": "session",
+    "effective_under_frozen_profile": "session",
+    "frozen_value": null,
+    "key": "python.kernelMode",
+    "type": "enum"
+   },
+   {
+    "class": "default-retained-behaviour-visible-in-evidence",
+    "default": 300,
+    "effective_under_frozen_profile": 300,
+    "frozen_value": null,
+    "key": "read.defaultLimit",
+    "type": "number"
+   },
+   {
+    "class": "default-retained-behaviour-visible-in-evidence",
+    "default": false,
+    "effective_under_frozen_profile": false,
+    "frozen_value": null,
+    "key": "read.renderMarkdown",
+    "type": "boolean"
+   },
+   {
+    "class": "frozen-closed",
+    "default": true,
+    "effective_under_frozen_profile": false,
+    "frozen_value": false,
+    "key": "read.summarize.enabled",
+    "type": "boolean"
+   },
+   {
+    "class": "default-retained-behaviour-visible-in-evidence",
+    "default": 4,
+    "effective_under_frozen_profile": 4,
+    "frozen_value": null,
+    "key": "read.summarize.minBodyLines",
+    "type": "number"
+   },
+   {
+    "class": "default-retained-behaviour-visible-in-evidence",
+    "default": 6,
+    "effective_under_frozen_profile": 6,
+    "frozen_value": null,
+    "key": "read.summarize.minCommentLines",
+    "type": "number"
+   },
+   {
+    "class": "default-retained-behaviour-visible-in-evidence",
+    "default": 100,
+    "effective_under_frozen_profile": 100,
+    "frozen_value": null,
+    "key": "read.summarize.minTotalLines",
+    "type": "number"
+   },
+   {
+    "class": "default-retained-behaviour-visible-in-evidence",
+    "default": false,
+    "effective_under_frozen_profile": false,
+    "frozen_value": null,
+    "key": "read.summarize.prose",
+    "type": "boolean"
+   },
+   {
+    "class": "default-retained-behaviour-visible-in-evidence",
+    "default": 100,
+    "effective_under_frozen_profile": 100,
+    "frozen_value": null,
+    "key": "read.summarize.unfoldLimit",
+    "type": "number"
+   },
+   {
+    "class": "default-retained-behaviour-visible-in-evidence",
+    "default": 50,
+    "effective_under_frozen_profile": 50,
+    "frozen_value": null,
+    "key": "read.summarize.unfoldUntil",
+    "type": "number"
+   },
+   {
+    "class": "default-retained-behaviour-visible-in-evidence",
+    "default": false,
+    "effective_under_frozen_profile": false,
+    "frozen_value": null,
+    "key": "read.toolResultPreview",
+    "type": "boolean"
+   },
+   {
+    "class": "default-retained-behaviour-visible-in-evidence",
+    "default": false,
+    "effective_under_frozen_profile": false,
+    "frozen_value": null,
+    "key": "readLineNumbers",
+    "type": "boolean"
+   },
+   {
+    "class": "frozen-closed",
+    "default": true,
+    "effective_under_frozen_profile": false,
+    "frozen_value": false,
+    "key": "recap.enabled",
+    "type": "boolean"
+   },
+   {
+    "class": "default-retained-behaviour-visible-in-evidence",
+    "default": 240,
+    "effective_under_frozen_profile": 240,
+    "frozen_value": null,
+    "key": "recap.idleSeconds",
+    "type": "number"
+   },
+   {
+    "class": "default-retained-behaviour-visible-in-evidence",
+    "default": -1,
+    "effective_under_frozen_profile": -1,
+    "frozen_value": null,
+    "key": "repetitionPenalty",
+    "type": "number"
+   },
+   {
+    "class": "default-retained-behaviour-visible-in-evidence",
+    "default": 500,
+    "effective_under_frozen_profile": 500,
+    "frozen_value": null,
+    "key": "retry.baseDelayMs",
+    "type": "number"
+   },
+   {
+    "class": "frozen-closed",
+    "default": true,
+    "effective_under_frozen_profile": false,
+    "frozen_value": false,
+    "key": "retry.enabled",
+    "type": "boolean"
+   },
+   {
+    "class": "default-retained-behaviour-visible-in-evidence",
+    "default": {},
+    "effective_under_frozen_profile": {},
+    "frozen_value": null,
+    "key": "retry.fallbackChains",
+    "type": "record"
+   },
+   {
+    "class": "default-retained-behaviour-visible-in-evidence",
+    "default": "cooldown-expiry",
+    "effective_under_frozen_profile": "cooldown-expiry",
+    "frozen_value": null,
+    "key": "retry.fallbackRevertPolicy",
+    "type": "enum"
+   },
+   {
+    "class": "default-retained-behaviour-visible-in-evidence",
+    "default": 300000,
+    "effective_under_frozen_profile": 300000,
+    "frozen_value": null,
+    "key": "retry.maxDelayMs",
+    "type": "number"
+   },
+   {
+    "class": "frozen-closed",
+    "default": 10,
+    "effective_under_frozen_profile": 0,
+    "frozen_value": 0,
+    "key": "retry.maxRetries",
+    "type": "number"
+   },
+   {
+    "class": "frozen-closed",
+    "default": true,
+    "effective_under_frozen_profile": false,
+    "frozen_value": false,
+    "key": "retry.modelFallback",
+    "type": "boolean"
+   },
+   {
+    "class": "frozen-closed",
+    "default": false,
+    "effective_under_frozen_profile": false,
+    "frozen_value": false,
+    "key": "retry.usageAwareFallback",
+    "type": "boolean"
+   },
+   {
+    "class": "default-retained-behaviour-visible-in-evidence",
+    "default": 10,
+    "effective_under_frozen_profile": 10,
+    "frozen_value": null,
+    "key": "retry.usageReservePct",
+    "type": "number"
+   },
+   {
+    "class": "default-retained-behaviour-visible-in-evidence",
+    "default": "confirm",
+    "effective_under_frozen_profile": "confirm",
+    "frozen_value": null,
+    "key": "retry.usageReservePolicy",
+    "type": "enum"
+   },
+   {
+    "class": "default-retained-behaviour-visible-in-evidence",
+    "default": "",
+    "effective_under_frozen_profile": "",
+    "frozen_value": null,
+    "key": "ruby.interpreter",
+    "type": "string"
+   },
+   {
+    "class": "requires-network-or-service-unreachable-in-subject-netns",
+    "default": null,
+    "effective_under_frozen_profile": null,
+    "frozen_value": null,
+    "key": "searxng.basicPassword",
+    "type": "string"
+   },
+   {
+    "class": "requires-network-or-service-unreachable-in-subject-netns",
+    "default": null,
+    "effective_under_frozen_profile": null,
+    "frozen_value": null,
+    "key": "searxng.basicUsername",
+    "type": "string"
+   },
+   {
+    "class": "requires-network-or-service-unreachable-in-subject-netns",
+    "default": null,
+    "effective_under_frozen_profile": null,
+    "frozen_value": null,
+    "key": "searxng.categories",
+    "type": "string"
+   },
+   {
+    "class": "requires-network-or-service-unreachable-in-subject-netns",
+    "default": null,
+    "effective_under_frozen_profile": null,
+    "frozen_value": null,
+    "key": "searxng.endpoint",
+    "type": "string"
+   },
+   {
+    "class": "requires-network-or-service-unreachable-in-subject-netns",
+    "default": null,
+    "effective_under_frozen_profile": null,
+    "frozen_value": null,
+    "key": "searxng.engines",
+    "type": "string"
+   },
+   {
+    "class": "requires-network-or-service-unreachable-in-subject-netns",
+    "default": null,
+    "effective_under_frozen_profile": null,
+    "frozen_value": null,
+    "key": "searxng.language",
+    "type": "string"
+   },
+   {
+    "class": "requires-network-or-service-unreachable-in-subject-netns",
+    "default": null,
+    "effective_under_frozen_profile": null,
+    "frozen_value": null,
+    "key": "searxng.safesearch",
+    "type": "number"
+   },
+   {
+    "class": "requires-network-or-service-unreachable-in-subject-netns",
+    "default": null,
+    "effective_under_frozen_profile": null,
+    "frozen_value": null,
+    "key": "searxng.token",
+    "type": "string"
+   },
+   {
+    "class": "requires-network-or-service-unreachable-in-subject-netns",
+    "default": false,
+    "effective_under_frozen_profile": false,
+    "frozen_value": null,
+    "key": "secrets.enabled",
+    "type": "boolean"
+   },
+   {
+    "class": "tool-not-exposed-by-frozen-tool-surface",
+    "default": false,
+    "effective_under_frozen_profile": false,
+    "frozen_value": null,
+    "key": "security.enabled",
+    "type": "boolean"
+   },
+   {
+    "class": "default-retained-behaviour-visible-in-evidence",
+    "default": 0,
+    "effective_under_frozen_profile": 0,
+    "frozen_value": null,
+    "key": "setupVersion",
+    "type": "number"
+   },
+   {
+    "class": "requires-network-or-service-unreachable-in-subject-netns",
+    "default": true,
+    "effective_under_frozen_profile": true,
+    "frozen_value": null,
+    "key": "share.redactSecrets",
+    "type": "boolean"
+   },
+   {
+    "class": "requires-network-or-service-unreachable-in-subject-netns",
+    "default": "https://my.omp.sh/s",
+    "effective_under_frozen_profile": "https://my.omp.sh/s",
+    "frozen_value": null,
+    "key": "share.serverUrl",
+    "type": "string"
+   },
+   {
+    "class": "requires-network-or-service-unreachable-in-subject-netns",
+    "default": "blob",
+    "effective_under_frozen_profile": "blob",
+    "frozen_value": null,
+    "key": "share.store",
+    "type": "enum"
+   },
+   {
+    "class": "requires-network-or-service-unreachable-in-subject-netns",
+    "default": 15000,
+    "effective_under_frozen_profile": 15000,
+    "frozen_value": null,
+    "key": "sharpshooter.injectionTokenLimit",
+    "type": "number"
+   },
+   {
+    "class": "requires-network-or-service-unreachable-in-subject-netns",
+    "default": 5,
+    "effective_under_frozen_profile": 5,
+    "frozen_value": null,
+    "key": "sharpshooter.intervalMinutes",
+    "type": "number"
+   },
+   {
+    "class": "requires-network-or-service-unreachable-in-subject-netns",
+    "default": null,
+    "effective_under_frozen_profile": null,
+    "frozen_value": null,
+    "key": "sharpshooter.model",
+    "type": "string"
+   },
+   {
+    "class": "frozen-closed",
+    "default": true,
+    "effective_under_frozen_profile": false,
+    "frozen_value": false,
+    "key": "shellMinimizer.enabled",
+    "type": "boolean"
+   },
+   {
+    "class": "default-retained-behaviour-visible-in-evidence",
+    "default": [],
+    "effective_under_frozen_profile": [],
+    "frozen_value": null,
+    "key": "shellMinimizer.except",
+    "type": "array"
+   },
+   {
+    "class": "default-retained-behaviour-visible-in-evidence",
+    "default": null,
+    "effective_under_frozen_profile": null,
+    "frozen_value": null,
+    "key": "shellMinimizer.legacyFilters",
+    "type": "boolean"
+   },
+   {
+    "class": "default-retained-behaviour-visible-in-evidence",
+    "default": 4194304,
+    "effective_under_frozen_profile": 4194304,
+    "frozen_value": null,
+    "key": "shellMinimizer.maxCaptureBytes",
+    "type": "number"
+   },
+   {
+    "class": "default-retained-behaviour-visible-in-evidence",
+    "default": [],
+    "effective_under_frozen_profile": [],
+    "frozen_value": null,
+    "key": "shellMinimizer.only",
+    "type": "array"
+   },
+   {
+    "class": "default-retained-behaviour-visible-in-evidence",
+    "default": null,
+    "effective_under_frozen_profile": null,
+    "frozen_value": null,
+    "key": "shellMinimizer.settingsPath",
+    "type": "string"
+   },
+   {
+    "class": "default-retained-behaviour-visible-in-evidence",
+    "default": "default",
+    "effective_under_frozen_profile": "default",
+    "frozen_value": null,
+    "key": "shellMinimizer.sourceOutlineLevel",
+    "type": "enum"
+   },
+   {
+    "class": "default-retained-behaviour-visible-in-evidence",
+    "default": null,
+    "effective_under_frozen_profile": null,
+    "frozen_value": null,
+    "key": "shellPath",
+    "type": "string"
+   },
+   {
+    "class": "ui-irrelevant-in-print-json-mode",
+    "default": true,
+    "effective_under_frozen_profile": true,
+    "frozen_value": null,
+    "key": "showHardwareCursor",
+    "type": "boolean"
+   },
+   {
+    "class": "frozen-closed",
+    "default": [],
+    "effective_under_frozen_profile": [
+     "/opt/ssdp/skills"
+    ],
+    "frozen_value": [
+     "/opt/ssdp/skills"
+    ],
+    "key": "skills.customDirectories",
+    "type": "array"
+   },
+   {
+    "class": "frozen-closed",
+    "default": true,
+    "effective_under_frozen_profile": false,
+    "frozen_value": false,
+    "key": "skills.enableAgentsProject",
+    "type": "boolean"
+   },
+   {
+    "class": "frozen-closed",
+    "default": true,
+    "effective_under_frozen_profile": false,
+    "frozen_value": false,
+    "key": "skills.enableAgentsUser",
+    "type": "boolean"
+   },
+   {
+    "class": "frozen-closed",
+    "default": true,
+    "effective_under_frozen_profile": false,
+    "frozen_value": false,
+    "key": "skills.enableClaudeProject",
+    "type": "boolean"
+   },
+   {
+    "class": "frozen-closed",
+    "default": true,
+    "effective_under_frozen_profile": false,
+    "frozen_value": false,
+    "key": "skills.enableClaudeUser",
+    "type": "boolean"
+   },
+   {
+    "class": "frozen-closed",
+    "default": true,
+    "effective_under_frozen_profile": false,
+    "frozen_value": false,
+    "key": "skills.enableCodexUser",
+    "type": "boolean"
+   },
+   {
+    "class": "frozen-closed",
+    "default": true,
+    "effective_under_frozen_profile": false,
+    "frozen_value": false,
+    "key": "skills.enablePiProject",
+    "type": "boolean"
+   },
+   {
+    "class": "frozen-closed",
+    "default": true,
+    "effective_under_frozen_profile": false,
+    "frozen_value": false,
+    "key": "skills.enablePiUser",
+    "type": "boolean"
+   },
+   {
+    "class": "frozen-closed",
+    "default": true,
+    "effective_under_frozen_profile": false,
+    "frozen_value": false,
+    "key": "skills.enableSkillCommands",
+    "type": "boolean"
+   },
+   {
+    "class": "frozen-closed",
+    "default": true,
+    "effective_under_frozen_profile": true,
+    "frozen_value": true,
+    "key": "skills.enabled",
+    "type": "boolean"
+   },
+   {
+    "class": "default-retained-behaviour-visible-in-evidence",
+    "default": [],
+    "effective_under_frozen_profile": [],
+    "frozen_value": null,
+    "key": "skills.ignoredSkills",
+    "type": "array"
+   },
+   {
+    "class": "default-retained-behaviour-visible-in-evidence",
+    "default": [],
+    "effective_under_frozen_profile": [],
+    "frozen_value": null,
+    "key": "skills.includeSkills",
+    "type": "array"
+   },
+   {
+    "class": "default-retained-behaviour-visible-in-evidence",
+    "default": "auto",
+    "effective_under_frozen_profile": "auto",
+    "frozen_value": null,
+    "key": "snapcompact.shape",
+    "type": "enum"
+   },
+   {
+    "class": "default-retained-behaviour-visible-in-evidence",
+    "default": "none",
+    "effective_under_frozen_profile": "none",
+    "frozen_value": null,
+    "key": "snapcompact.systemPrompt",
+    "type": "enum"
+   },
+   {
+    "class": "default-retained-behaviour-visible-in-evidence",
+    "default": false,
+    "effective_under_frozen_profile": false,
+    "frozen_value": null,
+    "key": "snapcompact.toolResults",
+    "type": "boolean"
+   },
+   {
+    "class": "ui-irrelevant-in-print-json-mode",
+    "default": false,
+    "effective_under_frozen_profile": false,
+    "frozen_value": null,
+    "key": "speech.enabled",
+    "type": "boolean"
+   },
+   {
+    "class": "ui-irrelevant-in-print-json-mode",
+    "default": false,
+    "effective_under_frozen_profile": false,
+    "frozen_value": null,
+    "key": "speech.enhanced",
+    "type": "boolean"
+   },
+   {
+    "class": "ui-irrelevant-in-print-json-mode",
+    "default": "assistant",
+    "effective_under_frozen_profile": "assistant",
+    "frozen_value": null,
+    "key": "speech.mode",
+    "type": "enum"
+   },
+   {
+    "class": "ui-irrelevant-in-print-json-mode",
+    "default": "af_heart",
+    "effective_under_frozen_profile": "af_heart",
+    "frozen_value": null,
+    "key": "speech.voice",
+    "type": "enum"
+   },
+   {
+    "class": "requires-network-or-service-unreachable-in-subject-netns",
+    "default": false,
+    "effective_under_frozen_profile": false,
+    "frozen_value": null,
+    "key": "speechgen.enabled",
+    "type": "boolean"
+   },
+   {
+    "class": "ui-irrelevant-in-print-json-mode",
+    "default": true,
+    "effective_under_frozen_profile": true,
+    "frozen_value": null,
+    "key": "spelling.autocomplete",
+    "type": "boolean"
+   },
+   {
+    "class": "ui-irrelevant-in-print-json-mode",
+    "default": false,
+    "effective_under_frozen_profile": false,
+    "frozen_value": null,
+    "key": "spelling.autocorrect",
+    "type": "boolean"
+   },
+   {
+    "class": "ui-irrelevant-in-print-json-mode",
+    "default": true,
+    "effective_under_frozen_profile": true,
+    "frozen_value": null,
+    "key": "spelling.typoDetection",
+    "type": "boolean"
+   },
+   {
+    "class": "frozen-closed",
+    "default": "summary",
+    "effective_under_frozen_profile": "hidden",
+    "frozen_value": "hidden",
+    "key": "startup.changelogMode",
+    "type": "enum"
+   },
+   {
+    "class": "frozen-closed",
+    "default": true,
+    "effective_under_frozen_profile": false,
+    "frozen_value": false,
+    "key": "startup.checkUpdate",
+    "type": "boolean"
+   },
+   {
+    "class": "default-retained-behaviour-visible-in-evidence",
+    "default": false,
+    "effective_under_frozen_profile": false,
+    "frozen_value": null,
+    "key": "startup.quiet",
+    "type": "boolean"
+   },
+   {
+    "class": "frozen-closed",
+    "default": true,
+    "effective_under_frozen_profile": false,
+    "frozen_value": false,
+    "key": "startup.setupWizard",
+    "type": "boolean"
+   },
+   {
+    "class": "frozen-closed",
+    "default": false,
+    "effective_under_frozen_profile": false,
+    "frozen_value": false,
+    "key": "startup.showSplash",
+    "type": "boolean"
+   },
+   {
+    "class": "ui-irrelevant-in-print-json-mode",
+    "default": true,
+    "effective_under_frozen_profile": true,
+    "frozen_value": null,
+    "key": "statusLine.compactThinkingLevel",
+    "type": "boolean"
+   },
+   {
+    "class": "ui-irrelevant-in-print-json-mode",
+    "default": "embedded",
+    "effective_under_frozen_profile": "embedded",
+    "frozen_value": null,
+    "key": "statusLine.contextLine",
+    "type": "enum"
+   },
+   {
+    "class": "ui-irrelevant-in-print-json-mode",
+    "default": [],
+    "effective_under_frozen_profile": [],
+    "frozen_value": null,
+    "key": "statusLine.leftSegments",
+    "type": "array"
+   },
+   {
+    "class": "ui-irrelevant-in-print-json-mode",
+    "default": "default",
+    "effective_under_frozen_profile": "default",
+    "frozen_value": null,
+    "key": "statusLine.preset",
+    "type": "enum"
+   },
+   {
+    "class": "ui-irrelevant-in-print-json-mode",
+    "default": [],
+    "effective_under_frozen_profile": [],
+    "frozen_value": null,
+    "key": "statusLine.rightSegments",
+    "type": "array"
+   },
+   {
+    "class": "ui-irrelevant-in-print-json-mode",
+    "default": {},
+    "effective_under_frozen_profile": {},
+    "frozen_value": null,
+    "key": "statusLine.segmentOptions",
+    "type": "record"
+   },
+   {
+    "class": "ui-irrelevant-in-print-json-mode",
+    "default": "powerline-thin",
+    "effective_under_frozen_profile": "powerline-thin",
+    "frozen_value": null,
+    "key": "statusLine.separator",
+    "type": "enum"
+   },
+   {
+    "class": "ui-irrelevant-in-print-json-mode",
+    "default": true,
+    "effective_under_frozen_profile": true,
+    "frozen_value": null,
+    "key": "statusLine.sessionAccent",
+    "type": "boolean"
+   },
+   {
+    "class": "ui-irrelevant-in-print-json-mode",
+    "default": true,
+    "effective_under_frozen_profile": true,
+    "frozen_value": null,
+    "key": "statusLine.showHookStatus",
+    "type": "boolean"
+   },
+   {
+    "class": "ui-irrelevant-in-print-json-mode",
+    "default": false,
+    "effective_under_frozen_profile": false,
+    "frozen_value": null,
+    "key": "statusLine.transparent",
+    "type": "boolean"
+   },
+   {
+    "class": "default-retained-behaviour-visible-in-evidence",
+    "default": "one-at-a-time",
+    "effective_under_frozen_profile": "one-at-a-time",
+    "frozen_value": null,
+    "key": "steeringMode",
+    "type": "enum"
+   },
+   {
+    "class": "ui-irrelevant-in-print-json-mode",
+    "default": false,
+    "effective_under_frozen_profile": false,
+    "frozen_value": null,
+    "key": "stt.enabled",
+    "type": "boolean"
+   },
+   {
+    "class": "ui-irrelevant-in-print-json-mode",
+    "default": "en",
+    "effective_under_frozen_profile": "en",
+    "frozen_value": null,
+    "key": "stt.language",
+    "type": "string"
+   },
+   {
+    "class": "ui-irrelevant-in-print-json-mode",
+    "default": "parakeet",
+    "effective_under_frozen_profile": "parakeet",
+    "frozen_value": null,
+    "key": "stt.modelName",
+    "type": "enum"
+   },
+   {
+    "class": "ui-irrelevant-in-print-json-mode",
+    "default": "never",
+    "effective_under_frozen_profile": "never",
+    "frozen_value": null,
+    "key": "stt.submitTrigger",
+    "type": "enum"
+   },
+   {
+    "class": "ui-irrelevant-in-print-json-mode",
+    "default": "unicode",
+    "effective_under_frozen_profile": "unicode",
+    "frozen_value": null,
+    "key": "symbolPreset",
+    "type": "enum"
+   },
+   {
+    "class": "tool-not-exposed-by-frozen-tool-surface",
+    "default": {},
+    "effective_under_frozen_profile": {},
+    "frozen_value": null,
+    "key": "task.agentAdvisor",
+    "type": "record"
+   },
+   {
+    "class": "tool-not-exposed-by-frozen-tool-surface",
+    "default": 420000,
+    "effective_under_frozen_profile": 420000,
+    "frozen_value": null,
+    "key": "task.agentIdleTtlMs",
+    "type": "number"
+   },
+   {
+    "class": "tool-not-exposed-by-frozen-tool-surface",
+    "default": {},
+    "effective_under_frozen_profile": {},
+    "frozen_value": null,
+    "key": "task.agentModelOverrides",
+    "type": "record"
+   },
+   {
+    "class": "tool-not-exposed-by-frozen-tool-surface",
+    "default": {},
+    "effective_under_frozen_profile": {},
+    "frozen_value": null,
+    "key": "task.agentPrewalk",
+    "type": "record"
+   },
+   {
+    "class": "tool-not-exposed-by-frozen-tool-surface",
+    "default": true,
+    "effective_under_frozen_profile": true,
+    "frozen_value": null,
+    "key": "task.batch",
+    "type": "boolean"
+   },
+   {
+    "class": "tool-not-exposed-by-frozen-tool-surface",
+    "default": [],
+    "effective_under_frozen_profile": [],
+    "frozen_value": null,
+    "key": "task.disabledAgents",
+    "type": "array"
+   },
+   {
+    "class": "tool-not-exposed-by-frozen-tool-surface",
+    "default": "default",
+    "effective_under_frozen_profile": "default",
+    "frozen_value": null,
+    "key": "task.eager",
+    "type": "enum"
+   },
+   {
+    "class": "tool-not-exposed-by-frozen-tool-surface",
+    "default": false,
+    "effective_under_frozen_profile": false,
+    "frozen_value": null,
+    "key": "task.enableEffort",
+    "type": "boolean"
+   },
+   {
+    "class": "tool-not-exposed-by-frozen-tool-surface",
+    "default": false,
+    "effective_under_frozen_profile": false,
+    "frozen_value": null,
+    "key": "task.enableLsp",
+    "type": "boolean"
+   },
+   {
+    "class": "tool-not-exposed-by-frozen-tool-surface",
+    "default": true,
+    "effective_under_frozen_profile": true,
+    "frozen_value": null,
+    "key": "task.isolation.apply",
+    "type": "boolean"
+   },
+   {
+    "class": "tool-not-exposed-by-frozen-tool-surface",
+    "default": "generic",
+    "effective_under_frozen_profile": "generic",
+    "frozen_value": null,
+    "key": "task.isolation.commits",
+    "type": "enum"
+   },
+   {
+    "class": "tool-not-exposed-by-frozen-tool-surface",
+    "default": "patch",
+    "effective_under_frozen_profile": "patch",
+    "frozen_value": null,
+    "key": "task.isolation.merge",
+    "type": "enum"
+   },
+   {
+    "class": "tool-not-exposed-by-frozen-tool-surface",
+    "default": "none",
+    "effective_under_frozen_profile": "none",
+    "frozen_value": null,
+    "key": "task.isolation.mode",
+    "type": "enum"
+   },
+   {
+    "class": "tool-not-exposed-by-frozen-tool-surface",
+    "default": 32,
+    "effective_under_frozen_profile": 32,
+    "frozen_value": null,
+    "key": "task.maxConcurrency",
+    "type": "number"
+   },
+   {
+    "class": "tool-not-exposed-by-frozen-tool-surface",
+    "default": "max",
+    "effective_under_frozen_profile": "max",
+    "frozen_value": null,
+    "key": "task.maxEffort",
+    "type": "enum"
+   },
+   {
+    "class": "tool-not-exposed-by-frozen-tool-surface",
+    "default": 2,
+    "effective_under_frozen_profile": 2,
+    "frozen_value": null,
+    "key": "task.maxRecursionDepth",
+    "type": "number"
+   },
+   {
+    "class": "tool-not-exposed-by-frozen-tool-surface",
+    "default": 0,
+    "effective_under_frozen_profile": 0,
+    "frozen_value": null,
+    "key": "task.maxRuntimeMs",
+    "type": "number"
+   },
+   {
+    "class": "frozen-closed",
+    "default": false,
+    "effective_under_frozen_profile": false,
+    "frozen_value": false,
+    "key": "task.prewalk",
+    "type": "boolean"
+   },
+   {
+    "class": "ui-irrelevant-in-print-json-mode",
+    "default": false,
+    "effective_under_frozen_profile": false,
+    "frozen_value": null,
+    "key": "task.showResolvedModelBadge",
+    "type": "boolean"
+   },
+   {
+    "class": "tool-not-exposed-by-frozen-tool-surface",
+    "default": 200,
+    "effective_under_frozen_profile": 200,
+    "frozen_value": null,
+    "key": "task.softRequestBudget",
+    "type": "number"
+   },
+   {
+    "class": "tool-not-exposed-by-frozen-tool-surface",
+    "default": true,
+    "effective_under_frozen_profile": true,
+    "frozen_value": null,
+    "key": "task.softRequestBudgetNotice",
+    "type": "boolean"
+   },
+   {
+    "class": "default-retained-behaviour-visible-in-evidence",
+    "default": 60,
+    "effective_under_frozen_profile": 60,
+    "frozen_value": null,
+    "key": "tasks.todoClearDelay",
+    "type": "number"
+   },
+   {
+    "class": "default-retained-behaviour-visible-in-evidence",
+    "default": -1,
+    "effective_under_frozen_profile": -1,
+    "frozen_value": null,
+    "key": "temperature",
+    "type": "number"
+   },
+   {
+    "class": "ui-irrelevant-in-print-json-mode",
+    "default": true,
+    "effective_under_frozen_profile": true,
+    "frozen_value": null,
+    "key": "terminal.showImages",
+    "type": "boolean"
+   },
+   {
+    "class": "ui-irrelevant-in-print-json-mode",
+    "default": false,
+    "effective_under_frozen_profile": false,
+    "frozen_value": null,
+    "key": "terminal.showProgress",
+    "type": "boolean"
+   },
+   {
+    "class": "default-retained-behaviour-visible-in-evidence",
+    "default": "medium",
+    "effective_under_frozen_profile": "medium",
+    "frozen_value": null,
+    "key": "textVerbosity",
+    "type": "enum"
+   },
+   {
+    "class": "ui-irrelevant-in-print-json-mode",
+    "default": "titanium",
+    "effective_under_frozen_profile": "titanium",
+    "frozen_value": null,
+    "key": "theme.dark",
+    "type": "string"
+   },
+   {
+    "class": "ui-irrelevant-in-print-json-mode",
+    "default": "light",
+    "effective_under_frozen_profile": "light",
+    "frozen_value": null,
+    "key": "theme.light",
+    "type": "string"
+   },
+   {
+    "class": "default-retained-behaviour-visible-in-evidence",
+    "default": 16384,
+    "effective_under_frozen_profile": 16384,
+    "frozen_value": null,
+    "key": "thinkingBudgets.high",
+    "type": "number"
+   },
+   {
+    "class": "default-retained-behaviour-visible-in-evidence",
+    "default": 2048,
+    "effective_under_frozen_profile": 2048,
+    "frozen_value": null,
+    "key": "thinkingBudgets.low",
+    "type": "number"
+   },
+   {
+    "class": "default-retained-behaviour-visible-in-evidence",
+    "default": 32768,
+    "effective_under_frozen_profile": 32768,
+    "frozen_value": null,
+    "key": "thinkingBudgets.max",
+    "type": "number"
+   },
+   {
+    "class": "default-retained-behaviour-visible-in-evidence",
+    "default": 8192,
+    "effective_under_frozen_profile": 8192,
+    "frozen_value": null,
+    "key": "thinkingBudgets.medium",
+    "type": "number"
+   },
+   {
+    "class": "default-retained-behaviour-visible-in-evidence",
+    "default": 1024,
+    "effective_under_frozen_profile": 1024,
+    "frozen_value": null,
+    "key": "thinkingBudgets.minimal",
+    "type": "number"
+   },
+   {
+    "class": "default-retained-behaviour-visible-in-evidence",
+    "default": 32768,
+    "effective_under_frozen_profile": 32768,
+    "frozen_value": null,
+    "key": "thinkingBudgets.xhigh",
+    "type": "number"
+   },
+   {
+    "class": "default-retained-behaviour-visible-in-evidence",
+    "default": "none",
+    "effective_under_frozen_profile": "none",
+    "frozen_value": null,
+    "key": "tier.advisor",
+    "type": "enum"
+   },
+   {
+    "class": "default-retained-behaviour-visible-in-evidence",
+    "default": "none",
+    "effective_under_frozen_profile": "none",
+    "frozen_value": null,
+    "key": "tier.anthropic",
+    "type": "enum"
+   },
+   {
+    "class": "default-retained-behaviour-visible-in-evidence",
+    "default": "none",
+    "effective_under_frozen_profile": "none",
+    "frozen_value": null,
+    "key": "tier.google",
+    "type": "enum"
+   },
+   {
+    "class": "default-retained-behaviour-visible-in-evidence",
+    "default": "none",
+    "effective_under_frozen_profile": "none",
+    "frozen_value": null,
+    "key": "tier.openai",
+    "type": "enum"
+   },
+   {
+    "class": "default-retained-behaviour-visible-in-evidence",
+    "default": "inherit",
+    "effective_under_frozen_profile": "inherit",
+    "frozen_value": null,
+    "key": "tier.subagent",
+    "type": "enum"
+   },
+   {
+    "class": "default-retained-behaviour-visible-in-evidence",
+    "default": true,
+    "effective_under_frozen_profile": true,
+    "frozen_value": null,
+    "key": "title.refreshOnReplan",
+    "type": "boolean"
+   },
+   {
+    "class": "tool-not-exposed-by-frozen-tool-surface",
+    "default": "default",
+    "effective_under_frozen_profile": "default",
+    "frozen_value": null,
+    "key": "todo.eager",
+    "type": "enum"
+   },
+   {
+    "class": "tool-not-exposed-by-frozen-tool-surface",
+    "default": true,
+    "effective_under_frozen_profile": true,
+    "frozen_value": null,
+    "key": "todo.enabled",
+    "type": "boolean"
+   },
+   {
+    "class": "frozen-closed",
+    "default": true,
+    "effective_under_frozen_profile": false,
+    "frozen_value": false,
+    "key": "todo.reminders",
+    "type": "boolean"
+   },
+   {
+    "class": "tool-not-exposed-by-frozen-tool-surface",
+    "default": 3,
+    "effective_under_frozen_profile": 3,
+    "frozen_value": null,
+    "key": "todo.remindersMax",
+    "type": "number"
+   },
+   {
+    "class": "default-retained-behaviour-visible-in-evidence",
+    "default": true,
+    "effective_under_frozen_profile": true,
+    "frozen_value": null,
+    "key": "tools.abortOnFabricatedResult",
+    "type": "boolean"
+   },
+   {
+    "class": "default-retained-behaviour-visible-in-evidence",
+    "default": {},
+    "effective_under_frozen_profile": {},
+    "frozen_value": null,
+    "key": "tools.approval",
+    "type": "record"
+   },
+   {
+    "class": "default-retained-behaviour-visible-in-evidence",
+    "default": "yolo",
+    "effective_under_frozen_profile": "yolo",
+    "frozen_value": null,
+    "key": "tools.approvalMode",
+    "type": "enum"
+   },
+   {
+    "class": "default-retained-behaviour-visible-in-evidence",
+    "default": 20,
+    "effective_under_frozen_profile": 20,
+    "frozen_value": null,
+    "key": "tools.artifactHeadBytes",
+    "type": "number"
+   },
+   {
+    "class": "default-retained-behaviour-visible-in-evidence",
+    "default": 50,
+    "effective_under_frozen_profile": 50,
+    "frozen_value": null,
+    "key": "tools.artifactSpillThreshold",
+    "type": "number"
+   },
+   {
+    "class": "default-retained-behaviour-visible-in-evidence",
+    "default": 20,
+    "effective_under_frozen_profile": 20,
+    "frozen_value": null,
+    "key": "tools.artifactTailBytes",
+    "type": "number"
+   },
+   {
+    "class": "default-retained-behaviour-visible-in-evidence",
+    "default": 500,
+    "effective_under_frozen_profile": 500,
+    "frozen_value": null,
+    "key": "tools.artifactTailLines",
+    "type": "number"
+   },
+   {
+    "class": "default-retained-behaviour-visible-in-evidence",
+    "default": "auto",
+    "effective_under_frozen_profile": "auto",
+    "frozen_value": null,
+    "key": "tools.format",
+    "type": "enum"
+   },
+   {
+    "class": "frozen-closed",
+    "default": true,
+    "effective_under_frozen_profile": false,
+    "frozen_value": false,
+    "key": "tools.intentTracing",
+    "type": "boolean"
+   },
+   {
+    "class": "default-retained-behaviour-visible-in-evidence",
+    "default": 0,
+    "effective_under_frozen_profile": 0,
+    "frozen_value": null,
+    "key": "tools.maxTimeout",
+    "type": "number"
+   },
+   {
+    "class": "default-retained-behaviour-visible-in-evidence",
+    "default": 768,
+    "effective_under_frozen_profile": 768,
+    "frozen_value": null,
+    "key": "tools.outputMaxColumns",
+    "type": "number"
+   },
+   {
+    "class": "frozen-closed",
+    "default": true,
+    "effective_under_frozen_profile": false,
+    "frozen_value": false,
+    "key": "tools.xdev",
+    "type": "boolean"
+   },
+   {
+    "class": "default-retained-behaviour-visible-in-evidence",
+    "default": "builtins",
+    "effective_under_frozen_profile": "builtins",
+    "frozen_value": null,
+    "key": "tools.xdevDocs",
+    "type": "enum"
+   },
+   {
+    "class": "default-retained-behaviour-visible-in-evidence",
+    "default": [],
+    "effective_under_frozen_profile": [],
+    "frozen_value": null,
+    "key": "tools.xdevInlineDevices",
+    "type": "array"
+   },
+   {
+    "class": "default-retained-behaviour-visible-in-evidence",
+    "default": -1,
+    "effective_under_frozen_profile": -1,
+    "frozen_value": null,
+    "key": "topK",
+    "type": "number"
+   },
+   {
+    "class": "default-retained-behaviour-visible-in-evidence",
+    "default": -1,
+    "effective_under_frozen_profile": -1,
+    "frozen_value": null,
+    "key": "topP",
+    "type": "number"
+   },
+   {
+    "class": "ui-irrelevant-in-print-json-mode",
+    "default": "default",
+    "effective_under_frozen_profile": "default",
+    "frozen_value": null,
+    "key": "treeFilterMode",
+    "type": "enum"
+   },
+   {
+    "class": "ui-irrelevant-in-print-json-mode",
+    "default": "kokoro",
+    "effective_under_frozen_profile": "kokoro",
+    "frozen_value": null,
+    "key": "tts.localModel",
+    "type": "enum"
+   },
+   {
+    "class": "ui-irrelevant-in-print-json-mode",
+    "default": "af_heart",
+    "effective_under_frozen_profile": "af_heart",
+    "frozen_value": null,
+    "key": "tts.localVoice",
+    "type": "enum"
+   },
+   {
+    "class": "default-retained-behaviour-visible-in-evidence",
+    "default": true,
+    "effective_under_frozen_profile": true,
+    "frozen_value": null,
+    "key": "ttsr.builtinRules",
+    "type": "boolean"
+   },
+   {
+    "class": "default-retained-behaviour-visible-in-evidence",
+    "default": "discard",
+    "effective_under_frozen_profile": "discard",
+    "frozen_value": null,
+    "key": "ttsr.contextMode",
+    "type": "enum"
+   },
+   {
+    "class": "default-retained-behaviour-visible-in-evidence",
+    "default": [],
+    "effective_under_frozen_profile": [],
+    "frozen_value": null,
+    "key": "ttsr.disabledRules",
+    "type": "array"
+   },
+   {
+    "class": "frozen-closed",
+    "default": true,
+    "effective_under_frozen_profile": false,
+    "frozen_value": false,
+    "key": "ttsr.enabled",
+    "type": "boolean"
+   },
+   {
+    "class": "default-retained-behaviour-visible-in-evidence",
+    "default": "always",
+    "effective_under_frozen_profile": "always",
+    "frozen_value": null,
+    "key": "ttsr.interruptMode",
+    "type": "enum"
+   },
+   {
+    "class": "default-retained-behaviour-visible-in-evidence",
+    "default": 10,
+    "effective_under_frozen_profile": 10,
+    "frozen_value": null,
+    "key": "ttsr.repeatGap",
+    "type": "number"
+   },
+   {
+    "class": "default-retained-behaviour-visible-in-evidence",
+    "default": "once",
+    "effective_under_frozen_profile": "once",
+    "frozen_value": null,
+    "key": "ttsr.repeatMode",
+    "type": "enum"
+   },
+   {
+    "class": "ui-irrelevant-in-print-json-mode",
+    "default": false,
+    "effective_under_frozen_profile": false,
+    "frozen_value": null,
+    "key": "tui.codexResetFireworks",
+    "type": "boolean"
+   },
+   {
+    "class": "ui-irrelevant-in-print-json-mode",
+    "default": "auto",
+    "effective_under_frozen_profile": "auto",
+    "frozen_value": null,
+    "key": "tui.hyperlinks",
+    "type": "enum"
+   },
+   {
+    "class": "ui-irrelevant-in-print-json-mode",
+    "default": false,
+    "effective_under_frozen_profile": false,
+    "frozen_value": null,
+    "key": "tui.imeSafeCursor",
+    "type": "boolean"
+   },
+   {
+    "class": "ui-irrelevant-in-print-json-mode",
+    "default": 100,
+    "effective_under_frozen_profile": 100,
+    "frozen_value": null,
+    "key": "tui.maxInlineImageColumns",
+    "type": "number"
+   },
+   {
+    "class": "ui-irrelevant-in-print-json-mode",
+    "default": 20,
+    "effective_under_frozen_profile": 20,
+    "frozen_value": null,
+    "key": "tui.maxInlineImageRows",
+    "type": "number"
+   },
+   {
+    "class": "ui-irrelevant-in-print-json-mode",
+    "default": 8,
+    "effective_under_frozen_profile": 8,
+    "frozen_value": null,
+    "key": "tui.maxInlineImages",
+    "type": "number"
+   },
+   {
+    "class": "ui-irrelevant-in-print-json-mode",
+    "default": true,
+    "effective_under_frozen_profile": true,
+    "frozen_value": null,
+    "key": "tui.renderMermaid",
+    "type": "boolean"
+   },
+   {
+    "class": "ui-irrelevant-in-print-json-mode",
+    "default": "rebuild",
+    "effective_under_frozen_profile": "rebuild",
+    "frozen_value": null,
+    "key": "tui.resizeScrollback",
+    "type": "enum"
+   },
+   {
+    "class": "ui-irrelevant-in-print-json-mode",
+    "default": false,
+    "effective_under_frozen_profile": false,
+    "frozen_value": null,
+    "key": "tui.textSizing",
+    "type": "boolean"
+   },
+   {
+    "class": "ui-irrelevant-in-print-json-mode",
+    "default": false,
+    "effective_under_frozen_profile": false,
+    "frozen_value": null,
+    "key": "tui.tight",
+    "type": "boolean"
+   },
+   {
+    "class": "ui-irrelevant-in-print-json-mode",
+    "default": true,
+    "effective_under_frozen_profile": true,
+    "frozen_value": null,
+    "key": "tui.titleState",
+    "type": "boolean"
+   },
+   {
+    "class": "default-retained-behaviour-visible-in-evidence",
+    "default": "stable",
+    "effective_under_frozen_profile": "stable",
+    "frozen_value": null,
+    "key": "update.channel",
+    "type": "enum"
+   },
+   {
+    "class": "requires-network-or-service-unreachable-in-subject-netns",
+    "default": false,
+    "effective_under_frozen_profile": false,
+    "frozen_value": null,
+    "key": "vault.enabled",
+    "type": "boolean"
+   },
+   {
+    "class": "tool-not-exposed-by-frozen-tool-surface",
+    "default": true,
+    "effective_under_frozen_profile": true,
+    "frozen_value": null,
+    "key": "web_search.enabled",
+    "type": "boolean"
+   },
+   {
+    "class": "default-retained-behaviour-visible-in-evidence",
+    "default": [],
+    "effective_under_frozen_profile": [],
+    "frozen_value": null,
+    "key": "workspace.additionalDirectories",
+    "type": "array"
+   },
+   {
+    "class": "default-retained-behaviour-visible-in-evidence",
+    "default": null,
+    "effective_under_frozen_profile": null,
+    "frozen_value": null,
+    "key": "worktree.base",
+    "type": "string"
+   }
+  ],
+  "frozen_keys_absent_from_build": []
+ }
+}

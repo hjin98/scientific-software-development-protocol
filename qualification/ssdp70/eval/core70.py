@@ -93,7 +93,24 @@ EVALUATOR_ADMISSION_CHECKS = (
     "evaluator_identity_perturbation",
 )
 
+# The harness-private layout of the qualification MCP stand-in. The harness creates it and every
+# adapter that realizes the qualification MCP server consumes exactly this layout, so no adapter
+# keeps a parallel private layout that tests could fabricate independently of the real harness.
+PRIVATE_MCP_LAYOUT = {
+    "server": "mcp-server.py",
+    "stub": "stub",
+    "log": "side-effects.jsonl",
+    "account": "mcp-account.txt",
+}
+
+
+def private_mcp_paths(private_root: Path) -> dict[str, Path]:
+    return {label: Path(private_root) / name for label, name in PRIVATE_MCP_LAYOUT.items()}
+
+
 EVIDENCE_INTEGRITY_ROOTS = (
+    "adapter-artifacts",
+    "project-control-record.json",
     "summary.json",
     "run-identity.json",
     "profile-snapshot.json",

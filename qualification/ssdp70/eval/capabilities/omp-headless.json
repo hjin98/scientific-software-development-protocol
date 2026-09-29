@@ -1,34 +1,32 @@
 {
-  "schema": 1,
-  "manifest_id": "omp-headless-stage-f-json-stdio-mcp",
   "capabilities": {
     "catalog_root_activation": {
       "decision": "ALLOW",
-      "scope": "run-owned installed skills under ~/.omp/agent/skills; project-local skill/config discovery is refused"
+      "scope": "read of skill://<root> from the read-only mounted arm package; foreign and project-scoped discovery providers are closed"
     },
     "credential_secret_service_account": {
       "decision": "DENY",
-      "scope": "ambient credentials excluded; provider credential must be held by an operator-frozen external broker outside the sandbox; no credential is written into the run-owned HOME"
+      "scope": "the provider credential lives only in the provider-control/observation principal; the subject has no credential, no host HOME and no credential variable, and `bash`/subprocesses cannot reach the inference or MCP transport"
     },
     "delegation": {
       "decision": "SANDBOX/MEDIATE",
-      "scope": "scripted qualification-owned stdio MCP delegate only; native task/hub subagent and peer messaging excluded until independently qualified"
+      "scope": "scripted qualification-owned delegate through the MCP mediator only; native task/hub/subagent surfaces are not exposed"
     },
     "external_mutation": {
       "decision": "SANDBOX/MEDIATE",
-      "scope": "qualification-owned stdio MCP issue mutations plus run-owned workspace effects; native executor network denied by the substrate"
+      "scope": "qualification-owned MCP issue mutations against the private stand-in; the subject filesystem view is read-only outside the run project, run HOME and tmpfs scratch, and the network namespace has only loopback"
     },
     "issue_evidence_store": {
       "decision": "SANDBOX/MEDIATE",
-      "scope": "qualification-owned stdio MCP plus the runtime todo store; private state/log/server/config remain under the denied harness-private root"
+      "scope": "qualification-owned MCP mediator run by the supervisor; stub root, side-effect log, account and server files are not present in the subject's view"
     },
     "network_remote_service": {
       "decision": "DENY",
-      "scope": "native executor network closed by substrate network-namespace isolation; provider control plane is outside tool capability"
+      "scope": "subject network namespace has loopback only; the provider route belongs to the provider-control/observation principal"
     },
     "process_execution": {
       "decision": "SANDBOX/MEDIATE",
-      "scope": "bash/eval under the operator-frozen substrate with filesystem, network, IPC, process and credential boundaries; approval rules alone are not the boundary"
+      "scope": "bash inside the subject sandbox: minimal read-only filesystem view, no host HOME, empty network, no relay authority for spawned processes"
     },
     "repository_object_store": {
       "decision": "SANDBOX/MEDIATE",
@@ -36,155 +34,110 @@
     },
     "workspace_mutation": {
       "decision": "ALLOW",
-      "scope": "run-owned project only; MCP control files live outside the workspace under the denied harness-private root"
+      "scope": "run-owned project only (read-write bind); everything else is read-only or ephemeral scratch"
     },
     "workspace_read_search_list": {
       "decision": "ALLOW",
-      "scope": "native read/glob/grep: run-owned project including the installed skill package; reads elsewhere are refused by the substrate"
+      "scope": "read/glob/grep over the run-owned project, the read-only mounted arm package and the read-only system view"
     }
   },
+  "manifest_id": "omp-headless-stage-f-three-principal-json",
   "native_capabilities": {
-    "tool:read": {
-      "semantic_classes": [
-        "workspace_read_search_list"
-      ],
-      "scope": "native read surface; run-project-scoped by substrate"
-    },
-    "tool:glob": {
-      "semantic_classes": [
-        "workspace_read_search_list"
-      ],
-      "scope": "native glob surface; run-project-scoped by substrate"
-    },
-    "tool:grep": {
-      "semantic_classes": [
-        "workspace_read_search_list"
-      ],
-      "scope": "native grep surface; run-project-scoped by substrate"
-    },
-    "tool:write": {
-      "semantic_classes": [
-        "workspace_mutation"
-      ],
-      "scope": "native write surface; run-project-scoped by substrate"
-    },
-    "tool:edit": {
-      "semantic_classes": [
-        "workspace_mutation"
-      ],
-      "scope": "native edit surface; run-project-scoped by substrate"
-    },
-    "tool:bash": {
-      "semantic_classes": [
-        "process_execution",
-        "repository_object_store",
-        "network_remote_service",
-        "external_mutation",
-        "credential_secret_service_account",
-        "issue_evidence_store",
-        "workspace_read_search_list",
-        "workspace_mutation"
-      ],
-      "scope": "native bash surface; governed by the frozen substrate, not by approval rules"
-    },
-    "tool:eval": {
-      "semantic_classes": [
-        "process_execution",
-        "repository_object_store",
-        "network_remote_service",
-        "external_mutation",
-        "credential_secret_service_account",
-        "issue_evidence_store",
-        "workspace_read_search_list",
-        "workspace_mutation"
-      ],
-      "scope": "native eval surface; governed by the frozen substrate, not by approval rules"
-    },
-    "tool:task": {
-      "semantic_classes": [
-        "delegation"
-      ],
-      "scope": "native subagent task surface; excluded from admission until independently qualified"
-    },
-    "tool:hub": {
-      "semantic_classes": [
-        "delegation",
-        "external_mutation"
-      ],
-      "scope": "native peer/background coordination surface; excluded from admission until independently qualified"
-    },
-    "tool:todo": {
-      "semantic_classes": [
-        "issue_evidence_store"
-      ],
-      "scope": "runtime todo store; mediated and contained"
-    },
-    "tool:web_search": {
-      "semantic_classes": [
-        "network_remote_service",
-        "external_mutation"
-      ],
-      "scope": "native web-search surface; excluded from admission until the substrate closes external egress"
-    },
     "mcp_server:ssdp70": {
+      "scope": "single qualification MCP server; the unchanged stdio mediator behind the supervisor bridge; exact identity and connection are observed on the trusted bridge",
       "semantic_classes": [
         "issue_evidence_store",
         "delegation",
         "external_mutation"
-      ],
-      "scope": "single strict run-owned qualification stdio MCP server; exact identity and connected runtime observation required"
-    },
-    "tool:mcp__ssdp_issue_locations": {
-      "semantic_classes": [
-        "issue_evidence_store"
-      ],
-      "scope": "list qualification-owned issue-store locations"
-    },
-    "tool:mcp__ssdp_issue_search": {
-      "semantic_classes": [
-        "issue_evidence_store"
-      ],
-      "scope": "search qualification-owned issue evidence"
-    },
-    "tool:mcp__ssdp_issue_show": {
-      "semantic_classes": [
-        "issue_evidence_store"
-      ],
-      "scope": "show qualification-owned issue evidence"
-    },
-    "tool:mcp__ssdp_issue_create": {
-      "semantic_classes": [
-        "issue_evidence_store",
-        "external_mutation"
-      ],
-      "scope": "create issue only in qualification-owned private stand-in"
-    },
-    "tool:mcp__ssdp_issue_comment": {
-      "semantic_classes": [
-        "issue_evidence_store",
-        "external_mutation"
-      ],
-      "scope": "comment only in qualification-owned private stand-in"
-    },
-    "tool:mcp__ssdp_delegate": {
-      "semantic_classes": [
-        "delegation"
-      ],
-      "scope": "scripted qualification delegate stand-in only"
+      ]
     },
     "runtime_capability:omp-json-event-stream-v1": {
+      "scope": "machine-readable NDJSON event stream (session format 3); the exact catalog/build/tool surface is NOT in this stream and is taken from the trusted observer",
       "semantic_classes": [
         "catalog_root_activation"
-      ],
-      "scope": "machine-readable NDJSON event stream; exact catalog/build surface is not exposed and must be observed independently"
+      ]
     },
-    "runtime_capability:omp-mcp-write-device-v1": {
+    "tool:bash": {
+      "scope": "bash under the subject sandbox; governed by the substrate, not by approval settings",
+      "semantic_classes": [
+        "process_execution",
+        "repository_object_store",
+        "network_remote_service",
+        "external_mutation",
+        "credential_secret_service_account",
+        "issue_evidence_store",
+        "workspace_read_search_list",
+        "workspace_mutation"
+      ]
+    },
+    "tool:edit": {
+      "scope": "native edit; same substrate view as write",
+      "semantic_classes": [
+        "workspace_mutation"
+      ]
+    },
+    "tool:glob": {
+      "scope": "native glob",
+      "semantic_classes": [
+        "workspace_read_search_list"
+      ]
+    },
+    "tool:grep": {
+      "scope": "native grep",
+      "semantic_classes": [
+        "workspace_read_search_list"
+      ]
+    },
+    "tool:mcp__ssdp_delegate": {
+      "scope": "scripted qualification delegate stand-in only",
+      "semantic_classes": [
+        "delegation"
+      ]
+    },
+    "tool:mcp__ssdp_issue_comment": {
+      "scope": "comment only in the qualification-owned private stand-in",
       "semantic_classes": [
         "issue_evidence_store",
-        "delegation",
         "external_mutation"
-      ],
-      "scope": "MCP tools are reached as xd:// write devices; raw<->native binding is proved by the adapter"
+      ]
+    },
+    "tool:mcp__ssdp_issue_create": {
+      "scope": "create issue only in the qualification-owned private stand-in",
+      "semantic_classes": [
+        "issue_evidence_store",
+        "external_mutation"
+      ]
+    },
+    "tool:mcp__ssdp_issue_locations": {
+      "scope": "list qualification-owned issue-store locations",
+      "semantic_classes": [
+        "issue_evidence_store"
+      ]
+    },
+    "tool:mcp__ssdp_issue_search": {
+      "scope": "search qualification-owned issue evidence",
+      "semantic_classes": [
+        "issue_evidence_store"
+      ]
+    },
+    "tool:mcp__ssdp_issue_show": {
+      "scope": "show qualification-owned issue evidence",
+      "semantic_classes": [
+        "issue_evidence_store"
+      ]
+    },
+    "tool:read": {
+      "scope": "native read; skill:// reads resolve to the read-only mounted arm package",
+      "semantic_classes": [
+        "workspace_read_search_list"
+      ]
+    },
+    "tool:write": {
+      "scope": "native write; paths outside the run project fail on the read-only view or land in ephemeral scratch",
+      "semantic_classes": [
+        "workspace_mutation"
+      ]
     }
-  }
+  },
+  "schema": 1
 }
