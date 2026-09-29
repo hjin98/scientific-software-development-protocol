@@ -396,11 +396,12 @@ def _containment_document(profile: dict[str, Any], project: Path, env: dict[str,
                 "envVars": [
                     {"name": name, "mode": "deny"}
                     for name in (
-                        "CLAUDE_CODE_OAUTH_TOKEN", "ANTHROPIC_API_KEY", "ANTHROPIC_AUTH_TOKEN",
+                        "CLAUDE_CODE_OAUTH_TOKEN", "CLAUDE_CODE_MESSAGING_TOKEN",
+                        "ANTHROPIC_API_KEY", "ANTHROPIC_AUTH_TOKEN",
                         "SSDP70_CLAUDE_CODE_OAUTH_TOKEN", "SSDP70_ANTHROPIC_API_KEY", "SSDP70_ANTHROPIC_AUTH_TOKEN",
                         "AWS_ACCESS_KEY_ID",
                         "AWS_SECRET_ACCESS_KEY", "AWS_SESSION_TOKEN", "GITHUB_TOKEN",
-                        "GH_TOKEN", "SSH_AUTH_SOCK",
+                        "GH_TOKEN", "SSH_AUTH_SOCK", "CLOUDSDK_PROXY_PASSWORD",
                     )
                 ],
             },

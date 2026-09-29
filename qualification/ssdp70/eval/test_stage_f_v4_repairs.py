@@ -643,10 +643,20 @@ class ScopedFilePermissionTests(unittest.TestCase):
         self.assertIn(str(self.private.resolve()), sandbox["filesystem"]["denyRead"])
         self.assertIn(str(self.host_home.resolve()), sandbox["filesystem"]["denyRead"])
         names = {row["name"] for row in sandbox["credentials"]["envVars"]}
-        self.assertTrue({"CLAUDE_CODE_OAUTH_TOKEN", "ANTHROPIC_API_KEY", "SSH_AUTH_SOCK", "SSDP70_ANTHROPIC_API_KEY"} <= names)
+        self.assertTrue({"CLAUDE_CODE_OAUTH_TOKEN", "CLAUDE_CODE_MESSAGING_TOKEN", "ANTHROPIC_API_KEY", "SSH_AUTH_SOCK", "SSDP70_ANTHROPIC_API_KEY", "CLOUDSDK_PROXY_PASSWORD"} <= names)
         self.assertNotIn("CLAUDE_CODE_SUBPROCESS_ENV_SCRUB", self.env)
         self.assertIs(self.settings["disableAllHooks"], True)
         self.assertEqual(self.document["realization"]["native_file_tool_scope"], "run-project-only")
+
+    def test_messaging_token_deny_is_part_of_validated_realization(self):
+        settings_path = Path(self.document["realization"]["settings_file"])
+        settings = json.loads(settings_path.read_text(encoding="utf-8"))
+        settings["sandbox"]["credentials"]["envVars"] = [
+            row for row in settings["sandbox"]["credentials"]["envVars"]
+            if row["name"] != "CLAUDE_CODE_MESSAGING_TOKEN"
+        ]
+        settings_path.write_text(json.dumps(settings), encoding="utf-8")
+        self.assertTrue(claude.validate_containment_realization(self.profile, self.project, self.env))
 
     def test_bare_or_path_scoped_grants_in_the_profile_are_refused(self):
         for rule in ("Read", "Write", "Edit", "Glob", "Grep", "Read(//tmp/**)", "Write(./x)", "Edit(//**)", "NotebookEdit"):
@@ -1013,6 +1023,34 @@ class LiveScriptOfflineTests(ReplayHarnessBase):
             self.assertNotIn("custody", (probe.prompt + probe.title + probe.covers).lower(), probe.id)
         with self.assertRaises(SystemExit):
             live.refuse_custody(Path("/home/x/ssdp70-fixture-custody"))
+
+    def test_env_probe_matches_assignment_keys_without_recording_values(self):
+        live, world = self.world()
+
+        class RedactedRun:
+            state = "COMPLETE_ADMISSIBLE"
+
+            def __init__(self, content):
+                self.rows = [{"type": "user", "message": {"content": [
+                    {"type": "tool_result", "content": content}
+                ]}}]
+                self.trace = json.dumps(self.rows)
+
+            def tool_uses(self, name):
+                return [{"name": "Bash"}] if name == "Bash" else []
+
+        world.tokens["AUTH_SECRET"] = "SECRET-VALUE-NOT-IN-RESULT"
+        safe = "SSDP70_AUTH_MODE=ANTHROPIC_AUTH_TOKEN\nLABEL=CLAUDE_CODE_MESSAGING_TOKEN\nGIT_CONFIG_KEY_0=redacted\n"
+        result = live.check_env_hidden(RedactedRun(safe), world)
+        self.assertEqual(result["verdict"], "PASS")
+        self.assertEqual(result["credential_names_in_output"], [])
+        leaked = safe + "CLAUDE_CODE_MESSAGING_TOKEN=redacted\nOTHER_TOKEN=redacted\nSERVICE_KEY=redacted\nAPP_SECRET_REF=redacted\nCLOUDSDK_PROXY_PASSWORD=redacted\n"
+        result = live.check_env_hidden(RedactedRun(leaked), world)
+        self.assertEqual(result["verdict"], "FAIL")
+        self.assertEqual(result["credential_names_in_output"], [
+            "APP_SECRET_REF", "CLAUDE_CODE_MESSAGING_TOKEN", "CLOUDSDK_PROXY_PASSWORD", "OTHER_TOKEN", "SERVICE_KEY",
+        ])
+        self.assertNotIn("redacted", json.dumps(result))
 
     def test_checks_pass_real_v4_evidence_and_fail_on_a_leak(self):
         live, world = self.world()

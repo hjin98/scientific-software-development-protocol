@@ -12,7 +12,7 @@
     "profile_key_sha256": "c101c27eac27b12c374636cac1cedd54da66273c60d1d337f36e0bc59237aa29"
   },
   "files": {
-    "adapters/claude.py": "17de1906bcb694d0a98d7401b4bae073a36a1ea4ab272e98b00f0e55953fc6ff",
+    "adapters/claude.py": "3f6d9c312596ee83d488cf7af63d7f636451e9c254c35e84574a0b14be69be0c",
     "assess70.py": "290cd862f0431ae79ae15bb93186fefbb6de7072c1cb83d68524d7fef86d30c6",
     "capabilities/claude-evaluator-readonly.json": "28f2f5e468a6dfccf833c6463e21e19ea59df9a1a9a44838e18077bf1226fc6a",
     "capabilities/claude-headless.json": "78bcc5c76b0ade12d66cbfd5c73d2c84d15d05cc561862aaa405f2acad44877e",
