@@ -1,0 +1,43 @@
+name: Stage F D4 repair checks
+
+on:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  repair:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install focused test dependency
+        run: python -m pip install PyYAML
+      - name: Compile Stage F qualification tooling
+        working-directory: qualification/ssdp70/eval
+        run: >-
+          python -m py_compile
+          adapters/claude.py
+          core70.py
+          harness70.py
+          assess70.py
+          stub_tools/mediator.py
+          stub_tools/issues.py
+          stub_tools/delegate.py
+          test_portable70.py
+          test_harness_integration.py
+          test_actual_profile_repair.py
+      - name: Run Stage F qualification tooling tests
+        working-directory: qualification/ssdp70/eval
+        run: >-
+          python -m unittest -v
+          test_portable70.py
+          test_harness_integration.py
+          test_actual_profile_repair.py
+      - name: Check patch whitespace
+        run: git diff --check "origin/$GITHUB_BASE_REF...HEAD"
