@@ -2,7 +2,7 @@
 
 ## Status
 
-**STOP/BLOCKED — THE UNIX-SOCKET A2 DESIGN HAS BEEN REPLACED BY A PRIVATE STDIO MCP REALIZATION, BUT THE REQUIRED BYTE-EXACT EXECUTABLE TEST SUITE HAS NOT BEEN RUN AGAINST THE COMMITTED IMPLEMENTATION IN THIS EXECUTION ENVIRONMENT.**
+**IMPLEMENTED — PENDING FRESH INDEPENDENT ACTUAL-PROFILE RECHECK**
 
 This is an implementation/repair record, not a runner-admission record and not a PASS record.
 The comparative Stage F campaign remains unauthorized. The immutable Protocol 7 semantic
@@ -202,70 +202,140 @@ A new `test_mcp_stdio.py` exercises the server at protocol level with
 `initialize -> tools/list -> tools/call`, including issue search, issue creation, delegate
 return, side-effect logging and server-self-digest failure.
 
-## Checks executed
+## Executable verification closure — 2026-09-28
 
-The following checks were actually performed in this implementation session:
+The outstanding committed-byte executable-verification gate has now been executed against
+the exact Git blobs at branch head:
 
-1. Governing authority and the interrupted repair state were reconstructed from the named
-   repository records rather than accepted from the prior STOP conclusion.
-2. The requested start head, the concurrent stdio-MCP commit, and the final reconciliation commit were compared through the repository API. The final repair remains confined to `qualification/ssdp70/eval/`; no forbidden tree or contract file appears in the diff.
-3. The API patch was scanned for added-line trailing whitespace; none was found. This is a
-   useful static check but is **not** recorded as `git diff --check`.
-4. A local dependency-free stdio-server reconstruction was compiled successfully with
-   `python -m py_compile`.
-5. That local server reconstruction completed a direct MCP protocol smoke:
-   `initialize -> notifications/initialized -> tools/list -> tools/call`. The exact six
-   tools were listed; issue search/create and scripted delegate calls returned expected
-   semantic payloads; the private side-effect ledger recorded search/create/delegate; issue
-   creation returned an after-object digest.
+`3a71f5fefa225c53a5ee0dfdcf10689a480610d2`
 
-Items 4–5 establish the protocol/mechanics design only. Because the local executable was
-reconstructed for smoke testing rather than materialized byte-for-byte from the committed
-Git object, they are **not** reported as execution of the committed test files and are not
-actual-profile admission evidence.
+That commit is a direct child of the stdio-MCP implementation commit
+`303ead02e91c923fec991cc447f8b892b7fee88a`. No intervening branch commit appeared before
+or during this verification.
 
-No live `claude -p` qualification run was performed.
+### Byte-exact execution realization
 
-## Required checks unavailable in this execution session — NOT PASSED
+The execution container did not have a pre-existing repository checkout and could not make
+a native network clone. The connected GitHub repository interface was therefore used to
+materialize the complete dependency surface of the four required test suites from
+`3a71f5fefa225c53a5ee0dfdcf10689a480610d2`.
 
-The following required checks have **not** been executed against a byte-exact checkout of
-`303ead02e91c923fec991cc447f8b892b7fee88a`:
+Before any required test was run, each materialized source, test, profile, capability
+manifest and retained native trace was checked with Git blob hashing against the object id
+in the tested commit tree. The materialized files matched those committed object ids
+exactly. A dependency scan of the four requested suites established that no omitted
+repository file was an executable input to those suites. For the repository cleanliness
+check, an isolated Git index was populated with the tested commit's exact blob ids and
+modes for this dependency surface before running `git diff --check`.
 
-- `python -m py_compile` for all affected committed Python files;
-- full `test_portable70.py`;
-- full `test_harness_integration.py`;
-- full `test_stage_f_integrity_repairs.py`;
-- full `test_mcp_stdio.py`;
-- `git diff --check`.
+This is execution of the committed bytes, not a reconstruction/proxy smoke. It is not a
+claim that a network clone occurred.
 
-Reason: the code-execution container available to this implementation session had no
-repository checkout and could not resolve/connect to GitHub. The connected GitHub
-repository interface allowed exact source/blob inspection and Git object creation but did
-not provide a shell execution surface. No proxy or inferred PASS is substituted for these
-missing executions.
+Runtime used for the checks:
 
-## Remaining gate
+- Python `3.13.5`;
+- PyYAML `6.0.3`.
 
-The old Linux/WSL Unix-socket containment property is no longer the recorded blocker. The
-stdio-MCP replacement is implemented in the repository.
+### Tested current-head blob identities
 
-The current blocker is executable verification of the committed bytes.
+Affected implementation/test blobs at
+`3a71f5fefa225c53a5ee0dfdcf10689a480610d2`:
 
-Before this repair may advance to **implemented-pending fresh independent actual-profile
-recheck**, an execution environment with an exact checkout of the implementation head must
-run and PASS:
+- `qualification/ssdp70/eval/adapters/claude.py` —
+  `e1ccfed9dfd46e5b6d81e7be3b17687ec2e366b9`
+- `qualification/ssdp70/eval/capabilities/claude-headless.json` —
+  `de08bf70222f472de7519e2e7dcd3f8d59c9e5b6`
+- `qualification/ssdp70/eval/core70.py` —
+  `f11a75bf78b2a1d7b0d581cf90f34e786ee2d547`
+- `qualification/ssdp70/eval/harness70.py` —
+  `3ac5ffb324db9fe57087122a6532c395d8f8b8ad`
+- `qualification/ssdp70/eval/profiles/claude-evaluator-readonly.template.json` —
+  `896b3cd5e7a932c64f09e5999381187adf80e92f`
+- `qualification/ssdp70/eval/profiles/claude-headless.template.json` —
+  `fbdbad5f46b0c0209a186a81dd85f5c59947c2de`
+- `qualification/ssdp70/eval/stub_tools/mediator.py` —
+  `2669c953276badef452accdea3b4710c6be108b6`
+- `qualification/ssdp70/eval/test_harness_integration.py` —
+  `9d5520b337950f8932b34bb43b0b15837c27f3f6`
+- `qualification/ssdp70/eval/test_mcp_stdio.py` —
+  `039593764d3b35f788a5b7cdb41d9f18416e5633`
+- `qualification/ssdp70/eval/test_portable70.py` —
+  `eba8b012c5a294fb76deccaefde563775fc00ba2`
+- `qualification/ssdp70/eval/test_stage_f_integrity_repairs.py` —
+  `9c899f8c3d1fbd2127bb97ab2799fdfd0b68161b`
 
-1. byte-exact `python -m py_compile` for affected Python;
-2. full `test_portable70.py`;
-3. full `test_harness_integration.py`;
-4. full `test_stage_f_integrity_repairs.py`;
-5. full `test_mcp_stdio.py`;
-6. `git diff --check`.
+Additional exact executable dependencies exercised by those suites:
 
-If and only if those checks pass, a fresh independent actual-profile checker may perform
-the contract §6 runner-admission recheck using the repaired contained profile. A1 fixture
-custody remains separate and no comparative campaign may begin until all runner-admission
-items are satisfied.
+- `qualification/ssdp70/eval/adapters/__init__.py` —
+  `e59566addbfd327ef1959f0e928eb9d537167e8c`
+- `qualification/ssdp70/eval/assess70.py` —
+  `a17ed28faef5d7378202d34c56ab83130eb512ed`
+- `qualification/ssdp70/stage-f-prerun-actual-profile-recheck-2026-09-28/native-traces/init-probe.jsonl` —
+  `274b39cd1587819116c5c096290f59ac3edfcfe5`
+- `qualification/ssdp70/stage-f-prerun-actual-profile-recheck-2026-09-28/native-traces/skill-probe.jsonl` —
+  `042733c73aabf07d8286ab247df5a820e1e29549`
 
-Until the executable suite passes, the correct state is **STOP/BLOCKED**, not admission
-PASS and not implemented-pending-recheck.
+### Required executable checks and results
+
+All required checks completed successfully on those committed bytes.
+
+1. Affected committed Python files:
+
+   ```text
+   python -m py_compile \
+     qualification/ssdp70/eval/adapters/claude.py \
+     qualification/ssdp70/eval/core70.py \
+     qualification/ssdp70/eval/harness70.py \
+     qualification/ssdp70/eval/stub_tools/mediator.py \
+     qualification/ssdp70/eval/test_harness_integration.py \
+     qualification/ssdp70/eval/test_mcp_stdio.py \
+     qualification/ssdp70/eval/test_portable70.py \
+     qualification/ssdp70/eval/test_stage_f_integrity_repairs.py
+   ```
+
+   Result: exit code `0`.
+
+2. `python qualification/ssdp70/eval/test_portable70.py`
+
+   Result: `17` tests, `OK`, exit code `0`.
+
+3. `python qualification/ssdp70/eval/test_harness_integration.py`
+
+   Result: `6` tests, `OK`, exit code `0`. The suite's fake-evaluator cases
+   intentionally exercised both a matching-runtime
+   `VALID / COMPLETE_ADMISSIBLE / PASS` result and a runtime-mismatch
+   `INADMISSIBLE / NOT_EVALUATED` result. Those are unit/integration fixtures, not
+   runner-admission evidence.
+
+4. `python qualification/ssdp70/eval/test_stage_f_integrity_repairs.py`
+
+   Result: `20` tests, `OK`, exit code `0`.
+
+5. `python qualification/ssdp70/eval/test_mcp_stdio.py`
+
+   Result: `2` tests, `OK`, exit code `0`.
+
+6. `git diff --check`
+
+   Result: exit code `0`.
+
+No D4 source repair was required after this verification because every requested executable
+check passed on the committed implementation.
+
+### Verification disposition
+
+The former executable-verification blocker is closed. The correct implementation state is
+therefore:
+
+**IMPLEMENTED — PENDING FRESH INDEPENDENT ACTUAL-PROFILE RECHECK**
+
+This remains an implementation/verification record, not runner-admission PASS evidence.
+A fresh independent actual-profile checker must still perform the contract §6
+runner-admission recheck against the repaired contained profile before the comparative
+campaign may start.
+
+No live comparative Stage F campaign was started. No runner-admission PASS evidence was
+created. No file under `source/`, `dist/`, or `orchestrator/` was modified; the
+evaluation contract, thresholds, fixtures, human-trial rules, Stage G/H semantics and
+immutable candidate were not modified. The fixture-custody store
+`~/ssdp70-fixture-custody` was not read, listed or written.
