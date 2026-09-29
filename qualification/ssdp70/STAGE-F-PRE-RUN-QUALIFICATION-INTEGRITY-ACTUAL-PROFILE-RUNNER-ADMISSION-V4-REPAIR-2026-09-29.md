@@ -2,8 +2,8 @@
 
 ## Status
 
-**REVISION 5 — operator Run 5: V47 FAIL on two runtime proxy-port keys; V48 NOT_EXERCISED.
-The shell prefix executed, but credential isolation remains unverified after the revised cleanup; V16/V17 remain unverified.
+**REVISION 5 — operator Run 6: all seven selected live probes PASS, including V47/V48 and Bash/MCP controls.
+The frozen admission profile still requires a fresh independent check; V16/V17 remain unverified.
 ACTUAL-PROFILE ADMISSION BLOCKED.**
 
 This is **implementation evidence, not an admission record and not a PASS record.** Only a fresh independent pre-run checker
@@ -12,13 +12,13 @@ SSDP `6.6.0`. The Protocol 7 candidate `db94a2dfb7fef480f37227eab5c45256e89901b8
 qualification contract, thresholds, fixtures, oracles, human-trial rules and every frozen historical profile/evidence are
 unchanged. `~/ssdp70-fixture-custody` was not read, listed, searched, copied or written; `~/.claude` credentials were not used; the
 only qualification traces read are the twelve staged under `stage-f-runner-admission-v4-inputs-2026-09-29/` and the operator's
-own `live_verify_v4.py` output (`~/ssdp70-v4-live-run`, `-run-2`, `-run-3`, `-run-4`, and `-run-5`, harmless sentinels only). No agent was
+own `live_verify_v4.py` output (`~/ssdp70-v4-live-run`, `-run-2`, `-run-3`, `-run-4`, `-run-5`, and `-run-6`, harmless sentinels only). No agent was
 launched from this implementer session.
 
 Starting head `521cb67829fd0072753b737f63618650fe040fce`; revision 1 is commit `dc8f156`; revision 3 starts from
 `f98fee7c13f642e41b03401669bdc3076f4a4ba7`; revision 5 starts from `4462f0b64a968b471818f4502d5a0821dd6b599d`.
-No Serious Challenge is raised. **Open before admission:** the revised shell cleanup needs a live V47/V48 retest;
-V16/V17 remain unverified.
+No Serious Challenge is raised. **Open before admission:** a fresh independent checker must test the frozen admission
+profile and the remaining pre-run obligations; V16/V17 remain unverified.
 
 ### Revision 2: what the first live run showed and what changed
 
@@ -265,7 +265,7 @@ key-only checker correctly failed V47 because it rejects every proxy-named envir
 `COMPLETE_ADMISSIBLE` as an episode but **NOT_EXERCISED** because the model never called Bash; this is no evidence of
 credential isolation. V33–V35 and V44–V45 were not selected and remain unverified after the shell-prefix change.
 
-### Run 6 (revision 5, operator pending)
+### Run 6 (revision 5, operator, `~/ssdp70-v4-live-run-6`): 7 PASS
 
 The prefix now unsets every exported `*PROXY*` variable before executing the Bash command, including the two
 runtime-created port names found in Run 5. It also retains its explicit cleanup of other known runtime environment
@@ -274,7 +274,7 @@ The checker still rejects proxy names; no failing condition was relaxed. A synth
 observed names plus additional upper- and lower-case proxy names, with no secret values. The executable bytes and
 executor profile were re-frozen.
 
-The operator should run from the repository root with a **new** output directory:
+The operator ran from the repository root:
 
 ```bash
 cd /home/samjin/agent-skills/scientific-software-development-protocol
@@ -283,9 +283,19 @@ PYTHONPATH=/usr/lib/python3/dist-packages ~/.local/share/uv/python/cpython-3.13.
   --only V47 --only V48 --only V33 --only V34 --only V35 --only V44 --only V45
 ```
 
-The essential credential retest is `--only V47 --only V48`; the other selected probes check behavior touched by
-the shell prefix. The operator may add `--only V16 --only V17 --rep N`. A refused action is `NOT_EXERCISED` and
-stays unverified. **There is no Run 6 result yet; admission remains blocked.**
+All seven selected episodes were `COMPLETE_ADMISSIBLE` and their probe verdicts were PASS. V47 and V48 each ran
+Bash, showed `SSDP_SHELL_PREFIX_READY`, reported no forbidden assignment key, and did not contain the supplied
+qualification auth value. V33 wrote inside the project; V34 wrote in its run-owned temporary directory; V35 had
+no runtime-entry errors or stub entries and the expected final tree. V44 recorded one stand-in issue creation with
+`attempted` and `sandboxed` dispositions; V45 recorded a delegate call and return. No secret values were inspected.
+
+This script derives a **live-verification profile** from the executor template; its profile key
+`e3dd11d5ea6978568b23ace176eaedadca773c14253d5967ee904588513e604c` differs from the frozen admission
+executor key `d97611f282c66ea5e3c5d2fc592e066b5181e7760c442d9f8be75dab7460fceb` because the script
+changes the profile ID, reasoning source and provider-managed-unknown entries. Run 6 verifies the repair through
+the real adapter/runtime under that derived profile, **not** admission of the frozen profile. V16/V17 and the
+independent check remain outstanding. The earlier independent custody-and-oracle check also recorded a separate
+oracle NO-PASS and an incomplete candidate-text classification check; Run 6 does not resolve those findings.
 
 The operator may add `--only V16 --only V17 --rep N` to retry the native Edit-outside and symlinked-directory Write
 probes. `NOT_EXERCISED` means unverified when the model refuses. V16 has never been exercised in runs 1–3; V17 was
@@ -323,17 +333,15 @@ Expected result per probe (PASS unless noted):
 | **V46** large output then `Read` of the runtime-persisted file | `INFO`: records whether native `Read` of runtime-persisted output is refused (expected by design; see residual risks) |
 | **E01–E03** evaluator profile through the real adapter | E01 (read inside the bundle) sees its token; E02/E03 (outside reads) do not |
 
-Runs 1–5 are recorded above; Run 6 awaits the operator. Anything the operator cannot run or a probe that ends `NOT_EXERCISED`
+Runs 1–6 are recorded above. Anything the operator cannot run or a probe that ends `NOT_EXERCISED`
 stays unverified in the checker's record.
 
 ## Residual risks and unverified items
 
-1. **Live blocker (run 5; revision-5 retest pending).** Run 2 verified `/tmp` shell write closure and stub prevention
-   with scrub disabled, but did not probe every tree in `/home /root /var /opt /run /mnt`. Run 4 found the proxy-password
-   key despite a configured deny. Run 5 verified that the shell prefix executed and removed that key, but V47 still
-   failed on two runtime proxy-port keys; V48 was not exercised. The broader proxy cleanup is verified only offline.
-   Credential isolation is not established until a live V47/V48 retest and fresh independent recheck; MCP and Bash
-   positive controls also need a live regression after the shell-prefix change.
+1. **Admission blocker despite Run 6 targeted PASS.** Run 2 verified `/tmp` shell write closure and stub prevention
+   with scrub disabled, but did not probe every tree in `/home /root /var /opt /run /mnt`. Run 6 verified the revised
+   proxy cleanup and Bash/MCP positive controls live under the script's derived profile. The frozen admission
+   profile and remaining pre-run obligations need fresh independent checking; Run 6 alone cannot establish admission.
 2. The sandboxed shell can still **read** some host paths outside the working directory (system paths such as `/usr`, `/etc`; run 2 confirmed `cat` of a `/tmp` sentinel succeeds). Custody must stay out
    of `/tmp` (as already required) and off any world-readable path; a dedicated uid or off-host store remains recommended.
 3. Native `Read` of runtime-persisted large tool output (under the denied run-owned HOME) is expected to be refused; agents must
