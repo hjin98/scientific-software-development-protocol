@@ -1,0 +1,148 @@
+{
+  "adapter_command_identity": {
+    "allowed_tools": [
+      "Skill",
+      "Read",
+      "Glob",
+      "Grep",
+      "Edit",
+      "Write",
+      "Bash(python:*)",
+      "Bash(python3:*)",
+      "Bash(git:*)",
+      "Bash(ls:*)",
+      "Bash(cat:*)",
+      "Bash(grep:*)",
+      "Bash(find:*)",
+      "Bash(head:*)",
+      "Bash(tail:*)",
+      "Bash(wc:*)",
+      "Bash(sed -n:*)",
+      "mcp__ssdp70__issue_locations",
+      "mcp__ssdp70__issue_search",
+      "mcp__ssdp70__issue_show",
+      "mcp__ssdp70__issue_create",
+      "mcp__ssdp70__issue_comment",
+      "mcp__ssdp70__delegate"
+    ],
+    "disallowed_tools": [
+      "Agent",
+      "WebFetch",
+      "WebSearch",
+      "SendMessage",
+      "ListAgents",
+      "RemoteTrigger",
+      "CronCreate",
+      "CronDelete",
+      "CronList",
+      "ScheduleWakeup",
+      "PushNotification",
+      "EnterWorktree",
+      "ExitWorktree",
+      "Artifact",
+      "ArtifactComments",
+      "ArtifactData",
+      "Workflow",
+      "Monitor",
+      "DesignSync",
+      "ToolSearch",
+      "TaskStop",
+      "ReportFindings",
+      "ShareOnboardingGuide"
+    ],
+    "executable": "<run-tmp>/harness-private/mcp-server.py",
+    "mcp_config_file": "<run-tmp>/harness-private/runtime-home/.ssdp70-control/mcp.json",
+    "mcp_config_sha256": "278e1746521f16416cedd0e4d977c4155dd2ced0272253fa6f2439fb7bed43d1",
+    "mcp_server_executable_sha256": {
+      "ssdp70": "e51f0641907215c9d5a0acb607f967363fc7491fa572a70cfb8701acd2308c2e"
+    },
+    "mcp_servers": [
+      {
+        "entrypoint": "stub_tools/mediator.py",
+        "name": "ssdp70",
+        "server_id": "ssdp70-qualification-stdio-v1",
+        "tools": [
+          "mcp__ssdp70__issue_locations",
+          "mcp__ssdp70__issue_search",
+          "mcp__ssdp70__issue_show",
+          "mcp__ssdp70__issue_create",
+          "mcp__ssdp70__issue_comment",
+          "mcp__ssdp70__delegate"
+        ],
+        "transport": "stdio"
+      }
+    ],
+    "model": "claude-sonnet-5",
+    "reasoning_configuration": {
+      "effort": "high",
+      "source": "checker-frozen-2026-09-28"
+    },
+    "restricted": true,
+    "settings_file": "<run-tmp>/harness-private/runtime-home/.ssdp70-control/settings.json",
+    "settings_file_sha256": "3ee1c69b108a9eb02c7cb75c7cc52540ae41810a4ac13c5d99ab011d5f82203e",
+    "strict_mcp_config": true,
+    "tools": [
+      "Skill",
+      "Read",
+      "Glob",
+      "Grep",
+      "Edit",
+      "Write",
+      "Bash",
+      "mcp__ssdp70__issue_locations",
+      "mcp__ssdp70__issue_search",
+      "mcp__ssdp70__issue_show",
+      "mcp__ssdp70__issue_create",
+      "mcp__ssdp70__issue_comment",
+      "mcp__ssdp70__delegate"
+    ]
+  },
+  "arm": "p70",
+  "catalog_isolation": {
+    "ok": false,
+    "reason": "expected one catalog snapshot, found 0"
+  },
+  "episode": "PROBE1",
+  "evidence_state": "EXECUTION_ERROR",
+  "evidence_state_reasons": [
+    "executor did not complete successfully"
+  ],
+  "execution_mode": "probe",
+  "execution_ok": false,
+  "execution_returncode": 1,
+  "missing_required_artifacts": [],
+  "missing_required_oracles": [],
+  "native_event_count": 1,
+  "normalization_completeness_errors": [],
+  "normalized_event_count": 3,
+  "normalized_event_errors": [],
+  "owner_read_sequences": [],
+  "pair_order": [
+    "p70"
+  ],
+  "profile_claim_errors": [
+    "launched executable does not match frozen execution profile",
+    "runtime-observed model does not match frozen execution profile",
+    "runtime-observed provider/runtime version does not match frozen execution profile",
+    "runtime init did not expose a valid native tools list",
+    "runtime native-tool surface differs from declared set: declared=['Bash', 'Edit', 'Glob', 'Grep', 'Read', 'Skill', 'Write', 'mcp__ssdp70__delegate', 'mcp__ssdp70__issue_comment', 'mcp__ssdp70__issue_create', 'mcp__ssdp70__issue_locations', 'mcp__ssdp70__issue_search', 'mcp__ssdp70__issue_show'], observed=[]",
+    "runtime init native capabilities list is malformed",
+    "runtime init MCP server list is malformed",
+    "runtime MCP server surface differs from declared set: declared=['ssdp70'], observed=[]",
+    "runtime did not expose required classified native surface 'runtime_capability:interrupt_receipt_v1'",
+    "runtime did not expose required classified native surface 'runtime_capability:interrupt_cancel_queued_v1'",
+    "runtime did not expose required classified native surface 'runtime_capability:msg_lifecycle_v1'",
+    "runtime did not expose required classified native surface 'runtime_capability:mcp_read_resource_v1'",
+    "runtime did not expose required classified native surface 'runtime_capability:mcp_tool_ui_meta_v1'",
+    "runtime did not expose required classified native surface 'messaging_socket_path'",
+    "runtime did not expose required classified native surface 'auto_memory_write'",
+    "runtime did not expose required classified native surface 'mcp_server:ssdp70'"
+  ],
+  "profile_key_sha256": "c30ea2157a57129071e6cbc2bcb11431f61adfbe2ed6c17f62b09ec721d5213d",
+  "qualification_outcome": "NOT_EVALUATED",
+  "run_identity_sha256": "f40678b494bab993aa02aa3052b3b2c56dcc8fe3bbb948f0b9f5abdca06307a0",
+  "runtime_observation": {},
+  "schema": 2,
+  "subject_commit": "db94a2dfb7fef480f37227eab5c45256e89901b8",
+  "wall_s": 0.516
+}

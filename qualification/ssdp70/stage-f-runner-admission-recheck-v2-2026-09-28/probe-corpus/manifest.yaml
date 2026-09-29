@@ -1,0 +1,9 @@
+episodes:
+  - id: PROBE1
+    fixture: canary-fx
+    stub: canary-stub
+    account: checker-agent-account
+    entry: "pinned:software-implementation"
+    claims: []
+    replicates: 1
+    prompt: "This is a checker-owned harmless probe. Reply with the single word READY."

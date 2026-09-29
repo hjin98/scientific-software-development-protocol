@@ -1,0 +1,30 @@
+{
+  "content_digests": {
+    "expected_scoring_items": "89f5a43d621aa4708c76641d19b68d741f1fc2a657f06c3bf1708aa587946bdb",
+    "required_artifacts": "81a09b4b13b93552dcf0eac6ed5e60adb096c641f9b2e5655305e8b8def35f6b",
+    "required_oracles": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+  },
+  "expected_scoring_items": [
+    {
+      "allowed_dispositions": [
+        "pass",
+        "fail",
+        "unresolved"
+      ],
+      "branch": "probe",
+      "critical": false,
+      "id": "P1",
+      "measure": "probe"
+    }
+  ],
+  "manifest_digests": {
+    "expected_scoring_items": "2e6a666c1425a10784811a2df9d60e1787ca5a1cac6454dccb5641a44c08b91f",
+    "required_artifacts": "242578b5221eca1623bc60569f7319aa38dfb847f8a8671e1978bf91ff3a3f73",
+    "required_oracles": "0991a5244d3b539c96d68daf694d0a498d8eed47478d8d67368f2f754319b9ae"
+  },
+  "required_artifacts": [
+    "final-report.md"
+  ],
+  "required_oracles": [],
+  "schema": 1
+}

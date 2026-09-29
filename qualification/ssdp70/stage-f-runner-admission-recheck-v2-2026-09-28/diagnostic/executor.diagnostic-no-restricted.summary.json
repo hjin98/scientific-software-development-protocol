@@ -1,0 +1,54 @@
+{
+  "init_apiKeySource": "none",
+  "init_capabilities": [
+    "interrupt_receipt_v1",
+    "interrupt_cancel_queued_v1",
+    "msg_lifecycle_v1",
+    "mcp_read_resource_v1",
+    "mcp_tool_ui_meta_v1"
+  ],
+  "init_mcp_servers": [
+    {
+      "name": "ssdp70",
+      "source": "dynamic",
+      "status": "connected"
+    }
+  ],
+  "init_memory_paths": null,
+  "init_messaging_socket_path": true,
+  "init_model": "claude-sonnet-5",
+  "init_permissionMode": "default",
+  "init_present": true,
+  "init_skills_count": 23,
+  "init_ssdp_skills": [
+    "numerical-algorithm-design",
+    "repository-hygiene",
+    "scientific-formulation",
+    "software-design",
+    "software-documentation",
+    "software-implementation",
+    "software-maintenance-audit"
+  ],
+  "init_tools": [
+    "Bash",
+    "Edit",
+    "Glob",
+    "Grep",
+    "Read",
+    "Skill",
+    "Write",
+    "mcp__ssdp70__delegate",
+    "mcp__ssdp70__issue_comment",
+    "mcp__ssdp70__issue_create",
+    "mcp__ssdp70__issue_locations",
+    "mcp__ssdp70__issue_search",
+    "mcp__ssdp70__issue_show"
+  ],
+  "init_version": "2.1.284",
+  "returncode": 1,
+  "role": "executor",
+  "runtime_observation_errors": [
+    "runtime did not expose required classified native surface 'auto_memory_write'"
+  ],
+  "variant": "no-restricted"
+}

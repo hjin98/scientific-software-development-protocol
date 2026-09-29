@@ -1,0 +1,17 @@
+{
+  "entries": [
+    {
+      "classification": "terminal-result",
+      "mapped_event_ids": [
+        "e000001",
+        "e000002",
+        "e000003"
+      ],
+      "native_index": 0,
+      "native_sha256": "c93832f91591b11790bd4c303a37d920fc55933f09141cdc9830f9b8c6c8d5b3",
+      "oracle_relevant": true
+    }
+  ],
+  "native_event_count": 1,
+  "schema": 1
+}
