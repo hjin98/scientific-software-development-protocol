@@ -261,9 +261,11 @@ def main(argv: list[str] | None = None) -> int:
     with tempfile.TemporaryDirectory(prefix="ssdp70-assess-") as tmp:
         root = Path(tmp)
         bundle_root = root / "bundle"
-        runtime_home = root / "runtime-home"
+        private = root / "evaluator-private"
+        runtime_home = private / "runtime-home"
         runtime_tmp = bundle_root / ".qualification-tmp"
         bundle_root.mkdir()
+        private.mkdir()
         runtime_home.mkdir()
         runtime_tmp.mkdir()
         manifest = prepare_bundle(args.run, args.keys, args.shared_rubric, requirements, bundle_root)

@@ -156,14 +156,19 @@ class SurfaceAndContainmentHostileTests(unittest.TestCase):
         profile = json.loads(self.profile_path.read_text(encoding="utf-8"))
         with tempfile.TemporaryDirectory() as td:
             root = Path(td)
-            (root / ".claude").mkdir()
+            project = root / "project"
+            private = root / "harness-private"
+            runtime_home = private / "runtime-home"
+            project.mkdir()
+            private.mkdir()
+            runtime_home.mkdir()
             env = {
                 "PATH": os.environ.get("PATH", ""),
-                "HOME": str(root / "runtime-home"),
-                "SSDP70_MEDIATOR_SOCKET": str(root / "mediator.sock"),
+                "HOME": str(runtime_home),
+                "SSDP70_MEDIATOR_SOCKET": str(private / "mediator.sock"),
             }
             with self.assertRaises(RuntimeError) as caught:
-                claude.launch(profile, "x", root, env)
+                claude.launch(profile, "x", project, env)
         self.assertIn("containment settings are absent", str(caught.exception))
 
     def test_evaluator_realization_is_read_only_and_network_denied(self):
@@ -171,8 +176,10 @@ class SurfaceAndContainmentHostileTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as td:
             root = Path(td)
             bundle = root / "bundle"
-            runtime_home = root / "runtime-home"
+            private = root / "evaluator-private"
+            runtime_home = private / "runtime-home"
             bundle.mkdir()
+            private.mkdir()
             runtime_home.mkdir()
             env = claude.clean_env()
             env.update({"HOME": str(runtime_home)})
@@ -190,24 +197,30 @@ class SurfaceAndContainmentHostileTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as td:
             root = Path(td)
             project = root / "project"
-            stub = root / "stub"
-            log = root / "side-effects.jsonl"
-            runtime_home = root / "runtime-home"
-            for directory in (project, stub, runtime_home):
-                directory.mkdir()
+            private = root / "harness-private"
+            stub = private / "stub"
+            log = private / "side-effects.jsonl"
+            runtime_home = private / "runtime-home"
+            for directory in (project, private, stub, runtime_home):
+                directory.mkdir(exist_ok=True)
             log.write_text("", encoding="utf-8")
-            mediator = root / "mediator.sock"
+            mediator = private / "mediator.sock"
             env = claude.clean_env()
             env.update({"HOME": str(runtime_home), "SSDP70_MEDIATOR_SOCKET": str(mediator), "SSDP70_ACCOUNT": "agent"})
             document = claude.realize_containment(profile, project, env)
             sandbox = document["settings"]["sandbox"]
             self.assertNotIn("SSDP70_STUB_DIR", env)
             self.assertNotIn("SSDP70_SIDE_EFFECT_LOG", env)
-            self.assertIn(str(root.resolve()), sandbox["filesystem"]["denyRead"])
-            self.assertIn(str(root.resolve()), sandbox["filesystem"]["denyWrite"])
+            self.assertIn(str(private.resolve()), sandbox["filesystem"]["denyRead"])
+            self.assertIn(str(private.resolve()), sandbox["filesystem"]["denyWrite"])
+            self.assertNotIn(str(root.resolve()), sandbox["filesystem"]["denyWrite"])
             self.assertIn("/proc", sandbox["filesystem"]["denyRead"])
-            self.assertIn(str((project / ".claude" / "settings.json").resolve()), sandbox["filesystem"]["denyWrite"])
-            self.assertIn(str((project / ".mcp.json").resolve()), sandbox["filesystem"]["denyWrite"])
+            settings_path = Path(document["realization"]["settings_file"])
+            mcp_path = Path(document["realization"]["mcp_config"])
+            self.assertNotEqual(settings_path.parent, project)
+            self.assertNotEqual(mcp_path.parent, project)
+            self.assertTrue(str(settings_path).startswith(str(private.resolve())))
+            self.assertTrue(str(mcp_path).startswith(str(private.resolve())))
             self.assertEqual(sandbox["network"]["allowUnixSockets"], [str(mediator.resolve())])
 
     def test_control_file_mutation_during_launch_fails_closed(self):
@@ -221,9 +234,11 @@ class SurfaceAndContainmentHostileTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as td:
             root = Path(td)
             project = root / "project"
-            runtime_home = root / "runtime-home"
+            private = root / "harness-private"
+            runtime_home = private / "runtime-home"
             runtime_tmp = project / ".qualification-tmp"
             project.mkdir()
+            private.mkdir()
             runtime_home.mkdir()
             runtime_tmp.mkdir()
             env = claude.clean_env()
@@ -232,13 +247,14 @@ class SurfaceAndContainmentHostileTests(unittest.TestCase):
                 "TMPDIR": str(runtime_tmp),
                 "TMP": str(runtime_tmp),
                 "TEMP": str(runtime_tmp),
-                "SSDP70_MEDIATOR_SOCKET": str(root / "mediator.sock"),
+                "SSDP70_MEDIATOR_SOCKET": str(private / "mediator.sock"),
                 "SSDP70_ACCOUNT": "agent",
             })
-            claude.realize_containment(profile, project, env)
+            document = claude.realize_containment(profile, project, env)
+            mcp_path = Path(document["realization"]["mcp_config"])
 
             def mutate_control(*args, **kwargs):
-                (project / ".mcp.json").write_text('{"mcpServers":{"forged":{}}}\n', encoding="utf-8")
+                mcp_path.write_text('{"mcpServers":{"forged":{}}}\n', encoding="utf-8")
                 return Proc()
 
             with patch.object(claude.subprocess, "run", side_effect=mutate_control):
@@ -271,21 +287,28 @@ class SurfaceAndContainmentHostileTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as td:
             root = Path(td)
             project = root / "project"
+            private = root / "harness-private"
             project.mkdir()
-            runtime_home = root / "runtime-home"
+            private.mkdir()
+            runtime_home = private / "runtime-home"
             runtime_home.mkdir()
-            mediator = root / "mediator.sock"
+            mediator = private / "mediator.sock"
             env = claude.clean_env()
             env.update({"HOME": str(runtime_home), "SSDP70_MEDIATOR_SOCKET": str(mediator), "SSDP70_ACCOUNT": "agent"})
             document = claude.realize_containment(profile, project, env)
-            self.assertEqual(document["settings"]["sandbox"]["filesystem"]["allowRead"], [str(project.resolve())])
-            self.assertEqual(document["settings"]["sandbox"]["filesystem"]["allowWrite"], [str(project.resolve())])
-            self.assertIn(str(root.resolve()), document["settings"]["sandbox"]["filesystem"]["denyRead"])
-            self.assertIn(str(root.resolve()), document["settings"]["sandbox"]["filesystem"]["denyWrite"])
+            filesystem = document["settings"]["sandbox"]["filesystem"]
+            self.assertEqual(filesystem["allowRead"], [str(project.resolve())])
+            self.assertEqual(filesystem["allowWrite"], [str(project.resolve())])
+            self.assertIn(str(private.resolve()), filesystem["denyRead"])
+            self.assertIn(str(private.resolve()), filesystem["denyWrite"])
+            self.assertNotIn(str(root.resolve()), filesystem["denyWrite"])
+            self.assertFalse(any(Path(path).resolve() in project.resolve().parents for path in filesystem["denyWrite"]))
             self.assertEqual(document["settings"]["sandbox"]["network"]["allowedDomains"], [])
             self.assertEqual(document["settings"]["sandbox"]["network"]["allowUnixSockets"], [str(mediator.resolve())])
             self.assertNotIn("SSDP70_STUB_DIR", env)
             self.assertNotIn("SSDP70_SIDE_EFFECT_LOG", env)
+            self.assertNotEqual(Path(document["realization"]["settings_file"]).parent, project)
+            self.assertNotEqual(Path(document["realization"]["mcp_config"]).parent, project)
             self.assertEqual(claude.validate_containment_realization(profile, project, env), [])
 
 

@@ -66,6 +66,31 @@ def clean_env() -> dict[str, str]:
     return env
 
 
+def _control_paths(project: Path, env: dict[str, str]) -> tuple[Path, Path, Path]:
+    runtime_home = env.get("HOME")
+    if not runtime_home:
+        raise RuntimeError("contained Claude launch requires a run-owned HOME")
+    home = Path(runtime_home).resolve()
+    project_resolved = project.resolve()
+    try:
+        home.relative_to(project_resolved)
+    except ValueError:
+        pass
+    else:
+        raise RuntimeError("run-owned HOME must remain outside the executor/evaluator working directory")
+    private_root = home.parent.resolve()
+    if private_root == project_resolved or private_root in project_resolved.parents:
+        raise RuntimeError("harness-private root may not contain the executor/evaluator working directory")
+    control = home / ".ssdp70-control"
+    return private_root, control / "settings.json", control / "mcp-empty.json"
+
+
+def _path_is_ancestor(path: Path, child: Path) -> bool:
+    resolved = path.resolve()
+    child_resolved = child.resolve()
+    return resolved == child_resolved or resolved in child_resolved.parents
+
+
 def _containment_document(profile: dict[str, Any], project: Path, env: dict[str, str]) -> dict[str, Any]:
     policy = profile.get("containment_policy") or {}
     if policy.get("kind") != "claude-code-restricted-sandbox-v1":
@@ -75,6 +100,7 @@ def _containment_document(profile: dict[str, Any], project: Path, env: dict[str,
         raise RuntimeError("contained Claude launch requires a run-owned HOME")
     home = Path(runtime_home).resolve()
     project_resolved = project.resolve()
+    private_root, settings_path, mcp_path = _control_paths(project, env)
     mediator = env.get("SSDP70_MEDIATOR_SOCKET")
     if policy.get("mediator_required") and not mediator:
         raise RuntimeError("executor containment requires the harness mediator socket")
@@ -83,7 +109,7 @@ def _containment_document(profile: dict[str, Any], project: Path, env: dict[str,
     allow_write = [] if write_policy.startswith("deny") else [str(project_resolved)]
     host_home_raw = os.environ.get("HOME")
     denied_roots = {
-        str(project_resolved.parent),
+        str(private_root),
         "/home",
         "/root",
         "/run/user",
@@ -95,12 +121,16 @@ def _containment_document(profile: dict[str, Any], project: Path, env: dict[str,
     }
     if host_home_raw:
         denied_roots.add(str(Path(host_home_raw).resolve()))
-    deny_paths = sorted(path for path in denied_roots if path != str(project_resolved))
-    settings_path = project_resolved / ".claude" / "settings.json"
-    mcp_path = project_resolved / ".mcp.json"
-    deny_write_paths = sorted(set(deny_paths) | {str(settings_path), str(mcp_path)})
+    deny_read_paths = sorted(path for path in denied_roots if Path(path).resolve() != project_resolved)
+    deny_write_paths = sorted(
+        path for path in denied_roots
+        if not _path_is_ancestor(Path(path), project_resolved)
+    )
+    deny_write_paths = sorted(set(deny_write_paths) | {str(settings_path), str(mcp_path)})
     if write_policy.startswith("deny"):
         deny_write_paths = sorted(set(deny_write_paths) | {str(project_resolved)})
+    elif any(_path_is_ancestor(Path(path), project_resolved) for path in deny_write_paths):
+        raise RuntimeError("sandbox deny-write path shadows the writable project")
     settings = {
         "sandbox": {
             "enabled": True,
@@ -116,7 +146,7 @@ def _containment_document(profile: dict[str, Any], project: Path, env: dict[str,
                 "allowLocalBinding": False,
             },
             "filesystem": {
-                "denyRead": deny_paths,
+                "denyRead": deny_read_paths,
                 "allowRead": [str(project_resolved)],
                 "denyWrite": deny_write_paths,
                 "allowWrite": allow_write,
@@ -145,11 +175,15 @@ def _containment_document(profile: dict[str, Any], project: Path, env: dict[str,
         "realization": {
             "project": str(project_resolved),
             "runtime_home": str(home),
+            "private_root": str(private_root),
+            "settings_file": str(settings_path),
+            "mcp_config": str(mcp_path),
             "mediator_socket": allow_sockets[0] if allow_sockets else None,
             "native_network": "deny",
-            "filesystem_deny_roots": deny_paths,
+            "filesystem_deny_roots": deny_read_paths,
             "filesystem_read": [str(project_resolved)],
             "filesystem_write": allow_write,
+            "control_files_outside_workspace": True,
             "host_home_inherited": False,
             "ambient_credentials_inherited": False,
             "exact_native_tools": list(profile.get("native_tools") or []),
@@ -158,14 +192,12 @@ def _containment_document(profile: dict[str, Any], project: Path, env: dict[str,
 
 
 def realize_containment(profile: dict[str, Any], project: Path, env: dict[str, str]) -> dict[str, Any]:
-    """Write run-owned sandbox settings before any executor/evaluator effect."""
+    """Write run-owned private control files before any executor/evaluator effect."""
     document = _containment_document(profile, project, env)
-    settings = project / ".claude" / "settings.json"
-    mcp_config = project / ".mcp.json"
+    _, settings, mcp_config = _control_paths(project, env)
     settings.parent.mkdir(parents=True, exist_ok=True)
     settings.write_text(json.dumps(document["settings"], indent=2, sort_keys=True) + "\n", encoding="utf-8")
     mcp_config.write_text(json.dumps({"mcpServers": {}}, indent=2, sort_keys=True) + "\n", encoding="utf-8")
-    document["realization"]["mcp_config"] = str(mcp_config.resolve())
     document["realization"]["mcp_servers"] = []
     document["realization"]["settings_sha256"] = hashlib.sha256(settings.read_bytes()).hexdigest()
     document["realization"]["mcp_config_sha256"] = hashlib.sha256(mcp_config.read_bytes()).hexdigest()
@@ -174,23 +206,22 @@ def realize_containment(profile: dict[str, Any], project: Path, env: dict[str, s
 
 def validate_containment_realization(profile: dict[str, Any], project: Path, env: dict[str, str]) -> list[str]:
     expected = _containment_document(profile, project, env)
-    settings = project / ".claude" / "settings.json"
-    mcp_config = project / ".mcp.json"
+    _, settings, mcp_config = _control_paths(project, env)
     if not settings.is_file():
-        return ["required project containment settings are absent"]
+        return ["required private containment settings are absent"]
     if not mcp_config.is_file():
-        return ["required empty MCP configuration is absent"]
+        return ["required private empty MCP configuration is absent"]
     try:
         actual = json.loads(settings.read_text(encoding="utf-8"))
     except (OSError, json.JSONDecodeError):
-        return ["required project containment settings are unreadable or malformed"]
+        return ["required private containment settings are unreadable or malformed"]
     errors: list[str] = []
     if actual != expected["settings"]:
-        errors.append("project containment settings do not match the frozen realization")
+        errors.append("private containment settings do not match the frozen realization")
     try:
         mcp_actual = json.loads(mcp_config.read_text(encoding="utf-8"))
     except (OSError, json.JSONDecodeError):
-        errors.append("required empty MCP configuration is unreadable or malformed")
+        errors.append("required private empty MCP configuration is unreadable or malformed")
     else:
         if mcp_actual != {"mcpServers": {}}:
             errors.append("MCP configuration is not empty")
@@ -239,7 +270,30 @@ def validate_containment_realization(profile: dict[str, Any], project: Path, env
                 Path(value).resolve().relative_to(project.resolve())
             except (OSError, ValueError):
                 errors.append(f"contained environment {key} escapes the run-owned project")
+    realization = expected["realization"]
+    for key in ("settings_file", "mcp_config"):
+        control_path = Path(realization[key]).resolve()
+        try:
+            control_path.relative_to(project.resolve())
+        except ValueError:
+            pass
+        else:
+            errors.append(f"containment control file {key} is executor/evaluator workspace-reachable")
+    if not write_policy_stays_inside_project(expected["settings"]["sandbox"]["filesystem"], project):
+        errors.append("sandbox write policy shadows or escapes the declared project boundary")
     return errors
+
+
+def write_policy_stays_inside_project(filesystem: dict[str, Any], project: Path) -> bool:
+    project_resolved = project.resolve()
+    allow_write = filesystem.get("allowWrite") or []
+    if allow_write and allow_write != [str(project_resolved)]:
+        return False
+    if allow_write:
+        for denied in filesystem.get("denyWrite") or []:
+            if _path_is_ancestor(Path(denied), project_resolved):
+                return False
+    return True
 
 def install_skills(dist: Path, project: Path) -> None:
     import shutil
@@ -265,8 +319,7 @@ def launch(profile: dict[str, Any], prompt: str, project: Path, env: dict[str, s
     containment_errors = validate_containment_realization(profile, project, env)
     if containment_errors:
         raise RuntimeError("; ".join(containment_errors))
-    settings_path = project / ".claude" / "settings.json"
-    mcp_config_path = project / ".mcp.json"
+    _, settings_path, mcp_config_path = _control_paths(project, env)
     settings_sha256 = hashlib.sha256(settings_path.read_bytes()).hexdigest()
     mcp_config_sha256 = hashlib.sha256(mcp_config_path.read_bytes()).hexdigest()
     cmd = [

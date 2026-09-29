@@ -328,11 +328,14 @@ def run_episode(
 
     with tempfile.TemporaryDirectory(prefix="ssdp70-") as tmp_name:
         tmp = Path(tmp_name)
-        project, stub, log = tmp / "project", tmp / "stub", tmp / "side-effects.jsonl"
-        mediator_socket = tmp / "mediator.sock"
-        runtime_home = tmp / "runtime-home"
+        project = tmp / "project"
+        private = tmp / "harness-private"
+        stub, log = private / "stub", private / "side-effects.jsonl"
+        mediator_socket = private / "mediator.sock"
+        runtime_home = private / "runtime-home"
         runtime_tmp = project / ".qualification-tmp"
         build_project(corpus, episode, project)
+        private.mkdir()
         stub.mkdir()
         if episode.get("stub"):
             _yaml_tree_to_json(corpus / "stubs" / episode["stub"], stub)
@@ -366,7 +369,7 @@ def run_episode(
                 "--side-effect-log", str(log),
                 "--account", env["SSDP70_ACCOUNT"],
             ],
-            cwd=tmp,
+            cwd=private,
             env={
                 key: os.environ[key]
                 for key in ("PATH", "LANG", "LC_ALL", "LC_CTYPE")
