@@ -11,6 +11,7 @@ from adapters import claude
 
 HERE = Path(__file__).resolve().parent
 TRACE_ROOT = HERE.parent / "stage-f-prerun-actual-profile-recheck-2026-09-28" / "native-traces"
+V3_ROOT = HERE.parent / "stage-f-runner-admission-v3-repair-2026-09-28"
 
 
 class ActualTraceRegressionTests(unittest.TestCase):
@@ -126,8 +127,9 @@ class SurfaceAndContainmentHostileTests(unittest.TestCase):
             "tools": list(bundle.profile["native_tools"]) if tools is None else tools,
             "native_capabilities": caps,
             "messaging_socket_path": "/run/user/test.sock",
-            "memory_paths": {"auto": "/tmp/run-owned-memory"},
+            "memory_paths": {},
             "mcp_servers": [{"name": "ssdp70", "status": "connected"}] if servers is None else servers,
+            "permission_mode": bundle.profile["permission_mode"],
         }
 
     def test_runtime_exact_mcp_tool_surface_fails_closed_on_extra(self):
@@ -343,7 +345,169 @@ class SurfaceAndContainmentHostileTests(unittest.TestCase):
         events, _, _, _ = claude.normalize(trace, "run", {})
         self.assertFalse(any(event["kind"] in {"issue_evidence_access", "delegate_call", "delegate_return"} for event in events))
 
+    def test_frozen_template_accepts_runtime_that_disables_auto_memory(self):
+        for name, caps in (("claude-headless.template.json", "claude-headless.json"),
+                           ("claude-evaluator-readonly.template.json", "claude-evaluator-readonly.json")):
+            profile = json.loads((HERE / "profiles" / name).read_text(encoding="utf-8"))
+            profile["provider_runtime"]["version"] = "9.9.9"
+            profile["reasoning_configuration"] = {"effort": "high", "source": "test"}
+            profile["provider_managed_unknowns"] = [
+                {"classification": "arm-neutral", "name": "provider-backend-shard", "sensitive_claims": ["*"]},
+            ]
+            with tempfile.TemporaryDirectory() as td:
+                p, c = Path(td) / "p.json", Path(td) / "c.json"
+                p.write_text(json.dumps(profile), encoding="utf-8")
+                c.write_text((HERE / "capabilities" / caps).read_text(encoding="utf-8"), encoding="utf-8")
+                bundle = core70.load_profile(p, c)
+            self.assertNotIn("auto_memory_write", bundle.profile["native_surface_requirements"])
+            observation = self.observed(bundle)
+            observation["runtime_version"] = "9.9.9"
+            observation["memory_paths"] = None
+            if name.startswith("claude-evaluator"):
+                observation["mcp_servers"] = []
+            self.assertEqual(core70.validate_runtime_observation(bundle, observation), [])
 
+    def test_runtime_permission_mode_must_equal_frozen_mode(self):
+        bundle = core70.load_profile(self.profile_path, self.capability_path)
+        observation = self.observed(bundle)
+        observation["runtime_version"] = "MUST-BE-FROZEN-BEFORE-QUALIFICATION"
+        observation["permission_mode"] = "acceptEdits"
+        errors = core70.validate_runtime_observation(bundle, observation)
+        self.assertTrue(any("permission mode" in error for error in errors))
+        observation["permission_mode"] = None
+        self.assertTrue(any("permission mode" in error for error in core70.validate_runtime_observation(bundle, observation)))
+
+    def test_runtime_observation_exposes_init_permission_mode(self):
+        init = json.dumps({"type": "system", "subtype": "init", "permissionMode": "default", "tools": []})
+        self.assertEqual(claude.runtime_observation(init)["permission_mode"], "default")
+
+    def test_executor_loads_only_fixed_project_source_and_is_not_restricted(self):
+        class Proc:
+            returncode = 0
+            stdout = ""
+            stderr = ""
+        with tempfile.TemporaryDirectory() as td:
+            profile, project, private, env = self.prepare_executor(Path(td))
+            document = claude.realize_containment(profile, project, env)
+            with patch.object(claude.subprocess, "run", return_value=Proc()) as run:
+                launched = claude.launch(profile, "x", project, env)
+            cmd = run.call_args.args[0]
+            identity = launched["command_identity"]
+            settings = document["settings"]
+        self.assertNotIn("--restricted", cmd)
+        self.assertEqual(cmd[cmd.index("--setting-sources") + 1], "project")
+        self.assertEqual(cmd[cmd.index("--permission-mode") + 1], profile["permission_mode"])
+        self.assertEqual(identity["executable"], "claude")
+        self.assertEqual(identity["setting_sources"], "project")
+        self.assertIs(identity["restricted"], False)
+        self.assertEqual(core70.validate_launch_identity(profile, identity), [])
+        self.assertIs(settings["disableAllHooks"], True)
+        self.assertIn("Edit(./.claude/**)", settings["permissions"]["deny"])
+        self.assertIn(str(project.resolve() / ".claude"), settings["sandbox"]["filesystem"]["denyWrite"])
+        self.assertEqual(document["realization"]["project_settings_sha256"], hashlib.sha256(b"{}\n").hexdigest())
+
+    def test_evaluator_remains_restricted_and_loads_no_settings_source(self):
+        class Proc:
+            returncode = 0
+            stdout = ""
+            stderr = ""
+        profile = json.loads((HERE / "profiles" / "claude-evaluator-readonly.template.json").read_text(encoding="utf-8"))
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            bundle = root / "bundle"
+            private = root / "evaluator-private"
+            runtime_home = private / "runtime-home"
+            bundle.mkdir(); private.mkdir(); runtime_home.mkdir()
+            env = claude.clean_env(); env.update({"HOME": str(runtime_home)})
+            document = claude.realize_containment(profile, bundle, env)
+            with patch.object(claude.subprocess, "run", return_value=Proc()) as run:
+                launched = claude.launch(profile, "x", bundle, env)
+            cmd = run.call_args.args[0]
+        self.assertIn("--restricted", cmd)
+        self.assertNotIn("--setting-sources", cmd)
+        self.assertIs(launched["command_identity"]["restricted"], True)
+        self.assertEqual(core70.validate_launch_identity(profile, launched["command_identity"]), [])
+        self.assertNotIn("permissions", document["settings"])
+
+    def test_missing_or_unknown_setting_sources_fail_closed(self):
+        with tempfile.TemporaryDirectory() as td:
+            profile, project, private, env = self.prepare_executor(Path(td))
+            for value in (None, "user", "project,local"):
+                broken = json.loads(json.dumps(profile))
+                if value is None:
+                    broken["containment_policy"].pop("setting_sources")
+                else:
+                    broken["containment_policy"]["setting_sources"] = value
+                with self.assertRaises(RuntimeError):
+                    claude.realize_containment(broken, project, env)
+
+    def test_project_settings_tampering_is_detected_before_and_after_launch(self):
+        with tempfile.TemporaryDirectory() as td:
+            profile, project, private, env = self.prepare_executor(Path(td))
+            claude.realize_containment(profile, project, env)
+            (project / ".claude" / "skills").mkdir()
+            self.assertEqual(claude.validate_containment_realization(profile, project, env), [])
+            self.assertEqual(claude.validate_post_run_project_state(profile, project), [])
+            settings = project / ".claude" / "settings.json"
+            settings.write_text('{"hooks": {}}\n', encoding="utf-8")
+            self.assertTrue(any("project settings" in e for e in claude.validate_containment_realization(profile, project, env)))
+            self.assertTrue(any("changed during execution" in e for e in claude.validate_post_run_project_state(profile, project)))
+            settings.write_bytes(claude.PROJECT_SETTINGS_BYTES)
+            (project / ".claude" / "settings.local.json").write_text("{}\n", encoding="utf-8")
+            self.assertTrue(any("project-local settings" in e for e in claude.validate_containment_realization(profile, project, env)))
+            self.assertTrue(any("unexpected entries" in e for e in claude.validate_post_run_project_state(profile, project)))
+
+    def test_runtime_created_empty_agents_and_commands_dirs_are_tolerated_only_when_empty(self):
+        with tempfile.TemporaryDirectory() as td:
+            profile, project, private, env = self.prepare_executor(Path(td))
+            claude.realize_containment(profile, project, env)
+            (project / ".claude" / "skills").mkdir()
+            (project / ".claude" / "agents").mkdir()
+            (project / ".claude" / "commands").mkdir()
+            self.assertEqual(claude.validate_post_run_project_state(profile, project), [])
+            (project / ".claude" / "agents" / "evil.md").write_text("x", encoding="utf-8")
+            errors = claude.validate_post_run_project_state(profile, project)
+            self.assertTrue(any("['agents']" in e for e in errors))
+
+    def test_evaluator_post_run_project_state_check_is_not_applicable(self):
+        profile = json.loads((HERE / "profiles" / "claude-evaluator-readonly.template.json").read_text(encoding="utf-8"))
+        with tempfile.TemporaryDirectory() as td:
+            self.assertEqual(claude.validate_post_run_project_state(profile, Path(td)), [])
+
+
+
+class RepairedV3RealRuntimeTraceTests(unittest.TestCase):
+    """Real Claude Code 2.1.284 init events captured through the repaired v3 realization.
+
+    The launches were unauthenticated (no model call), so only init-time surfaces are asserted.
+    """
+
+    def load(self, role: str):
+        caps = "claude-headless.json" if role == "executor" else "claude-evaluator-readonly.json"
+        bundle = core70.load_profile(V3_ROOT / "profiles" / f"{role}.frozen.json", HERE / "capabilities" / caps)
+        stdout = (V3_ROOT / "native-traces" / f"{role}-init.jsonl").read_text(encoding="utf-8")
+        return bundle, stdout, claude.runtime_observation(stdout)
+
+    def test_real_init_matches_frozen_profiles_without_errors(self):
+        for role in ("executor", "evaluator"):
+            bundle, _, observation = self.load(role)
+            self.assertEqual(bundle.profile["adapter_id"], claude.ADAPTER_ID)
+            self.assertEqual(core70.validate_runtime_observation(bundle, observation), [], role)
+            self.assertEqual(observation["permission_mode"], bundle.profile["permission_mode"])
+            self.assertEqual(sorted(observation["tools"]), sorted(bundle.profile["native_tools"]))
+
+    def test_real_executor_init_exposes_each_ssdp_skill_exactly_once(self):
+        _, stdout, _ = self.load("executor")
+        init = next(json.loads(line) for line in stdout.splitlines() if '"subtype":"init"' in line)
+        names = [s if isinstance(s, str) else s.get("name") for s in init["skills"]]
+        self.assertEqual({name: names.count(name) for name in claude.SSDP_SKILLS}, {name: 1 for name in claude.SSDP_SKILLS})
+
+    def test_real_evaluator_init_has_no_mcp_or_ssdp_skill_surface(self):
+        bundle, stdout, observation = self.load("evaluator")
+        self.assertEqual(observation["mcp_servers"], [])
+        init = next(json.loads(line) for line in stdout.splitlines() if '"subtype":"init"' in line)
+        names = [s if isinstance(s, str) else s.get("name") for s in init["skills"]]
+        self.assertFalse(set(names) & claude.SSDP_SKILLS)
 
 
 if __name__ == "__main__":

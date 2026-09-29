@@ -399,6 +399,14 @@ def run_episode(
             }
             if command_identity.get("mcp_server_executable_sha256") != retained_server_digests:
                 profile_errors.append("launch MCP server executable bytes differ from retained containment realization")
+        post_run = getattr(adapter_module, "validate_post_run_project_state", None)
+        if post_run is not None:
+            profile_errors.extend(post_run(profile_bundle.profile, project))
+        installed_after = core70.sha256_tree(installed_skills)
+        if installed_after != arm["dist_tree_sha256"]:
+            profile_errors.append(
+                f"installed protocol package changed during execution: {installed_after} != {arm['dist_tree_sha256']}"
+            )
         auto_memory = (runtime_observation.get("memory_paths") or {}).get("auto") if isinstance(runtime_observation, dict) else None
         if isinstance(auto_memory, str) and auto_memory:
             try:

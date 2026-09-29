@@ -16,7 +16,7 @@ import time
 from pathlib import Path
 from typing import Any
 
-ADAPTER_ID = "claude-stream-json-v2"
+ADAPTER_ID = "claude-stream-json-v3"
 SSDP_SKILLS = {
     "scientific-formulation",
     "numerical-algorithm-design",
@@ -55,6 +55,10 @@ QUALIFICATION_AUTH_ENV = {
     "SSDP70_ANTHROPIC_AUTH_TOKEN": "ANTHROPIC_AUTH_TOKEN",
 }
 PARENT_AUTH_ENV = set(QUALIFICATION_AUTH_ENV.values())
+SETTING_SOURCES = {"none", "project"}
+PROJECT_SETTINGS_BYTES = b"{}\n"
+PROJECT_CLAUDE_ALLOWED_ENTRIES = {"skills", "settings.json"}
+PROJECT_CLAUDE_RUNTIME_EMPTY_DIRS = {"agents", "commands"}  # created empty by the runtime itself
 
 
 def clean_env() -> dict[str, str]:
@@ -184,6 +188,24 @@ def _control_paths(project: Path, env: dict[str, str]) -> tuple[Path, Path, Path
     return private_root, control / "settings.json", control / "mcp.json"
 
 
+def _setting_sources(profile: dict[str, Any]) -> str:
+    """Return the frozen Claude settings-source realization: `none` or `project`.
+
+    `none` launches with --restricted (no settings files, and therefore no project skills).
+    `project` loads only the project source, whose skills are the arm package and whose
+    settings file is a harness-written, digest-bound, empty document.
+    """
+    policy = profile.get("containment_policy") or {}
+    sources = policy.get("setting_sources")
+    if sources not in SETTING_SOURCES:
+        raise RuntimeError("Claude profile must freeze containment_policy.setting_sources as 'none' or 'project'")
+    return sources
+
+
+def _project_settings_path(project: Path) -> Path:
+    return project.resolve() / ".claude" / "settings.json"
+
+
 def _path_is_ancestor(path: Path, child: Path) -> bool:
     resolved = path.resolve()
     child_resolved = child.resolve()
@@ -223,6 +245,9 @@ def _containment_document(profile: dict[str, Any], project: Path, env: dict[str,
         if not _path_is_ancestor(Path(path), project_resolved)
     )
     deny_write_paths = sorted(set(deny_write_paths) | {str(settings_path), str(mcp_path)})
+    sources = _setting_sources(profile)
+    if sources == "project":
+        deny_write_paths = sorted(set(deny_write_paths) | {str(project_resolved / ".claude")})
     if write_policy.startswith("deny"):
         deny_write_paths = sorted(set(deny_write_paths) | {str(project_resolved)})
     elif any(_path_is_ancestor(Path(path), project_resolved) for path in deny_write_paths):
@@ -264,7 +289,10 @@ def _containment_document(profile: dict[str, Any], project: Path, env: dict[str,
             "CLAUDE_CODE_DISABLE_ARTIFACT": "1",
             "CLAUDE_CODE_DISABLE_BACKGROUND_TASKS": "1",
         },
+        "disableAllHooks": True,
     }
+    if sources == "project":
+        settings["permissions"] = {"deny": ["Edit(./.claude/**)", "Write(./.claude/**)", "NotebookEdit(./.claude/**)"]}
     return {
         "schema": 1,
         "settings": settings,
@@ -281,6 +309,8 @@ def _containment_document(profile: dict[str, Any], project: Path, env: dict[str,
             "filesystem_read": [str(project_resolved)],
             "filesystem_write": allow_write,
             "control_files_outside_workspace": True,
+            "setting_sources": sources,
+            "project_settings_file": str(_project_settings_path(project)) if sources == "project" else None,
             "host_home_inherited": False,
             "ambient_credentials_inherited": False,
             "exact_native_tools": list(profile.get("native_tools") or []),
@@ -299,6 +329,11 @@ def realize_containment(profile: dict[str, Any], project: Path, env: dict[str, s
     document["realization"]["mcp_servers"] = realized_servers
     document["realization"]["settings_sha256"] = hashlib.sha256(settings.read_bytes()).hexdigest()
     document["realization"]["mcp_config_sha256"] = hashlib.sha256(mcp_config.read_bytes()).hexdigest()
+    if document["realization"]["setting_sources"] == "project":
+        project_settings = _project_settings_path(project)
+        project_settings.parent.mkdir(parents=True, exist_ok=True)
+        project_settings.write_bytes(PROJECT_SETTINGS_BYTES)
+        document["realization"]["project_settings_sha256"] = hashlib.sha256(PROJECT_SETTINGS_BYTES).hexdigest()
     return document
 
 
@@ -391,6 +426,47 @@ def validate_containment_realization(profile: dict[str, Any], project: Path, env
             errors.append(f"containment control file {key} is executor/evaluator workspace-reachable")
     if not write_policy_stays_inside_project(expected["settings"]["sandbox"]["filesystem"], project):
         errors.append("sandbox write policy shadows or escapes the declared project boundary")
+    if expected["realization"]["setting_sources"] == "project":
+        project_settings = _project_settings_path(project)
+        try:
+            if project_settings.read_bytes() != PROJECT_SETTINGS_BYTES:
+                errors.append("project settings source differs from the frozen empty settings document")
+        except OSError:
+            errors.append("required fixed project settings document is absent")
+        local_settings = project.resolve() / ".claude" / "settings.local.json"
+        if local_settings.exists():
+            errors.append("unexpected project-local settings document present before launch")
+    return errors
+
+
+def validate_post_run_project_state(profile: dict[str, Any], project: Path) -> list[str]:
+    """Detect executor tampering with the loaded project settings source after launch."""
+    try:
+        sources = _setting_sources(profile)
+    except RuntimeError as exc:
+        return [str(exc)]
+    if sources != "project":
+        return []
+    claude_dir = project.resolve() / ".claude"
+    errors: list[str] = []
+    try:
+        if _project_settings_path(project).read_bytes() != PROJECT_SETTINGS_BYTES:
+            errors.append("project settings source changed during execution")
+    except OSError:
+        errors.append("project settings source missing after execution")
+    extra: list[str] = []
+    try:
+        for entry in claude_dir.iterdir():
+            if entry.name in PROJECT_CLAUDE_ALLOWED_ENTRIES:
+                continue
+            if entry.name in PROJECT_CLAUDE_RUNTIME_EMPTY_DIRS and entry.is_dir() and not entry.is_symlink() and not any(entry.iterdir()):
+                continue
+            extra.append(entry.name)
+        extra.sort()
+    except OSError:
+        errors.append("project .claude directory missing after execution")
+    if extra:
+        errors.append(f"unexpected entries appeared in project .claude during execution: {extra}")
     return errors
 
 
@@ -452,10 +528,10 @@ def launch(profile: dict[str, Any], prompt: str, project: Path, env: dict[str, s
         "--mcp-config",
         str(mcp_config_path),
         "--strict-mcp-config",
-        "--restricted",
-        "--permission-mode",
-        str(profile.get("permission_mode", "acceptEdits")),
     ]
+    setting_sources = _setting_sources(profile)
+    cmd.extend(["--restricted"] if setting_sources == "none" else ["--setting-sources", setting_sources])
+    cmd.extend(["--permission-mode", str(profile.get("permission_mode", "default"))])
     cmd.extend(["--tools", ",".join(tools)])
     if allowed_tools:
         cmd.extend(["--allowedTools", " ".join(allowed_tools)])
@@ -479,8 +555,8 @@ def launch(profile: dict[str, Any], prompt: str, project: Path, env: dict[str, s
     if hashlib.sha256(mcp_config_path.read_bytes()).hexdigest() != mcp_config_sha256:
         raise RuntimeError("strict MCP configuration changed during Claude execution")
     for row in realized_mcp_servers:
-        executable = Path(row["executable_file"])
-        if not executable.is_file() or hashlib.sha256(executable.read_bytes()).hexdigest() != row["executable_sha256"]:
+        server_file = Path(row["executable_file"])
+        if not server_file.is_file() or hashlib.sha256(server_file.read_bytes()).hexdigest() != row["executable_sha256"]:
             raise RuntimeError("qualification MCP server executable changed during Claude execution")
     return {
         "returncode": proc.returncode,
@@ -501,7 +577,9 @@ def launch(profile: dict[str, Any], prompt: str, project: Path, env: dict[str, s
             "mcp_server_executable_sha256": mcp_server_sha256,
             "strict_mcp_config": True,
             "mcp_servers": list(profile.get("mcp_servers") or []),
-            "restricted": True,
+            "restricted": setting_sources == "none",
+            "setting_sources": setting_sources,
+            "permission_mode": str(profile.get("permission_mode", "default")),
         },
     }
 
@@ -614,6 +692,7 @@ def runtime_observation(stdout: str) -> dict[str, Any]:
                 "messaging_socket_path": raw.get("messaging_socket_path"),
                 "memory_paths": raw.get("memory_paths") or {},
                 "mcp_servers": raw.get("mcp_servers") or [],
+                "permission_mode": raw.get("permissionMode"),
             }
     return {}
 

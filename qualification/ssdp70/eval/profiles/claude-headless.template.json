@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "profile_id": "claude-headless-reference-template",
-  "adapter_id": "claude-stream-json-v2",
+  "adapter_id": "claude-stream-json-v3",
   "agent_model": "claude-sonnet-5",
   "provider_runtime": {
     "executable": "claude",
@@ -23,6 +23,7 @@
   },
   "containment_policy": {
     "kind": "claude-code-restricted-sandbox-v1",
+    "setting_sources": "project",
     "enforcement": "required-before-launch",
     "filesystem_read": "run-owned project/package plus immutable OS runtime reads needed by declared Bash families; host user/custody/run-state roots denied",
     "filesystem_write": "run-owned project only",
@@ -31,7 +32,7 @@
     "ambient_host_home": "deny",
     "ambient_credentials": "deny",
     "runtime_temp": "run-owned project temporary directory",
-    "protected_control_files": "settings and strict qualification-owned MCP config live under the denied harness-private/runtime area outside the executor working directory; settings, config, and private MCP server executable are digest-checked across launch",
+    "protected_control_files": "settings and strict qualification-owned MCP config live under the denied harness-private/runtime area outside the executor working directory; settings, config, and private MCP server executable are digest-checked across launch; the loaded project settings source is a fixed empty document, hooks are disabled, project .claude is write-denied and re-verified after execution",
     "denied_read_roots": "harness-private/runtime state, host HOME, /home, /root, /run/user, /proc, /mnt, /media, /srv, /var/tmp",
     "mediator_transport": "qualification-owned dependency-free stdio MCP; no executor Unix socket or native network route",
     "mcp_stdio_required": true
@@ -67,7 +68,6 @@
     "runtime_capability:mcp_read_resource_v1",
     "runtime_capability:mcp_tool_ui_meta_v1",
     "messaging_socket_path",
-    "auto_memory_write",
     "mcp_server:ssdp70"
   ],
   "native_allowed_tools": [
@@ -120,7 +120,7 @@
     "ReportFindings",
     "ShareOnboardingGuide"
   ],
-  "permission_mode": "dontAsk",
+  "permission_mode": "default",
   "pinned_root_instruction_template": "Use the {root} skill. {prompt}",
   "provider_managed_unknowns": [
     {
