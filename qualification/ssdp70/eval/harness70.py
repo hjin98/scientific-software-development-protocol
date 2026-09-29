@@ -148,6 +148,11 @@ def build_project(corpus: Path, episode: dict[str, Any], project: Path, control_
             dirs_exist_ok=True,
             ignore=shutil.ignore_patterns("__pycache__"),
         )
+    for name in control_names:
+        if (project / name).exists():
+            raise core70.ContractError(
+                f"fixture baseline contains reserved provider control path {name!r}; baseline content cannot be hidden"
+            )
     if not (project / ".git").is_dir():
         subprocess.run(["git", "init", "-q"], cwd=project, check=True)
     info = project / ".git" / "info"
@@ -159,6 +164,15 @@ def build_project(corpus: Path, episode: dict[str, Any], project: Path, control_
         cwd=project,
         check=True,
     )
+
+
+def private_mcp_paths(private_root: Path) -> dict[str, Path]:
+    return {
+        "server": private_root / "mcp-server.py",
+        "stub": private_root / "stub",
+        "log": private_root / "side-effects.jsonl",
+        "account": private_root / "mcp-account.txt",
+    }
 
 
 def _safe_oracle_path(root: Path, episode_id: str, relative: str) -> Path:
@@ -395,7 +409,8 @@ def run_episode(
         tmp = Path(tmp_name)
         project = tmp / "project"
         private = tmp / "harness-private"
-        stub, log = private / "stub", private / "side-effects.jsonl"
+        mcp_paths = private_mcp_paths(private)
+        stub, log = mcp_paths["stub"], mcp_paths["log"]
         runtime_home = private / "runtime-home"
         runtime_tmp = project / ".qualification-tmp"
         build_project(corpus, episode, project, control_names)
@@ -407,10 +422,10 @@ def run_episode(
         log.chmod(0o600)
         mcp_servers = profile_bundle.profile.get("mcp_servers") or []
         if mcp_servers:
-            mcp_server = private / "mcp-server.py"
+            mcp_server = mcp_paths["server"]
             shutil.copy2(HERE / "stub_tools" / "mediator.py", mcp_server)
             mcp_server.chmod(0o500)
-            account_file = private / "mcp-account.txt"
+            account_file = mcp_paths["account"]
             account_file.write_text((episode.get("account") or "agent-account") + "\n", encoding="utf-8")
             account_file.chmod(0o400)
         runtime_home.mkdir()
@@ -440,6 +455,14 @@ def run_episode(
         )
         runtime_baseline_fn = getattr(adapter_module, "runtime_entry_baseline", None)
         runtime_baseline = runtime_baseline_fn(profile_bundle.profile, project) if runtime_baseline_fn is not None else None
+        control_baselines: dict[str, dict[str, Any]] = {}
+        for name in control_names:
+            cpath = project / name
+            if cpath.exists():
+                control_baselines[name] = {
+                    "is_dir": cpath.is_dir(),
+                    "digest": core70.sha256_tree(cpath) if cpath.is_dir() else core70.sha256_file(cpath),
+                }
         launched = adapter_module.launch(profile_bundle.profile, prompt, project, env)
         stdout, stderr = launched["stdout"], launched["stderr"]
         (out / "trace.jsonl").write_text(stdout, encoding="utf-8")
@@ -478,6 +501,21 @@ def run_episode(
         post_run = getattr(adapter_module, "validate_post_run_project_state", None)
         if post_run is not None:
             profile_errors.extend(post_run(profile_bundle.profile, project))
+        for name in control_names:
+            cpath = project / name
+            if name not in control_baselines:
+                if cpath.exists():
+                    profile_errors.append(f"unexpected project control path created during execution: {name}")
+            else:
+                baseline = control_baselines[name]
+                if not cpath.exists():
+                    profile_errors.append(f"project control path deleted during execution: {name}")
+                elif cpath.is_dir() != baseline["is_dir"]:
+                    profile_errors.append(f"project control path type changed during execution: {name}")
+                elif not cpath.is_dir():
+                    curr_file_digest = core70.sha256_file(cpath)
+                    if curr_file_digest != baseline["digest"]:
+                        profile_errors.append(f"project control file mutated during execution: {name}")
         runtime_exclusions: list[str] = []
         inspect_entries = getattr(adapter_module, "inspect_runtime_entries", None)
         if inspect_entries is not None:

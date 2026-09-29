@@ -9,6 +9,8 @@ from pathlib import Path
 from unittest import mock
 
 import core70
+import harness70
+import observer70
 from adapters import omp
 
 EVAL = Path(__file__).resolve().parent
@@ -220,11 +222,11 @@ class ContainmentTests(unittest.TestCase):
         (self.home / omp.OMP_AGENT_RELATIVE).mkdir(parents=True)
         self.env = {"HOME": str(self.home)}
         self.private = self.home.parent
-        (self.private / "mcp").mkdir(parents=True)
-        shutil.copy2(EVAL / "stub_tools" / "mediator.py", self.private / "mcp" / "mediator.py")
-        (self.private / "stub-root").mkdir()
-        (self.private / "side-effect-log.jsonl").write_text("")
-        (self.private / "account.json").write_text("{}")
+        paths = omp._private_mcp_paths(self.private)
+        shutil.copy2(EVAL / "stub_tools" / "mediator.py", paths["server"])
+        paths["stub"].mkdir(parents=True)
+        paths["log"].write_text("")
+        paths["account"].write_text("agent-account\n")
         self.substrate = self.tmp / "fake-substrate"
         self.substrate.write_text("#!/bin/sh\n")
         self.substrate.chmod(0o755)
@@ -302,6 +304,448 @@ class ProfileTemplateTests(unittest.TestCase):
         import assess70
         module = assess70.load_adapter("omp")
         self.assertEqual(module.ADAPTER_ID, "omp-json-v1")
+
+
+class B1B2ObserverTests(unittest.TestCase):
+    def setUp(self):
+        self.tmp = Path(tempfile.mkdtemp(prefix="omp-obs-"))
+        self.addCleanup(shutil.rmtree, self.tmp, ignore_errors=True)
+        self.evidence = self.tmp / "obs-evidence.jsonl"
+
+    def test_observer_captures_catalog_mcp_and_tools(self):
+        prompt = (
+            "<skills>\n"
+            "<skill><name>scientific-formulation</name></skill>\n"
+            "<skill><name>software-design</name></skill>\n"
+            "</skills>\n"
+            "# xd:// Tool Devices\n"
+            "* xd://mcp__ssdp_issue_search: search\n"
+            "* xd://mcp__ssdp_delegate: delegate\n"
+            "## read\nread tool\n"
+            "## bash\nbash tool\n"
+        )
+        self.assertEqual(
+            observer70.parse_system_prompt_catalog(prompt),
+            ["scientific-formulation", "software-design"],
+        )
+        self.assertEqual(
+            observer70.parse_system_prompt_mcp_devices(prompt),
+            ["mcp__ssdp_delegate", "mcp__ssdp_issue_search"],
+        )
+        self.assertEqual(
+            observer70.parse_system_prompt_native_tools(prompt),
+            ["bash", "read"],
+        )
+
+        with observer70.TrustedObserver(evidence_path=self.evidence, verify_peer=False) as obs:
+            import urllib.request
+            req = urllib.request.Request(
+                obs.base_url + "/chat/completions",
+                data=json.dumps({
+                    "model": "local/test-model",
+                    "messages": [{"role": "system", "content": prompt}],
+                }).encode("utf-8"),
+                headers={"Content-Type": "application/json"},
+                method="POST",
+            )
+            with urllib.request.urlopen(req) as resp:
+                data = resp.read().decode("utf-8")
+                self.assertIn("data: ", data)
+                self.assertIn("[DONE]", data)
+
+            info = obs.get_observation()
+            self.assertIsNotNone(info)
+            self.assertEqual(info["model"], "local/test-model")
+            self.assertEqual(info["skills"], ["scientific-formulation", "software-design"])
+            self.assertEqual(info["mcp_devices"], ["mcp__ssdp_delegate", "mcp__ssdp_issue_search"])
+            self.assertEqual(info["tools"], ["bash", "read"])
+
+            ok, errors, records = observer70.validate_observer_log(self.evidence)
+            self.assertTrue(ok, errors)
+            self.assertEqual(len(records), 1)
+            self.assertEqual(records[0]["request_model"], "local/test-model")
+            self.assertEqual(records[0]["observed_skills"], ["scientific-formulation", "software-design"])
+
+    def test_observer_peer_verification_rejects_unauthorized(self):
+        with observer70.TrustedObserver(evidence_path=self.evidence, verify_peer=True) as obs:
+            import urllib.error
+            import urllib.request
+            req = urllib.request.Request(
+                obs.base_url + "/chat/completions",
+                data=json.dumps({"model": "m", "messages": []}).encode("utf-8"),
+                headers={"Content-Type": "application/json"},
+                method="POST",
+            )
+            with self.assertRaises(urllib.error.HTTPError) as caught:
+                urllib.request.urlopen(req)
+            self.assertEqual(caught.exception.code, 403)
+
+    def test_observer_rejects_non_completions_endpoints(self):
+        with observer70.TrustedObserver(evidence_path=self.evidence, verify_peer=False) as obs:
+            import urllib.error
+            import urllib.request
+            for bad_path, expected_code in [("/v1/models", 404), ("/", 404)]:
+                req = urllib.request.Request(
+                    f"http://127.0.0.1:{obs.port}{bad_path}",
+                    data=b"{}",
+                    headers={"Content-Type": "application/json"},
+                    method="POST",
+                )
+                with self.assertRaises(urllib.error.HTTPError) as caught:
+                    urllib.request.urlopen(req)
+                self.assertEqual(caught.exception.code, expected_code)
+
+    def test_runtime_observation_with_observer_evidence(self):
+        evidence_record = {
+            "model": "probe/observed-model",
+            "runtime_version": "omp/18.0.11",
+            "runtime_version_source": "trusted-observer-verified-executable-build",
+            "tools": ["read", "bash", "edit", "glob", "grep", "write"],
+            "mcp_servers": [{"name": "ssdp70", "status": "connected"}],
+            "evidence_sha256": "f" * 64,
+        }
+        obs = omp.runtime_observation("", observer_record=evidence_record)
+        self.assertEqual(obs["model"], "probe/observed-model")
+        self.assertEqual(obs["runtime_version"], "omp/18.0.11")
+        self.assertEqual(obs["runtime_version_source"], "trusted-observer-verified-executable-build")
+        self.assertEqual(obs["tools"], ["read", "bash", "edit", "glob", "grep", "write"])
+        self.assertEqual(len(obs["mcp_servers"]), 1)
+        self.assertEqual(obs["observer_evidence_sha256"], "f" * 64)
+
+
+class NameMintingAuthorityTests(unittest.TestCase):
+    def test_sanitize_component_rules(self):
+        self.assertEqual(omp._sanitize_component("SSDP70"), "ssdp")
+        self.assertEqual(omp._sanitize_component("Tool-A1!_B"), "tool_a_b")
+        self.assertEqual(omp._sanitize_component("___alpha___"), "alpha")
+        self.assertEqual(omp._sanitize_component(""), "")
+
+    def test_mcp_native_id_prefix_deduplication(self):
+        # In OMP v18.0.11 hft: if tool starts with server + "_", prefix is stripped
+        self.assertEqual(omp.mcp_native_id("server", "server_tool"), "mcp__server_tool")
+        self.assertEqual(omp.mcp_native_id("ssdp70", "issue_search"), "mcp__ssdp_issue_search")
+        self.assertEqual(omp.mcp_native_id("alpha", "tool_a1"), "mcp__alpha_tool_a")
+
+    def test_mcp_native_id_length_cap_64(self):
+        long_tool = "a" * 70
+        device = omp.mcp_native_id("server", long_tool)
+        self.assertEqual(len(device), 64)
+        self.assertTrue(device.startswith("mcp__server_"))
+        self.assertEqual(device[55], "_")
+
+
+class D4RepairsNormalizationTests(unittest.TestCase):
+    def setUp(self):
+        self.tmp = Path(tempfile.mkdtemp(prefix="omp-d4-"))
+        self.addCleanup(shutil.rmtree, self.tmp, ignore_errors=True)
+        self.project = self.tmp / "project"
+        self.project.mkdir()
+        self.skills = self.tmp / "skills"
+        for s in omp.SSDP_SKILLS:
+            (self.skills / s).mkdir(parents=True)
+            (self.skills / s / "SKILL.md").write_text(f"---\nname: {s}\n---\n# {s}\n")
+
+    def _ctx(self):
+        return {"project": str(self.project), "skills_root": str(self.skills), "package_identity": _pkg()}
+
+    def test_root_selection_on_skill_url_read(self):
+        trace = "\n".join([
+            json.dumps({"type": "session", "version": 3}),
+            json.dumps({"type": "message_end", "message": {"role": "assistant", "provider": "p", "model": "m"}}),
+            json.dumps({"type": "tool_execution_start", "toolCallId": "c1", "toolName": "read",
+                        "args": {"path": "skill://scientific-formulation"}}),
+            json.dumps({"type": "tool_execution_end", "toolCallId": "c1", "toolName": "read",
+                        "result": {"content": [{"type": "text", "text": "body"}]}, "isError": False}),
+            json.dumps({"type": "agent_end", "messages": [{"role": "assistant", "stopReason": "stop", "content": [{"type": "text", "text": "ok"}]}]}),
+        ])
+        events, _, errors, _ = omp.normalize(trace, "r1", self._ctx())
+        self.assertEqual(errors, [])
+        roots = [e for e in events if e.get("kind") == "root_selection"]
+        self.assertEqual(len(roots), 1)
+        self.assertEqual(roots[0]["payload"]["logical_root"], "scientific-formulation")
+        self.assertEqual(roots[0]["payload"]["selection_mechanism"], "ordinary-resource-read")
+        self.assertIsNotNone(roots[0]["payload"]["resolved_package_identity"])
+
+    def test_root_selection_on_skill_file_read(self):
+        skill_file = self.skills / "software-design" / "SKILL.md"
+        trace = "\n".join([
+            json.dumps({"type": "session", "version": 3}),
+            json.dumps({"type": "message_end", "message": {"role": "assistant", "provider": "p", "model": "m"}}),
+            json.dumps({"type": "tool_execution_start", "toolCallId": "c2", "toolName": "read",
+                        "args": {"path": str(skill_file)}}),
+            json.dumps({"type": "tool_execution_end", "toolCallId": "c2", "toolName": "read",
+                        "result": {"content": [{"type": "text", "text": "body"}]}, "isError": False}),
+            json.dumps({"type": "agent_end", "messages": [{"role": "assistant", "stopReason": "stop", "content": [{"type": "text", "text": "ok"}]}]}),
+        ])
+        events, _, errors, _ = omp.normalize(trace, "r2", self._ctx())
+        self.assertEqual(errors, [])
+        roots = [e for e in events if e.get("kind") == "root_selection"]
+        self.assertEqual(len(roots), 1)
+        self.assertEqual(roots[0]["payload"]["logical_root"], "software-design")
+
+    def test_mcp_issue_create_and_comment_emit_mutation_and_access(self):
+        trace = "\n".join([
+            json.dumps({"type": "session", "version": 3}),
+            json.dumps({"type": "message_end", "message": {"role": "assistant", "provider": "p", "model": "m"}}),
+            json.dumps({"type": "tool_execution_start", "toolCallId": "c_create", "toolName": "write",
+                        "args": {"path": "xd://mcp__ssdp_issue_create", "title": "new issue"}}),
+            json.dumps({"type": "tool_execution_end", "toolCallId": "c_create", "toolName": "write",
+                        "result": {"content": [{"type": "text", "text": "created"}],
+                                   "details": {"xdev": {"serverName": "ssdp70", "mcpToolName": "issue_create"}}},
+                        "isError": False}),
+            json.dumps({"type": "agent_end", "messages": [{"role": "assistant", "stopReason": "stop", "content": [{"type": "text", "text": "ok"}]}]}),
+        ])
+        events, _, errors, _ = omp.normalize(trace, "r3", self._ctx())
+        self.assertEqual(errors, [])
+        mutations = [e for e in events if e.get("kind") == "mutation"]
+        accesses = [e for e in events if e.get("kind") == "issue_evidence_access"]
+        self.assertTrue(len(mutations) >= 2)  # start + end
+        self.assertTrue(len(accesses) >= 2)   # start + end
+        self.assertEqual(mutations[-1]["payload"]["workspace_external_class"], "qualification-owned-standin")
+        self.assertEqual(mutations[-1]["payload"]["authorization_decision"], "sandbox-mediate")
+
+    def test_mcp_delegate_call_and_return(self):
+        trace = "\n".join([
+            json.dumps({"type": "session", "version": 3}),
+            json.dumps({"type": "message_end", "message": {"role": "assistant", "provider": "p", "model": "m"}}),
+            json.dumps({"type": "tool_execution_start", "toolCallId": "d1", "toolName": "write",
+                        "args": {"path": "xd://mcp__ssdp_delegate", "task": "analyze"}}),
+            json.dumps({"type": "tool_execution_end", "toolCallId": "d1", "toolName": "write",
+                        "result": {"content": [{"type": "text", "text": "done"}],
+                                   "details": {"xdev": {"serverName": "ssdp70", "mcpToolName": "delegate"}}},
+                        "isError": False}),
+            json.dumps({"type": "agent_end", "messages": [{"role": "assistant", "stopReason": "stop", "content": [{"type": "text", "text": "ok"}]}]}),
+        ])
+        events, _, errors, _ = omp.normalize(trace, "r4", self._ctx())
+        self.assertEqual(errors, [])
+        kinds = [e["kind"] for e in events]
+        self.assertIn("delegate_call", kinds)
+        self.assertIn("delegate_return", kinds)
+
+    def test_mcp_server_and_tool_name_mismatch_fails_closed(self):
+        trace = "\n".join([
+            json.dumps({"type": "session", "version": 3}),
+            json.dumps({"type": "message_end", "message": {"role": "assistant", "provider": "p", "model": "m"}}),
+            json.dumps({"type": "tool_execution_start", "toolCallId": "d2", "toolName": "write",
+                        "args": {"path": "xd://mcp__ssdp_delegate"}}),
+            json.dumps({"type": "tool_execution_end", "toolCallId": "d2", "toolName": "write",
+                        "result": {"content": [],
+                                   "details": {"xdev": {"serverName": "rogue-server", "mcpToolName": "delegate"}}},
+                        "isError": False}),
+            json.dumps({"type": "agent_end", "messages": [{"role": "assistant", "stopReason": "stop"}]}),
+        ])
+        events, _, errors, _ = omp.normalize(trace, "r5", self._ctx())
+        self.assertTrue(any("serverName mismatch" in err for err in errors), errors)
+
+    def test_unclosed_pending_calls_at_eof_fails_closed(self):
+        trace = "\n".join([
+            json.dumps({"type": "session", "version": 3}),
+            json.dumps({"type": "message_end", "message": {"role": "assistant", "provider": "p", "model": "m"}}),
+            json.dumps({"type": "tool_execution_start", "toolCallId": "unclosed_1", "toolName": "read",
+                        "args": {"path": "file.txt"}}),
+        ])
+        events, _, errors, _ = omp.normalize(trace, "r6", self._ctx())
+        self.assertTrue(any("unclosed pending tool execution" in err for err in errors), errors)
+
+    def test_external_path_write_classification(self):
+        trace = "\n".join([
+            json.dumps({"type": "session", "version": 3}),
+            json.dumps({"type": "message_end", "message": {"role": "assistant", "provider": "p", "model": "m"}}),
+            json.dumps({"type": "tool_execution_start", "toolCallId": "w1", "toolName": "write",
+                        "args": {"path": "/etc/shadow", "content": "hacked"}}),
+            json.dumps({"type": "tool_execution_end", "toolCallId": "w1", "toolName": "write",
+                        "result": "Permission denied", "isError": True}),
+            json.dumps({"type": "agent_end", "messages": [{"role": "assistant", "stopReason": "stop"}]}),
+        ])
+        events, _, errors, _ = omp.normalize(trace, "r7", self._ctx())
+        self.assertEqual(errors, [])
+        mutations = [e for e in events if e.get("kind") == "mutation"]
+        self.assertEqual(mutations[-1]["payload"]["workspace_external_class"], "external")
+        self.assertEqual(mutations[-1]["payload"]["disposition"], "blocked-or-error")
+
+    def test_token_cap_termination_distinction(self):
+        trace = "\n".join([
+            json.dumps({"type": "session", "version": 3}),
+            json.dumps({"type": "agent_end", "messages": [
+                {"role": "assistant", "provider": "p", "model": "m", "stopReason": "length",
+                 "content": [{"type": "text", "text": "partial"}]}
+            ]}),
+        ])
+        events, _, errors, _ = omp.normalize(trace, "r8", self._ctx())
+        self.assertEqual(errors, [])
+        term = [e for e in events if e.get("kind") == "termination"][0]
+        self.assertEqual(term["payload"]["state"], "length_capped")
+        self.assertTrue(term["payload"]["native_return_state"]["lengthCapped"])
+
+
+class HarnessControlExclusionTests(unittest.TestCase):
+    def setUp(self):
+        self.tmp = Path(tempfile.mkdtemp(prefix="omp-harn-"))
+        self.addCleanup(shutil.rmtree, self.tmp, ignore_errors=True)
+        self.corpus = self.tmp / "corpus"
+        self.fixture = self.corpus / "fixtures" / "f1"
+        self.fixture.mkdir(parents=True)
+        self.project = self.tmp / "project"
+
+    def test_build_project_rejects_reserved_control_paths(self):
+        # Place a reserved control path inside fixture
+        (self.fixture / "project").mkdir(parents=True)
+        (self.fixture / "project" / ".claude").mkdir()
+        episode = {"id": "ep1", "fixture": "f1"}
+        with self.assertRaises(core70.ContractError) as caught:
+            harness70.build_project(self.corpus, episode, self.project, [".claude"])
+        self.assertIn("fixture baseline contains reserved provider control path", str(caught.exception))
+
+    def test_unified_private_mcp_paths(self):
+        private = self.tmp / "private"
+        h_paths = harness70.private_mcp_paths(private)
+        o_paths = omp._private_mcp_paths(private)
+        self.assertEqual(h_paths, o_paths)
+        self.assertEqual(h_paths["server"].name, "mcp-server.py")
+        self.assertEqual(h_paths["stub"].name, "stub")
+        self.assertEqual(h_paths["log"].name, "side-effects.jsonl")
+        self.assertEqual(h_paths["account"].name, "mcp-account.txt")
+
+
+class ContainmentAndLaunchRepairsTests(unittest.TestCase):
+    def setUp(self):
+        self.tmp = Path(tempfile.mkdtemp(prefix="omp-cont-launch-"))
+        self.addCleanup(shutil.rmtree, self.tmp, ignore_errors=True)
+        self.project = self.tmp / "project"
+        self.project.mkdir()
+        self.home = self.tmp / "runtime-home"
+        (self.home / omp.OMP_AGENT_RELATIVE).mkdir(parents=True)
+        self.env = {"HOME": str(self.home)}
+        self.private = self.home.parent
+        paths = omp._private_mcp_paths(self.private)
+        shutil.copy2(EVAL / "stub_tools" / "mediator.py", paths["server"])
+        paths["stub"].mkdir(parents=True)
+        paths["log"].write_text("")
+        paths["account"].write_text("agent-account\n")
+        self.substrate = self.tmp / "fake-substrate"
+        self.substrate.write_text("#!/bin/sh\nexit 0\n")
+        self.substrate.chmod(0o755)
+        self.substrate_sha = hashlib.sha256(self.substrate.read_bytes()).hexdigest()
+        self.profile = json.loads(TEMPLATE_PROFILE.read_text())
+        policy = self.profile["containment_policy"]
+        policy["substrate"].update({
+            "status": "frozen", "executable": str(self.substrate),
+            "executable_sha256": self.substrate_sha,
+        })
+        policy["credential_isolation"] = {"kind": "external-broker-outside-sandbox", "broker": "/run/broker.sock"}
+        policy["provider_config_status"] = "frozen"
+        policy["provider_config"] = {"modelRoles": {"default": "probe/local"}}
+
+    def test_minimal_substrate_binds_exclude_host_home(self):
+        omp.realize_containment(self.profile, self.project, self.env)
+        cmd = omp._substrate_command(self.profile["containment_policy"]["substrate"], self.project, self.env)
+        # Verify --ro-bind / / is completely absent
+        self.assertNotIn(["--ro-bind", "/", "/"], [cmd[i:i+3] for i in range(len(cmd)-2)])
+        # Verify minimal explicit binds
+        self.assertIn("--proc", cmd)
+        self.assertIn("--dev", cmd)
+        self.assertIn("--tmpfs", cmd)
+        self.assertIn("/usr", cmd)
+        # Verify project and home are bound
+        self.assertIn(str(self.project.resolve()), cmd)
+        self.assertIn(str(self.home.resolve()), cmd)
+
+    def test_launch_executes_and_reports_real_identity(self):
+        omp.realize_containment(self.profile, self.project, self.env)
+        launched = omp.launch(self.profile, "hello", self.project, self.env)
+        self.assertIn("returncode", launched)
+        self.assertIn("wall_s", launched)
+        self.assertEqual(launched["returncode"], 0)
+        cmd_id = launched["command_identity"]
+        self.assertEqual(cmd_id["adapter_id"], "omp-json-v1")
+        self.assertTrue(cmd_id["strict_mcp_config"])
+
+    def test_launch_detects_control_file_tampering(self):
+        omp.realize_containment(self.profile, self.project, self.env)
+        config_path, _ = omp._control_paths(self.project, self.env)
+        # Substrate that mutates config.yml
+        mutator = self.tmp / "mutator-substrate"
+        mutator.write_text(f"#!/bin/sh\necho 'tampered: true' >> {config_path}\nexit 0\n")
+        mutator.chmod(0o755)
+        self.profile["containment_policy"]["substrate"]["executable"] = str(mutator)
+        self.profile["containment_policy"]["substrate"]["executable_sha256"] = hashlib.sha256(mutator.read_bytes()).hexdigest()
+        with self.assertRaises(RuntimeError) as caught:
+            omp.launch(self.profile, "hello", self.project, self.env)
+        self.assertIn("containment settings changed", str(caught.exception))
+
+    def test_harness_run_episode_with_omp_adapter(self):
+        corpus = self.tmp / "harness-corpus"
+        fixture = corpus / "fixtures" / "f1"
+        (fixture / "project").mkdir(parents=True)
+        (fixture / "project" / "hello.py").write_text("print('hi')\n")
+        episode = {
+            "id": "E_OMP",
+            "fixture": "f1",
+            "prompt": "solve problem",
+            "claims": [],
+        }
+        dist = self.tmp / "harness-dist"
+        for s in omp.SSDP_SKILLS:
+            (dist / s).mkdir(parents=True)
+            (dist / s / "SKILL.md").write_text(f"---\nname: {s}\n---\n# {s}\n")
+        dist_tree_sha = core70.sha256_tree(dist)
+        arm = {
+            "name": "candidate",
+            "requested_ref": "candidate",
+            "commit": "c" * 40,
+            "version": "7.0.0",
+            "skills_path": str(dist),
+            "dist_tree_sha256": dist_tree_sha,
+        }
+        trace_script = self.tmp / "trace-substrate"
+        trace_content = _synthetic_trace()
+        trace_script.write_text(f"#!/bin/sh\ncat << 'EOF'\n{trace_content}\nEOF\n")
+        trace_script.chmod(0o755)
+        self.profile["containment_policy"]["substrate"]["executable"] = str(trace_script)
+        self.profile["containment_policy"]["substrate"]["executable_sha256"] = hashlib.sha256(trace_script.read_bytes()).hexdigest()
+
+        bundle = core70.ProfileBundle(
+            profile=self.profile,
+            capabilities=json.loads(TEMPLATE_MANIFEST.read_text()),
+            profile_key="omp-key",
+            profile_key_sha256="k" * 64,
+            capability_manifest_sha256="m" * 64,
+        )
+        requirements = core70.Requirements(
+            artifacts=(), oracles=(), scoring_items=(),
+            artifact_manifest_digest="a" * 64,
+            oracle_manifest_digest="o" * 64,
+            scoring_manifest_digest="s" * 64,
+        )
+        identity = {
+            "schema": 2, "identity_sha256": "id" + "0" * 62, "subject": arm,
+            "episode": "E_OMP", "arm": "candidate",
+        }
+        out = self.tmp / "out-episode"
+        result = harness70.run_episode(
+            corpus=corpus,
+            episode=episode,
+            arm=arm,
+            arms_manifest_sha256="m" * 64,
+            dist=dist,
+            out=out,
+            profile_bundle=bundle,
+            profile_path=TEMPLATE_PROFILE,
+            capability_path=TEMPLATE_MANIFEST,
+            requirements=requirements,
+            requirements_root=self.tmp,
+            adapter_module=omp,
+            oracles=None,
+            mode="probe",
+            admission=None,
+            identity=identity,
+            pair_order=["E_OMP"],
+        )
+        self.assertEqual(result["episode"], "E_OMP")
+        self.assertEqual(result["execution_returncode"], 0)
+        self.assertTrue((out / "trace.jsonl").is_file())
+        self.assertTrue((out / "events.normalized.jsonl").is_file())
+        self.assertTrue((out / "final-report.md").is_file())
 
 
 if __name__ == "__main__":
