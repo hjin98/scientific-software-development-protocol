@@ -8,7 +8,7 @@
     },
     "credential_secret_service_account": {
       "decision": "DENY",
-      "scope": "ambient credentials denied; at most one explicitly supplied qualification-only parent auth source, hidden from sandboxed subprocesses by sandbox.credentials.envVars deny (subprocess scrub mode is disabled)"
+      "scope": "ambient credentials denied; at most one explicitly supplied qualification-only parent auth source; sandbox.credentials.envVars denies inherited credentials and a hash-bound shell prefix removes runtime-added proxy credentials before the Bash tool command (subprocess scrub mode is disabled)"
     },
     "delegation": {
       "decision": "SANDBOX/MEDIATE",

@@ -18,17 +18,18 @@
     "mediator_transport": "qualification-owned dependency-free stdio MCP; no executor Unix socket or native network route",
     "native_file_tools": "run-project-scoped: the adapter alone grants Read/Edit/Write as permission rules scoped to the run project and sets permissions.blockReadsOutsideWorkingDirectories; a bare or path-argument Read/Glob/Grep/Edit/Write in native_allowed_tools is refused; a denied read root that contains the project is refused",
     "native_network": "deny",
-    "protected_control_files": "settings and strict qualification-owned MCP config live under the denied harness-private/runtime area outside the executor working directory; settings, config, and private MCP server executable are digest-checked across launch; the loaded project settings source is a fixed empty document, hooks are disabled, project .claude is write-denied and re-verified after execution",
+    "protected_control_files": "settings and strict qualification-owned MCP config live under the denied harness-private/runtime area outside the executor working directory; the executable shell prefix lives in the read-enabled, write-denied project .claude control directory and is hash-checked across launch; settings, config, and private MCP server executable are digest-checked across launch; the loaded project settings source is a fixed empty document, hooks are disabled, project .claude is write-denied and re-verified after execution",
     "runtime_created_entries": "reviewed exact digest-bound set of entries the runtime still creates with scrub disabled: an empty .claude/.cc-writes directory (plus empty agents/commands directories); retained raw in runtime-created-entries.json; nothing is excluded from the final tree or diff; the scrub-mode start-up stub signature (17 named files) is INADMISSIBLE",
     "runtime_created_entries_sha256": "9522006cb3e934887955b50f03dc9849c6c6dc4fab2377c042707ea59d5529bf",
     "runtime_temp": "run-owned project temporary directory",
     "setting_sources": "project",
+    "shell_prefix_sha256": "af76c3285f3379299595e442e7074e988d57af8d045f14d97412bbe3fd9b59f7",
     "subprocess_env_scrub": "disabled"
   },
   "credential_service_account_policy": {
     "ambient_credentials": "deny",
     "parent_authentication": "zero or one qualification-only auth source mapped explicitly for the Claude parent process",
-    "sandboxed_subprocess_credentials": "deny (sandbox.credentials.envVars deny, enforced by the sandbox layer, including the SSDP70_* source names; child environment is an explicit allow-list; MCP server runs under env -i)"
+    "sandboxed_subprocess_credentials": "deny (sandbox.credentials.envVars denies inherited credentials; a hash-bound Bash startup file removes credentials and runtime-added authenticated proxy variables before the Bash tool command; child environment is an explicit allow-list; MCP server runs under env -i)"
   },
   "install_mechanism": "project-local skill package",
   "mcp_servers": [

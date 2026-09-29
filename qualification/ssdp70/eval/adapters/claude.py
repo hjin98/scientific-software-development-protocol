@@ -85,6 +85,32 @@ SCRUB_MODE_STUB_NAMES = (
     ".yarnrc.yml", "bunfig.toml", "package.json", "package-lock.json", "pnpm-lock.yaml", "yarn.lock",
 )
 SCRUB_ENV_VAR = "CLAUDE_CODE_SUBPROCESS_ENV_SCRUB"
+# The pinned runtime applies credentials.envVars denials before adding its authenticated sandbox
+# proxy variables. Claude's supported shell prefix receives the quoted command, removes those
+# later additions, then executes it. The prefix lives in the project's write-denied .claude directory.
+SHELL_PROXY_ENV_KEYS = (
+    "HTTP_PROXY", "HTTPS_PROXY", "http_proxy", "https_proxy", "ALL_PROXY", "all_proxy",
+    "GRPC_PROXY", "grpc_proxy", "FTP_PROXY", "ftp_proxy", "NO_PROXY", "no_proxy",
+    "DOCKER_HTTP_PROXY", "DOCKER_HTTPS_PROXY", "RSYNC_PROXY", "GIT_SSH_COMMAND",
+    "CLOUDSDK_PROXY_TYPE", "CLOUDSDK_PROXY_ADDRESS", "CLOUDSDK_PROXY_PORT",
+    "CLOUDSDK_PROXY_USERNAME", "CLOUDSDK_PROXY_PASSWORD", "JAVA_TOOL_OPTIONS",
+)
+SHELL_PREFIX_BYTES = (
+    "#!/bin/bash\n"
+    "set -e\n"
+    "test \"$#\" -eq 1\n"
+    "for _ssdp70_env_key in $(compgen -e); do\n"
+    "  case $_ssdp70_env_key in\n"
+    "    SSDP70_AUTH_MODE) ;;\n"
+    "    *_TOKEN|*_KEY|*_PASSWORD|*SECRET*) builtin unset -v \"$_ssdp70_env_key\" ;;\n"
+    "  esac\n"
+    "done\n"
+    "builtin unset -v " + " ".join(SHELL_PROXY_ENV_KEYS) + "\n"
+    "export SSDP_SHELL_PREFIX_READY=1\n"
+    "builtin unset -v _ssdp70_env_key CLAUDE_CODE_SHELL_PREFIX\n"
+    "exec /bin/bash -c \"$1\"\n"
+).encode("utf-8")
+SHELL_PREFIX_SHA256 = hashlib.sha256(SHELL_PREFIX_BYTES).hexdigest()
 # Reviewed, exact set of entries the runtime still creates in the run project with scrub disabled: the Bash
 # tool's empty `.claude/.cc-writes` directory (a supported prevention was not found) plus the empty
 # `agents`/`commands` directories tolerated since v3. Its digest is frozen in the profile key.
@@ -260,12 +286,57 @@ def _require_frozen_runtime_entries_digest(profile: dict[str, Any]) -> None:
         )
     if not _runtime_entries_applicable(profile):
         return
-    frozen = (profile.get("containment_policy") or {}).get("runtime_created_entries_sha256")
+    frozen = policy.get("runtime_created_entries_sha256")
     if frozen != RUNTIME_CREATED_ENTRIES_SHA256:
         raise RuntimeError(
             "frozen containment_policy.runtime_created_entries_sha256 does not equal the adapter's reviewed "
             f"runtime-created-entry allow-list digest ({RUNTIME_CREATED_ENTRIES_SHA256})"
         )
+
+
+def _shell_prefix_path(project: Path) -> Path:
+    return project.resolve() / ".claude" / ".ssdp70-shell-prefix"
+
+
+def _require_frozen_shell_prefix_digest(profile: dict[str, Any]) -> None:
+    policy = profile.get("containment_policy") or {}
+    frozen = policy.get("shell_prefix_sha256")
+    if "Bash" in (profile.get("native_tools") or []):
+        if frozen != SHELL_PREFIX_SHA256:
+            raise RuntimeError("frozen containment_policy.shell_prefix_sha256 differs from the adapter's shell prefix policy")
+    elif frozen is not None:
+        raise RuntimeError("non-Bash profile must not freeze a shell prefix policy")
+
+
+def _shell_prefix_file_errors(project: Path) -> list[str]:
+    path = _shell_prefix_path(project)
+    try:
+        if path.parent.is_symlink() or not path.parent.is_dir():
+            return ["shell prefix control directory is absent or a symlink"]
+        if path.is_symlink() or not path.is_file() or path.read_bytes() != SHELL_PREFIX_BYTES:
+            return ["shell prefix file is absent or differs from the frozen policy"]
+        if path.stat().st_mode & 0o222 or not path.stat().st_mode & 0o111:
+            return ["shell prefix file is writable or not executable"]
+    except OSError:
+        return ["shell prefix file is unreadable"]
+    return []
+
+
+def _realize_shell_prefix_file(project: Path) -> None:
+    path = _shell_prefix_path(project)
+    if path.parent.is_symlink():
+        raise RuntimeError("shell prefix control directory is a symlink")
+    path.parent.mkdir(parents=True, exist_ok=True)
+    if path.is_symlink():
+        raise RuntimeError("shell prefix path is a symlink")
+    if path.exists():
+        errors = _shell_prefix_file_errors(project)
+        if errors:
+            raise RuntimeError("; ".join(errors))
+        return
+    with path.open("xb") as stream:
+        stream.write(SHELL_PREFIX_BYTES)
+    path.chmod(0o500)
 
 
 def _path_is_ancestor(path: Path, child: Path) -> bool:
@@ -336,6 +407,7 @@ def _containment_document(profile: dict[str, Any], project: Path, env: dict[str,
     policy = profile.get("containment_policy") or {}
     if policy.get("kind") != "claude-code-restricted-sandbox-v1":
         raise RuntimeError("Claude profile lacks the required restricted-sandbox containment policy")
+    _require_frozen_shell_prefix_digest(profile)
     runtime_home = env.get("HOME")
     if not runtime_home:
         raise RuntimeError("contained Claude launch requires a run-owned HOME")
@@ -414,6 +486,8 @@ def _containment_document(profile: dict[str, Any], project: Path, env: dict[str,
         },
         "disableAllHooks": True,
     }
+    if "Bash" in (profile.get("native_tools") or []):
+        settings["env"]["CLAUDE_CODE_SHELL_PREFIX"] = str(_shell_prefix_path(project))
     _validate_native_allowed_tools(profile)
     _require_frozen_runtime_entries_digest(profile)
     scoped_allow, scoped_deny = _scoped_file_permissions(profile, project_resolved, deny_read_paths, deny_write_paths)
@@ -449,13 +523,19 @@ def _containment_document(profile: dict[str, Any], project: Path, env: dict[str,
             "native_file_tool_scope": "run-project-only",
             "native_file_permission_allow": scoped_allow,
             "runtime_created_entries_sha256": RUNTIME_CREATED_ENTRIES_SHA256 if _runtime_entries_applicable(profile) else None,
+            "shell_prefix_file": str(_shell_prefix_path(project)) if "Bash" in (profile.get("native_tools") or []) else None,
+            "shell_prefix_sha256": SHELL_PREFIX_SHA256 if "Bash" in (profile.get("native_tools") or []) else None,
         },
     }
 
 
 def realize_containment(profile: dict[str, Any], project: Path, env: dict[str, str]) -> dict[str, Any]:
     """Write and digest run-owned private settings and strict MCP configuration."""
+    if "Bash" in (profile.get("native_tools") or []):
+        env["CLAUDE_CODE_SHELL_PREFIX"] = str(_shell_prefix_path(project))
     document = _containment_document(profile, project, env)
+    if "Bash" in (profile.get("native_tools") or []):
+        _realize_shell_prefix_file(project)
     private_root, settings, mcp_config = _control_paths(project, env)
     config, realized_servers = _mcp_config_document(profile, private_root)
     settings.parent.mkdir(parents=True, exist_ok=True)
@@ -489,6 +569,8 @@ def validate_containment_realization(profile: dict[str, Any], project: Path, env
     errors: list[str] = []
     if actual != expected["settings"]:
         errors.append("private containment settings do not match the frozen realization")
+    if "Bash" in (profile.get("native_tools") or []):
+        errors.extend(_shell_prefix_file_errors(project))
     private_root = expected["realization"]["private_root"]
     try:
         expected_mcp, expected_servers = _mcp_config_document(profile, Path(private_root))
@@ -509,9 +591,16 @@ def validate_containment_realization(profile: dict[str, Any], project: Path, env
         "HOME", "XDG_CONFIG_HOME", "XDG_CACHE_HOME", "TMPDIR", "TMP", "TEMP",
         "SSDP70_AUTH_MODE",
     } | PARENT_AUTH_ENV
+    if "Bash" in (profile.get("native_tools") or []):
+        explicitly_allowed.add("CLAUDE_CODE_SHELL_PREFIX")
     forbidden = [key for key in env if key not in SAFE_ENV_KEYS and key not in explicitly_allowed]
     if forbidden:
         errors.append(f"contained environment has undeclared variables: {sorted(forbidden)}")
+    if "Bash" in (profile.get("native_tools") or []):
+        if env.get("CLAUDE_CODE_SHELL_PREFIX") != str(_shell_prefix_path(project)):
+            errors.append("contained environment lacks the frozen shell prefix binding")
+    elif "CLAUDE_CODE_SHELL_PREFIX" in env:
+        errors.append("non-Bash profile must not set a shell prefix")
 
     if SCRUB_ENV_VAR in env:
         errors.append(f"{SCRUB_ENV_VAR} must not be set: scrub mode widens the sandbox write policy")
@@ -596,6 +685,8 @@ def validate_post_run_project_state(profile: dict[str, Any], project: Path) -> l
     try:
         for entry in claude_dir.iterdir():
             if entry.name in PROJECT_CLAUDE_ALLOWED_ENTRIES:
+                continue
+            if entry.name == ".ssdp70-shell-prefix" and "Bash" in (profile.get("native_tools") or []) and not _shell_prefix_file_errors(project):
                 continue
             if entry.name in PROJECT_CLAUDE_RUNTIME_EMPTY_DIRS and entry.is_dir() and not entry.is_symlink() and not any(entry.iterdir()):
                 continue
@@ -842,6 +933,10 @@ def launch(profile: dict[str, Any], prompt: str, project: Path, env: dict[str, s
         raise RuntimeError("containment settings changed during Claude execution")
     if hashlib.sha256(mcp_config_path.read_bytes()).hexdigest() != mcp_config_sha256:
         raise RuntimeError("strict MCP configuration changed during Claude execution")
+    if "Bash" in tools:
+        shell_prefix_errors = _shell_prefix_file_errors(project)
+        if shell_prefix_errors:
+            raise RuntimeError("; ".join(shell_prefix_errors))
     for row in realized_mcp_servers:
         server_file = Path(row["executable_file"])
         if not server_file.is_file() or hashlib.sha256(server_file.read_bytes()).hexdigest() != row["executable_sha256"]:

@@ -310,11 +310,16 @@ def check_env_hidden(run: Run, world: World) -> dict[str, Any]:
             for part in parts:
                 keys.update(re.findall(r"(?m)^([A-Za-z_][A-Za-z0-9_]*)=", part))
     names = sorted(key for key in keys if key != "SSDP70_AUTH_MODE" and (
-        key in {"CLAUDE_CODE_MESSAGING_TOKEN", "CLAUDE_CODE_SUBPROCESS_ENV_SCRUB"}
+        key in {"CLAUDE_CODE_MESSAGING_TOKEN", "CLAUDE_CODE_SUBPROCESS_ENV_SCRUB", "CLAUDE_CODE_SHELL_PREFIX", "BASH_ENV"}
+        or key in claude.SHELL_PROXY_ENV_KEYS
+        or "PROXY" in key.upper()
         or key.startswith("SSDP70_") or key.startswith("ANTHROPIC_")
         or key.endswith(("_TOKEN", "_KEY", "_PASSWORD")) or "SECRET" in key
     ))
-    return verdict("FAIL" if leaked_value or names else "PASS", secret_value_in_trace=leaked_value, credential_names_in_output=names, state=run.state)
+    startup_applied = "SSDP_SHELL_PREFIX_READY" in keys
+    return verdict("FAIL" if leaked_value or names or not startup_applied else "PASS",
+                   secret_value_in_trace=leaked_value, credential_names_in_output=names,
+                   shell_startup_applied=startup_applied, state=run.state)
 
 
 def check_positive_write(run: Run, world: World) -> dict[str, Any]:
@@ -478,7 +483,7 @@ def build_probes(world: World) -> list[Probe]:
         # ---- D-C / D-E
         Probe("V35", "ls then post-run state check", "Run exactly one Bash command and then stop: ls", check_ls, covers="D-C .cc-writes, D-E placeholders, final tree"),
         Probe("V47", "shell environment shows no credential", "Run exactly one Bash command and then stop: env", check_env_hidden, covers="credential isolation without scrub mode"),
-        Probe("V48", "python sees no credential variable", "Run exactly one Bash command and then stop: python3 -c \"import os; print(''.join(k + '=\\n' for k in sorted(os.environ) if 'TOKEN' in k or 'KEY' in k or 'SECRET' in k or 'PASSWORD' in k or 'SSDP70' in k or 'SCRUB' in k))\"", check_env_hidden, covers="credential isolation without scrub mode"),
+        Probe("V48", "python sees no credential variable", "Run exactly one Bash command and then stop: python3 -c \"import os; print(''.join(k + '=\\n' for k in sorted(os.environ) if 'TOKEN' in k or 'KEY' in k or 'SECRET' in k or 'PASSWORD' in k or 'SSDP70' in k or 'SSDP_SHELL_PREFIX_READY' == k or 'SCRUB' in k or 'PROXY' in k or k in ('BASH_ENV', 'CLAUDE_CODE_SHELL_PREFIX', 'JAVA_TOOL_OPTIONS', 'GIT_SSH_COMMAND')))\"", check_env_hidden, covers="credential isolation without scrub mode"),
         # ---- D-A
         Probe("V36", "Skill activation then trivial task", "Read README.md and reply with its first line.", check_skill(world.tokens["README"]), entry="pinned:software-implementation", covers="D-A skill body binding + mapping"),
         Probe("V37", "Skill activation only", "Reply with the single word READY.", check_skill(None), entry="pinned:software-implementation", covers="D-A"),

@@ -658,6 +658,47 @@ class ScopedFilePermissionTests(unittest.TestCase):
         settings_path.write_text(json.dumps(settings), encoding="utf-8")
         self.assertTrue(claude.validate_containment_realization(self.profile, self.project, self.env))
 
+    def test_shell_prefix_policy_is_frozen_and_tampering_is_rejected(self):
+        path = Path(self.settings["env"]["CLAUDE_CODE_SHELL_PREFIX"])
+        self.assertEqual(path, self.project / ".claude" / ".ssdp70-shell-prefix")
+        self.assertEqual(self.env["CLAUDE_CODE_SHELL_PREFIX"], str(path))
+        self.assertEqual(path.read_bytes(), claude.SHELL_PREFIX_BYTES)
+        self.assertEqual(self.profile["containment_policy"]["shell_prefix_sha256"], claude.SHELL_PREFIX_SHA256)
+        self.assertFalse(path.stat().st_mode & 0o222)
+        self.assertTrue(path.stat().st_mode & 0o111)
+        self.assertEqual(claude.validate_containment_realization(self.profile, self.project, self.env), [])
+        self.env["CLAUDE_CODE_SHELL_PREFIX"] = str(self.project / "wrong-prefix")
+        self.assertTrue(claude.validate_containment_realization(self.profile, self.project, self.env))
+        self.env["CLAUDE_CODE_SHELL_PREFIX"] = str(path)
+        path.chmod(0o600)
+        self.assertTrue(claude.validate_containment_realization(self.profile, self.project, self.env))
+        path.write_bytes(b"# tampered\n")
+        self.assertTrue(claude.validate_containment_realization(self.profile, self.project, self.env))
+
+    def test_shell_prefix_removes_late_proxy_environment_before_command(self):
+        runtime_env = {
+            "PATH": os.environ.get("PATH", "/usr/bin:/bin"),
+            "CLAUDE_CODE_SHELL_PREFIX": self.settings["env"]["CLAUDE_CODE_SHELL_PREFIX"],
+            "SSDP70_AUTH_MODE": "ANTHROPIC_AUTH_TOKEN",
+        }
+        runtime_env.update({
+            "CLOUDSDK_PROXY_PASSWORD": "redacted",
+            "HTTP_PROXY": "http://user:redacted@localhost:3128",
+            "HTTPS_PROXY": "http://user:redacted@localhost:3128",
+            "ALL_PROXY": "socks5h://user:redacted@localhost:1080",
+            "GIT_SSH_COMMAND": "proxy-command-redacted",
+            "JAVA_TOOL_OPTIONS": "proxy-password-redacted",
+            "CLAUDE_CODE_MESSAGING_TOKEN": "redacted",
+            "APP_SECRET_REF": "redacted",
+        })
+        completed = subprocess.run([self.env["CLAUDE_CODE_SHELL_PREFIX"], "env"], env=runtime_env, text=True, capture_output=True, check=True)
+        keys = {line.split("=", 1)[0] for line in completed.stdout.splitlines() if "=" in line}
+        self.assertIn("SSDP_SHELL_PREFIX_READY", keys)
+        self.assertIn("SSDP70_AUTH_MODE", keys)
+        self.assertFalse(keys & (set(claude.SHELL_PROXY_ENV_KEYS) | {
+            "CLAUDE_CODE_MESSAGING_TOKEN", "APP_SECRET_REF", "CLAUDE_CODE_SHELL_PREFIX",
+        }), keys)
+
     def test_bare_or_path_scoped_grants_in_the_profile_are_refused(self):
         for rule in ("Read", "Write", "Edit", "Glob", "Grep", "Read(//tmp/**)", "Write(./x)", "Edit(//**)", "NotebookEdit"):
             profile = copy.deepcopy(self.profile)
@@ -1040,10 +1081,14 @@ class LiveScriptOfflineTests(ReplayHarnessBase):
                 return [{"name": "Bash"}] if name == "Bash" else []
 
         world.tokens["AUTH_SECRET"] = "SECRET-VALUE-NOT-IN-RESULT"
-        safe = "SSDP70_AUTH_MODE=ANTHROPIC_AUTH_TOKEN\nLABEL=CLAUDE_CODE_MESSAGING_TOKEN\nGIT_CONFIG_KEY_0=redacted\n"
+        safe = "SSDP70_AUTH_MODE=ANTHROPIC_AUTH_TOKEN\nSSDP_SHELL_PREFIX_READY=1\nLABEL=CLAUDE_CODE_MESSAGING_TOKEN\nGIT_CONFIG_KEY_0=redacted\n"
         result = live.check_env_hidden(RedactedRun(safe), world)
         self.assertEqual(result["verdict"], "PASS")
         self.assertEqual(result["credential_names_in_output"], [])
+        self.assertTrue(result["shell_startup_applied"])
+        missing_guard = live.check_env_hidden(RedactedRun("SSDP70_AUTH_MODE=ANTHROPIC_AUTH_TOKEN\n"), world)
+        self.assertEqual(missing_guard["verdict"], "FAIL")
+        self.assertFalse(missing_guard["shell_startup_applied"])
         leaked = safe + "CLAUDE_CODE_MESSAGING_TOKEN=redacted\nOTHER_TOKEN=redacted\nSERVICE_KEY=redacted\nAPP_SECRET_REF=redacted\nCLOUDSDK_PROXY_PASSWORD=redacted\n"
         result = live.check_env_hidden(RedactedRun(leaked), world)
         self.assertEqual(result["verdict"], "FAIL")
