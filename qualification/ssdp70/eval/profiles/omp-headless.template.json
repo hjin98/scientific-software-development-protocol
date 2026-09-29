@@ -8,9 +8,10 @@
   "containment_policy": {
     "build_inventory_sha256": "MUST-BE-FROZEN-BEFORE-QUALIFICATION",
     "inference_authority": "descriptor pairs inherited by the launcher only; relayed only for connections whose client socket is held solely by the launcher-started OMP process; capability is bound to that run instance, not to an executable identity",
-    "kind": "omp-three-principal-bwrap-v2",
+    "kind": "omp-three-principal-bwrap-v3",
     "mcp_transport_realization": "unchanged stdio mediator run by the supervisor; OMP reaches it as streamable-HTTP MCP through the supervisor bridge over the descriptor-bound relay",
     "principal_files_sha256": "MUST-BE-FROZEN-BEFORE-QUALIFICATION",
+    "runtime_dependency_manifest_sha256": "MUST-BE-FROZEN-BEFORE-QUALIFICATION",
     "principals": [
       "qualification-supervisor",
       "provider-control-observer",
@@ -29,7 +30,13 @@
       "upstream": "MUST-BE-FROZEN-BEFORE-QUALIFICATION"
     },
     "settings_closure_sha256": "MUST-BE-FROZEN-BEFORE-QUALIFICATION",
-    "subject_boundary": "bubblewrap user/pid/ipc/uts/cgroup/net namespaces, empty network namespace (loopback only), all capabilities dropped, seccomp denylist, minimal read-only /usr + synthetic /etc view, no host HOME/custody/private state",
+    "observer_boundary": {
+      "filesystem": "explicit Python runtime, observer code, CA bundle and synthetic /etc only; no host HOME, custody, mediator or supervisor state",
+      "network": "trusted observer opens only the frozen provider route before accepting subject input, then moves to a private network namespace and installs seccomp denying new sockets, connects and addressed sends",
+      "process": "private PID namespace with no host process view; capability set dropped after route setup",
+      "provider_route_capability": "one connected stream socket owned by the observer; inference requests remain single-purpose and evidence is append-only"
+    },
+    "subject_boundary": "bubblewrap user/pid/ipc/uts/cgroup/net namespaces, empty network namespace (loopback only), all capabilities dropped, seccomp denies AF_UNIX sockets and process inspection, explicit digest-bound runtime dependency manifest plus synthetic /etc, no host HOME/custody/private state",
     "substrate": {
       "executable": "/usr/bin/bwrap",
       "executable_sha256": "MUST-BE-FROZEN-BEFORE-QUALIFICATION",

@@ -3,7 +3,7 @@
 
 One of the three accepted D3 principals. It
 
-* owns the provider credential (read once from its own environment, never written anywhere),
+* owns the provider credential (received once on a launch descriptor after its route and privilege boundary are locked down; never written anywhere),
 * owns the only route to the model provider (`--upstream`),
 * sits ON the actual OMP inference request path: the subject reaches the model only through
   this process, over the descriptor pair it inherited (see muxhttp70.py), so there is no
@@ -26,10 +26,15 @@ from __future__ import annotations
 
 import argparse
 import base64
+import ctypes
 import hashlib
 import http.client
+import ipaddress
 import os
 import signal
+import socket
+import ssl
+import struct
 import sys
 import threading
 from typing import Any
@@ -38,6 +43,7 @@ from urllib.parse import urlsplit
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import evidence70  # noqa: E402
 import muxhttp70 as mux  # noqa: E402
+import seccomp70  # noqa: E402
 
 RESPONSE_EVIDENCE_LIMIT = 4 * 1024 * 1024
 HOP_BY_HOP = {
@@ -49,7 +55,8 @@ OBSERVER_ID = "ssdp70-provider-observer-v1"
 
 class Observer:
     def __init__(self, chain: evidence70.ChainWriter, upstream: str, credential: str | None,
-                 placeholder: str, allowed_path: str, upstream_timeout: float, max_requests: int | None = None):
+                 upstream_connection: http.client.HTTPConnection, placeholder: str, allowed_path: str,
+                 upstream_timeout: float, max_requests: int | None = None):
         self.chain = chain
         self.upstream = urlsplit(upstream)
         self.credential = credential
@@ -57,7 +64,9 @@ class Observer:
         self.allowed_path = allowed_path
         self.upstream_timeout = upstream_timeout
         self.max_requests = max_requests
+        self.upstream_connection = upstream_connection
         self.lock = threading.Lock()
+        self.upstream_lock = threading.Lock()
         self.request_count = 0
         self.refused_count = 0
 
@@ -94,6 +103,10 @@ class Observer:
             conn.close()
 
     def forward(self, conn: mux.Conn, request: mux.Request) -> None:
+        with self.upstream_lock:
+            self._forward_serial(conn, request)
+
+    def _forward_serial(self, conn: mux.Conn, request: mux.Request) -> None:
         body = request.body
         index = self.next_index()
         inbound_auth = request.headers.get("authorization")
@@ -130,9 +143,7 @@ class Observer:
         resp_headers: dict[str, str] = {}
         error = None
         try:
-            cls = http.client.HTTPSConnection if self.upstream.scheme == "https" else http.client.HTTPConnection
-            upstream = cls(self.upstream.hostname, self.upstream.port or (443 if self.upstream.scheme == "https" else 80),
-                           timeout=self.upstream_timeout)
+            upstream = self.upstream_connection
             upstream.request("POST", self.upstream.path.rstrip("/") + request.target, body=body, headers=forward)
             resp = upstream.getresponse()
             status = resp.status
@@ -148,7 +159,6 @@ class Observer:
                 if len(captured) < RESPONSE_EVIDENCE_LIMIT:
                     captured.extend(chunk[: RESPONSE_EVIDENCE_LIMIT - len(captured)])
                 conn.sendall(chunk)
-            upstream.close()
         except Exception as exc:  # upstream failure is evidence, not a crash
             error = f"{type(exc).__name__}: {exc}"
             if status is None:
@@ -165,6 +175,177 @@ class Observer:
         })
 
 
+def _open_frozen_route(upstream: str, timeout: float) -> tuple[http.client.HTTPConnection, list[str]]:
+    parsed = urlsplit(upstream)
+    if parsed.scheme not in ("http", "https") or not parsed.hostname or parsed.username or parsed.password:
+        raise RuntimeError("frozen provider route is not a simple HTTP(S) origin")
+    port = parsed.port or (443 if parsed.scheme == "https" else 80)
+    addresses = socket.getaddrinfo(parsed.hostname, port, type=socket.SOCK_STREAM)
+    peers: list[str] = []
+    connected: socket.socket | None = None
+    errors: list[str] = []
+    for family, socktype, proto, _canonname, sockaddr in addresses:
+        candidate: socket.socket | None = None
+        try:
+            candidate = socket.socket(family, socktype, proto)
+            candidate.settimeout(timeout)
+            candidate.connect(sockaddr)
+            connected = candidate
+            peers.append(str(sockaddr[0]))
+            break
+        except OSError as exc:
+            errors.append(f"{type(exc).__name__}:{exc.errno}")
+            if candidate is not None:
+                candidate.close()
+    if connected is None:
+        raise RuntimeError("frozen provider route connection failed: " + ",".join(errors))
+    connection = http.client.HTTPConnection(parsed.hostname, port, timeout=timeout)
+    connection.sock = connected
+    connection.auto_open = 0
+    connection._ssdp_https = parsed.scheme == "https"
+    return connection, peers
+
+
+def _complete_tls_handshake(connection: http.client.HTTPConnection) -> None:
+    parsed_host = connection.host
+    if getattr(connection, "_ssdp_https", False):
+        context = ssl.create_default_context()
+        assert connection.sock is not None
+        connection.sock = context.wrap_socket(connection.sock, server_hostname=parsed_host)
+
+
+def _install_observer_lockdown() -> None:
+    """Move off the host network, drop setup capability, then lock network/process syscalls."""
+    libc = ctypes.CDLL(None, use_errno=True)
+    if libc.unshare(0x40000000) != 0:  # CLONE_NEWNET; connected provider socket survives setns.
+        error = ctypes.get_errno()
+        raise OSError(error, os.strerror(error), "unshare(CLONE_NEWNET)")
+
+    class CapHeader(ctypes.Structure):
+        _fields_ = [("version", ctypes.c_uint32), ("pid", ctypes.c_int)]
+
+    class CapData(ctypes.Structure):
+        _fields_ = [("effective", ctypes.c_uint32), ("permitted", ctypes.c_uint32),
+                    ("inheritable", ctypes.c_uint32)]
+
+    # Remove the only setup capability from the bounding set before clearing all active sets.
+    libc.prctl.argtypes = [ctypes.c_int, ctypes.c_ulong, ctypes.c_ulong, ctypes.c_ulong, ctypes.c_ulong]
+    libc.prctl.restype = ctypes.c_int
+    libc.capset.argtypes = [ctypes.POINTER(CapHeader), ctypes.POINTER(CapData)]
+    libc.capset.restype = ctypes.c_int
+    libc.unshare.argtypes = [ctypes.c_int]
+    libc.unshare.restype = ctypes.c_int
+    if libc.prctl(24, 21, 0, 0, 0) != 0:  # PR_CAPBSET_DROP, CAP_SYS_ADMIN
+        error = ctypes.get_errno()
+        raise OSError(error, os.strerror(error), "drop CAP_SYS_ADMIN bounding capability")
+    if libc.prctl(24, 8, 0, 0, 0) != 0:  # PR_CAPBSET_DROP, CAP_SETPCAP
+        error = ctypes.get_errno()
+        raise OSError(error, os.strerror(error), "drop CAP_SETPCAP bounding capability")
+    header = CapHeader(0x20080522, 0)  # _LINUX_CAPABILITY_VERSION_3
+    data = (CapData * 2)()
+    if libc.capset(ctypes.byref(header), ctypes.cast(data, ctypes.POINTER(CapData))) != 0:
+        error = ctypes.get_errno()
+        raise OSError(error, os.strerror(error), "capset(empty)")
+    if libc.prctl(38, 1, 0, 0, 0) != 0:  # PR_SET_NO_NEW_PRIVS
+        error = ctypes.get_errno()
+        raise OSError(error, os.strerror(error), "PR_SET_NO_NEW_PRIVS")
+
+    install_observer_seccomp()
+
+
+def install_observer_seccomp() -> None:
+    """Install the exact observer syscall filter after no-new-privileges is active."""
+    libc = ctypes.CDLL(None, use_errno=True)
+    libc.prctl.argtypes = [ctypes.c_int, ctypes.c_ulong, ctypes.c_ulong, ctypes.c_ulong, ctypes.c_ulong]
+    libc.prctl.restype = ctypes.c_int
+
+    class SockFilter(ctypes.Structure):
+        _fields_ = [("code", ctypes.c_ushort), ("jt", ctypes.c_ubyte),
+                    ("jf", ctypes.c_ubyte), ("k", ctypes.c_uint32)]
+
+    class SockFprog(ctypes.Structure):
+        _fields_ = [("len", ctypes.c_ushort), ("filter", ctypes.POINTER(SockFilter))]
+
+    raw = seccomp70.build_observer_filter()
+    rows = [SockFilter(*struct.unpack("HBBI", raw[i:i + 8])) for i in range(0, len(raw), 8)]
+    filters = (SockFilter * len(rows))(*rows)
+    program = SockFprog(len(rows), filters)
+    filter_pointer = ctypes.cast(ctypes.byref(program), ctypes.c_void_p).value
+    if libc.prctl(22, 2, filter_pointer, 0, 0) != 0:  # PR_SET_SECCOMP, SECCOMP_MODE_FILTER
+        error = ctypes.get_errno()
+        raise OSError(error, os.strerror(error), "PR_SET_SECCOMP")
+
+
+def _observer_status() -> dict[str, str]:
+    wanted = {"CapEff", "CapPrm", "CapBnd", "NoNewPrivs", "Seccomp", "NSpid"}
+    values: dict[str, str] = {}
+    for line in open("/proc/self/status", encoding="ascii"):
+        key, _, value = line.partition(":")
+        if key in wanted:
+            values[key] = value.strip()
+    return values
+
+
+def _boundary_probes(chain: evidence70.ChainWriter, probe_paths: list[tuple[str, str]],
+                     supervisor_pid: int, credential_env: str, route_fd: int) -> list[dict[str, Any]]:
+    results: list[dict[str, Any]] = []
+    for label, path in probe_paths:
+        try:
+            with open(path, "rb") as stream:
+                stream.read(1)
+            result = {"name": label, "disposition": "unexpectedly-readable", "errno": None}
+        except OSError as exc:
+            result = {"name": label, "disposition": "denied", "errno": exc.errno}
+        results.append(result)
+
+    for family, label in ((socket.AF_INET, "new-af-inet-socket"), (socket.AF_UNIX, "new-af-unix-socket")):
+        try:
+            candidate = socket.socket(family, socket.SOCK_STREAM)
+            candidate.close()
+            result = {"name": label, "disposition": "unexpectedly-allowed", "errno": None}
+        except OSError as exc:
+            result = {"name": label, "disposition": "denied", "errno": exc.errno}
+        results.append(result)
+
+    # Attempt an addressed send on the only connected provider socket. Seccomp must deny the
+    # syscall before the kernel can emit a packet to this unrelated destination.
+    class SockAddrIn(ctypes.Structure):
+        _fields_ = [("family", ctypes.c_ushort), ("port", ctypes.c_ushort),
+                    ("address", ctypes.c_uint32), ("zero", ctypes.c_ubyte * 8)]
+
+    libc = ctypes.CDLL(None, use_errno=True)
+    destination = SockAddrIn(socket.AF_INET, socket.htons(53), int.from_bytes(socket.inet_aton("1.1.1.1"), "little"),
+                             (ctypes.c_ubyte * 8)())
+    sent = libc.sendto(route_fd, ctypes.c_char_p(b"x"), 1, 0, ctypes.byref(destination), ctypes.sizeof(destination))
+    results.append({"name": "unrelated-addressed-network-send", "disposition": "denied" if sent < 0 else "unexpectedly-allowed",
+                    "errno": ctypes.get_errno() if sent < 0 else None})
+
+    for name, operation in (
+        ("unrelated-process-control", lambda: os.kill(supervisor_pid, 0)),
+    ):
+        try:
+            operation()
+            result = {"name": name, "disposition": "unexpectedly-allowed", "errno": None}
+        except OSError as exc:
+            result = {"name": name, "disposition": "denied", "errno": exc.errno}
+        results.append(result)
+
+    ctypes.set_errno(0)
+    ptrace_result = libc.ptrace(16, supervisor_pid, 0, 0)
+    ptrace_errno = ctypes.get_errno()
+    results.append({"name": "unrelated-process-inspection",
+                    "disposition": "denied" if ptrace_result == -1 and ptrace_errno == seccomp70.EPERM else "unexpectedly-allowed",
+                    "errno": ptrace_errno if ptrace_result == -1 else None})
+
+    results.append({"name": "credential-environment", "disposition": "unavailable" if credential_env not in os.environ else "unexpectedly-present",
+                    "errno": None})
+    for result in results:
+        chain.append("boundary_probe", result)
+    if any(result["disposition"] not in ("denied", "unavailable") for result in results):
+        raise RuntimeError("observer least-privilege hostile probe unexpectedly succeeded")
+    return results
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--mux-in-fd", type=int, required=True)
@@ -176,32 +357,81 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--allowed-path", default="/v1/chat/completions")
     parser.add_argument("--upstream-timeout", type=float, default=600.0)
     parser.add_argument("--max-requests", type=int, default=None, help="supervisor-set inference request (turn) budget")
+    parser.add_argument("--credential-fd", type=int, required=True)
+    parser.add_argument("--supervisor-pid", type=int, required=True)
+    parser.add_argument("--supervisor-netns", required=True)
+    parser.add_argument("--supervisor-pidns", required=True)
+    parser.add_argument("--probe-path", action="append", default=[], help="host path probe as LABEL=PATH")
     args = parser.parse_args(argv)
 
-    credential = None
-    if args.credential_env:
-        credential = os.environ.pop(args.credential_env, None)
-        if credential is None:
-            print("observer: provider credential variable is not set", file=sys.stderr)
-            return 2
-
     chain = evidence70.ChainWriter(args.evidence_fd, OBSERVER_ID)
-    observer = Observer(chain, args.upstream, credential, args.placeholder, args.allowed_path, args.upstream_timeout,
-                        args.max_requests)
     chain.append("start", {
         "max_requests": args.max_requests,
         "observer": OBSERVER_ID,
         "allowed_path": args.allowed_path,
-        "credential_configured": credential is not None,
+        "credential_delivery": "supervisor descriptor after observer lockdown",
         "placeholder_sha256": hashlib.sha256(args.placeholder.encode()).hexdigest(),
     })
+    try:
+        upstream_connection, peers = _open_frozen_route(args.upstream, args.upstream_timeout)
+        chain.append("provider_route_opened", {
+            "frozen_origin": f"{urlsplit(args.upstream).scheme}://{urlsplit(args.upstream).netloc}",
+            "connected_peer_addresses": peers,
+            "connected": upstream_connection.sock is not None,
+            "socket_family": upstream_connection.sock.family if upstream_connection.sock is not None else None,
+            "socket_type": upstream_connection.sock.type if upstream_connection.sock is not None else None,
+        })
+        _install_observer_lockdown()
+        _complete_tls_handshake(upstream_connection)
+        parsed_probe_paths: list[tuple[str, str]] = []
+        for item in args.probe_path:
+            label, sep, path = item.partition("=")
+            if not sep or not label or not path:
+                raise RuntimeError("malformed observer boundary probe path")
+            parsed_probe_paths.append((label, path))
+        probes = _boundary_probes(chain, parsed_probe_paths, args.supervisor_pid, args.credential_env or "",
+                                  upstream_connection.sock.fileno())
+        chain.append("boundary", {
+            "network_namespace": os.readlink("/proc/self/ns/net"),
+            "pid_namespace": os.readlink("/proc/self/ns/pid"),
+            "supervisor_network_namespace": args.supervisor_netns,
+            "supervisor_pid_namespace": args.supervisor_pidns,
+            "status": _observer_status(),
+            "provider_socket_peer": str(upstream_connection.sock.getpeername()),
+            "boundary_probe_count": len(probes),
+            "seccomp_locked": True,
+            "capabilities_dropped": True,
+        })
+        print("boundary-ready", flush=True)
+        credential_bytes = bytearray()
+        while True:
+            chunk = os.read(args.credential_fd, 4096)
+            if not chunk:
+                break
+            credential_bytes.extend(chunk)
+            if len(credential_bytes) > 1024 * 1024:
+                raise RuntimeError("provider credential descriptor exceeded its bound")
+        os.close(args.credential_fd)
+        if not credential_bytes:
+            raise RuntimeError("provider credential descriptor closed without a credential")
+        credential = bytes(credential_bytes).decode("utf-8")
+        chain.append("credential_received", {"received_after_lockdown": True, "bytes": len(credential_bytes)})
+        observer = Observer(chain, args.upstream, credential, upstream_connection, args.placeholder,
+                            args.allowed_path, args.upstream_timeout, args.max_requests)
+    except Exception as exc:
+        chain.append("boundary_setup_failed", {"error": f"{type(exc).__name__}: {exc}"})
+        chain.close(setup_failed=True)
+        print(f"observer: boundary setup failed: {type(exc).__name__}: {exc}", file=sys.stderr, flush=True)
+        return 3
     transport = mux.Mux(args.mux_in_fd, args.mux_out_fd, on_open=observer.serve)
     stop = threading.Event()
     signal.signal(signal.SIGTERM, lambda *_: stop.set())
     signal.signal(signal.SIGINT, lambda *_: stop.set())
     transport.start()
+    chain.append("ready", {"provider_route_ready": True, "boundary_ready": True})
     print("ready", flush=True)
-    stop.wait()
+    while not stop.wait(0.05) and transport.alive:
+        pass
     threading.Event().wait(0.2)  # let in-flight handlers finish their last record
     chain.close(requests=observer.request_count, refused=observer.refused_count)
     return 0

@@ -35,13 +35,14 @@ class _State:
 
 
 def _sse(handler: BaseHTTPRequestHandler, chunks: list[dict]) -> None:
+    body = b"".join(b"data: " + json.dumps(chunk).encode() + b"\n\n" for chunk in chunks)
+    body += b"data: [DONE]\n\n"
     handler.send_response(200)
     handler.send_header("content-type", "text/event-stream")
     handler.send_header("cache-control", "no-cache")
+    handler.send_header("content-length", str(len(body)))
     handler.end_headers()
-    for chunk in chunks:
-        handler.wfile.write(b"data: " + json.dumps(chunk).encode() + b"\n\n")
-    handler.wfile.write(b"data: [DONE]\n\n")
+    handler.wfile.write(body)
     handler.wfile.flush()
 
 
@@ -114,7 +115,6 @@ def make_handler(state: _State):
                 self.end_headers()
                 return
             _sse(self, _chunks(step, index, "stand-model"))
-            self.close_connection = True
 
     return Handler
 

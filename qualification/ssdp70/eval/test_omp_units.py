@@ -10,9 +10,11 @@ import json
 import os
 import shutil
 import struct
+import subprocess
 import sys
 import tempfile
 import threading
+import textwrap
 import unittest
 from pathlib import Path
 
@@ -22,6 +24,7 @@ if str(HERE) not in sys.path:
 import core70  # noqa: E402
 import evidence70  # noqa: E402
 import muxhttp70 as mux  # noqa: E402
+import observer70  # noqa: E402
 import seccomp70  # noqa: E402
 from adapters import omp  # noqa: E402
 
@@ -241,6 +244,166 @@ class SeccompFilter(unittest.TestCase):
         for name in ("ptrace", "process_vm_readv", "process_vm_writev", "pidfd_getfd", "kcmp", "bpf"):
             self.assertIn(seccomp70.DENIED_SYSCALLS[name], numbers, name)
         self.assertEqual(instructions[-1][3], seccomp70.SECCOMP_RET_ALLOW)
+
+    def test_observer_filter_denies_network_creation_and_retargeting(self):
+        blob = seccomp70.build_observer_filter()
+        instructions = [struct.unpack("HBBI", blob[i:i + 8]) for i in range(0, len(blob), 8)]
+        numbers = {k for code, jt, jf, k in instructions if code == 0x15}
+        for name in ("socket", "connect", "sendto", "recvfrom", "sendmsg", "recvmsg", "execve", "ptrace",
+                     "process_vm_readv", "kill", "unshare", "setns", "io_uring_setup"):
+            self.assertIn(seccomp70.OBSERVER_DENIED_SYSCALLS[name], numbers, name)
+        self.assertEqual(instructions[-1][3], seccomp70.SECCOMP_RET_ALLOW)
+
+    def test_installed_observer_filter_denies_socket_syscalls(self):
+        script = textwrap.dedent(f"""
+            import ctypes, json, socket, sys
+            sys.path.insert(0, {str(HERE)!r})
+            import observer70
+            libc = ctypes.CDLL(None, use_errno=True)
+            if libc.prctl(38, 1, 0, 0, 0) != 0:
+                raise RuntimeError('no_new_privs failed')
+            observer70.install_observer_seccomp()
+            result = {{}}
+            for family in (socket.AF_INET, socket.AF_UNIX):
+                try:
+                    socket.socket(family, socket.SOCK_STREAM)
+                    result[str(family)] = 'allowed'
+                except OSError as exc:
+                    result[str(family)] = exc.errno
+            print(json.dumps(result, sort_keys=True))
+        """)
+        result = subprocess.run([sys.executable, "-c", script], capture_output=True, text=True, timeout=10)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(json.loads(result.stdout), {str(__import__("socket").AF_INET): 1,
+                                                    str(__import__("socket").AF_UNIX): 1})
+
+    def test_observer_filter_keeps_connected_stream_and_denies_addressed_send(self):
+        script = textwrap.dedent(f"""
+            import ctypes, json, socket, sys
+            sys.path.insert(0, {str(HERE)!r})
+            import observer70
+            left, right = socket.socketpair()
+            left.setblocking(False)
+            try:
+                left.send(b'outer-policy-probe')
+                right.recv(64)
+            except OSError as exc:
+                if exc.errno == 1:
+                    print(json.dumps({{'outer_policy': 'denied', 'errno': exc.errno}}))
+                    raise SystemExit(77)
+                raise
+            libc = ctypes.CDLL(None, use_errno=True)
+            if libc.prctl(38, 1, 0, 0, 0) != 0:
+                raise RuntimeError('no_new_privs failed')
+            observer70.install_observer_seccomp()
+            left.sendall(b'connected-route')
+            allowed = right.recv(32).decode()
+            class SockAddrIn(ctypes.Structure):
+                _fields_ = [('family', ctypes.c_ushort), ('port', ctypes.c_ushort),
+                            ('address', ctypes.c_uint32), ('zero', ctypes.c_ubyte * 8)]
+            destination = SockAddrIn(socket.AF_INET, socket.htons(9),
+                                     int.from_bytes(socket.inet_aton('127.0.0.1'), 'little'),
+                                     (ctypes.c_ubyte * 8)())
+            libc.sendto.argtypes = [ctypes.c_int, ctypes.c_void_p, ctypes.c_size_t, ctypes.c_int,
+                                    ctypes.c_void_p, ctypes.c_uint]
+            libc.sendto.restype = ctypes.c_ssize_t
+            payload = ctypes.create_string_buffer(b'x')
+            ctypes.set_errno(0)
+            sent = libc.sendto(left.fileno(), payload, 1, 0, ctypes.byref(destination),
+                               ctypes.sizeof(destination))
+            denied = ctypes.get_errno() if sent < 0 else None
+            print(json.dumps({{'allowed': allowed, 'addressed_errno': denied}}, sort_keys=True))
+        """)
+        result = subprocess.run([sys.executable, "-c", script], capture_output=True, text=True, timeout=10)
+        if result.returncode == 77:
+            self.skipTest("outer sandbox denied connected-stream send before observer seccomp")
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(json.loads(result.stdout), {"allowed": "connected-route", "addressed_errno": 1})
+
+
+class RuntimeDependencySurface(unittest.TestCase):
+    def test_manifest_digest_and_host_dependencies_match(self):
+        self.assertEqual(omp.sha256_file(omp.RUNTIME_DEPENDENCIES_PATH), omp.RUNTIME_DEPENDENCIES_SHA256)
+        self.assertEqual(omp.runtime_dependency_errors(), [])
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp) / "subject"
+            (root / "usr").mkdir(parents=True)
+            (root / "lib64").mkdir()
+            args = omp._runtime_mount_args("subject", {"subject_runtime": root})
+        self.assertFalse(any(args[i:i + 3] == ["--ro-bind", "/usr", "/usr"] for i in range(len(args) - 2)))
+        self.assertIn(str(root / "usr"), args)
+        self.assertIn("/usr", args)
+        dependencies = [row["destination"] for row in omp.runtime_dependency_manifest()["dependencies"]
+                        if "subject" in row.get("roles", [])]
+        self.assertIn("/usr/bin/bash", dependencies)
+        self.assertNotIn("/usr/bin/git", dependencies)
+
+    def test_manifest_dependency_drift_fails_closed(self):
+        document = omp.runtime_dependency_manifest()
+        document["dependencies"][0]["sha256"] = "0" * 64
+        with tempfile.TemporaryDirectory() as td:
+            path = Path(td) / "manifest.json"
+            path.write_text(json.dumps(document))
+            old = omp.RUNTIME_DEPENDENCIES_PATH
+            try:
+                omp.RUNTIME_DEPENDENCIES_PATH = path
+                errors = omp.runtime_dependency_errors()
+            finally:
+                omp.RUNTIME_DEPENDENCIES_PATH = old
+        self.assertTrue(any("drift" in item for item in errors))
+
+
+class ObserverResponseCompleteness(unittest.TestCase):
+    @staticmethod
+    def _chain(principal, rows=()):
+        read_fd, write_fd = os.pipe()
+        writer = evidence70.ChainWriter(write_fd, principal)
+        for kind, data in rows:
+            writer.append(kind, data)
+        writer.close()
+        os.close(write_fd)
+        content = os.read(read_fd, 1 << 20).decode()
+        os.close(read_fd)
+        return content
+
+    def test_response_truncation_is_a_material_normalization_error(self):
+        template = json.loads((HERE / "profiles" / "omp-headless.template.json").read_text())
+        profile = omp.freeze_profile(
+            template, executable_path=os.path.expanduser("~/.local/bin/omp"),
+            provider_route={"provider_id": "stand", "model_id": "m", "upstream": "http://127.0.0.1:1",
+                            "context_window": 1000, "max_tokens": 100, "reasoning": True},
+            reasoning={"thinking": "high", "source": "--thinking"}, profile_id="p",
+            budgets={"max_turns": 5, "timeout_s": 5})
+        body = b"{}"
+        complete_response = b"ab"
+        rows = [
+            ("start", {"observer": "ssdp70-provider-observer-v1"}),
+            ("provider_route_opened", {"frozen_origin": "http://127.0.0.1:1", "connected": True,
+                                       "connected_peer_addresses": ["127.0.0.1"]}),
+        ]
+        rows.extend(("boundary_probe", {"name": name,
+                                           "disposition": "unavailable" if name == "credential-environment" else "denied",
+                                           "errno": None if name == "credential-environment" else (2 if name in {
+                                               "host_home", "qualification_custody", "supervisor_private", "mediator_backing_state"} else 1)})
+                    for name in sorted(omp.OBSERVER_REQUIRED_PROBES))
+        rows.extend([
+            ("boundary", {"network_namespace": "net:[2]", "supervisor_network_namespace": "net:[1]",
+                           "pid_namespace": "pid:[2]", "supervisor_pid_namespace": "pid:[1]",
+                           "status": {"CapEff": "0000", "CapPrm": "0000", "CapBnd": "0000",
+                                      "NoNewPrivs": "1", "Seccomp": "2"},
+                           "boundary_probe_count": len(omp.OBSERVER_REQUIRED_PROBES)}),
+            ("request", {"request_index": 0, "body_b64": base64.b64encode(body).decode(),
+                         "body_bytes": len(body), "body_sha256": hashlib.sha256(body).hexdigest()}),
+            ("response", {"request_index": 0, "body_b64": base64.b64encode(complete_response[:1]).decode(),
+                          "body_bytes": len(complete_response), "body_sha256": hashlib.sha256(complete_response).hexdigest(),
+                          "body_truncated_in_evidence": True, "error": None, "upstream_status": 200}),
+        ])
+        observed = omp.Observed({
+            "observer-evidence.jsonl": self._chain("ssdp70-provider-observer-v1", rows),
+            "bridge-evidence.jsonl": self._chain("ssdp70-mcp-bridge-v1"),
+            "launcher-evidence.jsonl": self._chain("ssdp70-subject-launcher-v1"),
+        }, profile)
+        self.assertTrue(any("truncated in evidence" in error for error in observed.errors), observed.errors)
 
 
 class ProfileFreezeAndPerturbation(unittest.TestCase):

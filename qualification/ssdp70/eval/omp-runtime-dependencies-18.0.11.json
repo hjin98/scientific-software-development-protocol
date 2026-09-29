@@ -1,0 +1,194 @@
+{
+  "schema": 1,
+  "runtime": "omp/18.0.11-linux-x86_64",
+  "tree_hash": "sha256(path-nul-kind-nul-mode-nul-payload-nul; lexical-path-order; symlink-payload-is-link-target; file-payload-is-content-digest)",
+  "aliases": [
+    {"destination": "/bin", "target": "usr/bin", "roles": ["subject"]},
+    {"destination": "/lib", "target": "usr/lib", "roles": ["subject", "observer"]},
+    {"destination": "/usr/bin/python3", "target": "python3.10", "roles": ["subject", "observer"]}
+  ],
+  "subject_executable": {
+    "profile_key": "provider_runtime.executable_path",
+    "destination": "/opt/omp/omp",
+    "sha256": "6054460b29e9bad5eba78336f291e1979c2fa0a5cd96fc2d92afd666cc681d26",
+    "bytes": 194573512
+  },
+  "dependencies": [
+    {
+      "source": "/usr/bin/bash",
+      "destination": "/usr/bin/bash",
+      "kind": "file",
+      "roles": ["subject"],
+      "mode": "0755",
+      "sha256": "59474588a312b6b6e73e5a42a59bf71e62b55416b6c9d5e4a6e1c630c2a9ecd4",
+      "bytes": 1396520
+    },
+    {
+      "source": "/usr/bin/python3.10",
+      "destination": "/usr/bin/python3.10",
+      "kind": "file",
+      "roles": ["subject", "observer"],
+      "mode": "0755",
+      "sha256": "a2f33a6e006989270f4340528eb61f8f97366e00a5d1b602ac8672ea44fc56ae",
+      "bytes": 5941864
+    },
+    {
+      "source": "/usr/lib/python3.10",
+      "destination": "/usr/lib/python3.10",
+      "kind": "tree",
+      "roles": ["subject", "observer"],
+      "mode": "0755",
+      "sha256": "58df008b32cc27a098af80539d6a9e2e6a4e60c846b82912ba6549d60f6727fe",
+      "entries": 1492
+    },
+    {
+      "source": "/lib/x86_64-linux-gnu/libtinfo.so.6",
+      "destination": "/usr/lib/x86_64-linux-gnu/libtinfo.so.6",
+      "kind": "symlink",
+      "roles": ["subject"],
+      "mode": "0777",
+      "sha256": "856b8451914abc2277c3d91c64ba3e72b2e0d519806397afecae92fda1a6b10c",
+      "target": "libtinfo.so.6.3",
+      "bytes": 200136
+    },
+    {
+      "source": "/lib/x86_64-linux-gnu/libc.so.6",
+      "destination": "/usr/lib/x86_64-linux-gnu/libc.so.6",
+      "kind": "file",
+      "roles": ["subject", "observer"],
+      "mode": "0755",
+      "sha256": "b2cf6c33b74d2f22543b7a469a75b538911e690f769d0b238843a49465b83793",
+      "bytes": 2220400
+    },
+    {
+      "source": "/lib/x86_64-linux-gnu/libm.so.6",
+      "destination": "/usr/lib/x86_64-linux-gnu/libm.so.6",
+      "kind": "file",
+      "roles": ["subject", "observer"],
+      "mode": "0644",
+      "sha256": "3dd5511ae94785c9f921429b0f2b2f7aabb461b6f0e6de6dfdbef15f24bdfee6",
+      "bytes": 940560
+    },
+    {
+      "source": "/lib/x86_64-linux-gnu/libexpat.so.1",
+      "destination": "/usr/lib/x86_64-linux-gnu/libexpat.so.1",
+      "kind": "symlink",
+      "roles": ["subject", "observer"],
+      "mode": "0777",
+      "sha256": "683e2e41db14581194bf1f6616e95a8f02cd4ab599f0fba807e46325ec01d21f",
+      "target": "libexpat.so.1.8.7",
+      "bytes": 198968
+    },
+    {
+      "source": "/lib/x86_64-linux-gnu/libz.so.1",
+      "destination": "/usr/lib/x86_64-linux-gnu/libz.so.1",
+      "kind": "symlink",
+      "roles": ["subject", "observer"],
+      "mode": "0777",
+      "sha256": "64c206f0146cc58bbddc4f22054436f4ff278f5a554aa3ce6921ddf7e9133370",
+      "target": "libz.so.1.2.11",
+      "bytes": 108936
+    },
+    {
+      "source": "/lib/x86_64-linux-gnu/libpthread.so.0",
+      "destination": "/usr/lib/x86_64-linux-gnu/libpthread.so.0",
+      "kind": "file",
+      "roles": ["subject"],
+      "mode": "0644",
+      "sha256": "fbed9505adacada2abb37c6b43be2df6de81e742712c6025694ba48de62c7e78",
+      "bytes": 21448
+    },
+    {
+      "source": "/lib/x86_64-linux-gnu/libdl.so.2",
+      "destination": "/usr/lib/x86_64-linux-gnu/libdl.so.2",
+      "kind": "file",
+      "roles": ["subject"],
+      "mode": "0644",
+      "sha256": "3eaaa4aefd9c28f3867c96a427c3cbec9191cb61c4c9d0a2cb4a765d66064499",
+      "bytes": 14432
+    },
+    {
+      "source": "/lib/x86_64-linux-gnu/libutil.so.1",
+      "destination": "/usr/lib/x86_64-linux-gnu/libutil.so.1",
+      "kind": "file",
+      "roles": ["subject"],
+      "mode": "0644",
+      "sha256": "ee98a316fe33727cf23cc81d3a7f9628350d6ef75e905c7b713e5f5e68e177dc",
+      "bytes": 14432
+    },
+    {
+      "source": "/lib/x86_64-linux-gnu/libssl.so.3",
+      "destination": "/usr/lib/x86_64-linux-gnu/libssl.so.3",
+      "kind": "file",
+      "roles": ["observer"],
+      "mode": "0644",
+      "sha256": "3db6aff36baf2ced6dde3f340159edd2504f089c0d735765596ce96d2d835cb1",
+      "bytes": 667864
+    },
+    {
+      "source": "/lib/x86_64-linux-gnu/libcrypto.so.3",
+      "destination": "/usr/lib/x86_64-linux-gnu/libcrypto.so.3",
+      "kind": "file",
+      "roles": ["observer"],
+      "mode": "0644",
+      "sha256": "7be3a37c9d754ec214b30db1d00ce329d22ccebd5654dd7c3f92010a7b1ccf07",
+      "bytes": 4455728
+    },
+    {
+      "source": "/lib/x86_64-linux-gnu/libnss_dns.so.2",
+      "destination": "/usr/lib/x86_64-linux-gnu/libnss_dns.so.2",
+      "kind": "file",
+      "roles": ["observer"],
+      "mode": "0644",
+      "sha256": "10c3e1560711a52e4ec36b1e3220ae1c43e9a1638f449c3734b71c113e331dbb",
+      "bytes": 14352
+    },
+    {
+      "source": "/lib/x86_64-linux-gnu/libnss_files.so.2",
+      "destination": "/usr/lib/x86_64-linux-gnu/libnss_files.so.2",
+      "kind": "file",
+      "roles": ["observer"],
+      "mode": "0644",
+      "sha256": "18e1c21547f4b955ae8c08ae8460d7bf665ca74ace4af215678008cd764ffd67",
+      "bytes": 14352
+    },
+    {
+      "source": "/lib/x86_64-linux-gnu/libresolv.so.2",
+      "destination": "/usr/lib/x86_64-linux-gnu/libresolv.so.2",
+      "kind": "file",
+      "roles": ["observer"],
+      "mode": "0644",
+      "sha256": "7230adfc1d3676f2485bec78f2d5c916d6becb15bc554ff95901f46800215194",
+      "bytes": 64456
+    },
+    {
+      "source": "/lib/x86_64-linux-gnu/libffi.so.8",
+      "destination": "/usr/lib/x86_64-linux-gnu/libffi.so.8",
+      "kind": "symlink",
+      "roles": ["subject", "observer"],
+      "mode": "0777",
+      "sha256": "247da4d5d34a91cadcdd6282be4c4644fcb8af001334d2b8a82ecda435418cbf",
+      "target": "libffi.so.8.1.0",
+      "bytes": 47688
+    },
+    {
+      "source": "/lib64/ld-linux-x86-64.so.2",
+      "destination": "/lib64/ld-linux-x86-64.so.2",
+      "kind": "symlink",
+      "roles": ["subject", "observer"],
+      "mode": "0777",
+      "sha256": "41daf7836f7fce21a40ca63a00c5caf21b05a35a76ccc075d86f1716212cdf01",
+      "target": "/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2",
+      "bytes": 240936
+    },
+    {
+      "source": "/etc/ssl/certs/ca-certificates.crt",
+      "destination": "/etc/ssl/certs/ca-certificates.crt",
+      "kind": "file",
+      "roles": ["observer"],
+      "mode": "0644",
+      "sha256": "708c274efe972ba38dafbb180499514edc280b1f96b027dfc17b2c98034a7daf",
+      "bytes": 182140
+    }
+  ]
+}

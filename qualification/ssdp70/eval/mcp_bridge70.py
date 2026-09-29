@@ -167,7 +167,8 @@ def main(argv: list[str] | None = None) -> int:
     signal.signal(signal.SIGINT, lambda *_: stop.set())
     transport.start()
     print("ready", flush=True)
-    stop.wait()
+    while not stop.wait(0.05) and transport.alive:
+        pass
     threading.Event().wait(0.2)
     mediator.close()
     chain.close(exchanges=bridge.count, refused=bridge.refused)

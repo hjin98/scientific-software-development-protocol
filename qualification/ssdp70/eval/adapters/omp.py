@@ -35,6 +35,7 @@ from __future__ import annotations
 import base64
 import copy
 import hashlib
+import ipaddress
 import json
 import os
 import re
@@ -45,11 +46,13 @@ import threading
 import time
 from pathlib import Path
 from typing import Any
+from urllib.parse import urlsplit
 
 import yaml
 
 HERE = Path(__file__).resolve().parent
 EVAL_DIR = HERE.parent
+REPO_ROOT = EVAL_DIR.parents[2]
 if str(EVAL_DIR) not in sys.path:
     sys.path.insert(0, str(EVAL_DIR))
 import core70  # noqa: E402
@@ -57,7 +60,7 @@ import evidence70  # noqa: E402
 import seccomp70  # noqa: E402
 
 ADAPTER_ID = "omp-json-v2"
-CONTAINMENT_KIND = "omp-three-principal-bwrap-v2"
+CONTAINMENT_KIND = "omp-three-principal-bwrap-v3"
 PROJECT_CONTROL_MUTATION_POLICY = "immutable"
 
 SSDP_SKILLS = frozenset({
@@ -81,6 +84,12 @@ OMP_BUILD = {
     "http_user_agent": "Bun/1.4.0",
     "mcp_client_info": {"name": "omp-coding-agent", "version": "1.0.0"},
 }
+OBSERVER_BOUNDARY_POLICY = {
+    "filesystem": "explicit Python runtime, observer code, CA bundle and synthetic /etc only; no host HOME, custody, mediator or supervisor state",
+    "network": "trusted observer opens only the frozen provider route before accepting subject input, then moves to a private network namespace and installs seccomp denying new sockets, connects and addressed sends",
+    "process": "private PID namespace with no host process view; capability set dropped after route setup",
+    "provider_route_capability": "one connected stream socket owned by the observer; inference requests remain single-purpose and evidence is append-only",
+}
 
 # ----------------------------------------------------------------------- in-sandbox layout
 SB_PROJECT = "/workspace"
@@ -89,7 +98,16 @@ SB_SKILLS = "/opt/ssdp/skills"
 SB_CTL = "/opt/ssdp/ctl"
 SB_OMP = "/opt/omp/omp"
 SB_TMP = "/tmp"
+OBSERVER_HOME = "/observer-home"
+OBSERVER_CODE = "/opt/ssdp/observer"
 RELAY_PORTS = {"inference": 31001, "mcp": 31002}
+RUNTIME_DEPENDENCIES_PATH = EVAL_DIR / "omp-runtime-dependencies-18.0.11.json"
+RUNTIME_DEPENDENCIES_SHA256 = "dc2a6035d72e889d80f97e6c048f517765e1c2ade480171aa4e160a59f4c35f1"
+OBSERVER_REQUIRED_PROBES = frozenset({
+    "host_home", "qualification_custody", "supervisor_private", "mediator_backing_state",
+    "new-af-inet-socket", "new-af-unix-socket", "unrelated-addressed-network-send",
+    "unrelated-process-control", "unrelated-process-inspection", "credential-environment",
+})
 
 # --------------------------------------------------------------------------- tool surface
 OMP_MCP_SERVER_NAME = "ssdp70"
@@ -129,6 +147,13 @@ OMP_PROVIDER_MANAGED_EVENT_TYPES = frozenset({
     "auto_compaction_start", "auto_compaction_end", "auto_retry_start", "auto_retry_end",
     "retry_fallback_applied", "retry_fallback_succeeded", "ttsr_triggered", "todo_reminder",
     "todo_auto_clear", "irc_message", "notice", "thinking_level_changed", "model_changed", "goal_updated",
+})
+
+# These hash-linked observer records establish adapter containment and credential
+# custody. They are consumed by Observed's fail-closed D4 checks and retained as
+# adapter evidence; they are not task-trajectory events in the frozen core schema.
+REVIEWED_NON_ORACLE_OBSERVER_CONTROL_KINDS = frozenset({
+    "provider_route_opened", "boundary_probe", "boundary", "credential_received", "ready",
 })
 
 # ------------------------------------------------------------------ settings/discovery closure
@@ -389,7 +414,7 @@ def principal_files() -> dict[str, Path]:
 
 def support_files() -> dict[str, Path]:
     """Adapter-owned principal code that participates in the run identity (provenance)."""
-    return principal_files()
+    return {**principal_files(), "omp-runtime-dependencies-18.0.11.json": RUNTIME_DEPENDENCIES_PATH}
 
 
 def principal_files_sha256() -> dict[str, str]:
@@ -398,6 +423,162 @@ def principal_files_sha256() -> dict[str, str]:
 
 def settings_closure_sha256() -> str:
     return _digest_json(settings_document())
+
+
+def runtime_dependency_manifest() -> dict[str, Any]:
+    try:
+        manifest = json.loads(RUNTIME_DEPENDENCIES_PATH.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as exc:
+        raise AdapterError(f"runtime dependency manifest is unreadable: {exc}") from exc
+    if (not isinstance(manifest, dict) or manifest.get("schema") != 1
+            or not isinstance(manifest.get("dependencies"), list)
+            or not isinstance(manifest.get("aliases"), list)):
+        raise AdapterError("runtime dependency manifest has an unsupported shape")
+    return manifest
+
+
+def _runtime_tree_digest(root: Path) -> tuple[str, int]:
+    digest = hashlib.sha256()
+    rows = sorted(root.rglob("*"))
+    for path in rows:
+        relative = path.relative_to(root).as_posix()
+        info = path.lstat()
+        mode = format(info.st_mode & 0o7777, "04o")
+        if path.is_symlink():
+            kind = "symlink"
+            payload = os.readlink(path).encode("utf-8", "surrogateescape")
+        elif path.is_dir():
+            kind, payload = "dir", b""
+        elif path.is_file():
+            kind = "file"
+            payload = bytes.fromhex(sha256_file(path))
+        else:
+            raise AdapterError(f"runtime dependency tree contains an unsupported object: {path}")
+        for part in (relative.encode("utf-8", "surrogateescape"), kind.encode(), mode.encode(), payload):
+            digest.update(part)
+            digest.update(b"\0")
+    return digest.hexdigest(), len(rows)
+
+
+def runtime_dependency_errors(profile: dict[str, Any] | None = None) -> list[str]:
+    """Verify every explicitly exposed host dependency against the frozen content manifest."""
+    try:
+        manifest = runtime_dependency_manifest()
+    except AdapterError as exc:
+        return [str(exc)]
+    errors: list[str] = []
+    for entry in manifest["dependencies"]:
+        source = Path(str(entry.get("source", "")))
+        kind = entry.get("kind")
+        try:
+            info = source.lstat()
+            mode = format(info.st_mode & 0o7777, "04o")
+            if mode != entry.get("mode"):
+                errors.append(f"runtime dependency mode drift at {source}")
+                continue
+            if kind == "tree":
+                if not source.is_dir() or source.is_symlink():
+                    errors.append(f"runtime dependency is not the frozen directory: {source}")
+                    continue
+                actual, count = _runtime_tree_digest(source)
+                if actual != entry.get("sha256") or count != entry.get("entries"):
+                    errors.append(f"runtime dependency tree drift at {source}")
+            elif kind == "file":
+                if not source.is_file() or source.is_symlink():
+                    errors.append(f"runtime dependency is not the frozen file: {source}")
+                    continue
+                if sha256_file(source) != entry.get("sha256") or info.st_size != entry.get("bytes"):
+                    errors.append(f"runtime dependency content drift at {source}")
+            elif kind == "symlink":
+                if not source.is_symlink() or os.readlink(source) != entry.get("target"):
+                    errors.append(f"runtime dependency symlink drift at {source}")
+                    continue
+                if sha256_file(source) != entry.get("sha256") or source.stat().st_size != entry.get("bytes"):
+                    errors.append(f"runtime dependency target drift at {source}")
+            else:
+                errors.append(f"runtime dependency has an unsupported kind: {source}")
+        except OSError as exc:
+            errors.append(f"runtime dependency is unavailable at {source}: {exc}")
+    seen_aliases: set[tuple[str, str]] = set()
+    for alias in manifest["aliases"]:
+        destination, target, roles = alias.get("destination"), alias.get("target"), alias.get("roles")
+        if not isinstance(destination, str) or not destination.startswith("/") or ".." in Path(destination).parts:
+            errors.append("runtime dependency alias has an unsafe destination")
+            continue
+        if not isinstance(target, str) or not target or ".." in Path(target).parts:
+            errors.append(f"runtime dependency alias has an unsafe target at {destination}")
+            continue
+        if not isinstance(roles, list) or not roles or any(role not in ("subject", "observer") for role in roles):
+            errors.append(f"runtime dependency alias has an invalid role list at {destination}")
+            continue
+        for role in roles:
+            key = (role, destination)
+            if key in seen_aliases:
+                errors.append(f"runtime dependency alias is duplicated for {role}: {destination}")
+            seen_aliases.add(key)
+    executable = manifest.get("subject_executable") or {}
+    if profile is not None:
+        runtime = profile.get("provider_runtime") or {}
+        executable_path = Path(str(runtime.get("executable_path", "")))
+        try:
+            if (not executable_path.is_file()
+                    or executable_path.stat().st_size != executable.get("bytes")
+                    or sha256_file(executable_path) != executable.get("sha256")):
+                errors.append("runtime dependency OMP executable differs from the manifest")
+        except OSError as exc:
+            errors.append(f"runtime dependency OMP executable is unavailable: {exc}")
+    return errors
+
+
+def _dependencies_for_role(role: str) -> list[dict[str, Any]]:
+    return [entry for entry in runtime_dependency_manifest()["dependencies"] if role in entry.get("roles", [])]
+
+
+def _materialize_runtime_dependencies(paths: dict[str, Path]) -> dict[str, Any]:
+    """Copy verified manifest entries into per-principal run-owned roots for read-only binding."""
+    manifest = runtime_dependency_manifest()
+    results: dict[str, Any] = {}
+    for role in ("subject", "observer"):
+        root = paths[f"{role}_runtime"]
+        if root.exists():
+            shutil.rmtree(root)
+        root.mkdir(parents=True)
+        mounted: list[str] = []
+        for entry in manifest["dependencies"]:
+            if role not in entry.get("roles", []):
+                continue
+            destination = str(entry["destination"])
+            if role == "observer" and destination.startswith("/etc/"):
+                continue  # certificate material is copied into synthetic /etc below.
+            source = Path(str(entry["source"]))
+            target = root / destination.lstrip("/")
+            target.parent.mkdir(parents=True, exist_ok=True)
+            if entry.get("kind") == "tree":
+                shutil.copytree(source, target, symlinks=True, copy_function=shutil.copy2)
+            elif entry.get("kind") in ("file", "symlink"):
+                shutil.copy2(source, target, follow_symlinks=True)
+            else:
+                raise AdapterError(f"runtime dependency has an unsupported materialization kind: {source}")
+            if entry.get("kind") == "tree":
+                copied_digest, copied_entries = _runtime_tree_digest(target)
+                if copied_digest != entry.get("sha256") or copied_entries != entry.get("entries"):
+                    raise AdapterError(f"staged runtime dependency tree differs from its manifest: {source}")
+            elif sha256_file(target) != entry.get("sha256"):
+                raise AdapterError(f"staged runtime dependency file differs from its manifest: {source}")
+            mounted.append(destination)
+        for alias in manifest["aliases"]:
+            if role not in alias.get("roles", []):
+                continue
+            destination = str(alias["destination"])
+            if not destination.startswith("/usr/"):
+                continue  # top-level /bin and /lib aliases are installed by bubblewrap.
+            target = root / destination.lstrip("/")
+            target.parent.mkdir(parents=True, exist_ok=True)
+            os.symlink(str(alias["target"]), target)
+            mounted.append(destination)
+        tree_digest, entry_count = _runtime_tree_digest(root)
+        results[role] = {"tree_sha256": tree_digest, "entries": entry_count, "paths": sorted(mounted)}
+    return results
 
 
 def _policy(profile: dict[str, Any]) -> dict[str, Any]:
@@ -445,6 +626,13 @@ def profile_errors(profile: dict[str, Any]) -> list[str]:
             errors.append("a non-reasoning model cannot honor a frozen thinking level other than 'off'")
     if policy.get("settings_closure_sha256") != settings_closure_sha256():
         errors.append("frozen settings-closure digest does not match the adapter's reviewed settings closure")
+    manifest_sha = sha256_file(RUNTIME_DEPENDENCIES_PATH)
+    if manifest_sha != RUNTIME_DEPENDENCIES_SHA256:
+        errors.append("retained runtime dependency manifest differs from the reviewed exact surface")
+    if policy.get("runtime_dependency_manifest_sha256") != RUNTIME_DEPENDENCIES_SHA256:
+        errors.append("frozen runtime dependency manifest digest does not match the retained exact surface")
+    if policy.get("observer_boundary") != OBSERVER_BOUNDARY_POLICY:
+        errors.append("observer boundary policy differs from the reviewed least-privilege realization")
     if policy.get("principal_files_sha256") != principal_files_sha256():
         errors.append("frozen principal-file digests do not match the adapter's principal code")
     inventory = policy.get("build_inventory_sha256")
@@ -501,6 +689,7 @@ def freeze_profile(template: dict[str, Any], *, executable_path: str, provider_r
     policy["substrate"]["executable"] = substrate_executable
     policy["substrate"]["executable_sha256"] = sha256_file(Path(substrate_executable))
     policy["settings_closure_sha256"] = settings_closure_sha256()
+    policy["runtime_dependency_manifest_sha256"] = sha256_file(RUNTIME_DEPENDENCIES_PATH)
     policy["principal_files_sha256"] = principal_files_sha256()
     policy["build_inventory_sha256"] = sha256_file(inventory_path())
     return profile
@@ -583,6 +772,10 @@ def _paths(project: Path, env: dict[str, str]) -> dict[str, Path]:
         "skills": private / "omp-skills",
         "control": private / "omp-control",
         "etc": private / "omp-etc",
+        "observer_etc": private / "omp-observer-etc",
+        "observer": private / "omp-observer-runtime",
+        "subject_runtime": private / "omp-runtime-subject",
+        "observer_runtime": private / "omp-runtime-observer",
         "agent": home / ".omp" / "agent",
     }
 
@@ -661,6 +854,34 @@ def etc_documents() -> dict[str, bytes]:
     }
 
 
+def _observer_etc_documents() -> dict[str, bytes]:
+    uid, gid = os.getuid(), os.getgid()
+    nameservers: list[str] = []
+    try:
+        source = Path("/etc/resolv.conf").read_text(encoding="utf-8")
+    except OSError:
+        source = ""
+    for line in source.splitlines():
+        fields = line.split()
+        if len(fields) == 2 and fields[0] == "nameserver":
+            try:
+                nameserver = str(ipaddress.ip_address(fields[1].split("%", 1)[0]))
+            except ValueError:
+                continue
+            if nameserver not in nameservers:
+                nameservers.append(nameserver)
+    documents = {
+        "passwd": f"observer:x:{uid}:{gid}:observer:{OBSERVER_HOME}:/bin/false\n".encode(),
+        "group": f"observer:x:{gid}:\n".encode(),
+        "nsswitch.conf": b"passwd: files\ngroup: files\nhosts: files dns\n",
+        "hosts": b"127.0.0.1 localhost\n::1 localhost\n",
+        "resolv.conf": ("".join(f"nameserver {item}\n" for item in nameservers) + "options timeout:2 attempts:1\n").encode(),
+    }
+    ca_path = Path("/etc/ssl/certs/ca-certificates.crt")
+    documents["ssl/certs/ca-certificates.crt"] = ca_path.read_bytes()
+    return documents
+
+
 def _tree_manifest(root: Path) -> dict[str, str]:
     rows: dict[str, str] = {}
     if root.is_file():
@@ -677,7 +898,8 @@ def _write_control_tree(paths: dict[str, Path], profile: dict[str, Any]) -> dict
     """Create every immutable control input and return the digest manifest bound before launch."""
     home, agent = paths["home"], paths["agent"]
     agent.mkdir(parents=True, exist_ok=True)
-    manifest: dict[str, Any] = {"home_control": {}, "control_dir": {}, "etc": {}}
+    manifest: dict[str, Any] = {"home_control": {}, "control_dir": {}, "etc": {}, "observer_code": {},
+                                "observer_etc": {}}
     for rel, data in control_documents(profile).items():
         target = home / rel
         target.parent.mkdir(parents=True, exist_ok=True)
@@ -699,8 +921,24 @@ def _write_control_tree(paths: dict[str, Path], profile: dict[str, Any]) -> dict
     for name, data in etc_documents().items():
         (etc / name).write_bytes(data)
         manifest["etc"][name] = sha256_bytes(data)
-    shutil.copy2("/etc/ld.so.cache", etc / "ld.so.cache")
-    manifest["etc"]["ld.so.cache"] = sha256_file(etc / "ld.so.cache")
+    observer = paths["observer"]
+    if observer.exists():
+        shutil.rmtree(observer)
+    observer.mkdir(parents=True)
+    for name in ("observer70.py", "evidence70.py", "muxhttp70.py", "seccomp70.py"):
+        shutil.copy2(EVAL_DIR / name, observer / name)
+        (observer / name).chmod(0o444)
+        manifest["observer_code"][name] = sha256_file(observer / name)
+    observer_etc = paths["observer_etc"]
+    if observer_etc.exists():
+        shutil.rmtree(observer_etc)
+    observer_etc.mkdir(parents=True)
+    for name, data in _observer_etc_documents().items():
+        target = observer_etc / name
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_bytes(data)
+        manifest["observer_etc"][name] = sha256_bytes(data)
+    manifest["runtime_surface"] = _materialize_runtime_dependencies(paths)
     return manifest
 
 
@@ -718,6 +956,24 @@ def _verify_control_tree(paths: dict[str, Path], manifest: dict[str, Any]) -> li
         path = paths["etc"] / name
         if not path.is_file() or sha256_file(path) != digest:
             errors.append(f"immutable sandbox /etc file {name!r} is absent or changed")
+    for name, digest in (manifest.get("observer_code") or {}).items():
+        path = paths["observer"] / name
+        if not path.is_file() or sha256_file(path) != digest:
+            errors.append(f"immutable observer control file {name!r} is absent or changed")
+    for name, digest in (manifest.get("observer_etc") or {}).items():
+        path = paths["observer_etc"] / name
+        if not path.is_file() or sha256_file(path) != digest:
+            errors.append(f"immutable observer /etc file {name!r} is absent or changed")
+    for role in ("subject", "observer"):
+        expected = (manifest.get("runtime_surface") or {}).get(role) or {}
+        runtime_root = paths[f"{role}_runtime"]
+        try:
+            actual_digest, actual_count = _runtime_tree_digest(runtime_root)
+        except (AdapterError, OSError) as exc:
+            errors.append(f"staged {role} runtime dependency tree is unreadable: {exc}")
+            continue
+        if actual_digest != expected.get("tree_sha256") or actual_count != expected.get("entries"):
+            errors.append(f"staged {role} runtime dependency tree changed during execution")
     expected_control = set((manifest.get("control_dir") or {}))
     if paths["control"].is_dir() and {p.name for p in paths["control"].iterdir()} - expected_control - {"launcher.json"}:
         errors.append("unexpected entries appeared in the immutable launcher control directory")
@@ -771,6 +1027,9 @@ def realize_containment(profile: dict[str, Any], project: Path, env: dict[str, s
     problems = profile_errors(profile)
     if problems:
         raise AdapterError("OMP profile is not admissible for realization: " + "; ".join(problems))
+    dependency_errors = runtime_dependency_errors(profile)
+    if dependency_errors:
+        raise AdapterError("OMP explicit runtime dependency surface is inadmissible: " + "; ".join(dependency_errors))
     paths = _paths(project, env)
     policy = _policy(profile)
     runtime = profile["provider_runtime"]
@@ -806,6 +1065,9 @@ def realize_containment(profile: dict[str, Any], project: Path, env: dict[str, s
             "mcp_config_sha256": mcp_sha,
             "models_sha256": manifest["home_control"][".omp/agent/models.yml"],
             "control_manifest": manifest,
+            "runtime_dependency_manifest_sha256": sha256_file(RUNTIME_DEPENDENCIES_PATH),
+            "runtime_dependency_surface": runtime_dependency_manifest(),
+            "runtime_dependency_staging": manifest["runtime_surface"],
             "principal_files_sha256": principal_files_sha256(),
             "settings_closure_sha256": settings_closure_sha256(),
             "build_inventory_sha256": sha256_file(inventory_path()),
@@ -821,10 +1083,12 @@ def realize_containment(profile: dict[str, Any], project: Path, env: dict[str, s
             }],
             "network": "subject network namespace has loopback only; no host route",
             "filesystem_view": {
-                "read_only": ["/usr", "/etc(synthetic)", "/opt/omp/omp", "/opt/ssdp/skills", "/opt/ssdp/ctl"],
+                "read_only": ["manifest-listed runtime dependencies only", "/etc(synthetic)", "/opt/omp/omp",
+                              "/opt/ssdp/skills", "/opt/ssdp/ctl"],
                 "read_write": [SB_PROJECT, SB_HOME, SB_TMP],
                 "control_files_read_only_inside_home": list(CONTROL_FILES_IN_HOME),
-                "absent": ["host HOME", "custody/private harness state", "observer/bridge evidence"],
+                "absent": ["unlisted /usr software", "host HOME", "custody/private harness state",
+                           "observer/bridge evidence"],
             },
             "discovery_baseline": discovery_baseline(paths["project"], paths["home"]),
             "omp_executable_sha256": OMP_BUILD["sha256"],
@@ -854,7 +1118,7 @@ def _spawn_principal(argv: list[str], pass_fds: tuple[int, ...], env: dict[str, 
                             stdout=subprocess.PIPE, stderr=subprocess.PIPE, close_fds=True)
 
 
-def _await_ready(proc: subprocess.Popen, name: str) -> None:
+def _await_ready(proc: subprocess.Popen, name: str, expected: bytes = b"ready") -> None:
     ready = threading.Event()
     box: dict[str, bytes] = {}
 
@@ -864,7 +1128,7 @@ def _await_ready(proc: subprocess.Popen, name: str) -> None:
         ready.set()
 
     threading.Thread(target=read, daemon=True).start()
-    if not ready.wait(30) or box.get("line", b"").strip() != b"ready":
+    if not ready.wait(30) or box.get("line", b"").strip() != expected:
         proc.kill()
         err = proc.stderr.read(2000).decode("utf-8", "replace") if proc.stderr else ""
         raise AdapterError(f"{name} principal did not become ready: {err}")
@@ -895,10 +1159,12 @@ def _bwrap_argv(profile: dict[str, Any], paths: dict[str, Path], seccomp_fd: int
         "--unshare-user", "--unshare-pid", "--unshare-ipc", "--unshare-uts", "--unshare-cgroup", "--unshare-net",
         "--die-with-parent", "--new-session", "--as-pid-1", "--clearenv", "--cap-drop", "ALL", "--hostname", "ssdp-subject",
         "--seccomp", str(seccomp_fd),
-        "--ro-bind", "/usr", "/usr",
-        "--symlink", "usr/bin", "/bin", "--symlink", "usr/lib", "/lib",
-        "--symlink", "usr/lib64", "/lib64", "--symlink", "usr/sbin", "/sbin",
         "--proc", "/proc", "--dev", "/dev", "--tmpfs", SB_TMP,
+    ]
+    argv += _runtime_mount_args("subject", paths)
+    argv += [
+        "--dir", "/etc", "--dir", "/home", "--dir", SB_HOME,
+        "--dir", "/workspace", "--dir", "/opt", "--dir", "/opt/omp", "--dir", "/opt/ssdp",
         "--ro-bind", str(paths["etc"]), "/etc",
         "--bind", str(paths["project"]), SB_PROJECT,
         "--bind", str(paths["home"]), SB_HOME,
@@ -915,6 +1181,74 @@ def _bwrap_argv(profile: dict[str, Any], paths: dict[str, Path], seccomp_fd: int
     return argv
 
 
+def _runtime_mount_args(role: str, paths: dict[str, Path]) -> list[str]:
+    """Bind the staged, manifest-derived dependency roots read-only, never host /usr."""
+    root = paths[f"{role}_runtime"]
+    if not (root / "usr").is_dir() or not (root / "lib64").is_dir():
+        raise AdapterError(f"staged {role} runtime dependency roots are incomplete")
+    args = ["--ro-bind", str(root / "usr"), "/usr",
+            "--ro-bind", str(root / "lib64"), "/lib64"]
+    manifest = runtime_dependency_manifest()
+    for alias in manifest["aliases"]:
+        if role in alias.get("roles", []) and alias.get("destination") in ("/bin", "/lib"):
+            args.extend(("--symlink", str(alias["target"]), str(alias["destination"])))
+    return args
+
+
+def _observer_bwrap_argv(profile: dict[str, Any], paths: dict[str, Path], observer_fds: tuple[int, ...],
+                         probe_paths: list[tuple[str, str]], supervisor_pid: int,
+                         supervisor_netns: str, supervisor_pidns: str) -> list[str]:
+    policy = _policy(profile)
+    route = policy["provider_route"]
+    argv = [
+        policy["substrate"]["executable"],
+        "--unshare-user", "--unshare-pid", "--unshare-ipc", "--unshare-uts", "--unshare-cgroup", "--share-net",
+        "--die-with-parent", "--new-session", "--as-pid-1", "--hostname", "ssdp-observer",
+        # bubblewrap 0.6.1 inherits only the descriptors explicitly passed by Popen; it has no
+        # --preserve-fds option. _observer_fd_map assigns those inherited descriptors to 3..6.
+        "--cap-drop", "ALL", "--cap-add", "CAP_SYS_ADMIN", "--cap-add", "CAP_SETPCAP",
+        "--proc", "/proc", "--dev", "/dev", "--tmpfs", "/tmp", "--tmpfs", OBSERVER_HOME,
+    ]
+    argv += _runtime_mount_args("observer", paths)
+    argv += [
+        "--dir", "/etc", "--dir", "/opt", "--dir", "/opt/ssdp",
+        "--ro-bind", str(paths["observer_etc"]), "/etc",
+        "--ro-bind", str(paths["observer"]), OBSERVER_CODE,
+        "--chdir", "/",
+        "/usr/bin/python3", f"{OBSERVER_CODE}/observer70.py",
+        "--mux-in-fd", "3", "--mux-out-fd", "4", "--evidence-fd", "5", "--credential-fd", "6",
+        "--upstream", route["upstream"], "--credential-env", route["credential_env"],
+        "--placeholder", route["placeholder_key"],
+        "--allowed-path", route["base_path"].rstrip("/") + API_ENDPOINTS[route["api"]],
+        "--max-requests", str(profile["budgets"]["max_turns"]),
+        "--supervisor-pid", str(supervisor_pid),
+        "--supervisor-netns", supervisor_netns, "--supervisor-pidns", supervisor_pidns,
+    ]
+    for label, path in probe_paths:
+        argv.extend(("--probe-path", f"{label}={path}"))
+    return argv
+
+
+def _observer_fd_map(source_fds: tuple[int, ...]):
+    """Return a fork-child-only mapping to the descriptor range bubblewrap preserves."""
+    def apply() -> None:
+        targets = tuple(range(3, 3 + len(source_fds)))
+        copies = [os.dup(fd) for fd in source_fds]
+        for copied, target in zip(copies, targets):
+            os.dup2(copied, target, inheritable=True)
+        for copied in copies:
+            if copied not in targets:
+                os.close(copied)
+        # Keep only the mapped channels and bwrap's argument source in the child process.
+        for fd in set(source_fds):
+            if fd not in targets:
+                try:
+                    os.close(fd)
+                except OSError:
+                    pass
+    return apply
+
+
 def _sandbox_pipe_fds(pairs: list[tuple[int, int]]) -> tuple[int, ...]:
     return tuple(fd for pair in pairs for fd in pair)
 
@@ -924,6 +1258,9 @@ def launch(profile: dict[str, Any], prompt: str, project: Path, env: dict[str, s
     problems = profile_errors(profile)
     if problems:
         raise AdapterError("OMP launch refused; profile is not admissible: " + "; ".join(problems))
+    dependency_errors = runtime_dependency_errors(profile)
+    if dependency_errors:
+        raise AdapterError("OMP launch refused; explicit runtime dependency surface drifted: " + "; ".join(dependency_errors))
     paths = _paths(project, env)
     policy = _policy(profile)
     route = policy["provider_route"]
@@ -953,28 +1290,58 @@ def launch(profile: dict[str, Any], prompt: str, project: Path, env: dict[str, s
     infer_down = pipe()    # observer -> subject
     mcp_up = pipe()
     mcp_down = pipe()
+    credential_r, credential_w = pipe()
     obs_ev, br_ev, ln_ev = pipe(), pipe(), pipe()
     sinks = {"observer": bytearray(), "bridge": bytearray(), "launcher": bytearray()}
     threads: list[threading.Thread] = []
     procs: list[subprocess.Popen] = []
+    closed_parent_channel_writers: set[int] = set()
     seccomp_r = seccomp_w = -1
     run_launch = paths["control"] / "launcher.json"
+    observer_launch_argv: list[str] = []
+    boundary_sentinel = paths["private"] / "observer-boundary-host-sentinel.txt"
+    boundary_sentinel.write_text("SUPERVISOR-PRIVATE-OBSERVER-PROBE\n", encoding="utf-8")
+    boundary_sentinel.chmod(0o600)
     try:
         threads = [
             _drain(obs_ev[0], sinks["observer"]),
             _drain(br_ev[0], sinks["bridge"]),
             _drain(ln_ev[0], sinks["launcher"]),
         ]
-        observer_env = {"PATH": MINIMAL_PATH, route["credential_env"]: credential}
-        observer_argv = [
-            sys.executable, str(EVAL_DIR / "observer70.py"),
-            "--mux-in-fd", str(infer_up[0]), "--mux-out-fd", str(infer_down[1]), "--evidence-fd", str(obs_ev[1]),
-            "--upstream", route["upstream"], "--credential-env", route["credential_env"],
-            "--placeholder", route["placeholder_key"],
-            "--allowed-path", route["base_path"].rstrip("/") + API_ENDPOINTS[route["api"]],
-            "--max-requests", str(budgets["max_turns"]),
+        observer_probe_paths = [
+            ("host_home", str(Path.home() / ".bashrc")),
+            ("qualification_custody", str(REPO_ROOT / "qualification" / "ssdp70" / "PROTOCOL-7.0-EVALUATION-AND-QUALIFICATION-CONTRACT.md")),
+            ("supervisor_private", str(boundary_sentinel)),
+            ("mediator_backing_state", str(layout["log"])),
         ]
-        observer = _spawn_principal(observer_argv, (infer_up[0], infer_down[1], obs_ev[1]), observer_env)
+        observer_env = {"PATH": MINIMAL_PATH, "HOME": OBSERVER_HOME}
+        raw_observer_argv = _observer_bwrap_argv(
+            profile, paths, (infer_up[0], infer_down[1], obs_ev[1], credential_r), observer_probe_paths, os.getpid(),
+            os.readlink("/proc/self/ns/net"), os.readlink("/proc/self/ns/pid"))
+        observer_command_at = raw_observer_argv.index("/usr/bin/python3")
+        observer_args_r, observer_args_w = os.pipe()
+        os.write(observer_args_w, b"\0".join(a.encode() for a in raw_observer_argv[1:observer_command_at]) + b"\0")
+        os.close(observer_args_w)
+        observer_launch_argv = [raw_observer_argv[0], "--args", str(observer_args_r),
+                                *raw_observer_argv[observer_command_at:]]
+        observer_targets = tuple(range(3, 3 + len((infer_up[0], infer_down[1], obs_ev[1], credential_r))))
+        try:
+            observer = subprocess.Popen(
+                observer_launch_argv,
+                # Popen closes non-pass-through fds after preexec remapping. Include target
+                # slots so bubblewrap 0.6.1 receives the mapped channels as inheritable fds.
+                pass_fds=tuple(sorted(set((infer_up[0], infer_down[1], obs_ev[1], credential_r,
+                                           observer_args_r, *observer_targets)))),
+                preexec_fn=_observer_fd_map((infer_up[0], infer_down[1], obs_ev[1], credential_r)),
+                env=observer_env, stdin=subprocess.DEVNULL, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                close_fds=True)
+        finally:
+            os.close(observer_args_r)
+            try:
+                os.close(credential_r)
+            except OSError:
+                pass
+            credential_r = -1
         procs.append(observer)
         bridge_argv = [
             sys.executable, str(EVAL_DIR / "mcp_bridge70.py"),
@@ -986,6 +1353,14 @@ def launch(profile: dict[str, Any], prompt: str, project: Path, env: dict[str, s
         ]
         bridge = _spawn_principal(bridge_argv, (mcp_up[0], mcp_down[1], br_ev[1]), {"PATH": MINIMAL_PATH})
         procs.append(bridge)
+        _await_ready(observer, "provider-control/observer boundary", b"boundary-ready")
+        credential_bytes = credential.encode("utf-8")
+        offset = 0
+        while offset < len(credential_bytes):
+            offset += os.write(credential_w, credential_bytes[offset:])
+        os.close(credential_w)
+        credential_w = -1
+        credential = ""
         _await_ready(observer, "provider-control/observer")
         _await_ready(bridge, "qualification MCP bridge")
 
@@ -1032,12 +1407,27 @@ def launch(profile: dict[str, Any], prompt: str, project: Path, env: dict[str, s
             returncode = 124
             stdout = (exc.stdout or b"").decode("utf-8", "replace")
             stderr = (exc.stderr or b"").decode("utf-8", "replace") + "\nsandbox supervision timeout"
-    finally:
-        for proc in procs:
+        # The subject is gone. Close the supervisor-held writers on the two existing
+        # request edges so each principal sees EOF and can append its terminal record.
+        for fd in (infer_up[1], mcp_up[1]):
             try:
-                proc.terminate()
+                os.close(fd)
+                closed_parent_channel_writers.add(fd)
             except OSError:
                 pass
+    finally:
+        # Give the observer and bridge a chance to close their evidence chains on edge EOF.
+        for proc in procs:
+            try:
+                proc.wait(timeout=15)
+            except subprocess.TimeoutExpired:
+                pass
+        for proc in procs:
+            if proc.poll() is None:
+                try:
+                    proc.terminate()
+                except OSError:
+                    pass
         for proc in procs:
             try:
                 proc.wait(timeout=15)
@@ -1049,9 +1439,10 @@ def launch(profile: dict[str, Any], prompt: str, project: Path, env: dict[str, s
                     stream.close()
         # Close every write end this process still holds so the drain threads see EOF once the
         # principals have exited, then join them, then close the read ends.
-        writers = [infer_up[1], infer_down[1], mcp_up[1], mcp_down[1], obs_ev[1], br_ev[1], ln_ev[1], seccomp_r, seccomp_w]
+        writers = [infer_up[1], infer_down[1], mcp_up[1], mcp_down[1], obs_ev[1], br_ev[1], ln_ev[1],
+                   credential_r, credential_w, seccomp_r, seccomp_w]
         for fd in writers:
-            if fd >= 0:
+            if fd >= 0 and fd not in closed_parent_channel_writers:
                 try:
                     os.close(fd)
                 except OSError:
@@ -1063,14 +1454,34 @@ def launch(profile: dict[str, Any], prompt: str, project: Path, env: dict[str, s
                 os.close(fd)
             except OSError:
                 pass
+        try:
+            boundary_sentinel.unlink()
+        except FileNotFoundError:
+            pass
     wall_s = round(time.monotonic() - started, 3)
 
     home_docs_after = {rel: sha256_file(paths["home"] / rel) for rel in CONTROL_FILES_IN_HOME}
+    runtime_stage_digests = {role: _runtime_tree_digest(paths[f"{role}_runtime"])
+                             for role in ("subject", "observer")}
     artifacts: dict[str, Any] = {
         "observer-evidence.jsonl": bytes(sinks["observer"]).decode("utf-8", "replace"),
         "bridge-evidence.jsonl": bytes(sinks["bridge"]).decode("utf-8", "replace"),
         "launcher-evidence.jsonl": bytes(sinks["launcher"]).decode("utf-8", "replace"),
         "sandbox-argv.json": json.dumps({"argv": argv, "launcher": json.loads(run_launch.read_text())}, indent=2, sort_keys=True) + "\n",
+        "observer-boundary-argv.json": json.dumps({"argv": observer_launch_argv}, indent=2, sort_keys=True) + "\n",
+        "runtime-dependency-manifest.json": RUNTIME_DEPENDENCIES_PATH.read_text(encoding="utf-8"),
+        "runtime-dependency-attestation.json": json.dumps({
+            "manifest_sha256": sha256_file(RUNTIME_DEPENDENCIES_PATH),
+            "runtime_dependency_errors_after_launch": runtime_dependency_errors(profile),
+            "staged_runtime_roots": {
+                role: {"path_sha256": digest, "entries": count}
+                for role, (digest, count) in runtime_stage_digests.items()
+            },
+            "mounted_subject_dependencies": [row for row in runtime_dependency_manifest()["dependencies"]
+                                              if "subject" in row.get("roles", [])],
+            "mounted_observer_dependencies": [row for row in runtime_dependency_manifest()["dependencies"]
+                                               if "observer" in row.get("roles", [])],
+        }, indent=2, sort_keys=True) + "\n",
         "runtime-home-inventory.json": json.dumps(_home_inventory(paths["home"]), indent=2, sort_keys=True) + "\n",
         "control-digests.json": json.dumps({
             "before": home_docs, "after": home_docs_after,
@@ -1091,6 +1502,10 @@ def launch(profile: dict[str, Any], prompt: str, project: Path, env: dict[str, s
         "mcp_config_file": str(paths["agent"] / "mcp.json"),
         "mcp_config_sha256": home_docs[".omp/agent/mcp.json"],
         "runtime_version": runtime.get("version"),
+        "runtime_dependency_manifest_sha256": sha256_file(RUNTIME_DEPENDENCIES_PATH),
+        "runtime_dependency_staging": {
+            role: digest for role, (digest, _count) in runtime_stage_digests.items()
+        },
         "native_network": "subject netns loopback only",
     }
     return {
@@ -1141,6 +1556,10 @@ def post_run_integrity(profile: dict[str, Any], project: Path, env: dict[str, st
         errors.append("OMP executable changed during execution")
     for rel in _scan_sources(paths["project"], PROJECT_DISCOVERY_SOURCES):
         errors.append(f"post-run project contains provider discovery source {rel!r}")
+    expected_manifest_sha = realization.get("runtime_dependency_manifest_sha256")
+    if expected_manifest_sha != RUNTIME_DEPENDENCIES_SHA256:
+        errors.append("runtime dependency manifest identity differs from the retained containment realization")
+    errors.extend(runtime_dependency_errors(profile))
     return errors
 
 
@@ -1187,24 +1606,134 @@ class Observed:
 
     # ---- observer
     def _parse_observer(self) -> None:
+        response_positions: list[int] = []
+        boundary_probes: dict[str, dict[str, Any]] = {}
+        boundary: dict[str, Any] | None = None
+        route_opened: dict[str, Any] | None = None
+        credential_received: dict[str, Any] | None = None
+        observer_started = False
         for position, record in enumerate(self.records["observer"]):
             data = record.get("data") or {}
             kind = record.get("kind")
-            if kind == "request":
+            if kind == "start":
+                observer_started = True
+            elif kind == "provider_route_opened":
+                if route_opened is not None:
+                    self.errors.append("observer recorded multiple provider route capabilities")
+                route_opened = data
+            elif kind == "boundary":
+                if boundary is not None:
+                    self.errors.append("observer recorded multiple privilege boundaries")
+                boundary = data
+            elif kind == "credential_received":
+                if credential_received is not None:
+                    self.errors.append("observer recorded multiple provider credential deliveries")
+                credential_received = data
+            elif kind == "boundary_probe":
+                name = data.get("name")
+                if not isinstance(name, str) or name in boundary_probes:
+                    self.errors.append(f"observer boundary probe record {position} is unbound or duplicated")
+                else:
+                    boundary_probes[name] = data
+            elif kind == "boundary_setup_failed":
+                self.errors.append("observer least-privilege boundary setup failed")
+            elif kind == "request":
                 try:
-                    body = json.loads(base64.b64decode(data["body_b64"]))
-                except (KeyError, ValueError):
+                    raw_body = base64.b64decode(data["body_b64"], validate=True)
+                    body = json.loads(raw_body)
+                except (KeyError, ValueError, TypeError):
                     self.errors.append(f"observer request record {position} body is unreadable")
                     continue
-                if hashlib.sha256(base64.b64decode(data["body_b64"])).hexdigest() != data.get("body_sha256"):
+                if data.get("body_bytes") != len(raw_body):
+                    self.errors.append(f"observer request record {position} body length does not match its retained bytes")
+                if hashlib.sha256(raw_body).hexdigest() != data.get("body_sha256"):
                     self.errors.append(f"observer request record {position} body does not match its digest")
                 self.requests.append({"record": record, "position": position, "body": body, "index": data.get("request_index")})
             elif kind == "response":
-                self.responses[data.get("request_index")] = {"record": record, "position": position}
+                index = data.get("request_index")
+                if not isinstance(index, int) or isinstance(index, bool) or index < 0:
+                    self.errors.append(f"observer response record {position} has an invalid request index")
+                    continue
+                if index in self.responses:
+                    self.errors.append(f"observer response index {index} is duplicated")
+                    continue
+                try:
+                    retained = base64.b64decode(data.get("body_b64", ""), validate=True)
+                except (ValueError, TypeError):
+                    self.errors.append(f"observer response record {position} body is unreadable")
+                    continue
+                total = data.get("body_bytes")
+                truncated = data.get("body_truncated_in_evidence")
+                if not isinstance(total, int) or isinstance(total, bool) or total < 0:
+                    self.errors.append(f"observer response record {position} has an invalid body length")
+                elif len(retained) > total:
+                    self.errors.append(f"observer response record {position} retains more bytes than the provider returned")
+                if not isinstance(truncated, bool):
+                    self.errors.append(f"observer response record {position} lacks an explicit truncation disposition")
+                elif truncated:
+                    self.errors.append(f"observer response record {position} was truncated in evidence and is inadmissible")
+                if truncated is False and isinstance(total, int) and len(retained) != total:
+                    self.errors.append(f"observer response record {position} is incomplete without a truncation marker")
+                if truncated is False and hashlib.sha256(retained).hexdigest() != data.get("body_sha256"):
+                    self.errors.append(f"observer response record {position} body does not match its complete digest")
+                if data.get("error") is not None:
+                    self.errors.append(f"observer response record {position} reports a transport error")
+                response_positions.append(index)
+                self.responses[index] = {"record": record, "position": position}
             elif kind == "budget_exhausted":
                 self.budget_exhausted.append({"record": record, "position": position})
             elif kind == "refused":
                 self.errors.append(f"observer refused an inference-transport operation: {data.get('reason')}")
+        if response_positions != sorted(response_positions):
+            self.errors.append("observer provider responses were reordered")
+        request_indices = [row["index"] for row in self.requests]
+        if request_indices != list(range(len(request_indices))):
+            self.errors.append("observer provider requests are missing, duplicated or reordered")
+        if set(self.responses) - set(request_indices):
+            self.errors.append("observer contains a response without a corresponding provider request")
+        if set(request_indices) - set(self.responses):
+            self.errors.append("observer is missing a provider response record")
+        if not observer_started:
+            self.errors.append("observer start evidence is missing")
+        if not route_opened or route_opened.get("connected") is not True or not route_opened.get("connected_peer_addresses"):
+            self.errors.append("observer did not retain a successful frozen provider-route connection")
+        else:
+            route = ((self.profile.get("containment_policy") or {}).get("provider_route") or {})
+            parsed = urlsplit(str(route.get("upstream", "")))
+            expected_origin = f"{parsed.scheme}://{parsed.netloc}" if parsed.scheme and parsed.netloc else None
+            if route_opened.get("frozen_origin") != expected_origin:
+                self.errors.append("observer provider connection does not match the frozen provider route")
+        if boundary is None:
+            self.errors.append("observer least-privilege boundary evidence is missing")
+        else:
+            if boundary.get("network_namespace") == boundary.get("supervisor_network_namespace"):
+                self.errors.append("observer remains in the supervisor network namespace")
+            if boundary.get("pid_namespace") == boundary.get("supervisor_pid_namespace"):
+                self.errors.append("observer remains in the supervisor PID namespace")
+            status = boundary.get("status") or {}
+            if status.get("NoNewPrivs") != "1" or status.get("Seccomp") != "2":
+                self.errors.append("observer no-new-privileges or seccomp lockdown is absent")
+            for capability_set in ("CapEff", "CapPrm", "CapBnd"):
+                try:
+                    if int(status.get(capability_set, "-1"), 16) != 0:
+                        self.errors.append(f"observer retains capability bits in {capability_set}")
+                except (TypeError, ValueError):
+                    self.errors.append(f"observer capability status {capability_set} is unreadable")
+            if boundary.get("boundary_probe_count") != len(OBSERVER_REQUIRED_PROBES):
+                self.errors.append("observer boundary probe count does not match the required probe set")
+        if (credential_received is None or credential_received.get("received_after_lockdown") is not True
+                or not isinstance(credential_received.get("bytes"), int) or credential_received.get("bytes", 0) <= 0):
+            self.errors.append("observer did not receive its provider credential after privilege lockdown")
+        if set(boundary_probes) != set(OBSERVER_REQUIRED_PROBES):
+            self.errors.append("observer hostile boundary probe set is incomplete")
+        for name in OBSERVER_REQUIRED_PROBES:
+            result = boundary_probes.get(name) or {}
+            expected_disposition = "unavailable" if name == "credential-environment" else "denied"
+            if result.get("disposition") != expected_disposition:
+                self.errors.append(f"observer hostile boundary probe {name!r} did not fail closed")
+            if name not in {"host_home", "qualification_custody", "supervisor_private", "mediator_backing_state",
+                            "credential-environment"} and result.get("errno") != 1:
+                self.errors.append(f"observer hostile syscall probe {name!r} was not denied with EPERM")
 
     # ---- bridge
     def _parse_bridge(self) -> None:
@@ -2023,6 +2552,8 @@ def normalize(stdout: str, run_id: str, context: dict[str, Any] | None = None) -
             classify(index, "observer-inference-response", False)
         elif kind in ("start", "end"):
             classify(index, f"observer-{kind}", False)
+        elif kind in REVIEWED_NON_ORACLE_OBSERVER_CONTROL_KINDS:
+            classify(index, f"reviewed-non-oracle-observer-control:{kind}", False)
         else:
             classify(index, f"observer-{kind}", True)
     for position, record in enumerate(observed.records["bridge"]):

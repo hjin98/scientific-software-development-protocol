@@ -16,10 +16,12 @@ import base64
 import copy
 import json
 import os
+import socket
 import shutil
 import sys
 import tempfile
 import textwrap
+import threading
 import unittest
 from pathlib import Path
 
@@ -29,6 +31,7 @@ if str(HERE) not in sys.path:
 import core70  # noqa: E402
 import evidence70  # noqa: E402
 import harness70  # noqa: E402
+import observer70  # noqa: E402
 import omp_rig  # noqa: E402
 from omp_rig import Rig, call, calls, load_events, scenario_steps, text  # noqa: E402
 from adapters import omp  # noqa: E402
@@ -124,6 +127,18 @@ class B1RealObservationAndEventCompleteness(RigCase):
             if r["kind"] == "request")))
         self.assertEqual(first["reasoning_effort"], "high")
         self.assertTrue(first["messages"][0]["content"].startswith("<system-conventions>"))
+
+    def test_provider_response_over_evidence_limit_is_inadmissible_on_the_assembled_path(self):
+        body = "R" * (observer70.RESPONSE_EVIDENCE_LIMIT + 1024)
+        summary = self.rig(timeout_s=180).run(scenario_steps({"text": body}))
+        observer_records = [json.loads(line) for line in
+                            (Path(summary["_out"]) / "adapter-artifacts" / "observer-evidence.jsonl").read_text().splitlines()]
+        responses = [row["data"] for row in observer_records if row["kind"] == "response"]
+        self.assertTrue(responses)
+        self.assertTrue(any(row.get("body_truncated_in_evidence") is True for row in responses))
+        self.assertNotEqual(summary["evidence_state"], "COMPLETE_ADMISSIBLE")
+        self.assertTrue(any("truncated in evidence" in error
+                            for error in summary["runtime_observation"].get("observation_errors", [])))
 
     def test_every_native_and_observer_record_is_accounted_for_in_the_completeness_map(self):
         summary = self.rig().run(self.baseline_scenario())
@@ -387,7 +402,7 @@ class RootSelectionAndConsumedResources(RigCase):
         summary = self.rig().run(scenario_steps(
             call("read", path="skill://no-such-skill"),
             call("read", path="/opt/ssdp/skills/software-design/NOPE.md"),
-            call("bash", command="cat /opt/ssdp/skills/software-design/SKILL.md > /dev/null"),
+            py("from pathlib import Path; Path('/opt/ssdp/skills/software-design/SKILL.md').read_bytes()"),
             text("done")))
         self.assertComplete(summary)
         self.assertEqual(self.kinds(summary["_out"], "root_selection"), [])
@@ -518,7 +533,7 @@ class TerminationTimeoutTurnAndTokenCaps(RigCase):
         self.assertNotEqual(summary["evidence_state"], "COMPLETE_ADMISSIBLE")
 
     def test_timeout_kills_the_whole_sandbox_and_is_a_terminal_state(self):
-        summary = self.rig(timeout_s=6).run(scenario_steps(call("bash", command="sleep 300"), text("unreached")))
+        summary = self.rig(timeout_s=6).run(scenario_steps(py("import time; time.sleep(300)"), text("unreached")))
         termination = self.kinds(summary["_out"], "termination")[0]["payload"]
         self.assertEqual(termination["state"], "timeout")
         self.assertTrue(termination["native_return_state"]["timed_out"])
@@ -644,7 +659,11 @@ class ProviderManagedStateAndDiscoveryEffects(RigCase):
         self.patch(omp, "PROJECT_DISCOVERY_SOURCES", ())
         rig = self.rig(project_files=self.hostile_project())
         summary = rig.run(scenario_steps(
-            sh("printenv | grep -c HOSTILE; ls -a /workspace | tr '\\n' ' '"),
+            py("""
+                import os
+                print(sum(1 for key in os.environ if "HOSTILE" in key))
+                print(" ".join(sorted(os.listdir("/workspace"))))
+            """),
             text("done")))
         out = Path(summary["_out"])
         events = load_events(out)
@@ -677,7 +696,7 @@ class ProviderManagedStateAndDiscoveryEffects(RigCase):
             return manifest
 
         self.patch(omp, "_write_control_tree", with_dotenv)
-        summary = self.rig().run(scenario_steps(sh("printenv HOSTILE_ENV_HOME"), text("done")))
+        summary = self.rig().run(scenario_steps(py("import os; print(os.environ.get('HOSTILE_ENV_HOME', ''))"), text("done")))
         result = self.bash_results(summary["_out"])[0]["payload"]["result_content"]
         self.assertTrue(result.startswith("leaked"), result)
 
@@ -712,7 +731,12 @@ class ProviderManagedStateAndDiscoveryEffects(RigCase):
             self.assertEqual(rig.read_stand_in(), [])
 
     def test_ancestor_directory_discovery_sees_nothing(self):
-        summary = self.rig().run(scenario_steps(sh("ls -a /; ls -a /workspace/..; ls -a /workspace/../..; cat /proc/self/mountinfo | wc -l"), text("done")))
+        summary = self.rig().run(scenario_steps(py("""
+            import os
+            for root in ("/", "/workspace/..", "/workspace/../.."):
+                print(root, " ".join(sorted(os.listdir(root))))
+            print("mountinfo", sum(1 for _ in open("/proc/self/mountinfo")))
+        """), text("done")))
         self.assertComplete(summary)
         result = self.bash_results(summary["_out"])[0]["payload"]["result_content"]
         self.assertNotIn(".omp", result.split("\n")[0])
@@ -756,7 +780,6 @@ class ProviderManagedStateAndDiscoveryEffects(RigCase):
         del summary
 
 
-@SKIP
 class B2PrivilegeSeparationWhileInferenceWorks(RigCase):
     def run_attacks(self, steps, **kwargs):
         rig = self.rig(timeout_s=110, **kwargs)
@@ -770,25 +793,106 @@ class B2PrivilegeSeparationWhileInferenceWorks(RigCase):
         target = str(host_secret)
         summary, out = self.run_attacks([
             call("mcp__ssdp_issue_show", issue_id="A-1"),
-            sh(f"env | grep -i -E '{omp_rig.SENTINEL_CREDENTIAL[:16]}|SSDP70_OMP' ; echo ENVDONE; "
-               f"grep -rl {omp_rig.SENTINEL_CREDENTIAL} /workspace /home /tmp /opt /etc 2>/dev/null; echo GREPDONE"),
-            sh(f"ls {HOST_HOME} 2>&1 | head -2; cat {HOST_HOME}/.bashrc 2>&1 | head -1; cat {target} 2>&1 | head -1; ls /root 2>&1 | head -1"),
-            sh(f"cd /workspace && ln -s {target} abs-link && ln -s ../../../../../.. up && cat abs-link 2>&1 | head -1; "
-               f"cat ../../../..{target} 2>&1 | head -1; ls up/ | head -3; cat /proc/self/root{target} 2>&1 | head -1"),
-            sh("find / -xdev \\( -name 'side-effects.jsonl' -o -name 'mcp-account.txt' -o -name 'mcp-server.py' -o -name '*.evidence.jsonl' -o -name 'observer*' \\) 2>/dev/null | head; echo FINDDONE"),
-            sh("cat /proc/self/mountinfo | grep -c -E 'side-effects|mcp-account|mcp-server|/stub|evidence|observer|bridge'; echo MOUNTINFO-DONE"),
+            py(f"""
+                import os
+                marker = {omp_rig.SENTINEL_CREDENTIAL!r}
+                print("credential-env", [(k, v) for k, v in os.environ.items() if "SSDP70_OMP" in k or marker[:16] in v])
+                for root in ("/workspace", "/home", "/tmp", "/opt", "/etc"):
+                    for current, dirs, files in os.walk(root):
+                        dirs[:] = dirs[:80]
+                        for name in files[:300]:
+                            path = os.path.join(current, name)
+                            try:
+                                if marker in open(path, "r", errors="ignore").read(100000): print("SECRET-FILE", path)
+                            except OSError:
+                                pass
+                print("ENVDONE GREPDONE")
+            """),
+            py(f"""
+                from pathlib import Path
+                paths = [{HOST_HOME!r}, {str(Path(HOST_HOME) / '.bashrc')!r}, {target!r}, '/root']
+                for path in paths:
+                    try:
+                        p = Path(path)
+                        value = p.read_bytes()[:100] if p.is_file() else sorted(x.name for x in p.iterdir())[:2]
+                        print(path, value)
+                    except OSError as exc: print(path, type(exc).__name__, exc.errno)
+            """),
+            py(f"""
+                import os
+                target = {target!r}
+                for name, value in (("abs-link", target), ("up", "../../../../../..")):
+                    try: os.symlink(value, "/workspace/" + name)
+                    except FileExistsError: pass
+                for path in ("/workspace/abs-link", "/workspace/../../../../" + target.lstrip("/"),
+                             "/workspace/up", "/proc/self/root" + target):
+                    try: print(path, open(path, "rb").read(100))
+                    except OSError as exc: print(path, type(exc).__name__, exc.errno)
+            """),
+            py("""
+                import os, stat
+                names = {"side-effects.jsonl", "mcp-account.txt", "mcp-server.py"}
+                root_dev = os.stat("/").st_dev
+                found = []
+                for root, dirs, files in os.walk("/", followlinks=False):
+                    dirs[:] = [d for d in dirs if os.stat(os.path.join(root, d), follow_symlinks=False).st_dev == root_dev]
+                    for name in files:
+                        path = os.path.join(root, name)
+                        try:
+                            if name in names or name.endswith(".evidence.jsonl") or name.startswith("observer"):
+                                if stat.S_ISSOCK(os.stat(path, follow_symlinks=False).st_mode): found.append(path)
+                        except OSError: pass
+                print("\\n".join(found)); print("FINDDONE")
+            """),
+            py("""
+                import re
+                lines = open("/proc/self/mountinfo").read().splitlines()
+                print(sum(bool(re.search(r"side-effects|mcp-account|mcp-server|/stub|evidence|observer|bridge", line)) for line in lines))
+                print("MOUNTINFO-DONE")
+            """),
         ])
         self.assertComplete(summary)
         self.assertEqual(len(self.kinds(summary["_out"], "issue_evidence_access", "result")), 1)  # MCP works
         self.assertEqual(len(summary["_stand_in_requests"]), 7)                                   # inference works (6 tool turns + final)
-        mountinfo = next(v for k, v in out.items() if k.startswith("cat /proc/self/mountinfo"))
+        mountinfo = next(v for v in out.values() if "MOUNTINFO-DONE" in v)
         self.assertTrue(mountinfo.startswith("0"), mountinfo)
         text_out = "\n".join(out.values())
         self.assertNotIn("HOST-ONLY-SECRET", text_out)
         self.assertNotIn(omp_rig.SENTINEL_CREDENTIAL, text_out)
-        self.assertIn("No such file or directory", text_out)
-        find_out = next(v for k, v in out.items() if k.startswith("find /"))
+        self.assertIn("FileNotFoundError", text_out)
+        find_out = next(v for v in out.values() if "FINDDONE" in v)
         self.assertEqual(find_out.split("FINDDONE")[0].strip(), "")
+
+    def test_minimal_runtime_keeps_required_tools_and_omits_host_software(self):
+        summary, out = self.run_attacks([
+            py(f"""
+                import os, subprocess, sys
+                print("PYTHON", sys.version.split()[0])
+                bash = subprocess.run(['/usr/bin/bash', '--version'], capture_output=True, text=True)
+                print("BASH", bash.returncode, bash.stdout.splitlines()[0])
+                for path in ('/usr/bin/git', '/usr/bin/gcc', '/usr/bin/curl', '/usr/bin/apt',
+                             '/usr/bin/find', '/usr/bin/cat', '/usr/bin/node', {HOST_HOME!r},
+                             '/home/agent/.config', '/usr/share/doc'):
+                    try:
+                        with open(path, 'rb') as stream: stream.read(1)
+                        readable = True
+                    except OSError:
+                        readable = False
+                    try:
+                        subprocess.run([path, '--version'], capture_output=True, timeout=3)
+                        executable = True
+                    except (OSError, subprocess.SubprocessError):
+                        executable = False
+                    print(path, readable, executable)
+            """),
+        ])
+        self.assertComplete(summary)
+        result = next(v for v in out.values() if "PYTHON" in v)
+        self.assertIn("PYTHON 3.10", result)
+        self.assertIn("BASH 0 GNU bash", result)
+        for name in ("git", "gcc", "curl", "apt", "find", "cat", "node"):
+            self.assertIn(f"/usr/bin/{name} False False", result)
+        self.assertIn(f"{HOST_HOME} False False", result)
 
     def test_bash_cannot_use_the_inference_or_mcp_transport_or_launch_a_second_omp(self):
         summary, out = self.run_attacks([
@@ -810,7 +914,14 @@ class B2PrivilegeSeparationWhileInferenceWorks(RigCase):
                    except Exception as e:
                        print(host, port, type(e).__name__)
             """),
-            sh("/opt/omp/omp -p --mode=json --no-session --no-title --model stand/stand-model 'second instance' > /tmp/second.out 2>&1; grep -c 'HTTP\\|error' /tmp/second.out | head -1; echo SECOND-DONE"),
+            py("""
+                import re, subprocess
+                run = subprocess.run(['/opt/omp/omp', '-p', '--mode=json', '--no-session', '--no-title',
+                                      '--model', 'stand/stand-model', 'second instance'],
+                                     capture_output=True, text=True, timeout=30)
+                print(sum(1 for line in (run.stdout + run.stderr).splitlines() if re.search(r'HTTP|error', line)))
+                print('SECOND-DONE')
+            """),
         ])
         self.assertComplete(summary)
         # only the authorized OMP process ever reached the provider: 3 model calls, nothing else
@@ -907,14 +1018,79 @@ class B2PrivilegeSeparationWhileInferenceWorks(RigCase):
         self.assertIn("immutable OMP control file", blob)
         self.assertIn("installed protocol package changed during execution", blob)
 
-    def test_local_ipc_surface_is_structurally_empty(self):
-        summary, out = self.run_attacks([
-            sh("find / -xdev -type s 2>/dev/null | head -3; echo SOCKFILES-DONE; wc -l < /proc/net/unix; ls /run /var 2>&1 | head -2; ls /dev | tr '\\n' ' '"),
-        ])
+    def test_discriminating_external_local_ipc_sentinel_is_unreachable(self):
+        rig = self.rig(timeout_s=110)
+        original = omp.launch
+        sentinel_state = {"accepted": 0, "path": None}
+
+        def with_external_sentinel(profile, prompt, project, env):
+            path = project / ".qualification-external-ipc-sentinel.sock"
+            server = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+            server.bind(str(path))
+            server.listen(4)
+            server.settimeout(0.05)
+            sentinel_state["path"] = str(path)
+            stopping = threading.Event()
+
+            def accept_connections():
+                while not stopping.is_set():
+                    try:
+                        connection, _ = server.accept()
+                    except socket.timeout:
+                        continue
+                    except OSError:
+                        return
+                    sentinel_state["accepted"] += 1
+                    connection.close()
+
+            worker = threading.Thread(target=accept_connections, daemon=True)
+            worker.start()
+            try:
+                launched = original(profile, prompt, project, env)
+            finally:
+                stopping.set()
+                server.close()
+                worker.join(2)
+                try:
+                    path.unlink()
+                except FileNotFoundError:
+                    pass
+            launched["adapter_artifacts"]["local-ipc-sentinel.json"] = json.dumps({
+                "owner": "qualification-supervisor-test",
+                "server_outside_subject_process_and_pid_namespace": True,
+                "subject_visible_mount_path": "/workspace/.qualification-external-ipc-sentinel.sock",
+                "accepted_connections": sentinel_state["accepted"],
+            }, indent=2, sort_keys=True) + "\n"
+            return launched
+
+        self.patch(omp, "launch", with_external_sentinel)
+        try:
+            summary = rig.run(scenario_steps(
+                call("mcp__ssdp_issue_show", issue_id="A-1"),
+                py("""
+                    import socket
+                    path = '/workspace/.qualification-external-ipc-sentinel.sock'
+                    try:
+                        channel = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+                        print('AF_UNIX_SOCKET_CREATED')
+                        try:
+                            channel.connect(path)
+                            print('SENTINEL_CONNECTED')
+                        except OSError as exc:
+                            print('SENTINEL_CONNECT_DENIED', exc.errno)
+                    except OSError as exc:
+                        print('AF_UNIX_SOCKET_DENIED', exc.errno)
+                """),
+                text("done")))
+        except OSError as exc:
+            self.fail(f"B2 = UNRESOLVED/BLOCKING: outer host denied the discriminating local IPC/provider probe: {type(exc).__name__} errno={exc.errno}")
         self.assertComplete(summary)
-        result = next(iter(out.values()))
-        self.assertTrue(result.split("SOCKFILES-DONE")[0].strip() == "")
-        self.assertIn("No such file or directory", result)
+        bash_result = self.bash_results(summary["_out"])[0]["payload"]["result_content"]
+        self.assertIn("AF_UNIX_SOCKET_DENIED 1", bash_result)
+        self.assertNotIn("SENTINEL_CONNECTED", bash_result)
+        self.assertEqual(sentinel_state["accepted"], 0)
+        self.assertTrue(summary["_stand_in_requests"])
+        self.assertEqual(len(self.kinds(summary["_out"], "issue_evidence_access", "result")), 1)
 
 
 if __name__ == "__main__":
