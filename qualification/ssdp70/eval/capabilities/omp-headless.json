@@ -87,6 +87,45 @@
       ],
       "scope": "native bash surface; governed by the frozen substrate, not by approval rules"
     },
+    "tool:eval": {
+      "semantic_classes": [
+        "process_execution",
+        "repository_object_store",
+        "network_remote_service",
+        "external_mutation",
+        "credential_secret_service_account",
+        "issue_evidence_store",
+        "workspace_read_search_list",
+        "workspace_mutation"
+      ],
+      "scope": "native eval surface; governed by the frozen substrate, not by approval rules"
+    },
+    "tool:task": {
+      "semantic_classes": [
+        "delegation"
+      ],
+      "scope": "native subagent task surface; excluded from admission until independently qualified"
+    },
+    "tool:hub": {
+      "semantic_classes": [
+        "delegation",
+        "external_mutation"
+      ],
+      "scope": "native peer/background coordination surface; excluded from admission until independently qualified"
+    },
+    "tool:todo": {
+      "semantic_classes": [
+        "issue_evidence_store"
+      ],
+      "scope": "runtime todo store; mediated and contained"
+    },
+    "tool:web_search": {
+      "semantic_classes": [
+        "network_remote_service",
+        "external_mutation"
+      ],
+      "scope": "native web-search surface; excluded from admission until the substrate closes external egress"
+    },
     "mcp_server:ssdp70": {
       "semantic_classes": [
         "issue_evidence_store",
