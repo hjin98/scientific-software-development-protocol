@@ -31,12 +31,12 @@
     "ambient_host_home": "deny",
     "ambient_credentials": "deny",
     "runtime_temp": "run-owned project temporary directory",
-    "protected_control_files": "settings and strict empty MCP config live under the denied harness-private/runtime area outside the executor/evaluator working directory and are digest-checked across launch",
+    "protected_control_files": "settings and strict MCP config live under the denied harness-private/runtime area outside the executor/evaluator working directory and are digest-checked across launch",
     "denied_read_roots": "harness-private/runtime state, host HOME, /home, /root, /run/user, /proc, /mnt, /media, /srv, /var/tmp",
-    "mediator_transport": "path-selective Unix-domain socket; native Claude sandbox realization is supported only where exact socket-path allowlisting is enforceable. Linux/WSL must STOP unless an independently isolated outer boundary or alternate mediated transport is implemented."
+    "mediator_transport": "qualification-owned stdio MCP child process; no executor-visible socket or network route"
   },
   "network_external_write_policy": {
-    "external_write": "sandbox-or-mediate",
+    "external_write": "sandbox-or-mediate-via-qualification-stdio-mcp",
     "network": "deny-native-executor-network"
   },
   "credential_service_account_policy": {
@@ -51,7 +51,13 @@
     "Grep",
     "Edit",
     "Write",
-    "Bash"
+    "Bash",
+    "mcp__ssdp70__issues_locations",
+    "mcp__ssdp70__issues_search",
+    "mcp__ssdp70__issues_show",
+    "mcp__ssdp70__issues_create",
+    "mcp__ssdp70__issues_comment",
+    "mcp__ssdp70__delegate"
   ],
   "native_surface_requirements": [
     "runtime_capability:interrupt_receipt_v1",
@@ -60,7 +66,8 @@
     "runtime_capability:mcp_read_resource_v1",
     "runtime_capability:mcp_tool_ui_meta_v1",
     "messaging_socket_path",
-    "auto_memory_write"
+    "auto_memory_write",
+    "mcp_server:ssdp70"
   ],
   "native_allowed_tools": [
     "Skill",
@@ -79,10 +86,15 @@
     "Bash(head:*)",
     "Bash(tail:*)",
     "Bash(wc:*)",
-    "Bash(sed -n:*)"
+    "Bash(sed -n:*)",
+    "mcp__ssdp70__issues_locations",
+    "mcp__ssdp70__issues_search",
+    "mcp__ssdp70__issues_show",
+    "mcp__ssdp70__issues_create",
+    "mcp__ssdp70__issues_comment",
+    "mcp__ssdp70__delegate"
   ],
   "native_disallowed_tools": [
-    "mcp__*",
     "Agent",
     "WebFetch",
     "WebSearch",
@@ -124,5 +136,8 @@
         "*"
       ]
     }
+  ],
+  "native_mcp_servers": [
+    "ssdp70"
   ]
 }

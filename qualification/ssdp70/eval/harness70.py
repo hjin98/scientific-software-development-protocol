@@ -11,12 +11,10 @@ from __future__ import annotations
 import argparse
 import importlib
 import json
-import os
 import shutil
 import subprocess
 import sys
 import tempfile
-import time
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 from typing import Any
@@ -117,12 +115,6 @@ def build_project(corpus: Path, episode: dict[str, Any], project: Path) -> None:
             dirs_exist_ok=True,
             ignore=shutil.ignore_patterns("__pycache__"),
         )
-    tools = project / "tools"
-    tools.mkdir(exist_ok=True)
-    for name in ("delegate.py", "issues.py"):
-        src = HERE / "stub_tools" / name
-        if src.is_file():
-            shutil.copy2(src, tools / name)
     if not (project / ".git").is_dir():
         subprocess.run(["git", "init", "-q"], cwd=project, check=True)
     info = project / ".git" / "info"
@@ -331,7 +323,6 @@ def run_episode(
         project = tmp / "project"
         private = tmp / "harness-private"
         stub, log = private / "stub", private / "side-effects.jsonl"
-        mediator_socket = private / "mediator.sock"
         runtime_home = private / "runtime-home"
         runtime_tmp = project / ".qualification-tmp"
         build_project(corpus, episode, project)
@@ -358,46 +349,11 @@ def run_episode(
             "TMPDIR": str(runtime_tmp),
             "TMP": str(runtime_tmp),
             "TEMP": str(runtime_tmp),
-            "SSDP70_MEDIATOR_SOCKET": str(mediator_socket),
             "SSDP70_ACCOUNT": episode.get("account") or "agent-account",
         })
-        mediator = subprocess.Popen(
-            [
-                sys.executable, str(HERE / "stub_tools" / "mediator.py"),
-                "--socket", str(mediator_socket),
-                "--stub-root", str(stub),
-                "--side-effect-log", str(log),
-                "--account", env["SSDP70_ACCOUNT"],
-            ],
-            cwd=private,
-            env={
-                key: os.environ[key]
-                for key in ("PATH", "LANG", "LC_ALL", "LC_CTYPE")
-                if key in os.environ
-            },
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            text=True,
-        )
-        try:
-            deadline = time.monotonic() + 5.0
-            while not mediator_socket.exists() and mediator.poll() is None and time.monotonic() < deadline:
-                time.sleep(0.01)
-            if not mediator_socket.exists():
-                stderr = mediator.stderr.read() if mediator.stderr is not None else ""
-                raise core70.ContractError(f"qualification mediator failed to start: {stderr}")
-            containment = adapter_module.realize_containment(profile_bundle.profile, project, env)
-            (out / "containment-realization.json").write_text(
-                json.dumps(containment, indent=2, sort_keys=True) + "\n", encoding="utf-8"
-            )
-            launched = adapter_module.launch(profile_bundle.profile, prompt, project, env)
-        finally:
-            mediator.terminate()
-            try:
-                mediator.wait(timeout=5)
-            except subprocess.TimeoutExpired:
-                mediator.kill()
-                mediator.wait(timeout=5)
+        containment = adapter_module.realize_containment(profile_bundle.profile, project, env)
+        (out / "containment-realization.json").write_text(json.dumps(containment, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+        launched = adapter_module.launch(profile_bundle.profile, prompt, project, env)
         stdout, stderr = launched["stdout"], launched["stderr"]
         (out / "trace.jsonl").write_text(stdout, encoding="utf-8")
         if stderr:
@@ -425,6 +381,8 @@ def run_episode(
                 profile_errors.append("launch settings bytes differ from retained containment realization")
             if command_identity.get("mcp_config_sha256") != realization.get("mcp_config_sha256"):
                 profile_errors.append("launch MCP bytes differ from retained containment realization")
+            if command_identity.get("mcp_server_script_sha256") != realization.get("mcp_server_script_sha256"):
+                profile_errors.append("launch MCP server script differs from retained containment realization")
         auto_memory = (runtime_observation.get("memory_paths") or {}).get("auto") if isinstance(runtime_observation, dict) else None
         if isinstance(auto_memory, str) and auto_memory:
             try:

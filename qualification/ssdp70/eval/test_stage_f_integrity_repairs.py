@@ -85,25 +85,68 @@ class SurfaceAndContainmentHostileTests(unittest.TestCase):
     def setUp(self):
         self.profile_path = HERE / "profiles" / "claude-headless.template.json"
         self.capability_path = HERE / "capabilities" / "claude-headless.json"
-        # Containment mechanics tests use the substrate where path-selective Unix sockets exist.
-        # Linux/WSL rejection is tested explicitly below and is not waived for real launches.
-        self.platform_patcher = patch.object(claude.sys, "platform", "darwin")
-        self.platform_patcher.start()
-        self.addCleanup(self.platform_patcher.stop)
+
+    def runtime_observation(self, bundle, *, tools=None, servers=None, capabilities=None):
+        return {
+            "model": bundle.profile["agent_model"],
+            "runtime_version": bundle.profile["provider_runtime"]["version"],
+            "tools": list(bundle.profile["native_tools"]) if tools is None else tools,
+            "native_capabilities": [
+                item.split(":", 1)[1]
+                for item in bundle.profile["native_surface_requirements"]
+                if item.startswith("runtime_capability:")
+            ] if capabilities is None else capabilities,
+            "messaging_socket_path": "/run/user/test.sock",
+            "memory_paths": {"auto": "/tmp/run-owned-memory"},
+            "mcp_servers": [{"name": "ssdp70", "status": "connected"}] if servers is None else servers,
+        }
+
+    def executor_tree(self, root: Path):
+        project = root / "project"
+        private = root / "harness-private"
+        stub = private / "stub"
+        runtime_home = private / "runtime-home"
+        project.mkdir()
+        private.mkdir()
+        stub.mkdir()
+        runtime_home.mkdir()
+        (private / "side-effects.jsonl").write_text("", encoding="utf-8")
+        return project, private, stub, runtime_home
+
+    def executor_env(self, runtime_home: Path, project: Path | None = None):
+        env = claude.clean_env()
+        env.update({"HOME": str(runtime_home), "SSDP70_ACCOUNT": "agent"})
+        if project is not None:
+            runtime_tmp = project / ".qualification-tmp"
+            runtime_tmp.mkdir(exist_ok=True)
+            env.update({"TMPDIR": str(runtime_tmp), "TMP": str(runtime_tmp), "TEMP": str(runtime_tmp)})
+        return env
 
     def test_runtime_tool_surface_mismatch_fails_closed(self):
         bundle = core70.load_profile(self.profile_path, self.capability_path)
-        observation = {
-            "model": bundle.profile["agent_model"],
-            "runtime_version": bundle.profile["provider_runtime"]["version"],
-            "tools": list(bundle.profile["native_tools"]) + ["SendMessage"],
-            "native_capabilities": [],
-            "memory_paths": {},
-            "mcp_servers": [],
-        }
-        errors = core70.validate_runtime_observation(bundle, observation)
+        errors = core70.validate_runtime_observation(
+            bundle, self.runtime_observation(bundle, tools=list(bundle.profile["native_tools"]) + ["SendMessage"])
+        )
         self.assertTrue(any("native-tool surface differs" in error for error in errors))
         self.assertTrue(any("unclassified native tool" in error for error in errors))
+
+    def test_mcp_server_surface_mismatch_fails_closed(self):
+        bundle = core70.load_profile(self.profile_path, self.capability_path)
+        errors = core70.validate_runtime_observation(
+            bundle, self.runtime_observation(bundle, servers=[
+                {"name": "ssdp70", "status": "connected"},
+                {"name": "ambient", "status": "connected"},
+            ])
+        )
+        self.assertTrue(any("MCP server surface differs" in error for error in errors))
+        self.assertTrue(any("unclassified MCP server" in error for error in errors))
+
+    def test_mcp_server_must_be_connected(self):
+        bundle = core70.load_profile(self.profile_path, self.capability_path)
+        errors = core70.validate_runtime_observation(
+            bundle, self.runtime_observation(bundle, servers=[{"name": "ssdp70", "status": "failed"}])
+        )
+        self.assertTrue(any("is not connected" in error for error in errors))
 
     def test_declared_native_tool_without_classification_is_rejected(self):
         profile = json.loads(self.profile_path.read_text(encoding="utf-8"))
@@ -157,45 +200,12 @@ class SurfaceAndContainmentHostileTests(unittest.TestCase):
             with self.assertRaises(RuntimeError):
                 claude.clean_env()
 
-    def test_linux_executor_path_selective_mediator_fails_closed(self):
-        profile = json.loads(self.profile_path.read_text(encoding="utf-8"))
-        with tempfile.TemporaryDirectory() as td:
-            root = Path(td)
-            project = root / "project"
-            private = root / "harness-private"
-            runtime_home = private / "runtime-home"
-            project.mkdir()
-            private.mkdir()
-            runtime_home.mkdir()
-            env = claude.clean_env()
-            env.update({
-                "HOME": str(runtime_home),
-                "SSDP70_MEDIATOR_SOCKET": str(private / "mediator.sock"),
-                "SSDP70_ACCOUNT": "agent",
-            })
-            with patch.object(claude.sys, "platform", "linux"):
-                with self.assertRaises(RuntimeError) as caught:
-                    claude.realize_containment(profile, project, env)
-        message = str(caught.exception)
-        self.assertIn("path-selective Unix socket", message)
-        self.assertIn("allowAllUnixSockets", message)
-        self.assertIn("container/VM/mount boundary", message)
-
     def test_launch_refuses_missing_containment_configuration_before_subprocess(self):
         profile = json.loads(self.profile_path.read_text(encoding="utf-8"))
         with tempfile.TemporaryDirectory() as td:
             root = Path(td)
-            project = root / "project"
-            private = root / "harness-private"
-            runtime_home = private / "runtime-home"
-            project.mkdir()
-            private.mkdir()
-            runtime_home.mkdir()
-            env = {
-                "PATH": os.environ.get("PATH", ""),
-                "HOME": str(runtime_home),
-                "SSDP70_MEDIATOR_SOCKET": str(private / "mediator.sock"),
-            }
+            project, _, _, runtime_home = self.executor_tree(root)
+            env = self.executor_env(runtime_home)
             with self.assertRaises(RuntimeError) as caught:
                 claude.launch(profile, "x", project, env)
         self.assertIn("containment settings are absent", str(caught.exception))
@@ -217,40 +227,37 @@ class SurfaceAndContainmentHostileTests(unittest.TestCase):
             self.assertEqual(sandbox["filesystem"]["allowWrite"], [])
             self.assertEqual(sandbox["network"]["allowedDomains"], [])
             self.assertEqual(sandbox["network"]["allowUnixSockets"], [])
+            self.assertEqual(document["realization"]["mcp_servers"], [])
             self.assertTrue(sandbox["failIfUnavailable"])
             self.assertFalse(sandbox["allowUnsandboxedCommands"])
             self.assertEqual(claude.validate_containment_realization(profile, bundle, env), [])
 
-    def test_direct_stub_and_log_paths_are_not_exposed_to_executor(self):
+    def test_executor_uses_private_stdio_mcp_and_denies_all_unix_sockets(self):
         profile = json.loads(self.profile_path.read_text(encoding="utf-8"))
         with tempfile.TemporaryDirectory() as td:
             root = Path(td)
-            project = root / "project"
-            private = root / "harness-private"
-            stub = private / "stub"
-            log = private / "side-effects.jsonl"
-            runtime_home = private / "runtime-home"
-            for directory in (project, private, stub, runtime_home):
-                directory.mkdir(exist_ok=True)
-            log.write_text("", encoding="utf-8")
-            mediator = private / "mediator.sock"
-            env = claude.clean_env()
-            env.update({"HOME": str(runtime_home), "SSDP70_MEDIATOR_SOCKET": str(mediator), "SSDP70_ACCOUNT": "agent"})
+            project, private, stub, runtime_home = self.executor_tree(root)
+            env = self.executor_env(runtime_home)
             document = claude.realize_containment(profile, project, env)
             sandbox = document["settings"]["sandbox"]
+            self.assertEqual(sandbox["network"]["allowedDomains"], [])
+            self.assertEqual(sandbox["network"]["allowUnixSockets"], [])
+            self.assertFalse(sandbox["network"]["allowAllUnixSockets"])
             self.assertNotIn("SSDP70_STUB_DIR", env)
             self.assertNotIn("SSDP70_SIDE_EFFECT_LOG", env)
+            self.assertNotIn("SSDP70_MEDIATOR_SOCKET", env)
             self.assertIn(str(private.resolve()), sandbox["filesystem"]["denyRead"])
             self.assertIn(str(private.resolve()), sandbox["filesystem"]["denyWrite"])
-            self.assertNotIn(str(root.resolve()), sandbox["filesystem"]["denyWrite"])
-            self.assertIn("/proc", sandbox["filesystem"]["denyRead"])
-            settings_path = Path(document["realization"]["settings_file"])
             mcp_path = Path(document["realization"]["mcp_config"])
-            self.assertNotEqual(settings_path.parent, project)
+            mcp = json.loads(mcp_path.read_text(encoding="utf-8"))
+            self.assertEqual(set(mcp["mcpServers"]), {"ssdp70"})
+            server = mcp["mcpServers"]["ssdp70"]
+            self.assertEqual(server["type"], "stdio")
+            self.assertEqual(server["command"], claude.sys.executable)
+            self.assertIn(str(stub.resolve()), server["args"])
+            self.assertIn(str((private / "side-effects.jsonl").resolve()), server["args"])
             self.assertNotEqual(mcp_path.parent, project)
-            self.assertTrue(str(settings_path).startswith(str(private.resolve())))
-            self.assertTrue(str(mcp_path).startswith(str(private.resolve())))
-            self.assertEqual(sandbox["network"]["allowUnixSockets"], [str(mediator.resolve())])
+            self.assertEqual(claude.validate_containment_realization(profile, project, env), [])
 
     def test_control_file_mutation_during_launch_fails_closed(self):
         profile = json.loads(self.profile_path.read_text(encoding="utf-8"))
@@ -262,23 +269,8 @@ class SurfaceAndContainmentHostileTests(unittest.TestCase):
 
         with tempfile.TemporaryDirectory() as td:
             root = Path(td)
-            project = root / "project"
-            private = root / "harness-private"
-            runtime_home = private / "runtime-home"
-            runtime_tmp = project / ".qualification-tmp"
-            project.mkdir()
-            private.mkdir()
-            runtime_home.mkdir()
-            runtime_tmp.mkdir()
-            env = claude.clean_env()
-            env.update({
-                "HOME": str(runtime_home),
-                "TMPDIR": str(runtime_tmp),
-                "TMP": str(runtime_tmp),
-                "TEMP": str(runtime_tmp),
-                "SSDP70_MEDIATOR_SOCKET": str(private / "mediator.sock"),
-                "SSDP70_ACCOUNT": "agent",
-            })
+            project, _, _, runtime_home = self.executor_tree(root)
+            env = self.executor_env(runtime_home, project)
             document = claude.realize_containment(profile, project, env)
             mcp_path = Path(document["realization"]["mcp_config"])
 
@@ -299,46 +291,46 @@ class SurfaceAndContainmentHostileTests(unittest.TestCase):
             if item.startswith("runtime_capability:")
             and item != "runtime_capability:mcp_tool_ui_meta_v1"
         ]
-        observation = {
-            "model": bundle.profile["agent_model"],
-            "runtime_version": bundle.profile["provider_runtime"]["version"],
-            "tools": list(bundle.profile["native_tools"]),
-            "native_capabilities": capabilities,
-            "messaging_socket_path": "/run/user/test.sock",
-            "memory_paths": {"auto": "/tmp/run-owned-memory"},
-            "mcp_servers": [],
-        }
-        errors = core70.validate_runtime_observation(bundle, observation)
+        errors = core70.validate_runtime_observation(
+            bundle, self.runtime_observation(bundle, capabilities=capabilities)
+        )
         self.assertTrue(any("mcp_tool_ui_meta_v1" in error and "required classified native surface" in error for error in errors))
 
-    def test_realized_containment_exposes_only_mediator_not_stub_or_log_paths(self):
-        profile = json.loads(self.profile_path.read_text(encoding="utf-8"))
-        with tempfile.TemporaryDirectory() as td:
-            root = Path(td)
-            project = root / "project"
-            private = root / "harness-private"
-            project.mkdir()
-            private.mkdir()
-            runtime_home = private / "runtime-home"
-            runtime_home.mkdir()
-            mediator = private / "mediator.sock"
-            env = claude.clean_env()
-            env.update({"HOME": str(runtime_home), "SSDP70_MEDIATOR_SOCKET": str(mediator), "SSDP70_ACCOUNT": "agent"})
-            document = claude.realize_containment(profile, project, env)
-            filesystem = document["settings"]["sandbox"]["filesystem"]
-            self.assertEqual(filesystem["allowRead"], [str(project.resolve())])
-            self.assertEqual(filesystem["allowWrite"], [str(project.resolve())])
-            self.assertIn(str(private.resolve()), filesystem["denyRead"])
-            self.assertIn(str(private.resolve()), filesystem["denyWrite"])
-            self.assertNotIn(str(root.resolve()), filesystem["denyWrite"])
-            self.assertFalse(any(Path(path).resolve() in project.resolve().parents for path in filesystem["denyWrite"]))
-            self.assertEqual(document["settings"]["sandbox"]["network"]["allowedDomains"], [])
-            self.assertEqual(document["settings"]["sandbox"]["network"]["allowUnixSockets"], [str(mediator.resolve())])
-            self.assertNotIn("SSDP70_STUB_DIR", env)
-            self.assertNotIn("SSDP70_SIDE_EFFECT_LOG", env)
-            self.assertNotEqual(Path(document["realization"]["settings_file"]).parent, project)
-            self.assertNotEqual(Path(document["realization"]["mcp_config"]).parent, project)
-            self.assertEqual(claude.validate_containment_realization(profile, project, env), [])
+    def test_mcp_issue_and_delegate_native_events_normalize_to_core_semantics(self):
+        issue_result = json.dumps({
+            "returncode": 0, "stdout": "created NEW-1\n", "stderr": "",
+            "store_identity": "qualification-issue-standin", "operation": "create",
+            "object_ids": ["NEW-1"], "before_version": None, "after_version": "a" * 64,
+        })
+        delegate_result = json.dumps({
+            "returncode": 0, "stdout": "ok\n", "stderr": "", "delegate_id": "reviewer",
+        })
+        trace = "\n".join([
+            json.dumps({"type": "assistant", "message": {"content": [
+                {"type": "tool_use", "id": "i1", "name": "mcp__ssdp70__issues_create",
+                 "input": {"location": "x", "title": "t", "body": "b"}}
+            ]}}),
+            json.dumps({"type": "user", "message": {"content": [
+                {"type": "tool_result", "tool_use_id": "i1",
+                 "content": [{"type": "text", "text": issue_result}], "is_error": False}
+            ]}}),
+            json.dumps({"type": "assistant", "message": {"content": [
+                {"type": "tool_use", "id": "d1", "name": "mcp__ssdp70__delegate",
+                 "input": {"agent": "reviewer", "instruction": "check"}}
+            ]}}),
+            json.dumps({"type": "user", "message": {"content": [
+                {"type": "tool_result", "tool_use_id": "d1",
+                 "content": [{"type": "text", "text": delegate_result}], "is_error": False}
+            ]}}),
+        ])
+        events, mapping, errors, count = claude.normalize(trace, "mcp", {})
+        self.assertEqual(errors, [])
+        self.assertEqual(core70.validate_normalized_events(events, "mcp"), [])
+        self.assertEqual(core70.validate_completeness_map(count, mapping, events), [])
+        self.assertTrue(any(e["kind"] == "issue_evidence_access" and e["status"] == "result" for e in events))
+        self.assertTrue(any(e["kind"] == "mutation" and e["status"] == "result" for e in events))
+        self.assertTrue(any(e["kind"] == "delegate_call" for e in events))
+        self.assertTrue(any(e["kind"] == "delegate_return" for e in events))
 
 
 if __name__ == "__main__":

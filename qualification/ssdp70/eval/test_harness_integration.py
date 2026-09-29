@@ -162,7 +162,7 @@ class HarnessIntegration(unittest.TestCase):
             "containment_policy": {"kind": "fake-pre-effect"},
             "network_external_write_policy": {"network": "deny", "external_write": "sandbox"},
             "credential_service_account_policy": {"ambient": "deny"}, "provider_managed_unknowns": [],
-            "native_tools": ["Read"], "native_surface_requirements": [],
+            "native_tools": ["Read"], "native_mcp_servers": [], "native_surface_requirements": [],
         }
         write_json(self.profile_path, profile)
         write_json(self.cap_path, {"schema": 1, "capabilities": {
@@ -232,6 +232,7 @@ class HarnessIntegration(unittest.TestCase):
             "credential_service_account_policy": {"ambient": "deny"},
             "provider_managed_unknowns": [],
             "native_tools": ["Read"],
+            "native_mcp_servers": [],
             "native_surface_requirements": [],
         }
         write_json(profile_path, profile)

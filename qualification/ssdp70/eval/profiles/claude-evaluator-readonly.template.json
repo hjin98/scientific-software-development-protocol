@@ -110,5 +110,6 @@
         "*"
       ]
     }
-  ]
+  ],
+  "native_mcp_servers": []
 }

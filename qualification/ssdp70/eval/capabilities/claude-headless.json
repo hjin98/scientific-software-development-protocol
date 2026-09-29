@@ -11,16 +11,16 @@
       "scope": "ambient credentials denied; at most one explicitly supplied qualification-only parent auth source is scrubbed/denied from sandboxed subprocesses"
     },
     "delegation": {
-      "decision": "DENY",
-      "scope": "Agent/cross-session messaging/remote scheduling and trigger surfaces excluded"
+      "decision": "SANDBOX/MEDIATE",
+      "scope": "only the qualification-owned scripted stdio MCP delegate stand-in is mediated; native Agent/cross-session messaging/remote scheduling and trigger surfaces remain excluded"
     },
     "external_mutation": {
       "decision": "SANDBOX/MEDIATE",
-      "scope": "qualification-owned mediator only; runtime state isolated and auto-memory disabled. A mediator transport that would require broad Unix-socket access is not admitted."
+      "scope": "qualification-owned stdio MCP mediator only for declared stand-in mutations; runtime state isolated and auto-memory disabled"
     },
     "issue_evidence_store": {
       "decision": "SANDBOX/MEDIATE",
-      "scope": "qualification-owned mediator; executor has no direct state/log path. The native Unix-socket transport is admissible only where exact socket-path allowlisting is enforced; Linux/WSL native Claude sandbox realization fails closed."
+      "scope": "qualification-owned stdio MCP mediator; executor receives no direct stub/log path and has no Unix-socket mediator route"
     },
     "network_remote_service": {
       "decision": "DENY",
@@ -117,7 +117,7 @@
         "network_remote_service",
         "workspace_read_search_list"
       ],
-      "scope": "protocol support only; admitted profile requires zero MCP servers"
+      "scope": "runtime protocol support only; strict qualification MCP server exposes tools only and no arbitrary resources"
     },
     "runtime_capability:mcp_tool_ui_meta_v1": {
       "semantic_classes": [
@@ -131,13 +131,59 @@
         "network_remote_service",
         "external_mutation"
       ],
-      "scope": "runtime-created cross-session socket; restricted sandbox Unix-socket allow-list excludes it"
+      "scope": "runtime-created cross-session socket; restricted sandbox denies all Unix sockets to executor Bash"
     },
     "auto_memory_write": {
       "semantic_classes": [
         "external_mutation"
       ],
       "scope": "runtime auto-memory surface; disabled and isolated to fresh run-owned HOME; admission must prove no external write"
+    },
+    "mcp_server:ssdp70": {
+      "semantic_classes": [
+        "issue_evidence_store",
+        "delegation",
+        "external_mutation"
+      ],
+      "scope": "strict-config qualification-owned stdio server exposing only the six declared semantic stand-in tools"
+    },
+    "tool:mcp__ssdp70__issues_locations": {
+      "semantic_classes": [
+        "issue_evidence_store"
+      ],
+      "scope": "qualification-owned read-only issue stand-in operation over stdio MCP"
+    },
+    "tool:mcp__ssdp70__issues_search": {
+      "semantic_classes": [
+        "issue_evidence_store"
+      ],
+      "scope": "qualification-owned read-only issue stand-in operation over stdio MCP"
+    },
+    "tool:mcp__ssdp70__issues_show": {
+      "semantic_classes": [
+        "issue_evidence_store"
+      ],
+      "scope": "qualification-owned read-only issue stand-in operation over stdio MCP"
+    },
+    "tool:mcp__ssdp70__issues_create": {
+      "semantic_classes": [
+        "issue_evidence_store",
+        "external_mutation"
+      ],
+      "scope": "qualification-owned mediated issue mutation over stdio MCP; no live external service"
+    },
+    "tool:mcp__ssdp70__issues_comment": {
+      "semantic_classes": [
+        "issue_evidence_store",
+        "external_mutation"
+      ],
+      "scope": "qualification-owned mediated issue mutation over stdio MCP; no live external service"
+    },
+    "tool:mcp__ssdp70__delegate": {
+      "semantic_classes": [
+        "delegation"
+      ],
+      "scope": "scripted qualification-owned delegate stand-in over stdio MCP; cannot launch a live subagent"
     }
   }
 }
