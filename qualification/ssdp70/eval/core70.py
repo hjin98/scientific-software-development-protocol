@@ -230,8 +230,8 @@ def load_profile(profile_path: Path, capability_path: Path) -> ProfileBundle:
         "credential_service_account_policy",
         "provider_managed_unknowns",
         "native_tools",
-        "native_mcp_servers",
         "native_surface_requirements",
+        "mcp_servers",
     )
     absent = [name for name in required_profile if name not in profile]
     if absent:
@@ -241,11 +241,6 @@ def load_profile(profile_path: Path, capability_path: Path) -> ProfileBundle:
         raise ContractError("native_tools must be a list of non-empty strings")
     if len(native_tools) != len(set(native_tools)):
         raise ContractError("native_tools contains duplicates")
-    native_mcp_servers = profile["native_mcp_servers"]
-    if not isinstance(native_mcp_servers, list) or not all(isinstance(item, str) and item for item in native_mcp_servers): raise ContractError("native_mcp_servers must be a list of non-empty strings")
-    if len(native_mcp_servers) != len(set(native_mcp_servers)): raise ContractError("native_mcp_servers contains duplicates")
-    for server in native_mcp_servers:
-        if f"mcp_server:{server}" not in native_map: raise ContractError(f"MCP server {server!r} has no semantic capability classification")
     surface_requirements = profile["native_surface_requirements"]
     if not isinstance(surface_requirements, list) or not all(
         isinstance(item, str) and item for item in surface_requirements
@@ -259,6 +254,47 @@ def load_profile(profile_path: Path, capability_path: Path) -> ProfileBundle:
     for surface in surface_requirements:
         if surface not in native_map:
             raise ContractError(f"native surface {surface!r} has no semantic capability classification")
+
+    mcp_servers = profile["mcp_servers"]
+    if not isinstance(mcp_servers, list):
+        raise ContractError("mcp_servers must be a list")
+    mcp_names: set[str] = set()
+    declared_mcp_tools: list[str] = []
+    for index, server in enumerate(mcp_servers):
+        if not isinstance(server, dict):
+            raise ContractError(f"mcp_servers[{index}] must be an object")
+        name = server.get("name")
+        transport = server.get("transport")
+        server_id = server.get("server_id")
+        entrypoint = server.get("entrypoint")
+        tools = server.get("tools")
+        if not isinstance(name, str) or not name or name in mcp_names:
+            raise ContractError(f"mcp_servers[{index}] has invalid/duplicate name")
+        mcp_names.add(name)
+        if transport != "stdio":
+            raise ContractError(f"MCP server {name!r} must use stdio transport")
+        if not isinstance(server_id, str) or not server_id:
+            raise ContractError(f"MCP server {name!r} has no frozen server_id")
+        if not isinstance(entrypoint, str) or not entrypoint:
+            raise ContractError(f"MCP server {name!r} has no frozen entrypoint")
+        if not isinstance(tools, list) or not tools or not all(isinstance(tool, str) and tool for tool in tools):
+            raise ContractError(f"MCP server {name!r} has invalid tool surface")
+        if len(tools) != len(set(tools)):
+            raise ContractError(f"MCP server {name!r} tool surface contains duplicates")
+        if f"mcp_server:{name}" not in native_map:
+            raise ContractError(f"MCP server {name!r} has no semantic capability classification")
+        prefix = f"mcp__{name}__"
+        for tool in tools:
+            if not tool.startswith(prefix):
+                raise ContractError(f"MCP tool {tool!r} is not bound to declared server {name!r}")
+            if tool not in native_tools:
+                raise ContractError(f"MCP tool {tool!r} is missing from the exact native tool surface")
+            if f"tool:{tool}" not in native_map:
+                raise ContractError(f"MCP tool {tool!r} has no semantic capability classification")
+            declared_mcp_tools.append(tool)
+    native_mcp_tools = [tool for tool in native_tools if tool.startswith("mcp__")]
+    if sorted(declared_mcp_tools) != sorted(native_mcp_tools):
+        raise ContractError("declared MCP tool surface does not exactly match native_tools")
 
     unknowns = profile["provider_managed_unknowns"]
     if not isinstance(unknowns, list):
@@ -291,8 +327,8 @@ def load_profile(profile_path: Path, capability_path: Path) -> ProfileBundle:
         "credential_service_account_policy": profile["credential_service_account_policy"],
         "provider_managed_unknowns": unknowns,
         "native_tools": native_tools,
-        "native_mcp_servers": native_mcp_servers,
         "native_surface_requirements": surface_requirements,
+        "mcp_servers": mcp_servers,
     }
     return ProfileBundle(
         profile=profile,
@@ -508,14 +544,7 @@ def _validate_event_payload(kind: str, status: Any, payload: dict[str, Any], ind
         if status in {"result", "error"} and not _valid_sha256(payload.get("result_sha256")):
             errors.append(f"normalized event {index} network result_sha256 is invalid")
     elif kind == "issue_evidence_access":
-        _require_payload_keys(kind, payload, {"operation","resource_identity","store_identity","input","object_ids","before_version","after_version","tool_use_id","result_status","result_reference","result_sha256"}, index, errors)
-        if not isinstance(payload.get("object_ids"),list) or not all(isinstance(x,str) and x for x in payload.get("object_ids",[])): errors.append(f"normalized event {index} issue_evidence_access object_ids are invalid")
-        if status in {"result","error"}:
-            if not isinstance(payload.get("result_reference"),str) or not payload.get("result_reference"): errors.append(f"normalized event {index} issue_evidence_access result_reference is missing")
-            if not _valid_sha256(payload.get("result_sha256")): errors.append(f"normalized event {index} issue_evidence_access result_sha256 is invalid")
-            if "result_content" not in payload: errors.append(f"normalized event {index} issue_evidence_access result_content is missing")
-        if status=="result" and payload.get("operation")=="create" and not _valid_sha256(payload.get("after_version")): errors.append(f"normalized event {index} created issue lacks after_version")
-        if status=="result" and payload.get("operation")=="comment" and (not _valid_sha256(payload.get("before_version")) or not _valid_sha256(payload.get("after_version"))): errors.append(f"normalized event {index} issue comment lacks before/after versions")
+        _require_payload_keys(kind, payload, {"operation", "resource_identity", "input", "result_status"}, index, errors)
     elif kind == "termination":
         _require_payload_keys(kind, payload, {"state", "native_return_state", "terminal_result_exists"}, index, errors)
         if not isinstance(payload.get("state"), str) or not payload.get("state"):
@@ -945,6 +974,17 @@ def validate_launch_identity(profile: dict[str, Any], command_identity: Any) -> 
             errors.append("launched executable does not match frozen execution profile")
     if command_identity.get("tools") != profile.get("native_tools"):
         errors.append("launched exact native-tool surface does not match frozen execution profile")
+    if command_identity.get("mcp_servers") != profile.get("mcp_servers"):
+        errors.append("launched MCP server identity does not match frozen execution profile")
+    expected_mcp_names = [
+        server.get("name") for server in (profile.get("mcp_servers") or [])
+        if isinstance(server, dict)
+    ]
+    executable_digests = command_identity.get("mcp_server_executable_sha256")
+    if not isinstance(executable_digests, dict) or set(executable_digests) != set(expected_mcp_names):
+        errors.append("launched MCP server executable digest set does not match frozen execution profile")
+    elif any(not _valid_sha256(value) for value in executable_digests.values()):
+        errors.append("launched MCP server executable digest is malformed")
     containment = profile.get("containment_policy")
     if isinstance(containment, dict) and containment.get("kind") == "claude-code-restricted-sandbox-v1":
         if command_identity.get("restricted") is not True:
@@ -956,11 +996,9 @@ def validate_launch_identity(profile: dict[str, Any], command_identity: Any) -> 
         if command_identity.get("strict_mcp_config") is not True:
             errors.append("Claude launch did not require strict MCP configuration")
         if not isinstance(command_identity.get("mcp_config_file"), str) or not command_identity.get("mcp_config_file"):
-            errors.append("Claude launch did not bind an explicit strict MCP configuration")
+            errors.append("Claude launch did not bind an explicit run-owned MCP configuration")
         if not _valid_sha256(command_identity.get("mcp_config_sha256")):
-            errors.append("Claude launch did not bind the strict MCP configuration bytes")
-        if command_identity.get("mcp_servers") != profile.get("native_mcp_servers"):
-            errors.append("launched MCP server set does not match frozen execution profile")
+            errors.append("Claude launch did not bind the MCP configuration bytes")
     if "native_allowed_tools" in profile and command_identity.get("allowed_tools") != profile.get("native_allowed_tools"):
         errors.append("launched allowed-tool set does not match frozen execution profile")
     if "native_disallowed_tools" in profile and command_identity.get("disallowed_tools") != profile.get("native_disallowed_tools"):
@@ -969,47 +1007,94 @@ def validate_launch_identity(profile: dict[str, Any], command_identity: Any) -> 
 
 
 def validate_runtime_observation(bundle: ProfileBundle, observation: Any) -> list[str]:
-    errors: list[str]=[]
-    if _contains_unfrozen_marker(bundle.profile): errors.append("execution profile contains an unfrozen runtime/reasoning marker")
-    if not isinstance(observation,dict): return errors+["adapter did not expose runtime observation"]
-    if observation.get("model")!=bundle.profile.get("agent_model"): errors.append("runtime-observed model does not match frozen execution profile")
-    runtime=bundle.profile.get("provider_runtime"); expected_version=runtime.get("version") if isinstance(runtime,dict) else None; observed_version=observation.get("runtime_version")
-    if not isinstance(expected_version,str) or not expected_version: errors.append("execution profile has no frozen provider/runtime version")
-    elif observed_version!=expected_version: errors.append("runtime-observed provider/runtime version does not match frozen execution profile")
-    declared_tools=bundle.profile.get("native_tools"); observed_tools=observation.get("tools")
-    if not isinstance(observed_tools,list) or not all(isinstance(item,str) and item for item in observed_tools): errors.append("runtime init did not expose a valid native tools list"); observed_tools=[]
-    elif len(observed_tools)!=len(set(observed_tools)): errors.append("runtime init native tools list contains duplicates")
-    if isinstance(declared_tools,list) and set(observed_tools)!=set(declared_tools): errors.append(f"runtime native-tool surface differs from declared set: declared={sorted(declared_tools)}, observed={sorted(observed_tools)}")
-    native_map=bundle.capabilities.get("native_capabilities")
-    if not isinstance(native_map,dict): errors.append("native capability classification map is missing"); native_map={}
+    errors: list[str] = []
+    if _contains_unfrozen_marker(bundle.profile):
+        errors.append("execution profile contains an unfrozen runtime/reasoning marker")
+    if not isinstance(observation, dict):
+        return errors + ["adapter did not expose runtime observation"]
+    if observation.get("model") != bundle.profile.get("agent_model"):
+        errors.append("runtime-observed model does not match frozen execution profile")
+    runtime = bundle.profile.get("provider_runtime")
+    expected_version = runtime.get("version") if isinstance(runtime, dict) else None
+    observed_version = observation.get("runtime_version")
+    if not isinstance(expected_version, str) or not expected_version:
+        errors.append("execution profile has no frozen provider/runtime version")
+    elif observed_version != expected_version:
+        errors.append("runtime-observed provider/runtime version does not match frozen execution profile")
+
+    declared_tools = bundle.profile.get("native_tools")
+    observed_tools = observation.get("tools")
+    if not isinstance(observed_tools, list) or not all(isinstance(item, str) and item for item in observed_tools):
+        errors.append("runtime init did not expose a valid native tools list")
+        observed_tools = []
+    elif len(observed_tools) != len(set(observed_tools)):
+        errors.append("runtime init native tools list contains duplicates")
+    if isinstance(declared_tools, list) and set(observed_tools) != set(declared_tools):
+        errors.append(
+            f"runtime native-tool surface differs from declared set: declared={sorted(declared_tools)}, "
+            f"observed={sorted(observed_tools)}"
+        )
+
+    native_map = bundle.capabilities.get("native_capabilities")
+    if not isinstance(native_map, dict):
+        errors.append("native capability classification map is missing")
+        native_map = {}
     for tool in observed_tools:
-        if f"tool:{tool}" not in native_map: errors.append(f"runtime exposed unclassified native tool {tool!r}")
-    observed_caps=observation.get("native_capabilities")
-    if not isinstance(observed_caps,list) or not all(isinstance(item,str) and item for item in observed_caps): errors.append("runtime init native capabilities list is malformed"); observed_caps=[]
+        if f"tool:{tool}" not in native_map:
+            errors.append(f"runtime exposed unclassified native tool {tool!r}")
+    observed_caps = observation.get("native_capabilities")
+    if not isinstance(observed_caps, list) or not all(isinstance(item, str) and item for item in observed_caps):
+        errors.append("runtime init native capabilities list is malformed")
+        observed_caps = []
     for capability in observed_caps:
-        if f"runtime_capability:{capability}" not in native_map: errors.append(f"runtime exposed unclassified native capability {capability!r}")
-    if observation.get("messaging_socket_path") and "messaging_socket_path" not in native_map: errors.append("runtime exposed an unclassified messaging socket")
-    memory_paths=observation.get("memory_paths")
-    if isinstance(memory_paths,dict) and memory_paths.get("auto") and "auto_memory_write" not in native_map: errors.append("runtime exposed unclassified auto-memory state")
-    expected_mcp=bundle.profile.get("native_mcp_servers"); expected_mcp=expected_mcp if isinstance(expected_mcp,list) else []
-    observed_mcp=observation.get("mcp_servers"); parsed=[]
-    if not isinstance(observed_mcp,list): errors.append("runtime init MCP server list is malformed")
-    else:
-        for row in observed_mcp:
-            if not isinstance(row,dict) or not isinstance(row.get("name"),str) or not row["name"]: errors.append("runtime init MCP server entry is malformed"); continue
-            parsed.append((row["name"],row.get("status") if isinstance(row.get("status"),str) else None))
-    names=[name for name,_ in parsed]
-    if len(names)!=len(set(names)): errors.append("runtime init MCP server list contains duplicates")
-    if set(names)!=set(expected_mcp): errors.append(f"runtime MCP server surface differs from declared set: declared={sorted(expected_mcp)}, observed={sorted(names)}")
-    for name,status in parsed:
-        if f"mcp_server:{name}" not in native_map: errors.append(f"runtime exposed unclassified MCP server {name!r}")
-        if status!="connected": errors.append(f"runtime MCP server {name!r} is not connected: {status!r}")
-    exposed={f"tool:{tool}" for tool in observed_tools}; exposed.update(f"runtime_capability:{c}" for c in observed_caps); exposed.update(f"mcp_server:{n}" for n,_ in parsed)
-    if observation.get("messaging_socket_path"): exposed.add("messaging_socket_path")
-    if isinstance(memory_paths,dict) and memory_paths.get("auto"): exposed.add("auto_memory_write")
-    for required in bundle.profile.get("native_surface_requirements",[]):
-        if required not in exposed: errors.append(f"runtime did not expose required classified native surface {required!r}")
+        name = f"runtime_capability:{capability}"
+        if name not in native_map:
+            errors.append(f"runtime exposed unclassified native capability {capability!r}")
+    if observation.get("messaging_socket_path"):
+        if "messaging_socket_path" not in native_map:
+            errors.append("runtime exposed an unclassified messaging socket")
+    memory_paths = observation.get("memory_paths")
+    if isinstance(memory_paths, dict) and memory_paths.get("auto"):
+        if "auto_memory_write" not in native_map:
+            errors.append("runtime exposed unclassified auto-memory state")
+    expected_servers = bundle.profile.get("mcp_servers") or []
+    expected_names = [server.get("name") for server in expected_servers if isinstance(server, dict)]
+    mcp_servers = observation.get("mcp_servers")
+    if not isinstance(mcp_servers, list) or not all(isinstance(row, dict) for row in mcp_servers):
+        errors.append("runtime init MCP server list is malformed")
+        mcp_servers = []
+    observed_names: list[str] = []
+    for row in mcp_servers:
+        name = row.get("name")
+        status = row.get("status")
+        if not isinstance(name, str) or not name:
+            errors.append("runtime exposed MCP server without stable name")
+            continue
+        observed_names.append(name)
+        if status != "connected":
+            errors.append(f"runtime MCP server {name!r} is not connected")
+        if f"mcp_server:{name}" not in native_map:
+            errors.append(f"runtime exposed unclassified MCP server {name!r}")
+    if len(observed_names) != len(set(observed_names)):
+        errors.append("runtime init MCP server list contains duplicates")
+    if set(observed_names) != set(expected_names):
+        errors.append(
+            f"runtime MCP server surface differs from declared set: declared={sorted(expected_names)}, "
+            f"observed={sorted(observed_names)}"
+        )
+
+    exposed_surfaces = {f"tool:{tool}" for tool in observed_tools}
+    exposed_surfaces.update(f"mcp_server:{name}" for name in observed_names)
+    exposed_surfaces.update(f"runtime_capability:{capability}" for capability in observed_caps)
+    if observation.get("messaging_socket_path"):
+        exposed_surfaces.add("messaging_socket_path")
+    if isinstance(memory_paths, dict) and memory_paths.get("auto"):
+        exposed_surfaces.add("auto_memory_write")
+    for required in bundle.profile.get("native_surface_requirements", []):
+        if required not in exposed_surfaces:
+            errors.append(f"runtime did not expose required classified native surface {required!r}")
     return errors
+
 
 def validate_claim_observability(events: list[dict[str, Any]], claims: Iterable[str]) -> list[str]:
     normalized = {str(claim).lower() for claim in claims}

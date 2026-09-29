@@ -27,16 +27,17 @@
     "filesystem_read": "run-owned project/package plus immutable OS runtime reads needed by declared Bash families; host user/custody/run-state roots denied",
     "filesystem_write": "run-owned project only",
     "native_network": "deny",
-    "mediator_required": true,
+    "mediator_required": false,
     "ambient_host_home": "deny",
     "ambient_credentials": "deny",
     "runtime_temp": "run-owned project temporary directory",
-    "protected_control_files": "settings and strict MCP config live under the denied harness-private/runtime area outside the executor/evaluator working directory and are digest-checked across launch",
+    "protected_control_files": "settings and strict qualification-owned MCP config live under the denied harness-private/runtime area outside the executor working directory; settings, config, and private MCP server executable are digest-checked across launch",
     "denied_read_roots": "harness-private/runtime state, host HOME, /home, /root, /run/user, /proc, /mnt, /media, /srv, /var/tmp",
-    "mediator_transport": "qualification-owned stdio MCP child process; no executor-visible socket or network route"
+    "mediator_transport": "qualification-owned dependency-free stdio MCP; no executor Unix socket or native network route",
+    "mcp_stdio_required": true
   },
   "network_external_write_policy": {
-    "external_write": "sandbox-or-mediate-via-qualification-stdio-mcp",
+    "external_write": "sandbox-or-mediate",
     "network": "deny-native-executor-network"
   },
   "credential_service_account_policy": {
@@ -52,11 +53,11 @@
     "Edit",
     "Write",
     "Bash",
-    "mcp__ssdp70__issues_locations",
-    "mcp__ssdp70__issues_search",
-    "mcp__ssdp70__issues_show",
-    "mcp__ssdp70__issues_create",
-    "mcp__ssdp70__issues_comment",
+    "mcp__ssdp70__issue_locations",
+    "mcp__ssdp70__issue_search",
+    "mcp__ssdp70__issue_show",
+    "mcp__ssdp70__issue_create",
+    "mcp__ssdp70__issue_comment",
     "mcp__ssdp70__delegate"
   ],
   "native_surface_requirements": [
@@ -87,11 +88,11 @@
     "Bash(tail:*)",
     "Bash(wc:*)",
     "Bash(sed -n:*)",
-    "mcp__ssdp70__issues_locations",
-    "mcp__ssdp70__issues_search",
-    "mcp__ssdp70__issues_show",
-    "mcp__ssdp70__issues_create",
-    "mcp__ssdp70__issues_comment",
+    "mcp__ssdp70__issue_locations",
+    "mcp__ssdp70__issue_search",
+    "mcp__ssdp70__issue_show",
+    "mcp__ssdp70__issue_create",
+    "mcp__ssdp70__issue_comment",
     "mcp__ssdp70__delegate"
   ],
   "native_disallowed_tools": [
@@ -137,7 +138,20 @@
       ]
     }
   ],
-  "native_mcp_servers": [
-    "ssdp70"
+  "mcp_servers": [
+    {
+      "name": "ssdp70",
+      "transport": "stdio",
+      "server_id": "ssdp70-qualification-stdio-v1",
+      "entrypoint": "stub_tools/mediator.py",
+      "tools": [
+        "mcp__ssdp70__issue_locations",
+        "mcp__ssdp70__issue_search",
+        "mcp__ssdp70__issue_show",
+        "mcp__ssdp70__issue_create",
+        "mcp__ssdp70__issue_comment",
+        "mcp__ssdp70__delegate"
+      ]
+    }
   ]
 }

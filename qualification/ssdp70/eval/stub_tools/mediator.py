@@ -1,210 +1,314 @@
 #!/usr/bin/env python3
-"""Qualification-owned stdio MCP mediator for Stage F stand-ins."""
+"""Qualification-owned dependency-free stdio MCP server for SSDP 7.0 Stage F stand-ins."""
 from __future__ import annotations
+
 import argparse
 import hashlib
 import json
-import os
 import sys
 import time
 from pathlib import Path
 from typing import Any
 
-SERVER_NAME = "ssdp70"
+SERVER_NAME = "ssdp70-qualification"
 SERVER_VERSION = "1"
-PROTOCOL_VERSION = "2025-06-18"
-MAX_LINE_BYTES = 1024 * 1024
+SERVER_ID = "ssdp70-qualification-stdio-v1"
+PROTOCOL_VERSION = "2025-11-25"
+STORE_IDENTITY = "ssdp70-private-issue-standin"
+
 
 def load_json(path: Path) -> Any:
     return json.loads(path.read_text(encoding="utf-8"))
 
-def file_sha256(path: Path | None) -> str | None:
-    if path is None or not path.is_file():
-        return None
+
+def sha256_file(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def tool(name: str, description: str, properties: dict[str, Any], required: list[str] | None = None) -> dict[str, Any]:
+    return {
+        "name": name,
+        "description": description,
+        "inputSchema": {
+            "type": "object",
+            "properties": properties,
+            "required": required or [],
+            "additionalProperties": False,
+        },
+    }
+
+
+TOOLS = (
+    tool("issue_locations", "List qualification issue-store locations and availability.", {}),
+    tool("issue_search", "Search the qualification-owned issue stand-in.", {
+        "query": {"type": "string"}, "location": {"type": "string"},
+    }, ["query"]),
+    tool("issue_show", "Show one issue from the qualification-owned issue stand-in.", {
+        "issue_id": {"type": "string"},
+    }, ["issue_id"]),
+    tool("issue_create", "Create one issue in an available qualification-owned stand-in location.", {
+        "location": {"type": "string"}, "title": {"type": "string"}, "body": {"type": "string"},
+        "labels": {"type": "array", "items": {"type": "string"}},
+    }, ["location", "title", "body"]),
+    tool("issue_comment", "Append a comment to one qualification-owned stand-in issue.", {
+        "issue_id": {"type": "string"}, "body": {"type": "string"},
+    }, ["issue_id", "body"]),
+    tool("delegate", "Call one scripted qualification delegate.", {
+        "agent": {"type": "string"}, "instruction": {"type": "string"},
+    }, ["agent", "instruction"]),
+)
+
 
 class Store:
     def __init__(self, stub_root: Path, log_path: Path, account: str):
-        self.stub_root=stub_root
-        self.issues_root=stub_root/"issues"
-        self.delegates_root=stub_root/"delegates"
-        self.log_path=log_path
-        self.account=account
-        self.counter=0
+        self.stub_root = stub_root.resolve()
+        self.issues_root = (self.stub_root / "issues").resolve()
+        self.delegates_root = (self.stub_root / "delegates").resolve()
+        self.log_path = log_path.resolve()
+        self.account = account
+        self.counter = 0
 
     def log(self, event: dict[str, Any]) -> None:
         with self.log_path.open("a", encoding="utf-8") as handle:
-            handle.write(json.dumps({"ts":time.time(),"account":self.account,**event}, sort_keys=True)+"\n")
+            handle.write(json.dumps({"ts": time.time(), "account": self.account, **event}, sort_keys=True) + "\n")
 
     def config(self) -> dict[str, Any]:
-        path=self.issues_root/"_config.json"
-        return load_json(path) if path.is_file() else {"locations":{}}
+        path = self.issues_root / "_config.json"
+        return load_json(path) if path.is_file() else {"locations": {}}
 
     def available(self, location: str) -> bool:
-        return self.config().get("locations",{}).get(location)=="available"
+        return self.config().get("locations", {}).get(location) == "available"
 
     def records(self):
         if not self.issues_root.is_dir():
             return
-        for loc_dir in sorted(p for p in self.issues_root.iterdir() if p.is_dir()):
+        for loc_dir in sorted(path for path in self.issues_root.iterdir() if path.is_dir()):
             for path in sorted(loc_dir.glob("*.json")):
-                yield loc_dir.name,path
+                yield loc_dir.name, path
 
     def find(self, issue_id: str):
-        for location,path in self.records() or ():
-            if path.stem==issue_id:
-                return location,path
-        return None,None
+        for location, path in self.records() or ():
+            if path.stem == issue_id:
+                return location, path
+        return None, None
 
     @staticmethod
-    def response(*, returncode:int, operation:str, stdout:str="", stderr:str="", object_ids:list[str]|None=None,
-                 before_version:str|None=None, after_version:str|None=None, **extra:Any) -> dict[str,Any]:
-        return {"returncode":returncode,"stdout":stdout,"stderr":stderr,"store_identity":"qualification-issue-standin",
-                "operation":operation,"object_ids":object_ids or [],"before_version":before_version,"after_version":after_version,**extra}
+    def result(returncode: int, stdout: str = "", stderr: str = "", **evidence: Any) -> dict[str, Any]:
+        return {
+            "returncode": returncode,
+            "stdout": stdout,
+            "stderr": stderr,
+            "evidence": {"store_identity": STORE_IDENTITY, **evidence},
+        }
 
-    def issues_locations(self, _args):
-        locations=self.config().get("locations",{})
-        self.log({"tool":"issues","op":"locations"})
-        return self.response(returncode=0,operation="locations",stdout="".join(f"{k}: {v}\n" for k,v in sorted(locations.items())),object_ids=sorted(locations))
+    def issue_locations(self, args: dict[str, Any]) -> dict[str, Any]:
+        locations = self.config().get("locations", {})
+        return self.result(
+            0, "".join(f"{key}: {value}\n" for key, value in sorted(locations.items())),
+            operation="locations", object_ids=sorted(locations),
+            before_object_version=None, after_object_version=None,
+        )
 
-    def issues_search(self,args):
-        query,location=args.get("query"),args.get("location")
-        if not isinstance(query,str) or (location is not None and not isinstance(location,str)):
-            return self.response(returncode=2,operation="search",stderr="invalid search request\n")
-        self.log({"tool":"issues","op":"search","query":query,"location":location})
-        locations=self.config().get("locations",{})
-        rows=[]; ids=[]
+    def issue_search(self, args: dict[str, Any]) -> dict[str, Any]:
+        query, location = args.get("query"), args.get("location")
+        if not isinstance(query, str) or (location is not None and not isinstance(location, str)):
+            return self.result(2, stderr="invalid search request\n", operation="search", object_ids=[])
+        self.log({"tool": "issues", "op": "search", "query": query, "location": location})
+        locations = self.config().get("locations", {})
+        rows: list[str] = []
+        object_ids: list[str] = []
         for target in ([location] if location else sorted(locations)):
             if not self.available(target):
                 rows.append(f"[{target}] UNAVAILABLE: this location cannot be searched\n")
                 continue
-            for loc,path in self.records() or ():
-                if loc==target:
-                    data=load_json(path)
+            for loc, path in self.records() or ():
+                if loc == target:
+                    data = load_json(path)
                     if query.lower() in json.dumps(data).lower():
-                        ids.append(path.stem); rows.append(f"[{loc}] {path.stem}: {data.get('title','')}\n")
-        return self.response(returncode=0,operation="search",stdout="".join(rows),object_ids=ids,query=query,location=location)
+                        rows.append(f"[{loc}] {path.stem}: {data.get('title', '')}\n")
+                        object_ids.append(path.stem)
+        return self.result(
+            0, "".join(rows), operation="search", query=query, object_ids=object_ids,
+            before_object_version=None, after_object_version=None,
+        )
 
-    def issues_show(self,args):
-        issue_id=args.get("issue_id")
-        if not isinstance(issue_id,str):
-            return self.response(returncode=2,operation="show",stderr="invalid issue id\n")
-        self.log({"tool":"issues","op":"show","issue_id":issue_id})
-        location,path=self.find(issue_id)
+    def issue_show(self, args: dict[str, Any]) -> dict[str, Any]:
+        issue_id = args.get("issue_id")
+        if not isinstance(issue_id, str):
+            return self.result(2, stderr="invalid issue id\n", operation="show", object_ids=[])
+        self.log({"tool": "issues", "op": "show", "issue_id": issue_id})
+        location, path = self.find(issue_id)
         if path is None:
-            return self.response(returncode=1,operation="show",stderr=f"no issue {issue_id}\n",object_ids=[issue_id])
+            return self.result(1, stderr=f"no issue {issue_id}\n", operation="show", object_ids=[issue_id])
         if not self.available(location):
-            return self.response(returncode=1,operation="show",stderr=f"[{location}] UNAVAILABLE\n",object_ids=[issue_id])
-        version=file_sha256(path); data=load_json(path)
-        return self.response(returncode=0,operation="show",stdout=json.dumps({"id":issue_id,"location":location,**data},indent=2)+"\n",
-                             object_ids=[issue_id],before_version=version,after_version=version,location=location)
+            return self.result(1, stderr=f"[{location}] UNAVAILABLE\n", operation="show", object_ids=[issue_id])
+        version = sha256_file(path)
+        data = load_json(path)
+        return self.result(
+            0, json.dumps({"id": issue_id, "location": location, **data}, indent=2) + "\n",
+            operation="show", object_ids=[issue_id],
+            before_object_version=version, after_object_version=version,
+        )
 
-    def issues_create(self,args):
-        location,title,body,labels=args.get("location"),args.get("title"),args.get("body"),args.get("labels",[])
-        if not all(isinstance(x,str) for x in (location,title,body)) or not isinstance(labels,list) or not all(isinstance(x,str) for x in labels):
-            return self.response(returncode=2,operation="create",stderr="invalid create request\n")
-        self.log({"tool":"issues","op":"create","location":location,"title":title,"body":body,"labels":labels})
+    def issue_create(self, args: dict[str, Any]) -> dict[str, Any]:
+        location, title, body = args.get("location"), args.get("title"), args.get("body")
+        labels = args.get("labels", [])
+        if not all(isinstance(value, str) for value in (location, title, body)) or not isinstance(labels, list) or not all(isinstance(value, str) for value in labels):
+            return self.result(2, stderr="invalid create request\n", operation="create", object_ids=[])
+        self.log({"tool": "issues", "op": "create", "location": location, "title": title, "body": body, "labels": labels})
         if not self.available(location):
-            return self.response(returncode=1,operation="create",stderr=f"[{location}] UNAVAILABLE: write refused\n",location=location)
-        target=self.issues_root/location; target.mkdir(parents=True,exist_ok=True)
-        self.counter+=1
-        issue_id=f"NEW-{int(time.time()*1000)%10**9:09d}-{self.counter:04d}"
-        path=target/f"{issue_id}.json"
-        path.write_text(json.dumps({"title":title,"labels":labels,"body":body,"author":self.account,"comments":[]},indent=2)+"\n",encoding="utf-8")
-        return self.response(returncode=0,operation="create",stdout=f"created {issue_id} in {location} as {self.account}\n",
-                             object_ids=[issue_id],after_version=file_sha256(path),location=location)
+            return self.result(1, stderr=f"[{location}] UNAVAILABLE: write refused\n", operation="create", object_ids=[])
+        target = self.issues_root / location
+        target.mkdir(parents=True, exist_ok=True)
+        self.counter += 1
+        issue_id = f"NEW-{int(time.time() * 1000) % 10**9:09d}-{self.counter:04d}"
+        path = target / f"{issue_id}.json"
+        path.write_text(json.dumps({
+            "title": title, "labels": labels, "body": body, "author": self.account, "comments": [],
+        }, indent=2) + "\n", encoding="utf-8")
+        return self.result(
+            0, f"created {issue_id} in {location} as {self.account}\n",
+            operation="create", object_ids=[issue_id],
+            before_object_version=None, after_object_version=sha256_file(path),
+        )
 
-    def issues_comment(self,args):
-        issue_id,body=args.get("issue_id"),args.get("body")
-        if not isinstance(issue_id,str) or not isinstance(body,str):
-            return self.response(returncode=2,operation="comment",stderr="invalid comment request\n")
-        self.log({"tool":"issues","op":"comment","issue_id":issue_id,"body":body})
-        location,path=self.find(issue_id)
+    def issue_comment(self, args: dict[str, Any]) -> dict[str, Any]:
+        issue_id, body = args.get("issue_id"), args.get("body")
+        if not isinstance(issue_id, str) or not isinstance(body, str):
+            return self.result(2, stderr="invalid comment request\n", operation="comment", object_ids=[])
+        self.log({"tool": "issues", "op": "comment", "issue_id": issue_id, "body": body})
+        location, path = self.find(issue_id)
         if path is None or not self.available(location):
-            return self.response(returncode=1,operation="comment",stderr="comment refused: unknown or unavailable issue\n",object_ids=[issue_id])
-        before=file_sha256(path); data=load_json(path)
-        data.setdefault("comments",[]).append({"author":self.account,"date":time.strftime("%Y-%m-%d"),"body":body})
-        path.write_text(json.dumps(data,indent=2)+"\n",encoding="utf-8")
-        return self.response(returncode=0,operation="comment",stdout=f"commented on {issue_id} as {self.account}\n",
-                             object_ids=[issue_id],before_version=before,after_version=file_sha256(path),location=location)
+            return self.result(1, stderr="comment refused: unknown or unavailable issue\n", operation="comment", object_ids=[issue_id])
+        before = sha256_file(path)
+        data = load_json(path)
+        data.setdefault("comments", []).append({
+            "author": self.account, "date": time.strftime("%Y-%m-%d"), "body": body,
+        })
+        path.write_text(json.dumps(data, indent=2) + "\n", encoding="utf-8")
+        return self.result(
+            0, f"commented on {issue_id} as {self.account}\n",
+            operation="comment", object_ids=[issue_id],
+            before_object_version=before, after_object_version=sha256_file(path),
+        )
 
-    def delegate(self,args):
-        agent,instruction=args.get("agent"),args.get("instruction")
-        if not isinstance(agent,str) or not isinstance(instruction,str):
-            return {"returncode":2,"stdout":"","stderr":"invalid delegate request\n","delegate_id":agent}
-        stub=self.delegates_root/f"{agent}.json"
-        self.log({"tool":"delegate","agent":agent,"instruction":instruction,"known_agent":stub.is_file()})
+    def delegate(self, args: dict[str, Any]) -> dict[str, Any]:
+        agent, instruction = args.get("agent"), args.get("instruction")
+        if not isinstance(agent, str) or not isinstance(instruction, str):
+            return self.result(2, stderr="invalid delegate request\n", operation="delegate", object_ids=[])
+        stub = self.delegates_root / f"{agent}.json"
+        self.log({"tool": "delegate", "agent": agent, "instruction": instruction, "known_agent": stub.is_file()})
         if not stub.is_file():
-            return {"returncode":2,"stdout":"","stderr":f"delegate: no agent named {agent!r} is available\n","delegate_id":agent}
-        value=load_json(stub).get("return")
-        return {"returncode":0,"stdout":(value if isinstance(value,str) else json.dumps(value))+"\n","stderr":"","delegate_id":agent}
+            return self.result(2, stderr=f"delegate: no agent named {agent!r} is available\n", operation="delegate", object_ids=[agent])
+        value = load_json(stub).get("return")
+        text = value if isinstance(value, str) else json.dumps(value)
+        return self.result(0, text + "\n", operation="delegate", object_ids=[agent])
 
-    def call(self,name,args):
-        handlers={"issues_locations":self.issues_locations,"issues_search":self.issues_search,"issues_show":self.issues_show,
-                  "issues_create":self.issues_create,"issues_comment":self.issues_comment,"delegate":self.delegate}
-        handler=handlers.get(name)
-        return handler(args) if handler else {"returncode":2,"stdout":"","stderr":f"unsupported mediated tool {name!r}\n"}
+    def call(self, name: str, args: dict[str, Any]) -> dict[str, Any]:
+        handlers = {
+            "issue_locations": self.issue_locations, "issue_search": self.issue_search,
+            "issue_show": self.issue_show, "issue_create": self.issue_create,
+            "issue_comment": self.issue_comment, "delegate": self.delegate,
+        }
+        handler = handlers.get(name)
+        if handler is None:
+            return self.result(2, stderr=f"unsupported MCP tool {name!r}\n", operation="unknown", object_ids=[])
+        return handler(args)
 
-TOOLS=[
- {"name":"issues_locations","description":"List qualification-owned issue stand-in locations and availability.","inputSchema":{"type":"object","properties":{},"additionalProperties":False}},
- {"name":"issues_search","description":"Search the qualification-owned issue stand-in.","inputSchema":{"type":"object","properties":{"query":{"type":"string"},"location":{"type":"string"}},"required":["query"],"additionalProperties":False}},
- {"name":"issues_show","description":"Read one qualification-owned stand-in issue.","inputSchema":{"type":"object","properties":{"issue_id":{"type":"string"}},"required":["issue_id"],"additionalProperties":False}},
- {"name":"issues_create","description":"Create an issue only in the qualification-owned stand-in store.","inputSchema":{"type":"object","properties":{"location":{"type":"string"},"title":{"type":"string"},"body":{"type":"string"},"labels":{"type":"array","items":{"type":"string"}}},"required":["location","title","body"],"additionalProperties":False}},
- {"name":"issues_comment","description":"Comment only on an issue in the qualification-owned stand-in store.","inputSchema":{"type":"object","properties":{"issue_id":{"type":"string"},"body":{"type":"string"}},"required":["issue_id","body"],"additionalProperties":False}},
- {"name":"delegate","description":"Call a scripted qualification-owned delegate stand-in; this cannot launch a live subagent.","inputSchema":{"type":"object","properties":{"agent":{"type":"string"},"instruction":{"type":"string"}},"required":["agent","instruction"],"additionalProperties":False}},
-]
 
-def write_message(message):
-    sys.stdout.write(json.dumps(message,separators=(",",":"),sort_keys=True)+"\n"); sys.stdout.flush()
+class Server:
+    def __init__(self, store: Store, server_id: str):
+        self.store = store
+        self.server_id = server_id
 
-def rpc_error(request_id,code,message):
-    return {"jsonrpc":"2.0","id":request_id,"error":{"code":code,"message":message}}
+    @staticmethod
+    def result(request_id: Any, value: Any) -> dict[str, Any]:
+        return {"jsonrpc": "2.0", "id": request_id, "result": value}
 
-def tool_result(payload):
-    return {"content":[{"type":"text","text":json.dumps(payload,sort_keys=True)}],"isError":int(payload.get("returncode",2))!=0}
+    @staticmethod
+    def error(request_id: Any, code: int, message: str) -> dict[str, Any]:
+        return {"jsonrpc": "2.0", "id": request_id, "error": {"code": code, "message": message}}
 
-def handle_message(store,message):
-    if not isinstance(message,dict) or message.get("jsonrpc")!="2.0":
-        return rpc_error(message.get("id") if isinstance(message,dict) else None,-32600,"Invalid Request")
-    method,request_id,params=message.get("method"),message.get("id"),message.get("params") or {}
-    if method=="initialize":
-        return {"jsonrpc":"2.0","id":request_id,"result":{"protocolVersion":PROTOCOL_VERSION,"capabilities":{"tools":{"listChanged":False}},"serverInfo":{"name":SERVER_NAME,"version":SERVER_VERSION}}}
-    if method in {"notifications/initialized","notifications/cancelled"}: return None
-    if method=="ping": return {"jsonrpc":"2.0","id":request_id,"result":{}}
-    if method=="tools/list": return {"jsonrpc":"2.0","id":request_id,"result":{"tools":TOOLS}}
-    if method=="tools/call":
-        if not isinstance(params,dict) or not isinstance(params.get("name"),str): return rpc_error(request_id,-32602,"Invalid tools/call params")
-        args=params.get("arguments") or {}
-        if not isinstance(args,dict): return rpc_error(request_id,-32602,"Tool arguments must be an object")
-        return {"jsonrpc":"2.0","id":request_id,"result":tool_result(store.call(params["name"],args))}
-    return None if request_id is None else rpc_error(request_id,-32601,f"Method not found: {method}")
+    def dispatch(self, request: Any) -> dict[str, Any] | None:
+        if not isinstance(request, dict) or request.get("jsonrpc") != "2.0":
+            return self.error(request.get("id") if isinstance(request, dict) else None, -32600, "Invalid Request")
+        request_id = request.get("id")
+        method = request.get("method")
+        params = request.get("params") or {}
+        if not isinstance(params, dict):
+            return self.error(request_id, -32602, "Invalid params")
+        if method == "notifications/initialized" or request_id is None:
+            return None
+        if method == "initialize":
+            requested = params.get("protocolVersion")
+            protocol = requested if isinstance(requested, str) and requested else PROTOCOL_VERSION
+            return self.result(request_id, {
+                "protocolVersion": protocol,
+                "capabilities": {"tools": {"listChanged": False}},
+                "serverInfo": {"name": SERVER_NAME, "version": SERVER_VERSION},
+                "instructions": f"Private Stage F qualification stand-ins ({self.server_id}).",
+            })
+        if method == "ping":
+            return self.result(request_id, {})
+        if method == "tools/list":
+            return self.result(request_id, {"tools": list(TOOLS)})
+        if method == "tools/call":
+            name = params.get("name")
+            args = params.get("arguments", {})
+            if not isinstance(name, str) or not isinstance(args, dict):
+                return self.error(request_id, -32602, "Invalid tool call")
+            payload = self.store.call(name, args)
+            return self.result(request_id, {
+                "content": [{"type": "text", "text": json.dumps(payload, sort_keys=True)}],
+                "isError": payload["returncode"] != 0,
+            })
+        return self.error(request_id, -32601, "Method not found")
 
-def serve(store):
-    for raw in sys.stdin.buffer:
-        if len(raw)>MAX_LINE_BYTES:
-            write_message(rpc_error(None,-32700,"MCP request exceeds maximum line size")); return 2
-        if not raw.strip(): continue
-        try: message=json.loads(raw)
-        except json.JSONDecodeError:
-            write_message(rpc_error(None,-32700,"Parse error")); continue
-        try: response=handle_message(store,message)
+
+def main() -> int:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--stub-root", type=Path, required=True)
+    parser.add_argument("--side-effect-log", type=Path, required=True)
+    parser.add_argument("--account-file", type=Path, required=True)
+    parser.add_argument("--server-id", required=True)
+    parser.add_argument("--expected-self-sha256", required=True)
+    args = parser.parse_args()
+
+    if args.server_id != SERVER_ID:
+        print("server identity mismatch", file=sys.stderr)
+        return 2
+    actual_self = sha256_file(Path(__file__).resolve())
+    if args.expected_self_sha256 != actual_self:
+        print("server executable digest mismatch", file=sys.stderr)
+        return 2
+    stub_root = args.stub_root.resolve()
+    log_path = args.side_effect_log.resolve()
+    if not stub_root.is_dir() or not args.account_file.is_file():
+        print("private MCP state is unavailable", file=sys.stderr)
+        return 2
+    account = args.account_file.read_text(encoding="utf-8").strip()
+    if not account:
+        print("private MCP account identity is empty", file=sys.stderr)
+        return 2
+    log_path.parent.mkdir(parents=True, exist_ok=True)
+    log_path.touch(exist_ok=True)
+
+    server = Server(Store(stub_root, log_path, account), args.server_id)
+    for line in sys.stdin:
+        if not line.strip():
+            continue
+        request: Any = None
+        try:
+            request = json.loads(line)
+            response = server.dispatch(request)
         except Exception as exc:
-            response=rpc_error(message.get("id") if isinstance(message,dict) else None,-32603,f"Internal mediator error: {exc}")
-        if response is not None: write_message(response)
+            request_id = request.get("id") if isinstance(request, dict) else None
+            response = Server.error(request_id, -32603, f"Internal error: {exc}")
+        if response is not None:
+            sys.stdout.write(json.dumps(response, separators=(",", ":"), sort_keys=True) + "\n")
+            sys.stdout.flush()
     return 0
 
-def main():
-    parser=argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--stdio",action="store_true")
-    parser.add_argument("--stub-root",type=Path,required=True)
-    parser.add_argument("--side-effect-log",type=Path,required=True)
-    parser.add_argument("--account",required=True)
-    args=parser.parse_args()
-    if not args.stdio: parser.error("only --stdio transport is supported")
-    args.side_effect_log.parent.mkdir(parents=True,exist_ok=True); args.side_effect_log.touch()
-    store=Store(args.stub_root,args.side_effect_log,args.account)
-    os.environ.clear()
-    return serve(store)
 
-if __name__=="__main__":
+if __name__ == "__main__":
     raise SystemExit(main())

@@ -30,6 +30,19 @@ READ_TOOLS = {"Read", "Grep", "Glob"}
 MUTATION_TOOLS = {"Write", "Edit", "NotebookEdit", "MultiEdit"}
 NETWORK_TOOLS = {"WebFetch", "WebSearch"}
 DELEGATE_TOOLS = {"Agent"}
+MCP_SERVER_NAME = "ssdp70"
+MCP_SERVER_ID = "ssdp70-qualification-stdio-v1"
+MCP_TOOL_PREFIX = f"mcp__{MCP_SERVER_NAME}__"
+MCP_ISSUE_READ_TOOLS = {
+    f"{MCP_TOOL_PREFIX}issue_locations": "locations",
+    f"{MCP_TOOL_PREFIX}issue_search": "search",
+    f"{MCP_TOOL_PREFIX}issue_show": "show",
+}
+MCP_ISSUE_MUTATION_TOOLS = {
+    f"{MCP_TOOL_PREFIX}issue_create": "create",
+    f"{MCP_TOOL_PREFIX}issue_comment": "comment",
+}
+MCP_DELEGATE_TOOL = f"{MCP_TOOL_PREFIX}delegate"
 SAFE_ENV_KEYS = {
     "PATH", "LANG", "LC_ALL", "LC_CTYPE", "TERM",
     "SSL_CERT_FILE", "SSL_CERT_DIR", "CLAUDE_CODE_SUBPROCESS_ENV_SCRUB", "DISABLE_AUTOUPDATER",
@@ -42,16 +55,6 @@ QUALIFICATION_AUTH_ENV = {
     "SSDP70_ANTHROPIC_AUTH_TOKEN": "ANTHROPIC_AUTH_TOKEN",
 }
 PARENT_AUTH_ENV = set(QUALIFICATION_AUTH_ENV.values())
-MCP_SERVER_NAME = "ssdp70"
-MCP_ISSUE_TOOLS = {
-    "mcp__ssdp70__issues_locations": "locations",
-    "mcp__ssdp70__issues_search": "search",
-    "mcp__ssdp70__issues_show": "show",
-    "mcp__ssdp70__issues_create": "create",
-    "mcp__ssdp70__issues_comment": "comment",
-}
-MCP_WRITE_ISSUE_TOOLS = {"mcp__ssdp70__issues_create", "mcp__ssdp70__issues_comment"}
-MCP_DELEGATE_TOOL = "mcp__ssdp70__delegate"
 
 
 def clean_env() -> dict[str, str]:
@@ -75,6 +78,91 @@ def clean_env() -> dict[str, str]:
     env["CLAUDE_CODE_DISABLE_ARTIFACT"] = "1"
     env["CLAUDE_CODE_DISABLE_BACKGROUND_TASKS"] = "1"
     return env
+
+
+def _private_mcp_paths(private_root: Path) -> dict[str, Path]:
+    return {
+        "server": private_root / "mcp-server.py",
+        "stub": private_root / "stub",
+        "log": private_root / "side-effects.jsonl",
+        "account": private_root / "mcp-account.txt",
+    }
+
+
+def _declared_mcp_servers(profile: dict[str, Any]) -> list[dict[str, Any]]:
+    servers = profile.get("mcp_servers") or []
+    if not isinstance(servers, list):
+        raise RuntimeError("execution profile mcp_servers is malformed")
+    return servers
+
+
+def _mcp_config_document(profile: dict[str, Any], private_root: Path) -> tuple[dict[str, Any], list[dict[str, Any]]]:
+    servers = _declared_mcp_servers(profile)
+    if not servers:
+        return {"mcpServers": {}}, []
+    if len(servers) != 1:
+        raise RuntimeError("Claude Stage F profile requires exactly one qualification MCP server")
+    declared = servers[0]
+    if declared.get("name") != MCP_SERVER_NAME or declared.get("transport") != "stdio" or declared.get("server_id") != MCP_SERVER_ID:
+        raise RuntimeError("qualification MCP server identity differs from the frozen profile")
+    expected_tools = {
+        f"{MCP_TOOL_PREFIX}issue_locations",
+        f"{MCP_TOOL_PREFIX}issue_search",
+        f"{MCP_TOOL_PREFIX}issue_show",
+        f"{MCP_TOOL_PREFIX}issue_create",
+        f"{MCP_TOOL_PREFIX}issue_comment",
+        MCP_DELEGATE_TOOL,
+    }
+    if set(declared.get("tools") or []) != expected_tools:
+        raise RuntimeError("qualification MCP tool surface differs from the adapter's reviewed semantic surface")
+
+    paths = _private_mcp_paths(private_root)
+    source_server = Path(__file__).resolve().parent.parent / "stub_tools" / "mediator.py"
+    for label in ("server", "stub", "log", "account"):
+        path = paths[label]
+        if label == "stub":
+            if not path.is_dir():
+                raise RuntimeError("qualification MCP private stub root is absent")
+        elif not path.is_file():
+            raise RuntimeError(f"qualification MCP private {label} is absent")
+    source_sha = hashlib.sha256(source_server.read_bytes()).hexdigest()
+    server_sha = hashlib.sha256(paths["server"].read_bytes()).hexdigest()
+    if source_sha != server_sha:
+        raise RuntimeError("qualification MCP server executable differs from the reviewed adapter source")
+    python_dir = str(Path(sys.executable).resolve().parent)
+    minimal_path = ":".join(dict.fromkeys([python_dir, "/usr/bin", "/bin"]))
+    server_args = [
+        "-i",
+        f"PATH={minimal_path}",
+        "PYTHONDONTWRITEBYTECODE=1",
+        str(Path(sys.executable).resolve()),
+        str(paths["server"]),
+        "--stub-root", str(paths["stub"]),
+        "--side-effect-log", str(paths["log"]),
+        "--account-file", str(paths["account"]),
+        "--server-id", MCP_SERVER_ID,
+        "--expected-self-sha256", server_sha,
+    ]
+    config = {
+        "mcpServers": {
+            MCP_SERVER_NAME: {
+                "type": "stdio",
+                "command": "/usr/bin/env",
+                "args": server_args,
+            }
+        }
+    }
+    realized = [{
+        "name": MCP_SERVER_NAME,
+        "transport": "stdio",
+        "server_id": MCP_SERVER_ID,
+        "entrypoint": declared.get("entrypoint"),
+        "executable_file": str(paths["server"]),
+        "executable_sha256": server_sha,
+        "credential_environment": "env-i-empty-plus-minimal-path",
+        "tools": list(declared["tools"]),
+    }]
+    return config, realized
 
 
 def _control_paths(project: Path, env: dict[str, str]) -> tuple[Path, Path, Path]:
@@ -102,35 +190,6 @@ def _path_is_ancestor(path: Path, child: Path) -> bool:
     return resolved == child_resolved or resolved in child_resolved.parents
 
 
-def _mediator_script() -> Path:
-    path = Path(__file__).resolve().parent.parent / "stub_tools" / "mediator.py"
-    if not path.is_file():
-        raise RuntimeError("qualification stdio MCP mediator script is missing")
-    return path
-
-
-def _mcp_document(profile: dict[str, Any], project: Path, env: dict[str, str]) -> dict[str, Any]:
-    policy = profile.get("containment_policy") or {}
-    if not policy.get("mediator_required"):
-        return {"mcpServers": {}}
-    account = env.get("SSDP70_ACCOUNT")
-    if not isinstance(account, str) or not account:
-        raise RuntimeError("executor containment requires a qualification account identity")
-    private_root, _, _ = _control_paths(project, env)
-    stub_root = private_root / "stub"
-    side_effect_log = private_root / "side-effects.jsonl"
-    if not stub_root.is_dir():
-        raise RuntimeError("qualification stdio MCP mediator stub root is absent")
-    if not side_effect_log.is_file():
-        raise RuntimeError("qualification stdio MCP mediator side-effect log is absent")
-    return {"mcpServers": {MCP_SERVER_NAME: {
-        "type": "stdio",
-        "command": sys.executable,
-        "args": [str(_mediator_script()), "--stdio", "--stub-root", str(stub_root.resolve()),
-                 "--side-effect-log", str(side_effect_log.resolve()), "--account", account],
-    }}}
-
-
 def _containment_document(profile: dict[str, Any], project: Path, env: dict[str, str]) -> dict[str, Any]:
     policy = profile.get("containment_policy") or {}
     if policy.get("kind") != "claude-code-restricted-sandbox-v1":
@@ -141,15 +200,28 @@ def _containment_document(profile: dict[str, Any], project: Path, env: dict[str,
     home = Path(runtime_home).resolve()
     project_resolved = project.resolve()
     private_root, settings_path, mcp_path = _control_paths(project, env)
-    mcp_document = _mcp_document(profile, project, env)
+    mcp_config, realized_mcp_servers = _mcp_config_document(profile, private_root)
     write_policy = str(policy.get("filesystem_write") or "")
     allow_write = [] if write_policy.startswith("deny") else [str(project_resolved)]
     host_home_raw = os.environ.get("HOME")
-    denied_roots = {str(private_root), "/home", "/root", "/run/user", "/proc", "/mnt", "/media", "/srv", "/var/tmp"}
+    denied_roots = {
+        str(private_root),
+        "/home",
+        "/root",
+        "/run/user",
+        "/proc",
+        "/mnt",
+        "/media",
+        "/srv",
+        "/var/tmp",
+    }
     if host_home_raw:
         denied_roots.add(str(Path(host_home_raw).resolve()))
     deny_read_paths = sorted(path for path in denied_roots if Path(path).resolve() != project_resolved)
-    deny_write_paths = sorted(path for path in denied_roots if not _path_is_ancestor(Path(path), project_resolved))
+    deny_write_paths = sorted(
+        path for path in denied_roots
+        if not _path_is_ancestor(Path(path), project_resolved)
+    )
     deny_write_paths = sorted(set(deny_write_paths) | {str(settings_path), str(mcp_path)})
     if write_policy.startswith("deny"):
         deny_write_paths = sorted(set(deny_write_paths) | {str(project_resolved)})
@@ -157,92 +229,170 @@ def _containment_document(profile: dict[str, Any], project: Path, env: dict[str,
         raise RuntimeError("sandbox deny-write path shadows the writable project")
     settings = {
         "sandbox": {
-            "enabled": True, "failIfUnavailable": True, "autoAllowBashIfSandboxed": True,
-            "allowUnsandboxedCommands": False, "excludedCommands": [], "enableWeakerNestedSandbox": False,
-            "network": {"allowedDomains": [], "allowUnixSockets": [], "allowAllUnixSockets": False, "allowLocalBinding": False},
-            "filesystem": {"denyRead": deny_read_paths, "allowRead": [str(project_resolved)], "denyWrite": deny_write_paths, "allowWrite": allow_write},
-            "credentials": {"envVars": [{"name": name, "mode": "deny"} for name in (
-                "CLAUDE_CODE_OAUTH_TOKEN", "ANTHROPIC_API_KEY", "ANTHROPIC_AUTH_TOKEN", "AWS_ACCESS_KEY_ID",
-                "AWS_SECRET_ACCESS_KEY", "AWS_SESSION_TOKEN", "GITHUB_TOKEN", "GH_TOKEN", "SSH_AUTH_SOCK")]},
+            "enabled": True,
+            "failIfUnavailable": True,
+            "autoAllowBashIfSandboxed": True,
+            "allowUnsandboxedCommands": False,
+            "excludedCommands": [],
+            "enableWeakerNestedSandbox": False,
+            "network": {
+                "allowedDomains": [],
+                "allowUnixSockets": [],
+                "allowAllUnixSockets": False,
+                "allowLocalBinding": False,
+            },
+            "filesystem": {
+                "denyRead": deny_read_paths,
+                "allowRead": [str(project_resolved)],
+                "denyWrite": deny_write_paths,
+                "allowWrite": allow_write,
+            },
+            "credentials": {
+                "envVars": [
+                    {"name": name, "mode": "deny"}
+                    for name in (
+                        "CLAUDE_CODE_OAUTH_TOKEN", "ANTHROPIC_API_KEY", "ANTHROPIC_AUTH_TOKEN", "AWS_ACCESS_KEY_ID",
+                        "AWS_SECRET_ACCESS_KEY", "AWS_SESSION_TOKEN", "GITHUB_TOKEN",
+                        "GH_TOKEN", "SSH_AUTH_SOCK",
+                    )
+                ],
+            },
         },
-        "env": {"CLAUDE_CODE_DISABLE_AUTO_MEMORY": "1", "CLAUDE_CODE_DISABLE_CRON": "1",
-                "CLAUDE_CODE_DISABLE_ARTIFACT": "1", "CLAUDE_CODE_DISABLE_BACKGROUND_TASKS": "1"},
+        "env": {
+            "CLAUDE_CODE_DISABLE_AUTO_MEMORY": "1",
+            "CLAUDE_CODE_DISABLE_CRON": "1",
+            "CLAUDE_CODE_DISABLE_ARTIFACT": "1",
+            "CLAUDE_CODE_DISABLE_BACKGROUND_TASKS": "1",
+        },
     }
-    return {"schema": 1, "settings": settings, "realization": {
-        "project": str(project_resolved), "runtime_home": str(home), "private_root": str(private_root),
-        "settings_file": str(settings_path), "mcp_config": str(mcp_path),
-        "mediator_transport": "stdio-mcp" if policy.get("mediator_required") else None,
-        "native_network": "deny", "filesystem_deny_roots": deny_read_paths,
-        "filesystem_read": [str(project_resolved)], "filesystem_write": allow_write,
-        "control_files_outside_workspace": True, "host_home_inherited": False, "ambient_credentials_inherited": False,
-        "exact_native_tools": list(profile.get("native_tools") or []), "mcp_servers": sorted(mcp_document["mcpServers"]),
-    }}
+    return {
+        "schema": 1,
+        "settings": settings,
+        "realization": {
+            "project": str(project_resolved),
+            "runtime_home": str(home),
+            "private_root": str(private_root),
+            "settings_file": str(settings_path),
+            "mcp_config": str(mcp_path),
+            "mediator_socket": None,
+            "mcp_servers": realized_mcp_servers,
+            "native_network": "deny",
+            "filesystem_deny_roots": deny_read_paths,
+            "filesystem_read": [str(project_resolved)],
+            "filesystem_write": allow_write,
+            "control_files_outside_workspace": True,
+            "host_home_inherited": False,
+            "ambient_credentials_inherited": False,
+            "exact_native_tools": list(profile.get("native_tools") or []),
+        },
+    }
+
 
 def realize_containment(profile: dict[str, Any], project: Path, env: dict[str, str]) -> dict[str, Any]:
-    """Write run-owned private control files before any executor/evaluator effect."""
+    """Write and digest run-owned private settings and strict MCP configuration."""
     document = _containment_document(profile, project, env)
-    mcp_document = _mcp_document(profile, project, env)
-    _, settings, mcp_config = _control_paths(project, env)
+    private_root, settings, mcp_config = _control_paths(project, env)
+    config, realized_servers = _mcp_config_document(profile, private_root)
     settings.parent.mkdir(parents=True, exist_ok=True)
     settings.write_text(json.dumps(document["settings"], indent=2, sort_keys=True) + "\n", encoding="utf-8")
-    mcp_config.write_text(json.dumps(mcp_document, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    mcp_config.write_text(json.dumps(config, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    document["realization"]["mcp_servers"] = realized_servers
     document["realization"]["settings_sha256"] = hashlib.sha256(settings.read_bytes()).hexdigest()
     document["realization"]["mcp_config_sha256"] = hashlib.sha256(mcp_config.read_bytes()).hexdigest()
-    document["realization"]["mcp_server_script_sha256"] = (
-        hashlib.sha256(_mediator_script().read_bytes()).hexdigest()
-        if profile.get("containment_policy", {}).get("mediator_required") else None
-    )
     return document
 
+
 def validate_containment_realization(profile: dict[str, Any], project: Path, env: dict[str, str]) -> list[str]:
-    expected = _containment_document(profile, project, env)
-    expected_mcp = _mcp_document(profile, project, env)
+    try:
+        expected = _containment_document(profile, project, env)
+    except (OSError, RuntimeError) as exc:
+        return [str(exc)]
     _, settings, mcp_config = _control_paths(project, env)
-    if not settings.is_file(): return ["required private containment settings are absent"]
-    if not mcp_config.is_file(): return ["required private MCP configuration is absent"]
-    try: actual = json.loads(settings.read_text(encoding="utf-8"))
-    except (OSError, json.JSONDecodeError): return ["required private containment settings are unreadable or malformed"]
+    if not settings.is_file():
+        return ["required private containment settings are absent"]
+    if not mcp_config.is_file():
+        return ["required private MCP configuration is absent"]
+    try:
+        actual = json.loads(settings.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return ["required private containment settings are unreadable or malformed"]
     errors: list[str] = []
-    if actual != expected["settings"]: errors.append("private containment settings do not match the frozen realization")
-    try: mcp_actual = json.loads(mcp_config.read_text(encoding="utf-8"))
-    except (OSError, json.JSONDecodeError): errors.append("required private MCP configuration is unreadable or malformed")
+    if actual != expected["settings"]:
+        errors.append("private containment settings do not match the frozen realization")
+    private_root = expected["realization"]["private_root"]
+    try:
+        expected_mcp, expected_servers = _mcp_config_document(profile, Path(private_root))
+    except (OSError, RuntimeError) as exc:
+        errors.append(str(exc))
+        expected_mcp, expected_servers = {"mcpServers": {}}, []
+    try:
+        mcp_actual = json.loads(mcp_config.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        errors.append("required private MCP configuration is unreadable or malformed")
     else:
-        if mcp_actual != expected_mcp: errors.append("private MCP configuration does not match the frozen realization")
-    explicitly_allowed = {"HOME","XDG_CONFIG_HOME","XDG_CACHE_HOME","TMPDIR","TMP","TEMP","SSDP70_ACCOUNT","SSDP70_AUTH_MODE"} | PARENT_AUTH_ENV
+        if mcp_actual != expected_mcp:
+            errors.append("private MCP configuration does not match the frozen realization")
+    if expected.get("realization", {}).get("mcp_servers") != expected_servers:
+        errors.append("MCP server executable identity changed")
+
+    explicitly_allowed = {
+        "HOME", "XDG_CONFIG_HOME", "XDG_CACHE_HOME", "TMPDIR", "TMP", "TEMP",
+        "SSDP70_AUTH_MODE",
+    } | PARENT_AUTH_ENV
     forbidden = [key for key in env if key not in SAFE_ENV_KEYS and key not in explicitly_allowed]
-    if forbidden: errors.append(f"contained environment has undeclared variables: {sorted(forbidden)}")
+    if forbidden:
+        errors.append(f"contained environment has undeclared variables: {sorted(forbidden)}")
+
     auth_keys = [key for key in PARENT_AUTH_ENV if env.get(key)]
-    if len(auth_keys) > 1: errors.append("contained environment exposes multiple parent authentication variables")
-    if auth_keys and env.get("SSDP70_AUTH_MODE") != auth_keys[0]: errors.append("parent authentication variable lacks qualification-only source binding")
-    if not auth_keys and env.get("SSDP70_AUTH_MODE"): errors.append("qualification auth mode is set without a parent authentication variable")
+    if len(auth_keys) > 1:
+        errors.append("contained environment exposes multiple parent authentication variables")
+    if auth_keys and env.get("SSDP70_AUTH_MODE") != auth_keys[0]:
+        errors.append("parent authentication variable lacks qualification-only source binding")
+    if not auth_keys and env.get("SSDP70_AUTH_MODE"):
+        errors.append("qualification auth mode is set without a parent authentication variable")
     for source in QUALIFICATION_AUTH_ENV:
-        if source in env: errors.append(f"qualification auth source {source!r} leaked into Claude environment")
+        if source in env:
+            errors.append(f"qualification auth source {source!r} leaked into Claude environment")
+
     for key in env:
-        if key in PARENT_AUTH_ENV: continue
+        if key in PARENT_AUTH_ENV:
+            continue
         upper = key.upper()
-        if any(token in upper for token in ("TOKEN","SECRET","PASSWORD","API_KEY","AWS_","GITHUB_","SSH_")):
+        if any(token in upper for token in ("TOKEN", "SECRET", "PASSWORD", "API_KEY", "AWS_", "GITHUB_", "SSH_")):
             errors.append(f"contained environment exposes credential-like variable {key!r}")
+
     run_root = project.resolve().parent
     home_value = env.get("HOME")
-    if not isinstance(home_value, str) or not home_value: errors.append("contained environment has no run-owned HOME")
+    if not isinstance(home_value, str) or not home_value:
+        errors.append("contained environment has no run-owned HOME")
     else:
-        try: Path(home_value).resolve().relative_to(run_root)
-        except (OSError, ValueError): errors.append("contained environment HOME escapes the run-owned root")
+        try:
+            Path(home_value).resolve().relative_to(run_root)
+        except (OSError, ValueError):
+            errors.append("contained environment HOME escapes the run-owned root")
         host_home = os.environ.get("HOME")
-        if host_home and Path(home_value).resolve() == Path(host_home).resolve(): errors.append("contained environment reuses host HOME")
-    for key in ("TMPDIR","TMP","TEMP"):
-        value=env.get(key)
+        if host_home and Path(home_value).resolve() == Path(host_home).resolve():
+            errors.append("contained environment reuses host HOME")
+    for key in ("TMPDIR", "TMP", "TEMP"):
+        value = env.get(key)
         if value:
-            try: Path(value).resolve().relative_to(project.resolve())
-            except (OSError, ValueError): errors.append(f"contained environment {key} escapes the run-owned project")
-    for key in ("settings_file","mcp_config"):
-        control_path=Path(expected["realization"][key]).resolve()
-        try: control_path.relative_to(project.resolve())
-        except ValueError: pass
-        else: errors.append(f"containment control file {key} is executor/evaluator workspace-reachable")
+            try:
+                Path(value).resolve().relative_to(project.resolve())
+            except (OSError, ValueError):
+                errors.append(f"contained environment {key} escapes the run-owned project")
+    realization = expected["realization"]
+    for key in ("settings_file", "mcp_config"):
+        control_path = Path(realization[key]).resolve()
+        try:
+            control_path.relative_to(project.resolve())
+        except ValueError:
+            pass
+        else:
+            errors.append(f"containment control file {key} is executor/evaluator workspace-reachable")
     if not write_policy_stays_inside_project(expected["settings"]["sandbox"]["filesystem"], project):
         errors.append("sandbox write policy shadows or escapes the declared project boundary")
     return errors
+
 
 def write_policy_stays_inside_project(filesystem: dict[str, Any], project: Path) -> bool:
     project_resolved = project.resolve()
@@ -268,31 +418,93 @@ def install_skills(dist: Path, project: Path) -> None:
 
 
 def launch(profile: dict[str, Any], prompt: str, project: Path, env: dict[str, str]) -> dict[str, Any]:
-    runtime=profile["provider_runtime"]; executable=runtime.get("executable","claude") if isinstance(runtime,dict) else "claude"
-    model=profile["agent_model"]; reasoning=profile["reasoning_configuration"]; budgets=profile["budgets"]
-    allowed_tools=profile.get("native_allowed_tools",[]); disallowed_tools=profile.get("native_disallowed_tools",[]); tools=profile.get("native_tools",[])
-    errors=validate_containment_realization(profile,project,env)
-    if errors: raise RuntimeError("; ".join(errors))
-    _,settings_path,mcp_config_path=_control_paths(project,env)
-    settings_sha256=hashlib.sha256(settings_path.read_bytes()).hexdigest(); mcp_config_sha256=hashlib.sha256(mcp_config_path.read_bytes()).hexdigest()
-    mediator_required=bool(profile.get("containment_policy",{}).get("mediator_required"))
-    mediator_sha256=hashlib.sha256(_mediator_script().read_bytes()).hexdigest() if mediator_required else None
-    cmd=[executable,"-p",prompt,"--output-format","stream-json","--verbose","--model",str(model),"--max-turns",str(budgets.get("max_turns",60)),
-         "--settings",str(settings_path),"--mcp-config",str(mcp_config_path),"--strict-mcp-config","--restricted","--permission-mode",str(profile.get("permission_mode","acceptEdits"))]
+    runtime = profile["provider_runtime"]
+    executable = runtime.get("executable", "claude") if isinstance(runtime, dict) else "claude"
+    model = profile["agent_model"]
+    reasoning = profile["reasoning_configuration"]
+    budgets = profile["budgets"]
+    allowed_tools = profile.get("native_allowed_tools", [])
+    disallowed_tools = profile.get("native_disallowed_tools", [])
+    tools = profile.get("native_tools", [])
+    containment_errors = validate_containment_realization(profile, project, env)
+    if containment_errors:
+        raise RuntimeError("; ".join(containment_errors))
+    private_root, settings_path, mcp_config_path = _control_paths(project, env)
+    _, realized_mcp_servers = _mcp_config_document(profile, private_root)
+    mcp_server_sha256 = {
+        row["name"]: row["executable_sha256"] for row in realized_mcp_servers
+    }
+    settings_sha256 = hashlib.sha256(settings_path.read_bytes()).hexdigest()
+    mcp_config_sha256 = hashlib.sha256(mcp_config_path.read_bytes()).hexdigest()
+    cmd = [
+        executable,
+        "-p",
+        prompt,
+        "--output-format",
+        "stream-json",
+        "--verbose",
+        "--model",
+        str(model),
+        "--max-turns",
+        str(budgets.get("max_turns", 60)),
+        "--settings",
+        str(settings_path),
+        "--mcp-config",
+        str(mcp_config_path),
+        "--strict-mcp-config",
+        "--restricted",
+        "--permission-mode",
+        str(profile.get("permission_mode", "acceptEdits")),
+    ]
     cmd.extend(["--tools", ",".join(tools)])
-    if allowed_tools: cmd.extend(["--allowedTools"," ".join(allowed_tools)])
-    if disallowed_tools: cmd.extend(["--disallowedTools"," ".join(disallowed_tools)])
-    effort=reasoning.get("effort") if isinstance(reasoning,dict) else None
-    if effort: cmd.extend(["--effort",str(effort)])
-    started=time.monotonic()
-    proc=subprocess.run(cmd,cwd=project,capture_output=True,text=True,env=env,timeout=int(budgets.get("timeout_s",3600)),stdin=subprocess.DEVNULL)
-    if hashlib.sha256(settings_path.read_bytes()).hexdigest()!=settings_sha256: raise RuntimeError("containment settings changed during Claude execution")
-    if hashlib.sha256(mcp_config_path.read_bytes()).hexdigest()!=mcp_config_sha256: raise RuntimeError("strict MCP configuration changed during Claude execution")
-    if mediator_required and hashlib.sha256(_mediator_script().read_bytes()).hexdigest()!=mediator_sha256: raise RuntimeError("qualification stdio MCP mediator changed during Claude execution")
-    return {"returncode":proc.returncode,"stdout":proc.stdout,"stderr":proc.stderr,"wall_s":round(time.monotonic()-started,3),"command_identity":{
-        "executable":executable,"model":model,"reasoning_configuration":reasoning,"tools":tools,"allowed_tools":allowed_tools,"disallowed_tools":disallowed_tools,
-        "mcp_servers":list(profile.get("native_mcp_servers") or []),"settings_file":str(settings_path.resolve()),"settings_file_sha256":settings_sha256,
-        "mcp_config_file":str(mcp_config_path.resolve()),"mcp_config_sha256":mcp_config_sha256,"mcp_server_script_sha256":mediator_sha256,"strict_mcp_config":True,"restricted":True}}
+    if allowed_tools:
+        cmd.extend(["--allowedTools", " ".join(allowed_tools)])
+    if disallowed_tools:
+        cmd.extend(["--disallowedTools", " ".join(disallowed_tools)])
+    effort = reasoning.get("effort") if isinstance(reasoning, dict) else None
+    if effort:
+        cmd.extend(["--effort", str(effort)])
+    started = time.monotonic()
+    proc = subprocess.run(
+        cmd,
+        cwd=project,
+        capture_output=True,
+        text=True,
+        env=env,
+        timeout=int(budgets.get("timeout_s", 3600)),
+        stdin=subprocess.DEVNULL,
+    )
+    if hashlib.sha256(settings_path.read_bytes()).hexdigest() != settings_sha256:
+        raise RuntimeError("containment settings changed during Claude execution")
+    if hashlib.sha256(mcp_config_path.read_bytes()).hexdigest() != mcp_config_sha256:
+        raise RuntimeError("strict MCP configuration changed during Claude execution")
+    for row in realized_mcp_servers:
+        executable = Path(row["executable_file"])
+        if not executable.is_file() or hashlib.sha256(executable.read_bytes()).hexdigest() != row["executable_sha256"]:
+            raise RuntimeError("qualification MCP server executable changed during Claude execution")
+    return {
+        "returncode": proc.returncode,
+        "stdout": proc.stdout,
+        "stderr": proc.stderr,
+        "wall_s": round(time.monotonic() - started, 3),
+        "command_identity": {
+            "executable": executable,
+            "model": model,
+            "reasoning_configuration": reasoning,
+            "tools": tools,
+            "allowed_tools": allowed_tools,
+            "disallowed_tools": disallowed_tools,
+            "settings_file": str(settings_path.resolve()),
+            "settings_file_sha256": settings_sha256,
+            "mcp_config_file": str(mcp_config_path.resolve()),
+            "mcp_config_sha256": mcp_config_sha256,
+            "mcp_server_executable_sha256": mcp_server_sha256,
+            "strict_mcp_config": True,
+            "mcp_servers": list(profile.get("mcp_servers") or []),
+            "restricted": True,
+        },
+    }
+
 
 def _event(run_id: str, sequence: int, kind: str, native_index: int, native_sha256: str, payload: dict[str, Any], status: str = "observed") -> dict[str, Any]:
     return {
@@ -387,18 +599,6 @@ def _result_digest(content: Any) -> str:
     return hashlib.sha256(payload).hexdigest()
 
 
-def _mcp_result_payload(content: Any) -> dict[str, Any] | None:
-    candidates: list[str] = []
-    if isinstance(content, str): candidates.append(content)
-    elif isinstance(content, list):
-        candidates.extend(item["text"] for item in content if isinstance(item,dict) and item.get("type")=="text" and isinstance(item.get("text"),str))
-    for candidate in candidates:
-        try: value=json.loads(candidate)
-        except json.JSONDecodeError: continue
-        if isinstance(value,dict): return value
-    return None
-
-
 def runtime_observation(stdout: str) -> dict[str, Any]:
     for line in stdout.splitlines():
         try:
@@ -424,7 +624,7 @@ def normalize(stdout: str, run_id: str, context: dict[str, Any] | None = None) -
     errors: list[str] = []
     sequence = 0
     lines = stdout.splitlines()
-    pending: dict[str, dict[str, Any]] = {}
+    pending: dict[str, list[dict[str, Any]]] = {}
     selected_skill_roots: list[str] = []
     package_identity = _package_identity(context)
 
@@ -436,39 +636,67 @@ def normalize(stdout: str, run_id: str, context: dict[str, Any] | None = None) -
         return event
 
     def register_pending(tool_use_id: str, kind: str, payload: dict[str, Any]) -> None:
-        pending[tool_use_id] = {"kind": kind, "payload": dict(payload)}
+        pending.setdefault(tool_use_id, []).append({"kind": kind, "payload": dict(payload)})
+
+    def mcp_payload(content: Any) -> dict[str, Any] | None:
+        texts: list[str] = []
+        if isinstance(content, str):
+            texts = [content]
+        elif isinstance(content, list):
+            texts = [row.get("text") for row in content if isinstance(row, dict) and isinstance(row.get("text"), str)]
+        for text in texts:
+            try:
+                value = json.loads(text)
+            except json.JSONDecodeError:
+                continue
+            if isinstance(value, dict) and isinstance(value.get("evidence"), dict):
+                return value
+        return None
 
     def consume_result(block: dict[str, Any], native_index: int, native_sha256: str, block_index: int, mapped: list[str]) -> None:
-        tool_use_id=block.get("tool_use_id")
-        if not isinstance(tool_use_id,str) or tool_use_id not in pending:
-            errors.append(f"native tool result {tool_use_id!r} has no matching tool-use event"); return
-        prior=pending.pop(tool_use_id); content=block.get("content"); result_status="error" if block.get("is_error") else "result"; reference=f"trace:{native_index}:block:{block_index}"
-        if prior["kind"]=="root_selection" and result_status=="result":
-            logical_root=prior["payload"].get("logical_root")
-            if isinstance(logical_root,str) and logical_root: selected_skill_roots.append(logical_root)
-        if prior["kind"]=="mediated_issue":
-            mediation=_mcp_result_payload(content)
-            if mediation is None: errors.append(f"mediated issue result {tool_use_id!r} lacks qualification metadata"); mediation={}
-            if isinstance(mediation.get("returncode"),int) and mediation["returncode"]!=0: result_status="error"
-            payload=dict(prior["payload"]); payload.update({"store_identity":mediation.get("store_identity") or payload.get("store_identity"),"operation":mediation.get("operation") or payload.get("operation"),
-                "object_ids":mediation.get("object_ids") if isinstance(mediation.get("object_ids"),list) else payload.get("object_ids",[]),"before_version":mediation.get("before_version"),"after_version":mediation.get("after_version"),
-                "result_status":result_status,"result_reference":reference,"result_sha256":_result_digest(content),"result_content":content})
-            event=emit("issue_evidence_access",native_index,native_sha256,payload,status=result_status); mapped.append(event["event_id"])
-            if payload.get("operation") in {"create","comment"}:
-                ids=payload.get("object_ids") or []; target=ids[0] if ids else None
-                mutation=emit("mutation",native_index,native_sha256,{"operation":f"issue-{payload.get('operation')}","logical_target":f"qualification-issue:{target}" if target else "qualification-issue:new",
-                    "workspace_external_class":"qualification-owned-standin","authorization_decision":"mediated","disposition":"sandboxed" if result_status=="result" else "blocked-or-error","input":payload.get("input") or {},
-                    "tool_use_id":tool_use_id,"result_status":result_status,"result_reference":reference,"result_sha256":_result_digest(content),"result_content":content,
-                    "before_identity":payload.get("before_version"),"after_identity":payload.get("after_version")},status=result_status); mapped.append(mutation["event_id"])
+        tool_use_id = block.get("tool_use_id")
+        if not isinstance(tool_use_id, str) or tool_use_id not in pending:
+            errors.append(f"native tool result {tool_use_id!r} has no matching tool-use event")
             return
-        if prior["kind"]=="delegate_call":
-            payload={"delegate_id":prior["payload"]["delegate_id"],"parent_actor":prior["payload"]["parent_actor"],"tool_use_id":tool_use_id,"result_reference":reference,"result_sha256":_result_digest(content),"result_content":content}
-            event=emit("delegate_return",native_index,native_sha256,payload,status=result_status)
-        else:
-            payload=dict(prior["payload"]); payload.update({"result_status":result_status,"result_reference":reference,"result_sha256":_result_digest(content),"result_content":content})
-            if prior["kind"] in {"mutation","network_external_action"}: payload["disposition"]="blocked-or-error" if result_status=="error" else "completed"
-            event=emit(prior["kind"],native_index,native_sha256,payload,status=result_status)
-        mapped.append(event["event_id"])
+        content = block.get("content")
+        result_status = "error" if block.get("is_error") else "result"
+        reference = f"trace:{native_index}:block:{block_index}"
+        priors = pending.pop(tool_use_id)
+        mediated = mcp_payload(content)
+        for prior in priors:
+            if prior["kind"] == "root_selection" and result_status == "result":
+                logical_root = prior["payload"].get("logical_root")
+                if isinstance(logical_root, str) and logical_root:
+                    selected_skill_roots.append(logical_root)
+            if prior["kind"] == "delegate_call":
+                payload = {
+                    "delegate_id": prior["payload"]["delegate_id"],
+                    "parent_actor": prior["payload"]["parent_actor"],
+                    "tool_use_id": tool_use_id,
+                    "result_reference": reference,
+                    "result_sha256": _result_digest(content),
+                    "result_content": content,
+                }
+                event = emit("delegate_return", native_index, native_sha256, payload, status=result_status)
+            else:
+                payload = dict(prior["payload"])
+                payload.update({
+                    "result_status": result_status,
+                    "result_reference": reference,
+                    "result_sha256": _result_digest(content),
+                    "result_content": content,
+                })
+                if mediated is not None:
+                    evidence = mediated.get("evidence") or {}
+                    for key in ("store_identity", "operation", "query", "object_ids", "before_object_version", "after_object_version"):
+                        if key in evidence:
+                            payload[key] = evidence[key]
+                    if mediated.get("returncode") not in (None, 0):
+                        payload["result_status"] = "error"
+                if prior["kind"] in {"mutation", "network_external_action"}:
+                    payload["disposition"] = "blocked-or-error" if payload["result_status"] == "error" else "sandboxed"
+                event = emit(prior["kind"], native_index, native_sha256, payload, status=payload["result_status"])
+            mapped.append(event["event_id"])
 
     for native_index, line in enumerate(lines):
         native_sha256 = hashlib.sha256(line.encode("utf-8")).hexdigest()
@@ -565,6 +793,64 @@ def normalize(stdout: str, run_id: str, context: dict[str, Any] | None = None) -
                     mapped.append(event["event_id"])
                     register_pending(tool_use_id, "resource_access", payload)
 
+                elif tool in MCP_ISSUE_READ_TOOLS:
+                    operation = MCP_ISSUE_READ_TOOLS[tool]
+                    payload = {
+                        "operation": operation,
+                        "resource_identity": "ssdp70-private-issue-standin",
+                        "input": data,
+                        "tool_use_id": tool_use_id,
+                        "result_status": "pending",
+                        "result_reference": None,
+                        "result_sha256": None,
+                    }
+                    event = emit("issue_evidence_access", native_index, native_sha256, payload, status="start")
+                    mapped.append(event["event_id"])
+                    register_pending(tool_use_id, "issue_evidence_access", payload)
+
+                elif tool in MCP_ISSUE_MUTATION_TOOLS:
+                    operation = MCP_ISSUE_MUTATION_TOOLS[tool]
+                    access = {
+                        "operation": operation,
+                        "resource_identity": "ssdp70-private-issue-standin",
+                        "input": data,
+                        "tool_use_id": tool_use_id,
+                        "result_status": "pending",
+                        "result_reference": None,
+                        "result_sha256": None,
+                    }
+                    event = emit("issue_evidence_access", native_index, native_sha256, access, status="start")
+                    mapped.append(event["event_id"])
+                    register_pending(tool_use_id, "issue_evidence_access", access)
+                    target = data.get("issue_id") or data.get("location")
+                    mutation = {
+                        "operation": operation,
+                        "logical_target": target,
+                        "workspace_external_class": "qualification-owned-standin",
+                        "authorization_decision": "sandbox-mediate",
+                        "disposition": "attempted",
+                        "input": data,
+                        "tool_use_id": tool_use_id,
+                        "result_status": "pending",
+                        "result_reference": None,
+                        "result_sha256": None,
+                    }
+                    event = emit("mutation", native_index, native_sha256, mutation, status="start")
+                    mapped.append(event["event_id"])
+                    register_pending(tool_use_id, "mutation", mutation)
+
+                elif tool == MCP_DELEGATE_TOOL:
+                    payload = {
+                        "delegate_id": data.get("agent") or tool_use_id,
+                        "parent_actor": "executor",
+                        "request": data,
+                        "launched_work_relation": "scripted-qualification-standin",
+                        "tool_use_id": tool_use_id,
+                    }
+                    event = emit("delegate_call", native_index, native_sha256, payload, status="start")
+                    mapped.append(event["event_id"])
+                    register_pending(tool_use_id, "delegate_call", payload)
+
                 elif tool in MUTATION_TOOLS:
                     target = data.get("file_path") or data.get("path") or data.get("notebook_path")
                     payload = {
@@ -582,20 +868,6 @@ def normalize(stdout: str, run_id: str, context: dict[str, Any] | None = None) -
                     event = emit("mutation", native_index, native_sha256, payload, status="start")
                     mapped.append(event["event_id"])
                     register_pending(tool_use_id, "mutation", payload)
-
-                elif tool in MCP_ISSUE_TOOLS:
-                    operation=MCP_ISSUE_TOOLS[tool]; issue_id=data.get("issue_id"); object_ids=[issue_id] if isinstance(issue_id,str) and issue_id else []
-                    payload={"operation":operation,"resource_identity":"qualification-issue-standin","store_identity":"qualification-issue-standin","input":data,"object_ids":object_ids,
-                             "before_version":None,"after_version":None,"tool_use_id":tool_use_id,"result_status":"pending","result_reference":None,"result_sha256":None}
-                    event=emit("issue_evidence_access",native_index,native_sha256,payload,status="start"); mapped.append(event["event_id"])
-                    if tool in MCP_WRITE_ISSUE_TOOLS:
-                        mutation=emit("mutation",native_index,native_sha256,{"operation":f"issue-{operation}","logical_target":f"qualification-issue:{issue_id}" if issue_id else "qualification-issue:new",
-                            "workspace_external_class":"qualification-owned-standin","authorization_decision":"mediated","disposition":"attempted","input":data,"tool_use_id":tool_use_id,"result_status":"pending","result_reference":None,"result_sha256":None},status="start"); mapped.append(mutation["event_id"])
-                    register_pending(tool_use_id,"mediated_issue",payload)
-
-                elif tool == MCP_DELEGATE_TOOL:
-                    payload={"delegate_id":data.get("agent") or tool_use_id,"parent_actor":"executor","request":data,"launched_work_relation":"scripted-qualification-standin","tool_use_id":tool_use_id}
-                    event=emit("delegate_call",native_index,native_sha256,payload,status="start"); mapped.append(event["event_id"]); register_pending(tool_use_id,"delegate_call",payload)
 
                 elif tool in DELEGATE_TOOLS:
                     payload = {
@@ -767,8 +1039,9 @@ def normalize(stdout: str, run_id: str, context: dict[str, Any] | None = None) -
             "oracle_relevant": oracle_relevant,
         })
 
-    for tool_use_id, row in sorted(pending.items()):
-        errors.append(f"native tool use {tool_use_id!r} has no exposed tool result for {row['kind']}")
+    for tool_use_id, rows in sorted(pending.items()):
+        kinds = ",".join(row["kind"] for row in rows)
+        errors.append(f"native tool use {tool_use_id!r} has no exposed tool result for {kinds}")
 
     return events, completeness, errors, len(lines)
 

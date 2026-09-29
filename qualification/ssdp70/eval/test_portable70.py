@@ -45,8 +45,8 @@ class PortableCoreTests(unittest.TestCase):
                 {"name": "backend-shard", "classification": "arm-neutral", "sensitive_claims": ["*"]}
             ],
             "native_tools": ["Read"],
-            "native_mcp_servers": [],
             "native_surface_requirements": [],
+            "mcp_servers": [],
         })
 
     def tearDown(self):

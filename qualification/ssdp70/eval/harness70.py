@@ -11,6 +11,7 @@ from __future__ import annotations
 import argparse
 import importlib
 import json
+import os
 import shutil
 import subprocess
 import sys
@@ -331,6 +332,15 @@ def run_episode(
         if episode.get("stub"):
             _yaml_tree_to_json(corpus / "stubs" / episode["stub"], stub)
         log.write_text("", encoding="utf-8")
+        log.chmod(0o600)
+        mcp_servers = profile_bundle.profile.get("mcp_servers") or []
+        if mcp_servers:
+            mcp_server = private / "mcp-server.py"
+            shutil.copy2(HERE / "stub_tools" / "mediator.py", mcp_server)
+            mcp_server.chmod(0o500)
+            account_file = private / "mcp-account.txt"
+            account_file.write_text((episode.get("account") or "agent-account") + "\n", encoding="utf-8")
+            account_file.chmod(0o400)
         runtime_home.mkdir()
         runtime_tmp.mkdir()
         adapter_module.install_skills(dist, project)
@@ -349,10 +359,11 @@ def run_episode(
             "TMPDIR": str(runtime_tmp),
             "TMP": str(runtime_tmp),
             "TEMP": str(runtime_tmp),
-            "SSDP70_ACCOUNT": episode.get("account") or "agent-account",
         })
         containment = adapter_module.realize_containment(profile_bundle.profile, project, env)
-        (out / "containment-realization.json").write_text(json.dumps(containment, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+        (out / "containment-realization.json").write_text(
+            json.dumps(containment, indent=2, sort_keys=True) + "\n", encoding="utf-8"
+        )
         launched = adapter_module.launch(profile_bundle.profile, prompt, project, env)
         stdout, stderr = launched["stdout"], launched["stderr"]
         (out / "trace.jsonl").write_text(stdout, encoding="utf-8")
@@ -381,8 +392,13 @@ def run_episode(
                 profile_errors.append("launch settings bytes differ from retained containment realization")
             if command_identity.get("mcp_config_sha256") != realization.get("mcp_config_sha256"):
                 profile_errors.append("launch MCP bytes differ from retained containment realization")
-            if command_identity.get("mcp_server_script_sha256") != realization.get("mcp_server_script_sha256"):
-                profile_errors.append("launch MCP server script differs from retained containment realization")
+            retained_server_digests = {
+                row.get("name"): row.get("executable_sha256")
+                for row in (realization.get("mcp_servers") or [])
+                if isinstance(row, dict)
+            }
+            if command_identity.get("mcp_server_executable_sha256") != retained_server_digests:
+                profile_errors.append("launch MCP server executable bytes differ from retained containment realization")
         auto_memory = (runtime_observation.get("memory_paths") or {}).get("auto") if isinstance(runtime_observation, dict) else None
         if isinstance(auto_memory, str) and auto_memory:
             try:

@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "manifest_id": "claude-headless-stage-f-v2",
+  "manifest_id": "claude-headless-stage-f-v3-stdio-mcp",
   "capabilities": {
     "catalog_root_activation": {
       "decision": "ALLOW",
@@ -12,15 +12,15 @@
     },
     "delegation": {
       "decision": "SANDBOX/MEDIATE",
-      "scope": "only the qualification-owned scripted stdio MCP delegate stand-in is mediated; native Agent/cross-session messaging/remote scheduling and trigger surfaces remain excluded"
+      "scope": "scripted qualification-owned stdio MCP delegate only; native Agent/cross-session messaging/remote scheduling excluded"
     },
     "external_mutation": {
       "decision": "SANDBOX/MEDIATE",
-      "scope": "qualification-owned stdio MCP mediator only for declared stand-in mutations; runtime state isolated and auto-memory disabled"
+      "scope": "qualification-owned stdio MCP issue mutations plus run-owned workspace effects; no executor native network or Unix-socket route"
     },
     "issue_evidence_store": {
       "decision": "SANDBOX/MEDIATE",
-      "scope": "qualification-owned stdio MCP mediator; executor receives no direct stub/log path and has no Unix-socket mediator route"
+      "scope": "qualification-owned stdio MCP only; private state/log/server/config remain under denied harness-private root and are not exposed to executor Bash"
     },
     "network_remote_service": {
       "decision": "DENY",
@@ -117,7 +117,7 @@
         "network_remote_service",
         "workspace_read_search_list"
       ],
-      "scope": "runtime protocol support only; strict qualification MCP server exposes tools only and no arbitrary resources"
+      "scope": "runtime MCP protocol support; strict profile admits only the named qualification stdio server"
     },
     "runtime_capability:mcp_tool_ui_meta_v1": {
       "semantic_classes": [
@@ -131,7 +131,7 @@
         "network_remote_service",
         "external_mutation"
       ],
-      "scope": "runtime-created cross-session socket; restricted sandbox denies all Unix sockets to executor Bash"
+      "scope": "runtime-created cross-session socket; restricted sandbox Unix-socket allow-list excludes it"
     },
     "auto_memory_write": {
       "semantic_classes": [
@@ -145,45 +145,45 @@
         "delegation",
         "external_mutation"
       ],
-      "scope": "strict-config qualification-owned stdio server exposing only the six declared semantic stand-in tools"
+      "scope": "single strict run-owned qualification stdio MCP server; exact identity and connected runtime observation required"
     },
-    "tool:mcp__ssdp70__issues_locations": {
+    "tool:mcp__ssdp70__issue_locations": {
       "semantic_classes": [
         "issue_evidence_store"
       ],
-      "scope": "qualification-owned read-only issue stand-in operation over stdio MCP"
+      "scope": "list qualification-owned issue-store locations"
     },
-    "tool:mcp__ssdp70__issues_search": {
+    "tool:mcp__ssdp70__issue_search": {
       "semantic_classes": [
         "issue_evidence_store"
       ],
-      "scope": "qualification-owned read-only issue stand-in operation over stdio MCP"
+      "scope": "search qualification-owned issue evidence"
     },
-    "tool:mcp__ssdp70__issues_show": {
+    "tool:mcp__ssdp70__issue_show": {
       "semantic_classes": [
         "issue_evidence_store"
       ],
-      "scope": "qualification-owned read-only issue stand-in operation over stdio MCP"
+      "scope": "show qualification-owned issue evidence"
     },
-    "tool:mcp__ssdp70__issues_create": {
+    "tool:mcp__ssdp70__issue_create": {
       "semantic_classes": [
         "issue_evidence_store",
         "external_mutation"
       ],
-      "scope": "qualification-owned mediated issue mutation over stdio MCP; no live external service"
+      "scope": "create issue only in qualification-owned private stand-in"
     },
-    "tool:mcp__ssdp70__issues_comment": {
+    "tool:mcp__ssdp70__issue_comment": {
       "semantic_classes": [
         "issue_evidence_store",
         "external_mutation"
       ],
-      "scope": "qualification-owned mediated issue mutation over stdio MCP; no live external service"
+      "scope": "comment only in qualification-owned private stand-in"
     },
     "tool:mcp__ssdp70__delegate": {
       "semantic_classes": [
         "delegation"
       ],
-      "scope": "scripted qualification-owned delegate stand-in over stdio MCP; cannot launch a live subagent"
+      "scope": "scripted qualification delegate stand-in only"
     }
   }
 }

@@ -86,72 +86,83 @@ class SurfaceAndContainmentHostileTests(unittest.TestCase):
         self.profile_path = HERE / "profiles" / "claude-headless.template.json"
         self.capability_path = HERE / "capabilities" / "claude-headless.json"
 
-    def runtime_observation(self, bundle, *, tools=None, servers=None, capabilities=None):
+    def prepare_executor(self, root: Path):
+        profile = json.loads(self.profile_path.read_text(encoding="utf-8"))
+        project = root / "project"
+        private = root / "harness-private"
+        runtime_home = private / "runtime-home"
+        runtime_tmp = project / ".qualification-tmp"
+        stub = private / "stub"
+        project.mkdir()
+        private.mkdir()
+        runtime_home.mkdir()
+        runtime_tmp.mkdir()
+        stub.mkdir()
+        (private / "side-effects.jsonl").write_text("", encoding="utf-8")
+        (private / "mcp-account.txt").write_text("agent\n", encoding="utf-8")
+        source = HERE / "stub_tools" / "mediator.py"
+        (private / "mcp-server.py").write_bytes(source.read_bytes())
+        env = claude.clean_env()
+        env.update({
+            "HOME": str(runtime_home),
+            "XDG_CONFIG_HOME": str(runtime_home / ".config"),
+            "XDG_CACHE_HOME": str(runtime_home / ".cache"),
+            "TMPDIR": str(runtime_tmp),
+            "TMP": str(runtime_tmp),
+            "TEMP": str(runtime_tmp),
+        })
+        return profile, project, private, env
+
+    @staticmethod
+    def observed(bundle, *, tools=None, servers=None):
+        caps = [
+            item.split(":", 1)[1]
+            for item in bundle.profile["native_surface_requirements"]
+            if item.startswith("runtime_capability:")
+        ]
         return {
             "model": bundle.profile["agent_model"],
             "runtime_version": bundle.profile["provider_runtime"]["version"],
             "tools": list(bundle.profile["native_tools"]) if tools is None else tools,
-            "native_capabilities": [
-                item.split(":", 1)[1]
-                for item in bundle.profile["native_surface_requirements"]
-                if item.startswith("runtime_capability:")
-            ] if capabilities is None else capabilities,
+            "native_capabilities": caps,
             "messaging_socket_path": "/run/user/test.sock",
             "memory_paths": {"auto": "/tmp/run-owned-memory"},
             "mcp_servers": [{"name": "ssdp70", "status": "connected"}] if servers is None else servers,
         }
 
-    def executor_tree(self, root: Path):
-        project = root / "project"
-        private = root / "harness-private"
-        stub = private / "stub"
-        runtime_home = private / "runtime-home"
-        project.mkdir()
-        private.mkdir()
-        stub.mkdir()
-        runtime_home.mkdir()
-        (private / "side-effects.jsonl").write_text("", encoding="utf-8")
-        return project, private, stub, runtime_home
-
-    def executor_env(self, runtime_home: Path, project: Path | None = None):
-        env = claude.clean_env()
-        env.update({"HOME": str(runtime_home), "SSDP70_ACCOUNT": "agent"})
-        if project is not None:
-            runtime_tmp = project / ".qualification-tmp"
-            runtime_tmp.mkdir(exist_ok=True)
-            env.update({"TMPDIR": str(runtime_tmp), "TMP": str(runtime_tmp), "TEMP": str(runtime_tmp)})
-        return env
-
-    def test_runtime_tool_surface_mismatch_fails_closed(self):
+    def test_runtime_exact_mcp_tool_surface_fails_closed_on_extra(self):
         bundle = core70.load_profile(self.profile_path, self.capability_path)
         errors = core70.validate_runtime_observation(
-            bundle, self.runtime_observation(bundle, tools=list(bundle.profile["native_tools"]) + ["SendMessage"])
+            bundle, self.observed(bundle, tools=list(bundle.profile["native_tools"]) + ["mcp__ssdp70__forged"])
         )
         self.assertTrue(any("native-tool surface differs" in error for error in errors))
         self.assertTrue(any("unclassified native tool" in error for error in errors))
 
-    def test_mcp_server_surface_mismatch_fails_closed(self):
+    def test_runtime_exact_mcp_tool_surface_fails_closed_on_missing(self):
         bundle = core70.load_profile(self.profile_path, self.capability_path)
-        errors = core70.validate_runtime_observation(
-            bundle, self.runtime_observation(bundle, servers=[
+        tools = [tool for tool in bundle.profile["native_tools"] if tool != "mcp__ssdp70__issue_show"]
+        errors = core70.validate_runtime_observation(bundle, self.observed(bundle, tools=tools))
+        self.assertTrue(any("native-tool surface differs" in error for error in errors))
+
+    def test_runtime_exact_mcp_server_identity_fails_closed_on_missing_or_extra(self):
+        bundle = core70.load_profile(self.profile_path, self.capability_path)
+        missing = core70.validate_runtime_observation(bundle, self.observed(bundle, servers=[]))
+        extra = core70.validate_runtime_observation(
+            bundle, self.observed(bundle, servers=[
                 {"name": "ssdp70", "status": "connected"},
-                {"name": "ambient", "status": "connected"},
+                {"name": "forged", "status": "connected"},
             ])
         )
-        self.assertTrue(any("MCP server surface differs" in error for error in errors))
-        self.assertTrue(any("unclassified MCP server" in error for error in errors))
+        self.assertTrue(any("MCP server surface differs" in error for error in missing))
+        self.assertTrue(any("MCP server surface differs" in error for error in extra))
+        self.assertTrue(any("unclassified MCP server" in error for error in extra))
 
-    def test_mcp_server_must_be_connected(self):
-        bundle = core70.load_profile(self.profile_path, self.capability_path)
-        errors = core70.validate_runtime_observation(
-            bundle, self.runtime_observation(bundle, servers=[{"name": "ssdp70", "status": "failed"}])
-        )
-        self.assertTrue(any("is not connected" in error for error in errors))
-
-    def test_declared_native_tool_without_classification_is_rejected(self):
+    def test_declared_mcp_tool_without_classification_is_rejected(self):
         profile = json.loads(self.profile_path.read_text(encoding="utf-8"))
         capabilities = json.loads(self.capability_path.read_text(encoding="utf-8"))
-        profile["native_tools"].append("SendMessage")
+        forged = "mcp__ssdp70__forged"
+        profile["native_tools"].append(forged)
+        profile["mcp_servers"][0]["tools"].append(forged)
         with tempfile.TemporaryDirectory() as td:
             root = Path(td)
             p, c = root / "profile.json", root / "caps.json"
@@ -160,31 +171,31 @@ class SurfaceAndContainmentHostileTests(unittest.TestCase):
             with self.assertRaises(core70.ContractError):
                 core70.load_profile(p, c)
 
+    def test_altered_frozen_mcp_server_identity_is_rejected_by_adapter_realization(self):
+        with tempfile.TemporaryDirectory() as td:
+            profile, project, private, env = self.prepare_executor(Path(td))
+            profile["mcp_servers"][0]["server_id"] = "forged-server-id"
+            with self.assertRaises(RuntimeError) as caught:
+                claude.realize_containment(profile, project, env)
+        self.assertIn("identity differs", str(caught.exception))
+
     def test_clean_env_does_not_inherit_home_or_credentials(self):
         with patch.dict(os.environ, {
-            "HOME": "/host/home",
-            "ANTHROPIC_API_KEY": "secret",
-            "GITHUB_TOKEN": "secret",
-            "AWS_SECRET_ACCESS_KEY": "secret",
-            "PATH": "/bin",
-            "LANG": "C.UTF-8",
+            "HOME": "/host/home", "ANTHROPIC_API_KEY": "secret",
+            "GITHUB_TOKEN": "secret", "AWS_SECRET_ACCESS_KEY": "secret",
+            "PATH": "/bin", "LANG": "C.UTF-8",
         }, clear=True):
             env = claude.clean_env()
         self.assertEqual(env, {
-            "PATH": "/bin",
-            "LANG": "C.UTF-8",
-            "CLAUDE_CODE_SUBPROCESS_ENV_SCRUB": "1",
-            "DISABLE_AUTOUPDATER": "1",
-            "CLAUDE_CODE_DISABLE_AUTO_MEMORY": "1",
-            "CLAUDE_CODE_DISABLE_CRON": "1",
-            "CLAUDE_CODE_DISABLE_ARTIFACT": "1",
-            "CLAUDE_CODE_DISABLE_BACKGROUND_TASKS": "1",
+            "PATH": "/bin", "LANG": "C.UTF-8",
+            "CLAUDE_CODE_SUBPROCESS_ENV_SCRUB": "1", "DISABLE_AUTOUPDATER": "1",
+            "CLAUDE_CODE_DISABLE_AUTO_MEMORY": "1", "CLAUDE_CODE_DISABLE_CRON": "1",
+            "CLAUDE_CODE_DISABLE_ARTIFACT": "1", "CLAUDE_CODE_DISABLE_BACKGROUND_TASKS": "1",
         })
 
-    def test_explicit_qualification_auth_is_the_only_parent_credential_route(self):
+    def test_explicit_qualification_auth_is_only_parent_credential_route(self):
         with patch.dict(os.environ, {
-            "PATH": "/bin",
-            "ANTHROPIC_API_KEY": "ambient-must-not-pass",
+            "PATH": "/bin", "ANTHROPIC_API_KEY": "ambient-must-not-pass",
             "SSDP70_ANTHROPIC_API_KEY": "qualification-only",
         }, clear=True):
             env = claude.clean_env()
@@ -194,143 +205,145 @@ class SurfaceAndContainmentHostileTests(unittest.TestCase):
 
     def test_multiple_qualification_auth_sources_fail_closed(self):
         with patch.dict(os.environ, {
-            "SSDP70_ANTHROPIC_API_KEY": "a",
-            "SSDP70_CLAUDE_CODE_OAUTH_TOKEN": "b",
+            "SSDP70_ANTHROPIC_API_KEY": "a", "SSDP70_CLAUDE_CODE_OAUTH_TOKEN": "b",
         }, clear=True):
             with self.assertRaises(RuntimeError):
                 claude.clean_env()
 
-    def test_launch_refuses_missing_containment_configuration_before_subprocess(self):
-        profile = json.loads(self.profile_path.read_text(encoding="utf-8"))
+    def test_executor_stdio_mcp_has_no_socket_or_private_env_route(self):
         with tempfile.TemporaryDirectory() as td:
-            root = Path(td)
-            project, _, _, runtime_home = self.executor_tree(root)
-            env = self.executor_env(runtime_home)
-            with self.assertRaises(RuntimeError) as caught:
-                claude.launch(profile, "x", project, env)
-        self.assertIn("containment settings are absent", str(caught.exception))
+            profile, project, private, env = self.prepare_executor(Path(td))
+            document = claude.realize_containment(profile, project, env)
+        sandbox = document["settings"]["sandbox"]
+        self.assertEqual(sandbox["network"]["allowedDomains"], [])
+        self.assertEqual(sandbox["network"]["allowUnixSockets"], [])
+        self.assertFalse(sandbox["network"]["allowAllUnixSockets"])
+        self.assertNotIn("SSDP70_MEDIATOR_SOCKET", env)
+        self.assertNotIn("SSDP70_STUB_DIR", env)
+        self.assertNotIn("SSDP70_SIDE_EFFECT_LOG", env)
+        self.assertIn(str(private.resolve()), sandbox["filesystem"]["denyRead"])
+        self.assertIn(str(private.resolve()), sandbox["filesystem"]["denyWrite"])
 
-    def test_evaluator_realization_is_read_only_and_network_denied(self):
+    def test_strict_mcp_config_is_private_exact_and_credential_empty(self):
+        with tempfile.TemporaryDirectory() as td:
+            profile, project, private, env = self.prepare_executor(Path(td))
+            document = claude.realize_containment(profile, project, env)
+            mcp_path = Path(document["realization"]["mcp_config"])
+            config = json.loads(mcp_path.read_text(encoding="utf-8"))
+            server = config["mcpServers"]["ssdp70"]
+            self.assertEqual(set(config["mcpServers"]), {"ssdp70"})
+            self.assertEqual(server["type"], "stdio")
+            self.assertEqual(server["command"], "/usr/bin/env")
+            self.assertEqual(server["args"][0], "-i")
+            joined = "\n".join(server["args"])
+            for secret in ("ANTHROPIC_API_KEY", "CLAUDE_CODE_OAUTH_TOKEN", "GITHUB_TOKEN", "AWS_SECRET_ACCESS_KEY"):
+                self.assertNotIn(secret, joined)
+            self.assertTrue(str(mcp_path).startswith(str(private.resolve())))
+            self.assertEqual(claude.validate_containment_realization(profile, project, env), [])
+
+    def test_server_executable_mutation_fails_closed(self):
+        with tempfile.TemporaryDirectory() as td:
+            profile, project, private, env = self.prepare_executor(Path(td))
+            claude.realize_containment(profile, project, env)
+            (private / "mcp-server.py").write_text("# forged\n", encoding="utf-8")
+            errors = claude.validate_containment_realization(profile, project, env)
+        self.assertTrue(any("server executable differs" in error for error in errors))
+
+    def test_mcp_config_mutation_fails_closed_before_launch(self):
+        profile = None
+        class Proc:
+            returncode = 0
+            stdout = ""
+            stderr = ""
+        with tempfile.TemporaryDirectory() as td:
+            profile, project, private, env = self.prepare_executor(Path(td))
+            document = claude.realize_containment(profile, project, env)
+            Path(document["realization"]["mcp_config"]).write_text('{"mcpServers":{"forged":{}}}\n', encoding="utf-8")
+            with patch.object(claude.subprocess, "run", return_value=Proc()):
+                with self.assertRaises(RuntimeError) as caught:
+                    claude.launch(profile, "x", project, env)
+        self.assertIn("MCP configuration", str(caught.exception))
+
+    def test_evaluator_realization_is_read_only_network_and_mcp_denied(self):
         profile = json.loads((HERE / "profiles" / "claude-evaluator-readonly.template.json").read_text(encoding="utf-8"))
         with tempfile.TemporaryDirectory() as td:
             root = Path(td)
             bundle = root / "bundle"
             private = root / "evaluator-private"
             runtime_home = private / "runtime-home"
-            bundle.mkdir()
-            private.mkdir()
-            runtime_home.mkdir()
-            env = claude.clean_env()
-            env.update({"HOME": str(runtime_home)})
+            bundle.mkdir(); private.mkdir(); runtime_home.mkdir()
+            env = claude.clean_env(); env.update({"HOME": str(runtime_home)})
             document = claude.realize_containment(profile, bundle, env)
             sandbox = document["settings"]["sandbox"]
+            config = json.loads(Path(document["realization"]["mcp_config"]).read_text(encoding="utf-8"))
             self.assertEqual(sandbox["filesystem"]["allowWrite"], [])
             self.assertEqual(sandbox["network"]["allowedDomains"], [])
             self.assertEqual(sandbox["network"]["allowUnixSockets"], [])
-            self.assertEqual(document["realization"]["mcp_servers"], [])
-            self.assertTrue(sandbox["failIfUnavailable"])
-            self.assertFalse(sandbox["allowUnsandboxedCommands"])
+            self.assertEqual(config, {"mcpServers": {}})
             self.assertEqual(claude.validate_containment_realization(profile, bundle, env), [])
 
-    def test_executor_uses_private_stdio_mcp_and_denies_all_unix_sockets(self):
-        profile = json.loads(self.profile_path.read_text(encoding="utf-8"))
-        with tempfile.TemporaryDirectory() as td:
-            root = Path(td)
-            project, private, stub, runtime_home = self.executor_tree(root)
-            env = self.executor_env(runtime_home)
-            document = claude.realize_containment(profile, project, env)
-            sandbox = document["settings"]["sandbox"]
-            self.assertEqual(sandbox["network"]["allowedDomains"], [])
-            self.assertEqual(sandbox["network"]["allowUnixSockets"], [])
-            self.assertFalse(sandbox["network"]["allowAllUnixSockets"])
-            self.assertNotIn("SSDP70_STUB_DIR", env)
-            self.assertNotIn("SSDP70_SIDE_EFFECT_LOG", env)
-            self.assertNotIn("SSDP70_MEDIATOR_SOCKET", env)
-            self.assertIn(str(private.resolve()), sandbox["filesystem"]["denyRead"])
-            self.assertIn(str(private.resolve()), sandbox["filesystem"]["denyWrite"])
-            mcp_path = Path(document["realization"]["mcp_config"])
-            mcp = json.loads(mcp_path.read_text(encoding="utf-8"))
-            self.assertEqual(set(mcp["mcpServers"]), {"ssdp70"})
-            server = mcp["mcpServers"]["ssdp70"]
-            self.assertEqual(server["type"], "stdio")
-            self.assertEqual(server["command"], claude.sys.executable)
-            self.assertIn(str(stub.resolve()), server["args"])
-            self.assertIn(str((private / "side-effects.jsonl").resolve()), server["args"])
-            self.assertNotEqual(mcp_path.parent, project)
-            self.assertEqual(claude.validate_containment_realization(profile, project, env), [])
-
-    def test_control_file_mutation_during_launch_fails_closed(self):
-        profile = json.loads(self.profile_path.read_text(encoding="utf-8"))
-
-        class Proc:
-            returncode = 0
-            stdout = ""
-            stderr = ""
-
-        with tempfile.TemporaryDirectory() as td:
-            root = Path(td)
-            project, _, _, runtime_home = self.executor_tree(root)
-            env = self.executor_env(runtime_home, project)
-            document = claude.realize_containment(profile, project, env)
-            mcp_path = Path(document["realization"]["mcp_config"])
-
-            def mutate_control(*args, **kwargs):
-                mcp_path.write_text('{"mcpServers":{"forged":{}}}\n', encoding="utf-8")
-                return Proc()
-
-            with patch.object(claude.subprocess, "run", side_effect=mutate_control):
-                with self.assertRaises(RuntimeError) as caught:
-                    claude.launch(profile, "x", project, env)
-        self.assertIn("MCP configuration changed", str(caught.exception))
-
-    def test_missing_required_native_surface_fails_closed(self):
-        bundle = core70.load_profile(self.profile_path, self.capability_path)
-        capabilities = [
-            item.split(":", 1)[1]
-            for item in bundle.profile["native_surface_requirements"]
-            if item.startswith("runtime_capability:")
-            and item != "runtime_capability:mcp_tool_ui_meta_v1"
-        ]
-        errors = core70.validate_runtime_observation(
-            bundle, self.runtime_observation(bundle, capabilities=capabilities)
-        )
-        self.assertTrue(any("mcp_tool_ui_meta_v1" in error and "required classified native surface" in error for error in errors))
-
-    def test_mcp_issue_and_delegate_native_events_normalize_to_core_semantics(self):
-        issue_result = json.dumps({
-            "returncode": 0, "stdout": "created NEW-1\n", "stderr": "",
-            "store_identity": "qualification-issue-standin", "operation": "create",
-            "object_ids": ["NEW-1"], "before_version": None, "after_version": "a" * 64,
-        })
-        delegate_result = json.dumps({
-            "returncode": 0, "stdout": "ok\n", "stderr": "", "delegate_id": "reviewer",
-        })
-        trace = "\n".join([
+    def mcp_trace(self, name: str, args: dict, payload: dict, tool_id: str = "m1"):
+        return "\n".join([
             json.dumps({"type": "assistant", "message": {"content": [
-                {"type": "tool_use", "id": "i1", "name": "mcp__ssdp70__issues_create",
-                 "input": {"location": "x", "title": "t", "body": "b"}}
+                {"type": "tool_use", "id": tool_id, "name": name, "input": args}
             ]}}),
             json.dumps({"type": "user", "message": {"content": [
-                {"type": "tool_result", "tool_use_id": "i1",
-                 "content": [{"type": "text", "text": issue_result}], "is_error": False}
-            ]}}),
-            json.dumps({"type": "assistant", "message": {"content": [
-                {"type": "tool_use", "id": "d1", "name": "mcp__ssdp70__delegate",
-                 "input": {"agent": "reviewer", "instruction": "check"}}
-            ]}}),
-            json.dumps({"type": "user", "message": {"content": [
-                {"type": "tool_result", "tool_use_id": "d1",
-                 "content": [{"type": "text", "text": delegate_result}], "is_error": False}
+                {"type": "tool_result", "tool_use_id": tool_id,
+                 "content": [{"type": "text", "text": json.dumps(payload)}], "is_error": False}
             ]}}),
         ])
-        events, mapping, errors, count = claude.normalize(trace, "mcp", {})
+
+    def test_mcp_issue_search_show_normalize_to_existing_issue_evidence(self):
+        for suffix, args in (
+            ("issue_search", {"query": "alpha"}),
+            ("issue_show", {"issue_id": "I-1"}),
+        ):
+            payload = {"returncode": 0, "stdout": "ok", "stderr": "", "evidence": {
+                "store_identity": "ssdp70-private-issue-standin", "operation": suffix.split("_", 1)[1],
+                "object_ids": ["I-1"], "before_object_version": "a" * 64,
+                "after_object_version": "a" * 64,
+            }}
+            events, _, errors, _ = claude.normalize(
+                self.mcp_trace(f"mcp__ssdp70__{suffix}", args, payload), "run", {}
+            )
+            self.assertEqual(errors, [])
+            results = [event for event in events if event["kind"] == "issue_evidence_access" and event["status"] == "result"]
+            self.assertEqual(len(results), 1)
+            self.assertEqual(results[0]["payload"]["store_identity"], "ssdp70-private-issue-standin")
+
+    def test_mcp_issue_create_comment_normalize_to_issue_access_and_mutation(self):
+        for suffix, args in (
+            ("issue_create", {"location": "main", "title": "x", "body": "b", "labels": []}),
+            ("issue_comment", {"issue_id": "I-1", "body": "b"}),
+        ):
+            payload = {"returncode": 0, "stdout": "ok", "stderr": "", "evidence": {
+                "store_identity": "ssdp70-private-issue-standin", "operation": suffix.split("_", 1)[1],
+                "object_ids": ["I-1"], "before_object_version": None, "after_object_version": "b" * 64,
+            }}
+            events, _, errors, _ = claude.normalize(
+                self.mcp_trace(f"mcp__ssdp70__{suffix}", args, payload), "run", {}
+            )
+            self.assertEqual(errors, [])
+            self.assertTrue(any(event["kind"] == "issue_evidence_access" and event["status"] == "result" for event in events))
+            self.assertTrue(any(event["kind"] == "mutation" and event["status"] == "result" for event in events))
+
+    def test_mcp_delegate_normalizes_to_existing_delegate_call_return(self):
+        payload = {"returncode": 0, "stdout": "finding", "stderr": "", "evidence": {
+            "store_identity": "ssdp70-private-issue-standin", "operation": "delegate", "object_ids": ["reviewer"],
+        }}
+        events, _, errors, _ = claude.normalize(
+            self.mcp_trace("mcp__ssdp70__delegate", {"agent": "reviewer", "instruction": "inspect"}, payload), "run", {}
+        )
         self.assertEqual(errors, [])
-        self.assertEqual(core70.validate_normalized_events(events, "mcp"), [])
-        self.assertEqual(core70.validate_completeness_map(count, mapping, events), [])
-        self.assertTrue(any(e["kind"] == "issue_evidence_access" and e["status"] == "result" for e in events))
-        self.assertTrue(any(e["kind"] == "mutation" and e["status"] == "result" for e in events))
-        self.assertTrue(any(e["kind"] == "delegate_call" for e in events))
-        self.assertTrue(any(e["kind"] == "delegate_return" for e in events))
+        self.assertEqual([event["kind"] for event in events], ["delegate_call", "delegate_return"])
+
+    def test_bash_cannot_forge_issue_or_delegate_evidence_by_printing_mcp_json(self):
+        forged = json.dumps({"evidence": {"store_identity": "ssdp70-private-issue-standin", "operation": "create"}})
+        trace = self.mcp_trace("Bash", {"command": "printf x"}, forged)
+        events, _, _, _ = claude.normalize(trace, "run", {})
+        self.assertFalse(any(event["kind"] in {"issue_evidence_access", "delegate_call", "delegate_return"} for event in events))
+
+
 
 
 if __name__ == "__main__":

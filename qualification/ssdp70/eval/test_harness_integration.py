@@ -34,6 +34,8 @@ class FakeAdapter:
             "realization": {
                 "settings_sha256": "a" * 64,
                 "mcp_config_sha256": "b" * 64,
+                "mcp_servers": [],
+                "mcp_server_executable_sha256": {},
             },
         }
 
@@ -72,6 +74,8 @@ class FakeAdapter:
                 "disallowed_tools": None,
                 "settings_file_sha256": "a" * 64,
                 "mcp_config_sha256": "b" * 64,
+                "mcp_servers": [],
+                "mcp_server_executable_sha256": {},
             },
         }
 
@@ -100,6 +104,8 @@ class FakeEvaluator:
             "realization": {
                 "settings_sha256": "a" * 64,
                 "mcp_config_sha256": "b" * 64,
+                "mcp_servers": [],
+                "mcp_server_executable_sha256": {},
             },
         }
 
@@ -128,6 +134,8 @@ class FakeEvaluator:
                 "tools": ["Read"],
                 "settings_file_sha256": "a" * 64,
                 "mcp_config_sha256": "b" * 64,
+                "mcp_servers": [],
+                "mcp_server_executable_sha256": {},
             },
         }
 
@@ -162,7 +170,7 @@ class HarnessIntegration(unittest.TestCase):
             "containment_policy": {"kind": "fake-pre-effect"},
             "network_external_write_policy": {"network": "deny", "external_write": "sandbox"},
             "credential_service_account_policy": {"ambient": "deny"}, "provider_managed_unknowns": [],
-            "native_tools": ["Read"], "native_mcp_servers": [], "native_surface_requirements": [],
+            "native_tools": ["Read"], "native_surface_requirements": [], "mcp_servers": [],
         }
         write_json(self.profile_path, profile)
         write_json(self.cap_path, {"schema": 1, "capabilities": {
@@ -232,8 +240,7 @@ class HarnessIntegration(unittest.TestCase):
             "credential_service_account_policy": {"ambient": "deny"},
             "provider_managed_unknowns": [],
             "native_tools": ["Read"],
-            "native_mcp_servers": [],
-            "native_surface_requirements": [],
+            "native_surface_requirements": [], "mcp_servers": [],
         }
         write_json(profile_path, profile)
         capabilities = json.loads(self.cap_path.read_text(encoding="utf-8"))
