@@ -10,7 +10,7 @@ candidate `db94a2dfb7fef480f37227eab5c45256e89901b8` is unchanged.
 
 Implementation commit:
 
-`9a163553873621c5b4862016c0457644438b505e`
+`f4206d06c1c5005c8a14c6bb53ae719ecb39044f`
 
 Repair input was
 `STAGE-F-PRE-RUN-QUALIFICATION-INTEGRITY-ACTUAL-PROFILE-RECHECK-STOP-BLOCKED-2026-09-28.md`
@@ -54,7 +54,8 @@ No comparative campaign was started. No admission PASS evidence was created.
 The Claude adapter now realizes containment before launch rather than merely declaring it:
 
 - explicit `--restricted`;
-- explicit run-owned `--settings <project>/.claude/settings.json`;
+- explicit run-owned `--settings` whose control file lives under the harness-private/runtime
+  root outside the executor/evaluator working directory;
 - fail-closed sandbox startup (`failIfUnavailable: true`);
 - unsandboxed command escape disabled;
 - native network allowlist empty;
@@ -65,9 +66,15 @@ The Claude adapter now realizes containment before launch rather than merely dec
   denied to sandboxed commands;
 - auto-memory, scheduling, Artifact publication, and background-task surfaces are disabled
   in the contained runtime environment;
-- strict explicit empty MCP configuration (`--mcp-config ... --strict-mcp-config`);
-- filesystem deny roots cover the run parent, host HOME, `/root`, and `/run/user`, with
-  only the run-owned project reopened for executor reads/writes;
+- strict explicit empty MCP configuration (`--mcp-config ... --strict-mcp-config`) stored
+  beside the private settings file, outside the working directory;
+- filesystem deny roots cover the harness-private/runtime state, host HOME, `/home`,
+  `/root`, `/run/user`, `/proc`, `/mnt`, `/media`, `/srv`, and `/var/tmp`;
+- write-deny construction explicitly avoids placing an ancestor of the writable executor
+  project in `denyWrite`, so the sandbox does not shadow its own allowed workspace;
+- the active settings/MCP control files are outside the restricted file-tool working
+  directory, inside the denied private root, and their exact bytes are digest-checked before
+  and after launch;
 - containment settings and exact bytes are bound into launch identity and a retained
   `containment-realization.json`.
 
@@ -156,38 +163,49 @@ capability in the realized sandbox.
 - host HOME/credential environment leakage;
 - launch refusal when containment config is absent;
 - direct stub/log path non-exposure and mediator-only access;
-- executor sandbox realization;
+- executor sandbox realization without a writable-project/deny-write ancestor conflict;
+- private settings/MCP control files outside the native file-tool working directory;
+- control-file mutation detection;
 - evaluator read-only/network-denied realization.
 
 Existing portable/integration tests were updated only as required by the new profile and
 adapter contracts.
 
-## Implementation blob identities at `9a163553873621c5b4862016c0457644438b505e`
+## Implementation blob identities at `f4206d06c1c5005c8a14c6bb53ae719ecb39044f`
 
-- `qualification/ssdp70/eval/adapters/claude.py` — `b83e2d1c18b76ab80716c020e74b6142214f3eb8`
-- `qualification/ssdp70/eval/assess70.py` — `4ac85b91da3dc4172a624cc2c9406e909f358bbf`
-- `qualification/ssdp70/eval/capabilities/claude-evaluator-readonly.json` — `243d709d219b0a43e7d4c5be407c1b8d2915733c`
-- `qualification/ssdp70/eval/capabilities/claude-headless.json` — `405b8cf252d0750aa7ff359bb185915f57a379e5`
-- `qualification/ssdp70/eval/core70.py` — `4596f5c0e366e00499c2612531f6c165ff673750`
-- `qualification/ssdp70/eval/harness70.py` — `4e4113fb77c475a74d5f6fd28657545e4a845aae`
-- `qualification/ssdp70/eval/profiles/claude-evaluator-readonly.template.json` — `9431ea19bc52dcea8010a374edd5e0af3348bf4f`
-- `qualification/ssdp70/eval/profiles/claude-headless.template.json` — `75198dba713b0b6ed5fc93965ebb7667f17148bf`
+- `qualification/ssdp70/eval/adapters/claude.py` — `52f20cfcf0621cc15307325c4ebcf50dce80d200`
+- `qualification/ssdp70/eval/assess70.py` — `a17ed28faef5d7378202d34c56ab83130eb512ed`
+- `qualification/ssdp70/eval/capabilities/claude-evaluator-readonly.json` — `b4f39d045b5a5655d36c9944ef8aead562c9de9a`
+- `qualification/ssdp70/eval/capabilities/claude-headless.json` — `3055dd4acbcc90fc1b19689632ec2ba10211d2e0`
+- `qualification/ssdp70/eval/core70.py` — `31af182c467e50bc3a4d946c71654213d02c950c`
+- `qualification/ssdp70/eval/harness70.py` — `a92110e5c91c40fff1b0ee96fb4ccb5e4f7e3c56`
+- `qualification/ssdp70/eval/profiles/claude-evaluator-readonly.template.json` — `3faa5f6bfea1d73142c07531e3b9ec668eff2f26`
+- `qualification/ssdp70/eval/profiles/claude-headless.template.json` — `2328b8fc899b16bb791dd19222cf7a65a78f3da2`
 - `qualification/ssdp70/eval/stub_tools/delegate.py` — `8847efed0e50634162ae8d4728b3d6a39ffc9e35`
 - `qualification/ssdp70/eval/stub_tools/issues.py` — `47762f947d8cb6b22e5cb209d8942268233eaba5`
 - `qualification/ssdp70/eval/stub_tools/mediator.py` — `b257322b208d235c94a41ec7579f1cbf238bbfba`
-- `qualification/ssdp70/eval/test_harness_integration.py` — `23926cc692677c4ef072db3c8b83ee58bd70a071`
+- `qualification/ssdp70/eval/test_harness_integration.py` — `10a5be8da90d96b266987e4b6bcf06a8f63424e0`
 - `qualification/ssdp70/eval/test_portable70.py` — `8c574c9dcab0405445c5a817c9dcaed0869ddddf`
-- `qualification/ssdp70/eval/test_stage_f_integrity_repairs.py` — `d413538fe625c8bff56d0f4a2c2b4c8ff33b3a12`
+- `qualification/ssdp70/eval/test_stage_f_integrity_repairs.py` — `f810ca015b078f34a5bb539cb39536007fb188c3`
+
+The final implementation identity supersedes the earlier intermediate repair identities
+`3afae4fa...` through `112f75a7...`. The final D4 reconciliation in
+`f4206d06...` removes a writable-project `denyWrite` ancestor conflict and relocates the
+active settings/MCP control files outside the executor/evaluator working directory. Those
+post-intermediate corrections are part of the implementation being handed to the fresh
+checker.
 
 ## Checks executed and unavailable
 
 ### Executed
 
 - Reconstructed the governing workplan/contract authority independently.
-- Compared `8e05a7b8920415727e32ce778cdf4737ea59d530...9a163553873621c5b4862016c0457644438b505e`
-  through the repository API. The changed-file set is exclusively the 14 files under
-  `qualification/ssdp70/eval/` listed above.
-- Scanned the final comparison patch for added-line trailing whitespace: zero findings.
+- Compared `8e05a7b8920415727e32ce778cdf4737ea59d530...f4206d06c1c5005c8a14c6bb53ae719ecb39044f`
+  through the repository API. The changed-file set is exactly the 14 files under
+  `qualification/ssdp70/eval/` listed above plus this repair record under
+  `qualification/ssdp70/`; no `source/`, `dist/`, or `orchestrator/` file changed.
+- Scanned the final comparison patch through the repository API for added-line trailing
+  whitespace: zero findings.
   This is supplementary evidence only; it is **not** reported as execution of
   `git diff --check`.
 - Inspected the retained real 2.1.283 init/skill/evaluator traces used by the new
