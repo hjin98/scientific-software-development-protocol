@@ -28,6 +28,10 @@ if str(HERE) not in sys.path:
 import core70  # noqa: E402
 
 OWNER = "scientific-inspectability-and-initiative.md"
+# Harness-owned git exclude for the run project. It is restored before the diff is computed so that
+# neither the runtime nor the executor can hide a path from the diff handed to the oracles.
+PROJECT_GIT_EXCLUDE = "__pycache__/\n*.pyc\n.claude/\n.mcp.json\n.qualification-tmp/\n"
+FINAL_TREE_IGNORE = (".git", ".claude", ".mcp.json", ".qualification-tmp", "__pycache__")
 
 
 def load_adapter(name: str):
@@ -120,10 +124,7 @@ def build_project(corpus: Path, episode: dict[str, Any], project: Path) -> None:
         subprocess.run(["git", "init", "-q"], cwd=project, check=True)
     info = project / ".git" / "info"
     info.mkdir(parents=True, exist_ok=True)
-    (info / "exclude").write_text(
-        "__pycache__/\n*.pyc\n.claude/\n.mcp.json\n.qualification-tmp/\n",
-        encoding="utf-8",
-    )
+    (info / "exclude").write_text(PROJECT_GIT_EXCLUDE, encoding="utf-8")
     subprocess.run(["git", "add", "-A"], cwd=project, check=True)
     subprocess.run(
         ["git", "-c", "user.email=eval@example.invalid", "-c", "user.name=eval", "commit", "-qm", "fixture", "--allow-empty"],
@@ -175,6 +176,47 @@ def run_oracles(oracles_root: Path | None, episode_id: str, requirements: core70
         })
     (out / "oracle.json").write_text(json.dumps(result_payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     return result_payload
+
+
+def _final_tree_ignore(project: Path, exclude_paths: list[str]):
+    """copytree ignore: the fixed patterns plus EXACTLY the verified runtime placeholders (top-level names)."""
+    for name in exclude_paths:
+        if not isinstance(name, str) or not name or "/" in name or name in {".", ".."} or any(ch in name for ch in "*?[]"):
+            raise core70.ContractError(f"runtime placeholder exclusion {name!r} is not an exact top-level name")
+    exact = set(exclude_paths)
+    generic = shutil.ignore_patterns(*FINAL_TREE_IGNORE)
+    project_resolved = project.resolve()
+
+    def ignore(directory, names):
+        ignored = set(generic(directory, names))
+        if Path(directory).resolve() == project_resolved:
+            ignored |= exact & set(names)
+        return ignored
+
+    return ignore
+
+
+def capture_project_state(project: Path, out: Path, runtime_exclusions: list[str]) -> str:
+    """Write diff.patch and final-tree for the oracles.
+
+    The harness-owned git exclude is restored first (the runtime appends its stub names to it and the
+    executor may edit it), then only the verified runtime placeholders are hidden, by exact pathspec and
+    exact top-level name. Anything else the run left in the project stays visible to the oracles.
+    """
+    tree_ignore = _final_tree_ignore(project, runtime_exclusions)
+    (project / ".git" / "info").mkdir(parents=True, exist_ok=True)
+    (project / ".git" / "info" / "exclude").write_text(PROJECT_GIT_EXCLUDE, encoding="utf-8")
+    pathspecs = [".", ":(exclude).claude", *(f":(exclude){name}" for name in runtime_exclusions)]
+    subprocess.run(["git", "add", "-A", "-N", "--", *pathspecs], cwd=project, capture_output=True)
+    diff = subprocess.run(
+        ["git", "diff", "--", *pathspecs],
+        cwd=project,
+        capture_output=True,
+        text=True,
+    ).stdout
+    (out / "diff.patch").write_text(diff, encoding="utf-8")
+    shutil.copytree(project, out / "final-tree", ignore=tree_ignore)
+    return diff
 
 
 def _write_normalized(events: list[dict[str, Any]], out: Path) -> None:
@@ -364,6 +406,8 @@ def run_episode(
         (out / "containment-realization.json").write_text(
             json.dumps(containment, indent=2, sort_keys=True) + "\n", encoding="utf-8"
         )
+        runtime_baseline_fn = getattr(adapter_module, "runtime_entry_baseline", None)
+        runtime_baseline = runtime_baseline_fn(profile_bundle.profile, project) if runtime_baseline_fn is not None else None
         launched = adapter_module.launch(profile_bundle.profile, prompt, project, env)
         stdout, stderr = launched["stdout"], launched["stderr"]
         (out / "trace.jsonl").write_text(stdout, encoding="utf-8")
@@ -402,6 +446,16 @@ def run_episode(
         post_run = getattr(adapter_module, "validate_post_run_project_state", None)
         if post_run is not None:
             profile_errors.extend(post_run(profile_bundle.profile, project))
+        runtime_exclusions: list[str] = []
+        inspect_entries = getattr(adapter_module, "inspect_runtime_entries", None)
+        if inspect_entries is not None:
+            inspection = inspect_entries(profile_bundle.profile, project, runtime_baseline)
+            if inspection.get("record") is not None:
+                (out / "runtime-created-entries.json").write_text(
+                    json.dumps(inspection["record"], indent=2, sort_keys=True) + "\n", encoding="utf-8"
+                )
+            profile_errors.extend(inspection.get("errors") or [])
+            runtime_exclusions = list(inspection.get("exclude_paths") or [])
         installed_after = core70.sha256_tree(installed_skills)
         if installed_after != arm["dist_tree_sha256"]:
             profile_errors.append(
@@ -432,21 +486,7 @@ def run_episode(
         if (stub / "issues").is_dir():
             shutil.copytree(stub / "issues", out / "issues-final")
 
-        subprocess.run(["git", "add", "-A", "-N", "--", ".", ":(exclude).claude"], cwd=project, capture_output=True)
-        diff = subprocess.run(
-            ["git", "diff", "--", ".", ":(exclude).claude"],
-            cwd=project,
-            capture_output=True,
-            text=True,
-        ).stdout
-        (out / "diff.patch").write_text(diff, encoding="utf-8")
-        shutil.copytree(
-            project,
-            out / "final-tree",
-            ignore=shutil.ignore_patterns(
-                ".git", ".claude", ".mcp.json", ".qualification-tmp", "__pycache__"
-            ),
-        )
+        capture_project_state(project, out, runtime_exclusions)
 
         run_oracles(oracles, episode["id"], requirements, out)
 

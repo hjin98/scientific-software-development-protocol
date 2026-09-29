@@ -102,6 +102,7 @@ EVIDENCE_INTEGRITY_ROOTS = (
     "profile-admission-snapshot.json",
     "profile-admission-evidence",
     "containment-realization.json",
+    "runtime-created-entries.json",
     "requirements-snapshot.json",
     "final-report.md",
     "diff.patch",

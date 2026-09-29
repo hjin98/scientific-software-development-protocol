@@ -1,0 +1,177 @@
+{
+  "realization": {
+    "ambient_credentials_inherited": false,
+    "control_files_outside_workspace": true,
+    "exact_native_tools": [
+      "Skill",
+      "Read",
+      "Glob",
+      "Grep",
+      "Edit",
+      "Write",
+      "Bash",
+      "mcp__ssdp70__issue_locations",
+      "mcp__ssdp70__issue_search",
+      "mcp__ssdp70__issue_show",
+      "mcp__ssdp70__issue_create",
+      "mcp__ssdp70__issue_comment",
+      "mcp__ssdp70__delegate"
+    ],
+    "filesystem_deny_roots": [
+      "/home",
+      "/home/samjin",
+      "/media",
+      "/mnt",
+      "/proc",
+      "/root",
+      "/run/user",
+      "/srv",
+      "/tmp/ssdp70-erehc76i/harness-private",
+      "/var/tmp"
+    ],
+    "filesystem_read": [
+      "/tmp/ssdp70-erehc76i/project"
+    ],
+    "filesystem_write": [
+      "/tmp/ssdp70-erehc76i/project"
+    ],
+    "host_home_inherited": false,
+    "mcp_config": "/tmp/ssdp70-erehc76i/harness-private/runtime-home/.ssdp70-control/mcp.json",
+    "mcp_config_sha256": "97a5572c05d756635719b3db3d9e5d24978055a3e82d070582cb39b9d3596ebc",
+    "mcp_servers": [
+      {
+        "credential_environment": "env-i-empty-plus-minimal-path",
+        "entrypoint": "stub_tools/mediator.py",
+        "executable_file": "/tmp/ssdp70-erehc76i/harness-private/mcp-server.py",
+        "executable_sha256": "e51f0641907215c9d5a0acb607f967363fc7491fa572a70cfb8701acd2308c2e",
+        "name": "ssdp70",
+        "server_id": "ssdp70-qualification-stdio-v1",
+        "tools": [
+          "mcp__ssdp70__issue_locations",
+          "mcp__ssdp70__issue_search",
+          "mcp__ssdp70__issue_show",
+          "mcp__ssdp70__issue_create",
+          "mcp__ssdp70__issue_comment",
+          "mcp__ssdp70__delegate"
+        ],
+        "transport": "stdio"
+      }
+    ],
+    "mediator_socket": null,
+    "native_network": "deny",
+    "private_root": "/tmp/ssdp70-erehc76i/harness-private",
+    "project": "/tmp/ssdp70-erehc76i/project",
+    "project_settings_file": "/tmp/ssdp70-erehc76i/project/.claude/settings.json",
+    "project_settings_sha256": "ca3d163bab055381827226140568f3bef7eaac187cebd76878e0b63e9e442356",
+    "runtime_home": "/tmp/ssdp70-erehc76i/harness-private/runtime-home",
+    "setting_sources": "project",
+    "settings_file": "/tmp/ssdp70-erehc76i/harness-private/runtime-home/.ssdp70-control/settings.json",
+    "settings_sha256": "125f974b1a7ae2279705a7c819031cde0957b830695944a455d55de57782d36c"
+  },
+  "schema": 1,
+  "settings": {
+    "disableAllHooks": true,
+    "env": {
+      "CLAUDE_CODE_DISABLE_ARTIFACT": "1",
+      "CLAUDE_CODE_DISABLE_AUTO_MEMORY": "1",
+      "CLAUDE_CODE_DISABLE_BACKGROUND_TASKS": "1",
+      "CLAUDE_CODE_DISABLE_CRON": "1"
+    },
+    "permissions": {
+      "deny": [
+        "Edit(./.claude/**)",
+        "Write(./.claude/**)",
+        "NotebookEdit(./.claude/**)"
+      ]
+    },
+    "sandbox": {
+      "allowUnsandboxedCommands": false,
+      "autoAllowBashIfSandboxed": true,
+      "credentials": {
+        "envVars": [
+          {
+            "mode": "deny",
+            "name": "CLAUDE_CODE_OAUTH_TOKEN"
+          },
+          {
+            "mode": "deny",
+            "name": "ANTHROPIC_API_KEY"
+          },
+          {
+            "mode": "deny",
+            "name": "ANTHROPIC_AUTH_TOKEN"
+          },
+          {
+            "mode": "deny",
+            "name": "AWS_ACCESS_KEY_ID"
+          },
+          {
+            "mode": "deny",
+            "name": "AWS_SECRET_ACCESS_KEY"
+          },
+          {
+            "mode": "deny",
+            "name": "AWS_SESSION_TOKEN"
+          },
+          {
+            "mode": "deny",
+            "name": "GITHUB_TOKEN"
+          },
+          {
+            "mode": "deny",
+            "name": "GH_TOKEN"
+          },
+          {
+            "mode": "deny",
+            "name": "SSH_AUTH_SOCK"
+          }
+        ]
+      },
+      "enableWeakerNestedSandbox": false,
+      "enabled": true,
+      "excludedCommands": [],
+      "failIfUnavailable": true,
+      "filesystem": {
+        "allowRead": [
+          "/tmp/ssdp70-erehc76i/project"
+        ],
+        "allowWrite": [
+          "/tmp/ssdp70-erehc76i/project"
+        ],
+        "denyRead": [
+          "/home",
+          "/home/samjin",
+          "/media",
+          "/mnt",
+          "/proc",
+          "/root",
+          "/run/user",
+          "/srv",
+          "/tmp/ssdp70-erehc76i/harness-private",
+          "/var/tmp"
+        ],
+        "denyWrite": [
+          "/home",
+          "/home/samjin",
+          "/media",
+          "/mnt",
+          "/proc",
+          "/root",
+          "/run/user",
+          "/srv",
+          "/tmp/ssdp70-erehc76i/harness-private",
+          "/tmp/ssdp70-erehc76i/harness-private/runtime-home/.ssdp70-control/mcp.json",
+          "/tmp/ssdp70-erehc76i/harness-private/runtime-home/.ssdp70-control/settings.json",
+          "/tmp/ssdp70-erehc76i/project/.claude",
+          "/var/tmp"
+        ]
+      },
+      "network": {
+        "allowAllUnixSockets": false,
+        "allowLocalBinding": false,
+        "allowUnixSockets": [],
+        "allowedDomains": []
+      }
+    }
+  }
+}

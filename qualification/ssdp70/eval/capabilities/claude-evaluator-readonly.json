@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "manifest_id": "claude-evaluator-readonly-v2",
+  "manifest_id": "claude-evaluator-readonly-v3",
   "capabilities": {
     "catalog_root_activation": {
       "decision": "DENY",
@@ -48,19 +48,19 @@
       "semantic_classes": [
         "workspace_read_search_list"
       ],
-      "scope": "native Read surface; governed by semantic capability decision and substrate containment"
+      "scope": "native Read surface; evidence-bundle-scoped by permissions.blockReadsOutsideWorkingDirectories and an adapter-generated bundle-scoped permission rule; bare grants refused"
     },
     "tool:Glob": {
       "semantic_classes": [
         "workspace_read_search_list"
       ],
-      "scope": "native Glob surface; governed by semantic capability decision and substrate containment"
+      "scope": "native Glob surface; evidence-bundle-scoped by permissions.blockReadsOutsideWorkingDirectories and an adapter-generated bundle-scoped permission rule; bare grants refused"
     },
     "tool:Grep": {
       "semantic_classes": [
         "workspace_read_search_list"
       ],
-      "scope": "native Grep surface; governed by semantic capability decision and substrate containment"
+      "scope": "native Grep surface; evidence-bundle-scoped by permissions.blockReadsOutsideWorkingDirectories and an adapter-generated bundle-scoped permission rule; bare grants refused"
     },
     "runtime_capability:interrupt_receipt_v1": {
       "semantic_classes": [

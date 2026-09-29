@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "profile_id": "claude-headless-reference-template",
-  "adapter_id": "claude-stream-json-v3",
+  "adapter_id": "claude-stream-json-v4",
   "agent_model": "claude-sonnet-5",
   "provider_runtime": {
     "executable": "claude",
@@ -25,8 +25,8 @@
     "kind": "claude-code-restricted-sandbox-v1",
     "setting_sources": "project",
     "enforcement": "required-before-launch",
-    "filesystem_read": "run-owned project/package plus immutable OS runtime reads needed by declared Bash families; host user/custody/run-state roots denied",
-    "filesystem_write": "run-owned project only",
+    "filesystem_read": "native Read/Glob/Grep: run-owned project (including the installed package) only, refused elsewhere by permissions.blockReadsOutsideWorkingDirectories plus project-scoped permission rules and denied roots; Bash: sandboxed, host user/custody/run-state roots denied, immutable OS runtime reads only as needed by declared Bash families",
+    "filesystem_write": "run-owned project only for native Write/Edit (project-scoped permission rules, no bare allow) and for Bash (sandbox allowWrite); everything else, including /tmp outside the project, denied",
     "native_network": "deny",
     "mediator_required": false,
     "ambient_host_home": "deny",
@@ -35,7 +35,10 @@
     "protected_control_files": "settings and strict qualification-owned MCP config live under the denied harness-private/runtime area outside the executor working directory; settings, config, and private MCP server executable are digest-checked across launch; the loaded project settings source is a fixed empty document, hooks are disabled, project .claude is write-denied and re-verified after execution",
     "denied_read_roots": "harness-private/runtime state, host HOME, /home, /root, /run/user, /proc, /mnt, /media, /srv, /var/tmp",
     "mediator_transport": "qualification-owned dependency-free stdio MCP; no executor Unix socket or native network route",
-    "mcp_stdio_required": true
+    "mcp_stdio_required": true,
+    "native_file_tools": "run-project-scoped: the adapter alone grants Read/Edit/Write as permission rules scoped to the run project and sets permissions.blockReadsOutsideWorkingDirectories; a bare or path-argument Read/Glob/Grep/Edit/Write in native_allowed_tools is refused; a denied read root that contains the project is refused",
+    "runtime_created_entries_sha256": "c82fac2d791de95b1a854110e5c8606ee685f56daedde05a89f05318c3b9adcf",
+    "runtime_created_entries": "reviewed exact digest-bound set of zero-size runtime-created project placeholders (17 root files, node_modules with only an empty .bin, .claude/.cc-writes, agents, commands empty directories): existence/type/zero-size verified after every run, retained raw in runtime-created-entries.json, excluded only as that exact set from the final tree and diff, any deviation is INADMISSIBLE"
   },
   "network_external_write_policy": {
     "external_write": "sandbox-or-mediate",
@@ -72,11 +75,6 @@
   ],
   "native_allowed_tools": [
     "Skill",
-    "Read",
-    "Glob",
-    "Grep",
-    "Edit",
-    "Write",
     "Bash(python:*)",
     "Bash(python3:*)",
     "Bash(git:*)",

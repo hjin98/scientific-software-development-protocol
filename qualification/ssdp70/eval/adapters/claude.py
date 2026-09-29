@@ -10,13 +10,14 @@ from __future__ import annotations
 import hashlib
 import json
 import os
+import stat
 import subprocess
 import sys
 import time
 from pathlib import Path
 from typing import Any
 
-ADAPTER_ID = "claude-stream-json-v3"
+ADAPTER_ID = "claude-stream-json-v4"
 SSDP_SKILLS = {
     "scientific-formulation",
     "numerical-algorithm-design",
@@ -58,7 +59,41 @@ PARENT_AUTH_ENV = set(QUALIFICATION_AUTH_ENV.values())
 SETTING_SOURCES = {"none", "project"}
 PROJECT_SETTINGS_BYTES = b"{}\n"
 PROJECT_CLAUDE_ALLOWED_ENTRIES = {"skills", "settings.json"}
-PROJECT_CLAUDE_RUNTIME_EMPTY_DIRS = {"agents", "commands"}  # created empty by the runtime itself
+
+# Tools whose path scope the adapter alone realizes. A bare name (or any path argument) for one of
+# these in the frozen `native_allowed_tools` would widen the scope past the run project: a bare
+# `Edit`/`Write` allow rule is merged into the sandbox write allow-list (Claude Code settings schema:
+# sandbox.filesystem.allowWrite is "merged with paths from Edit(...) allow permission rules"), and a bare
+# `Read` allow lets the native file tools read any host path (sandbox.filesystem.* does not confine them).
+PATH_SCOPED_TOOLS = frozenset({"Read", "Glob", "Grep", "Edit", "Write", "NotebookEdit", "MultiEdit", "LSP"})
+PERMISSION_PATH_UNSAFE = frozenset("*?[]{}!\\\n\r\t\"'`$")
+
+# Reviewed, exact set of entries the Claude Code runtime itself creates in the run project. Observed in
+# 27 live episodes (Claude Code 2.1.284) and traced to runtime code: with CLAUDE_CODE_SUBPROCESS_ENV_SCRUB
+# set (kept for credential isolation) the runtime creates these zero-size stubs and directories in the
+# launch working directory as bubblewrap mount points; the Bash tool creates an empty `.claude/.cc-writes`
+# directory. The only runtime switch that skips the stubs is a "diskless" host launch option that also
+# removes shell execution, so prevention is not available for this profile and the set is allow-listed
+# instead. The digest of this document is frozen in the profile key (containment_policy).
+RUNTIME_STUB_FILES = (
+    ".env", ".env.development", ".env.development.local", ".env.local", ".env.production",
+    ".env.production.local", ".env.test", ".env.test.local", ".gitmodules", ".npmrc", ".yarnrc",
+    ".yarnrc.yml", "bunfig.toml", "package.json", "package-lock.json", "pnpm-lock.yaml", "yarn.lock",
+)
+RUNTIME_CREATED_ENTRIES = {
+    "schema": 1,
+    "runtime": "claude-code",
+    "project_root": {
+        "empty_regular_files": sorted(RUNTIME_STUB_FILES),
+        "directories": {"node_modules": {"empty_directories": [".bin"]}},
+    },
+    "project_claude": {"empty_directories": [".cc-writes", "agents", "commands"]},
+}
+RUNTIME_CREATED_ENTRIES_SHA256 = hashlib.sha256(
+    json.dumps(RUNTIME_CREATED_ENTRIES, sort_keys=True, separators=(",", ":")).encode("utf-8")
+).hexdigest()
+PROJECT_CLAUDE_RUNTIME_EMPTY_DIRS = set(RUNTIME_CREATED_ENTRIES["project_claude"]["empty_directories"])
+SKILL_BODY_RULE = "installed-skill-md-without-leading-frontmatter-and-leading-newlines-v1"
 
 
 def clean_env() -> dict[str, str]:
@@ -206,10 +241,85 @@ def _project_settings_path(project: Path) -> Path:
     return project.resolve() / ".claude" / "settings.json"
 
 
+def _runtime_entries_applicable(profile: dict[str, Any]) -> bool:
+    policy = profile.get("containment_policy") or {}
+    return policy.get("setting_sources") == "project" or "runtime_created_entries_sha256" in policy
+
+
+def _require_frozen_runtime_entries_digest(profile: dict[str, Any]) -> None:
+    """The reviewed runtime-created-entry allow-list is digest-bound to the frozen profile."""
+    if not _runtime_entries_applicable(profile):
+        return
+    frozen = (profile.get("containment_policy") or {}).get("runtime_created_entries_sha256")
+    if frozen != RUNTIME_CREATED_ENTRIES_SHA256:
+        raise RuntimeError(
+            "frozen containment_policy.runtime_created_entries_sha256 does not equal the adapter's reviewed "
+            f"runtime-created-entry allow-list digest ({RUNTIME_CREATED_ENTRIES_SHA256})"
+        )
+
+
 def _path_is_ancestor(path: Path, child: Path) -> bool:
     resolved = path.resolve()
     child_resolved = child.resolve()
     return resolved == child_resolved or resolved in child_resolved.parents
+
+
+def _permission_absolute(path: Path) -> str:
+    """Claude Code permission-rule spelling of an absolute path: a leading `//`."""
+    text = str(path)
+    if not text.startswith("/") or any(ch in PERMISSION_PATH_UNSAFE for ch in text):
+        raise RuntimeError(f"path {text!r} cannot be expressed exactly as a permission-rule scope")
+    return "/" + text
+
+
+def _validate_native_allowed_tools(profile: dict[str, Any]) -> None:
+    """Path scope for the native file tools is realized only by the adapter, never by the profile."""
+    for rule in profile.get("native_allowed_tools") or []:
+        if not isinstance(rule, str) or not rule:
+            raise RuntimeError("native_allowed_tools must contain non-empty strings")
+        name = rule.split("(", 1)[0].strip()
+        if name in PATH_SCOPED_TOOLS:
+            raise RuntimeError(
+                f"native_allowed_tools entry {rule!r}: path-scoped tools are granted only by the adapter "
+                "as run-project-scoped permission rules"
+            )
+
+
+def _scoped_file_permissions(
+    profile: dict[str, Any],
+    project_resolved: Path,
+    deny_read_paths: list[str],
+    deny_write_paths: list[str],
+) -> tuple[list[str], list[str]]:
+    """Return (allow, deny) permission rules confining the native file tools to the run project.
+
+    Deny rules take precedence over allow rules, so a denied root that contains the project cannot be
+    carved out again: that configuration fails closed instead of shadowing the workspace.
+    """
+    for root in deny_read_paths:
+        if _path_is_ancestor(Path(root), project_resolved):
+            raise RuntimeError(
+                f"denied read root {root!r} contains the run project; permission rules cannot carve the "
+                "project back out, so the run root must live outside every denied root"
+            )
+    scope = _permission_absolute(project_resolved) + "/**"
+    tools = set(profile.get("native_tools") or [])
+    allow: list[str] = []
+    if tools & {"Read", "Glob", "Grep"}:
+        allow.append(f"Read({scope})")
+    if "Edit" in tools:
+        allow.append(f"Edit({scope})")
+    if "Write" in tools:
+        allow.append(f"Write({scope})")
+    deny: list[str] = []
+    for root in deny_read_paths:
+        spelled = _permission_absolute(Path(root))
+        deny.extend((f"Read({spelled})", f"Read({spelled}/**)"))
+    for target in deny_write_paths:
+        spelled = _permission_absolute(Path(target))
+        for tool in ("Edit", "Write"):
+            deny.extend((f"{tool}({spelled})", f"{tool}({spelled}/**)"))
+    return sorted(set(allow)), sorted(set(deny))
 
 
 def _containment_document(profile: dict[str, Any], project: Path, env: dict[str, str]) -> dict[str, Any]:
@@ -291,8 +401,17 @@ def _containment_document(profile: dict[str, Any], project: Path, env: dict[str,
         },
         "disableAllHooks": True,
     }
+    _validate_native_allowed_tools(profile)
+    _require_frozen_runtime_entries_digest(profile)
+    scoped_allow, scoped_deny = _scoped_file_permissions(profile, project_resolved, deny_read_paths, deny_write_paths)
+    permission_deny = list(scoped_deny)
     if sources == "project":
-        settings["permissions"] = {"deny": ["Edit(./.claude/**)", "Write(./.claude/**)", "NotebookEdit(./.claude/**)"]}
+        permission_deny = ["Edit(./.claude/**)", "Write(./.claude/**)", "NotebookEdit(./.claude/**)"] + permission_deny
+    settings["permissions"] = {
+        "blockReadsOutsideWorkingDirectories": True,
+        "allow": scoped_allow,
+        "deny": permission_deny,
+    }
     return {
         "schema": 1,
         "settings": settings,
@@ -314,6 +433,9 @@ def _containment_document(profile: dict[str, Any], project: Path, env: dict[str,
             "host_home_inherited": False,
             "ambient_credentials_inherited": False,
             "exact_native_tools": list(profile.get("native_tools") or []),
+            "native_file_tool_scope": "run-project-only",
+            "native_file_permission_allow": scoped_allow,
+            "runtime_created_entries_sha256": RUNTIME_CREATED_ENTRIES_SHA256 if _runtime_entries_applicable(profile) else None,
         },
     }
 
@@ -426,6 +548,7 @@ def validate_containment_realization(profile: dict[str, Any], project: Path, env
             errors.append(f"containment control file {key} is executor/evaluator workspace-reachable")
     if not write_policy_stays_inside_project(expected["settings"]["sandbox"]["filesystem"], project):
         errors.append("sandbox write policy shadows or escapes the declared project boundary")
+    errors.extend(scoped_permission_errors(actual, project, str((profile.get('containment_policy') or {}).get('filesystem_write') or '').startswith('deny')))
     if expected["realization"]["setting_sources"] == "project":
         project_settings = _project_settings_path(project)
         try:
@@ -468,6 +591,192 @@ def validate_post_run_project_state(profile: dict[str, Any], project: Path) -> l
     if extra:
         errors.append(f"unexpected entries appeared in project .claude during execution: {extra}")
     return errors
+
+
+def scoped_permission_errors(settings: Any, project: Path, writes_denied: bool = False) -> list[str]:
+    """Independent invariant check of the realized permission block (does not trust regeneration).
+
+    The native file tools may hold allow rules only for the run project, the runtime must be told to
+    refuse reads outside the working directories, and no directory grant may widen the scope. A deny rule
+    over the whole project is legitimate only for writes when the frozen policy denies all writes.
+    """
+    if not isinstance(settings, dict):
+        return ["containment settings are not an object"]
+    permissions = settings.get("permissions")
+    if not isinstance(permissions, dict):
+        return ["containment settings lack the permissions block that scopes the native file tools"]
+    errors: list[str] = []
+    if permissions.get("blockReadsOutsideWorkingDirectories") is not True:
+        errors.append("permissions.blockReadsOutsideWorkingDirectories is not true")
+    if permissions.get("additionalDirectories"):
+        errors.append("permissions.additionalDirectories widens the native file-tool scope")
+    if permissions.get("defaultMode") not in (None, "default"):
+        errors.append("permissions.defaultMode changes the frozen permission mode")
+    try:
+        scope = _permission_absolute(project.resolve()) + "/**"
+    except RuntimeError as exc:
+        return errors + [str(exc)]
+    allow = permissions.get("allow")
+    if not isinstance(allow, list) or not all(isinstance(rule, str) for rule in allow):
+        return errors + ["permissions.allow is malformed"]
+    for rule in allow:
+        name = rule.split("(", 1)[0].strip()
+        if name in PATH_SCOPED_TOOLS and rule != f"{name}({scope})":
+            errors.append(f"permission allow rule {rule!r} is not scoped to the run project")
+    deny = permissions.get("deny")
+    if not isinstance(deny, list) or not all(isinstance(rule, str) for rule in deny):
+        errors.append("permissions.deny is malformed")
+    else:
+        for rule in deny:
+            name = rule.split("(", 1)[0].strip()
+            if name in PATH_SCOPED_TOOLS and rule == f"{name}({scope})":
+                if name == "Read" or not writes_denied:
+                    errors.append(f"permission deny rule {rule!r} shadows the run project")
+    return errors
+
+
+def _lstat_row(path: Path) -> dict[str, Any]:
+    try:
+        st = path.lstat()
+    except FileNotFoundError:
+        return {"present": False}
+    except OSError as exc:
+        return {"present": False, "error": str(exc)}
+    if stat.S_ISLNK(st.st_mode):
+        kind = "symlink"
+    elif stat.S_ISDIR(st.st_mode):
+        kind = "directory"
+    elif stat.S_ISREG(st.st_mode):
+        kind = "file"
+    else:
+        kind = "other"
+    return {"present": True, "kind": kind, "size": st.st_size if kind == "file" else None}
+
+
+def _runtime_candidate_paths() -> list[str]:
+    root = RUNTIME_CREATED_ENTRIES["project_root"]
+    return (
+        list(root["empty_regular_files"])
+        + list(root["directories"])
+        + [f".claude/{name}" for name in RUNTIME_CREATED_ENTRIES["project_claude"]["empty_directories"]]
+    )
+
+
+def runtime_entry_baseline(profile: dict[str, Any], project: Path) -> dict[str, Any] | None:
+    """Pre-launch presence of every reviewed runtime-created candidate (None when not applicable)."""
+    if not _runtime_entries_applicable(profile):
+        return None
+    base = project.resolve()
+    return {"schema": 1, "paths": {rel: _lstat_row(base / rel) for rel in _runtime_candidate_paths()}}
+
+
+def _raw_project_listing(project: Path) -> list[dict[str, Any]]:
+    rows: list[dict[str, Any]] = []
+    try:
+        names = sorted(entry.name for entry in project.iterdir())
+    except OSError:
+        return rows
+    for name in names:
+        if name == ".git":
+            continue
+        row = _lstat_row(project / name)
+        row["name"] = name
+        rows.append(row)
+    return rows
+
+
+def inspect_runtime_entries(profile: dict[str, Any], project: Path, baseline: dict[str, Any] | None) -> dict[str, Any]:
+    """Verify the runtime-created placeholders after execution.
+
+    Returns {"record", "exclude_paths", "errors"}. `record` is the raw evidence (retained verbatim). The
+    exact set of verified placeholders is returned in `exclude_paths` only when every listed entry
+    verifies; any deviation (non-empty, wrong type, symlink, missing, or unexpected child of a runtime
+    directory) is an error and nothing is excluded from what the oracles see.
+    """
+    if not _runtime_entries_applicable(profile):
+        return {"record": None, "exclude_paths": [], "errors": []}
+    errors: list[str] = []
+    frozen = (profile.get("containment_policy") or {}).get("runtime_created_entries_sha256")
+    if frozen != RUNTIME_CREATED_ENTRIES_SHA256:
+        errors.append("frozen runtime-created-entry allow-list digest does not match the adapter's reviewed allow-list")
+    base = project.resolve()
+    prior = (baseline or {}).get("paths") if isinstance(baseline, dict) else None
+    if not isinstance(prior, dict):
+        errors.append("pre-launch runtime-entry baseline is missing")
+        prior = {}
+    rows: dict[str, dict[str, Any]] = {}
+    verified: list[str] = []
+
+    def prior_present(rel: str) -> bool:
+        row = prior.get(rel)
+        return isinstance(row, dict) and row.get("present") is True
+
+    root_spec = RUNTIME_CREATED_ENTRIES["project_root"]
+    for name in root_spec["empty_regular_files"]:
+        now = _lstat_row(base / name)
+        row = {"observed": now, "fixture_owned": prior_present(name), "verified_runtime_placeholder": False}
+        rows[name] = row
+        if row["fixture_owned"]:
+            continue
+        if not now.get("present"):
+            errors.append(f"expected runtime placeholder {name!r} is absent after execution")
+        elif now.get("kind") != "file":
+            errors.append(f"runtime placeholder {name!r} is not a regular file ({now.get('kind')})")
+        elif now.get("size") != 0:
+            errors.append(f"runtime placeholder {name!r} is not empty (size {now.get('size')})")
+        else:
+            row["verified_runtime_placeholder"] = True
+            verified.append(name)
+    for name, spec in root_spec["directories"].items():
+        now = _lstat_row(base / name)
+        children: list[dict[str, Any]] = []
+        row = {"observed": now, "fixture_owned": prior_present(name), "children": children, "verified_runtime_placeholder": False}
+        rows[name] = row
+        if row["fixture_owned"]:
+            continue
+        if not now.get("present"):
+            errors.append(f"expected runtime directory {name!r} is absent after execution")
+            continue
+        if now.get("kind") != "directory":
+            errors.append(f"runtime directory {name!r} is not a real directory ({now.get('kind')})")
+            continue
+        allowed_children = set(spec["empty_directories"])
+        clean = True
+        for child in sorted(p.name for p in (base / name).iterdir()):
+            child_row = _lstat_row(base / name / child)
+            child_row["name"] = child
+            if child in allowed_children and child_row.get("kind") == "directory" and not any((base / name / child).iterdir()):
+                child_row["expected_empty_directory"] = True
+            else:
+                clean = False
+                errors.append(f"unexpected entry {name}/{child} inside runtime-created directory {name!r}")
+            children.append(child_row)
+        if clean:
+            row["verified_runtime_placeholder"] = True
+            verified.append(name)
+    claude_rows: dict[str, Any] = {}
+    claude_dir = base / ".claude"
+    try:
+        for entry in sorted(claude_dir.iterdir(), key=lambda p: p.name):
+            row = _lstat_row(entry)
+            if row.get("kind") == "directory":
+                row["children"] = sorted(child.name for child in entry.iterdir())
+            claude_rows[entry.name] = row
+    except OSError as exc:
+        errors.append(f"project .claude directory is unreadable after execution: {exc}")
+    record = {
+        "schema": 1,
+        "allowlist_sha256": RUNTIME_CREATED_ENTRIES_SHA256,
+        "frozen_allowlist_sha256": frozen,
+        "allowlist": RUNTIME_CREATED_ENTRIES,
+        "baseline": prior,
+        "project_root_placeholders": rows,
+        "project_claude_entries": claude_rows,
+        "project_root_raw_listing": _raw_project_listing(base),
+        "verified_exclusions": sorted(verified) if not errors else [],
+        "errors": list(errors),
+    }
+    return {"record": record, "exclude_paths": sorted(verified) if not errors else [], "errors": errors}
 
 
 def write_policy_stays_inside_project(filesystem: dict[str, Any], project: Path) -> bool:
@@ -599,14 +908,60 @@ def _event(run_id: str, sequence: int, kind: str, native_index: int, native_sha2
     }
 
 
-def _resource_identity(tool: str, data: dict[str, Any]) -> str | None:
+def _resource_identity(tool: str, data: dict[str, Any], context: dict[str, Any] | None = None) -> tuple[str | None, str | None]:
+    """Return (logical resource identity, identity source) for a read/search/list tool use.
+
+    Read names its file. Grep and Glob search the resolved run project root when no `path` is given
+    (the runtime's default search root is its working directory); the pattern and options stay in the
+    retained `input`. (None, None) means no identity could be established and the caller must record an
+    error: a resource_access is never emitted with a silently missing identity.
+    """
     if tool == "Read":
         value = data.get("file_path") or data.get("path")
-        return value if isinstance(value, str) else None
+        return (value, "input-path") if isinstance(value, str) and value else (None, None)
     if tool in {"Grep", "Glob"}:
         value = data.get("path") or data.get("file_path")
-        return value if isinstance(value, str) else None
+        if isinstance(value, str) and value:
+            return value, "input-path"
+        project = context.get("project") if isinstance(context, dict) else None
+        if isinstance(project, str) and project:
+            return str(Path(project).resolve()), "default-search-root-run-project"
+    return None, None
+
+
+def _search_root(tool: str, identity: str | None, context: dict[str, Any] | None) -> str | None:
+    """Absolute search root of a Grep/Glob (relative paths are relative to the run project)."""
+    if tool not in {"Grep", "Glob"} or not identity:
+        return None
+    path = Path(identity)
+    if path.is_absolute():
+        return os.path.normpath(str(path))
+    project = context.get("project") if isinstance(context, dict) else None
+    if isinstance(project, str) and project:
+        return os.path.normpath(str(Path(project).resolve() / path))
     return None
+
+
+def strip_skill_frontmatter(text: str) -> str:
+    """The body the runtime injects for an activated skill, derived from the installed SKILL.md.
+
+    Rule (`SKILL_BODY_RULE`): the file must start with a line that is exactly `---` (LF terminated); the
+    frontmatter ends at the next line that is exactly `---`; the body is everything after that line's
+    newline with leading newline characters removed. Nothing else is trimmed or normalized: no CR handling,
+    no trailing trim, no whitespace trimming, no substring/prefix matching.
+    """
+    if not text.startswith("---\n"):
+        raise ValueError("installed SKILL.md does not start with a frontmatter block")
+    offset = 4
+    while True:
+        newline = text.find("\n", offset)
+        line = text[offset:] if newline == -1 else text[offset:newline]
+        if line == "---":
+            body_start = len(text) if newline == -1 else newline + 1
+            return text[body_start:].lstrip("\n")
+        if newline == -1:
+            raise ValueError("installed SKILL.md frontmatter block is not terminated")
+        offset = newline + 1
 
 
 def _package_identity(context: dict[str, Any] | None) -> dict[str, Any] | None:
@@ -704,6 +1059,8 @@ def normalize(stdout: str, run_id: str, context: dict[str, Any] | None = None) -
     sequence = 0
     lines = stdout.splitlines()
     pending: dict[str, list[dict[str, Any]]] = {}
+    pending_tools: dict[str, str] = {}
+    start_events: dict[str, list[str]] = {}
     selected_skill_roots: list[str] = []
     package_identity = _package_identity(context)
 
@@ -712,10 +1069,12 @@ def normalize(stdout: str, run_id: str, context: dict[str, Any] | None = None) -
         sequence += 1
         event = _event(run_id, sequence, kind, native_index, native_sha256, payload, status=status)
         events.append(event)
+        if status == "start" and isinstance(payload.get("tool_use_id"), str):
+            start_events.setdefault(payload["tool_use_id"], []).append(event["event_id"])
         return event
 
     def register_pending(tool_use_id: str, kind: str, payload: dict[str, Any]) -> None:
-        pending.setdefault(tool_use_id, []).append({"kind": kind, "payload": dict(payload)})
+        pending.setdefault(tool_use_id, []).append({"kind": kind, "payload": dict(payload), "permission_mapped_ids": []})
 
     def mcp_payload(content: Any) -> dict[str, Any] | None:
         texts: list[str] = []
@@ -732,7 +1091,10 @@ def normalize(stdout: str, run_id: str, context: dict[str, Any] | None = None) -
                 return value
         return None
 
-    def consume_result(block: dict[str, Any], native_index: int, native_sha256: str, block_index: int, mapped: list[str]) -> None:
+    def consume_result(
+        block: dict[str, Any], native_index: int, native_sha256: str, block_index: int, mapped: list[str],
+        meta: dict[str, Any] | None = None,
+    ) -> None:
         tool_use_id = block.get("tool_use_id")
         if not isinstance(tool_use_id, str) or tool_use_id not in pending:
             errors.append(f"native tool result {tool_use_id!r} has no matching tool-use event")
@@ -741,8 +1103,14 @@ def normalize(stdout: str, run_id: str, context: dict[str, Any] | None = None) -
         result_status = "error" if block.get("is_error") else "result"
         reference = f"trace:{native_index}:block:{block_index}"
         priors = pending.pop(tool_use_id)
+        pending_tools.pop(tool_use_id, None)
         mediated = mcp_payload(content)
         for prior in priors:
+            decision = prior.get("permission_decision")
+            if decision is not None and result_status != "error":
+                errors.append(
+                    f"tool use {tool_use_id!r} was denied by a runtime permission decision but reports a successful result"
+                )
             if prior["kind"] == "root_selection" and result_status == "result":
                 logical_root = prior["payload"].get("logical_root")
                 if isinstance(logical_root, str) and logical_root:
@@ -756,7 +1124,6 @@ def normalize(stdout: str, run_id: str, context: dict[str, Any] | None = None) -
                     "result_sha256": _result_digest(content),
                     "result_content": content,
                 }
-                event = emit("delegate_return", native_index, native_sha256, payload, status=result_status)
             else:
                 payload = dict(prior["payload"])
                 payload.update({
@@ -774,8 +1141,18 @@ def normalize(stdout: str, run_id: str, context: dict[str, Any] | None = None) -
                         payload["result_status"] = "error"
                 if prior["kind"] in {"mutation", "network_external_action"}:
                     payload["disposition"] = "blocked-or-error" if payload["result_status"] == "error" else "sandboxed"
-                event = emit(prior["kind"], native_index, native_sha256, payload, status=payload["result_status"])
+            if isinstance(meta, dict) and meta.get("non_execution_kind") is not None:
+                payload["non_execution_kind"] = meta.get("non_execution_kind")
+            if decision is not None:
+                payload["blocked"] = True
+                payload["blocked_reason"] = "runtime-permission-denied"
+                payload["permission_decision"] = decision
+            kind = "delegate_return" if prior["kind"] == "delegate_call" else prior["kind"]
+            status = result_status if kind == "delegate_return" else payload["result_status"]
+            event = emit(kind, native_index, native_sha256, payload, status=status)
             mapped.append(event["event_id"])
+            if decision is not None:
+                prior["permission_mapped_ids"].append(event["event_id"])
 
     for native_index, line in enumerate(lines):
         native_sha256 = hashlib.sha256(line.encode("utf-8")).hexdigest()
@@ -826,6 +1203,7 @@ def normalize(stdout: str, run_id: str, context: dict[str, Any] | None = None) -
                 if not isinstance(tool_use_id, str) or not tool_use_id:
                     errors.append(f"native tool use {tool!r} lacks stable tool-use id")
                     continue
+                pending_tools[tool_use_id] = str(tool)
 
                 if tool == "Skill":
                     skill = data.get("skill") or data.get("command")
@@ -842,7 +1220,12 @@ def normalize(stdout: str, run_id: str, context: dict[str, Any] | None = None) -
                     register_pending(tool_use_id, "root_selection", payload)
 
                 elif tool in READ_TOOLS:
-                    resource_identity = _resource_identity(tool, data)
+                    resource_identity, identity_source = _resource_identity(tool, data, context)
+                    if resource_identity is None:
+                        errors.append(
+                            f"native {tool} tool use {tool_use_id!r} at event {native_index} has no resource identity "
+                            "(no path input and no resolvable run-project search root)"
+                        )
                     metadata = _resource_metadata(resource_identity, context)
                     ordinary_root = _ordinary_root(resource_identity, context)
                     if ordinary_root is not None:
@@ -858,6 +1241,8 @@ def normalize(stdout: str, run_id: str, context: dict[str, Any] | None = None) -
                     payload = {
                         "operation": tool.lower(),
                         "resource_identity": resource_identity,
+                        "resource_identity_source": identity_source,
+                        "search_root": _search_root(tool, resource_identity, context),
                         "input": data,
                         "tool_use_id": tool_use_id,
                         "result_status": "pending",
@@ -1008,6 +1393,38 @@ def normalize(stdout: str, run_id: str, context: dict[str, Any] | None = None) -
             classification = f"reviewed-non-oracle-system:{raw.get('subtype')}"
             oracle_relevant = False
 
+        elif raw_type == "system" and raw.get("subtype") == "permission_denied":
+            # Emitted when a tool call is auto-denied without an interactive prompt: an approval-required
+            # ("ask") decision in a headless session, a deny rule, or a runtime read block. The attempt is
+            # retained as a blocked tool use: the decision is attached to the tool-use's result event.
+            classification = "permission-decision:permission_denied"
+            oracle_relevant = True
+            denied_id = raw.get("tool_use_id")
+            denied_tool = raw.get("tool_name")
+            if not isinstance(denied_id, str) or denied_id not in pending:
+                errors.append(f"permission decision at native event {native_index} has no matching pending tool use")
+            elif pending_tools.get(denied_id) != denied_tool:
+                errors.append(
+                    f"permission decision at native event {native_index} names tool {denied_tool!r} but tool use "
+                    f"{denied_id!r} is {pending_tools.get(denied_id)!r}"
+                )
+            else:
+                decision = {key: raw[key] for key in (
+                    "tool_name", "tool_use_id", "agent_id", "decision_reason_type", "decision_reason_code",
+                    "decision_reason", "message",
+                ) if key in raw}
+                decision.update({
+                    "source": "runtime-system-event",
+                    "subtype": "permission_denied",
+                    "decision": "denied-without-interactive-approval",
+                    "native_index": native_index,
+                    "native_sha256": native_sha256,
+                })
+                mapped.extend(start_events.get(denied_id, []))
+                for row in pending[denied_id]:
+                    row["permission_decision"] = decision
+                    row["permission_mapped_ids"] = mapped
+
         elif raw_type == "user":
             classification = "user-message"
             content = raw.get("message", {}).get("content", raw.get("content", []))
@@ -1024,25 +1441,47 @@ def normalize(stdout: str, run_id: str, context: dict[str, Any] | None = None) -
                     errors.append(f"synthetic skill body at native event {native_index} is malformed")
                 elif not isinstance(context, dict) or not isinstance(context.get("skills_root"), str):
                     errors.append(f"synthetic skill body at native event {native_index} has no installed skills root")
+                elif "/" in selected_skill_roots[-1] or selected_skill_roots[-1] in {".", ".."}:
+                    errors.append(f"synthetic skill body at native event {native_index} follows a non-simple skill name")
                 else:
                     logical_root = selected_skill_roots[-1]
                     installed = Path(context["skills_root"]) / logical_root / "SKILL.md"
                     try:
                         installed_bytes = installed.read_bytes()
                         installed_text = installed_bytes.decode("utf-8")
-                    except (OSError, UnicodeDecodeError) as exc:
+                        expected_body = strip_skill_frontmatter(installed_text)
+                    except (OSError, UnicodeDecodeError, ValueError) as exc:
                         errors.append(f"cannot verify injected SKILL.md for {logical_root!r}: {exc}")
                     else:
                         prefix, injected = text_blocks[0].split("\n\n", 1)
+                        skill_dir = installed.parent
+                        accepted_prefixes = {
+                            f"Base directory for this skill: {skill_dir}",
+                            f"Base directory for this skill: {skill_dir.resolve()}",
+                        }
                         if not prefix.startswith("Base directory for this skill: "):
                             errors.append(f"synthetic skill body at native event {native_index} lacks base-directory binding")
-                        elif injected != installed_text:
-                            errors.append(f"synthetic skill body for {logical_root!r} does not match installed SKILL.md bytes")
+                        elif prefix not in accepted_prefixes:
+                            errors.append(
+                                f"synthetic skill body at native event {native_index} declares base directory "
+                                f"{prefix[len('Base directory for this skill: '):]!r}, not the selected skill {logical_root!r} installed directory"
+                            )
+                        elif injected != expected_body:
+                            errors.append(
+                                f"synthetic skill body for {logical_root!r} does not equal the installed SKILL.md "
+                                "with its leading frontmatter block removed"
+                            )
                         else:
                             payload = {
                                 "operation": "skill-injected-body",
                                 "resource_identity": str(installed),
-                                "input": {"logical_root": logical_root, "base_directory_declaration": prefix},
+                                "resource_identity_source": "selected-skill-installed-file",
+                                "search_root": None,
+                                "input": {
+                                    "logical_root": logical_root,
+                                    "base_directory_declaration": prefix,
+                                    "injected_body_rule": SKILL_BODY_RULE,
+                                },
                                 "tool_use_id": f"skill-injected:{native_index}",
                                 "result_status": "result",
                                 "result_reference": f"trace:{native_index}:synthetic-skill-body",
@@ -1065,11 +1504,15 @@ def normalize(stdout: str, run_id: str, context: dict[str, Any] | None = None) -
                 continue
             if not isinstance(content, list):
                 content = []
+            metas = {
+                row.get("id"): row for row in (raw.get("tool_result_meta") or [])
+                if isinstance(row, dict) and isinstance(row.get("id"), str)
+            }
             for block_index, block in enumerate(content):
                 if not isinstance(block, dict) or block.get("type") != "tool_result":
                     continue
                 oracle_relevant = True
-                consume_result(block, native_index, native_sha256, block_index, mapped)
+                consume_result(block, native_index, native_sha256, block_index, mapped, metas.get(block.get("tool_use_id")))
 
         elif raw_type == "tool_result":
             classification = "tool-result"

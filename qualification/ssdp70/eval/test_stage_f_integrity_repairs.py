@@ -7,6 +7,7 @@ from pathlib import Path
 from unittest.mock import patch
 
 import core70
+import v4_support
 from adapters import claude
 
 HERE = Path(__file__).resolve().parent
@@ -50,17 +51,14 @@ class ActualTraceRegressionTests(unittest.TestCase):
         self.assertTrue(all(row["oracle_relevant"] is False and row["mapped_event_ids"] == [] for row in reviewed))
 
     def test_a5_retained_skill_injection_binds_exact_installed_skill_bytes(self):
-        trace = (TRACE_ROOT / "skill-probe.jsonl").read_text(encoding="utf-8")
-        raw = [json.loads(line) for line in trace.splitlines() if line.strip()]
-        synthetic = next(row for row in raw if row.get("type") == "user" and row.get("isSynthetic") is True)
-        text = next(block["text"] for block in synthetic["message"]["content"] if block.get("type") == "text")
-        injected = text.split("\n\n", 1)[1]
+        # The v3-era version of this test wrote the injected body (frontmatter already removed) into the
+        # installed SKILL.md, so it could never fail on the real runtime behavior. The installed bytes now
+        # come from the immutable candidate package and the trace is the real Claude Code 2.1.284 activation.
         with tempfile.TemporaryDirectory() as td:
             root = Path(td)
-            skill = root / ".claude" / "skills" / "software-implementation" / "SKILL.md"
-            skill.parent.mkdir(parents=True)
-            skill.write_bytes(injected.encode("utf-8"))
-            events, mapping, errors, count = claude.normalize(trace, "a5", self.package_context(root))
+            installed = v4_support.install_real_skill(root)
+            trace = v4_support.retarget("CHK-PING-p70-r0", root)
+            events, mapping, errors, count = claude.normalize(trace, "a5", v4_support.package_context(root))
             self.assertEqual(errors, [])
             self.assertEqual(core70.validate_completeness_map(count, mapping, events), [])
             injected_reads = [
@@ -70,9 +68,11 @@ class ActualTraceRegressionTests(unittest.TestCase):
             ]
             self.assertEqual(len(injected_reads), 1)
             payload = injected_reads[0]["payload"]
-            self.assertEqual(payload["resource_bytes"], len(injected.encode("utf-8")))
-            self.assertEqual(payload["resource_sha256"], hashlib.sha256(injected.encode("utf-8")).hexdigest())
-            self.assertEqual(payload["result_content"], injected)
+            installed_bytes = installed.read_bytes()
+            self.assertEqual(payload["resource_bytes"], len(installed_bytes))
+            self.assertEqual(payload["resource_sha256"], hashlib.sha256(installed_bytes).hexdigest())
+            self.assertEqual(payload["result_content"], claude.strip_skill_frontmatter(installed_bytes.decode("utf-8")))
+            self.assertNotEqual(payload["result_content"], installed_bytes.decode("utf-8"))
             self.assertEqual(core70.validate_claim_observability(events, ["t1", "t7", "t8"]), [])
 
     def test_unknown_system_subtype_remains_fail_closed(self):
@@ -427,7 +427,11 @@ class SurfaceAndContainmentHostileTests(unittest.TestCase):
         self.assertNotIn("--setting-sources", cmd)
         self.assertIs(launched["command_identity"]["restricted"], True)
         self.assertEqual(core70.validate_launch_identity(profile, launched["command_identity"]), [])
-        self.assertNotIn("permissions", document["settings"])
+        permissions = document["settings"]["permissions"]
+        self.assertIs(permissions["blockReadsOutsideWorkingDirectories"], True)
+        self.assertEqual(len(permissions["allow"]), 1)
+        self.assertTrue(permissions["allow"][0].startswith("Read(//"))
+        self.assertFalse(any(rule.startswith(("Edit(./.claude", "Write(./.claude")) for rule in permissions["deny"]))
 
     def test_missing_or_unknown_setting_sources_fail_closed(self):
         with tempfile.TemporaryDirectory() as td:
@@ -491,7 +495,8 @@ class RepairedV3RealRuntimeTraceTests(unittest.TestCase):
     def test_real_init_matches_frozen_profiles_without_errors(self):
         for role in ("executor", "evaluator"):
             bundle, _, observation = self.load(role)
-            self.assertEqual(bundle.profile["adapter_id"], claude.ADAPTER_ID)
+            # historical v3 frozen profile and evidence: bound to the v3 adapter identity, never rewritten
+            self.assertEqual(bundle.profile["adapter_id"], "claude-stream-json-v3")
             self.assertEqual(core70.validate_runtime_observation(bundle, observation), [], role)
             self.assertEqual(observation["permission_mode"], bundle.profile["permission_mode"])
             self.assertEqual(sorted(observation["tools"]), sorted(bundle.profile["native_tools"]))

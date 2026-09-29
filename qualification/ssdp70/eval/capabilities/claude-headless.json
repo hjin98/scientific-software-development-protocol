@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "manifest_id": "claude-headless-stage-f-v3-stdio-mcp",
+  "manifest_id": "claude-headless-stage-f-v4-stdio-mcp",
   "capabilities": {
     "catalog_root_activation": {
       "decision": "ALLOW",
@@ -28,7 +28,7 @@
     },
     "process_execution": {
       "decision": "SANDBOX/MEDIATE",
-      "scope": "Bash under fail-closed restricted sandbox; command-family permission patterns are approval convenience, not the containment boundary"
+      "scope": "Bash under fail-closed restricted sandbox whose write scope is the run project only; command-family permission patterns are approval convenience, not the containment boundary"
     },
     "repository_object_store": {
       "decision": "SANDBOX/MEDIATE",
@@ -36,11 +36,11 @@
     },
     "workspace_mutation": {
       "decision": "ALLOW",
-      "scope": "run-owned project only; containment/MCP control files live outside the workspace under the denied harness-private root"
+      "scope": "run-owned project only for native Write/Edit (project-scoped permission rules, no bare allow, .claude write-denied) and for Bash (sandbox allowWrite is the project); containment/MCP control files live outside the workspace under the denied harness-private root; no other host path, including /tmp outside the project, is writable"
     },
     "workspace_read_search_list": {
       "decision": "ALLOW",
-      "scope": "run-owned project/package plus immutable OS runtime reads needed by declared sandboxed commands; host user, custody, run-state, and /proc roots denied"
+      "scope": "native Read/Glob/Grep: run-owned project including the installed skill package only (permissions.blockReadsOutsideWorkingDirectories plus adapter-generated project-scoped rules; reads elsewhere are refused); Bash: sandboxed, host user, custody, run-state and /proc roots denied, other host paths (for example /usr, /etc and /tmp) remain visible to the sandboxed shell read-only and are never writable"
     }
   },
   "native_capabilities": {
@@ -54,31 +54,31 @@
       "semantic_classes": [
         "workspace_read_search_list"
       ],
-      "scope": "native Read surface; governed by semantic capability decision and substrate containment"
+      "scope": "native Read surface; run-project-scoped by permissions.blockReadsOutsideWorkingDirectories and adapter-generated project-scoped permission rules; bare grants refused"
     },
     "tool:Glob": {
       "semantic_classes": [
         "workspace_read_search_list"
       ],
-      "scope": "native Glob surface; governed by semantic capability decision and substrate containment"
+      "scope": "native Glob surface; run-project-scoped by permissions.blockReadsOutsideWorkingDirectories and adapter-generated project-scoped permission rules; bare grants refused"
     },
     "tool:Grep": {
       "semantic_classes": [
         "workspace_read_search_list"
       ],
-      "scope": "native Grep surface; governed by semantic capability decision and substrate containment"
+      "scope": "native Grep surface; run-project-scoped by permissions.blockReadsOutsideWorkingDirectories and adapter-generated project-scoped permission rules; bare grants refused"
     },
     "tool:Edit": {
       "semantic_classes": [
         "workspace_mutation"
       ],
-      "scope": "native Edit surface; governed by semantic capability decision and substrate containment"
+      "scope": "native Edit surface; run-project-scoped by adapter-generated project-scoped permission rules (no bare allow); .claude write-denied"
     },
     "tool:Write": {
       "semantic_classes": [
         "workspace_mutation"
       ],
-      "scope": "native Write surface; governed by semantic capability decision and substrate containment"
+      "scope": "native Write surface; run-project-scoped by adapter-generated project-scoped permission rules (no bare allow); .claude write-denied"
     },
     "tool:Bash": {
       "semantic_classes": [

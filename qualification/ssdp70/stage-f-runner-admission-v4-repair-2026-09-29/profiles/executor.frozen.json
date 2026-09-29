@@ -1,0 +1,156 @@
+{
+  "adapter_id": "claude-stream-json-v4",
+  "agent_model": "claude-sonnet-5",
+  "budgets": {
+    "max_turns": 60,
+    "timeout_s": 3600
+  },
+  "containment_policy": {
+    "ambient_credentials": "deny",
+    "ambient_host_home": "deny",
+    "denied_read_roots": "harness-private/runtime state, host HOME, /home, /root, /run/user, /proc, /mnt, /media, /srv, /var/tmp",
+    "enforcement": "required-before-launch",
+    "filesystem_read": "native Read/Glob/Grep: run-owned project (including the installed package) only, refused elsewhere by permissions.blockReadsOutsideWorkingDirectories plus project-scoped permission rules and denied roots; Bash: sandboxed, host user/custody/run-state roots denied, immutable OS runtime reads only as needed by declared Bash families",
+    "filesystem_write": "run-owned project only for native Write/Edit (project-scoped permission rules, no bare allow) and for Bash (sandbox allowWrite); everything else, including /tmp outside the project, denied",
+    "kind": "claude-code-restricted-sandbox-v1",
+    "mcp_stdio_required": true,
+    "mediator_required": false,
+    "mediator_transport": "qualification-owned dependency-free stdio MCP; no executor Unix socket or native network route",
+    "native_file_tools": "run-project-scoped: the adapter alone grants Read/Edit/Write as permission rules scoped to the run project and sets permissions.blockReadsOutsideWorkingDirectories; a bare or path-argument Read/Glob/Grep/Edit/Write in native_allowed_tools is refused; a denied read root that contains the project is refused",
+    "native_network": "deny",
+    "protected_control_files": "settings and strict qualification-owned MCP config live under the denied harness-private/runtime area outside the executor working directory; settings, config, and private MCP server executable are digest-checked across launch; the loaded project settings source is a fixed empty document, hooks are disabled, project .claude is write-denied and re-verified after execution",
+    "runtime_created_entries": "reviewed exact digest-bound set of zero-size runtime-created project placeholders (17 root files, node_modules with only an empty .bin, .claude/.cc-writes, agents, commands empty directories): existence/type/zero-size verified after every run, retained raw in runtime-created-entries.json, excluded only as that exact set from the final tree and diff, any deviation is INADMISSIBLE",
+    "runtime_created_entries_sha256": "c82fac2d791de95b1a854110e5c8606ee685f56daedde05a89f05318c3b9adcf",
+    "runtime_temp": "run-owned project temporary directory",
+    "setting_sources": "project"
+  },
+  "credential_service_account_policy": {
+    "ambient_credentials": "deny",
+    "parent_authentication": "zero or one qualification-only auth source mapped explicitly for the Claude parent process",
+    "sandboxed_subprocess_credentials": "deny"
+  },
+  "install_mechanism": "project-local skill package",
+  "mcp_servers": [
+    {
+      "entrypoint": "stub_tools/mediator.py",
+      "name": "ssdp70",
+      "server_id": "ssdp70-qualification-stdio-v1",
+      "tools": [
+        "mcp__ssdp70__issue_locations",
+        "mcp__ssdp70__issue_search",
+        "mcp__ssdp70__issue_show",
+        "mcp__ssdp70__issue_create",
+        "mcp__ssdp70__issue_comment",
+        "mcp__ssdp70__delegate"
+      ],
+      "transport": "stdio"
+    }
+  ],
+  "native_allowed_tools": [
+    "Skill",
+    "Bash(python:*)",
+    "Bash(python3:*)",
+    "Bash(git:*)",
+    "Bash(ls:*)",
+    "Bash(cat:*)",
+    "Bash(grep:*)",
+    "Bash(find:*)",
+    "Bash(head:*)",
+    "Bash(tail:*)",
+    "Bash(wc:*)",
+    "Bash(sed -n:*)",
+    "mcp__ssdp70__issue_locations",
+    "mcp__ssdp70__issue_search",
+    "mcp__ssdp70__issue_show",
+    "mcp__ssdp70__issue_create",
+    "mcp__ssdp70__issue_comment",
+    "mcp__ssdp70__delegate"
+  ],
+  "native_disallowed_tools": [
+    "Agent",
+    "WebFetch",
+    "WebSearch",
+    "SendMessage",
+    "ListAgents",
+    "RemoteTrigger",
+    "CronCreate",
+    "CronDelete",
+    "CronList",
+    "ScheduleWakeup",
+    "PushNotification",
+    "EnterWorktree",
+    "ExitWorktree",
+    "Artifact",
+    "ArtifactComments",
+    "ArtifactData",
+    "Workflow",
+    "Monitor",
+    "DesignSync",
+    "ToolSearch",
+    "TaskStop",
+    "ReportFindings",
+    "ShareOnboardingGuide"
+  ],
+  "native_surface_requirements": [
+    "runtime_capability:interrupt_receipt_v1",
+    "runtime_capability:interrupt_cancel_queued_v1",
+    "runtime_capability:msg_lifecycle_v1",
+    "runtime_capability:mcp_read_resource_v1",
+    "runtime_capability:mcp_tool_ui_meta_v1",
+    "messaging_socket_path",
+    "mcp_server:ssdp70"
+  ],
+  "native_tools": [
+    "Skill",
+    "Read",
+    "Glob",
+    "Grep",
+    "Edit",
+    "Write",
+    "Bash",
+    "mcp__ssdp70__issue_locations",
+    "mcp__ssdp70__issue_search",
+    "mcp__ssdp70__issue_show",
+    "mcp__ssdp70__issue_create",
+    "mcp__ssdp70__issue_comment",
+    "mcp__ssdp70__delegate"
+  ],
+  "network_external_write_policy": {
+    "external_write": "sandbox-or-mediate",
+    "network": "deny-native-executor-network"
+  },
+  "permission_mode": "default",
+  "pinned_root_instruction_template": "Use the {root} skill. {prompt}",
+  "profile_id": "claude-code-2.1.284-sonnet5-high-local-samjin-executor-v4",
+  "provider_managed_unknowns": [
+    {
+      "classification": "arm-neutral",
+      "name": "provider-backend-shard",
+      "sensitive_claims": [
+        "*"
+      ]
+    },
+    {
+      "classification": "arm-neutral",
+      "name": "provider-model-serving-revision-behind-alias",
+      "sensitive_claims": [
+        "*"
+      ]
+    }
+  ],
+  "provider_runtime": {
+    "binary_sha256": "5cd90aabd83f8a15136c35aa37bb1d92b348993573316643dc3fe4e04afbf88f",
+    "executable": "claude",
+    "provider": "anthropic",
+    "runtime": "claude-code",
+    "version": "2.1.284"
+  },
+  "reasoning_configuration": {
+    "effort": "high",
+    "source": "implementer-frozen-2026-09-29"
+  },
+  "schema": 1,
+  "workspace_realization": {
+    "kind": "fresh-temporary-project"
+  }
+}

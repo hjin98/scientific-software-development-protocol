@@ -1,0 +1,58 @@
+{
+  "entries": [
+    {
+      "classification": "catalog",
+      "mapped_event_ids": [
+        "e000001"
+      ],
+      "native_index": 0,
+      "native_sha256": "540492826b94b882a61fdf2b7d4f498995a273082a1a004bc7f1f2d84a6562dd",
+      "oracle_relevant": true
+    },
+    {
+      "classification": "assistant-message",
+      "mapped_event_ids": [],
+      "native_index": 1,
+      "native_sha256": "8395e527767684a9cadb097d28c6db0cde40386f2b47c923d8574a086f5818d6",
+      "oracle_relevant": false
+    },
+    {
+      "classification": "assistant-message",
+      "mapped_event_ids": [
+        "e000002"
+      ],
+      "native_index": 2,
+      "native_sha256": "79f9842e2c49f75e61a1917724f0e32c2f1c924b114dab3c33e24b43e2f8f677",
+      "oracle_relevant": true
+    },
+    {
+      "classification": "user-message",
+      "mapped_event_ids": [
+        "e000003"
+      ],
+      "native_index": 3,
+      "native_sha256": "e7289e0079af43206a93c12599a1ffbf744d1c0eece796e73d32f3d5c4419a10",
+      "oracle_relevant": true
+    },
+    {
+      "classification": "assistant-message",
+      "mapped_event_ids": [],
+      "native_index": 4,
+      "native_sha256": "17146e080d4e2bd042cfc9557bc8bf748325b101a6d07fc5ef358fbb12324589",
+      "oracle_relevant": false
+    },
+    {
+      "classification": "terminal-result",
+      "mapped_event_ids": [
+        "e000004",
+        "e000005",
+        "e000006"
+      ],
+      "native_index": 5,
+      "native_sha256": "377855d416aa753562404b4db42a9abfe216a8b1e1bfb8cb113f8ec293a6536d",
+      "oracle_relevant": true
+    }
+  ],
+  "native_event_count": 6,
+  "schema": 1
+}

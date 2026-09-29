@@ -1,63 +1,32 @@
 {
-  "schema": 1,
-  "profile_id": "claude-evaluator-readonly-reference-template",
   "adapter_id": "claude-stream-json-v4",
   "agent_model": "claude-sonnet-5",
-  "provider_runtime": {
-    "executable": "claude",
-    "provider": "anthropic",
-    "runtime": "claude-code",
-    "version": "MUST-BE-FROZEN-BEFORE-ASSESSMENT"
-  },
-  "reasoning_configuration": {
-    "effort": null,
-    "source": "provider-default-until-frozen"
-  },
-  "workspace_realization": {
-    "kind": "temporary-read-only-evidence-bundle"
-  },
-  "install_mechanism": "none",
   "budgets": {
     "max_turns": 40,
     "timeout_s": 1800
   },
   "containment_policy": {
-    "kind": "claude-code-restricted-sandbox-v1",
-    "setting_sources": "none",
+    "ambient_credentials": "deny",
+    "ambient_host_home": "deny",
+    "denied_read_roots": "harness-private/runtime state, host HOME, /home, /root, /run/user, /proc, /mnt, /media, /srv, /var/tmp",
     "enforcement": "required-before-launch",
     "filesystem_read": "temporary copied evidence bundle only for native file tools (run-project-scoped permission rules and permissions.blockReadsOutsideWorkingDirectories); high-risk host/run-state roots denied",
     "filesystem_write": "deny evaluator tool writes",
-    "native_network": "deny",
+    "kind": "claude-code-restricted-sandbox-v1",
     "mediator_required": false,
-    "ambient_host_home": "deny",
-    "ambient_credentials": "deny",
-    "runtime_temp": "run-owned project temporary directory",
+    "native_file_tools": "run-project-scoped: the adapter alone grants Read as a permission rule scoped to the evidence bundle and sets permissions.blockReadsOutsideWorkingDirectories; a bare or path-argument Read/Glob/Grep in native_allowed_tools is refused",
+    "native_network": "deny",
     "protected_control_files": "settings and strict empty MCP config live under the denied evaluator-private/runtime area outside the evaluator working directory and are digest-checked across launch",
-    "denied_read_roots": "harness-private/runtime state, host HOME, /home, /root, /run/user, /proc, /mnt, /media, /srv, /var/tmp",
-    "native_file_tools": "run-project-scoped: the adapter alone grants Read as a permission rule scoped to the evidence bundle and sets permissions.blockReadsOutsideWorkingDirectories; a bare or path-argument Read/Glob/Grep in native_allowed_tools is refused"
+    "runtime_temp": "run-owned project temporary directory",
+    "setting_sources": "none"
   },
   "credential_service_account_policy": {
     "ambient_credentials": "deny",
     "parent_authentication": "zero or one qualification-only auth source mapped explicitly for the Claude parent process",
     "sandboxed_subprocess_credentials": "deny"
   },
-  "network_external_write_policy": {
-    "external_write": "deny",
-    "network": "deny-native-evaluator-network"
-  },
-  "native_tools": [
-    "Read",
-    "Glob",
-    "Grep"
-  ],
-  "native_surface_requirements": [
-    "runtime_capability:interrupt_receipt_v1",
-    "runtime_capability:interrupt_cancel_queued_v1",
-    "runtime_capability:msg_lifecycle_v1",
-    "runtime_capability:mcp_read_resource_v1",
-    "runtime_capability:mcp_tool_ui_meta_v1",
-    "messaging_socket_path"
-  ],
+  "install_mechanism": "none",
+  "mcp_servers": [],
   "native_allowed_tools": [],
   "native_disallowed_tools": [
     "mcp__*",
@@ -91,7 +60,25 @@
     "ReportFindings",
     "ShareOnboardingGuide"
   ],
+  "native_surface_requirements": [
+    "runtime_capability:interrupt_receipt_v1",
+    "runtime_capability:interrupt_cancel_queued_v1",
+    "runtime_capability:msg_lifecycle_v1",
+    "runtime_capability:mcp_read_resource_v1",
+    "runtime_capability:mcp_tool_ui_meta_v1",
+    "messaging_socket_path"
+  ],
+  "native_tools": [
+    "Read",
+    "Glob",
+    "Grep"
+  ],
+  "network_external_write_policy": {
+    "external_write": "deny",
+    "network": "deny-native-evaluator-network"
+  },
   "permission_mode": "default",
+  "profile_id": "claude-code-2.1.284-sonnet5-high-local-samjin-evaluator-v4",
   "provider_managed_unknowns": [
     {
       "classification": "arm-neutral",
@@ -101,12 +88,26 @@
       ]
     },
     {
-      "classification": "uncontrolled",
-      "name": "runtime-build-until-frozen-by-environment",
+      "classification": "arm-neutral",
+      "name": "provider-model-serving-revision-behind-alias",
       "sensitive_claims": [
         "*"
       ]
     }
   ],
-  "mcp_servers": []
+  "provider_runtime": {
+    "binary_sha256": "5cd90aabd83f8a15136c35aa37bb1d92b348993573316643dc3fe4e04afbf88f",
+    "executable": "claude",
+    "provider": "anthropic",
+    "runtime": "claude-code",
+    "version": "2.1.284"
+  },
+  "reasoning_configuration": {
+    "effort": "high",
+    "source": "implementer-frozen-2026-09-29"
+  },
+  "schema": 1,
+  "workspace_realization": {
+    "kind": "temporary-read-only-evidence-bundle"
+  }
 }
