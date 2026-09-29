@@ -38,7 +38,7 @@
     "mcp_stdio_required": true,
     "native_file_tools": "run-project-scoped: the adapter alone grants Read/Edit/Write as permission rules scoped to the run project and sets permissions.blockReadsOutsideWorkingDirectories; a bare or path-argument Read/Glob/Grep/Edit/Write in native_allowed_tools is refused; a denied read root that contains the project is refused",
     "runtime_created_entries_sha256": "9522006cb3e934887955b50f03dc9849c6c6dc4fab2377c042707ea59d5529bf",
-    "shell_prefix_sha256": "af76c3285f3379299595e442e7074e988d57af8d045f14d97412bbe3fd9b59f7",
+    "shell_prefix_sha256": "b0f4abdf9f053319e86ff834d46a003ac62b957a04386ae72474c081d9e385cb",
     "runtime_created_entries": "reviewed exact digest-bound set of entries the runtime still creates with scrub disabled: an empty .claude/.cc-writes directory (plus empty agents/commands directories); retained raw in runtime-created-entries.json; nothing is excluded from the final tree or diff; the scrub-mode start-up stub signature (17 named files) is INADMISSIBLE",
     "subprocess_env_scrub": "disabled"
   },

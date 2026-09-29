@@ -23,7 +23,7 @@
     "runtime_created_entries_sha256": "9522006cb3e934887955b50f03dc9849c6c6dc4fab2377c042707ea59d5529bf",
     "runtime_temp": "run-owned project temporary directory",
     "setting_sources": "project",
-    "shell_prefix_sha256": "af76c3285f3379299595e442e7074e988d57af8d045f14d97412bbe3fd9b59f7",
+    "shell_prefix_sha256": "b0f4abdf9f053319e86ff834d46a003ac62b957a04386ae72474c081d9e385cb",
     "subprocess_env_scrub": "disabled"
   },
   "credential_service_account_policy": {

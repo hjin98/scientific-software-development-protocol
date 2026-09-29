@@ -683,6 +683,11 @@ class ScopedFilePermissionTests(unittest.TestCase):
         }
         runtime_env.update({
             "CLOUDSDK_PROXY_PASSWORD": "redacted",
+            "CLAUDE_CODE_HOST_HTTP_PROXY_PORT": "3128",
+            "CLAUDE_CODE_HOST_SOCKS_PROXY_PORT": "1080",
+            "FUTURE_PROXY_ENDPOINT": "redacted",
+            "future_proxy_endpoint": "redacted",
+            "future_token": "redacted",
             "HTTP_PROXY": "http://user:redacted@localhost:3128",
             "HTTPS_PROXY": "http://user:redacted@localhost:3128",
             "ALL_PROXY": "socks5h://user:redacted@localhost:1080",
@@ -697,6 +702,8 @@ class ScopedFilePermissionTests(unittest.TestCase):
         self.assertIn("SSDP70_AUTH_MODE", keys)
         self.assertFalse(keys & (set(claude.SHELL_PROXY_ENV_KEYS) | {
             "CLAUDE_CODE_MESSAGING_TOKEN", "APP_SECRET_REF", "CLAUDE_CODE_SHELL_PREFIX",
+            "CLAUDE_CODE_HOST_HTTP_PROXY_PORT", "CLAUDE_CODE_HOST_SOCKS_PROXY_PORT", "FUTURE_PROXY_ENDPOINT",
+            "future_proxy_endpoint", "future_token",
         }), keys)
 
     def test_bare_or_path_scoped_grants_in_the_profile_are_refused(self):
@@ -1089,11 +1096,11 @@ class LiveScriptOfflineTests(ReplayHarnessBase):
         missing_guard = live.check_env_hidden(RedactedRun("SSDP70_AUTH_MODE=ANTHROPIC_AUTH_TOKEN\n"), world)
         self.assertEqual(missing_guard["verdict"], "FAIL")
         self.assertFalse(missing_guard["shell_startup_applied"])
-        leaked = safe + "CLAUDE_CODE_MESSAGING_TOKEN=redacted\nOTHER_TOKEN=redacted\nSERVICE_KEY=redacted\nAPP_SECRET_REF=redacted\nCLOUDSDK_PROXY_PASSWORD=redacted\n"
+        leaked = safe + "CLAUDE_CODE_MESSAGING_TOKEN=redacted\nOTHER_TOKEN=redacted\nSERVICE_KEY=redacted\nAPP_SECRET_REF=redacted\nCLOUDSDK_PROXY_PASSWORD=redacted\nCLAUDE_CODE_HOST_HTTP_PROXY_PORT=3128\n"
         result = live.check_env_hidden(RedactedRun(leaked), world)
         self.assertEqual(result["verdict"], "FAIL")
         self.assertEqual(result["credential_names_in_output"], [
-            "APP_SECRET_REF", "CLAUDE_CODE_MESSAGING_TOKEN", "CLOUDSDK_PROXY_PASSWORD", "OTHER_TOKEN", "SERVICE_KEY",
+            "APP_SECRET_REF", "CLAUDE_CODE_HOST_HTTP_PROXY_PORT", "CLAUDE_CODE_MESSAGING_TOKEN", "CLOUDSDK_PROXY_PASSWORD", "OTHER_TOKEN", "SERVICE_KEY",
         ])
         self.assertNotIn("redacted", json.dumps(result))
 
