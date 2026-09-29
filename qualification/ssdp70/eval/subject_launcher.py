@@ -216,6 +216,18 @@ def main() -> int:
     config = json.load(open(sys.argv[1], encoding="utf-8"))
     libc = ctypes.CDLL(None, use_errno=True)
     libc.prctl(PR_SET_DUMPABLE, 0, 0, 0, 0)
+    # This process is pid 1 of the subject sandbox and the only holder of the principal descriptors.
+    # Close every other inherited descriptor so no leftover pipe/evidence end exists in the sandbox.
+    keep = {0, 1, 2, config["status_fd"]}
+    for spec in config["relays"]:
+        keep.update((spec["read_fd"], spec["write_fd"]))
+    for name in os.listdir("/proc/self/fd"):
+        fd = int(name)
+        if fd not in keep:
+            try:
+                os.close(fd)
+            except OSError:
+                pass
 
     chain = evidence70.ChainWriter(config["status_fd"], LAUNCHER_ID)
 
@@ -298,20 +310,39 @@ def main() -> int:
     chain.append("omp_started", {"pid": proc.pid, "exe": exe_link, "exe_is_frozen_file": same})
     ready.set()
 
+    # pid 1 must reap: poll for any child, watch the deadline, and stop OMP's process group on timeout.
     timed_out = False
-    try:
-        proc.wait(timeout=config["timeout_s"])
-    except subprocess.TimeoutExpired:
-        timed_out = True
+    deadline = time.monotonic() + config["timeout_s"]
+    status = None
+    killed_at = None
+    while status is None:
         try:
-            os.killpg(proc.pid, signal.SIGTERM)
-            proc.wait(timeout=10)
-        except (subprocess.TimeoutExpired, ProcessLookupError, PermissionError):
+            pid, wait_status = os.waitpid(-1, os.WNOHANG)
+        except ChildProcessError:
+            break
+        if pid == proc.pid:
+            status = wait_status
+            break
+        now = time.monotonic()
+        if now > deadline and not timed_out:
+            timed_out = True
+            killed_at = now
+            try:
+                os.killpg(proc.pid, signal.SIGTERM)
+            except (ProcessLookupError, PermissionError):
+                pass
+        if timed_out and killed_at is not None and now - killed_at > 10:
             try:
                 os.killpg(proc.pid, signal.SIGKILL)
             except (ProcessLookupError, PermissionError):
                 pass
-            proc.wait()
+        time.sleep(0.05)
+    if status is None:
+        proc.returncode = 255
+    elif os.WIFEXITED(status):
+        proc.returncode = os.WEXITSTATUS(status)
+    else:
+        proc.returncode = -os.WTERMSIG(status)
     rc = proc.returncode
     for pump in pumps:
         pump.join(10)

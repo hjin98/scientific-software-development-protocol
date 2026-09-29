@@ -1,0 +1,408 @@
+"""Unit-level verification of OMP D4 pieces that have no external process dependency.
+
+These are NOT the integration acceptance: every claim about the assembled path lives in
+test_omp_integration.py, which drives harness70.run_episode through the real OMP executable.
+Here only pure functions and fail-closed edges of the real modules are exercised.
+"""
+import base64
+import hashlib
+import json
+import os
+import shutil
+import struct
+import sys
+import tempfile
+import threading
+import unittest
+from pathlib import Path
+
+HERE = Path(__file__).resolve().parent
+if str(HERE) not in sys.path:
+    sys.path.insert(0, str(HERE))
+import core70  # noqa: E402
+import evidence70  # noqa: E402
+import muxhttp70 as mux  # noqa: E402
+import seccomp70  # noqa: E402
+from adapters import omp  # noqa: E402
+
+
+class NameMinting(unittest.TestCase):
+    """Exact OMP 18.0.11 MCP name minting (source: `Qro`/`hft`), not a guessed sanitizer."""
+
+    def test_frozen_six(self):
+        self.assertEqual(omp.expected_mcp_native_ids(), {
+            "issue_locations": "mcp__ssdp_issue_locations", "issue_search": "mcp__ssdp_issue_search",
+            "issue_show": "mcp__ssdp_issue_show", "issue_create": "mcp__ssdp_issue_create",
+            "issue_comment": "mcp__ssdp_issue_comment", "delegate": "mcp__ssdp_delegate",
+        })
+
+    def test_digits_become_underscore_runs_not_removed(self):
+        self.assertEqual(omp.mint_mcp_tool_name("ssdp70", "issue_search"), "mcp__ssdp_issue_search")
+        # `tool_a1` -> `tool_a_` -> trimmed `tool_a`; an interior digit run separates words
+        self.assertEqual(omp.mint_mcp_tool_name("alpha", "tool_a1"), "mcp__alpha_tool_a")
+        self.assertEqual(omp.mint_mcp_tool_name("alpha", "a1b"), "mcp__alpha_a_b")
+        self.assertEqual(omp.mint_mcp_tool_name("s2rv", "t3"), "mcp__s_rv_t")
+
+    def test_case_punctuation_and_collapse(self):
+        self.assertEqual(omp.mint_mcp_tool_name("My.Server-1", "Do--Thing!!"), "mcp__my_server_do_thing")
+        self.assertEqual(omp.mint_mcp_tool_name("a", "__x__y__"), "mcp__a_x_y")
+
+    def test_redundant_server_prefix_removed_once(self):
+        self.assertEqual(omp.mint_mcp_tool_name("ssdp", "ssdp_issue"), "mcp__ssdp_issue")
+        self.assertEqual(omp.mint_mcp_tool_name("ssdp", "ssdp_ssdp_issue"), "mcp__ssdp_ssdp_issue")
+
+    def test_fallback_components(self):
+        self.assertEqual(omp.mint_mcp_tool_name("123", "456"), "mcp__server_tool")
+
+    def test_collision_rejected(self):
+        with self.assertRaises(omp.AdapterError):
+            omp.expected_mcp_native_ids("s", ["a1", "a2"])
+
+    def test_over_length_refused_not_guessed(self):
+        with self.assertRaises(omp.AdapterError):
+            omp.mint_mcp_tool_name("server", "x" * 80)
+
+    def test_binding_bijection_declared_surface(self):
+        template = json.loads((HERE / "profiles" / "omp-headless.template.json").read_text())
+        ok, errors, mapping = omp.verify_mcp_binding(template)
+        self.assertTrue(ok, errors)
+        broken = json.loads(json.dumps(template))
+        broken["mcp_servers"][0]["tools"][0] = "mcp__ssdp70_issue_locations"  # the false digit-preserving rule
+        ok, errors, _ = omp.verify_mcp_binding(broken)
+        self.assertFalse(ok)
+
+
+class CatalogAndConsumption(unittest.TestCase):
+    def test_parse_reviewed_catalog_template(self):
+        prompt = "x\nMatching skill → MUST read `skill://<name>` first.\n<skills>\n- a-b: does A\n- c: does\nmultiline C\n</skills>\ntail"
+        entries, problems = omp.parse_catalog(prompt)
+        self.assertEqual(problems, [])
+        self.assertEqual([e["name"] for e in entries], ["a-b", "c"])
+        self.assertEqual(entries[1]["description"], "does\nmultiline C")
+
+    def test_catalog_missing_or_duplicated_block_is_a_problem(self):
+        self.assertTrue(omp.parse_catalog("no catalog here")[1])
+        block = "Matching skill → MUST read `skill://<name>` first.\n<skills>\n- a: b\n</skills>\n"
+        self.assertTrue(omp.parse_catalog(block + block)[1])
+
+    def test_injected_entry_via_description_is_visible_as_extra_name(self):
+        prompt = "Matching skill → MUST read `skill://<name>` first.\n<skills>\n- real: fine\n- evil: injected\n</skills>\n"
+        entries, _ = omp.parse_catalog(prompt)
+        self.assertEqual(sorted(e["name"] for e in entries), ["evil", "real"])
+
+    def test_consumption_exact_partial_none(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "SKILL.md"
+            body = "---\nname: x\n---\nl1\n\nl3\n"
+            path.write_text(body)
+            exact = omp.consumption(body.rstrip("\n"), path)
+            self.assertEqual(exact["match"], "exact")
+            hashline = omp.consumption("[/opt/x/SKILL.md#AB12]\n1:---\n2:name: x\n3:---\n4:l1\n5:\n6:l3", path)
+            self.assertEqual(hashline["match"], "exact")
+            self.assertEqual(hashline["lines_consumed"], "all")
+            footered = omp.consumption("[/opt/x/SKILL.md#AB12]\n1:---\n2:name: x\n\n[Showing lines 1-2 of 6. Use :3 to continue]", path)
+            self.assertEqual(footered["match"], "partial")
+            self.assertEqual(footered["lines_consumed"], [[1, 2]])
+            gapped = omp.consumption("[/opt/x/SKILL.md#AB12]\n1:---\n\u2026\n6:l3", path)
+            self.assertEqual(gapped["match"], "partial")
+            self.assertEqual(gapped["lines_consumed"], [[1, 1], [6, 6]])
+            self.assertEqual(omp.consumption("[/opt/x/SKILL.md#AB12]\n1:---\n2:CHANGED", path)["match"], "none")
+            self.assertEqual(omp.consumption("---\nname: x", path)["match"], "partial")
+            self.assertEqual(omp.consumption("something else", path)["match"], "none")
+            self.assertEqual(exact["resource_sha256"], hashlib.sha256(body.encode()).hexdigest())
+
+    def test_selector_suffix_regex(self):
+        for raw, clean in (("a/b.md:50", "a/b.md"), ("a/b.md:50-200", "a/b.md"), ("a/b.md:raw", "a/b.md"),
+                           ("a/b.md:5-16,960-973", "a/b.md"), ("a/b.md:50+150", "a/b.md"), ("a/b.md", "a/b.md")):
+            self.assertEqual(omp.SELECTOR_SUFFIX.sub("", raw), clean)
+
+    def test_expected_catalog_reads_frontmatter(self):
+        entries = omp.expected_catalog(REPO_DIST)
+        self.assertEqual(sorted(e["name"] for e in entries), sorted(omp.SSDP_SKILLS))
+        self.assertTrue(all(e["description"] for e in entries))
+
+
+REPO_DIST = HERE.parents[2] / "dist" / "skills"
+
+
+class EvidenceChains(unittest.TestCase):
+    def _chain(self, n=3):
+        r, w = os.pipe()
+        writer = evidence70.ChainWriter(w, "p")
+        for i in range(n):
+            writer.append("k", {"i": i})
+        writer.close()
+        os.close(w)
+        text = os.read(r, 1 << 20).decode()
+        os.close(r)
+        return text
+
+    def test_valid_chain(self):
+        records, errors = evidence70.parse_chain(self._chain(), "p")
+        self.assertEqual(errors, [])
+        self.assertEqual(len(records), 4)
+
+    def test_dropped_record_reordered_altered_truncated_all_detected(self):
+        lines = self._chain(4).strip().split("\n")
+        dropped = "\n".join(lines[:2] + lines[3:]) + "\n"
+        self.assertTrue(evidence70.parse_chain(dropped, "p")[1])
+        swapped = "\n".join([lines[0], lines[2], lines[1], *lines[3:]]) + "\n"
+        self.assertTrue(evidence70.parse_chain(swapped, "p")[1])
+        altered = json.loads(lines[1])
+        altered["data"]["i"] = 99
+        self.assertTrue(evidence70.parse_chain("\n".join([lines[0], json.dumps(altered), *lines[2:]]) + "\n", "p")[1])
+        truncated = "\n".join(lines[:-1]) + "\n"
+        errs = evidence70.parse_chain(truncated, "p")[1]
+        self.assertTrue(any("no end record" in e for e in errs))
+        self.assertTrue(evidence70.parse_chain("", "p")[1])
+        self.assertTrue(evidence70.parse_chain(self._chain(), "other")[1])
+
+    def test_end_record_counts_records(self):
+        lines = self._chain(3).strip().split("\n")
+        end = json.loads(lines[-1])
+        self.assertEqual(end["data"]["records"], 3)
+
+
+class MuxTransport(unittest.TestCase):
+    def test_http_over_descriptor_pair_roundtrip_and_streaming(self):
+        c2s_r, c2s_w = os.pipe()
+        s2c_r, s2c_w = os.pipe()
+
+        def serve(conn):
+            request = mux.read_request(conn)
+            self.assertEqual(request.method, "POST")
+            mux.send_head(conn, 200, {"content-type": "text/plain"}, None)
+            conn.sendall(b"part1-")
+            conn.sendall(request.body[::-1])
+            conn.close()
+
+        server = mux.Mux(c2s_r, s2c_w, on_open=serve)
+        client = mux.Mux(s2c_r, c2s_w)
+        server.start()
+        client.start()
+        conn = client.open()
+        body = b"x" * 200000
+        conn.sendall(b"POST /p HTTP/1.1\r\ncontent-length: %d\r\n\r\n" % len(body) + body)
+        got = b""
+        while True:
+            chunk = conn.recv(timeout=10)
+            if not chunk:
+                break
+            got += chunk
+        self.assertTrue(got.startswith(b"HTTP/1.1 200 OK"))
+        self.assertTrue(got.endswith(b"part1-" + body[::-1]))
+
+    def test_chunked_request_body(self):
+        r, w = os.pipe()
+        r2, w2 = os.pipe()
+        seen = {}
+
+        def serve(conn):
+            seen["req"] = mux.read_request(conn)
+            conn.close()
+
+        server = mux.Mux(r, w2, on_open=serve)
+        client = mux.Mux(r2, w)
+        server.start()
+        client.start()
+        conn = client.open()
+        conn.sendall(b"POST /x HTTP/1.1\r\ntransfer-encoding: chunked\r\n\r\n3\r\nabc\r\n2\r\nde\r\n0\r\n\r\n")
+        while conn.recv(timeout=10):
+            pass
+        self.assertEqual(seen["req"].body, b"abcde")
+
+    def test_oversize_header_rejected(self):
+        r, w = os.pipe()
+        r2, w2 = os.pipe()
+        seen = {}
+
+        def serve(conn):
+            seen["req"] = mux.read_request(conn)
+            conn.close()
+
+        server = mux.Mux(r, w2, on_open=serve)
+        client = mux.Mux(r2, w)
+        server.start()
+        client.start()
+        conn = client.open()
+        conn.sendall(b"POST / HTTP/1.1\r\n" + b"a: " + b"b" * 200000)
+        conn.close()
+        while conn.recv(timeout=10):
+            pass
+        self.assertIsNone(seen["req"])
+
+
+class SeccompFilter(unittest.TestCase):
+    def test_filter_is_wellformed_and_denies_ptrace_family(self):
+        blob = seccomp70.build_deny_filter()
+        self.assertEqual(len(blob) % 8, 0)
+        instructions = [struct.unpack("HBBI", blob[i:i + 8]) for i in range(0, len(blob), 8)]
+        numbers = {k for code, jt, jf, k in instructions if code == 0x15}
+        for name in ("ptrace", "process_vm_readv", "process_vm_writev", "pidfd_getfd", "kcmp", "bpf"):
+            self.assertIn(seccomp70.DENIED_SYSCALLS[name], numbers, name)
+        self.assertEqual(instructions[-1][3], seccomp70.SECCOMP_RET_ALLOW)
+
+
+class ProfileFreezeAndPerturbation(unittest.TestCase):
+    def _profile(self, **overrides):
+        template = json.loads((HERE / "profiles" / "omp-headless.template.json").read_text())
+        route = {
+            "provider_id": "stand", "model_id": "m", "upstream": "http://127.0.0.1:1", "context_window": 1000,
+            "max_tokens": 100, "reasoning": True,
+        }
+        route.update(overrides.pop("route", {}))
+        profile = omp.freeze_profile(
+            template, executable_path=os.path.expanduser("~/.local/bin/omp"), provider_route=route,
+            reasoning={"thinking": "high", "source": "--thinking"}, profile_id="p", budgets={"max_turns": 5, "timeout_s": 5},
+        )
+        profile.update(overrides)
+        return profile
+
+    def test_frozen_profile_has_no_errors(self):
+        self.assertEqual(omp.profile_errors(self._profile()), [])
+
+    def test_template_with_markers_is_refused(self):
+        template = json.loads((HERE / "profiles" / "omp-headless.template.json").read_text())
+        self.assertTrue(any("unfrozen" in e for e in omp.profile_errors(template)))
+
+    def test_each_frozen_digest_perturbation_is_detected(self):
+        for path, needle in (
+            (("containment_policy", "settings_closure_sha256"), "settings-closure"),
+            (("containment_policy", "principal_files_sha256"), "principal-file"),
+            (("containment_policy", "build_inventory_sha256"), "inventory"),
+        ):
+            profile = self._profile()
+            profile[path[0]][path[1]] = "0" * 64 if path[1] != "principal_files_sha256" else {"observer70.py": "0" * 64}
+            self.assertTrue(any(needle in e for e in omp.profile_errors(profile)), path)
+
+    def test_exact_build_identity_is_required(self):
+        profile = self._profile()
+        profile["provider_runtime"]["executable_sha256"] = "1" * 64
+        self.assertTrue(any("exact reviewed OMP build" in e for e in omp.profile_errors(profile)))
+        profile = self._profile()
+        profile["provider_runtime"]["version"] = "18.0.12"
+        self.assertTrue(omp.profile_errors(profile))
+
+    def test_thinking_level_must_have_a_reviewed_request_binding(self):
+        profile = self._profile()
+        profile["reasoning_configuration"]["thinking"] = "xhigh"
+        self.assertTrue(any("reviewed request-level reasoning binding" in e for e in omp.profile_errors(profile)))
+        profile = self._profile(route={"reasoning": False})
+        self.assertTrue(any("non-reasoning model" in e for e in omp.profile_errors(profile)))
+        profile["reasoning_configuration"]["thinking"] = "off"
+        self.assertEqual(omp.profile_errors(profile), [])
+
+    def test_model_route_and_budget_perturbations(self):
+        profile = self._profile()
+        profile["agent_model"] = "stand/other"
+        self.assertTrue(any("agent_model" in e for e in omp.profile_errors(profile)))
+        profile = self._profile(route={"api": "anthropic-messages"})
+        self.assertTrue(any("outside the reviewed" in e for e in omp.profile_errors(profile)))
+        profile = self._profile()
+        profile["budgets"]["max_turns"] = 0
+        self.assertTrue(any("max_turns" in e for e in omp.profile_errors(profile)))
+
+    def test_mcp_declared_surface_must_equal_minted(self):
+        profile = self._profile()
+        profile["mcp_servers"][0]["tools"][1] = "mcp__ssdp70_issue_search"
+        self.assertTrue(any("name-minting" in e or "minted" in e for e in omp.profile_errors(profile)))
+
+    def test_substrate_digest_perturbation_fails_realization_inputs(self):
+        profile = self._profile()
+        profile["containment_policy"]["substrate"]["executable_sha256"] = "2" * 64
+        with tempfile.TemporaryDirectory() as tmp:
+            private = Path(tmp) / "harness-private"
+            (private / "runtime-home").mkdir(parents=True)
+            project = Path(tmp) / "project"
+            project.mkdir()
+            layout = core70.private_mcp_paths(private)
+            layout["server"].write_bytes((HERE / "stub_tools" / "mediator.py").read_bytes())
+            layout["stub"].mkdir()
+            layout["log"].write_text("")
+            layout["account"].write_text("a\n")
+            env = {"HOME": str(private / "runtime-home")}
+            with self.assertRaises(omp.AdapterError):
+                omp.realize_containment(profile, project, env)
+
+
+class InventoryAndSettings(unittest.TestCase):
+    def test_every_frozen_key_exists_in_exact_build_inventory_and_takes_effect(self):
+        inventory = omp.load_inventory()
+        rows = {row["key"]: row for row in inventory["settings"]["entries"]}
+        self.assertEqual(inventory["settings"]["frozen_keys_absent_from_build"], [])
+        for key, value in omp.frozen_settings_flat().items():
+            self.assertIn(key, rows, key)
+            self.assertEqual(rows[key]["effective_under_frozen_profile"], value, key)
+
+    def test_no_setting_is_left_unclassified(self):
+        classes = {row["class"] for row in omp.load_inventory()["settings"]["entries"]}
+        self.assertLessEqual(classes, {
+            "frozen-closed", "ui-irrelevant-in-print-json-mode", "requires-network-or-service-unreachable-in-subject-netns",
+            "tool-not-exposed-by-frozen-tool-surface", "default-retained-behaviour-visible-in-evidence",
+            "sub-parameter-of-closed-feature",
+        })
+
+    def test_inventory_build_matches_frozen_build(self):
+        self.assertEqual(omp.load_inventory()["build"], omp.OMP_BUILD)
+
+
+class DiscoveryBaselineRefusal(unittest.TestCase):
+    """Pre-launch closure: a fixture/HOME baseline containing any identified exact-build discovery
+    source is refused before OMP starts (a source that could change the runtime is never launched over)."""
+
+    def _paths(self, tmp):
+        private = Path(tmp) / "harness-private"
+        (private / "runtime-home").mkdir(parents=True)
+        project = Path(tmp) / "project"
+        project.mkdir()
+        return project, {"HOME": str(private / "runtime-home")}, private / "runtime-home"
+
+    def test_clean_baseline_passes(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            project, env, _ = self._paths(tmp)
+            self.assertEqual(omp.validate_ambient_discovery_closure(project, env), [])
+
+    def test_every_project_source_is_refused(self):
+        for rel in omp.PROJECT_DISCOVERY_SOURCES:
+            with tempfile.TemporaryDirectory() as tmp:
+                project, env, _ = self._paths(tmp)
+                target = project / rel
+                target.parent.mkdir(parents=True, exist_ok=True)
+                target.write_text("x")
+                errors = omp.validate_ambient_discovery_closure(project, env)
+                self.assertTrue(any(rel in e for e in errors), rel)
+
+    def test_every_home_source_is_refused(self):
+        for rel in omp.HOME_DISCOVERY_SOURCES:
+            with tempfile.TemporaryDirectory() as tmp:
+                project, env, home = self._paths(tmp)
+                target = home / rel
+                target.parent.mkdir(parents=True, exist_ok=True)
+                target.write_text("x")
+                errors = omp.validate_ambient_discovery_closure(project, env)
+                self.assertTrue(any(rel in e for e in errors), rel)
+
+    def test_credential_variables_in_run_environment_are_refused(self):
+        for name in omp.CREDENTIAL_ENV_NAMES:
+            with tempfile.TemporaryDirectory() as tmp:
+                project, env, _ = self._paths(tmp)
+                env[name] = "x"
+                self.assertTrue(any(name in e for e in omp.validate_ambient_discovery_closure(project, env)), name)
+
+    def test_host_home_is_never_a_run_home(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            project = Path(tmp) / "project"
+            project.mkdir()
+            with self.assertRaises(omp.AdapterError):
+                omp._paths(project, {"HOME": os.path.expanduser("~")})
+
+    def test_home_inside_project_is_refused(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            project = Path(tmp) / "project"
+            (project / "h").mkdir(parents=True)
+            with self.assertRaises(omp.AdapterError):
+                omp._paths(project, {"HOME": str(project / "h")})
+
+
+if __name__ == "__main__":
+    unittest.main()

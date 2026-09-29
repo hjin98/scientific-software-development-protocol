@@ -76,6 +76,10 @@ OMP_BUILD = {
     "sha256": "6054460b29e9bad5eba78336f291e1979c2fa0a5cd96fc2d92afd666cc681d26",
     "bytes": 194573512,
     "build_id": "2c2e51f3b6fae6722da4f7b69751a2e9467ab063",
+    # What the exact build presents on the trusted paths (observed): the embedded Bun runtime's HTTP client
+    # identity on every inference request, and its MCP client identity on initialize.
+    "http_user_agent": "Bun/1.4.0",
+    "mcp_client_info": {"name": "omp-coding-agent", "version": "1.0.0"},
 }
 
 # ----------------------------------------------------------------------- in-sandbox layout
@@ -206,8 +210,11 @@ PROJECT_DISCOVERY_SOURCES = (
     ".omp", ".claude", ".codex", ".gemini", ".agents", ".agent", ".opencode", ".cursor", ".windsurf", ".vscode",
     ".github/copilot-instructions.md", ".github/skills", ".github/instructions", ".github/agents",
     "AGENTS.md", "CLAUDE.md", "GEMINI.md", ".mcp.json", "mcp.json", "opencode.json", "opencode.jsonc",
-    "SYSTEM.md", ".env", "bunfig.toml",
+    "SYSTEM.md",
 )
+# Effect-tested inert for the project (process cwd is `/`, so Bun's dotenv/bunfig autoload never reads them):
+# `.env` and `bunfig.toml` in the project are not discovery sources. The HOME `.env` files ARE (observed to
+# enter OMP's environment) and are refused above.
 # OMP-owned runtime state created under the run-owned HOME (recorded, not control state).
 HOME_RUNTIME_STATE_PATTERNS = (
     r"^\.omp/natives(/|$)", r"^\.omp/logs(/|$)", r"^\.omp/run(/|$)", r"^\.omp/gpu_cache\.json$",
@@ -227,6 +234,15 @@ CREDENTIAL_ENV_NAMES = (
     "SSH_AUTH_SOCK", "ANTHROPIC_OAUTH_TOKEN", "COPILOT_GITHUB_TOKEN",
 )
 API_ENDPOINTS = {"openai-completions": "/chat/completions"}
+# Hard-coded in the exact build's provider/transport layers (source: `jv(...)` with retryEmptyCompletion,
+# MAX_EMPTY_COMPLETION_RETRIES=2, and a transport retry observed up to 6+ resends after HTTP 5xx and 5 after
+# HTTP 429; `maxRetries: 10` is the largest bound in the build). It sits below OMP's own retry setting, cannot
+# be disabled by configuration, and always resends the identical request before any content reaches the agent. It is therefore frozen as an observed arm-neutral
+# provider-managed behaviour: allowed only when every such request is byte-identical to its predecessor
+# and follows a transient error or an empty completion, and always retained in the evidence.
+MAX_PROVIDER_ERROR_RETRIES = 10
+MAX_EMPTY_COMPLETION_RETRIES = 2
+RETRYABLE_STATUS = frozenset({408, 429})
 
 
 class AdapterError(RuntimeError):
@@ -421,6 +437,12 @@ def profile_errors(profile: dict[str, Any]) -> list[str]:
             errors.append(f"provider_route.{key} is not frozen")
     if not isinstance(route.get("reasoning"), bool):
         errors.append("provider_route.reasoning is not frozen")
+    else:
+        thinking = (profile.get("reasoning_configuration") or {}).get("thinking")
+        if route["reasoning"] and thinking not in REASONING_EFFORT:
+            errors.append(f"frozen thinking level {thinking!r} has no reviewed request-level reasoning binding")
+        if not route["reasoning"] and thinking != "off":
+            errors.append("a non-reasoning model cannot honor a frozen thinking level other than 'off'")
     if policy.get("settings_closure_sha256") != settings_closure_sha256():
         errors.append("frozen settings-closure digest does not match the adapter's reviewed settings closure")
     if policy.get("principal_files_sha256") != principal_files_sha256():
@@ -871,7 +893,7 @@ def _bwrap_argv(profile: dict[str, Any], paths: dict[str, Path], seccomp_fd: int
     argv = [
         policy["substrate"]["executable"],
         "--unshare-user", "--unshare-pid", "--unshare-ipc", "--unshare-uts", "--unshare-cgroup", "--unshare-net",
-        "--die-with-parent", "--new-session", "--clearenv", "--cap-drop", "ALL", "--hostname", "ssdp-subject",
+        "--die-with-parent", "--new-session", "--as-pid-1", "--clearenv", "--cap-drop", "ALL", "--hostname", "ssdp-subject",
         "--seccomp", str(seccomp_fd),
         "--ro-bind", "/usr", "/usr",
         "--symlink", "usr/bin", "/bin", "--symlink", "usr/lib", "/lib",
@@ -992,10 +1014,18 @@ def launch(profile: dict[str, Any], prompt: str, project: Path, env: dict[str, s
         os.close(seccomp_w)
         seccomp_w = -1
         argv = _bwrap_argv(profile, paths, seccomp_r, f"{SB_CTL}/launcher.json", SB_OMP)
-        sandbox_fds = (infer_up[1], infer_down[0], mcp_up[1], mcp_down[0], ln_ev[1], seccomp_r)
+        # The full argument list (which names host run directories) is passed over a descriptor so
+        # that it is not readable from the sandbox through /proc/<pid>/cmdline.
+        args_r, args_w = os.pipe()
+        command_at = argv.index("/usr/bin/python3")
+        os.write(args_w, b"\0".join(a.encode() for a in argv[1:command_at]) + b"\0")
+        os.close(args_w)
+        launch_argv = [argv[0], "--args", str(args_r), *argv[command_at:]]
+        sandbox_fds = (infer_up[1], infer_down[0], mcp_up[1], mcp_down[0], ln_ev[1], seccomp_r, args_r)
         try:
-            done = subprocess.run(argv, capture_output=True, pass_fds=sandbox_fds,
+            done = subprocess.run(launch_argv, capture_output=True, pass_fds=sandbox_fds,
                                   timeout=budgets["timeout_s"] + 90, stdin=subprocess.DEVNULL)
+            os.close(args_r)
             returncode = done.returncode
             stdout, stderr = done.stdout.decode("utf-8", "replace"), done.stderr.decode("utf-8", "replace")
         except subprocess.TimeoutExpired as exc:
@@ -1014,6 +1044,9 @@ def launch(profile: dict[str, Any], prompt: str, project: Path, env: dict[str, s
             except subprocess.TimeoutExpired:
                 proc.kill()
                 proc.wait()
+            for stream in (proc.stdout, proc.stderr):
+                if stream is not None:
+                    stream.close()
         # Close every write end this process still holds so the drain threads see EOF once the
         # principals have exited, then join them, then close the read ends.
         writers = [infer_up[1], infer_down[1], mcp_up[1], mcp_down[1], obs_ev[1], br_ev[1], ln_ev[1], seccomp_r, seccomp_w]
@@ -1269,10 +1302,87 @@ class Observed:
         return names
 
 
+def _response_facts(observed: "Observed", request_index: Any) -> dict[str, Any]:
+    row = observed.responses.get(request_index)
+    facts: dict[str, Any] = {"status": None, "empty_completion": False, "error": None}
+    if row is None:
+        facts["error"] = "no response record"
+        return facts
+    data = row["record"].get("data") or {}
+    facts["status"] = data.get("upstream_status")
+    facts["error"] = data.get("error")
+    if facts["status"] == 200 and not data.get("body_truncated_in_evidence"):
+        try:
+            body = base64.b64decode(data.get("body_b64", "")).decode("utf-8", "replace")
+        except ValueError:
+            return facts
+        text, calls, completion_tokens = "", 0, None
+        for line in body.split("\n"):
+            if line.startswith("data:") and line[5:].strip() not in ("", "[DONE]"):
+                try:
+                    chunk = json.loads(line[5:].strip())
+                except json.JSONDecodeError:
+                    continue
+                for choice in chunk.get("choices") or []:
+                    delta = choice.get("delta") or {}
+                    text += delta.get("content") or "" if isinstance(delta.get("content"), str) else ""
+                    calls += len(delta.get("tool_calls") or [])
+                usage = chunk.get("usage")
+                if isinstance(usage, dict):
+                    completion_tokens = usage.get("completion_tokens")
+        facts["empty_completion"] = not text and calls == 0 and (completion_tokens or 0) <= 1
+    return facts
+
+
+def group_inference_requests(observed: "Observed") -> tuple[list[list[int]], list[str], list[dict[str, Any]]]:
+    """Group observer requests into assistant turns, accounting provider-layer retries explicitly.
+
+    Returns (groups of indexes into observed.requests, errors, retry ledger). A request continues the
+    previous group only if its body is byte-identical and the previous response was a transient error or an
+    empty completion; the per-kind retry limits of the exact build are enforced.
+    """
+    groups: list[list[int]] = []
+    ledger: list[dict[str, Any]] = []
+    errors: list[str] = []
+    error_retries = empty_retries = 0
+    for position, entry in enumerate(observed.requests):
+        digest = (entry["record"].get("data") or {}).get("body_sha256")
+        if groups:
+            previous = observed.requests[groups[-1][-1]]
+            if (previous["record"].get("data") or {}).get("body_sha256") == digest:
+                facts = _response_facts(observed, previous["index"])
+                transient = facts["status"] is None or facts["status"] in RETRYABLE_STATUS or (
+                    isinstance(facts["status"], int) and facts["status"] >= 500)
+                if facts["status"] == 200 and facts["empty_completion"]:
+                    empty_retries += 1
+                    kind = "empty-completion"
+                    if empty_retries > MAX_EMPTY_COMPLETION_RETRIES:
+                        errors.append("more provider-layer empty-completion retries than the exact build performs")
+                elif facts["status"] != 200 and transient:
+                    error_retries += 1
+                    kind = "transient-provider-error"
+                    if error_retries > MAX_PROVIDER_ERROR_RETRIES:
+                        errors.append("more provider-layer error retries than the exact build performs")
+                else:
+                    errors.append(
+                        f"inference request {entry['index']} repeats its predecessor after a response that is not a retryable "
+                        f"failure (status {facts['status']!r}): an unaccounted hidden call")
+                    kind = "unexplained-duplicate"
+                groups[-1].append(position)
+                ledger.append({"request_index": entry["index"], "of_previous_request_index": previous["index"], "kind": kind,
+                               "previous_status": facts["status"]})
+                continue
+        groups.append([position])
+        error_retries = empty_retries = 0
+    return groups, errors, ledger
+
+
 def provider_turns(observed: "Observed") -> list[dict[str, Any]]:
     """What the provider actually answered, reconstructed from the observer's raw response bodies."""
     turns: list[dict[str, Any]] = []
-    for entry in observed.requests:
+    groups, _, _ = group_inference_requests(observed)
+    final_positions = [group[-1] for group in groups]
+    for entry in (observed.requests[pos] for pos in final_positions):
         row = observed.responses.get(entry["index"])
         turn: dict[str, Any] = {"request_index": entry["index"], "status": None, "text": "", "tool_calls": [],
                                 "finish_reason": None, "complete": False}
@@ -1326,6 +1436,81 @@ def provider_turns(observed: "Observed") -> list[dict[str, Any]]:
 
 
 REASONING_EFFORT = {"minimal": "minimal", "low": "low", "medium": "medium", "high": "high", "off": "minimal"}
+
+
+REMINDER_PART = re.compile(
+    r"^<system-reminder>\nToday: (\d{4}-\d{2}-\d{2}); current working directory: '/workspace'\. "
+    r"Do not repeat this information in your reply\.\n</system-reminder>$")
+
+
+def _content_text(content: Any) -> str:
+    if isinstance(content, str):
+        return content
+    if isinstance(content, list):
+        return "".join(part.get("text", "") for part in content if isinstance(part, dict))
+    return ""
+
+
+def transcript_errors(observed: "Observed", prompt: str | None) -> tuple[list[str], dict[str, Any]]:
+    """The model must have received exactly the reviewed transcript grammar and nothing the runtime added.
+
+    system message, then ONE user message whose parts are the runtime's dated `<system-reminder>` and the
+    harness prompt, then for each earlier turn exactly the provider's assistant message and one tool message
+    per tool call. Any other message (for example the runtime's hard-coded empty-stop `<system-injection>`,
+    todo/TTSR/loop-guard reminders) is runtime-injected steering that the native trace does not show: the run
+    is inadmissible, never silently absorbed.
+    """
+    errors: list[str] = []
+    facts: dict[str, Any] = {"runtime_date": None}
+    groups, _, _ = group_inference_requests(observed)
+    turns = provider_turns(observed)
+    for turn_index, group in enumerate(groups):
+        body = observed.requests[group[-1]]["body"]
+        messages = body.get("messages") or []
+        roles = [m.get("role") for m in messages]
+        if not roles or roles[0] != "system":
+            errors.append(f"request {turn_index}: no system message")
+            continue
+        rest = messages[1:]
+        if not rest or rest[0].get("role") != "user":
+            errors.append(f"request {turn_index}: first message after the system prompt is not the user prompt")
+            continue
+        content = rest[0].get("content")
+        parts = [p.get("text", "") for p in content if isinstance(p, dict)] if isinstance(content, list) else [content if isinstance(content, str) else ""]
+        if len(parts) != 2 or not REMINDER_PART.match(parts[0]):
+            errors.append(f"request {turn_index}: user message is not the reviewed [dated reminder, prompt] grammar")
+        else:
+            facts["runtime_date"] = REMINDER_PART.match(parts[0]).group(1)
+            if prompt is not None and parts[1] != prompt:
+                errors.append(f"request {turn_index}: the prompt the model received differs from the harness-authored prompt")
+        expected_roles = ["user"]
+        cursor = 1
+        for previous in range(turn_index):
+            turn = turns[previous]
+            if cursor >= len(rest) or rest[cursor].get("role") != "assistant":
+                errors.append(f"request {turn_index}: transcript lacks the assistant message of turn {previous}")
+                break
+            assistant = rest[cursor]
+            calls = assistant.get("tool_calls") or []
+            got = [(c.get("id"), (c.get("function") or {}).get("name")) for c in calls]
+            want = [(c["id"], c["name"]) for c in turn["tool_calls"]]
+            if got != want:
+                errors.append(f"request {turn_index}: assistant message {previous} tool calls differ from the provider's response")
+            if _norm_ws(_content_text(assistant.get("content"))) != _norm_ws(turn["text"]):
+                errors.append(f"request {turn_index}: assistant message {previous} text differs from the provider's response")
+            cursor += 1
+            for call in turn["tool_calls"]:
+                if cursor >= len(rest) or rest[cursor].get("role") != "tool" or rest[cursor].get("tool_call_id") != call["id"]:
+                    errors.append(f"request {turn_index}: tool result for call {call['id']!r} is missing or out of order")
+                    break
+                cursor += 1
+        extras = rest[cursor:] if cursor <= len(rest) else []
+        if extras:
+            errors.append(
+                f"request {turn_index}: runtime-injected message(s) {[m.get('role') for m in extras]} follow the reviewed transcript: "
+                + "; ".join(_content_text(m.get("content"))[:80].replace("\n", " ") for m in extras)
+            )
+    return errors, facts
 
 
 def system_prompt_text(body: dict[str, Any]) -> str | None:
@@ -1492,6 +1677,19 @@ def check_runtime_surface(observed: Observed, context: dict[str, Any] | None) ->
                 errors.append(f"runtime catalog entry {row['name']!r} differs from the mounted package description")
     if len(set(names)) != len(names):
         errors.append("runtime catalog lists the same skill more than once")
+
+    for entry in observed.requests:
+        agent = ((entry["record"].get("data") or {}).get("headers") or {}).get("user-agent")
+        if agent != OMP_BUILD["http_user_agent"]:
+            errors.append(f"inference request client identity {agent!r} is not the exact build's {OMP_BUILD['http_user_agent']!r}")
+            break
+    for exchange in observed.mcp:
+        request = exchange.get("request")
+        if isinstance(request, dict) and request.get("method") == "initialize":
+            info = (request.get("params") or {}).get("clientInfo")
+            if info != OMP_BUILD["mcp_client_info"]:
+                errors.append(f"MCP client identity {info!r} is not the exact build's {OMP_BUILD['mcp_client_info']!r}")
+            break
 
     # ---- build identity, launcher attestations
     facts = observed.launcher_facts
@@ -1675,40 +1873,69 @@ def _map_sandbox_path(path: str, context: dict[str, Any] | None) -> Path | None:
     return None
 
 
-def _strip_hashline(text: str) -> str | None:
-    """Undo OMP's hashline read format (`[path#ID]` header then `N:content` lines)."""
-    lines = text.split("\n")
+SELECTOR_SUFFIX = re.compile(r":(?:raw|\d+(?:[-+]\d*)?(?:,\d+(?:[-+]\d*)?)*)$")
+FOOTER = re.compile(r"\n*\[Showing lines (\d+)-(\d+) of (\d+)\. Use :\d+ to continue\]\s*$")
+
+
+def _parse_hashline(text: str) -> tuple[dict[int, str], int | None] | None:
+    """Undo OMP's hashline read format: `[path#ID]` header, `N:content` lines, `…` gap lines, optional footer.
+
+    Returns ({line_number: content}, total_lines_reported) or None when the text is not that format.
+    """
+    footer = FOOTER.search(text)
+    total = int(footer.group(3)) if footer else None
+    body = text[: footer.start()] if footer else text
+    lines = body.split("\n")
     if not lines or not re.fullmatch(r"\[[^\]]*#[0-9A-Za-z]+\]", lines[0]):
         return None
-    body: list[str] = []
+    rows: dict[int, str] = {}
     for line in lines[1:]:
+        if line == "\u2026":
+            continue
         match = re.match(r"^(\d+):(.*)$", line, re.S)
         if match is None:
+            if line == "" and rows:
+                continue
             return None
-        body.append(match.group(2))
-    return "\n".join(body)
+        rows[int(match.group(1))] = match.group(2)
+    return rows, total
 
 
 def consumption(text: str, host_file: Path) -> dict[str, Any]:
-    """Compare what the model received with the exact mounted file: exact / partial / not-matching."""
+    """Compare what the model received with the exact mounted file.
+
+    exact   the whole file (plain, or every numbered line 1..N of a hashline read)
+    partial a strict subset of the file's lines, each identical to the source line it names
+    none    text that does not correspond to the file (or contradicts it)
+    """
     try:
         data = host_file.read_bytes()
         source = data.decode("utf-8")
     except (OSError, UnicodeDecodeError):
         return {"match": "unreadable", "resource_sha256": None, "resource_bytes": None}
     result = {"resource_sha256": sha256_bytes(data), "resource_bytes": len(data)}
-    for label, candidate in (("plain", text), ("hashline", _strip_hashline(text))):
-        if candidate is None:
-            continue
-        if candidate == source or candidate == source.rstrip("\n"):
-            return {**result, "match": "exact", "form": label, "consumed_bytes": len(data)}
-        if candidate and candidate in source:
-            return {**result, "match": "partial", "form": label, "consumed_bytes": len(candidate.encode("utf-8"))}
-        lines = candidate.split("\n")
+    if text == source or text == source.rstrip("\n"):
+        return {**result, "match": "exact", "form": "plain", "consumed_bytes": len(data), "lines_consumed": "all"}
+    parsed = _parse_hashline(text)
+    if parsed is not None:
+        rows, _total = parsed
         source_lines = source.split("\n")
-        window = "\n".join(source_lines[: len(lines)])
-        if lines and (candidate == window or candidate.rstrip("\n") == window):
-            return {**result, "match": "partial", "form": label, "consumed_bytes": len(candidate.encode("utf-8"))}
+        if source.endswith("\n"):
+            source_lines = source_lines[:-1]
+        if rows and all(1 <= n <= len(source_lines) and source_lines[n - 1] == content for n, content in rows.items()):
+            complete = sorted(rows) == list(range(1, len(source_lines) + 1))
+            consumed = sum(len(source_lines[n - 1].encode("utf-8")) + 1 for n in rows)
+            ranges: list[list[int]] = []
+            for n in sorted(rows):
+                if ranges and ranges[-1][1] == n - 1:
+                    ranges[-1][1] = n
+                else:
+                    ranges.append([n, n])
+            return {**result, "match": "exact" if complete else "partial", "form": "hashline",
+                    "consumed_bytes": min(consumed, len(data)), "lines_consumed": "all" if complete else ranges}
+        return {**result, "match": "none", "form": "hashline"}
+    if text and text in source:
+        return {**result, "match": "partial", "form": "plain-substring", "consumed_bytes": len(text.encode("utf-8")), "lines_consumed": "unknown"}
     return {**result, "match": "none"}
 
 
@@ -1777,18 +2004,21 @@ def normalize(stdout: str, run_id: str, context: dict[str, Any] | None = None) -
                 "native_tools": surface.get("tools"),
                 "reasoning_fields": surface.get("reasoning_fields"),
                 "request_model": surface.get("model_id"),
+                "runtime_date": transcript_errors(observed, context.get("prompt"))[1].get("runtime_date"),
             },
             "catalog_parsed": catalog_ok,
         })
 
     # ---- observer classification (every record accounted for)
     request_positions = {entry["position"]: entry for entry in observed.requests}
+    retry_request_indexes = {row["request_index"] for row in group_inference_requests(observed)[2]}
     for position, record in enumerate(observed.records["observer"]):
         index = observer_base + position
         kind = record.get("kind")
         if kind == "request" and position in request_positions:
             mapped = [catalog_event["event_id"]] if catalog_event and request_positions[position] is observed.requests[0] else []
-            classify(index, "observer-inference-request", False, mapped)
+            is_retry = request_positions[position]["index"] in retry_request_indexes
+            classify(index, "observer-provider-layer-retry" if is_retry else "observer-inference-request", False, mapped)
         elif kind == "response":
             classify(index, "observer-inference-response", False)
         elif kind in ("start", "end"):
@@ -1921,10 +2151,14 @@ def normalize(stdout: str, run_id: str, context: dict[str, Any] | None = None) -
             errors.append(f"assistant message {position}: native tool calls differ from the provider's response (forged, altered or dropped native event)")
         if _norm_ws(native_text) != _norm_ws(turn["text"]):
             errors.append(f"assistant message {position}: native text differs from the provider's response")
-    if len(observed.requests) != assistant_messages:
+    groups, group_errors, retry_ledger = group_inference_requests(observed)
+    errors.extend(group_errors)
+    transcript_problems, transcript_facts = transcript_errors(observed, context.get("prompt"))
+    errors.extend(transcript_problems)
+    if len(groups) != assistant_messages:
         errors.append(
-            f"observer recorded {len(observed.requests)} inference request(s) but the native trace shows {assistant_messages} "
-            "assistant message(s): an inference call is unaccounted for (hidden/background/retried call) or a native event is missing"
+            f"observer recorded {len(groups)} distinct inference turn(s) ({len(observed.requests)} request(s)) but the native trace shows "
+            f"{assistant_messages} assistant message(s): an inference call is unaccounted for (hidden/background call) or a native event is missing"
         )
     unused = [e for e in observed.mcp if isinstance(e.get("request"), dict) and e["request"].get("method") == "tools/call" and id(e) not in used_exchanges]
     if unused:
@@ -2202,7 +2436,9 @@ def _on_tool_end(raw, offset, native_index, context, observed, consumed, emit, c
             }
             root, package_rel = (None, None)
             if tool == "read" and isinstance(path_value, str):
-                root, package_rel = _skill_from_path(path_value, resolved)
+                meta_source = ((details.get("meta") or {}).get("source") or {}) if isinstance(details, dict) else {}
+                clean_path = meta_source.get("value") if isinstance(meta_source.get("value"), str) else SELECTOR_SUFFIX.sub("", path_value)
+                root, package_rel = _skill_from_path(clean_path, resolved)
             if root in SSDP_SKILLS and not is_error:
                 host = _map_sandbox_path(resolved, context) if resolved else None
                 if host is None and package_rel and context.get("skills_root"):
@@ -2251,6 +2487,7 @@ def _on_tool_end(raw, offset, native_index, context, observed, consumed, emit, c
     else:
         payload = {**_plain_action(tool, data, tool_use_id, ["unexposed-native-tool-attempt"]), **fields,
                    "attempted_semantic_class": ATTEMPT_CLASS_HINT.get(tool), "blocked": True,
+                   "exposed_in_runtime_surface": tool in (observed_surface_tools(observed) or []),
                    "blocked_reason": "tool is not in the runtime-exposed surface"}
         if not is_error:
             errors.append(f"unexposed native tool {tool!r} reported success")
@@ -2416,6 +2653,7 @@ def _on_agent_end(raw, native_index, observed, emit, errors, surface) -> list[st
         "duration_ms": duration, "duration_unit": "ms", "usage": usage,
         "usage_source": "provider-assistant-message", "native_duration_field": "assistant.duration",
         "observer_request_count": len(observed.requests),
+        "provider_layer_retries": group_inference_requests(observed)[2],
     })
     mapped.append(usage_event["event_id"])
     return mapped
@@ -2429,6 +2667,7 @@ def runtime_observation(stdout: str, context: dict[str, Any] | None = None) -> d
     artifacts = context.get("adapter_artifacts") or {}
     observed = Observed(artifacts, context.get("profile"))
     surface = check_runtime_surface(observed, context)
+    observed.errors.extend(transcript_errors(observed, context.get("prompt"))[0])
     native_model = None
     for line in stdout.splitlines():
         try:

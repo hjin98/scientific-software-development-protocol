@@ -115,7 +115,8 @@ class Observer:
             # Supervisor-set turn budget enforced on the actual inference path: the request is
             # retained as evidence but never reaches the provider.
             self.chain.append("budget_exhausted", {"request_index": index, "max_requests": self.max_requests})
-            mux.send_simple(conn, 429, b'{"error":{"message":"qualification turn budget exhausted","type":"turn_budget"}}',
+            # 403 (not 429): a non-retryable client error, so neither OMP nor its provider layer retries it.
+            mux.send_simple(conn, 403, b'{"error":{"message":"qualification turn budget exhausted","type":"turn_budget"}}',
                             "application/json")
             return
         forward = {k: v for k, v in request.headers.items() if k not in HOP_BY_HOP}

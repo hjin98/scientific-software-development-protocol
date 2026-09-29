@@ -227,7 +227,7 @@ def read_request(conn: Conn) -> Request | None:
     return Request(method, target, headers, body, head)
 
 
-REASONS = {200: "OK", 202: "Accepted", 400: "Bad Request", 401: "Unauthorized", 404: "Not Found",
+REASONS = {200: "OK", 202: "Accepted", 400: "Bad Request", 401: "Unauthorized", 403: "Forbidden", 404: "Not Found",
            405: "Method Not Allowed", 411: "Length Required", 500: "Internal Server Error",
            502: "Bad Gateway"}
 

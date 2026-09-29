@@ -9,6 +9,7 @@ not a credential store; a sentinel credential is only compared, never persisted.
 Scenario JSON: {"steps": [step, ...], "on_exhaust": "stop"}
   step := {"text": "..."} | {"tool_calls": [{"name": str, "arguments": {...}}], "text": optional}
           | {"http_error": 500}     (test the provider-managed retry surface)
+          | {"text": "...", "finish": "length"}   (output-token cap reached)
 Step i answers the i-th /chat/completions request of the process (a request whose last message
 is a tool result continues the scenario like any other request). Every request body is appended
 to `--log` as one JSON line so tests can compare what the model actually received.
@@ -58,9 +59,10 @@ def _chunks(step: dict, index: int, model: str) -> list[dict]:
             "type": "function",
             "function": {"name": call["name"], "arguments": json.dumps(call.get("arguments") or {})},
         }]}, "finish_reason": None}]})
-    finish = "tool_calls" if calls else "stop"
+    finish = step.get("finish") or ("tool_calls" if calls else "stop")
     out.append({**base, "choices": [{"index": 0, "delta": {}, "finish_reason": finish}],
-                "usage": {"prompt_tokens": 10 + index, "completion_tokens": 5, "total_tokens": 15 + index}})
+                "usage": {"prompt_tokens": 10 + index, "completion_tokens": 5 if (text or calls) else 0,
+                          "total_tokens": (15 if (text or calls) else 10) + index}})
     return out
 
 

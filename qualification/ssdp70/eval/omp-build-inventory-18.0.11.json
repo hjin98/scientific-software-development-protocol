@@ -2,12 +2,539 @@
  "build": {
   "build_id": "2c2e51f3b6fae6722da4f7b69751a2e9467ab063",
   "bytes": 194573512,
+  "http_user_agent": "Bun/1.4.0",
+  "mcp_client_info": {
+   "name": "omp-coding-agent",
+   "version": "1.0.0"
+  },
   "sha256": "6054460b29e9bad5eba78336f291e1979c2fa0a5cd96fc2d92afd666cc681d26",
   "version": "18.0.11"
  },
- "discovery": {},
- "environment": {},
- "provider_managed_state": [],
+ "discovery": {
+  "effects_observed_through_the_trusted_observer": {
+   "adapter_detected": [
+    "runtime system prompt contains project/context files; ambient context entered the runtime"
+   ],
+   "evidence_state": "INADMISSIBLE",
+   "hook_or_extension_or_bunfig_code_ran": [],
+   "hostile_markers_that_reached_the_system_prompt": [
+    "HOSTILE-MARKER-D4-copilot",
+    "HOSTILE-MARKER-D4-home-agents-md"
+   ],
+   "native_tools_in_request": [
+    "read",
+    "glob",
+    "grep",
+    "edit",
+    "write",
+    "bash",
+    "mcp__ssdp_delegate",
+    "mcp__ssdp_issue_comment",
+    "mcp__ssdp_issue_create",
+    "mcp__ssdp_issue_locations",
+    "mcp__ssdp_issue_search",
+    "mcp__ssdp_issue_show"
+   ],
+   "printenv_HOSTILE_count_and_workspace_listing_seen_by_the_agent": "2\n. .. .agent .agents .claude .codex .cursor .env .gemini .git .github .mcp.json .omp .opencode .qualification-tmp .vscode .windsurf AGENTS.md CLAUDE.md GEMINI.md README.md bunfig.toml evil.js mcp.json notes.txt \n\nWall time: 0.02 seconds",
+   "skills_in_runtime_catalog": [
+    "numerical-algorithm-design",
+    "repository-hygiene",
+    "scientific-formulation",
+    "software-design",
+    "software-documentation",
+    "software-implementation",
+    "software-maintenance-audit"
+   ]
+  },
+  "method": "run 1: strace -f of the real omp/18.0.11 in the real sandbox (allow-all seccomp so strace can trace), hostile project and HOME planted, pre-launch refusal bypassed; run 2: normal run with the same hostile sources, effects read from the trusted observer evidence",
+  "network_connect_attempts": [
+   "AF_INET::11434=-1",
+   "AF_INET::1234=-1",
+   "AF_INET::31001=-1",
+   "AF_INET::31002=-1",
+   "AF_INET::31096=-1",
+   "AF_INET::31097=-1",
+   "AF_INET::31098=-1",
+   "AF_INET::8080=-1"
+  ],
+  "paths_created_or_removed": [
+   "/home/agent/.omp/agent",
+   "/home/agent/.omp/agent/models.db-journal",
+   "/home/agent/.omp/agent/models.db-shm",
+   "/home/agent/.omp/agent/models.db-wal",
+   "/home/agent/.omp/logs/.omp.13-audit.json",
+   "/home/agent/.omp/natives/18.0.11",
+   "/home/agent/.omp/run",
+   "/home/agent/.omp/run/daemons",
+   "/home/agent/.omp/run/daemons/79b239fb62442541",
+   "/home/agent/.omp/run/daemons/79b239fb62442541/clients",
+   "/home/agent/.omp/run/daemons/79b239fb62442541/clients/70-bc1ca644-44c7-4a73-9f20-6829f61f64a9.json"
+  ],
+  "paths_probed_ancestors_and_other": [
+   "/$bunfs/root/omp-linux-x64",
+   "/.claude/agents",
+   "/.codex/agents",
+   "/.env",
+   "/.gemini/agents",
+   "/.jj/repo",
+   "/.omp/agents",
+   "/home",
+   "/home/",
+   "/home/agent",
+   "/workspace"
+  ],
+  "paths_probed_home": [
+   "/home/agent/",
+   "/home/agent/.agent/AGENTS.md",
+   "/home/agent/.agents/AGENTS.md",
+   "/home/agent/.agents/SYSTEM.md",
+   "/home/agent/.agents/commands",
+   "/home/agent/.aws/credentials",
+   "/home/agent/.cache/omp",
+   "/home/agent/.claude.json",
+   "/home/agent/.claude/.lsp.json",
+   "/home/agent/.claude/.lsp.yaml",
+   "/home/agent/.claude/.lsp.yml",
+   "/home/agent/.claude/APPEND_SYSTEM.md",
+   "/home/agent/.claude/CLAUDE.md",
+   "/home/agent/.claude/SYSTEM.md",
+   "/home/agent/.claude/TITLE_SYSTEM.md",
+   "/home/agent/.claude/lsp.json",
+   "/home/agent/.claude/lsp.yaml",
+   "/home/agent/.claude/lsp.yml",
+   "/home/agent/.claude/mcp.json",
+   "/home/agent/.claude/plugins/installed_plugins.json",
+   "/home/agent/.claude/settings.json",
+   "/home/agent/.claude/skills/hc/SKILL.md",
+   "/home/agent/.claude/tools",
+   "/home/agent/.codeium/windsurf/mcp_config.json",
+   "/home/agent/.codex/.lsp.json",
+   "/home/agent/.codex/.lsp.yaml",
+   "/home/agent/.codex/.lsp.yml",
+   "/home/agent/.codex/AGENTS.md",
+   "/home/agent/.codex/APPEND_SYSTEM.md",
+   "/home/agent/.codex/SYSTEM.md",
+   "/home/agent/.codex/TITLE_SYSTEM.md",
+   "/home/agent/.codex/config.toml",
+   "/home/agent/.codex/lsp.json",
+   "/home/agent/.codex/lsp.yaml",
+   "/home/agent/.codex/lsp.yml",
+   "/home/agent/.codex/skills",
+   "/home/agent/.config/gcloud/application_default_credentials.json",
+   "/home/agent/.config/opencode/AGENTS.md",
+   "/home/agent/.config/opencode/opencode.json",
+   "/home/agent/.config/opencode/opencode.jsonc",
+   "/home/agent/.copilot/copilot-instructions.md",
+   "/home/agent/.cursor/mcp.json",
+   "/home/agent/.cursor/settings.json",
+   "/home/agent/.env",
+   "/home/agent/.gemini/.lsp.json",
+   "/home/agent/.gemini/.lsp.yaml",
+   "/home/agent/.gemini/.lsp.yml",
+   "/home/agent/.gemini/APPEND_SYSTEM.md",
+   "/home/agent/.gemini/GEMINI.md",
+   "/home/agent/.gemini/SYSTEM.md",
+   "/home/agent/.gemini/TITLE_SYSTEM.md",
+   "/home/agent/.gemini/lsp.json",
+   "/home/agent/.gemini/lsp.yaml",
+   "/home/agent/.gemini/lsp.yml",
+   "/home/agent/.gemini/settings.json",
+   "/home/agent/.gemini/system.md",
+   "/home/agent/.lsp.json",
+   "/home/agent/.lsp.yaml",
+   "/home/agent/.lsp.yml",
+   "/home/agent/.omp",
+   "/home/agent/.omp/",
+   "/home/agent/.omp/.env",
+   "/home/agent/.omp/agent",
+   "/home/agent/.omp/agent/.env",
+   "/home/agent/.omp/agent/.lsp.json",
+   "/home/agent/.omp/agent/.lsp.yaml",
+   "/home/agent/.omp/agent/.lsp.yml",
+   "/home/agent/.omp/agent/AGENTS.md",
+   "/home/agent/.omp/agent/APPEND_SYSTEM.md",
+   "/home/agent/.omp/agent/PERSONALITY.md",
+   "/home/agent/.omp/agent/SYSTEM.md",
+   "/home/agent/.omp/agent/TITLE_SYSTEM.md",
+   "/home/agent/.omp/agent/WATCHDOG.md",
+   "/home/agent/.omp/agent/WATCHDOG.yml",
+   "/home/agent/.omp/agent/agent.db",
+   "/home/agent/.omp/agent/agent.db-journal",
+   "/home/agent/.omp/agent/agent.db-shm",
+   "/home/agent/.omp/agent/agent.db-wal",
+   "/home/agent/.omp/agent/agents",
+   "/home/agent/.omp/agent/config.yml",
+   "/home/agent/.omp/agent/lsp.json",
+   "/home/agent/.omp/agent/lsp.yaml",
+   "/home/agent/.omp/agent/lsp.yml",
+   "/home/agent/.omp/agent/managed-skills",
+   "/home/agent/.omp/agent/mcp.json",
+   "/home/agent/.omp/agent/models.db",
+   "/home/agent/.omp/agent/models.db-journal",
+   "/home/agent/.omp/agent/models.db-shm",
+   "/home/agent/.omp/agent/models.db-wal",
+   "/home/agent/.omp/agent/models.yml",
+   "/home/agent/.omp/agent/prompts",
+   "/home/agent/.omp/agent/settings.json",
+   "/home/agent/.omp/agent/skills/ho/SKILL.md",
+   "/home/agent/.omp/gpu_cache.json",
+   "/home/agent/.omp/logs",
+   "/home/agent/.omp/logs/.omp.13-audit.json",
+   "/home/agent/.omp/logs/.omp.70-audit.json",
+   "/home/agent/.omp/logs/omp.2026-09-29.70.log",
+   "/home/agent/.omp/natives",
+   "/home/agent/.omp/natives/",
+   "/home/agent/.omp/natives/18.0.11",
+   "/home/agent/.omp/natives/18.0.11/pi_natives.linux-x64-baseline.node",
+   "/home/agent/.omp/natives/18.0.11/pi_natives.linux-x64-modern.node",
+   "/home/agent/.omp/plugins/installed_plugins.json",
+   "/home/agent/.omp/plugins/node_modules",
+   "/home/agent/.omp/run/daemons/79b239fb62442541/clients/70-bc1ca644-44c7-4a73-9f20-6829f61f64a9.json",
+   "/home/agent/.pciids-cache",
+   "/home/agent/lsp.json",
+   "/home/agent/lsp.yaml",
+   "/home/agent/lsp.yml"
+  ],
+  "paths_probed_project": [
+   "/workspace/",
+   "/workspace/.agent/AGENTS.md",
+   "/workspace/.agent/SYSTEM.md",
+   "/workspace/.agent/skills",
+   "/workspace/.agents/AGENTS.md",
+   "/workspace/.agents/skills/evil-agents/SKILL.md",
+   "/workspace/.clang-format",
+   "/workspace/.clangd",
+   "/workspace/.claude/.lsp.json",
+   "/workspace/.claude/.lsp.yaml",
+   "/workspace/.claude/.lsp.yml",
+   "/workspace/.claude/.mcp.json",
+   "/workspace/.claude/APPEND_SYSTEM.md",
+   "/workspace/.claude/CLAUDE.md",
+   "/workspace/.claude/SYSTEM.md",
+   "/workspace/.claude/TITLE_SYSTEM.md",
+   "/workspace/.claude/agents",
+   "/workspace/.claude/lsp.json",
+   "/workspace/.claude/lsp.yaml",
+   "/workspace/.claude/lsp.yml",
+   "/workspace/.claude/mcp.json",
+   "/workspace/.claude/plugin-overrides.json",
+   "/workspace/.claude/settings.local.json",
+   "/workspace/.claude/skills",
+   "/workspace/.codex/.lsp.json",
+   "/workspace/.codex/.lsp.yaml",
+   "/workspace/.codex/.lsp.yml",
+   "/workspace/.codex/APPEND_SYSTEM.md",
+   "/workspace/.codex/SYSTEM.md",
+   "/workspace/.codex/TITLE_SYSTEM.md",
+   "/workspace/.codex/agents",
+   "/workspace/.codex/config.toml",
+   "/workspace/.codex/lsp.json",
+   "/workspace/.codex/lsp.yaml",
+   "/workspace/.codex/lsp.yml",
+   "/workspace/.codex/plugin-overrides.json",
+   "/workspace/.cursor/mcp.json",
+   "/workspace/.cursor/settings.json",
+   "/workspace/.dockerignore",
+   "/workspace/.env",
+   "/workspace/.env.development",
+   "/workspace/.env.development.local",
+   "/workspace/.env.local",
+   "/workspace/.eslintrc",
+   "/workspace/.eslintrc.js",
+   "/workspace/.eslintrc.json",
+   "/workspace/.eslintrc.yml",
+   "/workspace/.gemini/.lsp.json",
+   "/workspace/.gemini/.lsp.yaml",
+   "/workspace/.gemini/.lsp.yml",
+   "/workspace/.gemini/APPEND_SYSTEM.md",
+   "/workspace/.gemini/SYSTEM.md",
+   "/workspace/.gemini/TITLE_SYSTEM.md",
+   "/workspace/.gemini/agents",
+   "/workspace/.gemini/lsp.json",
+   "/workspace/.gemini/lsp.yaml",
+   "/workspace/.gemini/lsp.yml",
+   "/workspace/.gemini/plugin-overrides.json",
+   "/workspace/.gemini/settings.json",
+   "/workspace/.git",
+   "/workspace/.git/commondir",
+   "/workspace/.git/config",
+   "/workspace/.github/copilot-instructions.md",
+   "/workspace/.graphqlrc",
+   "/workspace/.graphqlrc.json",
+   "/workspace/.graphqlrc.yaml",
+   "/workspace/.graphqlrc.yml",
+   "/workspace/.jj/repo",
+   "/workspace/.latexmkrc",
+   "/workspace/.lsp.json",
+   "/workspace/.lsp.yaml",
+   "/workspace/.lsp.yml",
+   "/workspace/.luacheckrc",
+   "/workspace/.luarc.json",
+   "/workspace/.luarc.jsonc",
+   "/workspace/.marksman.toml",
+   "/workspace/.mcp.json",
+   "/workspace/.ocamlformat",
+   "/workspace/.omp",
+   "/workspace/.omp/.lsp.json",
+   "/workspace/.omp/.lsp.yaml",
+   "/workspace/.omp/.lsp.yml",
+   "/workspace/.omp/.mcp.json",
+   "/workspace/.omp/AGENTS.md",
+   "/workspace/.omp/APPEND_SYSTEM.md",
+   "/workspace/.omp/SYSTEM.md",
+   "/workspace/.omp/TITLE_SYSTEM.md",
+   "/workspace/.omp/WATCHDOG.yaml",
+   "/workspace/.omp/agents",
+   "/workspace/.omp/commands",
+   "/workspace/.omp/config.yml",
+   "/workspace/.omp/lsp.json",
+   "/workspace/.omp/lsp.yaml",
+   "/workspace/.omp/lsp.yml",
+   "/workspace/.omp/mcp.json",
+   "/workspace/.omp/plugin-overrides.json",
+   "/workspace/.omp/plugins/node_modules",
+   "/workspace/.omp/prompts",
+   "/workspace/.omp/skills/evil-omp/SKILL.md",
+   "/workspace/.opencode/opencode.json",
+   "/workspace/.opencode/opencode.jsonc",
+   "/workspace/.opencode/skills/evil-opencode/SKILL.md",
+   "/workspace/.phpactor.json",
+   "/workspace/.phpactor.yml",
+   "/workspace/.project",
+   "/workspace/.qualification-tmp/omp-local/01a0eecf-e3a0-74c9-8dcf-35fd8ab56572/PLAN.md",
+   "/workspace/.rubocop.yml",
+   "/workspace/.ruby-gemset",
+   "/workspace/.ruby-version",
+   "/workspace/.ruff.toml",
+   "/workspace/.solargraph.yml",
+   "/workspace/.stylua.toml",
+   "/workspace/.swiftlint.yaml",
+   "/workspace/.swiftlint.yml",
+   "/workspace/.swiftpm",
+   "/workspace/.terraform",
+   "/workspace/.texlabroot",
+   "/workspace/.vscode/mcp.json",
+   "/workspace/.windsurf/mcp_config.json",
+   "/workspace/AGENTS.md",
+   "/workspace/CMakeLists.txt",
+   "/workspace/Cargo.toml",
+   "/workspace/Chart.yaml",
+   "/workspace/Chart.yml",
+   "/workspace/Dockerfile",
+   "/workspace/Gemfile",
+   "/workspace/Gemfile.lock",
+   "/workspace/Makefile",
+   "/workspace/Package.swift",
+   "/workspace/Pipfile",
+   "/workspace/Rakefile",
+   "/workspace/Tectonic.toml",
+   "/workspace/astro.config.js",
+   "/workspace/astro.config.mjs",
+   "/workspace/astro.config.ts",
+   "/workspace/biome.json",
+   "/workspace/biome.jsonc",
+   "/workspace/build.gradle",
+   "/workspace/build.gradle.kts",
+   "/workspace/build.sbt",
+   "/workspace/build.sc",
+   "/workspace/build.zig",
+   "/workspace/build.zig.zon",
+   "/workspace/cabal.project",
+   "/workspace/compile_commands.json",
+   "/workspace/composer.json",
+   "/workspace/composer.lock",
+   "/workspace/default.nix",
+   "/workspace/deno.json",
+   "/workspace/deno.jsonc",
+   "/workspace/deno.lock",
+   "/workspace/docker-compose.yaml",
+   "/workspace/docker-compose.yml",
+   "/workspace/dune-project",
+   "/workspace/dune-workspace",
+   "/workspace/erlang.mk",
+   "/workspace/eslint.config.js",
+   "/workspace/eslint.config.mjs",
+   "/workspace/flake.nix",
+   "/workspace/gleam.toml",
+   "/workspace/go.mod",
+   "/workspace/go.sum",
+   "/workspace/go.work",
+   "/workspace/graphql.config.js",
+   "/workspace/hie.yaml",
+   "/workspace/jsconfig.json",
+   "/workspace/latexmkrc",
+   "/workspace/lsp.json",
+   "/workspace/lsp.yaml",
+   "/workspace/lsp.yml",
+   "/workspace/mcp.json",
+   "/workspace/mix.exs",
+   "/workspace/mix.lock",
+   "/workspace/nuxt.config.js",
+   "/workspace/nuxt.config.ts",
+   "/workspace/ols.json",
+   "/workspace/omnisharp.json",
+   "/workspace/package-lock.json",
+   "/workspace/package.json",
+   "/workspace/package.yaml",
+   "/workspace/pnpm-lock.yaml",
+   "/workspace/pom.xml",
+   "/workspace/prisma/schema.prisma",
+   "/workspace/project.yml",
+   "/workspace/pubspec.lock",
+   "/workspace/pubspec.yaml",
+   "/workspace/pyproject.toml",
+   "/workspace/pyrightconfig.json",
+   "/workspace/rebar.config",
+   "/workspace/rebar.lock",
+   "/workspace/requirements.txt",
+   "/workspace/ruff.toml",
+   "/workspace/rust-analyzer.toml",
+   "/workspace/schema.prisma",
+   "/workspace/settings.gradle",
+   "/workspace/settings.gradle.kts",
+   "/workspace/setup.cfg",
+   "/workspace/setup.py",
+   "/workspace/shell.nix",
+   "/workspace/stack.yaml",
+   "/workspace/stylua.toml",
+   "/workspace/svelte.config.js",
+   "/workspace/svelte.config.mjs",
+   "/workspace/tailwind.config.cjs",
+   "/workspace/tailwind.config.js",
+   "/workspace/tailwind.config.mjs",
+   "/workspace/tailwind.config.ts",
+   "/workspace/terraform.tfstate",
+   "/workspace/texlabroot",
+   "/workspace/tsconfig.json",
+   "/workspace/ty.toml",
+   "/workspace/vue.config.js",
+   "/workspace/yarn.lock",
+   "/workspace/zls.json"
+  ],
+  "programs_executed": [
+   [
+    "/opt/omp/omp",
+    "\"/opt/omp/omp\", \"-p\", \"--mode=json\", \"--no-session\", \"--no-title\", \"--no-extensions\", \"--no-rules\", \"--no-lsp\", \"--cwd\", \"/workspace\", \"--tools\", \"read,glob,grep,edit,write,bash\", \"--model\", \"stand/st"
+   ],
+   [
+    "/usr/bin/lspci",
+    "\"lspci\""
+   ]
+  ]
+ },
+ "environment": {
+  "embedded_shell_note": "the bash tool runs OMP's embedded shell (in-process builtins, external commands as children of OMP); shellPath is not used by that path, so the sandbox, not a shell wrapper, is the process boundary",
+  "omp_environment_variables_found_in_the_binary": "PI_* and OMP_* names (for example PI_CODING_AGENT_DIR, PI_DATA_DIR, PI_SMOL_MODEL, PI_SLOW_MODEL, PI_PLAN_MODEL, PI_NO_TITLE, PI_AUTO_QA_PUSH, PI_NO_PTY, PI_DISABLE_UUTILS_BUILTINS, PI_SHELL_PREFIX, PI_BASH_NO_CI, OMP_AUTH_BROKER_*, OMP_DAEMON_*, OMP_LSP_MUX_*); none is set by the profile beyond PI_NO_TITLE, and the environment is cleared so none can enter from the host",
+  "provider_credential_variables_absent_by_construction": [
+   "ANTHROPIC_API_KEY",
+   "ANTHROPIC_OAUTH_TOKEN",
+   "AWS_ACCESS_KEY_ID",
+   "AWS_SECRET_ACCESS_KEY",
+   "COPILOT_GITHUB_TOKEN",
+   "DEEPINFRA_API_KEY",
+   "GEMINI_API_KEY",
+   "GH_TOKEN",
+   "GITHUB_TOKEN",
+   "OMP_API_KEY",
+   "OMP_AUTH_TOKEN",
+   "OPENAI_API_KEY",
+   "OPENROUTER_API_KEY",
+   "SSH_AUTH_SOCK"
+  ],
+  "subject_environment": "cleared; only PATH, HOME, XDG_CONFIG_HOME, XDG_CACHE_HOME, TMPDIR/TMP/TEMP, TERM, NO_COLOR, LANG, TZ, PI_NO_TITLE are set"
+ },
+ "provider_managed_state": [
+  {
+   "disposition": "disabled",
+   "evidence": "one accounted inference request per assistant message; auto_retry_* events are inadmissible; test_provider_error_is_a_single_accounted_request_never_a_hidden_retry and test_provider_managed_retry_appears_in_evidence_and_is_inadmissible_when_enabled",
+   "mechanism": "retry.enabled=false, retry.maxRetries=0, retry.modelFallback=false",
+   "name": "auto-retry / model fallback"
+  },
+  {
+   "disposition": "frozen+observed (cannot be disabled)",
+   "evidence": "the observer records every resend; the adapter accepts it only when identical to its predecessor after a transient/empty response, within those limits, and retains the ledger in usage_timing.provider_layer_retries; profile unknown provider-layer-retry-of-transient-errors-and-empty-completions is arm-neutral",
+   "mechanism": "hard-coded in the exact build below OMP's retry setting: one resend after a transient provider error, up to two after an empty completion, always the byte-identical request, only before any content reached the agent",
+   "name": "provider-layer retry of transient errors and empty completions (openai-completions)"
+  },
+  {
+   "disposition": "disabled",
+   "evidence": "auto_compaction_* events inadmissible; any extra model call is an unaccounted observer request",
+   "mechanism": "compaction.enabled/midTurnEnabled/asyncEnabled/idleEnabled=false, contextPromotion.enabled=false, branchSummary.enabled=false",
+   "name": "compaction / context promotion / branch summary"
+  },
+  {
+   "disposition": "disabled",
+   "evidence": "extra observer request without a native assistant message fails the request/assistant-message accounting",
+   "mechanism": "--no-title, PI_NO_TITLE=1, title.refreshOnReplan via recap.enabled=false, features.unexpectedStopDetection=none",
+   "name": "title / recap / background summaries"
+  },
+  {
+   "disposition": "disabled",
+   "evidence": "model_changed / goal_updated events inadmissible; observer request accounting",
+   "mechanism": "advisor.enabled, prewalk.enabled, task.prewalk, plan.enabled, goal.enabled = false; task/hub tools not exposed",
+   "name": "advisor / prewalk / plan / goal"
+  },
+  {
+   "disposition": "disabled",
+   "evidence": "effective-settings probe equals the inventory for every key; observer request accounting",
+   "mechanism": "memory.backend=off, memories.enabled=false, autolearn.enabled=false; memory tools not exposed; network unreachable",
+   "name": "memory / auto-learning / hindsight / mnemopi / sharpshooter"
+  },
+  {
+   "disposition": "disabled",
+   "evidence": "ttsr_triggered/todo_reminder events inadmissible; effective-settings probe",
+   "mechanism": "ttsr.enabled=false, todo.reminders=false, model.loopGuard/toolCallLoopGuard.enabled=false, magicKeywords.enabled=false",
+   "name": "TTSR rule injection / todo reminders / loop guards / magic keywords"
+  },
+  {
+   "disposition": "frozen+observed",
+   "evidence": "runtime-home inventory classes are exactly control + omp-runtime-state in a normal run",
+   "mechanism": "--no-session; runtime state is confined to the run-owned HOME and inventoried after the run (runtime-home-inventory.json)",
+   "name": "session state / artifacts"
+  },
+  {
+   "disposition": "disabled",
+   "evidence": "hostile project/HOME effect test: no hook/extension/bunfig code ran; unit tests refuse every identified source",
+   "mechanism": "--no-extensions, --no-rules, --no-lsp, skills/commands enable* flags false, mcp.enableProjectConfig=false, run-owned HOME holds no plugin/extension/hook path (pre-launch refusal)",
+   "name": "extension / plugin / hook discovery"
+  },
+  {
+   "disposition": "disabled or refused",
+   "evidence": "discovery.effects_observed_through_the_trusted_observer; the only source that reached the runtime in the hostile probe (.github/copilot-instructions.md, HOME SYSTEM/APPEND/AGENTS.md) is detected from the observed prompt",
+   "mechanism": "skills.enable{Codex,Claude,Pi,Agents}{User,Project}=false plus skills.customDirectories=[/opt/ssdp/skills]; commands.enable*=false; mcp.enableProjectConfig=false; pre-launch refusal of every identified project/HOME source; system-prompt structure checks for context/override/append",
+   "name": "OMP / Claude / Codex / Gemini / OpenCode / Cursor / Windsurf / VS Code / GitHub-agents / standalone-MCP discovery"
+  },
+  {
+   "disposition": "closed by substrate",
+   "evidence": "test_ancestor_directory_discovery_sees_nothing",
+   "mechanism": "the sandbox root holds only /workspace, /home/agent, /usr, /etc, /opt, /tmp, /proc, /dev; the project has no host ancestors",
+   "name": "ancestor-directory discovery"
+  },
+  {
+   "disposition": "refused pre-launch",
+   "evidence": "hostile probe: HOME .env variables entered OMP's environment, project .env did not; HOME sources are refused before launch",
+   "mechanism": "run-owned HOME is created empty; any .env is refused; process cwd is `/` and project .env/bunfig.toml are not read (observed)",
+   "name": "dotenv autoload (HOME .env, ~/.omp/.env, ~/.omp/agent/.env)"
+  },
+  {
+   "disposition": "unreachable + disabled",
+   "evidence": "network_connect_attempts in the strace inventory all fail with the empty netns; no effect on runtime state",
+   "mechanism": "empty network namespace; startup.checkUpdate=false, dev.autoqa=false, marketplace.autoUpdate=off",
+   "name": "startup network activity (model catalog refresh, update check, telemetry, autoqa push)"
+  },
+  {
+   "disposition": "claim-scoped: arm-neutral provider-managed",
+   "evidence": "profile provider_managed_unknowns entry host-derived-system-prompt-workstation-block (arm-neutral)",
+   "mechanism": "host-derived OS/kernel/CPU/GPU lines are recorded by the observer; identical for both arms on one host",
+   "name": "hardware/host fingerprint in the system prompt (`<workstation>` block)"
+  },
+  {
+   "disposition": "observable",
+   "evidence": "test_ordinary_root_selection_from_successful_skill_read_with_exact_consumed_resource; read truncation (300-line default) is recorded as partial with line ranges, not as exact",
+   "mechanism": "tool results the model received are compared, line-numbered, with the exact mounted package files (consumed_resource)",
+   "name": "exact consumed SSDP material (T1/T7/T8)"
+  }
+ ],
  "purpose": "empirical exact-build inventory of OMP configuration, discovery and provider-managed state; evidence, not authority",
  "schema": 1,
  "settings": {
@@ -22,7 +549,7 @@
     "type": "boolean"
    },
    {
-    "class": "default-retained-behaviour-visible-in-evidence",
+    "class": "sub-parameter-of-closed-feature",
     "default": 3,
     "effective_under_frozen_profile": 3,
     "frozen_value": null,
@@ -30,7 +557,7 @@
     "type": "number"
    },
    {
-    "class": "default-retained-behaviour-visible-in-evidence",
+    "class": "sub-parameter-of-closed-feature",
     "default": "off",
     "effective_under_frozen_profile": "off",
     "frozen_value": null,
@@ -86,7 +613,7 @@
     "type": "boolean"
    },
    {
-    "class": "tool-not-exposed-by-frozen-tool-surface",
+    "class": "sub-parameter-of-closed-feature",
     "default": 100,
     "effective_under_frozen_profile": 100,
     "frozen_value": null,
@@ -94,7 +621,7 @@
     "type": "number"
    },
    {
-    "class": "tool-not-exposed-by-frozen-tool-surface",
+    "class": "sub-parameter-of-closed-feature",
     "default": "smart",
     "effective_under_frozen_profile": "smart",
     "frozen_value": null,
@@ -134,7 +661,7 @@
     "type": "number"
    },
    {
-    "class": "default-retained-behaviour-visible-in-evidence",
+    "class": "sub-parameter-of-closed-feature",
     "default": false,
     "effective_under_frozen_profile": false,
     "frozen_value": null,
@@ -150,7 +677,7 @@
     "type": "boolean"
    },
    {
-    "class": "default-retained-behaviour-visible-in-evidence",
+    "class": "sub-parameter-of-closed-feature",
     "default": 5,
     "effective_under_frozen_profile": 5,
     "frozen_value": null,
@@ -166,7 +693,7 @@
     "type": "boolean"
    },
    {
-    "class": "default-retained-behaviour-visible-in-evidence",
+    "class": "sub-parameter-of-closed-feature",
     "default": 60000,
     "effective_under_frozen_profile": 60000,
     "frozen_value": null,
@@ -182,7 +709,7 @@
     "type": "enum"
    },
    {
-    "class": "default-retained-behaviour-visible-in-evidence",
+    "class": "sub-parameter-of-closed-feature",
     "default": 30000,
     "effective_under_frozen_profile": 30000,
     "frozen_value": null,
@@ -332,7 +859,7 @@
     "type": "boolean"
    },
    {
-    "class": "default-retained-behaviour-visible-in-evidence",
+    "class": "sub-parameter-of-closed-feature",
     "default": 16384,
     "effective_under_frozen_profile": 16384,
     "frozen_value": null,
@@ -556,7 +1083,7 @@
     "type": "boolean"
    },
    {
-    "class": "default-retained-behaviour-visible-in-evidence",
+    "class": "sub-parameter-of-closed-feature",
     "default": true,
     "effective_under_frozen_profile": true,
     "frozen_value": null,
@@ -564,7 +1091,7 @@
     "type": "boolean"
    },
    {
-    "class": "default-retained-behaviour-visible-in-evidence",
+    "class": "sub-parameter-of-closed-feature",
     "default": true,
     "effective_under_frozen_profile": true,
     "frozen_value": null,
@@ -580,7 +1107,7 @@
     "type": "boolean"
    },
    {
-    "class": "default-retained-behaviour-visible-in-evidence",
+    "class": "sub-parameter-of-closed-feature",
     "default": false,
     "effective_under_frozen_profile": false,
     "frozen_value": null,
@@ -596,7 +1123,7 @@
     "type": "boolean"
    },
    {
-    "class": "default-retained-behaviour-visible-in-evidence",
+    "class": "sub-parameter-of-closed-feature",
     "default": 200000,
     "effective_under_frozen_profile": 200000,
     "frozen_value": null,
@@ -604,7 +1131,7 @@
     "type": "number"
    },
    {
-    "class": "default-retained-behaviour-visible-in-evidence",
+    "class": "sub-parameter-of-closed-feature",
     "default": 300,
     "effective_under_frozen_profile": 300,
     "frozen_value": null,
@@ -612,7 +1139,7 @@
     "type": "number"
    },
    {
-    "class": "default-retained-behaviour-visible-in-evidence",
+    "class": "sub-parameter-of-closed-feature",
     "default": 20000,
     "effective_under_frozen_profile": 20000,
     "frozen_value": null,
@@ -620,7 +1147,7 @@
     "type": "number"
    },
    {
-    "class": "default-retained-behaviour-visible-in-evidence",
+    "class": "sub-parameter-of-closed-feature",
     "default": [
      "remote",
      "snapcompact",
@@ -648,7 +1175,7 @@
     "type": "boolean"
    },
    {
-    "class": "default-retained-behaviour-visible-in-evidence",
+    "class": "sub-parameter-of-closed-feature",
     "default": null,
     "effective_under_frozen_profile": null,
     "frozen_value": null,
@@ -656,7 +1183,7 @@
     "type": "string"
    },
    {
-    "class": "default-retained-behaviour-visible-in-evidence",
+    "class": "sub-parameter-of-closed-feature",
     "default": true,
     "effective_under_frozen_profile": true,
     "frozen_value": null,
@@ -664,7 +1191,7 @@
     "type": "boolean"
    },
    {
-    "class": "default-retained-behaviour-visible-in-evidence",
+    "class": "sub-parameter-of-closed-feature",
     "default": null,
     "effective_under_frozen_profile": null,
     "frozen_value": null,
@@ -672,7 +1199,7 @@
     "type": "number"
    },
    {
-    "class": "default-retained-behaviour-visible-in-evidence",
+    "class": "sub-parameter-of-closed-feature",
     "default": true,
     "effective_under_frozen_profile": true,
     "frozen_value": null,
@@ -680,7 +1207,7 @@
     "type": "boolean"
    },
    {
-    "class": "default-retained-behaviour-visible-in-evidence",
+    "class": "sub-parameter-of-closed-feature",
     "default": -1,
     "effective_under_frozen_profile": -1,
     "frozen_value": null,
@@ -688,7 +1215,7 @@
     "type": "number"
    },
    {
-    "class": "default-retained-behaviour-visible-in-evidence",
+    "class": "sub-parameter-of-closed-feature",
     "default": -1,
     "effective_under_frozen_profile": -1,
     "frozen_value": null,
@@ -696,7 +1223,7 @@
     "type": "number"
    },
    {
-    "class": "default-retained-behaviour-visible-in-evidence",
+    "class": "sub-parameter-of-closed-feature",
     "default": 64000,
     "effective_under_frozen_profile": 64000,
     "frozen_value": null,
@@ -824,7 +1351,7 @@
     "type": "string"
    },
    {
-    "class": "default-retained-behaviour-visible-in-evidence",
+    "class": "sub-parameter-of-closed-feature",
     "default": [],
     "effective_under_frozen_profile": [],
     "frozen_value": null,
@@ -992,7 +1519,7 @@
     "type": "enum"
    },
    {
-    "class": "default-retained-behaviour-visible-in-evidence",
+    "class": "sub-parameter-of-closed-feature",
     "default": false,
     "effective_under_frozen_profile": false,
     "frozen_value": null,
@@ -1000,7 +1527,7 @@
     "type": "boolean"
    },
    {
-    "class": "default-retained-behaviour-visible-in-evidence",
+    "class": "sub-parameter-of-closed-feature",
     "default": 60000,
     "effective_under_frozen_profile": 60000,
     "frozen_value": null,
@@ -1008,7 +1535,7 @@
     "type": "number"
    },
    {
-    "class": "default-retained-behaviour-visible-in-evidence",
+    "class": "sub-parameter-of-closed-feature",
     "default": false,
     "effective_under_frozen_profile": false,
     "frozen_value": null,
@@ -1032,7 +1559,7 @@
     "type": "boolean"
    },
    {
-    "class": "default-retained-behaviour-visible-in-evidence",
+    "class": "sub-parameter-of-closed-feature",
     "default": false,
     "effective_under_frozen_profile": false,
     "frozen_value": null,
@@ -1072,7 +1599,7 @@
     "type": "number"
    },
    {
-    "class": "default-retained-behaviour-visible-in-evidence",
+    "class": "sub-parameter-of-closed-feature",
     "default": [],
     "effective_under_frozen_profile": [],
     "frozen_value": null,
@@ -1216,7 +1743,7 @@
     "type": "boolean"
    },
    {
-    "class": "default-retained-behaviour-visible-in-evidence",
+    "class": "sub-parameter-of-closed-feature",
     "default": [
      "interactive"
     ],
@@ -1236,7 +1763,7 @@
     "type": "boolean"
    },
    {
-    "class": "default-retained-behaviour-visible-in-evidence",
+    "class": "sub-parameter-of-closed-feature",
     "default": true,
     "effective_under_frozen_profile": true,
     "frozen_value": null,
@@ -1676,7 +2203,7 @@
     "type": "number"
    },
    {
-    "class": "default-retained-behaviour-visible-in-evidence",
+    "class": "sub-parameter-of-closed-feature",
     "default": "",
     "effective_under_frozen_profile": "",
     "frozen_value": null,
@@ -1708,7 +2235,7 @@
     "type": "enum"
    },
    {
-    "class": "default-retained-behaviour-visible-in-evidence",
+    "class": "sub-parameter-of-closed-feature",
     "default": true,
     "effective_under_frozen_profile": true,
     "frozen_value": null,
@@ -1716,7 +2243,7 @@
     "type": "boolean"
    },
    {
-    "class": "default-retained-behaviour-visible-in-evidence",
+    "class": "sub-parameter-of-closed-feature",
     "default": false,
     "effective_under_frozen_profile": false,
     "frozen_value": null,
@@ -1724,7 +2251,7 @@
     "type": "boolean"
    },
    {
-    "class": "default-retained-behaviour-visible-in-evidence",
+    "class": "sub-parameter-of-closed-feature",
     "default": true,
     "effective_under_frozen_profile": true,
     "frozen_value": null,
@@ -1740,7 +2267,7 @@
     "type": "boolean"
    },
    {
-    "class": "default-retained-behaviour-visible-in-evidence",
+    "class": "sub-parameter-of-closed-feature",
     "default": false,
     "effective_under_frozen_profile": false,
     "frozen_value": null,
@@ -1748,7 +2275,7 @@
     "type": "boolean"
    },
    {
-    "class": "default-retained-behaviour-visible-in-evidence",
+    "class": "sub-parameter-of-closed-feature",
     "default": true,
     "effective_under_frozen_profile": true,
     "frozen_value": null,
@@ -1756,7 +2283,7 @@
     "type": "boolean"
    },
    {
-    "class": "default-retained-behaviour-visible-in-evidence",
+    "class": "sub-parameter-of-closed-feature",
     "default": true,
     "effective_under_frozen_profile": true,
     "frozen_value": null,
@@ -1772,7 +2299,7 @@
     "type": "boolean"
    },
    {
-    "class": "default-retained-behaviour-visible-in-evidence",
+    "class": "sub-parameter-of-closed-feature",
     "default": true,
     "effective_under_frozen_profile": true,
     "frozen_value": null,
@@ -1780,7 +2307,7 @@
     "type": "boolean"
    },
    {
-    "class": "default-retained-behaviour-visible-in-evidence",
+    "class": "sub-parameter-of-closed-feature",
     "default": true,
     "effective_under_frozen_profile": true,
     "frozen_value": null,
@@ -1788,7 +2315,7 @@
     "type": "boolean"
    },
    {
-    "class": "default-retained-behaviour-visible-in-evidence",
+    "class": "sub-parameter-of-closed-feature",
     "default": true,
     "effective_under_frozen_profile": true,
     "frozen_value": null,
@@ -1812,7 +2339,7 @@
     "type": "boolean"
    },
    {
-    "class": "default-retained-behaviour-visible-in-evidence",
+    "class": "sub-parameter-of-closed-feature",
     "default": 500,
     "effective_under_frozen_profile": 500,
     "frozen_value": null,
@@ -1844,7 +2371,7 @@
     "type": "boolean"
    },
    {
-    "class": "default-retained-behaviour-visible-in-evidence",
+    "class": "sub-parameter-of-closed-feature",
     "default": 16000,
     "effective_under_frozen_profile": 16000,
     "frozen_value": null,
@@ -1852,7 +2379,7 @@
     "type": "number"
    },
    {
-    "class": "default-retained-behaviour-visible-in-evidence",
+    "class": "sub-parameter-of-closed-feature",
     "default": 200,
     "effective_under_frozen_profile": 200,
     "frozen_value": null,
@@ -1860,7 +2387,7 @@
     "type": "number"
    },
    {
-    "class": "default-retained-behaviour-visible-in-evidence",
+    "class": "sub-parameter-of-closed-feature",
     "default": 30,
     "effective_under_frozen_profile": 30,
     "frozen_value": null,
@@ -1868,7 +2395,7 @@
     "type": "number"
    },
    {
-    "class": "default-retained-behaviour-visible-in-evidence",
+    "class": "sub-parameter-of-closed-feature",
     "default": 64,
     "effective_under_frozen_profile": 64,
     "frozen_value": null,
@@ -1876,7 +2403,7 @@
     "type": "number"
    },
    {
-    "class": "default-retained-behaviour-visible-in-evidence",
+    "class": "sub-parameter-of-closed-feature",
     "default": 12,
     "effective_under_frozen_profile": 12,
     "frozen_value": null,
@@ -1884,7 +2411,7 @@
     "type": "number"
    },
    {
-    "class": "default-retained-behaviour-visible-in-evidence",
+    "class": "sub-parameter-of-closed-feature",
     "default": 4000,
     "effective_under_frozen_profile": 4000,
     "frozen_value": null,
@@ -1892,7 +2419,7 @@
     "type": "number"
    },
    {
-    "class": "default-retained-behaviour-visible-in-evidence",
+    "class": "sub-parameter-of-closed-feature",
     "default": 30,
     "effective_under_frozen_profile": 30,
     "frozen_value": null,
@@ -1900,7 +2427,7 @@
     "type": "number"
    },
    {
-    "class": "default-retained-behaviour-visible-in-evidence",
+    "class": "sub-parameter-of-closed-feature",
     "default": 180,
     "effective_under_frozen_profile": 180,
     "frozen_value": null,
@@ -1908,7 +2435,7 @@
     "type": "number"
    },
    {
-    "class": "default-retained-behaviour-visible-in-evidence",
+    "class": "sub-parameter-of-closed-feature",
     "default": 180,
     "effective_under_frozen_profile": 180,
     "frozen_value": null,
@@ -1916,7 +2443,7 @@
     "type": "number"
    },
    {
-    "class": "default-retained-behaviour-visible-in-evidence",
+    "class": "sub-parameter-of-closed-feature",
     "default": 0.7,
     "effective_under_frozen_profile": 0.7,
     "frozen_value": null,
@@ -1924,7 +2451,7 @@
     "type": "number"
    },
    {
-    "class": "default-retained-behaviour-visible-in-evidence",
+    "class": "sub-parameter-of-closed-feature",
     "default": 8,
     "effective_under_frozen_profile": 8,
     "frozen_value": null,
@@ -1932,7 +2459,7 @@
     "type": "number"
    },
    {
-    "class": "default-retained-behaviour-visible-in-evidence",
+    "class": "sub-parameter-of-closed-feature",
     "default": 120,
     "effective_under_frozen_profile": 120,
     "frozen_value": null,
@@ -1940,7 +2467,7 @@
     "type": "number"
    },
    {
-    "class": "default-retained-behaviour-visible-in-evidence",
+    "class": "sub-parameter-of-closed-feature",
     "default": 120,
     "effective_under_frozen_profile": 120,
     "frozen_value": null,
@@ -1948,7 +2475,7 @@
     "type": "number"
    },
    {
-    "class": "default-retained-behaviour-visible-in-evidence",
+    "class": "sub-parameter-of-closed-feature",
     "default": 5000,
     "effective_under_frozen_profile": 5000,
     "frozen_value": null,
@@ -1956,7 +2483,7 @@
     "type": "number"
    },
    {
-    "class": "default-retained-behaviour-visible-in-evidence",
+    "class": "sub-parameter-of-closed-feature",
     "default": 300,
     "effective_under_frozen_profile": 300,
     "frozen_value": null,
@@ -2164,7 +2691,7 @@
     "type": "enum"
    },
    {
-    "class": "default-retained-behaviour-visible-in-evidence",
+    "class": "sub-parameter-of-closed-feature",
     "default": true,
     "effective_under_frozen_profile": true,
     "frozen_value": null,
@@ -2180,7 +2707,7 @@
     "type": "boolean"
    },
    {
-    "class": "default-retained-behaviour-visible-in-evidence",
+    "class": "sub-parameter-of-closed-feature",
     "default": true,
     "effective_under_frozen_profile": true,
     "frozen_value": null,
@@ -2196,7 +2723,7 @@
     "type": "boolean"
    },
    {
-    "class": "default-retained-behaviour-visible-in-evidence",
+    "class": "sub-parameter-of-closed-feature",
     "default": [
      "hub"
     ],
@@ -2208,7 +2735,7 @@
     "type": "array"
    },
    {
-    "class": "default-retained-behaviour-visible-in-evidence",
+    "class": "sub-parameter-of-closed-feature",
     "default": 5,
     "effective_under_frozen_profile": 5,
     "frozen_value": null,
@@ -2272,7 +2799,7 @@
     "type": "enum"
    },
    {
-    "class": "default-retained-behaviour-visible-in-evidence",
+    "class": "sub-parameter-of-closed-feature",
     "default": false,
     "effective_under_frozen_profile": false,
     "frozen_value": null,
@@ -2544,7 +3071,7 @@
     "type": "number"
    },
    {
-    "class": "default-retained-behaviour-visible-in-evidence",
+    "class": "sub-parameter-of-closed-feature",
     "default": "",
     "effective_under_frozen_profile": "",
     "frozen_value": null,
@@ -2552,7 +3079,7 @@
     "type": "string"
    },
    {
-    "class": "default-retained-behaviour-visible-in-evidence",
+    "class": "sub-parameter-of-closed-feature",
     "default": "session",
     "effective_under_frozen_profile": "session",
     "frozen_value": null,
@@ -2584,7 +3111,7 @@
     "type": "boolean"
    },
    {
-    "class": "default-retained-behaviour-visible-in-evidence",
+    "class": "sub-parameter-of-closed-feature",
     "default": 4,
     "effective_under_frozen_profile": 4,
     "frozen_value": null,
@@ -2592,7 +3119,7 @@
     "type": "number"
    },
    {
-    "class": "default-retained-behaviour-visible-in-evidence",
+    "class": "sub-parameter-of-closed-feature",
     "default": 6,
     "effective_under_frozen_profile": 6,
     "frozen_value": null,
@@ -2600,7 +3127,7 @@
     "type": "number"
    },
    {
-    "class": "default-retained-behaviour-visible-in-evidence",
+    "class": "sub-parameter-of-closed-feature",
     "default": 100,
     "effective_under_frozen_profile": 100,
     "frozen_value": null,
@@ -2608,7 +3135,7 @@
     "type": "number"
    },
    {
-    "class": "default-retained-behaviour-visible-in-evidence",
+    "class": "sub-parameter-of-closed-feature",
     "default": false,
     "effective_under_frozen_profile": false,
     "frozen_value": null,
@@ -2616,7 +3143,7 @@
     "type": "boolean"
    },
    {
-    "class": "default-retained-behaviour-visible-in-evidence",
+    "class": "sub-parameter-of-closed-feature",
     "default": 100,
     "effective_under_frozen_profile": 100,
     "frozen_value": null,
@@ -2624,7 +3151,7 @@
     "type": "number"
    },
    {
-    "class": "default-retained-behaviour-visible-in-evidence",
+    "class": "sub-parameter-of-closed-feature",
     "default": 50,
     "effective_under_frozen_profile": 50,
     "frozen_value": null,
@@ -2656,7 +3183,7 @@
     "type": "boolean"
    },
    {
-    "class": "default-retained-behaviour-visible-in-evidence",
+    "class": "sub-parameter-of-closed-feature",
     "default": 240,
     "effective_under_frozen_profile": 240,
     "frozen_value": null,
@@ -2672,7 +3199,7 @@
     "type": "number"
    },
    {
-    "class": "default-retained-behaviour-visible-in-evidence",
+    "class": "sub-parameter-of-closed-feature",
     "default": 500,
     "effective_under_frozen_profile": 500,
     "frozen_value": null,
@@ -2688,7 +3215,7 @@
     "type": "boolean"
    },
    {
-    "class": "default-retained-behaviour-visible-in-evidence",
+    "class": "sub-parameter-of-closed-feature",
     "default": {},
     "effective_under_frozen_profile": {},
     "frozen_value": null,
@@ -2696,7 +3223,7 @@
     "type": "record"
    },
    {
-    "class": "default-retained-behaviour-visible-in-evidence",
+    "class": "sub-parameter-of-closed-feature",
     "default": "cooldown-expiry",
     "effective_under_frozen_profile": "cooldown-expiry",
     "frozen_value": null,
@@ -2704,7 +3231,7 @@
     "type": "enum"
    },
    {
-    "class": "default-retained-behaviour-visible-in-evidence",
+    "class": "sub-parameter-of-closed-feature",
     "default": 300000,
     "effective_under_frozen_profile": 300000,
     "frozen_value": null,
@@ -2736,7 +3263,7 @@
     "type": "boolean"
    },
    {
-    "class": "default-retained-behaviour-visible-in-evidence",
+    "class": "sub-parameter-of-closed-feature",
     "default": 10,
     "effective_under_frozen_profile": 10,
     "frozen_value": null,
@@ -2744,7 +3271,7 @@
     "type": "number"
    },
    {
-    "class": "default-retained-behaviour-visible-in-evidence",
+    "class": "sub-parameter-of-closed-feature",
     "default": "confirm",
     "effective_under_frozen_profile": "confirm",
     "frozen_value": null,
@@ -2752,7 +3279,7 @@
     "type": "enum"
    },
    {
-    "class": "default-retained-behaviour-visible-in-evidence",
+    "class": "sub-parameter-of-closed-feature",
     "default": "",
     "effective_under_frozen_profile": "",
     "frozen_value": null,
@@ -2904,7 +3431,7 @@
     "type": "boolean"
    },
    {
-    "class": "default-retained-behaviour-visible-in-evidence",
+    "class": "sub-parameter-of-closed-feature",
     "default": [],
     "effective_under_frozen_profile": [],
     "frozen_value": null,
@@ -2912,7 +3439,7 @@
     "type": "array"
    },
    {
-    "class": "default-retained-behaviour-visible-in-evidence",
+    "class": "sub-parameter-of-closed-feature",
     "default": null,
     "effective_under_frozen_profile": null,
     "frozen_value": null,
@@ -2920,7 +3447,7 @@
     "type": "boolean"
    },
    {
-    "class": "default-retained-behaviour-visible-in-evidence",
+    "class": "sub-parameter-of-closed-feature",
     "default": 4194304,
     "effective_under_frozen_profile": 4194304,
     "frozen_value": null,
@@ -2928,7 +3455,7 @@
     "type": "number"
    },
    {
-    "class": "default-retained-behaviour-visible-in-evidence",
+    "class": "sub-parameter-of-closed-feature",
     "default": [],
     "effective_under_frozen_profile": [],
     "frozen_value": null,
@@ -2936,7 +3463,7 @@
     "type": "array"
    },
    {
-    "class": "default-retained-behaviour-visible-in-evidence",
+    "class": "sub-parameter-of-closed-feature",
     "default": null,
     "effective_under_frozen_profile": null,
     "frozen_value": null,
@@ -2944,7 +3471,7 @@
     "type": "string"
    },
    {
-    "class": "default-retained-behaviour-visible-in-evidence",
+    "class": "sub-parameter-of-closed-feature",
     "default": "default",
     "effective_under_frozen_profile": "default",
     "frozen_value": null,
@@ -3052,7 +3579,7 @@
     "type": "boolean"
    },
    {
-    "class": "default-retained-behaviour-visible-in-evidence",
+    "class": "sub-parameter-of-closed-feature",
     "default": [],
     "effective_under_frozen_profile": [],
     "frozen_value": null,
@@ -3060,7 +3587,7 @@
     "type": "array"
    },
    {
-    "class": "default-retained-behaviour-visible-in-evidence",
+    "class": "sub-parameter-of-closed-feature",
     "default": [],
     "effective_under_frozen_profile": [],
     "frozen_value": null,
@@ -3068,7 +3595,7 @@
     "type": "array"
    },
    {
-    "class": "default-retained-behaviour-visible-in-evidence",
+    "class": "sub-parameter-of-closed-feature",
     "default": "auto",
     "effective_under_frozen_profile": "auto",
     "frozen_value": null,
@@ -3076,7 +3603,7 @@
     "type": "enum"
    },
    {
-    "class": "default-retained-behaviour-visible-in-evidence",
+    "class": "sub-parameter-of-closed-feature",
     "default": "none",
     "effective_under_frozen_profile": "none",
     "frozen_value": null,
@@ -3084,7 +3611,7 @@
     "type": "enum"
    },
    {
-    "class": "default-retained-behaviour-visible-in-evidence",
+    "class": "sub-parameter-of-closed-feature",
     "default": false,
     "effective_under_frozen_profile": false,
     "frozen_value": null,
@@ -3172,7 +3699,7 @@
     "type": "boolean"
    },
    {
-    "class": "default-retained-behaviour-visible-in-evidence",
+    "class": "sub-parameter-of-closed-feature",
     "default": false,
     "effective_under_frozen_profile": false,
     "frozen_value": null,
@@ -3492,7 +4019,7 @@
     "type": "boolean"
    },
    {
-    "class": "default-retained-behaviour-visible-in-evidence",
+    "class": "sub-parameter-of-closed-feature",
     "default": 60,
     "effective_under_frozen_profile": 60,
     "frozen_value": null,
@@ -3636,7 +4163,7 @@
     "type": "enum"
    },
    {
-    "class": "default-retained-behaviour-visible-in-evidence",
+    "class": "sub-parameter-of-closed-feature",
     "default": true,
     "effective_under_frozen_profile": true,
     "frozen_value": null,
@@ -3772,7 +4299,7 @@
     "type": "boolean"
    },
    {
-    "class": "default-retained-behaviour-visible-in-evidence",
+    "class": "sub-parameter-of-closed-feature",
     "default": "builtins",
     "effective_under_frozen_profile": "builtins",
     "frozen_value": null,
@@ -3780,7 +4307,7 @@
     "type": "enum"
    },
    {
-    "class": "default-retained-behaviour-visible-in-evidence",
+    "class": "sub-parameter-of-closed-feature",
     "default": [],
     "effective_under_frozen_profile": [],
     "frozen_value": null,
@@ -3828,7 +4355,7 @@
     "type": "enum"
    },
    {
-    "class": "default-retained-behaviour-visible-in-evidence",
+    "class": "sub-parameter-of-closed-feature",
     "default": true,
     "effective_under_frozen_profile": true,
     "frozen_value": null,
@@ -3836,7 +4363,7 @@
     "type": "boolean"
    },
    {
-    "class": "default-retained-behaviour-visible-in-evidence",
+    "class": "sub-parameter-of-closed-feature",
     "default": "discard",
     "effective_under_frozen_profile": "discard",
     "frozen_value": null,
@@ -3844,7 +4371,7 @@
     "type": "enum"
    },
    {
-    "class": "default-retained-behaviour-visible-in-evidence",
+    "class": "sub-parameter-of-closed-feature",
     "default": [],
     "effective_under_frozen_profile": [],
     "frozen_value": null,
@@ -3860,7 +4387,7 @@
     "type": "boolean"
    },
    {
-    "class": "default-retained-behaviour-visible-in-evidence",
+    "class": "sub-parameter-of-closed-feature",
     "default": "always",
     "effective_under_frozen_profile": "always",
     "frozen_value": null,
@@ -3868,7 +4395,7 @@
     "type": "enum"
    },
    {
-    "class": "default-retained-behaviour-visible-in-evidence",
+    "class": "sub-parameter-of-closed-feature",
     "default": 10,
     "effective_under_frozen_profile": 10,
     "frozen_value": null,
@@ -3876,7 +4403,7 @@
     "type": "number"
    },
    {
-    "class": "default-retained-behaviour-visible-in-evidence",
+    "class": "sub-parameter-of-closed-feature",
     "default": "once",
     "effective_under_frozen_profile": "once",
     "frozen_value": null,
@@ -3972,7 +4499,7 @@
     "type": "boolean"
    },
    {
-    "class": "default-retained-behaviour-visible-in-evidence",
+    "class": "sub-parameter-of-closed-feature",
     "default": "stable",
     "effective_under_frozen_profile": "stable",
     "frozen_value": null,

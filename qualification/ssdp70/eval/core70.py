@@ -111,6 +111,8 @@ def private_mcp_paths(private_root: Path) -> dict[str, Path]:
 EVIDENCE_INTEGRITY_ROOTS = (
     "adapter-artifacts",
     "project-control-record.json",
+    "final-tree-symlinks.json",
+    "project-git-config.raw",
     "summary.json",
     "run-identity.json",
     "profile-snapshot.json",

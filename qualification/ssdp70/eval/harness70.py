@@ -247,26 +247,91 @@ def _final_tree_ignore(project: Path, exclude_paths: list[str], control_names: l
     return ignore
 
 
+GIT_SAFE_CONFIG = "[core]\n\trepositoryformatversion = 0\n\tfilemode = true\n\tbare = false\n\tlogallrefupdates = true\n"
+
+
+def _git_env() -> dict[str, str]:
+    """Environment for every harness-side git command over executor-controlled repository state."""
+    return {
+        "PATH": os.environ.get("PATH", "/usr/bin:/bin"),
+        "HOME": "/nonexistent-home",
+        "GIT_CONFIG_NOSYSTEM": "1",
+        "GIT_CONFIG_GLOBAL": "/dev/null",
+        "GIT_TERMINAL_PROMPT": "0",
+    }
+
+
+def _git(project: Path, *args: str) -> subprocess.CompletedProcess:
+    return subprocess.run(
+        ["git", "-c", "core.fsmonitor=false", "-c", "core.hooksPath=/dev/null", *args],
+        cwd=project, env=_git_env(), capture_output=True, text=True,
+    )
+
+
+def _write_regular_file(path: Path, text: str) -> None:
+    """Write without following an executor-planted symlink (the supervisor never writes through one)."""
+    if path.is_symlink() or path.exists():
+        path.unlink()
+    fd = os.open(path, os.O_WRONLY | os.O_CREAT | os.O_TRUNC | os.O_NOFOLLOW, 0o644)
+    with os.fdopen(fd, "w", encoding="utf-8") as handle:
+        handle.write(text)
+
+
+def project_git_state_errors(project: Path) -> list[str]:
+    """The executor owns the project's `.git`; the supervisor runs git over it only if it is plain."""
+    errors: list[str] = []
+    git_dir = project / ".git"
+    if git_dir.is_symlink() or not git_dir.is_dir():
+        return [".git is not a plain directory in the executor project (symlink/file redirects git elsewhere)"]
+    for rel in ("info", "hooks", "objects", "refs"):
+        path = git_dir / rel
+        if path.is_symlink():
+            errors.append(f".git/{rel} is a symlink planted in the executor project")
+    return errors
+
+
 def capture_project_state(project: Path, out: Path, runtime_exclusions: list[str], control_names: list[str]) -> str:
     """Write diff.patch and final-tree for the oracles.
 
     The harness-owned git exclude is restored first (the runtime appends its stub names to it and the
     executor may edit it), then only the verified runtime placeholders are hidden, by exact pathspec and
     exact top-level name. Anything else the run left in the project stays visible to the oracles.
+
+    The executor controls `.git` (config, attributes, symlinks). The supervisor therefore never writes
+    through a symlink there, retains the executor's raw config as evidence, replaces the config with a
+    harness-owned one before running git, and disables config-borne command execution (fsmonitor, hooks,
+    external diff, textconv); a `.git` that is not a plain directory yields an empty diff and is
+    reported by `project_git_state_errors`.
     """
     tree_ignore = _final_tree_ignore(project, runtime_exclusions, control_names)
-    (project / ".git" / "info").mkdir(parents=True, exist_ok=True)
-    (project / ".git" / "info" / "exclude").write_text(project_git_exclude(control_names), encoding="utf-8")
     pathspecs = [".", *(f":(exclude){name}" for name in control_names), *(f":(exclude){name}" for name in runtime_exclusions)]
-    subprocess.run(["git", "add", "-A", "-N", "--", *pathspecs], cwd=project, capture_output=True)
-    diff = subprocess.run(
-        ["git", "diff", "--", *pathspecs],
-        cwd=project,
-        capture_output=True,
-        text=True,
-    ).stdout
+    diff = ""
+    if not project_git_state_errors(project):
+        raw_config = project / ".git" / "config"
+        if raw_config.is_symlink():
+            (out / "project-git-config.raw").write_text("symlink -> " + os.readlink(raw_config) + "\n", encoding="utf-8")
+        elif raw_config.is_file():
+            (out / "project-git-config.raw").write_bytes(raw_config.read_bytes())
+        _write_regular_file(raw_config, GIT_SAFE_CONFIG)
+        attributes = project / ".git" / "info" / "attributes"
+        if attributes.is_symlink() or attributes.exists():
+            attributes.unlink()
+        _write_regular_file(project / ".git" / "info" / "exclude", project_git_exclude(control_names))
+        _git(project, "add", "-A", "-N", "--", *pathspecs)
+        diff = _git(project, "diff", "--no-ext-diff", "--no-textconv", "--", *pathspecs).stdout
     (out / "diff.patch").write_text(diff, encoding="utf-8")
-    shutil.copytree(project, out / "final-tree", ignore=tree_ignore)
+    # Executor-created symlinks are preserved as symlinks and never followed: following one would copy
+    # arbitrary host files (or the whole host filesystem) into the evidence/oracle view.
+    shutil.copytree(project, out / "final-tree", ignore=tree_ignore, symlinks=True)
+    links = []
+    root = project.resolve()
+    for path in sorted(project.rglob("*")):
+        if path.is_symlink():
+            target = os.readlink(path)
+            resolved = (path.parent / target).resolve() if not os.path.isabs(target) else Path(target)
+            inside = resolved == root or root in resolved.parents
+            links.append({"path": path.relative_to(project).as_posix(), "target": target, "resolves_inside_project": inside})
+    (out / "final-tree-symlinks.json").write_text(json.dumps({"schema": 1, "symlinks": links}, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     return diff
 
 
@@ -508,6 +573,7 @@ def run_episode(
             "profile": profile_bundle.profile,
             "adapter_artifacts": dict(adapter_artifacts),
             "runtime_home": str(runtime_home),
+            "prompt": prompt,
         }
         events, completeness, normalization_errors, native_event_count = adapter_module.normalize(
             stdout, identity["identity_sha256"], normalization_context
@@ -599,6 +665,7 @@ def run_episode(
         if (stub / "issues").is_dir():
             shutil.copytree(stub / "issues", out / "issues-final")
 
+        profile_errors.extend(project_git_state_errors(project))
         capture_project_state(project, out, runtime_exclusions, control_names)
 
         run_oracles(oracles, episode["id"], requirements, out)

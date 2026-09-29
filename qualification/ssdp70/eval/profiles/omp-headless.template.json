@@ -96,6 +96,13 @@
       "sensitive_claims": [
         "*"
       ]
+    },
+    {
+      "classification": "arm-neutral",
+      "name": "provider-layer-retry-of-transient-errors-and-empty-completions",
+      "sensitive_claims": [
+        "*"
+      ]
     }
   ],
   "provider_runtime": {

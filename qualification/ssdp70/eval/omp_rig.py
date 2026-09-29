@@ -38,6 +38,9 @@ CREDENTIAL_ENV = "SSDP70_OMP_PROVIDER_CREDENTIAL"
 SENTINEL_CREDENTIAL = "SENTINEL-PROVIDER-CREDENTIAL-D4-NOT-A-SECRET"
 
 
+PROMPT_DEFAULT = "Do the task."
+
+
 def prerequisites() -> list[str]:
     missing = []
     if not OMP_EXE.is_file():
@@ -62,7 +65,8 @@ class Rig:
     def __init__(self, root: Path, *, reasoning: bool = True, thinking: str = "high", max_turns: int = 30,
                  timeout_s: int = 120, claims: list[str] | None = None, entry: str = "ordinary",
                  project_files: dict[str, str] | None = None, prompt: str = "Do the task."):
-        self.root = root
+        self.root = Path(tempfile.mkdtemp(dir=root))
+        root = self.root
         self.reasoning = reasoning
         self.thinking = thinking
         self.max_turns = max_turns
