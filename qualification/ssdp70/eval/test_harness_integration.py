@@ -40,11 +40,16 @@ class FakeAdapter:
         }
 
     @staticmethod
-    def install_skills(dist, project):
+    def install_skills(dist, project, env=None):
         target = project / ".claude" / "skills"
         target.mkdir(parents=True)
         for name in SKILLS:
             shutil.copytree(dist / name, target / name)
+        return target
+
+    @staticmethod
+    def project_control_paths(profile):
+        return [".claude", ".mcp.json"]
 
     @staticmethod
     def prepare_prompt(profile, entry, prompt):

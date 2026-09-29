@@ -449,7 +449,7 @@ class RuntimeCreatedEntriesTests(unittest.TestCase):
         self.fixture()
         subprocess.run(["git", "init", "-q"], cwd=self.project, check=True)
         (self.project / ".git" / "info").mkdir(exist_ok=True)
-        (self.project / ".git" / "info" / "exclude").write_text(harness70.PROJECT_GIT_EXCLUDE)
+        (self.project / ".git" / "info" / "exclude").write_text(harness70.project_git_exclude([".claude", ".mcp.json"]))
         subprocess.run(["git", "add", "-A"], cwd=self.project, check=True)
         subprocess.run(["git", "-c", "user.email=e@x.invalid", "-c", "user.name=e", "commit", "-qm", "fixture"], cwd=self.project, check=True)
         # the executor (or a runtime) edits .git/info/exclude to hide a path: restored before the diff
@@ -459,7 +459,7 @@ class RuntimeCreatedEntriesTests(unittest.TestCase):
         (self.project / "src" / "a.py").write_text("x = 2\n")
         out = self.root / "out"
         out.mkdir()
-        diff = harness70.capture_project_state(self.project, out, [])
+        diff = harness70.capture_project_state(self.project, out, [], [".claude", ".mcp.json"])
         tree = {p.relative_to(out / "final-tree").as_posix() for p in (out / "final-tree").rglob("*")}
         self.assertEqual(tree, {"README.md", "src", "src/a.py", "hidden.txt"})
         self.assertIn("hidden.txt", diff)
@@ -505,7 +505,7 @@ class RuntimeCreatedEntriesTests(unittest.TestCase):
     def test_harness_refuses_non_exact_exclusion_names(self):
         for name in ("*", "a/b", "..", ".", "pack*.json", ""):
             with self.assertRaises(core70.ContractError):
-                harness70._final_tree_ignore(self.project, [name])
+                harness70._final_tree_ignore(self.project, [name], [])
 
     def test_runtime_created_entries_are_integrity_bound_evidence(self):
         self.assertIn("runtime-created-entries.json", core70.EVIDENCE_INTEGRITY_ROOTS)
@@ -902,11 +902,12 @@ class ReplayAdapter:
         }}
 
     @staticmethod
-    def install_skills(dist, project):
+    def install_skills(dist, project, env=None):
         target = project / ".claude" / "skills"
         target.mkdir(parents=True, exist_ok=True)
         for skill in sorted(claude.SSDP_SKILLS):
             shutil.copytree(dist / skill, target / skill)
+        return target
 
     def launch(self, profile, prompt, project, env):
         stdout = v4_support.trace_text(self.run).replace(v4_support.recorded_project(self.run), str(project))

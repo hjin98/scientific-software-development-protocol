@@ -1,0 +1,129 @@
+{
+  "schema": 1,
+  "profile_id": "omp-headless-reference-template",
+  "adapter_id": "omp-json-v1",
+  "agent_model": "MUST-BE-FROZEN-BEFORE-QUALIFICATION",
+  "provider_runtime": {
+    "executable": "omp",
+    "provider": "MUST-BE-FROZEN-BEFORE-QUALIFICATION",
+    "runtime": "omp",
+    "version": "MUST-BE-FROZEN-BEFORE-QUALIFICATION"
+  },
+  "reasoning_configuration": {
+    "thinking": "MUST-BE-FROZEN-BEFORE-QUALIFICATION",
+    "source": "MUST-BE-FROZEN-BEFORE-QUALIFICATION"
+  },
+  "workspace_realization": {
+    "kind": "fresh-temporary-project"
+  },
+  "install_mechanism": "run-owned skill package under ~/.omp/agent/skills",
+  "budgets": {
+    "max_turns": 60,
+    "timeout_s": 3600
+  },
+  "containment_policy": {
+    "kind": "omp-bwrap-substrate-v1",
+    "enforcement": "required-before-launch",
+    "substrate": {
+      "status": "MUST-BE-FROZEN-BEFORE-QUALIFICATION",
+      "executable": "/usr/bin/bwrap",
+      "executable_sha256": "MUST-BE-FROZEN-BEFORE-QUALIFICATION",
+      "unshare_user": true,
+      "unshare_pid": true,
+      "unshare_ipc": true,
+      "unshare_uts": true,
+      "unshare_cgroup": true,
+      "unshare_net": true,
+      "bind_network_socket": false
+    },
+    "credential_isolation": {
+      "kind": "external-broker-outside-sandbox",
+      "broker": "MUST-BE-FROZEN-BEFORE-QUALIFICATION",
+      "note": "the provider credential must be held by an operator-frozen broker outside the sandbox; no credential may be written into the run-owned HOME"
+    },
+    "provider_config_status": "MUST-BE-FROZEN-BEFORE-QUALIFICATION",
+    "provider_config": {
+      "config_yml": "MUST-BE-FROZEN-BEFORE-QUALIFICATION"
+    },
+    "native_network": "MUST-BE-FROZEN-BEFORE-QUALIFICATION",
+    "ambient_host_home": "deny",
+    "ambient_credentials": "deny",
+    "runtime_temp": "run-owned project temporary directory",
+    "project_discovery": "closed: no project-local .omp/mcp.json/.mcp.json/.cursor/.vscode provider discovery may exist",
+    "protected_control_files": "run-owned OMP config.yml and mcp.json live under the denied harness-private/runtime area outside the executor working directory and are digest-checked across launch",
+    "mediator_transport": "qualification-owned dependency-free stdio MCP; MCP tools are reached as xd:// write devices, no executor Unix socket or native network route"
+  },
+  "network_external_write_policy": {
+    "external_write": "sandbox-or-mediate",
+    "network": "deny-native-executor-network"
+  },
+  "credential_service_account_policy": {
+    "ambient_credentials": "deny",
+    "parent_authentication": "zero or one qualification-only broker-mediated auth source held outside the sandbox",
+    "sandboxed_subprocess_credentials": "deny; the run-owned HOME contains no credential and the substrate blocks IPC/process routes to the broker"
+  },
+  "native_tools": [
+    "read",
+    "bash",
+    "edit",
+    "eval",
+    "glob",
+    "grep",
+    "task",
+    "hub",
+    "todo",
+    "web_search",
+    "write",
+    "mcp__ssdp_issue_locations",
+    "mcp__ssdp_issue_search",
+    "mcp__ssdp_issue_show",
+    "mcp__ssdp_issue_create",
+    "mcp__ssdp_issue_comment",
+    "mcp__ssdp_delegate"
+  ],
+  "native_surface_requirements": [
+    "runtime_capability:omp-json-event-stream-v1",
+    "runtime_capability:omp-mcp-write-device-v1",
+    "mcp_server:ssdp70"
+  ],
+  "provider_managed_unknowns": [
+    {
+      "classification": "arm-neutral",
+      "name": "provider-backend-shard",
+      "sensitive_claims": [
+        "*"
+      ]
+    },
+    {
+      "classification": "uncontrolled",
+      "name": "runtime-build-and-catalog-until-frozen-by-environment",
+      "sensitive_claims": [
+        "*"
+      ]
+    },
+    {
+      "classification": "uncontrolled",
+      "name": "provider-managed-auto-retry-compaction-maintenance-routing-title-advisor-prewalk-autolearn-memory-background-daemons-until-frozen",
+      "sensitive_claims": [
+        "*"
+      ]
+    }
+  ],
+  "mcp_servers": [
+    {
+      "name": "ssdp70",
+      "transport": "stdio",
+      "server_id": "ssdp70-qualification-stdio-v1",
+      "entrypoint": "stub_tools/mediator.py",
+      "tools": [
+        "mcp__ssdp_issue_locations",
+        "mcp__ssdp_issue_search",
+        "mcp__ssdp_issue_show",
+        "mcp__ssdp_issue_create",
+        "mcp__ssdp_issue_comment",
+        "mcp__ssdp_delegate"
+      ]
+    }
+  ],
+  "pinned_root_instruction_template": "Use the {root} skill. {prompt}"
+}

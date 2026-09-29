@@ -860,7 +860,7 @@ def write_policy_stays_inside_project(filesystem: dict[str, Any], project: Path)
                 return False
     return True
 
-def install_skills(dist: Path, project: Path) -> None:
+def install_skills(dist: Path, project: Path, env: dict[str, str] | None = None) -> Path:
     import shutil
 
     target = project / ".claude" / "skills"
@@ -870,6 +870,17 @@ def install_skills(dist: Path, project: Path) -> None:
         if not src.is_dir():
             raise RuntimeError(f"protocol package is missing skill {skill}")
         shutil.copytree(src, target / skill)
+    return target
+
+
+def project_control_paths(profile: dict[str, Any]) -> list[str]:
+    """Harness-owned project control paths for this adapter.
+
+    The installed skills tree and the strict run-owned MCP configuration live under the
+    run project and must not leak into the oracle diff/final tree. The harness excludes
+    exactly these top-level names; no other provider path is hidden.
+    """
+    return [".claude", ".mcp.json"]
 
 
 def launch(profile: dict[str, Any], prompt: str, project: Path, env: dict[str, str]) -> dict[str, Any]:

@@ -284,18 +284,20 @@ def load_profile(profile_path: Path, capability_path: Path) -> ProfileBundle:
             raise ContractError(f"MCP server {name!r} tool surface contains duplicates")
         if f"mcp_server:{name}" not in native_map:
             raise ContractError(f"MCP server {name!r} has no semantic capability classification")
-        prefix = f"mcp__{name}__"
+        # The provider-native registered tool id is whatever the provider exposes for this
+        # declared server; it is not derivable from the server name. Binding is established
+        # by the frozen exact identity of the server plus the declared id list, never by a
+        # naming convention. A provider-native id may belong to exactly one declared server.
         for tool in tools:
-            if not tool.startswith(prefix):
-                raise ContractError(f"MCP tool {tool!r} is not bound to declared server {name!r}")
+            if tool in declared_mcp_tools:
+                raise ContractError(
+                    f"provider-native MCP tool id {tool!r} is declared by more than one server"
+                )
             if tool not in native_tools:
                 raise ContractError(f"MCP tool {tool!r} is missing from the exact native tool surface")
             if f"tool:{tool}" not in native_map:
                 raise ContractError(f"MCP tool {tool!r} has no semantic capability classification")
             declared_mcp_tools.append(tool)
-    native_mcp_tools = [tool for tool in native_tools if tool.startswith("mcp__")]
-    if sorted(declared_mcp_tools) != sorted(native_mcp_tools):
-        raise ContractError("declared MCP tool surface does not exactly match native_tools")
 
     unknowns = profile["provider_managed_unknowns"]
     if not isinstance(unknowns, list):

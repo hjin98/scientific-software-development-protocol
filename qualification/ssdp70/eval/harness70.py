@@ -30,15 +30,43 @@ import core70  # noqa: E402
 OWNER = "scientific-inspectability-and-initiative.md"
 # Harness-owned git exclude for the run project. It is restored before the diff is computed so that
 # neither the runtime nor the executor can hide a path from the diff handed to the oracles.
-PROJECT_GIT_EXCLUDE = "__pycache__/\n*.pyc\n.claude/\n.mcp.json\n.qualification-tmp/\n"
-FINAL_TREE_IGNORE = (".git", ".claude", ".mcp.json", ".qualification-tmp", "__pycache__")
+# Harness-owned generic exclusions. Provider-specific control paths (for example a runtime's
+# project-local settings or MCP configuration) are supplied by the adapter through
+# `project_control_paths`; the harness never hard-codes a provider path here.
+PROJECT_GIT_EXCLUDE_BASE = "__pycache__/\n*.pyc\n.qualification-tmp/\n"
+FINAL_TREE_IGNORE_BASE = (".git", ".qualification-tmp", "__pycache__")
+
+
+def _exact_top_level_names(names: Any) -> list[str]:
+    result: list[str] = []
+    for name in names:
+        if (
+            not isinstance(name, str)
+            or not name
+            or "/" in name
+            or name in {".", ".."}
+            or any(ch in name for ch in "*?[]")
+        ):
+            raise core70.ContractError(f"provider control path {name!r} is not an exact top-level name")
+        result.append(name)
+    if len(result) != len(set(result)):
+        raise core70.ContractError("provider control paths contain duplicates")
+    return result
+
+
+def project_git_exclude(control_names: list[str]) -> str:
+    return PROJECT_GIT_EXCLUDE_BASE + "".join(f"{name}\n" for name in control_names)
+
+
+def final_tree_ignore(control_names: list[str]) -> tuple[str, ...]:
+    return FINAL_TREE_IGNORE_BASE + tuple(control_names)
 
 
 def load_adapter(name: str):
     if not name or any(part in {"", ".", ".."} for part in name.split(".")):
         raise core70.ContractError(f"invalid adapter name {name!r}")
     module = importlib.import_module(f"adapters.{name}")
-    for attr in ("ADAPTER_ID", "install_skills", "launch", "normalize", "final_result", "catalog_isolation", "owner_reads", "prepare_prompt", "clean_env", "runtime_observation", "realize_containment"):
+    for attr in ("ADAPTER_ID", "install_skills", "launch", "normalize", "final_result", "catalog_isolation", "owner_reads", "prepare_prompt", "clean_env", "runtime_observation", "realize_containment", "project_control_paths"):
         if not hasattr(module, attr):
             raise core70.ContractError(f"adapter {name!r} is missing {attr}")
     return module
@@ -105,7 +133,7 @@ def _yaml_tree_to_json(src: Path, dst: Path) -> None:
             shutil.copy2(path, dst / rel)
 
 
-def build_project(corpus: Path, episode: dict[str, Any], project: Path) -> None:
+def build_project(corpus: Path, episode: dict[str, Any], project: Path, control_names: list[str]) -> None:
     fixture = corpus / "fixtures" / episode["fixture"]
     if not fixture.is_dir():
         raise core70.ContractError(f"fixture directory is missing for {episode['id']}")
@@ -124,7 +152,7 @@ def build_project(corpus: Path, episode: dict[str, Any], project: Path) -> None:
         subprocess.run(["git", "init", "-q"], cwd=project, check=True)
     info = project / ".git" / "info"
     info.mkdir(parents=True, exist_ok=True)
-    (info / "exclude").write_text(PROJECT_GIT_EXCLUDE, encoding="utf-8")
+    (info / "exclude").write_text(project_git_exclude(control_names), encoding="utf-8")
     subprocess.run(["git", "add", "-A"], cwd=project, check=True)
     subprocess.run(
         ["git", "-c", "user.email=eval@example.invalid", "-c", "user.name=eval", "commit", "-qm", "fixture", "--allow-empty"],
@@ -178,13 +206,11 @@ def run_oracles(oracles_root: Path | None, episode_id: str, requirements: core70
     return result_payload
 
 
-def _final_tree_ignore(project: Path, exclude_paths: list[str]):
+def _final_tree_ignore(project: Path, exclude_paths: list[str], control_names: list[str]):
     """copytree ignore: the fixed patterns plus EXACTLY the verified runtime placeholders (top-level names)."""
-    for name in exclude_paths:
-        if not isinstance(name, str) or not name or "/" in name or name in {".", ".."} or any(ch in name for ch in "*?[]"):
-            raise core70.ContractError(f"runtime placeholder exclusion {name!r} is not an exact top-level name")
+    _exact_top_level_names(exclude_paths)
     exact = set(exclude_paths)
-    generic = shutil.ignore_patterns(*FINAL_TREE_IGNORE)
+    generic = shutil.ignore_patterns(*final_tree_ignore(control_names))
     project_resolved = project.resolve()
 
     def ignore(directory, names):
@@ -196,17 +222,17 @@ def _final_tree_ignore(project: Path, exclude_paths: list[str]):
     return ignore
 
 
-def capture_project_state(project: Path, out: Path, runtime_exclusions: list[str]) -> str:
+def capture_project_state(project: Path, out: Path, runtime_exclusions: list[str], control_names: list[str]) -> str:
     """Write diff.patch and final-tree for the oracles.
 
     The harness-owned git exclude is restored first (the runtime appends its stub names to it and the
     executor may edit it), then only the verified runtime placeholders are hidden, by exact pathspec and
     exact top-level name. Anything else the run left in the project stays visible to the oracles.
     """
-    tree_ignore = _final_tree_ignore(project, runtime_exclusions)
+    tree_ignore = _final_tree_ignore(project, runtime_exclusions, control_names)
     (project / ".git" / "info").mkdir(parents=True, exist_ok=True)
-    (project / ".git" / "info" / "exclude").write_text(PROJECT_GIT_EXCLUDE, encoding="utf-8")
-    pathspecs = [".", ":(exclude).claude", *(f":(exclude){name}" for name in runtime_exclusions)]
+    (project / ".git" / "info" / "exclude").write_text(project_git_exclude(control_names), encoding="utf-8")
+    pathspecs = [".", *(f":(exclude){name}" for name in control_names), *(f":(exclude){name}" for name in runtime_exclusions)]
     subprocess.run(["git", "add", "-A", "-N", "--", *pathspecs], cwd=project, capture_output=True)
     diff = subprocess.run(
         ["git", "diff", "--", *pathspecs],
@@ -361,6 +387,10 @@ def run_episode(
     if admission is not None:
         core70.snapshot_profile_admission(admission, out, role="executor", prefix="profile-admission")
 
+    # The adapter owns which provider control paths are harness-owned and must stay out of the
+    # oracle diff/final tree. The harness only accepts exact top-level names.
+    control_names = _exact_top_level_names(adapter_module.project_control_paths(profile_bundle.profile))
+
     with tempfile.TemporaryDirectory(prefix="ssdp70-") as tmp_name:
         tmp = Path(tmp_name)
         project = tmp / "project"
@@ -368,7 +398,7 @@ def run_episode(
         stub, log = private / "stub", private / "side-effects.jsonl"
         runtime_home = private / "runtime-home"
         runtime_tmp = project / ".qualification-tmp"
-        build_project(corpus, episode, project)
+        build_project(corpus, episode, project, control_names)
         private.mkdir()
         stub.mkdir()
         if episode.get("stub"):
@@ -385,13 +415,6 @@ def run_episode(
             account_file.chmod(0o400)
         runtime_home.mkdir()
         runtime_tmp.mkdir()
-        adapter_module.install_skills(dist, project)
-        installed_skills = project / ".claude" / "skills"
-        installed_digest = core70.sha256_tree(installed_skills)
-        if installed_digest != arm["dist_tree_sha256"]:
-            raise core70.ContractError(
-                f"installed protocol package digest mismatch: {installed_digest} != {arm['dist_tree_sha256']}"
-            )
         prompt = adapter_module.prepare_prompt(profile_bundle.profile, episode.get("entry", "ordinary"), episode["prompt"])
         env = adapter_module.clean_env()
         env.update({
@@ -402,6 +425,15 @@ def run_episode(
             "TMP": str(runtime_tmp),
             "TEMP": str(runtime_tmp),
         })
+        # The adapter owns where its runtime discovers the installed protocol package. The harness
+        # hashes exactly the root the adapter reports, before and after execution, and never assumes
+        # a provider-specific directory such as `.claude/skills`.
+        installed_skills = Path(adapter_module.install_skills(dist, project, env))
+        installed_digest = core70.sha256_tree(installed_skills)
+        if installed_digest != arm["dist_tree_sha256"]:
+            raise core70.ContractError(
+                f"installed protocol package digest mismatch: {installed_digest} != {arm['dist_tree_sha256']}"
+            )
         containment = adapter_module.realize_containment(profile_bundle.profile, project, env)
         (out / "containment-realization.json").write_text(
             json.dumps(containment, indent=2, sort_keys=True) + "\n", encoding="utf-8"
@@ -486,7 +518,7 @@ def run_episode(
         if (stub / "issues").is_dir():
             shutil.copytree(stub / "issues", out / "issues-final")
 
-        capture_project_state(project, out, runtime_exclusions)
+        capture_project_state(project, out, runtime_exclusions, control_names)
 
         run_oracles(oracles, episode["id"], requirements, out)
 
