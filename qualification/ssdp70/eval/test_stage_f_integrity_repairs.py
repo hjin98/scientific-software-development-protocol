@@ -85,6 +85,11 @@ class SurfaceAndContainmentHostileTests(unittest.TestCase):
     def setUp(self):
         self.profile_path = HERE / "profiles" / "claude-headless.template.json"
         self.capability_path = HERE / "capabilities" / "claude-headless.json"
+        # Containment mechanics tests use the substrate where path-selective Unix sockets exist.
+        # Linux/WSL rejection is tested explicitly below and is not waived for real launches.
+        self.platform_patcher = patch.object(claude.sys, "platform", "darwin")
+        self.platform_patcher.start()
+        self.addCleanup(self.platform_patcher.stop)
 
     def test_runtime_tool_surface_mismatch_fails_closed(self):
         bundle = core70.load_profile(self.profile_path, self.capability_path)
@@ -151,6 +156,30 @@ class SurfaceAndContainmentHostileTests(unittest.TestCase):
         }, clear=True):
             with self.assertRaises(RuntimeError):
                 claude.clean_env()
+
+    def test_linux_executor_path_selective_mediator_fails_closed(self):
+        profile = json.loads(self.profile_path.read_text(encoding="utf-8"))
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            project = root / "project"
+            private = root / "harness-private"
+            runtime_home = private / "runtime-home"
+            project.mkdir()
+            private.mkdir()
+            runtime_home.mkdir()
+            env = claude.clean_env()
+            env.update({
+                "HOME": str(runtime_home),
+                "SSDP70_MEDIATOR_SOCKET": str(private / "mediator.sock"),
+                "SSDP70_ACCOUNT": "agent",
+            })
+            with patch.object(claude.sys, "platform", "linux"):
+                with self.assertRaises(RuntimeError) as caught:
+                    claude.realize_containment(profile, project, env)
+        message = str(caught.exception)
+        self.assertIn("path-selective Unix socket", message)
+        self.assertIn("allowAllUnixSockets", message)
+        self.assertIn("container/VM/mount boundary", message)
 
     def test_launch_refuses_missing_containment_configuration_before_subprocess(self):
         profile = json.loads(self.profile_path.read_text(encoding="utf-8"))

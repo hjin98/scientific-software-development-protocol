@@ -16,11 +16,11 @@
     },
     "external_mutation": {
       "decision": "SANDBOX/MEDIATE",
-      "scope": "qualification-owned mediator only; runtime state isolated and auto-memory disabled"
+      "scope": "qualification-owned mediator only; runtime state isolated and auto-memory disabled. A mediator transport that would require broad Unix-socket access is not admitted."
     },
     "issue_evidence_store": {
       "decision": "SANDBOX/MEDIATE",
-      "scope": "qualification-owned mediator; executor has no direct state/log path"
+      "scope": "qualification-owned mediator; executor has no direct state/log path. The native Unix-socket transport is admissible only where exact socket-path allowlisting is enforced; Linux/WSL native Claude sandbox realization fails closed."
     },
     "network_remote_service": {
       "decision": "DENY",

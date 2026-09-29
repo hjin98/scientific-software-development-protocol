@@ -11,6 +11,7 @@ import hashlib
 import json
 import os
 import subprocess
+import sys
 import time
 from pathlib import Path
 from typing import Any
@@ -64,6 +65,25 @@ def clean_env() -> dict[str, str]:
     env["CLAUDE_CODE_DISABLE_ARTIFACT"] = "1"
     env["CLAUDE_CODE_DISABLE_BACKGROUND_TASKS"] = "1"
     return env
+
+
+def _assert_containment_platform_supported(profile: dict[str, Any], env: dict[str, str]) -> None:
+    """Fail closed when the declared mediator boundary cannot be enforced by this substrate."""
+    policy = profile.get("containment_policy") or {}
+    if policy.get("kind") != "claude-code-restricted-sandbox-v1":
+        return
+    if not policy.get("mediator_required"):
+        return
+    if not env.get("SSDP70_MEDIATOR_SOCKET"):
+        return
+    if sys.platform != "darwin":
+        raise RuntimeError(
+            "executor containment is unrealizable with the native Claude Code sandbox on "
+            f"platform {sys.platform!r}: the required mediator uses a path-selective Unix socket, "
+            "but Linux/WSL cannot enforce sandbox.network.allowUnixSockets by path. Enabling "
+            "allowAllUnixSockets would expose unmediated Unix-socket routes. Use an independently "
+            "isolated container/VM/mount boundary or an alternate mediated transport before admission."
+        )
 
 
 def _control_paths(project: Path, env: dict[str, str]) -> tuple[Path, Path, Path]:
@@ -194,6 +214,7 @@ def _containment_document(profile: dict[str, Any], project: Path, env: dict[str,
 def realize_containment(profile: dict[str, Any], project: Path, env: dict[str, str]) -> dict[str, Any]:
     """Write run-owned private control files before any executor/evaluator effect."""
     document = _containment_document(profile, project, env)
+    _assert_containment_platform_supported(profile, env)
     _, settings, mcp_config = _control_paths(project, env)
     settings.parent.mkdir(parents=True, exist_ok=True)
     settings.write_text(json.dumps(document["settings"], indent=2, sort_keys=True) + "\n", encoding="utf-8")
@@ -319,6 +340,7 @@ def launch(profile: dict[str, Any], prompt: str, project: Path, env: dict[str, s
     containment_errors = validate_containment_realization(profile, project, env)
     if containment_errors:
         raise RuntimeError("; ".join(containment_errors))
+    _assert_containment_platform_supported(profile, env)
     _, settings_path, mcp_config_path = _control_paths(project, env)
     settings_sha256 = hashlib.sha256(settings_path.read_bytes()).hexdigest()
     mcp_config_sha256 = hashlib.sha256(mcp_config_path.read_bytes()).hexdigest()

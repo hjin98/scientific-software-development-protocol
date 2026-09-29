@@ -32,7 +32,8 @@
     "ambient_credentials": "deny",
     "runtime_temp": "run-owned project temporary directory",
     "protected_control_files": "settings and strict empty MCP config live under the denied harness-private/runtime area outside the executor/evaluator working directory and are digest-checked across launch",
-    "denied_read_roots": "harness-private/runtime state, host HOME, /home, /root, /run/user, /proc, /mnt, /media, /srv, /var/tmp"
+    "denied_read_roots": "harness-private/runtime state, host HOME, /home, /root, /run/user, /proc, /mnt, /media, /srv, /var/tmp",
+    "mediator_transport": "path-selective Unix-domain socket; native Claude sandbox realization is supported only where exact socket-path allowlisting is enforceable. Linux/WSL must STOP unless an independently isolated outer boundary or alternate mediated transport is implemented."
   },
   "network_external_write_policy": {
     "external_write": "sandbox-or-mediate",
