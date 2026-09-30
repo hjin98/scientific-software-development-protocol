@@ -939,6 +939,7 @@ class ReplayHarnessBase(unittest.TestCase):
     def setUp(self):
         self.td = tempfile.TemporaryDirectory()
         self.root = Path(self.td.name)
+        self.replay_counter = 0
         self.corpus = self.root / "corpus"
         (self.corpus / "fixtures" / "f1" / "project").mkdir(parents=True)
         for rel, text in {"README.md": "fixture\n", "src/a.py": "x = 1\n", "data/d.csv": "1,2\n", "tests/t.py": "pass\n"}.items():
@@ -972,13 +973,15 @@ class ReplayHarnessBase(unittest.TestCase):
         self.td.cleanup()
 
     def replay(self, run, simulate=True, extra=None):
+        self.replay_counter += 1
+        realization = f"{run}-{self.replay_counter:03d}"
         adapter = ReplayAdapter(run, self.bundle.profile, simulate, extra)
         identity = harness70.run_identity(
             corpus=self.corpus, episode=self.episode, arm=self.arm, arms_manifest_sha256="arms", dist=self.dist,
             profile_bundle=self.bundle, profile_path=self.profile_path, capability_path=self.cap_path,
             requirements=self.requirements, requirements_root=self.req_root, adapter_module=adapter,
             oracles=None, mode="probe", admission=None, rep=0, pair_order=["p70"])
-        out = self.root / f"out-{run}"
+        out = self.root / f"out-{realization}"
         summary = harness70.run_episode(
             corpus=self.corpus, episode=self.episode, arm=self.arm, arms_manifest_sha256="arms", dist=self.dist, out=out,
             profile_bundle=self.bundle, profile_path=self.profile_path, capability_path=self.cap_path,

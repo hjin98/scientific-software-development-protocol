@@ -26,6 +26,7 @@ import tempfile
 import textwrap
 import threading
 import unittest
+import uuid
 from pathlib import Path
 from unittest import mock
 
@@ -292,9 +293,14 @@ class B1RealObservationAndEventCompleteness(RigCase):
         self.assertNotComplete(mismatch, "reasoning")
         # a non-reasoning model with a non-off frozen level is a mismatch, not a pass
         self.patch(omp, "omp_argv", original)
-        with self.assertRaises(omp.AdapterError) as ctx:
-            self.rig(reasoning=False, thinking="high").run(scenario_steps(text("x")))
-        self.assertIn("non-reasoning model", str(ctx.exception))
+        refused = self.rig(reasoning=False, thinking="high").run(scenario_steps(text("x")))
+        self.assertEqual(refused["evidence_state"], "EXECUTION_ERROR")
+        self.assertEqual(refused["qualification_outcome"], "NOT_EVALUATED")
+        self.assertEqual(refused["prelaunch_refusal"]["phase"], "realize_containment")
+        self.assertFalse(refused["prelaunch_refusal"]["subject_launched"])
+        self.assertIn("non-reasoning model", refused["prelaunch_refusal"]["reason"])
+        self.assertEqual(refused["_stand_in_requests"], [])
+        self.assertFalse((Path(refused["_out"]) / "trace.jsonl").exists())
         off = self.rig(reasoning=False, thinking="off").run(scenario_steps(text("x")))
         self.assertComplete(off)
         self.assertEqual(off["runtime_observation"]["reasoning_fields"], {})
@@ -1070,7 +1076,9 @@ class B2PrivilegeSeparationWhileInferenceWorks(RigCase):
         sentinel_state = {"accepted": 0, "path": None}
 
         def with_external_sentinel(profile, prompt, project, env):
-            path = project / ".qualification-external-ipc-sentinel.sock"
+            sentinel_root = Path.home() / "ssdp70-omp-stagef" / "logs"
+            sentinel_root.mkdir(parents=True, exist_ok=True)
+            path = sentinel_root / f"omp-ipc-{uuid.uuid4().hex[:12]}.sock"
             server = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
             server.bind(str(path))
             server.listen(4)
