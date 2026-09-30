@@ -46,6 +46,7 @@ import muxhttp70 as mux  # noqa: E402
 import seccomp70  # noqa: E402
 
 RESPONSE_EVIDENCE_LIMIT = 4 * 1024 * 1024
+OBSERVER_CA_FILE = "/etc/ssl/certs/ca-certificates.crt"
 HOP_BY_HOP = {
     "host", "connection", "content-length", "transfer-encoding", "keep-alive", "te", "trailer",
     "upgrade", "proxy-authorization", "proxy-connection", "authorization", "accept-encoding",
@@ -209,7 +210,11 @@ def _open_frozen_route(upstream: str, timeout: float) -> tuple[http.client.HTTPC
 def _complete_tls_handshake(connection: http.client.HTTPConnection) -> None:
     parsed_host = connection.host
     if getattr(connection, "_ssdp_https", False):
-        context = ssl.create_default_context()
+        # The observer runs in a deliberately minimal filesystem that stages the reviewed
+        # system CA bundle at this exact path. Do not rely on OpenSSL's compiled default
+        # compatibility paths (for example /usr/lib/ssl/cert.pem), which are intentionally
+        # absent from the observer sandbox.
+        context = ssl.create_default_context(cafile=OBSERVER_CA_FILE)
         assert connection.sock is not None
         connection.sock = context.wrap_socket(connection.sock, server_hostname=parsed_host)
 

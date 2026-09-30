@@ -17,6 +17,7 @@ import tempfile
 import threading
 import textwrap
 import unittest
+from unittest import mock
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
@@ -66,6 +67,34 @@ class ObserverLaunchSafety(unittest.TestCase):
         self.assertIn("F_DUPFD_CLOEXEC", helper)
         self.assertIn("os.execv", helper)
         self.assertNotIn("preexec_fn", helper)
+
+
+class ObserverTlsTrust(unittest.TestCase):
+    def test_tls_handshake_uses_explicit_staged_ca_bundle(self):
+        connection = mock.Mock()
+        connection.host = "provider.example"
+        original_sock = mock.Mock()
+        connection.sock = original_sock
+        connection._ssdp_https = True
+        context = mock.Mock()
+        wrapped = mock.Mock()
+        context.wrap_socket.return_value = wrapped
+
+        with mock.patch.object(observer70.ssl, "create_default_context", return_value=context) as create_context:
+            observer70._complete_tls_handshake(connection)
+
+        create_context.assert_called_once_with(cafile=observer70.OBSERVER_CA_FILE)
+        context.wrap_socket.assert_called_once_with(
+            original_sock,
+            server_hostname="provider.example",
+        )
+        self.assertIs(connection.sock, wrapped)
+
+    def test_observer_ca_path_is_the_bundle_staged_by_the_adapter(self):
+        self.assertEqual(observer70.OBSERVER_CA_FILE, "/etc/ssl/certs/ca-certificates.crt")
+        documents = omp._observer_etc_documents()
+        self.assertIn("ssl/certs/ca-certificates.crt", documents)
+        self.assertTrue(documents["ssl/certs/ca-certificates.crt"])
 
 
 class NameMinting(unittest.TestCase):
