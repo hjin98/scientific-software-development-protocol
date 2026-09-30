@@ -131,6 +131,41 @@ class B1RealObservationAndEventCompleteness(RigCase):
         self.assertEqual(first["reasoning_effort"], "high")
         self.assertTrue(first["messages"][0]["content"].startswith("<system-conventions>"))
 
+    def test_parallel_tool_results_may_arrive_in_completion_order(self):
+        summary = self.rig(timeout_s=120).run(scenario_steps(
+            calls(
+                ("bash", {"command": "sleep 1; printf slow"}),
+                ("bash", {"command": "printf fast"}),
+            ),
+            text("done"),
+        ))
+        self.assertComplete(summary)
+        observer = [
+            json.loads(line)
+            for line in (Path(summary["_out"]) / "adapter-artifacts" / "observer-evidence.jsonl").read_text().splitlines()
+            if json.loads(line)["kind"] == "request"
+        ]
+        histories = [json.loads(base64.b64decode(row["data"]["body_b64"])) for row in observer]
+        history = next(
+            body for body in histories
+            if any(
+                message.get("role") == "assistant" and len(message.get("tool_calls") or []) == 2
+                for message in body.get("messages") or []
+                if isinstance(message, dict)
+            )
+        )
+        assistant = next(
+            message for message in history["messages"]
+            if message.get("role") == "assistant" and len(message.get("tool_calls") or []) == 2
+        )
+        expected_ids = [call["id"] for call in assistant["tool_calls"]]
+        actual_ids = [
+            message["tool_call_id"] for message in history["messages"]
+            if message.get("role") == "tool" and message.get("tool_call_id") in set(expected_ids)
+        ]
+        self.assertCountEqual(actual_ids, expected_ids)
+        self.assertEqual(len(actual_ids), 2)
+
     def test_provider_response_over_evidence_limit_is_inadmissible_on_the_assembled_path(self):
         body = "R" * (observer70.RESPONSE_EVIDENCE_LIMIT + 1024)
         summary = self.rig(timeout_s=180).run(scenario_steps({"text": body}))
