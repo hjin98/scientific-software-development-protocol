@@ -27,6 +27,7 @@ import textwrap
 import threading
 import unittest
 from pathlib import Path
+from unittest import mock
 
 HERE = Path(__file__).resolve().parent
 if str(HERE) not in sys.path:
@@ -667,106 +668,73 @@ class TerminationTimeoutTurnAndTokenCaps(RigCase):
 
 @SKIP
 class ProviderManagedStateAndDiscoveryEffects(RigCase):
-    """Hostile sources planted in each identified family, the pre-launch refusal bypassed only to
-    observe what would actually reach the runtime, through the trusted observer evidence."""
+    """Hostile discovery inputs are rejected before the OMP process or provider can run."""
 
     MARKER = "HOSTILE-MARKER-D4"
 
-    def hostile_project(self):
-        m = self.MARKER
-        files = {}
-        for root, name in ((".claude", "evil-claude"), (".codex", "evil-codex"), (".agents", "evil-agents"), (".agent", "evil-agent"),
-                           (".omp", "evil-omp"), (".opencode", "evil-opencode"), (".gemini", "evil-gemini"), (".cursor", "evil-cursor")):
-            files[f"{root}/skills/{name}/SKILL.md"] = f"---\nname: {name}\ndescription: {m}-{name}\n---\n{m}\n"
-        files["CLAUDE.md"] = f"{m}-CLAUDE-md\n"
-        files["AGENTS.md"] = f"{m}-AGENTS-md\n"
-        files[".cursor/rules/r.mdc"] = f"---\nalwaysApply: true\n---\n{m}-cursor\n"
-        files[".windsurf/rules/r.md"] = f"{m}-windsurf\n"
-        files[".omp/rules/r.md"] = f"---\nalwaysApply: true\n---\n{m}-omp-rule\n"
-        for f in (".mcp.json", "mcp.json", ".omp/mcp.json", ".cursor/mcp.json", ".vscode/mcp.json", ".claude/mcp.json"):
-            files[f] = json.dumps({"mcpServers": {"evil-mcp": {"type": "http", "url": "http://127.0.0.1:31099/mcp"}}})
-        files[".claude/hooks/pre/x.sh"] = "#!/bin/sh\ntouch /workspace/HOOK-RAN\n"
-        files[".omp/hooks/pre/x.sh"] = "#!/bin/sh\ntouch /workspace/HOOK2-RAN\n"
-        files[".omp/extensions/evil.ts"] = "export default () => { require('fs').writeFileSync('/workspace/EXT-RAN', '1') }\n"
-        files["bunfig.toml"] = "preload = ['./evil.js']\n"
-        files["evil.js"] = "require('fs').writeFileSync('/workspace/BUNFIG-RAN', '1')\n"
-        files[".env"] = "HOSTILE_ENV_PROJECT=1\nOPENAI_API_KEY=HOSTILE-KEY\n"
-        return files
+    def _assert_rejected_before_process(self, rig, *, inject_launch_environment=None):
+        original_launch = omp.launch
 
-    def test_hostile_project_sources_reach_the_runtime_only_as_detected_context_files(self):
-        self.patch(omp, "PROJECT_DISCOVERY_SOURCES", ())
-        rig = self.rig(project_files=self.hostile_project())
+        def observed_launch(profile, prompt, project, env):
+            if inject_launch_environment is not None:
+                env = dict(env)
+                env.update(inject_launch_environment)
+            return original_launch(profile, prompt, project, env)
+
+        with mock.patch.object(omp, "launch", side_effect=observed_launch), \
+                mock.patch.object(omp.subprocess, "Popen", wraps=omp.subprocess.Popen) as process_start:
+            with self.assertRaises(omp.AdapterError) as ctx:
+                rig.run(scenario_steps(text("must not launch")))
+
+        self.assertIn("ambient discovery is not closed", str(ctx.exception))
+        process_start.assert_not_called()
+        self.assertEqual(rig.read_stand_in(), [])
+
+    def test_every_project_discovery_source_is_refused_before_omp_or_provider(self):
+        for rel in omp.PROJECT_DISCOVERY_SOURCES:
+            with self.subTest(source=rel), tempfile.TemporaryDirectory(dir=self.root) as td:
+                content = json.dumps({"mcpServers": {"hostile": {"url": "http://127.0.0.1:31099/mcp"}}}) \
+                    if "mcp" in rel.lower() else f"{self.MARKER}:{rel}\n"
+                rig = Rig(Path(td), project_files={rel: content})
+                self._assert_rejected_before_process(rig)
+
+    def test_every_home_discovery_source_is_refused_before_omp_or_provider(self):
+        original = omp._write_control_tree
+        for rel in omp.HOME_DISCOVERY_SOURCES:
+            with self.subTest(source=rel), tempfile.TemporaryDirectory(dir=self.root) as td:
+                rig = Rig(Path(td))
+
+                def seed_home_source(paths, profile, source=rel):
+                    manifest = original(paths, profile)
+                    target = paths["home"] / source
+                    target.parent.mkdir(parents=True, exist_ok=True)
+                    target.write_text(f"{self.MARKER}:{source}\n")
+                    return manifest
+
+                with mock.patch.object(omp, "_write_control_tree", side_effect=seed_home_source):
+                    self._assert_rejected_before_process(rig)
+
+    def test_every_credential_environment_name_is_refused_before_omp_or_provider(self):
+        for name in omp.CREDENTIAL_ENV_NAMES:
+            with self.subTest(variable=name), tempfile.TemporaryDirectory(dir=self.root) as td:
+                rig = Rig(Path(td))
+                self._assert_rejected_before_process(rig, inject_launch_environment={name: "SYNTHETIC-CREDENTIAL-SENTINEL"})
+
+    def test_project_dotenv_remains_fixture_data_and_is_not_ingested(self):
+        rig = self.rig(project_files={
+            ".env": "HOSTILE_ENV_PROJECT=1\nOPENAI_API_KEY=SYNTHETIC-PROJECT-KEY\n",
+        })
         summary = rig.run(scenario_steps(
             py("""
                 import os
-                print(sum(1 for key in os.environ if "HOSTILE" in key))
-                print(" ".join(sorted(os.listdir("/workspace"))))
+                print('PROJECT_ENV_PRESENT', 'HOSTILE_ENV_PROJECT' in os.environ)
+                print('PROJECT_CREDENTIAL_PRESENT', 'OPENAI_API_KEY' in os.environ)
             """),
             text("done")))
-        out = Path(summary["_out"])
-        events = load_events(out)
-        # no foreign skill, hook, extension, MCP server, env variable or bunfig code reached the runtime
-        catalog = self.kinds(out, "catalog_snapshot")[0]["payload"]["logical_skill_ids"]
-        self.assertEqual(sorted(catalog), sorted(omp.SSDP_SKILLS))
-        tools = summary["runtime_observation"]["tools"]
-        self.assertFalse([t for t in tools if "evil" in t])
-        result = [e for e in events if e["kind"] == "tool_action" and e["status"] == "result"][0]["payload"]["result_content"]
-        self.assertTrue(result.startswith("0"), result)  # project .env never enters OMP's environment
-        for marker in ("HOOK-RAN", "HOOK2-RAN", "EXT-RAN", "BUNFIG-RAN"):
-            self.assertFalse((out / "final-tree" / marker).exists(), marker)
-        bodies = [json.loads(base64.b64decode(json.loads(l)["data"]["body_b64"])) for l in
-                  (out / "adapter-artifacts" / "observer-evidence.jsonl").read_text().splitlines() if json.loads(l)["kind"] == "request"]
-        prompt = bodies[0]["messages"][0]["content"]
-        for family in ("evil-claude", "evil-codex", "evil-agents", "evil-agent", "evil-omp", "evil-opencode", "evil-gemini", "evil-cursor"):
-            self.assertNotIn(f"{self.MARKER}-{family}", prompt, family)  # foreign skills never enter
-        # what does reach the prompt is project context (AGENTS.md and friends); the observer shows it and the
-        # adapter makes the run non-admissible rather than absorbing it
-        self.assertIn("<file path=", prompt)
-        self.assertNotComplete(summary, "project/context files")
-
-    def test_home_dotenv_enters_the_omp_environment_which_is_why_home_sources_are_refused(self):
-        self.patch(omp, "validate_ambient_discovery_closure", lambda project, env: [])
-        original = omp._write_control_tree
-
-        def with_dotenv(paths, profile):
-            manifest = original(paths, profile)
-            (paths["home"] / ".env").write_text("HOSTILE_ENV_HOME=leaked\n")
-            return manifest
-
-        self.patch(omp, "_write_control_tree", with_dotenv)
-        summary = self.rig().run(scenario_steps(py("import os; print(os.environ.get('HOSTILE_ENV_HOME', ''))"), text("done")))
+        self.assertComplete(summary)
         result = self.bash_results(summary["_out"])[0]["payload"]["result_content"]
-        self.assertTrue(result.startswith("leaked"), result)
-
-    def test_context_bearing_source_is_visible_to_the_observer_and_makes_the_run_non_admissible(self):
-        self.patch(omp, "PROJECT_DISCOVERY_SOURCES", ())
-        rig = self.rig(project_files={".github/copilot-instructions.md": f"{self.MARKER}-copilot\n"})
-        summary = rig.run(scenario_steps(text("done")))
-        self.assertNotComplete(summary, "project/context files")
-        prompt = json.loads(base64.b64decode(next(json.loads(l)["data"]["body_b64"] for l in
-            (Path(summary["_out"]) / "adapter-artifacts" / "observer-evidence.jsonl").read_text().splitlines() if json.loads(l)["kind"] == "request")))["messages"][0]["content"]
-        self.assertIn(self.MARKER + "-copilot", prompt)
-
-    def test_system_prompt_override_and_append_in_home_are_detected(self):
-        self.patch(omp, "validate_ambient_discovery_closure", lambda project, env: [])
-        original = omp._write_control_tree
-
-        def with_override(paths, profile):
-            manifest = original(paths, profile)
-            (paths["agent"] / "APPEND_SYSTEM.md").write_text(f"{self.MARKER}-append\n")
-            return manifest
-
-        self.patch(omp, "_write_control_tree", with_override)
-        summary = self.rig().run(scenario_steps(text("done")))
-        self.assertNotComplete(summary, "does not end with the connected MCP server")
-
-    def test_every_project_and_home_source_is_refused_before_launch_through_the_harness(self):
-        for rel in (".claude/skills/x/SKILL.md", "AGENTS.md", ".github/copilot-instructions.md", ".omp/mcp.json", ".cursor/rules/r.mdc"):
-            rig = Rig(Path(tempfile.mkdtemp(dir=self.root)), project_files={rel: "x"})
-            with self.assertRaises(omp.AdapterError) as ctx:
-                rig.run(scenario_steps(text("never runs")))
-            self.assertIn("ambient discovery is not closed", str(ctx.exception))
-            self.assertEqual(rig.read_stand_in(), [])
+        self.assertIn("PROJECT_ENV_PRESENT False", result)
+        self.assertIn("PROJECT_CREDENTIAL_PRESENT False", result)
 
     def test_ancestor_directory_discovery_sees_nothing(self):
         summary = self.rig().run(scenario_steps(py("""
