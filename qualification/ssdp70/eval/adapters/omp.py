@@ -2058,11 +2058,30 @@ def transcript_errors(observed: "Observed", prompt: str | None) -> tuple[list[st
             if _norm_ws(_content_text(assistant.get("content"))) != _norm_ws(turn["text"]):
                 errors.append(f"request {turn_index}: assistant message {previous} text differs from the provider's response")
             cursor += 1
-            for call in turn["tool_calls"]:
-                if cursor >= len(rest) or rest[cursor].get("role") != "tool" or rest[cursor].get("tool_call_id") != call["id"]:
-                    errors.append(f"request {turn_index}: tool result for call {call['id']!r} is missing or out of order")
-                    break
+            expected_tool_ids = [call.get("id") for call in turn["tool_calls"]]
+            block_start = cursor
+            while cursor < len(rest) and rest[cursor].get("role") == "tool":
                 cursor += 1
+            tool_block = rest[block_start:cursor]
+            actual_tool_ids = [message.get("tool_call_id") for message in tool_block]
+            expected_unique = (
+                all(isinstance(call_id, str) and call_id for call_id in expected_tool_ids)
+                and len(expected_tool_ids) == len(set(expected_tool_ids))
+            )
+            actual_unique = (
+                all(isinstance(call_id, str) and call_id for call_id in actual_tool_ids)
+                and len(actual_tool_ids) == len(set(actual_tool_ids))
+            )
+            if (
+                not expected_unique
+                or not actual_unique
+                or len(actual_tool_ids) != len(expected_tool_ids)
+                or set(actual_tool_ids) != set(expected_tool_ids)
+            ):
+                errors.append(
+                    f"request {turn_index}: tool-result block for assistant turn {previous} is not an exact "
+                    f"bijection of provider tool calls: expected IDs {expected_tool_ids!r}, got {actual_tool_ids!r}"
+                )
         extras = rest[cursor:] if cursor <= len(rest) else []
         if extras:
             errors.append(

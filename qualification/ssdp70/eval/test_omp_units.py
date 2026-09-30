@@ -97,6 +97,105 @@ class ObserverTlsTrust(unittest.TestCase):
         self.assertTrue(documents["ssl/certs/ca-certificates.crt"])
 
 
+class TranscriptToolResultBijection(unittest.TestCase):
+    PROMPT = "probe prompt"
+    REMINDER = (
+        "<system-reminder>\nToday: 2026-09-30; current working directory: '/workspace'. "
+        "Do not repeat this information in your reply.\n</system-reminder>"
+    )
+
+    @classmethod
+    def _user(cls):
+        return {
+            "role": "user",
+            "content": [
+                {"type": "text", "text": cls.REMINDER},
+                {"type": "text", "text": cls.PROMPT},
+            ],
+        }
+
+    @staticmethod
+    def _turn():
+        return {
+            "request_index": 0,
+            "status": 200,
+            "text": "",
+            "tool_calls": [
+                {"id": "call-a", "name": "bash", "arguments": {"command": "true"}},
+                {"id": "call-b", "name": "read", "arguments": {"path": "/workspace/x"}},
+            ],
+            "finish_reason": "tool_calls",
+            "complete": True,
+        }
+
+    @classmethod
+    def _observed(cls, tool_messages):
+        first = {"messages": [{"role": "system", "content": "system"}, cls._user()]}
+        assistant = {
+            "role": "assistant",
+            "content": "",
+            "tool_calls": [
+                {"id": "call-a", "function": {"name": "bash", "arguments": '{"command":"true"}'}},
+                {"id": "call-b", "function": {"name": "read", "arguments": '{"path":"/workspace/x"}'}},
+            ],
+        }
+        second = {
+            "messages": [
+                {"role": "system", "content": "system"},
+                cls._user(),
+                assistant,
+                *tool_messages,
+            ],
+        }
+        return type("ObservedFixture", (), {"requests": [{"body": first}, {"body": second}]})()
+
+    def _errors(self, tool_messages):
+        observed = self._observed(tool_messages)
+        turns = [self._turn(), {
+            "request_index": 1,
+            "status": 200,
+            "text": "done",
+            "tool_calls": [],
+            "finish_reason": "stop",
+            "complete": True,
+        }]
+        with mock.patch.object(omp, "group_inference_requests", return_value=([[0], [1]], [], [])), \
+                mock.patch.object(omp, "provider_turns", return_value=turns):
+            errors, _ = omp.transcript_errors(observed, self.PROMPT)
+        return errors
+
+    def test_permuted_parallel_tool_results_are_a_valid_bijection(self):
+        errors = self._errors([
+            {"role": "tool", "tool_call_id": "call-b", "content": "B"},
+            {"role": "tool", "tool_call_id": "call-a", "content": "A"},
+        ])
+        self.assertEqual(errors, [])
+
+    def test_missing_duplicate_foreign_and_extra_tool_results_fail_closed(self):
+        cases = {
+            "missing": [
+                {"role": "tool", "tool_call_id": "call-a", "content": "A"},
+            ],
+            "duplicate": [
+                {"role": "tool", "tool_call_id": "call-a", "content": "A1"},
+                {"role": "tool", "tool_call_id": "call-a", "content": "A2"},
+            ],
+            "foreign": [
+                {"role": "tool", "tool_call_id": "call-a", "content": "A"},
+                {"role": "tool", "tool_call_id": "call-x", "content": "X"},
+            ],
+            "extra": [
+                {"role": "tool", "tool_call_id": "call-a", "content": "A"},
+                {"role": "tool", "tool_call_id": "call-b", "content": "B"},
+                {"role": "tool", "tool_call_id": "call-x", "content": "X"},
+            ],
+        }
+        for label, messages in cases.items():
+            with self.subTest(label=label):
+                errors = self._errors(messages)
+                self.assertTrue(any("not an exact bijection" in error for error in errors), errors)
+
+
 class ObserverProviderDiscoveryClosure(unittest.TestCase):
     def _observer(self):
         chain = mock.Mock()
