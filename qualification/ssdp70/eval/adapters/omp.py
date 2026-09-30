@@ -103,6 +103,9 @@ OBSERVER_CODE = "/opt/ssdp/observer"
 RELAY_PORTS = {"inference": 31001, "mcp": 31002}
 RUNTIME_DEPENDENCIES_PATH = EVAL_DIR / "omp-runtime-dependencies-18.0.11.json"
 RUNTIME_DEPENDENCIES_SHA256 = "dc2a6035d72e889d80f97e6c048f517765e1c2ade480171aa4e160a59f4c35f1"
+OBSERVER_EXEC_HELPER = EVAL_DIR / "observer_exec_helper70.py"
+OBSERVER_CHANNEL_TARGETS = (3, 4, 5, 6)
+OBSERVER_ARGUMENT_TARGET = 7
 OBSERVER_REQUIRED_PROBES = frozenset({
     "host_home", "qualification_custody", "supervisor_private", "mediator_backing_state",
     "new-af-inet-socket", "new-af-unix-socket", "unrelated-addressed-network-send",
@@ -402,6 +405,8 @@ def _contains_unfrozen(value: Any) -> bool:
 
 def principal_files() -> dict[str, Path]:
     return {
+        # Supervisor-owned launch control bytes are digest-bound here; this helper is not a principal.
+        "observer_exec_helper70.py": OBSERVER_EXEC_HELPER,
         "observer70.py": EVAL_DIR / "observer70.py",
         "mcp_bridge70.py": EVAL_DIR / "mcp_bridge70.py",
         "muxhttp70.py": EVAL_DIR / "muxhttp70.py",
@@ -1204,8 +1209,8 @@ def _observer_bwrap_argv(profile: dict[str, Any], paths: dict[str, Path], observ
         policy["substrate"]["executable"],
         "--unshare-user", "--unshare-pid", "--unshare-ipc", "--unshare-uts", "--unshare-cgroup", "--share-net",
         "--die-with-parent", "--new-session", "--as-pid-1", "--hostname", "ssdp-observer",
-        # bubblewrap 0.6.1 inherits only the descriptors explicitly passed by Popen; it has no
-        # --preserve-fds option. _observer_fd_map assigns those inherited descriptors to 3..6.
+        # bubblewrap 0.6.1 has no --preserve-fds option. The supervisor-owned one-shot exec helper
+        # maps only these four channels to 3..6 before it immediately execs Bubblewrap.
         "--cap-drop", "ALL", "--cap-add", "CAP_SYS_ADMIN", "--cap-add", "CAP_SETPCAP",
         "--proc", "/proc", "--dev", "/dev", "--tmpfs", "/tmp", "--tmpfs", OBSERVER_HOME,
     ]
@@ -1227,26 +1232,6 @@ def _observer_bwrap_argv(profile: dict[str, Any], paths: dict[str, Path], observ
     for label, path in probe_paths:
         argv.extend(("--probe-path", f"{label}={path}"))
     return argv
-
-
-def _observer_fd_map(source_fds: tuple[int, ...]):
-    """Return a fork-child-only mapping to the descriptor range bubblewrap preserves."""
-    def apply() -> None:
-        targets = tuple(range(3, 3 + len(source_fds)))
-        copies = [os.dup(fd) for fd in source_fds]
-        for copied, target in zip(copies, targets):
-            os.dup2(copied, target, inheritable=True)
-        for copied in copies:
-            if copied not in targets:
-                os.close(copied)
-        # Keep only the mapped channels and bwrap's argument source in the child process.
-        for fd in set(source_fds):
-            if fd not in targets:
-                try:
-                    os.close(fd)
-                except OSError:
-                    pass
-    return apply
 
 
 def _sandbox_pipe_fds(pairs: list[tuple[int, int]]) -> tuple[int, ...]:
@@ -1299,6 +1284,9 @@ def launch(profile: dict[str, Any], prompt: str, project: Path, env: dict[str, s
     seccomp_r = seccomp_w = -1
     run_launch = paths["control"] / "launcher.json"
     observer_launch_argv: list[str] = []
+    observer_helper_argv: list[str] = []
+    observer_pass_fds: tuple[int, ...] = ()
+    observer_fd_mapping: dict[str, Any] = {}
     boundary_sentinel = paths["private"] / "observer-boundary-host-sentinel.txt"
     boundary_sentinel.write_text("SUPERVISOR-PRIVATE-OBSERVER-PROBE\n", encoding="utf-8")
     boundary_sentinel.chmod(0o600)
@@ -1315,24 +1303,32 @@ def launch(profile: dict[str, Any], prompt: str, project: Path, env: dict[str, s
             ("mediator_backing_state", str(layout["log"])),
         ]
         observer_env = {"PATH": MINIMAL_PATH, "HOME": OBSERVER_HOME}
+        observer_channels = (infer_up[0], infer_down[1], obs_ev[1], credential_r)
         raw_observer_argv = _observer_bwrap_argv(
-            profile, paths, (infer_up[0], infer_down[1], obs_ev[1], credential_r), observer_probe_paths, os.getpid(),
+            profile, paths, observer_channels, observer_probe_paths, os.getpid(),
             os.readlink("/proc/self/ns/net"), os.readlink("/proc/self/ns/pid"))
         observer_command_at = raw_observer_argv.index("/usr/bin/python3")
         observer_args_r, observer_args_w = os.pipe()
         os.write(observer_args_w, b"\0".join(a.encode() for a in raw_observer_argv[1:observer_command_at]) + b"\0")
         os.close(observer_args_w)
-        observer_launch_argv = [raw_observer_argv[0], "--args", str(observer_args_r),
+        observer_launch_argv = [raw_observer_argv[0], "--args", str(OBSERVER_ARGUMENT_TARGET),
                                 *raw_observer_argv[observer_command_at:]]
-        observer_targets = tuple(range(3, 3 + len((infer_up[0], infer_down[1], obs_ev[1], credential_r))))
+        observer_pass_fds = tuple(sorted(set((*observer_channels, observer_args_r))))
+        observer_fd_mapping = {
+            "inference_input": {"supervisor_source_fd": observer_channels[0], "observer_fd": OBSERVER_CHANNEL_TARGETS[0]},
+            "inference_output": {"supervisor_source_fd": observer_channels[1], "observer_fd": OBSERVER_CHANNEL_TARGETS[1]},
+            "evidence_output": {"supervisor_source_fd": observer_channels[2], "observer_fd": OBSERVER_CHANNEL_TARGETS[2]},
+            "credential_input": {"supervisor_source_fd": observer_channels[3], "observer_fd": OBSERVER_CHANNEL_TARGETS[3]},
+            "bubblewrap_arguments": {"supervisor_source_fd": observer_args_r, "bubblewrap_fd": OBSERVER_ARGUMENT_TARGET},
+        }
+        observer_helper_argv = [
+            sys.executable, "-I", "-S", str(OBSERVER_EXEC_HELPER),
+            ",".join(str(fd) for fd in observer_channels), str(observer_args_r), *observer_launch_argv,
+        ]
         try:
             observer = subprocess.Popen(
-                observer_launch_argv,
-                # Popen closes non-pass-through fds after preexec remapping. Include target
-                # slots so bubblewrap 0.6.1 receives the mapped channels as inheritable fds.
-                pass_fds=tuple(sorted(set((infer_up[0], infer_down[1], obs_ev[1], credential_r,
-                                           observer_args_r, *observer_targets)))),
-                preexec_fn=_observer_fd_map((infer_up[0], infer_down[1], obs_ev[1], credential_r)),
+                observer_helper_argv,
+                pass_fds=observer_pass_fds,
                 env=observer_env, stdin=subprocess.DEVNULL, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                 close_fds=True)
         finally:
@@ -1468,7 +1464,13 @@ def launch(profile: dict[str, Any], prompt: str, project: Path, env: dict[str, s
         "bridge-evidence.jsonl": bytes(sinks["bridge"]).decode("utf-8", "replace"),
         "launcher-evidence.jsonl": bytes(sinks["launcher"]).decode("utf-8", "replace"),
         "sandbox-argv.json": json.dumps({"argv": argv, "launcher": json.loads(run_launch.read_text())}, indent=2, sort_keys=True) + "\n",
-        "observer-boundary-argv.json": json.dumps({"argv": observer_launch_argv}, indent=2, sort_keys=True) + "\n",
+        "observer-boundary-argv.json": json.dumps({
+            "argv": observer_launch_argv,
+            "exec_helper": str(OBSERVER_EXEC_HELPER),
+            "exec_helper_sha256": sha256_file(OBSERVER_EXEC_HELPER),
+            "pass_fds": list(observer_pass_fds),
+            "fd_mapping": observer_fd_mapping,
+        }, indent=2, sort_keys=True) + "\n",
         "runtime-dependency-manifest.json": RUNTIME_DEPENDENCIES_PATH.read_text(encoding="utf-8"),
         "runtime-dependency-attestation.json": json.dumps({
             "manifest_sha256": sha256_file(RUNTIME_DEPENDENCIES_PATH),

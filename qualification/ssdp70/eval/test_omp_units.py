@@ -4,6 +4,7 @@ These are NOT the integration acceptance: every claim about the assembled path l
 test_omp_integration.py, which drives harness70.run_episode through the real OMP executable.
 Here only pure functions and fail-closed edges of the real modules are exercised.
 """
+import ast
 import base64
 import hashlib
 import json
@@ -27,6 +28,44 @@ import muxhttp70 as mux  # noqa: E402
 import observer70  # noqa: E402
 import seccomp70  # noqa: E402
 from adapters import omp  # noqa: E402
+
+
+class ObserverLaunchSafety(unittest.TestCase):
+    def test_real_omp_launch_path_has_no_preexec_fn_and_binds_exec_helper(self):
+        adapter_path = Path(omp.__file__).resolve()
+        source = adapter_path.read_text(encoding="utf-8")
+        self.assertNotIn("preexec_fn", source)
+        tree = ast.parse(source)
+        functions = {
+            node.name: node for node in ast.walk(tree)
+            if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef))
+        }
+        self.assertIn("launch", functions)
+        reachable = set()
+        pending = ["launch"]
+        while pending:
+            name = pending.pop()
+            if name in reachable:
+                continue
+            reachable.add(name)
+            for node in ast.walk(functions[name]):
+                if isinstance(node, ast.Call):
+                    self.assertFalse(any(keyword.arg == "preexec_fn" for keyword in node.keywords))
+                    if isinstance(node.func, ast.Name) and node.func.id in functions:
+                        pending.append(node.func.id)
+        launch_calls = [node for node in ast.walk(functions["launch"])
+                        if isinstance(node, ast.Call) and isinstance(node.func, ast.Attribute)
+                        and isinstance(node.func.value, ast.Name) and node.func.value.id == "subprocess"
+                        and node.func.attr == "Popen"]
+        self.assertTrue(any(node.args and isinstance(node.args[0], ast.Name)
+                            and node.args[0].id == "observer_helper_argv"
+                            and {keyword.arg for keyword in node.keywords} >= {"pass_fds", "close_fds"}
+                            for node in launch_calls), "the real OMP observer path must spawn the FD helper with an exact pass_fds boundary")
+        self.assertIn("observer_exec_helper70.py", omp.principal_files())
+        helper = omp.OBSERVER_EXEC_HELPER.read_text(encoding="utf-8")
+        self.assertIn("F_DUPFD_CLOEXEC", helper)
+        self.assertIn("os.execv", helper)
+        self.assertNotIn("preexec_fn", helper)
 
 
 class NameMinting(unittest.TestCase):

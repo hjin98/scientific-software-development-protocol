@@ -14,10 +14,13 @@ produced. A missing prerequisite is reported as a skip with the reason, never as
 """
 import base64
 import copy
+import fcntl
 import json
 import os
-import socket
 import shutil
+import signal
+import socket
+import subprocess
 import sys
 import tempfile
 import textwrap
@@ -1091,6 +1094,191 @@ class B2PrivilegeSeparationWhileInferenceWorks(RigCase):
         self.assertEqual(sentinel_state["accepted"], 0)
         self.assertTrue(summary["_stand_in_requests"])
         self.assertEqual(len(self.kinds(summary["_out"], "issue_evidence_access", "result")), 1)
+
+
+@SKIP
+class ThirdPassObserverLaunchSafety(RigCase):
+    @staticmethod
+    def scenario():
+        return scenario_steps(
+            call("read", path="skill://software-implementation"),
+            call("mcp__ssdp_issue_show", issue_id="A-1"),
+            call("write", path="/workspace/out.txt", content="active\n"),
+            text("done"),
+        )
+
+    def test_real_observer_fd_map_excludes_inheritable_supervisor_sentinel(self):
+        sentinel_path = self.root / "unrelated-supervisor-open-fd.txt"
+        sentinel_path.write_text("UNRELATED-SUPERVISOR-FD\n", encoding="utf-8")
+        original_fd = os.open(sentinel_path, os.O_RDONLY)
+        sentinel_fd = fcntl.fcntl(original_fd, fcntl.F_DUPFD, 256)
+        os.close(original_fd)
+        os.set_inheritable(sentinel_fd, True)
+
+        original_builder = omp._observer_bwrap_argv
+
+        def probe_inheritable_fd(profile, paths, observer_fds, probe_paths, supervisor_pid,
+                                 supervisor_netns, supervisor_pidns):
+            adjusted = [
+                (name, f"/proc/self/fd/{sentinel_fd}" if name == "host_home" else path)
+                for name, path in probe_paths
+            ]
+            return original_builder(profile, paths, observer_fds, adjusted, supervisor_pid,
+                                    supervisor_netns, supervisor_pidns)
+
+        self.patch(omp, "_observer_bwrap_argv", probe_inheritable_fd)
+        try:
+            summary = self.rig(timeout_s=90).run(self.scenario())
+        finally:
+            os.close(sentinel_fd)
+
+        self.assertComplete(summary)
+        artifacts = Path(summary["_out"]) / "adapter-artifacts"
+        launch = json.loads((artifacts / "observer-boundary-argv.json").read_text(encoding="utf-8"))
+        mapping = launch["fd_mapping"]
+        self.assertEqual({name: mapping[name]["observer_fd"] for name in (
+            "inference_input", "inference_output", "evidence_output", "credential_input",
+        )}, {
+            "inference_input": 3, "inference_output": 4, "evidence_output": 5, "credential_input": 6,
+        })
+        self.assertEqual(mapping["bubblewrap_arguments"]["bubblewrap_fd"], 7)
+        expected_pass_fds = {
+            mapping[name]["supervisor_source_fd"] for name in (
+                "inference_input", "inference_output", "evidence_output", "credential_input",
+                "bubblewrap_arguments",
+            )
+        }
+        self.assertEqual(set(launch["pass_fds"]), expected_pass_fds)
+        self.assertEqual(len(launch["pass_fds"]), 5)
+        self.assertEqual(launch["argv"][1:3], ["--args", "7"])
+        self.assertEqual(launch["exec_helper_sha256"], omp.sha256_file(omp.OBSERVER_EXEC_HELPER))
+        identity = json.loads((Path(summary["_out"]) / "run-identity.json").read_text(encoding="utf-8"))
+        self.assertEqual(identity["adapter_support_sha256"]["observer_exec_helper70.py"],
+                         launch["exec_helper_sha256"])
+
+        records, errors = evidence70.parse_chain(
+            (artifacts / "observer-evidence.jsonl").read_text(encoding="utf-8"),
+            "ssdp70-provider-observer-v1",
+        )
+        self.assertEqual(errors, [])
+        kinds = [row["kind"] for row in records]
+        for required in ("boundary", "credential_received", "ready", "request", "response"):
+            self.assertIn(required, kinds)
+        self.assertLess(kinds.index("boundary"), kinds.index("credential_received"))
+        self.assertLess(kinds.index("credential_received"), kinds.index("ready"))
+        host_home_probe = next(row["data"] for row in records
+                               if row["kind"] == "boundary_probe" and row["data"].get("name") == "host_home")
+        self.assertEqual(host_home_probe["disposition"], "denied")
+        self.assertTrue(summary["_stand_in_requests"], "descriptor-bound inference channel was not exercised")
+        self.assertTrue(self.kinds(summary["_out"], "issue_evidence_access", "result"),
+                        "supervisor-owned MCP channel was not exercised")
+        self.assertLess(summary["wall_s"], 90)
+
+    @staticmethod
+    def _process_tree(pid):
+        ordered = []
+        seen = set()
+
+        def visit(parent):
+            if parent in seen:
+                return
+            seen.add(parent)
+            ordered.append(parent)
+            children_file = Path(f"/proc/{parent}/task/{parent}/children")
+            try:
+                children = [int(value) for value in children_file.read_text().split()]
+            except (OSError, ValueError):
+                children = []
+            for child in children:
+                visit(child)
+
+        visit(pid)
+        return ordered
+
+    def test_repeated_launches_with_active_threads_have_an_outer_watchdog(self):
+        worker_code = textwrap.dedent(r"""
+            import json, sys, threading
+            from pathlib import Path
+            sys.path.insert(0, sys.argv[1])
+            import evidence70
+            from omp_rig import Rig, call, load_events, scenario_steps, text
+            root = Path(sys.argv[2])
+            stop = threading.Event()
+            ready = [threading.Event() for _ in range(4)]
+            ticks = [0, 0, 0, 0]
+            def churn(index):
+                ready[index].set()
+                while not stop.is_set():
+                    ticks[index] += 1
+                    stop.wait(0.002)
+            threads = [threading.Thread(target=churn, args=(index,), daemon=True) for index in range(4)]
+            for thread in threads: thread.start()
+            if not all(event.wait(5) for event in ready):
+                raise SystemExit("unrelated supervisor threads did not start")
+            scenario = scenario_steps(
+                call("read", path="skill://software-implementation"),
+                call("mcp__ssdp_issue_show", issue_id="A-1"),
+                call("write", path="/workspace/out.txt", content="active\n"),
+                text("done"),
+            )
+            try:
+                for iteration in range(3):
+                    before = sum(ticks)
+                    summary = Rig(root, timeout_s=120).run(scenario, out_name=f"launch-{iteration}")
+                    if summary.get("evidence_state") != "COMPLETE_ADMISSIBLE":
+                        raise SystemExit("assembled launch failed: " + json.dumps(summary.get("evidence_state_reasons")))
+                    if sum(ticks) <= before:
+                        raise SystemExit("unrelated supervisor threads were not active during the OMP launch")
+                    if not summary.get("_stand_in_requests"):
+                        raise SystemExit("provider inference route was not exercised")
+                    artifacts = Path(summary["_out"]) / "adapter-artifacts"
+                    records, errors = evidence70.parse_chain(
+                        (artifacts / "observer-evidence.jsonl").read_text(encoding="utf-8"),
+                        "ssdp70-provider-observer-v1",
+                    )
+                    if errors:
+                        raise SystemExit("observer evidence chain failed: " + json.dumps(errors))
+                    kinds = [row["kind"] for row in records]
+                    if not all(kind in kinds for kind in ("boundary", "credential_received", "ready", "request", "response")):
+                        raise SystemExit("observer did not complete boundary, credential, readiness, and inference")
+                    if not (kinds.index("boundary") < kinds.index("credential_received") < kinds.index("ready")):
+                        raise SystemExit("credential was not delivered after observer lockdown and before ready")
+                    if not any(row["kind"] == "issue_evidence_access" and row["status"] == "result"
+                               for row in load_events(summary["_out"])):
+                        raise SystemExit("MCP bridge/mediator did not complete a normalized operation")
+                    print(f"completed {iteration + 1}/3", flush=True)
+            finally:
+                stop.set()
+                for thread in threads: thread.join(2)
+        """)
+
+        worker = subprocess.Popen(
+            [sys.executable, "-c", worker_code, str(HERE), str(self.root)],
+            stdin=subprocess.DEVNULL, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+            close_fds=True, start_new_session=True,
+        )
+        try:
+            stdout, stderr = worker.communicate(timeout=90)
+        except subprocess.TimeoutExpired:
+            for child in reversed(self._process_tree(worker.pid)[1:]):
+                try:
+                    os.kill(child, signal.SIGKILL)
+                except ProcessLookupError:
+                    pass
+            try:
+                os.killpg(worker.pid, signal.SIGKILL)
+            except ProcessLookupError:
+                pass
+            try:
+                stdout, stderr = worker.communicate(timeout=10)
+            except subprocess.TimeoutExpired:
+                worker.kill()
+                stdout, stderr = worker.communicate(timeout=10)
+            self.fail(f"outer launch watchdog expired; normal per-episode timeout was 120s; "
+                      f"stdout={stdout!r}; stderr={stderr!r}")
+        self.assertEqual(worker.returncode, 0, f"stdout={stdout!r}; stderr={stderr!r}")
+        self.assertEqual(stdout.decode("utf-8", "replace").count("completed "), 3,
+                         "the stress worker did not complete three assembled launches")
 
 
 if __name__ == "__main__":
