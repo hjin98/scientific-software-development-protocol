@@ -97,6 +97,134 @@ class ObserverTlsTrust(unittest.TestCase):
         self.assertTrue(documents["ssl/certs/ca-certificates.crt"])
 
 
+class ObserverProviderDiscoveryClosure(unittest.TestCase):
+    def _observer(self):
+        chain = mock.Mock()
+        upstream = mock.Mock()
+        instance = observer70.Observer(
+            chain,
+            "https://provider.example/v1",
+            "credential",
+            upstream,
+            "placeholder",
+            "/v1/chat/completions",
+            "/v1/models?filter=with_meta&sort_by=omp",
+            30.0,
+        )
+        return instance, chain
+
+    def test_exact_omp_model_catalog_probe_is_blocked_without_provider_egress(self):
+        instance, chain = self._observer()
+        conn = mock.Mock()
+        request = mux.Request(
+            "GET",
+            "/v1/models?filter=with_meta&sort_by=omp",
+            {},
+            b"",
+            b"",
+        )
+        with mock.patch.object(observer70.mux, "read_request", return_value=request), \
+                mock.patch.object(observer70.mux, "send_simple") as send_simple, \
+                mock.patch.object(instance, "forward") as forward:
+            instance.serve(conn)
+
+        forward.assert_not_called()
+        send_simple.assert_called_once_with(conn, 405)
+        chain.append.assert_called_once_with("provider_discovery_blocked", {
+            "method": "GET",
+            "path": "/v1/models?filter=with_meta&sort_by=omp",
+            "body_bytes": 0,
+            "provider_egress": False,
+            "response_status": 405,
+            "classification": "frozen-provider-catalog-discovery-disabled",
+        })
+        self.assertEqual(instance.provider_discovery_blocked_count, 1)
+        self.assertEqual(instance.refused_count, 0)
+
+    def test_nearby_provider_discovery_variant_remains_fail_closed(self):
+        instance, chain = self._observer()
+        conn = mock.Mock()
+        request = mux.Request(
+            "GET",
+            "/v1/models?sort_by=omp&filter=with_meta",
+            {},
+            b"",
+            b"",
+        )
+        with mock.patch.object(observer70.mux, "read_request", return_value=request), \
+                mock.patch.object(observer70.mux, "send_simple") as send_simple, \
+                mock.patch.object(instance, "forward") as forward:
+            instance.serve(conn)
+
+        forward.assert_not_called()
+        send_simple.assert_called_once_with(conn, 405)
+        chain.append.assert_called_once_with(
+            "refused",
+            {
+                "reason": "not-the-single-inference-operation",
+                "method": "GET",
+                "path": "/v1/models?sort_by=omp&filter=with_meta",
+            },
+        )
+        self.assertEqual(instance.provider_discovery_blocked_count, 0)
+        self.assertEqual(instance.refused_count, 1)
+
+    def test_adapter_accepts_only_the_exact_hash_linked_block_record(self):
+        template = json.loads((HERE / "profiles" / "omp-headless.template.json").read_text())
+        profile = omp.freeze_profile(
+            template,
+            executable_path=os.path.expanduser("~/.local/bin/omp"),
+            provider_route={
+                "provider_id": "stand",
+                "model_id": "m",
+                "upstream": "http://127.0.0.1:1",
+                "base_path": "/v1",
+                "context_window": 1000,
+                "max_tokens": 100,
+                "reasoning": True,
+            },
+            reasoning={"thinking": "high", "source": "--thinking"},
+            profile_id="p",
+            budgets={"max_turns": 5, "timeout_s": 5},
+        )
+
+        def chain(rows):
+            read_fd, write_fd = os.pipe()
+            writer = evidence70.ChainWriter(write_fd, "ssdp70-provider-observer-v1")
+            for kind, data in rows:
+                writer.append(kind, data)
+            writer.close()
+            os.close(write_fd)
+            content = os.read(read_fd, 1 << 20).decode()
+            os.close(read_fd)
+            return content
+
+        exact = {
+            "method": "GET",
+            "path": "/v1/models?filter=with_meta&sort_by=omp",
+            "body_bytes": 0,
+            "provider_egress": False,
+            "response_status": 405,
+            "classification": "frozen-provider-catalog-discovery-disabled",
+        }
+        observed = omp.Observed({
+            "observer-evidence.jsonl": chain([("start", {"observer": observer70.OBSERVER_ID}),
+                                             ("provider_discovery_blocked", exact)]),
+            "bridge-evidence.jsonl": "",
+            "launcher-evidence.jsonl": "",
+        }, profile)
+        self.assertFalse(any("provider discovery block" in error for error in observed.errors), observed.errors)
+
+        altered = dict(exact, path="/v1/models?sort_by=omp&filter=with_meta")
+        observed = omp.Observed({
+            "observer-evidence.jsonl": chain([("start", {"observer": observer70.OBSERVER_ID}),
+                                             ("provider_discovery_blocked", altered)]),
+            "bridge-evidence.jsonl": "",
+            "launcher-evidence.jsonl": "",
+        }, profile)
+        self.assertTrue(any("provider discovery block" in error for error in observed.errors), observed.errors)
+
+
 class NameMinting(unittest.TestCase):
     """Exact OMP 18.0.11 MCP name minting (source: `Qro`/`hft`), not a guessed sanitizer."""
 

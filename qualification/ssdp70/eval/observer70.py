@@ -57,12 +57,13 @@ OBSERVER_ID = "ssdp70-provider-observer-v1"
 class Observer:
     def __init__(self, chain: evidence70.ChainWriter, upstream: str, credential: str | None,
                  upstream_connection: http.client.HTTPConnection, placeholder: str, allowed_path: str,
-                 upstream_timeout: float, max_requests: int | None = None):
+                 blocked_discovery_target: str, upstream_timeout: float, max_requests: int | None = None):
         self.chain = chain
         self.upstream = urlsplit(upstream)
         self.credential = credential
         self.placeholder = placeholder
         self.allowed_path = allowed_path
+        self.blocked_discovery_target = blocked_discovery_target
         self.upstream_timeout = upstream_timeout
         self.max_requests = max_requests
         self.upstream_connection = upstream_connection
@@ -70,6 +71,7 @@ class Observer:
         self.upstream_lock = threading.Lock()
         self.request_count = 0
         self.refused_count = 0
+        self.provider_discovery_blocked_count = 0
 
     def next_index(self) -> int:
         with self.lock:
@@ -89,6 +91,24 @@ class Observer:
             request = mux.read_request(conn)
             if request is None:
                 self.refuse(conn, 400, "malformed-request")
+                return
+            if (request.method == "GET" and request.target == self.blocked_discovery_target
+                    and request.body == b""):
+                # OMP 18.0.11 performs this provider-catalog metadata probe against its configured
+                # base URL. The frozen qualification profile must not consume dynamic provider
+                # catalog state, so preserve the build's observed denial response while recording
+                # the exact operation as B3 evidence. No provider request is emitted here.
+                with self.lock:
+                    self.provider_discovery_blocked_count += 1
+                self.chain.append("provider_discovery_blocked", {
+                    "method": request.method,
+                    "path": request.target,
+                    "body_bytes": 0,
+                    "provider_egress": False,
+                    "response_status": 405,
+                    "classification": "frozen-provider-catalog-discovery-disabled",
+                })
+                mux.send_simple(conn, 405)
                 return
             if request.method != "POST" or request.path != self.allowed_path:
                 self.refuse(conn, 404 if request.method == "POST" else 405,
@@ -360,6 +380,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--credential-env", default=None)
     parser.add_argument("--placeholder", required=True, help="the non-secret key the subject is configured with")
     parser.add_argument("--allowed-path", default="/v1/chat/completions")
+    parser.add_argument("--blocked-discovery-target", required=True)
     parser.add_argument("--upstream-timeout", type=float, default=600.0)
     parser.add_argument("--max-requests", type=int, default=None, help="supervisor-set inference request (turn) budget")
     parser.add_argument("--credential-fd", type=int, required=True)
@@ -374,6 +395,7 @@ def main(argv: list[str] | None = None) -> int:
         "max_requests": args.max_requests,
         "observer": OBSERVER_ID,
         "allowed_path": args.allowed_path,
+        "blocked_discovery_target": args.blocked_discovery_target,
         "credential_delivery": "supervisor descriptor after observer lockdown",
         "placeholder_sha256": hashlib.sha256(args.placeholder.encode()).hexdigest(),
     })
@@ -422,7 +444,8 @@ def main(argv: list[str] | None = None) -> int:
         credential = bytes(credential_bytes).decode("utf-8")
         chain.append("credential_received", {"received_after_lockdown": True, "bytes": len(credential_bytes)})
         observer = Observer(chain, args.upstream, credential, upstream_connection, args.placeholder,
-                            args.allowed_path, args.upstream_timeout, args.max_requests)
+                            args.allowed_path, args.blocked_discovery_target,
+                            args.upstream_timeout, args.max_requests)
     except Exception as exc:
         chain.append("boundary_setup_failed", {"error": f"{type(exc).__name__}: {exc}"})
         chain.close(setup_failed=True)
@@ -438,7 +461,8 @@ def main(argv: list[str] | None = None) -> int:
     while not stop.wait(0.05) and transport.alive:
         pass
     threading.Event().wait(0.2)  # let in-flight handlers finish their last record
-    chain.close(requests=observer.request_count, refused=observer.refused_count)
+    chain.close(requests=observer.request_count, refused=observer.refused_count,
+                provider_discovery_blocked=observer.provider_discovery_blocked_count)
     return 0
 
 

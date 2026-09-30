@@ -157,6 +157,7 @@ OMP_PROVIDER_MANAGED_EVENT_TYPES = frozenset({
 # adapter evidence; they are not task-trajectory events in the frozen core schema.
 REVIEWED_NON_ORACLE_OBSERVER_CONTROL_KINDS = frozenset({
     "provider_route_opened", "boundary_probe", "boundary", "credential_received", "ready",
+    "provider_discovery_blocked",
 })
 
 # ------------------------------------------------------------------ settings/discovery closure
@@ -262,6 +263,7 @@ CREDENTIAL_ENV_NAMES = (
     "SSH_AUTH_SOCK", "ANTHROPIC_OAUTH_TOKEN", "COPILOT_GITHUB_TOKEN",
 )
 API_ENDPOINTS = {"openai-completions": "/chat/completions"}
+OMP_BLOCKED_PROVIDER_DISCOVERY_SUFFIX = "/models?filter=with_meta&sort_by=omp"
 # Hard-coded in the exact build's provider/transport layers (source: `jv(...)` with retryEmptyCompletion,
 # MAX_EMPTY_COMPLETION_RETRIES=2, and a transport retry observed up to 6+ resends after HTTP 5xx and 5 after
 # HTTP 429; `maxRetries: 10` is the largest bound in the build). It sits below OMP's own retry setting, cannot
@@ -805,6 +807,11 @@ def install_skills(dist: Path, project: Path, env: dict[str, str] | None = None)
 
 # ------------------------------------------------------------------------------ realization
 
+def provider_discovery_target(route: dict[str, Any]) -> str:
+    """Exact OMP 18.0.11 dynamic provider-catalog probe that the frozen profile denies."""
+    return str(route["base_path"]).rstrip("/") + OMP_BLOCKED_PROVIDER_DISCOVERY_SUFFIX
+
+
 def models_document(profile: dict[str, Any]) -> dict[str, Any]:
     route = _policy(profile)["provider_route"]
     return {
@@ -1225,6 +1232,7 @@ def _observer_bwrap_argv(profile: dict[str, Any], paths: dict[str, Path], observ
         "--upstream", route["upstream"], "--credential-env", route["credential_env"],
         "--placeholder", route["placeholder_key"],
         "--allowed-path", route["base_path"].rstrip("/") + API_ENDPOINTS[route["api"]],
+        "--blocked-discovery-target", provider_discovery_target(route),
         "--max-requests", str(profile["budgets"]["max_turns"]),
         "--supervisor-pid", str(supervisor_pid),
         "--supervisor-netns", supervisor_netns, "--supervisor-pidns", supervisor_pidns,
@@ -1613,6 +1621,9 @@ class Observed:
         boundary: dict[str, Any] | None = None
         route_opened: dict[str, Any] | None = None
         credential_received: dict[str, Any] | None = None
+        provider_discovery_blocks: list[dict[str, Any]] = []
+        route = ((self.profile.get("containment_policy") or {}).get("provider_route") or {})
+        expected_discovery_target = provider_discovery_target(route) if route.get("base_path") else None
         observer_started = False
         for position, record in enumerate(self.records["observer"]):
             data = record.get("data") or {}
@@ -1639,6 +1650,21 @@ class Observed:
                     boundary_probes[name] = data
             elif kind == "boundary_setup_failed":
                 self.errors.append("observer least-privilege boundary setup failed")
+            elif kind == "provider_discovery_blocked":
+                expected = {
+                    "method": "GET",
+                    "path": expected_discovery_target,
+                    "body_bytes": 0,
+                    "provider_egress": False,
+                    "response_status": 405,
+                    "classification": "frozen-provider-catalog-discovery-disabled",
+                }
+                if expected_discovery_target is None or any(data.get(key) != value for key, value in expected.items()):
+                    self.errors.append(
+                        f"observer provider discovery block record {position} does not match the exact frozen OMP metadata probe"
+                    )
+                else:
+                    provider_discovery_blocks.append(data)
             elif kind == "request":
                 try:
                     raw_body = base64.b64decode(data["body_b64"], validate=True)
@@ -1686,6 +1712,8 @@ class Observed:
                 self.budget_exhausted.append({"record": record, "position": position})
             elif kind == "refused":
                 self.errors.append(f"observer refused an inference-transport operation: {data.get('reason')}")
+        if len(provider_discovery_blocks) > 1:
+            self.errors.append("observer recorded repeated provider model-discovery attempts")
         if response_positions != sorted(response_positions):
             self.errors.append("observer provider responses were reordered")
         request_indices = [row["index"] for row in self.requests]
