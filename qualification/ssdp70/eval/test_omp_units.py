@@ -92,7 +92,11 @@ class ObserverTlsTrust(unittest.TestCase):
 
     def test_observer_ca_path_is_the_bundle_staged_by_the_adapter(self):
         self.assertEqual(observer70.OBSERVER_CA_FILE, "/etc/ssl/certs/ca-certificates.crt")
-        documents = omp._observer_etc_documents()
+        omp.RUNTIME_STATE_ROOT.mkdir(parents=True, exist_ok=True)
+        with tempfile.TemporaryDirectory(prefix="observer-etc-unit-", dir=omp.RUNTIME_STATE_ROOT) as td:
+            paths = {"subject_runtime": Path(td) / "subject", "observer_runtime": Path(td) / "observer"}
+            omp._materialize_runtime_dependencies(paths)
+            documents = omp._observer_etc_documents(paths)
         self.assertIn("ssl/certs/ca-certificates.crt", documents)
         self.assertTrue(documents["ssl/certs/ca-certificates.crt"])
 
@@ -617,10 +621,19 @@ class SeccompFilter(unittest.TestCase):
 
 
 class RuntimeDependencySurface(unittest.TestCase):
-    def test_manifest_digest_and_host_dependencies_match(self):
+    def test_content_addressed_runtime_closure_identity_and_surface_match(self):
         self.assertEqual(omp.sha256_file(omp.RUNTIME_DEPENDENCIES_PATH), omp.RUNTIME_DEPENDENCIES_SHA256)
         self.assertEqual(omp.runtime_dependency_errors(), [])
-        with tempfile.TemporaryDirectory() as tmp:
+        manifest = omp.runtime_dependency_manifest()
+        artifact = manifest["artifact"]
+        self.assertEqual(manifest["closure_identity_sha256"], "6c49a21528ae33c2f8dfee60995448b3d7af795a4b2b826c164f87699d4d8499")
+        self.assertEqual(omp.sha256_file(Path(artifact["path"])), artifact["sha256"])
+        self.assertTrue(Path(artifact["path"]).resolve().is_relative_to(omp.RUNTIME_CLOSURE_ROOT.resolve()))
+        self.assertFalse(Path(artifact["path"]).stat().st_mode & 0o222)
+        self.assertIn("content-addressed", manifest["provenance"]["method"])
+        self.assertTrue(all("source" not in row for row in manifest["dependencies"]))
+        omp.RUNTIME_STATE_ROOT.mkdir(parents=True, exist_ok=True)
+        with tempfile.TemporaryDirectory(prefix="runtime-mount-unit-", dir=omp.RUNTIME_STATE_ROOT) as tmp:
             root = Path(tmp) / "subject"
             (root / "usr").mkdir(parents=True)
             (root / "lib64").mkdir()
@@ -645,7 +658,52 @@ class RuntimeDependencySurface(unittest.TestCase):
                 errors = omp.runtime_dependency_errors()
             finally:
                 omp.RUNTIME_DEPENDENCIES_PATH = old
-        self.assertTrue(any("drift" in item for item in errors))
+        self.assertTrue(any("manifest digest differs" in item for item in errors), errors)
+
+    def test_changed_closure_artifact_bytes_fail_before_archive_read(self):
+        document = omp.runtime_dependency_manifest()
+        artifact = document["artifact"]
+        omp.RUNTIME_STATE_ROOT.mkdir(parents=True, exist_ok=True)
+        with tempfile.TemporaryDirectory(prefix="runtime-artifact-drift-", dir=omp.RUNTIME_STATE_ROOT) as td:
+            root = Path(td)
+            changed = root / Path(artifact["path"]).name
+            changed.write_bytes(b"changed runtime closure bytes")
+            changed.chmod(0o444)
+            document["artifact"]["path"] = str(changed)
+            with mock.patch.object(omp, "RUNTIME_CLOSURE_ROOT", root):
+                errors = omp._runtime_closure_artifact_errors(document)
+        self.assertTrue(any("artifact bytes differ" in item for item in errors), errors)
+
+    def test_exact_profile_key_binds_runtime_closure_and_executable_support(self):
+        template = json.loads((HERE / "profiles" / "omp-headless.template.json").read_text())
+        profile = omp.freeze_profile(
+            template,
+            executable_path="/unavailable/source/path-is-not-used-at-runtime",
+            provider_route={
+                "provider_id": "stand", "model_id": "stand-model", "upstream": "http://127.0.0.1:1",
+                "context_window": 32000, "max_tokens": 4000, "reasoning": True,
+            },
+            reasoning={"thinking": "high", "source": "--thinking"},
+            profile_id="omp-stage6-closure-test",
+        )
+        policy = profile["containment_policy"]
+        self.assertEqual(policy["runtime_closure_identity_sha256"],
+                         omp.runtime_dependency_manifest()["closure_identity_sha256"])
+        self.assertEqual(policy["execution_support_sha256"], omp.execution_support_sha256())
+        capability_path = HERE / "capabilities" / "omp-headless.json"
+        omp.RUNTIME_STATE_ROOT.mkdir(parents=True, exist_ok=True)
+        with tempfile.TemporaryDirectory(prefix="profile-key-unit-", dir=omp.RUNTIME_STATE_ROOT) as td:
+            root = Path(td)
+            first = root / "first.json"
+            second = root / "changed-support.json"
+            first.write_text(json.dumps(profile), encoding="utf-8")
+            changed = json.loads(json.dumps(profile))
+            changed["containment_policy"]["execution_support_sha256"]["harness70.py"] = "0" * 64
+            second.write_text(json.dumps(changed), encoding="utf-8")
+            original_bundle = core70.load_profile(first, capability_path)
+            changed_bundle = core70.load_profile(second, capability_path)
+            self.assertNotEqual(original_bundle.profile_key_sha256, changed_bundle.profile_key_sha256)
+        self.assertTrue(any("execution-support digests" in error for error in omp.profile_errors(changed)))
 
 
 class ObserverResponseCompleteness(unittest.TestCase):

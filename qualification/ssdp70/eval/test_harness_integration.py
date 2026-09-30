@@ -216,18 +216,66 @@ class HarnessIntegration(unittest.TestCase):
             requirements=self.requirements, requirements_root=self.req_root, adapter_module=FakeAdapter,
             oracles=self.oracles.parent, mode="probe", admission=None, rep=0, pair_order=["p70"])
 
-
-    def complete_run(self, name="run-assess"):
-        out = self.root / name
-        identity = self.identity()
-        summary = harness70.run_episode(
+    def invoke(self, out):
+        return harness70.run_episode(
             corpus=self.corpus, episode=self.episode, arm=self.arm, arms_manifest_sha256="arms",
             dist=self.dist, out=out, profile_bundle=self.bundle, profile_path=self.profile_path,
             capability_path=self.cap_path, requirements=self.requirements, requirements_root=self.req_root,
             adapter_module=FakeAdapter, oracles=self.oracles.parent, mode="probe", admission=None,
-            identity=identity, pair_order=["p70"])
+            identity=self.identity(), pair_order=["p70"])
+
+    @staticmethod
+    def snapshot_realization(root):
+        root = Path(root)
+        snapshot = {}
+        for path in [root, *sorted(root.rglob("*"))]:
+            info = path.lstat()
+            if path.is_symlink():
+                kind, content = "symlink", os.readlink(path)
+            elif path.is_file():
+                kind, content = "file", path.read_bytes()
+            else:
+                kind, content = "directory", None
+            snapshot[path.relative_to(root).as_posix()] = {
+                "kind": kind, "content": content, "mode": info.st_mode & 0o7777,
+                "inode": info.st_ino, "mtime_ns": info.st_mtime_ns, "ctime_ns": info.st_ctime_ns,
+            }
+        return snapshot
+
+
+    def complete_run(self, name="run-assess"):
+        out = self.root / name
+        summary = self.invoke(out)
         self.assertEqual(summary["evidence_state"], "COMPLETE_ADMISSIBLE")
         return out
+
+    def assert_collision_preserves(self, out):
+        before = self.snapshot_realization(out)
+        with self.assertRaisesRegex(core70.ContractError, "realization collision"):
+            self.invoke(out)
+        self.assertEqual(self.snapshot_realization(out), before)
+
+    def test_completed_realization_collision_is_byte_and_metadata_preserving(self):
+        out = self.complete_run("completed-collision")
+        self.assertTrue((out / "run-identity.json").is_file())
+        self.assertTrue((out / "summary.json").is_file())
+        self.assert_collision_preserves(out)
+
+    def test_interrupted_partial_realization_collision_is_byte_and_metadata_preserving(self):
+        out = self.root / "interrupted-collision"
+        out.mkdir()
+        (out / "run-identity.json").write_bytes(b'{"schema":2,"interrupted":true')
+        (out / "trace.jsonl").write_bytes(b'{"partial":"native event prefix"')
+        self.assert_collision_preserves(out)
+
+    def test_terminal_integrity_artifacts_survive_realization_collision(self):
+        out = self.root / "terminal-collision"
+        out.mkdir()
+        (out / "run-identity.json").write_bytes(b'{"identity_sha256":"prior-run"}\n')
+        (out / "trace.jsonl").write_bytes(b'{"kind":"termination","complete":true}\n')
+        (out / "summary.json").write_bytes(b'{"evidence_state":"COMPLETE_ADMISSIBLE","qualification_outcome":"NOT_EVALUATED"}\n')
+        (out / "evidence-integrity.json").write_bytes(b'{"schema":1,"files":[{"path":"trace.jsonl","sha256":"prior"}]}\n')
+        self.assert_collision_preserves(out)
 
     def evaluator_material(self, version="1"):
         profile_path = self.root / f"evaluator-{version}.json"

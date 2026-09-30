@@ -40,11 +40,14 @@ import json
 import os
 import re
 import shutil
+import stat
 import subprocess
 import sys
+import tarfile
 import threading
 import time
 from pathlib import Path
+from pathlib import PurePosixPath
 from typing import Any
 from urllib.parse import urlsplit
 
@@ -102,7 +105,19 @@ OBSERVER_HOME = "/observer-home"
 OBSERVER_CODE = "/opt/ssdp/observer"
 RELAY_PORTS = {"inference": 31001, "mcp": 31002}
 RUNTIME_DEPENDENCIES_PATH = EVAL_DIR / "omp-runtime-dependencies-18.0.11.json"
-RUNTIME_DEPENDENCIES_SHA256 = "dc2a6035d72e889d80f97e6c048f517765e1c2ade480171aa4e160a59f4c35f1"
+RUNTIME_DEPENDENCIES_SHA256 = "5114fe69e08c17470d4b19d7d3d1d20ad755ec20965151dc04afaf2b8c247216"
+STAGEF_WORKSPACE_ROOT = Path.home() / "ssdp70-omp-stagef"
+RUNTIME_CLOSURE_ROOT = STAGEF_WORKSPACE_ROOT / "runtime-closures"
+RUNTIME_STATE_ROOT = STAGEF_WORKSPACE_ROOT / "logs" / "runtime-state"
+RUN_REALIZATION_ROOTS = (
+    STAGEF_WORKSPACE_ROOT / "probes",
+    STAGEF_WORKSPACE_ROOT / "qualification",
+)
+MAX_RUNTIME_CLOSURE_ARCHIVE_BYTES = 512 * 1024 * 1024
+MAX_RUNTIME_CLOSURE_EXPANDED_BYTES = 1024 * 1024 * 1024
+MAX_RUNTIME_CLOSURE_FILE_BYTES = 512 * 1024 * 1024
+MAX_RUNTIME_CLOSURE_ENTRIES = 5000
+MAX_RUNTIME_MANIFEST_BYTES = 2 * 1024 * 1024
 OBSERVER_EXEC_HELPER = EVAL_DIR / "observer_exec_helper70.py"
 OBSERVER_CHANNEL_TARGETS = (3, 4, 5, 6)
 OBSERVER_ARGUMENT_TARGET = 7
@@ -279,6 +294,10 @@ class AdapterError(RuntimeError):
     pass
 
 
+class PrelaunchRefusal(AdapterError):
+    """The adapter refused before starting subject/observer/provider processes."""
+
+
 # --------------------------------------------------------------------------- basic helpers
 
 def sha256_bytes(data: bytes) -> str:
@@ -428,18 +447,34 @@ def principal_files_sha256() -> dict[str, str]:
     return {name: sha256_file(path) for name, path in sorted(principal_files().items())}
 
 
+def execution_support_sha256() -> dict[str, str]:
+    """Bind the exact adapter, portable core and harness into the execution-profile key."""
+    return {
+        "adapters/omp.py": sha256_file(Path(__file__).resolve()),
+        "profiles/omp-headless.template.json": sha256_file(EVAL_DIR / "profiles" / "omp-headless.template.json"),
+        "core70.py": sha256_file(EVAL_DIR / "core70.py"),
+        "harness70.py": sha256_file(EVAL_DIR / "harness70.py"),
+    }
+
+
 def settings_closure_sha256() -> str:
     return _digest_json(settings_document())
 
 
 def runtime_dependency_manifest() -> dict[str, Any]:
     try:
+        info = RUNTIME_DEPENDENCIES_PATH.lstat()
+        if (not stat.S_ISREG(info.st_mode) or stat.S_ISLNK(info.st_mode)
+                or info.st_size > MAX_RUNTIME_MANIFEST_BYTES):
+            raise AdapterError("runtime dependency manifest is not a bounded regular file")
         manifest = json.loads(RUNTIME_DEPENDENCIES_PATH.read_text(encoding="utf-8"))
     except (OSError, json.JSONDecodeError) as exc:
         raise AdapterError(f"runtime dependency manifest is unreadable: {exc}") from exc
-    if (not isinstance(manifest, dict) or manifest.get("schema") != 1
+    if (not isinstance(manifest, dict) or manifest.get("schema") != 2
             or not isinstance(manifest.get("dependencies"), list)
-            or not isinstance(manifest.get("aliases"), list)):
+            or not isinstance(manifest.get("aliases"), list)
+            or not isinstance(manifest.get("artifact"), dict)
+            or not isinstance(manifest.get("runtime_trees"), dict)):
         raise AdapterError("runtime dependency manifest has an unsupported shape")
     return manifest
 
@@ -455,7 +490,7 @@ def _runtime_tree_digest(root: Path) -> tuple[str, int]:
             kind = "symlink"
             payload = os.readlink(path).encode("utf-8", "surrogateescape")
         elif path.is_dir():
-            kind, payload = "dir", b""
+            kind, payload = "directory", b""
         elif path.is_file():
             kind = "file"
             payload = bytes.fromhex(sha256_file(path))
@@ -467,73 +502,225 @@ def _runtime_tree_digest(root: Path) -> tuple[str, int]:
     return digest.hexdigest(), len(rows)
 
 
-def runtime_dependency_errors(profile: dict[str, Any] | None = None) -> list[str]:
-    """Verify every explicitly exposed host dependency against the frozen content manifest."""
+def _closure_identity_basis(manifest: dict[str, Any]) -> dict[str, Any]:
+    artifact = manifest.get("artifact") or {}
+    executable = manifest.get("subject_executable") or {}
+    return {
+        "schema": manifest.get("schema"),
+        "artifact_sha256": artifact.get("sha256"),
+        "artifact_bytes": artifact.get("bytes"),
+        "runtime_trees": manifest.get("runtime_trees"),
+        "subject_executable_sha256": executable.get("sha256"),
+    }
+
+
+def _canonical_sha256(value: Any) -> str:
+    return hashlib.sha256(json.dumps(value, sort_keys=True, separators=(",", ":")).encode("utf-8")).hexdigest()
+
+
+def _runtime_closure_artifact_errors(manifest: dict[str, Any]) -> list[str]:
+    """Verify the content-addressed archive and its complete declared tree before discovery."""
+    errors: list[str] = []
+    artifact = manifest.get("artifact") or {}
+    artifact_path = Path(str(artifact.get("path", "")))
+    artifact_sha = artifact.get("sha256")
+    artifact_bytes = artifact.get("bytes")
+    if (not isinstance(artifact_sha, str) or not re.fullmatch(r"[0-9a-f]{64}", artifact_sha)
+            or not isinstance(artifact_bytes, int) or isinstance(artifact_bytes, bool) or artifact_bytes <= 0
+            or artifact_bytes > MAX_RUNTIME_CLOSURE_ARCHIVE_BYTES):
+        return ["runtime closure artifact identity is malformed"]
+    expected_name = f"omp-runtime-18.0.11-sha256-{artifact_sha}.tar.gz"
+    if artifact_path.name != expected_name:
+        errors.append("runtime closure artifact path is not content-addressed by its digest")
     try:
+        closure_root = RUNTIME_CLOSURE_ROOT.resolve(strict=True)
+        resolved_artifact = artifact_path.resolve(strict=True)
+        resolved_artifact.relative_to(closure_root)
+        artifact_stat = artifact_path.lstat()
+        if not stat.S_ISREG(artifact_stat.st_mode) or stat.S_ISLNK(artifact_stat.st_mode):
+            errors.append("runtime closure artifact is not a regular immutable file")
+        if artifact_stat.st_mode & 0o222:
+            errors.append("runtime closure artifact has writable mode bits")
+        if artifact_stat.st_size != artifact_bytes or sha256_file(artifact_path) != artifact_sha:
+            errors.append("runtime closure artifact bytes differ from the content-addressed identity")
+    except (OSError, ValueError) as exc:
+        errors.append(f"runtime closure artifact is unavailable or outside the approved workspace: {exc}")
+        return errors
+    if errors:
+        return errors
+
+    dependencies = manifest.get("dependencies") or []
+    if len(dependencies) > MAX_RUNTIME_CLOSURE_ENTRIES:
+        return ["runtime closure declares too many entries"]
+    expected: dict[str, dict[str, Any]] = {}
+    previous_path = ""
+    expanded_file_bytes = 0
+    for row in dependencies:
+        if not isinstance(row, dict):
+            errors.append("runtime closure dependency entry is malformed")
+            continue
+        destination = row.get("destination")
+        if not isinstance(destination, str) or not destination.startswith("/") or ".." in PurePosixPath(destination).parts:
+            errors.append("runtime closure dependency destination is unsafe")
+            continue
+        relative = destination.lstrip("/")
+        if not relative or relative in expected or relative < previous_path:
+            errors.append(f"runtime closure dependency path is duplicated or unsorted: {destination}")
+            continue
+        previous_path = relative
+        expected[relative] = row
+        kind = row.get("kind")
+        roles = row.get("roles")
+        if kind not in ("file", "directory", "symlink"):
+            errors.append(f"runtime closure dependency kind is unsupported at {destination}")
+        if not re.fullmatch(r"0[0-7]{3}", str(row.get("mode", ""))):
+            errors.append(f"runtime closure dependency mode is malformed at {destination}")
+        if (not isinstance(roles, list) or not roles
+                or not all(isinstance(role, str) and role in ("subject", "observer") for role in roles)
+                or len(roles) != len(set(roles))):
+            errors.append(f"runtime closure dependency roles are malformed at {destination}")
+        if kind == "file":
+            file_bytes = row.get("bytes")
+            if (not re.fullmatch(r"[0-9a-f]{64}", str(row.get("sha256", "")))
+                    or not isinstance(file_bytes, int) or isinstance(file_bytes, bool) or file_bytes < 0
+                    or file_bytes > MAX_RUNTIME_CLOSURE_FILE_BYTES):
+                errors.append(f"runtime closure file identity is malformed at {destination}")
+            elif file_bytes >= 0:
+                expanded_file_bytes += file_bytes
+        if kind == "symlink" and (not isinstance(row.get("target"), str) or not row["target"]):
+            errors.append(f"runtime closure symlink identity is malformed at {destination}")
+    if expanded_file_bytes > MAX_RUNTIME_CLOSURE_EXPANDED_BYTES:
+        errors.append("runtime closure declares too many expanded file bytes")
+    symlink_paths = {relative for relative, row in expected.items() if row.get("kind") == "symlink"}
+    for relative in expected:
+        if any(parent.as_posix() in symlink_paths for parent in PurePosixPath(relative).parents if parent.as_posix() != "."):
+            errors.append(f"runtime closure places an entry beneath a symlink path: /{relative}")
+    if errors:
+        return errors
+
+    identity_basis = _closure_identity_basis(manifest)
+    if manifest.get("closure_identity_basis") != identity_basis:
+        errors.append("runtime closure identity basis differs from its declared artifact and trees")
+    if manifest.get("closure_identity_sha256") != _canonical_sha256(identity_basis):
+        errors.append("runtime closure identity digest does not match its declared contents")
+
+    executable = manifest.get("subject_executable") or {}
+    executable_row = expected.get(str(executable.get("destination", "")).lstrip("/"))
+    if (not isinstance(executable_row, dict) or executable_row.get("kind") != "file"
+            or executable_row.get("sha256") != OMP_BUILD["sha256"]
+            or executable_row.get("bytes") != OMP_BUILD["bytes"]
+            or executable.get("build_id") != OMP_BUILD["build_id"]
+            or "subject" not in (executable_row.get("roles") or [])):
+        errors.append("runtime closure does not bind the exact reviewed OMP executable")
+    if errors:
+        return errors
+
+    try:
+        with tarfile.open(artifact_path, mode="r|gz") as archive:
+            seen: set[str] = set()
+            expanded_seen = 0
+            for member in archive:
+                if len(seen) >= MAX_RUNTIME_CLOSURE_ENTRIES:
+                    return ["runtime closure archive has too many entries"]
+                if member.size < 0 or member.size > MAX_RUNTIME_CLOSURE_FILE_BYTES:
+                    return [f"runtime closure archive member exceeds its size limit: {member.name!r}"]
+                row = expected.get(member.name)
+                if row is None or member.name in seen:
+                    return [f"runtime closure archive has an undeclared or duplicate member: {member.name!r}"]
+                seen.add(member.name)
+                if format(member.mode, "04o") != row.get("mode"):
+                    return [f"runtime closure archive mode differs at {row['destination']}"]
+                kind = row.get("kind")
+                if kind == "directory":
+                    if not member.isdir() or member.size != 0:
+                        return [f"runtime closure archive object type differs at {row['destination']}"]
+                elif kind == "symlink":
+                    if not member.issym() or member.size != 0 or member.linkname != row.get("target"):
+                        return [f"runtime closure archive symlink differs at {row['destination']}"]
+                elif kind == "file":
+                    if (not member.isfile() or member.size != row.get("bytes")
+                            or member.size > MAX_RUNTIME_CLOSURE_FILE_BYTES):
+                        return [f"runtime closure archive file shape differs at {row['destination']}"]
+                    expanded_seen += member.size
+                    if expanded_seen > MAX_RUNTIME_CLOSURE_EXPANDED_BYTES:
+                        return ["runtime closure archive exceeds the expanded file-byte limit"]
+                    digest = hashlib.sha256()
+                    count = 0
+                    stream = archive.extractfile(member)
+                    if stream is None:
+                        return [f"runtime closure archive file is unreadable at {row['destination']}"]
+                    for block in iter(lambda: stream.read(1 << 20), b""):
+                        digest.update(block)
+                        count += len(block)
+                    if count != row.get("bytes") or digest.hexdigest() != row.get("sha256"):
+                        return [f"runtime closure archive file digest differs at {row['destination']}"]
+            missing = sorted(set(expected) - seen)
+            if missing:
+                return [f"runtime closure archive omits declared member(s): {missing[:8]}"]
+    except (OSError, tarfile.TarError, EOFError) as exc:
+        errors.append(f"runtime closure archive is malformed: {exc}")
+    return errors
+
+
+def runtime_dependency_errors(profile: dict[str, Any] | None = None) -> list[str]:
+    """Verify the immutable runtime bundle, manifest-to-archive binding and optional profile binding."""
+    try:
+        manifest_stat = RUNTIME_DEPENDENCIES_PATH.lstat()
+        if (not stat.S_ISREG(manifest_stat.st_mode) or stat.S_ISLNK(manifest_stat.st_mode)
+                or manifest_stat.st_size > MAX_RUNTIME_MANIFEST_BYTES):
+            return ["runtime dependency manifest is not a bounded regular file"]
+        manifest_sha = sha256_file(RUNTIME_DEPENDENCIES_PATH)
+        if manifest_sha != RUNTIME_DEPENDENCIES_SHA256:
+            return ["runtime dependency manifest digest differs from the retained exact surface"]
         manifest = runtime_dependency_manifest()
     except AdapterError as exc:
         return [str(exc)]
+    except OSError as exc:
+        return [f"runtime dependency manifest is unavailable: {exc}"]
     errors: list[str] = []
-    for entry in manifest["dependencies"]:
-        source = Path(str(entry.get("source", "")))
-        kind = entry.get("kind")
-        try:
-            info = source.lstat()
-            mode = format(info.st_mode & 0o7777, "04o")
-            if mode != entry.get("mode"):
-                errors.append(f"runtime dependency mode drift at {source}")
-                continue
-            if kind == "tree":
-                if not source.is_dir() or source.is_symlink():
-                    errors.append(f"runtime dependency is not the frozen directory: {source}")
-                    continue
-                actual, count = _runtime_tree_digest(source)
-                if actual != entry.get("sha256") or count != entry.get("entries"):
-                    errors.append(f"runtime dependency tree drift at {source}")
-            elif kind == "file":
-                if not source.is_file() or source.is_symlink():
-                    errors.append(f"runtime dependency is not the frozen file: {source}")
-                    continue
-                if sha256_file(source) != entry.get("sha256") or info.st_size != entry.get("bytes"):
-                    errors.append(f"runtime dependency content drift at {source}")
-            elif kind == "symlink":
-                if not source.is_symlink() or os.readlink(source) != entry.get("target"):
-                    errors.append(f"runtime dependency symlink drift at {source}")
-                    continue
-                if sha256_file(source) != entry.get("sha256") or source.stat().st_size != entry.get("bytes"):
-                    errors.append(f"runtime dependency target drift at {source}")
-            else:
-                errors.append(f"runtime dependency has an unsupported kind: {source}")
-        except OSError as exc:
-            errors.append(f"runtime dependency is unavailable at {source}: {exc}")
+    errors.extend(_runtime_closure_artifact_errors(manifest))
     seen_aliases: set[tuple[str, str]] = set()
+    dependencies = {row.get("destination"): row for row in manifest["dependencies"] if isinstance(row, dict)}
     for alias in manifest["aliases"]:
+        if not isinstance(alias, dict):
+            errors.append("runtime dependency alias is malformed")
+            continue
         destination, target, roles = alias.get("destination"), alias.get("target"), alias.get("roles")
-        if not isinstance(destination, str) or not destination.startswith("/") or ".." in Path(destination).parts:
+        if destination not in ("/bin", "/lib"):
             errors.append("runtime dependency alias has an unsafe destination")
             continue
-        if not isinstance(target, str) or not target or ".." in Path(target).parts:
+        if (not isinstance(target, str) or not target or PurePosixPath(target).is_absolute()
+                or ".." in PurePosixPath(target).parts):
             errors.append(f"runtime dependency alias has an unsafe target at {destination}")
             continue
-        if not isinstance(roles, list) or not roles or any(role not in ("subject", "observer") for role in roles):
+        if (not isinstance(roles, list) or not roles
+                or not all(isinstance(role, str) and role in ("subject", "observer") for role in roles)
+                or len(roles) != len(set(roles))):
             errors.append(f"runtime dependency alias has an invalid role list at {destination}")
+            continue
+        target_row = dependencies.get("/" + target)
+        if (not isinstance(target_row, dict) or target_row.get("kind") != "directory"
+                or any(role not in (target_row.get("roles") or []) for role in roles)):
+            errors.append(f"runtime dependency alias target is not a declared directory at {destination}")
             continue
         for role in roles:
             key = (role, destination)
             if key in seen_aliases:
                 errors.append(f"runtime dependency alias is duplicated for {role}: {destination}")
             seen_aliases.add(key)
-    executable = manifest.get("subject_executable") or {}
     if profile is not None:
         runtime = profile.get("provider_runtime") or {}
-        executable_path = Path(str(runtime.get("executable_path", "")))
-        try:
-            if (not executable_path.is_file()
-                    or executable_path.stat().st_size != executable.get("bytes")
-                    or sha256_file(executable_path) != executable.get("sha256")):
-                errors.append("runtime dependency OMP executable differs from the manifest")
-        except OSError as exc:
-            errors.append(f"runtime dependency OMP executable is unavailable: {exc}")
+        policy = profile.get("containment_policy") or {}
+        executable = manifest.get("subject_executable") or {}
+        if runtime.get("executable_path") != SB_OMP:
+            errors.append("profile OMP executable path is not the closure-staged sandbox path")
+        if (runtime.get("executable_sha256") != executable.get("sha256")
+                or runtime.get("executable_bytes") != executable.get("bytes")):
+            errors.append("profile OMP executable identity differs from the runtime closure")
+        if policy.get("runtime_dependency_manifest_sha256") != sha256_file(RUNTIME_DEPENDENCIES_PATH):
+            errors.append("profile runtime manifest digest differs from the runtime closure manifest")
+        if policy.get("runtime_closure_identity_sha256") != manifest.get("closure_identity_sha256"):
+            errors.append("profile runtime closure identity differs from the immutable artifact")
     return errors
 
 
@@ -542,50 +729,123 @@ def _dependencies_for_role(role: str) -> list[dict[str, Any]]:
 
 
 def _materialize_runtime_dependencies(paths: dict[str, Path]) -> dict[str, Any]:
-    """Copy verified manifest entries into per-principal run-owned roots for read-only binding."""
+    """Stage only declared files from the verified closure into fresh per-principal roots."""
+    if sha256_file(RUNTIME_DEPENDENCIES_PATH) != RUNTIME_DEPENDENCIES_SHA256:
+        raise AdapterError("runtime dependency manifest digest differs from the retained exact surface")
     manifest = runtime_dependency_manifest()
-    results: dict[str, Any] = {}
+    errors = _runtime_closure_artifact_errors(manifest)
+    if errors:
+        raise AdapterError("OMP runtime closure artifact is inadmissible: " + "; ".join(errors))
+    roots: dict[str, Path] = {}
     for role in ("subject", "observer"):
         root = paths[f"{role}_runtime"]
-        if root.exists():
-            shutil.rmtree(root)
+        if os.path.lexists(root):
+            raise AdapterError(f"run-owned {role} runtime root already exists; refusing to replace it")
         root.mkdir(parents=True)
-        mounted: list[str] = []
-        for entry in manifest["dependencies"]:
-            if role not in entry.get("roles", []):
-                continue
-            destination = str(entry["destination"])
-            if role == "observer" and destination.startswith("/etc/"):
-                continue  # certificate material is copied into synthetic /etc below.
-            source = Path(str(entry["source"]))
-            target = root / destination.lstrip("/")
-            target.parent.mkdir(parents=True, exist_ok=True)
-            if entry.get("kind") == "tree":
-                shutil.copytree(source, target, symlinks=True, copy_function=shutil.copy2)
-            elif entry.get("kind") in ("file", "symlink"):
-                shutil.copy2(source, target, follow_symlinks=True)
-            else:
-                raise AdapterError(f"runtime dependency has an unsupported materialization kind: {source}")
-            if entry.get("kind") == "tree":
-                copied_digest, copied_entries = _runtime_tree_digest(target)
-                if copied_digest != entry.get("sha256") or copied_entries != entry.get("entries"):
-                    raise AdapterError(f"staged runtime dependency tree differs from its manifest: {source}")
-            elif sha256_file(target) != entry.get("sha256"):
-                raise AdapterError(f"staged runtime dependency file differs from its manifest: {source}")
-            mounted.append(destination)
-        for alias in manifest["aliases"]:
-            if role not in alias.get("roles", []):
-                continue
-            destination = str(alias["destination"])
-            if not destination.startswith("/usr/"):
-                continue  # top-level /bin and /lib aliases are installed by bubblewrap.
-            target = root / destination.lstrip("/")
-            target.parent.mkdir(parents=True, exist_ok=True)
-            os.symlink(str(alias["target"]), target)
-            mounted.append(destination)
+        roots[role] = root
+    for row in manifest["dependencies"]:
+        if row["kind"] != "directory":
+            continue
+        for role in row["roles"]:
+            target = roots[role] / row["destination"].lstrip("/")
+            target.mkdir(parents=True, exist_ok=True)
+            target.chmod(0o700)
+    expected = {row["destination"].lstrip("/"): row for row in manifest["dependencies"]}
+    artifact_path = Path(manifest["artifact"]["path"])
+    seen: set[str] = set()
+    try:
+        with tarfile.open(artifact_path, mode="r|gz") as archive:
+            for member in archive:
+                row = expected.get(member.name)
+                if row is None or member.name in seen:
+                    raise AdapterError(f"runtime closure archive changed while staging: {member.name!r}")
+                seen.add(member.name)
+                kind = row["kind"]
+                if format(member.mode, "04o") != row["mode"]:
+                    raise AdapterError(f"runtime closure archive mode changed while staging: {row['destination']}")
+                if kind == "directory":
+                    if not member.isdir():
+                        raise AdapterError(f"runtime closure archive object type changed at {row['destination']}")
+                    continue
+                if kind == "symlink":
+                    if not member.issym() or member.linkname != row["target"]:
+                        raise AdapterError(f"runtime closure archive symlink changed at {row['destination']}")
+                    for role in row["roles"]:
+                        target = roots[role] / row["destination"].lstrip("/")
+                        target.parent.mkdir(parents=True, exist_ok=True)
+                        os.symlink(member.linkname, target)
+                    continue
+                if not member.isfile() or member.size != row["bytes"]:
+                    raise AdapterError(f"runtime closure archive file shape changed at {row['destination']}")
+                source = archive.extractfile(member)
+                if source is None:
+                    raise AdapterError(f"runtime closure archive file is unreadable at {row['destination']}")
+                targets = []
+                for role in row["roles"]:
+                    target = roots[role] / row["destination"].lstrip("/")
+                    target.parent.mkdir(parents=True, exist_ok=True)
+                    targets.append(target.open("xb"))
+                digest = hashlib.sha256()
+                count = 0
+                try:
+                    for block in iter(lambda: source.read(1 << 20), b""):
+                        digest.update(block)
+                        count += len(block)
+                        for target_stream in targets:
+                            target_stream.write(block)
+                finally:
+                    for target_stream in targets:
+                        target_stream.close()
+                if count != row["bytes"] or digest.hexdigest() != row["sha256"]:
+                    raise AdapterError(f"runtime closure file digest changed while staging: {row['destination']}")
+                for role in row["roles"]:
+                    (roots[role] / row["destination"].lstrip("/")).chmod(int(row["mode"], 8))
+    except (OSError, tarfile.TarError, EOFError) as exc:
+        raise AdapterError(f"runtime closure staging failed: {exc}") from exc
+    if set(expected) != seen:
+        missing = sorted(set(expected) - seen)
+        raise AdapterError(f"runtime closure archive omitted declared entries while staging: {missing[:8]}")
+    for row in sorted(manifest["dependencies"], key=lambda item: item["destination"].count("/"), reverse=True):
+        if row["kind"] != "directory":
+            continue
+        for role in row["roles"]:
+            (roots[role] / row["destination"].lstrip("/")).chmod(int(row["mode"], 8))
+    results: dict[str, Any] = {}
+    for role in ("subject", "observer"):
+        root = roots[role]
         tree_digest, entry_count = _runtime_tree_digest(root)
-        results[role] = {"tree_sha256": tree_digest, "entries": entry_count, "paths": sorted(mounted)}
+        expected_tree = manifest["runtime_trees"].get(role) or {}
+        if tree_digest != expected_tree.get("tree_sha256") or entry_count != expected_tree.get("entries"):
+            raise AdapterError(f"staged {role} runtime tree differs from the immutable closure manifest")
+        results[role] = {"tree_sha256": tree_digest, "entries": entry_count,
+                         "paths": sorted(row["destination"] for row in manifest["dependencies"] if role in row["roles"])}
     return results
+
+
+def _verify_staged_runtime_dependencies(paths: dict[str, Path]) -> list[str]:
+    try:
+        if sha256_file(RUNTIME_DEPENDENCIES_PATH) != RUNTIME_DEPENDENCIES_SHA256:
+            return ["runtime dependency manifest digest differs from the retained exact surface"]
+    except OSError as exc:
+        return [f"runtime dependency manifest is unavailable: {exc}"]
+    manifest = runtime_dependency_manifest()
+    errors: list[str] = []
+    for role in ("subject", "observer"):
+        root = paths[f"{role}_runtime"]
+        try:
+            actual, count = _runtime_tree_digest(root)
+        except (AdapterError, OSError) as exc:
+            errors.append(f"staged {role} runtime closure is unreadable: {exc}")
+            continue
+        expected = manifest["runtime_trees"].get(role) or {}
+        if actual != expected.get("tree_sha256") or count != expected.get("entries"):
+            errors.append(f"staged {role} runtime closure differs from the immutable manifest")
+    executable = manifest["subject_executable"]
+    path = paths["subject_runtime"] / executable["destination"].lstrip("/")
+    if (not path.is_file() or path.is_symlink() or path.stat().st_size != executable["bytes"]
+            or sha256_file(path) != executable["sha256"]):
+        errors.append("staged OMP executable differs from the immutable runtime closure")
+    return errors
 
 
 def _policy(profile: dict[str, Any]) -> dict[str, Any]:
@@ -610,6 +870,10 @@ def profile_errors(profile: dict[str, Any]) -> list[str]:
             errors.append(f"provider_runtime.{key} is not frozen")
     if runtime.get("executable_sha256") != OMP_BUILD["sha256"] or runtime.get("version") != OMP_BUILD["version"]:
         errors.append("provider_runtime does not name the exact reviewed OMP build (version/sha256)")
+    if runtime.get("executable_bytes") != OMP_BUILD["bytes"] or runtime.get("build_id") != OMP_BUILD["build_id"]:
+        errors.append("provider_runtime does not bind the exact reviewed OMP build size/build id")
+    if runtime.get("executable_path") != SB_OMP:
+        errors.append("provider_runtime executable_path must name the closure-staged sandbox executable")
     substrate = policy.get("substrate") if isinstance(policy.get("substrate"), dict) else {}
     for key in ("executable", "executable_sha256"):
         if not isinstance(substrate.get(key), str) or not substrate.get(key):
@@ -638,10 +902,19 @@ def profile_errors(profile: dict[str, Any]) -> list[str]:
         errors.append("retained runtime dependency manifest differs from the reviewed exact surface")
     if policy.get("runtime_dependency_manifest_sha256") != RUNTIME_DEPENDENCIES_SHA256:
         errors.append("frozen runtime dependency manifest digest does not match the retained exact surface")
+    try:
+        closure_identity = runtime_dependency_manifest().get("closure_identity_sha256")
+    except AdapterError as exc:
+        errors.append(str(exc))
+        closure_identity = None
+    if policy.get("runtime_closure_identity_sha256") != closure_identity:
+        errors.append("frozen runtime closure identity does not match the immutable closure manifest")
     if policy.get("observer_boundary") != OBSERVER_BOUNDARY_POLICY:
         errors.append("observer boundary policy differs from the reviewed least-privilege realization")
     if policy.get("principal_files_sha256") != principal_files_sha256():
         errors.append("frozen principal-file digests do not match the adapter's principal code")
+    if policy.get("execution_support_sha256") != execution_support_sha256():
+        errors.append("frozen execution-support digests do not match the exact adapter/core/harness")
     inventory = policy.get("build_inventory_sha256")
     if inventory != sha256_file(inventory_path()):
         errors.append("frozen build-inventory digest does not match the retained exact-build inventory")
@@ -687,7 +960,15 @@ def freeze_profile(template: dict[str, Any], *, executable_path: str, provider_r
     profile["containment_policy"]["provider_route"] = route
     profile["agent_model"] = f"{route['provider_id']}/{route['model_id']}"
     runtime = profile["provider_runtime"]
-    runtime["executable_path"] = str(executable_path)
+    executable = runtime_dependency_manifest()["subject_executable"]
+    source_executable = Path(executable_path)
+    if source_executable.is_file() and (source_executable.stat().st_size != executable["bytes"]
+                                        or sha256_file(source_executable) != executable["sha256"]):
+        raise AdapterError("profile freeze input differs from the immutable OMP executable in the runtime closure")
+    runtime["executable_path"] = SB_OMP
+    runtime["executable_sha256"] = executable["sha256"]
+    runtime["executable_bytes"] = executable["bytes"]
+    runtime["build_id"] = executable["build_id"]
     runtime["provider"] = route["provider_id"]
     profile["reasoning_configuration"] = dict(reasoning)
     if budgets:
@@ -697,7 +978,9 @@ def freeze_profile(template: dict[str, Any], *, executable_path: str, provider_r
     policy["substrate"]["executable_sha256"] = sha256_file(Path(substrate_executable))
     policy["settings_closure_sha256"] = settings_closure_sha256()
     policy["runtime_dependency_manifest_sha256"] = sha256_file(RUNTIME_DEPENDENCIES_PATH)
+    policy["runtime_closure_identity_sha256"] = runtime_dependency_manifest()["closure_identity_sha256"]
     policy["principal_files_sha256"] = principal_files_sha256()
+    policy["execution_support_sha256"] = execution_support_sha256()
     policy["build_inventory_sha256"] = sha256_file(inventory_path())
     return profile
 
@@ -866,11 +1149,11 @@ def etc_documents() -> dict[str, bytes]:
     }
 
 
-def _observer_etc_documents() -> dict[str, bytes]:
+def _observer_etc_documents(paths: dict[str, Path]) -> dict[str, bytes]:
     uid, gid = os.getuid(), os.getgid()
     nameservers: list[str] = []
     try:
-        source = Path("/etc/resolv.conf").read_text(encoding="utf-8")
+        source = (paths["observer_runtime"] / "etc/resolv.conf").read_text(encoding="utf-8")
     except OSError:
         source = ""
     for line in source.splitlines():
@@ -889,7 +1172,7 @@ def _observer_etc_documents() -> dict[str, bytes]:
         "hosts": b"127.0.0.1 localhost\n::1 localhost\n",
         "resolv.conf": ("".join(f"nameserver {item}\n" for item in nameservers) + "options timeout:2 attempts:1\n").encode(),
     }
-    ca_path = Path("/etc/ssl/certs/ca-certificates.crt")
+    ca_path = paths["observer_runtime"] / "etc/ssl/certs/ca-certificates.crt"
     documents["ssl/certs/ca-certificates.crt"] = ca_path.read_bytes()
     return documents
 
@@ -945,12 +1228,12 @@ def _write_control_tree(paths: dict[str, Path], profile: dict[str, Any]) -> dict
     if observer_etc.exists():
         shutil.rmtree(observer_etc)
     observer_etc.mkdir(parents=True)
-    for name, data in _observer_etc_documents().items():
+    manifest["runtime_surface"] = _materialize_runtime_dependencies(paths)
+    for name, data in _observer_etc_documents(paths).items():
         target = observer_etc / name
         target.parent.mkdir(parents=True, exist_ok=True)
         target.write_bytes(data)
         manifest["observer_etc"][name] = sha256_bytes(data)
-    manifest["runtime_surface"] = _materialize_runtime_dependencies(paths)
     return manifest
 
 
@@ -1044,10 +1327,6 @@ def realize_containment(profile: dict[str, Any], project: Path, env: dict[str, s
         raise AdapterError("OMP explicit runtime dependency surface is inadmissible: " + "; ".join(dependency_errors))
     paths = _paths(project, env)
     policy = _policy(profile)
-    runtime = profile["provider_runtime"]
-    exe = Path(runtime["executable_path"])
-    if not exe.is_file() or sha256_file(exe) != OMP_BUILD["sha256"] or exe.stat().st_size != OMP_BUILD["bytes"]:
-        raise AdapterError("OMP executable differs from the exact frozen build (sha256/size)")
     substrate = Path(policy["substrate"]["executable"])
     if not substrate.is_file() or sha256_file(substrate) != policy["substrate"]["executable_sha256"]:
         raise AdapterError("containment substrate executable digest mismatch")
@@ -1061,8 +1340,11 @@ def realize_containment(profile: dict[str, Any], project: Path, env: dict[str, s
         raise AdapterError("harness-private MCP server differs from the reviewed mediator")
     discovery = validate_ambient_discovery_closure(project, env)
     if discovery:
-        raise AdapterError("OMP ambient discovery is not closed: " + "; ".join(discovery))
+        raise PrelaunchRefusal("OMP ambient discovery is not closed: " + "; ".join(discovery))
     manifest = _write_control_tree(paths, profile)
+    staged_errors = _verify_staged_runtime_dependencies(paths)
+    if staged_errors:
+        raise AdapterError("staged OMP runtime closure is inadmissible: " + "; ".join(staged_errors))
     mcp_sha = manifest["home_control"][".omp/agent/mcp.json"]
     server_sha = sha256_file(layout["server"])
     return {
@@ -1078,6 +1360,8 @@ def realize_containment(profile: dict[str, Any], project: Path, env: dict[str, s
             "models_sha256": manifest["home_control"][".omp/agent/models.yml"],
             "control_manifest": manifest,
             "runtime_dependency_manifest_sha256": sha256_file(RUNTIME_DEPENDENCIES_PATH),
+            "runtime_closure_identity_sha256": runtime_dependency_manifest()["closure_identity_sha256"],
+            "runtime_closure_artifact_sha256": runtime_dependency_manifest()["artifact"]["sha256"],
             "runtime_dependency_surface": runtime_dependency_manifest(),
             "runtime_dependency_staging": manifest["runtime_surface"],
             "principal_files_sha256": principal_files_sha256(),
@@ -1165,7 +1449,6 @@ def _drain(fd: int, sink: bytearray) -> threading.Thread:
 def _bwrap_argv(profile: dict[str, Any], paths: dict[str, Path], seccomp_fd: int,
                 launcher_config: str, sandbox_exe: str) -> list[str]:
     policy = _policy(profile)
-    runtime = profile["provider_runtime"]
     argv = [
         policy["substrate"]["executable"],
         "--unshare-user", "--unshare-pid", "--unshare-ipc", "--unshare-uts", "--unshare-cgroup", "--unshare-net",
@@ -1186,7 +1469,7 @@ def _bwrap_argv(profile: dict[str, Any], paths: dict[str, Path], seccomp_fd: int
     argv += [
         "--ro-bind", str(paths["skills"]), SB_SKILLS,
         "--ro-bind", str(paths["control"]), SB_CTL,
-        "--ro-bind", runtime["executable_path"], sandbox_exe,
+        "--ro-bind", str(paths["subject_runtime"] / SB_OMP.lstrip("/")), sandbox_exe,
         "--chdir", "/",
         "/usr/bin/python3", f"{SB_CTL}/subject_launcher.py", launcher_config,
     ]
@@ -1250,23 +1533,24 @@ def launch(profile: dict[str, Any], prompt: str, project: Path, env: dict[str, s
     """Run the exact frozen OMP build for real: principals, sandbox, relay, native JSON trace."""
     problems = profile_errors(profile)
     if problems:
-        raise AdapterError("OMP launch refused; profile is not admissible: " + "; ".join(problems))
+        raise PrelaunchRefusal("OMP launch refused; profile is not admissible: " + "; ".join(problems))
     dependency_errors = runtime_dependency_errors(profile)
     if dependency_errors:
-        raise AdapterError("OMP launch refused; explicit runtime dependency surface drifted: " + "; ".join(dependency_errors))
+        raise PrelaunchRefusal("OMP launch refused; explicit runtime dependency surface drifted: " + "; ".join(dependency_errors))
     paths = _paths(project, env)
     policy = _policy(profile)
     route = policy["provider_route"]
-    runtime = profile["provider_runtime"]
     layout = core70.private_mcp_paths(paths["private"])
+    staged_errors = _verify_staged_runtime_dependencies(paths)
+    if staged_errors:
+        raise PrelaunchRefusal("OMP launch refused; staged runtime closure changed: " + "; ".join(staged_errors))
     discovery = validate_ambient_discovery_closure(project, env)
     if discovery:
-        raise AdapterError("OMP launch refused; ambient discovery is not closed: " + "; ".join(discovery))
-    if sha256_file(Path(runtime["executable_path"])) != OMP_BUILD["sha256"]:
-        raise AdapterError("OMP launch refused; executable differs from the frozen build")
+        raise PrelaunchRefusal("OMP launch refused; ambient discovery is not closed: " + "; ".join(discovery))
+    runtime = profile["provider_runtime"]
     credential = os.environ.get(route["credential_env"])
     if credential is None:
-        raise AdapterError(f"provider credential variable {route['credential_env']!r} is not set for the observer principal")
+        raise PrelaunchRefusal(f"provider credential variable {route['credential_env']!r} is not set for the observer principal")
 
     # Digests of the immutable inputs at the moment of launch (compared by the harness with the
     # realization it retained, and re-verified after the run).
@@ -1482,6 +1766,8 @@ def launch(profile: dict[str, Any], prompt: str, project: Path, env: dict[str, s
         "runtime-dependency-manifest.json": RUNTIME_DEPENDENCIES_PATH.read_text(encoding="utf-8"),
         "runtime-dependency-attestation.json": json.dumps({
             "manifest_sha256": sha256_file(RUNTIME_DEPENDENCIES_PATH),
+            "runtime_closure_identity_sha256": runtime_dependency_manifest()["closure_identity_sha256"],
+            "artifact_sha256": runtime_dependency_manifest()["artifact"]["sha256"],
             "runtime_dependency_errors_after_launch": runtime_dependency_errors(profile),
             "staged_runtime_roots": {
                 role: {"path_sha256": digest, "entries": count}
@@ -1513,6 +1799,8 @@ def launch(profile: dict[str, Any], prompt: str, project: Path, env: dict[str, s
         "mcp_config_sha256": home_docs[".omp/agent/mcp.json"],
         "runtime_version": runtime.get("version"),
         "runtime_dependency_manifest_sha256": sha256_file(RUNTIME_DEPENDENCIES_PATH),
+        "runtime_closure_identity_sha256": runtime_dependency_manifest()["closure_identity_sha256"],
+        "runtime_closure_artifact_sha256": runtime_dependency_manifest()["artifact"]["sha256"],
         "runtime_dependency_staging": {
             role: digest for role, (digest, _count) in runtime_stage_digests.items()
         },
@@ -1560,15 +1848,14 @@ def post_run_integrity(profile: dict[str, Any], project: Path, env: dict[str, st
     recorded = {row.get("name"): row.get("executable_sha256") for row in realization.get("mcp_servers") or []}
     if not layout["server"].is_file() or sha256_file(layout["server"]) != recorded.get(OMP_MCP_SERVER_NAME):
         errors.append("qualification mediator executable changed during execution")
-    runtime = profile.get("provider_runtime") or {}
-    exe = Path(str(runtime.get("executable_path")))
-    if not exe.is_file() or sha256_file(exe) != OMP_BUILD["sha256"]:
-        errors.append("OMP executable changed during execution")
+    errors.extend(_verify_staged_runtime_dependencies(paths))
     for rel in _scan_sources(paths["project"], PROJECT_DISCOVERY_SOURCES):
         errors.append(f"post-run project contains provider discovery source {rel!r}")
     expected_manifest_sha = realization.get("runtime_dependency_manifest_sha256")
     if expected_manifest_sha != RUNTIME_DEPENDENCIES_SHA256:
         errors.append("runtime dependency manifest identity differs from the retained containment realization")
+    if realization.get("runtime_closure_identity_sha256") != runtime_dependency_manifest().get("closure_identity_sha256"):
+        errors.append("runtime closure identity differs from the retained containment realization")
     errors.extend(runtime_dependency_errors(profile))
     return errors
 

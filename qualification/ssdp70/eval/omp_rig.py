@@ -14,10 +14,11 @@ from __future__ import annotations
 
 import json
 import os
-import shutil
 import sys
-import tempfile
+import subprocess
 import threading
+import uuid
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
@@ -33,6 +34,8 @@ from adapters import omp  # noqa: E402
 
 REPO = HERE.parents[2]
 DIST_SKILLS = REPO / "dist" / "skills"
+STAGEF_WORKSPACE_ROOT = Path.home() / "ssdp70-omp-stagef"
+QUALIFICATION_ROOT = STAGEF_WORKSPACE_ROOT / "qualification"
 OMP_EXE = Path(os.environ.get("SSDP70_OMP_EXE", os.path.expanduser("~/.local/bin/omp")))
 CREDENTIAL_ENV = "SSDP70_OMP_PROVIDER_CREDENTIAL"
 SENTINEL_CREDENTIAL = "SENTINEL-PROVIDER-CREDENTIAL-D4-NOT-A-SECRET"
@@ -65,7 +68,14 @@ class Rig:
     def __init__(self, root: Path, *, reasoning: bool = True, thinking: str = "high", max_turns: int = 30,
                  timeout_s: int = 120, claims: list[str] | None = None, entry: str = "ordinary",
                  project_files: dict[str, str] | None = None, prompt: str = "Do the task."):
-        self.root = Path(tempfile.mkdtemp(dir=root))
+        QUALIFICATION_ROOT.mkdir(parents=True, exist_ok=True)
+        candidate = subprocess.run(
+            ["git", "rev-parse", "--short=12", "HEAD"], cwd=REPO, check=True,
+            capture_output=True, text=True,
+        ).stdout.strip()
+        stamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
+        self.root = QUALIFICATION_ROOT / f"OMP-STANDIN-{stamp}-{candidate}-{uuid.uuid4().hex[:12]}"
+        self.root.mkdir()
         root = self.root
         self.reasoning = reasoning
         self.thinking = thinking

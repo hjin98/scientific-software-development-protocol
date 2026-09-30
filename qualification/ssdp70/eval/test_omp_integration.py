@@ -672,10 +672,12 @@ class ProviderManagedStateAndDiscoveryEffects(RigCase):
 
     MARKER = "HOSTILE-MARKER-D4"
 
-    def _assert_rejected_before_process(self, rig, *, inject_launch_environment=None):
+    def _assert_rejected_before_process(self, rig, *, inject_launch_environment=None, expect_launch=False):
         original_launch = omp.launch
+        launch_calls = []
 
         def observed_launch(profile, prompt, project, env):
+            launch_calls.append(True)
             if inject_launch_environment is not None:
                 env = dict(env)
                 env.update(inject_launch_environment)
@@ -683,12 +685,27 @@ class ProviderManagedStateAndDiscoveryEffects(RigCase):
 
         with mock.patch.object(omp, "launch", side_effect=observed_launch), \
                 mock.patch.object(omp.subprocess, "Popen", wraps=omp.subprocess.Popen) as process_start:
-            with self.assertRaises(omp.AdapterError) as ctx:
-                rig.run(scenario_steps(text("must not launch")))
+            summary = rig.run(scenario_steps(text("must not launch")))
 
-        self.assertIn("ambient discovery is not closed", str(ctx.exception))
-        process_start.assert_not_called()
+        self.assertEqual(summary["evidence_state"], "EXECUTION_ERROR")
+        self.assertEqual(summary["qualification_outcome"], "NOT_EVALUATED")
+        self.assertFalse(summary["execution_ok"])
+        self.assertFalse(summary["prelaunch_refusal"]["subject_launched"])
+        self.assertTrue(any("ambient discovery is not closed" in item for item in summary["evidence_state_reasons"]))
+        subject_launches = [
+            call for call in process_start.call_args_list
+            if call.args and isinstance(call.args[0], (list, tuple)) and call.args[0]
+            and Path(str(call.args[0][0])).name == "bwrap"
+        ]
+        self.assertEqual(subject_launches, [])
+        self.assertEqual(len(launch_calls), 1 if expect_launch or inject_launch_environment else 0)
         self.assertEqual(rig.read_stand_in(), [])
+        secret_values = [omp_rig.SENTINEL_CREDENTIAL, *(inject_launch_environment or {}).values()]
+        for path in Path(summary["_out"]).rglob("*"):
+            if path.is_file():
+                contents = path.read_bytes()
+                for secret in secret_values:
+                    self.assertNotIn(secret.encode(), contents, f"credential value was written to {path.name}")
 
     def test_every_project_discovery_source_is_refused_before_omp_or_provider(self):
         for rel in omp.PROJECT_DISCOVERY_SOURCES:
@@ -712,7 +729,7 @@ class ProviderManagedStateAndDiscoveryEffects(RigCase):
                     return manifest
 
                 with mock.patch.object(omp, "_write_control_tree", side_effect=seed_home_source):
-                    self._assert_rejected_before_process(rig)
+                    self._assert_rejected_before_process(rig, expect_launch=True)
 
     def test_every_credential_environment_name_is_refused_before_omp_or_provider(self):
         for name in omp.CREDENTIAL_ENV_NAMES:
@@ -776,8 +793,10 @@ class ProviderManagedStateAndDiscoveryEffects(RigCase):
             def mutate(profile, path=path):
                 profile[path[0]][path[1]] = "0" * 64
                 return profile
-            with self.assertRaises(omp.AdapterError):
-                self.rig().run(scenario_steps(text("x")), mutate_profile=mutate)
+            refused = self.rig().run(scenario_steps(text("x")), mutate_profile=mutate)
+            self.assertEqual(refused["evidence_state"], "EXECUTION_ERROR")
+            self.assertEqual(refused["qualification_outcome"], "NOT_EVALUATED")
+            self.assertEqual(refused["_stand_in_requests"], [])
         # an unfrozen profile cannot reach the runtime through the harness
         def unfreeze(profile):
             profile["provider_runtime"]["provider"] = "MUST-BE-FROZEN-BEFORE-QUALIFICATION"
@@ -899,6 +918,27 @@ class B2PrivilegeSeparationWhileInferenceWorks(RigCase):
         for name in ("git", "gcc", "curl", "apt", "find", "cat", "node"):
             self.assertIn(f"/usr/bin/{name} False False", result)
         self.assertIn(f"{HOST_HOME} False False", result)
+
+    def test_staged_runtime_tampering_fails_before_subject_or_provider_execution(self):
+        rig = self.rig(timeout_s=110)
+        original_materialize = omp._materialize_runtime_dependencies
+        launched = mock.Mock()
+
+        def materialize_then_tamper(paths):
+            staged = original_materialize(paths)
+            target = paths["subject_runtime"] / "usr/bin/bash"
+            with target.open("ab") as stream:
+                stream.write(b"tamper")
+            return staged
+
+        with mock.patch.object(omp, "_materialize_runtime_dependencies", side_effect=materialize_then_tamper), \
+                mock.patch.object(omp, "launch", launched):
+            summary = rig.run(scenario_steps(text("must not launch")))
+        self.assertEqual(summary["evidence_state"], "EXECUTION_ERROR")
+        self.assertTrue(any("staged OMP runtime closure is inadmissible" in item
+                            for item in summary["evidence_state_reasons"]))
+        launched.assert_not_called()
+        self.assertEqual(rig.read_stand_in(), [])
 
     def test_bash_cannot_use_the_inference_or_mcp_transport_or_launch_a_second_omp(self):
         summary, out = self.run_attacks([

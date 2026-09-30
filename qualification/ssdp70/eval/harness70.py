@@ -358,6 +358,35 @@ def _termination_state(events: list[dict[str, Any]]) -> tuple[bool, bool]:
     return True, not bool(state.get("is_error"))
 
 
+def _create_realization_directory(out: Path, adapter_module) -> None:
+    """Atomically claim a fresh output directory before the harness writes any run evidence."""
+    out = Path(out)
+    if os.path.lexists(out):
+        raise core70.ContractError(f"realization collision: output directory already exists: {out}")
+    allowed_roots = getattr(adapter_module, "RUN_REALIZATION_ROOTS", ())
+    if allowed_roots:
+        resolved_out = out.resolve(strict=False)
+        allowed = False
+        for root in allowed_roots:
+            root = Path(root).resolve()
+            try:
+                if not resolved_out.relative_to(root).parts:
+                    continue
+                allowed = True
+                break
+            except ValueError:
+                continue
+        if not allowed:
+            raise core70.ContractError(
+                f"runtime adapter realization path must be beneath its approved external workspace: {out}"
+            )
+    out.parent.mkdir(parents=True, exist_ok=True)
+    try:
+        out.mkdir()
+    except FileExistsError as exc:
+        raise core70.ContractError(f"realization collision: output directory already exists: {out}") from exc
+
+
 def run_identity(
     *,
     corpus: Path,
@@ -474,9 +503,7 @@ def run_episode(
     if mode == "qualification" and profile_errors:
         raise core70.ContractError("; ".join(profile_errors))
 
-    if out.exists():
-        shutil.rmtree(out)
-    out.mkdir(parents=True)
+    _create_realization_directory(out, adapter_module)
     (out / "run-identity.json").write_text(json.dumps(identity, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     (out / "profile-snapshot.json").write_text(json.dumps(profile_bundle.profile, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     (out / "capability-manifest-snapshot.json").write_text(json.dumps(profile_bundle.capabilities, indent=2, sort_keys=True) + "\n", encoding="utf-8")
@@ -484,11 +511,53 @@ def run_episode(
     if admission is not None:
         core70.snapshot_profile_admission(admission, out, role="executor", prefix="profile-admission")
 
+    prelaunch_refusal_type = getattr(adapter_module, "PrelaunchRefusal", ())
+
+    def record_prelaunch_refusal(phase: str, exc: Exception) -> dict[str, Any]:
+        refusal = {
+            "schema": 1,
+            "phase": phase,
+            "exception_type": type(exc).__name__,
+            "reason": str(exc),
+            "subject_launched": False,
+        }
+        (out / "prelaunch-refusal.json").write_text(
+            json.dumps(refusal, indent=2, sort_keys=True) + "\n", encoding="utf-8"
+        )
+        summary = {
+            "schema": 2,
+            "episode": episode["id"],
+            "arm": arm["name"],
+            "subject_commit": arm["commit"],
+            "execution_mode": mode,
+            "execution_returncode": None,
+            "execution_ok": False,
+            "profile_key_sha256": profile_bundle.profile_key_sha256,
+            "run_identity_sha256": identity["identity_sha256"],
+            "normalized_event_count": 0,
+            "native_event_count": 0,
+            "evidence_state": "EXECUTION_ERROR",
+            "qualification_outcome": "NOT_EVALUATED",
+            "evidence_state_reasons": [
+                f"adapter refused during {phase} before subject launch",
+                f"{type(exc).__name__}: {exc}",
+            ],
+            "prelaunch_refusal": refusal,
+        }
+        (out / "summary.json").write_text(
+            json.dumps(summary, indent=2, sort_keys=True) + "\n", encoding="utf-8"
+        )
+        return summary
+
     # The adapter owns which provider control paths are harness-owned and must stay out of the
     # oracle diff/final tree. The harness only accepts exact top-level names.
     control_names = _exact_top_level_names(adapter_module.project_control_paths(profile_bundle.profile))
 
-    with tempfile.TemporaryDirectory(prefix="ssdp70-") as tmp_name:
+    runtime_state_root = getattr(adapter_module, "RUNTIME_STATE_ROOT", None)
+    if runtime_state_root is not None:
+        runtime_state_root = Path(runtime_state_root)
+        runtime_state_root.mkdir(parents=True, exist_ok=True)
+    with tempfile.TemporaryDirectory(prefix="ssdp70-", dir=runtime_state_root) as tmp_name:
         tmp = Path(tmp_name)
         project = tmp / "project"
         private = tmp / "harness-private"
@@ -539,14 +608,22 @@ def run_episode(
             raise core70.ContractError(
                 f"installed protocol package digest mismatch: {installed_digest} != {arm['dist_tree_sha256']}"
             )
-        containment = adapter_module.realize_containment(profile_bundle.profile, project, env)
+        try:
+            containment = adapter_module.realize_containment(profile_bundle.profile, project, env)
+        except Exception as exc:
+            return record_prelaunch_refusal("realize_containment", exc)
         (out / "containment-realization.json").write_text(
             json.dumps(containment, indent=2, sort_keys=True) + "\n", encoding="utf-8"
         )
         control_before = _control_snapshot(project, control_names)
         runtime_baseline_fn = getattr(adapter_module, "runtime_entry_baseline", None)
         runtime_baseline = runtime_baseline_fn(profile_bundle.profile, project) if runtime_baseline_fn is not None else None
-        launched = adapter_module.launch(profile_bundle.profile, prompt, project, env)
+        try:
+            launched = adapter_module.launch(profile_bundle.profile, prompt, project, env)
+        except Exception as exc:
+            if prelaunch_refusal_type and isinstance(exc, prelaunch_refusal_type):
+                return record_prelaunch_refusal("launch", exc)
+            raise
         stdout, stderr = launched["stdout"], launched["stderr"]
         (out / "trace.jsonl").write_text(stdout, encoding="utf-8")
         adapter_artifacts = launched.get("adapter_artifacts") or {}
@@ -805,28 +882,25 @@ def main(argv: list[str] | None = None) -> int:
             pair_order=[arm_name],
         )
         target = args.out / f"{args.id}-{arm_name}-r{args.rep}"
-        if args.mode == "probe" and core70.cache_valid(target, identity, requirements):
-            summary = core70.load_json(target / "summary.json")
-        else:
-            summary = run_episode(
-                corpus=args.corpus,
-                episode=episode,
-                arm=arms[arm_name],
-                arms_manifest_sha256=arms_manifest_sha,
-                dist=dists[arm_name],
-                out=target,
-                profile_bundle=profile_bundle,
-                profile_path=args.profile,
-                capability_path=args.capabilities,
-                requirements=requirements,
-                requirements_root=args.requirements,
-                adapter_module=adapter,
-                oracles=args.oracles,
-                mode=args.mode,
-                admission=args.profile_admission,
-                identity=identity,
-                pair_order=[arm_name],
-            )
+        summary = run_episode(
+            corpus=args.corpus,
+            episode=episode,
+            arm=arms[arm_name],
+            arms_manifest_sha256=arms_manifest_sha,
+            dist=dists[arm_name],
+            out=target,
+            profile_bundle=profile_bundle,
+            profile_path=args.profile,
+            capability_path=args.capabilities,
+            requirements=requirements,
+            requirements_root=args.requirements,
+            adapter_module=adapter,
+            oracles=args.oracles,
+            mode=args.mode,
+            admission=args.profile_admission,
+            identity=identity,
+            pair_order=[arm_name],
+        )
         print(json.dumps({
             "run": target.name,
             "evidence_state": summary["evidence_state"],
@@ -836,7 +910,7 @@ def main(argv: list[str] | None = None) -> int:
         return 0 if summary["evidence_state"] == "COMPLETE_ADMISSIBLE" else 2
 
     plan = matrix_plan(episodes, requested, args.only)
-    args.out.mkdir(parents=True, exist_ok=True)
+    _create_realization_directory(args.out, adapter)
     plan_record = {
         "schema": 2,
         "profile_key_sha256": profile_bundle.profile_key_sha256,
@@ -871,10 +945,6 @@ def main(argv: list[str] | None = None) -> int:
                 rep=rep,
                 pair_order=item["order"],
             )
-            if args.mode == "probe" and core70.cache_valid(target, identity, requirements):
-                summary = core70.load_json(target / "summary.json")
-                results.append({"run": target.name, "evidence_state": summary["evidence_state"], "cache": "reused-exact"})
-                continue
             try:
                 summary = run_episode(
                     corpus=args.corpus,
