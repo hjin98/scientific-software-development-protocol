@@ -4,7 +4,7 @@
 - **Governing SSDP:** 6.6.0
 - **Branch:** `ssdp-7.0-scientific-epistemic-closure`
 - **Starting independent NO-PASS:** `5fc2051d97e670a289b93eaddebc4297170b83cd`
-- **Executable repair head before this coordination-only record:** `d816dc93d23ca0456d69d049861646a5d2a14e37`
+- **Executable repair head before this coordination-only record:** `33531cf7439cb43956ad5a1504c1742cd3ea91be`
 - **State:** **SOURCE REPAIR IMPLEMENTED; TARGET-HOST ACCEPTANCE AND STAGE 7 ADMISSION EVIDENCE NOT YET EXECUTED. OMP REMAINS UNADMITTED.**
 
 This record is resumability/evidence state only. It does not admit OMP, qualify Protocol 7, or replace the independent Stage 7 review.
@@ -32,6 +32,7 @@ This record is resumability/evidence state only. It does not admit OMP, qualify 
 16. Exact-profile PASS evidence is claim-scoped rather than satisfied by an arbitrary successful run. Capability/raw-normalized claims require their workspace/mediated/containment discriminators; containment/custody require the containment probe; catalog contamination requires the semantic-subject `S7-CONTAMINATION` refusal; pair isolation requires complete `S7-PAIR` runs from both arm commits plus a PASS scheduler summary.
 17. The §6 composite ordinary-entry route now freezes twelve high-level known-probe classes and runs every one through genuine `entry=ordinary`: D4 scientific-code work; run-and-report; ad-hoc scientific analysis; realized-results review; human-gate evidence; the empty-admissible-set negative; the technical-outside-predicate negative; authority authoring/review; variant-history/claim integrity; source-to-rendered integrity; delegate-return handling; and tension retrieval. A PASS proof for `ordinary_entry_owner_read` or §6 `ordinary_entry_case_classes` requires a `COMPLETE_ADMISSIBLE` Protocol-7 semantic-subject realization for every frozen class.
 18. The synthetic fixture now contains concrete artifacts referenced by those probes, including the deliberately faulty local scientific utility, runnable pipeline, scientific data/results, gate evidence, near-boundary negative inputs, authority note, variant history, source/rendered corruption, scripted delegate, and persisted synthetic tension. The hostile-contamination probe is forced onto the arm whose immutable commit equals the campaign semantic subject rather than whichever arm appears first.
+19. Exact-profile proof acceptance now also requires claim-specific normalized event discriminators. Workspace behavior must retain resource/mutation/process events; mediated behavior must retain issue access, mutation and delegate call/return; containment must retain a process action, denied native external mutation and trusted `network_external_action`; pair probes must retain read/process/final events; every ordinary-entry class must retain catalog selection context and a final result. The containment prompt explicitly attempts the child-process inference relay and uses native `write` for the forbidden external path so these properties are not inferred from opaque shell prose.
 
 ## Evidence applicability
 
