@@ -1331,6 +1331,94 @@ class ThirdPassObserverLaunchSafety(RigCase):
         self.assertEqual(stdout.decode("utf-8", "replace").count("completed "), 3,
                          "the stress worker did not complete three assembled launches")
 
+    def test_concurrent_observer_launches_with_active_threads_have_an_outer_watchdog(self):
+        worker_code = textwrap.dedent(r"""
+            import json, sys, threading
+            from concurrent.futures import ThreadPoolExecutor
+            from pathlib import Path
+            sys.path.insert(0, sys.argv[1])
+            import evidence70
+            from omp_rig import Rig, call, load_events, scenario_steps, text
+            root = Path(sys.argv[2])
+            stop = threading.Event()
+            ready = [threading.Event() for _ in range(4)]
+            ticks = [0, 0, 0, 0]
+            def churn(index):
+                ready[index].set()
+                while not stop.is_set():
+                    ticks[index] += 1
+                    stop.wait(0.002)
+            threads = [threading.Thread(target=churn, args=(index,), daemon=True) for index in range(4)]
+            for thread in threads: thread.start()
+            if not all(event.wait(5) for event in ready):
+                raise SystemExit("unrelated supervisor threads did not start")
+            scenario = scenario_steps(
+                call("read", path="skill://software-implementation"),
+                call("mcp__ssdp_issue_show", issue_id="A-1"),
+                call("write", path="/workspace/out.txt", content="concurrent\n"),
+                text("done"),
+            )
+            def exercise(index):
+                before = sum(ticks)
+                summary = Rig(root, timeout_s=120).run(scenario, out_name=f"concurrent-{index}")
+                if summary.get("evidence_state") != "COMPLETE_ADMISSIBLE":
+                    raise RuntimeError("assembled concurrent launch failed: " +
+                                       json.dumps(summary.get("evidence_state_reasons")))
+                if sum(ticks) <= before:
+                    raise RuntimeError("unrelated supervisor threads were not active during the concurrent launch")
+                if not summary.get("_stand_in_requests"):
+                    raise RuntimeError("provider inference route was not exercised")
+                artifacts = Path(summary["_out"]) / "adapter-artifacts"
+                records, errors = evidence70.parse_chain(
+                    (artifacts / "observer-evidence.jsonl").read_text(encoding="utf-8"),
+                    "ssdp70-provider-observer-v1",
+                )
+                if errors:
+                    raise RuntimeError("observer evidence chain failed: " + json.dumps(errors))
+                kinds = [row["kind"] for row in records]
+                if not all(kind in kinds for kind in ("boundary", "credential_received", "ready", "request", "response")):
+                    raise RuntimeError("observer did not complete lockdown, credential handoff, and inference")
+                if not (kinds.index("boundary") < kinds.index("credential_received") < kinds.index("ready")):
+                    raise RuntimeError("credential was not delivered after observer lockdown and before ready")
+                if not any(row["kind"] == "issue_evidence_access" and row["status"] == "result"
+                           for row in load_events(summary["_out"])):
+                    raise RuntimeError("MCP bridge/mediator did not complete a normalized operation")
+                return index
+            try:
+                with ThreadPoolExecutor(max_workers=2) as pool:
+                    completed = list(pool.map(exercise, range(2)))
+                print("concurrent completed " + json.dumps(completed), flush=True)
+            finally:
+                stop.set()
+                for thread in threads: thread.join(2)
+        """)
+
+        worker = subprocess.Popen(
+            [sys.executable, "-c", worker_code, str(HERE), str(self.root)],
+            stdin=subprocess.DEVNULL, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+            close_fds=True, start_new_session=True,
+        )
+        try:
+            stdout, stderr = worker.communicate(timeout=90)
+        except subprocess.TimeoutExpired:
+            for child in reversed(self._process_tree(worker.pid)[1:]):
+                try:
+                    os.kill(child, signal.SIGKILL)
+                except ProcessLookupError:
+                    pass
+            try:
+                os.killpg(worker.pid, signal.SIGKILL)
+            except ProcessLookupError:
+                pass
+            try:
+                stdout, stderr = worker.communicate(timeout=10)
+            except subprocess.TimeoutExpired:
+                worker.kill()
+                stdout, stderr = worker.communicate(timeout=10)
+            self.fail(f"outer concurrent-launch watchdog expired; stdout={stdout!r}; stderr={stderr!r}")
+        self.assertEqual(worker.returncode, 0, f"stdout={stdout!r}; stderr={stderr!r}")
+        self.assertIn(b"concurrent completed [0, 1]", stdout)
+
 
 if __name__ == "__main__":
     unittest.main()
