@@ -118,6 +118,7 @@ class Stage7AdmissionCampaign(unittest.TestCase):
             root = Path(td)
             run = root / "run"
             run.mkdir()
+            campaign._write_json(run / "run-identity.json", {"schema": 2})
             campaign._write_json(run / "summary.json", {
                 "evidence_state": "EXECUTION_ERROR",
                 "execution_ok": False,
