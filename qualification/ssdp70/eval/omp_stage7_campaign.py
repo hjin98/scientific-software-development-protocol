@@ -125,6 +125,7 @@ def freeze_and_init(
     provider_id: str,
     model_id: str,
     upstream: str,
+    base_path: str,
     context_window: int,
     max_tokens: int,
     thinking: str,
@@ -144,7 +145,7 @@ def freeze_and_init(
             "model_id": model_id,
             "upstream": upstream,
             "api": "openai-completions",
-            "base_path": "/v1",
+            "base_path": base_path,
             "context_window": context_window,
             "max_tokens": max_tokens,
             "reasoning": thinking != "off",
@@ -567,6 +568,7 @@ def _parser() -> argparse.ArgumentParser:
     freeze.add_argument("--provider-id", required=True)
     freeze.add_argument("--model-id", required=True)
     freeze.add_argument("--upstream", required=True)
+    freeze.add_argument("--base-path", required=True, help="exact OMP-local provider base path, e.g. /v1; never inferred")
     freeze.add_argument("--context-window", type=int, required=True)
     freeze.add_argument("--max-tokens", type=int, required=True)
     freeze.add_argument("--thinking", required=True)
@@ -601,6 +603,7 @@ def main(argv: list[str] | None = None) -> int:
             provider_id=args.provider_id,
             model_id=args.model_id,
             upstream=args.upstream,
+            base_path=args.base_path,
             context_window=args.context_window,
             max_tokens=args.max_tokens,
             thinking=args.thinking,
