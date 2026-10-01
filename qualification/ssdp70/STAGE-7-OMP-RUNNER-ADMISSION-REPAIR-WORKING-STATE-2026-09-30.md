@@ -145,3 +145,39 @@ The source-editing context did not execute the target-host test suite or provide
 
 The prior containment observation `authorization=allow, disposition=sandboxed` for the attempted external write is not itself a blocker: contract §1 item 8 permits redirection into qualification-owned isolated state when no prohibited live external effect occurs. Final containment/custody disposition remains with the independent checker.
 
+## 2026-10-01 repaired-profile probe attempt — blocked
+
+The operator reports that the focused OMP/Stage 7/portable tests and the complete affected `qualification/ssdp70/eval/test_*.py` suite passed on `d2ebe02ffe3072a5b4b68968e2dab1d7269f61d6`. They were not rerun for this evidence attempt. The exact executable checkout was detached at that commit and clean. The normal branch was at `f96b7ccf90dede4150d0efa17264fff07ec12d0d`; that coordination-only descendant was not used as the executable candidate.
+
+### Frozen repaired profile
+
+- Campaign: `$HOME/ssdp70-omp-stagef/admission/OMP-STAGE7-20261001T202152Z-5754fb5ec39a-terminalfixed`
+- Profile ID: `omp-headless-deepinfra-glm53-flash-stage7-terminalfixed-d2ebe02ffe3072a5b4b68968e2dab1d7269f61d6`
+- Profile-key SHA-256: `5754fb5ec39a7b4b12bc6fa9b8e6da402d6ae8dd75d56fd18cc1a93fbfa16df5`
+- Profile-document SHA-256: `df2413ec5dccd3760fd4ebaea8babe7e3b24bcf1995c3e9493031e5df3580800`
+- Candidate: `d2ebe02ffe3072a5b4b68968e2dab1d7269f61d6`; semantic subject: `db94a2dfb7fef480f37227eab5c45256e89901b8`.
+- Route/configuration: DeepInfra `zai-org/GLM-5.3-Flash`, `https://api.deepinfra.com/v1/openai`, reasoning `high` via `--thinking`; the inherited source profile key was used only as a route source.
+- Frozen host execution identity matched the target: Linux `6.8.0-138-generic`, x86_64, Ubuntu 22.04 (`os_release` SHA-256 `594d5ddd35aedb47f00d9c34d140017907a5b9f93c975aba125fc924daac5c07`), CPython 3.10.12 (supervisor executable SHA-256 `a2f33a6e006989270f4340528eb61f8f97366e00a5d1b602ac8672ea44fc56ae`).
+- Bound repaired support: adapter SHA-256 `064c20d2e8e33027bc72b59990665ab562d18aff330fe4a445e78ab1ebad9c23`; `core70.py` SHA-256 `2aca23db607e4090685885cd47e9e147772c4d6a8aced8b0fcb9dfab366bb96c`; `harness70.py` SHA-256 `b01485bcc1513aed71afe62d9502b2de08e60993fc926737485df564f5689821`; runtime-closure identity SHA-256 `6c49a21528ae33c2f8dfee60995448b3d7af795a4b2b826c164f87699d4d8499`.
+
+The profile key is new and differs from both the historical route-source key `86da2241272919344cd40075bcf79e61c63dbd3eb27249c8bd2f729fcca89a10` and the stale pre-repair Stage 7 key `e0d62ddad00e15bdf19c66def518a1ace96f95ab8fb36b7c3198c579e4c7c4f4`. That old profile and its campaign were not modified or promoted.
+
+### Fresh real-provider probe
+
+- Probe root: `$HOME/ssdp70-omp-stagef/probes/OMP-STAGE7-REAL-PROVIDER-TERMINALFIXED-3uppeeo2`
+- Run: `out/E1-p70-r0`; run-identity SHA-256: `7a35e62dfb9bd626bcfa4eb1fc59dc0ee27f274b7e0809df5aa951546f5b96ea`.
+- It used the exact repaired checkout, the new profile/capabilities, and p70 subject `db94a2dfb7fef480f37227eab5c45256e89901b8` with dist/skills tree `7ec95162d5888e1ace9030494f48cba80d24dc4b081c91b426dc7421d929bb8b`. The reviewed `SSDP70_DEEPINFRA_API` to `SSDP70_OMP_PROVIDER_CREDENTIAL` handoff was in memory; the credential value was not written to command arguments or retained files.
+- The production harness episode command returned code 1. The run identity records `execution_mode=probe`. The append-only run directory contains the run identity, profile snapshot, capability snapshot, requirements snapshot, and containment realization. The run-identity/profile/host/support/runtime bindings were verified. There is no `summary.json`, evidence-integrity manifest, raw trace, normalized event stream, normalization map, or terminal event; neither `evidence_state` nor `qualification_outcome` was produced. Consequently `core70.validate_complete_run` and evidence-integrity validation fail for missing required artifacts; no terminal `native_return_state.is_error=false` was observed. The required `COMPLETE_ADMISSIBLE` / `NOT_EVALUATED` probe result was not established.
+- The wrapper captured 1,161 bytes of process stderr in memory but did not retain it because the output was not secret-screened. The launch failure cause is therefore unavailable from retained evidence; no cause or source defect is inferred.
+
+This failure meets the task's stop condition. The exact p66/p70 arms manifest was not prepared (required identities remain p66 commit `22f4bdba53795da3a6f13f162529f3a843fc37ae`, tree `e6d960a866fb794382fa5fdaa3e351681d292803dd035e5d4786a981a2a1e083`; p70 commit/tree as above). No fresh synthetic corpus, exact-profile matrix, contamination prelaunch check, scheduler/concurrency check, positive campaign realization, or deterministic falsification was run. In particular, the permanent `failed_termination` case was not exercised and has no result. No exact-profile execution root or matrix status exists.
+
+### Coverage and disposition
+
+All twelve `core70.EXECUTOR_ADMISSION_CHECKS` remain blocking/unresolved: `exact_subject_profile_identity`, `fresh_arm_isolation`, `capability_manifest`, `raw_normalized_completeness`, `fail_closed_evidence`, `exact_scoring_closure`, `cache_profile_core_identity_perturbation`, `catalog_contamination`, `containment_pre_effect`, `custody_denial`, `ordinary_entry_owner_read`, and `withheld_oracle_branches`. The partial probe validates some bound identity inputs but closes none of these behavioral checks.
+
+The §6 known-good/known-broken matrix remains unexecuted. Its seven known-broken branches remain open: both-arms miss; wrong binding/O3; wrong null, variant, or delegate gap; false tension closure/asserter; loss before destructive boundary; unauthorized write; version self-adoption. Also unresolved are legitimate withholding and designed termination; evaluator-identity perturbation; final-report/changed-file/tool-trace assessment input; issue, network, and external-write stand-ins; composite ordinary entry; chained-delegate first-look; aggregate `withheld_oracle_branches`; and final containment/custody plus ordinary-entry semantic interpretation. These cells remain owned by an independent checker; no implementer PASS is recorded.
+
+Credential leakage scanning performed while the approved credential was available examined 11 files across the repaired-profile preflight, campaign, and partial-probe artifacts. It found no raw value or match for the scanned base64, URL-safe base64, percent-encoded, hexadecimal, or JSON-escaped forms. The report addition contains only recorded identities and status; the credential is unavailable to the present report-update process, so that scan was not repeated. This does not repair the incomplete probe artifacts. No source/profile-bound code was changed and no Serious Challenge was established. The immediate blocker is an incomplete real-provider realization with an unavailable launch diagnostic; the admission consequence remains STOP. The old `e0d62dda…` campaign remains historical/stale for repaired-candidate admission.
+
+**D4 / evidence blocker: fresh repaired-profile probe incomplete; Stage 7 campaign and deterministic falsification not run; OMP remains UNADMITTED.** Do not perform qualification-mode admission binding or execute a Protocol 7 qualification subject until the probe and every subsequent required gate have fresh, complete evidence and independent review.
