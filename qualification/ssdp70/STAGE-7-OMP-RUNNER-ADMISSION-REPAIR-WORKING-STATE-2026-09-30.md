@@ -4,7 +4,7 @@
 - **Governing SSDP:** 6.6.0
 - **Branch:** `ssdp-7.0-scientific-epistemic-closure`
 - **Starting independent NO-PASS:** `5fc2051d97e670a289b93eaddebc4297170b83cd`
-- **Executable repair head before this coordination-only record:** `98a710a906804d39d8709271fed6e2caae33721b`
+- **Executable repair head before this coordination-only record:** `d816dc93d23ca0456d69d049861646a5d2a14e37`
 - **State:** **SOURCE REPAIR IMPLEMENTED; TARGET-HOST ACCEPTANCE AND STAGE 7 ADMISSION EVIDENCE NOT YET EXECUTED. OMP REMAINS UNADMITTED.**
 
 This record is resumability/evidence state only. It does not admit OMP, qualify Protocol 7, or replace the independent Stage 7 review.
@@ -28,6 +28,10 @@ This record is resumability/evidence state only. It does not admit OMP, qualify 
 12. Pair scheduling is now retained as `matrix-scheduler.jsonl`. The Stage 7 driver validates sequential arms within each pair, complete pair realization, and actual monotonic-time overlap of at least two independent pairs.
 13. Evidence classes are now aligned to their semantic owners. Exact runtime/containment cells accept only `exact-profile-behavior`; mechanically decidable missing-evidence/cache/profile/core cells accept only `deterministic-falsification`; semantic known-good/known-broken branches, evaluator-identity perturbation, assessment-input completeness, chained-delegate first-look, and the executor `withheld_oracle_branches` check accept `independent-inspection`. This prevents the implementer from closing semantic checker obligations with a structural proxy.
 14. The campaign remains candidate evidence only. No source path emits `status=ADMITTED`; the independent checker must supply the independent semantic/evaluator proof cells and finalize admission separately.
+15. The lower-level admission owner itself now enforces exact-checkout identity: direct `omp_stage7_admission.py init` cannot bypass the target-host driver's `candidate_head == git rev-parse HEAD` rule.
+16. Exact-profile PASS evidence is claim-scoped rather than satisfied by an arbitrary successful run. Capability/raw-normalized claims require their workspace/mediated/containment discriminators; containment/custody require the containment probe; catalog contamination requires the semantic-subject `S7-CONTAMINATION` refusal; pair isolation requires complete `S7-PAIR` runs from both arm commits plus a PASS scheduler summary.
+17. The §6 composite ordinary-entry route now freezes twelve high-level known-probe classes and runs every one through genuine `entry=ordinary`: D4 scientific-code work; run-and-report; ad-hoc scientific analysis; realized-results review; human-gate evidence; the empty-admissible-set negative; the technical-outside-predicate negative; authority authoring/review; variant-history/claim integrity; source-to-rendered integrity; delegate-return handling; and tension retrieval. A PASS proof for `ordinary_entry_owner_read` or §6 `ordinary_entry_case_classes` requires a `COMPLETE_ADMISSIBLE` Protocol-7 semantic-subject realization for every frozen class.
+18. The synthetic fixture now contains concrete artifacts referenced by those probes, including the deliberately faulty local scientific utility, runnable pipeline, scientific data/results, gate evidence, near-boundary negative inputs, authority note, variant history, source/rendered corruption, scripted delegate, and persisted synthetic tension. The hostile-contamination probe is forced onto the arm whose immutable commit equals the campaign semantic subject rather than whichever arm appears first.
 
 ## Evidence applicability
 
@@ -61,7 +65,7 @@ These are route/configuration inputs only; their prior profile/probe evidence re
 
 1. Sync this branch to the exact current descendant, require a clean worktree, and set `CANDIDATE_HEAD=$(git rev-parse HEAD)`. Do not freeze against one commit and execute another.
 2. Ensure `$HOME/ssdp70-omp-stagef/{runtime-closures,probes,admission,qualification,logs}` remain persistent writable roots and inject the approved provider credential only through the reviewed secret/environment path.
-3. Execute focused Stage 7 tests followed by the complete affected exact-head suite. Any required failure/skip is blocking:
+3. Execute focused Stage 7 tests followed by the complete affected exact-head suite. These tests have **not** been executed by the source-editing context: its isolated runner could not resolve GitHub and did not have the target-host runtime closure. Any required failure/skip is blocking:
 
    `python3 -m unittest qualification.ssdp70.eval.test_omp_stage7_admission qualification.ssdp70.eval.test_omp_stage7_campaign qualification.ssdp70.eval.test_omp_units -v`
 
