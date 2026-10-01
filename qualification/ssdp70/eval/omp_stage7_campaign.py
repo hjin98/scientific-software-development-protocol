@@ -23,6 +23,7 @@ import uuid
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
+from urllib.parse import urlsplit
 
 import yaml
 
@@ -136,6 +137,13 @@ def freeze_and_init(
 ) -> Path:
     if context_window <= 0 or max_tokens <= 0 or max_turns <= 0 or timeout_s <= 0:
         raise DriverError("context/token/turn/timeout values must be positive")
+    parsed_upstream = urlsplit(upstream)
+    if (parsed_upstream.scheme != "https" or not parsed_upstream.hostname
+            or parsed_upstream.username is not None or parsed_upstream.password is not None
+            or parsed_upstream.query or parsed_upstream.fragment):
+        raise DriverError("real-provider upstream must be an HTTPS origin/path with no userinfo, query or fragment")
+    if not base_path.startswith("/") or "?" in base_path or "#" in base_path:
+        raise DriverError("base_path must be an explicit absolute request path with no query or fragment")
     template = json.loads((HERE / "profiles" / "omp-headless.template.json").read_text(encoding="utf-8"))
     profile = omp.freeze_profile(
         template,
