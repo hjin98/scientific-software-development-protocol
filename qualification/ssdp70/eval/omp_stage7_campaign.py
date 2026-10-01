@@ -190,6 +190,71 @@ def freeze_and_init(
     return campaign_root
 
 
+def freeze_from_source_profile(
+    *,
+    source_profile: Path,
+    executable: Path,
+    capabilities: Path,
+    candidate_head: str,
+    semantic_subject: str,
+    profile_id: str,
+    expected_provider_id: str,
+    expected_model_id: str,
+    expected_upstream: str,
+    expected_source_profile_key: str | None,
+    label: str | None,
+) -> Path:
+    source_profile = Path(source_profile).resolve()
+    source_bundle = core70.load_profile(source_profile, Path(capabilities).resolve())
+    if expected_source_profile_key and source_bundle.profile_key_sha256 != expected_source_profile_key:
+        raise DriverError(
+            f"source profile key {source_bundle.profile_key_sha256} != expected {expected_source_profile_key}"
+        )
+    source = source_bundle.profile
+    if source.get("adapter_id") != omp.ADAPTER_ID:
+        raise DriverError("source profile is not an OMP profile")
+    policy = source.get("containment_policy") if isinstance(source.get("containment_policy"), dict) else {}
+    route = policy.get("provider_route") if isinstance(policy.get("provider_route"), dict) else {}
+    reasoning = source.get("reasoning_configuration") if isinstance(source.get("reasoning_configuration"), dict) else {}
+    budgets = source.get("budgets") if isinstance(source.get("budgets"), dict) else {}
+    required_route = ("provider_id", "model_id", "upstream", "api", "base_path", "context_window", "max_tokens", "reasoning")
+    if any(key not in route for key in required_route):
+        raise DriverError("source profile provider route is incomplete")
+    if route.get("provider_id") != expected_provider_id:
+        raise DriverError(f"source provider_id {route.get('provider_id')!r} != expected {expected_provider_id!r}")
+    if route.get("model_id") != expected_model_id:
+        raise DriverError(f"source model_id {route.get('model_id')!r} != expected {expected_model_id!r}")
+    if route.get("upstream") != expected_upstream:
+        raise DriverError(f"source upstream {route.get('upstream')!r} != expected {expected_upstream!r}")
+    if route.get("api") != "openai-completions":
+        raise DriverError("source profile API is outside the reviewed OMP openai-completions route")
+    thinking = reasoning.get("thinking")
+    if not isinstance(thinking, str) or not thinking:
+        raise DriverError("source profile has no frozen thinking level")
+    max_turns, timeout_s = budgets.get("max_turns"), budgets.get("timeout_s")
+    if not isinstance(max_turns, int) or isinstance(max_turns, bool) or max_turns <= 0:
+        raise DriverError("source profile has no positive max_turns budget")
+    if not isinstance(timeout_s, int) or isinstance(timeout_s, bool) or timeout_s <= 0:
+        raise DriverError("source profile has no positive timeout_s budget")
+    return freeze_and_init(
+        executable=executable,
+        capabilities=capabilities,
+        candidate_head=candidate_head,
+        semantic_subject=semantic_subject,
+        provider_id=route["provider_id"],
+        model_id=route["model_id"],
+        upstream=route["upstream"],
+        base_path=route["base_path"],
+        context_window=route["context_window"],
+        max_tokens=route["max_tokens"],
+        thinking=thinking,
+        max_turns=max_turns,
+        timeout_s=timeout_s,
+        profile_id=profile_id,
+        label=label,
+    )
+
+
 def _write_fixture(root: Path, *, hostile: bool = False) -> None:
     project = root / "project"
     project.mkdir(parents=True)
@@ -585,6 +650,19 @@ def _parser() -> argparse.ArgumentParser:
     freeze.add_argument("--profile-id", required=True)
     freeze.add_argument("--label")
 
+    inherit = sub.add_parser("freeze-inherit")
+    inherit.add_argument("--source-profile", type=Path, required=True)
+    inherit.add_argument("--executable", type=Path, required=True)
+    inherit.add_argument("--capabilities", type=Path, default=HERE / "capabilities" / "omp-headless.json")
+    inherit.add_argument("--candidate-head", required=True)
+    inherit.add_argument("--semantic-subject", default=SEMANTIC_SUBJECT_DEFAULT)
+    inherit.add_argument("--profile-id", required=True)
+    inherit.add_argument("--expect-provider-id", required=True)
+    inherit.add_argument("--expect-model-id", required=True)
+    inherit.add_argument("--expect-upstream", required=True)
+    inherit.add_argument("--expect-source-profile-key")
+    inherit.add_argument("--label")
+
     prepare = sub.add_parser("prepare")
     prepare.add_argument("--campaign", type=Path, required=True)
 
@@ -618,6 +696,22 @@ def main(argv: list[str] | None = None) -> int:
             max_turns=args.max_turns,
             timeout_s=args.timeout_s,
             profile_id=args.profile_id,
+            label=args.label,
+        )
+        print(root)
+        return 0
+    if args.command == "freeze-inherit":
+        root = freeze_from_source_profile(
+            source_profile=args.source_profile,
+            executable=args.executable,
+            capabilities=args.capabilities,
+            candidate_head=args.candidate_head,
+            semantic_subject=args.semantic_subject,
+            profile_id=args.profile_id,
+            expected_provider_id=args.expect_provider_id,
+            expected_model_id=args.expect_model_id,
+            expected_upstream=args.expect_upstream,
+            expected_source_profile_key=args.expect_source_profile_key,
             label=args.label,
         )
         print(root)

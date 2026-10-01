@@ -61,6 +61,49 @@ class Stage7CampaignDriverTests(unittest.TestCase):
                 with self.assertRaises(driver.DriverError):
                     driver.prepare_corpus(camp)
 
+    def test_freeze_inherit_preserves_route_without_inheriting_stale_support(self):
+        source_profile = {
+            "adapter_id": driver.omp.ADAPTER_ID,
+            "containment_policy": {"provider_route": {
+                "provider_id": "deepinfra",
+                "model_id": "zai-org/GLM-5.3-Flash",
+                "upstream": "https://api.deepinfra.com/v1/openai",
+                "api": "openai-completions",
+                "base_path": "/chat",
+                "context_window": 128000,
+                "max_tokens": 8192,
+                "reasoning": True,
+            }},
+            "reasoning_configuration": {"thinking": "high", "source": "--thinking"},
+            "budgets": {"max_turns": 30, "timeout_s": 900},
+        }
+        bundle = mock.Mock(profile=source_profile, profile_key_sha256="1" * 64)
+        with tempfile.TemporaryDirectory() as td, \
+                mock.patch.object(driver.core70, "load_profile", return_value=bundle), \
+                mock.patch.object(driver, "freeze_and_init", return_value=Path(td) / "campaign") as freeze:
+            result = driver.freeze_from_source_profile(
+                source_profile=Path(td) / "old-profile.json",
+                executable=Path(td) / "omp",
+                capabilities=Path(td) / "cap.json",
+                candidate_head="a" * 40,
+                semantic_subject=driver.SEMANTIC_SUBJECT_DEFAULT,
+                profile_id="new-profile",
+                expected_provider_id="deepinfra",
+                expected_model_id="zai-org/GLM-5.3-Flash",
+                expected_upstream="https://api.deepinfra.com/v1/openai",
+                expected_source_profile_key="1" * 64,
+                label="test",
+            )
+            self.assertEqual(result, Path(td) / "campaign")
+            kwargs = freeze.call_args.kwargs
+            self.assertEqual(kwargs["base_path"], "/chat")
+            self.assertEqual(kwargs["context_window"], 128000)
+            self.assertEqual(kwargs["max_tokens"], 8192)
+            self.assertEqual(kwargs["thinking"], "high")
+            self.assertEqual(kwargs["max_turns"], 30)
+            self.assertEqual(kwargs["timeout_s"], 900)
+            self.assertNotIn("containment_policy", kwargs)
+
     def test_exact_run_requires_two_distinct_arms_and_parallel_pairs(self):
         with tempfile.TemporaryDirectory() as td:
             root = Path(td)
