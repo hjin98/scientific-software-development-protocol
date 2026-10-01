@@ -129,6 +129,29 @@ class Stage7CampaignDriverTests(unittest.TestCase):
                 with self.assertRaises(driver.DriverError):
                     driver.prepare_arms(camp, repo=root)
 
+    def test_scheduler_trace_proves_sequential_arms_and_concurrent_pairs(self):
+        with tempfile.TemporaryDirectory() as td:
+            path = Path(td) / "scheduler.jsonl"
+            rows = [
+                {"schema": 1, "event": "pair_start", "pair_id": "A-r0", "order": ["p66", "p70"], "monotonic_ns": 10},
+                {"schema": 1, "event": "arm_start", "pair_id": "A-r0", "arm": "p66", "monotonic_ns": 11},
+                {"schema": 1, "event": "arm_end", "pair_id": "A-r0", "arm": "p66", "monotonic_ns": 20},
+                {"schema": 1, "event": "arm_start", "pair_id": "A-r0", "arm": "p70", "monotonic_ns": 21},
+                {"schema": 1, "event": "arm_end", "pair_id": "A-r0", "arm": "p70", "monotonic_ns": 40},
+                {"schema": 1, "event": "pair_end", "pair_id": "A-r0", "monotonic_ns": 41},
+                {"schema": 1, "event": "pair_start", "pair_id": "B-r0", "order": ["p70", "p66"], "monotonic_ns": 15},
+                {"schema": 1, "event": "arm_start", "pair_id": "B-r0", "arm": "p70", "monotonic_ns": 16},
+                {"schema": 1, "event": "arm_end", "pair_id": "B-r0", "arm": "p70", "monotonic_ns": 25},
+                {"schema": 1, "event": "arm_start", "pair_id": "B-r0", "arm": "p66", "monotonic_ns": 26},
+                {"schema": 1, "event": "arm_end", "pair_id": "B-r0", "arm": "p66", "monotonic_ns": 35},
+                {"schema": 1, "event": "pair_end", "pair_id": "B-r0", "monotonic_ns": 36},
+            ]
+            path.write_text("\n".join(json.dumps(row) for row in rows) + "\n", encoding="utf-8")
+            self.assertEqual(driver.scheduler_trace_errors(path), [])
+            rows[3]["monotonic_ns"] = 19
+            path.write_text("\n".join(json.dumps(row) for row in rows) + "\n", encoding="utf-8")
+            self.assertTrue(any("arms overlap" in item for item in driver.scheduler_trace_errors(path)))
+
     def test_exact_run_requires_two_distinct_arms_and_parallel_pairs(self):
         with tempfile.TemporaryDirectory() as td:
             root = Path(td)

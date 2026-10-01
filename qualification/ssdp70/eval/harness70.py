@@ -17,6 +17,8 @@ import shutil
 import subprocess
 import sys
 import tempfile
+import threading
+import time
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 from typing import Any
@@ -919,58 +921,84 @@ def main(argv: list[str] | None = None) -> int:
         "pairs": plan,
     }
     (args.out / "matrix-plan.json").write_text(json.dumps(plan_record, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    scheduler_path = args.out / "matrix-scheduler.jsonl"
+    scheduler_lock = threading.Lock()
+
+    def scheduler_event(event: str, item: dict[str, Any], arm: str | None = None) -> None:
+        row = {
+            "schema": 1,
+            "event": event,
+            "pair_id": f"{item['episode_id']}-r{item['rep']}",
+            "episode_id": item["episode_id"],
+            "rep": item["rep"],
+            "order": item["order"],
+            "arm": arm,
+            "monotonic_ns": time.monotonic_ns(),
+            "wall_time_ns": time.time_ns(),
+        }
+        with scheduler_lock:
+            with open(scheduler_path, "a", encoding="utf-8") as handle:
+                handle.write(json.dumps(row, sort_keys=True) + "\n")
 
     def run_pair(item: dict[str, Any]) -> list[dict[str, Any]]:
         episode = episodes[item["episode_id"]]
         rep = item["rep"]
         requirements = core70.load_requirements(args.requirements, episode["id"])
         results = []
-        for arm_name in item["order"]:
-            target = args.out / f"{episode['id']}-{arm_name}-r{rep}"
-            identity = run_identity(
-                corpus=args.corpus,
-                episode=episode,
-                arm=arms[arm_name],
-                arms_manifest_sha256=arms_manifest_sha,
-                dist=dists[arm_name],
-                profile_bundle=profile_bundle,
-                profile_path=args.profile,
-                capability_path=args.capabilities,
-                requirements=requirements,
-                requirements_root=args.requirements,
-                adapter_module=adapter,
-                oracles=args.oracles,
-                mode=args.mode,
-                admission=args.profile_admission,
-                rep=rep,
-                pair_order=item["order"],
-            )
-            try:
-                summary = run_episode(
-                    corpus=args.corpus,
-                    episode=episode,
-                    arm=arms[arm_name],
-                    arms_manifest_sha256=arms_manifest_sha,
-                    dist=dists[arm_name],
-                    out=target,
-                    profile_bundle=profile_bundle,
-                    profile_path=args.profile,
-                    capability_path=args.capabilities,
-                    requirements=requirements,
-                    requirements_root=args.requirements,
-                    adapter_module=adapter,
-                    oracles=args.oracles,
-                    mode=args.mode,
-                    admission=args.profile_admission,
-                    identity=identity,
-                    pair_order=item["order"],
-                )
-                results.append({"run": target.name, "evidence_state": summary["evidence_state"], "cache": "fresh"})
-            except Exception as exc:
-                args.out.mkdir(parents=True, exist_ok=True)
-                (args.out / f"{target.name}.error.txt").write_text(repr(exc), encoding="utf-8")
-                results.append({"run": target.name, "evidence_state": "EXECUTION_ERROR", "cache": "fresh"})
-        return results
+        scheduler_event("pair_start", item)
+        try:
+            for arm_name in item["order"]:
+                target = args.out / f"{episode['id']}-{arm_name}-r{rep}"
+                scheduler_event("arm_start", item, arm_name)
+                try:
+                    identity = run_identity(
+                        corpus=args.corpus,
+                        episode=episode,
+                        arm=arms[arm_name],
+                        arms_manifest_sha256=arms_manifest_sha,
+                        dist=dists[arm_name],
+                        profile_bundle=profile_bundle,
+                        profile_path=args.profile,
+                        capability_path=args.capabilities,
+                        requirements=requirements,
+                        requirements_root=args.requirements,
+                        adapter_module=adapter,
+                        oracles=args.oracles,
+                        mode=args.mode,
+                        admission=args.profile_admission,
+                        rep=rep,
+                        pair_order=item["order"],
+                    )
+                    try:
+                        summary = run_episode(
+                            corpus=args.corpus,
+                            episode=episode,
+                            arm=arms[arm_name],
+                            arms_manifest_sha256=arms_manifest_sha,
+                            dist=dists[arm_name],
+                            out=target,
+                            profile_bundle=profile_bundle,
+                            profile_path=args.profile,
+                            capability_path=args.capabilities,
+                            requirements=requirements,
+                            requirements_root=args.requirements,
+                            adapter_module=adapter,
+                            oracles=args.oracles,
+                            mode=args.mode,
+                            admission=args.profile_admission,
+                            identity=identity,
+                            pair_order=item["order"],
+                        )
+                        results.append({"run": target.name, "evidence_state": summary["evidence_state"], "cache": "fresh"})
+                    except Exception as exc:
+                        args.out.mkdir(parents=True, exist_ok=True)
+                        (args.out / f"{target.name}.error.txt").write_text(repr(exc), encoding="utf-8")
+                        results.append({"run": target.name, "evidence_state": "EXECUTION_ERROR", "cache": "fresh"})
+                finally:
+                    scheduler_event("arm_end", item, arm_name)
+            return results
+        finally:
+            scheduler_event("pair_end", item)
 
     any_non_complete = False
     with ThreadPoolExecutor(max_workers=args.parallel) as pool:

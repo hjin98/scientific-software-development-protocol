@@ -518,6 +518,55 @@ def _run(argv: list[str], *, log: Path) -> int:
     return proc.returncode
 
 
+def scheduler_trace_errors(path: Path) -> list[str]:
+    if not Path(path).is_file():
+        return ["matrix scheduler trace is missing"]
+    rows = [json.loads(line) for line in Path(path).read_text(encoding="utf-8").splitlines() if line.strip()]
+    errors: list[str] = []
+    groups: dict[str, list[dict[str, Any]]] = {}
+    for row in rows:
+        if not isinstance(row, dict) or row.get("schema") != 1 or not isinstance(row.get("pair_id"), str):
+            errors.append("matrix scheduler trace contains a malformed row")
+            continue
+        groups.setdefault(row["pair_id"], []).append(row)
+    pair_intervals: list[tuple[int, int]] = []
+    for pair_id, group in groups.items():
+        starts = [r for r in group if r.get("event") == "pair_start"]
+        ends = [r for r in group if r.get("event") == "pair_end"]
+        if len(starts) != 1 or len(ends) != 1:
+            errors.append(f"pair {pair_id} lacks exactly one start/end")
+            continue
+        pair_start, pair_end = starts[0].get("monotonic_ns"), ends[0].get("monotonic_ns")
+        if not isinstance(pair_start, int) or not isinstance(pair_end, int) or pair_start >= pair_end:
+            errors.append(f"pair {pair_id} has invalid timing")
+            continue
+        pair_intervals.append((pair_start, pair_end))
+        order = starts[0].get("order")
+        if not isinstance(order, list):
+            errors.append(f"pair {pair_id} lacks arm order")
+            continue
+        previous_end = None
+        for arm in order:
+            arm_starts = [r for r in group if r.get("event") == "arm_start" and r.get("arm") == arm]
+            arm_ends = [r for r in group if r.get("event") == "arm_end" and r.get("arm") == arm]
+            if len(arm_starts) != 1 or len(arm_ends) != 1:
+                errors.append(f"pair {pair_id} arm {arm!r} lacks exactly one start/end")
+                continue
+            start_ns, end_ns = arm_starts[0].get("monotonic_ns"), arm_ends[0].get("monotonic_ns")
+            if not isinstance(start_ns, int) or not isinstance(end_ns, int) or start_ns >= end_ns:
+                errors.append(f"pair {pair_id} arm {arm!r} has invalid timing")
+                continue
+            if previous_end is not None and start_ns < previous_end:
+                errors.append(f"pair {pair_id} arms overlap")
+            previous_end = end_ns
+    if len(pair_intervals) < 2:
+        errors.append("scheduler trace has fewer than two completed pairs")
+    elif not any(a0 < b1 and b0 < a1 for i, (a0, a1) in enumerate(pair_intervals)
+                 for b0, b1 in pair_intervals[i + 1:]):
+        errors.append("scheduler trace does not prove concurrent pair overlap")
+    return errors
+
+
 def run_exact_campaign(
     campaign_root: Path,
     *,
@@ -592,6 +641,7 @@ def run_exact_campaign(
         and ".mcp.json" in str(contamination_refusal.get("reason", ""))
     )
     structural_errors = admission._exact_profile_evidence_errors(execution_root, campaign)
+    scheduler_errors = scheduler_trace_errors(positive / "matrix-scheduler.jsonl")
     result = {
         "schema": 1,
         "kind": "omp-stage7-exact-profile-execution-v1",
@@ -603,7 +653,11 @@ def run_exact_campaign(
         "contamination_returncode": contamination_rc,
         "contamination_expected_prelaunch_refusal": contamination_expected,
         "structural_validation_errors": structural_errors,
-        "status": "PASS" if matrix_rc == 0 and contamination_expected and not structural_errors else "UNRESOLVED",
+        "scheduler_validation_errors": scheduler_errors,
+        "status": (
+            "PASS" if matrix_rc == 0 and contamination_expected and not structural_errors and not scheduler_errors
+            else "UNRESOLVED"
+        ),
     }
     _write_json(execution_root / "execution-summary.json", result)
     if result["status"] != "PASS":
