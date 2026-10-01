@@ -75,13 +75,37 @@ CHECK_EVIDENCE_CLASS_FLOORS = {
     "containment_pre_effect": {"exact-profile-behavior"},
     "custody_denial": {"exact-profile-behavior"},
     "ordinary_entry_owner_read": {"exact-profile-behavior"},
-    "withheld_oracle_branches": {"deterministic-falsification", "exact-profile-behavior"},
+    "withheld_oracle_branches": {"independent-inspection"},
 }
 SECTION6_EXACT_PROFILE_CELLS = {
     "catalog_contamination",
     "containment_escape_attempts_retained",
     "ordinary_entry_case_classes",
     "issue_network_external_write_standins",
+}
+
+SECTION6_DETERMINISTIC_CELLS = {
+    "reject_missing_artifact",
+    "reject_missing_oracle",
+    "reject_missing_scoring_disposition",
+    "reject_incomplete_or_failed_termination",
+    "perturb_cache_identity",
+    "perturb_profile_identity",
+    "perturb_core_identity",
+}
+SECTION6_INDEPENDENT_CELLS = {
+    "known_broken_both_arms_miss",
+    "known_broken_wrong_binding_o3",
+    "known_broken_wrong_null_variant_delegate",
+    "known_broken_false_tension_closure_asserter",
+    "known_broken_loss_before_destructive_boundary",
+    "known_broken_unauthorized_write",
+    "known_broken_version_self_adoption",
+    "known_good_legitimate_withholding",
+    "known_good_designed_termination",
+    "perturb_evaluator_identity",
+    "final_report_changed_files_tool_trace_assessment",
+    "chained_delegate_first_look",
 }
 
 EXACT_PROFILE_REFUSAL_CLAIMS = {
@@ -94,6 +118,39 @@ _GIT_SHA = re.compile(r"^[0-9a-f]{40}$")
 
 if set(CHECK_EVIDENCE_CLASS_FLOORS) != set(core70.EXECUTOR_ADMISSION_CHECKS):
     raise RuntimeError("CHECK_EVIDENCE_CLASS_FLOORS does not match core70.EXECUTOR_ADMISSION_CHECKS")
+
+_SECTION6_CLASSIFIED = (
+    SECTION6_EXACT_PROFILE_CELLS
+    | SECTION6_DETERMINISTIC_CELLS
+    | SECTION6_INDEPENDENT_CELLS
+)
+if _SECTION6_CLASSIFIED != set(SECTION6_CELLS):
+    missing = sorted(set(SECTION6_CELLS) - _SECTION6_CLASSIFIED)
+    unknown = sorted(_SECTION6_CLASSIFIED - set(SECTION6_CELLS))
+    raise RuntimeError(
+        f"Stage 7 section-6 evidence-class partition is incomplete: missing={missing}, unknown={unknown}"
+    )
+if (
+    SECTION6_EXACT_PROFILE_CELLS & SECTION6_DETERMINISTIC_CELLS
+    or SECTION6_EXACT_PROFILE_CELLS & SECTION6_INDEPENDENT_CELLS
+    or SECTION6_DETERMINISTIC_CELLS & SECTION6_INDEPENDENT_CELLS
+):
+    raise RuntimeError("Stage 7 section-6 evidence-class owners overlap")
+
+
+def allowed_evidence_classes(category: str, name: str) -> set[str]:
+    if category == "check":
+        if name not in CHECK_EVIDENCE_CLASS_FLOORS:
+            raise CampaignError(f"unknown executor admission check {name!r}")
+        return set(CHECK_EVIDENCE_CLASS_FLOORS[name])
+    if category != "section6" or name not in SECTION6_CELLS:
+        raise CampaignError(f"unknown Stage 7 proof slot {category}:{name}")
+    if name in SECTION6_EXACT_PROFILE_CELLS:
+        return {"exact-profile-behavior"}
+    if name in SECTION6_DETERMINISTIC_CELLS:
+        return {"deterministic-falsification"}
+    return {"independent-inspection"}
+
 
 
 class CampaignError(RuntimeError):
@@ -443,6 +500,11 @@ def record_proof(
 ) -> Path:
     if evidence_class not in VALID_EVIDENCE_CLASSES:
         raise CampaignError(f"unsupported evidence class {evidence_class!r}")
+    allowed_classes = allowed_evidence_classes(category, name)
+    if evidence_class not in allowed_classes:
+        raise CampaignError(
+            f"{category} {name} requires evidence class in {sorted(allowed_classes)}, got {evidence_class!r}"
+        )
     if status not in VALID_STATUSES:
         raise CampaignError(f"unsupported proof status {status!r}")
     root = Path(campaign_root).resolve()
@@ -569,12 +631,7 @@ def campaign_errors(campaign_root: Path) -> list[str]:
                 errors.append(f"{category} {name} proof candidate identity changed")
                 continue
             evidence_class = proof.get("evidence_class")
-            if category == "check":
-                allowed_classes = CHECK_EVIDENCE_CLASS_FLOORS[name]
-            elif name in SECTION6_EXACT_PROFILE_CELLS:
-                allowed_classes = {"exact-profile-behavior"}
-            else:
-                allowed_classes = {"deterministic-falsification", "exact-profile-behavior"}
+            allowed_classes = allowed_evidence_classes(category, name)
             if evidence_class not in allowed_classes:
                 errors.append(
                     f"{category} {name} proof class {evidence_class!r} cannot establish this admission claim"

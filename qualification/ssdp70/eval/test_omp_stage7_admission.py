@@ -136,6 +136,48 @@ class Stage7AdmissionCampaign(unittest.TestCase):
                     [],
                 )
 
+    def test_evidence_class_owner_partition_matches_stage7_roles(self):
+        self.assertEqual(
+            campaign.allowed_evidence_classes("section6", "catalog_contamination"),
+            {"exact-profile-behavior"},
+        )
+        self.assertEqual(
+            campaign.allowed_evidence_classes("section6", "reject_missing_artifact"),
+            {"deterministic-falsification"},
+        )
+        self.assertEqual(
+            campaign.allowed_evidence_classes("section6", "known_broken_both_arms_miss"),
+            {"independent-inspection"},
+        )
+        self.assertEqual(
+            campaign.allowed_evidence_classes("section6", "perturb_evaluator_identity"),
+            {"independent-inspection"},
+        )
+        self.assertEqual(
+            campaign.allowed_evidence_classes("check", "withheld_oracle_branches"),
+            {"independent-inspection"},
+        )
+
+    def test_record_rejects_semantic_checker_proof_routed_as_deterministic(self):
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            workspace = root / "workspace"
+            evidence = workspace / "checker.json"
+            evidence.parent.mkdir()
+            evidence.write_text("{}\n", encoding="utf-8")
+            with mock.patch.object(campaign, "STAGEF_WORKSPACE_ROOT", workspace), \
+                    mock.patch.object(campaign, "ADMISSION_ROOT", root / "admission"):
+                camp = self._campaign(root)
+                with self.assertRaises(campaign.CampaignError):
+                    campaign.record_proof(
+                        camp,
+                        category="section6",
+                        name="known_broken_both_arms_miss",
+                        evidence_path=evidence,
+                        evidence_class="deterministic-falsification",
+                        status="PASS",
+                    )
+
     def test_emitted_bundle_is_candidate_and_cannot_satisfy_admission_status(self):
         with tempfile.TemporaryDirectory() as td:
             root = Path(td)
