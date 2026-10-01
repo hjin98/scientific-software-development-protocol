@@ -1,0 +1,421 @@
+#!/usr/bin/env python3
+"""OMP Stage 7 runner-admission campaign evidence owner.
+
+This module does not admit a profile. It creates a persistent append-only campaign under
+$HOME/ssdp70-omp-stagef/admission, binds that campaign to one exact OMP profile, retains
+hash-addressed proof attempts for the portable executor-admission checks and the required
+section-6 matrix, verifies that referenced evidence has not drifted, and can emit only a
+CANDIDATE profile-admission bundle. A fresh independent checker must inspect/re-execute the
+evidence and change lifecycle state through the existing admission contract; this module has
+no code path that writes status=ADMITTED.
+"""
+from __future__ import annotations
+
+import argparse
+import json
+import os
+import re
+import sys
+import uuid
+from datetime import datetime, timezone
+from pathlib import Path
+from typing import Any
+
+HERE = Path(__file__).resolve().parent
+if str(HERE) not in sys.path:
+    sys.path.insert(0, str(HERE))
+import core70  # noqa: E402
+from adapters import omp  # noqa: E402
+
+SCHEMA = 1
+KIND = "omp-stage7-admission-campaign-v1"
+STAGEF_WORKSPACE_ROOT = Path.home() / "ssdp70-omp-stagef"
+ADMISSION_ROOT = STAGEF_WORKSPACE_ROOT / "admission"
+VALID_STATUSES = {"PASS", "FAIL", "UNRESOLVED"}
+VALID_EVIDENCE_CLASSES = {
+    "exact-profile-behavior",
+    "deterministic-falsification",
+    "independent-inspection",
+}
+SECTION6_CELLS = (
+    "known_broken_both_arms_miss",
+    "known_broken_wrong_binding_o3",
+    "known_broken_wrong_null_variant_delegate",
+    "known_broken_false_tension_closure_asserter",
+    "known_broken_loss_before_destructive_boundary",
+    "known_broken_unauthorized_write",
+    "known_broken_version_self_adoption",
+    "known_good_legitimate_withholding",
+    "known_good_designed_termination",
+    "reject_missing_artifact",
+    "reject_missing_oracle",
+    "reject_missing_scoring_disposition",
+    "reject_incomplete_or_failed_termination",
+    "perturb_cache_identity",
+    "perturb_profile_identity",
+    "perturb_core_identity",
+    "perturb_evaluator_identity",
+    "catalog_contamination",
+    "containment_escape_attempts_retained",
+    "ordinary_entry_case_classes",
+    "final_report_changed_files_tool_trace_assessment",
+    "issue_network_external_write_standins",
+    "chained_delegate_first_look",
+)
+_SAFE_LABEL = re.compile(r"^[A-Za-z0-9._-]+$")
+
+
+class CampaignError(RuntimeError):
+    pass
+
+
+def _write_json(path: Path, value: Any) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(value, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+
+
+def _load_json(path: Path) -> dict[str, Any]:
+    value = json.loads(path.read_text(encoding="utf-8"))
+    if not isinstance(value, dict):
+        raise CampaignError(f"{path} is not a JSON object")
+    return value
+
+
+def _within(path: Path, root: Path) -> bool:
+    resolved = path.resolve()
+    base = root.resolve()
+    return resolved == base or base in resolved.parents
+
+
+def _campaign_path(root: Path) -> Path:
+    return root / "campaign.json"
+
+
+def _load_campaign(root: Path) -> dict[str, Any]:
+    root = Path(root)
+    if not _within(root, ADMISSION_ROOT):
+        raise CampaignError(f"campaign is outside the persistent Stage 7 admission root: {root}")
+    path = _campaign_path(root)
+    if not path.is_file():
+        raise CampaignError(f"campaign manifest is unavailable: {path}")
+    campaign = _load_json(path)
+    if campaign.get("schema") != SCHEMA or campaign.get("kind") != KIND:
+        raise CampaignError("unsupported Stage 7 campaign schema/kind")
+    return campaign
+
+
+def _source_identity(path: Path) -> dict[str, Any]:
+    path = path.resolve()
+    if not _within(path, STAGEF_WORKSPACE_ROOT):
+        raise CampaignError(
+            f"proof evidence must live under the persistent Stage F workspace {STAGEF_WORKSPACE_ROOT}: {path}"
+        )
+    if path.is_file():
+        return {
+            "source_path": str(path),
+            "source_kind": "file",
+            "source_sha256": core70.sha256_file(path),
+            "source_bytes": path.stat().st_size,
+        }
+    if path.is_dir():
+        total = 0
+        files = 0
+        for item in path.rglob("*"):
+            if item.is_file() and not item.is_symlink():
+                total += item.stat().st_size
+                files += 1
+        return {
+            "source_path": str(path),
+            "source_kind": "directory",
+            "source_sha256": core70.sha256_tree(path),
+            "source_bytes": total,
+            "source_files": files,
+        }
+    raise CampaignError(f"proof evidence path is unavailable: {path}")
+
+
+def init_campaign(
+    profile_path: Path,
+    capability_path: Path,
+    *,
+    candidate_head: str,
+    semantic_subject: str,
+    label: str | None = None,
+) -> Path:
+    profile_path = Path(profile_path).resolve()
+    capability_path = Path(capability_path).resolve()
+    bundle = core70.load_profile(profile_path, capability_path)
+    if bundle.profile.get("adapter_id") != omp.ADAPTER_ID:
+        raise CampaignError("Stage 7 OMP campaign requires the exact OMP adapter profile")
+    profile_errors = omp.profile_errors(bundle.profile)
+    if profile_errors:
+        raise CampaignError("OMP profile is not admissible for campaign initialization: " + "; ".join(profile_errors))
+    if label is not None and not _SAFE_LABEL.fullmatch(label):
+        raise CampaignError("campaign label must contain only letters, digits, dot, underscore or hyphen")
+
+    ADMISSION_ROOT.mkdir(parents=True, exist_ok=True)
+    stamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
+    suffix = label or uuid.uuid4().hex[:12]
+    root = ADMISSION_ROOT / f"OMP-STAGE7-{stamp}-{bundle.profile_key_sha256[:12]}-{suffix}"
+    root.mkdir()
+    (root / "proofs").mkdir()
+
+    profile_snapshot = root / "profile.json"
+    capability_snapshot = root / "capabilities.json"
+    profile_snapshot.write_bytes(profile_path.read_bytes())
+    capability_snapshot.write_bytes(capability_path.read_bytes())
+
+    campaign = {
+        "schema": SCHEMA,
+        "kind": KIND,
+        "state": "CANDIDATE_EVIDENCE",
+        "created_utc": datetime.now(timezone.utc).isoformat(),
+        "candidate_head": candidate_head,
+        "semantic_subject": semantic_subject,
+        "profile": {
+            "profile_id": bundle.profile.get("profile_id"),
+            "profile_key_sha256": bundle.profile_key_sha256,
+            "profile_document_sha256": core70.sha256_file(profile_snapshot),
+            "capability_manifest_sha256": bundle.capability_manifest_sha256,
+            "adapter_sha256": core70.sha256_file(Path(omp.__file__).resolve()),
+            "core_sha256": core70.sha256_file(Path(core70.__file__).resolve()),
+            "host_execution_environment": bundle.profile.get("containment_policy", {}).get(
+                "host_execution_environment"
+            ),
+        },
+        "snapshots": {
+            "profile": profile_snapshot.name,
+            "capabilities": capability_snapshot.name,
+        },
+        "checks": {
+            name: {"status": "PENDING", "attempts": []}
+            for name in core70.EXECUTOR_ADMISSION_CHECKS
+        },
+        "section6": {
+            name: {"status": "PENDING", "attempts": []}
+            for name in SECTION6_CELLS
+        },
+    }
+    _write_json(_campaign_path(root), campaign)
+    return root
+
+
+def _target(campaign: dict[str, Any], category: str, name: str) -> dict[str, Any]:
+    if category == "check":
+        if name not in core70.EXECUTOR_ADMISSION_CHECKS:
+            raise CampaignError(f"unknown executor admission check {name!r}")
+        return campaign["checks"][name]
+    if category == "section6":
+        if name not in SECTION6_CELLS:
+            raise CampaignError(f"unknown section-6 matrix cell {name!r}")
+        return campaign["section6"][name]
+    raise CampaignError(f"unknown proof category {category!r}")
+
+
+def record_proof(
+    campaign_root: Path,
+    *,
+    category: str,
+    name: str,
+    evidence_path: Path,
+    evidence_class: str,
+    status: str,
+    note: str = "",
+) -> Path:
+    if evidence_class not in VALID_EVIDENCE_CLASSES:
+        raise CampaignError(f"unsupported evidence class {evidence_class!r}")
+    if status not in VALID_STATUSES:
+        raise CampaignError(f"unsupported proof status {status!r}")
+    root = Path(campaign_root).resolve()
+    campaign = _load_campaign(root)
+    row = _target(campaign, category, name)
+    source = _source_identity(Path(evidence_path))
+
+    stamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S.%fZ")
+    proof_name = f"{category}-{name}-{stamp}-{uuid.uuid4().hex[:8]}.json"
+    proof_path = root / "proofs" / proof_name
+    proof = {
+        "schema": SCHEMA,
+        "kind": "omp-stage7-proof-v1",
+        "category": category,
+        "name": name,
+        "status": status,
+        "evidence_class": evidence_class,
+        "note": note,
+        "profile_key_sha256": campaign["profile"]["profile_key_sha256"],
+        "candidate_head": campaign["candidate_head"],
+        **source,
+    }
+    _write_json(proof_path, proof)
+    attempt = {
+        "proof_path": proof_path.relative_to(root).as_posix(),
+        "proof_sha256": core70.sha256_file(proof_path),
+        "status": status,
+        "evidence_class": evidence_class,
+    }
+    row["attempts"].append(attempt)
+    row["status"] = status
+    row["proof_path"] = attempt["proof_path"]
+    row["proof_sha256"] = attempt["proof_sha256"]
+    _write_json(_campaign_path(root), campaign)
+    return proof_path
+
+
+def campaign_errors(campaign_root: Path) -> list[str]:
+    root = Path(campaign_root).resolve()
+    campaign = _load_campaign(root)
+    errors: list[str] = []
+    if set(campaign.get("checks", {})) != set(core70.EXECUTOR_ADMISSION_CHECKS):
+        errors.append("campaign does not contain the exact executor admission check set")
+    if set(campaign.get("section6", {})) != set(SECTION6_CELLS):
+        errors.append("campaign does not contain the exact section-6 matrix")
+
+    for category, names in (("check", core70.EXECUTOR_ADMISSION_CHECKS), ("section6", SECTION6_CELLS)):
+        table = campaign["checks"] if category == "check" else campaign["section6"]
+        for name in names:
+            row = table.get(name)
+            if not isinstance(row, dict):
+                errors.append(f"{category} {name} is missing")
+                continue
+            if row.get("status") != "PASS":
+                errors.append(f"{category} {name} is not PASS")
+                continue
+            rel = row.get("proof_path")
+            if not isinstance(rel, str) or not rel:
+                errors.append(f"{category} {name} has no proof path")
+                continue
+            proof_path = (root / rel).resolve()
+            if not _within(proof_path, root) or not proof_path.is_file():
+                errors.append(f"{category} {name} proof is unavailable")
+                continue
+            if core70.sha256_file(proof_path) != row.get("proof_sha256"):
+                errors.append(f"{category} {name} proof hash changed")
+                continue
+            proof = _load_json(proof_path)
+            try:
+                source = _source_identity(Path(proof.get("source_path", "")))
+            except CampaignError as exc:
+                errors.append(f"{category} {name} source evidence is unavailable: {exc}")
+                continue
+            if source.get("source_kind") != proof.get("source_kind"):
+                errors.append(f"{category} {name} source kind changed")
+            if source.get("source_sha256") != proof.get("source_sha256"):
+                errors.append(f"{category} {name} source evidence hash changed")
+            if source.get("source_bytes") != proof.get("source_bytes"):
+                errors.append(f"{category} {name} source evidence size changed")
+    return errors
+
+
+def emit_candidate_bundle(campaign_root: Path) -> Path:
+    root = Path(campaign_root).resolve()
+    errors = campaign_errors(root)
+    if errors:
+        raise CampaignError("campaign is incomplete: " + "; ".join(errors))
+    campaign = _load_campaign(root)
+    target = root / "profile-admission-candidate.json"
+    if target.exists():
+        raise CampaignError(f"candidate admission bundle already exists: {target}")
+    checks = {}
+    for name in core70.EXECUTOR_ADMISSION_CHECKS:
+        row = campaign["checks"][name]
+        checks[name] = {
+            "status": "PASS",
+            "evidence_path": row["proof_path"],
+            "evidence_sha256": row["proof_sha256"],
+        }
+    payload = {
+        "schema": core70.SCHEMA,
+        "status": "CANDIDATE",
+        "role": "executor",
+        "profile_key_sha256": campaign["profile"]["profile_key_sha256"],
+        "adapter_sha256": campaign["profile"]["adapter_sha256"],
+        "core_sha256": campaign["profile"]["core_sha256"],
+        "capability_manifest_sha256": campaign["profile"]["capability_manifest_sha256"],
+        "checks": checks,
+        "section6": {
+            name: {
+                "status": campaign["section6"][name]["status"],
+                "evidence_path": campaign["section6"][name]["proof_path"],
+                "evidence_sha256": campaign["section6"][name]["proof_sha256"],
+            }
+            for name in SECTION6_CELLS
+        },
+        "lifecycle_note": (
+            "CANDIDATE evidence only. A fresh independent Stage 7 checker must inspect/re-execute "
+            "the exact-profile evidence and separately finalize an ADMITTED executor bundle."
+        ),
+    }
+    _write_json(target, payload)
+    return target
+
+
+def _parser() -> argparse.ArgumentParser:
+    parser = argparse.ArgumentParser(description=__doc__)
+    sub = parser.add_subparsers(dest="command", required=True)
+
+    init = sub.add_parser("init")
+    init.add_argument("--profile", type=Path, required=True)
+    init.add_argument("--capabilities", type=Path, required=True)
+    init.add_argument("--candidate-head", required=True)
+    init.add_argument("--semantic-subject", required=True)
+    init.add_argument("--label")
+
+    record = sub.add_parser("record")
+    record.add_argument("--campaign", type=Path, required=True)
+    group = record.add_mutually_exclusive_group(required=True)
+    group.add_argument("--check", choices=core70.EXECUTOR_ADMISSION_CHECKS)
+    group.add_argument("--section6", choices=SECTION6_CELLS)
+    record.add_argument("--evidence", type=Path, required=True)
+    record.add_argument("--evidence-class", choices=sorted(VALID_EVIDENCE_CLASSES), required=True)
+    record.add_argument("--status", choices=sorted(VALID_STATUSES), required=True)
+    record.add_argument("--note", default="")
+
+    verify = sub.add_parser("verify")
+    verify.add_argument("--campaign", type=Path, required=True)
+
+    emit = sub.add_parser("emit-candidate")
+    emit.add_argument("--campaign", type=Path, required=True)
+    return parser
+
+
+def main(argv: list[str] | None = None) -> int:
+    args = _parser().parse_args(argv)
+    if args.command == "init":
+        root = init_campaign(
+            args.profile,
+            args.capabilities,
+            candidate_head=args.candidate_head,
+            semantic_subject=args.semantic_subject,
+            label=args.label,
+        )
+        print(root)
+        return 0
+    if args.command == "record":
+        category, name = ("check", args.check) if args.check else ("section6", args.section6)
+        proof = record_proof(
+            args.campaign,
+            category=category,
+            name=name,
+            evidence_path=args.evidence,
+            evidence_class=args.evidence_class,
+            status=args.status,
+            note=args.note,
+        )
+        print(proof)
+        return 0
+    if args.command == "verify":
+        errors = campaign_errors(args.campaign)
+        if errors:
+            for error in errors:
+                print(error, file=sys.stderr)
+            return 2
+        print("PASS: candidate Stage 7 evidence matrix is complete and unchanged")
+        return 0
+    if args.command == "emit-candidate":
+        print(emit_candidate_bundle(args.campaign))
+        return 0
+    raise AssertionError(args.command)
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
