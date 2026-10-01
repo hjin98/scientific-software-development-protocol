@@ -356,8 +356,10 @@ def _termination_state(events: list[dict[str, Any]]) -> tuple[bool, bool]:
     terminations = [e for e in events if e.get("kind") == "termination"]
     if not terminations:
         return False, False
-    state = terminations[-1].get("payload", {}).get("native_return_state") or {}
-    return True, not bool(state.get("is_error"))
+    state = terminations[-1].get("payload", {}).get("native_return_state")
+    if not isinstance(state, dict) or not isinstance(state.get("is_error"), bool):
+        return True, False
+    return True, not state["is_error"]
 
 
 def _create_realization_directory(out: Path, adapter_module) -> None:

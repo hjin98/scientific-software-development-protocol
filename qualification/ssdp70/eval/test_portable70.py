@@ -4,6 +4,7 @@ import unittest
 from pathlib import Path
 
 import core70
+import harness70
 from adapters import claude
 
 
@@ -215,6 +216,29 @@ class PortableCoreTests(unittest.TestCase):
         }
         errors = core70.validate_normalized_events([event], "r")
         self.assertTrue(any("result_reference" in error for error in errors))
+
+    def test_termination_requires_portable_boolean_is_error(self):
+        missing_flag = [{
+            "schema_version": 1, "run_id": "r", "event_id": "e000001", "sequence": 1,
+            "actor_id": "executor", "kind": "termination",
+            "native_source": {"native_index": 0, "native_sha256": "a" * 64},
+            "status": "observed", "timing": None,
+            "payload": {"state": "error", "native_return_state": {"isError": True}, "terminal_result_exists": False},
+        }]
+        errors = core70.validate_normalized_events(missing_flag, "r")
+        self.assertTrue(any("native_return_state.is_error" in error for error in errors), errors)
+        self.assertEqual(harness70._termination_state(missing_flag), (True, False))
+
+        success = [{
+            "kind": "termination",
+            "payload": {"state": "completed", "native_return_state": {"is_error": False}, "terminal_result_exists": True},
+        }]
+        failure = [{
+            "kind": "termination",
+            "payload": {"state": "error", "native_return_state": {"is_error": True}, "terminal_result_exists": False},
+        }]
+        self.assertEqual(harness70._termination_state(success), (True, True))
+        self.assertEqual(harness70._termination_state(failure), (True, False))
 
     def test_normalization_completeness_rejects_dropped_event(self):
         events = [{

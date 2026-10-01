@@ -571,8 +571,13 @@ def _validate_event_payload(kind: str, status: Any, payload: dict[str, Any], ind
         _require_payload_keys(kind, payload, {"state", "native_return_state", "terminal_result_exists"}, index, errors)
         if not isinstance(payload.get("state"), str) or not payload.get("state"):
             errors.append(f"normalized event {index} termination state is invalid")
-        if not isinstance(payload.get("native_return_state"), dict):
+        native_return_state = payload.get("native_return_state")
+        if not isinstance(native_return_state, dict):
             errors.append(f"normalized event {index} termination native_return_state is invalid")
+        elif not isinstance(native_return_state.get("is_error"), bool):
+            errors.append(
+                f"normalized event {index} termination native_return_state.is_error is missing or invalid"
+            )
         if not isinstance(payload.get("terminal_result_exists"), bool):
             errors.append(f"normalized event {index} termination terminal_result_exists is invalid")
     elif kind == "final_result":
