@@ -105,6 +105,30 @@ class Stage7CampaignDriverTests(unittest.TestCase):
             self.assertEqual(kwargs["timeout_s"], 900)
             self.assertNotIn("containment_policy", kwargs)
 
+    def test_prepare_arms_materializes_exact_frozen_packages_once(self):
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            camp = root / "campaign"
+            camp.mkdir()
+            def materialize(repo, commit, destination):
+                destination.mkdir(parents=True)
+                (destination / "skill.txt").write_text(commit + "\n", encoding="utf-8")
+            digests = [
+                driver.ARM_SPECS["p66"]["dist_tree_sha256"],
+                driver.ARM_SPECS["p70"]["dist_tree_sha256"],
+            ]
+            with mock.patch.object(driver, "_campaign", return_value={}), \
+                    mock.patch.object(driver, "_materialize_git_tree", side_effect=materialize), \
+                    mock.patch.object(driver.core70, "sha256_tree", side_effect=digests):
+                manifest = driver.prepare_arms(camp, repo=root)
+            payload = json.loads(manifest.read_text(encoding="utf-8"))
+            self.assertEqual([row["name"] for row in payload["arms"]], ["p66", "p70"])
+            self.assertEqual(payload["arms"][0]["commit"], driver.ARM_SPECS["p66"]["commit"])
+            self.assertEqual(payload["arms"][1]["commit"], driver.SEMANTIC_SUBJECT_DEFAULT)
+            with mock.patch.object(driver, "_campaign", return_value={}):
+                with self.assertRaises(driver.DriverError):
+                    driver.prepare_arms(camp, repo=root)
+
     def test_exact_run_requires_two_distinct_arms_and_parallel_pairs(self):
         with tempfile.TemporaryDirectory() as td:
             root = Path(td)

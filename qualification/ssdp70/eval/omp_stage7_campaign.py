@@ -36,6 +36,18 @@ import omp_stage7_admission as admission  # noqa: E402
 from adapters import omp  # noqa: E402
 
 SEMANTIC_SUBJECT_DEFAULT = "db94a2dfb7fef480f37227eab5c45256e89901b8"
+ARM_SPECS = {
+    "p66": {
+        "commit": "22f4bdba53795da3a6f13f162529f3a843fc37ae",
+        "version": "6.6.0",
+        "dist_tree_sha256": "e6d960a866fb794382fa5fdaa3e351681d292803dd035e5d4786a981a2a1e083",
+    },
+    "p70": {
+        "commit": SEMANTIC_SUBJECT_DEFAULT,
+        "version": "7.0.0",
+        "dist_tree_sha256": "7ec95162d5888e1ace9030494f48cba80d24dc4b081c91b426dc7421d929bb8b",
+    },
+}
 POSITIVE_EPISODES = (
     "S7-ORDINARY",
     "S7-WORKSPACE",
@@ -254,6 +266,94 @@ def freeze_from_source_profile(
         profile_id=profile_id,
         label=label,
     )
+
+
+def _git(repo: Path, *args: str, binary: bool = False) -> subprocess.CompletedProcess:
+    return subprocess.run(
+        ["git", *args], cwd=repo, check=False,
+        stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+        text=not binary,
+    )
+
+
+def _materialize_git_tree(repo: Path, commit: str, destination: Path) -> None:
+    exists = _git(repo, "cat-file", "-e", f"{commit}^{{commit}}")
+    if exists.returncode != 0:
+        raise DriverError(f"immutable arm commit is unavailable: {commit}")
+    listing = _git(repo, "ls-tree", "-r", "-z", commit, "--", "dist/skills", binary=True)
+    if listing.returncode != 0:
+        raise DriverError(f"cannot enumerate dist/skills at {commit}: {listing.stderr.decode('utf-8', 'replace')}")
+    destination.mkdir(parents=True)
+    prefix = "dist/skills/"
+    count = 0
+    for raw in listing.stdout.split(b"\0"):
+        if not raw:
+            continue
+        try:
+            meta, raw_path = raw.split(b"\t", 1)
+            mode_b, type_b, sha_b = meta.split(b" ", 2)
+            path_text = raw_path.decode("utf-8")
+            mode = mode_b.decode("ascii")
+            obj_type = type_b.decode("ascii")
+            sha = sha_b.decode("ascii")
+        except (ValueError, UnicodeDecodeError) as exc:
+            raise DriverError(f"malformed git tree row for {commit}: {exc}") from exc
+        if obj_type != "blob" or not path_text.startswith(prefix):
+            raise DriverError(f"unexpected git tree entry for arm {commit}: {path_text!r}")
+        relative = Path(path_text[len(prefix):])
+        if not relative.parts or relative.is_absolute() or ".." in relative.parts:
+            raise DriverError(f"unsafe arm package path {path_text!r}")
+        target = destination / relative
+        target.parent.mkdir(parents=True, exist_ok=True)
+        blob = _git(repo, "cat-file", "blob", sha, binary=True)
+        if blob.returncode != 0:
+            raise DriverError(f"cannot read arm package blob {sha} at {path_text}")
+        if mode == "120000":
+            link_target = blob.stdout.decode("utf-8")
+            if Path(link_target).is_absolute() or ".." in Path(link_target).parts:
+                raise DriverError(f"unsafe symlink target in arm package: {path_text} -> {link_target}")
+            target.symlink_to(link_target)
+        elif mode in {"100644", "100755"}:
+            target.write_bytes(blob.stdout)
+            target.chmod(0o755 if mode == "100755" else 0o644)
+        else:
+            raise DriverError(f"unsupported arm package git mode {mode} at {path_text}")
+        count += 1
+    if count == 0:
+        raise DriverError(f"arm commit {commit} contains no dist/skills files")
+
+
+def prepare_arms(campaign_root: Path, *, repo: Path = HERE.parents[2]) -> Path:
+    root = Path(campaign_root).resolve()
+    _campaign(root)
+    arms_root = root / "arms"
+    manifest_path = root / "arms.json"
+    if arms_root.exists() or manifest_path.exists():
+        raise DriverError("campaign arm materialization is append-only and already exists")
+    rows = []
+    for name in ("p66", "p70"):
+        spec = ARM_SPECS[name]
+        skills = arms_root / name / "dist" / "skills"
+        _materialize_git_tree(Path(repo).resolve(), spec["commit"], skills)
+        actual = core70.sha256_tree(skills)
+        if actual != spec["dist_tree_sha256"]:
+            raise DriverError(
+                f"materialized {name} package digest {actual} != frozen {spec['dist_tree_sha256']}"
+            )
+        rows.append({
+            "name": name,
+            "requested_ref": spec["commit"],
+            "commit": spec["commit"],
+            "version": spec["version"],
+            "skills_path": str(skills),
+            "dist_tree_sha256": actual,
+        })
+    _write_json(manifest_path, {
+        "schema": 1,
+        "repo": str(Path(repo).resolve()),
+        "arms": rows,
+    })
+    return manifest_path
 
 
 def _write_fixture(root: Path, *, hostile: bool = False) -> None:
@@ -676,6 +776,10 @@ def _parser() -> argparse.ArgumentParser:
     prepare = sub.add_parser("prepare")
     prepare.add_argument("--campaign", type=Path, required=True)
 
+    arms_cmd = sub.add_parser("prepare-arms")
+    arms_cmd.add_argument("--campaign", type=Path, required=True)
+    arms_cmd.add_argument("--repo", type=Path, default=HERE.parents[2])
+
     run = sub.add_parser("run-exact")
     run.add_argument("--campaign", type=Path, required=True)
     run.add_argument("--arms-manifest", type=Path, required=True)
@@ -729,6 +833,9 @@ def main(argv: list[str] | None = None) -> int:
         return 0
     if args.command == "prepare":
         print(json.dumps(prepare_corpus(args.campaign), indent=2, sort_keys=True))
+        return 0
+    if args.command == "prepare-arms":
+        print(prepare_arms(args.campaign, repo=args.repo))
         return 0
     if args.command == "run-exact":
         print(run_exact_campaign(
