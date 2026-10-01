@@ -113,6 +113,28 @@ class Stage7AdmissionCampaign(unittest.TestCase):
             })
             self.assertEqual(campaign._prelaunch_refusal_errors(run, summary), [])
 
+    def test_positive_exact_profile_claim_requires_complete_admissible(self):
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            run = root / "run"
+            run.mkdir()
+            campaign._write_json(run / "summary.json", {
+                "evidence_state": "EXECUTION_ERROR",
+                "execution_ok": False,
+                "qualification_outcome": "NOT_EVALUATED",
+            })
+            campaign._write_json(run / "prelaunch-refusal.json", {
+                "schema": 1,
+                "subject_launched": False,
+            })
+            with mock.patch.object(campaign, "ADMISSION_ROOT", root):
+                errors = campaign._exact_profile_claim_errors(run, "check", "fresh_arm_isolation")
+                self.assertTrue(any("COMPLETE_ADMISSIBLE" in item for item in errors), errors)
+                self.assertEqual(
+                    campaign._exact_profile_claim_errors(run, "check", "catalog_contamination"),
+                    [],
+                )
+
     def test_emitted_bundle_is_candidate_and_cannot_satisfy_admission_status(self):
         with tempfile.TemporaryDirectory() as td:
             root = Path(td)

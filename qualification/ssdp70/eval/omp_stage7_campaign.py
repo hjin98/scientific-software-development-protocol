@@ -16,6 +16,7 @@ import argparse
 import copy
 import json
 import os
+import re
 import shutil
 import subprocess
 import sys
@@ -129,6 +130,27 @@ def _campaign(root: Path) -> dict[str, Any]:
     return admission._load_campaign(Path(root).resolve())
 
 
+def _repo_head(repo: Path = HERE.parents[2]) -> str:
+    proc = subprocess.run(
+        ["git", "rev-parse", "HEAD"],
+        cwd=Path(repo).resolve(),
+        check=False,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        text=True,
+    )
+    head = proc.stdout.strip()
+    if proc.returncode != 0 or not re.fullmatch(r"[0-9a-f]{40}", head):
+        raise DriverError(f"cannot resolve exact repository HEAD: {proc.stderr.strip()}")
+    return head
+
+
+def _require_candidate_head(candidate_head: str) -> None:
+    actual = _repo_head()
+    if actual != candidate_head:
+        raise DriverError(f"candidate_head {candidate_head} != exact executing checkout {actual}")
+
+
 def freeze_and_init(
     *,
     executable: Path,
@@ -147,6 +169,7 @@ def freeze_and_init(
     profile_id: str,
     label: str | None,
 ) -> Path:
+    _require_candidate_head(candidate_head)
     if context_window <= 0 or max_tokens <= 0 or max_turns <= 0 or timeout_s <= 0:
         raise DriverError("context/token/turn/timeout values must be positive")
     parsed_upstream = urlsplit(upstream)
@@ -214,12 +237,12 @@ def freeze_from_source_profile(
     expected_provider_id: str,
     expected_model_id: str,
     expected_upstream: str,
-    expected_source_profile_key: str | None,
+    expected_source_profile_key: str,
     label: str | None,
 ) -> Path:
     source_profile = Path(source_profile).resolve()
     source_bundle = core70.load_profile(source_profile, Path(source_capabilities).resolve())
-    if expected_source_profile_key and source_bundle.profile_key_sha256 != expected_source_profile_key:
+    if source_bundle.profile_key_sha256 != expected_source_profile_key:
         raise DriverError(
             f"source profile key {source_bundle.profile_key_sha256} != expected {expected_source_profile_key}"
         )
@@ -824,7 +847,7 @@ def _parser() -> argparse.ArgumentParser:
     inherit.add_argument("--expect-provider-id", required=True)
     inherit.add_argument("--expect-model-id", required=True)
     inherit.add_argument("--expect-upstream", required=True)
-    inherit.add_argument("--expect-source-profile-key")
+    inherit.add_argument("--expect-source-profile-key", required=True)
     inherit.add_argument("--label")
 
     prepare = sub.add_parser("prepare")

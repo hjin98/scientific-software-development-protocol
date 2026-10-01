@@ -61,6 +61,12 @@ class Stage7CampaignDriverTests(unittest.TestCase):
                 with self.assertRaises(driver.DriverError):
                     driver.prepare_corpus(camp)
 
+    def test_candidate_head_must_match_exact_checkout(self):
+        with mock.patch.object(driver, "_repo_head", return_value="b" * 40):
+            with self.assertRaises(driver.DriverError):
+                driver._require_candidate_head("a" * 40)
+            driver._require_candidate_head("b" * 40)
+
     def test_freeze_inherit_preserves_route_without_inheriting_stale_support(self):
         source_profile = {
             "adapter_id": driver.omp.ADAPTER_ID,

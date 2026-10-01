@@ -84,6 +84,11 @@ SECTION6_EXACT_PROFILE_CELLS = {
     "issue_network_external_write_standins",
 }
 
+EXACT_PROFILE_REFUSAL_CLAIMS = {
+    ("check", "catalog_contamination"),
+    ("section6", "catalog_contamination"),
+}
+
 _SAFE_LABEL = re.compile(r"^[A-Za-z0-9._-]+$")
 _GIT_SHA = re.compile(r"^[0-9a-f]{40}$")
 
@@ -270,13 +275,12 @@ def _exact_profile_realization_errors(run: Path, campaign: dict[str, Any]) -> li
     return errors
 
 
-def _exact_profile_evidence_errors(source: Path, campaign: dict[str, Any]) -> list[str]:
-    """Require exact-profile evidence to contain one or more real harness realizations."""
+def _exact_profile_run_paths(source: Path) -> tuple[list[Path], list[str]]:
     source = Path(source).resolve()
     if not source.is_dir():
-        return ["exact-profile-behavior evidence must be a directory containing harness realizations"]
+        return [], ["exact-profile-behavior evidence must be a directory containing harness realizations"]
     if not _within(source, ADMISSION_ROOT):
-        return [f"exact-profile-behavior evidence is outside the Stage 7 admission root: {source}"]
+        return [], [f"exact-profile-behavior evidence is outside the Stage 7 admission root: {source}"]
     candidates: list[Path] = []
     if (source / "run-identity.json").is_file():
         candidates.append(source)
@@ -286,9 +290,17 @@ def _exact_profile_evidence_errors(source: Path, campaign: dict[str, Any]) -> li
             if _within(run, source) and run not in candidates:
                 candidates.append(run)
             if len(candidates) > 256:
-                return ["exact-profile-behavior evidence exceeds the bounded 256-realization campaign limit"]
+                return [], ["exact-profile-behavior evidence exceeds the bounded 256-realization campaign limit"]
     if not candidates:
-        return ["exact-profile-behavior evidence contains no harness run identity"]
+        return [], ["exact-profile-behavior evidence contains no harness run identity"]
+    return candidates, []
+
+
+def _exact_profile_evidence_errors(source: Path, campaign: dict[str, Any]) -> list[str]:
+    """Require exact-profile evidence to contain one or more real harness realizations."""
+    candidates, path_errors = _exact_profile_run_paths(source)
+    if path_errors:
+        return path_errors
     errors: list[str] = []
     semantic_subject_seen = False
     for run in sorted(candidates):
@@ -305,6 +317,29 @@ def _exact_profile_evidence_errors(source: Path, campaign: dict[str, Any]) -> li
     if not semantic_subject_seen:
         errors.append("exact-profile-behavior evidence contains no run of the campaign semantic subject")
     return errors
+
+
+def _exact_profile_claim_errors(source: Path, category: str, name: str) -> list[str]:
+    candidates, path_errors = _exact_profile_run_paths(source)
+    if path_errors:
+        return path_errors
+    states: list[str] = []
+    valid_refusals = 0
+    for run in candidates:
+        try:
+            summary = _load_json(run / "summary.json")
+        except (CampaignError, OSError, json.JSONDecodeError) as exc:
+            return [f"{run}: cannot inspect exact-profile terminal state: {exc}"]
+        state = str(summary.get("evidence_state"))
+        states.append(state)
+        if state == "EXECUTION_ERROR" and not _prelaunch_refusal_errors(run, summary):
+            valid_refusals += 1
+    if (category, name) in EXACT_PROFILE_REFUSAL_CLAIMS:
+        if valid_refusals < 1:
+            return [f"{category} {name} requires at least one valid retained prelaunch-refusal realization"]
+    elif "COMPLETE_ADMISSIBLE" not in states:
+        return [f"{category} {name} requires at least one COMPLETE_ADMISSIBLE exact-profile realization"]
+    return []
 
 
 def init_campaign(
@@ -418,6 +453,7 @@ def record_proof(
         raise CampaignError("proof evidence must remain inside its Stage 7 campaign realization")
     if evidence_class == "exact-profile-behavior":
         evidence_errors = _exact_profile_evidence_errors(evidence_path, campaign)
+        evidence_errors.extend(_exact_profile_claim_errors(evidence_path, category, name))
         if evidence_errors:
             raise CampaignError("exact-profile evidence is inadmissible: " + "; ".join(evidence_errors))
     source = _source_identity(evidence_path)
@@ -550,6 +586,7 @@ def campaign_errors(campaign_root: Path) -> list[str]:
                 continue
             if evidence_class == "exact-profile-behavior":
                 exact_errors = _exact_profile_evidence_errors(source_path, campaign)
+                exact_errors.extend(_exact_profile_claim_errors(source_path, category, name))
                 if exact_errors:
                     errors.extend(f"{category} {name}: {item}" for item in exact_errors)
                     continue
