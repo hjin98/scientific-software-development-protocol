@@ -4,7 +4,7 @@
 - **Governing SSDP:** 6.6.0
 - **Branch:** `ssdp-7.0-scientific-epistemic-closure`
 - **Starting independent NO-PASS:** `5fc2051d97e670a289b93eaddebc4297170b83cd`
-- **Current implementation head at this record:** `c13a90703437897e870584e02378a8e537c5d8de`
+- **Executable repair head before this coordination-only record:** `98a710a906804d39d8709271fed6e2caae33721b`
 - **State:** **SOURCE REPAIR IMPLEMENTED; TARGET-HOST ACCEPTANCE AND STAGE 7 ADMISSION EVIDENCE NOT YET EXECUTED. OMP REMAINS UNADMITTED.**
 
 This record is resumability/evidence state only. It does not admit OMP, qualify Protocol 7, or replace the independent Stage 7 review.
@@ -22,6 +22,12 @@ This record is resumability/evidence state only. It does not admit OMP, qualify 
 6. `qualification/ssdp70/eval/omp_stage7_admission.py` now owns persistent candidate campaign evidence under `$HOME/ssdp70-omp-stagef/admission/`. It binds one exact profile, retains hash-addressed proof attempts for the exact `core70.EXECUTOR_ADMISSION_CHECKS` set and the required §6 matrix, rejects evidence-class substitution where exact-profile behavior is required, and emits only `status=CANDIDATE`.
 7. The campaign code has no `status=ADMITTED` emission path. A fresh independent checker remains the only context allowed to finalize an executor admission record.
 8. OMP harness realizations are now authorized under the persistent `admission/` root in addition to `probes/` and `qualification/`, so exact-profile Stage 7 evidence can be produced through the real harness without relocating it into the source repository.
+9. `omp_stage7_campaign.py` now provides the target-host driver: it can inherit the approved Stage 6 provider/model/reasoning/budget route into a newly frozen host-bound profile, materialize the exact frozen Protocol 6.6 and Protocol 7 arm packages from immutable Git commits, build the bounded non-custody Stage 7 corpus, execute the exact-profile matrix, retain pair-scheduler evidence, and run deterministic core/harness falsification.
+10. Campaign creation is bound to the exact executing checkout: the supplied `candidate_head` must equal `git rev-parse HEAD`. `freeze-inherit` additionally requires the exact historical source-profile key and matching source capability snapshot; route inheritance fails closed on provider/model/upstream/API drift.
+11. Exact-profile proof records must point to real harness realizations whose retained profile/capability/core/harness/adapter/support identities match the campaign. Positive exact-profile claims require at least one `COMPLETE_ADMISSIBLE` realization. The catalog-contamination claim instead requires a structurally valid retained prelaunch refusal; an unrelated execution failure cannot serve as behavioral proof.
+12. Pair scheduling is now retained as `matrix-scheduler.jsonl`. The Stage 7 driver validates sequential arms within each pair, complete pair realization, and actual monotonic-time overlap of at least two independent pairs.
+13. Evidence classes are now aligned to their semantic owners. Exact runtime/containment cells accept only `exact-profile-behavior`; mechanically decidable missing-evidence/cache/profile/core cells accept only `deterministic-falsification`; semantic known-good/known-broken branches, evaluator-identity perturbation, assessment-input completeness, chained-delegate first-look, and the executor `withheld_oracle_branches` check accept `independent-inspection`. This prevents the implementer from closing semantic checker obligations with a structural proxy.
+14. The campaign remains candidate evidence only. No source path emits `status=ADMITTED`; the independent checker must supply the independent semantic/evaluator proof cells and finalize admission separately.
 
 ## Evidence applicability
 
@@ -45,11 +51,50 @@ No Protocol 7 qualification subject may run before all seven close.
 
 ## Resume sequence on the authorized target host
 
-1. Update the local branch to this record's descendant head and verify there are no intervening unreviewed executable changes.
-2. Ensure `$HOME/ssdp70-omp-stagef/{runtime-closures,probes,admission,qualification,logs}` remain writable persistent workspace roots.
-3. Run the focused Stage 7 unit tests, then the full affected exact-head suite. Any required skip/failure is blocking.
-4. Freeze a **new** OMP profile from the repaired template on that host. Record the new profile key and host-execution object; do not mutate the prior profile.
-5. Run a fresh append-only real-provider probe for the new profile. Required successful semantics remain `execution_mode=probe`, `evidence_state=COMPLETE_ADMISSIBLE`, `qualification_outcome=NOT_EVALUATED`.
-6. Initialize the candidate Stage 7 campaign with `omp_stage7_admission.py init`, execute the exact-profile and deterministic-falsification evidence matrix required by the workplan, and record every proof under that campaign. `verify` must be clean before `emit-candidate`.
-7. Hand the resulting `profile-admission-candidate.json`, campaign evidence and fresh probe to a fresh independent Stage 7 checker. The implementer must not change its status to `ADMITTED`.
-8. After independent PASS/finalization, run one harmless synthetic qualification-mode episode proving admission-bundle validation/snapshot/run-identity binding. Only then may blinded Protocol 7 qualification subjects begin.
+The approved Stage 6 route source is the successful historical realization:
+
+- profile: `$HOME/ssdp70-omp-stagef/probes/OMP-LIVE-20261001T005750650447Z-d03216d76d8860f4-5ea83cffdd46/out/E1-p70-r0/profile-snapshot.json`
+- capability snapshot: `$HOME/ssdp70-omp-stagef/probes/OMP-LIVE-20261001T005750650447Z-d03216d76d8860f4-5ea83cffdd46/out/E1-p70-r0/capability-manifest-snapshot.json`
+- historical source-profile key: `86da2241272919344cd40075bcf79e61c63dbd3eb27249c8bd2f729fcca89a10`
+
+These are route/configuration inputs only; their prior profile/probe evidence remains stale for the replacement profile.
+
+1. Sync this branch to the exact current descendant, require a clean worktree, and set `CANDIDATE_HEAD=$(git rev-parse HEAD)`. Do not freeze against one commit and execute another.
+2. Ensure `$HOME/ssdp70-omp-stagef/{runtime-closures,probes,admission,qualification,logs}` remain persistent writable roots and inject the approved provider credential only through the reviewed secret/environment path.
+3. Execute focused Stage 7 tests followed by the complete affected exact-head suite. Any required failure/skip is blocking:
+
+   `python3 -m unittest qualification.ssdp70.eval.test_omp_stage7_admission qualification.ssdp70.eval.test_omp_stage7_campaign qualification.ssdp70.eval.test_omp_units -v`
+
+   `python3 -W ignore -m unittest discover -s qualification/ssdp70/eval -p 'test_*.py' -q`
+
+4. Freeze the replacement host-bound profile and create the candidate campaign through the approved route:
+
+   `CAMPAIGN=$(python3 qualification/ssdp70/eval/omp_stage7_campaign.py freeze-inherit --source-profile "$HOME/ssdp70-omp-stagef/probes/OMP-LIVE-20261001T005750650447Z-d03216d76d8860f4-5ea83cffdd46/out/E1-p70-r0/profile-snapshot.json" --source-capabilities "$HOME/ssdp70-omp-stagef/probes/OMP-LIVE-20261001T005750650447Z-d03216d76d8860f4-5ea83cffdd46/out/E1-p70-r0/capability-manifest-snapshot.json" --executable "$HOME/.local/bin/omp" --capabilities qualification/ssdp70/eval/capabilities/omp-headless.json --candidate-head "$CANDIDATE_HEAD" --semantic-subject db94a2dfb7fef480f37227eab5c45256e89901b8 --profile-id "omp-headless-deepinfra-glm53-flash-stage7-hostbound-$CANDIDATE_HEAD" --expect-provider-id deepinfra --expect-model-id zai-org/GLM-5.3-Flash --expect-upstream https://api.deepinfra.com/v1/openai --expect-source-profile-key 86da2241272919344cd40075bcf79e61c63dbd3eb27249c8bd2f729fcca89a10 --label hostbound)`
+
+   Retain the new profile key and `host_execution_environment`. The key must not be relabeled as the historical `86da2241…` profile.
+
+5. Materialize the immutable arms and prepare the bounded Stage 7 corpus:
+
+   `ARMS=$(python3 qualification/ssdp70/eval/omp_stage7_campaign.py prepare-arms --campaign "$CAMPAIGN" --repo .)`
+
+   `python3 qualification/ssdp70/eval/omp_stage7_campaign.py prepare --campaign "$CAMPAIGN"`
+
+6. Execute the exact-profile campaign:
+
+   `EXECUTION_ROOT=$(python3 qualification/ssdp70/eval/omp_stage7_campaign.py run-exact --campaign "$CAMPAIGN" --arms-manifest "$ARMS" --arm p66 --arm p70 --parallel 2)`
+
+   Its execution summary must PASS; positive runs must be `COMPLETE_ADMISSIBLE`; the contamination case must be a validated prelaunch refusal; scheduler validation must prove sequential arms plus overlapping independent pairs.
+
+7. Select a complete positive Protocol 7 realization under `$EXECUTION_ROOT` and run deterministic falsification:
+
+   `python3 qualification/ssdp70/eval/omp_stage7_campaign.py falsify --campaign "$CAMPAIGN" --base-run "<complete-p70-run-directory>"`
+
+   This can close only the mechanically discriminated core/harness cells. It must not be used as semantic §6 evidence.
+
+8. Run a fresh append-only real-provider probe for the replacement profile under `$HOME/ssdp70-omp-stagef/probes/`. Required successful semantics remain `execution_mode=probe`, `evidence_state=COMPLETE_ADMISSIBLE`, `qualification_outcome=NOT_EVALUATED`.
+
+9. A fresh independent custody/evaluator checker must then produce the remaining `independent-inspection` proof cells: the §11.3 known-broken/known-good semantic branches, evaluator-identity perturbation, final-report/changed-file/tool-trace assessment-input completeness, chained-delegate first-look, and the aggregate `withheld_oracle_branches` executor check. Exact-profile and deterministic proof classes cannot substitute for these cells.
+
+10. After every campaign slot is independently supportable, the independent checker may verify the candidate campaign and finalize the hash-bound executor admission record as `ADMITTED`. The implementation context must not perform that promotion.
+
+11. After independent PASS/finalization, run one harmless synthetic qualification-mode episode proving admission validation, snapshotting and run-identity binding. Only after that dry run passes may blinded Protocol 7 qualification subjects execute.
