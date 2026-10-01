@@ -70,6 +70,16 @@ class Stage7CampaignDriverTests(unittest.TestCase):
                 entries = {row["id"]: row["entry"] for row in corpus_manifest["episodes"]}
                 for episode in admission.ORDINARY_ENTRY_CASE_EPISODES.values():
                     self.assertEqual(entries[episode], "ordinary")
+                base_project = Path(paths["corpus"]) / "fixtures" / "base" / "project"
+                required_fixture_files = {
+                    "scientific_filter.py", "local_defect.py", "pipeline.py", "data.csv",
+                    "analysis_report.md", "gate_results.csv", "business_report.csv", "service_test.py",
+                    "architecture_note.md", "variant_history.md", "source_values.json", "rendered_values.csv",
+                }
+                self.assertEqual(
+                    required_fixture_files,
+                    {name for name in required_fixture_files if (base_project / name).is_file()},
+                )
                 self.assertTrue((Path(paths["corpus"]) / "fixtures" / "hostile" / "project" / ".mcp.json").is_file())
                 with self.assertRaises(driver.DriverError):
                     driver.prepare_corpus(camp)

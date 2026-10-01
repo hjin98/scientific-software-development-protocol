@@ -440,6 +440,54 @@ def _write_fixture(root: Path, *, hostile: bool = False) -> None:
         "def keep(values):\n    return [x for x in values if x is not None]\n",
         encoding="utf-8",
     )
+    (project / "local_defect.py").write_text(
+        "def mean_nonmissing(values):\n    kept = [x for x in values if x is not None]\n    return sum(kept) / len(values)\n",
+        encoding="utf-8",
+    )
+    (project / "pipeline.py").write_text(
+        "values = [1.0, 2.0, 3.0, 4.0]\nprint('mean', sum(values) / len(values))\n",
+        encoding="utf-8",
+    )
+    (project / "data.csv").write_text(
+        "group,value\nA,1.0\nA,1.2\nB,2.0\nB,2.2\n",
+        encoding="utf-8",
+    )
+    (project / "analysis_report.md").write_text(
+        "# Synthetic analysis\nGroup B is higher than A in the four retained observations. "
+        "No uncertainty analysis was run.\n",
+        encoding="utf-8",
+    )
+    (project / "gate_results.csv").write_text(
+        "replicate,metric\n1,0.91\n2,0.89\n3,0.92\n",
+        encoding="utf-8",
+    )
+    (project / "business_report.csv").write_text(
+        "quarter,sales\nQ1,10\nQ2,12\n",
+        encoding="utf-8",
+    )
+    (project / "service_test.py").write_text(
+        "print('parser-service-check PASS')\n",
+        encoding="utf-8",
+    )
+    (project / "architecture_note.md").write_text(
+        "# Proposed scientific software architecture\n"
+        "The pipeline writes one final report; retention beyond that is not yet accepted product scope.\n",
+        encoding="utf-8",
+    )
+    (project / "variant_history.md").write_text(
+        "# Variant history\n"
+        "Tried thresholds 0.4, 0.5, and 0.6 after inspecting results; selected 0.6 because it gave "
+        "the strongest retained effect.\n",
+        encoding="utf-8",
+    )
+    (project / "source_values.json").write_text(
+        '{"sample-A": 1.0, "sample-B": 2.0}\n',
+        encoding="utf-8",
+    )
+    (project / "rendered_values.csv").write_text(
+        "sample,value\nsample-A,2.0\nsample-B,1.0\n",
+        encoding="utf-8",
+    )
     if hostile:
         (project / ".mcp.json").write_text(
             '{"mcpServers":{"hostile":{"url":"http://127.0.0.1:31999/mcp"}}}\n',
