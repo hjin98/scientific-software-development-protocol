@@ -140,6 +140,17 @@ EXACT_PROFILE_REQUIRED_EPISODES = {
     ("section6", "issue_network_external_write_standins"): ("S7-MEDIATED", "S7-CONTAINMENT"),
 }
 
+EXACT_PROFILE_REQUIRED_EVENT_KINDS = {
+    "S7-WORKSPACE": {"resource_access", "mutation", "tool_action", "final_result"},
+    "S7-MEDIATED": {"issue_evidence_access", "mutation", "delegate_call", "delegate_return", "final_result"},
+    "S7-CONTAINMENT": {"tool_action", "mutation", "network_external_action", "final_result"},
+    "S7-PAIR": {"resource_access", "tool_action", "final_result"},
+    **{
+        episode: {"catalog_snapshot", "final_result"}
+        for episode in ORDINARY_ENTRY_CASE_EPISODES.values()
+    },
+}
+
 _SAFE_LABEL = re.compile(r"^[A-Za-z0-9._-]+$")
 _GIT_SHA = re.compile(r"^[0-9a-f]{40}$")
 
@@ -420,6 +431,23 @@ def _exact_profile_evidence_errors(source: Path, campaign: dict[str, Any]) -> li
     return errors
 
 
+def _normalized_event_kinds(run: Path) -> set[str]:
+    path = Path(run) / "events.normalized.jsonl"
+    if not path.is_file():
+        return set()
+    kinds: set[str] = set()
+    for line in path.read_text(encoding="utf-8").splitlines():
+        if not line.strip():
+            continue
+        try:
+            row = json.loads(line)
+        except json.JSONDecodeError:
+            return set()
+        if isinstance(row, dict) and isinstance(row.get("kind"), str):
+            kinds.add(row["kind"])
+    return kinds
+
+
 def _exact_profile_claim_errors(
     source: Path,
     campaign: dict[str, Any],
@@ -432,6 +460,7 @@ def _exact_profile_claim_errors(
     states: list[str] = []
     valid_refusals: list[dict[str, Any]] = []
     complete_subject_episodes: set[str] = set()
+    complete_subject_runs: dict[str, list[Path]] = {}
     pair_subject_commits: set[str] = set()
     for run in candidates:
         try:
@@ -450,6 +479,7 @@ def _exact_profile_claim_errors(
             and isinstance(episode, str)
         ):
             complete_subject_episodes.add(episode)
+            complete_subject_runs.setdefault(episode, []).append(run)
         if state == "COMPLETE_ADMISSIBLE" and episode == "S7-PAIR" and isinstance(subject_commit, str):
             pair_subject_commits.add(subject_commit)
         if state == "EXECUTION_ERROR" and not _prelaunch_refusal_errors(run, summary):
@@ -479,6 +509,22 @@ def _exact_profile_claim_errors(
     missing = sorted(set(required_episodes) - complete_subject_episodes)
     if missing:
         return [f"{category} {name} lacks COMPLETE_ADMISSIBLE semantic-subject episode(s): {missing}"]
+
+    event_errors: list[str] = []
+    for episode in required_episodes:
+        required_kinds = EXACT_PROFILE_REQUIRED_EVENT_KINDS.get(episode, set())
+        if not required_kinds:
+            continue
+        runs = complete_subject_runs.get(episode, [])
+        observed_sets = [_normalized_event_kinds(run) for run in runs]
+        if not any(required_kinds.issubset(observed) for observed in observed_sets):
+            observed_union = sorted(set().union(*observed_sets)) if observed_sets else []
+            event_errors.append(
+                f"{episode} lacks required normalized event kinds {sorted(required_kinds)}; "
+                f"observed={observed_union}"
+            )
+    if event_errors:
+        return [f"{category} {name}: {item}" for item in event_errors]
 
     if (category, name) == ("check", "fresh_arm_isolation"):
         if len(pair_subject_commits) < 2:

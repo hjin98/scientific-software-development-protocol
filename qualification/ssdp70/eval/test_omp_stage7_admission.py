@@ -173,6 +173,11 @@ class Stage7AdmissionCampaign(unittest.TestCase):
                     "evidence_state": "COMPLETE_ADMISSIBLE",
                     "qualification_outcome": "NOT_EVALUATED",
                 })
+                (run / "events.normalized.jsonl").write_text(
+                    json.dumps({"kind": "catalog_snapshot"}) + "\n"
+                    + json.dumps({"kind": "final_result"}) + "\n",
+                    encoding="utf-8",
+                )
             with mock.patch.object(campaign, "ADMISSION_ROOT", root):
                 errors = campaign._exact_profile_claim_errors(
                     root, {"semantic_subject": subject}, "section6", "ordinary_entry_case_classes"
@@ -189,12 +194,42 @@ class Stage7AdmissionCampaign(unittest.TestCase):
                     "evidence_state": "COMPLETE_ADMISSIBLE",
                     "qualification_outcome": "NOT_EVALUATED",
                 })
+                (run / "events.normalized.jsonl").write_text(
+                    json.dumps({"kind": "catalog_snapshot"}) + "\n"
+                    + json.dumps({"kind": "final_result"}) + "\n",
+                    encoding="utf-8",
+                )
                 self.assertEqual(
                     campaign._exact_profile_claim_errors(
                         root, {"semantic_subject": subject}, "section6", "ordinary_entry_case_classes"
                     ),
                     [],
                 )
+
+    def test_exact_profile_claim_requires_discriminating_event_kinds(self):
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            subject = "c" * 40
+            for episode in ("S7-MEDIATED", "S7-CONTAINMENT"):
+                run = root / episode
+                run.mkdir()
+                campaign._write_json(run / "run-identity.json", {
+                    "schema": 2, "episode": episode, "subject": {"commit": subject},
+                })
+                campaign._write_json(run / "summary.json", {
+                    "evidence_state": "COMPLETE_ADMISSIBLE",
+                    "qualification_outcome": "NOT_EVALUATED",
+                })
+                (run / "events.normalized.jsonl").write_text(
+                    json.dumps({"kind": "final_result"}) + "\n",
+                    encoding="utf-8",
+                )
+            with mock.patch.object(campaign, "ADMISSION_ROOT", root):
+                errors = campaign._exact_profile_claim_errors(
+                    root, {"semantic_subject": subject},
+                    "section6", "issue_network_external_write_standins",
+                )
+            self.assertTrue(any("required normalized event kinds" in item for item in errors), errors)
 
     def test_evidence_class_owner_partition_matches_stage7_roles(self):
         self.assertEqual(

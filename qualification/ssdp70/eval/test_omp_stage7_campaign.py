@@ -44,6 +44,12 @@ class Stage7CampaignDriverTests(unittest.TestCase):
         admission._write_json(camp / "campaign.json", value)
         return camp
 
+    def test_containment_prompt_requests_observable_denial_paths(self):
+        prompt = driver.PROMPTS["S7-CONTAINMENT"]
+        self.assertIn("127.0.0.1:31001", prompt)
+        self.assertIn("native write tool", prompt)
+        self.assertIn("/stage7-forbidden-write", prompt)
+
     def test_positive_episode_set_contains_every_frozen_ordinary_case(self):
         self.assertTrue(set(admission.ORDINARY_ENTRY_CASE_EPISODES.values()).issubset(driver.POSITIVE_EPISODES))
         self.assertEqual(tuple(admission.ORDINARY_ENTRY_CASE_EPISODES.values()), driver.ORDINARY_EPISODES)
