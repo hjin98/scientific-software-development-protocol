@@ -180,6 +180,24 @@ def _identity_digest_errors(identity: dict[str, Any]) -> list[str]:
     return []
 
 
+def _prelaunch_refusal_errors(run: Path, summary: dict[str, Any]) -> list[str]:
+    errors: list[str] = []
+    refusal = Path(run) / "prelaunch-refusal.json"
+    if not refusal.is_file():
+        return ["execution-error realization is not a retained prelaunch refusal"]
+    try:
+        payload = _load_json(refusal)
+    except (CampaignError, OSError, json.JSONDecodeError) as exc:
+        return [f"prelaunch refusal is unreadable: {exc}"]
+    if payload.get("subject_launched") is not False:
+        errors.append("prelaunch refusal does not prove subject_launched=false")
+    if summary.get("execution_ok") is not False:
+        errors.append("prelaunch refusal summary does not retain execution_ok=false")
+    if summary.get("qualification_outcome") != "NOT_EVALUATED":
+        errors.append("prelaunch refusal incorrectly carries a qualification outcome")
+    return errors
+
+
 def _exact_profile_realization_errors(run: Path, campaign: dict[str, Any]) -> list[str]:
     """Structural/identity checks for one real harness realization used as admission evidence."""
     run = Path(run).resolve()
@@ -246,15 +264,9 @@ def _exact_profile_realization_errors(run: Path, campaign: dict[str, Any]) -> li
         else:
             errors.extend(core70.validate_complete_run(run, identity, requirements))
     elif summary.get("evidence_state") == "EXECUTION_ERROR":
-        refusal = run / "prelaunch-refusal.json"
-        if refusal.is_file():
-            try:
-                payload = _load_json(refusal)
-            except CampaignError as exc:
-                errors.append(str(exc))
-            else:
-                if payload.get("subject_launched") is not False:
-                    errors.append("prelaunch refusal does not prove subject_launched=false")
+        errors.extend(_prelaunch_refusal_errors(run, summary))
+    else:
+        errors.append(f"exact-profile realization has inadmissible evidence state {summary.get('evidence_state')!r}")
     return errors
 
 
@@ -345,6 +357,11 @@ def init_campaign(
             "adapter_sha256": core70.sha256_file(Path(omp.__file__).resolve()),
             "core_sha256": core70.sha256_file(Path(core70.__file__).resolve()),
             "harness_sha256": core70.sha256_file(Path(harness70.__file__).resolve()),
+            "admission_tool_sha256": core70.sha256_file(Path(__file__).resolve()),
+            "campaign_driver_sha256": (
+                core70.sha256_file(HERE / "omp_stage7_campaign.py")
+                if (HERE / "omp_stage7_campaign.py").is_file() else None
+            ),
             "adapter_support_sha256": _expected_adapter_support_sha256(),
             "host_execution_environment": bundle.profile.get("containment_policy", {}).get(
                 "host_execution_environment"
@@ -467,6 +484,13 @@ def campaign_errors(campaign_root: Path) -> list[str]:
                 errors.append("campaign qualification core changed")
             if core70.sha256_file(Path(harness70.__file__).resolve()) != expected_profile.get("harness_sha256"):
                 errors.append("campaign harness changed")
+            if core70.sha256_file(Path(__file__).resolve()) != expected_profile.get("admission_tool_sha256"):
+                errors.append("campaign admission tool changed")
+            frozen_driver = expected_profile.get("campaign_driver_sha256")
+            current_driver_path = HERE / "omp_stage7_campaign.py"
+            current_driver = core70.sha256_file(current_driver_path) if current_driver_path.is_file() else None
+            if current_driver != frozen_driver:
+                errors.append("campaign execution driver changed")
             if _expected_adapter_support_sha256() != (expected_profile.get("adapter_support_sha256") or {}):
                 errors.append("campaign adapter support files changed")
             host_errors = omp.profile_errors(bundle.profile)

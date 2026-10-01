@@ -193,6 +193,7 @@ def freeze_and_init(
 def freeze_from_source_profile(
     *,
     source_profile: Path,
+    source_capabilities: Path,
     executable: Path,
     capabilities: Path,
     candidate_head: str,
@@ -205,7 +206,7 @@ def freeze_from_source_profile(
     label: str | None,
 ) -> Path:
     source_profile = Path(source_profile).resolve()
-    source_bundle = core70.load_profile(source_profile, Path(capabilities).resolve())
+    source_bundle = core70.load_profile(source_profile, Path(source_capabilities).resolve())
     if expected_source_profile_key and source_bundle.profile_key_sha256 != expected_source_profile_key:
         raise DriverError(
             f"source profile key {source_bundle.profile_key_sha256} != expected {expected_source_profile_key}"
@@ -478,10 +479,17 @@ def run_exact_campaign(
     contam_summary = {}
     if (contam_run / "summary.json").is_file():
         contam_summary = core70.load_json(contam_run / "summary.json")
+    contamination_refusal = {}
+    refusal_path = contam_run / "prelaunch-refusal.json"
+    if refusal_path.is_file():
+        contamination_refusal = core70.load_json(refusal_path)
     contamination_expected = (
         contamination_rc == 2
         and contam_summary.get("evidence_state") == "EXECUTION_ERROR"
-        and (contam_run / "prelaunch-refusal.json").is_file()
+        and contamination_refusal.get("phase") == "realize_containment"
+        and contamination_refusal.get("subject_launched") is False
+        and "ambient discovery is not closed" in str(contamination_refusal.get("reason", ""))
+        and ".mcp.json" in str(contamination_refusal.get("reason", ""))
     )
     structural_errors = admission._exact_profile_evidence_errors(execution_root, campaign)
     result = {
@@ -652,6 +660,8 @@ def _parser() -> argparse.ArgumentParser:
 
     inherit = sub.add_parser("freeze-inherit")
     inherit.add_argument("--source-profile", type=Path, required=True)
+    inherit.add_argument("--source-capabilities", type=Path, required=True,
+                         help="capability snapshot retained with the historical source profile")
     inherit.add_argument("--executable", type=Path, required=True)
     inherit.add_argument("--capabilities", type=Path, default=HERE / "capabilities" / "omp-headless.json")
     inherit.add_argument("--candidate-head", required=True)
@@ -703,6 +713,7 @@ def main(argv: list[str] | None = None) -> int:
     if args.command == "freeze-inherit":
         root = freeze_from_source_profile(
             source_profile=args.source_profile,
+            source_capabilities=args.source_capabilities,
             executable=args.executable,
             capabilities=args.capabilities,
             candidate_head=args.candidate_head,

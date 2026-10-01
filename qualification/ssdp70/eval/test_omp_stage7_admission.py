@@ -94,6 +94,25 @@ class Stage7AdmissionCampaign(unittest.TestCase):
                     )
                 self.assertIn("must be a directory", str(caught.exception))
 
+    def test_execution_error_without_prelaunch_refusal_is_not_exact_profile_evidence(self):
+        with tempfile.TemporaryDirectory() as td:
+            run = Path(td) / "run"
+            run.mkdir()
+            summary = {
+                "evidence_state": "EXECUTION_ERROR",
+                "execution_ok": False,
+                "qualification_outcome": "NOT_EVALUATED",
+            }
+            errors = campaign._prelaunch_refusal_errors(run, summary)
+            self.assertTrue(any("not a retained prelaunch refusal" in item for item in errors), errors)
+            campaign._write_json(run / "prelaunch-refusal.json", {
+                "schema": 1,
+                "phase": "realize_containment",
+                "reason": "synthetic prelaunch refusal",
+                "subject_launched": False,
+            })
+            self.assertEqual(campaign._prelaunch_refusal_errors(run, summary), [])
+
     def test_emitted_bundle_is_candidate_and_cannot_satisfy_admission_status(self):
         with tempfile.TemporaryDirectory() as td:
             root = Path(td)

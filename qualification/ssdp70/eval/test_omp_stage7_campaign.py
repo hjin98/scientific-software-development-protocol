@@ -83,6 +83,7 @@ class Stage7CampaignDriverTests(unittest.TestCase):
                 mock.patch.object(driver, "freeze_and_init", return_value=Path(td) / "campaign") as freeze:
             result = driver.freeze_from_source_profile(
                 source_profile=Path(td) / "old-profile.json",
+                source_capabilities=Path(td) / "old-capabilities.json",
                 executable=Path(td) / "omp",
                 capabilities=Path(td) / "cap.json",
                 candidate_head="a" * 40,
