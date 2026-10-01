@@ -44,7 +44,7 @@ class Stage7AdmissionCampaign(unittest.TestCase):
     def test_recorded_proofs_are_append_only_and_source_bound(self):
         with tempfile.TemporaryDirectory() as td:
             root = Path(td)
-            workspace = root / "workspace"
+            workspace = root
             with mock.patch.object(campaign, "STAGEF_WORKSPACE_ROOT", workspace), \
                     mock.patch.object(campaign, "ADMISSION_ROOT", root / "admission"):
                 camp = self._campaign(root)
