@@ -777,6 +777,37 @@ class ProfileFreezeAndPerturbation(unittest.TestCase):
     def test_frozen_profile_has_no_errors(self):
         self.assertEqual(omp.profile_errors(self._profile()), [])
 
+    def test_host_execution_environment_is_profile_key_bound_and_migration_fails_closed(self):
+        profile = self._profile()
+        frozen = profile["containment_policy"]["host_execution_environment"]
+        self.assertEqual(frozen, omp.host_execution_environment())
+        capability_path = HERE / "capabilities" / "omp-headless.json"
+        omp.RUNTIME_STATE_ROOT.mkdir(parents=True, exist_ok=True)
+        with tempfile.TemporaryDirectory(prefix="host-profile-key-", dir=omp.RUNTIME_STATE_ROOT) as td:
+            root = Path(td)
+            first = root / "first.json"
+            changed_path = root / "changed.json"
+            first.write_text(json.dumps(profile), encoding="utf-8")
+            changed = json.loads(json.dumps(profile))
+            changed["containment_policy"]["host_execution_environment"]["kernel"]["release"] += "-different"
+            changed_path.write_text(json.dumps(changed), encoding="utf-8")
+            original_bundle = core70.load_profile(first, capability_path)
+            changed_bundle = core70.load_profile(changed_path, capability_path)
+            self.assertNotEqual(original_bundle.profile_key_sha256, changed_bundle.profile_key_sha256)
+        migrated = json.loads(json.dumps(frozen))
+        migrated["kernel"]["release"] += "-migrated"
+        with mock.patch.object(omp, "host_execution_environment", return_value=migrated):
+            errors = omp.profile_errors(profile)
+            self.assertTrue(any("host execution environment" in error for error in errors), errors)
+            with tempfile.TemporaryDirectory() as td:
+                project = Path(td) / "project"
+                project.mkdir()
+                env = {"HOME": str(Path(td) / "private" / "runtime-home")}
+                with self.assertRaises(omp.AdapterError) as caught:
+                    omp.realize_containment(profile, project, env)
+                self.assertIn("host execution environment", str(caught.exception))
+        self.assertEqual(omp.profile_errors(profile), [])
+
     def test_template_with_markers_is_refused(self):
         template = json.loads((HERE / "profiles" / "omp-headless.template.json").read_text())
         self.assertTrue(any("unfrozen" in e for e in omp.profile_errors(template)))

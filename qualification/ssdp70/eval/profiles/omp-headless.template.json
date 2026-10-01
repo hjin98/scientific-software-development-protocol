@@ -7,6 +7,7 @@
   },
   "containment_policy": {
     "build_inventory_sha256": "MUST-BE-FROZEN-BEFORE-QUALIFICATION",
+    "host_execution_environment": "MUST-BE-FROZEN-BEFORE-QUALIFICATION",
     "inference_authority": "descriptor pairs inherited by the launcher only; relayed only for connections whose client socket is held solely by the launcher-started OMP process; capability is bound to that run instance, not to an executable identity",
     "kind": "omp-three-principal-bwrap-v3",
     "mcp_transport_realization": "unchanged stdio mediator run by the supervisor; OMP reaches it as streamable-HTTP MCP through the supervisor bridge over the descriptor-bound relay",

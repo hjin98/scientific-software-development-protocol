@@ -38,6 +38,7 @@ import hashlib
 import ipaddress
 import json
 import os
+import platform
 import re
 import shutil
 import stat
@@ -918,6 +919,17 @@ def profile_errors(profile: dict[str, Any]) -> list[str]:
     inventory = policy.get("build_inventory_sha256")
     if inventory != sha256_file(inventory_path()):
         errors.append("frozen build-inventory digest does not match the retained exact-build inventory")
+    frozen_host = policy.get("host_execution_environment")
+    if not isinstance(frozen_host, dict):
+        errors.append("frozen host execution environment is missing or malformed")
+    else:
+        try:
+            observed_host = host_execution_environment()
+        except AdapterError as exc:
+            errors.append(str(exc))
+        else:
+            if frozen_host != observed_host:
+                errors.append("frozen host execution environment does not match the current executing host")
     if profile.get("agent_model") != f"{route.get('provider_id')}/{route.get('model_id')}":
         errors.append("agent_model does not equal provider_route provider_id/model_id")
     budgets = profile.get("budgets") if isinstance(profile.get("budgets"), dict) else {}
@@ -946,6 +958,47 @@ def load_inventory() -> dict[str, Any]:
         _INVENTORY_CACHE["digest"] = digest
         _INVENTORY_CACHE["value"] = json.loads(path.read_text(encoding="utf-8"))
     return _INVENTORY_CACHE["value"]
+
+
+def _os_release_source() -> Path:
+    for candidate in (Path("/etc/os-release"), Path("/usr/lib/os-release")):
+        if candidate.is_file():
+            return candidate
+    raise AdapterError("host OS-release identity is unavailable")
+
+
+def host_execution_environment() -> dict[str, Any]:
+    """Material host substrate that can change containment/supervisor semantics."""
+    if not hasattr(os, "uname"):
+        raise AdapterError("OMP containment requires a Linux host with uname support")
+    uname = os.uname()
+    os_release_path = _os_release_source()
+    try:
+        os_release = platform.freedesktop_os_release()
+    except OSError as exc:
+        raise AdapterError(f"cannot read host OS-release identity: {exc}") from exc
+    python_executable = Path(sys.executable).resolve()
+    if not python_executable.is_file():
+        raise AdapterError("qualification-supervisor Python executable is unavailable")
+    return {
+        "schema": 1,
+        "kernel": {
+            "sysname": uname.sysname,
+            "release": uname.release,
+            "version": uname.version,
+            "machine": uname.machine,
+        },
+        "os_release": {
+            "sha256": sha256_file(os_release_path),
+            "id": str(os_release.get("ID", "")),
+            "version_id": str(os_release.get("VERSION_ID", "")),
+        },
+        "supervisor_python": {
+            "implementation": platform.python_implementation(),
+            "version": platform.python_version(),
+            "executable_sha256": sha256_file(python_executable),
+        },
+    }
 
 
 def freeze_profile(template: dict[str, Any], *, executable_path: str, provider_route: dict[str, Any],
@@ -982,6 +1035,7 @@ def freeze_profile(template: dict[str, Any], *, executable_path: str, provider_r
     policy["principal_files_sha256"] = principal_files_sha256()
     policy["execution_support_sha256"] = execution_support_sha256()
     policy["build_inventory_sha256"] = sha256_file(inventory_path())
+    policy["host_execution_environment"] = host_execution_environment()
     return profile
 
 
@@ -1367,6 +1421,7 @@ def realize_containment(profile: dict[str, Any], project: Path, env: dict[str, s
             "principal_files_sha256": principal_files_sha256(),
             "settings_closure_sha256": settings_closure_sha256(),
             "build_inventory_sha256": sha256_file(inventory_path()),
+            "host_execution_environment": host_execution_environment(),
             "mcp_servers": [{
                 "name": OMP_MCP_SERVER_NAME,
                 "transport": "stdio",
