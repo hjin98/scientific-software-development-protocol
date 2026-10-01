@@ -516,6 +516,12 @@ def prepare_corpus(campaign_root: Path) -> dict[str, str]:
             name: {
                 "requires_exact_profile_behavior": name in admission.SECTION6_EXACT_PROFILE_CELLS,
                 "independent_checker_judgment_required": True,
+                "evidence_production_route": (
+                    "exact-profile-driver-plus-independent-checker"
+                    if name in admission.SECTION6_EXACT_PROFILE_CELLS
+                    else "deterministic-falsifier-plus-custody/evaluator-checker"
+                ),
+                "hidden_semantic_material_owner": "custody/evaluator-checker",
             }
             for name in admission.SECTION6_CELLS
         },
@@ -728,6 +734,12 @@ def deterministic_falsification(campaign_root: Path, *, base_run: Path) -> Path:
     cases["core_identity_perturbation"] = {
         "errors": core70.validate_complete_run(base, altered_core, requirements),
     }
+    cases["cache_profile_identity_perturbation"] = {
+        "cache_valid": core70.cache_valid(base, altered_identity, requirements),
+    }
+    cases["cache_core_identity_perturbation"] = {
+        "cache_valid": core70.cache_valid(base, altered_core, requirements),
+    }
 
     missing_artifact = out / "missing-artifact"
     shutil.copytree(base, missing_artifact)
@@ -794,7 +806,12 @@ def deterministic_falsification(campaign_root: Path, *, base_run: Path) -> Path:
         "duplicate_scoring_disposition",
         "unknown_scoring_disposition",
     )
-    passed = all(bool(cases[name]["errors"]) for name in required_nonempty) and state != "COMPLETE_ADMISSIBLE"
+    passed = (
+        all(bool(cases[name]["errors"]) for name in required_nonempty)
+        and cases["cache_profile_identity_perturbation"]["cache_valid"] is False
+        and cases["cache_core_identity_perturbation"]["cache_valid"] is False
+        and state != "COMPLETE_ADMISSIBLE"
+    )
     payload = {
         "schema": 1,
         "kind": "omp-stage7-deterministic-falsification-v1",
