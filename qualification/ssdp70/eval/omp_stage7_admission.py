@@ -13,7 +13,6 @@ from __future__ import annotations
 
 import argparse
 import json
-import os
 import re
 import sys
 import uuid
@@ -62,7 +61,33 @@ SECTION6_CELLS = (
     "issue_network_external_write_standins",
     "chained_delegate_first_look",
 )
+
+CHECK_EVIDENCE_CLASS_FLOORS = {
+    "exact_subject_profile_identity": {"exact-profile-behavior"},
+    "fresh_arm_isolation": {"exact-profile-behavior"},
+    "capability_manifest": {"exact-profile-behavior"},
+    "raw_normalized_completeness": {"exact-profile-behavior"},
+    "fail_closed_evidence": {"deterministic-falsification", "exact-profile-behavior"},
+    "exact_scoring_closure": {"deterministic-falsification", "exact-profile-behavior"},
+    "cache_profile_core_identity_perturbation": {"deterministic-falsification", "exact-profile-behavior"},
+    "catalog_contamination": {"exact-profile-behavior"},
+    "containment_pre_effect": {"exact-profile-behavior"},
+    "custody_denial": {"exact-profile-behavior"},
+    "ordinary_entry_owner_read": {"exact-profile-behavior"},
+    "withheld_oracle_branches": {"deterministic-falsification", "exact-profile-behavior"},
+}
+SECTION6_EXACT_PROFILE_CELLS = {
+    "catalog_contamination",
+    "containment_escape_attempts_retained",
+    "ordinary_entry_case_classes",
+    "issue_network_external_write_standins",
+}
+
 _SAFE_LABEL = re.compile(r"^[A-Za-z0-9._-]+$")
+_GIT_SHA = re.compile(r"^[0-9a-f]{40}$")
+
+if set(CHECK_EVIDENCE_CLASS_FLOORS) != set(core70.EXECUTOR_ADMISSION_CHECKS):
+    raise RuntimeError("CHECK_EVIDENCE_CLASS_FLOORS does not match core70.EXECUTOR_ADMISSION_CHECKS")
 
 
 class CampaignError(RuntimeError):
@@ -144,6 +169,10 @@ def init_campaign(
 ) -> Path:
     profile_path = Path(profile_path).resolve()
     capability_path = Path(capability_path).resolve()
+    if not _GIT_SHA.fullmatch(candidate_head):
+        raise CampaignError("candidate_head must be a full 40-hex Git commit")
+    if not _GIT_SHA.fullmatch(semantic_subject):
+        raise CampaignError("semantic_subject must be a full 40-hex Git commit")
     bundle = core70.load_profile(profile_path, capability_path)
     if bundle.profile.get("adapter_id") != omp.ADAPTER_ID:
         raise CampaignError("Stage 7 OMP campaign requires the exact OMP adapter profile")
@@ -265,6 +294,35 @@ def campaign_errors(campaign_root: Path) -> list[str]:
     root = Path(campaign_root).resolve()
     campaign = _load_campaign(root)
     errors: list[str] = []
+    snapshots = campaign.get("snapshots") if isinstance(campaign.get("snapshots"), dict) else {}
+    profile_rel = snapshots.get("profile")
+    capability_rel = snapshots.get("capabilities")
+    profile_path = (root / profile_rel).resolve() if isinstance(profile_rel, str) else None
+    capability_path = (root / capability_rel).resolve() if isinstance(capability_rel, str) else None
+    if profile_path is None or not _within(profile_path, root) or not profile_path.is_file():
+        errors.append("profile snapshot is unavailable or changed")
+    if capability_path is None or not _within(capability_path, root) or not capability_path.is_file():
+        errors.append("capability snapshot is unavailable or changed")
+    if profile_path is not None and profile_path.is_file() and capability_path is not None and capability_path.is_file():
+        try:
+            bundle = core70.load_profile(profile_path, capability_path)
+        except Exception as exc:
+            errors.append(f"campaign profile snapshots are invalid: {exc}")
+        else:
+            expected_profile = campaign.get("profile") if isinstance(campaign.get("profile"), dict) else {}
+            if bundle.profile_key_sha256 != expected_profile.get("profile_key_sha256"):
+                errors.append("campaign profile key changed")
+            if core70.sha256_file(profile_path) != expected_profile.get("profile_document_sha256"):
+                errors.append("campaign profile snapshot hash changed")
+            if bundle.capability_manifest_sha256 != expected_profile.get("capability_manifest_sha256"):
+                errors.append("campaign capability manifest changed")
+            if core70.sha256_file(Path(omp.__file__).resolve()) != expected_profile.get("adapter_sha256"):
+                errors.append("campaign adapter implementation changed")
+            if core70.sha256_file(Path(core70.__file__).resolve()) != expected_profile.get("core_sha256"):
+                errors.append("campaign qualification core changed")
+            host_errors = omp.profile_errors(bundle.profile)
+            if host_errors:
+                errors.append("campaign exact profile is no longer admissible on this host: " + "; ".join(host_errors))
     if set(campaign.get("checks", {})) != set(core70.EXECUTOR_ADMISSION_CHECKS):
         errors.append("campaign does not contain the exact executor admission check set")
     if set(campaign.get("section6", {})) != set(SECTION6_CELLS):
@@ -292,6 +350,27 @@ def campaign_errors(campaign_root: Path) -> list[str]:
                 errors.append(f"{category} {name} proof hash changed")
                 continue
             proof = _load_json(proof_path)
+            if proof.get("category") != category or proof.get("name") != name or proof.get("status") != "PASS":
+                errors.append(f"{category} {name} proof metadata does not match its campaign slot")
+                continue
+            if proof.get("profile_key_sha256") != campaign["profile"]["profile_key_sha256"]:
+                errors.append(f"{category} {name} proof profile identity changed")
+                continue
+            if proof.get("candidate_head") != campaign["candidate_head"]:
+                errors.append(f"{category} {name} proof candidate identity changed")
+                continue
+            evidence_class = proof.get("evidence_class")
+            if category == "check":
+                allowed_classes = CHECK_EVIDENCE_CLASS_FLOORS[name]
+            elif name in SECTION6_EXACT_PROFILE_CELLS:
+                allowed_classes = {"exact-profile-behavior"}
+            else:
+                allowed_classes = {"deterministic-falsification", "exact-profile-behavior"}
+            if evidence_class not in allowed_classes:
+                errors.append(
+                    f"{category} {name} proof class {evidence_class!r} cannot establish this admission claim"
+                )
+                continue
             try:
                 source = _source_identity(Path(proof.get("source_path", "")))
             except CampaignError as exc:
@@ -303,6 +382,8 @@ def campaign_errors(campaign_root: Path) -> list[str]:
                 errors.append(f"{category} {name} source evidence hash changed")
             if source.get("source_bytes") != proof.get("source_bytes"):
                 errors.append(f"{category} {name} source evidence size changed")
+            if source.get("source_kind") == "directory" and source.get("source_files") != proof.get("source_files"):
+                errors.append(f"{category} {name} source evidence file count changed")
     return errors
 
 

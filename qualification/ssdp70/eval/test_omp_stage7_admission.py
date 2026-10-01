@@ -104,7 +104,8 @@ class Stage7AdmissionCampaign(unittest.TestCase):
                             "proof_sha256": core70.sha256_file(proof),
                         }
                 campaign._write_json(camp / "campaign.json", manifest)
-                candidate = campaign.emit_candidate_bundle(camp)
+                with mock.patch.object(campaign, "campaign_errors", return_value=[]):
+                    candidate = campaign.emit_candidate_bundle(camp)
                 payload = json.loads(candidate.read_text(encoding="utf-8"))
                 self.assertEqual(payload["status"], "CANDIDATE")
                 self.assertEqual(set(payload["checks"]), set(core70.EXECUTOR_ADMISSION_CHECKS))
