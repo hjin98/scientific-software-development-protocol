@@ -103,3 +103,45 @@ These are route/configuration inputs only; their prior profile/probe evidence re
 10. After every campaign slot is independently supportable, the independent checker may verify the candidate campaign and finalize the hash-bound executor admission record as `ADMITTED`. The implementation context must not perform that promotion.
 
 11. After independent PASS/finalization, run one harmless synthetic qualification-mode episode proving admission validation, snapshotting and run-identity binding. Only after that dry run passes may blinded Protocol 7 qualification subjects execute.
+
+## 2026-10-01 failed-terminal D4 repair update
+
+A supplemental Stage 7 falsification against executable candidate `d605ff2e9448990e3ac75755fa4cee96c443a2c3` exposed a real D4 fail-closed defect: OMP `agent_end` normalization emitted `native_return_state.isError`, while the portable harness consumed `native_return_state.is_error`. An explicit OMP terminal `state=error` could therefore be misclassified as `terminal_ok=true` and reach `COMPLETE_ADMISSIBLE` when the process return code was zero.
+
+The bounded repair is now implemented. The exact repaired executable head is:
+
+`d2ebe02ffe3072a5b4b68968e2dab1d7269f61d6`
+
+Source commits in this repair tranche:
+
+- `ce076e8503f3665ec5e7b5ec53500a422d4b0cdd`: normalize OMP `agent_end` terminal status to the portable `native_return_state.is_error` field; add OMP success/error/token-cap/turn-cap/aborted regression coverage; add a permanent Stage 7 failed-terminal deterministic falsification case.
+- `d2ebe02ffe3072a5b4b68968e2dab1d7269f61d6`: make the portable harness fail closed when `native_return_state.is_error` is missing/non-boolean and make normalized-event validation require that field; add portable regression coverage.
+
+No D3 change or Serious Challenge was required. The accepted three-principal topology remains unchanged.
+
+### Evidence applicability after this repair
+
+Because the OMP execution profile binds the exact adapter, `core70.py`, and `harness70.py` through `execution_support_sha256`, this repair changes the exact profile key. Therefore the prior host-bound profile
+
+`e0d62ddad00e15bdf19c66def518a1ace96f95ab8fb36b7c3198c579e4c7c4f4`
+
+and its probe/campaign remain immutable historical development/falsification evidence only. They cannot be promoted to Stage 7 admission for the repaired executable candidate.
+
+The prior exact-profile campaign result correctly remains useful evidence for the discovered failure mode and unaffected campaign design, but all profile-bound acceptance for the repaired candidate must be freshly realized.
+
+### Current state
+
+**SOURCE REPAIR IMPLEMENTED AT `d2ebe02f…`; TARGET-HOST REGRESSION, NEW PROFILE FREEZE, FRESH REAL-PROVIDER PROBE, NEW STAGE 7 CAMPAIGN, AND INDEPENDENT ADMISSION REVIEW ARE REQUIRED. OMP REMAINS UNADMITTED.**
+
+The source-editing context did not execute the target-host test suite or provider-bound campaign. Required next steps are:
+
+1. check out exact executable head `d2ebe02ffe3072a5b4b68968e2dab1d7269f61d6` with a clean worktree;
+2. run focused Stage 7/OMP tests plus the complete affected `qualification/ssdp70/eval/test_*.py` suite with zero required failures/skips;
+3. freeze a new host-bound profile/campaign from the repaired head using the same approved historical DeepInfra route source;
+4. run a fresh real-provider probe for the new profile and require `execution_mode=probe`, `evidence_state=COMPLETE_ADMISSIBLE`, `qualification_outcome=NOT_EVALUATED`;
+5. materialize exact p66/p70 arms, prepare the synthetic corpus, run the full exact-profile Stage 7 matrix, and rerun deterministic falsification. The new falsification output must include `failed_termination` with `terminal_exists=true`, `terminal_ok=false`, `execution_ok=false`, and a non-`COMPLETE_ADMISSIBLE` evidence state;
+6. only after the repaired profile campaign is complete, perform the fresh independent Stage 7 checker review and, on PASS only, finalize the hash-bound `ADMITTED` executor record;
+7. then run the harmless synthetic qualification-mode admission-binding dry run before any blinded Protocol 7 qualification subject.
+
+The prior containment observation `authorization=allow, disposition=sandboxed` for the attempted external write is not itself a blocker: contract §1 item 8 permits redirection into qualification-owned isolated state when no prohibited live external effect occurs. Final containment/custody disposition remains with the independent checker.
+
