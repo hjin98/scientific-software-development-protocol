@@ -45,26 +45,25 @@ class Stage7AdmissionCampaign(unittest.TestCase):
         with tempfile.TemporaryDirectory() as td:
             root = Path(td)
             workspace = root / "workspace"
-            evidence = workspace / "proof.txt"
-            evidence.parent.mkdir()
-            evidence.write_text("evidence\n", encoding="utf-8")
             with mock.patch.object(campaign, "STAGEF_WORKSPACE_ROOT", workspace), \
                     mock.patch.object(campaign, "ADMISSION_ROOT", root / "admission"):
                 camp = self._campaign(root)
+                evidence = camp / "evidence.txt"
+                evidence.write_text("evidence\n", encoding="utf-8")
                 first = campaign.record_proof(
                     camp,
                     category="check",
-                    name=core70.EXECUTOR_ADMISSION_CHECKS[0],
+                    name="fail_closed_evidence",
                     evidence_path=evidence,
-                    evidence_class="independent-inspection",
+                    evidence_class="deterministic-falsification",
                     status="PASS",
                 )
                 second = campaign.record_proof(
                     camp,
                     category="check",
-                    name=core70.EXECUTOR_ADMISSION_CHECKS[0],
+                    name="fail_closed_evidence",
                     evidence_path=evidence,
-                    evidence_class="independent-inspection",
+                    evidence_class="deterministic-falsification",
                     status="PASS",
                 )
                 self.assertNotEqual(first, second)
@@ -73,6 +72,27 @@ class Stage7AdmissionCampaign(unittest.TestCase):
                 evidence.write_text("changed\n", encoding="utf-8")
                 errors = campaign.campaign_errors(camp)
                 self.assertTrue(any("source evidence hash changed" in item for item in errors), errors)
+
+    def test_exact_profile_label_cannot_be_applied_to_plain_file(self):
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            workspace = root / "workspace"
+            workspace.mkdir()
+            with mock.patch.object(campaign, "STAGEF_WORKSPACE_ROOT", workspace), \
+                    mock.patch.object(campaign, "ADMISSION_ROOT", root / "admission"):
+                camp = self._campaign(root)
+                evidence = camp / "not-a-run.txt"
+                evidence.write_text("not a harness realization\n", encoding="utf-8")
+                with self.assertRaises(campaign.CampaignError) as caught:
+                    campaign.record_proof(
+                        camp,
+                        category="check",
+                        name="exact_subject_profile_identity",
+                        evidence_path=evidence,
+                        evidence_class="exact-profile-behavior",
+                        status="PASS",
+                    )
+                self.assertIn("must be a directory", str(caught.exception))
 
     def test_emitted_bundle_is_candidate_and_cannot_satisfy_admission_status(self):
         with tempfile.TemporaryDirectory() as td:

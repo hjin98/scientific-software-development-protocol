@@ -24,6 +24,7 @@ HERE = Path(__file__).resolve().parent
 if str(HERE) not in sys.path:
     sys.path.insert(0, str(HERE))
 import core70  # noqa: E402
+import harness70  # noqa: E402
 from adapters import omp  # noqa: E402
 
 SCHEMA = 1
@@ -159,6 +160,141 @@ def _source_identity(path: Path) -> dict[str, Any]:
     raise CampaignError(f"proof evidence path is unavailable: {path}")
 
 
+def _expected_adapter_support_sha256() -> dict[str, str]:
+    support = getattr(omp, "support_files", None)
+    if support is None:
+        return {}
+    return {
+        name: core70.sha256_file(Path(path).resolve())
+        for name, path in sorted(support().items())
+    }
+
+
+def _identity_digest_errors(identity: dict[str, Any]) -> list[str]:
+    claimed = identity.get("identity_sha256")
+    unsigned = dict(identity)
+    unsigned.pop("identity_sha256", None)
+    actual = core70.stable_json_sha256(unsigned)
+    if claimed != actual:
+        return [f"run identity digest does not reproduce: {claimed!r} != {actual}"]
+    return []
+
+
+def _exact_profile_realization_errors(run: Path, campaign: dict[str, Any]) -> list[str]:
+    """Structural/identity checks for one real harness realization used as admission evidence."""
+    run = Path(run).resolve()
+    errors: list[str] = []
+    if not _within(run, ADMISSION_ROOT):
+        return [f"exact-profile realization is outside the Stage 7 admission root: {run}"]
+    required = (
+        "run-identity.json", "profile-snapshot.json", "capability-manifest-snapshot.json",
+        "requirements-snapshot.json", "summary.json",
+    )
+    missing = [name for name in required if not (run / name).is_file()]
+    if missing:
+        return [f"exact-profile realization is missing harness artifact(s): {missing}"]
+    try:
+        identity = _load_json(run / "run-identity.json")
+        summary = _load_json(run / "summary.json")
+        bundle = core70.load_profile(
+            run / "profile-snapshot.json", run / "capability-manifest-snapshot.json"
+        )
+    except (CampaignError, core70.ContractError, OSError, json.JSONDecodeError) as exc:
+        return [f"exact-profile realization is unreadable: {exc}"]
+
+    expected = campaign.get("profile") if isinstance(campaign.get("profile"), dict) else {}
+    if identity.get("execution_mode") != "probe":
+        errors.append("Stage 7 pre-admission realization did not run in probe mode")
+    if identity.get("profile_key_sha256") != expected.get("profile_key_sha256"):
+        errors.append("run identity profile key does not match the campaign")
+    if bundle.profile_key_sha256 != expected.get("profile_key_sha256"):
+        errors.append("run profile snapshot does not match the campaign profile key")
+    if core70.sha256_file(run / "profile-snapshot.json") != identity.get("profile_document_sha256"):
+        errors.append("run profile snapshot hash does not match run identity")
+    if bundle.capability_manifest_sha256 != expected.get("capability_manifest_sha256"):
+        errors.append("run capability snapshot does not match the campaign")
+    if identity.get("capability_manifest_sha256") != expected.get("capability_manifest_sha256"):
+        errors.append("run identity capability manifest does not match the campaign")
+    if identity.get("qualification_core_sha256") != expected.get("core_sha256"):
+        errors.append("run identity qualification core does not match the campaign")
+    if identity.get("harness_sha256") != expected.get("harness_sha256"):
+        errors.append("run identity harness does not match the campaign")
+    if identity.get("adapter_normalizer_sha256") != expected.get("adapter_sha256"):
+        errors.append("run identity adapter does not match the campaign")
+    expected_support = expected.get("adapter_support_sha256") or {}
+    if expected_support and identity.get("adapter_support_sha256") != expected_support:
+        errors.append("run identity adapter support files do not match the campaign")
+    if summary.get("profile_key_sha256") != expected.get("profile_key_sha256"):
+        errors.append("run summary profile key does not match the campaign")
+    if summary.get("run_identity_sha256") != identity.get("identity_sha256"):
+        errors.append("run summary identity does not match run identity")
+    errors.extend(_identity_digest_errors(identity))
+
+    if summary.get("evidence_state") == "COMPLETE_ADMISSIBLE":
+        requirements_identity = identity.get("requirements") if isinstance(identity.get("requirements"), dict) else {}
+        expected_manifest_digests = {
+            "required_artifacts": requirements_identity.get("required_artifacts_sha256"),
+            "required_oracles": requirements_identity.get("required_oracles_sha256"),
+            "expected_scoring_items": requirements_identity.get("expected_scoring_items_sha256"),
+        }
+        try:
+            requirements = core70.requirements_from_snapshot(
+                core70.load_json(run / "requirements-snapshot.json"), expected_manifest_digests
+            )
+        except core70.ContractError as exc:
+            errors.append(str(exc))
+        else:
+            errors.extend(core70.validate_complete_run(run, identity, requirements))
+    elif summary.get("evidence_state") == "EXECUTION_ERROR":
+        refusal = run / "prelaunch-refusal.json"
+        if refusal.is_file():
+            try:
+                payload = _load_json(refusal)
+            except CampaignError as exc:
+                errors.append(str(exc))
+            else:
+                if payload.get("subject_launched") is not False:
+                    errors.append("prelaunch refusal does not prove subject_launched=false")
+    return errors
+
+
+def _exact_profile_evidence_errors(source: Path, campaign: dict[str, Any]) -> list[str]:
+    """Require exact-profile evidence to contain one or more real harness realizations."""
+    source = Path(source).resolve()
+    if not source.is_dir():
+        return ["exact-profile-behavior evidence must be a directory containing harness realizations"]
+    if not _within(source, ADMISSION_ROOT):
+        return [f"exact-profile-behavior evidence is outside the Stage 7 admission root: {source}"]
+    candidates: list[Path] = []
+    if (source / "run-identity.json").is_file():
+        candidates.append(source)
+    else:
+        for identity_path in source.rglob("run-identity.json"):
+            run = identity_path.parent.resolve()
+            if _within(run, source) and run not in candidates:
+                candidates.append(run)
+            if len(candidates) > 256:
+                return ["exact-profile-behavior evidence exceeds the bounded 256-realization campaign limit"]
+    if not candidates:
+        return ["exact-profile-behavior evidence contains no harness run identity"]
+    errors: list[str] = []
+    semantic_subject_seen = False
+    for run in sorted(candidates):
+        try:
+            identity = _load_json(run / "run-identity.json")
+        except CampaignError as exc:
+            errors.append(f"{run}: {exc}")
+            continue
+        subject = identity.get("subject") if isinstance(identity.get("subject"), dict) else {}
+        if subject.get("commit") == campaign.get("semantic_subject"):
+            semantic_subject_seen = True
+        for error in _exact_profile_realization_errors(run, campaign):
+            errors.append(f"{run}: {error}")
+    if not semantic_subject_seen:
+        errors.append("exact-profile-behavior evidence contains no run of the campaign semantic subject")
+    return errors
+
+
 def init_campaign(
     profile_path: Path,
     capability_path: Path,
@@ -208,6 +344,8 @@ def init_campaign(
             "capability_manifest_sha256": bundle.capability_manifest_sha256,
             "adapter_sha256": core70.sha256_file(Path(omp.__file__).resolve()),
             "core_sha256": core70.sha256_file(Path(core70.__file__).resolve()),
+            "harness_sha256": core70.sha256_file(Path(harness70.__file__).resolve()),
+            "adapter_support_sha256": _expected_adapter_support_sha256(),
             "host_execution_environment": bundle.profile.get("containment_policy", {}).get(
                 "host_execution_environment"
             ),
@@ -258,7 +396,14 @@ def record_proof(
     root = Path(campaign_root).resolve()
     campaign = _load_campaign(root)
     row = _target(campaign, category, name)
-    source = _source_identity(Path(evidence_path))
+    evidence_path = Path(evidence_path).resolve()
+    if not _within(evidence_path, root):
+        raise CampaignError("proof evidence must remain inside its Stage 7 campaign realization")
+    if evidence_class == "exact-profile-behavior":
+        evidence_errors = _exact_profile_evidence_errors(evidence_path, campaign)
+        if evidence_errors:
+            raise CampaignError("exact-profile evidence is inadmissible: " + "; ".join(evidence_errors))
+    source = _source_identity(evidence_path)
 
     stamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S.%fZ")
     proof_name = f"{category}-{name}-{stamp}-{uuid.uuid4().hex[:8]}.json"
@@ -320,6 +465,10 @@ def campaign_errors(campaign_root: Path) -> list[str]:
                 errors.append("campaign adapter implementation changed")
             if core70.sha256_file(Path(core70.__file__).resolve()) != expected_profile.get("core_sha256"):
                 errors.append("campaign qualification core changed")
+            if core70.sha256_file(Path(harness70.__file__).resolve()) != expected_profile.get("harness_sha256"):
+                errors.append("campaign harness changed")
+            if _expected_adapter_support_sha256() != (expected_profile.get("adapter_support_sha256") or {}):
+                errors.append("campaign adapter support files changed")
             host_errors = omp.profile_errors(bundle.profile)
             if host_errors:
                 errors.append("campaign exact profile is no longer admissible on this host: " + "; ".join(host_errors))
@@ -371,8 +520,17 @@ def campaign_errors(campaign_root: Path) -> list[str]:
                     f"{category} {name} proof class {evidence_class!r} cannot establish this admission claim"
                 )
                 continue
+            source_path = Path(proof.get("source_path", "")).resolve()
+            if not _within(source_path, root):
+                errors.append(f"{category} {name} proof source escaped its Stage 7 campaign")
+                continue
+            if evidence_class == "exact-profile-behavior":
+                exact_errors = _exact_profile_evidence_errors(source_path, campaign)
+                if exact_errors:
+                    errors.extend(f"{category} {name}: {item}" for item in exact_errors)
+                    continue
             try:
-                source = _source_identity(Path(proof.get("source_path", "")))
+                source = _source_identity(source_path)
             except CampaignError as exc:
                 errors.append(f"{category} {name} source evidence is unavailable: {exc}")
                 continue
