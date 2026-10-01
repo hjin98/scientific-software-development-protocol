@@ -8,7 +8,7 @@ reviewed_date: 2026-09-28
 active_serious_challenge: none
 ---
 
-# SSDP 6.1 / 6.2 / 6.3 / 6.4 / 6.5 / 6.6 / 7.0 / 8.0 Workplan Authority Index
+# SSDP 6.1 / 6.2 / 6.3 / 6.4 / 6.5 / 6.6 / 7.0 / SSDS 8.0 Workplan Authority Index
 
 ## Background and terminology
 
@@ -190,53 +190,30 @@ LIFECYCLE STATUS: COMPLETED / ARCHIVED
 
 Protocol 6.6 is accepted-current. Its reduced-root-router, strict no-self-adoption version semantics, stochastic Protocol-6 robustness boundary, and bounded live trajectory evidence are inputs to Protocol 8's preserved deliberate D3 Orchestrator architecture reopen. They do not themselves select a Protocol 8 architecture or authorize Protocol 8 D4.
 
-## Protocol 8.0 deterministic-orchestrator future design handoff
+## SSDS 8.0 graph-native deterministic architecture future design handoff
 
-Protocol 8.0 deterministic-orchestrator design/review SHALL use the single current consolidated handoff:
+The former Protocol 8 deterministic-control-plane proposal has been deliberately re-consolidated as the broader **SSDS 8.0 graph-native deterministic orchestration architecture**. Its single current prospective handoff is:
 
-- `workplans/active/SSDP-8.0-DETERMINISTIC-CONTROL-PLANE-AND-MANDATORY-ORCHESTRATOR-CONSOLIDATED.md`
+- `workplans/active/SSDS-8.0-GRAPH-NATIVE-DETERMINISTIC-ORCHESTRATION-ARCHITECTURE.md`
 
-It supersedes, as one composition, these archived byte-identical design and review records (its §37.4 maps each to the sections now carrying it):
+The immediately preceding consolidated Protocol 8 plan is preserved byte-identically at:
 
-1. `workplans/archive/SSDP-7.0-DETERMINISTIC-CONTROL-PLANE-AND-MANDATORY-ORCHESTRATOR-MIGRATION.md`
-2. `workplans/archive/SSDP-7.0-DETERMINISTIC-CONTROL-PLANE-AND-MANDATORY-ORCHESTRATOR-MIGRATION-REVISION-1-SECOND-REVIEW-CLOSURE.md`
-3. `workplans/archive/SSDP-7.0-DETERMINISTIC-CONTROL-PLANE-AND-MANDATORY-ORCHESTRATOR-MIGRATION-REVISION-2-DETERMINISM-AND-RECOVERY-CLOSURE.md`
-4. `workplans/archive/SSDP-7.0-DETERMINISTIC-CONTROL-PLANE-AND-MANDATORY-ORCHESTRATOR-MIGRATION-REVISION-3-PROTOCOL-6.2-INHERITANCE-RECONCILIATION.md`
-5. `workplans/archive/SSDP-7.0-DETERMINISTIC-CONTROL-PLANE-AND-MANDATORY-ORCHESTRATOR-MIGRATION-REVISION-4-PROTOCOL-6.3-INHERITANCE-RECONCILIATION.md`
-6. `workplans/archive/SSDP-7.0-DETERMINISTIC-CONTROL-PLANE-AND-MANDATORY-ORCHESTRATOR-MIGRATION-REVISION-5-PROTOCOL-6.4-INHERITANCE-RECONCILIATION.md`
-7. `workplans/archive/SSDP-7.0-DETERMINISTIC-CONTROL-PLANE-AND-MANDATORY-ORCHESTRATOR-MIGRATION-REVISION-6-PROTOCOL-6.5-INHERITANCE-RECONCILIATION.md`
-8. `workplans/archive/SSDP-7.0-DETERMINISTIC-CONTROL-PLANE-AND-MANDATORY-ORCHESTRATOR-MIGRATION-REVISION-7-PROTOCOL-6.6-INHERITANCE-AND-D3-REASSESSMENT.md`
-9. `workplans/archive/SSDP-8.0-DETERMINISTIC-ORCHESTRATOR-VERSION-REBIND.md`
+- `workplans/archive/SSDP-8.0-DETERMINISTIC-CONTROL-PLANE-AND-MANDATORY-ORCHESTRATOR-CONSOLIDATED.md`
 
-The consolidation is a representation and version-label change only. Revisions 1-2 closed ownership, semantic/control binding, storage/transport, cutover, determinism and recovery gaps; Revisions 3-7 advanced only inherited baseline identity (6.2 through 6.6), with Revision 7 binding Protocol 6.6 evidence as mandatory input to the deliberate D3 reassessment; the rebind reassigned the target from 7.0 to 8.0. If the consolidated file and the composed archived family disagree materially, the composed family governs until the consolidation is repaired.
+and its older archived lineage remains historical design evidence. The new SSDS 8.0 workplan preserves the deterministic reducer/event-store/TaskEnvelope/ResultEnvelope/control-store guarantees while extending the architecture to first-class AuthorityGraph, WorkGraph, CodeGraph/EvidenceGraph, graph-native context retrieval, graph-aware mutation transactions, safe parallel work claims/integration, repository reconciliation/import, and progressive legacy-project migration.
 
 Current disposition:
 
 ```text
 SERIOUS CHALLENGE: NONE
-WORKPLAN DESIGN REVIEW: PASS HISTORY (parent + Revisions 1-2, second review under 6.1; dispositions recorded in the archived revisions)
-CONSOLIDATION: PENDING INDEPENDENT LOSSLESSNESS CHECK AGAINST THE ARCHIVED FAMILY
-IMPLEMENTATION STATUS: PROPOSED
-PROTOCOL 6.1 HISTORICAL COMPLETION/RECOVERY: SATISFIED
-PROTOCOL 6.2 COMPLETION/QUALIFICATION/RECOVERY PREREQUISITE: SATISFIED
-PROTOCOL 6.2 REPRESENTATION-INHERITANCE RECONCILIATION: SATISFIED
-PROTOCOL 6.3 COMPLETION/QUALIFICATION/R2-REVIEW/RECOVERY PREREQUISITE: SATISFIED
-PROTOCOL 6.3 INHERITANCE RECONCILIATION: SATISFIED
-PROTOCOL 6.4 COMPLETION/REVIEW/RECOVERY PREREQUISITE: SATISFIED
-PROTOCOL 6.4 INHERITANCE RECONCILIATION: SATISFIED
-PROTOCOL 6.5 COMPLETION/REVIEW/RATIFICATION/RECOVERY PREREQUISITE: SATISFIED
-PROTOCOL 6.5 INHERITANCE RECONCILIATION: SATISFIED
-PROTOCOL 6.6 COMPLETION/REVIEW/RATIFICATION/RECOVERY PREREQUISITE: SATISFIED
-PROTOCOL 6.6 INHERITANCE/REASSESSMENT INPUT: SATISFIED / CONSOLIDATED §3.2, §28.1
-CURRENT PRE-CUTOVER FALLBACK/ROLLBACK BASELINE: Protocol 6.6 recovery 384666764da4c55b282e6b1595ab97e2f86e1dc4
-REMAINING PROTOCOL-8-SPECIFIC PRE-D4 REQUIREMENT:
-  1. DELIBERATE D3 ORCHESTRATOR ARCHITECTURE REOPEN/SUPERSESSION
-PROTOCOL 8 D4: NOT AUTHORIZED
+SSDS 8 ARCHITECTURE: PROPOSED
+SOURCE SNAPSHOT: f96b7ccf90dede4150d0efa17264fff07ec12d0d
+PROTOCOL 7 INHERITANCE: NOT FINAL — Protocol 7 closure is still active
+INDEPENDENT D3 REVIEW: REQUIRED after final Protocol 7 inheritance reconsolidation
+SSDS 8 D4: NOT AUTHORIZED
 ```
 
-Protocol 8 D4 remains unauthorized until the deliberate D3 Orchestrator architecture reopen/supersession closes. No Protocol 8 cutover is implied.
-
-If Protocol 7 is accepted, its closeout SHALL author a Protocol 8 inheritance reconciliation of the consolidated workplan that advances the pre-cutover baseline to Protocol 7 recovery and binds Protocol 7 inputs to the Protocol 8 D3 reassessment. Known Protocol 7 inputs are recorded in the consolidated workplan's §37.2.
+SSDP 7.0 remains the active scientific inspectability/epistemic-initiative closure line and the latest manual/document-driven fallback. This SSDS 8 branch is intentionally isolated and implies no cutover, merge to `main`, or implementation authorization.
 
 ## Protocol 6.5 completed handoff
 
@@ -269,8 +246,8 @@ There is exactly one mutable repository release-state owner: `PROTOCOL-RELEASE-S
 - Repository default/latest is never a protocol-version oracle.
 - Protocol 6.6 is accepted-current with exact public fallback `22f4bdba53795da3a6f13f162529f3a843fc37ae` and recovery `384666764da4c55b282e6b1595ab97e2f86e1dc4`.
 - Protocol 7 is the proposed scientific inspectability/epistemic-initiative/feedback-loop revision governed by its single consolidated workplan above; select its artifacts by exact ID, never by `SSDP-7.0*` globs, because the historical deterministic-orchestrator family shares that prefix.
-- The deterministic-orchestrator proposal targets Protocol 8.0 through its single consolidated workplan; that workplan binds Protocol 6.6 recovery as the inherited pre-cutover baseline and does not authorize D4. Select its artifacts by exact ID as well.
-- Under the future Protocol 8 deterministic-orchestrator proposal, after its own qualified cutover, the deterministic control plane would own machine lifecycle transitions while workplans/skills/documents remain semantic artifacts.
+- SSDS 8.0 is the proposed graph-native deterministic orchestration successor through its single prospective architectural workplan. It is currently based on the active Protocol 7 branch snapshot and MUST be re-consolidated against final accepted Protocol 7 inheritance before D4; it does not authorize implementation or cutover.
+- Under future SSDS 8 native cutover, the deterministic reducer would own machine lifecycle transitions; graph-native authority/work definitions remain semantic/cycle artifacts, D4 code remains executable authority, and agents/humans retain semantic judgment according to their owning gates.
 - Shadow comparison is permitted only while one side remains explicitly non-authoritative.
 - No `main` merge or Protocol 7/8 D4 cutover is authorized merely by these active design workplans.
 
