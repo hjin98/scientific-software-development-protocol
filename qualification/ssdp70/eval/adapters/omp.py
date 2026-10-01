@@ -3564,7 +3564,7 @@ def _on_agent_end(raw, native_index, observed, emit, errors, surface) -> list[st
     mapped: list[str] = []
     termination = emit("termination", "stdout", native_index, {
         "state": state,
-        "native_return_state": {"stopReason": last_stop, "messageCount": len(messages), "isError": is_error,
+        "native_return_state": {"stopReason": last_stop, "messageCount": len(messages), "is_error": is_error,
                                 "errorMessage": error_message, "turn_budget_exhausted_on_observer": budget},
         "terminal_result_exists": bool(final_text) and not is_error,
     })

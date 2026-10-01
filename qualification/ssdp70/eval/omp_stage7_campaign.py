@@ -819,6 +819,41 @@ def _requirements_from_run(run: Path) -> tuple[dict[str, Any], core70.Requiremen
     return identity, req
 
 
+def failed_terminal_falsification_case() -> dict[str, Any]:
+    """Exercise a present failed terminal through the portable harness/core owner path."""
+    events = [{
+        "kind": "termination",
+        "payload": {
+            "state": "error",
+            "native_return_state": {"is_error": True},
+            "terminal_result_exists": False,
+        },
+    }]
+    terminal_exists, terminal_ok = harness70._termination_state(events)
+    process_returncode = 0
+    execution_ok = bool(process_returncode == 0 and terminal_exists and terminal_ok)
+    state, reasons = core70.run_evidence_state(
+        execution_ok=execution_ok,
+        profile_errors=[],
+        event_errors=[],
+        completeness_errors=[],
+        catalog_ok=True,
+        terminal_exists=terminal_exists,
+        final_result_exists=True,
+        missing_artifacts=[],
+        missing_oracles=[],
+    )
+    return {
+        "terminal_event": events[0],
+        "process_returncode": process_returncode,
+        "terminal_exists": terminal_exists,
+        "terminal_ok": terminal_ok,
+        "execution_ok": execution_ok,
+        "state": state,
+        "reasons": reasons,
+    }
+
+
 def deterministic_falsification(campaign_root: Path, *, base_run: Path) -> Path:
     root = Path(campaign_root).resolve()
     campaign = _campaign(root)
@@ -909,6 +944,7 @@ def deterministic_falsification(campaign_root: Path, *, base_run: Path) -> Path:
         missing_oracles=[],
     )
     cases["missing_termination"] = {"state": state, "reasons": reasons}
+    cases["failed_termination"] = failed_terminal_falsification_case()
 
     required_nonempty = (
         "profile_identity_perturbation",
@@ -924,6 +960,10 @@ def deterministic_falsification(campaign_root: Path, *, base_run: Path) -> Path:
         and cases["cache_profile_identity_perturbation"]["cache_valid"] is False
         and cases["cache_core_identity_perturbation"]["cache_valid"] is False
         and state != "COMPLETE_ADMISSIBLE"
+        and cases["failed_termination"]["terminal_exists"] is True
+        and cases["failed_termination"]["terminal_ok"] is False
+        and cases["failed_termination"]["execution_ok"] is False
+        and cases["failed_termination"]["state"] != "COMPLETE_ADMISSIBLE"
     )
     payload = {
         "schema": 1,

@@ -44,6 +44,15 @@ class Stage7CampaignDriverTests(unittest.TestCase):
         admission._write_json(camp / "campaign.json", value)
         return camp
 
+    def test_failed_terminal_falsification_rejects_present_error_terminal(self):
+        case = driver.failed_terminal_falsification_case()
+        self.assertTrue(case["terminal_exists"])
+        self.assertFalse(case["terminal_ok"])
+        self.assertFalse(case["execution_ok"])
+        self.assertEqual(case["state"], "EXECUTION_ERROR")
+        self.assertTrue(case["reasons"])
+        self.assertTrue(case["terminal_event"]["payload"]["native_return_state"]["is_error"])
+
     def test_containment_prompt_requests_observable_denial_paths(self):
         prompt = driver.PROMPTS["S7-CONTAINMENT"]
         self.assertIn("127.0.0.1:31001", prompt)

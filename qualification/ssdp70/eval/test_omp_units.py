@@ -25,10 +25,72 @@ if str(HERE) not in sys.path:
     sys.path.insert(0, str(HERE))
 import core70  # noqa: E402
 import evidence70  # noqa: E402
+import harness70  # noqa: E402
 import muxhttp70 as mux  # noqa: E402
 import observer70  # noqa: E402
 import seccomp70  # noqa: E402
 from adapters import omp  # noqa: E402
+
+
+class OmpTerminationNormalization(unittest.TestCase):
+    def _agent_end(self, stop_reason: str, *, budget_exhausted: bool = False):
+        events = []
+
+        def emit(kind, actor, native_index, payload, status="observed", timing=None):
+            event = {
+                "event_id": f"e{len(events)}",
+                "kind": kind,
+                "actor": actor,
+                "payload": payload,
+                "status": status,
+            }
+            events.append(event)
+            return event
+
+        observed = type("ObservedFixture", (), {
+            "budget_exhausted": budget_exhausted,
+            "requests": [],
+        })()
+        raw = {
+            "messages": [{
+                "role": "assistant",
+                "stopReason": stop_reason,
+                "usage": {},
+                "duration": 1,
+                "errorMessage": "synthetic error" if stop_reason != "stop" else None,
+                "content": [{"type": "text", "text": "done"}],
+            }],
+        }
+        with mock.patch.object(omp, "group_inference_requests", return_value=([], [], [])):
+            omp._on_agent_end(raw, 0, observed, emit, [], {})
+        termination = next(event for event in events if event["kind"] == "termination")
+        return events, termination
+
+    def test_normalized_terminal_uses_portable_is_error_field(self):
+        _, termination = self._agent_end("error")
+        native = termination["payload"]["native_return_state"]
+        self.assertTrue(native["is_error"])
+        self.assertNotIn("isError", native)
+
+    def test_failed_omp_terminal_states_fail_harness_terminal_check(self):
+        for stop_reason, budget, expected_state in (
+            ("length", False, "token_cap"),
+            ("error", False, "error"),
+            ("error", True, "turn_cap"),
+            ("aborted", False, "aborted"),
+        ):
+            with self.subTest(stop_reason=stop_reason, budget=budget):
+                events, termination = self._agent_end(stop_reason, budget_exhausted=budget)
+                self.assertEqual(termination["payload"]["state"], expected_state)
+                self.assertEqual(harness70._termination_state(events), (True, False))
+                self.assertFalse(any(event["kind"] == "final_result" for event in events))
+
+    def test_successful_omp_terminal_state_remains_accepted(self):
+        events, termination = self._agent_end("stop")
+        self.assertEqual(termination["payload"]["state"], "completed")
+        self.assertFalse(termination["payload"]["native_return_state"]["is_error"])
+        self.assertEqual(harness70._termination_state(events), (True, True))
+        self.assertTrue(any(event["kind"] == "final_result" for event in events))
 
 
 class ObserverLaunchSafety(unittest.TestCase):
