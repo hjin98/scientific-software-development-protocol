@@ -4,6 +4,8 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 ACTIVE = ROOT / "workplans/active"
 ARCHIVE = ROOT / "workplans/archive"
+SSDS8 = "SSDS-8.0-GRAPH-NATIVE-DETERMINISTIC-ORCHESTRATION-ARCHITECTURE.md"
+SSDS8_HYPOTHESIS = "SSDS-8.0-GRAPH-NATIVE-DETERMINISTIC-ORCHESTRATION-ARCHITECTURE-BEFE678-HYPOTHESIS.md"
 CONSOLIDATED = "SSDP-8.0-DETERMINISTIC-CONTROL-PLANE-AND-MANDATORY-ORCHESTRATOR-CONSOLIDATED.md"
 PREFIX = "SSDP-7.0-DETERMINISTIC-CONTROL-PLANE-AND-MANDATORY-ORCHESTRATOR-MIGRATION"
 SUPERSEDED = [
@@ -20,23 +22,31 @@ SUPERSEDED = [
 
 
 class Protocol80OrchestratorConsolidationTests(unittest.TestCase):
-    def test_single_proposed_protocol8_handoff(self) -> None:
-        text = (ACTIVE / CONSOLIDATED).read_text(encoding="utf-8")
-        self.assertIn("target_protocol_version: 8.0.0", text)
+    """The deterministic-orchestrator line has one current, unauthorized handoff."""
+
+    def test_single_proposed_ssds8_handoff(self) -> None:
+        text = (ACTIVE / SSDS8).read_text(encoding="utf-8")
+        self.assertIn("target_system_version: 8.0.0", text)
         self.assertIn("status: proposed", text)
-        self.assertIn("PROTOCOL 8 D4 IMPLEMENTATION: NOT AUTHORIZED", text)
-        for name in SUPERSEDED:
+        self.assertIn("implementation_handoff: not-authorized", text)
+        self.assertIn("SSDS 8 D4: NOT AUTHORIZED", text)
+        for name in [CONSOLIDATED, SSDS8_HYPOTHESIS, *SUPERSEDED]:
             self.assertIn(Path(name).stem, text, name)
 
-    def test_superseded_family_is_archived_not_active(self) -> None:
-        for name in SUPERSEDED:
+    def test_superseded_lineage_is_archived_not_active(self) -> None:
+        for name in [CONSOLIDATED, SSDS8_HYPOTHESIS, *SUPERSEDED]:
             self.assertFalse((ACTIVE / name).exists(), name)
             self.assertTrue((ARCHIVE / name).is_file(), name)
+        consolidated = (ARCHIVE / CONSOLIDATED).read_text(encoding="utf-8")
+        self.assertIn("PROTOCOL 8 D4 IMPLEMENTATION: NOT AUTHORIZED", consolidated)
 
-    def test_index_routes_to_consolidated_handoff(self) -> None:
+    def test_index_routes_to_current_handoff(self) -> None:
         index = (ACTIVE / "SSDP-6.1-7.0-WORKPLAN-AUTHORITY-INDEX.md").read_text(encoding="utf-8")
-        self.assertIn(f"workplans/active/{CONSOLIDATED}", index)
+        self.assertIn(f"workplans/active/{SSDS8}", index)
+        self.assertNotIn(f"workplans/active/{CONSOLIDATED}", index)
         self.assertNotIn(f"workplans/active/{PREFIX}", index)
+        for name in [CONSOLIDATED, SSDS8_HYPOTHESIS, *SUPERSEDED]:
+            self.assertIn(f"workplans/archive/{name}", index, name)
 
 
 if __name__ == "__main__":
