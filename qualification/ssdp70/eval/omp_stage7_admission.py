@@ -14,6 +14,7 @@ from __future__ import annotations
 import argparse
 import json
 import re
+import subprocess
 import sys
 import uuid
 from datetime import datetime, timezone
@@ -113,6 +114,32 @@ EXACT_PROFILE_REFUSAL_CLAIMS = {
     ("section6", "catalog_contamination"),
 }
 
+ORDINARY_ENTRY_CASE_EPISODES = {
+    "d4_code_work": "S7-ORD-D4",
+    "run_and_report": "S7-ORD-RUN-REPORT",
+    "ad_hoc_analysis": "S7-ORD-ADHOC",
+    "realized_results_review": "S7-ORD-REVIEW",
+    "human_gate_evidence": "S7-ORD-GATE",
+    "near_boundary_empty_admissible_set": "S7-ORD-NEG-EMPTY",
+    "near_boundary_technical_outside_predicate": "S7-ORD-NEG-TECH",
+    "authority_authoring_or_review": "S7-ORD-AUTHORITY",
+    "claim_and_variant_history": "S7-ORD-VARIANT",
+    "source_to_rendered_integrity": "S7-ORD-RENDERED",
+    "delegate_return": "S7-ORD-DELEGATE",
+    "tension_retrieval": "S7-ORD-TENSION",
+}
+
+EXACT_PROFILE_REQUIRED_EPISODES = {
+    ("check", "capability_manifest"): ("S7-WORKSPACE", "S7-MEDIATED", "S7-CONTAINMENT"),
+    ("check", "raw_normalized_completeness"): ("S7-WORKSPACE", "S7-MEDIATED", "S7-CONTAINMENT"),
+    ("check", "containment_pre_effect"): ("S7-CONTAINMENT",),
+    ("check", "custody_denial"): ("S7-CONTAINMENT",),
+    ("check", "ordinary_entry_owner_read"): tuple(ORDINARY_ENTRY_CASE_EPISODES.values()),
+    ("section6", "containment_escape_attempts_retained"): ("S7-CONTAINMENT",),
+    ("section6", "ordinary_entry_case_classes"): tuple(ORDINARY_ENTRY_CASE_EPISODES.values()),
+    ("section6", "issue_network_external_write_standins"): ("S7-MEDIATED", "S7-CONTAINMENT"),
+}
+
 _SAFE_LABEL = re.compile(r"^[A-Za-z0-9._-]+$")
 _GIT_SHA = re.compile(r"^[0-9a-f]{40}$")
 
@@ -155,6 +182,23 @@ def allowed_evidence_classes(category: str, name: str) -> set[str]:
 
 class CampaignError(RuntimeError):
     pass
+
+
+def _repo_head(repo: Path = HERE.parents[2]) -> str:
+    proc = subprocess.run(
+        ["git", "rev-parse", "HEAD"], cwd=Path(repo).resolve(), check=False,
+        stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True,
+    )
+    head = proc.stdout.strip()
+    if proc.returncode != 0 or not _GIT_SHA.fullmatch(head):
+        raise CampaignError(f"cannot resolve exact repository HEAD: {proc.stderr.strip()}")
+    return head
+
+
+def _require_candidate_head(candidate_head: str) -> None:
+    actual = _repo_head()
+    if actual != candidate_head:
+        raise CampaignError(f"candidate_head {candidate_head} != exact executing checkout {actual}")
 
 
 def _write_json(path: Path, value: Any) -> None:
@@ -376,28 +420,91 @@ def _exact_profile_evidence_errors(source: Path, campaign: dict[str, Any]) -> li
     return errors
 
 
-def _exact_profile_claim_errors(source: Path, category: str, name: str) -> list[str]:
+def _exact_profile_claim_errors(
+    source: Path,
+    campaign: dict[str, Any],
+    category: str,
+    name: str,
+) -> list[str]:
     candidates, path_errors = _exact_profile_run_paths(source)
     if path_errors:
         return path_errors
     states: list[str] = []
-    valid_refusals = 0
+    valid_refusals: list[dict[str, Any]] = []
+    complete_subject_episodes: set[str] = set()
+    pair_subject_commits: set[str] = set()
     for run in candidates:
         try:
             summary = _load_json(run / "summary.json")
+            identity = _load_json(run / "run-identity.json")
         except (CampaignError, OSError, json.JSONDecodeError) as exc:
             return [f"{run}: cannot inspect exact-profile terminal state: {exc}"]
         state = str(summary.get("evidence_state"))
         states.append(state)
+        subject = identity.get("subject") if isinstance(identity.get("subject"), dict) else {}
+        subject_commit = subject.get("commit")
+        episode = identity.get("episode")
+        if (
+            state == "COMPLETE_ADMISSIBLE"
+            and subject_commit == campaign.get("semantic_subject")
+            and isinstance(episode, str)
+        ):
+            complete_subject_episodes.add(episode)
+        if state == "COMPLETE_ADMISSIBLE" and episode == "S7-PAIR" and isinstance(subject_commit, str):
+            pair_subject_commits.add(subject_commit)
         if state == "EXECUTION_ERROR" and not _prelaunch_refusal_errors(run, summary):
-            valid_refusals += 1
-    if (category, name) in EXACT_PROFILE_REFUSAL_CLAIMS:
-        if valid_refusals < 1:
-            return [f"{category} {name} requires at least one valid retained prelaunch-refusal realization"]
-    elif "COMPLETE_ADMISSIBLE" not in states:
-        return [f"{category} {name} requires at least one COMPLETE_ADMISSIBLE exact-profile realization"]
-    return []
+            valid_refusals.append({
+                "episode": episode,
+                "subject_commit": subject_commit,
+                "run": str(run),
+            })
 
+    if (category, name) in EXACT_PROFILE_REFUSAL_CLAIMS:
+        matched = [
+            row for row in valid_refusals
+            if row["episode"] == "S7-CONTAMINATION"
+            and row["subject_commit"] == campaign.get("semantic_subject")
+        ]
+        if not matched:
+            return [
+                f"{category} {name} requires a valid S7-CONTAMINATION prelaunch refusal "
+                "for the campaign semantic subject"
+            ]
+        return []
+
+    if "COMPLETE_ADMISSIBLE" not in states:
+        return [f"{category} {name} requires at least one COMPLETE_ADMISSIBLE exact-profile realization"]
+
+    required_episodes = EXACT_PROFILE_REQUIRED_EPISODES.get((category, name), ())
+    missing = sorted(set(required_episodes) - complete_subject_episodes)
+    if missing:
+        return [f"{category} {name} lacks COMPLETE_ADMISSIBLE semantic-subject episode(s): {missing}"]
+
+    if (category, name) == ("check", "fresh_arm_isolation"):
+        if len(pair_subject_commits) < 2:
+            return ["fresh_arm_isolation requires COMPLETE_ADMISSIBLE S7-PAIR runs from at least two distinct arms"]
+        summaries = list(Path(source).resolve().rglob("execution-summary.json"))
+        if not summaries:
+            return ["fresh_arm_isolation requires the retained exact-profile execution summary"]
+        passed = False
+        for summary_path in summaries:
+            try:
+                payload = _load_json(summary_path)
+            except (CampaignError, OSError, json.JSONDecodeError):
+                continue
+            if (
+                payload.get("status") == "PASS"
+                and isinstance(payload.get("arms"), list)
+                and len(set(payload["arms"])) >= 2
+                and isinstance(payload.get("parallel"), int)
+                and payload["parallel"] >= 2
+                and not payload.get("scheduler_validation_errors")
+            ):
+                passed = True
+                break
+        if not passed:
+            return ["fresh_arm_isolation lacks a PASS execution summary proving sequential arms and concurrent independent pairs"]
+    return []
 
 def init_campaign(
     profile_path: Path,
@@ -413,6 +520,7 @@ def init_campaign(
         raise CampaignError("candidate_head must be a full 40-hex Git commit")
     if not _GIT_SHA.fullmatch(semantic_subject):
         raise CampaignError("semantic_subject must be a full 40-hex Git commit")
+    _require_candidate_head(candidate_head)
     bundle = core70.load_profile(profile_path, capability_path)
     if bundle.profile.get("adapter_id") != omp.ADAPTER_ID:
         raise CampaignError("Stage 7 OMP campaign requires the exact OMP adapter profile")
@@ -515,7 +623,7 @@ def record_proof(
         raise CampaignError("proof evidence must remain inside its Stage 7 campaign realization")
     if evidence_class == "exact-profile-behavior":
         evidence_errors = _exact_profile_evidence_errors(evidence_path, campaign)
-        evidence_errors.extend(_exact_profile_claim_errors(evidence_path, category, name))
+        evidence_errors.extend(_exact_profile_claim_errors(evidence_path, campaign, category, name))
         if evidence_errors:
             raise CampaignError("exact-profile evidence is inadmissible: " + "; ".join(evidence_errors))
     source = _source_identity(evidence_path)
@@ -643,7 +751,7 @@ def campaign_errors(campaign_root: Path) -> list[str]:
                 continue
             if evidence_class == "exact-profile-behavior":
                 exact_errors = _exact_profile_evidence_errors(source_path, campaign)
-                exact_errors.extend(_exact_profile_claim_errors(source_path, category, name))
+                exact_errors.extend(_exact_profile_claim_errors(source_path, campaign, category, name))
                 if exact_errors:
                     errors.extend(f"{category} {name}: {item}" for item in exact_errors)
                     continue

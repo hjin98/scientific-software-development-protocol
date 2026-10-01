@@ -118,7 +118,11 @@ class Stage7AdmissionCampaign(unittest.TestCase):
             root = Path(td)
             run = root / "run"
             run.mkdir()
-            campaign._write_json(run / "run-identity.json", {"schema": 2})
+            campaign._write_json(run / "run-identity.json", {
+                "schema": 2,
+                "episode": "S7-CONTAMINATION",
+                "subject": {"commit": "b" * 40},
+            })
             campaign._write_json(run / "summary.json", {
                 "evidence_state": "EXECUTION_ERROR",
                 "execution_ok": False,
@@ -129,10 +133,66 @@ class Stage7AdmissionCampaign(unittest.TestCase):
                 "subject_launched": False,
             })
             with mock.patch.object(campaign, "ADMISSION_ROOT", root):
-                errors = campaign._exact_profile_claim_errors(run, "check", "fresh_arm_isolation")
+                errors = campaign._exact_profile_claim_errors(
+                    run, {"semantic_subject": "b" * 40}, "check", "fresh_arm_isolation"
+                )
                 self.assertTrue(any("COMPLETE_ADMISSIBLE" in item for item in errors), errors)
                 self.assertEqual(
-                    campaign._exact_profile_claim_errors(run, "check", "catalog_contamination"),
+                    campaign._exact_profile_claim_errors(
+                        run, {"semantic_subject": "b" * 40}, "check", "catalog_contamination"
+                    ),
+                    [],
+                )
+
+    def test_direct_campaign_init_rejects_noncurrent_candidate_head(self):
+        with mock.patch.object(campaign, "_repo_head", return_value="b" * 40):
+            with self.assertRaises(campaign.CampaignError) as caught:
+                campaign.init_campaign(
+                    Path("/definitely/missing/profile.json"),
+                    Path("/definitely/missing/capabilities.json"),
+                    candidate_head="a" * 40,
+                    semantic_subject="c" * 40,
+                    label="test",
+                )
+        self.assertIn("exact executing checkout", str(caught.exception))
+
+    def test_ordinary_entry_claim_requires_every_frozen_case_class_for_semantic_subject(self):
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            subject = "c" * 40
+            episodes = list(campaign.ORDINARY_ENTRY_CASE_EPISODES.values())
+            for index, episode in enumerate(episodes[:-1]):
+                run = root / f"run-{index}"
+                run.mkdir()
+                campaign._write_json(run / "run-identity.json", {
+                    "schema": 2,
+                    "episode": episode,
+                    "subject": {"commit": subject},
+                })
+                campaign._write_json(run / "summary.json", {
+                    "evidence_state": "COMPLETE_ADMISSIBLE",
+                    "qualification_outcome": "NOT_EVALUATED",
+                })
+            with mock.patch.object(campaign, "ADMISSION_ROOT", root):
+                errors = campaign._exact_profile_claim_errors(
+                    root, {"semantic_subject": subject}, "section6", "ordinary_entry_case_classes"
+                )
+                self.assertTrue(any(episodes[-1] in item for item in errors), errors)
+                run = root / "last"
+                run.mkdir()
+                campaign._write_json(run / "run-identity.json", {
+                    "schema": 2,
+                    "episode": episodes[-1],
+                    "subject": {"commit": subject},
+                })
+                campaign._write_json(run / "summary.json", {
+                    "evidence_state": "COMPLETE_ADMISSIBLE",
+                    "qualification_outcome": "NOT_EVALUATED",
+                })
+                self.assertEqual(
+                    campaign._exact_profile_claim_errors(
+                        root, {"semantic_subject": subject}, "section6", "ordinary_entry_case_classes"
+                    ),
                     [],
                 )
 

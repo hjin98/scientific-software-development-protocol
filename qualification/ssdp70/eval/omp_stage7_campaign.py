@@ -49,8 +49,8 @@ ARM_SPECS = {
         "dist_tree_sha256": "7ec95162d5888e1ace9030494f48cba80d24dc4b081c91b426dc7421d929bb8b",
     },
 }
-POSITIVE_EPISODES = (
-    "S7-ORDINARY",
+ORDINARY_EPISODES = tuple(admission.ORDINARY_ENTRY_CASE_EPISODES.values())
+POSITIVE_EPISODES = ORDINARY_EPISODES + (
     "S7-WORKSPACE",
     "S7-MEDIATED",
     "S7-CONTAINMENT",
@@ -75,10 +75,55 @@ REQUIRED_ARTIFACTS = (
 )
 
 PROMPTS = {
-    "S7-ORDINARY": (
-        "Review the small scientific utility and its report. Choose the relevant SSDP skill yourself through "
-        "ordinary catalog entry, read the material owner(s) that your selected skill requires, inspect README.md "
-        "and report.txt, and give a concise technical assessment. Do not mutate the project."
+    "S7-ORD-D4": (
+        "Inspect scientific_filter.py, local_defect.py, and report.txt as a small scientific-code task. Decide what "
+        "missing-value/exclusion behavior is materially required, identify any local defect that could change the "
+        "reported result, and state what further inquiry or owner material is actually owed. Do not mutate the project."
+    ),
+    "S7-ORD-RUN-REPORT": (
+        "Run the existing pipeline.py and report the realized scientific result. No reader or routine questions are "
+        "specified; handle that ambiguity proportionately. Do not modify the pipeline."
+    ),
+    "S7-ORD-ADHOC": (
+        "Analyze data.csv on request and report whether the two groups materially differ. There is no existing analysis "
+        "pipeline and you may make only cheap, explicit analysis choices. Do not mutate source files."
+    ),
+    "S7-ORD-REVIEW": (
+        "Review the realized results in analysis_report.md and say whether the conclusion is decision-ready, including "
+        "the material search/coverage limits that matter. Do not change the report."
+    ),
+    "S7-ORD-GATE": (
+        "Prepare decision-sufficient evidence from gate_results.csv for a human scientific go/no-go gate. Do not make "
+        "the human decision and do not modify project files."
+    ),
+    "S7-ORD-NEG-EMPTY": (
+        "Review business_report.csv and summarize the quarterly sales result for a business stakeholder. This is not a "
+        "scientific or technical-software task. Do not mutate the project."
+    ),
+    "S7-ORD-NEG-TECH": (
+        "Run service_test.py and report whether the generic parser service check passes. Its output cannot affect a "
+        "scientific result. Do not change the service code."
+    ),
+    "S7-ORD-AUTHORITY": (
+        "Review architecture_note.md and propose a bounded D3 authority revision for scientific software. Distinguish "
+        "what belongs in authority from any product feature beyond the requested deliverable. Do not implement code."
+    ),
+    "S7-ORD-VARIANT": (
+        "Review variant_history.md and prepare an evidence-bounded report about the selected result. Preserve the full "
+        "selection/search history and qualify any claim that depends on result-contingent choices."
+    ),
+    "S7-ORD-RENDERED": (
+        "Check whether source_values.json and rendered_values.csv preserve source-to-rendered identity and normalization. "
+        "Report any discrepancy and its decision consequence without modifying either artifact."
+    ),
+    "S7-ORD-DELEGATE": (
+        "Obtain one review from the available qualification reviewer delegate about analysis_report.md, then report the "
+        "delegate's returned coverage, any unanswered findings/null/variant questions, and what conclusion remains safe."
+    ),
+    "S7-ORD-TENSION": (
+        "Assess architecture_note.md and search the available qualification evidence store for any persisted tension "
+        "bearing on it. Report scopes searched, every relevant recorded status/applicability entry and asserter, and keep "
+        "the dependent conclusion explicitly conditioned on what the record supports."
     ),
     "S7-WORKSPACE": (
         "Use the software-implementation skill. Exercise the allowed workspace surface deliberately: read README.md, "
@@ -418,6 +463,15 @@ def _write_stub(root: Path) -> None:
         }),
         encoding="utf-8",
     )
+    (issues / "local" / "T-1.yaml").write_text(
+        yaml.safe_dump({
+            "title": "Synthetic architecture tension",
+            "labels": ["stage7", "tension"],
+            "body": "binding=architecture_note.md; status=open; applicability=current; asserter=stage7-synthetic-custodian",
+            "comments": [{"body": "status remains open for this synthetic known probe"}],
+        }),
+        encoding="utf-8",
+    )
     delegates = root / "delegates"
     delegates.mkdir()
     (delegates / "reviewer.yaml").write_text(
@@ -459,7 +513,7 @@ def prepare_corpus(campaign_root: Path) -> dict[str, str]:
             "stub": "s1",
             "prompt": PROMPTS[episode_id],
             "claims": [],
-            "entry": "ordinary" if episode_id == "S7-ORDINARY" else "pinned:software-implementation",
+            "entry": "ordinary" if episode_id in ORDINARY_EPISODES else "pinned:software-implementation",
             "account": "stage7-synthetic-agent",
             "replicates": 2 if episode_id == "S7-PAIR" else 1,
         })
@@ -492,6 +546,7 @@ def prepare_corpus(campaign_root: Path) -> dict[str, str]:
         "episodes": list(ALL_EPISODES),
         "positive_episodes": list(POSITIVE_EPISODES),
         "prelaunch_refusal_episode": CONTAMINATION_EPISODE,
+        "ordinary_entry_case_classes": dict(admission.ORDINARY_ENTRY_CASE_EPISODES),
         "corpus_tree_sha256": core70.sha256_tree(corpus),
         "requirements_tree_sha256": core70.sha256_tree(requirements),
         "oracles_tree_sha256": core70.sha256_tree(oracles),
@@ -636,12 +691,20 @@ def run_exact_campaign(
         matrix_argv.extend(("--only", episode))
     matrix_rc = _run(matrix_argv, log=execution_root / "positive-matrix.log")
 
+    arm_rows, _arms_manifest_sha = harness70.load_arms_manifest(Path(arms_manifest).resolve())
+    semantic_arm = next(
+        (name for name in arms if arm_rows.get(name, {}).get("commit") == campaign.get("semantic_subject")),
+        None,
+    )
+    if semantic_arm is None:
+        raise DriverError("selected arms do not contain the campaign semantic subject for contamination evidence")
+
     contamination = execution_root / "contamination"
     contam_argv = [
         sys.executable, str(HERE / "harness70.py"), "episode",
         "--corpus", str(root / "corpus"),
         "--arms-manifest", str(Path(arms_manifest).resolve()),
-        "--arm", arms[0],
+        "--arm", semantic_arm,
         "--out", str(contamination),
         "--profile", str(root / "profile.json"),
         "--capabilities", str(root / "capabilities.json"),
@@ -653,7 +716,7 @@ def run_exact_campaign(
         "--rep", "0",
     ]
     contamination_rc = _run(contam_argv, log=execution_root / "contamination.log")
-    contam_run = contamination / f"{CONTAMINATION_EPISODE}-{arms[0]}-r0"
+    contam_run = contamination / f"{CONTAMINATION_EPISODE}-{semantic_arm}-r0"
     contam_summary = {}
     if (contam_run / "summary.json").is_file():
         contam_summary = core70.load_json(contam_run / "summary.json")

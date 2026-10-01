@@ -3,6 +3,8 @@ import json
 import sys
 import tempfile
 import unittest
+
+import yaml
 from pathlib import Path
 from unittest import mock
 
@@ -42,6 +44,10 @@ class Stage7CampaignDriverTests(unittest.TestCase):
         admission._write_json(camp / "campaign.json", value)
         return camp
 
+    def test_positive_episode_set_contains_every_frozen_ordinary_case(self):
+        self.assertTrue(set(admission.ORDINARY_ENTRY_CASE_EPISODES.values()).issubset(driver.POSITIVE_EPISODES))
+        self.assertEqual(tuple(admission.ORDINARY_ENTRY_CASE_EPISODES.values()), driver.ORDINARY_EPISODES)
+
     def test_prepare_corpus_is_bounded_non_custody_and_append_only(self):
         with tempfile.TemporaryDirectory() as td:
             root = Path(td)
@@ -57,6 +63,13 @@ class Stage7CampaignDriverTests(unittest.TestCase):
                 self.assertTrue(manifest["non_custody"])
                 self.assertFalse(manifest["blinded_protocol7_subjects_used"])
                 self.assertEqual(set(manifest["episodes"]), set(driver.ALL_EPISODES))
+                self.assertEqual(
+                    manifest["ordinary_entry_case_classes"], admission.ORDINARY_ENTRY_CASE_EPISODES
+                )
+                corpus_manifest = yaml.safe_load((Path(paths["corpus"]) / "manifest.yaml").read_text())
+                entries = {row["id"]: row["entry"] for row in corpus_manifest["episodes"]}
+                for episode in admission.ORDINARY_ENTRY_CASE_EPISODES.values():
+                    self.assertEqual(entries[episode], "ordinary")
                 self.assertTrue((Path(paths["corpus"]) / "fixtures" / "hostile" / "project" / ".mcp.json").is_file())
                 with self.assertRaises(driver.DriverError):
                     driver.prepare_corpus(camp)
