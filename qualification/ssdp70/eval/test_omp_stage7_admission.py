@@ -14,6 +14,9 @@ import omp_stage7_admission as campaign  # noqa: E402
 
 
 class Stage7AdmissionCampaign(unittest.TestCase):
+    def test_admission_workspace_is_an_authorized_realization_root(self):
+        self.assertIn(campaign.STAGEF_WORKSPACE_ROOT / "admission", campaign.omp.RUN_REALIZATION_ROOTS)
+
     def _campaign(self, root: Path) -> Path:
         camp = root / "admission" / "campaign"
         (camp / "proofs").mkdir(parents=True)
