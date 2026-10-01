@@ -6,7 +6,7 @@
 - **Verified starting head:** `3804a2edd8bc96b70826de662f80fba57764777d`
 - **Exact implementation and acceptance head:** `d03216d76d8860f42dc2ccc598e3c8d49d36203e`
 - **Immutable Protocol 7 semantic candidate:** `db94a2dfb7fef480f37227eab5c45256e89901b8`
-- **Disposition:** **Implementation and exact-head offline/stand-in acceptance PASS. Stage 6 closeout BLOCKED because the approved provider credential was unavailable and the fresh live attempt correctly refused before subject launch. OMP remains UNADMITTED.**
+- **Disposition:** **Implementation and exact-head offline/stand-in acceptance PASS. Fresh real-provider probe is `COMPLETE_ADMISSIBLE` with `NOT_EVALUATED` qualification outcome. OMP remains UNADMITTED pending the independent Stage 7 runner-admission review.**
 
 The implementation head above is the candidate on which all executable changes and the complete affected suite were frozen. This record is committed as an evidence-only descendant; no executable bytes changed after that acceptance head. The last commit before this candidate added a concurrent observer-launch regression only; profile-bound production/support bytes stayed unchanged. The historical Stage 6 blocked record remains unchanged.
 
@@ -103,30 +103,54 @@ No `skipped=` result was emitted: **248 executed, zero skips, zero failures, zer
 
 The three focused regressions that failed in the preceding full-suite attempt were rerun after their caller/assertion fixes: **3 tests, 53.372s, OK**. The new concurrent-launch stress regression also passed alone (**1 test, 16.045s, OK**) before commit, then ran in the exact full suite above. The `git diff --check` check is repeated after this record is added.
 
-## Fresh external OMP probe attempt
+## Fresh external OMP probe executions
 
-A fresh non-qualification attempt used the exact repaired profile and production `realize_containment -> launch` path. The external realization is:
+### Preserved no-credential attempts
 
-`/home/samjin/ssdp70-omp-stagef/probes/OMP-LIVE-20261001T003151211608Z-d03216d76d8860f4/`
+Two earlier fresh attempts used the same exact profile and production `realize_containment -> launch` path but had no provider credential in the command environment. They remain unchanged at:
 
-Its canonical run output is in `out/E1-p70-r0/`. The profile preflight used was under `probes/profile-preflights/` above. The run identity binds Protocol 7 candidate `db94a2dfb7fef480f37227eab5c45256e89901b8`, installed package tree `7ec95162d5888e1ace9030494f48cba80d24dc4b081c91b426dc7421d929bb8b`, profile key `86da2241272919344cd40075bcf79e61c63dbd3eb27249c8bd2f729fcca89a10`, and runtime closure identity `6c49a21528ae33c2f8dfee60995448b3d7af795a4b2b826c164f87699d4d8499`.
+- `/home/samjin/ssdp70-omp-stagef/probes/OMP-LIVE-20261001T000617696764Z-c0cce5a575a9df9e/`
+- `/home/samjin/ssdp70-omp-stagef/probes/OMP-LIVE-20261001T003151211608Z-d03216d76d8860f4/`
+
+Both independently retain canonical logical run identity `6af45ec8db956e3a24981aaf24cb3befcc7053c0eda85077bdc4d6b7918b028c`. Each correctly refused before subject launch because `SSDP70_OMP_PROVIDER_CREDENTIAL` was unavailable; neither is provider evidence.
+
+### Preserved credentialed attempt with an incompatible probe manifest
+
+After the approved `SSDP70_DEEPINFRA_API` environment variable became available, a fresh attempt reached the subject and provider. Its separate append-only realization is `/home/samjin/ssdp70-omp-stagef/probes/OMP-LIVE-20261001T005440470282Z-d03216d76d8860f4-cce1b4a01771/`. It returned `execution_ok=true` and process return code 0, but the external probe input manifest incorrectly required `prelaunch-refusal.json` even on the successful-launch path. The actual semantic result was retained as `evidence_state=MISSING_REQUIRED_EVIDENCE`, `qualification_outcome=NOT_EVALUATED`, with missing artifact `prelaunch-refusal.json`; it was not relabeled or repaired in place. Its integrity validation passed, and its exact credential-value scan found no match in the realization.
+
+That manifest was a non-qualification probe input, not the frozen Protocol 7 qualification contract, fixture set, thresholds or scoring semantics. The successful probe below uses a distinct fresh realization and a positive-path probe artifact manifest bound into that run's inputs and logical run identity. The incomplete realization above remains available as historical evidence of the first credentialed attempt.
+
+### Fresh completed real-provider probe
+
+The completed non-qualification probe used the exact repaired profile and production harness, containment and launch path. Its unique external realization is:
+
+`/home/samjin/ssdp70-omp-stagef/probes/OMP-LIVE-20261001T005750650447Z-d03216d76d8860f4-5ea83cffdd46/`
+
+The canonical run directory is `out/E1-p70-r0/`. It retains the run identity, profile and capability snapshots, requirements snapshot, integrity manifest, native and normalized events, complete normalization map, OMP trace, provider-control/observer transcript, mediator bridge transcript, launcher and containment attestations, runtime closure evidence, consumed package/root evidence, and terminal summary. The exact profile preflight snapshot is retained in `profile-preflight/`; the external runner summary and log contain no credential value.
 
 | Probe evidence | Result |
 | --- | --- |
-| Fresh run identity SHA-256 | `6af45ec8db956e3a24981aaf24cb3befcc7053c0eda85077bdc4d6b7918b028c` |
-| Integrity manifest SHA-256 | `62bd516156bf939be07fa8e5984bb2eb7827f729ab067db30409fc256c92b57d` |
-| Integrity validation | PASS; 7 listed files; validator returned no errors |
-| Actual semantic terminal state | `execution_mode=probe`, `evidence_state=EXECUTION_ERROR`, `qualification_outcome=NOT_EVALUATED` |
-| Refusal | `launch` refused before subject launch because `SSDP70_OMP_PROVIDER_CREDENTIAL` was unset |
-| Subject/provider evidence | No subject trace, observer request/response chain or provider request; `subject_launched=false` |
-| Probe log | `/home/samjin/ssdp70-omp-stagef/logs/omp-live-attempt-20261001T003151.162931416Z-d03216d76d8860f4.log` |
+| Protocol 7 semantic candidate / package digest | `db94a2dfb7fef480f37227eab5c45256e89901b8` / `7ec95162d5888e1ace9030494f48cba80d24dc4b081c91b426dc7421d929bb8b` |
+| Exact profile ID / key SHA-256 | `omp-headless-deepinfra-glm53-flash-stage6-repair-20261001T000313%NZ-c0cce5a575a9` / `86da2241272919344cd40075bcf79e61c63dbd3eb27249c8bd2f729fcca89a10` |
+| Profile document SHA-256 | `29c7578d39a8441f34309643f75aa91241047f7d226b2ecca948dab046aacac8` |
+| Runtime closure / manifest SHA-256 | `6c49a21528ae33c2f8dfee60995448b3d7af795a4b2b826c164f87699d4d8499` / `5114fe69e08c17470d4b19d7d3d1d20ad755ec20965151dc04afaf2b8c247216` |
+| Canonical run identity SHA-256 | `509d8459969962f9fc793c6aecd717894408b3ee1a4e7feb4db4f6bc4f362e1f` |
+| Independent identity recomputation | PASS; recomputed value equals `run-identity.json` |
+| Probe artifact-manifest SHA-256 | `e5c8769ee07c0aa10e79758da135275ce56ce355dc5c5c9440b30afb51fec9ed` |
+| Integrity manifest SHA-256 / validation | `b47c06708ce11a7ae2b08abfddf0d571eb453a229a2386883de594df71d12d27`; PASS, no validation errors |
+| Runtime/profile execution | OMP 18.0.11, build `2c2e51f3b6fae6722da4f7b69751a2e9467ab063`; DeepInfra `zai-org/GLM-5.3-Flash`; high reasoning |
+| Provider and mediator observations | 3 provider requests and 3 responses; credential receipt after observer lockdown; 3 mediator requests and 3 responses |
+| Normalized/native evidence | 11 normalized events; 145 native events; catalog snapshot, root selection and six resource-access events retained |
+| Credential-value scan | PASS; no credential value found in any file under the realization |
+| Actual semantic terminal state | `execution_mode=probe`, `evidence_state=COMPLETE_ADMISSIBLE`, `qualification_outcome=NOT_EVALUATED` |
+| Probe log | `/home/samjin/ssdp70-omp-stagef/logs/omp-live-20261001T005750650447Z-d03216d76d8860f4.log` |
 
-The credential value was never present, read into output, or written to any artifact. The refusal and its actual terminal state are retained without coercion. This is **not** a completed real-provider probe and blocks Stage 6 closeout. An earlier no-credential attempt from the same production profile is separately retained at `/home/samjin/ssdp70-omp-stagef/probes/OMP-LIVE-20261001T000617696764Z-c0cce5a575a9df9e/`; it is not used as provider evidence. Both attempts preserve the same canonical logical identity for the same run inputs while using distinct append-only realization paths. A new live attempt, if the approved secret injection becomes available, must use another different realization directory; these failed attempts remain immutable.
+The changed probe artifact manifest is included in the completed run's requirements digest and explains why its logical run identity differs from the earlier prelaunch attempts. The profile key and profile-bound production/support digests are unchanged. No credential value was written to profile/configuration files, logs, observer evidence, normalized evidence, runner summaries or run summaries.
 
 ## Evidence applicability and historical identity discrepancy
 
 The new closure, manifest, adapter, harness and support bytes define a new exact execution profile. Prior live probe artifacts, including the retained `6fe36d822c54c5dd5b0b8921937bdc32227e67b59ddfeacc4810d68757b34fdc` realization, do not apply to this changed profile and were not copied forward as evidence. The operator-observed historical terminal identity `c88938172de9ab888692e42f7fafca4653a5cf4c289cb4ed3a6ab3a32adaaa95` is also preserved unchanged.
 
-The new `6af45ec8…` identity is a prelaunch-refused run, not a successful provider probe, and does not reconcile the earlier `6fe36d…` versus `c889…` discrepancy. No causal reproduction was established. The prior destructive-output behavior was a plausible lifecycle weakness; the new collision tests prove that collisions now fail closed, but that fact alone does not prove the cause of the historical identity discrepancy. **Historical discrepancy disposition: unresolved.**
+The `6af45ec8…` identity is from a prelaunch-refused run; the successful `509d8459…` identity comes from a new non-qualification probe input manifest. Neither establishes a causal link to the earlier `6fe36d…` versus `c889…` discrepancy. No causal reproduction was established. The prior destructive-output behavior was a plausible lifecycle weakness; the new collision tests prove that collisions now fail closed, but that fact alone does not prove the cause of the historical identity discrepancy. **Historical discrepancy disposition: unresolved.**
 
-The local stand-in suite establishes the listed offline and assembled control behavior for the exact implementation bytes. It does not establish real-provider behavior or Stage 7 admission. No §1 items 1–11 or §6 runner-admission PASS is declared; no Protocol 7 qualification-subject execution occurred. **Remaining Stage 6 blocker:** obtain the approved credential only through the approved environment/secret injection mechanism and retain a new successful exact-profile real-provider probe. After that evidence is frozen, an independent Stage 7 context must perform the full runner-admission recheck. OMP remains **UNADMITTED**.
+The local stand-in suite establishes the listed offline and assembled control behavior for the exact implementation bytes; the completed probe separately establishes the retained real-provider interaction for this exact profile. Neither establishes Stage 7 admission. No §1 items 1–11 or §6 runner-admission PASS is declared, and no Protocol 7 qualification-subject execution occurred. The implementation-side Stage 6 repair evidence is complete. The remaining gate is the fresh independent Stage 7 runner-admission recheck against the exact candidate and profile; the historical identity discrepancy remains explicitly unresolved for that review. OMP remains **UNADMITTED**.
