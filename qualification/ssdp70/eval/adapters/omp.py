@@ -3211,12 +3211,13 @@ def _normalize_native_message_for_transcript_equality(msg: dict[str, Any], is_me
     # session transcript (`agent_end.messages`) retains the assistant message as
     # constructed prior to dispatch without this ephemeral timestamp.
     # This minimal, explicit exclusion applies solely to `completedAt` on `message_end`
-    # assistant records where `completedAt` is a numeric timestamp.
+    # assistant records where `completedAt` is an exact positive integer timestamp.
     if (is_message_end
             and norm.get("role") == "assistant"
-            and "completedAt" in norm
-            and isinstance(norm["completedAt"], (int, float))):
-        del norm["completedAt"]
+            and "completedAt" in norm):
+        val = norm["completedAt"]
+        if type(val) is int and val > 0:
+            del norm["completedAt"]
     return norm
 
 

@@ -1377,7 +1377,7 @@ class OmpTranscriptConsistencyAndPruningTests(unittest.TestCase):
             {"role": "assistant", "stopReason": "stop", "timestamp": 1790907334300, "content": [{"type": "text", "text": "done"}]},
         ]
 
-        # Case 1: Legitimate native pattern: message_end assistant has numeric completedAt, agent_end does not -> PASS
+        # Case 1: Legitimate native pattern: message_end assistant has positive integer completedAt, agent_end does not -> PASS
         m_msgs = copy.deepcopy(base_msgs)
         m_msgs[1]["completedAt"] = 1790907334150
         m_msgs[3]["completedAt"] = 1790907334350
@@ -1386,7 +1386,52 @@ class OmpTranscriptConsistencyAndPruningTests(unittest.TestCase):
         transcript_errors = [e for e in errors if "transcript" in e or "agent_end" in e or "metadata mismatch" in e]
         self.assertEqual(transcript_errors, [])
 
-        # Case 2: Injected completedAt in agent_end message -> FAILS
+        # Case 2: Boolean completedAt (True or False) on message_end assistant -> FAILS
+        for b_val in (True, False):
+            m_bool = copy.deepcopy(base_msgs)
+            m_bool[1]["completedAt"] = b_val
+            trace = self._make_trace(m_bool, base_msgs)
+            _, _, errors, _ = omp.normalize(trace, "run-1", {})
+            errs = [e for e in errors if "completedAt" in e and "metadata mismatch" in e]
+            self.assertEqual(len(errs), 1, f"Expected boolean completedAt={b_val} to fail closed")
+
+        # Case 3: Negative integer completedAt on message_end assistant -> FAILS
+        for neg_val in (-1, -1790907334150):
+            m_neg = copy.deepcopy(base_msgs)
+            m_neg[1]["completedAt"] = neg_val
+            trace = self._make_trace(m_neg, base_msgs)
+            _, _, errors, _ = omp.normalize(trace, "run-1", {})
+            errs = [e for e in errors if "completedAt" in e and "metadata mismatch" in e]
+            self.assertEqual(len(errs), 1, f"Expected negative completedAt={neg_val} to fail closed")
+
+        # Case 4: Zero integer completedAt on message_end assistant -> FAILS
+        m_zero = copy.deepcopy(base_msgs)
+        m_zero[1]["completedAt"] = 0
+        trace = self._make_trace(m_zero, base_msgs)
+        _, _, errors, _ = omp.normalize(trace, "run-1", {})
+        errs = [e for e in errors if "completedAt" in e and "metadata mismatch" in e]
+        self.assertEqual(len(errs), 1, "Expected zero completedAt to fail closed")
+
+        # Case 5: Floating-point completedAt (integer-valued and fractional) on message_end assistant -> FAILS
+        for flt_val in (1790907334150.0, 1790907334150.5):
+            m_flt = copy.deepcopy(base_msgs)
+            m_flt[1]["completedAt"] = flt_val
+            trace = self._make_trace(m_flt, base_msgs)
+            _, _, errors, _ = omp.normalize(trace, "run-1", {})
+            errs = [e for e in errors if "completedAt" in e and "metadata mismatch" in e]
+            self.assertEqual(len(errs), 1, f"Expected float completedAt={flt_val} to fail closed")
+
+        # Case 6: Non-numeric completedAt (string, dict, list, None) on message_end assistant -> FAILS
+        for non_num in ("invalid-string", {"ts": 123}, [123], None):
+            m_non_num = copy.deepcopy(base_msgs)
+            m_non_num[1]["completedAt"] = non_num
+            trace = self._make_trace(m_non_num, base_msgs)
+            _, _, errors, _ = omp.normalize(trace, "run-1", {})
+            errs = [e for e in errors if "completedAt" in e and "metadata mismatch" in e]
+            self.assertEqual(len(errs), 1, f"Expected non-numeric completedAt={non_num!r} to fail closed")
+
+        # Case 7: Injected completedAt in agent_end message -> FAILS
+        # Subcase 7a: agent_end assistant message has completedAt while message_end has none
         a_injected = copy.deepcopy(base_msgs)
         a_injected[1]["completedAt"] = 1790907334150
         trace = self._make_trace(base_msgs, a_injected)
@@ -1394,7 +1439,18 @@ class OmpTranscriptConsistencyAndPruningTests(unittest.TestCase):
         errs = [e for e in errors if "completedAt" in e and "metadata mismatch" in e]
         self.assertEqual(len(errs), 1)
 
-        # Case 3: completedAt on user/toolResult message in message_end -> FAILS
+        # Subcase 7b: agent_end assistant message has completedAt when message_end also has valid completedAt
+        m_valid = copy.deepcopy(base_msgs)
+        m_valid[1]["completedAt"] = 1790907334150
+        a_injected2 = copy.deepcopy(base_msgs)
+        a_injected2[1]["completedAt"] = 1790907334150
+        trace = self._make_trace(m_valid, a_injected2)
+        _, _, errors, _ = omp.normalize(trace, "run-1", {})
+        errs = [e for e in errors if "completedAt" in e and "metadata mismatch" in e]
+        self.assertEqual(len(errs), 1)
+
+        # Case 8: completedAt on user or toolResult message in message_end -> FAILS
+        # Subcase 8a: on toolResult message
         m_tool_completed = copy.deepcopy(base_msgs)
         m_tool_completed[2]["completedAt"] = 1790907334250
         trace = self._make_trace(m_tool_completed, base_msgs)
@@ -1402,13 +1458,22 @@ class OmpTranscriptConsistencyAndPruningTests(unittest.TestCase):
         errs = [e for e in errors if "completedAt" in e and "metadata mismatch" in e]
         self.assertEqual(len(errs), 1)
 
-        # Case 4: Non-numeric completedAt in message_end -> FAILS
-        m_non_num = copy.deepcopy(base_msgs)
-        m_non_num[1]["completedAt"] = "invalid-string"
-        trace = self._make_trace(m_non_num, base_msgs)
+        # Subcase 8b: on user message
+        m_user_completed = copy.deepcopy(base_msgs)
+        m_user_completed[0]["completedAt"] = 1790907334050
+        trace = self._make_trace(m_user_completed, base_msgs)
         _, _, errors, _ = omp.normalize(trace, "run-1", {})
         errs = [e for e in errors if "completedAt" in e and "metadata mismatch" in e]
         self.assertEqual(len(errs), 1)
+
+        # Case 9: completedAt on agent_end user or toolResult message -> FAILS
+        for target_idx in (0, 2):
+            a_unauth = copy.deepcopy(base_msgs)
+            a_unauth[target_idx]["completedAt"] = 1790907334050
+            trace = self._make_trace(base_msgs, a_unauth)
+            _, _, errors, _ = omp.normalize(trace, "run-1", {})
+            errs = [e for e in errors if "completedAt" in e and "metadata mismatch" in e]
+            self.assertEqual(len(errs), 1, f"Expected agent_end message {target_idx} completedAt to fail closed")
 
 
 if __name__ == "__main__":
