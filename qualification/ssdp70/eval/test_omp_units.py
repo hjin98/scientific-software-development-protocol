@@ -6,6 +6,7 @@ Here only pure functions and fail-closed edges of the real modules are exercised
 """
 import ast
 import base64
+import copy
 import hashlib
 import json
 import os
@@ -1011,6 +1012,128 @@ class DiscoveryBaselineRefusal(unittest.TestCase):
             (project / "h").mkdir(parents=True)
             with self.assertRaises(omp.AdapterError):
                 omp._paths(project, {"HOME": str(project / "h")})
+
+
+class OmpTranscriptConsistencyAndPruningTests(unittest.TestCase):
+    def test_omp_pruned_tool_result_admissible_relation(self):
+        m_valid = {
+            "role": "toolResult",
+            "toolCallId": "call-1",
+            "content": [{"type": "text", "text": "1:# Variant history\n2:data"}],
+        }
+        a_superseded = {
+            "role": "toolResult",
+            "toolCallId": "call-1",
+            "content": [{"type": "text", "text": "[Superseded by a newer read of this file]"}],
+            "prunedAt": 1790907334613,
+        }
+        self.assertTrue(omp._is_valid_omp_tool_result_pruning(m_valid, a_superseded))
+
+        a_useless = {
+            "role": "toolResult",
+            "toolCallId": "call-1",
+            "content": [{"type": "text", "text": "[Uneventful result elided]"}],
+            "prunedAt": 1790907334613,
+        }
+        self.assertTrue(omp._is_valid_omp_tool_result_pruning(m_valid, a_useless))
+
+        # Content identical is not pruning
+        self.assertFalse(omp._is_valid_omp_tool_result_pruning(a_superseded, a_superseded))
+
+        # Missing prunedAt marker is not admissible pruning
+        a_no_marker = copy.deepcopy(a_superseded)
+        del a_no_marker["prunedAt"]
+        self.assertFalse(omp._is_valid_omp_tool_result_pruning(m_valid, a_no_marker))
+
+        # Assistant role cannot be pruned with toolResult pruning notice
+        m_asst = {"role": "assistant", "toolCallId": "call-1", "content": [{"type": "text", "text": "foo"}]}
+        a_asst = {"role": "assistant", "toolCallId": "call-1", "content": [{"type": "text", "text": "[Superseded by a newer read of this file]"}], "prunedAt": 123}
+        self.assertFalse(omp._is_valid_omp_tool_result_pruning(m_asst, a_asst))
+
+        # Tool call ID mismatch cannot be reconciled
+        a_diff_call = copy.deepcopy(a_superseded)
+        a_diff_call["toolCallId"] = "call-2"
+        self.assertFalse(omp._is_valid_omp_tool_result_pruning(m_valid, a_diff_call))
+
+        # Arbitrary content mutation is rejected
+        a_corrupt = {
+            "role": "toolResult",
+            "toolCallId": "call-1",
+            "content": [{"type": "text", "text": "corrupted text"}],
+            "prunedAt": 1790907334613,
+        }
+        self.assertFalse(omp._is_valid_omp_tool_result_pruning(m_valid, a_corrupt))
+
+        # Unknown notice is rejected
+        a_unknown = {
+            "role": "toolResult",
+            "toolCallId": "call-1",
+            "content": [{"type": "text", "text": "[Unknown pruning notice]"}],
+            "prunedAt": 1790907334613,
+        }
+        self.assertFalse(omp._is_valid_omp_tool_result_pruning(m_valid, a_unknown))
+
+    def _make_trace(self, messages, agent_end_messages=None):
+        lines = [
+            json.dumps({"type": "session", "version": 3}),
+            json.dumps({"type": "agent_start"}),
+        ]
+        for m in messages:
+            lines.append(json.dumps({"type": "message_end", "message": m}))
+        final_msgs = messages if agent_end_messages is None else agent_end_messages
+        lines.append(json.dumps({"type": "agent_end", "messages": final_msgs}))
+        return "\n".join(lines) + "\n"
+
+    def test_reproduced_superseded_read_transcript_discrepancy_resolved(self):
+        m_end_msgs = [
+            {"role": "user", "content": [{"type": "text", "text": "start"}]},
+            {"role": "assistant", "stopReason": "toolUse", "content": [{"type": "toolCall", "id": "call-1", "name": "read", "arguments": {"path": "v.md"}}]},
+            {"role": "toolResult", "toolCallId": "call-1", "content": [{"type": "text", "text": "[v.md#1]\ncontent"}]},
+            {"role": "assistant", "stopReason": "stop", "content": [{"type": "text", "text": "done"}]},
+        ]
+        a_end_msgs = copy.deepcopy(m_end_msgs)
+        a_end_msgs[2]["content"] = [{"type": "text", "text": "[Superseded by a newer read of this file]"}]
+        a_end_msgs[2]["prunedAt"] = 1790907334613
+
+        trace = self._make_trace(m_end_msgs, a_end_msgs)
+        events, mapping, errors, count = omp.normalize(trace, "run-1", {})
+        transcript_errors = [e for e in errors if "agent_end" in e or "transcript" in e]
+        self.assertEqual(transcript_errors, [])
+
+    def test_transcript_consistency_rejects_corruptions_with_cause_neutral_diagnostics(self):
+        base_msgs = [
+            {"role": "user", "content": [{"type": "text", "text": "start"}]},
+            {"role": "assistant", "stopReason": "toolUse", "content": [{"type": "toolCall", "id": "call-1", "name": "read", "arguments": {"path": "v.md"}}]},
+            {"role": "toolResult", "toolCallId": "call-1", "content": [{"type": "text", "text": "file content"}]},
+            {"role": "assistant", "stopReason": "stop", "content": [{"type": "text", "text": "done"}]},
+        ]
+
+        # 1. Dropped message -> count mismatch
+        dropped = self._make_trace(base_msgs, base_msgs[:-1])
+        _, _, errors, _ = omp.normalize(dropped, "run-1", {})
+        count_errors = [e for e in errors if "count mismatch" in e]
+        self.assertEqual(len(count_errors), 1)
+        self.assertIn("native message events do not equal agent_end transcript", count_errors[0])
+        self.assertNotIn("dropped, reordered or duplicated events", count_errors[0])
+
+        # 2. Reordered messages -> identity mismatch
+        reordered_a = [base_msgs[0], base_msgs[2], base_msgs[1], base_msgs[3]]
+        reordered = self._make_trace(base_msgs, reordered_a)
+        _, _, errors, _ = omp.normalize(reordered, "run-1", {})
+        id_errors = [e for e in errors if "identity mismatch" in e]
+        self.assertEqual(len(id_errors), 1)
+        self.assertIn("native message events do not equal agent_end transcript", id_errors[0])
+        self.assertNotIn("dropped, reordered or duplicated events", id_errors[0])
+
+        # 3. Content mismatch (unauthorized mutation) -> content mismatch
+        corrupt_a = copy.deepcopy(base_msgs)
+        corrupt_a[2]["content"] = [{"type": "text", "text": "mutated content without pruning"}]
+        corrupted = self._make_trace(base_msgs, corrupt_a)
+        _, _, errors, _ = omp.normalize(corrupted, "run-1", {})
+        content_errors = [e for e in errors if "content mismatch" in e]
+        self.assertEqual(len(content_errors), 1)
+        self.assertIn("native message events do not equal agent_end transcript", content_errors[0])
+        self.assertNotIn("dropped, reordered or duplicated events", content_errors[0])
 
 
 if __name__ == "__main__":

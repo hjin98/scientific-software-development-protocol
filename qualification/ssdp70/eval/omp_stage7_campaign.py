@@ -15,6 +15,7 @@ from __future__ import annotations
 import argparse
 import base64
 import copy
+import dataclasses
 import html
 import io
 import json
@@ -787,6 +788,32 @@ def _diagnostic_secret_patterns(secrets: list[str]) -> dict[bytes, set[str]]:
     return patterns
 
 
+@dataclasses.dataclass(frozen=True)
+class PrelaunchSecretSnapshot:
+    profile_credential_name: str | None
+    sensitive_env_names: tuple[str, ...]
+    patterns: dict[bytes, set[str]]
+
+
+def _prelaunch_diagnostic_secret_snapshot(
+    argv: list[str], environment: dict[str, str] | None = None
+) -> PrelaunchSecretSnapshot:
+    """Derive and freeze credential names, sensitive environment sources, and scrub patterns before launch."""
+    env = os.environ if environment is None else environment
+    profile_credential_name = _profile_credential_environment(argv)
+    names = {name for name in env if _SENSITIVE_ENV_NAME.search(name)}
+    if profile_credential_name is not None:
+        names.add(profile_credential_name)
+    values = _diagnostic_secret_values(argv, environment=environment)
+    patterns = _diagnostic_secret_patterns(values)
+    return PrelaunchSecretSnapshot(
+        profile_credential_name=profile_credential_name,
+        sensitive_env_names=tuple(sorted(names)),
+        patterns=patterns,
+    )
+
+
+
 def _redact_diagnostic_bytes(data: bytes, patterns: dict[bytes, set[str]]) -> tuple[bytes, list[str]]:
     if not isinstance(data, bytes):
         raise DiagnosticSanitizationError("captured process output is not byte data")
@@ -964,6 +991,14 @@ def _diagnostic_path_for_argv(argv: list[str], log: Path) -> Path:
 
 
 def _run(argv: list[str], *, log: Path, diagnostic_path: Path | None = None) -> int:
+    diagnostic_path = diagnostic_path or _diagnostic_path_for_argv(argv, log)
+    try:
+        snapshot = _prelaunch_diagnostic_secret_snapshot(argv)
+    except DiagnosticSanitizationError:
+        raise DriverError(
+            "process output could not be safely screened; no output was persisted and execution remains failed closed"
+        ) from None
+
     try:
         proc = subprocess.run(
             argv, cwd=HERE.parents[2], stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=False
@@ -975,13 +1010,7 @@ def _run(argv: list[str], *, log: Path, diagnostic_path: Path | None = None) -> 
     else:
         proc_returncode, stdout, stderr = proc.returncode, proc.stdout, proc.stderr
 
-    diagnostic_path = diagnostic_path or _diagnostic_path_for_argv(argv, log)
-    try:
-        patterns = _diagnostic_secret_patterns(_diagnostic_secret_values(argv))
-    except DiagnosticSanitizationError:
-        raise DriverError(
-            "process output could not be safely screened; no output was persisted and execution remains failed closed"
-        ) from None
+    patterns = snapshot.patterns
 
     episode_run = _episode_run_directory(argv)
     ordinary_finalization = (

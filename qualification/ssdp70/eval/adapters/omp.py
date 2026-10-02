@@ -3050,10 +3050,28 @@ def normalize(stdout: str, run_id: str, context: dict[str, Any] | None = None) -
     if agent_end_messages is None and lines:
         errors.append("native trace has no agent_end record: truncated or terminated evidence")
     elif agent_end_messages is not None:
-        wanted = [_msg_key(m) for m in agent_end_messages]
-        got = [_msg_key(m) for m in message_ends]
-        if wanted != got:
-            errors.append("native message events do not equal agent_end's complete transcript: dropped, reordered or duplicated events")
+        if len(message_ends) != len(agent_end_messages):
+            errors.append(
+                f"native message events do not equal agent_end transcript: "
+                f"count mismatch (message_end={len(message_ends)}, agent_end={len(agent_end_messages)})"
+            )
+        else:
+            for idx, (m_msg, a_msg) in enumerate(zip(message_ends, agent_end_messages)):
+                if (m_msg.get("role") != a_msg.get("role")
+                        or m_msg.get("toolCallId") != a_msg.get("toolCallId")
+                        or m_msg.get("stopReason") != a_msg.get("stopReason")):
+                    errors.append(
+                        f"native message events do not equal agent_end transcript: "
+                        f"message {idx} identity mismatch"
+                    )
+                    break
+                if m_msg.get("content") != a_msg.get("content"):
+                    if not _is_valid_omp_tool_result_pruning(m_msg, a_msg):
+                        errors.append(
+                            f"native message events do not equal agent_end transcript: "
+                            f"message {idx} content mismatch"
+                        )
+                        break
     turns = provider_turns(observed)
     native_assistant = [m for m in message_ends if m.get("role") == "assistant"]
     provider_ids = {call["id"] for turn in turns for call in turn["tool_calls"] if call.get("id")}
@@ -3164,6 +3182,44 @@ def _msg_key(message: dict[str, Any]) -> str:
         "content": message.get("content"),
         "stopReason": message.get("stopReason"),
     })
+
+
+OMP_PRUNED_TOOL_RESULT_NOTICES = {
+    "[Superseded by a newer read of this file]",
+    "[Uneventful result elided]",
+}
+
+
+def _is_valid_omp_tool_result_pruning(m_end: dict[str, Any], a_end: dict[str, Any]) -> bool:
+    """Admissible relation between real-time tool execution output and in-memory pruned transcript.
+
+    OMP natively prunes superseded file reads or useless tool results in memory
+    before session end. The real-time `message_end` event retains the unpruned raw
+    execution output, while `agent_end.messages` reflects native in-memory compaction.
+    This relation is admissible only when both are toolResult messages with matching
+    toolCallId, a_end has a valid prunedAt timestamp, a_end content contains a recognized
+    OMP pruning notice, and m_end retains the unpruned result.
+    """
+    if m_end.get("role") != "toolResult" or a_end.get("role") != "toolResult":
+        return False
+    if m_end.get("toolCallId") != a_end.get("toolCallId"):
+        return False
+    if a_end.get("prunedAt") is None:
+        return False
+    a_content = a_end.get("content")
+    if not isinstance(a_content, list) or len(a_content) != 1:
+        return False
+    part = a_content[0]
+    if not isinstance(part, dict) or part.get("type") != "text":
+        return False
+    text = part.get("text")
+    if text not in OMP_PRUNED_TOOL_RESULT_NOTICES:
+        return False
+    m_content = m_end.get("content")
+    if m_content == a_content:
+        return False
+    return bool(m_content)
+
 
 
 TOOL_KIND = {

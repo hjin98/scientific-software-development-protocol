@@ -2,6 +2,7 @@
 import base64
 import html
 import json
+import os
 import shlex
 import sys
 import tempfile
@@ -412,6 +413,44 @@ class Stage7CampaignDriverTests(unittest.TestCase):
             self.assertEqual(result, 0)
             self.assertEqual(log.read_text(encoding="utf-8"), expected)
             self.assertFalse(diagnostic.exists())
+
+    def test_prelaunch_secret_snapshot_freezes_patterns_and_refuses_launch_on_derivation_failure(self):
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            log = root / "wrapper.log"
+            diagnostic = root / "run" / "launch-diagnostic.json"
+            argv = ["python3", "harness70.py", "episode"]
+            mock_run = mock.Mock()
+            with mock.patch.object(driver.subprocess, "run", mock_run), mock.patch.object(
+                driver, "_prelaunch_diagnostic_secret_snapshot",
+                side_effect=driver.DiagnosticSanitizationError("unscreenable credential"),
+            ):
+                with self.assertRaisesRegex(driver.DriverError, "no output was persisted"):
+                    driver._run(argv, log=log, diagnostic_path=diagnostic)
+            mock_run.assert_not_called()
+            self.assertFalse(log.exists())
+            self.assertFalse(diagnostic.exists())
+
+    def test_prelaunch_secret_snapshot_screens_using_prelaunch_values_even_if_env_mutated_during_run(self):
+        secret = "super-secret-token-12345"
+        with tempfile.TemporaryDirectory() as td, mock.patch.dict("os.environ", {"SSDP70_OMP_PROVIDER_CREDENTIAL": secret}):
+            root = Path(td)
+            log = root / "wrapper.log"
+            diagnostic = root / "run" / "launch-diagnostic.json"
+            argv = ["python3", "harness70.py", "episode"]
+
+            def fake_run(*args, **kwargs):
+                # Mutate environment during child run
+                os.environ.clear()
+                return mock.Mock(returncode=1, stdout=f"token is {secret}\n".encode(), stderr=b"failed\n")
+
+            with mock.patch.object(driver.subprocess, "run", side_effect=fake_run):
+                driver._run(argv, log=log, diagnostic_path=diagnostic)
+
+            retained = diagnostic.read_bytes()
+            self.assertNotIn(secret.encode(), retained)
+            payload = json.loads(retained)
+            self.assertIn("raw", payload["redacted_representations"])
 
 
 if __name__ == "__main__":
