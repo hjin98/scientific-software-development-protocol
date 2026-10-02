@@ -113,6 +113,53 @@ class Stage7AdmissionCampaign(unittest.TestCase):
             })
             self.assertEqual(campaign._prelaunch_refusal_errors(run, summary), [])
 
+    def test_sanitized_launch_diagnostic_cannot_satisfy_any_executor_check(self):
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            with mock.patch.object(campaign, "ADMISSION_ROOT", root):
+                camp = self._campaign(root)
+                failed_run = camp / "failed-run"
+                failed_run.mkdir()
+                campaign._write_json(failed_run / "launch-diagnostic.json", {
+                    "schema": 1,
+                    "kind": "sanitized-process-failure-diagnostic",
+                    "diagnostic_status": "EARLY_LAUNCH_FAILURE",
+                    "evidence_limits": {
+                        "diagnostic_only": True,
+                        "complete_admissible_realization": False,
+                        "executor_admission_evidence": False,
+                    },
+                })
+
+                for name in core70.EXECUTOR_ADMISSION_CHECKS:
+                    with self.subTest(check=name):
+                        evidence_class = sorted(campaign.allowed_evidence_classes("check", name))[0]
+                        with self.assertRaisesRegex(campaign.CampaignError, "diagnostic"):
+                            campaign.record_proof(
+                                camp,
+                                category="check",
+                                name=name,
+                                evidence_path=failed_run,
+                                evidence_class=evidence_class,
+                                status="PASS",
+                            )
+
+                errors = campaign._exact_profile_evidence_errors(
+                    failed_run, {"semantic_subject": "b" * 40}
+                )
+                self.assertTrue(errors)
+                self.assertTrue(any("no harness run identity" in error for error in errors), errors)
+                empty_requirements = core70.Requirements(
+                    artifacts=(), oracles=(), scoring_items=(),
+                    artifact_manifest_digest="", oracle_manifest_digest="", scoring_manifest_digest="",
+                )
+                complete_run_errors = core70.validate_complete_run(
+                    failed_run, {}, empty_requirements
+                )
+                self.assertTrue(complete_run_errors)
+                self.assertTrue(any("run-identity.json" in error
+                                    for error in complete_run_errors), complete_run_errors)
+
     def test_positive_exact_profile_claim_requires_complete_admissible(self):
         with tempfile.TemporaryDirectory() as td:
             root = Path(td)

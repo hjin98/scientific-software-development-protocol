@@ -217,6 +217,38 @@ def _write_json(path: Path, value: Any) -> None:
     path.write_text(json.dumps(value, indent=2, sort_keys=True) + "\n", encoding="utf-8")
 
 
+def _diagnostic_only_evidence_errors(source: Path) -> list[str]:
+    """Keep sanitized launch diagnostics from entering an admission slot as run evidence."""
+    source = Path(source).resolve()
+
+    def is_diagnostic(path: Path) -> bool:
+        try:
+            payload = _load_json(path)
+        except (CampaignError, OSError, json.JSONDecodeError):
+            return False
+        limits = payload.get("evidence_limits") if isinstance(payload, dict) else None
+        return bool(
+            isinstance(payload, dict)
+            and (
+                payload.get("kind") == "sanitized-process-failure-diagnostic"
+                or (isinstance(limits, dict) and limits.get("diagnostic_only") is True)
+            )
+        )
+
+    if source.is_file() and is_diagnostic(source):
+        return ["sanitized launch diagnostics are not Stage 7 executor-admission evidence"]
+    if source.is_dir() and not (source / "summary.json").is_file():
+        try:
+            if any(is_diagnostic(path) for path in source.glob("*.json") if path.is_file()):
+                return [
+                    "a run directory containing only sanitized launch diagnostics cannot satisfy "
+                    "Stage 7 executor-admission evidence"
+                ]
+        except OSError:
+            return ["sanitized diagnostic evidence could not be inspected safely"]
+    return []
+
+
 def _load_json(path: Path) -> dict[str, Any]:
     value = json.loads(path.read_text(encoding="utf-8"))
     if not isinstance(value, dict):
@@ -667,6 +699,9 @@ def record_proof(
     evidence_path = Path(evidence_path).resolve()
     if not _within(evidence_path, root):
         raise CampaignError("proof evidence must remain inside its Stage 7 campaign realization")
+    diagnostic_errors = _diagnostic_only_evidence_errors(evidence_path)
+    if diagnostic_errors:
+        raise CampaignError("inadmissible diagnostic evidence: " + "; ".join(diagnostic_errors))
     if evidence_class == "exact-profile-behavior":
         evidence_errors = _exact_profile_evidence_errors(evidence_path, campaign)
         evidence_errors.extend(_exact_profile_claim_errors(evidence_path, campaign, category, name))
@@ -794,6 +829,10 @@ def campaign_errors(campaign_root: Path) -> list[str]:
             source_path = Path(proof.get("source_path", "")).resolve()
             if not _within(source_path, root):
                 errors.append(f"{category} {name} proof source escaped its Stage 7 campaign")
+                continue
+            diagnostic_errors = _diagnostic_only_evidence_errors(source_path)
+            if diagnostic_errors:
+                errors.extend(f"{category} {name}: {item}" for item in diagnostic_errors)
                 continue
             if evidence_class == "exact-profile-behavior":
                 exact_errors = _exact_profile_evidence_errors(source_path, campaign)

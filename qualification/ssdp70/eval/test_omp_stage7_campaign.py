@@ -1,5 +1,8 @@
 """Focused unit tests for the OMP Stage 7 target-host campaign driver."""
+import base64
+import html
 import json
+import shlex
 import sys
 import tempfile
 import unittest
@@ -7,6 +10,7 @@ import unittest
 import yaml
 from pathlib import Path
 from unittest import mock
+from urllib.parse import quote_from_bytes, quote_plus
 
 HERE = Path(__file__).resolve().parent
 if str(HERE) not in sys.path:
@@ -208,6 +212,206 @@ class Stage7CampaignDriverTests(unittest.TestCase):
                     driver.run_exact_campaign(camp, arms_manifest=root / "arms.json", arms=["p70", "p70"], parallel=2)
                 with self.assertRaises(driver.DriverError):
                     driver.run_exact_campaign(camp, arms_manifest=root / "arms.json", arms=["p70", "p66"], parallel=1)
+
+    def test_nonzero_child_retains_diagnostic_only_failure_evidence(self):
+        with tempfile.TemporaryDirectory() as td, mock.patch.dict("os.environ", {}, clear=True):
+            root = Path(td)
+            log = root / "wrapper.log"
+            diagnostic = root / "run" / "launch-diagnostic.json"
+            argv = ["python3", "harness70.py", "episode"]
+            process = mock.Mock(returncode=1, stdout=b"", stderr=b"ordinary launch failure\n")
+            with mock.patch.object(driver.subprocess, "run", return_value=process):
+                result = driver._run(argv, log=log, diagnostic_path=diagnostic)
+            self.assertEqual(result, 1)
+            self.assertFalse(log.exists())
+            payload = json.loads(diagnostic.read_text(encoding="utf-8"))
+            self.assertEqual(payload["kind"], "sanitized-process-failure-diagnostic")
+            self.assertEqual(payload["diagnostic_status"], "EARLY_LAUNCH_FAILURE")
+            self.assertEqual(payload["stderr_sanitized"], "ordinary launch failure\n")
+            self.assertTrue(payload["evidence_limits"]["diagnostic_only"])
+            self.assertFalse(payload["evidence_limits"]["raw_trace"])
+            self.assertFalse(payload["evidence_limits"]["normalized_events"])
+            self.assertFalse(payload["evidence_limits"]["terminal_event"])
+            self.assertFalse(payload["evidence_limits"]["evidence_integrity_manifest"])
+            self.assertFalse(payload["evidence_limits"]["complete_admissible_realization"])
+            self.assertFalse(payload["evidence_limits"]["executor_admission_evidence"])
+            self.assertIn("diagnostic failure evidence only", payload["note"])
+
+    def test_episode_failure_defaults_diagnostic_to_append_only_run_directory(self):
+        with tempfile.TemporaryDirectory() as td, mock.patch.dict("os.environ", {}, clear=True):
+            root = Path(td)
+            out = root / "out"
+            profile = root / "profile.json"
+            profile.write_text(json.dumps({
+                "containment_policy": {"provider_route": {"credential_env": "SSDP70_OMP_PROVIDER_CREDENTIAL"}},
+            }), encoding="utf-8")
+            argv = [
+                sys.executable, str(HERE / "harness70.py"), "episode",
+                "--corpus", str(root / "corpus"), "--arms-manifest", str(root / "arms.json"),
+                "--arm", "p70", "--out", str(out), "--profile", str(profile),
+                "--capabilities", str(root / "capabilities.json"), "--requirements", str(root / "requirements"),
+                "--adapter", "omp", "--oracles", str(root / "oracles"), "--mode", "probe",
+                "--id", "E1", "--rep", "1",
+            ]
+            process = mock.Mock(returncode=1, stdout=b"", stderr=b"early error\n")
+            with mock.patch.object(driver.subprocess, "run", return_value=process):
+                self.assertEqual(driver._run(argv, log=root / "wrapper.log"), 1)
+            diagnostic = out / "E1-p70-r1" / "launch-diagnostic.json"
+            self.assertTrue(diagnostic.is_file())
+            self.assertEqual(json.loads(diagnostic.read_text())["stderr_sanitized"], "early error\n")
+
+    def test_finalized_nonzero_episode_keeps_existing_wrapper_log(self):
+        with tempfile.TemporaryDirectory() as td, mock.patch.dict("os.environ", {}, clear=True):
+            root = Path(td)
+            out = root / "out"
+            run = out / "E1-p70-r1"
+            run.mkdir(parents=True)
+            (run / "summary.json").write_text('{"evidence_state":"INADMISSIBLE"}\n', encoding="utf-8")
+            profile = root / "profile.json"
+            profile.write_text(json.dumps({
+                "containment_policy": {"provider_route": {"credential_env": "SSDP70_OMP_PROVIDER_CREDENTIAL"}},
+            }), encoding="utf-8")
+            argv = [
+                sys.executable, str(HERE / "harness70.py"), "episode",
+                "--corpus", str(root / "corpus"), "--arms-manifest", str(root / "arms.json"),
+                "--arm", "p70", "--out", str(out), "--profile", str(profile),
+                "--capabilities", str(root / "capabilities.json"), "--requirements", str(root / "requirements"),
+                "--adapter", "omp", "--oracles", str(root / "oracles"), "--mode", "probe",
+                "--id", "E1", "--rep", "1",
+            ]
+            log = root / "wrapper.log"
+            process = mock.Mock(returncode=2, stdout=b"finalized evidence\n", stderr=b"expected refusal\n")
+            with mock.patch.object(driver.subprocess, "run", return_value=process):
+                self.assertEqual(driver._run(argv, log=log), 2)
+            diagnostic = run / "launch-diagnostic.json"
+            self.assertEqual(
+                json.loads(diagnostic.read_text(encoding="utf-8"))["diagnostic_status"],
+                "FINALIZED_NONZERO_EXIT",
+            )
+            self.assertEqual(log.read_text(encoding="utf-8"),
+                             "ARGV:\n" + json.dumps(argv) + "\n\nSTDOUT:\nfinalized evidence\n"
+                             "\nSTDERR:\nexpected refusal\n")
+
+    def test_finalized_nonzero_matrix_keeps_existing_wrapper_log(self):
+        with tempfile.TemporaryDirectory() as td, mock.patch.dict("os.environ", {}, clear=True):
+            root = Path(td)
+            out = root / "matrix"
+            out.mkdir()
+            (out / "matrix-plan.json").write_text(json.dumps({
+                "pairs": [{"episode_id": "E1", "rep": 0}],
+            }), encoding="utf-8")
+            (out / "matrix-scheduler.jsonl").write_text("\n".join([
+                json.dumps({"pair_id": "E1-r0", "event": "pair_start"}),
+                json.dumps({"pair_id": "E1-r0", "event": "pair_end"}),
+            ]) + "\n", encoding="utf-8")
+            profile = root / "profile.json"
+            profile.write_text(json.dumps({
+                "containment_policy": {"provider_route": {"credential_env": "SSDP70_OMP_PROVIDER_CREDENTIAL"}},
+            }), encoding="utf-8")
+            argv = [
+                sys.executable, str(HERE / "harness70.py"), "matrix",
+                "--corpus", str(root / "corpus"), "--arms-manifest", str(root / "arms.json"),
+                "--arm", "p70", "--out", str(out), "--profile", str(profile),
+                "--capabilities", str(root / "capabilities.json"), "--requirements", str(root / "requirements"),
+                "--adapter", "omp", "--oracles", str(root / "oracles"), "--mode", "probe", "--parallel", "2",
+            ]
+            log = root / "wrapper.log"
+            process = mock.Mock(returncode=2, stdout=b"matrix finished with unresolved runs\n", stderr=b"")
+            with mock.patch.object(driver.subprocess, "run", return_value=process):
+                self.assertEqual(driver._run(argv, log=log), 2)
+            self.assertTrue(log.is_file())
+            diagnostic = json.loads(log.with_suffix(log.suffix + ".diagnostic.json").read_text(encoding="utf-8"))
+            self.assertEqual(diagnostic["diagnostic_status"], "FINALIZED_NONZERO_EXIT")
+
+    def test_failure_diagnostic_redacts_exact_injected_credential(self):
+        secret = "fixture-secret-value-that-is-not-a-real-provider-key"
+        with tempfile.TemporaryDirectory() as td, mock.patch.dict(
+            "os.environ", {"SSDP70_OMP_PROVIDER_CREDENTIAL": secret}, clear=True
+        ):
+            root = Path(td)
+            diagnostic = root / "run" / "launch-diagnostic.json"
+            process = mock.Mock(returncode=1, stdout=b"", stderr=f"provider rejected {secret}\n".encode())
+            with mock.patch.object(driver.subprocess, "run", return_value=process):
+                driver._run(["python3", "harness70.py", "episode"], log=root / "wrapper.log",
+                            diagnostic_path=diagnostic)
+            retained = diagnostic.read_bytes()
+            self.assertNotIn(secret.encode(), retained)
+            payload = json.loads(retained)
+            self.assertIn("raw", payload["redacted_representations"])
+            self.assertIn("provider rejected", payload["stderr_sanitized"])
+
+    def test_failure_diagnostic_redacts_policy_encoded_credential_forms(self):
+        secret = 'fixture/secret+value=<"line\\two & café\'>'
+        raw = secret.encode("utf-8")
+        forms = [
+            secret.encode(),
+            base64.b64encode(raw),
+            base64.b64encode(raw).rstrip(b"="),
+            base64.urlsafe_b64encode(raw),
+            base64.urlsafe_b64encode(raw).rstrip(b"="),
+            quote_from_bytes(raw, safe="").encode("ascii"),
+            quote_plus(secret, safe="").encode("ascii"),
+            ("%" + "%".join(f"{byte:02X}" for byte in raw)).encode("ascii"),
+            raw.hex().encode("ascii"),
+            raw.hex().upper().encode("ascii"),
+            json.dumps(secret, ensure_ascii=True)[1:-1].encode("utf-8"),
+            json.dumps(secret, ensure_ascii=True).encode("utf-8"),
+            html.escape(secret, quote=True).encode("utf-8"),
+            shlex.quote(secret).encode("utf-8"),
+            secret.encode("utf-16le"),
+            base64.b64encode(secret.encode("utf-16le")),
+        ]
+        output = b"encoded provider diagnostic:\n" + b"\n".join(forms) + b"\n"
+        with tempfile.TemporaryDirectory() as td, mock.patch.dict("os.environ", {"SSDP70_OMP_PROVIDER_CREDENTIAL": secret}, clear=True):
+            root = Path(td)
+            diagnostic = root / "run" / "launch-diagnostic.json"
+            process = mock.Mock(returncode=1, stdout=output, stderr=b"encoded form failure\n")
+            with mock.patch.object(driver.subprocess, "run", return_value=process):
+                driver._run(["python3", "harness70.py", "episode"], log=root / "wrapper.log",
+                            diagnostic_path=diagnostic)
+            retained = diagnostic.read_bytes()
+            for form in forms:
+                if form:
+                    self.assertNotIn(form, retained)
+            payload = json.loads(retained)
+            self.assertTrue({"base64", "url_safe_base64", "percent_encoded", "hex_lower", "hex_upper",
+                             "json_escaped", "json_quoted", "html_escaped", "shell_quoted",
+                             "utf16le", "utf16le_base64"}
+                            .issubset(payload["redacted_representations"]))
+
+    def test_sanitization_failure_persists_nothing_and_fails_closed(self):
+        with tempfile.TemporaryDirectory() as td, mock.patch.dict("os.environ", {}, clear=True):
+            root = Path(td)
+            log = root / "wrapper.log"
+            diagnostic = root / "run" / "launch-diagnostic.json"
+            process = mock.Mock(returncode=1, stdout=b"ordinary stdout", stderr=b"ordinary stderr")
+            with mock.patch.object(driver.subprocess, "run", return_value=process), mock.patch.object(
+                driver, "_diagnostic_secret_patterns",
+                side_effect=driver.DiagnosticSanitizationError("sensitive internal detail"),
+            ):
+                with self.assertRaisesRegex(driver.DriverError, "no output was persisted"):
+                    driver._run(["python3", "harness70.py", "episode"], log=log,
+                                diagnostic_path=diagnostic)
+            self.assertFalse(log.exists())
+            self.assertFalse(diagnostic.exists())
+            self.assertEqual(list(root.rglob("*")), [])
+
+    def test_successful_child_keeps_existing_log_format_without_diagnostic(self):
+        with tempfile.TemporaryDirectory() as td, mock.patch.dict("os.environ", {}, clear=True):
+            root = Path(td)
+            log = root / "wrapper.log"
+            diagnostic = root / "run" / "launch-diagnostic.json"
+            argv = ["python3", "harness70.py", "episode"]
+            process = mock.Mock(returncode=0, stdout=b"normal result\r\n", stderr=b"normal notice\r\n")
+            with mock.patch.object(driver.subprocess, "run", return_value=process):
+                result = driver._run(argv, log=log, diagnostic_path=diagnostic)
+            expected = (
+                "ARGV:\n" + json.dumps(argv) + "\n\nSTDOUT:\nnormal result\n"
+                "\nSTDERR:\nnormal notice\n"
+            )
+            self.assertEqual(result, 0)
+            self.assertEqual(log.read_text(encoding="utf-8"), expected)
+            self.assertFalse(diagnostic.exists())
 
 
 if __name__ == "__main__":

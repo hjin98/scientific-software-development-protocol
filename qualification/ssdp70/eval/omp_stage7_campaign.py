@@ -13,10 +13,15 @@ It never creates an ADMITTED bundle and never executes the blinded Protocol 7 qu
 from __future__ import annotations
 
 import argparse
+import base64
 import copy
+import html
+import io
 import json
+import locale
 import os
 import re
+import shlex
 import shutil
 import subprocess
 import sys
@@ -24,7 +29,7 @@ import uuid
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
-from urllib.parse import urlsplit
+from urllib.parse import quote_from_bytes, quote_plus, urlsplit
 
 import yaml
 
@@ -158,6 +163,18 @@ PROMPTS = {
 
 class DriverError(RuntimeError):
     pass
+
+
+class DiagnosticSanitizationError(RuntimeError):
+    """Raised when child output cannot be proven safe for durable diagnostics."""
+
+
+_SENSITIVE_ENV_NAME = re.compile(
+    r"(?:^|_)(?:API(?:_KEY)?|AUTH(?:_TOKEN)?|TOKEN|PASSWORD|PASSWD|SECRET|"
+    r"CREDENTIAL|ACCESS_KEY|PRIVATE_KEY|PROXY)(?:_|$)",
+    re.IGNORECASE,
+)
+_DIAGNOSTIC_REDACTION = b"[REDACTED]"
 
 
 def _write_json(path: Path, value: Any) -> None:
@@ -642,14 +659,397 @@ def prepare_corpus(campaign_root: Path) -> dict[str, str]:
     }
 
 
-def _run(argv: list[str], *, log: Path) -> int:
-    proc = subprocess.run(argv, cwd=HERE.parents[2], text=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+def _profile_credential_environment(argv: list[str]) -> str | None:
+    profile_path = None
+    for index, value in enumerate(argv):
+        if value == "--profile" and index + 1 < len(argv):
+            profile_path = Path(argv[index + 1])
+            break
+        if value.startswith("--profile="):
+            profile_path = Path(value.partition("=")[2])
+            break
+    if profile_path is None:
+        return None
+    try:
+        profile = core70.load_json(profile_path)
+        route = profile["containment_policy"]["provider_route"]
+        name = route["credential_env"]
+    except Exception:
+        raise DiagnosticSanitizationError(
+            "cannot establish the profile credential source for diagnostic sanitization"
+        ) from None
+    if not isinstance(name, str) or not name:
+        raise DiagnosticSanitizationError(
+            "cannot establish the profile credential source for diagnostic sanitization"
+        )
+    return name
+
+
+def _diagnostic_secret_values(
+    argv: list[str], environment: dict[str, str] | None = None
+) -> list[str]:
+    try:
+        env = os.environ if environment is None else environment
+        names = {name for name in env if _SENSITIVE_ENV_NAME.search(name)}
+        profile_credential_name = _profile_credential_environment(argv)
+        if profile_credential_name is not None:
+            names.add(profile_credential_name)
+        values = []
+        for name in sorted(names):
+            value = env.get(name)
+            if value is not None:
+                if not isinstance(value, str):
+                    raise DiagnosticSanitizationError(
+                        "cannot establish text values for diagnostic secret screening"
+                    )
+                if value:
+                    values.append(value)
+        return values
+    except DiagnosticSanitizationError:
+        raise
+    except Exception:
+        raise DiagnosticSanitizationError(
+            "cannot establish the environment secret set for diagnostic sanitization"
+        ) from None
+
+
+def _secret_encodings(secret: str) -> list[tuple[str, bytes]]:
+    try:
+        encodings = {
+            "utf-8": secret.encode("utf-8"),
+            "utf-16le": secret.encode("utf-16le"),
+        }
+        preferred = locale.getpreferredencoding(False)
+        if preferred not in encodings:
+            encodings[preferred] = secret.encode(preferred)
+    except (LookupError, UnicodeEncodeError):
+        raise DiagnosticSanitizationError(
+            "cannot encode the diagnostic secret set for screening"
+        ) from None
+
+    forms: list[tuple[str, bytes]] = []
+    for encoding_name, raw in encodings.items():
+        if not raw:
+            continue
+        forms.append(("raw", raw))
+        if encoding_name == "utf-16le":
+            forms.append(("utf16le", raw))
+        for label, encoded in (
+            ("base64", base64.b64encode(raw)),
+            ("base64_unpadded", base64.b64encode(raw).rstrip(b"=")),
+            ("url_safe_base64", base64.urlsafe_b64encode(raw)),
+            ("url_safe_base64_unpadded", base64.urlsafe_b64encode(raw).rstrip(b"=")),
+            ("hex_lower", raw.hex().encode("ascii")),
+            ("hex_upper", raw.hex().upper().encode("ascii")),
+        ):
+            forms.append((label, encoded))
+        if encoding_name == "utf-16le":
+            forms.append(("utf16le_base64", base64.b64encode(raw)))
+        if encoding_name == "utf-8":
+            escaped = {
+                json.dumps(secret, ensure_ascii=True)[1:-1],
+                json.dumps(secret, ensure_ascii=False)[1:-1],
+            }
+            forms.extend(("json_escaped", value.encode("utf-8")) for value in escaped if value)
+            quoted = {
+                json.dumps(secret, ensure_ascii=True),
+                json.dumps(secret, ensure_ascii=False),
+            }
+            forms.extend(("json_quoted", value.encode("utf-8")) for value in quoted if value)
+            forms.append(("percent_encoded", quote_from_bytes(raw, safe="").encode("ascii")))
+            forms.append(("percent_encoded", quote_plus(secret, safe="").encode("ascii")))
+            forms.append(("html_escaped", html.escape(secret, quote=True).encode("utf-8")))
+            forms.append(("shell_quoted", shlex.quote(secret).encode("utf-8")))
+        full_percent = "%".join(f"{byte:02X}" for byte in raw).encode("ascii")
+        if full_percent:
+            forms.append(("percent_encoded", b"%" + full_percent))
+            forms.append(("percent_encoded", (b"%" + full_percent).lower()))
+    return forms
+
+
+def _diagnostic_secret_patterns(secrets: list[str]) -> dict[bytes, set[str]]:
+    patterns: dict[bytes, set[str]] = {}
+    try:
+        for secret in secrets:
+            if not isinstance(secret, str):
+                raise DiagnosticSanitizationError(
+                    "cannot establish text values for diagnostic secret screening"
+                )
+            for label, encoded in _secret_encodings(secret):
+                if encoded:
+                    patterns.setdefault(encoded, set()).add(label)
+    except DiagnosticSanitizationError:
+        raise
+    except Exception:
+        raise DiagnosticSanitizationError(
+            "cannot derive diagnostic secret representations for screening"
+        ) from None
+    return patterns
+
+
+def _redact_diagnostic_bytes(data: bytes, patterns: dict[bytes, set[str]]) -> tuple[bytes, list[str]]:
+    if not isinstance(data, bytes):
+        raise DiagnosticSanitizationError("captured process output is not byte data")
+    matched: set[str] = set()
+    ordered = sorted(patterns, key=lambda pattern: (-len(pattern), pattern))
+    redacted = data
+    for pattern in ordered:
+        if pattern in redacted:
+            redacted = redacted.replace(pattern, _DIAGNOSTIC_REDACTION)
+            matched.update(patterns[pattern])
+    if any(pattern in redacted for pattern in ordered):
+        # A credential can equal or overlap the fixed marker. Drop matched spans completely then
+        # verify again; if that still cannot prove absence, the caller persists nothing.
+        redacted = data
+        for pattern in ordered:
+            if pattern in redacted:
+                redacted = redacted.replace(pattern, b"")
+        if any(pattern in redacted for pattern in ordered):
+            raise DiagnosticSanitizationError("diagnostic secret screening did not remove every match")
+    return redacted, sorted(matched)
+
+
+def _diagnostic_run_identity(path: Path) -> dict[str, str]:
+    identity_path = path.parent / "run-identity.json"
+    try:
+        identity = core70.load_json(identity_path)
+    except Exception:
+        return {}
+    if not isinstance(identity, dict):
+        return {}
+    fields: dict[str, str] = {}
+    for name in ("identity_sha256", "profile_key_sha256"):
+        value = identity.get(name)
+        if isinstance(value, str) and re.fullmatch(r"[0-9a-f]{64}", value):
+            fields[name] = value
+    return fields
+
+
+def _write_failure_diagnostic(
+    path: Path,
+    *,
+    returncode: int,
+    stdout: bytes,
+    stderr: bytes,
+    patterns: dict[bytes, set[str]],
+    diagnostic_status: str = "EARLY_LAUNCH_FAILURE",
+) -> None:
+    safe_stdout, stdout_forms = _redact_diagnostic_bytes(stdout, patterns)
+    safe_stderr, stderr_forms = _redact_diagnostic_bytes(stderr, patterns)
+    encoding = locale.getpreferredencoding(False)
+    try:
+        stdout_text = safe_stdout.decode(encoding, "replace")
+        stderr_text = safe_stderr.decode(encoding, "replace")
+    except LookupError:
+        raise DiagnosticSanitizationError(
+            "cannot decode sanitized diagnostic output safely"
+        ) from None
+    payload = {
+        "schema": 1,
+        "kind": "sanitized-process-failure-diagnostic",
+        "diagnostic_status": diagnostic_status,
+        "process_returncode": returncode,
+        "captured_stdout_bytes": len(stdout),
+        "captured_stderr_bytes": len(stderr),
+        "stdout_sanitized": stdout_text,
+        "stderr_sanitized": stderr_text,
+        "redacted_representations": sorted(set(stdout_forms) | set(stderr_forms)),
+        "run_identity": _diagnostic_run_identity(path),
+        "evidence_limits": {
+            "diagnostic_only": True,
+            "raw_trace": False,
+            "normalized_events": False,
+            "terminal_event": False,
+            "evidence_integrity_manifest": False,
+            "complete_admissible_realization": False,
+            "executor_admission_evidence": False,
+        },
+        "note": (
+            "Sanitized diagnostic failure evidence only. It is not a substitute for the required "
+            "raw trace, normalized events, terminal event, evidence-integrity manifest, or "
+            "COMPLETE_ADMISSIBLE realization."
+        ),
+        "diagnostic_writer_sha256": core70.sha256_file(Path(__file__).resolve()),
+    }
+    encoded = json.dumps(payload, indent=2, sort_keys=True, ensure_ascii=True) + "\n"
+    try:
+        path.parent.mkdir(parents=True, exist_ok=True, mode=0o700)
+        if path.parent.is_symlink() or not path.parent.is_dir():
+            raise OSError("diagnostic parent is not a plain directory")
+        fd = os.open(path, os.O_WRONLY | os.O_CREAT | os.O_EXCL | getattr(os, "O_NOFOLLOW", 0), 0o600)
+        with os.fdopen(fd, "w", encoding="utf-8") as handle:
+            handle.write(encoded)
+    except OSError:
+        raise DriverError(
+            "could not persist the sanitized process diagnostic; execution remains failed closed"
+        ) from None
+
+
+def _harness_invocation(argv: list[str]) -> tuple[str, dict[str, list[str]]] | None:
+    try:
+        if len(argv) < 3 or Path(argv[1]).name != "harness70.py" or argv[2] not in {"episode", "matrix"}:
+            return None
+        values: dict[str, list[str]] = {}
+        index = 3
+        while index < len(argv):
+            item = argv[index]
+            if item.startswith("--") and "=" in item:
+                name, value = item.split("=", 1)
+            elif item.startswith("--") and index + 1 < len(argv):
+                name, value = item, argv[index + 1]
+                index += 1
+            else:
+                raise ValueError("malformed harness episode arguments")
+            values.setdefault(name, []).append(value)
+            index += 1
+        return argv[2], values
+    except (ValueError, IndexError):
+        return None
+
+
+def _episode_run_directory(argv: list[str]) -> Path | None:
+    """Return the append-only run directory for one harness episode invocation."""
+    invocation = _harness_invocation(argv)
+    if invocation is None or invocation[0] != "episode":
+        return None
+    values = invocation[1]
+    try:
+        out = values["--out"]
+        episode = values["--id"]
+        arms = values["--arm"]
+        rep = values.get("--rep", ["0"])
+        name_pattern = re.compile(r"[A-Za-z0-9][A-Za-z0-9_.-]*\Z")
+        if (len(out) != 1 or len(episode) != 1 or len(arms) != 1 or len(rep) != 1
+                or not name_pattern.fullmatch(episode[0])
+                or not name_pattern.fullmatch(arms[0])
+                or not re.fullmatch(r"[0-9]+", rep[0])):
+            return None
+        return Path(out[0]) / f"{episode[0]}-{arms[0]}-r{rep[0]}"
+    except KeyError:
+        return None
+
+
+def _matrix_finalization_exists(argv: list[str]) -> bool:
+    invocation = _harness_invocation(argv)
+    if invocation is None or invocation[0] != "matrix":
+        return False
+    outs = invocation[1].get("--out", [])
+    if len(outs) != 1:
+        return False
+    root = Path(outs[0])
+    try:
+        plan = core70.load_json(root / "matrix-plan.json")
+        pairs = plan.get("pairs")
+        if not isinstance(pairs, list):
+            return False
+        expected = {f"{row['episode_id']}-r{row['rep']}" for row in pairs
+                    if isinstance(row, dict) and isinstance(row.get("episode_id"), str)
+                    and isinstance(row.get("rep"), int)}
+        if len(expected) != len(pairs):
+            return False
+        rows = [json.loads(line) for line in (root / "matrix-scheduler.jsonl").read_text(encoding="utf-8").splitlines()
+                if line.strip()]
+        completed = {row.get("pair_id") for row in rows if isinstance(row, dict) and row.get("event") == "pair_end"}
+        return completed == expected
+    except (OSError, ValueError, KeyError, TypeError):
+        return False
+
+
+def _diagnostic_path_for_argv(argv: list[str], log: Path) -> Path:
+    """Prefer append-only run evidence for episode failures, then the wrapper log directory."""
+    run_directory = _episode_run_directory(argv)
+    if run_directory is not None:
+        return run_directory / "launch-diagnostic.json"
+    return log.with_suffix(log.suffix + ".diagnostic.json")
+
+
+def _run(argv: list[str], *, log: Path, diagnostic_path: Path | None = None) -> int:
+    try:
+        proc = subprocess.run(
+            argv, cwd=HERE.parents[2], stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=False
+        )
+    except OSError as exc:
+        # No child stream exists when process creation itself fails. Persist only its exception type;
+        # OSError text can contain command or environment details and is not required here.
+        proc_returncode, stdout, stderr = 127, b"", f"process creation failed ({type(exc).__name__})\n".encode()
+    else:
+        proc_returncode, stdout, stderr = proc.returncode, proc.stdout, proc.stderr
+
+    diagnostic_path = diagnostic_path or _diagnostic_path_for_argv(argv, log)
+    try:
+        patterns = _diagnostic_secret_patterns(_diagnostic_secret_values(argv))
+    except DiagnosticSanitizationError:
+        raise DriverError(
+            "process output could not be safely screened; no output was persisted and execution remains failed closed"
+        ) from None
+
+    episode_run = _episode_run_directory(argv)
+    ordinary_finalization = (
+        (episode_run is not None and (episode_run / "summary.json").is_file())
+        or _matrix_finalization_exists(argv)
+    )
+    diagnostic_written = False
+    if proc_returncode != 0:
+        try:
+            _write_failure_diagnostic(
+                diagnostic_path,
+                returncode=proc_returncode,
+                stdout=stdout,
+                stderr=stderr,
+                patterns=patterns,
+                diagnostic_status=(
+                    "FINALIZED_NONZERO_EXIT" if ordinary_finalization else "EARLY_LAUNCH_FAILURE"
+                ),
+            )
+        except DiagnosticSanitizationError:
+            raise DriverError(
+                "process diagnostic could not be safely sanitized; no output was persisted and execution remains failed closed"
+            ) from None
+        diagnostic_written = True
+        if not ordinary_finalization:
+            return proc_returncode
+
+    try:
+        safe_stdout, stdout_forms = _redact_diagnostic_bytes(stdout, patterns)
+        safe_stderr, stderr_forms = _redact_diagnostic_bytes(stderr, patterns)
+    except DiagnosticSanitizationError:
+        raise DriverError(
+            "process output could not be safely screened; no output was persisted and execution remains failed closed"
+        ) from None
+
+    if stdout_forms or stderr_forms:
+        if not diagnostic_written:
+            try:
+                _write_failure_diagnostic(
+                    diagnostic_path,
+                    returncode=proc_returncode,
+                    stdout=stdout,
+                    stderr=stderr,
+                    patterns=patterns,
+                    diagnostic_status="SECRET_SCREEN_REJECTION",
+                )
+            except DiagnosticSanitizationError:
+                raise DriverError(
+                    "process output matched a secret and could not be safely retained; execution remains failed closed"
+                ) from None
+        raise DriverError(
+            "process output matched a secret; normal output logging was withheld"
+        )
+
+    try:
+        encoding = locale.getpreferredencoding(False)
+        stdout_text = io.TextIOWrapper(io.BytesIO(safe_stdout), encoding=encoding).read()
+        stderr_text = io.TextIOWrapper(io.BytesIO(safe_stderr), encoding=encoding).read()
+    except (LookupError, UnicodeDecodeError):
+        raise DriverError(
+            "successful process output could not be decoded safely; no output was persisted"
+        ) from None
     log.parent.mkdir(parents=True, exist_ok=True)
     log.write_text(
-        "ARGV:\n" + json.dumps(argv) + "\n\nSTDOUT:\n" + proc.stdout + "\nSTDERR:\n" + proc.stderr,
+        "ARGV:\n" + json.dumps(argv) + "\n\nSTDOUT:\n" + stdout_text + "\nSTDERR:\n" + stderr_text,
         encoding="utf-8",
     )
-    return proc.returncode
+    return proc_returncode
 
 
 def scheduler_trace_errors(path: Path) -> list[str]:
