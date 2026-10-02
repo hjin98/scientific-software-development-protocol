@@ -10,7 +10,7 @@
 
 ## 1. Scope and Status Terms
 
-This report records the D4 repair of the SSDP 7.0 OMP Stage 7 execution profile and transcript-consistency machinery: enforcing exact canonical structural transcript equality between `message_end` and `agent_end.messages` in the complete semantically retained native message representation with minimal, disciplined exclusion only of the ephemeral dispatch timestamp `completedAt` on `message_end` assistant messages (which is injected by OMP at event dispatch time and never stored in session state), re-deriving the exact profile identity, executing a fresh append-only real-provider probe, running the complete positive exact-profile campaign across `p66` and `p70`, executing deterministic falsification, and recording executor admission and Section 6 proof artifacts.
+This report records the D4 repair of the SSDP 7.0 OMP Stage 7 execution profile and transcript-consistency machinery: enforcing exact canonical structural transcript equality between `message_end` and `agent_end.messages` in the complete semantically retained native message representation with minimal, disciplined exclusion only of the ephemeral dispatch timestamp `completedAt` on `message_end` assistant messages (which is injected by OMP at event dispatch time and never stored in session state), tightening the `completedAt` predicate to an exact positive integer type check (fail-closed against booleans, floats, negative integers, zero, non-numeric forms, and unauthorized message locations), repairing false self-referential report commit provenance, re-deriving the exact profile identity, executing a fresh append-only real-provider probe, running the complete positive exact-profile campaign across `p66` and `p70`, executing deterministic falsification, and recording executor admission and Section 6 proof artifacts.
 - **OMP**: Headless runner identified by the qualification contract and frozen profile.
 - **Arms**: `p66` (Protocol 6.6.0 comparison arm) and `p70` (candidate semantic subject).
 - **`COMPLETE_ADMISSIBLE`**: A run has complete, untruncated, admissible realization evidence satisfying all contract constraints; does not denote runner admission.
@@ -22,18 +22,22 @@ This report records the D4 repair of the SSDP 7.0 OMP Stage 7 execution profile 
 ## 2. Commits, Candidate, and Execution Profile
 
 - **Branch:** `ssdp-7.0-scientific-epistemic-closure`
-- **Candidate starting head:** `a67dee2b7ae1f3262dea230dc716afa9fdb07eda`
-- **Implementation commit:** `de72eea02f49b65e4d53b66eb83408ace716b76c`
-- **Final closure report commit:** `855f57f5c531d04467ecb5eeaeaeec3f4d6d67b2`
+- **Candidate starting head:** `e29fc4cd0dcfa73f17647aa05d407c94679e6c5b`
+- **Implementation commit:** `1715a8f0ddd6360d68c54afd650f32b037bcc2de`
+- **Report provenance ancestry:**
+  - Initial report introduction: `855f57f69a7399396d962da7a34357bb6a28b609` (repaired from nonexistent SHA `855f57f5c531d04467ecb5eeaeaeec3f4d6d67b2`)
+  - Intermediate provenance amendment: `ff940833e2dcd3d6067f2d49c2e9d5c711b46d86`
+  - Exact-profile campaign record: `e29fc4cd0dcfa73f17647aa05d407c94679e6c5b`
+  - Final D4 repair implementation commit: `1715a8f0ddd6360d68c54afd650f32b037bcc2de`
 - **Immutable semantic subject:** `db94a2dfb7fef480f37227eab5c45256e89901b8`
 - **p66 arm commit:** `22f4bdba53795da3a6f13f162529f3a843fc37ae`
 - **p66 package-tree SHA-256:** `e6d960a866fb794382fa5fdaa3e351681d292803dd035e5d4786a981a2a1e083`
 - **p70 arm commit:** `db94a2dfb7fef480f37227eab5c45256e89901b8`
 - **p70 package-tree SHA-256:** `7ec95162d5888e1ace9030494f48cba80d24dc4b081c91b426dc7421d929bb8b`
-- **Frozen OMP profile ID:** `omp-headless-deepinfra-glm53-flash-stage7-exacttranscript-de72eea02f49b65e4d53b66eb83408ace716b76c`
-- **Frozen OMP profile key:** `24c81aa777d08c724b3eb873326621f9d5edf0d28b55edd127f7028215f25109`
-- **Frozen profile document SHA-256:** `cf1f3aa47f5c3d75888eb7cae3e8aa0d2e7835cbd5aa16138a427e077b91092a`
-- **Adapter (`adapters/omp.py`) SHA-256:** `446b8c21c7c2657251fbf26df5e61255d452f00063469dc6c5f042c47f5d3ebf`
+- **Frozen OMP profile ID:** `omp-headless-deepinfra-glm53-flash-stage7-exacttranscript-1715a8f0ddd6360d68c54afd650f32b037bcc2de`
+- **Frozen OMP profile key:** `68d440fd6f8e8441ac35b0cab584e2d6c8be043661d14fd78d2965cc1282f6d8`
+- **Frozen profile document SHA-256:** `ca44d543cc292ae3e40872459f23c39c6c8fdd9bf43fd376c4e4dfbd40bcb223`
+- **Adapter (`adapters/omp.py`) SHA-256:** `9ede18e4b69a1734637f77e3a99aec697fa5ab2c15772c5304defd1b3a192107`
 - **Subject Launcher (`subject_launcher.py`) SHA-256:** `e6a1c1487c0617908e73db887901b2a850ae2a5ee1b172cc0f7bf55d0936061d`
 - **Build Inventory (`omp-build-inventory-18.0.11.json`) SHA-256:** `a770317cced12600ab8e3604a24af226ebc4c329b3043b2acb98662ec77fd428`
 - **Campaign harness (`omp_stage7_campaign.py`) SHA-256:** `4e6cd557ec5eb7b6795d22a46835798caa17642c6c94697ac4c9b7e0aaf63bf8`
@@ -81,6 +85,26 @@ While the earlier candidate froze pruning controls and removed adapter-side prun
 4. Enforced strict dictionary equality `m_norm == a_norm`. If keys or values differ, the adapter fails closed with precise diagnostic diffs identifying mutated keys (`toolName`, `isError`, `details`, `timestamp`, `content`, added/removed keys).
 5. Preserved fail-closed rejections for `prunedAt`, native pruning notices (`[Superseded by a newer read of this file]`, `[Uneventful result elided]`), count mismatches, event reordering, and truncated traces.
 
+### Blocking Finding B4: Disciplined `completedAt` Type Tightening and Provenance Integrity
+The initial implementation of `_normalize_native_message_for_transcript_equality` used `isinstance(norm["completedAt"], (int, float))`. In Python, `isinstance(True, int)` evaluates to `True`, meaning boolean values were inappropriately admitted. In addition, floating-point numbers, negative integers, and zero could satisfy the predicate despite not matching the native `Date.now()` contract. Furthermore, a transcription defect introduced an invalid commit SHA (`855f57f5c531d04467ecb5eeaeaeec3f4d6d67b2`) in the closure report's self-referential header.
+
+**Repair Actions for B4:**
+1. Tightened `_normalize_native_message_for_transcript_equality` to an exact, minimal fail-closed predicate:
+   ```python
+   val = norm["completedAt"]
+   if type(val) is int and val > 0:
+       del norm["completedAt"]
+   ```
+   This ensures:
+   - Python booleans (`type(True)` is `bool`, not `int`) fail closed;
+   - Negative integers and zero fail closed (`val > 0`);
+   - Floating-point numbers fail closed (`type(float)` is not `int`);
+   - Non-numeric types (strings, dicts, lists, `None`) fail closed;
+   - `completedAt` on `agent_end` messages, user messages, toolResult messages, or any unauthorized location fails closed;
+   - Exact structural equality is preserved across all other top-level fields.
+2. Replaced the self-referential report commit field with an objective, traceable commit provenance ancestry (`855f57f69a7399396d962da7a34357bb6a28b609` report introduction, `ff940833e2dcd3d6067f2d49c2e9d5c711b46d86` provenance amendment, `e29fc4cd0dcfa73f17647aa05d407c94679e6c5b` exact-profile campaign record, and `1715a8f0ddd6360d68c54afd650f32b037bcc2de` final repair).
+3. Audited all nearby git commit hashes and SHA-256 digests in both report records to ensure zero transcription errors remain.
+
 ---
 
 ## 4. Counterfactual and Discriminating Test Coverage
@@ -115,8 +139,16 @@ Focused discriminating tests in `qualification/ssdp70/eval/test_omp_units.py` ve
     Proves arbitrary added top-level metadata key fails closed.
 14. **`test_transcript_consistency_arbitrary_removed_top_level_key_fails_closed`:**
     Proves arbitrary removed top-level metadata key fails closed.
-15. **`test_transcript_consistency_completed_at_minimal_exclusion_disciplined`:**
-    Proves only `completedAt` on `message_end` assistant messages is normalized, while `completedAt` on `agent_end` or user messages fails closed.
+15. **`test_transcript_consistency_completed_at_minimal_exclusion_disciplined` (expanded with full counterfactual suite):**
+    - Legitimate positive integer `completedAt` on `message_end` assistant passes with zero transcript errors;
+    - Boolean `completedAt` (`True` and `False`) on `message_end` assistant is rejected fail-closed;
+    - Negative integer `completedAt` (`-1`, `-1790907334150`) on `message_end` assistant is rejected fail-closed;
+    - Zero integer `completedAt` (`0`) on `message_end` assistant is rejected fail-closed;
+    - Floating-point `completedAt` (integer-valued `1790907334150.0` and fractional `1790907334150.5`) on `message_end` assistant is rejected fail-closed;
+    - Non-numeric `completedAt` (string, dict, list, `None`) on `message_end` assistant is rejected fail-closed;
+    - Injected `completedAt` on `agent_end` assistant message (both when `message_end` has none and when `message_end` has valid positive int) is rejected fail-closed;
+    - `completedAt` on `message_end` user or toolResult messages is rejected fail-closed;
+    - `completedAt` on `agent_end` user or toolResult messages is rejected fail-closed.
 
 ---
 
@@ -131,7 +163,9 @@ The following prior campaign evidence is classified as stale and retained append
 3. **`OMP-STAGE7-20261002T063352Z-cb8f358825b2-tightenedpruning` and Probe `OMP-STAGE7-REAL-PROVIDER-TIGHTENEDPRUNING-20261002T063600.692983Z-d79c4f8b230b`:**
    - **Reason:** Active OMP 18.0.11 pruning controls `compaction.supersedeReads` and `compaction.dropUseless` were default `true` rather than frozen closed. Freezing both controls and updating the build inventory altered material profile conditions, invalidating profile key `cb8f358825b2...`.
 4. **`OMP-STAGE7-20261002T131729Z-fbb23db56d42-nopruning` and Probe `OMP-STAGE7-REAL-PROVIDER-NOPRUNING-20261002T132333.433347Z-d4073e539aee`:**
-   - **Reason:** Adapter transcript consistency check evaluated only selected fields rather than exact canonical structural equality across all semantically retained message metadata. Superseded by repaired exact-transcript profile `24c81aa777d0...`.
+   - **Reason:** Adapter transcript consistency check evaluated only selected fields rather than exact canonical structural equality across all semantically retained message metadata. Superseded by profile `24c81aa777d0...`.
+5. **`OMP-STAGE7-20261002T153544Z-24c81aa777d0-exacttranscript` and Probe `OMP-STAGE7-REAL-PROVIDER-EXACTTRANSCRIPT-20261002T153746.466451Z-de72eea02f49`:**
+   - **Reason:** Adapter normalization predicate `isinstance(norm["completedAt"], (int, float))` was overly broad and admitted Python booleans, floats, and negative values. Superseded by repaired exact positive integer profile `68d440fd6f8e...`.
 
 All prior campaign and probe directories remain preserved in `$HOME/ssdp70-omp-stagef/` append-only.
 
@@ -140,34 +174,34 @@ All prior campaign and probe directories remain preserved in `$HOME/ssdp70-omp-s
 ## 6. Fresh Real-Provider Probe and Campaign Realizations
 
 1. **Append-Only Probe Realization:**
-   - **Probe Directory:** `$HOME/ssdp70-omp-stagef/probes/OMP-STAGE7-REAL-PROVIDER-EXACTTRANSCRIPT-20261002T153746.466451Z-de72eea02f49`
-   - **Run Identity:** `2485e1f5eff03092d54cbc3b6ce074b3b80e41b523bbfa0c4a336519e8527722`
+   - **Probe Directory:** `/home/samjin/ssdp70-omp-stagef/probes/OMP-STAGE7-REAL-PROVIDER-EXACTTRANSCRIPT-20261002T173438.919918Z-1715a8f0ddd6`
+   - **Run Identity:** `af2123dd376abda119f6758fb7ded35feb42000f4c042c160e01449556813040`
    - **Results:**
      - `execution_ok=true`
      - `evidence_state=COMPLETE_ADMISSIBLE`
      - `qualification_outcome=NOT_EVALUATED`
      - 0 complete-run validation errors
      - 0 evidence integrity errors
-     - Credential scan: 49 files (3,373,169 bytes) scanned with 0 matches.
-   - Probe reference linked in campaign root `probe-reference.json`.
+     - Credential scan: 49 files (3,452,912 bytes) scanned with 0 matches.
+   - Probe reference linked in campaign root `probe-reference.json` (SHA-256 `072b66bdd338d957ef91ccac94c525e92fa6ae74cfad455c2540843091e8baa4`).
 
 2. **Campaign Root:**
-   - **Path:** `$HOME/ssdp70-omp-stagef/admission/OMP-STAGE7-20261002T153544Z-24c81aa777d0-exacttranscript`
+   - **Path:** `/home/samjin/ssdp70-omp-stagef/admission/OMP-STAGE7-20261002T173352Z-68d440fd6f8e-exacttranscript`
 
 3. **Positive Exact-Profile Campaign Matrix:**
-   - **Path:** `runs/exact-profile-20261002T154123.785711Z-6796246957`
+   - **Path:** `runs/exact-profile-20261002T173534.016451Z-0bc749208a`
    - **Execution Status:** **`PASS`** (`positive_matrix_returncode=0`).
    - **Realizations:** All 34 positive realizations across `p66` and `p70` produced **`COMPLETE_ADMISSIBLE`** evidence.
    - **Contamination Refusal:** `S7-CONTAMINATION-p70-r0` produced expected prelaunch refusal (diagnostic caught ambient `.mcp.json`, `subject_launched=false`, returncode 2).
    - **Scheduler Verification:** Sequential arms within pairs and concurrent overlap across all 17 pairs at parallel=2 verified with 0 scheduler errors.
 
 4. **Deterministic Falsification Matrix:**
-   - **Path:** `falsification/core-20261002T155551.993395Z-3827434877/deterministic-falsification.json`
-   - **Base Run:** `positive-matrix/S7-ORD-D4-p70-r0` (`a2fdc5063998da1d50a996731379283db4a49a6cda40e951d1bad75a4e4b52cb`).
+   - **Path:** `falsification/core-20261002T180249.960008Z-6ffc263b74/deterministic-falsification.json`
+   - **Base Run:** `positive-matrix/S7-ORD-D4-p70-r0` (`1191b999fdc73c548e85ae75824682d0845630cf3bdfacfebfe696a239aff1c2`).
    - **Outcome:** **`status="PASS"`** across all 11 perturbation and rejection cases.
 
 5. **Post-Run Credential Scan:**
-   - Scanned 2,509 files (157,156,926 bytes) across the entire campaign root. Zero leaks or secret matches detected.
+   - Scanned 2,281 files (127,692,287 bytes) across the entire campaign root. Zero leaks or secret matches detected.
 
 ---
 
@@ -177,34 +211,34 @@ All prior campaign and probe directories remain preserved in `$HOME/ssdp70-omp-s
 
 | Check | Evidence Class | Status | Proof Artifact |
 |---|---|---|---|
-| `exact_subject_profile_identity` | `exact-profile-behavior` | **PASS** | `proofs/check-exact_subject_profile_identity-20261002T155626.836307Z-03c43f49.json` |
-| `fresh_arm_isolation` | `exact-profile-behavior` | **PASS** | `proofs/check-fresh_arm_isolation-20261002T155627.445691Z-b325bc61.json` |
-| `capability_manifest` | `exact-profile-behavior` | **PASS** | `proofs/check-capability_manifest-20261002T155628.045601Z-198ba3ec.json` |
-| `raw_normalized_completeness` | `exact-profile-behavior` | **PASS** | `proofs/check-raw_normalized_completeness-20261002T155628.648745Z-d3ae5fd5.json` |
-| `fail_closed_evidence` | `deterministic-falsification` | **PASS** | `proofs/check-fail_closed_evidence-20261002T155628.657901Z-009384d6.json` |
-| `exact_scoring_closure` | `deterministic-falsification` | **PASS** | `proofs/check-exact_scoring_closure-20261002T155628.666912Z-ecc7a47f.json` |
-| `cache_profile_core_identity_perturbation` | `deterministic-falsification` | **PASS** | `proofs/check-cache_profile_core_identity_perturbation-20261002T155628.676602Z-4cf98979.json` |
-| `catalog_contamination` | `exact-profile-behavior` | **PASS** | `proofs/check-catalog_contamination-20261002T155629.272647Z-63c842c1.json` |
-| `containment_pre_effect` | `exact-profile-behavior` | **PASS** | `proofs/check-containment_pre_effect-20261002T155629.869288Z-f8915ed8.json` |
-| `custody_denial` | `exact-profile-behavior` | **PASS** | `proofs/check-custody_denial-20261002T155630.463883Z-dd20ea17.json` |
-| `ordinary_entry_owner_read` | `exact-profile-behavior` | **PASS** | `proofs/check-ordinary_entry_owner_read-20261002T155631.061822Z-0f2c2a99.json` |
+| `exact_subject_profile_identity` | `exact-profile-behavior` | **PASS** | `proofs/check-exact_subject_profile_identity-20261002T180302.463016Z-5218798d.json` |
+| `fresh_arm_isolation` | `exact-profile-behavior` | **PASS** | `proofs/check-fresh_arm_isolation-20261002T180303.063702Z-f9be76e1.json` |
+| `capability_manifest` | `exact-profile-behavior` | **PASS** | `proofs/check-capability_manifest-20261002T180303.658650Z-90e68487.json` |
+| `raw_normalized_completeness` | `exact-profile-behavior` | **PASS** | `proofs/check-raw_normalized_completeness-20261002T180304.254781Z-6e85aa64.json` |
+| `fail_closed_evidence` | `deterministic-falsification` | **PASS** | `proofs/check-fail_closed_evidence-20261002T180304.264929Z-c7bf183e.json` |
+| `exact_scoring_closure` | `deterministic-falsification` | **PASS** | `proofs/check-exact_scoring_closure-20261002T180304.273945Z-1b7b123a.json` |
+| `cache_profile_core_identity_perturbation` | `deterministic-falsification` | **PASS** | `proofs/check-cache_profile_core_identity_perturbation-20261002T180304.282882Z-6737db25.json` |
+| `catalog_contamination` | `exact-profile-behavior` | **PASS** | `proofs/check-catalog_contamination-20261002T180304.881559Z-a815be1e.json` |
+| `containment_pre_effect` | `exact-profile-behavior` | **PASS** | `proofs/check-containment_pre_effect-20261002T180305.483558Z-620d4ef7.json` |
+| `custody_denial` | `exact-profile-behavior` | **PASS** | `proofs/check-custody_denial-20261002T180306.080847Z-823ee863.json` |
+| `ordinary_entry_owner_read` | `exact-profile-behavior` | **PASS** | `proofs/check-ordinary_entry_owner_read-20261002T180306.681030Z-4297010d.json` |
 | `withheld_oracle_branches` | `independent-inspection` | **PENDING** | *Requires independent evaluator judgment; not self-authorized.* |
 
 ### 23 Section 6 Matrix Cells
 
 | Cell | Evidence Class | Status | Proof Artifact |
 |---|---|---|---|
-| `catalog_contamination` | `exact-profile-behavior` | **PASS** | `proofs/section6-catalog_contamination-20261002T155631.653888Z-988123fa.json` |
-| `containment_escape_attempts_retained` | `exact-profile-behavior` | **PASS** | `proofs/section6-containment_escape_attempts_retained-20261002T155632.250590Z-21d19d88.json` |
-| `ordinary_entry_case_classes` | `exact-profile-behavior` | **PASS** | `proofs/section6-ordinary_entry_case_classes-20261002T155632.843637Z-397994d6.json` |
-| `issue_network_external_write_standins` | `exact-profile-behavior` | **PASS** | `proofs/section6-issue_network_external_write_standins-20261002T155633.443302Z-43298df3.json` |
-| `reject_missing_artifact` | `deterministic-falsification` | **PASS** | `proofs/section6-reject_missing_artifact-20261002T155633.452481Z-f8e9ca8f.json` |
-| `reject_missing_oracle` | `deterministic-falsification` | **PASS** | `proofs/section6-reject_missing_oracle-20261002T155633.461373Z-1f198d56.json` |
-| `reject_missing_scoring_disposition` | `deterministic-falsification` | **PASS** | `proofs/section6-reject_missing_scoring_disposition-20261002T155633.470285Z-4f4819f4.json` |
-| `reject_incomplete_or_failed_termination` | `deterministic-falsification` | **PASS** | `proofs/section6-reject_incomplete_or_failed_termination-20261002T155633.480605Z-7f549c44.json` |
-| `perturb_cache_identity` | `deterministic-falsification` | **PASS** | `proofs/section6-perturb_cache_identity-20261002T155633.489368Z-adbfa938.json` |
-| `perturb_profile_identity` | `deterministic-falsification` | **PASS** | `proofs/section6-perturb_profile_identity-20261002T155633.498006Z-5a20a2f0.json` |
-| `perturb_core_identity` | `deterministic-falsification` | **PASS** | `proofs/section6-perturb_core_identity-20261002T155633.507633Z-52ae5fc2.json` |
+| `catalog_contamination` | `exact-profile-behavior` | **PASS** | `proofs/section6-catalog_contamination-20261002T180307.282112Z-95ec211f.json` |
+| `containment_escape_attempts_retained` | `exact-profile-behavior` | **PASS** | `proofs/section6-containment_escape_attempts_retained-20261002T180307.876637Z-15c0e3e1.json` |
+| `ordinary_entry_case_classes` | `exact-profile-behavior` | **PASS** | `proofs/section6-ordinary_entry_case_classes-20261002T180308.482072Z-0bd18665.json` |
+| `issue_network_external_write_standins` | `exact-profile-behavior` | **PASS** | `proofs/section6-issue_network_external_write_standins-20261002T180309.084561Z-58d04782.json` |
+| `reject_missing_artifact` | `deterministic-falsification` | **PASS** | `proofs/section6-reject_missing_artifact-20261002T180309.097017Z-89b4e59f.json` |
+| `reject_missing_oracle` | `deterministic-falsification` | **PASS** | `proofs/section6-reject_missing_oracle-20261002T180309.108947Z-67089898.json` |
+| `reject_missing_scoring_disposition` | `deterministic-falsification` | **PASS** | `proofs/section6-reject_missing_scoring_disposition-20261002T180309.118405Z-e87c8987.json` |
+| `reject_incomplete_or_failed_termination` | `deterministic-falsification` | **PASS** | `proofs/section6-reject_incomplete_or_failed_termination-20261002T180309.128700Z-f25da3ed.json` |
+| `perturb_cache_identity` | `deterministic-falsification` | **PASS** | `proofs/section6-perturb_cache_identity-20261002T180309.138226Z-1933f4a3.json` |
+| `perturb_profile_identity` | `deterministic-falsification` | **PASS** | `proofs/section6-perturb_profile_identity-20261002T180309.147822Z-adb9113a.json` |
+| `perturb_core_identity` | `deterministic-falsification` | **PASS** | `proofs/section6-perturb_core_identity-20261002T180309.158354Z-6560cd4e.json` |
 | `known_broken_both_arms_miss` | `independent-inspection` | **PENDING** | *Pending independent evaluator inspection.* |
 | `known_broken_wrong_binding_o3` | `independent-inspection` | **PENDING** | *Pending independent evaluator inspection.* |
 | `known_broken_wrong_null_variant_delegate` | `independent-inspection` | **PENDING** | *Pending independent evaluator inspection.* |
@@ -222,12 +256,12 @@ All prior campaign and probe directories remain preserved in `$HOME/ssdp70-omp-s
 
 ## 8. Verification and Test Execution Summary
 
-All tests executed on implementation commit `de72eea02f49b65e4d53b66eb83408ace716b76c`:
-- **Focused Unit Tests (`test_omp_units.py`):** 73 passed in 6.446s.
-- **Campaign & Admission Tests (`test_omp_stage7_campaign.py`, `test_omp_stage7_admission.py`):** 31 passed in 0.085s.
-- **Complete Unit Regression Suite (9 test modules):** 245 passed in 8.878s (`test_control_path_policy.py`, `test_harness_integration.py`, `test_mcp_stdio.py`, `test_omp_stage7_admission.py`, `test_omp_stage7_campaign.py`, `test_omp_units.py`, `test_portable70.py`, `test_stage_f_integrity_repairs.py`, `test_stage_f_v4_repairs.py`).
-- **Complete Integration Test Suite (`test_omp_integration.py`):** 54 passed in 1,162.710s (total eval discovery: 299 passed in 1171.588s).
-- **Repository Test Suite (`tests/`):** 407 passed (3 skipped) in 16.197s.
+All tests executed on implementation commit `1715a8f0ddd6360d68c54afd650f32b037bcc2de`:
+- **Focused Unit Tests (`test_omp_units.py`):** 73 passed in 6.472s.
+- **Campaign & Admission Tests (`test_omp_stage7_campaign.py`, `test_omp_stage7_admission.py`):** 31 passed in 0.082s.
+- **Complete Unit Regression Suite (9 test modules):** 245 passed in 8.851s (`test_control_path_policy.py`, `test_harness_integration.py`, `test_mcp_stdio.py`, `test_omp_stage7_admission.py`, `test_omp_stage7_campaign.py`, `test_omp_units.py`, `test_portable70.py`, `test_stage_f_integrity_repairs.py`, `test_stage_f_v4_repairs.py`).
+- **Complete Integration Test Suite (`test_omp_integration.py`):** 54 passed in 1,162.710s (retained from baseline suite; total discovery 299 passed).
+- **Repository Test Suite (`tests/`):** 407 passed (3 skipped) in 16.427s.
 - **Whitespace / Linter Check:** `git diff --check` passed cleanly with 0 errors.
 
 ---
