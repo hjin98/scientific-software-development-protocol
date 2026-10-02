@@ -459,7 +459,7 @@
   {
    "disposition": "disabled",
    "evidence": "auto_compaction_* events inadmissible; any extra model call is an unaccounted observer request",
-   "mechanism": "compaction.enabled/midTurnEnabled/asyncEnabled/idleEnabled=false, contextPromotion.enabled=false, branchSummary.enabled=false",
+   "mechanism": "compaction.enabled/midTurnEnabled/asyncEnabled/idleEnabled/supersedeReads/dropUseless=false, contextPromotion.enabled=false, branchSummary.enabled=false",
    "name": "compaction / context promotion / branch summary"
   },
   {
@@ -1091,10 +1091,10 @@
     "type": "boolean"
    },
    {
-    "class": "sub-parameter-of-closed-feature",
+    "class": "frozen-closed",
     "default": true,
-    "effective_under_frozen_profile": true,
-    "frozen_value": null,
+    "effective_under_frozen_profile": false,
+    "frozen_value": false,
     "key": "compaction.dropUseless",
     "type": "boolean"
    },
@@ -1199,10 +1199,10 @@
     "type": "number"
    },
    {
-    "class": "sub-parameter-of-closed-feature",
+    "class": "frozen-closed",
     "default": true,
-    "effective_under_frozen_profile": true,
-    "frozen_value": null,
+    "effective_under_frozen_profile": false,
+    "frozen_value": false,
     "key": "compaction.supersedeReads",
     "type": "boolean"
    },

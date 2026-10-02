@@ -184,7 +184,10 @@ REVIEWED_NON_ORACLE_OBSERVER_CONTROL_KINDS = frozenset({
 FROZEN_SETTINGS: dict[str, Any] = {
     # Hidden model calls / provider-managed control flow
     "retry": {"enabled": False, "maxRetries": 0, "modelFallback": False, "usageAwareFallback": False},
-    "compaction": {"enabled": False, "midTurnEnabled": False, "asyncEnabled": False, "idleEnabled": False},
+    "compaction": {
+        "enabled": False, "midTurnEnabled": False, "asyncEnabled": False, "idleEnabled": False,
+        "supersedeReads": False, "dropUseless": False,
+    },
     "contextPromotion": {"enabled": False},
     "branchSummary": {"enabled": False},
     "advisor": {"enabled": False},
@@ -3066,12 +3069,23 @@ def normalize(stdout: str, run_id: str, context: dict[str, Any] | None = None) -
                     )
                     break
                 if m_msg.get("content") != a_msg.get("content"):
-                    if not _is_valid_omp_tool_result_pruning(m_msg, a_msg, trajectory=message_ends):
-                        errors.append(
-                            f"native message events do not equal agent_end transcript: "
-                            f"message {idx} content mismatch"
-                        )
-                        break
+                    errors.append(
+                        f"native message events do not equal agent_end transcript: "
+                        f"message {idx} content mismatch"
+                    )
+                    break
+                if "prunedAt" in a_msg or "prunedAt" in m_msg:
+                    errors.append(
+                        f"native message events do not equal agent_end transcript: "
+                        f"message {idx} contains unauthorized prunedAt under frozen profile"
+                    )
+                    break
+                if _has_pruning_notice(m_msg) or _has_pruning_notice(a_msg):
+                    errors.append(
+                        f"native message events do not equal agent_end transcript: "
+                        f"message {idx} contains unauthorized pruning notice under frozen profile"
+                    )
+                    break
     turns = provider_turns(observed)
     native_assistant = [m for m in message_ends if m.get("role") == "assistant"]
     provider_ids = {call["id"] for turn in turns for call in turn["tool_calls"] if call.get("id")}
@@ -3184,140 +3198,20 @@ def _msg_key(message: dict[str, Any]) -> str:
     })
 
 
-OMP_SUPERSEDED_READ_NOTICE = "[Superseded by a newer read of this file]"
-OMP_PRUNED_TOOL_RESULT_NOTICES = {
-    OMP_SUPERSEDED_READ_NOTICE,
-}
+FORBIDDEN_PRUNING_NOTICES = frozenset({
+    "[Superseded by a newer read of this file]",
+    "[Uneventful result elided]",
+})
 
 
-def _is_valid_omp_tool_result_pruning(
-    m_end: dict[str, Any],
-    a_end: dict[str, Any],
-    trajectory: list[dict[str, Any]] | None = None,
-) -> bool:
-    """Admissible relation between real-time tool execution output and in-memory pruned transcript.
-
-    OMP natively compacts superseded file reads in memory before session end via
-    `pruneSupersededToolResults`. The real-time `message_end` event retains the unpruned raw
-    execution output, while `agent_end.messages` reflects native in-memory compaction.
-
-    This relation is admissible strictly under all of the following conditions:
-    1. Both messages have role == 'toolResult'.
-    2. Both messages have matching non-empty string toolCallId.
-    3. a_end has a valid positive integer `prunedAt` (where `type(prunedAt) is int and prunedAt > 0`,
-       explicitly rejecting bool, 0, negative values, strings, lists, dicts, floats, and None).
-    4. m_end does not contain `prunedAt` (retaining the unpruned real-time tool result).
-    5. Structural fail-closed key preservation: `set(a_end.keys()) == set(m_end.keys()) | {'prunedAt'}`.
-       No fields may be added, removed, or renamed between m_end and a_end except the authorized
-       addition of `prunedAt`.
-    6. Non-pruning metadata equality: for every key `k` in m_end other than 'content',
-       `m_end[k] == a_end[k]`.
-    7. Intact original tool result: `m_end.get('content')` is a non-empty list of dicts distinct
-       from `a_end.get('content')`.
-    8. Authorized compaction representation: `a_end.get('content')` is exactly a single-element list
-       `[{'type': 'text', 'text': OMP_SUPERSEDED_READ_NOTICE}]` with no extraneous keys.
-    9. Native trajectory eligibility: from the retained trajectory, the tool call corresponding
-       to `toolCallId` must be a `read` call, and the trajectory must contain a subsequent `read`
-       call targeting the same file path.
-    """
-    if not isinstance(m_end, dict) or not isinstance(a_end, dict):
-        return False
-
-    # 1. Role validation
-    if m_end.get("role") != "toolResult" or a_end.get("role") != "toolResult":
-        return False
-
-    # 2. Tool call ID validation
-    tool_call_id = m_end.get("toolCallId")
-    if not isinstance(tool_call_id, str) or not tool_call_id:
-        return False
-    if a_end.get("toolCallId") != tool_call_id:
-        return False
-
-    # 3. Strict validation of prunedAt on a_end
-    if "prunedAt" not in a_end:
-        return False
-    pruned_at = a_end["prunedAt"]
-    if type(pruned_at) is not int or pruned_at <= 0:
-        return False
-
-    # 4. m_end must not be marked pruned
-    if "prunedAt" in m_end:
-        return False
-
-    # 5. Structural fail-closed key set preservation
-    if set(a_end.keys()) != (set(m_end.keys()) | {"prunedAt"}):
-        return False
-
-    # 6. Non-pruning metadata equality
-    for k in m_end:
-        if k != "content" and m_end[k] != a_end[k]:
-            return False
-
-    # 7. Intact original tool result in m_end
-    m_content = m_end.get("content")
-    if not isinstance(m_content, list) or not m_content:
-        return False
-    if not all(isinstance(p, dict) for p in m_content):
-        return False
-
-    # 8. Authorized compaction representation in a_end
-    a_content = a_end.get("content")
-    if not isinstance(a_content, list) or len(a_content) != 1:
-        return False
-    part = a_content[0]
-    if not isinstance(part, dict) or part.get("type") != "text" or part.get("text") != OMP_SUPERSEDED_READ_NOTICE:
-        return False
-    if set(part.keys()) != {"type", "text"}:
-        return False
-    if m_content == a_content:
-        return False
-
-    # 9. Native trajectory eligibility condition
-    if not trajectory or not isinstance(trajectory, list):
-        return False
-
-    tool_calls: list[dict[str, Any]] = []
-    for msg in trajectory:
-        if isinstance(msg, dict) and msg.get("role") == "assistant":
-            c_list = msg.get("content")
-            if isinstance(c_list, list):
-                for c_part in c_list:
-                    if isinstance(c_part, dict) and c_part.get("type") == "toolCall":
-                        tool_calls.append(c_part)
-
-    target_idx: int | None = None
-    target_call: dict[str, Any] | None = None
-    for idx, call in enumerate(tool_calls):
-        if call.get("id") == tool_call_id:
-            target_idx = idx
-            target_call = call
-            break
-
-    if target_call is None or target_idx is None:
-        return False
-
-    if target_call.get("name") != "read":
-        return False
-
-    args = target_call.get("arguments")
-    if not isinstance(args, dict):
-        return False
-    path = args.get("path")
-    if not isinstance(path, str) or not path or "://" in path:
-        return False
-    target_file = path.split("#")[0].strip()
-    if not target_file:
-        return False
-
-    for subsequent_call in tool_calls[target_idx + 1:]:
-        if subsequent_call.get("name") == "read":
-            sub_args = subsequent_call.get("arguments")
-            if isinstance(sub_args, dict):
-                sub_path = sub_args.get("path")
-                if isinstance(sub_path, str) and sub_path.split("#")[0].strip() == target_file:
+def _has_pruning_notice(msg: dict[str, Any]) -> bool:
+    content = msg.get("content")
+    if isinstance(content, list):
+        for part in content:
+            if isinstance(part, dict) and part.get("type") == "text":
+                text = part.get("text", "")
+                if any(notice in text for notice in FORBIDDEN_PRUNING_NOTICES):
                     return True
-
     return False
 
 

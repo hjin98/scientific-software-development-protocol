@@ -266,8 +266,31 @@ def main() -> int:
                 "stderr_b64": __import__("base64").b64encode(done.stderr[:1 << 16]).decode("ascii"),
                 "stdout_bytes": len(done.stdout),
             })
+            if probe.get("name") == "effective-settings":
+                if done.returncode != 0:
+                    chain.append("launcher_refused", {"reason": f"effective-settings-probe-failed: rc={done.returncode}"})
+                    chain.close()
+                    return 98
+                try:
+                    payload = json.loads(done.stdout)
+                    sr = payload.get("compaction.supersedeReads", {}).get("value")
+                    du = payload.get("compaction.dropUseless", {}).get("value")
+                    if sr is not False or du is not False:
+                        chain.append("launcher_refused", {
+                            "reason": f"profile-setting-mismatch: compaction.supersedeReads={sr!r}, compaction.dropUseless={du!r} (expected False)"
+                        })
+                        chain.close()
+                        return 98
+                except Exception as exc:
+                    chain.append("launcher_refused", {"reason": f"effective-settings-probe-unparseable: {exc}"})
+                    chain.close()
+                    return 98
         except (subprocess.TimeoutExpired, OSError) as exc:
             chain.append("probe", {"name": probe["name"], "argv": probe["argv"], "error": f"{type(exc).__name__}: {exc}"})
+            if probe.get("name") == "effective-settings":
+                chain.append("launcher_refused", {"reason": f"effective-settings-probe-error: {type(exc).__name__}: {exc}"})
+                chain.close()
+                return 98
 
     omp_pid: list[int] = [0]
     ready = threading.Event()
