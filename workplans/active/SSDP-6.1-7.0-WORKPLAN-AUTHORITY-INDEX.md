@@ -199,7 +199,7 @@ The deterministic control-plane / mandatory-orchestrator line (Protocol 8.0) is 
 
 - `workplans/active/SSDS-8.0-GRAPH-NATIVE-DETERMINISTIC-ORCHESTRATION-ARCHITECTURE.md`
 
-The workplan ID keeps the historical `GRAPH-NATIVE` lexeme. The 2026-10-01 first-principles redesign replaced the graph-native hypothesis with an architecture of basis-stamped judgments over content-addressed units: ledger plus stratified pure derivation, single Admission writer, optimistic concurrency, one intake route, and refinement plus qualified promotion for migration. Its first revision (`f9d9de8`) received an independent D3 **NO-PASS** with three blockers: `qualification/ssds80/WORKPLAN-REVIEW-SSDS-8.0-F9D9DE8-NO-PASS.md`. The handoff's design revision 2 addresses them and awaits a fresh independent Review. That handoff supersedes these archived byte-identical records, and its §18 dispositions every guarantee and capability of them:
+The workplan ID keeps the historical `GRAPH-NATIVE` lexeme. The 2026-10-01 first-principles redesign replaced the graph-native hypothesis with an architecture of basis-stamped judgments over content-addressed units: ledger plus stratified pure derivation, single Admission writer, optimistic concurrency, one intake route, and refinement plus qualified promotion for migration. Its first revision (`f9d9de8`) received an independent D3 **NO-PASS** (`qualification/ssds80/WORKPLAN-REVIEW-SSDS-8.0-F9D9DE8-NO-PASS.md`); design revision 2 (`441cf5c`) received a second independent D3 **NO-PASS** with three blockers (`qualification/ssds80/WORKPLAN-REVIEW-SSDS-8.0-441CF5C-NO-PASS.md`). The handoff's design revision 3 addresses them and awaits a fresh independent Review. That handoff supersedes these archived byte-identical records, and its §18 dispositions every guarantee and capability of them:
 
 1. `workplans/archive/SSDS-8.0-GRAPH-NATIVE-DETERMINISTIC-ORCHESTRATION-ARCHITECTURE-BEFE678-HYPOTHESIS.md` (the `befe678` graph-native hypothesis)
 2. `workplans/archive/SSDP-8.0-DETERMINISTIC-CONTROL-PLANE-AND-MANDATORY-ORCHESTRATOR-CONSOLIDATED.md` (the consolidated Protocol 8 plan), which itself carried as one composition:
@@ -219,7 +219,7 @@ Current disposition:
 
 ```text
 SERIOUS CHALLENGE: NONE
-SSDS 8 ARCHITECTURE: PROPOSED (2026-10-01 first-principles redesign, design revision 2; not accepted-current)
+SSDS 8 ARCHITECTURE: PROPOSED (2026-10-01 first-principles redesign, design revision 3; not accepted-current)
 SOURCE SNAPSHOT: f96b7ccf90dede4150d0efa17264fff07ec12d0d; DESIGN BASIS: befe6782e7c8fe038bf7cb764646d133ca167855
 PROTOCOL 6.1 HISTORICAL COMPLETION/RECOVERY: SATISFIED
 PROTOCOL 6.2 COMPLETION/QUALIFICATION/RECOVERY PREREQUISITE: SATISFIED
@@ -234,7 +234,7 @@ PROTOCOL 6.6 COMPLETION/REVIEW/RATIFICATION/RECOVERY PREREQUISITE: SATISFIED
 PROTOCOL 6.6 INHERITANCE/REASSESSMENT INPUT: CARRIED in SSDS 8 handoff §18.1, §24; adequacy under independent D3 Review
 CURRENT PRE-CUTOVER FALLBACK/ROLLBACK BASELINE: Protocol 6.6 recovery 384666764da4c55b282e6b1595ab97e2f86e1dc4
 PROTOCOL 7 INHERITANCE: NOT FINAL — Protocol 7 closure is still active; prospective inputs only (handoff §19)
-INDEPENDENT D3 REVIEW: f9d9de8 NO-PASS (record above); design revision 2 READY for fresh independent falsification;
+INDEPENDENT D3 REVIEW: f9d9de8 NO-PASS and 441cf5c NO-PASS (records above); design revision 3 READY for fresh independent falsification;
   a PASS cannot authorize D4 before Protocol 7 reconsolidation (Phase A) and the SSDS 8 Architecture Manual (Phase C)
 SSDS 8 D4: NOT AUTHORIZED
 ```
