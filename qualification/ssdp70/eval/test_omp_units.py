@@ -1015,63 +1015,254 @@ class DiscoveryBaselineRefusal(unittest.TestCase):
 
 
 class OmpTranscriptConsistencyAndPruningTests(unittest.TestCase):
-    def test_omp_pruned_tool_result_admissible_relation(self):
-        m_valid = {
-            "role": "toolResult",
-            "toolCallId": "call-1",
-            "content": [{"type": "text", "text": "1:# Variant history\n2:data"}],
-        }
-        a_superseded = {
-            "role": "toolResult",
-            "toolCallId": "call-1",
-            "content": [{"type": "text", "text": "[Superseded by a newer read of this file]"}],
-            "prunedAt": 1790907334613,
-        }
-        self.assertTrue(omp._is_valid_omp_tool_result_pruning(m_valid, a_superseded))
+    def _sample_trajectory(self, first_path="variant_history.md", second_path="variant_history.md", first_tool="read"):
+        return [
+            {"role": "user", "content": [{"type": "text", "text": "start"}]},
+            {
+                "role": "assistant",
+                "stopReason": "toolUse",
+                "content": [{"type": "toolCall", "id": "call-1", "name": first_tool, "arguments": {"path": first_path}}],
+            },
+            {
+                "role": "toolResult",
+                "toolCallId": "call-1",
+                "toolName": first_tool,
+                "isError": False,
+                "details": {"lines": 2},
+                "timestamp": 1790907330000,
+                "content": [{"type": "text", "text": "1:# Variant history\n2:data"}],
+            },
+            {
+                "role": "assistant",
+                "stopReason": "toolUse",
+                "content": [{"type": "toolCall", "id": "call-2", "name": "read", "arguments": {"path": second_path}}],
+            },
+            {
+                "role": "toolResult",
+                "toolCallId": "call-2",
+                "toolName": "read",
+                "isError": False,
+                "details": {"lines": 2},
+                "timestamp": 1790907335000,
+                "content": [{"type": "text", "text": "1:# Variant history\n2:data"}],
+            },
+            {"role": "assistant", "stopReason": "stop", "content": [{"type": "text", "text": "done"}]},
+        ]
 
-        a_useless = {
-            "role": "toolResult",
-            "toolCallId": "call-1",
-            "content": [{"type": "text", "text": "[Uneventful result elided]"}],
-            "prunedAt": 1790907334613,
-        }
-        self.assertTrue(omp._is_valid_omp_tool_result_pruning(m_valid, a_useless))
+    def test_omp_pruned_at_strict_validation(self):
+        traj = self._sample_trajectory()
+        m_valid = copy.deepcopy(traj[2])
+        a_valid = copy.deepcopy(traj[2])
+        a_valid["content"] = [{"type": "text", "text": "[Superseded by a newer read of this file]"}]
+        a_valid["prunedAt"] = 1790907334613
 
-        # Content identical is not pruning
-        self.assertFalse(omp._is_valid_omp_tool_result_pruning(a_superseded, a_superseded))
+        # Positive integer is accepted
+        self.assertTrue(omp._is_valid_omp_tool_result_pruning(m_valid, a_valid, trajectory=traj))
 
-        # Missing prunedAt marker is not admissible pruning
-        a_no_marker = copy.deepcopy(a_superseded)
-        del a_no_marker["prunedAt"]
-        self.assertFalse(omp._is_valid_omp_tool_result_pruning(m_valid, a_no_marker))
+        # 0 rejected
+        a_zero = copy.deepcopy(a_valid)
+        a_zero["prunedAt"] = 0
+        self.assertFalse(omp._is_valid_omp_tool_result_pruning(m_valid, a_zero, trajectory=traj))
 
-        # Assistant role cannot be pruned with toolResult pruning notice
-        m_asst = {"role": "assistant", "toolCallId": "call-1", "content": [{"type": "text", "text": "foo"}]}
-        a_asst = {"role": "assistant", "toolCallId": "call-1", "content": [{"type": "text", "text": "[Superseded by a newer read of this file]"}], "prunedAt": 123}
-        self.assertFalse(omp._is_valid_omp_tool_result_pruning(m_asst, a_asst))
+        # Negative integers rejected
+        a_neg = copy.deepcopy(a_valid)
+        a_neg["prunedAt"] = -1
+        self.assertFalse(omp._is_valid_omp_tool_result_pruning(m_valid, a_neg, trajectory=traj))
+        a_neg["prunedAt"] = -100
+        self.assertFalse(omp._is_valid_omp_tool_result_pruning(m_valid, a_neg, trajectory=traj))
 
-        # Tool call ID mismatch cannot be reconciled
-        a_diff_call = copy.deepcopy(a_superseded)
+        # False and True explicitly rejected
+        a_bool_f = copy.deepcopy(a_valid)
+        a_bool_f["prunedAt"] = False
+        self.assertFalse(omp._is_valid_omp_tool_result_pruning(m_valid, a_bool_f, trajectory=traj))
+        a_bool_t = copy.deepcopy(a_valid)
+        a_bool_t["prunedAt"] = True
+        self.assertFalse(omp._is_valid_omp_tool_result_pruning(m_valid, a_bool_t, trajectory=traj))
+
+        # String rejected
+        a_str = copy.deepcopy(a_valid)
+        a_str["prunedAt"] = "1790907334613"
+        self.assertFalse(omp._is_valid_omp_tool_result_pruning(m_valid, a_str, trajectory=traj))
+        a_str["prunedAt"] = ""
+        self.assertFalse(omp._is_valid_omp_tool_result_pruning(m_valid, a_str, trajectory=traj))
+
+        # List/dict rejected
+        a_list = copy.deepcopy(a_valid)
+        a_list["prunedAt"] = [1790907334613]
+        self.assertFalse(omp._is_valid_omp_tool_result_pruning(m_valid, a_list, trajectory=traj))
+        a_dict = copy.deepcopy(a_valid)
+        a_dict["prunedAt"] = {"timestamp": 1790907334613}
+        self.assertFalse(omp._is_valid_omp_tool_result_pruning(m_valid, a_dict, trajectory=traj))
+
+        # Float rejected
+        a_float = copy.deepcopy(a_valid)
+        a_float["prunedAt"] = 1790907334613.5
+        self.assertFalse(omp._is_valid_omp_tool_result_pruning(m_valid, a_float, trajectory=traj))
+
+        # Missing prunedAt (None or deleted) rejected
+        a_none = copy.deepcopy(a_valid)
+        a_none["prunedAt"] = None
+        self.assertFalse(omp._is_valid_omp_tool_result_pruning(m_valid, a_none, trajectory=traj))
+        a_missing = copy.deepcopy(a_valid)
+        del a_missing["prunedAt"]
+        self.assertFalse(omp._is_valid_omp_tool_result_pruning(m_valid, a_missing, trajectory=traj))
+
+        # prunedAt in m_end rejected (raw event must not be marked pruned)
+        m_already_pruned = copy.deepcopy(m_valid)
+        m_already_pruned["prunedAt"] = 1790907334613
+        self.assertFalse(omp._is_valid_omp_tool_result_pruning(m_already_pruned, a_valid, trajectory=traj))
+
+    def test_omp_pruning_structurally_fail_closed(self):
+        traj = self._sample_trajectory()
+        m_valid = copy.deepcopy(traj[2])
+        a_valid = copy.deepcopy(traj[2])
+        a_valid["content"] = [{"type": "text", "text": "[Superseded by a newer read of this file]"}]
+        a_valid["prunedAt"] = 1790907334613
+
+        # Baseline is valid
+        self.assertTrue(omp._is_valid_omp_tool_result_pruning(m_valid, a_valid, trajectory=traj))
+
+        # Mutated toolName rejected
+        a_mut_tool = copy.deepcopy(a_valid)
+        a_mut_tool["toolName"] = "bash"
+        self.assertFalse(omp._is_valid_omp_tool_result_pruning(m_valid, a_mut_tool, trajectory=traj))
+
+        # Mutated isError rejected
+        a_mut_err = copy.deepcopy(a_valid)
+        a_mut_err["isError"] = True
+        self.assertFalse(omp._is_valid_omp_tool_result_pruning(m_valid, a_mut_err, trajectory=traj))
+
+        # Mutated timestamp rejected
+        a_mut_time = copy.deepcopy(a_valid)
+        a_mut_time["timestamp"] = 9999999999999
+        self.assertFalse(omp._is_valid_omp_tool_result_pruning(m_valid, a_mut_time, trajectory=traj))
+
+        # Mutated details rejected
+        a_mut_details = copy.deepcopy(a_valid)
+        a_mut_details["details"] = {"lines": 999}
+        self.assertFalse(omp._is_valid_omp_tool_result_pruning(m_valid, a_mut_details, trajectory=traj))
+
+        # Arbitrary added field in agent_end rejected
+        a_added = copy.deepcopy(a_valid)
+        a_added["rogue_field"] = "unexpected"
+        self.assertFalse(omp._is_valid_omp_tool_result_pruning(m_valid, a_added, trajectory=traj))
+
+        # Arbitrary removed field from agent_end rejected
+        a_removed = copy.deepcopy(a_valid)
+        del a_removed["details"]
+        self.assertFalse(omp._is_valid_omp_tool_result_pruning(m_valid, a_removed, trajectory=traj))
+
+        # Added field in message_end not present in agent_end rejected
+        m_added = copy.deepcopy(m_valid)
+        m_added["extra_m"] = "extra"
+        self.assertFalse(omp._is_valid_omp_tool_result_pruning(m_added, a_valid, trajectory=traj))
+
+        # Tool call ID mismatch rejected
+        a_diff_call = copy.deepcopy(a_valid)
         a_diff_call["toolCallId"] = "call-2"
-        self.assertFalse(omp._is_valid_omp_tool_result_pruning(m_valid, a_diff_call))
+        self.assertFalse(omp._is_valid_omp_tool_result_pruning(m_valid, a_diff_call, trajectory=traj))
 
-        # Arbitrary content mutation is rejected
-        a_corrupt = {
-            "role": "toolResult",
-            "toolCallId": "call-1",
-            "content": [{"type": "text", "text": "corrupted text"}],
-            "prunedAt": 1790907334613,
-        }
-        self.assertFalse(omp._is_valid_omp_tool_result_pruning(m_valid, a_corrupt))
+        # Content identical is not pruning (unpruned output was not retained in m_end)
+        self.assertFalse(omp._is_valid_omp_tool_result_pruning(a_valid, a_valid, trajectory=traj))
 
-        # Unknown notice is rejected
-        a_unknown = {
-            "role": "toolResult",
-            "toolCallId": "call-1",
-            "content": [{"type": "text", "text": "[Unknown pruning notice]"}],
-            "prunedAt": 1790907334613,
-        }
-        self.assertFalse(omp._is_valid_omp_tool_result_pruning(m_valid, a_unknown))
+        # Empty m_end content rejected
+        m_empty = copy.deepcopy(m_valid)
+        m_empty["content"] = []
+        self.assertFalse(omp._is_valid_omp_tool_result_pruning(m_empty, a_valid, trajectory=traj))
+
+        # Extra key inside a_end content part rejected
+        a_rogue_part = copy.deepcopy(a_valid)
+        a_rogue_part["content"] = [{"type": "text", "text": "[Superseded by a newer read of this file]", "rogue": 1}]
+        self.assertFalse(omp._is_valid_omp_tool_result_pruning(m_valid, a_rogue_part, trajectory=traj))
+
+        # Non-text content type in a_end rejected
+        a_bad_type = copy.deepcopy(a_valid)
+        a_bad_type["content"] = [{"type": "image", "text": "[Superseded by a newer read of this file]"}]
+        self.assertFalse(omp._is_valid_omp_tool_result_pruning(m_valid, a_bad_type, trajectory=traj))
+
+        # Multiple content parts in a_end rejected
+        a_multi_part = copy.deepcopy(a_valid)
+        a_multi_part["content"] = [
+            {"type": "text", "text": "[Superseded by a newer read of this file]"},
+            {"type": "text", "text": "extra"},
+        ]
+        self.assertFalse(omp._is_valid_omp_tool_result_pruning(m_valid, a_multi_part, trajectory=traj))
+
+        # Role mismatch rejected
+        m_asst = {"role": "assistant", "toolCallId": "call-1", "content": [{"type": "text", "text": "foo"}]}
+        a_asst = copy.deepcopy(a_valid)
+        a_asst["role"] = "assistant"
+        self.assertFalse(omp._is_valid_omp_tool_result_pruning(m_asst, a_asst, trajectory=traj))
+
+    def test_omp_pruning_authorizes_only_superseded_read_with_trajectory_evidence(self):
+        traj = self._sample_trajectory(first_path="variant_history.md", second_path="variant_history.md")
+        m_valid = copy.deepcopy(traj[2])
+        a_superseded = copy.deepcopy(traj[2])
+        a_superseded["content"] = [{"type": "text", "text": "[Superseded by a newer read of this file]"}]
+        a_superseded["prunedAt"] = 1790907334613
+
+        # Legitimate superseded read verified against trajectory
+        self.assertTrue(omp._is_valid_omp_tool_result_pruning(m_valid, a_superseded, trajectory=traj))
+
+        # Useless result notice ("[Uneventful result elided]") is unauthorized and rejected
+        a_useless = copy.deepcopy(a_superseded)
+        a_useless["content"] = [{"type": "text", "text": "[Uneventful result elided]"}]
+        self.assertFalse(omp._is_valid_omp_tool_result_pruning(m_valid, a_useless, trajectory=traj))
+
+        # Unknown notice rejected
+        a_unknown = copy.deepcopy(a_superseded)
+        a_unknown["content"] = [{"type": "text", "text": "[Unknown pruning notice]"}]
+        self.assertFalse(omp._is_valid_omp_tool_result_pruning(m_valid, a_unknown, trajectory=traj))
+
+        # Ineligible tool: bash tool call cannot be superseded-read pruned
+        traj_bash = self._sample_trajectory(first_tool="bash")
+        m_bash = copy.deepcopy(traj_bash[2])
+        a_bash = copy.deepcopy(traj_bash[2])
+        a_bash["content"] = [{"type": "text", "text": "[Superseded by a newer read of this file]"}]
+        a_bash["prunedAt"] = 1790907334613
+        self.assertFalse(omp._is_valid_omp_tool_result_pruning(m_bash, a_bash, trajectory=traj_bash))
+
+        # Ineligible trajectory: file was read only once (second read was a different file)
+        traj_diff = self._sample_trajectory(first_path="file_a.txt", second_path="file_b.txt")
+        m_diff = copy.deepcopy(traj_diff[2])
+        a_diff = copy.deepcopy(traj_diff[2])
+        a_diff["content"] = [{"type": "text", "text": "[Superseded by a newer read of this file]"}]
+        a_diff["prunedAt"] = 1790907334613
+        self.assertFalse(omp._is_valid_omp_tool_result_pruning(m_diff, a_diff, trajectory=traj_diff))
+
+        # Ineligible: attempting to prune the latest read of the file (call-2 has no subsequent read)
+        m_latest = copy.deepcopy(traj[4])
+        a_latest = copy.deepcopy(traj[4])
+        a_latest["content"] = [{"type": "text", "text": "[Superseded by a newer read of this file]"}]
+        a_latest["prunedAt"] = 1790907334613
+        self.assertFalse(omp._is_valid_omp_tool_result_pruning(m_latest, a_latest, trajectory=traj))
+
+        # Missing / None / empty trajectory cannot prove native eligibility
+        self.assertFalse(omp._is_valid_omp_tool_result_pruning(m_valid, a_superseded, trajectory=None))
+        self.assertFalse(omp._is_valid_omp_tool_result_pruning(m_valid, a_superseded, trajectory=[]))
+
+        # Ungrounded toolCallId not in trajectory
+        m_ungrounded = copy.deepcopy(m_valid)
+        m_ungrounded["toolCallId"] = "call-unknown"
+        a_ungrounded = copy.deepcopy(a_superseded)
+        a_ungrounded["toolCallId"] = "call-unknown"
+        self.assertFalse(omp._is_valid_omp_tool_result_pruning(m_ungrounded, a_ungrounded, trajectory=traj))
+
+        # Protected URL schemes (skill://) cannot be superseded
+        traj_skill = self._sample_trajectory(first_path="skill://foo", second_path="skill://foo")
+        m_skill = copy.deepcopy(traj_skill[2])
+        a_skill = copy.deepcopy(traj_skill[2])
+        a_skill["content"] = [{"type": "text", "text": "[Superseded by a newer read of this file]"}]
+        a_skill["prunedAt"] = 1790907334613
+        self.assertFalse(omp._is_valid_omp_tool_result_pruning(m_skill, a_skill, trajectory=traj_skill))
+
+        # Selector handling: first read has selector (e.g. #29E3), second read does not
+        traj_sel = self._sample_trajectory(first_path="variant_history.md#29E3", second_path="variant_history.md")
+        m_sel = copy.deepcopy(traj_sel[2])
+        a_sel = copy.deepcopy(traj_sel[2])
+        a_sel["content"] = [{"type": "text", "text": "[Superseded by a newer read of this file]"}]
+        a_sel["prunedAt"] = 1790907334613
+        self.assertTrue(omp._is_valid_omp_tool_result_pruning(m_sel, a_sel, trajectory=traj_sel))
 
     def _make_trace(self, messages, agent_end_messages=None):
         lines = [
@@ -1087,8 +1278,10 @@ class OmpTranscriptConsistencyAndPruningTests(unittest.TestCase):
     def test_reproduced_superseded_read_transcript_discrepancy_resolved(self):
         m_end_msgs = [
             {"role": "user", "content": [{"type": "text", "text": "start"}]},
-            {"role": "assistant", "stopReason": "toolUse", "content": [{"type": "toolCall", "id": "call-1", "name": "read", "arguments": {"path": "v.md"}}]},
+            {"role": "assistant", "stopReason": "toolUse", "content": [{"type": "toolCall", "id": "call-1", "name": "read", "arguments": {"path": "v.md#1"}}]},
             {"role": "toolResult", "toolCallId": "call-1", "content": [{"type": "text", "text": "[v.md#1]\ncontent"}]},
+            {"role": "assistant", "stopReason": "toolUse", "content": [{"type": "toolCall", "id": "call-2", "name": "read", "arguments": {"path": "v.md"}}]},
+            {"role": "toolResult", "toolCallId": "call-2", "content": [{"type": "text", "text": "full content"}]},
             {"role": "assistant", "stopReason": "stop", "content": [{"type": "text", "text": "done"}]},
         ]
         a_end_msgs = copy.deepcopy(m_end_msgs)
@@ -1099,6 +1292,55 @@ class OmpTranscriptConsistencyAndPruningTests(unittest.TestCase):
         events, mapping, errors, count = omp.normalize(trace, "run-1", {})
         transcript_errors = [e for e in errors if "agent_end" in e or "transcript" in e]
         self.assertEqual(transcript_errors, [])
+
+    def test_normalize_rejects_ineligible_pruning_with_content_mismatch(self):
+        # 1. Single read (ineligible for pruning because never read again)
+        single_read_msgs = [
+            {"role": "user", "content": [{"type": "text", "text": "start"}]},
+            {"role": "assistant", "stopReason": "toolUse", "content": [{"type": "toolCall", "id": "call-1", "name": "read", "arguments": {"path": "v.md"}}]},
+            {"role": "toolResult", "toolCallId": "call-1", "content": [{"type": "text", "text": "[v.md#1]\ncontent"}]},
+            {"role": "assistant", "stopReason": "stop", "content": [{"type": "text", "text": "done"}]},
+        ]
+        a_ineligible = copy.deepcopy(single_read_msgs)
+        a_ineligible[2]["content"] = [{"type": "text", "text": "[Superseded by a newer read of this file]"}]
+        a_ineligible[2]["prunedAt"] = 1790907334613
+        trace = self._make_trace(single_read_msgs, a_ineligible)
+        _, _, errors, _ = omp.normalize(trace, "run-1", {})
+        self.assertTrue(any("content mismatch" in e for e in errors))
+
+        # 2. Unauthorized pruning notice: [Uneventful result elided]
+        multi_read_msgs = [
+            {"role": "user", "content": [{"type": "text", "text": "start"}]},
+            {"role": "assistant", "stopReason": "toolUse", "content": [{"type": "toolCall", "id": "call-1", "name": "read", "arguments": {"path": "v.md"}}]},
+            {"role": "toolResult", "toolCallId": "call-1", "content": [{"type": "text", "text": "[v.md#1]\ncontent"}]},
+            {"role": "assistant", "stopReason": "toolUse", "content": [{"type": "toolCall", "id": "call-2", "name": "read", "arguments": {"path": "v.md"}}]},
+            {"role": "toolResult", "toolCallId": "call-2", "content": [{"type": "text", "text": "full content"}]},
+            {"role": "assistant", "stopReason": "stop", "content": [{"type": "text", "text": "done"}]},
+        ]
+        a_useless = copy.deepcopy(multi_read_msgs)
+        a_useless[2]["content"] = [{"type": "text", "text": "[Uneventful result elided]"}]
+        a_useless[2]["prunedAt"] = 1790907334613
+        trace = self._make_trace(multi_read_msgs, a_useless)
+        _, _, errors, _ = omp.normalize(trace, "run-1", {})
+        self.assertTrue(any("content mismatch" in e for e in errors))
+
+        # 3. Invalid prunedAt (bool / 0 / negative / string / list)
+        for bad_pruned in (False, True, 0, -10, "1790907334613", [123]):
+            a_bad = copy.deepcopy(multi_read_msgs)
+            a_bad[2]["content"] = [{"type": "text", "text": "[Superseded by a newer read of this file]"}]
+            a_bad[2]["prunedAt"] = bad_pruned
+            trace = self._make_trace(multi_read_msgs, a_bad)
+            _, _, errors, _ = omp.normalize(trace, "run-1", {})
+            self.assertTrue(any("content mismatch" in e for e in errors), f"expected content mismatch for prunedAt={bad_pruned!r}")
+
+        # 4. Extra key added to agent_end pruned toolResult
+        a_extra = copy.deepcopy(multi_read_msgs)
+        a_extra[2]["content"] = [{"type": "text", "text": "[Superseded by a newer read of this file]"}]
+        a_extra[2]["prunedAt"] = 1790907334613
+        a_extra[2]["unauthorized_field"] = "bad"
+        trace = self._make_trace(multi_read_msgs, a_extra)
+        _, _, errors, _ = omp.normalize(trace, "run-1", {})
+        self.assertTrue(any("content mismatch" in e for e in errors))
 
     def test_transcript_consistency_rejects_corruptions_with_cause_neutral_diagnostics(self):
         base_msgs = [
