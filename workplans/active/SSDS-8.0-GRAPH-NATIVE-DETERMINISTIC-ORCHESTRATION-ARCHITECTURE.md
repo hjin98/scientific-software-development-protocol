@@ -6,15 +6,16 @@ target_system_version: 8.0.0
 status: proposed
 created_date: 2026-10-01
 revised_date: 2026-10-01
-design_revision: 3
+design_revision: 4
 source_branch_basis: f96b7ccf90dede4150d0efa17264fff07ec12d0d
 source_branch: ssdp-7.0-scientific-epistemic-closure
 design_basis: befe6782e7c8fe038bf7cb764646d133ca167855
-prior_review: qualification/ssds80/WORKPLAN-REVIEW-SSDS-8.0-441CF5C-NO-PASS.md
-prior_reviewed_candidate: 441cf5c4cce0428b44c6d3e15db697b0b4f6262c
+prior_review: qualification/ssds80/WORKPLAN-REVIEW-SSDS-8.0-8A75346-NO-PASS.md
+prior_reviewed_candidate: 8a75346892852a719df41d7ba6f296bb376fe9cf
 review_history:
   - qualification/ssds80/WORKPLAN-REVIEW-SSDS-8.0-F9D9DE8-NO-PASS.md
   - qualification/ssds80/WORKPLAN-REVIEW-SSDS-8.0-441CF5C-NO-PASS.md
+  - qualification/ssds80/WORKPLAN-REVIEW-SSDS-8.0-8A75346-NO-PASS.md
 design_review_state: pending-fresh-independent-d3-review
 d3_architecture_state: proposed
 implementation_handoff: not-authorized
@@ -33,32 +34,60 @@ The workplan ID keeps the historical `GRAPH-NATIVE` lexeme for routing stability
 ```text
 GOVERNING DESIGN PROTOCOL: SSDP 6.6.0 (accepted-current; identities owned by PROTOCOL-RELEASE-STATE.yaml)
 TARGET: SSDS 8.0.0, the system-level successor to the document-controlled SSDP line
-THIS FILE: single current prospective SSDS 8 architecture handoff, design revision 3; proposed, not accepted-current;
+THIS FILE: single current prospective SSDS 8 architecture handoff, design revision 4; proposed, not accepted-current;
            not an Architecture Manual
 PRIOR REVIEWS: f9d9de8 NO-PASS (qualification/ssds80/WORKPLAN-REVIEW-SSDS-8.0-F9D9DE8-NO-PASS.md), repaired by revision 2;
-           441cf5c NO-PASS, three blockers A-C and findings N6-N10
-           (qualification/ssds80/WORKPLAN-REVIEW-SSDS-8.0-441CF5C-NO-PASS.md), repaired here at their owners (§0.1)
+           441cf5c NO-PASS (qualification/ssds80/WORKPLAN-REVIEW-SSDS-8.0-441CF5C-NO-PASS.md), repaired by revision 3;
+           8a75346 NO-PASS, two blockers A-B and findings N1-N5
+           (qualification/ssds80/WORKPLAN-REVIEW-SSDS-8.0-8A75346-NO-PASS.md), repaired here at their owners (§0.1)
 SUPERSEDES: the consolidated Protocol 8 plan (archived byte-identically, with its nine-file lineage)
             and the befe678 graph-native hypothesis (archived byte-identically as ...-BEFE678-HYPOTHESIS.md)
 SERIOUS CHALLENGE: NONE (§1.3 records why the governing goals are judged consistent)
 PROTOCOL 7: active closure; inheritance NOT FINAL; §19 lists prospective inputs only
-INDEPENDENT D3 REVIEW: ready for a fresh independent falsification Review of design revision 3; this revision is
+INDEPENDENT D3 REVIEW: ready for a fresh independent falsification Review of design revision 4; this revision is
             refinement, not acceptance, and awards itself nothing;
             a PASS cannot authorize D4 before Phase A (Protocol 7 reconsolidation) and Phase C (accepted Architecture Manual)
 SSDS 8 D4: NOT AUTHORIZED
 ```
 
-**What the architecture is.** Four primitives (§5): content-addressed **units** (leaf regions grouped into acceptance **subjects**), typed **relations**, immutable **records** in one append-only ledger, and the **basis** each record relied on. Everything else — validity, currency, obligations, readiness, impact, context, views — is a pure stratified derivation (§6.6). One Admission writer serializes every canonical change (§6.8). The ledger is a Git object chain on one authoritative ref, appended by single-ref compare-and-swap, admitted only once a witness quorum holds the new head, and published to the product integration ref as a reconciled effect (§15).
+**What the architecture is.** Four primitives (§5): content-addressed **units** (leaf regions grouped into acceptance **subjects**), typed **relations**, immutable **records** in one append-only ledger, and the **basis** each record relied on. Everything else — validity, currency, obligations, readiness, impact, context, views — is a pure stratified derivation (§6.6). One Admission writer serializes every canonical change (§6.8). The ledger is a Git object chain on one authoritative ref, appended by single-ref compare-and-swap, admitted only once a witness quorum holds the new head, and published to the product integration ref as an effect whose outcome the next entry records (§15.3). A known loss of admitted history is itself a ledger fact that bounds which retained authority can still be current (§15.4).
 
-**Three separations carry the design.** Each removes a class of failure rather than one example:
+**Four separations carry the design.** Each removes a class of failure rather than one example:
 
 | Separation | Rule | Failure class it makes impossible |
 |---|---|---|
 | observed repository state vs admitted governance state | content proposes; admitted records enact. Ruleset, structural roles, membership, scope and acceptance change only by admission (S11, §6.1) | authority, routing or acceptance arising from repository presence, foreign pushes, restores or merges |
 | definitional dependency vs warrant dependency | every relation type has a closed semantic role and cycle class; cycles are legal only among definitional edges inside a declared simultaneous-definition group (§6.2) | circular warrant, authority, evidence, provenance or lineage, inside or across subjects |
 | appended ledger state vs current-qualified state | an append is provisional until a witness quorum holds its exact head; only admitted state is ever asserted current (P4, §15.3-§15.4) | a historical prefix or an unwitnessed append presented as the current head |
+| retained history vs known-lost admitted history | abandoning admitted history is a recorded loss boundary; effects recorded before it that could only add support or relax a block are withheld after it until requalified or attested unaffected; restrictive effects survive (P5, §15.4) | authority, support or relief reviving across admitted history known to be lost, even when ledger and product are restored to the same stale snapshot |
 
-### 0.1 Revision 3: what changed and why
+### 0.1 Revision 4: what changed and why
+
+The 8a75346 Review returned NO-PASS with two blockers. Both were treated as falsification hypotheses and reconstructed independently from the accepted 6.6 owners at the public-source commit named by `PROTOCOL-RELEASE-STATE.yaml` (`22f4bdba…`), in particular the concurrency owner (publication and retry are idempotent or transactionally reconciled; completion is never inferred from ref presence) and the storage owner (recovery must distinguish current, stale and historical state and must not make an older state look current). Both were confirmed. Neither repair adopts the Review's suggested mechanism as stated; each was re-derived for the smallest abstraction that closes the whole failure family.
+
+| Finding | Verified against | Repair (earliest owner) |
+|---|---|---|
+| **A** a publication outcome could not legally enter the ledger | 6.6 concurrency owner; C3, C4. Revision 3 §15.3 required a recorded observation to resolve publication and forbade the append that would record it | **Successor-entry reconciliation.** Every entry records `obs`, the integration head Admission read immediately before appending it; for an admission `obs` is its base `B_n`. Admission entry `n` is the complete intent of its effect (`B_n -> C_n`). The first later entry carrying `obs` *is* the reconciliation: `PUBLISHED` or `OVERTAKEN` is a pure function of `(B_n, C_n, obs)` and immutable commits; `PENDING` means no such entry exists yet. The rule constrains the successor's *shape*, never requires a prior step: if `obs` is the expected head, the successor may be any entry, including the next ordinary admission; otherwise it must be an absorption of `obs` carrying no submitted records. No new state, record category, privileged path or extra entry in ordinary operation (§6.3, §6.6 S0, §6.8, §15.3) |
+| **B** coordinated stale restore plus `LEDGER_LOSS` revived pre-loss authority | 6.6 storage owner; 6.6 workflow owner (restoration promotes nothing). Confirmed for every variant the Review lists | **Loss boundary.** A human-gated `LEDGER_LOSS` names the retained head, every known abandoned head with its witnessed admission status, and its evidence, and re-establishes the global control facts the lost interval could have changed (witness model, trust roots, ruleset). Its position is a continuity boundary. An S1 predicate `cont` withholds every *permissive* effect recorded before it — record currentness in S2, and the force of dismissals, withdrawals and risk overrides — unless a post-boundary record requalifies it or an in-force continuity attestation holds it. Restrictive effects (challenges, upholdings, supersessions, tenure ends, degradations) survive. The predicate reads only ledger records, so a product tree that agrees with the stale ledger cannot defeat it. Abandoning a provably never-admitted entry creates no boundary (P5, §6.6 S1, §13, §15.4) |
+| N1 warrant validity inside one subject | 6.6 semantic-definition owner: acyclic warrant is legitimate; no self-support | Basis mode by subject boundary: prerequisites inside the record's own subject are `content`-mode, because the authored relation is part of that subject's accepted revision; `validity` only across subject boundaries (§6.4); positive discriminator (§22) |
+| N2 qualification did not discriminate A or B | DS-001 | §22 publication-reconciliation and known-loss failpoint groups, written after the owners were repaired |
+| N3 archived Protocol 8 §36 row missing | archived consolidated plan §36 (and §38, also unrowed) | §18.1 rows added; no mechanism |
+| N4 Manual deferrals acceptable only while D4 stays gated | — | unchanged; D4 remains gated by Phases A and C |
+| N5 quorum inequality sound | — | re-verified after the repairs (§27.2) |
+
+**Where this revision departs from the Review's suggested repairs.**
+
+- *A.* The Review hypothesized a privileged reconciliation successor, appended while normal admissions are blocked. Taken literally that adds a second entry and a second quorum round to every publishing admission, plus a special path. The derivation here shows the missing piece was not a state or a path but a *carrier*: Admission already reads the integration head to set `B`, so recording that read on every entry lets the next ordinary admission carry its predecessor's outcome. A dedicated entry appears only when the ref moved (the absorption that was always required) or to record an outcome while idle. The separate "publication outcome" and "live-ref movement" observations collapse into that one field. The Git ABA case (a foreign reset to exactly `B_n` after a successful compare-and-swap) is handled explicitly.
+- *B.* The Review suggested a recovery epoch. No identifier is added: the `LEDGER_LOSS` position is the boundary. A tenure restart was rejected because tenure scopes only acceptance and would miss dismissals, evidence, completeness, equivalence, imports and consultations; a new ledger lineage was rejected as maximal disruption with the same requalification. The default reset is global because nothing mechanical can prove a retained effect unaffected; narrowing is an accountable, challengeable judgment, never an inference from product/ledger agreement.
+
+**Defects found by this revision's own pass (§27.1) and repaired:**
+
+- *S1 upholding defect.* `in_force` ignored upheld challenges: upholding a challenge against a dismissal closed the challenge and so silently re-enabled the dismissal, contradicting the stated "restores the block". An upheld challenge now removes its target's force permanently (§6.6 S1).
+- *Re-routed support edges.* A structural change that alters `subj` changes the endpoints of existing `validity` entries; Admission step 5 now recomputes those edges before the acyclicity check (§6.8).
+- *"Survives nowhere, never admitted".* Revision 3 inferred non-admission from absence of copies. An entry is admitted iff `q_a` witnesses held it; non-admission is now decided by a witness-count bound, and an entry that may have been admitted is a loss (§15.4).
+- *Quarantine as loss defense.* Revision 3 described quarantine as what stops a truncated history reviving an acceptance. Quarantine only detects disagreement between product and ledger; the boundary is the defense, and quarantine is additional when the product is newer (§13).
+
+#### Revision 3 (prior) record
 
 The 441cf5c Review returned NO-PASS with three blockers. Each was treated as a falsification hypothesis, not as authority, and was reconstructed independently from the accepted 6.6 owners at the public-source commit named by `PROTOCOL-RELEASE-STATE.yaml` (`22f4bdba…`; the branch's evolving `source/` was not used as 6.6 authority). All three were confirmed. In each case the repair adopted here is stronger than the Review's minimum, and the out-of-matrix pass (§27) found and closed three further defects of the same families.
 
@@ -76,7 +105,7 @@ The 441cf5c Review returned NO-PASS with three blockers. Each was treated as a f
 **Where the repair exceeds the Review's minimum.**
 
 - *A.* The Review asked for a semantic-role field. This revision also makes simultaneity itself semantic content, so declaring an SDG needs acceptance. It puts legality in S0, so a ruleset reclassification or an absorbed violation fails closed in validity, not only at Admission. It rejects self-relations, so single-object recursion stays the unit's own content.
-- *B.* Of the Review's two options, this revision takes the observed/effective separation. It is the same rule already used for the ruleset (content proposes, an adoption record enacts), it adds no store (`Σ` is derived from the ledger), and it makes quarantine a lower-stratum fact by construction. It adds the tenure lifecycle the Review asked for. It also closes two paths the Review did not name: re-scoping a challenged *destination* subject, and an acceptance revived by `LEDGER_LOSS` truncation (§27.1).
+- *B.* Of the Review's two options, this revision takes the observed/effective separation. It is the same rule already used for the ruleset (content proposes, an adoption record enacts), it adds no store (`Σ` is derived from the ledger), and it makes quarantine a lower-stratum fact by construction. It adds the tenure lifecycle the Review asked for. It also closes two paths the Review did not name: re-scoping a challenged *destination* subject, and an acceptance revived by `LEDGER_LOSS` truncation (§27.3; that quarantine-based defense proved partial and is superseded by the revision-4 loss boundary).
 - *C.* "Synchronous" anchoring alone is not enough: a fresh clone that reaches only witnesses lacking the newest checkpoint would still accept the older head. This revision therefore makes read/write quorum intersection part of the contract (`q_a + r > N + f`). It withdraws the multi-ref publication optimization, which published before anchoring. It adds lineage-retirement checkpoints, so a purged lineage cannot be presented as current from a stale mirror (§15.5).
 
 #### Revision 2 (prior) record
@@ -151,7 +180,7 @@ Three residual limitations are real but not contradictions:
 
 - Semantic dependencies an agent uses without the machinery observing them cannot be captured by any read-set scheme (§8.4).
 - Circular reasoning stated only in prose, without declared relations, can be found only by semantic review (§6.2).
-- No architecture can infer the existence of a state whose every copy and checkpoint has been destroyed. SSDS therefore asserts currentness only for durably witnessed state, under a declared witness model (§15.4).
+- No architecture can infer the existence of a state whose every copy and checkpoint has been destroyed, or reconstruct the content of admitted history known to be lost. SSDS therefore asserts currentness only for durably witnessed state, under a declared witness model, and makes a known loss a boundary that retained authority cannot silently cross (§15.4).
 
 The design bounds and discloses each; none weakens a stated invariant. No Serious Challenge is raised.
 
@@ -197,6 +226,7 @@ Source tags: **[6.6]** accepted-current SSDP doctrine; **[P8]** consolidated Pro
 - **P2** Historical decisions are never recomputed under newer rules, resources or interpretations. [P8]
 - **P3** Derived state is rebuildable; canonical records win any disagreement. [P8]
 - **P4** Currentness is asserted only for durably witnessed state. A ledger head is *current-qualified* only when a witness quorum holds its exact identity and it extends every checkpoint and high-water mark the evaluator observes, and every current-state assertion names its qualified head. A valid historical prefix, an appended-but-unadmitted entry and an unverifiable head are never presented as current. Rollback, fork, loss, provisional and unqualified states are distinguished and fail closed. The guarantee is exact under the declared witness model (§15.4); there is no lag window. [6.6 storage/concurrency/security owners + P8 §15.2]
+- **P5** Known loss of admitted history is a continuity boundary. Restoring an older state — of the ledger, the product or both — never makes authority current across admitted history known to have existed and to be unrecoverable. After the loss is recorded, every effect recorded before it that could only add support or relax a block is withheld until requalified after it, or held unaffected by an accountable, challengeable human attestation; restrictive effects survive. Abandoning entries provably never admitted creates no boundary and costs no requalification. [6.6 storage owner: recovery must not make older state appear current; 6.6 workflow owner: restoration promotes nothing; derived from P4, S11]
 
 ### 2.5 Agent interface and context
 
@@ -293,7 +323,7 @@ Comparison of the serious candidates (H0, H1+H2+H3 hybrid):
          Derivation Engine  <-------------------  Admission  ---- sole ledger writer -----+
    S0 observed content · effective structure ·  validate · append (single-ref CAS) ·     |
    S1 challenges · S2 support ·                 anchor (witness quorum) · publish        |
-   S3 obligations, readiness, impact, context   (reconciled effects)                     v
+   S3 obligations, readiness, impact, context   (outcome: next entry)                    v
           |            |                               Ledger Store: Git object chain on one authoritative
    Content Model    Analyzers                          ref; verification; current-head qualification
    observed declarations  derived relations             (quorum checkpoints, high-water marks)
@@ -422,12 +452,12 @@ The **ledger** is the single canonical store of everything that cannot be derive
 | Record kind | Produced by | Examples |
 |---|---|---|
 | **Judgment** (support tier) | agent, human, or semantic-role tool | acceptance; conformance; equivalence; completeness; evidence assessment; plan acceptance; intake classification and disposition, including adoption of a quarantined structural delta; legacy or external acceptance import; reconstruction proposal |
-| **Judgment** (challenge tier) | qualified actors per policy | finding or challenge (blocking or not); Serious Challenge; adjudication; withdrawal; risk override |
-| **Observation** | machinery | evidence realization from a trusted runner (§10); publication outcome; live-ref movement and other foreign-change detection; consultation of an external ledger's qualified head (§11.4); analyzer output recorded because the analyzer is nondeterministic or expensive; artifact availability |
-| **Admission** | Admission only | accept or reject of an admission request with reason codes, validated basis, ruleset version, request identity, base commit, resulting admitted (merged) commit and adopted structural deltas; absorption of an observed tree |
-| **Lifecycle** | Admission, human-gated where required | genesis (project identity, ledger location, authoritative replica, trust roots, witness set and quorums, initial effective structure); ruleset adoption; schema migration; governance-mode transition; project fork; replica redesignation; witness-set redesignation; ledger loss; ledger fork resolution; confidentiality-incident lineage migration and old-lineage retirement; redaction notice |
+| **Judgment** (challenge tier) | qualified actors per policy | finding or challenge (blocking or not); Serious Challenge; adjudication; withdrawal; risk override; continuity attestation after a loss boundary (human-gated, §15.4) |
+| **Observation** | machinery | evidence realization from a trusted runner (§10); consultation of an external ledger's qualified head (§11.4); analyzer output recorded because the analyzer is nondeterministic or expensive; artifact availability |
+| **Admission** | Admission only | accept or reject of an admission request with reason codes, validated basis, ruleset version, request identity, base commit (its `obs`), resulting admitted (merged) commit and adopted structural deltas; absorption of an observed integration head (§15.3) |
+| **Lifecycle** | Admission, human-gated where required | genesis (project identity, ledger location, authoritative replica, trust roots, witness set and quorums, initial effective structure, baseline commit); ruleset adoption; schema migration; governance-mode transition; project fork; replica redesignation; witness-set redesignation; ledger loss (a continuity boundary, §15.4); ledger fork resolution; confidentiality-incident lineage migration and old-lineage retirement; redaction notice |
 
-Every record enters through Admission. A ledger entry is *provisional* when appended and *admitted* once a witness quorum holds its head (§15.3); a judgment is *recorded* when its entry is admitted; whether it is *current* is derived (§6.6). Rejections are recorded too, so provenance includes what was refused and why.
+Every record enters through Admission. A ledger entry is *provisional* when appended and *admitted* once a witness quorum holds its head (§15.3); a judgment is *recorded* when its entry is admitted; whether it is *current* is derived (§6.6). Rejections are recorded too, so provenance includes what was refused and why. Every entry except a human-gated recovery lifecycle entry also records `obs`, the live integration head Admission read immediately before appending it. That one field is how publication outcomes and foreign movement of the integration ref enter canonical history (§15.3); no separate publication-outcome or live-ref observation kind exists.
 
 The ledger holds only what derivation consumes or audit requires. Purely operational facts — task issue, reservations, leases, worktree creation, agent launch, retries — live in the Dispatcher's durable operator journal under the same intent -> effect -> observed-outcome discipline (C4). They influence scheduling, never derived workflow state. Execution provenance that matters for audit (route, harness, model, attempt) travels inside submitted records.
 
@@ -437,10 +467,12 @@ A **basis entry** is `(mode, target, consumption class)`. The mode is fixed by t
 
 | Mode | Target | Satisfied when (§6.6) | Used for |
 |---|---|---|---|
-| `content` | unit revision `(u, r)` | `cur(u) = r`, or an equivalence path from `r` to `cur(u)` for the entry's consumption class | everything the actor saw: the judged revision, context supplied or read, change base, content behind evidence |
-| `validity` | unit revision `(u, r)` | the content condition holds and `subj(u)` is valid | **direct** governing or warrant prerequisites only, as the rule names them by relation role; never a `NEUTRAL` relation (§6.2) |
+| `content` | unit revision `(u, r)` | `cur(u) = r`, or an equivalence path from `r` to `cur(u)` for the entry's consumption class | everything the actor saw: the judged revision, context supplied or read, change base, content behind evidence; governing or warrant prerequisites inside the record's own subject (below) |
+| `validity` | unit revision `(u, r)` | the content condition holds and `subj(u)` is valid | **direct** governing or warrant prerequisites in **another** acceptance subject only, as the rule names them by relation role; never a `NEUTRAL` relation (§6.2) |
 | `record` | an earlier record `x` | `x` is current | premises that are themselves judgments: completeness, evidence realization/assessment, plan acceptance |
 | `identity` | a record, or `(subject, scope_id, rev)` | always (immutable fact) | targets of challenge-tier records and supersession; equivalence endpoints |
+
+**Mode by subject boundary.** Let `S_x` be the subject of a record's target: the subject itself for an acceptance, `subj(u)` for a judgment about part `u`. A governing or warrant prerequisite `v` with `subj(v) ≠ S_x` gets a `validity` entry where the rule requires validity. A prerequisite with `subj(v) = S_x` gets a `content` entry. The authored relation that makes `v` a prerequisite — for example `b DERIVED_FROM a` between parts of subject `G` — is a semantic declaration inside `S_x`'s scope, so `S_x`'s own acceptance already covers it, and any edit to `v` changes both `rev(v)` and `rev(S_x)`. A record therefore never holds a `validity` entry on its own subject. This gives the required properties together: no acceptance supports itself, because no edge runs from `S_x`'s support to `valid(S_x)`; no warrant is circular, because warrant relations are acyclic inside and across subjects (§6.2); an edit to the relied-on part makes the record stale through its `content` entry; and an `EQUIVALENCE` judgment on that part for the record's consumption class restores it without re-review (early cutoff, §6.7). Modes are fixed at admission. If a part is later promoted, records admitted earlier keep their `content` entries, which stay exactly as strong, because the former subject's frozen scope still covers the promoted bytes (§12.2); records admitted afterwards use `validity` on the new subject.
 
 Transitive governing authority is reached through the validity of direct prerequisites, not listed separately; this is what makes early cutoff predictable (§6.7). A unit the actor actually saw also gets a `content` entry, so backdating reaches a record only through units it did not see. A rule may declare consumption classes that let an `EQUIVALENCE` judgment cover a `content` entry; the default class is exact.
 
@@ -501,7 +533,9 @@ Derivation has four strata. A stratum reads only lower strata. Within S1 and S2 
 **S0 — observed content, effective structure and ledger syntax.**
 
 - *Ruleset in force* `ρ_n`, including the relation vocabulary of §6.2: the latest admitted `RULESET_ADOPTION` record at or before `n`, naming an exact system ruleset version and an exact policy content hash.
-- *Observed tree* `T_n`: named by the latest admission or absorption record.
+- *Expected integration head and observed tree.* `E_n` is the integration commit governance evaluates at `n`: genesis's baseline commit; `C_k` after an admission `k` (`C_k = B_k` for a records-only request); `obs_k` after an absorption `k`; unchanged after any other entry. The observed tree is `T_n = tree(E_n)`. For a publishing admission that is its admitted merged tree from its own position onward, before any publication is observed.
+- *Publication classification* (§15.3). For an admission `k` with `C_k ≠ B_k`, `pub(k)` is `PENDING` while no later entry carries `obs`; otherwise it is `PUBLISHED` or `OVERTAKEN`, a function of `B_k`, `C_k`, the `obs` of the first later entry that carries one, and the immutable commits reachable from that `obs`.
+- *Loss boundaries and exposure* (§15.4). Every admitted `LEDGER_LOSS` record is a boundary at its own position. `exposed(x, X)`, for a record `x` before the boundary and a set `X` of subjects and records, holds if `x ∈ X`, `x` targets a subject or record in `X`, or `x` targets an exposed record; subjects are resolved in the effective structure at the boundary.
 - *Effective structure* `Σ_n`: the fold of admitted structural changes (§6.1, §6.8 step 4). From it come the units, leaves, composites, `scope_id`, `subj`, kind/domain, coverage and tenure `τ(s)`.
 - *Quarantine* `Q_n` and *affected subjects* `aff(Q_n)` (§6.1).
 - *Revisions:* `rev(u, T)` and `cur(u) = rev(u, T_n)`, over effective scopes resolved in the observed bytes.
@@ -510,11 +544,15 @@ Derivation has four strata. A stratum reads only lower strata. Within S1 and S2 
 
 Policy and structure follow one rule: **content proposes; admitted records enact.** The project policy unit is ordinary content, and an edit to it takes effect only through a human-gated adoption record that Admission validated under the previous ruleset. A structural declaration takes effect only through an admission that authored or adopted it. Derivation never reads a derived acceptance of policy or a derived validity of structure, so S0 depends on nothing above it.
 
-**S1 — challenge tier.** Records of kinds CHALLENGE (with `blocking` flag; Serious Challenge is always blocking), ADJUDICATION (target a challenge; outcome `UPHELD` or `DISMISSED`), WITHDRAWAL (target the raiser's own challenge) and RISK_OVERRIDE (target a challenge; declared continuation scope). A challenge may target a support-tier record, a subject revision `(s, scope_id, r)`, an adjudication or a risk override, never another challenge. Targets carry no tenure, so a challenge or revocation on a triple binds every tenure in which that triple recurs. A challenge raised against a part targets its subject's current revision and records the part as its locus. To contest a challenge, a qualified actor requests adjudication. Every target is strictly earlier in the ledger (Admission step 5).
+**S1 — challenge tier.** Records of kinds CHALLENGE (with `blocking` flag; Serious Challenge is always blocking), ADJUDICATION (target a challenge; outcome `UPHELD` or `DISMISSED`), WITHDRAWAL (target the raiser's own challenge), RISK_OVERRIDE (target a challenge; declared continuation scope) and CONTINUITY_ATTESTATION (target a `LEDGER_LOSS`; human-gated; names the retained scope it holds unaffected, §15.4). A challenge may target a support-tier record, a subject revision `(s, scope_id, r)`, an adjudication, a risk override or a continuity attestation, never another challenge. Targets carry no tenure, so a challenge or revocation on a triple binds every tenure in which that triple recurs. A challenge raised against a part targets its subject's current revision and records the part as its locus. To contest a challenge, a qualified actor requests adjudication. Every target is strictly earlier in the ledger (Admission step 5). A `DISMISSED` adjudication, a withdrawal, a risk override and a continuity attestation are **relaxers**: their only effect is to remove or soften a block or a withholding. An `UPHELD` adjudication is restrictive.
 
 ```text
-in_force(y), y ∈ ADJUDICATION ∪ WITHDRAWAL ∪ RISK_OVERRIDE
-                 ⇔ ¬∃ c ∈ CHALLENGE : c.target = y ∧ c.blocking ∧ open(c)
+held(x, b)       ⇔ ∃ a ∈ CONTINUITY_ATTESTATION : a.target = b ∧ in_force(a) ∧ a holds x   (§15.4)
+cont(x)          ⇔ ⋀ { held(x, b) : b a loss boundary with pos(x) < pos(b) }          -- T if there is none
+
+gate(y)          = cont(y) if y is a relaxer;  T for an UPHELD adjudication
+in_force(y), y ∈ ADJUDICATION ∪ WITHDRAWAL ∪ RISK_OVERRIDE ∪ CONTINUITY_ATTESTATION
+                 ⇔ gate(y) ∧ ¬∃ c ∈ CHALLENGE : c.target = y ∧ (upheld(c) ∨ (c.blocking ∧ open(c)))
 open(c)          ⇔ ¬∃ y ∈ ADJUDICATION ∪ WITHDRAWAL : y.target = c ∧ in_force(y)
 upheld(c)        ⇔ ∃ a ∈ ADJUDICATION : a.target = c ∧ a.outcome = UPHELD ∧ in_force(a)
 overridden(c)    ⇔ open(c) ∧ ∃ o ∈ RISK_OVERRIDE : o.target = c ∧ in_force(o)
@@ -527,12 +565,15 @@ status1(z) = REVOKED      if ∃ c : c.target = z ∧ upheld(c)
              CLEAR        otherwise
 ```
 
-*Uniqueness.* Every right-hand side refers only to records whose position is strictly greater than the record on the left (a resolver is later than what it resolves; a challenge is later than its target). The definitions are therefore a recursion on a finite, strictly increasing chain of positions, evaluated once in decreasing ledger order. Each value is unique even though negation appears; no negative cycle can exist. Non-blocking challenges have no S1 effect; they create S3 obligations. Effects are conservative in both directions. A challenge against a dismissal restores the original block. A challenge against an override or an upholding adjudication suspends it.
+*Uniqueness.* Every right-hand side refers only to records whose position is strictly greater than the record on the left (a resolver is later than what it resolves; a challenge is later than its target; a loss boundary is later than every record it covers, and an attestation is later than its boundary). The definitions are therefore a recursion on a finite, strictly increasing chain of positions, evaluated once in decreasing ledger order. Each value is unique even though negation appears; no negative cycle can exist. Non-blocking challenges have no S1 effect while open; they create S3 obligations. Effects are conservative in both directions. An open blocking challenge against a dismissal restores the original block, and an upheld challenge against any relaxer removes its force permanently. A challenge against an override, an upholding adjudication or an attestation suspends it while open. Revision 3's `in_force` omitted the `upheld(c)` term, so upholding a challenge against a dismissal closed that challenge and re-enabled the dismissal; the term restores the stated semantics.
+
+*Loss boundary in S1.* `cont(x)` is false for a record admitted before a `LEDGER_LOSS` unless an in-force continuity attestation of that boundary holds it (§15.4). It gates exactly the permissive effects: a relaxer before the boundary loses force (`gate`), and a record before it cannot be current (S2 `base`). Challenges, `UPHELD` adjudications (so revocations), supersessions and every S0 fact are not gated; gating an upholding would turn a revocation back into a block or, for a non-blocking challenge, into `CLEAR`. With no `LEDGER_LOSS` in the ledger, `cont` is identically `T`.
 
 **S2 — support tier.** Values in the three-point lattice `F < P < T` (non-current/invalid < provisional < current/valid), with `∧ = min`, `∨ = max`, empty `∨ = F`, empty `∧ = T`. S0 and S1 are constants here.
 
 ```text
-base(z)  = F if superseded(z) or status1(z) ∈ {REVOKED, BLOCKED};  P if status1(z) = PROVISIONAL;  else T
+base(z)  = F if superseded(z) or status1(z) ∈ {REVOKED, BLOCKED} or ¬cont(z);  P if status1(z) = PROVISIONAL;  else T
+           (cont(z) = T for a subject-revision triple z)
 
 current(x)  = base(x) ∧ ⋀_{e ∈ basis(x)} sat(e)                         -- x a support-tier record
 
@@ -558,17 +599,17 @@ valid(part u) is not a variable: every use routes to valid(subj(u))
 
 The right-hand sides are built from `min` and `max` over S2 variables and constants, so the system is monotone on a finite lattice and has exactly one **least fixed point**. That fixed point is the S2 state. An ungrounded cycle evaluates to `F`: no acceptance can support itself. For the f9d9de8 review's counterexample (`current(j_a)` ← `valid(b)` ← `current(j_b)` ← `valid(a)` ← `current(j_a)`), the least fixed point is all-`F`, never all-`T`. The configuration is also inadmissible on two independent grounds. Mutual validity reliance between subjects is a support cycle (below). Mutual authored warrant between `a` and `b` is an illegal relation cycle (§6.2) whether or not `a` and `b` share a subject. The two checks are distinct because they guard different graphs: the support graph guards record currentness, and cycle legality guards declared semantic warrant (441cf5c Blocker A).
 
-`ok(s)` and `τ(s)` are how lower-stratum governance constrains S2 without reading S3. A subject touched by an unadmitted governance-affecting declaration, or carrying an illegal relation structure, cannot be valid. An acceptance from an earlier tenure cannot count. Both facts are syntactic functions of the ledger and the observed tree.
+`ok(s)`, `τ(s)` and `cont` are how lower-stratum governance constrains S2 without reading S3. A subject touched by an unadmitted governance-affecting declaration, or carrying an illegal relation structure, cannot be valid. An acceptance from an earlier tenure cannot count. A record from before a loss boundary cannot count unless held. All three are functions of the ledger and the observed tree; `cont` adds no S2 variable, no support edge and no fixed-point interaction.
 
 Admission maintains the stronger invariant that the **support dependency graph** is acyclic. Its nodes are `valid(s)` and `current(x)`. Its edges come from three sources: each basis entry; each subject to every acceptance, gate and assessment judgment naming it; and the static over-approximation of equivalence coverage, in which `x` depends on every equivalence judgment on `u` reachable from `r` for each `content` entry `(u, r)`. Edges change only when admitted records are added. Absorption adds none. A one-pass topological evaluation therefore computes the least fixed point. A cycle found at derivation can arise only from corrupted input; it still evaluates to `F` and raises an integrity obligation.
 
-**S3 — consequence tier.** Non-monotone functions of S0-S2 that nothing below reads: open obligations (including intake of each quarantined delta), discharge (§7.4), readiness (§7.3), blockers, drift (`cur(s)` differs from `acc(s)`, the latest revision with a passing acceptance judgment, which is a display view only), impact sets for hypothetical changes, context answers, briefs, graph, diff and history views, and integrity findings. Provisional values and risk-override scopes are interpreted here. S3 explains and schedules quarantine and ill-formedness; it never enforces them, because S2 already did.
+**S3 — consequence tier.** Non-monotone functions of S0-S2 that nothing below reads: open obligations (including intake of each quarantined delta, revalidation of each `OVERTAKEN` admission, and requalification of each record or relaxer withheld by a loss boundary that was in effect at the retained head), discharge (§7.4), readiness (§7.3), blockers, drift (`cur(s)` differs from `acc(s)`, the latest revision with a passing acceptance judgment, which is a display view only), impact sets for hypothetical changes, context answers, briefs, graph, diff and history views, and integrity findings. Provisional values and risk-override scopes are interpreted here. The requalification set is computed by comparing derivation at the retained head with derivation now; with no loss boundary it is empty. S3 explains and schedules quarantine and ill-formedness; it never enforces them, because S2 already did.
 
 **Determinism claim.** For every authenticated `(L_n, content)`, S0 is a function, S1 is a well-founded recursion, S2 is the unique least fixed point, and S3 is a function. `D_n` is therefore single-valued and independent of evaluation order, wall clock, live refs, witness reachability, operator state and search indexes (C2, C3, C8). Qualification is in §22.
 
 **Supersession and risk override.** Supersession is purely syntactic (S0). A superseded record never becomes current again, even if its superseder later goes stale. Supersession withdraws a record; it does not reverse its admitted history. A risk override never resolves a challenge. It turns `BLOCKED` into `PROVISIONAL` for the challenged target; `P` then propagates by `min`, and S3 permits provisional discharge only inside the override's declared scope. An upheld challenge on a subject revision revokes that revision permanently. Repair requires a new revision and acceptance, or a successful challenge to the upholding adjudication.
 
-**Analyzers** produce derived relations keyed by `(analyzer identity, version, configuration, input revisions)`. A deterministic analyzer's output is cache. A nondeterministic or expensive analyzer's output is recorded as an observation, so replay uses what was observed. **Caching** is memoization keyed by inputs. There is no dirty state, because nothing is cached without its content key. Incremental derivation must equal from-scratch derivation. **Integrity checks** run on every derivation: effective coverage partition, laminarity, single definer, relation cycle legality and vocabulary, support-graph acyclicity, the observed/effective structure comparison, and ledger authentication. Currentness qualification (§15.4) runs before any derivation is presented as current.
+**Analyzers** produce derived relations keyed by `(analyzer identity, version, configuration, input revisions)`. A deterministic analyzer's output is cache. A nondeterministic or expensive analyzer's output is recorded as an observation, so replay uses what was observed. **Caching** is memoization keyed by inputs. There is no dirty state, because nothing is cached without its content key. Incremental derivation must equal from-scratch derivation. **Integrity checks** run on every derivation: effective coverage partition, laminarity, single definer, relation cycle legality and vocabulary, support-graph acyclicity, the observed/effective structure comparison, the entry shape required by the integration observation (§15.3), and ledger authentication. Currentness qualification (§15.4) runs before any derivation is presented as current.
 
 ### 6.7 Early cutoff and equivalence
 
@@ -582,9 +623,9 @@ This one mechanism replaces epoch binding, plan-revision binding, context stalen
 
 An **admission request** is the typed result of `submit`. It contains: a request identity (idempotency key), the producing task and obligation(s) it claims, the base admitted position and base commit, candidate commit(s) on isolated refs (or none, for records-only requests such as a review, ratification or challenge of admitted content), any quarantined structural deltas it adopts, and the records it submits. The admission record that accepts or rejects it carries the request identity, the decision, reason codes, the admitted records and the resulting admitted commit. This is the complete identity and audit trail a change needs, so no separate change primitive exists. A repeated request identity returns the recorded decision.
 
-Admission is the **sole writer** of the ledger. Other actors can still move the integration ref: humans pushing to legacy scopes, an external merge button, a force-push, a restore from backup. Such movement carries no admitted status. It is observed and absorbed as a foreign change (§11). An absorption record sets the observed tree `T_n` and changes nothing else. Every touched unit whose content now differs from its accepted revision shows drift. Every structural declaration that differs from effective structure is quarantined. Production is never blocked by this; governance validity is.
+Admission is the **sole writer** of the ledger. Other actors can still move the integration ref: humans pushing to legacy scopes, an external merge button, a force-push, a restore from backup. Such movement carries no admitted status. Admission observes it before its next append and absorbs it as a foreign change (§11, §15.3). An absorption record sets the expected head `E` to the observed head, and so the observed tree `T_n`, and changes nothing else. Every touched unit whose content now differs from its accepted revision shows drift. Every structural declaration that differs from effective structure is quarantined. Production is never blocked by this; governance validity is.
 
-Admission validates, in order, and either appends or rejects with recorded reasons:
+Admission validates against the admitted head it holds, after reconciling the integration head (step 9, §15.3), in order, and either appends or rejects with recorded reasons:
 
 1. **schema** — records well-formed under the closed schema; bounded secret/sensitive-value checks (§15.5); unknown required semantics fail closed (C5);
 2. **reference** — every identity, revision, task, obligation and target exists and matches;
@@ -600,13 +641,13 @@ Admission validates, in order, and either appends or rejects with recorded reaso
      Authored and adopted changes are validated together: leaf coverage partition, laminar composites, scope conservation for refinement, promotion only with an acceptance in the same request (§12.2), no membership change that mixes governance modes without the mode-transition record (§12.1), SDG members never separated, and no change of a unit's kind or owning domain without a judgment by an actor qualified for its *current* domain (a unit never leaves its owner's authority by redeclaration). Admission never creates new quarantine, and repository presence never enters `Σ` except through an adopting disposition.
    - *(b) challenge freeze.* No change to the signature, scope, regions or membership of any subject is admitted, whether that subject would lose or gain units, while its current revision carries an unresolved blocking challenge (overridden or not) or is `REVOKED`. A challenge therefore cannot be escaped by re-scoping unchanged content at the source subject or at the destination subject.
    - *(c) semantic structure.* Known relation types of `ρ_n`, relation direction and layer order, cycle legality and the SDG rules (§6.2), and single definer;
-5. **dependency well-formedness** — challenge-tier targets strictly earlier and of permitted kinds; no `validity` entry naming the record's own subject or a part of it; after the request's edges are added (basis entries and equivalence coverage), the support dependency graph remains acyclic (§6.6);
+5. **dependency well-formedness** — challenge-tier targets strictly earlier and of permitted kinds; no `validity` entry naming the record's own subject or a part of it (prerequisites inside it are `content`-mode, §6.4); after the request's edges are added — basis entries, equivalence coverage, and the edges of existing records whose `validity` endpoints the request's structural changes re-route through `subj` — the support dependency graph remains acyclic (§6.6);
 6. **currency** — every basis entry of every submitted record is satisfied at the current admitted ledger head (optimistic concurrency; Admission holds that head by compare-and-swap, and it is admitted because at most one provisional entry exists, §15.3), except that entries naming content the request itself changes are checked against its merged tree; otherwise the request is classified stale and routed to revalidation rather than admitted;
 7. **legality** — each obligation the request claims exists and is undischarged at the current head (a duplicate discharge is rejected and recorded), and its discharge predicate (§7.4) holds after the request's own records, including affected evidence rerun on the merged tree;
 8. **no collateral regression** — every obligation discharged at the current head and affected by the merged tree stays discharged, with affected evidence rerun. The only legal way to reopen others' closures is an accepted change to a prerequisite authority, whose derived impact obligations are the intended consequence. A D4 change that breaks another closure is a regression and is not admitted;
-9. **commit and admit** — one ledger entry containing all records is appended by single-ref compare-and-swap (§15.3). The appended entry is *provisional*. It is *admitted* when a witness quorum holds its exact checkpoint (§15.4), and that is the commit point for every external effect. Only then is the request reported admitted, the integration ref published as a reconciled effect, work dispatched from the new state, and the next entry appended.
+9. **commit and admit** — Admission reads the live integration head `obs`. The request is appended only if `obs` is the head entry's expected head `E` (or an equivalent publication of it, §15.3); otherwise Admission first appends an absorption of `obs` and revalidates the request at the new head. One ledger entry carrying `obs` and all records is appended by single-ref compare-and-swap (§15.3); it also reconciles the publication of the previous admission if that was pending. The appended entry is *provisional*. It is *admitted* when a witness quorum holds its exact checkpoint (§15.4), and that is the commit point for every external effect. Only then is the request reported admitted, the integration ref published as an effect, work dispatched from the new state, and the next entry appended; the next entry records this publication's outcome.
 
-**Absorption** of a foreign change already on the integration ref records what happened, so it cannot be stale or illegal. It skips the validation steps and is itself appended and admitted like any entry. It sets the observed tree and changes nothing else: effective structure, ruleset and acceptance stay as admitted. Three things follow:
+**Absorption** of a foreign change already on the integration ref records what happened, so it cannot be stale or illegal. It skips the validation steps and is itself appended and admitted like any entry. It is a pure integration observation: its only content is `obs`, and an entry whose `obs` differs from the expected head must be an absorption carrying no submitted records (Admission rejects any other shape; derivation treats a violating entry as an integrity defect). It sets the observed tree and changes nothing else: effective structure, ruleset and acceptance stay as admitted. When the previous admission's publication is pending, the absorption is also its reconciliation (§15.3). Three things follow:
 
 - foreign structural declarations become quarantined deltas (§6.1);
 - foreign semantic content changes revisions, so acceptances and content reliance on it stop being current;
@@ -624,7 +665,7 @@ All three take effect in S0 and S2. The S3 obligations that follow — intake, d
 
 The befe678 WorkGraph conflated two different things.
 
-- **Derived obligations** follow from rules and state: a subject without a valid acceptance; a judgment no longer current; an evidence specification without a current admissible realization for its claim; an open challenge awaiting adjudication; a pending human gate; a foreign change awaiting intake, including each quarantined structural delta; a scope deviation awaiting disposition; an admitted change overtaken before publication (§15.3); an integrity finding. They are never authored; they appear and disappear as derivation changes (S3). Their deterministic identities are derived from `(rule, subject)`.
+- **Derived obligations** follow from rules and state: a subject without a valid acceptance; a judgment no longer current; an evidence specification without a current admissible realization for its claim; an open challenge awaiting adjudication; a pending human gate; a foreign change awaiting intake, including each quarantined structural delta; a scope deviation awaiting disposition; an admitted change overtaken before publication (§15.3); a record or relaxer withheld by a loss boundary and awaiting requalification (§15.4); an integrity finding. They are never authored; they appear and disappear as derivation changes (S3). Their deterministic identities are derived from `(rule, subject)`.
 - **Authored intents** carry creative direction: implement this, investigate that, migrate this region. They live in **change plans**: plan units (documents) whose sections are **items**. Each item has an objective, governing units, acceptance criteria, intended affected units, required gates and dependencies on other items or units.
 
 ### 7.2 Plan acceptance and local amendment
@@ -675,7 +716,7 @@ The impact a change triggers on *other* subjects is not a discharge condition: t
 
 ### 8.2 Optimistic admission (serializable by validation)
 
-Concurrent tasks work from recorded bases in isolated workspaces. Admission applies requests one at a time to the admitted head, as a merge queue. Speculative batching is delegated to D4 and must preserve this serial order. A request whose basis was overtaken is revalidated — rebased, re-derived, affected judgments re-requested. It is not rejected outright and never silently admitted. Two requests conflict when one modifies a unit or record in the other's basis. This catches write-skew among recorded reliances, including across disjoint files. A losing compare-and-swap between two Admission hosts is the same case.
+Concurrent tasks work from recorded bases in isolated workspaces. Admission applies requests one at a time to the admitted head, as a merge queue. Speculative batching is delegated to D4 and must preserve this serial order. A request whose basis was overtaken is revalidated — rebased, re-derived, affected judgments re-requested. It is not rejected outright and never silently admitted. Two requests conflict when one modifies a unit or record in the other's basis. This catches write-skew among recorded reliances, including across disjoint files. A losing compare-and-swap between two Admission hosts is the same case. So is a race between hosts reconciling one pending publication: the publication compare-and-swap is idempotent, and the ledger compare-and-swap admits exactly one reconciling successor (§15.3).
 
 A very late result whose basis is still current is admissible regardless of age; a fresh result with a stale basis is not. Lease expiry affects scheduling, never correctness.
 
@@ -699,7 +740,7 @@ The interface is defined independently of transport.
 | `ask(query)` | typed questions: what governs X; what X depends on / what depends on X (per relation class); explain a unit, record or obligation; evidence for a claim; why is this blocked or stale; impact of this workspace diff or proposed edit; text/semantic search; history of X (PEM-gated) |
 | `read(ref)` | content by unit identity or path; recorded into the basis |
 | `report(item)` | finding, challenge, Serious Challenge, proposed relation, question for a human, scope deviation, blocker |
-| `submit(result)` | outcome classification from the task's allowed set, plus the workspace. Machinery builds the typed admission request (§6.8): diff, touched units, changed authored relations, basis and derived consequences. The response is `ADMITTED` only after the entry is admitted (§15.3); before that it is `PROVISIONAL`, and an entry that is lost is resubmitted by request identity |
+| `submit(result)` | outcome classification from the task's allowed set, plus the workspace. Machinery builds the typed admission request (§6.8): diff, touched units, changed authored relations, basis and derived consequences. The response is `ADMITTED` only after the entry is admitted (§15.3); before that it is `PROVISIONAL`, and a provisional entry lost before admission is resubmitted by request identity (§15.4) |
 | `decide(gate)` | human only: a gate brief (§9.4) and an authenticated decision |
 
 Within a task, `ask` and `read` answer at the task's basis (snapshot isolation), so an agent never sees a mixture of states. `ask("what changed since my basis")` reports admitted changes that intersect the task, letting the agent stop early instead of discovering staleness at submission.
@@ -716,7 +757,7 @@ A task brief contains, in this order:
 4. constraints, non-goals and delegated space;
 5. acceptance criteria and required evidence;
 6. open challenges, findings and provisional states touching the subject;
-7. **incompleteness notices**: where the basis was widened or `UNBOUNDED`, where analyzers are incomplete, where relations are only proposed, where a relied-on unit is a part whose validity comes from a coarser subject, where the repository declares structure that governance has not admitted (quarantine), and the qualified ledger head the brief was derived at;
+7. **incompleteness notices**: where the basis was widened or `UNBOUNDED`, where analyzers are incomplete, where relations are only proposed, where a relied-on unit is a part whose validity comes from a coarser subject, where the repository declares structure that governance has not admitted (quarantine), where relied-on records are withheld by a loss boundary pending requalification, whether the head admission's publication outcome is not yet recorded, and the qualified ledger head the brief was derived at;
 8. workspace and submission instructions.
 
 It is rendered deterministically from derived state by version-bound templates; no model is needed to translate machine state.
@@ -734,7 +775,7 @@ Every context item is labeled:
 | `HISTORICAL` | PEM entries and Git history; offered only when the PEM predicate fires or on explicit request |
 | `CANDIDATE` | search or embedding hits and unaccepted proposals; never authority, never closure support |
 
-Each item also carries its acceptance status (valid, provisional, challenged, stale, drift, quarantined, ill-formed, unclassified) and its inclusion path. Every answer names the qualified ledger head it was derived at (§15.4); with no qualified head, answers are labeled historical (`UNQUALIFIED`) and claim no currentness. Answers are deterministic for identical basis, query and policy version. Search indexes record their versions, and nondeterministic search contributes only `CANDIDATE` items outside the determinism guarantee. A search hit can lead to a proposed relation, but never by itself to an accepted one.
+Each item also carries its acceptance status (valid, provisional, challenged, stale, drift, quarantined, ill-formed, loss-withheld, unclassified) and its inclusion path. Every answer names the qualified ledger head it was derived at (§15.4); with no qualified head, answers are labeled historical (`UNQUALIFIED`) and claim no currentness. Answers are deterministic for identical basis, query and policy version. Search indexes record their versions, and nondeterministic search contributes only `CANDIDATE` items outside the determinism guarantee. A search hit can lead to a proposed relation, but never by itself to an accepted one.
 
 ### 9.4 Human gates
 
@@ -765,7 +806,7 @@ Intake is not a separate engine. It is a set of derivation rules plus judgment k
 
 Recorded observations detect it:
 
-- the live integration ref has moved away from the admitted commit (direct push, external merge, force-push, restore from backup, manual conflict resolution, or overtaking an unpublished admission, §15.3);
+- the live integration ref has moved away from the expected head (direct push, external merge, force-push, restore from backup, manual conflict resolution, or overtaking an unpublished admission). Admission observes this before every append (§15.3); a Dispatcher census that notices it requests an absorption;
 - a submitted workspace contains changes outside its reported result;
 - an external branch is offered for import;
 - content differs from accepted revisions (drift);
@@ -843,7 +884,7 @@ Every subject is in exactly one governance mode at any ledger position, and its 
 | `UNGOVERNED` | production content with no authority system yet (Case C); changes are recorded, mechanical consequences derived, no conformance claims made |
 | `UNCLASSIFIED` | unknown content; excluded from governing context, evidence and acceptance basis until classified |
 
-Mode transitions are admitted lifecycle records, and each ends the subject's tenure (§6.1). A version rollback that returns a subject to `LEGACY(p)` therefore needs a fresh `LEGACY_ACCEPTANCE` import; an import from before cutover never revives. A membership change that would move a unit between subjects of different modes is a mode transition for that unit and needs its lifecycle record (§6.8 step 4). Neither an ordinary request nor an adopted foreign declaration can do it silently. A change touching subjects in several modes receives the union of their obligations. Changes confined to `LEGACY(p)` or `UNGOVERNED` subjects may arrive as ordinary commits. They are absorbed mechanically (§6.8, §11), and derive only intake classification for uncovered paths plus whatever the mode's policy requires.
+Mode transitions are admitted lifecycle records, and each ends the subject's tenure (§6.1). A version rollback that returns a subject to `LEGACY(p)` therefore needs a fresh `LEGACY_ACCEPTANCE` import; an import from before cutover never revives. A loss boundary is orthogonal to tenure (§15.4): tenure decides which acceptances count for a subject's current signature, and the boundary decides whether a record from before a known loss counts at all. A rollback after a loss therefore needs a fresh import on both counts. A cutover lost inside an abandoned interval leaves the retained mode in force, with every retained import withheld until requalified. A membership change that would move a unit between subjects of different modes is a mode transition for that unit and needs its lifecycle record (§6.8 step 4). Neither an ordinary request nor an adopted foreign declaration can do it silently. A change touching subjects in several modes receives the union of their obligations. Changes confined to `LEGACY(p)` or `UNGOVERNED` subjects may arrive as ordinary commits. They are absorbed mechanically (§6.8, §11), and derive only intake classification for uncovered paths plus whatever the mode's policy requires.
 
 **Relying on legacy authority.** SSDS never adjudicates a `LEGACY(p)` subject, but native work often depends on legacy authority that its own process did accept (for example SSDP source accepted through `PROTOCOL-RELEASE-STATE.yaml`). A `LEGACY_ACCEPTANCE` judgment imports that fact. It cites the legacy process's acceptance evidence for an exact revision of an exact scope, and supplies the acceptance judgment for that `(subject, scope_id, rev)` without claiming SSDS reviewed it. The imported scope is the scope the legacy process actually accepted. A legacy acceptance of a whole document or release cannot be imported onto a section: that would be B1's projection. Native work relying on a legacy subject without an imported acceptance is provisional.
 
@@ -864,10 +905,11 @@ Promotion and its acceptance are admitted in one request; a promotion without a 
 
 Restoring `A` to subject status later, by an ordinary request or by adopting a foreign declaration, is a promotion and starts a new tenure. It needs a new acceptance judgment in the same request. No separate reinstatement kind exists: a reinstatement is an ordinary acceptance whose basis may cite the earlier tenure's judgments, reviews and evidence by `identity`. Prior evidence counts only where it is currently admissible: its target and execution bases are current, and stale passing evidence never confirms.
 
-An old acceptance therefore cannot become current again because structure changed, and the protection has two independent locks:
+An old acceptance therefore cannot become current again because structure changed, and the protection has three independent locks:
 
 1. repository presence never changes `Σ` (S11);
-2. even an admitted restoration starts a tenure that excludes every earlier judgment.
+2. even an admitted restoration starts a tenure that excludes every earlier judgment;
+3. after a recorded loss of admitted history, every earlier acceptance is withheld whatever the restored structure says, until requalified or attested (§15.4).
 
 Challenges, revocations and supersessions target exact triples and records without tenure, so they bind the restored subject exactly as before. Demotion, restoration and every other signature change are frozen while any affected subject's current revision is under unresolved blocking challenge or revoked (§6.8 step 4(b)). A challenge thus constrains a role transition rather than following the unit out of it.
 
@@ -916,13 +958,19 @@ Change plans and authority documents remain semantic artifacts. In natively gove
 | Failure | Detection | Repair |
 |---|---|---|
 | Corrupted derived state | integrity checks, mismatch with re-derivation | discard and re-derive |
-| Corrupted ledger entry | authentication, hash chain, schema validation | restore from a replica whose chain qualifies (§15.4); else human-gated `LEDGER_LOSS` naming the abandoned checkpoint. Lost judgments become undischarged obligations; prose or reports may inform new judgments by qualified actors but never restore old records. Lost structural admissions leave the repository declaring structure that `Σ` no longer contains; that difference is quarantined (§11.3), so a truncated history cannot revive an acceptance that a lost demotion had ended |
-| Ledger ref rewound (force-push, hosting restore, backup older than the admitted head, mistaken or malicious reset) | head is a strict ancestor of a checkpoint observed in a read quorum (every admitted head is visible there, §15.4) or of a high-water mark | fail closed (`ROLLBACK`); restore the later chain from any replica or clone that holds it; if none does, human-gated `LEDGER_LOSS`; Admission halted until resolved |
+| Corrupted ledger entry | authentication, hash chain, schema validation | restore from a replica whose chain qualifies (§15.4); else human-gated `LEDGER_LOSS` (§15.4). Its position is a continuity boundary: every permissive effect recorded before it is withheld until requalified or attested, and S3 lists each as a requalification obligation. Prose or reports may inform new judgments by qualified actors but never restore old records. Repository declarations newer than the retained ledger also appear as quarantine, but that is not the loss defense: the boundary holds when product and ledger were restored to the same stale snapshot and `Q` is empty |
+| Ledger ref rewound (force-push, hosting restore, backup older than the admitted head, mistaken or malicious reset) | head is a strict ancestor of a checkpoint observed in a read quorum (every admitted head is visible there, §15.4) or of a high-water mark | fail closed (`ROLLBACK`); restore the later chain from any replica or clone that holds it (no boundary); if none does, human-gated `LEDGER_LOSS` with its boundary; Admission halted until resolved |
+| Ledger and product restored together to one stale snapshot after a later admitted head existed | `ROLLBACK` from the witnessed later checkpoint, although the restored tree agrees with the retained ledger (`Q` empty) | as above; if the suffix is unrecoverable, `LEDGER_LOSS`: the boundary withholds every pre-loss acceptance, support and relief regardless of the agreement, and `LEDGER_LOSS` re-establishes witness model, trust roots and ruleset (§15.4) |
 | Ledger fork, or witnesses holding checkpoints on conflicting chains | qualification | fail closed (`FORK`); human-gated fork resolution choosing one lineage and naming the abandoned head; key rotation if compromise is suspected; never auto-merged |
-| Crash after append, before admission | provisional entry on the ledger ref | on restart Admission completes anchoring of the surviving entry (idempotent; nothing else could append in between). If the entry survives nowhere, it was never admitted: no effect, publication, dispatch or answer depended on it, and its request is resubmitted by identity. A sub-quorum checkpoint of a vanished entry surfaces as `FORK`/loss and is resolved by human-gated abandonment; abandoning it loses no admitted judgment |
-| Crash after admission, before publication | admitted entry, publication `PENDING` | §15.3: publication retried, or the overtaken change revalidated |
+| Crash after append, before admission | provisional entry on the ledger ref | on restart Admission completes anchoring of the surviving entry (idempotent; nothing else could append in between). If no copy survives, the witness count decides (§15.4): when the non-admission bound proves it never reached `q_a`, a human-gated fork resolution abandons it with no boundary, nothing admitted is lost, and its request is resubmitted by identity; otherwise it may have been admitted, and abandoning it is a `LEDGER_LOSS` |
+| Crash after admission, before publication | admitted head entry; publication `PENDING` (no later entry carries `obs`) | §15.3: any Admission host reads the integration head, performs the idempotent compare-and-swap if it still shows `B_n`, and the next entry records the outcome |
+| Crash after the publication compare-and-swap, before any later entry | admitted head; integration ref shows `C_n` or has moved on | restart reads the head: `C_n` or an equivalent publication gives a consistent successor (`PUBLISHED`), ordinarily the next admission; later foreign movement gives an absorption (`PUBLISHED` if `C_n` is still reachable, else `OVERTAKEN`); a reset to exactly `B_n` is the ABA case (§15.3) |
+| Reconciling entry appended, not admitted | provisional successor | complete its anchoring; if it vanished (and was provably never admitted), re-read the integration head and append a new successor |
 | Witnesses below read quorum (unreachable or lost) | qualification cannot complete | `UNQUALIFIED`: historical views only, no current assertion, Admission halted, production continues; permanent loss beyond the fault bound needs human-gated witness-set redesignation (§15.4) |
-| Authoritative replica lost | unreachable or empty | restore from any replica extending the highest observed checkpoint; human-gated replica redesignation record |
+| Witnesses lost beyond the fault bound, ledger objects intact | `UNQUALIFIED` | human-gated witness-set redesignation continuing from the intact head when every reachable checkpoint, replica and high-water mark ends there; the record states that continuity rests on that evidence (an assumption beyond the fault model). Any reachable evidence of a later head not provably never-admitted makes it a `LEDGER_LOSS` |
+| Ledger objects lost, witness checkpoints intact | `ROLLBACK`: witnesses hold checkpoints beyond every recoverable entry | `LEDGER_LOSS` naming the retained head and the abandoned heads the witnesses hold; boundary |
+| Abandoned entries later surface | an authenticated chain conflicting with an admitted abandonment record | never merged; recorded as evidence with an S3 integrity obligation; may ground a challenge to a continuity attestation; the boundary stays |
+| Authoritative replica lost | unreachable or empty | restore from any replica extending the highest observed checkpoint; human-gated replica redesignation record; if no replica extends it, `LEDGER_LOSS` |
 | Fresh clone (with or without a historical prefix) | no high-water mark | qualify against a read quorum; fetch the missing suffix (`BEHIND`) or detect `ROLLBACK`; with no read quorum, views are `UNQUALIFIED` and Admission refuses to append |
 | Lost local store, intact repository | absent operator state | ledger is in Git; operator journal rebuilt; running executions reconciled by observing harnesses and workspaces; stale leases released; high-water mark re-established by qualification |
 | Foreign structural change (manual manifest edit, force-push, restore from stale backup, manual conflict resolution) | observed declarations differ from `Σ` | absorbed; bytes remain buildable; deltas quarantined; `aff(Q)` invalid until adopted or realigned (§11.2-§11.3); no tenure restarts and no acceptance revives |
@@ -970,10 +1018,10 @@ For each, the machinery produces a **focused question**: the exact subject, scop
 | Store | Content | Canonical? | Location | Sole writer | Recovery |
 |---|---|---|---|---|---|
 | Content store | all repository content including authored relations, unit manifests and anchors (the *observed* state) | yes, for meaning; structural declarations are proposals until admitted | the project's Git repository | humans and tools through Git; Admission only by publication CAS | Git replication; foreign movement absorbed (§11); referenced commits kept reachable by the ledger |
-| Ledger | records (§6.3) under the closed schema, from which effective structure, ruleset and acceptance derive | yes, for everything not derivable | one authoritative ref in a Git repository designated at genesis: the project repository's reserved namespace, or a dedicated (for example private) ledger repository | Admission | any replica extending the highest observed checkpoint; else human-gated `LEDGER_LOSS` (§15.4) |
+| Ledger | records (§6.3) under the closed schema, from which effective structure, ruleset and acceptance derive | yes, for everything not derivable | one authoritative ref in a Git repository designated at genesis: the project repository's reserved namespace, or a dedicated (for example private) ledger repository | Admission | any replica extending the highest observed checkpoint; else human-gated `LEDGER_LOSS`, a continuity boundary (§15.4) |
 | Witness checkpoints | authenticated `(ledger id, position, head)` statements and lineage-retirement statements; hashes only | no; evidence that admits entries and detects rollback | declared witnesses outside the authoritative replica's administrative control | Admission (checkpoints); any participant may relay an existing authenticated checkpoint (read repair) | redundancy by quorum; loss beyond the fault bound by human-gated witness-set redesignation |
 | Derived index | derived state, effective structure and derivation checkpoints | no | local, rebuildable (SQLite or equivalent, delegated) | Derivation | discard and re-derive |
-| Operator state | leases, reservations, account and quota telemetry, harness sessions, raw prompts and transcripts, signing keys and secret references, high-water marks | no project authority | private user-local root outside repositories | Dispatcher (journal); each participant's Ledger Store (its high-water mark); Admission (its keys) | journal rebuilt by observing harnesses and workspaces; high-water mark re-established by qualification; keys by trust-root lifecycle |
+| Operator state | leases, reservations, account and quota telemetry, harness sessions, raw prompts and transcripts, signing keys and secret references, high-water marks | no project authority | private user-local root outside repositories | Dispatcher (journal); each participant's Ledger Store (its high-water mark); Admission (its keys and its publication-attempt log, which informs the ABA choice of §15.3 and is never read by derivation) | journal rebuilt by observing harnesses and workspaces; high-water mark re-established by qualification; keys by trust-root lifecycle |
 | Transport | task and result envelopes on run branches | no | isolated run refs; retired by policy, never merged | Dispatcher and Interface (envelopes); agents (results) | regenerated from the ledger and obligations; results ingested only through Admission |
 
 ### 15.2 Storage decision
@@ -1008,21 +1056,63 @@ then: submit response ADMITTED; integration-ref publication; dispatch from the n
       current-state answers at the new head; next append
 ```
 
-Admission keeps **at most one provisional entry**. It appends entry `n+1` only after entry `n` is admitted and `n`'s publication is resolved. The single exception is a human-gated witness-set redesignation, which may be appended over a provisional entry and whose admission settles that prefix (§15.4). Because of this rule, the head Admission validates against (§6.8 step 6) is always admitted. A provisional entry never influences derivation that anyone relies on.
+Admission keeps **at most one provisional entry**: it appends entry `n+1` only after entry `n` is admitted. The single exception is a human-gated witness-set redesignation, which may be appended over a provisional entry and whose admission settles that prefix (§15.4). Because of this rule, the head Admission validates against (§6.8 step 6) is always admitted. A provisional entry never influences derivation that anyone relies on.
 
-After a crash, the request identity tells Admission what happened. If no entry carries it, nothing happened and the request is retried. If a provisional entry carries it, Admission completes the idempotent checkpoint distribution; nothing else could have appended in between, so the validation still holds. If an admitted entry carries it, Admission proceeds to publication. A provisional entry whose every copy is lost was never admitted, and its request is resubmitted by identity (§15.4).
+After a crash, the request identity tells Admission what happened. If no entry carries it, nothing happened and the request is retried. If a provisional entry carries it, Admission completes the idempotent checkpoint distribution; nothing else could have appended in between, so the validation still holds. If an admitted entry carries it, Admission proceeds to publication. A provisional entry whose every copy is lost is resubmitted by identity when qualification proves it never admitted; otherwise its loss is a `LEDGER_LOSS` (§15.4).
 
-**Publication.** An admission record names its admitted commit `C_n` and expected predecessor `B_n`, the commit at which the previous admission was published or absorbed. Publication begins only after the entry is admitted, and appending the next entry requires it to be resolved. Publication is an effect under C4: Admission compare-and-swaps the integration ref from `B_n` to `C_n`. The publication state is derived from the ledger plus the latest recorded observation of the live integration ref `L`:
+**Publication: intent, effect and observed outcome (C4).** An admission entry `n` names its admitted commit `C_n` and its base `B_n`. `B_n` is not an assumption: it is the integration head Admission read immediately before appending `n`. Entry `n` is therefore the complete, admitted **intent** of the effect — compare-and-swap the integration ref from `B_n` to `C_n` — and no separate intent record exists. A records-only request has `C_n = B_n` and no effect. Publication starts only after `n` is admitted, so no product ref ever shows provisional state.
 
-| State | Condition | Action |
+The **observed outcome** enters through a field every entry carries: `obs`, the live integration head Admission read immediately before appending that entry (for an admission, `obs = B`). The exception is a human-gated recovery lifecycle entry (`LEDGER_LOSS`, fork resolution, witness-set or replica redesignation, lineage retirement), which carries no `obs`, so recovery never waits for the integration host. Derivation tracks the expected head `E` (§6.6 S0): `C_k` after admission `k`, `obs_k` after an absorption, unchanged otherwise. An **equivalent publication** of admission `n` is a commit, reachable from `obs` or equal to it, that descends from `B_n` and has `C_n`'s tree (a squash, rebase or merge-button result of exactly that content).
+
+**Reconciliation rule.** Publication of admission `n` is reconciled by the first later entry that carries `obs`. The rule constrains that entry's *shape*; it never requires a step before it:
+
+| `obs` of the first later entry | That entry may be | `pub(n)` (derived, §6.6 S0) |
 |---|---|---|
-| `PENDING` | `L = B_n` | retry the idempotent compare-and-swap |
-| `PUBLISHED` | `C_n` is an ancestor of or equal to `L`; or an observed external merge produced a commit with `C_n`'s tree and parent `B_n` | record outcome; any movement of `L` beyond it is ordinary foreign change; next admission may proceed. A records-only request has `C_n = B_n` |
-| `OVERTAKEN` | otherwise (the ref moved in the window: foreign push, external merge of other work, force-push) | absorb `L` as a foreign change (§11); `C_n` stays recorded and reachable, its records are re-evaluated against the absorbed tree, and an obligation to revalidate the overtaken request is derived (§8.2) |
+| no such entry yet | — | `PENDING` |
+| `E_n = C_n`, or an equivalent publication equal to `obs` | any entry, including the next ordinary admission; `E` becomes `obs` (same tree) | `PUBLISHED` |
+| anything else | only an **absorption** of `obs`: a pure observation carrying no submitted records; `E` becomes `obs` | `PUBLISHED` if `C_n` or an equivalent publication is reachable from `obs`; otherwise `OVERTAKEN` |
 
-The three states are sufficient under the repaired currentness semantics, and no fourth publication state is added. Being provisional is a property of the ledger entry, not of publication, and publication is never attempted for a provisional entry. An `OVERTAKEN` admission's structural changes are already in `Σ` but absent from the absorbed tree. The difference appears as quarantine until the revalidated request publishes and realigns the repository (§6.8 step 4), which is conservative and needs no special case.
+The same shape rule governs every entry, so foreign movement after any entry is absorbed the same way. In the consistent row nothing in S0-S2 changes (`E` keeps its tree, so `T` is unchanged) and no S3 fact that validation reads changes, so a request validated at head `n` stays valid when its own entry also reconciles `n`. An entry whose `obs` differs from `E` and that carries submitted records is rejected by Admission and is an integrity defect in derivation. An `OVERTAKEN` admission keeps `C_n` recorded and reachable; its records are re-evaluated against the absorbed tree; an obligation to revalidate its request is derived (§8.2). Its structural changes are already in `Σ` but absent from the absorbed tree, so they appear as quarantine until the revalidated request publishes and realigns the repository (§6.8 step 4).
 
-Admission never moves the integration ref except by compare-and-swap from the exact expected predecessor, so it never overwrites foreign work. Revision 2 allowed updating the ledger and integration refs in one multi-ref transaction as an optimization; that is withdrawn, because it would publish an entry before admission. No product ref ever shows provisional state. If the authoritative replica, the integration host or a witness read quorum is unreachable, admissions stop (fail closed) while production continues.
+**Admission's procedure** at an admitted head `n` whose publication is `PENDING` (any Admission host; it reads only the qualified ledger and the live ref):
+
+```text
+read L
+L = B_n                       -> compare-and-swap B_n -> C_n (idempotent), then read L again
+L = C_n, or an equivalent publication equal to L
+                              -> append the next entry with obs = L: the next ordinary admission if one is
+                                 ready, otherwise an absorption with obs = L (records PUBLISHED; E keeps its tree)
+anything else                 -> append an absorption of L: PUBLISHED if C_n or an equivalent publication is
+                                 reachable from L, else OVERTAKEN
+```
+
+Recording an idle outcome is optional. A canonical `PENDING` with no successor is truthful: the governed tree is already `T_n`, and the next entry of any kind records the outcome.
+
+**Every failure point.**
+
+- *Crash before the compare-and-swap:* restart reads `L = B_n` and performs it.
+- *The compare-and-swap loses to a foreign push:* `L` is foreign; the next entry is its absorption; `OVERTAKEN` unless the foreign history contains `C_n` or an equivalent publication.
+- *The compare-and-swap succeeds, then a crash before any successor:* restart reads `L`; `L = C_n` gives a consistent successor (`PUBLISHED`), ordinarily the next admission; later foreign movement gives an absorption, `PUBLISHED` if `C_n` is still reachable, else `OVERTAKEN` (an immediate force-push removed it from the product).
+- *The successor is appended but not admitted:* it is the single provisional entry; restart completes its anchoring. If it vanished and is provably never admitted, nothing relied on it: read `L` again and append a new successor.
+- *The successor is admitted but the response is lost:* `submit` by request identity returns the recorded decision.
+- *Foreign movement between the compare-and-swap and the read:* the successor records what is live; classification is by reachability.
+- *Repeated or replayed reconciliation:* only the first later entry carrying `obs` classifies `n`; any later observation concerns the then-expected head. Two hosts racing are serialized by the ledger compare-and-swap; the loser re-derives from the winner's entry, whose `obs` is canonical even if the loser read a different value.
+- *Restart on another Admission host:* the procedure needs no operator state.
+- *ABA:* a foreign reset of the integration ref to exactly `B_n` after a successful compare-and-swap is indistinguishable, from the ref alone, from a publication not yet applied. Admission may re-apply it, losing no foreign content because `B_n` is an ancestor of `C_n`; or, when its publication-attempt log shows the earlier success, absorb `B_n`, which records `OVERTAKEN` and honours the reset. Either choice is a recorded, replayable entry; the log informs the choice and never derivation.
+
+**Idempotency.** The effect identity `(ledger id, n, B_n, C_n)` is fixed by entry `n`; a compare-and-swap from the exact expected predecessor is idempotent and never overwrites foreign work. The reconciliation is identified by its position `n+1`, made unique by the ledger compare-and-swap. Request identity keeps `submit` idempotent.
+
+**Replay uses recorded facts only.** Classification reads `B_n`, `C_n`, `obs` and the immutable commits reachable from `obs`, which the ledger keeps reachable (ledger representation, above). It never reads the live ref, so a replay explains, from the ledger alone, which entry resolved the publication and why.
+
+**No hidden cycle.** The dependency order is: `n` admitted -> effect (needs only `n`) -> read `L` -> append `n+1` (needs only that read) -> admission of `n+1`. Nothing on that chain waits for `n+1`. Revision 3's defect was a precondition ("resolve before appending") whose evidence could arrive only by appending; here the evidence *is* the append.
+
+**No second writer or authority.** Admission alone reads `L` for canonical purposes and alone appends; the reconciling entry is an ordinary entry under the same compare-and-swap and quorum admission. A Dispatcher census may request an absorption; it records nothing itself.
+
+**Cost.** In ordinary operation each admission is still one entry and one quorum round, because the next admission carries its predecessor's outcome. A separate entry appears only when the ref moved (an absorption, needed in any design) or when Admission chooses to record an idle outcome.
+
+**Three derived states suffice.** Revision 3 had the right states but no transition carrier. A fourth `RECONCILING` state would describe Admission's in-flight procedure, which is operational and leaves no canonical trace until the successor exists. Being provisional is a property of the ledger entry, and publication is never attempted for a provisional entry.
+
+Admission never moves the integration ref except by compare-and-swap from the exact expected predecessor, so it never overwrites foreign work. Revision 2 allowed updating the ledger and integration refs in one multi-ref transaction as an optimization; that is withdrawn, because it would publish an entry before admission. If the authoritative replica, the integration host or a witness read quorum is unreachable, admissions stop (fail closed) while production continues; recovery lifecycle entries need only the replica and witnesses.
 
 ### 15.4 Currentness qualification and anti-rollback
 
@@ -1049,7 +1139,7 @@ A faulty witness may be lost, rolled back or adversarial. Genesis and every witn
 3. **High-water marks.** Every participant that presents current state (Admission, Dispatcher, Interface hosts, clones) keeps the last head it qualified, in private operator state.
 4. **Qualification.** An evaluator with authoritative-replica head `A` and high-water mark `W` collects checkpoint sets from at least `r` witnesses, then classifies:
    - `FORK` — two observed checkpoints, or `A` and an observed checkpoint, lie on conflicting chains, with no authenticated human-gated resolution record in `A`'s chain naming the abandoned side;
-   - `ROLLBACK` — `A` is a strict ancestor of an observed checkpoint or of `W`, with no authenticated abandonment record (`LEDGER_LOSS`, fork resolution) naming it. For a non-authoritative copy that can fetch the missing suffix from a replica, the state is `BEHIND`: fetch, then re-qualify;
+   - `ROLLBACK` — `A` is a strict ancestor of an observed checkpoint or of `W`, with no admitted abandonment record (`LEDGER_LOSS`, fork resolution) in `A`'s chain naming it. For a non-authoritative copy that can fetch the missing suffix from a replica, the state is `BEHIND`: fetch, then re-qualify;
    - otherwise, the **qualified head** `H*` is the highest entry of `A`'s chain that the evaluator observes held by `q_a` witnesses (after read repair if needed) and that extends every observed checkpoint and `W`. `A` is either `H*` or `H*`'s single provisional successor, which is labeled `PROVISIONAL` and never presented as current;
    - `UNQUALIFIED` — fewer than `r` witnesses respond, or no head can be confirmed at `q_a`. Only historical views are available, no current assertion is made, and Admission does not append.
 5. **Use.** Every current-state answer, task brief, readiness decision for dispatch, snapshot export, external consultation and publication is bound to a named `H*`. Admission's own validation uses the head it holds by compare-and-swap, which is admitted by construction (§15.3). Every other participant's assertion is "current as of `H*`". Nothing irreversible depends on a non-Admission participant's notion of currency: results are revalidated at Admission (K4).
@@ -1059,9 +1149,54 @@ A faulty witness may be lost, rolled back or adversarial. Genesis and every witn
 - *Every admitted head is seen.* An admitted head is held by `q_a` witnesses. Any `r` responses include more than `f` of them, so at least one honest holder. Every qualifying evaluator therefore observes every admitted head, and an older prefix cannot qualify. This is what defeats the Review's L99/L100 world: if L100 was admitted, a fresh clone that sees replica head L99 also sees the L100 checkpoint and reports `ROLLBACK`; if L100 was not admitted, L99 *is* the current head and saying so is true.
 - *An unadmitted entry was never relied on.* No effect, publication, dispatch or answer depended on an entry that never reached `q_a`.
 - *The limit.* If every copy and every checkpoint of such an entry disappears, nothing distinguishes it from never having been appended, and no architecture can infer it. SSDS needs no such inference, because it never granted that entry currentness; its request is resubmitted by identity.
-- *A partial trace.* If a sub-quorum checkpoint of a vanished entry survives, evaluators that see it report `FORK` or `ROLLBACK` and fail closed until a human-gated record names it abandoned. Since the entry was never admitted, abandoning it loses no admitted judgment.
+- *A partial trace.* If a checkpoint of a vanished entry survives, evaluators that see it report `FORK` or `ROLLBACK` and fail closed until a human-gated record names it abandoned. When the non-admission bound below proves it never reached `q_a`, abandoning it loses no admitted judgment; otherwise the abandonment is a `LEDGER_LOSS`.
 
 The architecture thus aligns the definition of provable currentness with the durable evidence that proves it.
+
+**Known loss of admitted history (P5).**
+
+*Abandonment versus loss.* A human-gated record may abandon a head that is not in the retained chain. Whether that abandons admitted history is decided from witness reports, never asserted. Let `h` be the number of responding witnesses that hold the abandoned checkpoint and `m` the number not responding. Checkpoints are authenticated, so no witness can claim one it never received, but up to `f` responding witnesses may deny one they hold. The entry is **proved never admitted** iff `h + m + f < q_a`, and **known admitted** iff `h ≥ q_a`; otherwise it is **possibly admitted**. Abandoning only proved-never-admitted entries is a fork resolution with no boundary: nothing admitted is lost and nothing is requalified. Abandoning a known or possibly admitted head is a `LEDGER_LOSS`, whichever lifecycle record carries it; a fork resolution or witness-set redesignation that does so embeds one. When the bound is inconclusive because witnesses are unreachable, waiting for them is always an alternative to a boundary.
+
+*What `LEDGER_LOSS` names.*
+
+- the **retained head** `R`: position and hash of the highest entry of the retained, authenticated chain from genesis;
+- every **abandoned head** known from witnesses, replicas or high-water marks, each with position, hash and witnessed admission status; the highest gives `h_max`, and the lost interval is at least `(R, h_max]` — later unknown entries may also have existed;
+- the **evidence**: the content identity of the qualification report that gathered those reports;
+- the **global control facts** in force from its position: witness model `(N, q_a, r, f)` and witness set, trust roots, and ruleset (system version and policy hash). Each may equal its retained value. The human gate re-establishes them because the lost interval may have changed any of them, and their effect is project-wide, so no scope can narrow it;
+- the human gate's authenticated decision.
+
+It is appended on the retained chain at position `R + 1`, carries no `obs`, and is admitted under the quorum it re-establishes (and under the old one where reachable). Once admitted, it names the abandoned heads, so qualification classifies them as abandoned rather than `ROLLBACK` or `FORK` (rule 4). A lineage whose old witnesses hold a retirement statement (§15.5) cannot take a `LEDGER_LOSS`; recovery continues in the successor lineage.
+
+*The boundary.* The `LEDGER_LOSS` position is a continuity boundary; no epoch or generation identifier exists. Its effect is the S1 predicate `cont` (§6.6): a record admitted before the boundary has no permissive effect after it unless held. Polarity decides what is withheld:
+
+| Retained fact | After the boundary |
+|---|---|
+| acceptance, conformance, plan acceptance, completeness, equivalence, evidence assessment, legacy and external acceptance imports, reconstruction and intake judgments | not current (S2 `base = F`) until requalified or held |
+| evidence realizations, external consultations and other observations cited in `record` mode | not current until requalified (a fresh realization or consultation) or held |
+| `DISMISSED` adjudications, withdrawals, risk overrides, attestations of earlier boundaries | not in force: their challenges reopen and their blocks return |
+| challenges, `UPHELD` adjudications and the revocations they produce, supersessions | unchanged (restrictive; never gated by `cont`) |
+| effective structure `Σ`, tenure, quarantine, admitted trees and content | unchanged: they route and restrict, and validity still needs a current acceptance |
+| availability degradations, adverse consultations | unchanged (restrictive) |
+| witness model, trust roots, ruleset | as re-established by the `LEDGER_LOSS` |
+| derivation at positions before the boundary (historical views) | unchanged: deriving an earlier prefix never reads later records |
+
+*Requalification* uses existing kinds only: a fresh acceptance, adjudication, assessment, realization, import or consultation after the boundary, whose basis may cite the withheld records by `identity`, as reinstatement already does (§12.2). S3 derives one requalification obligation for each permissive record or relaxer that was in effect at `R` and is withheld now, so recovery work is enumerated rather than rediscovered, and readiness orders it top-down.
+
+*Narrowing.* Nothing mechanical can prove a retained effect unaffected: witnesses hold only hashes, the product holds content but no judgments, and a stale-consistent restore shows no difference at all. The only sound narrowings are recovering the lost entries themselves (then nothing is lost and no boundary is needed) and an accountable judgment. A **continuity attestation** is a human-gated challenge-tier judgment by an actor that policy designates. It targets one `LEDGER_LOSS` and names the retained scope it holds unaffected, either as the complement of a possibly-affected set of subjects and records or as an explicit set, citing its out-of-band evidence (hosting history, notifications, CI artifacts, operator journals, an abandoned chain if one is available) by content identity. A record is covered according to `exposed` (§6.6 S0). While in force the attestation holds what it covers, and dependents follow through S2. Any qualified actor may challenge it; an upheld challenge withdraws it permanently, and a later boundary withholds it like any relaxer unless that boundary's attestation holds it. It is the only way a pre-boundary record becomes current again without a fresh record, and it is an accountable act, never an inference from agreement between product and ledger.
+
+*Why a stale-consistent restore cannot resurrect authority.* While any read quorum shows a later checkpoint, qualification refuses to present the stale ledger as current (`ROLLBACK`). Continuing therefore requires an admitted `LEDGER_LOSS`, which is a ledger fact independent of product content. The boundary reads only ledger records, so agreement between the restored tree and the retained ledger is irrelevant: `Q` may be empty and nothing revives. At every position at or after the boundary, `current(x) ≤ base(x) ≤ cont(x)` for every earlier record `x`, and every earlier relaxer is in force only if `cont` holds. Every `T` or `P` support therefore rests only on records after the boundary or on records held by an in-force attestation. Tenure is not needed for this argument, and the boundary is not needed for tenure's: the two locks are independent (§12.2).
+
+*The five recovery situations.*
+
+| Situation | Recognized by | Boundary |
+|---|---|---|
+| rollback with a recoverable suffix | `ROLLBACK` or `BEHIND`; some replica holds the suffix | none: restore it |
+| stale product restore, ledger intact | the next entry's `obs` differs from `E` | none: absorption, drift and quarantine |
+| ledger-only truncation, newer product still observable | `ROLLBACK`; suffix unrecoverable | yes; the next entry also absorbs the newer product, adding drift and quarantine |
+| admitted history known lost, product equally stale | `ROLLBACK`; suffix unrecoverable; `Q` empty | yes; the boundary alone protects |
+| only provably never-admitted entries lost | the non-admission bound holds | none: fork resolution; no requalification |
+
+*Where information runs out.* If every copy, checkpoint and high-water mark of an admitted head is lost — more than `f` witnesses failing together with every replica — and the product is restored stale as well, nothing distinguishes that world from one in which the head never existed, and no architecture can infer it. A witness-set redesignation that continues from an intact head after losing more than `f` witnesses records that assumption explicitly (witness lifecycle, below). A continuity attestation can be wrong: it is accountable and challengeable, not infallible. A holder of recovery authority who abandons a recoverable suffix can withhold admitted history from continuity until the abandoned chain surfaces; it is then evidence, never silently merged (§13).
 
 **Distinctions.**
 
@@ -1073,13 +1208,13 @@ The architecture thus aligns the definition of provable currentness with the dur
 | `BEHIND` | a non-authoritative copy lacking a fetchable admitted suffix | fetch, then re-qualify |
 | `ROLLBACK` | the authoritative head is a strict ancestor of an observed checkpoint or high-water mark, with no abandonment record | fail closed; restore |
 | `FORK` | conflicting authenticated chains or checkpoints from one genesis | fail closed; human-gated fork resolution naming the abandoned head; never auto-merged |
-| loss | admitted entries unavailable from every replica | human-gated `LEDGER_LOSS`; lost judgments become obligations; lost structural admissions surface as quarantine |
-| abandoned provisional | a sub-quorum checkpoint whose entry survives nowhere | human-gated abandonment; nothing admitted is lost |
+| loss | a known or possibly admitted entry unavailable from every replica | human-gated `LEDGER_LOSS`: a continuity boundary withholding pre-loss permissive effects until requalified or attested (P5) |
+| abandoned provisional | a checkpoint whose entry survives nowhere, proved never admitted by the non-admission bound | human-gated fork resolution; no boundary; nothing admitted is lost |
 | `UNQUALIFIED` | no read quorum, or no head confirmable at `q_a` | historical views only; Admission halted |
 | retired lineage | the old lineage's witnesses hold a retirement statement naming a successor (§15.5) | historical views only, from any mirror |
 | recovery | restoring a replica whose chain qualifies; redesignating the authoritative replica by a human-gated lifecycle record | resume |
 
-**Witness lifecycle.** The witness set and quorums are declared in genesis and change only through a human-gated `WITNESS_SET_REDESIGNATION` lifecycle record. Where the old quorum is reachable, the record is admitted under both the old and the new quorum. Where it is not, the human gate gathers every reachable checkpoint and high-water mark and names the head the new set continues from. That record is the explicit acknowledgment that an admitted entry known only to permanently lost witnesses and lost replicas is declared lost, in the same way as `LEDGER_LOSS`. Witness admission latency sits on the Admission critical path; it is a reopen trigger (§26), not a reason to restore a lag window.
+**Witness lifecycle.** The witness set and quorums are declared in genesis and change only through a human-gated `WITNESS_SET_REDESIGNATION` lifecycle record. Where the old quorum is reachable, the record is admitted under both the old and the new quorum. Where it is not, the human gate gathers every reachable checkpoint, replica head and high-water mark and names the head the new set continues from. If any of that evidence names a later head that is not proved never admitted, the record carries a `LEDGER_LOSS` and its boundary. If none does, the record states that continuity rests on that evidence being complete: an assumption beyond the fault model, disclosed rather than hidden. Witness admission latency sits on the Admission critical path; it is a reopen trigger (§26), not a reason to restore a lag window.
 
 A project fork is different: an intentional lifecycle record creates a new project identity (§13).
 
@@ -1100,7 +1235,7 @@ A project fork is different: an intentional lifecycle record creates a new proje
 4. **Choose remediation by confidentiality need** (human decision):
    - *Rotation suffices* (the value is useless after rotation): keep history; append a `REDACTION_NOTICE`; no guarantee yields.
    - *Confidentiality required:* create a replacement ledger lineage in a new or private repository.
-     - **Settle the old head.** Settle any provisional entry of the old lineage first: admit it or record its abandonment. The old lineage then has one last admitted head.
+     - **Settle the old head.** Settle any provisional entry of the old lineage first: admit it (always possible while its witnesses are reachable), or abandon it only if the non-admission bound proves it never admitted (§15.4). The old lineage then has one last admitted head.
      - **Re-encode.** Re-encode records with the sensitive fields replaced, and map commit identities if product history moves to a new repository; any pseudonym mapping is held privately.
      - **Bind the new genesis.** The replacement's genesis carries a migration record naming the old lineage's last admitted head *hash* (a commitment, not content). Qualify that the replacement derives the same state, effective structure included, up to the renaming.
      - **Retire the old lineage.** Publish an authenticated **retirement statement** for the old ledger id to the old witnesses, naming the successor lineage by hash. It is held by `q_a` of them like a checkpoint, so every read quorum observes it. Evaluators that observe it treat the old lineage as historical only. A stale mirror, an old clone or a restored backup paired with the old witnesses therefore cannot present the purged lineage as current, even though its chain still qualifies cryptographically. Retire participants' high-water marks for the old lineage.
@@ -1131,13 +1266,13 @@ Agents cannot modify the ledger, rules registry, project policy, schemas, trust 
 |---|---|---|
 | Content Model | parsing observed declarations (manifest, anchors, semantic declarations), resolving effective scopes against observed bytes, authored relation extraction, revisions and scope identities | store status; decide which structure is effective |
 | Analyzers | derived relations and their incompleteness/completeness declarations | claim completeness they do not have |
-| Ledger Store | ledger persistence, authentication and hash-chain verification, currentness qualification (read quorum, read repair, high-water marks, `FORK`/`ROLLBACK`/`BEHIND`/`UNQUALIFIED`), replica restore | interpret records; present a provisional or unqualified head as current |
-| Derivation Engine | the four strata and every query over them, including the effective-structure fold, quarantine, tenure and well-formedness in S0 (§6.6) | write canonical state; choose which prefix is current |
-| Admission | validation (including structural deltas and adoption), the only ledger appends, admission by witness quorum (checkpoint distribution), and canonical publication effects (integration ref) | judge semantics; perform agent work; publish or report before admission |
+| Ledger Store | ledger persistence, authentication and hash-chain verification, currentness qualification (read quorum, read repair, high-water marks, `FORK`/`ROLLBACK`/`BEHIND`/`UNQUALIFIED`), the non-admission bound for abandoned checkpoints, replica restore | interpret records; present a provisional or unqualified head as current; decide what was lost |
+| Derivation Engine | the four strata and every query over them, including the effective-structure fold, quarantine, tenure, well-formedness, expected integration head and publication classification in S0, and loss-boundary continuity in S1 (§6.6) | write canonical state; choose which prefix is current; read the live integration ref |
+| Admission | validation (including structural deltas and adoption), the integration-head observation before every append and publication reconciliation, the only ledger appends (including human-gated recovery records), admission by witness quorum (checkpoint distribution), and canonical publication effects (integration ref) | judge semantics, including what a lost interval contained; perform agent work; publish or report before admission |
 | Dispatcher | scheduling among obligations ready at the qualified head (resource/account/model feasibility, route selection, reservations), workspaces, harness adapters, execution effects including trusted-runner evidence, operator journal | decide readiness or completion; act as a second admission; move canonical refs; dispatch from a provisional head |
 | Interface | logical operations, transports, version-bound brief and gate rendering | hold state of its own |
 
-Dependency direction: Content Model and Analyzers <- Derivation <- {Admission, Interface, Dispatcher}; Ledger Store is read by Derivation and written only by Admission. Ledger Store qualification is consulted by Admission, Interface and Dispatcher before anything is presented as current; Derivation itself never consults witnesses. No component was added for the three revision-3 separations: effective structure and well-formedness are S0 derivation, quarantine is S0/S3 derivation plus an intake judgment, and quorum admission is Admission's existing checkpoint effect plus Ledger Store's existing verification. The Dispatcher submits trusted-runner realizations and execution outcomes through Admission. Scheduling decisions never influence derived workflow state. The route, harness, model and attempt provenance they produce travels in submitted records and is replayed as recorded fact, never recomputed against current resources.
+Dependency direction: Content Model and Analyzers <- Derivation <- {Admission, Interface, Dispatcher}; Ledger Store is read by Derivation and written only by Admission. Ledger Store qualification is consulted by Admission, Interface and Dispatcher before anything is presented as current; Derivation itself never consults witnesses. No component was added for the three revision-3 separations: effective structure and well-formedness are S0 derivation, quarantine is S0/S3 derivation plus an intake judgment, and quorum admission is Admission's existing checkpoint effect plus Ledger Store's existing verification. None was added in revision 4 either: publication reconciliation is a field of Admission's existing append plus an S0 classification, and the loss boundary is a lifecycle record Admission already appended, given S1 semantics, plus one human-gated challenge-tier judgment kind. The Dispatcher submits trusted-runner realizations and execution outcomes through Admission. Scheduling decisions never influence derived workflow state. The route, harness, model and attempt provenance they produce travels in submitted records and is replayed as recorded fact, never recomputed against current resources.
 
 ### 16.2 Transfer of frozen Orchestrator Architecture 1.6.0
 
@@ -1218,6 +1353,8 @@ Classification: **Preserved** (binding on SSDS with unchanged meaning); **Replac
 | 441cf5c: any relation cycle licensed by a common subject; one composite construct for refinement parents and simultaneous definitions | relation roles and cycle classes; SDG as semantic declaration; cycle legality in Admission and S0 (§6.2) |
 | 441cf5c: structural declarations effective on repository presence (including absorbed foreign ones) | effective structure as a fold of admitted changes; quarantine in S0; tenure-scoped acceptance (§6.1, §11) |
 | 441cf5c: append as commit point; bounded-lag anchoring mode; optional multi-ref publication in one transaction | provisional append, admission by witness quorum with read/write intersection; publication after admission (§15.3-§15.4) |
+| 8a75346: publication resolved as a precondition of the next append, with outcome and live-ref movement as separate observations | `obs` on every entry; the first later entry is the reconciliation; one integration observation replaces both kinds (§15.3) |
+| 8a75346: quarantine described as the defense against resurrection after ledger truncation; non-admission inferred from absence of copies | loss boundary with S1 continuity (P5); witness-count non-admission bound (§15.4) |
 
 ## 18. Inheritance and capability transfer
 
@@ -1255,9 +1392,9 @@ Their historical inheritance dispositions (6.2-6.6 reconciled; D3 reopen require
 | §12.2 reducer purity and observation boundary | Carried (§6.6, C3) |
 | §12.3 snapshots derived and verified | Carried (§13) |
 | §13 seven validation layers; single canonical writer; humans decide meaning, writer serializes | Carried as nine steps (§6.8, §9.4) |
-| §14 external effects | Carried (C4, §15.3) |
+| §14 external effects | Carried (C4, §15.3); intent is the admitted entry, the outcome is recorded by the successor entry's integration observation |
 | §15.1 private canonical store by default; in-repository only by explicit D3 adoption resolving concurrency, privacy, history and ownership | **Changed**: Git-replicated ledger adopted with the four conditions resolved (§15.2-§15.5); operator state stays private |
-| §15.2 durability and recovery contract (atomic publication boundary, corruption detection, durable flush, backup/restore, identity mapping, compatibility on restore, retention) | Carried and strengthened (§13, §15.3-§15.5): the atomic publication boundary is quorum admission of a durable append; anti-rollback added as quorum-qualified currentness |
+| §15.2 durability and recovery contract (atomic publication boundary, corruption detection, durable flush, backup/restore, identity mapping, compatibility on restore, retention) | Carried and strengthened (§13, §15.3-§15.5): the atomic publication boundary is quorum admission of a durable append; anti-rollback added as quorum-qualified currentness; restore after unrecoverable admitted loss bounded by the continuity boundary (P5) |
 | §16 formal action registry | Replaced by the rules registry of fixed predicate templates (§6.6) |
 | §17 schema-valid agent outputs; no prose parsing | Carried (§9.1) |
 | §18.1-18.2 TaskEnvelope / ResultEnvelope | Carried: envelope = obligation + basis + brief; result = typed admission request (§6.8, §9) |
@@ -1281,7 +1418,9 @@ Their historical inheritance dispositions (6.2-6.6 reconciled; D3 reopen require
 | §33 versioning and historical preservation | Carried (§24) |
 | §34 acceptance criteria | Carried into §25 |
 | §35 non-goals | Carried (§20) |
+| §36 final target: semantic artifacts carry meaning; agents investigate and reason; evidence supports or challenges governed claims; schemas communicate bounded control facts; rules validate legal transitions; the orchestrator alone commits workflow state; replay determinism is a control guarantee, not deterministic scientific reasoning | Carried without a new mechanism: meaning stays in content and authored relations (§6.1-§6.2, §20); agents reason and judge, never bookkeep (§1.2, §9); evidence supports or challenges through realizations, assessments and challenges (§10, §6.6 S1); the closed schema carries only control facts (§6.3, §15.5, C7); fixed predicate templates and Admission's validation order decide legal transitions (§6.6, §6.8); Admission is the sole canonical writer (C1, §6.8); C2/C8 make derivation, not reasoning, deterministic, and semantic judgment propagates only once admitted as a typed record (§6.6, §14) |
 | §37 version rebind, Protocol 7 inputs and reconciliation contract | Carried (§0.2, §19) |
+| §38 handoff state | Replaced by §28 |
 
 ### 18.2 befe678 hypothesis capabilities
 
@@ -1305,12 +1444,12 @@ Their historical inheritance dispositions (6.2-6.6 reconciled; D3 reopen require
 | Structural split requires no false semantic claims (lost at f9d9de8, reinstated) | §12.2 |
 | Discovery bottom-up, authority top-down | §12.3 |
 | Mandatory orchestrator after scope-local cutover, legacy envelopes | §12.1, §12.4 |
-| Atomic accepted-event publication, integrity, backup/restore, crash recovery | §15.3-§15.4 (quorum admission), §13 |
+| Atomic accepted-event publication, integrity, backup/restore, crash recovery | §15.3-§15.4 (quorum admission, successor-entry reconciliation, loss boundary), §13 |
 | Private control state and secrets kept out of repository transport | §15.1, §15.5 |
 
 ## 19. Protocol 7 prospective inputs (not final)
 
-Protocol 7 closure is active, and nothing here binds Protocol 7 semantics or selects an inheritance. The source snapshot is `f96b7cc`. At this revision the Protocol 7 branch had advanced by a Stage 7 probe record (`7d7810f`) without closing. Phase A binds the final identities. Known prospective inputs, and where they would land:
+Protocol 7 closure is active, and nothing here binds Protocol 7 semantics or selects an inheritance. The source snapshot is `f96b7cc`. At this revision the Protocol 7 branch has advanced by Stage 7 probe and evaluation-tooling commits (`7d7810f`, `d2feaa4`) without closing; its consolidated workplan blob is unchanged (`36e2da1`). Phase A binds the final identities. Known prospective inputs, and where they would land:
 
 | Input | Landing point | Open question for Phase A |
 |---|---|---|
@@ -1336,6 +1475,7 @@ SSDS 8.0 does not:
 - depend on server-negotiated multi-ref atomicity;
 - assert currentness for state that a witness quorum does not hold, claim rollback detection beyond the declared witness model, or claim that lineage migration erases leaked data;
 - let repository presence, a foreign push, a restore or a merge change effective structure, ruleset or acceptance;
+- reconstruct or guess the content of lost admitted history, or let retained authority cross a known loss without requalification or an accountable attestation;
 - license a relation cycle by common subject identity, or let a definition or a condensation warrant a claim;
 - require every write to pass through an interface;
 - expose machine records as routine agent UX;
@@ -1356,9 +1496,9 @@ The SSDS 8 Architecture Manual, independently reviewed and accepted, SHALL decid
 1. unit model: manifest and anchor declaration syntax (governance-affecting declarations confined to the manifest), content normalization and boundary-marker rules, scope identity, coverage partition and laminarity rules, single-definer rule; effective-structure fold, declaration keys, resolution of effective scopes against observed bytes (`ABSENT`, uncovered region), governance-affecting vs neutral classification algorithm, `aff(Q)`, governance signature and tenure;
 2. relation vocabulary with every type's direction, semantic role, cycle class, permitted classes, layer constraint and completeness eligibility; vocabulary adoption checks; SDG declaration syntax and rules; cycle legality and `well_formed`; boundary-completeness judgment semantics and analyzer completeness declarations;
 3. closed record schemas, judgment kinds and tiers, actor qualifications, outcome vocabularies, compatibility contract;
-4. basis composition and mode assignment per judgment kind, consumption classes, equivalence-path composition, the widening chain and closure algorithm;
-5. derivation: strata S0-S3 (including `Σ`, `Q`, `aff`, `τ`, `well_formed` and `ok` in S0), the fixed predicate templates and the adoption-time stratification check, least-fixed-point evaluation, analyzer contract (deterministic vs recorded), derivation checkpoints and recovery-time bounds;
-6. Admission validation order including the structural-delta rule (author, realign, carry, adopt), source/destination challenge freeze, dependency well-formedness, request identity and idempotency, merge-queue serial order, single-ref append, quorum admission and the single provisional entry, publication states and effect reconciliation;
+4. basis composition and mode assignment per judgment kind, including the subject-boundary rule (`content` inside the record's subject, `validity` across), consumption classes, equivalence-path composition, the widening chain and closure algorithm;
+5. derivation: strata S0-S3 (including `Σ`, `Q`, `aff`, `τ`, `well_formed`, `ok`, `E` and `pub` in S0, and `cont` in S1), the polarity classification of every record kind, the fixed predicate templates and the adoption-time stratification check, least-fixed-point evaluation, analyzer contract (deterministic vs recorded), derivation checkpoints and recovery-time bounds;
+6. Admission validation order including the structural-delta rule (author, realign, carry, adopt), source/destination challenge freeze, dependency well-formedness with re-routed support edges, request identity and idempotency, merge-queue serial order, single-ref append, quorum admission and the single provisional entry; the integration observation `obs`, the entry-shape rule, the equivalent-publication and reachability classification, the reconciliation procedure and its ABA policy;
 7. obligation rules, readiness, three-valued discharge, provisional propagation and risk-override scope, iteration/attempt identity;
 8. change-plan structure, plan acceptance, scoped amendment policy, plan invariants;
 9. serialization policy surfaces, generated-unit handling, joint invariants, residual-risk disclosure;
@@ -1366,7 +1506,7 @@ The SSDS 8 Architecture Manual, independently reviewed and accepted, SHALL decid
 11. evidence realization basis fields for scientific regimes, stochastic replicates, environments and precision; trusted-runner designation and custody for expensive external realizations;
 12. intake detection, static classification, dispositions, trust/quarantine, structural quarantine views, adoption and realignment requests, policy for mechanical adoption of governance-neutral deltas;
 13. governance modes, legacy and external acceptance import scope, external consultation supersession, reconstruction status, structural refinement, subject promotion, demotion and restoration, carve-out, cutover, quiescence, genesis;
-14. ledger storage realization: Git entry format, referenced-object retention, durability (fsync) configuration, ledger location options, authentication scheme and key lifecycle, witness kinds, the witness model `(N, q_a, r, f)` and its deployment classes, checkpoint and retirement-statement formats, read repair, the qualification procedure and its states, fresh-clone procedure, replica and witness-set redesignation, confidentiality breach procedure and the closed-schema secret checks; operator-state boundary; derived index;
+14. ledger storage realization: Git entry format, referenced-object retention, durability (fsync) configuration, ledger location options, authentication scheme and key lifecycle, witness kinds, the witness model `(N, q_a, r, f)` and its deployment classes, checkpoint and retirement-statement formats, read repair, the qualification procedure and its states, fresh-clone procedure, replica and witness-set redesignation, the non-admission bound, `LEDGER_LOSS` contents and re-established global control facts, the recovery procedure, continuity-attestation grammar, actor designation and evidence, confidentiality breach procedure and the closed-schema secret checks; operator-state boundary; derived index;
 15. actor identity and human authentication trust roots;
 16. protected surfaces and SSDS self-governance of rules, schemas, trust roots and witnesses;
 17. component boundaries and dependency direction; Dispatcher/Admission separation; executed supersession of Architecture 1.6.0 resolving every **Deferred** row of §16.2;
@@ -1378,13 +1518,13 @@ The SSDS 8 Architecture Manual, independently reviewed and accepted, SHALL decid
 
 ## 22. Qualification program
 
-Qualification binds every claim to the property its method can discriminate (DS-001). Synthetic fixtures and model cases establish mechanical properties only; semantic adequacy (promotion, equivalence, completeness, gate adequacy) needs real-owner cases and independent Review. Material persistence and recovery claims use deterministic failpoints with the production owner executing, per the 6.6 storage and concurrency owners. Required, at minimum:
+Qualification binds every claim to the property its method can discriminate (DS-001). Synthetic fixtures and model cases establish mechanical properties only; semantic adequacy (promotion, equivalence, completeness, gate adequacy) needs real-owner cases and independent Review. Material persistence and recovery claims use deterministic failpoints with the production owner executing, per the 6.6 storage and concurrency owners. The publication-reconciliation and known-loss groups below test executable mechanics of the repaired owners; whether those owners are adequate remains for independent semantic Review, and no fixture result can stand in for it. Required, at minimum:
 
 - **Derivation model cases (well-foundedness).**
   - *One input, one state:* property-based generation of admissible ledgers and trees. Derived state is identical across evaluation orders, incremental vs from-scratch evaluation, repeated runs and hosts.
   - *Illegal per-member acceptance:* acceptance judgments on parts are rejected.
   - *Illegal positive recursion:* the f9d9de8 review's four-predicate configuration is rejected at Admission; a fixture-injected ledger evaluates to all-`F` with an integrity obligation, never all-`T`. Mutual validity reliance between subjects in different domains is rejected. An equivalence judgment relying on a consumer of the compared unit is rejected.
-  - *Negative/challenge recursion:* a challenge targeting a later record or another challenge is rejected. The chain challenge -> adjudication -> challenge -> adjudication evaluates uniquely. A challenge against a dismissal restores the block. A challenged risk override stops being in force. Demoting, promoting or re-scoping units of a subject with an unresolved blocking challenge (including an overridden one) or a revoked revision is rejected, at the source and at the destination subject.
+  - *Negative/challenge recursion:* a challenge targeting a later record or another challenge is rejected. The chain challenge -> adjudication -> challenge -> adjudication evaluates uniquely. A challenge against a dismissal restores the block, and upholding that challenge keeps it restored permanently (the revision-3 formula re-enabled the dismissal). A challenged risk override or continuity attestation stops being in force, permanently once the challenge is upheld. Demoting, promoting or re-scoping units of a subject with an unresolved blocking challenge (including an overridden one) or a revoked revision is rejected, at the source and at the destination subject.
   - *Supersession:* a superseded acceptance stays non-current after its superseder goes stale.
   - *Risk override:* `BLOCKED` becomes `PROVISIONAL`; `P` propagates; discharge outside the override scope stays `OPEN`; no unqualified closure.
   - *Ruleset:* a ruleset whose parameters make a lower stratum read a higher one is rejected at adoption. An unadopted policy edit has no effect. Historical views reproduce under the ruleset in force at their position.
@@ -1399,6 +1539,8 @@ Qualification binds every claim to the property its method can discriminate (DS-
   - *Group boundaries:* an SDG whose members have different subjects, or that contains a subject, is rejected; promotion of one SDG member alone is rejected; promotion of all members as one composite whose scope contains the declaration is admissible with acceptance.
   - *Code recursion stays legal:* mutually importing modules and recursive calls (derived `STRUCTURAL`, `NEUTRAL`) are admitted, carry no warrant, and are traversed by widening.
   - *Self-relation:* any self-relation is rejected.
+  - *Legitimate intra-subject warrant (8a75346 N1, positive):* subject `G` with parts `a`, `b` and the acyclic authored relation `b DERIVED_FROM a`. `G` is accepted once. A judgment about `b`'s claim is admitted with a `content` entry on `a` and no `validity` entry on `G`; Admission rejects a `validity` entry on `G` from any record about `G`. Editing `a` makes the judgment and `G`'s acceptance non-current; an editorial `EQUIVALENCE` on `a` for the judgment's consumption class restores the judgment without re-review, while `G` still needs acceptance of its new revision. Adding `a DERIVED_FROM b` is an illegal cycle. After `a` is promoted with acceptance, new judgments about `b` use `validity` on `a`, and judgments admitted before keep their `content` entries.
+  - *Re-routed support edge:* a demotion that would move an existing record's `validity` endpoint onto the subject whose acceptance consumes that record is rejected by the recomputed acyclicity check.
   - *Condensation carries no warrant:* a claim inside an SDG with no `ACYCLIC`-class warrant leaving the SDG is reported unwarranted by the brief, and the SDG's acceptance remains the only acceptance.
   - *Ruleset reclassification:* a new ruleset that reclassifies an admitted `SIMULTANEOUS` type to `ACYCLIC` makes the affected subjects ill-formed (S2 `F`) without re-adjudicating history; historical views at earlier positions are unchanged.
   - *Vocabulary adoption:* a ruleset declaring a `SIMULTANEOUS` warrant type, an authored `NEUTRAL` type, a type missing an attribute, or a rule naming a `NEUTRAL` type in validity mode, is rejected at adoption.
@@ -1412,7 +1554,7 @@ Qualification binds every claim to the property its method can discriminate (DS-
   - *Challenge-bearing subject reparenting:* a challenged subject declared a part of an unchallenged composite: quarantined; adoption rejected while the challenge is unresolved; the challenge remains on its triple.
   - *Destination freeze (ordinary Admission):* re-scoping a challenged composite by adding or removing members is rejected.
   - *Restoration after repository rewind or manual conflict resolution:* the integration ref is force-moved to an older commit, or a manual merge resolves manifest conflicts arbitrarily. Old declarations are quarantined; no tenure restarts; no old acceptance revives; realignment by an ordinary change clears the quarantine.
-  - *Ledger truncation:* after `LEDGER_LOSS` drops the admission that demoted `A`, the repository still declares `A` a part, so the difference is quarantined and `A` is invalid until dispositioned; `j_A` never silently revives.
+  - *Ledger truncation with newer product:* after `LEDGER_LOSS` drops the admission that demoted `A`, the repository still declares `A` a part, so the difference is quarantined. `j_A` is withheld by the loss boundary in any case; the quarantine is additional, not the defense (known-loss group below).
   - *Lawful demotion then restoration without foreign change:* the restoring request must carry a new acceptance; `j_A` from `τ1` never counts; prior evidence counts only where its bases are current.
   - *Ruleset evolution during quarantine:* adopting a new ruleset leaves `Σ` and `Q` unchanged; the later adoption of the delta is validated under the ruleset then in force.
   - *Overtaken admission:* an `OVERTAKEN` structural admission shows as quarantine against the absorbed tree until the revalidated request publishes.
@@ -1437,29 +1579,56 @@ Qualification binds every claim to the property its method can discriminate (DS-
   - *crash before admission:* the provisional entry survives locally; restart completes checkpoint distribution; no publication, dispatch or `ADMITTED` response occurred before;
   - *crash after admission:* restart finds `q_a` checkpoints, proceeds to publication;
   - *append survives locally but witness admission fails:* the entry stays `PROVISIONAL`; Admission halts further appends; current answers stay at the previous qualified head; when witnesses return, admission completes; on permanent loss, witness-set redesignation settles the prefix;
-  - *admitted but publication lost:* `PENDING`, then `PUBLISHED`;
-  - crash after the compare-and-swap, before the outcome is recorded (observed as `PUBLISHED`);
+  - *admitted, publication pending:* derivation at the admitted head gives `pub = PENDING` and `T_n = tree(C_n)`; the next entry records the outcome (see the reconciliation group below);
   - foreign push between admission and the compare-and-swap (`OVERTAKEN`: absorbed, request revalidated, foreign work never overwritten);
   - force-push of the integration ref in the window (`OVERTAKEN`);
-  - integration host unreachable (fail closed; production continues);
-  - an external merge producing a different commit with the admitted tree (`PUBLISHED`);
+  - integration host unreachable (fail closed for appends that need `obs`; recovery lifecycle entries still possible; production continues);
+  - an external squash, rebase or merge-button result with the admitted tree and descending from `B_n` (`PUBLISHED` as an equivalent publication);
   - no configuration publishes a provisional entry (the multi-ref optimization is absent).
+- **Publication reconciliation (8a75346 Blocker A).** Deterministic failpoints in the real Admission owner after admission, after the compare-and-swap, after the integration read, after the append and after quorum. The oracle for every case is a **ledger-only replay**: derivation runs with the integration host disconnected and must reproduce the classification and name the entry and `obs` that caused it; a fixture that asserts an outcome label without that replay is insufficient.
+  - *Compare-and-swap succeeds, crash before any successor:* before restart, ledger-only derivation gives `PENDING`; after restart the successor carries `obs = C_n` and replay gives `PUBLISHED` from that entry. Variant: the successor is the next ordinary admission, and its validation result and derived S0-S2 state equal those computed at head `n`.
+  - *Compare-and-swap loses to a foreign push:* the successor is an absorption; `OVERTAKEN`; a revalidation obligation; `n`'s structural changes quarantined against the absorbed tree; the foreign commit intact.
+  - *Successor appended but lacking quorum:* it stays `PROVISIONAL`; no further append; current answers stay at `n` with `pub(n) = PENDING`; restart completes anchoring; if the provisional successor is lost and provably never admitted, a new successor is appended after a fresh read.
+  - *Successor admitted, response lost:* resubmission by request identity returns the recorded decision; no second entry.
+  - *Restart on another Admission host* without the first host's operator state reaches the same ledger.
+  - *Duplicate reconciliation:* two hosts race with different reads; exactly one successor is admitted; the loser's append fails the ledger compare-and-swap; classification follows the winner's `obs`.
+  - *Foreign movement after the compare-and-swap:* a foreign descendant of `C_n` gives an absorption with `PUBLISHED`; a force-push that drops `C_n` gives `OVERTAKEN`.
+  - *Overtaken under structural quarantine:* `n` carried a structural change and the foreign tree both lacks it and declares a foreign delta; both are quarantined, `aff(Q)` is invalid, and the revalidated request publishes and realigns.
+  - *ABA:* a reset to exactly `B_n` after a successful compare-and-swap; both permitted Admission choices (re-apply, or absorb as `OVERTAKEN`) yield replayable ledgers.
+  - *Barrier discriminators:* an ordinary admission whose `obs` differs from `E` is rejected; an absorption carrying submitted records is rejected; a fixture-injected ledger containing either is an integrity defect in derivation; an absorption changes no effective structure, ruleset, acceptance or obligation discharge except through `T`.
+  - *Recovery entries:* a `LEDGER_LOSS` or witness-set redesignation appended while a publication is pending carries no `obs` and leaves `pub = PENDING`; the next entry carrying `obs` reconciles it.
 - **Currentness qualification and recovery** (witness model `(N, q_a, r, f)` with `q_a + r > N + f`, exercised at least with `N = 3, q_a = 2, r = 2, f = 0` and the local-trust instance):
   - *Review's L99/L100 world:* L100 admitted, then every replica rewound to L99 and every high-water mark lost. A fresh clone reaching any read quorum observes the L100 checkpoint and reports `ROLLBACK`; L99 is never presented as current.
   - *Total loss of an unadmitted newest entry:* L100 appended, no checkpoint reached any witness, every copy lost. Qualified head is L99, which is true; L100's request is resubmitted by identity; nothing had depended on L100.
-  - *Sub-quorum trace:* L100 reached one witness only, then every copy was lost. Evaluators that see the checkpoint report `FORK`/loss and fail closed until a human-gated abandonment names it; no admitted judgment is lost.
+  - *Sub-quorum trace:* L100 reached one witness only, then every copy was lost. Evaluators that see the checkpoint report `FORK` and fail closed until a human-gated record names it abandoned; when the non-admission bound holds, the abandonment creates no boundary and no admitted judgment is lost.
   - *Fresh clone from a valid historical prefix:* `BEHIND`, fetch, re-qualify; if the authoritative replica is also behind, `ROLLBACK`.
   - *Forked repository plus witness disagreement:* conflicting authenticated chains, or witnesses holding checkpoints on conflicting chains: `FORK`, fail closed, human-gated resolution, never auto-merged.
   - *Malicious or accidental rewind* of the authoritative ref, including with a compromised push credential: `ROLLBACK` from any read quorum.
   - *Witness loss below read quorum:* `UNQUALIFIED`; no current assertion; Admission halted; production continues; read repair completes a quorum when enough witnesses return.
   - *Faulty witnesses within the bound:* `f` witnesses rolled back or withholding checkpoints cannot hide an admitted head; with `f + 1`, the declared limit is reached and documented, never silently exceeded.
-  - *Restoration from a backup older than the admitted head:* `ROLLBACK`; restore from any replica holding the suffix; otherwise human-gated `LEDGER_LOSS`, lost judgments become obligations, lost structural admissions surface as quarantine.
+  - *Restoration from a backup older than the admitted head:* `ROLLBACK`; restore from any replica holding the suffix (no boundary); otherwise human-gated `LEDGER_LOSS` (known-loss group below).
   - Two authenticated chains: `FORK`, fail closed.
   - An unauthenticated entry pushed directly is rejected.
   - Authoritative replica lost: restored from a clone extending the highest observed checkpoint.
   - Content objects missing: `UNAVAILABLE`.
   - Snapshots and derived checkpoints at a provisional position are never served as current; answers always name their qualified head.
   - External consultation of another SSDS ledger qualifies its head; an unqualified or retired external head is never imported.
+- **Known admitted-history loss (8a75346 Blocker B).** Real Ledger Store qualification and real Derivation, witness model `N = 3, q_a = 2, r = 2, f = 0` and the local-trust instance. Common trajectory: subject `A` in tenure `τ1` with passing `j_A` at L10; L11 admitted (held by `q_a` witnesses) changes authority state; every copy of L11 and of the newer product objects is lost; ledger **and** product are restored to the same L10 snapshot, so `Q` is empty; a read quorum observes the L11 checkpoint (`ROLLBACK`, never current); a human-gated `LEDGER_LOSS` names `R = L10` and L11 as known admitted; current state is derived afterwards, first without and then with a continuity attestation. Variants for L11's content:
+  - *demotion:* L11 demoted `A` into part of `P`. `j_A` is not current; no `ACC` counts it; `A` requalifies only by a fresh acceptance after the boundary (which may cite `j_A` by identity).
+  - *demotion then restoration:* L11 demoted `A` and L12 restored it with a new acceptance, both lost. `j_A` and nothing else is in the retained ledger, and it stays withheld.
+  - *challenge or revocation:* L11 raised a blocking challenge on, or upheld one against, `(A, S, R)`. `j_A` is not current. A retained pre-loss dismissal of an older challenge on `A` loses force, so that challenge reopens and freezes `A`'s structure until re-adjudicated. Conversely, a retained pre-loss *upholding* (including of a non-blocking challenge) keeps its revocation in force after the boundary.
+  - *ruleset change:* L11 adopted a stricter ruleset. The `LEDGER_LOSS` re-establishes the ruleset by human gate; retained acceptances are withheld; requalified acceptances must satisfy the re-established ruleset.
+  - *evidence invalidation:* L11 superseded a passing assessment. The retained assessment and realization are withheld; the evidence obligation reopens; a fresh realization or assessment after the boundary discharges it.
+  - *external import:* a retained external consultation and import are withheld until re-consulted.
+  - *attestation:* an attestation holding everything except `A` makes an unrelated subject's acceptance current and leaves `j_A` withheld; an upheld challenge against the attestation withholds the unrelated acceptance again; a second boundary withholds the first attestation unless its own attestation holds it.
+  - *product newer:* the same trajectory with the product still at L11: the next entry absorbs it, adding drift and quarantine; the authority outcome is identical.
+  - *history visible, not current:* derivation of the L10 prefix still shows `j_A` current as a historical view; no current answer does.
+  - *requalification set:* S3 lists exactly the permissive records and relaxers in effect at L10 that are now withheld.
+  - *version rollback after loss:* a later rollback to `LEGACY(p)` needs a fresh import; neither the pre-loss nor the pre-cutover import revives.
+  - *retired lineage:* a `LEDGER_LOSS` on a lineage whose old witnesses hold a retirement statement is rejected.
+  - *abandoned chain surfaces later:* never merged; an integrity obligation; usable as evidence for a challenge to the attestation.
+  - **Contrast — provisional only:** L11 appended, its checkpoint reached one witness of three, and all three respond (`1 + 0 + 0 < 2`): proved never admitted; a fork resolution abandons it with no boundary; `j_A` stays current; the requalification set is empty. Variant with one witness unreachable (`1 + 1 + 0 = 2`): not proved; only a `LEDGER_LOSS` may abandon it, or the evaluator waits.
+  - *witness loss beyond `f`, ledger intact:* redesignation continuing from the intact head creates no boundary and records its assumption; if a high-water mark shows a later head, the redesignation must carry a `LEDGER_LOSS`.
 - **Confidentiality.**
   - A credential-like or high-entropy value in a record field is rejected at Admission.
   - A fixture-forced sensitive value runs the incident drill: a provisional entry settled first; rotation recorded; replacement lineage derives the same state, effective structure included, up to renaming; old-lineage retirement statement published, so a stale mirror plus the old witnesses yields only historical views; old-lineage high-water marks retired; yielded guarantees recorded.
@@ -1510,7 +1679,7 @@ Qualification binds every claim to the property its method can discriminate (DS-
 - Older version-bound work stays under its declared version and immutable source; every supported orchestration profile stays frozen and independently testable (PC-001); migration never reinterprets old records as authored under SSDS 8.
 - Native cutover is per subject; after cutover no document-controlled process governs that subject. Shadow comparison is permitted only while one side is explicitly non-authoritative.
 - Orchestrator unavailability yields truthful non-closure for native scopes, never implicit document-control fallback. Exploratory or report-only work may proceed but claims no canonical closure until admitted.
-- Rollback is version rollback to the immutable pre-cutover baseline: stop Admission for the affected scope, resume the pinned baseline process there, repair SSDS separately. The mode change ends each affected subject's tenure, so pre-cutover legacy acceptance imports never revive; a fresh import is needed (§12.1). Ledger rollback (§15.4) is an integrity incident, not a version rollback.
+- Rollback is version rollback to the immutable pre-cutover baseline: stop Admission for the affected scope, resume the pinned baseline process there, repair SSDS separately. The mode change ends each affected subject's tenure, so pre-cutover legacy acceptance imports never revive; a fresh import is needed (§12.1). Ledger rollback (§15.4) is an integrity incident, not a version rollback; an unrecoverable admitted loss adds a continuity boundary, which composes with a later version rollback because the mode change ends tenure and the boundary withholds every pre-loss import independently.
 - System, schema, ruleset, interface and profile versions are distinct and never conflated with protocol semantic version.
 
 ## 25. Acceptance criteria for the architecture cycle
@@ -1520,11 +1689,11 @@ D4 handoff is possible only when:
 1. Protocol 7 inheritance is reconciled (Phase A);
 2. one accepted Architecture Manual resolves every §21 obligation;
 3. exactly one canonical writer exists per ledger, and no document, profile, tracker, scheduler, index or derived view can enact a transition;
-4. the four primitives and their derived semantics are fully specified, including subjects, scope identity, effective structure, quarantine and tenure, relation roles and cycle legality, the four strata, currency, validity, three-valued discharge and provisional propagation, with the uniqueness argument of §6.6 independently checked;
+4. the four primitives and their derived semantics are fully specified, including subjects, scope identity, effective structure, quarantine and tenure, relation roles and cycle legality, the four strata, loss-boundary continuity, currency, validity, three-valued discharge and provisional propagation, with the uniqueness argument of §6.6 independently checked;
 5. every §16.2 and §18 inherited guarantee and capability is carried, replaced with equal-or-stronger evidence, retired with accepted reason, or closed by the Manual;
 6. concurrency correctness rests on admission-time validation, with residual risk stated;
 7. intake is the single route for unknown-provenance change, and migration is coverage refinement plus qualified promotion with per-subject cutover;
-8. persistence, quorum admission and currentness qualification, publication, confidentiality recovery and evolution are specified, survive loss of any one machine, and assert currentness only for quorum-witnessed state;
+8. persistence, quorum admission and currentness qualification, publication and its successor-entry reconciliation, known-loss recovery, confidentiality recovery and evolution are specified, survive loss of any one machine, assert currentness only for quorum-witnessed state, and never let retained authority cross a recorded loss without requalification or accountable attestation;
 9. the agent interface meets the minimum-semantic-burden invariant, demonstrated by live trajectories in shadow mode;
 10. independent D3 Review/Challenge finds no blocker or active governing Serious Challenge;
 11. stakeholder acceptance of this major architectural change is explicit.
@@ -1542,6 +1711,8 @@ Reopen this architecture if:
 - structural quarantine produces so much governance invalidity on real repositories (frequent manifest edits, restores, merges) that intake cost outweighs its protection;
 - simultaneous-definition groups prove so frequent or large that subjects become too coarse, or real owners need a sound recursive-warrant exception that the closed vocabulary cannot express;
 - the confidentiality breach protocol proves operationally unrealizable;
+- requalification after a loss boundary proves too costly in practice, so that a mechanical narrowing (for example authenticated per-entry scope commitments held outside the ledger's failure domain) becomes worth its ordinary-path and witness-privacy cost, or continuity attestations prove to be used as routine shortcuts rather than accountable exceptions;
+- integration-head reconciliation proves unworkable on a target host (for example repeated foreign resets producing ABA contention);
 - the fixed predicate templates cannot express a required project policy without breaking stratification;
 - Protocol 7 finalizes semantics that require the ledger to be, or forbid it from being, a canonical home for findings;
 - live trajectories show agents still doing bookkeeping;
@@ -1552,13 +1723,96 @@ Uncertainties that cannot close by design work alone:
 - **Protocol 7 dependent:** gate-brief obligations; finding/tension canonical home; product-surface acceptance actor; final pre-cutover baseline; execution-profile semantics from Stage F portability.
 - **Empirical:** rate of false staleness under conservative widening and part-to-subject routing; frequency and cost of promotion judgments in Case B; analyzer completeness for real Python and C++ scientific code; feasibility of read recording per harness; practical unit granularity; derivation cost and checkpoint sizing on large repositories; ledger growth over years; witness availability and admission latency in practice; frequency of structural quarantine and of SDG declarations; agent context and success compared with the document-controlled baseline.
 
-## 27. Adequacy and minimum-architecture passes (rounds 2 and 3)
+## 27. Adequacy and minimum-architecture passes (rounds 2-4)
 
 These passes are design rationale, not evidence of adequacy. The next Review must falsify independently, and nothing here awards a PASS.
 
-### 27.1 Out-of-matrix trajectories
+### 27.1 Round 4: fresh out-of-matrix pass against revision 4
 
-Each attack tried to obey every local rule while violating a governing invariant. The expected response is a repaired abstraction at the earliest owner, not a new test. The table gives the current disposition against design revision 3. The round that exposed each defect is noted.
+This pass was run after the repairs and did not reuse the revision-3 dispositions (§27.3). Each attack tried to obey every local rule while violating a governing invariant; the expected response to a failure is a repaired abstraction at the earliest owner, not a new test.
+
+| Attack | Trajectory attempted | Result (revision 4) |
+|---|---|---|
+| Publication outcome never recorded | admitted `n`; compare-and-swap succeeds; Admission dies and no request arrives for weeks | Holds: canonical `pub(n) = PENDING` is truthful (`T_n` is already the governed tree); the next entry of any kind, from any host, records it from its `obs` (§15.3) |
+| Foreign force-push right after publication | compare-and-swap succeeds; a force-push drops `C_n` before the next read | Holds: the successor must be an absorption; `C_n` unreachable, so `OVERTAKEN`; revalidation obligation; foreign work intact |
+| `OVERTAKEN` absorption under structural quarantine | `n` adopts a structural delta; the foreign tree lacks it and adds another | Holds: both deltas are in `Q`; `aff(Q)` is invalid in S2; the revalidated request realigns; no structure takes effect by presence |
+| Two Admission hosts recovering one publication | both read, both compare-and-swap, both append | Holds: the publication compare-and-swap is idempotent; the ledger compare-and-swap admits one successor; the loser re-derives |
+| Duplicate observation or reconciliation | a second observation entry for `n`; a replayed request identity | Holds: only the first later entry carrying `obs` classifies `n`; request identity returns the recorded decision |
+| Reconciliation hidden in a privileged path | an absorption that also carries a judgment or discharge | Holds: rejected by Admission; an integrity defect if injected |
+| Reconciliation depending on ambient Git state | replay with the integration host unreachable or since moved | Holds: classification reads only `B_n`, `C_n`, `obs` and immutable commits the ledger keeps reachable |
+| ABA on the integration ref | foreign reset to exactly `B_n` after a successful compare-and-swap | Holds within a disclosed limit: indistinguishable from the ref alone; both permitted choices are recorded and replayable; no foreign content is lost |
+| Admitted suffix lost, product newer | ledger restored to L10, product still at L15 | Holds: `ROLLBACK`, then `LEDGER_LOSS` boundary; the next entry absorbs the newer product |
+| **Admitted suffix lost, product equally stale** (the 8a75346 trajectory) | both stores restored to L10; `Q` empty | **Repaired**: the boundary is a ledger fact; `cont` withholds `j_A` and every other permissive pre-loss effect (§15.4) |
+| Lost challenge, revocation or ruleset adoption | the lost interval held them | Holds: support withheld; retained relaxers lose force; `LEDGER_LOSS` re-establishes the ruleset, trust roots and witness model |
+| Stale backup, then witness redesignation | redesignation used to step over a later witnessed head | Holds: a redesignation that abandons a head not proved never-admitted is a `LEDGER_LOSS` |
+| Resurrection through boundary and tenure interplay | after the loss, demote and restore `A` with the same bytes; or reuse `j_A` in an unchanged tenure | Holds: tenure restarts on restoration, and `cont` withholds `j_A` within the unchanged tenure; either lock suffices |
+| Loss then version rollback | rollback to `LEGACY(p)` after a loss | Holds: the mode change ends tenure and the boundary withholds every pre-loss import |
+| Redesignation over a provisional entry | old quorum lost while `n+1` is provisional | Holds: the redesignation settles `n+1` through the hash chain; if `n+1` publishes, its outcome is recorded by the next entry carrying `obs` |
+| Witnesses lost beyond `f`, ledger intact | more than `f` witnesses lost; every replica agrees | Holds within a disclosed limit: redesignation continues from the intact head, recording the assumption; any evidence of a later head forces `LEDGER_LOSS` |
+| Ledger objects lost, witness hashes intact | witnesses hold L11's checkpoint, no replica holds L11 | Holds: known admitted; `LEDGER_LOSS` names it; boundary |
+| Never-admitted entry abandoned as if admitted, or the reverse | label a possibly admitted entry provisional to skip requalification | Holds: the non-admission bound decides; an inconclusive bound cannot be abandoned without a boundary |
+| Abandoning a recoverable suffix to escape a challenge | recovery authority abandons a reachable chain, then attests broadly | Holds within a disclosed limit: the surfaced chain is evidence and an integrity obligation, and the attestation is challengeable; recovery authority is trusted (T4) |
+| Attestation laundering | attest a subject unaffected that the lost interval revoked | Holds within a disclosed limit: accountable, evidence-citing, challengeable; an upheld challenge withdraws it permanently |
+| **Upheld challenge re-enabling a relaxer** (found in this pass) | uphold a challenge against a dismissal; the challenge closes | **Repaired**: `in_force` excludes upheld challenges (§6.6 S1) |
+| Intra-subject acyclic warrant | `b DERIVED_FROM a` inside `G`; judgment about `b` | Holds: `content` entry on `a`; no self-validity; staleness and early cutoff as required (§6.4) |
+| **Support edge re-routed by structure** (found in this pass) | demote a subject whose `validity` reliance then points at its own consumer | **Repaired**: step 5 recomputes re-routed edges (§6.8) |
+| Cross-subject warrant cycle | `x1 CONCRETIZES y1`, `y2 CONSTRAINED_BY x2` with validity both ways | Holds: support cycle rejected; least fixed point `F` if injected |
+| Legitimate simultaneous definition | mutually recursive equations in an SDG | Holds: legal; no warrant inferred |
+| Same-subject circular warrant | `a DERIVED_FROM b`, `b DERIVED_FROM a` in one subject | Holds: illegal cycle at Admission and in S0 |
+| Challenge escape by re-scoping | source or destination re-scoping under challenge, including after a loss reopens a dismissed challenge | Holds: the freeze applies to every affected subject |
+| Governance-neutral repartition under challenge | foreign leaf repartition inside a challenged subject | Holds: revision unchanged, so the challenge still binds; mechanical adoption changes membership and is frozen until resolved |
+| Deleted manifest and inline anchors | delete the manifest; keep anchors | Holds: everything quarantined; effective scopes resolve from `Σ`; anchors declare nothing |
+| Widening with incomplete knowledge | no completeness judgment anywhere in the chain | Holds: whole-tree `UNBOUNDED` fallback |
+| Stale evidence after role, tenure or boundary change | reuse a pre-loss realization for a fresh assessment | Holds: the realization is withheld; a fresh realization, or an attestation, is needed |
+| Ruleset or vocabulary change during quarantine | adopt a ruleset while deltas are quarantined | Holds: `Σ` and `Q` unchanged; adoption validated under the then-current ruleset |
+| Historical profile isolation after recovery | `LEDGER_LOSS`, then schema evolution, then a historical view | Holds: earlier prefixes derive unchanged; `LEGACY(p)` interpreted by `p` |
+| Legacy and native dual authority | cutover lost in the abandoned interval | Holds: one mode in `Σ`; the retained import is withheld until requalified |
+| External authority stale, forked or retired | consultation before a loss; external retraction afterwards | Holds: withheld by the boundary and superseded by adverse consultations |
+| Confidentiality retirement, then stale backup | restore the purged lineage; or try `LEDGER_LOSS` on it | Holds: retired lineage is historical only; `LEDGER_LOSS` on it is rejected |
+| Agent output treated as authority | agent PASS, `PROVISIONAL` response, self-declared SDG, equivalence or completeness, a self-supplied `obs`, an agent attestation | Holds: proposals only; `obs` is Admission's own read; attestations are human-gated |
+
+**Failing trajectories in this round.** Four, all found before this revision was committed and repaired at their owners: the two 8a75346 blockers, the S1 upholding defect and the re-routed support edge. A fifth defect class was textual: revision 3's "survives nowhere, never admitted" and its description of quarantine as the truncation defense; both are corrected (§13, §15.4). No trajectory in the table fails against revision 4.
+
+**Residuals carried**, because no architecture removes them: undeclared semantic dependencies (§8.4); circular reasoning stated only in prose (§6.2); foreign edits that reduce governance validity, but never production, until dispositioned (§11.3); the information-theoretic limits of §15.4 (an entry, or an admitted head, whose every copy, checkpoint and high-water mark is gone); continuity beyond the fault model resting on recorded assumptions; the correctness of continuity attestations, which are accountable but not infallible; trust in recovery authority; and Git ABA on the integration ref.
+
+### 27.2 Minimum-justified-architecture pass (round 4)
+
+The question for revision 4 was whether publication reconciliation or known-loss recovery needs a new primitive, record category, persistent surface, component, state machine or identifier.
+
+- **Primitives:** four, unchanged. Reconciliation is a field of a record; the boundary is a record's position.
+- **Record categories:** five, unchanged. One challenge-tier judgment kind is added (continuity attestation), because narrowing a loss is an accountable judgment that must be challengeable, and that is exactly what the challenge tier's relaxers are. Two observation kinds (publication outcome, live-ref movement) are removed in favour of the `obs` field, so the kind count does not grow.
+- **Persistent surfaces:** six, unchanged. Admission's publication-attempt log lives in existing operator state, is optional and is never canonical.
+- **Components:** seven, unchanged (§16.1).
+- **State machines:** publication keeps three derived states; there is no reconciliation phase. The boundary is an S1 predicate, not a state machine.
+- **Identifiers:** none added. The boundary is the `LEDGER_LOSS` position.
+- **Ordinary-path cost:** one integration read per append, which setting `B` already required; no extra entry or quorum round for publication; `cont` is identically `T` and the requalification set empty when no loss exists.
+- **Quorum-currentness proof:** unchanged. Every entry, including `LEDGER_LOSS` and reconciliation entries, is single-ref appended and admitted by `q_a` witnesses; `|Q_a ∩ R| ≥ q_a + r − N > f` still gives an honest intersecting witness; a `LEDGER_LOSS` that re-establishes the witness model is checked against the inequality like genesis and redesignation.
+- **Composition:** the boundary is orthogonal to tenure (§12.1), to challenges (relaxers are withheld, restrictive records kept), to rulesets (re-established at the gate; historical views unchanged), to evidence (realizations and assessments withheld), to migration and version rollback (mode change and boundary are independent locks), and to quarantine (additional when the product is newer).
+- **Capability transfer:** §16.2 and §18 rechecked; §18.1 now rows archived §36 and §38; no capability is lost, and §14 external effects and §15.2 durability are strengthened.
+- **Removed or demoted in revision 4:** the "resolve before the next append" precondition; separate publication-outcome and live-ref-movement observations; quarantine as a loss defense; non-admission inferred from absence of copies.
+- **Rejected additions** (carried from earlier rounds, then new):
+  - a general rule language;
+  - a separate refinement or reinstatement judgment kind;
+  - a merge-and-publish reconciliation path;
+  - a cross-repository coordinator;
+  - a stored copy of effective structure;
+  - automatic, non-human-gated abandonment of sub-quorum checkpoints (its safety would depend on witness counts that read repair can change);
+  - a fifth primitive for simultaneous definition;
+  - a dedicated, privileged reconciliation successor while normal admissions are blocked (the Review's hypothesis): an extra entry and quorum round per publishing admission, and a special path, with no gain over the `obs` field;
+  - a fourth `RECONCILING` publication state: it would record an operational phase that leaves no canonical trace;
+  - publication outcomes kept only in operator state: breaks audit and replay;
+  - a recovery epoch or generation identifier: the boundary position already is one;
+  - a global tenure restart on loss: covers only acceptance;
+  - a new ledger lineage after loss: maximal disruption, same requalification;
+  - reusing ruleset generations: a ruleset change never invalidates acceptance, so the semantics differ;
+  - authenticated per-entry scope commitments at witnesses as a mechanical narrowing: ordinary-path cost and witness-privacy exposure to optimize a rare catastrophe (a reopen trigger, §26);
+  - provisional continuation of withheld authority after a loss: would silently degrade unknown lost negatives to provisional project-wide;
+  - automatically applying restrictive records from a surfaced abandoned chain: abandoned chains are evidence, never merged;
+  - inferring loss scope from agreement between product and ledger.
+
+### 27.3 Rounds 2-3 record (historical)
+
+The table below is the round 2-3 record as dispositioned against design revision 3. Round 4 (§27.1) re-attacked every family; where the two disagree, §27.1 governs, and superseded cells are marked.
 
 | Attack | Trajectory attempted | Result (revision 3) |
 |---|---|---|
@@ -1577,7 +1831,7 @@ Each attack tried to obey every local rule while violating a governing invariant
 | **Challenge escape at the destination** (round 3) | re-scope a challenged composite by adding or removing members so its challenged triple is no longer current | **Repaired**: the freeze covers every subject whose scope, regions or membership change, before or after (§6.8 step 4(b)) |
 | **Structural foreign change under unresolved challenge** (round 3, Blocker B) | foreign structural-only change restores a demoted part as subject while its composite is challenged | **Repaired**: `Σ` unchanged, `aff(Q)` invalid, adoption frozen, tenure excludes the old judgment (§6.1, §11, §12.2); required counterexample in §22 |
 | **Old acceptance resurrection after demotion and restoration** (round 3) | lawful demotion, then lawful promotion with the same bytes and scope; or `scope_id`, domain or mode oscillation | **Repaired** by tenure-scoped `ACC` (§6.1, §6.6) |
-| **Resurrection through ledger truncation** (round 3, not in the Review) | `LEDGER_LOSS` drops the admission that demoted `A`; `Σ` again says subject | **Repaired** by the observed/effective comparison: the repository still declares the demotion, so `A` is quarantined (§13) |
+| **Resurrection through ledger truncation** (round 3, not in the Review) | `LEDGER_LOSS` drops the admission that demoted `A`; `Σ` again says subject | **Repaired** by the observed/effective comparison: the repository still declares the demotion, so `A` is quarantined (§13). *Superseded in round 4: partial, since a stale-consistent restore leaves `Q` empty; the loss boundary is the defense* |
 | **Domain laundering** (round 3, not in the Review) | reclassify a part's owning domain, then promote it so a weaker reviewer accepts it | **Repaired**: a kind or domain change needs a judgment by an actor qualified for the current domain (§6.8 step 4(a), §12.2) |
 | Ruleset evolution during quarantined intake | adopt a ruleset while a structural delta is quarantined; reclassify relation types | `Σ` and `Q` unchanged; adoption validated under the ruleset then in force; reclassification makes affected subjects ill-formed with visible impact; history unchanged (§11.2, §6.2, §13) |
 | **Vocabulary evolution invalidating accepted content** (round 3, not in the Review) | rename or remove a relation type in a new ruleset | **Repaired**: adoption declares `READ`/`MIGRATE`/`REJECT` for existing uses and shows the derived impact before the gate; legacy relations are proposed and unaffected (§6.2) |
@@ -1586,7 +1840,7 @@ Each attack tried to obey every local rule while violating a governing invariant
 | Stale evidence reuse | merged-tree change in an undeclared execution dependency | Widening via analyzer incompleteness; residual stated (§8.4, §10) |
 | Historical profile isolation after schema evolution | new record schema or relation vocabulary while version-bound work continues | Frozen Core profiles untouched (PC-001); `LEGACY(p)` interpreted by `p`; historical views use the ruleset and schema of their position; current derivation fails closed only through declared vocabulary impact (§6.2, §13, §24) |
 | **Crash between ledger append and currentness qualification** (round 3, Blocker C) | append L100, crash before any witness holds it | **Repaired**: L100 is provisional; nothing depended on it; anchoring completes on restart, or the request is resubmitted (§15.3) |
-| Crash between qualification and publication | admitted, integration CAS not done | `PENDING`, then `PUBLISHED`/`OVERTAKEN` (§15.3) |
+| Crash between qualification and publication | admitted, integration CAS not done | `PENDING`, then `PUBLISHED`/`OVERTAKEN` (§15.3). *Superseded in round 4: revision 3 had no legal append to record the outcome (8a75346 Blocker A); repaired by successor-entry reconciliation* |
 | **Stale or rewound canonical state** (round 3, Blocker C) | the Review's L99/L100 world; fresh clone reaching only witnesses lacking the newest checkpoint | **Repaired**: quorum admission plus `q_a + r > N + f`; every admitted head is visible to every qualifying evaluator (§15.4) |
 | Witness disagreement | conflicting checkpoints; sub-quorum checkpoint of a vanished entry; relayed old checkpoints | `FORK` until human-gated resolution; relaying an old checkpoint is harmless; relaying can complete a quorum but never forge one (§15.4) |
 | Repository restoration from stale backup | product ref and ledger restored to an older state | Product: absorbed, bytes drift, declarations quarantined, `Σ` unaffected. Ledger: `ROLLBACK` from any read quorum (§13) |
@@ -1599,7 +1853,7 @@ Each attack tried to obey every local rule while violating a governing invariant
 
 Residuals carried rather than repaired, because no architecture removes them: undeclared semantic dependencies (§8.4); circular reasoning stated only in prose (§6.2); foreign edits that reduce governance validity, but never production, until dispositioned (§11.3); and the information-theoretic limit of §15.4.
 
-### 27.2 Minimum-justified-architecture pass
+Rounds 2-3 minimum-justified-architecture record (superseded by §27.2, which carries its conclusions and rejected additions):
 
 - **Primitives:** four, unchanged since round 2, when `Change` became an admission request. Round 3 adds none. The SDG is a semantic declaration. Effective structure and tenure are S0 derivations. Provisional versus admitted is a property of a ledger entry decided by witness quorum.
 - **Constructs:** round 2 used one composite subject for both refinement parents and simultaneous groups. Round 3 separates them, because the conflation was Blocker A; the separation adds a declaration, not a primitive. One boundary-completeness judgment serves per-unit and per-scope completeness. `acc(·)` is a display view.
@@ -1622,21 +1876,23 @@ Residuals carried rather than repaired, because no architecture removes them: un
 GOVERNING DESIGN PROTOCOL: SSDP 6.6.0
 TARGET: SSDS 8.0.0
 ARCHITECTURE: basis-stamped judgments over content-addressed units grouped into acceptance subjects;
-              stratified pure derivation (S0 observed content and admitted effective structure, S1 challenges,
-              S2 least-fixed-point support, S3 consequences); relation roles and cycle classes with
-              simultaneous-definition groups; tenure-scoped acceptance; single Admission writer; single-ref append
-              admitted by witness quorum; currentness only for quorum-witnessed heads; reconciled publication;
-              Git-replicated ledger; optimistic concurrency; one intake route with structural quarantine;
-              refinement plus qualified promotion for migration
+              stratified pure derivation (S0 observed content, admitted effective structure and publication
+              classification; S1 challenges and loss-boundary continuity; S2 least-fixed-point support;
+              S3 consequences); relation roles and cycle classes with simultaneous-definition groups;
+              tenure-scoped acceptance; single Admission writer; single-ref append admitted by witness quorum;
+              currentness only for quorum-witnessed heads; publication reconciled by the successor entry's
+              integration observation; known admitted loss as a continuity boundary; Git-replicated ledger;
+              optimistic concurrency; one intake route with structural quarantine; refinement plus qualified
+              promotion for migration
 SOURCE SNAPSHOT: f96b7ccf90dede4150d0efa17264fff07ec12d0d (ssdp-7.0-scientific-epistemic-closure)
 DESIGN BASIS: befe6782e7c8fe038bf7cb764646d133ca167855 (befe678 hypothesis archived byte-identically)
-PRIOR REVIEWS: f9d9de8 NO-PASS (repaired by revision 2); 441cf5c NO-PASS
-               (qualification/ssds80/WORKPLAN-REVIEW-SSDS-8.0-441CF5C-NO-PASS.md); repaired here (§0.1)
-THIS WORKPLAN: design revision 3; proposed; not accepted-current; not an Architecture Manual; no self-awarded PASS
+PRIOR REVIEWS: f9d9de8 NO-PASS (repaired by revision 2); 441cf5c NO-PASS (repaired by revision 3);
+               8a75346 NO-PASS (qualification/ssds80/WORKPLAN-REVIEW-SSDS-8.0-8A75346-NO-PASS.md); repaired here (§0.1)
+THIS WORKPLAN: design revision 4; proposed; not accepted-current; not an Architecture Manual; no self-awarded PASS
 SSDP 7: active closure; inheritance NOT FINAL; Stage H retargeting belongs to Protocol 7's own closeout (§0.2)
 D3: ready for fresh independent falsification Review; D4 handoff requires Phases A and C
 D4: NOT AUTHORIZED
 SERIOUS CHALLENGE: none
-NEXT ACTION: fresh independent D3 Review of design revision 3 by a context that authored neither it nor its
+NEXT ACTION: fresh independent D3 Review of design revision 4 by a context that authored neither it nor its
              predecessors; preserve the branch while Protocol 7 closes; then Phase A.
 ```
