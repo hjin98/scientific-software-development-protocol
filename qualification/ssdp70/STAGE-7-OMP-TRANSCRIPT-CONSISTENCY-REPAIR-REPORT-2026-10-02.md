@@ -260,7 +260,7 @@ All tests executed on implementation commit `1715a8f0ddd6360d68c54afd650f32b037b
 - **Focused Unit Tests (`test_omp_units.py`):** 73 passed in 6.472s.
 - **Campaign & Admission Tests (`test_omp_stage7_campaign.py`, `test_omp_stage7_admission.py`):** 31 passed in 0.082s.
 - **Complete Unit Regression Suite (9 test modules):** 245 passed in 8.851s (`test_control_path_policy.py`, `test_harness_integration.py`, `test_mcp_stdio.py`, `test_omp_stage7_admission.py`, `test_omp_stage7_campaign.py`, `test_omp_units.py`, `test_portable70.py`, `test_stage_f_integrity_repairs.py`, `test_stage_f_v4_repairs.py`).
-- **Complete Integration Test Suite (`test_omp_integration.py`):** 54 passed in 1,162.710s (retained from baseline suite; total discovery 299 passed).
+- **Complete Integration Test Suite (`test_omp_integration.py`):** 54 passed in 1,163.037s (freshly executed against current adapter `1715a8f0ddd6` and profile `68d440fd6f8e...`; total discovery 299 passed in 1,171.750s).
 - **Repository Test Suite (`tests/`):** 407 passed (3 skipped) in 16.427s.
 - **Whitespace / Linter Check:** `git diff --check` passed cleanly with 0 errors.
 
