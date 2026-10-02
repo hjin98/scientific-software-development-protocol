@@ -24,6 +24,7 @@ This report records the D4 repair of the SSDP 7.0 OMP Stage 7 execution profile 
 - **Branch:** `ssdp-7.0-scientific-epistemic-closure`
 - **Candidate starting head:** `b0af78352c8dfaf6c33a3d045d76d1c147306725`
 - **Implementation commit:** `d4073e539aee86f62d31acb0a02950a62554ec03`
+- **Final closure report commit:** `9c3d94e1e9c58812b1574fc0926cf4acde1d38e4`
 - **Immutable semantic subject:** `db94a2dfb7fef480f37227eab5c45256e89901b8`
 - **p66 arm commit:** `22f4bdba53795da3a6f13f162529f3a843fc37ae`
 - **p66 package-tree SHA-256:** `e6d960a866fb794382fa5fdaa3e351681d292803dd035e5d4786a981a2a1e083`
