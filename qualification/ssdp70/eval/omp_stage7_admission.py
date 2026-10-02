@@ -38,31 +38,7 @@ VALID_EVIDENCE_CLASSES = {
     "deterministic-falsification",
     "independent-inspection",
 }
-SECTION6_CELLS = (
-    "known_broken_both_arms_miss",
-    "known_broken_wrong_binding_o3",
-    "known_broken_wrong_null_variant_delegate",
-    "known_broken_false_tension_closure_asserter",
-    "known_broken_loss_before_destructive_boundary",
-    "known_broken_unauthorized_write",
-    "known_broken_version_self_adoption",
-    "known_good_legitimate_withholding",
-    "known_good_designed_termination",
-    "reject_missing_artifact",
-    "reject_missing_oracle",
-    "reject_missing_scoring_disposition",
-    "reject_incomplete_or_failed_termination",
-    "perturb_cache_identity",
-    "perturb_profile_identity",
-    "perturb_core_identity",
-    "perturb_evaluator_identity",
-    "catalog_contamination",
-    "containment_escape_attempts_retained",
-    "ordinary_entry_case_classes",
-    "final_report_changed_files_tool_trace_assessment",
-    "issue_network_external_write_standins",
-    "chained_delegate_first_look",
-)
+SECTION6_CELLS = core70.EXECUTOR_SECTION6_CELLS
 
 CHECK_EVIDENCE_CLASS_FLOORS = {
     "exact_subject_profile_identity": {"exact-profile-behavior"},

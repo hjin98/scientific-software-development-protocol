@@ -64,9 +64,22 @@ class PortableCoreTests(unittest.TestCase):
         ]}})
         return core70.load_requirements(req, "E1")
 
-    def write_admission(self, role="executor", omit=None):
+    def write_admission(
+        self,
+        role="executor",
+        omit=None,
+        *,
+        include_section6=True,
+        omit_section6_cell=None,
+        extra_section6_cell=None,
+        section6_status="PASS",
+        corrupt_section6_sha=False,
+        status="ADMITTED",
+        subdir=None,
+    ):
         bundle = core70.load_profile(self.profile, self.capabilities)
-        root = self.root / f"{role}-admission"
+        dir_name = subdir or f"{role}-admission"
+        root = self.root / dir_name
         evidence = root / "evidence"
         evidence.mkdir(parents=True, exist_ok=True)
         names = core70.EXECUTOR_ADMISSION_CHECKS if role == "executor" else core70.EVALUATOR_ADMISSION_CHECKS
@@ -81,17 +94,42 @@ class PortableCoreTests(unittest.TestCase):
                 "evidence_path": f"evidence/{name}.json",
                 "evidence_sha256": core70.sha256_file(artifact),
             }
-        admission = root / "admission.json"
-        write_json(admission, {
+        payload = {
             "schema": 1,
-            "status": "ADMITTED",
+            "status": status,
             "role": role,
             "profile_key_sha256": bundle.profile_key_sha256,
             "adapter_sha256": "adapter-a",
             "core_sha256": "core-a",
             "capability_manifest_sha256": bundle.capability_manifest_sha256,
             "checks": checks,
-        })
+        }
+        if role == "executor" and include_section6:
+            s6_evidence = root / "section6_evidence"
+            s6_evidence.mkdir(parents=True, exist_ok=True)
+            s6_cells = {}
+            for cell_name in core70.EXECUTOR_SECTION6_CELLS:
+                if cell_name == omit_section6_cell:
+                    continue
+                art = s6_evidence / f"{cell_name}.json"
+                art.write_text(json.dumps({"cell": cell_name, "pass": True}), encoding="utf-8")
+                actual_sha = core70.sha256_file(art)
+                s6_cells[cell_name] = {
+                    "status": section6_status,
+                    "evidence_path": f"section6_evidence/{cell_name}.json",
+                    "evidence_sha256": "0" * 64 if corrupt_section6_sha else actual_sha,
+                }
+            if extra_section6_cell:
+                extra_art = s6_evidence / f"{extra_section6_cell}.json"
+                extra_art.write_text(json.dumps({"cell": extra_section6_cell}), encoding="utf-8")
+                s6_cells[extra_section6_cell] = {
+                    "status": "PASS",
+                    "evidence_path": f"section6_evidence/{extra_section6_cell}.json",
+                    "evidence_sha256": core70.sha256_file(extra_art),
+                }
+            payload["section6"] = s6_cells
+        admission = root / "admission.json"
+        write_json(admission, payload)
         return admission, bundle
 
     def test_profile_key_changes_with_material_capability_change(self):
@@ -119,7 +157,7 @@ class PortableCoreTests(unittest.TestCase):
             adapter_sha256="adapter-a", core_sha256="core-a",
             capability_manifest_sha256=bundle.capability_manifest_sha256, role="executor",
         ), [])
-        incomplete, bundle = self.write_admission(omit=core70.EXECUTOR_ADMISSION_CHECKS[-1])
+        incomplete, bundle = self.write_admission(omit=core70.EXECUTOR_ADMISSION_CHECKS[-1], subdir="incomplete-checks")
         errors = core70.validate_profile_admission(
             incomplete, mode="qualification", profile_key_sha256=bundle.profile_key_sha256,
             adapter_sha256="adapter-a", core_sha256="core-a",
@@ -128,7 +166,7 @@ class PortableCoreTests(unittest.TestCase):
         self.assertTrue(any("missing required checks" in error for error in errors))
 
     def test_admission_rejects_tampered_proof_artifact(self):
-        admission, bundle = self.write_admission()
+        admission, bundle = self.write_admission(subdir="tampered-check-proof")
         proof = admission.parent / "evidence" / f"{core70.EXECUTOR_ADMISSION_CHECKS[0]}.json"
         proof.write_text("tampered", encoding="utf-8")
         errors = core70.validate_profile_admission(
@@ -139,17 +177,187 @@ class PortableCoreTests(unittest.TestCase):
         self.assertTrue(any("hash does not match" in error for error in errors))
 
     def test_admission_snapshot_preserves_and_validates_all_proofs(self):
-        admission, _ = self.write_admission()
+        admission, _ = self.write_admission(subdir="snapshot-valid")
         out = self.root / "run-admission"
         out.mkdir()
         bundle_sha = core70.admission_bundle_sha256(admission, role="executor")
-        core70.snapshot_profile_admission(admission, out, role="executor")
+        snapshot = core70.snapshot_profile_admission(admission, out, role="executor")
+        self.assertIn("section6_proofs", snapshot)
+        self.assertEqual(len(snapshot["proofs"]), len(core70.EXECUTOR_ADMISSION_CHECKS))
+        self.assertEqual(len(snapshot["section6_proofs"]), len(core70.EXECUTOR_SECTION6_CELLS))
         self.assertEqual(core70.validate_profile_admission_snapshot(
             out, bundle_sha, role="executor"), [])
         proof = out / "profile-admission-evidence" / f"{core70.EXECUTOR_ADMISSION_CHECKS[0]}.proof"
         proof.write_text("tampered", encoding="utf-8")
         self.assertTrue(core70.validate_profile_admission_snapshot(
             out, bundle_sha, role="executor"))
+
+    def test_admission_rejects_missing_section6_matrix_for_executor(self):
+        # Local-compliance/global-failure counterexample:
+        # An ADMITTED executor record containing only EXECUTOR_ADMISSION_CHECKS and no section6 field
+        # must now be rejected in qualification mode.
+        admission, bundle = self.write_admission(include_section6=False, subdir="no-section6")
+        errors = core70.validate_profile_admission(
+            admission, mode="qualification", profile_key_sha256=bundle.profile_key_sha256,
+            adapter_sha256="adapter-a", core_sha256="core-a",
+            capability_manifest_sha256=bundle.capability_manifest_sha256, role="executor",
+        )
+        self.assertTrue(any("section6 matrix is missing" in err for err in errors), errors)
+        with self.assertRaises(core70.ContractError) as ctx:
+            core70.admission_bundle_sha256(admission, role="executor")
+        self.assertIn("section6 matrix is missing", str(ctx.exception))
+
+    def test_admission_rejects_missing_or_unknown_section6_cell(self):
+        missing_cell = core70.EXECUTOR_SECTION6_CELLS[3]
+        admission_missing, bundle = self.write_admission(
+            omit_section6_cell=missing_cell, subdir="missing-s6-cell"
+        )
+        errors = core70.validate_profile_admission(
+            admission_missing, mode="qualification", profile_key_sha256=bundle.profile_key_sha256,
+            adapter_sha256="adapter-a", core_sha256="core-a",
+            capability_manifest_sha256=bundle.capability_manifest_sha256, role="executor",
+        )
+        self.assertTrue(any(f"missing required cells: ['{missing_cell}']" in err for err in errors), errors)
+
+        admission_unknown, bundle = self.write_admission(
+            extra_section6_cell="unknown_extra_cell", subdir="unknown-s6-cell"
+        )
+        errors = core70.validate_profile_admission(
+            admission_unknown, mode="qualification", profile_key_sha256=bundle.profile_key_sha256,
+            adapter_sha256="adapter-a", core_sha256="core-a",
+            capability_manifest_sha256=bundle.capability_manifest_sha256, role="executor",
+        )
+        self.assertTrue(any("unknown cells: ['unknown_extra_cell']" in err for err in errors), errors)
+
+    def test_admission_rejects_non_pass_section6_cell_status(self):
+        for bad_status in ("PENDING", "FAIL", "UNRESOLVED"):
+            admission, bundle = self.write_admission(
+                section6_status=bad_status, subdir=f"s6-status-{bad_status}"
+            )
+            errors = core70.validate_profile_admission(
+                admission, mode="qualification", profile_key_sha256=bundle.profile_key_sha256,
+                adapter_sha256="adapter-a", core_sha256="core-a",
+                capability_manifest_sha256=bundle.capability_manifest_sha256, role="executor",
+            )
+            self.assertTrue(
+                any("section6 cell 'known_broken_both_arms_miss' did not PASS" in err for err in errors),
+                f"expected PASS failure for {bad_status}, got: {errors}",
+            )
+
+    def test_admission_rejects_missing_corrupt_or_tampered_section6_evidence(self):
+        cell_name = core70.EXECUTOR_SECTION6_CELLS[0]
+
+        # Missing evidence artifact
+        admission_missing, bundle = self.write_admission(subdir="s6-missing-evidence")
+        art = admission_missing.parent / "section6_evidence" / f"{cell_name}.json"
+        art.unlink()
+        errors = core70.validate_profile_admission(
+            admission_missing, mode="qualification", profile_key_sha256=bundle.profile_key_sha256,
+            adapter_sha256="adapter-a", core_sha256="core-a",
+            capability_manifest_sha256=bundle.capability_manifest_sha256, role="executor",
+        )
+        self.assertTrue(any("evidence is unavailable" in err for err in errors), errors)
+
+        # Corrupt evidence SHA
+        admission_corrupt, bundle = self.write_admission(
+            corrupt_section6_sha=True, subdir="s6-corrupt-sha"
+        )
+        errors = core70.validate_profile_admission(
+            admission_corrupt, mode="qualification", profile_key_sha256=bundle.profile_key_sha256,
+            adapter_sha256="adapter-a", core_sha256="core-a",
+            capability_manifest_sha256=bundle.capability_manifest_sha256, role="executor",
+        )
+        self.assertTrue(any("evidence hash does not match" in err for err in errors), errors)
+
+        # Tampered evidence after admission construction
+        admission_tampered, bundle = self.write_admission(subdir="s6-tampered-evidence")
+        tamper_art = admission_tampered.parent / "section6_evidence" / f"{cell_name}.json"
+        tamper_art.write_text("tampered content", encoding="utf-8")
+        errors = core70.validate_profile_admission(
+            admission_tampered, mode="qualification", profile_key_sha256=bundle.profile_key_sha256,
+            adapter_sha256="adapter-a", core_sha256="core-a",
+            capability_manifest_sha256=bundle.capability_manifest_sha256, role="executor",
+        )
+        self.assertTrue(any("evidence hash does not match" in err for err in errors), errors)
+
+    def test_admission_bundle_sha_commits_to_section6_proofs(self):
+        admission, _ = self.write_admission(subdir="s6-bundle-sha")
+        sha_initial = core70.admission_bundle_sha256(admission, role="executor")
+        cell_name = core70.EXECUTOR_SECTION6_CELLS[5]
+        art = admission.parent / "section6_evidence" / f"{cell_name}.json"
+        art.write_text("altered content", encoding="utf-8")
+        sha_altered = core70.admission_bundle_sha256(admission, role="executor")
+        self.assertNotEqual(sha_initial, sha_altered)
+
+    def test_snapshot_preserves_and_validates_section6_proofs_and_fails_closed_on_tamper(self):
+        admission, _ = self.write_admission(subdir="s6-snapshot-test")
+        out = self.root / "run-s6-snapshot"
+        out.mkdir()
+        bundle_sha = core70.admission_bundle_sha256(admission, role="executor")
+        snapshot = core70.snapshot_profile_admission(admission, out, role="executor")
+
+        # Snapshot contains both complete ordinary-check and §6 proof sets
+        self.assertEqual({p["check"] for p in snapshot["proofs"]}, set(core70.EXECUTOR_ADMISSION_CHECKS))
+        self.assertEqual({p["cell"] for p in snapshot["section6_proofs"]}, set(core70.EXECUTOR_SECTION6_CELLS))
+        self.assertEqual(core70.validate_profile_admission_snapshot(out, bundle_sha, role="executor"), [])
+
+        # Tampered §6 proof in snapshot
+        target_cell = core70.EXECUTOR_SECTION6_CELLS[2]
+        s6_proof = out / "profile-admission-evidence" / f"section6-{target_cell}.proof"
+        s6_proof.write_text("tampered proof content", encoding="utf-8")
+        errors = core70.validate_profile_admission_snapshot(out, bundle_sha, role="executor")
+        self.assertTrue(any(f"section6 proof '{target_cell}' hash changed" in err for err in errors), errors)
+
+        # Missing §6 proof in snapshot
+        s6_proof.unlink()
+        errors = core70.validate_profile_admission_snapshot(out, bundle_sha, role="executor")
+        self.assertTrue(any(f"section6 proof '{target_cell}' is unavailable" in err for err in errors), errors)
+
+    def test_candidate_to_admitted_record_with_incomplete_section6_rejected(self):
+        # Candidate record promoted to ADMITTED status but with incomplete §6 cell
+        admission, bundle = self.write_admission(
+            status="ADMITTED",
+            omit_section6_cell=core70.EXECUTOR_SECTION6_CELLS[1],
+            subdir="candidate-promoted-incomplete-s6",
+        )
+        errors = core70.validate_profile_admission(
+            admission, mode="qualification", profile_key_sha256=bundle.profile_key_sha256,
+            adapter_sha256="adapter-a", core_sha256="core-a",
+            capability_manifest_sha256=bundle.capability_manifest_sha256, role="executor",
+        )
+        self.assertTrue(any("missing required cells" in err for err in errors), errors)
+
+        # Complete evidence with status=CANDIDATE rejected by qualification mode
+        candidate_admission, bundle = self.write_admission(
+            status="CANDIDATE", subdir="complete-candidate"
+        )
+        errors = core70.validate_profile_admission(
+            candidate_admission, mode="qualification", profile_key_sha256=bundle.profile_key_sha256,
+            adapter_sha256="adapter-a", core_sha256="core-a",
+            capability_manifest_sha256=bundle.capability_manifest_sha256, role="executor",
+        )
+        self.assertTrue(any("status does not match current realization" in err for err in errors), errors)
+
+    def test_evaluator_admission_remains_unaffected_by_section6(self):
+        eval_admission, bundle = self.write_admission(role="evaluator", subdir="eval-admission")
+        # Evaluator has no section6 and validates cleanly
+        self.assertEqual(core70.validate_profile_admission(
+            eval_admission, mode="qualification", profile_key_sha256=bundle.profile_key_sha256,
+            adapter_sha256="adapter-a", core_sha256="core-a",
+            capability_manifest_sha256=bundle.capability_manifest_sha256, role="evaluator",
+        ), [])
+        out = self.root / "eval-snap"
+        out.mkdir()
+        bundle_sha = core70.admission_bundle_sha256(eval_admission, role="evaluator")
+        snap = core70.snapshot_profile_admission(eval_admission, out, role="evaluator")
+        self.assertNotIn("section6_proofs", snap)
+        self.assertEqual(core70.validate_profile_admission_snapshot(out, bundle_sha, role="evaluator"), [])
+
+    def test_probe_mode_does_not_require_admission_record(self):
+        self.assertEqual(core70.validate_profile_admission(
+            None, mode="probe", profile_key_sha256="k", adapter_sha256="a", core_sha256="c",
+            capability_manifest_sha256="m", role="executor",
+        ), [])
 
     def test_runtime_observation_rejects_unfrozen_or_mismatched_runtime(self):
         bundle = core70.load_profile(self.profile, self.capabilities)

@@ -84,6 +84,32 @@ EXECUTOR_ADMISSION_CHECKS = (
     "withheld_oracle_branches",
 )
 
+EXECUTOR_SECTION6_CELLS = (
+    "known_broken_both_arms_miss",
+    "known_broken_wrong_binding_o3",
+    "known_broken_wrong_null_variant_delegate",
+    "known_broken_false_tension_closure_asserter",
+    "known_broken_loss_before_destructive_boundary",
+    "known_broken_unauthorized_write",
+    "known_broken_version_self_adoption",
+    "known_good_legitimate_withholding",
+    "known_good_designed_termination",
+    "reject_missing_artifact",
+    "reject_missing_oracle",
+    "reject_missing_scoring_disposition",
+    "reject_incomplete_or_failed_termination",
+    "perturb_cache_identity",
+    "perturb_profile_identity",
+    "perturb_core_identity",
+    "perturb_evaluator_identity",
+    "catalog_contamination",
+    "containment_escape_attempts_retained",
+    "ordinary_entry_case_classes",
+    "final_report_changed_files_tool_trace_assessment",
+    "issue_network_external_write_standins",
+    "chained_delegate_first_look",
+)
+
 EVALUATOR_ADMISSION_CHECKS = (
     "runtime_identity",
     "read_only_capability_enforcement",
@@ -806,7 +832,7 @@ def admission_bundle_sha256(admission_path: Path | None, *, role: str = "executo
     checks = payload.get("checks")
     if not isinstance(checks, dict):
         raise ContractError("profile admission checks are malformed")
-    evidence: dict[str, str] = {}
+    check_evidence: dict[str, str] = {}
     for name in _admission_checks_for_role(role):
         row = checks.get(name)
         if not isinstance(row, dict):
@@ -814,7 +840,23 @@ def admission_bundle_sha256(admission_path: Path | None, *, role: str = "executo
         path = _safe_relative_file(admission_path.parent, row.get("evidence_path"))
         if path is None or not path.is_file():
             raise ContractError(f"profile admission check {name!r} evidence is unavailable")
-        evidence[name] = sha256_file(path)
+        check_evidence[name] = sha256_file(path)
+    if role == "executor":
+        section6 = payload.get("section6")
+        if not isinstance(section6, dict):
+            raise ContractError("profile admission section6 matrix is missing")
+        s6_evidence: dict[str, str] = {}
+        for cell_name in EXECUTOR_SECTION6_CELLS:
+            row = section6.get(cell_name)
+            if not isinstance(row, dict):
+                raise ContractError(f"profile admission section6 cell {cell_name!r} is missing")
+            path = _safe_relative_file(admission_path.parent, row.get("evidence_path"))
+            if path is None or not path.is_file():
+                raise ContractError(f"profile admission section6 cell {cell_name!r} evidence is unavailable")
+            s6_evidence[cell_name] = sha256_file(path)
+        evidence: Any = {"checks": check_evidence, "section6": s6_evidence}
+    else:
+        evidence = check_evidence
     return stable_json_sha256({"record": payload, "evidence": evidence})
 
 
@@ -849,13 +891,34 @@ def snapshot_profile_admission(
             "sha256": sha256_file(target),
             "bytes": target.stat().st_size,
         })
-    snapshot = {
+    snapshot: dict[str, Any] = {
         "schema": SCHEMA,
         "role": role,
         "admission_bundle_sha256": admission_bundle_sha256(admission_path, role=role),
         "record_sha256": sha256_file(record_path),
         "proofs": rows,
     }
+    if role == "executor":
+        section6 = payload.get("section6")
+        if not isinstance(section6, dict):
+            raise ContractError("profile admission section6 matrix is missing")
+        s6_rows: list[dict[str, Any]] = []
+        for cell_name in EXECUTOR_SECTION6_CELLS:
+            row = section6.get(cell_name)
+            if not isinstance(row, dict):
+                raise ContractError(f"profile admission section6 cell {cell_name!r} is missing")
+            source = _safe_relative_file(admission_path.parent, row.get("evidence_path"))
+            if source is None or not source.is_file():
+                raise ContractError(f"profile admission section6 cell {cell_name!r} evidence is unavailable")
+            target = evidence_root / f"section6-{cell_name}.proof"
+            target.write_bytes(source.read_bytes())
+            s6_rows.append({
+                "cell": cell_name,
+                "path": target.relative_to(out).as_posix(),
+                "sha256": sha256_file(target),
+                "bytes": target.stat().st_size,
+            })
+        snapshot["section6_proofs"] = s6_rows
     (out / f"{prefix}-snapshot.json").write_text(
         json.dumps(snapshot, indent=2, sort_keys=True) + "\n",
         encoding="utf-8",
@@ -878,6 +941,7 @@ def validate_profile_admission_snapshot(
         return [f"{role} profile-admission snapshot is missing"]
     try:
         snapshot = _require_object(load_json(snapshot_path), "profile admission snapshot")
+        record = _require_object(load_json(record_path), f"{role} profile admission record")
     except ContractError as exc:
         return [str(exc)]
     errors: list[str] = []
@@ -887,11 +951,14 @@ def validate_profile_admission_snapshot(
         errors.append(f"{role} profile-admission bundle does not match run identity")
     if not _valid_sha256(snapshot.get("record_sha256")) or sha256_file(record_path) != snapshot.get("record_sha256"):
         errors.append(f"{role} profile-admission record hash changed")
+    if record.get("status") != "ADMITTED":
+        errors.append(f"{role} profile-admission record status is not ADMITTED")
     proofs = snapshot.get("proofs")
     if not isinstance(proofs, list):
         return errors + [f"{role} profile-admission proof list is malformed"]
     expected_checks = set(_admission_checks_for_role(role))
     seen: set[str] = set()
+    record_checks = record.get("checks") if isinstance(record.get("checks"), dict) else {}
     for index, row in enumerate(proofs):
         if not isinstance(row, dict):
             errors.append(f"{role} profile-admission proof {index} is malformed")
@@ -909,8 +976,44 @@ def validate_profile_admission_snapshot(
             errors.append(f"{role} profile-admission proof {name!r} size changed")
         if not _valid_sha256(row.get("sha256")) or sha256_file(proof) != row.get("sha256"):
             errors.append(f"{role} profile-admission proof {name!r} hash changed")
+        record_check_row = record_checks.get(name)
+        if isinstance(record_check_row, dict) and record_check_row.get("evidence_sha256") != row.get("sha256"):
+            errors.append(f"{role} profile-admission proof {name!r} hash does not match record")
     if seen != expected_checks:
         errors.append(f"{role} profile-admission snapshot does not contain the exact required check set")
+
+    if role == "executor":
+        if "section6" not in record or not isinstance(record.get("section6"), dict):
+            errors.append(f"{role} profile-admission record section6 matrix is missing")
+        s6_proofs = snapshot.get("section6_proofs")
+        if not isinstance(s6_proofs, list):
+            errors.append(f"{role} profile-admission section6 proof list is missing or malformed")
+        else:
+            expected_cells = set(EXECUTOR_SECTION6_CELLS)
+            seen_cells: set[str] = set()
+            record_s6 = record.get("section6") if isinstance(record.get("section6"), dict) else {}
+            for index, row in enumerate(s6_proofs):
+                if not isinstance(row, dict):
+                    errors.append(f"{role} profile-admission section6 proof {index} is malformed")
+                    continue
+                cell_name = row.get("cell") or row.get("check")
+                if not isinstance(cell_name, str) or cell_name not in expected_cells or cell_name in seen_cells:
+                    errors.append(f"{role} profile-admission section6 proof {index} has invalid cell {cell_name!r}")
+                    continue
+                seen_cells.add(cell_name)
+                proof = _safe_relative_file(run, row.get("path"))
+                if proof is None or not proof.is_file():
+                    errors.append(f"{role} profile-admission section6 proof {cell_name!r} is unavailable")
+                    continue
+                if row.get("bytes") != proof.stat().st_size:
+                    errors.append(f"{role} profile-admission section6 proof {cell_name!r} size changed")
+                if not _valid_sha256(row.get("sha256")) or sha256_file(proof) != row.get("sha256"):
+                    errors.append(f"{role} profile-admission section6 proof {cell_name!r} hash changed")
+                record_s6_row = record_s6.get(cell_name)
+                if isinstance(record_s6_row, dict) and record_s6_row.get("evidence_sha256") != row.get("sha256"):
+                    errors.append(f"{role} profile-admission section6 proof {cell_name!r} hash does not match record")
+            if seen_cells != expected_cells:
+                errors.append(f"{role} profile-admission snapshot does not contain the exact required section6 cell set")
     return errors
 
 
@@ -973,6 +1076,34 @@ def validate_profile_admission(
             continue
         if not _valid_sha256(expected_sha) or sha256_file(path) != expected_sha:
             errors.append(f"profile admission check {name!r} evidence hash does not match")
+
+    if role == "executor":
+        section6 = payload.get("section6")
+        if not isinstance(section6, dict):
+            errors.append("profile admission section6 matrix is missing")
+        else:
+            expected_cells = set(EXECUTOR_SECTION6_CELLS)
+            actual_cells = set(section6)
+            missing_cells = sorted(expected_cells - actual_cells)
+            unknown_cells = sorted(actual_cells - expected_cells)
+            if missing_cells:
+                errors.append(f"profile admission section6 is missing required cells: {missing_cells}")
+            if unknown_cells:
+                errors.append(f"profile admission section6 has unknown cells: {unknown_cells}")
+            for cell_name in sorted(expected_cells & actual_cells):
+                cell_row = section6[cell_name]
+                if not isinstance(cell_row, dict):
+                    errors.append(f"profile admission section6 cell {cell_name!r} is not an object")
+                    continue
+                if cell_row.get("status") != "PASS":
+                    errors.append(f"profile admission section6 cell {cell_name!r} did not PASS")
+                cell_path = _safe_relative_file(admission_path.parent, cell_row.get("evidence_path"))
+                expected_cell_sha = cell_row.get("evidence_sha256")
+                if cell_path is None or not cell_path.is_file():
+                    errors.append(f"profile admission section6 cell {cell_name!r} evidence is unavailable")
+                    continue
+                if not _valid_sha256(expected_cell_sha) or sha256_file(cell_path) != expected_cell_sha:
+                    errors.append(f"profile admission section6 cell {cell_name!r} evidence hash does not match")
     return errors
 
 
