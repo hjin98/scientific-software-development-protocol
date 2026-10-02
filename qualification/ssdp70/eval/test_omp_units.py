@@ -1269,6 +1269,147 @@ class OmpTranscriptConsistencyAndPruningTests(unittest.TestCase):
         _, _, errors, _ = omp.normalize(truncated_trace, "run-1", {})
         self.assertTrue(any("native trace has no agent_end record" in e for e in errors))
 
+    def test_transcript_consistency_mutated_tool_name_fails_closed(self):
+        base_msgs = [
+            {"role": "user", "attribution": "user", "timestamp": 1790907334000, "content": [{"type": "text", "text": "start"}]},
+            {"role": "assistant", "stopReason": "toolUse", "timestamp": 1790907334100, "content": [{"type": "toolCall", "id": "call-1", "name": "read", "arguments": {"path": "v.md"}}]},
+            {"role": "toolResult", "toolCallId": "call-1", "toolName": "read", "isError": False, "details": {"lines": 10}, "timestamp": 1790907334200, "content": [{"type": "text", "text": "content"}]},
+            {"role": "assistant", "stopReason": "stop", "timestamp": 1790907334300, "content": [{"type": "text", "text": "done"}]},
+        ]
+        a_msgs = copy.deepcopy(base_msgs)
+        a_msgs[2]["toolName"] = "mutated_read"
+        trace = self._make_trace(base_msgs, a_msgs)
+        _, _, errors, _ = omp.normalize(trace, "run-1", {})
+        errs = [e for e in errors if "toolName" in e and "metadata mismatch" in e]
+        self.assertEqual(len(errs), 1)
+        self.assertIn("native message events do not equal agent_end transcript", errs[0])
+
+    def test_transcript_consistency_mutated_is_error_fails_closed(self):
+        base_msgs = [
+            {"role": "user", "attribution": "user", "timestamp": 1790907334000, "content": [{"type": "text", "text": "start"}]},
+            {"role": "assistant", "stopReason": "toolUse", "timestamp": 1790907334100, "content": [{"type": "toolCall", "id": "call-1", "name": "read", "arguments": {"path": "v.md"}}]},
+            {"role": "toolResult", "toolCallId": "call-1", "toolName": "read", "isError": False, "details": {"lines": 10}, "timestamp": 1790907334200, "content": [{"type": "text", "text": "content"}]},
+            {"role": "assistant", "stopReason": "stop", "timestamp": 1790907334300, "content": [{"type": "text", "text": "done"}]},
+        ]
+        a_msgs = copy.deepcopy(base_msgs)
+        a_msgs[2]["isError"] = True
+        trace = self._make_trace(base_msgs, a_msgs)
+        _, _, errors, _ = omp.normalize(trace, "run-1", {})
+        errs = [e for e in errors if "isError" in e and "metadata mismatch" in e]
+        self.assertEqual(len(errs), 1)
+        self.assertIn("native message events do not equal agent_end transcript", errs[0])
+
+    def test_transcript_consistency_mutated_details_fails_closed(self):
+        base_msgs = [
+            {"role": "user", "attribution": "user", "timestamp": 1790907334000, "content": [{"type": "text", "text": "start"}]},
+            {"role": "assistant", "stopReason": "toolUse", "timestamp": 1790907334100, "content": [{"type": "toolCall", "id": "call-1", "name": "read", "arguments": {"path": "v.md"}}]},
+            {"role": "toolResult", "toolCallId": "call-1", "toolName": "read", "isError": False, "details": {"lines": 10}, "timestamp": 1790907334200, "content": [{"type": "text", "text": "content"}]},
+            {"role": "assistant", "stopReason": "stop", "timestamp": 1790907334300, "content": [{"type": "text", "text": "done"}]},
+        ]
+        a_msgs = copy.deepcopy(base_msgs)
+        a_msgs[2]["details"] = {"lines": 999}
+        trace = self._make_trace(base_msgs, a_msgs)
+        _, _, errors, _ = omp.normalize(trace, "run-1", {})
+        errs = [e for e in errors if "details" in e and "metadata mismatch" in e]
+        self.assertEqual(len(errs), 1)
+        self.assertIn("native message events do not equal agent_end transcript", errs[0])
+
+    def test_transcript_consistency_mutated_timestamp_metadata_fails_closed(self):
+        base_msgs = [
+            {"role": "user", "attribution": "user", "timestamp": 1790907334000, "content": [{"type": "text", "text": "start"}]},
+            {"role": "assistant", "stopReason": "toolUse", "timestamp": 1790907334100, "content": [{"type": "toolCall", "id": "call-1", "name": "read", "arguments": {"path": "v.md"}}]},
+            {"role": "toolResult", "toolCallId": "call-1", "toolName": "read", "isError": False, "details": {"lines": 10}, "timestamp": 1790907334200, "content": [{"type": "text", "text": "content"}]},
+            {"role": "assistant", "stopReason": "stop", "timestamp": 1790907334300, "content": [{"type": "text", "text": "done"}]},
+        ]
+        # Mutate timestamp on toolResult
+        a_msgs = copy.deepcopy(base_msgs)
+        a_msgs[2]["timestamp"] = 1790907999999
+        trace = self._make_trace(base_msgs, a_msgs)
+        _, _, errors, _ = omp.normalize(trace, "run-1", {})
+        errs = [e for e in errors if "timestamp" in e and "metadata mismatch" in e]
+        self.assertEqual(len(errs), 1)
+        self.assertIn("native message events do not equal agent_end transcript", errs[0])
+
+        # Mutate timestamp on assistant
+        a_msgs2 = copy.deepcopy(base_msgs)
+        a_msgs2[1]["timestamp"] = 1790907888888
+        trace2 = self._make_trace(base_msgs, a_msgs2)
+        _, _, errors2, _ = omp.normalize(trace2, "run-1", {})
+        errs2 = [e for e in errors2 if "timestamp" in e and "metadata mismatch" in e]
+        self.assertEqual(len(errs2), 1)
+        self.assertIn("native message events do not equal agent_end transcript", errs2[0])
+
+    def test_transcript_consistency_arbitrary_added_top_level_key_fails_closed(self):
+        base_msgs = [
+            {"role": "user", "attribution": "user", "timestamp": 1790907334000, "content": [{"type": "text", "text": "start"}]},
+            {"role": "assistant", "stopReason": "toolUse", "timestamp": 1790907334100, "content": [{"type": "toolCall", "id": "call-1", "name": "read", "arguments": {"path": "v.md"}}]},
+            {"role": "toolResult", "toolCallId": "call-1", "toolName": "read", "isError": False, "details": {"lines": 10}, "timestamp": 1790907334200, "content": [{"type": "text", "text": "content"}]},
+            {"role": "assistant", "stopReason": "stop", "timestamp": 1790907334300, "content": [{"type": "text", "text": "done"}]},
+        ]
+        a_msgs = copy.deepcopy(base_msgs)
+        a_msgs[2]["arbitraryInjectedKey"] = "unexpected"
+        trace = self._make_trace(base_msgs, a_msgs)
+        _, _, errors, _ = omp.normalize(trace, "run-1", {})
+        errs = [e for e in errors if "arbitraryInjectedKey" in e and "metadata mismatch" in e]
+        self.assertEqual(len(errs), 1)
+        self.assertIn("native message events do not equal agent_end transcript", errs[0])
+
+    def test_transcript_consistency_arbitrary_removed_top_level_key_fails_closed(self):
+        base_msgs = [
+            {"role": "user", "attribution": "user", "timestamp": 1790907334000, "content": [{"type": "text", "text": "start"}]},
+            {"role": "assistant", "stopReason": "toolUse", "timestamp": 1790907334100, "content": [{"type": "toolCall", "id": "call-1", "name": "read", "arguments": {"path": "v.md"}}]},
+            {"role": "toolResult", "toolCallId": "call-1", "toolName": "read", "isError": False, "details": {"lines": 10}, "timestamp": 1790907334200, "content": [{"type": "text", "text": "content"}]},
+            {"role": "assistant", "stopReason": "stop", "timestamp": 1790907334300, "content": [{"type": "text", "text": "done"}]},
+        ]
+        a_msgs = copy.deepcopy(base_msgs)
+        del a_msgs[2]["details"]
+        trace = self._make_trace(base_msgs, a_msgs)
+        _, _, errors, _ = omp.normalize(trace, "run-1", {})
+        errs = [e for e in errors if "details" in e and "metadata mismatch" in e]
+        self.assertEqual(len(errs), 1)
+        self.assertIn("native message events do not equal agent_end transcript", errs[0])
+
+    def test_transcript_consistency_completed_at_minimal_exclusion_disciplined(self):
+        base_msgs = [
+            {"role": "user", "attribution": "user", "timestamp": 1790907334000, "content": [{"type": "text", "text": "start"}]},
+            {"role": "assistant", "stopReason": "toolUse", "timestamp": 1790907334100, "content": [{"type": "toolCall", "id": "call-1", "name": "read", "arguments": {"path": "v.md"}}]},
+            {"role": "toolResult", "toolCallId": "call-1", "toolName": "read", "isError": False, "details": {"lines": 10}, "timestamp": 1790907334200, "content": [{"type": "text", "text": "content"}]},
+            {"role": "assistant", "stopReason": "stop", "timestamp": 1790907334300, "content": [{"type": "text", "text": "done"}]},
+        ]
+
+        # Case 1: Legitimate native pattern: message_end assistant has numeric completedAt, agent_end does not -> PASS
+        m_msgs = copy.deepcopy(base_msgs)
+        m_msgs[1]["completedAt"] = 1790907334150
+        m_msgs[3]["completedAt"] = 1790907334350
+        trace = self._make_trace(m_msgs, base_msgs)
+        _, _, errors, _ = omp.normalize(trace, "run-1", {})
+        transcript_errors = [e for e in errors if "transcript" in e or "agent_end" in e or "metadata mismatch" in e]
+        self.assertEqual(transcript_errors, [])
+
+        # Case 2: Injected completedAt in agent_end message -> FAILS
+        a_injected = copy.deepcopy(base_msgs)
+        a_injected[1]["completedAt"] = 1790907334150
+        trace = self._make_trace(base_msgs, a_injected)
+        _, _, errors, _ = omp.normalize(trace, "run-1", {})
+        errs = [e for e in errors if "completedAt" in e and "metadata mismatch" in e]
+        self.assertEqual(len(errs), 1)
+
+        # Case 3: completedAt on user/toolResult message in message_end -> FAILS
+        m_tool_completed = copy.deepcopy(base_msgs)
+        m_tool_completed[2]["completedAt"] = 1790907334250
+        trace = self._make_trace(m_tool_completed, base_msgs)
+        _, _, errors, _ = omp.normalize(trace, "run-1", {})
+        errs = [e for e in errors if "completedAt" in e and "metadata mismatch" in e]
+        self.assertEqual(len(errs), 1)
+
+        # Case 4: Non-numeric completedAt in message_end -> FAILS
+        m_non_num = copy.deepcopy(base_msgs)
+        m_non_num[1]["completedAt"] = "invalid-string"
+        trace = self._make_trace(m_non_num, base_msgs)
+        _, _, errors, _ = omp.normalize(trace, "run-1", {})
+        errs = [e for e in errors if "completedAt" in e and "metadata mismatch" in e]
+        self.assertEqual(len(errs), 1)
+
 
 if __name__ == "__main__":
     unittest.main()

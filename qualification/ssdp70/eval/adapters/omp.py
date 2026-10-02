@@ -3060,20 +3060,6 @@ def normalize(stdout: str, run_id: str, context: dict[str, Any] | None = None) -
             )
         else:
             for idx, (m_msg, a_msg) in enumerate(zip(message_ends, agent_end_messages)):
-                if (m_msg.get("role") != a_msg.get("role")
-                        or m_msg.get("toolCallId") != a_msg.get("toolCallId")
-                        or m_msg.get("stopReason") != a_msg.get("stopReason")):
-                    errors.append(
-                        f"native message events do not equal agent_end transcript: "
-                        f"message {idx} identity mismatch"
-                    )
-                    break
-                if m_msg.get("content") != a_msg.get("content"):
-                    errors.append(
-                        f"native message events do not equal agent_end transcript: "
-                        f"message {idx} content mismatch"
-                    )
-                    break
                 if "prunedAt" in a_msg or "prunedAt" in m_msg:
                     errors.append(
                         f"native message events do not equal agent_end transcript: "
@@ -3085,6 +3071,35 @@ def normalize(stdout: str, run_id: str, context: dict[str, Any] | None = None) -
                         f"native message events do not equal agent_end transcript: "
                         f"message {idx} contains unauthorized pruning notice under frozen profile"
                     )
+                    break
+                m_norm = _normalize_native_message_for_transcript_equality(m_msg, is_message_end=True)
+                a_norm = _normalize_native_message_for_transcript_equality(a_msg, is_message_end=False)
+                if m_norm != a_norm:
+                    if (m_norm.get("role") != a_norm.get("role")
+                            or m_norm.get("toolCallId") != a_norm.get("toolCallId")
+                            or m_norm.get("stopReason") != a_norm.get("stopReason")):
+                        errors.append(
+                            f"native message events do not equal agent_end transcript: "
+                            f"message {idx} identity mismatch"
+                        )
+                    elif m_norm.get("content") != a_norm.get("content"):
+                        errors.append(
+                            f"native message events do not equal agent_end transcript: "
+                            f"message {idx} content mismatch"
+                        )
+                    else:
+                        diff_keys = sorted(set(m_norm.keys()) ^ set(a_norm.keys()))
+                        diff_vals = sorted(k for k in (set(m_norm.keys()) & set(a_norm.keys())) if m_norm[k] != a_norm[k])
+                        details = []
+                        if diff_keys:
+                            details.append(f"key set mismatch: {diff_keys}")
+                        if diff_vals:
+                            details.append(f"value mismatch on keys: {diff_vals}")
+                        diff_desc = "; ".join(details) if details else "structural mismatch"
+                        errors.append(
+                            f"native message events do not equal agent_end transcript: "
+                            f"message {idx} metadata mismatch ({diff_desc})"
+                        )
                     break
     turns = provider_turns(observed)
     native_assistant = [m for m in message_ends if m.get("role") == "assistant"]
@@ -3189,13 +3204,20 @@ def normalize(stdout: str, run_id: str, context: dict[str, Any] | None = None) -
     return events, map_rows, list(dict.fromkeys(errors)), len(entries)
 
 
-def _msg_key(message: dict[str, Any]) -> str:
-    return stable_json({
-        "role": message.get("role"),
-        "toolCallId": message.get("toolCallId"),
-        "content": message.get("content"),
-        "stopReason": message.get("stopReason"),
-    })
+def _normalize_native_message_for_transcript_equality(msg: dict[str, Any], is_message_end: bool) -> dict[str, Any]:
+    norm = dict(msg)
+    # In OMP 18.0.11, the native event dispatcher stamps `completedAt = Date.now()`
+    # onto `message_end` events when `e.message.role === "assistant"`, but the internal
+    # session transcript (`agent_end.messages`) retains the assistant message as
+    # constructed prior to dispatch without this ephemeral timestamp.
+    # This minimal, explicit exclusion applies solely to `completedAt` on `message_end`
+    # assistant records where `completedAt` is a numeric timestamp.
+    if (is_message_end
+            and norm.get("role") == "assistant"
+            and "completedAt" in norm
+            and isinstance(norm["completedAt"], (int, float))):
+        del norm["completedAt"]
+    return norm
 
 
 FORBIDDEN_PRUNING_NOTICES = frozenset({
