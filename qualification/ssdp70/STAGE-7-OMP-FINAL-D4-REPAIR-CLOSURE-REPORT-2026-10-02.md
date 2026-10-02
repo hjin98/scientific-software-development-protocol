@@ -4,16 +4,22 @@
 **Governing Protocol:** Scientific Software Development Protocol (SSDP) 6.6.0
 **Disposition:** Candidate evidence closure; runner admission remains open for independent review (`CANDIDATE`).
 **Branch:** `ssdp-7.0-scientific-epistemic-closure`
-**Starting Head:** `e29fc4cd0dcfa73f17647aa05d407c94679e6c5b`
-**Final Head:** `e0dcb89d0261c74cd1738472d37976139112747b`
+**Starting Head:** `cc80107164197d8ec35f890f046ff43e8de8df82`
+**Implementation Commit:** `1715a8f0ddd6360d68c54afd650f32b037bcc2de`
 
 ---
 
 ## 1. Executive Summary & Governing Authority
 
-This report records the completed D4 repair of the SSDP 7.0 OMP Stage 7 execution-profile closure under SSDP 6.6.0 authority, addressing the two remaining blockers identified during independent review:
-1. **B1 (`completedAt` transcript-equality normalization):** Replaced overly broad numeric type acceptance with an exact positive integer type check (`type(val) is int and val > 0`), ensuring fail-closed rejection of booleans, floating-point numbers, negative values, zero, non-numeric values, and unauthorized message locations while preserving exact canonical structural transcript equality across all top-level message fields.
-2. **B2 (Provenance-record repair):** Removed the nonexistent commit SHA `855f57f5c531d04467ecb5eeaeaeec3f4d6d67b2` and eliminated self-referential report commit fields in favor of an objective, traceable Git commit provenance ancestry.
+This report records the completed D4 repair and evidence closure of the SSDP 7.0 OMP Stage 7 execution profile under SSDP 6.6.0 authority, addressing the closure defects identified during independent review:
+
+1. **D4 Executable & Profile Defects (Closed):**
+   - **`completedAt` transcript-equality normalization:** Replaced overly broad numeric type acceptance with an exact positive integer type check (`type(val) is int and val > 0`), ensuring fail-closed rejection of booleans, floating-point numbers, negative values, zero, non-numeric values, and unauthorized message locations while preserving exact canonical structural transcript equality across all top-level message fields.
+   - **Provenance-record repair:** Removed the nonexistent commit SHA `855f57f5c531d04467ecb5eeaeaeec3f4d6d67b2` and eliminated self-referential report commit fields in favor of an objective, traceable Git commit provenance ancestry.
+2. **Fresh Integration Regression (Closed):** Executed the complete 54-test `qualification/ssdp70/eval/test_omp_integration.py` suite against the exact repaired adapter (`1715a8f0ddd6360d68c54afd650f32b037bcc2de`, adapter SHA-256 `9ede18e4b69a1734637f77e3a99aec697fa5ab2c15772c5304defd1b3a192107`) and frozen profile `68d440fd6f8e...`. All 54 tests passed in 1,163.037s, replacing the previously retained stale baseline evidence.
+3. **Independent Stage 7 Runner Admission (Open / Pending):** In strict compliance with the Stage 7 qualification contract, **runner admission is not self-authorized**; the candidate disposition remains strictly **`CANDIDATE`** pending independent evaluator review of `withheld_oracle_branches` and the 12 §6 independent-inspection cells. Admission tooling fails closed (13 errors) and will not emit an `ADMITTED` bundle while these cells remain pending.
+4. **Blinded Qualification Hold:** No blinded Protocol 7 qualification subjects were executed.
+5. **Serious Challenges:** None discovered.
 
 All evidence consequences of the adapter change were fully executed:
 - Rederived the frozen execution profile ID and key;
@@ -23,15 +29,13 @@ All evidence consequences of the adapter change were fully executed:
 - Executed deterministic falsification across 11 perturbation/rejection cases (all `PASS`);
 - Generated executor admission and §6 proof artifacts;
 - Executed post-run credential and secret leak scans with 0 matches;
-- Executed unit, campaign, admission, regression, and repository test suites.
-
-In strict compliance with the Stage 7 qualification contract, **runner admission is not self-authorized**; the candidate disposition remains strictly **`CANDIDATE`** pending independent evaluator review of `withheld_oracle_branches` and 12 §6 independent-inspection cells. No blinded Protocol 7 qualification subjects were executed.
+- Executed unit, campaign, admission, fresh integration, and repository test suites.
 
 ---
 
 ## 2. Commit Ancestry and Provenance Repair
 
-The branch head advanced from the expected starting head `e29fc4cd0dcfa73f17647aa05d407c94679e6c5b` through two intervening commits, which have been verified and preserved:
+The branch head advanced from starting head `e29fc4cd0dcfa73f17647aa05d407c94679e6c5b` through intervening commits:
 
 1. **`1715a8f0ddd6360d68c54afd650f32b037bcc2de`**
    *Tighten OMP completedAt transcript-equality normalization to exact positive integer timestamp*
@@ -39,6 +43,11 @@ The branch head advanced from the expected starting head `e29fc4cd0dcfa73f17647a
 2. **`e0dcb89d0261c74cd1738472d37976139112747b`**
    *Record OMP Stage 7 tightened completedAt repair, corrected provenance ancestry, and fresh campaign evidence*
    - Documentation and campaign record update in `STAGE-7-OMP-TRANSCRIPT-CONSISTENCY-REPAIR-REPORT-2026-10-02.md` and `STAGE-7-OMP-EXACT-PROFILE-CAMPAIGN-RESULT-2026-10-02.md`.
+3. **`cc80107164197d8ec35f890f046ff43e8de8df82`**
+   *Record OMP Stage 7 execution-profile final D4 repair and closure report*
+   - Initial introduction of this final D4 closure report.
+
+The current evidence-closure round begins at head `cc80107164197d8ec35f890f046ff43e8de8df82` and performs the fresh integration regression and report reconciliation without altering the accepted D4 executable code (`1715a8f0ddd6360d68c54afd650f32b037bcc2de`).
 
 ### Provenance Ancestry of Stage 7 Closure Records
 The false, nonexistent SHA `855f57f5c531d04467ecb5eeaeaeec3f4d6d67b2` was corrected. The true provenance ancestry is:
@@ -47,6 +56,7 @@ The false, nonexistent SHA `855f57f5c531d04467ecb5eeaeaeec3f4d6d67b2` was correc
 - **Exact-profile campaign record:** `e29fc4cd0dcfa73f17647aa05d407c94679e6c5b`
 - **Final D4 repair implementation commit:** `1715a8f0ddd6360d68c54afd650f32b037bcc2de`
 - **Candidate evidence & provenance closure commit:** `e0dcb89d0261c74cd1738472d37976139112747b`
+- **Final D4 repair and closure report initial record:** `cc80107164197d8ec35f890f046ff43e8de8df82`
 
 All nearby commit SHAs and content digests have been audited and verified against the Git object store.
 
@@ -84,15 +94,27 @@ def _normalize_native_message_for_transcript_equality(msg: dict[str, Any], is_me
 
 ## 4. Test Verification Suite & Results
 
-All tests executed on the repaired implementation:
+All tests freshly executed against the exact repaired implementation (`1715a8f0ddd6360d68c54afd650f32b037bcc2de`) and frozen profile `68d440fd6f8e8441ac35b0cab584e2d6c8be043661d14fd78d2965cc1282f6d8`:
 
-| Test Suite | Module(s) | Tests Run | Result | Duration |
-|---|---|---|---|---|
-| **Focused Unit & Counterfactual** | `qualification/ssdp70/eval/test_omp_units.py` | 73 | **PASS** | 6.452s |
-| **Campaign & Admission Tests** | `test_omp_stage7_campaign.py`, `test_omp_stage7_admission.py` | 31 | **PASS** | 0.078s |
-| **Complete Unit Regression** | 9 evaluation modules | 245 | **PASS** | 8.699s |
-| **Repository Test Suite** | `tests/` discovery suite | 407 | **PASS** (3 skipped) | 16.160s |
-| **Whitespace / Formatting Check** | `git diff --check` | N/A | **PASS** (0 errors) | < 0.1s |
+| Test Suite | Module(s) | Tests Run | Result | Duration | Notes |
+|---|---|---|---|---|---|
+| **Focused Unit & Counterfactual** | `qualification/ssdp70/eval/test_omp_units.py` | 73 | **PASS** | 6.413s | Fresh run; verifies exact positive int `completedAt` |
+| **Campaign & Admission Tests** | `test_omp_stage7_campaign.py`, `test_omp_stage7_admission.py` | 31 | **PASS** | 0.076s | Fresh run; verifies harness & admission fail-closed logic |
+| **Complete Unit Regression** | 9 evaluation modules | 245 | **PASS** | 8.713s | Fresh run across all non-integration eval modules |
+| **Complete Fresh Integration Suite** | `qualification/ssdp70/eval/test_omp_integration.py` | 54 | **PASS** | 1,163.037s | Fresh run; drives real OMP in bubblewrap with mock rig |
+| **Complete Evaluation Regression Total** | Discovered across `qualification/ssdp70/eval/` | 299 | **PASS** | 1,171.750s | Total evaluation tests (245 unit + 54 integration) |
+| **Repository Test Suite** | `tests/` discovery suite | 407 | **PASS** (3 skipped) | 16.145s | Fresh run; repo-wide test discovery |
+| **Whitespace / Formatting Check** | `git diff --check` | N/A | **PASS** (0 errors) | < 0.1s | Clean |
+
+### Fresh Integration Regression Details:
+- **Exact Test Command:** `python3 -m unittest -v qualification/ssdp70/eval/test_omp_integration.py`
+- **Implementation Commit / Profile:** `1715a8f0ddd6360d68c54afd650f32b037bcc2de` / `omp-headless-deepinfra-glm53-flash-stage7-exacttranscript-1715a8f0ddd6360d68c54afd650f32b037bcc2de`
+- **Adapter SHA-256:** `9ede18e4b69a1734637f77e3a99aec697fa5ab2c15772c5304defd1b3a192107`
+- **Frozen Profile Key SHA-256:** `68d440fd6f8e8441ac35b0cab584e2d6c8be043661d14fd78d2965cc1282f6d8`
+- **Tests Executed:** 54 run, 54 passed, 0 failed, 0 skipped.
+- **Elapsed Duration:** 1,163.037s.
+- **Execution Environment:** Verified matching frozen host execution profile (Ubuntu 22.04, Linux 6.8.0-138-generic, CPython 3.10.12).
+- **Execution Mechanism:** Drives the real production path through `harness70.run_episode -> adapters.omp -> frozen omp/18.0.11 executable inside bubblewrap -> qualification observer -> qualification MCP bridge -> unchanged mediator -> deterministic local provider stand-in -> raw evidence -> adapter normalization -> core validation`.
 
 ### Counterfactual Cases Verified in `test_omp_units.py`:
 1. Positive integer `completedAt` on `message_end` assistant message: **PASS** (0 transcript errors).
@@ -193,8 +215,8 @@ are classified as **stale/superseded** due to the overly broad normalization pre
 
 ## 10. Admission Boundary & Open Obligations
 
-1. **Admission Boundary:** Runner admission disposition remains strictly **`CANDIDATE`**. The candidate harness does not self-authorize admission.
-2. **Pending Independent Inspection:** Formal admission requires independent evaluator review of:
+1. **Admission Boundary:** Runner admission disposition remains strictly **`CANDIDATE`**. The candidate harness does not self-authorize admission. Admission tooling (`omp_stage7_admission.py`) fails closed (reporting 13 errors) and refuses to emit an `ADMITTED` bundle while required admission checks remain pending.
+2. **Pending Independent Inspection:** Formal runner admission requires independent evaluator review outside this implementer context for:
    - `withheld_oracle_branches`
    - `known_broken_both_arms_miss`
    - `known_broken_wrong_binding_o3`
@@ -208,5 +230,10 @@ are classified as **stale/superseded** due to the overly broad normalization pre
    - `perturb_evaluator_identity`
    - `final_report_changed_files_tool_trace_assessment`
    - `chained_delegate_first_look`
+   These obligations remain strictly **`PENDING`** and must not be marked PASS by implementer judgment.
 3. **Blinded Qualification Hold:** No blinded Protocol 7 qualification subjects may be executed prior to independent evaluator adjudication and formal runner admission.
-4. **Blockers & Serious Challenges:** Zero open blockers or Serious Challenges remain in the Stage 7 execution profile or candidate evidence.
+4. **Defect & Blocker Status:**
+   - **D4 Executable & Profile Defects:** CLOSED. No known executable code or profile defects remain.
+   - **Fresh Implementer-Side Regression:** CLOSED. Fresh execution of the complete 54-test `test_omp_integration.py` suite and all unit/regression suites is complete with zero failures.
+   - **Mandatory Independent Runner Admission:** OPEN / PENDING. Runner admission is not closed because the 13 independent-inspection obligations remain pending independent evaluation.
+   - **Serious Challenges:** NONE. No evidence indicates accepted protocol or architectural authority is false, contradictory, or unrealizable.
