@@ -24,6 +24,7 @@ This report records the D4 transcript-consistency repair tightening the native O
 - **Branch:** `ssdp-7.0-scientific-epistemic-closure`
 - **Candidate starting head:** `800de808e5f3f435c904b49e07f64fc5c80a4994`
 - **Implementation commit:** `110c47de0da303df0c21eb9f0d1f22d6670da1c0`
+- **Final closure report commit:** `00675475819a0993aae0ace918573a75111a8e93`
 - **Immutable semantic subject:** `db94a2dfb7fef480f37227eab5c45256e89901b8`
 - **p66 arm commit:** `22f4bdba53795da3a6f13f162529f3a843fc37ae`
 - **p66 package-tree SHA-256:** `e6d960a866fb794382fa5fdaa3e351681d292803dd035e5d4786a981a2a1e083`
@@ -35,6 +36,10 @@ This report records the D4 transcript-consistency repair tightening the native O
 - **Adapter (`adapters/omp.py`) SHA-256:** `2009c56f2ecb99cf16d02e720fc7d4fd5c14720d6379d2cf6d51a9e156903907`
 - **Campaign harness (`omp_stage7_campaign.py`) SHA-256:** `9d739b6871dd39a57df0e93cea78836dd3dc77f6e20d2503aec214e76d5991be`
 - **Admission harness (`omp_stage7_admission.py`) SHA-256:** `e5d5059f67c0bae6449f5d5c3ea3077b96716aac28ff631fc31c9143080ead77`
+- **Host Execution Environment (bound in profile):**
+  - OS Release: Ubuntu 22.04 (`id="ubuntu"`, `version_id="22.04"`, SHA-256: `594d5ddd35aedb47f00d9c34d140017907a5b9f93c975aba125fc924daac5c07`)
+  - Kernel: `Linux 6.8.0-138-generic #138~22.04.1-Ubuntu SMP PREEMPT_DYNAMIC x86_64`
+  - Supervisor Python: CPython 3.10.12 (executable SHA-256: `a2f33a6e006989270f4340528eb61f8f97366e00a5d1b602ac8672ea44fc56ae`)
 
 ---
 
