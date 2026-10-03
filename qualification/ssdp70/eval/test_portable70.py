@@ -313,6 +313,144 @@ class PortableCoreTests(unittest.TestCase):
         errors = core70.validate_profile_admission_snapshot(out, bundle_sha, role="executor")
         self.assertTrue(any(f"section6 proof '{target_cell}' is unavailable" in err for err in errors), errors)
 
+    def test_snapshot_rejects_coherent_rebinding_tamper_of_section6_proof(self):
+        admission, _ = self.write_admission(subdir="s6-rebinding-test")
+        out = self.root / "run-s6-rebinding"
+        out.mkdir()
+        bundle_sha = core70.admission_bundle_sha256(admission, role="executor")
+        core70.snapshot_profile_admission(admission, out, role="executor")
+
+        # Snapshot is initially completely valid and matches run identity
+        self.assertEqual(core70.validate_profile_admission_snapshot(out, bundle_sha, role="executor"), [])
+        self.assertEqual(core70.recompute_profile_admission_snapshot_bundle_sha256(out, role="executor"), bundle_sha)
+
+        # Attack: Coherent rebinding of one Section 6 proof
+        target_cell = core70.EXECUTOR_SECTION6_CELLS[0]
+        s6_proof = out / "profile-admission-evidence" / f"section6-{target_cell}.proof"
+        s6_proof.write_text("coherently altered section6 proof content", encoding="utf-8")
+        new_sha = core70.sha256_file(s6_proof)
+        new_size = s6_proof.stat().st_size
+
+        # 1. Update evidence_sha256 in the archived admission record
+        record_file = out / "profile-admission.json"
+        record = json.loads(record_file.read_text(encoding="utf-8"))
+        record["section6"][target_cell]["evidence_sha256"] = new_sha
+        write_json(record_file, record)
+
+        # 2. Update snapshot proof SHA/size
+        snapshot_file = out / "profile-admission-snapshot.json"
+        snapshot = json.loads(snapshot_file.read_text(encoding="utf-8"))
+        for row in snapshot["section6_proofs"]:
+            if row.get("cell") == target_cell:
+                row["sha256"] = new_sha
+                row["bytes"] = new_size
+
+        # 3. Update record_sha256 in snapshot
+        snapshot["record_sha256"] = core70.sha256_file(record_file)
+
+        # 4. Leave snapshot["admission_bundle_sha256"] untouched (still equals bundle_sha)
+        self.assertEqual(snapshot["admission_bundle_sha256"], bundle_sha)
+        write_json(snapshot_file, snapshot)
+
+        # Verify all local metadata checks would pass in isolation
+        self.assertEqual(core70.sha256_file(record_file), snapshot["record_sha256"])
+        self.assertEqual(core70.sha256_file(s6_proof), new_sha)
+        self.assertEqual(record["section6"][target_cell]["evidence_sha256"], new_sha)
+
+        # But validate_profile_admission_snapshot MUST reject because recomputed bundle digest differs
+        errors = core70.validate_profile_admission_snapshot(out, bundle_sha, role="executor")
+        self.assertTrue(any("recomputed bundle does not match run identity" in err for err in errors), errors)
+        self.assertTrue(any("snapshot bundle does not match recomputed digest" in err for err in errors), errors)
+        self.assertNotEqual(
+            core70.recompute_profile_admission_snapshot_bundle_sha256(out, role="executor"),
+            bundle_sha,
+        )
+
+    def test_snapshot_rejects_coherent_rebinding_tamper_of_ordinary_check_proof(self):
+        admission, _ = self.write_admission(subdir="check-rebinding-test")
+        out = self.root / "run-check-rebinding"
+        out.mkdir()
+        bundle_sha = core70.admission_bundle_sha256(admission, role="executor")
+        core70.snapshot_profile_admission(admission, out, role="executor")
+
+        # Snapshot is initially completely valid
+        self.assertEqual(core70.validate_profile_admission_snapshot(out, bundle_sha, role="executor"), [])
+
+        # Attack: Coherent rebinding of an ordinary executor check proof
+        target_check = core70.EXECUTOR_ADMISSION_CHECKS[0]
+        check_proof = out / "profile-admission-evidence" / f"{target_check}.proof"
+        check_proof.write_text("coherently altered ordinary check proof content", encoding="utf-8")
+        new_sha = core70.sha256_file(check_proof)
+        new_size = check_proof.stat().st_size
+
+        # 1. Update evidence_sha256 in the archived admission record
+        record_file = out / "profile-admission.json"
+        record = json.loads(record_file.read_text(encoding="utf-8"))
+        record["checks"][target_check]["evidence_sha256"] = new_sha
+        write_json(record_file, record)
+
+        # 2. Update snapshot proof SHA/size
+        snapshot_file = out / "profile-admission-snapshot.json"
+        snapshot = json.loads(snapshot_file.read_text(encoding="utf-8"))
+        for row in snapshot["proofs"]:
+            if row.get("check") == target_check:
+                row["sha256"] = new_sha
+                row["bytes"] = new_size
+
+        # 3. Update record_sha256 in snapshot
+        snapshot["record_sha256"] = core70.sha256_file(record_file)
+
+        # 4. Leave snapshot["admission_bundle_sha256"] untouched
+        self.assertEqual(snapshot["admission_bundle_sha256"], bundle_sha)
+        write_json(snapshot_file, snapshot)
+
+        # Recomputed bundle digest must reject the coherently rebound archive
+        errors = core70.validate_profile_admission_snapshot(out, bundle_sha, role="executor")
+        self.assertTrue(any("recomputed bundle does not match run identity" in err for err in errors), errors)
+        self.assertTrue(any("snapshot bundle does not match recomputed digest" in err for err in errors), errors)
+        self.assertNotEqual(
+            core70.recompute_profile_admission_snapshot_bundle_sha256(out, role="executor"),
+            bundle_sha,
+        )
+
+    def test_snapshot_rejects_coherent_rebinding_tamper_for_evaluator_role(self):
+        eval_admission, _ = self.write_admission(role="evaluator", subdir="eval-rebinding-test")
+        out = self.root / "eval-snap-rebinding"
+        out.mkdir()
+        bundle_sha = core70.admission_bundle_sha256(eval_admission, role="evaluator")
+        core70.snapshot_profile_admission(eval_admission, out, role="evaluator")
+
+        self.assertEqual(core70.validate_profile_admission_snapshot(out, bundle_sha, role="evaluator"), [])
+
+        target_check = core70.EVALUATOR_ADMISSION_CHECKS[0]
+        check_proof = out / "profile-admission-evidence" / f"{target_check}.proof"
+        check_proof.write_text("coherently altered evaluator check proof content", encoding="utf-8")
+        new_sha = core70.sha256_file(check_proof)
+        new_size = check_proof.stat().st_size
+
+        record_file = out / "profile-admission.json"
+        record = json.loads(record_file.read_text(encoding="utf-8"))
+        record["checks"][target_check]["evidence_sha256"] = new_sha
+        write_json(record_file, record)
+
+        snapshot_file = out / "profile-admission-snapshot.json"
+        snapshot = json.loads(snapshot_file.read_text(encoding="utf-8"))
+        for row in snapshot["proofs"]:
+            if row.get("check") == target_check:
+                row["sha256"] = new_sha
+                row["bytes"] = new_size
+        snapshot["record_sha256"] = core70.sha256_file(record_file)
+        self.assertEqual(snapshot["admission_bundle_sha256"], bundle_sha)
+        write_json(snapshot_file, snapshot)
+
+        errors = core70.validate_profile_admission_snapshot(out, bundle_sha, role="evaluator")
+        self.assertTrue(any("recomputed bundle does not match run identity" in err for err in errors), errors)
+        self.assertTrue(any("snapshot bundle does not match recomputed digest" in err for err in errors), errors)
+        self.assertNotEqual(
+            core70.recompute_profile_admission_snapshot_bundle_sha256(out, role="evaluator"),
+            bundle_sha,
+        )
+
     def test_candidate_to_admitted_record_with_incomplete_section6_rejected(self):
         # Candidate record promoted to ADMITTED status but with incomplete §6 cell
         admission, bundle = self.write_admission(

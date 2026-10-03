@@ -825,6 +825,32 @@ def _safe_relative_file(base: Path, relative: Any) -> Path | None:
     return path
 
 
+def compute_admission_bundle_sha256(
+    record: dict[str, Any],
+    check_evidence: dict[str, str],
+    *,
+    role: str = "executor",
+    section6_evidence: dict[str, str] | None = None,
+) -> str:
+    if not isinstance(record, dict):
+        raise ContractError("profile admission record must be an object")
+    expected_checks = set(_admission_checks_for_role(role))
+    if set(check_evidence) != expected_checks:
+        raise ContractError(f"{role} admission bundle check evidence does not match canonical check set")
+    if role == "executor":
+        if not isinstance(record.get("section6"), dict):
+            raise ContractError("profile admission section6 matrix is missing")
+        if not isinstance(section6_evidence, dict):
+            raise ContractError("executor admission bundle requires section6 evidence mapping")
+        expected_cells = set(EXECUTOR_SECTION6_CELLS)
+        if set(section6_evidence) != expected_cells:
+            raise ContractError("executor admission bundle section6 evidence does not match canonical cell set")
+        evidence: Any = {"checks": check_evidence, "section6": section6_evidence}
+    else:
+        evidence = check_evidence
+    return stable_json_sha256({"record": record, "evidence": evidence})
+
+
 def admission_bundle_sha256(admission_path: Path | None, *, role: str = "executor") -> str | None:
     if admission_path is None:
         return None
@@ -841,11 +867,12 @@ def admission_bundle_sha256(admission_path: Path | None, *, role: str = "executo
         if path is None or not path.is_file():
             raise ContractError(f"profile admission check {name!r} evidence is unavailable")
         check_evidence[name] = sha256_file(path)
+    s6_evidence: dict[str, str] | None = None
     if role == "executor":
         section6 = payload.get("section6")
         if not isinstance(section6, dict):
             raise ContractError("profile admission section6 matrix is missing")
-        s6_evidence: dict[str, str] = {}
+        s6_evidence = {}
         for cell_name in EXECUTOR_SECTION6_CELLS:
             row = section6.get(cell_name)
             if not isinstance(row, dict):
@@ -854,10 +881,66 @@ def admission_bundle_sha256(admission_path: Path | None, *, role: str = "executo
             if path is None or not path.is_file():
                 raise ContractError(f"profile admission section6 cell {cell_name!r} evidence is unavailable")
             s6_evidence[cell_name] = sha256_file(path)
-        evidence: Any = {"checks": check_evidence, "section6": s6_evidence}
-    else:
-        evidence = check_evidence
-    return stable_json_sha256({"record": payload, "evidence": evidence})
+    return compute_admission_bundle_sha256(
+        payload,
+        check_evidence,
+        role=role,
+        section6_evidence=s6_evidence,
+    )
+
+
+def recompute_profile_admission_snapshot_bundle_sha256(
+    run: Path,
+    *,
+    role: str = "executor",
+    prefix: str = "profile-admission",
+) -> str:
+    snapshot_path = run / f"{prefix}-snapshot.json"
+    record_path = run / f"{prefix}.json"
+    if not snapshot_path.is_file() or not record_path.is_file():
+        raise ContractError(f"{role} profile-admission snapshot is missing")
+    snapshot = _require_object(load_json(snapshot_path), "profile admission snapshot")
+    record = _require_object(load_json(record_path), f"{role} profile admission record")
+    proofs = snapshot.get("proofs")
+    if not isinstance(proofs, list):
+        raise ContractError(f"{role} profile-admission proof list is malformed")
+    expected_checks = set(_admission_checks_for_role(role))
+    check_evidence: dict[str, str] = {}
+    for row in proofs:
+        if not isinstance(row, dict):
+            continue
+        name = row.get("check")
+        if isinstance(name, str) and name in expected_checks and name not in check_evidence:
+            proof = _safe_relative_file(run, row.get("path"))
+            if proof is None or not proof.is_file():
+                raise ContractError(f"{role} profile-admission proof {name!r} is unavailable")
+            check_evidence[name] = sha256_file(proof)
+    if set(check_evidence) != expected_checks:
+        raise ContractError(f"{role} profile-admission snapshot does not contain the exact required check set")
+    s6_evidence: dict[str, str] | None = None
+    if role == "executor":
+        s6_proofs = snapshot.get("section6_proofs")
+        if not isinstance(s6_proofs, list):
+            raise ContractError(f"{role} profile-admission section6 proof list is missing or malformed")
+        expected_cells = set(EXECUTOR_SECTION6_CELLS)
+        s6_evidence = {}
+        for row in s6_proofs:
+            if not isinstance(row, dict):
+                continue
+            cell_name = row.get("cell") or row.get("check")
+            if isinstance(cell_name, str) and cell_name in expected_cells and cell_name not in s6_evidence:
+                proof = _safe_relative_file(run, row.get("path"))
+                if proof is None or not proof.is_file():
+                    raise ContractError(f"{role} profile-admission section6 proof {cell_name!r} is unavailable")
+                s6_evidence[cell_name] = sha256_file(proof)
+        if set(s6_evidence) != expected_cells:
+            raise ContractError(f"{role} profile-admission snapshot does not contain the exact required section6 cell set")
+    return compute_admission_bundle_sha256(
+        record,
+        check_evidence,
+        role=role,
+        section6_evidence=s6_evidence,
+    )
 
 
 def snapshot_profile_admission(
@@ -959,6 +1042,7 @@ def validate_profile_admission_snapshot(
     expected_checks = set(_admission_checks_for_role(role))
     seen: set[str] = set()
     record_checks = record.get("checks") if isinstance(record.get("checks"), dict) else {}
+    check_evidence: dict[str, str] = {}
     for index, row in enumerate(proofs):
         if not isinstance(row, dict):
             errors.append(f"{role} profile-admission proof {index} is malformed")
@@ -972,9 +1056,11 @@ def validate_profile_admission_snapshot(
         if proof is None or not proof.is_file():
             errors.append(f"{role} profile-admission proof {name!r} is unavailable")
             continue
+        actual_sha = sha256_file(proof)
+        check_evidence[name] = actual_sha
         if row.get("bytes") != proof.stat().st_size:
             errors.append(f"{role} profile-admission proof {name!r} size changed")
-        if not _valid_sha256(row.get("sha256")) or sha256_file(proof) != row.get("sha256"):
+        if not _valid_sha256(row.get("sha256")) or actual_sha != row.get("sha256"):
             errors.append(f"{role} profile-admission proof {name!r} hash changed")
         record_check_row = record_checks.get(name)
         if isinstance(record_check_row, dict) and record_check_row.get("evidence_sha256") != row.get("sha256"):
@@ -982,6 +1068,7 @@ def validate_profile_admission_snapshot(
     if seen != expected_checks:
         errors.append(f"{role} profile-admission snapshot does not contain the exact required check set")
 
+    s6_evidence: dict[str, str] | None = None
     if role == "executor":
         if "section6" not in record or not isinstance(record.get("section6"), dict):
             errors.append(f"{role} profile-admission record section6 matrix is missing")
@@ -992,6 +1079,7 @@ def validate_profile_admission_snapshot(
             expected_cells = set(EXECUTOR_SECTION6_CELLS)
             seen_cells: set[str] = set()
             record_s6 = record.get("section6") if isinstance(record.get("section6"), dict) else {}
+            s6_evidence = {}
             for index, row in enumerate(s6_proofs):
                 if not isinstance(row, dict):
                     errors.append(f"{role} profile-admission section6 proof {index} is malformed")
@@ -1005,15 +1093,37 @@ def validate_profile_admission_snapshot(
                 if proof is None or not proof.is_file():
                     errors.append(f"{role} profile-admission section6 proof {cell_name!r} is unavailable")
                     continue
+                actual_sha = sha256_file(proof)
+                s6_evidence[cell_name] = actual_sha
                 if row.get("bytes") != proof.stat().st_size:
                     errors.append(f"{role} profile-admission section6 proof {cell_name!r} size changed")
-                if not _valid_sha256(row.get("sha256")) or sha256_file(proof) != row.get("sha256"):
+                if not _valid_sha256(row.get("sha256")) or actual_sha != row.get("sha256"):
                     errors.append(f"{role} profile-admission section6 proof {cell_name!r} hash changed")
                 record_s6_row = record_s6.get(cell_name)
                 if isinstance(record_s6_row, dict) and record_s6_row.get("evidence_sha256") != row.get("sha256"):
                     errors.append(f"{role} profile-admission section6 proof {cell_name!r} hash does not match record")
             if seen_cells != expected_cells:
                 errors.append(f"{role} profile-admission snapshot does not contain the exact required section6 cell set")
+
+    if len(check_evidence) == len(expected_checks) and (
+        role != "executor" or (s6_evidence is not None and len(s6_evidence) == len(expected_cells))
+    ):
+        try:
+            recomputed_bundle_sha = compute_admission_bundle_sha256(
+                record,
+                check_evidence,
+                role=role,
+                section6_evidence=s6_evidence,
+            )
+            if recomputed_bundle_sha != expected_bundle_sha256:
+                errors.append(f"{role} profile-admission recomputed bundle does not match run identity")
+            if snapshot.get("admission_bundle_sha256") != recomputed_bundle_sha:
+                errors.append(f"{role} profile-admission snapshot bundle does not match recomputed digest")
+        except ContractError as exc:
+            errors.append(f"{role} profile-admission bundle recomputation failed: {exc}")
+    else:
+        errors.append(f"{role} profile-admission bundle cannot be recomputed: incomplete proof set")
+
     return errors
 
 
