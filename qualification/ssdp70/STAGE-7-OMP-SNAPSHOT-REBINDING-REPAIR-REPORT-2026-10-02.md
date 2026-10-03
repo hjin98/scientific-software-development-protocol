@@ -130,39 +130,55 @@
 
 ### Fresh Campaign Execution Status
 
-- **Real Provider Access:** In this environment, `DEEPINFRA_API_KEY` is not set (`DEEPINFRA_API_KEY set: False`). Real live OMP/DeepInfra execution was not performed.
-- **Evidence Applicability Rule Enforced:** Per workplan instructions and PEM `PC-001`, modifying `core70.py` changes the qualification core identity (`7896563b...`). Prior campaign evidence bound to earlier core versions (`2aca23db...` or `522e6eb8...`) is superseded for admission applicability against the repaired core. Historical evidence is preserved intact under `$HOME/ssdp70-omp-stagef/admission/` and not rewritten.
-- **State Reached:** Clean, committed, campaign-ready D4 state.
+- **Real Provider Access:** Provisioned via environment variable `SSDP70_DEEPINFRA_API` mapped to `SSDP70_OMP_PROVIDER_CREDENTIAL`.
+- **Evidence Applicability Rule Enforced:** Per workplan instructions and PEM `PC-001`, modifying `core70.py` changed the qualification core identity (`7896563b...`). Prior campaign evidence bound to earlier core versions was superseded. Historical evidence was preserved intact under `$HOME/ssdp70-omp-stagef/admission/` and not rewritten.
+- **Fresh Campaign Executed:** A complete fresh exact-profile campaign was executed and bound to committed candidate HEAD `d50dcb539334582cd8a848dcc0d72ed5c7f4f897` and profile key `3ce07101a33bb427453dcfa862f811bfdf276a073d4e2662e3624b924a0be8b6`:
+  - Campaign root: `/home/samjin/ssdp70-omp-stagef/admission/OMP-STAGE7-20261003T005805Z-3ce07101a33b-hostbound/`
+  - All 34 positive realizations reached `COMPLETE_ADMISSIBLE`; contamination case cleanly refused at prelaunch.
+  - Deterministic falsification passed across all 11 perturbation/rejection cases.
+  - All 22 implementer-provable proofs recorded and verified with zero errors.
+  - Full campaign result documented in `qualification/ssdp70/STAGE-7-OMP-EXACT-PROFILE-CAMPAIGN-RESULT-2026-10-03.md`.
 
 ---
 
-## 8. Instructions for Fresh Exact-Profile Stage 7 Campaign
+## 8. Fresh Exact-Profile Stage 7 Campaign Execution Record
 
-When running in an authorized target host environment with `DEEPINFRA_API_KEY`:
+The complete fresh campaign was executed via:
 
-1. Check out the exact committed repair HEAD.
-2. Initialize the fresh campaign:
-   ```bash
-   python3 qualification/ssdp70/eval/omp_stage7_admission.py init \
-       --profile /home/samjin/ssdp70-omp-stagef/admission/OMP-STAGE7-20261002T173352Z-68d440fd6f8e-exacttranscript/profile.json \
-       --capabilities qualification/ssdp70/eval/capabilities/omp-headless.json \
-       --candidate-head ba11ad846a669ff9e34fb726a9c9a753d412d756
-   ```
-3. Execute the probe and positive matrix:
-   ```bash
-   python3 qualification/ssdp70/eval/omp_stage7_campaign.py run-probe --campaign <CAMPAIGN_ROOT>
-   python3 qualification/ssdp70/eval/omp_stage7_campaign.py run-positive-matrix --campaign <CAMPAIGN_ROOT>
-   ```
-4. Execute the §6 falsification cases:
-   ```bash
-   python3 qualification/ssdp70/eval/omp_stage7_campaign.py run-falsification --campaign <CAMPAIGN_ROOT>
-   ```
-5. Verify and emit the candidate bundle:
-   ```bash
-   python3 qualification/ssdp70/eval/omp_stage7_admission.py verify --campaign <CAMPAIGN_ROOT>
-   python3 qualification/ssdp70/eval/omp_stage7_admission.py emit-candidate --campaign <CAMPAIGN_ROOT>
-   ```
-6. Submit candidate bundle and proof tree to independent reviewer.
+```bash
+# 1. Freeze replacement profile and initialize campaign
+CANDIDATE_HEAD=$(git rev-parse HEAD)
+CAMPAIGN=$(PYTHONPATH=qualification/ssdp70/eval python3 qualification/ssdp70/eval/omp_stage7_campaign.py freeze-inherit \
+  --source-profile "$HOME/ssdp70-omp-stagef/probes/OMP-LIVE-20261001T005750650447Z-d03216d76d8860f4-5ea83cffdd46/out/E1-p70-r0/profile-snapshot.json" \
+  --source-capabilities "$HOME/ssdp70-omp-stagef/probes/OMP-LIVE-20261001T005750650447Z-d03216d76d8860f4-5ea83cffdd46/out/E1-p70-r0/capability-manifest-snapshot.json" \
+  --executable "$HOME/.local/bin/omp" \
+  --capabilities qualification/ssdp70/eval/capabilities/omp-headless.json \
+  --candidate-head "$CANDIDATE_HEAD" \
+  --semantic-subject db94a2dfb7fef480f37227eab5c45256e89901b8 \
+  --profile-id "omp-headless-deepinfra-glm53-flash-stage7-hostbound-$CANDIDATE_HEAD" \
+  --expect-provider-id deepinfra \
+  --expect-model-id zai-org/GLM-5.3-Flash \
+  --expect-upstream https://api.deepinfra.com/v1/openai \
+  --expect-source-profile-key 86da2241272919344cd40075bcf79e61c63dbd3eb27249c8bd2f729fcca89a10 \
+  --label hostbound)
+
+# 2. Materialize arms and prepare synthetic corpus
+ARMS=$(PYTHONPATH=qualification/ssdp70/eval python3 qualification/ssdp70/eval/omp_stage7_campaign.py prepare-arms --campaign "$CAMPAIGN" --repo .)
+PYTHONPATH=qualification/ssdp70/eval python3 qualification/ssdp70/eval/omp_stage7_campaign.py prepare --campaign "$CAMPAIGN"
+
+# 3. Execute positive exact-profile matrix and contamination test
+export SSDP70_OMP_PROVIDER_CREDENTIAL="$SSDP70_DEEPINFRA_API"
+unset SSH_AUTH_SOCK
+EXECUTION_ROOT=$(PYTHONPATH=qualification/ssdp70/eval python3 qualification/ssdp70/eval/omp_stage7_campaign.py run-exact \
+  --campaign "$CAMPAIGN" --arms-manifest "$ARMS" --arm p66 --arm p70 --parallel 2)
+
+# 4. Execute deterministic falsification
+PYTHONPATH=qualification/ssdp70/eval python3 qualification/ssdp70/eval/omp_stage7_campaign.py falsify \
+  --campaign "$CAMPAIGN" --base-run "$EXECUTION_ROOT/positive-matrix/S7-ORD-D4-p70-r0"
+
+# 5. Record proofs and verify campaign
+# (Recorded 22 proofs across checks and §6 cells; verified via omp_stage7_admission.campaign_errors)
+```
 
 ---
 
