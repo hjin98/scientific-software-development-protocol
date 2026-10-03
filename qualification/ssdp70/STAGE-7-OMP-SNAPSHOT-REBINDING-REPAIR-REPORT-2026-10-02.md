@@ -21,7 +21,7 @@
 - **Intervening Commit Review:**
   - `13a61f6b7cd60a440b0dce4d6968228727cd2acf`: Recorded Stage 7 OMP Section 6 admission repair report and counterfactual verification.
   - `1ce2db1b3d92d01c4ab2cafd7767db116d51274c`: Enforced mandatory Section 6 oracle-integrity closure in executor admission.
-- **D4 Executable Implementation Commit:** Committed upon completion of this repair.
+- **D4 Executable Implementation Commit:** `ba11ad846a669ff9e34fb726a9c9a753d412d756`
 
 ---
 
@@ -146,7 +146,7 @@ When running in an authorized target host environment with `DEEPINFRA_API_KEY`:
    python3 qualification/ssdp70/eval/omp_stage7_admission.py init \
        --profile /home/samjin/ssdp70-omp-stagef/admission/OMP-STAGE7-20261002T173352Z-68d440fd6f8e-exacttranscript/profile.json \
        --capabilities qualification/ssdp70/eval/capabilities/omp-headless.json \
-       --candidate-head <FINAL_COMMIT_SHA>
+       --candidate-head ba11ad846a669ff9e34fb726a9c9a753d412d756
    ```
 3. Execute the probe and positive matrix:
    ```bash
