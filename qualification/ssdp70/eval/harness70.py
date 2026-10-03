@@ -14,6 +14,7 @@ import inspect
 import json
 import os
 import shutil
+import stat
 import subprocess
 import sys
 import tempfile
@@ -168,6 +169,16 @@ def build_project(corpus: Path, episode: dict[str, Any], project: Path, control_
     script = fixture / "build_history.sh"
     if script.is_file():
         subprocess.run(["bash", str(script)], cwd=project, check=True, capture_output=True)
+        # History may create aliases to custody files. Refuse shared inodes before
+        # copytree can overwrite them or permission normalization can thaw them.
+        for root, _, files in os.walk(project):
+            for name in files:
+                path = Path(root) / name
+                metadata = path.lstat()
+                if stat.S_ISREG(metadata.st_mode) and metadata.st_nlink > 1:
+                    raise core70.ContractError(
+                        f"fixture history contains a hard-linked file: {path.relative_to(project)}"
+                    )
     if (fixture / "project").is_dir():
         shutil.copytree(
             fixture / "project",
@@ -175,6 +186,16 @@ def build_project(corpus: Path, episode: dict[str, Any], project: Path, control_
             dirs_exist_ok=True,
             ignore=shutil.ignore_patterns("__pycache__"),
         )
+        # Custody modes protect the fixture, not its mutable working copy.
+        # Add owner access only; preserve executable bits and other permissions.
+        # Do not follow links created by a fixture's history script.
+        for root, dirs, files in os.walk(project):
+            directory = Path(root)
+            directory.chmod(stat.S_IMODE(directory.stat().st_mode) | stat.S_IRWXU)
+            for name in files:
+                path = directory / name
+                if not path.is_symlink():
+                    path.chmod(stat.S_IMODE(path.stat().st_mode) | stat.S_IRUSR | stat.S_IWUSR)
     if not (project / ".git").is_dir():
         subprocess.run(["git", "init", "-q"], cwd=project, check=True)
     info = project / ".git" / "info"

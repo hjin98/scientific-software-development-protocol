@@ -1,4 +1,6 @@
 import json
+import stat
+import subprocess
 import tempfile
 import unittest
 from pathlib import Path
@@ -11,6 +13,125 @@ from adapters import claude
 def write_json(path: Path, value):
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(value, indent=2, sort_keys=True), encoding="utf-8")
+
+
+class ProjectStagingTests(unittest.TestCase):
+    def test_history_hard_links_are_refused_before_copy_or_chmod(self):
+        for copied_collision in (False, True):
+            with self.subTest(copied_collision=copied_collision), tempfile.TemporaryDirectory() as tmp:
+                root = Path(tmp)
+                fixture = root / "corpus/fixtures/frozen"
+                source = fixture / "project"
+                source.mkdir(parents=True)
+                outside = root / "outside.txt"
+                outside.write_text("protected\n")
+                outside.chmod(0o400)
+                if copied_collision:
+                    (source / "history-data").write_text("overlay\n")
+                (fixture / "build_history.sh").write_text(
+                    f'ln "{outside}" history-data\n'
+                )
+                project = root / "working"
+                with self.assertRaisesRegex(core70.ContractError, "hard-linked file: history-data"):
+                    harness70.build_project(
+                        root / "corpus", {"id": "E1", "fixture": "frozen"}, project, []
+                    )
+                self.assertEqual(stat.S_IMODE(outside.stat().st_mode), 0o400)
+                self.assertEqual(outside.read_text(), "protected\n")
+                self.assertFalse((project / ".git").exists())
+
+    def test_history_git_commits_and_restricted_modes_are_preserved(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            fixture = root / "corpus/fixtures/frozen"
+            source = fixture / "project"
+            nested = source / "nested"
+            nested.mkdir(parents=True)
+            data = nested / "data.txt"
+            data.write_text("frozen\n")
+            executable = source / "run.sh"
+            executable.write_text("#!/bin/sh\nprintf staged\n")
+            data.chmod(0o440)
+            executable.chmod(0o551)
+            nested.chmod(0o550)
+            source.chmod(0o550)
+            (fixture / "build_history.sh").write_text(
+                "git init -q\nprintf history > historical.txt\ngit add historical.txt\n"
+                "git -c user.email=eval@example.invalid -c user.name=eval commit -qm history\n"
+            )
+            project = root / "working"
+            try:
+                harness70.build_project(root / "corpus", {"id": "E1", "fixture": "frozen"}, project, [".omp"])
+                self.assertEqual(subprocess.check_output(["git", "rev-list", "--count", "HEAD"], cwd=project), b"2\n")
+                self.assertEqual(subprocess.check_output(["git", "status", "--porcelain"], cwd=project), b"")
+                self.assertEqual((project / ".git/info/exclude").read_text(), harness70.project_git_exclude([".omp"]))
+                self.assertEqual(stat.S_IMODE((project / "nested").stat().st_mode), 0o750)
+                self.assertEqual(stat.S_IMODE((project / "nested/data.txt").stat().st_mode), 0o640)
+                self.assertEqual(stat.S_IMODE((project / "run.sh").stat().st_mode), 0o751)
+                self.assertEqual(subprocess.check_output([str(project / "run.sh")]), b"staged")
+                (project / "nested/data.txt").write_text("edited\n")
+                self.assertEqual(data.read_text(), "frozen\n")
+                self.assertEqual(stat.S_IMODE(data.stat().st_mode), 0o440)
+                self.assertEqual(stat.S_IMODE(executable.stat().st_mode), 0o551)
+                self.assertEqual(stat.S_IMODE(nested.stat().st_mode), 0o550)
+                self.assertEqual(stat.S_IMODE(source.stat().st_mode), 0o550)
+            finally:
+                source.chmod(0o700)
+                nested.chmod(0o700)
+
+    def test_frozen_fixture_becomes_writable_without_changing_custody(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            source = root / "corpus" / "fixtures" / "frozen" / "project"
+            nested = source / "nested"
+            nested.mkdir(parents=True)
+            data = nested / "data.txt"
+            data.write_text("frozen data\n")
+            executable = source / "run.sh"
+            executable.write_text("#!/bin/sh\nprintf staged\n")
+            data.chmod(0o400)
+            executable.chmod(0o500)
+            nested.chmod(0o500)
+            source.chmod(0o500)
+            before = {p: (stat.S_IMODE(p.stat().st_mode), p.read_bytes() if p.is_file() else None)
+                      for p in (source, nested, data, executable)}
+            project = root / "working"
+            try:
+                harness70.build_project(root / "corpus", {"id": "E1", "fixture": "frozen"}, project, [])
+                self.assertEqual(stat.S_IMODE(project.stat().st_mode), 0o700)
+                self.assertEqual(stat.S_IMODE((project / "nested").stat().st_mode), 0o700)
+                self.assertEqual(stat.S_IMODE((project / "nested/data.txt").stat().st_mode), 0o600)
+                self.assertEqual(stat.S_IMODE((project / "run.sh").stat().st_mode), 0o700)
+                self.assertEqual(subprocess.check_output(["git", "status", "--porcelain"], cwd=project), b"")
+                self.assertEqual(subprocess.check_output([str(project / "run.sh")], cwd=project), b"staged")
+                (project / "nested/data.txt").write_text("edited\n")
+                (project / "nested/new.txt").write_text("created\n")
+                self.assertTrue(subprocess.check_output(["git", "diff", "--", "nested/data.txt"], cwd=project))
+                for path, expected in before.items():
+                    self.assertEqual((stat.S_IMODE(path.stat().st_mode), path.read_bytes() if path.is_file() else None), expected)
+            finally:
+                # Only the synthetic fixture needs thawing for temporary cleanup.
+                source.chmod(0o700)
+                nested.chmod(0o700)
+
+    def test_staging_does_not_chmod_history_script_symlink_targets(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            fixture = root / "corpus/fixtures/frozen"
+            (fixture / "project").mkdir(parents=True)
+            outside = root / "outside.txt"
+            outside.write_text("protected\n")
+            outside.chmod(0o400)
+            outside_dir = root / "outside-dir"
+            outside_dir.mkdir()
+            (outside_dir / "data.txt").write_text("protected\n")
+            (outside_dir / "data.txt").chmod(0o400)
+            (fixture / "build_history.sh").write_text(
+                f'ln -s "{outside}" file-link\nln -s "{outside_dir}" dir-link\n'
+            )
+            harness70.build_project(root / "corpus", {"id": "E1", "fixture": "frozen"}, root / "working", [])
+            self.assertEqual(stat.S_IMODE(outside.stat().st_mode), 0o400)
+            self.assertEqual(stat.S_IMODE((outside_dir / "data.txt").stat().st_mode), 0o400)
 
 
 class PortableCoreTests(unittest.TestCase):
