@@ -4,6 +4,7 @@
 
 - **Governing Protocol:** Scientific Software Development Protocol (SSDP) `6.6.0`
 - **Starting HEAD:** `c3f79cedfdf55e842aeb8655b2162c33ac2f1be0` (Add independent Stage 7 OMP runner-admission NO-PASS review)
+- **Implementation Commit (Executable D4 Repair):** `1ce2db1b3d92d01c4ab2cafd7767db116d51274c`
 - **Repository:** `hjin98/scientific-software-development-protocol`
 - **Branch:** `ssdp-7.0-scientific-epistemic-closure`
 - **Repair Domain:** D4 executable concretization (generic profile admission & snapshot validation)
@@ -20,8 +21,9 @@
   - Verified clean working tree and matching git rev-parse HEAD before implementation.
 - **Intervening Commit Review:**
   - `c3f79cedfdf55e842aeb8655b2162c33ac2f1be0`: Introduced independent review NO-PASS report documenting blocking defect B1 and evidence limitation E1.
-  - Prior implementation commit: `1715a8f0ddd6360d68c54afd650f32b037bcc2de` (`adapters/omp.py`).
-- **Final HEAD:** Objective Git commit created upon committing this completed repair and report.
+- **D4 Executable Implementation Commit:** `1ce2db1b3d92d01c4ab2cafd7767db116d51274c`
+  - Enforced mandatory Section 6 oracle-integrity closure in executor admission (`core70.py`, `omp_stage7_admission.py`, `test_portable70.py`).
+- **Final Report Commit:** Objective Git commit created upon committing this completed repair and verification record.
 
 ---
 
