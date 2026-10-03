@@ -251,7 +251,7 @@ The production falsifier ran against the complete `p70` base realization:
 ## 9. Integrity, Credential, and Disposition Closure
 
 1. **Campaign Verification:**
-   - Current qualification tooling (`omp_stage7_admission.campaign_errors()`) validated all 22 recorded proof artifacts with zero errors.
+   - The 22 recorded implementer-owned PASS proof artifacts satisfy the tooling's structural/hash checks. Whole-campaign `omp_stage7_admission.campaign_errors()` verification is **not clean**: it reports a non-PASS error for each of the 13 mandatory independent-inspection slots. The earlier zero-errors wording did not describe a successful whole-campaign verification. The historical command transcript for a separate successful proof-only check is not retained in this campaign.
    - Profile key, core hash, adapter hash, harness hash, build inventory, runtime closure, and host execution environment match across campaign, runs, and proofs.
    - Exactly the 13 designated independent-inspection obligations remain `PENDING` / `UNRESOLVED` (1 check + 12 Section 6 cells).
 
