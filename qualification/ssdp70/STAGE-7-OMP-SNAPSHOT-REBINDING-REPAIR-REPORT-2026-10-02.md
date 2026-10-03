@@ -22,6 +22,8 @@
   - `13a61f6b7cd60a440b0dce4d6968228727cd2acf`: Recorded Stage 7 OMP Section 6 admission repair report and counterfactual verification.
   - `1ce2db1b3d92d01c4ab2cafd7767db116d51274c`: Enforced mandatory Section 6 oracle-integrity closure in executor admission.
 - **D4 Executable Implementation Commit:** `ba11ad846a669ff9e34fb726a9c9a753d412d756`
+- **Initial Repair Report Commit:** `d50dcb539334582cd8a848dcc0d72ed5c7f4f897`
+- **Campaign Execution & Handoff Commit:** `5633fd29fb4fa7f7fa08d96d24f0c6fa6ae38b25`
 
 ---
 
@@ -124,7 +126,8 @@
 - **`omp_stage7_campaign.py` SHA-256:** `4e6cd557ec5eb7b6795d22a46835798caa17642c6c94697ac4c9b7e0aaf63bf8`
 - **`capabilities/omp-headless.json` File SHA-256:** `1c0f3ce0ec625c8c6609c36a746c631f08e81d6dc2a02d00f29bda03cbb416bd`
 - **`capabilities/omp-headless.json` Canonical Stable JSON SHA-256:** `f01ec2b6bda9c30ffb9495029cce8481ab762a62a0f1c3d9452c17a3d0ca0e55`
-- **Frozen Profile Key SHA-256:** `68d440fd6f8e8441ac35b0cab584e2d6c8be043661d14fd78d2965cc1282f6d8`
+- **Replacement Profile Key SHA-256:** `3ce07101a33bb427453dcfa862f811bfdf276a073d4e2662e3624b924a0be8b6`
+- **Historical Route-Source Profile Key SHA-256:** `86da2241272919344cd40075bcf79e61c63dbd3eb27249c8bd2f729fcca89a10`
 - **Protocol 7 Semantic Subject `p70`:** `db94a2dfb7fef480f37227eab5c45256e89901b8`
 - **Protocol 6.6 Comparison Arm `p66`:** `22f4bdba53795da3a6f13f162529f3a843fc37ae`
 
