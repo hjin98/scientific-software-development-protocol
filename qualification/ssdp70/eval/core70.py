@@ -1401,8 +1401,12 @@ def validate_runtime_observation(bundle: ProfileBundle, observation: Any) -> lis
     return errors
 
 
-def validate_claim_observability(events: list[dict[str, Any]], claims: Iterable[str]) -> list[str]:
+def validate_claim_observability(events: list[dict[str, Any]], claims: Iterable[str],
+                                 package_supply: list[dict[str, Any]] | None = None) -> list[str]:
+    """`package_supply`: exact supervisor-ledger accounting rows (rel, bytes, sha256) for package files
+    whose content reached the model through process output; native reads remain events."""
     normalized = {str(claim).lower() for claim in claims}
+    supply = list(package_supply or [])
     errors: list[str] = []
     successful_reads = [
         event for event in events
@@ -1410,7 +1414,7 @@ def validate_claim_observability(events: list[dict[str, Any]], claims: Iterable[
         and event.get("status") == "result"
         and (event.get("payload") or {}).get("result_status") == "result"
     ]
-    if any("owner-read" in claim for claim in normalized) and not successful_reads:
+    if any("owner-read" in claim for claim in normalized) and not successful_reads and not supply:
         errors.append("owner-read claim has no successful resource-access result evidence")
     burden_sensitive = any(
         token in claim
@@ -1429,8 +1433,12 @@ def validate_claim_observability(events: list[dict[str, Any]], claims: Iterable[
             event for event in successful_reads
             if isinstance((event.get("payload") or {}).get("resolved_package_identity"), dict)
         ]
-        if not package_reads:
+        if not package_reads and not supply:
             errors.append("T1/T7/T8 burden claim has no successful exact SSDP-resource evidence")
+        for row in supply:
+            if not _valid_sha256(row.get("sha256")) or not isinstance(row.get("bytes"), int):
+                errors.append("T1/T7/T8 burden claim lacks exact SSDP-resource byte/hash observability")
+                break
         for event in package_reads:
             payload = event.get("payload") or {}
             if not _valid_sha256(payload.get("resource_sha256")) or not isinstance(payload.get("resource_bytes"), int):
@@ -1918,6 +1926,9 @@ def validate_family(record: Any) -> list[str]:
     return errors
 
 
+RUN_ID_PATTERN = re.compile(r"[A-Za-z0-9][A-Za-z0-9._-]{0,127}")
+
+
 def campaign_manifest_errors(manifest: Any) -> list[str]:
     if not isinstance(manifest, dict):
         return ["campaign/suite manifest is not an object"]
@@ -1931,6 +1942,9 @@ def campaign_manifest_errors(manifest: Any) -> list[str]:
     for row in runs:
         if not isinstance(row, dict) or not isinstance(row.get("id"), str) or row["id"] in seen:
             errors.append("declared realization identity is malformed or duplicated")
+            continue
+        if not RUN_ID_PATTERN.fullmatch(row["id"]):
+            errors.append(f"declared realization id {row['id']!r} is not a safe single path component")
             continue
         seen.add(row["id"])
         if row.get("entry_stratum") not in ("deterministic", "ordinary"):

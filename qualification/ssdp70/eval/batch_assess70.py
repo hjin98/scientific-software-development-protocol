@@ -451,6 +451,10 @@ def quantitative_part(part, manifest, opportunities, root):
                 if field:
                     value = summary[field]
                     extra = (summary.get('installed_entrypoint_bytes'),summary.get('installed_owner_bytes'))
+                    owner_reads = summary.get('owner_read_sequences')
+                    if part in ('fixed_cost','active_material') and not isinstance(owner_reads, list):
+                        return 'UNRESOLVED','owner-read mode is unobserved (inexact package observation)'
+                    extra += (None if owner_reads is None else 'owner' if owner_reads else 'entrypoint-only',)
                 else:
                     oracle = core70.load_json(root/ref['run']/'oracle.json')['results'][ref['oracle']]
                     payload = core70.load_json(root/ref['run']/oracle['stdout_artifact'])
@@ -489,7 +493,7 @@ def quantitative_part(part, manifest, opportunities, root):
             return 'FAIL',f'{route}: candidate median {cm} exceeds bound {bound}'
         if part=='fixed_cost' and route=='T7':
             # Mixed entrypoint-only/owner modes trigger exactly 3 -> 5 -> 7 pairs.
-            mixed=any(len({v[0] for v in arm})>1 for arm in (c,b))
+            mixed=any(len({v[1][2] for v in arm})>1 for arm in (c,b))
             if len(c) not in (3,5,7) or (mixed and len(c)<7):
                 return 'UNRESOLVED','T7 bounded mixed-mode extension remains decision-sensitive'
     return 'PASS',None
@@ -513,10 +517,29 @@ def comparative_part(parts, manifest):
         return 'UNRESOLVED','required independent confidence/cluster/run-noise assessment is non-PASS'
     return 'PASS',None
 
-def main() -> int:
-    args = parse_args()
+def print_summary(summary: dict[str, Any], declared: set[str]) -> None:
+    """Purpose-aware final summary; integrity and development scopes have no qualification arms."""
+    print(f"Purpose {summary['purpose']} scope {summary['scope_id']}: runs {len(summary['runs'])}/{len(declared)}")
+    if "integrity_outcome" in summary:
+        print(f"Outer integrity outcome: {summary['integrity_outcome']}")
+    for arm, arm_data in sorted(summary["arms"].items()):
+        print(f"Arm {arm}: Total {arm_data['total']}, Outcomes: {arm_data['outcomes']}, "
+              f"Critical Fails: {summary['critical_failures'].get(arm, 0)}")
+    if summary["errors"]:
+        print(f"Errors: {summary['errors']}")
+
+
+def main(argv: list[str] | None = None) -> int:
+    args = parse_args(argv)
     runs_dir = args.runs_dir.resolve()
     out_dir = args.out_dir.resolve()
+    # The frozen purpose/campaign/suite manifest is validated before any evaluator is launched.
+    manifest = core70.load_json(args.accounting_manifest)
+    manifest_errors = core70.campaign_manifest_errors(manifest)
+    if manifest_errors:
+        print("[!] accounting manifest refused before evaluator launch: " + "; ".join(manifest_errors), file=sys.stderr)
+        return 2
+    declared = {row["id"] for row in manifest["runs"]}
     out_dir.mkdir(parents=True, exist_ok=True)
 
     all_runs = sorted(
@@ -531,6 +554,10 @@ def main() -> int:
     if args.limit:
         all_runs = all_runs[: args.limit]
 
+    undeclared = [r for r in all_runs if r not in declared]
+    if undeclared:
+        print(f"[!] undeclared realizations cannot be assessed or imported into this scope: {undeclared}", file=sys.stderr)
+        return 2
     total = len(all_runs)
     print(f"[*] Starting batch assessment of {total} runs (parallel={args.parallel})")
     print(f"    Source: {runs_dir}")
@@ -567,16 +594,13 @@ def main() -> int:
     print(f"[*] Completed {completed}/{total} runs in {total_time}s")
 
     # Aggregate results
-    summary = aggregate_assessments(out_dir, core70.load_json(args.accounting_manifest))
+    summary = aggregate_assessments(out_dir, manifest)
     summary_path = out_dir / "assessment-summary.json"
     summary_path.write_text(json.dumps(summary, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     print(f"[*] Saved summary to {summary_path}")
 
     print("\n=== Assessment Summary ===")
-    for arm in ("p66", "p70"):
-        arm_data = summary["arms"][arm]
-        print(f"Arm {arm}: Total {arm_data['total']}, Outcomes: {arm_data['outcomes']}, Critical Fails: {summary['critical_failures'][arm]}")
-
+    print_summary(summary, declared)
     return 0
 
 

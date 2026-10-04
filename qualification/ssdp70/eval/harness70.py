@@ -30,6 +30,7 @@ HERE = Path(__file__).resolve().parent
 if str(HERE) not in sys.path:
     sys.path.insert(0, str(HERE))
 import core70  # noqa: E402
+import package_ledger  # noqa: E402
 
 OWNER = "scientific-inspectability-and-initiative.md"
 # Harness-owned git exclude for the run project. It is restored before the diff is computed so that
@@ -811,8 +812,23 @@ def run_episode(
                 Path(auto_memory).resolve().relative_to(runtime_home.resolve())
             except (OSError, ValueError):
                 profile_errors.append("runtime auto-memory path escapes the fresh run-owned HOME")
-        profile_errors.extend(core70.validate_claim_observability(events, claims))
         owner_read_sequences = adapter_module.owner_reads(events, OWNER)
+        # Supervisor package-access accounting (D3-PACKAGE-ACCESS-LEDGER-OBSERVATION-DECISION).
+        ledger_hook = getattr(adapter_module, "package_access_ledger", None)
+        accounting = None
+        supplied_owner: list[int] = []
+        if ledger_hook is not None:
+            ledger_bundle = ledger_hook(adapter_artifacts, profile_bundle.profile)
+            accounting = package_ledger.account(ledger_bundle.get("ledger"), ledger_bundle.get("cut_ns"), events,
+                                                installed_skills, extra_errors=list(ledger_bundle.get("errors") or []))
+            if accounting["exact"]:
+                for rel, row in accounting["supplied"].items():
+                    if rel.endswith("/references/" + OWNER):
+                        supplied_owner.extend(row["sequences"])
+                owner_read_sequences = sorted(set(owner_read_sequences) | set(supplied_owner))
+        profile_errors.extend(core70.validate_claim_observability(
+            events, claims,
+            [{"rel": rel, **row} for rel, row in (accounting["supplied"].items() if accounting and accounting["exact"] else [])]))
         if any("owner-read" in str(claim).lower() for claim in claims) and not owner_read_sequences:
             profile_errors.append("owner-read claim has no successful read of the canonical owner resource")
         _write_normalized(events, out)
@@ -851,19 +867,33 @@ def run_episode(
                     path = payload.get("resolved_resource_path")
                     if isinstance(path, str) and path.startswith("/opt/ssdp/skills/"):
                         consumed_files[path.removeprefix("/opt/ssdp/skills/")] = payload["resource_bytes"]
-        # Native process results do not prove the complete package read set. Until
-        # the owning observation contract closes this gap, never publish an exact
-        # byte total or a negative owner-read conclusion from incomplete evidence.
-        opaque_package_access = [event["sequence"] for event in events
+        # Exact package consumption needs complete observation of package access, not just native
+        # read events. An adapter with a supervisor-owned package-access ledger supplies it
+        # (D3-PACKAGE-ACCESS-LEDGER-OBSERVATION-DECISION); without one, any process execution
+        # leaves the package read set unobserved and no exact byte total or negative owner-read
+        # conclusion is published.
+        process_events = [event["sequence"] for event in events
             if event.get("kind") == "tool_action" and event.get("status") == "result"
             and "process_execution" in event.get("payload", {}).get("semantic_capability_classes", [])]
-        resource_observation = {"exact": not opaque_package_access,
-            "unresolved_process_events": opaque_package_access,
-            "reason": "process execution lacks complete SSDP resource-read observation" if opaque_package_access else None}
+        if accounting is not None:
+            observation_exact = bool(accounting["exact"])
+            if observation_exact:
+                for rel, row in accounting["supplied"].items():
+                    consumed_files.setdefault(rel, row["bytes"])
+            reason = None if observation_exact else "package-access observation is not exact: " + "; ".join(accounting["reasons"])
+            unresolved_events = [] if observation_exact else process_events
+        else:
+            observation_exact = not process_events
+            reason = None if observation_exact else "process execution lacks complete SSDP resource-read observation"
+            unresolved_events = process_events
+        resource_observation = {"exact": observation_exact, "unresolved_process_events": unresolved_events,
+            "reason": reason, "mechanism": None if accounting is None else accounting["mechanism"],
+            "accounting": accounting}
         sensitive_claims = any(any(token in str(claim).lower() for token in
             ("owner", "t1", "t7", "t8", "burden", "active-byte")) for claim in claims)
-        if opaque_package_access and sensitive_claims:
-            profile_errors.append(resource_observation["reason"])
+        if not observation_exact and sensitive_claims:
+            profile_errors.append(reason)
+        opaque_package_access = not observation_exact
         declared_root = identity.get("declared_root")
         entrypoint = installed_skills / declared_root / "SKILL.md" if declared_root else None
         owner = installed_skills / declared_root / "references" / OWNER if declared_root else None

@@ -153,21 +153,57 @@ class RealActivationPath(unittest.TestCase):
         self.assertFalse(any('delegate' in tool for tool in summary['runtime_observation']['tools']))
         self.assertEqual(aggregate['integrity_outcome'], 'PASS', aggregate)
 
-    def test_process_read_cannot_supply_exact_burden_or_zero_owner_evidence(self):
-        expected = {'evidence_state':'INADMISSIBLE',
-                    'criteria':{'harness/admissibility':'FAIL','deterministic activation':'PASS'},
-                    'qualification_outcome':'NOT_EVALUATED'}
-        scenario = {'steps':[
-            {'tool_calls':[{'name':'read','arguments':{'path':'skill://software-implementation'}}]},
-            {'tool_calls':[{'name':'bash','arguments':{'command':'cat /opt/ssdp/skills/software-implementation/references/scientific-inspectability-and-initiative.md'}}]},
-            {'text':'process observation discriminator'}]}
-        summary,aggregate,identity,rig = self.realize(scenario=scenario, claims=['active-byte burden'], local_expected=expected)
-        self.assertEqual(summary['evidence_state'],'INADMISSIBLE',summary.get('evidence_state_reasons'))
-        self.assertTrue(summary['activation']['delivered'])
-        self.assertFalse(summary['resource_observation']['exact'])
-        self.assertIsNone(summary['active_ssdp_bytes'])
-        self.assertIsNone(summary['owner_read_sequences'])
-        self.assertEqual(aggregate['integrity_outcome'],'PASS',aggregate)
+    OWNER_REL = 'software-implementation/references/scientific-inspectability-and-initiative.md'
+    OWNER_PATH = '/opt/ssdp/skills/' + OWNER_REL
+
+    def process_case(self, command=None, tool=None):
+        call = tool or {'name': 'bash', 'arguments': {'command': command}}
+        scenario = {'steps': [{'tool_calls': [call]}, {'text': 'process observation discriminator'}]}
+        return self.realize(scenario=scenario, claims=['active-byte burden', 'owner-read'])
+
+    def test_process_read_with_supplied_content_is_exactly_accounted(self):
+        """Real OMP model reads the owner through `bash`; the supervisor ledger plus observer-seen output account it."""
+        root_bytes = (omp_rig.DIST_SKILLS / 'software-implementation' / 'SKILL.md').stat().st_size
+        owner_bytes = (omp_rig.DIST_SKILLS / self.OWNER_REL).stat().st_size
+        for name, command, bytes_counted in (
+                ('cat', f'cat {self.OWNER_PATH}', owner_bytes),
+                ('head', f'head -n 40 {self.OWNER_PATH}', owner_bytes),      # partial supply counts the file once
+                ('grep lines', f"grep -n 'owner' {self.OWNER_PATH}", owner_bytes)):
+            with self.subTest(name):
+                summary, aggregate, identity, rig = self.process_case(command)
+                self.assertEqual(summary['evidence_state'], 'COMPLETE_ADMISSIBLE', summary.get('evidence_state_reasons'))
+                observation = summary['resource_observation']
+                self.assertTrue(observation['exact'], observation)
+                self.assertEqual(observation['mechanism'], 'inotify-inode-marks')
+                self.assertEqual(sorted(observation['accounting']['opened_pre_request0']),
+                                 sorted(f'{r}/SKILL.md' for r in omp.SSDP_SKILLS))
+                self.assertEqual(summary['active_ssdp_bytes'], root_bytes + bytes_counted)
+                self.assertTrue(summary['owner_read_sequences'], summary['owner_read_sequences'])
+                self.assertEqual(aggregate['integrity_outcome'], 'PASS', aggregate)
+
+    def test_process_access_without_shown_content_is_inadmissible_for_burden_and_owner_claims(self):
+        """Opened package files whose content cannot be shown to have reached the model are named, never lower-bounded."""
+        expected = {'evidence_state': 'INADMISSIBLE',
+                    'criteria': {'harness/admissibility': 'FAIL', 'deterministic activation': 'PASS'},
+                    'qualification_outcome': 'NOT_EVALUATED'}
+        for name, call in (
+                ('count', {'name': 'bash', 'arguments': {'command': f'wc -l {self.OWNER_PATH}'}}),
+                ('transformed', {'name': 'bash', 'arguments': {'command': f'base64 {self.OWNER_PATH} | head -c 200'}}),
+                ('native grep over package', {'name': 'grep', 'arguments': {'pattern': 'owner', 'path': '/opt/ssdp/skills/software-implementation/references'}})):
+            with self.subTest(name):
+                scenario = {'steps': [{'tool_calls': [call]}, {'text': 'process observation discriminator'}]}
+                summary, aggregate, identity, rig = self.realize(scenario=scenario, claims=['active-byte burden', 'owner-read'],
+                                                                 local_expected=expected)
+                self.assertEqual(summary['evidence_state'], 'INADMISSIBLE', summary.get('evidence_state_reasons'))
+                self.assertTrue(summary['activation']['delivered'])
+                observation = summary['resource_observation']
+                self.assertFalse(observation['exact'], observation)
+                self.assertIn('package-access observation is not exact', observation['reason'])
+                self.assertIn(self.OWNER_REL if name != 'native grep over package' else 'software-implementation/references/',
+                              observation['reason'])
+                self.assertIsNone(summary['active_ssdp_bytes'])
+                self.assertIsNone(summary['owner_read_sequences'])
+                self.assertEqual(aggregate['integrity_outcome'], 'PASS', aggregate)
 
     def test_qualification_scoped_integrity_campaign_keeps_failure_after_good_repeat(self):
         """Real campaign aggregation; outer suite purpose remains integrity throughout."""

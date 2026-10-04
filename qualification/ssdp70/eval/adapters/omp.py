@@ -60,6 +60,7 @@ REPO_ROOT = EVAL_DIR.parents[2]
 if str(EVAL_DIR) not in sys.path:
     sys.path.insert(0, str(EVAL_DIR))
 import core70  # noqa: E402
+import package_ledger  # noqa: E402
 import evidence70  # noqa: E402
 import seccomp70  # noqa: E402
 import observer70  # noqa: E402
@@ -466,6 +467,7 @@ def execution_support_sha256() -> dict[str, str]:
         "profiles/omp-headless.template.json": sha256_file(EVAL_DIR / "profiles" / "omp-headless.template.json"),
         "core70.py": sha256_file(EVAL_DIR / "core70.py"),
         "harness70.py": sha256_file(EVAL_DIR / "harness70.py"),
+        "package_ledger.py": sha256_file(EVAL_DIR / "package_ledger.py"),
     }
 
 
@@ -1708,6 +1710,8 @@ def launch(profile: dict[str, Any], prompt: str, project: Path, env: dict[str, s
     if spec is not None:
         (paths["observer"] / "activation.json").write_text(json.dumps(spec), encoding="utf-8")
         (paths["observer"] / "activation.json").chmod(0o444)
+    ledger_watch = package_ledger.LedgerWatcher(paths["skills"])
+    ledger_record: dict[str, Any] | None = None
     started = time.monotonic()
 
     def pipe() -> tuple[int, int]:
@@ -1733,6 +1737,7 @@ def launch(profile: dict[str, Any], prompt: str, project: Path, env: dict[str, s
     boundary_sentinel.write_text("SUPERVISOR-PRIVATE-OBSERVER-PROBE\n", encoding="utf-8")
     boundary_sentinel.chmod(0o600)
     try:
+        ledger_watch.start()
         threads = [
             _drain(obs_ev[0], sinks["observer"]),
             _drain(br_ev[0], sinks["bridge"]),
@@ -1857,6 +1862,9 @@ def launch(profile: dict[str, Any], prompt: str, project: Path, env: dict[str, s
             except OSError:
                 pass
     finally:
+        # The subject is gone (or never started): the package-access ledger is closed first so
+        # supervisor post-run reads of the package cannot appear in it.
+        ledger_record = ledger_watch.stop()
         # Give the observer and bridge a chance to close their evidence chains on edge EOF.
         for proc in procs:
             try:
@@ -1931,6 +1939,7 @@ def launch(profile: dict[str, Any], prompt: str, project: Path, env: dict[str, s
             "mounted_observer_dependencies": [row for row in runtime_dependency_manifest()["dependencies"]
                                                if "observer" in row.get("roles", [])],
         }, indent=2, sort_keys=True) + "\n",
+        "package-access-ledger.json": json.dumps(ledger_record, sort_keys=True) + "\n",
         "runtime-input-template.json": json.dumps(expected_input, sort_keys=True) + "\n",
         "activation-spec.json": json.dumps(spec, sort_keys=True) + "\n",
         "runtime-home-inventory.json": json.dumps(_home_inventory(paths["home"]), indent=2, sort_keys=True) + "\n",
@@ -3909,6 +3918,25 @@ def owner_reads(events: list[dict[str, Any]], owner_name: str) -> list[int]:
         if owner_name in target and consumed.get("match") in ("exact", "partial"):
             hits.append(int(event["sequence"]))
     return hits
+
+
+def package_access_ledger(artifacts: dict[str, Any], profile: dict[str, Any] | None) -> dict[str, Any]:
+    """Supervisor package-access ledger and the request-0 cut it is judged against."""
+    errors: list[str] = []
+    try:
+        ledger = json.loads(artifacts.get("package-access-ledger.json") or "null")
+    except (ValueError, TypeError):
+        ledger = None
+        errors.append("package-access ledger artifact is malformed")
+    observed = Observed(artifacts, profile)
+    cut_ns = None
+    if observed.requests:
+        first = observed.requests[0]["record"]
+        if observed.requests[0].get("index") == 0 and isinstance(first.get("t_ns"), int):
+            cut_ns = first["t_ns"]
+        else:
+            errors.append("first retained provider request is not request 0 with a timestamp")
+    return {"ledger": ledger, "cut_ns": cut_ns, "errors": errors}
 
 
 def prepare_prompt(profile: dict[str, Any], entry: str, prompt: str) -> str:
