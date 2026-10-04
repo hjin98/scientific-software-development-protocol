@@ -3,7 +3,7 @@ kind: stakeholder-decision-record
 governing_protocol_version: 6.6.0
 target_protocol_version: 7.0.0
 decision_date_utc: 2026-10-04
-status: stakeholder-directed; contract/workplan amendments pending governed change and fresh independent check
+status: stakeholder-directed; refined 2026-10-04 (§§5–6); workplan overlay and contract amendment pending fresh independent check
 ---
 
 # Deterministic skill activation and activation as a qualification target
@@ -78,12 +78,12 @@ After seeing that Stage 7's ordinary-entry rate was far below the proposed 80% f
 
 > "Is it really important if we have the standard activation route using the commands? Our main focus should be that standard command activation alwasy activates. If that works, we don't necessarily need the plain-word version, and it can simply be regarded as unreliable."
 
-The stakeholder then approved the resulting plan: a governed workplan amendment, a contract revision, fresh independent checks, and runtime command-activation runs.
+The stakeholder then said: "yes, do steps 1–3 and the runtime runs, commit the review". Steps 1–3 were a governed workplan amendment, a contract revision and fresh independent checks.
 
 **Effective decisions (superseding §1 item 2 where they differ):**
 
-- **(2a)** The qualification target is that deterministic command activation always activates. This is stakeholder-stated.
-- **(2b)** Ordinary-entry (plain-word or description-driven) activation is regarded as unreliable and carries no pass floor. This is stakeholder-stated.
+- **(2a)** The qualification target is that "standard command activation alwasy [sic] activates". This is stakeholder-stated. The recorder operationalizes it as *deterministic* activation: the entrypoint reaches the model before its first request, independent of model choice.
+- **(2b)** "If that works, we don't necessarily need the plain-word version, and it can simply be regarded as unreliable." This is stakeholder-stated and **conditional** on 2a working; §6 Q2 fixes the condition.
 
 **Recorder's derivations.** These are not the stakeholder's words, and the independent check and stakeholder may correct them:
 
@@ -91,3 +91,19 @@ The stakeholder then approved the resulting plan: a governed workplan amendment,
 - **(D2)** Ordinary-entry activation is still measured and reported, since the stakeholder said it "can simply be regarded as unreliable", not that it is unobserved.
 - **(D3)** The 6.6 ordinary-selection preservation floors become report-only by the same reasoning.
 - **(D4)** Owner false-activation (zero tolerance) and the other entry-independent floors are unchanged.
+
+## 6. Stakeholder answers to the second independent check (2026-10-04)
+
+The second independent check (`ACTIVATION-OVERLAY-AND-CONTRACT-REV2-INDEPENDENT-CHECK-2026-10-04.md`) raised Serious Challenge SC-A and blockers B1–B3 for the stakeholder. The stakeholder chose these options, quoted as presented:
+
+| Question as asked | Option chosen and its stated meaning |
+|---|---|
+| Q1. "Can the harness loading the skill itself count as 'standard command activation', or must qualification show a runtime's own command loading the skill?" | **"Real command on ≥1 Flash"**: "At least one Flash-class profile must use a runtime whose own command loads the skill (OMP RPC mode does this on Flash). Harness loading is allowed for other profiles and for the byte-cost runs, but can't be the only evidence." |
+| Q2. "Is 'plain wording has no pass floor' unconditional, or only where a runtime's command is shown to activate?" | **"Conditional on proof"**: "No ordinary-entry floor, provided the activation question above is satisfied with real runtime-command evidence. If it isn't, plain wording is not exempt." |
+| Q3. "Protocol 7 must currently select skills from plain prompts no worse than 6.6 (within 2 of 32 episodes). Keep that as a pass/fail floor?" | **"Report only"**: "Measure and report the 6.6 comparison without pass/fail, consistent with plain wording being unreliable and unsupported." |
+| Q4. "Keep the floors that stop skills activating where they shouldn't (non-scientific near-miss tasks), now that descriptions were widened to copy/relay/delegate?" | **"Keep these floors"**: "No floor on activating, but keep the guard against activating wrongly, so wider descriptions can't start firing on non-scientific tasks. Cheap, and it protects users who don't type commands." |
+
+**Effect on §5.**
+- Q3 confirms derivation D3, narrowed to the 6.6 *correct-selection* non-inferiority bound. This is the explicit stakeholder supersession that workplan criterion 16 requires for that 6.6 capability.
+- Q4 keeps every false-activation floor binding. These are the 6.6 negative-selection bound, the near-boundary negative bound and predicate false-firing.
+- D1, D2 and D4 remain recorder derivations. D1 is narrowed by Q1.

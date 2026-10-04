@@ -4,65 +4,76 @@ governing_protocol_version: 6.6.0
 target_protocol_version: 7.0.0
 date_utc: 2026-10-04
 amends: qualification/ssdp70/PROTOCOL-7.0-EVALUATION-AND-QUALIFICATION-CONTRACT.md
-revision: 2
-status: revision 2 drafted; fresh independent check required (contract) together with fresh independent workplan Review (overlay)
+revision: 3
+status: revision 3 drafted; fresh independent check required (contract) together with fresh independent workplan Review (overlay revision 2)
 ---
 
-# Activation-strata amendment to the Protocol 7.0 qualification contract (revision 2)
+# Activation-strata amendment to the Protocol 7.0 qualification contract (revision 3)
 
 ## 1. Authority and status
 
-- **Stakeholder decision.** `STAKEHOLDER-DECISION-2026-10-04-PROTOCOL-7.0-DETERMINISTIC-ACTIVATION-AND-ACTIVATION-QUALIFICATION.md` §§1 and 5. The binding words are: "Our main focus should be that standard command activation alwasy activates. If that works, we don't necessarily need the plain-word version, and it can simply be regarded as unreliable." Recorder derivations D1–D4 are listed in that record's §5 and are labelled as derivations wherever they are used here.
-- **Workplan.** The governed overlay "Current stakeholder activation decision and governed overlay (2026-10-04)" in the active workplan's §0.1. It supersedes ordinary-entry requirements in §§8.3, 11.3, 11.5, 13 and 14 on entry mode only, and needs its own fresh independent Review.
-- **Revision 1** (commit `d370193`) received an independent NO-PASS (`ACTIVATION-STRATA-AMENDMENT-INDEPENDENT-CHECK-2026-10-04.md`). The same context that authored revision 1 authored this revision, so it cannot accept it.
+- **Authority.** `STAKEHOLDER-DECISION-2026-10-04-PROTOCOL-7.0-DETERMINISTIC-ACTIVATION-AND-ACTIVATION-QUALIFICATION.md`:
+  - §5: the stakeholder's verbatim refinement, with 2b recorded as conditional;
+  - §6: the stakeholder's verbatim answers Q1–Q4 to the second independent check.
+
+  Recorder derivations D1, D2 and D4 are labelled where used. D3 is superseded by Q3.
+- **Workplan.** The active workplan's §0.1 overlay, revision 2, with a header decision entry and markers at every affected location.
+- **History.**
+  - Revision 1 (`d370193`): NO-PASS, recorded in `ACTIVATION-STRATA-AMENDMENT-INDEPENDENT-CHECK-2026-10-04.md`.
+  - Revision 2 (`0c5372d`): NO-PASS, recorded in `ACTIVATION-OVERLAY-AND-CONTRACT-REV2-INDEPENDENT-CHECK-2026-10-04.md`.
+- **Authorship.** The same context authored all three revisions, so it cannot accept this one.
 
 ## 2. Evidence
-- **Stage 7 measured activation, not doctrine.** The executor loaded an SSDP root in 13/122 p70 runs. 42/43 p70 critical failures came from runs with no root loaded (`STAGE-7-M07-DELEGATE-REQUEST-AND-TREATMENT-DELIVERY-DIAGNOSIS-2026-10-04.md`).
-- **Ordinary selection depends on model and framing.** It was 2/10 on Flash and 4/10 on GLM-5.3, and copy/relay/delegate framings never triggered catalog consultation (`STAGE-7-SELECTION-STRONGER-EXECUTOR-PROBE-RESULT-2026-10-04.md`).
-- **Delivery and conformity are distinct.** With delivery, delegate-request conformity was 6–10/25 (`STAGE-7-M07-DOCTRINE-LOADED-PROBE-RESULT-2026-10-04.md`).
-- **Runtime command activation is mode-dependent** (`STAGE-7-RUNTIME-COMMAND-ACTIVATION-PROBE-RESULT-2026-10-04.md`):
-  - Claude Code print mode and OMP RPC mode expand the command;
-  - OMP print mode, which the Stage 7 adapter uses, and Codex `exec` do not.
 
-## 3. Contract changes in revision 2
+The evidence is unchanged from revision 2:
+- the treatment-delivery diagnosis;
+- the doctrine-loaded M07 probe;
+- the stronger-executor selection probe;
+- the runtime command-activation probe (`STAGE-7-*-2026-10-04.md`).
+
+## 3. Contract changes in revision 3
 
 | Section | Change |
 |---|---|
-| §1 item 4 | `root_selection` carries the stratum, the mechanism and the **delivery record** (runtime expansion event or injection record, with entrypoint hash, delivered bytes and a position before the first model request). |
-| §1 item 12 | Rewritten.<br>• **Mechanisms.** Deterministic entry is realized by `runtime-command` (only where expansion is demonstrated for that exact mode) or by `harness-injection` (reproducing the runtime's demonstrated delivery, with wrapper bytes recorded; it supports a delivery claim, not a claim that "this runtime's user command works").<br>• **Delivery proof.** Each run needs per-run proof; a model-initiated read never counts. A missing or late record makes the run inadmissible **and** fails the profile's activation criterion, with no rerun rescue.<br>• **Ordinary entry.** Unreliable, no floor. `ordinary-read`, `instructed-read` and no-selection are reported separately.<br>• **Run-type strata.** Assigned for every run type.<br>• **Scoring scope.** Floors apply only to deterministic runs. Ordinary runs are reported with every critical failure listed. The owner false activation rule applies everywhere.<br>• **Profile coverage.** At least one flash-class profile must be among those offered; each profile stands alone. The mechanism is in the profile key. |
-| §3 | Order: harness/admissibility → **deterministic activation** → critical → floors → … A new first row requires 100% delivery per profile. The proposed ordinary floor is withdrawn. |
-| §4 | **Selection routes:** S01–S11/H01–H05 are report-only (derivation D3).<br>**T1/T7/T8:**<br>• activation is deterministic;<br>• active bytes = delivered entrypoint + wrapper bytes;<br>• a later re-read counts as an additional read;<br>• the 6.5/6.6 denominators use the same mechanism. |
-| §5 | Every inadmissible run and its replacement are recorded with both identities. |
-| §6 | Canary-skill demonstration for `runtime-command`. Delivery-format check for `harness-injection`. Known-broken probes: withheld entrypoint, passthrough command with model read, late delivery record, hash mismatch. |
-| §8 | Records revision 2 and the pending checks. |
+| §1 item 4 | The deterministic delivery record holds:<br>• the installed `SKILL.md` hash;<br>• the delivery-transform identity;<br>• the delivered-text hash;<br>• the hash-linked observer record of the first provider request;<br>• the byte offset of the delivered text within that request. |
+| §1 item 12 | Rewritten.<br>• **`runtime-command`** is admissible only where expansion is demonstrated for that runtime and mode.<br>• **`harness-injection`** must reproduce the same runtime's demonstrated `runtime-command` request 0. A runtime with no demonstrated command delivery (Codex `exec`) has no deterministic stratum.<br>• **Proof.** A per-runtime *delivery transform* is frozen, and proof is **observer request 0**. Adapter or runtime records only corroborate. A runtime without an observer is claim-scoped inadmissible.<br>• **Activation failure.** The run is inadmissible for every floor and fails the profile's criterion, with no rerun rescue. Requalification needs a new profile key, a fresh pre-run check and a fresh campaign.<br>• **Ordinary reporting.** Four groups, plus at least 3 episodes per arm per new class (D2).<br>• **Retained false-activation floors (Q4).** Predicate false-firing is measured on deterministic runs.<br>• **Run-type strata** are revised accordingly.<br>• **Profile coverage (Q1).** At least one flash-class profile uses `runtime-command`. Injection is never the only evidence. Each profile stands alone (D1). |
+| §3 | The activation row counts **every declared deterministic run**, including inadmissible ones. It states the Q1 requirement and points to the §4 floors that remain binding. |
+| §4 | Only the 6.6 correct-selection bound is report-only (Q3). The 6.6 negative and near-boundary false-activation bounds and predicate false-firing stay floors (Q4). The routing probes and sentinels are deterministic, with their floors intact. The T1/T7/T8 byte metric is **unchanged** (whole installed `SKILL.md` plus SSDP files read, each counted once, identical across arms); delivered and wrapper bytes are descriptive only. The "Composite ordinary-entry" residue is removed. |
+| §6 | Expansion is demonstrated with a canary at the provider-request layer. The transform is frozen and reproduced byte-for-byte for the canary and each SSDP root. Injection is checked against `runtime-command` request 0. Six known-broken probes count against the activation criterion. The composite-ordinary residue is replaced by per-stratum recording. |
+| §8 | Records revision 3. |
 
-## 4. Response to the revision-1 independent check
+## 4. Response to the second independent check
 
 | Finding | Disposition |
 |---|---|
-| **SC-1** — the workplan requires ordinary entry (§8.3, §11.3, §11.5, §13 criterion 13, §14) | Answered by a governed workplan overlay (§0.1) with inline supersession markers at each bound location, following the 2026-09-28 fixed-cost overlay precedent. It needs a fresh independent workplan Review. |
-| **B1** — "fully accountable" ordinary runs vs deterministic-only floors; "doctrine measures" undefined; a wrong root drops out | All floors are deterministic-only, and ordinary runs are report-only. The undefined term is removed. On deterministic runs the root is predeclared, and a delivery record for any other root is a hash mismatch, so the run is inadmissible and the activation criterion fails. |
-| **B2** — mislabelled mechanism undetectable; no per-run delivery proof | Per-run delivery record with hash and pre-first-request position (§1 items 4 and 12). A model read never counts. §6 known-broken probes cover passthrough-plus-read, late record and hash mismatch. |
-| **B3** — PROPOSED floor not fail-closed | Withdrawn. Ordinary entry has no floor, by stakeholder decision §5 (2b). |
-| **B4** — `instructed-read` could satisfy the floor | No ordinary floor remains. `instructed-read` is reported separately and can never count as deterministic (§6 probe). |
-| **M1** — injection placement and wrapper; stratum vs profile key; claim scope; T1/T7/T8 bytes | Injection reproduces the runtime's demonstrated delivery; for OMP that is the RPC-mode `custom` message format. The mechanism is in the profile key, and stratum and mechanism are in run identity. The claim scope is stated. Byte rules are stated in §4. |
-| **M2** — new classes not required; "at least one flash-class" vs the per-profile rule | The ordinary report must cover the new classes (workplan overlay item 4). Profile coverage: each offered profile stands alone, and at least one must be flash-class. |
-| **M3** — derivations credited to the stakeholder | The decision record §5 separates stakeholder words (2a, 2b) from derivations D1–D4, and this record labels each use. |
-| **M4** — run types without a stratum | Every run type is assigned in §1 item 12. |
-| **M5** — exposure feasibility | Deterministic runs alone must meet the §2 minimums. Fresh fixtures are required, since the Stage 7 set is development data. |
-| **Minor** — order vs table placement | The order and the first table row now agree. |
-| **Minor** — cross-route cites an untracked closeout record and a wildcard path | The overlay names the closeout record as not yet committed and cites the exact corrigendum directory. |
-| **Minor** — replacement runs unrecorded | §5 record rule added. |
+| **SC-A** — 2b recorded unconditionally; injection could satisfy 2a | The stakeholder answered Q1 and Q2 (decision record §6). 2b is now recorded as conditional on runtime-command evidence. Item 12 and the §3 row require `runtime-command` on at least one flash-class profile, and injection is never the only evidence. |
+| **B1** — PASS possible with no `runtime-command` | Closed by the Q1 requirement in item 12 *Profile coverage* and in the §3 row. |
+| **B2** — D3 not non-binding; scope ambiguous | Q3 confirms D3, narrowed to the 6.6 correct-selection bound only. The §4 text names that bound alone. The routing probes and T2/T3 sentinels keep their floors on deterministic entry. Criterion 16 gets its explicit supersession (decision record §6; workplan marker). |
+| **B3** — false-activation and predicate-false-firing floors dropped | Q4 retains them. They are stated as floors in item 12, §3 and §4, and in overlay item 5. Predicate false-firing is measured on deterministic entry. Criterion 13's false-activation clause is restated in overlay item 4. |
+| **B4** — delivery record ill-defined, not tamper-evident | Proof is the observer's hash-linked request 0, checked under a per-runtime frozen delivery transform. This handles OMP's frontmatter stripping and embedded prompt. Runtime and adapter records only corroborate. A runtime without the observer is claim-scoped inadmissible for this stratum, which covers the Claude Code case where there is no expansion event. |
+| **B5** — contradictory byte accounting | There is one metric, the unchanged 6.6 metric, applied identically to all arms. Delivered and wrapper bytes are descriptive only. |
+| **B6** — ordinary new-class measurement unrealized | Item 12 requires at least 3 ordinary episodes per arm per new class, report-only (D2). |
+| **G1** — tautological activation row | The denominator is now every declared deterministic run, including inadmissible ones. |
+| **G2** — injection undefined across layers; Codex | Injection is defined at the provider-request layer against the same runtime's demonstrated `runtime-command` request 0. A runtime with no demonstrated command delivery cannot use injection. |
+| **G3** — Stage A static-margin basis | Unchanged, because the byte metric is unchanged. The workplan *Static pre-measurement* bullet carries a marker. |
+| **G4** — attribution and labelling | Every attribution is now stakeholder-quoted: the quote is restored verbatim ("alwasy [sic]"); 2b keeps "If that works"; "approved the plan" is replaced by the verbatim instruction; Q1–Q4 are quoted. The derivations are labelled at each use: D1 in item 12, D2 in item 12 and the overlay, and D4 is reflected in the retained floors. |
+| **G5** — D4 vs scope; wrong-root grouping | Owner false activation and the Q4 floors apply across strata. Doctrine floors are deterministic-only. Ordinary runs are reported in four groups (no selection, wrong root, admissible root, prose-instructed), with every critical failure listed by group. |
+| **G6** — unmarked workplan locations; header | Markers are added at: the I66-2 map row, §11.3 non-selection placement-miss, §11.3 *Route*, §11.5 selection non-inferiority, §11.5 false-activation bounds, §11.5 composite runs, criterion 14, criterion 16 and *Static pre-measurement*. A 2026-10-04 decision entry is added to the header. |
+| **G7** — requalification after a harness-caused failure | Requires a new profile key, a fresh §6 pre-run check and a fresh full campaign. The failed campaign stays on record. |
+| **Minor** — "each of which" | Reworded: the deterministic *stratum* must meet the §2 minimums. |
+| **Minor** — composite-ordinary residue | Removed from contract §4 and §6. The workplan §11.5 sentence carries a marker. |
+| **Minor** — stakeholder record status | Updated. |
+| **Minor** — README overstates the probe | README now says OMP *RPC mode* (interactive UI untested) and Claude Code *print mode* (interactive untested). |
+| **Revision-1 m2** — untracked closeout record | Still uncommitted, and labelled as such. Committing it is for the stakeholder. |
 
 ## 5. Questions for the fresh independent check
-1. Does the workplan overlay validly supersede the frozen §8.3 bullet and §13 criterion 13 on entry mode, under the 2026-09-28 precedent? Or does it change acceptance criteria in a way that needs more than an overlay?
-2. Is derivation D3 (6.6 ordinary-selection preservation becomes report-only) within the stakeholder's words, or must it wait for explicit confirmation before any run?
-3. Is per-run delivery proof achievable and tamper-evident with the existing observer and normalizer design? In particular, can OMP RPC-mode expansion events or harness injection be linked into the normalized stream before the first model request?
-4. Is "every critical failure listed" for ordinary runs enough visibility, given that ordinary usage is unsupported?
-5. Is there any remaining way to pass a floor without delivered doctrine, or to fail one because of an undelivered entrypoint?
+1. Is the request-0 delivery proof well defined and realizable with the existing observer for OMP RPC mode? The adapter currently launches print mode.
+2. Do the overlay's markers and named thresholds now leave no contradictory unmarked workplan statement?
+3. Is any stakeholder attribution still beyond the recorded words?
+4. Does any route remain for passing the activation criterion without a runtime's own command loading the skill on a flash-class profile?
 
 ## 6. Still blocked until both checks pass
-- adapter/harness changes (OMP RPC mode or injection, delivery records);
+- adapter changes (OMP RPC mode, the observer request-0 delivery check, transform freezing);
 - profile freezes;
 - the §6 pre-run check;
 - fresh fixtures;
