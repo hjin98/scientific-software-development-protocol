@@ -100,8 +100,8 @@ DETERMINISTIC ORCHESTRATOR: Protocol 8.0 (unchanged by this work)
 
 ### 0.1 Current repair and Review boundary
 
-**Current stakeholder activation decision and governed overlay (2026-10-04, overlay revision 4).** Stage 7 closed NON-QUALIFIED. Records:
-- the closeout decision, `qualification/ssdp70/STAKEHOLDER-DECISION-2026-10-04-PROTOCOL-7.0-NON-QUALIFICATION-CLOSEOUT.md`, present in the working tree but not yet committed;
+**Current stakeholder activation decision and governed overlay (2026-10-04, overlay revision 5).** Stage 7 closed NON-QUALIFIED. Records:
+- the closeout decision, `qualification/ssdp70/STAKEHOLDER-DECISION-2026-10-04-PROTOCOL-7.0-NON-QUALIFICATION-CLOSEOUT.md`, committed at `91b6de2`;
 - the corrigendum, `~/ssdp70-omp-stagef/reviews/SSDP-STAGE7-QUALIFICATION-REPORT-CORRIGENDUM-20261004T131137Z/`.
 
 Diagnosis showed that the executor rarely activated SSDP under ordinary entry, so Stage 7 mostly measured activation rather than doctrine. The stakeholder decided ("Our main focus should be that standard command activation alwasy [sic] activates. If that works, we don't necessarily need the plain-word version, and it can simply be regarded as unreliable.") and then answered questions Q1–Q5 raised by the independent checks. Both are recorded verbatim in `qualification/ssdp70/STAKEHOLDER-DECISION-2026-10-04-PROTOCOL-7.0-DETERMINISTIC-ACTIVATION-AND-ACTIVATION-QUALIFICATION.md` §§5–7.
@@ -115,11 +115,14 @@ This overlay is a governed workplan change. It changes **entry mode and exactly 
    A prose instruction is not deterministic. The probe `qualification/ssdp70/STAGE-7-RUNTIME-COMMAND-ACTIVATION-PROBE-RESULT-2026-10-04.md` found that:
    - Claude Code print mode and OMP RPC mode expand the command;
    - OMP print mode and Codex `exec` do not.
-2. **Primary flash profile family (stakeholder Q1, Q5).** The full rule is in contract §1 item 12. In summary:
-   - Before the candidate's first campaign, the offered profile set is frozen and one flash-class **primary profile family** is designated: a predeclared set of execution-profile keys differing only where a panel requires a different capability, such as T1/T7/T8 without delegation.
-   - The primary family uses `runtime-command` for every deterministic run, with a hash-bound runtime input. It must reach PASS on **every** §3-ordered criterion: activation, critical, floors, preservation, burden, comparative claim, and the §7 human trial on its outputs.
-   - Any non-PASS state of the primary blocks qualification PASS for every profile. Other profiles may use `harness-injection` but never rescue it.
-   - Changing the primary needs a written stakeholder decision, and every earlier campaign is disclosed.
+2. **Primary flash profile family (stakeholder Q1, Q5; operationalized in contract §1 item 12, labelled R-op there).** In summary:
+   - Before the candidate's first campaign, the offered profile set is frozen and one flash-class **primary profile family** is designated: predeclared execution-profile keys of one model, runtime and mode.
+     - Its deterministic keys use `runtime-command`, with a hash-bound runtime input. They differ only by panel-required capability, such as T1/T7/T8 without delegation.
+     - One same-model ordinary-entry key hosts the ordinary runs.
+   - A predeclared criterion-to-key map and pooled false-activation counts form its aggregation, and the family result has its own identity.
+   - The family must reach a final PASS on **every** §3-ordered criterion: activation, critical, floors, preservation (including the Q4 floors on its ordinary key), burden, comparative claim, and the §7 human trial on its outputs.
+   - Any non-PASS final criterion state blocks qualification PASS for every profile. Other profiles may use `harness-injection` but never rescue it.
+   - Changing the primary needs a written stakeholder decision. A requalification re-key of the same model, runtime and mode is a new family revision, not a change. Every earlier campaign is disclosed.
    - Requalification after a delivery failure needs a recorded root cause in the adapter or harness, removed by an independently reviewed repair. An undiagnosed or runtime-caused failure falsifies `runtime-command` for that runtime and mode.
 3. **§11 semantic qualification runs on deterministic entry.** This covers every §11.3 case (composite fixtures, O1 authoring and review, tension retrieval, delegate cases), the §11.5 sentinels and route probes, T1/T7/T8 and the R2 owner-load cases. Each case has a custodian-predeclared root: the one a user following the guide would invoke. The §11.3 *Route* rule scores a delegator against the elements carried on that root. Owner placement after activation keeps every floor.
 4. **§13 criterion 13** replaces "selection and routing are reliable on ordinary entry" with three conditions:
@@ -133,7 +136,7 @@ This overlay is a governed workplan change. It changes **entry mode and exactly 
    - **Retained as floors (stakeholder Q4):**
      - selection false activations on the 6.6 negatives (paired 6.6 + 1);
      - selection false activations on the near-boundary negatives (predeclared margin);
-     - predicate false-firing, scored on every run where an SSDP root was delivered or selected, in either stratum. This covers ordinary near-boundary runs that wrongly select SSDP, and deterministic runs that invoke a role on a predicate-excluded task. The scope is a recorder choice (D5).
+     - predicate false-firing, scored on every run where an SSDP root was delivered or selected, in either stratum. This covers ordinary near-boundary runs that wrongly select SSDP, and deterministic runs that invoke a role on a predicate-excluded task. The scope is a recorder choice (D5, decision record §6).
      - zero owner false activations on every run.
    - The route-probe and T2/T3 sentinel floors are unchanged and run on deterministic entry.
 6. **Burden.** The T1/T7/T8 active-byte metric is unchanged: the whole installed `SKILL.md`, frontmatter included, plus SSDP files read, each counted once. It applies identically to the 6.5, 6.6 and 7.0 arms. Delivered and wrapper bytes are reported only descriptively. The Stage A static-margin basis is therefore unchanged.
@@ -144,7 +147,7 @@ This overlay is a governed workplan change. It changes **entry mode and exactly 
 
    Ordinary non-selection is reported and does not reopen placement.
 
-The contract realization is `qualification/ssdp70/PROTOCOL-7.0-ACTIVATION-STRATA-CONTRACT-AMENDMENT-2026-10-04.md` (revision 5). Earlier revisions received independent NO-PASS. The latest check, of overlay revision 3 and contract revision 4, is `qualification/ssdp70/ACTIVATION-OVERLAY-REV3-AND-CONTRACT-REV4-INDEPENDENT-CHECK-2026-10-04.md`. This revision needs a fresh independent workplan Review before any stage relies on it.
+The contract realization is `qualification/ssdp70/PROTOCOL-7.0-ACTIVATION-STRATA-CONTRACT-AMENDMENT-2026-10-04.md` (revision 6). Earlier revisions received independent NO-PASS. The latest check, of overlay revision 4 and contract revision 5, is `qualification/ssdp70/ACTIVATION-OVERLAY-REV4-AND-CONTRACT-REV5-INDEPENDENT-CHECK-2026-10-04.md`. This revision needs a fresh independent workplan Review before any stage relies on it.
 
 **Stage F portable-execution repair (2026-09-28).** The first portable execution amendment at `62aa1bbaa9d2d1dfef1b48cede6bc1500837658f` received a fresh independent **NO-PASS** in `qualification/ssdp70/STAGE-F-PORTABLE-EXECUTION-ARCHITECTURE-INDEPENDENT-REVIEW-NO-PASS-2026-09-28.md`. That Review accepted the portable-core + runtime-adapter boundary in principle but blocked D4 on five under-specified contracts: execution-profile equality under hidden provider state; semantic capability/containment/custody equivalence; normalized-trace completeness; exact required evidence/scoring closure; and full provenance/profile-scoped PASS semantics. The current Stage F portability clauses repair those five gaps without changing the immutable Protocol 7 semantic candidate. The repair is recorded in `qualification/ssdp70/STAGE-F-PORTABLE-EXECUTION-ARCHITECTURE-REPAIR-2026-09-28.md` and **awaits fresh independent Review**; dependent Stage F tooling repair and candidate runs remain unauthorized by this repair context.
 
@@ -634,7 +637,7 @@ Stage A SHALL create `qualification/ssdp70/PROTOCOL-7.0-EVALUATION-AND-QUALIFICA
    - Protocol 7 candidate.
    - Both arms in a matched pair use the **same execution-profile key** except the exact protocol package. The key binds every exposed/controllable material execution condition and predeclares provider-managed unknown dimensions under the rule below. Run order is counterbalanced. A known runtime/provider migration within a pair, or an unknown dimension that is not demonstrably arm-neutral at the exposed interface, makes the pair inadmissible for claims sensitive to it.
    - Each run verifies that its runtime-visible catalog contains only its arm's SSDP skills, each exactly once (I66-5). A run that fails this check is inadmissible, not evidence for either arm.
-   - Qualification results are **profile-scoped**. Results from different execution-profile keys remain separate strata. A separately predeclared aggregation may summarize multiple strata, but it cannot rescue an inadmissible stratum, a hard/zero-tolerance failure in any included stratum, or establish equivalence of materially different profiles.
+   - Qualification results are **profile-scoped**. Results from different execution-profile keys remain separate strata. [Affected by the 2026-10-04 activation overlay, §0.1: the primary flash family rule in contract §1 item 12 governs qualification PASS.] A separately predeclared aggregation may summarize multiple strata, but it cannot rescue an inadmissible stratum, a hard/zero-tolerance failure in any included stratum, or establish equivalence of materially different profiles.
 
 **Portable execution-profile architecture (binding for Stage F).** Qualification semantics SHALL NOT depend on Claude Code, a named model vendor, a local shell, a local Git checkout, a particular operating system, or a fixed custody path. Local CLI, cloud agent, hosted workspace, container, VM and equivalent agents are admissible when an adapter proves the same qualification interface. The existing Claude-oriented tooling is one replaceable adapter/evidence prototype, not normative architecture.
 
@@ -659,7 +662,7 @@ A profile that cannot expose or enforce a property needed by a particular qualif
 
 Before an execution profile may run qualification subjects, the independent pre-run checker runs the §11.5 oracle-integrity suite **through that exact adapter/profile**, including known-good and known-broken branches, incomplete/failed termination, missing-artifact/oracle/disposition rejection, cache/profile/core/evaluator identity perturbations, catalog contamination, containment escapes and ordinary-entry/owner-read capture. It also verifies raw-to-normalized completeness and the exact expected scoring-item closure. Passing one adapter/profile does not qualify a materially different one.
 
-**Profile-scoped qualification.** Hard/zero-tolerance floors and matched comparisons are evaluated inside one execution-profile key. The result is `PASS(profile_id, candidate, comparator-set)` or a non-PASS state for that profile. A separately reviewed, predeclared multi-profile analysis may describe a population of profiles, but no aggregation may rescue an inadmissible profile, average away a hard/zero-tolerance failure, or be presented as proof that materially different profiles are equivalent.
+**Profile-scoped qualification.** Hard/zero-tolerance floors and matched comparisons are evaluated inside one execution-profile key. [Affected by the 2026-10-04 activation overlay, §0.1: the primary flash family rule in contract §1 item 12 governs qualification PASS.] The result is `PASS(profile_id, candidate, comparator-set)` or a non-PASS state for that profile. A separately reviewed, predeclared multi-profile analysis may describe a population of profiles, but no aggregation may rescue an inadmissible profile, average away a hard/zero-tolerance failure, or be presented as proof that materially different profiles are equivalent.
 
 
 **OMP-only provider-adaptation slice (next D4 implementation; Pi explicitly deferred).** The next Stage F portability implementation SHALL target OMP (`omp`) only. This cycle prepares an independently admissible OMP execution profile; it does not admit OMP, does not transfer Run 6 or any Claude-derived live evidence to OMP, does not modify the immutable Protocol 7 semantic candidate, and does not authorize Pi work. Pi remains outside this cycle unless separately reopened by D3.

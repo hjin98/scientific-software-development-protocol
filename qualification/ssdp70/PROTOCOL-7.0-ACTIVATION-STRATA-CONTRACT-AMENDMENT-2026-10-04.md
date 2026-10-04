@@ -4,11 +4,11 @@ governing_protocol_version: 6.6.0
 target_protocol_version: 7.0.0
 date_utc: 2026-10-04
 amends: qualification/ssdp70/PROTOCOL-7.0-EVALUATION-AND-QUALIFICATION-CONTRACT.md
-revision: 5
-status: revision 5 drafted; fresh independent check required (contract) together with fresh independent workplan Review (overlay revision 4)
+revision: 6
+status: revision 6 drafted; fresh independent check required (contract) together with fresh independent workplan Review (overlay revision 5)
 ---
 
-# Activation-strata amendment to the Protocol 7.0 qualification contract (revision 5)
+# Activation-strata amendment to the Protocol 7.0 qualification contract (revision 6)
 
 ## 1. Authority and status
 
@@ -17,14 +17,15 @@ status: revision 5 drafted; fresh independent check required (contract) together
   - §6: the stakeholder's verbatim answers Q1–Q4 to the second independent check;
   - §7: the stakeholder's verbatim answer Q5 to the third check.
 
-  Recorder derivations D1, D2 and D4 are labelled where used. D3 is superseded by Q3. D5 (predicate false-firing scope) is a recorder choice.
-- **Workplan.** The active workplan's §0.1 overlay, revision 4, with a header decision entry and markers at every affected location.
+  Recorder derivations D1, D2 and D4 are labelled where used. D3 is superseded by Q3. D5 (predicate false-firing scope) is a recorder choice. Contract operationalizations of Q1 and Q5 are labelled R-op.
+- **Workplan.** The active workplan's §0.1 overlay, revision 5, with a header decision entry and markers at every affected location.
 - **History.**
   - Revision 1 (`d370193`): NO-PASS, recorded in `ACTIVATION-STRATA-AMENDMENT-INDEPENDENT-CHECK-2026-10-04.md`.
   - Revision 2 (`0c5372d`): NO-PASS, recorded in `ACTIVATION-OVERLAY-AND-CONTRACT-REV2-INDEPENDENT-CHECK-2026-10-04.md`.
   - Revision 3 (`70727f1`): NO-PASS, recorded in `ACTIVATION-OVERLAY-REV2-AND-CONTRACT-REV3-INDEPENDENT-CHECK-2026-10-04.md`. It found no Serious Challenge and two blockers.
   - Revision 4 (`4c404ec`): NO-PASS, recorded in `ACTIVATION-OVERLAY-REV3-AND-CONTRACT-REV4-INDEPENDENT-CHECK-2026-10-04.md`. It found no Serious Challenge and one blocker.
-- **Authorship.** The same context authored all five revisions, so it cannot accept this one.
+  - Revision 5 (`077c1eb`): NO-PASS, recorded in `ACTIVATION-OVERLAY-REV4-AND-CONTRACT-REV5-INDEPENDENT-CHECK-2026-10-04.md`. It found no Serious Challenge and one blocker.
+- **Authorship.** The same context authored all six revisions, so it cannot accept this one.
 
 ## 2. Evidence
 
@@ -34,7 +35,7 @@ The evidence is unchanged from revision 2:
 - the stronger-executor selection probe;
 - the runtime command-activation probe (`STAGE-7-*-2026-10-04.md`).
 
-## 3. Contract changes (cumulative through revision 3; later deltas in §§4a0 and 4a)
+## 3. Contract changes (cumulative through revision 3; later deltas in §§4a00, 4a0 and 4a)
 
 | Section | Change |
 |---|---|
@@ -44,6 +45,21 @@ The evidence is unchanged from revision 2:
 | §4 | Only the 6.6 correct-selection bound is report-only (Q3). The 6.6 negative and near-boundary false-activation bounds and predicate false-firing stay floors (Q4). The routing probes and sentinels are deterministic, with their floors intact. The T1/T7/T8 byte metric is **unchanged** (whole installed `SKILL.md` plus SSDP files read, each counted once, identical across arms); delivered and wrapper bytes are descriptive only. The "Composite ordinary-entry" residue is removed. |
 | §6 | Expansion is demonstrated with a canary at the provider-request layer. The transform is frozen and reproduced byte-for-byte for the canary and each SSDP root. Injection is checked against `runtime-command` request 0. Six known-broken probes count against the activation criterion. The composite-ordinary residue is replaced by per-stratum recording. |
 | §8 | Records revision 3. |
+
+## 4a00. Response to the fifth independent check (revision 6)
+
+| Finding | Disposition |
+|---|---|
+| **B1** — the family cannot host the ordinary-entry floors it must pass; cross-key pooling | The family now contains **one same-model ordinary-entry key** beside its deterministic keys. A predeclared **criterion-to-key map** assigns each §3 criterion to family keys; the Q4 floors on ordinary negatives go to the ordinary key. Pooled D5 and owner-false-activation counts are declared as the family's aggregation, which can only add failures. The family result has an identity: a hash of the ordered keys and the map. The profile-scoped result rule cross-references this. |
+| **G1** — workplan profile-scoped lines unmarked | Markers are added at the §11 profile-scoped bullet and at the "Profile-scoped qualification" paragraph. |
+| **G2** — the runtime input swept in skill package, workspace and config; §6 wording | The runtime input is redefined as the invocation channel only: argv, stdin or RPC, prompt-bearing environment variables, prompt or command files. Environment realization is bound by its own identities. §6 now requires equality with the frozen input template. |
+| **G3** — run-level vs criterion-level blocking | Blocking applies to *final criterion-level* states, after the replacements, reruns and adjudications that §§4–5 allow. Undelivered deterministic runs remain direct activation failures. |
+| **m1** — stale records | The overlay cites the closeout commit. The decision-record status cites §§5–7. D5 is located in decision record §6. Record §4b is updated. |
+| **m2** — Q1/Q5 operationalizations unlabelled | Labelled R-op in contract item 12 and in overlay item 2. |
+| **m3** — disclosure boundary | Disclosure covers earlier campaigns of earlier Protocol 7 candidates under this workplan. |
+| **m4** — "primary result" collision | The contract's sentence now reads "per-profile result". |
+| **m5** — whether re-keying changes the family | A requalification re-key of the same model, runtime and mode is a new family revision, not a change of family. |
+| **m6** — human trial on non-primary profiles | The human trial runs on the primary family only. Other profiles carry no human-legibility claim. |
 
 ## 4a0. Response to the fourth independent check (revision 5)
 
@@ -94,13 +110,13 @@ The evidence is unchanged from revision 2:
 | **Minor** — composite-ordinary residue | Removed from contract §4 and §6. The workplan §11.5 sentence carries a marker. |
 | **Minor** — stakeholder record status | Updated. |
 | **Minor** — README overstates the probe | README now says OMP *RPC mode* (interactive UI untested) and Claude Code *print mode* (interactive untested). |
-| **Revision-1 m2** — untracked closeout record | Still uncommitted, and labelled as such. Committing it is for the stakeholder. |
+| **Revision-1 m2** — untracked closeout record | Committed at `91b6de2` by stakeholder instruction. The overlay cites the commit. |
 
 ## 5. Questions for the fresh independent check
-1. Can any profile reach qualification PASS while the primary flash family has any non-PASS state, or without its own runtime command loading the skill?
-2. Is the primary-family definition realizable for every panel, including T1/T7/T8 and the human trial, without breaking matched-key comparisons?
-3. Is the input-template rule well defined and not brittle?
-4. Does any unmarked statement still contradict the overlay, and is every attribution within the quoted words with recorder choices labelled?
+1. Can every §3 criterion be evaluated on a key in the primary family, with no criterion left unevaluable or evaluated outside it?
+2. Can any profile reach qualification PASS while the primary family has a non-PASS final criterion state?
+3. Are the runtime-input boundary and the input template well defined?
+4. Is the record set consistent (revisions, commits, cross-references, labels)?
 
 ## 6. Still blocked until both checks pass
 - adapter changes (OMP RPC mode, the observer request-0 delivery check, the runtime-input record, transform freezing);

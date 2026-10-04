@@ -3,7 +3,7 @@ kind: stakeholder-decision-record
 governing_protocol_version: 6.6.0
 target_protocol_version: 7.0.0
 decision_date_utc: 2026-10-04
-status: stakeholder-directed; refined 2026-10-04 (§§5–6); workplan overlay and contract amendment pending fresh independent check
+status: stakeholder-directed; refined 2026-10-04 (§§5–7); workplan overlay and contract amendment pending fresh independent check
 ---
 
 # Deterministic skill activation and activation as a qualification target
