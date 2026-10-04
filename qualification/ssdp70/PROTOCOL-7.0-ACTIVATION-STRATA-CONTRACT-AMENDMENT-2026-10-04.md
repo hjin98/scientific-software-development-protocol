@@ -4,11 +4,11 @@ governing_protocol_version: 6.6.0
 target_protocol_version: 7.0.0
 date_utc: 2026-10-04
 amends: qualification/ssdp70/PROTOCOL-7.0-EVALUATION-AND-QUALIFICATION-CONTRACT.md
-revision: 7
-status: revision 7 drafted; fresh independent check required (contract) together with fresh independent workplan Review (overlay revision 6)
+revision: 8
+status: revision 8 drafted; fresh independent check required (contract) together with fresh independent workplan Review (overlay revision 7)
 ---
 
-# Activation-strata amendment to the Protocol 7.0 qualification contract (revision 7)
+# Activation-strata amendment to the Protocol 7.0 qualification contract (revision 8)
 
 ## 1. Authority and status
 
@@ -18,7 +18,7 @@ status: revision 7 drafted; fresh independent check required (contract) together
   - §7: the stakeholder's verbatim answer Q5 to the third check.
 
   Recorder derivations D1, D2 and D4 are labelled where used. D3 is superseded by Q3. D5 (predicate false-firing scope) is a recorder choice. Contract operationalizations of Q1 and Q5 are labelled R-op.
-- **Workplan.** The active workplan's §0.1 overlay, revision 6, with a header decision entry and markers at affected locations. Overlay revision 5 received independent PASS; the changed overlay requires fresh Review.
+- **Workplan.** The active workplan's §0.1 overlay, revision 7, with a header decision entry and markers at affected locations. Overlay revisions 5 and 6 received independent PASS; the changed overlay requires fresh Review.
 - **History.**
   - Revision 1 (`d370193`): NO-PASS, recorded in `ACTIVATION-STRATA-AMENDMENT-INDEPENDENT-CHECK-2026-10-04.md`.
   - Revision 2 (`0c5372d`): NO-PASS, recorded in `ACTIVATION-OVERLAY-AND-CONTRACT-REV2-INDEPENDENT-CHECK-2026-10-04.md`.
@@ -26,7 +26,8 @@ status: revision 7 drafted; fresh independent check required (contract) together
   - Revision 4 (`4c404ec`): NO-PASS, recorded in `ACTIVATION-OVERLAY-REV3-AND-CONTRACT-REV4-INDEPENDENT-CHECK-2026-10-04.md`. It found no Serious Challenge and one blocker.
   - Revision 5 (`077c1eb`): NO-PASS, recorded in `ACTIVATION-OVERLAY-REV4-AND-CONTRACT-REV5-INDEPENDENT-CHECK-2026-10-04.md`. It found no Serious Challenge and one blocker.
   - Revision 6 (`b9f23d7`): NO-PASS, recorded in `ACTIVATION-OVERLAY-REV5-AND-CONTRACT-REV6-INDEPENDENT-CHECK-2026-10-04.md` at `04b7a41`. It found no Serious Challenge and one contract blocker; overlay revision 5 received PASS.
-- **Authorship.** The prior context authored revisions 1–6. The continuing Codex context authored revision 7 and overlay revision 6; it cannot independently accept these bytes. A separate reviewing context must reconstruct authority rather than inherit this record's dispositions.
+  - Revision 7 (`2a49e53`): NO-PASS, recorded in `ACTIVATION-OVERLAY-REV6-AND-CONTRACT-REV7-INDEPENDENT-CHECK-2026-10-04.md` at `3f4d47b`. No Serious Challenge and one contract blocker; overlay revision 6 received PASS.
+- **Authorship.** The prior context authored revisions 1–6. The continuing Codex context authored revisions 7–8 and overlays 6–7; it cannot independently accept these bytes. A separate reviewing context must reconstruct authority rather than inherit this record's dispositions.
 
 ## 2. Evidence
 
@@ -36,7 +37,7 @@ The evidence is unchanged from revision 2:
 - the stronger-executor selection probe;
 - the runtime command-activation probe (`STAGE-7-*-2026-10-04.md`).
 
-## 3. Contract changes (cumulative through revision 3; later deltas in §§4a000, 4a00, 4a0 and 4a)
+## 3. Contract changes (cumulative through revision 3; later deltas in §§4a0000, 4a000, 4a00, 4a0 and 4a)
 
 | Section | Change |
 |---|---|
@@ -46,6 +47,21 @@ The evidence is unchanged from revision 2:
 | §4 | Only the 6.6 correct-selection bound is report-only (Q3). The 6.6 negative and near-boundary false-activation bounds and predicate false-firing stay floors (Q4). The routing probes and sentinels are deterministic, with their floors intact. The T1/T7/T8 byte metric is **unchanged** (whole installed `SKILL.md` plus SSDP files read, each counted once, identical across arms); delivered and wrapper bytes are descriptive only. The "Composite ordinary-entry" residue is removed. |
 | §6 | Expansion is demonstrated with a canary at the provider-request layer. The transform is frozen and reproduced byte-for-byte for the canary and each SSDP root. Injection is checked against `runtime-command` request 0. Six known-broken probes count against the activation criterion. The composite-ordinary residue is replaced by per-stratum recording. |
 | §8 | Records revision 3. |
+
+## 4a0000. Response to the seventh independent check (revision 8)
+
+Author-side dispositions, pending independent acceptance. The stakeholder instructed “Repair until passes”; no stakeholder floor or doctrine changes.
+
+| Finding | Disposition |
+|---|---|
+| **B1** — negative pre-run probes can fail every correct campaign | Re-derived one accounting boundary in §1 item 7: purpose and campaign/suite identity are fixed before launch. Integrity probes retain their actual production-scored evidence and probe-local criterion result; the outer integrity assessment checks the frozen expected state. Qualification alone supplies campaign counts/outcomes/exposure. Items 11, §3 and §6 bind and apply this same owner rule. Genuine campaign activation failures retain no-rescue FAIL; expected injected test failures are never campaign failures. Unexpected integrity failures block admission until resolved. The suite must discriminate both scopes and reject relabelling or cross-scope evidence reuse through the existing production path. No parallel scorer, extra qualification stratum or floor relaxation is introduced. |
+| **m1** — stale overlay tail | Overlay revision 7 corrects the contract/check identities and states the pending exact review boundary. Its reopen summary routes integrity and campaign failures to the accounting owner. Fresh Review includes this overlay. |
+
+**Convergence and affected surface.** The simplification is one explicit accounting owner with local routes, rather than a per-probe exception. Contract, record and overlay alone change; candidate source, harness, profiles, fixtures and frozen trees do not. The eighth check must attempt (a) a complete passing campaign after successful negative integrity tests, (b) a genuine campaign delivery failure, (c) post-exposure relabelling and (d) separate test/campaign aggregation with the same production scorer. No live checks are claimed here; these are contract-level feasibility discriminators for Review and future mandatory §6 realizations.
+
+**PEM applicability.** Revision 7's exact integrated base, no-overlay composition and HAS remain applicable: DS-001 applies to assembled acceptance adequacy, all other families remain outside this document-only scope. No governing source, base blob or overlay changed; partial/stale metadata limitations remain visible. No PEM mutation.
+
+**Author-side checks.** Revision 8: 407 repository tests OK, three skipped; repository-aware PEM validation valid (five families, zero notices), bound base/HEAD PEM blobs equal, and whitespace clean. No source/generated descendant changed; package/snapshot, live qualification and frozen-tree checks are not executed. These checks do not independently accept the contract.
 
 ## 4a000. Response to the sixth independent check (revision 7)
 

@@ -100,13 +100,13 @@ DETERMINISTIC ORCHESTRATOR: Protocol 8.0 (unchanged by this work)
 
 ### 0.1 Current repair and Review boundary
 
-**Current stakeholder activation decision and governed overlay (2026-10-04, overlay revision 6).** Stage 7 closed NON-QUALIFIED. Records:
+**Current stakeholder activation decision and governed overlay (2026-10-04, overlay revision 7).** Stage 7 closed NON-QUALIFIED. Records:
 - the closeout decision, `qualification/ssdp70/STAKEHOLDER-DECISION-2026-10-04-PROTOCOL-7.0-NON-QUALIFICATION-CLOSEOUT.md`, committed at `91b6de2`;
 - the corrigendum, `~/ssdp70-omp-stagef/reviews/SSDP-STAGE7-QUALIFICATION-REPORT-CORRIGENDUM-20261004T131137Z/`.
 
 Diagnosis showed that the executor rarely activated SSDP under ordinary entry, so Stage 7 mostly measured activation rather than doctrine. The stakeholder decided ("Our main focus should be that standard command activation alwasy [sic] activates. If that works, we don't necessarily need the plain-word version, and it can simply be regarded as unreliable.") and then answered questions Q1–Q5 raised by the independent checks. Both are recorded verbatim in `qualification/ssdp70/STAKEHOLDER-DECISION-2026-10-04-PROTOCOL-7.0-DETERMINISTIC-ACTIVATION-AND-ACTIVATION-QUALIFICATION.md` §§5–7.
 
-This overlay is a governed workplan change. It changes **entry mode and exactly the thresholds named below**; every other threshold is unchanged. Frozen bytes are preserved, and each affected location carries a marker pointing here. Recorder derivations D1–D4 are in decision record §5; D5 is in §6. Contract operationalizations are labelled R-op. Revision 5 received independent PASS in `qualification/ssdp70/ACTIVATION-OVERLAY-REV5-AND-CONTRACT-REV6-INDEPENDENT-CHECK-2026-10-04.md`; revision 6 adds the root-selection evidence marker and aligns the local summaries below with contract revision 7. Fresh independent Review is required for these changed bytes.
+This overlay is a governed workplan change. It changes **entry mode and exactly the thresholds named below**; every other threshold is unchanged. Frozen bytes are preserved, and each affected location carries a marker pointing here. Recorder derivations D1–D4 are in decision record §5; D5 is in §6. Contract operationalizations are labelled R-op. Revision 5 received independent PASS in `qualification/ssdp70/ACTIVATION-OVERLAY-REV5-AND-CONTRACT-REV6-INDEPENDENT-CHECK-2026-10-04.md`; revision 6 adds the root-selection evidence marker and aligns the local summaries below with contract revision 7. Revision 6 received PASS in `qualification/ssdp70/ACTIVATION-OVERLAY-REV6-AND-CONTRACT-REV7-INDEPENDENT-CHECK-2026-10-04.md`. Revision 7 clarifies the integrity-probe/campaign accounting route below and corrects the stale status paragraph; fresh independent Review is required for these changed bytes.
 
 1. **Supported entry is the standard skill command, operationalized as deterministic activation.** The declared root's entrypoint must reach the model before its first request, independent of model choice. The trusted observer's first provider request establishes this for each run (contract §1 item 12). There are two mechanisms:
    - `runtime-command`: the runtime itself expands the command, demonstrated for that runtime and mode;
@@ -141,13 +141,13 @@ This overlay is a governed workplan change. It changes **entry mode and exactly 
    - The route-probe and T2/T3 sentinel floors are unchanged and run on deterministic entry.
 6. **Burden.** The T1/T7/T8 active-byte metric is unchanged: the whole installed `SKILL.md`, frontmatter included, plus SSDP files read, each counted once. It applies identically to the 6.5, 6.6 and 7.0 arms. Delivered and wrapper bytes are reported only descriptively. The Stage A static-margin basis is therefore unchanged.
 7. **Reopen.** The §8.3/§14 selection/placement reopen path fires on:
-   - a deterministic delivery failure (route: runtime, adapter or harness owner);
+   - a deterministic qualification delivery failure, or an unexpected pre-run integrity failure (route: runtime, adapter or harness owner; expected injected integrity-probe failures are assessed under contract §1 item 7 and §6, not campaign failures);
    - a placement miss after activation (route: unchanged, specialist then kernel placement);
    - a retained false-activation floor failure (route: description owner).
 
    Ordinary non-selection is reported and does not reopen placement.
 
-The contract realization is `qualification/ssdp70/PROTOCOL-7.0-ACTIVATION-STRATA-CONTRACT-AMENDMENT-2026-10-04.md` (revision 6). Earlier revisions received independent NO-PASS. The latest check, of overlay revision 4 and contract revision 5, is `qualification/ssdp70/ACTIVATION-OVERLAY-REV4-AND-CONTRACT-REV5-INDEPENDENT-CHECK-2026-10-04.md`. This revision needs a fresh independent workplan Review before any stage relies on it.
+The contract realization is `qualification/ssdp70/PROTOCOL-7.0-ACTIVATION-STRATA-CONTRACT-AMENDMENT-2026-10-04.md` (revision 8). The seventh check, `qualification/ssdp70/ACTIVATION-OVERLAY-REV6-AND-CONTRACT-REV7-INDEPENDENT-CHECK-2026-10-04.md`, returned overlay revision 6 PASS and contract revision 7 NO-PASS. This changed overlay and contract revision 8 require fresh independent Review before dependent harness work or qualification runs.
 
 **Stage F portable-execution repair (2026-09-28).** The first portable execution amendment at `62aa1bbaa9d2d1dfef1b48cede6bc1500837658f` received a fresh independent **NO-PASS** in `qualification/ssdp70/STAGE-F-PORTABLE-EXECUTION-ARCHITECTURE-INDEPENDENT-REVIEW-NO-PASS-2026-09-28.md`. That Review accepted the portable-core + runtime-adapter boundary in principle but blocked D4 on five under-specified contracts: execution-profile equality under hidden provider state; semantic capability/containment/custody equivalence; normalized-trace completeness; exact required evidence/scoring closure; and full provenance/profile-scoped PASS semantics. The current Stage F portability clauses repair those five gaps without changing the immutable Protocol 7 semantic candidate. The repair is recorded in `qualification/ssdp70/STAGE-F-PORTABLE-EXECUTION-ARCHITECTURE-REPAIR-2026-09-28.md` and **awaits fresh independent Review**; dependent Stage F tooling repair and candidate runs remain unauthorized by this repair context.
 
