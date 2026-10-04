@@ -825,11 +825,14 @@ def run_episode(
             accounting = package_ledger.account(
                 ledger_bundle.get("ledger"), ledger_bundle.get("cut_ns"), events, installed_skills,
                 extra_errors=list(ledger_bundle.get("errors") or []), delivered=delivered_roots,
-                owner_name=OWNER, mount=ledger_bundle.get("mount"))
+                owner_name=OWNER, mount=ledger_bundle.get("mount"),
+                request_stamps=ledger_bundle.get("request_stamps"))
             if accounting["owner_read_exact"]:
                 for rel, row in accounting["supplied"].items():
-                    if rel.endswith("/references/" + OWNER):
+                    if package_ledger.is_owner_copy(rel, OWNER):
                         supplied_owner.extend(row["sequences"])
+                # An owner copy's first open bounds the read time even when its content is shown later.
+                supplied_owner.extend(bound["sequence"] for bound in accounting["owner_access"].values())
                 owner_read_sequences = sorted(set(owner_read_sequences) | set(supplied_owner))
         supply_rows = [{"rel": rel, **row} for rel, row in
                        (accounting["supplied"].items() if accounting and accounting["owner_read_exact"] else [])]

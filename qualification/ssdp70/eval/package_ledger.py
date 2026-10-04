@@ -267,13 +267,16 @@ def _load_corpus(root: Path, tree: dict[str, Any]) -> dict[str, str]:
 
 def account(ledger: dict[str, Any] | None, cut_ns: int | None, events: list[dict[str, Any]],
             skills_root: Path, *, extra_errors: list[str] | None = None, delivered: set[str] | None = None,
-            owner_name: str | None = None, mount: str | None = None) -> dict[str, Any]:
+            owner_name: str | None = None, mount: str | None = None,
+            request_stamps: dict[int, int] | None = None) -> dict[str, Any]:
     """Exact package accounting from the ledger and model-visible supply. Fail closed.
 
     `exact` answers the byte question (every opened file explained). `owner_read_exact` answers the
     narrower owner-read question: the ledger itself is intact and every opened owner copy is
     explained, whatever happened to unrelated files. `delivered` holds `<root>/SKILL.md` entries
-    whose full content reached the model through the hash-linked request 0.
+    whose full content reached the model through the hash-linked request 0. `request_stamps` maps
+    each retained provider request index to its observer stamp; with the result events'
+    `result_request_index` it bounds *when* an opened owner copy was accessed (`owner_access`).
     """
     delivered = set(delivered or ())
     global_reasons: list[str] = list(extra_errors or [])
@@ -301,7 +304,7 @@ def account(ledger: dict[str, Any] | None, cut_ns: int | None, events: list[dict
     if ledger.get("rows_truncated"):
         global_reasons.append("package-access ledger exceeded its retained-row bound")
     tree = ledger["tree_files"]
-    opened: dict[str, dict[str, bool]] = {}
+    opened: dict[str, dict[str, Any]] = {}
     for event in ledger["events"]:
         flags = set(event.get("flags") or [])
         rel = event.get("rel")
@@ -311,7 +314,8 @@ def account(ledger: dict[str, Any] | None, cut_ns: int | None, events: list[dict
         if event.get("dir") or rel is None or rel not in tree:
             continue
         if "open" in flags:
-            row = opened.setdefault(rel, {"pre": False, "post": False})
+            row = opened.setdefault(rel, {"pre": False, "post": False, "first_ns": int(event["first_ns"])})
+            row["first_ns"] = min(row["first_ns"], int(event["first_ns"]))
             if cut_ns is None or int(event["first_ns"]) < cut_ns:
                 row["pre"] = True
             if cut_ns is not None and int(event["last_ns"]) >= cut_ns:
@@ -385,12 +389,61 @@ def account(ledger: dict[str, Any] | None, cut_ns: int | None, events: list[dict
     result["supplied"] = supplied
     result["unexplained"] = unexplained
     result["consumed_files"] = {rel: row["bytes"] for rel, row in supplied.items()}
+    # Owner-read time: access (first open) counts, not only display. Map each opened owner copy to the
+    # first request stamped after its first open and take the earliest result event delivered there.
+    owner_access: dict[str, dict[str, Any]] = {}
+    unresolved_owner: list[str] = []
+    for rel in sorted(opened):
+        if not is_owner_copy(rel, owner_name) or not opened[rel]["post"]:
+            continue
+        bound = access_bound(opened[rel]["first_ns"], events, request_stamps)
+        if bound is None:
+            unresolved_owner.append(rel)
+        else:
+            owner_access[rel] = bound
+    result["owner_access"] = owner_access
     reasons = list(global_reasons)
     if unexplained:
         reasons.append("package access not explained by supply: "
                        + ", ".join(f"{u['file']} ({u['phase']})" for u in unexplained))
     result["reasons"] = reasons
     result["exact"] = not reasons
-    owner_blocked = owner_name is None or any(u["file"].rsplit("/", 1)[-1] == owner_name for u in unexplained)
-    result["owner_read_exact"] = not global_reasons and not owner_blocked
+    owner_blocked = owner_name is None or any(is_owner_copy(u["file"], owner_name) for u in unexplained)
+    if unresolved_owner:
+        result["owner_access_unresolved"] = unresolved_owner
+    result["owner_read_exact"] = not global_reasons and not owner_blocked and not unresolved_owner
     return result
+
+
+def is_owner_copy(rel: str, owner_name: str | None) -> bool:
+    """One rule for owner copies everywhere: any package file with the owner's basename."""
+    return owner_name is not None and rel.rsplit("/", 1)[-1] == owner_name
+
+
+def access_bound(open_ns: int, events: list[dict[str, Any]], request_stamps: dict[int, int] | None) -> dict[str, Any] | None:
+    """Earliest event sequence at which an access at `open_ns` can have occurred, or None if unresolvable.
+
+    The access belongs to the turn whose tool results the first request stamped after `open_ns`
+    carries. Same-turn ties resolve to the earliest event. An access after the last request has no
+    later model-visible event; it is bounded by the end of the trace.
+    """
+    if not request_stamps:
+        return None
+    stamps = sorted((int(t), int(i)) for i, t in request_stamps.items())
+    following = next(((t, i) for t, i in stamps if t > open_ns), None)
+    delivered = [(int(e["sequence"]), (e.get("payload") or {}).get("result_request_index")) for e in events
+                 if (e.get("payload") or {}).get("result_request_index") is not None]
+    if following is None:
+        last = max((int(e["sequence"]) for e in events), default=0)
+        return {"request_index": None, "sequence": last + 1, "basis": "after-last-request"}
+    in_turn = [seq for seq, req in delivered if req == following[1]]
+    if not in_turn:
+        # The request carried no tool result (for example a retry or a final turn): the access cannot be
+        # placed on an earlier event, so it is bounded by the next result-bearing request.
+        later = [(req, seq) for seq, req in delivered if req > following[1]]
+        if not later:
+            return {"request_index": following[1], "sequence": max((int(e["sequence"]) for e in events), default=0) + 1,
+                    "basis": "no-later-result"}
+        req = min(r for r, _ in later)
+        return {"request_index": req, "sequence": min(s for r, s in later if r == req), "basis": "next-result-bearing-request"}
+    return {"request_index": following[1], "sequence": min(in_turn), "basis": "turn-window"}

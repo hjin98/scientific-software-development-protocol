@@ -3593,6 +3593,7 @@ def _on_tool_end(raw, offset, native_index, context, observed, consumed, emit, c
     fields = {"result_status": status, "result_reference": reference, "result_sha256": result_sha, "result_content": text}
     model_saw = consumed.get(tool_use_id)
     fields["result_seen_by_model"] = None if model_saw is None else (model_saw["text"] == text)
+    fields["result_request_index"] = None if model_saw is None else model_saw["request_index"]
     if model_saw is not None and model_saw["text"] != text:
         errors.append(f"tool result {tool_use_id!r} seen by the model differs from the native trace result")
     if model_saw is None and not is_error:
@@ -3936,7 +3937,9 @@ def package_access_ledger(artifacts: dict[str, Any], profile: dict[str, Any] | N
             cut_ns = first["t_ns"]
         else:
             errors.append("first retained provider request is not request 0 with a timestamp")
-    return {"ledger": ledger, "cut_ns": cut_ns, "errors": errors, "mount": SB_SKILLS}
+    stamps = {int(entry["index"]): entry["record"]["t_ns"] for entry in observed.requests
+              if isinstance(entry.get("index"), int) and isinstance((entry.get("record") or {}).get("t_ns"), int)}
+    return {"ledger": ledger, "cut_ns": cut_ns, "errors": errors, "mount": SB_SKILLS, "request_stamps": stamps}
 
 
 def prepare_prompt(profile: dict[str, Any], entry: str, prompt: str) -> str:

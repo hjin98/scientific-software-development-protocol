@@ -1429,6 +1429,7 @@ def validate_claim_observability(events: list[dict[str, Any]], claims: Iterable[
             event for event in events
             if event.get("kind") == "root_selection"
             and isinstance((event.get("payload") or {}).get("resolved_package_identity"), dict)
+            and ((event.get("payload") or {}).get("delivery") or {}).get("delivered", True) is not False
         ]
         if not roots:
             errors.append("T1/T7/T8 burden claim has no resolved logical root-selection evidence")

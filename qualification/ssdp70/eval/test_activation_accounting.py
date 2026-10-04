@@ -245,6 +245,19 @@ class RealActivationPath(unittest.TestCase):
                 self.assertEqual(summary['owner_read_sequences'], [])
                 self.assertEqual(aggregate['integrity_outcome'], 'PASS', aggregate)
 
+    def test_unshown_owner_open_before_a_later_display_bounds_the_owner_read_at_the_first_access(self):
+        """Review N-1: `wc -l owner` then `cat owner` must not score the owner read at the later display only."""
+        summary, aggregate, identity, rig = self.realize(
+            scenario=self.bash_steps(f'wc -l {self.OWNER_PATH}', f'cat {self.OWNER_PATH}'), claims=['active-byte burden', 'owner-read'])
+        self.assertEqual(summary['evidence_state'], 'COMPLETE_ADMISSIBLE', summary.get('evidence_state_reasons'))
+        observation = summary['resource_observation']
+        self.assertTrue(observation['exact'] and observation['owner_read_exact'], observation)
+        access = observation['accounting']['owner_access'][self.OWNER_REL]
+        shown = observation['accounting']['supplied'][self.OWNER_REL]['sequences']
+        self.assertEqual(access['basis'], 'turn-window')
+        self.assertLess(access['sequence'], min(shown))
+        self.assertEqual(min(summary['owner_read_sequences']), access['sequence'])
+
     def test_unrelated_unexplained_file_keeps_the_owner_question_exact(self):
         summary, aggregate, identity, rig = self.realize(
             scenario=self.bash_steps('wc -l /opt/ssdp/skills/software-implementation/references/abstraction-and-concretization.md'),

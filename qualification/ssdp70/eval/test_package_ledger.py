@@ -44,9 +44,10 @@ def sandbox_read(root: Path, command: str) -> None:
                     "--proc", "/proc", "--dev", "/dev", "/bin/sh", "-c", command], capture_output=True, check=True)
 
 
-def event(sequence, text, *, kind="tool_action", seen=True, command=None):
+def event(sequence, text, *, kind="tool_action", seen=True, command=None, req=None):
     return {"sequence": sequence, "kind": kind, "status": "result",
             "payload": {"result_status": "result", "result_content": text, "result_seen_by_model": seen,
+                        "result_request_index": req,
                         "input": {"command": command or "cat something"},
                         "semantic_capability_classes": ["process_execution"]}}
 
@@ -331,6 +332,68 @@ class PhaseAndDelivery(unittest.TestCase):
             with self.subTest(broken=str(broken)[-60:]):
                 self.assertFalse(pl.account(broken, 1000, [event(2, "n/a", command="x")], self.root, mount=MOUNT,
                                             owner_name="owner.md")["owner_read_exact"])
+
+
+class OwnerReadTimeIsAccessNotDisplay(unittest.TestCase):
+    """Revision 3 (review N-1): an owner open before R2 cannot hide behind a later full display."""
+    STAMPS = {0: 900, 1: 2500, 2: 3000, 3: 4000}
+
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.root = Path(self.tmp.name)
+        for rel, text in FILES.items():
+            (self.root / rel).parent.mkdir(parents=True, exist_ok=True)
+            (self.root / rel).write_text(text)
+
+    def tearDown(self):
+        self.tmp.cleanup()
+
+    def account(self, opens, events, stamps="default"):
+        return pl.account(overlap_ledger(opens), 1000, events, self.root, mount=MOUNT, owner_name="owner.md",
+                          request_stamps=self.STAMPS if stamps == "default" else stamps)
+
+    def hidden_then_shown(self):
+        opens = [(2000, "x/references/owner.md"), (3500, "x/references/owner.md")]
+        events = [event(4, "30 owner.md", command=f"wc -l {MOUNT}/x/references/owner.md", req=1),
+                  event(9, TWIN, command=f"cat {MOUNT}/x/references/owner.md", req=3)]
+        return opens, events
+
+    def test_unshown_open_before_r2_bounds_the_owner_read_before_the_later_display(self):
+        opens, events = self.hidden_then_shown()
+        result = self.account(opens, events)
+        self.assertTrue(result["owner_read_exact"], result["reasons"])
+        self.assertEqual(result["supplied"]["x/references/owner.md"]["sequences"], [9])
+        self.assertEqual(result["owner_access"]["x/references/owner.md"]["sequence"], 4)
+
+    def test_same_open_without_request_stamps_makes_the_owner_question_inexact(self):
+        opens, events = self.hidden_then_shown()
+        result = self.account(opens, events, stamps=None)
+        self.assertFalse(result["owner_read_exact"])
+        self.assertEqual(result["owner_access_unresolved"], ["x/references/owner.md"])
+
+    def test_non_owner_opens_add_no_owner_access_and_do_not_disturb_it(self):
+        result = self.account([(2000, "x/references/ref.md")], [event(4, REF, command=f"cat {MOUNT}/x/references/ref.md", req=1)])
+        self.assertEqual(result["owner_access"], {})
+        self.assertTrue(result["owner_read_exact"])
+
+    def test_open_after_the_last_request_is_bounded_by_the_end_of_the_trace(self):
+        result = self.account([(5000, "x/references/owner.md")], [event(4, TWIN, command=f"cat {MOUNT}/x/references/owner.md", req=3)])
+        self.assertEqual(result["owner_access"]["x/references/owner.md"]["basis"], "after-last-request")
+
+    def test_owner_copies_have_one_recognition_rule(self):
+        self.assertTrue(pl.is_owner_copy("y/references/owner.md", "owner.md"))
+        self.assertTrue(pl.is_owner_copy("owner.md", "owner.md"))
+        self.assertFalse(pl.is_owner_copy("y/references/owner.md.bak", "owner.md"))
+        self.assertFalse(pl.is_owner_copy("y/references/owner.md", None))
+
+
+class ClaimGateRequiresDeliveryProof(unittest.TestCase):
+    def test_failed_delivery_is_not_admitted_by_an_exact_ledger(self):
+        root = {"kind": "root_selection", "status": "error", "sequence": 1,
+                "payload": {"resolved_package_identity": {"package_sha256": "a" * 64}, "delivery": {"delivered": False}}}
+        self.assertTrue(core70.validate_claim_observability([root], ["t7-burden"], [], ledger_exact=True))
+        root["payload"]["delivery"]["delivered"] = True
+        self.assertEqual(core70.validate_claim_observability([root], ["t7-burden"], [], ledger_exact=True), [])
 
 
 class WatcherBoundsItsRecord(unittest.TestCase):
