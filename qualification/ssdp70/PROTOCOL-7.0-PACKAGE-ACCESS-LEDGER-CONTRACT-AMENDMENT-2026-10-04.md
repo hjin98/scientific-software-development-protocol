@@ -5,7 +5,7 @@ target_protocol_version: 7.0.0
 date_utc: 2026-10-04
 amends: qualification/ssdp70/PROTOCOL-7.0-EVALUATION-AND-QUALIFICATION-CONTRACT.md
 revision: 10
-status: revision 10 drafted; fresh independent check required (contract and workplan §0.1 entry and markers) together with fresh independent D3 acceptance of the package-access ledger decision revision 4
+status: revision 10 drafted on stakeholder adoption of the open decisions; fresh independent check required (contract and workplan §0.1 entry and markers) together with fresh independent D3 acceptance of the package-access ledger decision revision 4
 ---
 
 # Package-access ledger amendment to the Protocol 7.0 qualification contract (revision 10)
@@ -13,7 +13,7 @@ status: revision 10 drafted; fresh independent check required (contract and work
 ## 1. Authority and status
 
 - **What this resolves.** Open item C-4 of the independent D3 review of the package-access ledger decision (`D3-PACKAGE-ACCESS-LEDGER-OBSERVATION-DECISION-2026-10-04.md`): the decision's owner-read and byte accounting for process-executed package reads is a supervisor accounting record, while contract §1 item 4 scores owner reads "from complete `resource_access` identity/action records" and item 5 requires raw-to-normalized completeness. It also resolves the decision's open item (i), the workplan "Root-selection evidence contract" sentence that makes T1/T7/T8 burden claims inadmissible "if the exact OMP build cannot expose that consumption".
-- **Authority.** None new. The stakeholder authorized the bounded D3 repair of the process/file-access observation gap and asked for the recommended resolution of C-4 to proceed. **This is a drafted proposal, not a stakeholder decision.** It changes no threshold, floor, fixture, exposure minimum or case. Where a rule is a recorder choice it is labelled R-op in the contract item. Four stakeholder decisions it depends on are open (§5).
+- **Authority.** The stakeholder authorized the bounded D3 repair of the process/file-access observation gap, asked for the recommended resolution of C-4 to proceed, and then instructed that the recommendations for the four open decisions be applied. `STAKEHOLDER-DECISION-2026-10-04-PROTOCOL-7.0-PACKAGE-ACCESS-LEDGER.md` records that adoption (replacement runs, gate target, positive evidence, observation boundary, and the contract-amendment route for C-4). Two values are recorder choices (R-op) the stakeholder is asked to confirm: the per-arm inexact-rate disparity bound is frozen before runs with fail-closed default, and the 0.8 campaign target. This amendment changes no exposure minimum, fixture or case and adds no threshold beyond those two R-op values; the stakeholder adoption is not an independent acceptance.
 - **History.**
   - Revision 9 (`8d04088`): independent NO-PASS for the contract plus workplan marker and for D3 revision 3, recorded in `/tmp/SSDP70-INDEPENDENT-CHECK-D3-REV3-AND-CONTRACT-REV9-20261004T231706Z.md`. No Serious Challenge; blockers C-1 to C-6, W-1, W-2 and D3-1 to D3-3. It confirmed that revision 9 adds no floor or threshold and leaves revision 8 unchanged in effect.
   - Revision 10 (this file) repairs them.
@@ -59,14 +59,17 @@ The contract does not restate the D3 attribution rules (supply routes, phase spl
 - **Accept the accounting record as the owner-read source (profile-scoped residual).** Defensible because the record is hash-bound, deterministic and recomputable, but the zero-tolerance owner floor would then rest on evidence outside the schema and outside the completeness proof. Recorded as the fallback if the contract-revision cost is judged too high; if chosen, state the residual in every report that relies on it.
 - **Restate D3 attribution rules in the contract.** Rejected: two owners for one rule.
 - **A supervisor sentinel at each request for event ordering.** Not available without a new edge: the supervisor is not in the request path. The in-queue heartbeat gives the same ordering without one.
-- **Decide replacement semantics or the rehearsal target here.** Rejected: both are stakeholder decisions that depend on the campaign run count.
+- **Decide replacement semantics or the rehearsal target in the amendment without a stakeholder decision.** Rejected; now recorded in the stakeholder decision record, with the target instantiated only once N is frozen.
 
-## 5. Stakeholder decisions this amendment depends on (open)
+## 5. Stakeholder decisions (adopted; record `STAKEHOLDER-DECISION-2026-10-04-PROTOCOL-7.0-PACKAGE-ACCESS-LEDGER.md`)
 
-1. **Replacement runs.** Recommended: bounded replacement of observation-inexact originals only, cap as in §5, originals retained and disclosed with per-arm inexact rates, a material arm difference leaves the claim UNRESOLVED, and a positive owner read is never replaced.
-2. **Rehearsal-gate target.** Recommended: accept the structural gate with reported per-form, per-arm, per-question rates, and set a campaign target (for example, 80% probability that no owner-unresolved run voids the campaign) once the run count N is known.
-3. **Positive evidence.** Recommended: a definite pre-R2 owner read is a FAIL even when other observation is inexact.
-4. **Observation boundary.** Recommended: the supervisor ledger is an admissible observation of supervisor-owned inputs alongside the provider-control observer.
+1. **Replacement runs.** Adopted: bounded replacement (§5 cap) of observation-inexact originals only, originals retained and disclosed with per-arm and per-form inexact-run and replacement counts, a positive owner read never replaced, T7 pair rule unchanged. R-op, to confirm: a per-arm disparity bound frozen before runs, fail-closed default (no frozen bound means no replacement), and a disparity above it leaves the comparative claim UNRESOLVED. Contract item 13 *Replacement*.
+2. **Rehearsal-gate target.** Adopted: structural gate with reported rates; target probability at least 0.8 (R-op, to confirm) that no owner-unresolved run voids the campaign with replacement allowed, instantiated by the independent checker from the frozen run count N before runs.
+3. **Positive evidence.** Adopted: a definite pre-R2 owner read is a FAIL even when other observation is inexact.
+4. **Observation boundary.** Adopted: the supervisor ledger is admissible for supervisor-owned inputs alongside the provider-control observer.
+5. **C-4.** Adopted: the contract-amendment route (this revision), not the accounting-record fallback.
+
+Still open: the run count N, F-5, and whether the owner-access rule needs a bounded exemption (decided by the check and the rehearsal).
 
 ## 6. Questions for the fresh independent check
 
@@ -76,11 +79,12 @@ The contract does not restate the D3 attribution rules (supply routes, phase spl
 4. Is the `package_access` event derivable and recomputable from retained artifacts alone, and does the completeness map account for the ledger artifact and its heartbeat records without a loophole?
 5. Can item 13 create any path to PASS when observation is not exact, when positive evidence exists, or when the gate target is unrecorded? Is the campaign-effect sentence a faithful clarification of item 7 or a new floor?
 6. Are the workplan §0.1 entry and the two markers consistent with the overlay convention, and do revision 8's criteria, family rule and activation-strata bytes stay unchanged in effect?
+7. Is the replacement rule sound: can replacing observation-inexact originals bias a comparison or hide a failure (selection effect, positive evidence, T7 pair rule), and is the fail-closed default for the disparity bound adequate? Do the two R-op values add any threshold the contract forbids?
 
 ## 7. Still blocked
 
 - Independent acceptance of D3 revision 4 and of this amendment together.
-- The four decisions in §5, and the gate target (needs N).
+- Confirmation of the two R-op values, the frozen run count N and the instantiated gate target.
 - D4 realization of revision 4 (heartbeat and bracketed rows, earliest-consistent-turn mapping, route (iii), the split exactness fields and positive-evidence retention, the `package_access` event, the native `owner_reads` basename rule, the rehearsal).
 - Admission of any runner, profile or transform that relies on the ledger.
 - Re-binding D4 evidence to the accepted tree.
