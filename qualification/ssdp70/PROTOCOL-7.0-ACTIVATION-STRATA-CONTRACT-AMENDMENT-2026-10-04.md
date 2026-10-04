@@ -4,11 +4,11 @@ governing_protocol_version: 6.6.0
 target_protocol_version: 7.0.0
 date_utc: 2026-10-04
 amends: qualification/ssdp70/PROTOCOL-7.0-EVALUATION-AND-QUALIFICATION-CONTRACT.md
-revision: 6
-status: revision 6 drafted; fresh independent check required (contract) together with fresh independent workplan Review (overlay revision 5)
+revision: 7
+status: revision 7 drafted; fresh independent check required (contract) together with fresh independent workplan Review (overlay revision 6)
 ---
 
-# Activation-strata amendment to the Protocol 7.0 qualification contract (revision 6)
+# Activation-strata amendment to the Protocol 7.0 qualification contract (revision 7)
 
 ## 1. Authority and status
 
@@ -18,14 +18,15 @@ status: revision 6 drafted; fresh independent check required (contract) together
   - §7: the stakeholder's verbatim answer Q5 to the third check.
 
   Recorder derivations D1, D2 and D4 are labelled where used. D3 is superseded by Q3. D5 (predicate false-firing scope) is a recorder choice. Contract operationalizations of Q1 and Q5 are labelled R-op.
-- **Workplan.** The active workplan's §0.1 overlay, revision 5, with a header decision entry and markers at every affected location.
+- **Workplan.** The active workplan's §0.1 overlay, revision 6, with a header decision entry and markers at affected locations. Overlay revision 5 received independent PASS; the changed overlay requires fresh Review.
 - **History.**
   - Revision 1 (`d370193`): NO-PASS, recorded in `ACTIVATION-STRATA-AMENDMENT-INDEPENDENT-CHECK-2026-10-04.md`.
   - Revision 2 (`0c5372d`): NO-PASS, recorded in `ACTIVATION-OVERLAY-AND-CONTRACT-REV2-INDEPENDENT-CHECK-2026-10-04.md`.
   - Revision 3 (`70727f1`): NO-PASS, recorded in `ACTIVATION-OVERLAY-REV2-AND-CONTRACT-REV3-INDEPENDENT-CHECK-2026-10-04.md`. It found no Serious Challenge and two blockers.
   - Revision 4 (`4c404ec`): NO-PASS, recorded in `ACTIVATION-OVERLAY-REV3-AND-CONTRACT-REV4-INDEPENDENT-CHECK-2026-10-04.md`. It found no Serious Challenge and one blocker.
   - Revision 5 (`077c1eb`): NO-PASS, recorded in `ACTIVATION-OVERLAY-REV4-AND-CONTRACT-REV5-INDEPENDENT-CHECK-2026-10-04.md`. It found no Serious Challenge and one blocker.
-- **Authorship.** The same context authored all six revisions, so it cannot accept this one.
+  - Revision 6 (`b9f23d7`): NO-PASS, recorded in `ACTIVATION-OVERLAY-REV5-AND-CONTRACT-REV6-INDEPENDENT-CHECK-2026-10-04.md` at `04b7a41`. It found no Serious Challenge and one contract blocker; overlay revision 5 received PASS.
+- **Authorship.** The prior context authored revisions 1–6. The continuing Codex context authored revision 7 and overlay revision 6; it cannot independently accept these bytes. A separate reviewing context must reconstruct authority rather than inherit this record's dispositions.
 
 ## 2. Evidence
 
@@ -35,7 +36,7 @@ The evidence is unchanged from revision 2:
 - the stronger-executor selection probe;
 - the runtime command-activation probe (`STAGE-7-*-2026-10-04.md`).
 
-## 3. Contract changes (cumulative through revision 3; later deltas in §§4a00, 4a0 and 4a)
+## 3. Contract changes (cumulative through revision 3; later deltas in §§4a000, 4a00, 4a0 and 4a)
 
 | Section | Change |
 |---|---|
@@ -45,6 +46,31 @@ The evidence is unchanged from revision 2:
 | §4 | Only the 6.6 correct-selection bound is report-only (Q3). The 6.6 negative and near-boundary false-activation bounds and predicate false-firing stay floors (Q4). The routing probes and sentinels are deterministic, with their floors intact. The T1/T7/T8 byte metric is **unchanged** (whole installed `SKILL.md` plus SSDP files read, each counted once, identical across arms); delivered and wrapper bytes are descriptive only. The "Composite ordinary-entry" residue is removed. |
 | §6 | Expansion is demonstrated with a canary at the provider-request layer. The transform is frozen and reproduced byte-for-byte for the canary and each SSDP root. Injection is checked against `runtime-command` request 0. Six known-broken probes count against the activation criterion. The composite-ordinary residue is replaced by per-stratum recording. |
 | §8 | Records revision 3. |
+
+## 4a000. Response to the sixth independent check (revision 7)
+
+These are author-side repair dispositions, pending fresh independent falsification. No new stakeholder choice or qualification claim is made.
+
+| Finding | Disposition |
+|---|---|
+| **B1** — burden mapped only to a key unable to host its main-panel bounds | Contract item 12 assigns T1/T7/T8 fixed-cost/no-lookup bounds to that deterministic key, and the class-iii/new-class active-material bound plus all §5 bounds to the main deterministic key. The listed map bullets are minimums. The family record must assign every remaining criterion part, exposure and report-only measure: harness on all keys, activation on deterministic keys, P01–P19/T2–T6/R2 by deterministic panel, ordinary reporting on the ordinary key, and pooled counts across all keys. Overlay item 2 routes to that complete map. |
+| **G1** — non-primary PASS's Q4 scope unstated | A deterministic-key PASS on a non-primary profile carries no ordinary-selection false-activation claim. It retains predicate false-firing and zero owner false activations on its own scored runs. This limitation must appear in every such PASS report; the primary's ordinary Q4 floors remain mandatory. |
+| **G2** — family record/id outside frozen evidence chain | The campaign freezes the complete family record and digest before its first run; §6 reproduces the id/digest and checks each mapped exposure; item 11 binds campaign/family identities into every primary-family run and assessment. Record changes need a new revision, fresh pre-run check and affected requalification, never retrospective remapping. |
+| **G3** — workplan's weaker root-selection proof unmarked | Added a marker limiting native activation/resource-access evidence to ordinary entry and routing deterministic entry to request-0 proof plus hash-bound runtime input. Overlay revision 6 requires fresh Review. |
+| **G4** — permitted claim limits confused with claim-scoped-out | Item 12 distinguishes inability to expose a required property from contract-permitted predeclared descriptive-only routes below three episodes and named-class-only comparative claims. The latter are claim limits, never exposure/floor waivers or non-PASS criterion states. |
+| **m1** — D-label location | Contract and overlay cite D1–D4 to decision record §5, D5 to §6, and R-op to the contract. |
+| **m2** — shared budgets versus per-panel caps | The family freezes a panel budget schedule, permitting panel-required differences while matched arms share a key. The 6.6 select/3, route/8 and trajectory/60 turn caps remain unless separately changed through governed Review. |
+| **m3** — §7 repeat omitted from updates | Final criterion state is after the updates permitted by §§4–5 and §7; undelivered deterministic runs still fail activation directly. |
+| **m4** — re-key scope | All shared fields and panel schedule stay fixed except the independently reviewed repaired adapter/harness identity. Other changes require the primary-change process. |
+| **m5** — prompt-bearing variables undefined | Defined by incorporation into subject conversation or command input. §6 verifies classification and that non-template variables/configuration supply no entrypoint-derived conversation text. Secret credential values are never persisted. |
+
+**Impact and boundary.** Only this contract, this amendment record and the workplan overlay are changed. No candidate doctrine, harness, profile, fixture, frozen tree or release identity changes. Harness work remains blocked pending independent PASS. The checklist `p70ck2` probe remains awaiting stakeholder go-ahead; it is not launched here.
+
+**Project-memory intake.** Reused the workplan-bound integrated state `2585b73f00420daca185a4fbb9ac42a79473eda1`, independently confirmed as an ancestor of project-designated `main`; its PEM blob equals HEAD and main (`1561797125622f355f84eb27319f87e8fa4227d9`). Repository-aware schema validation passed: five families, zero notices. The base front matter and coverage retain the workplan §0.2's recorded stale/partial limitations; no overlay is composed (`candidate_overlay_semantic_candidate=NONE`). Canonical metadata search covered all five families. Task-local HAS: DS-001 **APPLICABLE** (a map/hash does not prove real-owner qualification); PC-001 **NOT_APPLICABLE** to this document-only repair (no frozen-resource mutation); FF-001, SP-001 and SP-002 **NOT_APPLICABLE** (no publication, package regeneration or source-routing repair). These are evidence-only decision support; no memory mutation or authority promotion occurs.
+
+**Convergence.** This repair corrects the existing family mechanism rather than adding another. The seventh check should attempt a complete family realization and an out-of-matrix bypass, not only recheck individual rows. A structurally new blocker reopens simplification/cycle economy before another additive round.
+
+**Author-side checks.** `python3 -m unittest discover -s tests`: 407 tests, OK, three skips (not treated as executed checks). `source/release_state.py`: coherent. Repository-aware PEM validation: valid. `git diff --check`: clean. The initial detached `/tmp` PEM validation could not resolve local Git routes; validation was rerun against the byte-identical repository PEM and passed. No source/generated descendant changed, so package/snapshot regeneration and live/frozen-tree checks were not run for this document-only repair. These checks do not accept the semantic contract.
 
 ## 4a00. Response to the fifth independent check (revision 6)
 
