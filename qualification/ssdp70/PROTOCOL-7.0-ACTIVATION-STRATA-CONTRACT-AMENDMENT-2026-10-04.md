@@ -4,24 +4,26 @@ governing_protocol_version: 6.6.0
 target_protocol_version: 7.0.0
 date_utc: 2026-10-04
 amends: qualification/ssdp70/PROTOCOL-7.0-EVALUATION-AND-QUALIFICATION-CONTRACT.md
-revision: 3
-status: revision 3 drafted; fresh independent check required (contract) together with fresh independent workplan Review (overlay revision 2)
+revision: 4
+status: revision 4 drafted; fresh independent check required (contract) together with fresh independent workplan Review (overlay revision 3)
 ---
 
-# Activation-strata amendment to the Protocol 7.0 qualification contract (revision 3)
+# Activation-strata amendment to the Protocol 7.0 qualification contract (revision 4)
 
 ## 1. Authority and status
 
 - **Authority.** `STAKEHOLDER-DECISION-2026-10-04-PROTOCOL-7.0-DETERMINISTIC-ACTIVATION-AND-ACTIVATION-QUALIFICATION.md`:
   - §5: the stakeholder's verbatim refinement, with 2b recorded as conditional;
-  - §6: the stakeholder's verbatim answers Q1–Q4 to the second independent check.
+  - §6: the stakeholder's verbatim answers Q1–Q4 to the second independent check;
+  - §7: the stakeholder's verbatim answer Q5 to the third check.
 
-  Recorder derivations D1, D2 and D4 are labelled where used. D3 is superseded by Q3.
-- **Workplan.** The active workplan's §0.1 overlay, revision 2, with a header decision entry and markers at every affected location.
+  Recorder derivations D1, D2 and D4 are labelled where used. D3 is superseded by Q3. D5 (predicate false-firing scope) is a recorder choice.
+- **Workplan.** The active workplan's §0.1 overlay, revision 3, with a header decision entry and markers at every affected location.
 - **History.**
   - Revision 1 (`d370193`): NO-PASS, recorded in `ACTIVATION-STRATA-AMENDMENT-INDEPENDENT-CHECK-2026-10-04.md`.
   - Revision 2 (`0c5372d`): NO-PASS, recorded in `ACTIVATION-OVERLAY-AND-CONTRACT-REV2-INDEPENDENT-CHECK-2026-10-04.md`.
-- **Authorship.** The same context authored all three revisions, so it cannot accept this one.
+  - Revision 3 (`70727f1`): NO-PASS, recorded in `ACTIVATION-OVERLAY-REV2-AND-CONTRACT-REV3-INDEPENDENT-CHECK-2026-10-04.md`. It found no Serious Challenge and two blockers.
+- **Authorship.** The same context authored all four revisions, so it cannot accept this one.
 
 ## 2. Evidence
 
@@ -31,7 +33,7 @@ The evidence is unchanged from revision 2:
 - the stronger-executor selection probe;
 - the runtime command-activation probe (`STAGE-7-*-2026-10-04.md`).
 
-## 3. Contract changes in revision 3
+## 3. Contract changes (cumulative through revision 3)
 
 | Section | Change |
 |---|---|
@@ -42,7 +44,21 @@ The evidence is unchanged from revision 2:
 | §6 | Expansion is demonstrated with a canary at the provider-request layer. The transform is frozen and reproduced byte-for-byte for the canary and each SSDP root. Injection is checked against `runtime-command` request 0. Six known-broken probes count against the activation criterion. The composite-ordinary residue is replaced by per-stratum recording. |
 | §8 | Records revision 3. |
 
-## 4. Response to the second independent check
+## 4a. Response to the third independent check (revision 4)
+
+| Finding | Disposition |
+|---|---|
+| **B1** — the flash profile need only *use* `runtime-command`; its failure did not block others; "offered" and "flash-class" undefined; exposure unstated | The offered set is frozen before runs. Flash-class is defined as the stakeholder-designated default campaign executor (now GLM-5.3-Flash), or one designated in writing before runs. The primary flash profile must: use `runtime-command` for every deterministic run; meet activation across every declared root; meet the §2 minimums on its own; and pass every floor (stakeholder Q5). Any failure there blocks PASS for every profile, and no profile can be withdrawn. This is in the item 12 *Primary flash profile* bullet, the §3 row, and overlay item 2. |
+| **B2** — request 0 cannot tell injection from runtime expansion | The adapter's runtime input (argv, stdin or RPC messages, prompt file) is retained and hash-bound. A `runtime-command` input must hold the command and no body segment. Request 0 together with that input determines the mechanism, and a mismatch is an activation failure. §6 adds the input check to the canary demonstration and a known-broken probe for "injection labelled `runtime-command`". |
+| **G1** — predicate false-firing dropped from ordinary negatives | Scored on every run where an SSDP root was delivered or selected, in either stratum (D5, labelled as a recorder choice). |
+| **G2** — transform and request 0 under-defined | The transform inputs include the declared fixed skill directory (`/opt/ssdp/skills/<root>`) and runtime constants. Comparison is on decoded message content. Request 0 is the first conversation request, with auxiliary requests classified and excluded. A run that ends before any conversation request is an activation failure. §6 says "delivered segment". Extra adapter text must match a frozen template. |
+| **G3** — four unmarked workplan statements | Markers are added at the §8.3 *Selection surface*, the §11.3 O1-authoring and tension-retrieval bullets, and the §11.5 composite ordinary-entry pre-run line. |
+| **G4** — requalification without root cause | Requalification requires a recorded root cause attributed to the adapter or harness, and an independently reviewed repair that removes it. An undiagnosed or runtime-caused failure falsifies `runtime-command` for that runtime and mode. Every earlier failed campaign is disclosed. |
+| **Minor** — predicate scope filed under Q4 | Relabelled D5, a recorder choice. |
+| **Minor** — "D1 narrowed by Q1" | Corrected to "Q1 adds a requirement to D1". |
+| **Minor** — extra adapter text in request 0 | It must match a frozen template, in item 12 and §6. |
+
+## 4b. Response to the second independent check (made in revision 3)
 
 | Finding | Disposition |
 |---|---|
@@ -67,13 +83,13 @@ The evidence is unchanged from revision 2:
 | **Revision-1 m2** — untracked closeout record | Still uncommitted, and labelled as such. Committing it is for the stakeholder. |
 
 ## 5. Questions for the fresh independent check
-1. Is the request-0 delivery proof well defined and realizable with the existing observer for OMP RPC mode? The adapter currently launches print mode.
-2. Do the overlay's markers and named thresholds now leave no contradictory unmarked workplan statement?
-3. Is any stakeholder attribution still beyond the recorded words?
-4. Does any route remain for passing the activation criterion without a runtime's own command loading the skill on a flash-class profile?
+1. Can the activation criterion now pass without the primary flash profile's own runtime command loading the skill for every declared root?
+2. Is the runtime-input record plus request 0 enough to distinguish the mechanisms, and is the transform definition realizable without brittleness?
+3. Does any unmarked workplan or contract statement still contradict the overlay?
+4. Is every stakeholder attribution within the quoted words, with recorder choices labelled?
 
 ## 6. Still blocked until both checks pass
-- adapter changes (OMP RPC mode, the observer request-0 delivery check, transform freezing);
+- adapter changes (OMP RPC mode, the observer request-0 delivery check, the runtime-input record, transform freezing);
 - profile freezes;
 - the §6 pre-run check;
 - fresh fixtures;

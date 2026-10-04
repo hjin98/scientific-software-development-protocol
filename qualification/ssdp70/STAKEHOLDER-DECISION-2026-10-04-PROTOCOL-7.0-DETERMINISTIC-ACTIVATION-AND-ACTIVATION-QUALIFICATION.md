@@ -106,4 +106,13 @@ The second independent check (`ACTIVATION-OVERLAY-AND-CONTRACT-REV2-INDEPENDENT-
 **Effect on §5.**
 - Q3 confirms derivation D3, narrowed to the 6.6 *correct-selection* non-inferiority bound. This is the explicit stakeholder supersession that workplan criterion 16 requires for that 6.6 capability.
 - Q4 keeps every false-activation floor binding. These are the 6.6 negative-selection bound, the near-boundary negative bound and predicate false-firing.
-- D1, D2 and D4 remain recorder derivations. D1 is narrowed by Q1.
+- D1, D2 and D4 remain recorder derivations. Q1 adds a requirement to D1: a flash-class profile must use `runtime-command`.
+- **D5 (recorder choice):** predicate false-firing is scored on every run where an SSDP root was delivered or selected, in either stratum.
+
+## 7. Stakeholder answer to the third independent check (2026-10-04)
+
+The third check (`ACTIVATION-OVERLAY-REV2-AND-CONTRACT-REV3-INDEPENDENT-CHECK-2026-10-04.md`, blocker B1) asked what role the flash profile plays. The stakeholder chose this option, quoted as presented:
+
+| Question as asked | Option chosen and its stated meaning |
+|---|---|
+| Q5. "The designated Flash profile must show a runtime's own command loading the skill. Must that same profile also pass all the doctrine floors (critical judgments, nulls, variants, delegate requests, etc.)?" | **"Yes, full qualification"**: "The Flash runtime-command profile is the primary qualification profile and must pass every floor. Matches your rule that Flash is the default campaign model and that lighter models matter most. Stronger profiles are extra strata that cannot rescue it." |
