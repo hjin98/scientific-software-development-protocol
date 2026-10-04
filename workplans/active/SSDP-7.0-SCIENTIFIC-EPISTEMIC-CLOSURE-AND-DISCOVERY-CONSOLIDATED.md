@@ -100,11 +100,11 @@ DETERMINISTIC ORCHESTRATOR: Protocol 8.0 (unchanged by this work)
 
 ### 0.1 Current repair and Review boundary
 
-**Current stakeholder activation decision and governed overlay (2026-10-04, overlay revision 3).** Stage 7 closed NON-QUALIFIED. Records:
+**Current stakeholder activation decision and governed overlay (2026-10-04, overlay revision 4).** Stage 7 closed NON-QUALIFIED. Records:
 - the closeout decision, `qualification/ssdp70/STAKEHOLDER-DECISION-2026-10-04-PROTOCOL-7.0-NON-QUALIFICATION-CLOSEOUT.md`, present in the working tree but not yet committed;
 - the corrigendum, `~/ssdp70-omp-stagef/reviews/SSDP-STAGE7-QUALIFICATION-REPORT-CORRIGENDUM-20261004T131137Z/`.
 
-Diagnosis showed that the executor rarely activated SSDP under ordinary entry, so Stage 7 mostly measured activation rather than doctrine. The stakeholder decided ("Our main focus should be that standard command activation alwasy [sic] activates. If that works, we don't necessarily need the plain-word version, and it can simply be regarded as unreliable.") and then answered questions Q1–Q5 raised by the independent checks. Both are recorded verbatim in `qualification/ssdp70/STAKEHOLDER-DECISION-2026-10-04-PROTOCOL-7.0-DETERMINISTIC-ACTIVATION-AND-ACTIVATION-QUALIFICATION.md` §§5–6.
+Diagnosis showed that the executor rarely activated SSDP under ordinary entry, so Stage 7 mostly measured activation rather than doctrine. The stakeholder decided ("Our main focus should be that standard command activation alwasy [sic] activates. If that works, we don't necessarily need the plain-word version, and it can simply be regarded as unreliable.") and then answered questions Q1–Q5 raised by the independent checks. Both are recorded verbatim in `qualification/ssdp70/STAKEHOLDER-DECISION-2026-10-04-PROTOCOL-7.0-DETERMINISTIC-ACTIVATION-AND-ACTIVATION-QUALIFICATION.md` §§5–7.
 
 This overlay is a governed workplan change. It changes **entry mode and exactly the thresholds named below**; every other threshold is unchanged. Frozen bytes are preserved, and each affected location carries a marker pointing here. Recorder derivations are labelled (D*n*, decision record §5).
 
@@ -115,15 +115,12 @@ This overlay is a governed workplan change. It changes **entry mode and exactly 
    A prose instruction is not deterministic. The probe `qualification/ssdp70/STAGE-7-RUNTIME-COMMAND-ACTIVATION-PROBE-RESULT-2026-10-04.md` found that:
    - Claude Code print mode and OMP RPC mode expand the command;
    - OMP print mode and Codex `exec` do not.
-2. **Primary flash profile (stakeholder Q1, Q5).**
-   - The offered profile set is frozen before any run.
-   - One flash-class profile is designated as **primary** before runs. Flash-class means the stakeholder-designated default campaign executor (currently `deepinfra/zai-org/GLM-5.3-Flash`) or another model the stakeholder designates in writing before runs.
-   - All of the primary profile's deterministic runs use `runtime-command`, with the adapter's runtime input hash-bound so that it shows no injection. Every declared run must be delivered across every declared root, and the profile must pass **every** floor.
-   - Any delivery failure or floor failure on the primary profile blocks qualification PASS for every profile.
-   - Other offered profiles are additional strata. They may use `harness-injection`, never rescue the primary, and cannot be withdrawn once runs start.
-   - Requalification after a delivery failure needs a recorded root cause attributed to the adapter or harness, removed by an independently reviewed repair. It then needs a new profile key, a fresh §6 check and a fresh full campaign.
-   - An undiagnosed failure, or one caused by the runtime, falsifies `runtime-command` for that runtime and mode.
-   - Every earlier failed campaign of a profile lineage stays on record and is disclosed.
+2. **Primary flash profile family (stakeholder Q1, Q5).** The full rule is in contract §1 item 12. In summary:
+   - Before the candidate's first campaign, the offered profile set is frozen and one flash-class **primary profile family** is designated: a predeclared set of execution-profile keys differing only where a panel requires a different capability, such as T1/T7/T8 without delegation.
+   - The primary family uses `runtime-command` for every deterministic run, with a hash-bound runtime input. It must reach PASS on **every** §3-ordered criterion: activation, critical, floors, preservation, burden, comparative claim, and the §7 human trial on its outputs.
+   - Any non-PASS state of the primary blocks qualification PASS for every profile. Other profiles may use `harness-injection` but never rescue it.
+   - Changing the primary needs a written stakeholder decision, and every earlier campaign is disclosed.
+   - Requalification after a delivery failure needs a recorded root cause in the adapter or harness, removed by an independently reviewed repair. An undiagnosed or runtime-caused failure falsifies `runtime-command` for that runtime and mode.
 3. **§11 semantic qualification runs on deterministic entry.** This covers every §11.3 case (composite fixtures, O1 authoring and review, tension retrieval, delegate cases), the §11.5 sentinels and route probes, T1/T7/T8 and the R2 owner-load cases. Each case has a custodian-predeclared root: the one a user following the guide would invoke. The §11.3 *Route* rule scores a delegator against the elements carried on that root. Owner placement after activation keeps every floor.
 4. **§13 criterion 13** replaces "selection and routing are reliable on ordinary entry" with three conditions:
    - standard command activation activates the declared root as in item 2;
@@ -147,7 +144,7 @@ This overlay is a governed workplan change. It changes **entry mode and exactly 
 
    Ordinary non-selection is reported and does not reopen placement.
 
-The contract realization is `qualification/ssdp70/PROTOCOL-7.0-ACTIVATION-STRATA-CONTRACT-AMENDMENT-2026-10-04.md` (revision 4). Earlier revisions received independent NO-PASS. Overlay revision 2 and contract revision 3 were checked in `qualification/ssdp70/ACTIVATION-OVERLAY-REV2-AND-CONTRACT-REV3-INDEPENDENT-CHECK-2026-10-04.md`. This revision needs a fresh independent workplan Review before any stage relies on it.
+The contract realization is `qualification/ssdp70/PROTOCOL-7.0-ACTIVATION-STRATA-CONTRACT-AMENDMENT-2026-10-04.md` (revision 5). Earlier revisions received independent NO-PASS. The latest check, of overlay revision 3 and contract revision 4, is `qualification/ssdp70/ACTIVATION-OVERLAY-REV3-AND-CONTRACT-REV4-INDEPENDENT-CHECK-2026-10-04.md`. This revision needs a fresh independent workplan Review before any stage relies on it.
 
 **Stage F portable-execution repair (2026-09-28).** The first portable execution amendment at `62aa1bbaa9d2d1dfef1b48cede6bc1500837658f` received a fresh independent **NO-PASS** in `qualification/ssdp70/STAGE-F-PORTABLE-EXECUTION-ARCHITECTURE-INDEPENDENT-REVIEW-NO-PASS-2026-09-28.md`. That Review accepted the portable-core + runtime-adapter boundary in principle but blocked D4 on five under-specified contracts: execution-profile equality under hidden provider state; semantic capability/containment/custody equivalence; normalized-trace completeness; exact required evidence/scoring closure; and full provenance/profile-scoped PASS semantics. The current Stage F portability clauses repair those five gaps without changing the immutable Protocol 7 semantic candidate. The repair is recorded in `qualification/ssdp70/STAGE-F-PORTABLE-EXECUTION-ARCHITECTURE-REPAIR-2026-09-28.md` and **awaits fresh independent Review**; dependent Stage F tooling repair and candidate runs remain unauthorized by this repair context.
 

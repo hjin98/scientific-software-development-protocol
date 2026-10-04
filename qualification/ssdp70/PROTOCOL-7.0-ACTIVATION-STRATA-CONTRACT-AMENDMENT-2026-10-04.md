@@ -4,11 +4,11 @@ governing_protocol_version: 6.6.0
 target_protocol_version: 7.0.0
 date_utc: 2026-10-04
 amends: qualification/ssdp70/PROTOCOL-7.0-EVALUATION-AND-QUALIFICATION-CONTRACT.md
-revision: 4
-status: revision 4 drafted; fresh independent check required (contract) together with fresh independent workplan Review (overlay revision 3)
+revision: 5
+status: revision 5 drafted; fresh independent check required (contract) together with fresh independent workplan Review (overlay revision 4)
 ---
 
-# Activation-strata amendment to the Protocol 7.0 qualification contract (revision 4)
+# Activation-strata amendment to the Protocol 7.0 qualification contract (revision 5)
 
 ## 1. Authority and status
 
@@ -18,12 +18,13 @@ status: revision 4 drafted; fresh independent check required (contract) together
   - §7: the stakeholder's verbatim answer Q5 to the third check.
 
   Recorder derivations D1, D2 and D4 are labelled where used. D3 is superseded by Q3. D5 (predicate false-firing scope) is a recorder choice.
-- **Workplan.** The active workplan's §0.1 overlay, revision 3, with a header decision entry and markers at every affected location.
+- **Workplan.** The active workplan's §0.1 overlay, revision 4, with a header decision entry and markers at every affected location.
 - **History.**
   - Revision 1 (`d370193`): NO-PASS, recorded in `ACTIVATION-STRATA-AMENDMENT-INDEPENDENT-CHECK-2026-10-04.md`.
   - Revision 2 (`0c5372d`): NO-PASS, recorded in `ACTIVATION-OVERLAY-AND-CONTRACT-REV2-INDEPENDENT-CHECK-2026-10-04.md`.
   - Revision 3 (`70727f1`): NO-PASS, recorded in `ACTIVATION-OVERLAY-REV2-AND-CONTRACT-REV3-INDEPENDENT-CHECK-2026-10-04.md`. It found no Serious Challenge and two blockers.
-- **Authorship.** The same context authored all four revisions, so it cannot accept this one.
+  - Revision 4 (`4c404ec`): NO-PASS, recorded in `ACTIVATION-OVERLAY-REV3-AND-CONTRACT-REV4-INDEPENDENT-CHECK-2026-10-04.md`. It found no Serious Challenge and one blocker.
+- **Authorship.** The same context authored all five revisions, so it cannot accept this one.
 
 ## 2. Evidence
 
@@ -33,7 +34,7 @@ The evidence is unchanged from revision 2:
 - the stronger-executor selection probe;
 - the runtime command-activation probe (`STAGE-7-*-2026-10-04.md`).
 
-## 3. Contract changes (cumulative through revision 3)
+## 3. Contract changes (cumulative through revision 3; later deltas in §§4a0 and 4a)
 
 | Section | Change |
 |---|---|
@@ -43,6 +44,19 @@ The evidence is unchanged from revision 2:
 | §4 | Only the 6.6 correct-selection bound is report-only (Q3). The 6.6 negative and near-boundary false-activation bounds and predicate false-firing stay floors (Q4). The routing probes and sentinels are deterministic, with their floors intact. The T1/T7/T8 byte metric is **unchanged** (whole installed `SKILL.md` plus SSDP files read, each counted once, identical across arms); delivered and wrapper bytes are descriptive only. The "Composite ordinary-entry" residue is removed. |
 | §6 | Expansion is demonstrated with a canary at the provider-request layer. The transform is frozen and reproduced byte-for-byte for the canary and each SSDP root. Injection is checked against `runtime-command` request 0. Six known-broken probes count against the activation criterion. The composite-ordinary residue is replaced by per-stratum recording. |
 | §8 | Records revision 3. |
+
+## 4a0. Response to the fourth independent check (revision 5)
+
+| Finding | Disposition |
+|---|---|
+| **B1** — the primary does not carry full qualification: comparative claim rescuable; T1/T7/T8 key incompatible; other non-PASS states don't block; human trial not tied | The primary is now a predeclared **profile family**: keys differing only by panel-required capability, such as T1/T7/T8 without delegation. Matched arms within a panel share a key. The family must reach PASS on **every §3-ordered criterion**, including burden, the comparative claim and the §7 human trial on its outputs. **Any** non-PASS state (`FAIL`, `UNRESOLVED`, `NOT_EVALUATED`, inadmissible, missing, claim-scoped-out) blocks every profile. The profile-scoped result rule cross-references this. This is in item 12, the §3 row and overlay item 2. |
+| **G1** — a different primary per campaign | Changing the primary family needs a written stakeholder decision before the next campaign. Every earlier campaign of the candidate is disclosed, whatever its outcome. |
+| **G2** — "no segment of the body" undefined | Replaced. The runtime input must equal a frozen input template, rendered from the command, the fixture prompt and the declared constants. Injection must equal its template with the delivered segment. |
+| **Minor** — stale cross-references | §§5–7 is cited where Q5 applies, and §3's heading is clarified. |
+| **Minor** — D4 unlabelled | Labelled at the owner-false-activation floor. |
+| **Minor** — runtime-input channels | Environment variables and adapter-written files are added. |
+| **Minor** — D5 vs the 1-of-12 denominator | The denominator counts every scored predicate-excluded opportunity, and its minimum of 12 must be met on the deterministic stratum alone. |
+| **Minor** — auxiliary-request classification | Classified by fixed request properties (endpoint, purpose marker, position), never by whether skill text is present. |
 
 ## 4a. Response to the third independent check (revision 4)
 
@@ -83,10 +97,10 @@ The evidence is unchanged from revision 2:
 | **Revision-1 m2** — untracked closeout record | Still uncommitted, and labelled as such. Committing it is for the stakeholder. |
 
 ## 5. Questions for the fresh independent check
-1. Can the activation criterion now pass without the primary flash profile's own runtime command loading the skill for every declared root?
-2. Is the runtime-input record plus request 0 enough to distinguish the mechanisms, and is the transform definition realizable without brittleness?
-3. Does any unmarked workplan or contract statement still contradict the overlay?
-4. Is every stakeholder attribution within the quoted words, with recorder choices labelled?
+1. Can any profile reach qualification PASS while the primary flash family has any non-PASS state, or without its own runtime command loading the skill?
+2. Is the primary-family definition realizable for every panel, including T1/T7/T8 and the human trial, without breaking matched-key comparisons?
+3. Is the input-template rule well defined and not brittle?
+4. Does any unmarked statement still contradict the overlay, and is every attribution within the quoted words with recorder choices labelled?
 
 ## 6. Still blocked until both checks pass
 - adapter changes (OMP RPC mode, the observer request-0 delivery check, the runtime-input record, transform freezing);

@@ -2,7 +2,7 @@
 kind: protocol-qualification-contract
 governing_protocol_version: 6.6.0
 target_protocol_version: 7.0.0
-status: activation-strata-amendment-revision-4-pending-fresh-independent-check
+status: activation-strata-amendment-revision-5-pending-fresh-independent-check
 ---
 
 # Protocol 7.0 evaluation and qualification contract
@@ -58,11 +58,11 @@ Any adapter/profile may be used only after the independent pre-run checker demon
        - declared runtime constants.
 
        Its output is the delivered segment as it appears in the decoded provider message content, after JSON decoding of the request body. For example, OMP RPC strips YAML frontmatter, prepends an invocation notice, and appends the skill-directory line and the prompt. Any other adapter-supplied text in request 0 must match a frozen template.
-     - **Request 0.** The first provider request that carries the subject conversation. Auxiliary requests, such as title generation or model discovery, are classified by the frozen transform specification and excluded.
+     - **Request 0.** The first provider request that carries the subject conversation. Auxiliary requests, such as title generation or model discovery, are excluded. They are classified by request properties fixed in the frozen transform specification (endpoint, purpose marker, position), never by whether skill text appears in them.
      - **What a run must show.**
        - Request 0, as captured by the trusted on-path observer and hash-linked, contains the transform's output for the declared root, at a recorded offset.
-       - The adapter's **runtime input** (argv, stdin or RPC messages, and any prompt file) is retained and hash-bound into the evidence-integrity chain.
-       - For `runtime-command`, that input contains the command and **no segment of the entrypoint body**. For `harness-injection`, it contains the injected text.
+       - The adapter's **runtime input** (argv, stdin or RPC messages, environment variables, and any file the adapter writes for the runtime) is retained and hash-bound into the evidence-integrity chain.
+       - For `runtime-command`, the runtime input must equal a frozen input template rendered from the command, the fixture prompt and the declared constants. For `harness-injection`, it must equal the injection template rendered with the delivered segment.
        - Request 0 together with the runtime input determines the mechanism. A mechanism mismatch is an activation failure.
      - **What does not count.** Runtime events and adapter delivery records only corroborate. A model-initiated read never establishes delivery.
      - **Runtimes without the observer.** A runtime whose provider requests cannot be observed this way is claim-scoped inadmissible for the deterministic stratum.
@@ -88,8 +88,8 @@ Any adapter/profile may be used only after the independent pre-run checker demon
      - The report covers at least three ordinary episodes per arm for each of the run, ad hoc analysis, results-review, gate-evidence, copy/transcribe/relay and delegate classes. That exposure is recorder-chosen for a report-only measure (D2).
    - **Retained false-activation floors (stakeholder Q4).** These floors stay binding:
      - selection false activations on the 6.6 negative selection cases and the near-boundary negative episodes (§4), both of which are ordinary-entry runs;
-     - predicate false-firing (§4), scored on every run where an SSDP root was delivered or selected, in either stratum. This includes ordinary near-boundary runs that wrongly select SSDP. The scope is a recorder choice (D5);
-     - zero owner false activations on every run in either stratum.
+     - predicate false-firing (§4), scored on every run where an SSDP root was delivered or selected, in either stratum. This includes ordinary near-boundary runs that wrongly select SSDP. The scope is a recorder choice (D5). The §4 bound's denominator counts every predicate-excluded opportunity so scored, and its minimum of 12 must be met on the deterministic stratum alone;
+     - zero owner false activations on every run in either stratum (unchanged, D4).
    - **Run-type strata.**
      - **Deterministic, each with a custodian-predeclared root:**
        - every §11.3 semantic case, including composite fixtures, O1 authoring and review, tension retrieval and delegate cases;
@@ -107,21 +107,29 @@ Any adapter/profile may be used only after the independent pre-run checker demon
      - The deterministic-activation criterion and the retained false-activation floors apply as stated.
      - Ordinary runs enter no other floor. Every critical failure in them is listed in the report, by group.
    - **Primary flash profile and profile coverage (stakeholder Q1, Q5).**
-     - **Before runs:** the offered profile set is frozen in the campaign record. One flash-class profile is designated **primary**. Flash-class means the stakeholder-designated default campaign executor (currently `deepinfra/zai-org/GLM-5.3-Flash`) or another model the stakeholder designates in writing before runs.
-     - **Primary profile requirements:**
-       - all its deterministic runs use `runtime-command`;
-       - it meets the deterministic-activation criterion across every declared root;
-       - it meets every §2 exposure minimum on its own;
-       - it passes **every** floor.
-     - **Effect of a primary failure:** any delivery or floor failure on the primary profile blocks qualification PASS for every profile.
-     - **Other offered profiles** are additional strata. They may use `harness-injection` and must meet the activation criterion on their own (D1). They never rescue the primary, and none can be withdrawn after runs start.
-   - **Record.** `PROTOCOL-7.0-ACTIVATION-STRATA-CONTRACT-AMENDMENT-2026-10-04.md` (revision 4).
+     - **Before the candidate's first campaign:** the offered profile set is frozen in the campaign record, and one flash-class **primary profile family** is designated.
+       - *Flash-class* means the stakeholder-designated default campaign executor (currently `deepinfra/zai-org/GLM-5.3-Flash`) or another model the stakeholder designates in writing before runs.
+       - The family is a predeclared set of execution-profile keys. They share model, runtime and mode, reasoning, budgets and `runtime-command` delivery, and differ only where this contract requires a panel-specific capability; for example, T1/T7/T8 run with delegation unavailable.
+       - Within each panel, matched arms share one key, as §4 requires.
+     - **The primary family must reach `PASS` on every §3-ordered criterion** (stakeholder Q5):
+       - harness/admissibility;
+       - deterministic activation across every declared root, with `runtime-command` on every deterministic run;
+       - no critical failure;
+       - every absolute floor;
+       - 6.6 preservation;
+       - burden;
+       - the comparative claim;
+       - the §7 human trial, whose candidate- and baseline-arm material comes from the primary family's runs.
+     - **Blocking.** Any non-`PASS` state of the primary family (`FAIL`, `UNRESOLVED`, `NOT_EVALUATED`, inadmissible, missing evidence, or a claim-scoped-out criterion) blocks qualification PASS for every profile.
+     - **Other offered profiles** are additional strata under the profile-scoped result rule below. They may use `harness-injection` and must meet the activation criterion on their own (D1). They never rescue the primary, and none can be withdrawn after runs start.
+     - **Changing the primary family** needs a written stakeholder decision before the next campaign. Every earlier campaign of the candidate is disclosed whatever its outcome.
+   - **Record.** `PROTOCOL-7.0-ACTIVATION-STRATA-CONTRACT-AMENDMENT-2026-10-04.md` (revision 5).
 
 A profile that cannot expose or enforce a required property is **claim-scoped inadmissible**, not silently approximated. In particular, an environment that cannot establish selected logical root, exact SSDP resources consumed, or the active material required by the frozen T1/T7/T8 byte accounting cannot qualify that burden claim even if it can qualify other claims.
 
 Before an execution profile may run qualification subjects, the independent pre-run checker runs the §6 oracle-integrity suite through that exact adapter/profile. It must exercise known-good and known-broken branches; incomplete/failed termination; missing artifact/oracle/scoring-disposition rejection; cache/profile/core/evaluator identity perturbations; catalog contamination; containment escapes; ordinary-entry/owner-read capture; and raw-to-normalized completeness.
 
-**Profile-scoped result rule.** Hard/zero-tolerance floors and matched comparisons are evaluated within one execution-profile key. Passing one profile does not qualify a materially different one. The primary result is `PASS(profile_id, candidate, comparator-set)` or a non-PASS state for that profile. Cross-profile results remain separate strata. A separately reviewed, predeclared aggregation may summarize multiple profiles, but it cannot rescue an inadmissible profile, average away a hard/zero-tolerance failure in an included profile, or establish equivalence of materially different profiles.
+**Profile-scoped result rule.** It is subject to the primary-flash-family rule in §1 item 12. Hard/zero-tolerance floors and matched comparisons are evaluated within one execution-profile key. Passing one profile does not qualify a materially different one. The primary result is `PASS(profile_id, candidate, comparator-set)` or a non-PASS state for that profile. Cross-profile results remain separate strata. A separately reviewed, predeclared aggregation may summarize multiple profiles, but it cannot rescue an inadmissible profile, average away a hard/zero-tolerance failure in an included profile, or establish equivalence of materially different profiles.
 
 ## 2. Classification, opportunities and critical oracle
 
@@ -139,7 +147,7 @@ Order: harness/admissibility → deterministic activation → no critical failur
 
 | Measure | Frozen absolute floor and protected-outcome reason |
 | --- | --- |
-| Deterministic activation | On each offered profile, **every declared deterministic run** is delivered (§1 item 12). The count includes all launched runs, inadmissible ones among them. One undelivered run fails the profile, and reruns cannot rescue it. The designated primary flash-class profile uses `runtime-command` for every deterministic run and must pass this row and every other floor. Any failure there blocks qualification PASS for every profile (stakeholder Q1, Q5). Ordinary activation is reported with no floor (stakeholder 2b/Q2). The false-activation floors in §4 remain binding (stakeholder Q4). |
+| Deterministic activation | On each offered profile, **every declared deterministic run** is delivered (§1 item 12). The count includes all launched runs, inadmissible ones among them. One undelivered run fails the profile, and reruns cannot rescue it. The designated primary flash-class profile family uses `runtime-command` for every deterministic run and must reach PASS on this row and on every other §3-ordered criterion. Any non-PASS state there blocks qualification PASS for every profile (stakeholder Q1, Q5). Ordinary activation is reported with no floor (stakeholder 2b/Q2). The false-activation floors in §4 remain binding (stakeholder Q4). |
 | Critical judgment/authority disposition | **100%** correct or specifically and legitimately withheld; a wrong critical decision defeats the protected outcome. |
 | Non-critical planted detection | ≥ **16/20** (80%) eligible **non-critical** planted properties, named and unnamed together; a small corpus cannot support a broad reliability claim, but a miss on most planted mechanisms would defeat initiative. |
 | Unnamed-class detection (separate floor) | ≥ **⌈0.8 n⌉** of the **n ≥ 6** eligible planted **unnamed-class** properties, **critical and non-critical alike** (5/6 at the minimum), counted independently of the non-critical row above and of the critical-disposition row. A property counts as detected only when the subject surfaces the planted property itself (its mechanism and affected area) as a finding; a correct specific limitation, blocker or withheld conclusion satisfies the critical-disposition rule but is **not** a detection here, so honest non-detection cannot satisfy this floor. A critical unnamed property therefore enters both this row and the zero-error critical rule; a non-critical unnamed property enters both this row and the non-critical row. The chained delegate's launched-work anomaly is excluded (§2). |
@@ -232,11 +240,11 @@ Unanswered questions and misleading interpretations count as wrong. A blinded in
 
 This framework contains no concrete fixture/answer data. The 2026-09-28 independent framework check returned NO-PASS on three gaps (`STAGE-A-INDEPENDENT-CONTRACT-CHECK-NO-PASS.md`); this revision repairs them in §3 (separate unnamed-class detection floor), §4 (per-R2-trigger-class owner-load exposure and floors) and §7 (per-arm human-trial exposure). Stage A still needs a fresh independent framework check of this exact revision and a designated separate fixture custodian. A later governed revision, made on stakeholder decision after the Stage A PASS, replaces §7's four-participant design with the stakeholder as the single participant. It needs a fresh independent check before any run. Candidate and fixture arms bind exact immutable identities before runs. Any changed threshold or case after exposure is a governed contract change with affected requalification; a tuned holdout becomes development data. Stage F records what ran, what did not, and the exact semantic subject. Stage G Review and Stage H release are outside the authorized task. The first 2026-09-28 Stage F portability amendment at `62aa1bbaa9d2d1dfef1b48cede6bc1500837658f` changed only execution architecture and received a fresh independent **NO-PASS** because five equivalence/admissibility contracts were under-specified. The current revision repairs those gaps by fixing execution-profile-key semantics, the versioned capability/containment/custody contract, the minimum normalized event schema and completeness proof, exact required-artifact/oracle/scoring closure with fail-closed states, and full provenance/profile-scoped PASS semantics. No named CLI, vendor, model, host, local checkout or custody path is normative. Prior exact-byte framework/human-trial checks and the first portability review do not accept these repaired bytes; fresh independent Review is required before Stage F tooling repair or any candidate run.
 
-**Activation-strata amendment (2026-10-04, revision 4).** This revision follows the decision record `STAKEHOLDER-DECISION-2026-10-04-PROTOCOL-7.0-DETERMINISTIC-ACTIVATION-AND-ACTIVATION-QUALIFICATION.md` §§5–7 (stakeholder answers Q1–Q5) and the workplan's 2026-10-04 activation overlay, revision 3. It changes these sections:
-- §1 items 4 and 12: mechanisms; a delivery transform with declared inputs and decoded-content comparison; request 0 and auxiliary requests; request-0 proof plus a hash-bound runtime-input record; activation failures, including runs that end before any request; root-cause requalification; ordinary reporting; retained false-activation floors; run-type strata; scoring scope; and the frozen offered set with a primary flash profile that must pass every floor;
+**Activation-strata amendment (2026-10-04, revision 5).** This revision follows the decision record `STAKEHOLDER-DECISION-2026-10-04-PROTOCOL-7.0-DETERMINISTIC-ACTIVATION-AND-ACTIVATION-QUALIFICATION.md` §§5–7 (stakeholder answers Q1–Q5) and the workplan's 2026-10-04 activation overlay, revision 4. It changes these sections:
+- §1 items 4 and 12: mechanisms; a delivery transform with declared inputs and decoded-content comparison; request 0 and auxiliary requests; request-0 proof plus a hash-bound runtime-input record; activation failures, including runs that end before any request; root-cause requalification; ordinary reporting; retained false-activation floors; run-type strata; scoring scope; and the frozen offered set with a primary flash profile family that must reach PASS on every §3-ordered criterion;
 - §3: the deterministic-activation row;
 - §4: the report-only 6.6 correct-selection bound, the retained negative bounds and the unchanged byte metric;
 - §5: replacement records;
 - §6: deterministic-entry demonstrations and known-broken probes.
 
-Revisions 1–3 received independent NO-PASS. No independent check accepts these bytes yet. A fresh check of this revision, together with a Review of overlay revision 3, is required before any harness change or run relies on them.
+Revisions 1–4 received independent NO-PASS. No independent check accepts these bytes yet. A fresh check of this revision, together with a Review of overlay revision 4, is required before any harness change or run relies on them.
