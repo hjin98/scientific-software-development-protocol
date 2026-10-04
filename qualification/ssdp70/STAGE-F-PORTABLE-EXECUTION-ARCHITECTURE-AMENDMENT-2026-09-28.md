@@ -41,7 +41,7 @@ The core owns a versioned semantic capability manifest. Native capabilities map 
 
 Unrestricted shell/code execution is admissible only when substrate containment still enforces the file/network/credential policy. A denied class may have no unmediated escape route. A prohibited external effect is blocked before the live effect or redirected to qualification-owned isolated state; merely logging a real prohibited live mutation is not containment. Regex-only detection is never sufficient.
 
-For machine qualification, keys/answers remain outside executor-reachable capability and credential scope until output freeze. Role- and time-scoped checker/evaluator access and immutable audit evidence support this denial. The contract's stakeholder human-trial behavioral-access exception remains the only explicit exception and does not generalize to machine executors.
+For machine qualification, keys/answers remain outside executor-reachable capability and credential scope until output freeze. Role- and time-scoped checker/evaluator access and immutable audit evidence support this denial. Behavioral access exceptions are owned by qualification contract §1 item 9 and §7. The stakeholder-adopted non-executor audit amendment is pending fresh independent check (`STAKEHOLDER-DECISION-2026-10-04-PROTOCOL-7.0-NON-EXECUTOR-CUSTODY-AUDIT.md`); neither exception permits behavioral non-access to substitute for machine executor denial.
 
 ### Trace equivalence
 
