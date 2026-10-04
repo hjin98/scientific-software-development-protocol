@@ -71,3 +71,23 @@ No qualification claim follows from any of this. Candidate changes after exposur
 4. **Doctrine conformity remains separate.** The doctrine-loaded M07 probe showed that a loaded entrypoint still yields only partial delegate-request conformity. Activation closes the delivery gap, not the doctrine-uptake gap.
 
 Protocol 7.0 remains NON-QUALIFIED. Protocol 6.6.0 remains the governing protocol.
+
+## 5. Refinement (2026-10-04, later the same day)
+
+After seeing that Stage 7's ordinary-entry rate was far below the proposed 80% floor, the stakeholder refined decision 2:
+
+> "Is it really important if we have the standard activation route using the commands? Our main focus should be that standard command activation alwasy activates. If that works, we don't necessarily need the plain-word version, and it can simply be regarded as unreliable."
+
+The stakeholder then approved the resulting plan: a governed workplan amendment, a contract revision, fresh independent checks, and runtime command-activation runs.
+
+**Effective decisions (superseding §1 item 2 where they differ):**
+
+- **(2a)** The qualification target is that deterministic command activation always activates. This is stakeholder-stated.
+- **(2b)** Ordinary-entry (plain-word or description-driven) activation is regarded as unreliable and carries no pass floor. This is stakeholder-stated.
+
+**Recorder's derivations.** These are not the stakeholder's words, and the independent check and stakeholder may correct them:
+
+- **(D1)** "Always activates" holds on every profile offered for qualification, and a flash-class profile is required among them. This applies the earlier "especially on the lighter models".
+- **(D2)** Ordinary-entry activation is still measured and reported, since the stakeholder said it "can simply be regarded as unreliable", not that it is unobserved.
+- **(D3)** The 6.6 ordinary-selection preservation floors become report-only by the same reasoning.
+- **(D4)** Owner false-activation (zero tolerance) and the other entry-independent floors are unchanged.
