@@ -43,7 +43,7 @@ Main improvements:
   - D1/D2 revisions make revision-scoped applicability assessments that reach the revision gate.
   - Inaccessible homes qualify or block only under stated conditions.
 - **Feedback persistence** goes to one existing authorized home when writable. Otherwise the report carries a non-writing fallback, and no universal discovery database exists.
-- **Consumed-surface placement.** Every D1–D4 entrypoint, plus the documentation and maintenance-audit specialists, carries the obligation predicate, the owner-load trigger and a completion clause with the minimum duties and their label meanings. The implementation skill's description now also selects scientific run/analysis, results-review and gate-evidence tasks.
+- **Consumed-surface placement.** Every D1–D4 entrypoint, plus the documentation and maintenance-audit specialists, carries the obligation predicate, the owner-load trigger and a completion clause with the minimum duties and their label meanings. The implementation skill's description now also selects scientific run/analysis, results-review, gate-evidence, copying/transcribing/relaying of scientific results or decisions, and delegated scientific work. The user guide now directs users to activate skills with deterministic runtime commands (`/skill`, `$skill`, `/skill:name`) rather than wording, after Stage 7 showed that ordinary-entry selection is unreliable.
 - **Local deltas.**
   - D1/D2/D3 O1 content.
   - Evidence: the realized-record/observation overlap, and exploratory/confirmatory inquiry status on `CHALLENGES`.

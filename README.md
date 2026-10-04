@@ -84,6 +84,8 @@ Use the smallest set of skills that covers the semantics you are actually changi
 
 The first four are authority-bearing D1-D4 roles. The last three are supporting specialists.
 
+**Activate skills with a deterministic command, not wording.** Start each governed task with your runtime's explicit skill command: `/software-design` in Claude Code, `$software-design` in Codex, `/skill:software-design` in OMP, or the equivalent. A request phrased as "use the software-design skill" or one that only describes the task relies on the model deciding to consult its skill catalog. Qualification runs show that this decision is unreliable, especially on lighter models, and that clerical-looking tasks (copying a memo, relaying a decision, delegating work) are often handled with no skill loaded at all. Skill descriptions still help an agent route sensibly when no command was given, but they are a fallback, not the activation mechanism. The examples below use the Claude Code form.
+
 The active skill entrypoint controls what context is loaded. Ordinary links and **package membership do not imply activation**; they make material discoverable, not automatically active. The universal routing and authority kernel is [`source/shared/references/abstraction-and-concretization.md`](source/shared/references/abstraction-and-concretization.md).
 
 ### What the agent actually keeps in mind
@@ -125,7 +127,7 @@ Do not reopen higher layers merely because many files are changing. Do not keep 
 For a new scientific project:
 
 ```text
-Use the scientific-formulation skill. Define the scientific problem, observables,
+/scientific-formulation Define the scientific problem, observables,
 assumptions, validity regime, uncertainty, and falsification/validation requirements.
 Produce the minimum D1 authority needed for downstream numerical design.
 ```
@@ -133,7 +135,7 @@ Produce the minimum D1 authority needed for downstream numerical design.
 Then:
 
 ```text
-Use the numerical-algorithm-design skill. Starting from the accepted D1 formulation,
+/numerical-algorithm-design Starting from the accepted D1 formulation,
 define the numerical method, approximation/error model, convergence and conditioning
 expectations, precision/stochastic semantics, verification oracles, and the minimum
 D2->D3 handoff.
@@ -142,7 +144,7 @@ D2->D3 handoff.
 Then:
 
 ```text
-Use the software-design skill. Starting from the accepted D1/D2 authority, design the
+/software-design Starting from the accepted D1/D2 authority, design the
 minimum justified architecture and produce a D3->D4 implementation workplan with
 ownership, interfaces, constraints, acceptance boundaries, non-goals, and reopen triggers.
 ```
@@ -150,7 +152,7 @@ ownership, interfaces, constraints, acceptance boundaries, non-goals, and reopen
 Then:
 
 ```text
-Use the software-implementation skill. Implement the accepted workplan, preserve D1-D3
+/software-implementation Implement the accepted workplan, preserve D1-D3
 invariants, keep delegated machinery simple, run affected regression/integration at the
 real semantic-owner boundary, and report blockers rather than weakening the contract.
 ```
@@ -158,7 +160,7 @@ real semantic-owner boundary, and report blockers rather than weakening the cont
 For a substantial independent implementation Review:
 
 ```text
-Use the software-design skill in independent Review mode. Reconstruct the governing
+/software-design Independent Review mode. Reconstruct the governing
 authority independently, perform the Challenge Pass first, review the assembled system
 rather than only the diff, falsify conformance and abstraction adequacy, and issue
 Pass/No-Pass only on genuine blockers.

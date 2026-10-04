@@ -134,7 +134,8 @@ class Protocol70StructuralTests(unittest.TestCase):
     def test_selection_description_covers_new_classes_without_narrowing(self) -> None:
         front = entrypoint("software-implementation").read_text(encoding="utf-8").split("---", 2)[1]
         description = next(line for line in front.splitlines() if line.startswith("description: "))
-        for phrase in ("scientific/technical", "run or analyze", "review scientific results", "gate evidence"):
+        for phrase in ("scientific/technical", "run or analyze", "review scientific results", "gate evidence",
+                       "copy, transcribe or relay scientific results", "delegate any of this work"):
             self.assertIn(phrase, description)
 
     def test_no_accepted_66_entrypoint_text_removed_and_kernel_unchanged(self) -> None:

@@ -1,6 +1,6 @@
 ---
 name: software-implementation
-description: Use to implement, fix, debug, refactor, test, package, run or analyze scientific/technical software and pipelines under unchanged scientific, numerical and architectural contracts; review scientific results or reports, or prepare human scientific gate evidence. Routes contract changes to formulation, numerical or design skills.
+description: Use to implement, fix, debug, refactor, test, package, run or analyze scientific/technical software and pipelines under unchanged scientific, numerical and architectural contracts; review scientific results or reports; copy, transcribe or relay scientific results, memos or acceptance decisions; delegate any of this work to agents or tools; or prepare human scientific gate evidence. Routes contract changes to formulation, numerical or design skills.
 ---
 
 # Software Implementation
