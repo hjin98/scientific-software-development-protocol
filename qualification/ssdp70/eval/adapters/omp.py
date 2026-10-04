@@ -3936,7 +3936,7 @@ def package_access_ledger(artifacts: dict[str, Any], profile: dict[str, Any] | N
             cut_ns = first["t_ns"]
         else:
             errors.append("first retained provider request is not request 0 with a timestamp")
-    return {"ledger": ledger, "cut_ns": cut_ns, "errors": errors}
+    return {"ledger": ledger, "cut_ns": cut_ns, "errors": errors, "mount": SB_SKILLS}
 
 
 def prepare_prompt(profile: dict[str, Any], entry: str, prompt: str) -> str:

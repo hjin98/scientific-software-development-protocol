@@ -125,5 +125,21 @@ class T7Mode(unittest.TestCase):
         self.assertIn("unobserved", reason)
 
 
+class OwnerObservationScope(unittest.TestCase):
+    """The zero-tolerance owner floor depends on the owner question, not on unrelated unexplained opens."""
+
+    def test_inexact_bytes_with_exact_owner_question_does_not_void_the_owner_floor(self):
+        runs = {"r1": {"resource_observation": {"exact": False, "owner_read_exact": True}},
+                "r2": {"resource_observation": {"exact": True, "owner_read_exact": True}}}
+        self.assertTrue(batch_assess70.owner_observation_complete(runs))
+
+    def test_unobserved_owner_question_voids_it_and_old_summaries_fall_back_to_exact(self):
+        self.assertFalse(batch_assess70.owner_observation_complete(
+            {"r": {"resource_observation": {"exact": True, "owner_read_exact": False}}}))
+        self.assertFalse(batch_assess70.owner_observation_complete({"r": {"resource_observation": {"exact": False}}}))
+        self.assertTrue(batch_assess70.owner_observation_complete({"r": {"resource_observation": {"exact": True}}}))
+        self.assertFalse(batch_assess70.owner_observation_complete({"r": {}}))
+
+
 if __name__ == "__main__":
     unittest.main()

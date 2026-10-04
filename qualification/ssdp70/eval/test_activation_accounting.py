@@ -205,6 +205,73 @@ class RealActivationPath(unittest.TestCase):
                 self.assertIsNone(summary['owner_read_sequences'])
                 self.assertEqual(aggregate['integrity_outcome'], 'PASS', aggregate)
 
+    INADMISSIBLE_EXPECTED = {'evidence_state': 'INADMISSIBLE',
+                             'criteria': {'harness/admissibility': 'FAIL', 'deterministic activation': 'PASS'},
+                             'qualification_outcome': 'NOT_EVALUATED'}
+
+    def bash_steps(self, *commands):
+        return {'steps': [{'tool_calls': [{'name': 'bash', 'arguments': {'command': c}}]} for c in commands]
+                + [{'text': 'process observation discriminator'}]}
+
+    def test_overlapping_package_content_does_not_explain_an_unshown_open(self):
+        """Shared kernel text and byte-identical twin owners across roots must not supply a size probe."""
+        root = '/opt/ssdp/skills/software-implementation'
+        twin_owner = '/opt/ssdp/skills/software-design/references/scientific-inspectability-and-initiative.md'
+        for name, commands, probed in (
+                ('shared kernel block', (f'cat {root}/SKILL.md', f'wc -c {root}/references/abstraction-and-concretization.md'),
+                 'software-implementation/references/abstraction-and-concretization.md'),
+                ('byte-identical twin owner', (f'cat {twin_owner}', f'wc -c {self.OWNER_PATH}'), self.OWNER_REL)):
+            with self.subTest(name):
+                summary, aggregate, identity, rig = self.realize(
+                    scenario=self.bash_steps(*commands), claims=['active-byte burden'], local_expected=self.INADMISSIBLE_EXPECTED)
+                self.assertEqual(summary['evidence_state'], 'INADMISSIBLE', summary.get('evidence_state_reasons'))
+                observation = summary['resource_observation']
+                self.assertFalse(observation['exact'], observation)
+                self.assertIn(probed, observation['reason'])
+                self.assertIsNone(summary['active_ssdp_bytes'])
+                self.assertEqual(aggregate['integrity_outcome'], 'PASS', aggregate)
+
+    def test_entrypoint_only_run_with_exact_ledger_is_admissible_for_burden_claims(self):
+        """No package read beyond the delivered root, or a re-open of that root, is an exact observation."""
+        root_bytes = (omp_rig.DIST_SKILLS / 'software-implementation' / 'SKILL.md').stat().st_size
+        for name, scenario in (('no tool call', {'steps': [{'text': 'entrypoint only'}]}),
+                               ('listing only', self.bash_steps('ls -la /opt/ssdp/skills/software-implementation/references')),
+                               ('size probe of delivered root', self.bash_steps('wc -c /opt/ssdp/skills/software-implementation/SKILL.md'))):
+            with self.subTest(name):
+                summary, aggregate, identity, rig = self.realize(scenario=scenario, claims=['active-byte burden'])
+                self.assertEqual(summary['evidence_state'], 'COMPLETE_ADMISSIBLE', summary.get('evidence_state_reasons'))
+                self.assertTrue(summary['resource_observation']['exact'], summary['resource_observation'])
+                self.assertEqual(summary['active_ssdp_bytes'], root_bytes)
+                self.assertEqual(summary['owner_read_sequences'], [])
+                self.assertEqual(aggregate['integrity_outcome'], 'PASS', aggregate)
+
+    def test_unrelated_unexplained_file_keeps_the_owner_question_exact(self):
+        summary, aggregate, identity, rig = self.realize(
+            scenario=self.bash_steps('wc -l /opt/ssdp/skills/software-implementation/references/abstraction-and-concretization.md'),
+            claims=['owner-read-absence'])
+        observation = summary['resource_observation']
+        self.assertFalse(observation['exact'])
+        self.assertTrue(observation['owner_read_exact'], observation)
+        self.assertEqual(summary['owner_read_sequences'], [])
+        self.assertIsNone(summary['active_ssdp_bytes'])
+
+    def test_adapter_without_a_ledger_keeps_the_process_execution_guard(self):
+        saved = omp.package_access_ledger
+        del omp.package_access_ledger
+        try:
+            summary, aggregate, identity, rig = self.realize(
+                scenario=self.bash_steps(f'cat {self.OWNER_PATH}'), claims=['active-byte burden', 'owner-read'],
+                local_expected=self.INADMISSIBLE_EXPECTED)
+        finally:
+            omp.package_access_ledger = saved
+        self.assertEqual(summary['evidence_state'], 'INADMISSIBLE', summary.get('evidence_state_reasons'))
+        observation = summary['resource_observation']
+        self.assertFalse(observation['exact'])
+        self.assertFalse(observation['owner_read_exact'])
+        self.assertIn('process execution lacks complete SSDP resource-read observation', observation['reason'])
+        self.assertIsNone(summary['active_ssdp_bytes'])
+        self.assertIsNone(summary['owner_read_sequences'])
+
     def test_qualification_scoped_integrity_campaign_keeps_failure_after_good_repeat(self):
         """Real campaign aggregation; outer suite purpose remains integrity throughout."""
         rig = omp_rig.Rig(Path('/tmp'), entry='pinned:software-implementation', timeout_s=45, max_turns=60)

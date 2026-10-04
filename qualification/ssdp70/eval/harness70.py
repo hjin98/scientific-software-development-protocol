@@ -819,16 +819,22 @@ def run_episode(
         supplied_owner: list[int] = []
         if ledger_hook is not None:
             ledger_bundle = ledger_hook(adapter_artifacts, profile_bundle.profile)
-            accounting = package_ledger.account(ledger_bundle.get("ledger"), ledger_bundle.get("cut_ns"), events,
-                                                installed_skills, extra_errors=list(ledger_bundle.get("errors") or []))
-            if accounting["exact"]:
+            delivered_roots = {f"{event['payload']['logical_root']}/SKILL.md" for event in events
+                               if event.get("kind") == "root_selection"
+                               and (event.get("payload") or {}).get("delivery", {}).get("delivered")}
+            accounting = package_ledger.account(
+                ledger_bundle.get("ledger"), ledger_bundle.get("cut_ns"), events, installed_skills,
+                extra_errors=list(ledger_bundle.get("errors") or []), delivered=delivered_roots,
+                owner_name=OWNER, mount=ledger_bundle.get("mount"))
+            if accounting["owner_read_exact"]:
                 for rel, row in accounting["supplied"].items():
                     if rel.endswith("/references/" + OWNER):
                         supplied_owner.extend(row["sequences"])
                 owner_read_sequences = sorted(set(owner_read_sequences) | set(supplied_owner))
+        supply_rows = [{"rel": rel, **row} for rel, row in
+                       (accounting["supplied"].items() if accounting and accounting["owner_read_exact"] else [])]
         profile_errors.extend(core70.validate_claim_observability(
-            events, claims,
-            [{"rel": rel, **row} for rel, row in (accounting["supplied"].items() if accounting and accounting["exact"] else [])]))
+            events, claims, supply_rows, ledger_exact=bool(accounting and accounting["exact"])))
         if any("owner-read" in str(claim).lower() for claim in claims) and not owner_read_sequences:
             profile_errors.append("owner-read claim has no successful read of the canonical owner resource")
         _write_normalized(events, out)
@@ -877,22 +883,29 @@ def run_episode(
             and "process_execution" in event.get("payload", {}).get("semantic_capability_classes", [])]
         if accounting is not None:
             observation_exact = bool(accounting["exact"])
+            owner_observation_exact = bool(accounting["owner_read_exact"])
             if observation_exact:
                 for rel, row in accounting["supplied"].items():
                     consumed_files.setdefault(rel, row["bytes"])
             reason = None if observation_exact else "package-access observation is not exact: " + "; ".join(accounting["reasons"])
+            owner_reason = None if owner_observation_exact else "owner-read observation is not exact: " + "; ".join(accounting["reasons"])
             unresolved_events = [] if observation_exact else process_events
         else:
-            observation_exact = not process_events
-            reason = None if observation_exact else "process execution lacks complete SSDP resource-read observation"
+            observation_exact = owner_observation_exact = not process_events
+            reason = owner_reason = None if observation_exact else "process execution lacks complete SSDP resource-read observation"
             unresolved_events = process_events
-        resource_observation = {"exact": observation_exact, "unresolved_process_events": unresolved_events,
-            "reason": reason, "mechanism": None if accounting is None else accounting["mechanism"],
+        resource_observation = {"exact": observation_exact, "owner_read_exact": owner_observation_exact,
+            "unresolved_process_events": unresolved_events,
+            "reason": reason, "owner_read_reason": owner_reason,
+            "mechanism": None if accounting is None else accounting["mechanism"],
             "accounting": accounting}
-        sensitive_claims = any(any(token in str(claim).lower() for token in
-            ("owner", "t1", "t7", "t8", "burden", "active-byte")) for claim in claims)
-        if not observation_exact and sensitive_claims:
+        claim_text = [str(claim).lower() for claim in claims]
+        burden_claims = any(any(token in claim for token in ("t1", "t7", "t8", "burden", "active-byte")) for claim in claim_text)
+        owner_claims = any("owner" in claim for claim in claim_text)
+        if not observation_exact and burden_claims:
             profile_errors.append(reason)
+        elif not owner_observation_exact and owner_claims:
+            profile_errors.append(owner_reason)
         opaque_package_access = not observation_exact
         declared_root = identity.get("declared_root")
         entrypoint = installed_skills / declared_root / "SKILL.md" if declared_root else None
@@ -918,7 +931,7 @@ def run_episode(
             "profile_key_sha256": profile_bundle.profile_key_sha256,
             "run_identity_sha256": identity["identity_sha256"],
             "catalog_isolation": catalog,
-            "owner_read_sequences": None if opaque_package_access else owner_read_sequences,
+            "owner_read_sequences": None if not owner_observation_exact else owner_read_sequences,
             "normalized_event_count": len(events),
             "native_event_count": native_event_count,
             "evidence_state": "UNRESOLVED",

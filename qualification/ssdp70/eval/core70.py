@@ -1402,9 +1402,12 @@ def validate_runtime_observation(bundle: ProfileBundle, observation: Any) -> lis
 
 
 def validate_claim_observability(events: list[dict[str, Any]], claims: Iterable[str],
-                                 package_supply: list[dict[str, Any]] | None = None) -> list[str]:
-    """`package_supply`: exact supervisor-ledger accounting rows (rel, bytes, sha256) for package files
-    whose content reached the model through process output; native reads remain events."""
+                                 package_supply: list[dict[str, Any]] | None = None,
+                                 ledger_exact: bool = False) -> list[str]:
+    """`package_supply`: supervisor-ledger accounting rows (rel, bytes, sha256) for package files
+    whose content reached the model through process output; native reads remain events.
+    `ledger_exact`: the supervisor ledger is exact for the byte question, so a root delivered at
+    request 0 with no further package access is itself exact evidence (entrypoint-only mode)."""
     normalized = {str(claim).lower() for claim in claims}
     supply = list(package_supply or [])
     errors: list[str] = []
@@ -1433,7 +1436,7 @@ def validate_claim_observability(events: list[dict[str, Any]], claims: Iterable[
             event for event in successful_reads
             if isinstance((event.get("payload") or {}).get("resolved_package_identity"), dict)
         ]
-        if not package_reads and not supply:
+        if not package_reads and not supply and not (ledger_exact and roots):
             errors.append("T1/T7/T8 burden claim has no successful exact SSDP-resource evidence")
         for row in supply:
             if not _valid_sha256(row.get("sha256")) or not isinstance(row.get("bytes"), int):

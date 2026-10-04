@@ -317,7 +317,7 @@ def aggregate_assessments(out_dir: Path, manifest: dict[str, Any] | None = None)
         }
     result["profiles"] = key_criteria
     result["parts"] = aggregate_parts(manifest, result["runs"], out_dir)
-    if any(row.get("resource_observation", {}).get("exact") is not True for row in result["runs"].values()):
+    if not owner_observation_complete(result["runs"]):
         result["parts"]["owner_false_activation"]["state"] = "UNRESOLVED"
         result["parts"]["owner_false_activation"]["reason"] = "complete SSDP resource-read observation is missing"
 
@@ -433,6 +433,16 @@ def aggregate_parts(manifest: dict[str, Any], runs: dict[str, Any], root: Path) 
         parts["unnamed_detection"]["state"]="UNRESOLVED"
         parts["unnamed_detection"]["reason"]="unnamed share, critical per-fixture membership or composite coverage missing"
     return parts
+
+
+def owner_observation_complete(runs: dict[str, Any]) -> bool:
+    """Owner false activation needs every run's owner-read question observed exactly; a run whose
+    byte accounting is inexact for unrelated files still answers it (summary `owner_read_exact`)."""
+    for row in runs.values():
+        observation = row.get("resource_observation") or {}
+        if observation.get("owner_read_exact", observation.get("exact")) is not True:
+            return False
+    return True
 
 
 def quantitative_part(part, manifest, opportunities, root):
