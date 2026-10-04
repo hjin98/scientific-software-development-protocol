@@ -412,6 +412,12 @@ def _create_realization_directory(out: Path, adapter_module) -> None:
         raise core70.ContractError(f"realization collision: output directory already exists: {out}") from exc
 
 
+def entry_stratum(episode: dict[str, Any], profile: dict[str, Any]) -> str:
+    # Legacy prose-pinned development inputs are ordinary instructed entry.
+    # A declared deterministic input still has to prove the declared mechanism.
+    return "deterministic" if episode.get("entry", "ordinary").startswith("pinned:") and profile.get("activation_mechanism") in ("runtime-command", "harness-injection") else "ordinary"
+
+
 def run_identity(
     *,
     corpus: Path,
@@ -431,11 +437,46 @@ def run_identity(
     rep: int,
     pair_order: list[str],
 ) -> dict[str, Any]:
+    accounting_manifest = episode.get("accounting_manifest")
+    if accounting_manifest is not None:
+        errors = core70.campaign_manifest_errors(accounting_manifest)
+        if errors:
+            raise core70.ContractError("; ".join(errors))
+        run_slot = f"{episode['id']}-{arm['name']}-r{rep}"
+        matching = [row for row in accounting_manifest["runs"] if row["id"] == run_slot]
+        if len(matching) != 1:
+            raise core70.ContractError("run is not enumerated in the frozen accounting manifest")
+        declaration = matching[0]
+        subject = {"commit": arm["commit"], "package_sha256": arm["dist_tree_sha256"]}
+        if declaration["subject"] != subject or declaration["profile_key_sha256"] != profile_bundle.profile_key_sha256 or declaration["scoring_manifest_sha256"] != requirements.scoring_manifest_digest:
+            raise core70.ContractError("launch does not match frozen subject/profile/scoring declaration")
+        stratum = entry_stratum(episode, profile_bundle.profile)
+        if declaration["entry_stratum"] != stratum:
+            raise core70.ContractError("entry stratum differs from launch declaration")
+        digest = core70.stable_json_sha256(accounting_manifest)
+        scope = {"purpose": accounting_manifest["purpose"], "scope_id": accounting_manifest["scope_id"],
+                 "manifest_sha256": digest, "scoring_manifest_sha256": requirements.scoring_manifest_digest}
+        if scope["purpose"] == "qualification":
+            scope.update({"campaign_record_sha256": digest, "family_record_sha256": accounting_manifest["family_record_sha256"],
+                          "primary_family_id": accounting_manifest["family"]["family_id"]})
+            if "integrity_test_campaign" in accounting_manifest:
+                scope["integrity_test_campaign"] = accounting_manifest["integrity_test_campaign"]
+        episode = {**episode, "accounting": scope}
     fixture = corpus / "fixtures" / episode["fixture"]
     stub = corpus / "stubs" / episode["stub"] if episode.get("stub") else None
     episode_oracles = oracles / episode["id"] if oracles is not None else None
     identity = {
         "schema": 2,
+        "accounting_manifest": accounting_manifest,
+        "entry_stratum": entry_stratum(episode, profile_bundle.profile),
+        "activation_mechanism": profile_bundle.profile.get("activation_mechanism", "ordinary-read"),
+        "declared_root": episode.get("entry", "ordinary").split(":", 1)[-1] if episode.get("entry", "ordinary").startswith("pinned:") else None,
+        "accounting": episode.get("accounting") or {
+            "purpose": "qualification" if mode == "qualification" else "development",
+            "scope_id": "development:" + core70.sha256_file(corpus / "manifest.yaml"),
+            "manifest_sha256": core70.sha256_file(corpus / "manifest.yaml"),
+            "scoring_manifest_sha256": requirements.scoring_manifest_digest,
+        },
         "episode": episode["id"],
         "arm": arm["name"],
         "subject": {
@@ -528,8 +569,28 @@ def run_episode(
     if mode == "qualification" and profile_errors:
         raise core70.ContractError("; ".join(profile_errors))
 
+    accounting_errors = core70.validate_accounting_identity(identity)
+    if accounting_errors:
+        raise core70.ContractError("; ".join(accounting_errors))
+    declarations = (identity.get("accounting_manifest") or {}).get("runs", [])
+    slot = f"{episode['id']}-{arm['name']}-r{identity['replicate']}"
+    declared_faults = [row.get("fault") for row in declarations if row["id"] == slot]
+    fault = declared_faults[0] if declared_faults and declared_faults[0] in getattr(adapter_module, "INTEGRITY_FAULTS", ()) else None
+    if fault is not None:
+        scope = identity["accounting"]
+        if scope["purpose"] != "oracle-integrity" and not scope.get("integrity_test_campaign"):
+            raise core70.ContractError("fault injection is limited to predeclared integrity-suite realizations")
+        declarations = identity["accounting_manifest"]["runs"]
+        slot = f"{episode['id']}-{arm['name']}-r{identity['replicate']}"
+        if not any(row["id"] == slot and row.get("fault") == fault for row in declarations):
+            raise core70.ContractError("fault is not frozen in the launch manifest")
+    if mode == "qualification" and adapter_module.ADAPTER_ID == "omp-json-v2":
+        if profile_bundle.profile.get("runtime_mode") != "rpc":
+            raise core70.ContractError("OMP qualification requires RPC mode")
     _create_realization_directory(out, adapter_module)
     (out / "run-identity.json").write_text(json.dumps(identity, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    if identity.get("accounting_manifest") is not None:
+        (out / "accounting-manifest.json").write_text(json.dumps(identity["accounting_manifest"], indent=2, sort_keys=True) + "\n", encoding="utf-8")
     (out / "profile-snapshot.json").write_text(json.dumps(profile_bundle.profile, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     (out / "capability-manifest-snapshot.json").write_text(json.dumps(profile_bundle.capabilities, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     (out / "requirements-snapshot.json").write_text(json.dumps(core70.requirements_snapshot(requirements), indent=2, sort_keys=True) + "\n", encoding="utf-8")
@@ -555,6 +616,7 @@ def run_episode(
             "arm": arm["name"],
             "subject_commit": arm["commit"],
             "execution_mode": mode,
+            "accounting": identity["accounting"],
             "execution_returncode": None,
             "execution_ok": False,
             "profile_key_sha256": profile_bundle.profile_key_sha256,
@@ -605,7 +667,7 @@ def run_episode(
         log.write_text("", encoding="utf-8")
         log.chmod(0o600)
         mcp_servers = profile_bundle.profile.get("mcp_servers") or []
-        if mcp_servers:
+        if mcp_servers or adapter_module.ADAPTER_ID == "omp-json-v2":
             mcp_server = layout["server"]
             shutil.copy2(HERE / "stub_tools" / "mediator.py", mcp_server)
             mcp_server.chmod(0o500)
@@ -644,7 +706,8 @@ def run_episode(
         runtime_baseline_fn = getattr(adapter_module, "runtime_entry_baseline", None)
         runtime_baseline = runtime_baseline_fn(profile_bundle.profile, project) if runtime_baseline_fn is not None else None
         try:
-            launched = adapter_module.launch(profile_bundle.profile, prompt, project, env)
+            launch_kwargs = {"integrity_fault": fault} if fault is not None else {}
+            launched = adapter_module.launch(profile_bundle.profile, prompt, project, env, **launch_kwargs)
         except Exception as exc:
             if prelaunch_refusal_type and isinstance(exc, prelaunch_refusal_type):
                 return record_prelaunch_refusal("launch", exc)
@@ -777,6 +840,33 @@ def run_episode(
         catalog = adapter_module.catalog_isolation(events)
         execution_ok = bool(launched["returncode"] == 0 and terminal_exists and terminal_ok)
 
+        consumed_files = {}
+        for event in events:
+            payload = event.get("payload", {})
+            if event.get("kind") == "root_selection" and payload.get("delivery", {}).get("delivered"):
+                consumed_files[f"{payload['logical_root']}/SKILL.md"] = payload["delivery"]["installed_skill_bytes"]
+            if event.get("kind") == "resource_access" and payload.get("result_status") == "result":
+                consumed = payload.get("consumed_resource", {})
+                if consumed.get("match") in ("exact", "partial") and payload.get("resolved_package_identity"):
+                    path = payload.get("resolved_resource_path")
+                    if isinstance(path, str) and path.startswith("/opt/ssdp/skills/"):
+                        consumed_files[path.removeprefix("/opt/ssdp/skills/")] = payload["resource_bytes"]
+        # Native process results do not prove the complete package read set. Until
+        # the owning observation contract closes this gap, never publish an exact
+        # byte total or a negative owner-read conclusion from incomplete evidence.
+        opaque_package_access = [event["sequence"] for event in events
+            if event.get("kind") == "tool_action" and event.get("status") == "result"
+            and "process_execution" in event.get("payload", {}).get("semantic_capability_classes", [])]
+        resource_observation = {"exact": not opaque_package_access,
+            "unresolved_process_events": opaque_package_access,
+            "reason": "process execution lacks complete SSDP resource-read observation" if opaque_package_access else None}
+        sensitive_claims = any(any(token in str(claim).lower() for token in
+            ("owner", "t1", "t7", "t8", "burden", "active-byte")) for claim in claims)
+        if opaque_package_access and sensitive_claims:
+            profile_errors.append(resource_observation["reason"])
+        declared_root = identity.get("declared_root")
+        entrypoint = installed_skills / declared_root / "SKILL.md" if declared_root else None
+        owner = installed_skills / declared_root / "references" / OWNER if declared_root else None
         preliminary = {
             "schema": 2,
             "episode": episode["id"],
@@ -785,12 +875,20 @@ def run_episode(
             "execution_mode": mode,
             "execution_returncode": launched["returncode"],
             "execution_ok": execution_ok,
+            "accounting": identity["accounting"],
             "wall_s": launched["wall_s"],
+            "report_bytes": len(final_text.encode("utf-8")),
+            "active_ssdp_files": consumed_files,
+            "active_ssdp_bytes": None if opaque_package_access else sum(consumed_files.values()),
+            "resource_observation": resource_observation,
+            "observed_ssdp_bytes_lower_bound": sum(consumed_files.values()),
+            "installed_entrypoint_bytes": entrypoint.stat().st_size if entrypoint and entrypoint.is_file() else None,
+            "installed_owner_bytes": owner.stat().st_size if owner and owner.is_file() else None,
             "pair_order": pair_order,
             "profile_key_sha256": profile_bundle.profile_key_sha256,
             "run_identity_sha256": identity["identity_sha256"],
             "catalog_isolation": catalog,
-            "owner_read_sequences": owner_read_sequences,
+            "owner_read_sequences": None if opaque_package_access else owner_read_sequences,
             "normalized_event_count": len(events),
             "native_event_count": native_event_count,
             "evidence_state": "UNRESOLVED",
@@ -800,6 +898,17 @@ def run_episode(
             "runtime_observation": runtime_observation,
         }
         (out / "summary.json").write_text(json.dumps(preliminary, indent=2, sort_keys=True, default=str) + "\n", encoding="utf-8")
+
+        if identity["entry_stratum"] == "deterministic":
+            activation_fn = getattr(adapter_module, "verify_activation", None)
+            if activation_fn is None:
+                activation = {"delivered": False, "errors": ["adapter has no trusted request-0 proof"]}
+            else:
+                observed = adapter_module.Observed(adapter_artifacts, profile_bundle.profile)
+                activation = activation_fn(observed, normalization_context)
+            preliminary["activation"] = activation
+            if not isinstance(activation, dict) or activation.get("delivered") is not True:
+                profile_errors.append("deterministic activation failed")
 
         missing_artifacts = core70.validate_required_artifacts(out, requirements)
         missing_oracles = core70.validate_required_oracles(out, requirements)
@@ -814,6 +923,9 @@ def run_episode(
             missing_artifacts=missing_artifacts,
             missing_oracles=missing_oracles,
         )
+        if preliminary.get("activation", {}).get("delivered") is False:
+            state = "INADMISSIBLE"
+            reasons.append("deterministic activation failed, including termination before request 0")
         preliminary.update({
             "evidence_state": state,
             "evidence_state_reasons": reasons,
@@ -823,6 +935,8 @@ def run_episode(
             "normalized_event_errors": event_errors,
             "normalization_completeness_errors": completeness_errors,
         })
+        (out / "summary.json").write_text(json.dumps(preliminary, indent=2, sort_keys=True, default=str) + "\n", encoding="utf-8")
+        preliminary["criteria"] = core70.local_criteria(preliminary, identity)
         (out / "summary.json").write_text(json.dumps(preliminary, indent=2, sort_keys=True, default=str) + "\n", encoding="utf-8")
         if state == "COMPLETE_ADMISSIBLE":
             core70.write_evidence_integrity(out, requirements)
@@ -854,6 +968,7 @@ def main(argv: list[str] | None = None) -> int:
         command.add_argument("--requirements", type=Path, required=True)
         command.add_argument("--adapter", default="claude")
         command.add_argument("--oracles", type=Path, default=None, help="custodian oracle root (post-run only)")
+        command.add_argument("--accounting-manifest", type=Path, default=None)
         command.add_argument("--mode", choices=("probe", "qualification"), default="probe")
         command.add_argument("--profile-admission", type=Path, default=None)
         if name == "episode":
@@ -879,6 +994,12 @@ def main(argv: list[str] | None = None) -> int:
         raise core70.ContractError(f"requested arms are absent from manifest: {missing_arms}")
     dists = {name: resolve_arm_dist(arms[name]) for name in requested}
     episodes = {episode["id"]: episode for episode in load_manifest(args.corpus)}
+    if args.mode == "qualification" and args.accounting_manifest is None:
+        raise core70.ContractError("qualification requires a frozen campaign/family/accounting manifest")
+    if args.accounting_manifest is not None:
+        manifest = core70.load_json(args.accounting_manifest)
+        for episode in episodes.values():
+            episode["accounting_manifest"] = manifest
 
     if args.cmd == "episode":
         if args.id not in episodes:

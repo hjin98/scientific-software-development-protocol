@@ -1,0 +1,12 @@
+{
+  "_out": "/home/samjin/ssdp70-omp-stagef/qualification/OMP-STANDIN-20261004T172146Z-86ed09a24ca5-1bf361e90a86/run",
+  "evidence_state": "INADMISSIBLE",
+  "evidence_state_reasons": [
+    "process execution lacks complete SSDP resource-read observation"
+  ],
+  "active_ssdp_files": {
+    "software-implementation/SKILL.md": 14454
+  },
+  "active_ssdp_bytes": null,
+  "owner_read_sequences": null
+}

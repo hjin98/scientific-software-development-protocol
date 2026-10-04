@@ -141,6 +141,9 @@ class Rig:
             profile_id="omp-headless-d4-standin",
             budgets={"max_turns": self.max_turns, "timeout_s": self.timeout_s},
         )
+        if not self.entry.startswith("pinned:"):
+            profile["activation_mechanism"] = "ordinary-read"
+            profile["runtime_input_template"] = omp.input_template("ordinary-read")
         if extra:
             profile.update(extra)
         return profile

@@ -1,4 +1,5 @@
 {
+  "activation_mechanism": "runtime-command",
   "adapter_id": "omp-json-v2",
   "agent_model": "MUST-BE-FROZEN-BEFORE-QUALIFICATION",
   "budgets": {
@@ -11,8 +12,13 @@
     "inference_authority": "descriptor pairs inherited by the launcher only; relayed only for connections whose client socket is held solely by the launcher-started OMP process; capability is bound to that run instance, not to an executable identity",
     "kind": "omp-three-principal-bwrap-v3",
     "mcp_transport_realization": "unchanged stdio mediator run by the supervisor; OMP reaches it as streamable-HTTP MCP through the supervisor bridge over the descriptor-bound relay",
+    "observer_boundary": {
+      "filesystem": "explicit Python runtime, observer code, CA bundle and synthetic /etc only; no host HOME, custody, mediator or supervisor state",
+      "network": "trusted observer opens only the frozen provider route before accepting subject input, then moves to a private network namespace and installs seccomp denying new sockets, connects and addressed sends",
+      "process": "private PID namespace with no host process view; capability set dropped after route setup",
+      "provider_route_capability": "one connected stream socket owned by the observer; inference requests remain single-purpose and evidence is append-only"
+    },
     "principal_files_sha256": "MUST-BE-FROZEN-BEFORE-QUALIFICATION",
-    "runtime_dependency_manifest_sha256": "MUST-BE-FROZEN-BEFORE-QUALIFICATION",
     "principals": [
       "qualification-supervisor",
       "provider-control-observer",
@@ -30,13 +36,8 @@
       "reasoning": false,
       "upstream": "MUST-BE-FROZEN-BEFORE-QUALIFICATION"
     },
+    "runtime_dependency_manifest_sha256": "MUST-BE-FROZEN-BEFORE-QUALIFICATION",
     "settings_closure_sha256": "MUST-BE-FROZEN-BEFORE-QUALIFICATION",
-    "observer_boundary": {
-      "filesystem": "explicit Python runtime, observer code, CA bundle and synthetic /etc only; no host HOME, custody, mediator or supervisor state",
-      "network": "trusted observer opens only the frozen provider route before accepting subject input, then moves to a private network namespace and installs seccomp denying new sockets, connects and addressed sends",
-      "process": "private PID namespace with no host process view; capability set dropped after route setup",
-      "provider_route_capability": "one connected stream socket owned by the observer; inference requests remain single-purpose and evidence is append-only"
-    },
     "subject_boundary": "bubblewrap user/pid/ipc/uts/cgroup/net namespaces, empty network namespace (loopback only), all capabilities dropped, seccomp denies AF_UNIX sockets and process inspection, explicit digest-bound runtime dependency manifest plus synthetic /etc, no host HOME/custody/private state",
     "substrate": {
       "executable": "/usr/bin/bwrap",
@@ -48,6 +49,24 @@
     "ambient_credentials": "deny",
     "parent_authentication": "one qualification-only provider credential held only by the provider-control/observation principal",
     "sandboxed_subprocess_credentials": "deny"
+  },
+  "delivery_transform": {
+    "classification": {
+      "auxiliary_post_requests": [],
+      "method": "POST",
+      "path": "/v1/chat/completions"
+    },
+    "directory": "\n\n---\n\n[Skill directory: {directory}]\nResolve relative paths in this skill (e.g. `scripts/foo.js`, `templates/config.yaml`) against this absolute directory; read referenced assets and templates; run scripts with the terminal tool when skill instructions call for it.",
+    "frontmatter": "leading-yaml-block-then-trim",
+    "markdown_table_cells": "strip-padding-in-pipe-bounded-table-rows",
+    "message_index": 1,
+    "message_role": "user",
+    "mode": "rpc",
+    "notice": "[IMPORTANT: User invoked the \"{root}\" skill; follow its instructions. Full skill below.]",
+    "prompt_join": "\nUser: {prompt}",
+    "runtime": "omp",
+    "schema": 1,
+    "version": "18.0.11"
   },
   "install_mechanism": "run-owned copy of the arm package outside the project, mounted read-only at /opt/ssdp/skills and enabled only through skills.customDirectories",
   "mcp_servers": [
@@ -127,6 +146,15 @@
     "source": "--thinking",
     "thinking": "MUST-BE-FROZEN-BEFORE-QUALIFICATION"
   },
+  "runtime_input_template": {
+    "channel": "rpc-prompt",
+    "command": "/skill:{root} {prompt}",
+    "prompt_environment": {},
+    "prompt_files": {},
+    "schema": 1,
+    "stdin_serialization": "json-compact-utf8-newline"
+  },
+  "runtime_mode": "rpc",
   "schema": 1,
   "workspace_realization": {
     "kind": "fresh-temporary-project"

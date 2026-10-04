@@ -1,0 +1,11 @@
+test_malformed_family_and_missing_map_fail_closed (test_activation_accounting.FamilyAndScope) ... ok
+test_missing_integrity_result_and_unexpected_result_block (test_activation_accounting.FamilyAndScope) ... ok
+test_transform_is_exact_decoded_content_and_rejects_wrong_root_truncation_late_and_auxiliary (test_activation_accounting.FamilyAndScope) ... ok
+test_all_broken_probes_keep_local_failure_and_only_outer_integrity_passes (test_activation_accounting.RealActivationPath) ... ok
+test_canary_without_tools_and_burden_without_delegate_use_real_runtime (test_activation_accounting.RealActivationPath) ... ok
+test_known_good_each_declared_root_and_honestly_labelled_injection (test_activation_accounting.RealActivationPath) ... ok
+
+----------------------------------------------------------------------
+Ran 6 tests in 229.568s
+
+OK

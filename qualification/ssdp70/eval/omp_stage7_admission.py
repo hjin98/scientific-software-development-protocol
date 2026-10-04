@@ -53,6 +53,9 @@ CHECK_EVIDENCE_CLASS_FLOORS = {
     "custody_denial": {"exact-profile-behavior"},
     "ordinary_entry_owner_read": {"exact-profile-behavior"},
     "withheld_oracle_branches": {"independent-inspection"},
+    "activation_delivery": {"exact-profile-behavior", "independent-inspection"},
+    "evidence_accounting": {"exact-profile-behavior", "independent-inspection"},
+    "primary_family_bindings": {"independent-inspection"},
 }
 SECTION6_EXACT_PROFILE_CELLS = {
     "catalog_contamination",
@@ -83,6 +86,7 @@ SECTION6_INDEPENDENT_CELLS = {
     "perturb_evaluator_identity",
     "final_report_changed_files_tool_trace_assessment",
     "chained_delegate_first_look",
+    *[cell for cell in core70.EXECUTOR_SECTION6_CELLS if cell.startswith(("activation_", "accounting_", "family_"))],
 }
 
 EXACT_PROFILE_REFUSAL_CLAIMS = {

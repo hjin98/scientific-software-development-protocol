@@ -1,0 +1,7 @@
+test_mcp_reachable_but_inference_dead_and_inference_alive_but_mcp_dead (test_omp_integration.B1RealObservationAndEventCompleteness) ... ok
+test_explicit_mechanism_is_distinct_from_ordinary (test_omp_integration.RootSelectionAndConsumedResources) ... ok
+
+----------------------------------------------------------------------
+Ran 2 tests in 38.483s
+
+OK

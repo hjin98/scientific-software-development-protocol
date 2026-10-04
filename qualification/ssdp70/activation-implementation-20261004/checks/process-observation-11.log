@@ -1,0 +1,6 @@
+test_process_read_cannot_supply_exact_burden_or_zero_owner_evidence (test_activation_accounting.RealActivationPath) ... ok
+
+----------------------------------------------------------------------
+Ran 1 test in 12.869s
+
+OK

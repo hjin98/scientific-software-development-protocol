@@ -217,9 +217,10 @@ class Store:
 
 
 class Server:
-    def __init__(self, store: Store, server_id: str):
+    def __init__(self, store: Store, server_id: str, disabled_tools: tuple[str, ...] = ()):
         self.store = store
         self.server_id = server_id
+        self.disabled_tools = frozenset(disabled_tools)
 
     @staticmethod
     def result(request_id: Any, value: Any) -> dict[str, Any]:
@@ -251,12 +252,14 @@ class Server:
         if method == "ping":
             return self.result(request_id, {})
         if method == "tools/list":
-            return self.result(request_id, {"tools": list(TOOLS)})
+            return self.result(request_id, {"tools": [item for item in TOOLS if item["name"] not in self.disabled_tools]})
         if method == "tools/call":
             name = params.get("name")
             args = params.get("arguments", {})
             if not isinstance(name, str) or not isinstance(args, dict):
                 return self.error(request_id, -32602, "Invalid tool call")
+            if name in self.disabled_tools:
+                return self.error(request_id, -32601, "Tool unavailable in this frozen panel")
             payload = self.store.call(name, args)
             return self.result(request_id, {
                 "content": [{"type": "text", "text": json.dumps(payload, sort_keys=True)}],
@@ -272,6 +275,7 @@ def main() -> int:
     parser.add_argument("--account-file", type=Path, required=True)
     parser.add_argument("--server-id", required=True)
     parser.add_argument("--expected-self-sha256", required=True)
+    parser.add_argument("--disabled-tool", action="append", choices=("delegate",), default=[])
     args = parser.parse_args()
 
     if args.server_id != SERVER_ID:
@@ -293,7 +297,7 @@ def main() -> int:
     log_path.parent.mkdir(parents=True, exist_ok=True)
     log_path.touch(exist_ok=True)
 
-    server = Server(Store(stub_root, log_path, account), args.server_id)
+    server = Server(Store(stub_root, log_path, account), args.server_id, tuple(args.disabled_tool))
     for line in sys.stdin:
         if not line.strip():
             continue

@@ -942,7 +942,13 @@ class InventoryAndSettings(unittest.TestCase):
         self.assertEqual(inventory["settings"]["frozen_keys_absent_from_build"], [])
         for key, value in omp.frozen_settings_flat().items():
             self.assertIn(key, rows, key)
-            self.assertEqual(rows[key]["effective_under_frozen_profile"], value, key)
+            if key == "skills.enableSkillCommands":
+                # Preserve the historical print-profile observation. The new RPC effective
+                # setting is checked from real launcher evidence in test_activation_accounting.
+                self.assertIs(rows[key]["effective_under_frozen_profile"], False)
+                self.assertIs(value, True)
+            else:
+                self.assertEqual(rows[key]["effective_under_frozen_profile"], value, key)
 
     def test_no_setting_is_left_unclassified(self):
         classes = {row["class"] for row in omp.load_inventory()["settings"]["entries"]}

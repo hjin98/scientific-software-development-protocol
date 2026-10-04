@@ -194,6 +194,7 @@ def main(argv: list[str] | None = None) -> int:
     run_identity = core70.load_json(args.run / "run-identity.json")
     if not isinstance(summary, dict) or not isinstance(run_identity, dict):
         raise core70.ContractError("run summary or identity is malformed")
+    accounting = core70.assessment_accounting(run_identity)
     expected_episode = summary.get("episode")
     req_payload = core70.load_json(args.run / "requirements-snapshot.json")
     identity_requirements = run_identity.get("requirements") if isinstance(run_identity.get("requirements"), dict) else {}
@@ -210,8 +211,10 @@ def main(argv: list[str] | None = None) -> int:
         run_errors = [str(exc)]
     if summary.get("evidence_state") != "COMPLETE_ADMISSIBLE" or run_errors:
         output = {
+            **accounting,
+            "criteria": core70.local_criteria(summary, run_identity),
             "assessment_status": "NOT_EVALUATED",
-            "evidence_state": "MALFORMED_EVIDENCE_OR_ASSESSMENT" if run_errors else summary.get("evidence_state"),
+            "evidence_state": summary.get("evidence_state") if summary.get("evidence_state") != "COMPLETE_ADMISSIBLE" else "MALFORMED_EVIDENCE_OR_ASSESSMENT",
             "qualification_outcome": "NOT_EVALUATED",
             "errors": run_errors or ["only COMPLETE_ADMISSIBLE run evidence may enter assessment"],
         }
@@ -311,6 +314,7 @@ def main(argv: list[str] | None = None) -> int:
             runtime_errors.append("evaluator auto-memory path escapes the fresh run-owned HOME")
     assessment_identity = {
         "schema": 1,
+        **accounting,
         "run_identity_sha256": run_identity.get("identity_sha256"),
         "run_evidence_state": summary["evidence_state"],
         "evaluator_profile_key_sha256": evaluator_bundle.profile_key_sha256,
@@ -359,8 +363,10 @@ def main(argv: list[str] | None = None) -> int:
             errors.extend(schema_errors)
 
     if status == "VALID":
-        outcome = core70.outcome_from_dispositions(verdict["dispositions"], requirements)
+        scored = core70.production_assessment(summary, run_identity, requirements, verdict["dispositions"])
+        outcome = scored["qualification_outcome"]
         output = {
+            **scored,
             "assessment_status": "VALID",
             "evidence_state": "COMPLETE_ADMISSIBLE",
             "qualification_outcome": outcome,
@@ -374,6 +380,8 @@ def main(argv: list[str] | None = None) -> int:
         exit_code = 0 if outcome == "PASS" else 1 if outcome == "FAIL" else 2
     else:
         output = {
+            **accounting,
+            "criteria": core70.local_criteria(summary, run_identity),
             "assessment_status": status,
             "evidence_state": (
                 "INADMISSIBLE" if status == "INADMISSIBLE"

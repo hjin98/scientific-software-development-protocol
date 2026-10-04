@@ -1,0 +1,342 @@
+#!/usr/bin/env python3
+"""Batch evaluator runner for Protocol 7 Stage F matrix realizations.
+
+Executes independent blind evaluation via assess70.py over frozen realizations,
+preserving the source realization directory unmodified. Evaluates runs across
+isolated copies in an assessment workspace, derives qualification outcomes,
+and aggregates scoring per qualification contract §§1–6.
+"""
+from __future__ import annotations
+
+import argparse
+import concurrent.futures
+import json
+import os
+import shutil
+import subprocess
+import sys
+import time
+from pathlib import Path
+from typing import Any
+
+HERE = Path(__file__).resolve().parent
+if str(HERE) not in sys.path:
+    sys.path.insert(0, str(HERE))
+import core70  # noqa: E402
+
+
+def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "--runs-dir",
+        type=Path,
+        required=True,
+        help="Path to source frozen run realizations (read-only)",
+    )
+    parser.add_argument(
+        "--out-dir",
+        type=Path,
+        required=True,
+        help="Path to assessment output workspace directory",
+    )
+    parser.add_argument(
+        "--keys",
+        type=Path,
+        required=True,
+        help="Path to custodian withheld keys directory",
+    )
+    parser.add_argument(
+        "--evaluator-profile",
+        type=Path,
+        required=True,
+        help="Path to admitted evaluator profile.json",
+    )
+    parser.add_argument(
+        "--evaluator-capabilities",
+        type=Path,
+        required=True,
+        help="Path to admitted evaluator capabilities.json",
+    )
+    parser.add_argument(
+        "--evaluator-admission",
+        type=Path,
+        required=True,
+        help="Path to admitted evaluator profile-admission.json",
+    )
+    parser.add_argument(
+        "--adapter",
+        default="omp_eval",
+        help="Evaluator adapter to use (default: omp_eval)",
+    )
+    parser.add_argument(
+        "--parallel",
+        type=int,
+        default=4,
+        help="Number of concurrent assessment workers (default: 4)",
+    )
+    parser.add_argument(
+        "--limit",
+        type=int,
+        default=None,
+        help="Limit number of runs to process (for staging/testing)",
+    )
+    parser.add_argument(
+        "--only",
+        default=None,
+        help="Comma-separated list of episodes or run directory names to assess",
+    )
+    parser.add_argument(
+        "--resume",
+        action="store_true",
+        default=True,
+        help="Skip runs that already have a valid assessment.json (default: True)",
+    )
+    parser.add_argument(
+        "--no-resume",
+        action="store_false",
+        dest="resume",
+        help="Do not skip existing assessments",
+    )
+    return parser.parse_args(argv)
+
+
+def is_assessment_complete(dest_run_dir: Path) -> bool:
+    assess_json = dest_run_dir / "assessment.json"
+    if not assess_json.is_file():
+        return False
+    try:
+        data = json.loads(assess_json.read_text(encoding="utf-8"))
+        return isinstance(data, dict) and "assessment_status" in data
+    except Exception:
+        return False
+
+
+def assess_one_run(
+    run_name: str,
+    src_run_dir: Path,
+    dest_run_dir: Path,
+    args: argparse.Namespace,
+) -> dict[str, Any]:
+    t0 = time.time()
+    dest_run_dir.parent.mkdir(parents=True, exist_ok=True)
+
+    # Check resume: only resume if assessment_status is VALID or if it was EXECUTION_ERROR on a non-admissible run
+    if args.resume and is_assessment_complete(dest_run_dir):
+        try:
+            payload = json.loads((dest_run_dir / "assessment.json").read_text(encoding="utf-8"))
+            st = payload.get("assessment_status")
+            if st == "VALID" or (st == "NOT_EVALUATED" and payload.get("evidence_state") == "EXECUTION_ERROR"):
+                elapsed = time.time() - t0
+                return {
+                    "run": run_name,
+                    "status": st,
+                    "outcome": payload.get("qualification_outcome"),
+                    "elapsed_s": round(elapsed, 2),
+                    "resumed": True,
+                }
+        except Exception:
+            pass
+
+    max_attempts = getattr(args, "max_retries", 3)
+    last_res: dict[str, Any] = {}
+
+    for attempt in range(1, max_attempts + 1):
+        # Copy realization to staging directory
+        if dest_run_dir.exists():
+            subprocess.run(["chmod", "-R", "u+w", str(dest_run_dir)], check=False)
+            shutil.rmtree(dest_run_dir)
+        shutil.copytree(src_run_dir, dest_run_dir)
+        # Ensure writable permissions on top-level directory and all descendants
+        subprocess.run(["chmod", "-R", "u+w", str(dest_run_dir)], check=True)
+
+        cmd = [
+            sys.executable,
+            str(HERE / "assess70.py"),
+            "--run",
+            str(dest_run_dir),
+            "--keys",
+            str(args.keys),
+            "--evaluator-profile",
+            str(args.evaluator_profile),
+            "--evaluator-capabilities",
+            str(args.evaluator_capabilities),
+            "--evaluator-admission",
+            str(args.evaluator_admission),
+            "--adapter",
+            args.adapter,
+        ]
+
+        env = dict(os.environ)
+        if "SSDP70_DEEPINFRA_API" in env and "SSDP70_OMP_PROVIDER_CREDENTIAL" not in env:
+            env["SSDP70_OMP_PROVIDER_CREDENTIAL"] = env["SSDP70_DEEPINFRA_API"]
+        env["PYTHONDONTWRITEBYTECODE"] = "1"
+
+        proc = subprocess.run(
+            cmd,
+            cwd=str(HERE),
+            env=env,
+            capture_output=True,
+            text=True,
+        )
+        elapsed = time.time() - t0
+
+        assess_json = dest_run_dir / "assessment.json"
+        if assess_json.is_file():
+            try:
+                payload = json.loads(assess_json.read_text(encoding="utf-8"))
+                st = payload.get("assessment_status")
+                last_res = {
+                    "run": run_name,
+                    "status": st,
+                    "outcome": payload.get("qualification_outcome"),
+                    "elapsed_s": round(elapsed, 2),
+                    "resumed": False,
+                    "exit_code": proc.returncode,
+                    "attempts": attempt,
+                }
+                if st == "VALID" or (st == "NOT_EVALUATED" and payload.get("evidence_state") == "EXECUTION_ERROR"):
+                    return last_res
+                if attempt < max_attempts:
+                    time.sleep(1)
+                    continue
+                return last_res
+            except Exception as exc:
+                last_res = {
+                    "run": run_name,
+                    "status": "MALFORMED_OUTPUT",
+                    "outcome": "NOT_EVALUATED",
+                    "elapsed_s": round(elapsed, 2),
+                    "error": str(exc),
+                    "exit_code": proc.returncode,
+                    "attempts": attempt,
+                }
+        else:
+            last_res = {
+                "run": run_name,
+                "status": "ASSESSMENT_FAILED",
+                "outcome": "NOT_EVALUATED",
+                "elapsed_s": round(elapsed, 2),
+                "error": proc.stderr[-500:],
+                "exit_code": proc.returncode,
+                "attempts": attempt,
+            }
+
+    return last_res
+
+
+def aggregate_assessments(out_dir: Path) -> dict[str, Any]:
+    runs = sorted(d for d in os.listdir(out_dir) if (out_dir / d).is_dir())
+    summary: dict[str, Any] = {
+        "total_runs": len(runs),
+        "arms": {
+            "p66": {"total": 0, "outcomes": {}, "dispositions": {"pass": 0, "fail": 0, "unresolved": 0}},
+            "p70": {"total": 0, "outcomes": {}, "dispositions": {"pass": 0, "fail": 0, "unresolved": 0}},
+        },
+        "critical_failures": {"p66": 0, "p70": 0},
+        "by_episode": {},
+    }
+
+    for r in runs:
+        assess_json = out_dir / r / "assessment.json"
+        if not assess_json.is_file():
+            continue
+        try:
+            data = json.loads(assess_json.read_text(encoding="utf-8"))
+        except Exception:
+            continue
+
+        arm = "p70" if "-p70-" in r else "p66" if "-p66-" in r else "unknown"
+        if arm in summary["arms"]:
+            summary["arms"][arm]["total"] += 1
+            out = data.get("qualification_outcome", "UNKNOWN")
+            summary["arms"][arm]["outcomes"][out] = summary["arms"][arm]["outcomes"].get(out, 0) + 1
+
+            for disp in data.get("dispositions", []):
+                res = disp.get("result")
+                crit = disp.get("critical", False)
+                if res in summary["arms"][arm]["dispositions"]:
+                    summary["arms"][arm]["dispositions"][res] += 1
+                if crit and res == "fail":
+                    summary["critical_failures"][arm] += 1
+
+        ep = data.get("episode", r.split("-")[0])
+        if ep not in summary["by_episode"]:
+            summary["by_episode"][ep] = {}
+        summary["by_episode"][ep][arm] = {
+            "status": data.get("assessment_status"),
+            "outcome": data.get("qualification_outcome"),
+            "dispositions": data.get("dispositions", []),
+        }
+
+    return summary
+
+
+def main() -> int:
+    args = parse_args()
+    runs_dir = args.runs_dir.resolve()
+    out_dir = args.out_dir.resolve()
+    out_dir.mkdir(parents=True, exist_ok=True)
+
+    all_runs = sorted(
+        d for d in os.listdir(runs_dir)
+        if (runs_dir / d).is_dir() and not d.startswith(".") and not d.startswith("FREEZE")
+    )
+
+    if args.only:
+        targets = set(args.only.split(","))
+        all_runs = [r for r in all_runs if r in targets or r.split("-")[0] in targets]
+
+    if args.limit:
+        all_runs = all_runs[: args.limit]
+
+    total = len(all_runs)
+    print(f"[*] Starting batch assessment of {total} runs (parallel={args.parallel})")
+    print(f"    Source: {runs_dir}")
+    print(f"    Destination: {out_dir}")
+
+    results = []
+    completed = 0
+    start_time = time.time()
+
+    with concurrent.futures.ThreadPoolExecutor(max_workers=args.parallel) as executor:
+        future_map = {
+            executor.submit(
+                assess_one_run,
+                r,
+                runs_dir / r,
+                out_dir / r,
+                args,
+            ): r
+            for r in all_runs
+        }
+
+        for future in concurrent.futures.as_completed(future_map):
+            completed += 1
+            res = future.result()
+            results.append(res)
+            run_name = res["run"]
+            status = res.get("status", "ERR")
+            outcome = res.get("outcome", "ERR")
+            elapsed = res.get("elapsed_s", 0)
+            resumed = " (resumed)" if res.get("resumed") else ""
+            print(f"[{completed:3d}/{total:3d}] {run_name}: {status} / {outcome} ({elapsed}s){resumed}")
+
+    total_time = round(time.time() - start_time, 2)
+    print(f"[*] Completed {completed}/{total} runs in {total_time}s")
+
+    # Aggregate results
+    summary = aggregate_assessments(out_dir)
+    summary_path = out_dir / "assessment-summary.json"
+    summary_path.write_text(json.dumps(summary, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    print(f"[*] Saved summary to {summary_path}")
+
+    print("\n=== Assessment Summary ===")
+    for arm in ("p66", "p70"):
+        arm_data = summary["arms"][arm]
+        print(f"Arm {arm}: Total {arm_data['total']}, Outcomes: {arm_data['outcomes']}, Critical Fails: {summary['critical_failures'][arm]}")
+
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

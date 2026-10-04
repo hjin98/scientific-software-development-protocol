@@ -30,6 +30,8 @@ import ctypes
 import hashlib
 import http.client
 import ipaddress
+import json
+import re
 import os
 import signal
 import socket
@@ -54,10 +56,80 @@ HOP_BY_HOP = {
 OBSERVER_ID = "ssdp70-provider-observer-v1"
 
 
+# Candidate transform, not an independently frozen/admitted runtime specification.
+# Constants are bound in the profile and demonstrated through the real runtime with a stand-in.
+OMP_RPC_TRANSFORM = {
+    "schema": 1, "runtime": "omp", "version": "18.0.11", "mode": "rpc",
+    "frontmatter": "leading-yaml-block-then-trim",
+    "markdown_table_cells": "strip-padding-in-pipe-bounded-table-rows",
+    "notice": '[IMPORTANT: User invoked the "{root}" skill; follow its instructions. Full skill below.]',
+    "directory": "\n\n---\n\n[Skill directory: {directory}]\nResolve relative paths in this skill (e.g. `scripts/foo.js`, `templates/config.yaml`) against this absolute directory; read referenced assets and templates; run scripts with the terminal tool when skill instructions call for it.",
+    "prompt_join": "\nUser: {prompt}",
+    "classification": {"method": "POST", "path": "/v1/chat/completions", "auxiliary_post_requests": []},
+    "message_role": "user", "message_index": 1,
+}
+
+
+def delivery_segment(skill: bytes, root: str, prompt: str, directory: str,
+                     transform: dict[str, Any]) -> str:
+    if transform != OMP_RPC_TRANSFORM:
+        raise ValueError("unknown or modified delivery transform")
+    if not re.fullmatch(r"[a-z][a-z0-9-]*", root) or directory != f"/opt/ssdp/skills/{root}":
+        raise ValueError("root or fixed skill directory is invalid")
+    body = skill.decode("utf-8")
+    body = re.sub(r"^---\r?\n.*?\r?\n---(?:\r?\n|$)", "", body, count=1, flags=re.S).strip()
+    # Demonstrated by the real request-0 hygiene root and the table canary.
+    body = "\n".join("|".join(cell.strip() for cell in line.split("|"))
+                     if line.startswith("|") and line.endswith("|") else line
+                     for line in body.split("\n"))
+    return (transform["notice"].format(root=root) + "\n\n" + body
+            + transform["directory"].format(directory=directory)
+            + transform["prompt_join"].format(prompt=prompt))
+
+
+def delivery_proof(body: bytes, spec: dict[str, Any]) -> dict[str, Any]:
+    """Check the real assembled, decoded consumer message; never an adapter assertion."""
+    proof: dict[str, Any] = {"delivered": False, "errors": [],
+                            "transform_sha256": hashlib.sha256(evidence70.canonical(spec["transform"])).hexdigest(),
+                            "runtime_input_sha256": spec["runtime_input_sha256"],
+                            "installed_skill_sha256": spec["installed_skill_sha256"],
+                            "installed_skill_bytes": spec["installed_skill_bytes"],
+                            "logical_root": spec["root"], "mechanism": spec["mechanism"]}
+    try:
+        request = json.loads(body)
+        segment = delivery_segment(base64.b64decode(spec["skill_b64"], validate=True), spec["root"],
+                                   spec["prompt"], spec["directory"], spec["transform"])
+        messages = request["messages"]
+        # No title calls are offered by this mode; every allowed inference POST is conversation.
+        message = messages[spec["transform"]["message_index"]]
+        if message["role"] != spec["transform"]["message_role"]:
+            raise ValueError("wrong delivery message role")
+        content = message["content"]
+        if isinstance(content, list):
+            parts = [part["text"] for part in content if part.get("type") == "text"]
+        elif isinstance(content, str):
+            parts = [content]
+        else:
+            raise ValueError("malformed provider content")
+        matches = [(index, part) for index, part in enumerate(parts) if part == segment]
+        if len(matches) != 1:
+            raise ValueError("request 0 lacks the exact transformed segment at the declared position")
+        index, part = matches[0]
+        proof.update({"delivered": True, "message_index": spec["transform"]["message_index"],
+                      "content_part_index": index,
+                      "decoded_content_byte_offset": sum(len(text.encode("utf-8")) for text in parts[:index]),
+                      "offset_encoding": "UTF-8 concatenated text parts of the declared provider message; no separator",
+                      "delivered_text_sha256": hashlib.sha256(part.encode()).hexdigest(),
+                      "decoded_content_sha256": hashlib.sha256(part.encode()).hexdigest()})
+    except (ValueError, KeyError, IndexError, TypeError, UnicodeError) as exc:
+        proof["errors"].append(str(exc))
+    return proof
+
+
 class Observer:
     def __init__(self, chain: evidence70.ChainWriter, upstream: str, credential: str | None,
                  upstream_connection: http.client.HTTPConnection, placeholder: str, allowed_path: str,
-                 blocked_discovery_target: str, upstream_timeout: float, max_requests: int | None = None):
+                 blocked_discovery_target: str, upstream_timeout: float, max_requests: int | None = None, activation_spec: dict[str, Any] | None = None):
         self.chain = chain
         self.upstream = urlsplit(upstream)
         self.credential = credential
@@ -69,6 +141,7 @@ class Observer:
         self.upstream_connection = upstream_connection
         self.lock = threading.Lock()
         self.upstream_lock = threading.Lock()
+        self.activation_spec = activation_spec
         self.request_count = 0
         self.refused_count = 0
         self.provider_discovery_blocked_count = 0
@@ -132,7 +205,7 @@ class Observer:
         index = self.next_index()
         inbound_auth = request.headers.get("authorization")
         headers = {name: value for name, value in request.headers.items() if name != "authorization"}
-        self.chain.append("request", {
+        request_record = self.chain.append("request", {
             "request_index": index,
             "method": request.method,
             "path": request.target,
@@ -145,6 +218,12 @@ class Observer:
             "body_sha256": hashlib.sha256(body).hexdigest(),
             "body_b64": base64.b64encode(body).decode("ascii"),
         })
+        if index == 0 and self.activation_spec is not None:
+            proof = delivery_proof(body, self.activation_spec)
+            proof.update({"request_index": index, "request_record_sha256": request_record["hash"],
+                          "request_body_sha256": request_record["data"]["body_sha256"],
+                          "request_classification": "subject-conversation"})
+            self.chain.append("activation_delivery", proof)
         if self.max_requests is not None and index >= self.max_requests:
             # Supervisor-set turn budget enforced on the actual inference path: the request is
             # retained as evidence but never reaches the provider.
@@ -376,6 +455,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--mux-in-fd", type=int, required=True)
     parser.add_argument("--mux-out-fd", type=int, required=True)
     parser.add_argument("--evidence-fd", type=int, required=True)
+    parser.add_argument("--activation-spec", default=None)
     parser.add_argument("--upstream", required=True, help="http(s)://host:port[/base]")
     parser.add_argument("--credential-env", default=None)
     parser.add_argument("--placeholder", required=True, help="the non-secret key the subject is configured with")
@@ -445,7 +525,8 @@ def main(argv: list[str] | None = None) -> int:
         chain.append("credential_received", {"received_after_lockdown": True, "bytes": len(credential_bytes)})
         observer = Observer(chain, args.upstream, credential, upstream_connection, args.placeholder,
                             args.allowed_path, args.blocked_discovery_target,
-                            args.upstream_timeout, args.max_requests)
+                            args.upstream_timeout, args.max_requests,
+                            json.loads(open(args.activation_spec, encoding="utf-8").read()) if args.activation_spec else None)
     except Exception as exc:
         chain.append("boundary_setup_failed", {"error": f"{type(exc).__name__}: {exc}"})
         chain.close(setup_failed=True)

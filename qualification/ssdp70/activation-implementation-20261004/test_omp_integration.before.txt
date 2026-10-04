@@ -248,7 +248,7 @@ class B1RealObservationAndEventCompleteness(RigCase):
 
     def test_mcp_reachable_but_inference_dead_and_inference_alive_but_mcp_dead(self):
         original = omp.mcp_document
-        self.patch(omp, "mcp_document", lambda profile=None: {"mcpServers": {"ssdp70": {"type": "http", "url": "http://127.0.0.1:1/mcp"}}})
+        self.patch(omp, "mcp_document", lambda: {"mcpServers": {"ssdp70": {"type": "http", "url": "http://127.0.0.1:1/mcp"}}})
         summary = self.rig(timeout_s=90).run(scenario_steps(text("no tools needed")))
         self.assertNotComplete(summary)
         self.assertNotEqual(summary["runtime_observation"]["mcp_servers"], [{"name": "ssdp70", "status": "connected"}])
@@ -439,11 +439,9 @@ class RootSelectionAndConsumedResources(RigCase):
         rig = self.rig(entry="pinned:software-design", claims=[])
         summary = rig.run(scenario_steps(call("read", path="skill://software-design"), text("done")))
         self.assertComplete(summary)
-        self.assertEqual(self.kinds(summary["_out"], "root_selection")[0]["payload"]["selection_mechanism"], "runtime-command")
-        self.assertTrue(summary["activation"]["delivered"])
+        self.assertEqual(self.kinds(summary["_out"], "root_selection")[0]["payload"]["selection_mechanism"], "explicit-instruction-skill-read")
         other = self.rig(entry="pinned:software-design", claims=[]).run(scenario_steps(call("read", path="skill://scientific-formulation"), text("done")), out_name="run2")
-        self.assertEqual(self.kinds(other["_out"], "root_selection")[0]["payload"]["selection_mechanism"], "runtime-command")
-        self.assertTrue(any(event["payload"].get("logical_root") == "scientific-formulation" and event["payload"].get("selection_mechanism") == "ordinary-skill-read" for event in self.kinds(other["_out"], "root_selection")))
+        self.assertEqual(self.kinds(other["_out"], "root_selection")[0]["payload"]["selection_mechanism"], "ordinary-skill-read")
 
     def test_failed_or_attempted_read_creates_no_root_selection(self):
         summary = self.rig().run(scenario_steps(

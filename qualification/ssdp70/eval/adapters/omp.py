@@ -62,6 +62,7 @@ if str(EVAL_DIR) not in sys.path:
 import core70  # noqa: E402
 import evidence70  # noqa: E402
 import seccomp70  # noqa: E402
+import observer70  # noqa: E402
 
 ADAPTER_ID = "omp-json-v2"
 CONTAINMENT_KIND = "omp-three-principal-bwrap-v3"
@@ -227,7 +228,7 @@ FROZEN_SETTINGS: dict[str, Any] = {
         "enableCodexUser": False, "enableClaudeUser": False, "enableClaudeProject": False,
         "enablePiUser": False, "enablePiProject": False,
         "enableAgentsUser": False, "enableAgentsProject": False,
-        "enableSkillCommands": False,
+        "enableSkillCommands": True,
         "customDirectories": [SB_SKILLS],
     },
     # Process / tool behaviour that alters what the model sees or what runs
@@ -392,6 +393,10 @@ def verify_mcp_binding(profile: dict[str, Any]) -> tuple[bool, list[str], dict[s
     """Static half of the raw-tool <-> provider-native-id bijection (runtime half: observation)."""
     errors: list[str] = []
     servers = profile.get("mcp_servers")
+    if servers == []:
+        if any(str(tool).startswith("mcp__") for tool in profile.get("native_tools", [])):
+            return False, ["native MCP tools require a declared server"], {}
+        return True, [], {}
     if not isinstance(servers, list) or len(servers) != 1 or not isinstance(servers[0], dict):
         return False, ["OMP Stage F profile requires exactly one declared qualification MCP server"], {}
     declared = servers[0]
@@ -409,6 +414,8 @@ def verify_mcp_binding(profile: dict[str, Any]) -> tuple[bool, list[str], dict[s
     if not isinstance(declared_tools, list) or not all(isinstance(item, str) for item in declared_tools):
         errors.append("declared MCP tool surface is malformed")
         declared_tools = []
+    if sorted(declared_tools) == sorted(value for raw, value in mapping.items() if raw != "delegate"):
+        mapping = {raw: value for raw, value in mapping.items() if raw != "delegate"}
     if sorted(declared_tools) != sorted(mapping.values()):
         errors.append(
             "declared MCP tool surface differs from the exact name-minting result: "
@@ -943,7 +950,7 @@ def profile_errors(profile: dict[str, Any]) -> list[str]:
     ok, binding_errors, _ = verify_mcp_binding(profile)
     if not ok:
         errors.extend(binding_errors)
-    if list(profile.get("native_tools") or [])[: len(OMP_BUILTIN_TOOLS)] != list(OMP_BUILTIN_TOOLS):
+    if profile.get("native_tools") != [] and list(profile.get("native_tools") or [])[: len(OMP_BUILTIN_TOOLS)] != list(OMP_BUILTIN_TOOLS):
         errors.append("native_tools does not begin with the reviewed builtin tool surface")
     return errors
 
@@ -1051,15 +1058,89 @@ def _reasoning_argv(profile: dict[str, Any]) -> list[str]:
 
 
 def omp_argv(profile: dict[str, Any], prompt: str) -> list[str]:
-    """Launch argv (comparison identity only): exact tool selection, closed discovery, JSON mode."""
-    return [
-        SB_OMP, "-p", "--mode=json", "--no-session", "--no-title", "--no-extensions", "--no-rules", "--no-lsp",
-        "--cwd", SB_PROJECT,
-        "--tools", ",".join(OMP_BUILTIN_TOOLS),
-        "--model", str(profile.get("agent_model")),
-        *_reasoning_argv(profile),
-        str(prompt),
-    ]
+    rpc = profile.get("runtime_mode") == "rpc"
+    return [SB_OMP, *([] if rpc else ["-p"]), "--mode=" + ("rpc" if rpc else "json"),
+            "--no-session", "--no-title", "--no-extensions", "--no-rules", "--no-lsp",
+            "--cwd", SB_PROJECT,
+            *(["--tools", ",".join(tool for tool in profile["native_tools"] if not tool.startswith("mcp__"))]
+              if any(not tool.startswith("mcp__") for tool in profile["native_tools"]) else ["--no-tools"]),
+            "--model", str(profile.get("agent_model")), *_reasoning_argv(profile),
+            *([] if rpc else [str(prompt)])]
+
+
+def input_template(mechanism: str) -> dict[str, Any]:
+    return {"schema": 1, "channel": "rpc-prompt",
+            "command": "/skill:{root} {prompt}" if mechanism == "runtime-command" else "{delivered_segment}" if mechanism == "harness-injection" else "{prompt}",
+            "stdin_serialization": "json-compact-utf8-newline",
+            "prompt_environment": {}, "prompt_files": {}}
+
+
+def runtime_input(profile: dict[str, Any], prompt: str, skills: Path | None = None) -> dict[str, Any]:
+    rpc = profile.get("runtime_mode") == "rpc"
+    if rpc and profile.get("runtime_input_template") != input_template(profile.get("activation_mechanism", "ordinary-read")):
+        raise PrelaunchRefusal("runtime-input template is missing or differs from the supported frozen command form")
+    if profile.get("activation_mechanism") == "harness-injection":
+        match = re.fullmatch(r"/skill:([a-z][a-z0-9-]*)(?: (.*))?", prompt, flags=re.S)
+        if match is None or skills is None:
+            raise PrelaunchRefusal("injection requires a root command and installed skill bytes")
+        root, task = match.group(1), match.group(2) or ""
+        prompt = observer70.delivery_segment((skills / root / "SKILL.md").read_bytes(), root, task,
+                    f"/opt/ssdp/skills/{root}", profile["delivery_transform"])
+    stdin = (json.dumps({"type": "prompt", "message": prompt}, separators=(",", ":"),
+                        ensure_ascii=False) + "\n") if rpc else ""
+    return {"schema": 1, "argv": omp_argv(profile, prompt), "stdin": stdin,
+            "rpc": [{"type": "prompt", "message": prompt}] if rpc else [],
+            "prompt_files": {}, "prompt_environment": {},
+            "non_prompt_environment": _subject_env(),
+            "credential_policy": "observer-only descriptor; no subject credential values"}
+
+
+
+INTEGRITY_FAULTS = frozenset({"withheld", "instructed-read", "injection-labelled-command", "late",
+                             "wrong-root", "truncated", "adapter-assertion", "no-request"})
+
+
+def integrity_fault_input(fault: str | None, prompt: str, expected: dict[str, Any], spec: Any) -> dict[str, Any]:
+    """Explicit fault realization on the existing invocation edge, only for frozen integrity tests."""
+    if fault is None:
+        return expected
+    if fault not in INTEGRITY_FAULTS or not isinstance(spec, dict):
+        raise PrelaunchRefusal("unknown integrity fault or missing activation specification")
+    actual = copy.deepcopy(expected)
+    task = spec["prompt"]
+    segment = observer70.delivery_segment(base64.b64decode(spec["skill_b64"]), spec["root"], task,
+                                           spec["directory"], spec["transform"])
+    message = task
+    if fault == "instructed-read":
+        message = f"Use the {spec['root']} skill. {task}"
+    elif fault == "injection-labelled-command":
+        message = segment
+    elif fault == "wrong-root":
+        wrong = "software-design" if spec["root"] != "software-design" else "software-implementation"
+        message = f"/skill:{wrong} {task}"
+    elif fault == "truncated":
+        message = segment[:-32]
+    command = {"type": "get_state"} if fault == "no-request" else {"type": "prompt", "message": message}
+    actual["rpc"] = [command]
+    actual["stdin"] = json.dumps(command, separators=(",", ":"), ensure_ascii=False) + "\n"
+    return actual
+
+def activation_spec(profile: dict[str, Any], prompt: str, skills: Path) -> dict[str, Any] | None:
+    match = re.fullmatch(r"/skill:([a-z][a-z0-9-]*)(?: (.*))?", prompt, flags=re.S)
+    if not match or profile.get("runtime_mode") != "rpc":
+        return None
+    root, task = match.group(1), match.group(2) or ""
+    skill = (skills / root / "SKILL.md").read_bytes()
+    transform = profile.get("delivery_transform")
+    if transform != observer70.OMP_RPC_TRANSFORM:
+        raise PrelaunchRefusal("OMP RPC delivery transform is missing or differs from its candidate specification")
+    return {"schema": 1, "root": root, "prompt": task,
+            "directory": f"/opt/ssdp/skills/{root}", "transform": transform,
+            "mechanism": profile.get("activation_mechanism"),
+            "skill_b64": base64.b64encode(skill).decode("ascii"),
+            "installed_skill_sha256": sha256_bytes(skill),
+            "installed_skill_bytes": len(skill),
+            "runtime_input_sha256": core70.stable_json_sha256(runtime_input(profile, prompt, skills))}
 
 
 # ------------------------------------------------------------------------------ environment
@@ -1174,7 +1255,9 @@ def models_document(profile: dict[str, Any]) -> dict[str, Any]:
     }
 
 
-def mcp_document() -> dict[str, Any]:
+def mcp_document(profile: dict[str, Any] | None = None) -> dict[str, Any]:
+    if profile is not None and profile.get("mcp_servers") == []:
+        return {"mcpServers": {}}
     return {"mcpServers": {OMP_MCP_SERVER_NAME: {
         "type": "http", "url": f"http://127.0.0.1:{RELAY_PORTS['mcp']}/mcp",
     }}}
@@ -1192,7 +1275,7 @@ def control_documents(profile: dict[str, Any]) -> dict[str, bytes]:
     return {
         ".omp/agent/config.yml": _yaml(settings_document()),
         ".omp/agent/models.yml": _yaml(models_document(profile)),
-        ".omp/agent/mcp.json": _json_bytes(mcp_document()),
+        ".omp/agent/mcp.json": _json_bytes(mcp_document(profile)),
     }
 
 
@@ -1434,8 +1517,9 @@ def realize_containment(profile: dict[str, Any], project: Path, env: dict[str, s
                 "executable_file": str(layout["server"]),
                 "executable_sha256": server_sha,
                 "realization": "unchanged stdio mediator run by the supervisor; reached by OMP as streamable-HTTP MCP through the supervisor bridge",
-                "tools": list(profile["mcp_servers"][0]["tools"]),
-            }],
+                "tools": list(profile["mcp_servers"][0]["tools"]) if profile["mcp_servers"] else [],
+            }] if profile["mcp_servers"] else [],
+            "mediator_executable_sha256": server_sha,
             "network": "subject network namespace has loopback only; no host route",
             "filesystem_view": {
                 "read_only": ["manifest-listed runtime dependencies only", "/etc(synthetic)", "/opt/omp/omp",
@@ -1579,6 +1663,8 @@ def _observer_bwrap_argv(profile: dict[str, Any], paths: dict[str, Path], observ
         "--supervisor-pid", str(supervisor_pid),
         "--supervisor-netns", supervisor_netns, "--supervisor-pidns", supervisor_pidns,
     ]
+    if (paths["observer"] / "activation.json").is_file():
+        argv.extend(("--activation-spec", f"{OBSERVER_CODE}/activation.json"))
     for label, path in probe_paths:
         argv.extend(("--probe-path", f"{label}={path}"))
     return argv
@@ -1588,7 +1674,7 @@ def _sandbox_pipe_fds(pairs: list[tuple[int, int]]) -> tuple[int, ...]:
     return tuple(fd for pair in pairs for fd in pair)
 
 
-def launch(profile: dict[str, Any], prompt: str, project: Path, env: dict[str, str]) -> dict[str, Any]:
+def launch(profile: dict[str, Any], prompt: str, project: Path, env: dict[str, str], *, integrity_fault: str | None = None) -> dict[str, Any]:
     """Run the exact frozen OMP build for real: principals, sandbox, relay, native JSON trace."""
     problems = profile_errors(profile)
     if problems:
@@ -1617,6 +1703,11 @@ def launch(profile: dict[str, Any], prompt: str, project: Path, env: dict[str, s
     mcp_server_sha = sha256_file(layout["server"])
     packages_before = core70.sha256_tree(paths["skills"])
     budgets = profile["budgets"]
+    expected_input = runtime_input(profile, prompt, paths["skills"])
+    spec = activation_spec(profile, prompt, paths["skills"])
+    if spec is not None:
+        (paths["observer"] / "activation.json").write_text(json.dumps(spec), encoding="utf-8")
+        (paths["observer"] / "activation.json").chmod(0o444)
     started = time.monotonic()
 
     def pipe() -> tuple[int, int]:
@@ -1697,6 +1788,7 @@ def launch(profile: dict[str, Any], prompt: str, project: Path, env: dict[str, s
             "--stub-root", str(layout["stub"]), "--side-effect-log", str(layout["log"]),
             "--account-file", str(layout["account"]), "--server-id", OMP_MCP_SERVER_ID,
             "--expected-self-sha256", mcp_server_sha,
+            *(["--disabled-tool", "delegate"] if not any("delegate" in tool for tool in profile["native_tools"]) else []),
         ]
         bridge = _spawn_principal(bridge_argv, (mcp_up[0], mcp_down[1], br_ev[1]), {"PATH": MINIMAL_PATH})
         procs.append(bridge)
@@ -1725,6 +1817,8 @@ def launch(profile: dict[str, Any], prompt: str, project: Path, env: dict[str, s
             ],
             "env": _subject_env(),
             "omp_argv": omp_argv(profile, prompt),
+            "runtime_input": integrity_fault_input(integrity_fault, prompt, expected_input, spec),
+            "rpc_late_message": prompt if integrity_fault == "late" else None,
             "cwd": "/",
             "timeout_s": budgets["timeout_s"],
             "probes": probes,
@@ -1837,6 +1931,8 @@ def launch(profile: dict[str, Any], prompt: str, project: Path, env: dict[str, s
             "mounted_observer_dependencies": [row for row in runtime_dependency_manifest()["dependencies"]
                                                if "observer" in row.get("roles", [])],
         }, indent=2, sort_keys=True) + "\n",
+        "runtime-input-template.json": json.dumps(expected_input, sort_keys=True) + "\n",
+        "activation-spec.json": json.dumps(spec, sort_keys=True) + "\n",
         "runtime-home-inventory.json": json.dumps(_home_inventory(paths["home"]), indent=2, sort_keys=True) + "\n",
         "control-digests.json": json.dumps({
             "before": home_docs, "after": home_docs_after,
@@ -1851,7 +1947,7 @@ def launch(profile: dict[str, Any], prompt: str, project: Path, env: dict[str, s
         "reasoning_configuration": profile.get("reasoning_configuration"),
         "tools": list(profile.get("native_tools") or []),
         "mcp_servers": list(profile.get("mcp_servers") or []),
-        "mcp_server_executable_sha256": {OMP_MCP_SERVER_NAME: mcp_server_sha},
+        "mcp_server_executable_sha256": {OMP_MCP_SERVER_NAME: mcp_server_sha} if profile["mcp_servers"] else {},
         "settings_file": str(paths["agent"] / "config.yml"),
         "settings_file_sha256": home_docs[".omp/agent/config.yml"],
         "mcp_config_file": str(paths["agent"] / "mcp.json"),
@@ -1905,7 +2001,7 @@ def post_run_integrity(profile: dict[str, Any], project: Path, env: dict[str, st
     errors.extend(_verify_control_tree(paths, realization.get("control_manifest") or {}))
     layout = core70.private_mcp_paths(paths["private"])
     recorded = {row.get("name"): row.get("executable_sha256") for row in realization.get("mcp_servers") or []}
-    if not layout["server"].is_file() or sha256_file(layout["server"]) != recorded.get(OMP_MCP_SERVER_NAME):
+    if not layout["server"].is_file() or sha256_file(layout["server"]) != (recorded.get(OMP_MCP_SERVER_NAME) or realization.get("mediator_executable_sha256")):
         errors.append("qualification mediator executable changed during execution")
     errors.extend(_verify_staged_runtime_dependencies(paths))
     for rel in _scan_sources(paths["project"], PROJECT_DISCOVERY_SOURCES):
@@ -1931,6 +2027,11 @@ class Observed:
     def __init__(self, artifacts: dict[str, Any], profile: dict[str, Any] | None):
         self.errors: list[str] = []
         self.profile = profile or {}
+        try:
+            self.activation_spec = json.loads(artifacts.get("activation-spec.json") or "null")
+        except (ValueError, TypeError):
+            self.activation_spec = None
+            self.errors.append("activation spec is malformed")
         self.texts = {
             "observer": str(artifacts.get("observer-evidence.jsonl") or ""),
             "bridge": str(artifacts.get("bridge-evidence.jsonl") or ""),
@@ -2196,6 +2297,8 @@ class Observed:
 
     def tool_names(self, body: dict[str, Any]) -> list[str] | None:
         tools = body.get("tools")
+        if tools is None and self.profile.get("native_tools") == []:
+            return []
         if not isinstance(tools, list):
             return None
         names: list[str] = []
@@ -2386,7 +2489,13 @@ def transcript_errors(observed: "Observed", prompt: str | None) -> tuple[list[st
             errors.append(f"request {turn_index}: user message is not the reviewed [dated reminder, prompt] grammar")
         else:
             facts["runtime_date"] = REMINDER_PART.match(parts[0]).group(1)
-            if prompt is not None and parts[1] != prompt:
+            expected_prompt = prompt
+            if prompt is not None and getattr(observed, "profile", {}).get("runtime_mode") == "rpc":
+                context_spec = getattr(observed, "activation_spec", None)
+                if isinstance(context_spec, dict):
+                    expected_prompt = observer70.delivery_segment(base64.b64decode(context_spec["skill_b64"]),
+                        context_spec["root"], context_spec["prompt"], context_spec["directory"], context_spec["transform"])
+            if expected_prompt is not None and parts[1] != expected_prompt:
                 errors.append(f"request {turn_index}: the prompt the model received differs from the harness-authored prompt")
         expected_roles = ["user"]
         cursor = 1
@@ -2660,35 +2769,39 @@ def check_runtime_surface(observed: Observed, context: dict[str, Any] | None) ->
                 errors.append(f"effective OMP setting {key} is {flat.get(key, '<absent>')!r}, inventory {row.get('effective_under_frozen_profile')!r}")
 
     # ---- MCP surface: raw mediator tool list <-> provider-native ids <-> observed request surface
-    raw_tools = observed.mcp_tools_list
-    if raw_tools is None:
-        errors.append("the qualification MCP bridge never returned tools/list; the MCP server is not connected")
+    if profile.get("mcp_servers") == []:
+        if observed.mcp_tools_list is not None or observed.mcp_initialize is not None:
+            errors.append("undeclared MCP connection in a no-MCP panel")
     else:
-        raw_names = [t.get("name") for t in raw_tools if isinstance(t, dict)]
-        if sorted(raw_names) != sorted(OMP_RAW_MCP_TOOLS):
-            errors.append(f"raw mediator tool list {sorted(raw_names)} differs from the reviewed six-tool surface")
+        raw_tools = observed.mcp_tools_list
+        if raw_tools is None:
+            errors.append("the qualification MCP bridge never returned tools/list; the MCP server is not connected")
         else:
-            minted = {name: mint_mcp_tool_name(OMP_MCP_SERVER_NAME, name) for name in raw_names}
-            if len(set(minted.values())) != len(minted):
-                errors.append("OMP name minting collides for the raw mediator tool list")
-            observed_mcp = sorted(name for name in (tools0 or []) if name.startswith("mcp__"))
-            if observed_mcp != sorted(minted.values()):
-                errors.append(
-                    "observed provider-native MCP tools differ from the raw mediator tools' minted ids: "
-                    f"observed={observed_mcp}, minted={sorted(minted.values())}"
-                )
+            raw_names = [t.get("name") for t in raw_tools if isinstance(t, dict)]
+            if sorted(raw_names) != sorted(verify_mcp_binding(profile)[2]):
+                errors.append(f"raw mediator tool list {sorted(raw_names)} differs from the reviewed six-tool surface")
             else:
-                by_native = {v: k for k, v in minted.items()}
-                for tool in first.get("tools") or []:
-                    function = tool.get("function") or {}
-                    native = function.get("name")
-                    if native in by_native:
-                        raw = next(t for t in raw_tools if t.get("name") == by_native[native])
-                        if function.get("parameters") != raw.get("inputSchema") or function.get("description") != raw.get("description"):
-                            errors.append(f"native MCP tool {native!r} schema/description differs from the raw mediator tool")
-                summary["mcp_server_connected"] = observed.mcp_initialize is not None
-    if observed.mcp_initialize is None:
-        errors.append("the qualification MCP bridge never completed initialize; the MCP server is not connected")
+                minted = {name: mint_mcp_tool_name(OMP_MCP_SERVER_NAME, name) for name in raw_names}
+                if len(set(minted.values())) != len(minted):
+                    errors.append("OMP name minting collides for the raw mediator tool list")
+                observed_mcp = sorted(name for name in (tools0 or []) if name.startswith("mcp__"))
+                if observed_mcp != sorted(minted.values()):
+                    errors.append(
+                        "observed provider-native MCP tools differ from the raw mediator tools' minted ids: "
+                        f"observed={observed_mcp}, minted={sorted(minted.values())}"
+                    )
+                else:
+                    by_native = {v: k for k, v in minted.items()}
+                    for tool in first.get("tools") or []:
+                        function = tool.get("function") or {}
+                        native = function.get("name")
+                        if native in by_native:
+                            raw = next(t for t in raw_tools if t.get("name") == by_native[native])
+                            if function.get("parameters") != raw.get("inputSchema") or function.get("description") != raw.get("description"):
+                                errors.append(f"native MCP tool {native!r} schema/description differs from the raw mediator tool")
+                    summary["mcp_server_connected"] = observed.mcp_initialize is not None
+        if observed.mcp_initialize is None:
+            errors.append("the qualification MCP bridge never completed initialize; the MCP server is not connected")
     declared_builtin = [t for t in (profile.get("native_tools") or []) if not str(t).startswith("mcp__")]
     if tools0 is not None and profile:
         builtin_observed = [t for t in tools0 if not t.startswith("mcp__")]
@@ -2863,6 +2976,42 @@ def consumption(text: str, host_file: Path) -> dict[str, Any]:
     return {**result, "match": "none"}
 
 
+def verify_activation(observed: Observed, context: dict[str, Any]) -> dict[str, Any] | None:
+    entry = context.get("entry", "ordinary")
+    if not entry.startswith("pinned:"):
+        return None
+    root = entry.split(":", 1)[1]
+    proof = {"logical_root": root, "mechanism": observed.profile.get("activation_mechanism"),
+             "delivered": False, "errors": []}
+    try:
+        if observed.profile.get("runtime_mode") != "rpc" or proof["mechanism"] not in ("runtime-command", "harness-injection"):
+            raise ValueError("deterministic activation requires the declared RPC runtime-command mechanism")
+        expected = runtime_input(observed.profile, context["prompt"], Path(context["skills_root"]))
+        actual = [record["data"] for record in observed.records["launcher"] if record["kind"] == "runtime_input"]
+        if actual != [expected]:
+            raise ValueError("actual runtime input differs from the rendered frozen command template")
+        spec = activation_spec(observed.profile, context["prompt"], Path(context["skills_root"]))
+        if spec is None or spec["root"] != root or spec != observed.activation_spec:
+            raise ValueError("activation spec is missing or mismatched")
+        requests = observed.requests
+        if not requests:
+            raise ValueError("termination before any subject conversation request")
+        first = requests[0]
+        proof.update(observer70.delivery_proof(base64.b64decode(first["record"]["data"]["body_b64"]), spec))
+        proof["installed_skill_bytes"] = spec["installed_skill_bytes"]
+        proof["request_record_sha256"] = first["record"]["hash"]
+        proof["request_body_sha256"] = first["record"]["data"]["body_sha256"]
+        expected_observation = dict(proof)
+        expected_observation.pop("errors", None)
+        records = [r["data"] for r in observed.records["observer"] if r["kind"] == "activation_delivery"]
+        if len(records) != 1 or any(records[0].get(key) != value for key, value in expected_observation.items()):
+            raise ValueError("trusted request-0 delivery check is absent or inconsistent")
+    except (ValueError, KeyError, TypeError, OSError) as exc:
+        proof["delivered"] = False
+        proof["errors"].append(str(exc))
+    return proof
+
+
 def normalize(stdout: str, run_id: str, context: dict[str, Any] | None = None) -> tuple[list[dict[str, Any]], list[dict[str, Any]], list[str], int]:
     context = context or {}
     artifacts = context.get("adapter_artifacts") or {}
@@ -2933,6 +3082,20 @@ def normalize(stdout: str, run_id: str, context: dict[str, Any] | None = None) -
             "catalog_parsed": catalog_ok,
         })
 
+    delivery = verify_activation(observed, context)
+    if delivery is not None:
+        errors.extend(delivery["errors"])
+        if observed.requests:
+            first = observed.requests[0]
+            root_event = emit("root_selection", "observer", first["position"], {
+                "logical_root": delivery["logical_root"], "selection_mechanism": delivery["mechanism"],
+                "entry_stratum": "deterministic", "activation_mechanism": delivery["mechanism"],
+                "native_operation": "request-0-delivery", "input": context.get("prompt"),
+                "resolved_package_identity": _package_identity(context), "delivery": delivery,
+            }, status="observed" if delivery["delivered"] else "error")
+            # Added to the native request completeness entry below.
+            catalog_event["activation_event_id"] = root_event["event_id"]
+
     # ---- observer classification (every record accounted for)
     request_positions = {entry["position"]: entry for entry in observed.requests}
     retry_request_indexes = {row["request_index"] for row in group_inference_requests(observed)[2]}
@@ -2941,8 +3104,12 @@ def normalize(stdout: str, run_id: str, context: dict[str, Any] | None = None) -
         kind = record.get("kind")
         if kind == "request" and position in request_positions:
             mapped = [catalog_event["event_id"]] if catalog_event and request_positions[position] is observed.requests[0] else []
+            if catalog_event and "activation_event_id" in catalog_event and request_positions[position] is observed.requests[0]:
+                mapped.append(catalog_event["activation_event_id"])
             is_retry = request_positions[position]["index"] in retry_request_indexes
             classify(index, "observer-provider-layer-retry" if is_retry else "observer-inference-request", False, mapped)
+        elif kind == "activation_delivery":
+            classify(index, "observer-activation-delivery", False)
         elif kind == "response":
             classify(index, "observer-inference-response", False)
         elif kind in ("start", "end"):
@@ -3005,6 +3172,14 @@ def normalize(stdout: str, run_id: str, context: dict[str, Any] | None = None) -
             if raw_type == "turn_start":
                 turn_depth += 1
             classify(native_index, f"benign-native:{raw_type}", False)
+        elif observed.profile.get("runtime_mode") == "rpc" and raw_type in ("ready", "available_commands_update", "response", "extension_ui_request"):
+            valid = ((raw_type == "ready" and raw.get("protocolVersion") == 1)
+                     or (raw_type == "available_commands_update" and isinstance(raw.get("commands"), list))
+                     or (raw_type == "response" and raw.get("command") == "prompt" and raw.get("success") is True)
+                     or (raw_type == "extension_ui_request" and raw.get("method") in ("setWidget", "setStatus", "setTitle")))
+            if not valid:
+                errors.append(f"unreviewed RPC control event {offset}")
+            classify(native_index, f"rpc-control:{raw_type}", not valid)
         elif raw_type == "turn_end":
             turn_depth -= 1
             if turn_depth < 0:
@@ -3185,7 +3360,7 @@ def normalize(stdout: str, run_id: str, context: dict[str, Any] | None = None) -
                 })
                 mapped_exit.append(ev["event_id"])
             classify(index, "launcher-omp-exit", bool(mapped_exit), mapped_exit)
-        elif kind in ("launcher_start", "omp_started", "probe", "start", "end"):
+        elif kind in ("launcher_start", "omp_started", "probe", "start", "end", "runtime_input"):
             classify(index, f"launcher-{kind}", False)
         else:
             classify(index, f"launcher-{kind}", True)
@@ -3677,7 +3852,7 @@ def runtime_observation(stdout: str, context: dict[str, Any] | None = None) -> d
     for line in stdout.splitlines()[:1]:
         try:
             first = json.loads(line)
-            session_seen = isinstance(first, dict) and first.get("type") == "session" and first.get("version") == 3
+            session_seen = isinstance(first, dict) and ((first.get("type") == "session" and first.get("version") == 3) or (observed.profile.get("runtime_mode") == "rpc" and first.get("type") == "ready" and first.get("protocolVersion") == 1))
         except json.JSONDecodeError:
             pass
     mcp_servers = [{"name": OMP_MCP_SERVER_NAME, "status": "connected"}] if surface.get("mcp_server_connected") else []
@@ -3740,5 +3915,5 @@ def prepare_prompt(profile: dict[str, Any], entry: str, prompt: str) -> str:
     if not entry.startswith("pinned:"):
         return prompt.strip()
     root = entry.split(":", 1)[1]
-    template = profile.get("pinned_root_instruction_template", "Use the {root} skill. {prompt}")
+    template = "/skill:{root} {prompt}" if profile.get("runtime_mode") == "rpc" else profile.get("pinned_root_instruction_template", "Use the {root} skill. {prompt}")
     return str(template).format(root=root, prompt=prompt.strip())

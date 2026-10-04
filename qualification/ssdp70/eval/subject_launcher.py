@@ -181,12 +181,18 @@ def private_socket_pair() -> tuple[socket.socket, socket.socket]:
     return client, server
 
 
-def forward(source: socket.socket, target_fd: int) -> None:
+def forward(source: socket.socket, target_fd: int, on_line=None) -> None:
+    pending = b""
     try:
         while True:
             data = source.recv(65536)
             if not data:
                 return
+            if on_line is not None:
+                pending += data
+                while b"\n" in pending:
+                    line, pending = pending.split(b"\n", 1)
+                    on_line(line)
             view = memoryview(data)
             while view:
                 view = view[os.write(target_fd, view):]
@@ -309,14 +315,38 @@ def main() -> int:
     # /proc/<pid>/fd/N, so no other sandbox process can inject into or read the native trace.
     out_client, out_server = private_socket_pair()
     err_client, err_server = private_socket_pair()
+    runtime_input = config.get("runtime_input")
+    rpc = isinstance(runtime_input, dict) and bool(runtime_input.get("rpc"))
+    in_client, in_server = private_socket_pair() if rpc else (None, None)
     proc = subprocess.Popen(
-        config["omp_argv"], env=env, cwd=config["cwd"], stdin=subprocess.DEVNULL,
+        config["omp_argv"], env=env, cwd=config["cwd"], stdin=in_client.fileno() if rpc else subprocess.DEVNULL,
         stdout=out_client.fileno(), stderr=err_client.fileno(), close_fds=True, start_new_session=True,
     )
     out_client.close()
     err_client.close()
+    if rpc:
+        in_client.close()
+    ended = threading.Event()
+
+    def rpc_line(line):
+        try:
+            event = json.loads(line)
+            if event.get("type") == "agent_end" and not ended.is_set():
+                late = config.get("rpc_late_message")
+                if late:
+                    config["rpc_late_message"] = None
+                    command = {"type": "prompt", "message": late}
+                    raw = json.dumps(command, separators=(",", ":"), ensure_ascii=False) + "\n"
+                    chain.append("runtime_input_late", {"rpc": command, "stdin": raw})
+                    in_server.sendall(raw.encode("utf-8"))
+                else:
+                    ended.set()
+                    in_server.shutdown(socket.SHUT_WR)
+        except (ValueError, OSError, AttributeError):
+            pass
+
     pumps = [
-        threading.Thread(target=forward, args=(out_server, 1), daemon=True),
+        threading.Thread(target=forward, args=(out_server, 1, rpc_line if rpc else None), daemon=True),
         threading.Thread(target=forward, args=(err_server, 2), daemon=True),
     ]
     for pump in pumps:
@@ -332,6 +362,14 @@ def main() -> int:
         same = None
     chain.append("omp_started", {"pid": proc.pid, "exe": exe_link, "exe_is_frozen_file": same})
     ready.set()
+    if runtime_input is not None:
+        if runtime_input["argv"] != config["omp_argv"] or runtime_input["non_prompt_environment"] != env:
+            raise RuntimeError("runtime input does not bind the actual invocation")
+        chain.append("runtime_input", runtime_input)
+        if rpc:
+            in_server.sendall(runtime_input["stdin"].encode("utf-8"))
+            if not any(command.get("type") == "prompt" for command in runtime_input["rpc"]):
+                in_server.shutdown(socket.SHUT_WR)
 
     # pid 1 must reap: poll for any child, watch the deadline, and stop OMP's process group on timeout.
     timed_out = False
@@ -367,6 +405,8 @@ def main() -> int:
     else:
         proc.returncode = -os.WTERMSIG(status)
     rc = proc.returncode
+    if rpc:
+        in_server.close()
     for pump in pumps:
         pump.join(10)
     chain.append("omp_exit", {

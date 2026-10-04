@@ -1,0 +1,116 @@
+----------------------------------------------------------------------
+Ran 261 tests in 9.060s
+
+OK (skipped=1)
+{
+  "accounting": {
+    "manifest_sha256": "7275aa5021fa783ca481c32f8220b8b1a4ecd37f14b89547dd4e26821ef9ada5",
+    "purpose": "development",
+    "scope_id": "development:7275aa5021fa783ca481c32f8220b8b1a4ecd37f14b89547dd4e26821ef9ada5",
+    "scoring_manifest_sha256": "0f50b6567d8ba50fb96bb49619075c40bfee5e2d788d147431bf0cf5be42181a"
+  },
+  "run_identity_sha256": "f086007697b33f0754109a13b82ae4d78e4d9f1418a9075942b605664d6effb7",
+  "evidence_state": "COMPLETE_ADMISSIBLE",
+  "criteria": {
+    "harness/admissibility": "PASS",
+    "deterministic activation": "NOT_EVALUATED"
+  },
+  "qualification_outcome": "PASS",
+  "resource_observation": {
+    "exact": true,
+    "reason": null,
+    "unresolved_process_events": []
+  },
+  "dispositions": [
+    {
+      "item": "i1",
+      "measure": "critical",
+      "result": "pass",
+      "critical": true,
+      "evidence": "complete evidence"
+    }
+  ],
+  "assessment_status": "VALID",
+  "assessment_identity_sha256": "104cc2912f4f772ee53a0376761e96fffcbe794cc16da01ec7782b80d9767448",
+  "episode": "E1",
+  "r2_point_index": null,
+  "owner_false_activation": null,
+  "notes": ""
+}
+{
+  "accounting": {
+    "manifest_sha256": "7275aa5021fa783ca481c32f8220b8b1a4ecd37f14b89547dd4e26821ef9ada5",
+    "purpose": "development",
+    "scope_id": "development:7275aa5021fa783ca481c32f8220b8b1a4ecd37f14b89547dd4e26821ef9ada5",
+    "scoring_manifest_sha256": "0f50b6567d8ba50fb96bb49619075c40bfee5e2d788d147431bf0cf5be42181a"
+  },
+  "run_identity_sha256": "f086007697b33f0754109a13b82ae4d78e4d9f1418a9075942b605664d6effb7",
+  "criteria": {
+    "harness/admissibility": "PASS",
+    "deterministic activation": "NOT_EVALUATED"
+  },
+  "assessment_status": "INADMISSIBLE",
+  "evidence_state": "INADMISSIBLE",
+  "qualification_outcome": "NOT_EVALUATED",
+  "assessment_identity_sha256": "34f2cf23f2bf64de4d92d0ae4afb231335dc0f6d3706d85f42db09b0b53b941d",
+  "errors": [
+    "runtime-observed provider/runtime version does not match frozen execution profile"
+  ],
+  "raw_result": "{\"episode\": \"E1\", \"dispositions\": [{\"item\": \"i1\", \"measure\": \"critical\", \"result\": \"pass\", \"critical\": true, \"evidence\": \"complete evidence\"}], \"r2_point_index\": null, \"owner_false_activation\": null, \"notes\": \"\"}"
+}
+{
+  "accounting": {
+    "manifest_sha256": "7275aa5021fa783ca481c32f8220b8b1a4ecd37f14b89547dd4e26821ef9ada5",
+    "purpose": "development",
+    "scope_id": "development:7275aa5021fa783ca481c32f8220b8b1a4ecd37f14b89547dd4e26821ef9ada5",
+    "scoring_manifest_sha256": "0f50b6567d8ba50fb96bb49619075c40bfee5e2d788d147431bf0cf5be42181a"
+  },
+  "run_identity_sha256": "f086007697b33f0754109a13b82ae4d78e4d9f1418a9075942b605664d6effb7",
+  "evidence_state": "COMPLETE_ADMISSIBLE",
+  "criteria": {
+    "harness/admissibility": "PASS",
+    "deterministic activation": "NOT_EVALUATED"
+  },
+  "qualification_outcome": "PASS",
+  "resource_observation": {
+    "exact": true,
+    "reason": null,
+    "unresolved_process_events": []
+  },
+  "dispositions": [
+    {
+      "item": "i1",
+      "measure": "critical",
+      "result": "pass",
+      "critical": true,
+      "evidence": "complete evidence"
+    }
+  ],
+  "assessment_status": "VALID",
+  "assessment_identity_sha256": "104cc2912f4f772ee53a0376761e96fffcbe794cc16da01ec7782b80d9767448",
+  "episode": "E1",
+  "r2_point_index": null,
+  "owner_false_activation": null,
+  "notes": ""
+}
+{
+  "accounting": {
+    "manifest_sha256": "7275aa5021fa783ca481c32f8220b8b1a4ecd37f14b89547dd4e26821ef9ada5",
+    "purpose": "development",
+    "scope_id": "development:7275aa5021fa783ca481c32f8220b8b1a4ecd37f14b89547dd4e26821ef9ada5",
+    "scoring_manifest_sha256": "0f50b6567d8ba50fb96bb49619075c40bfee5e2d788d147431bf0cf5be42181a"
+  },
+  "run_identity_sha256": "f086007697b33f0754109a13b82ae4d78e4d9f1418a9075942b605664d6effb7",
+  "criteria": {
+    "harness/admissibility": "PASS",
+    "deterministic activation": "NOT_EVALUATED"
+  },
+  "assessment_status": "INADMISSIBLE",
+  "evidence_state": "INADMISSIBLE",
+  "qualification_outcome": "NOT_EVALUATED",
+  "assessment_identity_sha256": "34f2cf23f2bf64de4d92d0ae4afb231335dc0f6d3706d85f42db09b0b53b941d",
+  "errors": [
+    "runtime-observed provider/runtime version does not match frozen execution profile"
+  ],
+  "raw_result": "{\"episode\": \"E1\", \"dispositions\": [{\"item\": \"i1\", \"measure\": \"critical\", \"result\": \"pass\", \"critical\": true, \"evidence\": \"complete evidence\"}], \"r2_point_index\": null, \"owner_false_activation\": null, \"notes\": \"\"}"
+}
