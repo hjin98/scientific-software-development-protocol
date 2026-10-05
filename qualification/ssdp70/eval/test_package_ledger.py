@@ -604,16 +604,34 @@ class ReviewDiscriminators(PhaseAndDelivery):
             self.assertIn(needs, core70.validate_claim_observability([], [claim]), claim)
         self.assertNotIn(needs, core70.validate_claim_observability([], ["owner-read-absence"]))
 
-    def test_s_empty_or_unpositioned_window_is_the_whole_trace_so_an_honest_text_final_turn_stays_explained(self):
-        # A text-only final turn has no tool event, so its request position falls back to the trace start (1);
-        # the window would end at 0. An empty window must not leave an honest whole-file read unexplained.
-        requests = [{"t_ns": 1000, "monotonic_ns": 1000, "position": 1}, {"t_ns": 1500, "monotonic_ns": 1500, "position": 1}]
-        events = [event(i, "nothing") for i in range(1, 6)]
-        events[2] = event(3, TWIN)
+    def test_s_unpositioned_later_request_bounds_nothing_so_an_honest_text_final_turn_stays_explained(self):
+        # A text-only final turn has no tool event, hence no position (None): it bounds nothing from above.
+        requests = [{"t_ns": 1000, "monotonic_ns": 1000, "position": 2}, {"t_ns": 1500, "monotonic_ns": 1500, "position": None}]
+        for shown, exact in ((3, True), (1, False)):                       # whole file shown after / before the window start
+            events = [event(i, "nothing") for i in range(1, 6)]
+            events[shown - 1] = event(shown, TWIN)
+            r = self.account([(1200, "x/references/owner.md")], events, request_records=requests)
+            window = r["owner_open_windows"][0]["window"]
+            self.assertEqual((window["start"], window["end"]), (2, 5))
+            self.assertEqual(r["exact"], exact, (shown, r["reasons"]))
+
+    def test_s_unpositioned_or_absent_earlier_request_starts_at_the_trace_start_and_the_end_is_still_bounded(self):
+        for earlier in ([], [{"t_ns": 1000, "monotonic_ns": 1000, "position": None}]):
+            requests = earlier + [{"t_ns": 2500, "monotonic_ns": 2500, "position": 8}]
+            for seq, exact in ((5, True), (9, False)):
+                events = [event(i, "nothing") for i in range(1, 11)]
+                events[seq - 1] = event(seq, TWIN)
+                r = self.account([(1500, "x/references/owner.md")], events, request_records=requests)
+                window = r["owner_open_windows"][0]["window"]
+                self.assertEqual((window["start"], window["end"]), (1, 7), earlier)
+                self.assertEqual(r["exact"], exact, (seq, earlier))
+
+    def test_s_inconsistent_positions_make_an_empty_window_the_whole_trace(self):
+        requests = [{"t_ns": 1000, "monotonic_ns": 1000, "position": 8}, {"t_ns": 1500, "monotonic_ns": 1500, "position": 3}]
+        events = [event(i, "nothing") for i in range(1, 11)]
         r = self.account([(1200, "x/references/owner.md")], events, request_records=requests)
         window = r["owner_open_windows"][0]["window"]
-        self.assertEqual((window["start"], window["end"]), (1, 5))
-        self.assertTrue(r["exact"], r["reasons"])
+        self.assertEqual((window["start"], window["end"]), (1, 10))
 
 class RealWatcherOverflow(unittest.TestCase):
     @unittest.skipUnless(bwrap_usable(), "bwrap unusable")

@@ -1,0 +1,147 @@
+........................................................................................................................................................................................................................................................................................................................................
+----------------------------------------------------------------------
+Ran 328 tests in 10.035s
+
+OK
+{
+  "accounting": {
+    "manifest_sha256": "7275aa5021fa783ca481c32f8220b8b1a4ecd37f14b89547dd4e26821ef9ada5",
+    "purpose": "development",
+    "scope_id": "development:7275aa5021fa783ca481c32f8220b8b1a4ecd37f14b89547dd4e26821ef9ada5",
+    "scoring_manifest_sha256": "0f50b6567d8ba50fb96bb49619075c40bfee5e2d788d147431bf0cf5be42181a"
+  },
+  "run_identity_sha256": "7a2eab216139561851cfa3124d6c61762682dad11f1e689c508f3edb98d397c9",
+  "arm": "p70",
+  "evidence_state": "COMPLETE_ADMISSIBLE",
+  "criteria": {
+    "harness/admissibility": "PASS",
+    "deterministic activation": "NOT_EVALUATED"
+  },
+  "qualification_outcome": "PASS",
+  "resource_observation": {
+    "accounting": null,
+    "exact": true,
+    "mechanism": null,
+    "owner_floor_exact": true,
+    "owner_read_reason": null,
+    "reason": null,
+    "unresolved_process_events": []
+  },
+  "observation_only_inadmissibility": false,
+  "original_dispositions": [
+    {
+      "item": "i1",
+      "measure": "critical",
+      "result": "pass",
+      "critical": true,
+      "evidence": "complete evidence"
+    }
+  ],
+  "dispositions": [
+    {
+      "item": "i1",
+      "measure": "critical",
+      "result": "pass",
+      "critical": true,
+      "evidence": "complete evidence"
+    }
+  ],
+  "assessment_status": "VALID",
+  "assessment_identity_sha256": "00e468f9d81cc9ff037c706fae74c52fafc37a1b83931eb1627b87fe08c36f4c",
+  "episode": "E1",
+  "r2_point_index": null,
+  "owner_false_activation": null,
+  "notes": ""
+}
+{
+  "accounting": {
+    "manifest_sha256": "7275aa5021fa783ca481c32f8220b8b1a4ecd37f14b89547dd4e26821ef9ada5",
+    "purpose": "development",
+    "scope_id": "development:7275aa5021fa783ca481c32f8220b8b1a4ecd37f14b89547dd4e26821ef9ada5",
+    "scoring_manifest_sha256": "0f50b6567d8ba50fb96bb49619075c40bfee5e2d788d147431bf0cf5be42181a"
+  },
+  "run_identity_sha256": "7a2eab216139561851cfa3124d6c61762682dad11f1e689c508f3edb98d397c9",
+  "criteria": {
+    "harness/admissibility": "PASS",
+    "deterministic activation": "NOT_EVALUATED"
+  },
+  "assessment_status": "INADMISSIBLE",
+  "evidence_state": "INADMISSIBLE",
+  "qualification_outcome": "NOT_EVALUATED",
+  "assessment_identity_sha256": "e8e112d00f09a85587e344cba11067e56e4f8b624ac02bbcf0a7e098c52ed8a6",
+  "errors": [
+    "runtime-observed provider/runtime version does not match frozen execution profile"
+  ],
+  "raw_result": "{\"episode\": \"E1\", \"dispositions\": [{\"item\": \"i1\", \"measure\": \"critical\", \"result\": \"pass\", \"critical\": true, \"evidence\": \"complete evidence\"}], \"r2_point_index\": null, \"owner_false_activation\": null, \"notes\": \"\"}"
+}
+{
+  "accounting": {
+    "manifest_sha256": "7275aa5021fa783ca481c32f8220b8b1a4ecd37f14b89547dd4e26821ef9ada5",
+    "purpose": "development",
+    "scope_id": "development:7275aa5021fa783ca481c32f8220b8b1a4ecd37f14b89547dd4e26821ef9ada5",
+    "scoring_manifest_sha256": "0f50b6567d8ba50fb96bb49619075c40bfee5e2d788d147431bf0cf5be42181a"
+  },
+  "run_identity_sha256": "7a2eab216139561851cfa3124d6c61762682dad11f1e689c508f3edb98d397c9",
+  "arm": "p70",
+  "evidence_state": "COMPLETE_ADMISSIBLE",
+  "criteria": {
+    "harness/admissibility": "PASS",
+    "deterministic activation": "NOT_EVALUATED"
+  },
+  "qualification_outcome": "PASS",
+  "resource_observation": {
+    "accounting": null,
+    "exact": true,
+    "mechanism": null,
+    "owner_floor_exact": true,
+    "owner_read_reason": null,
+    "reason": null,
+    "unresolved_process_events": []
+  },
+  "observation_only_inadmissibility": false,
+  "original_dispositions": [
+    {
+      "item": "i1",
+      "measure": "critical",
+      "result": "pass",
+      "critical": true,
+      "evidence": "complete evidence"
+    }
+  ],
+  "dispositions": [
+    {
+      "item": "i1",
+      "measure": "critical",
+      "result": "pass",
+      "critical": true,
+      "evidence": "complete evidence"
+    }
+  ],
+  "assessment_status": "VALID",
+  "assessment_identity_sha256": "00e468f9d81cc9ff037c706fae74c52fafc37a1b83931eb1627b87fe08c36f4c",
+  "episode": "E1",
+  "r2_point_index": null,
+  "owner_false_activation": null,
+  "notes": ""
+}
+{
+  "accounting": {
+    "manifest_sha256": "7275aa5021fa783ca481c32f8220b8b1a4ecd37f14b89547dd4e26821ef9ada5",
+    "purpose": "development",
+    "scope_id": "development:7275aa5021fa783ca481c32f8220b8b1a4ecd37f14b89547dd4e26821ef9ada5",
+    "scoring_manifest_sha256": "0f50b6567d8ba50fb96bb49619075c40bfee5e2d788d147431bf0cf5be42181a"
+  },
+  "run_identity_sha256": "7a2eab216139561851cfa3124d6c61762682dad11f1e689c508f3edb98d397c9",
+  "criteria": {
+    "harness/admissibility": "PASS",
+    "deterministic activation": "NOT_EVALUATED"
+  },
+  "assessment_status": "INADMISSIBLE",
+  "evidence_state": "INADMISSIBLE",
+  "qualification_outcome": "NOT_EVALUATED",
+  "assessment_identity_sha256": "e8e112d00f09a85587e344cba11067e56e4f8b624ac02bbcf0a7e098c52ed8a6",
+  "errors": [
+    "runtime-observed provider/runtime version does not match frozen execution profile"
+  ],
+  "raw_result": "{\"episode\": \"E1\", \"dispositions\": [{\"item\": \"i1\", \"measure\": \"critical\", \"result\": \"pass\", \"critical\": true, \"evidence\": \"complete evidence\"}], \"r2_point_index\": null, \"owner_false_activation\": null, \"notes\": \"\"}"
+}

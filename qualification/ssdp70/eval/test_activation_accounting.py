@@ -403,12 +403,14 @@ class RealActivationPath(unittest.TestCase):
         original=next(row for row in mapping if row['request_index']==retry['retry_of'])
         self.assertEqual(retry['position'],original['position'])
         self.assertTrue(retry['pairing_verified'])
+        self.assertIsInstance(original['position'],int)
+        self.assertIsNone(max(mapping,key=lambda row:row['conversation_turn'])['position'])      # text-only final turn: no position
         observed=omp.Observed({p.name:p.read_text() for p in (out/'adapter-artifacts').iterdir()},core70.load_json(out/'profile-snapshot.json'))
         broken=copy.deepcopy(observed)
         broken.requests[-1]['body']['messages']=[]
         positions=omp.request_positions(broken,events,(out/'trace.jsonl').read_text(),'Do the task.')
         self.assertTrue(positions)
-        self.assertTrue(all(not row['pairing_verified'] and row['position']==events[0]['sequence'] for row in positions))
+        self.assertTrue(all(not row['pairing_verified'] and row['position'] is None for row in positions))
 
     def test_z_encoded_full_package_and_owner_only_cannot_admit_negative_or_exact_claims(self):
         import base64,hashlib,io,tarfile

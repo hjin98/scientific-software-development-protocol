@@ -221,20 +221,40 @@ class ReplacementBookkeeping(unittest.TestCase):
             else:broken[path[0]]=value
             self.assertFalse(batch_assess70.observation_adjudicated(broken),path)
 
-    def test_second_replacement_for_another_question_is_disclosed_unscored_not_an_aborted_aggregation(self):
+    def add_replacement(self,mf,runs,rid,question,**record):
+        mf["runs"].append({**mf["runs"][1],"id":rid})
+        runs[rid]={**runs["replacement"],**record}
+        mf["package_access_replacements"].append({"original":"original","replacement":rid,"question":question})
+
+    def test_one_slot_one_scored_run_partial_replacement_is_disclosed_and_the_rerun_must_resolve_all(self):
         mf,runs=self.setup_case()
-        mf["runs"].append({**mf["runs"][1],"id":"replacement-2"})
-        runs["replacement-2"]={**runs["replacement"]}
-        runs["replacement"]["owner_floor_state"]="UNRESOLVED"       # byte-exact, owner floor still unresolved
-        mf["package_access_replacements"].append({"original":"original","replacement":"replacement-2","question":"owner-floor"})
+        runs["replacement"]["owner_floor_state"]="UNRESOLVED"        # byte-exact, owner floor still open
+        self.add_replacement(mf,runs,"replacement-2","bytes",owner_floor_state="PASS")
         slots,report=batch_assess70.replacement_slots(mf,runs)
         first,second=report["records"]
-        self.assertTrue(first["scored"]);self.assertFalse(second["scored"])
-        self.assertIn("undecided",second["reason"])
-        self.assertEqual(slots["original"],"replacement")
-        self.assertTrue(any(v["original"]=="original" and "owner-floor" in v["questions"] for v in report["required"]))
-        again=copy.deepcopy(mf);again["package_access_replacements"][1]["question"]="bytes"      # same question again is outcome selection
-        with self.assertRaises(core70.ContractError):batch_assess70.replacement_slots(again,runs)
+        self.assertFalse(first["scored"]);self.assertIn("does not resolve every available open question",first["reason"])
+        self.assertTrue(second["scored"])
+        self.assertEqual(slots["original"],"replacement-2")
+        self.assertEqual(report["byte_slots"]["original"],"replacement-2");self.assertEqual(report["owner_slots"]["original"],"replacement-2")
+        self.assertEqual(report["required"],[])
+        self.assertEqual(report["per_arm"]["p70"]["replacements"],1)      # only the scored run counts as the replacement
+        self.add_replacement(mf,runs,"replacement-3","bytes",owner_floor_state="PASS")
+        with self.assertRaises(core70.ContractError):batch_assess70.replacement_slots(mf,runs)    # cap of two independent reruns
+
+    def test_a_resolved_slot_cannot_be_rerun_for_any_question(self):
+        for question in ("bytes","owner-floor"):
+            mf,runs=self.setup_case()
+            self.add_replacement(mf,runs,"replacement-2",question)
+            with self.assertRaises(core70.ContractError):batch_assess70.replacement_slots(mf,runs)
+
+    def test_without_a_byte_bound_the_owner_floor_alone_decides_scoring_and_bytes_stay_pending(self):
+        mf,runs=self.setup_case(bound=False)
+        mf["package_access_replacements"][0]["question"]="owner-floor"
+        runs["replacement"]["resource_observation"]={"exact":False}   # bytes not resolved, owner floor resolved
+        slots,report=batch_assess70.replacement_slots(mf,runs)
+        self.assertEqual(slots["original"],"replacement");self.assertEqual(report["owner_slots"]["original"],"replacement")
+        self.assertEqual(report["byte_slots"]["original"],"original")
+        self.assertTrue(any(v["original"]=="original" and v["questions"]==["bytes"] for v in report["required"]))
 
     def test_v_missing_byte_bound_keeps_byte_question_pending_but_owner_has_no_campaign_cap(self):
         mf,runs=self.setup_case(bound=False)

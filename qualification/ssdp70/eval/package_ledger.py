@@ -361,10 +361,17 @@ def candidate_window(lower, upper, requests, events, lost=False):
         return {"start": start, "end": end, "timing_loss": True}
     earlier = [r for r in requests if r["t_ns"] < lower]
     later = [r for r in requests if r["t_ns"] > upper]
-    lo = earlier[-1].get("position", start) if earlier else start
-    hi = later[0].get("position", start) - 1 if later else end
-    if hi < lo or not earlier:
-        lo, hi = start, end     # conservative whole-trace window; a text-only final turn has no position (hi < lo)
+
+    def position(request):          # a request with no derivable, verified position (text-only turn, failed pairing) has None
+        value = request.get("position")
+        return value if isinstance(value, int) and not isinstance(value, bool) else None
+
+    # Lower side: an absent or unpositioned earlier request starts the window at the beginning of the trace.
+    lo = position(earlier[-1]) if earlier and position(earlier[-1]) is not None else start
+    # Upper side: an unpositioned later request bounds nothing, so the window runs to the end of the trace.
+    hi = position(later[0]) - 1 if later and position(later[0]) is not None else end
+    if hi < lo:
+        lo, hi = start, end         # an otherwise empty window is the whole trace (D3 window-end clarification)
     return {"start": lo, "end": hi, "timing_loss": False}
 
 

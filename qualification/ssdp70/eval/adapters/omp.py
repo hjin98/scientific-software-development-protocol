@@ -3998,7 +3998,6 @@ def package_access_ledger(artifacts: dict[str, Any], profile: dict[str, Any] | N
 
 def request_positions(observed, events, stdout, prompt):
     """Verified request/assistant-turn pairing, including each retained retry's original position."""
-    beginning = min((e["sequence"] for e in events), default=1)
     groups, group_errors, retries = group_inference_requests(observed)
     turns = provider_turns(observed)
     transcript_problems, _ = transcript_errors(observed, prompt)
@@ -4022,14 +4021,14 @@ def request_positions(observed, events, stdout, prompt):
             verified = False
         seqs = [e["sequence"] for e in events if e.get("kind") == "assistant_message"
                 and (e.get("payload") or {}).get("assistant_turn") == index]
-        positions.append(min(seqs) if seqs and expected else beginning)
+        positions.append(min(seqs) if seqs and expected else None)     # a text-only turn has no tool event: no position
     rows = []
     for k, group in enumerate(groups):
         for pos in group:
             entry = observed.requests[pos]
             record = entry["record"]
             rows.append({"request_index": entry["index"], "conversation_turn": k,
-                         "position": positions[k] if verified else beginning, "pairing_verified": verified,
+                         "position": positions[k] if verified else None, "pairing_verified": verified,
                          "retry_of": observed.requests[group[0]]["index"] if pos != group[0] else None,
                          "t_ns": record.get("t_ns"), "monotonic_ns": (record.get("data") or {}).get("monotonic_ns"),
                          "observer_sha256": record.get("hash"), "body": entry["body"]})

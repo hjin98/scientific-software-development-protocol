@@ -548,16 +548,10 @@ def replacement_slots(manifest, runs):
         count[case] = count.get(case,0)+1
         if count[case]>2:
             raise core70.ContractError("package-access replacement exceeds the per-case/per-T7-run cap of two")
-        prior = [v for v in report["records"] if v["original"]==original and v["scored"]]
-        if any(v["question"]==question for v in prior):
+        if any(v["original"]==original and v["scored"] for v in report["records"]):
             raise core70.ContractError("a resolved replacement cannot be outcome-selected again")
         record = {**request, "original_outcome":o.get("qualification_outcome"), "scored":False}
         report["records"].append(record)
-        if prior:
-            # The slot already has a scored replacement for another question. Which run then scores each criterion is a
-            # contract decision (review finding 4), so fail closed: disclose, do not score, keep the question required.
-            record["reason"] = "slot already resolved by another replacement; scored-slot rule for a second question is undecided"
-            continue
         safe = (observation_adjudicated(o)
                 and o.get("owner_floor_adjudication",{}).get("adjudicated") is True
                 and o.get("owner_floor_state") != "FAIL"
@@ -571,9 +565,21 @@ def replacement_slots(manifest, runs):
         for name in ("profile_key_sha256","subject"):
             if declarations[original].get(name) != declarations[replacement].get(name):
                 raise core70.ContractError("replacement changed the frozen slot profile or subject")
-        exact = (r.get("resource_observation") or {}).get("exact") is True if question=="bytes" else r.get("owner_floor_state") in ("PASS","FAIL")
+        # One slot, one scored run (D3 window/replacement clarification): a non-T7 replacement scores only if it is
+        # exact for every available question still open on the original. The owner floor is always available; the
+        # byte question only with a frozen bound. A T7 owner-only rerun answers the owner floor alone.
+        resolved = {"bytes": (r.get("resource_observation") or {}).get("exact") is True,
+                    "owner-floor": r.get("owner_floor_state") in ("PASS","FAIL")}
+        open_questions = next((v["questions"] for v in report["required"] if v["original"]==original), [])
+        if question == "t7-owner-floor":
+            needed = ["owner-floor"]
+        else:
+            needed = [q for q in open_questions if q == "owner-floor" or byte_available] or ["bytes" if question=="bytes" else "owner-floor"]
+        exact = all(resolved[q] for q in needed)
         if not safe or not exact or (question=="bytes" and not byte_available):
-            record["reason"] = "replacement unavailable, inexact, or original adjudication bars it"
+            record["reason"] = ("replacement does not resolve every available open question of the slot; the slot stays unresolved"
+                                if safe and not exact and any(resolved[q] for q in needed)
+                                else "replacement unavailable, inexact, or original adjudication bars it")
             continue
         record["scored"] = True
         for required in report["required"]:
