@@ -188,14 +188,15 @@ class ReplacementBookkeeping(unittest.TestCase):
         self.assertEqual(slots,{"original":"replacement"})
         self.assertEqual(report["byte_slots"],slots);self.assertEqual(report["owner_slots"],slots)
         self.assertTrue(runs["original"]["owner_load_hit"])
-        self.assertEqual(report["per_arm"]["p70"],{"runs":1,"inexact":1,"replacements":1})
+        self.assertEqual(report["per_arm"]["p70"],{"runs":1,"inexact":1,"replacements":1,"scored_replacements":1})
         self.assertEqual(report["required"],[])
 
     def test_l_u_v_pre_r2_positive_other_unresolved_and_undisclosed_overflow_bar(self):
-        for change in ("positive","other","overflow","r2"):
+        mf,runs=self.setup_case();runs["original"]["owner_floor_state"]="FAIL"
+        with self.assertRaises(core70.ContractError):batch_assess70.replacement_slots(mf,runs)   # a positive pre-R2 original is never replaced
+        for change in ("other","overflow","r2"):
             mf,runs=self.setup_case();o=runs["original"]
-            if change=="positive":o["owner_floor_state"]="FAIL"
-            elif change=="other":o["original_dispositions"]=[{"result":"unresolved"}]
+            if change=="other":o["original_dispositions"]=[{"result":"unresolved"}]
             elif change=="overflow":o["resource_observation"]["accounting"]["reasons"]=["ledger overflowed"]
             else:o["owner_floor_adjudication"]["adjudicated"]=False
             slots,report=batch_assess70.replacement_slots(mf,runs)
@@ -207,9 +208,11 @@ class ReplacementBookkeeping(unittest.TestCase):
         self.assertEqual(batch_assess70.replacement_slots(mf,runs)[0]["original"],"replacement")
 
     def test_v_not_applicable_items_do_not_bar_but_fail_and_unresolved_do(self):
-        for result,expected in (("not-applicable","replacement"),("pass","replacement"),("fail","original"),("unresolved","original")):
+        for result,expected in (("not-applicable","replacement"),("pass","replacement"),("unresolved","original")):
             mf,runs=self.setup_case();runs["original"]["original_dispositions"]=[{"result":"pass"},{"result":result}]
             self.assertEqual(batch_assess70.replacement_slots(mf,runs)[0]["original"],expected,result)
+        mf,runs=self.setup_case();runs["original"]["original_dispositions"]=[{"result":"pass"},{"result":"fail"}]
+        with self.assertRaises(core70.ContractError):batch_assess70.replacement_slots(mf,runs)   # a failing original is never replaced
 
     def test_observation_adjudicated_needs_every_independent_attestation(self):
         mf,runs=self.setup_case();row=runs["original"]
@@ -237,7 +240,7 @@ class ReplacementBookkeeping(unittest.TestCase):
         self.assertEqual(slots["original"],"replacement-2")
         self.assertEqual(report["byte_slots"]["original"],"replacement-2");self.assertEqual(report["owner_slots"]["original"],"replacement-2")
         self.assertEqual(report["required"],[])
-        self.assertEqual(report["per_arm"]["p70"]["replacements"],1)      # only the scored run counts as the replacement
+        self.assertEqual((report["per_arm"]["p70"]["replacements"],report["per_arm"]["p70"]["scored_replacements"]),(2,1))   # attempts vs scored
         self.add_replacement(mf,runs,"replacement-3","bytes",owner_floor_state="PASS")
         with self.assertRaises(core70.ContractError):batch_assess70.replacement_slots(mf,runs)    # cap of two independent reruns
 
@@ -255,6 +258,28 @@ class ReplacementBookkeeping(unittest.TestCase):
         self.assertEqual(slots["original"],"replacement");self.assertEqual(report["owner_slots"]["original"],"replacement")
         self.assertEqual(report["byte_slots"]["original"],"original")
         self.assertTrue(any(v["original"]=="original" and v["questions"]==["bytes"] for v in report["required"]))
+
+    def test_bn1_a_replacement_must_resolve_its_own_owner_floor_even_when_only_bytes_were_open(self):
+        for owner_state, scored in (("UNRESOLVED", False), ("PASS", True)):
+            mf, runs = self.setup_case(route="T1", question="bytes")
+            runs["original"]["owner_floor_state"] = "PASS"             # only the byte question is open on the original
+            runs["replacement"]["owner_floor_state"] = owner_state
+            slots, report = batch_assess70.replacement_slots(mf, runs)
+            self.assertEqual(report["records"][0]["scored"], scored, owner_state)
+            self.assertEqual(slots["original"], "replacement" if scored else "original")
+
+    def test_cr2_b1_a_declared_reserve_cannot_override_an_original_that_needed_no_replacement(self):
+        for question in ("bytes","owner-floor"):                      # exact original, owner floor PASS: nothing is open
+            mf,runs=self.setup_case(question=question);o=runs["original"]
+            o.update(evidence_state="COMPLETE_ADMISSIBLE",owner_floor_state="PASS",resource_observation={"exact":True},
+                     observation_only_inadmissibility=False)
+            with self.assertRaises(core70.ContractError):batch_assess70.replacement_slots(mf,runs)
+        mf,runs=self.setup_case(question="owner-floor",bound=False)    # only the byte question is open: an owner-floor reserve answers nothing
+        runs["original"]["owner_floor_state"]="PASS"
+        with self.assertRaises(core70.ContractError):batch_assess70.replacement_slots(mf,runs)
+        mf,runs=self.setup_case(route="T7",question="t7-owner-floor")  # T7 owner floor already resolved: nothing for an owner-only rerun
+        runs["original"]["owner_floor_state"]="PASS"
+        with self.assertRaises(core70.ContractError):batch_assess70.replacement_slots(mf,runs)
 
     def test_v_missing_byte_bound_keeps_byte_question_pending_but_owner_has_no_campaign_cap(self):
         mf,runs=self.setup_case(bound=False)
@@ -326,7 +351,7 @@ class SlotScoringComposition(unittest.TestCase):
             {"active_ssdp_bytes": 14000, "installed_entrypoint_bytes": 14000, "installed_owner_bytes": 46000,
              "owner_read_sequences": [], **summary}))
 
-    def build(self, *, replaced, question, bound=1, owner_replacement=None):
+    def build(self, *, replaced, question, bound=1, owner_replacement=None, extra=(), original_overrides=None):
         """Three paired T1/T7/T8 fixed-cost opportunities per arm; one affected p70 run with a declared replacement."""
         runs, declared, opportunities = {}, [], []
         subject = {"commit": COMMIT, "package_sha256": SHA}
@@ -344,17 +369,25 @@ class SlotScoringComposition(unittest.TestCase):
             opportunities.append({"id": "own-" + arm, "part": "owner_false_activation", "route": "T7", "arm": arm, "fixture": "f",
                                   "profile_key_sha256": SHA, "realizations": [{"run": rid, "item": "i1"}]})
         original = replaced
-        runs[original] = self.inexact("p70")
+        opportunities.append({"id": "own-slot", "part": "owner_false_activation", "route": "T7" if original.startswith("T7") else "T1",
+                              "arm": "p70", "fixture": "f", "profile_key_sha256": SHA, "realizations": [{"run": original, "item": "i1"}]})
+        runs[original] = {**self.inexact("p70"), **(original_overrides or {})}
         self.write(original, active_ssdp_bytes=None, owner_read_sequences=None, resource_observation={"exact": False})
         replacement = original + "-repl"
         runs[replacement] = {**self.good("p70"), **(owner_replacement or {})}
         self.write(replacement)
         declared.append({"id": replacement, "profile_key_sha256": SHA, "entry_stratum": "deterministic", "subject": subject,
                          "replacement_case": "case-" + original})
+        replacements = [{"original": original, "replacement": replacement, "question": question}]
+        for rid, q, overrides in extra:      # further declared attempts at the same slot, in order
+            runs[rid] = {**self.good("p70"), **overrides}; self.write(rid)
+            declared.append({"id": rid, "profile_key_sha256": SHA, "entry_stratum": "deterministic", "subject": subject,
+                             "replacement_case": "case-" + original})
+            replacements.append({"original": original, "replacement": rid, "question": q})
         manifest = {"candidate_arm": "p70", "comparator_arm": "p66", "cost_comparator_arm": "p66", "runs": declared,
                     "family": {"criterion_to_keys": {part: [SHA] for part in core70.CAMPAIGN_PARTS}}, "offered_profiles": [SHA],
                     "opportunities": opportunities,
-                    "package_access_replacements": [{"original": original, "replacement": replacement, "question": question}]}
+                    "package_access_replacements": replacements}
         if bound is not None:
             manifest["package_access_policy"] = {"byte_inexact_disparity_bound": {"value": bound, "stakeholder_confirmation": "frozen record"}}
         result = {"runs": runs, "errors": []}
@@ -387,3 +420,87 @@ class SlotScoringComposition(unittest.TestCase):
         self.assertEqual(result["parts"]["owner_false_activation"]["state"], "FAIL")
         clean = self.build(replaced="T7-p70-r0", question="t7-owner-floor")
         self.assertNotEqual(clean["parts"]["owner_false_activation"]["state"], "FAIL")
+
+
+    def test_b1_a_partial_replacement_that_carries_a_positive_pre_r2_read_stands_and_bars_the_slot(self):
+        """Independent text review B-1: outcome selection must not discard a definite failure seen in a replacement."""
+        failing_partial = {"resource_observation": {"exact": False}, "owner_floor_state": "FAIL"}
+        result = self.build(replaced="T1-p70-r0", question="bytes", owner_replacement=failing_partial)
+        self.assertEqual(result["parts"]["owner_false_activation"]["state"], "FAIL")            # a single failing attempt stands
+        record = result["package_access_replacements"]["records"][0]
+        self.assertTrue(record["scored"] and record["standing_failure"])
+        self.assertEqual(result["package_access_replacements"]["owner_slots"]["T1-p70-r0"], "T1-p70-r0-repl")
+        with self.assertRaises(core70.ContractError):         # a cleaner second rerun of the barred slot is refused outright
+            self.build(replaced="T1-p70-r0", question="bytes", owner_replacement=failing_partial,
+                       extra=[("T1-p70-r0-repl2", "bytes", {})])
+
+    def test_b1_a_deterministic_activation_failure_in_a_replacement_also_stands(self):
+        failing = {"criteria": {"deterministic activation": "FAIL", "harness/admissibility": "PASS"}}
+        result = self.build(replaced="T1-p70-r0", question="bytes", owner_replacement=failing)
+        record = result["package_access_replacements"]["records"][0]
+        self.assertTrue(record["scored"] and record["standing_failure"])
+        self.assertEqual(result["package_access_replacements"]["owner_slots"]["T1-p70-r0"], "T1-p70-r0-repl")
+
+
+    def test_r2_1_no_declared_run_loses_a_definite_failure_whatever_the_original_or_the_evidence_state(self):
+        """Independent text review R2-1, each case executed through score_slots."""
+        owner_fail = {"owner_floor_state": "FAIL"}
+        cases = {
+            "original unresolved on another criterion": dict(original_overrides={"original_dispositions": [{"item": "i1", "result": "unresolved"}]}, owner_replacement=owner_fail),
+            "original not yet adjudicated": dict(original_overrides={"owner_floor_adjudication": {"adjudicated": False, "r2_sequence": None, "consequential_sequence": None}}, owner_replacement=owner_fail),
+            "original with undisclosed overflow": dict(original_overrides={"resource_observation": {"exact": False, "accounting": {"reasons": ["ledger overflowed"]}}}, owner_replacement=owner_fail),
+            "unusable replacement evidence": dict(owner_replacement={**owner_fail, "evidence_state": "EXECUTION_ERROR"}),
+            "partial replacement": dict(owner_replacement={"resource_observation": {"exact": False}, **owner_fail}),
+        }
+        for name, kwargs in cases.items():
+            result = self.build(replaced="T1-p70-r0", question="bytes", **kwargs)
+            self.assertEqual(result["parts"]["owner_false_activation"]["state"], "FAIL", name)
+            self.assertTrue(result["package_access_replacements"]["records"][0].get("standing_failure"), name)
+
+    def test_r2_1_failing_or_unresolved_dispositions_in_a_replacement_stand_and_bar_the_rerun(self):
+        for disposition in ({"item": "i1", "measure": "m", "critical": True, "result": "fail"},
+                            {"item": "i1", "measure": "m", "critical": False, "result": "unresolved"}):
+            kwargs = dict(replaced="T1-p70-r0", question="bytes", owner_replacement={"dispositions": [disposition]})
+            result = self.build(**kwargs)
+            self.assertTrue(result["package_access_replacements"]["records"][0]["standing_failure"], disposition)
+            with self.assertRaises(core70.ContractError):          # no rerun-until-clean
+                self.build(**kwargs, extra=[("T1-p70-r0-repl2", "bytes", {})])
+
+    def test_r2_1_t7_owner_only_rerun_with_an_activation_failure_fails_the_activation_criterion(self):
+        failing = {"criteria": {"deterministic activation": "FAIL", "harness/admissibility": "PASS"}}
+        result = self.build(replaced="T7-p70-r0", question="t7-owner-floor", owner_replacement=failing)
+        self.assertTrue(result["package_access_replacements"]["records"][0]["standing_failure"])
+        self.assertEqual(result["profiles"][SHA]["deterministic activation"], "FAIL")
+        self.assertEqual(result["package_access_replacements"]["byte_slots"]["T7-p70-r0"], "T7-p70-r0")     # median value unchanged
+        clean = self.build(replaced="T7-p70-r0", question="t7-owner-floor")
+        self.assertEqual(clean["profiles"][SHA]["deterministic activation"], "PASS")
+
+
+    def test_r3_1_a_replacement_declared_for_an_original_with_a_definite_failure_is_refused_not_dropped(self):
+        tolerated = [{"item": "i1", "measure": "m", "critical": False, "result": "fail"}]       # a campaign may tolerate this one
+        for original_overrides in ({"original_dispositions": tolerated},
+                                   {"criteria": {"deterministic activation": "FAIL", "harness/admissibility": "FAIL"}},
+                                   {"owner_floor_state": "FAIL"}):
+            with self.assertRaises(core70.ContractError):
+                self.build(replaced="T1-p70-r0", question="bytes", original_overrides=original_overrides,
+                           owner_replacement={"owner_floor_state": "FAIL"})
+
+    def test_r3_n2_t7_owner_only_rerun_with_a_critical_fail_disposition_counts_as_a_critical_failure(self):
+        failing = {"dispositions": [{"item": "i1", "measure": "m", "critical": True, "result": "fail"}]}
+        result = self.build(replaced="T7-p70-r0", question="t7-owner-floor", owner_replacement=failing)
+        self.assertEqual(result["critical_failures"].get("p70"), 1)
+        self.assertEqual(result["arms"]["p70"]["dispositions"]["fail"], 1)
+        clean = self.build(replaced="T7-p70-r0", question="t7-owner-floor")
+        self.assertEqual(clean["critical_failures"].get("p70", 0), 0)
+
+
+    def test_cr2_b2_activation_counts_every_declared_deterministic_run_not_only_the_scored_slots(self):
+        undetermined = {"resource_observation": {"exact": True}, "owner_floor_state": "UNRESOLVED",
+                        "criteria": {"deterministic activation": "NOT_EVALUATED", "harness/admissibility": "PASS"}}
+        result = self.build(replaced="T1-p70-r0", question="bytes", owner_replacement=undetermined,
+                            extra=[("T1-p70-r0-repl2", "bytes", {})])
+        first, second = result["package_access_replacements"]["records"]
+        self.assertFalse(first["scored"]);self.assertTrue(second["scored"])
+        self.assertEqual(result["profiles"][SHA]["deterministic activation"], "NOT_EVALUATED")     # an unscored launched run still counts
+        clean = self.build(replaced="T1-p70-r0", question="bytes")
+        self.assertEqual(clean["profiles"][SHA]["deterministic activation"], "PASS")

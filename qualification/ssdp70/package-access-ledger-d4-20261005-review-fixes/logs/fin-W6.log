@@ -1,0 +1,14 @@
+F
+======================================================================
+FAIL: test_r_x_request_retry_shares_original_position_and_mismatch_falls_back (test_activation_accounting.RealActivationPath)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/tmp/claude-1000/-home-samjin-agent-skills-scientific-software-development-protocol/2d2d6014-06c8-4e83-8f5c-27bd2aca76d0/scratchpad/fin-W6/qualification/ssdp70/eval/test_activation_accounting.py", line 407, in test_r_x_request_retry_shares_original_position_and_mismatch_falls_back
+    self.assertIsNone(max(mapping,key=lambda row:row['conversation_turn'])['position'])      # text-only final turn: no position
+AssertionError: 1 is not None
+
+----------------------------------------------------------------------
+Ran 1 test in 61.789s
+
+FAILED (failures=1)
+W6 exit 1

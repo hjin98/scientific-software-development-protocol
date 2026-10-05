@@ -1,0 +1,11 @@
+{
+ "base_head": "96d2106b67fea9d0f9b883284b2eb43bbb9cddd4",
+ "base_tree": "28fb95cea774d004bd9ace6f3dfaa383c740be27",
+ "delta_patch_sha256": "f9901cf29b34bd20e8b4f1a4fde9d1d60e53605f1d0a0ca7cafb12e35cf72f98",
+ "hashes": [
+  "31dd4dca0a0770b84e42c642b9c5398dc025a38250e7b43e6f5e437a715e7f9a  qualification/ssdp70/eval/batch_assess70.py",
+  "85ea5f7abb8b5b35aad3975f5c92556789bc27d5a62386ef9162e7a93710ac60  qualification/ssdp70/eval/test_batch_cli.py",
+  "b7bead4ecb139732683d1919740a19ce3342740f2e8dace00781d4159c99e87f  qualification/ssdp70/D3-PACKAGE-ACCESS-WINDOW-AND-REPLACEMENT-CLARIFICATION-2026-10-05.md"
+ ],
+ "omp_sha256": "6054460b29e9bad5eba78336f291e1979c2fa0a5cd96fc2d92afd666cc681d26"
+}
