@@ -20,7 +20,7 @@ After the independent check of D3 revision 3 and contract revision 9 returned NO
 
 ## Confirmations and amendments (2026-10-04, after the second independent check)
 
-The second independent check (`/tmp/SSDP70-INDEPENDENT-CHECK-D3-REV4-AND-CONTRACT-REV10-20261004T234050Z.md`, NO-PASS) found that scoring *any* post-request owner open as access produces false zero-tolerance FAILs on honest package-wide scans (a `grep -rl` over the package opened all seven owner copies with no owner content shown), and listed four items for the stakeholder. The stakeholder replied: **“I confirm the items are accepted.”** The items, as put to the stakeholder, are:
+The second independent check (`qualification/ssdp70/PACKAGE-ACCESS-LEDGER-INDEPENDENT-CHECK-D3-REV4-AND-CONTRACT-REV10-2026-10-04.md`, NO-PASS) found that scoring *any* post-request owner open as access produces false zero-tolerance FAILs on honest package-wide scans (a `grep -rl` over the package opened all seven owner copies with no owner content shown), and listed four items for the stakeholder. The stakeholder replied: **“I confirm the items are accepted.”** The items, as put to the stakeholder, are:
 
 1. **R-op values.** The frozen per-arm inexact-rate disparity bound (fail-closed default) and the 0.8 campaign target are confirmed as acceptance-process values.
 2. **Untargeted owner opens.** An unshown, unnamed owner open (for example a package-wide scan) is `UNRESOLVED` and replaceable, not a FAIL. Positive evidence was defined as a *targeted* owner access (a native read, supply of the owner content, or an open of an owner copy whose path is named in a tool action's recorded input). **Superseded by the second round below.**
@@ -29,7 +29,7 @@ The second independent check (`/tmp/SSDP70-INDEPENDENT-CHECK-D3-REV4-AND-CONTRAC
 
 ## Second round of confirmations (2026-10-04, after the third independent check)
 
-The third independent check (`/tmp/SSDP70-INDEPENDENT-CHECK-D3-REV5-AND-CONTRACT-REV11-20261004T235855Z.md`, NO-PASS) showed that first-open placement turns an honest pre-R2 package scan followed by a legitimate post-R2 owner load into a definite, non-replaceable FAIL; that shown owner content is not attributable to one of seven identical copies; and that the named-path test is co-occurrence. Each repair since revision 3 had added mechanism and produced new findings, so a simplification was recommended with these items, and the stakeholder replied: **“I confirm. Draft revision 6, commit, refresh handoff, and spawn a fresh review.”**
+The third independent check (`qualification/ssdp70/PACKAGE-ACCESS-LEDGER-INDEPENDENT-CHECK-D3-REV5-AND-CONTRACT-REV11-2026-10-04.md`, NO-PASS) showed that first-open placement turns an honest pre-R2 package scan followed by a legitimate post-R2 owner load into a definite, non-replaceable FAIL; that shown owner content is not attributable to one of seven identical copies; and that the named-path test is co-occurrence. Each repair since revision 3 had added mechanism and produced new findings, so a simplification was recommended with these items, and the stakeholder replied: **“I confirm. Draft revision 6, commit, refresh handoff, and spawn a fresh review.”**
 
 - **(a) Named-but-unshown owner open.** UNRESOLVED and replaceable, not a FAIL (reverses the named-open part of the first-round confirmation 2).
 - **(b) No read-to-access change.** The owner floor stays an owner *read*, now observed for process-executed reads as content that reached the model (a native read, or owner-class supply: whole owner lines at least the floor long, placed at its own result sequence). First-round confirmation 3 is withdrawn.
@@ -37,10 +37,22 @@ The third independent check (`/tmp/SSDP70-INDEPENDENT-CHECK-D3-REV5-AND-CONTRACT
 - **(d) T7 definition.** An observation-inexact burden run is not replaced; it is an unknown value (candidate unbounded above, comparator zero) that triggers T7 pair addition, and the bound resolves only under that adversarial assignment. Inexactness as a pair-addition trigger is the one declared change in effect (ledger profiles only).
 - **(e) Recorder choices (R-op), applied by the recorder on the stakeholder's confirmation:** the frozen per-arm disparity bound also covers the burden comparisons (the 2.0x-versus-6.5 bound and the class-iii comparisons); there is no campaign-wide cap on replaced owner-unresolved runs beyond the per-case cap. The stakeholder may revise either after the rehearsal.
 
+## Third round of confirmations (2026-10-04, after the fourth independent check)
+
+The fourth independent check (`qualification/ssdp70/PACKAGE-ACCESS-LEDGER-INDEPENDENT-CHECK-D3-REV6-AND-CONTRACT-REV12-2026-10-04.md`, NO-PASS, no Serious Challenge) found only undefined primitives, inconsistencies and undeclared effects, and recommended one text-only revision with no new mechanism. The stakeholder replied: **“I accept your recommendations. Revise, commit, and spawn a new review. We have been revising for too long without converging on a satisfying solution, so we should wrap up instead of keep changing the mechanism.”** The five items, as put to the stakeholder, are:
+
+1. **Detection hole.** A transformed pre-R2 owner read is `UNRESOLVED` and replaceable; no campaign-wide cap on replaced owner-unresolved runs beyond the per-case cap; revisit after the rehearsal.
+2. **Owner-load quantum.** A single matched owner line shown by a package-wide search is **not** a non-replaceable FAIL. A FAIL (or an owner-load hit) needs a native read or owner-class content of at least **256 bytes** of whole owner lines (each at least the 48-byte line floor) in one result, frozen before runs; below it the floor is `UNRESOLVED` and replaceable (minor exposure).
+3. **Burden routes.** T7 uses the unknown-value rule with pair addition, and an inexact T7 run keeps the mixed-mode trigger on through the seven-pair stop. T1, T8, class iii and the new classes use replacement under §5 with a frozen bound. **First-round decision 1 is superseded to that extent:** its "burden run inadmissible only for inexact observation may be replaced" now applies to non-T7 routes only.
+4. **Declared effects.** The four effects (process-executed owner reads scorable; owner-floor UNRESOLVED state, replaceable; T7 inexact run keeps pair addition to seven; mandatory replacement as the scored run) are declared with their direction in contract §8.
+5. **Replaced originals.** Replacement is mandatory, not at the checker's option, once an original is observation-inexact; the replacement is the scored run for every criterion; the original's outcomes are disclosed but not counted; a positive owner FAIL stands and is never replaced.
+
+**Wrap-up instruction.** The stakeholder asked to stop changing the mechanism. Revision 7 therefore changes definitions, clarifications and declarations only. If its independent check returns PASS or only non-blocking findings, the D3 and contract text for this decision is closed and further work is D4 realization and the rehearsal, not redesign; a new blocker is routed as a text fix unless it shows the mechanism cannot work (Serious Challenge).
+
 ## Not decided here
 
 F-5 (T7 mixture reporting at seven pairs; 6.5 comparator owner naming) and the run count N remain open. The UNRESOLVED rate of the owner floor on honest runs is measured by the multi-turn rehearsal.
 
 ## Pending acceptance
 
-**Stakeholder adoption is recorded; fresh independent acceptance remains pending.** The authoring context cannot independently accept these bytes. No runner, profile, transform, qualification, subject, provider or evaluator run is authorized by this decision. D3 revision 6, contract revision 12 and the workplan §0.1 entry need a fresh independent check before dependent D4 realization or admission.
+**Stakeholder adoption is recorded; fresh independent acceptance remains pending.** The authoring context cannot independently accept these bytes. No runner, profile, transform, qualification, subject, provider or evaluator run is authorized by this decision. D3 revision 7, contract revision 13 and the workplan §0.1 entry need a fresh independent check before dependent D4 realization or admission.
