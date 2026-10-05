@@ -49,7 +49,7 @@
       "observer70.py": "13dbb679cda7ed5c24fd11fb2f092e9db3bbc49495093c0744894b29629bd2ff",
       "observer_exec_helper70.py": "8891d415d3d0c10bea887caabdfda6bb9f510523f5a1e54eda4d45165a270972",
       "seccomp70.py": "c81bef42fd310f30c177681cd7b9592158a16f4f164a22fa427804224fa617f9",
-      "stub_tools/mediator.py": "e51f0641907215c9d5a0acb607f967363fc7491fa572a70cfb8701acd2308c2e",
+      "stub_tools/mediator.py": "c68e58229a243f55da04807cff3fea965b65b061d3cbd3fa461312f5de309e18",
       "subject_launcher.py": "e6a1c1487c0617908e73db887901b2a850ae2a5ee1b172cc0f7bf55d0936061d"
     },
     "principals": [
