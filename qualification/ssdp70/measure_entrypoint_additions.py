@@ -3,7 +3,11 @@
 Gross added bytes are the generated lines absent from the 6.6 generated entrypoint, excluding the
 version stamp and description line, which are reported separately (SD-B target accounting, workplan
 section 8.3). Each added block is attributed to R1/R2 (routing line), the clause heading, or its
-numbered element.
+numbered element. The delegate-request block (Protocol 7.1) holds the relocated delegate-request
+sentences of elements 1-3, so each of its lines is attributed to the element whose sentences it carries:
+the lead line, Findings and Realized-results questions to element 1, Variants to element 2, Tensions to
+element 3, and the gap rule to elements 1 and 2 together (it carries both elements' unanswered-part
+rules). The per-element SD-B attribution is confirmed by a context that did not author the wording.
 """
 
 from __future__ import annotations
@@ -55,6 +59,14 @@ def main() -> None:
                 key = "R1+R2 routing line"
             elif line.startswith("## Scientific completion"):
                 key = "clause heading"
+            elif line.startswith(("**When you delegate.**", "- **Findings", "- **Realized results")):
+                key = "element 1 (delegate block)"
+            elif line.startswith("- **Variants"):
+                key = "element 2 (delegate block)"
+            elif line.startswith("- **Tensions"):
+                key = "element 3 (delegate block)"
+            elif line.startswith("Report each part the delegate leaves unanswered"):
+                key = "elements 1+2 (delegate block gap rule)"
             elif re.match(r"^[1-7]\. ", line):
                 key = f"element {line[0]}"
             else:

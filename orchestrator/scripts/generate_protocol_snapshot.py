@@ -83,7 +83,7 @@ def main() -> int:
         if stale:
             print(f"current packaged snapshot is stale: {', '.join(stale)}", file=sys.stderr)
             return 1
-        print("current Protocol 7.0 snapshot matches canonical source; Protocol 5.16, 6.0, 6.1, 6.2, 6.3, 6.4, 6.5, and 6.6 snapshots are immutable and coherent")
+        print("current Protocol 7.1 snapshot matches canonical source; Protocol 5.16, 6.0, 6.1, 6.2, 6.3, 6.4, 6.5, and 6.6 snapshots are immutable and coherent")
         return 0
     CURRENT_TARGET_DIR.mkdir(parents=True, exist_ok=True)
     for name, text in expected.items():

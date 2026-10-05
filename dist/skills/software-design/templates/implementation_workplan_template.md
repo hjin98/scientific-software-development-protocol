@@ -1,7 +1,7 @@
 ---
 kind: implementation-workplan
 workplan_id: REPLACE_ME
-protocol_version: 7.0.0
+protocol_version: 7.1.0
 status: proposed
 ---
 

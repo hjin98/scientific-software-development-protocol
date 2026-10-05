@@ -10,6 +10,25 @@ Older README files accumulated release mappings, bootstrap attempts, and version
 
 ## Protocol 7.x
 
+### 7.1.0 — obligation salience, structured delegation requests, and stratified qualification
+
+Protocol 7.1 is a capability and presentation refinement to Protocol 7.0 following empirical evaluation under Stage 7. It preserves all Protocol 7.0 doctrine, owners, predicates, and thresholds while restructuring delegate requests for execution reliability and refining qualification precision.
+
+Main improvements:
+
+- **Structured delegate-request blocks:**
+  - Relocates delegate questions from scattered element prose to a dedicated, prominent block at the head of the Scientific completion clause on all four role entrypoints and two specialists (`software-documentation`, `software-maintenance-audit`).
+  - Formulates each owed question as an explicit, answerable-either-way prompt containing the launched-work qualifier inside the question itself: Findings (findings or none), Realized results (null envelope of examined and unexamined areas), Variants (variant-search disclosure including changes after seeing results, held-out reuse, lineage, and lower-bound/unknown-interval/claim-limit for unavailable history), and Tensions (gated to consequential judgments, asking for search scope, unreachable places, and found records with bindings and asserters).
+  - Establishes explicit gap rules without an artificial return condition: an unanswered question (including when a delegate returns nothing) or partial coverage is reported as a gap, never as none, a null, or no selection.
+- **Specialist entrypoint adaptation:**
+  - `software-documentation` and `software-maintenance-audit` carry only Findings and Realized results questions, matching their historical scope and omitting variant and tension duties. `repository-hygiene` remains unburdened.
+- **Timing and follow-up semantics:**
+  - Separates launch-time requests from post-return follow-ups. A follow-up re-invocation does not satisfy an initial request part, but answers supplied in frozen returns can remove owed gaps to the extent already addressed.
+- **Execution-surface realism:**
+  - Model-visible surfaces are neutralized of stand-in and qualification cues, ensuring delegator agents interact with tools without artificial status indicators, while adapter-pinned server and store identities are tracked as disclosed residuals.
+- **Undelivered-treatment stratification:**
+  - Ordinary-run episodes where no SSDP skill was selected are classified as undelivered-treatment outcomes rather than candidate doctrine failures, preventing unselected runs from masking the performance of delivered doctrine.
+
 ### 7.0.0 — scientific inspectability, epistemic initiative, and the scientific feedback loop
 
 Protocol 7 is a major revision. It changes what counts as an adequately inspectable scientific computation, what agents must notice and report, and what human gates must receive. It keeps every accepted 6.6 capability unless a stakeholder decision explicitly superseded it. It adds no D5 layer and changes neither the pre-routing kernel nor the Orchestrator control semantics.

@@ -239,4 +239,14 @@ Protocol 6.6 completed its cognitive/operational optimization lifecycle without 
   - exhaustive tension retrieval;
   - Orchestrator control-semantics changes, which are deferred to Protocol 8.
 - **Profiles:** `ssdp-protocol-7.0` rebinds version-bound prompts over the unchanged schema-v2 stage table and transitions. The 6.6 prompts/profile bytes are frozen by blob hash, and the versioning owner's supported-profile list now names 6.6 and 7.0.
-- **Current lifecycle state:** candidate implementation under the 6.6-governed workplan. No 7.0 candidate is frozen, qualified, reviewed, ratified or published. Release identities resolve only from `PROTOCOL-RELEASE-STATE.yaml`.
+- **Current lifecycle state:** the Protocol 7.0 candidate was evaluated in Stage 7 and closed as NON-QUALIFIED under the stakeholder's Option A determination (`STAKEHOLDER-DECISION-2026-10-04-PROTOCOL-7.0-NON-QUALIFICATION-CLOSEOUT.md`).
+
+
+## Protocol 7.0 -> Protocol 7.1 candidate — obligation salience and stratified qualification
+
+- **Trigger:** empirical evaluation of the 7.0 candidate (Stage 7) showed that ordinary executing models often omitted delegate questions buried in dense body prose, while unselected runs (undelivered treatments) were pooled into headline failure rates, and model-visible test-rig cues created artificial artifacts. The stakeholder directed Option B: Re-open Design, targeting Protocol 7.1.0 (`STAKEHOLDER-DECISION-2026-10-05-PROTOCOL-7.1-OPTION-B-REOPEN.md`, OD-1 to OD-4).
+- **Replacement:**
+  - *Obligation salience:* delegate questions are relocated to a dedicated, prominent block at the head of the Scientific completion clause on all four role entrypoints and two specialists (`software-documentation`, `software-maintenance-audit`), with per-question launched-work qualifiers (OD-3) and explicit gap rules without an artificial return condition.
+  - *Contract revision 16:* successor candidate 7.1.0 (A1), with the 7.0 Stage 7 campaign disclosed as development data and fresh blind fixtures required; execution-surface realism (A2) neutralizing mediator cues with adapter-pinned identifiers disclosed as a residual under OD-4(b); request timing and follow-up semantics (A3) distinguishing launch-time requests from post-return follow-ups; and undelivered-treatment outcomes (A4) distinguishing unselected episodes from doctrine failures.
+- **Size decision:** stakeholder decision OD-2 carried over SD-B and the 2.0× fixed-cost backstop (16,208 B limit for the generated implementation entrypoint). The 7.1 generated entrypoint measures 15,463 B, leaving 745 B of static margin.
+- **Current lifecycle state:** candidate implementation under the 6.6-governed workplan; offline D4 acceptance and independent review complete; live qualification gate pending. Release identities resolve only from `PROTOCOL-RELEASE-STATE.yaml`.

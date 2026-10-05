@@ -1,6 +1,6 @@
 ---
 kind: abstraction-concretization-change-plan
-protocol_version: 7.0.0
+protocol_version: 7.1.0
 status: proposed
 ---
 

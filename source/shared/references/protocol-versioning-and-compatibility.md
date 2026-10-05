@@ -141,7 +141,7 @@ Invalidated bootstrap attempts remain historical evidence only and must not be s
 
 ## Orchestration profiles
 
-Profiles remain independently version-bound. Schema identity is separate from protocol version. Supported profile identities include `sdp-protocol-5.16`, `ssdp-protocol-6.0`, `ssdp-protocol-6.1`, `ssdp-protocol-6.2`, `ssdp-protocol-6.3`, `ssdp-protocol-6.4`, `ssdp-protocol-6.5`, `ssdp-protocol-6.6`, and `ssdp-protocol-7.0`. The 6.x and 7.0 profiles may reuse the same machine stage/result schema while carrying distinct version-intrinsic prompt semantics; 7.0 changes no lifecycle/control semantics.
+Profiles remain independently version-bound. Schema identity is separate from protocol version. Supported profile identities include `sdp-protocol-5.16`, `ssdp-protocol-6.0`, `ssdp-protocol-6.1`, `ssdp-protocol-6.2`, `ssdp-protocol-6.3`, `ssdp-protocol-6.4`, `ssdp-protocol-6.5`, `ssdp-protocol-6.6`, `ssdp-protocol-7.0`, and `ssdp-protocol-7.1`. The 6.x and 7.x profiles may reuse the same machine stage/result schema while carrying distinct version-intrinsic prompt semantics; 7.x changes no lifecycle/control semantics.
 
 Core selects by declared protocol/profile identity, not a global semantic "latest". When a new profile becomes current, every older supported profile remains frozen and independently testable. Generic packages/profiles may include PEM doctrine/templates but never a live project's `PROJECT-ENGINEERING-MEMORY.md` or mutable project release-state file.
 

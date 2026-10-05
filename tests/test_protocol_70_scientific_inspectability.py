@@ -45,6 +45,11 @@ PREDICATE = (
     "pipelines, analyses, models, or reports whose outputs mediate scientific interpretation or scientific decisions"
 )
 TRIGGER = "> **Owner-load trigger.** Load the scientific-inspectability owner before a consequential scientific analysis"
+DELEGATE_HEAD = "**When you delegate.**"
+COMPLETION_HEAD = "## Scientific completion when the predicate above applies"
+LAUNCHED = "any tools or agents you launched"
+QUESTIONS = ("Findings", "Realized results", "Variants", "Tensions")
+SPECIALIST_QUESTIONS = {"software-documentation": QUESTIONS[:2], "software-maintenance-audit": QUESTIONS[:2]}
 
 
 def entrypoint(name: str) -> Path:
@@ -59,6 +64,16 @@ def element_lines(text: str) -> dict[str, str]:
         if lines:
             found[key] = lines[0]
     return found
+
+
+def delegate_block(text: str) -> str:
+    """The delegate-request block: from its lead line to the first numbered element."""
+    start = text.index(DELEGATE_HEAD)
+    return text[start:text.index("\n\n1. ", start)]
+
+
+def question_lines(block: str) -> dict[str, str]:
+    return {key: line for key in QUESTIONS for line in block.splitlines() if line.startswith(f"- **{key}")}
 
 
 def accepted(rel: str) -> str | None:
@@ -112,7 +127,11 @@ class Protocol70StructuralTests(unittest.TestCase):
             "if none, only negligible probes using no shared, metered or queued resource; propose the rest",
             "missing, irrecoverable, archaeology-only or misleading realized records",
             "a null states examined and materially unexamined areas",
-            "Unanswered findings are always a gap",
+            "as a gap, never as none, a null or no selection: findings always;",
+            "including when it returns nothing",
+            "lineage including delegated or resumed work, without double-counting overlapping trials",
+            "a recorded finding bearing on it that has not been raised as a Serious Challenge",
+            "evidently produced, ran and reviewed no realized results and prepared no gate evidence",
             "known lower bound, unknown interval and claim limit",
             "natively attributed account/record asserter",
             "content-stated human/AI asserter and which agent",
@@ -130,6 +149,48 @@ class Protocol70StructuralTests(unittest.TestCase):
             "which binds only after the stakeholder or task authority accepts it",
         ):
             self.assertIn(meaning, d1)
+
+    def test_delegate_request_block_is_relocated_once_with_one_wording_per_variant(self) -> None:
+        blocks: dict[str, str] = {}
+        for name in PLACEMENT:
+            text = entrypoint(name).read_text(encoding="utf-8")
+            if name == "repository-hygiene":
+                self.assertNotIn(DELEGATE_HEAD, text, name)
+                continue
+            self.assertEqual(text.count(DELEGATE_HEAD), 1, name)
+            completion = text.index(COMPLETION_HEAD)
+            self.assertLess(completion, text.index(DELEGATE_HEAD), name)
+            self.assertLess(text.index(DELEGATE_HEAD), text.index("\n\n1. Within the task's declared resource budget"), name)
+            block = blocks[name] = delegate_block(text)
+            expected = SPECIALIST_QUESTIONS.get(name, QUESTIONS)
+            found = question_lines(block)
+            self.assertEqual(tuple(found), expected, name)
+            for key, line in found.items():
+                self.assertIn(LAUNCHED, line, f"{name}: {key} question lost its launched-work qualifier")
+            for dropped in set(QUESTIONS) - set(expected):
+                self.assertNotIn(f"- **{dropped}", block, name)
+            self.assertIn("including when it returns nothing", block, name)
+            self.assertNotIn("On return", block, name)
+            self.assertIn("findings always;", block, name)
+            self.assertIn("evidently produced, ran and reviewed no realized results", block, name)
+            # relocated, not duplicated: the old delegate-request sentences are gone from the element prose
+            for old in ("ask for findings or none", "Ask each delegate asked for findings", "Ask a delegate relying on it",
+                        "Unanswered findings are always a gap"):
+                self.assertNotIn(old, text, f"{name}: old sentence {old!r} still present")
+            # the delegator's own duties stay in the element prose
+            self.assertIn("adds nothing except asked delegate answers/gaps", text, name)
+        roles = {blocks[name] for name in ROLES}
+        self.assertEqual(len(roles), 1, "the role entrypoints must carry one block wording")
+        specialists = {blocks[name] for name in SPECIALIST_QUESTIONS}
+        self.assertEqual(len(specialists), 1, "the specialists must carry one block wording")
+        role_block, specialist_block = next(iter(roles)), next(iter(specialists))
+        shared = role_block[:role_block.index("- **Variants")]
+        self.assertTrue(specialist_block.startswith(shared), "specialist lead line and first two questions must equal the role block's")
+        self.assertIn("variants, for a returned result, with unknown selection history and claim limit", role_block)
+        self.assertNotIn("variant", specialist_block.split("- **Realized results")[1])
+        self.assertIn("never as none or a null", specialist_block)
+        for name in ROLES:
+            self.assertIn("judgments with no reported search", entrypoint(name).read_text(encoding="utf-8"), name)
 
     def test_selection_description_covers_new_classes_without_narrowing(self) -> None:
         front = entrypoint("software-implementation").read_text(encoding="utf-8").split("---", 2)[1]

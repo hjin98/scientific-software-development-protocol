@@ -333,6 +333,7 @@ SSDP began as a software-engineering protocol and grew into a scientific-softwar
 | **6.5** | self-governance/release-state strengthening plus importance-weighted attention, proportional rigor/evidence, evidence-only requalification economy, and release-documentation closeout |
 | **6.6** | cognitive/operational optimization: small universal kernel with a minimal inlined safety kernel, conditional semantic-definition and memory-schema owners, decision-sufficient handoffs and Working State, cognitive-resource escalation, optional independent review trajectories, strict version binding at entry, and empirical trajectory evaluation |
 | **7.0** | scientific inspectability, epistemic initiative and the scientific feedback loop: realized-record inspectability, O1/O2/O3 obligation binding with a claim-integrity floor, bounded initiative with delegate returns and variant-search disclosure, bounded tension search, feedback persistence, and decision-sufficient gate evidence |
+| **7.1** | obligation salience and stratified qualification: structured delegate-request blocks with per-question launched-work qualifiers, specialist entrypoint scoping, execution-surface neutralization, and undelivered-treatment stratification |
 
 For the full user-facing capability history, see [CHANGELOG.md](CHANGELOG.md). For detailed semantic rationale and superseded release attempts, see [history/SEMANTIC_EVOLUTION.md](history/SEMANTIC_EVOLUTION.md). Exact mutable release mappings remain in [PROTOCOL-RELEASE-STATE.yaml](PROTOCOL-RELEASE-STATE.yaml).
 

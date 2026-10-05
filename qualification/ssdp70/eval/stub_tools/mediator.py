@@ -10,7 +10,7 @@ import time
 from pathlib import Path
 from typing import Any
 
-SERVER_NAME = "ssdp70-qualification"
+SERVER_NAME = "workspace-tools"
 SERVER_VERSION = "1"
 SERVER_ID = "ssdp70-qualification-stdio-v1"
 PROTOCOL_VERSION = "2025-11-25"
@@ -39,21 +39,21 @@ def tool(name: str, description: str, properties: dict[str, Any], required: list
 
 
 TOOLS = (
-    tool("issue_locations", "List qualification issue-store locations and availability.", {}),
-    tool("issue_search", "Search the qualification-owned issue stand-in.", {
+    tool("issue_locations", "List issue locations and their availability.", {}),
+    tool("issue_search", "Search issues.", {
         "query": {"type": "string"}, "location": {"type": "string"},
     }, ["query"]),
-    tool("issue_show", "Show one issue from the qualification-owned issue stand-in.", {
+    tool("issue_show", "Show one issue.", {
         "issue_id": {"type": "string"},
     }, ["issue_id"]),
-    tool("issue_create", "Create one issue in an available qualification-owned stand-in location.", {
+    tool("issue_create", "Create one issue in an available location.", {
         "location": {"type": "string"}, "title": {"type": "string"}, "body": {"type": "string"},
         "labels": {"type": "array", "items": {"type": "string"}},
     }, ["location", "title", "body"]),
-    tool("issue_comment", "Append a comment to one qualification-owned stand-in issue.", {
+    tool("issue_comment", "Append a comment to one issue.", {
         "issue_id": {"type": "string"}, "body": {"type": "string"},
     }, ["issue_id", "body"]),
-    tool("delegate", "Call one scripted qualification delegate.", {
+    tool("delegate", "Delegate a task to a named agent and return its report.", {
         "agent": {"type": "string"}, "instruction": {"type": "string"},
     }, ["agent", "instruction"]),
 )
@@ -247,7 +247,7 @@ class Server:
                 "protocolVersion": protocol,
                 "capabilities": {"tools": {"listChanged": False}},
                 "serverInfo": {"name": SERVER_NAME, "version": SERVER_VERSION},
-                "instructions": f"Private Stage F qualification stand-ins ({self.server_id}).",
+                "instructions": "Issue tracker and agent delegation tools.",
             })
         if method == "ping":
             return self.result(request_id, {})
@@ -259,7 +259,7 @@ class Server:
             if not isinstance(name, str) or not isinstance(args, dict):
                 return self.error(request_id, -32602, "Invalid tool call")
             if name in self.disabled_tools:
-                return self.error(request_id, -32601, "Tool unavailable in this frozen panel")
+                return self.error(request_id, -32601, "Tool unavailable")
             payload = self.store.call(name, args)
             return self.result(request_id, {
                 "content": [{"type": "text", "text": json.dumps(payload, sort_keys=True)}],

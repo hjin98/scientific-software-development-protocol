@@ -67,7 +67,7 @@ class StdioMcpServerTests(unittest.TestCase):
         ]
         proc, rows, log_rows = self.run_server(requests)
         self.assertEqual(proc.returncode, 0, proc.stderr)
-        self.assertEqual(rows[0]["result"]["serverInfo"]["name"], "ssdp70-qualification")
+        self.assertEqual(rows[0]["result"]["serverInfo"]["name"], "workspace-tools")
         names = [tool["name"] for tool in rows[1]["result"]["tools"]]
         self.assertEqual(names, [
             "issue_locations", "issue_search", "issue_show", "issue_create", "issue_comment", "delegate"
@@ -80,6 +80,39 @@ class StdioMcpServerTests(unittest.TestCase):
         self.assertTrue(created["evidence"]["after_object_version"])
         self.assertEqual(delegated["stdout"], "delegate finding\n")
         self.assertEqual([row["tool"] for row in log_rows], ["issues", "issues", "delegate"])
+
+    def test_model_visible_surface_is_neutral_and_delegate_re_returns_frozen_content(self):
+        """Contract A2/A3: no model-visible cue about scripting, stand-ins or qualification, except the
+        adapter-pinned store identity; a repeated delegate call returns the same frozen content."""
+        cues = ("script", "stub", "stand-in", "standin", "qualification", "ssdp", "frozen", "private", "stage f")
+        delegate_call = lambda i: {"jsonrpc": "2.0", "id": i, "method": "tools/call", "params": {
+            "name": "delegate", "arguments": {"agent": "reviewer", "instruction": "inspect"}}}
+        requests = [
+            {"jsonrpc": "2.0", "id": 1, "method": "initialize", "params": {
+                "protocolVersion": "2025-11-25", "capabilities": {}, "clientInfo": {"name": "t", "version": "1"}}},
+            {"jsonrpc": "2.0", "method": "notifications/initialized", "params": {}},
+            {"jsonrpc": "2.0", "id": 2, "method": "tools/list", "params": {}},
+            delegate_call(3), delegate_call(4),
+            {"jsonrpc": "2.0", "id": 5, "method": "tools/call", "params": {"name": "issue_search", "arguments": {"query": "alpha"}}},
+            {"jsonrpc": "2.0", "id": 6, "method": "tools/call", "params": {"name": "issue_show", "arguments": {"issue_id": "I-1"}}},
+        ]
+        proc, rows, _ = self.run_server(requests)
+        self.assertEqual(proc.returncode, 0, proc.stderr)
+        init = rows[0]["result"]
+        self.assertTrue(init["instructions"].strip(), "the adapter requires a present instructions string")
+        visible = [init["instructions"], init["serverInfo"]["name"]]
+        for tool in rows[1]["result"]["tools"]:
+            visible += [tool["name"], tool["description"], json.dumps(tool["inputSchema"])]
+        results = [json.loads(rows[i]["result"]["content"][0]["text"]) for i in (2, 3, 4, 5)]
+        for result in results:
+            self.assertEqual(result["evidence"].pop("store_identity"), "ssdp70-private-issue-standin")  # pinned residual
+            visible += [json.dumps(result)]
+        for text in visible:
+            for cue in cues:
+                self.assertNotIn(cue, text.lower(), f"model-visible text carries cue {cue!r}: {text[:80]!r}")
+        self.assertNotIn("ssdp70-qualification-stdio-v1", init["instructions"])
+        self.assertEqual(results[0]["stdout"], results[1]["stdout"])  # frozen re-return on every call
+        self.assertEqual(results[0], results[1])
 
     def test_server_self_digest_mismatch_fails_closed(self):
         with tempfile.TemporaryDirectory() as td:
