@@ -1,0 +1,110 @@
+{
+  "schema": 1,
+  "profile_id": "omp-evaluator-readonly-template",
+  "adapter_id": "omp-eval-json-v1",
+  "agent_model": "MUST-BE-FROZEN-BEFORE-ASSESSMENT",
+  "budgets": {
+    "max_turns": 40,
+    "timeout_s": 1800
+  },
+  "containment_policy": {
+    "kind": "omp-three-principal-bwrap-v3",
+    "enforcement": "required-before-launch",
+    "build_inventory_sha256": "MUST-BE-FROZEN-BEFORE-ASSESSMENT",
+    "execution_support_sha256": "MUST-BE-FROZEN-BEFORE-ASSESSMENT",
+    "host_execution_environment": "MUST-BE-FROZEN-BEFORE-ASSESSMENT",
+    "inference_authority": "descriptor pairs inherited by the launcher only; relayed only for connections whose client socket is held solely by the launcher-started OMP process",
+    "observer_boundary": {
+      "filesystem": "explicit Python runtime, observer code, CA bundle and synthetic /etc only; no host HOME, custody, mediator or supervisor state",
+      "network": "trusted observer opens only the frozen provider route before accepting subject input, then moves to a private network namespace and installs seccomp denying new sockets, connects and addressed sends",
+      "process": "private PID namespace with no host process view; capability set dropped after route setup",
+      "provider_route_capability": "one connected stream socket owned by the observer; inference requests remain single-purpose and evidence is append-only"
+    },
+    "principal_files_sha256": "MUST-BE-FROZEN-BEFORE-ASSESSMENT",
+    "principals": [
+      "qualification-supervisor",
+      "provider-control-observer",
+      "evaluator-subject"
+    ],
+    "provider_route": {
+      "api": "openai-completions",
+      "base_path": "/",
+      "context_window": 262144,
+      "credential_env": "SSDP70_OMP_PROVIDER_CREDENTIAL",
+      "max_tokens": 65536,
+      "model_id": "zai-org/GLM-5.3-Flash",
+      "placeholder_key": "ssdp70-run-transport-key",
+      "provider_id": "deepinfra",
+      "reasoning": true,
+      "upstream": "https://api.deepinfra.com/v1/openai"
+    },
+    "runtime_closure_identity_sha256": "MUST-BE-FROZEN-BEFORE-ASSESSMENT",
+    "runtime_dependency_manifest_sha256": "MUST-BE-FROZEN-BEFORE-ASSESSMENT",
+    "settings_closure_sha256": "MUST-BE-FROZEN-BEFORE-ASSESSMENT",
+    "subject_boundary": "bubblewrap user/pid/ipc/uts/cgroup/net namespaces, empty network namespace (loopback only), all capabilities dropped, seccomp denies AF_UNIX sockets and process inspection, explicit digest-bound runtime dependency manifest plus synthetic /etc, candidate bundle mounted read-only, no host HOME/custody/private state",
+    "substrate": {
+      "executable": "/usr/bin/bwrap",
+      "executable_sha256": "MUST-BE-FROZEN-BEFORE-ASSESSMENT",
+      "version": "bubblewrap 0.6.1"
+    }
+  },
+  "credential_service_account_policy": {
+    "ambient_credentials": "deny",
+    "parent_authentication": "one qualification-only provider credential held only by the provider-control/observation principal",
+    "sandboxed_subprocess_credentials": "deny"
+  },
+  "install_mechanism": "none",
+  "mcp_servers": [],
+  "native_surface_requirements": [
+    "runtime_capability:omp-json-event-stream-v1"
+  ],
+  "native_tools": [
+    "read",
+    "glob",
+    "grep"
+  ],
+  "network_external_write_policy": {
+    "external_write": "deny",
+    "network": "deny-native-evaluator-network"
+  },
+  "provider_managed_unknowns": [
+    {
+      "classification": "arm-neutral",
+      "name": "provider-backend-shard",
+      "sensitive_claims": [
+        "*"
+      ]
+    },
+    {
+      "classification": "arm-neutral",
+      "name": "host-derived-system-prompt-workstation-block",
+      "sensitive_claims": [
+        "*"
+      ]
+    },
+    {
+      "classification": "arm-neutral",
+      "name": "provider-layer-retry-of-transient-errors-and-empty-completions",
+      "sensitive_claims": [
+        "*"
+      ]
+    }
+  ],
+  "provider_runtime": {
+    "build_id": "2c2e51f3b6fae6722da4f7b69751a2e9467ab063",
+    "executable": "omp",
+    "executable_bytes": 194573512,
+    "executable_path": "MUST-BE-FROZEN-BEFORE-ASSESSMENT",
+    "executable_sha256": "6054460b29e9bad5eba78336f291e1979c2fa0a5cd96fc2d92afd666cc681d26",
+    "provider": "deepinfra",
+    "runtime": "omp",
+    "version": "18.0.11"
+  },
+  "reasoning_configuration": {
+    "source": "--thinking",
+    "thinking": "high"
+  },
+  "workspace_realization": {
+    "kind": "temporary-read-only-evidence-bundle"
+  }
+}
