@@ -574,6 +574,46 @@ class ReviewDiscriminators(PhaseAndDelivery):
         self.assertFalse(r["owner_floor_exact"])
         self.assertTrue(any("request" in reason for reason in r["timing_reasons"] + r["reasons"]), (r["timing_reasons"], r["reasons"]))
 
+    def test_k_ledger_and_adapter_agree_on_every_native_owner_read_target_form(self):
+        from adapters import omp
+        def native(**payload):
+            return {"kind": "resource_access", "status": "result", "sequence": 5, "event_id": "e5",
+                    "payload": {"result_status": "result", **payload}}
+        forms = (
+            {"consumed_resource": {"match": "exact", "package_relative_path": "x/references/owner.md"}},
+            {"consumed_resource": {"match": "partial"}, "resolved_resource_path": "/opt/ssdp/skills/x/references/owner.md"},
+            {"consumed_resource": {"match": "exact"}, "resource_identity": "x/references/owner.md:10-20"},
+            {"consumed_resource": {"match": "partial", "package_relative_path": "x/references/owner.md:raw"}},
+        )
+        for payload in forms:
+            event_ = native(**payload)
+            ledger = pl.account(None, 1000, [event_], self.root, owner_name="owner.md", parameters=TEST_PARAMETERS)
+            self.assertEqual([r["sequence"] for r in ledger["owner_read_observed"]], [5], payload)
+            self.assertEqual(omp.owner_reads([event_], "owner.md"), [5], payload)
+        for payload in ({"consumed_resource": {"match": "none", "package_relative_path": "x/references/owner.md"}},
+                        {"consumed_resource": {"match": "exact", "package_relative_path": "x/references/owner.md.bak"}},
+                        {"consumed_resource": {"match": "exact", "package_relative_path": "x/references/other.md"}}):
+            event_ = native(**payload)
+            ledger = pl.account(None, 1000, [event_], self.root, owner_name="owner.md", parameters=TEST_PARAMETERS)
+            self.assertEqual(ledger["owner_read_observed"], [], payload)
+            self.assertEqual(omp.owner_reads([event_], "owner.md"), [], payload)
+
+    def test_owner_read_claim_family_needs_evidence_except_the_absence_claim(self):
+        needs = "owner-read claim has no successful resource-access result evidence"
+        for claim in ("owner-read", "t7-owner-read", "owner-read-mode", "Owner-Read-Hit"):
+            self.assertIn(needs, core70.validate_claim_observability([], [claim]), claim)
+        self.assertNotIn(needs, core70.validate_claim_observability([], ["owner-read-absence"]))
+
+    def test_s_empty_or_unpositioned_window_is_the_whole_trace_so_an_honest_text_final_turn_stays_explained(self):
+        # A text-only final turn has no tool event, so its request position falls back to the trace start (1);
+        # the window would end at 0. An empty window must not leave an honest whole-file read unexplained.
+        requests = [{"t_ns": 1000, "monotonic_ns": 1000, "position": 1}, {"t_ns": 1500, "monotonic_ns": 1500, "position": 1}]
+        events = [event(i, "nothing") for i in range(1, 6)]
+        events[2] = event(3, TWIN)
+        r = self.account([(1200, "x/references/owner.md")], events, request_records=requests)
+        window = r["owner_open_windows"][0]["window"]
+        self.assertEqual((window["start"], window["end"]), (1, 5))
+        self.assertTrue(r["exact"], r["reasons"])
 
 class RealWatcherOverflow(unittest.TestCase):
     @unittest.skipUnless(bwrap_usable(), "bwrap unusable")

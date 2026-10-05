@@ -1427,7 +1427,7 @@ def validate_claim_observability(events: list[dict[str, Any]], claims: Iterable[
         and event.get("status") == "result"
         and (event.get("payload") or {}).get("result_status") == "result"
     ]
-    if any(claim.endswith("owner-read") for claim in normalized) and not successful_reads and not supply and not any(e.get("kind")=="package_access" and e["payload"].get("owner_read_observed") for e in events):
+    if any("owner-read" in claim and "owner-read-absence" not in claim for claim in normalized) and not successful_reads and not supply and not any(e.get("kind")=="package_access" and e["payload"].get("owner_read_observed") for e in events):
         errors.append("owner-read claim has no successful resource-access result evidence")
     burden_sensitive = any(
         token in claim

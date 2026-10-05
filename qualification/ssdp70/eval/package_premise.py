@@ -58,7 +58,16 @@ def check(package, sources, mounts, witness=None, *, owner_name, line_floor=48,
     owners = [p for p in package.rglob(owner_name) if p.is_file()]
     if not owners:
         unresolved.append("owner source is absent")
-    lines = {line for path in owners for line in path.read_bytes().splitlines() if len(line) >= line_floor}
+    # Segment owner lines exactly as the accounting does (strict UTF-8, str.splitlines); a copy the accounting
+    # cannot decode would contribute no owner lines there, so it cannot be verified here either.
+    lines = set()
+    for path in owners:
+        try:
+            text = path.read_bytes().decode("utf-8")
+        except UnicodeDecodeError:
+            unresolved.append(f"owner copy is not valid UTF-8: {path.relative_to(package)}")
+            continue
+        lines.update(line.encode() for line in text.splitlines() if len(line.encode()) >= line_floor)
     pattern = re.compile(b"|".join(re.escape(line) for line in sorted(lines))) if lines else None
     for path in package.rglob("*"):
         if path.is_symlink():
@@ -75,7 +84,7 @@ def check(package, sources, mounts, witness=None, *, owner_name, line_floor=48,
         unresolved.append("mount source outside frozen input envelope")
     for name, root in sources.items():
         manifest = actual_sources[name]
-        key = (digest(package_manifest), digest(manifest), digest(mounts))
+        key = (digest(package_manifest), digest(manifest), digest(mounts), line_floor, owner_name)
         if key not in _SCAN_CACHE:
             hits = []
             for rel, row in manifest.items():

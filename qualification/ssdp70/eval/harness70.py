@@ -849,7 +849,7 @@ def run_episode(
         claim_errors = core70.validate_claim_observability(events, claims, supply_rows, ledger_exact=bool(accounting and accounting["exact"]))
         profile_errors.extend(claim_errors)
         observation_errors.extend(e for e in claim_errors if e in ("T1/T7/T8 burden claim has no successful exact SSDP-resource evidence", "T1/T7/T8 burden claim requires an exact package-access observation", "owner-read-absence needs exact owner observation and independently adjudicated provably-post-R2 opens"))
-        if any(str(claim).lower().endswith("owner-read") for claim in claims) and not owner_read_sequences:
+        if any("owner-read" in str(claim).lower() and "owner-read-absence" not in str(claim).lower() for claim in claims) and not owner_read_sequences:
             profile_errors.append("owner-read claim has no successful read of the canonical owner resource")
         _write_normalized(events, out)
         (out / "normalization-map.json").write_text(

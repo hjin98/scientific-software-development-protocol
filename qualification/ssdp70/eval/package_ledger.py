@@ -321,6 +321,21 @@ def is_owner_copy(rel: str, owner_name: str | None) -> bool:
     return owner_name is not None and rel.rsplit("/", 1)[-1] == owner_name
 
 
+SELECTOR_SUFFIX = re.compile(r":(?:raw|\d+(?:[-+]\d*)?(?:,\d+(?:[-+]\d*)?)*)$")
+
+
+def native_owner_target(event: dict[str, Any], owner_name: str | None) -> bool:
+    """The one test for a native read of an owner copy: consumed content (exact or partial) whose package path,
+    resolved path or resource identity, after selector stripping, is an owner copy. Shared by the ledger accounting
+    and the adapter, so the two owner-read records cannot disagree about which native reads count."""
+    payload = event.get("payload") or {}
+    consumed = payload.get("consumed_resource") or {}
+    if event.get("kind") != "resource_access" or consumed.get("match") not in ("exact", "partial"):
+        return False
+    targets = (consumed.get("package_relative_path"), payload.get("resolved_resource_path"), payload.get("resource_identity"))
+    return any(isinstance(t, str) and is_owner_copy(SELECTOR_SUFFIX.sub("", t), owner_name) for t in targets)
+
+
 def owner_supply(events, corpus, owner_name, parameters):
     lines = {line for rel, text in corpus.items() if is_owner_copy(rel, owner_name)
              for line in text.splitlines() if len(line.encode()) >= parameters["owner_line_floor"]}
@@ -333,9 +348,7 @@ def owner_supply(events, corpus, owner_name, parameters):
                "bytes": sum(len(line.encode()) for line in matched), "source": "owner-class-supply"}
         (positive if len(matched) >= 2 and row["bytes"] >= parameters["owner_load_quantum"] else minor).append(row)
     for event in events:
-        consumed = (event.get("payload") or {}).get("consumed_resource") or {}
-        if (event.get("kind") == "resource_access" and consumed.get("match") in ("exact", "partial")
-                and is_owner_copy(consumed.get("package_relative_path") or "", owner_name)):
+        if native_owner_target(event, owner_name):
             positive.append({"sequence": int(event["sequence"]), "event_id": event.get("event_id"), "source": "native-read"})
     return positive, minor
 
@@ -351,7 +364,7 @@ def candidate_window(lower, upper, requests, events, lost=False):
     lo = earlier[-1].get("position", start) if earlier else start
     hi = later[0].get("position", start) - 1 if later else end
     if hi < lo or not earlier:
-        lo, hi = start, end
+        lo, hi = start, end     # conservative whole-trace window; a text-only final turn has no position (hi < lo)
     return {"start": lo, "end": hi, "timing_loss": False}
 
 

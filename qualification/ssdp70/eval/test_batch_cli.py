@@ -221,6 +221,21 @@ class ReplacementBookkeeping(unittest.TestCase):
             else:broken[path[0]]=value
             self.assertFalse(batch_assess70.observation_adjudicated(broken),path)
 
+    def test_second_replacement_for_another_question_is_disclosed_unscored_not_an_aborted_aggregation(self):
+        mf,runs=self.setup_case()
+        mf["runs"].append({**mf["runs"][1],"id":"replacement-2"})
+        runs["replacement-2"]={**runs["replacement"]}
+        runs["replacement"]["owner_floor_state"]="UNRESOLVED"       # byte-exact, owner floor still unresolved
+        mf["package_access_replacements"].append({"original":"original","replacement":"replacement-2","question":"owner-floor"})
+        slots,report=batch_assess70.replacement_slots(mf,runs)
+        first,second=report["records"]
+        self.assertTrue(first["scored"]);self.assertFalse(second["scored"])
+        self.assertIn("undecided",second["reason"])
+        self.assertEqual(slots["original"],"replacement")
+        self.assertTrue(any(v["original"]=="original" and "owner-floor" in v["questions"] for v in report["required"]))
+        again=copy.deepcopy(mf);again["package_access_replacements"][1]["question"]="bytes"      # same question again is outcome selection
+        with self.assertRaises(core70.ContractError):batch_assess70.replacement_slots(again,runs)
+
     def test_v_missing_byte_bound_keeps_byte_question_pending_but_owner_has_no_campaign_cap(self):
         mf,runs=self.setup_case(bound=False)
         self.assertEqual(batch_assess70.replacement_slots(mf,runs)[0]["original"],"original")

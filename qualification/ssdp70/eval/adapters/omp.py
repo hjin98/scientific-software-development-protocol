@@ -3962,10 +3962,7 @@ def owner_reads(events: list[dict[str, Any]], owner_name: str) -> list[int]:
         payload = event.get("payload") or {}
         if payload.get("result_status") != "result":
             continue
-        consumed = payload.get("consumed_resource") or {}
-        target = f"{payload.get('resource_identity') or ''} {consumed.get('package_relative_path') or ''} {payload.get('resolved_resource_path') or ''}"
-        targets = (consumed.get("package_relative_path"), payload.get("resolved_resource_path"), payload.get("resource_identity"))
-        if any(isinstance(t, str) and package_ledger.is_owner_copy(SELECTOR_SUFFIX.sub("", t), owner_name) for t in targets) and consumed.get("match") in ("exact", "partial"):
+        if package_ledger.native_owner_target(event, owner_name):
             hits.append(int(event["sequence"]))
     return hits
 

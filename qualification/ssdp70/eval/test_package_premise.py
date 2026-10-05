@@ -132,3 +132,23 @@ class PremiseDetectorsIsolated(PremiseFixture):
         for state in ("FAIL", "UNRESOLVED"):
             self.assertTrue(pp.verify_report({**report, "state": state}))
         self.assertTrue(pp.verify_report({**report, "failures": ["x"]}))
+
+
+    def test_z_scan_is_not_reused_across_floors_or_owner_names_and_segments_like_the_accounting(self):
+        line = self.owner.read_text().splitlines()[0]
+        (self.workspace / "notes2.txt").write_text("prefix\n" + line + "\n")
+        witness = self.witness()
+        self.assertEqual(pp.check(self.package, self.sources, self.mounts, witness, owner_name="owner.md", line_floor=48)["state"], "FAIL")
+        # Same bindings, higher floor: the 64-byte line is below it, so the earlier cached collision must not be reused.
+        self.assertEqual(pp.check(self.package, self.sources, self.mounts, witness, owner_name="owner.md", line_floor=100)["state"], "PASS")
+        # Same bindings, other owner name: no owner copy exists.
+        self.assertEqual(pp.check(self.package, self.sources, self.mounts, witness, owner_name="absent.md", line_floor=48)["state"], "UNRESOLVED")
+        # A form feed separates str lines but not bytes lines; the accounting uses str segmentation.
+        a, b = "A" * 30, "B" * 30
+        self.owner.write_text(a + "\x0c" + b + "\n")
+        (self.workspace / "notes2.txt").write_text(a + "\n")
+        self.assertEqual(pp.check(self.package, self.sources, self.mounts, self.witness(), owner_name="owner.md", line_floor=48)["state"], "PASS")
+        self.owner.write_bytes(b"\xff\xfe" + (b"x" * 60) + b"\n")
+        report = pp.check(self.package, self.sources, self.mounts, self.witness(), owner_name="owner.md", line_floor=48)
+        self.assertEqual(report["state"], "UNRESOLVED")
+        self.assertTrue(any("not valid UTF-8" in r for r in report["unresolved"]))

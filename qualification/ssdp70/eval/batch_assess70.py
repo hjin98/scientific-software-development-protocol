@@ -548,10 +548,16 @@ def replacement_slots(manifest, runs):
         count[case] = count.get(case,0)+1
         if count[case]>2:
             raise core70.ContractError("package-access replacement exceeds the per-case/per-T7-run cap of two")
-        if any(v["original"]==original and v["scored"] for v in report["records"]):
+        prior = [v for v in report["records"] if v["original"]==original and v["scored"]]
+        if any(v["question"]==question for v in prior):
             raise core70.ContractError("a resolved replacement cannot be outcome-selected again")
         record = {**request, "original_outcome":o.get("qualification_outcome"), "scored":False}
         report["records"].append(record)
+        if prior:
+            # The slot already has a scored replacement for another question. Which run then scores each criterion is a
+            # contract decision (review finding 4), so fail closed: disclose, do not score, keep the question required.
+            record["reason"] = "slot already resolved by another replacement; scored-slot rule for a second question is undecided"
+            continue
         safe = (observation_adjudicated(o)
                 and o.get("owner_floor_adjudication",{}).get("adjudicated") is True
                 and o.get("owner_floor_state") != "FAIL"

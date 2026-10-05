@@ -1,0 +1,246 @@
+diff --git a/qualification/ssdp70/eval/adapters/omp.py b/qualification/ssdp70/eval/adapters/omp.py
+index 87c2e5e..04701f6 100644
+--- a/qualification/ssdp70/eval/adapters/omp.py
++++ b/qualification/ssdp70/eval/adapters/omp.py
+@@ -3962,10 +3962,7 @@ def owner_reads(events: list[dict[str, Any]], owner_name: str) -> list[int]:
+         payload = event.get("payload") or {}
+         if payload.get("result_status") != "result":
+             continue
+-        consumed = payload.get("consumed_resource") or {}
+-        target = f"{payload.get('resource_identity') or ''} {consumed.get('package_relative_path') or ''} {payload.get('resolved_resource_path') or ''}"
+-        targets = (consumed.get("package_relative_path"), payload.get("resolved_resource_path"), payload.get("resource_identity"))
+-        if any(isinstance(t, str) and package_ledger.is_owner_copy(SELECTOR_SUFFIX.sub("", t), owner_name) for t in targets) and consumed.get("match") in ("exact", "partial"):
++        if package_ledger.native_owner_target(event, owner_name):
+             hits.append(int(event["sequence"]))
+     return hits
+ 
+diff --git a/qualification/ssdp70/eval/batch_assess70.py b/qualification/ssdp70/eval/batch_assess70.py
+index b6c9483..73e3d6b 100644
+--- a/qualification/ssdp70/eval/batch_assess70.py
++++ b/qualification/ssdp70/eval/batch_assess70.py
+@@ -548,10 +548,16 @@ def replacement_slots(manifest, runs):
+         count[case] = count.get(case,0)+1
+         if count[case]>2:
+             raise core70.ContractError("package-access replacement exceeds the per-case/per-T7-run cap of two")
+-        if any(v["original"]==original and v["scored"] for v in report["records"]):
++        prior = [v for v in report["records"] if v["original"]==original and v["scored"]]
++        if any(v["question"]==question for v in prior):
+             raise core70.ContractError("a resolved replacement cannot be outcome-selected again")
+         record = {**request, "original_outcome":o.get("qualification_outcome"), "scored":False}
+         report["records"].append(record)
++        if prior:
++            # The slot already has a scored replacement for another question. Which run then scores each criterion is a
++            # contract decision (review finding 4), so fail closed: disclose, do not score, keep the question required.
++            record["reason"] = "slot already resolved by another replacement; scored-slot rule for a second question is undecided"
++            continue
+         safe = (observation_adjudicated(o)
+                 and o.get("owner_floor_adjudication",{}).get("adjudicated") is True
+                 and o.get("owner_floor_state") != "FAIL"
+diff --git a/qualification/ssdp70/eval/core70.py b/qualification/ssdp70/eval/core70.py
+index 7b1642e..ede37f8 100644
+--- a/qualification/ssdp70/eval/core70.py
++++ b/qualification/ssdp70/eval/core70.py
+@@ -1427,7 +1427,7 @@ def validate_claim_observability(events: list[dict[str, Any]], claims: Iterable[
+         and event.get("status") == "result"
+         and (event.get("payload") or {}).get("result_status") == "result"
+     ]
+-    if any(claim.endswith("owner-read") for claim in normalized) and not successful_reads and not supply and not any(e.get("kind")=="package_access" and e["payload"].get("owner_read_observed") for e in events):
++    if any("owner-read" in claim and "owner-read-absence" not in claim for claim in normalized) and not successful_reads and not supply and not any(e.get("kind")=="package_access" and e["payload"].get("owner_read_observed") for e in events):
+         errors.append("owner-read claim has no successful resource-access result evidence")
+     burden_sensitive = any(
+         token in claim
+diff --git a/qualification/ssdp70/eval/harness70.py b/qualification/ssdp70/eval/harness70.py
+index dc6e019..de9f08d 100644
+--- a/qualification/ssdp70/eval/harness70.py
++++ b/qualification/ssdp70/eval/harness70.py
+@@ -849,7 +849,7 @@ def run_episode(
+         claim_errors = core70.validate_claim_observability(events, claims, supply_rows, ledger_exact=bool(accounting and accounting["exact"]))
+         profile_errors.extend(claim_errors)
+         observation_errors.extend(e for e in claim_errors if e in ("T1/T7/T8 burden claim has no successful exact SSDP-resource evidence", "T1/T7/T8 burden claim requires an exact package-access observation", "owner-read-absence needs exact owner observation and independently adjudicated provably-post-R2 opens"))
+-        if any(str(claim).lower().endswith("owner-read") for claim in claims) and not owner_read_sequences:
++        if any("owner-read" in str(claim).lower() and "owner-read-absence" not in str(claim).lower() for claim in claims) and not owner_read_sequences:
+             profile_errors.append("owner-read claim has no successful read of the canonical owner resource")
+         _write_normalized(events, out)
+         (out / "normalization-map.json").write_text(
+diff --git a/qualification/ssdp70/eval/package_ledger.py b/qualification/ssdp70/eval/package_ledger.py
+index e3a9899..f55ab45 100644
+--- a/qualification/ssdp70/eval/package_ledger.py
++++ b/qualification/ssdp70/eval/package_ledger.py
+@@ -321,6 +321,21 @@ def is_owner_copy(rel: str, owner_name: str | None) -> bool:
+     return owner_name is not None and rel.rsplit("/", 1)[-1] == owner_name
+ 
+ 
++SELECTOR_SUFFIX = re.compile(r":(?:raw|\d+(?:[-+]\d*)?(?:,\d+(?:[-+]\d*)?)*)$")
++
++
++def native_owner_target(event: dict[str, Any], owner_name: str | None) -> bool:
++    """The one test for a native read of an owner copy: consumed content (exact or partial) whose package path,
++    resolved path or resource identity, after selector stripping, is an owner copy. Shared by the ledger accounting
++    and the adapter, so the two owner-read records cannot disagree about which native reads count."""
++    payload = event.get("payload") or {}
++    consumed = payload.get("consumed_resource") or {}
++    if event.get("kind") != "resource_access" or consumed.get("match") not in ("exact", "partial"):
++        return False
++    targets = (consumed.get("package_relative_path"), payload.get("resolved_resource_path"), payload.get("resource_identity"))
++    return any(isinstance(t, str) and is_owner_copy(SELECTOR_SUFFIX.sub("", t), owner_name) for t in targets)
++
++
+ def owner_supply(events, corpus, owner_name, parameters):
+     lines = {line for rel, text in corpus.items() if is_owner_copy(rel, owner_name)
+              for line in text.splitlines() if len(line.encode()) >= parameters["owner_line_floor"]}
+@@ -333,9 +348,7 @@ def owner_supply(events, corpus, owner_name, parameters):
+                "bytes": sum(len(line.encode()) for line in matched), "source": "owner-class-supply"}
+         (positive if len(matched) >= 2 and row["bytes"] >= parameters["owner_load_quantum"] else minor).append(row)
+     for event in events:
+-        consumed = (event.get("payload") or {}).get("consumed_resource") or {}
+-        if (event.get("kind") == "resource_access" and consumed.get("match") in ("exact", "partial")
+-                and is_owner_copy(consumed.get("package_relative_path") or "", owner_name)):
++        if native_owner_target(event, owner_name):
+             positive.append({"sequence": int(event["sequence"]), "event_id": event.get("event_id"), "source": "native-read"})
+     return positive, minor
+ 
+@@ -351,7 +364,7 @@ def candidate_window(lower, upper, requests, events, lost=False):
+     lo = earlier[-1].get("position", start) if earlier else start
+     hi = later[0].get("position", start) - 1 if later else end
+     if hi < lo or not earlier:
+-        lo, hi = start, end
++        lo, hi = start, end     # conservative whole-trace window; a text-only final turn has no position (hi < lo)
+     return {"start": lo, "end": hi, "timing_loss": False}
+ 
+ 
+diff --git a/qualification/ssdp70/eval/package_premise.py b/qualification/ssdp70/eval/package_premise.py
+index 002c742..53419ea 100644
+--- a/qualification/ssdp70/eval/package_premise.py
++++ b/qualification/ssdp70/eval/package_premise.py
+@@ -58,7 +58,16 @@ def check(package, sources, mounts, witness=None, *, owner_name, line_floor=48,
+     owners = [p for p in package.rglob(owner_name) if p.is_file()]
+     if not owners:
+         unresolved.append("owner source is absent")
+-    lines = {line for path in owners for line in path.read_bytes().splitlines() if len(line) >= line_floor}
++    # Segment owner lines exactly as the accounting does (strict UTF-8, str.splitlines); a copy the accounting
++    # cannot decode would contribute no owner lines there, so it cannot be verified here either.
++    lines = set()
++    for path in owners:
++        try:
++            text = path.read_bytes().decode("utf-8")
++        except UnicodeDecodeError:
++            unresolved.append(f"owner copy is not valid UTF-8: {path.relative_to(package)}")
++            continue
++        lines.update(line.encode() for line in text.splitlines() if len(line.encode()) >= line_floor)
+     pattern = re.compile(b"|".join(re.escape(line) for line in sorted(lines))) if lines else None
+     for path in package.rglob("*"):
+         if path.is_symlink():
+@@ -75,7 +84,7 @@ def check(package, sources, mounts, witness=None, *, owner_name, line_floor=48,
+         unresolved.append("mount source outside frozen input envelope")
+     for name, root in sources.items():
+         manifest = actual_sources[name]
+-        key = (digest(package_manifest), digest(manifest), digest(mounts))
++        key = (digest(package_manifest), digest(manifest), digest(mounts), line_floor, owner_name)
+         if key not in _SCAN_CACHE:
+             hits = []
+             for rel, row in manifest.items():
+diff --git a/qualification/ssdp70/eval/test_batch_cli.py b/qualification/ssdp70/eval/test_batch_cli.py
+index a6d9ba0..80f2b02 100644
+--- a/qualification/ssdp70/eval/test_batch_cli.py
++++ b/qualification/ssdp70/eval/test_batch_cli.py
+@@ -221,6 +221,21 @@ class ReplacementBookkeeping(unittest.TestCase):
+             else:broken[path[0]]=value
+             self.assertFalse(batch_assess70.observation_adjudicated(broken),path)
+ 
++    def test_second_replacement_for_another_question_is_disclosed_unscored_not_an_aborted_aggregation(self):
++        mf,runs=self.setup_case()
++        mf["runs"].append({**mf["runs"][1],"id":"replacement-2"})
++        runs["replacement-2"]={**runs["replacement"]}
++        runs["replacement"]["owner_floor_state"]="UNRESOLVED"       # byte-exact, owner floor still unresolved
++        mf["package_access_replacements"].append({"original":"original","replacement":"replacement-2","question":"owner-floor"})
++        slots,report=batch_assess70.replacement_slots(mf,runs)
++        first,second=report["records"]
++        self.assertTrue(first["scored"]);self.assertFalse(second["scored"])
++        self.assertIn("undecided",second["reason"])
++        self.assertEqual(slots["original"],"replacement")
++        self.assertTrue(any(v["original"]=="original" and "owner-floor" in v["questions"] for v in report["required"]))
++        again=copy.deepcopy(mf);again["package_access_replacements"][1]["question"]="bytes"      # same question again is outcome selection
++        with self.assertRaises(core70.ContractError):batch_assess70.replacement_slots(again,runs)
++
+     def test_v_missing_byte_bound_keeps_byte_question_pending_but_owner_has_no_campaign_cap(self):
+         mf,runs=self.setup_case(bound=False)
+         self.assertEqual(batch_assess70.replacement_slots(mf,runs)[0]["original"],"original")
+diff --git a/qualification/ssdp70/eval/test_package_ledger.py b/qualification/ssdp70/eval/test_package_ledger.py
+index 3a27548..7132928 100644
+--- a/qualification/ssdp70/eval/test_package_ledger.py
++++ b/qualification/ssdp70/eval/test_package_ledger.py
+@@ -574,6 +574,46 @@ class ReviewDiscriminators(PhaseAndDelivery):
+         self.assertFalse(r["owner_floor_exact"])
+         self.assertTrue(any("request" in reason for reason in r["timing_reasons"] + r["reasons"]), (r["timing_reasons"], r["reasons"]))
+ 
++    def test_k_ledger_and_adapter_agree_on_every_native_owner_read_target_form(self):
++        from adapters import omp
++        def native(**payload):
++            return {"kind": "resource_access", "status": "result", "sequence": 5, "event_id": "e5",
++                    "payload": {"result_status": "result", **payload}}
++        forms = (
++            {"consumed_resource": {"match": "exact", "package_relative_path": "x/references/owner.md"}},
++            {"consumed_resource": {"match": "partial"}, "resolved_resource_path": "/opt/ssdp/skills/x/references/owner.md"},
++            {"consumed_resource": {"match": "exact"}, "resource_identity": "x/references/owner.md:10-20"},
++            {"consumed_resource": {"match": "partial", "package_relative_path": "x/references/owner.md:raw"}},
++        )
++        for payload in forms:
++            event_ = native(**payload)
++            ledger = pl.account(None, 1000, [event_], self.root, owner_name="owner.md", parameters=TEST_PARAMETERS)
++            self.assertEqual([r["sequence"] for r in ledger["owner_read_observed"]], [5], payload)
++            self.assertEqual(omp.owner_reads([event_], "owner.md"), [5], payload)
++        for payload in ({"consumed_resource": {"match": "none", "package_relative_path": "x/references/owner.md"}},
++                        {"consumed_resource": {"match": "exact", "package_relative_path": "x/references/owner.md.bak"}},
++                        {"consumed_resource": {"match": "exact", "package_relative_path": "x/references/other.md"}}):
++            event_ = native(**payload)
++            ledger = pl.account(None, 1000, [event_], self.root, owner_name="owner.md", parameters=TEST_PARAMETERS)
++            self.assertEqual(ledger["owner_read_observed"], [], payload)
++            self.assertEqual(omp.owner_reads([event_], "owner.md"), [], payload)
++
++    def test_owner_read_claim_family_needs_evidence_except_the_absence_claim(self):
++        needs = "owner-read claim has no successful resource-access result evidence"
++        for claim in ("owner-read", "t7-owner-read", "owner-read-mode", "Owner-Read-Hit"):
++            self.assertIn(needs, core70.validate_claim_observability([], [claim]), claim)
++        self.assertNotIn(needs, core70.validate_claim_observability([], ["owner-read-absence"]))
++
++    def test_s_empty_or_unpositioned_window_is_the_whole_trace_so_an_honest_text_final_turn_stays_explained(self):
++        # A text-only final turn has no tool event, so its request position falls back to the trace start (1);
++        # the window would end at 0. An empty window must not leave an honest whole-file read unexplained.
++        requests = [{"t_ns": 1000, "monotonic_ns": 1000, "position": 1}, {"t_ns": 1500, "monotonic_ns": 1500, "position": 1}]
++        events = [event(i, "nothing") for i in range(1, 6)]
++        events[2] = event(3, TWIN)
++        r = self.account([(1200, "x/references/owner.md")], events, request_records=requests)
++        window = r["owner_open_windows"][0]["window"]
++        self.assertEqual((window["start"], window["end"]), (1, 5))
++        self.assertTrue(r["exact"], r["reasons"])
+ 
+ class RealWatcherOverflow(unittest.TestCase):
+     @unittest.skipUnless(bwrap_usable(), "bwrap unusable")
+diff --git a/qualification/ssdp70/eval/test_package_premise.py b/qualification/ssdp70/eval/test_package_premise.py
+index 2782173..2addf52 100644
+--- a/qualification/ssdp70/eval/test_package_premise.py
++++ b/qualification/ssdp70/eval/test_package_premise.py
+@@ -132,3 +132,23 @@ class PremiseDetectorsIsolated(PremiseFixture):
+         for state in ("FAIL", "UNRESOLVED"):
+             self.assertTrue(pp.verify_report({**report, "state": state}))
+         self.assertTrue(pp.verify_report({**report, "failures": ["x"]}))
++
++
++    def test_z_scan_is_not_reused_across_floors_or_owner_names_and_segments_like_the_accounting(self):
++        line = self.owner.read_text().splitlines()[0]
++        (self.workspace / "notes2.txt").write_text("prefix\n" + line + "\n")
++        witness = self.witness()
++        self.assertEqual(pp.check(self.package, self.sources, self.mounts, witness, owner_name="owner.md", line_floor=48)["state"], "FAIL")
++        # Same bindings, higher floor: the 64-byte line is below it, so the earlier cached collision must not be reused.
++        self.assertEqual(pp.check(self.package, self.sources, self.mounts, witness, owner_name="owner.md", line_floor=100)["state"], "PASS")
++        # Same bindings, other owner name: no owner copy exists.
++        self.assertEqual(pp.check(self.package, self.sources, self.mounts, witness, owner_name="absent.md", line_floor=48)["state"], "UNRESOLVED")
++        # A form feed separates str lines but not bytes lines; the accounting uses str segmentation.
++        a, b = "A" * 30, "B" * 30
++        self.owner.write_text(a + "\x0c" + b + "\n")
++        (self.workspace / "notes2.txt").write_text(a + "\n")
++        self.assertEqual(pp.check(self.package, self.sources, self.mounts, self.witness(), owner_name="owner.md", line_floor=48)["state"], "PASS")
++        self.owner.write_bytes(b"\xff\xfe" + (b"x" * 60) + b"\n")
++        report = pp.check(self.package, self.sources, self.mounts, self.witness(), owner_name="owner.md", line_floor=48)
++        self.assertEqual(report["state"], "UNRESOLVED")
++        self.assertTrue(any("not valid UTF-8" in r for r in report["unresolved"]))
