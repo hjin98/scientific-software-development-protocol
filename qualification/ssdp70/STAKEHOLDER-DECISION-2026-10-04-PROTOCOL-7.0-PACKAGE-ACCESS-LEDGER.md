@@ -60,10 +60,17 @@ The fifth independent check (`qualification/ssdp70/PACKAGE-ACCESS-LEDGER-INDEPEN
 
 Wrap-up posture unchanged: this revision changes a counting rule, declarations and wording only.
 
+## Fifth round of confirmations (2026-10-04, after the sixth independent check)
+
+The sixth independent check (`qualification/ssdp70/PACKAGE-ACCESS-LEDGER-INDEPENDENT-CHECK-D3-REV8-AND-CONTRACT-REV14-2026-10-04.md`) passed the governing D3 decision revision 8 and the workplan entry and markers and returned NO-PASS on the contract for one narrow blocker: bars on replacement keyed on "positive owner evidence" at any time made an honest pre-R2 package scan followed by a legitimate post-R2 owner load permanently non-PASS. The stakeholder replied: **“Confirmed. Repair, commit, then spawn a narrow review.”** The two items, as put to the stakeholder, are:
+
+1. **What bars replacement.** Only a positive owner read before the first predeclared R2 event (a FAIL) bars replacement and rerun. A post-R2 owner-load hit does not: a run with a post-R2 hit and inexact bytes (or an UNRESOLVED owner floor after a scan) is replaced, the replacement is the scored run, and the hit is disclosed on the original. This supersedes round 4 item 4 (a non-T7 burden run with positive owner evidence and inexact bytes is not replaced) to the extent that item concerned a post-R2 hit; a non-T7 burden run with a positive owner read before R2 is still not replaced.
+2. **Keyword grep.** An honest pre-R2 package-wide keyword `grep` that shows at least 256 bytes over at least two distinct owner lines is intended to be a non-replaceable pre-R2 FAIL; the rehearsal adds that form and reports its FAIL rate.
+
 ## Not decided here
 
 F-5 (T7 mixture reporting at seven pairs; 6.5 comparator owner naming) and the run count N remain open. The UNRESOLVED rate of the owner floor on honest runs is measured by the multi-turn rehearsal.
 
 ## Pending acceptance
 
-**Stakeholder adoption is recorded; fresh independent acceptance remains pending.** The authoring context cannot independently accept these bytes. No runner, profile, transform, qualification, subject, provider or evaluator run is authorized by this decision. D3 revision 8, contract revision 14 and the workplan §0.1 entry need a fresh independent check before dependent D4 realization or admission.
+**Stakeholder adoption is recorded; fresh independent acceptance remains pending.** The authoring context cannot independently accept these bytes. No runner, profile, transform, qualification, subject, provider or evaluator run is authorized by this decision. D3 revision 8 (PASS at the sixth check), contract revision 15 and the workplan §0.1 entry need a fresh independent check before dependent D4 realization or admission.
