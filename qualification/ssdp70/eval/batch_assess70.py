@@ -317,6 +317,29 @@ def aggregate_assessments(out_dir: Path, manifest: dict[str, Any] | None = None)
             "declared_deterministic_runs": len(states), "delivered": states.count("PASS"),
         }
     result["profiles"] = key_criteria
+    score_slots(result, manifest, expected, out_dir, key_criteria)
+    for criterion in core70.CRITERION_ORDER:
+        states = [row["state"] for part, row in result["parts"].items() if core70.CAMPAIGN_PARTS[part][0] == criterion]
+        if criterion in ("harness/admissibility", "deterministic activation"):
+            states.extend(key_criteria[key][criterion] for key in keys if criterion != "deterministic activation" or key != family["panels"]["ordinary"]["key"])
+        if criterion == "no critical failure" and result["critical_failures"].get(manifest.get("candidate_arm"), 0):
+            states.append("FAIL")
+        result["criteria"][criterion] = "FAIL" if "FAIL" in states else "PASS" if states and set(states) == {"PASS"} else "UNRESOLVED"
+    primary_pass = not result["errors"] and len(result["runs"]) == len(expected) and set(result["criteria"].values()) == {"PASS"}
+    result["primary_family_id"] = family["family_id"]
+    result["primary_family_outcome"] = "PASS" if primary_pass else "FAIL" if "FAIL" in result["criteria"].values() else "UNRESOLVED"
+    for key, criteria in key_criteria.items():
+        criteria["qualification_outcome"] = "PASS" if primary_pass and all(criteria[c] == "PASS" for c in ("harness/admissibility", "deterministic activation")) else "NOT_EVALUATED"
+        if key not in keys:
+            criteria["claim_limits"] = ["no human-legibility claim", "no ordinary-selection false-activation claim", "own predicate/owner false-activation floors required", "cannot rescue primary family"]
+            # Non-primary doctrine and false activation evidence must pass independently.
+            criteria["qualification_outcome"] = "NOT_EVALUATED"
+    result["qualification_outcome"] = result["primary_family_outcome"]
+    return result
+
+
+def score_slots(result, manifest, expected, out_dir, key_criteria):
+    """Score the replacement-resolved slots (contract item 13); mutates `result` and `key_criteria` in place."""
     slots, ledger_bookkeeping = replacement_slots(manifest, result["runs"])
     result["package_access_replacements"] = ledger_bookkeeping
     scored = {slot: result["runs"].get(run_id) for slot, run_id in slots.items() if run_id in result["runs"]}
@@ -364,24 +387,6 @@ def aggregate_assessments(out_dir: Path, manifest: dict[str, Any] | None = None)
         result["parts"]["owner_false_activation"]["state"] = "UNRESOLVED"
         result["parts"]["owner_false_activation"]["reason"] = "complete SSDP resource-read observation is missing"
 
-    for criterion in core70.CRITERION_ORDER:
-        states = [row["state"] for part, row in result["parts"].items() if core70.CAMPAIGN_PARTS[part][0] == criterion]
-        if criterion in ("harness/admissibility", "deterministic activation"):
-            states.extend(key_criteria[key][criterion] for key in keys if criterion != "deterministic activation" or key != family["panels"]["ordinary"]["key"])
-        if criterion == "no critical failure" and result["critical_failures"].get(manifest.get("candidate_arm"), 0):
-            states.append("FAIL")
-        result["criteria"][criterion] = "FAIL" if "FAIL" in states else "PASS" if states and set(states) == {"PASS"} else "UNRESOLVED"
-    primary_pass = not result["errors"] and len(result["runs"]) == len(expected) and set(result["criteria"].values()) == {"PASS"}
-    result["primary_family_id"] = family["family_id"]
-    result["primary_family_outcome"] = "PASS" if primary_pass else "FAIL" if "FAIL" in result["criteria"].values() else "UNRESOLVED"
-    for key, criteria in key_criteria.items():
-        criteria["qualification_outcome"] = "PASS" if primary_pass and all(criteria[c] == "PASS" for c in ("harness/admissibility", "deterministic activation")) else "NOT_EVALUATED"
-        if key not in keys:
-            criteria["claim_limits"] = ["no human-legibility claim", "no ordinary-selection false-activation claim", "own predicate/owner false-activation floors required", "cannot rescue primary family"]
-            # Non-primary doctrine and false activation evidence must pass independently.
-            criteria["qualification_outcome"] = "NOT_EVALUATED"
-    result["qualification_outcome"] = result["primary_family_outcome"]
-    return result
 
 
 def aggregate_parts(manifest: dict[str, Any], runs: dict[str, Any], root: Path) -> dict[str, Any]:

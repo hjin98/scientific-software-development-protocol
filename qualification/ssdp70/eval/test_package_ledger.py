@@ -554,6 +554,26 @@ class ReviewDiscriminators(PhaseAndDelivery):
         self.assertEqual(r["owner_read_observed"][0]["source"], "native-read")
         self.assertEqual(core70.owner_floor_state(r, 5, r2_adjudicated=True), "FAIL")
 
+    def test_s_window_ends_before_the_first_event_of_the_next_request(self):
+        requests = [{"t_ns": 1000, "monotonic_ns": 1000, "position": 1}, {"t_ns": 2500, "monotonic_ns": 2500, "position": 8}]
+        for seq, exact in ((7, True), (8, False)):
+            events = [event(i, "nothing") for i in range(1, 11)]
+            events[seq - 1] = event(seq, TWIN)
+            r = self.account([(1500, "x/references/owner.md")], events, request_records=requests)
+            window = r["owner_open_windows"][0]["window"]
+            self.assertEqual((window["start"], window["end"]), (1, 7))
+            self.assertEqual(r["exact"], exact, (seq, r["reasons"]))
+
+    def test_results_not_shown_to_the_model_are_never_owner_evidence(self):
+        for seen in (False, None):
+            r = pl.account(None, 1000, [event(3, TWIN, seen=seen)], self.root, owner_name="owner.md", parameters=TEST_PARAMETERS)
+            self.assertEqual((r["owner_read_observed"], r["owner_minor_exposure"]), ([], []), seen)
+
+    def test_owner_open_without_any_request_record_is_timing_loss_for_the_floor(self):
+        r = self.account([(2000, "x/references/owner.md")], [event(4, "nothing")], request_records=[])
+        self.assertFalse(r["owner_floor_exact"])
+        self.assertTrue(any("request" in reason for reason in r["timing_reasons"] + r["reasons"]), (r["timing_reasons"], r["reasons"]))
+
 
 class RealWatcherOverflow(unittest.TestCase):
     @unittest.skipUnless(bwrap_usable(), "bwrap unusable")
@@ -575,3 +595,39 @@ class RealWatcherOverflow(unittest.TestCase):
             result = pl.account(record, None, [], root)
             self.assertFalse(result["exact"])
             self.assertTrue(any("overflow" in reason for reason in result["reasons"]), result["reasons"])
+
+
+class TimingBracketEdgesAreConservative(unittest.TestCase):
+    """Independent-review B-2 (M5, M13, M26, M27): the synthetic helper sets before == after for every heartbeat,
+    which hides the edge definitions. Distinct pre/post-write stamps make each one observable."""
+    PARAMS = {**pl.PARAMETERS, "clock_tolerance_ns": 7, "bracket_width_bound_ns": 10**9, "heartbeat_gap_bound_ns": 10**9}
+
+    @staticmethod
+    def beat(i, before, width=10, drift=0):
+        return {"index": i, "before_ns": before + drift, "after_ns": before + width + drift,
+                "before_mono_ns": before, "after_mono_ns": before + width}
+
+    def test_p_x_lower_edge_precedes_the_earlier_write_and_upper_edge_follows_the_later_write_with_tolerance(self):
+        ledger = {"heartbeats": [self.beat(0, 1000), self.beat(1, 2000)]}
+        brackets, reasons = pl.timing(ledger, [], self.PARAMS)
+        self.assertEqual(reasons, [])
+        self.assertEqual((brackets[0]["lower_ns"], brackets[0]["upper_ns"]), (1000 - 7, 2010 + 7))
+
+    def test_p_divergence_taints_every_later_bracket_not_only_the_adjacent_one(self):
+        ledger = {"heartbeats": [self.beat(0, 1000), self.beat(1, 2000, drift=500), self.beat(2, 3000), self.beat(3, 4000)]}
+        brackets, reasons = pl.timing(ledger, [], self.PARAMS)
+        self.assertTrue(any("clock divergence" in r for r in reasons))
+        self.assertEqual([brackets[i]["timing_loss"] for i in sorted(brackets)], [True, True, True])
+        clean, none = pl.timing({"heartbeats": [self.beat(i, 1000 * (i + 1)) for i in range(4)]}, [], self.PARAMS)
+        self.assertEqual(none, [])
+        self.assertFalse(any(b["timing_loss"] for b in clean.values()))
+
+    def test_x_decreasing_request_stamps_are_timing_loss_even_when_consistent_with_the_baseline(self):
+        ledger = {"heartbeats": [self.beat(0, 1000), self.beat(1, 2000)]}
+        ordered = [{"t_ns": 1500, "monotonic_ns": 1500}, {"t_ns": 1800, "monotonic_ns": 1800}]
+        self.assertEqual(pl.timing(ledger, ordered, self.PARAMS)[1], [])
+        for decreasing in ([{"t_ns": 1800, "monotonic_ns": 1800}, {"t_ns": 1500, "monotonic_ns": 1500}],
+                           [{"t_ns": 1500, "monotonic_ns": 1800}, {"t_ns": 1800, "monotonic_ns": 1500}][::-1]):
+            brackets, reasons = pl.timing(ledger, decreasing, self.PARAMS)
+            self.assertIn("request stamps decrease or disagree with heartbeat baseline", reasons)
+            self.assertTrue(all(b["timing_loss"] for b in brackets.values()))

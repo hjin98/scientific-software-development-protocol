@@ -256,3 +256,99 @@ class PositiveIdentity(unittest.TestCase):
    manifest={'candidate_arm':'p70','comparator_arm':'p66','family':{'criterion_to_keys':{part:['wanted']}},'runs':[{'id':'r','profile_key_sha256':'wrong','entry_stratum':'deterministic'}], 'opportunities':[{'id':'o','part':part,'arm':'p70','fixture':'f','profile_key_sha256':'wanted','realizations':[{'run':'r','item':'i'}]}]}
    with self.subTest(part=part),self.assertRaises(core70.ContractError):
     batch_assess70.aggregate_parts(manifest,{'r':{'owner_floor_state':'PASS','owner_load_hit':True}},Path('/tmp'))
+
+
+class SlotScoringComposition(unittest.TestCase):
+    """Independent-review B-2 (M36-M38): the production slot scorer must apply replacement byte slots,
+    the T7 owner-floor-only override and the frozen disparity bound to the parts it computes."""
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.root = Path(self.tmp.name)
+
+    def tearDown(self):
+        self.tmp.cleanup()
+
+    def good(self, arm):
+        return {"arm": arm, "evidence_state": "COMPLETE_ADMISSIBLE", "qualification_outcome": "PASS",
+                "criteria": {"deterministic activation": "PASS", "harness/admissibility": "PASS"},
+                "dispositions": [{"item": "i1", "measure": "m", "critical": False, "result": "pass"}],
+                "owner_floor_state": "PASS", "resource_observation": {"exact": True}}
+
+    def inexact(self, arm):
+        row = {**self.good(arm), "evidence_state": "INADMISSIBLE", "qualification_outcome": "NOT_EVALUATED",
+                "criteria": {"deterministic activation": "PASS", "harness/admissibility": "FAIL"},
+                "observation_only_inadmissibility": True, "owner_floor_state": "UNRESOLVED",
+                "resource_observation": {"exact": False, "accounting": {"reasons": []}},
+                "owner_floor_adjudication": {"adjudicated": True, "r2_sequence": 3, "consequential_sequence": 9},
+                "replacement_review": {"other_criteria_adjudicated": True, "observation_only": True, "overflow_cause": None},
+                "original_dispositions": [{"item": "i1", "result": "pass"}]}
+        row.pop("dispositions")      # production publishes dispositions only for COMPLETE_ADMISSIBLE runs
+        return row
+
+    def write(self, rid, **summary):
+        (self.root / rid).mkdir(exist_ok=True)
+        (self.root / rid / "summary.json").write_text(json.dumps(
+            {"active_ssdp_bytes": 14000, "installed_entrypoint_bytes": 14000, "installed_owner_bytes": 46000,
+             "owner_read_sequences": [], **summary}))
+
+    def build(self, *, replaced, question, bound=1, owner_replacement=None):
+        """Three paired T1/T7/T8 fixed-cost opportunities per arm; one affected p70 run with a declared replacement."""
+        runs, declared, opportunities = {}, [], []
+        subject = {"commit": COMMIT, "package_sha256": SHA}
+        for route in ("T1", "T7", "T8"):
+            for arm in ("p70", "p66"):
+                for i in range(3):
+                    rid = f"{route}-{arm}-r{i}"
+                    runs[rid] = self.good(arm); self.write(rid)
+                    declared.append({"id": rid, "profile_key_sha256": SHA, "entry_stratum": "deterministic", "subject": subject,
+                                     "replacement_case": "case-" + rid})
+                    opportunities.append({"id": rid, "part": "fixed_cost", "route": route, "arm": arm, "fixture": "f",
+                                          "profile_key_sha256": SHA, "realizations": [{"run": rid, "item": "i1"}]})
+        for arm in ("p70", "p66"):
+            rid = f"T7-{arm}-r0"
+            opportunities.append({"id": "own-" + arm, "part": "owner_false_activation", "route": "T7", "arm": arm, "fixture": "f",
+                                  "profile_key_sha256": SHA, "realizations": [{"run": rid, "item": "i1"}]})
+        original = replaced
+        runs[original] = self.inexact("p70")
+        self.write(original, active_ssdp_bytes=None, owner_read_sequences=None, resource_observation={"exact": False})
+        replacement = original + "-repl"
+        runs[replacement] = {**self.good("p70"), **(owner_replacement or {})}
+        self.write(replacement)
+        declared.append({"id": replacement, "profile_key_sha256": SHA, "entry_stratum": "deterministic", "subject": subject,
+                         "replacement_case": "case-" + original})
+        manifest = {"candidate_arm": "p70", "comparator_arm": "p66", "cost_comparator_arm": "p66", "runs": declared,
+                    "family": {"criterion_to_keys": {part: [SHA] for part in core70.CAMPAIGN_PARTS}}, "offered_profiles": [SHA],
+                    "opportunities": opportunities,
+                    "package_access_replacements": [{"original": original, "replacement": replacement, "question": question}]}
+        if bound is not None:
+            manifest["package_access_policy"] = {"byte_inexact_disparity_bound": {"value": bound, "stakeholder_confirmation": "frozen record"}}
+        result = {"runs": runs, "errors": []}
+        batch_assess70.score_slots(result, manifest, {r["id"]: r for r in declared}, self.root, {SHA: {}})
+        return result
+
+    def test_m36_replacement_byte_summary_resolves_fixed_cost_only_through_the_byte_slot(self):
+        result = self.build(replaced="T1-p70-r0", question="bytes")
+        self.assertEqual(result["package_access_replacements"]["byte_slots"]["T1-p70-r0"], "T1-p70-r0-repl")
+        self.assertEqual(result["parts"]["fixed_cost"]["state"], "PASS", result["parts"]["fixed_cost"])
+        unbounded = self.build(replaced="T1-p70-r0", question="bytes", bound=None)   # no frozen bound: byte replacement unavailable
+        self.assertEqual(unbounded["package_access_replacements"]["byte_slots"]["T1-p70-r0"], "T1-p70-r0")
+        self.assertEqual(unbounded["parts"]["fixed_cost"]["state"], "UNRESOLVED")
+
+    def test_m38_frozen_disparity_bound_makes_every_byte_comparison_unresolved(self):
+        for part in ("fixed_cost", "active_material", "comparative"):
+            self.assertNotEqual(self.build(replaced="T1-p70-r0", question="bytes", bound=1)["parts"][part].get("reason"),
+                                "byte inexact-run disparity exceeds frozen bound")
+        result = self.build(replaced="T1-p70-r0", question="bytes", bound=0)
+        self.assertTrue(result["package_access_replacements"]["byte_disparity_exceeded"])
+        for part in ("fixed_cost", "active_material", "comparative"):
+            self.assertEqual(result["parts"][part]["state"], "UNRESOLVED", part)
+            self.assertEqual(result["parts"][part]["reason"], "byte inexact-run disparity exceeds frozen bound")
+
+    def test_m37_t7_owner_floor_only_replacement_decides_the_owner_floor_but_not_the_burden_slot(self):
+        result = self.build(replaced="T7-p70-r0", question="t7-owner-floor", owner_replacement={"owner_floor_state": "FAIL"})
+        bookkeeping = result["package_access_replacements"]
+        self.assertEqual(bookkeeping["owner_slots"]["T7-p70-r0"], "T7-p70-r0-repl")
+        self.assertEqual(bookkeeping["byte_slots"]["T7-p70-r0"], "T7-p70-r0")
+        self.assertEqual(result["parts"]["owner_false_activation"]["state"], "FAIL")
+        clean = self.build(replaced="T7-p70-r0", question="t7-owner-floor")
+        self.assertNotEqual(clean["parts"]["owner_false_activation"]["state"], "FAIL")
