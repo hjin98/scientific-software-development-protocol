@@ -1,0 +1,45 @@
+{
+  "content_digests": {
+    "expected_scoring_items": "e17b3ff846d7ad46a46009048c75ab1b00f7dd720719d0ad9eb75214b3e67962",
+    "required_artifacts": "dc1289f9a5f1888f05dc88f83c24f46004f3cf817d4e37a67eb3201ce0e45da3",
+    "required_oracles": "fa5d3201479d93d16037c0fc2b603fe26d8e4fdcbed2649100a0251badae7514"
+  },
+  "expected_scoring_items": [
+    {
+      "allowed_dispositions": [
+        "pass",
+        "fail",
+        "unresolved"
+      ],
+      "branch": "main",
+      "critical": true,
+      "id": "i1",
+      "measure": "critical"
+    }
+  ],
+  "manifest_digests": {
+    "expected_scoring_items": "0f50b6567d8ba50fb96bb49619075c40bfee5e2d788d147431bf0cf5be42181a",
+    "required_artifacts": "d208c3e6b3991584bea4d1f313b044b51ed0915365b1070ba8fc4ed49a81d3e4",
+    "required_oracles": "c38421c11e9cf4d9fdc2b4218f78f3e22413c213467f22655e8ad705a5b83626"
+  },
+  "required_artifacts": [
+    "summary.json",
+    "run-identity.json",
+    "trace.jsonl",
+    "events.normalized.jsonl",
+    "normalization-map.json",
+    "final-report.md",
+    "final-tree",
+    "oracle.json",
+    "requirements-snapshot.json",
+    "adapter-artifacts",
+    "project-control-record.json"
+  ],
+  "required_oracles": [
+    {
+      "id": "o1",
+      "path": "check_o1.py"
+    }
+  ],
+  "schema": 1
+}

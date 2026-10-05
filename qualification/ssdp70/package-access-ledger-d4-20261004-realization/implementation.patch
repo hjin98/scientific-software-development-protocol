@@ -1,0 +1,2787 @@
+diff --git a/qualification/ssdp70/eval/adapters/omp.py b/qualification/ssdp70/eval/adapters/omp.py
+index ad8fcce..87c2e5e 100644
+--- a/qualification/ssdp70/eval/adapters/omp.py
++++ b/qualification/ssdp70/eval/adapters/omp.py
+@@ -60,7 +60,8 @@ REPO_ROOT = EVAL_DIR.parents[2]
+ if str(EVAL_DIR) not in sys.path:
+     sys.path.insert(0, str(EVAL_DIR))
+ import core70  # noqa: E402
+-import package_ledger  # noqa: E402
++import package_ledger
++import package_premise  # noqa: E402
+ import evidence70  # noqa: E402
+ import seccomp70  # noqa: E402
+ import observer70  # noqa: E402
+@@ -468,6 +469,7 @@ def execution_support_sha256() -> dict[str, str]:
+         "core70.py": sha256_file(EVAL_DIR / "core70.py"),
+         "harness70.py": sha256_file(EVAL_DIR / "harness70.py"),
+         "package_ledger.py": sha256_file(EVAL_DIR / "package_ledger.py"),
++        "package_premise.py": sha256_file(EVAL_DIR / "package_premise.py"),
+     }
+ 
+ 
+@@ -872,6 +874,13 @@ def _policy(profile: dict[str, Any]) -> dict[str, Any]:
+ def profile_errors(profile: dict[str, Any]) -> list[str]:
+     """Everything the profile must freeze before this adapter will run a subject."""
+     errors: list[str] = []
++    parameters = profile.get("package_access_parameters")
++    if (not isinstance(parameters, dict) or set(parameters) != set(package_ledger.PARAMETERS)
++            or parameters.get("owner_load_quantum") != 256
++            or any(not isinstance(parameters.get(k), int) or isinstance(parameters.get(k), bool) or parameters[k] <= 0
++                   for k in package_ledger.PARAMETERS if k not in ("marks_before_launch", "marks_after_teardown"))
++            or parameters.get("marks_before_launch") is not True or parameters.get("marks_after_teardown") is not True):
++        errors.append("package-access parameters are not frozen or violate the accepted owner quantum/mark lifetime")
+     if _contains_unfrozen(profile):
+         errors.append("OMP execution profile contains an unfrozen marker; profile is not frozen")
+     try:
+@@ -1019,6 +1028,7 @@ def freeze_profile(template: dict[str, Any], *, executable_path: str, provider_r
+                    substrate_executable: str = "/usr/bin/bwrap") -> dict[str, Any]:
+     """Fill a profile template with exact digests. Every operator choice is an explicit argument."""
+     profile = copy.deepcopy(template)
++    profile["package_access_parameters"] = dict(template.get("package_access_parameters", package_ledger.PARAMETERS))
+     profile["profile_id"] = profile_id
+     profile["adapter_id"] = ADAPTER_ID
+     route = dict(profile["containment_policy"]["provider_route"])
+@@ -1676,7 +1686,8 @@ def _sandbox_pipe_fds(pairs: list[tuple[int, int]]) -> tuple[int, ...]:
+     return tuple(fd for pair in pairs for fd in pair)
+ 
+ 
+-def launch(profile: dict[str, Any], prompt: str, project: Path, env: dict[str, str], *, integrity_fault: str | None = None) -> dict[str, Any]:
++def launch(profile: dict[str, Any], prompt: str, project: Path, env: dict[str, str], *, integrity_fault: str | None = None,
++           accounting_purpose: str = "qualification", premise_witness_provider=None) -> dict[str, Any]:
+     """Run the exact frozen OMP build for real: principals, sandbox, relay, native JSON trace."""
+     problems = profile_errors(profile)
+     if problems:
+@@ -1710,7 +1721,7 @@ def launch(profile: dict[str, Any], prompt: str, project: Path, env: dict[str, s
+     if spec is not None:
+         (paths["observer"] / "activation.json").write_text(json.dumps(spec), encoding="utf-8")
+         (paths["observer"] / "activation.json").chmod(0o444)
+-    ledger_watch = package_ledger.LedgerWatcher(paths["skills"])
++    ledger_watch = package_ledger.LedgerWatcher(paths["skills"], profile.get("package_access_parameters"))
+     ledger_record: dict[str, Any] | None = None
+     started = time.monotonic()
+ 
+@@ -1737,7 +1748,6 @@ def launch(profile: dict[str, Any], prompt: str, project: Path, env: dict[str, s
+     boundary_sentinel.write_text("SUPERVISOR-PRIVATE-OBSERVER-PROBE\n", encoding="utf-8")
+     boundary_sentinel.chmod(0o600)
+     try:
+-        ledger_watch.start()
+         threads = [
+             _drain(obs_ev[0], sinks["observer"]),
+             _drain(br_ev[0], sinks["bridge"]),
+@@ -1835,6 +1845,39 @@ def launch(profile: dict[str, Any], prompt: str, project: Path, env: dict[str, s
+         os.close(seccomp_w)
+         seccomp_w = -1
+         argv = _bwrap_argv(profile, paths, seccomp_r, f"{SB_CTL}/launcher.json", SB_OMP)
++        # Before marks: this owner reads package bytes only while observation is inactive.
++        sources = {"workspace": paths["project"], "home": paths["home"], "control": paths["control"],
++                   "etc": paths["etc"], "runtime-usr": paths["subject_runtime"]/"usr",
++                   "runtime-lib64": paths["subject_runtime"]/"lib64",
++                   "omp": paths["subject_runtime"]/SB_OMP.lstrip("/"),
++                   "stub": layout["stub"], "mediator": layout["server"], "task": prompt.encode()}
++        mounts = []
++        by_path = {str(value): name for name,value in sources.items() if isinstance(value,Path)}
++        by_path[str(paths["skills"])] = "package"
++        for index, arg in enumerate(argv):
++            if arg in ("--bind", "--ro-bind"):
++                source, destination = argv[index+1:index+3]
++                # Home control overmounts are already members of the enumerated home source.
++                name = by_path.get(source, "home" if source.startswith(str(paths["home"])+"/") else "UNLISTED")
++                mounts.append({"source":name,"destination":destination,"read_only":arg=="--ro-bind"})
++        for alias in runtime_dependency_manifest()["aliases"]:
++            if "subject" in alias.get("roles",[]) and alias["destination"] in ("/bin","/lib"):
++                target = "/" + alias["target"].lstrip("/")
++                mounts.append({"source":"runtime-usr" if target.startswith("/usr/") else "UNLISTED",
++                    "destination":alias["destination"],"read_only":True,
++                    "alias_target":target})
++        witness = profile.get("package_access_premise_witness")
++        if premise_witness_provider is not None:
++            if accounting_purpose == "qualification":
++                raise PrelaunchRefusal("development premise construction cannot supply qualification acceptance")
++            witness = premise_witness_provider(package_premise.inventory(paths["skills"]),
++                package_premise.source_manifest(sources), mounts)
++        premise_record = package_premise.check(paths["skills"],sources,mounts,witness,
++            owner_name="scientific-inspectability-and-initiative.md",
++            line_floor=profile["package_access_parameters"]["owner_line_floor"],
++            qualification=accounting_purpose=="qualification",
++            accepted_witness_sha256=profile.get("package_access_premise_acceptance_sha256"))
++        ledger_watch.start()
+         # The full argument list (which names host run directories) is passed over a descriptor so
+         # that it is not readable from the sandbox through /proc/<pid>/cmdline.
+         args_r, args_w = os.pipe()
+@@ -1913,6 +1956,7 @@ def launch(profile: dict[str, Any], prompt: str, project: Path, env: dict[str, s
+     runtime_stage_digests = {role: _runtime_tree_digest(paths[f"{role}_runtime"])
+                              for role in ("subject", "observer")}
+     artifacts: dict[str, Any] = {
++        "package-access-premise.json": json.dumps(premise_record,sort_keys=True)+"\n",
+         "observer-evidence.jsonl": bytes(sinks["observer"]).decode("utf-8", "replace"),
+         "bridge-evidence.jsonl": bytes(sinks["bridge"]).decode("utf-8", "replace"),
+         "launcher-evidence.jsonl": bytes(sinks["launcher"]).decode("utf-8", "replace"),
+@@ -3200,11 +3244,15 @@ def normalize(stdout: str, run_id: str, context: dict[str, Any] | None = None) -
+                 provider, model = message.get("provider"), message.get("model")
+                 if isinstance(provider, str) and isinstance(model, str):
+                     observed_model = f"{provider}/{model}"
++                if raw_type == "message_start":
++                    ev = emit("assistant_message", "stdout", native_index, {"message": message,
++                              "assistant_turn": assistant_messages})
++                    mapped.append(ev["event_id"])
+                 if raw_type == "message_end":
+                     assistant_messages += 1
+             if raw_type == "message_end" and isinstance(message, dict):
+                 message_ends.append(message)
+-            classify(native_index, f"benign-native:{raw_type}", False)
++            classify(native_index, f"native:{raw_type}", bool(mapped), mapped)
+         elif raw_type == "tool_execution_start":
+             _on_tool_start(raw, offset, native_index, context, observed, emit, classify, pending, errors, start_types,
+                            provider_call_ids)
+@@ -3916,12 +3964,14 @@ def owner_reads(events: list[dict[str, Any]], owner_name: str) -> list[int]:
+             continue
+         consumed = payload.get("consumed_resource") or {}
+         target = f"{payload.get('resource_identity') or ''} {consumed.get('package_relative_path') or ''} {payload.get('resolved_resource_path') or ''}"
+-        if owner_name in target and consumed.get("match") in ("exact", "partial"):
++        targets = (consumed.get("package_relative_path"), payload.get("resolved_resource_path"), payload.get("resource_identity"))
++        if any(isinstance(t, str) and package_ledger.is_owner_copy(SELECTOR_SUFFIX.sub("", t), owner_name) for t in targets) and consumed.get("match") in ("exact", "partial"):
+             hits.append(int(event["sequence"]))
+     return hits
+ 
+ 
+-def package_access_ledger(artifacts: dict[str, Any], profile: dict[str, Any] | None) -> dict[str, Any]:
++def package_access_ledger(artifacts: dict[str, Any], profile: dict[str, Any] | None,
++                          *, events=None, stdout="", prompt=None) -> dict[str, Any]:
+     """Supervisor package-access ledger and the request-0 cut it is judged against."""
+     errors: list[str] = []
+     try:
+@@ -3939,7 +3989,54 @@ def package_access_ledger(artifacts: dict[str, Any], profile: dict[str, Any] | N
+             errors.append("first retained provider request is not request 0 with a timestamp")
+     stamps = {int(entry["index"]): entry["record"]["t_ns"] for entry in observed.requests
+               if isinstance(entry.get("index"), int) and isinstance((entry.get("record") or {}).get("t_ns"), int)}
+-    return {"ledger": ledger, "cut_ns": cut_ns, "errors": errors, "mount": SB_SKILLS, "request_stamps": stamps}
++    positions = request_positions(observed, events or [], stdout, prompt)
++    try:
++        premise = json.loads(artifacts.get("package-access-premise.json") or "null")
++    except (ValueError, TypeError):
++        premise = None
++    errors.extend(package_premise.verify_report(premise))
++    return {"ledger": ledger, "cut_ns": cut_ns, "errors": errors, "mount": SB_SKILLS, "request_stamps": stamps,
++            "premise": premise, "request_records": positions, "parameters": (profile or {}).get("package_access_parameters")}
++
++
++def request_positions(observed, events, stdout, prompt):
++    """Verified request/assistant-turn pairing, including each retained retry's original position."""
++    beginning = min((e["sequence"] for e in events), default=1)
++    groups, group_errors, retries = group_inference_requests(observed)
++    turns = provider_turns(observed)
++    transcript_problems, _ = transcript_errors(observed, prompt)
++    native = []
++    for line in stdout.splitlines():
++        try:
++            raw = json.loads(line)
++        except ValueError:
++            continue
++        if raw.get("type") == "message_end" and (raw.get("message") or {}).get("role") == "assistant":
++            native.append(raw["message"])
++    verified = not group_errors and not transcript_problems and len(groups) == len(native) == len(turns)
++    positions = []
++    for index, turn in enumerate(turns):
++        content = native[index].get("content", []) if index < len(native) else []
++        calls = [{"id": c.get("id"), "name": c.get("name"), "arguments": c.get("arguments")}
++                 for c in content if c.get("type") == "toolCall"]
++        expected = [{"id": c["id"], "name": c["name"], "arguments": c["arguments"]} for c in turn["tool_calls"]]
++        text = "\n".join(c.get("text", "") for c in content if c.get("type") == "text")
++        if calls != expected or _norm_ws(text) != _norm_ws(turn["text"]):
++            verified = False
++        seqs = [e["sequence"] for e in events if e.get("kind") == "assistant_message"
++                and (e.get("payload") or {}).get("assistant_turn") == index]
++        positions.append(min(seqs) if seqs and expected else beginning)
++    rows = []
++    for k, group in enumerate(groups):
++        for pos in group:
++            entry = observed.requests[pos]
++            record = entry["record"]
++            rows.append({"request_index": entry["index"], "conversation_turn": k,
++                         "position": positions[k] if verified else beginning, "pairing_verified": verified,
++                         "retry_of": observed.requests[group[0]]["index"] if pos != group[0] else None,
++                         "t_ns": record.get("t_ns"), "monotonic_ns": (record.get("data") or {}).get("monotonic_ns"),
++                         "observer_sha256": record.get("hash"), "body": entry["body"]})
++    return rows
+ 
+ 
+ def prepare_prompt(profile: dict[str, Any], entry: str, prompt: str) -> str:
+diff --git a/qualification/ssdp70/eval/assess70.py b/qualification/ssdp70/eval/assess70.py
+index 19923f7..eb73dfe 100644
+--- a/qualification/ssdp70/eval/assess70.py
++++ b/qualification/ssdp70/eval/assess70.py
+@@ -23,6 +23,9 @@ if str(HERE) not in sys.path:
+ import core70  # noqa: E402
+ 
+ STANDARD_EVIDENCE = (
++    "installed-package",
++    "package-access-inputs.json",
++    "adapter-artifacts",
+     "summary.json",
+     "run-identity.json",
+     "profile-snapshot.json",
+@@ -55,7 +58,16 @@ You MUST return exactly one disposition for every expected scoring item, using t
+ and an allowed disposition from the manifest. Never omit an item. If applicability or evidence is unresolved, return
+ "unresolved" when allowed; do not manufacture a pass. The wrapper will reject missing, duplicate, unknown or altered items.
+ 
+-Return strict JSON only, exactly this shape:
++The r2_point_index is a normalized event sequence (not a timestamp or raw native line index).
++For a ledger run also return owner_observation: {"adjudicated":true|false,"r2_sequence":integer|null,
++"consequential_sequence":integer|null}. Null R2 means the frozen trajectory has no R2; ambiguous timing
++uses adjudicated:false. Resolve the frozen R2 event before replacement eligibility. The core recomputes
++owner false activation and hits from content and windows; your boolean cannot suppress a positive.
++For an observation-only inadmissible original, disclose all other criteria and return replacement_review:
++{"other_criteria_adjudicated":true|false,"observation_only":true|false,"overflow_cause":string|null}.
++Unresolved suspected O3, claim-integrity, mutation or any other failure bars replacement. These records
++are adjudication/disclosure; they do not make the original admissible or count its outcomes.
++Return strict JSON only with the base shape below and those two optional objects:
+ {"episode":"...","dispositions":[{"item":"...","measure":"...","result":"pass|fail|unresolved|not-applicable","critical":true,"evidence":"<=40 words"}],"r2_point_index":null,"owner_false_activation":null,"notes":"<=80 words"}
+ """
+ 
+@@ -148,7 +160,7 @@ def validate_verdict(verdict: Any, expected_episode: str, requirements: core70.R
+     if not isinstance(verdict, dict):
+         return ["top-level result is not an object"]
+     required = {"episode", "dispositions", "r2_point_index", "owner_false_activation", "notes"}
+-    if set(verdict) != required:
++    if not required <= set(verdict) or set(verdict)-required-{"owner_observation","replacement_review"}:
+         errors.append(f"top-level keys must be exactly {sorted(required)}")
+     if verdict.get("episode") != expected_episode:
+         errors.append("episode does not match run summary")
+@@ -167,6 +179,9 @@ def validate_verdict(verdict: Any, expected_episode: str, requirements: core70.R
+             if not isinstance(evidence, str) or word_count(evidence) > 40:
+                 errors.append(f"dispositions[{index}].evidence exceeds 40 words or is not text")
+         errors.extend(core70.validate_dispositions(dispositions, requirements))
++    errors.extend(core70.validate_owner_adjudication(verdict.get("owner_observation"), verdict.get("replacement_review")))
++    if verdict.get("owner_observation") and verdict["owner_observation"].get("r2_sequence") != verdict.get("r2_point_index"):
++        errors.append("owner adjudication and r2_point_index disagree")
+     r2 = verdict.get("r2_point_index")
+     if r2 is not None and (not isinstance(r2, int) or isinstance(r2, bool) or r2 < 0):
+         errors.append("r2_point_index must be a non-negative integer or null")
+@@ -205,11 +220,11 @@ def main(argv: list[str] | None = None) -> int:
+     }
+     try:
+         requirements = core70.requirements_from_snapshot(req_payload, expected_manifest_digests)
+-        run_errors = core70.validate_complete_run(args.run, run_identity, requirements)
++        run_errors = core70.validate_complete_run(args.run, run_identity, requirements, allow_observation_inexact=True)
+     except core70.ContractError as exc:
+         requirements = None
+         run_errors = [str(exc)]
+-    if summary.get("evidence_state") != "COMPLETE_ADMISSIBLE" or run_errors:
++    if (summary.get("evidence_state") != "COMPLETE_ADMISSIBLE" and summary.get("observation_only_inadmissibility") is not True) or run_errors:
+         output = {
+             **accounting,
+             "criteria": core70.local_criteria(summary, run_identity),
+@@ -363,12 +378,13 @@ def main(argv: list[str] | None = None) -> int:
+             errors.extend(schema_errors)
+ 
+     if status == "VALID":
+-        scored = core70.production_assessment(summary, run_identity, requirements, verdict["dispositions"])
++        scored = core70.production_assessment(summary, run_identity, requirements, verdict["dispositions"],
++            owner_adjudication=verdict.get("owner_observation"), replacement_review=verdict.get("replacement_review"))
+         outcome = scored["qualification_outcome"]
+         output = {
+             **scored,
+             "assessment_status": "VALID",
+-            "evidence_state": "COMPLETE_ADMISSIBLE",
++            "evidence_state": summary["evidence_state"],
+             "qualification_outcome": outcome,
+             "assessment_identity_sha256": assessment_identity["identity_sha256"],
+             "episode": verdict["episode"],
+diff --git a/qualification/ssdp70/eval/batch_assess70.py b/qualification/ssdp70/eval/batch_assess70.py
+index 282c3f3..6e4e858 100644
+--- a/qualification/ssdp70/eval/batch_assess70.py
++++ b/qualification/ssdp70/eval/batch_assess70.py
+@@ -263,9 +263,10 @@ def aggregate_assessments(out_dir: Path, manifest: dict[str, Any] | None = None)
+         dispositions = assessment.get("dispositions") if isinstance(assessment, dict) else None
+         if isinstance(assessment, dict) and (assessment.get("accounting") != scope or assessment.get("run_identity_sha256") != identity["identity_sha256"]):
+             raise core70.ContractError("assessment cache/accounting provenance mismatch")
+-        actual = core70.production_assessment(summary, identity, requirements, dispositions)
+-        if summary.get("evidence_state") == "COMPLETE_ADMISSIBLE":
+-            evidence_errors = core70.validate_complete_run(run, identity, requirements)
++        actual = core70.production_assessment(summary, identity, requirements, dispositions or (assessment or {}).get("original_dispositions"),
++            owner_adjudication=(assessment or {}).get("owner_floor_adjudication"), replacement_review=(assessment or {}).get("replacement_review"))
++        if summary.get("evidence_state") == "COMPLETE_ADMISSIBLE" or summary.get("observation_only_inadmissibility") is True:
++            evidence_errors = core70.validate_complete_run(run, identity, requirements, allow_observation_inexact=True)
+             if evidence_errors:
+                 actual["evidence_state"] = "MALFORMED_EVIDENCE_OR_ASSESSMENT"
+                 actual["qualification_outcome"] = "NOT_EVALUATED"
+@@ -316,8 +317,50 @@ def aggregate_assessments(out_dir: Path, manifest: dict[str, Any] | None = None)
+             "declared_deterministic_runs": len(states), "delivered": states.count("PASS"),
+         }
+     result["profiles"] = key_criteria
+-    result["parts"] = aggregate_parts(manifest, result["runs"], out_dir)
+-    if not owner_observation_complete(result["runs"]):
++    slots, ledger_bookkeeping = replacement_slots(manifest, result["runs"])
++    result["package_access_replacements"] = ledger_bookkeeping
++    scored = {slot: result["runs"].get(run_id) for slot, run_id in slots.items() if run_id in result["runs"]}
++    scored_manifest = {**manifest, "_byte_slots": ledger_bookkeeping["byte_slots"]}
++    owner_scored = {**scored}
++    for slot, selected in ledger_bookkeeping["owner_slots"].items():
++        if selected != slots.get(slot) and selected in result["runs"] and slot in owner_scored:
++            owner_scored[slot] = {**owner_scored[slot], "owner_floor_state":result["runs"][selected].get("owner_floor_state")}
++    result["parts"] = aggregate_parts(scored_manifest, owner_scored, out_dir)
++    # Retain every original identity; only the scored slot supplies exposure and outcome counts.
++    result["scored_slots"] = slots
++    result["total_runs"] = len(scored)
++    result["arms"] = {}
++    result["critical_failures"] = {}
++    for slot, actual in scored.items():
++        arm = actual.get("arm")
++        if arm is None:
++            continue
++        data = result["arms"].setdefault(arm,{"total":0,"outcomes":{},"dispositions":{"pass":0,"fail":0,"unresolved":0}})
++        data["total"] += 1
++        outcome = actual["qualification_outcome"]
++        data["outcomes"][outcome] = data["outcomes"].get(outcome,0)+1
++        for d in actual.get("dispositions",[]):
++            data["dispositions"][d["result"]] += 1
++            if d["critical"] and d["result"]=="fail":
++                result["critical_failures"][arm]=result["critical_failures"].get(arm,0)+1
++    for key in manifest["offered_profiles"]:
++        members = [scored.get(slot) for slot in slots if expected[slot]["profile_key_sha256"] == key]
++        deterministic = [scored.get(slot) for slot in slots if expected[slot]["profile_key_sha256"] == key
++                         and expected[slot]["entry_stratum"] == "deterministic"]
++        states = [r["criteria"]["deterministic activation"] if r else "NOT_EVALUATED" for r in deterministic]
++        key_criteria[key] = {"harness/admissibility":"PASS" if members and all(r and (
++                r["criteria"]["harness/admissibility"]=="PASS" or (observation_adjudicated(r)
++                and all(result["parts"][o["part"]]["state"] in ("PASS","FAIL")
++                    for o in manifest.get("opportunities",[]) if any(scored.get(ref["run"]) is r for ref in o["realizations"]))
++                and any(o.get("route")=="T7" and any(scored.get(ref["run"]) is r for ref in o["realizations"])
++                    for o in manifest.get("opportunities",[])))) for r in members) else "FAIL",
++            "deterministic activation":"FAIL" if "FAIL" in states else "PASS" if states and set(states)=={"PASS"} else "NOT_EVALUATED",
++            "declared_deterministic_runs":len(states),"delivered":states.count("PASS")}
++    result["profiles"] = key_criteria
++    if ledger_bookkeeping["byte_disparity_exceeded"]:
++        for part in ("fixed_cost","active_material","comparative"):
++            result["parts"][part].update(state="UNRESOLVED",reason="byte inexact-run disparity exceeds frozen bound")
++    if not owner_observation_complete(owner_scored) and result["parts"]["owner_false_activation"]["state"] != "FAIL":
+         result["parts"]["owner_false_activation"]["state"] = "UNRESOLVED"
+         result["parts"]["owner_false_activation"]["reason"] = "complete SSDP resource-read observation is missing"
+ 
+@@ -361,13 +404,21 @@ def aggregate_parts(manifest: dict[str, Any], runs: dict[str, Any], root: Path)
+         for reference in opportunity["realizations"]:
+             run_id, item_id = reference["run"], reference["item"]
+             actual = runs.get(run_id)
+-            if actual is None or actual["evidence_state"] != "COMPLETE_ADMISSIBLE":
++            declaration = next((row for row in manifest["runs"] if row["id"] == run_id), None)
++            if declaration is None or declaration["profile_key_sha256"] != opportunity["profile_key_sha256"]:
++                raise core70.ContractError("opportunity realization profile key mismatch")
++            if part.startswith("r2_") and actual and actual.get("owner_load_hit") is True:
++                outcomes.append("pass")
++                continue
++            if part == "owner_false_activation" and actual and actual.get("owner_floor_state") in ("PASS", "FAIL"):
++                outcomes.append("pass" if actual["owner_floor_state"] == "PASS" else "fail")
++                continue
++            observation_scope = (actual is not None and observation_adjudicated(actual)
++                and (opportunity.get("route") == "T7" or part == "owner_false_activation"))
++            if actual is None or (actual["evidence_state"] != "COMPLETE_ADMISSIBLE" and not observation_scope):
+                 outcomes.append("unresolved")
+                 continue
+-            declaration = next(row for row in manifest["runs"] if row["id"] == run_id)
+-            if declaration["profile_key_sha256"] != opportunity["profile_key_sha256"]:
+-                raise core70.ContractError("opportunity realization profile key mismatch")
+-            matches = [row for row in actual.get("dispositions", []) if row["item"] == item_id]
++            matches = [row for row in actual.get("dispositions", actual.get("original_dispositions", [])) if row["item"] == item_id]
+             outcomes.append(matches[0]["result"] if len(matches) == 1 else "unresolved")
+         # A replicate is not exposure; R2 hit requires strict majority of admissible replicates.
+         if not outcomes or any(value == "unresolved" for value in outcomes):
+@@ -388,6 +439,10 @@ def aggregate_parts(manifest: dict[str, Any], runs: dict[str, Any], root: Path)
+             continue
+         exposures = [arm_counts[candidate]] if part.startswith("r2_") else [arm_counts[a] for a in (candidate, comparator)]
+         selected = [arm_counts[candidate]]
++        if part == "owner_false_activation" and any(c["fail"] for c in selected):
++            row["state"] = "FAIL"
++            row["reason"] = "positive owner evidence before independently adjudicated R2"
++            continue
+         if any(c["opportunities"] < minimum or c["unresolved"] for c in exposures):
+             row["reason"] = "underexposed or unresolved independent opportunities"
+             continue
+@@ -435,12 +490,127 @@ def aggregate_parts(manifest: dict[str, Any], runs: dict[str, Any], root: Path)
+     return parts
+ 
+ 
++def replacement_slots(manifest, runs):
++    """Item 13 bookkeeping. Independent adjudication precedes eligibility; absent byte bound fails closed."""
++    declarations = {r["id"]:r for r in manifest["runs"]}
++    replacements = manifest.get("package_access_replacements", [])
++    if not isinstance(replacements,list) or any(not isinstance(r,dict) or set(r) != {"original","replacement","question"}
++        or not all(isinstance(r[k],str) for k in r) for r in replacements):
++        raise core70.ContractError("malformed package-access replacement record")
++    replacement_ids = {r["replacement"] for r in replacements}
++    if len(replacement_ids) != len(replacements):
++        raise core70.ContractError("a replacement identity cannot serve multiple slots")
++    slots = {key:key for key in declarations if key not in replacement_ids}
++    report = {"records": [], "required": [], "byte_slots": dict(slots), "owner_slots": dict(slots),
++              "per_arm": {}, "per_form": {}, "byte_disparity_exceeded": False}
++    bound = (manifest.get("package_access_policy") or {}).get("byte_inexact_disparity_bound")
++    byte_available = (isinstance(bound,dict) and isinstance(bound.get("value"),(int,float))
++                      and not isinstance(bound.get("value"),bool) and 0 <= bound["value"] <= 1
++                      and isinstance(bound.get("stakeholder_confirmation"),str) and bool(bound["stakeholder_confirmation"]))
++    report["byte_replacement_available"] = byte_available
++    count = {}
++    forms_by_slot = {}
++    for slot in slots:
++        row = runs.get(slot) or {}
++        arm = row.get("arm")
++        observation = row.get("resource_observation") or {}
++        inexact = observation.get("exact") is not True
++        forms = {o.get("route",o["part"]) for o in manifest.get("opportunities",[]) if any(r["run"]==slot for r in o["realizations"])}
++        forms_by_slot[slot] = forms
++        for key in ([('per_arm',arm)] if arm else []) + [('per_form',f"{arm}:{form}") for form in forms]:
++            counter = report[key[0]].setdefault(key[1],{"runs":0,"inexact":0,"replacements":0})
++            counter["runs"] += 1; counter["inexact"] += int(inexact)
++        unresolved_owner = row.get("owner_floor_state") == "UNRESOLVED"
++        non_t7_bytes = inexact and any(form != "T7" for form in forms)
++        if non_t7_bytes or unresolved_owner:
++            status = "barred-positive-pre-R2" if row.get("owner_floor_state") == "FAIL" else "required" if observation_adjudicated(row) else "pending-other-criteria-and-R2-adjudication"
++            report["required"].append({"original":slot,"status":status,
++                "questions": (["bytes"] if non_t7_bytes else []) + (["owner-floor"] if unresolved_owner else [])})
++    for request in replacements:
++        original, replacement, question = request["original"], request["replacement"], request["question"]
++        if original not in slots or replacement not in declarations or original == replacement or question not in ("bytes","owner-floor","t7-owner-floor"):
++            raise core70.ContractError("malformed package-access replacement binding")
++        forms = forms_by_slot[original]
++        if "T7" in forms and question != "t7-owner-floor":
++            raise core70.ContractError("T7 can rerun solely for its owner floor; original stays in the median")
++        if "T7" not in forms and question == "t7-owner-floor":
++            raise core70.ContractError("T7 owner-only rerun assigned outside T7")
++        o, r = runs.get(original) or {}, runs.get(replacement) or {}
++        review = o.get("replacement_review") or {}
++        case = original if question=="t7-owner-floor" else declarations[original].get("replacement_case")
++        if case is None:
++            raise core70.ContractError("non-T7 replacement needs a frozen affected-case identity")
++        count[case] = count.get(case,0)+1
++        if count[case]>2:
++            raise core70.ContractError("package-access replacement exceeds the per-case/per-T7-run cap of two")
++        if any(v["original"]==original and v["scored"] for v in report["records"]):
++            raise core70.ContractError("a resolved replacement cannot be outcome-selected again")
++        record = {**request, "original_outcome":o.get("qualification_outcome"), "scored":False}
++        report["records"].append(record)
++        safe = (observation_adjudicated(o)
++                and o.get("owner_floor_adjudication",{}).get("adjudicated") is True
++                and o.get("owner_floor_state") != "FAIL"
++                and o.get("criteria",{}).get("deterministic activation") != "FAIL"
++                and all(d.get("result")=="pass" for d in o.get("original_dispositions",[]))
++                and r.get("evidence_state") in ("COMPLETE_ADMISSIBLE", "INADMISSIBLE")
++                and r.get("criteria",{}).get("deterministic activation") != "FAIL")
++        accounting = (o.get("resource_observation") or {}).get("accounting") or {}
++        if any("overflow" in reason for reason in accounting.get("reasons",[])) and not review.get("overflow_cause"):
++            safe = False
++        for name in ("profile_key_sha256","subject"):
++            if declarations[original].get(name) != declarations[replacement].get(name):
++                raise core70.ContractError("replacement changed the frozen slot profile or subject")
++        exact = (r.get("resource_observation") or {}).get("exact") is True if question=="bytes" else r.get("owner_floor_state") in ("PASS","FAIL")
++        if not safe or not exact or (question=="bytes" and not byte_available):
++            record["reason"] = "replacement unavailable, inexact, or original adjudication bars it"
++            continue
++        record["scored"] = True
++        for required in report["required"]:
++            if required["original"] == original:
++                question_key = "owner-floor" if question == "t7-owner-floor" else question
++                required["questions"] = [q for q in required["questions"] if q != question_key]
++                if question != "t7-owner-floor" and (r.get("resource_observation") or {}).get("exact") is True:
++                    required["questions"] = [q for q in required["questions"] if q != "bytes"]
++                if r.get("owner_floor_state") in ("PASS", "FAIL"):
++                    required["questions"] = [q for q in required["questions"] if q != "owner-floor"]
++        report["required"] = [v for v in report["required"] if v["questions"]]
++        report["owner_slots"][original] = replacement
++        if question != "t7-owner-floor":
++            slots[original] = replacement
++            if byte_available:
++                report["byte_slots"][original] = replacement
++        arm = o.get("arm")
++        if arm in report["per_arm"]:
++            report["per_arm"][arm]["replacements"] += 1
++        for key,counter in report["per_form"].items():
++            if key in {f"{arm}:{form}" for form in forms_by_slot[original]}:
++                counter["replacements"] += 1
++    if byte_available:
++        rates = [c["inexact"]/c["runs"] for c in report["per_arm"].values() if c["runs"]]
++        report["byte_disparity_exceeded"] = bool(rates and max(rates)-min(rates)>bound["value"])
++    return slots, report
++
++
++def observation_adjudicated(row):
++    review = row.get("replacement_review") or {}
++    return ((row.get("observation_only_inadmissibility") is True or row.get("evidence_state") == "COMPLETE_ADMISSIBLE")
++            and review.get("other_criteria_adjudicated") is True and review.get("observation_only") is True
++            and (row.get("owner_floor_adjudication") or {}).get("adjudicated") is True
++            and bool(row.get("original_dispositions"))
++            and all(d.get("result") == "pass" for d in row["original_dispositions"]))
++
++
+ def owner_observation_complete(runs: dict[str, Any]) -> bool:
+     """Owner false activation needs every run's owner-read question observed exactly; a run whose
+-    byte accounting is inexact for unrelated files still answers it (summary `owner_read_exact`)."""
++    byte accounting is inexact for unrelated files still answers it (summary `owner_floor_exact`)."""
+     for row in runs.values():
++        if row.get("owner_floor_state") in ("PASS", "FAIL"):
++            continue
+         observation = row.get("resource_observation") or {}
+-        if observation.get("owner_read_exact", observation.get("exact")) is not True:
++        accounting = observation.get("accounting")
++        if accounting and any(accounting.get(k) for k in ("owner_open_windows","owner_read_observed","owner_minor_exposure")):
++            return False
++        if observation.get("owner_floor_exact", observation.get("exact")) is not True:
+             return False
+     return True
+ 
+@@ -448,7 +618,11 @@ def owner_observation_complete(runs: dict[str, Any]) -> bool:
+ def quantitative_part(part, manifest, opportunities, root):
+     """Compare retained numeric observables, preserving units, pairs and route boundaries."""
+     field = {"fixed_cost":"active_ssdp_bytes", "active_material":"active_ssdp_bytes", "report_length":"report_bytes", "elapsed_time":"wall_s"}.get(part)
++    candidate = manifest.get('candidate_arm')
++    baseline = manifest.get('cost_comparator_arm') if part=='fixed_cost' else manifest.get('comparator_arm')
+     grouped = {}
++    unknown_routes = set()
++    disclosures = []
+     for opportunity in opportunities:
+         if opportunity["part"] != part:
+             continue
+@@ -457,14 +631,20 @@ def quantitative_part(part, manifest, opportunities, root):
+             return "UNRESOLVED", "numeric route identity missing"
+         for ref in opportunity["realizations"]:
+             try:
+-                summary = core70.load_json(root/ref['run']/'summary.json')
++                summary = core70.load_json(root/manifest.get('_byte_slots',{}).get(ref['run'],ref['run'])/'summary.json')
+                 if field:
+                     value = summary[field]
+                     extra = (summary.get('installed_entrypoint_bytes'),summary.get('installed_owner_bytes'))
+                     owner_reads = summary.get('owner_read_sequences')
+-                    if part in ('fixed_cost','active_material') and not isinstance(owner_reads, list):
++                    unknown = (part in ('fixed_cost','active_material') and route=='T7'
++                               and (summary.get('resource_observation') or {}).get('exact') is False)
++                    if unknown:
++                        value = float('inf') if opportunity['arm']==candidate else 0
++                        unknown_routes.add(route)
++                        owner_reads = None
++                    if part in ('fixed_cost','active_material') and not isinstance(owner_reads, list) and not unknown:
+                         return 'UNRESOLVED','owner-read mode is unobserved (inexact package observation)'
+-                    extra += (None if owner_reads is None else 'owner' if owner_reads else 'entrypoint-only',)
++                    extra += ('unknown' if owner_reads is None else 'owner' if owner_reads else 'entrypoint-only',)
+                 else:
+                     oracle = core70.load_json(root/ref['run']/'oracle.json')['results'][ref['oracle']]
+                     payload = core70.load_json(root/ref['run']/oracle['stdout_artifact'])
+@@ -472,7 +652,7 @@ def quantitative_part(part, manifest, opportunities, root):
+                     if metric['unit'] != 'seconds':
+                         return 'UNRESOLVED','human time unit missing/wrong'
+                     value=metric['value']; extra=(None,None)
+-                if not isinstance(value,(int,float)) or isinstance(value,bool) or value<0 or not __import__('math').isfinite(value):
++                if not isinstance(value,(int,float)) or isinstance(value,bool) or value<0 or (not __import__('math').isfinite(value) and not (route in unknown_routes and value==float('inf'))):
+                     return 'UNRESOLVED','numeric observable missing/malformed'
+                 grouped.setdefault(route,{}).setdefault(opportunity['arm'],[]).append((value,extra))
+             except (core70.ContractError,KeyError,TypeError):
+@@ -499,14 +679,16 @@ def quantitative_part(part, manifest, opportunities, root):
+             bound=bm+delta+median(v[1][1] for v in c)+512
+         else:
+             bound=2.0*bm
+-        if cm>bound:
+-            return 'FAIL',f'{route}: candidate median {cm} exceeds bound {bound}'
+         if part=='fixed_cost' and route=='T7':
+             # Mixed entrypoint-only/owner modes trigger exactly 3 -> 5 -> 7 pairs.
+-            mixed=any(len({v[1][2] for v in arm})>1 for arm in (c,b))
++            mixed=route in unknown_routes or any(len({v[1][2] for v in arm})>1 for arm in (c,b))
+             if len(c) not in (3,5,7) or (mixed and len(c)<7):
+-                return 'UNRESOLVED','T7 bounded mixed-mode extension remains decision-sensitive'
+-    return 'PASS',None
++                return 'UNRESOLVED',f'T7 mixed-mode pair addition required: {len(c)} -> {min(len(c)+2,7)}; unknown originals persist through seven pairs'
++        if cm>bound:
++            return ('UNRESOLVED' if route in unknown_routes else 'FAIL'),f'{route}: adversarial candidate median {cm} exceeds bound {bound}; unknown candidate=unbounded above, comparator=zero'
++        if route in unknown_routes:
++            disclosures.append(f'{route}: mixture={[[v[1][2] for v in a] for a in (c,b)]}; candidate median upper={cm}, comparator median lower={bm}, bound={bound}')
++    return 'PASS','; '.join(disclosures) or None
+ 
+ 
+ def comparative_part(parts, manifest):
+diff --git a/qualification/ssdp70/eval/core70.py b/qualification/ssdp70/eval/core70.py
+index db4d991..7b1642e 100644
+--- a/qualification/ssdp70/eval/core70.py
++++ b/qualification/ssdp70/eval/core70.py
+@@ -43,6 +43,8 @@ REQUIRED_CAPABILITY_CLASSES = (
+ )
+ 
+ NORMALIZED_EVENT_KINDS = {
++    "assistant_message",
++    "package_access",
+     "catalog_snapshot",
+     "root_selection",
+     "resource_access",
+@@ -156,6 +158,8 @@ def private_mcp_paths(private_root: Path) -> dict[str, Path]:
+ 
+ 
+ EVIDENCE_INTEGRITY_ROOTS = (
++    "installed-package",
++    "package-access-inputs.json",
+     "adapter-artifacts",
+     "project-control-record.json",
+     "final-tree-symlinks.json",
+@@ -400,7 +404,7 @@ def load_profile(profile_path: Path, capability_path: Path) -> ProfileBundle:
+         "mcp_servers": mcp_servers,
+     }
+     # Runtime mode, transform and mechanism are material execution-profile fields.
+-    for name in ("runtime_mode", "activation_mechanism", "delivery_transform", "runtime_input_template"):
++    for name in ("runtime_mode", "activation_mechanism", "delivery_transform", "runtime_input_template", "package_access_parameters", "package_access_premise_witness", "package_access_premise_acceptance_sha256"):
+         if name in profile:
+             profile_key[name] = profile[name]
+     return ProfileBundle(
+@@ -537,6 +541,12 @@ def _require_payload_keys(kind: str, payload: dict[str, Any], required: set[str]
+ 
+ def _validate_event_payload(kind: str, status: Any, payload: dict[str, Any], index: int) -> list[str]:
+     errors: list[str] = []
++    if kind == "package_access":
++        _require_payload_keys(kind, payload, {"ledger", "ledger_artifact_sha256", "provenance", "parameters",
++            "exact", "owner_floor_exact", "owner_read_observed", "owner_minor_exposure", "owner_open_windows",
++            "request_records", "opened_files", "reasons", "timing_reasons", "active_ssdp_bytes"}, index, errors)
++        if payload.get("exact") is not True and payload.get("active_ssdp_bytes") is not None:
++            errors.append("inexact package_access publishes a byte total")
+     if kind == "catalog_snapshot":
+         _require_payload_keys(kind, payload, {"logical_skill_ids", "model", "runtime_version", "resolved_package_identity"}, index, errors)
+         skills = payload.get("logical_skill_ids")
+@@ -1403,7 +1413,7 @@ def validate_runtime_observation(bundle: ProfileBundle, observation: Any) -> lis
+ 
+ def validate_claim_observability(events: list[dict[str, Any]], claims: Iterable[str],
+                                  package_supply: list[dict[str, Any]] | None = None,
+-                                 ledger_exact: bool = False) -> list[str]:
++                                 ledger_exact: bool = False, *, owner_r2_sequence=None, owner_r2_adjudicated=False) -> list[str]:
+     """`package_supply`: supervisor-ledger accounting rows (rel, bytes, sha256) for package files
+     whose content reached the model through process output; native reads remain events.
+     `ledger_exact`: the supervisor ledger is exact for the byte question, so a root delivered at
+@@ -1417,14 +1427,23 @@ def validate_claim_observability(events: list[dict[str, Any]], claims: Iterable[
+         and event.get("status") == "result"
+         and (event.get("payload") or {}).get("result_status") == "result"
+     ]
+-    if any("owner-read" in claim for claim in normalized) and not successful_reads and not supply:
++    if any(claim.endswith("owner-read") for claim in normalized) and not successful_reads and not supply and not any(e.get("kind")=="package_access" and e["payload"].get("owner_read_observed") for e in events):
+         errors.append("owner-read claim has no successful resource-access result evidence")
+     burden_sensitive = any(
+         token in claim
+         for claim in normalized
+         for token in ("t1", "t7", "t8", "burden", "active-byte")
+     )
++    ledger_events = [e["payload"] for e in events if e.get("kind") == "package_access"]
++    if any("owner-read-absence" in claim for claim in normalized) and ledger_events:
++        owner = ledger_events[0]
++        needs_r2 = any(owner.get(k) for k in ("owner_read_observed", "owner_open_windows", "owner_minor_exposure"))
++        if (len(ledger_events) != 1 or owner.get("owner_floor_exact") is not True
++                or (needs_r2 and owner_floor_state(owner,owner_r2_sequence,r2_adjudicated=owner_r2_adjudicated) != "PASS")):
++            errors.append("owner-read-absence needs exact owner observation and independently adjudicated provably-post-R2 opens")
+     if burden_sensitive:
++        if ledger_events and (len(ledger_events) != 1 or ledger_events[0].get("exact") is not True):
++            errors.append("T1/T7/T8 burden claim requires an exact package-access observation")
+         roots = [
+             event for event in events
+             if event.get("kind") == "root_selection"
+@@ -1459,6 +1478,77 @@ def validate_claim_observability(events: list[dict[str, Any]], claims: Iterable[
+     return errors
+ 
+ 
++def derive_package_access(bundle, events, skills_root, owner_name, delivered, run_id, native_index):
++    """Deterministic supervisor record; recomputation uses the retained inputs, never a summary."""
++    import package_ledger
++    import package_premise
++    premise = bundle.get("premise")
++    premise_errors = package_premise.verify_report(premise)
++    if isinstance(premise, dict) and premise.get("package") != package_premise.inventory(skills_root):
++        premise_errors.append("premise package binding differs from retained installed package")
++    accounting = package_ledger.account(bundle.get("ledger"), bundle.get("cut_ns"), events, skills_root,
++        extra_errors=list(dict.fromkeys([*(bundle.get("errors") or []), *premise_errors])), delivered=delivered, owner_name=owner_name,
++        mount=bundle.get("mount"), request_records=bundle.get("request_records"), parameters=bundle.get("parameters"))
++    raw = bundle.get("artifact", "")
++    digest = hashlib.sha256(raw.encode()).hexdigest()
++    decision = Path(__file__).resolve().parents[1] / "D3-PACKAGE-ACCESS-LEDGER-OBSERVATION-DECISION-2026-10-04.md"
++    payload = {**accounting, "premise": bundle.get("premise"), "ledger": bundle.get("ledger"), "ledger_artifact_sha256": digest,
++               "provenance": {"accounting_code_sha256": sha256_file(Path(package_ledger.__file__)),
++                   "decision_path": "qualification/ssdp70/" + decision.name,
++                   "decision_commit": "07a4bb0d2093605425374ac3102c6ac04dbe1652", "decision_sha256": sha256_file(decision)}}
++    if payload["provenance"]["decision_sha256"] != "fccb9a3a44afd89338eb19c8b3238a9943fab7c88ee694428dc7d6ce124fd783":
++        raise ContractError("package-access D3 accepted bytes changed without rebinding")
++    clarification = decision.parent / "D3-PACKAGE-ACCESS-PREMISE-CLOSURE-2026-10-04.md"
++    if sha256_file(clarification) != "5f713e2bd816950a2fd0962c6732242631295b3416387beb761c8b40906a3316":
++        raise ContractError("package-access premise clarification changed without rebinding")
++    payload["provenance"]["premise_clarification"] = {"path":"qualification/ssdp70/"+clarification.name,
++        "sha256":sha256_file(clarification), "independent_review_path":"qualification/ssdp70/INDEPENDENT-D3-PREMISE-CLOSURE-REVIEW-2026-10-04-R2.md",
++        "independent_review_sha256":"ee5dd4e722a0c80a180c0a5d83ba59379f6b4c81a08d38852e7e0b114a29a2ed",
++        "publication":"uncommitted cycle decision; SHA-bound, no committed-source claim"}
++    sequence = max((e["sequence"] for e in events), default=0) + 1
++    event = {"schema_version": SCHEMA, "run_id": run_id, "event_id": f"e{sequence:06d}",
++             "sequence": sequence, "actor_id": "supervisor", "kind": "package_access", "status": "observed",
++             "timing": None, "native_source": {"stream": "package-access-ledger.json", "native_index": native_index,
++                                                  "native_sha256": digest}, "payload": payload}
++    entry = {"native_index": native_index, "native_sha256": digest, "classification": "supervisor-package-access-ledger",
++             "oracle_relevant": True, "mapped_event_ids": [event["event_id"]]}
++    return event, entry, accounting
++
++
++def recompute_package_access(run, events, identity):
++    from adapters import omp
++    derived = [e for e in events if e.get("kind") == "package_access"]
++    if len(derived) != 1:
++        return ["ledger run must carry exactly one package_access event"]
++    source = [e for e in events if e.get("kind") != "package_access"]
++    inputs = load_json(run / "package-access-inputs.json")
++    artifacts = {p.name: p.read_text() for p in (run / "adapter-artifacts").iterdir() if p.is_file()}
++    bundle = omp.package_access_ledger(artifacts, load_json(run / "profile-snapshot.json"),
++        events=source, stdout=(run / "trace.jsonl").read_text(), prompt=inputs["prompt"])
++    bundle["artifact"] = artifacts.get("package-access-ledger.json", "")
++    actual, _, _ = derive_package_access(bundle, source, run / "installed-package", inputs["owner_name"],
++        set(inputs["delivered"]), identity["identity_sha256"], derived[0]["native_source"]["native_index"])
++    errors = [] if actual == derived[0] else ["package_access differs from deterministic recomputation"]
++    if identity["accounting"]["purpose"] == "qualification":
++        import package_premise
++        errors.extend(package_premise.verify_report(bundle.get("premise"), qualification=True,
++            accepted_witness_sha256=load_json(run/"profile-snapshot.json").get("package_access_premise_acceptance_sha256")))
++    return errors
++
++
++def owner_floor_state(accounting, r2_sequence, *, r2_adjudicated=False):
++    """Apply item 13 only after independent R2 adjudication. None means no R2 on this trajectory."""
++    if not r2_adjudicated:
++        return "UNRESOLVED"
++    boundary = float("inf") if r2_sequence is None else r2_sequence
++    if any(r["sequence"] < boundary for r in accounting.get("owner_read_observed", [])):
++        return "FAIL"
++    if (accounting.get("owner_floor_exact") is not True or accounting.get("owner_minor_exposure")
++            or any(r["window"]["start"] <= boundary for r in accounting.get("owner_open_windows", []))):
++        return "UNRESOLVED"
++    return "PASS"
++
++
+ def _evidence_files(run: Path, requirements: Requirements) -> list[Path]:
+     roots = list(dict.fromkeys((*EVIDENCE_INTEGRITY_ROOTS, *requirements.artifacts)))
+     oracle_path = run / "oracle.json"
+@@ -1712,7 +1802,7 @@ def integrity_assessment(actual: dict[str, Any], expected: dict[str, Any]) -> di
+     passed = all(actual[key] == expected[key] for key in keys)
+     return {"integrity_outcome": "PASS" if passed else "FAIL", "actual": json.loads(json.dumps(actual)), "expected": expected}
+ 
+-def validate_complete_run(run: Path, identity: dict[str, Any], requirements: Requirements) -> list[str]:
++def validate_complete_run(run: Path, identity: dict[str, Any], requirements: Requirements, *, allow_observation_inexact: bool = False) -> list[str]:
+     errors: list[str] = []
+     try:
+         prior = _require_object(load_json(run / "run-identity.json"), "run identity")
+@@ -1727,7 +1817,7 @@ def validate_complete_run(run: Path, identity: dict[str, Any], requirements: Req
+         errors.append("stored run identity does not match current identity")
+     if summary.get("run_identity_sha256") != identity.get("identity_sha256"):
+         errors.append("run summary identity does not match current identity")
+-    if summary.get("evidence_state") != "COMPLETE_ADMISSIBLE" or summary.get("execution_ok") is not True:
++    if (summary.get("evidence_state") != "COMPLETE_ADMISSIBLE" and not (allow_observation_inexact and summary.get("observation_only_inadmissibility") is True)) or summary.get("execution_ok") is not True:
+         errors.append("run summary is not COMPLETE_ADMISSIBLE with successful execution")
+     if identity.get("execution_mode") == "qualification":
+         errors.extend(validate_profile_admission_snapshot(
+@@ -1759,6 +1849,13 @@ def validate_complete_run(run: Path, identity: dict[str, Any], requirements: Req
+     errors.extend(parse_errors)
+     if not parse_errors:
+         errors.extend(validate_normalized_events(events, identity.get("identity_sha256")))
++        if (any(e.get("kind") == "package_access" for e in events)
++                or (run / "adapter-artifacts/package-access-ledger.json").is_file()
++                or "package_access_parameters" in (load_json(run / "profile-snapshot.json") if (run / "profile-snapshot.json").is_file() else {})):
++            try:
++                errors.extend(recompute_package_access(run, events, identity))
++            except (ContractError, OSError, ValueError, TypeError, KeyError) as exc:
++                errors.append(f"package_access cannot be recomputed: {exc}")
+     try:
+         completeness = _require_object(load_json(run / "normalization-map.json"), "normalization map")
+         count = completeness.get("native_event_count")
+@@ -1942,6 +2039,27 @@ def campaign_manifest_errors(manifest: Any) -> list[str]:
+     runs = manifest.get("runs")
+     if not isinstance(runs, list) or not runs:
+         return ["campaign/suite must enumerate every declared realization before launch"]
++    replacements = manifest.get("package_access_replacements", [])
++    if not isinstance(replacements,list) or any(not isinstance(r,dict) or set(r) != {"original","replacement","question"}
++        or not all(isinstance(r[k],str) for k in r) or r["question"] not in ("bytes","owner-floor","t7-owner-floor") for r in replacements):
++        errors.append("package-access replacement declarations malformed")
++    else:
++        declared = {r.get("id") for r in runs if isinstance(r,dict)}
++        replacement_ids = [r["replacement"] for r in replacements]
++        if (len(set(replacement_ids)) != len(replacement_ids) or any(r["original"] not in declared
++            or r["replacement"] not in declared or r["original"] in replacement_ids for r in replacements)):
++            errors.append("package-access replacement identities missing, reused or chained")
++    policy = manifest.get("package_access_policy")
++    if policy is not None:
++        if not isinstance(policy,dict) or set(policy) - {"byte_inexact_disparity_bound"}:
++            errors.append("package-access policy malformed")
++        elif "byte_inexact_disparity_bound" in policy:
++            bound = policy["byte_inexact_disparity_bound"]
++            if (not isinstance(bound,dict) or set(bound) != {"value","stakeholder_confirmation"}
++                or not isinstance(bound.get("value"),(int,float)) or isinstance(bound.get("value"),bool)
++                or not 0 <= bound["value"] <= 1 or not isinstance(bound.get("stakeholder_confirmation"),str)
++                or not bound["stakeholder_confirmation"].strip()):
++                errors.append("byte disparity bound needs a frozen stakeholder-confirmed value in [0,1]")
+     seen = set()
+     for row in runs:
+         if not isinstance(row, dict) or not isinstance(row.get("id"), str) or row["id"] in seen:
+@@ -1978,13 +2096,64 @@ def campaign_manifest_errors(manifest: Any) -> list[str]:
+     return errors
+ 
+ 
++def validate_owner_adjudication(owner, review):
++    errors = []
++    if owner is not None:
++        if not isinstance(owner, dict) or set(owner) != {"adjudicated", "r2_sequence", "consequential_sequence"}:
++            errors.append("owner adjudication fields are invalid")
++        else:
++            if not isinstance(owner["adjudicated"], bool):
++                errors.append("owner adjudicated must be boolean")
++            for name in ("r2_sequence", "consequential_sequence"):
++                v = owner[name]
++                if v is not None and (not isinstance(v, int) or isinstance(v, bool) or v < 1):
++                    errors.append(f"{name} must be a positive normalized sequence or null")
++            r2, consequent = owner["r2_sequence"], owner["consequential_sequence"]
++            if isinstance(r2, int) and isinstance(consequent, int) and consequent <= r2:
++                errors.append("consequential event must follow R2")
++    if review is not None:
++        if not isinstance(review, dict) or set(review) != {"other_criteria_adjudicated", "observation_only", "overflow_cause"}:
++            errors.append("replacement review fields are invalid")
++        else:
++            if not all(isinstance(review[k], bool) for k in ("other_criteria_adjudicated", "observation_only")):
++                errors.append("replacement review flags must be boolean")
++            if review["overflow_cause"] is not None and (not isinstance(review["overflow_cause"], str) or not review["overflow_cause"].strip()):
++                errors.append("overflow cause must be nonempty text or null")
++    return errors
++
++
+ def production_assessment(summary: dict[str, Any], identity: dict[str, Any], requirements: Requirements,
+-                          dispositions: list[dict[str, Any]] | None = None) -> dict[str, Any]:
+-    result = {**assessment_accounting(identity), "evidence_state": summary.get("evidence_state"),
++                          dispositions: list[dict[str, Any]] | None = None, *, owner_adjudication=None, replacement_review=None) -> dict[str, Any]:
++    adjudication_errors = validate_owner_adjudication(owner_adjudication, replacement_review)
++    if adjudication_errors:
++        raise ContractError("invalid independent adjudication: " + "; ".join(adjudication_errors))
++    result = {**assessment_accounting(identity), "arm": identity.get("arm"), "evidence_state": summary.get("evidence_state"),
+               "criteria": local_criteria(summary, identity), "qualification_outcome": "NOT_EVALUATED",
+-              "resource_observation": summary.get("resource_observation", {"exact": False})}
++              "resource_observation": summary.get("resource_observation", {"exact": False}),
++              "observation_only_inadmissibility": summary.get("observation_only_inadmissibility") is True}
+     if summary.get("accounting") != identity["accounting"]:
+         raise ContractError("post-launch purpose/campaign/scoring change")
++    if dispositions is not None:
++        validate_errors = validate_dispositions(dispositions, requirements)
++        if validate_errors:
++            raise ContractError("invalid independent dispositions: " + "; ".join(validate_errors))
++        adjudications = [owner_adjudication] if owner_adjudication is not None else []
++        if len(adjudications) == 1:
++            adjudication = adjudications[0]
++            accounting = (summary.get("resource_observation") or {}).get("accounting") or {
++                "owner_read_observed": summary.get("owner_read_observed", []), "owner_floor_exact": False}
++            result["owner_floor_state"] = owner_floor_state(accounting, adjudication.get("r2_sequence"),
++                r2_adjudicated=adjudication.get("adjudicated") is True)
++            result["owner_floor_adjudication"] = adjudication
++            consequent = adjudication.get("consequential_sequence")
++            r2 = adjudication.get("r2_sequence")
++            result["owner_load_hit"] = (any(r2 < row["sequence"] < consequent for row in accounting.get("owner_read_observed",[]))
++                if isinstance(r2,int) and isinstance(consequent,int) and adjudication.get("adjudicated") is True else None)
++        # This is disclosed evidence for replacement eligibility, not doctrine scoring on an inadmissible run.
++        result["original_dispositions"] = dispositions
++        reviews = [replacement_review] if replacement_review is not None else []
++        if len(reviews) == 1:
++            result["replacement_review"] = reviews[0]
+     if summary.get("evidence_state") == "COMPLETE_ADMISSIBLE" and dispositions is not None:
+         result["qualification_outcome"] = outcome_from_dispositions(dispositions, requirements)
+         result["dispositions"] = dispositions
+diff --git a/qualification/ssdp70/eval/evidence70.py b/qualification/ssdp70/eval/evidence70.py
+index 1871205..1570e27 100644
+--- a/qualification/ssdp70/eval/evidence70.py
++++ b/qualification/ssdp70/eval/evidence70.py
+@@ -46,6 +46,7 @@ class ChainWriter:
+             if self._closed:
+                 raise RuntimeError("evidence chain is closed")
+             t_ns = time.time_ns()
++            data = {**data, "monotonic_ns": time.monotonic_ns()} if kind == "request" else data
+             digest = record_hash(self.principal, self._seq, self._prev, kind, t_ns, data)
+             record = {
+                 "schema": SCHEMA, "principal": self.principal, "seq": self._seq, "prev": self._prev,
+diff --git a/qualification/ssdp70/eval/harness70.py b/qualification/ssdp70/eval/harness70.py
+index 15e0c2b..dc6e019 100644
+--- a/qualification/ssdp70/eval/harness70.py
++++ b/qualification/ssdp70/eval/harness70.py
+@@ -708,6 +708,8 @@ def run_episode(
+         runtime_baseline = runtime_baseline_fn(profile_bundle.profile, project) if runtime_baseline_fn is not None else None
+         try:
+             launch_kwargs = {"integrity_fault": fault} if fault is not None else {}
++            if getattr(adapter_module, "ADAPTER_ID", None) == "omp-json-v2":
++                launch_kwargs["accounting_purpose"] = identity["accounting"]["purpose"]
+             launched = adapter_module.launch(profile_bundle.profile, prompt, project, env, **launch_kwargs)
+         except Exception as exc:
+             if prelaunch_refusal_type and isinstance(exc, prelaunch_refusal_type):
+@@ -816,33 +818,42 @@ def run_episode(
+         # Supervisor package-access accounting (D3-PACKAGE-ACCESS-LEDGER-OBSERVATION-DECISION).
+         ledger_hook = getattr(adapter_module, "package_access_ledger", None)
+         accounting = None
++        owner_positive = [{"sequence":seq,"source":"native-read"} for seq in owner_read_sequences]
++        owner_minor = []
+         supplied_owner: list[int] = []
+         if ledger_hook is not None:
+-            ledger_bundle = ledger_hook(adapter_artifacts, profile_bundle.profile)
++            ledger_bundle = ledger_hook(adapter_artifacts, profile_bundle.profile, events=events, stdout=stdout, prompt=prompt)
+             delivered_roots = {f"{event['payload']['logical_root']}/SKILL.md" for event in events
+                                if event.get("kind") == "root_selection"
+                                and (event.get("payload") or {}).get("delivery", {}).get("delivered")}
+-            accounting = package_ledger.account(
+-                ledger_bundle.get("ledger"), ledger_bundle.get("cut_ns"), events, installed_skills,
+-                extra_errors=list(ledger_bundle.get("errors") or []), delivered=delivered_roots,
+-                owner_name=OWNER, mount=ledger_bundle.get("mount"),
+-                request_stamps=ledger_bundle.get("request_stamps"))
+-            if accounting["owner_read_exact"]:
+-                for rel, row in accounting["supplied"].items():
+-                    if package_ledger.is_owner_copy(rel, OWNER):
+-                        supplied_owner.extend(row["sequences"])
+-                # An owner copy's first open bounds the read time even when its content is shown later.
+-                supplied_owner.extend(bound["sequence"] for bound in accounting["owner_access"].values())
+-                owner_read_sequences = sorted(set(owner_read_sequences) | set(supplied_owner))
++            ledger_bundle["artifact"] = adapter_artifacts.get("package-access-ledger.json", "")
++            derived, ledger_entry, accounting = core70.derive_package_access(ledger_bundle, events, installed_skills,
++                OWNER, delivered_roots, identity["identity_sha256"], native_event_count)
++            events.append(derived)
++            completeness.append(ledger_entry)
++            native_event_count += 1
++            shutil.copytree(installed_skills, out / "installed-package")
++            (out / "package-access-inputs.json").write_text(json.dumps({"owner_name": OWNER,
++                "delivered": sorted(delivered_roots), "prompt": prompt}, indent=2) + "\n")
++            supplied_owner = [row["sequence"] for row in accounting["owner_read_observed"]]
++            owner_read_sequences = sorted(set(owner_read_sequences) | set(supplied_owner))
++        if accounting is None:
++            fallback = package_ledger.account(None, None, events, installed_skills, owner_name=OWNER)
++            owner_positive, owner_minor = fallback["owner_read_observed"], fallback["owner_minor_exposure"]
++            owner_read_sequences = sorted(set(owner_read_sequences) | {r["sequence"] for r in owner_positive})
++        else:
++            owner_positive, owner_minor = accounting["owner_read_observed"], accounting["owner_minor_exposure"]
++        observation_errors = []
+         supply_rows = [{"rel": rel, **row} for rel, row in
+-                       (accounting["supplied"].items() if accounting and accounting["owner_read_exact"] else [])]
+-        profile_errors.extend(core70.validate_claim_observability(
+-            events, claims, supply_rows, ledger_exact=bool(accounting and accounting["exact"])))
+-        if any("owner-read" in str(claim).lower() for claim in claims) and not owner_read_sequences:
++                       (accounting["supplied"].items() if accounting and accounting["exact"] else [])]
++        claim_errors = core70.validate_claim_observability(events, claims, supply_rows, ledger_exact=bool(accounting and accounting["exact"]))
++        profile_errors.extend(claim_errors)
++        observation_errors.extend(e for e in claim_errors if e in ("T1/T7/T8 burden claim has no successful exact SSDP-resource evidence", "T1/T7/T8 burden claim requires an exact package-access observation", "owner-read-absence needs exact owner observation and independently adjudicated provably-post-R2 opens"))
++        if any(str(claim).lower().endswith("owner-read") for claim in claims) and not owner_read_sequences:
+             profile_errors.append("owner-read claim has no successful read of the canonical owner resource")
+         _write_normalized(events, out)
+         (out / "normalization-map.json").write_text(
+-            json.dumps({"schema": 1, "native_event_count": native_event_count, "entries": completeness}, indent=2, sort_keys=True) + "\n",
++            json.dumps({"schema": 1, "native_event_count": native_event_count, "entries": completeness, "request_positions": [] if accounting is None else accounting["request_records"]}, indent=2, sort_keys=True) + "\n",
+             encoding="utf-8",
+         )
+         event_errors = core70.validate_normalized_events(events, identity["identity_sha256"])
+@@ -886,7 +897,7 @@ def run_episode(
+             and "process_execution" in event.get("payload", {}).get("semantic_capability_classes", [])]
+         if accounting is not None:
+             observation_exact = bool(accounting["exact"])
+-            owner_observation_exact = bool(accounting["owner_read_exact"])
++            owner_observation_exact = bool(accounting["owner_floor_exact"])
+             if observation_exact:
+                 for rel, row in accounting["supplied"].items():
+                     consumed_files.setdefault(rel, row["bytes"])
+@@ -897,7 +908,7 @@ def run_episode(
+             observation_exact = owner_observation_exact = not process_events
+             reason = owner_reason = None if observation_exact else "process execution lacks complete SSDP resource-read observation"
+             unresolved_events = process_events
+-        resource_observation = {"exact": observation_exact, "owner_read_exact": owner_observation_exact,
++        resource_observation = {"exact": observation_exact, "owner_floor_exact": owner_observation_exact,
+             "unresolved_process_events": unresolved_events,
+             "reason": reason, "owner_read_reason": owner_reason,
+             "mechanism": None if accounting is None else accounting["mechanism"],
+@@ -907,8 +918,10 @@ def run_episode(
+         owner_claims = any("owner" in claim for claim in claim_text)
+         if not observation_exact and burden_claims:
+             profile_errors.append(reason)
++            observation_errors.append(reason)
+         elif not owner_observation_exact and owner_claims:
+             profile_errors.append(owner_reason)
++            observation_errors.append(owner_reason)
+         opaque_package_access = not observation_exact
+         declared_root = identity.get("declared_root")
+         entrypoint = installed_skills / declared_root / "SKILL.md" if declared_root else None
+@@ -927,14 +940,16 @@ def run_episode(
+             "active_ssdp_files": consumed_files,
+             "active_ssdp_bytes": None if opaque_package_access else sum(consumed_files.values()),
+             "resource_observation": resource_observation,
+-            "observed_ssdp_bytes_lower_bound": sum(consumed_files.values()),
+             "installed_entrypoint_bytes": entrypoint.stat().st_size if entrypoint and entrypoint.is_file() else None,
+             "installed_owner_bytes": owner.stat().st_size if owner and owner.is_file() else None,
+             "pair_order": pair_order,
+             "profile_key_sha256": profile_bundle.profile_key_sha256,
+             "run_identity_sha256": identity["identity_sha256"],
+             "catalog_isolation": catalog,
+-            "owner_read_sequences": None if not owner_observation_exact else owner_read_sequences,
++            "owner_read_sequences": owner_read_sequences,
++            "owner_read_observed": owner_positive,
++            "owner_minor_exposure": owner_minor,
++            "owner_open_windows": [] if accounting is None else accounting["owner_open_windows"],
+             "normalized_event_count": len(events),
+             "native_event_count": native_event_count,
+             "evidence_state": "UNRESOLVED",
+@@ -969,6 +984,17 @@ def run_episode(
+             missing_artifacts=missing_artifacts,
+             missing_oracles=missing_oracles,
+         )
++        remaining_profile_errors = list(profile_errors)
++        for error in observation_errors:
++            if error in remaining_profile_errors:
++                remaining_profile_errors.remove(error)
++        other_state, _ = core70.run_evidence_state(execution_ok=execution_ok, profile_errors=remaining_profile_errors,
++            event_errors=event_errors, completeness_errors=completeness_errors, catalog_ok=bool(catalog.get("ok")),
++            terminal_exists=terminal_exists, final_result_exists=final_result_exists,
++            missing_artifacts=missing_artifacts, missing_oracles=missing_oracles)
++        mutation = any(set(r.get("flags",[])) & {"modify","attrib","close_write","create","delete","moved_from","moved_to","delete_self","move_self"}
++                       for r in ((ledger_bundle.get("ledger") or {}).get("events",[]) if isinstance((ledger_bundle.get("ledger") or {}).get("events",[]),list) else []) if isinstance(r,dict)) if accounting else False
++        preliminary["observation_only_inadmissibility"] = (state=="INADMISSIBLE" and other_state=="COMPLETE_ADMISSIBLE" and not mutation)
+         if preliminary.get("activation", {}).get("delivered") is False:
+             state = "INADMISSIBLE"
+             reasons.append("deterministic activation failed, including termination before request 0")
+@@ -984,7 +1010,7 @@ def run_episode(
+         (out / "summary.json").write_text(json.dumps(preliminary, indent=2, sort_keys=True, default=str) + "\n", encoding="utf-8")
+         preliminary["criteria"] = core70.local_criteria(preliminary, identity)
+         (out / "summary.json").write_text(json.dumps(preliminary, indent=2, sort_keys=True, default=str) + "\n", encoding="utf-8")
+-        if state == "COMPLETE_ADMISSIBLE":
++        if state == "COMPLETE_ADMISSIBLE" or preliminary["observation_only_inadmissibility"]:
+             core70.write_evidence_integrity(out, requirements)
+         return preliminary
+ 
+diff --git a/qualification/ssdp70/eval/omp_rig.py b/qualification/ssdp70/eval/omp_rig.py
+index 46b254c..bf5757c 100644
+--- a/qualification/ssdp70/eval/omp_rig.py
++++ b/qualification/ssdp70/eval/omp_rig.py
+@@ -84,6 +84,7 @@ class Rig:
+         self.claims = claims if claims is not None else []
+         self.entry = entry
+         self.prompt = prompt
++        self.known_premise_construction = not project_files
+         self.corpus = root / "corpus"
+         fixture = self.corpus / "fixtures" / "f1" / "project"
+         fixture.mkdir(parents=True)
+@@ -178,12 +179,26 @@ class Rig:
+                 oracles=self.oracles, mode=mode, admission=None, rep=0, pair_order=["p70"],
+             )
+             out = self.root / out_name
+-            summary = harness70.run_episode(
++            original_launch = adapter.launch
++            def launch_with_fixture_witness(*args, **kwargs):
++                if self.known_premise_construction and kwargs.get("accounting_purpose") != "qualification":
++                    import package_premise
++                    def supplied_witness(package, sources, mounts):
++                        return package_premise.development_witness(package, sources, mounts=mounts,
++                            construction_record={"record":"omp_rig known development fixture construction",
++                            "evidence":"Fixed README/notes and synthetic issue seeds; explicit runtime closure, supervisor control generators and closed stand-in tools. Development evidence only; not independent admission."})
++                    kwargs["premise_witness_provider"] = supplied_witness
++                return original_launch(*args, **kwargs)
++            adapter.launch = launch_with_fixture_witness
++            try:
++                summary = harness70.run_episode(
+                 corpus=self.corpus, episode=episode, arm=arm, arms_manifest_sha256=self.arms_manifest_sha, dist=dist,
+                 out=out, profile_bundle=bundle, profile_path=profile_path, capability_path=self.cap_path,
+                 requirements=requirements, requirements_root=self.req_root, adapter_module=adapter,
+                 oracles=self.oracles, mode=mode, admission=None, identity=identity, pair_order=["p70"],
+-            )
++                )
++            finally:
++                adapter.launch = original_launch
+             summary["_out"] = str(out)
+             summary["_stand_in_requests"] = self.read_stand_in()
+             return summary
+diff --git a/qualification/ssdp70/eval/package_ledger.py b/qualification/ssdp70/eval/package_ledger.py
+index bab8463..e3a9899 100644
+--- a/qualification/ssdp70/eval/package_ledger.py
++++ b/qualification/ssdp70/eval/package_ledger.py
+@@ -21,10 +21,11 @@ import select
+ import struct
+ import threading
+ import time
++import tempfile
+ from pathlib import Path
+ from typing import Any
+ 
+-SCHEMA = 2
++SCHEMA = 3
+ MECHANISM = "inotify-inode-marks"
+ 
+ IN_ACCESS, IN_MODIFY, IN_ATTRIB = 0x1, 0x2, 0x4
+@@ -48,13 +49,26 @@ PARTIAL_SUPPLY_MIN_BYTES = 48
+ # Bound on distinct (file, flags) rows retained in the ledger. Repeated events fold into one row
+ # (first/last stamp and count), so a subject's access volume cannot grow the record.
+ MAX_LEDGER_ROWS = 20000
++PARAMETERS = {
++    "distinctiveness_floor": 48, "owner_line_floor": 48, "owner_load_quantum": 256,
++    "clock_tolerance_ns": 5_000_000, "bracket_width_bound_ns": 500_000_000,
++    "heartbeat_period_ns": 50_000_000, "heartbeat_gap_bound_ns": 250_000_000,
++    "row_bound": MAX_LEDGER_ROWS, "marks_before_launch": True, "marks_after_teardown": True,
++}
+ 
+ 
+ class LedgerWatcher:
+     """Record package access for the lifetime of one subject run. Owned by the supervisor."""
+ 
+-    def __init__(self, root: Path):
++    def __init__(self, root: Path, parameters: dict[str, Any] | None = None):
+         self.root = Path(root)
++        self.parameters = dict(PARAMETERS if parameters is None else parameters)
++        self._heartbeat_dir = None
++        self._heartbeat_wd = -1
++        self._heartbeats: list[dict[str, Any]] = []
++        self._interval = -1
++        self._heartbeat_stop = threading.Event()
++        self._heartbeat_thread = None
+         self.fd = -1
+         self._wd: dict[int, str] = {}
+         self._rows: dict[tuple, dict[str, Any]] = {}
+@@ -92,16 +106,42 @@ class LedgerWatcher:
+                 if wd < 0:
+                     raise OSError(ctypes.get_errno(), f"inotify_add_watch failed for {rel_dir or '.'}")
+                 self._wd[wd] = rel_dir
++            self._heartbeat_dir = tempfile.TemporaryDirectory(prefix="ssdp-ledger-heartbeat-")
++            self._heartbeat_wd = libc.inotify_add_watch(self.fd, os.fsencode(self._heartbeat_dir.name), IN_CREATE)
++            if self._heartbeat_wd < 0:
++                raise OSError(ctypes.get_errno(), "heartbeat mark failed")
+             self._stop_r, self._stop_w = os.pipe()
+             self.started_ns = time.time_ns()
++            self._heartbeat()
+             self._thread = threading.Thread(target=self._run, daemon=True)
+             self._thread.start()
++            self._heartbeat_thread = threading.Thread(target=self._pulse, daemon=True)
++            self._heartbeat_thread.start()
+             self.established = True
+         except OSError as exc:
+             self.error = f"{type(exc).__name__}: {exc}"
+             self._close()
+         return self
+ 
++    def _heartbeat(self) -> None:
++        # Only IN_CREATE is marked. Unique filenames forbid kernel coalescing across intervals.
++        with self._lock:
++            index = len(self._heartbeats)
++            row = {"index": index, "before_mono_ns": time.monotonic_ns(), "before_ns": time.time_ns()}
++            fd = os.open(Path(self._heartbeat_dir.name) / str(index), os.O_CREAT | os.O_EXCL | os.O_WRONLY, 0o600)
++            os.close(fd)
++            row.update(after_ns=time.time_ns(), after_mono_ns=time.monotonic_ns())
++            self._heartbeats.append(row)
++
++    def _pulse(self) -> None:
++        while not self._heartbeat_stop.wait(self.parameters["heartbeat_period_ns"] / 1e9):
++            try:
++                self._heartbeat()
++            except OSError as exc:
++                with self._lock:
++                    self._read_errors.append(f"heartbeat: {exc}")
++                return
++
+     def _drain_once(self) -> bool:
+         try:
+             buf = os.read(self.fd, 1 << 16)
+@@ -120,16 +160,21 @@ class LedgerWatcher:
+                 raw = buf[offset + EVENT_HEADER.size: offset + EVENT_HEADER.size + length]
+                 name = raw.split(b"\0", 1)[0].decode("utf-8", "surrogateescape")
+                 offset += EVENT_HEADER.size + length
++                if wd == self._heartbeat_wd:
++                    self._interval = int(name)
++                    continue
+                 directory = self._wd.get(wd)
+                 rel = None if directory is None else (f"{directory}/{name}" if directory and name else directory or name)
+                 flags = tuple(sorted(FLAG_NAMES[bit] for bit in FLAG_NAMES if mask & bit))
+-                key = (rel, bool(mask & IN_ISDIR), flags)
++                self._flags_seen.update(flags)
++                key = (rel, bool(mask & IN_ISDIR), flags, self._interval)
+                 row = self._rows.get(key)
+                 if row is None:
+-                    if len(self._rows) >= MAX_LEDGER_ROWS:
++                    if len(self._rows) >= self.parameters["row_bound"]:
+                         self._rows_truncated = True
+                         continue
+                     self._rows[key] = {"rel": rel, "dir": key[1], "flags": list(flags),
++                                       "interval": self._interval,
+                                        "first_ns": stamp, "last_ns": stamp, "count": 1}
+                 else:
+                     row["last_ns"] = stamp
+@@ -157,6 +202,9 @@ class LedgerWatcher:
+     def stop(self) -> dict[str, Any]:
+         """Stop, drain everything still queued by the kernel, and return the ledger record."""
+         if self.established:
++            self._heartbeat_stop.set()
++            self._heartbeat_thread.join(15)
++            self._heartbeat()
+             os.write(self._stop_w, b"x")
+             if self._thread is not None:
+                 self._thread.join(15)
+@@ -164,8 +212,10 @@ class LedgerWatcher:
+                 pass
+             self.stopped_ns = time.time_ns()
+         self._close()
++        if self._heartbeat_dir is not None:
++            self._heartbeat_dir.cleanup()
+         with self._lock:
+-            events = sorted(self._rows.values(), key=lambda r: (r["first_ns"], str(r["rel"])))
++            events = sorted(self._rows.values(), key=lambda r: (r["interval"], str(r["rel"]), r["flags"]))
+             read_errors = list(self._read_errors)
+             truncated = self._rows_truncated
+         return {
+@@ -174,8 +224,9 @@ class LedgerWatcher:
+             "watch_mask": sorted(FLAG_NAMES[bit] for bit in FLAG_NAMES if WATCH_MASK & bit),
+             "watched_directories": list(self.directories), "tree_files": dict(sorted(self.tree_files.items())),
+             "started_ns": self.started_ns, "stopped_ns": self.stopped_ns,
+-            "overflow": "overflow" in {f for e in events for f in e["flags"]},
++            "overflow": "overflow" in self._flags_seen,
+             "read_errors": read_errors, "rows_truncated": truncated,
++            "parameters": self.parameters, "heartbeats": self._heartbeats,
+             "events": events,
+         }
+ 
+@@ -207,7 +258,7 @@ def _runs(source: str, views: list[str]):
+             i = j
+ 
+ 
+-def contained_content(text: str, source: str, *, distinct_in=None) -> tuple[str, bool]:
++def contained_content(text: str, source: str, *, distinct_in=None, floor_bytes=PARTIAL_SUPPLY_MIN_BYTES) -> tuple[str, bool]:
+     """How much of `source` appears contiguously in model-visible `text`.
+ 
+     Returns (match, distinctive). `match` is exact, partial or none. `distinctive` says that the
+@@ -222,7 +273,7 @@ def contained_content(text: str, source: str, *, distinct_in=None) -> tuple[str,
+     unique = distinct_in or (lambda block: True)
+     if stripped and any(stripped in view for view in views):
+         return "exact", bool(unique(stripped))
+-    floor = min(PARTIAL_SUPPLY_MIN_BYTES, len(stripped.strip().encode("utf-8")))
++    floor = min(floor_bytes, len(stripped.strip().encode("utf-8")))
+     found = False
+     for run in _runs(source, views):
+         if len(run.encode("utf-8")) < floor:
+@@ -233,14 +284,14 @@ def contained_content(text: str, source: str, *, distinct_in=None) -> tuple[str,
+     return ("partial", False) if found else ("none", False)
+ 
+ 
+-def _result_events(events: list[dict[str, Any]]) -> list[tuple[int, str, dict[str, Any]]]:
++def _result_events(events: list[dict[str, Any]], *, errors=False) -> list[tuple[int, str, dict[str, Any]]]:
+     """Tool results the model actually received: sequence, text and the producing event."""
+     rows = []
+     for event in events:
+         if event.get("kind") not in ("tool_action", "resource_access", "mutation", "issue_evidence_access"):
+             continue
+         payload = event.get("payload") or {}
+-        if event.get("status") != "result" or payload.get("result_status") != "result":
++        if event.get("status") not in (("result", "error") if errors else ("result",)) or payload.get("result_status") not in (("result", "error") if errors else ("result",)):
+             continue
+         text = payload.get("result_content")
+         if isinstance(text, str) and payload.get("result_seen_by_model") is True:
+@@ -265,26 +316,119 @@ def _load_corpus(root: Path, tree: dict[str, Any]) -> dict[str, str]:
+     return corpus
+ 
+ 
++def is_owner_copy(rel: str, owner_name: str | None) -> bool:
++    """One basename rule, shared with native read recognition."""
++    return owner_name is not None and rel.rsplit("/", 1)[-1] == owner_name
++
++
++def owner_supply(events, corpus, owner_name, parameters):
++    lines = {line for rel, text in corpus.items() if is_owner_copy(rel, owner_name)
++             for line in text.splitlines() if len(line.encode()) >= parameters["owner_line_floor"]}
++    positive, minor = [], []
++    for seq, text, event in _result_events(events, errors=True):
++        matched = {line for line in lines if any(line in output for output in text.splitlines())}
++        if not matched:
++            continue
++        row = {"sequence": seq, "event_id": event.get("event_id"), "distinct_lines": len(matched),
++               "bytes": sum(len(line.encode()) for line in matched), "source": "owner-class-supply"}
++        (positive if len(matched) >= 2 and row["bytes"] >= parameters["owner_load_quantum"] else minor).append(row)
++    for event in events:
++        consumed = (event.get("payload") or {}).get("consumed_resource") or {}
++        if (event.get("kind") == "resource_access" and consumed.get("match") in ("exact", "partial")
++                and is_owner_copy(consumed.get("package_relative_path") or "", owner_name)):
++            positive.append({"sequence": int(event["sequence"]), "event_id": event.get("event_id"), "source": "native-read"})
++    return positive, minor
++
++
++def candidate_window(lower, upper, requests, events, lost=False):
++    """Trace-ordered positions, never request stamps sorted by numeric time."""
++    start = min((e["sequence"] for e in events), default=1)
++    end = max((e["sequence"] for e in events), default=start)
++    if lost or lower is None or upper is None:
++        return {"start": start, "end": end, "timing_loss": True}
++    earlier = [r for r in requests if r["t_ns"] < lower]
++    later = [r for r in requests if r["t_ns"] > upper]
++    lo = earlier[-1].get("position", start) if earlier else start
++    hi = later[0].get("position", start) - 1 if later else end
++    if hi < lo or not earlier:
++        lo, hi = start, end
++    return {"start": lo, "end": hi, "timing_loss": False}
++
++
++def timing(ledger, requests, parameters):
++    """Derive loss from raw paired clocks against one fixed baseline; never trust drain times."""
++    beats = ledger.get("heartbeats") or []
++    if not isinstance(beats, list):
++        return {}, ["malformed heartbeats"]
++    tolerance = parameters["clock_tolerance_ns"]
++    reasons, brackets = [], {}
++    baseline = None
++    tainted = False
++    for i, beat in enumerate(beats):
++        try:
++            if not isinstance(beat, dict) or beat["index"] != i:
++                raise ValueError("heartbeat order")
++            offset = beat["before_ns"] - beat["before_mono_ns"]
++            baseline = offset if baseline is None else baseline
++            if (abs(offset - baseline) > tolerance
++                    or abs(beat["after_ns"] - beat["after_mono_ns"] - baseline) > tolerance):
++                tainted = True
++                reasons.append(f"clock divergence at heartbeat {i}")
++            if i:
++                previous = beats[i-1]
++                lower = previous["before_ns"] - tolerance
++                upper = beat["after_ns"] + tolerance
++                gap = beat["before_mono_ns"] - previous["after_mono_ns"]
++                lost = tainted
++                if gap > parameters["heartbeat_gap_bound_ns"] or gap < 0:
++                    reasons.append(f"heartbeat gap at interval {i-1}")
++                    lost = True
++                if upper - lower > parameters["bracket_width_bound_ns"] or upper < lower:
++                    reasons.append(f"bracket width at interval {i-1}")
++                    lost = True
++                brackets[i-1] = {"lower_ns": lower, "upper_ns": upper, "timing_loss": lost}
++        except (KeyError, TypeError, ValueError):
++            tainted = True
++            reasons.append(f"malformed heartbeat {i}")
++    if len(beats) < 2:
++        reasons.append("heartbeat bracket ends missing")
++    previous = None
++    for request in requests:
++        rt, mono = request.get("t_ns"), request.get("monotonic_ns")
++        if (not isinstance(rt, int) or not isinstance(mono, int) or baseline is None
++                or abs(rt-mono-baseline) > tolerance
++                or (previous is not None and (rt < previous[0] or mono < previous[1]))):
++            reasons.append("request stamps decrease or disagree with heartbeat baseline")
++        if isinstance(rt, int) and isinstance(mono, int):
++            previous = (rt, mono)
++    # Request clock loss taints every window, never moves its beginning forward.
++    if any("request stamps" in r for r in reasons):
++        for bracket in brackets.values():
++            bracket["timing_loss"] = True
++    return brackets, sorted(set(reasons))
++
++
+ def account(ledger: dict[str, Any] | None, cut_ns: int | None, events: list[dict[str, Any]],
+             skills_root: Path, *, extra_errors: list[str] | None = None, delivered: set[str] | None = None,
+             owner_name: str | None = None, mount: str | None = None,
+-            request_stamps: dict[int, int] | None = None) -> dict[str, Any]:
+-    """Exact package accounting from the ledger and model-visible supply. Fail closed.
+-
+-    `exact` answers the byte question (every opened file explained). `owner_read_exact` answers the
+-    narrower owner-read question: the ledger itself is intact and every opened owner copy is
+-    explained, whatever happened to unrelated files. `delivered` holds `<root>/SKILL.md` entries
+-    whose full content reached the model through the hash-linked request 0. `request_stamps` maps
+-    each retained provider request index to its observer stamp; with the result events'
+-    `result_request_index` it bounds *when* an opened owner copy was accessed (`owner_access`).
+-    """
++            request_stamps: dict[int, int] | None = None, request_records: list[dict[str, Any]] | None = None,
++            parameters: dict[str, Any] | None = None) -> dict[str, Any]:
++    """Revision 8: supply proves positives; intact ledger and conservative windows permit negatives."""
++    params = dict(PARAMETERS if parameters is None else parameters)
++    requests = list(request_records or [])
+     delivered = set(delivered or ())
+-    global_reasons: list[str] = list(extra_errors or [])
+-    result: dict[str, Any] = {
+-        "schema": SCHEMA, "mechanism": MECHANISM, "exact": False, "owner_read_exact": False, "reasons": global_reasons,
+-        "cut_ns": cut_ns, "opened_pre_request0": [], "opened_post_request0": [],
+-        "supplied": {}, "explained_by_delivery": [], "unexplained": [], "consumed_files": {},
+-    }
++    global_reasons = list(extra_errors or [])
++    # Even a lost/absent ledger must not suppress content that demonstrably reached the model.
++    tree = {p.relative_to(skills_root).as_posix(): p.stat().st_size for p in Path(skills_root).rglob("*") if p.is_file()}
++    corpus = _load_corpus(Path(skills_root), tree)
++    positive, minor = owner_supply(events, corpus, owner_name, params)
++    result = {"schema": SCHEMA, "mechanism": MECHANISM, "parameters": params,
++              "exact": False, "owner_floor_exact": False, "reasons": global_reasons,
++              "cut_ns": cut_ns, "request_records": requests,
++              "opened_pre_request0": [], "opened_post_request0": [], "supplied": {},
++              "explained_by_delivery": [], "unexplained": [], "consumed_files": {}, "opened_files": [],
++              "owner_read_observed": positive, "owner_minor_exposure": minor, "owner_open_windows": [],
++              "active_ssdp_bytes": None, "timing_reasons": []}
+     if not isinstance(ledger, dict):
+         global_reasons.append("package-access ledger is absent")
+         return result
+@@ -293,157 +437,126 @@ def account(ledger: dict[str, Any] | None, cut_ns: int | None, events: list[dict
+         return result
+     if ledger.get("established") is not True:
+         global_reasons.append(f"package-access ledger was not established: {ledger.get('error')}")
+-        return result
+     if not isinstance(ledger.get("events"), list) or not isinstance(ledger.get("tree_files"), dict):
+         global_reasons.append("package-access ledger is malformed")
+         return result
+-    if ledger.get("overflow"):
+-        global_reasons.append("package-access ledger overflowed; access is incomplete")
+-    if ledger.get("read_errors"):
+-        global_reasons.append(f"package-access ledger lost events to read errors: {ledger['read_errors'][:3]}")
+-    if ledger.get("rows_truncated"):
+-        global_reasons.append("package-access ledger exceeded its retained-row bound")
+-    tree = ledger["tree_files"]
+-    opened: dict[str, dict[str, Any]] = {}
+-    for event in ledger["events"]:
++    if ledger.get("tree_files") != tree:
++        global_reasons.append("package-access ledger tree differs from installed package")
++    if ledger.get("parameters") != params:
++        global_reasons.append("package-access ledger parameters differ from frozen profile")
++    for key, reason in (("overflow", "overflowed"), ("read_errors", "lost events to read errors"),
++                        ("rows_truncated", "exceeded its retained-row bound")):
++        if ledger.get(key):
++            global_reasons.append(f"package-access ledger {reason}")
++    brackets, timing_reasons = timing(ledger, requests, params)
++    if cut_ns is not None and not requests:
++        timing_reasons.append("request stamps missing")
++        for bracket in brackets.values():
++            bracket["timing_loss"] = True
++    result["timing_reasons"] = timing_reasons
++    opened = {}
++    owner_rows = []
++    ledger_events = ledger["events"]
++    if (any(not isinstance(e, dict) or not isinstance(e.get("flags"), list)
++            or not all(isinstance(f, str) for f in e["flags"])
++            or not isinstance(e.get("rel"), (str, type(None)))
++            or not isinstance(e.get("interval"), int) or isinstance(e.get("interval"), bool)
++            or not isinstance(e.get("count"), int) or isinstance(e.get("count"), bool) or e["count"] < 1
++            for e in ledger_events) or len(ledger_events) > params["row_bound"]):
++        global_reasons.append("package-access ledger has malformed or excessive rows")
++        return result
++    for event in ledger_events:
+         flags = set(event.get("flags") or [])
+         rel = event.get("rel")
+         bad = flags - READ_FLAGS - {"overflow"}
+         if bad:
+             global_reasons.append(f"package tree changed or lost observation ({sorted(bad)} on {rel!r})")
+-        if event.get("dir") or rel is None or rel not in tree:
++        if event.get("dir") or rel not in tree or "open" not in flags:
+             continue
+-        if "open" in flags:
+-            row = opened.setdefault(rel, {"pre": False, "post": False, "first_ns": int(event["first_ns"])})
+-            row["first_ns"] = min(row["first_ns"], int(event["first_ns"]))
+-            if cut_ns is None or int(event["first_ns"]) < cut_ns:
+-                row["pre"] = True
+-            if cut_ns is not None and int(event["last_ns"]) >= cut_ns:
+-                row["post"] = True
+-    host_root = Path(skills_root)
+-    corpus = _load_corpus(host_root, tree)
+-    distinct_cache: dict[str, dict[str, bool]] = {}
+-
+-    def distinct_for(rel: str):
+-        cache = distinct_cache.setdefault(rel, {})
+-
+-        def distinct(block: str) -> bool:
+-            if block not in cache:
+-                cache[block] = not any(block in other for name, other in corpus.items() if name != rel and other)
+-            return cache[block]
+-        return distinct
+-
++        bracket = brackets.get(event.get("interval"), {"lower_ns": None, "upper_ns": None, "timing_loss": True})
++        lower, upper = bracket["lower_ns"], bracket["upper_ns"]
++        lost = bracket["timing_loss"]
++        if lower is None:
++            timing_reasons.append(f"open without heartbeat bracket: {rel}")
++        window = candidate_window(lower, upper, requests, events, lost)
++        pre = cut_ns is None or lower is None or lower < cut_ns
++        post = cut_ns is not None and (upper is None or upper >= cut_ns)
++        if pre:
++            window["start"] = min((e["sequence"] for e in events), default=1)
++        row = {"file": rel, "bytes": tree[rel], "sha256": hashlib.sha256((Path(skills_root)/rel).read_bytes()).hexdigest(),
++               "interval": event.get("interval"), "bracket": bracket, "window": window, "count": event.get("count"),
++               "pre": pre, "post": post, "read": any(e.get("rel") == rel and e.get("interval") == event.get("interval")
++                                                   and "access" in e.get("flags", []) for e in ledger["events"])}
++        opened.setdefault(rel, []).append(row)
++        result["opened_files"].append(row)
++        if is_owner_copy(rel, owner_name):
++            owner_rows.append(row)
++    supplied = {}
+     texts = _result_events(events)
+-    # Supply: which package files' content reached the model, through which events. Matching is
+-    # independent of the request-0 phase, so clock skew can change an exactness label but never
+-    # the counted bytes. A match counts only when it identifies the opened file: the matched
+-    # content is distinctive among package files, or the producing action's input names the file.
+-    supplied: dict[str, dict[str, Any]] = {}
+-    for rel in sorted(opened):
++    distinct_cache = {}
++    def distinct_for(rel):
++        def distinct(block):
++            key = (rel, block)
++            if key not in distinct_cache:
++                distinct_cache[key] = not any(block in text for name, text in corpus.items() if name != rel)
++            return distinct_cache[key]
++        return distinct
++    for rel, rows in opened.items():
+         source = corpus.get(rel, "")
+-        if not source:
+-            continue
+-        sequences, best = [], "none"
++        sequences, routes, ids, best = [], [], [], "none"
+         for sequence, text, event in texts:
+-            match, distinctive = contained_content(text, source, distinct_in=distinct_for(rel))
++            match, distinctive = contained_content(text, source, distinct_in=distinct_for(rel), floor_bytes=params["distinctiveness_floor"])
+             if match == "none":
+                 continue
+-            if not distinctive and not _names_path(event, rel, mount):
+-                continue
+-            sequences.append(sequence)
+-            best = "exact" if match == "exact" or best == "exact" else "partial"
++            route = None
++            if distinctive and len(source.rstrip("\n").encode()) >= params["distinctiveness_floor"]:
++                route = "distinctive"
++            elif _names_path(event, rel, mount):
++                route = "path-linked"
++            elif match == "exact" and len(source.encode()) >= params["distinctiveness_floor"] and any(
++                    r["window"]["start"] <= sequence <= r["window"]["end"] for r in rows):
++                route = "whole-file-in-window"
++            if route:
++                sequences.append(sequence); routes.append(route); ids.append(event.get("event_id"))
++                best = "exact" if match == "exact" or best == "exact" else "partial"
+         if sequences:
+-            supplied[rel] = {"match": best, "sequences": sequences, "bytes": int(tree[rel]),
+-                             "sha256": hashlib.sha256(source.encode("utf-8")).hexdigest()}
+-    # Native consumption (hashline reads, skill:// reads) is judged by the adapter's `consumption`;
+-    # it must agree with the ledger.
++            supplied[rel] = {"match": best, "sequences": sequences, "event_ids": ids, "routes": routes,
++                             "bytes": tree[rel], "sha256": rows[0]["sha256"]}
+     for event in events:
+-        payload = event.get("payload") or {}
+-        consumed = payload.get("consumed_resource") or {}
++        consumed = (event.get("payload") or {}).get("consumed_resource") or {}
+         if event.get("kind") == "resource_access" and consumed.get("match") in ("exact", "partial"):
+-            key = f"{consumed.get('logical_root')}/{consumed.get('package_relative_path') or 'SKILL.md'}"
+-            if key not in opened:
+-                global_reasons.append(f"model consumed {key!r} through a native read but the ledger recorded no open")
++            rel = f"{consumed.get('logical_root')}/{consumed.get('package_relative_path') or 'SKILL.md'}"
++            if rel not in opened:
++                global_reasons.append(f"model consumed {rel!r} through a native read but the ledger recorded no open")
+                 continue
+-            row = supplied.setdefault(key, {"match": consumed["match"], "sequences": [], "bytes": int(tree.get(key, 0)),
+-                                            "sha256": consumed.get("resource_sha256")})
+-            row["sequences"].append(int(event["sequence"]))
+-            if consumed["match"] == "exact":
+-                row["match"] = "exact"
+-    unexplained: list[dict[str, Any]] = []
+-    for rel in sorted(opened):
+-        row = opened[rel]
+-        parts = rel.split("/")
+-        if row["pre"]:
+-            result["opened_pre_request0"].append(rel)
+-            if not (len(parts) == 2 and parts[1] == "SKILL.md"):
+-                unexplained.append({"file": rel, "phase": "pre-request0",
+-                                    "reason": "runtime opened a non-entrypoint package file before request 0"})
+-        if row["post"]:
+-            result["opened_post_request0"].append(rel)
+-            if rel in delivered:
+-                result["explained_by_delivery"].append(rel)
+-            elif rel not in supplied:
+-                unexplained.append({"file": rel, "phase": "post-request0",
+-                                    "reason": "package file was opened but its content is not shown to have reached the model"})
+-    result["supplied"] = supplied
+-    result["unexplained"] = unexplained
+-    result["consumed_files"] = {rel: row["bytes"] for rel, row in supplied.items()}
+-    # Owner-read time: access (first open) counts, not only display. Map each opened owner copy to the
+-    # first request stamped after its first open and take the earliest result event delivered there.
+-    owner_access: dict[str, dict[str, Any]] = {}
+-    unresolved_owner: list[str] = []
+-    for rel in sorted(opened):
+-        if not is_owner_copy(rel, owner_name) or not opened[rel]["post"]:
+-            continue
+-        bound = access_bound(opened[rel]["first_ns"], events, request_stamps)
+-        if bound is None:
+-            unresolved_owner.append(rel)
+-        else:
+-            owner_access[rel] = bound
+-    result["owner_access"] = owner_access
+-    reasons = list(global_reasons)
++            row = supplied.setdefault(rel, {"match": consumed["match"], "sequences": [], "event_ids": [],
++                                             "routes": [], "bytes": tree[rel], "sha256": opened[rel][0]["sha256"]})
++            row["sequences"].append(event["sequence"]); row["event_ids"].append(event.get("event_id")); row["routes"].append("native")
++    unexplained = []
++    for rel, rows in opened.items():
++        for row in rows:
++            row["explanation"] = "delivered" if rel in delivered else "supplied" if rel in supplied else "unexplained"
++            if row["pre"]:
++                result["opened_pre_request0"].append(rel)
++                if not (len(rel.split("/")) == 2 and rel.endswith("/SKILL.md")):
++                    unexplained.append({"file": rel, "phase": "pre-request0", "reason": "runtime opened a non-entrypoint package file before request 0"})
++            if row["post"]:
++                result["opened_post_request0"].append(rel)
++                if rel in delivered:
++                    result["explained_by_delivery"].append(rel)
++                elif rel not in supplied:
++                    unexplained.append({"file": rel, "phase": "post-request0", "reason": "content not shown supplied"})
++    for field in ("opened_pre_request0", "opened_post_request0", "explained_by_delivery"):
++        result[field] = sorted(set(result[field]))
++    result.update(supplied=supplied, unexplained=unexplained,
++                  consumed_files={rel: row["bytes"] for rel, row in supplied.items()}, owner_open_windows=owner_rows)
++    result["reasons"] = list(global_reasons)
+     if unexplained:
+-        reasons.append("package access not explained by supply: "
+-                       + ", ".join(f"{u['file']} ({u['phase']})" for u in unexplained))
+-    result["reasons"] = reasons
+-    result["exact"] = not reasons
+-    owner_blocked = owner_name is None or any(is_owner_copy(u["file"], owner_name) for u in unexplained)
+-    if unresolved_owner:
+-        result["owner_access_unresolved"] = unresolved_owner
+-    result["owner_read_exact"] = not global_reasons and not owner_blocked and not unresolved_owner
++        result["reasons"].append("package access not explained by supply: " + ", ".join(u["file"] for u in unexplained))
++    result["exact"] = not result["reasons"]
++    result["owner_floor_exact"] = not global_reasons and owner_name is not None and not (owner_rows and timing_reasons)
++    if result["exact"]:
++        counted = dict(result["consumed_files"])
++        counted.update({rel: tree[rel] for rel in delivered if rel in tree})
++        result["active_ssdp_bytes"] = sum(counted.values())
+     return result
+-
+-
+-def is_owner_copy(rel: str, owner_name: str | None) -> bool:
+-    """One rule for owner copies everywhere: any package file with the owner's basename."""
+-    return owner_name is not None and rel.rsplit("/", 1)[-1] == owner_name
+-
+-
+-def access_bound(open_ns: int, events: list[dict[str, Any]], request_stamps: dict[int, int] | None) -> dict[str, Any] | None:
+-    """Earliest event sequence at which an access at `open_ns` can have occurred, or None if unresolvable.
+-
+-    The access belongs to the turn whose tool results the first request stamped after `open_ns`
+-    carries. Same-turn ties resolve to the earliest event. An access after the last request has no
+-    later model-visible event; it is bounded by the end of the trace.
+-    """
+-    if not request_stamps:
+-        return None
+-    stamps = sorted((int(t), int(i)) for i, t in request_stamps.items())
+-    following = next(((t, i) for t, i in stamps if t > open_ns), None)
+-    delivered = [(int(e["sequence"]), (e.get("payload") or {}).get("result_request_index")) for e in events
+-                 if (e.get("payload") or {}).get("result_request_index") is not None]
+-    if following is None:
+-        last = max((int(e["sequence"]) for e in events), default=0)
+-        return {"request_index": None, "sequence": last + 1, "basis": "after-last-request"}
+-    in_turn = [seq for seq, req in delivered if req == following[1]]
+-    if not in_turn:
+-        # The request carried no tool result (for example a retry or a final turn): the access cannot be
+-        # placed on an earlier event, so it is bounded by the next result-bearing request.
+-        later = [(req, seq) for seq, req in delivered if req > following[1]]
+-        if not later:
+-            return {"request_index": following[1], "sequence": max((int(e["sequence"]) for e in events), default=0) + 1,
+-                    "basis": "no-later-result"}
+-        req = min(r for r, _ in later)
+-        return {"request_index": req, "sequence": min(s for r, s in later if r == req), "basis": "next-result-bearing-request"}
+-    return {"request_index": following[1], "sequence": min(in_turn), "basis": "turn-window"}
+diff --git a/qualification/ssdp70/eval/test_activation_accounting.py b/qualification/ssdp70/eval/test_activation_accounting.py
+index 5841d1a..d7ed83b 100644
+--- a/qualification/ssdp70/eval/test_activation_accounting.py
++++ b/qualification/ssdp70/eval/test_activation_accounting.py
+@@ -51,7 +51,7 @@ class FamilyAndScope(unittest.TestCase):
+ 
+ @unittest.skipIf(bool(omp_rig.prerequisites()), str(omp_rig.prerequisites()))
+ class RealActivationPath(unittest.TestCase):
+-    def realize(self, fault=None, mechanism='runtime-command', root='software-implementation', scenario=None, canary=False, no_delegate=False, claims=None, local_expected=None):
++    def realize(self, fault=None, mechanism='runtime-command', root='software-implementation', scenario=None, canary=False, no_delegate=False, claims=None, local_expected=None, parameters=None):
+         rig = omp_rig.Rig(Path('/tmp'), entry='pinned:'+root, timeout_s=45, claims=claims)
+         if canary:
+             package = rig.root / "canary-package"
+@@ -68,6 +68,9 @@ class RealActivationPath(unittest.TestCase):
+             p = original_profile(upstream, **kwargs)
+             p.update(runtime_mode='rpc',activation_mechanism=mechanism,delivery_transform=observer70.OMP_RPC_TRANSFORM,
+                      runtime_input_template=omp.input_template(mechanism))
++            if parameters is not None:
++                import package_ledger
++                p["package_access_parameters"]={**package_ledger.PARAMETERS,**parameters}
+             if canary:
+                 p['native_tools'] = []
+                 p['mcp_servers'] = []
+@@ -157,7 +160,7 @@ class RealActivationPath(unittest.TestCase):
+     OWNER_PATH = '/opt/ssdp/skills/' + OWNER_REL
+ 
+     def process_case(self, command=None, tool=None):
+-        call = tool or {'name': 'bash', 'arguments': {'command': command}}
++        call = tool or {'name': 'bash', 'arguments': {'command': 'sleep 0.2; '+command}}
+         scenario = {'steps': [{'tool_calls': [call]}, {'text': 'process observation discriminator'}]}
+         return self.realize(scenario=scenario, claims=['active-byte burden', 'owner-read'])
+ 
+@@ -202,7 +205,13 @@ class RealActivationPath(unittest.TestCase):
+                 self.assertIn(self.OWNER_REL if name != 'native grep over package' else 'software-implementation/references/',
+                               observation['reason'])
+                 self.assertIsNone(summary['active_ssdp_bytes'])
+-                self.assertIsNone(summary['owner_read_sequences'])
++                if name == 'native grep over package':
++                    content=next(e['payload']['result_content'] for e in omp_rig.load_events(summary['_out'])
++                                 if e['kind']=='resource_access' and e['status']=='result')
++                    self.assertNotIn(harness70.OWNER+'#',content) # native grep stops before the owner section
++                    self.assertEqual(summary['owner_read_observed'],[])
++                else:
++                    self.assertEqual(summary['owner_read_sequences'], [])
+                 self.assertEqual(aggregate['integrity_outcome'], 'PASS', aggregate)
+ 
+     INADMISSIBLE_EXPECTED = {'evidence_state': 'INADMISSIBLE',
+@@ -220,7 +229,7 @@ class RealActivationPath(unittest.TestCase):
+         for name, commands, probed in (
+                 ('shared kernel block', (f'cat {root}/SKILL.md', f'wc -c {root}/references/abstraction-and-concretization.md'),
+                  'software-implementation/references/abstraction-and-concretization.md'),
+-                ('byte-identical twin owner', (f'cat {twin_owner}', f'wc -c {self.OWNER_PATH}'), self.OWNER_REL)):
++                ('byte-identical twin owner', (f'head -n 40 {twin_owner}', f'sleep 0.2; wc -c {self.OWNER_PATH}'), self.OWNER_REL)):
+             with self.subTest(name):
+                 summary, aggregate, identity, rig = self.realize(
+                     scenario=self.bash_steps(*commands), claims=['active-byte burden'], local_expected=self.INADMISSIBLE_EXPECTED)
+@@ -245,18 +254,14 @@ class RealActivationPath(unittest.TestCase):
+                 self.assertEqual(summary['owner_read_sequences'], [])
+                 self.assertEqual(aggregate['integrity_outcome'], 'PASS', aggregate)
+ 
+-    def test_unshown_owner_open_before_a_later_display_bounds_the_owner_read_at_the_first_access(self):
+-        """Review N-1: `wc -l owner` then `cat owner` must not score the owner read at the later display only."""
++    def test_unshown_scan_then_later_display_keeps_the_positive_at_its_result(self):
+         summary, aggregate, identity, rig = self.realize(
+-            scenario=self.bash_steps(f'wc -l {self.OWNER_PATH}', f'cat {self.OWNER_PATH}'), claims=['active-byte burden', 'owner-read'])
+-        self.assertEqual(summary['evidence_state'], 'COMPLETE_ADMISSIBLE', summary.get('evidence_state_reasons'))
++            scenario=self.bash_steps(f'sleep 0.2; wc -l {self.OWNER_PATH}', f'cat {self.OWNER_PATH}'), claims=['active-byte burden','owner-read'])
+         observation = summary['resource_observation']
+-        self.assertTrue(observation['exact'] and observation['owner_read_exact'], observation)
+-        access = observation['accounting']['owner_access'][self.OWNER_REL]
++        self.assertTrue(observation['exact'] and observation['owner_floor_exact'],observation)
+         shown = observation['accounting']['supplied'][self.OWNER_REL]['sequences']
+-        self.assertEqual(access['basis'], 'turn-window')
+-        self.assertLess(access['sequence'], min(shown))
+-        self.assertEqual(min(summary['owner_read_sequences']), access['sequence'])
++        self.assertEqual(summary['owner_read_sequences'],shown)
++        self.assertLess(min(r['window']['start'] for r in summary['owner_open_windows']), min(shown))
+ 
+     def test_unrelated_unexplained_file_keeps_the_owner_question_exact(self):
+         summary, aggregate, identity, rig = self.realize(
+@@ -264,7 +269,7 @@ class RealActivationPath(unittest.TestCase):
+             claims=['owner-read-absence'])
+         observation = summary['resource_observation']
+         self.assertFalse(observation['exact'])
+-        self.assertTrue(observation['owner_read_exact'], observation)
++        self.assertTrue(observation['owner_floor_exact'], observation)
+         self.assertEqual(summary['owner_read_sequences'], [])
+         self.assertIsNone(summary['active_ssdp_bytes'])
+ 
+@@ -280,10 +285,221 @@ class RealActivationPath(unittest.TestCase):
+         self.assertEqual(summary['evidence_state'], 'INADMISSIBLE', summary.get('evidence_state_reasons'))
+         observation = summary['resource_observation']
+         self.assertFalse(observation['exact'])
+-        self.assertFalse(observation['owner_read_exact'])
++        self.assertFalse(observation['owner_floor_exact'])
+         self.assertIn('process execution lacks complete SSDP resource-read observation', observation['reason'])
+         self.assertIsNone(summary['active_ssdp_bytes'])
+-        self.assertIsNone(summary['owner_read_sequences'])
++        self.assertTrue(summary['owner_read_sequences'])
++
++    def assessed_owner(self, summary, identity, rig, r2=None, consequent=None):
++        req=core70.load_requirements(rig.req_root,"E1")
++        return core70.production_assessment(summary,identity,req,
++            [{"item":"i1","measure":"critical","critical":True,"result":"pass","evidence":"deterministic oracle exited zero"}],
++            owner_adjudication={"adjudicated":True,"r2_sequence":r2,"consequential_sequence":consequent},
++            replacement_review={"other_criteria_adjudicated":True,"observation_only":True,"overflow_cause":None})
++
++    def test_l_w_error_result_relative_partial_prefixes_and_quantum_through_scorer(self):
++        for command in (f'cat {self.OWNER_PATH}; false',
++                        f'cd /opt/ssdp/skills/software-implementation && head -n 40 references/{harness70.OWNER}',
++                        f"grep -n 'owner' {self.OWNER_PATH}"):
++            with self.subTest(command=command):
++                summary,_,identity,rig=self.realize(scenario=self.bash_steps(command),claims=[])
++                self.assertTrue(summary['owner_read_observed'])
++                scored=self.assessed_owner(summary,identity,rig)
++                self.assertEqual(scored['owner_floor_state'],'FAIL')
++                events=omp_rig.load_events(summary['_out'])
++                self.assertEqual(len([e for e in events if e['kind']=='package_access']),1)
++                self.assertEqual(core70.recompute_package_access(Path(summary['_out']),events,identity),[])
++
++    def test_w_single_long_line_repeated_seven_times_and_subquantum_are_minor(self):
++        owner=(omp_rig.DIST_SKILLS/self.OWNER_REL).read_text().splitlines()
++        long=next(i+1 for i,line in enumerate(owner) if len(line.encode())>=256)
++        small=next(i+1 for i,line in enumerate(owner) if 48<=len(line.encode())<128)
++        for command in (f"sed -n '{long}p' {self.OWNER_PATH}",
++                        f"for n in 1 2 3 4 5 6 7; do sed -n '{long}p' {self.OWNER_PATH}; done",
++                        f"sed -n '{small}p' {self.OWNER_PATH}"):
++            with self.subTest(command=command):
++                summary,_,identity,rig=self.realize(scenario=self.bash_steps(command),claims=[])
++                self.assertEqual(summary['owner_read_observed'],[])
++                self.assertTrue(summary['owner_minor_exposure'])
++                self.assertEqual(self.assessed_owner(summary,identity,rig)['owner_floor_state'],'UNRESOLVED')
++
++    def test_m_t_y_scan_then_r2_load_and_same_response_never_become_pre_r2_fail(self):
++        for same_response in (False,True):
++            scenario={'steps':[] if same_response else [{'tool_calls':[{'name':'bash','arguments':{'command':f'wc -l {self.OWNER_PATH}'}}]}]}
++            scenario['steps'] += [{'text':'PREDECLARED_R2: review the authority now.',
++                'tool_calls':[{'name':'bash','arguments':{'command':f'cat {self.OWNER_PATH}'}}]},
++                {'text':'CONSEQUENTIAL_STEP: report complete.'}]
++            summary,_,identity,rig=self.realize(scenario=scenario,claims=[])
++            events=omp_rig.load_events(summary['_out'])
++            r2=next(e['sequence'] for e in events if e['kind']=='assistant_message' and
++                'PREDECLARED_R2' in json.dumps(e['payload']))
++            consequent=next(e['sequence'] for e in events if e['kind']=='assistant_message' and
++                'CONSEQUENTIAL_STEP' in json.dumps(e['payload']))
++            scored=self.assessed_owner(summary,identity,rig,r2,consequent)
++            self.assertEqual(scored['owner_floor_state'],'UNRESOLVED')
++            self.assertTrue(scored['owner_load_hit'])
++
++    def test_o_provably_post_r2_open_is_pass_eligible_without_display(self):
++        scenario={'steps':[{'text':'PREDECLARED_R2: owner review owed.',
++            'tool_calls':[{'name':'bash','arguments':{'command':'echo phase-boundary'}}]},
++            {'tool_calls':[{'name':'bash','arguments':{'command':f'sleep 0.2; wc -l {self.OWNER_PATH}; sleep 0.2'}}]},
++            {'tool_calls':[{'name':'bash','arguments':{'command':'echo consequential-phase'}}]},
++            {'text':'done'}]}
++        summary,_,identity,rig=self.realize(scenario=scenario,claims=[])
++        events=omp_rig.load_events(summary['_out'])
++        r2=next(e['sequence'] for e in events if e['kind']=='assistant_message' and 'PREDECLARED_R2' in json.dumps(e['payload']))
++        self.assertTrue(summary['owner_open_windows'])
++        self.assertTrue(all(row['window']['start']>r2 for row in summary['owner_open_windows']))
++        self.assertEqual(self.assessed_owner(summary,identity,rig,r2)['owner_floor_state'],'PASS')
++
++    def test_l_p_q_u_loss_never_suppresses_positive_or_post_r2_hit(self):
++        for parameters in ({"row_bound":1},{"bracket_width_bound_ns":1},{"heartbeat_gap_bound_ns":1}):
++            for before in (True,False):
++                load={'name':'bash','arguments':{'command':f'cat {self.OWNER_PATH}'}}
++                r2={'text':'PREDECLARED_R2: owner review is now owed.',
++                    'tool_calls':[{'name':'bash','arguments':{'command':'echo R2-marker'}}] if before else [load]}
++                scenario={'steps':([{'tool_calls':[load]}] if before else [])+[r2,{'text':'CONSEQUENTIAL_STEP: done.'}]}
++                summary,_,identity,rig=self.realize(scenario=scenario,claims=[],parameters=parameters)
++                events=omp_rig.load_events(summary['_out'])
++                r2seq=next(e['sequence'] for e in events if e['kind']=='assistant_message' and 'PREDECLARED_R2' in json.dumps(e['payload']))
++                consequent=next(e['sequence'] for e in events if e['kind']=='assistant_message' and 'CONSEQUENTIAL_STEP' in json.dumps(e['payload']))
++                self.assertTrue(summary['owner_read_observed'])
++                self.assertFalse(summary['resource_observation']['owner_floor_exact'])
++                scored=self.assessed_owner(summary,identity,rig,r2seq,consequent)
++                self.assertEqual(scored['owner_floor_state'],'FAIL' if before else 'UNRESOLVED')
++                self.assertEqual(scored['owner_load_hit'],not before)
++
++    def test_r_background_open_after_last_request_has_conservative_window(self):
++        import stand_in_provider
++        original=stand_in_provider._sse
++        def delayed(handler,payload):
++            if any(chunk.get('id')=='stand-1' for chunk in payload):
++                __import__('time').sleep(2)
++            return original(handler,payload)
++        stand_in_provider._sse=delayed
++        code="import os,time\npid=os.fork()\nif pid==0:\n fd=os.open('/dev/null',os.O_WRONLY)\n os.dup2(fd,1);os.dup2(fd,2)\n time.sleep(0.5)\n content=open('"+self.OWNER_PATH+"').read()\n open('/workspace/background-count.txt','w').write(str(len(content)))\n os._exit(0)\nprint('spawned')\n"
++        command="python3 - <<'BG'\n"+code+"BG"
++        try:
++            summary,_,identity,rig=self.realize(scenario={'steps':[{'tool_calls':[{'name':'bash','arguments':{'command':command}}]},
++                {'text':'PREDECLARED_R2: now review authority.'}]},claims=[])
++        finally:stand_in_provider._sse=original
++        events=omp_rig.load_events(summary['_out'])
++        r2=next(e['sequence'] for e in events if e['kind']=='assistant_message' and 'PREDECLARED_R2' in json.dumps(e['payload']))
++        self.assertTrue(summary['owner_open_windows'])
++        self.assertEqual(summary['owner_read_observed'],[])
++        records=summary['resource_observation']['accounting']['request_records']
++        for row in summary['owner_open_windows']:
++            self.assertGreater(row['bracket']['lower_ns'],records[-1]['t_ns'])
++            self.assertLessEqual(row['window']['start'],r2)
++            self.assertGreaterEqual(row['window']['end'],r2)
++        self.assertEqual(self.assessed_owner(summary,identity,rig,r2)['owner_floor_state'],'UNRESOLVED')
++
++    def test_r_x_request_retry_shares_original_position_and_mismatch_falls_back(self):
++        scenario={'steps':[{'http_error':500},{'tool_calls':[{'name':'bash','arguments':{'command':f'cat {self.OWNER_PATH}'}}]},{'text':'done'}]}
++        summary,_,identity,rig=self.realize(scenario=scenario,claims=[])
++        events=omp_rig.load_events(summary['_out']);out=Path(summary['_out'])
++        mapping=core70.load_json(out/'normalization-map.json')['request_positions']
++        retry=next(row for row in mapping if row['retry_of'] is not None)
++        original=next(row for row in mapping if row['request_index']==retry['retry_of'])
++        self.assertEqual(retry['position'],original['position'])
++        self.assertTrue(retry['pairing_verified'])
++        observed=omp.Observed({p.name:p.read_text() for p in (out/'adapter-artifacts').iterdir()},core70.load_json(out/'profile-snapshot.json'))
++        broken=copy.deepcopy(observed)
++        broken.requests[-1]['body']['messages']=[]
++        positions=omp.request_positions(broken,events,(out/'trace.jsonl').read_text(),'Do the task.')
++        self.assertTrue(positions)
++        self.assertTrue(all(not row['pairing_verified'] and row['position']==events[0]['sequence'] for row in positions))
++
++    def test_z_encoded_full_package_and_owner_only_cannot_admit_negative_or_exact_claims(self):
++        import base64,hashlib,io,tarfile
++        owner=(omp_rig.DIST_SKILLS/self.OWNER_REL).read_bytes()
++        buf=io.BytesIO()
++        with tarfile.open(fileobj=buf,mode='w') as archive:
++            for path in sorted(omp_rig.DIST_SKILLS.rglob('*')):
++                if path.is_file():archive.add(path,arcname=str(path.relative_to(omp_rig.DIST_SKILLS)),recursive=False)
++        for payload in (owner,buf.getvalue()):
++            key=b'CASE-Z-KEY'
++            encoded=base64.b85encode(bytes(b^key[i%len(key)] for i,b in enumerate(payload))).decode()
++            rig=omp_rig.Rig(Path('/tmp'),entry='pinned:software-implementation',timeout_s=45,
++                project_files={'payload.txt':encoded,'decode.py':"""import base64
++from pathlib import Path
++raw=base64.b85decode(Path('/workspace/payload.txt').read_bytes())
++key=b'CASE-Z-KEY'
++decoded=bytes(b^key[i%len(key)] for i,b in enumerate(raw))
++print(len(decoded))
++"""},claims=['active-byte burden','owner-read-absence'])
++            old=rig.profile
++            def profile(*args,**kwargs):
++                p=old(*args,**kwargs);p.update(runtime_mode='rpc',activation_mechanism='runtime-command',
++                    delivery_transform=observer70.OMP_RPC_TRANSFORM,runtime_input_template=omp.input_template('runtime-command'))
++                return p
++            rig.profile=profile
++            summary=rig.run(self.bash_steps('python3 /workspace/decode.py'))
++            self.assertEqual(summary['evidence_state'],'INADMISSIBLE')
++            self.assertIsNone(summary['active_ssdp_bytes'])
++            self.assertFalse(summary['resource_observation']['owner_floor_exact'])
++            identity=core70.load_json(Path(summary['_out'])/'run-identity.json')
++            self.assertEqual(self.assessed_owner(summary,identity,rig)['owner_floor_state'],'UNRESOLVED')
++
++    def test_c_d_j_p_s_v_x_real_artifacts_reach_derived_event_and_scorer(self):
++        import package_ledger
++        summary,_,identity,rig=self.realize(
++            scenario=self.bash_steps(f'sleep 0.2; cd /opt/ssdp/skills/software-implementation && cat references/{harness70.OWNER}'),
++            claims=['active-byte burden','owner-read'])
++        self.assertTrue(summary['resource_observation']['exact'])
++        out=Path(summary['_out']);events=omp_rig.load_events(out)
++        source=[e for e in events if e['kind']!='package_access']
++        inputs=core70.load_json(out/'package-access-inputs.json')
++        artifacts={p.name:p.read_text() for p in (out/'adapter-artifacts').iterdir() if p.is_file()}
++        bundle=omp.package_access_ledger(artifacts,core70.load_json(out/'profile-snapshot.json'),events=source,
++            stdout=(out/'trace.jsonl').read_text(),prompt=inputs['prompt'])
++        self.assertIn('whole-file-in-window',bundle and summary['resource_observation']['accounting']['supplied'][self.OWNER_REL]['routes'])
++        inputs=core70.load_json(out/'package-access-inputs.json')
++        def derived(b):
++            b['artifact']=json.dumps(b.get('ledger'),sort_keys=True)
++            return core70.derive_package_access(b,source,out/'installed-package',harness70.OWNER,
++                set(inputs['delivered']),identity['identity_sha256'],0)[2]
++        mutations={
++            'missing-ledger':lambda b:b.update(ledger=None),
++            'mutation':lambda b:b['ledger']['events'].append({'rel':self.OWNER_REL,'dir':False,'flags':['modify'],'interval':0,'count':1}),
++            'native-contradiction':lambda b:b['ledger'].update(events=[]),
++            'pre-request-owner':lambda b:[r.update(interval=0) for r in b['ledger']['events'] if r['rel']==self.OWNER_REL],
++            'decreasing-request':lambda b:b['request_records'][-1].update(t_ns=b['request_records'][0]['t_ns']-1),
++            'clock-divergence':lambda b:b['ledger']['heartbeats'][-1].update(after_ns=b['ledger']['heartbeats'][-1]['after_ns']+10**9),
++            'unbracketed-owner':lambda b:[r.update(interval=-1) for r in b['ledger']['events'] if r['rel']==self.OWNER_REL],
++        }
++        native=copy.deepcopy(source)
++        owner_event=next(e for e in native if e['kind']=='tool_action' and e['status']=='result')
++        native.append({**owner_event,'kind':'resource_access','payload':{'consumed_resource':{'match':'exact','logical_root':'software-implementation','package_relative_path':'references/'+harness70.OWNER}}})
++        req=core70.load_requirements(rig.req_root,'E1')
++        for name,change in mutations.items():
++            with self.subTest(fault=name):
++                altered=copy.deepcopy(bundle);change(altered)
++                if name=='native-contradiction':
++                    event,_,accounting=core70.derive_package_access(altered,native,out/'installed-package',harness70.OWNER,
++                        set(inputs['delivered']),identity['identity_sha256'],0)
++                else:accounting=derived(altered)
++                self.assertTrue(accounting['owner_read_observed'])
++                changed=copy.deepcopy(summary)
++                changed['resource_observation']={**changed['resource_observation'],'accounting':accounting,
++                    'exact':accounting['exact'],'owner_floor_exact':accounting['owner_floor_exact']}
++                changed['owner_read_observed']=accounting['owner_read_observed']
++                if name=='missing-ledger':lost_summary=changed
++                self.assertEqual(self.assessed_owner(changed,identity,rig)['owner_floor_state'],'FAIL')
++                if name in ('missing-ledger','mutation','native-contradiction','pre-request-owner'):
++                    self.assertFalse(accounting['exact'])
++                else:self.assertFalse(accounting['owner_floor_exact'])
++        failed_delivery=copy.deepcopy(source)
++        for e in failed_delivery:
++            if e['kind']=='root_selection': e['payload']['delivery']={'delivered':False}
++        self.assertIn('T1/T7/T8 burden claim has no resolved logical root-selection evidence',
++                      core70.validate_claim_observability(failed_delivery,['active-byte burden'],ledger_exact=True))
++        # Retained actual assessments feed the production replacement owner; no qualification run is declared.
++        original=self.assessed_owner(lost_summary,identity,rig)
++        manifest={'runs':[{'id':'r','profile_key_sha256':'k','subject':{'commit':'c','package_sha256':'s'},'replacement_case':'case'}],
++                  'opportunities':[{'part':'fixed_cost','route':'T1','realizations':[{'run':'r','item':'i1'}]}]}
++        _,report=batch_assess70.replacement_slots(manifest,{'r':original})
++        self.assertEqual(report['required'][0]['status'],'barred-positive-pre-R2')
+ 
+     def test_qualification_scoped_integrity_campaign_keeps_failure_after_good_repeat(self):
+         """Real campaign aggregation; outer suite purpose remains integrity throughout."""
+diff --git a/qualification/ssdp70/eval/test_batch_cli.py b/qualification/ssdp70/eval/test_batch_cli.py
+index d6542bd..9aa3fad 100644
+--- a/qualification/ssdp70/eval/test_batch_cli.py
++++ b/qualification/ssdp70/eval/test_batch_cli.py
+@@ -84,7 +84,7 @@ class T7Mode(unittest.TestCase):
+     def tearDown(self):
+         self.tmp.cleanup()
+ 
+-    def panel(self, modes, bytes_by_mode=None, cost=None):
++    def panel(self, modes, bytes_by_mode=None, cost=None, unknown=False):
+         """Three paired T7 runs per arm; mode is the observed owner-read state."""
+         bytes_by_mode = bytes_by_mode or {"owner": 60000, "entry": 14000}
+         opportunities = []
+@@ -95,6 +95,9 @@ class T7Mode(unittest.TestCase):
+                 summary = {"active_ssdp_bytes": bytes_by_mode["owner" if mode == "owner" else "entry"] + i,
+                            "installed_entrypoint_bytes": 14000, "installed_owner_bytes": 46000,
+                            "owner_read_sequences": None if mode is None else [3] if mode == "owner" else []}
++                if unknown and mode is None:
++                    summary["active_ssdp_bytes"] = None
++                    summary["resource_observation"] = {"exact":False}
+                 (self.root / run / "summary.json").write_text(json.dumps(summary))
+                 opportunities.append({"part": "fixed_cost", "route": "T7", "arm": arm, "realizations": [{"run": run}]})
+         for route in ("T1", "T8"):
+@@ -129,13 +132,13 @@ class OwnerObservationScope(unittest.TestCase):
+     """The zero-tolerance owner floor depends on the owner question, not on unrelated unexplained opens."""
+ 
+     def test_inexact_bytes_with_exact_owner_question_does_not_void_the_owner_floor(self):
+-        runs = {"r1": {"resource_observation": {"exact": False, "owner_read_exact": True}},
+-                "r2": {"resource_observation": {"exact": True, "owner_read_exact": True}}}
++        runs = {"r1": {"resource_observation": {"exact": False, "owner_floor_exact": True}},
++                "r2": {"resource_observation": {"exact": True, "owner_floor_exact": True}}}
+         self.assertTrue(batch_assess70.owner_observation_complete(runs))
+ 
+     def test_unobserved_owner_question_voids_it_and_old_summaries_fall_back_to_exact(self):
+         self.assertFalse(batch_assess70.owner_observation_complete(
+-            {"r": {"resource_observation": {"exact": True, "owner_read_exact": False}}}))
++            {"r": {"resource_observation": {"exact": True, "owner_floor_exact": False}}}))
+         self.assertFalse(batch_assess70.owner_observation_complete({"r": {"resource_observation": {"exact": False}}}))
+         self.assertTrue(batch_assess70.owner_observation_complete({"r": {"resource_observation": {"exact": True}}}))
+         self.assertFalse(batch_assess70.owner_observation_complete({"r": {}}))
+@@ -143,3 +146,97 @@ class OwnerObservationScope(unittest.TestCase):
+ 
+ if __name__ == "__main__":
+     unittest.main()
++
++
++class T7Unknown(T7Mode):
++    def test_v_unknown_original_triggers_pair_addition_at_three_and_five(self):
++        state,reason=self.panel({"p70":[None]*3,"p66":["entry"]*3},unknown=True)
++        self.assertEqual(state,"UNRESOLVED");self.assertIn("3 -> 5",reason)
++
++    def test_v_unknown_minority_at_seven_is_adversarial_interval_not_lower_bound(self):
++        state,reason=self.panel({"p70":[None]+["entry"]*6,"p66":[None]+["entry"]*6},unknown=True)
++        self.assertEqual(state,"PASS",reason)
++        self.assertIn("median upper",reason);self.assertIn("median lower",reason)
++        self.assertIsNone(json.loads((self.root/"T7-p70-r0/summary.json").read_text())["active_ssdp_bytes"])
++
++    def test_v_majority_unknown_candidate_or_comparator_never_manufactures_pass(self):
++        state,reason=self.panel({"p70":[None]*4+["entry"]*3,"p66":["entry"]*7},unknown=True)
++        self.assertEqual(state,"UNRESOLVED");self.assertIn("unbounded above",reason)
++
++
++class ReplacementBookkeeping(unittest.TestCase):
++    def setup_case(self,route="T1",question="bytes",bound=True):
++        mf=manifest(["original","replacement"])
++        for d in mf["runs"]:d["replacement_case"]="affected-case"
++        mf["opportunities"]=[{"part":"active_material","route":route,"arm":"p70",
++            "realizations":[{"run":"original"}]}]
++        mf["package_access_replacements"]=[{"original":"original","replacement":"replacement","question":question}]
++        if bound:mf["package_access_policy"]={"byte_inexact_disparity_bound":{"value":1,"stakeholder_confirmation":"frozen stakeholder record"}}
++        original={"arm":"p70","evidence_state":"INADMISSIBLE","qualification_outcome":"NOT_EVALUATED",
++            "criteria":{"deterministic activation":"PASS"},"observation_only_inadmissibility":True,
++            "resource_observation":{"exact":False,"accounting":{"reasons":[]}},"owner_floor_state":"UNRESOLVED",
++            "owner_floor_adjudication":{"adjudicated":True,"r2_sequence":3,"consequential_sequence":9},
++            "replacement_review":{"other_criteria_adjudicated":True,"observation_only":True,"overflow_cause":None},
++            "original_dispositions":[{"result":"pass"}],"owner_load_hit":True}
++        replacement={"arm":"p70","evidence_state":"COMPLETE_ADMISSIBLE","qualification_outcome":"PASS",
++            "criteria":{"deterministic activation":"PASS"},"resource_observation":{"exact":True},"owner_floor_state":"PASS"}
++        return mf,{"original":original,"replacement":replacement}
++
++    def test_v_original_retained_replacement_scored_all_and_post_r2_hit_does_not_bar(self):
++        mf,runs=self.setup_case();slots,report=batch_assess70.replacement_slots(mf,runs)
++        self.assertEqual(slots,{"original":"replacement"})
++        self.assertEqual(report["byte_slots"],slots);self.assertEqual(report["owner_slots"],slots)
++        self.assertTrue(runs["original"]["owner_load_hit"])
++        self.assertEqual(report["per_arm"]["p70"],{"runs":1,"inexact":1,"replacements":1})
++        self.assertEqual(report["required"],[])
++
++    def test_l_u_v_pre_r2_positive_other_unresolved_and_undisclosed_overflow_bar(self):
++        for change in ("positive","other","overflow","r2"):
++            mf,runs=self.setup_case();o=runs["original"]
++            if change=="positive":o["owner_floor_state"]="FAIL"
++            elif change=="other":o["original_dispositions"]=[{"result":"unresolved"}]
++            elif change=="overflow":o["resource_observation"]["accounting"]["reasons"]=["ledger overflowed"]
++            else:o["owner_floor_adjudication"]["adjudicated"]=False
++            slots,report=batch_assess70.replacement_slots(mf,runs)
++            self.assertEqual(slots["original"],"original",change)
++            self.assertFalse(report["records"][0]["scored"])
++        o["owner_floor_adjudication"]["adjudicated"]=True
++        o["resource_observation"]["accounting"]["reasons"]=["ledger overflowed"]
++        o["replacement_review"]["overflow_cause"]="disclosed volume of distinct interval rows"
++        self.assertEqual(batch_assess70.replacement_slots(mf,runs)[0]["original"],"replacement")
++
++    def test_v_missing_byte_bound_keeps_byte_question_pending_but_owner_has_no_campaign_cap(self):
++        mf,runs=self.setup_case(bound=False)
++        self.assertEqual(batch_assess70.replacement_slots(mf,runs)[0]["original"],"original")
++        mf["package_access_replacements"][0]["question"]="owner-floor"
++        slots,report=batch_assess70.replacement_slots(mf,runs)
++        self.assertEqual(slots["original"],"replacement")
++        self.assertEqual(report["owner_slots"]["original"],"replacement")
++        self.assertEqual(report["byte_slots"]["original"],"original")
++
++    def test_v_t7_owner_only_is_outside_median_and_cap_is_per_affected_original(self):
++        mf,runs=self.setup_case(route="T7",question="t7-owner-floor")
++        slots,report=batch_assess70.replacement_slots(mf,runs)
++        self.assertEqual(slots["original"],"original")
++        self.assertEqual(report["byte_slots"]["original"],"original")
++        self.assertEqual(report["owner_slots"]["original"],"replacement")
++        mf["package_access_replacements"][0]["question"]="bytes"
++        with self.assertRaises(core70.ContractError):batch_assess70.replacement_slots(mf,runs)
++
++    def test_v_cap_disallows_third_independent_rerun_and_reuse_of_one_identity(self):
++        mf,runs=self.setup_case()
++        requests=mf["package_access_replacements"]
++        for i in range(2):
++            rid=f"replacement-{i}";mf["runs"].append({**mf["runs"][1],"id":rid})
++            runs[rid]={**runs["replacement"],"resource_observation":{"exact":False}}
++            requests.append({"original":"original","replacement":rid,"question":"bytes"})
++        runs["replacement"]["resource_observation"]["exact"]=False
++        with self.assertRaises(core70.ContractError):batch_assess70.replacement_slots(mf,runs)
++
++
++class PositiveIdentity(unittest.TestCase):
++ def test_positive_owner_and_hit_still_require_frozen_profile_identity(self):
++  for part in ('owner_false_activation','r2_analysis'):
++   manifest={'candidate_arm':'p70','comparator_arm':'p66','family':{'criterion_to_keys':{part:['wanted']}},'runs':[{'id':'r','profile_key_sha256':'wrong','entry_stratum':'deterministic'}], 'opportunities':[{'id':'o','part':part,'arm':'p70','fixture':'f','profile_key_sha256':'wanted','realizations':[{'run':'r','item':'i'}]}]}
++   with self.subTest(part=part),self.assertRaises(core70.ContractError):
++    batch_assess70.aggregate_parts(manifest,{'r':{'owner_floor_state':'PASS','owner_load_hit':True}},Path('/tmp'))
+diff --git a/qualification/ssdp70/eval/test_omp_integration.py b/qualification/ssdp70/eval/test_omp_integration.py
+index a46bf68..96c8b93 100644
+--- a/qualification/ssdp70/eval/test_omp_integration.py
++++ b/qualification/ssdp70/eval/test_omp_integration.py
+@@ -237,8 +237,8 @@ class B1RealObservationAndEventCompleteness(RigCase):
+     def test_observer_evidence_removed_after_a_real_run_fails_closed(self):
+         original = omp.launch
+ 
+-        def launch_without_observer(profile, prompt, project, env):
+-            launched = original(profile, prompt, project, env)
++        def launch_without_observer(profile, prompt, project, env, **kwargs):
++            launched = original(profile, prompt, project, env, **kwargs)
+             launched["adapter_artifacts"]["observer-evidence.jsonl"] = ""
+             return launched
+ 
+@@ -684,7 +684,7 @@ class ProviderManagedStateAndDiscoveryEffects(RigCase):
+         original_launch = omp.launch
+         launch_calls = []
+ 
+-        def observed_launch(profile, prompt, project, env):
++        def observed_launch(profile, prompt, project, env, **kwargs):
+             launch_calls.append(True)
+             if inject_launch_environment is not None:
+                 env = dict(env)
+@@ -1057,8 +1057,8 @@ class B2PrivilegeSeparationWhileInferenceWorks(RigCase):
+     def test_host_side_mutation_of_immutable_control_material_is_detected_post_run(self):
+         original = omp.launch
+ 
+-        def mutate_after(profile, prompt, project, env):
+-            launched = original(profile, prompt, project, env)
++        def mutate_after(profile, prompt, project, env, **kwargs):
++            launched = original(profile, prompt, project, env, **kwargs)
+             paths = omp._paths(project, env)
+             (paths["home"] / ".omp" / "agent" / "mcp.json").chmod(0o644)
+             (paths["home"] / ".omp" / "agent" / "mcp.json").write_text("{}")
+@@ -1077,7 +1077,7 @@ class B2PrivilegeSeparationWhileInferenceWorks(RigCase):
+         original = omp.launch
+         sentinel_state = {"accepted": 0, "path": None}
+ 
+-        def with_external_sentinel(profile, prompt, project, env):
++        def with_external_sentinel(profile, prompt, project, env, **kwargs):
+             sentinel_root = Path.home() / "ssdp70-omp-stagef" / "logs"
+             sentinel_root.mkdir(parents=True, exist_ok=True)
+             path = sentinel_root / f"omp-ipc-{uuid.uuid4().hex[:12]}.sock"
+@@ -1102,7 +1102,7 @@ class B2PrivilegeSeparationWhileInferenceWorks(RigCase):
+             worker = threading.Thread(target=accept_connections, daemon=True)
+             worker.start()
+             try:
+-                launched = original(profile, prompt, project, env)
++                launched = original(profile, prompt, project, env, **kwargs)
+             finally:
+                 stopping.set()
+                 server.close()
+diff --git a/qualification/ssdp70/eval/test_package_ledger.py b/qualification/ssdp70/eval/test_package_ledger.py
+index 5cccc85..1444890 100644
+--- a/qualification/ssdp70/eval/test_package_ledger.py
++++ b/qualification/ssdp70/eval/test_package_ledger.py
+@@ -52,16 +52,33 @@ def event(sequence, text, *, kind="tool_action", seen=True, command=None, req=No
+                         "semantic_capability_classes": ["process_execution"]}}
+ 
+ 
++
++TEST_PARAMETERS = {**pl.PARAMETERS, "clock_tolerance_ns": 0}
++
++def bracketed(ledger):
++    if not isinstance(ledger["events"],list):
++        return ledger
++    stamps = sorted({e["first_ns"] for e in ledger["events"]})
++    beats = []
++    for t in sorted({t for stamp in stamps for t in (stamp-1,stamp+1)}):
++            beats.append({"index": len(beats), "before_ns": t, "after_ns": t, "before_mono_ns": t, "after_mono_ns": t})
++    if not beats:
++        beats = [{"index": i, "before_ns": t, "after_ns": t, "before_mono_ns": t, "after_mono_ns": t} for i,t in enumerate((0,10000))]
++    for e in ledger["events"]:
++        e["interval"] = next(i for i,b in enumerate(beats) if b["before_ns"] == e["first_ns"]-1)
++    ledger.update(parameters=TEST_PARAMETERS, heartbeats=beats)
++    return ledger
++
+ def led(opens, *, cut=1000, extra=None, **overrides):
+     """Ledger with explicit (t_ns, rel, flags) rows over the standard tree."""
+     tree = {"a/SKILL.md": len(SKILL_A), "a/references/owner.md": len(OWNER), "a/references/other.md": len(OTHER),
+-            "b/SKILL.md": 22}
++            "b/SKILL.md": len("---\nname: b\n---\n# B\n")}
+     rows = [{"first_ns": t, "last_ns": t, "count": 1, "rel": rel, "dir": False,
+              "flags": flags or ["open", "access", "close_nowrite"]} for t, rel, flags in opens]
+     ledger = {"schema": pl.SCHEMA, "mechanism": pl.MECHANISM, "root": "x", "established": True, "error": None,
+               "tree_files": tree, "overflow": False, "events": rows + list(extra or [])}
+     ledger.update(overrides)
+-    return ledger
++    return bracketed(ledger)
+ 
+ 
+ class WatcherUsesRealKernelObservation(unittest.TestCase):
+@@ -118,7 +135,7 @@ class AccountingFailsClosed(unittest.TestCase):
+         self.tmp.cleanup()
+ 
+     def account(self, ledger, events, cut=1000):
+-        return pl.account(ledger, cut, events, self.root)
++        return pl.account(ledger, cut, events, self.root, parameters=TEST_PARAMETERS)
+ 
+     def test_cat_of_owner_is_exact_and_attributed(self):
+         ledger = led([(10, "a/SKILL.md", None), (11, "b/SKILL.md", None), (2000, "a/references/owner.md", None)])
+@@ -222,7 +239,7 @@ def overlap_ledger(opens, **overrides):
+     ledger = {"schema": pl.SCHEMA, "mechanism": pl.MECHANISM, "root": "x", "established": True, "error": None,
+               "tree_files": tree, "overflow": False, "events": rows}
+     ledger.update(overrides)
+-    return ledger
++    return bracketed(ledger)
+ 
+ 
+ class SupplyIdentifiesTheOpenedFile(unittest.TestCase):
+@@ -239,7 +256,8 @@ class SupplyIdentifiesTheOpenedFile(unittest.TestCase):
+         self.tmp.cleanup()
+ 
+     def account(self, opens, events, **kw):
+-        return pl.account(overlap_ledger(opens), 1000, events, self.root, mount=MOUNT, owner_name="owner.md", **kw)
++        kw.setdefault("request_records", [{"t_ns": 1000, "monotonic_ns": 1000, "position": min((e["sequence"] for e in events), default=1)}])
++        return pl.account(overlap_ledger(opens), 1000, events, self.root, mount=MOUNT, parameters=TEST_PARAMETERS, owner_name="owner.md", **kw)
+ 
+     def test_shared_kernel_block_in_an_entrypoint_does_not_explain_a_size_probe_of_a_reference(self):
+         result = self.account([(2000, "x/SKILL.md"), (2001, "x/references/ref.md")],
+@@ -251,12 +269,12 @@ class SupplyIdentifiesTheOpenedFile(unittest.TestCase):
+ 
+     def test_byte_identical_twin_shown_for_another_path_does_not_explain_the_unshown_twin(self):
+         result = self.account([(2000, "y/references/owner.md"), (2001, "x/references/owner.md")],
+-                              [event(5, TWIN, command=f"cat {MOUNT}/y/references/owner.md"),
++                              [event(5, "".join(TWIN.splitlines(True)[:6]), command=f"head {MOUNT}/y/references/owner.md"),
+                                event(6, "30 lines", command=f"wc -l {MOUNT}/x/references/owner.md")])
+         self.assertFalse(result["exact"])
+         self.assertEqual(result["supplied"]["y/references/owner.md"]["sequences"], [5])
+         self.assertNotIn("x/references/owner.md", result["supplied"])
+-        self.assertFalse(result["owner_read_exact"])           # an unexplained owner copy blocks the owner question
++        self.assertTrue(result["owner_floor_exact"])  # window blocks no-read, not byte explanation
+ 
+     def test_twins_each_shown_by_an_action_naming_them_are_both_supplied(self):
+         result = self.account([(2000, "y/references/owner.md"), (2001, "x/references/owner.md")],
+@@ -272,7 +290,7 @@ class SupplyIdentifiesTheOpenedFile(unittest.TestCase):
+ 
+     def test_path_prefix_is_a_boundary_not_a_substring(self):
+         result = self.account([(2000, "y/references/owner.md")],
+-                              [event(5, TWIN, command=f"cat {MOUNT}/xy/references/owner.md; echo {MOUNT}/zy/references/owner.md")])
++                              [event(5, "".join(TWIN.splitlines(True)[:6]), command=f"cat {MOUNT}/xy/references/owner.md; echo {MOUNT}/zy/references/owner.md")])
+         self.assertFalse(result["exact"])
+ 
+     def test_distinctive_partial_block_still_supplies_without_naming_the_path(self):
+@@ -298,93 +316,40 @@ class PhaseAndDelivery(unittest.TestCase):
+         for stamp in (2000, 999):
+             with self.subTest(stamp=stamp):
+                 result = pl.account(overlap_ledger([(stamp, "y/SKILL.md")]), 1000,
+-                                    [event(4, ENTRY_Y, command=f"cat {MOUNT}/y/SKILL.md")], self.root, mount=MOUNT)
++                                    [event(4, ENTRY_Y, command=f"cat {MOUNT}/y/SKILL.md")], self.root, mount=MOUNT, parameters=TEST_PARAMETERS)
+                 self.assertEqual(result["consumed_files"], {"y/SKILL.md": len(ENTRY_Y.encode())})
+ 
+     def test_skew_moves_a_non_entrypoint_open_only_to_the_stricter_class(self):
+         result = pl.account(overlap_ledger([(999, "x/references/ref.md")]), 1000, [event(4, REF, command=f"cat {MOUNT}/x/references/ref.md")],
+-                            self.root, mount=MOUNT)
++                            self.root, mount=MOUNT, parameters=TEST_PARAMETERS)
+         self.assertFalse(result["exact"])
+         self.assertEqual(result["unexplained"][0]["phase"], "pre-request0")
+ 
+     def test_reopening_the_delivered_entrypoint_is_explained_by_delivery(self):
+         result = pl.account(overlap_ledger([(2000, "x/SKILL.md")]), 1000, [event(3, "99 bytes", command=f"wc -c {MOUNT}/x/SKILL.md")],
+-                            self.root, mount=MOUNT, delivered={"x/SKILL.md"})
++                            self.root, mount=MOUNT, parameters=TEST_PARAMETERS, delivered={"x/SKILL.md"})
+         self.assertTrue(result["exact"], result["reasons"])
+         self.assertEqual(result["explained_by_delivery"], ["x/SKILL.md"])
+-        undelivered = pl.account(overlap_ledger([(2000, "y/SKILL.md")]), 1000, [event(3, "99 bytes")], self.root, mount=MOUNT,
++        undelivered = pl.account(overlap_ledger([(2000, "y/SKILL.md")]), 1000, [event(3, "99 bytes")], self.root, mount=MOUNT, parameters=TEST_PARAMETERS,
+                                  delivered={"x/SKILL.md"})
+         self.assertFalse(undelivered["exact"])
+ 
+     def test_entrypoint_only_run_with_exact_ledger_is_exact_and_names_no_opened_file(self):
+-        result = pl.account(overlap_ledger([(10, "x/SKILL.md"), (11, "y/SKILL.md")]), 1000, [], self.root, mount=MOUNT,
++        result = pl.account(overlap_ledger([(10, "x/SKILL.md"), (11, "y/SKILL.md")]), 1000, [], self.root, mount=MOUNT, parameters=TEST_PARAMETERS,
+                             delivered={"x/SKILL.md"}, owner_name="owner.md")
+         self.assertTrue(result["exact"], result["reasons"])
+         self.assertEqual(result["consumed_files"], {})
+-        self.assertTrue(result["owner_read_exact"])
++        self.assertTrue(result["owner_floor_exact"])
+ 
+     def test_unrelated_unexplained_file_leaves_the_owner_question_exact(self):
+         result = pl.account(overlap_ledger([(2000, "x/references/ref.md")]), 1000, [event(2, "n/a", command="wc -c ref.md")],
+-                            self.root, mount=MOUNT, owner_name="owner.md")
++                            self.root, mount=MOUNT, parameters=TEST_PARAMETERS, owner_name="owner.md")
+         self.assertFalse(result["exact"])
+-        self.assertTrue(result["owner_read_exact"])
+-        for broken in (overlap_ledger([], overflow=True), overlap_ledger([(2000, "x/references/owner.md")])):
++        self.assertTrue(result["owner_floor_exact"])
++        for broken in (overlap_ledger([], overflow=True),):
+             with self.subTest(broken=str(broken)[-60:]):
+-                self.assertFalse(pl.account(broken, 1000, [event(2, "n/a", command="x")], self.root, mount=MOUNT,
+-                                            owner_name="owner.md")["owner_read_exact"])
+-
+-
+-class OwnerReadTimeIsAccessNotDisplay(unittest.TestCase):
+-    """Revision 3 (review N-1): an owner open before R2 cannot hide behind a later full display."""
+-    STAMPS = {0: 900, 1: 2500, 2: 3000, 3: 4000}
+-
+-    def setUp(self):
+-        self.tmp = tempfile.TemporaryDirectory()
+-        self.root = Path(self.tmp.name)
+-        for rel, text in FILES.items():
+-            (self.root / rel).parent.mkdir(parents=True, exist_ok=True)
+-            (self.root / rel).write_text(text)
+-
+-    def tearDown(self):
+-        self.tmp.cleanup()
+-
+-    def account(self, opens, events, stamps="default"):
+-        return pl.account(overlap_ledger(opens), 1000, events, self.root, mount=MOUNT, owner_name="owner.md",
+-                          request_stamps=self.STAMPS if stamps == "default" else stamps)
+-
+-    def hidden_then_shown(self):
+-        opens = [(2000, "x/references/owner.md"), (3500, "x/references/owner.md")]
+-        events = [event(4, "30 owner.md", command=f"wc -l {MOUNT}/x/references/owner.md", req=1),
+-                  event(9, TWIN, command=f"cat {MOUNT}/x/references/owner.md", req=3)]
+-        return opens, events
+-
+-    def test_unshown_open_before_r2_bounds_the_owner_read_before_the_later_display(self):
+-        opens, events = self.hidden_then_shown()
+-        result = self.account(opens, events)
+-        self.assertTrue(result["owner_read_exact"], result["reasons"])
+-        self.assertEqual(result["supplied"]["x/references/owner.md"]["sequences"], [9])
+-        self.assertEqual(result["owner_access"]["x/references/owner.md"]["sequence"], 4)
+-
+-    def test_same_open_without_request_stamps_makes_the_owner_question_inexact(self):
+-        opens, events = self.hidden_then_shown()
+-        result = self.account(opens, events, stamps=None)
+-        self.assertFalse(result["owner_read_exact"])
+-        self.assertEqual(result["owner_access_unresolved"], ["x/references/owner.md"])
+-
+-    def test_non_owner_opens_add_no_owner_access_and_do_not_disturb_it(self):
+-        result = self.account([(2000, "x/references/ref.md")], [event(4, REF, command=f"cat {MOUNT}/x/references/ref.md", req=1)])
+-        self.assertEqual(result["owner_access"], {})
+-        self.assertTrue(result["owner_read_exact"])
+-
+-    def test_open_after_the_last_request_is_bounded_by_the_end_of_the_trace(self):
+-        result = self.account([(5000, "x/references/owner.md")], [event(4, TWIN, command=f"cat {MOUNT}/x/references/owner.md", req=3)])
+-        self.assertEqual(result["owner_access"]["x/references/owner.md"]["basis"], "after-last-request")
+-
+-    def test_owner_copies_have_one_recognition_rule(self):
+-        self.assertTrue(pl.is_owner_copy("y/references/owner.md", "owner.md"))
+-        self.assertTrue(pl.is_owner_copy("owner.md", "owner.md"))
+-        self.assertFalse(pl.is_owner_copy("y/references/owner.md.bak", "owner.md"))
+-        self.assertFalse(pl.is_owner_copy("y/references/owner.md", None))
++                self.assertFalse(pl.account(broken, 1000, [event(2, "n/a", command="x")], self.root, mount=MOUNT, parameters=TEST_PARAMETERS,
++                                            owner_name="owner.md")["owner_floor_exact"])
+ 
+ 
+ class ClaimGateRequiresDeliveryProof(unittest.TestCase):
+@@ -409,8 +374,8 @@ class WatcherBoundsItsRecord(unittest.TestCase):
+         time.sleep(0.1)
+         record = watch.stop()
+         opens = [r for r in record["events"] if r["rel"] == "a/f" and "open" in r["flags"]]
+-        self.assertEqual(len(opens), 1)
+-        self.assertGreaterEqual(opens[0]["count"], 400)
++        self.assertGreaterEqual(len(opens), 1)
++        self.assertGreaterEqual(sum(r["count"] for r in opens), 400)
+         self.assertLessEqual(opens[0]["first_ns"], opens[0]["last_ns"])
+         self.assertFalse(record["read_errors"])
+         broken = pl.LedgerWatcher(root)
+@@ -435,3 +400,120 @@ class ClaimGateHonoursAnExactLedger(unittest.TestCase):
+ 
+ if __name__ == "__main__":
+     unittest.main()
++
++class Revision8OwnerEvidence(PhaseAndDelivery):
++    def account(self, opens, events, **kwargs):
++        return pl.account(overlap_ledger(opens), 1000, events, self.root, mount=MOUNT,
++                          parameters=TEST_PARAMETERS, owner_name="owner.md", **kwargs)
++
++    def test_l_m_n_t_display_sequence_survives_lost_observation(self):
++        events = [event(4, "30 lines"), event(9, TWIN)]
++        for ledger in (None, overlap_ledger([(2000,"x/references/owner.md")], overflow=True)):
++            result = pl.account(ledger, 1000, events, self.root, owner_name="owner.md", parameters=TEST_PARAMETERS)
++            self.assertEqual([r["sequence"] for r in result["owner_read_observed"]], [9])
++            self.assertFalse(result["owner_floor_exact"])
++        result = self.account([(2000,"x/references/owner.md")], events)
++        self.assertEqual([r["sequence"] for r in result["owner_read_observed"]], [9])
++        self.assertEqual(result["owner_open_windows"][0]["window"]["start"], 4)
++
++    def test_w_distinct_line_quantum_error_status_prefixes_and_chunks(self):
++        lines = TWIN.splitlines()
++        one = "one very long owner line " + "x"*300
++        for rel in ("x/references/owner.md", "y/references/owner.md"):
++            (self.root/rel).write_text(TWIN+one+"\n")
++        for text in (one, "\n".join([lines[0]]*7), "\n".join(lines[:2])):
++            r = pl.account(None, 1000, [event(3,text)], self.root, owner_name="owner.md", parameters=TEST_PARAMETERS)
++            self.assertEqual(r["owner_read_observed"], [])
++            self.assertEqual([v["sequence"] for v in r["owner_minor_exposure"]], [3])
++        e = event(7, "\n".join(f"file:{i}:{line}" for i,line in enumerate(lines[:6])))
++        e["status"] = e["payload"]["result_status"] = "error"
++        r = pl.account(None, 1000, [e], self.root, owner_name="owner.md", parameters=TEST_PARAMETERS)
++        self.assertEqual([v["sequence"] for v in r["owner_read_observed"]], [7])
++        self.assertEqual(r["owner_minor_exposure"], [])
++
++    def test_o_r_x_trace_order_windows_late_drain_background_and_fallback(self):
++        events = [event(i,"nothing") for i in range(1,11)]
++        requests = [{"t_ns": t, "monotonic_ns": t, "position": pos} for t,pos in ((1000,1),(1500,4),(3000,8))]
++        r = self.account([(2000,"x/references/owner.md"),(5000,"x/references/owner.md")],events, request_records=requests)
++        self.assertEqual([v["window"]["start"] for v in r["owner_open_windows"]], [4,8])
++        requests[1]["position"] = 1
++        r = self.account([(2000,"x/references/owner.md")],events, request_records=requests)
++        self.assertEqual(r["owner_open_windows"][0]["window"]["start"],1)
++        requests[1]["t_ns"] = 500
++        r = self.account([(2000,"x/references/owner.md")],events, request_records=requests)
++        self.assertFalse(r["owner_floor_exact"])
++        self.assertEqual(r["owner_open_windows"][0]["window"]["start"],1)
++
++    def test_p_q_clock_divergence_gap_and_width_never_hide_supply(self):
++        for kind in ("clock", "gap", "width", "ends"):
++            ledger = overlap_ledger([(2000,"x/references/owner.md"),(4000,"x/references/owner.md")])
++            if kind == "clock":
++                ledger["heartbeats"][0]["before_mono_ns"] -= 100
++            elif kind == "gap":
++                ledger["parameters"] = {**TEST_PARAMETERS,"heartbeat_gap_bound_ns":1}
++            elif kind == "width":
++                ledger["parameters"] = {**TEST_PARAMETERS,"bracket_width_bound_ns":1}
++            else:
++                ledger["heartbeats"] = []
++            r = pl.account(ledger,1000,[event(9,TWIN)],self.root,owner_name="owner.md",parameters=ledger["parameters"])
++            self.assertFalse(r["owner_floor_exact"],kind)
++            self.assertEqual([v["sequence"] for v in r["owner_read_observed"]],[9])
++
++    def test_s_whole_file_twin_in_window_but_never_partial_or_shared_block(self):
++        for text,exact in ((TWIN,True),("\n".join(TWIN.splitlines()[:6]),False),(KERNEL,False)):
++            r = self.account([(2000,"x/references/owner.md")],[event(4,text)])
++            self.assertEqual(r["exact"],exact,r["reasons"])
++            if exact:
++                self.assertEqual(r["supplied"]["x/references/owner.md"]["routes"],["whole-file-in-window"])
++
++    def test_k_basename_is_the_only_copy_rule(self):
++        self.assertTrue(pl.is_owner_copy("x/references/owner.md","owner.md"))
++        self.assertFalse(pl.is_owner_copy("x/references/owner.md.bak","owner.md"))
++        from adapters import omp
++        fake={"kind":"resource_access","status":"result","sequence":5,
++              "payload":{"result_status":"result","resource_identity":"owner.md.bak",
++              "consumed_resource":{"match":"exact","package_relative_path":"references/owner.md.bak"}}}
++        self.assertEqual(omp.owner_reads([fake],"owner.md"),[])
++        fake["payload"]["consumed_resource"]["package_relative_path"]="references/owner.md"
++        self.assertEqual(omp.owner_reads([fake],"owner.md"),[5])
++
++class HeartbeatKernelBoundary(unittest.TestCase):
++    def test_p_r_u_x_two_directories_intervals_bound_and_bracket_ends(self):
++        with tempfile.TemporaryDirectory() as td:
++            root = Path(td)
++            for name in ('a','b'):
++                (root/name).mkdir(); (root/name/'f').write_text(name)
++            w = pl.LedgerWatcher(root).start()
++            self.assertTrue(w.established,w.error)
++            (root/'a/f').read_bytes()
++            time.sleep(.12)
++            (root/'b/f').read_bytes()
++            time.sleep(.12)
++            (root/'a/f').read_bytes()
++            ledger = w.stop()
++            opens = [r for r in ledger['events'] if 'open' in r['flags'] and not r['dir']]
++            self.assertGreaterEqual(len({r['interval'] for r in opens}),3)
++            self.assertEqual([r['index'] for r in ledger['heartbeats']],list(range(len(ledger['heartbeats']))))
++            brackets,reasons = pl.timing(ledger,[],ledger['parameters'])
++            self.assertEqual(reasons,[])
++            for r in opens:
++                self.assertIn(r['interval'],brackets)
++                self.assertFalse(brackets[r['interval']]['timing_loss'])
++            small = pl.LedgerWatcher(root,{**pl.PARAMETERS,'row_bound':1}).start()
++            (root/'a/f').read_bytes(); (root/'b/f').read_bytes()
++            record=small.stop()
++            self.assertTrue(record['rows_truncated'])
++            self.assertLessEqual(len(record['events']),1)
++
++class OwnerFloorProductionOwner(unittest.TestCase):
++    def test_l_m_o_p_q_t_w_y_decisions_and_positive_exception(self):
++        positive={'owner_floor_exact':False,'owner_read_observed':[{'sequence':3}], 'owner_minor_exposure':[], 'owner_open_windows':[]}
++        self.assertEqual(core70.owner_floor_state(positive,5,r2_adjudicated=True),'FAIL')
++        self.assertEqual(core70.owner_floor_state(positive,2,r2_adjudicated=True),'UNRESOLVED')
++        self.assertEqual(core70.owner_floor_state(positive,5),'UNRESOLVED')
++        for start,state in ((4,'UNRESOLVED'),(5,'UNRESOLVED'),(6,'PASS')):
++            a={**positive,'owner_floor_exact':True,'owner_read_observed':[{'sequence':7}],
++               'owner_open_windows':[{'window':{'start':start,'end':9}}]}
++            self.assertEqual(core70.owner_floor_state(a,5,r2_adjudicated=True),state)
++        a={**positive,'owner_floor_exact':True,'owner_read_observed':[],'owner_minor_exposure':[{'sequence':1}]}
++        self.assertEqual(core70.owner_floor_state(a,5,r2_adjudicated=True),'UNRESOLVED')
+diff --git a/qualification/ssdp70/eval/package_premise.py b/qualification/ssdp70/eval/package_premise.py
+new file mode 100644
+index 0000000..002c742
+--- /dev/null
++++ b/qualification/ssdp70/eval/package_premise.py
+@@ -0,0 +1,188 @@
++#!/usr/bin/env python3
++"""Mechanical verifier for the independently reviewed frozen-source premise witness.
++
++Hashes authenticate bindings, not semantic warrants. An opaque or unreviewed source stays
++UNRESOLVED. No decoder list is used as proof of absence. Development construction witnesses
++exercise this owner but cannot satisfy qualification admission.
++"""
++from __future__ import annotations
++
++import hashlib
++import json
++import os
++import re
++from pathlib import Path
++
++SCHEMA = 1
++_SCAN_CACHE = {}
++
++
++def digest(value):
++    return hashlib.sha256(json.dumps(value, sort_keys=True, separators=(",", ":")).encode()).hexdigest()
++
++
++def inventory(root):
++    root = Path(root)
++    paths = [root] if root.is_file() else sorted(root.rglob("*"))
++    result = {}
++    for path in paths:
++        rel = "." if path == root else path.relative_to(root).as_posix()
++        if path.is_symlink():
++            result[rel] = {"type": "symlink", "target": os.readlink(path)}
++        elif path.is_file():
++            result[rel] = {"type": "file", "sha256": hashlib.sha256(path.read_bytes()).hexdigest()}
++    return result
++
++
++def source_manifest(sources):
++    return {name: inventory(path) if isinstance(path, Path) else
++            {".": {"type": "value", "sha256": hashlib.sha256(path).hexdigest()}}
++            for name, path in sorted(sources.items())}
++
++
++def development_witness(package_manifest, sources, *, construction_record, mounts):
++    """Fixture-custodian input for known test constructions; never a production acceptance."""
++    return {"schema": SCHEMA, "purpose": "development", "package": package_manifest,
++            "sources": sources, "mounts": mounts, "construction_record": construction_record,
++            "nodes": {name: {"inputs": [], "warrant": construction_record} for name in sources},
++            "envelope_warrant": construction_record}
++
++
++def check(package, sources, mounts, witness=None, *, owner_name, line_floor=48,
++          qualification=False, accepted_witness_sha256=None):
++    """Verify complete bindings and structural predicates before package marks are installed."""
++    package = Path(package)
++    package_manifest = inventory(package)
++    actual_sources = source_manifest(sources)
++    failures, unresolved = [], []
++    owners = [p for p in package.rglob(owner_name) if p.is_file()]
++    if not owners:
++        unresolved.append("owner source is absent")
++    lines = {line for path in owners for line in path.read_bytes().splitlines() if len(line) >= line_floor}
++    pattern = re.compile(b"|".join(re.escape(line) for line in sorted(lines))) if lines else None
++    for path in package.rglob("*"):
++        if path.is_symlink():
++            failures.append(f"package symlink: {path.relative_to(package)}")
++        elif path.is_file() and path.stat().st_nlink != 1:
++            failures.append(f"package hard link: {path.relative_to(package)}")
++        elif path.is_file() and path.name != owner_name and pattern and pattern.search(path.read_bytes()):
++            failures.append(f"whole owner line in non-owner package file: {path.relative_to(package)}")
++    package_binds = [m for m in mounts if m.get("source") == "package"]
++    if len(package_binds) != 1 or package_binds[0].get("read_only") is not True:
++        failures.append("package must have exactly one read-only bind")
++    mounted_sources = {m.get("source") for m in mounts}
++    if mounted_sources - set(sources) - {"package"}:
++        unresolved.append("mount source outside frozen input envelope")
++    for name, root in sources.items():
++        manifest = actual_sources[name]
++        key = (digest(package_manifest), digest(manifest), digest(mounts))
++        if key not in _SCAN_CACHE:
++            hits = []
++            for rel, row in manifest.items():
++                if row["type"] == "symlink":
++                    target = row["target"]
++                    # Absolute targets must resolve inside the enumerated sandbox mount envelope.
++                    destinations = [m.get("destination", "") for m in mounts]
++                    if target.startswith("/"):
++                        if not any(d and (target == d or target.startswith(d.rstrip("/")+"/")) for d in destinations):
++                            hits.append(f"escaping symlink: {name}/{rel}")
++                    elif isinstance(root, Path):
++                        resolved = ((root if root.is_dir() else root.parent) / rel).parent.joinpath(target).resolve()
++                        if not any(isinstance(p, Path) and (resolved == p.resolve() or p.resolve() in resolved.parents)
++                                   for p in sources.values()):
++                            hits.append(f"escaping symlink: {name}/{rel}")
++                    continue
++                data = root if isinstance(root, bytes) else (root if rel == "." else root/rel).read_bytes()
++                if pattern and pattern.search(data):
++                    hits.append(f"whole owner line in other source: {name}/{rel}")
++                if row.get("sha256") in {r["sha256"] for r in package_manifest.values() if r["type"] == "file"}:
++                    hits.append(f"byte-identical package file in other source: {name}/{rel}")
++            _SCAN_CACHE[key] = hits
++        failures.extend(_SCAN_CACHE[key])
++    if not isinstance(witness, dict):
++        unresolved.append("frozen-source provenance witness missing")
++    else:
++        if witness.get("schema") != SCHEMA or witness.get("package") != package_manifest or witness.get("sources") != actual_sources or witness.get("mounts") != mounts:
++            unresolved.append("witness package/source identities or coverage differ")
++        nodes = witness.get("nodes")
++        if not isinstance(nodes, dict) or set(nodes) != set(actual_sources):
++            unresolved.append("construction nodes do not cover the complete source envelope")
++            nodes = {}
++        def warranted(value):
++            return (isinstance(value, dict) and isinstance(value.get("record"), str) and bool(value["record"].strip())
++                    and isinstance(value.get("evidence"), str) and bool(value["evidence"].strip()))
++        if not warranted(witness.get("envelope_warrant")):
++            unresolved.append("joint source envelope exclusion warrant missing")
++        visited, active = set(), set()
++        def visit(name):
++            if name in active:
++                unresolved.append("construction graph is cyclic")
++                return
++            if name in visited:
++                return
++            node = nodes.get(name)
++            if not isinstance(node, dict) or not isinstance(node.get("inputs"), list) or not warranted(node.get("warrant")):
++                unresolved.append(f"source/construction exclusion warrant missing: {name}")
++                return
++            active.add(name)
++            for parent in node["inputs"]:
++                if not isinstance(parent, str) or parent not in nodes:
++                    unresolved.append(f"unclosed construction input: {name}")
++                else:
++                    visit(parent)
++            active.remove(name); visited.add(name)
++        for name in nodes:
++            visit(name)
++        if qualification:
++            if witness.get("purpose") != "qualification" or digest(witness) != accepted_witness_sha256:
++                unresolved.append("independent pre-run acceptance does not bind this witness")
++    return {"schema": SCHEMA, "package": package_manifest, "sources": actual_sources,
++            "mounts": mounts, "witness": witness, "witness_sha256": digest(witness),
++            "qualification": qualification, "line_floor": line_floor,
++            "failures": sorted(set(failures)), "unresolved": sorted(set(unresolved)),
++            "state": "FAIL" if failures else "UNRESOLVED" if unresolved else "PASS"}
++
++
++def verify_report(report, *, qualification=False, accepted_witness_sha256=None):
++    """Evaluator binding check; does not convert a warrant label into independent acceptance."""
++    if not isinstance(report, dict) or report.get("schema") != SCHEMA or report.get("state") != "PASS":
++        return ["package-access premise was not established"]
++    if report.get("failures") != [] or report.get("unresolved") != []:
++        return ["package-access premise report contradicts its PASS state"]
++    witness = report.get("witness")
++    if not isinstance(witness, dict) or witness.get("package") != report.get("package") or witness.get("sources") != report.get("sources") or witness.get("mounts") != report.get("mounts"):
++        return ["package-access premise witness/report binding differs"]
++    if report.get("witness_sha256") != digest(witness):
++        return ["package-access premise witness digest differs"]
++    if qualification and (witness.get("purpose") != "qualification" or digest(witness) != accepted_witness_sha256):
++        return ["development/unaccepted premise witness cannot qualify a profile"]
++    return []
++
++
++def main(argv=None):
++    import argparse
++    import base64
++    parser = argparse.ArgumentParser(description=__doc__)
++    parser.add_argument("--package", type=Path, required=True)
++    parser.add_argument("--sources", type=Path, required=True,
++                        help="JSON map from source id to {path:...} or {value_b64:...}")
++    parser.add_argument("--mounts", type=Path, required=True)
++    parser.add_argument("--witness", type=Path)
++    parser.add_argument("--qualification", action="store_true")
++    parser.add_argument("--accepted-witness-sha256")
++    parser.add_argument("--owner-name", default="scientific-inspectability-and-initiative.md")
++    parser.add_argument("--output", type=Path, required=True)
++    args = parser.parse_args(argv)
++    rows = json.loads(args.sources.read_text())
++    sources = {name: Path(row["path"]) if set(row)=={"path"} else
++               base64.b64decode(row["value_b64"], validate=True) for name,row in rows.items()}
++    report = check(args.package,sources,json.loads(args.mounts.read_text()),
++        json.loads(args.witness.read_text()) if args.witness else None, owner_name=args.owner_name,
++        qualification=args.qualification,accepted_witness_sha256=args.accepted_witness_sha256)
++    with args.output.open("x") as stream:
++        json.dump(report,stream,sort_keys=True,indent=2);stream.write("\n")
++    return 0 if report["state"]=="PASS" else 1
++
++
++if __name__ == "__main__":
++    raise SystemExit(main())
+diff --git a/qualification/ssdp70/eval/test_package_premise.py b/qualification/ssdp70/eval/test_package_premise.py
+new file mode 100644
+index 0000000..2c4b4bd
+--- /dev/null
++++ b/qualification/ssdp70/eval/test_package_premise.py
+@@ -0,0 +1,95 @@
++"""Case (z) at the production mechanical owner; no admission is created by these fixtures."""
++import copy
++import tempfile
++import unittest
++from pathlib import Path
++
++import package_premise as pp
++
++
++class PremiseBoundary(unittest.TestCase):
++    def setUp(self):
++        self.tmp = tempfile.TemporaryDirectory()
++        self.root = Path(self.tmp.name)
++        self.package = self.root / "package"
++        self.package.mkdir()
++        self.owner = self.package / "owner.md"
++        self.owner.write_text("A distinctive owner line longer than the forty eight byte floor.\n" * 2)
++        self.workspace = self.root / "workspace"
++        self.workspace.mkdir()
++        (self.workspace / "notes.txt").write_text("clean independently constructed fixture\n")
++        self.sources = {"workspace": self.workspace, "task": b"Read notes."}
++        self.mounts = [{"source":"package","destination":"/opt/package","read_only":True},
++                       {"source":"workspace","destination":"/workspace","read_only":False}]
++
++    def tearDown(self):
++        self.tmp.cleanup()
++
++    def witness(self):
++        return pp.development_witness(pp.inventory(self.package), pp.source_manifest(self.sources),
++            mounts=self.mounts, construction_record={"record":"known test seed and output construction",
++            "evidence":"literal notes/task unrelated to the independently constructed owner; combined envelope inspected"})
++
++    def check(self, witness=None, **kwargs):
++        return pp.check(self.package,self.sources,self.mounts,witness,owner_name="owner.md",**kwargs)
++
++    def test_z_known_construction_missing_or_unreviewed_source_and_qualification_binding(self):
++        witness = self.witness()
++        self.assertEqual(self.check(witness)["state"], "PASS")
++        self.assertEqual(self.check()["state"], "UNRESOLVED")
++        self.assertEqual(self.check(witness,qualification=True)["state"], "UNRESOLVED")
++        witness["purpose"] = "qualification"
++        self.assertEqual(self.check(witness,qualification=True,accepted_witness_sha256=pp.digest(witness))["state"], "PASS")
++        for key in ("nodes", "envelope_warrant"):
++            broken = copy.deepcopy(witness); broken.pop(key)
++            self.assertEqual(self.check(broken)["state"],"UNRESOLVED")
++        broken = copy.deepcopy(witness); broken["nodes"]["workspace"]["inputs"]=["unlisted-generator-input"]
++        self.assertEqual(self.check(broken)["state"],"UNRESOLVED")
++        broken = copy.deepcopy(witness); broken["nodes"]["workspace"]["inputs"]=["task"]
++        broken["nodes"]["task"]["inputs"]=["workspace"]
++        self.assertEqual(self.check(broken)["state"],"UNRESOLVED")
++
++    def test_z_stale_package_workspace_generator_output_and_joint_warrant(self):
++        witness = self.witness()
++        (self.workspace/"extra.txt").write_text("uncovered source")
++        self.assertEqual(self.check(witness)["state"],"UNRESOLVED")
++        (self.workspace/"extra.txt").unlink()
++        self.owner.write_text(self.owner.read_text()+"regenerated package")
++        self.assertEqual(self.check(witness)["state"],"UNRESOLVED")
++        witness=self.witness(); witness["nodes"]["task"]["warrant"]={"record":"reviewed-generator-hash"}
++        self.assertEqual(self.check(witness)["state"],"UNRESOLVED")
++        witness=self.witness(); witness["envelope_warrant"]={"record":"PASS"}
++        self.assertEqual(self.check(witness)["state"],"UNRESOLVED")
++
++    def test_z_collisions_hard_links_extra_bind_and_escaping_link(self):
++        witness = self.witness()
++        (self.workspace/"collision.txt").write_bytes(self.owner.read_bytes())
++        self.assertEqual(self.check(witness)["state"],"FAIL")
++        (self.workspace/"collision.txt").unlink()
++        (self.package/"not-owner.txt").write_bytes(self.owner.read_bytes())
++        self.assertEqual(self.check(self.witness())["state"],"FAIL")
++        (self.package/"not-owner.txt").unlink()
++        import os
++        os.link(self.owner,self.package/"hardlink.txt")
++        self.assertEqual(self.check(self.witness())["state"],"FAIL")
++        (self.package/"hardlink.txt").unlink()
++        self.mounts.append({"source":"package","destination":"/second","read_only":True})
++        self.assertEqual(self.check(self.witness())["state"],"FAIL")
++        self.mounts.pop()
++        (self.workspace/"escape").symlink_to("../../outside")
++        self.assertEqual(self.check(self.witness())["state"],"FAIL")
++
++    def test_z_report_cannot_relabel_unknown_or_development_as_qualified(self):
++        report = self.check(self.witness())
++        self.assertEqual(pp.verify_report(report),[])
++        self.assertTrue(pp.verify_report(report,qualification=True))
++        report["sources"]["task"]["."]["sha256"]="0"*64
++        self.assertTrue(pp.verify_report(report))
++        report = self.check(); report["state"]="PASS"
++        self.assertTrue(pp.verify_report(report))
++
++    def test_z_declared_runtime_alias_is_in_the_closed_mount_envelope(self):
++        (self.workspace/"loader").symlink_to("/lib/runtime-loader")
++        self.assertEqual(self.check(self.witness())["state"],"FAIL")
++        self.mounts.append({"source":"workspace","destination":"/lib","read_only":True,"alias_target":"/workspace"})
++        self.assertEqual(self.check(self.witness())["state"],"PASS")

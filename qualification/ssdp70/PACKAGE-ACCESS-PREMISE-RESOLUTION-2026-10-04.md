@@ -1,0 +1,11 @@
+# Package-access premise Challenge resolution and D4 continuation
+
+Governing SSDP **6.6.0**; Protocol 7.0 **NON-QUALIFIED**. The stakeholder authorized the bounded repair and D4 continuation in the session instruction “OK repair this issue, then proceed D4 implementation.”
+
+The cycle now uses the unchanged accepted ledger decision revision 8 and contract revision 15 **plus** `D3-PACKAGE-ACCESS-PREMISE-CLOSURE-2026-10-04.md`, SHA-256 `5f713e2bd816950a2fd0962c6732242631295b3416387beb761c8b40906a3316`. This clarification has independent D3 text PASS in `INDEPENDENT-D3-PREMISE-CLOSURE-REVIEW-2026-10-04-R2.md`, report SHA-256 `ee5dd4e722a0c80a180c0a5d83ba59379f6b4c81a08d38852e7e0b114a29a2ed`. Its original NO-PASS remains in the first review record. The clarification bytes remain unchanged after Review.
+
+The historical D4 Challenge recorded in `package-access-ledger-d4-20261004-025110Z/HANDOFF.md` is resolved **at the D3 text boundary** by the permitted closed-source constructive witness, explicit per-construction/output and joint-envelope semantic warrants, and fail-closed treatment of every unproved source or transformation. No finite decoder list supplies the absence proof. The ledger mechanism, capabilities, ordering, accounting, replacement and campaign rules remain frozen.
+
+D4 may implement against this authority. No old diagnostic is re-identified or retrospectively admitted. All affected run/profile identities require the clarification and checker-code bindings and a current witness; qualification additionally requires independently accepted substantive warrants and existing profile/rehearsal gates. A development fixture witness exercises mechanical checking only. No production witness, profile admission, executor rehearsal, instantiated target, ratification or qualification is accepted by this resolution.
+
+This is a SHA-bound uncommitted cycle decision and review, not a publication/commit claim. No commit/push or release-state/source/distribution edit is authorized. Passed D3/contract/workplan text and hashes, historical evidence and the eight out-of-scope files remain preserved. The next gate is D4 production-boundary acceptance and independent implementation Review, followed by the independent checker's witness inspection and rehearsal.

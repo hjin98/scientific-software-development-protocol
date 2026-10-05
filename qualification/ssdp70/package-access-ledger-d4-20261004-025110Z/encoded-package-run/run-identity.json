@@ -1,0 +1,257 @@
+{
+  "accounting": {
+    "manifest_sha256": "515942de23e35b08df087f7b0f5575b9bf85c6d2c305fbaeb5ad0f5e44f44401",
+    "purpose": "development",
+    "scope_id": "development:515942de23e35b08df087f7b0f5575b9bf85c6d2c305fbaeb5ad0f5e44f44401",
+    "scoring_manifest_sha256": "0f50b6567d8ba50fb96bb49619075c40bfee5e2d788d147431bf0cf5be42181a"
+  },
+  "accounting_manifest": null,
+  "activation_mechanism": "runtime-command",
+  "adapter_normalizer_sha256": "f910f63c48b1b2a3650e6dcbb6c90fc52f8ec9843c251701788f5618edbb25be",
+  "adapter_support_sha256": {
+    "evidence70.py": "29645dce4b6ea1180b56ba238dbd26af29bae957d0ec30d62b14c933fc755a30",
+    "mcp_bridge70.py": "cbb6f6b615de153ab4e814b7adbdc237702c35c1620457a603c7dfb52f501ff3",
+    "muxhttp70.py": "9db135ba2048092678b1983ba578152205cb0e5d8c51fa903a2d33996582e012",
+    "observer70.py": "a08feabadeb9d5c7627474116be44dba820a8fda946da8652e4fda96000d4f3a",
+    "observer_exec_helper70.py": "8891d415d3d0c10bea887caabdfda6bb9f510523f5a1e54eda4d45165a270972",
+    "omp-runtime-dependencies-18.0.11.json": "5114fe69e08c17470d4b19d7d3d1d20ad755ec20965151dc04afaf2b8c247216",
+    "seccomp70.py": "c81bef42fd310f30c177681cd7b9592158a16f4f164a22fa427804224fa617f9",
+    "stub_tools/mediator.py": "bf0070c0990044bab6114875c7059c678f1e5ed889ba5b06ce823f16fa0751eb",
+    "subject_launcher.py": "efb54756fa52f82fc0e5c13e6293ea4cb8a9b791f1e5695c67401619878ff6b4"
+  },
+  "arm": "p70",
+  "capability_manifest_sha256": "f01ec2b6bda9c30ffb9495029cce8481ab762a62a0f1c3d9452c17a3d0ca0e55",
+  "corpus_manifest_sha256": "515942de23e35b08df087f7b0f5575b9bf85c6d2c305fbaeb5ad0f5e44f44401",
+  "declared_root": "software-implementation",
+  "dist_tree_sha256_verified": "bbf7431f4ececcaf33517d6a95fe4604244d62a34f4c7370728f9f198713a61d",
+  "entry_stratum": "deterministic",
+  "episode": "E1",
+  "episode_config_sha256": "6eb39e30c5e681ec0a6fe516a22548f623bde9a50add3a57aaa69c4fbf6c1d5f",
+  "execution_mode": "probe",
+  "fixture_tree_sha256": "e8db2434c1d6fefcc085c3a962c83a58adc24a7fc734d3b5cf0d6aa9e70930c4",
+  "harness_sha256": "56856e1b9e729f441d101f76c3c79e51f4df325da4bd01beaf31388a9f172ada",
+  "identity_sha256": "8879791e51bed31ba8a01a211eb68799dc7c10b579b551970ef80773cd83b370",
+  "normalized_event_schema": 1,
+  "oracles_tree_sha256": "0e7e5699e4ea58c7c903c6013c0d28d984ee6d070cfb1f9497ec68b0be410410",
+  "pair_order": [
+    "p70"
+  ],
+  "profile_admission_sha256": null,
+  "profile_document_sha256": "993d9564ff6c92b418ffe220fab88822fb82d9d0efdbc441404e45e155f1db1d",
+  "profile_key": {
+    "activation_mechanism": "runtime-command",
+    "adapter_id": "omp-json-v2",
+    "agent_model": "stand/stand-model",
+    "budgets": {
+      "max_turns": 30,
+      "timeout_s": 45
+    },
+    "capability_manifest_sha256": "f01ec2b6bda9c30ffb9495029cce8481ab762a62a0f1c3d9452c17a3d0ca0e55",
+    "containment_policy": {
+      "build_inventory_sha256": "a770317cced12600ab8e3604a24af226ebc4c329b3043b2acb98662ec77fd428",
+      "execution_support_sha256": {
+        "adapters/omp.py": "f910f63c48b1b2a3650e6dcbb6c90fc52f8ec9843c251701788f5618edbb25be",
+        "core70.py": "13298e0952d014e345c2f83fc1b11620615a2c774e10aac8c0e2a94283e8aed7",
+        "harness70.py": "56856e1b9e729f441d101f76c3c79e51f4df325da4bd01beaf31388a9f172ada",
+        "package_ledger.py": "8343601f8f008a28fb2ff35e62b45c5b657c9097f7266698291d3ced1d7d6f0f",
+        "profiles/omp-headless.template.json": "dc5b0d6b33d039b511db9959113e13c3b759975bf73e9661ace192b684238cf4"
+      },
+      "host_execution_environment": {
+        "kernel": {
+          "machine": "x86_64",
+          "release": "6.8.0-138-generic",
+          "sysname": "Linux",
+          "version": "#138~22.04.1-Ubuntu SMP PREEMPT_DYNAMIC Fri Aug  7 13:43:15 UTC "
+        },
+        "os_release": {
+          "id": "ubuntu",
+          "sha256": "594d5ddd35aedb47f00d9c34d140017907a5b9f93c975aba125fc924daac5c07",
+          "version_id": "22.04"
+        },
+        "schema": 1,
+        "supervisor_python": {
+          "executable_sha256": "a2f33a6e006989270f4340528eb61f8f97366e00a5d1b602ac8672ea44fc56ae",
+          "implementation": "CPython",
+          "version": "3.10.12"
+        }
+      },
+      "inference_authority": "descriptor pairs inherited by the launcher only; relayed only for connections whose client socket is held solely by the launcher-started OMP process; capability is bound to that run instance, not to an executable identity",
+      "kind": "omp-three-principal-bwrap-v3",
+      "mcp_transport_realization": "unchanged stdio mediator run by the supervisor; OMP reaches it as streamable-HTTP MCP through the supervisor bridge over the descriptor-bound relay",
+      "observer_boundary": {
+        "filesystem": "explicit Python runtime, observer code, CA bundle and synthetic /etc only; no host HOME, custody, mediator or supervisor state",
+        "network": "trusted observer opens only the frozen provider route before accepting subject input, then moves to a private network namespace and installs seccomp denying new sockets, connects and addressed sends",
+        "process": "private PID namespace with no host process view; capability set dropped after route setup",
+        "provider_route_capability": "one connected stream socket owned by the observer; inference requests remain single-purpose and evidence is append-only"
+      },
+      "principal_files_sha256": {
+        "evidence70.py": "29645dce4b6ea1180b56ba238dbd26af29bae957d0ec30d62b14c933fc755a30",
+        "mcp_bridge70.py": "cbb6f6b615de153ab4e814b7adbdc237702c35c1620457a603c7dfb52f501ff3",
+        "muxhttp70.py": "9db135ba2048092678b1983ba578152205cb0e5d8c51fa903a2d33996582e012",
+        "observer70.py": "a08feabadeb9d5c7627474116be44dba820a8fda946da8652e4fda96000d4f3a",
+        "observer_exec_helper70.py": "8891d415d3d0c10bea887caabdfda6bb9f510523f5a1e54eda4d45165a270972",
+        "seccomp70.py": "c81bef42fd310f30c177681cd7b9592158a16f4f164a22fa427804224fa617f9",
+        "stub_tools/mediator.py": "bf0070c0990044bab6114875c7059c678f1e5ed889ba5b06ce823f16fa0751eb",
+        "subject_launcher.py": "efb54756fa52f82fc0e5c13e6293ea4cb8a9b791f1e5695c67401619878ff6b4"
+      },
+      "principals": [
+        "qualification-supervisor",
+        "provider-control-observer",
+        "subject-executor"
+      ],
+      "provider_route": {
+        "api": "openai-completions",
+        "base_path": "/v1",
+        "context_window": 32000,
+        "credential_env": "SSDP70_OMP_PROVIDER_CREDENTIAL",
+        "max_tokens": 4000,
+        "model_id": "stand-model",
+        "placeholder_key": "ssdp70-run-transport-key",
+        "provider_id": "stand",
+        "reasoning": true,
+        "upstream": "http://127.0.0.1:40819"
+      },
+      "runtime_closure_identity_sha256": "6c49a21528ae33c2f8dfee60995448b3d7af795a4b2b826c164f87699d4d8499",
+      "runtime_dependency_manifest_sha256": "5114fe69e08c17470d4b19d7d3d1d20ad755ec20965151dc04afaf2b8c247216",
+      "settings_closure_sha256": "961a47fcf5205088480e382bfea7bca68456b5a4d999a328cca3eb50f6e32a71",
+      "subject_boundary": "bubblewrap user/pid/ipc/uts/cgroup/net namespaces, empty network namespace (loopback only), all capabilities dropped, seccomp denies AF_UNIX sockets and process inspection, explicit digest-bound runtime dependency manifest plus synthetic /etc, no host HOME/custody/private state",
+      "substrate": {
+        "executable": "/usr/bin/bwrap",
+        "executable_sha256": "bf6cf3d4456665f5d80c14eb79a76e0ce87b39a0883e614a161658b4ec33492c",
+        "version": "bubblewrap 0.6.1"
+      }
+    },
+    "credential_service_account_policy": {
+      "ambient_credentials": "deny",
+      "parent_authentication": "one qualification-only provider credential held only by the provider-control/observation principal",
+      "sandboxed_subprocess_credentials": "deny"
+    },
+    "delivery_transform": {
+      "classification": {
+        "auxiliary_post_requests": [],
+        "method": "POST",
+        "path": "/v1/chat/completions"
+      },
+      "directory": "\n\n---\n\n[Skill directory: {directory}]\nResolve relative paths in this skill (e.g. `scripts/foo.js`, `templates/config.yaml`) against this absolute directory; read referenced assets and templates; run scripts with the terminal tool when skill instructions call for it.",
+      "frontmatter": "leading-yaml-block-then-trim",
+      "markdown_table_cells": "strip-padding-in-pipe-bounded-table-rows",
+      "message_index": 1,
+      "message_role": "user",
+      "mode": "rpc",
+      "notice": "[IMPORTANT: User invoked the \"{root}\" skill; follow its instructions. Full skill below.]",
+      "prompt_join": "\nUser: {prompt}",
+      "runtime": "omp",
+      "schema": 1,
+      "version": "18.0.11"
+    },
+    "install_mechanism": "run-owned copy of the arm package outside the project, mounted read-only at /opt/ssdp/skills and enabled only through skills.customDirectories",
+    "mcp_servers": [
+      {
+        "entrypoint": "stub_tools/mediator.py",
+        "name": "ssdp70",
+        "server_id": "ssdp70-qualification-stdio-v1",
+        "tools": [
+          "mcp__ssdp_issue_locations",
+          "mcp__ssdp_issue_search",
+          "mcp__ssdp_issue_show",
+          "mcp__ssdp_issue_create",
+          "mcp__ssdp_issue_comment",
+          "mcp__ssdp_delegate"
+        ],
+        "transport": "stdio"
+      }
+    ],
+    "native_surface_requirements": [
+      "runtime_capability:omp-json-event-stream-v1",
+      "mcp_server:ssdp70"
+    ],
+    "native_tools": [
+      "read",
+      "glob",
+      "grep",
+      "edit",
+      "write",
+      "bash",
+      "mcp__ssdp_issue_locations",
+      "mcp__ssdp_issue_search",
+      "mcp__ssdp_issue_show",
+      "mcp__ssdp_issue_create",
+      "mcp__ssdp_issue_comment",
+      "mcp__ssdp_delegate"
+    ],
+    "network_external_write_policy": {
+      "external_write": "sandbox-or-mediate",
+      "network": "deny-native-executor-network"
+    },
+    "profile_id": "omp-headless-d4-standin",
+    "provider_managed_unknowns": [
+      {
+        "classification": "arm-neutral",
+        "name": "provider-backend-shard",
+        "sensitive_claims": [
+          "*"
+        ]
+      },
+      {
+        "classification": "arm-neutral",
+        "name": "host-derived-system-prompt-workstation-block",
+        "sensitive_claims": [
+          "*"
+        ]
+      },
+      {
+        "classification": "arm-neutral",
+        "name": "provider-layer-retry-of-transient-errors-and-empty-completions",
+        "sensitive_claims": [
+          "*"
+        ]
+      }
+    ],
+    "provider_runtime": {
+      "build_id": "2c2e51f3b6fae6722da4f7b69751a2e9467ab063",
+      "executable": "omp",
+      "executable_bytes": 194573512,
+      "executable_path": "/opt/omp/omp",
+      "executable_sha256": "6054460b29e9bad5eba78336f291e1979c2fa0a5cd96fc2d92afd666cc681d26",
+      "provider": "stand",
+      "runtime": "omp",
+      "version": "18.0.11"
+    },
+    "reasoning_configuration": {
+      "source": "--thinking",
+      "thinking": "high"
+    },
+    "runtime_input_template": {
+      "channel": "rpc-prompt",
+      "command": "/skill:{root} {prompt}",
+      "prompt_environment": {},
+      "prompt_files": {},
+      "schema": 1,
+      "stdin_serialization": "json-compact-utf8-newline"
+    },
+    "runtime_mode": "rpc",
+    "schema": 1,
+    "workspace_realization": {
+      "kind": "fresh-temporary-project"
+    }
+  },
+  "profile_key_sha256": "3854555e6816cb0410bbb2e86580f434e98f7077503f84f735eed1d9eccfbce8",
+  "qualification_core_sha256": "13298e0952d014e345c2f83fc1b11620615a2c774e10aac8c0e2a94283e8aed7",
+  "replicate": 0,
+  "requirements": {
+    "expected_scoring_items_sha256": "0f50b6567d8ba50fb96bb49619075c40bfee5e2d788d147431bf0cf5be42181a",
+    "required_artifacts_sha256": "d208c3e6b3991584bea4d1f313b044b51ed0915365b1070ba8fc4ed49a81d3e4",
+    "required_oracles_sha256": "c38421c11e9cf4d9fdc2b4218f78f3e22413c213467f22655e8ad705a5b83626",
+    "requirements_root_sha256": "9ee81faba00b17447372cbb7f5c108d155f5e7e40fd0fbc57541a1d929a624b0"
+  },
+  "schema": 2,
+  "stub_tools_sha256": "5890965dc7440f383d15206f77ffb0a19b634ec2da630c253b9953a8f051681f",
+  "stub_tree_sha256": "2b24cfa3f7df999ba1f5df2c3d23a9a684a4cd824d41299655909926d148abbb",
+  "subject": {
+    "commit": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "package_sha256": "bbf7431f4ececcaf33517d6a95fe4604244d62a34f4c7370728f9f198713a61d",
+    "prepared_arms_manifest_sha256": "d2a8c119dd2da51394ca76c5dee3a9cd96b712d6e63cf2d7ef63948d05535e72",
+    "requested_ref": "test-ref",
+    "version": "7.0.0"
+  }
+}

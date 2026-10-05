@@ -1,0 +1,16 @@
+{
+  "results": {
+    "o1": {
+      "executed": true,
+      "oracle_path": "check_o1.py",
+      "oracle_sha256": "14c75fb904c57c2197695141fb784fa0202c233163005a789791e5dc339d109c",
+      "pass": true,
+      "returncode": 0,
+      "stderr_artifact": "oracle-output/o1.stderr.txt",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_artifact": "oracle-output/o1.stdout.txt",
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  },
+  "schema": 1
+}

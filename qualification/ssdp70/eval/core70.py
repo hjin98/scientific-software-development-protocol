@@ -43,6 +43,8 @@ REQUIRED_CAPABILITY_CLASSES = (
 )
 
 NORMALIZED_EVENT_KINDS = {
+    "assistant_message",
+    "package_access",
     "catalog_snapshot",
     "root_selection",
     "resource_access",
@@ -156,6 +158,8 @@ def private_mcp_paths(private_root: Path) -> dict[str, Path]:
 
 
 EVIDENCE_INTEGRITY_ROOTS = (
+    "installed-package",
+    "package-access-inputs.json",
     "adapter-artifacts",
     "project-control-record.json",
     "final-tree-symlinks.json",
@@ -400,7 +404,7 @@ def load_profile(profile_path: Path, capability_path: Path) -> ProfileBundle:
         "mcp_servers": mcp_servers,
     }
     # Runtime mode, transform and mechanism are material execution-profile fields.
-    for name in ("runtime_mode", "activation_mechanism", "delivery_transform", "runtime_input_template"):
+    for name in ("runtime_mode", "activation_mechanism", "delivery_transform", "runtime_input_template", "package_access_parameters", "package_access_premise_witness", "package_access_premise_acceptance_sha256"):
         if name in profile:
             profile_key[name] = profile[name]
     return ProfileBundle(
@@ -537,6 +541,12 @@ def _require_payload_keys(kind: str, payload: dict[str, Any], required: set[str]
 
 def _validate_event_payload(kind: str, status: Any, payload: dict[str, Any], index: int) -> list[str]:
     errors: list[str] = []
+    if kind == "package_access":
+        _require_payload_keys(kind, payload, {"ledger", "ledger_artifact_sha256", "provenance", "parameters",
+            "exact", "owner_floor_exact", "owner_read_observed", "owner_minor_exposure", "owner_open_windows",
+            "request_records", "opened_files", "reasons", "timing_reasons", "active_ssdp_bytes"}, index, errors)
+        if payload.get("exact") is not True and payload.get("active_ssdp_bytes") is not None:
+            errors.append("inexact package_access publishes a byte total")
     if kind == "catalog_snapshot":
         _require_payload_keys(kind, payload, {"logical_skill_ids", "model", "runtime_version", "resolved_package_identity"}, index, errors)
         skills = payload.get("logical_skill_ids")
@@ -1403,7 +1413,7 @@ def validate_runtime_observation(bundle: ProfileBundle, observation: Any) -> lis
 
 def validate_claim_observability(events: list[dict[str, Any]], claims: Iterable[str],
                                  package_supply: list[dict[str, Any]] | None = None,
-                                 ledger_exact: bool = False) -> list[str]:
+                                 ledger_exact: bool = False, *, owner_r2_sequence=None, owner_r2_adjudicated=False) -> list[str]:
     """`package_supply`: supervisor-ledger accounting rows (rel, bytes, sha256) for package files
     whose content reached the model through process output; native reads remain events.
     `ledger_exact`: the supervisor ledger is exact for the byte question, so a root delivered at
@@ -1417,14 +1427,23 @@ def validate_claim_observability(events: list[dict[str, Any]], claims: Iterable[
         and event.get("status") == "result"
         and (event.get("payload") or {}).get("result_status") == "result"
     ]
-    if any("owner-read" in claim for claim in normalized) and not successful_reads and not supply:
+    if any(claim.endswith("owner-read") for claim in normalized) and not successful_reads and not supply and not any(e.get("kind")=="package_access" and e["payload"].get("owner_read_observed") for e in events):
         errors.append("owner-read claim has no successful resource-access result evidence")
     burden_sensitive = any(
         token in claim
         for claim in normalized
         for token in ("t1", "t7", "t8", "burden", "active-byte")
     )
+    ledger_events = [e["payload"] for e in events if e.get("kind") == "package_access"]
+    if any("owner-read-absence" in claim for claim in normalized) and ledger_events:
+        owner = ledger_events[0]
+        needs_r2 = any(owner.get(k) for k in ("owner_read_observed", "owner_open_windows", "owner_minor_exposure"))
+        if (len(ledger_events) != 1 or owner.get("owner_floor_exact") is not True
+                or (needs_r2 and owner_floor_state(owner,owner_r2_sequence,r2_adjudicated=owner_r2_adjudicated) != "PASS")):
+            errors.append("owner-read-absence needs exact owner observation and independently adjudicated provably-post-R2 opens")
     if burden_sensitive:
+        if ledger_events and (len(ledger_events) != 1 or ledger_events[0].get("exact") is not True):
+            errors.append("T1/T7/T8 burden claim requires an exact package-access observation")
         roots = [
             event for event in events
             if event.get("kind") == "root_selection"
@@ -1457,6 +1476,77 @@ def validate_claim_observability(events: list[dict[str, Any]], claims: Iterable[
         if not ordinary:
             errors.append("ordinary-entry claim has no observed ordinary root selection")
     return errors
+
+
+def derive_package_access(bundle, events, skills_root, owner_name, delivered, run_id, native_index):
+    """Deterministic supervisor record; recomputation uses the retained inputs, never a summary."""
+    import package_ledger
+    import package_premise
+    premise = bundle.get("premise")
+    premise_errors = package_premise.verify_report(premise)
+    if isinstance(premise, dict) and premise.get("package") != package_premise.inventory(skills_root):
+        premise_errors.append("premise package binding differs from retained installed package")
+    accounting = package_ledger.account(bundle.get("ledger"), bundle.get("cut_ns"), events, skills_root,
+        extra_errors=list(dict.fromkeys([*(bundle.get("errors") or []), *premise_errors])), delivered=delivered, owner_name=owner_name,
+        mount=bundle.get("mount"), request_records=bundle.get("request_records"), parameters=bundle.get("parameters"))
+    raw = bundle.get("artifact", "")
+    digest = hashlib.sha256(raw.encode()).hexdigest()
+    decision = Path(__file__).resolve().parents[1] / "D3-PACKAGE-ACCESS-LEDGER-OBSERVATION-DECISION-2026-10-04.md"
+    payload = {**accounting, "premise": bundle.get("premise"), "ledger": bundle.get("ledger"), "ledger_artifact_sha256": digest,
+               "provenance": {"accounting_code_sha256": sha256_file(Path(package_ledger.__file__)),
+                   "decision_path": "qualification/ssdp70/" + decision.name,
+                   "decision_commit": "07a4bb0d2093605425374ac3102c6ac04dbe1652", "decision_sha256": sha256_file(decision)}}
+    if payload["provenance"]["decision_sha256"] != "fccb9a3a44afd89338eb19c8b3238a9943fab7c88ee694428dc7d6ce124fd783":
+        raise ContractError("package-access D3 accepted bytes changed without rebinding")
+    clarification = decision.parent / "D3-PACKAGE-ACCESS-PREMISE-CLOSURE-2026-10-04.md"
+    if sha256_file(clarification) != "5f713e2bd816950a2fd0962c6732242631295b3416387beb761c8b40906a3316":
+        raise ContractError("package-access premise clarification changed without rebinding")
+    payload["provenance"]["premise_clarification"] = {"path":"qualification/ssdp70/"+clarification.name,
+        "sha256":sha256_file(clarification), "independent_review_path":"qualification/ssdp70/INDEPENDENT-D3-PREMISE-CLOSURE-REVIEW-2026-10-04-R2.md",
+        "independent_review_sha256":"ee5dd4e722a0c80a180c0a5d83ba59379f6b4c81a08d38852e7e0b114a29a2ed",
+        "publication":"uncommitted cycle decision; SHA-bound, no committed-source claim"}
+    sequence = max((e["sequence"] for e in events), default=0) + 1
+    event = {"schema_version": SCHEMA, "run_id": run_id, "event_id": f"e{sequence:06d}",
+             "sequence": sequence, "actor_id": "supervisor", "kind": "package_access", "status": "observed",
+             "timing": None, "native_source": {"stream": "package-access-ledger.json", "native_index": native_index,
+                                                  "native_sha256": digest}, "payload": payload}
+    entry = {"native_index": native_index, "native_sha256": digest, "classification": "supervisor-package-access-ledger",
+             "oracle_relevant": True, "mapped_event_ids": [event["event_id"]]}
+    return event, entry, accounting
+
+
+def recompute_package_access(run, events, identity):
+    from adapters import omp
+    derived = [e for e in events if e.get("kind") == "package_access"]
+    if len(derived) != 1:
+        return ["ledger run must carry exactly one package_access event"]
+    source = [e for e in events if e.get("kind") != "package_access"]
+    inputs = load_json(run / "package-access-inputs.json")
+    artifacts = {p.name: p.read_text() for p in (run / "adapter-artifacts").iterdir() if p.is_file()}
+    bundle = omp.package_access_ledger(artifacts, load_json(run / "profile-snapshot.json"),
+        events=source, stdout=(run / "trace.jsonl").read_text(), prompt=inputs["prompt"])
+    bundle["artifact"] = artifacts.get("package-access-ledger.json", "")
+    actual, _, _ = derive_package_access(bundle, source, run / "installed-package", inputs["owner_name"],
+        set(inputs["delivered"]), identity["identity_sha256"], derived[0]["native_source"]["native_index"])
+    errors = [] if actual == derived[0] else ["package_access differs from deterministic recomputation"]
+    if identity["accounting"]["purpose"] == "qualification":
+        import package_premise
+        errors.extend(package_premise.verify_report(bundle.get("premise"), qualification=True,
+            accepted_witness_sha256=load_json(run/"profile-snapshot.json").get("package_access_premise_acceptance_sha256")))
+    return errors
+
+
+def owner_floor_state(accounting, r2_sequence, *, r2_adjudicated=False):
+    """Apply item 13 only after independent R2 adjudication. None means no R2 on this trajectory."""
+    if not r2_adjudicated:
+        return "UNRESOLVED"
+    boundary = float("inf") if r2_sequence is None else r2_sequence
+    if any(r["sequence"] < boundary for r in accounting.get("owner_read_observed", [])):
+        return "FAIL"
+    if (accounting.get("owner_floor_exact") is not True or accounting.get("owner_minor_exposure")
+            or any(r["window"]["start"] <= boundary for r in accounting.get("owner_open_windows", []))):
+        return "UNRESOLVED"
+    return "PASS"
 
 
 def _evidence_files(run: Path, requirements: Requirements) -> list[Path]:
@@ -1712,7 +1802,7 @@ def integrity_assessment(actual: dict[str, Any], expected: dict[str, Any]) -> di
     passed = all(actual[key] == expected[key] for key in keys)
     return {"integrity_outcome": "PASS" if passed else "FAIL", "actual": json.loads(json.dumps(actual)), "expected": expected}
 
-def validate_complete_run(run: Path, identity: dict[str, Any], requirements: Requirements) -> list[str]:
+def validate_complete_run(run: Path, identity: dict[str, Any], requirements: Requirements, *, allow_observation_inexact: bool = False) -> list[str]:
     errors: list[str] = []
     try:
         prior = _require_object(load_json(run / "run-identity.json"), "run identity")
@@ -1727,7 +1817,7 @@ def validate_complete_run(run: Path, identity: dict[str, Any], requirements: Req
         errors.append("stored run identity does not match current identity")
     if summary.get("run_identity_sha256") != identity.get("identity_sha256"):
         errors.append("run summary identity does not match current identity")
-    if summary.get("evidence_state") != "COMPLETE_ADMISSIBLE" or summary.get("execution_ok") is not True:
+    if (summary.get("evidence_state") != "COMPLETE_ADMISSIBLE" and not (allow_observation_inexact and summary.get("observation_only_inadmissibility") is True)) or summary.get("execution_ok") is not True:
         errors.append("run summary is not COMPLETE_ADMISSIBLE with successful execution")
     if identity.get("execution_mode") == "qualification":
         errors.extend(validate_profile_admission_snapshot(
@@ -1759,6 +1849,13 @@ def validate_complete_run(run: Path, identity: dict[str, Any], requirements: Req
     errors.extend(parse_errors)
     if not parse_errors:
         errors.extend(validate_normalized_events(events, identity.get("identity_sha256")))
+        if (any(e.get("kind") == "package_access" for e in events)
+                or (run / "adapter-artifacts/package-access-ledger.json").is_file()
+                or "package_access_parameters" in (load_json(run / "profile-snapshot.json") if (run / "profile-snapshot.json").is_file() else {})):
+            try:
+                errors.extend(recompute_package_access(run, events, identity))
+            except (ContractError, OSError, ValueError, TypeError, KeyError) as exc:
+                errors.append(f"package_access cannot be recomputed: {exc}")
     try:
         completeness = _require_object(load_json(run / "normalization-map.json"), "normalization map")
         count = completeness.get("native_event_count")
@@ -1942,6 +2039,27 @@ def campaign_manifest_errors(manifest: Any) -> list[str]:
     runs = manifest.get("runs")
     if not isinstance(runs, list) or not runs:
         return ["campaign/suite must enumerate every declared realization before launch"]
+    replacements = manifest.get("package_access_replacements", [])
+    if not isinstance(replacements,list) or any(not isinstance(r,dict) or set(r) != {"original","replacement","question"}
+        or not all(isinstance(r[k],str) for k in r) or r["question"] not in ("bytes","owner-floor","t7-owner-floor") for r in replacements):
+        errors.append("package-access replacement declarations malformed")
+    else:
+        declared = {r.get("id") for r in runs if isinstance(r,dict)}
+        replacement_ids = [r["replacement"] for r in replacements]
+        if (len(set(replacement_ids)) != len(replacement_ids) or any(r["original"] not in declared
+            or r["replacement"] not in declared or r["original"] in replacement_ids for r in replacements)):
+            errors.append("package-access replacement identities missing, reused or chained")
+    policy = manifest.get("package_access_policy")
+    if policy is not None:
+        if not isinstance(policy,dict) or set(policy) - {"byte_inexact_disparity_bound"}:
+            errors.append("package-access policy malformed")
+        elif "byte_inexact_disparity_bound" in policy:
+            bound = policy["byte_inexact_disparity_bound"]
+            if (not isinstance(bound,dict) or set(bound) != {"value","stakeholder_confirmation"}
+                or not isinstance(bound.get("value"),(int,float)) or isinstance(bound.get("value"),bool)
+                or not 0 <= bound["value"] <= 1 or not isinstance(bound.get("stakeholder_confirmation"),str)
+                or not bound["stakeholder_confirmation"].strip()):
+                errors.append("byte disparity bound needs a frozen stakeholder-confirmed value in [0,1]")
     seen = set()
     for row in runs:
         if not isinstance(row, dict) or not isinstance(row.get("id"), str) or row["id"] in seen:
@@ -1978,13 +2096,64 @@ def campaign_manifest_errors(manifest: Any) -> list[str]:
     return errors
 
 
+def validate_owner_adjudication(owner, review):
+    errors = []
+    if owner is not None:
+        if not isinstance(owner, dict) or set(owner) != {"adjudicated", "r2_sequence", "consequential_sequence"}:
+            errors.append("owner adjudication fields are invalid")
+        else:
+            if not isinstance(owner["adjudicated"], bool):
+                errors.append("owner adjudicated must be boolean")
+            for name in ("r2_sequence", "consequential_sequence"):
+                v = owner[name]
+                if v is not None and (not isinstance(v, int) or isinstance(v, bool) or v < 1):
+                    errors.append(f"{name} must be a positive normalized sequence or null")
+            r2, consequent = owner["r2_sequence"], owner["consequential_sequence"]
+            if isinstance(r2, int) and isinstance(consequent, int) and consequent <= r2:
+                errors.append("consequential event must follow R2")
+    if review is not None:
+        if not isinstance(review, dict) or set(review) != {"other_criteria_adjudicated", "observation_only", "overflow_cause"}:
+            errors.append("replacement review fields are invalid")
+        else:
+            if not all(isinstance(review[k], bool) for k in ("other_criteria_adjudicated", "observation_only")):
+                errors.append("replacement review flags must be boolean")
+            if review["overflow_cause"] is not None and (not isinstance(review["overflow_cause"], str) or not review["overflow_cause"].strip()):
+                errors.append("overflow cause must be nonempty text or null")
+    return errors
+
+
 def production_assessment(summary: dict[str, Any], identity: dict[str, Any], requirements: Requirements,
-                          dispositions: list[dict[str, Any]] | None = None) -> dict[str, Any]:
-    result = {**assessment_accounting(identity), "evidence_state": summary.get("evidence_state"),
+                          dispositions: list[dict[str, Any]] | None = None, *, owner_adjudication=None, replacement_review=None) -> dict[str, Any]:
+    adjudication_errors = validate_owner_adjudication(owner_adjudication, replacement_review)
+    if adjudication_errors:
+        raise ContractError("invalid independent adjudication: " + "; ".join(adjudication_errors))
+    result = {**assessment_accounting(identity), "arm": identity.get("arm"), "evidence_state": summary.get("evidence_state"),
               "criteria": local_criteria(summary, identity), "qualification_outcome": "NOT_EVALUATED",
-              "resource_observation": summary.get("resource_observation", {"exact": False})}
+              "resource_observation": summary.get("resource_observation", {"exact": False}),
+              "observation_only_inadmissibility": summary.get("observation_only_inadmissibility") is True}
     if summary.get("accounting") != identity["accounting"]:
         raise ContractError("post-launch purpose/campaign/scoring change")
+    if dispositions is not None:
+        validate_errors = validate_dispositions(dispositions, requirements)
+        if validate_errors:
+            raise ContractError("invalid independent dispositions: " + "; ".join(validate_errors))
+        adjudications = [owner_adjudication] if owner_adjudication is not None else []
+        if len(adjudications) == 1:
+            adjudication = adjudications[0]
+            accounting = (summary.get("resource_observation") or {}).get("accounting") or {
+                "owner_read_observed": summary.get("owner_read_observed", []), "owner_floor_exact": False}
+            result["owner_floor_state"] = owner_floor_state(accounting, adjudication.get("r2_sequence"),
+                r2_adjudicated=adjudication.get("adjudicated") is True)
+            result["owner_floor_adjudication"] = adjudication
+            consequent = adjudication.get("consequential_sequence")
+            r2 = adjudication.get("r2_sequence")
+            result["owner_load_hit"] = (any(r2 < row["sequence"] < consequent for row in accounting.get("owner_read_observed",[]))
+                if isinstance(r2,int) and isinstance(consequent,int) and adjudication.get("adjudicated") is True else None)
+        # This is disclosed evidence for replacement eligibility, not doctrine scoring on an inadmissible run.
+        result["original_dispositions"] = dispositions
+        reviews = [replacement_review] if replacement_review is not None else []
+        if len(reviews) == 1:
+            result["replacement_review"] = reviews[0]
     if summary.get("evidence_state") == "COMPLETE_ADMISSIBLE" and dispositions is not None:
         result["qualification_outcome"] = outcome_from_dispositions(dispositions, requirements)
         result["dispositions"] = dispositions

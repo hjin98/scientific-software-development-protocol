@@ -1,0 +1,76 @@
+{
+  "argv": [
+    "/usr/bin/bwrap",
+    "--args",
+    "7",
+    "/usr/bin/python3",
+    "/opt/ssdp/observer/observer70.py",
+    "--mux-in-fd",
+    "3",
+    "--mux-out-fd",
+    "4",
+    "--evidence-fd",
+    "5",
+    "--credential-fd",
+    "6",
+    "--upstream",
+    "http://127.0.0.1:40819",
+    "--credential-env",
+    "SSDP70_OMP_PROVIDER_CREDENTIAL",
+    "--placeholder",
+    "ssdp70-run-transport-key",
+    "--allowed-path",
+    "/v1/chat/completions",
+    "--blocked-discovery-target",
+    "/v1/models?filter=with_meta&sort_by=omp",
+    "--max-requests",
+    "30",
+    "--supervisor-pid",
+    "27044",
+    "--supervisor-netns",
+    "net:[4026531840]",
+    "--supervisor-pidns",
+    "pid:[4026531836]",
+    "--activation-spec",
+    "/opt/ssdp/observer/activation.json",
+    "--probe-path",
+    "host_home=/tmp/s70h/.bashrc",
+    "--probe-path",
+    "qualification_custody=/home/samjin/agent-skills/scientific-software-development-protocol/qualification/ssdp70/PROTOCOL-7.0-EVALUATION-AND-QUALIFICATION-CONTRACT.md",
+    "--probe-path",
+    "supervisor_private=/tmp/s70h/ssdp70-omp-stagef/logs/runtime-state/ssdp70-4_ktn9ym/harness-private/observer-boundary-host-sentinel.txt",
+    "--probe-path",
+    "mediator_backing_state=/tmp/s70h/ssdp70-omp-stagef/logs/runtime-state/ssdp70-4_ktn9ym/harness-private/side-effects.jsonl"
+  ],
+  "exec_helper": "/home/samjin/agent-skills/scientific-software-development-protocol/qualification/ssdp70/eval/observer_exec_helper70.py",
+  "exec_helper_sha256": "8891d415d3d0c10bea887caabdfda6bb9f510523f5a1e54eda4d45165a270972",
+  "fd_mapping": {
+    "bubblewrap_arguments": {
+      "bubblewrap_fd": 7,
+      "supervisor_source_fd": 23
+    },
+    "credential_input": {
+      "observer_fd": 6,
+      "supervisor_source_fd": 12
+    },
+    "evidence_output": {
+      "observer_fd": 5,
+      "supervisor_source_fd": 15
+    },
+    "inference_input": {
+      "observer_fd": 3,
+      "supervisor_source_fd": 4
+    },
+    "inference_output": {
+      "observer_fd": 4,
+      "supervisor_source_fd": 7
+    }
+  },
+  "pass_fds": [
+    4,
+    7,
+    12,
+    15,
+    23
+  ]
+}

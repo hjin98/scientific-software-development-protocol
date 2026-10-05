@@ -1,0 +1,110 @@
+{
+  "entries": [
+    {
+      "bytes": 163840,
+      "class": "omp-runtime-state",
+      "path": ".omp/agent/agent.db",
+      "sha256": "0bcbbc490e95d9a2200770cd5a257b2f0c3f772f17a5d0ddb50cbd22f4fe20aa",
+      "type": "file"
+    },
+    {
+      "bytes": 32768,
+      "class": "omp-runtime-state",
+      "path": ".omp/agent/agent.db-shm",
+      "sha256": "c180ea81458cb067904280ad087f53c43b3f27114941c6ddc142a9c7367a7a34",
+      "type": "file"
+    },
+    {
+      "bytes": 0,
+      "class": "omp-runtime-state",
+      "path": ".omp/agent/agent.db-wal",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "type": "file"
+    },
+    {
+      "bytes": 1807,
+      "class": "control",
+      "path": ".omp/agent/config.yml",
+      "sha256": "946e097d517997df522d83a8e80feedcf91f214a47ee3d192bd25c217f9c3075",
+      "type": "file"
+    },
+    {
+      "bytes": 112,
+      "class": "control",
+      "path": ".omp/agent/mcp.json",
+      "sha256": "743b35d83349a72fd900300ec3b7f24afdce22d77c8277de5e20e677424a19ff",
+      "type": "file"
+    },
+    {
+      "bytes": 1163264,
+      "class": "omp-runtime-state",
+      "path": ".omp/agent/models.db",
+      "sha256": "af5116315cb26a9b6c21191d3912c807869920b7a81619ace7c172414b5d1f3f",
+      "type": "file"
+    },
+    {
+      "bytes": 279,
+      "class": "control",
+      "path": ".omp/agent/models.yml",
+      "sha256": "e0643d205dd1ac825db8666fb14368f51e9b79d0fddd90c250089d5f69af3ff4",
+      "type": "file"
+    },
+    {
+      "bytes": 31,
+      "class": "omp-runtime-state",
+      "path": ".omp/gpu_cache.json",
+      "sha256": "287e7cca5dabe9b575f1e17928ee4f1afdcabab52663b912d26b2b654df3ae74",
+      "type": "file"
+    },
+    {
+      "bytes": 383,
+      "class": "omp-runtime-state",
+      "path": ".omp/logs/.omp.65-audit.json",
+      "sha256": "886b14c69ae2f84ee1c57c9224a8334503c5e021846be43f31e8091f86917c83",
+      "type": "file"
+    },
+    {
+      "bytes": 151,
+      "class": "omp-runtime-state",
+      "path": ".omp/logs/omp.2026-10-05.13.log",
+      "sha256": "ddcde9243dc6775acdc610a52116f96d906bae76b39ec70a5c18a03e543b77e9",
+      "type": "file"
+    },
+    {
+      "bytes": 150,
+      "class": "omp-runtime-state",
+      "path": ".omp/logs/omp.2026-10-05.2.log",
+      "sha256": "c2f3cbae5612cae90b78bcbb8d26c6114d5ef9b299a8a52f350d1331abce3021",
+      "type": "file"
+    },
+    {
+      "bytes": 1829,
+      "class": "omp-runtime-state",
+      "path": ".omp/logs/omp.2026-10-05.65.log",
+      "sha256": "8adcacbd2355325c47a902ea98a53c7d4a97032c81b58ee5e5d0b836f9277bfc",
+      "type": "file"
+    },
+    {
+      "bytes": 176887688,
+      "class": "omp-runtime-state",
+      "path": ".omp/natives/18.0.11/pi_natives.linux-x64-baseline.node",
+      "sha256": null,
+      "type": "file"
+    },
+    {
+      "bytes": 176721664,
+      "class": "omp-runtime-state",
+      "path": ".omp/natives/18.0.11/pi_natives.linux-x64-modern.node",
+      "sha256": null,
+      "type": "file"
+    },
+    {
+      "bytes": 83,
+      "class": "omp-runtime-state",
+      "path": ".omp/run/daemons/79b239fb62442541/clients/65-5605f250-77ab-455a-8614-52ef1342a6ff.json",
+      "sha256": "40145732d3f9607d785b90e1938aca19cc99c40a08870175d6c12319b0b3e410",
+      "type": "file"
+    }
+  ],
+  "schema": 1
+}

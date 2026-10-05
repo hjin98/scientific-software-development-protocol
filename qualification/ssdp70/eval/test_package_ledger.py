@@ -52,16 +52,33 @@ def event(sequence, text, *, kind="tool_action", seen=True, command=None, req=No
                         "semantic_capability_classes": ["process_execution"]}}
 
 
+
+TEST_PARAMETERS = {**pl.PARAMETERS, "clock_tolerance_ns": 0}
+
+def bracketed(ledger):
+    if not isinstance(ledger["events"],list):
+        return ledger
+    stamps = sorted({e["first_ns"] for e in ledger["events"]})
+    beats = []
+    for t in sorted({t for stamp in stamps for t in (stamp-1,stamp+1)}):
+            beats.append({"index": len(beats), "before_ns": t, "after_ns": t, "before_mono_ns": t, "after_mono_ns": t})
+    if not beats:
+        beats = [{"index": i, "before_ns": t, "after_ns": t, "before_mono_ns": t, "after_mono_ns": t} for i,t in enumerate((0,10000))]
+    for e in ledger["events"]:
+        e["interval"] = next(i for i,b in enumerate(beats) if b["before_ns"] == e["first_ns"]-1)
+    ledger.update(parameters=TEST_PARAMETERS, heartbeats=beats)
+    return ledger
+
 def led(opens, *, cut=1000, extra=None, **overrides):
     """Ledger with explicit (t_ns, rel, flags) rows over the standard tree."""
     tree = {"a/SKILL.md": len(SKILL_A), "a/references/owner.md": len(OWNER), "a/references/other.md": len(OTHER),
-            "b/SKILL.md": 22}
+            "b/SKILL.md": len("---\nname: b\n---\n# B\n")}
     rows = [{"first_ns": t, "last_ns": t, "count": 1, "rel": rel, "dir": False,
              "flags": flags or ["open", "access", "close_nowrite"]} for t, rel, flags in opens]
     ledger = {"schema": pl.SCHEMA, "mechanism": pl.MECHANISM, "root": "x", "established": True, "error": None,
               "tree_files": tree, "overflow": False, "events": rows + list(extra or [])}
     ledger.update(overrides)
-    return ledger
+    return bracketed(ledger)
 
 
 class WatcherUsesRealKernelObservation(unittest.TestCase):
@@ -118,7 +135,7 @@ class AccountingFailsClosed(unittest.TestCase):
         self.tmp.cleanup()
 
     def account(self, ledger, events, cut=1000):
-        return pl.account(ledger, cut, events, self.root)
+        return pl.account(ledger, cut, events, self.root, parameters=TEST_PARAMETERS)
 
     def test_cat_of_owner_is_exact_and_attributed(self):
         ledger = led([(10, "a/SKILL.md", None), (11, "b/SKILL.md", None), (2000, "a/references/owner.md", None)])
@@ -222,7 +239,7 @@ def overlap_ledger(opens, **overrides):
     ledger = {"schema": pl.SCHEMA, "mechanism": pl.MECHANISM, "root": "x", "established": True, "error": None,
               "tree_files": tree, "overflow": False, "events": rows}
     ledger.update(overrides)
-    return ledger
+    return bracketed(ledger)
 
 
 class SupplyIdentifiesTheOpenedFile(unittest.TestCase):
@@ -239,7 +256,8 @@ class SupplyIdentifiesTheOpenedFile(unittest.TestCase):
         self.tmp.cleanup()
 
     def account(self, opens, events, **kw):
-        return pl.account(overlap_ledger(opens), 1000, events, self.root, mount=MOUNT, owner_name="owner.md", **kw)
+        kw.setdefault("request_records", [{"t_ns": 1000, "monotonic_ns": 1000, "position": min((e["sequence"] for e in events), default=1)}])
+        return pl.account(overlap_ledger(opens), 1000, events, self.root, mount=MOUNT, parameters=TEST_PARAMETERS, owner_name="owner.md", **kw)
 
     def test_shared_kernel_block_in_an_entrypoint_does_not_explain_a_size_probe_of_a_reference(self):
         result = self.account([(2000, "x/SKILL.md"), (2001, "x/references/ref.md")],
@@ -251,12 +269,12 @@ class SupplyIdentifiesTheOpenedFile(unittest.TestCase):
 
     def test_byte_identical_twin_shown_for_another_path_does_not_explain_the_unshown_twin(self):
         result = self.account([(2000, "y/references/owner.md"), (2001, "x/references/owner.md")],
-                              [event(5, TWIN, command=f"cat {MOUNT}/y/references/owner.md"),
+                              [event(5, "".join(TWIN.splitlines(True)[:6]), command=f"head {MOUNT}/y/references/owner.md"),
                                event(6, "30 lines", command=f"wc -l {MOUNT}/x/references/owner.md")])
         self.assertFalse(result["exact"])
         self.assertEqual(result["supplied"]["y/references/owner.md"]["sequences"], [5])
         self.assertNotIn("x/references/owner.md", result["supplied"])
-        self.assertFalse(result["owner_read_exact"])           # an unexplained owner copy blocks the owner question
+        self.assertTrue(result["owner_floor_exact"])  # window blocks no-read, not byte explanation
 
     def test_twins_each_shown_by_an_action_naming_them_are_both_supplied(self):
         result = self.account([(2000, "y/references/owner.md"), (2001, "x/references/owner.md")],
@@ -272,7 +290,7 @@ class SupplyIdentifiesTheOpenedFile(unittest.TestCase):
 
     def test_path_prefix_is_a_boundary_not_a_substring(self):
         result = self.account([(2000, "y/references/owner.md")],
-                              [event(5, TWIN, command=f"cat {MOUNT}/xy/references/owner.md; echo {MOUNT}/zy/references/owner.md")])
+                              [event(5, "".join(TWIN.splitlines(True)[:6]), command=f"cat {MOUNT}/xy/references/owner.md; echo {MOUNT}/zy/references/owner.md")])
         self.assertFalse(result["exact"])
 
     def test_distinctive_partial_block_still_supplies_without_naming_the_path(self):
@@ -298,93 +316,40 @@ class PhaseAndDelivery(unittest.TestCase):
         for stamp in (2000, 999):
             with self.subTest(stamp=stamp):
                 result = pl.account(overlap_ledger([(stamp, "y/SKILL.md")]), 1000,
-                                    [event(4, ENTRY_Y, command=f"cat {MOUNT}/y/SKILL.md")], self.root, mount=MOUNT)
+                                    [event(4, ENTRY_Y, command=f"cat {MOUNT}/y/SKILL.md")], self.root, mount=MOUNT, parameters=TEST_PARAMETERS)
                 self.assertEqual(result["consumed_files"], {"y/SKILL.md": len(ENTRY_Y.encode())})
 
     def test_skew_moves_a_non_entrypoint_open_only_to_the_stricter_class(self):
         result = pl.account(overlap_ledger([(999, "x/references/ref.md")]), 1000, [event(4, REF, command=f"cat {MOUNT}/x/references/ref.md")],
-                            self.root, mount=MOUNT)
+                            self.root, mount=MOUNT, parameters=TEST_PARAMETERS)
         self.assertFalse(result["exact"])
         self.assertEqual(result["unexplained"][0]["phase"], "pre-request0")
 
     def test_reopening_the_delivered_entrypoint_is_explained_by_delivery(self):
         result = pl.account(overlap_ledger([(2000, "x/SKILL.md")]), 1000, [event(3, "99 bytes", command=f"wc -c {MOUNT}/x/SKILL.md")],
-                            self.root, mount=MOUNT, delivered={"x/SKILL.md"})
+                            self.root, mount=MOUNT, parameters=TEST_PARAMETERS, delivered={"x/SKILL.md"})
         self.assertTrue(result["exact"], result["reasons"])
         self.assertEqual(result["explained_by_delivery"], ["x/SKILL.md"])
-        undelivered = pl.account(overlap_ledger([(2000, "y/SKILL.md")]), 1000, [event(3, "99 bytes")], self.root, mount=MOUNT,
+        undelivered = pl.account(overlap_ledger([(2000, "y/SKILL.md")]), 1000, [event(3, "99 bytes")], self.root, mount=MOUNT, parameters=TEST_PARAMETERS,
                                  delivered={"x/SKILL.md"})
         self.assertFalse(undelivered["exact"])
 
     def test_entrypoint_only_run_with_exact_ledger_is_exact_and_names_no_opened_file(self):
-        result = pl.account(overlap_ledger([(10, "x/SKILL.md"), (11, "y/SKILL.md")]), 1000, [], self.root, mount=MOUNT,
+        result = pl.account(overlap_ledger([(10, "x/SKILL.md"), (11, "y/SKILL.md")]), 1000, [], self.root, mount=MOUNT, parameters=TEST_PARAMETERS,
                             delivered={"x/SKILL.md"}, owner_name="owner.md")
         self.assertTrue(result["exact"], result["reasons"])
         self.assertEqual(result["consumed_files"], {})
-        self.assertTrue(result["owner_read_exact"])
+        self.assertTrue(result["owner_floor_exact"])
 
     def test_unrelated_unexplained_file_leaves_the_owner_question_exact(self):
         result = pl.account(overlap_ledger([(2000, "x/references/ref.md")]), 1000, [event(2, "n/a", command="wc -c ref.md")],
-                            self.root, mount=MOUNT, owner_name="owner.md")
+                            self.root, mount=MOUNT, parameters=TEST_PARAMETERS, owner_name="owner.md")
         self.assertFalse(result["exact"])
-        self.assertTrue(result["owner_read_exact"])
-        for broken in (overlap_ledger([], overflow=True), overlap_ledger([(2000, "x/references/owner.md")])):
+        self.assertTrue(result["owner_floor_exact"])
+        for broken in (overlap_ledger([], overflow=True),):
             with self.subTest(broken=str(broken)[-60:]):
-                self.assertFalse(pl.account(broken, 1000, [event(2, "n/a", command="x")], self.root, mount=MOUNT,
-                                            owner_name="owner.md")["owner_read_exact"])
-
-
-class OwnerReadTimeIsAccessNotDisplay(unittest.TestCase):
-    """Revision 3 (review N-1): an owner open before R2 cannot hide behind a later full display."""
-    STAMPS = {0: 900, 1: 2500, 2: 3000, 3: 4000}
-
-    def setUp(self):
-        self.tmp = tempfile.TemporaryDirectory()
-        self.root = Path(self.tmp.name)
-        for rel, text in FILES.items():
-            (self.root / rel).parent.mkdir(parents=True, exist_ok=True)
-            (self.root / rel).write_text(text)
-
-    def tearDown(self):
-        self.tmp.cleanup()
-
-    def account(self, opens, events, stamps="default"):
-        return pl.account(overlap_ledger(opens), 1000, events, self.root, mount=MOUNT, owner_name="owner.md",
-                          request_stamps=self.STAMPS if stamps == "default" else stamps)
-
-    def hidden_then_shown(self):
-        opens = [(2000, "x/references/owner.md"), (3500, "x/references/owner.md")]
-        events = [event(4, "30 owner.md", command=f"wc -l {MOUNT}/x/references/owner.md", req=1),
-                  event(9, TWIN, command=f"cat {MOUNT}/x/references/owner.md", req=3)]
-        return opens, events
-
-    def test_unshown_open_before_r2_bounds_the_owner_read_before_the_later_display(self):
-        opens, events = self.hidden_then_shown()
-        result = self.account(opens, events)
-        self.assertTrue(result["owner_read_exact"], result["reasons"])
-        self.assertEqual(result["supplied"]["x/references/owner.md"]["sequences"], [9])
-        self.assertEqual(result["owner_access"]["x/references/owner.md"]["sequence"], 4)
-
-    def test_same_open_without_request_stamps_makes_the_owner_question_inexact(self):
-        opens, events = self.hidden_then_shown()
-        result = self.account(opens, events, stamps=None)
-        self.assertFalse(result["owner_read_exact"])
-        self.assertEqual(result["owner_access_unresolved"], ["x/references/owner.md"])
-
-    def test_non_owner_opens_add_no_owner_access_and_do_not_disturb_it(self):
-        result = self.account([(2000, "x/references/ref.md")], [event(4, REF, command=f"cat {MOUNT}/x/references/ref.md", req=1)])
-        self.assertEqual(result["owner_access"], {})
-        self.assertTrue(result["owner_read_exact"])
-
-    def test_open_after_the_last_request_is_bounded_by_the_end_of_the_trace(self):
-        result = self.account([(5000, "x/references/owner.md")], [event(4, TWIN, command=f"cat {MOUNT}/x/references/owner.md", req=3)])
-        self.assertEqual(result["owner_access"]["x/references/owner.md"]["basis"], "after-last-request")
-
-    def test_owner_copies_have_one_recognition_rule(self):
-        self.assertTrue(pl.is_owner_copy("y/references/owner.md", "owner.md"))
-        self.assertTrue(pl.is_owner_copy("owner.md", "owner.md"))
-        self.assertFalse(pl.is_owner_copy("y/references/owner.md.bak", "owner.md"))
-        self.assertFalse(pl.is_owner_copy("y/references/owner.md", None))
+                self.assertFalse(pl.account(broken, 1000, [event(2, "n/a", command="x")], self.root, mount=MOUNT, parameters=TEST_PARAMETERS,
+                                            owner_name="owner.md")["owner_floor_exact"])
 
 
 class ClaimGateRequiresDeliveryProof(unittest.TestCase):
@@ -409,8 +374,8 @@ class WatcherBoundsItsRecord(unittest.TestCase):
         time.sleep(0.1)
         record = watch.stop()
         opens = [r for r in record["events"] if r["rel"] == "a/f" and "open" in r["flags"]]
-        self.assertEqual(len(opens), 1)
-        self.assertGreaterEqual(opens[0]["count"], 400)
+        self.assertGreaterEqual(len(opens), 1)
+        self.assertGreaterEqual(sum(r["count"] for r in opens), 400)
         self.assertLessEqual(opens[0]["first_ns"], opens[0]["last_ns"])
         self.assertFalse(record["read_errors"])
         broken = pl.LedgerWatcher(root)
@@ -435,3 +400,120 @@ class ClaimGateHonoursAnExactLedger(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+class Revision8OwnerEvidence(PhaseAndDelivery):
+    def account(self, opens, events, **kwargs):
+        return pl.account(overlap_ledger(opens), 1000, events, self.root, mount=MOUNT,
+                          parameters=TEST_PARAMETERS, owner_name="owner.md", **kwargs)
+
+    def test_l_m_n_t_display_sequence_survives_lost_observation(self):
+        events = [event(4, "30 lines"), event(9, TWIN)]
+        for ledger in (None, overlap_ledger([(2000,"x/references/owner.md")], overflow=True)):
+            result = pl.account(ledger, 1000, events, self.root, owner_name="owner.md", parameters=TEST_PARAMETERS)
+            self.assertEqual([r["sequence"] for r in result["owner_read_observed"]], [9])
+            self.assertFalse(result["owner_floor_exact"])
+        result = self.account([(2000,"x/references/owner.md")], events)
+        self.assertEqual([r["sequence"] for r in result["owner_read_observed"]], [9])
+        self.assertEqual(result["owner_open_windows"][0]["window"]["start"], 4)
+
+    def test_w_distinct_line_quantum_error_status_prefixes_and_chunks(self):
+        lines = TWIN.splitlines()
+        one = "one very long owner line " + "x"*300
+        for rel in ("x/references/owner.md", "y/references/owner.md"):
+            (self.root/rel).write_text(TWIN+one+"\n")
+        for text in (one, "\n".join([lines[0]]*7), "\n".join(lines[:2])):
+            r = pl.account(None, 1000, [event(3,text)], self.root, owner_name="owner.md", parameters=TEST_PARAMETERS)
+            self.assertEqual(r["owner_read_observed"], [])
+            self.assertEqual([v["sequence"] for v in r["owner_minor_exposure"]], [3])
+        e = event(7, "\n".join(f"file:{i}:{line}" for i,line in enumerate(lines[:6])))
+        e["status"] = e["payload"]["result_status"] = "error"
+        r = pl.account(None, 1000, [e], self.root, owner_name="owner.md", parameters=TEST_PARAMETERS)
+        self.assertEqual([v["sequence"] for v in r["owner_read_observed"]], [7])
+        self.assertEqual(r["owner_minor_exposure"], [])
+
+    def test_o_r_x_trace_order_windows_late_drain_background_and_fallback(self):
+        events = [event(i,"nothing") for i in range(1,11)]
+        requests = [{"t_ns": t, "monotonic_ns": t, "position": pos} for t,pos in ((1000,1),(1500,4),(3000,8))]
+        r = self.account([(2000,"x/references/owner.md"),(5000,"x/references/owner.md")],events, request_records=requests)
+        self.assertEqual([v["window"]["start"] for v in r["owner_open_windows"]], [4,8])
+        requests[1]["position"] = 1
+        r = self.account([(2000,"x/references/owner.md")],events, request_records=requests)
+        self.assertEqual(r["owner_open_windows"][0]["window"]["start"],1)
+        requests[1]["t_ns"] = 500
+        r = self.account([(2000,"x/references/owner.md")],events, request_records=requests)
+        self.assertFalse(r["owner_floor_exact"])
+        self.assertEqual(r["owner_open_windows"][0]["window"]["start"],1)
+
+    def test_p_q_clock_divergence_gap_and_width_never_hide_supply(self):
+        for kind in ("clock", "gap", "width", "ends"):
+            ledger = overlap_ledger([(2000,"x/references/owner.md"),(4000,"x/references/owner.md")])
+            if kind == "clock":
+                ledger["heartbeats"][0]["before_mono_ns"] -= 100
+            elif kind == "gap":
+                ledger["parameters"] = {**TEST_PARAMETERS,"heartbeat_gap_bound_ns":1}
+            elif kind == "width":
+                ledger["parameters"] = {**TEST_PARAMETERS,"bracket_width_bound_ns":1}
+            else:
+                ledger["heartbeats"] = []
+            r = pl.account(ledger,1000,[event(9,TWIN)],self.root,owner_name="owner.md",parameters=ledger["parameters"])
+            self.assertFalse(r["owner_floor_exact"],kind)
+            self.assertEqual([v["sequence"] for v in r["owner_read_observed"]],[9])
+
+    def test_s_whole_file_twin_in_window_but_never_partial_or_shared_block(self):
+        for text,exact in ((TWIN,True),("\n".join(TWIN.splitlines()[:6]),False),(KERNEL,False)):
+            r = self.account([(2000,"x/references/owner.md")],[event(4,text)])
+            self.assertEqual(r["exact"],exact,r["reasons"])
+            if exact:
+                self.assertEqual(r["supplied"]["x/references/owner.md"]["routes"],["whole-file-in-window"])
+
+    def test_k_basename_is_the_only_copy_rule(self):
+        self.assertTrue(pl.is_owner_copy("x/references/owner.md","owner.md"))
+        self.assertFalse(pl.is_owner_copy("x/references/owner.md.bak","owner.md"))
+        from adapters import omp
+        fake={"kind":"resource_access","status":"result","sequence":5,
+              "payload":{"result_status":"result","resource_identity":"owner.md.bak",
+              "consumed_resource":{"match":"exact","package_relative_path":"references/owner.md.bak"}}}
+        self.assertEqual(omp.owner_reads([fake],"owner.md"),[])
+        fake["payload"]["consumed_resource"]["package_relative_path"]="references/owner.md"
+        self.assertEqual(omp.owner_reads([fake],"owner.md"),[5])
+
+class HeartbeatKernelBoundary(unittest.TestCase):
+    def test_p_r_u_x_two_directories_intervals_bound_and_bracket_ends(self):
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            for name in ('a','b'):
+                (root/name).mkdir(); (root/name/'f').write_text(name)
+            w = pl.LedgerWatcher(root).start()
+            self.assertTrue(w.established,w.error)
+            (root/'a/f').read_bytes()
+            time.sleep(.12)
+            (root/'b/f').read_bytes()
+            time.sleep(.12)
+            (root/'a/f').read_bytes()
+            ledger = w.stop()
+            opens = [r for r in ledger['events'] if 'open' in r['flags'] and not r['dir']]
+            self.assertGreaterEqual(len({r['interval'] for r in opens}),3)
+            self.assertEqual([r['index'] for r in ledger['heartbeats']],list(range(len(ledger['heartbeats']))))
+            brackets,reasons = pl.timing(ledger,[],ledger['parameters'])
+            self.assertEqual(reasons,[])
+            for r in opens:
+                self.assertIn(r['interval'],brackets)
+                self.assertFalse(brackets[r['interval']]['timing_loss'])
+            small = pl.LedgerWatcher(root,{**pl.PARAMETERS,'row_bound':1}).start()
+            (root/'a/f').read_bytes(); (root/'b/f').read_bytes()
+            record=small.stop()
+            self.assertTrue(record['rows_truncated'])
+            self.assertLessEqual(len(record['events']),1)
+
+class OwnerFloorProductionOwner(unittest.TestCase):
+    def test_l_m_o_p_q_t_w_y_decisions_and_positive_exception(self):
+        positive={'owner_floor_exact':False,'owner_read_observed':[{'sequence':3}], 'owner_minor_exposure':[], 'owner_open_windows':[]}
+        self.assertEqual(core70.owner_floor_state(positive,5,r2_adjudicated=True),'FAIL')
+        self.assertEqual(core70.owner_floor_state(positive,2,r2_adjudicated=True),'UNRESOLVED')
+        self.assertEqual(core70.owner_floor_state(positive,5),'UNRESOLVED')
+        for start,state in ((4,'UNRESOLVED'),(5,'UNRESOLVED'),(6,'PASS')):
+            a={**positive,'owner_floor_exact':True,'owner_read_observed':[{'sequence':7}],
+               'owner_open_windows':[{'window':{'start':start,'end':9}}]}
+            self.assertEqual(core70.owner_floor_state(a,5,r2_adjudicated=True),state)
+        a={**positive,'owner_floor_exact':True,'owner_read_observed':[],'owner_minor_exposure':[{'sequence':1}]}
+        self.assertEqual(core70.owner_floor_state(a,5,r2_adjudicated=True),'UNRESOLVED')

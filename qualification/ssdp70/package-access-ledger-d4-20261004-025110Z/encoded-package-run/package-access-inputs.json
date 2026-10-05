@@ -1,0 +1,7 @@
+{
+  "owner_name": "scientific-inspectability-and-initiative.md",
+  "delivered": [
+    "software-implementation/SKILL.md"
+  ],
+  "prompt": "/skill:software-implementation Do the task."
+}

@@ -237,8 +237,8 @@ class B1RealObservationAndEventCompleteness(RigCase):
     def test_observer_evidence_removed_after_a_real_run_fails_closed(self):
         original = omp.launch
 
-        def launch_without_observer(profile, prompt, project, env):
-            launched = original(profile, prompt, project, env)
+        def launch_without_observer(profile, prompt, project, env, **kwargs):
+            launched = original(profile, prompt, project, env, **kwargs)
             launched["adapter_artifacts"]["observer-evidence.jsonl"] = ""
             return launched
 
@@ -684,7 +684,7 @@ class ProviderManagedStateAndDiscoveryEffects(RigCase):
         original_launch = omp.launch
         launch_calls = []
 
-        def observed_launch(profile, prompt, project, env):
+        def observed_launch(profile, prompt, project, env, **kwargs):
             launch_calls.append(True)
             if inject_launch_environment is not None:
                 env = dict(env)
@@ -1057,8 +1057,8 @@ class B2PrivilegeSeparationWhileInferenceWorks(RigCase):
     def test_host_side_mutation_of_immutable_control_material_is_detected_post_run(self):
         original = omp.launch
 
-        def mutate_after(profile, prompt, project, env):
-            launched = original(profile, prompt, project, env)
+        def mutate_after(profile, prompt, project, env, **kwargs):
+            launched = original(profile, prompt, project, env, **kwargs)
             paths = omp._paths(project, env)
             (paths["home"] / ".omp" / "agent" / "mcp.json").chmod(0o644)
             (paths["home"] / ".omp" / "agent" / "mcp.json").write_text("{}")
@@ -1077,7 +1077,7 @@ class B2PrivilegeSeparationWhileInferenceWorks(RigCase):
         original = omp.launch
         sentinel_state = {"accepted": 0, "path": None}
 
-        def with_external_sentinel(profile, prompt, project, env):
+        def with_external_sentinel(profile, prompt, project, env, **kwargs):
             sentinel_root = Path.home() / "ssdp70-omp-stagef" / "logs"
             sentinel_root.mkdir(parents=True, exist_ok=True)
             path = sentinel_root / f"omp-ipc-{uuid.uuid4().hex[:12]}.sock"
@@ -1102,7 +1102,7 @@ class B2PrivilegeSeparationWhileInferenceWorks(RigCase):
             worker = threading.Thread(target=accept_connections, daemon=True)
             worker.start()
             try:
-                launched = original(profile, prompt, project, env)
+                launched = original(profile, prompt, project, env, **kwargs)
             finally:
                 stopping.set()
                 server.close()

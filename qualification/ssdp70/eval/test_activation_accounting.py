@@ -51,7 +51,7 @@ class FamilyAndScope(unittest.TestCase):
 
 @unittest.skipIf(bool(omp_rig.prerequisites()), str(omp_rig.prerequisites()))
 class RealActivationPath(unittest.TestCase):
-    def realize(self, fault=None, mechanism='runtime-command', root='software-implementation', scenario=None, canary=False, no_delegate=False, claims=None, local_expected=None):
+    def realize(self, fault=None, mechanism='runtime-command', root='software-implementation', scenario=None, canary=False, no_delegate=False, claims=None, local_expected=None, parameters=None):
         rig = omp_rig.Rig(Path('/tmp'), entry='pinned:'+root, timeout_s=45, claims=claims)
         if canary:
             package = rig.root / "canary-package"
@@ -68,6 +68,9 @@ class RealActivationPath(unittest.TestCase):
             p = original_profile(upstream, **kwargs)
             p.update(runtime_mode='rpc',activation_mechanism=mechanism,delivery_transform=observer70.OMP_RPC_TRANSFORM,
                      runtime_input_template=omp.input_template(mechanism))
+            if parameters is not None:
+                import package_ledger
+                p["package_access_parameters"]={**package_ledger.PARAMETERS,**parameters}
             if canary:
                 p['native_tools'] = []
                 p['mcp_servers'] = []
@@ -157,7 +160,7 @@ class RealActivationPath(unittest.TestCase):
     OWNER_PATH = '/opt/ssdp/skills/' + OWNER_REL
 
     def process_case(self, command=None, tool=None):
-        call = tool or {'name': 'bash', 'arguments': {'command': command}}
+        call = tool or {'name': 'bash', 'arguments': {'command': 'sleep 0.2; '+command}}
         scenario = {'steps': [{'tool_calls': [call]}, {'text': 'process observation discriminator'}]}
         return self.realize(scenario=scenario, claims=['active-byte burden', 'owner-read'])
 
@@ -202,7 +205,13 @@ class RealActivationPath(unittest.TestCase):
                 self.assertIn(self.OWNER_REL if name != 'native grep over package' else 'software-implementation/references/',
                               observation['reason'])
                 self.assertIsNone(summary['active_ssdp_bytes'])
-                self.assertIsNone(summary['owner_read_sequences'])
+                if name == 'native grep over package':
+                    content=next(e['payload']['result_content'] for e in omp_rig.load_events(summary['_out'])
+                                 if e['kind']=='resource_access' and e['status']=='result')
+                    self.assertNotIn(harness70.OWNER+'#',content) # native grep stops before the owner section
+                    self.assertEqual(summary['owner_read_observed'],[])
+                else:
+                    self.assertEqual(summary['owner_read_sequences'], [])
                 self.assertEqual(aggregate['integrity_outcome'], 'PASS', aggregate)
 
     INADMISSIBLE_EXPECTED = {'evidence_state': 'INADMISSIBLE',
@@ -220,7 +229,7 @@ class RealActivationPath(unittest.TestCase):
         for name, commands, probed in (
                 ('shared kernel block', (f'cat {root}/SKILL.md', f'wc -c {root}/references/abstraction-and-concretization.md'),
                  'software-implementation/references/abstraction-and-concretization.md'),
-                ('byte-identical twin owner', (f'cat {twin_owner}', f'wc -c {self.OWNER_PATH}'), self.OWNER_REL)):
+                ('byte-identical twin owner', (f'head -n 40 {twin_owner}', f'sleep 0.2; wc -c {self.OWNER_PATH}'), self.OWNER_REL)):
             with self.subTest(name):
                 summary, aggregate, identity, rig = self.realize(
                     scenario=self.bash_steps(*commands), claims=['active-byte burden'], local_expected=self.INADMISSIBLE_EXPECTED)
@@ -245,18 +254,14 @@ class RealActivationPath(unittest.TestCase):
                 self.assertEqual(summary['owner_read_sequences'], [])
                 self.assertEqual(aggregate['integrity_outcome'], 'PASS', aggregate)
 
-    def test_unshown_owner_open_before_a_later_display_bounds_the_owner_read_at_the_first_access(self):
-        """Review N-1: `wc -l owner` then `cat owner` must not score the owner read at the later display only."""
+    def test_unshown_scan_then_later_display_keeps_the_positive_at_its_result(self):
         summary, aggregate, identity, rig = self.realize(
-            scenario=self.bash_steps(f'wc -l {self.OWNER_PATH}', f'cat {self.OWNER_PATH}'), claims=['active-byte burden', 'owner-read'])
-        self.assertEqual(summary['evidence_state'], 'COMPLETE_ADMISSIBLE', summary.get('evidence_state_reasons'))
+            scenario=self.bash_steps(f'sleep 0.2; wc -l {self.OWNER_PATH}', f'cat {self.OWNER_PATH}'), claims=['active-byte burden','owner-read'])
         observation = summary['resource_observation']
-        self.assertTrue(observation['exact'] and observation['owner_read_exact'], observation)
-        access = observation['accounting']['owner_access'][self.OWNER_REL]
+        self.assertTrue(observation['exact'] and observation['owner_floor_exact'],observation)
         shown = observation['accounting']['supplied'][self.OWNER_REL]['sequences']
-        self.assertEqual(access['basis'], 'turn-window')
-        self.assertLess(access['sequence'], min(shown))
-        self.assertEqual(min(summary['owner_read_sequences']), access['sequence'])
+        self.assertEqual(summary['owner_read_sequences'],shown)
+        self.assertLess(min(r['window']['start'] for r in summary['owner_open_windows']), min(shown))
 
     def test_unrelated_unexplained_file_keeps_the_owner_question_exact(self):
         summary, aggregate, identity, rig = self.realize(
@@ -264,7 +269,7 @@ class RealActivationPath(unittest.TestCase):
             claims=['owner-read-absence'])
         observation = summary['resource_observation']
         self.assertFalse(observation['exact'])
-        self.assertTrue(observation['owner_read_exact'], observation)
+        self.assertTrue(observation['owner_floor_exact'], observation)
         self.assertEqual(summary['owner_read_sequences'], [])
         self.assertIsNone(summary['active_ssdp_bytes'])
 
@@ -280,10 +285,221 @@ class RealActivationPath(unittest.TestCase):
         self.assertEqual(summary['evidence_state'], 'INADMISSIBLE', summary.get('evidence_state_reasons'))
         observation = summary['resource_observation']
         self.assertFalse(observation['exact'])
-        self.assertFalse(observation['owner_read_exact'])
+        self.assertFalse(observation['owner_floor_exact'])
         self.assertIn('process execution lacks complete SSDP resource-read observation', observation['reason'])
         self.assertIsNone(summary['active_ssdp_bytes'])
-        self.assertIsNone(summary['owner_read_sequences'])
+        self.assertTrue(summary['owner_read_sequences'])
+
+    def assessed_owner(self, summary, identity, rig, r2=None, consequent=None):
+        req=core70.load_requirements(rig.req_root,"E1")
+        return core70.production_assessment(summary,identity,req,
+            [{"item":"i1","measure":"critical","critical":True,"result":"pass","evidence":"deterministic oracle exited zero"}],
+            owner_adjudication={"adjudicated":True,"r2_sequence":r2,"consequential_sequence":consequent},
+            replacement_review={"other_criteria_adjudicated":True,"observation_only":True,"overflow_cause":None})
+
+    def test_l_w_error_result_relative_partial_prefixes_and_quantum_through_scorer(self):
+        for command in (f'cat {self.OWNER_PATH}; false',
+                        f'cd /opt/ssdp/skills/software-implementation && head -n 40 references/{harness70.OWNER}',
+                        f"grep -n 'owner' {self.OWNER_PATH}"):
+            with self.subTest(command=command):
+                summary,_,identity,rig=self.realize(scenario=self.bash_steps(command),claims=[])
+                self.assertTrue(summary['owner_read_observed'])
+                scored=self.assessed_owner(summary,identity,rig)
+                self.assertEqual(scored['owner_floor_state'],'FAIL')
+                events=omp_rig.load_events(summary['_out'])
+                self.assertEqual(len([e for e in events if e['kind']=='package_access']),1)
+                self.assertEqual(core70.recompute_package_access(Path(summary['_out']),events,identity),[])
+
+    def test_w_single_long_line_repeated_seven_times_and_subquantum_are_minor(self):
+        owner=(omp_rig.DIST_SKILLS/self.OWNER_REL).read_text().splitlines()
+        long=next(i+1 for i,line in enumerate(owner) if len(line.encode())>=256)
+        small=next(i+1 for i,line in enumerate(owner) if 48<=len(line.encode())<128)
+        for command in (f"sed -n '{long}p' {self.OWNER_PATH}",
+                        f"for n in 1 2 3 4 5 6 7; do sed -n '{long}p' {self.OWNER_PATH}; done",
+                        f"sed -n '{small}p' {self.OWNER_PATH}"):
+            with self.subTest(command=command):
+                summary,_,identity,rig=self.realize(scenario=self.bash_steps(command),claims=[])
+                self.assertEqual(summary['owner_read_observed'],[])
+                self.assertTrue(summary['owner_minor_exposure'])
+                self.assertEqual(self.assessed_owner(summary,identity,rig)['owner_floor_state'],'UNRESOLVED')
+
+    def test_m_t_y_scan_then_r2_load_and_same_response_never_become_pre_r2_fail(self):
+        for same_response in (False,True):
+            scenario={'steps':[] if same_response else [{'tool_calls':[{'name':'bash','arguments':{'command':f'wc -l {self.OWNER_PATH}'}}]}]}
+            scenario['steps'] += [{'text':'PREDECLARED_R2: review the authority now.',
+                'tool_calls':[{'name':'bash','arguments':{'command':f'cat {self.OWNER_PATH}'}}]},
+                {'text':'CONSEQUENTIAL_STEP: report complete.'}]
+            summary,_,identity,rig=self.realize(scenario=scenario,claims=[])
+            events=omp_rig.load_events(summary['_out'])
+            r2=next(e['sequence'] for e in events if e['kind']=='assistant_message' and
+                'PREDECLARED_R2' in json.dumps(e['payload']))
+            consequent=next(e['sequence'] for e in events if e['kind']=='assistant_message' and
+                'CONSEQUENTIAL_STEP' in json.dumps(e['payload']))
+            scored=self.assessed_owner(summary,identity,rig,r2,consequent)
+            self.assertEqual(scored['owner_floor_state'],'UNRESOLVED')
+            self.assertTrue(scored['owner_load_hit'])
+
+    def test_o_provably_post_r2_open_is_pass_eligible_without_display(self):
+        scenario={'steps':[{'text':'PREDECLARED_R2: owner review owed.',
+            'tool_calls':[{'name':'bash','arguments':{'command':'echo phase-boundary'}}]},
+            {'tool_calls':[{'name':'bash','arguments':{'command':f'sleep 0.2; wc -l {self.OWNER_PATH}; sleep 0.2'}}]},
+            {'tool_calls':[{'name':'bash','arguments':{'command':'echo consequential-phase'}}]},
+            {'text':'done'}]}
+        summary,_,identity,rig=self.realize(scenario=scenario,claims=[])
+        events=omp_rig.load_events(summary['_out'])
+        r2=next(e['sequence'] for e in events if e['kind']=='assistant_message' and 'PREDECLARED_R2' in json.dumps(e['payload']))
+        self.assertTrue(summary['owner_open_windows'])
+        self.assertTrue(all(row['window']['start']>r2 for row in summary['owner_open_windows']))
+        self.assertEqual(self.assessed_owner(summary,identity,rig,r2)['owner_floor_state'],'PASS')
+
+    def test_l_p_q_u_loss_never_suppresses_positive_or_post_r2_hit(self):
+        for parameters in ({"row_bound":1},{"bracket_width_bound_ns":1},{"heartbeat_gap_bound_ns":1}):
+            for before in (True,False):
+                load={'name':'bash','arguments':{'command':f'cat {self.OWNER_PATH}'}}
+                r2={'text':'PREDECLARED_R2: owner review is now owed.',
+                    'tool_calls':[{'name':'bash','arguments':{'command':'echo R2-marker'}}] if before else [load]}
+                scenario={'steps':([{'tool_calls':[load]}] if before else [])+[r2,{'text':'CONSEQUENTIAL_STEP: done.'}]}
+                summary,_,identity,rig=self.realize(scenario=scenario,claims=[],parameters=parameters)
+                events=omp_rig.load_events(summary['_out'])
+                r2seq=next(e['sequence'] for e in events if e['kind']=='assistant_message' and 'PREDECLARED_R2' in json.dumps(e['payload']))
+                consequent=next(e['sequence'] for e in events if e['kind']=='assistant_message' and 'CONSEQUENTIAL_STEP' in json.dumps(e['payload']))
+                self.assertTrue(summary['owner_read_observed'])
+                self.assertFalse(summary['resource_observation']['owner_floor_exact'])
+                scored=self.assessed_owner(summary,identity,rig,r2seq,consequent)
+                self.assertEqual(scored['owner_floor_state'],'FAIL' if before else 'UNRESOLVED')
+                self.assertEqual(scored['owner_load_hit'],not before)
+
+    def test_r_background_open_after_last_request_has_conservative_window(self):
+        import stand_in_provider
+        original=stand_in_provider._sse
+        def delayed(handler,payload):
+            if any(chunk.get('id')=='stand-1' for chunk in payload):
+                __import__('time').sleep(2)
+            return original(handler,payload)
+        stand_in_provider._sse=delayed
+        code="import os,time\npid=os.fork()\nif pid==0:\n fd=os.open('/dev/null',os.O_WRONLY)\n os.dup2(fd,1);os.dup2(fd,2)\n time.sleep(0.5)\n content=open('"+self.OWNER_PATH+"').read()\n open('/workspace/background-count.txt','w').write(str(len(content)))\n os._exit(0)\nprint('spawned')\n"
+        command="python3 - <<'BG'\n"+code+"BG"
+        try:
+            summary,_,identity,rig=self.realize(scenario={'steps':[{'tool_calls':[{'name':'bash','arguments':{'command':command}}]},
+                {'text':'PREDECLARED_R2: now review authority.'}]},claims=[])
+        finally:stand_in_provider._sse=original
+        events=omp_rig.load_events(summary['_out'])
+        r2=next(e['sequence'] for e in events if e['kind']=='assistant_message' and 'PREDECLARED_R2' in json.dumps(e['payload']))
+        self.assertTrue(summary['owner_open_windows'])
+        self.assertEqual(summary['owner_read_observed'],[])
+        records=summary['resource_observation']['accounting']['request_records']
+        for row in summary['owner_open_windows']:
+            self.assertGreater(row['bracket']['lower_ns'],records[-1]['t_ns'])
+            self.assertLessEqual(row['window']['start'],r2)
+            self.assertGreaterEqual(row['window']['end'],r2)
+        self.assertEqual(self.assessed_owner(summary,identity,rig,r2)['owner_floor_state'],'UNRESOLVED')
+
+    def test_r_x_request_retry_shares_original_position_and_mismatch_falls_back(self):
+        scenario={'steps':[{'http_error':500},{'tool_calls':[{'name':'bash','arguments':{'command':f'cat {self.OWNER_PATH}'}}]},{'text':'done'}]}
+        summary,_,identity,rig=self.realize(scenario=scenario,claims=[])
+        events=omp_rig.load_events(summary['_out']);out=Path(summary['_out'])
+        mapping=core70.load_json(out/'normalization-map.json')['request_positions']
+        retry=next(row for row in mapping if row['retry_of'] is not None)
+        original=next(row for row in mapping if row['request_index']==retry['retry_of'])
+        self.assertEqual(retry['position'],original['position'])
+        self.assertTrue(retry['pairing_verified'])
+        observed=omp.Observed({p.name:p.read_text() for p in (out/'adapter-artifacts').iterdir()},core70.load_json(out/'profile-snapshot.json'))
+        broken=copy.deepcopy(observed)
+        broken.requests[-1]['body']['messages']=[]
+        positions=omp.request_positions(broken,events,(out/'trace.jsonl').read_text(),'Do the task.')
+        self.assertTrue(positions)
+        self.assertTrue(all(not row['pairing_verified'] and row['position']==events[0]['sequence'] for row in positions))
+
+    def test_z_encoded_full_package_and_owner_only_cannot_admit_negative_or_exact_claims(self):
+        import base64,hashlib,io,tarfile
+        owner=(omp_rig.DIST_SKILLS/self.OWNER_REL).read_bytes()
+        buf=io.BytesIO()
+        with tarfile.open(fileobj=buf,mode='w') as archive:
+            for path in sorted(omp_rig.DIST_SKILLS.rglob('*')):
+                if path.is_file():archive.add(path,arcname=str(path.relative_to(omp_rig.DIST_SKILLS)),recursive=False)
+        for payload in (owner,buf.getvalue()):
+            key=b'CASE-Z-KEY'
+            encoded=base64.b85encode(bytes(b^key[i%len(key)] for i,b in enumerate(payload))).decode()
+            rig=omp_rig.Rig(Path('/tmp'),entry='pinned:software-implementation',timeout_s=45,
+                project_files={'payload.txt':encoded,'decode.py':"""import base64
+from pathlib import Path
+raw=base64.b85decode(Path('/workspace/payload.txt').read_bytes())
+key=b'CASE-Z-KEY'
+decoded=bytes(b^key[i%len(key)] for i,b in enumerate(raw))
+print(len(decoded))
+"""},claims=['active-byte burden','owner-read-absence'])
+            old=rig.profile
+            def profile(*args,**kwargs):
+                p=old(*args,**kwargs);p.update(runtime_mode='rpc',activation_mechanism='runtime-command',
+                    delivery_transform=observer70.OMP_RPC_TRANSFORM,runtime_input_template=omp.input_template('runtime-command'))
+                return p
+            rig.profile=profile
+            summary=rig.run(self.bash_steps('python3 /workspace/decode.py'))
+            self.assertEqual(summary['evidence_state'],'INADMISSIBLE')
+            self.assertIsNone(summary['active_ssdp_bytes'])
+            self.assertFalse(summary['resource_observation']['owner_floor_exact'])
+            identity=core70.load_json(Path(summary['_out'])/'run-identity.json')
+            self.assertEqual(self.assessed_owner(summary,identity,rig)['owner_floor_state'],'UNRESOLVED')
+
+    def test_c_d_j_p_s_v_x_real_artifacts_reach_derived_event_and_scorer(self):
+        import package_ledger
+        summary,_,identity,rig=self.realize(
+            scenario=self.bash_steps(f'sleep 0.2; cd /opt/ssdp/skills/software-implementation && cat references/{harness70.OWNER}'),
+            claims=['active-byte burden','owner-read'])
+        self.assertTrue(summary['resource_observation']['exact'])
+        out=Path(summary['_out']);events=omp_rig.load_events(out)
+        source=[e for e in events if e['kind']!='package_access']
+        inputs=core70.load_json(out/'package-access-inputs.json')
+        artifacts={p.name:p.read_text() for p in (out/'adapter-artifacts').iterdir() if p.is_file()}
+        bundle=omp.package_access_ledger(artifacts,core70.load_json(out/'profile-snapshot.json'),events=source,
+            stdout=(out/'trace.jsonl').read_text(),prompt=inputs['prompt'])
+        self.assertIn('whole-file-in-window',bundle and summary['resource_observation']['accounting']['supplied'][self.OWNER_REL]['routes'])
+        inputs=core70.load_json(out/'package-access-inputs.json')
+        def derived(b):
+            b['artifact']=json.dumps(b.get('ledger'),sort_keys=True)
+            return core70.derive_package_access(b,source,out/'installed-package',harness70.OWNER,
+                set(inputs['delivered']),identity['identity_sha256'],0)[2]
+        mutations={
+            'missing-ledger':lambda b:b.update(ledger=None),
+            'mutation':lambda b:b['ledger']['events'].append({'rel':self.OWNER_REL,'dir':False,'flags':['modify'],'interval':0,'count':1}),
+            'native-contradiction':lambda b:b['ledger'].update(events=[]),
+            'pre-request-owner':lambda b:[r.update(interval=0) for r in b['ledger']['events'] if r['rel']==self.OWNER_REL],
+            'decreasing-request':lambda b:b['request_records'][-1].update(t_ns=b['request_records'][0]['t_ns']-1),
+            'clock-divergence':lambda b:b['ledger']['heartbeats'][-1].update(after_ns=b['ledger']['heartbeats'][-1]['after_ns']+10**9),
+            'unbracketed-owner':lambda b:[r.update(interval=-1) for r in b['ledger']['events'] if r['rel']==self.OWNER_REL],
+        }
+        native=copy.deepcopy(source)
+        owner_event=next(e for e in native if e['kind']=='tool_action' and e['status']=='result')
+        native.append({**owner_event,'kind':'resource_access','payload':{'consumed_resource':{'match':'exact','logical_root':'software-implementation','package_relative_path':'references/'+harness70.OWNER}}})
+        req=core70.load_requirements(rig.req_root,'E1')
+        for name,change in mutations.items():
+            with self.subTest(fault=name):
+                altered=copy.deepcopy(bundle);change(altered)
+                if name=='native-contradiction':
+                    event,_,accounting=core70.derive_package_access(altered,native,out/'installed-package',harness70.OWNER,
+                        set(inputs['delivered']),identity['identity_sha256'],0)
+                else:accounting=derived(altered)
+                self.assertTrue(accounting['owner_read_observed'])
+                changed=copy.deepcopy(summary)
+                changed['resource_observation']={**changed['resource_observation'],'accounting':accounting,
+                    'exact':accounting['exact'],'owner_floor_exact':accounting['owner_floor_exact']}
+                changed['owner_read_observed']=accounting['owner_read_observed']
+                if name=='missing-ledger':lost_summary=changed
+                self.assertEqual(self.assessed_owner(changed,identity,rig)['owner_floor_state'],'FAIL')
+                if name in ('missing-ledger','mutation','native-contradiction','pre-request-owner'):
+                    self.assertFalse(accounting['exact'])
+                else:self.assertFalse(accounting['owner_floor_exact'])
+        failed_delivery=copy.deepcopy(source)
+        for e in failed_delivery:
+            if e['kind']=='root_selection': e['payload']['delivery']={'delivered':False}
+        self.assertIn('T1/T7/T8 burden claim has no resolved logical root-selection evidence',
+                      core70.validate_claim_observability(failed_delivery,['active-byte burden'],ledger_exact=True))
+        # Retained actual assessments feed the production replacement owner; no qualification run is declared.
+        original=self.assessed_owner(lost_summary,identity,rig)
+        manifest={'runs':[{'id':'r','profile_key_sha256':'k','subject':{'commit':'c','package_sha256':'s'},'replacement_case':'case'}],
+                  'opportunities':[{'part':'fixed_cost','route':'T1','realizations':[{'run':'r','item':'i1'}]}]}
+        _,report=batch_assess70.replacement_slots(manifest,{'r':original})
+        self.assertEqual(report['required'][0]['status'],'barred-positive-pre-R2')
 
     def test_qualification_scoped_integrity_campaign_keeps_failure_after_good_repeat(self):
         """Real campaign aggregation; outer suite purpose remains integrity throughout."""

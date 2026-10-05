@@ -263,9 +263,10 @@ def aggregate_assessments(out_dir: Path, manifest: dict[str, Any] | None = None)
         dispositions = assessment.get("dispositions") if isinstance(assessment, dict) else None
         if isinstance(assessment, dict) and (assessment.get("accounting") != scope or assessment.get("run_identity_sha256") != identity["identity_sha256"]):
             raise core70.ContractError("assessment cache/accounting provenance mismatch")
-        actual = core70.production_assessment(summary, identity, requirements, dispositions)
-        if summary.get("evidence_state") == "COMPLETE_ADMISSIBLE":
-            evidence_errors = core70.validate_complete_run(run, identity, requirements)
+        actual = core70.production_assessment(summary, identity, requirements, dispositions or (assessment or {}).get("original_dispositions"),
+            owner_adjudication=(assessment or {}).get("owner_floor_adjudication"), replacement_review=(assessment or {}).get("replacement_review"))
+        if summary.get("evidence_state") == "COMPLETE_ADMISSIBLE" or summary.get("observation_only_inadmissibility") is True:
+            evidence_errors = core70.validate_complete_run(run, identity, requirements, allow_observation_inexact=True)
             if evidence_errors:
                 actual["evidence_state"] = "MALFORMED_EVIDENCE_OR_ASSESSMENT"
                 actual["qualification_outcome"] = "NOT_EVALUATED"
@@ -316,8 +317,50 @@ def aggregate_assessments(out_dir: Path, manifest: dict[str, Any] | None = None)
             "declared_deterministic_runs": len(states), "delivered": states.count("PASS"),
         }
     result["profiles"] = key_criteria
-    result["parts"] = aggregate_parts(manifest, result["runs"], out_dir)
-    if not owner_observation_complete(result["runs"]):
+    slots, ledger_bookkeeping = replacement_slots(manifest, result["runs"])
+    result["package_access_replacements"] = ledger_bookkeeping
+    scored = {slot: result["runs"].get(run_id) for slot, run_id in slots.items() if run_id in result["runs"]}
+    scored_manifest = {**manifest, "_byte_slots": ledger_bookkeeping["byte_slots"]}
+    owner_scored = {**scored}
+    for slot, selected in ledger_bookkeeping["owner_slots"].items():
+        if selected != slots.get(slot) and selected in result["runs"] and slot in owner_scored:
+            owner_scored[slot] = {**owner_scored[slot], "owner_floor_state":result["runs"][selected].get("owner_floor_state")}
+    result["parts"] = aggregate_parts(scored_manifest, owner_scored, out_dir)
+    # Retain every original identity; only the scored slot supplies exposure and outcome counts.
+    result["scored_slots"] = slots
+    result["total_runs"] = len(scored)
+    result["arms"] = {}
+    result["critical_failures"] = {}
+    for slot, actual in scored.items():
+        arm = actual.get("arm")
+        if arm is None:
+            continue
+        data = result["arms"].setdefault(arm,{"total":0,"outcomes":{},"dispositions":{"pass":0,"fail":0,"unresolved":0}})
+        data["total"] += 1
+        outcome = actual["qualification_outcome"]
+        data["outcomes"][outcome] = data["outcomes"].get(outcome,0)+1
+        for d in actual.get("dispositions",[]):
+            data["dispositions"][d["result"]] += 1
+            if d["critical"] and d["result"]=="fail":
+                result["critical_failures"][arm]=result["critical_failures"].get(arm,0)+1
+    for key in manifest["offered_profiles"]:
+        members = [scored.get(slot) for slot in slots if expected[slot]["profile_key_sha256"] == key]
+        deterministic = [scored.get(slot) for slot in slots if expected[slot]["profile_key_sha256"] == key
+                         and expected[slot]["entry_stratum"] == "deterministic"]
+        states = [r["criteria"]["deterministic activation"] if r else "NOT_EVALUATED" for r in deterministic]
+        key_criteria[key] = {"harness/admissibility":"PASS" if members and all(r and (
+                r["criteria"]["harness/admissibility"]=="PASS" or (observation_adjudicated(r)
+                and all(result["parts"][o["part"]]["state"] in ("PASS","FAIL")
+                    for o in manifest.get("opportunities",[]) if any(scored.get(ref["run"]) is r for ref in o["realizations"]))
+                and any(o.get("route")=="T7" and any(scored.get(ref["run"]) is r for ref in o["realizations"])
+                    for o in manifest.get("opportunities",[])))) for r in members) else "FAIL",
+            "deterministic activation":"FAIL" if "FAIL" in states else "PASS" if states and set(states)=={"PASS"} else "NOT_EVALUATED",
+            "declared_deterministic_runs":len(states),"delivered":states.count("PASS")}
+    result["profiles"] = key_criteria
+    if ledger_bookkeeping["byte_disparity_exceeded"]:
+        for part in ("fixed_cost","active_material","comparative"):
+            result["parts"][part].update(state="UNRESOLVED",reason="byte inexact-run disparity exceeds frozen bound")
+    if not owner_observation_complete(owner_scored) and result["parts"]["owner_false_activation"]["state"] != "FAIL":
         result["parts"]["owner_false_activation"]["state"] = "UNRESOLVED"
         result["parts"]["owner_false_activation"]["reason"] = "complete SSDP resource-read observation is missing"
 
@@ -361,13 +404,21 @@ def aggregate_parts(manifest: dict[str, Any], runs: dict[str, Any], root: Path) 
         for reference in opportunity["realizations"]:
             run_id, item_id = reference["run"], reference["item"]
             actual = runs.get(run_id)
-            if actual is None or actual["evidence_state"] != "COMPLETE_ADMISSIBLE":
+            declaration = next((row for row in manifest["runs"] if row["id"] == run_id), None)
+            if declaration is None or declaration["profile_key_sha256"] != opportunity["profile_key_sha256"]:
+                raise core70.ContractError("opportunity realization profile key mismatch")
+            if part.startswith("r2_") and actual and actual.get("owner_load_hit") is True:
+                outcomes.append("pass")
+                continue
+            if part == "owner_false_activation" and actual and actual.get("owner_floor_state") in ("PASS", "FAIL"):
+                outcomes.append("pass" if actual["owner_floor_state"] == "PASS" else "fail")
+                continue
+            observation_scope = (actual is not None and observation_adjudicated(actual)
+                and (opportunity.get("route") == "T7" or part == "owner_false_activation"))
+            if actual is None or (actual["evidence_state"] != "COMPLETE_ADMISSIBLE" and not observation_scope):
                 outcomes.append("unresolved")
                 continue
-            declaration = next(row for row in manifest["runs"] if row["id"] == run_id)
-            if declaration["profile_key_sha256"] != opportunity["profile_key_sha256"]:
-                raise core70.ContractError("opportunity realization profile key mismatch")
-            matches = [row for row in actual.get("dispositions", []) if row["item"] == item_id]
+            matches = [row for row in actual.get("dispositions", actual.get("original_dispositions", [])) if row["item"] == item_id]
             outcomes.append(matches[0]["result"] if len(matches) == 1 else "unresolved")
         # A replicate is not exposure; R2 hit requires strict majority of admissible replicates.
         if not outcomes or any(value == "unresolved" for value in outcomes):
@@ -388,6 +439,10 @@ def aggregate_parts(manifest: dict[str, Any], runs: dict[str, Any], root: Path) 
             continue
         exposures = [arm_counts[candidate]] if part.startswith("r2_") else [arm_counts[a] for a in (candidate, comparator)]
         selected = [arm_counts[candidate]]
+        if part == "owner_false_activation" and any(c["fail"] for c in selected):
+            row["state"] = "FAIL"
+            row["reason"] = "positive owner evidence before independently adjudicated R2"
+            continue
         if any(c["opportunities"] < minimum or c["unresolved"] for c in exposures):
             row["reason"] = "underexposed or unresolved independent opportunities"
             continue
@@ -435,12 +490,127 @@ def aggregate_parts(manifest: dict[str, Any], runs: dict[str, Any], root: Path) 
     return parts
 
 
+def replacement_slots(manifest, runs):
+    """Item 13 bookkeeping. Independent adjudication precedes eligibility; absent byte bound fails closed."""
+    declarations = {r["id"]:r for r in manifest["runs"]}
+    replacements = manifest.get("package_access_replacements", [])
+    if not isinstance(replacements,list) or any(not isinstance(r,dict) or set(r) != {"original","replacement","question"}
+        or not all(isinstance(r[k],str) for k in r) for r in replacements):
+        raise core70.ContractError("malformed package-access replacement record")
+    replacement_ids = {r["replacement"] for r in replacements}
+    if len(replacement_ids) != len(replacements):
+        raise core70.ContractError("a replacement identity cannot serve multiple slots")
+    slots = {key:key for key in declarations if key not in replacement_ids}
+    report = {"records": [], "required": [], "byte_slots": dict(slots), "owner_slots": dict(slots),
+              "per_arm": {}, "per_form": {}, "byte_disparity_exceeded": False}
+    bound = (manifest.get("package_access_policy") or {}).get("byte_inexact_disparity_bound")
+    byte_available = (isinstance(bound,dict) and isinstance(bound.get("value"),(int,float))
+                      and not isinstance(bound.get("value"),bool) and 0 <= bound["value"] <= 1
+                      and isinstance(bound.get("stakeholder_confirmation"),str) and bool(bound["stakeholder_confirmation"]))
+    report["byte_replacement_available"] = byte_available
+    count = {}
+    forms_by_slot = {}
+    for slot in slots:
+        row = runs.get(slot) or {}
+        arm = row.get("arm")
+        observation = row.get("resource_observation") or {}
+        inexact = observation.get("exact") is not True
+        forms = {o.get("route",o["part"]) for o in manifest.get("opportunities",[]) if any(r["run"]==slot for r in o["realizations"])}
+        forms_by_slot[slot] = forms
+        for key in ([('per_arm',arm)] if arm else []) + [('per_form',f"{arm}:{form}") for form in forms]:
+            counter = report[key[0]].setdefault(key[1],{"runs":0,"inexact":0,"replacements":0})
+            counter["runs"] += 1; counter["inexact"] += int(inexact)
+        unresolved_owner = row.get("owner_floor_state") == "UNRESOLVED"
+        non_t7_bytes = inexact and any(form != "T7" for form in forms)
+        if non_t7_bytes or unresolved_owner:
+            status = "barred-positive-pre-R2" if row.get("owner_floor_state") == "FAIL" else "required" if observation_adjudicated(row) else "pending-other-criteria-and-R2-adjudication"
+            report["required"].append({"original":slot,"status":status,
+                "questions": (["bytes"] if non_t7_bytes else []) + (["owner-floor"] if unresolved_owner else [])})
+    for request in replacements:
+        original, replacement, question = request["original"], request["replacement"], request["question"]
+        if original not in slots or replacement not in declarations or original == replacement or question not in ("bytes","owner-floor","t7-owner-floor"):
+            raise core70.ContractError("malformed package-access replacement binding")
+        forms = forms_by_slot[original]
+        if "T7" in forms and question != "t7-owner-floor":
+            raise core70.ContractError("T7 can rerun solely for its owner floor; original stays in the median")
+        if "T7" not in forms and question == "t7-owner-floor":
+            raise core70.ContractError("T7 owner-only rerun assigned outside T7")
+        o, r = runs.get(original) or {}, runs.get(replacement) or {}
+        review = o.get("replacement_review") or {}
+        case = original if question=="t7-owner-floor" else declarations[original].get("replacement_case")
+        if case is None:
+            raise core70.ContractError("non-T7 replacement needs a frozen affected-case identity")
+        count[case] = count.get(case,0)+1
+        if count[case]>2:
+            raise core70.ContractError("package-access replacement exceeds the per-case/per-T7-run cap of two")
+        if any(v["original"]==original and v["scored"] for v in report["records"]):
+            raise core70.ContractError("a resolved replacement cannot be outcome-selected again")
+        record = {**request, "original_outcome":o.get("qualification_outcome"), "scored":False}
+        report["records"].append(record)
+        safe = (observation_adjudicated(o)
+                and o.get("owner_floor_adjudication",{}).get("adjudicated") is True
+                and o.get("owner_floor_state") != "FAIL"
+                and o.get("criteria",{}).get("deterministic activation") != "FAIL"
+                and all(d.get("result")=="pass" for d in o.get("original_dispositions",[]))
+                and r.get("evidence_state") in ("COMPLETE_ADMISSIBLE", "INADMISSIBLE")
+                and r.get("criteria",{}).get("deterministic activation") != "FAIL")
+        accounting = (o.get("resource_observation") or {}).get("accounting") or {}
+        if any("overflow" in reason for reason in accounting.get("reasons",[])) and not review.get("overflow_cause"):
+            safe = False
+        for name in ("profile_key_sha256","subject"):
+            if declarations[original].get(name) != declarations[replacement].get(name):
+                raise core70.ContractError("replacement changed the frozen slot profile or subject")
+        exact = (r.get("resource_observation") or {}).get("exact") is True if question=="bytes" else r.get("owner_floor_state") in ("PASS","FAIL")
+        if not safe or not exact or (question=="bytes" and not byte_available):
+            record["reason"] = "replacement unavailable, inexact, or original adjudication bars it"
+            continue
+        record["scored"] = True
+        for required in report["required"]:
+            if required["original"] == original:
+                question_key = "owner-floor" if question == "t7-owner-floor" else question
+                required["questions"] = [q for q in required["questions"] if q != question_key]
+                if question != "t7-owner-floor" and (r.get("resource_observation") or {}).get("exact") is True:
+                    required["questions"] = [q for q in required["questions"] if q != "bytes"]
+                if r.get("owner_floor_state") in ("PASS", "FAIL"):
+                    required["questions"] = [q for q in required["questions"] if q != "owner-floor"]
+        report["required"] = [v for v in report["required"] if v["questions"]]
+        report["owner_slots"][original] = replacement
+        if question != "t7-owner-floor":
+            slots[original] = replacement
+            if byte_available:
+                report["byte_slots"][original] = replacement
+        arm = o.get("arm")
+        if arm in report["per_arm"]:
+            report["per_arm"][arm]["replacements"] += 1
+        for key,counter in report["per_form"].items():
+            if key in {f"{arm}:{form}" for form in forms_by_slot[original]}:
+                counter["replacements"] += 1
+    if byte_available:
+        rates = [c["inexact"]/c["runs"] for c in report["per_arm"].values() if c["runs"]]
+        report["byte_disparity_exceeded"] = bool(rates and max(rates)-min(rates)>bound["value"])
+    return slots, report
+
+
+def observation_adjudicated(row):
+    review = row.get("replacement_review") or {}
+    return ((row.get("observation_only_inadmissibility") is True or row.get("evidence_state") == "COMPLETE_ADMISSIBLE")
+            and review.get("other_criteria_adjudicated") is True and review.get("observation_only") is True
+            and (row.get("owner_floor_adjudication") or {}).get("adjudicated") is True
+            and bool(row.get("original_dispositions"))
+            and all(d.get("result") == "pass" for d in row["original_dispositions"]))
+
+
 def owner_observation_complete(runs: dict[str, Any]) -> bool:
     """Owner false activation needs every run's owner-read question observed exactly; a run whose
-    byte accounting is inexact for unrelated files still answers it (summary `owner_read_exact`)."""
+    byte accounting is inexact for unrelated files still answers it (summary `owner_floor_exact`)."""
     for row in runs.values():
+        if row.get("owner_floor_state") in ("PASS", "FAIL"):
+            continue
         observation = row.get("resource_observation") or {}
-        if observation.get("owner_read_exact", observation.get("exact")) is not True:
+        accounting = observation.get("accounting")
+        if accounting and any(accounting.get(k) for k in ("owner_open_windows","owner_read_observed","owner_minor_exposure")):
+            return False
+        if observation.get("owner_floor_exact", observation.get("exact")) is not True:
             return False
     return True
 
@@ -448,7 +618,11 @@ def owner_observation_complete(runs: dict[str, Any]) -> bool:
 def quantitative_part(part, manifest, opportunities, root):
     """Compare retained numeric observables, preserving units, pairs and route boundaries."""
     field = {"fixed_cost":"active_ssdp_bytes", "active_material":"active_ssdp_bytes", "report_length":"report_bytes", "elapsed_time":"wall_s"}.get(part)
+    candidate = manifest.get('candidate_arm')
+    baseline = manifest.get('cost_comparator_arm') if part=='fixed_cost' else manifest.get('comparator_arm')
     grouped = {}
+    unknown_routes = set()
+    disclosures = []
     for opportunity in opportunities:
         if opportunity["part"] != part:
             continue
@@ -457,14 +631,20 @@ def quantitative_part(part, manifest, opportunities, root):
             return "UNRESOLVED", "numeric route identity missing"
         for ref in opportunity["realizations"]:
             try:
-                summary = core70.load_json(root/ref['run']/'summary.json')
+                summary = core70.load_json(root/manifest.get('_byte_slots',{}).get(ref['run'],ref['run'])/'summary.json')
                 if field:
                     value = summary[field]
                     extra = (summary.get('installed_entrypoint_bytes'),summary.get('installed_owner_bytes'))
                     owner_reads = summary.get('owner_read_sequences')
-                    if part in ('fixed_cost','active_material') and not isinstance(owner_reads, list):
+                    unknown = (part in ('fixed_cost','active_material') and route=='T7'
+                               and (summary.get('resource_observation') or {}).get('exact') is False)
+                    if unknown:
+                        value = float('inf') if opportunity['arm']==candidate else 0
+                        unknown_routes.add(route)
+                        owner_reads = None
+                    if part in ('fixed_cost','active_material') and not isinstance(owner_reads, list) and not unknown:
                         return 'UNRESOLVED','owner-read mode is unobserved (inexact package observation)'
-                    extra += (None if owner_reads is None else 'owner' if owner_reads else 'entrypoint-only',)
+                    extra += ('unknown' if owner_reads is None else 'owner' if owner_reads else 'entrypoint-only',)
                 else:
                     oracle = core70.load_json(root/ref['run']/'oracle.json')['results'][ref['oracle']]
                     payload = core70.load_json(root/ref['run']/oracle['stdout_artifact'])
@@ -472,7 +652,7 @@ def quantitative_part(part, manifest, opportunities, root):
                     if metric['unit'] != 'seconds':
                         return 'UNRESOLVED','human time unit missing/wrong'
                     value=metric['value']; extra=(None,None)
-                if not isinstance(value,(int,float)) or isinstance(value,bool) or value<0 or not __import__('math').isfinite(value):
+                if not isinstance(value,(int,float)) or isinstance(value,bool) or value<0 or (not __import__('math').isfinite(value) and not (route in unknown_routes and value==float('inf'))):
                     return 'UNRESOLVED','numeric observable missing/malformed'
                 grouped.setdefault(route,{}).setdefault(opportunity['arm'],[]).append((value,extra))
             except (core70.ContractError,KeyError,TypeError):
@@ -499,14 +679,16 @@ def quantitative_part(part, manifest, opportunities, root):
             bound=bm+delta+median(v[1][1] for v in c)+512
         else:
             bound=2.0*bm
-        if cm>bound:
-            return 'FAIL',f'{route}: candidate median {cm} exceeds bound {bound}'
         if part=='fixed_cost' and route=='T7':
             # Mixed entrypoint-only/owner modes trigger exactly 3 -> 5 -> 7 pairs.
-            mixed=any(len({v[1][2] for v in arm})>1 for arm in (c,b))
+            mixed=route in unknown_routes or any(len({v[1][2] for v in arm})>1 for arm in (c,b))
             if len(c) not in (3,5,7) or (mixed and len(c)<7):
-                return 'UNRESOLVED','T7 bounded mixed-mode extension remains decision-sensitive'
-    return 'PASS',None
+                return 'UNRESOLVED',f'T7 mixed-mode pair addition required: {len(c)} -> {min(len(c)+2,7)}; unknown originals persist through seven pairs'
+        if cm>bound:
+            return ('UNRESOLVED' if route in unknown_routes else 'FAIL'),f'{route}: adversarial candidate median {cm} exceeds bound {bound}; unknown candidate=unbounded above, comparator=zero'
+        if route in unknown_routes:
+            disclosures.append(f'{route}: mixture={[[v[1][2] for v in a] for a in (c,b)]}; candidate median upper={cm}, comparator median lower={bm}, bound={bound}')
+    return 'PASS','; '.join(disclosures) or None
 
 
 def comparative_part(parts, manifest):

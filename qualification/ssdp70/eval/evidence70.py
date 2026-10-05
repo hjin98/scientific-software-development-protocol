@@ -46,6 +46,7 @@ class ChainWriter:
             if self._closed:
                 raise RuntimeError("evidence chain is closed")
             t_ns = time.time_ns()
+            data = {**data, "monotonic_ns": time.monotonic_ns()} if kind == "request" else data
             digest = record_hash(self.principal, self._seq, self._prev, kind, t_ns, data)
             record = {
                 "schema": SCHEMA, "principal": self.principal, "seq": self._seq, "prev": self._prev,

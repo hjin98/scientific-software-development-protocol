@@ -21,10 +21,11 @@ import select
 import struct
 import threading
 import time
+import tempfile
 from pathlib import Path
 from typing import Any
 
-SCHEMA = 2
+SCHEMA = 3
 MECHANISM = "inotify-inode-marks"
 
 IN_ACCESS, IN_MODIFY, IN_ATTRIB = 0x1, 0x2, 0x4
@@ -48,13 +49,26 @@ PARTIAL_SUPPLY_MIN_BYTES = 48
 # Bound on distinct (file, flags) rows retained in the ledger. Repeated events fold into one row
 # (first/last stamp and count), so a subject's access volume cannot grow the record.
 MAX_LEDGER_ROWS = 20000
+PARAMETERS = {
+    "distinctiveness_floor": 48, "owner_line_floor": 48, "owner_load_quantum": 256,
+    "clock_tolerance_ns": 5_000_000, "bracket_width_bound_ns": 500_000_000,
+    "heartbeat_period_ns": 50_000_000, "heartbeat_gap_bound_ns": 250_000_000,
+    "row_bound": MAX_LEDGER_ROWS, "marks_before_launch": True, "marks_after_teardown": True,
+}
 
 
 class LedgerWatcher:
     """Record package access for the lifetime of one subject run. Owned by the supervisor."""
 
-    def __init__(self, root: Path):
+    def __init__(self, root: Path, parameters: dict[str, Any] | None = None):
         self.root = Path(root)
+        self.parameters = dict(PARAMETERS if parameters is None else parameters)
+        self._heartbeat_dir = None
+        self._heartbeat_wd = -1
+        self._heartbeats: list[dict[str, Any]] = []
+        self._interval = -1
+        self._heartbeat_stop = threading.Event()
+        self._heartbeat_thread = None
         self.fd = -1
         self._wd: dict[int, str] = {}
         self._rows: dict[tuple, dict[str, Any]] = {}
@@ -92,15 +106,41 @@ class LedgerWatcher:
                 if wd < 0:
                     raise OSError(ctypes.get_errno(), f"inotify_add_watch failed for {rel_dir or '.'}")
                 self._wd[wd] = rel_dir
+            self._heartbeat_dir = tempfile.TemporaryDirectory(prefix="ssdp-ledger-heartbeat-")
+            self._heartbeat_wd = libc.inotify_add_watch(self.fd, os.fsencode(self._heartbeat_dir.name), IN_CREATE)
+            if self._heartbeat_wd < 0:
+                raise OSError(ctypes.get_errno(), "heartbeat mark failed")
             self._stop_r, self._stop_w = os.pipe()
             self.started_ns = time.time_ns()
+            self._heartbeat()
             self._thread = threading.Thread(target=self._run, daemon=True)
             self._thread.start()
+            self._heartbeat_thread = threading.Thread(target=self._pulse, daemon=True)
+            self._heartbeat_thread.start()
             self.established = True
         except OSError as exc:
             self.error = f"{type(exc).__name__}: {exc}"
             self._close()
         return self
+
+    def _heartbeat(self) -> None:
+        # Only IN_CREATE is marked. Unique filenames forbid kernel coalescing across intervals.
+        with self._lock:
+            index = len(self._heartbeats)
+            row = {"index": index, "before_mono_ns": time.monotonic_ns(), "before_ns": time.time_ns()}
+            fd = os.open(Path(self._heartbeat_dir.name) / str(index), os.O_CREAT | os.O_EXCL | os.O_WRONLY, 0o600)
+            os.close(fd)
+            row.update(after_ns=time.time_ns(), after_mono_ns=time.monotonic_ns())
+            self._heartbeats.append(row)
+
+    def _pulse(self) -> None:
+        while not self._heartbeat_stop.wait(self.parameters["heartbeat_period_ns"] / 1e9):
+            try:
+                self._heartbeat()
+            except OSError as exc:
+                with self._lock:
+                    self._read_errors.append(f"heartbeat: {exc}")
+                return
 
     def _drain_once(self) -> bool:
         try:
@@ -120,16 +160,21 @@ class LedgerWatcher:
                 raw = buf[offset + EVENT_HEADER.size: offset + EVENT_HEADER.size + length]
                 name = raw.split(b"\0", 1)[0].decode("utf-8", "surrogateescape")
                 offset += EVENT_HEADER.size + length
+                if wd == self._heartbeat_wd:
+                    self._interval = int(name)
+                    continue
                 directory = self._wd.get(wd)
                 rel = None if directory is None else (f"{directory}/{name}" if directory and name else directory or name)
                 flags = tuple(sorted(FLAG_NAMES[bit] for bit in FLAG_NAMES if mask & bit))
-                key = (rel, bool(mask & IN_ISDIR), flags)
+                self._flags_seen.update(flags)
+                key = (rel, bool(mask & IN_ISDIR), flags, self._interval)
                 row = self._rows.get(key)
                 if row is None:
-                    if len(self._rows) >= MAX_LEDGER_ROWS:
+                    if len(self._rows) >= self.parameters["row_bound"]:
                         self._rows_truncated = True
                         continue
                     self._rows[key] = {"rel": rel, "dir": key[1], "flags": list(flags),
+                                       "interval": self._interval,
                                        "first_ns": stamp, "last_ns": stamp, "count": 1}
                 else:
                     row["last_ns"] = stamp
@@ -157,6 +202,9 @@ class LedgerWatcher:
     def stop(self) -> dict[str, Any]:
         """Stop, drain everything still queued by the kernel, and return the ledger record."""
         if self.established:
+            self._heartbeat_stop.set()
+            self._heartbeat_thread.join(15)
+            self._heartbeat()
             os.write(self._stop_w, b"x")
             if self._thread is not None:
                 self._thread.join(15)
@@ -164,8 +212,10 @@ class LedgerWatcher:
                 pass
             self.stopped_ns = time.time_ns()
         self._close()
+        if self._heartbeat_dir is not None:
+            self._heartbeat_dir.cleanup()
         with self._lock:
-            events = sorted(self._rows.values(), key=lambda r: (r["first_ns"], str(r["rel"])))
+            events = sorted(self._rows.values(), key=lambda r: (r["interval"], str(r["rel"]), r["flags"]))
             read_errors = list(self._read_errors)
             truncated = self._rows_truncated
         return {
@@ -174,8 +224,9 @@ class LedgerWatcher:
             "watch_mask": sorted(FLAG_NAMES[bit] for bit in FLAG_NAMES if WATCH_MASK & bit),
             "watched_directories": list(self.directories), "tree_files": dict(sorted(self.tree_files.items())),
             "started_ns": self.started_ns, "stopped_ns": self.stopped_ns,
-            "overflow": "overflow" in {f for e in events for f in e["flags"]},
+            "overflow": "overflow" in self._flags_seen,
             "read_errors": read_errors, "rows_truncated": truncated,
+            "parameters": self.parameters, "heartbeats": self._heartbeats,
             "events": events,
         }
 
@@ -207,7 +258,7 @@ def _runs(source: str, views: list[str]):
             i = j
 
 
-def contained_content(text: str, source: str, *, distinct_in=None) -> tuple[str, bool]:
+def contained_content(text: str, source: str, *, distinct_in=None, floor_bytes=PARTIAL_SUPPLY_MIN_BYTES) -> tuple[str, bool]:
     """How much of `source` appears contiguously in model-visible `text`.
 
     Returns (match, distinctive). `match` is exact, partial or none. `distinctive` says that the
@@ -222,7 +273,7 @@ def contained_content(text: str, source: str, *, distinct_in=None) -> tuple[str,
     unique = distinct_in or (lambda block: True)
     if stripped and any(stripped in view for view in views):
         return "exact", bool(unique(stripped))
-    floor = min(PARTIAL_SUPPLY_MIN_BYTES, len(stripped.strip().encode("utf-8")))
+    floor = min(floor_bytes, len(stripped.strip().encode("utf-8")))
     found = False
     for run in _runs(source, views):
         if len(run.encode("utf-8")) < floor:
@@ -233,14 +284,14 @@ def contained_content(text: str, source: str, *, distinct_in=None) -> tuple[str,
     return ("partial", False) if found else ("none", False)
 
 
-def _result_events(events: list[dict[str, Any]]) -> list[tuple[int, str, dict[str, Any]]]:
+def _result_events(events: list[dict[str, Any]], *, errors=False) -> list[tuple[int, str, dict[str, Any]]]:
     """Tool results the model actually received: sequence, text and the producing event."""
     rows = []
     for event in events:
         if event.get("kind") not in ("tool_action", "resource_access", "mutation", "issue_evidence_access"):
             continue
         payload = event.get("payload") or {}
-        if event.get("status") != "result" or payload.get("result_status") != "result":
+        if event.get("status") not in (("result", "error") if errors else ("result",)) or payload.get("result_status") not in (("result", "error") if errors else ("result",)):
             continue
         text = payload.get("result_content")
         if isinstance(text, str) and payload.get("result_seen_by_model") is True:
@@ -265,26 +316,119 @@ def _load_corpus(root: Path, tree: dict[str, Any]) -> dict[str, str]:
     return corpus
 
 
+def is_owner_copy(rel: str, owner_name: str | None) -> bool:
+    """One basename rule, shared with native read recognition."""
+    return owner_name is not None and rel.rsplit("/", 1)[-1] == owner_name
+
+
+def owner_supply(events, corpus, owner_name, parameters):
+    lines = {line for rel, text in corpus.items() if is_owner_copy(rel, owner_name)
+             for line in text.splitlines() if len(line.encode()) >= parameters["owner_line_floor"]}
+    positive, minor = [], []
+    for seq, text, event in _result_events(events, errors=True):
+        matched = {line for line in lines if any(line in output for output in text.splitlines())}
+        if not matched:
+            continue
+        row = {"sequence": seq, "event_id": event.get("event_id"), "distinct_lines": len(matched),
+               "bytes": sum(len(line.encode()) for line in matched), "source": "owner-class-supply"}
+        (positive if len(matched) >= 2 and row["bytes"] >= parameters["owner_load_quantum"] else minor).append(row)
+    for event in events:
+        consumed = (event.get("payload") or {}).get("consumed_resource") or {}
+        if (event.get("kind") == "resource_access" and consumed.get("match") in ("exact", "partial")
+                and is_owner_copy(consumed.get("package_relative_path") or "", owner_name)):
+            positive.append({"sequence": int(event["sequence"]), "event_id": event.get("event_id"), "source": "native-read"})
+    return positive, minor
+
+
+def candidate_window(lower, upper, requests, events, lost=False):
+    """Trace-ordered positions, never request stamps sorted by numeric time."""
+    start = min((e["sequence"] for e in events), default=1)
+    end = max((e["sequence"] for e in events), default=start)
+    if lost or lower is None or upper is None:
+        return {"start": start, "end": end, "timing_loss": True}
+    earlier = [r for r in requests if r["t_ns"] < lower]
+    later = [r for r in requests if r["t_ns"] > upper]
+    lo = earlier[-1].get("position", start) if earlier else start
+    hi = later[0].get("position", start) - 1 if later else end
+    if hi < lo or not earlier:
+        lo, hi = start, end
+    return {"start": lo, "end": hi, "timing_loss": False}
+
+
+def timing(ledger, requests, parameters):
+    """Derive loss from raw paired clocks against one fixed baseline; never trust drain times."""
+    beats = ledger.get("heartbeats") or []
+    if not isinstance(beats, list):
+        return {}, ["malformed heartbeats"]
+    tolerance = parameters["clock_tolerance_ns"]
+    reasons, brackets = [], {}
+    baseline = None
+    tainted = False
+    for i, beat in enumerate(beats):
+        try:
+            if not isinstance(beat, dict) or beat["index"] != i:
+                raise ValueError("heartbeat order")
+            offset = beat["before_ns"] - beat["before_mono_ns"]
+            baseline = offset if baseline is None else baseline
+            if (abs(offset - baseline) > tolerance
+                    or abs(beat["after_ns"] - beat["after_mono_ns"] - baseline) > tolerance):
+                tainted = True
+                reasons.append(f"clock divergence at heartbeat {i}")
+            if i:
+                previous = beats[i-1]
+                lower = previous["before_ns"] - tolerance
+                upper = beat["after_ns"] + tolerance
+                gap = beat["before_mono_ns"] - previous["after_mono_ns"]
+                lost = tainted
+                if gap > parameters["heartbeat_gap_bound_ns"] or gap < 0:
+                    reasons.append(f"heartbeat gap at interval {i-1}")
+                    lost = True
+                if upper - lower > parameters["bracket_width_bound_ns"] or upper < lower:
+                    reasons.append(f"bracket width at interval {i-1}")
+                    lost = True
+                brackets[i-1] = {"lower_ns": lower, "upper_ns": upper, "timing_loss": lost}
+        except (KeyError, TypeError, ValueError):
+            tainted = True
+            reasons.append(f"malformed heartbeat {i}")
+    if len(beats) < 2:
+        reasons.append("heartbeat bracket ends missing")
+    previous = None
+    for request in requests:
+        rt, mono = request.get("t_ns"), request.get("monotonic_ns")
+        if (not isinstance(rt, int) or not isinstance(mono, int) or baseline is None
+                or abs(rt-mono-baseline) > tolerance
+                or (previous is not None and (rt < previous[0] or mono < previous[1]))):
+            reasons.append("request stamps decrease or disagree with heartbeat baseline")
+        if isinstance(rt, int) and isinstance(mono, int):
+            previous = (rt, mono)
+    # Request clock loss taints every window, never moves its beginning forward.
+    if any("request stamps" in r for r in reasons):
+        for bracket in brackets.values():
+            bracket["timing_loss"] = True
+    return brackets, sorted(set(reasons))
+
+
 def account(ledger: dict[str, Any] | None, cut_ns: int | None, events: list[dict[str, Any]],
             skills_root: Path, *, extra_errors: list[str] | None = None, delivered: set[str] | None = None,
             owner_name: str | None = None, mount: str | None = None,
-            request_stamps: dict[int, int] | None = None) -> dict[str, Any]:
-    """Exact package accounting from the ledger and model-visible supply. Fail closed.
-
-    `exact` answers the byte question (every opened file explained). `owner_read_exact` answers the
-    narrower owner-read question: the ledger itself is intact and every opened owner copy is
-    explained, whatever happened to unrelated files. `delivered` holds `<root>/SKILL.md` entries
-    whose full content reached the model through the hash-linked request 0. `request_stamps` maps
-    each retained provider request index to its observer stamp; with the result events'
-    `result_request_index` it bounds *when* an opened owner copy was accessed (`owner_access`).
-    """
+            request_stamps: dict[int, int] | None = None, request_records: list[dict[str, Any]] | None = None,
+            parameters: dict[str, Any] | None = None) -> dict[str, Any]:
+    """Revision 8: supply proves positives; intact ledger and conservative windows permit negatives."""
+    params = dict(PARAMETERS if parameters is None else parameters)
+    requests = list(request_records or [])
     delivered = set(delivered or ())
-    global_reasons: list[str] = list(extra_errors or [])
-    result: dict[str, Any] = {
-        "schema": SCHEMA, "mechanism": MECHANISM, "exact": False, "owner_read_exact": False, "reasons": global_reasons,
-        "cut_ns": cut_ns, "opened_pre_request0": [], "opened_post_request0": [],
-        "supplied": {}, "explained_by_delivery": [], "unexplained": [], "consumed_files": {},
-    }
+    global_reasons = list(extra_errors or [])
+    # Even a lost/absent ledger must not suppress content that demonstrably reached the model.
+    tree = {p.relative_to(skills_root).as_posix(): p.stat().st_size for p in Path(skills_root).rglob("*") if p.is_file()}
+    corpus = _load_corpus(Path(skills_root), tree)
+    positive, minor = owner_supply(events, corpus, owner_name, params)
+    result = {"schema": SCHEMA, "mechanism": MECHANISM, "parameters": params,
+              "exact": False, "owner_floor_exact": False, "reasons": global_reasons,
+              "cut_ns": cut_ns, "request_records": requests,
+              "opened_pre_request0": [], "opened_post_request0": [], "supplied": {},
+              "explained_by_delivery": [], "unexplained": [], "consumed_files": {}, "opened_files": [],
+              "owner_read_observed": positive, "owner_minor_exposure": minor, "owner_open_windows": [],
+              "active_ssdp_bytes": None, "timing_reasons": []}
     if not isinstance(ledger, dict):
         global_reasons.append("package-access ledger is absent")
         return result
@@ -293,157 +437,126 @@ def account(ledger: dict[str, Any] | None, cut_ns: int | None, events: list[dict
         return result
     if ledger.get("established") is not True:
         global_reasons.append(f"package-access ledger was not established: {ledger.get('error')}")
-        return result
     if not isinstance(ledger.get("events"), list) or not isinstance(ledger.get("tree_files"), dict):
         global_reasons.append("package-access ledger is malformed")
         return result
-    if ledger.get("overflow"):
-        global_reasons.append("package-access ledger overflowed; access is incomplete")
-    if ledger.get("read_errors"):
-        global_reasons.append(f"package-access ledger lost events to read errors: {ledger['read_errors'][:3]}")
-    if ledger.get("rows_truncated"):
-        global_reasons.append("package-access ledger exceeded its retained-row bound")
-    tree = ledger["tree_files"]
-    opened: dict[str, dict[str, Any]] = {}
-    for event in ledger["events"]:
+    if ledger.get("tree_files") != tree:
+        global_reasons.append("package-access ledger tree differs from installed package")
+    if ledger.get("parameters") != params:
+        global_reasons.append("package-access ledger parameters differ from frozen profile")
+    for key, reason in (("overflow", "overflowed"), ("read_errors", "lost events to read errors"),
+                        ("rows_truncated", "exceeded its retained-row bound")):
+        if ledger.get(key):
+            global_reasons.append(f"package-access ledger {reason}")
+    brackets, timing_reasons = timing(ledger, requests, params)
+    if cut_ns is not None and not requests:
+        timing_reasons.append("request stamps missing")
+        for bracket in brackets.values():
+            bracket["timing_loss"] = True
+    result["timing_reasons"] = timing_reasons
+    opened = {}
+    owner_rows = []
+    ledger_events = ledger["events"]
+    if (any(not isinstance(e, dict) or not isinstance(e.get("flags"), list)
+            or not all(isinstance(f, str) for f in e["flags"])
+            or not isinstance(e.get("rel"), (str, type(None)))
+            or not isinstance(e.get("interval"), int) or isinstance(e.get("interval"), bool)
+            or not isinstance(e.get("count"), int) or isinstance(e.get("count"), bool) or e["count"] < 1
+            for e in ledger_events) or len(ledger_events) > params["row_bound"]):
+        global_reasons.append("package-access ledger has malformed or excessive rows")
+        return result
+    for event in ledger_events:
         flags = set(event.get("flags") or [])
         rel = event.get("rel")
         bad = flags - READ_FLAGS - {"overflow"}
         if bad:
             global_reasons.append(f"package tree changed or lost observation ({sorted(bad)} on {rel!r})")
-        if event.get("dir") or rel is None or rel not in tree:
+        if event.get("dir") or rel not in tree or "open" not in flags:
             continue
-        if "open" in flags:
-            row = opened.setdefault(rel, {"pre": False, "post": False, "first_ns": int(event["first_ns"])})
-            row["first_ns"] = min(row["first_ns"], int(event["first_ns"]))
-            if cut_ns is None or int(event["first_ns"]) < cut_ns:
-                row["pre"] = True
-            if cut_ns is not None and int(event["last_ns"]) >= cut_ns:
-                row["post"] = True
-    host_root = Path(skills_root)
-    corpus = _load_corpus(host_root, tree)
-    distinct_cache: dict[str, dict[str, bool]] = {}
-
-    def distinct_for(rel: str):
-        cache = distinct_cache.setdefault(rel, {})
-
-        def distinct(block: str) -> bool:
-            if block not in cache:
-                cache[block] = not any(block in other for name, other in corpus.items() if name != rel and other)
-            return cache[block]
-        return distinct
-
+        bracket = brackets.get(event.get("interval"), {"lower_ns": None, "upper_ns": None, "timing_loss": True})
+        lower, upper = bracket["lower_ns"], bracket["upper_ns"]
+        lost = bracket["timing_loss"]
+        if lower is None:
+            timing_reasons.append(f"open without heartbeat bracket: {rel}")
+        window = candidate_window(lower, upper, requests, events, lost)
+        pre = cut_ns is None or lower is None or lower < cut_ns
+        post = cut_ns is not None and (upper is None or upper >= cut_ns)
+        if pre:
+            window["start"] = min((e["sequence"] for e in events), default=1)
+        row = {"file": rel, "bytes": tree[rel], "sha256": hashlib.sha256((Path(skills_root)/rel).read_bytes()).hexdigest(),
+               "interval": event.get("interval"), "bracket": bracket, "window": window, "count": event.get("count"),
+               "pre": pre, "post": post, "read": any(e.get("rel") == rel and e.get("interval") == event.get("interval")
+                                                   and "access" in e.get("flags", []) for e in ledger["events"])}
+        opened.setdefault(rel, []).append(row)
+        result["opened_files"].append(row)
+        if is_owner_copy(rel, owner_name):
+            owner_rows.append(row)
+    supplied = {}
     texts = _result_events(events)
-    # Supply: which package files' content reached the model, through which events. Matching is
-    # independent of the request-0 phase, so clock skew can change an exactness label but never
-    # the counted bytes. A match counts only when it identifies the opened file: the matched
-    # content is distinctive among package files, or the producing action's input names the file.
-    supplied: dict[str, dict[str, Any]] = {}
-    for rel in sorted(opened):
+    distinct_cache = {}
+    def distinct_for(rel):
+        def distinct(block):
+            key = (rel, block)
+            if key not in distinct_cache:
+                distinct_cache[key] = not any(block in text for name, text in corpus.items() if name != rel)
+            return distinct_cache[key]
+        return distinct
+    for rel, rows in opened.items():
         source = corpus.get(rel, "")
-        if not source:
-            continue
-        sequences, best = [], "none"
+        sequences, routes, ids, best = [], [], [], "none"
         for sequence, text, event in texts:
-            match, distinctive = contained_content(text, source, distinct_in=distinct_for(rel))
+            match, distinctive = contained_content(text, source, distinct_in=distinct_for(rel), floor_bytes=params["distinctiveness_floor"])
             if match == "none":
                 continue
-            if not distinctive and not _names_path(event, rel, mount):
-                continue
-            sequences.append(sequence)
-            best = "exact" if match == "exact" or best == "exact" else "partial"
+            route = None
+            if distinctive and len(source.rstrip("\n").encode()) >= params["distinctiveness_floor"]:
+                route = "distinctive"
+            elif _names_path(event, rel, mount):
+                route = "path-linked"
+            elif match == "exact" and len(source.encode()) >= params["distinctiveness_floor"] and any(
+                    r["window"]["start"] <= sequence <= r["window"]["end"] for r in rows):
+                route = "whole-file-in-window"
+            if route:
+                sequences.append(sequence); routes.append(route); ids.append(event.get("event_id"))
+                best = "exact" if match == "exact" or best == "exact" else "partial"
         if sequences:
-            supplied[rel] = {"match": best, "sequences": sequences, "bytes": int(tree[rel]),
-                             "sha256": hashlib.sha256(source.encode("utf-8")).hexdigest()}
-    # Native consumption (hashline reads, skill:// reads) is judged by the adapter's `consumption`;
-    # it must agree with the ledger.
+            supplied[rel] = {"match": best, "sequences": sequences, "event_ids": ids, "routes": routes,
+                             "bytes": tree[rel], "sha256": rows[0]["sha256"]}
     for event in events:
-        payload = event.get("payload") or {}
-        consumed = payload.get("consumed_resource") or {}
+        consumed = (event.get("payload") or {}).get("consumed_resource") or {}
         if event.get("kind") == "resource_access" and consumed.get("match") in ("exact", "partial"):
-            key = f"{consumed.get('logical_root')}/{consumed.get('package_relative_path') or 'SKILL.md'}"
-            if key not in opened:
-                global_reasons.append(f"model consumed {key!r} through a native read but the ledger recorded no open")
+            rel = f"{consumed.get('logical_root')}/{consumed.get('package_relative_path') or 'SKILL.md'}"
+            if rel not in opened:
+                global_reasons.append(f"model consumed {rel!r} through a native read but the ledger recorded no open")
                 continue
-            row = supplied.setdefault(key, {"match": consumed["match"], "sequences": [], "bytes": int(tree.get(key, 0)),
-                                            "sha256": consumed.get("resource_sha256")})
-            row["sequences"].append(int(event["sequence"]))
-            if consumed["match"] == "exact":
-                row["match"] = "exact"
-    unexplained: list[dict[str, Any]] = []
-    for rel in sorted(opened):
-        row = opened[rel]
-        parts = rel.split("/")
-        if row["pre"]:
-            result["opened_pre_request0"].append(rel)
-            if not (len(parts) == 2 and parts[1] == "SKILL.md"):
-                unexplained.append({"file": rel, "phase": "pre-request0",
-                                    "reason": "runtime opened a non-entrypoint package file before request 0"})
-        if row["post"]:
-            result["opened_post_request0"].append(rel)
-            if rel in delivered:
-                result["explained_by_delivery"].append(rel)
-            elif rel not in supplied:
-                unexplained.append({"file": rel, "phase": "post-request0",
-                                    "reason": "package file was opened but its content is not shown to have reached the model"})
-    result["supplied"] = supplied
-    result["unexplained"] = unexplained
-    result["consumed_files"] = {rel: row["bytes"] for rel, row in supplied.items()}
-    # Owner-read time: access (first open) counts, not only display. Map each opened owner copy to the
-    # first request stamped after its first open and take the earliest result event delivered there.
-    owner_access: dict[str, dict[str, Any]] = {}
-    unresolved_owner: list[str] = []
-    for rel in sorted(opened):
-        if not is_owner_copy(rel, owner_name) or not opened[rel]["post"]:
-            continue
-        bound = access_bound(opened[rel]["first_ns"], events, request_stamps)
-        if bound is None:
-            unresolved_owner.append(rel)
-        else:
-            owner_access[rel] = bound
-    result["owner_access"] = owner_access
-    reasons = list(global_reasons)
+            row = supplied.setdefault(rel, {"match": consumed["match"], "sequences": [], "event_ids": [],
+                                             "routes": [], "bytes": tree[rel], "sha256": opened[rel][0]["sha256"]})
+            row["sequences"].append(event["sequence"]); row["event_ids"].append(event.get("event_id")); row["routes"].append("native")
+    unexplained = []
+    for rel, rows in opened.items():
+        for row in rows:
+            row["explanation"] = "delivered" if rel in delivered else "supplied" if rel in supplied else "unexplained"
+            if row["pre"]:
+                result["opened_pre_request0"].append(rel)
+                if not (len(rel.split("/")) == 2 and rel.endswith("/SKILL.md")):
+                    unexplained.append({"file": rel, "phase": "pre-request0", "reason": "runtime opened a non-entrypoint package file before request 0"})
+            if row["post"]:
+                result["opened_post_request0"].append(rel)
+                if rel in delivered:
+                    result["explained_by_delivery"].append(rel)
+                elif rel not in supplied:
+                    unexplained.append({"file": rel, "phase": "post-request0", "reason": "content not shown supplied"})
+    for field in ("opened_pre_request0", "opened_post_request0", "explained_by_delivery"):
+        result[field] = sorted(set(result[field]))
+    result.update(supplied=supplied, unexplained=unexplained,
+                  consumed_files={rel: row["bytes"] for rel, row in supplied.items()}, owner_open_windows=owner_rows)
+    result["reasons"] = list(global_reasons)
     if unexplained:
-        reasons.append("package access not explained by supply: "
-                       + ", ".join(f"{u['file']} ({u['phase']})" for u in unexplained))
-    result["reasons"] = reasons
-    result["exact"] = not reasons
-    owner_blocked = owner_name is None or any(is_owner_copy(u["file"], owner_name) for u in unexplained)
-    if unresolved_owner:
-        result["owner_access_unresolved"] = unresolved_owner
-    result["owner_read_exact"] = not global_reasons and not owner_blocked and not unresolved_owner
+        result["reasons"].append("package access not explained by supply: " + ", ".join(u["file"] for u in unexplained))
+    result["exact"] = not result["reasons"]
+    result["owner_floor_exact"] = not global_reasons and owner_name is not None and not (owner_rows and timing_reasons)
+    if result["exact"]:
+        counted = dict(result["consumed_files"])
+        counted.update({rel: tree[rel] for rel in delivered if rel in tree})
+        result["active_ssdp_bytes"] = sum(counted.values())
     return result
-
-
-def is_owner_copy(rel: str, owner_name: str | None) -> bool:
-    """One rule for owner copies everywhere: any package file with the owner's basename."""
-    return owner_name is not None and rel.rsplit("/", 1)[-1] == owner_name
-
-
-def access_bound(open_ns: int, events: list[dict[str, Any]], request_stamps: dict[int, int] | None) -> dict[str, Any] | None:
-    """Earliest event sequence at which an access at `open_ns` can have occurred, or None if unresolvable.
-
-    The access belongs to the turn whose tool results the first request stamped after `open_ns`
-    carries. Same-turn ties resolve to the earliest event. An access after the last request has no
-    later model-visible event; it is bounded by the end of the trace.
-    """
-    if not request_stamps:
-        return None
-    stamps = sorted((int(t), int(i)) for i, t in request_stamps.items())
-    following = next(((t, i) for t, i in stamps if t > open_ns), None)
-    delivered = [(int(e["sequence"]), (e.get("payload") or {}).get("result_request_index")) for e in events
-                 if (e.get("payload") or {}).get("result_request_index") is not None]
-    if following is None:
-        last = max((int(e["sequence"]) for e in events), default=0)
-        return {"request_index": None, "sequence": last + 1, "basis": "after-last-request"}
-    in_turn = [seq for seq, req in delivered if req == following[1]]
-    if not in_turn:
-        # The request carried no tool result (for example a retry or a final turn): the access cannot be
-        # placed on an earlier event, so it is bounded by the next result-bearing request.
-        later = [(req, seq) for seq, req in delivered if req > following[1]]
-        if not later:
-            return {"request_index": following[1], "sequence": max((int(e["sequence"]) for e in events), default=0) + 1,
-                    "basis": "no-later-result"}
-        req = min(r for r, _ in later)
-        return {"request_index": req, "sequence": min(s for r, s in later if r == req), "basis": "next-result-bearing-request"}
-    return {"request_index": following[1], "sequence": min(in_turn), "basis": "turn-window"}

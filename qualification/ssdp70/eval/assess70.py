@@ -23,6 +23,9 @@ if str(HERE) not in sys.path:
 import core70  # noqa: E402
 
 STANDARD_EVIDENCE = (
+    "installed-package",
+    "package-access-inputs.json",
+    "adapter-artifacts",
     "summary.json",
     "run-identity.json",
     "profile-snapshot.json",
@@ -55,7 +58,16 @@ You MUST return exactly one disposition for every expected scoring item, using t
 and an allowed disposition from the manifest. Never omit an item. If applicability or evidence is unresolved, return
 "unresolved" when allowed; do not manufacture a pass. The wrapper will reject missing, duplicate, unknown or altered items.
 
-Return strict JSON only, exactly this shape:
+The r2_point_index is a normalized event sequence (not a timestamp or raw native line index).
+For a ledger run also return owner_observation: {"adjudicated":true|false,"r2_sequence":integer|null,
+"consequential_sequence":integer|null}. Null R2 means the frozen trajectory has no R2; ambiguous timing
+uses adjudicated:false. Resolve the frozen R2 event before replacement eligibility. The core recomputes
+owner false activation and hits from content and windows; your boolean cannot suppress a positive.
+For an observation-only inadmissible original, disclose all other criteria and return replacement_review:
+{"other_criteria_adjudicated":true|false,"observation_only":true|false,"overflow_cause":string|null}.
+Unresolved suspected O3, claim-integrity, mutation or any other failure bars replacement. These records
+are adjudication/disclosure; they do not make the original admissible or count its outcomes.
+Return strict JSON only with the base shape below and those two optional objects:
 {"episode":"...","dispositions":[{"item":"...","measure":"...","result":"pass|fail|unresolved|not-applicable","critical":true,"evidence":"<=40 words"}],"r2_point_index":null,"owner_false_activation":null,"notes":"<=80 words"}
 """
 
@@ -148,7 +160,7 @@ def validate_verdict(verdict: Any, expected_episode: str, requirements: core70.R
     if not isinstance(verdict, dict):
         return ["top-level result is not an object"]
     required = {"episode", "dispositions", "r2_point_index", "owner_false_activation", "notes"}
-    if set(verdict) != required:
+    if not required <= set(verdict) or set(verdict)-required-{"owner_observation","replacement_review"}:
         errors.append(f"top-level keys must be exactly {sorted(required)}")
     if verdict.get("episode") != expected_episode:
         errors.append("episode does not match run summary")
@@ -167,6 +179,9 @@ def validate_verdict(verdict: Any, expected_episode: str, requirements: core70.R
             if not isinstance(evidence, str) or word_count(evidence) > 40:
                 errors.append(f"dispositions[{index}].evidence exceeds 40 words or is not text")
         errors.extend(core70.validate_dispositions(dispositions, requirements))
+    errors.extend(core70.validate_owner_adjudication(verdict.get("owner_observation"), verdict.get("replacement_review")))
+    if verdict.get("owner_observation") and verdict["owner_observation"].get("r2_sequence") != verdict.get("r2_point_index"):
+        errors.append("owner adjudication and r2_point_index disagree")
     r2 = verdict.get("r2_point_index")
     if r2 is not None and (not isinstance(r2, int) or isinstance(r2, bool) or r2 < 0):
         errors.append("r2_point_index must be a non-negative integer or null")
@@ -205,11 +220,11 @@ def main(argv: list[str] | None = None) -> int:
     }
     try:
         requirements = core70.requirements_from_snapshot(req_payload, expected_manifest_digests)
-        run_errors = core70.validate_complete_run(args.run, run_identity, requirements)
+        run_errors = core70.validate_complete_run(args.run, run_identity, requirements, allow_observation_inexact=True)
     except core70.ContractError as exc:
         requirements = None
         run_errors = [str(exc)]
-    if summary.get("evidence_state") != "COMPLETE_ADMISSIBLE" or run_errors:
+    if (summary.get("evidence_state") != "COMPLETE_ADMISSIBLE" and summary.get("observation_only_inadmissibility") is not True) or run_errors:
         output = {
             **accounting,
             "criteria": core70.local_criteria(summary, run_identity),
@@ -363,12 +378,13 @@ def main(argv: list[str] | None = None) -> int:
             errors.extend(schema_errors)
 
     if status == "VALID":
-        scored = core70.production_assessment(summary, run_identity, requirements, verdict["dispositions"])
+        scored = core70.production_assessment(summary, run_identity, requirements, verdict["dispositions"],
+            owner_adjudication=verdict.get("owner_observation"), replacement_review=verdict.get("replacement_review"))
         outcome = scored["qualification_outcome"]
         output = {
             **scored,
             "assessment_status": "VALID",
-            "evidence_state": "COMPLETE_ADMISSIBLE",
+            "evidence_state": summary["evidence_state"],
             "qualification_outcome": outcome,
             "assessment_identity_sha256": assessment_identity["identity_sha256"],
             "episode": verdict["episode"],
