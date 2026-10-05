@@ -4,6 +4,7 @@ The refusals under test occur before any evaluator could launch; the numeric tes
 production `quantitative_part` retained summary files.
 """
 import contextlib
+import copy
 import io
 import json
 import tempfile
@@ -204,6 +205,21 @@ class ReplacementBookkeeping(unittest.TestCase):
         o["resource_observation"]["accounting"]["reasons"]=["ledger overflowed"]
         o["replacement_review"]["overflow_cause"]="disclosed volume of distinct interval rows"
         self.assertEqual(batch_assess70.replacement_slots(mf,runs)[0]["original"],"replacement")
+
+    def test_v_not_applicable_items_do_not_bar_but_fail_and_unresolved_do(self):
+        for result,expected in (("not-applicable","replacement"),("pass","replacement"),("fail","original"),("unresolved","original")):
+            mf,runs=self.setup_case();runs["original"]["original_dispositions"]=[{"result":"pass"},{"result":result}]
+            self.assertEqual(batch_assess70.replacement_slots(mf,runs)[0]["original"],expected,result)
+
+    def test_observation_adjudicated_needs_every_independent_attestation(self):
+        mf,runs=self.setup_case();row=runs["original"]
+        self.assertTrue(batch_assess70.observation_adjudicated(row))
+        for path,value in ((("owner_floor_adjudication","adjudicated"),False),(("replacement_review","other_criteria_adjudicated"),False),
+                           (("replacement_review","observation_only"),False),(("original_dispositions",),[]),(("original_dispositions",),[{"result":"fail"}])):
+            broken=copy.deepcopy(row)
+            if len(path)==2:broken[path[0]][path[1]]=value
+            else:broken[path[0]]=value
+            self.assertFalse(batch_assess70.observation_adjudicated(broken),path)
 
     def test_v_missing_byte_bound_keeps_byte_question_pending_but_owner_has_no_campaign_cap(self):
         mf,runs=self.setup_case(bound=False)

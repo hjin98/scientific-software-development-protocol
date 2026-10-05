@@ -7,7 +7,7 @@ from pathlib import Path
 import package_premise as pp
 
 
-class PremiseBoundary(unittest.TestCase):
+class PremiseFixture(unittest.TestCase):
     def setUp(self):
         self.tmp = tempfile.TemporaryDirectory()
         self.root = Path(self.tmp.name)
@@ -33,6 +33,8 @@ class PremiseBoundary(unittest.TestCase):
     def check(self, witness=None, **kwargs):
         return pp.check(self.package,self.sources,self.mounts,witness,owner_name="owner.md",**kwargs)
 
+
+class PremiseBoundary(PremiseFixture):
     def test_z_known_construction_missing_or_unreviewed_source_and_qualification_binding(self):
         witness = self.witness()
         self.assertEqual(self.check(witness)["state"], "PASS")
@@ -93,3 +95,40 @@ class PremiseBoundary(unittest.TestCase):
         self.assertEqual(self.check(self.witness())["state"],"FAIL")
         self.mounts.append({"source":"workspace","destination":"/lib","read_only":True,"alias_target":"/workspace"})
         self.assertEqual(self.check(self.witness())["state"],"PASS")
+
+
+class PremiseDetectorsIsolated(PremiseFixture):
+    """Independent-review B-2: each detector must fail alone, not only behind another rule that also fires."""
+    def test_z_hard_link_between_non_owner_package_files_fails_with_no_owner_content(self):
+        import os
+        (self.package / "a.txt").write_text("unrelated package file\n")
+        os.link(self.package / "a.txt", self.package / "b.txt")
+        report = self.check(self.witness())
+        self.assertEqual(report["state"], "FAIL")
+        self.assertTrue(any("hard link" in f for f in report["failures"]), report["failures"])
+        self.assertFalse(any("owner line" in f for f in report["failures"]))
+
+    def test_z_single_embedded_owner_line_in_a_non_identical_source_fails(self):
+        line = self.owner.read_text().splitlines()[0]
+        (self.workspace / "notes2.txt").write_text("short prefix\n" + line + "\nshort suffix\n")
+        report = self.check(self.witness())
+        self.assertEqual(report["state"], "FAIL")
+        self.assertTrue(any("whole owner line in other source" in f for f in report["failures"]), report["failures"])
+        self.assertFalse(any("byte-identical" in f for f in report["failures"]))
+
+    def test_z_mount_from_an_unlisted_source_is_unresolved_not_pass(self):
+        self.mounts.append({"source": "unlisted-host-dir", "destination": "/extra", "read_only": True})
+        report = self.check(self.witness())
+        self.assertEqual(report["state"], "UNRESOLVED")
+        self.assertIn("mount source outside frozen input envelope", report["unresolved"])
+
+    def test_z_qualification_needs_the_accepted_digest_and_verify_report_checks_state_and_digest(self):
+        witness = self.witness(); witness["purpose"] = "qualification"
+        for wrong in (None, "0" * 64):
+            self.assertEqual(self.check(witness, qualification=True, accepted_witness_sha256=wrong)["state"], "UNRESOLVED")
+        report = self.check(witness, qualification=True, accepted_witness_sha256=pp.digest(witness))
+        self.assertEqual(pp.verify_report(report, qualification=True, accepted_witness_sha256=pp.digest(witness)), [])
+        self.assertTrue(pp.verify_report(report, qualification=True, accepted_witness_sha256="0" * 64))
+        for state in ("FAIL", "UNRESOLVED"):
+            self.assertTrue(pp.verify_report({**report, "state": state}))
+        self.assertTrue(pp.verify_report({**report, "failures": ["x"]}))

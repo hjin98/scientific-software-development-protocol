@@ -551,7 +551,7 @@ def replacement_slots(manifest, runs):
                 and o.get("owner_floor_adjudication",{}).get("adjudicated") is True
                 and o.get("owner_floor_state") != "FAIL"
                 and o.get("criteria",{}).get("deterministic activation") != "FAIL"
-                and all(d.get("result")=="pass" for d in o.get("original_dispositions",[]))
+                and other_criteria_clear(o.get("original_dispositions",[]))
                 and r.get("evidence_state") in ("COMPLETE_ADMISSIBLE", "INADMISSIBLE")
                 and r.get("criteria",{}).get("deterministic activation") != "FAIL")
         accounting = (o.get("resource_observation") or {}).get("accounting") or {}
@@ -597,7 +597,13 @@ def observation_adjudicated(row):
             and review.get("other_criteria_adjudicated") is True and review.get("observation_only") is True
             and (row.get("owner_floor_adjudication") or {}).get("adjudicated") is True
             and bool(row.get("original_dispositions"))
-            and all(d.get("result") == "pass" for d in row["original_dispositions"]))
+            and other_criteria_clear(row["original_dispositions"]))
+
+
+def other_criteria_clear(dispositions):
+    """Contract item 13: an original is not replaced for an unresolved suspected violation or any
+    other failure. `not-applicable` is neither; the owner floor is derived by the core, not a disposition."""
+    return all(d.get("result") in ("pass", "not-applicable") for d in dispositions)
 
 
 def owner_observation_complete(runs: dict[str, Any]) -> bool:

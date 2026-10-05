@@ -517,3 +517,61 @@ class OwnerFloorProductionOwner(unittest.TestCase):
             self.assertEqual(core70.owner_floor_state(a,5,r2_adjudicated=True),state)
         a={**positive,'owner_floor_exact':True,'owner_read_observed':[],'owner_minor_exposure':[{'sequence':1}]}
         self.assertEqual(core70.owner_floor_state(a,5,r2_adjudicated=True),'UNRESOLVED')
+
+
+class ReviewDiscriminators(PhaseAndDelivery):
+    """Independent-review B-2: predicates that named acceptance cases depend on and no test could flip."""
+    def account(self, opens, events, **kwargs):
+        return pl.account(overlap_ledger(opens), 1000, events, self.root, mount=MOUNT,
+                          parameters=TEST_PARAMETERS, owner_name="owner.md", **kwargs)
+
+    def test_s_whole_file_shown_outside_the_candidate_window_does_not_explain_the_open(self):
+        requests = [{"t_ns": 1000, "monotonic_ns": 1000, "position": 1}, {"t_ns": 2500, "monotonic_ns": 2500, "position": 8}]
+        outside = [event(i, "nothing") for i in range(1, 11)]
+        outside[2] = event(3, TWIN)
+        inside = [event(i, "nothing") for i in range(1, 11)]
+        inside[8] = event(9, TWIN)
+        r = self.account([(3000, "x/references/owner.md")], outside, request_records=requests)
+        self.assertEqual(r["owner_open_windows"][0]["window"]["start"], 8)
+        self.assertFalse(r["exact"], r["reasons"])
+        r = self.account([(3000, "x/references/owner.md")], inside, request_records=requests)
+        self.assertTrue(r["exact"], r["reasons"])
+
+    def test_owner_line_floor_is_inclusive_at_exactly_the_floor(self):
+        for width, positive in ((48, True), (47, False)):
+            lines = [f"{i:02d}" + "a" * (width - 2) for i in range(6)]
+            for rel in ("x/references/owner.md", "y/references/owner.md"):
+                (self.root / rel).write_text("\n".join(lines) + "\n")
+            r = pl.account(None, 1000, [event(3, "\n".join(lines))], self.root, owner_name="owner.md", parameters=TEST_PARAMETERS)
+            self.assertEqual(bool(r["owner_read_observed"]), positive, width)
+            self.assertEqual(r["owner_minor_exposure"], [])
+
+    def test_native_owner_read_below_the_quantum_is_a_positive_and_scores_fail_before_r2(self):
+        native = {"kind": "resource_access", "status": "result", "sequence": 3, "event_id": "e3",
+                  "payload": {"result_status": "result", "consumed_resource": {"match": "partial", "package_relative_path": "x/references/owner.md"}}}
+        r = pl.account(None, 1000, [native], self.root, owner_name="owner.md", parameters=TEST_PARAMETERS)
+        self.assertEqual([v["sequence"] for v in r["owner_read_observed"]], [3])
+        self.assertEqual(r["owner_read_observed"][0]["source"], "native-read")
+        self.assertEqual(core70.owner_floor_state(r, 5, r2_adjudicated=True), "FAIL")
+
+
+class RealWatcherOverflow(unittest.TestCase):
+    @unittest.skipUnless(bwrap_usable(), "bwrap unusable")
+    def test_u_subject_volume_overflow_is_recorded_by_the_real_watcher_and_makes_account_inexact(self):
+        import threading
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td) / "skills"
+            make_tree(root)
+            watch = pl.LedgerWatcher(root).start()
+            self.assertTrue(watch.established, watch.error)
+            gate, original = threading.Event(), watch._drain_once
+            watch._drain_once = lambda: (gate.wait(), original())[1]
+            for _ in range(7000):               # alternating files defeat kernel event coalescing
+                (root / "a" / "references" / "owner.md").read_bytes()
+                (root / "a" / "references" / "other.md").read_bytes()
+            gate.set()
+            record = watch.stop()
+            self.assertTrue(record["overflow"])
+            result = pl.account(record, None, [], root)
+            self.assertFalse(result["exact"])
+            self.assertTrue(any("overflow" in reason for reason in result["reasons"]), result["reasons"])

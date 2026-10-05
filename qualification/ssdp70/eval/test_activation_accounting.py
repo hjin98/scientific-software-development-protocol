@@ -501,6 +501,24 @@ print(len(decoded))
         _,report=batch_assess70.replacement_slots(manifest,{'r':original})
         self.assertEqual(report['required'][0]['status'],'barred-positive-pre-R2')
 
+    def test_c_tampered_or_missing_derived_event_fails_recomputation_on_a_real_run(self):
+        """Independent-review B-2 (M44): the honest run recomputes to [], and every forgery of the derived record is refused."""
+        summary,_,identity,rig=self.realize(scenario=self.bash_steps(f'cat {self.OWNER_PATH}; false'),claims=[])
+        run=Path(summary['_out']); events=omp_rig.load_events(summary['_out'])
+        self.assertEqual(core70.recompute_package_access(run,events,identity),[])
+        index=next(i for i,e in enumerate(events) if e['kind']=='package_access')
+        for name,forge in (('owner_read_observed',lambda p:p.update(owner_read_observed=[])),
+                           ('owner_floor_exact',lambda p:p.update(owner_floor_exact=not p['owner_floor_exact'])),
+                           ('exact',lambda p:p.update(exact=not p['exact'])),
+                           ('parameters',lambda p:p.update(parameters={**p['parameters'],'owner_load_quantum':1}))):
+            tampered=copy.deepcopy(events); forge(tampered[index]['payload'])
+            errors=core70.recompute_package_access(run,tampered,identity)
+            self.assertTrue(any('differs from deterministic recomputation' in e for e in errors),(name,errors))
+        errors=core70.recompute_package_access(run,[e for e in events if e['kind']!='package_access'],identity)
+        self.assertEqual(errors,['ledger run must carry exactly one package_access event'])
+        errors=core70.recompute_package_access(run,events+[copy.deepcopy(events[index])],identity)
+        self.assertEqual(errors,['ledger run must carry exactly one package_access event'])
+
     def test_qualification_scoped_integrity_campaign_keeps_failure_after_good_repeat(self):
         """Real campaign aggregation; outer suite purpose remains integrity throughout."""
         rig = omp_rig.Rig(Path('/tmp'), entry='pinned:software-implementation', timeout_s=45, max_turns=60)
