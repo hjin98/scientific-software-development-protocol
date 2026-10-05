@@ -9,6 +9,7 @@ import io
 import json
 import tempfile
 import unittest
+from unittest.mock import patch
 from pathlib import Path
 
 import batch_assess70
@@ -492,6 +493,100 @@ class SlotScoringComposition(unittest.TestCase):
         self.assertEqual(result["arms"]["p70"]["dispositions"]["fail"], 1)
         clean = self.build(replaced="T7-p70-r0", question="t7-owner-floor")
         self.assertEqual(clean["critical_failures"].get("p70", 0), 0)
+
+    def test_inadmissible_standing_failure_counts_failures_and_blocks_without_scoring_retained_passes(self):
+        retained = [{"item": "i1", "measure": "m", "critical": True, "result": "fail"},
+                    {"item": "i2", "measure": "m", "critical": False, "result": "pass"},
+                    {"item": "i3", "measure": "m", "critical": True, "result": "unresolved"}]
+        for route, question in (("T1", "bytes"), ("T7", "t7-owner-floor")):
+            with self.subTest(route=route):
+                failure = {"evidence_state": "INADMISSIBLE", "qualification_outcome": "NOT_EVALUATED",
+                           "dispositions": [], "original_dispositions": retained}
+                result = self.build(replaced=route + "-p70-r0", question=question, owner_replacement=failure)
+                self.assertTrue(result["package_access_replacements"]["records"][0]["standing_failure"])
+                self.assertEqual(result["critical_failures"].get("p70"), 1)
+                tallies = result["arms"]["p70"]["dispositions"]
+                self.assertEqual(tallies["fail"], 1)
+                self.assertEqual(tallies["unresolved"], 1)
+                self.assertEqual(tallies["pass"], 8)
+
+    def test_t7_unresolved_critical_block_reaches_the_final_aggregation_criterion(self):
+        """Real slot/part/final criterion owners; validated assessment loading is controlled below them."""
+        captured = {}
+        score = batch_assess70.score_slots
+        def capture(result, mf, expected, out, keys):
+            for arm in ("p70", "p66"):
+                base = next(d for d in mf["runs"] if d["id"] == "T1-" + arm + "-r0")
+                for i in range(3):
+                    rid = "critical-" + arm + "-" + str(i)
+                    declaration = {**base, "id": rid}
+                    mf["runs"].append(declaration); expected[rid] = declaration
+                    result["runs"][rid] = self.good(arm); self.write(rid)
+                ids = [d["id"] for d in mf["runs"] if result["runs"][d["id"]]["arm"] == arm
+                       and not d["id"].endswith("-repl")]
+                for i, rid in enumerate(ids):
+                    mf["opportunities"].append({"id": "critical-" + arm + "-" + str(i), "part": "critical",
+                        "arm": arm, "fixture": "f", "profile_key_sha256": SHA, "realizations": [{"run": rid, "item": "i1"}]})
+            self.write("T7-p70-r0", active_ssdp_bytes=14000, owner_read_sequences=[])
+            captured.update(manifest=copy.deepcopy(mf), runs=copy.deepcopy(result["runs"]))
+            return score(result, mf, expected, out, keys)
+        with patch.object(batch_assess70, "score_slots", side_effect=capture):
+            self.build(replaced="T7-p70-r0", question="t7-owner-floor",
+                owner_replacement={"dispositions": [{"item": "i1", "measure": "m", "critical": True, "result": "unresolved"}]},
+                original_overrides={"evidence_state": "COMPLETE_ADMISSIBLE", "qualification_outcome": "PASS",
+                    "criteria": {"harness/admissibility": "PASS", "deterministic activation": "PASS"},
+                    "resource_observation": {"exact": True},
+                    "dispositions": [{"item": "i1", "measure": "m", "critical": True, "result": "pass"}]})
+        mf, runs = captured["manifest"], captured["runs"]
+        mf.update(purpose="qualification", scope_id="synthetic-aggregation-test", family_record_sha256=SHA)
+        mf["family"].update(ordered_keys=[SHA], family_id="synthetic-family", panels={"ordinary": {"key": "ordinary"}})
+        digest = core70.stable_json_sha256(mf)
+        for declaration in mf["runs"]:
+            rid = declaration["id"]
+            scope = {"purpose": mf["purpose"], "scope_id": mf["scope_id"], "manifest_sha256": digest,
+                "campaign_record_sha256": digest, "family_record_sha256": SHA, "primary_family_id": mf["family"]["family_id"],
+                "scoring_manifest_sha256": declaration.get("scoring_manifest_sha256")}
+            identity = {**declaration, "accounting": scope, "identity_sha256": SHA, "arm": runs[rid]["arm"], "episode": "E1",
+                "requirements": {"required_artifacts_sha256": SHA, "required_oracles_sha256": SHA}}
+            directory = self.root / rid
+            summary = json.loads((directory / "summary.json").read_text())
+            summary.update(accounting=scope, run_identity_sha256=SHA, fixture_run_id=rid)
+            for name, value in (("run-identity.json", identity), ("summary.json", summary),
+                    ("requirements-snapshot.json", {}), ("assessment.json", {"accounting": scope, "run_identity_sha256": SHA})):
+                (directory / name).write_text(json.dumps(value))
+        # This test does not claim fixture admission: only the aggregation
+        # consumers execute; raw-run validation/assessment is the controlled boundary.
+        with patch.object(core70, "campaign_manifest_errors", return_value=[]), \
+             patch.object(core70, "validate_accounting_identity", return_value=[]), \
+             patch.object(core70, "requirements_from_snapshot", return_value=None), \
+             patch.object(core70, "validate_complete_run", return_value=[]), \
+             patch.object(core70, "production_assessment", side_effect=lambda summary, *a, **k: copy.deepcopy(runs[summary["fixture_run_id"]])):
+            result = batch_assess70.aggregate_assessments(self.root, mf)
+            runs["T7-p70-r0-repl"]["dispositions"].append(
+                {"item": "i2", "measure": "m", "critical": True, "result": "fail"})
+            failed = batch_assess70.aggregate_assessments(self.root, mf)
+        self.assertEqual(result["criteria"]["no critical failure"], "UNRESOLVED")
+        self.assertEqual(failed["criteria"]["no critical failure"], "FAIL")
+        self.assertEqual(result["critical_unresolved"], {"p70": 1})
+        self.assertEqual(result["arms"]["p70"]["dispositions"]["unresolved"], 1)
+        self.assertEqual(result["parts"]["owner_false_activation"]["state"], "PASS")
+        self.assertEqual(result["parts"]["fixed_cost"]["state"], "PASS")
+        self.assertEqual(result["package_access_replacements"]["byte_slots"]["T7-p70-r0"], "T7-p70-r0")
+        self.assertNotEqual(result["qualification_outcome"], "PASS")
+
+    def test_t7_noncritical_block_uses_its_binding_and_unmapped_blocks_are_refused(self):
+        for item, raises in (("i1", False), ("unbound", True)):
+            kwargs = dict(replaced="T7-p70-r0", question="t7-owner-floor", owner_replacement={
+                "dispositions": [{"item": item, "measure": "m", "critical": False, "result": "unresolved"}]})
+            if raises:
+                with self.assertRaisesRegex(core70.ContractError, "no qualification criterion binding"):
+                    self.build(**kwargs)
+            else:
+                result = self.build(**kwargs)
+                self.assertEqual(result["parts"]["owner_false_activation"]["state"], "UNRESOLVED")
+                self.assertEqual(result["runs"]["T7-p70-r0-repl"]["owner_floor_state"], "PASS")
+                self.assertEqual(result["critical_unresolved"], {})
+                self.assertEqual(result["arms"]["p70"]["dispositions"]["unresolved"], 1)
 
 
     def test_cr2_b2_activation_counts_every_declared_deterministic_run_not_only_the_scored_slots(self):

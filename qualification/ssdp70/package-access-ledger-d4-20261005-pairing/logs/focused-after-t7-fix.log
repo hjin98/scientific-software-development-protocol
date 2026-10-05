@@ -1,0 +1,21 @@
+................................................................................................................
+======================================================================
+FAIL: test_inadmissible_standing_failure_counts_retained_failures_without_scoring_other_dispositions (test_batch_cli.SlotScoringComposition) (route='T1')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/samjin/agent-skills/scientific-software-development-protocol/qualification/ssdp70/eval/test_batch_cli.py", line 510, in test_inadmissible_standing_failure_counts_retained_failures_without_scoring_other_dispositions
+    self.assertEqual(tallies["unresolved"], 0)
+AssertionError: 1 != 0
+
+======================================================================
+FAIL: test_inadmissible_standing_failure_counts_retained_failures_without_scoring_other_dispositions (test_batch_cli.SlotScoringComposition) (route='T7')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/samjin/agent-skills/scientific-software-development-protocol/qualification/ssdp70/eval/test_batch_cli.py", line 510, in test_inadmissible_standing_failure_counts_retained_failures_without_scoring_other_dispositions
+    self.assertEqual(tallies["unresolved"], 0)
+AssertionError: 1 != 0
+
+----------------------------------------------------------------------
+Ran 113 tests in 1.086s
+
+FAILED (failures=2)

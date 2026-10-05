@@ -324,6 +324,8 @@ def aggregate_assessments(out_dir: Path, manifest: dict[str, Any] | None = None)
             states.extend(key_criteria[key][criterion] for key in keys if criterion != "deterministic activation" or key != family["panels"]["ordinary"]["key"])
         if criterion == "no critical failure" and result["critical_failures"].get(manifest.get("candidate_arm"), 0):
             states.append("FAIL")
+        if criterion == "no critical failure" and any(result["critical_unresolved"].values()):
+            states.append("UNRESOLVED")
         result["criteria"][criterion] = "FAIL" if "FAIL" in states else "PASS" if states and set(states) == {"PASS"} else "UNRESOLVED"
     primary_pass = not result["errors"] and len(result["runs"]) == len(expected) and set(result["criteria"].values()) == {"PASS"}
     result["primary_family_id"] = family["family_id"]
@@ -354,6 +356,7 @@ def score_slots(result, manifest, expected, out_dir, key_criteria):
     result["total_runs"] = len(scored)
     result["arms"] = {}
     result["critical_failures"] = {}
+    result["critical_unresolved"] = {}
     for slot, actual in scored.items():
         arm = actual.get("arm")
         if arm is None:
@@ -362,7 +365,12 @@ def score_slots(result, manifest, expected, out_dir, key_criteria):
         data["total"] += 1
         outcome = actual["qualification_outcome"]
         data["outcomes"][outcome] = data["outcomes"].get(outcome,0)+1
-        for d in actual.get("dispositions",[]):
+        # Inadmissible assessments retain independent dispositions for failure
+        # adjudication only. A definite failure still stands; other retained
+        # dispositions do not become doctrine scores on an inadmissible run.
+        dispositions = actual.get("dispositions") or [
+            d for d in actual.get("original_dispositions", []) if d.get("result") == "fail"]
+        for d in dispositions:
             data["dispositions"][d["result"]] += 1
             if d["critical"] and d["result"]=="fail":
                 result["critical_failures"][arm]=result["critical_failures"].get(arm,0)+1
@@ -378,6 +386,29 @@ def score_slots(result, manifest, expected, out_dir, key_criteria):
                     data["dispositions"]["fail"] += 1
                     if d.get("critical"):
                         result["critical_failures"][arm] = result["critical_failures"].get(arm,0)+1
+        if record.get("standing_failure") and rid in result["runs"]:
+            rerun = result["runs"][rid]
+            arm = rerun.get("arm")
+            for d in rerun.get("dispositions") or rerun.get("original_dispositions") or []:
+                if d.get("result") != "unresolved":
+                    continue
+                if rid not in scored_ids or not rerun.get("dispositions"):
+                    data = result["arms"].setdefault(arm,{"total":0,"outcomes":{},"dispositions":{"pass":0,"fail":0,"unresolved":0}})
+                    data["dispositions"]["unresolved"] += 1
+                if d.get("critical"):
+                    result["critical_unresolved"][arm] = result["critical_unresolved"].get(arm,0)+1
+                    continue
+                # A noncritical block follows its frozen criterion binding; it
+                # cannot be relabeled critical or silently discarded when unmapped.
+                parts = {o["part"] for o in manifest.get("opportunities", [])
+                         if core70.CAMPAIGN_PARTS[o["part"]][0] != "report-only"
+                         and any(ref["run"] == record["original"] and ref["item"] == d.get("item")
+                                 for ref in o["realizations"])}
+                if not parts:
+                    raise core70.ContractError("unresolved replacement disposition has no qualification criterion binding")
+                for part in parts:
+                    if result["parts"][part]["state"] != "FAIL":
+                        result["parts"][part].update(state="UNRESOLVED", reason="unresolved disposition in a standing replacement")
     for key in manifest["offered_profiles"]:
         members = [scored.get(slot) for slot in slots if expected[slot]["profile_key_sha256"] == key]
         deterministic = [scored.get(slot) for slot in slots if expected[slot]["profile_key_sha256"] == key

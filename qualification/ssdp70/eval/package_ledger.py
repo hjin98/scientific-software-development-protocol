@@ -435,7 +435,14 @@ def account(ledger: dict[str, Any] | None, cut_ns: int | None, events: list[dict
             parameters: dict[str, Any] | None = None) -> dict[str, Any]:
     """Revision 8: supply proves positives; intact ledger and conservative windows permit negatives."""
     params = dict(PARAMETERS if parameters is None else parameters)
-    requests = list(request_records or [])
+    # Coverage/correspondence is derived by the adapter from retained raw evidence.
+    # Missing or malformed metadata cannot enable the window-dependent supply route.
+    records_valid = isinstance(request_records, list) and all(isinstance(r, dict) for r in request_records)
+    requests = list(request_records) if records_valid else []
+    pairing_verified = bool(requests) and all(
+        r.get("pairing_verified") is True and "position" in r
+        and (r["position"] is None or type(r["position"]) is int)
+        for r in requests)
     delivered = set(delivered or ())
     global_reasons = list(extra_errors or [])
     # Even a lost/absent ledger must not suppress content that demonstrably reached the model.
@@ -445,6 +452,8 @@ def account(ledger: dict[str, Any] | None, cut_ns: int | None, events: list[dict
     result = {"schema": SCHEMA, "mechanism": MECHANISM, "parameters": params,
               "exact": False, "owner_floor_exact": False, "reasons": global_reasons,
               "cut_ns": cut_ns, "request_records": requests,
+              "route_iii_available": pairing_verified,
+              "route_iii_unavailable_reason": None if pairing_verified else "request/assistant-turn pairing is not verified",
               "opened_pre_request0": [], "opened_post_request0": [], "supplied": {},
               "explained_by_delivery": [], "unexplained": [], "consumed_files": {}, "opened_files": [],
               "owner_read_observed": positive, "owner_minor_exposure": minor, "owner_open_windows": [],
@@ -533,7 +542,7 @@ def account(ledger: dict[str, Any] | None, cut_ns: int | None, events: list[dict
                 route = "distinctive"
             elif _names_path(event, rel, mount):
                 route = "path-linked"
-            elif match == "exact" and len(source.encode()) >= params["distinctiveness_floor"] and any(
+            elif pairing_verified and match == "exact" and len(source.encode()) >= params["distinctiveness_floor"] and any(
                     r["window"]["start"] <= sequence <= r["window"]["end"] for r in rows):
                 route = "whole-file-in-window"
             if route:

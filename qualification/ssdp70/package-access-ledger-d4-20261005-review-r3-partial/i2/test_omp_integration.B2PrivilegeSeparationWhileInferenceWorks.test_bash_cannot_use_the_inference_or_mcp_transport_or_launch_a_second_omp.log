@@ -1,0 +1,23 @@
+E
+======================================================================
+ERROR: test_bash_cannot_use_the_inference_or_mcp_transport_or_launch_a_second_omp (test_omp_integration.B2PrivilegeSeparationWhileInferenceWorks)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/tmp/cr5/qualification/ssdp70/eval/test_omp_integration.py", line 952, in test_bash_cannot_use_the_inference_or_mcp_transport_or_launch_a_second_omp
+    summary, out = self.run_attacks([
+  File "/tmp/cr5/qualification/ssdp70/eval/test_omp_integration.py", line 819, in run_attacks
+    summary = rig.run(scenario_steps(*steps, text("done")))
+  File "/tmp/cr5/qualification/ssdp70/eval/omp_rig.py", line 156, in run
+    server, _state = stand_in_provider.serve(
+  File "/tmp/cr5/qualification/ssdp70/eval/stand_in_provider.py", line 148, in serve
+    server = _UnixHTTPServer(unix, handler) if unix else _TcpServer((host, port), handler)
+  File "/usr/lib/python3.10/socketserver.py", line 448, in __init__
+    self.socket = socket.socket(self.address_family,
+  File "/usr/lib/python3.10/socket.py", line 232, in __init__
+    _socket.socket.__init__(self, family, type, proto, fileno)
+PermissionError: [Errno 1] Operation not permitted
+
+----------------------------------------------------------------------
+Ran 1 test in 0.020s
+
+FAILED (errors=1)

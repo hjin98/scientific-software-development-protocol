@@ -1,0 +1,24 @@
+{
+  "schema": 1,
+  "governing_ssdp": "6.6.0",
+  "protocol70_state": "NON-QUALIFIED",
+  "baseline_commit": "3ca1891a0415ace6026bfb452377a557bc6947d6",
+  "candidate_state": "uncommitted working bytes; not baseline commit bytes",
+  "files": {
+    "qualification/ssdp70/eval/package_ledger.py": "d8c408eda659cd4a8515a3f5db882077d3e089ee3d556caef0c32102c61eac39",
+    "qualification/ssdp70/eval/core70.py": "6d40340ee7bbdbb130f22ea6e1c0067294353ad3bc7c88efceacc32f3fdb84bd",
+    "qualification/ssdp70/eval/test_package_ledger.py": "906751dcc856e63631ea875e95a7ba8b6def672ec08549f8fdc6f65a91298755",
+    "qualification/ssdp70/eval/test_activation_accounting.py": "b59e97feda838e34c2b65923b25f0de534cea90534060e11a821f99b94692553",
+    "qualification/ssdp70/D3-PACKAGE-ACCESS-LEDGER-OBSERVATION-DECISION-2026-10-04.md": "fccb9a3a44afd89338eb19c8b3238a9943fab7c88ee694428dc7d6ce124fd783",
+    "qualification/ssdp70/D3-PACKAGE-ACCESS-PREMISE-CLOSURE-2026-10-04.md": "5f713e2bd816950a2fd0962c6732242631295b3416387beb761c8b40906a3316",
+    "qualification/ssdp70/PROTOCOL-7.0-EVALUATION-AND-QUALIFICATION-CONTRACT.md": "c08a3e658a69714dc55218943f1d4fc3763f1d0ded4bbf70fdb06e7df08e1920",
+    "qualification/ssdp70/D3-PACKAGE-ACCESS-WINDOW-AND-REPLACEMENT-CLARIFICATION-2026-10-05.md": "b7bead4ecb139732683d1919740a19ce3342740f2e8dace00781d4159c99e87f",
+    "qualification/ssdp70/D3-PACKAGE-ACCESS-UNVERIFIED-PAIRING-FAIL-CLOSURE-2026-10-05.md": "c2f7a3a348a9e9e1ef448b81e0db456e4e6720afdd5994f14b22068035edee9c",
+    "qualification/ssdp70/INDEPENDENT-D3-WINDOW-REPLACEMENT-PAIRING-TEXT-REVIEW-2026-10-05-R1.md": "d52bfbba53eb3a90aef59059c83c4a86af4fa4a64c575f148c32040f24f2b6c4",
+    "qualification/ssdp70/INDEPENDENT-D3-WINDOW-REPLACEMENT-PAIRING-TEXT-REVIEW-2026-10-05-R2.md": "670e03fd8fbb80c194e21a72e50fc22b1214fdf077744031bb74f34488e7f6f6"
+  },
+  "omp_executable_sha256": "6054460b29e9bad5eba78336f291e1979c2fa0a5cd96fc2d92afd666cc681d26",
+  "provider": "local deterministic stand-in only; no real provider credentials",
+  "tests_global_cap": 16,
+  "independent_d4_review": "pending"
+}

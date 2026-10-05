@@ -463,6 +463,8 @@ print(len(decoded))
                 set(inputs['delivered']),identity['identity_sha256'],0)[2]
         mutations={
             'missing-ledger':lambda b:b.update(ledger=None),
+            'unverified-pairing':lambda b:[r.update(pairing_verified=False, position=None) for r in b['request_records']],
+            'missing-pairing':lambda b:b.update(request_records=[]),
             'mutation':lambda b:b['ledger']['events'].append({'rel':self.OWNER_REL,'dir':False,'flags':['modify'],'interval':0,'count':1}),
             'native-contradiction':lambda b:b['ledger'].update(events=[]),
             'pre-request-owner':lambda b:[r.update(interval=0) for r in b['ledger']['events'] if r['rel']==self.OWNER_REL],
@@ -488,9 +490,13 @@ print(len(decoded))
                 changed['owner_read_observed']=accounting['owner_read_observed']
                 if name=='missing-ledger':lost_summary=changed
                 self.assertEqual(self.assessed_owner(changed,identity,rig)['owner_floor_state'],'FAIL')
-                if name in ('missing-ledger','mutation','native-contradiction','pre-request-owner'):
+                if name in ('missing-ledger','mutation','native-contradiction','pre-request-owner','unverified-pairing','missing-pairing'):
                     self.assertFalse(accounting['exact'])
                 else:self.assertFalse(accounting['owner_floor_exact'])
+                if name in ('unverified-pairing','missing-pairing'):
+                    self.assertFalse(accounting['route_iii_available'])
+                    self.assertIsNone(accounting['active_ssdp_bytes'])
+                    self.assertTrue(core70.validate_claim_observability(source,['active-byte burden'],ledger_exact=accounting['exact']))
         failed_delivery=copy.deepcopy(source)
         for e in failed_delivery:
             if e['kind']=='root_selection': e['payload']['delivery']={'delivered':False}

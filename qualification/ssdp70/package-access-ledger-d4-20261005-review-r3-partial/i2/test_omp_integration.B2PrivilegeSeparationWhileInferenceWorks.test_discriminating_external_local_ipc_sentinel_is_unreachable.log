@@ -1,0 +1,28 @@
+F
+======================================================================
+FAIL: test_discriminating_external_local_ipc_sentinel_is_unreachable (test_omp_integration.B2PrivilegeSeparationWhileInferenceWorks)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/tmp/cr5/qualification/ssdp70/eval/test_omp_integration.py", line 1124, in test_discriminating_external_local_ipc_sentinel_is_unreachable
+    summary = rig.run(scenario_steps(
+  File "/tmp/cr5/qualification/ssdp70/eval/omp_rig.py", line 156, in run
+    server, _state = stand_in_provider.serve(
+  File "/tmp/cr5/qualification/ssdp70/eval/stand_in_provider.py", line 148, in serve
+    server = _UnixHTTPServer(unix, handler) if unix else _TcpServer((host, port), handler)
+  File "/usr/lib/python3.10/socketserver.py", line 448, in __init__
+    self.socket = socket.socket(self.address_family,
+  File "/usr/lib/python3.10/socket.py", line 232, in __init__
+    _socket.socket.__init__(self, family, type, proto, fileno)
+PermissionError: [Errno 1] Operation not permitted
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/tmp/cr5/qualification/ssdp70/eval/test_omp_integration.py", line 1142, in test_discriminating_external_local_ipc_sentinel_is_unreachable
+    self.fail(f"B2 = UNRESOLVED/BLOCKING: outer host denied the discriminating local IPC/provider probe: {type(exc).__name__} errno={exc.errno}")
+AssertionError: B2 = UNRESOLVED/BLOCKING: outer host denied the discriminating local IPC/provider probe: PermissionError errno=1
+
+----------------------------------------------------------------------
+Ran 1 test in 0.015s
+
+FAILED (failures=1)

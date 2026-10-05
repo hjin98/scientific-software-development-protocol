@@ -1,0 +1,59 @@
+
+======================================================================
+ERROR: test_w_single_long_line_repeated_seven_times_and_subquantum_are_minor (test_activation_accounting.RealActivationPath) (command="sed -n '3p' /opt/ssdp/skills/software-implementation/references/scientific-inspectability-and-initiative.md")
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/tmp/cr5/qualification/ssdp70/eval/test_activation_accounting.py", line 321, in test_w_single_long_line_repeated_seven_times_and_subquantum_are_minor
+    summary,_,identity,rig=self.realize(scenario=self.bash_steps(command),claims=[])
+  File "/tmp/cr5/qualification/ssdp70/eval/test_activation_accounting.py", line 100, in realize
+    summary = rig.run(scenario or {'steps':[{'text':'CANARY-DEVELOPMENT'}]})
+  File "/tmp/cr5/qualification/ssdp70/eval/omp_rig.py", line 156, in run
+    server, _state = stand_in_provider.serve(
+  File "/tmp/cr5/qualification/ssdp70/eval/stand_in_provider.py", line 148, in serve
+    server = _UnixHTTPServer(unix, handler) if unix else _TcpServer((host, port), handler)
+  File "/usr/lib/python3.10/socketserver.py", line 448, in __init__
+    self.socket = socket.socket(self.address_family,
+  File "/usr/lib/python3.10/socket.py", line 232, in __init__
+    _socket.socket.__init__(self, family, type, proto, fileno)
+PermissionError: [Errno 1] Operation not permitted
+
+======================================================================
+ERROR: test_w_single_long_line_repeated_seven_times_and_subquantum_are_minor (test_activation_accounting.RealActivationPath) (command="for n in 1 2 3 4 5 6 7; do sed -n '3p' /opt/ssdp/skills/software-implementation/references/scientific-inspectability-and-initiative.md; done")
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/tmp/cr5/qualification/ssdp70/eval/test_activation_accounting.py", line 321, in test_w_single_long_line_repeated_seven_times_and_subquantum_are_minor
+    summary,_,identity,rig=self.realize(scenario=self.bash_steps(command),claims=[])
+  File "/tmp/cr5/qualification/ssdp70/eval/test_activation_accounting.py", line 100, in realize
+    summary = rig.run(scenario or {'steps':[{'text':'CANARY-DEVELOPMENT'}]})
+  File "/tmp/cr5/qualification/ssdp70/eval/omp_rig.py", line 156, in run
+    server, _state = stand_in_provider.serve(
+  File "/tmp/cr5/qualification/ssdp70/eval/stand_in_provider.py", line 148, in serve
+    server = _UnixHTTPServer(unix, handler) if unix else _TcpServer((host, port), handler)
+  File "/usr/lib/python3.10/socketserver.py", line 448, in __init__
+    self.socket = socket.socket(self.address_family,
+  File "/usr/lib/python3.10/socket.py", line 232, in __init__
+    _socket.socket.__init__(self, family, type, proto, fileno)
+PermissionError: [Errno 1] Operation not permitted
+
+======================================================================
+ERROR: test_w_single_long_line_repeated_seven_times_and_subquantum_are_minor (test_activation_accounting.RealActivationPath) (command="sed -n '1p' /opt/ssdp/skills/software-implementation/references/scientific-inspectability-and-initiative.md")
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/tmp/cr5/qualification/ssdp70/eval/test_activation_accounting.py", line 321, in test_w_single_long_line_repeated_seven_times_and_subquantum_are_minor
+    summary,_,identity,rig=self.realize(scenario=self.bash_steps(command),claims=[])
+  File "/tmp/cr5/qualification/ssdp70/eval/test_activation_accounting.py", line 100, in realize
+    summary = rig.run(scenario or {'steps':[{'text':'CANARY-DEVELOPMENT'}]})
+  File "/tmp/cr5/qualification/ssdp70/eval/omp_rig.py", line 156, in run
+    server, _state = stand_in_provider.serve(
+  File "/tmp/cr5/qualification/ssdp70/eval/stand_in_provider.py", line 148, in serve
+    server = _UnixHTTPServer(unix, handler) if unix else _TcpServer((host, port), handler)
+  File "/usr/lib/python3.10/socketserver.py", line 448, in __init__
+    self.socket = socket.socket(self.address_family,
+  File "/usr/lib/python3.10/socket.py", line 232, in __init__
+    _socket.socket.__init__(self, family, type, proto, fileno)
+PermissionError: [Errno 1] Operation not permitted
+
+----------------------------------------------------------------------
+Ran 1 test in 0.038s
+
+FAILED (errors=3)

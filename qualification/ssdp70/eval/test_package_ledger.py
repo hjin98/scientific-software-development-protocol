@@ -256,7 +256,7 @@ class SupplyIdentifiesTheOpenedFile(unittest.TestCase):
         self.tmp.cleanup()
 
     def account(self, opens, events, **kw):
-        kw.setdefault("request_records", [{"t_ns": 1000, "monotonic_ns": 1000, "position": min((e["sequence"] for e in events), default=1)}])
+        kw.setdefault("request_records", [{"t_ns": 1000, "pairing_verified": True, "monotonic_ns": 1000, "position": min((e["sequence"] for e in events), default=1)}])
         return pl.account(overlap_ledger(opens), 1000, events, self.root, mount=MOUNT, parameters=TEST_PARAMETERS, owner_name="owner.md", **kw)
 
     def test_shared_kernel_block_in_an_entrypoint_does_not_explain_a_size_probe_of_a_reference(self):
@@ -403,6 +403,7 @@ if __name__ == "__main__":
 
 class Revision8OwnerEvidence(PhaseAndDelivery):
     def account(self, opens, events, **kwargs):
+        kwargs.setdefault("request_records", [{"t_ns": 1000, "monotonic_ns": 1000, "position": min((e["sequence"] for e in events), default=1), "pairing_verified": True}])
         return pl.account(overlap_ledger(opens), 1000, events, self.root, mount=MOUNT,
                           parameters=TEST_PARAMETERS, owner_name="owner.md", **kwargs)
 
@@ -433,7 +434,7 @@ class Revision8OwnerEvidence(PhaseAndDelivery):
 
     def test_o_r_x_trace_order_windows_late_drain_background_and_fallback(self):
         events = [event(i,"nothing") for i in range(1,11)]
-        requests = [{"t_ns": t, "monotonic_ns": t, "position": pos} for t,pos in ((1000,1),(1500,4),(3000,8))]
+        requests = [{"t_ns": t, "pairing_verified": True, "monotonic_ns": t, "position": pos} for t,pos in ((1000,1),(1500,4),(3000,8))]
         r = self.account([(2000,"x/references/owner.md"),(5000,"x/references/owner.md")],events, request_records=requests)
         self.assertEqual([v["window"]["start"] for v in r["owner_open_windows"]], [4,8])
         requests[1]["position"] = 1
@@ -522,11 +523,42 @@ class OwnerFloorProductionOwner(unittest.TestCase):
 class ReviewDiscriminators(PhaseAndDelivery):
     """Independent-review B-2: predicates that named acceptance cases depend on and no test could flip."""
     def account(self, opens, events, **kwargs):
+        kwargs.setdefault("request_records", [{"t_ns": 1000, "monotonic_ns": 1000, "position": min((e["sequence"] for e in events), default=1), "pairing_verified": True}])
         return pl.account(overlap_ledger(opens), 1000, events, self.root, mount=MOUNT,
                           parameters=TEST_PARAMETERS, owner_name="owner.md", **kwargs)
 
+    def test_unverified_pairing_never_explains_a_twin_from_whole_trace_content(self):
+        good = {"t_ns": 1000, "monotonic_ns": 1000, "position": None, "pairing_verified": True}
+        cases = [None, [], "malformed", [None], [good, None]]
+        cases += [[{k: v for k, v in good.items() if k != "pairing_verified"}]]
+        cases += [[{**good, "pairing_verified": v}] for v in (False, None, "true", 1)]
+        cases += [[good, {**good, "pairing_verified": False}]]
+        cases += [[{**good, "position": v}] for v in (True, "3", [])]
+        for records in cases:
+            with self.subTest(records=records):
+                r = self.account([(2000, "x/references/owner.md")], [event(3, TWIN)], request_records=records)
+                self.assertFalse(r["route_iii_available"])
+                self.assertFalse(r["exact"], r)
+                self.assertIsNone(r["active_ssdp_bytes"])
+                self.assertEqual([u["file"] for u in r["unexplained"]], ["x/references/owner.md"])
+                self.assertTrue(r["owner_read_observed"])
+                self.assertEqual(core70.owner_floor_state(r, 5, r2_adjudicated=True), "FAIL")
+        r = self.account([(2000, "x/references/owner.md")], [event(3, TWIN)], request_records=[good])
+        self.assertTrue(r["exact"], r["reasons"])
+        self.assertEqual(r["supplied"]["x/references/owner.md"]["routes"], ["whole-file-in-window"])
+
+    def test_unverified_pairing_preserves_distinctive_and_path_linked_supply(self):
+        for rel, text, command, route in (
+                ("x/references/ref.md", REF, "cat nonliteral", "distinctive"),
+                ("x/references/owner.md", TWIN, f"cat {MOUNT}/x/references/owner.md", "path-linked")):
+            with self.subTest(route=route):
+                r = self.account([(2000, rel)], [event(3, text, command=command)], request_records=[])
+                self.assertFalse(r["route_iii_available"])
+                self.assertTrue(r["exact"], r["reasons"])
+                self.assertEqual(r["supplied"][rel]["routes"], [route])
+
     def test_s_whole_file_shown_outside_the_candidate_window_does_not_explain_the_open(self):
-        requests = [{"t_ns": 1000, "monotonic_ns": 1000, "position": 1}, {"t_ns": 2500, "monotonic_ns": 2500, "position": 8}]
+        requests = [{"t_ns": 1000, "pairing_verified": True, "monotonic_ns": 1000, "position": 1}, {"t_ns": 2500, "pairing_verified": True, "monotonic_ns": 2500, "position": 8}]
         outside = [event(i, "nothing") for i in range(1, 11)]
         outside[2] = event(3, TWIN)
         inside = [event(i, "nothing") for i in range(1, 11)]
@@ -555,7 +587,7 @@ class ReviewDiscriminators(PhaseAndDelivery):
         self.assertEqual(core70.owner_floor_state(r, 5, r2_adjudicated=True), "FAIL")
 
     def test_s_window_ends_before_the_first_event_of_the_next_request(self):
-        requests = [{"t_ns": 1000, "monotonic_ns": 1000, "position": 1}, {"t_ns": 2500, "monotonic_ns": 2500, "position": 8}]
+        requests = [{"t_ns": 1000, "pairing_verified": True, "monotonic_ns": 1000, "position": 1}, {"t_ns": 2500, "pairing_verified": True, "monotonic_ns": 2500, "position": 8}]
         for seq, exact in ((7, True), (8, False)):
             events = [event(i, "nothing") for i in range(1, 11)]
             events[seq - 1] = event(seq, TWIN)
@@ -606,7 +638,7 @@ class ReviewDiscriminators(PhaseAndDelivery):
 
     def test_s_unpositioned_later_request_bounds_nothing_so_an_honest_text_final_turn_stays_explained(self):
         # A text-only final turn has no tool event, hence no position (None): it bounds nothing from above.
-        requests = [{"t_ns": 1000, "monotonic_ns": 1000, "position": 2}, {"t_ns": 1500, "monotonic_ns": 1500, "position": None}]
+        requests = [{"t_ns": 1000, "pairing_verified": True, "monotonic_ns": 1000, "position": 2}, {"t_ns": 1500, "pairing_verified": True, "monotonic_ns": 1500, "position": None}]
         for shown, exact in ((3, True), (1, False)):                       # whole file shown after / before the window start
             events = [event(i, "nothing") for i in range(1, 6)]
             events[shown - 1] = event(shown, TWIN)
@@ -616,8 +648,8 @@ class ReviewDiscriminators(PhaseAndDelivery):
             self.assertEqual(r["exact"], exact, (shown, r["reasons"]))
 
     def test_s_unpositioned_or_absent_earlier_request_starts_at_the_trace_start_and_the_end_is_still_bounded(self):
-        for earlier in ([], [{"t_ns": 1000, "monotonic_ns": 1000, "position": None}]):
-            requests = earlier + [{"t_ns": 2500, "monotonic_ns": 2500, "position": 8}]
+        for earlier in ([], [{"t_ns": 1000, "pairing_verified": True, "monotonic_ns": 1000, "position": None}]):
+            requests = earlier + [{"t_ns": 2500, "pairing_verified": True, "monotonic_ns": 2500, "position": 8}]
             for seq, exact in ((5, True), (9, False)):
                 events = [event(i, "nothing") for i in range(1, 11)]
                 events[seq - 1] = event(seq, TWIN)
@@ -627,7 +659,7 @@ class ReviewDiscriminators(PhaseAndDelivery):
                 self.assertEqual(r["exact"], exact, (seq, earlier))
 
     def test_s_inconsistent_positions_make_an_empty_window_the_whole_trace(self):
-        requests = [{"t_ns": 1000, "monotonic_ns": 1000, "position": 8}, {"t_ns": 1500, "monotonic_ns": 1500, "position": 3}]
+        requests = [{"t_ns": 1000, "pairing_verified": True, "monotonic_ns": 1000, "position": 8}, {"t_ns": 1500, "pairing_verified": True, "monotonic_ns": 1500, "position": 3}]
         events = [event(i, "nothing") for i in range(1, 11)]
         r = self.account([(1200, "x/references/owner.md")], events, request_records=requests)
         window = r["owner_open_windows"][0]["window"]
@@ -682,10 +714,10 @@ class TimingBracketEdgesAreConservative(unittest.TestCase):
 
     def test_x_decreasing_request_stamps_are_timing_loss_even_when_consistent_with_the_baseline(self):
         ledger = {"heartbeats": [self.beat(0, 1000), self.beat(1, 2000)]}
-        ordered = [{"t_ns": 1500, "monotonic_ns": 1500}, {"t_ns": 1800, "monotonic_ns": 1800}]
+        ordered = [{"t_ns": 1500, "pairing_verified": True, "monotonic_ns": 1500}, {"t_ns": 1800, "pairing_verified": True, "monotonic_ns": 1800}]
         self.assertEqual(pl.timing(ledger, ordered, self.PARAMS)[1], [])
-        for decreasing in ([{"t_ns": 1800, "monotonic_ns": 1800}, {"t_ns": 1500, "monotonic_ns": 1500}],
-                           [{"t_ns": 1500, "monotonic_ns": 1800}, {"t_ns": 1800, "monotonic_ns": 1500}][::-1]):
+        for decreasing in ([{"t_ns": 1800, "pairing_verified": True, "monotonic_ns": 1800}, {"t_ns": 1500, "pairing_verified": True, "monotonic_ns": 1500}],
+                           [{"t_ns": 1500, "pairing_verified": True, "monotonic_ns": 1800}, {"t_ns": 1800, "pairing_verified": True, "monotonic_ns": 1500}][::-1]):
             brackets, reasons = pl.timing(ledger, decreasing, self.PARAMS)
             self.assertIn("request stamps decrease or disagree with heartbeat baseline", reasons)
             self.assertTrue(all(b["timing_loss"] for b in brackets.values()))

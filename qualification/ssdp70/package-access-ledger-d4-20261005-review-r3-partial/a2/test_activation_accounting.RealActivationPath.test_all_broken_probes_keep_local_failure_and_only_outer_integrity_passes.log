@@ -1,0 +1,149 @@
+
+======================================================================
+ERROR: test_all_broken_probes_keep_local_failure_and_only_outer_integrity_passes (test_activation_accounting.RealActivationPath) (fault='adapter-assertion')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/tmp/cr5/qualification/ssdp70/eval/test_activation_accounting.py", line 133, in test_all_broken_probes_keep_local_failure_and_only_outer_integrity_passes
+    summary,aggregate,identity,rig=self.realize(fault=fault,scenario=scenario)
+  File "/tmp/cr5/qualification/ssdp70/eval/test_activation_accounting.py", line 100, in realize
+    summary = rig.run(scenario or {'steps':[{'text':'CANARY-DEVELOPMENT'}]})
+  File "/tmp/cr5/qualification/ssdp70/eval/omp_rig.py", line 156, in run
+    server, _state = stand_in_provider.serve(
+  File "/tmp/cr5/qualification/ssdp70/eval/stand_in_provider.py", line 148, in serve
+    server = _UnixHTTPServer(unix, handler) if unix else _TcpServer((host, port), handler)
+  File "/usr/lib/python3.10/socketserver.py", line 448, in __init__
+    self.socket = socket.socket(self.address_family,
+  File "/usr/lib/python3.10/socket.py", line 232, in __init__
+    _socket.socket.__init__(self, family, type, proto, fileno)
+PermissionError: [Errno 1] Operation not permitted
+
+======================================================================
+ERROR: test_all_broken_probes_keep_local_failure_and_only_outer_integrity_passes (test_activation_accounting.RealActivationPath) (fault='injection-labelled-command')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/tmp/cr5/qualification/ssdp70/eval/test_activation_accounting.py", line 133, in test_all_broken_probes_keep_local_failure_and_only_outer_integrity_passes
+    summary,aggregate,identity,rig=self.realize(fault=fault,scenario=scenario)
+  File "/tmp/cr5/qualification/ssdp70/eval/test_activation_accounting.py", line 100, in realize
+    summary = rig.run(scenario or {'steps':[{'text':'CANARY-DEVELOPMENT'}]})
+  File "/tmp/cr5/qualification/ssdp70/eval/omp_rig.py", line 156, in run
+    server, _state = stand_in_provider.serve(
+  File "/tmp/cr5/qualification/ssdp70/eval/stand_in_provider.py", line 148, in serve
+    server = _UnixHTTPServer(unix, handler) if unix else _TcpServer((host, port), handler)
+  File "/usr/lib/python3.10/socketserver.py", line 448, in __init__
+    self.socket = socket.socket(self.address_family,
+  File "/usr/lib/python3.10/socket.py", line 232, in __init__
+    _socket.socket.__init__(self, family, type, proto, fileno)
+PermissionError: [Errno 1] Operation not permitted
+
+======================================================================
+ERROR: test_all_broken_probes_keep_local_failure_and_only_outer_integrity_passes (test_activation_accounting.RealActivationPath) (fault='instructed-read')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/tmp/cr5/qualification/ssdp70/eval/test_activation_accounting.py", line 133, in test_all_broken_probes_keep_local_failure_and_only_outer_integrity_passes
+    summary,aggregate,identity,rig=self.realize(fault=fault,scenario=scenario)
+  File "/tmp/cr5/qualification/ssdp70/eval/test_activation_accounting.py", line 100, in realize
+    summary = rig.run(scenario or {'steps':[{'text':'CANARY-DEVELOPMENT'}]})
+  File "/tmp/cr5/qualification/ssdp70/eval/omp_rig.py", line 156, in run
+    server, _state = stand_in_provider.serve(
+  File "/tmp/cr5/qualification/ssdp70/eval/stand_in_provider.py", line 148, in serve
+    server = _UnixHTTPServer(unix, handler) if unix else _TcpServer((host, port), handler)
+  File "/usr/lib/python3.10/socketserver.py", line 448, in __init__
+    self.socket = socket.socket(self.address_family,
+  File "/usr/lib/python3.10/socket.py", line 232, in __init__
+    _socket.socket.__init__(self, family, type, proto, fileno)
+PermissionError: [Errno 1] Operation not permitted
+
+======================================================================
+ERROR: test_all_broken_probes_keep_local_failure_and_only_outer_integrity_passes (test_activation_accounting.RealActivationPath) (fault='late')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/tmp/cr5/qualification/ssdp70/eval/test_activation_accounting.py", line 133, in test_all_broken_probes_keep_local_failure_and_only_outer_integrity_passes
+    summary,aggregate,identity,rig=self.realize(fault=fault,scenario=scenario)
+  File "/tmp/cr5/qualification/ssdp70/eval/test_activation_accounting.py", line 100, in realize
+    summary = rig.run(scenario or {'steps':[{'text':'CANARY-DEVELOPMENT'}]})
+  File "/tmp/cr5/qualification/ssdp70/eval/omp_rig.py", line 156, in run
+    server, _state = stand_in_provider.serve(
+  File "/tmp/cr5/qualification/ssdp70/eval/stand_in_provider.py", line 148, in serve
+    server = _UnixHTTPServer(unix, handler) if unix else _TcpServer((host, port), handler)
+  File "/usr/lib/python3.10/socketserver.py", line 448, in __init__
+    self.socket = socket.socket(self.address_family,
+  File "/usr/lib/python3.10/socket.py", line 232, in __init__
+    _socket.socket.__init__(self, family, type, proto, fileno)
+PermissionError: [Errno 1] Operation not permitted
+
+======================================================================
+ERROR: test_all_broken_probes_keep_local_failure_and_only_outer_integrity_passes (test_activation_accounting.RealActivationPath) (fault='no-request')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/tmp/cr5/qualification/ssdp70/eval/test_activation_accounting.py", line 133, in test_all_broken_probes_keep_local_failure_and_only_outer_integrity_passes
+    summary,aggregate,identity,rig=self.realize(fault=fault,scenario=scenario)
+  File "/tmp/cr5/qualification/ssdp70/eval/test_activation_accounting.py", line 100, in realize
+    summary = rig.run(scenario or {'steps':[{'text':'CANARY-DEVELOPMENT'}]})
+  File "/tmp/cr5/qualification/ssdp70/eval/omp_rig.py", line 156, in run
+    server, _state = stand_in_provider.serve(
+  File "/tmp/cr5/qualification/ssdp70/eval/stand_in_provider.py", line 148, in serve
+    server = _UnixHTTPServer(unix, handler) if unix else _TcpServer((host, port), handler)
+  File "/usr/lib/python3.10/socketserver.py", line 448, in __init__
+    self.socket = socket.socket(self.address_family,
+  File "/usr/lib/python3.10/socket.py", line 232, in __init__
+    _socket.socket.__init__(self, family, type, proto, fileno)
+PermissionError: [Errno 1] Operation not permitted
+
+======================================================================
+ERROR: test_all_broken_probes_keep_local_failure_and_only_outer_integrity_passes (test_activation_accounting.RealActivationPath) (fault='truncated')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/tmp/cr5/qualification/ssdp70/eval/test_activation_accounting.py", line 133, in test_all_broken_probes_keep_local_failure_and_only_outer_integrity_passes
+    summary,aggregate,identity,rig=self.realize(fault=fault,scenario=scenario)
+  File "/tmp/cr5/qualification/ssdp70/eval/test_activation_accounting.py", line 100, in realize
+    summary = rig.run(scenario or {'steps':[{'text':'CANARY-DEVELOPMENT'}]})
+  File "/tmp/cr5/qualification/ssdp70/eval/omp_rig.py", line 156, in run
+    server, _state = stand_in_provider.serve(
+  File "/tmp/cr5/qualification/ssdp70/eval/stand_in_provider.py", line 148, in serve
+    server = _UnixHTTPServer(unix, handler) if unix else _TcpServer((host, port), handler)
+  File "/usr/lib/python3.10/socketserver.py", line 448, in __init__
+    self.socket = socket.socket(self.address_family,
+  File "/usr/lib/python3.10/socket.py", line 232, in __init__
+    _socket.socket.__init__(self, family, type, proto, fileno)
+PermissionError: [Errno 1] Operation not permitted
+
+======================================================================
+ERROR: test_all_broken_probes_keep_local_failure_and_only_outer_integrity_passes (test_activation_accounting.RealActivationPath) (fault='withheld')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/tmp/cr5/qualification/ssdp70/eval/test_activation_accounting.py", line 133, in test_all_broken_probes_keep_local_failure_and_only_outer_integrity_passes
+    summary,aggregate,identity,rig=self.realize(fault=fault,scenario=scenario)
+  File "/tmp/cr5/qualification/ssdp70/eval/test_activation_accounting.py", line 100, in realize
+    summary = rig.run(scenario or {'steps':[{'text':'CANARY-DEVELOPMENT'}]})
+  File "/tmp/cr5/qualification/ssdp70/eval/omp_rig.py", line 156, in run
+    server, _state = stand_in_provider.serve(
+  File "/tmp/cr5/qualification/ssdp70/eval/stand_in_provider.py", line 148, in serve
+    server = _UnixHTTPServer(unix, handler) if unix else _TcpServer((host, port), handler)
+  File "/usr/lib/python3.10/socketserver.py", line 448, in __init__
+    self.socket = socket.socket(self.address_family,
+  File "/usr/lib/python3.10/socket.py", line 232, in __init__
+    _socket.socket.__init__(self, family, type, proto, fileno)
+PermissionError: [Errno 1] Operation not permitted
+
+======================================================================
+ERROR: test_all_broken_probes_keep_local_failure_and_only_outer_integrity_passes (test_activation_accounting.RealActivationPath) (fault='wrong-root')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/tmp/cr5/qualification/ssdp70/eval/test_activation_accounting.py", line 133, in test_all_broken_probes_keep_local_failure_and_only_outer_integrity_passes
+    summary,aggregate,identity,rig=self.realize(fault=fault,scenario=scenario)
+  File "/tmp/cr5/qualification/ssdp70/eval/test_activation_accounting.py", line 100, in realize
+    summary = rig.run(scenario or {'steps':[{'text':'CANARY-DEVELOPMENT'}]})
+  File "/tmp/cr5/qualification/ssdp70/eval/omp_rig.py", line 156, in run
+    server, _state = stand_in_provider.serve(
+  File "/tmp/cr5/qualification/ssdp70/eval/stand_in_provider.py", line 148, in serve
+    server = _UnixHTTPServer(unix, handler) if unix else _TcpServer((host, port), handler)
+  File "/usr/lib/python3.10/socketserver.py", line 448, in __init__
+    self.socket = socket.socket(self.address_family,
+  File "/usr/lib/python3.10/socket.py", line 232, in __init__
+    _socket.socket.__init__(self, family, type, proto, fileno)
+PermissionError: [Errno 1] Operation not permitted
+
+----------------------------------------------------------------------
+Ran 1 test in 0.100s
+
+FAILED (errors=8)

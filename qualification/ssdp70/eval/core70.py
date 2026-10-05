@@ -1505,6 +1505,22 @@ def derive_package_access(bundle, events, skills_root, owner_name, delivered, ru
         "sha256":sha256_file(clarification), "independent_review_path":"qualification/ssdp70/INDEPENDENT-D3-PREMISE-CLOSURE-REVIEW-2026-10-04-R2.md",
         "independent_review_sha256":"ee5dd4e722a0c80a180c0a5d83ba59379f6b4c81a08d38852e7e0b114a29a2ed",
         "publication":"uncommitted cycle decision; SHA-bound, no committed-source claim"}
+    text_review = decision.parent / "INDEPENDENT-D3-WINDOW-REPLACEMENT-PAIRING-TEXT-REVIEW-2026-10-05-R2.md"
+    text_review_sha = "670e03fd8fbb80c194e21a72e50fc22b1214fdf077744031bb74f34488e7f6f6"
+    if sha256_file(text_review) != text_review_sha:
+        raise ContractError("package-access window/replacement/pairing text review changed without rebinding")
+    for key, name, expected in (
+            ("window_replacement_clarification", "D3-PACKAGE-ACCESS-WINDOW-AND-REPLACEMENT-CLARIFICATION-2026-10-05.md",
+             "b7bead4ecb139732683d1919740a19ce3342740f2e8dace00781d4159c99e87f"),
+            ("unverified_pairing_delta", "D3-PACKAGE-ACCESS-UNVERIFIED-PAIRING-FAIL-CLOSURE-2026-10-05.md",
+             "c2f7a3a348a9e9e1ef448b81e0db456e4e6720afdd5994f14b22068035edee9c")):
+        bound = decision.parent / name
+        if sha256_file(bound) != expected:
+            raise ContractError("package-access D3 clarification changed without rebinding: " + name)
+        payload["provenance"][key] = {"path": "qualification/ssdp70/" + name, "sha256": expected,
+            "independent_review_path": "qualification/ssdp70/" + text_review.name,
+            "independent_review_sha256": text_review_sha,
+            "publication": "cycle decision; SHA-bound, no committed-source claim"}
     sequence = max((e["sequence"] for e in events), default=0) + 1
     event = {"schema_version": SCHEMA, "run_id": run_id, "event_id": f"e{sequence:06d}",
              "sequence": sequence, "actor_id": "supervisor", "kind": "package_access", "status": "observed",

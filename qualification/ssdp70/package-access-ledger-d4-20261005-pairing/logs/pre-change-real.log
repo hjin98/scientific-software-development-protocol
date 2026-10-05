@@ -1,0 +1,21 @@
+
+======================================================================
+FAIL: test_c_d_j_p_s_v_x_real_artifacts_reach_derived_event_and_scorer (test_activation_accounting.RealActivationPath) (fault='unverified-pairing')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/tmp/s70old.0s4ckmra/repo/qualification/ssdp70/eval/test_activation_accounting.py", line 494, in test_c_d_j_p_s_v_x_real_artifacts_reach_derived_event_and_scorer
+    self.assertFalse(accounting['exact'])
+AssertionError: True is not false
+
+======================================================================
+FAIL: test_c_d_j_p_s_v_x_real_artifacts_reach_derived_event_and_scorer (test_activation_accounting.RealActivationPath) (fault='missing-pairing')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/tmp/s70old.0s4ckmra/repo/qualification/ssdp70/eval/test_activation_accounting.py", line 494, in test_c_d_j_p_s_v_x_real_artifacts_reach_derived_event_and_scorer
+    self.assertFalse(accounting['exact'])
+AssertionError: True is not false
+
+----------------------------------------------------------------------
+Ran 1 test in 37.072s
+
+FAILED (failures=2)

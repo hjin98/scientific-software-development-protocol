@@ -1,0 +1,36 @@
+{
+  "record": {
+    "original": "T7-p70-r0",
+    "replacement": "T7-p70-r0-repl",
+    "question": "t7-owner-floor",
+    "original_outcome": "PASS",
+    "scored": true,
+    "standing_failure": true
+  },
+  "critical_part": {
+    "state": "PASS",
+    "arms": {
+      "p70": {
+        "opportunities": 12,
+        "pass": 12,
+        "fail": 0,
+        "unresolved": 0
+      },
+      "p66": {
+        "opportunities": 12,
+        "pass": 12,
+        "fail": 0,
+        "unresolved": 0
+      }
+    }
+  },
+  "critical_failures": {},
+  "candidate_dispositions": {
+    "pass": 12,
+    "fail": 0,
+    "unresolved": 0
+  },
+  "owner_part": "PASS",
+  "fixed_part": "PASS",
+  "harness": "PASS"
+}
