@@ -34,7 +34,7 @@ The third independent check (`qualification/ssdp70/PACKAGE-ACCESS-LEDGER-INDEPEN
 - **(a) Named-but-unshown owner open.** UNRESOLVED and replaceable, not a FAIL (reverses the named-open part of the first-round confirmation 2).
 - **(b) No read-to-access change.** The owner floor stays an owner *read*, now observed for process-executed reads as content that reached the model (a native read, or owner-class supply: whole owner lines at least the floor long, placed at its own result sequence). First-round confirmation 3 is withdrawn.
 - **(c) Partial owner content is supply.** Whole owner lines of at least the floor length count, through any path form.
-- **(d) T7 definition.** An observation-inexact burden run is not replaced; it is an unknown value (candidate unbounded above, comparator zero) that triggers T7 pair addition, and the bound resolves only under that adversarial assignment. Inexactness as a pair-addition trigger is the one declared change in effect (ledger profiles only).
+- **(d) T7 definition** (*superseded in part by the fourth round: the declared effects now number six*). An observation-inexact burden run is not replaced; it is an unknown value (candidate unbounded above, comparator zero) that triggers T7 pair addition, and the bound resolves only under that adversarial assignment. Inexactness as a pair-addition trigger is the one declared change in effect (ledger profiles only).
 - **(e) Recorder choices (R-op), applied by the recorder on the stakeholder's confirmation:** the frozen per-arm disparity bound also covers the burden comparisons (the 2.0x-versus-6.5 bound and the class-iii comparisons); there is no campaign-wide cap on replaced owner-unresolved runs beyond the per-case cap. The stakeholder may revise either after the rehearsal.
 
 ## Third round of confirmations (2026-10-04, after the fourth independent check)
@@ -49,10 +49,21 @@ The fourth independent check (`qualification/ssdp70/PACKAGE-ACCESS-LEDGER-INDEPE
 
 **Wrap-up instruction.** The stakeholder asked to stop changing the mechanism. Revision 7 therefore changes definitions, clarifications and declarations only. If its independent check returns PASS or only non-blocking findings, the D3 and contract text for this decision is closed and further work is D4 realization and the rehearsal, not redesign; a new blocker is routed as a text fix unless it shows the mechanism cannot work (Serious Challenge).
 
+## Fourth round of confirmations (2026-10-04, after the fifth independent check)
+
+The fifth independent check (`qualification/ssdp70/PACKAGE-ACCESS-LEDGER-INDEPENDENT-CHECK-D3-REV7-AND-CONTRACT-REV13-2026-10-04.md`, NO-PASS, no Serious Challenge to the mechanism) found four blockers fixable by text and showed that the third-round quantum contradicted the stakeholder's own protected case for long owner lines. The stakeholder replied: **“Confirmed. Revise, commit, then spawn a review.”** The four choices, as put to the stakeholder, are:
+
+1. **Quantum (clarifies round 3 item 2).** A FAIL (or an owner-load hit) needs a native read or at least 256 bytes across **at least two distinct owner lines** in one result, each owner line counted once per result (the owner ships in seven identical copies). A single matched line, however long, the same line seven times, and owner content in chunks below the quantum across several results are minor exposure, `UNRESOLVED` and replaceable.
+2. **Owner-floor replacement.** No frozen bound and no campaign-wide cap on replaced owner-floor runs beyond the per-case cap (round 2 (e) and round 3 item 1 stand); the byte question keeps a between-arm bound.
+3. **T7 owner floor.** A T7 run `UNRESOLVED` on the owner floor may be rerun solely to resolve the owner floor; the rerun does not enter the T7 median and the original stays an unknown value for the burden route.
+4. **Non-replaceable slots.** A non-T7 burden run with positive owner evidence and inexact bytes is not replaced and that burden slot stays non-PASS; the gate arithmetic counts it.
+
+Wrap-up posture unchanged: this revision changes a counting rule, declarations and wording only.
+
 ## Not decided here
 
 F-5 (T7 mixture reporting at seven pairs; 6.5 comparator owner naming) and the run count N remain open. The UNRESOLVED rate of the owner floor on honest runs is measured by the multi-turn rehearsal.
 
 ## Pending acceptance
 
-**Stakeholder adoption is recorded; fresh independent acceptance remains pending.** The authoring context cannot independently accept these bytes. No runner, profile, transform, qualification, subject, provider or evaluator run is authorized by this decision. D3 revision 7, contract revision 13 and the workplan §0.1 entry need a fresh independent check before dependent D4 realization or admission.
+**Stakeholder adoption is recorded; fresh independent acceptance remains pending.** The authoring context cannot independently accept these bytes. No runner, profile, transform, qualification, subject, provider or evaluator run is authorized by this decision. D3 revision 8, contract revision 14 and the workplan §0.1 entry need a fresh independent check before dependent D4 realization or admission.
