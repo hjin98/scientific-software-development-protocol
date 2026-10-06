@@ -1,0 +1,29 @@
+{
+  "schema": 1,
+  "arms": [
+    {
+      "name": "p66",
+      "requested_ref": "22f4bdba53795da3a6f13f162529f3a843fc37ae",
+      "commit": "22f4bdba53795da3a6f13f162529f3a843fc37ae",
+      "version": "6.6.0",
+      "skills_path": "/home/samjin/ssdp70-omp-stagef/admission/OMP-STAGE7-20261004T002409Z-d4572470db98-staging-repair-411510ed96c0/arms/p66/dist/skills",
+      "dist_tree_sha256": "e6d960a866fb794382fa5fdaa3e351681d292803dd035e5d4786a981a2a1e083"
+    },
+    {
+      "name": "p70",
+      "requested_ref": "db94a2dfb7fef480f37227eab5c45256e89901b8",
+      "commit": "db94a2dfb7fef480f37227eab5c45256e89901b8",
+      "version": "7.0.0",
+      "skills_path": "/home/samjin/ssdp70-omp-stagef/admission/OMP-STAGE7-20261004T002409Z-d4572470db98-staging-repair-411510ed96c0/arms/p70/dist/skills",
+      "dist_tree_sha256": "7ec95162d5888e1ace9030494f48cba80d24dc4b081c91b426dc7421d929bb8b"
+    },
+    {
+      "name": "p71",
+      "requested_ref": "ee3a2b5b69f4c8a6fd8f7d6a0a6e807e960bb0eb",
+      "commit": "ee3a2b5b69f4c8a6fd8f7d6a0a6e807e960bb0eb",
+      "version": "7.1.0",
+      "skills_path": "/home/samjin/agent-skills/scientific-software-development-protocol/dist/skills",
+      "dist_tree_sha256": "7a86ea4011034f8abf793c1c06d523577356a5b1a7167b267dda53e567a2892e"
+    }
+  ]
+}

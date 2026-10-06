@@ -1,0 +1,1330 @@
+[
+  {
+    "run": "C042-p66-r0",
+    "episode": "C042",
+    "arm": "p66",
+    "rep": "r0",
+    "evidence_state": "COMPLETE_ADMISSIBLE",
+    "root": null,
+    "calls_count": 1,
+    "owed": [
+      "F",
+      "N",
+      "V",
+      "T"
+    ],
+    "scored_parts": {
+      "F": {
+        "absent": true
+      },
+      "N": {
+        "absent": true
+      },
+      "V": {
+        "absent": true
+      },
+      "T": {
+        "absent": true
+      }
+    },
+    "unowed_asked": []
+  },
+  {
+    "run": "C042-p66-r1",
+    "episode": "C042",
+    "arm": "p66",
+    "rep": "r1",
+    "evidence_state": "COMPLETE_ADMISSIBLE",
+    "root": null,
+    "calls_count": 1,
+    "owed": [
+      "F",
+      "N",
+      "V",
+      "T"
+    ],
+    "scored_parts": {
+      "F": {
+        "absent": true
+      },
+      "N": {
+        "absent": true
+      },
+      "V": {
+        "absent": true
+      },
+      "T": {
+        "absent": true
+      }
+    },
+    "unowed_asked": []
+  },
+  {
+    "run": "C042-p70-r0",
+    "episode": "C042",
+    "arm": "p70",
+    "rep": "r0",
+    "evidence_state": "COMPLETE_ADMISSIBLE",
+    "root": null,
+    "calls_count": 1,
+    "owed": [
+      "F",
+      "N",
+      "V",
+      "T"
+    ],
+    "scored_parts": {
+      "F": {
+        "absent": true
+      },
+      "N": {
+        "core": true,
+        "strict": false,
+        "timing": "launching"
+      },
+      "V": {
+        "core": true,
+        "strict": false,
+        "timing": "launching"
+      },
+      "T": {
+        "absent": true
+      }
+    },
+    "unowed_asked": []
+  },
+  {
+    "run": "C042-p70-r1",
+    "episode": "C042",
+    "arm": "p70",
+    "rep": "r1",
+    "evidence_state": "COMPLETE_ADMISSIBLE",
+    "root": null,
+    "calls_count": 1,
+    "owed": [
+      "F",
+      "N",
+      "V",
+      "T"
+    ],
+    "scored_parts": {
+      "F": {
+        "absent": true
+      },
+      "N": {
+        "absent": true
+      },
+      "V": {
+        "absent": true
+      },
+      "T": {
+        "absent": true
+      }
+    },
+    "unowed_asked": []
+  },
+  {
+    "run": "C042-p71-r0",
+    "episode": "C042",
+    "arm": "p71",
+    "rep": "r0",
+    "evidence_state": "COMPLETE_ADMISSIBLE",
+    "root": null,
+    "calls_count": 1,
+    "owed": [
+      "F",
+      "N",
+      "V",
+      "T"
+    ],
+    "scored_parts": {
+      "F": {
+        "core": true,
+        "strict": true,
+        "timing": "launching"
+      },
+      "N": {
+        "core": true,
+        "strict": true,
+        "timing": "launching"
+      },
+      "V": {
+        "core": true,
+        "strict": true,
+        "timing": "launching"
+      },
+      "T": {
+        "core": true,
+        "strict": true,
+        "timing": "launching"
+      }
+    },
+    "unowed_asked": []
+  },
+  {
+    "run": "C042-p71-r1",
+    "episode": "C042",
+    "arm": "p71",
+    "rep": "r1",
+    "evidence_state": "COMPLETE_ADMISSIBLE",
+    "root": null,
+    "calls_count": 2,
+    "owed": [
+      "F",
+      "N",
+      "V",
+      "T"
+    ],
+    "scored_parts": {
+      "F": {
+        "core": true,
+        "strict": true,
+        "timing": "launching"
+      },
+      "N": {
+        "core": true,
+        "strict": true,
+        "timing": "launching"
+      },
+      "V": {
+        "core": true,
+        "strict": true,
+        "timing": "launching"
+      },
+      "T": {
+        "core": true,
+        "strict": true,
+        "timing": "launching"
+      }
+    },
+    "unowed_asked": []
+  },
+  {
+    "run": "C044-p66-r0",
+    "episode": "C044",
+    "arm": "p66",
+    "rep": "r0",
+    "evidence_state": "COMPLETE_ADMISSIBLE",
+    "root": null,
+    "calls_count": 1,
+    "owed": [
+      "F",
+      "N",
+      "V",
+      "T"
+    ],
+    "scored_parts": {
+      "F": {
+        "absent": true
+      },
+      "N": {
+        "absent": true
+      },
+      "V": {
+        "absent": true
+      },
+      "T": {
+        "absent": true
+      }
+    },
+    "unowed_asked": []
+  },
+  {
+    "run": "C044-p66-r1",
+    "episode": "C044",
+    "arm": "p66",
+    "rep": "r1",
+    "evidence_state": "COMPLETE_ADMISSIBLE",
+    "root": null,
+    "calls_count": 1,
+    "owed": [
+      "F",
+      "N",
+      "V",
+      "T"
+    ],
+    "scored_parts": {
+      "F": {
+        "absent": true
+      },
+      "N": {
+        "absent": true
+      },
+      "V": {
+        "absent": true
+      },
+      "T": {
+        "absent": true
+      }
+    },
+    "unowed_asked": []
+  },
+  {
+    "run": "C044-p70-r0",
+    "episode": "C044",
+    "arm": "p70",
+    "rep": "r0",
+    "evidence_state": "COMPLETE_ADMISSIBLE",
+    "root": null,
+    "calls_count": 1,
+    "owed": [
+      "F",
+      "N",
+      "V",
+      "T"
+    ],
+    "scored_parts": {
+      "F": {
+        "absent": true
+      },
+      "N": {
+        "absent": true
+      },
+      "V": {
+        "absent": true
+      },
+      "T": {
+        "absent": true
+      }
+    },
+    "unowed_asked": []
+  },
+  {
+    "run": "C044-p70-r1",
+    "episode": "C044",
+    "arm": "p70",
+    "rep": "r1",
+    "evidence_state": "COMPLETE_ADMISSIBLE",
+    "root": null,
+    "calls_count": 1,
+    "owed": [
+      "F",
+      "N",
+      "V",
+      "T"
+    ],
+    "scored_parts": {
+      "F": {
+        "absent": true
+      },
+      "N": {
+        "core": true,
+        "strict": false,
+        "timing": "launching"
+      },
+      "V": {
+        "absent": true
+      },
+      "T": {
+        "absent": true
+      }
+    },
+    "unowed_asked": []
+  },
+  {
+    "run": "C044-p71-r0",
+    "episode": "C044",
+    "arm": "p71",
+    "rep": "r0",
+    "evidence_state": "COMPLETE_ADMISSIBLE",
+    "root": null,
+    "calls_count": 2,
+    "owed": [
+      "F",
+      "N",
+      "V",
+      "T"
+    ],
+    "scored_parts": {
+      "F": {
+        "core": true,
+        "strict": true,
+        "timing": "launching"
+      },
+      "N": {
+        "core": true,
+        "strict": true,
+        "timing": "launching"
+      },
+      "V": {
+        "core": true,
+        "strict": true,
+        "timing": "launching"
+      },
+      "T": {
+        "core": true,
+        "strict": true,
+        "timing": "launching"
+      }
+    },
+    "unowed_asked": []
+  },
+  {
+    "run": "C044-p71-r1",
+    "episode": "C044",
+    "arm": "p71",
+    "rep": "r1",
+    "evidence_state": "COMPLETE_ADMISSIBLE",
+    "root": null,
+    "calls_count": 1,
+    "owed": [
+      "F",
+      "N",
+      "V",
+      "T"
+    ],
+    "scored_parts": {
+      "F": {
+        "core": true,
+        "strict": true,
+        "timing": "launching"
+      },
+      "N": {
+        "core": true,
+        "strict": true,
+        "timing": "launching"
+      },
+      "V": {
+        "core": true,
+        "strict": true,
+        "timing": "launching"
+      },
+      "T": {
+        "core": true,
+        "strict": true,
+        "timing": "launching"
+      }
+    },
+    "unowed_asked": []
+  },
+  {
+    "run": "C046-p66-r0",
+    "episode": "C046",
+    "arm": "p66",
+    "rep": "r0",
+    "evidence_state": "COMPLETE_ADMISSIBLE",
+    "root": null,
+    "calls_count": 1,
+    "owed": [
+      "F",
+      "N",
+      "V",
+      "T"
+    ],
+    "scored_parts": {
+      "F": {
+        "absent": true
+      },
+      "N": {
+        "absent": true
+      },
+      "V": {
+        "absent": true
+      },
+      "T": {
+        "absent": true
+      }
+    },
+    "unowed_asked": []
+  },
+  {
+    "run": "C046-p66-r1",
+    "episode": "C046",
+    "arm": "p66",
+    "rep": "r1",
+    "evidence_state": "COMPLETE_ADMISSIBLE",
+    "root": null,
+    "calls_count": 1,
+    "owed": [
+      "F",
+      "N",
+      "V",
+      "T"
+    ],
+    "scored_parts": {
+      "F": {
+        "absent": true
+      },
+      "N": {
+        "absent": true
+      },
+      "V": {
+        "absent": true
+      },
+      "T": {
+        "absent": true
+      }
+    },
+    "unowed_asked": []
+  },
+  {
+    "run": "C046-p70-r0",
+    "episode": "C046",
+    "arm": "p70",
+    "rep": "r0",
+    "evidence_state": "COMPLETE_ADMISSIBLE",
+    "root": null,
+    "calls_count": 1,
+    "owed": [
+      "F",
+      "N",
+      "V",
+      "T"
+    ],
+    "scored_parts": {
+      "F": {
+        "absent": true
+      },
+      "N": {
+        "absent": true
+      },
+      "V": {
+        "core": true,
+        "strict": false,
+        "timing": "launching"
+      },
+      "T": {
+        "core": true,
+        "strict": false,
+        "timing": "launching"
+      }
+    },
+    "unowed_asked": []
+  },
+  {
+    "run": "C046-p70-r1",
+    "episode": "C046",
+    "arm": "p70",
+    "rep": "r1",
+    "evidence_state": "COMPLETE_ADMISSIBLE",
+    "root": null,
+    "calls_count": 1,
+    "owed": [
+      "F",
+      "N",
+      "V",
+      "T"
+    ],
+    "scored_parts": {
+      "F": {
+        "core": true,
+        "strict": false,
+        "timing": "launching"
+      },
+      "N": {
+        "core": true,
+        "strict": false,
+        "timing": "launching"
+      },
+      "V": {
+        "absent": true
+      },
+      "T": {
+        "absent": true
+      }
+    },
+    "unowed_asked": []
+  },
+  {
+    "run": "C046-p71-r0",
+    "episode": "C046",
+    "arm": "p71",
+    "rep": "r0",
+    "evidence_state": "COMPLETE_ADMISSIBLE",
+    "root": null,
+    "calls_count": 2,
+    "owed": [
+      "F",
+      "N",
+      "V",
+      "T"
+    ],
+    "scored_parts": {
+      "F": {
+        "core": true,
+        "strict": true,
+        "timing": "launching"
+      },
+      "N": {
+        "core": true,
+        "strict": true,
+        "timing": "launching"
+      },
+      "V": {
+        "core": true,
+        "strict": true,
+        "timing": "launching"
+      },
+      "T": {
+        "core": true,
+        "strict": true,
+        "timing": "launching"
+      }
+    },
+    "unowed_asked": []
+  },
+  {
+    "run": "C046-p71-r1",
+    "episode": "C046",
+    "arm": "p71",
+    "rep": "r1",
+    "evidence_state": "COMPLETE_ADMISSIBLE",
+    "root": null,
+    "calls_count": 1,
+    "owed": [
+      "F",
+      "N",
+      "V",
+      "T"
+    ],
+    "scored_parts": {
+      "F": {
+        "core": true,
+        "strict": true,
+        "timing": "launching"
+      },
+      "N": {
+        "core": true,
+        "strict": true,
+        "timing": "launching"
+      },
+      "V": {
+        "core": true,
+        "strict": true,
+        "timing": "launching"
+      },
+      "T": {
+        "core": true,
+        "strict": true,
+        "timing": "launching"
+      }
+    },
+    "unowed_asked": []
+  },
+  {
+    "run": "C048-p66-r0",
+    "episode": "C048",
+    "arm": "p66",
+    "rep": "r0",
+    "evidence_state": "COMPLETE_ADMISSIBLE",
+    "root": null,
+    "calls_count": 1,
+    "owed": [
+      "F",
+      "N",
+      "V"
+    ],
+    "scored_parts": {
+      "F": {
+        "absent": true
+      },
+      "N": {
+        "absent": true
+      },
+      "V": {
+        "absent": true
+      }
+    },
+    "unowed_asked": []
+  },
+  {
+    "run": "C048-p66-r1",
+    "episode": "C048",
+    "arm": "p66",
+    "rep": "r1",
+    "evidence_state": "COMPLETE_ADMISSIBLE",
+    "root": null,
+    "calls_count": 1,
+    "owed": [
+      "F",
+      "N",
+      "V"
+    ],
+    "scored_parts": {
+      "F": {
+        "absent": true
+      },
+      "N": {
+        "absent": true
+      },
+      "V": {
+        "absent": true
+      }
+    },
+    "unowed_asked": []
+  },
+  {
+    "run": "C048-p70-r0",
+    "episode": "C048",
+    "arm": "p70",
+    "rep": "r0",
+    "evidence_state": "COMPLETE_ADMISSIBLE",
+    "root": null,
+    "calls_count": 1,
+    "owed": [
+      "F",
+      "N",
+      "V"
+    ],
+    "scored_parts": {
+      "F": {
+        "absent": true
+      },
+      "N": {
+        "absent": true
+      },
+      "V": {
+        "absent": true
+      }
+    },
+    "unowed_asked": []
+  },
+  {
+    "run": "C048-p70-r1",
+    "episode": "C048",
+    "arm": "p70",
+    "rep": "r1",
+    "evidence_state": "COMPLETE_ADMISSIBLE",
+    "root": null,
+    "calls_count": 1,
+    "owed": [
+      "F",
+      "N",
+      "V"
+    ],
+    "scored_parts": {
+      "F": {
+        "absent": true
+      },
+      "N": {
+        "absent": true
+      },
+      "V": {
+        "absent": true
+      }
+    },
+    "unowed_asked": []
+  },
+  {
+    "run": "C048-p71-r0",
+    "episode": "C048",
+    "arm": "p71",
+    "rep": "r0",
+    "evidence_state": "COMPLETE_ADMISSIBLE",
+    "root": null,
+    "calls_count": 1,
+    "owed": [
+      "F",
+      "N",
+      "V"
+    ],
+    "scored_parts": {
+      "F": {
+        "core": true,
+        "strict": true,
+        "timing": "launching"
+      },
+      "N": {
+        "core": true,
+        "strict": true,
+        "timing": "launching"
+      },
+      "V": {
+        "core": true,
+        "strict": true,
+        "timing": "launching"
+      }
+    },
+    "unowed_asked": [
+      "T"
+    ]
+  },
+  {
+    "run": "C048-p71-r1",
+    "episode": "C048",
+    "arm": "p71",
+    "rep": "r1",
+    "evidence_state": "COMPLETE_ADMISSIBLE",
+    "root": null,
+    "calls_count": 1,
+    "owed": [
+      "F",
+      "N",
+      "V"
+    ],
+    "scored_parts": {
+      "F": {
+        "core": true,
+        "strict": true,
+        "timing": "launching"
+      },
+      "N": {
+        "core": true,
+        "strict": true,
+        "timing": "launching"
+      },
+      "V": {
+        "core": true,
+        "strict": true,
+        "timing": "launching"
+      }
+    },
+    "unowed_asked": [
+      "T"
+    ]
+  },
+  {
+    "run": "C050-p66-r0",
+    "episode": "C050",
+    "arm": "p66",
+    "rep": "r0",
+    "evidence_state": "COMPLETE_ADMISSIBLE",
+    "root": null,
+    "calls_count": 1,
+    "owed": [
+      "F",
+      "N",
+      "V"
+    ],
+    "scored_parts": {
+      "F": {
+        "absent": true
+      },
+      "N": {
+        "absent": true
+      },
+      "V": {
+        "absent": true
+      }
+    },
+    "unowed_asked": []
+  },
+  {
+    "run": "C050-p66-r1",
+    "episode": "C050",
+    "arm": "p66",
+    "rep": "r1",
+    "evidence_state": "COMPLETE_ADMISSIBLE",
+    "root": null,
+    "calls_count": 1,
+    "owed": [
+      "F",
+      "N",
+      "V"
+    ],
+    "scored_parts": {
+      "F": {
+        "absent": true
+      },
+      "N": {
+        "absent": true
+      },
+      "V": {
+        "absent": true
+      }
+    },
+    "unowed_asked": []
+  },
+  {
+    "run": "C050-p70-r0",
+    "episode": "C050",
+    "arm": "p70",
+    "rep": "r0",
+    "evidence_state": "COMPLETE_ADMISSIBLE",
+    "root": null,
+    "calls_count": 1,
+    "owed": [
+      "F",
+      "N",
+      "V"
+    ],
+    "scored_parts": {
+      "F": {
+        "absent": true
+      },
+      "N": {
+        "absent": true
+      },
+      "V": {
+        "absent": true
+      }
+    },
+    "unowed_asked": []
+  },
+  {
+    "run": "C050-p70-r1",
+    "episode": "C050",
+    "arm": "p70",
+    "rep": "r1",
+    "evidence_state": "COMPLETE_ADMISSIBLE",
+    "root": null,
+    "calls_count": 1,
+    "owed": [
+      "F",
+      "N",
+      "V"
+    ],
+    "scored_parts": {
+      "F": {
+        "absent": true
+      },
+      "N": {
+        "absent": true
+      },
+      "V": {
+        "absent": true
+      }
+    },
+    "unowed_asked": []
+  },
+  {
+    "run": "C050-p71-r0",
+    "episode": "C050",
+    "arm": "p71",
+    "rep": "r0",
+    "evidence_state": "COMPLETE_ADMISSIBLE",
+    "root": null,
+    "calls_count": 1,
+    "owed": [
+      "F",
+      "N",
+      "V"
+    ],
+    "scored_parts": {
+      "F": {
+        "core": true,
+        "strict": true,
+        "timing": "launching"
+      },
+      "N": {
+        "core": true,
+        "strict": true,
+        "timing": "launching"
+      },
+      "V": {
+        "core": true,
+        "strict": true,
+        "timing": "launching"
+      }
+    },
+    "unowed_asked": [
+      "T"
+    ]
+  },
+  {
+    "run": "C050-p71-r1",
+    "episode": "C050",
+    "arm": "p71",
+    "rep": "r1",
+    "evidence_state": "COMPLETE_ADMISSIBLE",
+    "root": null,
+    "calls_count": 1,
+    "owed": [
+      "F",
+      "N",
+      "V"
+    ],
+    "scored_parts": {
+      "F": {
+        "core": true,
+        "strict": true,
+        "timing": "launching"
+      },
+      "N": {
+        "core": true,
+        "strict": true,
+        "timing": "launching"
+      },
+      "V": {
+        "core": true,
+        "strict": true,
+        "timing": "launching"
+      }
+    },
+    "unowed_asked": []
+  },
+  {
+    "run": "C052-p66-r0",
+    "episode": "C052",
+    "arm": "p66",
+    "rep": "r0",
+    "evidence_state": "COMPLETE_ADMISSIBLE",
+    "root": null,
+    "calls_count": 1,
+    "owed": [
+      "F",
+      "N",
+      "V"
+    ],
+    "scored_parts": {
+      "F": {
+        "absent": true
+      },
+      "N": {
+        "absent": true
+      },
+      "V": {
+        "absent": true
+      }
+    },
+    "unowed_asked": []
+  },
+  {
+    "run": "C052-p66-r1",
+    "episode": "C052",
+    "arm": "p66",
+    "rep": "r1",
+    "evidence_state": "COMPLETE_ADMISSIBLE",
+    "root": null,
+    "calls_count": 1,
+    "owed": [
+      "F",
+      "N",
+      "V"
+    ],
+    "scored_parts": {
+      "F": {
+        "absent": true
+      },
+      "N": {
+        "absent": true
+      },
+      "V": {
+        "absent": true
+      }
+    },
+    "unowed_asked": []
+  },
+  {
+    "run": "C052-p70-r0",
+    "episode": "C052",
+    "arm": "p70",
+    "rep": "r0",
+    "evidence_state": "COMPLETE_ADMISSIBLE",
+    "root": null,
+    "calls_count": 1,
+    "owed": [
+      "F",
+      "N",
+      "V"
+    ],
+    "scored_parts": {
+      "F": {
+        "absent": true
+      },
+      "N": {
+        "absent": true
+      },
+      "V": {
+        "absent": true
+      }
+    },
+    "unowed_asked": []
+  },
+  {
+    "run": "C052-p70-r1",
+    "episode": "C052",
+    "arm": "p70",
+    "rep": "r1",
+    "evidence_state": "COMPLETE_ADMISSIBLE",
+    "root": null,
+    "calls_count": 1,
+    "owed": [
+      "F",
+      "N",
+      "V"
+    ],
+    "scored_parts": {
+      "F": {
+        "core": true,
+        "strict": false,
+        "timing": "launching"
+      },
+      "N": {
+        "absent": true
+      },
+      "V": {
+        "core": true,
+        "strict": false,
+        "timing": "launching"
+      }
+    },
+    "unowed_asked": [
+      "T"
+    ]
+  },
+  {
+    "run": "C052-p71-r0",
+    "episode": "C052",
+    "arm": "p71",
+    "rep": "r0",
+    "evidence_state": "COMPLETE_ADMISSIBLE",
+    "root": null,
+    "calls_count": 1,
+    "owed": [
+      "F",
+      "N",
+      "V"
+    ],
+    "scored_parts": {
+      "F": {
+        "core": true,
+        "strict": true,
+        "timing": "launching"
+      },
+      "N": {
+        "core": true,
+        "strict": true,
+        "timing": "launching"
+      },
+      "V": {
+        "core": true,
+        "strict": true,
+        "timing": "launching"
+      }
+    },
+    "unowed_asked": []
+  },
+  {
+    "run": "C052-p71-r1",
+    "episode": "C052",
+    "arm": "p71",
+    "rep": "r1",
+    "evidence_state": "COMPLETE_ADMISSIBLE",
+    "root": null,
+    "calls_count": 1,
+    "owed": [
+      "F",
+      "N",
+      "V"
+    ],
+    "scored_parts": {
+      "F": {
+        "core": true,
+        "strict": true,
+        "timing": "launching"
+      },
+      "N": {
+        "core": true,
+        "strict": true,
+        "timing": "launching"
+      },
+      "V": {
+        "core": true,
+        "strict": true,
+        "timing": "launching"
+      }
+    },
+    "unowed_asked": [
+      "T"
+    ]
+  },
+  {
+    "run": "C055-p66-r0",
+    "episode": "C055",
+    "arm": "p66",
+    "rep": "r0",
+    "evidence_state": "COMPLETE_ADMISSIBLE",
+    "root": null,
+    "calls_count": 1,
+    "owed": [
+      "F",
+      "N",
+      "V",
+      "T"
+    ],
+    "scored_parts": {
+      "F": {
+        "absent": true
+      },
+      "N": {
+        "absent": true
+      },
+      "V": {
+        "absent": true
+      },
+      "T": {
+        "absent": true
+      }
+    },
+    "unowed_asked": []
+  },
+  {
+    "run": "C055-p66-r1",
+    "episode": "C055",
+    "arm": "p66",
+    "rep": "r1",
+    "evidence_state": "COMPLETE_ADMISSIBLE",
+    "root": null,
+    "calls_count": 1,
+    "owed": [
+      "F",
+      "N",
+      "V",
+      "T"
+    ],
+    "scored_parts": {
+      "F": {
+        "absent": true
+      },
+      "N": {
+        "absent": true
+      },
+      "V": {
+        "absent": true
+      },
+      "T": {
+        "absent": true
+      }
+    },
+    "unowed_asked": []
+  },
+  {
+    "run": "C055-p70-r0",
+    "episode": "C055",
+    "arm": "p70",
+    "rep": "r0",
+    "evidence_state": "COMPLETE_ADMISSIBLE",
+    "root": null,
+    "calls_count": 3,
+    "owed": [
+      "F",
+      "N",
+      "V",
+      "T"
+    ],
+    "scored_parts": {
+      "F": {
+        "core": true,
+        "strict": false,
+        "timing": "launching"
+      },
+      "N": {
+        "core": true,
+        "strict": false,
+        "timing": "launching"
+      },
+      "V": {
+        "core": true,
+        "strict": false,
+        "timing": "launching"
+      },
+      "T": {
+        "core": true,
+        "strict": false,
+        "timing": "launching"
+      }
+    },
+    "unowed_asked": []
+  },
+  {
+    "run": "C055-p70-r1",
+    "episode": "C055",
+    "arm": "p70",
+    "rep": "r1",
+    "evidence_state": "COMPLETE_ADMISSIBLE",
+    "root": null,
+    "calls_count": 1,
+    "owed": [
+      "F",
+      "N",
+      "V",
+      "T"
+    ],
+    "scored_parts": {
+      "F": {
+        "absent": true
+      },
+      "N": {
+        "absent": true
+      },
+      "V": {
+        "core": true,
+        "strict": false,
+        "timing": "launching"
+      },
+      "T": {
+        "core": true,
+        "strict": false,
+        "timing": "launching"
+      }
+    },
+    "unowed_asked": []
+  },
+  {
+    "run": "C055-p71-r0",
+    "episode": "C055",
+    "arm": "p71",
+    "rep": "r0",
+    "evidence_state": "COMPLETE_ADMISSIBLE",
+    "root": null,
+    "calls_count": 1,
+    "owed": [
+      "F",
+      "N",
+      "V",
+      "T"
+    ],
+    "scored_parts": {
+      "F": {
+        "core": true,
+        "strict": true,
+        "timing": "launching"
+      },
+      "N": {
+        "core": true,
+        "strict": true,
+        "timing": "launching"
+      },
+      "V": {
+        "core": true,
+        "strict": true,
+        "timing": "launching"
+      },
+      "T": {
+        "core": true,
+        "strict": true,
+        "timing": "launching"
+      }
+    },
+    "unowed_asked": []
+  },
+  {
+    "run": "C055-p71-r1",
+    "episode": "C055",
+    "arm": "p71",
+    "rep": "r1",
+    "evidence_state": "COMPLETE_ADMISSIBLE",
+    "root": null,
+    "calls_count": 2,
+    "owed": [
+      "F",
+      "N",
+      "V",
+      "T"
+    ],
+    "scored_parts": {
+      "F": {
+        "core": true,
+        "strict": true,
+        "timing": "launching"
+      },
+      "N": {
+        "core": true,
+        "strict": true,
+        "timing": "launching"
+      },
+      "V": {
+        "core": true,
+        "strict": true,
+        "timing": "launching"
+      },
+      "T": {
+        "core": true,
+        "strict": true,
+        "timing": "launching"
+      }
+    },
+    "unowed_asked": []
+  }
+]
