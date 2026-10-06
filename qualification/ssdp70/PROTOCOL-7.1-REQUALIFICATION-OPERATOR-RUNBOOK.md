@@ -36,11 +36,16 @@ source /home/samjin/agent-skills/scientific-software-development-protocol/qualif
 source "$REPO/qualification/ssdp70/requal71/operator-lib.sh"
 S=$(date -u +%Y%m%dT%H%M%SZ)
 need REPO PY WORK && mkdir -p "$WORK"
+export SSDP70_OMP_PROVIDER_CREDENTIAL="${SSDP70_OMP_PROVIDER_CREDENTIAL:-${DEEPINFRA_API_KEY-}}"
+need SSDP70_OMP_PROVIDER_CREDENTIAL   # the provider API key; never print, echo or log it
 gate "R0-pins-$S"  bash -c "cd '$REPO' && sha256sum -c --quiet qualification/ssdp70/requal71/tool-pins.sha256"
 gate "R0-tests-$S" bash -c "cd '$EVAL_DIR' && '$PY' -m unittest test_requal71"
 ```
 
-**Pass:** all three exit 0. If `need` refuses because a value is `UNDECIDED`, the phase is not authorized yet: escalate.
+**Pass:** both `need` lines and both gates succeed.
+
+- If `need` refuses because a value is `UNDECIDED`, the phase is not authorized yet: escalate.
+- If `need SSDP70_OMP_PROVIDER_CREDENTIAL` refuses, the provider key is missing from your environment (the adapter reads `SSDP70_OMP_PROVIDER_CREDENTIAL`; it falls back to `DEEPINFRA_API_KEY`). Escalate; never type, print or paste a key yourself.
 
 **Shorthands used below** (define them after session start):
 
