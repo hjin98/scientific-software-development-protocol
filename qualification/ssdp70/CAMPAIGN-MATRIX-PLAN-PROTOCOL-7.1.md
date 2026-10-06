@@ -1,5 +1,13 @@
 # SSDP Protocol 7.1 Candidate Qualification — Campaign Run Matrix Plan
 
+> **Status (2026-10-06): SUPERSEDED, not followed.**
+> - **Contract nonconformance.** This plan is incomplete against the contract. It has no fresh fixtures, no entry strata or declared roots, no primary-family record, no panel budget schedule, no evaluator step, and no 6.5 burden comparator.
+> - **The realized matrix departed from it anyway.** It ran with `--mode probe`, no profile admission and 1 replicate.
+> - **The result is development data.** See [`PROTOCOL-7.1-DEVELOPMENT-MATRIX-2026-10-06-RECORD.md`](PROTOCOL-7.1-DEVELOPMENT-MATRIX-2026-10-06-RECORD.md).
+> - **Successor.** The requalification path is owned by [`PROTOCOL-7.1-REQUALIFICATION-PLAN.md`](PROTOCOL-7.1-REQUALIFICATION-PLAN.md).
+>
+> The text below is kept unchanged as history.
+
 **Governing Protocol:** SSDP 6.6.0  
 **Target Subject:** Protocol 7.1.0 Candidate (Stakeholder Decision OD-1; commit `9700805`, dist sha256 `7a86ea40...`)  
 **Comparators:**

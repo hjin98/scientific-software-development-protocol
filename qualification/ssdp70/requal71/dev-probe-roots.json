@@ -1,0 +1,32 @@
+{
+  "schema": 1,
+  "purpose": "Analyst-assigned deterministic roots for the SD-5 development probe on the disclosed 2026-09-28 corpus (development data only). Assigned from the task prompt by contract domain before any probe run; not custodian keys.",
+  "default_root": "software-implementation",
+  "default_rationale": "run, analyze, evaluate, results/report review, gate evidence, code change, report writing or delegation (7.1 software-implementation description)",
+  "excluded": {
+    "episodes": ["NB-01", "NB-02", "NB-03", "NB-04", "NB-05", "NB-06", "NB-07", "NB-08"],
+    "rationale": "selection negatives belong to the ordinary stratum (contract §1 item 12); a delivered-treatment probe does not measure them"
+  },
+  "overrides": {
+    "scientific-formulation": {
+      "episodes": ["EP-012", "EP-015", "EP-032", "EP-046", "EP-047", "EP-048", "EP-053", "EP-054", "EP-082"],
+      "rationale": "D1: author or review a formulation, judge fitness of a model for a new scientific use, or whether accepted formulation assumptions hold"
+    },
+    "numerical-algorithm-design": {
+      "episodes": ["EP-033", "EP-034", "EP-041", "EP-042", "EP-043", "EP-044", "EP-049", "EP-050", "EP-051", "EP-052", "EP-055", "EP-056", "EP-057", "EP-058", "EP-059", "EP-062"],
+      "rationale": "D2: author, review or judge the soundness of the accepted calibration method"
+    },
+    "software-design": {
+      "episodes": ["EP-011", "EP-083"],
+      "rationale": "D3: author or review a software design document"
+    },
+    "repository-hygiene": {
+      "episodes": ["EP-040"],
+      "rationale": "post-release repository tidy"
+    },
+    "software-documentation": {
+      "episodes": ["EP-017", "EP-074", "EP-090"],
+      "rationale": "documentation-only edits (links, units/links in a report, changelog)"
+    }
+  }
+}
