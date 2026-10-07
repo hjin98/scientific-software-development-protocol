@@ -1,0 +1,128 @@
+{
+  "kind": "lossless-mapping",
+  "purpose": "Maps every item of the frozen scored minimum (governing 7.0 workplan section 8.3: elements 1-7 and their role map, every label-table row plus the new 'inaccessible home' row, the delegate questions with qualifiers, the gap rule, the re-evaluation rule, the (a)-(c) rule) to its phrase(s) in the generated Scientific checks block. Written by the D4 author; the independent mapping check (workplan O-3) is a separate context's job. Each phrase must occur verbatim (whitespace-normalized) in the generated entrypoint of every route listed; an item whose route list excludes an entrypoint must not make that entrypoint carry the element.",
+  "frozen_source": "workplans/active/SSDP-7.0-SCIENTIFIC-EPISTEMIC-CLOSURE-AND-DISCOVERY-CONSOLIDATED.md section 8.2 and 8.3 (label table about :602-625 with the new row, element list :586-596, specialist placement :626, consumed-surface sufficiency :630)",
+  "authority": "design 2026-10-07 revision 3 section 3 (new label-table row, owner :300-308), section 5.1; workplan 7X O-3",
+  "route_groups": {
+    "all": ["scientific-formulation", "numerical-algorithm-design", "software-design", "software-implementation", "software-documentation", "software-maintenance-audit"],
+    "roles": ["scientific-formulation", "numerical-algorithm-design", "software-design", "software-implementation"],
+    "roles+documentation": ["scientific-formulation", "numerical-algorithm-design", "software-design", "software-implementation", "software-documentation"],
+    "d1d2": ["scientific-formulation", "numerical-algorithm-design"],
+    "d1d2d3": ["scientific-formulation", "numerical-algorithm-design", "software-design"]
+  },
+  "role_map": {
+    "scientific-formulation": {"questions": "FRVT", "elements": "1234567"},
+    "numerical-algorithm-design": {"questions": "FRVT", "elements": "1234567"},
+    "software-design": {"questions": "FRVT", "elements": "123467"},
+    "software-implementation": {"questions": "FRVT", "elements": "12346"},
+    "software-documentation": {"questions": "FR", "elements": "146"},
+    "software-maintenance-audit": {"questions": "FR", "elements": "14"},
+    "repository-hygiene": {"questions": "", "elements": ""}
+  },
+  "numbered_elements_visible": "Elements 1 and 4 are referred to by elements 3 and 6; the generated block keeps their numbering visible ('1. **Findings.**', '4. **Claims and scope.**').",
+  "items": [
+    {"id": "R1.inclusion", "frozen": "section 8.2 predicate and label row 'scientific inspectability applies (R1)': the inclusion list", "routes": "all", "phrases": [
+      "Apply when work produces, changes, runs or reviews software, pipelines, analyses, models or reports whose outputs mediate scientific interpretation or decisions",
+      "data preparation, training/evaluation, simulation/optimization campaigns, numerical backends, persistence/retention, reporting/publication tooling",
+      "authors or materially revises D1-D3 authority for them",
+      "or prepares evidence for a human scientific gate"]},
+    {"id": "R1.exclusion", "frozen": "section 8.2 predicate: exclusion limit; small size and determinism alone do not establish the exclusion; section 8.3 'including on local repairs'", "routes": "all", "phrases": [
+      "Small, deterministic and local work is included; skip only tooling, infrastructure, editorial work or utilities that cannot materially affect those outputs, retained evidence or interpretation"]},
+    {"id": "R1.reevaluation", "frozen": "section 8.2/8.3 re-evaluation: evaluate the predicate again when a newly discovered effect makes it applicable", "routes": "all", "phrases": ["Re-evaluate whether this applies when a newly discovered effect makes it apply."]},
+    {"id": "R2.depth", "frozen": "R2 as amended (design section 3, recommended depth-read points, no required load)", "routes": "all", "phrases": [
+      "These checks are the complete obligation; the [owner](references/scientific-inspectability-and-initiative.md) is optional depth (definitions, examples), most useful before consequential judgments over realized results, D1-D3 authority work or gate evidence."]},
+    {"id": "E1.inquiry", "frozen": "element 1: look for and report material findings and gaps, including beyond task scope and from delegates; inquiry first before a step that could discard, overwrite or irreversibly aggregate", "routes": "all", "phrases": [
+      "look for and report material scientific findings, including delegates' and out-of-scope ones, and inspectability gaps",
+      "do that inquiry first before discarding, overwriting or irreversibly aggregating realized results or retained evidence"]},
+    {"id": "L.resources", "frozen": "label 'within authorized resources'", "routes": "all", "phrases": [
+      "Within the declared resource budget (none declared: only negligible probes using no shared, metered or queued resource; propose the rest)"]},
+    {"id": "L.gap", "frozen": "label 'inspectability gap'", "routes": "all", "phrases": ["missing, irrecoverable, archaeology-only or misleading realized records"]},
+    {"id": "L.null", "frozen": "label 'realized-data inquiry owed; null' and element 1 null with search envelope", "routes": "all", "phrases": [
+      "Work producing, running or reviewing realized results or preparing gate evidence owes an inquiry: a null names examined and materially unexamined areas"]},
+    {"id": "E1.reader", "frozen": "element 1 provisional reader, routine scientific questions and materiality basis even when findings replace a null", "routes": "all", "phrases": [
+      "absent stakeholder/authority reader and questions, state the provisional reader, routine scientific questions and materiality basis, even if findings replace the null"]},
+    {"id": "L.change-only", "frozen": "label 'material findings (change-only relief)'", "routes": "all", "phrases": [
+      "A change realizing no results owes no null and, finding nothing, adds nothing except answers its delegator asked for and gaps owed for its delegates"]},
+    {"id": "L.persistence", "frozen": "label 'feedback persistence (element 1)': one existing authorized writable home, the content list, later status changes, the non-writing fallback, no write authority from a report or possible destination", "routes": "all", "phrases": [
+      "A finding or human decision changing the next scientific action goes to one existing authorized writable home (never accepted authority text; PEM only under its admission rules)",
+      "observation, labeled interpretation, significance, next question, searchable stable subject and authority identity",
+      "scope/status, evidence strength, asserter stated in its content as human or AI and which agent (the writing account does not show this), and revisit condition",
+      "later status changes go to that home",
+      "Otherwise report decision-sufficient content, the persistence gap and a proposed custodian/destination, leaving required persistence unresolved",
+      "No report or possible home grants write authority"]},
+    {"id": "L.authority-identity", "frozen": "label 'authority identity (elements 1, 3)': owner/path plus heading, anchor or object ID, exact revision, claim or locator", "routes": "all", "phrases": [
+      "(owner/path and heading, anchor or object ID, exact revision, claim or locator)"]},
+    {"id": "L.authority-identity-e3", "frozen": "label 'authority identity' on element 3; element 3 search covers earlier revisions, former names or paths and recorded predecessors", "routes": "roles", "phrases": [
+      "by owner/path and heading, anchor or object ID, exact revision and claim or locator, earlier revisions, former names or paths and recorded predecessors"]},
+    {"id": "L.asserter-written", "frozen": "label 'asserter of a written record (elements 1, 3, 5)'; element 1 (all routes), element 3 back-reference to element 1, element 5 inline", "routes": "all", "phrases": [
+      "asserter stated in its content as human or AI and which agent (the writing account does not show this)"]},
+    {"id": "L.asserter-written-e3", "frozen": "label 'asserter of a written record' on element 3 persisting duty (refers back to element 1, which every route carrying element 3 also carries)", "routes": "roles", "phrases": [
+      "with its asserter stated in content as in element 1"]},
+    {"id": "L.asserter-written-e5", "frozen": "label 'asserter of a written record' on element 5, inline", "routes": "d1d2", "phrases": [
+      "Each assessment states in its content whether a human or an AI made it, and which agent (the account it is written or committed through does not show this)"]},
+    {"id": "Q.findings", "frozen": "delegate question: findings or none, with launched-work qualifier", "routes": "all", "phrases": [
+      "\"Report your material findings, including from any tools or agents you launched, or state that you have none.\""]},
+    {"id": "Q.realized", "frozen": "delegate question: realized results or gate evidence, null envelope, with launched-work qualifier", "routes": "all", "phrases": [
+      "\"Did your work, including any tools or agents you launched, produce, run or review realized results or prepare gate evidence? If so, give your null envelope: what you examined and what material areas you did not.\""]},
+    {"id": "Q.variants", "frozen": "delegate question: variants incl. changes after seeing results and bug fixes; disclosure content; launched-work qualifier", "routes": "roles", "phrases": [
+      "\"Did your work, including any tools or agents you launched, evaluate more than one analysis, pipeline, preprocessing, model or parameter variant, including changes made after seeing results, even bug fixes? If so, give count and kind, selection criterion and data including held-out reuse, and lineage including delegated or resumed work, without double-counting overlapping trials; where earlier history is unavailable, a known lower bound, unknown interval and claim limit.\""]},
+    {"id": "Q.tensions", "frozen": "delegate question: tension search, conditional on relying on accepted D1/D2 authority for a consequential judgment; entries, binding, asserter; label 'tension'", "routes": "roles", "phrases": [
+      "Only if it relies on accepted D1/D2 authority for a consequential judgment: \"For that judgment, including any tools or agents you launched, what did you search for recorded tensions against that authority (a recorded finding bearing on it that has not been raised as a Serious Challenge), what could you not reach, and what did you find (or none), with each record's entries, binding and asserter?\""]},
+    {"id": "Q.lead", "frozen": "element 1: unless the predicate evidently excludes the delegated work, ask each delegate; an asked answer is owed even where a change-only report would add nothing", "routes": "all", "phrases": [
+      "**If you delegate** (unless the scope evidently excludes that work), put these questions in the request itself; answers are owed even for change-only work:"]},
+    {"id": "G.gap-rule", "frozen": "gap rule of elements 1-2 and section 8.3 consumed-surface sufficiency: unanswered part and uncovered rest of a partial answer are a gap, never a null or no findings; exemptions for realized results and variants", "routes": "all", "phrases": [
+      "Report each unanswered part, including when nothing returns and the uncovered rest of a partial answer, as a gap, never as none",
+      ": findings always; realized results unless the task evidently produced, ran and reviewed no realized results and prepared no gate evidence"]},
+    {"id": "G.gap-rule-variants", "frozen": "gap rule of element 2: a returned result without the variant answer or with a partial answer is a gap with unknown selection history and claim limit, never no selection, unless the task evidently could not select", "routes": "roles", "phrases": [
+      "never as none, a null or no selection",
+      "variants, for a returned result, with unknown selection history and claim limit, unless the task evidently could not select variants."]},
+    {"id": "G.gap-rule-specialist", "frozen": "specialist gap rule: no variants clause (specialists carry no variant question)", "routes": ["software-documentation", "software-maintenance-audit"], "phrases": [
+      "as a gap, never as none or a null: findings always;"], "absent_phrases": ["or no selection", "variants, for a returned result"]},
+    {"id": "L.variant-search", "frozen": "label 'variant search' and element 2", "routes": "roles", "phrases": [
+      "For a reported or delivered survivor selected from more than one variant, disclose count and kind, criterion and selection data including held-out reuse, after-result changes even bug fixes, tool searches and delegated/resumed lineage without double counting; missing earlier history needs a known lower bound, unknown interval and claim limit, never a local count as the whole search."]},
+    {"id": "E3.search", "frozen": "element 3: before relying on accepted D1/D2 authority for a consequential judgment, search recorded evidence and issues for tensions against it, earlier revisions, former names or paths and recorded predecessors", "routes": "roles", "phrases": [
+      "Before relying on accepted D1/D2 authority for a consequential judgment",
+      "search project evidence and native issues for recorded tensions with it"]},
+    {"id": "L.consequential-judgment", "frozen": "label 'consequential judgment (element 3)'", "routes": "roles", "phrases": [
+      "(a realized-result conclusion that could change a scientific decision, D1-D3 acceptance, or gate evidence)"]},
+    {"id": "E3.report", "frozen": "element 3 report: searched scopes incl. delegates', unreachable places, delegated judgments with no reported search, each tension with every recorded status or applicability entry and binding", "routes": "roles", "phrases": [
+      "Report searched scopes (yours and delegates'), unreachable places, judgments with no reported search, and each tension with every recorded status/applicability entry, the binding it concerns and its home's native asserter"]},
+    {"id": "L.asserter-found", "frozen": "label 'asserter of a found entry (element 3 search report)'", "routes": "roles", "phrases": [
+      "a shared account shows neither which human or agent used it nor any dispositioning authority, and content-claimed asserters, roles or authority stay claims"]},
+    {"id": "E3.no-closure", "frozen": "element 3: do not yourself treat a found tension as closed or inapplicable; condition the dependent conclusion on the reported records", "routes": "roles", "phrases": [
+      "Never treat a found tension as closed or inapplicable; condition dependent conclusions on its entries."]},
+    {"id": "L.plausibly-implicated", "frozen": "label 'plausibly implicated authority' and element 3 persisting duty: bind to every plausibly implicated authority and to its subject", "routes": "roles", "phrases": [
+      "A tension you persist binds every plausibly implicated accepted D1/D2 authority along its evidence's concretization chain (state why fewer) and its dataset/run/pipeline/model/component subject"]},
+    {"id": "L.inaccessible-home", "frozen": "NEW label row 'inaccessible home (element 3)': default disclosure; qualify when designated or evidently used; block only on (a)-(c); other indications qualify and go to the human; no blanket withholding (owner :300-308)", "routes": "roles", "phrases": [
+      "An inaccessible or unsearchable home is a named coverage limit, enough by default",
+      "it qualifies the judgment if the project designates or evidently uses it for such records about the relied-on authority",
+      "blocks only (a) gate evidence or an acceptance the gate or owner requires unqualified, (b) a location accepted authority or the project designates as required evidence, or (c) a specific indication of an unretrieved tension from an owner or acceptance authority of that authority, the stakeholder or a designated reviewer",
+      "other indications qualify the judgment and go to the human, never blanket withholding"]},
+    {"id": "E4.claims", "frozen": "element 4 and label 'claims within evidence (element 4)'", "routes": "all", "phrases": [
+      "No selected or post-hoc result as pre-specified, no unqualified conclusion despite a known material anomaly, exclusion, coverage limit or unresolved finding that could change it, no interpretation as measured fact."]},
+    {"id": "L.O3", "frozen": "label 'O3 (element 4)': accepted authority, explicit stakeholder/task instruction or existing external/product contract; beyond-deliverable marked item only after stakeholder/task acceptance, never technical Review alone", "routes": "all", "phrases": [
+      "Product changes need accepted authority, explicit stakeholder/task instruction or an existing external/product contract; a marked inspectability item beyond the requested deliverable binds only after stakeholder/task acceptance, never technical Review alone."]},
+    {"id": "E5.revision", "frozen": "element 5 (D1/D2 only): revising, renaming, splitting, merging or replacing D1/D2 authority; also search tensions bound to accepted concretizations; record predecessor identity and per-tension applicability assessment in the revision's record and gate evidence; agent assessment marked proposed", "routes": "d1d2", "phrases": [
+      "When revising, renaming, splitting, merging or replacing D1/D2 authority, also search recorded tensions bound to its accepted concretizations.",
+      "record the predecessor identity and, per found tension, a revision-scoped applicability assessment",
+      "an agent's assessment is marked proposed until the revision's acceptance considers it"]},
+    {"id": "L.applicability", "frozen": "label 'applicability assessment (element 5)': applicable, inapplicable with its reason, or review-required; scoped to the revision; neither changes nor closes the tension's own status", "routes": "d1d2", "phrases": [
+      "applicable, inapplicable with its reason, or review-required; it neither changes nor closes the tension's own status in its home"]},
+    {"id": "E6.choices", "frozen": "element 6 and label 'consequential-choice status (element 6)': consequential choices, effective choice, origin and chooser, binding cited separately or proposed; instruction not ratification; unknown origin not guessed", "routes": "roles+documentation", "phrases": [
+      "state each consequential choice (filtering, exclusions, missing values, splits, selection, defaults), its effective value, origin and chooser (human, agent, delegate, tool default, policy or unknown), and separately its binding: cite the exact element-4 source (authority, instruction or contract) fixing it, else mark it proposed/unaccepted; an instruction is not ratification and an unknown origin is not guessed"]},
+    {"id": "L.O1-content", "frozen": "label 'O1 content (element 6)' and 'material realized record' list as used in element 6", "routes": "roles+documentation", "phrases": [
+      "Unless applicable accepted D1-D3 authority states the material realized record (quantities, populations/regimes, trajectories, decisions, exclusions/failures, retention/destructive boundaries; \"None material, because ...\" valid), reader, routine questions and visibly marked product inspectability surfaces to retain, project or expose realized records with within-deliverable status (\"agent reports only\" or \"None\" valid; draft or unaccepted text does not bind)"]},
+    {"id": "L.reader-short-form", "frozen": "label 'reader/questions and short form (element 6)': retention/projection statement; agent-chosen parts proposed defaults; fixed parts cite source; the short form completes only the materiality-choices statement; independent reader/question proposal", "routes": "roles+documentation", "phrases": [
+      "state what the change retains, projects and omits, marking agent-chosen parts as proposed defaults and citing what fixes the rest; \"no retention/projection change\" completes only this statement. Independently and visibly propose a reader and routine questions when neither the stakeholder nor accepted authority states them, proportionately even for local work."]},
+    {"id": "L.material-realized-record", "frozen": "label 'material realized record (element 7)': realized quantities, populations/regimes, trajectories, decisions, exclusions/failures and retention/destructive boundaries", "routes": "d1d2d3", "phrases": [
+      "state the material realized record (realized quantities, populations/regimes, trajectories, decisions, exclusions/failures, retention/destructive boundaries)"]},
+    {"id": "L.product-surface", "frozen": "label 'product inspectability surface (element 7)': the routine questions the product itself must support by retaining, projecting or exposing realized records", "routes": "d1d2d3", "phrases": [
+      "visibly mark each product inspectability surface (a routine question the product itself must support by retaining, projecting or exposing realized records)"]},
+    {"id": "L.product-surface-e6", "frozen": "label 'product inspectability surface (element 7)' as used by element 6 on the routes that do not carry element 7: the routine questions the product itself must support by retaining, projecting or exposing realized records", "routes": "roles+documentation", "phrases": [
+      "visibly marked product inspectability surfaces to retain, project or expose realized records with within-deliverable status"]},
+    {"id": "E7.authoring", "frozen": "element 7 (D1/D2/D3): material realized record, reader, routine questions, product inspectability surfaces marked within or beyond the deliverable; acceptance review checks content, unmarked requirements and misclassified marks; technical acceptance does not accept a beyond-deliverable item", "routes": "d1d2d3", "phrases": [
+      "When authoring or materially revising D1/D2/D3 authority for such software, state the material realized record (realized quantities, populations/regimes, trajectories, decisions, exclusions/failures, retention/destructive boundaries), intended reader and routine scientific questions (“None material, because …” valid)",
+      "visibly mark each product inspectability surface (a routine question the product itself must support by retaining, projecting or exposing realized records) as within or beyond the requested deliverable (“answered through agent reports only” or “None” valid)",
+      "When reviewing such authority for acceptance, check for that content, for inspectability-driven product requirements left unmarked and for marks wrongly classed as within the deliverable, and state that technical acceptance does not accept a marked item beyond the requested deliverable, which binds only after the stakeholder or task authority accepts it."]}
+  ]
+}

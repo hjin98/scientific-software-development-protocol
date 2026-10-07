@@ -26,13 +26,13 @@ This owner defines the terms below, obligation binding, channels, projection fai
 
 > **Obligation predicate.** Protocol 7 obligations apply when the task produces, changes, runs, or reviews software, pipelines, analyses, models, or reports whose outputs mediate scientific interpretation or scientific decisions (including data preparation, training/evaluation, simulation/optimization campaigns, numerical backends, persistence/retention, and reporting/publication tooling); when it authors or materially revises D1/D2/D3 authority for such software; or when it prepares evidence for a human scientific gate. Exclude tooling, infrastructure, editorial work and utilities only when they cannot materially affect scientific outputs, retained evidence or interpretation. Small size and determinism alone do not establish that exclusion.
 
-> **Owner-load trigger.** Load the scientific-inspectability owner before a consequential scientific analysis or judgment over realized results (running, analyzing or reviewing them where their interpretation is consequential); when authoring, materially revising or reviewing for acceptance D1/D2/D3 authority for such software; or when preparing evidence for a human scientific gate. Otherwise the completion clause suffices.
+> **Recommended depth-read points.** This owner is optional depth and no load is required. It is most useful before a consequential scientific analysis or judgment over realized results (running, analyzing or reviewing them where their interpretation is consequential); when authoring, materially revising or reviewing for acceptance D1/D2/D3 authority for such software; or when preparing evidence for a human scientific gate. The entrypoint's Scientific checks are the complete minimum obligation either way.
 
-Evaluate both at intake and again when a newly discovered effect makes them applicable.
+Evaluate the predicate at intake and again when a newly discovered effect makes it applicable.
 
-**Predicate without trigger.** A code change that realizes no consequential scientific analysis or judgment meets the predicate without the trigger. That includes a local repair, a feature or a workplan implementation. Its consumed entrypoint clause carries the minimum obligation. The clause's proportionate inquiry and consequential-choice statement are not load triggers. The trigger holds once that inquiry finds affected reported or retained results and the task proceeds to a consequential judgment over them.
+**Predicate without a depth read.** A code change that realizes no consequential scientific analysis or judgment meets the predicate and needs no owner read. That includes a local repair, a feature or a workplan implementation. Its consumed entrypoint carries the minimum obligation. The proportionate inquiry and consequential-choice statement are not depth-read points. The depth-read points apply once that inquiry finds affected reported or retained results and the task proceeds to a consequential judgment over them.
 
-**Local-work exemptions.** The 6.6 local-work exemptions, such as "a first clean local defect loads none of these owners", keep governing owner loading unchanged. The trigger holding for one judgment brings in no PEM, census, convergence, redesign or other load. The kernel still requires D1/D2 owners before relying on material scientific meaning. The exemptions never waived the completion contract, so the owed inquiry reaches local repairs proportionately. For example, it asks whether a defect affected results already reported or retained.
+**Local-work exemptions.** The 6.6 local-work exemptions, such as "a first clean local defect loads none of these owners", keep governing owner loading unchanged. A depth read for one judgment brings in no PEM, census, convergence, redesign or other load. The kernel still requires D1/D2 owners before relying on material scientific meaning. The exemptions never waived the completion contract, so the owed inquiry reaches local repairs proportionately. For example, it asks whether a defect affected results already reported or retained.
 
 Reading this owner does not show that its semantics were applied.
 
@@ -386,7 +386,7 @@ Illustrative lists are never checklists.
 
 ## Consumed-surface claim and route limitations
 
-Ordinary routes may consume only the invoked entrypoint. Each role and intersecting specialist entrypoint therefore carries the predicate, the load trigger and a completion clause stating the minimum obligation with the label meanings it uses. This owner supplies depth: disposition-trust and applicability judgment, per-binding dispositioning authority, the (a)–(c) blocking conditions and coverage-envelope detail. It is not inlined.
+Ordinary routes may consume only the invoked entrypoint. Each role and intersecting specialist entrypoint therefore carries the predicate, the recommended depth-read points and the complete minimum obligation (its Scientific checks section) with the label meanings it uses. This owner supplies depth: disposition-trust and applicability judgment, per-binding dispositioning authority and coverage-envelope detail. Apart from the (a)–(c) blocking conditions, which the entrypoint states in element 3, it is not inlined.
 
 **Placement.**
 

@@ -60,6 +60,94 @@ def entry_contract(kernel: str, versioning: str) -> str:
     )
 
 
+# The scientific checks section is generated from one tagged fragment. An entrypoint carries
+# CHECKS_MARKER with the delegate questions (q) and elements (e) its role map assigns; the build
+# injects exactly those fragment lines at the marker, so the six blocks cannot drift. A line tag
+# `{{q=F,R}} ` or `{{e=3}} ` includes the line when the marker selects any listed value; an inline
+# `{{q=V:text}}` (or `{{!q=V:text}}`) includes text only when V is (is not) selected.
+CHECKS_MARKER = "<!-- SSDP-SCIENTIFIC-CHECKS"
+CHECKS_MARKER_RE = re.compile(r"<!-- SSDP-SCIENTIFIC-CHECKS q=([A-Z](?:,[A-Z])*) e=([0-9](?:,[0-9])*) -->")
+CHECKS_FRAGMENT = SHARED / "fragments" / "scientific-checks.md"
+CHECKS_QUESTIONS = "FRVT"
+CHECKS_ELEMENTS = "1234567"
+CHECKS_REQUIRES = {"3": "1", "6": "4"}  # element 3 and 6 refer back to element 1's asserter rule and 4's source list
+NO_CHECKS_SKILLS = {"repository-hygiene"}
+CHECKS_LINE_TAG_RE = re.compile(r"^\{\{([qe])=([A-Za-z0-9,]+)\}\} ")
+CHECKS_INLINE_RE = re.compile(r"\{\{(!?)q=([A-Za-z0-9,]+):(.*?)\}\}")
+
+
+def _checks_values(kind: str, raw: str, where: str) -> set[str]:
+    vocabulary = CHECKS_QUESTIONS if kind == "q" else CHECKS_ELEMENTS
+    values = raw.split(",")
+    unknown = [v for v in values if v not in vocabulary]
+    if unknown:
+        raise SystemExit(f"{where}: unknown scientific-checks {kind} tag {unknown}")
+    return set(values)
+
+
+def checks_selection(text: str, where: str) -> tuple[set[str], set[str]] | None:
+    """Parse the entrypoint's one marker; None when it has none, SystemExit when malformed or duplicated."""
+    if CHECKS_MARKER not in text:
+        return None
+    if text.count(CHECKS_MARKER) != 1:
+        raise SystemExit(f"{where}: entrypoint must contain at most one {CHECKS_MARKER} marker")
+    match = CHECKS_MARKER_RE.search(text)
+    if match is None:
+        raise SystemExit(f"{where}: malformed {CHECKS_MARKER} marker")
+    questions = _checks_values("q", match.group(1), where)
+    elements = _checks_values("e", match.group(2), where)
+    for need_by, need in CHECKS_REQUIRES.items():
+        if need_by in elements and need not in elements:
+            raise SystemExit(f"{where}: element {need_by} refers back to element {need}, which the marker omits")
+    return questions, elements
+
+
+def render_checks(fragment: str, questions: set[str], elements: set[str], where: str = "scientific-checks") -> str:
+    """Return the fragment lines the selection includes, with every tag stripped."""
+    out: list[str] = []
+    for number, line in enumerate(fragment.rstrip("\n").split("\n"), 1):
+        tag = CHECKS_LINE_TAG_RE.match(line)
+        if tag is not None:
+            chosen = questions if tag.group(1) == "q" else elements
+            wanted = _checks_values(tag.group(1), tag.group(2), f"{where}:{number}")
+            if not wanted & chosen:
+                continue
+            line = line[tag.end():]
+
+        def inline(match: re.Match) -> str:
+            wanted = _checks_values("q", match.group(2), f"{where}:{number}")
+            return match.group(3) if bool(wanted & questions) != bool(match.group(1)) else ""
+
+        line = CHECKS_INLINE_RE.sub(inline, line)
+        if "{{" in line or "}}" in line:
+            raise SystemExit(f"{where}:{number}: malformed scientific-checks tag")
+        out.append(line)
+    return "\n".join(out)
+
+
+def validate_checks_fragment(fragment: str) -> None:
+    """Every tag is in the vocabulary and every question and element has a carrier line."""
+    seen = {"q": set(), "e": set()}
+    for number, line in enumerate(fragment.split("\n"), 1):
+        tag = CHECKS_LINE_TAG_RE.match(line)
+        if tag is not None:
+            seen[tag.group(1)] |= _checks_values(tag.group(1), tag.group(2), f"scientific-checks:{number}")
+        for match in CHECKS_INLINE_RE.finditer(line):
+            seen["q"] |= _checks_values("q", match.group(2), f"scientific-checks:{number}")
+    for kind, vocabulary in (("q", CHECKS_QUESTIONS), ("e", CHECKS_ELEMENTS)):
+        if seen[kind] != set(vocabulary):
+            raise SystemExit(f"scientific-checks fragment {kind} tags {sorted(seen[kind])} do not cover {sorted(vocabulary)}")
+    render_checks(fragment, set(CHECKS_QUESTIONS), set(CHECKS_ELEMENTS))
+
+
+def expand_checks(text: str, fragment: str, where: str) -> str:
+    """Replace the entrypoint's marker with its generated block; entrypoints without one are unchanged."""
+    selection = checks_selection(text, where)
+    if selection is None:
+        return text
+    return CHECKS_MARKER_RE.sub(lambda _: render_checks(fragment, *selection, where=where), text, count=1)
+
+
 DIRECT_ROUTE_RE = re.compile(r"\]\((?P<kind>references|templates)/(?P<name>[A-Za-z0-9_.-]+\.md)\)")
 LOCAL_MARKDOWN_LINK_RE = re.compile(r"\[[^\]]+\]\(([^)]+)\)")
 URI_SCHEME_RE = re.compile(r"^[A-Za-z][A-Za-z0-9+.-]*:")
@@ -67,7 +155,8 @@ URI_SCHEME_RE = re.compile(r"^[A-Za-z][A-Za-z0-9+.-]*:")
 
 def _direct_payload(root: Path, skill_name: str) -> tuple[list[str], list[str]]:
     """Derive package payload directly from the skill's explicit Markdown routes."""
-    text = (root / skill_name / "SKILL.md").read_text(encoding="utf-8")
+    skill = root / skill_name / "SKILL.md"
+    text = expand_checks(skill.read_text(encoding="utf-8"), CHECKS_FRAGMENT.read_text(encoding="utf-8"), str(skill))
     references: list[str] = []
     templates: list[str] = []
     references.extend(ENTRY_REFERENCES)
@@ -166,6 +255,12 @@ def validate_registry(root: Path, specs: dict, kind: str) -> None:
             raise SystemExit(f"{skill}: frontmatter name mismatch")
         if skill.read_text(encoding="utf-8").count(ENTRY_PLACEHOLDER) != 1:
             raise SystemExit(f"{skill}: entrypoint must contain exactly one {ENTRY_PLACEHOLDER}")
+        carries = checks_selection(skill.read_text(encoding="utf-8"), str(skill)) is not None
+        if carries == (skill_name in NO_CHECKS_SKILLS):
+            raise SystemExit(
+                f"{skill}: " + (f"{skill_name} must not contain a {CHECKS_MARKER} marker" if carries
+                               else f"entrypoint must contain exactly one {CHECKS_MARKER} marker")
+            )
         for _, path in entries(skill_name, spec, kind):
             if not path.is_file():
                 raise SystemExit(f"missing package source: {path}")
@@ -174,6 +269,7 @@ def validate_registry(root: Path, specs: dict, kind: str) -> None:
 def validate() -> None:
     if not re.fullmatch(r"\d+\.\d+\.\d+", PROTOCOL_VERSION):
         raise SystemExit(f"invalid protocol version: {PROTOCOL_VERSION!r}")
+    validate_checks_fragment(CHECKS_FRAGMENT.read_text(encoding="utf-8"))
     validate_registry(ROLES, ROLE_SPECS, "role")
     validate_registry(SPECIALISTS, SPECIALIST_SPECS, "specialist")
 
@@ -186,6 +282,7 @@ def build_one(skill_name: str, spec: dict, kind: str, stage: Path) -> Path:
         dst.parent.mkdir(parents=True, exist_ok=True)
         text = src.read_text(encoding="utf-8")
         if rel == "SKILL.md":
+            text = expand_checks(text, CHECKS_FRAGMENT.read_text(encoding="utf-8"), str(src))
             text = text.replace(ENTRY_PLACEHOLDER, entry_contract(
                 (SHARED / "references" / ENTRY_REFERENCES[0]).read_text(encoding="utf-8"),
                 (SHARED / "references" / ENTRY_REFERENCES[1]).read_text(encoding="utf-8"),

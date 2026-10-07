@@ -9,11 +9,15 @@ from __future__ import annotations
 
 import re
 import subprocess
+import sys
 import unittest
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 SOURCE = ROOT / "source"
+sys.path.insert(0, str(SOURCE))
+import build_skills  # noqa: E402
+
 REFS = SOURCE / "shared" / "references"
 TEMPLATES = SOURCE / "shared" / "templates"
 OWNER = "scientific-inspectability-and-initiative.md"
@@ -22,13 +26,13 @@ ACCEPTED_66 = "22f4bdba53795da3a6f13f162529f3a843fc37ae"
 ROLES = ("scientific-formulation", "numerical-algorithm-design", "software-design", "software-implementation")
 SPECIALISTS = ("software-documentation", "software-maintenance-audit", "repository-hygiene")
 ELEMENT_PREFIX = {
-    "1": "1. Within the task's declared resource budget",
-    "2": "2. For a selected reported/delivered survivor",
-    "3": "3. Before relying on accepted D1/D2 authority for a consequential judgment",
-    "4": "4. Keep claims within evidence",
-    "5": "5. When revising, renaming, splitting, merging or replacing D1/D2 authority",
-    "6": "6. For a built/changed scientific pipeline, analysis or report",
-    "7": "7. When authoring or materially revising D1/D2/D3 authority for such software",
+    "1": "1. **Findings.**",
+    "2": "2. **Variants.**",
+    "3": "3. **Tensions.**",
+    "4": "4. **Claims and scope.**",
+    "5": "5. **Revisions.**",
+    "6": "6. **Choices.**",
+    "7": "7. **Authority content.**",
 }
 PLACEMENT = {
     "scientific-formulation": {"1", "2", "3", "4", "5", "6", "7"},
@@ -44,17 +48,37 @@ PREDICATE = (
     "> **Obligation predicate.** Protocol 7 obligations apply when the task produces, changes, runs, or reviews software, "
     "pipelines, analyses, models, or reports whose outputs mediate scientific interpretation or scientific decisions"
 )
-TRIGGER = "> **Owner-load trigger.** Load the scientific-inspectability owner before a consequential scientific analysis"
-DELEGATE_HEAD = "**When you delegate.**"
-COMPLETION_HEAD = "## Scientific completion when the predicate above applies"
+DEPTH_POINTS = "> **Recommended depth-read points.** This owner is optional depth and no load is required."
+BLOCK_HEAD = "## Scientific checks"
+DELEGATE_HEAD = "**If you delegate**"
 LAUNCHED = "any tools or agents you launched"
 QUESTIONS = ("Findings", "Realized results", "Variants", "Tensions")
+QUESTION_START = {
+    "Findings": '- "Report your material findings',
+    "Realized results": '- "Did your work, including any tools or agents you launched, produce',
+    "Variants": '- "Did your work, including any tools or agents you launched, evaluate',
+    "Tensions": "- Only if it relies on accepted D1/D2 authority for a consequential judgment:",
+}
+QUESTION_QUALIFIERS = {
+    "Findings": ("or state that you have none",),
+    "Realized results": ("give your null envelope",),
+    "Variants": ("including changes made after seeing results, even bug fixes", "held-out reuse"),
+    "Tensions": ("a recorded finding bearing on it that has not been raised as a Serious Challenge",
+                 "with each record's entries, binding and asserter"),
+}
 SPECIALIST_QUESTIONS = {"software-documentation": QUESTIONS[:2], "software-maintenance-audit": QUESTIONS[:2]}
 
 
 def entrypoint(name: str) -> Path:
     kind = "roles" if name in ROLES else "specialists"
     return SOURCE / kind / name / "SKILL.md"
+
+
+def generated(name: str) -> str:
+    """The entrypoint as the build emits it: the Scientific checks marker expanded from the fragment."""
+    path = entrypoint(name)
+    return build_skills.expand_checks(
+        path.read_text(encoding="utf-8"), build_skills.CHECKS_FRAGMENT.read_text(encoding="utf-8"), str(path))
 
 
 def element_lines(text: str) -> dict[str, str]:
@@ -66,14 +90,48 @@ def element_lines(text: str) -> dict[str, str]:
     return found
 
 
-def delegate_block(text: str) -> str:
-    """The delegate-request block: from its lead line to the first numbered element."""
-    start = text.index(DELEGATE_HEAD)
-    return text[start:text.index("\n\n1. ", start)]
+def question_lines(text: str) -> dict[str, str]:
+    return {key: line for key, start in QUESTION_START.items() for line in text.splitlines() if line.startswith(start)}
 
 
-def question_lines(block: str) -> dict[str, str]:
-    return {key: line for key in QUESTIONS for line in block.splitlines() if line.startswith(f"- **{key}")}
+def block_problems(name: str, text: str) -> list[str]:
+    """Everything the consumed surface owes this entrypoint that `text` fails to carry (empty when sound)."""
+    problems: list[str] = []
+    if not PLACEMENT[name]:
+        return [f"{name}: carries a Scientific checks section"] if BLOCK_HEAD in text else []
+    if text.count(BLOCK_HEAD + "\n") != 1:
+        return [f"{name}: Scientific checks section is not present exactly once"]
+    block = text[text.index(BLOCK_HEAD):]
+    block = block[:block.index("\n## ", 1)]
+    if "These checks are the complete obligation" not in block:
+        problems.append(f"{name}: scope lost the complete-obligation sentence")
+    if DELEGATE_HEAD not in block:
+        problems.append(f"{name}: delegate lead lost")
+    expected = SPECIALIST_QUESTIONS.get(name, QUESTIONS)
+    found = question_lines(block)
+    for key in QUESTIONS:
+        if key in expected and key not in found:
+            problems.append(f"{name}: delegate question {key} missing")
+        if key not in expected and key in found:
+            problems.append(f"{name}: delegate question {key} must not be carried")
+    for key, line in found.items():
+        if LAUNCHED not in line:
+            problems.append(f"{name}: {key} question lost its launched-work qualifier")
+        for qualifier in QUESTION_QUALIFIERS[key]:
+            if qualifier not in line:
+                problems.append(f"{name}: {key} question lost its qualifier {qualifier!r}")
+    for phrase in ("including when nothing returns", "findings always;", "evidently produced, ran and reviewed no realized results"):
+        if phrase not in block:
+            problems.append(f"{name}: gap rule lost {phrase!r}")
+    variants = "variants, for a returned result, with unknown selection history and claim limit" in block
+    if variants != ("Variants" in expected):
+        problems.append(f"{name}: gap rule variants clause {'missing' if 'Variants' in expected else 'present without a variant question'}")
+    elements = element_lines(block)
+    for key in sorted(PLACEMENT[name] - set(elements)):
+        problems.append(f"{name}: element {key} missing")
+    for key in sorted(set(elements) - PLACEMENT[name]):
+        problems.append(f"{name}: element {key} must not be carried")
+    return problems
 
 
 def accepted(rel: str) -> str | None:
@@ -82,12 +140,12 @@ def accepted(rel: str) -> str | None:
 
 
 class Protocol70StructuralTests(unittest.TestCase):
-    def test_single_canonical_owner_carries_frozen_predicate_and_trigger(self) -> None:
+    def test_single_canonical_owner_carries_frozen_predicate_and_depth_points(self) -> None:
         owners = [path.name for path in REFS.glob("*.md") if "Obligation predicate." in path.read_text(encoding="utf-8")]
         self.assertEqual(owners, [OWNER])
         owner = (REFS / OWNER).read_text(encoding="utf-8")
         self.assertIn(PREDICATE, owner)
-        self.assertIn(TRIGGER, owner)
+        self.assertIn(DEPTH_POINTS, owner)
         for bound in (
             "not guaranteed to perform a tension search",
             "reported as given",
@@ -97,50 +155,53 @@ class Protocol70StructuralTests(unittest.TestCase):
         ):
             self.assertIn(bound, owner)
 
-    def test_routing_line_and_elements_are_placed_exactly(self) -> None:
+    def test_scientific_checks_and_elements_are_placed_exactly(self) -> None:
         for name, expected in PLACEMENT.items():
-            text = entrypoint(name).read_text(encoding="utf-8")
+            source = entrypoint(name).read_text(encoding="utf-8")
+            text = generated(name)
+            self.assertEqual(block_problems(name, text), [], name)
             self.assertEqual(set(element_lines(text)), expected, name)
-            self.assertEqual(ROUTE_MARK in text, bool(expected), name)
+            self.assertNotIn(ROUTE_MARK, text, f"{name}: the 7.1 owner routing bullet is removed")
+            self.assertEqual(source.count(build_skills.CHECKS_MARKER), 1 if expected else 0, name)
             if expected:
-                self.assertEqual(text.count("## Scientific completion when the predicate above applies"), 1, name)
-                self.assertLess(text.index(ROUTE_MARK), text.index("## Scientific completion"), name)
+                self.assertEqual(text.count(BLOCK_HEAD + "\n"), 1, name)
+                self.assertNotIn("## Scientific completion", text, name)
+                # at the 7.1 completion-clause position: after the contract text, before the closing section
+                self.assertLess(text.index("A required check that did not execute" if name == "software-implementation" else "## "), text.index(BLOCK_HEAD), name)
+                tail = text[text.index(BLOCK_HEAD):]
+                self.assertRegex(tail[1:].split("\n## ", 1)[1].split("\n", 1)[0], r"^(Challenge and completion|Completion|Output)\b", name)
 
     def test_each_element_has_one_wording_across_entrypoints(self) -> None:
         wordings: dict[str, set[str]] = {}
         for name in PLACEMENT:
-            for key, line in element_lines(entrypoint(name).read_text(encoding="utf-8")).items():
+            for key, line in element_lines(generated(name)).items():
                 wordings.setdefault(key, set()).add(line)
-        routes = {
-            line.removeprefix("- ")
-            for name in PLACEMENT
-            for line in entrypoint(name).read_text(encoding="utf-8").splitlines()
-            if ROUTE_MARK in line
-        }
-        self.assertEqual(len(routes), 1)
         for key, lines in wordings.items():
             self.assertEqual(len(lines), 1, key)
+        scopes = {generated(name)[generated(name).index("**Scope.**"):].split("\n", 1)[0] for name in PLACEMENT if PLACEMENT[name]}
+        self.assertEqual(len(scopes), 1, "the scope and depth line has one wording on every route")
 
     def test_consumed_clauses_carry_label_meanings(self) -> None:
-        d4 = entrypoint("software-implementation").read_text(encoding="utf-8")
+        d4 = generated("software-implementation")
         for meaning in (
-            "if none, only negligible probes using no shared, metered or queued resource; propose the rest",
+            "none declared: only negligible probes using no shared, metered or queued resource; propose the rest",
             "missing, irrecoverable, archaeology-only or misleading realized records",
-            "a null states examined and materially unexamined areas",
+            "a null names examined and materially unexamined areas",
             "as a gap, never as none, a null or no selection: findings always;",
-            "including when it returns nothing",
+            "including when nothing returns",
             "lineage including delegated or resumed work, without double-counting overlapping trials",
             "a recorded finding bearing on it that has not been raised as a Serious Challenge",
             "evidently produced, ran and reviewed no realized results and prepared no gate evidence",
             "known lower bound, unknown interval and claim limit",
-            "natively attributed account/record asserter",
-            "content-stated human/AI asserter and which agent",
+            "its home's native asserter",
+            "asserter stated in its content as human or AI and which agent",
             "an instruction is not ratification",
             "never technical Review alone",
             "no retention/projection change",
+            "An inaccessible or unsearchable home is a named coverage limit, enough by default",
         ):
             self.assertIn(meaning, d4)
-        d1 = entrypoint("scientific-formulation").read_text(encoding="utf-8")
+        d1 = generated("scientific-formulation")
         for meaning in (
             "applicable, inapplicable with its reason, or review-required",
             "neither changes nor closes the tension's own status",
@@ -150,47 +211,59 @@ class Protocol70StructuralTests(unittest.TestCase):
         ):
             self.assertIn(meaning, d1)
 
-    def test_delegate_request_block_is_relocated_once_with_one_wording_per_variant(self) -> None:
+    def test_delegate_questions_carry_their_qualifiers_with_one_wording_per_variant(self) -> None:
         blocks: dict[str, str] = {}
         for name in PLACEMENT:
-            text = entrypoint(name).read_text(encoding="utf-8")
-            if name == "repository-hygiene":
-                self.assertNotIn(DELEGATE_HEAD, text, name)
+            text = generated(name)
+            self.assertEqual(block_problems(name, text), [], name)
+            if not PLACEMENT[name]:
                 continue
-            self.assertEqual(text.count(DELEGATE_HEAD), 1, name)
-            completion = text.index(COMPLETION_HEAD)
-            self.assertLess(completion, text.index(DELEGATE_HEAD), name)
-            self.assertLess(text.index(DELEGATE_HEAD), text.index("\n\n1. Within the task's declared resource budget"), name)
-            block = blocks[name] = delegate_block(text)
-            expected = SPECIALIST_QUESTIONS.get(name, QUESTIONS)
-            found = question_lines(block)
-            self.assertEqual(tuple(found), expected, name)
-            for key, line in found.items():
-                self.assertIn(LAUNCHED, line, f"{name}: {key} question lost its launched-work qualifier")
-            for dropped in set(QUESTIONS) - set(expected):
-                self.assertNotIn(f"- **{dropped}", block, name)
-            self.assertIn("including when it returns nothing", block, name)
-            self.assertNotIn("On return", block, name)
-            self.assertIn("findings always;", block, name)
-            self.assertIn("evidently produced, ran and reviewed no realized results", block, name)
-            # relocated, not duplicated: the old delegate-request sentences are gone from the element prose
-            for old in ("ask for findings or none", "Ask each delegate asked for findings", "Ask a delegate relying on it",
-                        "Unanswered findings are always a gap"):
-                self.assertNotIn(old, text, f"{name}: old sentence {old!r} still present")
-            # the delegator's own duties stay in the element prose
-            self.assertIn("adds nothing except asked delegate answers/gaps", text, name)
-        roles = {blocks[name] for name in ROLES}
-        self.assertEqual(len(roles), 1, "the role entrypoints must carry one block wording")
-        specialists = {blocks[name] for name in SPECIALIST_QUESTIONS}
-        self.assertEqual(len(specialists), 1, "the specialists must carry one block wording")
-        role_block, specialist_block = next(iter(roles)), next(iter(specialists))
-        shared = role_block[:role_block.index("- **Variants")]
-        self.assertTrue(specialist_block.startswith(shared), "specialist lead line and first two questions must equal the role block's")
-        self.assertIn("variants, for a returned result, with unknown selection history and claim limit", role_block)
-        self.assertNotIn("variant", specialist_block.split("- **Realized results")[1])
-        self.assertIn("never as none or a null", specialist_block)
+            block = blocks[name] = text[text.index(BLOCK_HEAD):text.index("**Before you finish")]
+            self.assertEqual(tuple(key for key in QUESTIONS if key in question_lines(block)),
+                             SPECIALIST_QUESTIONS.get(name, QUESTIONS), name)
+            self.assertIn("adds nothing except answers its delegator asked for and gaps owed for its delegates", text, name)
+            for old in ("On return", "ask for findings or none", "Ask each delegate asked for findings"):
+                self.assertNotIn(old, text, name)
+        # the delegate parts (everything before the element lead, after the scope line) are one wording per role family
+        def delegate_part(name: str) -> str:
+            block = blocks[name]
+            return block[block.index(DELEGATE_HEAD):]
+        self.assertEqual(len({delegate_part(name) for name in ROLES}), 1)
+        self.assertEqual(len({delegate_part(name) for name in SPECIALIST_QUESTIONS}), 1)
+        self.assertIn("never as none or a null", delegate_part("software-documentation"))
         for name in ROLES:
-            self.assertIn("judgments with no reported search", entrypoint(name).read_text(encoding="utf-8"), name)
+            self.assertIn("judgments with no reported search", generated(name), name)
+
+    def test_block_checks_reject_a_missing_question_element_or_qualifier(self) -> None:
+        d3 = generated("software-design")
+        self.assertEqual(block_problems("software-design", d3), [])
+        # a missing delegate question
+        dropped = "\n".join(line for line in d3.split("\n") if not line.startswith(QUESTION_START["Realized results"]))
+        self.assertTrue(any("question Realized results missing" in m for m in block_problems("software-design", dropped)))
+        # a missing element
+        no_element = "\n".join(line for line in d3.split("\n") if not line.startswith(ELEMENT_PREFIX["3"]))
+        self.assertTrue(any("element 3 missing" in m for m in block_problems("software-design", no_element)))
+        # a lost qualifier: the launched-work clause, then a question-specific one
+        launched = d3.replace("For that judgment, including any tools or agents you launched, what", "For that judgment, what", 1)
+        self.assertTrue(any("Tensions question lost its launched-work qualifier" in m for m in block_problems("software-design", launched)))
+        reworded = d3.replace("Did your work, including any tools or agents you launched, evaluate", "Did your work evaluate", 1)
+        self.assertTrue(any("question Variants missing" in m for m in block_problems("software-design", reworded)))
+        for key, qualifiers in QUESTION_QUALIFIERS.items():
+            for qualifier in qualifiers:
+                broken = d3.replace(qualifier, "", 1)
+                self.assertTrue(any(f"{key} question lost its qualifier" in m for m in block_problems("software-design", broken)),
+                                f"{key}: {qualifier!r}")
+        # the gap rule's exemptions
+        gap = d3.replace("unless the task evidently produced, ran and reviewed no realized results and prepared no gate evidence", "", 1)
+        self.assertTrue(any("gap rule lost" in m for m in block_problems("software-design", gap)))
+        # a route that must not carry a question or element
+        doc = generated("software-documentation")
+        extra = doc.replace(QUESTION_START["Realized results"], QUESTION_START["Variants"] + " x " + QUESTION_START["Realized results"], 1)
+        self.assertTrue(any("must not be carried" in m for m in block_problems("software-documentation", extra)))
+        hygiene = generated("repository-hygiene") + "\n" + BLOCK_HEAD + "\n"
+        self.assertTrue(block_problems("repository-hygiene", hygiene))
+        # a removed section
+        self.assertTrue(block_problems("software-design", d3[:d3.index(BLOCK_HEAD)]))
 
     def test_selection_description_covers_new_classes_without_narrowing(self) -> None:
         front = entrypoint("software-implementation").read_text(encoding="utf-8").split("---", 2)[1]
