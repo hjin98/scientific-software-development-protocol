@@ -57,3 +57,21 @@ The analyst evaluates only these, in this order, from run artifacts and **bindin
 - The fixtures are disclosed and non-blind, and the roots are the analyst's, not a custodian's.
 - 1 replicate.
 - This is development data and supports no qualification or comparative claim.
+
+## Repair addendum (2026-10-06, analyst)
+
+**What happened.** The first `dev-s` launch (started 2026-10-06T12:01:05Z) never ran. The operator runtime killed the background launcher when its tool shell ended, before the launcher wrote anything. No harness run started: there is no `$WORK/dev/runs`. The old `launch_status` checked only marker files, so it kept reporting `RUNNING` until the operator escalated (`escalations/resolved/20261006T150812Z-dev-s.md`).
+
+**Repair.**
+- `operator-lib.sh` now runs the launcher in its own session (fork + `setsid()` in Python).
+- The launcher writes its own PID to `$WORK/launch/<key>.pid`. The shell's `$!` is not used, because a forking `setsid` makes it name an already-exited parent.
+- `launch_status` adds `CRASHED`: started, no exit marker, and no live launcher whose command line names `$WORK/launch/<key>`.
+- `launch` refuses with `STOP` if the launcher is not alive after start.
+- Runbook rule 9 and Phase D now escalate on `CRASHED`.
+- `launch_fg` (same launcher, foreground) exists only as an analyst-directed fallback. It is **not** authorized by this work order.
+
+**Workspace.** The analyst moved the dead `dev-s.started`/`dev-s.log` to `$WORK/launch/aborted-dev-s-20261006T120105Z/`.
+
+**Re-authorization.** Run Session start, then Phase D for `dev-s`, `dev-p`, `dev-a` exactly as above, using `launch`. This `dev-s` launch is a new analyst-authorized step, not an operator retry. Session start must show `NOT-LAUNCHED` for all three keys; anything else is an escalation.
+
+**Limit.** The detached mode survives the end of the launching shell (tested under this analyst's runner). If the operator runtime kills the whole process tree or cgroup, no in-shell detach can survive. The first `launch_status` poll then shows `CRASHED`, the operator escalates, and the analyst decides whether to authorize `launch_fg` under the runtime's native task backgrounding.

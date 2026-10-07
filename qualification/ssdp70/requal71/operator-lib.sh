@@ -24,25 +24,59 @@ gate() {  # gate <step-id> <command...> : run once, keep the JSON verdict, retur
   return $rc
 }
 
-launch() {  # launch <commands.json> <key> : start one printed harness command in the background, exactly as printed
-  local plan="$1" key="$2"
-  mkdir -p "$WORK/launch"
-  if [ -e "$WORK/launch/$key.started" ]; then echo "STOP: $key was already launched; never relaunch"; return 1; fi
-  date -u +%FT%TZ > "$WORK/launch/$key.started"
-  nohup "$PY" - "$plan" "$key" "$WORK/launch/$key.exit" > "$WORK/launch/$key.log" 2>&1 <<'PYEOF' &
-import json, subprocess, sys
-plan, key, exit_path = sys.argv[1:4]
-cmds = [c for c in json.load(open(plan))["commands"] if c["key"] == key]
-if len(cmds) != 1:
-    open(exit_path, "w").write("97\n"); sys.exit(97)
-rc = subprocess.call(cmds[0]["argv"])
-open(exit_path, "w").write(f"{rc}\n")
+_launcher() {  # _launcher <commands.json> <key> <detach 0|1> : run one printed command; the launcher records its own PID and exit
+  # Detached mode forks and calls setsid() inside Python so the run leaves the caller's process group and session;
+  # the shell's $! is never used because a forking setsid/nohup makes it name an already-exited parent.
+  "$PY" - "$1" "$2" "$WORK/launch/$2" "$3" > "$WORK/launch/$2.log" 2>&1 <<'PYEOF'
+import json, os, subprocess, sys, traceback
+plan, key, base, detach = sys.argv[1:5]
+if detach == "1":
+    if os.fork():
+        os._exit(0)
+    os.setsid()
+with open(base + ".pid", "w") as f:
+    f.write(f"{os.getpid()}\n")
+try:
+    cmds = [c for c in json.load(open(plan))["commands"] if c["key"] == key]
+    rc = subprocess.call(cmds[0]["argv"]) if len(cmds) == 1 else 97
+except Exception:
+    traceback.print_exc(); rc = 98
+with open(base + ".exit", "w") as f:
+    f.write(f"{rc}\n")
 PYEOF
-  echo "launched $key; poll with: launch_status $key"
 }
 
-launch_status() {  # launch_status <key> : RUNNING, or the exit code once finished
-  if [ ! -e "$WORK/launch/$1.started" ]; then echo "NOT-LAUNCHED"; elif [ -e "$WORK/launch/$1.exit" ]; then echo "EXIT $(cat "$WORK/launch/$1.exit")"; else echo "RUNNING"; fi
+_launch_begin() {  # _launch_begin <key> : refuse a relaunch, then mark the start
+  mkdir -p "$WORK/launch"
+  if [ -e "$WORK/launch/$1.started" ]; then echo "STOP: $1 was already launched; never relaunch"; return 1; fi
+  date -u +%FT%TZ > "$WORK/launch/$1.started"
+}
+
+launch() {  # launch <commands.json> <key> : start one printed harness command, detached, exactly as printed
+  local plan="$1" key="$2" i
+  _launch_begin "$key" || return 1
+  _launcher "$plan" "$key" 1
+  for i in $(seq 50); do [ -s "$WORK/launch/$key.pid" ] && break; sleep 0.2; done
+  if [ "$(launch_status "$key")" = RUNNING ] || [ -e "$WORK/launch/$key.exit" ]; then
+    echo "launched $key (PID $(cat "$WORK/launch/$key.pid")); poll with: launch_status $key"
+  else
+    echo "STOP: $key launcher is not alive ($(launch_status "$key"))"; return 1
+  fi
+}
+
+launch_fg() {  # launch_fg <commands.json> <key> : same, in the foreground; ONLY when the analyst's work order says so
+  _launch_begin "$2" || return 1
+  _launcher "$1" "$2" 0
+  echo "$2: $(launch_status "$2")"
+}
+
+launch_status() {  # launch_status <key> : NOT-LAUNCHED, RUNNING, EXIT <rc>, or CRASHED (started, no exit, launcher gone)
+  local b="$WORK/launch/$1" pid
+  if [ ! -e "$b.started" ]; then echo "NOT-LAUNCHED"; return; fi
+  if [ -e "$b.exit" ]; then echo "EXIT $(cat "$b.exit")"; return; fi
+  pid=$(cat "$b.pid" 2>/dev/null)
+  # The launcher's command line carries $b, so a recycled PID is not mistaken for it.
+  if [ -n "$pid" ] && tr '\0' ' ' 2>/dev/null < "/proc/$pid/cmdline" | grep -qF -- " $b "; then echo "RUNNING"; else echo "CRASHED"; fi
 }
 
 log_access() {  # log_access <role> <paths> <reason> : append one line to the custody access log (append-only)
@@ -58,6 +92,7 @@ escalate() {  # escalate <step-id> <one-line description> : write the packet, th
     echo "- time: $(date -u +%FT%TZ)"
     echo "- operator note (facts only): $*"
     echo "- exit code: $(cat "$WORK/gates/$id.exit" 2>/dev/null || cat "$WORK/launch/$id.exit" 2>/dev/null || echo n/a)"
+    [ -e "$WORK/launch/$id.started" ] && echo "- launch status: $(launch_status "$id")"
     echo; echo '## Verdict JSON (verbatim)'; echo '```json'; cat "$WORK/gates/$id.json" 2>/dev/null; echo '```'
     echo; echo '## stderr / log tail'; echo '```'; tail -n 60 "$WORK/gates/$id.stderr" "$WORK/launch/$id.log" 2>/dev/null; echo '```'
     echo; echo "The operator has stopped and will not continue until the analyst replies."

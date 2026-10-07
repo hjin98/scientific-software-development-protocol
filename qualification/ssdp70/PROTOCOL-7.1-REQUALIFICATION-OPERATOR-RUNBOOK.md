@@ -26,7 +26,7 @@ Governing SSDP version: 6.6.0.
 6. **Never judge results.** Never read run reports to judge them, never compare arms, never summarize results. Your report is the list of gate files.
 7. **The harness only through `launch`.** Never run `harness70.py`, `batch_assess70.py` or any oracle directly. Never use `--mode probe` or `--only`.
 8. **No git.** Never commit, push, stash, checkout or reset.
-9. **Waiting.** When a step says WAIT, poll with `launch_status` at most every 10 minutes and do nothing else meanwhile.
+9. **Waiting.** When a step says WAIT, poll with `launch_status` at most every 10 minutes and do nothing else meanwhile. `RUNNING` means keep waiting. `CRASHED` (the launcher died without an exit code) is never a wait: `escalate <key> "launch status CRASHED"` and stop. If `launch` itself prints `STOP`, escalate and stop.
 10. **Doubt is an escalation.** A step that seems wrong, ambiguous or impossible is an escalation, not a judgment call.
 
 ## Session start (every session, before any step)
@@ -85,11 +85,13 @@ The analyst provides `$WORK/dev/commands.json` (development-purpose harness comm
 For each listed key, in order:
 
 ```bash
-launch "$WORK/dev/commands.json" <key>     # WAIT until: launch_status <key>  shows EXIT
+launch "$WORK/dev/commands.json" <key>     # WAIT until: launch_status <key>  shows EXIT or CRASHED
 ```
 
 - **Continue** if the exit is `EXIT 0` or `EXIT 2`.
 - **Stop** on any other exit: `escalate <key> "dev launch exit <n>"`.
+- **Stop** on `CRASHED`: `escalate <key> "launch status CRASHED"`.
+- Use `launch_fg` instead of `launch` only when the analyst's work order says so.
 - Report "Phase D complete" with the list of `$WORK/launch/*`.
 
 ## Phase P3: fresh custody and corpus (after the custodian's hand-over C-6)
