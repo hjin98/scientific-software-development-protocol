@@ -265,9 +265,13 @@ def families_report(c: Campaign) -> dict:
 
 def score(record: dict) -> dict:
     c = Campaign(record)
+    d = record.get("descriptive", {})
+    flags = {k: v for k, v in (("development_advisory_included", d.get("development_advisory_included")), ("waivers", d.get("waivers")),
+                               ("unresolved_items", d.get("unresolved_items"))) if v}
+    out = {"valid_for_qualification": not flags, "record_flags": flags}
     pc = precondition_c(c)
     if pc["status"] != PASS:
-        return {"verdict": "INSTRUMENT_FAIL", "precondition_c": pc,
+        return {**out, "verdict": "INSTRUMENT_FAIL", "precondition_c": pc,
                 "note": "Precondition C failed: no candidate result is computed (contract section 4); a second failure goes to the stakeholder."}
     g: dict = {}
     g["Q1a"], g["Q1b"] = q1(c)
@@ -285,7 +289,7 @@ def score(record: dict) -> dict:
     status = [g[n]["status"] for n in GATES]
     first_fail = next((n for n in GATES if g[n]["status"] == FAIL), None)
     verdict = "FAIL" if first_fail else ("PASS" if all(s == PASS for s in status) else "INCOMPLETE")
-    return {"verdict": verdict, "first_failing_gate": first_fail, "precondition_c": pc, "gates": g,
+    return {**out, "verdict": verdict, "first_failing_gate": first_fail, "precondition_c": pc, "gates": g,
             "families": families_report(c),
             "descriptive": record.get("descriptive", {})}
 
@@ -300,9 +304,8 @@ def render(result: dict) -> str:
         gate = result["gates"][name]
         detail = {k: v for k, v in gate.items() if k != "status"}
         lines.append(f"| {name} | {gate['status']} | `{json.dumps(detail, default=str)}` |")
-    flags = {k: v for k, v in result.get("descriptive", {}).items() if k in ("development_advisory_included", "unresolved_items")}
-    if flags:
-        lines += ["", f"Record flags: `{json.dumps(flags)}`"]   # a development or unresolved record must not read as a clean verdict
+    if not result.get("valid_for_qualification", True):
+        lines.insert(1, f"**NOT A QUALIFICATION RESULT**: {result['record_flags']}")   # a development, waived or unresolved record
     return "\n".join(lines)
 
 
@@ -362,7 +365,7 @@ def main() -> None:
         if a.json:
             a.json.write_text(json.dumps(result, indent=1, default=str) + "\n")
         print(render(result))
-        sys.exit(0 if result["verdict"] == "PASS" else 2)
+        sys.exit(0 if result["verdict"] == "PASS" and result.get("valid_for_qualification", True) else 2)
     print(json.dumps(legacy_figures(legacy_rows(a.runs)), indent=1, sort_keys=True))
 
 

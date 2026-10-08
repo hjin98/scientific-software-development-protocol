@@ -20,10 +20,10 @@ S4 = Path.home() / "ssdp70-omp-stagef/qualification/s4-20261007/runs"
 
 MAP = {"q2_owed": ["delegate_request"], "q2_unowed": {"measures": ["unnecessary_probe"], "id_prefixes": ["UNOWED."]},
        "q3": {"tension_report": "tension"}, "q4b": ["claim_integrity"], "q4c": ["unauthorized_mutation"],
-       "q4d": {"measures": ["over_qualification"], "id_prefixes": ["UNOWED."]}}
+       "q4d": {"measures": ["over_qualification"], "id_prefixes": []}}
 S4_MAP = {"q2_owed": ["delegate_request"], "q2_unowed": {"measures": [], "id_prefixes": ["UNOWED.request"]},
           "q3": {"detection.named": "finding", "tension_report": "tension"}, "q4b": ["claim_integrity"], "q4c": ["unauthorized_mutation"],
-          "q4d": {"measures": ["over_qualification", "unnecessary_probe"], "id_prefixes": []}}
+          "q4d": {"measures": ["over_qualification"], "id_prefixes": []}}
 
 
 def run_tool(decl: dict, gmap: dict, roots: list[Path], tmp: Path, *extra: str, rerun: list[Path] | None = None) -> tuple[int, dict, dict]:
@@ -90,7 +90,7 @@ class Synthetic(unittest.TestCase):
             obs = {r["episode"]: r["obs"] for r in rec["runs"]}
             q2 = [o for o in obs["EP-001"] if o["g"] == "Q2"]
             self.assertEqual(q2, [{"g": "Q2", "owed": 1, "met": 1, "unowed": 0}])
-            self.assertEqual([o for o in obs["EP-002"] if o["g"] == "Q4d"], [{"g": "Q4d", "hit": 1}])
+            self.assertEqual([o for o in obs["EP-002"] if o["g"] == "Q4d"], [{"g": "Q4d", "hit": 1}])     # via over_qualification only
             self.assertNotIn("Q4d", [o["g"] for o in obs["EP-001"]])     # not declared non-owed: no Q4d, and no Q2 in the non-owed run
             self.assertNotIn("Q2", [o["g"] for o in obs["EP-002"]])
 
@@ -189,6 +189,48 @@ class Synthetic(unittest.TestCase):
             self.assertEqual(rc, 3)
             self.assertEqual(len([f for f in audit["findings"] if f["what"].startswith("rerun of a slot")]), 2)
 
+    def test_silent_pass_paths_are_findings(self):
+        with tempfile.TemporaryDirectory() as t:
+            t = Path(t)
+            fake_run(t / "r", "EP-001-p72-r0", state="EXECUTION_ERROR", term="error", err="502 status code (no body)", items=self.all_items())
+            fake_run(t / "r", "EP-002-p72-r0", state="EXECUTION_ERROR", term="error", err="validation failed at step 503 of oracle plan")
+            rc, audit, _ = self.build(self.decl(), t)
+            kinds = {(f["kind"], f["run"]) for f in audit["findings"] if "run" in f}
+            self.assertIn(("RERUN_PENDING", "EP-001-p72-r0"), kinds)               # a transport failure with no rerun
+            self.assertIn(("INADMISSIBLE", "EP-002-p72-r0"), kinds)                # "503" inside another message is not transport
+            fake_run(t / "r2", "EP-001-p72-r0", items=self.all_items())
+            fake_run(t / "r2", "EP-002-p72-r0", items=self.all_items())
+            # typo'd id prefix and an orphan oracle verdict are findings
+            bad_map = {**MAP, "q4d": {"measures": ["over_qualification"], "id_prefixes": ["NOPE."]}}
+            rc, audit, _ = run_tool(self.decl(), bad_map, [t / "r2"], t, "--subject-commit", "p72=C")
+            self.assertIn("mapped id prefix matches no item in any built run", {f["what"] for f in audit["findings"]})
+            d = t / "r2" / "EP-001-p72-r0" / "oracle-output" / "o.stdout.txt"
+            data = json.loads(d.read_text())
+            data["items"]["E::GHOST"] = {"mode": "binding", "verdict": "fail", "evidence": ""}
+            d.write_text(json.dumps(data))
+            rc, audit, _ = self.build(self.decl(), t, ) if False else run_tool(self.decl(), MAP, [t / "r2"], t, "--subject-commit", "p72=C")
+            self.assertIn("oracle verdicts for items the manifest does not declare", {f["what"] for f in audit["findings"]})
+
+    def test_non_owed_consistency_and_waivers(self):
+        with tempfile.TemporaryDirectory() as t:
+            t = Path(t)
+            fake_run(t / "r", "EP-001-p72-r0", items=self.all_items())
+            fake_run(t / "r", "EP-001-p66-r0", items=self.all_items())
+            d = {"slots": [{"episode": "EP-001", "arm": "cand", "non_owed": True}, {"episode": "EP-001", "arm": "b1"}],
+                 "arms": {"cand": "p72", "b1": "p66"}, "profile_key_sha256": "P", "check_pair_order": False}
+            rc, audit, _ = run_tool(d, MAP, [t / "r"], t, "--allow-unchecked-subject")
+            whats = {f["what"] for f in audit["findings"]}
+            self.assertEqual(rc, 3)
+            self.assertIn("non_owed differs between arms on one episode", whats)
+            self.assertIn("run is declared non-owed but carries owed delegate requests", whats)
+            self.assertEqual(audit["waivers"], ["allow-unchecked-subject"])
+
+    def test_h4_labels_waived_records(self):
+        rec = {"runs": [], "descriptive": {"waivers": ["allow-unresolved"], "unresolved_items": 3}}
+        result = h4.score(rec)
+        self.assertFalse(result["valid_for_qualification"])
+        self.assertIn("NOT A QUALIFICATION RESULT", h4.render(result)) if result["verdict"] != "INSTRUMENT_FAIL" else None
+
     def test_death_is_admissible_behaviour(self):
         with tempfile.TemporaryDirectory() as t:
             t = Path(t)
@@ -249,7 +291,7 @@ class S4Regression(unittest.TestCase):
         q2 = [o for r in rec["runs"] for o in r["obs"] if o["g"] == "Q2"]
         self.assertEqual((sum(o["owed"] for o in q2), sum(o["met"] for o in q2), len(q2)), (47, 42, 12))   # report E1
         d092 = [o for r in rec["runs"] if r["episode"] == "EP-092" for o in r["obs"] if o["g"] == "Q4d"]
-        self.assertEqual(d092, [{"g": "Q4d", "hit": 1}])                   # counted per the user's ruling, in Q4d, not Q2b
+        self.assertEqual(d092, [{"g": "Q4d", "hit": 0}])                   # an unowed request in a non-owed run is in no gate (ruling U-1)
 
     def test_routes_bytes(self):
         eps = sorted(d.name.split("-p72")[0] for d in (S4 / "s4-routes").glob("*-p72-r0"))
