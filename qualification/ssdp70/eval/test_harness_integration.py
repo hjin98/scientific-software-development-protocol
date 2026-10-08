@@ -434,10 +434,11 @@ class HarnessIntegration(unittest.TestCase):
         self.assertEqual(summary["evidence_state"], "MISSING_REQUIRED_EVIDENCE")
         self.assertEqual(summary["missing_required_oracles"], ["o1"])
 
-    def test_evaluator_bundle_blinds_arm_and_redacts_identifiers_but_not_numbers(self):
+    def test_evaluator_bundle_blinds_arm_and_redacts_identifiers_but_not_project_content(self):
         import assess70
         out = self.complete_run("run-blind")
-        (out / "final-report.md").write_text("Under Protocol 7.1 (SSDP 6.6.0, arm p71) the mean was 6.5 and 7.25 on 127.0.0.1", encoding="utf-8")
+        (out / "final-report.md").write_text(
+            "Under Protocol 7.1 (SSDP `6.6.0`, arm p71) version 2 of aqpipe 0.7.1 gave mean 6.5 and 7.25 on 127.0.0.1", encoding="utf-8")
         keys = self.root / "keys-blind"
         keys.mkdir()
         (keys / "key.txt").write_text("custodian", encoding="utf-8")
@@ -447,11 +448,31 @@ class HarnessIntegration(unittest.TestCase):
         run = bundle / "run"
         for withheld in ("run-identity.json", "profile-snapshot.json", "installed-package", "adapter-artifacts"):
             self.assertFalse((run / withheld).exists(), withheld)
-        self.assertNotIn("arm", json.loads((run / "summary.json").read_text(encoding="utf-8")))
+        summary = json.loads((run / "summary.json").read_text(encoding="utf-8"))
+        for key in ("arm", "subject_commit", "active_ssdp_bytes", "installed_entrypoint_bytes", "resource_observation"):
+            self.assertNotIn(key, summary)
+        events = (run / "events.normalized.jsonl").read_text(encoding="utf-8")
+        self.assertNotIn("package_sha256", events)
+        self.assertNotIn("resolved_package_identity", events)
         report = (run / "final-report.md").read_text(encoding="utf-8")
-        self.assertNotIn("7.1", report)
-        self.assertNotIn("p71", report)
-        self.assertIn("mean was 6.5 and 7.25 on 127.0.0.1", report)
+        for leaked in ("Protocol 7.1", "6.6.0", "p71", "SSDP"):
+            self.assertNotIn(leaked, report)
+        self.assertIn("version 2 of aqpipe 0.7.1 gave mean 6.5 and 7.25 on 127.0.0.1", report)
+
+    def test_the_evaluator_model_must_differ_from_the_executor_model(self):
+        import assess70
+        out = self.complete_run("run-same-model")
+        keys = self.root / "keys-same"
+        keys.mkdir()
+        (keys / "key.txt").write_text("custodian", encoding="utf-8")
+        profile, capabilities = self.evaluator_material("1")
+        document = json.loads(profile.read_text(encoding="utf-8"))
+        document["agent_model"] = "fake"           # the executor's model in this fixture
+        write_json(profile, document)
+        with patch.object(assess70, "load_adapter", return_value=FakeEvaluator):
+            with self.assertRaisesRegex(core70.ContractError, "evaluator model must not be the executor model"):
+                assess70.main(["--run", str(out), "--keys", str(keys), "--evaluator-profile", str(profile),
+                               "--evaluator-capabilities", str(capabilities), "--adapter", "fake"])
 
 
 class AssessmentValidation(unittest.TestCase):

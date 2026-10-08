@@ -5,7 +5,7 @@ revision: 3
 governing_protocol_version: 6.6.0
 target_protocol_version: 7.2.0 (SD-R6)
 date_utc: 2026-10-07
-status: stakeholder-adopted in principle (SD-R1; SD-R2 as decided; SD-R9 to SD-R12 adopted 2026-10-07); revision 3 repairs the NO-PASS second S0 check; the third check returned PASS WITH GAPS, repaired by a minimal delta (design §12b); S0 overall PASS after the delta and closing checks (…-CHECK-2026-10-07-R3-DELTA.md, 2026-10-07); on acceptance it replaces PROTOCOL-7.0-EVALUATION-AND-QUALIFICATION-CONTRACT.md revision 16 §1–§7 (revision 16 preserved unchanged as history)
+status: stakeholder-adopted in principle (SD-R1; SD-R2 as decided; SD-R9 to SD-R12 adopted 2026-10-07; SD-R13 soft block size and SD-R14 harness budget decided later the same day, neither changes a gate); revision 3 repairs the NO-PASS second S0 check; the third check returned PASS WITH GAPS, repaired by a minimal delta (design §12b); S0 overall PASS after the delta and closing checks (…-CHECK-2026-10-07-R3-DELTA.md, 2026-10-07); on acceptance it replaces PROTOCOL-7.0-EVALUATION-AND-QUALIFICATION-CONTRACT.md revision 16 §1–§7 (revision 16 preserved unchanged as history)
 revision_history: revision 1 preserved as PROTOCOL-7X-CALIBRATED-QUALIFICATION-CONTRACT-V2-PROPOSED-R1-HISTORICAL.md (sha256 b05eab18…); revision 2 as …-R2-HISTORICAL.md (sha256 662be814…)
 design: D3-PROTOCOL-7X-RELIABILITY-SIMPLIFICATION-AND-CALIBRATED-QUALIFICATION-DESIGN-2026-10-07.md (revision 3)
 thresholds_derived_by: qual-v2/operating_characteristics.py (revision 3; ICC 0.3 and 0.5; --trials 20000)

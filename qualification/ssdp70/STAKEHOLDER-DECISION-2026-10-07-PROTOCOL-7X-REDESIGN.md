@@ -4,7 +4,7 @@ governing_protocol_version: 6.6.0
 target_protocol_version: 7.x skills-only candidate (7.2.0 per SD-R6)
 decision_date_utc: 2026-10-07
 status: stakeholder-adopted
-decides: D3-PROTOCOL-7X-RELIABILITY-SIMPLIFICATION-AND-CALIBRATED-QUALIFICATION-DESIGN-2026-10-07.md §9 SD-R1..SD-R14
+decides: D3-PROTOCOL-7X-RELIABILITY-SIMPLIFICATION-AND-CALIBRATED-QUALIFICATION-DESIGN-2026-10-07.md §9 SD-R1..SD-R15
 ---
 
 Governing SSDP version: 6.6.0.
@@ -101,4 +101,17 @@ The third S0 check (`INDEPENDENT-D3-PROTOCOL-7X-REDESIGN-CHECK-2026-10-07-R3.md`
 
 | # | Decision | Realized in |
 |---|---|---|
-| SD-R14 | Supersedes SD-R5's "≤ 9,000 non-test and ≤ 4,000 test lines". The measured size, 10,304 non-test and 4,541 test lines on the design §6 scope, is accepted as the H1–H5 floor for the OMP adaptation. Any later growth is an additive repair that shows its line cost (X5). The relay, H1–H5 and the 6.6 comparison rules are unchanged. | Design §6, §9 annotations; workplan §1, §3 and O-6 annotations; S2 report |
+| SD-R14 | Supersedes SD-R5's "≤ 9,000 non-test and ≤ 4,000 test lines". The measured size, 10,304 non-test and 4,541 test lines on the design §6 scope, is accepted as the H1–H5 floor for the OMP adaptation. Any later growth is an additive repair that shows its line cost (X5). The relay, H1–H5 and the 6.6 comparison rules are unchanged. (The 205-line superseded script `operating_characteristics-R2-HISTORICAL.py` was moved out of the budget scope to `qual-v2-history/`; counting it would give 10,509 non-test lines.) | Design §6, §9 annotations; workplan §1, §3 and O-6 annotations; S2 report |
+
+## SD-R15 (2026-10-07, after the independent S1-S3 Review): O-8 placement and the budget floor
+
+**Questions put by D4** (S3 report `D4-PROTOCOL-7X-S3-IMPLEMENTATION-REPORT-2026-10-07.md`, section 3, in response to the Review's F-9):
+1. O-8 placement: "amend the workplan so that [the O-8 inputs] belong to the S4/P3 custodian work order, and keep the synthetic Precondition C exercise in `qual-v2/test_h4.py` as S2 evidence."
+2. Budget floor: "record the new measured floor, 10,364 / 4,672, in SD-R14" (the repairs to the Review's findings F-1 to F-7 and D-1 to D-3 add 60 non-test and 131 test lines to SD-R14's 10,304 / 4,541).
+
+**Verbatim answer.** "Yes for both decisions."
+
+| # | Decision | Realized in |
+|---|---|---|
+| SD-R15a | O-8 moves from S2 to the S4/P3 custodian work order: the 40-item evaluator calibration set with at least 10 known failures, the oracle known-good and known-bad fixtures and the version-redacted evaluator input are authored and frozen by the custodian under SD-2 custody. Their existence, and the re-freezing of the evaluator profile (currently pinned to the executor's own model) and of the executor profile (it still pins the retired ledger modules), are explicit S4 entry conditions. The synthetic Precondition C exercise in `qual-v2/test_h4.py` stays as S2 evidence. | Workplan O-8, §8 stages S2 and S4 |
+| SD-R15b | SD-R14's accepted floor is 10,364 non-test and 4,672 test lines on the design §6 scope (the 205-line superseded history script, moved to `qual-v2-history/`, is not counted). Later growth is an additive repair that shows its line cost (X5). | SD-R14 row, design §6, workplan O-6 |

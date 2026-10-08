@@ -29,10 +29,17 @@ EVIDENCE = (
     "trace.jsonl", "events.normalized.jsonl", "oracle.json", "stderr.txt", "issues-final", "oracle-output", "final-tree",
 )
 # What would name the arm, package or profile never reaches the evaluator.
-BLINDED_SUMMARY_KEYS = ("arm", "subject_commit", "profile_key_sha256", "run_identity_sha256", "adapter_command_identity", "runtime_observation")
-_VERSION_RES = (  # identifiers only: a bare scientific number such as 6.5 is never touched
-    (re.compile(r"(?i)\b(?:SSDP|Protocol|version)[ -]?v?\d+(?:\.\d+){0,2}\b"), "PROTOCOL-X"),
-    (re.compile(r"(?<![\w.])v?\d+\.\d+\.\d+(?![\w.])"), "X.Y.Z"),
+# What would name the arm, package, profile or protocol reaches the evaluator in no field and no filename.
+BLINDED_KEYS = frozenset({
+    "arm", "subject_commit", "profile_key_sha256", "run_identity_sha256", "adapter_command_identity", "runtime_observation",
+    "pair_order", "commit", "package_sha256", "requested_ref", "installed_skill_bytes", "installed_skill_sha256",
+    "installed_entrypoint_bytes", "installed_owner_bytes", "active_ssdp_files", "active_ssdp_bytes", "ssdp_read_mode",
+    "resource_observation", "resolved_package_identity", "owner_read_sequences", "owner_read_observed", "owner_minor_exposure",
+})
+_SSDP_VERSIONS = r"(?:5\.16|6\.[0-6]|7\.[0-2]|8\.0)"
+_VERSION_RES = (  # explicit SSDP identifiers only: project content such as "version 2" or "aqpipe 0.7.1" and bare numbers like 6.5 stay
+    (re.compile(r"(?i)\b(?:SSDP|Protocol)\b[\s`'\"-]*v?\d+(?:\.\d+){0,2}"), "PROTOCOL-X"),
+    (re.compile(r"(?<![\w.])v?" + _SSDP_VERSIONS + r"\.0(?![\w.])"), "X.Y.Z"),
     (re.compile(r"\bp(?:65|66|70|71|72)\b"), "armX"),
 )
 PROMPT = """You are an independent evaluator. You did not perform this run and must not trust the executor's claims.
@@ -69,6 +76,14 @@ def redact(text: str) -> str:
     return text
 
 
+def _scrub(value: Any) -> Any:
+    if isinstance(value, dict):
+        return {k: _scrub(v) for k, v in value.items() if k not in BLINDED_KEYS}
+    if isinstance(value, list):
+        return [_scrub(v) for v in value]
+    return value
+
+
 def copy_redacted(src: Path, dst: Path) -> None:
     if src.is_dir():
         dst.mkdir(parents=True, exist_ok=True)
@@ -81,9 +96,14 @@ def copy_redacted(src: Path, dst: Path) -> None:
     except UnicodeDecodeError:
         shutil.copy2(src, dst)
         return
-    if src.name == "summary.json":
-        summary = json.loads(text)
-        text = json.dumps({k: v for k, v in summary.items() if k not in BLINDED_SUMMARY_KEYS}, indent=2, sort_keys=True)
+    try:
+        if src.suffix == ".json":
+            text = json.dumps(_scrub(json.loads(text)), indent=2, sort_keys=True)
+        elif src.suffix == ".jsonl":
+            text = "\n".join(json.dumps(_scrub(json.loads(line)), sort_keys=True) if line.strip() else line
+                             for line in text.split("\n"))
+    except ValueError:
+        pass  # not JSON after all: text redaction below still applies
     dst.write_text(redact(text), encoding="utf-8")
 
 
@@ -185,6 +205,11 @@ def main(argv: list[str] | None = None) -> int:
     profile_errors = core70.profile_claim_errors(evaluator, [])
     if profile_errors:
         raise core70.ContractError("; ".join(profile_errors))
+    executor = core70.load_json(args.run / "profile-snapshot.json")
+    if not isinstance(executor, dict) or not executor.get("agent_model") or not evaluator.profile.get("agent_model"):
+        raise core70.ContractError("both the executor and evaluator profiles must name an agent_model")
+    if evaluator.profile["agent_model"] == executor["agent_model"]:
+        raise core70.ContractError(f"the evaluator model must not be the executor model ({executor['agent_model']!r})")
     adapter = load_adapter(args.adapter)
     if evaluator.profile["adapter_id"] != adapter.ADAPTER_ID:
         raise core70.ContractError(f"evaluator profile adapter_id {evaluator.profile['adapter_id']!r} != {adapter.ADAPTER_ID!r}")

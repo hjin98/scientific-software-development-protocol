@@ -10,6 +10,29 @@ Older README files accumulated release mappings, bootstrap attempts, and version
 
 ## Protocol 7.x
 
+### 7.2.0 — reliable consumed surface and calibrated qualification
+
+Protocol 7.2 carries forward every Protocol 7.0 and 7.1 duty, drops only the requirement to load the owner, and changes how reliably an agent meets the duties. Development probing of 7.1 showed that agents obeyed text on the surface they read but did not reliably follow "read the owner when ..." instructions, and that the absolute qualification floors measured the model rather than the protocol. 7.2 removes the dependency on loading and recalibrates the measurement.
+
+Main improvements:
+
+- **One generated *Scientific checks* section per entrypoint.**
+  - It replaces the 7.1 owner routing bullet and the completion clause. It states when the duties apply, the delegate questions (each with its launched-work qualifier), the gap rule and the numbered duties, so an agent that reads only the entrypoint holds the whole obligation.
+  - It is built from one shared fragment, so the six entrypoints cannot drift, and every other 6.6 line is byte-identical apart from the generated governing-version line and the implementation skill's description (unchanged from 7.1).
+  - Element 3 now also carries the owner's inaccessible-home rule: a named coverage limit is enough by default, it qualifies the judgment when the project designates or evidently uses the home, and it blocks only on the three stated conditions.
+- **Owner reads are optional depth.** The scientific-inspectability owner remains the place for definitions and examples, most useful before consequential judgments over realized results, D1-D3 authority work or gate evidence. No duty depends on reading it.
+- **Calibrated qualification (contract v2).** Gates compare the candidate with accepted 6.6 on the same executor and fixtures, with margins derived from a cluster-aware model; Precondition C checks the instrument before any candidate result counts. Stated operating characteristics replace absolute floors.
+- **A consolidated qualification harness.** One scorer, the provider relay and containment kept, and the package-access ledger replaced by a conservative consumed-bytes count.
+
+Stated limits:
+
+- No qualification campaign has been run for 7.2. A PASS would claim only improvement over 6.6 on the gating executor and corpus, at the stated operating characteristics.
+- The consumed surface is longer than 6.6's, so the fixed-cost backstop (2.0× the accepted 6.5 median) leaves little headroom, and a run that also reads the owner would breach it.
+- Mandatory activation, typed delegation schemas and mechanical write enforcement need a deterministic control plane and stay with Protocol 8.
+- 7.1.0 is superseded and was not qualified.
+
+The Orchestrator gains a 7.2 profile with unchanged lifecycle, transition graph and profile schema; the 7.1 profile is frozen. Release status is deliberately not stated here; resolve it from `PROTOCOL-RELEASE-STATE.yaml`.
+
 ### 7.1.0 — obligation salience, structured delegation requests, and stratified qualification
 
 Protocol 7.1 is a capability and presentation refinement to Protocol 7.0 following empirical evaluation under Stage 7. It preserves all Protocol 7.0 doctrine, owners, predicates, and thresholds while restructuring delegate requests for execution reliability and refining qualification precision.

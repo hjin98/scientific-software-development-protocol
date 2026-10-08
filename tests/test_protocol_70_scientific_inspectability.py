@@ -317,6 +317,8 @@ class Protocol70StructuralTests(unittest.TestCase):
         text = (REFS / "protocol-versioning-and-compatibility.md").read_text(encoding="utf-8")
         self.assertIn("`ssdp-protocol-6.6`", text)
         self.assertIn("`ssdp-protocol-7.0`", text)
+        self.assertIn("`ssdp-protocol-7.1`", text)
+        self.assertIn("`ssdp-protocol-7.2`", text)
 
 
 if __name__ == "__main__":

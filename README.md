@@ -334,6 +334,7 @@ SSDP began as a software-engineering protocol and grew into a scientific-softwar
 | **6.6** | cognitive/operational optimization: small universal kernel with a minimal inlined safety kernel, conditional semantic-definition and memory-schema owners, decision-sufficient handoffs and Working State, cognitive-resource escalation, optional independent review trajectories, strict version binding at entry, and empirical trajectory evaluation |
 | **7.0** | scientific inspectability, epistemic initiative and the scientific feedback loop: realized-record inspectability, O1/O2/O3 obligation binding with a claim-integrity floor, bounded initiative with delegate returns and variant-search disclosure, bounded tension search, feedback persistence, and decision-sufficient gate evidence |
 | **7.1** | obligation salience and stratified qualification: structured delegate-request blocks with per-question launched-work qualifiers, specialist entrypoint scoping, execution-surface neutralization, and undelivered-treatment stratification |
+| **7.2** | skills-only reliability and calibrated qualification: one generated Scientific checks section per entrypoint carries the complete minimum duty, so no owner read is required (the owner is optional depth); qualification gates are calibrated against accepted 6.6 on the same executor; the qualification harness is consolidated |
 
 For the full user-facing capability history, see [CHANGELOG.md](CHANGELOG.md). For detailed semantic rationale and superseded release attempts, see [history/SEMANTIC_EVOLUTION.md](history/SEMANTIC_EVOLUTION.md). Exact mutable release mappings remain in [PROTOCOL-RELEASE-STATE.yaml](PROTOCOL-RELEASE-STATE.yaml).
 
@@ -345,6 +346,7 @@ For the full user-facing capability history, see [CHANGELOG.md](CHANGELOG.md). F
 | `source/roles/` | D1-D4 authority-bearing skill entrypoints |
 | `source/specialists/` | optional documentation/audit/hygiene specialists |
 | `source/shared/references/` | canonical concern owners loaded by progressive disclosure |
+| `source/shared/fragments/` | shared text generated into entrypoints (the Scientific checks section) |
 | `dist/skills/` | ready-to-install generated skill bundles |
 | `orchestrator/` | optional version-bound orchestration/profile implementation |
 | `qualification/` | non-normative qualification, Review, and evaluation evidence per protocol cycle |

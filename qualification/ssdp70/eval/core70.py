@@ -805,23 +805,6 @@ def validate_launch_identity(profile: dict[str, Any], command_identity: Any) -> 
         errors.append("launched MCP server executable digest set does not match frozen execution profile")
     elif any(not _valid_sha256(value) for value in executable_digests.values()):
         errors.append("launched MCP server executable digest is malformed")
-    containment = profile.get("containment_policy")
-    if isinstance(containment, dict) and containment.get("kind") == "claude-code-restricted-sandbox-v1":
-        sources = containment.get("setting_sources")
-        if command_identity.get("setting_sources") != sources:
-            errors.append("Claude launch setting sources do not match the frozen containment policy")
-        if command_identity.get("restricted") is not (sources == "none"):
-            errors.append("Claude launch restricted mode does not match the frozen containment policy")
-        if not isinstance(command_identity.get("settings_file"), str) or not command_identity.get("settings_file"):
-            errors.append("Claude launch did not bind explicit run-owned settings")
-        if not _valid_sha256(command_identity.get("settings_file_sha256")):
-            errors.append("Claude launch did not bind the explicit settings bytes")
-        if command_identity.get("strict_mcp_config") is not True:
-            errors.append("Claude launch did not require strict MCP configuration")
-        if not isinstance(command_identity.get("mcp_config_file"), str) or not command_identity.get("mcp_config_file"):
-            errors.append("Claude launch did not bind an explicit run-owned MCP configuration")
-        if not _valid_sha256(command_identity.get("mcp_config_sha256")):
-            errors.append("Claude launch did not bind the MCP configuration bytes")
     if "permission_mode" in profile and command_identity.get("permission_mode") != profile.get("permission_mode"):
         errors.append("launched permission mode does not match frozen execution profile")
     if "native_allowed_tools" in profile and command_identity.get("allowed_tools") != profile.get("native_allowed_tools"):
@@ -929,7 +912,7 @@ def validate_runtime_observation(bundle: ProfileBundle, observation: Any) -> lis
 
 
 def validate_claim_observability(events: list[dict[str, Any]], claims: Iterable[str]) -> list[str]:
-    """Claims need the observations they rest on. Consumed package bytes are always an upper bound (package_bytes),
+    """Claims need the observations they rest on. Consumed package bytes are a conservative upper bound (package_bytes states its residual),
     so a burden claim needs a delivered root or a successful package read, not an exact ledger."""
     normalized = {str(claim).lower() for claim in claims}
     errors: list[str] = []

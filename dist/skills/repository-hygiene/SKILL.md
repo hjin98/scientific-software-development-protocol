@@ -11,7 +11,7 @@ Optional post-stage cleanup specialist. Use after formal development closure or 
 
 ## Entry contract
 
-**Governing version.** This package is SSDP `7.1.0`. Before the first file change or protocol-dependent decision, state in one line the governing SSDP version: the `protocol_version` of the task or of a workplan it names, else `none`. `none` or `7.1.0` -> continue, no source lookup. Any other version governs until the task/workplan authority rebinds it; this package is not its source even if newer or compatible, so do not apply it: use an installed/local source of that version or its mapped immutable source ([versioning](references/protocol-versioning-and-compatibility.md)), else report protocol non-closure. You may recommend adopting this package, never adopt it yourself.
+**Governing version.** This package is SSDP `7.2.0`. Before the first file change or protocol-dependent decision, state in one line the governing SSDP version: the `protocol_version` of the task or of a workplan it names, else `none`. `none` or `7.2.0` -> continue, no source lookup. Any other version governs until the task/workplan authority rebinds it; this package is not its source even if newer or compatible, so do not apply it: use an installed/local source of that version or its mapped immutable source ([versioning](references/protocol-versioning-and-compatibility.md)), else report protocol non-closure. You may recommend adopting this package, never adopt it yourself.
 
 **Pre-routing safety kernel** ([universal kernel](references/abstraction-and-concretization.md) owns it and any materiality, authority/delegation, simplicity, proportional-rigor, verification/Challenge, representation or SSDP self-development question):
 

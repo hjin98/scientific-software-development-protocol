@@ -25,6 +25,7 @@ SSDP65_PROFILE_ID = "ssdp-protocol-6.5"
 SSDP66_PROFILE_ID = "ssdp-protocol-6.6"
 SSDP70_PROFILE_ID = "ssdp-protocol-7.0"
 SSDP71_PROFILE_ID = "ssdp-protocol-7.1"
+SSDP72_PROFILE_ID = "ssdp-protocol-7.2"
 
 # Kept as the legacy compatibility name because existing Core v1 tests and
 # consumers import CANONICAL_STAGES directly.
@@ -65,6 +66,7 @@ _PROFILE_STAGES = {
     SSDP66_PROFILE_ID: SSDP6_STAGES,
     SSDP70_PROFILE_ID: SSDP6_STAGES,
     SSDP71_PROFILE_ID: SSDP6_STAGES,
+    SSDP72_PROFILE_ID: SSDP6_STAGES,
 }
 
 _HEADING = re.compile(r"^##\s+(?:(?P<number>\d+)\.\s+)?(?P<title>.+?)\s*$")
@@ -115,6 +117,7 @@ def all_stage_keys() -> tuple[str, ...]:
         SSDP66_PROFILE_ID,
         SSDP70_PROFILE_ID,
         SSDP71_PROFILE_ID,
+        SSDP72_PROFILE_ID,
     ):
         for _, key, _ in _PROFILE_STAGES[profile_id]:
             if key not in seen:

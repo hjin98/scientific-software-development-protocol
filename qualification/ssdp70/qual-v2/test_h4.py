@@ -151,6 +151,52 @@ class GateTests(unittest.TestCase):
                         o["hit"] = 1
         self.assertFalse(h4.score(record)["precondition_c"]["C(c)"])
 
+    def test_dropped_baselines_or_routes_are_exposure_shortfalls_not_passes(self):
+        record = build()
+        for run in record["runs"]:
+            if run["arm"] in ("b1", "b2"):
+                run["obs"] = [o for o in run["obs"] if o["g"] != "Q4d"]
+        self.assertEqual(h4.score(record)["gates"]["Q4d"]["status"], h4.EXPOSURE)       # Q4d with no B1/B2 observations
+        record = build()
+        record["runs"] = [r for r in record["runs"] if not any(o.get("route") == "T3" for o in r["obs"])]
+        self.assertEqual(h4.score(record)["gates"]["Q5e"]["status"], h4.EXPOSURE)       # a declared route dropped
+        record = build()
+        kept = [r for r in record["runs"] if not (r["run"].startswith("cand-T1-") and r["run"] != "cand-T1-0")]
+        self.assertEqual(h4.score({**record, "runs": kept})["gates"]["Q5f"]["status"], h4.EXPOSURE)   # one run on T1
+
+    def test_q2_needs_equal_sized_episodes_and_q5c_ignores_inadmissible_runs(self):
+        record = build()
+        cand = [r for r in record["runs"] if r["run"] == "cand-0"][0]
+        cand["obs"][0]["owed"] = 5                                                        # unequal episodes: threshold not derived
+        self.assertEqual(h4.score(record)["gates"]["Q2a"]["status"], h4.EXPOSURE)
+        record = build({"bytes": 40000})
+        for run in record["runs"]:
+            if run["arm"] == "cand" and run["run"].startswith("cand-T1-"):
+                run["admissible"] = False                                                 # infrastructure-failed runs carry no bytes
+        self.assertEqual(h4.score(record)["gates"]["Q5c"]["routes"]["T1"]["status"], h4.EXPOSURE)
+
+    def test_the_aa_screen_covers_critical_items(self):
+        record = build()
+        for run in record["runs"]:
+            if run["arm"] == "b2":
+                for o in run["obs"]:
+                    if o["g"] == "Q4a":
+                        o["err"] = 1
+        result = h4.score(record)
+        self.assertFalse(result["precondition_c"]["aa"]["Q4a.err"]["ok"])
+        self.assertEqual(result["verdict"], "INSTRUMENT_FAIL")
+
+    def test_family_results_flag_a_family_worse_than_b1(self):
+        record = build()
+        for run in record["runs"]:
+            if run["arm"] == "cand":
+                for o in run["obs"]:
+                    if o["g"] == "Q3" and o["fam"] == "tension":
+                        o["score"] = 0
+        families = h4.score(record)["families"]
+        self.assertTrue(families["tension"]["worse_than_b1_beyond_margin"] or families["tension"]["cand"] <= families["tension"]["b1"])
+        self.assertTrue(all(f["counts_toward_gate"] for f in families.values()))
+
     def test_script_matches_gate_arithmetic_for_the_good_campaign(self) -> None:
         record = copy.deepcopy(build())
         c = h4.Campaign(record)

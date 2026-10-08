@@ -76,10 +76,13 @@ class RealRelayPath(unittest.TestCase):
         entry = (SKILLS / ROOT / "SKILL.md").stat().st_size
         owner = (SKILLS / OWNER_REL).stat().st_size
         references = sum(p.stat().st_size for p in (SKILLS / ROOT / "references").rglob("*") if p.is_file())
+        whole_tree = sum(p.stat().st_size for p in SKILLS.rglob("*") if p.is_file()) - entry
         for name, command, expected, mode in (
                 ("cat", f"cat {OWNER_PATH}", entry + owner, "owner"),
                 ("count only", f"wc -l {OWNER_PATH}", entry + owner, "owner"),      # content not shown: still an upper bound
                 ("directory listing", f"ls /opt/ssdp/skills/{ROOT}/references", entry + references, "owner"),
+                ("double-quoted path", f'cat "{OWNER_PATH}"', entry + owner, "owner"),
+                ("recursive grep on the root without a slash", "grep -r owner /opt/ssdp/skills", entry + whole_tree, "owner"),
                 ("no package path", "echo unrelated", entry, "entry")):
             with self.subTest(name):
                 summary, _ = self.episode(scenario=steps(("bash", {"command": command})), claims=["active-byte burden"])
@@ -87,6 +90,19 @@ class RealRelayPath(unittest.TestCase):
                 self.assertEqual(summary["active_ssdp_bytes"], expected)
                 self.assertEqual(summary["ssdp_read_mode"], mode)
                 self.assertEqual(summary["resource_observation"]["conservative_shell_count"], name != "no package path")
+
+    def test_a_native_grep_over_the_package_and_a_workflow_owner_read_are_counted(self):
+        entry = (SKILLS / ROOT / "SKILL.md").stat().st_size
+        references = sum(p.stat().st_size for p in (SKILLS / ROOT / "references").rglob("*") if p.is_file())
+        summary, _ = self.episode(scenario=steps(("grep", {"pattern": "owner", "path": f"/opt/ssdp/skills/{ROOT}/references"})),
+                                  claims=["active-byte burden"])
+        self.assertEqual(summary["evidence_state"], "COMPLETE_ADMISSIBLE", summary.get("evidence_state_reasons"))
+        self.assertEqual(summary["active_ssdp_bytes"], entry + references)
+        self.assertEqual(summary["ssdp_read_mode"], "owner")
+        workflow = f"{ROOT}/references/workflow-and-workplans.md"
+        summary, _ = self.episode(scenario=steps(("read", {"path": "/opt/ssdp/skills/" + workflow})), claims=["active-byte burden"])
+        self.assertEqual(summary["active_ssdp_bytes"], entry + (SKILLS / workflow).stat().st_size)
+        self.assertEqual(summary["ssdp_read_mode"], "owner")     # any consumed file beyond an entrypoint is owner mode (T7 rule)
 
 
 if __name__ == "__main__":

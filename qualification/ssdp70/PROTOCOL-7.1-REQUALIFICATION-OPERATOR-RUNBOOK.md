@@ -7,6 +7,8 @@ date_utc: 2026-10-06
 owner_plan: PROTOCOL-7.1-REQUALIFICATION-PLAN.md
 ---
 
+> **Superseded (2026-10-07).** The 7.1.0 candidate is closed non-qualified and superseded by the 7.2.0 candidate (`PROTOCOL-7.1-DISPOSITION-RECORD-2026-10-07.md`). The harness tools this document names were retired in stage S2 (`eval/RETIRED-MODULES.md`); it stays as history.
+
 Governing SSDP version: 6.6.0.
 
 # Protocol 7.1 requalification: operator runbook

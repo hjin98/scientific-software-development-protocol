@@ -7,7 +7,7 @@ date_utc: 2026-10-07
 revision: 3
 status: proposed; revision 3 repairs the NO-PASS second S0 check (…-CHECK-2026-10-07-R2.md); the third check (…-CHECK-2026-10-07-R3.md) returned PASS WITH GAPS, repaired by the minimal delta in §12b; the delta and closing checks (…-CHECK-2026-10-07-R3-DELTA.md) give S0 an overall PASS (2026-10-07); accepted as the cycle design by that independent check, not self-accepted
 revision_history: revision 1 preserved as …-DESIGN-2026-10-07-R1-HISTORICAL.md (sha256 ab98be06…); revision 2 as …-DESIGN-2026-10-07-R2-HISTORICAL.md (sha256 5ad262a8…); §12 and §12a map every finding to its repair
-stakeholder_decisions: STAKEHOLDER-DECISION-2026-10-07-PROTOCOL-7X-REDESIGN.md (SD-R1..R12; SD-R2, SD-R4, SD-R5 as decided; SD-R4 revised again, SD-R9 to SD-R12 adopted 2026-10-07)
+stakeholder_decisions: STAKEHOLDER-DECISION-2026-10-07-PROTOCOL-7X-REDESIGN.md (SD-R1..R14; SD-R2, SD-R4, SD-R5 as decided; SD-R4 revised again, SD-R9 to SD-R12 adopted 2026-10-07)
 companions:
   - PROTOCOL-7X-CALIBRATED-QUALIFICATION-CONTRACT-V2-PROPOSED.md (revision 3)
   - qual-v2/operating_characteristics.py (revision 3, cluster-aware)
@@ -249,7 +249,7 @@ No new routes, owners, kernel placement or repetition.
 
 **Totals.** About 7.5k non-test lines retired (7,460), plus their tests.
 
-**Budget (SD-R5 as decided; superseded by SD-R14).** ≤ 9,000 non-test and ≤ 4,000 test lines. *[SD-R14, 2026-10-07: after S2 the stakeholder accepted the measured 10,304 non-test and 4,541 test lines as the H1–H5 floor (S2 report §2); later growth must show its line cost (X5).]* **Scope:** every Python file under `qualification/ssdp70/eval/` (with `adapters/` and `stub_tools/`) and `qualification/ssdp70/qual-v2/`; test lines are the `test_*.py` files there plus `stand_in_provider.py`. `requal71/` is superseded operator material, frozen and outside the v2 harness. About 12.7k retained lines (20,279 − 7,460 − 169 = 12,650) must lose about 3.7k (29%), mainly the admission and provenance paths in `adapters/omp.py` and `core70.py`. This is plausible, not guaranteed. A shortfall is reported (X4) and never met by dropping an H-function.
+**Budget (SD-R5 as decided; superseded by SD-R14).** ≤ 9,000 non-test and ≤ 4,000 test lines. *[SD-R14, 2026-10-07: after S2 the stakeholder accepted the measured 10,304 non-test and 4,541 test lines as the H1–H5 floor (S2 report §2), raised to 10,364 / 4,672 after the Review's repairs (SD-R15b); later growth must show its line cost (X5).]* **Scope:** every Python file under `qualification/ssdp70/eval/` (with `adapters/` and `stub_tools/`) and `qualification/ssdp70/qual-v2/`; test lines are the `test_*.py` files there plus `stand_in_provider.py`. `requal71/` is superseded operator material, frozen and outside the v2 harness. About 12.7k retained lines (20,279 − 7,460 − 169 = 12,650) must lose about 3.7k (29%), mainly the admission and provenance paths in `adapters/omp.py` and `core70.py`. This is plausible, not guaranteed. A shortfall is reported (X4) and never met by dropping an H-function.
 
 ## 7. Delegated to SSDP 8.0
 

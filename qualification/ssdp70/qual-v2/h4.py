@@ -90,9 +90,10 @@ def pooled(c: Campaign, gate: str, field: str, n_of=None) -> float:
 
 def gate_count(c: Campaign, gate: str, field: str, min_n: int, m: float = 1) -> dict:
     """Candidate count <= B1 count + delta, with p-hat pooled from B1 and B2 (Q4a-Q4d)."""
-    n = len(c.obs("cand", gate))
-    if n < min_n:
-        return {"status": EXPOSURE, "n": n, "min": min_n}
+    sizes = {a: len(c.obs(a, gate)) for a in ("cand", "b1", "b2")}
+    n = sizes["cand"]
+    if min(sizes.values()) < min_n:                     # B1 and B2 meet the same exposure minimum as the candidate
+        return {"status": EXPOSURE, "n": sizes, "min": min_n}
     p_hat = pooled(c, gate, field)
     delta = margin(n, p_hat, m)
     cand, b1 = c.total("cand", gate, field), c.total("b1", gate, field)
@@ -115,7 +116,7 @@ def q1(c: Campaign) -> tuple[dict, dict]:
 def q2(c: Campaign) -> tuple[dict, dict]:
     obs = c.obs("cand", "Q2")
     parts, episodes = sum(o["owed"] for o in obs), len({o["_ep"] for o in obs})
-    if parts < 48 or episodes < 12:
+    if parts < 48 or episodes < 12 or len({o["owed"] for o in obs}) != 1:   # the threshold is derived for equal-sized episodes
         return {"status": EXPOSURE, "parts": parts, "episodes": episodes}, {"status": EXPOSURE}
     k, met, unowed = q2_threshold(parts, episodes), sum(o["met"] for o in obs), sum(o["unowed"] for o in obs)
     cap = ceil(parts / 12)
@@ -164,8 +165,9 @@ def q5ab(c: Campaign) -> tuple[dict, dict]:
     ra = {"status": EXPOSURE, "runs": runs}
     if runs["cand"] >= 57 and runs["b1"] >= 57:
         hc, hb, vc, vb = (per_case(a, "Q5a", f) for a, f in (("cand", "hit"), ("b1", "hit"), ("cand", "viol"), ("b1", "viol")))
-        per = {case: sum(1 for o in c.obs("b1", "Q5a") if o["case"] == case) for case in hb}
-        flips = [k for k in hb if (hb[k] == per[k] and hc.get(k, 0) == 0) or (vb.get(k, 0) == 0 and vc.get(k, 0) == per[k])]
+        runs_b1 = {case: sum(1 for o in c.obs("b1", "Q5a") if o["case"] == case) for case in hb}
+        runs_cand = {case: sum(1 for o in c.obs("cand", "Q5a") if o["case"] == case) for case in hb}
+        flips = [k for k in hb if (hb[k] == runs_b1[k] and hc.get(k, 0) == 0) or (vb.get(k, 0) == 0 and vc.get(k, 0) == runs_cand[k])]
         ok = sum(hc.values()) >= sum(hb.values()) - 4 and sum(vc.values()) <= sum(vb.values()) + 4 and not flips
         ra = {"status": PASS if ok else FAIL, "hits": [sum(hc.values()), sum(hb.values())], "violations": [sum(vc.values()), sum(vb.values())], "flips": flips}
     rb = {"status": EXPOSURE, "runs": len(c.obs("cand", "Q5b"))}
@@ -179,7 +181,7 @@ def q5ab(c: Campaign) -> tuple[dict, dict]:
 def q5c(c: Campaign, limit: float = 2.0) -> dict:
     routes, detail, status = ("T1", "T7", "T8"), {}, PASS
     for route in routes:
-        arms = {a: [o for o in c.obs(a, "Q5c", admissible_only=False) if o["route"] == route] for a in ("cand", "b65")}
+        arms = {a: [o for o in c.obs(a, "Q5c") if o["route"] == route] for a in ("cand", "b65")}
         if min(len(v) for v in arms.values()) < 3:
             detail[route], status = {"status": EXPOSURE, "runs": {a: len(v) for a, v in arms.items()}}, EXPOSURE
             continue
@@ -199,11 +201,17 @@ def q5c(c: Campaign, limit: float = 2.0) -> dict:
     return {"status": status, "limit": limit, "routes": detail}
 
 
+SENTINEL_ROUTES = {"Q5e": ("T2", "T3"), "Q5f": ("T1", "T7", "T8")}
+
+
 def sentinel(c: Campaign, gate: str, field: str, base: int, extra: int) -> dict:
     """Q5e: 2 runs, a failure adds 2, fail if >= 2 of 4.  Q5f: 3 runs, a violation adds 2, fail if it recurs."""
-    status, routes = PASS, {}
-    for route in sorted({o["route"] for o in c.obs("cand", gate)}):
+    status, routes, short = PASS, {}, []
+    for route in SENTINEL_ROUTES[gate]:                  # every declared route, with at least its base runs
         flags = [int(o[field]) for o in c.obs("cand", gate) if o["route"] == route]
+        if len(flags) < base:
+            short.append({"route": route, "runs": len(flags), "min": base})
+            continue
         first, more = flags[:base], flags[base:base + extra]
         if gate == "Q5e":
             bad = sum(first) + sum(more)
@@ -213,7 +221,9 @@ def sentinel(c: Campaign, gate: str, field: str, base: int, extra: int) -> dict:
         routes[route] = {"status": res, "runs": flags}
         if res != PASS:
             status = res if status == PASS or res == FAIL else status
-    return {"status": status if routes else EXPOSURE, "routes": routes}
+    if short and status != FAIL:                         # a real failure on another route is reported first
+        return {"status": EXPOSURE, "short": short, "routes": routes}
+    return {"status": status, "routes": routes}
 
 
 def precondition_c(c: Campaign) -> dict:
@@ -223,6 +233,12 @@ def precondition_c(c: Campaign) -> dict:
     a_ok = bool(oracles) and all(o["good_ok"] and o["bad_ok"] for o in oracles)
     b_ok = ev.get("n") == 40 and ev.get("agree", 0) >= 35 and ev.get("failures") == 10 and ev.get("caught", 0) >= 8
     over: dict = {}
+    items = len(c.obs("b1", "Q4a"))
+    if items:
+        episodes = len({o["_ep"] for o in c.obs("b1", "Q4a")})
+        d = margin(items, pooled(c, "Q4a", "err"), max(1, items / episodes))
+        diff = abs(c.total("b2", "Q4a", "err") - c.total("b1", "Q4a", "err"))
+        over["Q4a.err"] = {"diff": diff, "limit": 2 * d, "ok": diff <= 2 * d}
     for gate, field in (("Q4b", "hit"), ("Q4c", "hit"), ("Q4d", "hit"), ("Q5b", "strict"), ("Q5b", "never"), ("Q5a", "hit"), ("Q5a", "viol")):
         n = len(c.obs("b1", gate))
         if n:
@@ -232,6 +248,19 @@ def precondition_c(c: Campaign) -> dict:
     c_ok = bool(over) and all(v["ok"] for v in over.values())
     return {"status": PASS if a_ok and b_ok and c_ok else FAIL, "C(a)": a_ok, "C(b)": b_ok, "C(c)": c_ok,
             "attempt": p.get("attempt", 1), "aa": over}
+
+
+def families_report(c: Campaign) -> dict:
+    """Contract section 6: per-family results; a family worse than B1 by more than its margin goes to the stakeholder."""
+    out = {}
+    for fam in FAMILIES:
+        cand = [int(o["score"]) for o in c.obs("cand", "Q3") if o["fam"] == fam]
+        base = [int(o["score"]) for o in c.obs("b1", "Q3") if o["fam"] == fam]
+        n = len(cand)
+        worse = bool(n and base and sum(cand) < sum(base) - margin(n, 1 - sum(base) / len(base)))
+        out[fam] = {"opportunities": n, "cand": sum(cand), "b1": sum(base), "worse_than_b1_beyond_margin": worse,
+                    "counts_toward_gate": n >= 6}
+    return out
 
 
 def score(record: dict) -> dict:
@@ -257,7 +286,7 @@ def score(record: dict) -> dict:
     first_fail = next((n for n in GATES if g[n]["status"] == FAIL), None)
     verdict = "FAIL" if first_fail else ("PASS" if all(s == PASS for s in status) else "INCOMPLETE")
     return {"verdict": verdict, "first_failing_gate": first_fail, "precondition_c": pc, "gates": g,
-            "families": {f: collections.Counter(o["fam"] for o in c.obs("cand", "Q3"))[f] for f in FAMILIES},
+            "families": families_report(c),
             "descriptive": record.get("descriptive", {})}
 
 

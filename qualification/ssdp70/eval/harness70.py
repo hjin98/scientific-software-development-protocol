@@ -746,7 +746,7 @@ def run_episode(
                 profile_errors.append("runtime auto-memory path escapes the fresh run-owned HOME")
         owner_read_sequences = adapter_module.owner_reads(events, OWNER)
         # H1 consumed package bytes: native reads plus a conservative full-file count for shell commands
-        # that name the package path (package_bytes). The count is an upper bound, never "unobserved".
+        # that name the package path (package_bytes). The count is an upper bound for any access that names (or could assemble) the package path; see package_bytes for the residual.
         accounting = package_bytes.account(events, installed_skills, OWNER)
         owner_positive, owner_minor = accounting["owner_read_observed"], accounting["owner_minor_exposure"]
         owner_read_sequences = sorted(set(owner_read_sequences) | {r["sequence"] for r in owner_positive})
@@ -803,7 +803,7 @@ def run_episode(
             "report_bytes": len(final_text.encode("utf-8")),
             "active_ssdp_files": consumed_files,
             "active_ssdp_bytes": sum(consumed_files.values()),
-            "ssdp_read_mode": "owner" if any(package_bytes.is_owner_copy(rel, OWNER) for rel in consumed_files) else "entry",
+            "ssdp_read_mode": "entry" if all(rel.count("/") == 1 and rel.endswith("/SKILL.md") for rel in consumed_files) else "owner",
             "resource_observation": resource_observation,
             "installed_entrypoint_bytes": entrypoint.stat().st_size if entrypoint and entrypoint.is_file() else None,
             "installed_owner_bytes": owner.stat().st_size if owner and owner.is_file() else None,

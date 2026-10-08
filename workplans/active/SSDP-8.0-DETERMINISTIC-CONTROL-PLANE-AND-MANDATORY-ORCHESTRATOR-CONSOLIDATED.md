@@ -838,6 +838,18 @@ These are inputs, not Protocol 8 design decisions:
 - Protocol 7 keeps realized-scientific-record and feedback-persistence state in existing project artifacts, not in control-plane state, and requires no orchestrator transition/control-semantics change.
 - Protocol 7 (as proposed) requires product-scope acceptance of marked product inspectability surfaces at existing human/task gates. A control plane may represent that pending/accepted state but cannot self-accept it or infer it from technical D3 Review.
 
+### 37.2a Known Protocol 7.2 inputs to the D3 reassessment (skills-only successor; design 2026-10-07 §7)
+
+These are inputs, not Protocol 8 design decisions. Each is a duty that Protocol 7.x could state only in prose, because prose cannot make an indeterministic executor comply:
+
+- **Mandatory role activation and selection.** Whether an agent consults the skill catalog at all is model-dependent; 7.x deliveries relied on deterministic runtime commands chosen by the user.
+- **Event-triggered owner injection at the depth-read situations.** 7.2 made owner reads optional because "read X when Y" was not followed reliably; depth delivered at the right moment needs an observed event.
+- **A typed delegation request and return schema.** 7.2 puts the delegate questions inline and measures conformity; a schema would turn conformity into a validation.
+- **Mechanical write-scope (O3) and persistence-home enforcement.** A zero-tolerance rule on unauthorized mutation is reasonable only under enforcement; 7.2 gates the candidate only relative to 6.6.
+- **In-loop version routing and a self-adoption guard.** Prose version checks are weakly followed.
+- **Typed choice-provenance and claim records,** checkable without an LLM judge.
+- **Exact package-access provenance.** The 7.1 inotify ledger was retired as more provenance than the decision needed; a control plane that needs consumed-package accounting would own it.
+
 ### 37.3 Inheritance reconciliations
 
 If Protocol 7 is accepted, its closeout authors the Protocol 8 inheritance reconciliation of this workplan (Protocol 7 workplan, Stage H). That reconciliation advances the §28.1 pre-cutover baseline from Protocol 6.6 recovery to Protocol 7 recovery, binds Protocol 7 gate-evidence and RSR semantics as mandatory inputs to the §3 reassessment, selects no Protocol 8 architecture, authorizes no Protocol 8 D4, and recommends (never self-adopts) whether this family should adopt Protocol 7 as its governing `protocol_version` under the versioning owner's adoption sequence. Until then, the Protocol 6.6 baseline stands. Later accepted versions follow the same pattern.

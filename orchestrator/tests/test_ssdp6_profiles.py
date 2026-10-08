@@ -23,10 +23,10 @@ class SSDP6CanonicalProfileTests(unittest.TestCase):
         cls.snapshot = P.build_profile(cls.document, P.DEFAULT_PROFILE_ID)
         cls.descriptor = cls.snapshot.descriptor
 
-    def test_current_profile_is_schema_v2_protocol_71(self) -> None:
-        self.assertEqual(P.DEFAULT_PROFILE_ID, "ssdp-protocol-7.1")
+    def test_current_profile_is_schema_v2_protocol_72(self) -> None:
+        self.assertEqual(P.DEFAULT_PROFILE_ID, "ssdp-protocol-7.2")
         self.assertEqual(self.descriptor.profile.profile_id, P.DEFAULT_PROFILE_ID)
-        self.assertEqual(self.descriptor.profile.protocol_version, "7.1.0")
+        self.assertEqual(self.descriptor.profile.protocol_version, "7.2.0")
         self.assertEqual(self.descriptor.profile.profile_schema_version, 2)
         self.assertEqual(self.descriptor.schema_version, 2)
 
@@ -55,8 +55,10 @@ class SSDP6CanonicalProfileTests(unittest.TestCase):
         self.assertEqual(P.profile_id_for_version("6.6.0"), P.SSDP66_PROFILE_ID)
         self.assertEqual(P.profile_id_for_version("7.0.0"), P.SSDP70_PROFILE_ID)
         self.assertEqual(P.profile_id_for_version("7.0"), P.SSDP70_PROFILE_ID)
-        self.assertEqual(P.profile_id_for_version("7.1.0"), P.DEFAULT_PROFILE_ID)
-        self.assertEqual(P.profile_id_for_version("7.1"), P.DEFAULT_PROFILE_ID)
+        self.assertEqual(P.profile_id_for_version("7.1.0"), P.SSDP71_PROFILE_ID)
+        self.assertEqual(P.profile_id_for_version("7.1"), P.SSDP71_PROFILE_ID)
+        self.assertEqual(P.profile_id_for_version("7.2.0"), P.DEFAULT_PROFILE_ID)
+        self.assertEqual(P.profile_id_for_version("7.2"), P.DEFAULT_PROFILE_ID)
 
     def test_every_current_input_is_classified(self) -> None:
         for stage in self.descriptor.stages:
@@ -249,9 +251,9 @@ class SSDP6CanonicalProfileTests(unittest.TestCase):
     def test_profile_json_round_trips(self) -> None:
         self.assertEqual(P.profile_from_json(P.profile_to_json(self.descriptor)), self.descriptor)
 
-    def test_protocol_71_preserves_lifecycle_control_schema(self) -> None:
-        """7.1 adds doctrine/prompt content only; lifecycle/control schema is unchanged (Protocol 8 owns control-plane change)."""
-        current = P.definition(P.SSDP71_PROFILE_ID)
+    def test_protocol_72_preserves_lifecycle_control_schema(self) -> None:
+        """7.2 adds doctrine/prompt content only; lifecycle/control schema is unchanged (Protocol 8 owns control-plane change)."""
+        current = P.definition(P.SSDP72_PROFILE_ID)
         previous = P.definition(P.SSDP66_PROFILE_ID)
         self.assertEqual(current.schema_version, previous.schema_version)
         self.assertEqual(current.stage_table, previous.stage_table)

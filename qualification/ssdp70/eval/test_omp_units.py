@@ -1133,5 +1133,53 @@ class OmpTranscriptConsistencyAndPruningTests(unittest.TestCase):
             self.assert_one_mismatch(base, self.mutated(index, completedAt=1790907334050), "completedAt")
 
 
+class PackageBytesReach(unittest.TestCase):
+    TREE = {"a/SKILL.md": 10, "a/references/o.md": 20, "b/SKILL.md": 5}
+
+    def reach(self, command, **kw):
+        import package_bytes
+        return sorted(package_bytes.shell_reach(command, self.TREE, **kw))
+
+    def test_every_way_of_naming_the_package_counts_the_files_it_can_reach(self):
+        everything = sorted(self.TREE)
+        for command, expected in (
+                ('cat "/opt/ssdp/skills/a/references/o.md"', ["a/references/o.md"]),
+                ("cat '/opt/ssdp/skills/a/references/o.md'", ["a/references/o.md"]),
+                ("grep -r x /opt/ssdp/skills", everything),
+                ("find /opt/ssdp/skills -name '*.md'", everything),
+                ("cd /opt/ssdp/skills/a && ls", ["a/SKILL.md", "a/references/o.md"]),
+                ("cat /opt/ssdp/skills/*/SKILL.md", ["a/SKILL.md", "b/SKILL.md"]),
+                ("cat /opt/ssdp/skills/a/../b/SKILL.md", everything),
+                ("P=/opt; cat $P/ssdp/skills/a/SKILL.md", everything),
+                ("echo unrelated", [])):
+            with self.subTest(command):
+                self.assertEqual(self.reach(command), expected)
+        self.assertEqual(self.reach("echo /opt/ssdp", process=False), everything)   # a literal parent path still counts for a native tool
+        self.assertEqual(self.reach("echo ssdp", process=False), [])
+        for native in ('{"path": "/opt"}', '{"path": "/"}', "/opt/**/*.md"):
+            with self.subTest(native):
+                self.assertEqual(self.reach(native, process=False), everything)           # native grep/glob over a root that holds the package
+
+
+class PackageBytesAccount(unittest.TestCase):
+    def test_native_grep_over_the_package_and_a_native_read_are_counted(self):
+        import package_bytes
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            (root / "a" / "references").mkdir(parents=True)
+            (root / "a" / "SKILL.md").write_text("x" * 10)
+            (root / "a" / "references" / "o.md").write_text("y" * 20)
+            grep = {"kind": "resource_access", "status": "result", "sequence": 1, "payload": {
+                "result_status": "result", "input": {"pattern": "o", "path": "/opt/ssdp/skills/a/references"}}}
+            read = {"kind": "resource_access", "status": "result", "sequence": 2, "payload": {
+                "result_status": "result", "resolved_resource_path": "/opt/ssdp/skills/a/SKILL.md", "resource_bytes": 10,
+                "consumed_resource": {"match": "exact"}, "input": {"path": "/opt/ssdp/skills/a/SKILL.md"}}}
+            account = package_bytes.account([grep, read], root, "o.md")
+            self.assertEqual(account["native_files"], {"a/SKILL.md": 10})
+            self.assertEqual(account["shell_files"], {"a/references/o.md": 20})
+            self.assertTrue(account["conservative"])
+            self.assertEqual([r["source"] for r in account["owner_read_observed"]], ["shell-touch"])
+
+
 if __name__ == "__main__":
     unittest.main()
