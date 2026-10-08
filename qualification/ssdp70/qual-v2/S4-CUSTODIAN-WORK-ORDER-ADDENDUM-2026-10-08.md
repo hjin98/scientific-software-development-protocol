@@ -6,7 +6,7 @@ target_protocol_version: 7.2.0 (candidate, frozen identity `2dedcfa`; non-govern
 date_utc: 2026-10-08
 revision: 2 (revision 1 is in git history at 2c85e0e; revision 2 adds section 2 items 5 to 7 and rewrites sections 3 and 4 because the adjudication has since been done)
 issued_by: S4 analyst, at the user's instruction of 2026-10-08
-owner_inputs: `qualification/ssdp70/S4-DEVELOPMENT-PROBE-REPORT-2026-10-08.md` (§3 E4, §3 E7, §7 decision 1); contract v2 revision 3, Precondition C(a) and the O-8 inputs (SD-R15a)
+owner_inputs: analyst reference only, which the custodian should not read before authoring the fixtures: `qualification/ssdp70/S4-DEVELOPMENT-PROBE-REPORT-2026-10-08.md`; contract v2 revision 3, Precondition C(a) and the O-8 inputs (SD-R15a)
 status: ISSUED as a repository record. Delivery to the custodian is the user's action; the analyst opened no custodian store and cannot deliver into one.
 ---
 
