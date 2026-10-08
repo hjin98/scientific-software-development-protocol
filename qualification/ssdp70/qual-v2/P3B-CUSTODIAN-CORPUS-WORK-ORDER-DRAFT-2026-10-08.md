@@ -1,7 +1,7 @@
 ---
 kind: role-work-package
 role: fixture custodian (capable model, separate context; not the candidate author; not the analyst; no candidate results)
-status: DRAFT by the S4 analyst; not issued; delivery to a custodian is a stakeholder action; needs the independent check of campaign draft section 8 before issue
+status: ISSUED 2026-10-08 on the stakeholder's instruction ("Prepare everything up to the actual campaign") to custodian-7.2-b, in the existing store `~/ssdp72b-fixture-custody`; the independent check of the campaign draft stays open and gates the launch, not the authoring
 governing_protocol_version: 6.6.0
 target_protocol_version: 7.2.0 (candidate, frozen identity `2dedcfa`; non-governing)
 date_utc: 2026-10-08
@@ -22,16 +22,35 @@ The addendum (revision 3, which reads the 7.1 package for conventions only) cove
 
 ## 1. Rules (all of the 7.1 conventions that still apply)
 
-- **Custody.** A fresh store at a path the stakeholder names, never the 2026-09-28, 7.0 or 7.1 stores, and never any earlier 7.2 calibration store that was superseded. Layout: `corpus/`, `requirements/`, `oracles/`, `keys/`, `probes/`, `calibration/`, `rulings/`, `authoring/`, `operator/`, `human-trial/`, plus `ACCESS-LOG.md` (append-only, excluded from the freeze list), `FREEZE-GATE.json` (`{"candidate_frozen": false, "frozen_run_output_exists": false}`), `FREEZE.sha256` and `ATTESTATION.md`. The arrangement is the attestation path (campaign draft decision 1): honesty of the log is the control.
+- **Custody.** The store is `~/ssdp72b-fixture-custody` (already holding `calibration/` and `rulings/`); add the campaign material to the same store. Never use the 2026-09-28, 7.0 or 7.1 stores, and never any earlier 7.2 calibration store that was superseded. Layout: `corpus/`, `requirements/`, `oracles/`, `keys/`, `probes/`, `calibration/`, `rulings/`, `authoring/`, `operator/`, `human-trial/`, plus `ACCESS-LOG.md` (append-only, excluded from the freeze list), `FREEZE-GATE.json` (`{"candidate_frozen": false, "frozen_run_output_exists": false}`), `FREEZE.sha256` and `ATTESTATION.md`. The arrangement is the attestation path (campaign draft decision 1): honesty of the log is the control.
 - **Before and after each custodian session** the operator takes a metadata snapshot of the store (a manual `stat` listing until a tool exists, campaign draft gap 3), and the custodian writes an attestation entry naming every path opened with times.
 - **Independence.** Author everything fresh from the contract's item definitions, the protocol text and governing workplan section 8.3. Do not use, copy or shape anything after the disclosed 2026-09-28 corpus, any development probe (7.1 or S4) episode, transcript or run, or any candidate result. Development episodes never count.
 - **Reporting.** To the analyst and operator: counts, digests and interface files only. No key, answer, planted-property identity or oracle pattern goes to the analyst, operator or any executor.
 - **STOP reasons are defects in your deliverable**, not a negotiation. Anything the contract leaves undecided stays UNDETERMINED with the reason, and goes to the stakeholder; do not choose.
 - **No candidate text change.** You never edit the repository.
 
+## 1b. Tooling you may run (provider-free) and where things are
+
+- Accepted 6.6 sources to import: `qualification/ssdp66/eval/` (`fixtures/` T1 to T8, `scenarios.yaml`, `routing-preservation-map.yaml`, `rubrics.yaml`, `oracles/`). The probe fixtures for routing (P01 to P19) and versioning (T4 to T6) are described there; read them and import what the accepted 6.6 evaluation used. The overlay format for route episodes is shown by `qualification/ssdp70/s4/build_s4_probe.py` (`build_routes`), which you may read. You must give the burden routes real oracles only where Q5a, Q5b, Q5e or Q5f need hits and violations scored; Q5c needs only the consumed-bytes data the harness records.
+- Check your work with `python3 qualification/ssdp70/qual-v2/prepare_campaign.py check-corpus --work ~/ssdp70-omp-stagef/qualification/campaign-72-20261008 --corpus <your corpus> --requirements <your requirements> --oracles <your oracles> --slot-flags <your operator/slot-flags.json>`. It reads only the corpus, requirements, oracles, flags and the campaign arms and executor profile (a harness profile, not a custodian key). It does not run a model. Fix every problem it prints. Do not open any run directory.
+- The campaign arms and executor profile already exist in that campaign directory. The candidate is `2dedcfa`.
+
+## 1c. Panels, names and files to deliver
+
+Use these panel names in `corpus/manifest.yaml` (`panel` field): `main` (delegate and duty episodes), `routing` (Q5a), `versioning` (Q5b), `burden` (Q5c: T1, T7, T8, three episodes each, ids `T1-r01` and so on), `sentinels` (Q5e: T2, T3 twice each), `unversioned` (Q5f: T1, T7, T8 three each), and conditional add-on panels named `burden-add` (T7-r04 to T7-r07, the predeclared T7 pair rule), `sentinels-add` and `unversioned-add` (the two extra runs each). Optional descriptive panels: `r2`, `ordinary`. Every episode: `entry: pinned:<root>`, `max_turns: 60`, `replicates` (3 for routing, versioning; 1 for main, burden, and for the sentinel and unversioned episodes make each run its own episode id), and the fixture and prompt. Arms per panel are fixed by the plan tool: main, routing, versioning: candidate, B1 and B2; burden: candidate and accepted 6.5; sentinels, unversioned: candidate.
+
+Deliver, besides the corpus, requirements and oracles:
+- `operator/slot-flags.json`: for every `main` episode, `{"delegate": bool, "non_owed": bool, "scored": true}` (the rulings define the three flags).
+- `operator/gate-map.json`: the JSON map `build_campaign_record.py` reads (`q2_owed`, `q2_unowed`, `q3`, `q4b`, `q4c`, `q4d`) with your measure names and the mapping conventions of the rulings.
+- `operator/CORPUS-COUNTS.md`: counts only, by panel, gate and flag.
+
+## 1d. Staging
+
+Work in this order and report counts and digests after each stage, so that the analyst can run the checks: (1) `main` delegate episodes; (2) `main` duty episodes; (3) `routing` and `versioning`; (4) `burden`, `sentinels`, `unversioned` and their `-add` panels; (5) gate map, flags, counts, evaluator-calibration set (section 4), the freeze files. If your context ends early, say exactly where you stopped.
+
 ## 2. Corpus (P3b), by gate
 
-The corpus is a set of episodes the harness (`eval/harness70.py matrix`) can run for the candidate, B1 and B2 on the gating executor (60 turns, 2400 s, deterministic activation of the custodian-declared root). Size every task to finish well inside 60 turns. The format is the 7.0 harness interface (`CUSTODY-RULES.md`, `HARNESS-INTERFACE.md` of the 7.0 store, which the stakeholder authorizes you to read); episode fields follow it. Declare for every episode: the panel, the root, the replicates (one per arm), whether it is a **delegate episode** (`delegate`, the Q2 population) and whether the run is **non-owed** (`non_owed`: it owed no null, envelope or disclosure, ruling A-x5). The two flags are independent; the builder infers neither.
+The corpus is a set of episodes the harness (`eval/harness70.py matrix`) can run for the candidate, B1 and B2 on the gating executor (60 turns, 2400 s, deterministic activation of the custodian-declared root). Size every task to finish well inside 60 turns. The format is the 7.0 harness interface (`CUSTODY-RULES.md`, `HARNESS-INTERFACE.md` of the 7.0 store; you have read them already); episode fields follow it. Declare for every episode: the panel, the root, the replicates (one per arm), whether it is a **delegate episode** (`delegate`, the Q2 population) and whether the run is **non-owed** (`non_owed`: it owed no null, envelope or disclosure, ruling A-x5). The two flags are independent; the builder infers neither.
 
 | Gate | Corpus requirement | Notes |
 |---|---|---|
