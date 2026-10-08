@@ -27,3 +27,14 @@ These are stakeholder rulings on how the contract's undefined or silent terms ar
 ## Custodian restart
 
 The first custodian pass (store `~/ssdp72-fixture-custody`, FREEZE.sha256 digest `6f1199d3…9a95`) read addendum revision 2 before authoring and is **superseded**; it stays untouched as evidence and is not used. A fresh custodian session builds a new store on revision 3 and these rulings. It must not read the first store.
+
+## Role naming (stakeholder: "Proceed with your recommendations")
+
+| Role | Session | Model | Note |
+|---|---|---|---|
+| Custodian (restart) | custodian-7.2-b | Opus agent | Store `~/ssdp72b-fixture-custody`; addendum revision 3 and these rulings |
+| Independent re-check of the revised campaign draft, builder and P3b draft | checker-draft-7.2-b | agent, fresh | Delta re-check of the NO-PASS blockers B1 to B6 |
+| Pre-run checker (P5) | checker-p5-7.2-a | agent, fresh; not custodian-7.2-b, not checker-draft-7.2-b, not the analyst | Launched only after the corpus exists and is under the custodian's hand-over |
+| Evaluator | evaluator-7.2-a | claude-opus-5-5 (never the executor GLM-5.3-Flash), a session separate from the custodian and the checkers | Profile frozen at P4; launched only at P9 |
+
+These are agent sessions launched by the analyst at the stakeholder's instruction, weaker than separate human-operated sessions; the attestation trail is the control.
