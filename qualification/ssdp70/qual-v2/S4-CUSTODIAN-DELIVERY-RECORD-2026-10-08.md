@@ -64,3 +64,10 @@ The analyst does not open the new store and does not read fixture content. The a
 - Digests: FREEZE.sha256 `68c16945eaffe97213a2161e00f72f39dad9d8e83b38962e648b918a9319c3cb` (16 entries); ATTESTATION `88f4a41a3a9d98ed2bdf74c28011e7709bf9d6e6dababc95d721778b13737ac4` (entry 2 appended). Unfrozen.
 - Verdicts that still rest on a provisional reading: A-x1 (qualifier list taken from the candidate wording, OD-3 not seen), A-x2 to A-x6, and a new A-x11 (a conditionally phrased tension question is not an unowed part when reliance on accepted authority does not hold; C7-P03 depends on it). A-x5 and A-x6 touch every Q4d verdict.
 - Next: `checker-p5-7.2-a` (launched) confirms or rejects the readings, the A-9 mapping and each fixture's verdict, then reports counts and pass/fail only.
+
+## custodian-7.2-b repair pass (after the pre-run check NO-PASS; counts only)
+
+- Rulings set 3 (`d0a936ec…2691`, commit `ebbbcb2`) verified at 16:57:41Z. 133 fixtures, none pending, none removed: C1A 6/6, C1B 6/6, C1U 9/6, C2 12/8, C5i 6/6, C5ii 6/1 (+6 label-only), C5-N 3, C6 8/7, C7 16/15.
+- Repairs: A-x11 label and a new twin; the qualifier list narrowed to the §11.3 list; trace facts added across C2 and C6; mapping to one item per unowed part, Q4d prefix-scoped, Q4b claim integrity only; evaluator view with neutral ids separated from the custodian-held labels; bad twins rewritten to defeat length and token shortcuts (best shortcut accuracy 0.58 to 0.75 against chance 0.50 to 0.60; C2 twins are not length-matched).
+- Digests: FREEZE.sha256 `94e4ec8e0c224bcee68298805a427785c2e004df516e0b2facd7a7a4ca06d312` (152 entries); ATTESTATION `b86fa83b127a1fd675168754cd83fb187e666c70ae10a5cd86a5077069e01a2d`; LABELS.json `07f493d1…16ed2`; MANIFEST.json `4280bbdb…bb7`. Unfrozen.
+- Open: the checker re-checks the repairs and the provisional readings A-x2, A-x3, A-x4, A-x6, A-x8 and the mapping. A-x7 is accepted as a stated limitation (fourth ruling).
