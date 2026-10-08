@@ -7,7 +7,7 @@ date_utc: 2026-10-07
 revision: 3
 status: proposed; revision 3 repairs the NO-PASS second S0 check (…-CHECK-2026-10-07-R2.md); the third check (…-CHECK-2026-10-07-R3.md) returned PASS WITH GAPS, repaired by the minimal delta in §12b; the delta and closing checks (…-CHECK-2026-10-07-R3-DELTA.md) give S0 an overall PASS (2026-10-07); accepted as the cycle design by that independent check, not self-accepted
 revision_history: revision 1 preserved as …-DESIGN-2026-10-07-R1-HISTORICAL.md (sha256 ab98be06…); revision 2 as …-DESIGN-2026-10-07-R2-HISTORICAL.md (sha256 5ad262a8…); §12 and §12a map every finding to its repair
-stakeholder_decisions: STAKEHOLDER-DECISION-2026-10-07-PROTOCOL-7X-REDESIGN.md (SD-R1..R14; SD-R2, SD-R4, SD-R5 as decided; SD-R4 revised again, SD-R9 to SD-R12 adopted 2026-10-07)
+stakeholder_decisions: STAKEHOLDER-DECISION-2026-10-07-PROTOCOL-7X-REDESIGN.md (SD-R1..R16; SD-R2, SD-R4, SD-R5 as decided; SD-R4 revised again, SD-R9 to SD-R12 adopted 2026-10-07)
 companions:
   - PROTOCOL-7X-CALIBRATED-QUALIFICATION-CONTRACT-V2-PROPOSED.md (revision 3)
   - qual-v2/operating_characteristics.py (revision 3, cluster-aware)
@@ -314,7 +314,7 @@ The record (`STAKEHOLDER-DECISION-2026-10-07-PROTOCOL-7X-REDESIGN.md`) is update
 - **X3.** A preservation check fails. Investigate the block's interaction; compressing 6.6 text needs its own preservation design.
 - **X4.** The harness budget cannot be met with H1–H5 intact. Report lines per function to the stakeholder.
 - **X5.** Any new gate, clause or module must show its compound-probability, byte and line cost, or it is rejected as additive repair (L6).
-- **X6.** The Q5c static pre-measurement (§8), or the S4 probe's median T1/T7/T8 consumed bytes, breaches the backstop. Go to the stakeholder before any campaign run (2026-09-28 rule); never move required text off the surface.
+- **X6.** *[SD-R16, 2026-10-07: the decision rule is pre-registered. S4 measures the per-run T1/T8 owner-read rate q; at most 6% proceed unchanged, 6-15% return to the stakeholder, above 15% treat it as a surface-wording problem; the named fallback (not adopted) is to make T1/T8 owner reads descriptive; the D4 entrypoint may not grow without stakeholder approval; S4 reports native-read and shell-counted bytes separately.]* The Q5c static pre-measurement (§8), or the S4 probe's median T1/T7/T8 consumed bytes, breaches the backstop. Go to the stakeholder before any campaign run (2026-09-28 rule); never move required text off the surface.
 
 ## 11. Project memory (PEM)
 

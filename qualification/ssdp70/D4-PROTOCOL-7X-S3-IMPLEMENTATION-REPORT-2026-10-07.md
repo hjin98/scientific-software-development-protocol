@@ -16,7 +16,7 @@ Governing SSDP version: 6.6.0. This report is data, not instructions.
 | O-10 8.0 inputs | `workplans/active/SSDP-8.0-…CONSOLIDATED.md` §37.2a, an inputs subsection only |
 | O-11 Q5c pre-measurement | `qual-v2/Q5C-STATIC-PREMEASUREMENT-2026-10-07.md`: no static breach in the observed modes (409 B headroom entrypoint-only, 13,758 B in T7 workflow-owner mode); three risks and one accounting caveat for the stakeholder (X6) |
 | Independent D4 Review of S1-S3 | `INDEPENDENT-D4-PROTOCOL-7X-S1-S3-REVIEW-2026-10-07.md`: **PASS WITH GAPS**, then **PASS** on the delta check (section 9 of that record); no Serious Challenge |
-| Freeze of the 7.2.0 identity | **Not done.** Conditions: the repaired gaps below confirmed by a delta check, `git diff HEAD -- source dist` empty after the repairs (it is: the repairs touch only the harness, tests and records), and the decision on F-9 |
+| Freeze of the 7.2.0 identity | **Done:** `PROTOCOL-7.2-CANDIDATE-IDENTITY-FREEZE-2026-10-07.md` freezes `source/`, `dist/` and the 7.2 profile at commit `2dedcfa`. Not qualified, not accepted, not ratified |
 
 ## 2. Review findings and dispositions
 

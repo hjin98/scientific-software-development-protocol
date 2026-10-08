@@ -177,7 +177,7 @@ Governing SSDP version: 6.6.0.
 | S1 | Skill: O-1 to O-5; regenerate; P7 tests; independent mapping check | Repository acceptance green; mapping check PASS |
 | S2 | Harness: O-6 to O-8; retirement after the new harness passes | Budgets met; integration through the relay green; H4 regression reproduces the dev-probe figures |
 | S3 | O-9, O-10 and O-11; independent D4 Review of S1–S3 | Review PASS and no O-11 breach; then freeze the 7.2.0 identity |
-| S4 | Pre-registered development probe on the disclosed corpus (development purpose): GLM-5.3-Flash, plus optionally one flash-tier comparison model; candidate vs B1 vs B2; estimates the duty effect, conformity, ICC, p̂, Q4a items per episode, the Q2b and Q4d rates, and median T1/T7/T8 consumed bytes | X1 and X6 not triggered → re-size the exposures with the script → commission the P3 custodian and the campaign work order under contract v2 |
+| S4 | Pre-registered development probe on the disclosed corpus (development purpose): GLM-5.3-Flash, plus optionally one flash-tier comparison model; candidate vs B1 vs B2; estimates the duty effect, conformity, ICC, p̂, Q4a items per episode, the Q2b and Q4d rates, and median T1/T7/T8 consumed bytes | X1 and X6 not triggered (X6 per the SD-R16 rule: T1/T8 owner-read rate q at most 6%; S4 reports native-read and shell-counted bytes separately) → re-size the exposures with the script → commission the P3 custodian and the campaign work order under contract v2 |
 
 ## 9. Reopen and Challenge triggers
 

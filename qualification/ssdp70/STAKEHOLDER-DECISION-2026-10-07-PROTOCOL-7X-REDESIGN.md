@@ -4,7 +4,7 @@ governing_protocol_version: 6.6.0
 target_protocol_version: 7.x skills-only candidate (7.2.0 per SD-R6)
 decision_date_utc: 2026-10-07
 status: stakeholder-adopted
-decides: D3-PROTOCOL-7X-RELIABILITY-SIMPLIFICATION-AND-CALIBRATED-QUALIFICATION-DESIGN-2026-10-07.md §9 SD-R1..SD-R15
+decides: D3-PROTOCOL-7X-RELIABILITY-SIMPLIFICATION-AND-CALIBRATED-QUALIFICATION-DESIGN-2026-10-07.md §9 SD-R1..SD-R16
 ---
 
 Governing SSDP version: 6.6.0.
@@ -115,3 +115,18 @@ The third S0 check (`INDEPENDENT-D3-PROTOCOL-7X-REDESIGN-CHECK-2026-10-07-R3.md`
 |---|---|---|
 | SD-R15a | O-8 moves from S2 to the S4/P3 custodian work order: the 40-item evaluator calibration set with at least 10 known failures, the oracle known-good and known-bad fixtures and the version-redacted evaluator input are authored and frozen by the custodian under SD-2 custody. Their existence, and the re-freezing of the evaluator profile (currently pinned to the executor's own model) and of the executor profile (it still pins the retired ledger modules), are explicit S4 entry conditions. The synthetic Precondition C exercise in `qual-v2/test_h4.py` stays as S2 evidence. | Workplan O-8, §8 stages S2 and S4 |
 | SD-R15b | SD-R14's accepted floor is 10,364 non-test and 4,672 test lines on the design §6 scope (the 205-line superseded history script, moved to `qual-v2-history/`, is not counted). Later growth is an additive repair that shows its line cost (X5). | SD-R14 row, design §6, workplan O-6 |
+
+## SD-R16 (2026-10-07): X6 decision rule for the fixed-cost backstop (Q5c)
+
+**Question put by D4** (the stakeholder asked for a recommendation on X6; the Q5c pre-measurement `qual-v2/Q5C-STATIC-PREMEASUREMENT-2026-10-07.md` shows 409 B of headroom for the D4 entrypoint and a breach if a median T1/T8 run also reads the 46,131 B scientific-inspectability owner). D4 recommended four items.
+
+**Verbatim answer.** "Ok let's go with item 1-4 for now."
+
+| # | Decision | Realized in |
+|---|---|---|
+| SD-R16.1 | **Pre-registered rule.** S4 measures q, the per-run rate of reading the scientific-inspectability owner on T1 and T8. With q the per-run probability, a route's median of three runs reads the owner with probability 3q²(1−q)+q³, so the unconditional pass probability is the conditional compound (0.821 at ICC 0.3, 0.815 at ICC 0.5) times the square of one minus that. The design rule (at least 0.80) holds up to q = 6.7% at ICC 0.3 and 5.7% at ICC 0.5. If measured q is at most 6%, proceed unchanged; between 6% and 15%, return to the stakeholder; above 15%, treat it as a surface-wording problem, not a cap problem. The estimate is reported with its Wilson 90% interval. | Design §10 X6; workplan S4 gate |
+| SD-R16.2 | **Named fallback (not adopted).** If the rule sends the question back, the least-bad relaxation is to make owner reads on T1 and T8 descriptive (reported, not gated). It weakens the backstop's fixed-cost purpose. Raising the multiplier (about 7× to absorb the read) is rejected. | Design §10 X6 |
+| SD-R16.3 | **No growth of the D4 entrypoint.** It leaves 409 B under the Q5c limit; any later change that adds text to it needs the stakeholder's prior approval. | Design §10 X5; freeze record |
+| SD-R16.4 | **Accounting.** Q5c still gates on the conservative consumed-bytes count (contract §3). S4 reports, per run, the bytes from native reads and the bytes from shell counting separately, so a run that only lists the package is visible as an accounting artifact. | Workplan S4; freeze record |
+
+The contract is unchanged: SD-R16 pre-registers how a measurement will be read; it changes no gate, threshold or exposure.
