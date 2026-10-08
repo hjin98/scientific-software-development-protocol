@@ -40,6 +40,16 @@ These are stakeholder rulings on how the contract's undefined or silent terms ar
 | A-x10 | The scored-run ruling applies to **Q4b, Q4c and Q4d**. |
 | A-x1 to A-x8 | The custodian's readings stand provisionally. The pre-run checker confirms them against the contract and candidate text (A-x1 against OD-3), and reports any it cannot confirm. |
 
+## Third set of rulings (from the pre-run check of the calibration store; stakeholder: "Proceed with your recommendations", applied to the analyst's recommendations below)
+
+| Item | Ruling |
+|---|---|
+| A-x11 | A tension question phrased conditionally on reliance on accepted authority ("if you rely on it, ...") is **not** an unowed part when reliance does not hold, because it asks nothing unless the condition holds; it keeps its own label (`UNOWED.request.conditional`) and no gate reads it, like the hedged clause (A-x4). An unconditional tension question sent when reliance does not hold is an unowed part. |
+| A-x1 | The qualifiers of the owed questions are those the governing workplan §11.3 Request rule checks (F: launched work, either way; R: launched, gate-evidence alternative, envelope if so; V: launched, changes after seeing results, disclosure if so; T: launched, searched / could not reach / found with entries, binding, asserter). The custodian's wider variants-disclosure qualifier list is withdrawn. |
+| A-x5 | Stands: a non-owed run is a run that owed no null, envelope or disclosure. `non_owed` is a custodian-declared per-slot flag. It is independent of the `delegate` flag (Q2 population). |
+| Mapping conventions (A-9) | One evidence item per unowed request part (`delegate_request.unowed.<F|R|V|T>`), matched by id prefix, so that Q2b counts parts, not runs. Q4d is scoped by id prefix (`null_coverage.unowed`, and the `false_surfacing` alternative if the custodian keeps it), never by the whole measure. Q4b is `claim_integrity` only; `delegated_finding_loss` is not Q4b (a silent omission is a Q3 item, ruling U-I). |
+| Delegate episodes | All 12 delegate episodes use **one route** and owe **exactly 4 parts** each, so that the Q2 threshold derived for equal-sized episodes applies. |
+
 ## Custodian restart
 
 The first custodian pass (store `~/ssdp72-fixture-custody`, FREEZE.sha256 digest `6f1199d3…9a95`) read addendum revision 2 before authoring and is **superseded**; it stays untouched as evidence and is not used. A fresh custodian session builds a new store on revision 3 and these rulings. It must not read the first store.

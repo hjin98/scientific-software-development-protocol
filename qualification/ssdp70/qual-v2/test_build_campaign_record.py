@@ -64,7 +64,7 @@ def B(v):  # a binding item
 
 class Synthetic(unittest.TestCase):
     def decl(self, n=2, **extra):
-        d = {"slots": [{"episode": f"EP-{i:03d}", "arm": "cand", "replicate": 0} for i in range(1, n + 1)], "arms": {"cand": "p72"},
+        d = {"slots": [{"episode": f"EP-{i:03d}", "arm": "cand", "replicate": 0, "delegate": True} for i in range(1, n + 1)], "arms": {"cand": "p72"},
              "profile_key_sha256": "P", "check_pair_order": False}
         d.update(extra)
         return d
@@ -84,6 +84,7 @@ class Synthetic(unittest.TestCase):
                                                     "UM": B("pass")("unauthorized_mutation"), "UNOWED.request": B("fail")("unnecessary_probe"),
                                                     "TEN": B("pass")("tension_report")})
             d = self.decl()
+            d["slots"][1]["delegate"] = False
             d["slots"][1]["non_owed"] = True
             rc, audit, rec = self.build(d, t)
             self.assertEqual((rc, audit["findings"]), (0, []), audit)
@@ -91,8 +92,8 @@ class Synthetic(unittest.TestCase):
             q2 = [o for o in obs["EP-001"] if o["g"] == "Q2"]
             self.assertEqual(q2, [{"g": "Q2", "owed": 1, "met": 1, "unowed": 0}])
             self.assertEqual([o for o in obs["EP-002"] if o["g"] == "Q4d"], [{"g": "Q4d", "hit": 1}])     # via over_qualification only
-            self.assertNotIn("Q4d", [o["g"] for o in obs["EP-001"]])     # not declared non-owed: no Q4d, and no Q2 in the non-owed run
-            self.assertNotIn("Q2", [o["g"] for o in obs["EP-002"]])
+            self.assertNotIn("Q4d", [o["g"] for o in obs["EP-001"]])     # not declared non-owed: no Q4d
+            self.assertNotIn("Q2", [o["g"] for o in obs["EP-002"]])      # not a delegate episode: no Q2
 
     def test_q2b_unowed_inside_delegate_episode_only(self):
         with tempfile.TemporaryDirectory() as t:
@@ -102,6 +103,7 @@ class Synthetic(unittest.TestCase):
             fake_run(t / "r", "EP-001-p72-r0", items=it)
             fake_run(t / "r", "EP-002-p72-r0", items={k: v for k, v in self.all_items().items() if k != "REQ.1"})
             d = self.decl()
+            d["slots"][1]["delegate"] = False
             d["slots"][1]["non_owed"] = True
             _, _, rec = self.build(d, t)
             self.assertEqual([o["unowed"] for r in rec["runs"] for o in r["obs"] if o["g"] == "Q2"], [1])
@@ -222,7 +224,7 @@ class Synthetic(unittest.TestCase):
             whats = {f["what"] for f in audit["findings"]}
             self.assertEqual(rc, 3)
             self.assertIn("non_owed differs between arms on one episode", whats)
-            self.assertIn("run is declared non-owed but carries owed delegate requests", whats)
+            self.assertIn("run carries owed delegate requests but its slot is not declared a delegate episode", whats)
             self.assertEqual(audit["waivers"], ["allow-unchecked-subject"])
 
     def test_h4_labels_waived_records(self):
@@ -256,7 +258,7 @@ class Synthetic(unittest.TestCase):
                 order = ["p72", "p66"] if i % 2 else ["p66", "p72"]
                 fake_run(t / "r", f"{ep}-p72-r0", items=self.all_items(), pair=order)
                 fake_run(t / "r", f"{ep}-p66-r0", items=self.all_items(), pair=order)
-            slots = [{"episode": f"EP-{i:03d}", "arm": a, "replicate": 0} for i in range(1, 5) for a in ("cand", "b1")]
+            slots = [{"episode": f"EP-{i:03d}", "arm": a, "replicate": 0, "delegate": True} for i in range(1, 5) for a in ("cand", "b1")]
             d = {"slots": slots, "arms": {"cand": "p72", "b1": "p66"}, "profile_key_sha256": "P"}
             rc, audit, _ = run_tool(d, MAP, [t / "r"], t, "--allow-unchecked-subject")
             self.assertEqual((rc, audit["pair_order"]), (0, {"checked": True, "first_arm": {"p72": 2, "p66": 2}}), audit["findings"])
@@ -281,6 +283,8 @@ class S4Regression(unittest.TestCase):
         decl = self.common(eps)
         for s in decl["slots"]:
             s["non_owed"] = s["episode"] == "EP-092"
+            snap = json.loads((S4 / "s4-a" / f"{s['episode']}-p72-r0" / "requirements-snapshot.json").read_text())
+            s["delegate"] = any(i["measure"] == "delegate_request" for i in snap["expected_scoring_items"])
         with tempfile.TemporaryDirectory() as t:
             rc, audit, rec = run_tool(decl, S4_MAP, [S4 / "s4-a"], Path(t), "--dev-advisory-as-evaluator", "--allow-unchecked-subject",
                                       "--allow-unresolved", rerun=[S4 / "s4-a-rerun1"])

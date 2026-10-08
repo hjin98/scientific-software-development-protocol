@@ -10,7 +10,7 @@ It fails closed: nothing is defaulted. The gate map is required, every mapped me
 resolved verdict blocks scoring (exit 4), and unchecked integrity inputs are findings.
 
 Declaration (JSON):
-  {"slots": [{"episode": "EP-001", "arm": "cand", "replicate": 0, "non_owed": false, "scored": true}, ...],
+  {"slots": [{"episode": "EP-001", "arm": "cand", "replicate": 0, "delegate": false, "non_owed": false, "scored": true}, ...],
    "arms": {"cand": "p72", "b1": "p66", "b2": "p66b", "b65": "p65"},        # h4 label -> run-name arm key (must be one-to-one)
    "q5c_routes": ["T1", "T7", "T8"],         # slots on these routes yield Q5c only (no Q2-Q4 observations) unless "scored": true
    "execution_mode": "qualification", "purpose": "qualification",             # required run fields (summary.execution_mode, accounting.purpose)
@@ -18,7 +18,10 @@ Declaration (JSON):
    "no_activation_arms": [],                                                   # run-name arm keys exempt from deterministic activation
    "check_pair_order": true,                                                   # audit summary.pair_order and alternation
    "infra_error_patterns": ["\\\\b(429|5\\\\d\\\\d)\\\\b", "connection", "ECONN"]}  # provider-transport causes of an infrastructure failure
-  `non_owed` (custodian-declared): the run owed no delegate request; it is the Q4d population. The builder does not infer it.
+  `delegate` (custodian-declared): a delegate episode, the Q2 population (owed parts and unowed request parts). `non_owed`
+  (custodian-declared, ruling A-x5): the run owed no null, envelope or disclosure; it is the Q4d population. The two are
+  independent declarations; the builder infers neither. A run with owed delegate requests on a slot not declared `delegate`
+  is an INTEGRITY finding. Q2 needs equal-sized episodes (h4 reports EXPOSURE otherwise): declare delegate episodes on one route.
 Gate map (JSON, required): {"q2_owed": [measures], "q2_unowed": {"measures": [...], "id_prefixes": [...]},
   "q3": {"measure": "family"}, "q4b": [measures], "q4c": [measures], "q4d": {"measures": [...], "id_prefixes": [...]}}
 Verdicts: a binding oracle verdict decides. An advisory verdict is unadjudicated and is NOT used, unless a disposition for
@@ -138,13 +141,11 @@ def observations(run: Path, slot: dict, rec: dict, gmap: dict, disp: dict, dev: 
     for k, m in items.items():
         if any(matches(k, m, sp) for sp in specs) or m.get("critical"):
             used.add(m["measure"])
-    arm, owed, non_owed = slot["arm"], 0, bool(slot.get("non_owed"))
-    if arm == "cand":
+    arm, non_owed = slot["arm"], bool(slot.get("non_owed"))
+    if arm == "cand" and slot.get("delegate"):
         req = [(k, v(k)) for k, m in items.items() if m["measure"] in gmap["q2_owed"] and not matches(k, m, gmap["q2_unowed"])]
-        if req:
-            owed = len(req)
-            unowed = sum(v(k) == "fail" for k, m in items.items() if matches(k, m, gmap["q2_unowed"]))
-            obs.append({"g": "Q2", "owed": owed, "met": sum(r == "pass" for _, r in req), "unowed": unowed})
+        unowed = sum(v(k) == "fail" for k, m in items.items() if matches(k, m, gmap["q2_unowed"]))     # one item per unowed part
+        obs.append({"g": "Q2", "owed": sum(r is not None for _, r in req), "met": sum(r == "pass" for _, r in req), "unowed": unowed})
     if arm in ("cand", "b1"):
         for k, m in items.items():
             fam = gmap["q3"].get(m["measure"])
@@ -267,9 +268,8 @@ def main() -> None:
                                                                if f in ro.get("native_files", []) and not f.endswith("/SKILL.md"))
                 rec["obs"].append({"g": "Q5c", "route": slot["episode"].split("-")[0], "bytes": s["active_ssdp_bytes"],
                                    "native_bytes": native, "mode": s["ssdp_read_mode"]})
-            owed_here = bool(owed_items(Path(final["dir"]), gmap))
-            if owed_here and slot.get("non_owed"):
-                bad("run is declared non-owed but carries owed delegate requests", run=name)
+            if owed_items(Path(final["dir"]), gmap) and not slot.get("delegate") and not route:
+                bad("run carries owed delegate requests but its slot is not declared a delegate episode", run=name)
             orphan = [u for u in rec["unresolved_items"] if u.startswith("ORPHAN:")]
             if orphan:
                 bad("oracle verdicts for items the manifest does not declare", run=name, items=orphan)
