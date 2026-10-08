@@ -279,6 +279,10 @@ def main() -> None:
                 findings.append({"kind": "UNRESOLVED", "what": "mapped items without a resolved verdict", "run": name, "items": rec["unresolved_items"]})
         runs.append(rec)
 
+    owed_counts = {r["run"]: o["owed"] for r in runs if r["arm"] == "cand" for o in r["obs"] if o["g"] == "Q2"}
+    if owed_counts and (min(owed_counts.values()) == 0 or len(set(owed_counts.values())) != 1):
+        bad("delegate episodes are not equal-sized or one owes no part (Q2 needs equal sizes and h4 would report EXPOSURE)",
+            owed_per_run=owed_counts)
     for label, spec in zip(("q2_owed", "q2_unowed", "q3", "q4b", "q4c", "q4d"), mapped_specs(gmap)):
         missing = [m for m in spec.get("measures", []) if m not in used_measures]
         if missing and gated_runs:

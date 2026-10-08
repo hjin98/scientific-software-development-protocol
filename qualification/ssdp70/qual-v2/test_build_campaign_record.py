@@ -233,6 +233,15 @@ class Synthetic(unittest.TestCase):
         self.assertFalse(result["valid_for_qualification"])
         self.assertIn("NOT A QUALIFICATION RESULT", h4.render(result)) if result["verdict"] != "INSTRUMENT_FAIL" else None
 
+    def test_delegate_episodes_must_be_equal_sized(self):
+        with tempfile.TemporaryDirectory() as t:
+            t = Path(t)
+            fake_run(t / "r", "EP-001-p72-r0", items=self.all_items())
+            fake_run(t / "r", "EP-002-p72-r0", items={k: v for k, v in self.all_items().items() if k != "REQ.1"})
+            rc, audit, _ = self.build(self.decl(), t)
+            self.assertEqual(rc, 3)
+            self.assertTrue(any(f["what"].startswith("delegate episodes are not equal-sized") for f in audit["findings"]))
+
     def test_death_is_admissible_behaviour(self):
         with tempfile.TemporaryDirectory() as t:
             t = Path(t)
@@ -288,7 +297,9 @@ class S4Regression(unittest.TestCase):
         with tempfile.TemporaryDirectory() as t:
             rc, audit, rec = run_tool(decl, S4_MAP, [S4 / "s4-a"], Path(t), "--dev-advisory-as-evaluator", "--allow-unchecked-subject",
                                       "--allow-unresolved", rerun=[S4 / "s4-a-rerun1"])
-        self.assertEqual((rc, audit["declared"], audit["reruns"]), (0, 92, 4), audit["findings"])
+        # the development corpus has 12 delegate episodes of unequal size (47 parts), which the campaign corpus must not have
+        self.assertEqual([f["what"][:34] for f in audit["findings"] if f["kind"] == "INTEGRITY"], ["delegate episodes are not equal-si"])
+        self.assertEqual((rc, audit["declared"], audit["reruns"]), (3, 92, 4))
         adm = {r["episode"]: r["admissible"] for r in rec["runs"]}
         self.assertFalse(adm["EP-021"])                                    # lost twice, inadmissible
         self.assertTrue(adm["EP-009"])
