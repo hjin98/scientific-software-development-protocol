@@ -32,3 +32,9 @@ Only the addendum, items 1, 2, 5, 6 and 7: calibration fixtures, owed-ness rulin
 - It leaves `FREEZE-GATE.json` unfrozen.
 
 The analyst does not open the new store and does not read fixture content. The analyst reads only the counts and digests the custodian reports.
+
+## Update (same day): revision 3 and the first custodian report
+
+- The independent check found that revision 2 disclosed candidate-result figures, the adjudication class and named hit mechanisms to the custodian, and invited a re-read of development runs. Revision 3 (sha256 `69594fb935faf7ca7d1bdea941206e3bcd810229627aa8037224be7df826ec89`, commit `9392ac7`) removes them.
+- The custodian's **first pass ran on revision 2** (it verified revision 2's digest). It reports that it did not re-read the development runs or the S4 report, but it did read revision 2. Its fixtures are therefore not independent of that disclosure until it shows otherwise. Revision 3 and a follow-up were sent to it with instructions to record the disclosure in its attestation and rebuild any fixture it cannot show derives from the contract and protocol text. The stakeholder may instead restart with a fresh custodian session on revision 3.
+- First report (counts only): 121 fixtures in `~/ssdp72-fixture-custody`, 119 with a fixed verdict and 2 UNDETERMINED; store unfrozen; FREEZE.sha256 file digest `2fe5ef768325ae2ba4db89dbc63a6245931e96a4d0d45bc55ab71be08cfd5916`; ATTESTATION digest `b23de24e158d8861fa747872cc429eadc0dead63c6c4136cbe56d3179ca6550e`. It found the old store path in the addendum does not exist (D-1), and that a deterministic Q4b/Q4d oracle needs structured trace facts (D-2). Open rulings are in the campaign draft, section 8, items 8 to 10.
