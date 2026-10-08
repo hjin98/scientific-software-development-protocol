@@ -48,7 +48,12 @@ import re
 import sys
 from pathlib import Path
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import h4  # noqa: E402
+
 SCORABLE = {"pass": 1, "fail": 0}
+Q5_PANELS = {"routing": "Q5a", "versioning": "Q5b", "sentinels": "Q5e", "sentinels-add": "Q5e", "unversioned": "Q5f", "unversioned-add": "Q5f"}
+BURDEN_PANELS = ("burden", "burden-add")
 DEFAULT_INFRA = [r"\b(429|5\d\d) status code", r"status code (429|5\d\d)\b", r"ECONN", r"ETIMEDOUT", r"connection (reset|refused|closed)"]
 
 
@@ -110,6 +115,32 @@ def prefix_hits(run: Path, gmap: dict) -> set:
             if any(k.startswith(p) for k in items)}
 
 
+def validate_map(gmap: dict) -> list[str]:
+    """The map shape the builder reads; a mismatch is refused, never reinterpreted."""
+    errs = []
+    for key in ("q2_owed", "q4b", "q4c"):
+        v = gmap.get(key)
+        if not (isinstance(v, list) and v and all(isinstance(x, str) for x in v)):
+            errs.append(f"{key} must be a non-empty list of measure names")
+    for key in ("q2_unowed", "q4d"):
+        v = gmap.get(key)
+        ok = isinstance(v, dict) and set(v) <= {"measures", "id_prefixes"} and any(v.get(k) for k in v) \
+            and all(isinstance(x, str) for k in v for x in v[k])
+        if not ok:
+            errs.append(f"{key} must be an object with only 'measures' and/or 'id_prefixes' lists of strings")
+    q3 = gmap.get("q3")
+    if not (isinstance(q3, dict) and q3 and all(isinstance(k, str) and v in h4.FAMILIES for k, v in q3.items())):
+        errs.append(f"q3 must map measure names to the h4 families {list(h4.FAMILIES)}")
+    q5 = gmap.get("q5")
+    if q5 is not None:
+        need = {"q5a": ("hit", "viol"), "q5b": ("strict", "never"), "q5e": ("fail",), "q5f": ("viol",)}
+        for key, fields in need.items():
+            v = q5.get(key) if isinstance(q5, dict) else None
+            if not (isinstance(v, dict) and all(isinstance(v.get(f), list) and v.get(f) for f in fields)):
+                errs.append(f"q5.{key} must give non-empty measure lists for {list(fields)}")
+    return errs
+
+
 def mapped_specs(gmap: dict) -> list[dict]:
     flat = lambda ms: {"measures": list(ms)}  # noqa: E731
     return [flat(gmap["q2_owed"]), gmap["q2_unowed"], flat(gmap["q3"]), flat(gmap["q4b"]), flat(gmap["q4c"]), gmap["q4d"]]
@@ -135,6 +166,30 @@ def observations(run: Path, slot: dict, rec: dict, gmap: dict, disp: dict, dev: 
             unresolved.append(k)
         return r
 
+    panel = slot.get("panel")
+    if panel in Q5_PANELS:
+        q5 = gmap.get("q5")
+        if q5 is None:
+            unresolved.append("NO_Q5_MAP")
+            return obs, unresolved, None
+        gate, case = Q5_PANELS[panel], slot["episode"]
+        route_name = slot["episode"].split("-")[0]
+        def hits(measures):
+            return [v(k) for k, m in items.items() if m["measure"] in measures]
+        if gate == "Q5a":
+            obs.append({"g": "Q5a", "case": case, "hit": int(any(r == "pass" for r in hits(q5["q5a"]["hit"]))),
+                        "viol": int(any(r == "fail" for r in hits(q5["q5a"]["viol"])))})
+        elif gate == "Q5b":
+            strict = hits(q5["q5b"]["strict"])
+            obs.append({"g": "Q5b", "case": case, "strict": int(bool(strict) and all(r == "pass" for r in strict)),
+                        "never": int(any(r == "fail" for r in hits(q5["q5b"]["never"])))})
+        elif gate == "Q5e":
+            obs.append({"g": "Q5e", "route": route_name, "fail": int(any(r == "fail" for r in hits(q5["q5e"]["fail"])))})
+        else:
+            obs.append({"g": "Q5f", "route": route_name, "viol": int(any(r == "fail" for r in hits(q5["q5f"]["viol"])))})
+        return obs, sorted(set(unresolved)), None
+    if panel and panel != "main":
+        return obs, unresolved, None                 # descriptive and burden panels enter no Q2 to Q4 gate
     if route and not slot.get("scored"):
         return obs, unresolved, None
     specs = mapped_specs(gmap)
@@ -182,9 +237,9 @@ def main() -> None:
     decl, gmap = json.loads(a.declaration.read_text()), json.loads(a.map.read_text())
     disp = json.loads(a.dispositions.read_text()) if a.dispositions else {}
     expect = dict(x.split("=", 1) for x in a.subject_commit)
-    for key in ("q2_owed", "q2_unowed", "q3", "q4b", "q4c", "q4d"):
-        if key not in gmap:
-            sys.exit(f"gate map lacks {key!r}")
+    map_errors = validate_map(gmap)
+    if map_errors:
+        sys.exit("gate map refused: " + "; ".join(map_errors))
     bad_arm = [x for x in decl["slots"] if x["arm"] not in decl["arms"]]
     if bad_arm:
         sys.exit(f"slot arm label not in the declaration's arms: {bad_arm[0]}")
@@ -257,7 +312,7 @@ def main() -> None:
         rec = {"run": name, "episode": slot["episode"], "arm": slot["arm"], "admissible": admissible, "death": final["kind"] == "death",
                "kind": final["kind"], "identities": [t["dir"] for t in tries + rr], "obs": []}
         if admissible:
-            route = slot["episode"].split("-")[0] in routes
+            route = (slot["panel"] in BURDEN_PANELS) if "panel" in slot else (slot["episode"].split("-")[0] in routes)
             rec["obs"], rec["unresolved_items"], used = observations(Path(final["dir"]), slot, final, gmap, disp, a.dev_advisory_as_evaluator, route)
             if used is not None:
                 used_measures |= used

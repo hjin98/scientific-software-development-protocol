@@ -242,6 +242,43 @@ class Synthetic(unittest.TestCase):
             self.assertEqual(rc, 3)
             self.assertTrue(any(f["what"].startswith("delegate episodes are not equal-sized") for f in audit["findings"]))
 
+    def test_gate_map_shape_and_families_are_refused(self):
+        with tempfile.TemporaryDirectory() as t:
+            t = Path(t)
+            fake_run(t / "r", "EP-001-p72-r0", items=self.all_items())
+            for bad in ({**MAP, "q4b": {"measure": "claim_integrity"}}, {**MAP, "q3": {"tension_report": "iv"}},
+                        {**MAP, "q4d": {"measure": "null_coverage"}}):
+                rc, _, _ = run_tool(self.decl(1), bad, [t / "r"], t, "--subject-commit", "p72=C")
+                self.assertNotEqual(rc, 0)
+            (t / "decl.json").write_text(json.dumps(self.decl(1)))
+            (t / "map.json").write_text(json.dumps({**MAP, "q4b": {"measure": "claim_integrity"}}))
+            p = subprocess.run([sys.executable, str(TOOL), "--declaration", str(t / "decl.json"), "--map", str(t / "map.json"),
+                                "--runs", str(t / "r")], capture_output=True, text=True)
+            self.assertIn("gate map refused", p.stderr + p.stdout)
+
+    def test_q5_panels_and_burden_only_for_q5c(self):
+        q5 = {"q5a": {"hit": ["route_hit"], "viol": ["route_violation"]}, "q5b": {"strict": ["version_ordering"], "never": ["version_stated"]},
+              "q5e": {"fail": ["sentinel_rubric"]}, "q5f": {"viol": ["unversioned_lookup"]}}
+        with tempfile.TemporaryDirectory() as t:
+            t = Path(t)
+            rows = {"P01-r0": ("routing", {"H": B("pass")("route_hit"), "V": B("fail")("route_violation")}),
+                    "VER1": ("versioning", {"O": B("pass")("version_ordering"), "S": B("fail")("version_stated")}),
+                    "T2-s01": ("sentinels", {"R": B("fail")("sentinel_rubric")}),
+                    "T1-u01": ("unversioned", {"L": B("fail")("unversioned_lookup")}),
+                    "T1-r01": ("burden", {"b": B("pass")("burden-route")})}
+            slots = []
+            for ep, (panel, items) in rows.items():
+                fake_run(t / "r", f"{ep}-p72-r0", items=items)
+                slots.append({"episode": ep, "arm": "cand", "replicate": 0, "panel": panel})
+            d = {"slots": slots, "arms": {"cand": "p72"}, "profile_key_sha256": "P", "check_pair_order": False, "q5c_routes": ["T1"]}
+            rc, audit, rec = run_tool(d, {**MAP, "q5": q5}, [t / "r"], t, "--subject-commit", "p72=C", "--allow-unresolved")
+            by = {r["episode"]: r["obs"] for r in rec["runs"]}
+            self.assertEqual(by["P01-r0"], [{"g": "Q5a", "case": "P01-r0", "hit": 1, "viol": 1}])
+            self.assertEqual(by["VER1"], [{"g": "Q5b", "case": "VER1", "strict": 1, "never": 1}])
+            self.assertEqual(by["T2-s01"], [{"g": "Q5e", "route": "T2", "fail": 1}])
+            self.assertEqual(by["T1-u01"], [{"g": "Q5f", "route": "T1", "viol": 1}])     # an unversioned T1 run is not a Q5c run
+            self.assertEqual([o["g"] for o in by["T1-r01"]], ["Q5c"])
+
     def test_death_is_admissible_behaviour(self):
         with tempfile.TemporaryDirectory() as t:
             t = Path(t)
@@ -256,7 +293,7 @@ class Synthetic(unittest.TestCase):
             fake_run(t / "r", "T1-r01-p72-r0")
             d = self.decl(q5c_routes=["T1"])
             d["slots"] = [{"episode": "T1-r01", "arm": "cand", "replicate": 0}]
-            rc, audit, rec = self.build(d, t, gmap={**MAP, "q4b": [], "q4c": []})
+            rc, audit, rec = self.build(d, t)
             self.assertEqual([o["g"] for o in rec["runs"][0]["obs"]], ["Q5c"])
 
     def test_pair_order_audited(self):
