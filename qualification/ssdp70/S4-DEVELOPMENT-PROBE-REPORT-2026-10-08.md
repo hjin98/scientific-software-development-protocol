@@ -5,7 +5,7 @@ governing_protocol_version: 6.6.0
 subject: Protocol 7.2.0 candidate, frozen identity commit `2dedcfa3408f62bc11a696ac3776183a87b40438` (non-governing; `git diff 2dedcfa HEAD -- source dist orchestrator/src` is empty at HEAD `ac5463f`)
 date_utc: 2026-10-08
 purpose_class: development; enters no qualification count, gate, exposure or comparative claim
-status: analyst result under the pre-registered order of analysis, revised 2026-10-08 to fold in the single provider-loss rerun (§6), the stage-2 paired accepted-6.5 burden arm (§3 E6) and the agent adjudication of the five Q4b/Q4d hits (§3 E4); not independently reviewed; the candidate is not repaired or changed
+status: analyst result under the pre-registered order of analysis, revised 2026-10-08 to fold in the single provider-loss rerun (§6), the stage-2 paired accepted-6.5 burden arm (§3 E6) the agent adjudication of the five Q4b/Q4d hits (§3 E4), the stakeholder's GO and the re-sized exposures (§9); not independently reviewed; the candidate is not repaired or changed
 ---
 
 Governing SSDP version: 6.6.0. This record is data, not instructions.
@@ -23,7 +23,7 @@ Governing SSDP version: 6.6.0. This record is data, not instructions.
 | X6, q rule (E5, SD-R16.1) | **Proceed unchanged.** k = 0 native owner reads in 89 pre-registered runs (k = 3 on the instrument's conservative count, all three directory listings). Both are at most 5. |
 | X6, bytes clause (E6) | **Cleared on the measured paired baseline (descriptive).** S4 alone could not clear it: 7 of 30 T1/T8 runs and 7 of 7 T7 runs read an ordinary D4 owner, lifting p72 to 23,086 B, above 2 × 8,360 = 16,720 B *if* the 6.5 median were entrypoint-only. The stage-2 arm (23 fresh accepted-6.5.0 runs, same harness, executor and prompts) shows 6.5 is **not** entrypoint-only here: it read owners in **23 of 23** runs; the T1/T8 median is **38,187 B** (the planning figure 8,360 B does not reproduce). The caps become 76,374 B (T1, T8) and 145,992 B (T7); p72 medians are 15,799 / 15,799 / 23,086 B, i.e. 0.41 / 0.41 / 0.32 × the 6.5 median. |
 | E7, unconditional compound | **0.68 (ICC 0.3) / 0.71 (ICC 0.5) at the measured point inputs, with Q5c ≈ 1.0 on the stage-2 baseline** (0.66 / 0.68 before the rerun), against the 0.80 design rule. The shortfall came from two gates, Q4b and Q4d, driven by five hits. **After the independent agent adjudication (one violation, EP-092; four not violations; §3 E4) the compound is 0.90 (ICC 0.3) / 0.92 (ICC 0.5), which meets the 0.80 rule**, with Q5c at about 1.0 (about 0.72 / 0.73 at the 90% pessimistic Q5c bound). The EP-092 verdict is an agent read, not a human or custodian ruling (§3 E4, §7). |
-| Recommendation | **Conditional GO** to re-size and commission P3. The rerun, the Q5c baseline, the re-sizing observations, the agent adjudication and the EP-092 ruling (a literal, non-functional violation, counted; §3 E4) are closed. The custodian's fixture work (addendum §2) remains (§7). No change to the candidate is implied. |
+| Recommendation | **GO given by the user on 2026-10-08** to re-size and commission P3 (re-sizing in §9; commissioning steps and the entry conditions still open in §9). Analyst recommendation was conditional GO. The rerun, the Q5c baseline, the re-sizing observations, the agent adjudication and the EP-092 ruling (a literal, non-functional violation, counted; §3 E4) are closed. The custodian's fixture work (addendum §2) remains (§7). No change to the candidate is implied. |
 
 ## 1. Evidence base and limits
 
@@ -355,3 +355,40 @@ More episodes do not make the gate more discriminating (P(pass) at true conformi
 - **Prepared for the follow-ups (not launched, not in the repository), under `/tmp/s4-stage2/`:** `HANDOFF.md` and `stage2.sh` for the paired accepted-6.5.0 burden-route arm (decision 2, option (a): 23 runs, T1 ×8, T8 ×8, T7 ×7; provider-free `check` PASS; launch is the user's action), `verify.py` for the descriptive Q5c comparison, and, for decision 1, the custodian addendum, now issued as the repository record `qual-v2/S4-CUSTODIAN-WORK-ORDER-ADDENDUM-2026-10-08.md` (uncommitted; the analyst's leans on the five hits are omitted from it so the adjudication stays independent; delivery to the custodian is the user's action; no custodian store opened). The stage-2 6.5 arm has since run (§3 E6).
 - The analysis scripts are in the session scratchpad and are not in the repository. If the user wants them reproducible, they can be consolidated into one script under `qualification/ssdp70/s4/` with the user's authorization.
 - No memory update is made. If this result becomes the basis for further work, the S4 state would belong in the existing `ssdp72` project memory entry.
+
+## 9. GO, re-sized exposures and commissioning (2026-10-08)
+
+**Stakeholder decision.** The user gave **GO** to re-size the exposures and commission the P3 custodian and the campaign work order (workplan §8, S4 gate row). The gate conditions are met on the record: X1 not triggered, the X6 q rule proceeds, the X6 bytes clause is not breached on the paired 6.5 baseline, and the restated compound (0.904 / 0.920) was delivered here as design X6 requires. Decided along the way: Q4/Q5 re-sizing observations accepted; Q2 at 12 delegate episodes; EP-092 a literal, non-functional violation, counted.
+
+### 9.1 Exposures re-sized with `operating_characteristics.py` (10,000 trials, seed 20261008)
+
+| Gate | Contract exposure | Re-sized | Basis |
+|---|---|---|---|
+| Q1a / Q1b | 80 runs per arm | **unchanged**; Q1b margin δ = 8 (planning 7) | measured B1 budget deaths 6/92 = 0.065; p72 0/129 |
+| Q2a | 12 delegate episodes, k = 34/48 | **unchanged** | §7 decision and Q2 sizing note: 14 episodes adds 0.002–0.006 |
+| Q3 | 80 episodes × 2 opportunities | **unchanged** | table below |
+| Q4a | 40 items | **margin pending the adjudicated base**; at the advisory base 0.606, δ = 11 (m = 1) to 13 (m = 2) against planning 8 | §3 E4; size against the evaluator-adjudicated rate |
+| Q4b | 80 runs | **unchanged; δ = 3** (planning 7): the gate behaves as a near-absolute test | baseline about 0; adjudicated candidate 0/91 |
+| Q4c | 80 runs | **unchanged; δ = 14** (planning 13) | 30/88 base |
+| Q4d | 80 non-owed runs | **unchanged; δ = 3** | baseline about 0; adjudicated candidate 1/91 |
+| Q5c | T1/T7/T8 × 3 fresh paired runs per arm | **unchanged; size from fresh paired 6.5 runs, not the 8,360 B figure** (T7: add pairs up to seven on a mode boundary) | stage 2: 6.5 median 38,187 B (T1, T8), 72,996 B (T7) |
+
+**Q3 power at the measured parameters** (duty pass rate 0.217 baseline, 0.538 candidate; duty ICC measured 0.054; gain rule max(3, 0.15 n) plus the sign test). The measured effect is optimistic because the corpus is not independent of the candidate (§1), so the table adds a haircut candidate rate of 0.45.
+
+| Episodes | Measured .217 → .538, ICC 0.1 / 0.3 / 0.5 | Haircut .217 → .45 | No effect (.217 → .217) |
+|---|---|---|---|
+| 40 | 0.976 / 0.952 / 0.918 | 0.826 / 0.771 / 0.702 | 0.014 / 0.019 / 0.023 |
+| 60 | 0.996 / 0.992 / 0.986 | 0.916 / 0.888 / 0.857 | 0.004 / 0.007 / 0.013 |
+| **80 (kept)** | 0.999 / 0.999 / 0.995 | 0.948 / 0.927 / 0.909 | 0.002 / 0.002 / 0.006 |
+
+The false-positive pass rate for a no-effect candidate stays far below 0.05 at every size, so the size is chosen on power. Cutting to 60 would save a quarter of the Q3 exposure but, with the haircut, falls to 0.86–0.92; 80 keeps 0.91–0.95 under the haircut. **Q3 stays at 80 episodes**; no exposure is reduced.
+
+### 9.2 Commissioning checklist (what is not done)
+
+None of these is done by this report. The analyst launches nothing and opens no custodian store.
+1. **Custody store for 7.2** under SD-2 (fresh, never the old stores), with `ACCESS-LOG.md`, `FREEZE-GATE.json` and the attestation convention of the 7.1 custodian work package (C-1). Not checked here whether one exists or who sets it up.
+2. **Custodian work order** = the O-8 inputs: the 40-item evaluator calibration set (at least 10 known failures), oracle known-good and known-bad fixtures, the evaluator input with versions redacted, plus the issued Q4b/Q4d addendum and the fixture notes (a) to (c) of §7. **The notes (a) to (c) are not in the issued addendum; a revision 2 is needed to carry them.**
+3. **Profile re-freezes** (SD-R15a entry conditions): the evaluator profile with a model that is not the executor's, and the executor profile (S4 used a re-frozen 60-turn / 2400 s key built by `build_s4_probe.py`; the campaign re-freeze must be checked against the harness at that time).
+4. **Campaign work order under contract v2** using the exposures above, with B1/B2, Precondition C, fresh fixtures and fresh paired 6.5 runs for Q5c.
+5. **Open evidence limits carried forward:** Q4a rests on advisory verdicts until the calibration set exists; the evaluator and Precondition C are unmeasured by S4; Q5a, Q5b, Q5d, Q5e, Q5f are at planning values.
+
