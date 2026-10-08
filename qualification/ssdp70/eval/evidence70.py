@@ -13,7 +13,7 @@ import json
 import os
 import threading
 import time
-from typing import Any, Iterable
+from typing import Any
 
 GENESIS = "0" * 64
 SCHEMA = 1
@@ -120,7 +120,3 @@ def parse_chain(text: str, principal: str) -> tuple[list[dict[str, Any]], list[s
     elif not ended:
         errors.append(f"{principal} evidence is truncated: no end record")
     return records, errors
-
-
-def records_of_kind(records: Iterable[dict[str, Any]], kind: str) -> list[dict[str, Any]]:
-    return [record for record in records if record.get("kind") == kind]

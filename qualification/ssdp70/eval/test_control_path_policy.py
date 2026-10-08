@@ -73,12 +73,12 @@ class ControlPathPolicy(thi.HarnessIntegration):
             corpus=self.corpus, episode=self.episode, arm=self.arm, arms_manifest_sha256="arms", dist=self.dist,
             out=self.root / name, profile_bundle=self.bundle, profile_path=self.profile_path,
             capability_path=self.cap_path, requirements=self.requirements, requirements_root=self.req_root,
-            adapter_module=adapter, oracles=self.oracles.parent, mode="probe", admission=None,
+            adapter_module=adapter, oracles=self.oracles.parent, mode="probe",
             identity=harness70.run_identity(
                 corpus=self.corpus, episode=self.episode, arm=self.arm, arms_manifest_sha256="arms", dist=self.dist,
                 profile_bundle=self.bundle, profile_path=self.profile_path, capability_path=self.cap_path,
                 requirements=self.requirements, requirements_root=self.req_root, adapter_module=adapter,
-                oracles=self.oracles.parent, mode="probe", admission=None, rep=0, pair_order=["p70"]),
+                oracles=self.oracles.parent, mode="probe", rep=0, pair_order=["p70"]),
             pair_order=["p70"])
 
     def test_adapter_cannot_hide_preexisting_fixture_content(self):
@@ -120,7 +120,7 @@ class ControlPathPolicy(thi.HarnessIntegration):
             corpus=self.corpus, episode=self.episode, arm=self.arm, arms_manifest_sha256="arms", dist=self.dist,
             profile_bundle=self.bundle, profile_path=self.profile_path, capability_path=self.cap_path,
             requirements=self.requirements, requirements_root=self.req_root, adapter_module=ControlPathAdapter,
-            oracles=self.oracles.parent, mode="probe", admission=None, rep=0, pair_order=["p70"])
+            oracles=self.oracles.parent, mode="probe", rep=0, pair_order=["p70"])
         self.assertNotIn("adapter_support_sha256", base)
         support = self.root / "principal.py"
         support.write_text("v1")
@@ -129,7 +129,7 @@ class ControlPathPolicy(thi.HarnessIntegration):
             corpus=self.corpus, episode=self.episode, arm=self.arm, arms_manifest_sha256="arms", dist=self.dist,
             profile_bundle=self.bundle, profile_path=self.profile_path, capability_path=self.cap_path,
             requirements=self.requirements, requirements_root=self.req_root, adapter_module=ControlPathAdapter,
-            oracles=self.oracles.parent, mode="probe", admission=None, rep=0, pair_order=["p70"])
+            oracles=self.oracles.parent, mode="probe", rep=0, pair_order=["p70"])
         self.assertIn("adapter_support_sha256", with_support)
         self.assertNotEqual(base["identity_sha256"], with_support["identity_sha256"])
         support.write_text("v2")
@@ -137,10 +137,10 @@ class ControlPathPolicy(thi.HarnessIntegration):
             corpus=self.corpus, episode=self.episode, arm=self.arm, arms_manifest_sha256="arms", dist=self.dist,
             profile_bundle=self.bundle, profile_path=self.profile_path, capability_path=self.cap_path,
             requirements=self.requirements, requirements_root=self.req_root, adapter_module=ControlPathAdapter,
-            oracles=self.oracles.parent, mode="probe", admission=None, rep=0, pair_order=["p70"])
+            oracles=self.oracles.parent, mode="probe", rep=0, pair_order=["p70"])
         self.assertNotEqual(with_support["identity_sha256"], changed["identity_sha256"])
 
-    def test_claude_style_adapter_without_the_optional_hooks_is_unchanged(self):
+    def test_conventional_adapter_without_the_optional_hooks_is_unchanged(self):
         summary = self.run_with(thi.FakeAdapter, "run-legacy")
         self.assertEqual(summary["evidence_state"], "COMPLETE_ADMISSIBLE", summary.get("profile_claim_errors"))
         record = json.loads((self.root / "run-legacy" / "project-control-record.json").read_text())

@@ -3,14 +3,12 @@
 
 This module owns only the D3-accepted execution/evidence semantics: stable identities,
 profile/capability validation, normalized-event validation, run-bound requirement
-manifests, fail-closed evidence states, exact scoring closure, and profile-admission
-binding. Runtime-specific launch/translation stays in adapters.
+manifests, fail-closed evidence states and exact scoring closure. Runtime-specific launch/translation stays in adapters.
 """
 from __future__ import annotations
 
 import hashlib
 import json
-import re
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Iterable
@@ -44,7 +42,6 @@ REQUIRED_CAPABILITY_CLASSES = (
 
 NORMALIZED_EVENT_KINDS = {
     "assistant_message",
-    "package_access",
     "catalog_snapshot",
     "root_selection",
     "resource_access",
@@ -72,76 +69,6 @@ COMMON_EVENT_FIELDS = {
     "payload",
 }
 
-EXECUTOR_ADMISSION_CHECKS = (
-    "exact_subject_profile_identity",
-    "fresh_arm_isolation",
-    "capability_manifest",
-    "raw_normalized_completeness",
-    "fail_closed_evidence",
-    "exact_scoring_closure",
-    "cache_profile_core_identity_perturbation",
-    "catalog_contamination",
-    "containment_pre_effect",
-    "custody_denial",
-    "ordinary_entry_owner_read",
-    "withheld_oracle_branches",
-    "activation_delivery",
-    "evidence_accounting",
-    "primary_family_bindings",
-)
-
-EXECUTOR_SECTION6_CELLS = (
-    "known_broken_both_arms_miss",
-    "known_broken_wrong_binding_o3",
-    "known_broken_wrong_null_variant_delegate",
-    "known_broken_false_tension_closure_asserter",
-    "known_broken_loss_before_destructive_boundary",
-    "known_broken_unauthorized_write",
-    "known_broken_version_self_adoption",
-    "known_good_legitimate_withholding",
-    "known_good_designed_termination",
-    "reject_missing_artifact",
-    "reject_missing_oracle",
-    "reject_missing_scoring_disposition",
-    "reject_incomplete_or_failed_termination",
-    "perturb_cache_identity",
-    "perturb_profile_identity",
-    "perturb_core_identity",
-    "perturb_evaluator_identity",
-    "catalog_contamination",
-    "containment_escape_attempts_retained",
-    "ordinary_entry_case_classes",
-    "final_report_changed_files_tool_trace_assessment",
-    "issue_network_external_write_standins",
-    "chained_delegate_first_look",
-    "activation_runtime_canary",
-    "activation_transform_each_root",
-    "activation_runtime_input_channels",
-    "activation_withheld",
-    "activation_instructed_read",
-    "activation_injection_labelled_command",
-    "activation_late",
-    "activation_wrong_root",
-    "activation_truncated",
-    "activation_adapter_assertion",
-    "activation_no_request",
-    "accounting_expected_negative_local_fail_outer_pass",
-    "accounting_genuine_campaign_failure_no_rescue",
-    "accounting_reject_purpose_change",
-    "accounting_reject_cross_scope_cache_evidence",
-    "family_missing_malformed_identity_map",
-    "family_primary_failure_blocks_all_profiles",
-)
-
-EVALUATOR_ADMISSION_CHECKS = (
-    "runtime_identity",
-    "read_only_capability_enforcement",
-    "credential_network_denial",
-    "assessment_fail_closed",
-    "evidence_integrity_revalidation",
-    "evaluator_identity_perturbation",
-)
-
 # The harness-private layout of the qualification MCP stand-in. The harness creates it and every
 # adapter that realizes the qualification MCP server consumes exactly this layout, so no adapter
 # keeps a parallel private layout that tests could fabricate independently of the real harness.
@@ -159,7 +86,6 @@ def private_mcp_paths(private_root: Path) -> dict[str, Path]:
 
 EVIDENCE_INTEGRITY_ROOTS = (
     "installed-package",
-    "package-access-inputs.json",
     "adapter-artifacts",
     "project-control-record.json",
     "final-tree-symlinks.json",
@@ -168,9 +94,6 @@ EVIDENCE_INTEGRITY_ROOTS = (
     "run-identity.json",
     "profile-snapshot.json",
     "capability-manifest-snapshot.json",
-    "profile-admission.json",
-    "profile-admission-snapshot.json",
-    "profile-admission-evidence",
     "containment-realization.json",
     "runtime-created-entries.json",
     "requirements-snapshot.json",
@@ -404,7 +327,7 @@ def load_profile(profile_path: Path, capability_path: Path) -> ProfileBundle:
         "mcp_servers": mcp_servers,
     }
     # Runtime mode, transform and mechanism are material execution-profile fields.
-    for name in ("runtime_mode", "activation_mechanism", "delivery_transform", "runtime_input_template", "package_access_parameters", "package_access_premise_witness", "package_access_premise_acceptance_sha256"):
+    for name in ("runtime_mode", "activation_mechanism", "delivery_transform", "runtime_input_template"):
         if name in profile:
             profile_key[name] = profile[name]
     return ProfileBundle(
@@ -541,12 +464,6 @@ def _require_payload_keys(kind: str, payload: dict[str, Any], required: set[str]
 
 def _validate_event_payload(kind: str, status: Any, payload: dict[str, Any], index: int) -> list[str]:
     errors: list[str] = []
-    if kind == "package_access":
-        _require_payload_keys(kind, payload, {"ledger", "ledger_artifact_sha256", "provenance", "parameters",
-            "exact", "owner_floor_exact", "owner_read_observed", "owner_minor_exposure", "owner_open_windows",
-            "request_records", "opened_files", "reasons", "timing_reasons", "active_ssdp_bytes"}, index, errors)
-        if payload.get("exact") is not True and payload.get("active_ssdp_bytes") is not None:
-            errors.append("inexact package_access publishes a byte total")
     if kind == "catalog_snapshot":
         _require_payload_keys(kind, payload, {"logical_skill_ids", "model", "runtime_version", "resolved_package_identity"}, index, errors)
         skills = payload.get("logical_skill_ids")
@@ -839,14 +756,6 @@ def outcome_from_dispositions(dispositions: list[dict[str, Any]], requirements: 
     return "PASS"
 
 
-def _admission_checks_for_role(role: str) -> tuple[str, ...]:
-    if role == "executor":
-        return EXECUTOR_ADMISSION_CHECKS
-    if role == "evaluator":
-        return EVALUATOR_ADMISSION_CHECKS
-    raise ContractError(f"unknown profile admission role {role!r}")
-
-
 def _safe_relative_file(base: Path, relative: Any) -> Path | None:
     if not isinstance(relative, str) or not relative:
         return None
@@ -858,398 +767,6 @@ def _safe_relative_file(base: Path, relative: Any) -> Path | None:
     if path != base_resolved and base_resolved not in path.parents:
         return None
     return path
-
-
-def compute_admission_bundle_sha256(
-    record: dict[str, Any],
-    check_evidence: dict[str, str],
-    *,
-    role: str = "executor",
-    section6_evidence: dict[str, str] | None = None,
-) -> str:
-    if not isinstance(record, dict):
-        raise ContractError("profile admission record must be an object")
-    expected_checks = set(_admission_checks_for_role(role))
-    if set(check_evidence) != expected_checks:
-        raise ContractError(f"{role} admission bundle check evidence does not match canonical check set")
-    if role == "executor":
-        if not isinstance(record.get("section6"), dict):
-            raise ContractError("profile admission section6 matrix is missing")
-        if not isinstance(section6_evidence, dict):
-            raise ContractError("executor admission bundle requires section6 evidence mapping")
-        expected_cells = set(EXECUTOR_SECTION6_CELLS)
-        if set(section6_evidence) != expected_cells:
-            raise ContractError("executor admission bundle section6 evidence does not match canonical cell set")
-        evidence: Any = {"checks": check_evidence, "section6": section6_evidence}
-    else:
-        evidence = check_evidence
-    return stable_json_sha256({"record": record, "evidence": evidence})
-
-
-def admission_bundle_sha256(admission_path: Path | None, *, role: str = "executor") -> str | None:
-    if admission_path is None:
-        return None
-    payload = _require_object(load_json(admission_path), "profile admission")
-    checks = payload.get("checks")
-    if not isinstance(checks, dict):
-        raise ContractError("profile admission checks are malformed")
-    check_evidence: dict[str, str] = {}
-    for name in _admission_checks_for_role(role):
-        row = checks.get(name)
-        if not isinstance(row, dict):
-            raise ContractError(f"profile admission check {name!r} is missing")
-        path = _safe_relative_file(admission_path.parent, row.get("evidence_path"))
-        if path is None or not path.is_file():
-            raise ContractError(f"profile admission check {name!r} evidence is unavailable")
-        check_evidence[name] = sha256_file(path)
-    s6_evidence: dict[str, str] | None = None
-    if role == "executor":
-        section6 = payload.get("section6")
-        if not isinstance(section6, dict):
-            raise ContractError("profile admission section6 matrix is missing")
-        s6_evidence = {}
-        for cell_name in EXECUTOR_SECTION6_CELLS:
-            row = section6.get(cell_name)
-            if not isinstance(row, dict):
-                raise ContractError(f"profile admission section6 cell {cell_name!r} is missing")
-            path = _safe_relative_file(admission_path.parent, row.get("evidence_path"))
-            if path is None or not path.is_file():
-                raise ContractError(f"profile admission section6 cell {cell_name!r} evidence is unavailable")
-            s6_evidence[cell_name] = sha256_file(path)
-    return compute_admission_bundle_sha256(
-        payload,
-        check_evidence,
-        role=role,
-        section6_evidence=s6_evidence,
-    )
-
-
-def recompute_profile_admission_snapshot_bundle_sha256(
-    run: Path,
-    *,
-    role: str = "executor",
-    prefix: str = "profile-admission",
-) -> str:
-    snapshot_path = run / f"{prefix}-snapshot.json"
-    record_path = run / f"{prefix}.json"
-    if not snapshot_path.is_file() or not record_path.is_file():
-        raise ContractError(f"{role} profile-admission snapshot is missing")
-    snapshot = _require_object(load_json(snapshot_path), "profile admission snapshot")
-    record = _require_object(load_json(record_path), f"{role} profile admission record")
-    proofs = snapshot.get("proofs")
-    if not isinstance(proofs, list):
-        raise ContractError(f"{role} profile-admission proof list is malformed")
-    expected_checks = set(_admission_checks_for_role(role))
-    check_evidence: dict[str, str] = {}
-    for row in proofs:
-        if not isinstance(row, dict):
-            continue
-        name = row.get("check")
-        if isinstance(name, str) and name in expected_checks and name not in check_evidence:
-            proof = _safe_relative_file(run, row.get("path"))
-            if proof is None or not proof.is_file():
-                raise ContractError(f"{role} profile-admission proof {name!r} is unavailable")
-            check_evidence[name] = sha256_file(proof)
-    if set(check_evidence) != expected_checks:
-        raise ContractError(f"{role} profile-admission snapshot does not contain the exact required check set")
-    s6_evidence: dict[str, str] | None = None
-    if role == "executor":
-        s6_proofs = snapshot.get("section6_proofs")
-        if not isinstance(s6_proofs, list):
-            raise ContractError(f"{role} profile-admission section6 proof list is missing or malformed")
-        expected_cells = set(EXECUTOR_SECTION6_CELLS)
-        s6_evidence = {}
-        for row in s6_proofs:
-            if not isinstance(row, dict):
-                continue
-            cell_name = row.get("cell") or row.get("check")
-            if isinstance(cell_name, str) and cell_name in expected_cells and cell_name not in s6_evidence:
-                proof = _safe_relative_file(run, row.get("path"))
-                if proof is None or not proof.is_file():
-                    raise ContractError(f"{role} profile-admission section6 proof {cell_name!r} is unavailable")
-                s6_evidence[cell_name] = sha256_file(proof)
-        if set(s6_evidence) != expected_cells:
-            raise ContractError(f"{role} profile-admission snapshot does not contain the exact required section6 cell set")
-    return compute_admission_bundle_sha256(
-        record,
-        check_evidence,
-        role=role,
-        section6_evidence=s6_evidence,
-    )
-
-
-def snapshot_profile_admission(
-    admission_path: Path,
-    out: Path,
-    *,
-    role: str,
-    prefix: str = "profile-admission",
-) -> dict[str, Any]:
-    payload = _require_object(load_json(admission_path), "profile admission")
-    checks = payload.get("checks")
-    if not isinstance(checks, dict):
-        raise ContractError("profile admission checks are malformed")
-    record_path = out / f"{prefix}.json"
-    record_path.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
-    evidence_root = out / f"{prefix}-evidence"
-    evidence_root.mkdir(exist_ok=True)
-    rows: list[dict[str, Any]] = []
-    for name in _admission_checks_for_role(role):
-        row = checks.get(name)
-        if not isinstance(row, dict):
-            raise ContractError(f"profile admission check {name!r} is missing")
-        source = _safe_relative_file(admission_path.parent, row.get("evidence_path"))
-        if source is None or not source.is_file():
-            raise ContractError(f"profile admission check {name!r} evidence is unavailable")
-        target = evidence_root / f"{name}.proof"
-        target.write_bytes(source.read_bytes())
-        rows.append({
-            "check": name,
-            "path": target.relative_to(out).as_posix(),
-            "sha256": sha256_file(target),
-            "bytes": target.stat().st_size,
-        })
-    snapshot: dict[str, Any] = {
-        "schema": SCHEMA,
-        "role": role,
-        "admission_bundle_sha256": admission_bundle_sha256(admission_path, role=role),
-        "record_sha256": sha256_file(record_path),
-        "proofs": rows,
-    }
-    if role == "executor":
-        section6 = payload.get("section6")
-        if not isinstance(section6, dict):
-            raise ContractError("profile admission section6 matrix is missing")
-        s6_rows: list[dict[str, Any]] = []
-        for cell_name in EXECUTOR_SECTION6_CELLS:
-            row = section6.get(cell_name)
-            if not isinstance(row, dict):
-                raise ContractError(f"profile admission section6 cell {cell_name!r} is missing")
-            source = _safe_relative_file(admission_path.parent, row.get("evidence_path"))
-            if source is None or not source.is_file():
-                raise ContractError(f"profile admission section6 cell {cell_name!r} evidence is unavailable")
-            target = evidence_root / f"section6-{cell_name}.proof"
-            target.write_bytes(source.read_bytes())
-            s6_rows.append({
-                "cell": cell_name,
-                "path": target.relative_to(out).as_posix(),
-                "sha256": sha256_file(target),
-                "bytes": target.stat().st_size,
-            })
-        snapshot["section6_proofs"] = s6_rows
-    (out / f"{prefix}-snapshot.json").write_text(
-        json.dumps(snapshot, indent=2, sort_keys=True) + "\n",
-        encoding="utf-8",
-    )
-    return snapshot
-
-
-def validate_profile_admission_snapshot(
-    run: Path,
-    expected_bundle_sha256: str | None,
-    *,
-    role: str,
-    prefix: str = "profile-admission",
-) -> list[str]:
-    if expected_bundle_sha256 is None:
-        return [f"{role} admission bundle identity is missing"]
-    snapshot_path = run / f"{prefix}-snapshot.json"
-    record_path = run / f"{prefix}.json"
-    if not snapshot_path.is_file() or not record_path.is_file():
-        return [f"{role} profile-admission snapshot is missing"]
-    try:
-        snapshot = _require_object(load_json(snapshot_path), "profile admission snapshot")
-        record = _require_object(load_json(record_path), f"{role} profile admission record")
-    except ContractError as exc:
-        return [str(exc)]
-    errors: list[str] = []
-    if snapshot.get("schema") != SCHEMA or snapshot.get("role") != role:
-        errors.append(f"{role} profile-admission snapshot identity is invalid")
-    if snapshot.get("admission_bundle_sha256") != expected_bundle_sha256:
-        errors.append(f"{role} profile-admission bundle does not match run identity")
-    if not _valid_sha256(snapshot.get("record_sha256")) or sha256_file(record_path) != snapshot.get("record_sha256"):
-        errors.append(f"{role} profile-admission record hash changed")
-    if record.get("status") != "ADMITTED":
-        errors.append(f"{role} profile-admission record status is not ADMITTED")
-    proofs = snapshot.get("proofs")
-    if not isinstance(proofs, list):
-        return errors + [f"{role} profile-admission proof list is malformed"]
-    expected_checks = set(_admission_checks_for_role(role))
-    seen: set[str] = set()
-    record_checks = record.get("checks") if isinstance(record.get("checks"), dict) else {}
-    check_evidence: dict[str, str] = {}
-    for index, row in enumerate(proofs):
-        if not isinstance(row, dict):
-            errors.append(f"{role} profile-admission proof {index} is malformed")
-            continue
-        name = row.get("check")
-        if not isinstance(name, str) or name not in expected_checks or name in seen:
-            errors.append(f"{role} profile-admission proof {index} has invalid check {name!r}")
-            continue
-        seen.add(name)
-        proof = _safe_relative_file(run, row.get("path"))
-        if proof is None or not proof.is_file():
-            errors.append(f"{role} profile-admission proof {name!r} is unavailable")
-            continue
-        actual_sha = sha256_file(proof)
-        check_evidence[name] = actual_sha
-        if row.get("bytes") != proof.stat().st_size:
-            errors.append(f"{role} profile-admission proof {name!r} size changed")
-        if not _valid_sha256(row.get("sha256")) or actual_sha != row.get("sha256"):
-            errors.append(f"{role} profile-admission proof {name!r} hash changed")
-        record_check_row = record_checks.get(name)
-        if isinstance(record_check_row, dict) and record_check_row.get("evidence_sha256") != row.get("sha256"):
-            errors.append(f"{role} profile-admission proof {name!r} hash does not match record")
-    if seen != expected_checks:
-        errors.append(f"{role} profile-admission snapshot does not contain the exact required check set")
-
-    s6_evidence: dict[str, str] | None = None
-    if role == "executor":
-        if "section6" not in record or not isinstance(record.get("section6"), dict):
-            errors.append(f"{role} profile-admission record section6 matrix is missing")
-        s6_proofs = snapshot.get("section6_proofs")
-        if not isinstance(s6_proofs, list):
-            errors.append(f"{role} profile-admission section6 proof list is missing or malformed")
-        else:
-            expected_cells = set(EXECUTOR_SECTION6_CELLS)
-            seen_cells: set[str] = set()
-            record_s6 = record.get("section6") if isinstance(record.get("section6"), dict) else {}
-            s6_evidence = {}
-            for index, row in enumerate(s6_proofs):
-                if not isinstance(row, dict):
-                    errors.append(f"{role} profile-admission section6 proof {index} is malformed")
-                    continue
-                cell_name = row.get("cell") or row.get("check")
-                if not isinstance(cell_name, str) or cell_name not in expected_cells or cell_name in seen_cells:
-                    errors.append(f"{role} profile-admission section6 proof {index} has invalid cell {cell_name!r}")
-                    continue
-                seen_cells.add(cell_name)
-                proof = _safe_relative_file(run, row.get("path"))
-                if proof is None or not proof.is_file():
-                    errors.append(f"{role} profile-admission section6 proof {cell_name!r} is unavailable")
-                    continue
-                actual_sha = sha256_file(proof)
-                s6_evidence[cell_name] = actual_sha
-                if row.get("bytes") != proof.stat().st_size:
-                    errors.append(f"{role} profile-admission section6 proof {cell_name!r} size changed")
-                if not _valid_sha256(row.get("sha256")) or actual_sha != row.get("sha256"):
-                    errors.append(f"{role} profile-admission section6 proof {cell_name!r} hash changed")
-                record_s6_row = record_s6.get(cell_name)
-                if isinstance(record_s6_row, dict) and record_s6_row.get("evidence_sha256") != row.get("sha256"):
-                    errors.append(f"{role} profile-admission section6 proof {cell_name!r} hash does not match record")
-            if seen_cells != expected_cells:
-                errors.append(f"{role} profile-admission snapshot does not contain the exact required section6 cell set")
-
-    if len(check_evidence) == len(expected_checks) and (
-        role != "executor" or (s6_evidence is not None and len(s6_evidence) == len(expected_cells))
-    ):
-        try:
-            recomputed_bundle_sha = compute_admission_bundle_sha256(
-                record,
-                check_evidence,
-                role=role,
-                section6_evidence=s6_evidence,
-            )
-            if recomputed_bundle_sha != expected_bundle_sha256:
-                errors.append(f"{role} profile-admission recomputed bundle does not match run identity")
-            if snapshot.get("admission_bundle_sha256") != recomputed_bundle_sha:
-                errors.append(f"{role} profile-admission snapshot bundle does not match recomputed digest")
-        except ContractError as exc:
-            errors.append(f"{role} profile-admission bundle recomputation failed: {exc}")
-    else:
-        errors.append(f"{role} profile-admission bundle cannot be recomputed: incomplete proof set")
-
-    return errors
-
-
-def validate_profile_admission(
-    admission_path: Path | None,
-    *,
-    mode: str,
-    profile_key_sha256: str,
-    adapter_sha256: str,
-    core_sha256: str,
-    capability_manifest_sha256: str,
-    role: str = "executor",
-) -> list[str]:
-    if mode == "probe":
-        return []
-    if mode != "qualification":
-        return [f"unknown execution mode {mode!r}"]
-    if admission_path is None:
-        return [f"qualification mode requires a {role} profile-admission record"]
-    try:
-        payload = _require_object(load_json(admission_path), "profile admission")
-        expected_checks = set(_admission_checks_for_role(role))
-    except ContractError as exc:
-        return [str(exc)]
-    required = {
-        "schema": SCHEMA,
-        "status": "ADMITTED",
-        "role": role,
-        "profile_key_sha256": profile_key_sha256,
-        "adapter_sha256": adapter_sha256,
-        "core_sha256": core_sha256,
-        "capability_manifest_sha256": capability_manifest_sha256,
-    }
-    errors: list[str] = []
-    for key, expected in required.items():
-        if payload.get(key) != expected:
-            errors.append(f"profile admission {key} does not match current realization")
-    checks = payload.get("checks")
-    if not isinstance(checks, dict):
-        errors.append("profile admission checks are missing")
-        return errors
-    actual_checks = set(checks)
-    missing = sorted(expected_checks - actual_checks)
-    unknown = sorted(actual_checks - expected_checks)
-    if missing:
-        errors.append(f"profile admission is missing required checks: {missing}")
-    if unknown:
-        errors.append(f"profile admission has unknown checks: {unknown}")
-    for name in sorted(expected_checks & actual_checks):
-        row = checks[name]
-        if not isinstance(row, dict):
-            errors.append(f"profile admission check {name!r} is not an object")
-            continue
-        if row.get("status") != "PASS":
-            errors.append(f"profile admission check {name!r} did not PASS")
-        path = _safe_relative_file(admission_path.parent, row.get("evidence_path"))
-        expected_sha = row.get("evidence_sha256")
-        if path is None or not path.is_file():
-            errors.append(f"profile admission check {name!r} evidence is unavailable")
-            continue
-        if not _valid_sha256(expected_sha) or sha256_file(path) != expected_sha:
-            errors.append(f"profile admission check {name!r} evidence hash does not match")
-
-    if role == "executor":
-        section6 = payload.get("section6")
-        if not isinstance(section6, dict):
-            errors.append("profile admission section6 matrix is missing")
-        else:
-            expected_cells = set(EXECUTOR_SECTION6_CELLS)
-            actual_cells = set(section6)
-            missing_cells = sorted(expected_cells - actual_cells)
-            unknown_cells = sorted(actual_cells - expected_cells)
-            if missing_cells:
-                errors.append(f"profile admission section6 is missing required cells: {missing_cells}")
-            if unknown_cells:
-                errors.append(f"profile admission section6 has unknown cells: {unknown_cells}")
-            for cell_name in sorted(expected_cells & actual_cells):
-                cell_row = section6[cell_name]
-                if not isinstance(cell_row, dict):
-                    errors.append(f"profile admission section6 cell {cell_name!r} is not an object")
-                    continue
-                if cell_row.get("status") != "PASS":
-                    errors.append(f"profile admission section6 cell {cell_name!r} did not PASS")
-                cell_path = _safe_relative_file(admission_path.parent, cell_row.get("evidence_path"))
-                expected_cell_sha = cell_row.get("evidence_sha256")
-                if cell_path is None or not cell_path.is_file():
-                    errors.append(f"profile admission section6 cell {cell_name!r} evidence is unavailable")
-                    continue
-                if not _valid_sha256(expected_cell_sha) or sha256_file(cell_path) != expected_cell_sha:
-                    errors.append(f"profile admission section6 cell {cell_name!r} evidence hash does not match")
-    return errors
 
 
 def _contains_unfrozen_marker(value: Any) -> bool:
@@ -1411,159 +928,34 @@ def validate_runtime_observation(bundle: ProfileBundle, observation: Any) -> lis
     return errors
 
 
-def validate_claim_observability(events: list[dict[str, Any]], claims: Iterable[str],
-                                 package_supply: list[dict[str, Any]] | None = None,
-                                 ledger_exact: bool = False, *, owner_r2_sequence=None, owner_r2_adjudicated=False) -> list[str]:
-    """`package_supply`: supervisor-ledger accounting rows (rel, bytes, sha256) for package files
-    whose content reached the model through process output; native reads remain events.
-    `ledger_exact`: the supervisor ledger is exact for the byte question, so a root delivered at
-    request 0 with no further package access is itself exact evidence (entrypoint-only mode)."""
+def validate_claim_observability(events: list[dict[str, Any]], claims: Iterable[str]) -> list[str]:
+    """Claims need the observations they rest on. Consumed package bytes are always an upper bound (package_bytes),
+    so a burden claim needs a delivered root or a successful package read, not an exact ledger."""
     normalized = {str(claim).lower() for claim in claims}
-    supply = list(package_supply or [])
     errors: list[str] = []
-    successful_reads = [
-        event for event in events
-        if event.get("kind") == "resource_access"
-        and event.get("status") == "result"
-        and (event.get("payload") or {}).get("result_status") == "result"
-    ]
-    if any("owner-read" in claim and "owner-read-absence" not in claim for claim in normalized) and not successful_reads and not supply and not any(e.get("kind")=="package_access" and e["payload"].get("owner_read_observed") for e in events):
+    reads = [e for e in events if e.get("kind") == "resource_access" and e.get("status") == "result"
+             and (e.get("payload") or {}).get("result_status") == "result"]
+    if any("owner-read" in c and "owner-read-absence" not in c for c in normalized) and not reads:
         errors.append("owner-read claim has no successful resource-access result evidence")
-    burden_sensitive = any(
-        token in claim
-        for claim in normalized
-        for token in ("t1", "t7", "t8", "burden", "active-byte")
-    )
-    ledger_events = [e["payload"] for e in events if e.get("kind") == "package_access"]
-    if any("owner-read-absence" in claim for claim in normalized) and ledger_events:
-        owner = ledger_events[0]
-        needs_r2 = any(owner.get(k) for k in ("owner_read_observed", "owner_open_windows", "owner_minor_exposure"))
-        if (len(ledger_events) != 1 or owner.get("owner_floor_exact") is not True
-                or (needs_r2 and owner_floor_state(owner,owner_r2_sequence,r2_adjudicated=owner_r2_adjudicated) != "PASS")):
-            errors.append("owner-read-absence needs exact owner observation and independently adjudicated provably-post-R2 opens")
-    if burden_sensitive:
-        if ledger_events and (len(ledger_events) != 1 or ledger_events[0].get("exact") is not True):
-            errors.append("T1/T7/T8 burden claim requires an exact package-access observation")
-        roots = [
-            event for event in events
-            if event.get("kind") == "root_selection"
-            and isinstance((event.get("payload") or {}).get("resolved_package_identity"), dict)
-            and ((event.get("payload") or {}).get("delivery") or {}).get("delivered", True) is not False
-        ]
+    if any(token in claim for claim in normalized for token in ("t1", "t7", "t8", "burden", "active-byte")):
+        roots = [e for e in events if e.get("kind") == "root_selection"
+                 and isinstance((e.get("payload") or {}).get("resolved_package_identity"), dict)
+                 and ((e.get("payload") or {}).get("delivery") or {}).get("delivered", True) is not False]
+        package_reads = [e for e in reads if isinstance((e.get("payload") or {}).get("resolved_package_identity"), dict)]
         if not roots:
             errors.append("T1/T7/T8 burden claim has no resolved logical root-selection evidence")
-        package_reads = [
-            event for event in successful_reads
-            if isinstance((event.get("payload") or {}).get("resolved_package_identity"), dict)
-        ]
-        if not package_reads and not supply and not (ledger_exact and roots):
+        if not package_reads and not roots:
             errors.append("T1/T7/T8 burden claim has no successful exact SSDP-resource evidence")
-        for row in supply:
-            if not _valid_sha256(row.get("sha256")) or not isinstance(row.get("bytes"), int):
-                errors.append("T1/T7/T8 burden claim lacks exact SSDP-resource byte/hash observability")
-                break
         for event in package_reads:
-            payload = event.get("payload") or {}
+            payload = event["payload"]
             if not _valid_sha256(payload.get("resource_sha256")) or not isinstance(payload.get("resource_bytes"), int):
                 errors.append("T1/T7/T8 burden claim lacks exact SSDP-resource byte/hash observability")
                 break
     if any("ordinary-entry" in claim for claim in normalized):
-        ordinary = [
-            event for event in events
-            if event.get("kind") == "root_selection"
-            and str((event.get("payload") or {}).get("selection_mechanism", "")).startswith("ordinary")
-        ]
-        if not ordinary:
+        if not any(e.get("kind") == "root_selection" and str((e.get("payload") or {}).get("selection_mechanism", "")).startswith("ordinary")
+                   for e in events):
             errors.append("ordinary-entry claim has no observed ordinary root selection")
     return errors
-
-
-def derive_package_access(bundle, events, skills_root, owner_name, delivered, run_id, native_index):
-    """Deterministic supervisor record; recomputation uses the retained inputs, never a summary."""
-    import package_ledger
-    import package_premise
-    premise = bundle.get("premise")
-    premise_errors = package_premise.verify_report(premise)
-    if isinstance(premise, dict) and premise.get("package") != package_premise.inventory(skills_root):
-        premise_errors.append("premise package binding differs from retained installed package")
-    accounting = package_ledger.account(bundle.get("ledger"), bundle.get("cut_ns"), events, skills_root,
-        extra_errors=list(dict.fromkeys([*(bundle.get("errors") or []), *premise_errors])), delivered=delivered, owner_name=owner_name,
-        mount=bundle.get("mount"), request_records=bundle.get("request_records"), parameters=bundle.get("parameters"))
-    raw = bundle.get("artifact", "")
-    digest = hashlib.sha256(raw.encode()).hexdigest()
-    decision = Path(__file__).resolve().parents[1] / "D3-PACKAGE-ACCESS-LEDGER-OBSERVATION-DECISION-2026-10-04.md"
-    payload = {**accounting, "premise": bundle.get("premise"), "ledger": bundle.get("ledger"), "ledger_artifact_sha256": digest,
-               "provenance": {"accounting_code_sha256": sha256_file(Path(package_ledger.__file__)),
-                   "decision_path": "qualification/ssdp70/" + decision.name,
-                   "decision_commit": "07a4bb0d2093605425374ac3102c6ac04dbe1652", "decision_sha256": sha256_file(decision)}}
-    if payload["provenance"]["decision_sha256"] != "fccb9a3a44afd89338eb19c8b3238a9943fab7c88ee694428dc7d6ce124fd783":
-        raise ContractError("package-access D3 accepted bytes changed without rebinding")
-    clarification = decision.parent / "D3-PACKAGE-ACCESS-PREMISE-CLOSURE-2026-10-04.md"
-    if sha256_file(clarification) != "5f713e2bd816950a2fd0962c6732242631295b3416387beb761c8b40906a3316":
-        raise ContractError("package-access premise clarification changed without rebinding")
-    payload["provenance"]["premise_clarification"] = {"path":"qualification/ssdp70/"+clarification.name,
-        "sha256":sha256_file(clarification), "independent_review_path":"qualification/ssdp70/INDEPENDENT-D3-PREMISE-CLOSURE-REVIEW-2026-10-04-R2.md",
-        "independent_review_sha256":"ee5dd4e722a0c80a180c0a5d83ba59379f6b4c81a08d38852e7e0b114a29a2ed",
-        "publication":"uncommitted cycle decision; SHA-bound, no committed-source claim"}
-    text_review = decision.parent / "INDEPENDENT-D3-WINDOW-REPLACEMENT-PAIRING-TEXT-REVIEW-2026-10-05-R2.md"
-    text_review_sha = "670e03fd8fbb80c194e21a72e50fc22b1214fdf077744031bb74f34488e7f6f6"
-    if sha256_file(text_review) != text_review_sha:
-        raise ContractError("package-access window/replacement/pairing text review changed without rebinding")
-    for key, name, expected in (
-            ("window_replacement_clarification", "D3-PACKAGE-ACCESS-WINDOW-AND-REPLACEMENT-CLARIFICATION-2026-10-05.md",
-             "b7bead4ecb139732683d1919740a19ce3342740f2e8dace00781d4159c99e87f"),
-            ("unverified_pairing_delta", "D3-PACKAGE-ACCESS-UNVERIFIED-PAIRING-FAIL-CLOSURE-2026-10-05.md",
-             "c2f7a3a348a9e9e1ef448b81e0db456e4e6720afdd5994f14b22068035edee9c")):
-        bound = decision.parent / name
-        if sha256_file(bound) != expected:
-            raise ContractError("package-access D3 clarification changed without rebinding: " + name)
-        payload["provenance"][key] = {"path": "qualification/ssdp70/" + name, "sha256": expected,
-            "independent_review_path": "qualification/ssdp70/" + text_review.name,
-            "independent_review_sha256": text_review_sha,
-            "publication": "cycle decision; SHA-bound, no committed-source claim"}
-    sequence = max((e["sequence"] for e in events), default=0) + 1
-    event = {"schema_version": SCHEMA, "run_id": run_id, "event_id": f"e{sequence:06d}",
-             "sequence": sequence, "actor_id": "supervisor", "kind": "package_access", "status": "observed",
-             "timing": None, "native_source": {"stream": "package-access-ledger.json", "native_index": native_index,
-                                                  "native_sha256": digest}, "payload": payload}
-    entry = {"native_index": native_index, "native_sha256": digest, "classification": "supervisor-package-access-ledger",
-             "oracle_relevant": True, "mapped_event_ids": [event["event_id"]]}
-    return event, entry, accounting
-
-
-def recompute_package_access(run, events, identity):
-    from adapters import omp
-    derived = [e for e in events if e.get("kind") == "package_access"]
-    if len(derived) != 1:
-        return ["ledger run must carry exactly one package_access event"]
-    source = [e for e in events if e.get("kind") != "package_access"]
-    inputs = load_json(run / "package-access-inputs.json")
-    artifacts = {p.name: p.read_text() for p in (run / "adapter-artifacts").iterdir() if p.is_file()}
-    bundle = omp.package_access_ledger(artifacts, load_json(run / "profile-snapshot.json"),
-        events=source, stdout=(run / "trace.jsonl").read_text(), prompt=inputs["prompt"])
-    bundle["artifact"] = artifacts.get("package-access-ledger.json", "")
-    actual, _, _ = derive_package_access(bundle, source, run / "installed-package", inputs["owner_name"],
-        set(inputs["delivered"]), identity["identity_sha256"], derived[0]["native_source"]["native_index"])
-    errors = [] if actual == derived[0] else ["package_access differs from deterministic recomputation"]
-    if identity["accounting"]["purpose"] == "qualification":
-        import package_premise
-        errors.extend(package_premise.verify_report(bundle.get("premise"), qualification=True,
-            accepted_witness_sha256=load_json(run/"profile-snapshot.json").get("package_access_premise_acceptance_sha256")))
-    return errors
-
-
-def owner_floor_state(accounting, r2_sequence, *, r2_adjudicated=False):
-    """Apply item 13 only after independent R2 adjudication. None means no R2 on this trajectory."""
-    if not r2_adjudicated:
-        return "UNRESOLVED"
-    boundary = float("inf") if r2_sequence is None else r2_sequence
-    if any(r["sequence"] < boundary for r in accounting.get("owner_read_observed", [])):
-        return "FAIL"
-    if (accounting.get("owner_floor_exact") is not True or accounting.get("owner_minor_exposure")
-            or any(r["window"]["start"] <= boundary for r in accounting.get("owner_open_windows", []))):
-        return "UNRESOLVED"
-    return "PASS"
-
 
 def _evidence_files(run: Path, requirements: Requirements) -> list[Path]:
     roots = list(dict.fromkeys((*EVIDENCE_INTEGRITY_ROOTS, *requirements.artifacts)))
@@ -1751,55 +1143,9 @@ def _load_normalized_events(path: Path) -> tuple[list[dict[str, Any]], list[str]
 
 
 
-PURPOSES = frozenset({"qualification", "oracle-integrity", "development"})
-
-
-def validate_accounting_identity(identity: dict[str, Any]) -> list[str]:
-    scope = identity.get("accounting")
-    errors = []
-    if not isinstance(scope, dict) or scope.get("purpose") not in PURPOSES:
-        return ["missing or malformed frozen evidence-accounting scope"]
-    for name in ("manifest_sha256", "scoring_manifest_sha256"):
-        if not _valid_sha256(scope.get(name)):
-            errors.append(f"accounting {name} is missing or malformed")
-    if not isinstance(scope.get("scope_id"), str) or not scope["scope_id"]:
-        errors.append("accounting campaign/suite identity is missing")
-    req = identity.get("requirements") or {}
-    if scope.get("scoring_manifest_sha256") != req.get("expected_scoring_items_sha256"):
-        errors.append("accounting scoring manifest differs from frozen run requirements")
-    if identity.get("execution_mode") == "qualification" and scope.get("purpose") != "qualification":
-        errors.append("qualification execution cannot import integrity/development evidence")
-    if scope.get("purpose") == "qualification":
-        for name in ("campaign_record_sha256", "family_record_sha256", "primary_family_id"):
-            if not _valid_sha256(scope.get(name)):
-                errors.append(f"qualification {name} is missing or malformed")
-        if identity.get("execution_mode") != "qualification":
-            parent = scope.get("integrity_test_campaign")
-            if not isinstance(parent, dict) or parent.get("purpose") != "oracle-integrity" or not _valid_sha256(parent.get("suite_sha256")):
-                errors.append("qualification scope in probe mode requires a predeclared outer integrity test campaign")
-    manifest = identity.get("accounting_manifest")
-    if manifest is not None:
-        errors.extend(campaign_manifest_errors(manifest))
-        if stable_json_sha256(manifest) != scope.get("manifest_sha256") or manifest.get("purpose") != scope.get("purpose"):
-            errors.append("launch manifest purpose/digest mismatch")
-    elif scope.get("purpose") != "development":
-        errors.append("non-development scope requires its frozen campaign/suite manifest")
-    digest = identity.get("identity_sha256")
-    if digest != stable_json_sha256({k: v for k, v in identity.items() if k != "identity_sha256"}):
-        errors.append("launch identity digest differs from its frozen contents")
-    return errors
-
-
-def assessment_accounting(identity: dict[str, Any]) -> dict[str, Any]:
-    errors = validate_accounting_identity(identity)
-    if errors:
-        raise ContractError("; ".join(errors))
-    return {"accounting": identity["accounting"], "run_identity_sha256": identity["identity_sha256"]}
-
-
 def local_criteria(summary: dict[str, Any], identity: dict[str, Any]) -> dict[str, str]:
     """An activation FAIL is independent of doctrine scoring on inadmissible evidence."""
-    errors = validate_accounting_identity(identity)
+    errors = []
     if summary.get("accounting") != identity.get("accounting"):
         errors.append("post-launch accounting change")
     result = {"harness/admissibility": "PASS" if not errors and summary.get("evidence_state") == "COMPLETE_ADMISSIBLE" else "FAIL"}
@@ -1810,15 +1156,7 @@ def local_criteria(summary: dict[str, Any], identity: dict[str, Any]) -> dict[st
     return result
 
 
-def integrity_assessment(actual: dict[str, Any], expected: dict[str, Any]) -> dict[str, Any]:
-    """Outer assessment compares the retained production result, without changing it."""
-    keys = {"evidence_state", "criteria", "qualification_outcome"}
-    if set(expected) != keys or not all(key in actual for key in keys):
-        return {"integrity_outcome": "FAIL", "reason": "missing/malformed frozen expected or actual result", "actual": actual}
-    passed = all(actual[key] == expected[key] for key in keys)
-    return {"integrity_outcome": "PASS" if passed else "FAIL", "actual": json.loads(json.dumps(actual)), "expected": expected}
-
-def validate_complete_run(run: Path, identity: dict[str, Any], requirements: Requirements, *, allow_observation_inexact: bool = False) -> list[str]:
+def validate_complete_run(run: Path, identity: dict[str, Any], requirements: Requirements) -> list[str]:
     errors: list[str] = []
     try:
         prior = _require_object(load_json(run / "run-identity.json"), "run identity")
@@ -1826,22 +1164,14 @@ def validate_complete_run(run: Path, identity: dict[str, Any], requirements: Req
         snapshot_payload = load_json(run / "requirements-snapshot.json")
     except ContractError as exc:
         return [str(exc)]
-    errors.extend(validate_accounting_identity(identity))
     if summary.get("accounting") != identity.get("accounting"):
         errors.append("summary accounting purpose/bindings differ from frozen launch identity")
     if prior != identity:
         errors.append("stored run identity does not match current identity")
     if summary.get("run_identity_sha256") != identity.get("identity_sha256"):
         errors.append("run summary identity does not match current identity")
-    if (summary.get("evidence_state") != "COMPLETE_ADMISSIBLE" and not (allow_observation_inexact and summary.get("observation_only_inadmissibility") is True)) or summary.get("execution_ok") is not True:
+    if summary.get("evidence_state") != "COMPLETE_ADMISSIBLE" or summary.get("execution_ok") is not True:
         errors.append("run summary is not COMPLETE_ADMISSIBLE with successful execution")
-    if identity.get("execution_mode") == "qualification":
-        errors.extend(validate_profile_admission_snapshot(
-            run,
-            identity.get("profile_admission_sha256"),
-            role="executor",
-            prefix="profile-admission",
-        ))
     identity_requirements = identity.get("requirements") if isinstance(identity.get("requirements"), dict) else {}
     expected_manifest_digests = {
         "required_artifacts": identity_requirements.get("required_artifacts_sha256"),
@@ -1865,13 +1195,6 @@ def validate_complete_run(run: Path, identity: dict[str, Any], requirements: Req
     errors.extend(parse_errors)
     if not parse_errors:
         errors.extend(validate_normalized_events(events, identity.get("identity_sha256")))
-        if (any(e.get("kind") == "package_access" for e in events)
-                or (run / "adapter-artifacts/package-access-ledger.json").is_file()
-                or "package_access_parameters" in (load_json(run / "profile-snapshot.json") if (run / "profile-snapshot.json").is_file() else {})):
-            try:
-                errors.extend(recompute_package_access(run, events, identity))
-            except (ContractError, OSError, ValueError, TypeError, KeyError) as exc:
-                errors.append(f"package_access cannot be recomputed: {exc}")
     try:
         completeness = _require_object(load_json(run / "normalization-map.json"), "normalization map")
         count = completeness.get("native_event_count")
@@ -1884,10 +1207,6 @@ def validate_complete_run(run: Path, identity: dict[str, Any], requirements: Req
         errors.append(str(exc))
     errors.extend(validate_evidence_integrity(run, requirements))
     return errors
-
-
-def cache_valid(target: Path, identity: dict[str, Any], requirements: Requirements) -> bool:
-    return not validate_complete_run(target, identity, requirements)
 
 
 def run_evidence_state(
@@ -1927,250 +1246,3 @@ def run_evidence_state(
     if reasons:
         return "MISSING_REQUIRED_EVIDENCE", reasons
     return "COMPLETE_ADMISSIBLE", []
-
-# Complete criterion parts, including report-only exposure, shared by freezing and aggregation.
-# (criterion, panel, minimum independent opportunities per arm, maximum failed parts)
-CAMPAIGN_PARTS = {
-    "harness": ("harness/admissibility", "all", 1, 0),
-    "activation": ("deterministic activation", "deterministic", 1, 0),
-    "critical": ("no critical failure", "main", 12, 0),
-    "noncritical_detection": ("absolute floors", "main", 20, None),
-    "unnamed_detection": ("absolute floors", "main", 6, None),
-    "null": ("absolute floors", "main", 6, 0),
-    "variant": ("absolute floors", "main", 6, 0),
-    "provenance": ("absolute floors", "main", 6, 0),
-    "delegated_finding": ("absolute floors", "main", 6, 0),
-    "delegate_request": ("absolute floors", "main", 12, 0),
-    "claim_integrity": ("absolute floors", "main", 1, 0),
-    "o3": ("absolute floors", "main", 6, 0),
-    "unauthorized_mutation": ("absolute floors", "main", 6, 0),
-    "false_surfacing": ("absolute floors", "main", 20, None),
-    "r2_analysis": ("6.6 preservation", "r2", 6, None),
-    "r2_authority": ("6.6 preservation", "r2", 6, None),
-    "r2_gate": ("6.6 preservation", "r2", 6, None),
-    "r2_authoring": ("6.6 preservation", "r2", 2, None),
-    "r2_review": ("6.6 preservation", "r2", 2, None),
-    "owner_false_activation": ("6.6 preservation", "all", 1, 0),
-    "predicate_false_firing": ("6.6 preservation", "all", 12, 1),
-    "selection_negative": ("6.6 preservation", "ordinary", 1, None),
-    "near_negative": ("6.6 preservation", "ordinary", 8, None),
-    "routing_hits": ("6.6 preservation", "routing", 38, None),
-    "routing_violations": ("6.6 preservation", "routing", 38, None),
-    "routing_case_extremes": ("6.6 preservation", "routing", 19, 0),
-    "t2_t3": ("6.6 preservation", "sentinels", 4, 0),
-    "t4_t6": ("6.6 preservation", "versioning", 8, None),
-    "never_stated": ("6.6 preservation", "versioning", 8, None),
-    "sentinel_regression": ("6.6 preservation", "sentinels", 1, 0),
-    "fixed_cost": ("burden", "burden", 3, None),
-    "no_lookup": ("burden", "burden", 3, 0),
-    "panel_correctness": ("burden", "burden", 3, 0),
-    "active_material": ("burden", "main", 1, None),
-    "unowed_owner": ("burden", "main", 1, 0),
-    "unauthorized_shared_probe": ("burden", "main", 1, 0),
-    "unowed_delegate": ("burden", "main", 12, 1),
-    "unowed_gap": ("burden", "main", 12, 1),
-    "blanket_withholding": ("burden", "main", 1, 0),
-    "report_length": ("burden", "main", 1, None),
-    "elapsed_time": ("burden", "main", 1, None),
-    "comparative": ("comparative benefit", "main", 1, None),
-    "human_routine": ("human trial", "main", 20, None),
-    "human_critical": ("human trial", "main", 4, 0),
-    "human_time": ("human trial", "main", 20, None),
-    "selection_correct_reporting": ("report-only", "ordinary", 32, None),
-    **{f"ordinary_{kind}": ("report-only", "ordinary", 3, None)
-       for kind in ("run", "adhoc", "review", "gate", "copy_relay", "delegate")},
-}
-CRITERION_ORDER = ("harness/admissibility", "deterministic activation", "no critical failure", "absolute floors",
-                   "6.6 preservation", "burden", "comparative benefit", "human trial")
-FAMILY_SERIALIZATION = "json-sort-keys-compact-utf8"
-
-
-def family_id(record: dict[str, Any]) -> str:
-    return stable_json_sha256({"ordered_keys": record["ordered_keys"], "criterion_to_keys": record["criterion_to_keys"]})
-
-
-def validate_family(record: Any) -> list[str]:
-    if not isinstance(record, dict):
-        return ["missing primary family record"]
-    errors = []
-    try:
-        if record["serialization"] != FAMILY_SERIALIZATION or record["hash_algorithm"] != "sha256":
-            errors.append("family serialization/hash algorithm is unsupported")
-        keys, profiles, mapping, panels = record["ordered_keys"], record["profile_keys"], record["criterion_to_keys"], record["panels"]
-        if not isinstance(keys, list) or len(keys) < 2 or len(set(keys)) != len(keys) or set(keys) != set(profiles):
-            return errors + ["family ordered key set is missing, duplicated or mismatched"]
-        if any(not _valid_sha256(key) or stable_json_sha256(profiles[key]) != key for key in keys):
-            errors.append("family execution-profile key digest mismatch")
-        if set(mapping) != set(CAMPAIGN_PARTS):
-            errors.append("family criterion-part map is incomplete or has unknown parts")
-        if record.get("family_id") != family_id(record):
-            errors.append("family id does not bind ordered keys and complete criterion-part map")
-        if set(panels) != {"main", "burden", "ordinary", "routing", "sentinels", "versioning", "r2"}:
-            return errors + ["family panel budget schedule is incomplete"]
-        main = profiles[panels["main"]["key"]]
-        shared_fields = ("agent_model", "provider_runtime", "runtime_mode", "reasoning_configuration", "adapter_id",
-                         "containment_policy", "network_external_write_policy", "credential_service_account_policy",
-                         "workspace_realization", "install_mechanism", "provider_managed_unknowns")
-        if main["agent_model"] != "deepinfra/zai-org/GLM-5.3-Flash":
-            errors.append("primary family model needs a separately resolved written stakeholder designation")
-        for key in keys:
-            if any(profiles[key].get(field) != main.get(field) for field in shared_fields):
-                errors.append("family shared fields differ across execution keys")
-        ordinary_key = panels["ordinary"]["key"]
-        deterministic = [key for key in keys if key != ordinary_key]
-        if profiles[ordinary_key].get("activation_mechanism") != "ordinary-read":
-            errors.append("ordinary-entry key mechanism is missing or wrong")
-        for key in deterministic:
-            if profiles[key].get("runtime_mode") != "rpc" or profiles[key].get("activation_mechanism") != "runtime-command":
-                errors.append("primary deterministic keys require real runtime-command in RPC mode")
-        for panel, row in panels.items():
-            key = row["key"]
-            expected = 3 if panel == "ordinary" else 8 if panel == "routing" else 60
-            if key not in keys or row["max_turns"] != expected or profiles[key]["budgets"]["max_turns"] != expected:
-                errors.append(f"panel {panel} budget/key schedule differs from frozen contract")
-        burden = profiles[panels["burden"]["key"]]
-        if any("delegate" in name for name in burden.get("native_tools", [])):
-            errors.append("T1/T7/T8 key exposes delegated-agent capability")
-        for part, (_, panel, _, _) in CAMPAIGN_PARTS.items():
-            assigned = mapping.get(part)
-            expected = keys if panel == "all" else deterministic if panel == "deterministic" else [panels[panel]["key"]]
-            if assigned != expected:
-                errors.append(f"criterion part {part} has wrong or missing ordered key assignments")
-        if record.get("aggregation") != {"owner_false_activation": "pool-all-keys", "predicate_false_firing": "pool-all-keys", "failures": "never-remove"}:
-            errors.append("family aggregation rules are missing or weakened")
-    except (KeyError, TypeError, ValueError):
-        errors.append("family record is malformed")
-    return errors
-
-
-RUN_ID_PATTERN = re.compile(r"[A-Za-z0-9][A-Za-z0-9._-]{0,127}")
-
-
-def campaign_manifest_errors(manifest: Any) -> list[str]:
-    if not isinstance(manifest, dict):
-        return ["campaign/suite manifest is not an object"]
-    if manifest.get("purpose") not in PURPOSES or not isinstance(manifest.get("scope_id"), str):
-        return ["campaign/suite purpose or identity is missing"]
-    errors = []
-    runs = manifest.get("runs")
-    if not isinstance(runs, list) or not runs:
-        return ["campaign/suite must enumerate every declared realization before launch"]
-    replacements = manifest.get("package_access_replacements", [])
-    if not isinstance(replacements,list) or any(not isinstance(r,dict) or set(r) != {"original","replacement","question"}
-        or not all(isinstance(r[k],str) for k in r) or r["question"] not in ("bytes","owner-floor","t7-owner-floor") for r in replacements):
-        errors.append("package-access replacement declarations malformed")
-    else:
-        declared = {r.get("id") for r in runs if isinstance(r,dict)}
-        replacement_ids = [r["replacement"] for r in replacements]
-        if (len(set(replacement_ids)) != len(replacement_ids) or any(r["original"] not in declared
-            or r["replacement"] not in declared or r["original"] in replacement_ids for r in replacements)):
-            errors.append("package-access replacement identities missing, reused or chained")
-    policy = manifest.get("package_access_policy")
-    if policy is not None:
-        if not isinstance(policy,dict) or set(policy) - {"byte_inexact_disparity_bound"}:
-            errors.append("package-access policy malformed")
-        elif "byte_inexact_disparity_bound" in policy:
-            bound = policy["byte_inexact_disparity_bound"]
-            if (not isinstance(bound,dict) or set(bound) != {"value","stakeholder_confirmation"}
-                or not isinstance(bound.get("value"),(int,float)) or isinstance(bound.get("value"),bool)
-                or not 0 <= bound["value"] <= 1 or not isinstance(bound.get("stakeholder_confirmation"),str)
-                or not bound["stakeholder_confirmation"].strip()):
-                errors.append("byte disparity bound needs a frozen stakeholder-confirmed value in [0,1]")
-    seen = set()
-    for row in runs:
-        if not isinstance(row, dict) or not isinstance(row.get("id"), str) or row["id"] in seen:
-            errors.append("declared realization identity is malformed or duplicated")
-            continue
-        if not RUN_ID_PATTERN.fullmatch(row["id"]):
-            errors.append(f"declared realization id {row['id']!r} is not a safe single path component")
-            continue
-        seen.add(row["id"])
-        if row.get("entry_stratum") not in ("deterministic", "ordinary"):
-            errors.append("declared entry stratum is missing")
-        if not _valid_sha256(row.get("profile_key_sha256")) or not _valid_sha256(row.get("scoring_manifest_sha256")):
-            errors.append("declared profile/scoring identity is missing")
-        if not isinstance(row.get("subject"), dict) or not _valid_sha256(row["subject"].get("package_sha256")) or not re.fullmatch(r"[a-f0-9]{40}", str(row["subject"].get("commit", ""))):
-            errors.append("declared immutable subject identity is missing")
-        if manifest["purpose"] == "oracle-integrity":
-            expected = row.get("expected")
-            if not isinstance(expected, dict) or set(expected) != {"evidence_state", "criteria", "qualification_outcome"} or not isinstance(row.get("fault"), str):
-                errors.append("integrity fault/expected assessment is not frozen")
-    if manifest["purpose"] == "qualification":
-        family = manifest.get("family")
-        errors.extend(validate_family(family))
-        if manifest.get("family_record_sha256") != stable_json_sha256(family):
-            errors.append("campaign family digest mismatch")
-        offered = manifest.get("offered_profiles")
-        if not isinstance(offered, list) or not offered or len(set(offered)) != len(offered):
-            errors.append("offered profile set is missing or duplicated")
-        elif isinstance(family, dict) and not set(family.get("ordered_keys", [])) <= set(offered):
-            errors.append("offered profile set omits a primary family key")
-        if any(row.get("profile_key_sha256") not in (offered or []) for row in runs):
-            errors.append("campaign realization is outside the frozen offered set")
-        if not isinstance(manifest.get("prior_campaigns"), list):
-            errors.append("prior campaign lineage disclosure is missing")
-    return errors
-
-
-def validate_owner_adjudication(owner, review):
-    errors = []
-    if owner is not None:
-        if not isinstance(owner, dict) or set(owner) != {"adjudicated", "r2_sequence", "consequential_sequence"}:
-            errors.append("owner adjudication fields are invalid")
-        else:
-            if not isinstance(owner["adjudicated"], bool):
-                errors.append("owner adjudicated must be boolean")
-            for name in ("r2_sequence", "consequential_sequence"):
-                v = owner[name]
-                if v is not None and (not isinstance(v, int) or isinstance(v, bool) or v < 1):
-                    errors.append(f"{name} must be a positive normalized sequence or null")
-            r2, consequent = owner["r2_sequence"], owner["consequential_sequence"]
-            if isinstance(r2, int) and isinstance(consequent, int) and consequent <= r2:
-                errors.append("consequential event must follow R2")
-    if review is not None:
-        if not isinstance(review, dict) or set(review) != {"other_criteria_adjudicated", "observation_only", "overflow_cause"}:
-            errors.append("replacement review fields are invalid")
-        else:
-            if not all(isinstance(review[k], bool) for k in ("other_criteria_adjudicated", "observation_only")):
-                errors.append("replacement review flags must be boolean")
-            if review["overflow_cause"] is not None and (not isinstance(review["overflow_cause"], str) or not review["overflow_cause"].strip()):
-                errors.append("overflow cause must be nonempty text or null")
-    return errors
-
-
-def production_assessment(summary: dict[str, Any], identity: dict[str, Any], requirements: Requirements,
-                          dispositions: list[dict[str, Any]] | None = None, *, owner_adjudication=None, replacement_review=None) -> dict[str, Any]:
-    adjudication_errors = validate_owner_adjudication(owner_adjudication, replacement_review)
-    if adjudication_errors:
-        raise ContractError("invalid independent adjudication: " + "; ".join(adjudication_errors))
-    result = {**assessment_accounting(identity), "arm": identity.get("arm"), "evidence_state": summary.get("evidence_state"),
-              "criteria": local_criteria(summary, identity), "qualification_outcome": "NOT_EVALUATED",
-              "resource_observation": summary.get("resource_observation", {"exact": False}),
-              "observation_only_inadmissibility": summary.get("observation_only_inadmissibility") is True}
-    if summary.get("accounting") != identity["accounting"]:
-        raise ContractError("post-launch purpose/campaign/scoring change")
-    if dispositions is not None:
-        validate_errors = validate_dispositions(dispositions, requirements)
-        if validate_errors:
-            raise ContractError("invalid independent dispositions: " + "; ".join(validate_errors))
-        adjudications = [owner_adjudication] if owner_adjudication is not None else []
-        if len(adjudications) == 1:
-            adjudication = adjudications[0]
-            accounting = (summary.get("resource_observation") or {}).get("accounting") or {
-                "owner_read_observed": summary.get("owner_read_observed", []), "owner_floor_exact": False}
-            result["owner_floor_state"] = owner_floor_state(accounting, adjudication.get("r2_sequence"),
-                r2_adjudicated=adjudication.get("adjudicated") is True)
-            result["owner_floor_adjudication"] = adjudication
-            consequent = adjudication.get("consequential_sequence")
-            r2 = adjudication.get("r2_sequence")
-            result["owner_load_hit"] = (any(r2 < row["sequence"] < consequent for row in accounting.get("owner_read_observed",[]))
-                if isinstance(r2,int) and isinstance(consequent,int) and adjudication.get("adjudicated") is True else None)
-        # This is disclosed evidence for replacement eligibility, not doctrine scoring on an inadmissible run.
-        result["original_dispositions"] = dispositions
-        reviews = [replacement_review] if replacement_review is not None else []
-        if len(reviews) == 1:
-            result["replacement_review"] = reviews[0]
-    if summary.get("evidence_state") == "COMPLETE_ADMISSIBLE" and dispositions is not None:
-        result["qualification_outcome"] = outcome_from_dispositions(dispositions, requirements)
-        result["dispositions"] = dispositions
-    return result

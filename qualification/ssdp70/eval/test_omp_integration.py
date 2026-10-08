@@ -37,8 +37,8 @@ import core70  # noqa: E402
 import evidence70  # noqa: E402
 import harness70  # noqa: E402
 import observer70  # noqa: E402
-import omp_rig  # noqa: E402
-from omp_rig import Rig, call, calls, load_events, scenario_steps, text  # noqa: E402
+import test_rig as omp_rig  # noqa: E402
+from test_rig import Rig, call, calls, load_events, scenario_steps, text  # noqa: E402
 from adapters import omp  # noqa: E402
 
 MISSING = omp_rig.prerequisites()
@@ -1254,7 +1254,7 @@ class ThirdPassObserverLaunchSafety(RigCase):
             from pathlib import Path
             sys.path.insert(0, sys.argv[1])
             import evidence70
-            from omp_rig import Rig, call, load_events, scenario_steps, text
+            from test_rig import Rig, call, load_events, scenario_steps, text
             root = Path(sys.argv[2])
             stop = threading.Event()
             ready = [threading.Event() for _ in range(4)]
@@ -1340,7 +1340,7 @@ class ThirdPassObserverLaunchSafety(RigCase):
             from pathlib import Path
             sys.path.insert(0, sys.argv[1])
             import evidence70
-            from omp_rig import Rig, call, load_events, scenario_steps, text
+            from test_rig import Rig, call, load_events, scenario_steps, text
             root = Path(sys.argv[2])
             stop = threading.Event()
             ready = [threading.Event() for _ in range(4)]

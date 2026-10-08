@@ -30,7 +30,7 @@ HERE = Path(__file__).resolve().parent
 if str(HERE) not in sys.path:
     sys.path.insert(0, str(HERE))
 import core70  # noqa: E402
-import package_ledger  # noqa: E402
+import package_bytes  # noqa: E402
 
 OWNER = "scientific-inspectability-and-initiative.md"
 # Harness-owned git exclude for the run project. It is restored before the diff is computed so that
@@ -434,41 +434,14 @@ def run_identity(
     adapter_module,
     oracles: Path | None,
     mode: str,
-    admission: Path | None,
     rep: int,
     pair_order: list[str],
 ) -> dict[str, Any]:
-    accounting_manifest = episode.get("accounting_manifest")
-    if accounting_manifest is not None:
-        errors = core70.campaign_manifest_errors(accounting_manifest)
-        if errors:
-            raise core70.ContractError("; ".join(errors))
-        run_slot = f"{episode['id']}-{arm['name']}-r{rep}"
-        matching = [row for row in accounting_manifest["runs"] if row["id"] == run_slot]
-        if len(matching) != 1:
-            raise core70.ContractError("run is not enumerated in the frozen accounting manifest")
-        declaration = matching[0]
-        subject = {"commit": arm["commit"], "package_sha256": arm["dist_tree_sha256"]}
-        if declaration["subject"] != subject or declaration["profile_key_sha256"] != profile_bundle.profile_key_sha256 or declaration["scoring_manifest_sha256"] != requirements.scoring_manifest_digest:
-            raise core70.ContractError("launch does not match frozen subject/profile/scoring declaration")
-        stratum = entry_stratum(episode, profile_bundle.profile)
-        if declaration["entry_stratum"] != stratum:
-            raise core70.ContractError("entry stratum differs from launch declaration")
-        digest = core70.stable_json_sha256(accounting_manifest)
-        scope = {"purpose": accounting_manifest["purpose"], "scope_id": accounting_manifest["scope_id"],
-                 "manifest_sha256": digest, "scoring_manifest_sha256": requirements.scoring_manifest_digest}
-        if scope["purpose"] == "qualification":
-            scope.update({"campaign_record_sha256": digest, "family_record_sha256": accounting_manifest["family_record_sha256"],
-                          "primary_family_id": accounting_manifest["family"]["family_id"]})
-            if "integrity_test_campaign" in accounting_manifest:
-                scope["integrity_test_campaign"] = accounting_manifest["integrity_test_campaign"]
-        episode = {**episode, "accounting": scope}
     fixture = corpus / "fixtures" / episode["fixture"]
     stub = corpus / "stubs" / episode["stub"] if episode.get("stub") else None
     episode_oracles = oracles / episode["id"] if oracles is not None else None
     identity = {
         "schema": 2,
-        "accounting_manifest": accounting_manifest,
         "entry_stratum": entry_stratum(episode, profile_bundle.profile),
         "activation_mechanism": profile_bundle.profile.get("activation_mechanism", "ordinary-read"),
         "declared_root": episode.get("entry", "ordinary").split(":", 1)[-1] if episode.get("entry", "ordinary").startswith("pinned:") else None,
@@ -510,7 +483,6 @@ def run_identity(
         "adapter_normalizer_sha256": core70.sha256_file(Path(adapter_module.__file__).resolve()),
         "normalized_event_schema": core70.SCHEMA,
         "stub_tools_sha256": core70.sha256_tree(HERE / "stub_tools"),
-        "profile_admission_sha256": core70.admission_bundle_sha256(admission, role="executor") if admission is not None else None,
         "dist_tree_sha256_verified": core70.sha256_tree(dist),
     }
     support_files = getattr(adapter_module, "support_files", None)
@@ -540,29 +512,9 @@ def run_episode(
     adapter_module,
     oracles: Path | None,
     mode: str,
-    admission: Path | None,
     identity: dict[str, Any],
     pair_order: list[str],
 ) -> dict[str, Any]:
-    adapter_sha = core70.sha256_file(Path(adapter_module.__file__).resolve())
-    core_sha = core70.sha256_file(Path(core70.__file__).resolve())
-    admission_errors = core70.validate_profile_admission(
-        admission,
-        mode=mode,
-        profile_key_sha256=profile_bundle.profile_key_sha256,
-        adapter_sha256=adapter_sha,
-        core_sha256=core_sha,
-        capability_manifest_sha256=profile_bundle.capability_manifest_sha256,
-        role="executor",
-    )
-    if admission_errors:
-        raise core70.ContractError("; ".join(admission_errors))
-    if admission is not None:
-        frozen_admission_sha = identity.get("profile_admission_sha256")
-        current_admission_sha = core70.admission_bundle_sha256(admission, role="executor")
-        if current_admission_sha != frozen_admission_sha:
-            raise core70.ContractError("executor profile-admission bundle changed after run identity was frozen")
-
     claims = episode.get("claims") or []
     if not isinstance(claims, list) or not all(isinstance(x, str) and x for x in claims):
         raise core70.ContractError(f"episode {episode['id']} claims must be a list of strings")
@@ -570,33 +522,14 @@ def run_episode(
     if mode == "qualification" and profile_errors:
         raise core70.ContractError("; ".join(profile_errors))
 
-    accounting_errors = core70.validate_accounting_identity(identity)
-    if accounting_errors:
-        raise core70.ContractError("; ".join(accounting_errors))
-    declarations = (identity.get("accounting_manifest") or {}).get("runs", [])
-    slot = f"{episode['id']}-{arm['name']}-r{identity['replicate']}"
-    declared_faults = [row.get("fault") for row in declarations if row["id"] == slot]
-    fault = declared_faults[0] if declared_faults and declared_faults[0] in getattr(adapter_module, "INTEGRITY_FAULTS", ()) else None
-    if fault is not None:
-        scope = identity["accounting"]
-        if scope["purpose"] != "oracle-integrity" and not scope.get("integrity_test_campaign"):
-            raise core70.ContractError("fault injection is limited to predeclared integrity-suite realizations")
-        declarations = identity["accounting_manifest"]["runs"]
-        slot = f"{episode['id']}-{arm['name']}-r{identity['replicate']}"
-        if not any(row["id"] == slot and row.get("fault") == fault for row in declarations):
-            raise core70.ContractError("fault is not frozen in the launch manifest")
     if mode == "qualification" and adapter_module.ADAPTER_ID == "omp-json-v2":
         if profile_bundle.profile.get("runtime_mode") != "rpc":
             raise core70.ContractError("OMP qualification requires RPC mode")
     _create_realization_directory(out, adapter_module)
     (out / "run-identity.json").write_text(json.dumps(identity, indent=2, sort_keys=True) + "\n", encoding="utf-8")
-    if identity.get("accounting_manifest") is not None:
-        (out / "accounting-manifest.json").write_text(json.dumps(identity["accounting_manifest"], indent=2, sort_keys=True) + "\n", encoding="utf-8")
     (out / "profile-snapshot.json").write_text(json.dumps(profile_bundle.profile, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     (out / "capability-manifest-snapshot.json").write_text(json.dumps(profile_bundle.capabilities, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     (out / "requirements-snapshot.json").write_text(json.dumps(core70.requirements_snapshot(requirements), indent=2, sort_keys=True) + "\n", encoding="utf-8")
-    if admission is not None:
-        core70.snapshot_profile_admission(admission, out, role="executor", prefix="profile-admission")
 
     prelaunch_refusal_type = getattr(adapter_module, "PrelaunchRefusal", ())
 
@@ -707,10 +640,7 @@ def run_episode(
         runtime_baseline_fn = getattr(adapter_module, "runtime_entry_baseline", None)
         runtime_baseline = runtime_baseline_fn(profile_bundle.profile, project) if runtime_baseline_fn is not None else None
         try:
-            launch_kwargs = {"integrity_fault": fault} if fault is not None else {}
-            if getattr(adapter_module, "ADAPTER_ID", None) == "omp-json-v2":
-                launch_kwargs["accounting_purpose"] = identity["accounting"]["purpose"]
-            launched = adapter_module.launch(profile_bundle.profile, prompt, project, env, **launch_kwargs)
+            launched = adapter_module.launch(profile_bundle.profile, prompt, project, env)
         except Exception as exc:
             if prelaunch_refusal_type and isinstance(exc, prelaunch_refusal_type):
                 return record_prelaunch_refusal("launch", exc)
@@ -815,45 +745,19 @@ def run_episode(
             except (OSError, ValueError):
                 profile_errors.append("runtime auto-memory path escapes the fresh run-owned HOME")
         owner_read_sequences = adapter_module.owner_reads(events, OWNER)
-        # Supervisor package-access accounting (D3-PACKAGE-ACCESS-LEDGER-OBSERVATION-DECISION).
-        ledger_hook = getattr(adapter_module, "package_access_ledger", None)
-        accounting = None
-        owner_positive = [{"sequence":seq,"source":"native-read"} for seq in owner_read_sequences]
-        owner_minor = []
-        supplied_owner: list[int] = []
-        if ledger_hook is not None:
-            ledger_bundle = ledger_hook(adapter_artifacts, profile_bundle.profile, events=events, stdout=stdout, prompt=prompt)
-            delivered_roots = {f"{event['payload']['logical_root']}/SKILL.md" for event in events
-                               if event.get("kind") == "root_selection"
-                               and (event.get("payload") or {}).get("delivery", {}).get("delivered")}
-            ledger_bundle["artifact"] = adapter_artifacts.get("package-access-ledger.json", "")
-            derived, ledger_entry, accounting = core70.derive_package_access(ledger_bundle, events, installed_skills,
-                OWNER, delivered_roots, identity["identity_sha256"], native_event_count)
-            events.append(derived)
-            completeness.append(ledger_entry)
-            native_event_count += 1
-            shutil.copytree(installed_skills, out / "installed-package")
-            (out / "package-access-inputs.json").write_text(json.dumps({"owner_name": OWNER,
-                "delivered": sorted(delivered_roots), "prompt": prompt}, indent=2) + "\n")
-            supplied_owner = [row["sequence"] for row in accounting["owner_read_observed"]]
-            owner_read_sequences = sorted(set(owner_read_sequences) | set(supplied_owner))
-        if accounting is None:
-            fallback = package_ledger.account(None, None, events, installed_skills, owner_name=OWNER)
-            owner_positive, owner_minor = fallback["owner_read_observed"], fallback["owner_minor_exposure"]
-            owner_read_sequences = sorted(set(owner_read_sequences) | {r["sequence"] for r in owner_positive})
-        else:
-            owner_positive, owner_minor = accounting["owner_read_observed"], accounting["owner_minor_exposure"]
-        observation_errors = []
-        supply_rows = [{"rel": rel, **row} for rel, row in
-                       (accounting["supplied"].items() if accounting and accounting["exact"] else [])]
-        claim_errors = core70.validate_claim_observability(events, claims, supply_rows, ledger_exact=bool(accounting and accounting["exact"]))
+        # H1 consumed package bytes: native reads plus a conservative full-file count for shell commands
+        # that name the package path (package_bytes). The count is an upper bound, never "unobserved".
+        accounting = package_bytes.account(events, installed_skills, OWNER)
+        owner_positive, owner_minor = accounting["owner_read_observed"], accounting["owner_minor_exposure"]
+        owner_read_sequences = sorted(set(owner_read_sequences) | {r["sequence"] for r in owner_positive})
+        shutil.copytree(installed_skills, out / "installed-package")
+        claim_errors = core70.validate_claim_observability(events, claims)
         profile_errors.extend(claim_errors)
-        observation_errors.extend(e for e in claim_errors if e in ("T1/T7/T8 burden claim has no successful exact SSDP-resource evidence", "T1/T7/T8 burden claim requires an exact package-access observation", "owner-read-absence needs exact owner observation and independently adjudicated provably-post-R2 opens"))
         if any("owner-read" in str(claim).lower() and "owner-read-absence" not in str(claim).lower() for claim in claims) and not owner_read_sequences:
             profile_errors.append("owner-read claim has no successful read of the canonical owner resource")
         _write_normalized(events, out)
         (out / "normalization-map.json").write_text(
-            json.dumps({"schema": 1, "native_event_count": native_event_count, "entries": completeness, "request_positions": [] if accounting is None else accounting["request_records"]}, indent=2, sort_keys=True) + "\n",
+            json.dumps({"schema": 1, "native_event_count": native_event_count, "entries": completeness}, indent=2, sort_keys=True) + "\n",
             encoding="utf-8",
         )
         event_errors = core70.validate_normalized_events(events, identity["identity_sha256"])
@@ -876,53 +780,13 @@ def run_episode(
         catalog = adapter_module.catalog_isolation(events)
         execution_ok = bool(launched["returncode"] == 0 and terminal_exists and terminal_ok)
 
-        consumed_files = {}
+        consumed_files = {**accounting["shell_files"], **accounting["native_files"]}
         for event in events:
             payload = event.get("payload", {})
             if event.get("kind") == "root_selection" and payload.get("delivery", {}).get("delivered"):
                 consumed_files[f"{payload['logical_root']}/SKILL.md"] = payload["delivery"]["installed_skill_bytes"]
-            if event.get("kind") == "resource_access" and payload.get("result_status") == "result":
-                consumed = payload.get("consumed_resource", {})
-                if consumed.get("match") in ("exact", "partial") and payload.get("resolved_package_identity"):
-                    path = payload.get("resolved_resource_path")
-                    if isinstance(path, str) and path.startswith("/opt/ssdp/skills/"):
-                        consumed_files[path.removeprefix("/opt/ssdp/skills/")] = payload["resource_bytes"]
-        # Exact package consumption needs complete observation of package access, not just native
-        # read events. An adapter with a supervisor-owned package-access ledger supplies it
-        # (D3-PACKAGE-ACCESS-LEDGER-OBSERVATION-DECISION); without one, any process execution
-        # leaves the package read set unobserved and no exact byte total or negative owner-read
-        # conclusion is published.
-        process_events = [event["sequence"] for event in events
-            if event.get("kind") == "tool_action" and event.get("status") == "result"
-            and "process_execution" in event.get("payload", {}).get("semantic_capability_classes", [])]
-        if accounting is not None:
-            observation_exact = bool(accounting["exact"])
-            owner_observation_exact = bool(accounting["owner_floor_exact"])
-            if observation_exact:
-                for rel, row in accounting["supplied"].items():
-                    consumed_files.setdefault(rel, row["bytes"])
-            reason = None if observation_exact else "package-access observation is not exact: " + "; ".join(accounting["reasons"])
-            owner_reason = None if owner_observation_exact else "owner-read observation is not exact: " + "; ".join(accounting["reasons"])
-            unresolved_events = [] if observation_exact else process_events
-        else:
-            observation_exact = owner_observation_exact = not process_events
-            reason = owner_reason = None if observation_exact else "process execution lacks complete SSDP resource-read observation"
-            unresolved_events = process_events
-        resource_observation = {"exact": observation_exact, "owner_floor_exact": owner_observation_exact,
-            "unresolved_process_events": unresolved_events,
-            "reason": reason, "owner_read_reason": owner_reason,
-            "mechanism": None if accounting is None else accounting["mechanism"],
-            "accounting": accounting}
-        claim_text = [str(claim).lower() for claim in claims]
-        burden_claims = any(any(token in claim for token in ("t1", "t7", "t8", "burden", "active-byte")) for claim in claim_text)
-        owner_claims = any("owner" in claim for claim in claim_text)
-        if not observation_exact and burden_claims:
-            profile_errors.append(reason)
-            observation_errors.append(reason)
-        elif not owner_observation_exact and owner_claims:
-            profile_errors.append(owner_reason)
-            observation_errors.append(owner_reason)
-        opaque_package_access = not observation_exact
+        resource_observation = {"conservative_shell_count": accounting["conservative"],
+                                "shell_files": sorted(accounting["shell_files"]), "native_files": sorted(accounting["native_files"])}
         declared_root = identity.get("declared_root")
         entrypoint = installed_skills / declared_root / "SKILL.md" if declared_root else None
         owner = installed_skills / declared_root / "references" / OWNER if declared_root else None
@@ -938,7 +802,8 @@ def run_episode(
             "wall_s": launched["wall_s"],
             "report_bytes": len(final_text.encode("utf-8")),
             "active_ssdp_files": consumed_files,
-            "active_ssdp_bytes": None if opaque_package_access else sum(consumed_files.values()),
+            "active_ssdp_bytes": sum(consumed_files.values()),
+            "ssdp_read_mode": "owner" if any(package_bytes.is_owner_copy(rel, OWNER) for rel in consumed_files) else "entry",
             "resource_observation": resource_observation,
             "installed_entrypoint_bytes": entrypoint.stat().st_size if entrypoint and entrypoint.is_file() else None,
             "installed_owner_bytes": owner.stat().st_size if owner and owner.is_file() else None,
@@ -949,7 +814,6 @@ def run_episode(
             "owner_read_sequences": owner_read_sequences,
             "owner_read_observed": owner_positive,
             "owner_minor_exposure": owner_minor,
-            "owner_open_windows": [] if accounting is None else accounting["owner_open_windows"],
             "normalized_event_count": len(events),
             "native_event_count": native_event_count,
             "evidence_state": "UNRESOLVED",
@@ -984,17 +848,6 @@ def run_episode(
             missing_artifacts=missing_artifacts,
             missing_oracles=missing_oracles,
         )
-        remaining_profile_errors = list(profile_errors)
-        for error in observation_errors:
-            if error in remaining_profile_errors:
-                remaining_profile_errors.remove(error)
-        other_state, _ = core70.run_evidence_state(execution_ok=execution_ok, profile_errors=remaining_profile_errors,
-            event_errors=event_errors, completeness_errors=completeness_errors, catalog_ok=bool(catalog.get("ok")),
-            terminal_exists=terminal_exists, final_result_exists=final_result_exists,
-            missing_artifacts=missing_artifacts, missing_oracles=missing_oracles)
-        mutation = any(set(r.get("flags",[])) & {"modify","attrib","close_write","create","delete","moved_from","moved_to","delete_self","move_self"}
-                       for r in ((ledger_bundle.get("ledger") or {}).get("events",[]) if isinstance((ledger_bundle.get("ledger") or {}).get("events",[]),list) else []) if isinstance(r,dict)) if accounting else False
-        preliminary["observation_only_inadmissibility"] = (state=="INADMISSIBLE" and other_state=="COMPLETE_ADMISSIBLE" and not mutation)
         if preliminary.get("activation", {}).get("delivered") is False:
             state = "INADMISSIBLE"
             reasons.append("deterministic activation failed, including termination before request 0")
@@ -1010,7 +863,7 @@ def run_episode(
         (out / "summary.json").write_text(json.dumps(preliminary, indent=2, sort_keys=True, default=str) + "\n", encoding="utf-8")
         preliminary["criteria"] = core70.local_criteria(preliminary, identity)
         (out / "summary.json").write_text(json.dumps(preliminary, indent=2, sort_keys=True, default=str) + "\n", encoding="utf-8")
-        if state == "COMPLETE_ADMISSIBLE" or preliminary["observation_only_inadmissibility"]:
+        if state == "COMPLETE_ADMISSIBLE":
             core70.write_evidence_integrity(out, requirements)
         return preliminary
 
@@ -1038,11 +891,9 @@ def main(argv: list[str] | None = None) -> int:
         command.add_argument("--profile", type=Path, required=True)
         command.add_argument("--capabilities", type=Path, required=True)
         command.add_argument("--requirements", type=Path, required=True)
-        command.add_argument("--adapter", default="claude")
+        command.add_argument("--adapter", default="omp")
         command.add_argument("--oracles", type=Path, default=None, help="custodian oracle root (post-run only)")
-        command.add_argument("--accounting-manifest", type=Path, default=None)
         command.add_argument("--mode", choices=("probe", "qualification"), default="probe")
-        command.add_argument("--profile-admission", type=Path, default=None)
         if name == "episode":
             command.add_argument("--id", required=True)
             command.add_argument("--rep", type=int, default=0)
@@ -1066,12 +917,6 @@ def main(argv: list[str] | None = None) -> int:
         raise core70.ContractError(f"requested arms are absent from manifest: {missing_arms}")
     dists = {name: resolve_arm_dist(arms[name]) for name in requested}
     episodes = {episode["id"]: episode for episode in load_manifest(args.corpus)}
-    if args.mode == "qualification" and args.accounting_manifest is None:
-        raise core70.ContractError("qualification requires a frozen campaign/family/accounting manifest")
-    if args.accounting_manifest is not None:
-        manifest = core70.load_json(args.accounting_manifest)
-        for episode in episodes.values():
-            episode["accounting_manifest"] = manifest
 
     if args.cmd == "episode":
         if args.id not in episodes:
@@ -1095,7 +940,6 @@ def main(argv: list[str] | None = None) -> int:
             adapter_module=adapter,
             oracles=args.oracles,
             mode=args.mode,
-            admission=args.profile_admission,
             rep=args.rep,
             pair_order=[arm_name],
         )
@@ -1115,7 +959,6 @@ def main(argv: list[str] | None = None) -> int:
             adapter_module=adapter,
             oracles=args.oracles,
             mode=args.mode,
-            admission=args.profile_admission,
             identity=identity,
             pair_order=[arm_name],
         )
@@ -1181,8 +1024,7 @@ def main(argv: list[str] | None = None) -> int:
                         adapter_module=adapter,
                         oracles=args.oracles,
                         mode=args.mode,
-                        admission=args.profile_admission,
-                        rep=rep,
+                                    rep=rep,
                         pair_order=item["order"],
                     )
                     try:
@@ -1201,8 +1043,7 @@ def main(argv: list[str] | None = None) -> int:
                             adapter_module=adapter,
                             oracles=args.oracles,
                             mode=args.mode,
-                            admission=args.profile_admission,
-                            identity=identity,
+                                            identity=identity,
                             pair_order=item["order"],
                         )
                         results.append({"run": target.name, "evidence_state": summary["evidence_state"], "cache": "fresh"})

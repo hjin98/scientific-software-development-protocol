@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Test rig that drives the REAL production path for the OMP D4 verification.
+"""Test support (counted as test code): the rig that drives the REAL production path for the OMP D4 verification.
 
 `harness70.run_episode` -> `adapters.omp` (real realization, principals, sandbox, launch) -> the
 real frozen OMP executable -> the trusted observer -> the qualification MCP bridge + unchanged
@@ -84,7 +84,6 @@ class Rig:
         self.claims = claims if claims is not None else []
         self.entry = entry
         self.prompt = prompt
-        self.known_premise_construction = not project_files
         self.corpus = root / "corpus"
         fixture = self.corpus / "fixtures" / "f1" / "project"
         fixture.mkdir(parents=True)
@@ -176,29 +175,15 @@ class Rig:
                 corpus=self.corpus, episode=episode, arm=arm, arms_manifest_sha256=self.arms_manifest_sha, dist=dist,
                 profile_bundle=bundle, profile_path=profile_path, capability_path=self.cap_path,
                 requirements=requirements, requirements_root=self.req_root, adapter_module=adapter,
-                oracles=self.oracles, mode=mode, admission=None, rep=0, pair_order=["p70"],
+                oracles=self.oracles, mode=mode, rep=0, pair_order=["p70"],
             )
             out = self.root / out_name
-            original_launch = adapter.launch
-            def launch_with_fixture_witness(*args, **kwargs):
-                if self.known_premise_construction and kwargs.get("accounting_purpose") != "qualification":
-                    import package_premise
-                    def supplied_witness(package, sources, mounts):
-                        return package_premise.development_witness(package, sources, mounts=mounts,
-                            construction_record={"record":"omp_rig known development fixture construction",
-                            "evidence":"Fixed README/notes and synthetic issue seeds; explicit runtime closure, supervisor control generators and closed stand-in tools. Development evidence only; not independent admission."})
-                    kwargs["premise_witness_provider"] = supplied_witness
-                return original_launch(*args, **kwargs)
-            adapter.launch = launch_with_fixture_witness
-            try:
-                summary = harness70.run_episode(
+            summary = harness70.run_episode(
                 corpus=self.corpus, episode=episode, arm=arm, arms_manifest_sha256=self.arms_manifest_sha, dist=dist,
                 out=out, profile_bundle=bundle, profile_path=profile_path, capability_path=self.cap_path,
                 requirements=requirements, requirements_root=self.req_root, adapter_module=adapter,
-                oracles=self.oracles, mode=mode, admission=None, identity=identity, pair_order=["p70"],
-                )
-            finally:
-                adapter.launch = original_launch
+                oracles=self.oracles, mode=mode, identity=identity, pair_order=["p70"],
+            )
             summary["_out"] = str(out)
             summary["_stand_in_requests"] = self.read_stand_in()
             return summary

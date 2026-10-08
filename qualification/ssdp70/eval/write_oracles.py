@@ -14,7 +14,6 @@ Governing SSDP version: 6.6.0. Target protocol: 7.0.0.
 from __future__ import annotations
 
 import json
-import re
 from pathlib import Path
 from typing import Any
 

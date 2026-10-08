@@ -60,8 +60,7 @@ REPO_ROOT = EVAL_DIR.parents[2]
 if str(EVAL_DIR) not in sys.path:
     sys.path.insert(0, str(EVAL_DIR))
 import core70  # noqa: E402
-import package_ledger
-import package_premise  # noqa: E402
+import package_bytes  # noqa: E402
 import evidence70  # noqa: E402
 import seccomp70  # noqa: E402
 import observer70  # noqa: E402
@@ -148,22 +147,11 @@ MCP_MUTATING = {"issue_create", "issue_comment"}
 MCP_STORE_IDENTITY = "ssdp70-private-issue-standin"
 # Builtin tool names OMP 18.0.11 can register (source of truth: the build's tool table). A model
 # call to a name outside the exposed surface is retained as a blocked attempt, never mapped to work.
-OMP_ALL_BUILTIN_NAMES = frozenset({
-    "read", "security_scan", "bash", "edit", "ast_grep", "ast_edit", "ask", "debug", "eval", "github",
-    "glob", "grep", "lsp", "inspect_image", "browser", "computer", "checkpoint", "rewind", "task", "hub",
-    "todo", "web_search", "write", "memory_edit", "retain", "recall", "reflect", "learn", "manage_skill",
-    "think", "yield", "goal",
-})
 ATTEMPT_CLASS_HINT = {
     "web_search": "network_remote_service", "browser": "network_remote_service", "github": "network_remote_service",
     "task": "delegation", "hub": "delegation", "eval": "process_execution", "debug": "process_execution",
 }
 
-OMP_KNOWN_EVENT_TYPES = frozenset({
-    "session", "agent_start", "agent_end", "turn_start", "turn_end",
-    "message_start", "message_update", "message_end",
-    "tool_execution_start", "tool_execution_update", "tool_execution_end",
-})
 # Provider-managed behaviours the frozen closure disables. Seeing one of these events means a
 # behaviour the profile froze off ran anyway: the run is inadmissible, never silently absorbed.
 OMP_PROVIDER_MANAGED_EVENT_TYPES = frozenset({
@@ -328,15 +316,6 @@ def _digest_json(value: Any) -> str:
     return sha256_bytes(stable_json(value).encode("utf-8"))
 
 
-def _deep_update(base: dict[str, Any], patch: dict[str, Any]) -> dict[str, Any]:
-    for key, value in patch.items():
-        if isinstance(value, dict) and isinstance(base.get(key), dict):
-            _deep_update(base[key], value)
-        else:
-            base[key] = copy.deepcopy(value)
-    return base
-
-
 def _flatten(prefix: str, value: Any, out: dict[str, Any]) -> None:
     if isinstance(value, dict) and value:
         for key, item in value.items():
@@ -468,8 +447,7 @@ def execution_support_sha256() -> dict[str, str]:
         "profiles/omp-headless.template.json": sha256_file(EVAL_DIR / "profiles" / "omp-headless.template.json"),
         "core70.py": sha256_file(EVAL_DIR / "core70.py"),
         "harness70.py": sha256_file(EVAL_DIR / "harness70.py"),
-        "package_ledger.py": sha256_file(EVAL_DIR / "package_ledger.py"),
-        "package_premise.py": sha256_file(EVAL_DIR / "package_premise.py"),
+        "package_bytes.py": sha256_file(EVAL_DIR / "package_bytes.py"),
     }
 
 
@@ -740,10 +718,6 @@ def runtime_dependency_errors(profile: dict[str, Any] | None = None) -> list[str
     return errors
 
 
-def _dependencies_for_role(role: str) -> list[dict[str, Any]]:
-    return [entry for entry in runtime_dependency_manifest()["dependencies"] if role in entry.get("roles", [])]
-
-
 def _materialize_runtime_dependencies(paths: dict[str, Path]) -> dict[str, Any]:
     """Stage only declared files from the verified closure into fresh per-principal roots."""
     if sha256_file(RUNTIME_DEPENDENCIES_PATH) != RUNTIME_DEPENDENCIES_SHA256:
@@ -874,13 +848,6 @@ def _policy(profile: dict[str, Any]) -> dict[str, Any]:
 def profile_errors(profile: dict[str, Any]) -> list[str]:
     """Everything the profile must freeze before this adapter will run a subject."""
     errors: list[str] = []
-    parameters = profile.get("package_access_parameters")
-    if (not isinstance(parameters, dict) or set(parameters) != set(package_ledger.PARAMETERS)
-            or parameters.get("owner_load_quantum") != 256
-            or any(not isinstance(parameters.get(k), int) or isinstance(parameters.get(k), bool) or parameters[k] <= 0
-                   for k in package_ledger.PARAMETERS if k not in ("marks_before_launch", "marks_after_teardown"))
-            or parameters.get("marks_before_launch") is not True or parameters.get("marks_after_teardown") is not True):
-        errors.append("package-access parameters are not frozen or violate the accepted owner quantum/mark lifetime")
     if _contains_unfrozen(profile):
         errors.append("OMP execution profile contains an unfrozen marker; profile is not frozen")
     try:
@@ -1028,7 +995,6 @@ def freeze_profile(template: dict[str, Any], *, executable_path: str, provider_r
                    substrate_executable: str = "/usr/bin/bwrap") -> dict[str, Any]:
     """Fill a profile template with exact digests. Every operator choice is an explicit argument."""
     profile = copy.deepcopy(template)
-    profile["package_access_parameters"] = dict(template.get("package_access_parameters", package_ledger.PARAMETERS))
     profile["profile_id"] = profile_id
     profile["adapter_id"] = ADAPTER_ID
     route = dict(profile["containment_policy"]["provider_route"])
@@ -1330,18 +1296,6 @@ def _observer_etc_documents(paths: dict[str, Path]) -> dict[str, bytes]:
     return documents
 
 
-def _tree_manifest(root: Path) -> dict[str, str]:
-    rows: dict[str, str] = {}
-    if root.is_file():
-        return {".": sha256_file(root)}
-    for path in sorted(root.rglob("*")):
-        if path.is_symlink():
-            rows[path.relative_to(root).as_posix()] = "symlink:" + os.readlink(path)
-        elif path.is_file():
-            rows[path.relative_to(root).as_posix()] = sha256_file(path)
-    return rows
-
-
 def _write_control_tree(paths: dict[str, Path], profile: dict[str, Any]) -> dict[str, Any]:
     """Create every immutable control input and return the digest manifest bound before launch."""
     home, agent = paths["home"], paths["agent"]
@@ -1548,20 +1502,6 @@ def realize_containment(profile: dict[str, Any], project: Path, env: dict[str, s
     }
 
 
-def validate_containment_realization(profile: dict[str, Any], project: Path, env: dict[str, str]) -> list[str]:
-    try:
-        paths = _paths(project, env)
-        expected = control_documents(profile)
-    except (AdapterError, OSError) as exc:
-        return [str(exc)]
-    errors: list[str] = []
-    for rel, data in expected.items():
-        path = paths["home"] / rel
-        if not path.is_file() or path.read_bytes() != data:
-            errors.append(f"run-owned OMP control file {rel!r} differs from the frozen realization")
-    return errors
-
-
 # ------------------------------------------------------------------------------------ launch
 
 def _spawn_principal(argv: list[str], pass_fds: tuple[int, ...], env: dict[str, str]) -> subprocess.Popen:
@@ -1682,12 +1622,8 @@ def _observer_bwrap_argv(profile: dict[str, Any], paths: dict[str, Path], observ
     return argv
 
 
-def _sandbox_pipe_fds(pairs: list[tuple[int, int]]) -> tuple[int, ...]:
-    return tuple(fd for pair in pairs for fd in pair)
-
-
 def launch(profile: dict[str, Any], prompt: str, project: Path, env: dict[str, str], *, integrity_fault: str | None = None,
-           accounting_purpose: str = "qualification", premise_witness_provider=None) -> dict[str, Any]:
+           ) -> dict[str, Any]:
     """Run the exact frozen OMP build for real: principals, sandbox, relay, native JSON trace."""
     problems = profile_errors(profile)
     if problems:
@@ -1721,8 +1657,6 @@ def launch(profile: dict[str, Any], prompt: str, project: Path, env: dict[str, s
     if spec is not None:
         (paths["observer"] / "activation.json").write_text(json.dumps(spec), encoding="utf-8")
         (paths["observer"] / "activation.json").chmod(0o444)
-    ledger_watch = package_ledger.LedgerWatcher(paths["skills"], profile.get("package_access_parameters"))
-    ledger_record: dict[str, Any] | None = None
     started = time.monotonic()
 
     def pipe() -> tuple[int, int]:
@@ -1845,39 +1779,6 @@ def launch(profile: dict[str, Any], prompt: str, project: Path, env: dict[str, s
         os.close(seccomp_w)
         seccomp_w = -1
         argv = _bwrap_argv(profile, paths, seccomp_r, f"{SB_CTL}/launcher.json", SB_OMP)
-        # Before marks: this owner reads package bytes only while observation is inactive.
-        sources = {"workspace": paths["project"], "home": paths["home"], "control": paths["control"],
-                   "etc": paths["etc"], "runtime-usr": paths["subject_runtime"]/"usr",
-                   "runtime-lib64": paths["subject_runtime"]/"lib64",
-                   "omp": paths["subject_runtime"]/SB_OMP.lstrip("/"),
-                   "stub": layout["stub"], "mediator": layout["server"], "task": prompt.encode()}
-        mounts = []
-        by_path = {str(value): name for name,value in sources.items() if isinstance(value,Path)}
-        by_path[str(paths["skills"])] = "package"
-        for index, arg in enumerate(argv):
-            if arg in ("--bind", "--ro-bind"):
-                source, destination = argv[index+1:index+3]
-                # Home control overmounts are already members of the enumerated home source.
-                name = by_path.get(source, "home" if source.startswith(str(paths["home"])+"/") else "UNLISTED")
-                mounts.append({"source":name,"destination":destination,"read_only":arg=="--ro-bind"})
-        for alias in runtime_dependency_manifest()["aliases"]:
-            if "subject" in alias.get("roles",[]) and alias["destination"] in ("/bin","/lib"):
-                target = "/" + alias["target"].lstrip("/")
-                mounts.append({"source":"runtime-usr" if target.startswith("/usr/") else "UNLISTED",
-                    "destination":alias["destination"],"read_only":True,
-                    "alias_target":target})
-        witness = profile.get("package_access_premise_witness")
-        if premise_witness_provider is not None:
-            if accounting_purpose == "qualification":
-                raise PrelaunchRefusal("development premise construction cannot supply qualification acceptance")
-            witness = premise_witness_provider(package_premise.inventory(paths["skills"]),
-                package_premise.source_manifest(sources), mounts)
-        premise_record = package_premise.check(paths["skills"],sources,mounts,witness,
-            owner_name="scientific-inspectability-and-initiative.md",
-            line_floor=profile["package_access_parameters"]["owner_line_floor"],
-            qualification=accounting_purpose=="qualification",
-            accepted_witness_sha256=profile.get("package_access_premise_acceptance_sha256"))
-        ledger_watch.start()
         # The full argument list (which names host run directories) is passed over a descriptor so
         # that it is not readable from the sandbox through /proc/<pid>/cmdline.
         args_r, args_w = os.pipe()
@@ -1905,9 +1806,6 @@ def launch(profile: dict[str, Any], prompt: str, project: Path, env: dict[str, s
             except OSError:
                 pass
     finally:
-        # The subject is gone (or never started): the package-access ledger is closed first so
-        # supervisor post-run reads of the package cannot appear in it.
-        ledger_record = ledger_watch.stop()
         # Give the observer and bridge a chance to close their evidence chains on edge EOF.
         for proc in procs:
             try:
@@ -1956,7 +1854,6 @@ def launch(profile: dict[str, Any], prompt: str, project: Path, env: dict[str, s
     runtime_stage_digests = {role: _runtime_tree_digest(paths[f"{role}_runtime"])
                              for role in ("subject", "observer")}
     artifacts: dict[str, Any] = {
-        "package-access-premise.json": json.dumps(premise_record,sort_keys=True)+"\n",
         "observer-evidence.jsonl": bytes(sinks["observer"]).decode("utf-8", "replace"),
         "bridge-evidence.jsonl": bytes(sinks["bridge"]).decode("utf-8", "replace"),
         "launcher-evidence.jsonl": bytes(sinks["launcher"]).decode("utf-8", "replace"),
@@ -1983,7 +1880,6 @@ def launch(profile: dict[str, Any], prompt: str, project: Path, env: dict[str, s
             "mounted_observer_dependencies": [row for row in runtime_dependency_manifest()["dependencies"]
                                                if "observer" in row.get("roles", [])],
         }, indent=2, sort_keys=True) + "\n",
-        "package-access-ledger.json": json.dumps(ledger_record, sort_keys=True) + "\n",
         "runtime-input-template.json": json.dumps(expected_input, sort_keys=True) + "\n",
         "activation-spec.json": json.dumps(spec, sort_keys=True) + "\n",
         "runtime-home-inventory.json": json.dumps(_home_inventory(paths["home"]), indent=2, sort_keys=True) + "\n",
@@ -2550,7 +2446,6 @@ def transcript_errors(observed: "Observed", prompt: str | None) -> tuple[list[st
                         context_spec["root"], context_spec["prompt"], context_spec["directory"], context_spec["transform"])
             if expected_prompt is not None and parts[1] != expected_prompt:
                 errors.append(f"request {turn_index}: the prompt the model received differs from the harness-authored prompt")
-        expected_roles = ["user"]
         cursor = 1
         for previous in range(turn_index):
             turn = turns[previous]
@@ -3264,7 +3159,6 @@ def normalize(stdout: str, run_id: str, context: dict[str, Any] | None = None) -
             agent_end_messages = [m for m in messages if isinstance(m, dict)]
             terminated = True
             mapped = _on_agent_end(raw, native_index, observed, emit, errors, surface)
-            final_text = next((e["payload"].get("result_text", "") for e in reversed(events) if e["kind"] == "final_result"), "")
             classify(native_index, "agent-end", True, mapped)
         elif raw_type in OMP_PROVIDER_MANAGED_EVENT_TYPES:
             errors.append(
@@ -3335,7 +3229,6 @@ def normalize(stdout: str, run_id: str, context: dict[str, Any] | None = None) -
                     break
     turns = provider_turns(observed)
     native_assistant = [m for m in message_ends if m.get("role") == "assistant"]
-    provider_ids = {call["id"] for turn in turns for call in turn["tool_calls"] if call.get("id")}
     for position, message in enumerate(native_assistant):
         if position >= len(turns):
             break
@@ -3962,77 +3855,9 @@ def owner_reads(events: list[dict[str, Any]], owner_name: str) -> list[int]:
         payload = event.get("payload") or {}
         if payload.get("result_status") != "result":
             continue
-        if package_ledger.native_owner_target(event, owner_name):
+        if package_bytes.native_owner_target(event, owner_name):
             hits.append(int(event["sequence"]))
     return hits
-
-
-def package_access_ledger(artifacts: dict[str, Any], profile: dict[str, Any] | None,
-                          *, events=None, stdout="", prompt=None) -> dict[str, Any]:
-    """Supervisor package-access ledger and the request-0 cut it is judged against."""
-    errors: list[str] = []
-    try:
-        ledger = json.loads(artifacts.get("package-access-ledger.json") or "null")
-    except (ValueError, TypeError):
-        ledger = None
-        errors.append("package-access ledger artifact is malformed")
-    observed = Observed(artifacts, profile)
-    cut_ns = None
-    if observed.requests:
-        first = observed.requests[0]["record"]
-        if observed.requests[0].get("index") == 0 and isinstance(first.get("t_ns"), int):
-            cut_ns = first["t_ns"]
-        else:
-            errors.append("first retained provider request is not request 0 with a timestamp")
-    stamps = {int(entry["index"]): entry["record"]["t_ns"] for entry in observed.requests
-              if isinstance(entry.get("index"), int) and isinstance((entry.get("record") or {}).get("t_ns"), int)}
-    positions = request_positions(observed, events or [], stdout, prompt)
-    try:
-        premise = json.loads(artifacts.get("package-access-premise.json") or "null")
-    except (ValueError, TypeError):
-        premise = None
-    errors.extend(package_premise.verify_report(premise))
-    return {"ledger": ledger, "cut_ns": cut_ns, "errors": errors, "mount": SB_SKILLS, "request_stamps": stamps,
-            "premise": premise, "request_records": positions, "parameters": (profile or {}).get("package_access_parameters")}
-
-
-def request_positions(observed, events, stdout, prompt):
-    """Verified request/assistant-turn pairing, including each retained retry's original position."""
-    groups, group_errors, retries = group_inference_requests(observed)
-    turns = provider_turns(observed)
-    transcript_problems, _ = transcript_errors(observed, prompt)
-    native = []
-    for line in stdout.splitlines():
-        try:
-            raw = json.loads(line)
-        except ValueError:
-            continue
-        if raw.get("type") == "message_end" and (raw.get("message") or {}).get("role") == "assistant":
-            native.append(raw["message"])
-    verified = not group_errors and not transcript_problems and len(groups) == len(native) == len(turns)
-    positions = []
-    for index, turn in enumerate(turns):
-        content = native[index].get("content", []) if index < len(native) else []
-        calls = [{"id": c.get("id"), "name": c.get("name"), "arguments": c.get("arguments")}
-                 for c in content if c.get("type") == "toolCall"]
-        expected = [{"id": c["id"], "name": c["name"], "arguments": c["arguments"]} for c in turn["tool_calls"]]
-        text = "\n".join(c.get("text", "") for c in content if c.get("type") == "text")
-        if calls != expected or _norm_ws(text) != _norm_ws(turn["text"]):
-            verified = False
-        seqs = [e["sequence"] for e in events if e.get("kind") == "assistant_message"
-                and (e.get("payload") or {}).get("assistant_turn") == index]
-        positions.append(min(seqs) if seqs and expected else None)     # a text-only turn has no tool event: no position
-    rows = []
-    for k, group in enumerate(groups):
-        for pos in group:
-            entry = observed.requests[pos]
-            record = entry["record"]
-            rows.append({"request_index": entry["index"], "conversation_turn": k,
-                         "position": positions[k] if verified else None, "pairing_verified": verified,
-                         "retry_of": observed.requests[group[0]]["index"] if pos != group[0] else None,
-                         "t_ns": record.get("t_ns"), "monotonic_ns": (record.get("data") or {}).get("monotonic_ns"),
-                         "observer_sha256": record.get("hash"), "body": entry["body"]})
-    return rows
 
 
 def prepare_prompt(profile: dict[str, Any], entry: str, prompt: str) -> str:

@@ -4,7 +4,7 @@ governing_protocol_version: 6.6.0
 target_protocol_version: 7.x skills-only candidate (7.2.0 per SD-R6)
 decision_date_utc: 2026-10-07
 status: stakeholder-adopted
-decides: D3-PROTOCOL-7X-RELIABILITY-SIMPLIFICATION-AND-CALIBRATED-QUALIFICATION-DESIGN-2026-10-07.md §9 SD-R1..SD-R13
+decides: D3-PROTOCOL-7X-RELIABILITY-SIMPLIFICATION-AND-CALIBRATED-QUALIFICATION-DESIGN-2026-10-07.md §9 SD-R1..SD-R14
 ---
 
 Governing SSDP version: 6.6.0.
@@ -92,3 +92,13 @@ The third S0 check (`INDEPENDENT-D3-PROTOCOL-7X-REDESIGN-CHECK-2026-10-07-R3.md`
 | # | Decision | Realized in |
 |---|---|---|
 | SD-R13 | Supersedes SD-R4's "≤ 100% hard". Losslessness of the frozen minimum is the hard requirement. Block size against each entrypoint's 7.1 block is a soft target (≤ 100%, with 95% as a goal), reported and not gated. Any excess must be attributable to lossless required content (the SD-B attribution rule); redundancy remains a D4 defect. The 2.0× fixed-cost backstop (Q5c, SD-R12) is unchanged and remains the binding size constraint. | Design rev 3 §0, §3, §5.1, §8, §9; contract v2 rev 3 Q5d; workplan rev 3 §2, §3, O-4 |
+
+## SD-R14 (2026-10-07, after S2): harness budget
+
+**Question put by D4** (S2 report `D4-PROTOCOL-7X-S2-IMPLEMENTATION-REPORT-2026-10-07.md`, section 2; stop trigger X4): the harness is 10,304 non-test and 4,541 test lines against 9,000 and 4,000, with H1–H5 intact. Option 1 was: "Accept the measured size (about 10.3k and 4.5k) as the H1–H5 floor for this OMP adaptation and revise SD-R5."
+
+**Verbatim answer.** "Go with option 1."
+
+| # | Decision | Realized in |
+|---|---|---|
+| SD-R14 | Supersedes SD-R5's "≤ 9,000 non-test and ≤ 4,000 test lines". The measured size, 10,304 non-test and 4,541 test lines on the design §6 scope, is accepted as the H1–H5 floor for the OMP adaptation. Any later growth is an additive repair that shows its line cost (X5). The relay, H1–H5 and the 6.6 comparison rules are unchanged. | Design §6, §9 annotations; workplan §1, §3 and O-6 annotations; S2 report |

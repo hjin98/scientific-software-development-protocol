@@ -10,12 +10,10 @@ import copy
 import hashlib
 import json
 import os
-import shutil
 import struct
 import subprocess
 import sys
 import tempfile
-import threading
 import textwrap
 import unittest
 from unittest import mock
@@ -1021,465 +1019,118 @@ class DiscoveryBaselineRefusal(unittest.TestCase):
 
 
 class OmpTranscriptConsistencyAndPruningTests(unittest.TestCase):
-    def _sample_trajectory(self, first_path="variant_history.md", second_path="variant_history.md", first_tool="read"):
+    """The frozen closure disables native pruning/compaction; the native transcript must equal agent_end's, metadata included."""
+    MISMATCH = "native message events do not equal agent_end transcript"
+
+    @staticmethod
+    def base():
         return [
-            {"role": "user", "content": [{"type": "text", "text": "start"}]},
-            {
-                "role": "assistant",
-                "stopReason": "toolUse",
-                "content": [{"type": "toolCall", "id": "call-1", "name": first_tool, "arguments": {"path": first_path}}],
-            },
-            {
-                "role": "toolResult",
-                "toolCallId": "call-1",
-                "toolName": first_tool,
-                "isError": False,
-                "details": {"lines": 2},
-                "timestamp": 1790907330000,
-                "content": [{"type": "text", "text": "1:# Variant history\n2:data"}],
-            },
-            {
-                "role": "assistant",
-                "stopReason": "toolUse",
-                "content": [{"type": "toolCall", "id": "call-2", "name": "read", "arguments": {"path": second_path}}],
-            },
-            {
-                "role": "toolResult",
-                "toolCallId": "call-2",
-                "toolName": "read",
-                "isError": False,
-                "details": {"lines": 2},
-                "timestamp": 1790907335000,
-                "content": [{"type": "text", "text": "1:# Variant history\n2:data"}],
-            },
-            {"role": "assistant", "stopReason": "stop", "content": [{"type": "text", "text": "done"}]},
-        ]
-
-    def _make_trace(self, messages, agent_end_messages=None):
-        lines = [
-            json.dumps({"type": "session", "version": 3}),
-            json.dumps({"type": "agent_start"}),
-        ]
-        for m in messages:
-            lines.append(json.dumps({"type": "message_end", "message": m}))
-        final_msgs = messages if agent_end_messages is None else agent_end_messages
-        lines.append(json.dumps({"type": "agent_end", "messages": final_msgs}))
-        return "\n".join(lines) + "\n"
-
-    def test_compaction_supersede_reads_true_rejected_as_frozen_profile_mismatch(self):
-        # 1. compaction.supersedeReads=true is rejected as a frozen-profile mismatch.
-        self.assertIn("compaction.supersedeReads", omp.frozen_settings_flat())
-        self.assertFalse(omp.frozen_settings_flat()["compaction.supersedeReads"])
-
-        dummy_observed = mock.MagicMock()
-        dummy_observed.errors = []
-        dummy_observed.profile = {}
-        req = {
-            "body": {"model": "m"},
-            "record": {"data": {"inbound_authorization": {"matches_placeholder": True}}},
-        }
-        dummy_observed.requests = [req]
-        dummy_observed.tool_names.return_value = []
-        dummy_observed.mcp = []
-        dummy_observed.launcher_facts = {
-            "omp_exe_sha256": omp.OMP_BUILD["sha256"],
-            "omp_started": {"exe_is_frozen_file": True},
-            "cap_eff": "0", "no_new_privs": "1", "seccomp_mode": "2", "ptrace_scope": "1",
-        }
-        dummy_observed.runtime_version.return_value = omp.OMP_BUILD["version"]
-        dummy_observed.mcp_tools_list = []
-
-        eff = {row["key"]: {"value": row.get("effective_under_frozen_profile")} for row in omp.load_inventory()["settings"]["entries"]}
-        eff["compaction.supersedeReads"] = {"value": True}
-        dummy_observed.effective_settings.return_value = eff
-
-        with mock.patch("adapters.omp.system_prompt_text", return_value="<system-conventions>"):
-            with mock.patch("adapters.omp.parse_catalog", return_value=([], [])):
-                omp.check_runtime_surface(dummy_observed, {})
-        self.assertTrue(any("effective OMP setting compaction.supersedeReads is True, frozen False" in e for e in dummy_observed.errors))
-
-    def test_compaction_drop_useless_true_rejected_as_frozen_profile_mismatch(self):
-        # 2. compaction.dropUseless=true is rejected as a frozen-profile mismatch.
-        self.assertIn("compaction.dropUseless", omp.frozen_settings_flat())
-        self.assertFalse(omp.frozen_settings_flat()["compaction.dropUseless"])
-
-        dummy_observed = mock.MagicMock()
-        dummy_observed.errors = []
-        dummy_observed.profile = {}
-        req = {
-            "body": {"model": "m"},
-            "record": {"data": {"inbound_authorization": {"matches_placeholder": True}}},
-        }
-        dummy_observed.requests = [req]
-        dummy_observed.tool_names.return_value = []
-        dummy_observed.mcp = []
-        dummy_observed.launcher_facts = {
-            "omp_exe_sha256": omp.OMP_BUILD["sha256"],
-            "omp_started": {"exe_is_frozen_file": True},
-            "cap_eff": "0", "no_new_privs": "1", "seccomp_mode": "2", "ptrace_scope": "1",
-        }
-        dummy_observed.runtime_version.return_value = omp.OMP_BUILD["version"]
-        dummy_observed.mcp_tools_list = []
-
-        eff = {row["key"]: {"value": row.get("effective_under_frozen_profile")} for row in omp.load_inventory()["settings"]["entries"]}
-        eff["compaction.dropUseless"] = {"value": True}
-        dummy_observed.effective_settings.return_value = eff
-
-        with mock.patch("adapters.omp.system_prompt_text", return_value="<system-conventions>"):
-            with mock.patch("adapters.omp.parse_catalog", return_value=([], [])):
-                omp.check_runtime_surface(dummy_observed, {})
-        self.assertTrue(any("effective OMP setting compaction.dropUseless is True, frozen False" in e for e in dummy_observed.errors))
-
-    def test_pruning_controls_verified_through_effective_settings_path_and_launcher_probe(self):
-        # 3. Both false are verified through the real effective-settings path, not just a profile-document assertion.
-        eff = {row["key"]: {"value": row.get("effective_under_frozen_profile")} for row in omp.load_inventory()["settings"]["entries"]}
-        self.assertFalse(eff["compaction.supersedeReads"]["value"])
-        self.assertFalse(eff["compaction.dropUseless"]["value"])
-
-        dummy_observed = mock.MagicMock()
-        dummy_observed.errors = []
-        dummy_observed.profile = {}
-        req = {
-            "body": {"model": "m"},
-            "record": {"data": {"inbound_authorization": {"matches_placeholder": True}}},
-        }
-        dummy_observed.requests = [req]
-        dummy_observed.tool_names.return_value = []
-        dummy_observed.mcp = []
-        dummy_observed.launcher_facts = {
-            "omp_exe_sha256": omp.OMP_BUILD["sha256"],
-            "omp_started": {"exe_is_frozen_file": True},
-            "cap_eff": "0", "no_new_privs": "1", "seccomp_mode": "2", "ptrace_scope": "1",
-        }
-        dummy_observed.runtime_version.return_value = omp.OMP_BUILD["version"]
-        dummy_observed.mcp_tools_list = []
-        dummy_observed.effective_settings.return_value = eff
-
-        with mock.patch("adapters.omp.system_prompt_text", return_value="<system-conventions>"):
-            with mock.patch("adapters.omp.parse_catalog", return_value=([], [])):
-                omp.check_runtime_surface(dummy_observed, {})
-
-        pruning_errors = [e for e in dummy_observed.errors if "supersedeReads" in e or "dropUseless" in e]
-        self.assertEqual(pruning_errors, [])
-
-    def test_transcript_consistency_pruning_difference_fails_closed(self):
-        # 4. A message_end / agent_end.messages pruning difference fails transcript consistency.
-        m_end_msgs = [
-            {"role": "user", "content": [{"type": "text", "text": "start"}]},
-            {"role": "assistant", "stopReason": "toolUse", "content": [{"type": "toolCall", "id": "call-1", "name": "read", "arguments": {"path": "v.md#1"}}]},
-            {"role": "toolResult", "toolCallId": "call-1", "content": [{"type": "text", "text": "[v.md#1]\ncontent"}]},
-            {"role": "assistant", "stopReason": "toolUse", "content": [{"type": "toolCall", "id": "call-2", "name": "read", "arguments": {"path": "v.md"}}]},
-            {"role": "toolResult", "toolCallId": "call-2", "content": [{"type": "text", "text": "full content"}]},
-            {"role": "assistant", "stopReason": "stop", "content": [{"type": "text", "text": "done"}]},
-        ]
-        a_end_msgs = copy.deepcopy(m_end_msgs)
-        a_end_msgs[2]["content"] = [{"type": "text", "text": "different content"}]
-
-        trace = self._make_trace(m_end_msgs, a_end_msgs)
-        _, _, errors, _ = omp.normalize(trace, "run-1", {})
-        content_errors = [e for e in errors if "content mismatch" in e]
-        self.assertTrue(len(content_errors) > 0)
-        self.assertIn("message 2 content mismatch", content_errors[0])
-
-    def test_transcript_consistency_pruned_at_bearing_message_fails_closed(self):
-        # 5. A prunedAt-bearing agent_end message fails.
-        m_end_msgs = [
-            {"role": "user", "content": [{"type": "text", "text": "start"}]},
-            {"role": "assistant", "stopReason": "toolUse", "content": [{"type": "toolCall", "id": "call-1", "name": "read", "arguments": {"path": "v.md"}}]},
-            {"role": "toolResult", "toolCallId": "call-1", "content": [{"type": "text", "text": "content"}]},
-            {"role": "assistant", "stopReason": "stop", "content": [{"type": "text", "text": "done"}]},
-        ]
-        # prunedAt in agent_end message
-        a_end_pruned = copy.deepcopy(m_end_msgs)
-        a_end_pruned[2]["prunedAt"] = 1790907334613
-        trace = self._make_trace(m_end_msgs, a_end_pruned)
-        _, _, errors, _ = omp.normalize(trace, "run-1", {})
-        self.assertTrue(any("contains unauthorized prunedAt under frozen profile" in e for e in errors))
-
-        # prunedAt in message_end message
-        m_end_pruned = copy.deepcopy(m_end_msgs)
-        m_end_pruned[2]["prunedAt"] = 1790907334613
-        trace_m = self._make_trace(m_end_pruned, m_end_msgs)
-        _, _, errors_m, _ = omp.normalize(trace_m, "run-1", {})
-        self.assertTrue(any("contains unauthorized prunedAt under frozen profile" in e for e in errors_m))
-
-    def test_transcript_consistency_both_native_pruning_notices_fail_closed(self):
-        # 6. Both native pruning notice forms fail.
-        base_msgs = [
-            {"role": "user", "content": [{"type": "text", "text": "start"}]},
-            {"role": "assistant", "stopReason": "toolUse", "content": [{"type": "toolCall", "id": "call-1", "name": "read", "arguments": {"path": "v.md"}}]},
-            {"role": "toolResult", "toolCallId": "call-1", "content": [{"type": "text", "text": "raw content"}]},
-            {"role": "assistant", "stopReason": "stop", "content": [{"type": "text", "text": "done"}]},
-        ]
-
-        # Notice 1: [Superseded by a newer read of this file]
-        msgs_sup = copy.deepcopy(base_msgs)
-        msgs_sup[2]["content"] = [{"type": "text", "text": "[Superseded by a newer read of this file]"}]
-        trace_sup = self._make_trace(msgs_sup, msgs_sup)
-        _, _, errors_sup, _ = omp.normalize(trace_sup, "run-1", {})
-        self.assertTrue(any("contains unauthorized pruning notice under frozen profile" in e for e in errors_sup))
-
-        # Notice 2: [Uneventful result elided]
-        msgs_elided = copy.deepcopy(base_msgs)
-        msgs_elided[2]["content"] = [{"type": "text", "text": "[Uneventful result elided]"}]
-        trace_elided = self._make_trace(msgs_elided, msgs_elided)
-        _, _, errors_elided, _ = omp.normalize(trace_elided, "run-1", {})
-        self.assertTrue(any("contains unauthorized pruning notice under frozen profile" in e for e in errors_elided))
-
-    def test_transcript_consistency_exact_unchanged_transcripts_pass(self):
-        # 7. Exact unchanged transcripts pass.
-        msgs = [
-            {"role": "user", "content": [{"type": "text", "text": "start"}]},
-            {"role": "assistant", "stopReason": "toolUse", "content": [{"type": "toolCall", "id": "call-1", "name": "read", "arguments": {"path": "v.md"}}]},
-            {"role": "toolResult", "toolCallId": "call-1", "content": [{"type": "text", "text": "file content"}]},
-            {"role": "assistant", "stopReason": "toolUse", "content": [{"type": "toolCall", "id": "call-2", "name": "read", "arguments": {"path": "v.md"}}]},
-            {"role": "toolResult", "toolCallId": "call-2", "content": [{"type": "text", "text": "file content second read"}]},
-            {"role": "assistant", "stopReason": "stop", "content": [{"type": "text", "text": "done"}]},
-        ]
-        trace = self._make_trace(msgs, msgs)
-        _, _, errors, _ = omp.normalize(trace, "run-1", {})
-        transcript_errors = [e for e in errors if "agent_end" in e or "transcript" in e or "prun" in e]
-        self.assertEqual(transcript_errors, [])
-
-    def test_transcript_consistency_dropped_reordered_truncated_detection_fails_closed(self):
-        # 8. Existing dropped/reordered/truncated-event detection still fails closed.
-        base_msgs = [
-            {"role": "user", "content": [{"type": "text", "text": "start"}]},
-            {"role": "assistant", "stopReason": "toolUse", "content": [{"type": "toolCall", "id": "call-1", "name": "read", "arguments": {"path": "v.md"}}]},
-            {"role": "toolResult", "toolCallId": "call-1", "content": [{"type": "text", "text": "file content"}]},
-            {"role": "assistant", "stopReason": "stop", "content": [{"type": "text", "text": "done"}]},
-        ]
-
-        # Dropped message -> count mismatch
-        dropped = self._make_trace(base_msgs, base_msgs[:-1])
-        _, _, errors, _ = omp.normalize(dropped, "run-1", {})
-        count_errors = [e for e in errors if "count mismatch" in e]
-        self.assertEqual(len(count_errors), 1)
-        self.assertIn("native message events do not equal agent_end transcript", count_errors[0])
-
-        # Reordered messages -> identity mismatch
-        reordered_a = [base_msgs[0], base_msgs[2], base_msgs[1], base_msgs[3]]
-        reordered = self._make_trace(base_msgs, reordered_a)
-        _, _, errors, _ = omp.normalize(reordered, "run-1", {})
-        id_errors = [e for e in errors if "identity mismatch" in e]
-        self.assertEqual(len(id_errors), 1)
-        self.assertIn("native message events do not equal agent_end transcript", id_errors[0])
-
-        # Truncated before agent_end -> no agent_end record
-        lines = [
-            json.dumps({"type": "session", "version": 3}),
-            json.dumps({"type": "agent_start"}),
-            json.dumps({"type": "message_end", "message": base_msgs[0]}),
-        ]
-        truncated_trace = "\n".join(lines) + "\n"
-        _, _, errors, _ = omp.normalize(truncated_trace, "run-1", {})
-        self.assertTrue(any("native trace has no agent_end record" in e for e in errors))
-
-    def test_transcript_consistency_mutated_tool_name_fails_closed(self):
-        base_msgs = [
             {"role": "user", "attribution": "user", "timestamp": 1790907334000, "content": [{"type": "text", "text": "start"}]},
-            {"role": "assistant", "stopReason": "toolUse", "timestamp": 1790907334100, "content": [{"type": "toolCall", "id": "call-1", "name": "read", "arguments": {"path": "v.md"}}]},
-            {"role": "toolResult", "toolCallId": "call-1", "toolName": "read", "isError": False, "details": {"lines": 10}, "timestamp": 1790907334200, "content": [{"type": "text", "text": "content"}]},
-            {"role": "assistant", "stopReason": "stop", "timestamp": 1790907334300, "content": [{"type": "text", "text": "done"}]},
-        ]
-        a_msgs = copy.deepcopy(base_msgs)
-        a_msgs[2]["toolName"] = "mutated_read"
-        trace = self._make_trace(base_msgs, a_msgs)
-        _, _, errors, _ = omp.normalize(trace, "run-1", {})
-        errs = [e for e in errors if "toolName" in e and "metadata mismatch" in e]
-        self.assertEqual(len(errs), 1)
-        self.assertIn("native message events do not equal agent_end transcript", errs[0])
-
-    def test_transcript_consistency_mutated_is_error_fails_closed(self):
-        base_msgs = [
-            {"role": "user", "attribution": "user", "timestamp": 1790907334000, "content": [{"type": "text", "text": "start"}]},
-            {"role": "assistant", "stopReason": "toolUse", "timestamp": 1790907334100, "content": [{"type": "toolCall", "id": "call-1", "name": "read", "arguments": {"path": "v.md"}}]},
-            {"role": "toolResult", "toolCallId": "call-1", "toolName": "read", "isError": False, "details": {"lines": 10}, "timestamp": 1790907334200, "content": [{"type": "text", "text": "content"}]},
-            {"role": "assistant", "stopReason": "stop", "timestamp": 1790907334300, "content": [{"type": "text", "text": "done"}]},
-        ]
-        a_msgs = copy.deepcopy(base_msgs)
-        a_msgs[2]["isError"] = True
-        trace = self._make_trace(base_msgs, a_msgs)
-        _, _, errors, _ = omp.normalize(trace, "run-1", {})
-        errs = [e for e in errors if "isError" in e and "metadata mismatch" in e]
-        self.assertEqual(len(errs), 1)
-        self.assertIn("native message events do not equal agent_end transcript", errs[0])
-
-    def test_transcript_consistency_mutated_details_fails_closed(self):
-        base_msgs = [
-            {"role": "user", "attribution": "user", "timestamp": 1790907334000, "content": [{"type": "text", "text": "start"}]},
-            {"role": "assistant", "stopReason": "toolUse", "timestamp": 1790907334100, "content": [{"type": "toolCall", "id": "call-1", "name": "read", "arguments": {"path": "v.md"}}]},
-            {"role": "toolResult", "toolCallId": "call-1", "toolName": "read", "isError": False, "details": {"lines": 10}, "timestamp": 1790907334200, "content": [{"type": "text", "text": "content"}]},
-            {"role": "assistant", "stopReason": "stop", "timestamp": 1790907334300, "content": [{"type": "text", "text": "done"}]},
-        ]
-        a_msgs = copy.deepcopy(base_msgs)
-        a_msgs[2]["details"] = {"lines": 999}
-        trace = self._make_trace(base_msgs, a_msgs)
-        _, _, errors, _ = omp.normalize(trace, "run-1", {})
-        errs = [e for e in errors if "details" in e and "metadata mismatch" in e]
-        self.assertEqual(len(errs), 1)
-        self.assertIn("native message events do not equal agent_end transcript", errs[0])
-
-    def test_transcript_consistency_mutated_timestamp_metadata_fails_closed(self):
-        base_msgs = [
-            {"role": "user", "attribution": "user", "timestamp": 1790907334000, "content": [{"type": "text", "text": "start"}]},
-            {"role": "assistant", "stopReason": "toolUse", "timestamp": 1790907334100, "content": [{"type": "toolCall", "id": "call-1", "name": "read", "arguments": {"path": "v.md"}}]},
-            {"role": "toolResult", "toolCallId": "call-1", "toolName": "read", "isError": False, "details": {"lines": 10}, "timestamp": 1790907334200, "content": [{"type": "text", "text": "content"}]},
-            {"role": "assistant", "stopReason": "stop", "timestamp": 1790907334300, "content": [{"type": "text", "text": "done"}]},
-        ]
-        # Mutate timestamp on toolResult
-        a_msgs = copy.deepcopy(base_msgs)
-        a_msgs[2]["timestamp"] = 1790907999999
-        trace = self._make_trace(base_msgs, a_msgs)
-        _, _, errors, _ = omp.normalize(trace, "run-1", {})
-        errs = [e for e in errors if "timestamp" in e and "metadata mismatch" in e]
-        self.assertEqual(len(errs), 1)
-        self.assertIn("native message events do not equal agent_end transcript", errs[0])
-
-        # Mutate timestamp on assistant
-        a_msgs2 = copy.deepcopy(base_msgs)
-        a_msgs2[1]["timestamp"] = 1790907888888
-        trace2 = self._make_trace(base_msgs, a_msgs2)
-        _, _, errors2, _ = omp.normalize(trace2, "run-1", {})
-        errs2 = [e for e in errors2 if "timestamp" in e and "metadata mismatch" in e]
-        self.assertEqual(len(errs2), 1)
-        self.assertIn("native message events do not equal agent_end transcript", errs2[0])
-
-    def test_transcript_consistency_arbitrary_added_top_level_key_fails_closed(self):
-        base_msgs = [
-            {"role": "user", "attribution": "user", "timestamp": 1790907334000, "content": [{"type": "text", "text": "start"}]},
-            {"role": "assistant", "stopReason": "toolUse", "timestamp": 1790907334100, "content": [{"type": "toolCall", "id": "call-1", "name": "read", "arguments": {"path": "v.md"}}]},
-            {"role": "toolResult", "toolCallId": "call-1", "toolName": "read", "isError": False, "details": {"lines": 10}, "timestamp": 1790907334200, "content": [{"type": "text", "text": "content"}]},
-            {"role": "assistant", "stopReason": "stop", "timestamp": 1790907334300, "content": [{"type": "text", "text": "done"}]},
-        ]
-        a_msgs = copy.deepcopy(base_msgs)
-        a_msgs[2]["arbitraryInjectedKey"] = "unexpected"
-        trace = self._make_trace(base_msgs, a_msgs)
-        _, _, errors, _ = omp.normalize(trace, "run-1", {})
-        errs = [e for e in errors if "arbitraryInjectedKey" in e and "metadata mismatch" in e]
-        self.assertEqual(len(errs), 1)
-        self.assertIn("native message events do not equal agent_end transcript", errs[0])
-
-    def test_transcript_consistency_arbitrary_removed_top_level_key_fails_closed(self):
-        base_msgs = [
-            {"role": "user", "attribution": "user", "timestamp": 1790907334000, "content": [{"type": "text", "text": "start"}]},
-            {"role": "assistant", "stopReason": "toolUse", "timestamp": 1790907334100, "content": [{"type": "toolCall", "id": "call-1", "name": "read", "arguments": {"path": "v.md"}}]},
-            {"role": "toolResult", "toolCallId": "call-1", "toolName": "read", "isError": False, "details": {"lines": 10}, "timestamp": 1790907334200, "content": [{"type": "text", "text": "content"}]},
-            {"role": "assistant", "stopReason": "stop", "timestamp": 1790907334300, "content": [{"type": "text", "text": "done"}]},
-        ]
-        a_msgs = copy.deepcopy(base_msgs)
-        del a_msgs[2]["details"]
-        trace = self._make_trace(base_msgs, a_msgs)
-        _, _, errors, _ = omp.normalize(trace, "run-1", {})
-        errs = [e for e in errors if "details" in e and "metadata mismatch" in e]
-        self.assertEqual(len(errs), 1)
-        self.assertIn("native message events do not equal agent_end transcript", errs[0])
-
-    def test_transcript_consistency_completed_at_minimal_exclusion_disciplined(self):
-        base_msgs = [
-            {"role": "user", "attribution": "user", "timestamp": 1790907334000, "content": [{"type": "text", "text": "start"}]},
-            {"role": "assistant", "stopReason": "toolUse", "timestamp": 1790907334100, "content": [{"type": "toolCall", "id": "call-1", "name": "read", "arguments": {"path": "v.md"}}]},
-            {"role": "toolResult", "toolCallId": "call-1", "toolName": "read", "isError": False, "details": {"lines": 10}, "timestamp": 1790907334200, "content": [{"type": "text", "text": "content"}]},
+            {"role": "assistant", "stopReason": "toolUse", "timestamp": 1790907334100,
+             "content": [{"type": "toolCall", "id": "call-1", "name": "read", "arguments": {"path": "v.md"}}]},
+            {"role": "toolResult", "toolCallId": "call-1", "toolName": "read", "isError": False, "details": {"lines": 10},
+             "timestamp": 1790907334200, "content": [{"type": "text", "text": "content"}]},
             {"role": "assistant", "stopReason": "stop", "timestamp": 1790907334300, "content": [{"type": "text", "text": "done"}]},
         ]
 
-        # Case 1: Legitimate native pattern: message_end assistant has positive integer completedAt, agent_end does not -> PASS
-        m_msgs = copy.deepcopy(base_msgs)
-        m_msgs[1]["completedAt"] = 1790907334150
-        m_msgs[3]["completedAt"] = 1790907334350
-        trace = self._make_trace(m_msgs, base_msgs)
-        _, _, errors, _ = omp.normalize(trace, "run-1", {})
-        transcript_errors = [e for e in errors if "transcript" in e or "agent_end" in e or "metadata mismatch" in e]
-        self.assertEqual(transcript_errors, [])
+    @staticmethod
+    def errors(native, ended=None):
+        lines = [json.dumps({"type": "session", "version": 3}), json.dumps({"type": "agent_start"})]
+        lines += [json.dumps({"type": "message_end", "message": m}) for m in native]
+        lines.append(json.dumps({"type": "agent_end", "messages": native if ended is None else ended}))
+        return omp.normalize("\n".join(lines) + "\n", "run-1", {})[2]
 
-        # Case 2: Boolean completedAt (True or False) on message_end assistant -> FAILS
-        for b_val in (True, False):
-            m_bool = copy.deepcopy(base_msgs)
-            m_bool[1]["completedAt"] = b_val
-            trace = self._make_trace(m_bool, base_msgs)
-            _, _, errors, _ = omp.normalize(trace, "run-1", {})
-            errs = [e for e in errors if "completedAt" in e and "metadata mismatch" in e]
-            self.assertEqual(len(errs), 1, f"Expected boolean completedAt={b_val} to fail closed")
+    def mutated(self, index, **changes):
+        messages = copy.deepcopy(self.base())
+        for key, value in changes.items():
+            if value is KeyError:
+                del messages[index][key]
+            else:
+                messages[index][key] = value
+        return messages
 
-        # Case 3: Negative integer completedAt on message_end assistant -> FAILS
-        for neg_val in (-1, -1790907334150):
-            m_neg = copy.deepcopy(base_msgs)
-            m_neg[1]["completedAt"] = neg_val
-            trace = self._make_trace(m_neg, base_msgs)
-            _, _, errors, _ = omp.normalize(trace, "run-1", {})
-            errs = [e for e in errors if "completedAt" in e and "metadata mismatch" in e]
-            self.assertEqual(len(errs), 1, f"Expected negative completedAt={neg_val} to fail closed")
+    def assert_one_mismatch(self, native, ended, key):
+        found = [e for e in self.errors(native, ended) if key in e and "metadata mismatch" in e]
+        self.assertEqual(len(found), 1, (key, found))
+        self.assertIn(self.MISMATCH, found[0])
 
-        # Case 4: Zero integer completedAt on message_end assistant -> FAILS
-        m_zero = copy.deepcopy(base_msgs)
-        m_zero[1]["completedAt"] = 0
-        trace = self._make_trace(m_zero, base_msgs)
-        _, _, errors, _ = omp.normalize(trace, "run-1", {})
-        errs = [e for e in errors if "completedAt" in e and "metadata mismatch" in e]
-        self.assertEqual(len(errs), 1, "Expected zero completedAt to fail closed")
+    def effective_setting_errors(self, **overrides):
+        observed = mock.MagicMock()
+        observed.errors, observed.profile, observed.mcp, observed.mcp_tools_list = [], {}, [], []
+        observed.requests = [{"body": {"model": "m"}, "record": {"data": {"inbound_authorization": {"matches_placeholder": True}}}}]
+        observed.tool_names.return_value = []
+        observed.launcher_facts = {"omp_exe_sha256": omp.OMP_BUILD["sha256"], "omp_started": {"exe_is_frozen_file": True},
+                                   "cap_eff": "0", "no_new_privs": "1", "seccomp_mode": "2", "ptrace_scope": "1"}
+        observed.runtime_version.return_value = omp.OMP_BUILD["version"]
+        effective = {row["key"]: {"value": row.get("effective_under_frozen_profile")} for row in omp.load_inventory()["settings"]["entries"]}
+        for key, value in overrides.items():
+            effective[key] = {"value": value}
+        observed.effective_settings.return_value = effective
+        with mock.patch("adapters.omp.system_prompt_text", return_value="<system-conventions>"), \
+                mock.patch("adapters.omp.parse_catalog", return_value=([], [])):
+            omp.check_runtime_surface(observed, {})
+        return observed.errors
 
-        # Case 5: Floating-point completedAt (integer-valued and fractional) on message_end assistant -> FAILS
-        for flt_val in (1790907334150.0, 1790907334150.5):
-            m_flt = copy.deepcopy(base_msgs)
-            m_flt[1]["completedAt"] = flt_val
-            trace = self._make_trace(m_flt, base_msgs)
-            _, _, errors, _ = omp.normalize(trace, "run-1", {})
-            errs = [e for e in errors if "completedAt" in e and "metadata mismatch" in e]
-            self.assertEqual(len(errs), 1, f"Expected float completedAt={flt_val} to fail closed")
+    def test_pruning_controls_are_frozen_off_verified_through_effective_settings_and_rejected_when_on(self):
+        for key in ("compaction.supersedeReads", "compaction.dropUseless"):
+            self.assertFalse(omp.frozen_settings_flat()[key])
+            self.assertEqual([e for e in self.effective_setting_errors() if key in e], [])
+            self.assertTrue(any(f"effective OMP setting {key} is True, frozen False" in e
+                                for e in self.effective_setting_errors(**{key: True})))
 
-        # Case 6: Non-numeric completedAt (string, dict, list, None) on message_end assistant -> FAILS
-        for non_num in ("invalid-string", {"ts": 123}, [123], None):
-            m_non_num = copy.deepcopy(base_msgs)
-            m_non_num[1]["completedAt"] = non_num
-            trace = self._make_trace(m_non_num, base_msgs)
-            _, _, errors, _ = omp.normalize(trace, "run-1", {})
-            errs = [e for e in errors if "completedAt" in e and "metadata mismatch" in e]
-            self.assertEqual(len(errs), 1, f"Expected non-numeric completedAt={non_num!r} to fail closed")
+    def test_content_difference_between_message_end_and_agent_end_fails_closed(self):
+        ended = self.mutated(2, content=[{"type": "text", "text": "different content"}])
+        found = [e for e in self.errors(self.base(), ended) if "content mismatch" in e]
+        self.assertTrue(found)
+        self.assertIn("message 2 content mismatch", found[0])
 
-        # Case 7: Injected completedAt in agent_end message -> FAILS
-        # Subcase 7a: agent_end assistant message has completedAt while message_end has none
-        a_injected = copy.deepcopy(base_msgs)
-        a_injected[1]["completedAt"] = 1790907334150
-        trace = self._make_trace(base_msgs, a_injected)
-        _, _, errors, _ = omp.normalize(trace, "run-1", {})
-        errs = [e for e in errors if "completedAt" in e and "metadata mismatch" in e]
-        self.assertEqual(len(errs), 1)
+    def test_native_pruning_markers_fail_closed_in_either_stream(self):
+        marked = self.mutated(2, prunedAt=1790907334613)
+        for native, ended in ((self.base(), marked), (marked, self.base())):
+            self.assertTrue(any("contains unauthorized prunedAt under frozen profile" in e for e in self.errors(native, ended)))
+        for notice in ("[Superseded by a newer read of this file]", "[Uneventful result elided]"):
+            messages = self.mutated(2, content=[{"type": "text", "text": notice}])
+            self.assertTrue(any("contains unauthorized pruning notice under frozen profile" in e for e in self.errors(messages, messages)), notice)
 
-        # Subcase 7b: agent_end assistant message has completedAt when message_end also has valid completedAt
-        m_valid = copy.deepcopy(base_msgs)
-        m_valid[1]["completedAt"] = 1790907334150
-        a_injected2 = copy.deepcopy(base_msgs)
-        a_injected2[1]["completedAt"] = 1790907334150
-        trace = self._make_trace(m_valid, a_injected2)
-        _, _, errors, _ = omp.normalize(trace, "run-1", {})
-        errs = [e for e in errors if "completedAt" in e and "metadata mismatch" in e]
-        self.assertEqual(len(errs), 1)
+    def test_exact_unchanged_transcripts_pass(self):
+        errors = self.errors(self.base())
+        self.assertEqual([e for e in errors if "agent_end" in e or "transcript" in e or "prun" in e], [])
 
-        # Case 8: completedAt on user or toolResult message in message_end -> FAILS
-        # Subcase 8a: on toolResult message
-        m_tool_completed = copy.deepcopy(base_msgs)
-        m_tool_completed[2]["completedAt"] = 1790907334250
-        trace = self._make_trace(m_tool_completed, base_msgs)
-        _, _, errors, _ = omp.normalize(trace, "run-1", {})
-        errs = [e for e in errors if "completedAt" in e and "metadata mismatch" in e]
-        self.assertEqual(len(errs), 1)
+    def test_dropped_reordered_and_truncated_streams_fail_closed(self):
+        base = self.base()
+        count = [e for e in self.errors(base, base[:-1]) if "count mismatch" in e]
+        self.assertEqual(len(count), 1)
+        self.assertIn(self.MISMATCH, count[0])
+        identity = [e for e in self.errors(base, [base[0], base[2], base[1], base[3]]) if "identity mismatch" in e]
+        self.assertEqual(len(identity), 1)
+        self.assertIn(self.MISMATCH, identity[0])
+        truncated = "\n".join([json.dumps({"type": "session", "version": 3}), json.dumps({"type": "agent_start"}),
+                               json.dumps({"type": "message_end", "message": base[0]})]) + "\n"
+        self.assertTrue(any("native trace has no agent_end record" in e for e in omp.normalize(truncated, "run-1", {})[2]))
 
-        # Subcase 8b: on user message
-        m_user_completed = copy.deepcopy(base_msgs)
-        m_user_completed[0]["completedAt"] = 1790907334050
-        trace = self._make_trace(m_user_completed, base_msgs)
-        _, _, errors, _ = omp.normalize(trace, "run-1", {})
-        errs = [e for e in errors if "completedAt" in e and "metadata mismatch" in e]
-        self.assertEqual(len(errs), 1)
+    def test_any_metadata_difference_fails_closed(self):
+        for name, index, changes, key in (
+                ("tool name", 2, {"toolName": "mutated_read"}, "toolName"), ("is_error", 2, {"isError": True}, "isError"),
+                ("details", 2, {"details": {"lines": 999}}, "details"), ("tool result timestamp", 2, {"timestamp": 1790907999999}, "timestamp"),
+                ("assistant timestamp", 1, {"timestamp": 1790907888888}, "timestamp"),
+                ("added key", 2, {"arbitraryInjectedKey": "unexpected"}, "arbitraryInjectedKey"),
+                ("removed key", 2, {"details": KeyError}, "details")):
+            with self.subTest(name):
+                self.assert_one_mismatch(self.base(), self.mutated(index, **changes), key)
 
-        # Case 9: completedAt on agent_end user or toolResult message -> FAILS
-        for target_idx in (0, 2):
-            a_unauth = copy.deepcopy(base_msgs)
-            a_unauth[target_idx]["completedAt"] = 1790907334050
-            trace = self._make_trace(base_msgs, a_unauth)
-            _, _, errors, _ = omp.normalize(trace, "run-1", {})
-            errs = [e for e in errors if "completedAt" in e and "metadata mismatch" in e]
-            self.assertEqual(len(errs), 1, f"Expected agent_end message {target_idx} completedAt to fail closed")
+    def test_completed_at_is_accepted_only_as_a_positive_integer_on_a_native_assistant_message(self):
+        base = self.base()
+        native = self.mutated(1, completedAt=1790907334150)
+        native[3]["completedAt"] = 1790907334350
+        self.assertEqual([e for e in self.errors(native, base) if "transcript" in e or "agent_end" in e or "metadata mismatch" in e], [])
+        for value in (True, False, -1, -1790907334150, 0, 1790907334150.0, 1790907334150.5, "invalid-string", {"ts": 123}, [123], None):
+            with self.subTest(value=value):
+                self.assert_one_mismatch(self.mutated(1, completedAt=value), base, "completedAt")
+        self.assert_one_mismatch(base, self.mutated(1, completedAt=1790907334150), "completedAt")     # injected into agent_end
+        self.assert_one_mismatch(self.mutated(1, completedAt=1790907334150), self.mutated(1, completedAt=1790907334150), "completedAt")
+        for index in (0, 2):                                                                          # user / toolResult, either stream
+            self.assert_one_mismatch(self.mutated(index, completedAt=1790907334050), base, "completedAt")
+            self.assert_one_mismatch(base, self.mutated(index, completedAt=1790907334050), "completedAt")
 
 
 if __name__ == "__main__":

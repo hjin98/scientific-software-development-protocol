@@ -249,7 +249,7 @@ No new routes, owners, kernel placement or repetition.
 
 **Totals.** About 7.5k non-test lines retired (7,460), plus their tests.
 
-**Budget (SD-R5 as decided).** ≤ 9,000 non-test and ≤ 4,000 test lines. **Scope:** every Python file under `qualification/ssdp70/eval/` (with `adapters/` and `stub_tools/`) and `qualification/ssdp70/qual-v2/`; test lines are the `test_*.py` files there plus `stand_in_provider.py`. `requal71/` is superseded operator material, frozen and outside the v2 harness. About 12.7k retained lines (20,279 − 7,460 − 169 = 12,650) must lose about 3.7k (29%), mainly the admission and provenance paths in `adapters/omp.py` and `core70.py`. This is plausible, not guaranteed. A shortfall is reported (X4) and never met by dropping an H-function.
+**Budget (SD-R5 as decided; superseded by SD-R14).** ≤ 9,000 non-test and ≤ 4,000 test lines. *[SD-R14, 2026-10-07: after S2 the stakeholder accepted the measured 10,304 non-test and 4,541 test lines as the H1–H5 floor (S2 report §2); later growth must show its line cost (X5).]* **Scope:** every Python file under `qualification/ssdp70/eval/` (with `adapters/` and `stub_tools/`) and `qualification/ssdp70/qual-v2/`; test lines are the `test_*.py` files there plus `stand_in_provider.py`. `requal71/` is superseded operator material, frozen and outside the v2 harness. About 12.7k retained lines (20,279 − 7,460 − 169 = 12,650) must lose about 3.7k (29%), mainly the admission and provenance paths in `adapters/omp.py` and `core70.py`. This is plausible, not guaranteed. A shortfall is reported (X4) and never met by dropping an H-function.
 
 ## 7. Delegated to SSDP 8.0
 
@@ -298,7 +298,7 @@ The record (`STAKEHOLDER-DECISION-2026-10-07-PROTOCOL-7X-REDESIGN.md`) is update
 | SD-R3 | Adopted: owner reads are optional depth |
 | SD-R4 | **Revised twice by the stakeholder:** lossless block ("Lossless ~7 KB"); then, after the second S0 check, losslessness governs with a hard limit of ≤ 100% of the 7.1 block and 95% as a target ("Lossless wins; ≤100% hard"); after S0, the 100% limit became a soft target (SD-R13) |
 | **SD-R13** | **Decided by the stakeholder (2026-10-07, after S0 PASS).** "Relax size limit <100% as soft target, while losslessness stays hard." Excess over 100% is reported and must be attributable to lossless required content. |
-| SD-R5 | **Revised by the stakeholder:** ≤ 9,000 / ≤ 4,000 lines |
+| SD-R5 | **Revised by the stakeholder:** ≤ 9,000 / ≤ 4,000 lines; **superseded by SD-R14** (measured 10,304 / 4,541 accepted as the floor) |
 | SD-R6 | Adopted: 7.2.0 |
 | SD-R7 | Adopted: one infrastructure rerun |
 | SD-R8 | Adopted: the human trial is ratification evidence |
