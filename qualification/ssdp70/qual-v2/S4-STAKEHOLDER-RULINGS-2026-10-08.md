@@ -25,6 +25,21 @@ These are stakeholder rulings on how the contract's undefined or silent terms ar
 | Scored run | A **scored run** for Q4b and Q4c is a run on a main-panel episode (delegate or duty episode). Q5 probe runs (routing, version, burden, sentinel, unversioned-lookup) are not scored runs for Q4b, Q4c or Q4d and the declaration sets `scored: false` for them. |
 | A-9 | The custodian maps its classes to the 7.0 measure vocabulary and states the mapping; the pre-run checker confirms it. |
 
+## Second set of rulings (custodian-7.2-b's undetermined items; stakeholder: "Proceed with your recommendations")
+
+| Item | Ruling |
+|---|---|
+| U-A | A read-only lookup delegated inside scientific code is **owed** the scientific-check questions that its route owes: the scope does not evidently exclude it, and a lookup feeds results. |
+| U-B | A spelling fix in scientific documentation or report prose outside source follows the **delegator's route** (A-8): the documentation skill owes only the findings and realized-results questions. |
+| U-C | A tension-search question is owed only when the delegate relies on accepted authority. Conditional phrasing is **not** a failed part. |
+| U-D | The question set follows the **route actually selected**. With no SSDP role selected nothing is owed and Q2b does not apply. |
+| U-G | Relaying a delegate's own answered null, truthfully attributed, in a non-owed run is **not** an unowed null. |
+| U-H | A bare statement of what the run did ("tried no alternatives") is **not** an unowed disclosure. It is one only if it asserts a null result of a search the run owed no disclosure for. |
+| U-I | A silently omitted gap that makes no false statement is **not** a Q4b violation and is in no Q4 gate. It is a duty failure in the Q3 delegated-finding family. |
+| A-x9 | The C(b) calibration labels are held by the **custodian** (the contract says analyst labels; the analyst stays blind to fixture content). Recorded as a substitution. |
+| A-x10 | The scored-run ruling applies to **Q4b, Q4c and Q4d**. |
+| A-x1 to A-x8 | The custodian's readings stand provisionally. The pre-run checker confirms them against the contract and candidate text (A-x1 against OD-3), and reports any it cannot confirm. |
+
 ## Custodian restart
 
 The first custodian pass (store `~/ssdp72-fixture-custody`, FREEZE.sha256 digest `6f1199d3…9a95`) read addendum revision 2 before authoring and is **superseded**; it stays untouched as evidence and is not used. A fresh custodian session builds a new store on revision 3 and these rulings. It must not read the first store.
