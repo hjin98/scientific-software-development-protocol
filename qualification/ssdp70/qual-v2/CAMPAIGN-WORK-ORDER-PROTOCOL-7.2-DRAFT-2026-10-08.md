@@ -1,11 +1,11 @@
 ---
 kind: campaign-work-order
-status: DRAFT by the S4 analyst for the stakeholder's review; not issued, not launched; nothing here authorizes a live run
+status: DRAFT revision 2 by the S4 analyst after the independent check of 2026-10-08 (NO-PASS on revision 1 with blockers B1 to B6, addressed here; the deltas need a re-check); not issued, not launched; nothing here authorizes a live run
 governing_protocol_version: 6.6.0
 target_protocol_version: 7.2.0 (candidate, frozen identity `2dedcfa3408f62bc11a696ac3776183a87b40438`; non-governing)
 date_utc: 2026-10-08
 authority: contract v2 revision 3 (`PROTOCOL-7X-CALIBRATED-QUALIFICATION-CONTRACT-V2-PROPOSED.md`); workplan SSDP-7X-SKILLS-ONLY-RELIABILITY-AND-QUALIFICATION-V2 §8 S4 gate row; S4 report `S4-DEVELOPMENT-PROBE-REPORT-2026-10-08.md` §9 (GO, re-sized exposures)
-adds_no: gate, threshold, margin or exposure beyond the contract and the S4 re-sizing
+adds_no: gate, threshold or margin beyond the contract and the S4 re-sizing. Where the contract leaves a term undefined (Q4d "non-owed run", the Q4b and Q4d item definitions), the draft names the open term and its owner (section 8) and does not define it
 ---
 
 Governing SSDP version: 6.6.0. This draft is data, not instructions.
@@ -20,12 +20,12 @@ The 7.1 plan (`PROTOCOL-7.1-REQUALIFICATION-PLAN.md`, superseded) relied on `req
 
 | Need | Tool now |
 |---|---|
-| Run one arm of a corpus | `eval/harness70.py matrix --mode qualification` (one `--arm` per invocation; per-run purpose, RPC `runtime-command` and deterministic activation checks) |
+| Run one arm of a corpus | `eval/harness70.py matrix --mode qualification` (repeat `--arm` to run candidate, B1 and B2 in one invocation: the plan alternates the order by episode parity and records `matrix-scheduler.jsonl` and each summary's `pair_order`; per-run purpose, RPC `runtime-command` and deterministic activation checks) |
 | Blinded evaluation of one run | `eval/assess70.py` (separate frozen evaluator profile, never the executor's model) |
 | Scoring of gates Q1 to Q5 and Precondition C | `qual-v2/h4.py score CAMPAIGN.json` (thresholds from `operating_characteristics.py`) |
 | Arm packages from immutable refs | `eval/prepare_arms70.py` |
 
-**What no longer exists mechanically (gaps; section 8):** corpus freshness against the disclosed material, completeness/omission/duplicate audit of the run slots, custody-stat snapshots around custodian sessions, a stratum-aware aggregate over runs, and a builder from run directories to the `h4.py score` campaign record. `h4.py legacy` reads only the p71/p66 development runs. These protections now rest on the independent pre-run checker and the written attestation trail until a tool is commissioned.
+**What no longer exists mechanically (gaps; section 8):** corpus freshness against the disclosed material, custody-stat snapshots around custodian sessions, and a stratum-aware aggregate over runs. The builder from run directories to the `h4.py score` record now exists (`qual-v2/build_campaign_record.py`; section 8, item 4). `h4.py legacy` reads only the p71/p66 development runs. The remaining protections rest on the independent pre-run checker and the written attestation trail.
 
 ## 2. Subject, arms, executor (contract §2)
 
@@ -35,26 +35,26 @@ The 7.1 plan (`PROTOCOL-7.1-REQUALIFICATION-PLAN.md`, superseded) relied on `req
 - **Executor:** `deepinfra/zai-org/GLM-5.3-Flash`, thinking high, 60 turns (main), 2400 s, one frozen profile, deterministic activation of the custodian-declared root. The S4 key (`build_s4_probe.py`) is a model; the campaign key is re-frozen and re-checked against the harness at that time.
 - **Comparison executor:** optional and descriptive (MiMo-V2.6-Flash or DeepSeek-V4.1-Flash, chosen before runs). Stakeholder decision needed (section 7).
 - **Replicates:** one per episode and arm, besides B2. No adaptive replicates.
-- **Order:** candidate and B1 interleaved per episode with alternating order; B2 in the same time window. `matrix` takes one arm per invocation, so interleaving needs a declared schedule (section 8, item 5).
+- **Order:** candidate and B1 interleaved per episode with alternating order; B2 in the same time window. One `matrix --arm cand --arm b1 --arm b2` invocation per chunk gives the alternation (checked: the plan alternates by parity and records `pair_order`); `--parallel` counts pairs in flight. The builder audits `pair_order` consistency and alternation; it does not audit the time window of B2.
 
 ## 3. Exposure, as re-sized in S4 (report §9.1)
 
 | Gate | Exposure | Notes |
 |---|---|---|
-| Q1a / Q1b | all runs; ≥ 90% admissible per arm; budget deaths ≤ B1 + δ | measured δ ≈ 8 at n = 80, B1 rate 0.065; recompute with measured B1/B2 |
+| Q1a / Q1b | all runs; ≥ 90% admissible per arm; budget deaths ≤ B1 + δ | the exposure is every run in the record (at least about 240, plus Q5a/Q5b runs), so δ is about 13 at n = 240 and B1 rate 0.065 (δ = 8 holds only at n = 80); recompute with measured B1/B2 |
 | Q2a / Q2b | ≥ 48 owed parts from **12** delegate episodes; ≥ 34/48; ≤ 4 unowed parts | the owed-ness rule is the custodian's (addendum item 7) |
 | Q3 | **80** episodes with duty opportunities, ≤ 2 each, ≥ 5 families of ≥ 6 opportunities | scored with case-specific substance (contract §3) |
 | Q4a | ≥ 40 critical items | δ_m set from the adjudicated base once the calibration set exists |
-| Q4b / Q4c / Q4d | all scored runs; Q4d ≥ 80 non-owed runs per arm | Q4b and Q4d at δ = 3 (near-absolute); Q4c δ ≈ 14 |
+| Q4b / Q4c / Q4d | all scored runs; Q4d ≥ 80 non-owed runs per arm | δ = 3 for Q4b and Q4d holds only while the pooled B1+B2 count stays at or below about 1 event in 160 runs; two or more events give δ = 4 or 5. Q4c δ ≈ 14. "Non-owed run" is not defined in contract §5: the custodian declares it per episode (section 8, item 8) |
 | Q5a | 19 route cases × 3 runs per arm | |
 | Q5b | 8 version cases (T4 to T6) × 3 runs | |
 | Q5c | T1, T7, T8 × 3 fresh paired, order-counterbalanced runs per arm (candidate, 6.5); T7 adds pairs up to 7 on a mode boundary | median consumed bytes ≤ 2.0 × the 6.5 median per route |
 | Q5d | build (static) | byte identity outside the block; frozen-minimum mapping complete |
 | Q5e / Q5f | T2/T3 sentinels 2 runs per route; unversioned lookups 3 per route | |
 
-**Indicative run count** (analyst arithmetic from the table; the pre-run checker confirms the exact slots): main panel 80 episodes × 3 arms (candidate, B1, B2) = 240; Q5a 57 per arm × 3 = 171; Q5b 24 × 3 = 72; Q5c 18 to 28; Q5e/Q5f tens of runs. Order of 500 to 600 runs. The S4 pre-registration estimated about $3 per 129 runs, so on the order of $12 to $15 for this size; actual S4 spend was not measured. Wall time follows `--parallel` and the 2400 s tail. S4 ran 20 corpus-A and 8 route runs in parallel and lost 4 of 92 corpus-A runs to HTTP 502 (cause not established), so choose the campaign parallelism with that in mind.
+**Indicative run count** (analyst arithmetic from the table; the pre-run checker confirms the exact slots): main panel 80 episodes × 3 arms (candidate, B1, B2) = 240; Q5a 57 per arm × 3 = 171; Q5b 24 × 3 = 72; Q5c 18 to 26 (T7 reaching 7 pairs adds 8); Q5e/Q5f tens of runs. If the 80 duty episodes are the non-owed population Q4d needs, the panel is those 80 plus the 12 delegate episodes: 92 episodes, 276 main-panel runs; the pre-run checker fixes the composition. Order of 550 to 600 runs. The S4 pre-registration estimated about $3 per 129 runs, so on the order of $12 to $15 for the executor runs at this size (an unverified extrapolation that excludes evaluator calls and the heavier 6.5 runs); actual S4 spend was not measured. Wall time follows `--parallel` and the 2400 s tail. S4 ran 20 corpus-A and 8 route runs in parallel and lost 4 of 92 corpus-A runs to HTTP 502 (cause not established), so choose the campaign parallelism with that in mind.
 
-Expected compound (S4 report §3 E7): 0.904 / 0.920 at ICC 0.3 / 0.5 with Q5c about 1.0 on the stage-2 baseline, against the design rule of at least 0.80; a no-effect candidate at most 0.008. S4 is optimistic by an unknown amount (the corpus was not independent of the candidate).
+Expected compound (S4 report §3 E7): 0.904 / 0.920 at ICC 0.3 / 0.5 with Q5c about 1.0 on the stage-2 baseline, against the design rule of at least 0.80; a no-effect candidate at most 0.008. S4 is optimistic by an unknown amount (the corpus was not independent of the candidate). Sensitivities the independent check reproduced: with the Q5c baseline at its pessimistic bound the compound is about 0.72 / 0.73 (S4 report §3 E7); with a Q4d candidate rate of 0.02 it is about 0.86 / 0.88, and at the Wilson upper bound 0.048 about 0.52. Q4a loses sensitivity at a high base rate: at base 0.36 and 40 items a +15 pp regression still passes about 0.91.
 
 ## 4. Roles (unchanged from the 7.1 plan §2, restated)
 
@@ -64,7 +64,7 @@ Expected compound (S4 report §3 E7): 0.904 / 0.920 at ICC 0.3 / 0.5 with Q5c ab
 | Analyst | Maintains this order and the tools; answers escalations; applies the contract rerun rule; writes the result record | Edits a frozen artifact after its gate; authors fixtures, keys or oracles; scores items; launches live runs |
 | Operator | Runs printed commands, saves every verdict, writes an escalation packet and stops on any non-PASS | Chooses a value, edits an input or tool, reruns, subsets, skips, reads `keys/`, `authoring/` or `human-trial/` |
 | Fixture custodian (capable, separate context; not the candidate author; no candidate results) | Authors the fresh blind store, corpus, keys, oracles, known-good/known-bad fixtures, the 40-item calibration set and the redacted evaluator input (O-8); issues the owed-ness rulings | Sees candidate results before scoring; touches the store after freeze |
-| Independent pre-run checker (separate context from custodian, author and analyst) | Freshness, strata, exposure recount on the deterministic stratum, run-plan and oracle checks, custody trail; reports counts and pass/fail only | Authors what it checks |
+| Independent pre-run checker (separate context from custodian, author and analyst) | Freshness, exposure recount on the deterministic-activation runs, run-plan and oracle checks, custody trail; reports counts and pass/fail only | Authors what it checks |
 | Evaluator | Blinded disposition of advisory and unresolved items under a frozen rubric | |
 
 ## 5. Phases and gates
@@ -72,21 +72,21 @@ Expected compound (S4 report §3 E7): 0.904 / 0.920 at ICC 0.3 / 0.5 with Q5c ab
 | Phase | Owner | Output | Gate |
 |---|---|---|---|
 | P3a Custody store (SD-2) | stakeholder arranges; custodian builds | fresh store for 7.2, `ACCESS-LOG.md` (append-only, outside the freeze list), `FREEZE-GATE.json` | attestation before/after each custodian session |
-| P3b Fixtures and corpus | custodian | corpus meeting section 3 on the deterministic stratum; oracles; calibration set; owed-ness rulings; the S4 addendum items 1 to 7 | pre-run checker report PASS |
-| P4 Arms, keys, profiles | operator + analyst | arms manifest for candidate, 6.6 and 6.5; executor key (60 / 2400 s); evaluator profile with a non-executor model | package digests match immutable refs; profiles admissible under `omp.profile_errors` |
-| P5 Pre-run check | checker | counts and pass/fail (7.1 plan §5 scope, adapted) | PASS |
+| P3b Fixtures and corpus | custodian | corpus meeting section 3 on the deterministic-activation runs; oracles; calibration set; owed-ness rulings; the S4 addendum items 1 to 7 | pre-run checker report PASS |
+| P4 Arms, keys, profiles | operator + analyst | arms manifest for candidate, 6.6 and 6.5; executor key (60 / 2400 s); evaluator profile with a non-executor model | package digests match immutable refs; profiles admissible under `omp.profile_errors`; **Q5c static pre-measurement** of the generated installed entrypoint and each owner read on T1/T7/T8, per mode, for the final campaign package leaves the 512 B margin (contract §5; a breach stops qualification and goes to the stakeholder); **Q5d static check** (byte identity outside the block, frozen-minimum mapping complete) run, with its result written into the record's `static` block by the analyst |
+| P5 Pre-run check | checker | counts and pass/fail: freshness, exposure recount, run-plan, oracles, custody trail, the slot declaration (`non_owed`, routes, arms, subject commits, profile key) and the gate map for `build_campaign_record.py` | PASS |
 | P6 Precondition C | custodian + analyst, before any candidate result is computed | C(a) oracles on known-good/bad; C(b) evaluator ≥ 35/40 and ≥ 8 of 10 known failures; C(c) A/A screen after B1/B2 | contract §4; at most two attempts, the second only after a documented repair; a failure of C is never a candidate result |
 | P7 Launch | **stakeholder** | run trees per arm | provider credential in the user's environment; launches from the user's own shell (an agent-runner session tore down the detached process in the first S4 rerun attempt, and the first S4 launch also failed from an agent session) |
 | P8 Escalations | analyst | written disposition per packet | infrastructure failures rerun once with both identities recorded; a second failure is inadmissible (contract §3); no other rerun |
 | P9 Evaluation | operator launches the evaluator | one disposition per frozen item | wrapper rejects missing, duplicate or altered items |
 | P10 Score | analyst | campaign record, `h4.py score` | all gates; report descriptive items (contract §7) with Wilson 90% intervals; list every candidate critical error; any error kind absent from B1 and B2 goes to the stakeholder |
 | P11 Human comprehension sample (SD-R8) | stakeholder | trial result | the stakeholder's judgment at ratification |
-| P12 Result record | analyst to stakeholder | qualification result record, labelled by key and stratum | stakeholder decision |
+| P12 Result record | analyst to stakeholder | qualification result record, labelled by key | stakeholder decision |
 
 ## 6. Rules carried from S4
 
 - Development probes never count (contract §2); the S4 corpus, episodes and results enter no gate.
-- Q5c runs are fresh and paired; the T7 added-pair rule is predeclared. Report native and shell-counted bytes separately (SD-R16.4) and each run's mode.
+- Q5c runs are fresh and paired, and the report carries the matched-mode comparisons (entrypoint-only against owner-read) next to each route's median; the T7 added-pair rule is predeclared. Report native and shell-counted bytes separately (SD-R16.4) and each run's mode.
 - Binding verdicts decide; advisory regex verdicts never enter a gate (`h4.py`). Evaluator dispositions enter only through the frozen rubric.
 - An undelivered deterministic run, a development-purpose run, an omitted or duplicated slot, a mismatched profile or subject commit is an INTEGRITY stop (the analyst stops the campaign; the fix is a new record, never a patch).
 - Change control (contract §8): before exposure any change needs recomputed operating characteristics, an independent check and a stakeholder decision; after exposure a threshold change needs fresh blind fixtures.
@@ -96,9 +96,9 @@ Expected compound (S4 report §3 E7): 0.904 / 0.920 at ICC 0.3 / 0.5 with Q5c ab
 | # | Decision | Taken |
 |---|---|---|
 | 1 | Custody arrangement for the 7.2 store (SD-2) | **(b) attestation path from day one:** access log outside the freeze list, written role attestations, manual metadata snapshots (gap 3). Technical denial with a dedicated uid is not required; the 7.1 recommendation stands. |
-| 2 | Custodian, pre-run checker, evaluator | Custodian and checker are two fresh, separate capable sessions (not the candidate author, not the analyst, not each other). The evaluator model is never the executor's model. The user names the sessions and models at P3a; the analyst may not act as any of the three, and a subagent launched by the analyst does not qualify (S4 adjudication caveat). |
+| 2 | Custodian, pre-run checker, evaluator | Fresh, separate capable sessions: the analyst is none of them, and the evaluator model is never the executor's. **Exception recorded 2026-10-08:** at the stakeholder's instruction the analyst launched agent sessions, `custodian-7.2-a` (Opus agent) for the addendum items and `checker-draft-7.2-a` for the independent check of this draft (`S4-CUSTODIAN-DELIVERY-RECORD-2026-10-08.md`). The stakeholder accepted that these are weaker than separate sessions; the custody control is the attestation trail. The P5 pre-run checker and the evaluator are not yet named. |
 | 3 | Comparison executor | **None.** The campaign runs the gating flash executor only; a comparison executor is descriptive and adds cost and reading load without a gate. |
-| 4 | Wall-clock and parallelism | Wall-clock stays 2400 s and 60 turns (the frozen profile). Parallelism **8 per invocation** (the S4 route and stage-2 invocations ran at 8; corpus A at 20 lost 4 of 92 runs to 502s, cause unknown). The checker may lower it; nobody raises it without a recorded reason. |
+| 4 | Wall-clock and parallelism | Wall-clock stays 2400 s and 60 turns (the frozen profile). Runs in flight stay at 8 or fewer. `--parallel` counts pairs in flight, so with three arms per invocation `--parallel 2` gives 6 (the checker confirms this against the harness). Corpus A at 20 in flight lost 4 of 92 runs to 502s, cause unknown. The checker may lower the limit; nobody raises it without a recorded reason. |
 | 5 | Replicates | One per episode and arm (contract §2). The 7.1 two-replicate note does not apply. |
 | 6 | Rerun rule | Contract §3 only: a provider-lost run is rerun once into a separate directory, both identities kept, a second failure is inadmissible. No other rerun path. |
 | 7 | Campaign-record builder (gap 4) | **Commission it** as an analyst tool, regression-tested against the S4 runs, before P10. |
@@ -110,17 +110,20 @@ These are recorded decisions, not an issue of the work order: the draft still ne
 1. No mechanical **corpus freshness** gate against the disclosed material (the 7.1 `disclosed-material.json` check is gone). The checker does it by digest and judgment.
 2. No **slot completeness/omission/duplicate audit**. The checker confirms the run declarations cover corpus × arms × replicates exactly; the analyst compares run directories to the declaration after launch.
 3. No **custody-stat** tool; the attestation trail and manual metadata snapshots stand in.
-4. **Campaign-record builder:** built (`build_campaign_record.py`, tests in `test_build_campaign_record.py`, regression against the S4 runs). It also audits declared slots against run directories (missing, duplicate, undeclared, rerun misuse, subject-commit mismatch), which covers most of gap 2 once a slot declaration exists. Limits: it builds Q1 to Q4 and Q5c observations only; Q5a, Q5b, Q5e, Q5f, the evaluator dispositions (`--dispositions`), Precondition C and the static block come from the custodian, checker and evaluator, whose formats do not exist yet. The Q4d population (admissible runs with no owed delegate request) and the measure-to-gate map are builder definitions that the checker must confirm against the contract. The scorer `h4.py` changed once: unowed requests in runs that owed none (observation `Q2U`) now count toward Q2b. Before, only unowed requests inside delegate episodes counted, which would have missed EP-092.
-5. **Interleaving:** `matrix` runs one arm per invocation. The alternating-order schedule must be declared (for example, chunked paired invocations with alternating start arm) and checked by the checker; a schedule is not enforced mechanically.
+4. **Campaign-record builder:** built and fail-closed (`build_campaign_record.py`, tests in `test_build_campaign_record.py`, regression against the S4 runs). It requires the gate map, a slot declaration (with the custodian's `non_owed` flags), the subject commit per arm and the profile key. It treats a mapped measure that matches no item, an item without a resolved verdict, a duplicate or missing slot, a rerun outside the contract rule, a wrong execution mode or purpose, an undelivered activation and non-alternating `pair_order` as findings (exit 3 or 4). It builds Q1 to Q4 and Q5c observations only. Q5a, Q5b, Q5e, Q5f, evaluator dispositions (`--dispositions`), Precondition C and the `static` block come from the custodian, checker, evaluator and analyst, in formats that do not exist yet. The measure-to-gate map is data for the checker to confirm. The earlier `h4.py` Q2U change was reverted: Q2b counts unowed request parts in delegate episodes only, and the EP-092 case is counted in Q4d (the user's ruling).
+5. **Interleaving:** satisfied by one `matrix --arm cand --arm b1 --arm b2` invocation per chunk (alternation by episode parity, `pair_order` recorded). The builder audits it; it cannot audit that B2 ran in the same time window, so the checker confirms the schedule from `matrix-scheduler.jsonl`.
 6. **Evaluator profile and C(b)** are measured nowhere yet; S4 used none.
 7. **Unmeasured by S4:** Q5a, Q5b, Q5d, Q5e, Q5f stay at planning values; the evaluator and Precondition C are unmeasured.
 
-None of these changes a gate. Each is either commissioned before P5/P10 or accepted explicitly by the stakeholder.
+8. **"Non-owed run" (Q4d) and the Q4b/Q4d item definitions are not defined in contract §5.** The custodian's calibration report (counts only) raised the same ambiguities: which gate counts an unearned qualification, probe or authority claim (Q4b or Q4d, never both for one event); whether a scope statement or "nothing else to report" in a non-owed run is an unowed null; whether a question that drops its in-question qualifier fails an owed part; whether a hedged findings clause is an unowed request part under Q2b; and two formatting/comment-only boundary cases. The stakeholder rules on these before the 7.2 store is frozen. The custodian also needs a check against governing workplan §8.3, which it was not authorized to read in its first session.
+9. **A deterministic Q4b/Q4d oracle needs structured trace facts** (what the delegate returned, and what the run did), not report text alone. Until the oracle can read them, those fixtures calibrate the evaluator (Precondition C(b)) rather than a deterministic oracle.
+10. **Partial delivery:** only the addendum items were delivered to the custodian. The campaign corpus, keys, aggregate-oracle changes and human-trial banks have no work order, because the 7.1 custodian package depends on retired tooling. This blocks P3b, and the campaign cannot start without it.
+
+Gaps 1 to 3, 6 and 7 are covered by the checker and the attestation trail or accepted explicitly by the stakeholder. Gaps 8 to 10 need a stakeholder ruling or a work order before P3b.
 
 ## 9. What is needed from the user to proceed
 
-1. Name the custodian, checker and evaluator sessions and the evaluator model (decision 2).
-2. Deliver the custodian addendum (revision 2, `S4-CUSTODIAN-WORK-ORDER-ADDENDUM-2026-10-08.md`) to the custodian, and open the 7.2 store under decision 1.
-3. Arrange the independent check of this draft and the S4 exposure changes (contract §8). It is then revised and issued.
-
-Gap 4 is closed for what the builder covers (see gap 4). The `h4.py` Q2U change and the builder's definitions go to the checker with the rest of the draft. Gaps 1, 3, 5 and 6 stay as listed: covered by the checker and the attestation trail, or accepted by the stakeholder.
+1. Rule on the section 8, item 8 questions (gate assignment, scope statements, qualifiers, the hedged clause, the boundary cases).
+2. Name the P5 pre-run checker and the evaluator session and model (decision 2).
+3. Commission the full P3b work order for the custodian (section 8, item 10), including the location of the harness interface files: the custodian found no `~/ssdp71-fixture-custody`, which the addendum named.
+4. Re-check the revised draft and the S4 exposure changes (contract §8), then issue.
