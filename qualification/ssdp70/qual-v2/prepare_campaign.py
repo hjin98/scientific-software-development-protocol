@@ -11,6 +11,8 @@
   verify        audits completed runs against the plan with build_campaign_record.py (no scoring)
   refresh-identity  re-records tool hashes and the repo head in campaign-identity.json after analyst-tool changes (arms and key re-verified)
 
+Stages (gate order, contract section 5): stage 1 is the main panel (Q1 to Q4), stage 2 the Q5 panels; stage 2 starts only after the
+analyst has scored stage 1 and written authorizations/stage2.ok.
 Panels and arms (override with --config): main/routing/versioning/r2/ordinary -> p72 p66 p66b; burden -> p72 p65;
 sentinels/unversioned -> p72. A panel named `<base>-add` is conditional: it uses the base arms and is never run by the runner
 until the analyst authorizes it (T7 added pairs, Q5e and Q5f extra runs).
@@ -51,6 +53,7 @@ CHUNK, PARALLEL_MAX = 16, 8
 STATIC_BASELINES = {"entry": 8360, "owner": 25188}          # historical 6.5 planning figures (Q5C-STATIC-PREMEASUREMENT-2026-10-07.md)
 MARGIN = 512
 EVALUATOR_PROVIDER = "deepinfra"
+EVALUATOR_TURNS = 20                                   # the committed template allows 40; a cap bounds the context re-sent each turn
 
 
 def write_json(path: Path, value) -> None:
@@ -82,7 +85,8 @@ def build_evaluator_key(work: Path, model_id: str) -> None:
     route = dict(source["containment_policy"]["provider_route"])
     route["model_id"] = model_id
     profile = omp.freeze_profile(template, executable_path=str(Path.home() / ".local/bin/omp"), provider_route=route,
-                                 reasoning=source["reasoning_configuration"], profile_id="omp-evaluator-readonly")
+                                 reasoning=source["reasoning_configuration"], profile_id="omp-evaluator-readonly",
+                                 budgets={"max_turns": EVALUATOR_TURNS, "timeout_s": 1800})
     profile["activation_mechanism"] = "runtime-command"
     profile["runtime_input_template"] = omp.input_template("runtime-command")
     write_json(work / "keys" / "omp-evaluator-readonly.json", profile)
@@ -272,7 +276,8 @@ def cmd_plan(a) -> int:
             for e in part:
                 argv += ["--only", e["id"]]
             runs = sum(int(e.get("replicates", 1)) for e in part) * len(used)
-            commands.append({"key": key, "panel": panel, "conditional": conditional, "episodes": len(part), "runs": runs,
+            commands.append({"key": key, "panel": panel, "stage": 1 if panel == "main" else 2, "conditional": conditional,
+                             "episodes": len(part), "runs": runs,
                              "arms": used, "argv": argv, "shell": shlex.join(argv)})
             for e in part:
                 f = flags.get(e["id"], {})
@@ -345,11 +350,16 @@ def cmd_verify(a) -> int:
     arms, _ = load_arms(work)
     roots = [d for d in sorted((work / "runs").glob("*")) if d.is_dir() and not d.name.startswith("rerun")]
     reruns = [d for d in sorted((work / "runs").glob("rerun*")) if d.is_dir()]
+    if not roots:
+        print("no run directories yet under runs/")
+        return 2
     decl = json.loads((work / "declaration.json").read_text())
     run_decl = {k: v for k, v in decl.items() if k != "conditional_slots"}
-    ran_conditional = a.include_conditional
-    if ran_conditional:
-        run_decl["slots"] = decl["slots"] + decl["conditional_slots"]
+    stage_of = {c["panel"]: int(c.get("stage", 1)) for c in json.loads((work / "commands.json").read_text())["commands"]}
+    if a.stage:                                                      # only the stages launched so far are declared
+        run_decl["slots"] = [x for x in decl["slots"] if stage_of.get(x["panel"], 1) <= a.stage]
+    if a.include_conditional:
+        run_decl["slots"] = run_decl["slots"] + decl["conditional_slots"]
     (work / "declaration.effective.json").write_text(json.dumps(run_decl))
     cmd = [sys.executable, str(HERE / "build_campaign_record.py"), "--declaration", str(work / "declaration.effective.json"),
            "--map", str(a.map), "--allow-unresolved", "--audit", str(work / "campaign-verify.json")]
@@ -383,6 +393,7 @@ def main() -> int:
         if name == "verify":
             sp.add_argument("--map", type=Path, required=True)
             sp.add_argument("--include-conditional", action="store_true")
+            sp.add_argument("--stage", type=int, help="verify only the slots of stages up to N (default: all unconditional slots)")
     a = ap.parse_args()
     return {"init": cmd_init, "static": cmd_static, "check-corpus": cmd_check_corpus, "plan": cmd_plan,
             "check-plan": cmd_check_plan, "verify": cmd_verify, "refresh-identity": cmd_refresh_identity}[a.cmd](a)

@@ -94,6 +94,28 @@ class Plan(unittest.TestCase):
         self.assertEqual(p.returncode, 2)
         self.assertIn("not authorized", p.stderr)
 
+    def test_stages_follow_gate_order_and_stage2_needs_authorization(self):
+        run(HERE / "prepare_campaign.py", "plan", *self.args)
+        plan = json.loads((self.work / "commands.json").read_text())["commands"]
+        self.assertEqual({c["panel"]: c["stage"] for c in plan}, {"main": 1, "burden": 2, "burden-add": 2, "sentinels": 2})
+        env = {"PATH": "/usr/bin:/bin", "SSDP70_OMP_PROVIDER_CREDENTIAL": "x"}
+        p = subprocess.run([sys.executable, HERE / "campaign_run.py", str(self.work), "start", "2"], capture_output=True, text=True, env=env)
+        self.assertEqual(p.returncode, 2)
+        self.assertIn("not authorized", p.stderr)
+        (self.work / "authorizations").mkdir()
+        (self.work / "authorizations" / "stage2.ok").write_text("ok")
+        p = subprocess.run([sys.executable, HERE / "campaign_run.py", str(self.work), "start", "2"], capture_output=True, text=True, env=env)
+        self.assertEqual(p.returncode, 2)
+        self.assertIn("has not finished", p.stderr)
+
+    def test_evaluator_profile_has_the_turn_cap(self):
+        sys.path.insert(0, str(HERE))
+        import prepare_campaign
+        prepare_campaign.build_evaluator_key(self.work, "deepseek-ai/DeepSeek-V4.1-Flash")
+        prof = json.loads((self.work / "keys" / "omp-evaluator-readonly.json").read_text())
+        self.assertEqual(prof["budgets"]["max_turns"], 20)
+        self.assertEqual(prof["agent_model"], "deepinfra/deepseek-ai/DeepSeek-V4.1-Flash")
+
     def test_evaluator_must_not_be_the_executor(self):
         # the evaluator key builder refuses the executor model (calls the module function on a scratch copy)
         sys.path.insert(0, str(HERE))
@@ -104,6 +126,26 @@ class Plan(unittest.TestCase):
 
 
 class Assess(unittest.TestCase):
+    def test_panel_filter_and_cost_projection(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            work = Path(tmp)
+            (work / "commands.json").write_text(json.dumps({"commands": [
+                {"key": "main-c01", "panel": "main", "runs": 6}, {"key": "routing-c01", "panel": "routing", "runs": 9}]}))
+            for key, name in (("main-c01", "EP-001-p72-r0"), ("main-c01", "EP-001-p66-r0"), ("routing-c01", "P01-p72-r0")):
+                d = work / "runs" / key / name
+                d.mkdir(parents=True)
+                (d / "summary.json").write_text(json.dumps({"evidence_state": "COMPLETE_ADMISSIBLE", "episode": name[:6]}))
+                msg = {"type": "message_end", "message": {"role": "assistant", "usage": {"input": 10000, "cacheRead": 40000, "output": 1000}}}
+                (d / "assessment-trace.jsonl").write_text(json.dumps(msg) + "\n" + json.dumps(msg) + "\n")
+            p = run(HERE / "campaign_assess.py", "cost", work, "--price-in", "0.2", "--price-cached", "0.006", "--price-out", "0.6")
+            out = json.loads(p.stdout)
+            self.assertEqual(out["assessed_runs"], 2)                       # the routing run is outside the default panels
+            self.assertEqual(out["mean_turns"], 2.0)
+            self.assertEqual(out["cache_hit_rate"], 0.8)
+            self.assertEqual(out["planned_evaluable_runs"], 6)
+            self.assertAlmostEqual(out["mean_usd_per_run"], (2 * (10000 * 0.2 + 40000 * 0.006 + 1000 * 0.6)) / 1e6, places=4)
+            self.assertAlmostEqual(out["projected_usd"], round(out["mean_usd_per_run"] * 6, 2), places=2)
+
     def test_collect_reads_valid_assessments_and_lists_the_rest(self):
         with tempfile.TemporaryDirectory() as tmp:
             work = Path(tmp)

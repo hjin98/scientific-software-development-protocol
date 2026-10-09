@@ -51,12 +51,14 @@ cd $REPO && git status --short && git rev-parse HEAD    # write both outputs int
 
 ## 3. Launch (the stakeholder is present or has said GO; the credential is in your shell)
 
+The campaign runs in two stages, in gate order. **Stage 1** is the main panel (366 runs). **Stage 2** is the preservation panels (274 runs) and starts only after the analyst has scored stage 1 and written `$W/authorizations/stage2.ok`. If stage 1 shows the candidate has failed an earlier gate, the analyst will not authorize stage 2, and you stop there.
+
 ```bash
 export SSDP70_OMP_PROVIDER_CREDENTIAL=...     # the stakeholder gives you the key; never print it
-python3 $Q/campaign_run.py $W start           # prints: started the sequential runner (pid N)
+python3 $Q/campaign_run.py $W start 1         # prints: started the sequential runner for stage 1 (pid N)
 ```
 
-If it prints anything else, stop. Do not run `start` twice.
+If it prints anything else, stop. Do not run `start 1` twice. Stage 2 (only when told, with the `.ok` file present): `python3 $Q/campaign_run.py $W start 2`; it refuses otherwise.
 
 ## 4. Watch
 
@@ -69,16 +71,16 @@ Run it every 10 to 15 minutes and keep the output. Each command line shows RUNNI
 - **EXIT 0**: the command finished and every run is admissible. The runner goes on to the next command.
 - **EXIT 2**: the command finished and at least one run is not admissible (for example a provider failure). The runner still goes on. Note the command key in your packet for the analyst; do not touch the runs.
 - **HALT** line at the bottom, or **CRASHED**: the sequence stopped. Stop and write an escalation packet. Do not restart.
-- `DONE` at the bottom: every unconditional command finished.
+- `DONE-stage1` (or `DONE-stage2`) at the bottom: every unconditional command of that stage finished.
 
 You may leave the terminal alone between checks. If your own session or machine goes down, do not relaunch: write what you saw into a packet and ask the analyst.
 
-## 5. After DONE: verify (no credential needed)
+## 5. After each stage: verify (no credential needed)
 
 The analyst gives you the gate-map path in the READY file (a file under the custodian's `operator/` directory, meant for you).
 
 ```bash
-python3 $Q/prepare_campaign.py verify --work $W --map "<gate-map path from READY>"
+python3 $Q/prepare_campaign.py verify --work $W --map "<gate-map path from READY>" --stage <1 after stage 1, 2 after stage 2>
 echo "exit=$?"
 ```
 
@@ -86,12 +88,21 @@ Expected: `"findings": []` and `exit=0`. Findings of kind `RERUN_PENDING`, `INAD
 
 ## 6. Evaluator pass (P9): only when `$W/keys/omp-evaluator-readonly.json` exists and READY says `EVALUATION MAY START`
 
+The evaluator pass covers the main, versioning and sentinel panels only (the other panels are scored by binding oracles or recorded bytes). It has a **pilot first**, then the rest. The evaluator key variable may differ from the executor's: use the one READY names.
+
 ```bash
-python3 $Q/campaign_assess.py run $W --keys-root "<keys root from READY>" \
-  --evaluator-profile $W/keys/omp-evaluator-readonly.json \
-  --evaluator-capabilities $W/keys/omp-evaluator-readonly.capabilities.json \
-  --shared-rubric "<rubric path from READY>" --parallel 4
+EV="--keys-root <keys root from READY> --evaluator-profile $W/keys/omp-evaluator-readonly.json \
+    --evaluator-capabilities $W/keys/omp-evaluator-readonly.capabilities.json --shared-rubric <rubric path from READY>"
+python3 $Q/campaign_assess.py run $W $EV --parallel 4 --limit 5           # the pilot: five runs
+python3 $Q/campaign_assess.py cost $W --price-in <P> --price-cached <P> --price-out <P>   # prices come from READY
+```
+
+Copy the `cost` output into your notes and **stop**. The analyst compares the measured dollars per run and the projection with the budget and writes `$W/authorizations/evaluator-full.ok` if the full pass may go ahead. Only then:
+
+```bash
+python3 $Q/campaign_assess.py run $W $EV --parallel 4
 python3 $Q/campaign_assess.py collect $W --out $W/dispositions.json
+python3 $Q/campaign_assess.py cost $W --price-in <P> --price-cached <P> --price-out <P>
 ```
 
 Expected: `collect` prints `"problems": []`. Any problem entry goes into the packet as it is. Do not rerun an assessment.

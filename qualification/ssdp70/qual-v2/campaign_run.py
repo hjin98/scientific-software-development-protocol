@@ -1,8 +1,10 @@
 #!/usr/bin/env python3
 """Sequential campaign runner for the operator (launches live runs only when the operator starts it from their own terminal).
 
-  campaign_run.py WORK start              needs SSDP70_OMP_PROVIDER_CREDENTIAL; runs every unconditional command in commands.json one
-                                          after another (so at most --parallel runs are in flight), detached in its own session
+  campaign_run.py WORK start [STAGE]     needs SSDP70_OMP_PROVIDER_CREDENTIAL; runs the unconditional commands of one stage (default 1:
+                                          the main panel) one after another (so at most --parallel runs are in flight), detached in
+                                          its own session. Stage 2 (the Q5 panels) starts only if the analyst wrote authorizations/stage2.ok
+                                          after scoring stage 1 (contract section 5: a later gate cannot compensate for an earlier failure).
   campaign_run.py WORK status             per command: NOT-LAUNCHED | RUNNING | EXIT <rc> | CRASHED; runs started and summaries so far
   campaign_run.py WORK run-conditional KEY   runs one conditional command; only if WORK/authorizations/KEY.ok exists (written by the analyst)
 
@@ -53,10 +55,10 @@ def run_one(work: Path, c: dict) -> int:
     return rc
 
 
-def loop(work: Path) -> None:
-    (work / "launch" / "runner.pid").write_text(str(os.getpid()))
+def loop(work: Path, stage: int) -> None:
+    (work / "launch" / f"runner-stage{stage}.pid").write_text(str(os.getpid()))
     for c in commands(work):
-        if c.get("conditional"):
+        if c.get("conditional") or int(c.get("stage", 1)) != stage:
             continue
         if state(work, c["key"]) != "NOT-LAUNCHED":
             continue
@@ -64,7 +66,7 @@ def loop(work: Path) -> None:
         if rc not in CONTINUE:
             (work / "launch" / "HALT").write_text(f"{c['key']} exited {rc}\n")
             return
-    (work / "launch" / "DONE").write_text(time.strftime("%FT%TZ", time.gmtime()) + "\n")
+    (work / "launch" / f"DONE-stage{stage}").write_text(time.strftime("%FT%TZ", time.gmtime()) + "\n")
 
 
 def counts(work: Path, key: str) -> tuple[int, int, int]:
@@ -79,26 +81,33 @@ def main() -> int:
         return 2
     work, action = Path(sys.argv[1]).resolve(), sys.argv[2]
     if action == "_loop":
-        loop(work)
+        loop(work, int(sys.argv[3]))
         return 0
     if action == "start":
         if not os.environ.get("SSDP70_OMP_PROVIDER_CREDENTIAL"):
             print("SSDP70_OMP_PROVIDER_CREDENTIAL is not set", file=sys.stderr)
             return 2
-        if (work / "launch" / "runner.pid").exists() or (work / "launch" / "HALT").exists():
+        stage = int(sys.argv[3]) if len(sys.argv) > 3 else 1
+        if stage > 1 and not (work / "authorizations" / f"stage{stage}.ok").exists():
+            print(f"stage {stage} is not authorized: the analyst has not written authorizations/stage{stage}.ok", file=sys.stderr)
+            return 2
+        if stage > 1 and not (work / "launch" / f"DONE-stage{stage - 1}").exists():
+            print(f"stage {stage - 1} has not finished (no DONE-stage{stage - 1})", file=sys.stderr)
+            return 2
+        if (work / "launch" / f"runner-stage{stage}.pid").exists() or (work / "launch" / "HALT").exists():
             print("a runner was already started or halted here; do not relaunch; see the hand-off, section on halts", file=sys.stderr)
             return 2
         (work / "launch").mkdir(parents=True, exist_ok=True)
-        proc = subprocess.Popen([sys.executable, str(Path(__file__).resolve()), str(work), "_loop"], start_new_session=True,
+        proc = subprocess.Popen([sys.executable, str(Path(__file__).resolve()), str(work), "_loop", str(stage)], start_new_session=True,
                                 stdout=open(work / "launch" / "runner.log", "ab"), stderr=subprocess.STDOUT, stdin=subprocess.DEVNULL)
-        print(f"started the sequential runner (pid {proc.pid})")
+        print(f"started the sequential runner for stage {stage} (pid {proc.pid})")
         return 0
     if action == "status":
         for c in commands(work):
             started, summaries, errors = counts(work, c["key"])
-            print(f"{c['key']:<18} {'(conditional) ' if c.get('conditional') else ''}{state(work, c['key']):<14} "
+            print(f"{c['key']:<18} stage {c.get('stage', 1)} {'(conditional) ' if c.get('conditional') else ''}{state(work, c['key']):<14} "
                   f"started {started:>3} summaries {summaries:>3} of {c['runs']:>3}  error files {errors}")
-        for flag in ("HALT", "DONE"):
+        for flag in ("HALT", "DONE-stage1", "DONE-stage2"):
             if (work / "launch" / flag).exists():
                 print(flag, (work / "launch" / flag).read_text().strip())
         return 0
