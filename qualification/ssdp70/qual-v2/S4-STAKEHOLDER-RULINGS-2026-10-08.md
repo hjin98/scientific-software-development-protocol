@@ -67,6 +67,15 @@ These are stakeholder rulings on how the contract's undefined or silent terms ar
 | U-1, restated for the oracle | A hedged findings clause alone never produces a binding fail on `delegate_request.unowed.*`; it produces its label and no gate reads it. When a request exists but the oracle cannot detect its topic by text, the item goes to the evaluator as unresolved; it never becomes a binding fail. |
 | Q5 observations | The builder produces Q5a, Q5b, Q5e and Q5f from the gate map's `q5` block (measure lists per field, shape fixed by `build_campaign_record.py`). Q5b `strict` is all strict-measure items pass; `never` is any never-stated item failing. |
 
+## Sixth set (2026-10-09; stakeholder: "I accept your recommendations")
+
+| Item | Ruling |
+|---|---|
+| Early stop | **Not available.** Staging is an ordering only; the analyst computes no candidate gate between stages; stage 2 follows a clean stage-1 `verify`. An early stop would need contract section 8 change control and a new stakeholder decision. |
+| C(b) versus P9 format | **Accepted as a stated instrument limitation.** C(b) judges one curated item per session and P9 gives the evaluator a whole run bundle. Mitigation: the analyst reads the evidence strings of the 5 pilot assessments (no fixture or label content) and reports unsupported ones before the full evaluator pass. |
+| T7 stopping rule | Operational definition: add pairs two at a time while either arm's T7 runs are in mixed modes, up to seven pairs (the pre-measurement record's rule, as `h4.py` implements). |
+| Evaluator | `deepinfra/deepseek-ai/DeepSeek-V4.1-Flash`, 20 turns. |
+
 ## Custodian restart
 
 The first custodian pass (store `~/ssdp72-fixture-custody`, FREEZE.sha256 digest `6f1199d3…9a95`) read addendum revision 2 before authoring and is **superseded**; it stays untouched as evidence and is not used. A fresh custodian session builds a new store on revision 3 and these rulings. It must not read the first store.
