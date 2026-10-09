@@ -12,7 +12,7 @@ adds_no: gate, threshold, margin or exposure (the exposure minima are the contra
 
 Governing SSDP version: 6.6.0. This draft is data, not instructions to any agent that has not been assigned the custodian role by the user.
 
-**Blindness.** The custodian is not given the campaign work order draft, the S4 report, or any file recording development results or adjudication. The few campaign rules the custodian needs are inlined here: (a) the T7 added-pair rule is predeclared as follows: T7 gets three fresh paired runs per arm and adds two pairs while the median sits on an entrypoint-only / owner-read boundary, up to seven pairs; (b) custody follows the attestation path of section 1; (c) the operator snapshots store metadata before and after each custodian session.
+**Blindness.** The custodian is not given the campaign work order draft, the S4 report, or any file recording development results or adjudication. The few campaign rules the custodian needs are inlined here: (a) the T7 added-pair rule is predeclared as follows: T7 gets three fresh paired runs per arm and adds two pairs while either arm's T7 runs are in mixed entrypoint-only / owner-read modes, up to seven pairs (the pre-measurement record's rule); (b) custody follows the attestation path of section 1; (c) the operator snapshots store metadata before and after each custodian session.
 
 # Custodian work order: the 7.2 qualification corpus, keys, oracles and evaluator calibration (P3a, P3b, P6 inputs)
 
