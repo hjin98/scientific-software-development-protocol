@@ -1,6 +1,6 @@
 ---
 kind: campaign-work-order
-status: DRAFT revision 2 by the S4 analyst after the independent check of 2026-10-08 (NO-PASS on revision 1 with blockers B1 to B6, addressed here; the deltas need a re-check); not issued, not launched; nothing here authorizes a live run
+status: DRAFT revision 3 by the S4 analyst (revision 2 answered the NO-PASS of 2026-10-08, blockers B1 to B6; revision 3 adds the 2026-10-09 stakeholder decisions in section 10 and needs a final independent re-read before issue); not issued, not launched; nothing here authorizes a live run
 governing_protocol_version: 6.6.0
 target_protocol_version: 7.2.0 (candidate, frozen identity `2dedcfa3408f62bc11a696ac3776183a87b40438`; non-governing)
 date_utc: 2026-10-08
@@ -121,10 +121,22 @@ These are recorded decisions, not an issue of the work order: the draft still ne
 
 Gaps 1 to 3, 6 and 7 are covered by the checker and the attestation trail or accepted explicitly by the stakeholder. Gaps 8 to 10 need a stakeholder ruling or a work order before P3b.
 
-## 9. What is needed from the user to proceed
+## 9. What is needed to proceed (revision 3)
 
-1. Let `custodian-7.2-b` finish; its store passes the pre-run check (`checker-p5-7.2-a`) before anything is frozen.
-2. Issue the P3b work order (`P3B-CUSTODIAN-CORPUS-WORK-ORDER-DRAFT-2026-10-08.md`) to the custodian and name the store path.
-3. Confirm which 6.5 baseline the 512 B Q5c static margin uses: the pre-measurement (`Q5C-STATIC-PREMEASUREMENT-2026-10-07.md`) is computed on the 8,360 B historical figure, while stage 2 measured 6.5 higher under this executor. P4 states the choice.
-4. Order of checks: Precondition C(a) and C(b) before the launch; C(c) needs the B1/B2 runs, so it runs after those runs and before any candidate result is computed.
-5. A short re-read of this revision by an independent checker, then issue.
+1. A final independent re-read of this draft against section 10 and the tools (this revision).
+2. Precondition C: C(a) from the custodian's probe record, C(b) with the frozen evaluator, C(c) after the B1/B2 runs.
+3. The candidate freeze, then the custody freeze (the operator sets FREEZE-GATE after the checker's PASS and the stakeholder's decision).
+4. The stakeholder's launch authorization and the credential in the operator's shell; the analyst then writes `READY`.
+
+## 10. Decisions and changes of 2026-10-09 (stakeholder: "go with your recommendation", "freeze the evaluator model as DeepSeek V4.1 Flash")
+
+| Item | Decision |
+|---|---|
+| Evaluator | `deepinfra/deepseek-ai/DeepSeek-V4.1-Flash`, frozen in the campaign directory (profile digest in `campaign-identity.json`), read-only evaluator profile, 20-turn cap (the template allowed 40), same provider route and credential variable as the executor. Never the executor model (contract section 3; `assess70.py` refuses). |
+| Evaluator scope | The main, versioning and sentinel panels. Routing, unversioned and burden items are binding oracles or recorded bytes and need no model. |
+| Staged launch (gate order, contract section 5) | Stage 1 is the main panel (Q1 to Q4). Stage 2 (Q5 panels) starts only after the analyst scores stage 1 and writes `authorizations/stage2.ok`. The runner refuses stage 2 otherwise. A stage-1 failure of an earlier gate ends the campaign without stage 2 (a later gate cannot compensate). |
+| Evaluator cost control | A 5-run pilot, measured tokens and dollars (`campaign_assess.py cost`), then the analyst's `authorizations/evaluator-full.ok` before the full evaluator pass. |
+| Static margin baseline | The 512 B Q5c static check uses the historical 6.5 figures (8,360 B entry; 25,188 B workflow owner), as the contract text states them; the live Q5c gate uses fresh paired 6.5 runs (stage 2 measured 38,187 B and 72,996 B under this executor, so the live caps are far looser). Q5d is checked by `tests/test_protocol_72_scientific_checks.py` (byte identity outside the block, mapping complete), run by `prepare_campaign.py static`. |
+| Cost | About $14 executor (measured per-run costs of S4) and an evaluator estimate of about $13 to $20 to be replaced by the pilot. |
+| Precondition C record | `prepare_campaign.py assemble` merges the built record, the custodian's `precondition-c-a.json`, the `score_cb.py` counts (n, agree, failures = the designated 10, caught) and the static block into the `h4.py score` input. |
+| Open term | The designated 10 known failures of the C(b) set fix the sensitivity rule at 10 (fifth-set ruling), because `h4.py` and the contract require 10. |

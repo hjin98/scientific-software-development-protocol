@@ -125,6 +125,58 @@ class Plan(unittest.TestCase):
         self.assertIn("must not be the executor model", str(ctx.exception))
 
 
+class CB(unittest.TestCase):
+    def test_bundle_has_only_item_rubric_and_task_and_parse_is_strict(self):
+        sys.path.insert(0, str(HERE))
+        import campaign_cb
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp = Path(tmp)
+            item = tmp / "cb-aaa.json"
+            item.write_text(json.dumps({"item": "cb-aaa", "report": "SSDP 7.2.0 said so"}))
+            rub = tmp / "rubric.txt"
+            rub.write_text("Rubric for Protocol 7.2.0")
+            b = tmp / "b"
+            b.mkdir()
+            campaign_cb.build_bundle(item, rub, b)
+            self.assertEqual(sorted(p.name for p in b.iterdir() if p.is_file()), ["EVIDENCE-MANIFEST.json", "item.json", "shared-rubric.txt", "task.md"])
+            self.assertNotIn("7.2.0", (b / "shared-rubric.txt").read_text())          # version identifiers are redacted from the rubric
+        p = campaign_cb.parse
+        self.assertEqual(p('{"item":"cb-1","result":"fail","evidence":"x"}', "cb-1")["result"], "fail")
+        self.assertEqual(p('{"item":"cb-2","result":"fail","evidence":"x"}', "cb-1")["result"], "invalid")
+        self.assertEqual(p('{"item":"cb-1","result":"maybe","evidence":"x"}', "cb-1")["result"], "invalid")
+        self.assertEqual(p("no json", "cb-1")["result"], "invalid")
+        self.assertEqual(p(None, "cb-1")["result"], "invalid")
+
+    def test_run_with_a_fake_adapter_writes_results_and_traces(self):
+        sys.path.insert(0, str(HERE))
+        import types
+        import campaign_cb
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp = Path(tmp)
+            work = tmp / "work"
+            shutil.copytree(CAMPAIGN / "keys", work / "keys")
+            sys.path.insert(0, str(HERE))
+            import prepare_campaign
+            prepare_campaign.build_evaluator_key(work, "deepseek-ai/DeepSeek-V4.1-Flash")
+            view = tmp / "view"
+            view.mkdir()
+            for i in ("cb-a", "cb-b"):
+                (view / f"{i}.json").write_text(json.dumps({"item": i}))
+            rub = tmp / "r.txt"
+            rub.write_text("rubric")
+
+            def launch(profile, prompt, bundle, env):
+                item = json.loads((bundle / "item.json").read_text())["item"]
+                out = json.dumps({"type": "result", "result": json.dumps({"item": item, "result": "pass", "evidence": "ok"})})
+                return {"stdout": out + "\n", "stderr": "", "returncode": 0, "command_identity": {}}
+            fake = types.SimpleNamespace(clean_env=lambda: {}, realize_containment=lambda *a, **k: {}, launch=launch)
+            ns = types.SimpleNamespace(work=work, view_dir=view, rubric=rub, out=tmp / "cb-results.json", limit=None, parallel=2)
+            self.assertEqual(campaign_cb.cmd_run(ns, adapter=fake), 0)
+            res = json.loads((tmp / "cb-results.json").read_text())
+            self.assertEqual(res, {"cb-a": {"result": "pass", "evidence": "ok"}, "cb-b": {"result": "pass", "evidence": "ok"}})
+            self.assertTrue((tmp / "cb-traces" / "cb-a.jsonl").exists())
+
+
 class Assess(unittest.TestCase):
     def test_panel_filter_and_cost_projection(self):
         with tempfile.TemporaryDirectory() as tmp:

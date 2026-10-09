@@ -9,6 +9,9 @@
                 declaration.json for build_campaign_record.py, expected-runs.json
   check-plan    provider-free check that the plan resolves (arms, key, episodes, requirements, oracles, counts)
   verify        audits completed runs against the plan with build_campaign_record.py (no scoring)
+  freeze-evaluator  freezes the evaluator profile (--model) in an existing campaign directory and records it in the identity
+  preflight     OK or STOP per check for the operator (READY, digests, tool hashes, plan, binaries, disk, credential presence)
+  report        writes OPERATOR-REPORT.md (status, identity, verification, authorizations, escalations)
   refresh-identity  re-records tool hashes and the repo head in campaign-identity.json after analyst-tool changes (arms and key re-verified)
 
 Stages (gate order, contract section 5): stage 1 is the main panel (Q1 to Q4), stage 2 the Q5 panels; stage 2 starts only after the
@@ -158,6 +161,127 @@ def cmd_refresh_identity(a) -> int:
     return 0
 
 
+def cmd_freeze_evaluator(a) -> int:
+    """Freeze the evaluator profile in an existing campaign directory and record it in campaign-identity.json."""
+    keys = a.work / "keys"
+    if (keys / "omp-evaluator-readonly.json").exists():
+        sys.exit("the evaluator profile is already frozen here; a different model is a new campaign identity")
+    build_evaluator_key(a.work, a.model)
+    bundle = core70.load_profile(keys / "omp-evaluator-readonly.json", keys / "omp-evaluator-readonly.capabilities.json")
+    errors = core70.profile_claim_errors(bundle, [])
+    if errors:
+        (keys / "omp-evaluator-readonly.json").unlink()
+        (keys / "omp-evaluator-readonly.capabilities.json").unlink()
+        sys.exit(f"evaluator profile refused: {errors}")
+    path = a.work / "campaign-identity.json"
+    ident = json.loads(path.read_text())
+    ident["evaluator_profile"] = "frozen"
+    ident["evaluator_agent_model"] = bundle.profile["agent_model"]
+    ident["evaluator_profile_sha256"] = sha(keys / "omp-evaluator-readonly.json")
+    ident["evaluator_profile_key_sha256"] = bundle.profile_key_sha256
+    ident["evaluator_budgets"] = bundle.profile["budgets"]
+    ident["evaluator_credential_env"] = bundle.profile["containment_policy"]["provider_route"]["credential_env"]
+    write_json(path, ident)
+    print(json.dumps({k: ident[k] for k in ident if k.startswith("evaluator")}, indent=1))
+    return 0
+
+
+def row(ok: bool, name: str, detail: str = "") -> bool:
+    print(f"{'OK  ' if ok else 'STOP'} {name}{(': ' + detail) if detail else ''}")
+    return ok
+
+
+def cmd_preflight(a) -> int:
+    """Every check an operator would otherwise do by eye. Prints OK or STOP per line; exit 0 only if nothing STOPs."""
+    import os
+    import shutil
+    work, ok = a.work, True
+    ident = json.loads((work / "campaign-identity.json").read_text())
+    ready = (work / "READY")
+    tokens = {"launch": "OPERATOR MAY LAUNCH", "evaluation": "EVALUATION MAY START"}
+    text = ready.read_text() if ready.exists() else ""
+    ok &= row(tokens[a.phase] in text, f"READY says {tokens[a.phase]!r}", "" if tokens[a.phase] in text else "the READY file is missing or does not say it")
+    try:
+        arms, _ = load_arms(work)
+        bad = [n for n, r in arms.items() if harness70.resolve_arm_dist(r) and r["dist_tree_sha256"] != ident["arms"][n]["dist_tree_sha256"]]
+        ok &= row(not bad, "arm packages match the recorded identities", ",".join(bad))
+    except Exception as exc:  # noqa: BLE001
+        ok &= row(False, "arm packages", str(exc))
+    keys = work / "keys"
+    ok &= row(sha(keys / "omp-primary-flash-executor-main.json") == ident["executor_profile_sha256"], "executor profile digest matches")
+    ev = keys / "omp-evaluator-readonly.json"
+    ok &= row(ev.exists() and sha(ev) == ident.get("evaluator_profile_sha256"), "evaluator profile is frozen and matches",
+              ident.get("evaluator_agent_model", "not frozen"))
+    for name, path, key in (("builder", HERE / "build_campaign_record.py", "builder_sha256"), ("h4", HERE / "h4.py", "h4_sha256"),
+                            ("prepare_campaign", Path(__file__).resolve(), "prepare_campaign_sha256"),
+                            ("campaign_run", HERE / "campaign_run.py", "campaign_run_sha256"),
+                            ("campaign_assess", HERE / "campaign_assess.py", "campaign_assess_sha256"),
+                            ("harness70", EVAL / "harness70.py", "harness_sha256"), ("assess70", EVAL / "assess70.py", "assess_sha256")):
+        ok &= row(sha(path) == ident.get(key), f"tool unchanged since the identity record: {name}")
+    drift = subprocess.run(["git", "-C", str(REPO), "diff", "--stat", ident["candidate_ref"], "HEAD", "--", "source", "dist"], capture_output=True, text=True).stdout.strip()
+    ok &= row(not drift, "candidate source and dist unchanged from the frozen identity")
+    p = subprocess.run([sys.executable, str(Path(__file__).resolve()), "check-plan", "--work", str(work)], capture_output=True, text=True)
+    ok &= row(p.returncode == 0 and '"PASS"' in p.stdout, "check-plan passes", "" if p.returncode == 0 else p.stdout[-300:])
+    st = json.loads((work / "static-premeasurement.json").read_text())["verdict"]
+    ok &= row(st == "PASS", "static pre-measurement", st)
+    omp_bin = Path.home() / ".local/bin/omp"
+    prof = json.loads((keys / "omp-primary-flash-executor-main.json").read_text())
+    ok &= row(omp_bin.is_file() and sha(omp_bin) == prof["provider_runtime"]["executable_sha256"], "omp binary matches the profile digest")
+    ok &= row(Path("/usr/bin/bwrap").exists(), "bubblewrap present")
+    free = shutil.disk_usage(work).free / 1e9
+    ok &= row(free >= 60, "free disk space", f"{free:.0f} GB free (the campaign needs about 25 GB; 60 required)")
+    if a.custody:
+        gate = json.loads((a.custody / "FREEZE-GATE.json").read_text())
+        want = {"candidate_frozen": True, "frozen_run_output_exists": False} if a.phase == "launch" and not (work / "runs").exists() else None
+        ok &= row(want is None or gate == want, "custody FREEZE-GATE", json.dumps(gate))
+    if a.need_credential:
+        ok &= row(bool(os.environ.get("SSDP70_OMP_PROVIDER_CREDENTIAL")), "SSDP70_OMP_PROVIDER_CREDENTIAL is set in this shell (value not shown)")
+    ok &= row(not (work / "launch" / "HALT").exists(), "no HALT file in launch/")
+    print("RESULT:", "ALL OK" if ok else "STOP: write an escalation packet; do not continue")
+    return 0 if ok else 2
+
+
+def cmd_assemble(a) -> int:
+    """Merge the built record with Precondition C inputs and the static block into the final `h4.py score` input."""
+    rec = json.loads(a.record.read_text())
+    ca = json.loads(a.c_a.read_text())
+    cb = json.loads(a.c_b.read_text())
+    need = ("n", "agree", "failures", "caught")
+    if any(k not in cb for k in need):
+        sys.exit(f"the C(b) counts lack one of {need}; use the custodian's score_cb.py output")
+    if not all(isinstance(o.get("good_ok"), bool) and isinstance(o.get("bad_ok"), bool) for o in ca.get("oracles", [])):
+        sys.exit("the C(a) record is malformed")
+    static = json.loads(a.static.read_text())
+    rec["precondition"] = {"oracles": ca["oracles"], "evaluator": {k: cb[k] for k in need}, "attempt": a.attempt}
+    q5d = static.get("q5d", {}).get("passed", False)
+    rec["static"] = {"byte_identical": q5d, "mapping_complete": q5d, "block_bytes": a.block_bytes}
+    rec.setdefault("descriptive", {})["q5c_static_premeasurement"] = static["verdict"]
+    a.out.write_text(json.dumps(rec, indent=1) + "\n")
+    print(json.dumps({"out": str(a.out), "oracles": len(ca["oracles"]), "evaluator": rec["precondition"]["evaluator"], "attempt": a.attempt}))
+    return 0
+
+
+def cmd_report(a) -> int:
+    """One file the operator sends back: status, verification, costs, escalations, identity."""
+    work = a.work
+    run = lambda *args: subprocess.run([sys.executable, *map(str, args)], capture_output=True, text=True).stdout  # noqa: E731
+    parts = ["# Operator report", "", "## Run status", "```", run(HERE / "campaign_run.py", work, "status"), "```"]
+    ident = json.loads((work / "campaign-identity.json").read_text())
+    parts += ["## Identity", "```", json.dumps({k: ident[k] for k in ("candidate_ref", "executor_agent_model", "evaluator_agent_model", "repo_head") if k in ident}, indent=1), "```"]
+    for f in ("campaign-verify.json", "dispositions.json"):
+        if (work / f).exists():
+            parts += [f"## {f} (head)", "```", (work / f).read_text()[:3000], "```"]
+    esc = sorted((work / "escalations").glob("*")) if (work / "escalations").exists() else []
+    parts += ["## Escalation packets", *([f"- {e.name}" for e in esc] or ["- none"])]
+    auth = sorted((work / "authorizations").glob("*")) if (work / "authorizations").exists() else []
+    parts += ["## Authorizations present", *([f"- {e.name}" for e in auth] or ["- none"])]
+    parts += ["## Run directories", *[f"- {d.name}: {len(list(d.glob('*-r*/summary.json')))} summaries" for d in sorted((work / "runs").glob("*")) if d.is_dir()]]
+    out = work / "OPERATOR-REPORT.md"
+    out.write_text("\n".join(parts) + "\n")
+    print(f"wrote {out}")
+    return 0
+
+
 def cmd_static(a) -> int:
     arms, _ = load_arms(a.work)
     dist = harness70.resolve_arm_dist(arms["p72"])
@@ -178,6 +302,11 @@ def cmd_static(a) -> int:
            "sizes": {"entrypoint": entry, "workflow_owner": workflow, "scientific_inspectability_owner": inspect_owner},
            "rows": rows, "outside_enumerated_modes": risks,
            "verdict": "PASS" if all(r["verdict"] == "OK" for r in rows) else "BREACH: stops qualification, goes to the stakeholder (contract section 5)"}
+    t = subprocess.run([sys.executable, "-m", "unittest", "tests.test_protocol_72_scientific_checks"], cwd=REPO, capture_output=True, text=True)
+    out["q5d"] = {"tests": "tests.test_protocol_72_scientific_checks", "passed": t.returncode == 0, "tail": t.stderr.strip().splitlines()[-3:],
+                  "covers": "O-2 byte identity of the 6.6 text outside the block (source and dist), frozen-minimum mapping complete"}
+    if t.returncode != 0:
+        out["verdict"] = "BREACH: the Q5d static tests fail (" + out["verdict"] + ")"
     write_json(a.work / "static-premeasurement.json", out)
     print(json.dumps(out, indent=1))
     return 0 if out["verdict"] == "PASS" else 2
@@ -378,12 +507,26 @@ def cmd_verify(a) -> int:
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     sub = ap.add_subparsers(dest="cmd", required=True)
-    for name in ("init", "static", "check-corpus", "plan", "check-plan", "verify", "refresh-identity"):
+    for name in ("init", "static", "check-corpus", "plan", "check-plan", "verify", "refresh-identity", "freeze-evaluator", "preflight", "report", "assemble"):
         sp = sub.add_parser(name)
         sp.add_argument("--work", type=Path, required=True)
         if name == "init":
             sp.add_argument("--candidate-ref", default=CANDIDATE_REF)
             sp.add_argument("--evaluator-model", help="model id on the deepinfra route (never the executor model); omit to leave the evaluator unfrozen")
+        if name == "freeze-evaluator":
+            sp.add_argument("--model", required=True, help="model id on the deepinfra route, never the executor model")
+        if name == "assemble":
+            sp.add_argument("--record", type=Path, required=True)
+            sp.add_argument("--c-a", type=Path, required=True)
+            sp.add_argument("--c-b", type=Path, required=True)
+            sp.add_argument("--static", type=Path, required=True)
+            sp.add_argument("--attempt", type=int, default=1)
+            sp.add_argument("--block-bytes", type=int, default=0)
+            sp.add_argument("--out", type=Path, required=True)
+        if name == "preflight":
+            sp.add_argument("--phase", choices=("launch", "evaluation"), required=True)
+            sp.add_argument("--custody", type=Path)
+            sp.add_argument("--need-credential", action="store_true")
         if name in ("check-corpus", "plan"):
             sp.add_argument("--corpus", type=Path, required=True)
             sp.add_argument("--requirements", type=Path, required=True)
@@ -396,7 +539,8 @@ def main() -> int:
             sp.add_argument("--stage", type=int, help="verify only the slots of stages up to N (default: all unconditional slots)")
     a = ap.parse_args()
     return {"init": cmd_init, "static": cmd_static, "check-corpus": cmd_check_corpus, "plan": cmd_plan,
-            "check-plan": cmd_check_plan, "verify": cmd_verify, "refresh-identity": cmd_refresh_identity}[a.cmd](a)
+            "check-plan": cmd_check_plan, "verify": cmd_verify, "refresh-identity": cmd_refresh_identity,
+            "freeze-evaluator": cmd_freeze_evaluator, "preflight": cmd_preflight, "report": cmd_report, "assemble": cmd_assemble}[a.cmd](a)
 
 
 if __name__ == "__main__":
