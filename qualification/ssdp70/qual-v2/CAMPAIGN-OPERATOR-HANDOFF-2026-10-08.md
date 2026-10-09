@@ -68,7 +68,7 @@ Run this before every phase. It prints OK or STOP per line.
 python3 $Q/prepare_campaign.py preflight --work $W --phase launch --custody $S
 ```
 
-Before sections 5 and 7 use `--phase evaluation` instead, and add `--need-credential` before any command that spends money:
+Before section 5 use `--phase calibration` instead, before sections 7 and 8 use `--phase evaluation`, and add `--need-credential` before any command that spends money:
 
 ```bash
 python3 $Q/prepare_campaign.py preflight --work $W --phase evaluation --custody $S --need-credential
@@ -85,7 +85,7 @@ Purpose: show the evaluator model is a fair judge before it judges anything. It 
 
 ```bash
 export SSDP70_OMP_PROVIDER_CREDENTIAL=...        # given to you by the stakeholder; never print it
-python3 $Q/prepare_campaign.py preflight --work $W --phase evaluation --custody $S --need-credential
+python3 $Q/prepare_campaign.py preflight --work $W --phase calibration --custody $S --need-credential
 mkdir -p $W/calibration
 python3 $Q/campaign_cb.py run --work $W --view-dir $S/calibration/cb-set/items --rubric $S/keys/SHARED-RUBRIC.txt --task-doc $S/calibration/cb-set/EVALUATOR-TASK.md --out $W/calibration/cb-results.json --parallel 4
 python3 $S/operator/score_cb.py $W/calibration/cb-results.json | tee $W/calibration/cb-score.json
@@ -159,7 +159,7 @@ Expected: `collect` prints `"problems": []`. Any problem entry goes into the pac
 
 ## 8. Stage 2: the preservation panels (274 runs): only when READY says `STAGE 2 MAY START`
 
-The analyst scores stage 1 first. If the candidate failed an earlier gate, the analyst will not authorize stage 2 and the campaign ends there. That is a normal outcome, not an error.
+Stage 2 follows stage 1 as soon as the analyst has looked at your stage-1 verify output and written the READY line. The analyst does not score the candidate between the stages. If the stage-1 verify output has an INTEGRITY finding, the analyst will not release stage 2; that is a normal outcome, not an error.
 
 ```bash
 ls $W/authorizations/stage2.ok                    # must exist
@@ -171,7 +171,7 @@ python3 $Q/campaign_run.py $W start 2
 Watch with `campaign_run.py $W status` exactly as in section 6 until `DONE-stage2`. Then:
 
 ```bash
-python3 $Q/prepare_campaign.py verify --work $W --map $S/operator/gate-map.json --stage 2
+python3 $Q/prepare_campaign.py verify --work $W --map $S/operator/gate-map.json --stage 2 [--include-conditional <keys the analyst authorized and you ran>]
 echo "exit=$?"
 python3 $Q/prepare_campaign.py report --work $W
 ```
@@ -187,7 +187,7 @@ python3 $Q/campaign_assess.py collect $W --panels main versioning sentinels sent
 
 ## 9. Extra runs and reruns (only on the analyst's instruction)
 
-- **Conditional runs** (extra T7 pairs, extra sentinel and lookup runs): the analyst writes `$W/authorizations/<key>.ok`. Then, and only then: `python3 $Q/campaign_run.py $W run-conditional <key>`. The tool refuses without the file. Never create the file yourself.
+- **Conditional runs** (extra T7 pairs, extra sentinel and lookup runs; each command holds two episodes, so they come one small command at a time): the analyst writes `$W/authorizations/<key>.ok`. Then, and only then: `python3 $Q/campaign_run.py $W run-conditional <key>`. The tool refuses without the file. Never create the file yourself.
 - **Reruns of lost runs:** the analyst gives you an exact command line in a message. You run that command and nothing else. You never choose to rerun.
 
 ## 10. Escalation packet (what to write when anything is a STOP)

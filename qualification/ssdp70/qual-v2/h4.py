@@ -371,8 +371,9 @@ def main() -> None:
     if a.cmd == "precondition":
         rec = json.loads(a.campaign.read_text())
         rec["runs"] = [r for r in rec.get("runs", []) if r["arm"] in ("b1", "b2")]   # C(c) is computed blind to candidate results
-        print(json.dumps(precondition_c(Campaign(rec)), indent=1, default=str))
-        sys.exit(0)
+        out = precondition_c(Campaign(rec))
+        print(json.dumps(out, indent=1, default=str))
+        sys.exit(0 if out["C(c)"] else 2)          # C(a) and C(b) are checked at assembly; this command answers the A/A screen only
     print(json.dumps(legacy_figures(legacy_rows(a.runs)), indent=1, sort_keys=True))
 
 

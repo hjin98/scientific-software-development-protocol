@@ -88,6 +88,11 @@ def main() -> int:
             print("SSDP70_OMP_PROVIDER_CREDENTIAL is not set", file=sys.stderr)
             return 2
         stage = int(sys.argv[3]) if len(sys.argv) > 3 else 1
+        ready = (work / "READY").read_text() if (work / "READY").exists() else ""
+        need = "OPERATOR MAY LAUNCH" if stage == 1 else "STAGE 2 MAY START"
+        if need not in ready:
+            print(f"READY does not say {need!r}; the analyst has not released this stage", file=sys.stderr)
+            return 2
         if stage > 1 and not (work / "authorizations" / f"stage{stage}.ok").exists():
             print(f"stage {stage} is not authorized: the analyst has not written authorizations/stage{stage}.ok", file=sys.stderr)
             return 2

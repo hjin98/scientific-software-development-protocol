@@ -87,6 +87,10 @@ class Plan(unittest.TestCase):
         p = subprocess.run([sys.executable, HERE / "campaign_run.py", str(self.work), "start"], capture_output=True, text=True, env=env)
         self.assertEqual(p.returncode, 2)
         self.assertIn("CREDENTIAL", p.stderr)
+        p = subprocess.run([sys.executable, HERE / "campaign_run.py", str(self.work), "start", "1"], capture_output=True, text=True,
+                           env={**env, "SSDP70_OMP_PROVIDER_CREDENTIAL": "x"})
+        self.assertEqual(p.returncode, 2)
+        self.assertIn("READY does not say", p.stderr)
         self.assertFalse((self.work / "launch").exists() and any((self.work / "launch").iterdir()))
         key = next(c["key"] for c in json.loads((self.work / "commands.json").read_text())["commands"] if c["conditional"])
         p = subprocess.run([sys.executable, HERE / "campaign_run.py", str(self.work), "run-conditional", key], capture_output=True, text=True,
@@ -99,6 +103,7 @@ class Plan(unittest.TestCase):
         plan = json.loads((self.work / "commands.json").read_text())["commands"]
         self.assertEqual({c["panel"]: c["stage"] for c in plan}, {"main": 1, "burden": 2, "burden-add": 2, "sentinels": 2})
         env = {"PATH": "/usr/bin:/bin", "SSDP70_OMP_PROVIDER_CREDENTIAL": "x"}
+        (self.work / "READY").write_text("STAGE 2 MAY START\n")
         p = subprocess.run([sys.executable, HERE / "campaign_run.py", str(self.work), "start", "2"], capture_output=True, text=True, env=env)
         self.assertEqual(p.returncode, 2)
         self.assertIn("not authorized", p.stderr)
@@ -107,6 +112,14 @@ class Plan(unittest.TestCase):
         p = subprocess.run([sys.executable, HERE / "campaign_run.py", str(self.work), "start", "2"], capture_output=True, text=True, env=env)
         self.assertEqual(p.returncode, 2)
         self.assertIn("has not finished", p.stderr)
+
+    def test_conditional_commands_are_two_episodes_and_slots_carry_their_command(self):
+        run(HERE / "prepare_campaign.py", "plan", *self.args)
+        plan = json.loads((self.work / "commands.json").read_text())["commands"]
+        cond = [c for c in plan if c["conditional"]]
+        self.assertTrue(cond and all(c["episodes"] <= 2 for c in cond))
+        decl = json.loads((self.work / "declaration.json").read_text())
+        self.assertTrue(all(x["command"] in {c["key"] for c in cond} for x in decl["conditional_slots"]))
 
     def test_evaluator_profile_has_the_turn_cap(self):
         sys.path.insert(0, str(HERE))
@@ -190,6 +203,8 @@ class Assess(unittest.TestCase):
                 (d / "summary.json").write_text(json.dumps({"evidence_state": "COMPLETE_ADMISSIBLE", "episode": name[:6]}))
                 msg = {"type": "message_end", "message": {"role": "assistant", "usage": {"input": 10000, "cacheRead": 40000, "output": 1000}}}
                 (d / "assessment-trace.jsonl").write_text(json.dumps(msg) + "\n" + json.dumps(msg) + "\n")
+            p = run(HERE / "campaign_assess.py", "run", work, "--keys-root", work, "--evaluator-profile", work, "--evaluator-capabilities", work)
+            self.assertEqual(p.returncode, 2)                                   # no credential in this test environment
             p = run(HERE / "campaign_assess.py", "cost", work, "--price-in", "0.2", "--price-cached", "0.006", "--price-out", "0.6")
             out = json.loads(p.stdout)
             self.assertEqual(out["assessed_runs"], 2)                       # the routing run is outside the default panels

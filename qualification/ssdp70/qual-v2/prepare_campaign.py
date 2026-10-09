@@ -155,7 +155,8 @@ def cmd_refresh_identity(a) -> int:
                   "harness_sha256": sha(EVAL / "harness70.py"), "assess_sha256": sha(EVAL / "assess70.py"),
                   "builder_sha256": sha(HERE / "build_campaign_record.py"), "h4_sha256": sha(HERE / "h4.py"),
                   "prepare_campaign_sha256": sha(Path(__file__).resolve()), "campaign_run_sha256": sha(HERE / "campaign_run.py"),
-                  "campaign_assess_sha256": sha(HERE / "campaign_assess.py")})
+                  "campaign_assess_sha256": sha(HERE / "campaign_assess.py"),
+                  "campaign_cb_sha256": sha(HERE / "campaign_cb.py")})
     write_json(path, ident)
     print(json.dumps({k: ident[k] for k in ("repo_head", "builder_sha256", "h4_sha256", "prepare_campaign_sha256", "refreshes")}, indent=1))
     return 0
@@ -198,7 +199,7 @@ def cmd_preflight(a) -> int:
     work, ok = a.work, True
     ident = json.loads((work / "campaign-identity.json").read_text())
     ready = (work / "READY")
-    tokens = {"launch": "OPERATOR MAY LAUNCH", "evaluation": "EVALUATION MAY START"}
+    tokens = {"launch": "OPERATOR MAY LAUNCH", "evaluation": "EVALUATION MAY START", "calibration": "CALIBRATION MAY START"}
     text = ready.read_text() if ready.exists() else ""
     ok &= row(tokens[a.phase] in text, f"READY says {tokens[a.phase]!r}", "" if tokens[a.phase] in text else "the READY file is missing or does not say it")
     try:
@@ -216,6 +217,7 @@ def cmd_preflight(a) -> int:
                             ("prepare_campaign", Path(__file__).resolve(), "prepare_campaign_sha256"),
                             ("campaign_run", HERE / "campaign_run.py", "campaign_run_sha256"),
                             ("campaign_assess", HERE / "campaign_assess.py", "campaign_assess_sha256"),
+                            ("campaign_cb", HERE / "campaign_cb.py", "campaign_cb_sha256"),
                             ("harness70", EVAL / "harness70.py", "harness_sha256"), ("assess70", EVAL / "assess70.py", "assess_sha256")):
         ok &= row(sha(path) == ident.get(key), f"tool unchanged since the identity record: {name}")
     drift = subprocess.run(["git", "-C", str(REPO), "diff", "--stat", ident["candidate_ref"], "HEAD", "--", "source", "dist"], capture_output=True, text=True).stdout.strip()
@@ -230,7 +232,7 @@ def cmd_preflight(a) -> int:
     ok &= row(Path("/usr/bin/bwrap").exists(), "bubblewrap present")
     free = shutil.disk_usage(work).free / 1e9
     ok &= row(free >= 60, "free disk space", f"{free:.0f} GB free (the campaign needs about 25 GB; 60 required)")
-    if a.custody:
+    if a.custody and a.phase != "calibration":
         gate = json.loads((a.custody / "FREEZE-GATE.json").read_text())
         want = {"candidate_frozen": True, "frozen_run_output_exists": False} if a.phase == "launch" and not (work / "runs").exists() else None
         ok &= row(want is None or gate == want, "custody FREEZE-GATE", json.dumps(gate))
@@ -384,6 +386,7 @@ def cmd_plan(a) -> int:
               "--adapter", "omp", "--mode", "qualification"]
     parallel = min(int(config.get("parallel", PARALLEL_MAX)), PARALLEL_MAX)
     chunk = int(config.get("chunk", CHUNK))
+    cond_chunk = int(config.get("conditional_chunk", 2))      # add-ons run two episodes at a time (the T7 rule adds two pairs, then re-checks)
     by_panel: dict[str, list[dict]] = {}
     for e in episodes:
         by_panel.setdefault(e["panel"], []).append(e)
@@ -395,9 +398,10 @@ def cmd_plan(a) -> int:
         used = panel_arms(panel, config)
         conditional = panel.endswith("-add")
         rows = by_panel[panel]
-        for n in range(0, len(rows), chunk):
-            part = rows[n:n + chunk]
-            key = f"{panel}-c{n // chunk + 1:02d}"
+        size = cond_chunk if conditional else chunk
+        for n in range(0, len(rows), size):
+            part = rows[n:n + size]
+            key = f"{panel}-c{n // size + 1:02d}"
             argv = [*common, "--corpus", str(a.corpus), "--out", str(work / "runs" / key), "--requirements", str(a.requirements),
                     "--oracles", str(a.oracles), "--parallel", str(parallel)]
             for arm in used:
@@ -412,7 +416,7 @@ def cmd_plan(a) -> int:
                 f = flags.get(e["id"], {})
                 for arm in used:
                     for rep in range(int(e.get("replicates", 1))):
-                        slot = {"episode": e["id"], "arm": LABELS[arm], "replicate": rep, "panel": panel}
+                        slot = {"episode": e["id"], "arm": LABELS[arm], "replicate": rep, "panel": panel, "command": key}
                         if panel == "main":
                             slot.update({k: bool(f.get(k)) for k in ("delegate", "non_owed", "scored")})
                         else:
@@ -487,8 +491,9 @@ def cmd_verify(a) -> int:
     stage_of = {c["panel"]: int(c.get("stage", 1)) for c in json.loads((work / "commands.json").read_text())["commands"]}
     if a.stage:                                                      # only the stages launched so far are declared
         run_decl["slots"] = [x for x in decl["slots"] if stage_of.get(x["panel"], 1) <= a.stage]
-    if a.include_conditional:
-        run_decl["slots"] = run_decl["slots"] + decl["conditional_slots"]
+    if a.include_conditional:                                          # only the conditional commands that were authorized and run
+        keys = set(a.include_conditional)
+        run_decl["slots"] = run_decl["slots"] + [x for x in decl["conditional_slots"] if x.get("command") in keys]
     (work / "declaration.effective.json").write_text(json.dumps(run_decl))
     cmd = [sys.executable, str(HERE / "build_campaign_record.py"), "--declaration", str(work / "declaration.effective.json"),
            "--map", str(a.map), "--allow-unresolved", "--audit", str(work / "campaign-verify.json")]
@@ -524,7 +529,7 @@ def main() -> int:
             sp.add_argument("--block-bytes", type=int, default=0)
             sp.add_argument("--out", type=Path, required=True)
         if name == "preflight":
-            sp.add_argument("--phase", choices=("launch", "evaluation"), required=True)
+            sp.add_argument("--phase", choices=("launch", "evaluation", "calibration"), required=True)
             sp.add_argument("--custody", type=Path)
             sp.add_argument("--need-credential", action="store_true")
         if name in ("check-corpus", "plan"):
@@ -535,7 +540,7 @@ def main() -> int:
             sp.add_argument("--config", type=Path)
         if name == "verify":
             sp.add_argument("--map", type=Path, required=True)
-            sp.add_argument("--include-conditional", action="store_true")
+            sp.add_argument("--include-conditional", nargs="+", metavar="KEY", help="conditional command keys that were authorized and run")
             sp.add_argument("--stage", type=int, help="verify only the slots of stages up to N (default: all unconditional slots)")
     a = ap.parse_args()
     return {"init": cmd_init, "static": cmd_static, "check-corpus": cmd_check_corpus, "plan": cmd_plan,

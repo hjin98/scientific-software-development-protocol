@@ -54,6 +54,9 @@ def cmd_run(a) -> int:
     if not os.environ.get("SSDP70_OMP_PROVIDER_CREDENTIAL"):
         print("SSDP70_OMP_PROVIDER_CREDENTIAL is not set", file=sys.stderr)
         return 2
+    if not a.limit and not (a.work / "authorizations" / "evaluator-full.ok").exists():
+        print("the full evaluator pass is not authorized: run the pilot (--limit) and wait for authorizations/evaluator-full.ok", file=sys.stderr)
+        return 2
     todo = [d for d in run_dirs(a.work, a.panels)
             if json.loads((d / "summary.json").read_text())["evidence_state"] == "COMPLETE_ADMISSIBLE" and not (d / "assessment.json").exists()]
     if a.limit:
