@@ -356,6 +356,21 @@ class S4Regression(unittest.TestCase):
         self.assertEqual((len(b), sorted(b)[len(b) // 2]), (15, 15799))      # report E6: T1 median 15,799 B (T1 has 15 p72 runs)
 
 
+class H4Precondition(unittest.TestCase):
+    def test_precondition_command_drops_candidate_observations(self):
+        runs = [{"run": f"{a}{i}", "episode": f"E{i}", "arm": a, "admissible": True, "obs": [{"g": "Q4b", "hit": 1 if a == "cand" else 0}]}
+                for a in ("cand", "b1", "b2") for i in range(5)]
+        rec = {"runs": runs, "precondition": {"oracles": [{"name": "o", "good_ok": True, "bad_ok": True}],
+                                              "evaluator": {"n": 40, "agree": 38, "failures": 10, "caught": 9}}}
+        with tempfile.TemporaryDirectory() as t:
+            f = Path(t) / "r.json"
+            f.write_text(json.dumps(rec))
+            p = subprocess.run([sys.executable, str(HERE / "h4.py"), "precondition", str(f)], capture_output=True, text=True)
+            out = json.loads(p.stdout)
+            self.assertEqual((p.returncode, out["C(a)"], out["C(b)"], out["C(c)"]), (0, True, True, True))
+            self.assertEqual(out["aa"]["Q4b.hit"]["diff"], 0)               # the candidate's hits never enter the A/A screen
+
+
 class H4Q2b(unittest.TestCase):
     def test_q2b_counts_unowed_inside_delegate_episodes_only(self):
         runs = [{"run": f"r{i}", "episode": f"EP-{i}", "arm": "cand", "admissible": True,

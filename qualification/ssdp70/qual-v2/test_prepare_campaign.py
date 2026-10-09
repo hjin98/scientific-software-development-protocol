@@ -139,6 +139,7 @@ class CB(unittest.TestCase):
             b.mkdir()
             campaign_cb.build_bundle(item, rub, b)
             self.assertEqual(sorted(p.name for p in b.iterdir() if p.is_file()), ["EVIDENCE-MANIFEST.json", "item.json", "shared-rubric.txt", "task.md"])
+            self.assertEqual(json.loads((b / "item.json").read_text())["id"], "cb-aaa")
             self.assertNotIn("7.2.0", (b / "shared-rubric.txt").read_text())          # version identifiers are redacted from the rubric
         p = campaign_cb.parse
         self.assertEqual(p('{"item":"cb-1","result":"fail","evidence":"x"}', "cb-1")["result"], "fail")
@@ -166,7 +167,7 @@ class CB(unittest.TestCase):
             rub.write_text("rubric")
 
             def launch(profile, prompt, bundle, env):
-                item = json.loads((bundle / "item.json").read_text())["item"]
+                item = json.loads((bundle / "item.json").read_text())["id"]
                 out = json.dumps({"type": "result", "result": json.dumps({"item": item, "result": "pass", "evidence": "ok"})})
                 return {"stdout": out + "\n", "stderr": "", "returncode": 0, "command_identity": {}}
             fake = types.SimpleNamespace(clean_env=lambda: {}, realize_containment=lambda *a, **k: {}, launch=launch)

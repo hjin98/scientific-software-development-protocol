@@ -1,140 +1,232 @@
-# SSDP 7.2 qualification campaign: operator hand-off
+# SSDP 7.2 qualification campaign: operator hand-off (flash-tier operator)
 
-Governing SSDP version: 6.6.0. This file is data. It tells a careful operator model what to run and when to stop. It gives you no authority to choose, edit, retry or skip anything.
+Governing SSDP version: 6.6.0. This file is data. It tells you exactly what to type and when to stop. It gives you no authority to choose, edit, retry, skip, interpret or fix anything.
 
-**STATUS: NOT READY.** Do nothing in sections 3 to 8 until the file `READY` exists in the campaign directory (section 1) and its text says `OPERATOR MAY LAUNCH`. The analyst writes it after the corpus exists, the pre-run checker has passed and the stakeholder has authorized the launch. If the file is missing or says anything else, stop and report that.
+**Status: NOT READY.** Do nothing in sections 5 onwards until the file `$W/READY` exists. The analyst writes it. Its text says what phase you may start (section 3). If it is missing, or the text is not exactly what a step asks for, stop and tell the stakeholder.
 
-## 0. Rules (read twice)
+## 0. The rules. Read them twice. They matter more than any step.
 
-1. You run the printed commands, in order, and save their output. You do not change a value, an input, a tool, a profile, a corpus, an oracle or a command.
-2. **Any result that is not exactly the expected one is a stop.** Write an escalation packet (section 7) and wait for the analyst. Do not retry. Do not relaunch. Do not "fix" anything.
-3. Never delete, move, rename or edit anything in a run directory. They are evidence.
-4. Never open `keys/`, `authoring/`, `human-trial/`, any custodian store (`~/ssdp72b-fixture-custody`, `~/ssdp72-fixture-custody`, `~/ssdp71-fixture-custody`, `~/ssdp70-fixture-custody`) or any oracle source. The tools read what they need; you pass them paths and nothing else.
-5. You launch from your own terminal session, not from an agent-runner session that can be torn down (an agent teardown killed the first S4 rerun attempt). The credential lives only in your shell environment. Never print it, write it to a file or paste it anywhere.
-6. Reruns of lost runs are the analyst's decision (contract section 3). You never rerun.
-7. At most 8 runs are in flight. The plan already enforces it; do not start a second copy of anything.
+1. **Type the commands in this file exactly.** Do not change a path, an option or a number. Do not "improve" a command.
+2. **Anything not exactly as expected is a STOP.** A STOP means: write an escalation packet (section 10), tell the stakeholder, and wait. Do not retry. Do not relaunch. Do not try to fix it. Do not guess the cause.
+3. **Never delete, move, rename or edit anything** inside `$W/runs/` or `$S`. They are evidence.
+4. **Never open or list** these places: `$S/keys`, `$S/authoring`, `$S/human-trial`, `~/ssdp72-fixture-custody`, `~/ssdp71-fixture-custody`, `~/ssdp70-fixture-custody`, any `oracles/` directory. The tools read what they need. You hand them paths. You do not read fixtures, answers or oracles.
+5. **Run live commands from your own terminal**, not inside a tool that can be shut down (an agent tool shutting down killed an earlier launch). Keep the terminal open until the command says it is finished.
+6. **The credential** is an API key in your shell variable `SSDP70_OMP_PROVIDER_CREDENTIAL`. Never print it, never write it to any file, never paste it into any message or packet. If a command output shows it, stop and tell the stakeholder.
+7. **You never rerun a lost run.** Only the analyst decides reruns.
+8. **You never score, interpret or summarize results.** You run, record and send back.
+9. **At most 8 runs are in flight.** The plan enforces it. Never start a second copy of a runner.
+10. If your session or machine goes down at any time: do not relaunch anything. Write a packet and ask.
 
-## 1. Paths and values
+## 1. What this campaign is, in four lines
+
+- A model called **GLM-5.3-Flash** (the executor) is run on about 640 small coding tasks under three protocol versions (candidate 7.2, baseline 6.6 twice, and old 6.5 on a few tasks).
+- A second model, **DeepSeek V4.1 Flash** (the evaluator), then reads the finished runs and judges what code cannot.
+- The analyst scores everything. You operate the machinery.
+- Cost: about $30 in total. Time: about 5 to 8 hours of runs, in two stages.
+
+## 2. Paths (set these first in every new terminal)
 
 ```bash
 export REPO=$HOME/agent-skills/scientific-software-development-protocol
 export W=$HOME/ssdp70-omp-stagef/qualification/campaign-72-20261008
 export Q=$REPO/qualification/ssdp70/qual-v2
+export S=$HOME/ssdp72b-fixture-custody
+cd $REPO
 ```
 
-The campaign directory `$W` holds: `arms/` (the packages), `keys/` (the executor profile; the evaluator profile appears here only when the stakeholder has named the evaluator model), `campaign-identity.json`, `static-premeasurement.json`, `commands.json` and `declaration.json` (written by the analyst at plan time), `launch/`, `runs/`, `escalations/`, `authorizations/`.
-
-Expected identities (the analyst printed these on 2026-10-08; they must match exactly):
+Expected identities (the analyst printed these; they must match):
 
 | Item | Value |
 |---|---|
-| Candidate arm p72 | commit `2dedcfa3408f62bc11a696ac3776183a87b40438`, version 7.2.0, dist tree `69a310a26eb22be395b0a9b98603d8b58dd53171657bfb068ce5821518c5f622` |
-| Baseline arms p66 and p66b | commit `22f4bdba53795da3a6f13f162529f3a843fc37ae`, version 6.6.0, dist tree `e6d960a866fb794382fa5fdaa3e351681d292803dd035e5d4786a981a2a1e083` |
-| Old arm p65 | commit `7f7b5e24858e813e45ace867a7f8ea5180f43bf0`, version 6.5.0, dist tree `7d61d8b7b19dfe40714e71daa2c46d0e4cdd62efebd96b8e96dfe3f33550429b` |
-| Executor profile file sha256 | `b96dcb43155f452eec121307b83df56ff3f79ca308f6c4555206a5871088b107` |
-| Executor | `deepinfra/zai-org/GLM-5.3-Flash`, 60 turns, 2400 s |
+| Candidate arm p72 | version 7.2.0, commit `2dedcfa3408f62bc11a696ac3776183a87b40438`, dist tree `69a310a26eb22be395b0a9b98603d8b58dd53171657bfb068ce5821518c5f622` |
+| Baseline arms p66 and p66b | version 6.6.0, commit `22f4bdba53795da3a6f13f162529f3a843fc37ae`, dist tree `e6d960a866fb794382fa5fdaa3e351681d292803dd035e5d4786a981a2a1e083` |
+| Old arm p65 | version 6.5.0, commit `7f7b5e24858e813e45ace867a7f8ea5180f43bf0`, dist tree `7d61d8b7b19dfe40714e71daa2c46d0e4cdd62efebd96b8e96dfe3f33550429b` |
+| Executor | `deepinfra/zai-org/GLM-5.3-Flash`, 60 turns, 2400 s, profile sha256 `b96dcb43155f452eec121307b83df56ff3f79ca308f6c4555206a5871088b107` |
+| Evaluator | `deepinfra/deepseek-ai/DeepSeek-V4.1-Flash`, 20 turns, 1800 s, profile sha256 `a0db2d61d9cefbe975afac29adbc5dba1f4a1560078e92a15a6fdf22bbe83864` |
+| Both models use | one provider (deepinfra) and the one credential variable `SSDP70_OMP_PROVIDER_CREDENTIAL` |
 
-## 2. Pre-flight (no provider, no credential; read-only)
+The preflight (section 4) checks these for you.
 
-Run each command and compare. A mismatch is a stop.
+## 3. The phases and what READY must say
+
+The analyst writes one line in `$W/READY` per phase you may start. You may only do a phase whose line is present.
+
+| Phase | READY line | Section |
+|---|---|---|
+| Evaluator calibration (Precondition C(b)) | `CALIBRATION MAY START` | 5 |
+| Stage 1: main panel | `OPERATOR MAY LAUNCH` | 6 |
+| Evaluator pilot and pass | `EVALUATION MAY START` | 7 |
+| Stage 2: preservation panels | `STAGE 2 MAY START` (and the file `$W/authorizations/stage2.ok`) | 8 |
+
+Look at it any time with `cat $W/READY`.
+
+## 4. Pre-flight (checks only; a key is needed only where stated)
+
+Run this before every phase. It prints OK or STOP per line.
 
 ```bash
-cat $W/READY                                            # must say: OPERATOR MAY LAUNCH
-sha256sum $W/keys/omp-primary-flash-executor-main.json  # must equal the profile sha256 above
-python3 -c "import json;d=json.load(open('$W/campaign-identity.json'));print(json.dumps(d['arms'],indent=1));print(d['candidate_source_dist_diff_from_ref'])"
-                                                        # arms must match the table; the last line must be: empty
-python3 $Q/prepare_campaign.py check-plan --work $W     # must print "verdict": "PASS"
-cat $W/static-premeasurement.json | python3 -c "import json,sys;print(json.load(sys.stdin)['verdict'])"   # must print: PASS
-cat $W/expected-runs.json                               # note unconditional_runs; you will compare it later
-cd $REPO && git status --short && git rev-parse HEAD    # write both outputs into your notes
+python3 $Q/prepare_campaign.py preflight --work $W --phase launch --custody $S
 ```
 
-## 3. Launch (the stakeholder is present or has said GO; the credential is in your shell)
-
-The campaign runs in two stages, in gate order. **Stage 1** is the main panel (366 runs). **Stage 2** is the preservation panels (274 runs) and starts only after the analyst has scored stage 1 and written `$W/authorizations/stage2.ok`. If stage 1 shows the candidate has failed an earlier gate, the analyst will not authorize stage 2, and you stop there.
+Before sections 5 and 7 use `--phase evaluation` instead, and add `--need-credential` before any command that spends money:
 
 ```bash
-export SSDP70_OMP_PROVIDER_CREDENTIAL=...     # the stakeholder gives you the key; never print it
-python3 $Q/campaign_run.py $W start 1         # prints: started the sequential runner for stage 1 (pid N)
+python3 $Q/prepare_campaign.py preflight --work $W --phase evaluation --custody $S --need-credential
 ```
 
-If it prints anything else, stop. Do not run `start 1` twice. Stage 2 (only when told, with the `.ok` file present): `python3 $Q/campaign_run.py $W start 2`; it refuses otherwise.
+- Last line `RESULT: ALL OK`: go on.
+- Any `STOP` line, or any other last line: STOP. Packet (section 10) containing the whole output.
 
-## 4. Watch
+Write this into your notes at the start of every session: `cd $REPO && git status --short && git rev-parse HEAD`
+
+## 5. Evaluator calibration (Precondition C(b)): only when READY says `CALIBRATION MAY START`
+
+Purpose: show the evaluator model is a fair judge before it judges anything. It takes the custodian's 40 test items. About 40 short model calls, well under a dollar.
+
+```bash
+export SSDP70_OMP_PROVIDER_CREDENTIAL=...        # given to you by the stakeholder; never print it
+python3 $Q/prepare_campaign.py preflight --work $W --phase evaluation --custody $S --need-credential
+mkdir -p $W/calibration
+python3 $Q/campaign_cb.py run --work $W --view-dir $S/calibration/cb-set/items --rubric $S/keys/SHARED-RUBRIC.txt --task-doc $S/calibration/cb-set/EVALUATOR-TASK.md --out $W/calibration/cb-results.json --parallel 4
+python3 $S/operator/score_cb.py $W/calibration/cb-results.json | tee $W/calibration/cb-score.json
+python3 $Q/campaign_cb.py cost --work $W --traces $W/calibration/cb-traces --price-in 0.20 --price-cached 0.006 --price-out 0.60 | tee $W/calibration/cb-cost.json
+```
+
+(The items directory is what the evaluator sees; the tool reads the rubric and the task description. You never open `$S/keys` yourself.)
+
+Expected: `campaign_cb.py run` prints a line with `"invalid": 0` or a small number; `score_cb.py` prints counts only. **Do not judge the score.** Copy all three outputs into a packet named `calibration-result` and tell the stakeholder. The analyst decides whether the evaluator passed (the bar is 35 of 40 agreement and 8 of the 10 designated failures caught; two attempts at most) and writes the next READY line.
+
+If `campaign_cb.py run` exits with an error, or `score_cb.py` exits with 3: STOP, packet.
+
+## 6. Stage 1: the main panel (366 runs): only when READY says `OPERATOR MAY LAUNCH`
+
+```bash
+export SSDP70_OMP_PROVIDER_CREDENTIAL=...
+python3 $Q/prepare_campaign.py preflight --work $W --phase launch --custody $S --need-credential      # must end: RESULT: ALL OK
+python3 $Q/campaign_run.py $W start 1
+```
+
+It must print `started the sequential runner for stage 1 (pid N)`. Anything else: STOP. **Never run `start 1` twice.**
+
+Watch it every 10 to 15 minutes and save every output in your notes:
 
 ```bash
 python3 $Q/campaign_run.py $W status
 ```
 
-Run it every 10 to 15 minutes and keep the output. Each command line shows RUNNING, EXIT 0, EXIT 2 or CRASHED. Meaning:
+Each line shows a command key and RUNNING, EXIT 0, EXIT 2 or CRASHED:
 
-- **EXIT 0**: the command finished and every run is admissible. The runner goes on to the next command.
-- **EXIT 2**: the command finished and at least one run is not admissible (for example a provider failure). The runner still goes on. Note the command key in your packet for the analyst; do not touch the runs.
-- **HALT** line at the bottom, or **CRASHED**: the sequence stopped. Stop and write an escalation packet. Do not restart.
-- `DONE-stage1` (or `DONE-stage2`) at the bottom: every unconditional command of that stage finished.
+- `EXIT 0`: that command finished and all its runs are fine.
+- `EXIT 2`: it finished and at least one run was not admissible (for example a provider error). The runner continues by itself. Note the key in your notes. Do not touch the runs.
+- `CRASHED`, or a `HALT` line at the bottom: the runner stopped. STOP, packet. Do not restart.
+- `DONE-stage1` at the bottom: stage 1 is finished.
 
-You may leave the terminal alone between checks. If your own session or machine goes down, do not relaunch: write what you saw into a packet and ask the analyst.
+You may leave the terminal alone between checks. Do not stop the runner.
 
-## 5. After each stage: verify (no credential needed)
-
-The analyst gives you the gate-map path in the READY file (a file under the custodian's `operator/` directory, meant for you).
+After `DONE-stage1`:
 
 ```bash
-python3 $Q/prepare_campaign.py verify --work $W --map "<gate-map path from READY>" --stage <1 after stage 1, 2 after stage 2>
+python3 $Q/prepare_campaign.py verify --work $W --map $S/operator/gate-map.json --stage 1
 echo "exit=$?"
+python3 $Q/prepare_campaign.py report --work $W
 ```
 
-Expected: `"findings": []` and `exit=0`. Findings of kind `RERUN_PENDING`, `INADMISSIBLE` or `UNRESOLVED` are not your decision: copy the whole output into the packet. `UNRESOLVED` is expected until the evaluator has run (section 6).
+Expected: no `INTEGRITY` finding and `exit=0`, or exit 4 with only `RERUN_PENDING`, `UNRESOLVED` or `INADMISSIBLE` findings. `UNRESOLVED` is normal until the evaluator has run. Send everything to the analyst. Exit 3, or any `INTEGRITY` finding: STOP, packet. **You do not decide what findings mean.**
 
-## 6. Evaluator pass (P9): only when `$W/keys/omp-evaluator-readonly.json` exists and READY says `EVALUATION MAY START`
+## 7. Evaluator pilot and pass: only when READY says `EVALUATION MAY START`
 
-The evaluator pass covers the main, versioning and sentinel panels only (the other panels are scored by binding oracles or recorded bytes). It has a **pilot first**, then the rest. The evaluator key variable may differ from the executor's: use the one READY names.
+The evaluator reads each finished run on the main panel. First a pilot of 5 runs to measure the real cost.
 
 ```bash
-EV="--keys-root <keys root from READY> --evaluator-profile $W/keys/omp-evaluator-readonly.json \
-    --evaluator-capabilities $W/keys/omp-evaluator-readonly.capabilities.json --shared-rubric <rubric path from READY>"
-python3 $Q/campaign_assess.py run $W $EV --parallel 4 --limit 5           # the pilot: five runs
-python3 $Q/campaign_assess.py cost $W --price-in <P> --price-cached <P> --price-out <P>   # prices come from READY
+export SSDP70_OMP_PROVIDER_CREDENTIAL=...
+python3 $Q/prepare_campaign.py preflight --work $W --phase evaluation --custody $S --need-credential
+EV="--keys-root $S/keys --evaluator-profile $W/keys/omp-evaluator-readonly.json --evaluator-capabilities $W/keys/omp-evaluator-readonly.capabilities.json --shared-rubric $S/keys/SHARED-RUBRIC.txt"
+python3 $Q/campaign_assess.py run $W $EV --panels main --parallel 4 --limit 5
+python3 $Q/campaign_assess.py cost $W --panels main --price-in 0.20 --price-cached 0.006 --price-out 0.60
 ```
 
-Copy the `cost` output into your notes and **stop**. The analyst compares the measured dollars per run and the projection with the budget and writes `$W/authorizations/evaluator-full.ok` if the full pass may go ahead. Only then:
+(`--keys-root` lets the tool copy one episode's key into the evaluator's sandbox. You do not open it.)
+
+**Stop here.** Copy both outputs into a packet named `evaluator-pilot`. The analyst writes `$W/authorizations/evaluator-full.ok` if the cost is acceptable. Only when that file exists and READY still says `EVALUATION MAY START`:
 
 ```bash
-python3 $Q/campaign_assess.py run $W $EV --parallel 4
-python3 $Q/campaign_assess.py collect $W --out $W/dispositions.json
-python3 $Q/campaign_assess.py cost $W --price-in <P> --price-cached <P> --price-out <P>
+python3 $Q/campaign_assess.py run $W $EV --panels main --parallel 4
+python3 $Q/campaign_assess.py collect $W --panels main --out $W/dispositions-stage1.json
+python3 $Q/campaign_assess.py cost $W --panels main --price-in 0.20 --price-cached 0.006 --price-out 0.60
 ```
 
-Expected: `collect` prints `"problems": []`. Any problem entry goes into the packet as it is. Do not rerun an assessment.
+Expected: `collect` prints `"problems": []`. Any problem entry goes into the packet exactly as printed. You never rerun an assessment.
 
-## 7. Escalation packet (write a file, then stop and wait)
+## 8. Stage 2: the preservation panels (274 runs): only when READY says `STAGE 2 MAY START`
 
-Create `$W/escalations/<UTC time>-<short name>.md` with exactly:
-
-1. The command you ran, verbatim.
-2. Its full output, or the last 40 lines if it is longer, plus the exit code.
-3. `python3 $Q/campaign_run.py $W status` output.
-4. For a crashed or failed command: `tail -n 40 $W/launch/<key>.log` and the names of any `*.error.txt` files under `$W/runs/<key>/`.
-5. The time, the machine, and whether your session was interrupted.
-6. One sentence: what you expected and what you saw. No guesses about causes. No proposed fixes.
-
-Then tell the stakeholder the packet path and stop.
-
-## 8. Conditional commands (only on the analyst's instruction)
-
-Some commands (extra T7 pairs, extra sentinel and unversioned runs) run only if the analyst says so. The analyst writes `$W/authorizations/<key>.ok`. Then, and only then:
+The analyst scores stage 1 first. If the candidate failed an earlier gate, the analyst will not authorize stage 2 and the campaign ends there. That is a normal outcome, not an error.
 
 ```bash
-python3 $Q/campaign_run.py $W run-conditional <key>
+ls $W/authorizations/stage2.ok                    # must exist
+export SSDP70_OMP_PROVIDER_CREDENTIAL=...
+python3 $Q/prepare_campaign.py preflight --work $W --phase launch --custody $S --need-credential
+python3 $Q/campaign_run.py $W start 2
 ```
 
-The tool refuses without that file. Do not create the file yourself.
+Watch with `campaign_run.py $W status` exactly as in section 6 until `DONE-stage2`. Then:
 
-## 9. What to send back when you finish
+```bash
+python3 $Q/prepare_campaign.py verify --work $W --map $S/operator/gate-map.json --stage 2
+echo "exit=$?"
+python3 $Q/prepare_campaign.py report --work $W
+```
 
-- Your notes from section 2 and the first and last `status` outputs.
-- The `verify` output and, if section 6 ran, the `collect` output.
-- Every escalation packet.
-- `ls $W/runs` (names only) and `cat $W/launch/*.exit`.
+Then, for the versioning and sentinel panels only, when READY says `EVALUATION MAY START` again (and `evaluator-full.ok` is still there):
 
-You never score, interpret or summarize results. The analyst does that.
+```bash
+python3 $Q/campaign_assess.py run $W $EV --panels versioning sentinels sentinels-add --parallel 4
+python3 $Q/campaign_assess.py collect $W --panels main versioning sentinels sentinels-add --out $W/dispositions.json
+```
+
+(`EV` is the variable defined in section 7. Set it again in a new terminal.)
+
+## 9. Extra runs and reruns (only on the analyst's instruction)
+
+- **Conditional runs** (extra T7 pairs, extra sentinel and lookup runs): the analyst writes `$W/authorizations/<key>.ok`. Then, and only then: `python3 $Q/campaign_run.py $W run-conditional <key>`. The tool refuses without the file. Never create the file yourself.
+- **Reruns of lost runs:** the analyst gives you an exact command line in a message. You run that command and nothing else. You never choose to rerun.
+
+## 10. Escalation packet (what to write when anything is a STOP)
+
+Create the file `$W/escalations/<UTC time>-<short name>.md` containing exactly:
+
+1. The command you ran, copied exactly.
+2. Its full output (last 60 lines if longer) and its exit code (`echo $?` right after).
+3. The output of `python3 $Q/campaign_run.py $W status`.
+4. If a runner command failed: `tail -n 60 $W/launch/<key>.log` and the names of any files matching `$W/runs/<key>/*.error.txt`.
+5. The time, the machine name, and whether your terminal or session was interrupted.
+6. One sentence: what you expected and what you saw. **No guesses about causes. No suggested fixes.**
+
+Tell the stakeholder the packet path. Stop. Wait.
+
+Good packet sentence: "I expected `RESULT: ALL OK`; the line `STOP evaluator profile is frozen and matches` appeared." Bad one: "It probably needs the profile re-created."
+
+## 11. Quick answers (the only decisions you may make)
+
+| You see | You do |
+|---|---|
+| `STOP` in preflight | Packet, wait |
+| A command prints something different from "Expected" | Packet, wait |
+| `EXIT 2` on one command in `status` | Note it, keep watching |
+| `CRASHED` or `HALT` | Packet, wait |
+| Provider error text in a log (for example 502) | Note the key in your notes; do not touch it; mention it in the final report |
+| Your terminal closed | Do not relaunch; open a new one; run `status`; packet describing it |
+| Disk free below 60 GB | Packet (the preflight checks this) |
+| You are unsure | Packet, wait |
+
+## 12. What to send back at the end of each phase
+
+- Your notes: the preflight output, the first and last `status` outputs, the `verify` output, the `cost` outputs.
+- `$W/OPERATOR-REPORT.md` (made by `prepare_campaign.py report`).
+- Every packet in `$W/escalations/`.
+- The calibration and pilot outputs (sections 5 and 7).
+
+Never include the credential, any file from `$S/keys`, or any fixture or oracle text.
+
+## 13. Glossary
+
+- **Run**: one model session on one task. **Arm**: which protocol version it ran under (p72 candidate, p66 and p66b baseline, p65 old). **Stage 1 / stage 2**: the main panel first, then the preservation panels. **Admissible**: the run finished in a way that can be scored; a provider error makes it inadmissible, and only the analyst may rerun it. **Evaluator**: the second model that judges finished runs. **Calibration (C(b))**: the test that the evaluator is a fair judge. **Packet**: your written STOP report. **READY**: the analyst's go-ahead file.

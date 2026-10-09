@@ -17,7 +17,7 @@ Campaign record (JSON). `runs` is a list of runs; each has `run`, `episode`, `ar
   Q5e  {g, route, fail}  Q5f {g, route, viol}   sentinel / unversioned-lookup runs, in run order
 `precondition`: {oracles: [{name, good_ok, bad_ok}], evaluator: {agree, n, caught, failures}, attempt}.
 `static`: {byte_identical, mapping_complete, block_bytes}.   `descriptive`: reported unchanged.
-Usage: h4.py score CAMPAIGN.json [--json OUT] | h4.py legacy RUNS_DIR
+Usage: h4.py score CAMPAIGN.json [--json OUT] | h4.py precondition CAMPAIGN.json (B1/B2 only, blind to the candidate) | h4.py legacy RUNS_DIR
 """
 from __future__ import annotations
 
@@ -357,6 +357,8 @@ def main() -> None:
     s = sub.add_parser("score")
     s.add_argument("campaign", type=Path)
     s.add_argument("--json", type=Path)
+    pc = sub.add_parser("precondition", help="Precondition C only, from the baseline arms (b1, b2); candidate observations are dropped before scoring")
+    pc.add_argument("campaign", type=Path)
     lg = sub.add_parser("legacy")
     lg.add_argument("runs", type=Path)
     a = ap.parse_args()
@@ -366,6 +368,11 @@ def main() -> None:
             a.json.write_text(json.dumps(result, indent=1, default=str) + "\n")
         print(render(result))
         sys.exit(0 if result["verdict"] == "PASS" and result.get("valid_for_qualification", True) else 2)
+    if a.cmd == "precondition":
+        rec = json.loads(a.campaign.read_text())
+        rec["runs"] = [r for r in rec.get("runs", []) if r["arm"] in ("b1", "b2")]   # C(c) is computed blind to candidate results
+        print(json.dumps(precondition_c(Campaign(rec)), indent=1, default=str))
+        sys.exit(0)
     print(json.dumps(legacy_figures(legacy_rows(a.runs)), indent=1, sort_keys=True))
 
 
