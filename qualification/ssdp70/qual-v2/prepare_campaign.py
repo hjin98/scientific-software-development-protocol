@@ -9,6 +9,7 @@
                 declaration.json for build_campaign_record.py, expected-runs.json
   check-plan    provider-free check that the plan resolves (arms, key, episodes, requirements, oracles, counts)
   verify        audits completed runs against the plan with build_campaign_record.py (no scoring)
+  refresh-identity  re-records tool hashes and the repo head in campaign-identity.json after analyst-tool changes (arms and key re-verified)
 
 Panels and arms (override with --config): main/routing/versioning/r2/ordinary -> p72 p66 p66b; burden -> p72 p65;
 sentinels/unversioned -> p72. A panel named `<base>-add` is conditional: it uses the base arms and is never run by the runner
@@ -122,6 +123,34 @@ def cmd_init(a) -> int:
              "prepare_campaign_sha256": sha(Path(__file__).resolve())}
     write_json(work / "campaign-identity.json", ident)
     print(json.dumps(ident, indent=1))
+    return 0
+
+
+def cmd_refresh_identity(a) -> int:
+    """Re-record the tool hashes and repo head after the analyst tools changed; arms and the executor key are re-verified, never rebuilt."""
+    path = a.work / "campaign-identity.json"
+    ident = json.loads(path.read_text())
+    arms, _ = load_arms(a.work)
+    for name, row in arms.items():
+        harness70.resolve_arm_dist(row)                               # digest re-verified
+        if ident["arms"][name]["dist_tree_sha256"] != row["dist_tree_sha256"]:
+            sys.exit(f"arm {name} differs from the recorded identity")
+    bundle = executor(a.work)
+    if sha(a.work / "keys" / "omp-primary-flash-executor-main.json") != ident["executor_profile_sha256"]:
+        sys.exit("the executor profile differs from the recorded identity")
+    drift = subprocess.run(["git", "-C", str(REPO), "diff", "--stat", ident["candidate_ref"], "HEAD", "--", "source", "dist"],
+                           capture_output=True, text=True).stdout.strip()
+    if drift:
+        sys.exit("the candidate source or dist differs from the frozen identity; this is a new identity (PEM FF-001)")
+    old = {k: ident[k] for k in ("repo_head", "harness_sha256", "assess_sha256", "builder_sha256", "h4_sha256", "prepare_campaign_sha256")}
+    ident.setdefault("refreshes", []).append({"at": subprocess.run(["date", "-u", "+%FT%TZ"], capture_output=True, text=True).stdout.strip(), "previous": old})
+    ident.update({"repo_head": subprocess.run(["git", "-C", str(REPO), "rev-parse", "HEAD"], capture_output=True, text=True).stdout.strip(),
+                  "harness_sha256": sha(EVAL / "harness70.py"), "assess_sha256": sha(EVAL / "assess70.py"),
+                  "builder_sha256": sha(HERE / "build_campaign_record.py"), "h4_sha256": sha(HERE / "h4.py"),
+                  "prepare_campaign_sha256": sha(Path(__file__).resolve()), "campaign_run_sha256": sha(HERE / "campaign_run.py"),
+                  "campaign_assess_sha256": sha(HERE / "campaign_assess.py")})
+    write_json(path, ident)
+    print(json.dumps({k: ident[k] for k in ("repo_head", "builder_sha256", "h4_sha256", "prepare_campaign_sha256", "refreshes")}, indent=1))
     return 0
 
 
@@ -339,7 +368,7 @@ def cmd_verify(a) -> int:
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     sub = ap.add_subparsers(dest="cmd", required=True)
-    for name in ("init", "static", "check-corpus", "plan", "check-plan", "verify"):
+    for name in ("init", "static", "check-corpus", "plan", "check-plan", "verify", "refresh-identity"):
         sp = sub.add_parser(name)
         sp.add_argument("--work", type=Path, required=True)
         if name == "init":
@@ -356,7 +385,7 @@ def main() -> int:
             sp.add_argument("--include-conditional", action="store_true")
     a = ap.parse_args()
     return {"init": cmd_init, "static": cmd_static, "check-corpus": cmd_check_corpus, "plan": cmd_plan,
-            "check-plan": cmd_check_plan, "verify": cmd_verify}[a.cmd](a)
+            "check-plan": cmd_check_plan, "verify": cmd_verify, "refresh-identity": cmd_refresh_identity}[a.cmd](a)
 
 
 if __name__ == "__main__":
