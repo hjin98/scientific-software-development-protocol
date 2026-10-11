@@ -14,8 +14,8 @@
   report        writes OPERATOR-REPORT.md (status, identity, verification, authorizations, escalations)
   refresh-identity  re-records tool hashes and the repo head in campaign-identity.json after analyst-tool changes (arms and key re-verified)
 
-Stages (gate order, contract section 5): stage 1 is the main panel (Q1 to Q4), stage 2 the Q5 panels; stage 2 starts only after the
-analyst has scored stage 1 and written authorizations/stage2.ok.
+Stages (ordering only): stage 1 is the main panel (Q1 to Q4), stage 2 the Q5 panels; stage 2 starts only after the
+analyst has verified stage 1 and written authorizations/stage2.ok. No candidate gate is scored between stages.
 Panels and arms (override with --config): main/routing/versioning/r2/ordinary -> p72 p66 p66b; burden -> p72 p65;
 sentinels/unversioned -> p72. A panel named `<base>-add` is conditional: it uses the base arms and is never run by the runner
 until the analyst authorizes it (T7 added pairs, Q5e and Q5f extra runs).
@@ -41,7 +41,7 @@ import build_s4_probe  # noqa: E402
 import core70  # noqa: E402
 import harness70  # noqa: E402
 import prepare_arms70  # noqa: E402
-from adapters import omp  # noqa: E402
+from adapters import omp, omp_eval  # noqa: E402
 
 CANDIDATE_REF = "2dedcfa3408f62bc11a696ac3776183a87b40438"
 B_REF = "22f4bdba53795da3a6f13f162529f3a843fc37ae"       # accepted 6.6.0, PROTOCOL-RELEASE-STATE.yaml
@@ -87,11 +87,12 @@ def build_evaluator_key(work: Path, model_id: str) -> None:
     source = json.loads((EVAL / "profiles" / "omp-evaluator-readonly.json").read_text())
     route = dict(source["containment_policy"]["provider_route"])
     route["model_id"] = model_id
-    profile = omp.freeze_profile(template, executable_path=str(Path.home() / ".local/bin/omp"), provider_route=route,
+    profile = omp_eval.freeze_profile(template, executable_path=str(Path.home() / ".local/bin/omp"), provider_route=route,
                                  reasoning=source["reasoning_configuration"], profile_id="omp-evaluator-readonly",
                                  budgets={"max_turns": EVALUATOR_TURNS, "timeout_s": 1800})
-    profile["activation_mechanism"] = "runtime-command"
-    profile["runtime_input_template"] = omp.input_template("runtime-command")
+    errors = omp_eval.eval_profile_errors(profile) + omp.runtime_dependency_errors(profile)
+    if errors:
+        sys.exit(f"evaluator profile refused: {errors}")
     write_json(work / "keys" / "omp-evaluator-readonly.json", profile)
     caps_src = EVAL / "capabilities" / "omp-evaluator-readonly.json"
     (work / "keys" / "omp-evaluator-readonly.capabilities.json").write_bytes(caps_src.read_bytes())
@@ -125,7 +126,8 @@ def cmd_init(a) -> int:
              "executor_agent_model": bundle.profile["agent_model"], "executor_profile_sha256": sha(profile),
              "executor_profile_key_sha256": bundle.profile_key_sha256, "executor_budgets": bundle.profile["budgets"],
              "evaluator_profile": ("frozen" if a.evaluator_model else "NOT FROZEN: no evaluator model named"),
-             "harness_sha256": sha(EVAL / "harness70.py"), "assess_sha256": sha(EVAL / "assess70.py"),
+             "harness_sha256": sha(EVAL / "harness70.py"), "assess_sha256": sha(EVAL / "assess70.py"), "core_sha256": sha(EVAL / "core70.py"),
+             "assessment_evidence_sha256": sha(EVAL / "assessment_evidence.py"),
              "builder_sha256": sha(HERE / "build_campaign_record.py"), "h4_sha256": sha(HERE / "h4.py"),
              "prepare_campaign_sha256": sha(Path(__file__).resolve())}
     write_json(work / "campaign-identity.json", ident)
@@ -152,7 +154,8 @@ def cmd_refresh_identity(a) -> int:
     old = {k: ident[k] for k in ("repo_head", "harness_sha256", "assess_sha256", "builder_sha256", "h4_sha256", "prepare_campaign_sha256")}
     ident.setdefault("refreshes", []).append({"at": subprocess.run(["date", "-u", "+%FT%TZ"], capture_output=True, text=True).stdout.strip(), "previous": old})
     ident.update({"repo_head": subprocess.run(["git", "-C", str(REPO), "rev-parse", "HEAD"], capture_output=True, text=True).stdout.strip(),
-                  "harness_sha256": sha(EVAL / "harness70.py"), "assess_sha256": sha(EVAL / "assess70.py"),
+                  "harness_sha256": sha(EVAL / "harness70.py"), "assess_sha256": sha(EVAL / "assess70.py"), "core_sha256": sha(EVAL / "core70.py"),
+                  "assessment_evidence_sha256": sha(EVAL / "assessment_evidence.py"),
                   "builder_sha256": sha(HERE / "build_campaign_record.py"), "h4_sha256": sha(HERE / "h4.py"),
                   "prepare_campaign_sha256": sha(Path(__file__).resolve()), "campaign_run_sha256": sha(HERE / "campaign_run.py"),
                   "campaign_assess_sha256": sha(HERE / "campaign_assess.py"),
@@ -169,7 +172,8 @@ def cmd_freeze_evaluator(a) -> int:
         sys.exit("the evaluator profile is already frozen here; a different model is a new campaign identity")
     build_evaluator_key(a.work, a.model)
     bundle = core70.load_profile(keys / "omp-evaluator-readonly.json", keys / "omp-evaluator-readonly.capabilities.json")
-    errors = core70.profile_claim_errors(bundle, [])
+    errors = (core70.profile_claim_errors(bundle, []) + omp_eval.eval_profile_errors(bundle.profile)
+              + omp.runtime_dependency_errors(bundle.profile))
     if errors:
         (keys / "omp-evaluator-readonly.json").unlink()
         (keys / "omp-evaluator-readonly.capabilities.json").unlink()
@@ -213,12 +217,25 @@ def cmd_preflight(a) -> int:
     ev = keys / "omp-evaluator-readonly.json"
     ok &= row(ev.exists() and sha(ev) == ident.get("evaluator_profile_sha256"), "evaluator profile is frozen and matches",
               ident.get("evaluator_agent_model", "not frozen"))
+    try:
+        evaluator = core70.load_profile(ev, keys / "omp-evaluator-readonly.capabilities.json")
+        errors = (core70.profile_claim_errors(evaluator, []) + omp_eval.eval_profile_errors(evaluator.profile)
+                  + omp.runtime_dependency_errors(evaluator.profile))
+        if evaluator.profile_key_sha256 != ident.get("evaluator_profile_key_sha256"):
+            errors.append("evaluator profile key differs from the recorded identity")
+        if evaluator.profile["agent_model"] == executor(work).profile["agent_model"]:
+            errors.append("evaluator model must not be the executor model")
+        ok &= row(not errors, "evaluator profile is admissible for omp_eval", "; ".join(errors))
+    except (core70.ContractError, OSError, ValueError) as exc:
+        ok &= row(False, "evaluator profile is admissible for omp_eval", str(exc))
     for name, path, key in (("builder", HERE / "build_campaign_record.py", "builder_sha256"), ("h4", HERE / "h4.py", "h4_sha256"),
                             ("prepare_campaign", Path(__file__).resolve(), "prepare_campaign_sha256"),
                             ("campaign_run", HERE / "campaign_run.py", "campaign_run_sha256"),
                             ("campaign_assess", HERE / "campaign_assess.py", "campaign_assess_sha256"),
                             ("campaign_cb", HERE / "campaign_cb.py", "campaign_cb_sha256"),
-                            ("harness70", EVAL / "harness70.py", "harness_sha256"), ("assess70", EVAL / "assess70.py", "assess_sha256")):
+                            ("harness70", EVAL / "harness70.py", "harness_sha256"), ("assess70", EVAL / "assess70.py", "assess_sha256"),
+                            ("core70", EVAL / "core70.py", "core_sha256"),
+                            ("assessment_evidence", EVAL / "assessment_evidence.py", "assessment_evidence_sha256")):
         ok &= row(sha(path) == ident.get(key), f"tool unchanged since the identity record: {name}")
     drift = subprocess.run(["git", "-C", str(REPO), "diff", "--stat", ident["candidate_ref"], "HEAD", "--", "source", "dist"], capture_output=True, text=True).stdout.strip()
     ok &= row(not drift, "candidate source and dist unchanged from the frozen identity")

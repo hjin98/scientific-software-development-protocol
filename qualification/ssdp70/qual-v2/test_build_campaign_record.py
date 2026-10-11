@@ -134,6 +134,34 @@ class Synthetic(unittest.TestCase):
             self.assertEqual(rc, 0)
             self.assertEqual([o["hit"] for o in rec["runs"][0]["obs"] if o["g"] == "Q4b"], [1])
 
+    def test_owed_exposure_does_not_depend_on_resolved_verdicts(self):
+        with tempfile.TemporaryDirectory() as t:
+            t = Path(t)
+            dispositions = {}
+            for episode, resolved in ((1, 1), (2, 3)):
+                it = self.all_items()
+                del it["REQ.1"]
+                for part in range(4):
+                    key = f"REQ.{part + 1}"
+                    it[key] = ("delegate_request", "pass", "binding" if part < resolved else "advisory")
+                    if part >= resolved:
+                        dispositions[f"EP-{episode:03d}-p72-r0::{key}"] = "fail"
+                fake_run(t / "r", f"EP-{episode:03d}-p72-r0", items=it)
+            rc, audit, rec = self.build(self.decl(), t)
+            self.assertEqual(rc, 4)
+            self.assertEqual([f["kind"] for f in audit["findings"]], ["UNRESOLVED", "UNRESOLVED"])
+            q2 = lambda record: [o for r in record["runs"] for o in r["obs"] if o["g"] == "Q2"]
+            self.assertEqual([(o["owed"], o["met"]) for o in q2(rec)], [(4, 1), (4, 3)])
+            rc, audit, rec = self.build(self.decl(), t, "--allow-unresolved")
+            self.assertEqual((rc, audit["findings"]), (0, []))
+            self.assertIn("allow-unresolved", audit["waivers"])
+            disp = t / "disp.json"
+            disp.write_text(json.dumps(dispositions))
+            rc, audit, rec = self.build(self.decl(), t, "--dispositions", str(disp))
+            self.assertEqual((rc, audit["findings"]), (0, []))
+            self.assertEqual([(o["owed"], o["met"]) for o in q2(rec)], [(4, 1), (4, 3)])
+            self.assertTrue(all(not r["unresolved_items"] for r in rec["runs"]))
+
     def test_missing_duplicate_undeclared_and_collisions(self):
         with tempfile.TemporaryDirectory() as t:
             t = Path(t)

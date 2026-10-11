@@ -5,11 +5,14 @@ Run: python3 -m unittest discover -s qualification/ssdp70/qual-v2 -p 'test_*.py'
 from __future__ import annotations
 
 import json
+import contextlib
+import io
 import shutil
 import subprocess
 import sys
 import tempfile
 import unittest
+from unittest.mock import patch
 from pathlib import Path
 
 import yaml
@@ -128,6 +131,52 @@ class Plan(unittest.TestCase):
         prof = json.loads((self.work / "keys" / "omp-evaluator-readonly.json").read_text())
         self.assertEqual(prof["budgets"]["max_turns"], 20)
         self.assertEqual(prof["agent_model"], "deepinfra/deepseek-ai/DeepSeek-V4.1-Flash")
+        self.assertEqual(prepare_campaign.omp_eval.eval_profile_errors(prof), [])
+        self.assertEqual(prepare_campaign.omp.runtime_dependency_errors(prof), [])
+        self.assertNotIn("activation_mechanism", prof)
+        self.assertNotIn("runtime_input_template", prof)
+        self.assertIn("adapters/omp_eval.py", prof["containment_policy"]["execution_support_sha256"])
+        self.assertNotIn("harness70.py", prof["containment_policy"]["execution_support_sha256"])
+
+    def test_preflight_rejects_wrong_adapter_even_when_frozen_digests_match(self):
+        import types
+        import prepare_campaign
+        prepare_campaign.build_evaluator_key(self.work, "deepseek-ai/DeepSeek-V4.1-Flash")
+        path = self.work / "keys/omp-evaluator-readonly.json"
+        prof = json.loads(path.read_text())
+        prof["adapter_id"] = "omp-json-v2"
+        path.write_text(json.dumps(prof))
+        bundle = prepare_campaign.core70.load_profile(path, self.work / "keys/omp-evaluator-readonly.capabilities.json")
+        ident = json.loads((CAMPAIGN / "campaign-identity.json").read_text())
+        ident["evaluator_profile_sha256"] = prepare_campaign.sha(path)
+        ident["evaluator_profile_key_sha256"] = bundle.profile_key_sha256
+        (self.work / "campaign-identity.json").write_text(json.dumps(ident))
+        shutil.copyfile(CAMPAIGN / "static-premeasurement.json", self.work / "static-premeasurement.json")
+        (self.work / "READY").write_text("CALIBRATION MAY START\n")
+        def command(argv, **kwargs):
+            return types.SimpleNamespace(returncode=0, stdout='"PASS"' if "check-plan" in argv else "")
+        out = io.StringIO()
+        with patch.object(prepare_campaign.subprocess, "run", side_effect=command), contextlib.redirect_stdout(out):
+            code = prepare_campaign.cmd_preflight(types.SimpleNamespace(work=self.work, phase="calibration", custody=None, need_credential=False))
+        self.assertEqual(code, 2)
+        self.assertIn("OK   evaluator profile is frozen and matches", out.getvalue())
+        self.assertIn("STOP evaluator profile is admissible for omp_eval", out.getvalue())
+        self.assertIn("profile adapter_id 'omp-json-v2' != 'omp-eval-json-v1'", out.getvalue())
+
+    def test_cb_refuses_wrong_adapter_before_reading_items(self):
+        import types
+        import campaign_cb
+        import prepare_campaign
+        prepare_campaign.build_evaluator_key(self.work, "deepseek-ai/DeepSeek-V4.1-Flash")
+        path = self.work / "keys/omp-evaluator-readonly.json"
+        prof = json.loads(path.read_text())
+        prof["adapter_id"] = "omp-json-v2"
+        path.write_text(json.dumps(prof))
+        ns = types.SimpleNamespace(work=self.work)  # no view/rubric: refusal must precede access
+        err = io.StringIO()
+        with contextlib.redirect_stderr(err):
+            self.assertEqual(campaign_cb.cmd_run(ns, adapter=object()), 2)
+        self.assertIn("profile adapter_id 'omp-json-v2' != 'omp-eval-json-v1'", err.getvalue())
 
     def test_evaluator_must_not_be_the_executor(self):
         # the evaluator key builder refuses the executor model (calls the module function on a scratch copy)

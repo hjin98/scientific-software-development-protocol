@@ -22,11 +22,12 @@ HERE = Path(__file__).resolve().parent
 if str(HERE) not in sys.path:
     sys.path.insert(0, str(HERE))
 import core70  # noqa: E402
+import assessment_evidence  # noqa: E402
 
 REDACTION_VERSION = 1
 EVIDENCE = (
     "summary.json", "requirements-snapshot.json", "final-report.md", "diff.patch", "side-effects.jsonl", "tool-calls.jsonl",
-    "trace.jsonl", "events.normalized.jsonl", "oracle.json", "stderr.txt", "issues-final", "oracle-output", "final-tree",
+    "trace.jsonl", "events.normalized.jsonl", "oracle.json", "stderr.txt", "issues-final", "oracle-output", "final-tree", "final-tree-symlinks.json",
 )
 # What would name the arm, package or profile never reaches the evaluator.
 # What would name the arm, package, profile or protocol reaches the evaluator in no field and no filename.
@@ -49,13 +50,14 @@ run/requirements-snapshot.json, and custodian key material is under keys/. Score
 and the frozen rubric. Do not infer a missing fact from an excerpt. Do not alter evidence and do not use network,
 shell, skills or agents.
 
-You MUST return exactly one disposition for every expected scoring item, using the exact item id, measure, critical flag
-and an allowed disposition from the manifest. Never omit an item. If applicability or evidence is unresolved, return
+You MUST return exactly one disposition for every expected scoring item, using the exact item id and an allowed
+disposition from the manifest. Never omit an item. If applicability or evidence is unresolved, return
 "unresolved" when allowed; do not manufacture a pass. Generic or boilerplate text never earns a pass for an item that
-requires case-specific content. The wrapper rejects missing, duplicate, unknown or altered items.
+requires case-specific content. The wrapper rejects missing, duplicate, unknown items and any other row field: each row
+holds only item, result and evidence (the wrapper itself attaches the frozen measure and critical flag).
 
 Return strict JSON only:
-{"episode":"...","dispositions":[{"item":"...","measure":"...","result":"pass|fail|unresolved|not-applicable","critical":true,"evidence":"<=40 words"}],"notes":"<=80 words"}
+{"episode":"...","dispositions":[{"item":"...","result":"pass|fail|unresolved|not-applicable","evidence":"<=40 words"}],"notes":"<=80 words"}
 """
 
 
@@ -85,6 +87,13 @@ def _scrub(value: Any) -> Any:
 
 
 def copy_redacted(src: Path, dst: Path) -> None:
+    if src.is_symlink():
+        # The captured object is a link, never its host referent. A regular
+        # descriptor also prevents the evaluator following it in the bundle.
+        dst.parent.mkdir(parents=True, exist_ok=True)
+        dst.write_text(json.dumps({"captured_symlink_target": redact(str(src.readlink())),
+                                   "referent_not_copied": True}) + "\n", encoding="utf-8")
+        return
     if src.is_dir():
         dst.mkdir(parents=True, exist_ok=True)
         for child in sorted(src.iterdir()):
@@ -145,6 +154,18 @@ def result_text(stdout: str) -> tuple[str | None, dict[str, Any] | None]:
     return (None, None) if final is None else (final.get("result", ""), final)
 
 
+ROW_KEYS = {"item", "result", "evidence"}   # output schema p9-v2: the frozen measure and critical flag are attached from the manifest, never echoed by the model
+
+
+def expand_rows(rows: Any, requirements: core70.Requirements) -> Any:
+    """Attach each row's frozen measure and critical flag from the manifest (core70 and the collector keep the full row shape)."""
+    if not isinstance(rows, list):
+        return rows
+    spec = {item["id"]: item for item in requirements.scoring_items}
+    return [dict(row, measure=spec[row["item"]]["measure"], critical=spec[row["item"]]["critical"])
+            if isinstance(row, dict) and isinstance(row.get("item"), str) and row["item"] in spec else row for row in rows]
+
+
 def validate_verdict(verdict: Any, episode: str, requirements: core70.Requirements) -> list[str]:
     if not isinstance(verdict, dict):
         return ["top-level result is not an object"]
@@ -157,25 +178,50 @@ def validate_verdict(verdict: Any, episode: str, requirements: core70.Requiremen
     if not isinstance(rows, list):
         return errors + ["dispositions is not a list"]
     for index, row in enumerate(rows):
-        if not isinstance(row, dict) or set(row) != {"item", "measure", "result", "critical", "evidence"}:
+        if not isinstance(row, dict) or set(row) != ROW_KEYS:
             errors.append(f"dispositions[{index}] keys are invalid")
         elif not isinstance(row["evidence"], str) or len(row["evidence"].split()) > 40:
             errors.append(f"dispositions[{index}].evidence exceeds 40 words or is not text")
-    errors.extend(core70.validate_dispositions(rows, requirements))
+    errors.extend(core70.validate_dispositions(expand_rows(rows, requirements), requirements))
     if not isinstance(verdict.get("notes"), str) or len(verdict["notes"].split()) > 80:
         errors.append("notes exceeds 80 words or is not text")
     return errors
 
 
+def evaluator_prompt(episode: str, requirements: core70.Requirements) -> str:
+    """Expose exact output metadata, never expected answers, in the task itself."""
+    rows = [{k: item[k] for k in ("id", "measure", "critical", "allowed_dispositions")}
+            for item in requirements.scoring_items]
+    return PROMPT + "\n" + (
+        "Output formatting checklist: JSON uses double quotes, not Python literals. "
+        "Every row has exactly item, result, evidence. Copy item from id below. Do not output measure or critical: "
+        "they are listed only to say what each item scores and are attached by the wrapper. "
+        "Use result, not verdict/outcome/disposition, for your judgment. Choose only an allowed value. "
+        "Target at most 20 words per evidence string; the hard limit remains 40. "
+        "Return the final JSON promptly after the necessary evidence checks, with no code fence or commentary. "
+        "These metadata are not answers and do not replace the frozen rubric or evidence.\n"
+        + json.dumps({"episode": episode, "expected_output_metadata": rows}, sort_keys=True)
+    )
+
+
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--run", type=Path, required=True)
+    ap.add_argument("--out-dir", type=Path, help="Separate assessment pass directory; original run evidence stays untouched")
     ap.add_argument("--keys", type=Path, required=True, help="custodian keys/<episode> directory")
     ap.add_argument("--shared-rubric", type=Path, default=None)
     ap.add_argument("--evaluator-profile", type=Path, required=True)
     ap.add_argument("--evaluator-capabilities", type=Path, required=True)
     ap.add_argument("--adapter", default="omp_eval")
     args = ap.parse_args(argv)
+    assessment_dir = args.out_dir or args.run
+    if args.out_dir is not None:
+        if assessment_dir.resolve() == args.run.resolve() or args.run.resolve() in assessment_dir.resolve().parents:
+            ap.error("out-dir must be separate from original run evidence")
+        if any((assessment_dir / name).exists() for name in
+               ("assessment.json", "assessment-identity.json", "assessment-trace.jsonl", "assessment-stderr.txt", "assessment.stderr.txt")):
+            ap.error("separate assessment output already exists; use a new authorized pass")
+    assessment_dir.mkdir(parents=True, exist_ok=True)
 
     summary = core70.load_json(args.run / "summary.json")
     identity = core70.load_json(args.run / "run-identity.json")
@@ -187,12 +233,12 @@ def main(argv: list[str] | None = None) -> int:
             "required_artifacts": digests.get("required_artifacts_sha256"),
             "required_oracles": digests.get("required_oracles_sha256"),
             "expected_scoring_items": digests.get("expected_scoring_items_sha256")})
-        run_errors = core70.validate_complete_run(args.run, identity, requirements)
+        run_errors = assessment_evidence.validate_complete_run(args.run, identity, requirements)
     except core70.ContractError as exc:
         requirements, run_errors = None, [str(exc)]
 
     def finish(output: dict[str, Any], code: int) -> int:
-        (args.run / "assessment.json").write_text(json.dumps(output, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+        (assessment_dir / "assessment.json").write_text(json.dumps(output, indent=2, sort_keys=True) + "\n", encoding="utf-8")
         print(json.dumps(output, indent=2))
         return code
 
@@ -223,10 +269,10 @@ def main(argv: list[str] | None = None) -> int:
         env.update({"HOME": str(home), "XDG_CONFIG_HOME": str(home / ".config"), "XDG_CACHE_HOME": str(home / ".cache"),
                     "TMPDIR": str(bundle / ".qualification-tmp"), "TMP": str(bundle / ".qualification-tmp"), "TEMP": str(bundle / ".qualification-tmp")})
         containment = adapter.realize_containment(evaluator.profile, bundle, env)
-        launched = adapter.launch(evaluator.profile, PROMPT, bundle, env)
+        launched = adapter.launch(evaluator.profile, evaluator_prompt(summary.get("episode"), requirements), bundle, env)
         text, final = result_text(launched["stdout"])
-    (args.run / "assessment-trace.jsonl").write_text(launched["stdout"], encoding="utf-8")
-    (args.run / "assessment-stderr.txt").write_text(launched["stderr"], encoding="utf-8")
+    (assessment_dir / "assessment-trace.jsonl").write_text(launched["stdout"], encoding="utf-8")
+    (assessment_dir / "assessment-stderr.txt").write_text(launched["stderr"], encoding="utf-8")
     observation = adapter.runtime_observation(launched["stdout"])
     errors = core70.validate_launch_identity(evaluator.profile, launched.get("command_identity"))
     errors.extend(core70.validate_runtime_observation(evaluator, observation))
@@ -236,12 +282,13 @@ def main(argv: list[str] | None = None) -> int:
         "schema": 2, "run_identity_sha256": identity.get("identity_sha256"), "evaluator_profile_key_sha256": evaluator.profile_key_sha256,
         "evaluator_adapter_sha256": core70.sha256_file(Path(adapter.__file__).resolve()),
         "evaluator_wrapper_sha256": core70.sha256_file(Path(__file__).resolve()), "core_sha256": core70.sha256_file(Path(core70.__file__).resolve()),
+        "assessment_evidence_sha256": core70.sha256_file(Path(assessment_evidence.__file__).resolve()),
         "custodian_key_tree_sha256": core70.sha256_tree(args.keys), "rubric_sha256": core70.sha256_file(args.shared_rubric) if args.shared_rubric else None,
         "redaction_version": REDACTION_VERSION, "evidence_manifest_sha256": core70.stable_json_sha256(manifest),
         "expected_scoring_items_sha256": requirements.scoring_manifest_digest,
     }
     assessment_id["identity_sha256"] = core70.stable_json_sha256(assessment_id)
-    (args.run / "assessment-identity.json").write_text(json.dumps(assessment_id, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    (assessment_dir / "assessment-identity.json").write_text(json.dumps(assessment_id, indent=2, sort_keys=True) + "\n", encoding="utf-8")
 
     status, verdict = ("INADMISSIBLE" if errors else "VALID"), None
     if launched["returncode"] != 0 or final is None or final.get("is_error"):
@@ -265,10 +312,10 @@ def main(argv: list[str] | None = None) -> int:
         return finish({"assessment_status": status, "qualification_outcome": "NOT_EVALUATED", "evidence_state": summary["evidence_state"],
                        "assessment_identity_sha256": assessment_id["identity_sha256"], "errors": errors,
                        "raw_result": text[-4000:] if isinstance(text, str) else ""}, 2)
-    outcome = core70.outcome_from_dispositions(verdict["dispositions"], requirements)
+    outcome = core70.outcome_from_dispositions(expand_rows(verdict["dispositions"], requirements), requirements)
     return finish({"assessment_status": "VALID", "qualification_outcome": outcome, "evidence_state": summary["evidence_state"],
                    "assessment_identity_sha256": assessment_id["identity_sha256"], "episode": verdict["episode"],
-                   "dispositions": verdict["dispositions"], "notes": verdict["notes"]}, 0 if outcome == "PASS" else 1 if outcome == "FAIL" else 2)
+                   "dispositions": expand_rows(verdict["dispositions"], requirements), "notes": verdict["notes"]}, 0 if outcome == "PASS" else 1 if outcome == "FAIL" else 2)
 
 
 if __name__ == "__main__":

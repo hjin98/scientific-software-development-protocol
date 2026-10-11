@@ -200,7 +200,9 @@ def observations(run: Path, slot: dict, rec: dict, gmap: dict, disp: dict, dev: 
     if arm == "cand" and slot.get("delegate"):
         req = [(k, v(k)) for k, m in items.items() if m["measure"] in gmap["q2_owed"] and not matches(k, m, gmap["q2_unowed"])]
         unowed = sum(v(k) == "fail" for k, m in items.items() if matches(k, m, gmap["q2_unowed"]))     # one item per unowed part
-        obs.append({"g": "Q2", "owed": sum(r is not None for _, r in req), "met": sum(r == "pass" for _, r in req), "unowed": unowed})
+        # Exposure is declared by the manifest, independent of verdict resolution.
+        # v(k) still records unresolved items, which block final qualification.
+        obs.append({"g": "Q2", "owed": len(req), "met": sum(r == "pass" for _, r in req), "unowed": unowed})
     if arm in ("cand", "b1"):
         for k, m in items.items():
             fam = gmap["q3"].get(m["measure"])

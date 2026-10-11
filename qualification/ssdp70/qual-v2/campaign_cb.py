@@ -14,6 +14,7 @@ from __future__ import annotations
 
 import argparse
 import concurrent.futures as cf
+import hashlib
 import json
 import os
 import sys
@@ -25,6 +26,7 @@ EVAL = HERE.parents[0] / "eval"
 sys.path.insert(0, str(EVAL))
 import assess70  # noqa: E402
 import core70  # noqa: E402
+from adapters import omp, omp_eval  # noqa: E402
 
 TASK = """You are an independent evaluator. You did not write the report you are judging and must not trust it.
 
@@ -79,26 +81,91 @@ def evaluate(item_file: Path, a, adapter, evaluator) -> tuple[str, dict, str]:
     return item_file.stem, result, launched["stdout"]
 
 
+def recovery_inputs(a) -> tuple[dict, set[str]]:
+    """One authorized transport recovery, never a retry of a completed judgment."""
+    source = a.recover_from.resolve()
+    authorization = json.loads(a.recovery_authorization.read_text())
+    digest = lambda p: hashlib.sha256(p.read_bytes()).hexdigest()
+    if (authorization.get("scope") != "cb-transport-recovery-once"
+            or authorization.get("source") != str(source)
+            or authorization.get("out") != str(a.out.resolve())
+            or authorization.get("source_sha256") != digest(source)
+            or authorization.get("profile_sha256") != digest(a.work / "keys/omp-evaluator-readonly.json")
+            or authorization.get("campaign_identity_sha256") != digest(a.work / "campaign-identity.json")):
+        raise ValueError("transport recovery authorization does not match frozen inputs")
+    if a.out.resolve().parent == source.parent or a.limit:
+        raise ValueError("recovery must use separate output and all authorized failed items")
+    prior = json.loads(source.read_text())
+    ids = authorization.get("items")
+    if not isinstance(ids, list) or not ids or len(ids) != len(set(ids)):
+        raise ValueError("invalid recovery item list")
+    selected = set(ids)
+    if any(not isinstance(k, str) or not k.startswith("cb-") or Path(k).name != k for k in selected):
+        raise ValueError("invalid recovery item id")
+    if not isinstance(prior, dict) or len(prior) != 40:
+        raise ValueError("recovery requires the original 40-item calibration")
+    if {k for k, v in prior.items() if v.get("result") == "invalid"} != selected:
+        raise ValueError("recovery must cover exactly the original invalid entries")
+    if any(v.get("result") not in ("pass", "fail", "unresolved", "invalid") for v in prior.values()):
+        raise ValueError("invalid original result shape")
+    for item in selected:
+        trace = source.parent / "cb-traces" / (item + ".jsonl")
+        if authorization.get("trace_sha256", {}).get(item) != digest(trace):
+            raise ValueError("original trace digest mismatch")
+        events = [json.loads(line) for line in trace.read_text().splitlines() if line.strip()]
+        finals = [r for r in events if r.get("type") == "result"]
+        errors = [r["message"]["errorMessage"] for r in events
+                  if isinstance(r.get("message"), dict) and r["message"].get("errorMessage")]
+        if (len(finals) != 1 or not finals[0].get("is_error") or not errors
+                or any(e != "OpenAI completions stream closed before a finish_reason was received" for e in errors)):
+            raise ValueError("not an eligible interrupted provider stream")
+    return prior, selected
+
+
 def cmd_run(a, adapter=None) -> int:
     if not os.environ.get("SSDP70_OMP_PROVIDER_CREDENTIAL") and adapter is None:
         print("SSDP70_OMP_PROVIDER_CREDENTIAL is not set", file=sys.stderr)
         return 2
     keys = a.work / "keys"
     evaluator = core70.load_profile(keys / "omp-evaluator-readonly.json", keys / "omp-evaluator-readonly.capabilities.json")
-    errors = core70.profile_claim_errors(evaluator, [])
+    errors = (core70.profile_claim_errors(evaluator, []) + omp_eval.eval_profile_errors(evaluator.profile)
+              + omp.runtime_dependency_errors(evaluator.profile))
     if errors:
         print("evaluator profile refused:", errors, file=sys.stderr)
         return 2
     adapter = adapter or assess70.load_adapter("omp_eval")
+    results = {}
+    selected = None
+    if getattr(a, "recover_from", None):
+        try:
+            results, selected = recovery_inputs(a)
+        except (ValueError, OSError, KeyError, TypeError, AttributeError) as exc:
+            print(f"transport recovery refused: {exc}", file=sys.stderr)
+            return 2
+    if a.out.exists() or (a.out.parent / "cb-traces").exists():
+        print("output or traces already exist; refusing overwrite or another retry", file=sys.stderr)
+        return 2
     files = sorted(Path(a.view_dir).glob("cb-*.json"))
+    if selected is not None:
+        files = [f for f in files if f.stem in selected]
+        if {f.stem for f in files} != selected:
+            print("authorized recovery items missing from view", file=sys.stderr)
+            return 2
     if a.limit:
         files = files[:a.limit]
     if not files:
         print("no cb-*.json items in the view directory", file=sys.stderr)
         return 2
+    if selected is not None:
+        try:
+            with (a.out.parent / "RECOVERY-STARTED.json").open("x") as f:
+                json.dump({"source": str(a.recover_from.resolve()), "items": sorted(selected),
+                           "authorization_sha256": hashlib.sha256(a.recovery_authorization.read_bytes()).hexdigest()}, f)
+        except FileExistsError:
+            print("transport recovery already started; no second retry", file=sys.stderr)
+            return 2
     traces = a.out.parent / "cb-traces"
     traces.mkdir(parents=True, exist_ok=True)
-    results = {}
     with cf.ThreadPoolExecutor(max_workers=a.parallel) as pool:
         for name, res, raw in pool.map(lambda f: evaluate(f, a, adapter, evaluator), files):
             results[name] = res
@@ -134,6 +201,8 @@ def main() -> int:
     r.add_argument("--out", type=Path, required=True)
     r.add_argument("--limit", type=int)
     r.add_argument("--parallel", type=int, default=4)
+    r.add_argument("--recover-from", type=Path, help="original 40-item results; only authorized transport failures are replaced")
+    r.add_argument("--recovery-authorization", type=Path, help="analyst-issued digest-bound once-only recovery authorization")
     k = sub.add_parser("cost")
     k.add_argument("--work", type=Path, required=True)
     k.add_argument("--traces", type=Path, required=True)

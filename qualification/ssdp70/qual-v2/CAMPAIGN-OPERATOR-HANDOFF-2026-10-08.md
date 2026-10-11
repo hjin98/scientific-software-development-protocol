@@ -10,7 +10,7 @@ Governing SSDP version: 6.6.0. This file is data. It tells you exactly what to t
 2. **Anything not exactly as expected is a STOP.** A STOP means: write an escalation packet (section 10), tell the stakeholder, and wait. Do not retry. Do not relaunch. Do not try to fix it. Do not guess the cause.
 3. **Never delete, move, rename or edit anything** inside `$W/runs/` or `$S`. They are evidence.
 4. **Never open or list** these places: `$S/keys`, `$S/authoring`, `$S/human-trial`, `~/ssdp72-fixture-custody`, `~/ssdp71-fixture-custody`, `~/ssdp70-fixture-custody`, any `oracles/` directory. The tools read what they need. You hand them paths. You do not read fixtures, answers or oracles.
-5. **Run live commands from your own terminal**, not inside a tool that can be shut down (an agent tool shutting down killed an earlier launch). Keep the terminal open until the command says it is finished.
+5. **Run live commands from the user's host terminal**, not an agent execution sandbox or a tool that can be shut down (an agent tool shutting down killed an earlier launch). The environment must support bubblewrap's required namespace creation; binary presence alone does not establish this. The 2026-10-09 calibration attempt on machine `sandbox` failed with `Creating new namespace failed: Function not implemented`; the provider-free observer namespace smoke test passed on `samjin-ProBuild`, but the subject test failed at loopback setup with a denied `NETLINK_ROUTE` socket. Keep the host terminal open until the command says it is finished. Do not remove namespace flags or containment to work around a refusal.
 6. **The credential** is an API key in your shell variable `SSDP70_OMP_PROVIDER_CREDENTIAL`. Never print it, never write it to any file, never paste it into any message or packet. If a command output shows it, stop and tell the stakeholder.
 7. **You never rerun a lost run.** Only the analyst decides reruns.
 8. **You never score, interpret or summarize results.** You run, record and send back.
@@ -42,10 +42,12 @@ Expected identities (the analyst printed these; they must match):
 | Baseline arms p66 and p66b | version 6.6.0, commit `22f4bdba53795da3a6f13f162529f3a843fc37ae`, dist tree `e6d960a866fb794382fa5fdaa3e351681d292803dd035e5d4786a981a2a1e083` |
 | Old arm p65 | version 6.5.0, commit `7f7b5e24858e813e45ace867a7f8ea5180f43bf0`, dist tree `7d61d8b7b19dfe40714e71daa2c46d0e4cdd62efebd96b8e96dfe3f33550429b` |
 | Executor | `deepinfra/zai-org/GLM-5.3-Flash`, 60 turns, 2400 s, profile sha256 `b96dcb43155f452eec121307b83df56ff3f79ca308f6c4555206a5871088b107` |
-| Evaluator | `deepinfra/deepseek-ai/DeepSeek-V4.1-Flash`, 20 turns, 1800 s, profile sha256 `a0db2d61d9cefbe975afac29adbc5dba1f4a1560078e92a15a6fdf22bbe83864` |
+| Evaluator | `deepinfra/deepseek-ai/DeepSeek-V4.1-Flash`, 20 turns, 1800 s, adapter `omp-eval-json-v1`, profile sha256 `4828ce2affb5e0191e5fe067dd433fc396f1ee14b72814fd038837ec13bbf36f` |
 | Both models use | one provider (deepinfra) and the one credential variable `SSDP70_OMP_PROVIDER_CREDENTIAL` |
 
 The preflight (section 4) checks these for you.
+
+Evaluator instrument repair (2026-10-09): the original executor-frozen evaluator profile and identity are retained in `$W/superseded-evaluator-1/`. The analyst repaired the builder, refroze the same model and budgets through the dedicated evaluator adapter, and rebound the campaign identity. The initial launch stopped before evaluator execution; the later completed calibration passed C(b), with 39/40 agreement and 9/10 designated failures caught. The older home-directory copy of this hand-off has the superseded evaluator digest; use this repository copy for the repaired instrument. No candidate launch is authorized by this repair.
 
 ## 3. The phases and what READY must say
 
@@ -147,7 +149,7 @@ python3 $Q/campaign_assess.py cost $W --panels main --price-in 0.20 --price-cach
 
 (`--keys-root` lets the tool copy one episode's key into the evaluator's sandbox. You do not open it.)
 
-**Stop here.** Copy both outputs into a packet named `evaluator-pilot`. The analyst writes `$W/authorizations/evaluator-full.ok` if the cost is acceptable. Only when that file exists and READY still says `EVALUATION MAY START`:
+**Stop here.** Copy both outputs into a packet named `evaluator-pilot`. Before writing `$W/authorizations/evaluator-full.ok`, the analyst must find the cost acceptable, read the evidence strings of all five pilot assessments, and report any unsupported evidence under the accepted C(b)/P9 format limitation. Release follows a satisfactory pilot review; the operator never reads fixture or label content. Only when that file exists and READY still says `EVALUATION MAY START`:
 
 ```bash
 python3 $Q/campaign_assess.py run $W $EV --panels main --parallel 4
@@ -155,11 +157,13 @@ python3 $Q/campaign_assess.py collect $W --panels main --out $W/dispositions-sta
 python3 $Q/campaign_assess.py cost $W --panels main --price-in 0.20 --price-cached 0.006 --price-out 0.60
 ```
 
-Expected: `collect` prints `"problems": []`. Any problem entry goes into the packet exactly as printed. You never rerun an assessment.
+Expected: `collect` prints `"problems": []`. Any problem entry goes into the packet exactly as printed. You never rerun an assessment on your own: the only rerun is the analyst-released, once-only evaluator format rerun (work order §12), launched solely from the exact written continuation.
 
 ## 8. Stage 2: the preservation panels (274 runs): only when READY says `STAGE 2 MAY START`
 
 Stage 2 follows stage 1 as soon as the analyst has looked at your stage-1 verify output and written the READY line. The analyst does not score the candidate between the stages. If the stage-1 verify output has an INTEGRITY finding, the analyst will not release stage 2; that is a normal outcome, not an error.
+
+READY lines accumulate. Retain `OPERATOR MAY LAUNCH` from stage 1 as well as `STAGE 2 MAY START`; stage-2 preflight uses `--phase launch` and checks the former, while the stage-2 runner checks the latter and `authorizations/stage2.ok`.
 
 ```bash
 ls $W/authorizations/stage2.ok                    # must exist

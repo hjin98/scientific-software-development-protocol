@@ -4,7 +4,7 @@
   campaign_run.py WORK start [STAGE]     needs SSDP70_OMP_PROVIDER_CREDENTIAL; runs the unconditional commands of one stage (default 1:
                                           the main panel) one after another (so at most --parallel runs are in flight), detached in
                                           its own session. Stage 2 (the Q5 panels) starts only if the analyst wrote authorizations/stage2.ok
-                                          after scoring stage 1 (contract section 5: a later gate cannot compensate for an earlier failure).
+                                          after verifying stage 1. Staging is ordering only; no candidate gate is scored between stages.
   campaign_run.py WORK status             per command: NOT-LAUNCHED | RUNNING | EXIT <rc> | CRASHED; runs started and summaries so far
   campaign_run.py WORK run-conditional KEY   runs one conditional command; only if WORK/authorizations/KEY.ok exists (written by the analyst)
 

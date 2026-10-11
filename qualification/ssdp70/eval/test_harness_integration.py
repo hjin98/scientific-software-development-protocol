@@ -159,8 +159,7 @@ class FakeEvaluator:
         verdict = {
             "episode": "E1",
             "dispositions": [{
-                "item": "i1", "measure": "critical", "result": "pass",
-                "critical": True, "evidence": "complete evidence",
+                "item": "i1", "result": "pass", "evidence": "complete evidence",
             }],
             "notes": "",
         }
