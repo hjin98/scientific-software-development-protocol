@@ -10,6 +10,18 @@ Older README files accumulated release mappings, bootstrap attempts, and version
 
 ## Protocol 7.x
 
+### 7.2.1 — smaller, trigger-tied Scientific checks (development candidate)
+
+Protocol 7.2.1 is a patch to 7.2.0. It applies the stakeholder-ratified 7.2.1 amendment and rewrites the generated *Scientific checks* section to state the same duties more plainly. No other duty changes.
+
+- **Reader and routine-question proposal removed.** An agent's task report no longer has to propose an intended reader and routine scientific questions when nobody states them, either beside a retention/projection statement or when reporting an inquiry. Accepted D1-D3 authority still states them when authored or revised, so nothing changes for authority authors.
+- **Materiality basis whenever an inquiry is owed.** When work produces, runs or reviews realized results or prepares gate evidence, the agent states the materiality basis its inquiry used, whether it reports findings or a null, unless the stakeholder or accepted authority states it.
+- **Duties tied to their triggers.** The section states the change-only relief with the scope: each check applies only when its trigger occurs, and a change that realizes no results and finds nothing adds nothing. It is no longer framed as a list that every task must complete before finishing.
+- **Named items in place of numbered paragraphs.** The duties that keep a result's status recoverable (findings, the owed inquiry, variants, tensions, choices, retention, claims) are short named items. Separate rules (inquiry before irreversible loss, resource limits, persistence, persisting a tension, inaccessible homes, product changes, revising D1/D2 authority, authority content) are listed apart from them. The variant duty refers to the variant delegate question instead of repeating it.
+- **Size.** Compared with 7.2.0 the section is about 100 B smaller on the role entrypoints, 29 B smaller on documentation and 37 B larger on maintenance audit, which stays below its 7.1 reference.
+
+Stated limits: 7.2.1 is not frozen and has no qualification run. The Orchestrator 7.2 profile now declares 7.2.1 and still resolves 7.2.0 and 7.2, with unchanged lifecycle and prompts.
+
 ### 7.2.0 — reliable consumed surface and calibrated qualification
 
 Protocol 7.2 carries forward every Protocol 7.0 and 7.1 duty, drops only the requirement to load the owner, and changes how reliably an agent meets the duties. Development probing of 7.1 showed that agents obeyed text on the surface they read but did not reliably follow "read the owner when ..." instructions, and that the absolute qualification floors measured the model rather than the protocol. 7.2 removes the dependency on loading and recalibrates the measurement.

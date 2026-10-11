@@ -1,8 +1,9 @@
-"""Skills-only 7.2 candidate, S1 (workplan SSDP-7X-SKILLS-ONLY-RELIABILITY-AND-QUALIFICATION-V2, O-1 to O-5).
+"""Skills-only 7.2 Scientific checks section, as reduced for development candidate 7.2.1.
 
-Structural checks, necessary and not sufficient: they cannot show that agents behave as the doctrine
-requires, and the lossless mapping they run is the D4 author's mapping, whose independent check is a
-separate context's record.
+Governing authority: the 7.0 consolidated workplan section 8.3 read with its [7.2.1 amendment]
+annotations M1-M10. Structural checks, necessary and not sufficient: they cannot show that agents
+behave as the doctrine requires, and the lossless mapping they run is the D4 author's mapping, whose
+independent check is a separate context's record.
 """
 
 from __future__ import annotations
@@ -32,6 +33,9 @@ FRAGMENT = build_skills.CHECKS_FRAGMENT.read_text(encoding="utf-8")
 BLOCK_SKILLS = tuple(MAPPING["route_groups"]["all"])
 ALL_SKILLS = (*BLOCK_SKILLS, "repository-hygiene")
 ROLE_NAMES = set(MAPPING["route_groups"]["roles"])
+ELEMENT_LABELS: dict[str, list[str]] = MAPPING["element_labels"]
+STATUS_LEAD = "**Keep scientific results' status recoverable:**"
+RULES_LEAD = "**Rules:**"
 
 
 def source_path(name: str) -> Path:
@@ -92,6 +96,12 @@ class InjectionTests(unittest.TestCase):
                 continue
             self.assertEqual(("".join(sorted(selection[0])), "".join(sorted(selection[1]))),
                              ("".join(sorted(expected["questions"])), "".join(sorted(expected["elements"]))), name)
+
+    def test_variant_element_travels_with_the_variant_question(self) -> None:
+        # element 2 discloses "what the variant question above asks for"
+        for name, roles in MAPPING["role_map"].items():
+            self.assertEqual("2" in roles["elements"], "V" in roles["questions"], name)
+            self.assertEqual("3" in roles["elements"], "T" in roles["questions"], name)
 
     def test_generated_block_equals_its_fragment_subset(self) -> None:
         for name in BLOCK_SKILLS:
@@ -231,9 +241,11 @@ class ByteIdentityTests(unittest.TestCase):
 
 
 class BlockSizeReportTests(unittest.TestCase):
-    """O-4 (SD-R13): sizes against the 7.1 reference; excess only for required content new to this surface."""
+    """SD-R13: size is soft, losslessness hard. Excess over the 7.1 block must be required content new to
+    this surface (the inaccessible-home rule). Per-part attribution is the measurement tool's; the generated
+    block itself is attributed line by line to fragment tags by test_generated_block_equals_its_fragment_subset."""
 
-    def test_excess_over_the_71_block_is_attributed_to_the_inaccessible_home_rule(self) -> None:
+    def test_excess_over_the_71_block_is_the_inaccessible_home_rule(self) -> None:
         spec = importlib.util.spec_from_file_location("measure_blocks", QUAL / "measure_blocks.py")
         measure = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(measure)
@@ -243,40 +255,51 @@ class BlockSizeReportTests(unittest.TestCase):
             build_skills.build(Path(td))
             report = measure.measure(Path(td) / "skills")
         for name, row in report.items():
-            self.assertNotIn("UNATTRIBUTED", row["parts"], name)
             self.assertEqual(sum(row["parts"].values()), row["block_bytes"], name)
             self.assertLessEqual(row["excess_over_100_percent"], row["new_required_content_bytes"],
                                  f"{name}: excess over the 7.1 block must be lossless required content absent from 7.1")
-            self.assertEqual(row["new_required_content_bytes"] > 0, MAPPING["role_map"][name]["elements"].find("3") >= 0, name)
+            self.assertEqual(row["new_required_content_bytes"] > 0, "3" in MAPPING["role_map"][name]["elements"], name)
 
 
 class LosslessMappingTests(unittest.TestCase):
-    """O-3: every mapped phrase exists in each route it lists; the role map and numbering hold."""
+    """Every mapped phrase exists in each route it lists; removed meanings are gone; the role map holds."""
 
     def texts(self) -> dict[str, str]:
         return {name: normalized(generated(name)) for name in BLOCK_SKILLS}
 
+    @staticmethod
+    def routes(item: dict) -> list[str]:
+        return MAPPING["route_groups"][item["routes"]] if isinstance(item["routes"], str) else item["routes"]
+
     def test_every_mapped_phrase_exists_in_every_listed_route(self) -> None:
-        texts, groups = self.texts(), MAPPING["route_groups"]
+        texts = self.texts()
         for item in MAPPING["items"]:
-            routes = groups[item["routes"]] if isinstance(item["routes"], str) else item["routes"]
-            for name in routes:
+            for name in self.routes(item):
                 for phrase in item["phrases"]:
                     self.assertIn(normalized(phrase), texts[name], f"{item['id']} missing from {name}")
                 for phrase in item.get("absent_phrases", []):
                     self.assertNotIn(normalized(phrase), texts[name], f"{item['id']} unexpectedly in {name}")
 
-    def test_mapped_phrases_do_not_appear_outside_their_routes_when_element_specific(self) -> None:
-        texts, groups = self.texts(), MAPPING["route_groups"]
+    def test_route_specific_phrases_do_not_appear_outside_their_routes(self) -> None:
+        texts = self.texts()
         for item in MAPPING["items"]:
-            routes = groups[item["routes"]] if isinstance(item["routes"], str) else item["routes"]
-            if not item["id"].startswith(("E3.", "E5.", "E6.", "E7.", "Q.variants", "Q.tensions", "L.variant", "L.inaccessible")):
+            if item["routes"] == "all":
                 continue
-            for name in set(BLOCK_SKILLS) - set(routes):
+            for name in set(BLOCK_SKILLS) - set(self.routes(item)):
                 for phrase in item["phrases"]:
                     self.assertNotIn(normalized(phrase), texts[name], f"{item['id']} leaks into {name}")
 
-    def test_role_map_elements_questions_and_visible_numbering(self) -> None:
+    def test_removed_meanings_are_absent_everywhere_and_name_their_amendment(self) -> None:
+        texts, workplan = self.texts(), WORKPLAN.read_text(encoding="utf-8")
+        self.assertTrue(MAPPING["removed"])
+        for item in MAPPING["removed"]:
+            for code in re.findall(r"\bM\d+\b", item["amendment"]):
+                self.assertIn(f"[7.2.1 amendment ({code}, ratified 2026-10-11", workplan, item["id"])
+            for name, text in texts.items():
+                for phrase in item["absent_phrases"]:
+                    self.assertNotIn(normalized(phrase), text, f"{item['id']} still on {name}")
+
+    def test_role_map_elements_questions_and_named_duties(self) -> None:
         for name in ALL_SKILLS:
             roles = MAPPING["role_map"][name]
             text = generated(name)
@@ -284,16 +307,21 @@ class LosslessMappingTests(unittest.TestCase):
                 self.assertNotIn("Scientific checks", text, name)
                 continue
             block = block_of(text)
-            self.assertEqual("".join(re.findall(r"(?m)^([1-7])\. \*\*", block)), roles["elements"], name)
+            for element, labels in ELEMENT_LABELS.items():
+                for label in labels:
+                    present = sum(1 for line in block.split("\n") if line.startswith(label))
+                    self.assertEqual(present, 1 if element in roles["elements"] else 0, f"{name}: {label}")
             self.assertEqual(len(re.findall(r'(?m)^- (?:"|Only if it relies)', block)), len(roles["questions"]), name)
-            self.assertIn("\n1. **Findings.**", block, name)
-            self.assertIn("\n4. **Claims and scope.**", block, name)  # elements 3 and 6 refer back to 1 and 4
-            if "3" in roles["elements"]:
-                self.assertIn("as in element 1", block, name)
-            if "6" in roles["elements"]:
-                self.assertIn("exact element-4 source", block, name)
+            # the relief is stated with the scope, before any duty
+            scope = block.split("\n\n")[1]
+            self.assertTrue(scope.startswith("**Scope.**"), name)
+            self.assertIn("Each check applies when its trigger occurs; a change realizing no results owes no null", scope, name)
+            self.assertLess(block.index("**If you delegate**"), block.index(STATUS_LEAD), name)
+            self.assertLess(block.index(STATUS_LEAD), block.index(RULES_LEAD), name)
+            self.assertNotIn("Before you finish", block, name)
+            self.assertIsNone(re.search(r"(?m)^[1-7]\. ", block), name)
 
-    def test_every_label_table_row_and_the_new_row_is_mapped(self) -> None:
+    def test_every_label_table_row_is_mapped(self) -> None:
         text = WORKPLAN.read_text(encoding="utf-8")
         table = text.split("**Consumed-surface label meanings (frozen minimum).**", 1)[1].split("- **Specialist placement (frozen).**", 1)[0]
         labels = [m.group(1).strip() for m in re.finditer(r"(?m)^  \| (.+?) \|", table)
@@ -306,7 +334,7 @@ class LosslessMappingTests(unittest.TestCase):
 
 
 class ConsistencyTests(unittest.TestCase):
-    """O-5: no current text makes an owner read mandatory or describes an owner-load trigger on the entrypoint."""
+    """No current text makes an owner read mandatory; owner and workplan agree with the 7.2.1 amendment."""
 
     LEGACY = re.compile(
         r"owner-load trigger|owner load trigger|load trigger|Load the scientific-inspectability owner"
@@ -328,6 +356,14 @@ class ConsistencyTests(unittest.TestCase):
         self.assertIn("Apart from the (a)–(c) blocking conditions", owner)
         self.assertNotIn("It is not inlined.", owner)
         self.assertIn("**Predicate without a depth read.**", owner)
+
+    def test_owner_agrees_with_the_721_amendment(self) -> None:
+        owner = OWNER.read_text(encoding="utf-8")
+        for removed in ("Otherwise the agent proposes them visibly", "provisional reader",
+                        "separately owed reader/question proposal"):
+            self.assertNotIn(removed, owner)
+        self.assertIn("otherwise the task report owes no proposal of them", owner)
+        self.assertIn("the agent states the materiality basis its inquiry used, whether it reports findings or a null", owner)
 
     def test_governing_workplan_amendments_are_in_place(self) -> None:
         text = WORKPLAN.read_text(encoding="utf-8")
@@ -358,6 +394,8 @@ class ConsistencyTests(unittest.TestCase):
         self.assertNotIn("the (a)-(c) blocking conditions and coverage-envelope detail", text)
         self.assertNotIn("The owner's doctrine is not inlined (I66-3).", text)
         self.assertIn("## 11. Qualification design (cold contract created in Stage A)\n\n[7.2 amendment", text)
+        for code in range(1, 11):
+            self.assertIn(f"[7.2.1 amendment (M{code}, ratified 2026-10-11", text, f"M{code}")
 
     def test_current_placement_text_in_the_governing_workplan_is_annotated_or_amended(self) -> None:
         text = WORKPLAN.read_text(encoding="utf-8")

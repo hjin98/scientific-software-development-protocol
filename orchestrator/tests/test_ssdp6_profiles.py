@@ -26,7 +26,7 @@ class SSDP6CanonicalProfileTests(unittest.TestCase):
     def test_current_profile_is_schema_v2_protocol_72(self) -> None:
         self.assertEqual(P.DEFAULT_PROFILE_ID, "ssdp-protocol-7.2")
         self.assertEqual(self.descriptor.profile.profile_id, P.DEFAULT_PROFILE_ID)
-        self.assertEqual(self.descriptor.profile.protocol_version, "7.2.0")
+        self.assertEqual(self.descriptor.profile.protocol_version, "7.2.1")
         self.assertEqual(self.descriptor.profile.profile_schema_version, 2)
         self.assertEqual(self.descriptor.schema_version, 2)
 
@@ -57,6 +57,7 @@ class SSDP6CanonicalProfileTests(unittest.TestCase):
         self.assertEqual(P.profile_id_for_version("7.0"), P.SSDP70_PROFILE_ID)
         self.assertEqual(P.profile_id_for_version("7.1.0"), P.SSDP71_PROFILE_ID)
         self.assertEqual(P.profile_id_for_version("7.1"), P.SSDP71_PROFILE_ID)
+        self.assertEqual(P.profile_id_for_version("7.2.1"), P.DEFAULT_PROFILE_ID)
         self.assertEqual(P.profile_id_for_version("7.2.0"), P.DEFAULT_PROFILE_ID)
         self.assertEqual(P.profile_id_for_version("7.2"), P.DEFAULT_PROFILE_ID)
 

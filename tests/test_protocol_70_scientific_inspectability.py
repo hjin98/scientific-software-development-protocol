@@ -26,13 +26,13 @@ ACCEPTED_66 = "22f4bdba53795da3a6f13f162529f3a843fc37ae"
 ROLES = ("scientific-formulation", "numerical-algorithm-design", "software-design", "software-implementation")
 SPECIALISTS = ("software-documentation", "software-maintenance-audit", "repository-hygiene")
 ELEMENT_PREFIX = {
-    "1": "1. **Findings.**",
-    "2": "2. **Variants.**",
-    "3": "3. **Tensions.**",
-    "4": "4. **Claims and scope.**",
-    "5": "5. **Revisions.**",
-    "6": "6. **Choices.**",
-    "7": "7. **Authority content.**",
+    "1": "- **Findings.**",
+    "2": "- **Variants.**",
+    "3": "- **Tensions.**",
+    "4": "- **Claims.**",
+    "5": "- **Revising D1/D2 authority.**",
+    "6": "- **Choices.**",
+    "7": "- **Authority content.**",
 }
 PLACEMENT = {
     "scientific-formulation": {"1", "2", "3", "4", "5", "6", "7"},
@@ -184,12 +184,14 @@ class Protocol70StructuralTests(unittest.TestCase):
     def test_consumed_clauses_carry_label_meanings(self) -> None:
         d4 = generated("software-implementation")
         for meaning in (
-            "none declared: only negligible probes using no shared, metered or queued resource; propose the rest",
+            "with none declared, only negligible probes using no shared, metered or queued resource; propose the rest",
             "missing, irrecoverable, archaeology-only or misleading realized records",
-            "a null names examined and materially unexamined areas",
+            "a null naming examined and materially unexamined areas",
             "as a gap, never as none, a null or no selection: findings always;",
             "including when nothing returns",
             "lineage including delegated or resumed work, without double-counting overlapping trials",
+            "give the disclosure the variant question above asks for",
+            "the materiality basis used",
             "a recorded finding bearing on it that has not been raised as a Serious Challenge",
             "evidently produced, ran and reviewed no realized results and prepared no gate evidence",
             "known lower bound, unknown interval and claim limit",
@@ -218,10 +220,12 @@ class Protocol70StructuralTests(unittest.TestCase):
             self.assertEqual(block_problems(name, text), [], name)
             if not PLACEMENT[name]:
                 continue
-            block = blocks[name] = text[text.index(BLOCK_HEAD):text.index("**Before you finish")]
+            block = blocks[name] = text[text.index(BLOCK_HEAD):text.index("**Keep scientific results' status recoverable:**")]
             self.assertEqual(tuple(key for key in QUESTIONS if key in question_lines(block)),
                              SPECIALIST_QUESTIONS.get(name, QUESTIONS), name)
             self.assertIn("adds nothing except answers its delegator asked for and gaps owed for its delegates", text, name)
+            for removed in ("propose a reader", "provisional reader"):
+                self.assertNotIn(removed, text, name)
             for old in ("On return", "ask for findings or none", "Ask each delegate asked for findings"):
                 self.assertNotIn(old, text, name)
         # the delegate parts (everything before the element lead, after the scope line) are one wording per role family
