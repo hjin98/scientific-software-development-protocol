@@ -2,7 +2,6 @@
   "profile": {
     "compatible_protocol_versions": [
       "7.2.1",
-      "7.2.0",
       "7.2"
     ],
     "profile_id": "ssdp-protocol-7.2",

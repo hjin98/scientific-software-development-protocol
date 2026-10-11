@@ -58,8 +58,20 @@ class SSDP6CanonicalProfileTests(unittest.TestCase):
         self.assertEqual(P.profile_id_for_version("7.1.0"), P.SSDP71_PROFILE_ID)
         self.assertEqual(P.profile_id_for_version("7.1"), P.SSDP71_PROFILE_ID)
         self.assertEqual(P.profile_id_for_version("7.2.1"), P.DEFAULT_PROFILE_ID)
-        self.assertEqual(P.profile_id_for_version("7.2.0"), P.DEFAULT_PROFILE_ID)
         self.assertEqual(P.profile_id_for_version("7.2"), P.DEFAULT_PROFILE_ID)
+
+    def test_exact_patch_version_never_adopts_another_patch(self) -> None:
+        with self.assertRaises(E.OrchestratorError) as caught:
+            P.profile_id_for_version("7.2.0")
+        self.assertEqual(caught.exception.code, E.PROTOCOL_INCOMPATIBLE)
+        self.assertEqual(caught.exception.problem.details["declared"], "7.2.0")
+        self.assertNotIn("7.2.0", P.compatible_versions(P.DEFAULT_PROFILE_ID))
+        for profile_id in P.available_profile_ids():
+            for version in P.compatible_versions(profile_id):
+                if len(version.split(".")) == 3:
+                    with self.subTest(version=version):
+                        resolved = PS.resolve_packaged(P.profile_id_for_version(version))
+                        self.assertEqual(resolved.snapshot.descriptor.profile.protocol_version, version)
 
     def test_every_current_input_is_classified(self) -> None:
         for stage in self.descriptor.stages:

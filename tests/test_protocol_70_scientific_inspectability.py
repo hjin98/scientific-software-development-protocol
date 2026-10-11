@@ -103,7 +103,7 @@ def block_problems(name: str, text: str) -> list[str]:
         return [f"{name}: Scientific checks section is not present exactly once"]
     block = text[text.index(BLOCK_HEAD):]
     block = block[:block.index("\n## ", 1)]
-    if "These checks are the complete obligation" not in block:
+    if "These checks are complete" not in block:
         problems.append(f"{name}: scope lost the complete-obligation sentence")
     if DELEGATE_HEAD not in block:
         problems.append(f"{name}: delegate lead lost")

@@ -185,7 +185,8 @@ class IndependentValidationTests(unittest.TestCase):
             if name == "repository-hygiene":
                 continue
             drifted = dict(files)
-            drifted["SKILL.md"] = files["SKILL.md"].replace(b"These checks are the complete obligation", b"These checks are optional", 1)
+            drifted["SKILL.md"] = files["SKILL.md"].replace(b"These checks are complete", b"These checks are optional", 1)
+            self.assertNotEqual(drifted["SKILL.md"], files["SKILL.md"], name)
             self.assertTrue(validate_packages.validate_core_bundle(drifted, name, kind, source_path(name).parent), name)
             unexpanded = dict(files)
             unexpanded["SKILL.md"] = files["SKILL.md"] + b"\n<!-- SSDP-SCIENTIFIC-CHECKS q=F e=1 -->\n"
@@ -244,6 +245,20 @@ class BlockSizeReportTests(unittest.TestCase):
     """SD-R13: size is soft, losslessness hard. Excess over the 7.1 block must be required content new to
     this surface (the inaccessible-home rule). Per-part attribution is the measurement tool's; the generated
     block itself is attributed line by line to fragment tags by test_generated_block_equals_its_fragment_subset."""
+
+    def test_each_entrypoint_and_section_is_smaller_than_720(self) -> None:
+        with tempfile.TemporaryDirectory() as td:
+            build_skills.build(Path(td))
+            for name in BLOCK_SKILLS:
+                rel = f"dist/skills/{name}/SKILL.md"
+                previous = subprocess.run(
+                    ["git", "-C", str(ROOT), "show", f"2dedcfa:{rel}"],
+                    capture_output=True, check=True,
+                ).stdout
+                current = (Path(td) / "skills" / name / "SKILL.md").read_bytes()
+                self.assertLess(len(current), len(previous), name)
+                self.assertLess(len(block_of(current.decode()).encode()),
+                                len(block_of(previous.decode()).encode()), name)
 
     def test_excess_over_the_71_block_is_the_inaccessible_home_rule(self) -> None:
         spec = importlib.util.spec_from_file_location("measure_blocks", QUAL / "measure_blocks.py")
@@ -315,7 +330,7 @@ class LosslessMappingTests(unittest.TestCase):
             # the relief is stated with the scope, before any duty
             scope = block.split("\n\n")[1]
             self.assertTrue(scope.startswith("**Scope.**"), name)
-            self.assertIn("Each check applies when its trigger occurs; a change realizing no results owes no null", scope, name)
+            self.assertIn("Each duty follows its trigger; a change realizing no results owes no null", scope, name)
             self.assertLess(block.index("**If you delegate**"), block.index(STATUS_LEAD), name)
             self.assertLess(block.index(STATUS_LEAD), block.index(RULES_LEAD), name)
             self.assertNotIn("Before you finish", block, name)

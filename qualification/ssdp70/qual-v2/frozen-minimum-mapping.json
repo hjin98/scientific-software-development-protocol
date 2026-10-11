@@ -38,12 +38,12 @@
       "authors or materially revises D1-D3 authority for them",
       "or prepares evidence for a human scientific gate"]},
     {"id": "R1.exclusion", "frozen": "section 8.2 predicate: exclusion limit; small size and determinism alone do not establish the exclusion; section 8.3 'including on local repairs'", "routes": "all", "phrases": [
-      "Small, deterministic and local work is included; skip only tooling, infrastructure, editorial work or utilities that cannot materially affect those outputs, retained evidence or interpretation"]},
-    {"id": "R1.reevaluation", "frozen": "section 8.2/8.3 re-evaluation: evaluate the predicate again when a newly discovered effect makes it applicable", "routes": "all", "phrases": ["Re-evaluate scope when a newly discovered effect may change it."]},
+      "Small deterministic local work is included; skip only tooling, infrastructure, editorial work or utilities that cannot materially affect those outputs, retained evidence or interpretation"]},
+    {"id": "R1.reevaluation", "frozen": "section 8.2/8.3 re-evaluation: evaluate the predicate again when a newly discovered effect makes it applicable", "routes": "all", "phrases": ["Re-evaluate scope if a new effect may change it."]},
     {"id": "R2.depth", "frozen": "R2 as amended (recommended depth-read points, no required load)", "routes": "all", "phrases": [
-      "These checks are the complete obligation; the [owner](references/scientific-inspectability-and-initiative.md) is optional depth (definitions, examples), most useful before consequential judgments over realized results, D1-D3 authority work or gate evidence."]},
+      "These checks are complete; the [owner](references/scientific-inspectability-and-initiative.md) is optional depth (definitions, examples), most useful before consequential judgments over realized results, D1-D3 authority work or gate evidence."]},
     {"id": "L.change-only", "frozen": "label 'material findings (change-only relief)' and section 6.3.6: a change realizing no scientific results owes no null and, finding nothing, adds nothing; an asked answer is still owed; no delegate gap report is removed. Also element 1 'an asked answer is owed even where a change-only report would otherwise add nothing'. Stated with the scope, and each duty is owed when its trigger occurs (brief item 2)", "routes": "all", "phrases": [
-      "Each check applies when its trigger occurs; a change realizing no results owes no null and, finding nothing, adds nothing except answers its delegator asked for and gaps owed for its delegates."]},
+      "Each duty follows its trigger; a change realizing no results owes no null and, finding nothing, adds nothing except answers its delegator asked for and gaps owed for its delegates."]},
     {"id": "E1.inquiry", "frozen": "element 1: look for and report material findings and gaps, including beyond task scope and from delegates", "routes": "all", "phrases": [
       "- **Findings.** Look for and report material scientific findings, including delegates' and out-of-scope ones, and inspectability gaps"]},
     {"id": "L.gap", "frozen": "label 'inspectability gap'", "routes": "all", "phrases": ["(missing, irrecoverable, archaeology-only or misleading realized records)"]},
