@@ -1,0 +1,56 @@
+{
+  "baselines": "historical 6.5 planning figures (Q5C-STATIC-PREMEASUREMENT-2026-10-07.md); live Q5c uses fresh paired 6.5 runs",
+  "outside_enumerated_modes": [
+    {
+      "bytes": 61724,
+      "case": "T1/T8 run that also reads the scientific-inspectability owner",
+      "limit": 16208
+    }
+  ],
+  "q5d": {
+    "covers": "O-2 byte identity of the 6.6 text outside the block (source and dist), frozen-minimum mapping complete",
+    "passed": true,
+    "tail": [
+      "Ran 24 tests in 0.986s",
+      "",
+      "OK"
+    ],
+    "tests": "tests.test_protocol_72_scientific_checks"
+  },
+  "rows": [
+    {
+      "candidate_bytes": 15643,
+      "cap": 16720,
+      "headroom": 565,
+      "limit_with_margin": 16208,
+      "mode": "entrypoint-only",
+      "route": "T1/T8",
+      "verdict": "OK"
+    },
+    {
+      "candidate_bytes": 15643,
+      "cap": 16720,
+      "headroom": 565,
+      "limit_with_margin": 16208,
+      "mode": "entrypoint-only",
+      "route": "T7",
+      "verdict": "OK"
+    },
+    {
+      "candidate_bytes": 35950,
+      "cap": 50376,
+      "headroom": 13914,
+      "limit_with_margin": 49864,
+      "mode": "workflow-owner",
+      "route": "T7",
+      "verdict": "OK"
+    }
+  ],
+  "schema": 1,
+  "sizes": {
+    "entrypoint": 15643,
+    "scientific_inspectability_owner": 46081,
+    "workflow_owner": 20307
+  },
+  "verdict": "PASS"
+}

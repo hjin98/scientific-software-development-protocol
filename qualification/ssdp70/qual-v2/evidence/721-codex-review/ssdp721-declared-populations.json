@@ -1,0 +1,165 @@
+{
+  "p72": {
+    "runs": 122,
+    "states": {
+      "COMPLETE_ADMISSIBLE": 122
+    },
+    "items": {
+      "null_coverage.unowed": {
+        "declared": 90,
+        "episodes": 90
+      },
+      "delegate_request.F": {
+        "declared": 14,
+        "episodes": 14
+      },
+      "delegate_request.R": {
+        "declared": 14,
+        "episodes": 14
+      },
+      "delegate_request.V": {
+        "declared": 14,
+        "episodes": 14
+      },
+      "delegate_request.T": {
+        "declared": 14,
+        "episodes": 14
+      },
+      "delegated_finding_loss": {
+        "declared": 14,
+        "episodes": 14
+      },
+      "tension_report": {
+        "declared": 28,
+        "episodes": 28
+      },
+      "o1_authoring": {
+        "declared": 12,
+        "episodes": 12
+      },
+      "detection.unnamed": {
+        "declared": 33,
+        "episodes": 33
+      },
+      "claim_integrity": {
+        "declared": 122,
+        "episodes": 122
+      },
+      "unauthorized_mutation": {
+        "declared": 122,
+        "episodes": 122
+      }
+    },
+    "P2": 110,
+    "P3": 277
+  },
+  "p66": {
+    "runs": 122,
+    "states": {
+      "COMPLETE_ADMISSIBLE": 121,
+      "EXECUTION_ERROR": 1
+    },
+    "items": {
+      "null_coverage.unowed": {
+        "declared": 90,
+        "episodes": 90
+      },
+      "delegate_request.F": {
+        "declared": 14,
+        "episodes": 14
+      },
+      "delegate_request.R": {
+        "declared": 14,
+        "episodes": 14
+      },
+      "delegate_request.V": {
+        "declared": 14,
+        "episodes": 14
+      },
+      "delegate_request.T": {
+        "declared": 14,
+        "episodes": 14
+      },
+      "delegated_finding_loss": {
+        "declared": 14,
+        "episodes": 14
+      },
+      "tension_report": {
+        "declared": 28,
+        "episodes": 28
+      },
+      "o1_authoring": {
+        "declared": 12,
+        "episodes": 12
+      },
+      "detection.unnamed": {
+        "declared": 33,
+        "episodes": 33
+      },
+      "claim_integrity": {
+        "declared": 122,
+        "episodes": 122
+      },
+      "unauthorized_mutation": {
+        "declared": 122,
+        "episodes": 122
+      }
+    },
+    "P2": 110,
+    "P3": 277
+  },
+  "p66b": {
+    "runs": 122,
+    "states": {
+      "COMPLETE_ADMISSIBLE": 122
+    },
+    "items": {
+      "null_coverage.unowed": {
+        "declared": 90,
+        "episodes": 90
+      },
+      "delegate_request.F": {
+        "declared": 14,
+        "episodes": 14
+      },
+      "delegate_request.R": {
+        "declared": 14,
+        "episodes": 14
+      },
+      "delegate_request.V": {
+        "declared": 14,
+        "episodes": 14
+      },
+      "delegate_request.T": {
+        "declared": 14,
+        "episodes": 14
+      },
+      "delegated_finding_loss": {
+        "declared": 14,
+        "episodes": 14
+      },
+      "tension_report": {
+        "declared": 28,
+        "episodes": 28
+      },
+      "o1_authoring": {
+        "declared": 12,
+        "episodes": 12
+      },
+      "detection.unnamed": {
+        "declared": 33,
+        "episodes": 33
+      },
+      "claim_integrity": {
+        "declared": 122,
+        "episodes": 122
+      },
+      "unauthorized_mutation": {
+        "declared": 122,
+        "episodes": 122
+      }
+    },
+    "P2": 110,
+    "P3": 277
+  }
+}
