@@ -48,7 +48,7 @@ from adapters import omp, omp_eval  # noqa: E402
 
 CANDIDATE_REF = arms_spec.CANDIDATE_REF      # the 72b defaults (arms_spec.DEFAULT_SPEC) apply without WORK/arms-spec.json
 ROUTES = ["T1", "T7", "T8"]
-CHUNK, PARALLEL_MAX = 16, 8
+CHUNK, PARALLEL_DEFAULT, PARALLEL_MAX = 16, 8, 32   # 72b defaults (chunk 16, 8 pairs); the 7.2.1 plan passes chunk/parallel 32 via --config
 STATIC_BASELINES = {"entry": 8360, "owner": 25188}          # historical 6.5 planning figures (Q5C-STATIC-PREMEASUREMENT-2026-10-07.md)
 MARGIN = 512
 EVALUATOR_PROVIDER = "deepinfra"
@@ -417,7 +417,7 @@ def cmd_plan(a) -> int:
               "--profile", str(work / "keys" / "omp-primary-flash-executor-main.json"),
               "--capabilities", str(work / "keys" / "omp-primary-flash-executor-main.capabilities.json"),
               "--adapter", "omp", "--mode", "qualification"]
-    parallel = min(int(config.get("parallel", PARALLEL_MAX)), PARALLEL_MAX)
+    parallel = min(int(config.get("parallel", PARALLEL_DEFAULT)), PARALLEL_MAX)
     chunk = int(config.get("chunk", CHUNK))
     cond_chunk = int(config.get("conditional_chunk", 2))      # add-ons run two episodes at a time (the T7 rule adds two pairs, then re-checks)
     by_panel: dict[str, list[dict]] = {}

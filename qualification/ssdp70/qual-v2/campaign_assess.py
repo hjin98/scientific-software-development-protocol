@@ -42,7 +42,7 @@ ASSESS = EVAL / "assess70.py"
 # Panels whose items need a model judgement. Routing, unversioned and burden items are scored by binding oracles or recorded bytes.
 DEFAULT_PANELS = ("main", "versioning", "sentinels", "sentinels-add")
 FORMAT_INVALID = ("INVALID_SCHEMA", "UNPARSEABLE")        # evaluator output-format failures; the statuses the once-only format rerun covers
-TRANSPORT_STATUS = (500, 502, 503, 504)                   # provider HTTP errors that the contract section 3 treats as transport
+TRANSPORT_STATUS = (429, 500, 502, 503, 504)              # provider HTTP errors that the contract section 3 treats as transport (429: stakeholder fourteenth set)
 TRANSPORT_STREAM = "stream closed before a finish_reason"  # the interrupted provider stream diagnosed in C(b) transport recovery
 
 
@@ -123,7 +123,7 @@ def transport_failure(path: Path) -> bool:
     """True iff an EXECUTION_ERROR primary assessment ended on a provider transport error with no evaluator decision (contract section 3).
 
     All of: the evaluator process did not time out (return code 124) and returned no result text; the final assistant message in the trace has
-    stopReason "error" and either a closed provider stream or a 5xx provider status; and that message carries no text and no tool call, so the
+    stopReason "error" and either a closed provider stream or a 429/5xx provider status; and that message carries no text and no tool call, so the
     evaluator had emitted no answer or action at the failure point (a stream that drops its finish reason after a streamed answer is not
     transport). A wall-clock timeout, an exhausted turn budget (403) and a clean exit without a result are never transport."""
     try:
@@ -162,7 +162,7 @@ def trace_digest(path: Path) -> str | None:
 def limit_failure(path: Path) -> bool:
     """True iff an EXECUTION_ERROR primary assessment ended on the evaluator's own frozen limits with no result (eighth ruling, 2026-10-10):
     the wall-clock limit (return code 124) or the turn budget (a final assistant message refused with status 403 "turn budget"). The
-    raw result must be empty. Disjoint from transport_failure(): that needs a closed stream or a 5xx status and excludes return code 124."""
+    raw result must be empty. Disjoint from transport_failure(): that needs a closed stream or a 429/5xx status and excludes return code 124."""
     try:
         data = json.loads((path / "assessment.json").read_text())
         if data.get("assessment_status") != "EXECUTION_ERROR" or data.get("raw_result"):

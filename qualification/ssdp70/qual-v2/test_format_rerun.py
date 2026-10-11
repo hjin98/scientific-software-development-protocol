@@ -237,7 +237,9 @@ class FormatRerun(unittest.TestCase):
     def test_transport_failure_classification_is_mechanical(self):
         closed = {"stopReason": "error", "errorMessage": "OpenAI completions stream closed before a finish_reason was received"}
         cases = [(closed, True), ({"stopReason": "error", "errorStatus": 502, "errorMessage": "bad gateway"}, True),
+                 ({"stopReason": "error", "errorStatus": 429, "errorMessage": "429 rate limit exceeded"}, True),
                  ({"stopReason": "error", "errorStatus": 403, "errorMessage": "403 qualification turn budget exhausted"}, False),
+                 ({"stopReason": "error", "errorStatus": 408, "errorMessage": "request timeout"}, False),
                  ({"stopReason": "error", "errorMessage": "something else"}, False), ({"stopReason": "stop"}, False)]
         for last, expected in cases:
             self.assertEqual(ca.transport_failure(self.trace("C", **last)), expected, last)
