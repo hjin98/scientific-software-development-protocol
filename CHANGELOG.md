@@ -18,9 +18,9 @@ Protocol 7.2.1 is a patch to 7.2.0. It applies the stakeholder-ratified 7.2.1 am
 - **Materiality basis whenever an inquiry is owed.** When work produces, runs or reviews realized results or prepares gate evidence, the agent states the materiality basis its inquiry used, whether it reports findings or a null, unless the stakeholder or accepted authority states it.
 - **Duties tied to their triggers.** The section states the change-only relief with the scope: each check applies only when its trigger occurs, and a change that realizes no results and finds nothing adds nothing. It is no longer framed as a list that every task must complete before finishing.
 - **Named items in place of numbered paragraphs.** The duties that keep a result's status recoverable (findings, the owed inquiry, variants, tensions, choices, retention, claims) are short named items. Separate rules (inquiry before irreversible loss, resource limits, persistence, persisting a tension, inaccessible homes, product changes, revising D1/D2 authority, authority content) are listed apart from them. The variant duty refers to the variant delegate question instead of repeating it.
-- **Size.** Compared with 7.2.0 the section is about 100 B smaller on the role entrypoints, 29 B smaller on documentation and 37 B larger on maintenance audit, which stays below its 7.1 reference.
+- **Size.** Compared with 7.2.0 the section is 143–157 B smaller on the role entrypoints, 77 B smaller on documentation and 11 B smaller on maintenance audit, which stays below its 7.1 reference.
 
-Stated limits: 7.2.1 is not frozen and has no qualification run. The Orchestrator 7.2 profile now declares 7.2.1 and still resolves 7.2.0 and 7.2, with unchanged lifecycle and prompts.
+Stated limits: 7.2.1 is not frozen and has no qualification run. The Orchestrator 7.2 profile declares 7.2.1 and resolves 7.2.1 and 7.2, with unchanged lifecycle and prompts. Exact 7.2.0 requests are rejected as incompatible.
 
 ### 7.2.0 — reliable consumed surface and calibrated qualification
 
