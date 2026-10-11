@@ -71,6 +71,19 @@ def part(line: str) -> str:
         return "gap rule"
     if stripped.startswith("**Before you finish"):
         return "framing (element lead)"
+    if stripped in ("**Keep scientific results' status recoverable:**", "**Rules:**"):
+        return "framing (element lead)"
+    named = {
+        "Findings": 1, "Realized results": 1, "Before loss": 1, "Resources": 1, "Persistence": 1,
+        "Variants": 2, "Tensions": 3, "Persisting a tension": 3, "Inaccessible homes": 3,
+        "Claims": 4, "Product changes": 4, "Revising D1/D2 authority": 5, "Choices": 6, "Retention": 6,
+        "Authority content": 7,
+    }
+    item = re.match(r"^- \*\*([^*]+?)\.?\*\*", stripped)
+    if item and item.group(1).rstrip(".") in named:
+        return f"element {named[item.group(1).rstrip('.')]}"
+    if stripped.startswith(("- search project evidence", "- report searched scopes", "- never treat a found tension")):
+        return "element 3"
     match = re.match(r"^([1-7])\. ", stripped)
     return f"element {match.group(1)}" if match else "UNATTRIBUTED"
 

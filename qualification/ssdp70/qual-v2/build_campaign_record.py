@@ -18,6 +18,10 @@ Declaration (JSON):
    "no_activation_arms": [],                                                   # run-name arm keys exempt from deterministic activation
    "check_pair_order": true,                                                   # audit summary.pair_order and alternation
    "infra_error_patterns": ["\\\\b(429|5\\\\d\\\\d)\\\\b", "connection", "ECONN"]}  # provider-transport causes of an infrastructure failure
+  A slot may carry `command` (the plan command key; the run directory must then sit under that key), `set` (replicate set, 0 by default) and
+  `run_replicate` (the harness replicate in the run name, default `replicate`). Set k >= 1 repeats a command set under new command keys (see
+  arms_spec.py): its runs share their run names with set 0, are keyed by (command, run name), and are named `<command>/<run>` in the record and
+  in `--dispositions` keys. Set 0 keeps the bare run name, so a campaign without replicate sets builds the same record as before.
   `delegate` (custodian-declared): a delegate episode, the Q2 population (owed parts and unowed request parts). `non_owed`
   (custodian-declared, ruling A-x5): the run owed no null, envelope or disclosure; it is the Q4d population. The two are
   independent declarations; the builder infers neither. A run with owed delegate requests on a slot not declared `delegate`
@@ -49,6 +53,7 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
+import arms_spec  # noqa: E402
 import h4  # noqa: E402
 
 SCORABLE = {"pass": 1, "fail": 0}
@@ -79,7 +84,31 @@ def classify(run: Path, infra_patterns: list[str]) -> dict:
         kind = "infra"
     else:
         kind = "malformed"
-    return {"summary": s, "state": state, "term": term.get("state"), "kind": kind, "dir": str(run), "name": run.name}
+    return {"summary": s, "state": state, "term": term.get("state"), "kind": kind, "dir": str(run), "name": run.name, "command": run.parent.name}
+
+
+def collect(roots, infra_patterns: list[str]) -> dict:
+    """run name -> every run directory of that name under the roots; each keeps its command key (its parent directory name)."""
+    out = collections.defaultdict(list)
+    for root in roots:
+        for d in sorted(root.glob("*/*-r*")) + sorted(root.glob("*-r*")):
+            if (d / "summary.json").exists():
+                out[d.name].append(classify(d, infra_patterns))
+    return out
+
+
+def pick(index: dict, name: str, slot: dict, commands: set, rerun: bool) -> list:
+    """The directories that belong to a slot. A slot without a `command` matches by run name alone. A slot with one needs the directory under
+    that command key, so two commands holding the same run name (a replicate set) never mix. A rerun of a set-0 slot may also sit in a rerun
+    root that is not a plan command; a rerun of a replicate-set slot must sit under its own command key."""
+    found = index.get(name, [])
+    command = slot.get("command")
+    if command is None:
+        return found
+    exact = [t for t in found if t["command"] == command]
+    if rerun and not slot.get("set"):
+        return exact or [t for t in found if t["command"] not in commands]
+    return exact
 
 
 def items_of(run: Path) -> dict:
@@ -158,8 +187,8 @@ def observations(run: Path, slot: dict, rec: dict, gmap: dict, disp: dict, dev: 
         r = None
         if o and o.get("mode") == "binding" and o.get("verdict") in SCORABLE:
             r = o["verdict"]
-        elif disp.get(f"{rec['name']}::{k}") in SCORABLE:
-            r = disp[f"{rec['name']}::{k}"]
+        elif disp.get(f"{rec.get('id', rec['name'])}::{k}") in SCORABLE:
+            r = disp[f"{rec.get('id', rec['name'])}::{k}"]
         elif dev and o and o.get("verdict") in SCORABLE:
             r = o["verdict"]
         if r is None and not (o and o.get("verdict") == "not-applicable"):
@@ -254,36 +283,37 @@ def main() -> None:
     if len(set(arms.values())) != len(arms):
         bad("two arm labels share one run-name arm key", arms=arms)
 
-    def collect(roots):
-        out = collections.defaultdict(list)
-        for root in roots:
-            for d in sorted(root.glob("*/*-r*")) + sorted(root.glob("*-r*")):
-                if (d / "summary.json").exists():
-                    out[d.name].append(classify(d, infra))
-        return out
-
-    orig, rer = collect(a.runs), collect(a.rerun)
-    declared = {}
+    orig, rer = collect(a.runs, infra), collect(a.rerun, infra)
+    declared, names, set_of = {}, {}, {}
     for slot in decl["slots"]:
-        name = f"{slot['episode']}-{arms[slot['arm']]}-r{slot.get('replicate', 0)}"
-        if name in declared:
-            bad("duplicate slot in declaration", run=name)
-        declared[name] = slot
+        name = f"{slot['episode']}-{arms[slot['arm']]}-r{slot.get('run_replicate', slot.get('replicate', 0))}"
+        rid = arms_spec.run_id(name, slot.get("command"), int(slot.get("set", 0)))
+        if rid in declared:
+            bad("duplicate slot in declaration", run=rid)
+        declared[rid], names[rid], set_of[rid] = slot, name, int(slot.get("set", 0))
     keys = set(arms.values())
     other = sorted(n for n in set(orig) | set(rer) if n.rsplit("-", 2)[1] not in keys)
-    for name in sorted((set(orig) | set(rer)) - set(declared) - set(other)):
-        bad("undeclared run", run=name)
+    commands = {x["command"] for x in decl["slots"] if x.get("command")}
+    picked, claimed = {}, set()
+    for rid, slot in declared.items():
+        picked[rid] = (pick(orig, names[rid], slot, commands, False), pick(rer, names[rid], slot, commands, True))
+        claimed.update(id(t) for ts in picked[rid] for t in ts)
+    stray = [t for index in (orig, rer) for ts in index.values() for t in ts if id(t) not in claimed and t["name"] not in other]
+    for name in sorted({t["name"] for t in stray}):
+        bad("undeclared run", run=name, **({"command": sorted({t["command"] for t in stray if t["name"] == name})}
+                                           if name in set(names.values()) else {}))
 
     runs, reruns, used_measures, gated_runs, prefixes_seen = [], [], set(), 0, set()
     profile_keys = collections.Counter()
     for name, slot in declared.items():
-        tries, rr = orig.get(name, []), rer.get(name, [])
+        tries, rr = picked[name]
         if not tries:
             bad("declared slot has no original run", run=name)
             continue
         if len(tries) > 1 or len(rr) > 1:
             bad("more than one original or rerun directory for a slot", run=name, dirs=[t["dir"] for t in tries + rr])
         first, final = tries[0], (rr[0] if rr else tries[0])
+        final["id"] = name
         if rr:
             reruns.append({"run": name, "original": first["dir"], "rerun": rr[0]["dir"], "original_kind": first["kind"], "rerun_kind": rr[0]["kind"]})
             if first["kind"] != "infra":
@@ -363,22 +393,27 @@ def main() -> None:
             bad("non_owed differs between arms on one episode", episode=ep)
     pair = {"checked": False}
     if decl.get("check_pair_order", True):
-        by_ep = collections.defaultdict(dict)
+        by_ep, sets_of = collections.defaultdict(dict), collections.defaultdict(set)
+        for rid, slot in declared.items():
+            sets_of[(slot["episode"], set_of[rid])].add(arms[slot["arm"]])
         for rec in runs:
             if rec["arm"] in ("cand", "b1"):
-                t = orig[rec["run"]][0]
-                by_ep[rec["episode"]][rec["arm"]] = t["summary"].get("pair_order")
-        first = collections.Counter()
-        for ep, po in by_ep.items():
+                t = picked[rec["run"]][0][0]
+                by_ep[(rec["episode"], set_of[rec["run"]])][rec["arm"]] = t["summary"].get("pair_order")
+        first_by_set = collections.defaultdict(collections.Counter)
+        for (ep, k), po in by_ep.items():
             if set(po) != {"cand", "b1"}:
                 continue
-            if po["cand"] != po["b1"] or sorted(po["cand"] or []) != sorted([arms["cand"], arms["b1"], *([arms["b2"]] if "b2" in arms else [])]):
+            if po["cand"] != po["b1"] or sorted(po["cand"] or []) != sorted(sets_of[(ep, k)]):
                 bad("pair_order missing or inconsistent between the candidate and B1 runs", episode=ep, pair_order=po)
                 continue
             order = [x for x in po["cand"] if x in (arms["cand"], arms["b1"])]
-            first[order[0]] += 1
+            first_by_set[k][order[0]] += 1
+        first = sum(first_by_set.values(), collections.Counter())
         pair = {"checked": True, "first_arm": dict(first)}
-        if first and abs(first[arms["cand"]] - first[arms["b1"]]) > 1:
+        if len(first_by_set) > 1:
+            pair["by_set"] = {str(k): dict(v) for k, v in sorted(first_by_set.items())}
+        if any(abs(c[arms["cand"]] - c[arms["b1"]]) > 1 for c in first_by_set.values()):
             bad("order is not alternating", first_arm=dict(first))
 
     waivers = [w for w, on in (("allow-unresolved", a.allow_unresolved), ("dev-advisory-as-evaluator", a.dev_advisory_as_evaluator),

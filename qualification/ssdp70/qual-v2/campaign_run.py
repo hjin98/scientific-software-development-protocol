@@ -11,6 +11,8 @@
 A command that exits 0 or 2 (2 = at least one run is not admissible) lets the sequence continue. Any other exit code, or a crash,
 writes WORK/launch/HALT and stops the sequence. The runner never reruns, never edits a run directory and never deletes anything.
 Rerunning a lost run is the analyst's decision (contract section 3): the analyst writes a new command into a new directory.
+The arms specification (WORK/arms-spec.json, arms_spec.py) is read as a guard: `start` and `run-conditional` refuse a commands.json that names an
+arm outside it, and `status` prints each panel's replicate set per command (`set`).
 """
 from __future__ import annotations
 
@@ -21,11 +23,28 @@ import sys
 import time
 from pathlib import Path
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import arms_spec  # noqa: E402
+
 CONTINUE = (0, 2)
 
 
 def commands(work: Path) -> list[dict]:
     return json.loads((work / "commands.json").read_text())["commands"]
+
+
+def spec_problem(work: Path) -> str:
+    """A command naming an arm outside the arms specification (empty string when the plan agrees with it)."""
+    spec = arms_spec.load(work)
+    names = set(arms_spec.label_of(spec))
+    bad = sorted({a for c in commands(work) for a in c["arms"]} - names)
+    if bad:
+        return f"commands.json names arms outside the arms specification: {bad}"
+    if (work / arms_spec.SPEC_NAME).is_file():
+        mismatched = [c["key"] for c in commands(work) if c["arms"] != arms_spec.panel_arms(spec, c["panel"])]
+        if mismatched:
+            return f"commands.json panel arms differ from the arms specification: {mismatched}"
+    return ""
 
 
 def state(work: Path, key: str) -> str:
@@ -88,6 +107,9 @@ def main() -> int:
             print("SSDP70_OMP_PROVIDER_CREDENTIAL is not set", file=sys.stderr)
             return 2
         stage = int(sys.argv[3]) if len(sys.argv) > 3 else 1
+        if spec_problem(work):
+            print(spec_problem(work), file=sys.stderr)
+            return 2
         ready = (work / "READY").read_text() if (work / "READY").exists() else ""
         need = "OPERATOR MAY LAUNCH" if stage == 1 else "STAGE 2 MAY START"
         if need not in ready:
@@ -110,7 +132,7 @@ def main() -> int:
     if action == "status":
         for c in commands(work):
             started, summaries, errors = counts(work, c["key"])
-            print(f"{c['key']:<18} stage {c.get('stage', 1)} {'(conditional) ' if c.get('conditional') else ''}{state(work, c['key']):<14} "
+            print(f"{c['key']:<18} stage {c.get('stage', 1)} {'(conditional) ' if c.get('conditional') else ''}{'set ' + str(c['set']) + ' ' if 'set' in c else ''}{state(work, c['key']):<14} "
                   f"started {started:>3} summaries {summaries:>3} of {c['runs']:>3}  error files {errors}")
         for flag in ("HALT", "DONE-stage1", "DONE-stage2"):
             if (work / "launch" / flag).exists():
@@ -121,6 +143,9 @@ def main() -> int:
         c = next((x for x in commands(work) if x["key"] == key), None)
         if c is None or not c.get("conditional"):
             print(f"{key} is not a conditional command", file=sys.stderr)
+            return 2
+        if spec_problem(work):
+            print(spec_problem(work), file=sys.stderr)
             return 2
         if not (work / "authorizations" / f"{key}.ok").exists():
             print(f"{key} is not authorized: the analyst has not written authorizations/{key}.ok", file=sys.stderr)

@@ -2,13 +2,15 @@
 """P9 driver: run the blinded evaluator (`eval/assess70.py`) over completed campaign runs, and collect its dispositions.
 
   campaign_assess.py run WORK --keys-root KEYS --evaluator-profile P --evaluator-capabilities C [--shared-rubric R] [--parallel N]
-      Every run directory under WORK/runs/<panel>-cNN whose panel is in --panels (default main, versioning, sentinels, sentinels-add: routing, unversioned and burden items are binding or recorded bytes) and whose summary is COMPLETE_ADMISSIBLE and whose arm is p72, p66 or p66b and that has no
-      assessment.json yet. Needs SSDP70_OMP_PROVIDER_CREDENTIAL. Exits non-zero on the first evaluator failure that is not a
+      Every run directory under WORK/runs/<panel>-cNN whose panel is in --panels (default main, versioning, sentinels, sentinels-add: routing, unversioned and burden items are binding or recorded bytes) and whose summary is COMPLETE_ADMISSIBLE and whose arm is an assessed arm (the arms specification WORK/arms-spec.json,
+      arms_spec.py; without one p72, p66 or p66b) and that has no assessment.json yet. Needs SSDP70_OMP_PROVIDER_CREDENTIAL. Exits non-zero on the first evaluator failure that is not a
       per-run result (exit codes 0, 1 and 2 of assess70 are results: PASS, FAIL, UNRESOLVED/not evaluated).
   campaign_assess.py cost WORK --price-in P --price-cached P --price-out P     (measured tokens, hit rate, USD per run, projection)
   campaign_assess.py collect WORK --out DISPOSITIONS.json
       Reads every VALID assessment.json into {"<run>::<item>": "pass"|"fail"|...} for `build_campaign_record.py --dispositions`,
-      and lists runs whose assessment is missing or not VALID. It never edits a run directory.
+      and lists runs whose assessment is missing or not VALID. It never edits a run directory. Runs are keyed by (command key, run name): a run of a
+      replicate set k >= 1 (commands.json `set`) is named `<command>/<run>` in the keys, because its run name repeats set 0's; set 0 keeps the bare
+      run name. `--evidence-out F` also writes {"<run>::<item>": evaluator evidence text} (data for the descriptive component table, never a verdict).
   campaign_assess.py run WORK ... --assessment-root RERUN --format-rerun-of PRIMARY      (once-only format rerun)
       Reruns exactly the runs frozen in RERUN/PASS-AUTHORIZATION.json (phase "format-rerun"), each of whose PRIMARY assessment is
       INVALID_SCHEMA or UNPARSEABLE, or is an EXECUTION_ERROR that transport_failure() classifies as a provider transport error (contract
@@ -33,9 +35,10 @@ import sys
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
+sys.path.insert(0, str(HERE))
+import arms_spec  # noqa: E402
 EVAL = HERE.parent / "eval"
 ASSESS = EVAL / "assess70.py"
-GATED_ARMS = ("p72", "p66", "p66b")
 # Panels whose items need a model judgement. Routing, unversioned and burden items are scored by binding oracles or recorded bytes.
 DEFAULT_PANELS = ("main", "versioning", "sentinels", "sentinels-add")
 FORMAT_INVALID = ("INVALID_SCHEMA", "UNPARSEABLE")        # evaluator output-format failures; the statuses the once-only format rerun covers
@@ -49,8 +52,9 @@ def in_panels(d: Path, panels) -> bool:
 
 
 def run_dirs(work: Path, panels=DEFAULT_PANELS):
+    gated = arms_spec.assessed(arms_spec.load(work))
     for d in sorted((work / "runs").glob("*/*-r*")):
-        if (d / "summary.json").exists() and d.name.rsplit("-", 2)[1] in GATED_ARMS and in_panels(d, panels):
+        if (d / "summary.json").exists() and d.name.rsplit("-", 2)[1] in gated and in_panels(d, panels):
             yield d
 
 
@@ -354,6 +358,7 @@ def cmd_collect(a) -> int:
     out, problems, n, used, first, rows = {}, [], 0, [], [], []
     rerun_root = getattr(a, "rerun_root", None)
     frozen, marked, exec_frozen = {}, False, {}
+    sets, evidence = arms_spec.command_sets(a.work), {}
     if rerun_root is not None:
         if getattr(a, "assessment_root", None) is None:
             print("--rerun-root needs the primary --assessment-root")
@@ -379,34 +384,35 @@ def cmd_collect(a) -> int:
         if json.loads((d / "summary.json").read_text())["evidence_state"] != "COMPLETE_ADMISSIBLE":
             continue
         n += 1
+        rid = arms_spec.run_id(d.name, d.parent.name, sets.get(d.parent.name, 0))
         path = assessment_dir(d, a) / "assessment.json"
         if not path.exists():
-            problems.append({"run": d.name, "what": "no assessment"})
+            problems.append({"run": rid, "what": "no assessment"})
             continue
         data = json.loads(path.read_text())
         slot = slot_of(d, a.work)
         if data.get("assessment_status") in FORMAT_INVALID or (data.get("assessment_status") == "EXECUTION_ERROR" and slot in exec_frozen):
-            row = {"run": d.name, "panel": slot.split("/")[0], "arm": d.name.rsplit("-", 2)[1], "first_status": data["assessment_status"],
+            row = {"run": rid, "panel": slot.split("/")[0], "arm": d.name.rsplit("-", 2)[1], "first_status": data["assessment_status"],
                    "first_class": error_class(data, path.parent), "first_items": sorted(set(re.findall(r"item (\S+) ", " ".join(e for e in data.get("errors", []) if isinstance(e, str)))))}
             first.append(row)
             rerun = (rerun_root / slot / "assessment.json") if rerun_root is not None else None
             if rerun_root is None:
-                problems.append({"run": d.name, "what": f"assessment {data['assessment_status']}", "first_class": row["first_class"]})
+                problems.append({"run": rid, "what": f"assessment {data['assessment_status']}", "first_class": row["first_class"]})
                 continue
             if slot not in frozen or hashlib.sha256(path.read_bytes()).hexdigest() != frozen[slot]:
-                problems.append({"run": d.name, "what": "rerun-eligible primary (format-invalid, transport or limit) is not in the frozen rerun set"})
+                problems.append({"run": rid, "what": "rerun-eligible primary (format-invalid, transport or limit) is not in the frozen rerun set"})
                 continue
             if not marked:
-                problems.append({"run": d.name, "what": "format rerun marker missing or does not match the authorization"})
+                problems.append({"run": rid, "what": "format rerun marker missing or does not match the authorization"})
                 continue
             if slot in exec_frozen and (trace_digest(path.parent) != exec_frozen[slot][1] or exec_class(path.parent) != exec_frozen[slot][0]):
-                problems.append({"run": d.name, "what": f"{exec_frozen[slot][0]} primary does not match its frozen trace digest or classification"})
+                problems.append({"run": rid, "what": f"{exec_frozen[slot][0]} primary does not match its frozen trace digest or classification"})
                 continue
             if not rerun.exists():
-                problems.append({"run": d.name, "what": "format rerun missing", "first_class": row["first_class"]})
+                problems.append({"run": rid, "what": "format rerun missing", "first_class": row["first_class"]})
                 continue
             if identity_of(rerun.parent) is None or identity_of(rerun.parent) != identity_of(path.parent):
-                problems.append({"run": d.name, "what": "rerun assessment identity differs from the primary's"})
+                problems.append({"run": rid, "what": "rerun assessment identity differs from the primary's"})
                 continue
             data = json.loads(rerun.read_text())
             row["rerun_status"] = data.get("assessment_status")
@@ -415,14 +421,17 @@ def cmd_collect(a) -> int:
             rows.append(row)
             used.append(slot)
             if data.get("assessment_status") != "VALID":
-                problems.append({"run": d.name, "what": f"format rerun {data.get('assessment_status')}", "first_class": row["first_class"], "rerun_class": row["rerun_class"]})
+                problems.append({"run": rid, "what": f"format rerun {data.get('assessment_status')}", "first_class": row["first_class"], "rerun_class": row["rerun_class"]})
                 continue
         if data.get("assessment_status") != "VALID":
-            problems.append({"run": d.name, "what": f"assessment {data.get('assessment_status')}"})
+            problems.append({"run": rid, "what": f"assessment {data.get('assessment_status')}"})
             continue
         for disp in data["dispositions"]:
-            out[f"{d.name}::{disp['item'].split('::', 1)[-1]}"] = disp["result"]
+            out[f"{rid}::{disp['item'].split('::', 1)[-1]}"] = disp["result"]
+            evidence[f"{rid}::{disp['item'].split('::', 1)[-1]}"] = disp.get("evidence", "")
     a.out.write_text(json.dumps(out, indent=1, sort_keys=True) + "\n")
+    if getattr(a, "evidence_out", None):
+        a.evidence_out.write_text(json.dumps(evidence, indent=1, sort_keys=True) + "\n")
 
     def tally(key, items):
         t = {}
@@ -479,8 +488,9 @@ def cmd_cost(a) -> int:
         return (r["input"] * a.price_in + r["cacheRead"] * a.price_cached + r["output"] * a.price_out) / 1e6
 
     per = dollars(total) / len(rows)
-    gated = sum(c["runs"] for c in json.loads((a.work / "commands.json").read_text())["commands"]
-                if c["panel"] in a.panels and not c.get("conditional"))
+    assessed = arms_spec.assessed(arms_spec.load(a.work))
+    gated = sum(c["runs"] // len(c["arms"]) * len([x for x in c["arms"] if x in assessed]) if c.get("arms") else c["runs"]
+                for c in json.loads((a.work / "commands.json").read_text())["commands"] if c["panel"] in a.panels and not c.get("conditional"))
     hit = total["cacheRead"] / max(1, total["cacheRead"] + total["input"])
     out = {"assessed_runs": len(rows), "mean_turns": round(total["turns"] / len(rows), 1),
            "mean_tokens": {k: round(total[k] / len(rows)) for k in ("input", "cacheRead", "output")},
@@ -506,6 +516,7 @@ def main() -> int:
     r.add_argument("--format-rerun-of", type=Path, help="once-only rerun of the format-invalid assessments of this primary root (see module doc)")
     c.add_argument("--rerun-root", type=Path, help="format-rerun root whose VALID results replace frozen format-invalid primaries")
     c.add_argument("--out", type=Path, required=True)
+    c.add_argument("--evidence-out", type=Path, help="also write {run::item: evaluator evidence text} (descriptive input for compare_721.py)")
     k = sub.add_parser("cost")
     k.add_argument("work", type=Path)
     k.add_argument("--price-in", type=float, required=True, help="USD per million uncached input tokens")

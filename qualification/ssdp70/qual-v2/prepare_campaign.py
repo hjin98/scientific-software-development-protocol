@@ -16,9 +16,11 @@
 
 Stages (ordering only): stage 1 is the main panel (Q1 to Q4), stage 2 the Q5 panels; stage 2 starts only after the
 analyst has verified stage 1 and written authorizations/stage2.ok. No candidate gate is scored between stages.
-Panels and arms (override with --config): main/routing/versioning/r2/ordinary -> p72 p66 p66b; burden -> p72 p65;
-sentinels/unversioned -> p72. A panel named `<base>-add` is conditional: it uses the base arms and is never run by the runner
-until the analyst authorizes it (T7 added pairs, Q5e and Q5f extra runs).
+Panels and arms come from the arms specification WORK/arms-spec.json (arms_spec.py; `init --arms-spec F` copies it there). Without one the
+72b defaults apply (override with --config): main/routing/versioning/r2/ordinary -> p72 p66 p66b; burden -> p72 p65; sentinels/unversioned -> p72.
+A panel named `<base>-add` is conditional: it uses the base arms and is never run by the runner until the analyst authorizes it (T7 added
+pairs, Q5e and Q5f extra runs). A panel with `replicates` N > 1 in the specification runs N identical command sets: set 0 is `main-c01` ...,
+set k repeats the same chunks under the next command keys with the unchanged corpus manifest (see arms_spec.py).
 Usage: prepare_campaign.py <command> --work WORK [options]
 """
 from __future__ import annotations
@@ -36,21 +38,15 @@ import yaml
 HERE = Path(__file__).resolve().parent
 REPO = HERE.parents[2]
 EVAL = REPO / "qualification" / "ssdp70" / "eval"
-sys.path[:0] = [str(EVAL), str(REPO / "qualification" / "ssdp70" / "s4")]
+sys.path[:0] = [str(HERE), str(EVAL), str(REPO / "qualification" / "ssdp70" / "s4")]
+import arms_spec  # noqa: E402
 import build_s4_probe  # noqa: E402
 import core70  # noqa: E402
 import harness70  # noqa: E402
 import prepare_arms70  # noqa: E402
 from adapters import omp, omp_eval  # noqa: E402
 
-CANDIDATE_REF = "2dedcfa3408f62bc11a696ac3776183a87b40438"
-B_REF = "22f4bdba53795da3a6f13f162529f3a843fc37ae"       # accepted 6.6.0, PROTOCOL-RELEASE-STATE.yaml
-OLD_REF = "7f7b5e24858e813e45ace867a7f8ea5180f43bf0"     # 6.5.0 public source, same file
-ARMS = [("p72", CANDIDATE_REF, "7.2.0"), ("p66", B_REF, "6.6.0"), ("p66b", B_REF, "6.6.0"), ("p65", OLD_REF, "6.5.0")]
-LABELS = {"p72": "cand", "p66": "b1", "p66b": "b2", "p65": "b65"}
-THREE = ["p72", "p66", "p66b"]
-PANEL_ARMS = {"main": THREE, "routing": THREE, "versioning": THREE, "r2": THREE, "ordinary": THREE,
-              "burden": ["p72", "p65"], "sentinels": ["p72"], "unversioned": ["p72"]}
+CANDIDATE_REF = arms_spec.CANDIDATE_REF      # the 72b defaults (arms_spec.DEFAULT_SPEC) apply without WORK/arms-spec.json
 ROUTES = ["T1", "T7", "T8"]
 CHUNK, PARALLEL_MAX = 16, 8
 STATIC_BASELINES = {"entry": 8360, "owner": 25188}          # historical 6.5 planning figures (Q5C-STATIC-PREMEASUREMENT-2026-10-07.md)
@@ -104,12 +100,21 @@ def cmd_init(a) -> int:
         sys.exit(f"refusing to overwrite {work}")
     if not any(r.resolve() in work.resolve().parents for r in omp.RUN_REALIZATION_ROOTS):
         sys.exit(f"{work} is not beneath an approved OMP realization root")
+    if a.arms_spec:
+        if (work / arms_spec.SPEC_NAME).exists():
+            sys.exit(f"refusing to overwrite {work / arms_spec.SPEC_NAME}")
+        arms_spec.validate(json.loads(a.arms_spec.read_text(encoding="utf-8")))
+        work.mkdir(parents=True, exist_ok=True)
+        (work / arms_spec.SPEC_NAME).write_bytes(a.arms_spec.read_bytes())
+    spec = arms_spec.load(work)
+    cand = arms_spec.by_label(spec)["cand"]["name"]
+    a.candidate_ref = a.candidate_ref or arms_spec.by_label(spec)["cand"]["ref"]
     drift = subprocess.run(["git", "-C", str(REPO), "diff", "--stat", a.candidate_ref, "HEAD", "--", "source", "dist"],
                            capture_output=True, text=True).stdout.strip()
     if drift:
         sys.exit("the candidate source or dist differs from the frozen identity; this is a new identity (PEM FF-001):\n" + drift)
     records = []
-    for name, ref, version in [(n, a.candidate_ref if n == "p72" else r, v) for n, r, v in ARMS]:
+    for name, ref, version in [(x["name"], a.candidate_ref if x["name"] == cand else x["ref"], x["version"]) for x in spec["arms"]]:
         records.append(prepare_arms70.extract_arm(REPO, work / "arms", name, ref, version))
     write_json(work / "arms" / "arms.json", {"schema": 1, "repo": str(REPO), "arms": records})
     profile, caps = build_s4_probe.build_key(work)
@@ -129,7 +134,9 @@ def cmd_init(a) -> int:
              "harness_sha256": sha(EVAL / "harness70.py"), "assess_sha256": sha(EVAL / "assess70.py"), "core_sha256": sha(EVAL / "core70.py"),
              "assessment_evidence_sha256": sha(EVAL / "assessment_evidence.py"),
              "builder_sha256": sha(HERE / "build_campaign_record.py"), "h4_sha256": sha(HERE / "h4.py"),
-             "prepare_campaign_sha256": sha(Path(__file__).resolve())}
+             "prepare_campaign_sha256": sha(Path(__file__).resolve()), "arms_spec_module_sha256": sha(HERE / "arms_spec.py")}
+    if (work / arms_spec.SPEC_NAME).is_file():
+        ident["arms_spec_sha256"] = sha(work / arms_spec.SPEC_NAME)
     write_json(work / "campaign-identity.json", ident)
     print(json.dumps(ident, indent=1))
     return 0
@@ -151,6 +158,8 @@ def cmd_refresh_identity(a) -> int:
                            capture_output=True, text=True).stdout.strip()
     if drift:
         sys.exit("the candidate source or dist differs from the frozen identity; this is a new identity (PEM FF-001)")
+    if "arms_spec_sha256" in ident and sha(a.work / arms_spec.SPEC_NAME) != ident["arms_spec_sha256"]:
+        sys.exit("the arms specification differs from the recorded identity")
     old = {k: ident[k] for k in ("repo_head", "harness_sha256", "assess_sha256", "builder_sha256", "h4_sha256", "prepare_campaign_sha256")}
     ident.setdefault("refreshes", []).append({"at": subprocess.run(["date", "-u", "+%FT%TZ"], capture_output=True, text=True).stdout.strip(), "previous": old})
     ident.update({"repo_head": subprocess.run(["git", "-C", str(REPO), "rev-parse", "HEAD"], capture_output=True, text=True).stdout.strip(),
@@ -159,7 +168,7 @@ def cmd_refresh_identity(a) -> int:
                   "builder_sha256": sha(HERE / "build_campaign_record.py"), "h4_sha256": sha(HERE / "h4.py"),
                   "prepare_campaign_sha256": sha(Path(__file__).resolve()), "campaign_run_sha256": sha(HERE / "campaign_run.py"),
                   "campaign_assess_sha256": sha(HERE / "campaign_assess.py"),
-                  "campaign_cb_sha256": sha(HERE / "campaign_cb.py")})
+                  "campaign_cb_sha256": sha(HERE / "campaign_cb.py"), "arms_spec_module_sha256": sha(HERE / "arms_spec.py")})
     write_json(path, ident)
     print(json.dumps({k: ident[k] for k in ("repo_head", "builder_sha256", "h4_sha256", "prepare_campaign_sha256", "refreshes")}, indent=1))
     return 0
@@ -233,10 +242,15 @@ def cmd_preflight(a) -> int:
                             ("campaign_run", HERE / "campaign_run.py", "campaign_run_sha256"),
                             ("campaign_assess", HERE / "campaign_assess.py", "campaign_assess_sha256"),
                             ("campaign_cb", HERE / "campaign_cb.py", "campaign_cb_sha256"),
+                            ("arms_spec", HERE / "arms_spec.py", "arms_spec_module_sha256"),
                             ("harness70", EVAL / "harness70.py", "harness_sha256"), ("assess70", EVAL / "assess70.py", "assess_sha256"),
                             ("core70", EVAL / "core70.py", "core_sha256"),
                             ("assessment_evidence", EVAL / "assessment_evidence.py", "assessment_evidence_sha256")):
+        if key == "arms_spec_module_sha256" and key not in ident:        # an identity recorded before the arms specification existed
+            continue
         ok &= row(sha(path) == ident.get(key), f"tool unchanged since the identity record: {name}")
+    if "arms_spec_sha256" in ident:
+        ok &= row((work / arms_spec.SPEC_NAME).is_file() and sha(work / arms_spec.SPEC_NAME) == ident["arms_spec_sha256"], "arms specification matches the recorded identity")
     drift = subprocess.run(["git", "-C", str(REPO), "diff", "--stat", ident["candidate_ref"], "HEAD", "--", "source", "dist"], capture_output=True, text=True).stdout.strip()
     ok &= row(not drift, "candidate source and dist unchanged from the frozen identity")
     p = subprocess.run([sys.executable, str(Path(__file__).resolve()), "check-plan", "--work", str(work)], capture_output=True, text=True)
@@ -303,7 +317,7 @@ def cmd_report(a) -> int:
 
 def cmd_static(a) -> int:
     arms, _ = load_arms(a.work)
-    dist = harness70.resolve_arm_dist(arms["p72"])
+    dist = harness70.resolve_arm_dist(arms[arms_spec.by_label(arms_spec.load(a.work))["cand"]["name"]])
     root = dist / "software-implementation"
     entry = (root / "SKILL.md").stat().st_size
     workflow = (root / "references" / "workflow-and-workplans.md").stat().st_size
@@ -339,29 +353,29 @@ def corpus_rows(corpus: Path):
     return harness70.load_manifest(corpus)
 
 
-def panel_arms(panel: str, config: dict) -> list[str] | None:
-    table = {**PANEL_ARMS, **config.get("panel_arms", {})}
-    base = panel[:-4] if panel.endswith("-add") else panel
-    return table.get(base)
+def panel_arms(panel: str, config: dict, spec: dict) -> list[str] | None:
+    table = {**{p: r["arms"] for p, r in spec["panels"].items()}, **config.get("panel_arms", {})}
+    return table.get(arms_spec.base_panel(panel))
 
 
 def cmd_check_corpus(a) -> int:
     arms, _ = load_arms(a.work)
     bundle = executor(a.work)
     config = json.loads(a.config.read_text()) if a.config else {}
+    spec = arms_spec.load(a.work)
     flags = read_flags(a.slot_flags)
     dists = {n: harness70.resolve_arm_dist(r) for n, r in arms.items()}
     problems, counts = [], {}
     episodes = corpus_rows(a.corpus)
     for e in episodes:
         i, panel = e["id"], e.get("panel")
-        used = panel_arms(panel, config) if panel else None
+        used = panel_arms(panel, config, spec) if panel else None
         if used is None:
             problems.append(f"{i}: unknown or missing panel {panel!r}")
             continue
         counts.setdefault(panel, [0, 0])
         counts[panel][0] += 1
-        counts[panel][1] += int(e.get("replicates", 1))
+        counts[panel][1] += int(e.get("replicates", 1)) * (1 if panel.endswith("-add") else arms_spec.panel_sets(spec, panel))
         if harness70.entry_stratum(e, bundle.profile) != "deterministic":
             problems.append(f"{i}: entry does not resolve deterministic")
         root = e.get("entry", "").split(":", 1)[-1]
@@ -393,6 +407,8 @@ def cmd_plan(a) -> int:
     if (work / "commands.json").exists():
         sys.exit(f"refusing to overwrite {work / 'commands.json'}")
     config = json.loads(a.config.read_text()) if a.config else {}
+    spec = arms_spec.load(work)
+    labels = arms_spec.label_of(spec)
     flags = read_flags(a.slot_flags)
     bundle = executor(work)
     episodes = corpus_rows(a.corpus)
@@ -412,35 +428,43 @@ def cmd_plan(a) -> int:
     order += sorted(p for p in by_panel if p.endswith("-add"))
     commands, slots, cond_slots = [], [], []
     for panel in order:
-        used = panel_arms(panel, config)
+        used = panel_arms(panel, config, spec)
         conditional = panel.endswith("-add")
+        sets = 1 if conditional else arms_spec.panel_sets(spec, panel)      # add-ons are never replicate sets
         rows = by_panel[panel]
         size = cond_chunk if conditional else chunk
-        for n in range(0, len(rows), size):
-            part = rows[n:n + size]
-            key = f"{panel}-c{n // size + 1:02d}"
-            argv = [*common, "--corpus", str(a.corpus), "--out", str(work / "runs" / key), "--requirements", str(a.requirements),
-                    "--oracles", str(a.oracles), "--parallel", str(parallel)]
-            for arm in used:
-                argv += ["--arm", arm]
-            for e in part:
-                argv += ["--only", e["id"]]
-            runs = sum(int(e.get("replicates", 1)) for e in part) * len(used)
-            commands.append({"key": key, "panel": panel, "stage": 1 if panel == "main" else 2, "conditional": conditional,
-                             "episodes": len(part), "runs": runs,
-                             "arms": used, "argv": argv, "shell": shlex.join(argv)})
-            for e in part:
-                f = flags.get(e["id"], {})
+        starts = list(range(0, len(rows), size))
+        for k in range(sets):                                              # set k repeats the chunks of set 0 under the next command keys
+            for ci, n in enumerate(starts):
+                part = rows[n:n + size]
+                key = f"{panel}-c{k * len(starts) + ci + 1:02d}"
+                argv = [*common, "--corpus", str(a.corpus), "--out", str(work / "runs" / key), "--requirements", str(a.requirements),
+                        "--oracles", str(a.oracles), "--parallel", str(parallel)]
                 for arm in used:
-                    for rep in range(int(e.get("replicates", 1))):
-                        slot = {"episode": e["id"], "arm": LABELS[arm], "replicate": rep, "panel": panel, "command": key}
-                        if panel == "main":
-                            slot.update({k: bool(f.get(k)) for k in ("delegate", "non_owed", "scored")})
-                        else:
-                            slot["scored"] = bool(f.get("scored", False))
-                        (cond_slots if conditional else slots).append(slot)
+                    argv += ["--arm", arm]
+                for e in part:
+                    argv += ["--only", e["id"]]
+                runs = sum(int(e.get("replicates", 1)) for e in part) * len(used)
+                command = {"key": key, "panel": panel, "stage": 1 if panel == "main" else 2, "conditional": conditional,
+                           "episodes": len(part), "runs": runs, "arms": used, "argv": argv, "shell": shlex.join(argv)}
+                if sets > 1:
+                    command.update({"set": k, "replicate_of": f"{panel}-c{ci + 1:02d}"})
+                commands.append(command)
+                for e in part:
+                    f = flags.get(e["id"], {})
+                    reps = int(e.get("replicates", 1))
+                    for arm in used:
+                        for rep in range(reps):
+                            slot = {"episode": e["id"], "arm": labels[arm], "replicate": k * reps + rep, "panel": panel, "command": key}
+                            if k:
+                                slot.update({"set": k, "run_replicate": rep})
+                            if panel == "main":
+                                slot.update({kk: bool(f.get(kk)) for kk in ("delegate", "non_owed", "scored")})
+                            else:
+                                slot["scored"] = bool(f.get("scored", False))
+                            (cond_slots if conditional else slots).append(slot)
     write_json(work / "commands.json", {"schema": 1, "purpose": "qualification", "commands": commands})
-    declaration = {"slots": slots, "conditional_slots": cond_slots, "arms": LABELS and {v: k for k, v in LABELS.items()},
+    declaration = {"slots": slots, "conditional_slots": cond_slots, "arms": arms_spec.name_of(spec),
                    "q5c_routes": ROUTES, "execution_mode": "qualification", "purpose": "qualification",
                    "profile_key_sha256": bundle.profile_key_sha256, "check_pair_order": True}
     write_json(work / "declaration.json", declaration)
@@ -453,11 +477,17 @@ def cmd_plan(a) -> int:
     return 0
 
 
+def without_out(command: dict) -> list:
+    argv = command["argv"]
+    return [v for j, v in enumerate(argv) if j == 0 or argv[j - 1] != "--out"]
+
+
 def cmd_check_plan(a) -> int:
     work, problems = a.work, []
     plan = json.loads((work / "commands.json").read_text())["commands"]
     decl = json.loads((work / "declaration.json").read_text())
     arms, _ = load_arms(work)
+    spec = arms_spec.load(work)
     bundle = executor(work)
     problems += [f"executor profile: {e}" for e in omp.profile_errors(bundle.profile)]
     if bundle.profile["budgets"] != {"max_turns": 60, "timeout_s": 2400}:
@@ -467,6 +497,25 @@ def cmd_check_plan(a) -> int:
             harness70.resolve_arm_dist(arms[name])
         except (KeyError, core70.ContractError) as exc:
             problems.append(f"arm {name}: {exc}")
+    if decl.get("arms") != arms_spec.name_of(spec):
+        problems.append(f"declaration arms {decl.get('arms')} differ from the arms specification {arms_spec.name_of(spec)}")
+    spec_names = set(arms_spec.label_of(spec))
+    by_key = {c["key"]: c for c in plan}
+    sets_of = {}
+    for c in plan:
+        if not set(c["arms"]) <= spec_names:
+            problems.append(f"{c['key']}: arms {sorted(set(c['arms']) - spec_names)} are not in the arms specification")
+        if (work / arms_spec.SPEC_NAME).is_file() and c["arms"] != arms_spec.panel_arms(spec, c["panel"]):
+            problems.append(f"{c['key']}: panel arms differ from the arms specification")
+        if not c["conditional"]:
+            sets_of.setdefault(c["panel"], set()).add(int(c.get("set", 0)))
+        if int(c.get("set", 0)):                                 # a replicate set repeats a set-0 command exactly, except for its output directory
+            base = by_key.get(c.get("replicate_of"))
+            if base is None or int(base.get("set", 0)) != 0 or without_out(base) != without_out(c) or base["arms"] != c["arms"] or base["panel"] != c["panel"]:
+                problems.append(f"{c['key']}: not an identical repeat of its set-0 command {c.get('replicate_of')!r}")
+    for panel, found in sets_of.items():
+        if arms_spec.panel_arms(spec, panel) is not None and found != set(range(arms_spec.panel_sets(spec, panel))):
+            problems.append(f"panel {panel}: replicate sets {sorted(found)} differ from the specification's {arms_spec.panel_sets(spec, panel)}")
     seen, total = set(), 0
     for c in plan:
         argv = c["argv"]
@@ -482,7 +531,7 @@ def cmd_check_plan(a) -> int:
                 continue
             for arm in c["arms"]:
                 for rep in range(int(corpus[i].get("replicates", 1))):
-                    s = (i, arm, rep)
+                    s = (i, arm, rep) if not int(c.get("set", 0)) else (i, arm, rep, int(c["set"]))
                     total += 1
                     if s in seen:
                         problems.append(f"duplicate slot {s}")
@@ -504,6 +553,8 @@ def cmd_verify(a) -> int:
         print("no run directories yet under runs/")
         return 2
     decl = json.loads((work / "declaration.json").read_text())
+    if decl.get("arms") != arms_spec.name_of(arms_spec.load(work)):
+        sys.exit(f"declaration arms {decl.get('arms')} differ from the arms specification; rerun plan")
     run_decl = {k: v for k, v in decl.items() if k != "conditional_slots"}
     stage_of = {c["panel"]: int(c.get("stage", 1)) for c in json.loads((work / "commands.json").read_text())["commands"]}
     if a.stage:                                                      # only the stages launched so far are declared
@@ -533,7 +584,8 @@ def main() -> int:
         sp = sub.add_parser(name)
         sp.add_argument("--work", type=Path, required=True)
         if name == "init":
-            sp.add_argument("--candidate-ref", default=CANDIDATE_REF)
+            sp.add_argument("--candidate-ref", help="the candidate commit (default: the cand arm's ref in the arms specification)")
+            sp.add_argument("--arms-spec", type=Path, help="arms specification JSON (arms_spec.py), copied to WORK/arms-spec.json; omit for the 72b defaults")
             sp.add_argument("--evaluator-model", help="model id on the deepinfra route (never the executor model); omit to leave the evaluator unfrozen")
         if name == "freeze-evaluator":
             sp.add_argument("--model", required=True, help="model id on the deepinfra route, never the executor model")
