@@ -1,0 +1,219 @@
+diff --git a/qualification/ssdp70/eval/core70.py b/qualification/ssdp70/eval/core70.py
+index ede37f8..5a9e02a 100644
+--- a/qualification/ssdp70/eval/core70.py
++++ b/qualification/ssdp70/eval/core70.py
+@@ -1505,6 +1505,22 @@ def derive_package_access(bundle, events, skills_root, owner_name, delivered, ru
+         "sha256":sha256_file(clarification), "independent_review_path":"qualification/ssdp70/INDEPENDENT-D3-PREMISE-CLOSURE-REVIEW-2026-10-04-R2.md",
+         "independent_review_sha256":"ee5dd4e722a0c80a180c0a5d83ba59379f6b4c81a08d38852e7e0b114a29a2ed",
+         "publication":"uncommitted cycle decision; SHA-bound, no committed-source claim"}
++    text_review = decision.parent / "INDEPENDENT-D3-WINDOW-REPLACEMENT-PAIRING-TEXT-REVIEW-2026-10-05-R2.md"
++    text_review_sha = "670e03fd8fbb80c194e21a72e50fc22b1214fdf077744031bb74f34488e7f6f6"
++    if sha256_file(text_review) != text_review_sha:
++        raise ContractError("package-access window/replacement/pairing text review changed without rebinding")
++    for key, name, expected in (
++            ("window_replacement_clarification", "D3-PACKAGE-ACCESS-WINDOW-AND-REPLACEMENT-CLARIFICATION-2026-10-05.md",
++             "b7bead4ecb139732683d1919740a19ce3342740f2e8dace00781d4159c99e87f"),
++            ("unverified_pairing_delta", "D3-PACKAGE-ACCESS-UNVERIFIED-PAIRING-FAIL-CLOSURE-2026-10-05.md",
++             "c2f7a3a348a9e9e1ef448b81e0db456e4e6720afdd5994f14b22068035edee9c")):
++        bound = decision.parent / name
++        if sha256_file(bound) != expected:
++            raise ContractError("package-access D3 clarification changed without rebinding: " + name)
++        payload["provenance"][key] = {"path": "qualification/ssdp70/" + name, "sha256": expected,
++            "independent_review_path": "qualification/ssdp70/" + text_review.name,
++            "independent_review_sha256": text_review_sha,
++            "publication": "cycle decision; SHA-bound, no committed-source claim"}
+     sequence = max((e["sequence"] for e in events), default=0) + 1
+     event = {"schema_version": SCHEMA, "run_id": run_id, "event_id": f"e{sequence:06d}",
+              "sequence": sequence, "actor_id": "supervisor", "kind": "package_access", "status": "observed",
+diff --git a/qualification/ssdp70/eval/package_ledger.py b/qualification/ssdp70/eval/package_ledger.py
+index e543851..5652280 100644
+--- a/qualification/ssdp70/eval/package_ledger.py
++++ b/qualification/ssdp70/eval/package_ledger.py
+@@ -435,7 +435,14 @@ def account(ledger: dict[str, Any] | None, cut_ns: int | None, events: list[dict
+             parameters: dict[str, Any] | None = None) -> dict[str, Any]:
+     """Revision 8: supply proves positives; intact ledger and conservative windows permit negatives."""
+     params = dict(PARAMETERS if parameters is None else parameters)
+-    requests = list(request_records or [])
++    # Coverage/correspondence is derived by the adapter from retained raw evidence.
++    # Missing or malformed metadata cannot enable the window-dependent supply route.
++    records_valid = isinstance(request_records, list) and all(isinstance(r, dict) for r in request_records)
++    requests = list(request_records) if records_valid else []
++    pairing_verified = bool(requests) and all(
++        r.get("pairing_verified") is True and "position" in r
++        and (r["position"] is None or type(r["position"]) is int)
++        for r in requests)
+     delivered = set(delivered or ())
+     global_reasons = list(extra_errors or [])
+     # Even a lost/absent ledger must not suppress content that demonstrably reached the model.
+@@ -445,6 +452,8 @@ def account(ledger: dict[str, Any] | None, cut_ns: int | None, events: list[dict
+     result = {"schema": SCHEMA, "mechanism": MECHANISM, "parameters": params,
+               "exact": False, "owner_floor_exact": False, "reasons": global_reasons,
+               "cut_ns": cut_ns, "request_records": requests,
++              "route_iii_available": pairing_verified,
++              "route_iii_unavailable_reason": None if pairing_verified else "request/assistant-turn pairing is not verified",
+               "opened_pre_request0": [], "opened_post_request0": [], "supplied": {},
+               "explained_by_delivery": [], "unexplained": [], "consumed_files": {}, "opened_files": [],
+               "owner_read_observed": positive, "owner_minor_exposure": minor, "owner_open_windows": [],
+@@ -533,7 +542,7 @@ def account(ledger: dict[str, Any] | None, cut_ns: int | None, events: list[dict
+                 route = "distinctive"
+             elif _names_path(event, rel, mount):
+                 route = "path-linked"
+-            elif match == "exact" and len(source.encode()) >= params["distinctiveness_floor"] and any(
++            elif pairing_verified and match == "exact" and len(source.encode()) >= params["distinctiveness_floor"] and any(
+                     r["window"]["start"] <= sequence <= r["window"]["end"] for r in rows):
+                 route = "whole-file-in-window"
+             if route:
+diff --git a/qualification/ssdp70/eval/test_activation_accounting.py b/qualification/ssdp70/eval/test_activation_accounting.py
+index 2cfc36e..16252d0 100644
+--- a/qualification/ssdp70/eval/test_activation_accounting.py
++++ b/qualification/ssdp70/eval/test_activation_accounting.py
+@@ -463,6 +463,8 @@ print(len(decoded))
+                 set(inputs['delivered']),identity['identity_sha256'],0)[2]
+         mutations={
+             'missing-ledger':lambda b:b.update(ledger=None),
++            'unverified-pairing':lambda b:[r.update(pairing_verified=False, position=None) for r in b['request_records']],
++            'missing-pairing':lambda b:b.update(request_records=[]),
+             'mutation':lambda b:b['ledger']['events'].append({'rel':self.OWNER_REL,'dir':False,'flags':['modify'],'interval':0,'count':1}),
+             'native-contradiction':lambda b:b['ledger'].update(events=[]),
+             'pre-request-owner':lambda b:[r.update(interval=0) for r in b['ledger']['events'] if r['rel']==self.OWNER_REL],
+@@ -488,9 +490,13 @@ print(len(decoded))
+                 changed['owner_read_observed']=accounting['owner_read_observed']
+                 if name=='missing-ledger':lost_summary=changed
+                 self.assertEqual(self.assessed_owner(changed,identity,rig)['owner_floor_state'],'FAIL')
+-                if name in ('missing-ledger','mutation','native-contradiction','pre-request-owner'):
++                if name in ('missing-ledger','mutation','native-contradiction','pre-request-owner','unverified-pairing','missing-pairing'):
+                     self.assertFalse(accounting['exact'])
+                 else:self.assertFalse(accounting['owner_floor_exact'])
++                if name in ('unverified-pairing','missing-pairing'):
++                    self.assertFalse(accounting['route_iii_available'])
++                    self.assertIsNone(accounting['active_ssdp_bytes'])
++                    self.assertTrue(core70.validate_claim_observability(source,['active-byte burden'],ledger_exact=accounting['exact']))
+         failed_delivery=copy.deepcopy(source)
+         for e in failed_delivery:
+             if e['kind']=='root_selection': e['payload']['delivery']={'delivered':False}
+diff --git a/qualification/ssdp70/eval/test_package_ledger.py b/qualification/ssdp70/eval/test_package_ledger.py
+index 3f34e81..7691663 100644
+--- a/qualification/ssdp70/eval/test_package_ledger.py
++++ b/qualification/ssdp70/eval/test_package_ledger.py
+@@ -256,7 +256,7 @@ class SupplyIdentifiesTheOpenedFile(unittest.TestCase):
+         self.tmp.cleanup()
+ 
+     def account(self, opens, events, **kw):
+-        kw.setdefault("request_records", [{"t_ns": 1000, "monotonic_ns": 1000, "position": min((e["sequence"] for e in events), default=1)}])
++        kw.setdefault("request_records", [{"t_ns": 1000, "pairing_verified": True, "monotonic_ns": 1000, "position": min((e["sequence"] for e in events), default=1)}])
+         return pl.account(overlap_ledger(opens), 1000, events, self.root, mount=MOUNT, parameters=TEST_PARAMETERS, owner_name="owner.md", **kw)
+ 
+     def test_shared_kernel_block_in_an_entrypoint_does_not_explain_a_size_probe_of_a_reference(self):
+@@ -403,6 +403,7 @@ if __name__ == "__main__":
+ 
+ class Revision8OwnerEvidence(PhaseAndDelivery):
+     def account(self, opens, events, **kwargs):
++        kwargs.setdefault("request_records", [{"t_ns": 1000, "monotonic_ns": 1000, "position": min((e["sequence"] for e in events), default=1), "pairing_verified": True}])
+         return pl.account(overlap_ledger(opens), 1000, events, self.root, mount=MOUNT,
+                           parameters=TEST_PARAMETERS, owner_name="owner.md", **kwargs)
+ 
+@@ -433,7 +434,7 @@ class Revision8OwnerEvidence(PhaseAndDelivery):
+ 
+     def test_o_r_x_trace_order_windows_late_drain_background_and_fallback(self):
+         events = [event(i,"nothing") for i in range(1,11)]
+-        requests = [{"t_ns": t, "monotonic_ns": t, "position": pos} for t,pos in ((1000,1),(1500,4),(3000,8))]
++        requests = [{"t_ns": t, "pairing_verified": True, "monotonic_ns": t, "position": pos} for t,pos in ((1000,1),(1500,4),(3000,8))]
+         r = self.account([(2000,"x/references/owner.md"),(5000,"x/references/owner.md")],events, request_records=requests)
+         self.assertEqual([v["window"]["start"] for v in r["owner_open_windows"]], [4,8])
+         requests[1]["position"] = 1
+@@ -522,11 +523,42 @@ class OwnerFloorProductionOwner(unittest.TestCase):
+ class ReviewDiscriminators(PhaseAndDelivery):
+     """Independent-review B-2: predicates that named acceptance cases depend on and no test could flip."""
+     def account(self, opens, events, **kwargs):
++        kwargs.setdefault("request_records", [{"t_ns": 1000, "monotonic_ns": 1000, "position": min((e["sequence"] for e in events), default=1), "pairing_verified": True}])
+         return pl.account(overlap_ledger(opens), 1000, events, self.root, mount=MOUNT,
+                           parameters=TEST_PARAMETERS, owner_name="owner.md", **kwargs)
+ 
++    def test_unverified_pairing_never_explains_a_twin_from_whole_trace_content(self):
++        good = {"t_ns": 1000, "monotonic_ns": 1000, "position": None, "pairing_verified": True}
++        cases = [None, [], "malformed", [None], [good, None]]
++        cases += [[{k: v for k, v in good.items() if k != "pairing_verified"}]]
++        cases += [[{**good, "pairing_verified": v}] for v in (False, None, "true", 1)]
++        cases += [[good, {**good, "pairing_verified": False}]]
++        cases += [[{**good, "position": v}] for v in (True, "3", [])]
++        for records in cases:
++            with self.subTest(records=records):
++                r = self.account([(2000, "x/references/owner.md")], [event(3, TWIN)], request_records=records)
++                self.assertFalse(r["route_iii_available"])
++                self.assertFalse(r["exact"], r)
++                self.assertIsNone(r["active_ssdp_bytes"])
++                self.assertEqual([u["file"] for u in r["unexplained"]], ["x/references/owner.md"])
++                self.assertTrue(r["owner_read_observed"])
++                self.assertEqual(core70.owner_floor_state(r, 5, r2_adjudicated=True), "FAIL")
++        r = self.account([(2000, "x/references/owner.md")], [event(3, TWIN)], request_records=[good])
++        self.assertTrue(r["exact"], r["reasons"])
++        self.assertEqual(r["supplied"]["x/references/owner.md"]["routes"], ["whole-file-in-window"])
++
++    def test_unverified_pairing_preserves_distinctive_and_path_linked_supply(self):
++        for rel, text, command, route in (
++                ("x/references/ref.md", REF, "cat nonliteral", "distinctive"),
++                ("x/references/owner.md", TWIN, f"cat {MOUNT}/x/references/owner.md", "path-linked")):
++            with self.subTest(route=route):
++                r = self.account([(2000, rel)], [event(3, text, command=command)], request_records=[])
++                self.assertFalse(r["route_iii_available"])
++                self.assertTrue(r["exact"], r["reasons"])
++                self.assertEqual(r["supplied"][rel]["routes"], [route])
++
+     def test_s_whole_file_shown_outside_the_candidate_window_does_not_explain_the_open(self):
+-        requests = [{"t_ns": 1000, "monotonic_ns": 1000, "position": 1}, {"t_ns": 2500, "monotonic_ns": 2500, "position": 8}]
++        requests = [{"t_ns": 1000, "pairing_verified": True, "monotonic_ns": 1000, "position": 1}, {"t_ns": 2500, "pairing_verified": True, "monotonic_ns": 2500, "position": 8}]
+         outside = [event(i, "nothing") for i in range(1, 11)]
+         outside[2] = event(3, TWIN)
+         inside = [event(i, "nothing") for i in range(1, 11)]
+@@ -555,7 +587,7 @@ class ReviewDiscriminators(PhaseAndDelivery):
+         self.assertEqual(core70.owner_floor_state(r, 5, r2_adjudicated=True), "FAIL")
+ 
+     def test_s_window_ends_before_the_first_event_of_the_next_request(self):
+-        requests = [{"t_ns": 1000, "monotonic_ns": 1000, "position": 1}, {"t_ns": 2500, "monotonic_ns": 2500, "position": 8}]
++        requests = [{"t_ns": 1000, "pairing_verified": True, "monotonic_ns": 1000, "position": 1}, {"t_ns": 2500, "pairing_verified": True, "monotonic_ns": 2500, "position": 8}]
+         for seq, exact in ((7, True), (8, False)):
+             events = [event(i, "nothing") for i in range(1, 11)]
+             events[seq - 1] = event(seq, TWIN)
+@@ -606,7 +638,7 @@ class ReviewDiscriminators(PhaseAndDelivery):
+ 
+     def test_s_unpositioned_later_request_bounds_nothing_so_an_honest_text_final_turn_stays_explained(self):
+         # A text-only final turn has no tool event, hence no position (None): it bounds nothing from above.
+-        requests = [{"t_ns": 1000, "monotonic_ns": 1000, "position": 2}, {"t_ns": 1500, "monotonic_ns": 1500, "position": None}]
++        requests = [{"t_ns": 1000, "pairing_verified": True, "monotonic_ns": 1000, "position": 2}, {"t_ns": 1500, "pairing_verified": True, "monotonic_ns": 1500, "position": None}]
+         for shown, exact in ((3, True), (1, False)):                       # whole file shown after / before the window start
+             events = [event(i, "nothing") for i in range(1, 6)]
+             events[shown - 1] = event(shown, TWIN)
+@@ -616,8 +648,8 @@ class ReviewDiscriminators(PhaseAndDelivery):
+             self.assertEqual(r["exact"], exact, (shown, r["reasons"]))
+ 
+     def test_s_unpositioned_or_absent_earlier_request_starts_at_the_trace_start_and_the_end_is_still_bounded(self):
+-        for earlier in ([], [{"t_ns": 1000, "monotonic_ns": 1000, "position": None}]):
+-            requests = earlier + [{"t_ns": 2500, "monotonic_ns": 2500, "position": 8}]
++        for earlier in ([], [{"t_ns": 1000, "pairing_verified": True, "monotonic_ns": 1000, "position": None}]):
++            requests = earlier + [{"t_ns": 2500, "pairing_verified": True, "monotonic_ns": 2500, "position": 8}]
+             for seq, exact in ((5, True), (9, False)):
+                 events = [event(i, "nothing") for i in range(1, 11)]
+                 events[seq - 1] = event(seq, TWIN)
+@@ -627,7 +659,7 @@ class ReviewDiscriminators(PhaseAndDelivery):
+                 self.assertEqual(r["exact"], exact, (seq, earlier))
+ 
+     def test_s_inconsistent_positions_make_an_empty_window_the_whole_trace(self):
+-        requests = [{"t_ns": 1000, "monotonic_ns": 1000, "position": 8}, {"t_ns": 1500, "monotonic_ns": 1500, "position": 3}]
++        requests = [{"t_ns": 1000, "pairing_verified": True, "monotonic_ns": 1000, "position": 8}, {"t_ns": 1500, "pairing_verified": True, "monotonic_ns": 1500, "position": 3}]
+         events = [event(i, "nothing") for i in range(1, 11)]
+         r = self.account([(1200, "x/references/owner.md")], events, request_records=requests)
+         window = r["owner_open_windows"][0]["window"]
+@@ -682,10 +714,10 @@ class TimingBracketEdgesAreConservative(unittest.TestCase):
+ 
+     def test_x_decreasing_request_stamps_are_timing_loss_even_when_consistent_with_the_baseline(self):
+         ledger = {"heartbeats": [self.beat(0, 1000), self.beat(1, 2000)]}
+-        ordered = [{"t_ns": 1500, "monotonic_ns": 1500}, {"t_ns": 1800, "monotonic_ns": 1800}]
++        ordered = [{"t_ns": 1500, "pairing_verified": True, "monotonic_ns": 1500}, {"t_ns": 1800, "pairing_verified": True, "monotonic_ns": 1800}]
+         self.assertEqual(pl.timing(ledger, ordered, self.PARAMS)[1], [])
+-        for decreasing in ([{"t_ns": 1800, "monotonic_ns": 1800}, {"t_ns": 1500, "monotonic_ns": 1500}],
+-                           [{"t_ns": 1500, "monotonic_ns": 1800}, {"t_ns": 1800, "monotonic_ns": 1500}][::-1]):
++        for decreasing in ([{"t_ns": 1800, "pairing_verified": True, "monotonic_ns": 1800}, {"t_ns": 1500, "pairing_verified": True, "monotonic_ns": 1500}],
++                           [{"t_ns": 1500, "pairing_verified": True, "monotonic_ns": 1800}, {"t_ns": 1800, "pairing_verified": True, "monotonic_ns": 1500}][::-1]):
+             brackets, reasons = pl.timing(ledger, decreasing, self.PARAMS)
+             self.assertIn("request stamps decrease or disagree with heartbeat baseline", reasons)
+             self.assertTrue(all(b["timing_loss"] for b in brackets.values()))

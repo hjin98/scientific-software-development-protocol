@@ -1,0 +1,13 @@
+F
+======================================================================
+FAIL: test_c_d_j_p_s_v_x_real_artifacts_reach_derived_event_and_scorer (test_activation_accounting.RealActivationPath)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/samjin/agent-skills/scientific-software-development-protocol/qualification/ssdp70/eval/test_activation_accounting.py", line 449, in test_c_d_j_p_s_v_x_real_artifacts_reach_derived_event_and_scorer
+    self.assertTrue(summary['resource_observation']['exact'])
+AssertionError: False is not true
+
+----------------------------------------------------------------------
+Ran 1 test in 38.440s
+
+FAILED (failures=1)

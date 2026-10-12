@@ -18,6 +18,8 @@ For every material qualification claim make the tuple recoverable: `(subject, pr
 
 For protocol releases, arbitrary prose-semantic mutations and counterexamples belong to independent semantic Review of the assembled candidate unless the affected meaning is represented by a genuinely machine-readable contract. Exact wording pins are acceptance evidence only when that exact token/grammar is itself governed.
 
+Report-producing code is verified at the real source-to-rendered-value boundary under these oracle rules. Count accounting identities cannot by themselves discriminate identity-join, normalization, unit or uncertainty errors, and a same-pipeline export is not an independent oracle. [Scientific inspectability and epistemic initiative](scientific-inspectability-and-initiative.md) states the projection-faithfulness requirement.
+
 ## Oracle strength and counterfactuals
 
 For important changed logic ask: **What is the smallest plausible semantically wrong concretization that could still pass this evidence?** Strengthen economically with exact/reference cases, properties/stateful tests, known-broken counterfactuals, mutation/semantic perturbation, differential comparison, metamorphic relations, or real-owner integration. Coverage/mutation/complexity scores are sensors unless project authority adopts a threshold; do not optimize the score instead of the governed behavior.

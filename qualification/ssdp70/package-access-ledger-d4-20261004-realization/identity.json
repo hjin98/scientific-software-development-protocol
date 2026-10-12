@@ -1,0 +1,14 @@
+{
+ "head": "c4b8781bfa5764a406758130d21e934ecf3662c8",
+ "head_tree": "a3efc6c70514e7d81b621b713c5e610ee67d6b03",
+ "code_manifest_sha256": "f29b2c3291d8cdf28c82d75c63e8b1383bc4f7c477e3897ce87aa72503242022",
+ "omp_sha256": "6054460b29e9bad5eba78336f291e1979c2fa0a5cd96fc2d92afd666cc681d26",
+ "d3_rev8_sha256": "fccb9a3a44afd89338eb19c8b3238a9943fab7c88ee694428dc7d6ce124fd783",
+ "premise_closure_sha256": "5f713e2bd816950a2fd0962c6732242631295b3416387beb761c8b40906a3316",
+ "results": {
+  "test_activation_accounting": "23 OK",
+  "test_omp_integration": "54 OK",
+  "eval_nonruntime_set": "295 OK",
+  "root": "407 OK, 3 skipped"
+ }
+}

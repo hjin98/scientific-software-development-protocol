@@ -1,0 +1,82 @@
+diff --git a/workplans/active/SSDP-7.0-SCIENTIFIC-EPISTEMIC-CLOSURE-AND-DISCOVERY-CONSOLIDATED.md b/workplans/active/SSDP-7.0-SCIENTIFIC-EPISTEMIC-CLOSURE-AND-DISCOVERY-CONSOLIDATED.md
+index e739e80..390a92b 100644
+--- a/workplans/active/SSDP-7.0-SCIENTIFIC-EPISTEMIC-CLOSURE-AND-DISCOVERY-CONSOLIDATED.md
++++ b/workplans/active/SSDP-7.0-SCIENTIFIC-EPISTEMIC-CLOSURE-AND-DISCOVERY-CONSOLIDATED.md
+@@ -11,8 +11,8 @@ supersedes:
+   - SSDP-7.0-SCIENTIFIC-EPISTEMIC-CLOSURE-AND-DISCOVERY-REVISION-1
+   - SSDP-7.0-SCIENTIFIC-EPISTEMIC-CLOSURE-AND-DISCOVERY-REVISION-2
+ deterministic_orchestrator_workplan: SSDP-8.0-DETERMINISTIC-CONTROL-PLANE-AND-MANDATORY-ORCHESTRATOR-CONSOLIDATED
+-design_review_state: stage-f-portability-repair-pending-fresh-independent-review
+-implementation_handoff: stage-f-portability-repair-pending-fresh-independent-review
++design_review_state: option-b-reopen-d3-salience-rev3-and-contract-rev16-record-rev3-proposed-pending-fresh-independent-delta-check (rev2 and record rev2 PASSED R2 review with gaps; 2026-10-05; section 0.1)
++implementation_handoff: salience-entrypoint-and-contract-rev16-D4-not-authorized-pending-independent-delta-check-of-option-b-reopen-rev3 (2026-10-05; section 0.1); separately governed package-access/harness D4 unaffected
+ stakeholder_confirmation: section-4 obligation-binding rule accepted 2026-09-27; SC1 claim-integrity floor and SC2 Option B accepted 2026-09-27
+ stakeholder_sd_b: 6.6 per-route 1.10 burden cap SUPERSEDED 2026-09-27; 1,000 B per role entrypoint is a compression target subordinate to lossless required clause elements
+ stakeholder_sd_b_confirmation: corrected premise CONFIRMED 2026-09-27; Option B fixed-cost backstop then selected as an escalation trigger; numeric multiplier superseded by stakeholder 2026-09-28 with 2.0 x accepted 6.5 median on T1/T7/T8
+@@ -91,6 +91,9 @@ STAKEHOLDER DECISION (2026-09-28): fixed-cost multiplier RELAXED to 2.0 x fresh
+ STAKEHOLDER DECISION (2026-10-04): standard command activation must always activate (runtime-command on >=1 flash-class
+   profile); ordinary entry has no activation floor, conditionally; 6.6 correct-selection bound report-only; false-activation
+   floors retained; the flash runtime-command profile is primary and must pass every floor (qualification/ssdp70/STAKEHOLDER-DECISION-2026-10-04-PROTOCOL-7.0-DETERMINISTIC-ACTIVATION-AND-ACTIVATION-QUALIFICATION.md; overlay §0.1)
++STAKEHOLDER DECISION (2026-10-05): Option B re-open for successor candidate 7.1.0; decisions recorded for "Protocol 7.0" (SD-B,
++  backstop 2.0x, SC1/SC2, Q1-Q5, package-access ledger) carry over unchanged; per-question delegate qualifier is SD-B required content
++  (qualification/ssdp70/STAKEHOLDER-DECISION-2026-10-05-PROTOCOL-7.1-OPTION-B-REOPEN.md; overlay §0.1)
+ HISTORICAL ESCALATION: the recorded D4 probe measured 10,415 B and the 67fb29d reviewer's probe with the later duties
+   11,121 B (measurement recorded, text not, so unreproducible) against the 9,196 B fixed-cost backstop (§8.3); both predate the current
+   wording. Stage A drafted, measured and escalated; the 2026-09-28 stakeholder decision above now controls the numeric backstop
+@@ -100,6 +103,47 @@ DETERMINISTIC ORCHESTRATOR: Protocol 8.0 (unchanged by this work)
+ 
+ ### 0.1 Current repair and Review boundary
+ 
++**Option B re-open for successor candidate 7.1.0 (2026-10-05; governed overlay revision 8, the next number after activation overlay revision 7; this text is the revision 8 bytes repaired for the second review's minors, pending fresh independent delta check).**
++
++- **Authority.** The stakeholder directed **Option B: re-open design**, and confirmed OD-1 to OD-3 ("Decisions confirmed. Proceed."). Both are recorded verbatim in `qualification/ssdp70/STAKEHOLDER-DECISION-2026-10-05-PROTOCOL-7.1-OPTION-B-REOPEN.md`. The decisions are:
++  - **OD-1:** the successor label is 7.1.0;
++  - **OD-2:** the decisions recorded for "Protocol 7.0" bind it unchanged. They are SD-B and its confirmation, the 2.0× backstop "for Protocol 7.0 only", SC1/SC2, Q1–Q5 and the package-access ledger;
++  - **OD-3:** the per-question delegate qualifier is SD-B required content.
++
++  Option A's determination stands: the 7.0 candidate is NON-QUALIFIED and not to be ratified. SSDP 6.6.0 remains governing. In this workplan, "Protocol 7.0"/"the candidate" now denote the 7.1.0 successor where they concern the candidate under qualification. The header `target_protocol_version` is updated at Stage E with `source/PROTOCOL_VERSION`.
++- **Records:**
++  - design `qualification/ssdp70/D3-PROTOCOL-7.1-OBLIGATION-SALIENCE-AND-STRATIFICATION-DESIGN-2026-10-05.md` (revision 3; CD-1 to CD-7);
++  - contract amendment record `qualification/ssdp70/PROTOCOL-7.1-QUALIFICATION-CONTRACT-AMENDMENT-2026-10-05.md` (record revision 3, proposing contract revision 16; A1 to A4).
++
++  The first independent review returned design NO-PASS, contract NO-PASS and overlay PASS (`qualification/ssdp70/INDEPENDENT-D3-PROTOCOL-7.1-SALIENCE-AND-CONTRACT-REV16-REVIEW-2026-10-05.md`). Its findings are repaired in those records and in this entry. The second review (`qualification/ssdp70/INDEPENDENT-D3-PROTOCOL-7.1-SALIENCE-AND-CONTRACT-REV16-REVIEW-2026-10-05-R2.md`) returned PASS for the design (revision 2), the record (revision 2) and this overlay, with gaps G-1 to G-5 and minors m-1 to m-7. Design revision 3 and record revision 3 repair them (`…-R2-HISTORICAL.md` copies preserve the reviewed bytes), pending a fresh independent delta check.
++- **What this overlay changes.**
++  1. **§8.3 form of the completion clause, not its placement or meaning.** In each role and touched specialist entrypoint, the delegate-request sentences of elements 1–3 and their unanswered-part rules move into one block at the head of the same completion clause.
++     - **Questions.** The block holds self-contained questions, each carrying every qualifier the §11.3 *Request* rule checks and the label-table content of what it asks for.
++     - **Gap rule.** The questions are followed by the delegator's gap rule, which has no return condition.
++     - **By route.** Roles carry the findings, realized-results, variants and tensions questions. Under the frozen specialist placement, `software-documentation` and `software-maintenance-audit` carry only findings and realized results.
++     - **Unchanged:** element semantics, the label table, R1/R2, the descriptions, the owner and the kernel.
++     - **Under a stricter reading.** If a reviewer reads the block as more than internal structure of the one §8.3 clause, this overlay is the governed change for it.
++  2. **Qualification (contract revision 16 deltas only).**
++     - A1: successor subject, reading rule and fresh blind fixtures; the 6.6/6.5 preservation panels stay matched; the earlier-campaign disclosure clause is excluded from the reading rule, so the 7.0 Stage 7 campaign stays disclosed.
++     - A2: nothing the model can see (executor package, launching prompt, MCP server instructions and identity, the whole tool catalog and return wrapper) states or implies a delegate's governance status either way, or pre-states a return; task facts the §11.3 exemptions need stay visible.
++     - A3: request timing, with follow-ups counted separately, scripted delegates re-returning their frozen return, and every call to a case's fixture delegate within an episode being the same delegated work. A3 is the scoring reading; the entrypoint's "in the delegation request itself" is the stricter instruction.
++     - A4: undelivered-treatment labelling, with no cross-stratum pooled totals except the §1 item 12 pools.
++
++     Reused unchanged: the activation strata of overlay revision 7 and contract revision 8, and the package-access ledger of contract revision 15. That revision, with D3 package-access revision 8, now has independent PASS: D3 revision 8's own PASS is verdict 1 of `qualification/ssdp70/PACKAGE-ACCESS-LEDGER-INDEPENDENT-CHECK-D3-REV8-AND-CONTRACT-REV14-2026-10-04.md`, and the consistency PASS for revision 8 with contract revision 15 is `qualification/ssdp70/PACKAGE-ACCESS-LEDGER-INDEPENDENT-CHECK-CONTRACT-REV15-2026-10-04.md` (verdict 2). The "pending independent Review" wording in the package-access entry below is historical.
++  3. **A pre-campaign development gate (design CD-7).** It runs on the primary flash `runtime-command` profile, before any blind campaign, and scores:
++     - core and strict request conformity under A3 timing;
++     - unowed request parts and gaps against the §11.5 burden bound;
++     - owed-gap outcomes.
++
++     A failure routes to the stakeholder before a campaign (design §9 R3).
++- **Evidence basis and material uncertainty.** The evidence is development data: the M07 diagnosis, the doctrine-loaded probe, and the checklist probe (current wording against checklist). In the checklist probe, core uptake rose from 14 to 46 of 50 as published. Under this cycle's request timing (no credit for follow-ups after the return), the independent recount is:
++  - core: 10 against 42 of 50;
++  - strict: 2 (current wording) against **0** (checklist) of 50, so before the return the checklist arm was nominally no better on strict conformity.
++
++  Whether the 100% delegate-request floor is reachable on the flash primary is therefore unestablished. The redesign removes the identified cause: qualifiers left in a preamble that agents did not copy into their requests.
++- **Reference measurement.** At `6d09418`, net +1,009 B per role and +432 B per specialist entrypoint (design revision 3). The `software-implementation` generated entrypoint (T1/T7/T8) goes 14,454 → 15,463 B, against the 16,208 B static limit under OD-2 (745 B left).
++- **Status.** Salience-entrypoint and contract-revision-16 D4 is not authorized until the design (revision 3), contract amendment record (revision 3) and this overlay revision receive a fresh independent delta PASS. Separately governed package-access and harness work is unaffected.
++
+ **Current stakeholder activation decision and governed overlay (2026-10-04, overlay revision 7).** Stage 7 closed NON-QUALIFIED. Records:
+ - the closeout decision, `qualification/ssdp70/STAKEHOLDER-DECISION-2026-10-04-PROTOCOL-7.0-NON-QUALIFICATION-CLOSEOUT.md`, committed at `91b6de2`;
+ - the corrigendum, `~/ssdp70-omp-stagef/reviews/SSDP-STAGE7-QUALIFICATION-REPORT-CORRIGENDUM-20261004T131137Z/`.
+@@ -534,7 +578,7 @@ Under this workplan, SSDP's own stochastic qualification campaigns are treated a
+ 
+ - Each of the four role entrypoints (`source/roles/*/SKILL.md`) gains exactly two additions:
+   - one routing line carrying **R1** the §8.2 obligation predicate and **R2** the §8.2 owner-load trigger (wording compressible under §8.2's wording-only rule);
+-  - one clause in its Completion/report contract carrying the **required elements** below. Exact wording is delegated to D4 under the SD-B compression target, which never overrides a required element.
++  - one clause in its Completion/report contract carrying the **required elements** below. Exact wording is delegated to D4 under the SD-B compression target, which never overrides a required element. [Form affected by the 2026-10-05 Option B overlay revision 8, §0.1: delegate-request block.]
+ 
+   **Required clause elements (frozen).** When the predicate fires, including on local repairs:
+   1. within authorized resources, look for and report material scientific findings and inspectability gaps, including those beyond task scope and those returned by delegates; before any step that could discard, overwrite or irreversibly aggregate realized results or retained evidence, do that inquiry first. When a realized-data inquiry was owed, state any null (no material unexpected finding) with its search envelope and, where no accepted authority or stakeholder states them, report the provisional intended reader, routine scientific questions and materiality basis the inquiry used (§6.3.6; §4.3). Unless the predicate evidently excludes the delegated work, ask each delegate to state, for its work including tools or agents it launched, its findings or that it has none, and whether that work produced, ran or reviewed realized results or prepared gate evidence, with its null envelope if so; an asked answer is owed even where a change-only report would otherwise add nothing. Report an unanswered part, including the uncovered rest of an answer that covers only part of that work, as a gap, never as a null or as no findings, except a null part where the delegated task evidently produced, ran and reviewed no realized results and prepared no gate evidence (§6.3.11). For a finding or human decision changing the next scientific action, make a decision-sufficient durable handoff in one existing authorized home (never accepted authority text; PEM only under its admission rules) when its write is permitted, carrying the observation, labeled interpretation, significance, next question, subject/authority identity, scope/status, evidence strength, asserter (stated in the record as human or AI, and which agent) and revisit condition; update that home rather than copying its status. Otherwise provide decision-sufficient content in the permitted report, identify the persistence gap and proposed custodian/destination, and leave required but unavailable persistence unresolved (§6.5);

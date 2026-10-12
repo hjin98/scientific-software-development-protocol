@@ -1,0 +1,116 @@
+{
+ "G1_p66": {
+  "admissible": {
+   "fail": 46,
+   "pass": 1
+  },
+  "all": {
+   "fail": 46,
+   "pass": 1
+  }
+ },
+ "G1_p71": {
+  "admissible": {
+   "fail": 4,
+   "pass": 43
+  },
+  "all": {
+   "fail": 4,
+   "pass": 43
+  }
+ },
+ "G2_p66": {
+  "admissible": {
+   "not-applicable": 34
+  },
+  "all": {
+   "not-applicable": 41
+  }
+ },
+ "G2_p71": {
+  "admissible": {
+   "fail": 24,
+   "pass": 12
+  },
+  "all": {
+   "fail": 26,
+   "pass": 15
+  }
+ },
+ "G3_p66": {
+  "admissible": {
+   "pass": 56
+  },
+  "all": {
+   "pass": 59
+  }
+ },
+ "G3_p71": {
+  "admissible": {
+   "fail": 3,
+   "pass": 52
+  },
+  "all": {
+   "fail": 3,
+   "pass": 56
+  }
+ },
+ "G4-O3_p66": {
+  "admissible": {
+   "pass": 7
+  },
+  "all": {
+   "pass": 7
+  }
+ },
+ "G4-O3_p71": {
+  "admissible": {
+   "pass": 6
+  },
+  "all": {
+   "pass": 7
+  }
+ },
+ "G4-UM_p66": {
+  "admissible": {
+   "fail": 25,
+   "pass": 57
+  },
+  "all": {
+   "fail": 32,
+   "pass": 60
+  }
+ },
+ "G4-UM_p71": {
+  "admissible": {
+   "fail": 22,
+   "pass": 61
+  },
+  "all": {
+   "fail": 29,
+   "pass": 63
+  }
+ },
+ "budget_p66": {
+  "deaths": 6,
+  "holds": false,
+  "runs": 92
+ },
+ "budget_p71": {
+  "deaths": 3,
+  "holds": true,
+  "runs": 92
+ },
+ "runs": 184,
+ "termination": {
+  "p66/completed/COMPLETE_ADMISSIBLE": 82,
+  "p66/completed/MALFORMED_EVIDENCE_OR_ASSESSMENT": 2,
+  "p66/error/EXECUTION_ERROR": 2,
+  "p66/timeout/EXECUTION_ERROR": 4,
+  "p66/turn_cap/EXECUTION_ERROR": 2,
+  "p71/completed/COMPLETE_ADMISSIBLE": 83,
+  "p71/error/EXECUTION_ERROR": 6,
+  "p71/timeout/EXECUTION_ERROR": 2,
+  "p71/turn_cap/EXECUTION_ERROR": 1
+ }
+}

@@ -1,0 +1,57 @@
+{
+  "arms": [
+    {
+      "commit": "7f7b5e24858e813e45ace867a7f8ea5180f43bf0",
+      "dist_tree_sha256": "7d61d8b7b19dfe40714e71daa2c46d0e4cdd62efebd96b8e96dfe3f33550429b",
+      "name": "p65",
+      "package_versions": {
+        "numerical-algorithm-design": "6.5.0",
+        "repository-hygiene": "6.5.0",
+        "scientific-formulation": "6.5.0",
+        "software-design": "6.5.0",
+        "software-documentation": "6.5.0",
+        "software-implementation": "6.5.0",
+        "software-maintenance-audit": "6.5.0"
+      },
+      "requested_ref": "7f7b5e24858e813e45ace867a7f8ea5180f43bf0",
+      "skills_path": "<checker-scratch>/arms/p65/dist/skills",
+      "version": "6.5.0"
+    },
+    {
+      "commit": "22f4bdba53795da3a6f13f162529f3a843fc37ae",
+      "dist_tree_sha256": "e6d960a866fb794382fa5fdaa3e351681d292803dd035e5d4786a981a2a1e083",
+      "name": "p66",
+      "package_versions": {
+        "numerical-algorithm-design": "6.6.0",
+        "repository-hygiene": "6.6.0",
+        "scientific-formulation": "6.6.0",
+        "software-design": "6.6.0",
+        "software-documentation": "6.6.0",
+        "software-implementation": "6.6.0",
+        "software-maintenance-audit": "6.6.0"
+      },
+      "requested_ref": "22f4bdba53795da3a6f13f162529f3a843fc37ae",
+      "skills_path": "<checker-scratch>/arms/p66/dist/skills",
+      "version": "6.6.0"
+    },
+    {
+      "commit": "db94a2dfb7fef480f37227eab5c45256e89901b8",
+      "dist_tree_sha256": "7ec95162d5888e1ace9030494f48cba80d24dc4b081c91b426dc7421d929bb8b",
+      "name": "p70",
+      "package_versions": {
+        "numerical-algorithm-design": "7.0.0",
+        "repository-hygiene": "7.0.0",
+        "scientific-formulation": "7.0.0",
+        "software-design": "7.0.0",
+        "software-documentation": "7.0.0",
+        "software-implementation": "7.0.0",
+        "software-maintenance-audit": "7.0.0"
+      },
+      "requested_ref": "db94a2dfb7fef480f37227eab5c45256e89901b8",
+      "skills_path": "<checker-scratch>/arms/p70/dist/skills",
+      "version": "7.0.0"
+    }
+  ],
+  "repo": "/home/samjin/agent-skills/scientific-software-development-protocol",
+  "schema": 1
+}

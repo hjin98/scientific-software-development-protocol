@@ -1,0 +1,454 @@
+#!/usr/bin/env python3
+"""Campaign-record builder: run directories -> the `h4.py score` input, with a slot and integrity audit.
+
+Analyst tool (campaign work order gap 4, and gap 2 for declared slots). It changes no gate, threshold or margin and reads only
+run directories, a slot declaration and a gate map. It never opens custody stores, keys or oracle sources: it reads
+`summary.json`, `requirements-snapshot.json` (item id, measure, critical), `oracle-output/*.stdout.txt` (item verdicts) and
+`events.normalized.jsonl` (termination) from each run.
+
+It fails closed: nothing is defaulted. The gate map is required, every mapped measure must match an item, an item with no
+resolved verdict blocks scoring (exit 4), and unchecked integrity inputs are findings.
+
+Declaration (JSON):
+  {"slots": [{"episode": "EP-001", "arm": "cand", "replicate": 0, "delegate": false, "non_owed": false, "scored": true}, ...],
+   "arms": {"cand": "p72", "b1": "p66", "b2": "p66b", "b65": "p65"},        # h4 label -> run-name arm key (must be one-to-one)
+   "q5c_routes": ["T1", "T7", "T8"],         # slots on these routes yield Q5c only (no Q2-Q4 observations) unless "scored": true
+   "execution_mode": "qualification", "purpose": "qualification",             # required run fields (summary.execution_mode, accounting.purpose)
+   "profile_key_sha256": "...",                                                # required unless "unchecked_profile": true
+   "no_activation_arms": [],                                                   # run-name arm keys exempt from deterministic activation
+   "check_pair_order": true,                                                   # audit summary.pair_order and alternation
+   "infra_error_patterns": ["\\\\b(429|5\\\\d\\\\d)\\\\b", "connection", "ECONN"]}  # provider-transport causes of an infrastructure failure
+  A slot may carry `command` (the plan command key; the run directory must then sit under that key), `set` (replicate set, 0 by default) and
+  `run_replicate` (the harness replicate in the run name, default `replicate`). Set k >= 1 repeats a command set under new command keys (see
+  arms_spec.py): its runs share their run names with set 0, are keyed by (command, run name), and are named `<command>/<run>` in the record and
+  in `--dispositions` keys. Set 0 keeps the bare run name, so a campaign without replicate sets builds the same record as before.
+  `delegate` (custodian-declared): a delegate episode, the Q2 population (owed parts and unowed request parts). `non_owed`
+  (custodian-declared, ruling A-x5): the run owed no null, envelope or disclosure; it is the Q4d population. The two are
+  independent declarations; the builder infers neither. A run with owed delegate requests on a slot not declared `delegate`
+  is an INTEGRITY finding. Q2 needs equal-sized episodes (h4 reports EXPOSURE otherwise): declare delegate episodes on one route.
+Gate map (JSON, required): {"q2_owed": [measures], "q2_unowed": {"measures": [...], "id_prefixes": [...]},
+  "q3": {"measure": "family"}, "q4b": [measures], "q4c": [measures], "q4d": {"measures": [...], "id_prefixes": [...]}}
+Verdicts: a binding oracle verdict decides. An advisory verdict is unadjudicated and is NOT used, unless a disposition for
+(run, item) is supplied with --dispositions ({"<run>::<item>": "pass"|"fail"}). `--dev-advisory-as-evaluator` treats advisory
+verdicts as dispositions for development cross-checks only and labels the record.
+
+Admissibility (contract section 3): COMPLETE_ADMISSIBLE is admissible; EXECUTION_ERROR whose termination is turn_cap or timeout
+is behaviour (admissible, death). Another EXECUTION_ERROR is infrastructure only if its error message matches an infra pattern
+(the provider's own form "429 Model busy, retry later" included); a MALFORMED_EVIDENCE_OR_ASSESSMENT run whose only reason is the
+harness's provider-retry excess (PROVIDER_RETRY_REASON) is infrastructure too (stakeholder sixteenth ruling set). Either may be rerun once. Originals come from --runs, reruns from --rerun; both identities are kept; a second failure is
+inadmissible. The harness reruns an episode's replicates together, so a rerun of a slot whose original was not infrastructure is an
+unused sibling (listed in the record, never substituted) when another replicate of the same command, episode and arm was an
+infrastructure failure that was rerun (stakeholder seventeenth ruling set); any other such rerun is an INTEGRITY finding.
+
+Usage: build_campaign_record.py --declaration D.json --map M.json --runs DIR [--runs DIR ...] [--rerun DIR ...]
+         [--dispositions F.json] [--subject-commit ARMKEY=COMMIT ...] [--allow-unchecked-subject] [--allow-unresolved]
+         [--out CAMPAIGN.json] [--audit AUDIT.json]
+Exit: 0 clean; 3 INTEGRITY finding; 4 UNRESOLVED or RERUN_PENDING only; a refused input (map or arm label) exits with a message.
+INADMISSIBLE findings are informational (the run counts against Q1a). Waivers (--allow-*) are listed in the audit and the record, and h4 labels such a record NOT A QUALIFICATION RESULT.
+"""
+from __future__ import annotations
+
+import argparse
+import collections
+import json
+import re
+import sys
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import arms_spec  # noqa: E402
+import h4  # noqa: E402
+
+SCORABLE = {"pass": 1, "fail": 0}
+Q5_PANELS = {"routing": "Q5a", "versioning": "Q5b", "sentinels": "Q5e", "sentinels-add": "Q5e", "unversioned": "Q5f", "unversioned-add": "Q5f"}
+BURDEN_PANELS = ("burden", "burden-add")
+DEFAULT_INFRA = [r"\b(429|5\d\d) status code", r"status code (429|5\d\d)\b", r"^(429|5\d\d)\b", r"ECONN", r"ETIMEDOUT", r"connection (reset|refused|closed)"]
+PROVIDER_RETRY_REASON = "more provider-layer error retries than the exact build performs"   # harness70 evidence check under provider throttling
+
+
+def termination(run: Path) -> dict:
+    p = run / "events.normalized.jsonl"
+    if p.exists():
+        for line in p.read_text().splitlines():
+            event = json.loads(line)
+            if event.get("kind") == "termination":
+                return event["payload"]
+    return {}
+
+
+def classify(run: Path, infra_patterns: list[str]) -> dict:
+    s = json.loads((run / "summary.json").read_text())
+    state, term = s["evidence_state"], termination(run)
+    message = str((term.get("native_return_state") or {}).get("errorMessage", ""))
+    if state == "COMPLETE_ADMISSIBLE":
+        kind = "ok"
+    elif state == "EXECUTION_ERROR" and term.get("state") in ("turn_cap", "timeout"):
+        kind = "death"
+    elif state == "EXECUTION_ERROR" and any(re.search(p, message) for p in infra_patterns):
+        kind = "infra"
+    elif state == "MALFORMED_EVIDENCE_OR_ASSESSMENT" and s.get("evidence_state_reasons") == [PROVIDER_RETRY_REASON]:
+        kind = "infra"
+    else:
+        kind = "malformed"
+    return {"summary": s, "state": state, "term": term.get("state"), "kind": kind, "dir": str(run), "name": run.name, "command": run.parent.name}
+
+
+def collect(roots, infra_patterns: list[str]) -> dict:
+    """run name -> every run directory of that name under the roots; each keeps its command key (its parent directory name)."""
+    out = collections.defaultdict(list)
+    for root in roots:
+        for d in sorted(root.glob("*/*-r*")) + sorted(root.glob("*-r*")):
+            if (d / "summary.json").exists():
+                out[d.name].append(classify(d, infra_patterns))
+    return out
+
+
+def pick(index: dict, name: str, slot: dict, commands: set, rerun: bool) -> list:
+    """The directories that belong to a slot. A slot without a `command` matches by run name alone. A slot with one needs the directory under
+    that command key, so two commands holding the same run name (a replicate set) never mix. A rerun of a set-0 slot may also sit in a rerun
+    root that is not a plan command; a rerun of a replicate-set slot must sit under its own command key."""
+    found = index.get(name, [])
+    command = slot.get("command")
+    if command is None:
+        return found
+    exact = [t for t in found if t["command"] == command]
+    if rerun and not slot.get("set"):
+        return exact or [t for t in found if t["command"] not in commands]
+    return exact
+
+
+def items_of(run: Path) -> dict:
+    manifest = {i["id"].split("::", 1)[-1]: i for i in json.loads((run / "requirements-snapshot.json").read_text())["expected_scoring_items"]}
+    verdicts = {}
+    for f in sorted((run / "oracle-output").glob("*.stdout.txt")):
+        text = f.read_text().strip()
+        if not text:                                       # an oracle that prints nothing leaves its items unresolved
+            continue
+        try:
+            parsed = json.loads(text).get("items", {})
+        except (ValueError, AttributeError):
+            raise ValueError(f"oracle output not parseable: {f}")
+        for key, value in parsed.items():
+            verdicts[key.split("::", 1)[-1]] = value
+    items = {k: dict(m, oracle=verdicts.get(k)) for k, m in manifest.items()}
+    items["__orphans__"] = sorted(set(verdicts) - set(manifest))      # oracle verdicts for items the manifest does not declare
+    return items
+
+
+def matches(k: str, m: dict, spec: dict) -> bool:
+    return m["measure"] in spec.get("measures", []) or any(k.startswith(p) for p in spec.get("id_prefixes", []))
+
+
+def owed_items(run: Path, gmap: dict) -> list:
+    return [k for k, m in items_of(run).items() if k != "__orphans__" and m["measure"] in gmap["q2_owed"] and not matches(k, m, gmap["q2_unowed"])]
+
+
+def prefix_hits(run: Path, gmap: dict) -> set:
+    items = items_of(run)
+    items.pop("__orphans__")
+    return {(lab, p) for lab, spec in (("q2_unowed", gmap["q2_unowed"]), ("q4d", gmap["q4d"])) for p in spec.get("id_prefixes", [])
+            if any(k.startswith(p) for k in items)}
+
+
+def validate_map(gmap: dict) -> list[str]:
+    """The map shape the builder reads; a mismatch is refused, never reinterpreted."""
+    errs = []
+    for key in ("q2_owed", "q4b", "q4c"):
+        v = gmap.get(key)
+        if not (isinstance(v, list) and v and all(isinstance(x, str) for x in v)):
+            errs.append(f"{key} must be a non-empty list of measure names")
+    for key in ("q2_unowed", "q4d"):
+        v = gmap.get(key)
+        ok = isinstance(v, dict) and set(v) <= {"measures", "id_prefixes"} and any(v.get(k) for k in v) \
+            and all(isinstance(x, str) for k in v for x in v[k])
+        if not ok:
+            errs.append(f"{key} must be an object with only 'measures' and/or 'id_prefixes' lists of strings")
+    q3 = gmap.get("q3")
+    if not (isinstance(q3, dict) and q3 and all(isinstance(k, str) and v in h4.FAMILIES for k, v in q3.items())):
+        errs.append(f"q3 must map measure names to the h4 families {list(h4.FAMILIES)}")
+    q5 = gmap.get("q5")
+    if q5 is not None:
+        need = {"q5a": ("hit", "viol"), "q5b": ("strict", "never"), "q5e": ("fail",), "q5f": ("viol",)}
+        for key, fields in need.items():
+            v = q5.get(key) if isinstance(q5, dict) else None
+            if not (isinstance(v, dict) and all(isinstance(v.get(f), list) and v.get(f) for f in fields)):
+                errs.append(f"q5.{key} must give non-empty measure lists for {list(fields)}")
+    return errs
+
+
+def mapped_specs(gmap: dict) -> list[dict]:
+    flat = lambda ms: {"measures": list(ms)}  # noqa: E731
+    return [flat(gmap["q2_owed"]), gmap["q2_unowed"], flat(gmap["q3"]), flat(gmap["q4b"]), flat(gmap["q4c"]), gmap["q4d"]]
+
+
+def observations(run: Path, slot: dict, rec: dict, gmap: dict, disp: dict, dev: bool, route: bool) -> tuple[list, list, set]:
+    items, obs, unresolved, used = items_of(run), [], [], set()
+    orphans = items.pop("__orphans__")
+    if orphans:
+        unresolved.append("ORPHAN:" + ",".join(orphans))              # surfaced as UNRESOLVED; the caller turns it into an integrity finding
+
+    def v(k):
+        m = items[k]
+        o = m.get("oracle")
+        r = None
+        if o and o.get("mode") == "binding" and o.get("verdict") in SCORABLE:
+            r = o["verdict"]
+        elif disp.get(f"{rec.get('id', rec['name'])}::{k}") in SCORABLE:
+            r = disp[f"{rec.get('id', rec['name'])}::{k}"]
+        elif dev and o and o.get("verdict") in SCORABLE:
+            r = o["verdict"]
+        if r is None and not (o and o.get("verdict") == "not-applicable"):
+            unresolved.append(k)
+        return r
+
+    panel = slot.get("panel")
+    if panel in Q5_PANELS:
+        q5 = gmap.get("q5")
+        if q5 is None:
+            unresolved.append("NO_Q5_MAP")
+            return obs, unresolved, None
+        gate, case = Q5_PANELS[panel], slot["episode"]
+        route_name = slot["episode"].split("-")[0]
+        def hits(measures):
+            return [v(k) for k, m in items.items() if m["measure"] in measures]
+        if gate == "Q5a":
+            obs.append({"g": "Q5a", "case": case, "hit": int(any(r == "pass" for r in hits(q5["q5a"]["hit"]))),
+                        "viol": int(any(r == "fail" for r in hits(q5["q5a"]["viol"])))})
+        elif gate == "Q5b":
+            strict = hits(q5["q5b"]["strict"])
+            obs.append({"g": "Q5b", "case": case, "strict": int(bool(strict) and all(r == "pass" for r in strict)),
+                        "never": int(any(r == "fail" for r in hits(q5["q5b"]["never"])))})
+        elif gate == "Q5e":
+            obs.append({"g": "Q5e", "route": route_name, "fail": int(any(r == "fail" for r in hits(q5["q5e"]["fail"])))})
+        else:
+            obs.append({"g": "Q5f", "route": route_name, "viol": int(any(r == "fail" for r in hits(q5["q5f"]["viol"])))})
+        return obs, sorted(set(unresolved)), None
+    if panel and panel != "main":
+        return obs, unresolved, None                 # descriptive and burden panels enter no Q2 to Q4 gate
+    if route and not slot.get("scored"):
+        return obs, unresolved, None
+    specs = mapped_specs(gmap)
+    for k, m in items.items():
+        if any(matches(k, m, sp) for sp in specs) or m.get("critical"):
+            used.add(m["measure"])
+    arm, non_owed = slot["arm"], bool(slot.get("non_owed"))
+    if arm == "cand" and slot.get("delegate"):
+        req = [(k, v(k)) for k, m in items.items() if m["measure"] in gmap["q2_owed"] and not matches(k, m, gmap["q2_unowed"])]
+        unowed = sum(v(k) == "fail" for k, m in items.items() if matches(k, m, gmap["q2_unowed"]))     # one item per unowed part
+        # Exposure is declared by the manifest, independent of verdict resolution.
+        # v(k) still records unresolved items, which block final qualification.
+        obs.append({"g": "Q2", "owed": len(req), "met": sum(r == "pass" for _, r in req), "unowed": unowed})
+    if arm in ("cand", "b1"):
+        for k, m in items.items():
+            fam = gmap["q3"].get(m["measure"])
+            if fam and (r := v(k)) is not None:
+                obs.append({"g": "Q3", "fam": fam, "score": SCORABLE[r], "item": k})
+    for k, m in items.items():
+        if m.get("critical") and (r := v(k)) is not None:
+            obs.append({"g": "Q4a", "err": 1 - SCORABLE[r], "item": k})
+    if slot.get("scored", True):
+        for gate, key in (("Q4b", "q4b"), ("Q4c", "q4c")):
+            rs = [v(k) for k, m in items.items() if m["measure"] in gmap[key]]
+            obs.append({"g": gate, "hit": int("fail" in rs)})
+        if non_owed:
+            rs = [v(k) for k, m in items.items() if matches(k, m, gmap["q4d"])]
+            obs.append({"g": "Q4d", "hit": int("fail" in rs)})
+    return obs, sorted(set(unresolved)), used
+
+
+def main() -> None:
+    ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
+    ap.add_argument("--declaration", type=Path, required=True)
+    ap.add_argument("--map", type=Path, required=True)
+    ap.add_argument("--runs", type=Path, action="append", required=True)
+    ap.add_argument("--rerun", type=Path, action="append", default=[])
+    ap.add_argument("--dispositions", type=Path)
+    ap.add_argument("--dev-advisory-as-evaluator", action="store_true")
+    ap.add_argument("--subject-commit", action="append", default=[], metavar="ARMKEY=COMMIT")
+    ap.add_argument("--allow-unchecked-subject", action="store_true")
+    ap.add_argument("--allow-unresolved", action="store_true")
+    ap.add_argument("--out", type=Path)
+    ap.add_argument("--audit", type=Path)
+    a = ap.parse_args()
+
+    decl, gmap = json.loads(a.declaration.read_text()), json.loads(a.map.read_text())
+    disp = json.loads(a.dispositions.read_text()) if a.dispositions else {}
+    expect = dict(x.split("=", 1) for x in a.subject_commit)
+    map_errors = validate_map(gmap)
+    if map_errors:
+        sys.exit("gate map refused: " + "; ".join(map_errors))
+    bad_arm = [x for x in decl["slots"] if x["arm"] not in decl["arms"]]
+    if bad_arm:
+        sys.exit(f"slot arm label not in the declaration's arms: {bad_arm[0]}")
+    arms, routes = decl["arms"], decl.get("q5c_routes", [])
+    mode, purpose = decl.get("execution_mode", "qualification"), decl.get("purpose", "qualification")
+    infra = decl.get("infra_error_patterns", DEFAULT_INFRA)
+    findings: list[dict] = []
+    bad = lambda what, **kw: findings.append({"kind": "INTEGRITY", "what": what, **kw})  # noqa: E731
+
+    if len(set(arms.values())) != len(arms):
+        bad("two arm labels share one run-name arm key", arms=arms)
+
+    orig, rer = collect(a.runs, infra), collect(a.rerun, infra)
+    declared, names, set_of = {}, {}, {}
+    for slot in decl["slots"]:
+        name = f"{slot['episode']}-{arms[slot['arm']]}-r{slot.get('run_replicate', slot.get('replicate', 0))}"
+        rid = arms_spec.run_id(name, slot.get("command"), int(slot.get("set", 0)))
+        if rid in declared:
+            bad("duplicate slot in declaration", run=rid)
+        declared[rid], names[rid], set_of[rid] = slot, name, int(slot.get("set", 0))
+    keys = set(arms.values())
+    other = sorted(n for n in set(orig) | set(rer) if n.rsplit("-", 2)[1] not in keys)
+    commands = {x["command"] for x in decl["slots"] if x.get("command")}
+    picked, claimed = {}, set()
+    for rid, slot in declared.items():
+        picked[rid] = (pick(orig, names[rid], slot, commands, False), pick(rer, names[rid], slot, commands, True))
+        claimed.update(id(t) for ts in picked[rid] for t in ts)
+    stray = [t for index in (orig, rer) for ts in index.values() for t in ts if id(t) not in claimed and t["name"] not in other]
+    for name in sorted({t["name"] for t in stray}):
+        bad("undeclared run", run=name, **({"command": sorted({t["command"] for t in stray if t["name"] == name})}
+                                           if name in set(names.values()) else {}))
+
+    runs, reruns, used_measures, gated_runs, prefixes_seen = [], [], set(), 0, set()
+    profile_keys = collections.Counter()
+    group = lambda slot: (slot.get("command"), slot["episode"], slot["arm"])  # noqa: E731  one harness episode: its replicates rerun together
+    rerun_groups = {group(declared[rid]) for rid, (tries, rr) in picked.items() if tries and rr and tries[0]["kind"] == "infra"}
+    for name, slot in declared.items():
+        tries, rr = picked[name]
+        if not tries:
+            bad("declared slot has no original run", run=name)
+            continue
+        if len(tries) > 1 or len(rr) > 1:
+            bad("more than one original or rerun directory for a slot", run=name, dirs=[t["dir"] for t in tries + rr])
+        first = tries[0]
+        substituted = bool(rr) and first["kind"] == "infra"
+        final = rr[0] if substituted else first
+        final["id"] = name
+        if rr:
+            reruns.append({"run": name, "original": first["dir"], "rerun": rr[0]["dir"], "original_kind": first["kind"], "rerun_kind": rr[0]["kind"],
+                           **({} if substituted else {"unused_sibling": True})})
+            if not substituted and group(slot) not in rerun_groups:
+                bad("rerun of a slot whose original was not a provider-transport failure", run=name, original_kind=first["kind"])
+        arm_key = arms[slot["arm"]]
+        for t in tries + rr:
+            s = t["summary"]
+            want, have = expect.get(arm_key), s.get("subject_commit")
+            if want is None and not a.allow_unchecked_subject:
+                bad("no expected subject commit given for the arm", run=name, arm=arm_key)
+            elif want and have != want:
+                bad("subject commit mismatch", run=name, have=have, want=want)
+            if "delivered" not in (s.get("activation") or {}):
+                if arm_key not in decl.get("no_activation_arms", []):
+                    bad("activation record absent", run=name)
+            elif not s["activation"]["delivered"]:
+                bad("activation not delivered", run=name)
+            if s.get("execution_mode") != mode:
+                bad("execution mode differs from the declaration", run=name, have=s.get("execution_mode"), want=mode)
+            if (s.get("accounting") or {}).get("purpose") != purpose:
+                bad("accounting purpose differs from the declaration", run=name, have=(s.get("accounting") or {}).get("purpose"), want=purpose)
+            profile_keys[s.get("profile_key_sha256")] += 1
+        if first["kind"] == "infra" and not rr:
+            findings.append({"kind": "RERUN_PENDING", "what": "provider-transport failure with no rerun (contract section 3 reruns once)", "run": name})
+        elif final["kind"] in ("infra", "malformed"):
+            findings.append({"kind": "INADMISSIBLE", "what": "run is inadmissible", "run": name, "state": final["state"], "cause": final["kind"]})
+        admissible = final["kind"] in ("ok", "death")
+        rec = {"run": name, "episode": slot["episode"], "arm": slot["arm"], "admissible": admissible, "death": final["kind"] == "death",
+               "kind": final["kind"], "identities": [t["dir"] for t in tries + rr], "obs": []}
+        if admissible:
+            route = (slot["panel"] in BURDEN_PANELS) if "panel" in slot else (slot["episode"].split("-")[0] in routes)
+            rec["obs"], rec["unresolved_items"], used = observations(Path(final["dir"]), slot, final, gmap, disp, a.dev_advisory_as_evaluator, route)
+            if used is not None:
+                used_measures |= used
+                gated_runs += 1
+            if route and slot["arm"] in ("cand", "b65"):
+                s, ro = final["summary"], final["summary"].get("resource_observation", {})
+                native = s["installed_entrypoint_bytes"] + sum(b for f, b in s["active_ssdp_files"].items()
+                                                               if f in ro.get("native_files", []) and not f.endswith("/SKILL.md"))
+                rec["obs"].append({"g": "Q5c", "route": slot["episode"].split("-")[0], "bytes": s["active_ssdp_bytes"],
+                                   "native_bytes": native, "mode": s["ssdp_read_mode"]})
+            if owed_items(Path(final["dir"]), gmap) and not slot.get("delegate") and not route:
+                bad("run carries owed delegate requests but its slot is not declared a delegate episode", run=name)
+            orphan = [u for u in rec["unresolved_items"] if u.startswith("ORPHAN:")]
+            if orphan:
+                bad("oracle verdicts for items the manifest does not declare", run=name, items=orphan)
+                rec["unresolved_items"] = [u for u in rec["unresolved_items"] if not u.startswith("ORPHAN:")]
+            prefixes_seen |= prefix_hits(Path(final["dir"]), gmap)
+            if rec["unresolved_items"] and not a.allow_unresolved:
+                findings.append({"kind": "UNRESOLVED", "what": "mapped items without a resolved verdict", "run": name, "items": rec["unresolved_items"]})
+        runs.append(rec)
+
+    owed_counts = {r["run"]: o["owed"] for r in runs if r["arm"] == "cand" for o in r["obs"] if o["g"] == "Q2"}
+    if owed_counts and (min(owed_counts.values()) == 0 or len(set(owed_counts.values())) != 1):
+        bad("delegate episodes are not equal-sized or one owes no part (Q2 needs equal sizes and h4 would report EXPOSURE)",
+            owed_per_run=owed_counts)
+    for label, spec in zip(("q2_owed", "q2_unowed", "q3", "q4b", "q4c", "q4d"), mapped_specs(gmap)):
+        missing = [m for m in spec.get("measures", []) if m not in used_measures]
+        if missing and gated_runs:
+            bad("mapped measure matches no item in any built run", gate=label, measures=missing)
+    for lab, spec in (("q2_unowed", gmap["q2_unowed"]), ("q4d", gmap["q4d"])):
+        dead = [p for p in spec.get("id_prefixes", []) if (lab, p) not in prefixes_seen]
+        if dead and gated_runs:
+            bad("mapped id prefix matches no item in any built run", gate=lab, prefixes=dead)
+    want_profile = decl.get("profile_key_sha256")
+    if want_profile:
+        if set(profile_keys) - {want_profile}:
+            bad("runs with a profile key other than the declared one", seen=dict(profile_keys))
+    elif not decl.get("unchecked_profile"):
+        bad("no profile key declared")
+
+    by_non = collections.defaultdict(set)
+    for slot in decl["slots"]:
+        by_non[slot["episode"]].add(bool(slot.get("non_owed")))
+    for ep, v in by_non.items():
+        if len(v) > 1:
+            bad("non_owed differs between arms on one episode", episode=ep)
+    pair = {"checked": False}
+    if decl.get("check_pair_order", True):
+        by_ep, sets_of = collections.defaultdict(dict), collections.defaultdict(set)
+        for rid, slot in declared.items():
+            sets_of[(slot["episode"], set_of[rid])].add(arms[slot["arm"]])
+        for rec in runs:
+            if rec["arm"] in ("cand", "b1"):
+                t = picked[rec["run"]][0][0]
+                by_ep[(rec["episode"], set_of[rec["run"]])][rec["arm"]] = t["summary"].get("pair_order")
+        first_by_set = collections.defaultdict(collections.Counter)
+        for (ep, k), po in by_ep.items():
+            if set(po) != {"cand", "b1"}:
+                continue
+            if po["cand"] != po["b1"] or sorted(po["cand"] or []) != sorted(sets_of[(ep, k)]):
+                bad("pair_order missing or inconsistent between the candidate and B1 runs", episode=ep, pair_order=po)
+                continue
+            order = [x for x in po["cand"] if x in (arms["cand"], arms["b1"])]
+            first_by_set[k][order[0]] += 1
+        first = sum(first_by_set.values(), collections.Counter())
+        pair = {"checked": True, "first_arm": dict(first)}
+        if len(first_by_set) > 1:
+            pair["by_set"] = {str(k): dict(v) for k, v in sorted(first_by_set.items())}
+        if any(abs(c[arms["cand"]] - c[arms["b1"]]) > 1 for c in first_by_set.values()):
+            bad("order is not alternating", first_arm=dict(first))
+
+    waivers = [w for w, on in (("allow-unresolved", a.allow_unresolved), ("dev-advisory-as-evaluator", a.dev_advisory_as_evaluator),
+                               ("allow-unchecked-subject", a.allow_unchecked_subject)) if on]
+    record = {"runs": runs, "reruns": reruns,
+              "descriptive": {"builder": "build_campaign_record.py", "development_advisory_included": bool(a.dev_advisory_as_evaluator), "waivers": waivers,
+                              "dispositions": a.dispositions.name if a.dispositions else None,
+                              "unresolved_items": sum(len(r.get("unresolved_items", [])) for r in runs), "pair_order": pair}}
+    siblings = sum(bool(r.get("unused_sibling")) for r in reruns)
+    audit = {"declared": len(declared), "built": len(runs), "reruns": len(reruns), "ignored_other_arms": len(other), "pair_order": pair, "waivers": waivers,
+             "by_arm": {k: dict(collections.Counter("admissible" if r["admissible"] else "inadmissible" for r in runs if r["arm"] == k))
+                        for k in sorted({r["arm"] for r in runs})},
+             "findings": findings}
+    if siblings:                                       # absent otherwise, so a record without whole-episode reruns is byte-identical
+        audit["unused_sibling_reruns"] = siblings
+    if a.out:
+        a.out.write_text(json.dumps(record, indent=1) + "\n")
+    if a.audit:
+        a.audit.write_text(json.dumps(audit, indent=1) + "\n")
+    print(json.dumps(audit, indent=1))
+    if any(f["kind"] == "INTEGRITY" for f in findings):
+        sys.exit(3)
+    sys.exit(4 if any(f["kind"] in ("UNRESOLVED", "RERUN_PENDING") for f in findings) else 0)
+
+
+if __name__ == "__main__":
+    main()

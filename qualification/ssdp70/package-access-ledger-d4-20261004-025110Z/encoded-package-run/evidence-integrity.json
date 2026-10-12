@@ -1,0 +1,1396 @@
+{
+  "files": [
+    {
+      "bytes": 20441,
+      "path": "adapter-artifacts/activation-spec.json",
+      "sha256": "fe22833127155ca43d6d388d3be2f8644a82f2bdb66b783617ca767b89fa0cf2"
+    },
+    {
+      "bytes": 6448,
+      "path": "adapter-artifacts/bridge-evidence.jsonl",
+      "sha256": "a4e66f82d2ffb38469c2679be1abe973de42697e3f0faaff3b298aed8f1a683a"
+    },
+    {
+      "bytes": 793,
+      "path": "adapter-artifacts/control-digests.json",
+      "sha256": "56bad723e854463554f3a58d206fd1687fa4905885b450d67c55942e04e8d02e"
+    },
+    {
+      "bytes": 117655,
+      "path": "adapter-artifacts/launcher-evidence.jsonl",
+      "sha256": "c69cb8867578ea00a27ab2450bcbc22a96249dc2d12050b1665d000d3d0ecef5"
+    },
+    {
+      "bytes": 2095,
+      "path": "adapter-artifacts/observer-boundary-argv.json",
+      "sha256": "07f6acefd5945dc01edc8799829fb7b3869c69176b1a7727b46d2f6997ea9009"
+    },
+    {
+      "bytes": 126015,
+      "path": "adapter-artifacts/observer-evidence.jsonl",
+      "sha256": "b620ae4fb724db384f8ee7fddd83bcfef77572c9119a195744289f06db4252b5"
+    },
+    {
+      "bytes": 38227,
+      "path": "adapter-artifacts/package-access-ledger.json",
+      "sha256": "1788564e2f705158ca50e4a051664fca34dbac0f3a461b7916383186722074c7"
+    },
+    {
+      "bytes": 896220,
+      "path": "adapter-artifacts/runtime-dependency-attestation.json",
+      "sha256": "6e346c4aa030cb2250b890facb8015e621de3346657b9b7f008693c035ece5e9"
+    },
+    {
+      "bytes": 458740,
+      "path": "adapter-artifacts/runtime-dependency-manifest.json",
+      "sha256": "5114fe69e08c17470d4b19d7d3d1d20ad755ec20965151dc04afaf2b8c247216"
+    },
+    {
+      "bytes": 3261,
+      "path": "adapter-artifacts/runtime-home-inventory.json",
+      "sha256": "237402b69e52999f59a1ebdf13532b152da55661eafc69b33f13d9e84336bde1"
+    },
+    {
+      "bytes": 926,
+      "path": "adapter-artifacts/runtime-input-template.json",
+      "sha256": "3249ff4c5b838d40b6235560dfaae32521c7b3655f6d9aa4022b0998a23377fa"
+    },
+    {
+      "bytes": 5326,
+      "path": "adapter-artifacts/sandbox-argv.json",
+      "sha256": "1115ef39634f261638e2dfe57e7b843c24ab39790b3a2bc6794a928f8fff0a46"
+    },
+    {
+      "bytes": 5298,
+      "path": "capability-manifest-snapshot.json",
+      "sha256": "1c0f3ce0ec625c8c6609c36a746c631f08e81d6dc2a02d00f29bda03cbb416bd"
+    },
+    {
+      "bytes": 935091,
+      "path": "containment-realization.json",
+      "sha256": "3a02baf1f84615d85259839b4ef784d7789ae85f6fe96707ac0ca9d3542e8f99"
+    },
+    {
+      "bytes": 0,
+      "path": "diff.patch",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 140149,
+      "path": "events.normalized.jsonl",
+      "sha256": "eda390d6de204af45df4b89f5faf4af09d914128cd9c520889c3093bdc00e37c"
+    },
+    {
+      "bytes": 5,
+      "path": "final-report.md",
+      "sha256": "ed251864987c367e9641fbdc89c1d83e9bf0fa2e3eecef8f301c79f619bfac81"
+    },
+    {
+      "bytes": 36,
+      "path": "final-tree-symlinks.json",
+      "sha256": "1b727dbb9925f62632845a7211c6c1a25e6193bd106996bb48fc8b5f1c3a617d"
+    },
+    {
+      "bytes": 15,
+      "path": "final-tree/README.md",
+      "sha256": "2401991f812e1120dba531307019b3831c41d3727816b71e2feeeeedb3bbad86"
+    },
+    {
+      "bytes": 11,
+      "path": "final-tree/notes.txt",
+      "sha256": "e49c81e2d2f84e259d40e2fb8192f3bcd198b355184845d76d8f58807d0d78ee"
+    },
+    {
+      "bytes": 4083200,
+      "path": "final-tree/payload.txt",
+      "sha256": "f1c11197ba7a288218fdfcfa0c1343d076e32e06bdd983c1425aab6e658c2b40"
+    },
+    {
+      "bytes": 401,
+      "path": "final-tree/read_payload.py",
+      "sha256": "865bd3cd9ec669bb26ec101c1f3fcff1ac57d9203c284425d46ebfe84e4c1be7"
+    },
+    {
+      "bytes": 6,
+      "path": "installed-package/numerical-algorithm-design/PROTOCOL_VERSION",
+      "sha256": "746472de66b936ac885ca6d6e68058242b4e909e3260c6317f3ec719f78f76cc"
+    },
+    {
+      "bytes": 15373,
+      "path": "installed-package/numerical-algorithm-design/SKILL.md",
+      "sha256": "d20c1127b429c8979ff7a3f7d14d1ffee8768d3e8606d9d98a6eac9d21c77a83"
+    },
+    {
+      "bytes": 137,
+      "path": "installed-package/numerical-algorithm-design/agents/openai.yaml",
+      "sha256": "b178ecca80398f895cf987cc794b0d09586c7224a9c6893f9cd45c34b7e6bcf8"
+    },
+    {
+      "bytes": 123,
+      "path": "installed-package/numerical-algorithm-design/protocol-manifest.json",
+      "sha256": "343a7898157c3db3868fe750b8ad036aa32cae9b19710808ac3d8f62d0fa8fbd"
+    },
+    {
+      "bytes": 15261,
+      "path": "installed-package/numerical-algorithm-design/references/abstraction-and-concretization.md",
+      "sha256": "0decccf3d35c25de5bdbb286fe03e058523ef9a2e8127324e3029b851a3dddc6"
+    },
+    {
+      "bytes": 12538,
+      "path": "installed-package/numerical-algorithm-design/references/architecture-and-design.md",
+      "sha256": "06a7f931935ae84f11d3fd9ec52124333489d5c162fe1de6996535cee839cfd6"
+    },
+    {
+      "bytes": 10543,
+      "path": "installed-package/numerical-algorithm-design/references/concurrency-and-orchestration.md",
+      "sha256": "a6a0c196b2a6108966540fcbfee7d1cacbb33ae260aec77aa5adcb114ffb94e8"
+    },
+    {
+      "bytes": 6405,
+      "path": "installed-package/numerical-algorithm-design/references/configuration-and-policy.md",
+      "sha256": "904a4a588851ea9dd805eda8b8ee736e4dcee7b56870aba22edc0ede1d1f414b"
+    },
+    {
+      "bytes": 18014,
+      "path": "installed-package/numerical-algorithm-design/references/convergence-and-cycle-economy.md",
+      "sha256": "25015789764f5f631c869715f695588ec095563e6927d3866edd52ae8a11747e"
+    },
+    {
+      "bytes": 20799,
+      "path": "installed-package/numerical-algorithm-design/references/evidence-evolution-and-dependencies.md",
+      "sha256": "8fe20778d49d0546a3a9523aaab3ea287dbd50f48ea43af779f30e1b7fc8001d"
+    },
+    {
+      "bytes": 16174,
+      "path": "installed-package/numerical-algorithm-design/references/git-and-version-control.md",
+      "sha256": "95e9540985d5ad4cb2a4ea9a77fb4b91b272df5ebf1fa74a55dda80812e0c26e"
+    },
+    {
+      "bytes": 8714,
+      "path": "installed-package/numerical-algorithm-design/references/numerical-algorithm-design.md",
+      "sha256": "f41f73eb5d3acb09ce7138e3f18ca5cb9c26e90a651f13548b8eee3fa7ecf267"
+    },
+    {
+      "bytes": 12980,
+      "path": "installed-package/numerical-algorithm-design/references/performance-and-parallelism.md",
+      "sha256": "c201db92e971a93211cc40165d16e56ae8a7942b0ee553de64678719fa4470e0"
+    },
+    {
+      "bytes": 25271,
+      "path": "installed-package/numerical-algorithm-design/references/project-engineering-memory-schema.md",
+      "sha256": "0e80961324721417b765bf08ceb7bf7a4accca68687e0e8faea577f9a38da074"
+    },
+    {
+      "bytes": 9668,
+      "path": "installed-package/numerical-algorithm-design/references/project-engineering-memory.md",
+      "sha256": "2a410fe9e21dd0ed984b2d7371791e8d9bbd53ccc7f22577001f856dd031b3fa"
+    },
+    {
+      "bytes": 14322,
+      "path": "installed-package/numerical-algorithm-design/references/protocol-versioning-and-compatibility.md",
+      "sha256": "f8f4dd7f28b7e5c3edb3cae0f683a4b1c75b6adc6a4e1b537bde60b16e8fa034"
+    },
+    {
+      "bytes": 8445,
+      "path": "installed-package/numerical-algorithm-design/references/scientific-formulation.md",
+      "sha256": "246cef460328c85c6d9ca4c0d2d45586486b70ecbf76308c7b7318f7df706f99"
+    },
+    {
+      "bytes": 45958,
+      "path": "installed-package/numerical-algorithm-design/references/scientific-inspectability-and-initiative.md",
+      "sha256": "370802006b9cd11f0d77f67d0891eb0c0d075878432b13546064377925027140"
+    },
+    {
+      "bytes": 8603,
+      "path": "installed-package/numerical-algorithm-design/references/scientific-software.md",
+      "sha256": "0928b7e9d4aa4a32776374e4f67479d43a70f21cec77e8e7fe04c4a7ebe6bbb4"
+    },
+    {
+      "bytes": 14310,
+      "path": "installed-package/numerical-algorithm-design/references/scientific-technical-writing.md",
+      "sha256": "eb74ad7b60a6ee7b2b8bf11f9cf37211663d84ba87137a3084f0394a2b683406"
+    },
+    {
+      "bytes": 18090,
+      "path": "installed-package/numerical-algorithm-design/references/security-and-trust-boundaries.md",
+      "sha256": "ffc0093283ef93451eef87a628514089af872cd6656481ccbdffe6647880be54"
+    },
+    {
+      "bytes": 10140,
+      "path": "installed-package/numerical-algorithm-design/references/semantic-definition-and-traceability.md",
+      "sha256": "584af70c51e2e0a58a2ed432be0c71546c84824e635c47492cdf1ee67d30de3c"
+    },
+    {
+      "bytes": 11944,
+      "path": "installed-package/numerical-algorithm-design/references/storage-and-io.md",
+      "sha256": "4934daccfd87ee5ae4564644c321267ad71f560a993d0baea7da2b587d1db052"
+    },
+    {
+      "bytes": 18411,
+      "path": "installed-package/numerical-algorithm-design/references/testing-and-validation.md",
+      "sha256": "ad94b0a98443a81ed35ac1ccc6a90beb067ae81fa7faf61317a7efdeb4c044c0"
+    },
+    {
+      "bytes": 20307,
+      "path": "installed-package/numerical-algorithm-design/references/workflow-and-workplans.md",
+      "sha256": "7a6261b72934ec7226dd2bc7f22436b07666466e0955fdd6eda05e8c1cc399a1"
+    },
+    {
+      "bytes": 4689,
+      "path": "installed-package/numerical-algorithm-design/templates/abstraction_concretization_change_plan_template.md",
+      "sha256": "1e658a27582d9b920fb47a0525b87ed85af0d98990f5b8f94c1968e9822c98e3"
+    },
+    {
+      "bytes": 3638,
+      "path": "installed-package/numerical-algorithm-design/templates/numerical_algorithmic_method_paper_template.md",
+      "sha256": "a823310bd0db650b686870c3fa01a9e139e1526075535a34cefe4cec5ed14674"
+    },
+    {
+      "bytes": 9956,
+      "path": "installed-package/numerical-algorithm-design/templates/project_engineering_memory_template.md",
+      "sha256": "631b052c482d266a645bd1eb0ff1f277ad73f385322cbdf67133e99c68933724"
+    },
+    {
+      "bytes": 6,
+      "path": "installed-package/repository-hygiene/PROTOCOL_VERSION",
+      "sha256": "746472de66b936ac885ca6d6e68058242b4e909e3260c6317f3ec719f78f76cc"
+    },
+    {
+      "bytes": 7370,
+      "path": "installed-package/repository-hygiene/SKILL.md",
+      "sha256": "7bc8ce114e494da22c078dd34f3edce5bd2e0404185e8142e16fec297c247efb"
+    },
+    {
+      "bytes": 120,
+      "path": "installed-package/repository-hygiene/agents/openai.yaml",
+      "sha256": "7aa17135184c07ba52bac584f57668438e8f8998ffe6977bf115815f79bf782b"
+    },
+    {
+      "bytes": 133,
+      "path": "installed-package/repository-hygiene/protocol-manifest.json",
+      "sha256": "1ed90aa61e1eb77ff372b5f3dcb8d357b9ce48e19ecbd27dbca4f255b084a08b"
+    },
+    {
+      "bytes": 15261,
+      "path": "installed-package/repository-hygiene/references/abstraction-and-concretization.md",
+      "sha256": "0decccf3d35c25de5bdbb286fe03e058523ef9a2e8127324e3029b851a3dddc6"
+    },
+    {
+      "bytes": 12538,
+      "path": "installed-package/repository-hygiene/references/architecture-and-design.md",
+      "sha256": "06a7f931935ae84f11d3fd9ec52124333489d5c162fe1de6996535cee839cfd6"
+    },
+    {
+      "bytes": 10543,
+      "path": "installed-package/repository-hygiene/references/concurrency-and-orchestration.md",
+      "sha256": "a6a0c196b2a6108966540fcbfee7d1cacbb33ae260aec77aa5adcb114ffb94e8"
+    },
+    {
+      "bytes": 6405,
+      "path": "installed-package/repository-hygiene/references/configuration-and-policy.md",
+      "sha256": "904a4a588851ea9dd805eda8b8ee736e4dcee7b56870aba22edc0ede1d1f414b"
+    },
+    {
+      "bytes": 18014,
+      "path": "installed-package/repository-hygiene/references/convergence-and-cycle-economy.md",
+      "sha256": "25015789764f5f631c869715f695588ec095563e6927d3866edd52ae8a11747e"
+    },
+    {
+      "bytes": 6642,
+      "path": "installed-package/repository-hygiene/references/documentation-and-evidence.md",
+      "sha256": "6da5be86bc8c984bc2cf7d08f207dbaf78a9c16a4079d9f90afa01cd048938fc"
+    },
+    {
+      "bytes": 9832,
+      "path": "installed-package/repository-hygiene/references/documentation-maintenance.md",
+      "sha256": "6e52eca8e248d7d6a7342831e3ed69338a83ea2d6b062373db102918cdd76bdc"
+    },
+    {
+      "bytes": 20799,
+      "path": "installed-package/repository-hygiene/references/evidence-evolution-and-dependencies.md",
+      "sha256": "8fe20778d49d0546a3a9523aaab3ea287dbd50f48ea43af779f30e1b7fc8001d"
+    },
+    {
+      "bytes": 16174,
+      "path": "installed-package/repository-hygiene/references/git-and-version-control.md",
+      "sha256": "95e9540985d5ad4cb2a4ea9a77fb4b91b272df5ebf1fa74a55dda80812e0c26e"
+    },
+    {
+      "bytes": 8714,
+      "path": "installed-package/repository-hygiene/references/numerical-algorithm-design.md",
+      "sha256": "f41f73eb5d3acb09ce7138e3f18ca5cb9c26e90a651f13548b8eee3fa7ecf267"
+    },
+    {
+      "bytes": 12980,
+      "path": "installed-package/repository-hygiene/references/performance-and-parallelism.md",
+      "sha256": "c201db92e971a93211cc40165d16e56ae8a7942b0ee553de64678719fa4470e0"
+    },
+    {
+      "bytes": 25271,
+      "path": "installed-package/repository-hygiene/references/project-engineering-memory-schema.md",
+      "sha256": "0e80961324721417b765bf08ceb7bf7a4accca68687e0e8faea577f9a38da074"
+    },
+    {
+      "bytes": 9668,
+      "path": "installed-package/repository-hygiene/references/project-engineering-memory.md",
+      "sha256": "2a410fe9e21dd0ed984b2d7371791e8d9bbd53ccc7f22577001f856dd031b3fa"
+    },
+    {
+      "bytes": 14322,
+      "path": "installed-package/repository-hygiene/references/protocol-versioning-and-compatibility.md",
+      "sha256": "f8f4dd7f28b7e5c3edb3cae0f683a4b1c75b6adc6a4e1b537bde60b16e8fa034"
+    },
+    {
+      "bytes": 2529,
+      "path": "installed-package/repository-hygiene/references/release-and-distribution.md",
+      "sha256": "3e2588464173c1a843c112ebe7536a7c11b6e030d9cf09c57b1c2467313ef8ec"
+    },
+    {
+      "bytes": 6998,
+      "path": "installed-package/repository-hygiene/references/repository-intake.md",
+      "sha256": "6ad885ed69382415c2848d88cde949237d71950b0dcb5bd1a3f325a2c2517dbd"
+    },
+    {
+      "bytes": 8445,
+      "path": "installed-package/repository-hygiene/references/scientific-formulation.md",
+      "sha256": "246cef460328c85c6d9ca4c0d2d45586486b70ecbf76308c7b7318f7df706f99"
+    },
+    {
+      "bytes": 45958,
+      "path": "installed-package/repository-hygiene/references/scientific-inspectability-and-initiative.md",
+      "sha256": "370802006b9cd11f0d77f67d0891eb0c0d075878432b13546064377925027140"
+    },
+    {
+      "bytes": 8603,
+      "path": "installed-package/repository-hygiene/references/scientific-software.md",
+      "sha256": "0928b7e9d4aa4a32776374e4f67479d43a70f21cec77e8e7fe04c4a7ebe6bbb4"
+    },
+    {
+      "bytes": 14310,
+      "path": "installed-package/repository-hygiene/references/scientific-technical-writing.md",
+      "sha256": "eb74ad7b60a6ee7b2b8bf11f9cf37211663d84ba87137a3084f0394a2b683406"
+    },
+    {
+      "bytes": 18090,
+      "path": "installed-package/repository-hygiene/references/security-and-trust-boundaries.md",
+      "sha256": "ffc0093283ef93451eef87a628514089af872cd6656481ccbdffe6647880be54"
+    },
+    {
+      "bytes": 10140,
+      "path": "installed-package/repository-hygiene/references/semantic-definition-and-traceability.md",
+      "sha256": "584af70c51e2e0a58a2ed432be0c71546c84824e635c47492cdf1ee67d30de3c"
+    },
+    {
+      "bytes": 11944,
+      "path": "installed-package/repository-hygiene/references/storage-and-io.md",
+      "sha256": "4934daccfd87ee5ae4564644c321267ad71f560a993d0baea7da2b587d1db052"
+    },
+    {
+      "bytes": 18411,
+      "path": "installed-package/repository-hygiene/references/testing-and-validation.md",
+      "sha256": "ad94b0a98443a81ed35ac1ccc6a90beb067ae81fa7faf61317a7efdeb4c044c0"
+    },
+    {
+      "bytes": 20307,
+      "path": "installed-package/repository-hygiene/references/workflow-and-workplans.md",
+      "sha256": "7a6261b72934ec7226dd2bc7f22436b07666466e0955fdd6eda05e8c1cc399a1"
+    },
+    {
+      "bytes": 9956,
+      "path": "installed-package/repository-hygiene/templates/project_engineering_memory_template.md",
+      "sha256": "631b052c482d266a645bd1eb0ff1f277ad73f385322cbdf67133e99c68933724"
+    },
+    {
+      "bytes": 6,
+      "path": "installed-package/scientific-formulation/PROTOCOL_VERSION",
+      "sha256": "746472de66b936ac885ca6d6e68058242b4e909e3260c6317f3ec719f78f76cc"
+    },
+    {
+      "bytes": 15131,
+      "path": "installed-package/scientific-formulation/SKILL.md",
+      "sha256": "94955a52e80edbfca7a4b3e9a3a875e50e3a579c9af7500ec260fe28509c63ee"
+    },
+    {
+      "bytes": 138,
+      "path": "installed-package/scientific-formulation/agents/openai.yaml",
+      "sha256": "c50e32da4520021d6c5c467806d7355f18f7340dac8701bcb475aaae8048f98d"
+    },
+    {
+      "bytes": 115,
+      "path": "installed-package/scientific-formulation/protocol-manifest.json",
+      "sha256": "75216bcb5095d42bc674daec7697896c8857a9ea2f30cf65e2a090bc733437a2"
+    },
+    {
+      "bytes": 15261,
+      "path": "installed-package/scientific-formulation/references/abstraction-and-concretization.md",
+      "sha256": "0decccf3d35c25de5bdbb286fe03e058523ef9a2e8127324e3029b851a3dddc6"
+    },
+    {
+      "bytes": 12538,
+      "path": "installed-package/scientific-formulation/references/architecture-and-design.md",
+      "sha256": "06a7f931935ae84f11d3fd9ec52124333489d5c162fe1de6996535cee839cfd6"
+    },
+    {
+      "bytes": 10543,
+      "path": "installed-package/scientific-formulation/references/concurrency-and-orchestration.md",
+      "sha256": "a6a0c196b2a6108966540fcbfee7d1cacbb33ae260aec77aa5adcb114ffb94e8"
+    },
+    {
+      "bytes": 6405,
+      "path": "installed-package/scientific-formulation/references/configuration-and-policy.md",
+      "sha256": "904a4a588851ea9dd805eda8b8ee736e4dcee7b56870aba22edc0ede1d1f414b"
+    },
+    {
+      "bytes": 18014,
+      "path": "installed-package/scientific-formulation/references/convergence-and-cycle-economy.md",
+      "sha256": "25015789764f5f631c869715f695588ec095563e6927d3866edd52ae8a11747e"
+    },
+    {
+      "bytes": 6642,
+      "path": "installed-package/scientific-formulation/references/documentation-and-evidence.md",
+      "sha256": "6da5be86bc8c984bc2cf7d08f207dbaf78a9c16a4079d9f90afa01cd048938fc"
+    },
+    {
+      "bytes": 9832,
+      "path": "installed-package/scientific-formulation/references/documentation-maintenance.md",
+      "sha256": "6e52eca8e248d7d6a7342831e3ed69338a83ea2d6b062373db102918cdd76bdc"
+    },
+    {
+      "bytes": 20799,
+      "path": "installed-package/scientific-formulation/references/evidence-evolution-and-dependencies.md",
+      "sha256": "8fe20778d49d0546a3a9523aaab3ea287dbd50f48ea43af779f30e1b7fc8001d"
+    },
+    {
+      "bytes": 16174,
+      "path": "installed-package/scientific-formulation/references/git-and-version-control.md",
+      "sha256": "95e9540985d5ad4cb2a4ea9a77fb4b91b272df5ebf1fa74a55dda80812e0c26e"
+    },
+    {
+      "bytes": 8714,
+      "path": "installed-package/scientific-formulation/references/numerical-algorithm-design.md",
+      "sha256": "f41f73eb5d3acb09ce7138e3f18ca5cb9c26e90a651f13548b8eee3fa7ecf267"
+    },
+    {
+      "bytes": 12980,
+      "path": "installed-package/scientific-formulation/references/performance-and-parallelism.md",
+      "sha256": "c201db92e971a93211cc40165d16e56ae8a7942b0ee553de64678719fa4470e0"
+    },
+    {
+      "bytes": 25271,
+      "path": "installed-package/scientific-formulation/references/project-engineering-memory-schema.md",
+      "sha256": "0e80961324721417b765bf08ceb7bf7a4accca68687e0e8faea577f9a38da074"
+    },
+    {
+      "bytes": 9668,
+      "path": "installed-package/scientific-formulation/references/project-engineering-memory.md",
+      "sha256": "2a410fe9e21dd0ed984b2d7371791e8d9bbd53ccc7f22577001f856dd031b3fa"
+    },
+    {
+      "bytes": 14322,
+      "path": "installed-package/scientific-formulation/references/protocol-versioning-and-compatibility.md",
+      "sha256": "f8f4dd7f28b7e5c3edb3cae0f683a4b1c75b6adc6a4e1b537bde60b16e8fa034"
+    },
+    {
+      "bytes": 8445,
+      "path": "installed-package/scientific-formulation/references/scientific-formulation.md",
+      "sha256": "246cef460328c85c6d9ca4c0d2d45586486b70ecbf76308c7b7318f7df706f99"
+    },
+    {
+      "bytes": 45958,
+      "path": "installed-package/scientific-formulation/references/scientific-inspectability-and-initiative.md",
+      "sha256": "370802006b9cd11f0d77f67d0891eb0c0d075878432b13546064377925027140"
+    },
+    {
+      "bytes": 8603,
+      "path": "installed-package/scientific-formulation/references/scientific-software.md",
+      "sha256": "0928b7e9d4aa4a32776374e4f67479d43a70f21cec77e8e7fe04c4a7ebe6bbb4"
+    },
+    {
+      "bytes": 14310,
+      "path": "installed-package/scientific-formulation/references/scientific-technical-writing.md",
+      "sha256": "eb74ad7b60a6ee7b2b8bf11f9cf37211663d84ba87137a3084f0394a2b683406"
+    },
+    {
+      "bytes": 18090,
+      "path": "installed-package/scientific-formulation/references/security-and-trust-boundaries.md",
+      "sha256": "ffc0093283ef93451eef87a628514089af872cd6656481ccbdffe6647880be54"
+    },
+    {
+      "bytes": 10140,
+      "path": "installed-package/scientific-formulation/references/semantic-definition-and-traceability.md",
+      "sha256": "584af70c51e2e0a58a2ed432be0c71546c84824e635c47492cdf1ee67d30de3c"
+    },
+    {
+      "bytes": 11944,
+      "path": "installed-package/scientific-formulation/references/storage-and-io.md",
+      "sha256": "4934daccfd87ee5ae4564644c321267ad71f560a993d0baea7da2b587d1db052"
+    },
+    {
+      "bytes": 18411,
+      "path": "installed-package/scientific-formulation/references/testing-and-validation.md",
+      "sha256": "ad94b0a98443a81ed35ac1ccc6a90beb067ae81fa7faf61317a7efdeb4c044c0"
+    },
+    {
+      "bytes": 20307,
+      "path": "installed-package/scientific-formulation/references/workflow-and-workplans.md",
+      "sha256": "7a6261b72934ec7226dd2bc7f22436b07666466e0955fdd6eda05e8c1cc399a1"
+    },
+    {
+      "bytes": 4689,
+      "path": "installed-package/scientific-formulation/templates/abstraction_concretization_change_plan_template.md",
+      "sha256": "1e658a27582d9b920fb47a0525b87ed85af0d98990f5b8f94c1968e9822c98e3"
+    },
+    {
+      "bytes": 9956,
+      "path": "installed-package/scientific-formulation/templates/project_engineering_memory_template.md",
+      "sha256": "631b052c482d266a645bd1eb0ff1f277ad73f385322cbdf67133e99c68933724"
+    },
+    {
+      "bytes": 3455,
+      "path": "installed-package/scientific-formulation/templates/scientific_method_paper_template.md",
+      "sha256": "1263a4e91c50e1eb168cabda5550485b58272a0329f08342415349335590379c"
+    },
+    {
+      "bytes": 6,
+      "path": "installed-package/software-design/PROTOCOL_VERSION",
+      "sha256": "746472de66b936ac885ca6d6e68058242b4e909e3260c6317f3ec719f78f76cc"
+    },
+    {
+      "bytes": 16538,
+      "path": "installed-package/software-design/SKILL.md",
+      "sha256": "bbf68f04ddb3c22d4c174b319cbe2ec5d3435bacbee1ba9b5dbe27583b4a111c"
+    },
+    {
+      "bytes": 123,
+      "path": "installed-package/software-design/agents/openai.yaml",
+      "sha256": "1c6a8944e91ec429ae788e0318093e12450c29d39074b5832556018bce504cfb"
+    },
+    {
+      "bytes": 101,
+      "path": "installed-package/software-design/protocol-manifest.json",
+      "sha256": "6411af534696982b1a1076967efc322c959cd9c655be9b88b4e967c872078494"
+    },
+    {
+      "bytes": 15261,
+      "path": "installed-package/software-design/references/abstraction-and-concretization.md",
+      "sha256": "0decccf3d35c25de5bdbb286fe03e058523ef9a2e8127324e3029b851a3dddc6"
+    },
+    {
+      "bytes": 12538,
+      "path": "installed-package/software-design/references/architecture-and-design.md",
+      "sha256": "06a7f931935ae84f11d3fd9ec52124333489d5c162fe1de6996535cee839cfd6"
+    },
+    {
+      "bytes": 10543,
+      "path": "installed-package/software-design/references/concurrency-and-orchestration.md",
+      "sha256": "a6a0c196b2a6108966540fcbfee7d1cacbb33ae260aec77aa5adcb114ffb94e8"
+    },
+    {
+      "bytes": 6405,
+      "path": "installed-package/software-design/references/configuration-and-policy.md",
+      "sha256": "904a4a588851ea9dd805eda8b8ee736e4dcee7b56870aba22edc0ede1d1f414b"
+    },
+    {
+      "bytes": 18014,
+      "path": "installed-package/software-design/references/convergence-and-cycle-economy.md",
+      "sha256": "25015789764f5f631c869715f695588ec095563e6927d3866edd52ae8a11747e"
+    },
+    {
+      "bytes": 11337,
+      "path": "installed-package/software-design/references/cpp-engineering.md",
+      "sha256": "7e4b85e15266e18a395fa4d9012bde26e47cf103ec76bf98b4d28c02d6741707"
+    },
+    {
+      "bytes": 6642,
+      "path": "installed-package/software-design/references/documentation-and-evidence.md",
+      "sha256": "6da5be86bc8c984bc2cf7d08f207dbaf78a9c16a4079d9f90afa01cd048938fc"
+    },
+    {
+      "bytes": 9832,
+      "path": "installed-package/software-design/references/documentation-maintenance.md",
+      "sha256": "6e52eca8e248d7d6a7342831e3ed69338a83ea2d6b062373db102918cdd76bdc"
+    },
+    {
+      "bytes": 20799,
+      "path": "installed-package/software-design/references/evidence-evolution-and-dependencies.md",
+      "sha256": "8fe20778d49d0546a3a9523aaab3ea287dbd50f48ea43af779f30e1b7fc8001d"
+    },
+    {
+      "bytes": 16174,
+      "path": "installed-package/software-design/references/git-and-version-control.md",
+      "sha256": "95e9540985d5ad4cb2a4ea9a77fb4b91b272df5ebf1fa74a55dda80812e0c26e"
+    },
+    {
+      "bytes": 4217,
+      "path": "installed-package/software-design/references/language-profiles.md",
+      "sha256": "d5733d9b057fa6cecebb9fd943b33347c3e4803e7525177542fd6d556dca57ef"
+    },
+    {
+      "bytes": 5803,
+      "path": "installed-package/software-design/references/long-horizon-code-health.md",
+      "sha256": "b4f10a601e6d239c7fe95967d341b2bef0371620db41574776ea97ab1ff0c80e"
+    },
+    {
+      "bytes": 8714,
+      "path": "installed-package/software-design/references/numerical-algorithm-design.md",
+      "sha256": "f41f73eb5d3acb09ce7138e3f18ca5cb9c26e90a651f13548b8eee3fa7ecf267"
+    },
+    {
+      "bytes": 12980,
+      "path": "installed-package/software-design/references/performance-and-parallelism.md",
+      "sha256": "c201db92e971a93211cc40165d16e56ae8a7942b0ee553de64678719fa4470e0"
+    },
+    {
+      "bytes": 25271,
+      "path": "installed-package/software-design/references/project-engineering-memory-schema.md",
+      "sha256": "0e80961324721417b765bf08ceb7bf7a4accca68687e0e8faea577f9a38da074"
+    },
+    {
+      "bytes": 9668,
+      "path": "installed-package/software-design/references/project-engineering-memory.md",
+      "sha256": "2a410fe9e21dd0ed984b2d7371791e8d9bbd53ccc7f22577001f856dd031b3fa"
+    },
+    {
+      "bytes": 14322,
+      "path": "installed-package/software-design/references/protocol-versioning-and-compatibility.md",
+      "sha256": "f8f4dd7f28b7e5c3edb3cae0f683a4b1c75b6adc6a4e1b537bde60b16e8fa034"
+    },
+    {
+      "bytes": 11172,
+      "path": "installed-package/software-design/references/python-engineering.md",
+      "sha256": "d9ec69ca9d130e653643023167032c261537a71f0e944b95850f7ef6eb2beb2d"
+    },
+    {
+      "bytes": 2529,
+      "path": "installed-package/software-design/references/release-and-distribution.md",
+      "sha256": "3e2588464173c1a843c112ebe7536a7c11b6e030d9cf09c57b1c2467313ef8ec"
+    },
+    {
+      "bytes": 6998,
+      "path": "installed-package/software-design/references/repository-intake.md",
+      "sha256": "6ad885ed69382415c2848d88cde949237d71950b0dcb5bd1a3f325a2c2517dbd"
+    },
+    {
+      "bytes": 8445,
+      "path": "installed-package/software-design/references/scientific-formulation.md",
+      "sha256": "246cef460328c85c6d9ca4c0d2d45586486b70ecbf76308c7b7318f7df706f99"
+    },
+    {
+      "bytes": 45958,
+      "path": "installed-package/software-design/references/scientific-inspectability-and-initiative.md",
+      "sha256": "370802006b9cd11f0d77f67d0891eb0c0d075878432b13546064377925027140"
+    },
+    {
+      "bytes": 8603,
+      "path": "installed-package/software-design/references/scientific-software.md",
+      "sha256": "0928b7e9d4aa4a32776374e4f67479d43a70f21cec77e8e7fe04c4a7ebe6bbb4"
+    },
+    {
+      "bytes": 14310,
+      "path": "installed-package/software-design/references/scientific-technical-writing.md",
+      "sha256": "eb74ad7b60a6ee7b2b8bf11f9cf37211663d84ba87137a3084f0394a2b683406"
+    },
+    {
+      "bytes": 18090,
+      "path": "installed-package/software-design/references/security-and-trust-boundaries.md",
+      "sha256": "ffc0093283ef93451eef87a628514089af872cd6656481ccbdffe6647880be54"
+    },
+    {
+      "bytes": 10140,
+      "path": "installed-package/software-design/references/semantic-definition-and-traceability.md",
+      "sha256": "584af70c51e2e0a58a2ed432be0c71546c84824e635c47492cdf1ee67d30de3c"
+    },
+    {
+      "bytes": 7287,
+      "path": "installed-package/software-design/references/specification-and-implementation.md",
+      "sha256": "37e463959fbd08bedf0c06d2010b4b7a7473b6252fa75c1755e96a4d5c139aba"
+    },
+    {
+      "bytes": 11944,
+      "path": "installed-package/software-design/references/storage-and-io.md",
+      "sha256": "4934daccfd87ee5ae4564644c321267ad71f560a993d0baea7da2b587d1db052"
+    },
+    {
+      "bytes": 18411,
+      "path": "installed-package/software-design/references/testing-and-validation.md",
+      "sha256": "ad94b0a98443a81ed35ac1ccc6a90beb067ae81fa7faf61317a7efdeb4c044c0"
+    },
+    {
+      "bytes": 12073,
+      "path": "installed-package/software-design/references/tool-assisted-engineering.md",
+      "sha256": "692e9c18dccd4b7f81c9c77a6c24fe605ab771feb0897a47f26534813e52da18"
+    },
+    {
+      "bytes": 7368,
+      "path": "installed-package/software-design/references/tool-codeql.md",
+      "sha256": "e231913212840292d4fd7d4aa8a80b09c86db8d86d68f820b89167488c415643"
+    },
+    {
+      "bytes": 4065,
+      "path": "installed-package/software-design/references/tool-hypothesis.md",
+      "sha256": "c02c7702a57e9f223ddd327f9f183f063a21d019f9aa2113ca7124a0c883e862"
+    },
+    {
+      "bytes": 4901,
+      "path": "installed-package/software-design/references/tool-semgrep.md",
+      "sha256": "9e2a311f06675cd0b4755b2163521df1d809b0f87c1e90d62616483c12c06e7b"
+    },
+    {
+      "bytes": 5011,
+      "path": "installed-package/software-design/references/tool-serena.md",
+      "sha256": "a1041512ce1b9e1a09f6b338ca965370ec03696a28464d05565004068fed5800"
+    },
+    {
+      "bytes": 20307,
+      "path": "installed-package/software-design/references/workflow-and-workplans.md",
+      "sha256": "7a6261b72934ec7226dd2bc7f22436b07666466e0955fdd6eda05e8c1cc399a1"
+    },
+    {
+      "bytes": 6772,
+      "path": "installed-package/software-design/templates/implementation_workplan_template.md",
+      "sha256": "35954ceb6f73697f656d20719e09b85699463546bcbf3e49b66d84cd30d6399e"
+    },
+    {
+      "bytes": 9956,
+      "path": "installed-package/software-design/templates/project_engineering_memory_template.md",
+      "sha256": "631b052c482d266a645bd1eb0ff1f277ad73f385322cbdf67133e99c68933724"
+    },
+    {
+      "bytes": 6,
+      "path": "installed-package/software-documentation/PROTOCOL_VERSION",
+      "sha256": "746472de66b936ac885ca6d6e68058242b4e909e3260c6317f3ec719f78f76cc"
+    },
+    {
+      "bytes": 11283,
+      "path": "installed-package/software-documentation/SKILL.md",
+      "sha256": "a8cf7b2387ecc9d83d2631ed88828f1ac944a4a98c8aab1d0dc34fc1c17f3912"
+    },
+    {
+      "bytes": 122,
+      "path": "installed-package/software-documentation/agents/openai.yaml",
+      "sha256": "5ed243963bad55bf3710523ae3fe3374b3c44dab6670de437f0f4598876e7bd3"
+    },
+    {
+      "bytes": 132,
+      "path": "installed-package/software-documentation/protocol-manifest.json",
+      "sha256": "7dac4cc6124ace856a41c0dfec69753d9b9cb5dd317f39fe15a92dd21279311c"
+    },
+    {
+      "bytes": 15261,
+      "path": "installed-package/software-documentation/references/abstraction-and-concretization.md",
+      "sha256": "0decccf3d35c25de5bdbb286fe03e058523ef9a2e8127324e3029b851a3dddc6"
+    },
+    {
+      "bytes": 12538,
+      "path": "installed-package/software-documentation/references/architecture-and-design.md",
+      "sha256": "06a7f931935ae84f11d3fd9ec52124333489d5c162fe1de6996535cee839cfd6"
+    },
+    {
+      "bytes": 10543,
+      "path": "installed-package/software-documentation/references/concurrency-and-orchestration.md",
+      "sha256": "a6a0c196b2a6108966540fcbfee7d1cacbb33ae260aec77aa5adcb114ffb94e8"
+    },
+    {
+      "bytes": 6405,
+      "path": "installed-package/software-documentation/references/configuration-and-policy.md",
+      "sha256": "904a4a588851ea9dd805eda8b8ee736e4dcee7b56870aba22edc0ede1d1f414b"
+    },
+    {
+      "bytes": 18014,
+      "path": "installed-package/software-documentation/references/convergence-and-cycle-economy.md",
+      "sha256": "25015789764f5f631c869715f695588ec095563e6927d3866edd52ae8a11747e"
+    },
+    {
+      "bytes": 6642,
+      "path": "installed-package/software-documentation/references/documentation-and-evidence.md",
+      "sha256": "6da5be86bc8c984bc2cf7d08f207dbaf78a9c16a4079d9f90afa01cd048938fc"
+    },
+    {
+      "bytes": 9832,
+      "path": "installed-package/software-documentation/references/documentation-maintenance.md",
+      "sha256": "6e52eca8e248d7d6a7342831e3ed69338a83ea2d6b062373db102918cdd76bdc"
+    },
+    {
+      "bytes": 20799,
+      "path": "installed-package/software-documentation/references/evidence-evolution-and-dependencies.md",
+      "sha256": "8fe20778d49d0546a3a9523aaab3ea287dbd50f48ea43af779f30e1b7fc8001d"
+    },
+    {
+      "bytes": 16174,
+      "path": "installed-package/software-documentation/references/git-and-version-control.md",
+      "sha256": "95e9540985d5ad4cb2a4ea9a77fb4b91b272df5ebf1fa74a55dda80812e0c26e"
+    },
+    {
+      "bytes": 8714,
+      "path": "installed-package/software-documentation/references/numerical-algorithm-design.md",
+      "sha256": "f41f73eb5d3acb09ce7138e3f18ca5cb9c26e90a651f13548b8eee3fa7ecf267"
+    },
+    {
+      "bytes": 12980,
+      "path": "installed-package/software-documentation/references/performance-and-parallelism.md",
+      "sha256": "c201db92e971a93211cc40165d16e56ae8a7942b0ee553de64678719fa4470e0"
+    },
+    {
+      "bytes": 25271,
+      "path": "installed-package/software-documentation/references/project-engineering-memory-schema.md",
+      "sha256": "0e80961324721417b765bf08ceb7bf7a4accca68687e0e8faea577f9a38da074"
+    },
+    {
+      "bytes": 9668,
+      "path": "installed-package/software-documentation/references/project-engineering-memory.md",
+      "sha256": "2a410fe9e21dd0ed984b2d7371791e8d9bbd53ccc7f22577001f856dd031b3fa"
+    },
+    {
+      "bytes": 14322,
+      "path": "installed-package/software-documentation/references/protocol-versioning-and-compatibility.md",
+      "sha256": "f8f4dd7f28b7e5c3edb3cae0f683a4b1c75b6adc6a4e1b537bde60b16e8fa034"
+    },
+    {
+      "bytes": 2529,
+      "path": "installed-package/software-documentation/references/release-and-distribution.md",
+      "sha256": "3e2588464173c1a843c112ebe7536a7c11b6e030d9cf09c57b1c2467313ef8ec"
+    },
+    {
+      "bytes": 8445,
+      "path": "installed-package/software-documentation/references/scientific-formulation.md",
+      "sha256": "246cef460328c85c6d9ca4c0d2d45586486b70ecbf76308c7b7318f7df706f99"
+    },
+    {
+      "bytes": 45958,
+      "path": "installed-package/software-documentation/references/scientific-inspectability-and-initiative.md",
+      "sha256": "370802006b9cd11f0d77f67d0891eb0c0d075878432b13546064377925027140"
+    },
+    {
+      "bytes": 8603,
+      "path": "installed-package/software-documentation/references/scientific-software.md",
+      "sha256": "0928b7e9d4aa4a32776374e4f67479d43a70f21cec77e8e7fe04c4a7ebe6bbb4"
+    },
+    {
+      "bytes": 14310,
+      "path": "installed-package/software-documentation/references/scientific-technical-writing.md",
+      "sha256": "eb74ad7b60a6ee7b2b8bf11f9cf37211663d84ba87137a3084f0394a2b683406"
+    },
+    {
+      "bytes": 18090,
+      "path": "installed-package/software-documentation/references/security-and-trust-boundaries.md",
+      "sha256": "ffc0093283ef93451eef87a628514089af872cd6656481ccbdffe6647880be54"
+    },
+    {
+      "bytes": 10140,
+      "path": "installed-package/software-documentation/references/semantic-definition-and-traceability.md",
+      "sha256": "584af70c51e2e0a58a2ed432be0c71546c84824e635c47492cdf1ee67d30de3c"
+    },
+    {
+      "bytes": 7287,
+      "path": "installed-package/software-documentation/references/specification-and-implementation.md",
+      "sha256": "37e463959fbd08bedf0c06d2010b4b7a7473b6252fa75c1755e96a4d5c139aba"
+    },
+    {
+      "bytes": 11944,
+      "path": "installed-package/software-documentation/references/storage-and-io.md",
+      "sha256": "4934daccfd87ee5ae4564644c321267ad71f560a993d0baea7da2b587d1db052"
+    },
+    {
+      "bytes": 18411,
+      "path": "installed-package/software-documentation/references/testing-and-validation.md",
+      "sha256": "ad94b0a98443a81ed35ac1ccc6a90beb067ae81fa7faf61317a7efdeb4c044c0"
+    },
+    {
+      "bytes": 20307,
+      "path": "installed-package/software-documentation/references/workflow-and-workplans.md",
+      "sha256": "7a6261b72934ec7226dd2bc7f22436b07666466e0955fdd6eda05e8c1cc399a1"
+    },
+    {
+      "bytes": 9956,
+      "path": "installed-package/software-documentation/templates/project_engineering_memory_template.md",
+      "sha256": "631b052c482d266a645bd1eb0ff1f277ad73f385322cbdf67133e99c68933724"
+    },
+    {
+      "bytes": 6,
+      "path": "installed-package/software-implementation/PROTOCOL_VERSION",
+      "sha256": "746472de66b936ac885ca6d6e68058242b4e909e3260c6317f3ec719f78f76cc"
+    },
+    {
+      "bytes": 14454,
+      "path": "installed-package/software-implementation/SKILL.md",
+      "sha256": "6951ac5face61aba80ed8e2107b58c33d77cdc6dfb0f8e38bb5e2ae839418851"
+    },
+    {
+      "bytes": 136,
+      "path": "installed-package/software-implementation/agents/openai.yaml",
+      "sha256": "e4af1916c288aea2f6ef885e981a1f3d4d4d7fb81051d14915c022818c827a99"
+    },
+    {
+      "bytes": 117,
+      "path": "installed-package/software-implementation/protocol-manifest.json",
+      "sha256": "550f6c61d76c775bf6365329b110f65e0a22dabad41d3bb2520c6aa4e5789539"
+    },
+    {
+      "bytes": 15261,
+      "path": "installed-package/software-implementation/references/abstraction-and-concretization.md",
+      "sha256": "0decccf3d35c25de5bdbb286fe03e058523ef9a2e8127324e3029b851a3dddc6"
+    },
+    {
+      "bytes": 12538,
+      "path": "installed-package/software-implementation/references/architecture-and-design.md",
+      "sha256": "06a7f931935ae84f11d3fd9ec52124333489d5c162fe1de6996535cee839cfd6"
+    },
+    {
+      "bytes": 10543,
+      "path": "installed-package/software-implementation/references/concurrency-and-orchestration.md",
+      "sha256": "a6a0c196b2a6108966540fcbfee7d1cacbb33ae260aec77aa5adcb114ffb94e8"
+    },
+    {
+      "bytes": 6405,
+      "path": "installed-package/software-implementation/references/configuration-and-policy.md",
+      "sha256": "904a4a588851ea9dd805eda8b8ee736e4dcee7b56870aba22edc0ede1d1f414b"
+    },
+    {
+      "bytes": 18014,
+      "path": "installed-package/software-implementation/references/convergence-and-cycle-economy.md",
+      "sha256": "25015789764f5f631c869715f695588ec095563e6927d3866edd52ae8a11747e"
+    },
+    {
+      "bytes": 11337,
+      "path": "installed-package/software-implementation/references/cpp-engineering.md",
+      "sha256": "7e4b85e15266e18a395fa4d9012bde26e47cf103ec76bf98b4d28c02d6741707"
+    },
+    {
+      "bytes": 3677,
+      "path": "installed-package/software-implementation/references/debugging-and-state-recovery.md",
+      "sha256": "7f9e77e67135a426f6cd9f78add74832567d3c523914bde23420c5d0893cf656"
+    },
+    {
+      "bytes": 6642,
+      "path": "installed-package/software-implementation/references/documentation-and-evidence.md",
+      "sha256": "6da5be86bc8c984bc2cf7d08f207dbaf78a9c16a4079d9f90afa01cd048938fc"
+    },
+    {
+      "bytes": 9832,
+      "path": "installed-package/software-implementation/references/documentation-maintenance.md",
+      "sha256": "6e52eca8e248d7d6a7342831e3ed69338a83ea2d6b062373db102918cdd76bdc"
+    },
+    {
+      "bytes": 20799,
+      "path": "installed-package/software-implementation/references/evidence-evolution-and-dependencies.md",
+      "sha256": "8fe20778d49d0546a3a9523aaab3ea287dbd50f48ea43af779f30e1b7fc8001d"
+    },
+    {
+      "bytes": 16174,
+      "path": "installed-package/software-implementation/references/git-and-version-control.md",
+      "sha256": "95e9540985d5ad4cb2a4ea9a77fb4b91b272df5ebf1fa74a55dda80812e0c26e"
+    },
+    {
+      "bytes": 4217,
+      "path": "installed-package/software-implementation/references/language-profiles.md",
+      "sha256": "d5733d9b057fa6cecebb9fd943b33347c3e4803e7525177542fd6d556dca57ef"
+    },
+    {
+      "bytes": 5803,
+      "path": "installed-package/software-implementation/references/long-horizon-code-health.md",
+      "sha256": "b4f10a601e6d239c7fe95967d341b2bef0371620db41574776ea97ab1ff0c80e"
+    },
+    {
+      "bytes": 8714,
+      "path": "installed-package/software-implementation/references/numerical-algorithm-design.md",
+      "sha256": "f41f73eb5d3acb09ce7138e3f18ca5cb9c26e90a651f13548b8eee3fa7ecf267"
+    },
+    {
+      "bytes": 12980,
+      "path": "installed-package/software-implementation/references/performance-and-parallelism.md",
+      "sha256": "c201db92e971a93211cc40165d16e56ae8a7942b0ee553de64678719fa4470e0"
+    },
+    {
+      "bytes": 25271,
+      "path": "installed-package/software-implementation/references/project-engineering-memory-schema.md",
+      "sha256": "0e80961324721417b765bf08ceb7bf7a4accca68687e0e8faea577f9a38da074"
+    },
+    {
+      "bytes": 9668,
+      "path": "installed-package/software-implementation/references/project-engineering-memory.md",
+      "sha256": "2a410fe9e21dd0ed984b2d7371791e8d9bbd53ccc7f22577001f856dd031b3fa"
+    },
+    {
+      "bytes": 14322,
+      "path": "installed-package/software-implementation/references/protocol-versioning-and-compatibility.md",
+      "sha256": "f8f4dd7f28b7e5c3edb3cae0f683a4b1c75b6adc6a4e1b537bde60b16e8fa034"
+    },
+    {
+      "bytes": 11172,
+      "path": "installed-package/software-implementation/references/python-engineering.md",
+      "sha256": "d9ec69ca9d130e653643023167032c261537a71f0e944b95850f7ef6eb2beb2d"
+    },
+    {
+      "bytes": 2529,
+      "path": "installed-package/software-implementation/references/release-and-distribution.md",
+      "sha256": "3e2588464173c1a843c112ebe7536a7c11b6e030d9cf09c57b1c2467313ef8ec"
+    },
+    {
+      "bytes": 6998,
+      "path": "installed-package/software-implementation/references/repository-intake.md",
+      "sha256": "6ad885ed69382415c2848d88cde949237d71950b0dcb5bd1a3f325a2c2517dbd"
+    },
+    {
+      "bytes": 8445,
+      "path": "installed-package/software-implementation/references/scientific-formulation.md",
+      "sha256": "246cef460328c85c6d9ca4c0d2d45586486b70ecbf76308c7b7318f7df706f99"
+    },
+    {
+      "bytes": 45958,
+      "path": "installed-package/software-implementation/references/scientific-inspectability-and-initiative.md",
+      "sha256": "370802006b9cd11f0d77f67d0891eb0c0d075878432b13546064377925027140"
+    },
+    {
+      "bytes": 8603,
+      "path": "installed-package/software-implementation/references/scientific-software.md",
+      "sha256": "0928b7e9d4aa4a32776374e4f67479d43a70f21cec77e8e7fe04c4a7ebe6bbb4"
+    },
+    {
+      "bytes": 14310,
+      "path": "installed-package/software-implementation/references/scientific-technical-writing.md",
+      "sha256": "eb74ad7b60a6ee7b2b8bf11f9cf37211663d84ba87137a3084f0394a2b683406"
+    },
+    {
+      "bytes": 18090,
+      "path": "installed-package/software-implementation/references/security-and-trust-boundaries.md",
+      "sha256": "ffc0093283ef93451eef87a628514089af872cd6656481ccbdffe6647880be54"
+    },
+    {
+      "bytes": 10140,
+      "path": "installed-package/software-implementation/references/semantic-definition-and-traceability.md",
+      "sha256": "584af70c51e2e0a58a2ed432be0c71546c84824e635c47492cdf1ee67d30de3c"
+    },
+    {
+      "bytes": 7287,
+      "path": "installed-package/software-implementation/references/specification-and-implementation.md",
+      "sha256": "37e463959fbd08bedf0c06d2010b4b7a7473b6252fa75c1755e96a4d5c139aba"
+    },
+    {
+      "bytes": 11944,
+      "path": "installed-package/software-implementation/references/storage-and-io.md",
+      "sha256": "4934daccfd87ee5ae4564644c321267ad71f560a993d0baea7da2b587d1db052"
+    },
+    {
+      "bytes": 18411,
+      "path": "installed-package/software-implementation/references/testing-and-validation.md",
+      "sha256": "ad94b0a98443a81ed35ac1ccc6a90beb067ae81fa7faf61317a7efdeb4c044c0"
+    },
+    {
+      "bytes": 12073,
+      "path": "installed-package/software-implementation/references/tool-assisted-engineering.md",
+      "sha256": "692e9c18dccd4b7f81c9c77a6c24fe605ab771feb0897a47f26534813e52da18"
+    },
+    {
+      "bytes": 7368,
+      "path": "installed-package/software-implementation/references/tool-codeql.md",
+      "sha256": "e231913212840292d4fd7d4aa8a80b09c86db8d86d68f820b89167488c415643"
+    },
+    {
+      "bytes": 4065,
+      "path": "installed-package/software-implementation/references/tool-hypothesis.md",
+      "sha256": "c02c7702a57e9f223ddd327f9f183f063a21d019f9aa2113ca7124a0c883e862"
+    },
+    {
+      "bytes": 4901,
+      "path": "installed-package/software-implementation/references/tool-semgrep.md",
+      "sha256": "9e2a311f06675cd0b4755b2163521df1d809b0f87c1e90d62616483c12c06e7b"
+    },
+    {
+      "bytes": 5011,
+      "path": "installed-package/software-implementation/references/tool-serena.md",
+      "sha256": "a1041512ce1b9e1a09f6b338ca965370ec03696a28464d05565004068fed5800"
+    },
+    {
+      "bytes": 20307,
+      "path": "installed-package/software-implementation/references/workflow-and-workplans.md",
+      "sha256": "7a6261b72934ec7226dd2bc7f22436b07666466e0955fdd6eda05e8c1cc399a1"
+    },
+    {
+      "bytes": 9956,
+      "path": "installed-package/software-implementation/templates/project_engineering_memory_template.md",
+      "sha256": "631b052c482d266a645bd1eb0ff1f277ad73f385322cbdf67133e99c68933724"
+    },
+    {
+      "bytes": 6,
+      "path": "installed-package/software-maintenance-audit/PROTOCOL_VERSION",
+      "sha256": "746472de66b936ac885ca6d6e68058242b4e909e3260c6317f3ec719f78f76cc"
+    },
+    {
+      "bytes": 9452,
+      "path": "installed-package/software-maintenance-audit/SKILL.md",
+      "sha256": "09bbc14f6ba433641476d892b7cb2057f812eeddc9cdc2a4e999be3f4a4c3e83"
+    },
+    {
+      "bytes": 137,
+      "path": "installed-package/software-maintenance-audit/agents/openai.yaml",
+      "sha256": "67b43481a0236f567273e903d073d6564637e475e73a76e79ba4d32411308df3"
+    },
+    {
+      "bytes": 140,
+      "path": "installed-package/software-maintenance-audit/protocol-manifest.json",
+      "sha256": "14ba436d21628c30641e4dbaae2e9fcbb74e1ad9301a3670ddb7bc95760be716"
+    },
+    {
+      "bytes": 15261,
+      "path": "installed-package/software-maintenance-audit/references/abstraction-and-concretization.md",
+      "sha256": "0decccf3d35c25de5bdbb286fe03e058523ef9a2e8127324e3029b851a3dddc6"
+    },
+    {
+      "bytes": 12538,
+      "path": "installed-package/software-maintenance-audit/references/architecture-and-design.md",
+      "sha256": "06a7f931935ae84f11d3fd9ec52124333489d5c162fe1de6996535cee839cfd6"
+    },
+    {
+      "bytes": 10543,
+      "path": "installed-package/software-maintenance-audit/references/concurrency-and-orchestration.md",
+      "sha256": "a6a0c196b2a6108966540fcbfee7d1cacbb33ae260aec77aa5adcb114ffb94e8"
+    },
+    {
+      "bytes": 6405,
+      "path": "installed-package/software-maintenance-audit/references/configuration-and-policy.md",
+      "sha256": "904a4a588851ea9dd805eda8b8ee736e4dcee7b56870aba22edc0ede1d1f414b"
+    },
+    {
+      "bytes": 18014,
+      "path": "installed-package/software-maintenance-audit/references/convergence-and-cycle-economy.md",
+      "sha256": "25015789764f5f631c869715f695588ec095563e6927d3866edd52ae8a11747e"
+    },
+    {
+      "bytes": 11337,
+      "path": "installed-package/software-maintenance-audit/references/cpp-engineering.md",
+      "sha256": "7e4b85e15266e18a395fa4d9012bde26e47cf103ec76bf98b4d28c02d6741707"
+    },
+    {
+      "bytes": 6642,
+      "path": "installed-package/software-maintenance-audit/references/documentation-and-evidence.md",
+      "sha256": "6da5be86bc8c984bc2cf7d08f207dbaf78a9c16a4079d9f90afa01cd048938fc"
+    },
+    {
+      "bytes": 9832,
+      "path": "installed-package/software-maintenance-audit/references/documentation-maintenance.md",
+      "sha256": "6e52eca8e248d7d6a7342831e3ed69338a83ea2d6b062373db102918cdd76bdc"
+    },
+    {
+      "bytes": 20799,
+      "path": "installed-package/software-maintenance-audit/references/evidence-evolution-and-dependencies.md",
+      "sha256": "8fe20778d49d0546a3a9523aaab3ea287dbd50f48ea43af779f30e1b7fc8001d"
+    },
+    {
+      "bytes": 16174,
+      "path": "installed-package/software-maintenance-audit/references/git-and-version-control.md",
+      "sha256": "95e9540985d5ad4cb2a4ea9a77fb4b91b272df5ebf1fa74a55dda80812e0c26e"
+    },
+    {
+      "bytes": 4217,
+      "path": "installed-package/software-maintenance-audit/references/language-profiles.md",
+      "sha256": "d5733d9b057fa6cecebb9fd943b33347c3e4803e7525177542fd6d556dca57ef"
+    },
+    {
+      "bytes": 5803,
+      "path": "installed-package/software-maintenance-audit/references/long-horizon-code-health.md",
+      "sha256": "b4f10a601e6d239c7fe95967d341b2bef0371620db41574776ea97ab1ff0c80e"
+    },
+    {
+      "bytes": 8714,
+      "path": "installed-package/software-maintenance-audit/references/numerical-algorithm-design.md",
+      "sha256": "f41f73eb5d3acb09ce7138e3f18ca5cb9c26e90a651f13548b8eee3fa7ecf267"
+    },
+    {
+      "bytes": 12980,
+      "path": "installed-package/software-maintenance-audit/references/performance-and-parallelism.md",
+      "sha256": "c201db92e971a93211cc40165d16e56ae8a7942b0ee553de64678719fa4470e0"
+    },
+    {
+      "bytes": 25271,
+      "path": "installed-package/software-maintenance-audit/references/project-engineering-memory-schema.md",
+      "sha256": "0e80961324721417b765bf08ceb7bf7a4accca68687e0e8faea577f9a38da074"
+    },
+    {
+      "bytes": 9668,
+      "path": "installed-package/software-maintenance-audit/references/project-engineering-memory.md",
+      "sha256": "2a410fe9e21dd0ed984b2d7371791e8d9bbd53ccc7f22577001f856dd031b3fa"
+    },
+    {
+      "bytes": 14322,
+      "path": "installed-package/software-maintenance-audit/references/protocol-versioning-and-compatibility.md",
+      "sha256": "f8f4dd7f28b7e5c3edb3cae0f683a4b1c75b6adc6a4e1b537bde60b16e8fa034"
+    },
+    {
+      "bytes": 11172,
+      "path": "installed-package/software-maintenance-audit/references/python-engineering.md",
+      "sha256": "d9ec69ca9d130e653643023167032c261537a71f0e944b95850f7ef6eb2beb2d"
+    },
+    {
+      "bytes": 6998,
+      "path": "installed-package/software-maintenance-audit/references/repository-intake.md",
+      "sha256": "6ad885ed69382415c2848d88cde949237d71950b0dcb5bd1a3f325a2c2517dbd"
+    },
+    {
+      "bytes": 8445,
+      "path": "installed-package/software-maintenance-audit/references/scientific-formulation.md",
+      "sha256": "246cef460328c85c6d9ca4c0d2d45586486b70ecbf76308c7b7318f7df706f99"
+    },
+    {
+      "bytes": 45958,
+      "path": "installed-package/software-maintenance-audit/references/scientific-inspectability-and-initiative.md",
+      "sha256": "370802006b9cd11f0d77f67d0891eb0c0d075878432b13546064377925027140"
+    },
+    {
+      "bytes": 8603,
+      "path": "installed-package/software-maintenance-audit/references/scientific-software.md",
+      "sha256": "0928b7e9d4aa4a32776374e4f67479d43a70f21cec77e8e7fe04c4a7ebe6bbb4"
+    },
+    {
+      "bytes": 14310,
+      "path": "installed-package/software-maintenance-audit/references/scientific-technical-writing.md",
+      "sha256": "eb74ad7b60a6ee7b2b8bf11f9cf37211663d84ba87137a3084f0394a2b683406"
+    },
+    {
+      "bytes": 18090,
+      "path": "installed-package/software-maintenance-audit/references/security-and-trust-boundaries.md",
+      "sha256": "ffc0093283ef93451eef87a628514089af872cd6656481ccbdffe6647880be54"
+    },
+    {
+      "bytes": 10140,
+      "path": "installed-package/software-maintenance-audit/references/semantic-definition-and-traceability.md",
+      "sha256": "584af70c51e2e0a58a2ed432be0c71546c84824e635c47492cdf1ee67d30de3c"
+    },
+    {
+      "bytes": 11944,
+      "path": "installed-package/software-maintenance-audit/references/storage-and-io.md",
+      "sha256": "4934daccfd87ee5ae4564644c321267ad71f560a993d0baea7da2b587d1db052"
+    },
+    {
+      "bytes": 18411,
+      "path": "installed-package/software-maintenance-audit/references/testing-and-validation.md",
+      "sha256": "ad94b0a98443a81ed35ac1ccc6a90beb067ae81fa7faf61317a7efdeb4c044c0"
+    },
+    {
+      "bytes": 12073,
+      "path": "installed-package/software-maintenance-audit/references/tool-assisted-engineering.md",
+      "sha256": "692e9c18dccd4b7f81c9c77a6c24fe605ab771feb0897a47f26534813e52da18"
+    },
+    {
+      "bytes": 7368,
+      "path": "installed-package/software-maintenance-audit/references/tool-codeql.md",
+      "sha256": "e231913212840292d4fd7d4aa8a80b09c86db8d86d68f820b89167488c415643"
+    },
+    {
+      "bytes": 4065,
+      "path": "installed-package/software-maintenance-audit/references/tool-hypothesis.md",
+      "sha256": "c02c7702a57e9f223ddd327f9f183f063a21d019f9aa2113ca7124a0c883e862"
+    },
+    {
+      "bytes": 4901,
+      "path": "installed-package/software-maintenance-audit/references/tool-semgrep.md",
+      "sha256": "9e2a311f06675cd0b4755b2163521df1d809b0f87c1e90d62616483c12c06e7b"
+    },
+    {
+      "bytes": 5011,
+      "path": "installed-package/software-maintenance-audit/references/tool-serena.md",
+      "sha256": "a1041512ce1b9e1a09f6b338ca965370ec03696a28464d05565004068fed5800"
+    },
+    {
+      "bytes": 20307,
+      "path": "installed-package/software-maintenance-audit/references/workflow-and-workplans.md",
+      "sha256": "7a6261b72934ec7226dd2bc7f22436b07666466e0955fdd6eda05e8c1cc399a1"
+    },
+    {
+      "bytes": 9956,
+      "path": "installed-package/software-maintenance-audit/templates/project_engineering_memory_template.md",
+      "sha256": "631b052c482d266a645bd1eb0ff1f277ad73f385322cbdf67133e99c68933724"
+    },
+    {
+      "bytes": 62,
+      "path": "issues-final/_config.json",
+      "sha256": "b849efb1ca734cf8abea3a958d45ebb9312add1850af73974c9960b53cfab10b"
+    },
+    {
+      "bytes": 67,
+      "path": "issues-final/local/A-1.json",
+      "sha256": "c0e94f34432aa73eb69a43d8e7cc812ebd0f496f2b0544a4e22c8fdab698e26a"
+    },
+    {
+      "bytes": 115564,
+      "path": "normalization-map.json",
+      "sha256": "1bf8090d6fb82d6bdda394854e8a10b3783d1dc867504b20805b200f8f979e40"
+    },
+    {
+      "bytes": 0,
+      "path": "oracle-output/o1.stderr.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 0,
+      "path": "oracle-output/o1.stdout.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 543,
+      "path": "oracle.json",
+      "sha256": "23704fc9c44bf70b72911db2993b4cb0e7fa00b3a23728e19f27eb773ada4123"
+    },
+    {
+      "bytes": 186,
+      "path": "package-access-inputs.json",
+      "sha256": "244e7815b2d202c579b60ee1f8e91c88a397be76b9cee85cb1f64ebbebd3a3a2"
+    },
+    {
+      "bytes": 8749,
+      "path": "profile-snapshot.json",
+      "sha256": "a61c9326b2c25050d1bffe39245f7350665826d7197eeb4c864a91d75c1d4a8d"
+    },
+    {
+      "bytes": 134,
+      "path": "project-control-record.json",
+      "sha256": "60386b4aa4565ec3b3a8a2b0394ec1c7519d81d491efe184e2f0a55d48fbcffa"
+    },
+    {
+      "bytes": 92,
+      "path": "project-git-config.raw",
+      "sha256": "cfe7ba1238c9a78be7535d7c63bcaf5a4d5011d46b07c9b45d3bbf7d6c312dfe"
+    },
+    {
+      "bytes": 1272,
+      "path": "requirements-snapshot.json",
+      "sha256": "15ab469400f019f47b80c718c2d02bdd406540d98557308df3a96a29f70d6df9"
+    },
+    {
+      "bytes": 12475,
+      "path": "run-identity.json",
+      "sha256": "ca5b83dc6f0fd9fec8adc08558745e7e4a133a52fe0a87f222ddb1334509a0ed"
+    },
+    {
+      "bytes": 0,
+      "path": "side-effects.jsonl",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 0,
+      "path": "stderr.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 117571,
+      "path": "summary.json",
+      "sha256": "0a5186f9d1d1c2141d3dbaef4655e59814d8eb581b6d28c25a3e928229bae158"
+    },
+    {
+      "bytes": 3813,
+      "path": "tool-calls.jsonl",
+      "sha256": "ac2e1532440c5fe3b6d30ffb7deebbd14a323f0f937f9f7d2a14f2dc7dd06c30"
+    },
+    {
+      "bytes": 72406,
+      "path": "trace.jsonl",
+      "sha256": "43cd71c36eac7c170fc94ef9886688f224c3ac6530e2557d2e1c359b07d79783"
+    }
+  ],
+  "requirements_content_digests": {
+    "expected_scoring_items": "e17b3ff846d7ad46a46009048c75ab1b00f7dd720719d0ad9eb75214b3e67962",
+    "required_artifacts": "dc1289f9a5f1888f05dc88f83c24f46004f3cf817d4e37a67eb3201ce0e45da3",
+    "required_oracles": "fa5d3201479d93d16037c0fc2b603fe26d8e4fdcbed2649100a0251badae7514"
+  },
+  "run_identity_sha256": "8879791e51bed31ba8a01a211eb68799dc7c10b579b551970ef80773cd83b370",
+  "schema": 1
+}

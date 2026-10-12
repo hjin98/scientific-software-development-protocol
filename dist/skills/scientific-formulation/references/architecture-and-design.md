@@ -47,6 +47,20 @@ Do not preserve obsolete components merely because their tests encode a once-use
 
 A capability-transfer map is cycle evidence/coordination, not a new architecture authority surface. Once the replacement is accepted and current authority/evidence/PEM are reconciled, retire temporary mapping machinery unless project practice gives it continuing value.
 
+## Realized-record architecture (O1)
+
+When D3 authority for software producing scientific results is authored or materially revised, state proportionately the O1 content defined by [Scientific inspectability and epistemic initiative](scientific-inspectability-and-initiative.md). Part (i) covers the material realized record, the intended reader and the routine questions. Part (ii) visibly marks each product inspectability surface, recording whether it lies within the requested deliverable. D3 owns the architectural consequences:
+
+- ownership of the realized record;
+- canonical source versus derived projection;
+- drill-down identity linkage, including per-unit keys;
+- retention and destructive boundaries;
+- streaming/interim exposure;
+- restart continuity of the record;
+- privacy/security/resource boundaries.
+
+Do not add a universal observability database or event bus unless actual requirements justify one. A marked item beyond the requested deliverable binds D4 only after the stakeholder or task authority accepts it. Technical D3 Review does not accept it, and an inspectability-driven product requirement left unmarked in D3 text is an O1 defect.
+
 ## Architecture design test
 
 Prefer cohesive ownership, direct control flow, one authoritative representation/state, acyclic understandable dependencies, and the fewest necessary components/interfaces/synchronization/compatibility paths.

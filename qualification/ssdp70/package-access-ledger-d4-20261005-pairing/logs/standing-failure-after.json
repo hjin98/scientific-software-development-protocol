@@ -1,0 +1,19 @@
+{
+  "selected": "T1-p70-r0-repl",
+  "record": {
+    "original": "T1-p70-r0",
+    "replacement": "T1-p70-r0-repl",
+    "question": "bytes",
+    "original_outcome": "NOT_EVALUATED",
+    "scored": true,
+    "standing_failure": true
+  },
+  "critical_failures": {
+    "p70": 1
+  },
+  "candidate_dispositions": {
+    "pass": 8,
+    "fail": 1,
+    "unresolved": 0
+  }
+}

@@ -1,0 +1,164 @@
+[
+  {
+    "skill": "scientific-formulation",
+    "66": {
+      "entrypoint_bytes": 6317,
+      "section_bytes": 0,
+      "sha256": "0eb7cacaf41ae23dd508539a6bc338c7337b1c79c13c0420cb730bb8b5fdfe0f"
+    },
+    "720": {
+      "entrypoint_bytes": 16512,
+      "section_bytes": 10193,
+      "sha256": "dfdd0a955f5c69d86552bcce54b570a83dde8982ce2b464a1b237e1e8eaa448e"
+    },
+    "round1": {
+      "entrypoint_bytes": 16417,
+      "section_bytes": 10098,
+      "sha256": "0b0e04a31aae76b195ff701fa005dc1c48ce876f43e98ef222bd220e2db7d105"
+    },
+    "final": {
+      "entrypoint_bytes": 16369,
+      "section_bytes": 10050,
+      "sha256": "111a13625cf40a70aa95cf0c3968ca8efa533bfab55ec94a772d5790b2a81b5c"
+    },
+    "delta720": {
+      "entrypoint_bytes": -143,
+      "section_bytes": -143
+    }
+  },
+  {
+    "skill": "numerical-algorithm-design",
+    "66": {
+      "entrypoint_bytes": 6559,
+      "section_bytes": 0,
+      "sha256": "7879654440925a9ba1c5c800f74c4778dfe74d7666efd3f0d6dc7490802a0203"
+    },
+    "720": {
+      "entrypoint_bytes": 16754,
+      "section_bytes": 10193,
+      "sha256": "d8d30212dfaa32ed644887054806a1c60376b426fb38d8ddc3330bc3e9ab1f44"
+    },
+    "round1": {
+      "entrypoint_bytes": 16659,
+      "section_bytes": 10098,
+      "sha256": "04781119804be38921336131602dc8d3b1d2b794bb9f4845e162e075d01b6799"
+    },
+    "final": {
+      "entrypoint_bytes": 16611,
+      "section_bytes": 10050,
+      "sha256": "4de404bb9c1e24e82e0d26806b35a01b43b933e63294a54492769d6b6ec2826d"
+    },
+    "delta720": {
+      "entrypoint_bytes": -143,
+      "section_bytes": -143
+    }
+  },
+  {
+    "skill": "software-design",
+    "66": {
+      "entrypoint_bytes": 8397,
+      "section_bytes": 0,
+      "sha256": "7b7e7bdf51788d23d3612218169abf3d47f5ff6d004542d54e6f92193b8ffc97"
+    },
+    "720": {
+      "entrypoint_bytes": 17905,
+      "section_bytes": 9506,
+      "sha256": "bdbbf68e5d83a3f659bac517cd43e68de5b3044c83faedb7e390c90709cc5731"
+    },
+    "round1": {
+      "entrypoint_bytes": 17796,
+      "section_bytes": 9397,
+      "sha256": "e5ce683b7d2c36001f53ef30c1825fa008c9ad3d6837084253635c972c56c28b"
+    },
+    "final": {
+      "entrypoint_bytes": 17748,
+      "section_bytes": 9349,
+      "sha256": "d5f0d045ee6af2db72dfd1cd5da86362b48512cc6e6bc4d293ad363747ee2364"
+    },
+    "delta720": {
+      "entrypoint_bytes": -157,
+      "section_bytes": -157
+    }
+  },
+  {
+    "skill": "software-implementation",
+    "66": {
+      "entrypoint_bytes": 7057,
+      "section_bytes": 0,
+      "sha256": "916ba5174c9acbcfa72525d97df010b1ca778aaa0c213bf73d04167f14eb0aa0"
+    },
+    "720": {
+      "entrypoint_bytes": 15799,
+      "section_bytes": 8526,
+      "sha256": "4e36231a9947470c65a14872b2f504311e76e202c86915ae98e1245b81ea7da7"
+    },
+    "round1": {
+      "entrypoint_bytes": 15691,
+      "section_bytes": 8418,
+      "sha256": "0abe701701d3cd6939fd27cf9f0742f6e2164b7c6b1097f2c969fedf83a0cd8c"
+    },
+    "final": {
+      "entrypoint_bytes": 15643,
+      "section_bytes": 8370,
+      "sha256": "2342cdde6b5f6f5713db95aeb7e8fb20464784d671991f9a0aa12df5bf25f620"
+    },
+    "delta720": {
+      "entrypoint_bytes": -156,
+      "section_bytes": -156
+    }
+  },
+  {
+    "skill": "software-documentation",
+    "66": {
+      "entrypoint_bytes": 6264,
+      "section_bytes": 0,
+      "sha256": "20389a2c2f1fc5605a9ea24858c65257e9614018af2d40c1f6dbbe7cbbe8c5f0"
+    },
+    "720": {
+      "entrypoint_bytes": 11591,
+      "section_bytes": 5325,
+      "sha256": "54d496bdc5b23cb466ba232b59cd5abc4657bf056617355271cf0ecbc42cab81"
+    },
+    "round1": {
+      "entrypoint_bytes": 11562,
+      "section_bytes": 5296,
+      "sha256": "f3ca603e14edc93c00a9afab47cb0919eed5c84dac7795c53a8388359aa0e4c8"
+    },
+    "final": {
+      "entrypoint_bytes": 11514,
+      "section_bytes": 5248,
+      "sha256": "157925ee91f4989a62b1e8426a215a21c9ebdd975379fcc5810fbd0d3108b301"
+    },
+    "delta720": {
+      "entrypoint_bytes": -77,
+      "section_bytes": -77
+    }
+  },
+  {
+    "skill": "software-maintenance-audit",
+    "66": {
+      "entrypoint_bytes": 5837,
+      "section_bytes": 0,
+      "sha256": "3ce504fa8c05084ac479fcc50a6a071fb9176f906ba71df13cf0dc14a11771f7"
+    },
+    "720": {
+      "entrypoint_bytes": 9842,
+      "section_bytes": 4003,
+      "sha256": "59abab484cb2dca4a340ba8e34aa36936ebbc771fb4cb55e7cce1c1173a3cc4a"
+    },
+    "round1": {
+      "entrypoint_bytes": 9879,
+      "section_bytes": 4040,
+      "sha256": "5a8a39cb18247d49b9155c547b62a5cd5a801850c766b256ddb6235fe4b9c6de"
+    },
+    "final": {
+      "entrypoint_bytes": 9831,
+      "section_bytes": 3992,
+      "sha256": "34b2726d77871eb1e92504dd6ee4d9598ea284348d1b5b5dde6d89ab5345ab1d"
+    },
+    "delta720": {
+      "entrypoint_bytes": -11,
+      "section_bytes": -11
+    }
+  }
+]

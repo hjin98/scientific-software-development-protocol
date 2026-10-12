@@ -1,0 +1,21 @@
+{
+ "base_head": "c1e81501ef17d5a8856905e8cace0ed542e176dd",
+ "base_tree": "ebb14da6ac1c3c3a7c8c813907880dd6884b6072",
+ "delta_patch_sha256": "e38907d6fcf7094fe3892e45fa272ed8096c35c9e27f9ff983547518786cf30f",
+ "hashes": [
+  "4b3e2c750c91e82ed78ba92d9cf9bda90d6aca2d430d659d2625fdfa0fbdb5d0  qualification/ssdp70/eval/adapters/omp.py",
+  "6059e076b1f6867fa00f770dd5d07dac0513a09c9a49e2680865d327617c63a5  qualification/ssdp70/eval/batch_assess70.py",
+  "a645289914e3e4a6615d5ea2ee891a5bfe24938d945065ea6d81140a13c83638  qualification/ssdp70/eval/package_ledger.py",
+  "1fea6a7c73f1b454f0ee5f586b50d8640394708e862af361696672380c17f211  qualification/ssdp70/eval/test_activation_accounting.py",
+  "462ae4e952ad0253175ecfb79aa8b5a3ad761ec0689b222cc7f853d81795c46f  qualification/ssdp70/eval/test_batch_cli.py",
+  "a94bc705730620d435b5bf6fb73cce6f106cebdade09c025a5e42b6465393ec3  qualification/ssdp70/eval/test_package_ledger.py",
+  "924194c4dd0efbec657e747189cf32426885786b32bd2fe7d9b8dd1f42722ca4  qualification/ssdp70/D3-PACKAGE-ACCESS-WINDOW-AND-REPLACEMENT-CLARIFICATION-2026-10-05.md"
+ ],
+ "omp_sha256": "6054460b29e9bad5eba78336f291e1979c2fa0a5cd96fc2d92afd666cc681d26",
+ "results": {
+  "test_activation_accounting 16-way x3": "24/24 each",
+  "test_omp_integration 16-way": "54/54",
+  "eval_nonruntime_set": "328 OK",
+  "root": "407 OK, 3 skipped"
+ }
+}

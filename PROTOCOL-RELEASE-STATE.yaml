@@ -1,9 +1,9 @@
 schema_version: 1
 project: hjin98/scientific-software-development-protocol
 accepted_current:
-  version: "6.6.0"
-  public_source_ref: 22f4bdba53795da3a6f13f162529f3a843fc37ae
-  recovery_ref: 384666764da4c55b282e6b1595ab97e2f86e1dc4
+  version: "7.2.1"
+  public_source_ref: aaeaf8b6b2121b9fb8aba31917c8265649c43954
+  recovery_ref: efdd1b59a7592b1cecef0a0013c35b54a7a6315d
 historical:
   "5.16.0":
     public_source_ref: NONE
@@ -26,14 +26,17 @@ historical:
   "6.5.0":
     public_source_ref: 7f7b5e24858e813e45ace867a7f8ea5180f43bf0
     recovery_ref: c4d5da1e0acb0e9f27376bf69561e8762747cd2d
+  "6.6.0":
+    public_source_ref: 22f4bdba53795da3a6f13f162529f3a843fc37ae
+    recovery_ref: 384666764da4c55b282e6b1595ab97e2f86e1dc4
 candidate:
-  version: "6.6.0"
-  semantic_ref: 22f4bdba53795da3a6f13f162529f3a843fc37ae
+  version: "7.2.1"
+  semantic_ref: aaeaf8b6b2121b9fb8aba31917c8265649c43954
   review:
     state: PASS
-    evidence_ref: hjin98/scientific-software-development-protocol@356d13f05ae56892dc1a75f1eae4c5d3d47881ee:qualification/ssdp66/INDEPENDENT-REVIEW-2026-09-26-PROTOCOL-6.6-PASS.md
+    evidence_ref: hjin98/scientific-software-development-protocol@04827e657cd156a6ea664a04869f73d15e8bcbed:qualification/ssdp70/INDEPENDENT-REVIEW-2026-10-12-PROTOCOL-7.2.1-PASS.md
   ratification:
     state: RATIFIED
-    evidence_ref: hjin98/scientific-software-development-protocol@073aa74d0e786f8997d7a2885a67160000bd031c:qualification/ssdp66/STAKEHOLDER-RATIFICATION-2026-09-26-PROTOCOL-6.6.md
-  public_source_ref: 22f4bdba53795da3a6f13f162529f3a843fc37ae
-  recovery_ref: 384666764da4c55b282e6b1595ab97e2f86e1dc4
+    evidence_ref: hjin98/scientific-software-development-protocol@409451c874eb0a6bb098b622ea6f967bc9578b01:qualification/ssdp70/STAKEHOLDER-RATIFICATION-2026-10-12-PROTOCOL-7.2.1.md
+  public_source_ref: aaeaf8b6b2121b9fb8aba31917c8265649c43954
+  recovery_ref: efdd1b59a7592b1cecef0a0013c35b54a7a6315d

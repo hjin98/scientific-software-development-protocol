@@ -105,6 +105,8 @@ Executable D4 stage-local/final acceptance is owned by [Testing and validation](
 
 For a substantial protocol/authority Review, also perform an **out-of-matrix abstraction-adequacy pass**: reconstruct global invariants from current owners, temporarily ignore the author's workplan/obligation matrix/test decomposition, inspect the assembled candidate, and attempt a locally-compliant trajectory that still violates a material global invariant. Record when no such trajectory survives; do not invent a defect merely to satisfy the pass. Challenge the adequacy of the qualification method itself rather than assuming that green author-supplied checks are sufficient.
 
+**Bidirectional scientific Review.** Substantial scientific Review asks two questions: whether execution is faithful to authority, and whether realized behavior reveals evidence that should challenge, qualify or motivate investigation of the authority or its framing. The out-of-matrix pass includes formally compliant execution that exposes behavior the acceptance matrix never represented. Review need not invent a Challenge, and it reports when no reverse-direction finding survives. Data remain evidence, not authority. Findings below the Serious Challenge threshold become tensions under [Scientific inspectability and epistemic initiative](scientific-inspectability-and-initiative.md).
+
 **Verification** is a deeper risk-triggered falsification mode for materially high-risk claims; it may reconcile multiple authorities, construct counterexamples, or trace composed D4->D1 behavior. It is not a routine duplicate Review.
 
 **Stabilization / architecture-GC** is a non-mutating convergence-boundary question: would the current concretization still be deliberately chosen for the same governing authority? Required changes return through the owning domain.
@@ -120,6 +122,16 @@ Semantic-definition/traceability adds no workflow stage. At intake/design/review
 ## Human gates and closeout learning
 
 Human gates attach to governed semantic risk, not every transition. The designated human authority is required where project/domain policy assigns ratification/adjudication. Orchestration may represent pending/accepted/rejected state but cannot self-approve it. A visible risk override authorizes only bounded continuation where allowed; dependent outputs remain provisional and cannot close the challenged claim unqualified.
+
+**Gate evidence (Channel C).** A human asked for scientific adjudication receives decision-sufficient gate evidence: a scientifically intelligible projection adequate to the decision, not only PASS/FAIL labels, digests, agent conclusions, locations, raw logs or references that need reconstruction.
+
+- **Consequential decisions.** The evidence also shows material anomalies, uncertainty, alternatives, variant-search disclosure and unresolved findings, so that approval does not collapse into confirming the agent's framing.
+- **Anchoring.** A non-narrative evidence core is separable from the AI's interpretation and readable first. The core covers identity, coverage, key trajectories/decisions and findings as data. Mere reachability of evidence from a summary does not satisfy this.
+- **D1/D2 revision gates.** A gate accepting a D1/D2 revision receives the revising duty's tension applicability assessments, including those marked inapplicable, with their asserters. Acceptance does not ratify an assessment the gate was not shown.
+- **Unqualified closure.** The gate does not close unqualified when missing realized records could plausibly change its judgment.
+- **Adequacy.** Gate-evidence adequacy is a semantic judgment, not a machine-checkable presence predicate. The claim-integrity floor binds agent-authored gate evidence.
+
+**Product-scope acceptance.** O1 may visibly mark a product inspectability surface beyond the requested deliverable. Such an item is accepted only by the owner of product scope, the stakeholder or task authority, at an existing gate. Technical D3 Review alone does not accept it. An applicable D1/D2 human gate that considers the marked surface does. Until then the item stays proposed, while the rest of the authority may proceed. Record the acceptance and its binding where the descendant task can read it. This adds no gate type.
 
 After every accepted material repair/rework/optimization/revert/restoration, perform the **closeout learning assessment** owned by [Project Engineering Memory](project-engineering-memory.md) before declaring repository/lifecycle closure. Ordinary fix chronology and first-clean local defects stay out of permanent memory; no specialist can self-promote findings into authority.
 

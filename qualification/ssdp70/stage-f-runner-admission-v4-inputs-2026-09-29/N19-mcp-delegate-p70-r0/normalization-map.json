@@ -1,0 +1,72 @@
+{
+  "entries": [
+    {
+      "classification": "catalog",
+      "mapped_event_ids": [
+        "e000001"
+      ],
+      "native_index": 0,
+      "native_sha256": "962c9e3f804d12f600ce755c2f781382b1bd429080a77825fa215e57e51bda6d",
+      "oracle_relevant": true
+    },
+    {
+      "classification": "reviewed-non-oracle-system:thinking_tokens",
+      "mapped_event_ids": [],
+      "native_index": 1,
+      "native_sha256": "81104ec3a4223b000d92a7854e5e88101263e87bd379df0f5ea49a02d3651b13",
+      "oracle_relevant": false
+    },
+    {
+      "classification": "reviewed-non-oracle-system:thinking_tokens",
+      "mapped_event_ids": [],
+      "native_index": 2,
+      "native_sha256": "9a7843437c237ebb23a6fac574891de485c364089d2e8a71849a0d8f549b24e2",
+      "oracle_relevant": false
+    },
+    {
+      "classification": "assistant-message",
+      "mapped_event_ids": [],
+      "native_index": 3,
+      "native_sha256": "afe629b4d48645bd55e0387d41a416bc626daaa9114fbe715f87db9ec67f36fa",
+      "oracle_relevant": false
+    },
+    {
+      "classification": "assistant-message",
+      "mapped_event_ids": [
+        "e000002"
+      ],
+      "native_index": 4,
+      "native_sha256": "015c50198effe4d27909c31ccc6c850bd07fe17e35395b5ae3f96bcee9d9ec35",
+      "oracle_relevant": true
+    },
+    {
+      "classification": "user-message",
+      "mapped_event_ids": [
+        "e000003"
+      ],
+      "native_index": 5,
+      "native_sha256": "8aa33f58f8821f2d1ce8bba50d4f09ea9586d96d6914a852e49ebf86f345dbe4",
+      "oracle_relevant": true
+    },
+    {
+      "classification": "assistant-message",
+      "mapped_event_ids": [],
+      "native_index": 6,
+      "native_sha256": "70b215e2050ad64916a642001419030f95e110fb3d29b8afa36c77d0b33e0bdf",
+      "oracle_relevant": false
+    },
+    {
+      "classification": "terminal-result",
+      "mapped_event_ids": [
+        "e000004",
+        "e000005",
+        "e000006"
+      ],
+      "native_index": 7,
+      "native_sha256": "6a6763b3d6364abdddbfad0500267b2453624fa66dfbbeffc52caebac4fbecf1",
+      "oracle_relevant": true
+    }
+  ],
+  "native_event_count": 8,
+  "schema": 1
+}

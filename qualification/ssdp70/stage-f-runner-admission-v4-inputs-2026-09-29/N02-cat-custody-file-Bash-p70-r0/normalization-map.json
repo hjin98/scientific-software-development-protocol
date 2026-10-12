@@ -1,0 +1,79 @@
+{
+  "entries": [
+    {
+      "classification": "catalog",
+      "mapped_event_ids": [
+        "e000001"
+      ],
+      "native_index": 0,
+      "native_sha256": "ae96bbef6d4a9edd9521f98d4b1706e8e5429563bec17972c653ad0b9171f877",
+      "oracle_relevant": true
+    },
+    {
+      "classification": "reviewed-non-oracle-system:thinking_tokens",
+      "mapped_event_ids": [],
+      "native_index": 1,
+      "native_sha256": "1c3cf14b4ac90e87abf8369b245e26fcbab59fb76ce43531b1583f4b3eac1591",
+      "oracle_relevant": false
+    },
+    {
+      "classification": "reviewed-non-oracle-system:thinking_tokens",
+      "mapped_event_ids": [],
+      "native_index": 2,
+      "native_sha256": "8a9abb72e46a0280b46bdba3bcf2103985ab416b858522076cedba7cd05db4b1",
+      "oracle_relevant": false
+    },
+    {
+      "classification": "assistant-message",
+      "mapped_event_ids": [],
+      "native_index": 3,
+      "native_sha256": "2014beea0d6adc450d9809300792d16f66734434ff8196396457109305ebb2ef",
+      "oracle_relevant": false
+    },
+    {
+      "classification": "assistant-message",
+      "mapped_event_ids": [
+        "e000002"
+      ],
+      "native_index": 4,
+      "native_sha256": "2aa74940d4105c023331626e39cc1d882b7bfe1f6fc42faa481d176ca3bb62e9",
+      "oracle_relevant": true
+    },
+    {
+      "classification": "unknown-native-type:system",
+      "mapped_event_ids": [],
+      "native_index": 5,
+      "native_sha256": "642af4e03cde8c5c4f22b73e558ad1763070f0e559efa9af61db89b0e5062567",
+      "oracle_relevant": true
+    },
+    {
+      "classification": "user-message",
+      "mapped_event_ids": [
+        "e000003"
+      ],
+      "native_index": 6,
+      "native_sha256": "b6a8732cec2ad84e1c220ba5ddd4c419a5697608287f4ef00df30f050ff0697d",
+      "oracle_relevant": true
+    },
+    {
+      "classification": "assistant-message",
+      "mapped_event_ids": [],
+      "native_index": 7,
+      "native_sha256": "1fa8aa1bb0cc13740c9d820d4da521d5d736ab01efd50e8e843cae173f3b1209",
+      "oracle_relevant": false
+    },
+    {
+      "classification": "terminal-result",
+      "mapped_event_ids": [
+        "e000004",
+        "e000005",
+        "e000006"
+      ],
+      "native_index": 8,
+      "native_sha256": "e63ef5926f2dffbccbfe2723e362593bc311bc7819e5f8b813949595430a808a",
+      "oracle_relevant": true
+    }
+  ],
+  "native_event_count": 9,
+  "schema": 1
+}

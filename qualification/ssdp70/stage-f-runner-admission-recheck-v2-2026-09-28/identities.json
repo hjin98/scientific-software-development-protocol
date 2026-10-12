@@ -1,0 +1,95 @@
+{
+  "capability_native_keys_missing_from_runtime": null,
+  "evaluator": {
+    "adapter_id": "claude-stream-json-v2",
+    "capability_manifest_sha256": "a138808f4ec3970a06a4480e08eb969f3bec7ded4352e8939e8a8deb41063ca3",
+    "containment_kind": "claude-code-restricted-sandbox-v1",
+    "mcp_servers": [],
+    "native_surface_requirements": [
+      "runtime_capability:interrupt_receipt_v1",
+      "runtime_capability:interrupt_cancel_queued_v1",
+      "runtime_capability:msg_lifecycle_v1",
+      "runtime_capability:mcp_read_resource_v1",
+      "runtime_capability:mcp_tool_ui_meta_v1",
+      "messaging_socket_path",
+      "auto_memory_write"
+    ],
+    "native_tools": [
+      "Read",
+      "Glob",
+      "Grep"
+    ],
+    "permission_mode": "plan",
+    "profile_document_sha256": "e6c06d88f8861cee49e2197995b39fe31f3d8f5cc7a46778da5160d1e05d71f6",
+    "profile_id": "claude-code-2.1.284-sonnet5-high-local-samjin-evaluator-v2",
+    "profile_key_sha256": "9747eb8a00f5e162b5f3214eec15f12ba4ca10182df13a04be3aea143e8ac90a"
+  },
+  "executor": {
+    "adapter_id": "claude-stream-json-v2",
+    "capability_manifest_sha256": "048c00f6e18af92641cd934d015afc706c070c5699604491f9158944da2cd9cb",
+    "containment_kind": "claude-code-restricted-sandbox-v1",
+    "mcp_servers": [
+      {
+        "entrypoint": "stub_tools/mediator.py",
+        "name": "ssdp70",
+        "server_id": "ssdp70-qualification-stdio-v1",
+        "tools": [
+          "mcp__ssdp70__issue_locations",
+          "mcp__ssdp70__issue_search",
+          "mcp__ssdp70__issue_show",
+          "mcp__ssdp70__issue_create",
+          "mcp__ssdp70__issue_comment",
+          "mcp__ssdp70__delegate"
+        ],
+        "transport": "stdio"
+      }
+    ],
+    "native_surface_requirements": [
+      "runtime_capability:interrupt_receipt_v1",
+      "runtime_capability:interrupt_cancel_queued_v1",
+      "runtime_capability:msg_lifecycle_v1",
+      "runtime_capability:mcp_read_resource_v1",
+      "runtime_capability:mcp_tool_ui_meta_v1",
+      "messaging_socket_path",
+      "auto_memory_write",
+      "mcp_server:ssdp70"
+    ],
+    "native_tools": [
+      "Skill",
+      "Read",
+      "Glob",
+      "Grep",
+      "Edit",
+      "Write",
+      "Bash",
+      "mcp__ssdp70__issue_locations",
+      "mcp__ssdp70__issue_search",
+      "mcp__ssdp70__issue_show",
+      "mcp__ssdp70__issue_create",
+      "mcp__ssdp70__issue_comment",
+      "mcp__ssdp70__delegate"
+    ],
+    "permission_mode": "dontAsk",
+    "profile_document_sha256": "fff6e548adeea1d7a0e7c9b3527d4501c180b5f23e3958bf31c23fbeac325e77",
+    "profile_id": "claude-code-2.1.284-sonnet5-high-local-samjin-executor-v2",
+    "profile_key_sha256": "c30ea2157a57129071e6cbc2bcb11431f61adfbe2ed6c17f62b09ec721d5213d"
+  },
+  "file_sha256": {
+    "adapters/claude.py": "cc4066bf03bc3eb56f8e1affe88d8704ee0c5316e5096307fa05428f0054b622",
+    "assess70.py": "290cd862f0431ae79ae15bb93186fefbb6de7072c1cb83d68524d7fef86d30c6",
+    "capabilities/claude-evaluator-readonly.json": "3459789787cd1e18ffb79627e902b589dd7ab959b6003c546a067a0167fa05a9",
+    "capabilities/claude-headless.json": "81611be8783d060d386ce1c7a1e0f8ae3e9f2077ef80679f9cd5497f5ad17ef0",
+    "core70.py": "75f40d7e9d7258ce192555704d55464565e52ee4ba37e5d6da124abc86df11f7",
+    "harness70.py": "c530d6da48f907fae65f9efcd71941e83bc0c669e3e820eb9a261be3b7438be2",
+    "profiles/claude-evaluator-readonly.template.json": "629b2257dcb063d7397021bb6b9f70739a362d04d314eda968979e5ce1020be8",
+    "profiles/claude-headless.template.json": "e5c4ca402e4688e2c75cd2044a5421ff7ce6327147a1d65c970cb7e3651d0294",
+    "stub_tools/mediator.py": "e51f0641907215c9d5a0acb607f967363fc7491fa572a70cfb8701acd2308c2e"
+  },
+  "git_blob": {
+    "adapters/claude.py": "e1ccfed9dfd46e5b6d81e7be3b17687ec2e366b9",
+    "assess70.py": "a17ed28faef5d7378202d34c56ab83130eb512ed",
+    "core70.py": "f11a75bf78b2a1d7b0d581cf90f34e786ee2d547",
+    "harness70.py": "3ac5ffb324db9fe57087122a6532c395d8f8b8ad",
+    "stub_tools/mediator.py": "2669c953276badef452accdea3b4710c6be108b6"
+  }
+}

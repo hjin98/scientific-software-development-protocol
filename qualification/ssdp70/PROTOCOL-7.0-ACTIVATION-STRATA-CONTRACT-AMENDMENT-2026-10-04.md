@@ -1,0 +1,168 @@
+---
+kind: qualification-contract-amendment
+governing_protocol_version: 6.6.0
+target_protocol_version: 7.0.0
+date_utc: 2026-10-04
+amends: qualification/ssdp70/PROTOCOL-7.0-EVALUATION-AND-QUALIFICATION-CONTRACT.md
+revision: 8
+status: revision 8 drafted; fresh independent check required (contract) together with fresh independent workplan Review (overlay revision 7)
+---
+
+# Activation-strata amendment to the Protocol 7.0 qualification contract (revision 8)
+
+## 1. Authority and status
+
+- **Authority.** `STAKEHOLDER-DECISION-2026-10-04-PROTOCOL-7.0-DETERMINISTIC-ACTIVATION-AND-ACTIVATION-QUALIFICATION.md`:
+  - §5: the stakeholder's verbatim refinement, with 2b recorded as conditional;
+  - §6: the stakeholder's verbatim answers Q1–Q4 to the second independent check;
+  - §7: the stakeholder's verbatim answer Q5 to the third check.
+
+  Recorder derivations D1, D2 and D4 are labelled where used. D3 is superseded by Q3. D5 (predicate false-firing scope) is a recorder choice. Contract operationalizations of Q1 and Q5 are labelled R-op.
+- **Workplan.** The active workplan's §0.1 overlay, revision 7, with a header decision entry and markers at affected locations. Overlay revisions 5 and 6 received independent PASS; the changed overlay requires fresh Review.
+- **History.**
+  - Revision 1 (`d370193`): NO-PASS, recorded in `ACTIVATION-STRATA-AMENDMENT-INDEPENDENT-CHECK-2026-10-04.md`.
+  - Revision 2 (`0c5372d`): NO-PASS, recorded in `ACTIVATION-OVERLAY-AND-CONTRACT-REV2-INDEPENDENT-CHECK-2026-10-04.md`.
+  - Revision 3 (`70727f1`): NO-PASS, recorded in `ACTIVATION-OVERLAY-REV2-AND-CONTRACT-REV3-INDEPENDENT-CHECK-2026-10-04.md`. It found no Serious Challenge and two blockers.
+  - Revision 4 (`4c404ec`): NO-PASS, recorded in `ACTIVATION-OVERLAY-REV3-AND-CONTRACT-REV4-INDEPENDENT-CHECK-2026-10-04.md`. It found no Serious Challenge and one blocker.
+  - Revision 5 (`077c1eb`): NO-PASS, recorded in `ACTIVATION-OVERLAY-REV4-AND-CONTRACT-REV5-INDEPENDENT-CHECK-2026-10-04.md`. It found no Serious Challenge and one blocker.
+  - Revision 6 (`b9f23d7`): NO-PASS, recorded in `ACTIVATION-OVERLAY-REV5-AND-CONTRACT-REV6-INDEPENDENT-CHECK-2026-10-04.md` at `04b7a41`. It found no Serious Challenge and one contract blocker; overlay revision 5 received PASS.
+  - Revision 7 (`2a49e53`): NO-PASS, recorded in `ACTIVATION-OVERLAY-REV6-AND-CONTRACT-REV7-INDEPENDENT-CHECK-2026-10-04.md` at `3f4d47b`. No Serious Challenge and one contract blocker; overlay revision 6 received PASS.
+- **Authorship.** The prior context authored revisions 1–6. The continuing Codex context authored revisions 7–8 and overlays 6–7; it cannot independently accept these bytes. A separate reviewing context must reconstruct authority rather than inherit this record's dispositions.
+
+## 2. Evidence
+
+The evidence is unchanged from revision 2:
+- the treatment-delivery diagnosis;
+- the doctrine-loaded M07 probe;
+- the stronger-executor selection probe;
+- the runtime command-activation probe (`STAGE-7-*-2026-10-04.md`).
+
+## 3. Contract changes (cumulative through revision 3; later deltas in §§4a0000, 4a000, 4a00, 4a0 and 4a)
+
+| Section | Change |
+|---|---|
+| §1 item 4 | The deterministic delivery record holds:<br>• the installed `SKILL.md` hash;<br>• the delivery-transform identity;<br>• the delivered-text hash;<br>• the hash-linked observer record of the first provider request;<br>• the byte offset of the delivered text within that request. |
+| §1 item 12 | Rewritten.<br>• **`runtime-command`** is admissible only where expansion is demonstrated for that runtime and mode.<br>• **`harness-injection`** must reproduce the same runtime's demonstrated `runtime-command` request 0. A runtime with no demonstrated command delivery (Codex `exec`) has no deterministic stratum.<br>• **Proof.** A per-runtime *delivery transform* is frozen, and proof is **observer request 0**. Adapter or runtime records only corroborate. A runtime without an observer is claim-scoped inadmissible.<br>• **Activation failure.** The run is inadmissible for every floor and fails the profile's criterion, with no rerun rescue. Requalification needs a new profile key, a fresh pre-run check and a fresh campaign.<br>• **Ordinary reporting.** Four groups, plus at least 3 episodes per arm per new class (D2).<br>• **Retained false-activation floors (Q4).** Predicate false-firing is measured on deterministic runs.<br>• **Run-type strata** are revised accordingly.<br>• **Profile coverage (Q1).** At least one flash-class profile uses `runtime-command`. Injection is never the only evidence. Each profile stands alone (D1). |
+| §3 | The activation row counts **every declared deterministic run**, including inadmissible ones. It states the Q1 requirement and points to the §4 floors that remain binding. |
+| §4 | Only the 6.6 correct-selection bound is report-only (Q3). The 6.6 negative and near-boundary false-activation bounds and predicate false-firing stay floors (Q4). The routing probes and sentinels are deterministic, with their floors intact. The T1/T7/T8 byte metric is **unchanged** (whole installed `SKILL.md` plus SSDP files read, each counted once, identical across arms); delivered and wrapper bytes are descriptive only. The "Composite ordinary-entry" residue is removed. |
+| §6 | Expansion is demonstrated with a canary at the provider-request layer. The transform is frozen and reproduced byte-for-byte for the canary and each SSDP root. Injection is checked against `runtime-command` request 0. Six known-broken probes count against the activation criterion. The composite-ordinary residue is replaced by per-stratum recording. |
+| §8 | Records revision 3. |
+
+## 4a0000. Response to the seventh independent check (revision 8)
+
+Author-side dispositions, pending independent acceptance. The stakeholder instructed “Repair until passes”; no stakeholder floor or doctrine changes.
+
+| Finding | Disposition |
+|---|---|
+| **B1** — negative pre-run probes can fail every correct campaign | Re-derived one accounting boundary in §1 item 7: purpose and campaign/suite identity are fixed before launch. Integrity probes retain their actual production-scored evidence and probe-local criterion result; the outer integrity assessment checks the frozen expected state. Qualification alone supplies campaign counts/outcomes/exposure. Items 11, §3 and §6 bind and apply this same owner rule. Genuine campaign activation failures retain no-rescue FAIL; expected injected test failures are never campaign failures. Unexpected integrity failures block admission until resolved. The suite must discriminate both scopes and reject relabelling or cross-scope evidence reuse through the existing production path. No parallel scorer, extra qualification stratum or floor relaxation is introduced. |
+| **m1** — stale overlay tail | Overlay revision 7 corrects the contract/check identities and states the pending exact review boundary. Its reopen summary routes integrity and campaign failures to the accounting owner. Fresh Review includes this overlay. |
+
+**Convergence and affected surface.** The simplification is one explicit accounting owner with local routes, rather than a per-probe exception. Contract, record and overlay alone change; candidate source, harness, profiles, fixtures and frozen trees do not. The eighth check must attempt (a) a complete passing campaign after successful negative integrity tests, (b) a genuine campaign delivery failure, (c) post-exposure relabelling and (d) separate test/campaign aggregation with the same production scorer. No live checks are claimed here; these are contract-level feasibility discriminators for Review and future mandatory §6 realizations.
+
+**PEM applicability.** Revision 7's exact integrated base, no-overlay composition and HAS remain applicable: DS-001 applies to assembled acceptance adequacy, all other families remain outside this document-only scope. No governing source, base blob or overlay changed; partial/stale metadata limitations remain visible. No PEM mutation.
+
+**Author-side checks.** Revision 8: 407 repository tests OK, three skipped; repository-aware PEM validation valid (five families, zero notices), bound base/HEAD PEM blobs equal, and whitespace clean. No source/generated descendant changed; package/snapshot, live qualification and frozen-tree checks are not executed. These checks do not independently accept the contract.
+
+## 4a000. Response to the sixth independent check (revision 7)
+
+These are author-side repair dispositions, pending fresh independent falsification. No new stakeholder choice or qualification claim is made.
+
+| Finding | Disposition |
+|---|---|
+| **B1** — burden mapped only to a key unable to host its main-panel bounds | Contract item 12 assigns T1/T7/T8 fixed-cost/no-lookup bounds to that deterministic key, and the class-iii/new-class active-material bound plus all §5 bounds to the main deterministic key. The listed map bullets are minimums. The family record must assign every remaining criterion part, exposure and report-only measure: harness on all keys, activation on deterministic keys, P01–P19/T2–T6/R2 by deterministic panel, ordinary reporting on the ordinary key, and pooled counts across all keys. Overlay item 2 routes to that complete map. |
+| **G1** — non-primary PASS's Q4 scope unstated | A deterministic-key PASS on a non-primary profile carries no ordinary-selection false-activation claim. It retains predicate false-firing and zero owner false activations on its own scored runs. This limitation must appear in every such PASS report; the primary's ordinary Q4 floors remain mandatory. |
+| **G2** — family record/id outside frozen evidence chain | The campaign freezes the complete family record and digest before its first run; §6 reproduces the id/digest and checks each mapped exposure; item 11 binds campaign/family identities into every primary-family run and assessment. Record changes need a new revision, fresh pre-run check and affected requalification, never retrospective remapping. |
+| **G3** — workplan's weaker root-selection proof unmarked | Added a marker limiting native activation/resource-access evidence to ordinary entry and routing deterministic entry to request-0 proof plus hash-bound runtime input. Overlay revision 6 requires fresh Review. |
+| **G4** — permitted claim limits confused with claim-scoped-out | Item 12 distinguishes inability to expose a required property from contract-permitted predeclared descriptive-only routes below three episodes and named-class-only comparative claims. The latter are claim limits, never exposure/floor waivers or non-PASS criterion states. |
+| **m1** — D-label location | Contract and overlay cite D1–D4 to decision record §5, D5 to §6, and R-op to the contract. |
+| **m2** — shared budgets versus per-panel caps | The family freezes a panel budget schedule, permitting panel-required differences while matched arms share a key. The 6.6 select/3, route/8 and trajectory/60 turn caps remain unless separately changed through governed Review. |
+| **m3** — §7 repeat omitted from updates | Final criterion state is after the updates permitted by §§4–5 and §7; undelivered deterministic runs still fail activation directly. |
+| **m4** — re-key scope | All shared fields and panel schedule stay fixed except the independently reviewed repaired adapter/harness identity. Other changes require the primary-change process. |
+| **m5** — prompt-bearing variables undefined | Defined by incorporation into subject conversation or command input. §6 verifies classification and that non-template variables/configuration supply no entrypoint-derived conversation text. Secret credential values are never persisted. |
+
+**Impact and boundary.** Only this contract, this amendment record and the workplan overlay are changed. No candidate doctrine, harness, profile, fixture, frozen tree or release identity changes. Harness work remains blocked pending independent PASS. The checklist `p70ck2` probe remains awaiting stakeholder go-ahead; it is not launched here.
+
+**Project-memory intake.** Reused the workplan-bound integrated state `2585b73f00420daca185a4fbb9ac42a79473eda1`, independently confirmed as an ancestor of project-designated `main`; its PEM blob equals HEAD and main (`1561797125622f355f84eb27319f87e8fa4227d9`). Repository-aware schema validation passed: five families, zero notices. The base front matter and coverage retain the workplan §0.2's recorded stale/partial limitations; no overlay is composed (`candidate_overlay_semantic_candidate=NONE`). Canonical metadata search covered all five families. Task-local HAS: DS-001 **APPLICABLE** (a map/hash does not prove real-owner qualification); PC-001 **NOT_APPLICABLE** to this document-only repair (no frozen-resource mutation); FF-001, SP-001 and SP-002 **NOT_APPLICABLE** (no publication, package regeneration or source-routing repair). These are evidence-only decision support; no memory mutation or authority promotion occurs.
+
+**Convergence.** This repair corrects the existing family mechanism rather than adding another. The seventh check should attempt a complete family realization and an out-of-matrix bypass, not only recheck individual rows. A structurally new blocker reopens simplification/cycle economy before another additive round.
+
+**Author-side checks.** `python3 -m unittest discover -s tests`: 407 tests, OK, three skips (not treated as executed checks). `source/release_state.py`: coherent. Repository-aware PEM validation: valid. `git diff --check`: clean. The initial detached `/tmp` PEM validation could not resolve local Git routes; validation was rerun against the byte-identical repository PEM and passed. No source/generated descendant changed, so package/snapshot regeneration and live/frozen-tree checks were not run for this document-only repair. These checks do not accept the semantic contract.
+
+## 4a00. Response to the fifth independent check (revision 6)
+
+| Finding | Disposition |
+|---|---|
+| **B1** — the family cannot host the ordinary-entry floors it must pass; cross-key pooling | The family now contains **one same-model ordinary-entry key** beside its deterministic keys. A predeclared **criterion-to-key map** assigns each §3 criterion to family keys; the Q4 floors on ordinary negatives go to the ordinary key. Pooled D5 and owner-false-activation counts are declared as the family's aggregation, which can only add failures. The family result has an identity: a hash of the ordered keys and the map. The profile-scoped result rule cross-references this. |
+| **G1** — workplan profile-scoped lines unmarked | Markers are added at the §11 profile-scoped bullet and at the "Profile-scoped qualification" paragraph. |
+| **G2** — the runtime input swept in skill package, workspace and config; §6 wording | The runtime input is redefined as the invocation channel only: argv, stdin or RPC, prompt-bearing environment variables, prompt or command files. Environment realization is bound by its own identities. §6 now requires equality with the frozen input template. |
+| **G3** — run-level vs criterion-level blocking | Blocking applies to *final criterion-level* states, after the replacements, reruns and adjudications that §§4–5 allow. Undelivered deterministic runs remain direct activation failures. |
+| **m1** — stale records | The overlay cites the closeout commit. The decision-record status cites §§5–7. D5 is located in decision record §6. Record §4b is updated. |
+| **m2** — Q1/Q5 operationalizations unlabelled | Labelled R-op in contract item 12 and in overlay item 2. |
+| **m3** — disclosure boundary | Disclosure covers earlier campaigns of earlier Protocol 7 candidates under this workplan. |
+| **m4** — "primary result" collision | The contract's sentence now reads "per-profile result". |
+| **m5** — whether re-keying changes the family | A requalification re-key of the same model, runtime and mode is a new family revision, not a change of family. |
+| **m6** — human trial on non-primary profiles | The human trial runs on the primary family only. Other profiles carry no human-legibility claim. |
+
+## 4a0. Response to the fourth independent check (revision 5)
+
+| Finding | Disposition |
+|---|---|
+| **B1** — the primary does not carry full qualification: comparative claim rescuable; T1/T7/T8 key incompatible; other non-PASS states don't block; human trial not tied | The primary is now a predeclared **profile family**: keys differing only by panel-required capability, such as T1/T7/T8 without delegation. Matched arms within a panel share a key. The family must reach PASS on **every §3-ordered criterion**, including burden, the comparative claim and the §7 human trial on its outputs. **Any** non-PASS state (`FAIL`, `UNRESOLVED`, `NOT_EVALUATED`, inadmissible, missing, claim-scoped-out) blocks every profile. The profile-scoped result rule cross-references this. This is in item 12, the §3 row and overlay item 2. |
+| **G1** — a different primary per campaign | Changing the primary family needs a written stakeholder decision before the next campaign. Every earlier campaign of the candidate is disclosed, whatever its outcome. |
+| **G2** — "no segment of the body" undefined | Replaced. The runtime input must equal a frozen input template, rendered from the command, the fixture prompt and the declared constants. Injection must equal its template with the delivered segment. |
+| **Minor** — stale cross-references | §§5–7 is cited where Q5 applies, and §3's heading is clarified. |
+| **Minor** — D4 unlabelled | Labelled at the owner-false-activation floor. |
+| **Minor** — runtime-input channels | Environment variables and adapter-written files are added. |
+| **Minor** — D5 vs the 1-of-12 denominator | The denominator counts every scored predicate-excluded opportunity, and its minimum of 12 must be met on the deterministic stratum alone. |
+| **Minor** — auxiliary-request classification | Classified by fixed request properties (endpoint, purpose marker, position), never by whether skill text is present. |
+
+## 4a. Response to the third independent check (revision 4)
+
+| Finding | Disposition |
+|---|---|
+| **B1** — the flash profile need only *use* `runtime-command`; its failure did not block others; "offered" and "flash-class" undefined; exposure unstated | The offered set is frozen before runs. Flash-class is defined as the stakeholder-designated default campaign executor (now GLM-5.3-Flash), or one designated in writing before runs. The primary flash profile must: use `runtime-command` for every deterministic run; meet activation across every declared root; meet the §2 minimums on its own; and pass every floor (stakeholder Q5). Any failure there blocks PASS for every profile, and no profile can be withdrawn. This is in the item 12 *Primary flash profile* bullet, the §3 row, and overlay item 2. |
+| **B2** — request 0 cannot tell injection from runtime expansion | The adapter's runtime input (argv, stdin or RPC messages, prompt file) is retained and hash-bound. A `runtime-command` input must hold the command and no body segment. Request 0 together with that input determines the mechanism, and a mismatch is an activation failure. §6 adds the input check to the canary demonstration and a known-broken probe for "injection labelled `runtime-command`". |
+| **G1** — predicate false-firing dropped from ordinary negatives | Scored on every run where an SSDP root was delivered or selected, in either stratum (D5, labelled as a recorder choice). |
+| **G2** — transform and request 0 under-defined | The transform inputs include the declared fixed skill directory (`/opt/ssdp/skills/<root>`) and runtime constants. Comparison is on decoded message content. Request 0 is the first conversation request, with auxiliary requests classified and excluded. A run that ends before any conversation request is an activation failure. §6 says "delivered segment". Extra adapter text must match a frozen template. |
+| **G3** — four unmarked workplan statements | Markers are added at the §8.3 *Selection surface*, the §11.3 O1-authoring and tension-retrieval bullets, and the §11.5 composite ordinary-entry pre-run line. |
+| **G4** — requalification without root cause | Requalification requires a recorded root cause attributed to the adapter or harness, and an independently reviewed repair that removes it. An undiagnosed or runtime-caused failure falsifies `runtime-command` for that runtime and mode. Every earlier failed campaign is disclosed. |
+| **Minor** — predicate scope filed under Q4 | Relabelled D5, a recorder choice. |
+| **Minor** — "D1 narrowed by Q1" | Corrected to "Q1 adds a requirement to D1". |
+| **Minor** — extra adapter text in request 0 | It must match a frozen template, in item 12 and §6. |
+
+## 4b. Response to the second independent check (made in revision 3)
+
+| Finding | Disposition |
+|---|---|
+| **SC-A** — 2b recorded unconditionally; injection could satisfy 2a | The stakeholder answered Q1 and Q2 (decision record §6). 2b is now recorded as conditional on runtime-command evidence. Item 12 and the §3 row require `runtime-command` on at least one flash-class profile, and injection is never the only evidence. |
+| **B1** — PASS possible with no `runtime-command` | Closed by the Q1 requirement in item 12 *Profile coverage* and in the §3 row. |
+| **B2** — D3 not non-binding; scope ambiguous | Q3 confirms D3, narrowed to the 6.6 correct-selection bound only. The §4 text names that bound alone. The routing probes and T2/T3 sentinels keep their floors on deterministic entry. Criterion 16 gets its explicit supersession (decision record §6; workplan marker). |
+| **B3** — false-activation and predicate-false-firing floors dropped | Q4 retains them. They are stated as floors in item 12, §3 and §4, and in overlay item 5. Predicate false-firing is measured on deterministic entry. Criterion 13's false-activation clause is restated in overlay item 4. |
+| **B4** — delivery record ill-defined, not tamper-evident | Proof is the observer's hash-linked request 0, checked under a per-runtime frozen delivery transform. This handles OMP's frontmatter stripping and embedded prompt. Runtime and adapter records only corroborate. A runtime without the observer is claim-scoped inadmissible for this stratum, which covers the Claude Code case where there is no expansion event. |
+| **B5** — contradictory byte accounting | There is one metric, the unchanged 6.6 metric, applied identically to all arms. Delivered and wrapper bytes are descriptive only. |
+| **B6** — ordinary new-class measurement unrealized | Item 12 requires at least 3 ordinary episodes per arm per new class, report-only (D2). |
+| **G1** — tautological activation row | The denominator is now every declared deterministic run, including inadmissible ones. |
+| **G2** — injection undefined across layers; Codex | Injection is defined at the provider-request layer against the same runtime's demonstrated `runtime-command` request 0. A runtime with no demonstrated command delivery cannot use injection. |
+| **G3** — Stage A static-margin basis | Unchanged, because the byte metric is unchanged. The workplan *Static pre-measurement* bullet carries a marker. |
+| **G4** — attribution and labelling | Every attribution is now stakeholder-quoted: the quote is restored verbatim ("alwasy [sic]"); 2b keeps "If that works"; "approved the plan" is replaced by the verbatim instruction; Q1–Q4 are quoted. The derivations are labelled at each use: D1 in item 12, D2 in item 12 and the overlay, and D4 is reflected in the retained floors. |
+| **G5** — D4 vs scope; wrong-root grouping | Owner false activation and the Q4 floors apply across strata. Doctrine floors are deterministic-only. Ordinary runs are reported in four groups (no selection, wrong root, admissible root, prose-instructed), with every critical failure listed by group. |
+| **G6** — unmarked workplan locations; header | Markers are added at: the I66-2 map row, §11.3 non-selection placement-miss, §11.3 *Route*, §11.5 selection non-inferiority, §11.5 false-activation bounds, §11.5 composite runs, criterion 14, criterion 16 and *Static pre-measurement*. A 2026-10-04 decision entry is added to the header. |
+| **G7** — requalification after a harness-caused failure | Requires a new profile key, a fresh §6 pre-run check and a fresh full campaign. The failed campaign stays on record. |
+| **Minor** — "each of which" | Reworded: the deterministic *stratum* must meet the §2 minimums. |
+| **Minor** — composite-ordinary residue | Removed from contract §4 and §6. The workplan §11.5 sentence carries a marker. |
+| **Minor** — stakeholder record status | Updated. |
+| **Minor** — README overstates the probe | README now says OMP *RPC mode* (interactive UI untested) and Claude Code *print mode* (interactive untested). |
+| **Revision-1 m2** — untracked closeout record | Committed at `91b6de2` by stakeholder instruction. The overlay cites the commit. |
+
+## 5. Questions for the fresh independent check
+1. Can every §3 criterion be evaluated on a key in the primary family, with no criterion left unevaluable or evaluated outside it?
+2. Can any profile reach qualification PASS while the primary family has a non-PASS final criterion state?
+3. Are the runtime-input boundary and the input template well defined?
+4. Is the record set consistent (revisions, commits, cross-references, labels)?
+
+## 6. Still blocked until both checks pass
+- adapter changes (OMP RPC mode, the observer request-0 delivery check, the runtime-input record, transform freezing);
+- profile freezes;
+- the §6 pre-run check;
+- fresh fixtures;
+- any qualification run.

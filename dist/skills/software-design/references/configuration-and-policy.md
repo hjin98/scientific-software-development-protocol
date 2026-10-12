@@ -30,6 +30,8 @@ Validate semantic constraints on the resolved configuration, not only on individ
 
 For long or scientifically important workflows, persist a redacted canonical snapshot with the run/evidence record so the exact executed policy can be reconstructed.
 
+The resolved values, origins and automatic-policy rationale here are the source that scientific decision provenance reuses; [Scientific inspectability and epistemic initiative](scientific-inspectability-and-initiative.md) owns their scientific presentation, including actor and binding status, without adding a configuration registry.
+
 ## Dynamic defaults and automatic policy
 
 Values derived from runtime state are still configuration once resolved. Examples include:

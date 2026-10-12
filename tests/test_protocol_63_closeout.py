@@ -22,7 +22,7 @@ class Protocol63CloseoutTests(unittest.TestCase):
     def test_workplan_archived_and_protocol7_inheritance_reconciled(self) -> None:
         self.assertFalse((ROOT / "workplans/active/PROTOCOL-6.3-EVIDENCE-BACKED-PROJECT-ENGINEERING-MEMORY-WORKPLAN.md").exists())
         self.assertTrue((ROOT / "workplans/archive/PROTOCOL-6.3-EVIDENCE-BACKED-PROJECT-ENGINEERING-MEMORY-WORKPLAN.md").is_file())
-        rev4 = (ROOT / "workplans/active/SSDP-7.0-DETERMINISTIC-CONTROL-PLANE-AND-MANDATORY-ORCHESTRATOR-MIGRATION-REVISION-4-PROTOCOL-6.3-INHERITANCE-RECONCILIATION.md").read_text()
+        rev4 = (ROOT / "workplans/archive/SSDP-7.0-DETERMINISTIC-CONTROL-PLANE-AND-MANDATORY-ORCHESTRATOR-MIGRATION-REVISION-4-PROTOCOL-6.3-INHERITANCE-RECONCILIATION.md").read_text()
         self.assertIn("d3_architecture_mutation: none", rev4)
         self.assertIn("PROTOCOL 7 D4 IMPLEMENTATION: NOT AUTHORIZED", rev4)
 

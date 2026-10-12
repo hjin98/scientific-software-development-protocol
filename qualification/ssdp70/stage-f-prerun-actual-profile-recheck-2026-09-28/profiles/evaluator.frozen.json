@@ -1,0 +1,67 @@
+{
+  "adapter_id": "claude-stream-json-v1",
+  "agent_model": "claude-sonnet-5",
+  "budgets": {
+    "max_turns": 40,
+    "timeout_s": 1800
+  },
+  "containment_policy": {
+    "kind": "read-only-evaluator"
+  },
+  "credential_service_account_policy": {
+    "ambient_credentials": "deny"
+  },
+  "install_mechanism": "none",
+  "native_allowed_tools": [
+    "Read",
+    "Glob",
+    "Grep"
+  ],
+  "native_disallowed_tools": [
+    "Bash",
+    "Edit",
+    "Write",
+    "NotebookEdit",
+    "MultiEdit",
+    "Skill",
+    "Agent",
+    "WebFetch",
+    "WebSearch"
+  ],
+  "network_external_write_policy": {
+    "external_write": "deny",
+    "network": "deny"
+  },
+  "permission_mode": "plan",
+  "profile_id": "claude-code-2.1.283-sonnet5-high-local-samjin-evaluator",
+  "provider_managed_unknowns": [
+    {
+      "classification": "arm-neutral",
+      "name": "provider-backend-shard",
+      "sensitive_claims": [
+        "*"
+      ]
+    },
+    {
+      "classification": "arm-neutral",
+      "name": "provider-model-serving-revision-behind-alias",
+      "sensitive_claims": [
+        "*"
+      ]
+    }
+  ],
+  "provider_runtime": {
+    "executable": "claude",
+    "provider": "anthropic",
+    "runtime": "claude-code",
+    "version": "2.1.283"
+  },
+  "reasoning_configuration": {
+    "effort": "high",
+    "source": "checker-frozen-2026-09-28"
+  },
+  "schema": 1,
+  "workspace_realization": {
+    "kind": "temporary-read-only-evidence-bundle"
+  }
+}

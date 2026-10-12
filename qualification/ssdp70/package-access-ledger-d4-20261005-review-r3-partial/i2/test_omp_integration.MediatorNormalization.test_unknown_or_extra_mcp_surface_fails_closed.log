@@ -1,0 +1,21 @@
+E
+======================================================================
+ERROR: test_unknown_or_extra_mcp_surface_fails_closed (test_omp_integration.MediatorNormalization)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/tmp/cr5/qualification/ssdp70/eval/test_omp_integration.py", line 546, in test_unknown_or_extra_mcp_surface_fails_closed
+    summary = self.rig().run(scenario_steps(call("mcp__ssdp_issue_show", issue_id="A-1"), text("x")))
+  File "/tmp/cr5/qualification/ssdp70/eval/omp_rig.py", line 156, in run
+    server, _state = stand_in_provider.serve(
+  File "/tmp/cr5/qualification/ssdp70/eval/stand_in_provider.py", line 148, in serve
+    server = _UnixHTTPServer(unix, handler) if unix else _TcpServer((host, port), handler)
+  File "/usr/lib/python3.10/socketserver.py", line 448, in __init__
+    self.socket = socket.socket(self.address_family,
+  File "/usr/lib/python3.10/socket.py", line 232, in __init__
+    _socket.socket.__init__(self, family, type, proto, fileno)
+PermissionError: [Errno 1] Operation not permitted
+
+----------------------------------------------------------------------
+Ran 1 test in 0.015s
+
+FAILED (errors=1)

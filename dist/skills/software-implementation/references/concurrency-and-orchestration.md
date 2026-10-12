@@ -146,7 +146,7 @@ MPI is a common concretization from both Python and C++, not a C++-only doctrine
 
 Progress describes accepted logical work, not merely submitted tasks. Keep output convention stable within a project. Restored completed work should not be double-counted.
 
-Estimated time of arrival (ETA) is observational: base it on representative completed work, use a consistent project-defined format, and do not let progress reporting materially perturb hot loops, event loops, communication, or disk I/O.
+Estimated time of arrival (ETA) is observational: base it on representative completed work, use a consistent project-defined format, and do not let progress reporting materially perturb hot loops, event loops, communication, or disk I/O. Scientific interim visibility of realized records for long, adaptive or irreversible runs is owned by [Scientific inspectability and epistemic initiative](scientific-inspectability-and-initiative.md); it grants no control authority.
 
 ## Verification
 

@@ -36,6 +36,8 @@ For material D2 authority mutation use the [change plan](templates/abstraction_c
 
 Stale results neither confirm nor refute. Tests sharing one expected-value generator, fixture, dataset defect, reference implementation or assumption are correlated even when separately executed. Material D2 Review seeks wrong normalization/limits, degraded convergence, unstable regimes, hidden estimator bias, precision-induced bias, non-equivalent restart, or reordered/parallel arithmetic outside the accepted envelope. If accepted D2 itself may be false, contradictory, materially ambiguous or impossible to concretize, raise **SERIOUS CHALLENGE** to D2 rather than asking D3/D4 to work around it.
 
+<!-- SSDP-SCIENTIFIC-CHECKS q=F,R,V,T e=1,2,3,4,5,6,7 -->
+
 ## Completion
 
 Report D1 invariants concretized, D2 method/error/uncertainty semantics, evidence and applicability, required human state, D2->D3 handoff, affected descendants/documentation/dependencies/history and unresolved blockers/Challenge. Keep architecture/code mechanisms delegated unless D2 authority requires them.

@@ -1,6 +1,6 @@
 ---
 name: software-implementation
-description: Use to implement, fix, debug, refactor, test, or package scientific/technical code under unchanged scientific, numerical, and architectural contracts. Routes changes to those contracts to the SSDP formulation, numerical, or design skills.
+description: Use to implement, fix, debug, refactor, test, package, run or analyze scientific/technical software and pipelines under unchanged scientific, numerical and architectural contracts; review scientific results or reports; copy, transcribe or relay scientific results, memos or acceptance decisions; delegate any of this work to agents or tools; or prepare human scientific gate evidence. Routes contract changes to formulation, numerical or design skills.
 ---
 
 # Software Implementation
@@ -33,6 +33,8 @@ A first clean local defect under sufficient authority loads none of these owners
 3. Close each material stage with affected regression before dependent work. Before completion reconcile every obligation, inspect obsolete/bypassed/duplicate ownership, re-derive the complete final affected semantic/behavioral/evidence/documentation surface, remap/rerun evidence whose owner changed, and run affected regression, real-boundary integration and required checks.
 
 A required check that did not execute is not a pass; green tests do not prove omitted workplan obligations. Name each material claim's real semantic owner/path and ask whether evidence could remain green while that owner is broken; test doubles may control dependencies below/outside the owner, never replace it. If that boundary is unavailable, report unavailable/blocking rather than proxy-passing it. Stale results neither confirm nor refute; stop when uncertainty cannot change the decision.
+
+<!-- SSDP-SCIENTIFIC-CHECKS q=F,R,V,T e=1,2,3,4,6 -->
 
 ## Challenge and completion
 

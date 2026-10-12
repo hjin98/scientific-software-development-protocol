@@ -1,0 +1,7 @@
+test_qualification_scoped_integrity_campaign_keeps_failure_after_good_repeat (test_activation_accounting.RealActivationPath)
+Real campaign aggregation; outer suite purpose remains integrity throughout. ... ok
+
+----------------------------------------------------------------------
+Ran 1 test in 25.341s
+
+OK

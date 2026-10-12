@@ -1,0 +1,14 @@
+{
+  "checks": [
+    "request inside bracket cannot move either edge",
+    "edges use strict before/after comparisons",
+    "tree mismatch denies exactness",
+    "tree mismatch preserves pre-R2 positive FAIL",
+    "frozen parameter mismatch denies exactness",
+    "frozen parameter mismatch preserves pre-R2 positive FAIL",
+    "missing heartbeat end taints owner negative",
+    "positive exactly at R2 is not before R2",
+    "request versus fixed baseline disagreement denies owner exactness"
+  ],
+  "result": "PASS"
+}

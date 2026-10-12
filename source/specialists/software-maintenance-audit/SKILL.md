@@ -27,6 +27,8 @@ Route each material finding to its smallest owning repair: equivalent local D4 r
 
 A finding becomes a PEM candidate only when the PEM admission threshold and evidence/counterevidence requirements are actually met. The audit does not mint family identity, recurrence, maturity, temperature, positive preference or authority by assertion; a one-off local finding stays local. Do not redesign or broadly refactor inside the audit. Report under the Lossless Representation Rule: consolidate manifestations under root causes, lead with high-consequence findings, keep each finding falsifiable and actionable without replaying full history.
 
+<!-- SSDP-SCIENTIFIC-CHECKS q=F,R e=1,4 -->
+
 ## Output
 
 Conclude **HEALTHY**, **WATCH** or **ACTION REQUIRED**. For each material finding give affected subsystem, evidence/trend, authority implication, smallest justified corrective scope and expected risk/simplicity improvement; prefer one coherent repair for a shared cause over one workplan per symptom. When a finding materially updates a PEM family/notice or meets the admission threshold, name that closeout-learning consequence without treating it as accepted authority.

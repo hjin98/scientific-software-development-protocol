@@ -22,6 +22,8 @@ authority / governed claim
 
 **Concretization** remains D1-D4 semantic descent; do not use evidence realization as a synonym. PEM is the non-authoritative project-learning representation owned by [Project Engineering Memory](project-engineering-memory.md); evidence semantics remain owned here even when represented inside PEM.
 
+**Realized scientific record overlap.** A [realized scientific record](scientific-inspectability-and-initiative.md) (RSR) may retain observations. A result produced by an evidence realization is an observation whether or not it has been assessed. Other RSR items are execution records, not automatically observations. Observation existence stays realization-based and independent of assessment; retention in an RSR neither creates, assesses nor re-identifies an observation. A later evidence realization that uses retained records is governed here like any other realization.
+
 A contradictory observation at D4 does not identify the faulty owner. Consider D4 nonconformance, D3 inadequacy, D2 numerical inadequacy, D1 model/context inadequacy, conflicting authority, defective oracle/specification, inapplicable realization, or incorrect interpretation.
 
 ## Typed relationships
@@ -41,6 +43,8 @@ evidence specification/realization EXECUTION_DEPENDS_ON -> machinery/data/enviro
 evidence realization INSTANTIATES -> evidence specification
 observation GENERATED_BY -> evidence realization
 ```
+
+On `CHALLENGES`, record the finding's **inquiry status** as its own attribute: *exploratory* (found by searching data or variants) or *confirmatory* (a pre-specified test). Keep it separate from evidence strength, applicability and Challenge disposition. An exploratory observation may motivate a hypothesis or Challenge but does not independently confirm the hypothesis it generated. A single exploratory counterexample can still warrant Serious Challenge, and a confirmatory label establishes neither strength nor independence. Tension binding, retrieval and per-binding disposition are owned by [Scientific inspectability and epistemic initiative](scientific-inspectability-and-initiative.md).
 
 PEM may add typed non-authoritative relations such as `SUPERSEDES`, `SPLIT_FROM`, `MERGED_FROM`, `REPLACES`, `LED_TO`, `NARROWS`, `GENERALIZES`, `SUPPORTS_LEARNING_FROM`, and `CONFLICTS_WITH` for retrieval/impact closure. Those edges do not recursively warrant either endpoint: every substantive claim remains independently evidence-bound and every normative claim independently authority-bound. Current lineage must be acyclic and unambiguous.
 

@@ -42,6 +42,20 @@ State nearby excluded work where ambiguity is plausible.
 - Unaffected siblings/evidence worth identifying:
 - Any bounded dependency view used for exclusion, and whether its scope is complete:
 
+## 3a. Scientific inspectability (O1)
+
+For D1/D2/D3 authority of software producing scientific results; "None material, because …" is valid:
+
+- Material realized record (realized quantities, populations/regimes, trajectories, decisions, exclusions/failures, retention/destructive boundaries):
+- Intended reader and routine scientific questions:
+- Marked product inspectability surfaces, each within/beyond the requested deliverable ("answered through agent reports only" or "None" valid); beyond-deliverable items stay proposed until stakeholder/task-authority acceptance (by whom, where):
+
+## 3b. Revision tension record (D1/D2 revise, rename, split, merge or replace)
+
+- Predecessor identity or identities (owner/path plus heading/anchor/object ID, revision, claim/locator):
+- Tension search envelope: searched scopes including bound concretizations; unreachable locations:
+- Per tension: home, binding, revision-scoped applicability (applicable / inapplicable with reason / review-required), assessor stated as human or AI and which agent, and "proposed" until this revision's acceptance considers it. The tension's own status is unchanged. Carry these into the gate evidence:
+
 ## 4. Evidence and falsification
 
 - Reverse-semantic verification question:

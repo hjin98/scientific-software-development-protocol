@@ -1,0 +1,224 @@
+diff --git a/qualification/ssdp70/eval/adapters/omp.py b/qualification/ssdp70/eval/adapters/omp.py
+index 04701f6..59def74 100644
+--- a/qualification/ssdp70/eval/adapters/omp.py
++++ b/qualification/ssdp70/eval/adapters/omp.py
+@@ -3998,7 +3998,6 @@ def package_access_ledger(artifacts: dict[str, Any], profile: dict[str, Any] | N
+ 
+ def request_positions(observed, events, stdout, prompt):
+     """Verified request/assistant-turn pairing, including each retained retry's original position."""
+-    beginning = min((e["sequence"] for e in events), default=1)
+     groups, group_errors, retries = group_inference_requests(observed)
+     turns = provider_turns(observed)
+     transcript_problems, _ = transcript_errors(observed, prompt)
+@@ -4022,14 +4021,14 @@ def request_positions(observed, events, stdout, prompt):
+             verified = False
+         seqs = [e["sequence"] for e in events if e.get("kind") == "assistant_message"
+                 and (e.get("payload") or {}).get("assistant_turn") == index]
+-        positions.append(min(seqs) if seqs and expected else beginning)
++        positions.append(min(seqs) if seqs and expected else None)     # a text-only turn has no tool event: no position
+     rows = []
+     for k, group in enumerate(groups):
+         for pos in group:
+             entry = observed.requests[pos]
+             record = entry["record"]
+             rows.append({"request_index": entry["index"], "conversation_turn": k,
+-                         "position": positions[k] if verified else beginning, "pairing_verified": verified,
++                         "position": positions[k] if verified else None, "pairing_verified": verified,
+                          "retry_of": observed.requests[group[0]]["index"] if pos != group[0] else None,
+                          "t_ns": record.get("t_ns"), "monotonic_ns": (record.get("data") or {}).get("monotonic_ns"),
+                          "observer_sha256": record.get("hash"), "body": entry["body"]})
+diff --git a/qualification/ssdp70/eval/batch_assess70.py b/qualification/ssdp70/eval/batch_assess70.py
+index 73e3d6b..1771b00 100644
+--- a/qualification/ssdp70/eval/batch_assess70.py
++++ b/qualification/ssdp70/eval/batch_assess70.py
+@@ -548,16 +548,10 @@ def replacement_slots(manifest, runs):
+         count[case] = count.get(case,0)+1
+         if count[case]>2:
+             raise core70.ContractError("package-access replacement exceeds the per-case/per-T7-run cap of two")
+-        prior = [v for v in report["records"] if v["original"]==original and v["scored"]]
+-        if any(v["question"]==question for v in prior):
++        if any(v["original"]==original and v["scored"] for v in report["records"]):
+             raise core70.ContractError("a resolved replacement cannot be outcome-selected again")
+         record = {**request, "original_outcome":o.get("qualification_outcome"), "scored":False}
+         report["records"].append(record)
+-        if prior:
+-            # The slot already has a scored replacement for another question. Which run then scores each criterion is a
+-            # contract decision (review finding 4), so fail closed: disclose, do not score, keep the question required.
+-            record["reason"] = "slot already resolved by another replacement; scored-slot rule for a second question is undecided"
+-            continue
+         safe = (observation_adjudicated(o)
+                 and o.get("owner_floor_adjudication",{}).get("adjudicated") is True
+                 and o.get("owner_floor_state") != "FAIL"
+@@ -571,9 +565,21 @@ def replacement_slots(manifest, runs):
+         for name in ("profile_key_sha256","subject"):
+             if declarations[original].get(name) != declarations[replacement].get(name):
+                 raise core70.ContractError("replacement changed the frozen slot profile or subject")
+-        exact = (r.get("resource_observation") or {}).get("exact") is True if question=="bytes" else r.get("owner_floor_state") in ("PASS","FAIL")
++        # One slot, one scored run (D3 window/replacement clarification): a non-T7 replacement scores only if it is
++        # exact for every available question still open on the original. The owner floor is always available; the
++        # byte question only with a frozen bound. A T7 owner-only rerun answers the owner floor alone.
++        resolved = {"bytes": (r.get("resource_observation") or {}).get("exact") is True,
++                    "owner-floor": r.get("owner_floor_state") in ("PASS","FAIL")}
++        open_questions = next((v["questions"] for v in report["required"] if v["original"]==original), [])
++        if question == "t7-owner-floor":
++            needed = ["owner-floor"]
++        else:
++            needed = [q for q in open_questions if q == "owner-floor" or byte_available] or ["bytes" if question=="bytes" else "owner-floor"]
++        exact = all(resolved[q] for q in needed)
+         if not safe or not exact or (question=="bytes" and not byte_available):
+-            record["reason"] = "replacement unavailable, inexact, or original adjudication bars it"
++            record["reason"] = ("replacement does not resolve every available open question of the slot; the slot stays unresolved"
++                                if safe and not exact and any(resolved[q] for q in needed)
++                                else "replacement unavailable, inexact, or original adjudication bars it")
+             continue
+         record["scored"] = True
+         for required in report["required"]:
+diff --git a/qualification/ssdp70/eval/package_ledger.py b/qualification/ssdp70/eval/package_ledger.py
+index f55ab45..e543851 100644
+--- a/qualification/ssdp70/eval/package_ledger.py
++++ b/qualification/ssdp70/eval/package_ledger.py
+@@ -361,10 +361,17 @@ def candidate_window(lower, upper, requests, events, lost=False):
+         return {"start": start, "end": end, "timing_loss": True}
+     earlier = [r for r in requests if r["t_ns"] < lower]
+     later = [r for r in requests if r["t_ns"] > upper]
+-    lo = earlier[-1].get("position", start) if earlier else start
+-    hi = later[0].get("position", start) - 1 if later else end
+-    if hi < lo or not earlier:
+-        lo, hi = start, end     # conservative whole-trace window; a text-only final turn has no position (hi < lo)
++
++    def position(request):          # a request with no derivable, verified position (text-only turn, failed pairing) has None
++        value = request.get("position")
++        return value if isinstance(value, int) and not isinstance(value, bool) else None
++
++    # Lower side: an absent or unpositioned earlier request starts the window at the beginning of the trace.
++    lo = position(earlier[-1]) if earlier and position(earlier[-1]) is not None else start
++    # Upper side: an unpositioned later request bounds nothing, so the window runs to the end of the trace.
++    hi = position(later[0]) - 1 if later and position(later[0]) is not None else end
++    if hi < lo:
++        lo, hi = start, end         # an otherwise empty window is the whole trace (D3 window-end clarification)
+     return {"start": lo, "end": hi, "timing_loss": False}
+ 
+ 
+diff --git a/qualification/ssdp70/eval/test_activation_accounting.py b/qualification/ssdp70/eval/test_activation_accounting.py
+index e190f50..2cfc36e 100644
+--- a/qualification/ssdp70/eval/test_activation_accounting.py
++++ b/qualification/ssdp70/eval/test_activation_accounting.py
+@@ -403,12 +403,14 @@ class RealActivationPath(unittest.TestCase):
+         original=next(row for row in mapping if row['request_index']==retry['retry_of'])
+         self.assertEqual(retry['position'],original['position'])
+         self.assertTrue(retry['pairing_verified'])
++        self.assertIsInstance(original['position'],int)
++        self.assertIsNone(max(mapping,key=lambda row:row['conversation_turn'])['position'])      # text-only final turn: no position
+         observed=omp.Observed({p.name:p.read_text() for p in (out/'adapter-artifacts').iterdir()},core70.load_json(out/'profile-snapshot.json'))
+         broken=copy.deepcopy(observed)
+         broken.requests[-1]['body']['messages']=[]
+         positions=omp.request_positions(broken,events,(out/'trace.jsonl').read_text(),'Do the task.')
+         self.assertTrue(positions)
+-        self.assertTrue(all(not row['pairing_verified'] and row['position']==events[0]['sequence'] for row in positions))
++        self.assertTrue(all(not row['pairing_verified'] and row['position'] is None for row in positions))
+ 
+     def test_z_encoded_full_package_and_owner_only_cannot_admit_negative_or_exact_claims(self):
+         import base64,hashlib,io,tarfile
+diff --git a/qualification/ssdp70/eval/test_batch_cli.py b/qualification/ssdp70/eval/test_batch_cli.py
+index 80f2b02..e98e40a 100644
+--- a/qualification/ssdp70/eval/test_batch_cli.py
++++ b/qualification/ssdp70/eval/test_batch_cli.py
+@@ -221,20 +221,40 @@ class ReplacementBookkeeping(unittest.TestCase):
+             else:broken[path[0]]=value
+             self.assertFalse(batch_assess70.observation_adjudicated(broken),path)
+ 
+-    def test_second_replacement_for_another_question_is_disclosed_unscored_not_an_aborted_aggregation(self):
++    def add_replacement(self,mf,runs,rid,question,**record):
++        mf["runs"].append({**mf["runs"][1],"id":rid})
++        runs[rid]={**runs["replacement"],**record}
++        mf["package_access_replacements"].append({"original":"original","replacement":rid,"question":question})
++
++    def test_one_slot_one_scored_run_partial_replacement_is_disclosed_and_the_rerun_must_resolve_all(self):
+         mf,runs=self.setup_case()
+-        mf["runs"].append({**mf["runs"][1],"id":"replacement-2"})
+-        runs["replacement-2"]={**runs["replacement"]}
+-        runs["replacement"]["owner_floor_state"]="UNRESOLVED"       # byte-exact, owner floor still unresolved
+-        mf["package_access_replacements"].append({"original":"original","replacement":"replacement-2","question":"owner-floor"})
++        runs["replacement"]["owner_floor_state"]="UNRESOLVED"        # byte-exact, owner floor still open
++        self.add_replacement(mf,runs,"replacement-2","bytes",owner_floor_state="PASS")
+         slots,report=batch_assess70.replacement_slots(mf,runs)
+         first,second=report["records"]
+-        self.assertTrue(first["scored"]);self.assertFalse(second["scored"])
+-        self.assertIn("undecided",second["reason"])
+-        self.assertEqual(slots["original"],"replacement")
+-        self.assertTrue(any(v["original"]=="original" and "owner-floor" in v["questions"] for v in report["required"]))
+-        again=copy.deepcopy(mf);again["package_access_replacements"][1]["question"]="bytes"      # same question again is outcome selection
+-        with self.assertRaises(core70.ContractError):batch_assess70.replacement_slots(again,runs)
++        self.assertFalse(first["scored"]);self.assertIn("does not resolve every available open question",first["reason"])
++        self.assertTrue(second["scored"])
++        self.assertEqual(slots["original"],"replacement-2")
++        self.assertEqual(report["byte_slots"]["original"],"replacement-2");self.assertEqual(report["owner_slots"]["original"],"replacement-2")
++        self.assertEqual(report["required"],[])
++        self.assertEqual(report["per_arm"]["p70"]["replacements"],1)      # only the scored run counts as the replacement
++        self.add_replacement(mf,runs,"replacement-3","bytes",owner_floor_state="PASS")
++        with self.assertRaises(core70.ContractError):batch_assess70.replacement_slots(mf,runs)    # cap of two independent reruns
++
++    def test_a_resolved_slot_cannot_be_rerun_for_any_question(self):
++        for question in ("bytes","owner-floor"):
++            mf,runs=self.setup_case()
++            self.add_replacement(mf,runs,"replacement-2",question)
++            with self.assertRaises(core70.ContractError):batch_assess70.replacement_slots(mf,runs)
++
++    def test_without_a_byte_bound_the_owner_floor_alone_decides_scoring_and_bytes_stay_pending(self):
++        mf,runs=self.setup_case(bound=False)
++        mf["package_access_replacements"][0]["question"]="owner-floor"
++        runs["replacement"]["resource_observation"]={"exact":False}   # bytes not resolved, owner floor resolved
++        slots,report=batch_assess70.replacement_slots(mf,runs)
++        self.assertEqual(slots["original"],"replacement");self.assertEqual(report["owner_slots"]["original"],"replacement")
++        self.assertEqual(report["byte_slots"]["original"],"original")
++        self.assertTrue(any(v["original"]=="original" and v["questions"]==["bytes"] for v in report["required"]))
+ 
+     def test_v_missing_byte_bound_keeps_byte_question_pending_but_owner_has_no_campaign_cap(self):
+         mf,runs=self.setup_case(bound=False)
+diff --git a/qualification/ssdp70/eval/test_package_ledger.py b/qualification/ssdp70/eval/test_package_ledger.py
+index 7132928..3f34e81 100644
+--- a/qualification/ssdp70/eval/test_package_ledger.py
++++ b/qualification/ssdp70/eval/test_package_ledger.py
+@@ -604,16 +604,34 @@ class ReviewDiscriminators(PhaseAndDelivery):
+             self.assertIn(needs, core70.validate_claim_observability([], [claim]), claim)
+         self.assertNotIn(needs, core70.validate_claim_observability([], ["owner-read-absence"]))
+ 
+-    def test_s_empty_or_unpositioned_window_is_the_whole_trace_so_an_honest_text_final_turn_stays_explained(self):
+-        # A text-only final turn has no tool event, so its request position falls back to the trace start (1);
+-        # the window would end at 0. An empty window must not leave an honest whole-file read unexplained.
+-        requests = [{"t_ns": 1000, "monotonic_ns": 1000, "position": 1}, {"t_ns": 1500, "monotonic_ns": 1500, "position": 1}]
+-        events = [event(i, "nothing") for i in range(1, 6)]
+-        events[2] = event(3, TWIN)
++    def test_s_unpositioned_later_request_bounds_nothing_so_an_honest_text_final_turn_stays_explained(self):
++        # A text-only final turn has no tool event, hence no position (None): it bounds nothing from above.
++        requests = [{"t_ns": 1000, "monotonic_ns": 1000, "position": 2}, {"t_ns": 1500, "monotonic_ns": 1500, "position": None}]
++        for shown, exact in ((3, True), (1, False)):                       # whole file shown after / before the window start
++            events = [event(i, "nothing") for i in range(1, 6)]
++            events[shown - 1] = event(shown, TWIN)
++            r = self.account([(1200, "x/references/owner.md")], events, request_records=requests)
++            window = r["owner_open_windows"][0]["window"]
++            self.assertEqual((window["start"], window["end"]), (2, 5))
++            self.assertEqual(r["exact"], exact, (shown, r["reasons"]))
++
++    def test_s_unpositioned_or_absent_earlier_request_starts_at_the_trace_start_and_the_end_is_still_bounded(self):
++        for earlier in ([], [{"t_ns": 1000, "monotonic_ns": 1000, "position": None}]):
++            requests = earlier + [{"t_ns": 2500, "monotonic_ns": 2500, "position": 8}]
++            for seq, exact in ((5, True), (9, False)):
++                events = [event(i, "nothing") for i in range(1, 11)]
++                events[seq - 1] = event(seq, TWIN)
++                r = self.account([(1500, "x/references/owner.md")], events, request_records=requests)
++                window = r["owner_open_windows"][0]["window"]
++                self.assertEqual((window["start"], window["end"]), (1, 7), earlier)
++                self.assertEqual(r["exact"], exact, (seq, earlier))
++
++    def test_s_inconsistent_positions_make_an_empty_window_the_whole_trace(self):
++        requests = [{"t_ns": 1000, "monotonic_ns": 1000, "position": 8}, {"t_ns": 1500, "monotonic_ns": 1500, "position": 3}]
++        events = [event(i, "nothing") for i in range(1, 11)]
+         r = self.account([(1200, "x/references/owner.md")], events, request_records=requests)
+         window = r["owner_open_windows"][0]["window"]
+-        self.assertEqual((window["start"], window["end"]), (1, 5))
+-        self.assertTrue(r["exact"], r["reasons"])
++        self.assertEqual((window["start"], window["end"]), (1, 10))
+ 
+ class RealWatcherOverflow(unittest.TestCase):
+     @unittest.skipUnless(bwrap_usable(), "bwrap unusable")

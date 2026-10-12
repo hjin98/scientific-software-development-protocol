@@ -1,0 +1,79 @@
+{
+  "entries": [
+    {
+      "classification": "catalog",
+      "mapped_event_ids": [
+        "e000001"
+      ],
+      "native_index": 0,
+      "native_sha256": "59ea370a888809554885d04ac731c5bc9506be2f69b1805810f52c501e719166",
+      "oracle_relevant": true
+    },
+    {
+      "classification": "reviewed-non-oracle-system:thinking_tokens",
+      "mapped_event_ids": [],
+      "native_index": 1,
+      "native_sha256": "7cfeef36fa391019d77cfcf2a8e99f731e862ea338541bfad4a49d8e51c89462",
+      "oracle_relevant": false
+    },
+    {
+      "classification": "reviewed-non-oracle-system:thinking_tokens",
+      "mapped_event_ids": [],
+      "native_index": 2,
+      "native_sha256": "72d0f175842234c81a3702919fdba9c7441eed1fb4bc623220ad09ce79271fab",
+      "oracle_relevant": false
+    },
+    {
+      "classification": "assistant-message",
+      "mapped_event_ids": [],
+      "native_index": 3,
+      "native_sha256": "01c106311a901d8eba2e78701d92b0f109738d91870bf135e4c33a4ca3f2894a",
+      "oracle_relevant": false
+    },
+    {
+      "classification": "assistant-message",
+      "mapped_event_ids": [
+        "e000002"
+      ],
+      "native_index": 4,
+      "native_sha256": "f300c887d61243eb3c7ae34abf83af69de1d314cc2c9d9acd3730dc5dcd49dc6",
+      "oracle_relevant": true
+    },
+    {
+      "classification": "user-message",
+      "mapped_event_ids": [
+        "e000003"
+      ],
+      "native_index": 5,
+      "native_sha256": "2571ab2ccce68d9695c3a15eb9523659baa2e55a47d56aa64b9c5a6ed2252fed",
+      "oracle_relevant": true
+    },
+    {
+      "classification": "skill-injected-resource",
+      "mapped_event_ids": [],
+      "native_index": 6,
+      "native_sha256": "1a98593651413961f80e357c7a9d92605fa2d5aa0b36e2980afb0545bac6d67c",
+      "oracle_relevant": true
+    },
+    {
+      "classification": "assistant-message",
+      "mapped_event_ids": [],
+      "native_index": 7,
+      "native_sha256": "46cbdb8ede64c4be0cbdbc419a6020be78c363c6e86197edd0f31cee20e59c08",
+      "oracle_relevant": false
+    },
+    {
+      "classification": "terminal-result",
+      "mapped_event_ids": [
+        "e000004",
+        "e000005",
+        "e000006"
+      ],
+      "native_index": 8,
+      "native_sha256": "cfa103472d4381bb09024d01ec3137fcfa7cf26377a564a15201ccf4b2b596af",
+      "oracle_relevant": true
+    }
+  ],
+  "native_event_count": 9,
+  "schema": 1
+}

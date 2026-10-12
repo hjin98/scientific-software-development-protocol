@@ -1,0 +1,13 @@
+F
+======================================================================
+FAIL: test_repeated_launches_with_active_threads_have_an_outer_watchdog (test_omp_integration.ThirdPassObserverLaunchSafety)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/tmp/cr5/qualification/ssdp70/eval/test_omp_integration.py", line 1332, in test_repeated_launches_with_active_threads_have_an_outer_watchdog
+    self.assertEqual(worker.returncode, 0, f"stdout={stdout!r}; stderr={stderr!r}")
+AssertionError: 1 != 0 : stdout=b''; stderr=b'Traceback (most recent call last):\n  File "<string>", line 29, in <module>\n  File "/tmp/cr5/qualification/ssdp70/eval/omp_rig.py", line 156, in run\n    server, _state = stand_in_provider.serve(\n  File "/tmp/cr5/qualification/ssdp70/eval/stand_in_provider.py", line 148, in serve\n    server = _UnixHTTPServer(unix, handler) if unix else _TcpServer((host, port), handler)\n  File "/usr/lib/python3.10/socketserver.py", line 448, in __init__\n    self.socket = socket.socket(self.address_family,\n  File "/usr/lib/python3.10/socket.py", line 232, in __init__\n    _socket.socket.__init__(self, family, type, proto, fileno)\nPermissionError: [Errno 1] Operation not permitted\n'
+
+----------------------------------------------------------------------
+Ran 1 test in 0.174s
+
+FAILED (failures=1)

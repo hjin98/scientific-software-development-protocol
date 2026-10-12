@@ -1,0 +1,8 @@
+{
+  "after_run": {},
+  "before_launch": {},
+  "changed": [],
+  "control_paths": [],
+  "mutation_policy": "immutable",
+  "schema": 1
+}

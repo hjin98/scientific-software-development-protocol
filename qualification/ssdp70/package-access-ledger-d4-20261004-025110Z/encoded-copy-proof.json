@@ -1,0 +1,13 @@
+{
+  "out": "/tmp/s70h/ssdp70-omp-stagef/qualification/OMP-STANDIN-20261005T024550Z-c4b8781bfa57-d867b9e3a960/run",
+  "encoded_source_sha256": "92cd19849015187fc1f74a0060b2abdf851ea73ca8e74c2a75d84d98f3af3f04",
+  "reconstructed_owner_sha256": "370802006b9cd11f0d77f67d0891eb0c0d075878432b13546064377925027140",
+  "fixture_has_whole_owner_line": false,
+  "state": "COMPLETE_ADMISSIBLE",
+  "byte_exact": true,
+  "active_ssdp_bytes": 14454,
+  "owner_floor_exact": true,
+  "owner_read_observed": [],
+  "owner_open_windows": [],
+  "owner_floor_no_R2": "PASS"
+}

@@ -1,0 +1,18 @@
+[
+  {
+    "form": "echo-only",
+    "owner_floor_state": "PASS",
+    "exact": true,
+    "owner_opens": 0,
+    "positive": [],
+    "outer_integrity": "PASS"
+  },
+  {
+    "form": "package-scan",
+    "owner_floor_state": "UNRESOLVED",
+    "exact": false,
+    "owner_opens": 7,
+    "positive": [],
+    "outer_integrity": "PASS"
+  }
+]

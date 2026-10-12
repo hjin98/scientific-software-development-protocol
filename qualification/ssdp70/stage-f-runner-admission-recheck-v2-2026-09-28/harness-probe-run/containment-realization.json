@@ -1,0 +1,165 @@
+{
+  "realization": {
+    "ambient_credentials_inherited": false,
+    "control_files_outside_workspace": true,
+    "exact_native_tools": [
+      "Skill",
+      "Read",
+      "Glob",
+      "Grep",
+      "Edit",
+      "Write",
+      "Bash",
+      "mcp__ssdp70__issue_locations",
+      "mcp__ssdp70__issue_search",
+      "mcp__ssdp70__issue_show",
+      "mcp__ssdp70__issue_create",
+      "mcp__ssdp70__issue_comment",
+      "mcp__ssdp70__delegate"
+    ],
+    "filesystem_deny_roots": [
+      "/home",
+      "/home/samjin",
+      "/media",
+      "/mnt",
+      "/proc",
+      "/root",
+      "/run/user",
+      "/srv",
+      "<run-tmp>/harness-private",
+      "/var/tmp"
+    ],
+    "filesystem_read": [
+      "<run-tmp>/project"
+    ],
+    "filesystem_write": [
+      "<run-tmp>/project"
+    ],
+    "host_home_inherited": false,
+    "mcp_config": "<run-tmp>/harness-private/runtime-home/.ssdp70-control/mcp.json",
+    "mcp_config_sha256": "278e1746521f16416cedd0e4d977c4155dd2ced0272253fa6f2439fb7bed43d1",
+    "mcp_servers": [
+      {
+        "credential_environment": "env-i-empty-plus-minimal-path",
+        "entrypoint": "stub_tools/mediator.py",
+        "executable_file": "<run-tmp>/harness-private/mcp-server.py",
+        "executable_sha256": "e51f0641907215c9d5a0acb607f967363fc7491fa572a70cfb8701acd2308c2e",
+        "name": "ssdp70",
+        "server_id": "ssdp70-qualification-stdio-v1",
+        "tools": [
+          "mcp__ssdp70__issue_locations",
+          "mcp__ssdp70__issue_search",
+          "mcp__ssdp70__issue_show",
+          "mcp__ssdp70__issue_create",
+          "mcp__ssdp70__issue_comment",
+          "mcp__ssdp70__delegate"
+        ],
+        "transport": "stdio"
+      }
+    ],
+    "mediator_socket": null,
+    "native_network": "deny",
+    "private_root": "<run-tmp>/harness-private",
+    "project": "<run-tmp>/project",
+    "runtime_home": "<run-tmp>/harness-private/runtime-home",
+    "settings_file": "<run-tmp>/harness-private/runtime-home/.ssdp70-control/settings.json",
+    "settings_sha256": "3ee1c69b108a9eb02c7cb75c7cc52540ae41810a4ac13c5d99ab011d5f82203e"
+  },
+  "schema": 1,
+  "settings": {
+    "env": {
+      "CLAUDE_CODE_DISABLE_ARTIFACT": "1",
+      "CLAUDE_CODE_DISABLE_AUTO_MEMORY": "1",
+      "CLAUDE_CODE_DISABLE_BACKGROUND_TASKS": "1",
+      "CLAUDE_CODE_DISABLE_CRON": "1"
+    },
+    "sandbox": {
+      "allowUnsandboxedCommands": false,
+      "autoAllowBashIfSandboxed": true,
+      "credentials": {
+        "envVars": [
+          {
+            "mode": "deny",
+            "name": "CLAUDE_CODE_OAUTH_TOKEN"
+          },
+          {
+            "mode": "deny",
+            "name": "ANTHROPIC_API_KEY"
+          },
+          {
+            "mode": "deny",
+            "name": "ANTHROPIC_AUTH_TOKEN"
+          },
+          {
+            "mode": "deny",
+            "name": "AWS_ACCESS_KEY_ID"
+          },
+          {
+            "mode": "deny",
+            "name": "AWS_SECRET_ACCESS_KEY"
+          },
+          {
+            "mode": "deny",
+            "name": "AWS_SESSION_TOKEN"
+          },
+          {
+            "mode": "deny",
+            "name": "GITHUB_TOKEN"
+          },
+          {
+            "mode": "deny",
+            "name": "GH_TOKEN"
+          },
+          {
+            "mode": "deny",
+            "name": "SSH_AUTH_SOCK"
+          }
+        ]
+      },
+      "enableWeakerNestedSandbox": false,
+      "enabled": true,
+      "excludedCommands": [],
+      "failIfUnavailable": true,
+      "filesystem": {
+        "allowRead": [
+          "<run-tmp>/project"
+        ],
+        "allowWrite": [
+          "<run-tmp>/project"
+        ],
+        "denyRead": [
+          "/home",
+          "/home/samjin",
+          "/media",
+          "/mnt",
+          "/proc",
+          "/root",
+          "/run/user",
+          "/srv",
+          "<run-tmp>/harness-private",
+          "/var/tmp"
+        ],
+        "denyWrite": [
+          "/home",
+          "/home/samjin",
+          "/media",
+          "/mnt",
+          "/proc",
+          "/root",
+          "/run/user",
+          "/srv",
+          "<run-tmp>/harness-private",
+          "<run-tmp>/harness-private/runtime-home/.ssdp70-control/mcp.json",
+          "<run-tmp>/harness-private/runtime-home/.ssdp70-control/settings.json",
+          "/var/tmp"
+        ]
+      },
+      "network": {
+        "allowAllUnixSockets": false,
+        "allowLocalBinding": false,
+        "allowUnixSockets": [],
+        "allowedDomains": []
+      }
+    }
+  }
+}

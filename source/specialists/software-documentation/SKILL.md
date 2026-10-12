@@ -39,6 +39,8 @@ For human-facing material, identify the intended competent reader. Define newly 
 
 Edit the highest editable canonical source and regenerate descendants; do not hand-edit generated derivatives as independent truth. Preserve evidence specification/realization/observation/assessment distinctions and never present stale/rejected/unavailable-required evidence as current confirmation. When editing PEM representation, preserve accepted-base/overlay, semantic identity, applicability, evidence/counterevidence and authority-binding distinctions; documentation does not decide admission, maturity or promotion.
 
+<!-- SSDP-SCIENTIFIC-CHECKS q=F,R e=1,4,6 -->
+
 ## Completion
 
 Report material source chains changed, authority/drift conflicts and routing, substantial structural/editorial changes, build/render/link checks actually executed, generated outputs regenerated, PEM representation reconciled when applicable, and unresolved semantic contradictions.

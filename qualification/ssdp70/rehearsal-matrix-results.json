@@ -1,0 +1,727 @@
+[
+  {
+    "case_id": "F01-native-read",
+    "arm": "p70",
+    "description": "Native read of skill URL and path",
+    "elapsed_s": 36.54,
+    "evidence_state": "INADMISSIBLE",
+    "byte_question": {
+      "exact": true,
+      "active_bytes": 14454,
+      "verdict": "PASS-eligible",
+      "unexplained": [],
+      "route_iii_available": true
+    },
+    "owner_floor": {
+      "owner_floor_exact": true,
+      "state": "PASS",
+      "verdict": "PASS-eligible",
+      "owner_load_hit": false,
+      "owner_opens_count": 0,
+      "owner_read_observed_count": 0,
+      "owner_minor_exposure_count": 0
+    },
+    "bracket_widths_ns": {
+      "count": 0,
+      "min_ns": null,
+      "max_ns": null,
+      "median_ns": null
+    }
+  },
+  {
+    "case_id": "F02-absolute-cat",
+    "arm": "p70",
+    "description": "bash cat with absolute path",
+    "elapsed_s": 36.08,
+    "evidence_state": "COMPLETE_ADMISSIBLE",
+    "byte_question": {
+      "exact": true,
+      "active_bytes": 60412,
+      "verdict": "PASS-eligible",
+      "unexplained": [],
+      "route_iii_available": true
+    },
+    "owner_floor": {
+      "owner_floor_exact": true,
+      "state": "FAIL",
+      "verdict": "definite FAIL",
+      "owner_load_hit": false,
+      "owner_opens_count": 1,
+      "owner_read_observed_count": 1,
+      "owner_minor_exposure_count": 0
+    },
+    "bracket_widths_ns": {
+      "count": 0,
+      "min_ns": null,
+      "max_ns": null,
+      "median_ns": null
+    }
+  },
+  {
+    "case_id": "F03-cd-cat",
+    "arm": "p70",
+    "description": "cd <root> && cat references/x (route iii)",
+    "elapsed_s": 36.82,
+    "evidence_state": "COMPLETE_ADMISSIBLE",
+    "byte_question": {
+      "exact": true,
+      "active_bytes": 60412,
+      "verdict": "PASS-eligible",
+      "unexplained": [],
+      "route_iii_available": true
+    },
+    "owner_floor": {
+      "owner_floor_exact": true,
+      "state": "FAIL",
+      "verdict": "definite FAIL",
+      "owner_load_hit": false,
+      "owner_opens_count": 1,
+      "owner_read_observed_count": 1,
+      "owner_minor_exposure_count": 0
+    },
+    "bracket_widths_ns": {
+      "count": 0,
+      "min_ns": null,
+      "max_ns": null,
+      "median_ns": null
+    }
+  },
+  {
+    "case_id": "F04-glob-loop",
+    "arm": "p70",
+    "description": "loop and variable path (route iii)",
+    "elapsed_s": 36.68,
+    "evidence_state": "INADMISSIBLE",
+    "byte_question": {
+      "exact": false,
+      "active_bytes": null,
+      "verdict": "UNRESOLVED",
+      "unexplained": [],
+      "route_iii_available": true
+    },
+    "owner_floor": {
+      "owner_floor_exact": true,
+      "state": "FAIL",
+      "verdict": "definite FAIL",
+      "owner_load_hit": false,
+      "owner_opens_count": 1,
+      "owner_read_observed_count": 1,
+      "owner_minor_exposure_count": 0
+    },
+    "bracket_widths_ns": {
+      "count": 0,
+      "min_ns": null,
+      "max_ns": null,
+      "median_ns": null
+    }
+  },
+  {
+    "case_id": "F05a-head-literal-owner",
+    "arm": "p70",
+    "description": "head partial read through literal path (owner-class supply)",
+    "elapsed_s": 36.16,
+    "evidence_state": "INADMISSIBLE",
+    "byte_question": {
+      "exact": false,
+      "active_bytes": null,
+      "verdict": "UNRESOLVED",
+      "unexplained": [],
+      "route_iii_available": true
+    },
+    "owner_floor": {
+      "owner_floor_exact": true,
+      "state": "FAIL",
+      "verdict": "definite FAIL",
+      "owner_load_hit": false,
+      "owner_opens_count": 1,
+      "owner_read_observed_count": 1,
+      "owner_minor_exposure_count": 0
+    },
+    "bracket_widths_ns": {
+      "count": 0,
+      "min_ns": null,
+      "max_ns": null,
+      "median_ns": null
+    }
+  },
+  {
+    "case_id": "F05b-head-nonliteral-twin",
+    "arm": "p70",
+    "description": "head partial read of twin through non-literal path (unexplained)",
+    "elapsed_s": 36.15,
+    "evidence_state": "INADMISSIBLE",
+    "byte_question": {
+      "exact": false,
+      "active_bytes": null,
+      "verdict": "UNRESOLVED",
+      "unexplained": [],
+      "route_iii_available": true
+    },
+    "owner_floor": {
+      "owner_floor_exact": true,
+      "state": "PASS",
+      "verdict": "PASS-eligible",
+      "owner_load_hit": false,
+      "owner_opens_count": 0,
+      "owner_read_observed_count": 0,
+      "owner_minor_exposure_count": 0
+    },
+    "bracket_widths_ns": {
+      "count": 0,
+      "min_ns": null,
+      "max_ns": null,
+      "median_ns": null
+    }
+  },
+  {
+    "case_id": "F06-protocol-version-nonliteral",
+    "arm": "p70",
+    "description": "PROTOCOL_VERSION non-literal path (below floor, unexplained)",
+    "elapsed_s": 36.26,
+    "evidence_state": "INADMISSIBLE",
+    "byte_question": {
+      "exact": false,
+      "active_bytes": null,
+      "verdict": "UNRESOLVED",
+      "unexplained": [],
+      "route_iii_available": true
+    },
+    "owner_floor": {
+      "owner_floor_exact": true,
+      "state": "PASS",
+      "verdict": "PASS-eligible",
+      "owner_load_hit": false,
+      "owner_opens_count": 0,
+      "owner_read_observed_count": 0,
+      "owner_minor_exposure_count": 0
+    },
+    "bracket_widths_ns": {
+      "count": 0,
+      "min_ns": null,
+      "max_ns": null,
+      "median_ns": null
+    }
+  },
+  {
+    "case_id": "F07-package-scan",
+    "arm": "p70",
+    "description": "grep -rl package-wide scan (unexplained opens, UNRESOLVED floor)",
+    "elapsed_s": 36.63,
+    "evidence_state": "INADMISSIBLE",
+    "byte_question": {
+      "exact": false,
+      "active_bytes": null,
+      "verdict": "UNRESOLVED",
+      "unexplained": [],
+      "route_iii_available": true
+    },
+    "owner_floor": {
+      "owner_floor_exact": true,
+      "state": "UNRESOLVED",
+      "verdict": "UNRESOLVED",
+      "owner_load_hit": false,
+      "owner_opens_count": 7,
+      "owner_read_observed_count": 0,
+      "owner_minor_exposure_count": 0
+    },
+    "bracket_widths_ns": {
+      "count": 0,
+      "min_ns": null,
+      "max_ns": null,
+      "median_ns": null
+    }
+  },
+  {
+    "case_id": "F08-scan-then-r2-load",
+    "arm": "p70",
+    "description": "package scan followed by post-R2 owner load (owner-load hit)",
+    "elapsed_s": 36.61,
+    "evidence_state": "COMPLETE_ADMISSIBLE",
+    "byte_question": {
+      "exact": true,
+      "active_bytes": 60412,
+      "verdict": "PASS-eligible",
+      "unexplained": [],
+      "route_iii_available": true
+    },
+    "owner_floor": {
+      "owner_floor_exact": true,
+      "state": "UNRESOLVED",
+      "verdict": "owner-load hit",
+      "owner_load_hit": true,
+      "owner_opens_count": 2,
+      "owner_read_observed_count": 1,
+      "owner_minor_exposure_count": 0
+    },
+    "bracket_widths_ns": {
+      "count": 0,
+      "min_ns": null,
+      "max_ns": null,
+      "median_ns": null
+    }
+  },
+  {
+    "case_id": "F09-wc-grep-c",
+    "arm": "p70",
+    "description": "wc -l owner probe without content (UNRESOLVED floor)",
+    "elapsed_s": 36.19,
+    "evidence_state": "INADMISSIBLE",
+    "byte_question": {
+      "exact": false,
+      "active_bytes": null,
+      "verdict": "UNRESOLVED",
+      "unexplained": [],
+      "route_iii_available": true
+    },
+    "owner_floor": {
+      "owner_floor_exact": true,
+      "state": "UNRESOLVED",
+      "verdict": "UNRESOLVED",
+      "owner_load_hit": false,
+      "owner_opens_count": 1,
+      "owner_read_observed_count": 0,
+      "owner_minor_exposure_count": 0
+    },
+    "bracket_widths_ns": {
+      "count": 0,
+      "min_ns": null,
+      "max_ns": null,
+      "median_ns": null
+    }
+  },
+  {
+    "case_id": "F10-path-naming-ls-echo",
+    "arm": "p70",
+    "description": "echo owner path without opening (exact, 0 owner opens)",
+    "elapsed_s": 36.14,
+    "evidence_state": "INADMISSIBLE",
+    "byte_question": {
+      "exact": true,
+      "active_bytes": 14454,
+      "verdict": "PASS-eligible",
+      "unexplained": [],
+      "route_iii_available": true
+    },
+    "owner_floor": {
+      "owner_floor_exact": true,
+      "state": "PASS",
+      "verdict": "PASS-eligible",
+      "owner_load_hit": false,
+      "owner_opens_count": 0,
+      "owner_read_observed_count": 0,
+      "owner_minor_exposure_count": 0
+    },
+    "bracket_widths_ns": {
+      "count": 0,
+      "min_ns": null,
+      "max_ns": null,
+      "median_ns": null
+    }
+  },
+  {
+    "case_id": "F11-same-response-r2",
+    "arm": "p70",
+    "description": "owner load in same assistant response as R2 text (UNRESOLVED)",
+    "elapsed_s": 36.31,
+    "evidence_state": "INADMISSIBLE",
+    "byte_question": {
+      "exact": false,
+      "active_bytes": null,
+      "verdict": "UNRESOLVED",
+      "unexplained": [],
+      "route_iii_available": true
+    },
+    "owner_floor": {
+      "owner_floor_exact": true,
+      "state": "UNRESOLVED",
+      "verdict": "owner-load hit",
+      "owner_load_hit": true,
+      "owner_opens_count": 1,
+      "owner_read_observed_count": 1,
+      "owner_minor_exposure_count": 0
+    },
+    "bracket_widths_ns": {
+      "count": 0,
+      "min_ns": null,
+      "max_ns": null,
+      "median_ns": null
+    }
+  },
+  {
+    "case_id": "F12-keyword-grep-minor",
+    "arm": "p70",
+    "description": "single long owner line >=256 bytes (minor exposure, UNRESOLVED)",
+    "elapsed_s": 36.55,
+    "evidence_state": "INADMISSIBLE",
+    "byte_question": {
+      "exact": false,
+      "active_bytes": null,
+      "verdict": "UNRESOLVED",
+      "unexplained": [],
+      "route_iii_available": true
+    },
+    "owner_floor": {
+      "owner_floor_exact": true,
+      "state": "UNRESOLVED",
+      "verdict": "UNRESOLVED",
+      "owner_load_hit": false,
+      "owner_opens_count": 1,
+      "owner_read_observed_count": 0,
+      "owner_minor_exposure_count": 1
+    },
+    "bracket_widths_ns": {
+      "count": 0,
+      "min_ns": null,
+      "max_ns": null,
+      "median_ns": null
+    }
+  },
+  {
+    "case_id": "F13-pairing-mismatch",
+    "arm": "p70",
+    "description": "request-position pairing mismatch (route iii denied)",
+    "elapsed_s": 36.35,
+    "evidence_state": "INADMISSIBLE",
+    "byte_question": {
+      "exact": false,
+      "active_bytes": null,
+      "verdict": "UNRESOLVED",
+      "unexplained": [],
+      "route_iii_available": false
+    },
+    "owner_floor": {
+      "owner_floor_exact": true,
+      "state": "FAIL",
+      "verdict": "definite FAIL",
+      "owner_load_hit": false,
+      "owner_opens_count": 0,
+      "owner_read_observed_count": 1,
+      "owner_minor_exposure_count": 0
+    },
+    "bracket_widths_ns": {
+      "count": 0,
+      "min_ns": null,
+      "max_ns": null,
+      "median_ns": null
+    }
+  },
+  {
+    "case_id": "F14-error-status-cat-false",
+    "arm": "p70",
+    "description": "cat <owner>; false (error status owner-class supply FAIL)",
+    "elapsed_s": 36.07,
+    "evidence_state": "INADMISSIBLE",
+    "byte_question": {
+      "exact": false,
+      "active_bytes": null,
+      "verdict": "UNRESOLVED",
+      "unexplained": [],
+      "route_iii_available": true
+    },
+    "owner_floor": {
+      "owner_floor_exact": true,
+      "state": "FAIL",
+      "verdict": "definite FAIL",
+      "owner_load_hit": false,
+      "owner_opens_count": 1,
+      "owner_read_observed_count": 1,
+      "owner_minor_exposure_count": 0
+    },
+    "bracket_widths_ns": {
+      "count": 0,
+      "min_ns": null,
+      "max_ns": null,
+      "median_ns": null
+    }
+  },
+  {
+    "case_id": "F15-above-quantum-keyword-grep",
+    "arm": "p70",
+    "description": "grep -rn 'authority' package-wide multi-line (pre-R2 FAIL)",
+    "elapsed_s": 36.49,
+    "evidence_state": "INADMISSIBLE",
+    "byte_question": {
+      "exact": false,
+      "active_bytes": null,
+      "verdict": "UNRESOLVED",
+      "unexplained": [],
+      "route_iii_available": true
+    },
+    "owner_floor": {
+      "owner_floor_exact": true,
+      "state": "FAIL",
+      "verdict": "definite FAIL",
+      "owner_load_hit": false,
+      "owner_opens_count": 7,
+      "owner_read_observed_count": 1,
+      "owner_minor_exposure_count": 0
+    },
+    "bracket_widths_ns": {
+      "count": 0,
+      "min_ns": null,
+      "max_ns": null,
+      "median_ns": null
+    }
+  },
+  {
+    "case_id": "F16-request-retry",
+    "arm": "p70",
+    "description": "HTTP 500 retry sharing original position",
+    "elapsed_s": 37.45,
+    "evidence_state": "COMPLETE_ADMISSIBLE",
+    "byte_question": {
+      "exact": true,
+      "active_bytes": 60412,
+      "verdict": "PASS-eligible",
+      "unexplained": [],
+      "route_iii_available": true
+    },
+    "owner_floor": {
+      "owner_floor_exact": true,
+      "state": "FAIL",
+      "verdict": "definite FAIL",
+      "owner_load_hit": false,
+      "owner_opens_count": 1,
+      "owner_read_observed_count": 1,
+      "owner_minor_exposure_count": 0
+    },
+    "bracket_widths_ns": {
+      "count": 0,
+      "min_ns": null,
+      "max_ns": null,
+      "median_ns": null
+    }
+  },
+  {
+    "case_id": "F17-multi-turn-rescan",
+    "arm": "p70",
+    "description": "multi-turn session with package rescan",
+    "elapsed_s": 36.89,
+    "evidence_state": "INADMISSIBLE",
+    "byte_question": {
+      "exact": false,
+      "active_bytes": null,
+      "verdict": "UNRESOLVED",
+      "unexplained": [],
+      "route_iii_available": true
+    },
+    "owner_floor": {
+      "owner_floor_exact": true,
+      "state": "UNRESOLVED",
+      "verdict": "UNRESOLVED",
+      "owner_load_hit": false,
+      "owner_opens_count": 1,
+      "owner_read_observed_count": 0,
+      "owner_minor_exposure_count": 0
+    },
+    "bracket_widths_ns": {
+      "count": 0,
+      "min_ns": null,
+      "max_ns": null,
+      "median_ns": null
+    }
+  },
+  {
+    "case_id": "F18-timing-stress",
+    "arm": "p70",
+    "description": "timing loss / tight bracket bound",
+    "elapsed_s": 36.66,
+    "evidence_state": "INADMISSIBLE",
+    "byte_question": {
+      "exact": true,
+      "active_bytes": 60412,
+      "verdict": "PASS-eligible",
+      "unexplained": [],
+      "route_iii_available": true
+    },
+    "owner_floor": {
+      "owner_floor_exact": false,
+      "state": "FAIL",
+      "verdict": "definite FAIL",
+      "owner_load_hit": false,
+      "owner_opens_count": 1,
+      "owner_read_observed_count": 1,
+      "owner_minor_exposure_count": 0
+    },
+    "bracket_widths_ns": {
+      "count": 0,
+      "min_ns": null,
+      "max_ns": null,
+      "median_ns": null
+    }
+  },
+  {
+    "case_id": "F-p66-01-native-read",
+    "arm": "p66",
+    "description": "p66 comparator native read of root SKILL.md",
+    "elapsed_s": 13.9,
+    "evidence_state": "INADMISSIBLE",
+    "byte_question": {
+      "exact": false,
+      "active_bytes": null,
+      "verdict": "UNRESOLVED",
+      "unexplained": [],
+      "route_iii_available": true
+    },
+    "owner_floor": {
+      "owner_floor_exact": false,
+      "state": "UNRESOLVED",
+      "verdict": "UNRESOLVED",
+      "owner_load_hit": false,
+      "owner_opens_count": 0,
+      "owner_read_observed_count": 0,
+      "owner_minor_exposure_count": 0
+    },
+    "bracket_widths_ns": {
+      "count": 0,
+      "min_ns": null,
+      "max_ns": null,
+      "median_ns": null
+    }
+  },
+  {
+    "case_id": "F-p66-02-cd-cat-twin",
+    "arm": "p66",
+    "description": "p66 comparator cd && cat twin reference",
+    "elapsed_s": 13.89,
+    "evidence_state": "INADMISSIBLE",
+    "byte_question": {
+      "exact": false,
+      "active_bytes": null,
+      "verdict": "UNRESOLVED",
+      "unexplained": [],
+      "route_iii_available": true
+    },
+    "owner_floor": {
+      "owner_floor_exact": false,
+      "state": "UNRESOLVED",
+      "verdict": "UNRESOLVED",
+      "owner_load_hit": false,
+      "owner_opens_count": 0,
+      "owner_read_observed_count": 0,
+      "owner_minor_exposure_count": 0
+    },
+    "bracket_widths_ns": {
+      "count": 0,
+      "min_ns": null,
+      "max_ns": null,
+      "median_ns": null
+    }
+  },
+  {
+    "case_id": "F-p66-03-package-scan",
+    "arm": "p66",
+    "description": "p66 comparator grep -rl package scan (212 files opened)",
+    "elapsed_s": 14.52,
+    "evidence_state": "INADMISSIBLE",
+    "byte_question": {
+      "exact": false,
+      "active_bytes": null,
+      "verdict": "UNRESOLVED",
+      "unexplained": [],
+      "route_iii_available": true
+    },
+    "owner_floor": {
+      "owner_floor_exact": false,
+      "state": "UNRESOLVED",
+      "verdict": "UNRESOLVED",
+      "owner_load_hit": false,
+      "owner_opens_count": 0,
+      "owner_read_observed_count": 0,
+      "owner_minor_exposure_count": 0
+    },
+    "bracket_widths_ns": {
+      "count": 0,
+      "min_ns": null,
+      "max_ns": null,
+      "median_ns": null
+    }
+  },
+  {
+    "case_id": "F-p65-01-native-read",
+    "arm": "p65",
+    "description": "p65 comparator native read of root SKILL.md",
+    "elapsed_s": 14.44,
+    "evidence_state": "INADMISSIBLE",
+    "byte_question": {
+      "exact": false,
+      "active_bytes": null,
+      "verdict": "UNRESOLVED",
+      "unexplained": [],
+      "route_iii_available": true
+    },
+    "owner_floor": {
+      "owner_floor_exact": false,
+      "state": "UNRESOLVED",
+      "verdict": "UNRESOLVED",
+      "owner_load_hit": false,
+      "owner_opens_count": 0,
+      "owner_read_observed_count": 0,
+      "owner_minor_exposure_count": 0
+    },
+    "bracket_widths_ns": {
+      "count": 0,
+      "min_ns": null,
+      "max_ns": null,
+      "median_ns": null
+    }
+  },
+  {
+    "case_id": "F-p65-02-cd-cat-twin",
+    "arm": "p65",
+    "description": "p65 comparator cd && cat twin reference",
+    "elapsed_s": 14.42,
+    "evidence_state": "INADMISSIBLE",
+    "byte_question": {
+      "exact": false,
+      "active_bytes": null,
+      "verdict": "UNRESOLVED",
+      "unexplained": [],
+      "route_iii_available": true
+    },
+    "owner_floor": {
+      "owner_floor_exact": false,
+      "state": "UNRESOLVED",
+      "verdict": "UNRESOLVED",
+      "owner_load_hit": false,
+      "owner_opens_count": 0,
+      "owner_read_observed_count": 0,
+      "owner_minor_exposure_count": 0
+    },
+    "bracket_widths_ns": {
+      "count": 0,
+      "min_ns": null,
+      "max_ns": null,
+      "median_ns": null
+    }
+  },
+  {
+    "case_id": "F-p65-03-package-scan",
+    "arm": "p65",
+    "description": "p65 comparator grep -rl package scan (198 files opened)",
+    "elapsed_s": 14.45,
+    "evidence_state": "INADMISSIBLE",
+    "byte_question": {
+      "exact": false,
+      "active_bytes": null,
+      "verdict": "UNRESOLVED",
+      "unexplained": [],
+      "route_iii_available": true
+    },
+    "owner_floor": {
+      "owner_floor_exact": false,
+      "state": "UNRESOLVED",
+      "verdict": "UNRESOLVED",
+      "owner_load_hit": false,
+      "owner_opens_count": 0,
+      "owner_read_observed_count": 0,
+      "owner_minor_exposure_count": 0
+    },
+    "bracket_widths_ns": {
+      "count": 0,
+      "min_ns": null,
+      "max_ns": null,
+      "median_ns": null
+    }
+  }
+]

@@ -1,0 +1,17 @@
+test_canary_without_tools_and_burden_without_delegate_use_real_runtime (test_activation_accounting.RealActivationPath) ... FAIL
+
+======================================================================
+FAIL: test_canary_without_tools_and_burden_without_delegate_use_real_runtime (test_activation_accounting.RealActivationPath)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/samjin/agent-skills/scientific-software-development-protocol/qualification/ssdp70/eval/test_activation_accounting.py", line 143, in test_canary_without_tools_and_burden_without_delegate_use_real_runtime
+    self.assertEqual(summary['evidence_state'], 'COMPLETE_ADMISSIBLE', summary.get('evidence_state_reasons'))
+AssertionError: 'INADMISSIBLE' != 'COMPLETE_ADMISSIBLE'
+- INADMISSIBLE
++ COMPLETE_ADMISSIBLE
+ : ['no MCP initialize instructions were observed on the bridge', 'runtime system prompt has no reviewed skills catalog block', 'runtime catalog differs from the mounted protocol package: observed=[]', "runtime did not expose required classified native surface 'mcp_server:ssdp70'"]
+
+----------------------------------------------------------------------
+Ran 1 test in 12.820s
+
+FAILED (failures=1)

@@ -8,6 +8,118 @@ This is the **user-facing capability history** of the Scientific Software Develo
 
 Older README files accumulated release mappings, bootstrap attempts, and version-specific narrative because the README was doing too many jobs. That material is now intentionally separated: this changelog keeps the **capability story**, semantic history keeps the **why**, and release state keeps the **current exact identities**.
 
+## Protocol 7.x
+
+### 7.2.1 — smaller, trigger-tied Scientific checks (accepted with conditions)
+
+Protocol 7.2.1 is a patch to 7.2.0. It applies the stakeholder-ratified 7.2.1 amendment and rewrites the generated *Scientific checks* section to state the same duties more plainly. No other duty changes.
+
+- **Reader and routine-question proposal removed.** An agent's task report no longer has to propose an intended reader and routine scientific questions when nobody states them, either beside a retention/projection statement or when reporting an inquiry. Accepted D1-D3 authority still states them when authored or revised, so nothing changes for authority authors.
+- **Materiality basis whenever an inquiry is owed.** When work produces, runs or reviews realized results or prepares gate evidence, the agent states the materiality basis its inquiry used, whether it reports findings or a null, unless the stakeholder or accepted authority states it.
+- **Duties tied to their triggers.** The section states the change-only relief with the scope: each check applies only when its trigger occurs, and a change that realizes no results and finds nothing adds nothing. It is no longer framed as a list that every task must complete before finishing.
+- **Named items in place of numbered paragraphs.** The duties that keep a result's status recoverable (findings, the owed inquiry, variants, tensions, choices, retention, claims) are short named items. Separate rules (inquiry before irreversible loss, resource limits, persistence, persisting a tension, inaccessible homes, product changes, revising D1/D2 authority, authority content) are listed apart from them. The variant duty refers to the variant delegate question instead of repeating it.
+- **Size.** Compared with 7.2.0 the section is 143–157 B smaller on the role entrypoints, 77 B smaller on documentation and 11 B smaller on maintenance audit, which stays below its 7.1 reference.
+
+Accepted with conditions by stakeholder decision over a statistical **no-go**: one concurrent campaign with executor GLM-5.3-Flash and evaluator MiMo-V2.6-Flash compared 7.2.1 with 7.2.0 on the same 122 main-panel episodes under a frozen decision rule; target narration improvement (P1) was FRAGILE (10.4% vs 17.1% failing on resolved items, not robust to evaluator-unresolved items), retained duties (P2) and outcome items (P3) were robustly non-inferior, and one harm flag recorded a single failure of an unowed delegate-request item. This is stakeholder acceptance, not statistical qualification: language-only skills cannot guarantee full compliance, reliability depends on model capability, and users should activate skills explicitly and review consequential output (see the [README reliability warning](README.md#reliability-warning)); 7.2.0 remains NOT QUALIFIED history and is not separately accepted, the 7.x semantic line concludes here, and further improvement through deterministic machinery is stakeholder direction for a future SSDS 8.0+ design, not a plan or promise.
+
+Compatibility: The Orchestrator 7.2 profile declares 7.2.1 and resolves 7.2.1 and 7.2, with unchanged lifecycle and prompts. Exact 7.2.0 requests are rejected as incompatible.
+
+### 7.2.0 — reliable consumed surface and calibrated qualification
+
+Protocol 7.2 carries forward every Protocol 7.0 and 7.1 duty, drops only the requirement to load the owner, and changes how reliably an agent meets the duties. Development probing of 7.1 showed that agents obeyed text on the surface they read but did not reliably follow "read the owner when ..." instructions, and that the absolute qualification floors measured the model rather than the protocol. 7.2 removes the dependency on loading and recalibrates the measurement.
+
+Main improvements:
+
+- **One generated *Scientific checks* section per entrypoint.**
+  - It replaces the 7.1 owner routing bullet and the completion clause. It states when the duties apply, the delegate questions (each with its launched-work qualifier), the gap rule and the numbered duties, so an agent that reads only the entrypoint holds the whole obligation.
+  - It is built from one shared fragment, so the six entrypoints cannot drift, and every other 6.6 line is byte-identical apart from the generated governing-version line and the implementation skill's description (unchanged from 7.1).
+  - Element 3 now also carries the owner's inaccessible-home rule: a named coverage limit is enough by default, it qualifies the judgment when the project designates or evidently uses the home, and it blocks only on the three stated conditions.
+- **Owner reads are optional depth.** The scientific-inspectability owner remains the place for definitions and examples, most useful before consequential judgments over realized results, D1-D3 authority work or gate evidence. No duty depends on reading it.
+- **Calibrated qualification (contract v2).** Gates compare the candidate with accepted 6.6 on the same executor and fixtures, with margins derived from a cluster-aware model; Precondition C checks the instrument before any candidate result counts. Stated operating characteristics replace absolute floors.
+- **A consolidated qualification harness.** One scorer, the provider relay and containment kept, and the package-access ledger replaced by a conservative consumed-bytes count.
+
+Stated limits:
+
+- No qualification campaign has been run for 7.2. A PASS would claim only improvement over 6.6 on the gating executor and corpus, at the stated operating characteristics.
+- The consumed surface is longer than 6.6's, so the fixed-cost backstop (2.0× the accepted 6.5 median) leaves little headroom, and a run that also reads the owner would breach it.
+- Mandatory activation, typed delegation schemas and mechanical write enforcement need a deterministic control plane and stay with Protocol 8.
+- 7.1.0 is superseded and was not qualified.
+
+The Orchestrator gains a 7.2 profile with unchanged lifecycle, transition graph and profile schema; the 7.1 profile is frozen. Release status is deliberately not stated here; resolve it from `PROTOCOL-RELEASE-STATE.yaml`.
+
+### 7.1.0 — obligation salience, structured delegation requests, and stratified qualification
+
+Protocol 7.1 is a capability and presentation refinement to Protocol 7.0 following empirical evaluation under Stage 7. It preserves all Protocol 7.0 doctrine, owners, predicates, and thresholds while restructuring delegate requests for execution reliability and refining qualification precision.
+
+Main improvements:
+
+- **Structured delegate-request blocks:**
+  - Relocates delegate questions from scattered element prose to a dedicated, prominent block at the head of the Scientific completion clause on all four role entrypoints and two specialists (`software-documentation`, `software-maintenance-audit`).
+  - Formulates each owed question as an explicit, answerable-either-way prompt containing the launched-work qualifier inside the question itself: Findings (findings or none), Realized results (null envelope of examined and unexamined areas), Variants (variant-search disclosure including changes after seeing results, held-out reuse, lineage, and lower-bound/unknown-interval/claim-limit for unavailable history), and Tensions (gated to consequential judgments, asking for search scope, unreachable places, and found records with bindings and asserters).
+  - Establishes explicit gap rules without an artificial return condition: an unanswered question (including when a delegate returns nothing) or partial coverage is reported as a gap, never as none, a null, or no selection.
+- **Specialist entrypoint adaptation:**
+  - `software-documentation` and `software-maintenance-audit` carry only Findings and Realized results questions, matching their historical scope and omitting variant and tension duties. `repository-hygiene` remains unburdened.
+- **Timing and follow-up semantics:**
+  - Separates launch-time requests from post-return follow-ups. A follow-up re-invocation does not satisfy an initial request part, but answers supplied in frozen returns can remove owed gaps to the extent already addressed.
+- **Execution-surface realism:**
+  - Model-visible surfaces are neutralized of stand-in and qualification cues, ensuring delegator agents interact with tools without artificial status indicators, while adapter-pinned server and store identities are tracked as disclosed residuals.
+- **Undelivered-treatment stratification:**
+  - Ordinary-run episodes where no SSDP skill was selected are classified as undelivered-treatment outcomes rather than candidate doctrine failures, preventing unselected runs from masking the performance of delivered doctrine.
+
+### 7.0.0 — scientific inspectability, epistemic initiative, and the scientific feedback loop
+
+Protocol 7 is a major revision. It changes what counts as an adequately inspectable scientific computation, what agents must notice and report, and what human gates must receive. It keeps every accepted 6.6 capability unless a stakeholder decision explicitly superseded it. It adds no D5 layer and changes neither the pre-routing kernel nor the Orchestrator control semantics.
+
+Main improvements:
+
+- **One conditional owner** (`scientific-inspectability-and-initiative.md`) defines the realized scientific record, scientific inspectability, epistemic initiative, the three channels (task report, product inspection surface, governance gate), feedback persistence and the claim-integrity floor.
+- **An obligation-binding rule.**
+  - D1–D3 authors state the inspectability need and visibly mark product inspectability surfaces (O1).
+  - Agents perform a bounded inquiry and report findings and gaps (O2).
+  - Product retention, projection and exposure bind only through accepted authority, an explicit instruction or an existing contract (O3), never through the protocol alone. A marked surface beyond the requested deliverable binds only after stakeholder/task-authority acceptance.
+  - Without O1 content, an agent records its retention/projection choices as a visible proposed default.
+- **A claim-integrity floor** on every agent-authored assertion, including product content an agent writes. It covers selected or post hoc results, unqualified conclusions past known material limits, and interpretation laundered into fact. It never adds product capability.
+- **Inspectability doctrine.**
+  - Recoverability is not accessibility.
+  - Progressive disclosure, meaning preservation and a coverage envelope that includes the stratification axes examined.
+  - Faithful deterministic projection with lineage and source-to-rendered verification.
+  - Non-narrative and tool-independent routes.
+  - Retention and destructive boundaries with per-unit keys, and semantic stability across runs.
+  - Decision/trajectory/negative-result visibility, explicit insufficiency, interim visibility and privacy limits.
+- **Decision provenance and variant-search disclosure.** Effective choice, origin, actor and exact binding are separate facts. An instruction is not ratification. Disclosure covers result-contingent iteration, tool-launched searches, and delegated/resumed selection lineage with explicit unknown history.
+- **Bounded epistemic initiative.**
+  - An expectation record, and a too-good-to-be-true finding class.
+  - A fixed finding shape, and a null only with its search envelope.
+  - No manufactured novelty, and exploratory kept apart from confirmatory.
+  - Engineering-task and AI-consumer rules.
+  - An answerable-either-way delegate request, with unanswered parts reported as gaps.
+- **Data → authority feedback.**
+  - Tensions are recorded outside authority text and bound to every plausibly implicated authority and its subject.
+  - They are searched across revisions, former names and recorded predecessors before authority is relied on or revised, and reported with native asserters and per-binding status.
+  - D1/D2 revisions make revision-scoped applicability assessments that reach the revision gate.
+  - Inaccessible homes qualify or block only under stated conditions.
+- **Feedback persistence** goes to one existing authorized home when writable. Otherwise the report carries a non-writing fallback, and no universal discovery database exists.
+- **Consumed-surface placement.** Every D1–D4 entrypoint, plus the documentation and maintenance-audit specialists, carries the obligation predicate, the owner-load trigger and a completion clause with the minimum duties and their label meanings. The implementation skill's description now also selects scientific run/analysis, results-review, gate-evidence, copying/transcribing/relaying of scientific results or decisions, and delegated scientific work. The user guide now directs users to activate skills with deterministic runtime commands (`/skill`, `$skill`, `/skill:name`) rather than wording, after Stage 7 showed that ordinary-entry selection is unreliable.
+- **Local deltas.**
+  - D1/D2/D3 O1 content.
+  - Evidence: the realized-record/observation overlap, and exploratory/confirmatory inquiry status on `CHALLENGES`.
+  - Writing: recommendation/next-probe and authority-Challenge reporting roles.
+  - Workflow: bidirectional scientific Review, the Channel C gate-evidence contract and product-scope acceptance.
+  - Templates: O1, revision-record and variant-disclosure fields.
+  - Workflow prompts.
+  - A versioning note that the ratification package is decision-sufficient gate evidence.
+
+Stated limits:
+
+- The tension claim is a bounded disclosed search, not exhaustive retrieval.
+- Documentation and audit routes do not perform tension searches or ask delegates for variant/tension returns.
+- Delegate answers are reported as given.
+- Adoption is prospective, and version-bound 6.x work stays 6.x.
+
+The stakeholder superseded 6.6's per-route 1.10 burden cap with a 1,000 B-per-entrypoint compression target that is subordinate to lossless required elements. The retained fixed-cost backstop is 2.0 × the fresh paired accepted-6.5 median on the T1/T7/T8 reference routes.
+
+The Orchestrator gains a 7.0 profile with unchanged lifecycle, transition graph and profile schema. The 6.6 profile is frozen. The deterministic control plane remains Protocol 8. Release status is deliberately not stated here; resolve it from `PROTOCOL-RELEASE-STATE.yaml`.
+
 ## Protocol 6.x
 
 ### 6.6.0 — cognitive and operational optimization

@@ -1,0 +1,214 @@
+{
+  "adapter_command_identity": {
+    "allowed_tools": [
+      "Skill",
+      "Read",
+      "Glob",
+      "Grep",
+      "Edit",
+      "Write",
+      "Bash(python:*)",
+      "Bash(python3:*)",
+      "Bash(git:*)",
+      "Bash(ls:*)",
+      "Bash(cat:*)",
+      "Bash(grep:*)",
+      "Bash(find:*)",
+      "Bash(head:*)",
+      "Bash(tail:*)",
+      "Bash(wc:*)",
+      "Bash(sed -n:*)",
+      "mcp__ssdp70__issue_locations",
+      "mcp__ssdp70__issue_search",
+      "mcp__ssdp70__issue_show",
+      "mcp__ssdp70__issue_create",
+      "mcp__ssdp70__issue_comment",
+      "mcp__ssdp70__delegate"
+    ],
+    "disallowed_tools": [
+      "Agent",
+      "WebFetch",
+      "WebSearch",
+      "SendMessage",
+      "ListAgents",
+      "RemoteTrigger",
+      "CronCreate",
+      "CronDelete",
+      "CronList",
+      "ScheduleWakeup",
+      "PushNotification",
+      "EnterWorktree",
+      "ExitWorktree",
+      "Artifact",
+      "ArtifactComments",
+      "ArtifactData",
+      "Workflow",
+      "Monitor",
+      "DesignSync",
+      "ToolSearch",
+      "TaskStop",
+      "ReportFindings",
+      "ShareOnboardingGuide"
+    ],
+    "executable": "claude",
+    "mcp_config_file": "/tmp/ssdp70-yyurkrmk/harness-private/runtime-home/.ssdp70-control/mcp.json",
+    "mcp_config_sha256": "6adfddeee005a91ef192e1133876e83fe8f6b6d7157f61d49f0626ad5b7f9f24",
+    "mcp_server_executable_sha256": {
+      "ssdp70": "e51f0641907215c9d5a0acb607f967363fc7491fa572a70cfb8701acd2308c2e"
+    },
+    "mcp_servers": [
+      {
+        "entrypoint": "stub_tools/mediator.py",
+        "name": "ssdp70",
+        "server_id": "ssdp70-qualification-stdio-v1",
+        "tools": [
+          "mcp__ssdp70__issue_locations",
+          "mcp__ssdp70__issue_search",
+          "mcp__ssdp70__issue_show",
+          "mcp__ssdp70__issue_create",
+          "mcp__ssdp70__issue_comment",
+          "mcp__ssdp70__delegate"
+        ],
+        "transport": "stdio"
+      }
+    ],
+    "model": "claude-sonnet-5",
+    "permission_mode": "default",
+    "reasoning_configuration": {
+      "effort": "high",
+      "source": "checker-frozen-2026-09-28"
+    },
+    "restricted": false,
+    "setting_sources": "project",
+    "settings_file": "/tmp/ssdp70-yyurkrmk/harness-private/runtime-home/.ssdp70-control/settings.json",
+    "settings_file_sha256": "c6ba861b3aab8f450766690826cb5ec0aa913528b47321ba8f5459a1e1a7620a",
+    "strict_mcp_config": true,
+    "tools": [
+      "Skill",
+      "Read",
+      "Glob",
+      "Grep",
+      "Edit",
+      "Write",
+      "Bash",
+      "mcp__ssdp70__issue_locations",
+      "mcp__ssdp70__issue_search",
+      "mcp__ssdp70__issue_show",
+      "mcp__ssdp70__issue_create",
+      "mcp__ssdp70__issue_comment",
+      "mcp__ssdp70__delegate"
+    ]
+  },
+  "arm": "p70",
+  "catalog_isolation": {
+    "catalog": [
+      "numerical-algorithm-design",
+      "repository-hygiene",
+      "scientific-formulation",
+      "software-design",
+      "software-documentation",
+      "software-implementation",
+      "software-maintenance-audit",
+      "deep-research",
+      "design",
+      "design-sync",
+      "dataviz",
+      "update-config",
+      "verify",
+      "debug",
+      "code-review",
+      "simplify",
+      "batch",
+      "fewer-permission-prompts",
+      "doctor",
+      "claude-api",
+      "workflow-authoring",
+      "run",
+      "run-skill-generator"
+    ],
+    "ok": true,
+    "resolved_package_identity": {
+      "commit": "db94a2dfb7fef480f37227eab5c45256e89901b8",
+      "identity_source": "verified-install",
+      "package_sha256": "7ec95162d5888e1ace9030494f48cba80d24dc4b081c91b426dc7421d929bb8b",
+      "prepared_arms_manifest_sha256": "c3b99b8f55738c56156093a19f4159f3ab3e2c350644f4c1e3132ff8b5f15e92",
+      "requested_ref": "db94a2dfb7fef480f37227eab5c45256e89901b8",
+      "version": "7.0.0"
+    },
+    "ssdp_counts": {
+      "numerical-algorithm-design": 1,
+      "repository-hygiene": 1,
+      "scientific-formulation": 1,
+      "software-design": 1,
+      "software-documentation": 1,
+      "software-implementation": 1,
+      "software-maintenance-audit": 1
+    }
+  },
+  "episode": "CHK-PING",
+  "evidence_state": "MALFORMED_EVIDENCE_OR_ASSESSMENT",
+  "evidence_state_reasons": [
+    "synthetic skill body for 'software-implementation' does not match installed SKILL.md bytes",
+    "oracle-relevant native event 6 is unmapped"
+  ],
+  "execution_mode": "probe",
+  "execution_ok": true,
+  "execution_returncode": 0,
+  "missing_required_artifacts": [],
+  "missing_required_oracles": [],
+  "native_event_count": 9,
+  "normalization_completeness_errors": [
+    "oracle-relevant native event 6 is unmapped"
+  ],
+  "normalized_event_count": 6,
+  "normalized_event_errors": [
+    "synthetic skill body for 'software-implementation' does not match installed SKILL.md bytes"
+  ],
+  "owner_read_sequences": [],
+  "pair_order": [
+    "p70"
+  ],
+  "profile_claim_errors": [],
+  "profile_key_sha256": "698c680f1df289fc6e1b2f0a97f7fa231c7183dc5cab345a0559b0c9866836e2",
+  "qualification_outcome": "NOT_EVALUATED",
+  "run_identity_sha256": "4e2c5ae4d2b2309472bf275412ff7dbccc1e7e30452dd1fb76e43eeb2b55e794",
+  "runtime_observation": {
+    "mcp_servers": [
+      {
+        "name": "ssdp70",
+        "source": "dynamic",
+        "status": "connected"
+      }
+    ],
+    "memory_paths": {},
+    "messaging_socket_path": "/tmp/ssdp70-yyurkrmk/project/.qualification-tmp/cc-socks/145139.sock",
+    "model": "claude-sonnet-5",
+    "native_capabilities": [
+      "interrupt_receipt_v1",
+      "interrupt_cancel_queued_v1",
+      "msg_lifecycle_v1",
+      "mcp_read_resource_v1",
+      "mcp_tool_ui_meta_v1"
+    ],
+    "permission_mode": "default",
+    "runtime_version": "2.1.284",
+    "tools": [
+      "Bash",
+      "Edit",
+      "Glob",
+      "Grep",
+      "Read",
+      "Skill",
+      "Write",
+      "mcp__ssdp70__delegate",
+      "mcp__ssdp70__issue_comment",
+      "mcp__ssdp70__issue_create",
+      "mcp__ssdp70__issue_locations",
+      "mcp__ssdp70__issue_search",
+      "mcp__ssdp70__issue_show"
+    ]
+  },
+  "schema": 2,
+  "subject_commit": "db94a2dfb7fef480f37227eab5c45256e89901b8",
+  "wall_s": 4.621
+}

@@ -1,0 +1,25 @@
+{
+ "base_head": "5a6e29bfb1dd353e12f962ce456445c4e29c1551",
+ "base_tree": "25ae1e14d1832e094a5d812c186e130f1d32f41a",
+ "delta_patch_sha256": "3aced0a93b29344dce22a1c4f043896749cbf48b895aef8468307483322a6f11",
+ "code_files": [
+  "8768f5f9aaf15188a4dd0843cdfa3ee7deee60091a269580b3b54b66c2425020  qualification/ssdp70/eval/adapters/omp.py",
+  "a1a92fe87be68576f2ffa64d8ed11f47ff400dc079cf3a31694c24b40105694e  qualification/ssdp70/eval/batch_assess70.py",
+  "67e4fdf4479f42a5bee63882f3bcb21de8991b844e8bb1741aa99c6ff707c8e4  qualification/ssdp70/eval/core70.py",
+  "c2b552dc3bea33a939c267c688e56abc714468d4b64210b862f6bf78e41e03bc  qualification/ssdp70/eval/harness70.py",
+  "6f0b85f423cc42f8e0488d79b9686b050090fdcbfdf8193a3696e8014a8c546e  qualification/ssdp70/eval/package_ledger.py",
+  "d9009747a50d724e01ac233400f74a9312b3854166f0b4f88f4c08e93d49df0d  qualification/ssdp70/eval/package_premise.py",
+  "c758810452c2a782cb25d364868c2445a24cf0794a170ec81a6a3fffa5416bdd  qualification/ssdp70/eval/test_batch_cli.py",
+  "2b2b7cfe7b97f65a9c6dd5dfdeeb5b6a94529fb634ba82ed4262eb15a4d04d7a  qualification/ssdp70/eval/test_package_ledger.py",
+  "7ed8821f09d00ae6f7665c7bc129011959379afaef73f0707c91e12b8abaaa80  qualification/ssdp70/eval/test_package_premise.py"
+ ],
+ "omp_sha256": "6054460b29e9bad5eba78336f291e1979c2fa0a5cd96fc2d92afd666cc681d26",
+ "host": "AMD Ryzen 9 5950X, 16 cores / 32 threads; OMP_NUM_THREADS=1 makes nproc print 1",
+ "results": {
+  "test_activation_accounting x3 parallel(16)": "24/24 each",
+  "test_omp_integration parallel(16)": "54/54",
+  "eval_nonruntime_set": "324 OK",
+  "root": "407 OK, 3 skipped",
+  "mutants_killed": "44 of 46 fast suites; M44 killed by real-OMP test; M4 deliberate survivor"
+ }
+}

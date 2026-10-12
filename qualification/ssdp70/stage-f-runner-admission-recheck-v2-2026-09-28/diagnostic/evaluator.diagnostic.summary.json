@@ -1,0 +1,28 @@
+{
+  "init_apiKeySource": "none",
+  "init_capabilities": [
+    "interrupt_receipt_v1",
+    "interrupt_cancel_queued_v1",
+    "msg_lifecycle_v1",
+    "mcp_read_resource_v1",
+    "mcp_tool_ui_meta_v1"
+  ],
+  "init_mcp_servers": [],
+  "init_memory_paths": null,
+  "init_messaging_socket_path": true,
+  "init_model": "claude-sonnet-5",
+  "init_permissionMode": "default",
+  "init_present": true,
+  "init_skills_count": 16,
+  "init_tools": [
+    "Glob",
+    "Grep",
+    "Read"
+  ],
+  "init_version": "2.1.284",
+  "returncode": 1,
+  "role": "evaluator",
+  "runtime_observation_errors": [
+    "runtime did not expose required classified native surface 'auto_memory_write'"
+  ]
+}

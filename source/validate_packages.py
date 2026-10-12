@@ -256,6 +256,40 @@ def expected_entry_contract(files: dict[str, bytes]) -> bytes | None:
     )
 
 
+CHECKS_MARKER = b"<!-- SSDP-SCIENTIFIC-CHECKS"
+CHECKS_MARKER_RE = re.compile(rb"<!-- SSDP-SCIENTIFIC-CHECKS q=([A-Z](?:,[A-Z])*) e=([0-9](?:,[0-9])*) -->")
+CHECKS_FRAGMENT = SOURCE / "shared" / "fragments" / "scientific-checks.md"
+
+
+def expected_checks_block(canonical_skill: bytes) -> bytes | None:
+    """Re-derive the Scientific checks block a canonical entrypoint's marker selects (independent of the build).
+
+    Returns None for an entrypoint without a marker. A line tagged `{{q=..}}` or `{{e=..}}` is kept when it
+    shares a value with the marker's selection; `{{q=V:text}}` / `{{!q=V:text}}` inline text is kept when its
+    values do (do not) intersect the selected questions. Anything unresolved is an error (SystemExit-free: the
+    caller reports it through a None/unequal comparison)."""
+    if CHECKS_MARKER not in canonical_skill:
+        return None
+    marker = CHECKS_MARKER_RE.search(canonical_skill)
+    if marker is None or canonical_skill.count(CHECKS_MARKER) != 1 or not CHECKS_FRAGMENT.is_file():
+        return b"<!-- unresolvable Scientific checks marker -->"
+    chosen = {"q": set(marker.group(1).decode().split(",")), "e": set(marker.group(2).decode().split(","))}
+    kept: list[bytes] = []
+    for line in CHECKS_FRAGMENT.read_bytes().rstrip(b"\n").split(b"\n"):
+        head = re.match(rb"\{\{([qe])=([A-Za-z0-9,]+)\}\} ", line)
+        if head:
+            if not set(head.group(2).decode().split(",")) & chosen[head.group(1).decode()]:
+                continue
+            line = line[head.end():]
+        line = re.sub(
+            rb"\{\{(!?)q=([A-Za-z0-9,]+):(.*?)\}\}",
+            lambda m: m.group(3) if bool(set(m.group(2).decode().split(",")) & chosen["q"]) == (m.group(1) == b"") else b"",
+            line,
+        )
+        kept.append(line)
+    return b"\n".join(kept)
+
+
 def expected_canonical_bytes(rel: str, source_root: Path) -> bytes | None:
     if rel == "SKILL.md":
         path = source_root / "SKILL.md"
@@ -288,6 +322,9 @@ def validate_core_bundle(files: dict[str, bytes], skill_name: str, kind: str, so
     errors.extend(f"SKILL.md: {error}" for error in fm_errors)
 
     canonical_skill = expected_canonical_bytes("SKILL.md", source_root)
+    checks = expected_checks_block(canonical_skill) if canonical_skill is not None else None
+    if checks is not None:
+        canonical_skill = CHECKS_MARKER_RE.sub(lambda _: checks, canonical_skill, count=1)
     entry = expected_entry_contract(files)
     if canonical_skill is None or canonical_skill.count(ENTRY_PLACEHOLDER) != 1:
         errors.append("canonical SKILL.md lacks exactly one entry-contract placeholder")
@@ -296,6 +333,8 @@ def validate_core_bundle(files: dict[str, bytes], skill_name: str, kind: str, so
     elif files["SKILL.md"] != canonical_skill.replace(ENTRY_PLACEHOLDER, entry.replace(
             b"REPLACE_WITH_SKILL_PROTOCOL_VERSION", PROTOCOL_VERSION.encode("utf-8"))):
         errors.append("SKILL.md differs from canonical source plus its generated entry contract")
+    if CHECKS_MARKER in files["SKILL.md"] or b"{{" in files["SKILL.md"]:
+        errors.append("SKILL.md still contains an unexpanded Scientific checks marker or tag")
 
     try:
         packaged_version = files["PROTOCOL_VERSION"].decode("utf-8").strip()

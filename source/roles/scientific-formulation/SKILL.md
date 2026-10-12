@@ -36,6 +36,8 @@ For a material D1 authority mutation use the [change plan](templates/abstraction
 
 Stale results neither confirm nor refute. Important/high-risk claims use independent evidence routes when they materially reduce common-mode risk. Every material D1 Review includes the bounded Challenge Pass: if accepted D1 may be materially false, contradictory, ambiguous, inadequate or impossible to concretize, raise **SERIOUS CHALLENGE** before ordinary findings and route human adjudication. Literature or implementation output is evidence, not authority to silently rewrite accepted formulation; genuinely reconsider a sound rebuttal.
 
+<!-- SSDP-SCIENTIFIC-CHECKS q=F,R,V,T e=1,2,3,4,5,6,7 -->
+
 ## Completion
 
 Report accepted/proposed/challenged D1 authority, governing invariants and external constraints, uncertainty/adequacy route, required human decision state, evidence/applicability, D1->D2 handoff, affected descendants/documentation/dependencies/history and unresolved blockers/Challenge. Create no extra process artifacts when current authority and native evidence already carry the semantics.

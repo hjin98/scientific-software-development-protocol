@@ -1,0 +1,15 @@
+F
+======================================================================
+FAIL: test_c_tampered_or_missing_derived_event_fails_recomputation_on_a_real_run (test_activation_accounting.RealActivationPath)
+Independent-review B-2 (M44): the honest run recomputes to [], and every forgery of the derived record is refused.
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/tmp/claude-1000/-home-samjin-agent-skills-scientific-software-development-protocol/2d2d6014-06c8-4e83-8f5c-27bd2aca76d0/scratchpad/fin-M44/qualification/ssdp70/eval/test_activation_accounting.py", line 518, in test_c_tampered_or_missing_derived_event_fails_recomputation_on_a_real_run
+    self.assertTrue(any('differs from deterministic recomputation' in e for e in errors),(name,errors))
+AssertionError: False is not true : ('owner_read_observed', [])
+
+----------------------------------------------------------------------
+Ran 1 test in 38.267s
+
+FAILED (failures=1)
+M44 exit 1

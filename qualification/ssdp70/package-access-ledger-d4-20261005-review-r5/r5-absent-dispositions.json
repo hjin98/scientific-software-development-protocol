@@ -1,0 +1,30 @@
+[
+  {
+    "route": "T1",
+    "critical_failures": {
+      "p70": 1
+    },
+    "critical_unresolved": {
+      "p70": 1
+    },
+    "dispositions": {
+      "pass": 8,
+      "fail": 1,
+      "unresolved": 1
+    }
+  },
+  {
+    "route": "T7",
+    "critical_failures": {
+      "p70": 1
+    },
+    "critical_unresolved": {
+      "p70": 1
+    },
+    "dispositions": {
+      "pass": 8,
+      "fail": 1,
+      "unresolved": 1
+    }
+  }
+]

@@ -1,0 +1,25 @@
+{
+  "evaluator": {
+    "capability_manifest_sha256": "a138808f4ec3970a06a4480e08eb969f3bec7ded4352e8939e8a8deb41063ca3",
+    "document_sha256": "9e8ddb73de0378273c0f99cd6bfa561e0696bfb19fac82efea475fd753a824f6",
+    "profile_id": "claude-code-2.1.284-sonnet5-high-local-samjin-evaluator-v3",
+    "profile_key_sha256": "5032d13abe314fdd446a1171e0091e2fa5c95faad30a095f5a0fd42f5559c5ff"
+  },
+  "executor": {
+    "capability_manifest_sha256": "048c00f6e18af92641cd934d015afc706c070c5699604491f9158944da2cd9cb",
+    "document_sha256": "6f9529cef38e8a3b4cc487b36dcc94b1408958d09bf4e3b230cb05316a44c264",
+    "profile_id": "claude-code-2.1.284-sonnet5-high-local-samjin-executor-v3",
+    "profile_key_sha256": "698c680f1df289fc6e1b2f0a97f7fa231c7183dc5cab345a0559b0c9866836e2"
+  },
+  "files": {
+    "adapters/claude.py": "d9646a8e46536d5f458b03fd6ce23b45ac331e021a56a41c26fbb7fa3bb8654d",
+    "assess70.py": "290cd862f0431ae79ae15bb93186fefbb6de7072c1cb83d68524d7fef86d30c6",
+    "capabilities/claude-evaluator-readonly.json": "3459789787cd1e18ffb79627e902b589dd7ab959b6003c546a067a0167fa05a9",
+    "capabilities/claude-headless.json": "81611be8783d060d386ce1c7a1e0f8ae3e9f2077ef80679f9cd5497f5ad17ef0",
+    "core70.py": "4d869aeede2e08ce1d7f80fec0edde8c8eb407d1346a35a39dfd1f2010dd9d89",
+    "harness70.py": "14882bad4c26453867f227edfba5e252b1c412b135a86c17073d4fc1d09ac188",
+    "profiles/claude-evaluator-readonly.template.json": "471f2a349029dc4357ac97d0fb416eb3f89eea52fb8ac2e8e542dfca6d611a83",
+    "profiles/claude-headless.template.json": "48805c400ff3358159ccf89fdd0de7227d0202bd2bd95b69160259341ec919f0",
+    "stub_tools/mediator.py": "e51f0641907215c9d5a0acb607f967363fc7491fa572a70cfb8701acd2308c2e"
+  }
+}

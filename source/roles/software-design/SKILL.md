@@ -44,6 +44,8 @@ Independent D4 Review reconstructs parent semantics, D3/workplan authority, actu
 
 Coherent D3, D4 violates it -> D4 blocker; D3 contradictory/ambiguous/inadequate/unrealizable -> SERIOUS CHALLENGE to D3; upstream D2/D1 may be wrong -> SERIOUS CHALLENGE routed upstream. Verification is a deeper risk-triggered falsification mode; Stabilization is non-mutating and asks whether the concretized architecture remains the minimum justified system.
 
+<!-- SSDP-SCIENTIFIC-CHECKS q=F,R,V,T e=1,2,3,4,6,7 -->
+
 ## Completion
 
 Design: report governing parents/constraints, accepted/proposed D3 state, cycle decisions, delegated D4 space, non-goals, affected surface, acceptance boundaries, dependency/history obligations and reopen/simplification triggers. Review: any Serious Challenge first, then blockers by earliest owner, executed/reused/missing evidence with applicability, impact-closure state and Pass/No-Pass without manufacturing closure.

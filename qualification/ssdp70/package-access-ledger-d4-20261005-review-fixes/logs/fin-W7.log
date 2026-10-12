@@ -1,0 +1,14 @@
+F
+======================================================================
+FAIL: test_r_x_request_retry_shares_original_position_and_mismatch_falls_back (test_activation_accounting.RealActivationPath)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/tmp/claude-1000/-home-samjin-agent-skills-scientific-software-development-protocol/2d2d6014-06c8-4e83-8f5c-27bd2aca76d0/scratchpad/fin-W7/qualification/ssdp70/eval/test_activation_accounting.py", line 413, in test_r_x_request_retry_shares_original_position_and_mismatch_falls_back
+    self.assertTrue(all(not row['pairing_verified'] and row['position'] is None for row in positions))
+AssertionError: False is not true
+
+----------------------------------------------------------------------
+Ran 1 test in 39.735s
+
+FAILED (failures=1)
+W7 exit 1

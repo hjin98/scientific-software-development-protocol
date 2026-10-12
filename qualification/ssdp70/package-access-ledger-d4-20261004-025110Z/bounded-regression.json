@@ -1,0 +1,17 @@
+{
+  "command": [
+    "python3",
+    "-m",
+    "unittest",
+    "test_package_ledger",
+    "test_batch_cli",
+    "test_harness_integration"
+  ],
+  "cwd": "/home/samjin/agent-skills/scientific-software-development-protocol/qualification/ssdp70/eval",
+  "start_realtime_ns": 1791168760840670578,
+  "end_realtime_ns": 1791168761844980368,
+  "exit_code": 0,
+  "log_sha256": "bb0a951d45cc7fb2f9bf06c518cc510dcabed8fcb376e275efb4a8260af9c83b",
+  "tree_binding": "execution-tree-binding.json",
+  "purpose": "bounded draft regression, NOT case (a)-(z) acceptance"
+}

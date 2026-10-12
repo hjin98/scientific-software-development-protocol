@@ -1,0 +1,52 @@
+[
+  {
+    "id": "protocol-7.0-stage7-omp-runner-admission-2026-10-01-to-03",
+    "candidate": "7.0.0",
+    "purpose": "runner/profile admission on synthetic non-custody corpora (not a qualification campaign)",
+    "records": [
+      "qualification/ssdp70/STAGE-7-OMP-EXACT-PROFILE-CAMPAIGN-RESULT-2026-10-01.md",
+      "qualification/ssdp70/STAGE-7-OMP-EXACT-PROFILE-CAMPAIGN-RESULT-2026-10-02.md",
+      "qualification/ssdp70/STAGE-7-OMP-EXACT-PROFILE-CAMPAIGN-RESULT-2026-10-03.md"
+    ],
+    "outcome": "admission campaign; custody_denial UNRESOLVED (stakeholder Option 1, claim-scoped)"
+  },
+  {
+    "id": "protocol-7.0-stage7-semantic-campaign-2026-10-04",
+    "candidate": "7.0.0",
+    "purpose": "qualification-intended semantic campaign, ordinary entry only",
+    "runs": 244,
+    "realization": "~/ssdp70-omp-stagef/admission/OMP-STAGE7-20261004T002409Z-d4572470db98-staging-repair-411510ed96c0/semantic-runs/20261004T050108Z",
+    "records": [
+      "qualification/ssdp70/STAKEHOLDER-DECISION-2026-10-04-PROTOCOL-7.0-STAGE7-OPTION1-CLAIM-SCOPED-ADMISSION.md",
+      "qualification/ssdp70/STAGE-7-M07-DELEGATE-REQUEST-AND-TREATMENT-DELIVERY-DIAGNOSIS-2026-10-04.md",
+      "qualification/ssdp70/STAKEHOLDER-DECISION-2026-10-04-PROTOCOL-7.0-NON-QUALIFICATION-CLOSEOUT.md"
+    ],
+    "outcome": "NON-QUALIFIED (Option A closeout); 211 of 244 runs selected no SSDP root"
+  },
+  {
+    "id": "protocol-7.0-and-7.1-development-probes-2026-10-04-to-05",
+    "candidate": "7.0.0 / 7.1.0",
+    "purpose": "development (doctrine-loaded, checklist, runtime-command, stronger-executor, deterministic-activation probes; package-access rehearsal; Gate C.2/C.3)",
+    "records": [
+      "qualification/ssdp70/STAGE-7-M07-DOCTRINE-LOADED-PROBE-RESULT-2026-10-04.md",
+      "qualification/ssdp70/STAGE-7-M07-CHECKLIST-PROBE-RESULT-2026-10-04.md",
+      "qualification/ssdp70/STAGE-7-RUNTIME-COMMAND-ACTIVATION-PROBE-RESULT-2026-10-04.md",
+      "qualification/ssdp70/STAGE-7-SELECTION-STRONGER-EXECUTOR-PROBE-RESULT-2026-10-04.md",
+      "qualification/ssdp70/REHEARSAL-REPORT-2026-10-05.md",
+      "qualification/ssdp70/GATE-C2-C3-LIVE-GATES-RESULT-2026-10-05.md"
+    ],
+    "outcome": "development data only; Gate C.3 delegate-request uptake 50/50 under deterministic delivery"
+  },
+  {
+    "id": "protocol-7.1-development-matrix-2026-10-06",
+    "candidate": "7.1.0",
+    "purpose": "development (purpose=development, execution_mode=probe, ordinary entry, disclosed 7.0 corpus); first reported as a qualification campaign, withdrawn",
+    "runs": 300,
+    "realization": "~/ssdp70-omp-stagef/probes/PROTOCOL-7.1-CAMPAIGN-CONSOLIDATED/runs (plus PROTOCOL-7.1-CAMPAIGN-20261006/runs/EP-061-p66-r0.failed-timeout, EP061-RERUN, SMOKE-20261006, CAMPAIGN-PROBES-20261006)",
+    "records": [
+      "qualification/ssdp70/PROTOCOL-7.1-DEVELOPMENT-MATRIX-2026-10-06-RECORD.md",
+      "qualification/ssdp70/PROTOCOL-7.1-CANDIDATE-QUALIFICATION-REPORT-2026-10-06-WITHDRAWN-HISTORICAL.md"
+    ],
+    "outcome": "no qualification outcome (development data); 7.1 remains NON-QUALIFIED because no qualification PASS exists"
+  }
+]

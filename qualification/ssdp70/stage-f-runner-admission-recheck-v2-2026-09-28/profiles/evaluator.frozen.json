@@ -1,0 +1,116 @@
+{
+  "adapter_id": "claude-stream-json-v2",
+  "agent_model": "claude-sonnet-5",
+  "budgets": {
+    "max_turns": 40,
+    "timeout_s": 1800
+  },
+  "containment_policy": {
+    "ambient_credentials": "deny",
+    "ambient_host_home": "deny",
+    "denied_read_roots": "harness-private/runtime state, host HOME, /home, /root, /run/user, /proc, /mnt, /media, /srv, /var/tmp",
+    "enforcement": "required-before-launch",
+    "filesystem_read": "temporary copied evidence bundle only for native file tools; high-risk host/run-state roots denied",
+    "filesystem_write": "deny evaluator tool writes",
+    "kind": "claude-code-restricted-sandbox-v1",
+    "mediator_required": false,
+    "native_network": "deny",
+    "protected_control_files": "settings and strict empty MCP config live under the denied evaluator-private/runtime area outside the evaluator working directory and are digest-checked across launch",
+    "runtime_temp": "run-owned project temporary directory"
+  },
+  "credential_service_account_policy": {
+    "ambient_credentials": "deny",
+    "parent_authentication": "zero or one qualification-only auth source mapped explicitly for the Claude parent process",
+    "sandboxed_subprocess_credentials": "deny"
+  },
+  "install_mechanism": "none",
+  "mcp_servers": [],
+  "native_allowed_tools": [
+    "Read",
+    "Glob",
+    "Grep"
+  ],
+  "native_disallowed_tools": [
+    "mcp__*",
+    "Bash",
+    "Edit",
+    "Write",
+    "NotebookEdit",
+    "MultiEdit",
+    "Skill",
+    "Agent",
+    "WebFetch",
+    "WebSearch",
+    "SendMessage",
+    "ListAgents",
+    "RemoteTrigger",
+    "CronCreate",
+    "CronDelete",
+    "CronList",
+    "ScheduleWakeup",
+    "PushNotification",
+    "EnterWorktree",
+    "ExitWorktree",
+    "Artifact",
+    "ArtifactComments",
+    "ArtifactData",
+    "Workflow",
+    "Monitor",
+    "DesignSync",
+    "ToolSearch",
+    "TaskStop",
+    "ReportFindings",
+    "ShareOnboardingGuide"
+  ],
+  "native_surface_requirements": [
+    "runtime_capability:interrupt_receipt_v1",
+    "runtime_capability:interrupt_cancel_queued_v1",
+    "runtime_capability:msg_lifecycle_v1",
+    "runtime_capability:mcp_read_resource_v1",
+    "runtime_capability:mcp_tool_ui_meta_v1",
+    "messaging_socket_path",
+    "auto_memory_write"
+  ],
+  "native_tools": [
+    "Read",
+    "Glob",
+    "Grep"
+  ],
+  "network_external_write_policy": {
+    "external_write": "deny",
+    "network": "deny-native-evaluator-network"
+  },
+  "permission_mode": "plan",
+  "profile_id": "claude-code-2.1.284-sonnet5-high-local-samjin-evaluator-v2",
+  "provider_managed_unknowns": [
+    {
+      "classification": "arm-neutral",
+      "name": "provider-backend-shard",
+      "sensitive_claims": [
+        "*"
+      ]
+    },
+    {
+      "classification": "arm-neutral",
+      "name": "provider-model-serving-revision-behind-alias",
+      "sensitive_claims": [
+        "*"
+      ]
+    }
+  ],
+  "provider_runtime": {
+    "binary_sha256": "5cd90aabd83f8a15136c35aa37bb1d92b348993573316643dc3fe4e04afbf88f",
+    "executable": "claude",
+    "provider": "anthropic",
+    "runtime": "claude-code",
+    "version": "2.1.284"
+  },
+  "reasoning_configuration": {
+    "effort": "high",
+    "source": "checker-frozen-2026-09-28"
+  },
+  "schema": 1,
+  "workspace_realization": {
+    "kind": "temporary-read-only-evidence-bundle"
+  }
+}

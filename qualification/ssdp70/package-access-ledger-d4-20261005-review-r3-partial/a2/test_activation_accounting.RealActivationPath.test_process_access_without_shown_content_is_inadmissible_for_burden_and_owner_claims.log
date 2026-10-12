@@ -1,0 +1,62 @@
+
+======================================================================
+ERROR: test_process_access_without_shown_content_is_inadmissible_for_burden_and_owner_claims (test_activation_accounting.RealActivationPath) [count]
+Opened package files whose content cannot be shown to have reached the model are named, never lower-bounded.
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/tmp/cr5/qualification/ssdp70/eval/test_activation_accounting.py", line 198, in test_process_access_without_shown_content_is_inadmissible_for_burden_and_owner_claims
+    summary, aggregate, identity, rig = self.realize(scenario=scenario, claims=['active-byte burden', 'owner-read'],
+  File "/tmp/cr5/qualification/ssdp70/eval/test_activation_accounting.py", line 100, in realize
+    summary = rig.run(scenario or {'steps':[{'text':'CANARY-DEVELOPMENT'}]})
+  File "/tmp/cr5/qualification/ssdp70/eval/omp_rig.py", line 156, in run
+    server, _state = stand_in_provider.serve(
+  File "/tmp/cr5/qualification/ssdp70/eval/stand_in_provider.py", line 148, in serve
+    server = _UnixHTTPServer(unix, handler) if unix else _TcpServer((host, port), handler)
+  File "/usr/lib/python3.10/socketserver.py", line 448, in __init__
+    self.socket = socket.socket(self.address_family,
+  File "/usr/lib/python3.10/socket.py", line 232, in __init__
+    _socket.socket.__init__(self, family, type, proto, fileno)
+PermissionError: [Errno 1] Operation not permitted
+
+======================================================================
+ERROR: test_process_access_without_shown_content_is_inadmissible_for_burden_and_owner_claims (test_activation_accounting.RealActivationPath) [transformed]
+Opened package files whose content cannot be shown to have reached the model are named, never lower-bounded.
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/tmp/cr5/qualification/ssdp70/eval/test_activation_accounting.py", line 198, in test_process_access_without_shown_content_is_inadmissible_for_burden_and_owner_claims
+    summary, aggregate, identity, rig = self.realize(scenario=scenario, claims=['active-byte burden', 'owner-read'],
+  File "/tmp/cr5/qualification/ssdp70/eval/test_activation_accounting.py", line 100, in realize
+    summary = rig.run(scenario or {'steps':[{'text':'CANARY-DEVELOPMENT'}]})
+  File "/tmp/cr5/qualification/ssdp70/eval/omp_rig.py", line 156, in run
+    server, _state = stand_in_provider.serve(
+  File "/tmp/cr5/qualification/ssdp70/eval/stand_in_provider.py", line 148, in serve
+    server = _UnixHTTPServer(unix, handler) if unix else _TcpServer((host, port), handler)
+  File "/usr/lib/python3.10/socketserver.py", line 448, in __init__
+    self.socket = socket.socket(self.address_family,
+  File "/usr/lib/python3.10/socket.py", line 232, in __init__
+    _socket.socket.__init__(self, family, type, proto, fileno)
+PermissionError: [Errno 1] Operation not permitted
+
+======================================================================
+ERROR: test_process_access_without_shown_content_is_inadmissible_for_burden_and_owner_claims (test_activation_accounting.RealActivationPath) [native grep over package]
+Opened package files whose content cannot be shown to have reached the model are named, never lower-bounded.
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/tmp/cr5/qualification/ssdp70/eval/test_activation_accounting.py", line 198, in test_process_access_without_shown_content_is_inadmissible_for_burden_and_owner_claims
+    summary, aggregate, identity, rig = self.realize(scenario=scenario, claims=['active-byte burden', 'owner-read'],
+  File "/tmp/cr5/qualification/ssdp70/eval/test_activation_accounting.py", line 100, in realize
+    summary = rig.run(scenario or {'steps':[{'text':'CANARY-DEVELOPMENT'}]})
+  File "/tmp/cr5/qualification/ssdp70/eval/omp_rig.py", line 156, in run
+    server, _state = stand_in_provider.serve(
+  File "/tmp/cr5/qualification/ssdp70/eval/stand_in_provider.py", line 148, in serve
+    server = _UnixHTTPServer(unix, handler) if unix else _TcpServer((host, port), handler)
+  File "/usr/lib/python3.10/socketserver.py", line 448, in __init__
+    self.socket = socket.socket(self.address_family,
+  File "/usr/lib/python3.10/socket.py", line 232, in __init__
+    _socket.socket.__init__(self, family, type, proto, fileno)
+PermissionError: [Errno 1] Operation not permitted
+
+----------------------------------------------------------------------
+Ran 1 test in 0.042s
+
+FAILED (errors=3)

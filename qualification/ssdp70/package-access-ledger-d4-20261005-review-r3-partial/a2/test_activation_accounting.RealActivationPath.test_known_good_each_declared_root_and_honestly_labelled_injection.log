@@ -1,0 +1,149 @@
+E
+======================================================================
+ERROR: test_known_good_each_declared_root_and_honestly_labelled_injection (test_activation_accounting.RealActivationPath) (root='numerical-algorithm-design')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/tmp/cr5/qualification/ssdp70/eval/test_activation_accounting.py", line 118, in test_known_good_each_declared_root_and_honestly_labelled_injection
+    summary,aggregate,identity,rig=self.realize(root=root)
+  File "/tmp/cr5/qualification/ssdp70/eval/test_activation_accounting.py", line 100, in realize
+    summary = rig.run(scenario or {'steps':[{'text':'CANARY-DEVELOPMENT'}]})
+  File "/tmp/cr5/qualification/ssdp70/eval/omp_rig.py", line 156, in run
+    server, _state = stand_in_provider.serve(
+  File "/tmp/cr5/qualification/ssdp70/eval/stand_in_provider.py", line 148, in serve
+    server = _UnixHTTPServer(unix, handler) if unix else _TcpServer((host, port), handler)
+  File "/usr/lib/python3.10/socketserver.py", line 448, in __init__
+    self.socket = socket.socket(self.address_family,
+  File "/usr/lib/python3.10/socket.py", line 232, in __init__
+    _socket.socket.__init__(self, family, type, proto, fileno)
+PermissionError: [Errno 1] Operation not permitted
+
+======================================================================
+ERROR: test_known_good_each_declared_root_and_honestly_labelled_injection (test_activation_accounting.RealActivationPath) (root='repository-hygiene')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/tmp/cr5/qualification/ssdp70/eval/test_activation_accounting.py", line 118, in test_known_good_each_declared_root_and_honestly_labelled_injection
+    summary,aggregate,identity,rig=self.realize(root=root)
+  File "/tmp/cr5/qualification/ssdp70/eval/test_activation_accounting.py", line 100, in realize
+    summary = rig.run(scenario or {'steps':[{'text':'CANARY-DEVELOPMENT'}]})
+  File "/tmp/cr5/qualification/ssdp70/eval/omp_rig.py", line 156, in run
+    server, _state = stand_in_provider.serve(
+  File "/tmp/cr5/qualification/ssdp70/eval/stand_in_provider.py", line 148, in serve
+    server = _UnixHTTPServer(unix, handler) if unix else _TcpServer((host, port), handler)
+  File "/usr/lib/python3.10/socketserver.py", line 448, in __init__
+    self.socket = socket.socket(self.address_family,
+  File "/usr/lib/python3.10/socket.py", line 232, in __init__
+    _socket.socket.__init__(self, family, type, proto, fileno)
+PermissionError: [Errno 1] Operation not permitted
+
+======================================================================
+ERROR: test_known_good_each_declared_root_and_honestly_labelled_injection (test_activation_accounting.RealActivationPath) (root='scientific-formulation')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/tmp/cr5/qualification/ssdp70/eval/test_activation_accounting.py", line 118, in test_known_good_each_declared_root_and_honestly_labelled_injection
+    summary,aggregate,identity,rig=self.realize(root=root)
+  File "/tmp/cr5/qualification/ssdp70/eval/test_activation_accounting.py", line 100, in realize
+    summary = rig.run(scenario or {'steps':[{'text':'CANARY-DEVELOPMENT'}]})
+  File "/tmp/cr5/qualification/ssdp70/eval/omp_rig.py", line 156, in run
+    server, _state = stand_in_provider.serve(
+  File "/tmp/cr5/qualification/ssdp70/eval/stand_in_provider.py", line 148, in serve
+    server = _UnixHTTPServer(unix, handler) if unix else _TcpServer((host, port), handler)
+  File "/usr/lib/python3.10/socketserver.py", line 448, in __init__
+    self.socket = socket.socket(self.address_family,
+  File "/usr/lib/python3.10/socket.py", line 232, in __init__
+    _socket.socket.__init__(self, family, type, proto, fileno)
+PermissionError: [Errno 1] Operation not permitted
+
+======================================================================
+ERROR: test_known_good_each_declared_root_and_honestly_labelled_injection (test_activation_accounting.RealActivationPath) (root='software-design')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/tmp/cr5/qualification/ssdp70/eval/test_activation_accounting.py", line 118, in test_known_good_each_declared_root_and_honestly_labelled_injection
+    summary,aggregate,identity,rig=self.realize(root=root)
+  File "/tmp/cr5/qualification/ssdp70/eval/test_activation_accounting.py", line 100, in realize
+    summary = rig.run(scenario or {'steps':[{'text':'CANARY-DEVELOPMENT'}]})
+  File "/tmp/cr5/qualification/ssdp70/eval/omp_rig.py", line 156, in run
+    server, _state = stand_in_provider.serve(
+  File "/tmp/cr5/qualification/ssdp70/eval/stand_in_provider.py", line 148, in serve
+    server = _UnixHTTPServer(unix, handler) if unix else _TcpServer((host, port), handler)
+  File "/usr/lib/python3.10/socketserver.py", line 448, in __init__
+    self.socket = socket.socket(self.address_family,
+  File "/usr/lib/python3.10/socket.py", line 232, in __init__
+    _socket.socket.__init__(self, family, type, proto, fileno)
+PermissionError: [Errno 1] Operation not permitted
+
+======================================================================
+ERROR: test_known_good_each_declared_root_and_honestly_labelled_injection (test_activation_accounting.RealActivationPath) (root='software-documentation')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/tmp/cr5/qualification/ssdp70/eval/test_activation_accounting.py", line 118, in test_known_good_each_declared_root_and_honestly_labelled_injection
+    summary,aggregate,identity,rig=self.realize(root=root)
+  File "/tmp/cr5/qualification/ssdp70/eval/test_activation_accounting.py", line 100, in realize
+    summary = rig.run(scenario or {'steps':[{'text':'CANARY-DEVELOPMENT'}]})
+  File "/tmp/cr5/qualification/ssdp70/eval/omp_rig.py", line 156, in run
+    server, _state = stand_in_provider.serve(
+  File "/tmp/cr5/qualification/ssdp70/eval/stand_in_provider.py", line 148, in serve
+    server = _UnixHTTPServer(unix, handler) if unix else _TcpServer((host, port), handler)
+  File "/usr/lib/python3.10/socketserver.py", line 448, in __init__
+    self.socket = socket.socket(self.address_family,
+  File "/usr/lib/python3.10/socket.py", line 232, in __init__
+    _socket.socket.__init__(self, family, type, proto, fileno)
+PermissionError: [Errno 1] Operation not permitted
+
+======================================================================
+ERROR: test_known_good_each_declared_root_and_honestly_labelled_injection (test_activation_accounting.RealActivationPath) (root='software-implementation')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/tmp/cr5/qualification/ssdp70/eval/test_activation_accounting.py", line 118, in test_known_good_each_declared_root_and_honestly_labelled_injection
+    summary,aggregate,identity,rig=self.realize(root=root)
+  File "/tmp/cr5/qualification/ssdp70/eval/test_activation_accounting.py", line 100, in realize
+    summary = rig.run(scenario or {'steps':[{'text':'CANARY-DEVELOPMENT'}]})
+  File "/tmp/cr5/qualification/ssdp70/eval/omp_rig.py", line 156, in run
+    server, _state = stand_in_provider.serve(
+  File "/tmp/cr5/qualification/ssdp70/eval/stand_in_provider.py", line 148, in serve
+    server = _UnixHTTPServer(unix, handler) if unix else _TcpServer((host, port), handler)
+  File "/usr/lib/python3.10/socketserver.py", line 448, in __init__
+    self.socket = socket.socket(self.address_family,
+  File "/usr/lib/python3.10/socket.py", line 232, in __init__
+    _socket.socket.__init__(self, family, type, proto, fileno)
+PermissionError: [Errno 1] Operation not permitted
+
+======================================================================
+ERROR: test_known_good_each_declared_root_and_honestly_labelled_injection (test_activation_accounting.RealActivationPath) (root='software-maintenance-audit')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/tmp/cr5/qualification/ssdp70/eval/test_activation_accounting.py", line 118, in test_known_good_each_declared_root_and_honestly_labelled_injection
+    summary,aggregate,identity,rig=self.realize(root=root)
+  File "/tmp/cr5/qualification/ssdp70/eval/test_activation_accounting.py", line 100, in realize
+    summary = rig.run(scenario or {'steps':[{'text':'CANARY-DEVELOPMENT'}]})
+  File "/tmp/cr5/qualification/ssdp70/eval/omp_rig.py", line 156, in run
+    server, _state = stand_in_provider.serve(
+  File "/tmp/cr5/qualification/ssdp70/eval/stand_in_provider.py", line 148, in serve
+    server = _UnixHTTPServer(unix, handler) if unix else _TcpServer((host, port), handler)
+  File "/usr/lib/python3.10/socketserver.py", line 448, in __init__
+    self.socket = socket.socket(self.address_family,
+  File "/usr/lib/python3.10/socket.py", line 232, in __init__
+    _socket.socket.__init__(self, family, type, proto, fileno)
+PermissionError: [Errno 1] Operation not permitted
+
+======================================================================
+ERROR: test_known_good_each_declared_root_and_honestly_labelled_injection (test_activation_accounting.RealActivationPath)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/tmp/cr5/qualification/ssdp70/eval/test_activation_accounting.py", line 125, in test_known_good_each_declared_root_and_honestly_labelled_injection
+    summary,aggregate,_,_=self.realize(mechanism='harness-injection')
+  File "/tmp/cr5/qualification/ssdp70/eval/test_activation_accounting.py", line 100, in realize
+    summary = rig.run(scenario or {'steps':[{'text':'CANARY-DEVELOPMENT'}]})
+  File "/tmp/cr5/qualification/ssdp70/eval/omp_rig.py", line 156, in run
+    server, _state = stand_in_provider.serve(
+  File "/tmp/cr5/qualification/ssdp70/eval/stand_in_provider.py", line 148, in serve
+    server = _UnixHTTPServer(unix, handler) if unix else _TcpServer((host, port), handler)
+  File "/usr/lib/python3.10/socketserver.py", line 448, in __init__
+    self.socket = socket.socket(self.address_family,
+  File "/usr/lib/python3.10/socket.py", line 232, in __init__
+    _socket.socket.__init__(self, family, type, proto, fileno)
+PermissionError: [Errno 1] Operation not permitted
+
+----------------------------------------------------------------------
+Ran 1 test in 0.099s
+
+FAILED (errors=8)

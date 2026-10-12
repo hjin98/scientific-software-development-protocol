@@ -1,0 +1,10 @@
+W1 upper edge uses position not position-1 KILLED ['FAIL: test_s_unpositioned_or_absent_earlier_request_starts_at_the_trace_start_and_the_end_is_still_bounded', 'FAIL: test_s_window_ends_before_the_first_event_of_the_next_request']
+W2 unpositioned later request treated as trace start KILLED ['FAIL: test_s_unpositioned_later_request_bounds_nothing_so_an_honest_text_final_turn_stays_explained']
+W3 empty window not widened KILLED ['FAIL: test_s_inconsistent_positions_make_an_empty_window_the_whole_trace']
+W4 no earlier request widens the end (old M4) KILLED ['FAIL: test_s_unpositioned_or_absent_earlier_request_starts_at_the_trace_start_and_the_end_is_still_bounded']
+W5 unpositioned earlier request not trace start KILLED ['FAIL: test_s_unpositioned_or_absent_earlier_request_starts_at_the_trace_start_and_the_end_is_still_bounded']
+W6 adapter text-only turn keeps numeric position SURVIVED []
+W7 adapter unverified pairing keeps position SURVIVED []
+R1 replacement ignores open owner question PATTERN-NOT-FOUND
+R2 replacement ignores open byte question PATTERN-NOT-FOUND
+R3 rerun after scored replacement allowed PATTERN-NOT-FOUND

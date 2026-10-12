@@ -1,0 +1,33 @@
+{
+  "entries": [
+    {
+      "classification": "catalog",
+      "mapped_event_ids": [
+        "e000001"
+      ],
+      "native_index": 0,
+      "native_sha256": "c9a33ef4d3d6cdb25daaa46a867ef9bb17fab24171b9418f76fd35271745f3bc",
+      "oracle_relevant": true
+    },
+    {
+      "classification": "assistant-message",
+      "mapped_event_ids": [],
+      "native_index": 1,
+      "native_sha256": "58c34471f586aa668f80fe490bd3d8f97fd5f4a4a6d11d86a816f2160f16a812",
+      "oracle_relevant": false
+    },
+    {
+      "classification": "terminal-result",
+      "mapped_event_ids": [
+        "e000002",
+        "e000003",
+        "e000004"
+      ],
+      "native_index": 2,
+      "native_sha256": "e617f68f3592dffdf4e8dff1ebb00d609b6c34279deaeceb385962219e7cee12",
+      "oracle_relevant": true
+    }
+  ],
+  "native_event_count": 3,
+  "schema": 1
+}

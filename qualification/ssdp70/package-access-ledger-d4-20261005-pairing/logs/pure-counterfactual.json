@@ -1,0 +1,14 @@
+{
+  "scope": "production account with synthetic twin fixture, identical opened file/content/failed-pairing record",
+  "current": {
+    "exact": false,
+    "active_ssdp_bytes": null,
+    "owner_positive": true
+  },
+  "pre_change_accounting": {
+    "exact": true,
+    "active_ssdp_bytes": 1760,
+    "owner_positive": true
+  },
+  "pre_change_source": "package_ledger.py at baseline commit"
+}

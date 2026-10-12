@@ -1,0 +1,10 @@
+{
+  "unchanged_diagnostic_copy": true,
+  "diagnostic_regular_file_count": 278,
+  "run_support_bytes_match_current_draft": true,
+  "whitespace_check_exit_code": 0,
+  "tracked_manifest_drift": false,
+  "accepted_authority_hashes_verified": true,
+  "acceptance": "NOT_COMPLETE",
+  "upstream": "SERIOUS_CHALLENGE_D3_CASE_Z"
+}

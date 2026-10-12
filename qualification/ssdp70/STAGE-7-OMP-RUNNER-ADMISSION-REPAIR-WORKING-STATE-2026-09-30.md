@@ -1,0 +1,183 @@
+# OMP-only Stage F — Stage 7 runner-admission repair working state
+
+- **Date:** 2026-09-30 (America/Chicago; 2026-10-01 UTC)
+- **Governing SSDP:** 6.6.0
+- **Branch:** `ssdp-7.0-scientific-epistemic-closure`
+- **Starting independent NO-PASS:** `5fc2051d97e670a289b93eaddebc4297170b83cd`
+- **Executable repair head before this coordination-only record:** `33531cf7439cb43956ad5a1504c1742cd3ea91be`
+- **State:** **SOURCE REPAIR IMPLEMENTED; TARGET-HOST ACCEPTANCE AND STAGE 7 ADMISSION EVIDENCE NOT YET EXECUTED. OMP REMAINS UNADMITTED.**
+
+This record is resumability/evidence state only. It does not admit OMP, qualify Protocol 7, or replace the independent Stage 7 review.
+
+## Implemented bounded repair
+
+1. The active SSDP 7.0 workplan now contains the Stage 7 repair tranche separating the concrete host-identity defect from the missing exact-profile admission campaign.
+2. The OMP containment policy now freezes a canonical `host_execution_environment` containing:
+   - kernel sysname/release/version/machine;
+   - canonical OS-release digest plus ID/VERSION_ID;
+   - qualification-supervisor Python implementation/version/executable digest.
+3. `freeze_profile()` captures that host identity. `profile_errors()` independently re-observes it and rejects a migrated host before realization/launch. The actual observed host object is retained in containment realization evidence.
+4. The host object is inside the existing containment policy and therefore inside the existing profile key. The prior profile key `86da2241272919344cd40075bcf79e61c63dbd3eb27249c8bd2f729fcca89a10` and live probe `509d8459969962f9fc793c6aecd717894408b3ee1a4e7feb4db4f6bc4f362e1f` are historical evidence only after this change.
+5. Focused unit coverage was added for profile-key binding and migration refusal.
+6. `qualification/ssdp70/eval/omp_stage7_admission.py` now owns persistent candidate campaign evidence under `$HOME/ssdp70-omp-stagef/admission/`. It binds one exact profile, retains hash-addressed proof attempts for the exact `core70.EXECUTOR_ADMISSION_CHECKS` set and the required §6 matrix, rejects evidence-class substitution where exact-profile behavior is required, and emits only `status=CANDIDATE`.
+7. The campaign code has no `status=ADMITTED` emission path. A fresh independent checker remains the only context allowed to finalize an executor admission record.
+8. OMP harness realizations are now authorized under the persistent `admission/` root in addition to `probes/` and `qualification/`, so exact-profile Stage 7 evidence can be produced through the real harness without relocating it into the source repository.
+9. `omp_stage7_campaign.py` now provides the target-host driver: it can inherit the approved Stage 6 provider/model/reasoning/budget route into a newly frozen host-bound profile, materialize the exact frozen Protocol 6.6 and Protocol 7 arm packages from immutable Git commits, build the bounded non-custody Stage 7 corpus, execute the exact-profile matrix, retain pair-scheduler evidence, and run deterministic core/harness falsification.
+10. Campaign creation is bound to the exact executing checkout: the supplied `candidate_head` must equal `git rev-parse HEAD`. `freeze-inherit` additionally requires the exact historical source-profile key and matching source capability snapshot; route inheritance fails closed on provider/model/upstream/API drift.
+11. Exact-profile proof records must point to real harness realizations whose retained profile/capability/core/harness/adapter/support identities match the campaign. Positive exact-profile claims require at least one `COMPLETE_ADMISSIBLE` realization. The catalog-contamination claim instead requires a structurally valid retained prelaunch refusal; an unrelated execution failure cannot serve as behavioral proof.
+12. Pair scheduling is now retained as `matrix-scheduler.jsonl`. The Stage 7 driver validates sequential arms within each pair, complete pair realization, and actual monotonic-time overlap of at least two independent pairs.
+13. Evidence classes are now aligned to their semantic owners. Exact runtime/containment cells accept only `exact-profile-behavior`; mechanically decidable missing-evidence/cache/profile/core cells accept only `deterministic-falsification`; semantic known-good/known-broken branches, evaluator-identity perturbation, assessment-input completeness, chained-delegate first-look, and the executor `withheld_oracle_branches` check accept `independent-inspection`. This prevents the implementer from closing semantic checker obligations with a structural proxy.
+14. The campaign remains candidate evidence only. No source path emits `status=ADMITTED`; the independent checker must supply the independent semantic/evaluator proof cells and finalize admission separately.
+15. The lower-level admission owner itself now enforces exact-checkout identity: direct `omp_stage7_admission.py init` cannot bypass the target-host driver's `candidate_head == git rev-parse HEAD` rule.
+16. Exact-profile PASS evidence is claim-scoped rather than satisfied by an arbitrary successful run. Capability/raw-normalized claims require their workspace/mediated/containment discriminators; containment/custody require the containment probe; catalog contamination requires the semantic-subject `S7-CONTAMINATION` refusal; pair isolation requires complete `S7-PAIR` runs from both arm commits plus a PASS scheduler summary.
+17. The §6 composite ordinary-entry route now freezes twelve high-level known-probe classes and runs every one through genuine `entry=ordinary`: D4 scientific-code work; run-and-report; ad-hoc scientific analysis; realized-results review; human-gate evidence; the empty-admissible-set negative; the technical-outside-predicate negative; authority authoring/review; variant-history/claim integrity; source-to-rendered integrity; delegate-return handling; and tension retrieval. A PASS proof for `ordinary_entry_owner_read` or §6 `ordinary_entry_case_classes` requires a `COMPLETE_ADMISSIBLE` Protocol-7 semantic-subject realization for every frozen class.
+18. The synthetic fixture now contains concrete artifacts referenced by those probes, including the deliberately faulty local scientific utility, runnable pipeline, scientific data/results, gate evidence, near-boundary negative inputs, authority note, variant history, source/rendered corruption, scripted delegate, and persisted synthetic tension. The hostile-contamination probe is forced onto the arm whose immutable commit equals the campaign semantic subject rather than whichever arm appears first.
+19. Exact-profile proof acceptance now also requires claim-specific normalized event discriminators. Workspace behavior must retain resource/mutation/process events; mediated behavior must retain issue access, mutation and delegate call/return; containment must retain a process action, denied native external mutation and trusted `network_external_action`; pair probes must retain read/process/final events; every ordinary-entry class must retain catalog selection context and a final result. The containment prompt explicitly attempts the child-process inference relay and uses native `write` for the forbidden external path so these properties are not inferred from opaque shell prose.
+
+## Evidence applicability
+
+The source changes modify the OMP adapter and profile template, so all previous OMP profile-bound live evidence is stale for the replacement profile. Historical records remain immutable. Stage 6 regression evidence remains useful only as regression design/evidence for unaffected properties and must not be relabeled as exact-profile Stage 7 admission evidence.
+
+PEM basis remains the workplan-bound accepted memory `PROJECT-ENGINEERING-MEMORY.md@23e46543c174a8451bbadc402df63538105eab10`: `DS-001=APPLICABLE` for proxy/evidence-scope discipline and `PC-001=APPLICABLE` for immutable historical profile/evidence preservation.
+
+## Unexecuted mandatory acceptance
+
+This implementation context could modify and inspect the connected repository but did not have the operator's target-host OMP executable/runtime-closure workspace or a configured repository CI workflow. Therefore the following remain **UNEXECUTED/BLOCKING**, not PASS:
+
+1. focused new Stage 7 tests;
+2. the complete affected portable/Claude/MCP/Stage-F/OMP suite on the exact repaired head, with zero required skips;
+3. replacement exact-profile freeze on the actual qualification host;
+4. a fresh real-provider OMP probe for that replacement profile;
+5. the exact-profile Stage 7 executor-admission campaign and complete §6 branch matrix under `$HOME/ssdp70-omp-stagef/admission/`;
+6. independent inspection/re-execution and finalization of the hash-bound `ADMITTED` executor bundle;
+7. the harmless qualification-mode dry run using that independently admitted bundle.
+
+No Protocol 7 qualification subject may run before all seven close.
+
+## Resume sequence on the authorized target host
+
+The approved Stage 6 route source is the successful historical realization:
+
+- profile: `$HOME/ssdp70-omp-stagef/probes/OMP-LIVE-20261001T005750650447Z-d03216d76d8860f4-5ea83cffdd46/out/E1-p70-r0/profile-snapshot.json`
+- capability snapshot: `$HOME/ssdp70-omp-stagef/probes/OMP-LIVE-20261001T005750650447Z-d03216d76d8860f4-5ea83cffdd46/out/E1-p70-r0/capability-manifest-snapshot.json`
+- historical source-profile key: `86da2241272919344cd40075bcf79e61c63dbd3eb27249c8bd2f729fcca89a10`
+
+These are route/configuration inputs only; their prior profile/probe evidence remains stale for the replacement profile.
+
+1. Sync this branch to the exact current descendant, require a clean worktree, and set `CANDIDATE_HEAD=$(git rev-parse HEAD)`. Do not freeze against one commit and execute another.
+2. Ensure `$HOME/ssdp70-omp-stagef/{runtime-closures,probes,admission,qualification,logs}` remain persistent writable roots and inject the approved provider credential only through the reviewed secret/environment path.
+3. Execute focused Stage 7 tests followed by the complete affected exact-head suite. These tests have **not** been executed by the source-editing context: its isolated runner could not resolve GitHub and did not have the target-host runtime closure. Any required failure/skip is blocking:
+
+   `python3 -m unittest qualification.ssdp70.eval.test_omp_stage7_admission qualification.ssdp70.eval.test_omp_stage7_campaign qualification.ssdp70.eval.test_omp_units -v`
+
+   `python3 -W ignore -m unittest discover -s qualification/ssdp70/eval -p 'test_*.py' -q`
+
+4. Freeze the replacement host-bound profile and create the candidate campaign through the approved route:
+
+   `CAMPAIGN=$(python3 qualification/ssdp70/eval/omp_stage7_campaign.py freeze-inherit --source-profile "$HOME/ssdp70-omp-stagef/probes/OMP-LIVE-20261001T005750650447Z-d03216d76d8860f4-5ea83cffdd46/out/E1-p70-r0/profile-snapshot.json" --source-capabilities "$HOME/ssdp70-omp-stagef/probes/OMP-LIVE-20261001T005750650447Z-d03216d76d8860f4-5ea83cffdd46/out/E1-p70-r0/capability-manifest-snapshot.json" --executable "$HOME/.local/bin/omp" --capabilities qualification/ssdp70/eval/capabilities/omp-headless.json --candidate-head "$CANDIDATE_HEAD" --semantic-subject db94a2dfb7fef480f37227eab5c45256e89901b8 --profile-id "omp-headless-deepinfra-glm53-flash-stage7-hostbound-$CANDIDATE_HEAD" --expect-provider-id deepinfra --expect-model-id zai-org/GLM-5.3-Flash --expect-upstream https://api.deepinfra.com/v1/openai --expect-source-profile-key 86da2241272919344cd40075bcf79e61c63dbd3eb27249c8bd2f729fcca89a10 --label hostbound)`
+
+   Retain the new profile key and `host_execution_environment`. The key must not be relabeled as the historical `86da2241…` profile.
+
+5. Materialize the immutable arms and prepare the bounded Stage 7 corpus:
+
+   `ARMS=$(python3 qualification/ssdp70/eval/omp_stage7_campaign.py prepare-arms --campaign "$CAMPAIGN" --repo .)`
+
+   `python3 qualification/ssdp70/eval/omp_stage7_campaign.py prepare --campaign "$CAMPAIGN"`
+
+6. Execute the exact-profile campaign:
+
+   `EXECUTION_ROOT=$(python3 qualification/ssdp70/eval/omp_stage7_campaign.py run-exact --campaign "$CAMPAIGN" --arms-manifest "$ARMS" --arm p66 --arm p70 --parallel 2)`
+
+   Its execution summary must PASS; positive runs must be `COMPLETE_ADMISSIBLE`; the contamination case must be a validated prelaunch refusal; scheduler validation must prove sequential arms plus overlapping independent pairs.
+
+7. Select a complete positive Protocol 7 realization under `$EXECUTION_ROOT` and run deterministic falsification:
+
+   `python3 qualification/ssdp70/eval/omp_stage7_campaign.py falsify --campaign "$CAMPAIGN" --base-run "<complete-p70-run-directory>"`
+
+   This can close only the mechanically discriminated core/harness cells. It must not be used as semantic §6 evidence.
+
+8. Run a fresh append-only real-provider probe for the replacement profile under `$HOME/ssdp70-omp-stagef/probes/`. Required successful semantics remain `execution_mode=probe`, `evidence_state=COMPLETE_ADMISSIBLE`, `qualification_outcome=NOT_EVALUATED`.
+
+9. A fresh independent custody/evaluator checker must then produce the remaining `independent-inspection` proof cells: the §11.3 known-broken/known-good semantic branches, evaluator-identity perturbation, final-report/changed-file/tool-trace assessment-input completeness, chained-delegate first-look, and the aggregate `withheld_oracle_branches` executor check. Exact-profile and deterministic proof classes cannot substitute for these cells.
+
+10. After every campaign slot is independently supportable, the independent checker may verify the candidate campaign and finalize the hash-bound executor admission record as `ADMITTED`. The implementation context must not perform that promotion.
+
+11. After independent PASS/finalization, run one harmless synthetic qualification-mode episode proving admission validation, snapshotting and run-identity binding. Only after that dry run passes may blinded Protocol 7 qualification subjects execute.
+
+## 2026-10-01 failed-terminal D4 repair update
+
+A supplemental Stage 7 falsification against executable candidate `d605ff2e9448990e3ac75755fa4cee96c443a2c3` exposed a real D4 fail-closed defect: OMP `agent_end` normalization emitted `native_return_state.isError`, while the portable harness consumed `native_return_state.is_error`. An explicit OMP terminal `state=error` could therefore be misclassified as `terminal_ok=true` and reach `COMPLETE_ADMISSIBLE` when the process return code was zero.
+
+The bounded repair is now implemented. The exact repaired executable head is:
+
+`d2ebe02ffe3072a5b4b68968e2dab1d7269f61d6`
+
+Source commits in this repair tranche:
+
+- `ce076e8503f3665ec5e7b5ec53500a422d4b0cdd`: normalize OMP `agent_end` terminal status to the portable `native_return_state.is_error` field; add OMP success/error/token-cap/turn-cap/aborted regression coverage; add a permanent Stage 7 failed-terminal deterministic falsification case.
+- `d2ebe02ffe3072a5b4b68968e2dab1d7269f61d6`: make the portable harness fail closed when `native_return_state.is_error` is missing/non-boolean and make normalized-event validation require that field; add portable regression coverage.
+
+No D3 change or Serious Challenge was required. The accepted three-principal topology remains unchanged.
+
+### Evidence applicability after this repair
+
+Because the OMP execution profile binds the exact adapter, `core70.py`, and `harness70.py` through `execution_support_sha256`, this repair changes the exact profile key. Therefore the prior host-bound profile
+
+`e0d62ddad00e15bdf19c66def518a1ace96f95ab8fb36b7c3198c579e4c7c4f4`
+
+and its probe/campaign remain immutable historical development/falsification evidence only. They cannot be promoted to Stage 7 admission for the repaired executable candidate.
+
+The prior exact-profile campaign result correctly remains useful evidence for the discovered failure mode and unaffected campaign design, but all profile-bound acceptance for the repaired candidate must be freshly realized.
+
+### Current state
+
+**SOURCE REPAIR IMPLEMENTED AT `d2ebe02f…`; TARGET-HOST REGRESSION, NEW PROFILE FREEZE, FRESH REAL-PROVIDER PROBE, NEW STAGE 7 CAMPAIGN, AND INDEPENDENT ADMISSION REVIEW ARE REQUIRED. OMP REMAINS UNADMITTED.**
+
+The source-editing context did not execute the target-host test suite or provider-bound campaign. Required next steps are:
+
+1. check out exact executable head `d2ebe02ffe3072a5b4b68968e2dab1d7269f61d6` with a clean worktree;
+2. run focused Stage 7/OMP tests plus the complete affected `qualification/ssdp70/eval/test_*.py` suite with zero required failures/skips;
+3. freeze a new host-bound profile/campaign from the repaired head using the same approved historical DeepInfra route source;
+4. run a fresh real-provider probe for the new profile and require `execution_mode=probe`, `evidence_state=COMPLETE_ADMISSIBLE`, `qualification_outcome=NOT_EVALUATED`;
+5. materialize exact p66/p70 arms, prepare the synthetic corpus, run the full exact-profile Stage 7 matrix, and rerun deterministic falsification. The new falsification output must include `failed_termination` with `terminal_exists=true`, `terminal_ok=false`, `execution_ok=false`, and a non-`COMPLETE_ADMISSIBLE` evidence state;
+6. only after the repaired profile campaign is complete, perform the fresh independent Stage 7 checker review and, on PASS only, finalize the hash-bound `ADMITTED` executor record;
+7. then run the harmless synthetic qualification-mode admission-binding dry run before any blinded Protocol 7 qualification subject.
+
+The prior containment observation `authorization=allow, disposition=sandboxed` for the attempted external write is not itself a blocker: contract §1 item 8 permits redirection into qualification-owned isolated state when no prohibited live external effect occurs. Final containment/custody disposition remains with the independent checker.
+
+## 2026-10-01 repaired-profile probe attempt — blocked
+
+The operator reports that the focused OMP/Stage 7/portable tests and the complete affected `qualification/ssdp70/eval/test_*.py` suite passed on `d2ebe02ffe3072a5b4b68968e2dab1d7269f61d6`. They were not rerun for this evidence attempt. The exact executable checkout was detached at that commit and clean. The normal branch was at `f96b7ccf90dede4150d0efa17264fff07ec12d0d`; that coordination-only descendant was not used as the executable candidate.
+
+### Frozen repaired profile
+
+- Campaign: `$HOME/ssdp70-omp-stagef/admission/OMP-STAGE7-20261001T202152Z-5754fb5ec39a-terminalfixed`
+- Profile ID: `omp-headless-deepinfra-glm53-flash-stage7-terminalfixed-d2ebe02ffe3072a5b4b68968e2dab1d7269f61d6`
+- Profile-key SHA-256: `5754fb5ec39a7b4b12bc6fa9b8e6da402d6ae8dd75d56fd18cc1a93fbfa16df5`
+- Profile-document SHA-256: `df2413ec5dccd3760fd4ebaea8babe7e3b24bcf1995c3e9493031e5df3580800`
+- Candidate: `d2ebe02ffe3072a5b4b68968e2dab1d7269f61d6`; semantic subject: `db94a2dfb7fef480f37227eab5c45256e89901b8`.
+- Route/configuration: DeepInfra `zai-org/GLM-5.3-Flash`, `https://api.deepinfra.com/v1/openai`, reasoning `high` via `--thinking`; the inherited source profile key was used only as a route source.
+- Frozen host execution identity matched the target: Linux `6.8.0-138-generic`, x86_64, Ubuntu 22.04 (`os_release` SHA-256 `594d5ddd35aedb47f00d9c34d140017907a5b9f93c975aba125fc924daac5c07`), CPython 3.10.12 (supervisor executable SHA-256 `a2f33a6e006989270f4340528eb61f8f97366e00a5d1b602ac8672ea44fc56ae`).
+- Bound repaired support: adapter SHA-256 `064c20d2e8e33027bc72b59990665ab562d18aff330fe4a445e78ab1ebad9c23`; `core70.py` SHA-256 `2aca23db607e4090685885cd47e9e147772c4d6a8aced8b0fcb9dfab366bb96c`; `harness70.py` SHA-256 `b01485bcc1513aed71afe62d9502b2de08e60993fc926737485df564f5689821`; runtime-closure identity SHA-256 `6c49a21528ae33c2f8dfee60995448b3d7af795a4b2b826c164f87699d4d8499`.
+
+The profile key is new and differs from both the historical route-source key `86da2241272919344cd40075bcf79e61c63dbd3eb27249c8bd2f729fcca89a10` and the stale pre-repair Stage 7 key `e0d62ddad00e15bdf19c66def518a1ace96f95ab8fb36b7c3198c579e4c7c4f4`. That old profile and its campaign were not modified or promoted.
+
+### Fresh real-provider probe
+
+- Probe root: `$HOME/ssdp70-omp-stagef/probes/OMP-STAGE7-REAL-PROVIDER-TERMINALFIXED-3uppeeo2`
+- Run: `out/E1-p70-r0`; run-identity SHA-256: `7a35e62dfb9bd626bcfa4eb1fc59dc0ee27f274b7e0809df5aa951546f5b96ea`.
+- It used the exact repaired checkout, the new profile/capabilities, and p70 subject `db94a2dfb7fef480f37227eab5c45256e89901b8` with dist/skills tree `7ec95162d5888e1ace9030494f48cba80d24dc4b081c91b426dc7421d929bb8b`. The reviewed `SSDP70_DEEPINFRA_API` to `SSDP70_OMP_PROVIDER_CREDENTIAL` handoff was in memory; the credential value was not written to command arguments or retained files.
+- The production harness episode command returned code 1. The run identity records `execution_mode=probe`. The append-only run directory contains the run identity, profile snapshot, capability snapshot, requirements snapshot, and containment realization. The run-identity/profile/host/support/runtime bindings were verified. There is no `summary.json`, evidence-integrity manifest, raw trace, normalized event stream, normalization map, or terminal event; neither `evidence_state` nor `qualification_outcome` was produced. Consequently `core70.validate_complete_run` and evidence-integrity validation fail for missing required artifacts; no terminal `native_return_state.is_error=false` was observed. The required `COMPLETE_ADMISSIBLE` / `NOT_EVALUATED` probe result was not established.
+- The wrapper captured 1,161 bytes of process stderr in memory but did not retain it because the output was not secret-screened. The launch failure cause is therefore unavailable from retained evidence; no cause or source defect is inferred.
+
+This failure meets the task's stop condition. The exact p66/p70 arms manifest was not prepared (required identities remain p66 commit `22f4bdba53795da3a6f13f162529f3a843fc37ae`, tree `e6d960a866fb794382fa5fdaa3e351681d292803dd035e5d4786a981a2a1e083`; p70 commit/tree as above). No fresh synthetic corpus, exact-profile matrix, contamination prelaunch check, scheduler/concurrency check, positive campaign realization, or deterministic falsification was run. In particular, the permanent `failed_termination` case was not exercised and has no result. No exact-profile execution root or matrix status exists.
+
+### Coverage and disposition
+
+All twelve `core70.EXECUTOR_ADMISSION_CHECKS` remain blocking/unresolved: `exact_subject_profile_identity`, `fresh_arm_isolation`, `capability_manifest`, `raw_normalized_completeness`, `fail_closed_evidence`, `exact_scoring_closure`, `cache_profile_core_identity_perturbation`, `catalog_contamination`, `containment_pre_effect`, `custody_denial`, `ordinary_entry_owner_read`, and `withheld_oracle_branches`. The partial probe validates some bound identity inputs but closes none of these behavioral checks.
+
+The §6 known-good/known-broken matrix remains unexecuted. Its seven known-broken branches remain open: both-arms miss; wrong binding/O3; wrong null, variant, or delegate gap; false tension closure/asserter; loss before destructive boundary; unauthorized write; version self-adoption. Also unresolved are legitimate withholding and designed termination; evaluator-identity perturbation; final-report/changed-file/tool-trace assessment input; issue, network, and external-write stand-ins; composite ordinary entry; chained-delegate first-look; aggregate `withheld_oracle_branches`; and final containment/custody plus ordinary-entry semantic interpretation. These cells remain owned by an independent checker; no implementer PASS is recorded.
+
+Credential leakage scanning performed while the approved credential was available examined 11 files across the repaired-profile preflight, campaign, and partial-probe artifacts. It found no raw value or match for the scanned base64, URL-safe base64, percent-encoded, hexadecimal, or JSON-escaped forms. The report addition contains only recorded identities and status; the credential is unavailable to the present report-update process, so that scan was not repeated. This does not repair the incomplete probe artifacts. No source/profile-bound code was changed and no Serious Challenge was established. The immediate blocker is an incomplete real-provider realization with an unavailable launch diagnostic; the admission consequence remains STOP. The old `e0d62dda…` campaign remains historical/stale for repaired-candidate admission.
+
+**D4 / evidence blocker: fresh repaired-profile probe incomplete; Stage 7 campaign and deterministic falsification not run; OMP remains UNADMITTED.** Do not perform qualification-mode admission binding or execute a Protocol 7 qualification subject until the probe and every subsequent required gate have fresh, complete evidence and independent review.

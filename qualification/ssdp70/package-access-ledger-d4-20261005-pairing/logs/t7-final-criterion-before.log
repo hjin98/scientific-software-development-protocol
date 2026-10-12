@@ -1,0 +1,17 @@
+F
+======================================================================
+FAIL: test_t7_unresolved_critical_block_reaches_the_final_aggregation_criterion (test_batch_cli.SlotScoringComposition)
+Real slot/part/final criterion owners; validated assessment loading is controlled below them.
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/tmp/s70old.0s4ckmra/repo/qualification/ssdp70/eval/test_batch_cli.py", line 565, in test_t7_unresolved_critical_block_reaches_the_final_aggregation_criterion
+    self.assertEqual(result["criteria"]["no critical failure"], "UNRESOLVED")
+AssertionError: 'PASS' != 'UNRESOLVED'
+- PASS
++ UNRESOLVED
+
+
+----------------------------------------------------------------------
+Ran 1 test in 0.028s
+
+FAILED (failures=1)

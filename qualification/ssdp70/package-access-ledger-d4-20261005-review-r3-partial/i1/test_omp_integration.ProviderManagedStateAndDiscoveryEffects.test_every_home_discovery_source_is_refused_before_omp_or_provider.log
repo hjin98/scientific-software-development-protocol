@@ -1,0 +1,707 @@
+
+======================================================================
+ERROR: test_every_home_discovery_source_is_refused_before_omp_or_provider (test_omp_integration.ProviderManagedStateAndDiscoveryEffects) (source='.env')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/tmp/cr5/qualification/ssdp70/eval/test_omp_integration.py", line 740, in test_every_home_discovery_source_is_refused_before_omp_or_provider
+    self._assert_rejected_before_process(rig, expect_launch=True)
+  File "/tmp/cr5/qualification/ssdp70/eval/test_omp_integration.py", line 696, in _assert_rejected_before_process
+    summary = rig.run(scenario_steps(text("must not launch")))
+  File "/tmp/cr5/qualification/ssdp70/eval/omp_rig.py", line 156, in run
+    server, _state = stand_in_provider.serve(
+  File "/tmp/cr5/qualification/ssdp70/eval/stand_in_provider.py", line 148, in serve
+    server = _UnixHTTPServer(unix, handler) if unix else _TcpServer((host, port), handler)
+  File "/usr/lib/python3.10/socketserver.py", line 448, in __init__
+    self.socket = socket.socket(self.address_family,
+  File "/usr/lib/python3.10/socket.py", line 232, in __init__
+    _socket.socket.__init__(self, family, type, proto, fileno)
+PermissionError: [Errno 1] Operation not permitted
+
+======================================================================
+ERROR: test_every_home_discovery_source_is_refused_before_omp_or_provider (test_omp_integration.ProviderManagedStateAndDiscoveryEffects) (source='.omp/.env')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/tmp/cr5/qualification/ssdp70/eval/test_omp_integration.py", line 740, in test_every_home_discovery_source_is_refused_before_omp_or_provider
+    self._assert_rejected_before_process(rig, expect_launch=True)
+  File "/tmp/cr5/qualification/ssdp70/eval/test_omp_integration.py", line 696, in _assert_rejected_before_process
+    summary = rig.run(scenario_steps(text("must not launch")))
+  File "/tmp/cr5/qualification/ssdp70/eval/omp_rig.py", line 156, in run
+    server, _state = stand_in_provider.serve(
+  File "/tmp/cr5/qualification/ssdp70/eval/stand_in_provider.py", line 148, in serve
+    server = _UnixHTTPServer(unix, handler) if unix else _TcpServer((host, port), handler)
+  File "/usr/lib/python3.10/socketserver.py", line 448, in __init__
+    self.socket = socket.socket(self.address_family,
+  File "/usr/lib/python3.10/socket.py", line 232, in __init__
+    _socket.socket.__init__(self, family, type, proto, fileno)
+PermissionError: [Errno 1] Operation not permitted
+
+======================================================================
+ERROR: test_every_home_discovery_source_is_refused_before_omp_or_provider (test_omp_integration.ProviderManagedStateAndDiscoveryEffects) (source='.omp/agent/.env')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/tmp/cr5/qualification/ssdp70/eval/test_omp_integration.py", line 740, in test_every_home_discovery_source_is_refused_before_omp_or_provider
+    self._assert_rejected_before_process(rig, expect_launch=True)
+  File "/tmp/cr5/qualification/ssdp70/eval/test_omp_integration.py", line 696, in _assert_rejected_before_process
+    summary = rig.run(scenario_steps(text("must not launch")))
+  File "/tmp/cr5/qualification/ssdp70/eval/omp_rig.py", line 156, in run
+    server, _state = stand_in_provider.serve(
+  File "/tmp/cr5/qualification/ssdp70/eval/stand_in_provider.py", line 148, in serve
+    server = _UnixHTTPServer(unix, handler) if unix else _TcpServer((host, port), handler)
+  File "/usr/lib/python3.10/socketserver.py", line 448, in __init__
+    self.socket = socket.socket(self.address_family,
+  File "/usr/lib/python3.10/socket.py", line 232, in __init__
+    _socket.socket.__init__(self, family, type, proto, fileno)
+PermissionError: [Errno 1] Operation not permitted
+
+======================================================================
+ERROR: test_every_home_discovery_source_is_refused_before_omp_or_provider (test_omp_integration.ProviderManagedStateAndDiscoveryEffects) (source='.omp/agent/SYSTEM.md')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/tmp/cr5/qualification/ssdp70/eval/test_omp_integration.py", line 740, in test_every_home_discovery_source_is_refused_before_omp_or_provider
+    self._assert_rejected_before_process(rig, expect_launch=True)
+  File "/tmp/cr5/qualification/ssdp70/eval/test_omp_integration.py", line 696, in _assert_rejected_before_process
+    summary = rig.run(scenario_steps(text("must not launch")))
+  File "/tmp/cr5/qualification/ssdp70/eval/omp_rig.py", line 156, in run
+    server, _state = stand_in_provider.serve(
+  File "/tmp/cr5/qualification/ssdp70/eval/stand_in_provider.py", line 148, in serve
+    server = _UnixHTTPServer(unix, handler) if unix else _TcpServer((host, port), handler)
+  File "/usr/lib/python3.10/socketserver.py", line 448, in __init__
+    self.socket = socket.socket(self.address_family,
+  File "/usr/lib/python3.10/socket.py", line 232, in __init__
+    _socket.socket.__init__(self, family, type, proto, fileno)
+PermissionError: [Errno 1] Operation not permitted
+
+======================================================================
+ERROR: test_every_home_discovery_source_is_refused_before_omp_or_provider (test_omp_integration.ProviderManagedStateAndDiscoveryEffects) (source='.omp/agent/APPEND_SYSTEM.md')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/tmp/cr5/qualification/ssdp70/eval/test_omp_integration.py", line 740, in test_every_home_discovery_source_is_refused_before_omp_or_provider
+    self._assert_rejected_before_process(rig, expect_launch=True)
+  File "/tmp/cr5/qualification/ssdp70/eval/test_omp_integration.py", line 696, in _assert_rejected_before_process
+    summary = rig.run(scenario_steps(text("must not launch")))
+  File "/tmp/cr5/qualification/ssdp70/eval/omp_rig.py", line 156, in run
+    server, _state = stand_in_provider.serve(
+  File "/tmp/cr5/qualification/ssdp70/eval/stand_in_provider.py", line 148, in serve
+    server = _UnixHTTPServer(unix, handler) if unix else _TcpServer((host, port), handler)
+  File "/usr/lib/python3.10/socketserver.py", line 448, in __init__
+    self.socket = socket.socket(self.address_family,
+  File "/usr/lib/python3.10/socket.py", line 232, in __init__
+    _socket.socket.__init__(self, family, type, proto, fileno)
+PermissionError: [Errno 1] Operation not permitted
+
+======================================================================
+ERROR: test_every_home_discovery_source_is_refused_before_omp_or_provider (test_omp_integration.ProviderManagedStateAndDiscoveryEffects) (source='.omp/agent/AGENTS.md')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/tmp/cr5/qualification/ssdp70/eval/test_omp_integration.py", line 740, in test_every_home_discovery_source_is_refused_before_omp_or_provider
+    self._assert_rejected_before_process(rig, expect_launch=True)
+  File "/tmp/cr5/qualification/ssdp70/eval/test_omp_integration.py", line 696, in _assert_rejected_before_process
+    summary = rig.run(scenario_steps(text("must not launch")))
+  File "/tmp/cr5/qualification/ssdp70/eval/omp_rig.py", line 156, in run
+    server, _state = stand_in_provider.serve(
+  File "/tmp/cr5/qualification/ssdp70/eval/stand_in_provider.py", line 148, in serve
+    server = _UnixHTTPServer(unix, handler) if unix else _TcpServer((host, port), handler)
+  File "/usr/lib/python3.10/socketserver.py", line 448, in __init__
+    self.socket = socket.socket(self.address_family,
+  File "/usr/lib/python3.10/socket.py", line 232, in __init__
+    _socket.socket.__init__(self, family, type, proto, fileno)
+PermissionError: [Errno 1] Operation not permitted
+
+======================================================================
+ERROR: test_every_home_discovery_source_is_refused_before_omp_or_provider (test_omp_integration.ProviderManagedStateAndDiscoveryEffects) (source='.omp/agent/RULES.md')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/tmp/cr5/qualification/ssdp70/eval/test_omp_integration.py", line 740, in test_every_home_discovery_source_is_refused_before_omp_or_provider
+    self._assert_rejected_before_process(rig, expect_launch=True)
+  File "/tmp/cr5/qualification/ssdp70/eval/test_omp_integration.py", line 696, in _assert_rejected_before_process
+    summary = rig.run(scenario_steps(text("must not launch")))
+  File "/tmp/cr5/qualification/ssdp70/eval/omp_rig.py", line 156, in run
+    server, _state = stand_in_provider.serve(
+  File "/tmp/cr5/qualification/ssdp70/eval/stand_in_provider.py", line 148, in serve
+    server = _UnixHTTPServer(unix, handler) if unix else _TcpServer((host, port), handler)
+  File "/usr/lib/python3.10/socketserver.py", line 448, in __init__
+    self.socket = socket.socket(self.address_family,
+  File "/usr/lib/python3.10/socket.py", line 232, in __init__
+    _socket.socket.__init__(self, family, type, proto, fileno)
+PermissionError: [Errno 1] Operation not permitted
+
+======================================================================
+ERROR: test_every_home_discovery_source_is_refused_before_omp_or_provider (test_omp_integration.ProviderManagedStateAndDiscoveryEffects) (source='.omp/agent/PERSONALITY.md')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/tmp/cr5/qualification/ssdp70/eval/test_omp_integration.py", line 740, in test_every_home_discovery_source_is_refused_before_omp_or_provider
+    self._assert_rejected_before_process(rig, expect_launch=True)
+  File "/tmp/cr5/qualification/ssdp70/eval/test_omp_integration.py", line 696, in _assert_rejected_before_process
+    summary = rig.run(scenario_steps(text("must not launch")))
+  File "/tmp/cr5/qualification/ssdp70/eval/omp_rig.py", line 156, in run
+    server, _state = stand_in_provider.serve(
+  File "/tmp/cr5/qualification/ssdp70/eval/stand_in_provider.py", line 148, in serve
+    server = _UnixHTTPServer(unix, handler) if unix else _TcpServer((host, port), handler)
+  File "/usr/lib/python3.10/socketserver.py", line 448, in __init__
+    self.socket = socket.socket(self.address_family,
+  File "/usr/lib/python3.10/socket.py", line 232, in __init__
+    _socket.socket.__init__(self, family, type, proto, fileno)
+PermissionError: [Errno 1] Operation not permitted
+
+======================================================================
+ERROR: test_every_home_discovery_source_is_refused_before_omp_or_provider (test_omp_integration.ProviderManagedStateAndDiscoveryEffects) (source='.omp/agent/TITLE_SYSTEM.md')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/tmp/cr5/qualification/ssdp70/eval/test_omp_integration.py", line 740, in test_every_home_discovery_source_is_refused_before_omp_or_provider
+    self._assert_rejected_before_process(rig, expect_launch=True)
+  File "/tmp/cr5/qualification/ssdp70/eval/test_omp_integration.py", line 696, in _assert_rejected_before_process
+    summary = rig.run(scenario_steps(text("must not launch")))
+  File "/tmp/cr5/qualification/ssdp70/eval/omp_rig.py", line 156, in run
+    server, _state = stand_in_provider.serve(
+  File "/tmp/cr5/qualification/ssdp70/eval/stand_in_provider.py", line 148, in serve
+    server = _UnixHTTPServer(unix, handler) if unix else _TcpServer((host, port), handler)
+  File "/usr/lib/python3.10/socketserver.py", line 448, in __init__
+    self.socket = socket.socket(self.address_family,
+  File "/usr/lib/python3.10/socket.py", line 232, in __init__
+    _socket.socket.__init__(self, family, type, proto, fileno)
+PermissionError: [Errno 1] Operation not permitted
+
+======================================================================
+ERROR: test_every_home_discovery_source_is_refused_before_omp_or_provider (test_omp_integration.ProviderManagedStateAndDiscoveryEffects) (source='.omp/agent/WATCHDOG.md')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/tmp/cr5/qualification/ssdp70/eval/test_omp_integration.py", line 740, in test_every_home_discovery_source_is_refused_before_omp_or_provider
+    self._assert_rejected_before_process(rig, expect_launch=True)
+  File "/tmp/cr5/qualification/ssdp70/eval/test_omp_integration.py", line 696, in _assert_rejected_before_process
+    summary = rig.run(scenario_steps(text("must not launch")))
+  File "/tmp/cr5/qualification/ssdp70/eval/omp_rig.py", line 156, in run
+    server, _state = stand_in_provider.serve(
+  File "/tmp/cr5/qualification/ssdp70/eval/stand_in_provider.py", line 148, in serve
+    server = _UnixHTTPServer(unix, handler) if unix else _TcpServer((host, port), handler)
+  File "/usr/lib/python3.10/socketserver.py", line 448, in __init__
+    self.socket = socket.socket(self.address_family,
+  File "/usr/lib/python3.10/socket.py", line 232, in __init__
+    _socket.socket.__init__(self, family, type, proto, fileno)
+PermissionError: [Errno 1] Operation not permitted
+
+======================================================================
+ERROR: test_every_home_discovery_source_is_refused_before_omp_or_provider (test_omp_integration.ProviderManagedStateAndDiscoveryEffects) (source='.omp/agent/settings.json')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/tmp/cr5/qualification/ssdp70/eval/test_omp_integration.py", line 740, in test_every_home_discovery_source_is_refused_before_omp_or_provider
+    self._assert_rejected_before_process(rig, expect_launch=True)
+  File "/tmp/cr5/qualification/ssdp70/eval/test_omp_integration.py", line 696, in _assert_rejected_before_process
+    summary = rig.run(scenario_steps(text("must not launch")))
+  File "/tmp/cr5/qualification/ssdp70/eval/omp_rig.py", line 156, in run
+    server, _state = stand_in_provider.serve(
+  File "/tmp/cr5/qualification/ssdp70/eval/stand_in_provider.py", line 148, in serve
+    server = _UnixHTTPServer(unix, handler) if unix else _TcpServer((host, port), handler)
+  File "/usr/lib/python3.10/socketserver.py", line 448, in __init__
+    self.socket = socket.socket(self.address_family,
+  File "/usr/lib/python3.10/socket.py", line 232, in __init__
+    _socket.socket.__init__(self, family, type, proto, fileno)
+PermissionError: [Errno 1] Operation not permitted
+
+======================================================================
+ERROR: test_every_home_discovery_source_is_refused_before_omp_or_provider (test_omp_integration.ProviderManagedStateAndDiscoveryEffects) (source='.omp/agent/config.yaml')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/tmp/cr5/qualification/ssdp70/eval/test_omp_integration.py", line 740, in test_every_home_discovery_source_is_refused_before_omp_or_provider
+    self._assert_rejected_before_process(rig, expect_launch=True)
+  File "/tmp/cr5/qualification/ssdp70/eval/test_omp_integration.py", line 696, in _assert_rejected_before_process
+    summary = rig.run(scenario_steps(text("must not launch")))
+  File "/tmp/cr5/qualification/ssdp70/eval/omp_rig.py", line 156, in run
+    server, _state = stand_in_provider.serve(
+  File "/tmp/cr5/qualification/ssdp70/eval/stand_in_provider.py", line 148, in serve
+    server = _UnixHTTPServer(unix, handler) if unix else _TcpServer((host, port), handler)
+  File "/usr/lib/python3.10/socketserver.py", line 448, in __init__
+    self.socket = socket.socket(self.address_family,
+  File "/usr/lib/python3.10/socket.py", line 232, in __init__
+    _socket.socket.__init__(self, family, type, proto, fileno)
+PermissionError: [Errno 1] Operation not permitted
+
+======================================================================
+ERROR: test_every_home_discovery_source_is_refused_before_omp_or_provider (test_omp_integration.ProviderManagedStateAndDiscoveryEffects) (source='.omp/agent/.mcp.json')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/tmp/cr5/qualification/ssdp70/eval/test_omp_integration.py", line 740, in test_every_home_discovery_source_is_refused_before_omp_or_provider
+    self._assert_rejected_before_process(rig, expect_launch=True)
+  File "/tmp/cr5/qualification/ssdp70/eval/test_omp_integration.py", line 696, in _assert_rejected_before_process
+    summary = rig.run(scenario_steps(text("must not launch")))
+  File "/tmp/cr5/qualification/ssdp70/eval/omp_rig.py", line 156, in run
+    server, _state = stand_in_provider.serve(
+  File "/tmp/cr5/qualification/ssdp70/eval/stand_in_provider.py", line 148, in serve
+    server = _UnixHTTPServer(unix, handler) if unix else _TcpServer((host, port), handler)
+  File "/usr/lib/python3.10/socketserver.py", line 448, in __init__
+    self.socket = socket.socket(self.address_family,
+  File "/usr/lib/python3.10/socket.py", line 232, in __init__
+    _socket.socket.__init__(self, family, type, proto, fileno)
+PermissionError: [Errno 1] Operation not permitted
+
+======================================================================
+ERROR: test_every_home_discovery_source_is_refused_before_omp_or_provider (test_omp_integration.ProviderManagedStateAndDiscoveryEffects) (source='.omp/agent/skills')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/tmp/cr5/qualification/ssdp70/eval/test_omp_integration.py", line 740, in test_every_home_discovery_source_is_refused_before_omp_or_provider
+    self._assert_rejected_before_process(rig, expect_launch=True)
+  File "/tmp/cr5/qualification/ssdp70/eval/test_omp_integration.py", line 696, in _assert_rejected_before_process
+    summary = rig.run(scenario_steps(text("must not launch")))
+  File "/tmp/cr5/qualification/ssdp70/eval/omp_rig.py", line 156, in run
+    server, _state = stand_in_provider.serve(
+  File "/tmp/cr5/qualification/ssdp70/eval/stand_in_provider.py", line 148, in serve
+    server = _UnixHTTPServer(unix, handler) if unix else _TcpServer((host, port), handler)
+  File "/usr/lib/python3.10/socketserver.py", line 448, in __init__
+    self.socket = socket.socket(self.address_family,
+  File "/usr/lib/python3.10/socket.py", line 232, in __init__
+    _socket.socket.__init__(self, family, type, proto, fileno)
+PermissionError: [Errno 1] Operation not permitted
+
+======================================================================
+ERROR: test_every_home_discovery_source_is_refused_before_omp_or_provider (test_omp_integration.ProviderManagedStateAndDiscoveryEffects) (source='.omp/agent/rules')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/tmp/cr5/qualification/ssdp70/eval/test_omp_integration.py", line 740, in test_every_home_discovery_source_is_refused_before_omp_or_provider
+    self._assert_rejected_before_process(rig, expect_launch=True)
+  File "/tmp/cr5/qualification/ssdp70/eval/test_omp_integration.py", line 696, in _assert_rejected_before_process
+    summary = rig.run(scenario_steps(text("must not launch")))
+  File "/tmp/cr5/qualification/ssdp70/eval/omp_rig.py", line 156, in run
+    server, _state = stand_in_provider.serve(
+  File "/tmp/cr5/qualification/ssdp70/eval/stand_in_provider.py", line 148, in serve
+    server = _UnixHTTPServer(unix, handler) if unix else _TcpServer((host, port), handler)
+  File "/usr/lib/python3.10/socketserver.py", line 448, in __init__
+    self.socket = socket.socket(self.address_family,
+  File "/usr/lib/python3.10/socket.py", line 232, in __init__
+    _socket.socket.__init__(self, family, type, proto, fileno)
+PermissionError: [Errno 1] Operation not permitted
+
+======================================================================
+ERROR: test_every_home_discovery_source_is_refused_before_omp_or_provider (test_omp_integration.ProviderManagedStateAndDiscoveryEffects) (source='.omp/agent/prompts')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/tmp/cr5/qualification/ssdp70/eval/test_omp_integration.py", line 740, in test_every_home_discovery_source_is_refused_before_omp_or_provider
+    self._assert_rejected_before_process(rig, expect_launch=True)
+  File "/tmp/cr5/qualification/ssdp70/eval/test_omp_integration.py", line 696, in _assert_rejected_before_process
+    summary = rig.run(scenario_steps(text("must not launch")))
+  File "/tmp/cr5/qualification/ssdp70/eval/omp_rig.py", line 156, in run
+    server, _state = stand_in_provider.serve(
+  File "/tmp/cr5/qualification/ssdp70/eval/stand_in_provider.py", line 148, in serve
+    server = _UnixHTTPServer(unix, handler) if unix else _TcpServer((host, port), handler)
+  File "/usr/lib/python3.10/socketserver.py", line 448, in __init__
+    self.socket = socket.socket(self.address_family,
+  File "/usr/lib/python3.10/socket.py", line 232, in __init__
+    _socket.socket.__init__(self, family, type, proto, fileno)
+PermissionError: [Errno 1] Operation not permitted
+
+======================================================================
+ERROR: test_every_home_discovery_source_is_refused_before_omp_or_provider (test_omp_integration.ProviderManagedStateAndDiscoveryEffects) (source='.omp/agent/commands')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/tmp/cr5/qualification/ssdp70/eval/test_omp_integration.py", line 740, in test_every_home_discovery_source_is_refused_before_omp_or_provider
+    self._assert_rejected_before_process(rig, expect_launch=True)
+  File "/tmp/cr5/qualification/ssdp70/eval/test_omp_integration.py", line 696, in _assert_rejected_before_process
+    summary = rig.run(scenario_steps(text("must not launch")))
+  File "/tmp/cr5/qualification/ssdp70/eval/omp_rig.py", line 156, in run
+    server, _state = stand_in_provider.serve(
+  File "/tmp/cr5/qualification/ssdp70/eval/stand_in_provider.py", line 148, in serve
+    server = _UnixHTTPServer(unix, handler) if unix else _TcpServer((host, port), handler)
+  File "/usr/lib/python3.10/socketserver.py", line 448, in __init__
+    self.socket = socket.socket(self.address_family,
+  File "/usr/lib/python3.10/socket.py", line 232, in __init__
+    _socket.socket.__init__(self, family, type, proto, fileno)
+PermissionError: [Errno 1] Operation not permitted
+
+======================================================================
+ERROR: test_every_home_discovery_source_is_refused_before_omp_or_provider (test_omp_integration.ProviderManagedStateAndDiscoveryEffects) (source='.omp/agent/hooks')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/tmp/cr5/qualification/ssdp70/eval/test_omp_integration.py", line 740, in test_every_home_discovery_source_is_refused_before_omp_or_provider
+    self._assert_rejected_before_process(rig, expect_launch=True)
+  File "/tmp/cr5/qualification/ssdp70/eval/test_omp_integration.py", line 696, in _assert_rejected_before_process
+    summary = rig.run(scenario_steps(text("must not launch")))
+  File "/tmp/cr5/qualification/ssdp70/eval/omp_rig.py", line 156, in run
+    server, _state = stand_in_provider.serve(
+  File "/tmp/cr5/qualification/ssdp70/eval/stand_in_provider.py", line 148, in serve
+    server = _UnixHTTPServer(unix, handler) if unix else _TcpServer((host, port), handler)
+  File "/usr/lib/python3.10/socketserver.py", line 448, in __init__
+    self.socket = socket.socket(self.address_family,
+  File "/usr/lib/python3.10/socket.py", line 232, in __init__
+    _socket.socket.__init__(self, family, type, proto, fileno)
+PermissionError: [Errno 1] Operation not permitted
+
+======================================================================
+ERROR: test_every_home_discovery_source_is_refused_before_omp_or_provider (test_omp_integration.ProviderManagedStateAndDiscoveryEffects) (source='.omp/agent/agents')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/tmp/cr5/qualification/ssdp70/eval/test_omp_integration.py", line 740, in test_every_home_discovery_source_is_refused_before_omp_or_provider
+    self._assert_rejected_before_process(rig, expect_launch=True)
+  File "/tmp/cr5/qualification/ssdp70/eval/test_omp_integration.py", line 696, in _assert_rejected_before_process
+    summary = rig.run(scenario_steps(text("must not launch")))
+  File "/tmp/cr5/qualification/ssdp70/eval/omp_rig.py", line 156, in run
+    server, _state = stand_in_provider.serve(
+  File "/tmp/cr5/qualification/ssdp70/eval/stand_in_provider.py", line 148, in serve
+    server = _UnixHTTPServer(unix, handler) if unix else _TcpServer((host, port), handler)
+  File "/usr/lib/python3.10/socketserver.py", line 448, in __init__
+    self.socket = socket.socket(self.address_family,
+  File "/usr/lib/python3.10/socket.py", line 232, in __init__
+    _socket.socket.__init__(self, family, type, proto, fileno)
+PermissionError: [Errno 1] Operation not permitted
+
+======================================================================
+ERROR: test_every_home_discovery_source_is_refused_before_omp_or_provider (test_omp_integration.ProviderManagedStateAndDiscoveryEffects) (source='.omp/agent/extensions')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/tmp/cr5/qualification/ssdp70/eval/test_omp_integration.py", line 740, in test_every_home_discovery_source_is_refused_before_omp_or_provider
+    self._assert_rejected_before_process(rig, expect_launch=True)
+  File "/tmp/cr5/qualification/ssdp70/eval/test_omp_integration.py", line 696, in _assert_rejected_before_process
+    summary = rig.run(scenario_steps(text("must not launch")))
+  File "/tmp/cr5/qualification/ssdp70/eval/omp_rig.py", line 156, in run
+    server, _state = stand_in_provider.serve(
+  File "/tmp/cr5/qualification/ssdp70/eval/stand_in_provider.py", line 148, in serve
+    server = _UnixHTTPServer(unix, handler) if unix else _TcpServer((host, port), handler)
+  File "/usr/lib/python3.10/socketserver.py", line 448, in __init__
+    self.socket = socket.socket(self.address_family,
+  File "/usr/lib/python3.10/socket.py", line 232, in __init__
+    _socket.socket.__init__(self, family, type, proto, fileno)
+PermissionError: [Errno 1] Operation not permitted
+
+======================================================================
+ERROR: test_every_home_discovery_source_is_refused_before_omp_or_provider (test_omp_integration.ProviderManagedStateAndDiscoveryEffects) (source='.omp/plugins')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/tmp/cr5/qualification/ssdp70/eval/test_omp_integration.py", line 740, in test_every_home_discovery_source_is_refused_before_omp_or_provider
+    self._assert_rejected_before_process(rig, expect_launch=True)
+  File "/tmp/cr5/qualification/ssdp70/eval/test_omp_integration.py", line 696, in _assert_rejected_before_process
+    summary = rig.run(scenario_steps(text("must not launch")))
+  File "/tmp/cr5/qualification/ssdp70/eval/omp_rig.py", line 156, in run
+    server, _state = stand_in_provider.serve(
+  File "/tmp/cr5/qualification/ssdp70/eval/stand_in_provider.py", line 148, in serve
+    server = _UnixHTTPServer(unix, handler) if unix else _TcpServer((host, port), handler)
+  File "/usr/lib/python3.10/socketserver.py", line 448, in __init__
+    self.socket = socket.socket(self.address_family,
+  File "/usr/lib/python3.10/socket.py", line 232, in __init__
+    _socket.socket.__init__(self, family, type, proto, fileno)
+PermissionError: [Errno 1] Operation not permitted
+
+======================================================================
+ERROR: test_every_home_discovery_source_is_refused_before_omp_or_provider (test_omp_integration.ProviderManagedStateAndDiscoveryEffects) (source='.omp/marketplaces.json')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/tmp/cr5/qualification/ssdp70/eval/test_omp_integration.py", line 740, in test_every_home_discovery_source_is_refused_before_omp_or_provider
+    self._assert_rejected_before_process(rig, expect_launch=True)
+  File "/tmp/cr5/qualification/ssdp70/eval/test_omp_integration.py", line 696, in _assert_rejected_before_process
+    summary = rig.run(scenario_steps(text("must not launch")))
+  File "/tmp/cr5/qualification/ssdp70/eval/omp_rig.py", line 156, in run
+    server, _state = stand_in_provider.serve(
+  File "/tmp/cr5/qualification/ssdp70/eval/stand_in_provider.py", line 148, in serve
+    server = _UnixHTTPServer(unix, handler) if unix else _TcpServer((host, port), handler)
+  File "/usr/lib/python3.10/socketserver.py", line 448, in __init__
+    self.socket = socket.socket(self.address_family,
+  File "/usr/lib/python3.10/socket.py", line 232, in __init__
+    _socket.socket.__init__(self, family, type, proto, fileno)
+PermissionError: [Errno 1] Operation not permitted
+
+======================================================================
+ERROR: test_every_home_discovery_source_is_refused_before_omp_or_provider (test_omp_integration.ProviderManagedStateAndDiscoveryEffects) (source='.claude')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/tmp/cr5/qualification/ssdp70/eval/test_omp_integration.py", line 740, in test_every_home_discovery_source_is_refused_before_omp_or_provider
+    self._assert_rejected_before_process(rig, expect_launch=True)
+  File "/tmp/cr5/qualification/ssdp70/eval/test_omp_integration.py", line 696, in _assert_rejected_before_process
+    summary = rig.run(scenario_steps(text("must not launch")))
+  File "/tmp/cr5/qualification/ssdp70/eval/omp_rig.py", line 156, in run
+    server, _state = stand_in_provider.serve(
+  File "/tmp/cr5/qualification/ssdp70/eval/stand_in_provider.py", line 148, in serve
+    server = _UnixHTTPServer(unix, handler) if unix else _TcpServer((host, port), handler)
+  File "/usr/lib/python3.10/socketserver.py", line 448, in __init__
+    self.socket = socket.socket(self.address_family,
+  File "/usr/lib/python3.10/socket.py", line 232, in __init__
+    _socket.socket.__init__(self, family, type, proto, fileno)
+PermissionError: [Errno 1] Operation not permitted
+
+======================================================================
+ERROR: test_every_home_discovery_source_is_refused_before_omp_or_provider (test_omp_integration.ProviderManagedStateAndDiscoveryEffects) (source='.claude.json')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/tmp/cr5/qualification/ssdp70/eval/test_omp_integration.py", line 740, in test_every_home_discovery_source_is_refused_before_omp_or_provider
+    self._assert_rejected_before_process(rig, expect_launch=True)
+  File "/tmp/cr5/qualification/ssdp70/eval/test_omp_integration.py", line 696, in _assert_rejected_before_process
+    summary = rig.run(scenario_steps(text("must not launch")))
+  File "/tmp/cr5/qualification/ssdp70/eval/omp_rig.py", line 156, in run
+    server, _state = stand_in_provider.serve(
+  File "/tmp/cr5/qualification/ssdp70/eval/stand_in_provider.py", line 148, in serve
+    server = _UnixHTTPServer(unix, handler) if unix else _TcpServer((host, port), handler)
+  File "/usr/lib/python3.10/socketserver.py", line 448, in __init__
+    self.socket = socket.socket(self.address_family,
+  File "/usr/lib/python3.10/socket.py", line 232, in __init__
+    _socket.socket.__init__(self, family, type, proto, fileno)
+PermissionError: [Errno 1] Operation not permitted
+
+======================================================================
+ERROR: test_every_home_discovery_source_is_refused_before_omp_or_provider (test_omp_integration.ProviderManagedStateAndDiscoveryEffects) (source='.codex')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/tmp/cr5/qualification/ssdp70/eval/test_omp_integration.py", line 740, in test_every_home_discovery_source_is_refused_before_omp_or_provider
+    self._assert_rejected_before_process(rig, expect_launch=True)
+  File "/tmp/cr5/qualification/ssdp70/eval/test_omp_integration.py", line 696, in _assert_rejected_before_process
+    summary = rig.run(scenario_steps(text("must not launch")))
+  File "/tmp/cr5/qualification/ssdp70/eval/omp_rig.py", line 156, in run
+    server, _state = stand_in_provider.serve(
+  File "/tmp/cr5/qualification/ssdp70/eval/stand_in_provider.py", line 148, in serve
+    server = _UnixHTTPServer(unix, handler) if unix else _TcpServer((host, port), handler)
+  File "/usr/lib/python3.10/socketserver.py", line 448, in __init__
+    self.socket = socket.socket(self.address_family,
+  File "/usr/lib/python3.10/socket.py", line 232, in __init__
+    _socket.socket.__init__(self, family, type, proto, fileno)
+PermissionError: [Errno 1] Operation not permitted
+
+======================================================================
+ERROR: test_every_home_discovery_source_is_refused_before_omp_or_provider (test_omp_integration.ProviderManagedStateAndDiscoveryEffects) (source='.gemini')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/tmp/cr5/qualification/ssdp70/eval/test_omp_integration.py", line 740, in test_every_home_discovery_source_is_refused_before_omp_or_provider
+    self._assert_rejected_before_process(rig, expect_launch=True)
+  File "/tmp/cr5/qualification/ssdp70/eval/test_omp_integration.py", line 696, in _assert_rejected_before_process
+    summary = rig.run(scenario_steps(text("must not launch")))
+  File "/tmp/cr5/qualification/ssdp70/eval/omp_rig.py", line 156, in run
+    server, _state = stand_in_provider.serve(
+  File "/tmp/cr5/qualification/ssdp70/eval/stand_in_provider.py", line 148, in serve
+    server = _UnixHTTPServer(unix, handler) if unix else _TcpServer((host, port), handler)
+  File "/usr/lib/python3.10/socketserver.py", line 448, in __init__
+    self.socket = socket.socket(self.address_family,
+  File "/usr/lib/python3.10/socket.py", line 232, in __init__
+    _socket.socket.__init__(self, family, type, proto, fileno)
+PermissionError: [Errno 1] Operation not permitted
+
+======================================================================
+ERROR: test_every_home_discovery_source_is_refused_before_omp_or_provider (test_omp_integration.ProviderManagedStateAndDiscoveryEffects) (source='.agents')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/tmp/cr5/qualification/ssdp70/eval/test_omp_integration.py", line 740, in test_every_home_discovery_source_is_refused_before_omp_or_provider
+    self._assert_rejected_before_process(rig, expect_launch=True)
+  File "/tmp/cr5/qualification/ssdp70/eval/test_omp_integration.py", line 696, in _assert_rejected_before_process
+    summary = rig.run(scenario_steps(text("must not launch")))
+  File "/tmp/cr5/qualification/ssdp70/eval/omp_rig.py", line 156, in run
+    server, _state = stand_in_provider.serve(
+  File "/tmp/cr5/qualification/ssdp70/eval/stand_in_provider.py", line 148, in serve
+    server = _UnixHTTPServer(unix, handler) if unix else _TcpServer((host, port), handler)
+  File "/usr/lib/python3.10/socketserver.py", line 448, in __init__
+    self.socket = socket.socket(self.address_family,
+  File "/usr/lib/python3.10/socket.py", line 232, in __init__
+    _socket.socket.__init__(self, family, type, proto, fileno)
+PermissionError: [Errno 1] Operation not permitted
+
+======================================================================
+ERROR: test_every_home_discovery_source_is_refused_before_omp_or_provider (test_omp_integration.ProviderManagedStateAndDiscoveryEffects) (source='.agent')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/tmp/cr5/qualification/ssdp70/eval/test_omp_integration.py", line 740, in test_every_home_discovery_source_is_refused_before_omp_or_provider
+    self._assert_rejected_before_process(rig, expect_launch=True)
+  File "/tmp/cr5/qualification/ssdp70/eval/test_omp_integration.py", line 696, in _assert_rejected_before_process
+    summary = rig.run(scenario_steps(text("must not launch")))
+  File "/tmp/cr5/qualification/ssdp70/eval/omp_rig.py", line 156, in run
+    server, _state = stand_in_provider.serve(
+  File "/tmp/cr5/qualification/ssdp70/eval/stand_in_provider.py", line 148, in serve
+    server = _UnixHTTPServer(unix, handler) if unix else _TcpServer((host, port), handler)
+  File "/usr/lib/python3.10/socketserver.py", line 448, in __init__
+    self.socket = socket.socket(self.address_family,
+  File "/usr/lib/python3.10/socket.py", line 232, in __init__
+    _socket.socket.__init__(self, family, type, proto, fileno)
+PermissionError: [Errno 1] Operation not permitted
+
+======================================================================
+ERROR: test_every_home_discovery_source_is_refused_before_omp_or_provider (test_omp_integration.ProviderManagedStateAndDiscoveryEffects) (source='.cursor')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/tmp/cr5/qualification/ssdp70/eval/test_omp_integration.py", line 740, in test_every_home_discovery_source_is_refused_before_omp_or_provider
+    self._assert_rejected_before_process(rig, expect_launch=True)
+  File "/tmp/cr5/qualification/ssdp70/eval/test_omp_integration.py", line 696, in _assert_rejected_before_process
+    summary = rig.run(scenario_steps(text("must not launch")))
+  File "/tmp/cr5/qualification/ssdp70/eval/omp_rig.py", line 156, in run
+    server, _state = stand_in_provider.serve(
+  File "/tmp/cr5/qualification/ssdp70/eval/stand_in_provider.py", line 148, in serve
+    server = _UnixHTTPServer(unix, handler) if unix else _TcpServer((host, port), handler)
+  File "/usr/lib/python3.10/socketserver.py", line 448, in __init__
+    self.socket = socket.socket(self.address_family,
+  File "/usr/lib/python3.10/socket.py", line 232, in __init__
+    _socket.socket.__init__(self, family, type, proto, fileno)
+PermissionError: [Errno 1] Operation not permitted
+
+======================================================================
+ERROR: test_every_home_discovery_source_is_refused_before_omp_or_provider (test_omp_integration.ProviderManagedStateAndDiscoveryEffects) (source='.codeium')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/tmp/cr5/qualification/ssdp70/eval/test_omp_integration.py", line 740, in test_every_home_discovery_source_is_refused_before_omp_or_provider
+    self._assert_rejected_before_process(rig, expect_launch=True)
+  File "/tmp/cr5/qualification/ssdp70/eval/test_omp_integration.py", line 696, in _assert_rejected_before_process
+    summary = rig.run(scenario_steps(text("must not launch")))
+  File "/tmp/cr5/qualification/ssdp70/eval/omp_rig.py", line 156, in run
+    server, _state = stand_in_provider.serve(
+  File "/tmp/cr5/qualification/ssdp70/eval/stand_in_provider.py", line 148, in serve
+    server = _UnixHTTPServer(unix, handler) if unix else _TcpServer((host, port), handler)
+  File "/usr/lib/python3.10/socketserver.py", line 448, in __init__
+    self.socket = socket.socket(self.address_family,
+  File "/usr/lib/python3.10/socket.py", line 232, in __init__
+    _socket.socket.__init__(self, family, type, proto, fileno)
+PermissionError: [Errno 1] Operation not permitted
+
+======================================================================
+ERROR: test_every_home_discovery_source_is_refused_before_omp_or_provider (test_omp_integration.ProviderManagedStateAndDiscoveryEffects) (source='.config/opencode')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/tmp/cr5/qualification/ssdp70/eval/test_omp_integration.py", line 740, in test_every_home_discovery_source_is_refused_before_omp_or_provider
+    self._assert_rejected_before_process(rig, expect_launch=True)
+  File "/tmp/cr5/qualification/ssdp70/eval/test_omp_integration.py", line 696, in _assert_rejected_before_process
+    summary = rig.run(scenario_steps(text("must not launch")))
+  File "/tmp/cr5/qualification/ssdp70/eval/omp_rig.py", line 156, in run
+    server, _state = stand_in_provider.serve(
+  File "/tmp/cr5/qualification/ssdp70/eval/stand_in_provider.py", line 148, in serve
+    server = _UnixHTTPServer(unix, handler) if unix else _TcpServer((host, port), handler)
+  File "/usr/lib/python3.10/socketserver.py", line 448, in __init__
+    self.socket = socket.socket(self.address_family,
+  File "/usr/lib/python3.10/socket.py", line 232, in __init__
+    _socket.socket.__init__(self, family, type, proto, fileno)
+PermissionError: [Errno 1] Operation not permitted
+
+======================================================================
+ERROR: test_every_home_discovery_source_is_refused_before_omp_or_provider (test_omp_integration.ProviderManagedStateAndDiscoveryEffects) (source='.config/gcloud')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/tmp/cr5/qualification/ssdp70/eval/test_omp_integration.py", line 740, in test_every_home_discovery_source_is_refused_before_omp_or_provider
+    self._assert_rejected_before_process(rig, expect_launch=True)
+  File "/tmp/cr5/qualification/ssdp70/eval/test_omp_integration.py", line 696, in _assert_rejected_before_process
+    summary = rig.run(scenario_steps(text("must not launch")))
+  File "/tmp/cr5/qualification/ssdp70/eval/omp_rig.py", line 156, in run
+    server, _state = stand_in_provider.serve(
+  File "/tmp/cr5/qualification/ssdp70/eval/stand_in_provider.py", line 148, in serve
+    server = _UnixHTTPServer(unix, handler) if unix else _TcpServer((host, port), handler)
+  File "/usr/lib/python3.10/socketserver.py", line 448, in __init__
+    self.socket = socket.socket(self.address_family,
+  File "/usr/lib/python3.10/socket.py", line 232, in __init__
+    _socket.socket.__init__(self, family, type, proto, fileno)
+PermissionError: [Errno 1] Operation not permitted
+
+======================================================================
+ERROR: test_every_home_discovery_source_is_refused_before_omp_or_provider (test_omp_integration.ProviderManagedStateAndDiscoveryEffects) (source='.aws')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/tmp/cr5/qualification/ssdp70/eval/test_omp_integration.py", line 740, in test_every_home_discovery_source_is_refused_before_omp_or_provider
+    self._assert_rejected_before_process(rig, expect_launch=True)
+  File "/tmp/cr5/qualification/ssdp70/eval/test_omp_integration.py", line 696, in _assert_rejected_before_process
+    summary = rig.run(scenario_steps(text("must not launch")))
+  File "/tmp/cr5/qualification/ssdp70/eval/omp_rig.py", line 156, in run
+    server, _state = stand_in_provider.serve(
+  File "/tmp/cr5/qualification/ssdp70/eval/stand_in_provider.py", line 148, in serve
+    server = _UnixHTTPServer(unix, handler) if unix else _TcpServer((host, port), handler)
+  File "/usr/lib/python3.10/socketserver.py", line 448, in __init__
+    self.socket = socket.socket(self.address_family,
+  File "/usr/lib/python3.10/socket.py", line 232, in __init__
+    _socket.socket.__init__(self, family, type, proto, fileno)
+PermissionError: [Errno 1] Operation not permitted
+
+======================================================================
+ERROR: test_every_home_discovery_source_is_refused_before_omp_or_provider (test_omp_integration.ProviderManagedStateAndDiscoveryEffects) (source='.lsp.json')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/tmp/cr5/qualification/ssdp70/eval/test_omp_integration.py", line 740, in test_every_home_discovery_source_is_refused_before_omp_or_provider
+    self._assert_rejected_before_process(rig, expect_launch=True)
+  File "/tmp/cr5/qualification/ssdp70/eval/test_omp_integration.py", line 696, in _assert_rejected_before_process
+    summary = rig.run(scenario_steps(text("must not launch")))
+  File "/tmp/cr5/qualification/ssdp70/eval/omp_rig.py", line 156, in run
+    server, _state = stand_in_provider.serve(
+  File "/tmp/cr5/qualification/ssdp70/eval/stand_in_provider.py", line 148, in serve
+    server = _UnixHTTPServer(unix, handler) if unix else _TcpServer((host, port), handler)
+  File "/usr/lib/python3.10/socketserver.py", line 448, in __init__
+    self.socket = socket.socket(self.address_family,
+  File "/usr/lib/python3.10/socket.py", line 232, in __init__
+    _socket.socket.__init__(self, family, type, proto, fileno)
+PermissionError: [Errno 1] Operation not permitted
+
+======================================================================
+ERROR: test_every_home_discovery_source_is_refused_before_omp_or_provider (test_omp_integration.ProviderManagedStateAndDiscoveryEffects) (source='.lsp.yaml')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/tmp/cr5/qualification/ssdp70/eval/test_omp_integration.py", line 740, in test_every_home_discovery_source_is_refused_before_omp_or_provider
+    self._assert_rejected_before_process(rig, expect_launch=True)
+  File "/tmp/cr5/qualification/ssdp70/eval/test_omp_integration.py", line 696, in _assert_rejected_before_process
+    summary = rig.run(scenario_steps(text("must not launch")))
+  File "/tmp/cr5/qualification/ssdp70/eval/omp_rig.py", line 156, in run
+    server, _state = stand_in_provider.serve(
+  File "/tmp/cr5/qualification/ssdp70/eval/stand_in_provider.py", line 148, in serve
+    server = _UnixHTTPServer(unix, handler) if unix else _TcpServer((host, port), handler)
+  File "/usr/lib/python3.10/socketserver.py", line 448, in __init__
+    self.socket = socket.socket(self.address_family,
+  File "/usr/lib/python3.10/socket.py", line 232, in __init__
+    _socket.socket.__init__(self, family, type, proto, fileno)
+PermissionError: [Errno 1] Operation not permitted
+
+======================================================================
+ERROR: test_every_home_discovery_source_is_refused_before_omp_or_provider (test_omp_integration.ProviderManagedStateAndDiscoveryEffects) (source='.lsp.yml')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/tmp/cr5/qualification/ssdp70/eval/test_omp_integration.py", line 740, in test_every_home_discovery_source_is_refused_before_omp_or_provider
+    self._assert_rejected_before_process(rig, expect_launch=True)
+  File "/tmp/cr5/qualification/ssdp70/eval/test_omp_integration.py", line 696, in _assert_rejected_before_process
+    summary = rig.run(scenario_steps(text("must not launch")))
+  File "/tmp/cr5/qualification/ssdp70/eval/omp_rig.py", line 156, in run
+    server, _state = stand_in_provider.serve(
+  File "/tmp/cr5/qualification/ssdp70/eval/stand_in_provider.py", line 148, in serve
+    server = _UnixHTTPServer(unix, handler) if unix else _TcpServer((host, port), handler)
+  File "/usr/lib/python3.10/socketserver.py", line 448, in __init__
+    self.socket = socket.socket(self.address_family,
+  File "/usr/lib/python3.10/socket.py", line 232, in __init__
+    _socket.socket.__init__(self, family, type, proto, fileno)
+PermissionError: [Errno 1] Operation not permitted
+
+======================================================================
+ERROR: test_every_home_discovery_source_is_refused_before_omp_or_provider (test_omp_integration.ProviderManagedStateAndDiscoveryEffects) (source='lsp.json')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/tmp/cr5/qualification/ssdp70/eval/test_omp_integration.py", line 740, in test_every_home_discovery_source_is_refused_before_omp_or_provider
+    self._assert_rejected_before_process(rig, expect_launch=True)
+  File "/tmp/cr5/qualification/ssdp70/eval/test_omp_integration.py", line 696, in _assert_rejected_before_process
+    summary = rig.run(scenario_steps(text("must not launch")))
+  File "/tmp/cr5/qualification/ssdp70/eval/omp_rig.py", line 156, in run
+    server, _state = stand_in_provider.serve(
+  File "/tmp/cr5/qualification/ssdp70/eval/stand_in_provider.py", line 148, in serve
+    server = _UnixHTTPServer(unix, handler) if unix else _TcpServer((host, port), handler)
+  File "/usr/lib/python3.10/socketserver.py", line 448, in __init__
+    self.socket = socket.socket(self.address_family,
+  File "/usr/lib/python3.10/socket.py", line 232, in __init__
+    _socket.socket.__init__(self, family, type, proto, fileno)
+PermissionError: [Errno 1] Operation not permitted
+
+======================================================================
+ERROR: test_every_home_discovery_source_is_refused_before_omp_or_provider (test_omp_integration.ProviderManagedStateAndDiscoveryEffects) (source='lsp.yaml')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/tmp/cr5/qualification/ssdp70/eval/test_omp_integration.py", line 740, in test_every_home_discovery_source_is_refused_before_omp_or_provider
+    self._assert_rejected_before_process(rig, expect_launch=True)
+  File "/tmp/cr5/qualification/ssdp70/eval/test_omp_integration.py", line 696, in _assert_rejected_before_process
+    summary = rig.run(scenario_steps(text("must not launch")))
+  File "/tmp/cr5/qualification/ssdp70/eval/omp_rig.py", line 156, in run
+    server, _state = stand_in_provider.serve(
+  File "/tmp/cr5/qualification/ssdp70/eval/stand_in_provider.py", line 148, in serve
+    server = _UnixHTTPServer(unix, handler) if unix else _TcpServer((host, port), handler)
+  File "/usr/lib/python3.10/socketserver.py", line 448, in __init__
+    self.socket = socket.socket(self.address_family,
+  File "/usr/lib/python3.10/socket.py", line 232, in __init__
+    _socket.socket.__init__(self, family, type, proto, fileno)
+PermissionError: [Errno 1] Operation not permitted
+
+======================================================================
+ERROR: test_every_home_discovery_source_is_refused_before_omp_or_provider (test_omp_integration.ProviderManagedStateAndDiscoveryEffects) (source='lsp.yml')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/tmp/cr5/qualification/ssdp70/eval/test_omp_integration.py", line 740, in test_every_home_discovery_source_is_refused_before_omp_or_provider
+    self._assert_rejected_before_process(rig, expect_launch=True)
+  File "/tmp/cr5/qualification/ssdp70/eval/test_omp_integration.py", line 696, in _assert_rejected_before_process
+    summary = rig.run(scenario_steps(text("must not launch")))
+  File "/tmp/cr5/qualification/ssdp70/eval/omp_rig.py", line 156, in run
+    server, _state = stand_in_provider.serve(
+  File "/tmp/cr5/qualification/ssdp70/eval/stand_in_provider.py", line 148, in serve
+    server = _UnixHTTPServer(unix, handler) if unix else _TcpServer((host, port), handler)
+  File "/usr/lib/python3.10/socketserver.py", line 448, in __init__
+    self.socket = socket.socket(self.address_family,
+  File "/usr/lib/python3.10/socket.py", line 232, in __init__
+    _socket.socket.__init__(self, family, type, proto, fileno)
+PermissionError: [Errno 1] Operation not permitted
+
+----------------------------------------------------------------------
+Ran 1 test in 0.504s
+
+FAILED (errors=39)

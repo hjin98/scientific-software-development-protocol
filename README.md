@@ -10,7 +10,7 @@ That distinction is the core of the protocol. Scientific models, numerical metho
 
 ## Start here
 
-If you remember only six ideas, remember these:
+If you remember only seven ideas, remember these:
 
 1. **Start at the earliest layer whose meaning changes.** A code change is not always just a code change.
 2. **Write down the contract before choosing the mechanism.** Protect scientific, numerical, architectural, and behavioral invariants explicitly.
@@ -18,6 +18,7 @@ If you remember only six ideas, remember these:
 4. **Challenge a bad contract instead of patching around it.** If the governing model, method, or architecture is wrong, ambiguous, or unrealizable, route the problem to its real owner.
 5. **Prefer the simplest admissible system.** Remove, narrow, consolidate, or redesign delegated machinery before adding wrappers, fallback paths, duplicated state, or special cases.
 6. **Spend rigor where it changes the decision.** Mandatory obligations stay mandatory, but analysis/evidence depth should track consequence and unresolved uncertainty rather than treating every detail like a research problem.
+7. **Keep delegated science inspectable.** When software or an agent produces, runs, analyzes or reviews scientific results, the scientist must still be able to see what actually happened, judge how much the result can be trusted, and hear about what the delegated work ran into, without the protocol inventing product features nobody asked for.
 
 A useful rule of thumb is:
 
@@ -76,12 +77,14 @@ Use the smallest set of skills that covers the semantics you are actually changi
 | `scientific-formulation` | defining or changing the scientific question, observables, equations/model, assumptions, validity regime, interpretation, or external adequacy |
 | `numerical-algorithm-design` | defining or changing discretization, estimator, optimizer, approximation, convergence, conditioning, precision, stochastic semantics, tolerances, or numerical uncertainty |
 | `software-design` | designing or reviewing architecture, ownership, interfaces, state, data/control flow, persistence, concurrency, resources, compatibility, or an implementation workplan |
-| `software-implementation` | implementing, refactoring, debugging, testing, packaging, or validating code under accepted D1-D3 authority |
+| `software-implementation` | implementing, refactoring, debugging, testing, packaging, or validating code under accepted D1-D3 authority; running or analyzing scientific pipelines and data; reviewing realized results or reports; preparing evidence for a human scientific gate |
 | `software-documentation` | making accepted science/software understandable without turning explanatory prose into new authority |
 | `software-maintenance-audit` | inspecting long-horizon architectural entropy, weak tests, duplicated authority, dependency drift, and maintainability risk |
 | `repository-hygiene` | cleaning up completed branches/artifacts conservatively after semantic and evidentiary closure |
 
 The first four are authority-bearing D1-D4 roles. The last three are supporting specialists.
+
+**Activate skills with a deterministic command, not wording.** Start each governed task with your runtime's explicit skill command, such as `/software-design` in Claude Code, `/skill:software-design` in OMP or `$software-design` in Codex. Confirm that your runtime and mode actually load the skill when given the command: in our tests Claude Code print mode and OMP's RPC mode did, while OMP print mode (`-p`) and `codex exec` passed the command to the model as plain text (interactive modes were not tested). Where the command is not expanded, load the skill explicitly through the runtime's supported mechanism. A request phrased as "use the software-design skill" or one that only describes the task relies on the model deciding to consult its skill catalog. Qualification runs show that this decision is unreliable, especially on lighter models, and that clerical-looking tasks (copying a memo, relaying a decision, delegating work) are often handled with no skill loaded at all. Skill descriptions still help an agent route sensibly when no command was given, but they are a fallback, not the activation mechanism. The examples below use the Claude Code form.
 
 The active skill entrypoint controls what context is loaded. Ordinary links and **package membership do not imply activation**; they make material discoverable, not automatically active. The universal routing and authority kernel is [`source/shared/references/abstraction-and-concretization.md`](source/shared/references/abstraction-and-concretization.md).
 
@@ -93,6 +96,7 @@ SSDP is written so an agent carries only what the current decision needs:
 - **Conditional owners** load only when their trigger fires. Precise semantic-definition machinery is used when the work touches a specialized scientific/numerical object, a parameter or default binding, an external result, or a formal claim; ordinary engineering meaning needs only precise prose, types, contracts, and tests. Project memory and its storage schema, authority-lifecycle detail, language/tool profiles, and history stay cold otherwise.
 - **Handoffs and resumable state are decision-sufficient projections**: objective, exact identities, local decisions, open blockers and uncertainty, evidence state, next action, and reopen/stop conditions—never a replay of chronology or generic doctrine, and never a place where an open blocker quietly disappears.
 - **Working State** (a compact checkpoint for long or interruptible work) is optional coordination cache. It is not authority, is not a required file, and is stale as soon as its protocol, authority, workplan, candidate, or regime basis changes.
+- **A generated Scientific checks section.** Every D1-D4 role entrypoint, plus the documentation and maintenance-audit specialists, carries the Protocol 7 obligation predicate and the complete minimum duties for scientific work, generated from one shared fragment. So an agent that reads only the entrypoint still inquires before irreversible loss, reports findings and gaps, asks delegates the right questions, discloses variant searches, reports recorded tensions, keeps claims within evidence and states its consequential choices. The detailed scientific-inspectability owner is optional depth, most useful before consequential judgments over realized results, D1-D3 authority work or gate evidence; no read of it is required.
 - **Strict version binding at entry.** Before its first file change the agent states the governing SSDP version (from the task or a workplan it names, else `none`) and compares it with the installed package. Version-bound work stays under its declared version until the authority over that work rebinds it: a newer, compatible installed package is an adoption candidate the agent may recommend, never one it adopts itself. Without a source of the declared version the agent reports non-closure.
 
 The portable runtime unit is `dist/skills/<skill-name>/`; top-level ZIPs contain the same bundles for transport. See [PORTABILITY.md](PORTABILITY.md) for installation and routing details.
@@ -123,7 +127,7 @@ Do not reopen higher layers merely because many files are changing. Do not keep 
 For a new scientific project:
 
 ```text
-Use the scientific-formulation skill. Define the scientific problem, observables,
+/scientific-formulation Define the scientific problem, observables,
 assumptions, validity regime, uncertainty, and falsification/validation requirements.
 Produce the minimum D1 authority needed for downstream numerical design.
 ```
@@ -131,7 +135,7 @@ Produce the minimum D1 authority needed for downstream numerical design.
 Then:
 
 ```text
-Use the numerical-algorithm-design skill. Starting from the accepted D1 formulation,
+/numerical-algorithm-design Starting from the accepted D1 formulation,
 define the numerical method, approximation/error model, convergence and conditioning
 expectations, precision/stochastic semantics, verification oracles, and the minimum
 D2->D3 handoff.
@@ -140,7 +144,7 @@ D2->D3 handoff.
 Then:
 
 ```text
-Use the software-design skill. Starting from the accepted D1/D2 authority, design the
+/software-design Starting from the accepted D1/D2 authority, design the
 minimum justified architecture and produce a D3->D4 implementation workplan with
 ownership, interfaces, constraints, acceptance boundaries, non-goals, and reopen triggers.
 ```
@@ -148,7 +152,7 @@ ownership, interfaces, constraints, acceptance boundaries, non-goals, and reopen
 Then:
 
 ```text
-Use the software-implementation skill. Implement the accepted workplan, preserve D1-D3
+/software-implementation Implement the accepted workplan, preserve D1-D3
 invariants, keep delegated machinery simple, run affected regression/integration at the
 real semantic-owner boundary, and report blockers rather than weakening the contract.
 ```
@@ -156,7 +160,7 @@ real semantic-owner boundary, and report blockers rather than weakening the cont
 For a substantial independent implementation Review:
 
 ```text
-Use the software-design skill in independent Review mode. Reconstruct the governing
+/software-design Independent Review mode. Reconstruct the governing
 authority independently, perform the Challenge Pass first, review the assembled system
 rather than only the diff, falsify conformance and abstraction adequacy, and issue
 Pass/No-Pass only on genuine blockers.
@@ -270,6 +274,7 @@ After a material change:
 | **Local bug fix** | Stay at D4 if D1-D3 and public D4 contracts are unchanged. Repair the owning cause, run focused checks plus affected regression/integration, and stop. |
 | **Suspicious scientific/numerical result** | Reconstruct D4 behavior -> D3 state/data/control -> D2 numerical envelope -> D1 meaning/validity. Locate the earliest faulty owner. |
 | **Performance optimization** | Involve D2 if precision, reduction order, approximation, stochastic behavior, or convergence changes. Involve D3 if ownership, data movement, concurrency, or resources change materially. Otherwise remain at D4. |
+| **Running or reviewing a scientific analysis** | Stay at D4 when the contracts are unchanged. Look for material findings before anything is discarded, report a null with its coverage, disclose variant searches and consequential choices, and keep claims within evidence. Route an authority tension or Challenge upward instead of reinterpreting the science. |
 | **Mature subsystem replacement** | Use `software-design`; activate Project Engineering Memory when project history can materially affect the decision. Preserve useful capability without preserving obsolete machinery. |
 | **High-risk integration or release** | Freeze an exact candidate, qualify the real assembled system, perform independent Review, resolve Challenges, obtain required human ratification, then publish/cut over under the project's release authority. |
 
@@ -281,10 +286,26 @@ Activate PEM only when demonstrated project history can materially change the cu
 
 Keep PEM cold for a first clean local bug or unrelated task. Memory is a hypothesis index and decision aid, not a vote for whatever succeeded most often in the past. Agents use a compact memory contract (when to activate, how to retrieve, how to record applicability, when an update is justified); the storage schema and publication mechanics load only when someone is actually maintaining the memory.
 
+## Scientific inspectability and the feedback loop
+
+Protocol 7 makes the **scientific feedback loop** a first-class objective. Science flows downward from question to D1 to D4 to execution. What execution actually did must flow back up: realized results → something a human can inspect → a bounded search for anomalies and tensions → human judgment → a persisted next question, Challenge or revised method.
+
+- **Recoverability is not accessibility.** Bytes somewhere in a log or database do not help if a routine scientific question needs code archaeology. The **realized scientific record** (what a run actually did: states, trajectories, decisions, exclusions, failures and results) should be retained and projected so its intended reader can answer routine questions, with drill-down to exact provenance.
+- **Three binding modes keep this honest.**
+  - Authors of D1-D3 authority state the inspectability need and visibly mark any product surface it implies (**O1**).
+  - Agents perform a bounded inquiry and report findings and gaps (**O2**).
+  - Products must retain, project or expose information only when accepted authority, an explicit instruction or an existing contract says so (**O3**, never the protocol alone). A marked product item beyond the requested deliverable binds only after the stakeholder accepts it.
+- **Claim integrity always binds.** An agent never presents a searched-for result as pre-specified, never states a conclusion unqualified past a known material anomaly or coverage limit, and never passes off interpretation as measurement.
+- **Epistemic initiative.** An agent looks beyond the literal task, inside its authorized budget and before any destructive step. It reports a null only together with what it examined. It discloses every variant it searched and asks its delegates the same questions, reporting unanswered parts as gaps.
+- **Tensions accumulate without becoming authority.** A finding that bears on accepted science but is below the Serious Challenge threshold is recorded in an existing evidence or issue home. It is bound to every plausibly implicated authority and searched for before that authority is relied on or revised. Data remain evidence, never authority.
+- **Human gates get decision-sufficient evidence**, with a non-narrative core separable from the AI's interpretation.
+
+The claim is deliberately bounded. It promises a disclosed, bounded search, not exhaustive retrieval. Documentation and audit routes do not perform tension searches. Delegate answers are reported as given. Adoption is prospective: existing accepted authority does not become stale.
+
 ## Core doctrines
 
 - **One semantic owner per material current claim.** Tests, history, generated views, documentation, and project memory do not become parallel owners.
-- **Authority and evidence are different.** Evidence can support or challenge authority; repetition does not turn it into authority.
+- **Authority and evidence are different.** Evidence can support or challenge authority; repetition does not turn it into authority. Likewise an inspectability finding is not a product requirement.
 - **Current code is not automatically the intended contract.** When code and accepted specification disagree, classify the defect before editing authority.
 - **Compatibility is a real contract, not an archaeological obligation.** Preserve it where it is actually supported.
 - **History explains why; current owners explain what is true.** Keep chronology discoverable but outside the normal hot path.
@@ -311,6 +332,9 @@ SSDP began as a software-engineering protocol and grew into a scientific-softwar
 | **6.4** | semantic definition/source availability, well-defined formal contracts, parameter binding, exact imports, typed semantic dependencies, and claim/warrant discipline |
 | **6.5** | self-governance/release-state strengthening plus importance-weighted attention, proportional rigor/evidence, evidence-only requalification economy, and release-documentation closeout |
 | **6.6** | cognitive/operational optimization: small universal kernel with a minimal inlined safety kernel, conditional semantic-definition and memory-schema owners, decision-sufficient handoffs and Working State, cognitive-resource escalation, optional independent review trajectories, strict version binding at entry, and empirical trajectory evaluation |
+| **7.0** | scientific inspectability, epistemic initiative and the scientific feedback loop: realized-record inspectability, O1/O2/O3 obligation binding with a claim-integrity floor, bounded initiative with delegate returns and variant-search disclosure, bounded tension search, feedback persistence, and decision-sufficient gate evidence |
+| **7.1** | obligation salience and stratified qualification: structured delegate-request blocks with per-question launched-work qualifiers, specialist entrypoint scoping, execution-surface neutralization, and undelivered-treatment stratification |
+| **7.2.1**[*](#reliability-warning) | the concluding 7.x semantic protocol: one generated Scientific checks section carries the complete minimum duty with optional owner depth; the patch makes checks smaller and ties duties to their triggers; qualification uses calibrated paired comparisons and a consolidated harness |
 
 For the full user-facing capability history, see [CHANGELOG.md](CHANGELOG.md). For detailed semantic rationale and superseded release attempts, see [history/SEMANTIC_EVOLUTION.md](history/SEMANTIC_EVOLUTION.md). Exact mutable release mappings remain in [PROTOCOL-RELEASE-STATE.yaml](PROTOCOL-RELEASE-STATE.yaml).
 
@@ -322,6 +346,7 @@ For the full user-facing capability history, see [CHANGELOG.md](CHANGELOG.md). F
 | `source/roles/` | D1-D4 authority-bearing skill entrypoints |
 | `source/specialists/` | optional documentation/audit/hygiene specialists |
 | `source/shared/references/` | canonical concern owners loaded by progressive disclosure |
+| `source/shared/fragments/` | shared text generated into entrypoints (the Scientific checks section) |
 | `dist/skills/` | ready-to-install generated skill bundles |
 | `orchestrator/` | optional version-bound orchestration/profile implementation |
 | `qualification/` | non-normative qualification, Review, and evaluation evidence per protocol cycle |
@@ -356,3 +381,7 @@ Mechanical qualification establishes only the property its oracle actually discr
 ---
 
 **Operating principle:** make the science explicit, make the numerical contract explicit, keep the architecture simple, let implementation stay adaptive, and demand evidence strong enough to justify the claim.
+
+## Reliability warning
+
+**\* Reliability warning.** SSDP is a language-based protocol: it works only through text an AI agent reads, and nothing in it enforces compliance. A purely language-based skill can never guarantee 100% compliance, and how reliably an agent follows SSDP depends on the strength and capability of the model. Protocol 7.2.1 is **accepted with conditions**: its qualification study (four candidate rounds, 7.0 to 7.2.1) never produced a statistically robust pass, so do not treat it as a statistically robust guarantee. Activate skills with explicit commands (for example `/software-design`), and review consequential output yourself. What the study measured and learned is recorded in [the qualification study evidence and lessons](qualification/ssdp70/PROTOCOL-7X-QUALIFICATION-STUDY-EVIDENCE-AND-LESSONS-2026-10-12.md).

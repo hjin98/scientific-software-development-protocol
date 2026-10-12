@@ -1,0 +1,14 @@
+{
+  "after": {
+    ".omp/agent/config.yml": "946e097d517997df522d83a8e80feedcf91f214a47ee3d192bd25c217f9c3075",
+    ".omp/agent/mcp.json": "743b35d83349a72fd900300ec3b7f24afdce22d77c8277de5e20e677424a19ff",
+    ".omp/agent/models.yml": "e0643d205dd1ac825db8666fb14368f51e9b79d0fddd90c250089d5f69af3ff4"
+  },
+  "before": {
+    ".omp/agent/config.yml": "946e097d517997df522d83a8e80feedcf91f214a47ee3d192bd25c217f9c3075",
+    ".omp/agent/mcp.json": "743b35d83349a72fd900300ec3b7f24afdce22d77c8277de5e20e677424a19ff",
+    ".omp/agent/models.yml": "e0643d205dd1ac825db8666fb14368f51e9b79d0fddd90c250089d5f69af3ff4"
+  },
+  "packages_after": "bbf7431f4ececcaf33517d6a95fe4604244d62a34f4c7370728f9f198713a61d",
+  "packages_before": "bbf7431f4ececcaf33517d6a95fe4604244d62a34f4c7370728f9f198713a61d"
+}

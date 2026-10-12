@@ -1,0 +1,11 @@
+{
+  "governing_ssdp": "6.6.0",
+  "target_protocol_status": "NON-QUALIFIED",
+  "head_commit": "c4b8781bfa5764a406758130d21e934ecf3662c8",
+  "head_tree": "a3efc6c70514e7d81b621b713c5e610ee67d6b03",
+  "branch": "ssdp-7.0-scientific-epistemic-closure",
+  "tracked_worktree_manifest_sha256": "f8b8fa7744c503ec1a3ebf917b36883e12650e51179a4c95ad1a387c1b35cee1",
+  "implementation_patch_sha256": "4d027e37ada78e60f7177c08798808c8bc54635cf05aa869a916f9ec232bb8ae",
+  "purpose": "D4 provisional implementation / Serious Challenge diagnostic; NOT acceptance",
+  "git_status_before_capture": " M qualification/ssdp70/eval/adapters/omp.py\n M qualification/ssdp70/eval/assess70.py\n M qualification/ssdp70/eval/batch_assess70.py\n M qualification/ssdp70/eval/core70.py\n M qualification/ssdp70/eval/evidence70.py\n M qualification/ssdp70/eval/harness70.py\n M qualification/ssdp70/eval/package_ledger.py\n M qualification/ssdp70/eval/test_activation_accounting.py\n M qualification/ssdp70/eval/test_batch_cli.py\n M qualification/ssdp70/eval/test_package_ledger.py\n?? qualification/ssdp70/STAKEHOLDER-DECISION-2026-10-04-PROTOCOL-7.0-STAGE7-OPTION1-CLAIM-SCOPED-ADMISSION.md\n?? qualification/ssdp70/eval/adapters/omp_eval.py\n?? qualification/ssdp70/eval/capabilities/omp-evaluator-readonly.json\n?? qualification/ssdp70/eval/evaluator_admission.py\n?? qualification/ssdp70/eval/profiles/omp-evaluator-readonly.json\n?? qualification/ssdp70/eval/profiles/omp-evaluator-readonly.template.json\n?? qualification/ssdp70/eval/test_omp_eval.py\n?? qualification/ssdp70/eval/write_oracles.py\n?? qualification/ssdp70/package-access-ledger-d4-20261004-025110Z/\n"
+}
