@@ -30,8 +30,8 @@ candidate:
   version: "7.2.1"
   semantic_ref: aaeaf8b6b2121b9fb8aba31917c8265649c43954
   review:
-    state: NOT_RUN
-    evidence_ref: NONE
+    state: PASS
+    evidence_ref: hjin98/scientific-software-development-protocol@04827e657cd156a6ea664a04869f73d15e8bcbed:qualification/ssdp70/INDEPENDENT-REVIEW-2026-10-12-PROTOCOL-7.2.1-PASS.md
   ratification:
     state: NOT_REQUESTED
     evidence_ref: NONE
