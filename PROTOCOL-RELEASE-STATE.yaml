@@ -27,13 +27,13 @@ historical:
     public_source_ref: 7f7b5e24858e813e45ace867a7f8ea5180f43bf0
     recovery_ref: c4d5da1e0acb0e9f27376bf69561e8762747cd2d
 candidate:
-  version: "6.6.0"
-  semantic_ref: 22f4bdba53795da3a6f13f162529f3a843fc37ae
+  version: "7.2.1"
+  semantic_ref: UNFROZEN
   review:
-    state: PASS
-    evidence_ref: hjin98/scientific-software-development-protocol@356d13f05ae56892dc1a75f1eae4c5d3d47881ee:qualification/ssdp66/INDEPENDENT-REVIEW-2026-09-26-PROTOCOL-6.6-PASS.md
+    state: NOT_RUN
+    evidence_ref: NONE
   ratification:
-    state: RATIFIED
-    evidence_ref: hjin98/scientific-software-development-protocol@073aa74d0e786f8997d7a2885a67160000bd031c:qualification/ssdp66/STAKEHOLDER-RATIFICATION-2026-09-26-PROTOCOL-6.6.md
-  public_source_ref: 22f4bdba53795da3a6f13f162529f3a843fc37ae
-  recovery_ref: 384666764da4c55b282e6b1595ab97e2f86e1dc4
+    state: NOT_REQUESTED
+    evidence_ref: NONE
+  public_source_ref: UNAVAILABLE
+  recovery_ref: UNAVAILABLE

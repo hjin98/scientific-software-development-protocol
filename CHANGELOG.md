@@ -10,7 +10,7 @@ Older README files accumulated release mappings, bootstrap attempts, and version
 
 ## Protocol 7.x
 
-### 7.2.1 — smaller, trigger-tied Scientific checks (development candidate)
+### 7.2.1 — smaller, trigger-tied Scientific checks (accepted with conditions)
 
 Protocol 7.2.1 is a patch to 7.2.0. It applies the stakeholder-ratified 7.2.1 amendment and rewrites the generated *Scientific checks* section to state the same duties more plainly. No other duty changes.
 
@@ -20,7 +20,9 @@ Protocol 7.2.1 is a patch to 7.2.0. It applies the stakeholder-ratified 7.2.1 am
 - **Named items in place of numbered paragraphs.** The duties that keep a result's status recoverable (findings, the owed inquiry, variants, tensions, choices, retention, claims) are short named items. Separate rules (inquiry before irreversible loss, resource limits, persistence, persisting a tension, inaccessible homes, product changes, revising D1/D2 authority, authority content) are listed apart from them. The variant duty refers to the variant delegate question instead of repeating it.
 - **Size.** Compared with 7.2.0 the section is 143–157 B smaller on the role entrypoints, 77 B smaller on documentation and 11 B smaller on maintenance audit, which stays below its 7.1 reference.
 
-Stated limits: 7.2.1 is not frozen and has no qualification run. The Orchestrator 7.2 profile declares 7.2.1 and resolves 7.2.1 and 7.2, with unchanged lifecycle and prompts. Exact 7.2.0 requests are rejected as incompatible.
+Accepted with conditions by stakeholder decision over a statistical **no-go**: one concurrent campaign with executor GLM-5.3-Flash and evaluator MiMo-V2.6-Flash compared 7.2.1 with 7.2.0 on the same 122 main-panel episodes under a frozen decision rule; target narration improvement (P1) was FRAGILE (10.4% vs 17.1% failing on resolved items, not robust to evaluator-unresolved items), retained duties (P2) and outcome items (P3) were robustly non-inferior, and one harm flag recorded a single failure of an unowed delegate-request item. This is stakeholder acceptance, not statistical qualification: language-only skills cannot guarantee full compliance, reliability depends on model capability, and users should activate skills explicitly and review consequential output (see the [README reliability warning](README.md#reliability-warning)); 7.2.0 remains NOT QUALIFIED history and is not separately accepted, the 7.x semantic line concludes here, and further improvement through deterministic machinery is stakeholder direction for a future SSDS 8.0+ design, not a plan or promise.
+
+Compatibility: The Orchestrator 7.2 profile declares 7.2.1 and resolves 7.2.1 and 7.2, with unchanged lifecycle and prompts. Exact 7.2.0 requests are rejected as incompatible.
 
 ### 7.2.0 — reliable consumed surface and calibrated qualification
 

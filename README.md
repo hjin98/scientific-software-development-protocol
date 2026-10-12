@@ -334,7 +334,7 @@ SSDP began as a software-engineering protocol and grew into a scientific-softwar
 | **6.6** | cognitive/operational optimization: small universal kernel with a minimal inlined safety kernel, conditional semantic-definition and memory-schema owners, decision-sufficient handoffs and Working State, cognitive-resource escalation, optional independent review trajectories, strict version binding at entry, and empirical trajectory evaluation |
 | **7.0** | scientific inspectability, epistemic initiative and the scientific feedback loop: realized-record inspectability, O1/O2/O3 obligation binding with a claim-integrity floor, bounded initiative with delegate returns and variant-search disclosure, bounded tension search, feedback persistence, and decision-sufficient gate evidence |
 | **7.1** | obligation salience and stratified qualification: structured delegate-request blocks with per-question launched-work qualifiers, specialist entrypoint scoping, execution-surface neutralization, and undelivered-treatment stratification |
-| **7.2** | skills-only reliability and calibrated qualification: one generated Scientific checks section per entrypoint carries the complete minimum duty, so no owner read is required (the owner is optional depth); qualification gates are calibrated against accepted 6.6 on the same executor; the qualification harness is consolidated |
+| **7.2.1**[*](#reliability-warning) | the concluding 7.x semantic protocol: one generated Scientific checks section carries the complete minimum duty with optional owner depth; the patch makes checks smaller and ties duties to their triggers; qualification uses calibrated paired comparisons and a consolidated harness |
 
 For the full user-facing capability history, see [CHANGELOG.md](CHANGELOG.md). For detailed semantic rationale and superseded release attempts, see [history/SEMANTIC_EVOLUTION.md](history/SEMANTIC_EVOLUTION.md). Exact mutable release mappings remain in [PROTOCOL-RELEASE-STATE.yaml](PROTOCOL-RELEASE-STATE.yaml).
 
@@ -381,3 +381,7 @@ Mechanical qualification establishes only the property its oracle actually discr
 ---
 
 **Operating principle:** make the science explicit, make the numerical contract explicit, keep the architecture simple, let implementation stay adaptive, and demand evidence strong enough to justify the claim.
+
+## Reliability warning
+
+**\* Reliability warning.** SSDP is a language-based protocol: it works only through text an AI agent reads, and nothing in it enforces compliance. A purely language-based skill can never guarantee 100% compliance, and how reliably an agent follows SSDP depends on the strength and capability of the model. Protocol 7.2.1 is **accepted with conditions**: its qualification study (four candidate rounds, 7.0 to 7.2.1) never produced a statistically robust pass, so do not treat it as a statistically robust guarantee. Activate skills with explicit commands (for example `/software-design`), and review consequential output yourself. What the study measured and learned is recorded in [the qualification study evidence and lessons](qualification/ssdp70/PROTOCOL-7X-QUALIFICATION-STUDY-EVIDENCE-AND-LESSONS-2026-10-12.md).
