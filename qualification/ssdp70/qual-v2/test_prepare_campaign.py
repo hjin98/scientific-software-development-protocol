@@ -6,6 +6,7 @@ from __future__ import annotations
 
 import json
 import contextlib
+import hashlib
 import io
 import shutil
 import subprocess
@@ -115,6 +116,96 @@ class Plan(unittest.TestCase):
         p = subprocess.run([sys.executable, HERE / "campaign_run.py", str(self.work), "start", "2"], capture_output=True, text=True, env=env)
         self.assertEqual(p.returncode, 2)
         self.assertIn("has not finished", p.stderr)
+
+    def test_stage_parallel_sets_stage_two_only(self):
+        cfg = self.t / "cfg.json"
+        cfg.write_text(json.dumps({"parallel": 32, "stage_parallel": {"2": 8}}))
+        run(HERE / "prepare_campaign.py", "plan", *self.args, "--config", cfg)
+        plan = json.loads((self.work / "commands.json").read_text())["commands"]
+        par = {c["key"]: c["argv"][c["argv"].index("--parallel") + 1] for c in plan}
+        self.assertTrue(all(par[c["key"]] == ("32" if c["stage"] == 1 else "8") for c in plan), par)
+
+    def fake(self, key: str, name: str, state: str, err: str = "", reasons=None):
+        d = self.work / "runs" / key / name
+        d.mkdir(parents=True)
+        (d / "summary.json").write_text(json.dumps({"evidence_state": state, "evidence_state_reasons": reasons or []}))
+        term = {"state": "error" if err else "completed", "native_return_state": {"errorMessage": err}}
+        (d / "events.normalized.jsonl").write_text(json.dumps({"kind": "termination", "payload": term}) + "\n")
+
+    def test_plan_rerun_selects_infra_only_per_command_and_arm_once(self):
+        run(HERE / "prepare_campaign.py", "plan", *self.args)
+        main = next(c for c in json.loads((self.work / "commands.json").read_text())["commands"] if c["panel"] == "main")
+        a0, a1 = main["arms"][:2]
+        self.fake(main["key"], f"T1-r01-{a0}-r0", "EXECUTION_ERROR", err="429 Model busy, retry later")
+        self.fake(main["key"], f"T1-r01-{a1}-r0", "COMPLETE_ADMISSIBLE")
+        self.fake(main["key"], f"T1-r02-{a1}-r0", "MALFORMED_EVIDENCE_OR_ASSESSMENT", reasons=["more provider-layer error retries than the exact build performs"])
+        self.fake(main["key"], f"T1-r03-{a0}-r0", "EXECUTION_ERROR", err="executor refused")
+        args = ["--work", self.work, "--stage", "1", "--parallel", "8"]
+        p = run(HERE / "prepare_campaign.py", "plan-rerun", *args)
+        self.assertNotEqual(p.returncode, 0)
+        self.assertIn("has not finished", p.stderr)
+        (self.work / "launch").mkdir()
+        (self.work / "launch" / "DONE-stage1").write_text("x")
+        p = run(HERE / "prepare_campaign.py", "plan-rerun", *args)
+        self.assertEqual(p.returncode, 0, p.stderr)
+        plan = json.loads((self.work / "rerun-commands-stage1.json").read_text())
+        got = {(c["source_command"], c["arm"]): [r["run"] for r in c["originals"]] for c in plan["commands"]}
+        self.assertEqual(got, {(main["key"], a0): [f"T1-r01-{a0}-r0"], (main["key"], a1): [f"T1-r02-{a1}-r0"]})
+        for c in plan["commands"]:
+            argv = c["argv"]
+            self.assertEqual(argv[argv.index("--parallel") + 1], "8")
+            self.assertEqual([argv[j + 1] for j, x in enumerate(argv) if x == "--arm"], [c["arm"]])
+            self.assertEqual(argv[argv.index("--out") + 1], str(self.work / "runs" / f"rerun-s1-{c['arm']}" / main["key"]))
+            strip = lambda v: [x for j, x in enumerate(v) if x not in ("--out", "--parallel", "--arm", "--only") and v[j - 1] not in ("--out", "--parallel", "--arm", "--only")]  # noqa: E731
+            self.assertEqual(strip(argv), strip(main["argv"]))
+        outs = [c["argv"][c["argv"].index("--out") + 1] for c in plan["commands"]]
+        self.assertEqual(len(outs), len(set(outs)))                       # the harness refuses an existing --out: one fresh root per command
+        self.assertFalse(any(Path(o).exists() for o in outs))
+        self.assertNotEqual(run(HERE / "prepare_campaign.py", "plan-rerun", *args).returncode, 0)      # once per stage
+        env = {"PATH": "/usr/bin:/bin", "SSDP70_OMP_PROVIDER_CREDENTIAL": "x"}
+        rr = lambda: subprocess.run([sys.executable, HERE / "campaign_run.py", str(self.work), "run-rerun", "1"], capture_output=True, text=True, env=env)  # noqa: E731
+        (self.work / "READY").write_text("STAGE 2 MAY START\n")
+        self.assertIn("RERUN MAY START", rr().stderr)
+        (self.work / "READY").write_text("RERUN MAY START\n")
+        (self.work / "authorizations").mkdir()
+        (self.work / "authorizations" / "rerun-stage1.ok").write_text("0" * 64)
+        p = rr()
+        self.assertEqual(p.returncode, 2)
+        self.assertIn("not authorized", p.stderr)
+        self.assertFalse((self.work / "launch" / "rerun-runner-stage1.pid").exists())
+        (self.work / "authorizations" / "rerun-stage1.ok").write_text(hashlib.sha256((self.work / "rerun-commands-stage1.json").read_bytes()).hexdigest())
+        (self.work / "launch" / "runner-stage2.pid").write_text("1")
+        p = rr()
+        self.assertEqual(p.returncode, 2)
+        self.assertIn("already started", p.stderr)
+        (self.work / "launch" / "runner-stage2.pid").unlink()
+        (self.work / "launch" / "rerun-runner-stage1.pid").write_text("1")          # a stage-1 rerun in progress blocks stage 2
+        (self.work / "READY").write_text("STAGE 2 MAY START\n")
+        (self.work / "authorizations" / "stage2.ok").write_text("ok")
+        p = subprocess.run([sys.executable, HERE / "campaign_run.py", str(self.work), "start", "2"], capture_output=True, text=True, env=env)
+        self.assertEqual(p.returncode, 2)
+        self.assertIn("rerun has not finished", p.stderr)
+
+    def test_plan_rerun_reruns_a_partial_replicate_episode_whole(self):
+        run(HERE / "prepare_campaign.py", "plan", *self.args)
+        main = next(c for c in json.loads((self.work / "commands.json").read_text())["commands"] if c["panel"] == "main")
+        a0 = main["arms"][0]
+        self.fake(main["key"], f"T1-r01-{a0}-r0", "EXECUTION_ERROR", err="429 Model busy, retry later")
+        self.fake(main["key"], f"T1-r01-{a0}-r1", "COMPLETE_ADMISSIBLE")
+        self.fake(main["key"], f"T1-r01-{a0}-r2", "EXECUTION_ERROR", err="429 Model busy, retry later")
+        self.fake(main["key"], f"T1-r02-{a0}-r0", "COMPLETE_ADMISSIBLE")              # an episode with no infra replicate is not rerun
+        (self.work / "launch").mkdir()
+        (self.work / "launch" / "DONE-stage1").write_text("x")
+        p = run(HERE / "prepare_campaign.py", "plan-rerun", "--work", self.work, "--stage", "1", "--parallel", "32")
+        self.assertEqual(p.returncode, 0, p.stderr)
+        plan = json.loads((self.work / "rerun-commands-stage1.json").read_text())
+        (c,) = plan["commands"]
+        self.assertEqual([r["run"] for r in c["originals"]], [f"T1-r01-{a0}-r0", f"T1-r01-{a0}-r2"])
+        self.assertEqual(c["siblings"], [f"T1-r01-{a0}-r1"])
+        self.assertEqual((c["runs"], plan["runs"], plan["parallel"]), (3, 3, 32))
+        argv = c["argv"]
+        self.assertEqual([argv[j + 1] for j, x in enumerate(argv) if x == "--only"], ["T1-r01"])
+        self.assertEqual(argv[argv.index("--parallel") + 1], "32")
 
     def test_conditional_commands_are_two_episodes_and_slots_carry_their_command(self):
         run(HERE / "prepare_campaign.py", "plan", *self.args)

@@ -257,6 +257,23 @@ class Mapping721(Fixture):
         p = run(HERE / "prepare_campaign.py", "check-plan", "--work", self.work)
         self.assertEqual(p.returncode, 0, p.stdout)
 
+    def test_plan_config_sets_chunk_and_parallel_up_to_the_cap_and_check_plan_refuses_above_it(self):
+        cfg = self.t / "plan-config.json"
+        cfg.write_text(json.dumps({"parallel": 64, "chunk": 32}))                     # above the cap: clamped to PARALLEL_MAX
+        p = run(HERE / "prepare_campaign.py", "plan", *self.args, "--config", cfg)
+        self.assertEqual(p.returncode, 0, p.stderr)
+        plan = json.loads((self.work / "commands.json").read_text())["commands"]
+        self.assertTrue(all(c["argv"][c["argv"].index("--parallel") + 1] == "32" for c in plan))
+        p = run(HERE / "prepare_campaign.py", "check-plan", "--work", self.work)
+        self.assertEqual(p.returncode, 0, p.stdout)
+        doc = json.loads((self.work / "commands.json").read_text())
+        argv = doc["commands"][0]["argv"]
+        argv[argv.index("--parallel") + 1] = "33"
+        (self.work / "commands.json").write_text(json.dumps(doc))
+        p = run(HERE / "prepare_campaign.py", "check-plan", "--work", self.work)
+        self.assertNotEqual(p.returncode, 0)
+        self.assertIn("parallel above 32", p.stdout)
+
     def test_check_plan_refuses_a_replicate_set_that_is_not_identical_or_not_in_the_specification(self):
         self.plan()
         path = self.work / "commands.json"

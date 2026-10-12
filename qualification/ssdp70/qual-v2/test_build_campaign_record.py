@@ -208,6 +208,23 @@ class Synthetic(unittest.TestCase):
             self.assertEqual({r["episode"]: r["admissible"] for r in rec["runs"]}, {"EP-001": True, "EP-002": False})
             self.assertEqual(len(rec["reruns"]), 2)
 
+    def test_provider_busy_and_retry_excess_are_infrastructure(self):
+        retry = "more provider-layer error retries than the exact build performs"
+        with tempfile.TemporaryDirectory() as t:
+            t = Path(t)
+            fake_run(t / "r", "EP-001-p72-r0", state="EXECUTION_ERROR", term="error", err="429 Model busy, retry later\nModel busy (type=x)")
+            fake_run(t / "rr", "EP-001-p72-r0", items=self.all_items())
+            fake_run(t / "r", "EP-002-p72-r0", state="MALFORMED_EVIDENCE_OR_ASSESSMENT", term="completed", evidence_state_reasons=[retry])
+            fake_run(t / "rr", "EP-002-p72-r0", items=self.all_items())
+            fake_run(t / "r", "EP-003-p72-r0", state="MALFORMED_EVIDENCE_OR_ASSESSMENT", term="completed", evidence_state_reasons=[retry, "other"])
+            fake_run(t / "r", "EP-004-p72-r0", state="EXECUTION_ERROR", term="error", err="403 qualification turn budget exhausted")
+            fake_run(t / "r", "EP-005-p72-r0", state="EXECUTION_ERROR", term="error", err="request failed after 429 Model busy")
+            rc, audit, rec = self.build(self.decl(5), t, rerun=[t / "rr"])
+            kinds = {r["episode"]: r["kind"] for r in rec["runs"]}
+            self.assertEqual(kinds, {"EP-001": "ok", "EP-002": "ok", "EP-003": "malformed", "EP-004": "malformed", "EP-005": "malformed"})
+            self.assertEqual({r["run"]: r["original_kind"] for r in rec["reruns"]}, {"EP-001-p72-r0": "infra", "EP-002-p72-r0": "infra"})
+            self.assertFalse([f for f in audit["findings"] if f["kind"] == "INTEGRITY"], audit)
+
     def test_rerun_of_behaviour_death_or_non_transport_error_is_integrity(self):
         with tempfile.TemporaryDirectory() as t:
             t = Path(t)
@@ -218,6 +235,29 @@ class Synthetic(unittest.TestCase):
             rc, audit, rec = self.build(self.decl(), t, rerun=[t / "rr"])
             self.assertEqual(rc, 3)
             self.assertEqual(len([f for f in audit["findings"] if f["what"].startswith("rerun of a slot")]), 2)
+
+    def test_whole_episode_rerun_substitutes_only_the_infra_replicate(self):
+        with tempfile.TemporaryDirectory() as t:
+            t = Path(t)
+            busy = dict(state="EXECUTION_ERROR", term="error", err="429 Model busy, retry later")
+            fake_run(t / "r", "EP-001-p72-r0", **busy)
+            fake_run(t / "rr", "EP-001-p72-r0", items=self.all_items())
+            fake_run(t / "r", "EP-001-p72-r1", items=self.all_items())
+            fake_run(t / "rr", "EP-001-p72-r1", **busy)                   # sibling: re-executed with the episode, never used
+            decl = self.decl(1)
+            decl["slots"] = [{"episode": "EP-001", "arm": "cand", "replicate": k, "delegate": True} for k in (0, 1)]
+            rc, audit, rec = self.build(decl, t, rerun=[t / "rr"])
+            self.assertEqual(rc, 0, audit)
+            self.assertEqual({r["run"]: (r["admissible"], r["kind"]) for r in rec["runs"]}, {"EP-001-p72-r0": (True, "ok"), "EP-001-p72-r1": (True, "ok")})
+            self.assertEqual({r["run"]: r.get("unused_sibling", False) for r in rec["reruns"]}, {"EP-001-p72-r0": False, "EP-001-p72-r1": True})
+            self.assertEqual(audit["unused_sibling_reruns"], 1)
+            # a rerun of an admissible replicate whose episode had no infra replicate stays an integrity finding
+            decl["slots"].append({"episode": "EP-002", "arm": "cand", "replicate": 0, "delegate": True})
+            fake_run(t / "r", "EP-002-p72-r0", items=self.all_items())
+            fake_run(t / "rr", "EP-002-p72-r0", items=self.all_items())
+            rc, audit, _ = self.build(decl, t, rerun=[t / "rr"])
+            self.assertEqual(rc, 3)
+            self.assertEqual([f["run"] for f in audit["findings"] if f["what"].startswith("rerun of a slot")], ["EP-002-p72-r0"])
 
     def test_silent_pass_paths_are_findings(self):
         with tempfile.TemporaryDirectory() as t:

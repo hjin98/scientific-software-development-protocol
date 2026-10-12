@@ -70,7 +70,7 @@ CHECKS_MARKER_RE = re.compile(r"<!-- SSDP-SCIENTIFIC-CHECKS q=([A-Z](?:,[A-Z])*)
 CHECKS_FRAGMENT = SHARED / "fragments" / "scientific-checks.md"
 CHECKS_QUESTIONS = "FRVT"
 CHECKS_ELEMENTS = "1234567"
-CHECKS_REQUIRES = {"3": "1", "6": "4"}  # element 3 and 6 refer back to element 1's asserter rule and 4's source list
+CHECKS_REQUIRES = {"3": "1", "6": "4"}  # element 3 uses element 1's Persistence asserter rule; element 6 relies on 4's product-change rule
 NO_CHECKS_SKILLS = {"repository-hygiene"}
 CHECKS_LINE_TAG_RE = re.compile(r"^\{\{([qe])=([A-Za-z0-9,]+)\}\} ")
 CHECKS_INLINE_RE = re.compile(r"\{\{(!?)q=([A-Za-z0-9,]+):(.*?)\}\}")

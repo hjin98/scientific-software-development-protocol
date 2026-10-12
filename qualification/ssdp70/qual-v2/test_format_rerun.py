@@ -237,7 +237,9 @@ class FormatRerun(unittest.TestCase):
     def test_transport_failure_classification_is_mechanical(self):
         closed = {"stopReason": "error", "errorMessage": "OpenAI completions stream closed before a finish_reason was received"}
         cases = [(closed, True), ({"stopReason": "error", "errorStatus": 502, "errorMessage": "bad gateway"}, True),
+                 ({"stopReason": "error", "errorStatus": 429, "errorMessage": "429 rate limit exceeded"}, True),
                  ({"stopReason": "error", "errorStatus": 403, "errorMessage": "403 qualification turn budget exhausted"}, False),
+                 ({"stopReason": "error", "errorStatus": 408, "errorMessage": "request timeout"}, False),
                  ({"stopReason": "error", "errorMessage": "something else"}, False), ({"stopReason": "stop"}, False)]
         for last, expected in cases:
             self.assertEqual(ca.transport_failure(self.trace("C", **last)), expected, last)
@@ -360,6 +362,25 @@ class FormatRerun(unittest.TestCase):
         t.write_text(original + "\n")
         self.assertEqual(ca.cmd_collect(a), 4)                                                                    # primary trace changed since the freeze
         t.write_text(original)
+
+
+class ExecutorReruns(unittest.TestCase):
+    def test_run_dirs_take_a_substituting_rerun_and_never_a_sibling(self):
+        with tempfile.TemporaryDirectory() as t:
+            w = Path(t)
+            def run(rel, state, err=""):
+                d = w / "runs" / rel
+                d.mkdir(parents=True)
+                (d / "summary.json").write_text(json.dumps({"evidence_state": state, "evidence_state_reasons": [], "episode": "E1"}))
+                term = {"state": "error" if err else "completed", "native_return_state": {"errorMessage": err}}
+                (d / "events.normalized.jsonl").write_text(json.dumps({"kind": "termination", "payload": term}) + "\n")
+            run("main-c01/E1-p72-r0", "EXECUTION_ERROR", "429 Model busy, retry later")
+            run("main-c01/E1-p72-r1", "COMPLETE_ADMISSIBLE")
+            run("rerun-s1-p72/main-c01/E1-p72-r0", "COMPLETE_ADMISSIBLE")
+            run("rerun-s1-p72/main-c01/E1-p72-r1", "COMPLETE_ADMISSIBLE")
+            got = [ca.slot_of(d, w) for d in ca.run_dirs(w, ["main"])]
+            self.assertEqual(got, ["main-c01/E1-p72-r0", "main-c01/E1-p72-r1", "rerun-s1-p72/main-c01/E1-p72-r0"])
+            self.assertTrue(all(ca.SLOT.fullmatch(s) for s in got))
 
 
 class OrdinaryPathUnchanged(unittest.TestCase):

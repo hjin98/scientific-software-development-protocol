@@ -68,7 +68,7 @@ This doctrine never mandates a report, dashboard, inspection surface or retentio
 - **Human-facing reports.** A human-facing report it builds within scope is governed by the claim-integrity floor, not an added disclosure section.
 - **Capability beyond the task.** It proposes such capability rather than building it.
 
-**Reader, questions and materiality.** The stakeholder or accepted authority states the intended reader and routine questions. Otherwise the agent proposes them visibly, separately from the materiality statement and proportionately for local work. Run/review work without O1 content likewise states the provisional reader, questions and materiality basis its inquiry used, without amending authority or requiring product retrofit. Materiality is the kernel's grounded decision-changing-path definition, not a new threshold.
+**Reader, questions and materiality.** The stakeholder or accepted authority states the intended reader and routine questions; otherwise the task report owes no proposal of them. When a realized-data inquiry is owed, the agent states the materiality basis its inquiry used, whether it reports findings or a null, unless the stakeholder or accepted authority states that basis; that basis neither amends authority nor requires product retrofit. Materiality is the kernel's grounded decision-changing-path definition, not a new threshold.
 
 **Binding across channels.** Every rule in this owner is read through this binding, whatever its wording or author.
 
@@ -364,7 +364,7 @@ The Channel C gate-evidence contract is owned by the [workflow](workflow-and-wor
 
 **Excluded and low-consequence work.** Predicate-excluded work owes no null, envelope or added section. In-scope low-consequence work uses short forms:
 
-- "no retention/projection change", with any separately owed reader/question proposal stated proportionately;
+- "no retention/projection change";
 - no null when no realized-data inquiry was owed;
 - a one-line envelope when one was.
 
@@ -386,7 +386,7 @@ Illustrative lists are never checklists.
 
 ## Consumed-surface claim and route limitations
 
-Ordinary routes may consume only the invoked entrypoint. Each role and intersecting specialist entrypoint therefore carries the predicate, the recommended depth-read points and the complete minimum obligation (its Scientific checks section) with the label meanings it uses. This owner supplies depth: disposition-trust and applicability judgment, per-binding dispositioning authority and coverage-envelope detail. Apart from the (a)–(c) blocking conditions, which the entrypoint states in element 3, it is not inlined.
+Ordinary routes may consume only the invoked entrypoint. Each role and intersecting specialist entrypoint therefore carries the predicate, the recommended depth-read points and the complete minimum obligation (its Scientific checks section) with the label meanings it uses. This owner supplies depth: disposition-trust and applicability judgment, per-binding dispositioning authority and coverage-envelope detail. Apart from the (a)–(c) blocking conditions, which the entrypoint states with the tension search, it is not inlined.
 
 **Placement.**
 

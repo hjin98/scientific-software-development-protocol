@@ -1,12 +1,12 @@
 {
   "profile": {
     "compatible_protocol_versions": [
-      "7.2.0",
+      "7.2.1",
       "7.2"
     ],
     "profile_id": "ssdp-protocol-7.2",
     "profile_schema_version": 2,
-    "protocol_version": "7.2.0",
+    "protocol_version": "7.2.1",
     "source_digest": {
       "algorithm": "sha256",
       "canonicalization_scheme": "sdp.content.v1",
@@ -103,7 +103,7 @@
       "role_owner": "scientific-formulation,numerical-algorithm-design,software-design,software-implementation",
       "stage": {
         "profile_id": "ssdp-protocol-7.2",
-        "protocol_version": "7.2.0",
+        "protocol_version": "7.2.1",
         "stage_key": "intake"
       },
       "title": "Authority / Affected-Domain Intake",
@@ -209,7 +209,7 @@
       "role_owner": "scientific-formulation",
       "stage": {
         "profile_id": "ssdp-protocol-7.2",
-        "protocol_version": "7.2.0",
+        "protocol_version": "7.2.1",
         "stage_key": "scientific-formulation"
       },
       "title": "D1 Scientific & Mathematical Formulation",
@@ -324,7 +324,7 @@
       "role_owner": "numerical-algorithm-design",
       "stage": {
         "profile_id": "ssdp-protocol-7.2",
-        "protocol_version": "7.2.0",
+        "protocol_version": "7.2.1",
         "stage_key": "numerical-algorithm-design"
       },
       "title": "D2 Algorithm & Numerical Method Design",
@@ -419,7 +419,7 @@
       "role_owner": "software-design",
       "stage": {
         "profile_id": "ssdp-protocol-7.2",
-        "protocol_version": "7.2.0",
+        "protocol_version": "7.2.1",
         "stage_key": "software-design"
       },
       "title": "D3 Software Architecture / Workplan",
@@ -496,7 +496,7 @@
       "role_owner": "software-implementation",
       "stage": {
         "profile_id": "ssdp-protocol-7.2",
-        "protocol_version": "7.2.0",
+        "protocol_version": "7.2.1",
         "stage_key": "software-implementation"
       },
       "title": "D4 Software Implementation",
@@ -581,7 +581,7 @@
       "role_owner": "domain-parent-owner",
       "stage": {
         "profile_id": "ssdp-protocol-7.2",
-        "protocol_version": "7.2.0",
+        "protocol_version": "7.2.1",
         "stage_key": "review"
       },
       "title": "Review & Challenge Pass",
@@ -675,7 +675,7 @@
       "role_owner": "domain-parent-owner",
       "stage": {
         "profile_id": "ssdp-protocol-7.2",
-        "protocol_version": "7.2.0",
+        "protocol_version": "7.2.1",
         "stage_key": "verification"
       },
       "title": "Verification",
@@ -760,7 +760,7 @@
       "role_owner": "software-design",
       "stage": {
         "profile_id": "ssdp-protocol-7.2",
-        "protocol_version": "7.2.0",
+        "protocol_version": "7.2.1",
         "stage_key": "stabilization"
       },
       "title": "Stabilization / Architecture GC",
@@ -852,7 +852,7 @@
       "role_owner": "domain-owner",
       "stage": {
         "profile_id": "ssdp-protocol-7.2",
-        "protocol_version": "7.2.0",
+        "protocol_version": "7.2.1",
         "stage_key": "alignment"
       },
       "title": "Downstream Authority Alignment",
@@ -947,7 +947,7 @@
       "role_owner": "software-maintenance-audit",
       "stage": {
         "profile_id": "ssdp-protocol-7.2",
-        "protocol_version": "7.2.0",
+        "protocol_version": "7.2.1",
         "stage_key": "health-audit"
       },
       "title": "Health Audit",
@@ -1030,7 +1030,7 @@
       "role_owner": "software-documentation,repository-hygiene",
       "stage": {
         "profile_id": "ssdp-protocol-7.2",
-        "protocol_version": "7.2.0",
+        "protocol_version": "7.2.1",
         "stage_key": "closeout"
       },
       "title": "Closeout",
@@ -1042,14 +1042,14 @@
       "explanation": "route when D1 is the highest potentially affected domain",
       "from_stage": {
         "profile_id": "ssdp-protocol-7.2",
-        "protocol_version": "7.2.0",
+        "protocol_version": "7.2.1",
         "stage_key": "intake"
       },
       "priority_hint": null,
       "terminal": false,
       "to_stage": {
         "profile_id": "ssdp-protocol-7.2",
-        "protocol_version": "7.2.0",
+        "protocol_version": "7.2.1",
         "stage_key": "scientific-formulation"
       },
       "trigger_key": "classified"
@@ -1058,14 +1058,14 @@
       "explanation": "route when D2 is the highest potentially affected domain",
       "from_stage": {
         "profile_id": "ssdp-protocol-7.2",
-        "protocol_version": "7.2.0",
+        "protocol_version": "7.2.1",
         "stage_key": "intake"
       },
       "priority_hint": null,
       "terminal": false,
       "to_stage": {
         "profile_id": "ssdp-protocol-7.2",
-        "protocol_version": "7.2.0",
+        "protocol_version": "7.2.1",
         "stage_key": "numerical-algorithm-design"
       },
       "trigger_key": "classified"
@@ -1074,14 +1074,14 @@
       "explanation": "route when D3 is the highest potentially affected domain",
       "from_stage": {
         "profile_id": "ssdp-protocol-7.2",
-        "protocol_version": "7.2.0",
+        "protocol_version": "7.2.1",
         "stage_key": "intake"
       },
       "priority_hint": null,
       "terminal": false,
       "to_stage": {
         "profile_id": "ssdp-protocol-7.2",
-        "protocol_version": "7.2.0",
+        "protocol_version": "7.2.1",
         "stage_key": "software-design"
       },
       "trigger_key": "classified"
@@ -1090,14 +1090,14 @@
       "explanation": "route when only D4 concretization is affected",
       "from_stage": {
         "profile_id": "ssdp-protocol-7.2",
-        "protocol_version": "7.2.0",
+        "protocol_version": "7.2.1",
         "stage_key": "intake"
       },
       "priority_hint": null,
       "terminal": false,
       "to_stage": {
         "profile_id": "ssdp-protocol-7.2",
-        "protocol_version": "7.2.0",
+        "protocol_version": "7.2.1",
         "stage_key": "software-implementation"
       },
       "trigger_key": "classified"
@@ -1106,14 +1106,14 @@
       "explanation": "concretize accepted D1 changes downward when D2 is affected",
       "from_stage": {
         "profile_id": "ssdp-protocol-7.2",
-        "protocol_version": "7.2.0",
+        "protocol_version": "7.2.1",
         "stage_key": "scientific-formulation"
       },
       "priority_hint": null,
       "terminal": false,
       "to_stage": {
         "profile_id": "ssdp-protocol-7.2",
-        "protocol_version": "7.2.0",
+        "protocol_version": "7.2.1",
         "stage_key": "numerical-algorithm-design"
       },
       "trigger_key": "accepted"
@@ -1122,14 +1122,14 @@
       "explanation": "concretize accepted D1 changes through affected architecture when D2 authority remains unchanged",
       "from_stage": {
         "profile_id": "ssdp-protocol-7.2",
-        "protocol_version": "7.2.0",
+        "protocol_version": "7.2.1",
         "stage_key": "scientific-formulation"
       },
       "priority_hint": null,
       "terminal": false,
       "to_stage": {
         "profile_id": "ssdp-protocol-7.2",
-        "protocol_version": "7.2.0",
+        "protocol_version": "7.2.1",
         "stage_key": "software-design"
       },
       "trigger_key": "accepted"
@@ -1138,14 +1138,14 @@
       "explanation": "concretize accepted D1 changes directly in D4 when D2 and D3 authority remain unchanged",
       "from_stage": {
         "profile_id": "ssdp-protocol-7.2",
-        "protocol_version": "7.2.0",
+        "protocol_version": "7.2.1",
         "stage_key": "scientific-formulation"
       },
       "priority_hint": null,
       "terminal": false,
       "to_stage": {
         "profile_id": "ssdp-protocol-7.2",
-        "protocol_version": "7.2.0",
+        "protocol_version": "7.2.1",
         "stage_key": "software-implementation"
       },
       "trigger_key": "accepted"
@@ -1154,14 +1154,14 @@
       "explanation": "review a D1-only authority change when no lower concretization is affected",
       "from_stage": {
         "profile_id": "ssdp-protocol-7.2",
-        "protocol_version": "7.2.0",
+        "protocol_version": "7.2.1",
         "stage_key": "scientific-formulation"
       },
       "priority_hint": null,
       "terminal": false,
       "to_stage": {
         "profile_id": "ssdp-protocol-7.2",
-        "protocol_version": "7.2.0",
+        "protocol_version": "7.2.1",
         "stage_key": "review"
       },
       "trigger_key": "accepted"
@@ -1170,14 +1170,14 @@
       "explanation": "close an accepted D1-only scope when no further concretization/review is required",
       "from_stage": {
         "profile_id": "ssdp-protocol-7.2",
-        "protocol_version": "7.2.0",
+        "protocol_version": "7.2.1",
         "stage_key": "scientific-formulation"
       },
       "priority_hint": null,
       "terminal": false,
       "to_stage": {
         "profile_id": "ssdp-protocol-7.2",
-        "protocol_version": "7.2.0",
+        "protocol_version": "7.2.1",
         "stage_key": "closeout"
       },
       "trigger_key": "accepted"
@@ -1186,14 +1186,14 @@
       "explanation": "unaccepted D1 work remains with its owner",
       "from_stage": {
         "profile_id": "ssdp-protocol-7.2",
-        "protocol_version": "7.2.0",
+        "protocol_version": "7.2.1",
         "stage_key": "scientific-formulation"
       },
       "priority_hint": null,
       "terminal": false,
       "to_stage": {
         "profile_id": "ssdp-protocol-7.2",
-        "protocol_version": "7.2.0",
+        "protocol_version": "7.2.1",
         "stage_key": "scientific-formulation"
       },
       "trigger_key": "no_pass"
@@ -1202,7 +1202,7 @@
       "explanation": "human adjudication is required before dependent routing",
       "from_stage": {
         "profile_id": "ssdp-protocol-7.2",
-        "protocol_version": "7.2.0",
+        "protocol_version": "7.2.1",
         "stage_key": "scientific-formulation"
       },
       "priority_hint": null,
@@ -1214,7 +1214,7 @@
       "explanation": "required human ratification is pending",
       "from_stage": {
         "profile_id": "ssdp-protocol-7.2",
-        "protocol_version": "7.2.0",
+        "protocol_version": "7.2.1",
         "stage_key": "scientific-formulation"
       },
       "priority_hint": null,
@@ -1226,14 +1226,14 @@
       "explanation": "bounded downstream work may proceed under visible unresolved risk where policy permits",
       "from_stage": {
         "profile_id": "ssdp-protocol-7.2",
-        "protocol_version": "7.2.0",
+        "protocol_version": "7.2.1",
         "stage_key": "scientific-formulation"
       },
       "priority_hint": null,
       "terminal": false,
       "to_stage": {
         "profile_id": "ssdp-protocol-7.2",
-        "protocol_version": "7.2.0",
+        "protocol_version": "7.2.1",
         "stage_key": "numerical-algorithm-design"
       },
       "trigger_key": "risk_override"
@@ -1242,14 +1242,14 @@
       "explanation": "bounded D3 work may proceed under visible unresolved D1 risk when D2 authority is unaffected",
       "from_stage": {
         "profile_id": "ssdp-protocol-7.2",
-        "protocol_version": "7.2.0",
+        "protocol_version": "7.2.1",
         "stage_key": "scientific-formulation"
       },
       "priority_hint": null,
       "terminal": false,
       "to_stage": {
         "profile_id": "ssdp-protocol-7.2",
-        "protocol_version": "7.2.0",
+        "protocol_version": "7.2.1",
         "stage_key": "software-design"
       },
       "trigger_key": "risk_override"
@@ -1258,14 +1258,14 @@
       "explanation": "bounded D4 work may proceed under visible unresolved D1 risk when D2 and D3 authority are unaffected",
       "from_stage": {
         "profile_id": "ssdp-protocol-7.2",
-        "protocol_version": "7.2.0",
+        "protocol_version": "7.2.1",
         "stage_key": "scientific-formulation"
       },
       "priority_hint": null,
       "terminal": false,
       "to_stage": {
         "profile_id": "ssdp-protocol-7.2",
-        "protocol_version": "7.2.0",
+        "protocol_version": "7.2.1",
         "stage_key": "software-implementation"
       },
       "trigger_key": "risk_override"
@@ -1274,14 +1274,14 @@
       "explanation": "concretize accepted D2 changes through affected architecture",
       "from_stage": {
         "profile_id": "ssdp-protocol-7.2",
-        "protocol_version": "7.2.0",
+        "protocol_version": "7.2.1",
         "stage_key": "numerical-algorithm-design"
       },
       "priority_hint": null,
       "terminal": false,
       "to_stage": {
         "profile_id": "ssdp-protocol-7.2",
-        "protocol_version": "7.2.0",
+        "protocol_version": "7.2.1",
         "stage_key": "software-design"
       },
       "trigger_key": "accepted"
@@ -1290,14 +1290,14 @@
       "explanation": "concretize accepted D2 changes directly in D4 when D3 authority remains unchanged",
       "from_stage": {
         "profile_id": "ssdp-protocol-7.2",
-        "protocol_version": "7.2.0",
+        "protocol_version": "7.2.1",
         "stage_key": "numerical-algorithm-design"
       },
       "priority_hint": null,
       "terminal": false,
       "to_stage": {
         "profile_id": "ssdp-protocol-7.2",
-        "protocol_version": "7.2.0",
+        "protocol_version": "7.2.1",
         "stage_key": "software-implementation"
       },
       "trigger_key": "accepted"
@@ -1306,14 +1306,14 @@
       "explanation": "review a D2-only authority change when no architecture concretization is affected",
       "from_stage": {
         "profile_id": "ssdp-protocol-7.2",
-        "protocol_version": "7.2.0",
+        "protocol_version": "7.2.1",
         "stage_key": "numerical-algorithm-design"
       },
       "priority_hint": null,
       "terminal": false,
       "to_stage": {
         "profile_id": "ssdp-protocol-7.2",
-        "protocol_version": "7.2.0",
+        "protocol_version": "7.2.1",
         "stage_key": "review"
       },
       "trigger_key": "accepted"
@@ -1322,14 +1322,14 @@
       "explanation": "close an accepted D2-only scope when no lower concretization is required",
       "from_stage": {
         "profile_id": "ssdp-protocol-7.2",
-        "protocol_version": "7.2.0",
+        "protocol_version": "7.2.1",
         "stage_key": "numerical-algorithm-design"
       },
       "priority_hint": null,
       "terminal": false,
       "to_stage": {
         "profile_id": "ssdp-protocol-7.2",
-        "protocol_version": "7.2.0",
+        "protocol_version": "7.2.1",
         "stage_key": "closeout"
       },
       "trigger_key": "accepted"
@@ -1338,14 +1338,14 @@
       "explanation": "unaccepted D2 work remains with its owner",
       "from_stage": {
         "profile_id": "ssdp-protocol-7.2",
-        "protocol_version": "7.2.0",
+        "protocol_version": "7.2.1",
         "stage_key": "numerical-algorithm-design"
       },
       "priority_hint": null,
       "terminal": false,
       "to_stage": {
         "profile_id": "ssdp-protocol-7.2",
-        "protocol_version": "7.2.0",
+        "protocol_version": "7.2.1",
         "stage_key": "numerical-algorithm-design"
       },
       "trigger_key": "no_pass"
@@ -1354,7 +1354,7 @@
       "explanation": "human adjudication is required before dependent routing",
       "from_stage": {
         "profile_id": "ssdp-protocol-7.2",
-        "protocol_version": "7.2.0",
+        "protocol_version": "7.2.1",
         "stage_key": "numerical-algorithm-design"
       },
       "priority_hint": null,
@@ -1366,7 +1366,7 @@
       "explanation": "required human ratification is pending",
       "from_stage": {
         "profile_id": "ssdp-protocol-7.2",
-        "protocol_version": "7.2.0",
+        "protocol_version": "7.2.1",
         "stage_key": "numerical-algorithm-design"
       },
       "priority_hint": null,
@@ -1378,14 +1378,14 @@
       "explanation": "bounded downstream work may proceed under visible unresolved risk where policy permits",
       "from_stage": {
         "profile_id": "ssdp-protocol-7.2",
-        "protocol_version": "7.2.0",
+        "protocol_version": "7.2.1",
         "stage_key": "numerical-algorithm-design"
       },
       "priority_hint": null,
       "terminal": false,
       "to_stage": {
         "profile_id": "ssdp-protocol-7.2",
-        "protocol_version": "7.2.0",
+        "protocol_version": "7.2.1",
         "stage_key": "software-design"
       },
       "trigger_key": "risk_override"
@@ -1394,14 +1394,14 @@
       "explanation": "bounded D4 work may proceed under visible unresolved D2 risk when D3 authority is unaffected",
       "from_stage": {
         "profile_id": "ssdp-protocol-7.2",
-        "protocol_version": "7.2.0",
+        "protocol_version": "7.2.1",
         "stage_key": "numerical-algorithm-design"
       },
       "priority_hint": null,
       "terminal": false,
       "to_stage": {
         "profile_id": "ssdp-protocol-7.2",
-        "protocol_version": "7.2.0",
+        "protocol_version": "7.2.1",
         "stage_key": "software-implementation"
       },
       "trigger_key": "risk_override"
@@ -1410,14 +1410,14 @@
       "explanation": "an accepted D3->D4 workplan is ready for implementation",
       "from_stage": {
         "profile_id": "ssdp-protocol-7.2",
-        "protocol_version": "7.2.0",
+        "protocol_version": "7.2.1",
         "stage_key": "software-design"
       },
       "priority_hint": null,
       "terminal": false,
       "to_stage": {
         "profile_id": "ssdp-protocol-7.2",
-        "protocol_version": "7.2.0",
+        "protocol_version": "7.2.1",
         "stage_key": "software-implementation"
       },
       "trigger_key": "accepted"
@@ -1426,14 +1426,14 @@
       "explanation": "review an accepted D3-only authority change when no D4 concretization is affected",
       "from_stage": {
         "profile_id": "ssdp-protocol-7.2",
-        "protocol_version": "7.2.0",
+        "protocol_version": "7.2.1",
         "stage_key": "software-design"
       },
       "priority_hint": null,
       "terminal": false,
       "to_stage": {
         "profile_id": "ssdp-protocol-7.2",
-        "protocol_version": "7.2.0",
+        "protocol_version": "7.2.1",
         "stage_key": "review"
       },
       "trigger_key": "accepted"
@@ -1442,14 +1442,14 @@
       "explanation": "close an accepted D3-only scope when existing D4 already conforms and no further review is required",
       "from_stage": {
         "profile_id": "ssdp-protocol-7.2",
-        "protocol_version": "7.2.0",
+        "protocol_version": "7.2.1",
         "stage_key": "software-design"
       },
       "priority_hint": null,
       "terminal": false,
       "to_stage": {
         "profile_id": "ssdp-protocol-7.2",
-        "protocol_version": "7.2.0",
+        "protocol_version": "7.2.1",
         "stage_key": "closeout"
       },
       "trigger_key": "accepted"
@@ -1458,14 +1458,14 @@
       "explanation": "incomplete D3 authority/workplan stays with Software Design",
       "from_stage": {
         "profile_id": "ssdp-protocol-7.2",
-        "protocol_version": "7.2.0",
+        "protocol_version": "7.2.1",
         "stage_key": "software-design"
       },
       "priority_hint": null,
       "terminal": false,
       "to_stage": {
         "profile_id": "ssdp-protocol-7.2",
-        "protocol_version": "7.2.0",
+        "protocol_version": "7.2.1",
         "stage_key": "software-design"
       },
       "trigger_key": "no_pass"
@@ -1474,7 +1474,7 @@
       "explanation": "human adjudication is required before dependent routing",
       "from_stage": {
         "profile_id": "ssdp-protocol-7.2",
-        "protocol_version": "7.2.0",
+        "protocol_version": "7.2.1",
         "stage_key": "software-design"
       },
       "priority_hint": null,
@@ -1486,14 +1486,14 @@
       "explanation": "an assembled D4 candidate is reviewed",
       "from_stage": {
         "profile_id": "ssdp-protocol-7.2",
-        "protocol_version": "7.2.0",
+        "protocol_version": "7.2.1",
         "stage_key": "software-implementation"
       },
       "priority_hint": null,
       "terminal": false,
       "to_stage": {
         "profile_id": "ssdp-protocol-7.2",
-        "protocol_version": "7.2.0",
+        "protocol_version": "7.2.1",
         "stage_key": "review"
       },
       "trigger_key": "complete"
@@ -1502,14 +1502,14 @@
       "explanation": "a D4-local blocker remains with implementation",
       "from_stage": {
         "profile_id": "ssdp-protocol-7.2",
-        "protocol_version": "7.2.0",
+        "protocol_version": "7.2.1",
         "stage_key": "software-implementation"
       },
       "priority_hint": null,
       "terminal": false,
       "to_stage": {
         "profile_id": "ssdp-protocol-7.2",
-        "protocol_version": "7.2.0",
+        "protocol_version": "7.2.1",
         "stage_key": "software-implementation"
       },
       "trigger_key": "blocked"
@@ -1518,14 +1518,14 @@
       "explanation": "a blocker invalidating D3 routes to Software Design",
       "from_stage": {
         "profile_id": "ssdp-protocol-7.2",
-        "protocol_version": "7.2.0",
+        "protocol_version": "7.2.1",
         "stage_key": "software-implementation"
       },
       "priority_hint": null,
       "terminal": false,
       "to_stage": {
         "profile_id": "ssdp-protocol-7.2",
-        "protocol_version": "7.2.0",
+        "protocol_version": "7.2.1",
         "stage_key": "software-design"
       },
       "trigger_key": "blocked"
@@ -1534,14 +1534,14 @@
       "explanation": "a blocker invalidating D2 routes to Numerical Algorithm Design",
       "from_stage": {
         "profile_id": "ssdp-protocol-7.2",
-        "protocol_version": "7.2.0",
+        "protocol_version": "7.2.1",
         "stage_key": "software-implementation"
       },
       "priority_hint": null,
       "terminal": false,
       "to_stage": {
         "profile_id": "ssdp-protocol-7.2",
-        "protocol_version": "7.2.0",
+        "protocol_version": "7.2.1",
         "stage_key": "numerical-algorithm-design"
       },
       "trigger_key": "blocked"
@@ -1550,14 +1550,14 @@
       "explanation": "a blocker invalidating D1 routes to Scientific Formulation",
       "from_stage": {
         "profile_id": "ssdp-protocol-7.2",
-        "protocol_version": "7.2.0",
+        "protocol_version": "7.2.1",
         "stage_key": "software-implementation"
       },
       "priority_hint": null,
       "terminal": false,
       "to_stage": {
         "profile_id": "ssdp-protocol-7.2",
-        "protocol_version": "7.2.0",
+        "protocol_version": "7.2.1",
         "stage_key": "scientific-formulation"
       },
       "trigger_key": "blocked"
@@ -1566,7 +1566,7 @@
       "explanation": "dependent closure stops for human adjudication",
       "from_stage": {
         "profile_id": "ssdp-protocol-7.2",
-        "protocol_version": "7.2.0",
+        "protocol_version": "7.2.1",
         "stage_key": "software-implementation"
       },
       "priority_hint": null,
@@ -1578,14 +1578,14 @@
       "explanation": "a passed D1-boundary review may continue into dependent D2 concretization",
       "from_stage": {
         "profile_id": "ssdp-protocol-7.2",
-        "protocol_version": "7.2.0",
+        "protocol_version": "7.2.1",
         "stage_key": "review"
       },
       "priority_hint": null,
       "terminal": false,
       "to_stage": {
         "profile_id": "ssdp-protocol-7.2",
-        "protocol_version": "7.2.0",
+        "protocol_version": "7.2.1",
         "stage_key": "numerical-algorithm-design"
       },
       "trigger_key": "pass"
@@ -1594,14 +1594,14 @@
       "explanation": "a passed D1/D2-boundary review may continue into dependent D3 concretization",
       "from_stage": {
         "profile_id": "ssdp-protocol-7.2",
-        "protocol_version": "7.2.0",
+        "protocol_version": "7.2.1",
         "stage_key": "review"
       },
       "priority_hint": null,
       "terminal": false,
       "to_stage": {
         "profile_id": "ssdp-protocol-7.2",
-        "protocol_version": "7.2.0",
+        "protocol_version": "7.2.1",
         "stage_key": "software-design"
       },
       "trigger_key": "pass"
@@ -1610,14 +1610,14 @@
       "explanation": "a passed D1/D2/D3-boundary review may continue into dependent D4 concretization",
       "from_stage": {
         "profile_id": "ssdp-protocol-7.2",
-        "protocol_version": "7.2.0",
+        "protocol_version": "7.2.1",
         "stage_key": "review"
       },
       "priority_hint": null,
       "terminal": false,
       "to_stage": {
         "profile_id": "ssdp-protocol-7.2",
-        "protocol_version": "7.2.0",
+        "protocol_version": "7.2.1",
         "stage_key": "software-implementation"
       },
       "trigger_key": "pass"
@@ -1626,14 +1626,14 @@
       "explanation": "deeper verification is optional for materially high-risk claims",
       "from_stage": {
         "profile_id": "ssdp-protocol-7.2",
-        "protocol_version": "7.2.0",
+        "protocol_version": "7.2.1",
         "stage_key": "review"
       },
       "priority_hint": null,
       "terminal": false,
       "to_stage": {
         "profile_id": "ssdp-protocol-7.2",
-        "protocol_version": "7.2.0",
+        "protocol_version": "7.2.1",
         "stage_key": "verification"
       },
       "trigger_key": "pass"
@@ -1642,14 +1642,14 @@
       "explanation": "stabilization is optional at material convergence boundaries",
       "from_stage": {
         "profile_id": "ssdp-protocol-7.2",
-        "protocol_version": "7.2.0",
+        "protocol_version": "7.2.1",
         "stage_key": "review"
       },
       "priority_hint": null,
       "terminal": false,
       "to_stage": {
         "profile_id": "ssdp-protocol-7.2",
-        "protocol_version": "7.2.0",
+        "protocol_version": "7.2.1",
         "stage_key": "stabilization"
       },
       "trigger_key": "pass"
@@ -1658,14 +1658,14 @@
       "explanation": "closeout follows when no further stage is warranted",
       "from_stage": {
         "profile_id": "ssdp-protocol-7.2",
-        "protocol_version": "7.2.0",
+        "protocol_version": "7.2.1",
         "stage_key": "review"
       },
       "priority_hint": null,
       "terminal": false,
       "to_stage": {
         "profile_id": "ssdp-protocol-7.2",
-        "protocol_version": "7.2.0",
+        "protocol_version": "7.2.1",
         "stage_key": "closeout"
       },
       "trigger_key": "pass"
@@ -1674,14 +1674,14 @@
       "explanation": "D4 nonconformance returns to implementation",
       "from_stage": {
         "profile_id": "ssdp-protocol-7.2",
-        "protocol_version": "7.2.0",
+        "protocol_version": "7.2.1",
         "stage_key": "review"
       },
       "priority_hint": null,
       "terminal": false,
       "to_stage": {
         "profile_id": "ssdp-protocol-7.2",
-        "protocol_version": "7.2.0",
+        "protocol_version": "7.2.1",
         "stage_key": "software-implementation"
       },
       "trigger_key": "no_pass"
@@ -1690,14 +1690,14 @@
       "explanation": "D3 deficiency reopens Software Design",
       "from_stage": {
         "profile_id": "ssdp-protocol-7.2",
-        "protocol_version": "7.2.0",
+        "protocol_version": "7.2.1",
         "stage_key": "review"
       },
       "priority_hint": null,
       "terminal": false,
       "to_stage": {
         "profile_id": "ssdp-protocol-7.2",
-        "protocol_version": "7.2.0",
+        "protocol_version": "7.2.1",
         "stage_key": "software-design"
       },
       "trigger_key": "no_pass"
@@ -1706,14 +1706,14 @@
       "explanation": "D2 deficiency reopens Numerical Algorithm Design",
       "from_stage": {
         "profile_id": "ssdp-protocol-7.2",
-        "protocol_version": "7.2.0",
+        "protocol_version": "7.2.1",
         "stage_key": "review"
       },
       "priority_hint": null,
       "terminal": false,
       "to_stage": {
         "profile_id": "ssdp-protocol-7.2",
-        "protocol_version": "7.2.0",
+        "protocol_version": "7.2.1",
         "stage_key": "numerical-algorithm-design"
       },
       "trigger_key": "no_pass"
@@ -1722,14 +1722,14 @@
       "explanation": "D1 deficiency reopens Scientific Formulation",
       "from_stage": {
         "profile_id": "ssdp-protocol-7.2",
-        "protocol_version": "7.2.0",
+        "protocol_version": "7.2.1",
         "stage_key": "review"
       },
       "priority_hint": null,
       "terminal": false,
       "to_stage": {
         "profile_id": "ssdp-protocol-7.2",
-        "protocol_version": "7.2.0",
+        "protocol_version": "7.2.1",
         "stage_key": "scientific-formulation"
       },
       "trigger_key": "no_pass"
@@ -1738,7 +1738,7 @@
       "explanation": "human adjudication is required before normal Pass",
       "from_stage": {
         "profile_id": "ssdp-protocol-7.2",
-        "protocol_version": "7.2.0",
+        "protocol_version": "7.2.1",
         "stage_key": "review"
       },
       "priority_hint": null,
@@ -1750,7 +1750,7 @@
       "explanation": "required human adjudication/ratification is pending",
       "from_stage": {
         "profile_id": "ssdp-protocol-7.2",
-        "protocol_version": "7.2.0",
+        "protocol_version": "7.2.1",
         "stage_key": "review"
       },
       "priority_hint": null,
@@ -1762,14 +1762,14 @@
       "explanation": "bounded D2 concretization may proceed under visible accepted risk where policy permits",
       "from_stage": {
         "profile_id": "ssdp-protocol-7.2",
-        "protocol_version": "7.2.0",
+        "protocol_version": "7.2.1",
         "stage_key": "review"
       },
       "priority_hint": null,
       "terminal": false,
       "to_stage": {
         "profile_id": "ssdp-protocol-7.2",
-        "protocol_version": "7.2.0",
+        "protocol_version": "7.2.1",
         "stage_key": "numerical-algorithm-design"
       },
       "trigger_key": "risk_override"
@@ -1778,14 +1778,14 @@
       "explanation": "bounded D3 concretization may proceed under visible accepted risk where policy permits",
       "from_stage": {
         "profile_id": "ssdp-protocol-7.2",
-        "protocol_version": "7.2.0",
+        "protocol_version": "7.2.1",
         "stage_key": "review"
       },
       "priority_hint": null,
       "terminal": false,
       "to_stage": {
         "profile_id": "ssdp-protocol-7.2",
-        "protocol_version": "7.2.0",
+        "protocol_version": "7.2.1",
         "stage_key": "software-design"
       },
       "trigger_key": "risk_override"
@@ -1794,14 +1794,14 @@
       "explanation": "bounded D4 concretization may proceed under visible accepted risk where policy permits",
       "from_stage": {
         "profile_id": "ssdp-protocol-7.2",
-        "protocol_version": "7.2.0",
+        "protocol_version": "7.2.1",
         "stage_key": "review"
       },
       "priority_hint": null,
       "terminal": false,
       "to_stage": {
         "profile_id": "ssdp-protocol-7.2",
-        "protocol_version": "7.2.0",
+        "protocol_version": "7.2.1",
         "stage_key": "software-implementation"
       },
       "trigger_key": "risk_override"
@@ -1810,14 +1810,14 @@
       "explanation": "bounded verification may proceed under visible accepted risk where policy permits",
       "from_stage": {
         "profile_id": "ssdp-protocol-7.2",
-        "protocol_version": "7.2.0",
+        "protocol_version": "7.2.1",
         "stage_key": "review"
       },
       "priority_hint": null,
       "terminal": false,
       "to_stage": {
         "profile_id": "ssdp-protocol-7.2",
-        "protocol_version": "7.2.0",
+        "protocol_version": "7.2.1",
         "stage_key": "verification"
       },
       "trigger_key": "risk_override"
@@ -1826,14 +1826,14 @@
       "explanation": "non-protocol product closeout may proceed only under policy-permitted visible risk",
       "from_stage": {
         "profile_id": "ssdp-protocol-7.2",
-        "protocol_version": "7.2.0",
+        "protocol_version": "7.2.1",
         "stage_key": "review"
       },
       "priority_hint": null,
       "terminal": false,
       "to_stage": {
         "profile_id": "ssdp-protocol-7.2",
-        "protocol_version": "7.2.0",
+        "protocol_version": "7.2.1",
         "stage_key": "closeout"
       },
       "trigger_key": "risk_override"
@@ -1842,14 +1842,14 @@
       "explanation": "stabilization may follow a verified material milestone",
       "from_stage": {
         "profile_id": "ssdp-protocol-7.2",
-        "protocol_version": "7.2.0",
+        "protocol_version": "7.2.1",
         "stage_key": "verification"
       },
       "priority_hint": null,
       "terminal": false,
       "to_stage": {
         "profile_id": "ssdp-protocol-7.2",
-        "protocol_version": "7.2.0",
+        "protocol_version": "7.2.1",
         "stage_key": "stabilization"
       },
       "trigger_key": "pass"
@@ -1858,14 +1858,14 @@
       "explanation": "verified work may close when no stabilization is warranted",
       "from_stage": {
         "profile_id": "ssdp-protocol-7.2",
-        "protocol_version": "7.2.0",
+        "protocol_version": "7.2.1",
         "stage_key": "verification"
       },
       "priority_hint": null,
       "terminal": false,
       "to_stage": {
         "profile_id": "ssdp-protocol-7.2",
-        "protocol_version": "7.2.0",
+        "protocol_version": "7.2.1",
         "stage_key": "closeout"
       },
       "trigger_key": "pass"
@@ -1874,14 +1874,14 @@
       "explanation": "D4 verification failure routes to implementation",
       "from_stage": {
         "profile_id": "ssdp-protocol-7.2",
-        "protocol_version": "7.2.0",
+        "protocol_version": "7.2.1",
         "stage_key": "verification"
       },
       "priority_hint": null,
       "terminal": false,
       "to_stage": {
         "profile_id": "ssdp-protocol-7.2",
-        "protocol_version": "7.2.0",
+        "protocol_version": "7.2.1",
         "stage_key": "software-implementation"
       },
       "trigger_key": "no_pass"
@@ -1890,14 +1890,14 @@
       "explanation": "D3 verification failure routes to Software Design",
       "from_stage": {
         "profile_id": "ssdp-protocol-7.2",
-        "protocol_version": "7.2.0",
+        "protocol_version": "7.2.1",
         "stage_key": "verification"
       },
       "priority_hint": null,
       "terminal": false,
       "to_stage": {
         "profile_id": "ssdp-protocol-7.2",
-        "protocol_version": "7.2.0",
+        "protocol_version": "7.2.1",
         "stage_key": "software-design"
       },
       "trigger_key": "no_pass"
@@ -1906,14 +1906,14 @@
       "explanation": "D2 verification failure routes to Numerical Algorithm Design",
       "from_stage": {
         "profile_id": "ssdp-protocol-7.2",
-        "protocol_version": "7.2.0",
+        "protocol_version": "7.2.1",
         "stage_key": "verification"
       },
       "priority_hint": null,
       "terminal": false,
       "to_stage": {
         "profile_id": "ssdp-protocol-7.2",
-        "protocol_version": "7.2.0",
+        "protocol_version": "7.2.1",
         "stage_key": "numerical-algorithm-design"
       },
       "trigger_key": "no_pass"
@@ -1922,14 +1922,14 @@
       "explanation": "D1 verification failure routes to Scientific Formulation",
       "from_stage": {
         "profile_id": "ssdp-protocol-7.2",
-        "protocol_version": "7.2.0",
+        "protocol_version": "7.2.1",
         "stage_key": "verification"
       },
       "priority_hint": null,
       "terminal": false,
       "to_stage": {
         "profile_id": "ssdp-protocol-7.2",
-        "protocol_version": "7.2.0",
+        "protocol_version": "7.2.1",
         "stage_key": "scientific-formulation"
       },
       "trigger_key": "no_pass"
@@ -1938,7 +1938,7 @@
       "explanation": "human adjudication is required before dependent closure",
       "from_stage": {
         "profile_id": "ssdp-protocol-7.2",
-        "protocol_version": "7.2.0",
+        "protocol_version": "7.2.1",
         "stage_key": "verification"
       },
       "priority_hint": null,
@@ -1950,7 +1950,7 @@
       "explanation": "required human adjudication is pending",
       "from_stage": {
         "profile_id": "ssdp-protocol-7.2",
-        "protocol_version": "7.2.0",
+        "protocol_version": "7.2.1",
         "stage_key": "verification"
       },
       "priority_hint": null,
@@ -1962,14 +1962,14 @@
       "explanation": "bounded product closeout may proceed under visible accepted risk where policy permits",
       "from_stage": {
         "profile_id": "ssdp-protocol-7.2",
-        "protocol_version": "7.2.0",
+        "protocol_version": "7.2.1",
         "stage_key": "verification"
       },
       "priority_hint": null,
       "terminal": false,
       "to_stage": {
         "profile_id": "ssdp-protocol-7.2",
-        "protocol_version": "7.2.0",
+        "protocol_version": "7.2.1",
         "stage_key": "closeout"
       },
       "trigger_key": "risk_override"
@@ -1978,14 +1978,14 @@
       "explanation": "a stable scope is ready for closeout",
       "from_stage": {
         "profile_id": "ssdp-protocol-7.2",
-        "protocol_version": "7.2.0",
+        "protocol_version": "7.2.1",
         "stage_key": "stabilization"
       },
       "priority_hint": null,
       "terminal": false,
       "to_stage": {
         "profile_id": "ssdp-protocol-7.2",
-        "protocol_version": "7.2.0",
+        "protocol_version": "7.2.1",
         "stage_key": "closeout"
       },
       "trigger_key": "stable"
@@ -1994,14 +1994,14 @@
       "explanation": "D4 simplification under sufficient D3 authority",
       "from_stage": {
         "profile_id": "ssdp-protocol-7.2",
-        "protocol_version": "7.2.0",
+        "protocol_version": "7.2.1",
         "stage_key": "stabilization"
       },
       "priority_hint": null,
       "terminal": false,
       "to_stage": {
         "profile_id": "ssdp-protocol-7.2",
-        "protocol_version": "7.2.0",
+        "protocol_version": "7.2.1",
         "stage_key": "software-implementation"
       },
       "trigger_key": "d4_simplification"
@@ -2010,14 +2010,14 @@
       "explanation": "architecture concern reopens D3",
       "from_stage": {
         "profile_id": "ssdp-protocol-7.2",
-        "protocol_version": "7.2.0",
+        "protocol_version": "7.2.1",
         "stage_key": "stabilization"
       },
       "priority_hint": null,
       "terminal": false,
       "to_stage": {
         "profile_id": "ssdp-protocol-7.2",
-        "protocol_version": "7.2.0",
+        "protocol_version": "7.2.1",
         "stage_key": "software-design"
       },
       "trigger_key": "d3_concern"
@@ -2026,14 +2026,14 @@
       "explanation": "numerical concern routes to D2",
       "from_stage": {
         "profile_id": "ssdp-protocol-7.2",
-        "protocol_version": "7.2.0",
+        "protocol_version": "7.2.1",
         "stage_key": "stabilization"
       },
       "priority_hint": null,
       "terminal": false,
       "to_stage": {
         "profile_id": "ssdp-protocol-7.2",
-        "protocol_version": "7.2.0",
+        "protocol_version": "7.2.1",
         "stage_key": "numerical-algorithm-design"
       },
       "trigger_key": "upstream_concern"
@@ -2042,14 +2042,14 @@
       "explanation": "scientific concern routes to D1",
       "from_stage": {
         "profile_id": "ssdp-protocol-7.2",
-        "protocol_version": "7.2.0",
+        "protocol_version": "7.2.1",
         "stage_key": "stabilization"
       },
       "priority_hint": null,
       "terminal": false,
       "to_stage": {
         "profile_id": "ssdp-protocol-7.2",
-        "protocol_version": "7.2.0",
+        "protocol_version": "7.2.1",
         "stage_key": "scientific-formulation"
       },
       "trigger_key": "upstream_concern"
@@ -2058,7 +2058,7 @@
       "explanation": "authority challenge requires adjudication",
       "from_stage": {
         "profile_id": "ssdp-protocol-7.2",
-        "protocol_version": "7.2.0",
+        "protocol_version": "7.2.1",
         "stage_key": "stabilization"
       },
       "priority_hint": null,
@@ -2070,14 +2070,14 @@
       "explanation": "an aligned downstream D2 plan is ready for numerical-method concretization",
       "from_stage": {
         "profile_id": "ssdp-protocol-7.2",
-        "protocol_version": "7.2.0",
+        "protocol_version": "7.2.1",
         "stage_key": "alignment"
       },
       "priority_hint": null,
       "terminal": false,
       "to_stage": {
         "profile_id": "ssdp-protocol-7.2",
-        "protocol_version": "7.2.0",
+        "protocol_version": "7.2.1",
         "stage_key": "numerical-algorithm-design"
       },
       "trigger_key": "pass"
@@ -2086,14 +2086,14 @@
       "explanation": "an aligned downstream D3 plan is ready for architecture/workplan concretization",
       "from_stage": {
         "profile_id": "ssdp-protocol-7.2",
-        "protocol_version": "7.2.0",
+        "protocol_version": "7.2.1",
         "stage_key": "alignment"
       },
       "priority_hint": null,
       "terminal": false,
       "to_stage": {
         "profile_id": "ssdp-protocol-7.2",
-        "protocol_version": "7.2.0",
+        "protocol_version": "7.2.1",
         "stage_key": "software-design"
       },
       "trigger_key": "pass"
@@ -2102,14 +2102,14 @@
       "explanation": "an aligned downstream D3->D4 plan is ready for implementation",
       "from_stage": {
         "profile_id": "ssdp-protocol-7.2",
-        "protocol_version": "7.2.0",
+        "protocol_version": "7.2.1",
         "stage_key": "alignment"
       },
       "priority_hint": null,
       "terminal": false,
       "to_stage": {
         "profile_id": "ssdp-protocol-7.2",
-        "protocol_version": "7.2.0",
+        "protocol_version": "7.2.1",
         "stage_key": "software-implementation"
       },
       "trigger_key": "pass"
@@ -2118,14 +2118,14 @@
       "explanation": "incomplete alignment stays in the alignment stage",
       "from_stage": {
         "profile_id": "ssdp-protocol-7.2",
-        "protocol_version": "7.2.0",
+        "protocol_version": "7.2.1",
         "stage_key": "alignment"
       },
       "priority_hint": null,
       "terminal": false,
       "to_stage": {
         "profile_id": "ssdp-protocol-7.2",
-        "protocol_version": "7.2.0",
+        "protocol_version": "7.2.1",
         "stage_key": "alignment"
       },
       "trigger_key": "no_pass"
@@ -2134,7 +2134,7 @@
       "explanation": "authority conflict requires adjudication",
       "from_stage": {
         "profile_id": "ssdp-protocol-7.2",
-        "protocol_version": "7.2.0",
+        "protocol_version": "7.2.1",
         "stage_key": "alignment"
       },
       "priority_hint": null,
@@ -2146,7 +2146,7 @@
       "explanation": "no action is required",
       "from_stage": {
         "profile_id": "ssdp-protocol-7.2",
-        "protocol_version": "7.2.0",
+        "protocol_version": "7.2.1",
         "stage_key": "health-audit"
       },
       "priority_hint": null,
@@ -2158,7 +2158,7 @@
       "explanation": "findings remain watch items",
       "from_stage": {
         "profile_id": "ssdp-protocol-7.2",
-        "protocol_version": "7.2.0",
+        "protocol_version": "7.2.1",
         "stage_key": "health-audit"
       },
       "priority_hint": null,
@@ -2170,14 +2170,14 @@
       "explanation": "local D4 repair under sufficient authority",
       "from_stage": {
         "profile_id": "ssdp-protocol-7.2",
-        "protocol_version": "7.2.0",
+        "protocol_version": "7.2.1",
         "stage_key": "health-audit"
       },
       "priority_hint": null,
       "terminal": false,
       "to_stage": {
         "profile_id": "ssdp-protocol-7.2",
-        "protocol_version": "7.2.0",
+        "protocol_version": "7.2.1",
         "stage_key": "software-implementation"
       },
       "trigger_key": "action_required"
@@ -2186,14 +2186,14 @@
       "explanation": "D3 maintenance concern requires architecture/workplan action",
       "from_stage": {
         "profile_id": "ssdp-protocol-7.2",
-        "protocol_version": "7.2.0",
+        "protocol_version": "7.2.1",
         "stage_key": "health-audit"
       },
       "priority_hint": null,
       "terminal": false,
       "to_stage": {
         "profile_id": "ssdp-protocol-7.2",
-        "protocol_version": "7.2.0",
+        "protocol_version": "7.2.1",
         "stage_key": "software-design"
       },
       "trigger_key": "action_required"
@@ -2202,14 +2202,14 @@
       "explanation": "D2 maintenance concern routes to numerical authority",
       "from_stage": {
         "profile_id": "ssdp-protocol-7.2",
-        "protocol_version": "7.2.0",
+        "protocol_version": "7.2.1",
         "stage_key": "health-audit"
       },
       "priority_hint": null,
       "terminal": false,
       "to_stage": {
         "profile_id": "ssdp-protocol-7.2",
-        "protocol_version": "7.2.0",
+        "protocol_version": "7.2.1",
         "stage_key": "numerical-algorithm-design"
       },
       "trigger_key": "action_required"
@@ -2218,14 +2218,14 @@
       "explanation": "D1 maintenance concern routes to scientific authority",
       "from_stage": {
         "profile_id": "ssdp-protocol-7.2",
-        "protocol_version": "7.2.0",
+        "protocol_version": "7.2.1",
         "stage_key": "health-audit"
       },
       "priority_hint": null,
       "terminal": false,
       "to_stage": {
         "profile_id": "ssdp-protocol-7.2",
-        "protocol_version": "7.2.0",
+        "protocol_version": "7.2.1",
         "stage_key": "scientific-formulation"
       },
       "trigger_key": "action_required"
@@ -2234,7 +2234,7 @@
       "explanation": "material authority contradiction requires adjudication",
       "from_stage": {
         "profile_id": "ssdp-protocol-7.2",
-        "protocol_version": "7.2.0",
+        "protocol_version": "7.2.1",
         "stage_key": "health-audit"
       },
       "priority_hint": null,
@@ -2246,7 +2246,7 @@
       "explanation": "the lifecycle scope is closed",
       "from_stage": {
         "profile_id": "ssdp-protocol-7.2",
-        "protocol_version": "7.2.0",
+        "protocol_version": "7.2.1",
         "stage_key": "closeout"
       },
       "priority_hint": null,
@@ -2258,14 +2258,14 @@
       "explanation": "D4 closeout blocker returns to implementation",
       "from_stage": {
         "profile_id": "ssdp-protocol-7.2",
-        "protocol_version": "7.2.0",
+        "protocol_version": "7.2.1",
         "stage_key": "closeout"
       },
       "priority_hint": null,
       "terminal": false,
       "to_stage": {
         "profile_id": "ssdp-protocol-7.2",
-        "protocol_version": "7.2.0",
+        "protocol_version": "7.2.1",
         "stage_key": "software-implementation"
       },
       "trigger_key": "blocked"
@@ -2274,14 +2274,14 @@
       "explanation": "D3 closeout blocker reopens Software Design",
       "from_stage": {
         "profile_id": "ssdp-protocol-7.2",
-        "protocol_version": "7.2.0",
+        "protocol_version": "7.2.1",
         "stage_key": "closeout"
       },
       "priority_hint": null,
       "terminal": false,
       "to_stage": {
         "profile_id": "ssdp-protocol-7.2",
-        "protocol_version": "7.2.0",
+        "protocol_version": "7.2.1",
         "stage_key": "software-design"
       },
       "trigger_key": "blocked"
@@ -2290,14 +2290,14 @@
       "explanation": "D2 closeout blocker reopens Numerical Algorithm Design",
       "from_stage": {
         "profile_id": "ssdp-protocol-7.2",
-        "protocol_version": "7.2.0",
+        "protocol_version": "7.2.1",
         "stage_key": "closeout"
       },
       "priority_hint": null,
       "terminal": false,
       "to_stage": {
         "profile_id": "ssdp-protocol-7.2",
-        "protocol_version": "7.2.0",
+        "protocol_version": "7.2.1",
         "stage_key": "numerical-algorithm-design"
       },
       "trigger_key": "blocked"
@@ -2306,14 +2306,14 @@
       "explanation": "D1 closeout blocker reopens Scientific Formulation",
       "from_stage": {
         "profile_id": "ssdp-protocol-7.2",
-        "protocol_version": "7.2.0",
+        "protocol_version": "7.2.1",
         "stage_key": "closeout"
       },
       "priority_hint": null,
       "terminal": false,
       "to_stage": {
         "profile_id": "ssdp-protocol-7.2",
-        "protocol_version": "7.2.0",
+        "protocol_version": "7.2.1",
         "stage_key": "scientific-formulation"
       },
       "trigger_key": "blocked"
@@ -2322,7 +2322,7 @@
       "explanation": "Protocol 6 release cannot close under unresolved governing challenge",
       "from_stage": {
         "profile_id": "ssdp-protocol-7.2",
-        "protocol_version": "7.2.0",
+        "protocol_version": "7.2.1",
         "stage_key": "closeout"
       },
       "priority_hint": null,
