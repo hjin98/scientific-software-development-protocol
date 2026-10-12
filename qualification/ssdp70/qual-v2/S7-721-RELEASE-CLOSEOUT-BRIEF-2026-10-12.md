@@ -36,6 +36,8 @@ is expected to be conflict-free. Preserve history: merge, never rebase, squash, 
 - The stakeholder ratified 7.2.1 regardless: **Accepted with conditions** (accepted by stakeholder decision over a statistical
   no-go; never described as qualified or as a statistical go). The condition is the user warning below. 7.2.0 stays NOT
   QUALIFIED history and is not separately accepted.
+- The 7.x semantic-protocol line concludes at 7.2.1. Stakeholder direction: further improvement needs deterministic machinery,
+  the work of a future SSDS 8.0+ design. Mention as direction, not as a plan or promise.
 - The study's lessons are in the lessons summary (§3–§5); documentation summarizes them, it does not restate the tables.
 
 ## User warning (the acceptance condition)
@@ -50,8 +52,6 @@ the README version table with an asterisk pointing to it:
 > a statistically robust guarantee. Activate skills with explicit commands (for example `/software-design`), and review
 > consequential output yourself. What the study measured and learned is recorded in
 > [`qualification/ssdp70/PROTOCOL-7X-QUALIFICATION-STUDY-EVIDENCE-AND-LESSONS-2026-10-12.md`](qualification/ssdp70/PROTOCOL-7X-QUALIFICATION-STUDY-EVIDENCE-AND-LESSONS-2026-10-12.md).
-- The 7.x semantic-protocol line concludes at 7.2.1. Stakeholder direction: further improvement needs deterministic machinery,
-  the work of a future SSDS 8.0+ design. Mention as direction, not as a plan or promise.
 
 ## Steps
 
