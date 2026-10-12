@@ -33,7 +33,7 @@ candidate:
     state: PASS
     evidence_ref: hjin98/scientific-software-development-protocol@04827e657cd156a6ea664a04869f73d15e8bcbed:qualification/ssdp70/INDEPENDENT-REVIEW-2026-10-12-PROTOCOL-7.2.1-PASS.md
   ratification:
-    state: NOT_REQUESTED
-    evidence_ref: NONE
+    state: RATIFIED
+    evidence_ref: hjin98/scientific-software-development-protocol@409451c874eb0a6bb098b622ea6f967bc9578b01:qualification/ssdp70/STAKEHOLDER-RATIFICATION-2026-10-12-PROTOCOL-7.2.1.md
   public_source_ref: UNAVAILABLE
   recovery_ref: UNAVAILABLE
