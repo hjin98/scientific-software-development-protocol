@@ -10,7 +10,7 @@
   check-plan    provider-free check that the plan resolves (arms, key, episodes, requirements, oracles, counts)
   verify        audits completed runs against the plan with build_campaign_record.py (no scoring)
   plan-rerun    after a stage: WORK/rerun-commands-stage<N>.json, one harness command per (plan command, arm) holding exactly the runs the
-                builder classifies as provider-transport failures (kind infra), at --parallel P, into runs/rerun-s<N>/<command>; once per stage
+                builder classifies as provider-transport failures (kind infra), at --parallel P, into runs/rerun-s<N>-<arm>/<command>; once per stage
   freeze-evaluator  freezes the evaluator profile (--model) in an existing campaign directory and records it in the identity
   preflight     OK or STOP per check for the operator (READY, digests, tool hashes, plan, binaries, disk, credential presence)
   report        writes OPERATOR-REPORT.md (status, identity, verification, authorizations, escalations)
@@ -560,22 +560,33 @@ def cmd_plan_rerun(a) -> int:
     Selection is mechanical and arm-blind: every original run of the stage's unconditional commands that build_campaign_record.classify
     marks kind "infra" with its default patterns, nothing else (no death, no other malformed run, no verdict). Each (command, arm) group
     becomes one harness command identical to its plan command except --out (runs/rerun-s<N>/<command>), --parallel, one --arm and the
-    group's --only episodes. Refuses to overwrite an existing rerun plan or rerun root, so a stage is rerun at most once."""
+    group's --only episodes. Each arm has its own rerun root runs/rerun-s<N>-<arm>, so every harness command claims a fresh --out (the
+    harness refuses an existing one) while the parent directory keeps the source command key the builder matches set-k reruns on. The
+    harness reruns every replicate of an --only episode, so an episode is selected only when all of its replicates in that command and
+    arm are infra; otherwise plan-rerun refuses (no partial-replicate rerun exists). Refuses to overwrite an existing rerun plan or rerun
+    root, so a stage is rerun at most once."""
     work, stage = a.work, a.stage
-    out_path, root = rerun_plan_path(work, stage), work / "runs" / f"rerun-s{stage}"
-    if out_path.exists() or root.exists():
-        sys.exit(f"refusing: {out_path.name} or {root.name} already exists (one rerun per stage)")
+    out_path = rerun_plan_path(work, stage)
+    roots = sorted((work / "runs").glob(f"rerun-s{stage}*"))
+    if out_path.exists() or roots:
+        sys.exit(f"refusing: {out_path.name} or a runs/rerun-s{stage}* root already exists (one rerun per stage)")
     if not (work / "launch" / f"DONE-stage{stage}").exists():
         sys.exit(f"stage {stage} has not finished (no launch/DONE-stage{stage})")
     parallel = min(a.parallel, PARALLEL_MAX)
     plan = [c for c in json.loads((work / "commands.json").read_text())["commands"] if int(c.get("stage", 1)) == stage and not c["conditional"]]
     commands, total = [], 0
     for c in plan:
-        groups = collections.defaultdict(list)
+        groups, replicates = collections.defaultdict(list), collections.Counter()
         for d in sorted((work / "runs" / c["key"]).glob("*-r*")):
+            episode, arm, _ = d.name.rsplit("-", 2)
+            replicates[(episode, arm)] += 1
             if (d / "summary.json").exists() and bcr.classify(d, bcr.DEFAULT_INFRA)["kind"] == "infra":
-                episode, arm, _ = d.name.rsplit("-", 2)
                 groups[arm].append({"run": d.name, "episode": episode, "summary_sha256": sha(d / "summary.json")})
+        for arm, runs in groups.items():
+            for episode, n in collections.Counter(r["episode"] for r in runs).items():
+                if n != replicates[(episode, arm)]:
+                    sys.exit(f"refusing: {c['key']} {episode} {arm}: {n} of {replicates[(episode, arm)]} replicates are infra; "
+                             "the harness cannot rerun a subset of an episode's replicates")
         for arm in [x for x in c["arms"] if x in groups]:
             runs = groups[arm]
             argv, j = [], 0
@@ -586,13 +597,14 @@ def cmd_plan_rerun(a) -> int:
                     continue
                 argv.append(src[j])
                 j += 1
-            argv += ["--out", str(root / c["key"]), "--parallel", str(parallel), "--arm", arm]
-            for r in runs:
-                argv += ["--only", r["episode"]]
+            argv += ["--out", str(work / "runs" / f"rerun-s{stage}-{arm}" / c["key"]), "--parallel", str(parallel), "--arm", arm]
+            for episode in dict.fromkeys(r["episode"] for r in runs):
+                argv += ["--only", episode]
             commands.append({"key": f"rerun-s{stage}-{c['key']}-{arm}", "source_command": c["key"], "arm": arm, "runs": len(runs),
                              "originals": runs, "argv": argv, "shell": shlex.join(argv)})
             total += len(runs)
-    write_json(out_path, {"schema": 1, "stage": stage, "root": str(root), "parallel": parallel, "runs": total, "commands": commands})
+    write_json(out_path, {"schema": 1, "stage": stage, "roots": sorted({str(work / "runs" / f"rerun-s{stage}-{c['arm']}") for c in commands}),
+                          "parallel": parallel, "runs": total, "commands": commands})
     print(json.dumps({"rerun_plan": str(out_path), "sha256": sha(out_path), "commands": len(commands), "runs": total,
                       "by_arm": dict(collections.Counter(c["arm"] for c in commands for _ in range(c["runs"])))}, indent=1))
     return 0

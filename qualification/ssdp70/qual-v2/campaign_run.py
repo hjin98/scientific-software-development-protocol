@@ -146,6 +146,9 @@ def main() -> int:
         if (work / "launch" / f"rerun-runner-stage{stage}.pid").exists() or (work / "launch" / "HALT").exists():
             print("a rerun runner was already started or halted here; do not relaunch", file=sys.stderr)
             return 2
+        if (work / "launch" / f"runner-stage{stage + 1}.pid").exists():
+            print(f"stage {stage + 1} was already started; the stage {stage} rerun must run before it", file=sys.stderr)
+            return 2
         if spec_problem(work) or {c["arm"] for c in rerun_commands(work, stage)} - {a for c in commands(work) for a in c["arms"]}:
             print("the rerun plan names an arm outside the plan or the arms specification", file=sys.stderr)
             return 2
@@ -175,6 +178,9 @@ def main() -> int:
         if (work / "launch" / f"runner-stage{stage}.pid").exists() or (work / "launch" / "HALT").exists():
             print("a runner was already started or halted here; do not relaunch; see the hand-off, section on halts", file=sys.stderr)
             return 2
+        if stage > 1 and (work / "launch" / f"rerun-runner-stage{stage - 1}.pid").exists() and not (work / "launch" / f"DONE-rerun-stage{stage - 1}").exists():
+            print(f"the stage {stage - 1} rerun has not finished (no DONE-rerun-stage{stage - 1})", file=sys.stderr)
+            return 2
         (work / "launch").mkdir(parents=True, exist_ok=True)
         proc = subprocess.Popen([sys.executable, str(Path(__file__).resolve()), str(work), "_loop", str(stage)], start_new_session=True,
                                 stdout=open(work / "launch" / "runner.log", "ab"), stderr=subprocess.STDOUT, stdin=subprocess.DEVNULL)
@@ -187,8 +193,8 @@ def main() -> int:
                   f"started {started:>3} summaries {summaries:>3} of {c['runs']:>3}  error files {errors}")
         for stage in (1, 2):
             for c in rerun_commands(work, stage):
-                d = work / "runs" / f"rerun-s{stage}" / c["source_command"]
-                summaries = len(list(d.glob(f"*-{c['arm']}-r*/summary.json"))) if d.exists() else 0
+                d = work / "runs" / f"rerun-s{stage}-{c['arm']}" / c["source_command"]
+                summaries = len(list(d.glob("*-r*/summary.json"))) if d.exists() else 0
                 print(f"{c['key']:<30} rerun {state(work, c['key']):<14} summaries {summaries:>3} of {c['runs']:>3}")
         for flag in ("HALT", "DONE-stage1", "DONE-stage2", "DONE-rerun-stage1", "DONE-rerun-stage2"):
             if (work / "launch" / flag).exists():

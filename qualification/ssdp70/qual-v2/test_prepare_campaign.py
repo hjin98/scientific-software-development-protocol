@@ -6,6 +6,7 @@ from __future__ import annotations
 
 import json
 import contextlib
+import hashlib
 import io
 import shutil
 import subprocess
@@ -154,9 +155,12 @@ class Plan(unittest.TestCase):
             argv = c["argv"]
             self.assertEqual(argv[argv.index("--parallel") + 1], "8")
             self.assertEqual([argv[j + 1] for j, x in enumerate(argv) if x == "--arm"], [c["arm"]])
-            self.assertEqual(argv[argv.index("--out") + 1], str(self.work / "runs" / "rerun-s1" / main["key"]))
+            self.assertEqual(argv[argv.index("--out") + 1], str(self.work / "runs" / f"rerun-s1-{c['arm']}" / main["key"]))
             strip = lambda v: [x for j, x in enumerate(v) if x not in ("--out", "--parallel", "--arm", "--only") and v[j - 1] not in ("--out", "--parallel", "--arm", "--only")]  # noqa: E731
             self.assertEqual(strip(argv), strip(main["argv"]))
+        outs = [c["argv"][c["argv"].index("--out") + 1] for c in plan["commands"]]
+        self.assertEqual(len(outs), len(set(outs)))                       # the harness refuses an existing --out: one fresh root per command
+        self.assertFalse(any(Path(o).exists() for o in outs))
         self.assertNotEqual(run(HERE / "prepare_campaign.py", "plan-rerun", *args).returncode, 0)      # once per stage
         env = {"PATH": "/usr/bin:/bin", "SSDP70_OMP_PROVIDER_CREDENTIAL": "x"}
         rr = lambda: subprocess.run([sys.executable, HERE / "campaign_run.py", str(self.work), "run-rerun", "1"], capture_output=True, text=True, env=env)  # noqa: E731
@@ -169,6 +173,31 @@ class Plan(unittest.TestCase):
         self.assertEqual(p.returncode, 2)
         self.assertIn("not authorized", p.stderr)
         self.assertFalse((self.work / "launch" / "rerun-runner-stage1.pid").exists())
+        (self.work / "authorizations" / "rerun-stage1.ok").write_text(hashlib.sha256((self.work / "rerun-commands-stage1.json").read_bytes()).hexdigest())
+        (self.work / "launch" / "runner-stage2.pid").write_text("1")
+        p = rr()
+        self.assertEqual(p.returncode, 2)
+        self.assertIn("already started", p.stderr)
+        (self.work / "launch" / "runner-stage2.pid").unlink()
+        (self.work / "launch" / "rerun-runner-stage1.pid").write_text("1")          # a stage-1 rerun in progress blocks stage 2
+        (self.work / "READY").write_text("STAGE 2 MAY START\n")
+        (self.work / "authorizations" / "stage2.ok").write_text("ok")
+        p = subprocess.run([sys.executable, HERE / "campaign_run.py", str(self.work), "start", "2"], capture_output=True, text=True, env=env)
+        self.assertEqual(p.returncode, 2)
+        self.assertIn("rerun has not finished", p.stderr)
+
+    def test_plan_rerun_refuses_a_partial_replicate_episode(self):
+        run(HERE / "prepare_campaign.py", "plan", *self.args)
+        main = next(c for c in json.loads((self.work / "commands.json").read_text())["commands"] if c["panel"] == "main")
+        a0 = main["arms"][0]
+        self.fake(main["key"], f"T1-r01-{a0}-r0", "EXECUTION_ERROR", err="429 Model busy, retry later")
+        self.fake(main["key"], f"T1-r01-{a0}-r1", "COMPLETE_ADMISSIBLE")
+        (self.work / "launch").mkdir()
+        (self.work / "launch" / "DONE-stage1").write_text("x")
+        p = run(HERE / "prepare_campaign.py", "plan-rerun", "--work", self.work, "--stage", "1", "--parallel", "8")
+        self.assertNotEqual(p.returncode, 0)
+        self.assertIn("1 of 2 replicates", p.stderr)
+        self.assertFalse((self.work / "rerun-commands-stage1.json").exists())
 
     def test_conditional_commands_are_two_episodes_and_slots_carry_their_command(self):
         run(HERE / "prepare_campaign.py", "plan", *self.args)
