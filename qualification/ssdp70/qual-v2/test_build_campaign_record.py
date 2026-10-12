@@ -208,6 +208,23 @@ class Synthetic(unittest.TestCase):
             self.assertEqual({r["episode"]: r["admissible"] for r in rec["runs"]}, {"EP-001": True, "EP-002": False})
             self.assertEqual(len(rec["reruns"]), 2)
 
+    def test_provider_busy_and_retry_excess_are_infrastructure(self):
+        retry = "more provider-layer error retries than the exact build performs"
+        with tempfile.TemporaryDirectory() as t:
+            t = Path(t)
+            fake_run(t / "r", "EP-001-p72-r0", state="EXECUTION_ERROR", term="error", err="429 Model busy, retry later\nModel busy (type=x)")
+            fake_run(t / "rr", "EP-001-p72-r0", items=self.all_items())
+            fake_run(t / "r", "EP-002-p72-r0", state="MALFORMED_EVIDENCE_OR_ASSESSMENT", term="completed", evidence_state_reasons=[retry])
+            fake_run(t / "rr", "EP-002-p72-r0", items=self.all_items())
+            fake_run(t / "r", "EP-003-p72-r0", state="MALFORMED_EVIDENCE_OR_ASSESSMENT", term="completed", evidence_state_reasons=[retry, "other"])
+            fake_run(t / "r", "EP-004-p72-r0", state="EXECUTION_ERROR", term="error", err="403 qualification turn budget exhausted")
+            fake_run(t / "r", "EP-005-p72-r0", state="EXECUTION_ERROR", term="error", err="request failed after 429 Model busy")
+            rc, audit, rec = self.build(self.decl(5), t, rerun=[t / "rr"])
+            kinds = {r["episode"]: r["kind"] for r in rec["runs"]}
+            self.assertEqual(kinds, {"EP-001": "ok", "EP-002": "ok", "EP-003": "malformed", "EP-004": "malformed", "EP-005": "malformed"})
+            self.assertEqual({r["run"]: r["original_kind"] for r in rec["reruns"]}, {"EP-001-p72-r0": "infra", "EP-002-p72-r0": "infra"})
+            self.assertFalse([f for f in audit["findings"] if f["kind"] == "INTEGRITY"], audit)
+
     def test_rerun_of_behaviour_death_or_non_transport_error_is_integrity(self):
         with tempfile.TemporaryDirectory() as t:
             t = Path(t)

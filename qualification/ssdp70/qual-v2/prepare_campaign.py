@@ -9,6 +9,8 @@
                 declaration.json for build_campaign_record.py, expected-runs.json
   check-plan    provider-free check that the plan resolves (arms, key, episodes, requirements, oracles, counts)
   verify        audits completed runs against the plan with build_campaign_record.py (no scoring)
+  plan-rerun    after a stage: WORK/rerun-commands-stage<N>.json, one harness command per (plan command, arm) holding exactly the runs the
+                builder classifies as provider-transport failures (kind infra), at --parallel P, into runs/rerun-s<N>/<command>; once per stage
   freeze-evaluator  freezes the evaluator profile (--model) in an existing campaign directory and records it in the identity
   preflight     OK or STOP per check for the operator (READY, digests, tool hashes, plan, binaries, disk, credential presence)
   report        writes OPERATOR-REPORT.md (status, identity, verification, authorizations, escalations)
@@ -26,6 +28,7 @@ Usage: prepare_campaign.py <command> --work WORK [options]
 from __future__ import annotations
 
 import argparse
+import collections
 import hashlib
 import json
 import shlex
@@ -40,6 +43,7 @@ REPO = HERE.parents[2]
 EVAL = REPO / "qualification" / "ssdp70" / "eval"
 sys.path[:0] = [str(HERE), str(EVAL), str(REPO / "qualification" / "ssdp70" / "s4")]
 import arms_spec  # noqa: E402
+import build_campaign_record as bcr  # noqa: E402
 import build_s4_probe  # noqa: E402
 import core70  # noqa: E402
 import harness70  # noqa: E402
@@ -418,6 +422,7 @@ def cmd_plan(a) -> int:
               "--capabilities", str(work / "keys" / "omp-primary-flash-executor-main.capabilities.json"),
               "--adapter", "omp", "--mode", "qualification"]
     parallel = min(int(config.get("parallel", PARALLEL_DEFAULT)), PARALLEL_MAX)
+    stage_parallel = {int(k): min(int(v), PARALLEL_MAX) for k, v in config.get("stage_parallel", {}).items()}   # e.g. {"2": 8}
     chunk = int(config.get("chunk", CHUNK))
     cond_chunk = int(config.get("conditional_chunk", 2))      # add-ons run two episodes at a time (the T7 rule adds two pairs, then re-checks)
     by_panel: dict[str, list[dict]] = {}
@@ -438,14 +443,15 @@ def cmd_plan(a) -> int:
             for ci, n in enumerate(starts):
                 part = rows[n:n + size]
                 key = f"{panel}-c{k * len(starts) + ci + 1:02d}"
+                stage = 1 if panel == "main" else 2
                 argv = [*common, "--corpus", str(a.corpus), "--out", str(work / "runs" / key), "--requirements", str(a.requirements),
-                        "--oracles", str(a.oracles), "--parallel", str(parallel)]
+                        "--oracles", str(a.oracles), "--parallel", str(stage_parallel.get(stage, parallel))]
                 for arm in used:
                     argv += ["--arm", arm]
                 for e in part:
                     argv += ["--only", e["id"]]
                 runs = sum(int(e.get("replicates", 1)) for e in part) * len(used)
-                command = {"key": key, "panel": panel, "stage": 1 if panel == "main" else 2, "conditional": conditional,
+                command = {"key": key, "panel": panel, "stage": stage, "conditional": conditional,
                            "episodes": len(part), "runs": runs, "arms": used, "argv": argv, "shell": shlex.join(argv)}
                 if sets > 1:
                     command.update({"set": k, "replicate_of": f"{panel}-c{ci + 1:02d}"})
@@ -544,6 +550,54 @@ def cmd_check_plan(a) -> int:
     return 0 if not problems else 2
 
 
+def rerun_plan_path(work: Path, stage: int) -> Path:
+    return work / f"rerun-commands-stage{stage}.json"
+
+
+def cmd_plan_rerun(a) -> int:
+    """The once-only rerun of one stage's provider-transport failures (contract section 3; stakeholder sixteenth ruling set).
+
+    Selection is mechanical and arm-blind: every original run of the stage's unconditional commands that build_campaign_record.classify
+    marks kind "infra" with its default patterns, nothing else (no death, no other malformed run, no verdict). Each (command, arm) group
+    becomes one harness command identical to its plan command except --out (runs/rerun-s<N>/<command>), --parallel, one --arm and the
+    group's --only episodes. Refuses to overwrite an existing rerun plan or rerun root, so a stage is rerun at most once."""
+    work, stage = a.work, a.stage
+    out_path, root = rerun_plan_path(work, stage), work / "runs" / f"rerun-s{stage}"
+    if out_path.exists() or root.exists():
+        sys.exit(f"refusing: {out_path.name} or {root.name} already exists (one rerun per stage)")
+    if not (work / "launch" / f"DONE-stage{stage}").exists():
+        sys.exit(f"stage {stage} has not finished (no launch/DONE-stage{stage})")
+    parallel = min(a.parallel, PARALLEL_MAX)
+    plan = [c for c in json.loads((work / "commands.json").read_text())["commands"] if int(c.get("stage", 1)) == stage and not c["conditional"]]
+    commands, total = [], 0
+    for c in plan:
+        groups = collections.defaultdict(list)
+        for d in sorted((work / "runs" / c["key"]).glob("*-r*")):
+            if (d / "summary.json").exists() and bcr.classify(d, bcr.DEFAULT_INFRA)["kind"] == "infra":
+                episode, arm, _ = d.name.rsplit("-", 2)
+                groups[arm].append({"run": d.name, "episode": episode, "summary_sha256": sha(d / "summary.json")})
+        for arm in [x for x in c["arms"] if x in groups]:
+            runs = groups[arm]
+            argv, j = [], 0
+            src = c["argv"]
+            while j < len(src):                                      # drop --out/--parallel/--arm/--only; keep everything else in order
+                if src[j] in ("--out", "--parallel", "--arm", "--only"):
+                    j += 2
+                    continue
+                argv.append(src[j])
+                j += 1
+            argv += ["--out", str(root / c["key"]), "--parallel", str(parallel), "--arm", arm]
+            for r in runs:
+                argv += ["--only", r["episode"]]
+            commands.append({"key": f"rerun-s{stage}-{c['key']}-{arm}", "source_command": c["key"], "arm": arm, "runs": len(runs),
+                             "originals": runs, "argv": argv, "shell": shlex.join(argv)})
+            total += len(runs)
+    write_json(out_path, {"schema": 1, "stage": stage, "root": str(root), "parallel": parallel, "runs": total, "commands": commands})
+    print(json.dumps({"rerun_plan": str(out_path), "sha256": sha(out_path), "commands": len(commands), "runs": total,
+                      "by_arm": dict(collections.Counter(c["arm"] for c in commands for _ in range(c["runs"])))}, indent=1))
+    return 0
+
+
 def cmd_verify(a) -> int:
     work = a.work
     arms, _ = load_arms(work)
@@ -580,7 +634,8 @@ def cmd_verify(a) -> int:
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     sub = ap.add_subparsers(dest="cmd", required=True)
-    for name in ("init", "static", "check-corpus", "plan", "check-plan", "verify", "refresh-identity", "freeze-evaluator", "preflight", "report", "assemble"):
+    for name in ("init", "static", "check-corpus", "plan", "check-plan", "verify", "refresh-identity", "freeze-evaluator", "preflight", "report", "assemble",
+                 "plan-rerun"):
         sp = sub.add_parser(name)
         sp.add_argument("--work", type=Path, required=True)
         if name == "init":
@@ -607,6 +662,9 @@ def main() -> int:
             sp.add_argument("--oracles", type=Path, required=True)
             sp.add_argument("--slot-flags", type=Path)
             sp.add_argument("--config", type=Path)
+        if name == "plan-rerun":
+            sp.add_argument("--stage", type=int, required=True)
+            sp.add_argument("--parallel", type=int, required=True, help="harness pairs in flight for the rerun commands (one arm each)")
         if name == "verify":
             sp.add_argument("--map", type=Path, required=True)
             sp.add_argument("--include-conditional", nargs="+", metavar="KEY", help="conditional command keys that were authorized and run")
@@ -614,7 +672,8 @@ def main() -> int:
     a = ap.parse_args()
     return {"init": cmd_init, "static": cmd_static, "check-corpus": cmd_check_corpus, "plan": cmd_plan,
             "check-plan": cmd_check_plan, "verify": cmd_verify, "refresh-identity": cmd_refresh_identity,
-            "freeze-evaluator": cmd_freeze_evaluator, "preflight": cmd_preflight, "report": cmd_report, "assemble": cmd_assemble}[a.cmd](a)
+            "freeze-evaluator": cmd_freeze_evaluator, "preflight": cmd_preflight, "report": cmd_report, "assemble": cmd_assemble,
+            "plan-rerun": cmd_plan_rerun}[a.cmd](a)
 
 
 if __name__ == "__main__":

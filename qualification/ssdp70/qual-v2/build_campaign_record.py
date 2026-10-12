@@ -33,8 +33,9 @@ Verdicts: a binding oracle verdict decides. An advisory verdict is unadjudicated
 verdicts as dispositions for development cross-checks only and labels the record.
 
 Admissibility (contract section 3): COMPLETE_ADMISSIBLE is admissible; EXECUTION_ERROR whose termination is turn_cap or timeout
-is behaviour (admissible, death). Another EXECUTION_ERROR is infrastructure only if its error message matches an infra pattern;
-it may be rerun once. Originals come from --runs, reruns from --rerun; both identities are kept; a second failure is
+is behaviour (admissible, death). Another EXECUTION_ERROR is infrastructure only if its error message matches an infra pattern
+(the provider's own form "429 Model busy, retry later" included); a MALFORMED_EVIDENCE_OR_ASSESSMENT run whose only reason is the
+harness's provider-retry excess (PROVIDER_RETRY_REASON) is infrastructure too (stakeholder sixteenth ruling set). Either may be rerun once. Originals come from --runs, reruns from --rerun; both identities are kept; a second failure is
 inadmissible; a rerun of a slot whose original was not infrastructure is an INTEGRITY finding.
 
 Usage: build_campaign_record.py --declaration D.json --map M.json --runs DIR [--runs DIR ...] [--rerun DIR ...]
@@ -59,7 +60,8 @@ import h4  # noqa: E402
 SCORABLE = {"pass": 1, "fail": 0}
 Q5_PANELS = {"routing": "Q5a", "versioning": "Q5b", "sentinels": "Q5e", "sentinels-add": "Q5e", "unversioned": "Q5f", "unversioned-add": "Q5f"}
 BURDEN_PANELS = ("burden", "burden-add")
-DEFAULT_INFRA = [r"\b(429|5\d\d) status code", r"status code (429|5\d\d)\b", r"ECONN", r"ETIMEDOUT", r"connection (reset|refused|closed)"]
+DEFAULT_INFRA = [r"\b(429|5\d\d) status code", r"status code (429|5\d\d)\b", r"^(429|5\d\d)\b", r"ECONN", r"ETIMEDOUT", r"connection (reset|refused|closed)"]
+PROVIDER_RETRY_REASON = "more provider-layer error retries than the exact build performs"   # harness70 evidence check under provider throttling
 
 
 def termination(run: Path) -> dict:
@@ -81,6 +83,8 @@ def classify(run: Path, infra_patterns: list[str]) -> dict:
     elif state == "EXECUTION_ERROR" and term.get("state") in ("turn_cap", "timeout"):
         kind = "death"
     elif state == "EXECUTION_ERROR" and any(re.search(p, message) for p in infra_patterns):
+        kind = "infra"
+    elif state == "MALFORMED_EVIDENCE_OR_ASSESSMENT" and s.get("evidence_state_reasons") == [PROVIDER_RETRY_REASON]:
         kind = "infra"
     else:
         kind = "malformed"

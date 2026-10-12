@@ -7,15 +7,19 @@
                                           after verifying stage 1. Staging is ordering only; no candidate gate is scored between stages.
   campaign_run.py WORK status             per command: NOT-LAUNCHED | RUNNING | EXIT <rc> | CRASHED; runs started and summaries so far
   campaign_run.py WORK run-conditional KEY   runs one conditional command; only if WORK/authorizations/KEY.ok exists (written by the analyst)
+  campaign_run.py WORK run-rerun STAGE    runs the analyst's frozen rerun plan WORK/rerun-commands-stage<STAGE>.json (prepare_campaign.py
+                                          plan-rerun) sequentially, detached, once; needs READY "RERUN MAY START" and
+                                          WORK/authorizations/rerun-stage<STAGE>.ok containing that plan's sha256
 
 A command that exits 0 or 2 (2 = at least one run is not admissible) lets the sequence continue. Any other exit code, or a crash,
 writes WORK/launch/HALT and stops the sequence. The runner never reruns, never edits a run directory and never deletes anything.
-Rerunning a lost run is the analyst's decision (contract section 3): the analyst writes a new command into a new directory.
+Rerunning a lost run is the analyst's decision (contract section 3): the analyst freezes a rerun plan into a new directory and authorizes it.
 The arms specification (WORK/arms-spec.json, arms_spec.py) is read as a guard: `start` and `run-conditional` refuse a commands.json that names an
 arm outside it, and `status` prints each panel's replicate set per command (`set`).
 """
 from __future__ import annotations
 
+import hashlib
 import json
 import os
 import subprocess
@@ -74,6 +78,23 @@ def run_one(work: Path, c: dict) -> int:
     return rc
 
 
+def rerun_commands(work: Path, stage: int) -> list[dict]:
+    path = work / f"rerun-commands-stage{stage}.json"
+    return json.loads(path.read_text())["commands"] if path.exists() else []
+
+
+def rerun_loop(work: Path, stage: int) -> None:
+    (work / "launch" / f"rerun-runner-stage{stage}.pid").write_text(str(os.getpid()))
+    for c in rerun_commands(work, stage):
+        if state(work, c["key"]) != "NOT-LAUNCHED":
+            continue
+        rc = run_one(work, c)
+        if rc not in CONTINUE:
+            (work / "launch" / "HALT").write_text(f"{c['key']} exited {rc}\n")
+            return
+    (work / "launch" / f"DONE-rerun-stage{stage}").write_text(time.strftime("%FT%TZ", time.gmtime()) + "\n")
+
+
 def loop(work: Path, stage: int) -> None:
     (work / "launch" / f"runner-stage{stage}.pid").write_text(str(os.getpid()))
     for c in commands(work):
@@ -101,6 +122,36 @@ def main() -> int:
     work, action = Path(sys.argv[1]).resolve(), sys.argv[2]
     if action == "_loop":
         loop(work, int(sys.argv[3]))
+        return 0
+    if action == "_rerun_loop":
+        rerun_loop(work, int(sys.argv[3]))
+        return 0
+    if action == "run-rerun":
+        if not os.environ.get("SSDP70_OMP_PROVIDER_CREDENTIAL"):
+            print("SSDP70_OMP_PROVIDER_CREDENTIAL is not set", file=sys.stderr)
+            return 2
+        stage = int(sys.argv[3])
+        plan = work / f"rerun-commands-stage{stage}.json"
+        ready = (work / "READY").read_text() if (work / "READY").exists() else ""
+        auth = work / "authorizations" / f"rerun-stage{stage}.ok"
+        if "RERUN MAY START" not in ready:
+            print("READY does not say 'RERUN MAY START'; the analyst has not released the rerun", file=sys.stderr)
+            return 2
+        if not plan.exists() or not auth.exists() or hashlib.sha256(plan.read_bytes()).hexdigest() not in auth.read_text():
+            print(f"the rerun of stage {stage} is not authorized: authorizations/{auth.name} must name the sha256 of {plan.name}", file=sys.stderr)
+            return 2
+        if not (work / "launch" / f"DONE-stage{stage}").exists():
+            print(f"stage {stage} has not finished (no DONE-stage{stage})", file=sys.stderr)
+            return 2
+        if (work / "launch" / f"rerun-runner-stage{stage}.pid").exists() or (work / "launch" / "HALT").exists():
+            print("a rerun runner was already started or halted here; do not relaunch", file=sys.stderr)
+            return 2
+        if spec_problem(work) or {c["arm"] for c in rerun_commands(work, stage)} - {a for c in commands(work) for a in c["arms"]}:
+            print("the rerun plan names an arm outside the plan or the arms specification", file=sys.stderr)
+            return 2
+        proc = subprocess.Popen([sys.executable, str(Path(__file__).resolve()), str(work), "_rerun_loop", str(stage)], start_new_session=True,
+                                stdout=open(work / "launch" / "runner.log", "ab"), stderr=subprocess.STDOUT, stdin=subprocess.DEVNULL)
+        print(f"started the sequential rerun runner for stage {stage} (pid {proc.pid})")
         return 0
     if action == "start":
         if not os.environ.get("SSDP70_OMP_PROVIDER_CREDENTIAL"):
@@ -134,7 +185,12 @@ def main() -> int:
             started, summaries, errors = counts(work, c["key"])
             print(f"{c['key']:<18} stage {c.get('stage', 1)} {'(conditional) ' if c.get('conditional') else ''}{'set ' + str(c['set']) + ' ' if 'set' in c else ''}{state(work, c['key']):<14} "
                   f"started {started:>3} summaries {summaries:>3} of {c['runs']:>3}  error files {errors}")
-        for flag in ("HALT", "DONE-stage1", "DONE-stage2"):
+        for stage in (1, 2):
+            for c in rerun_commands(work, stage):
+                d = work / "runs" / f"rerun-s{stage}" / c["source_command"]
+                summaries = len(list(d.glob(f"*-{c['arm']}-r*/summary.json"))) if d.exists() else 0
+                print(f"{c['key']:<30} rerun {state(work, c['key']):<14} summaries {summaries:>3} of {c['runs']:>3}")
+        for flag in ("HALT", "DONE-stage1", "DONE-stage2", "DONE-rerun-stage1", "DONE-rerun-stage2"):
             if (work / "launch" / flag).exists():
                 print(flag, (work / "launch" / flag).read_text().strip())
         return 0
