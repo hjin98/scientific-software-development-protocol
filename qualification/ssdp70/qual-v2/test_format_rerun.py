@@ -364,6 +364,25 @@ class FormatRerun(unittest.TestCase):
         t.write_text(original)
 
 
+class ExecutorReruns(unittest.TestCase):
+    def test_run_dirs_take_a_substituting_rerun_and_never_a_sibling(self):
+        with tempfile.TemporaryDirectory() as t:
+            w = Path(t)
+            def run(rel, state, err=""):
+                d = w / "runs" / rel
+                d.mkdir(parents=True)
+                (d / "summary.json").write_text(json.dumps({"evidence_state": state, "evidence_state_reasons": [], "episode": "E1"}))
+                term = {"state": "error" if err else "completed", "native_return_state": {"errorMessage": err}}
+                (d / "events.normalized.jsonl").write_text(json.dumps({"kind": "termination", "payload": term}) + "\n")
+            run("main-c01/E1-p72-r0", "EXECUTION_ERROR", "429 Model busy, retry later")
+            run("main-c01/E1-p72-r1", "COMPLETE_ADMISSIBLE")
+            run("rerun-s1-p72/main-c01/E1-p72-r0", "COMPLETE_ADMISSIBLE")
+            run("rerun-s1-p72/main-c01/E1-p72-r1", "COMPLETE_ADMISSIBLE")
+            got = [ca.slot_of(d, w) for d in ca.run_dirs(w, ["main"])]
+            self.assertEqual(got, ["main-c01/E1-p72-r0", "main-c01/E1-p72-r1", "rerun-s1-p72/main-c01/E1-p72-r0"])
+            self.assertTrue(all(ca.SLOT.fullmatch(s) for s in got))
+
+
 class OrdinaryPathUnchanged(unittest.TestCase):
     def test_full_pass_still_needs_evaluator_full_ok_and_pilot_still_needs_limit_5(self):
         with tempfile.TemporaryDirectory() as tmp:

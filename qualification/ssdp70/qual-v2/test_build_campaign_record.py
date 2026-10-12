@@ -236,6 +236,29 @@ class Synthetic(unittest.TestCase):
             self.assertEqual(rc, 3)
             self.assertEqual(len([f for f in audit["findings"] if f["what"].startswith("rerun of a slot")]), 2)
 
+    def test_whole_episode_rerun_substitutes_only_the_infra_replicate(self):
+        with tempfile.TemporaryDirectory() as t:
+            t = Path(t)
+            busy = dict(state="EXECUTION_ERROR", term="error", err="429 Model busy, retry later")
+            fake_run(t / "r", "EP-001-p72-r0", **busy)
+            fake_run(t / "rr", "EP-001-p72-r0", items=self.all_items())
+            fake_run(t / "r", "EP-001-p72-r1", items=self.all_items())
+            fake_run(t / "rr", "EP-001-p72-r1", **busy)                   # sibling: re-executed with the episode, never used
+            decl = self.decl(1)
+            decl["slots"] = [{"episode": "EP-001", "arm": "cand", "replicate": k, "delegate": True} for k in (0, 1)]
+            rc, audit, rec = self.build(decl, t, rerun=[t / "rr"])
+            self.assertEqual(rc, 0, audit)
+            self.assertEqual({r["run"]: (r["admissible"], r["kind"]) for r in rec["runs"]}, {"EP-001-p72-r0": (True, "ok"), "EP-001-p72-r1": (True, "ok")})
+            self.assertEqual({r["run"]: r.get("unused_sibling", False) for r in rec["reruns"]}, {"EP-001-p72-r0": False, "EP-001-p72-r1": True})
+            self.assertEqual(audit["unused_sibling_reruns"], 1)
+            # a rerun of an admissible replicate whose episode had no infra replicate stays an integrity finding
+            decl["slots"].append({"episode": "EP-002", "arm": "cand", "replicate": 0, "delegate": True})
+            fake_run(t / "r", "EP-002-p72-r0", items=self.all_items())
+            fake_run(t / "rr", "EP-002-p72-r0", items=self.all_items())
+            rc, audit, _ = self.build(decl, t, rerun=[t / "rr"])
+            self.assertEqual(rc, 3)
+            self.assertEqual([f["run"] for f in audit["findings"] if f["what"].startswith("rerun of a slot")], ["EP-002-p72-r0"])
+
     def test_silent_pass_paths_are_findings(self):
         with tempfile.TemporaryDirectory() as t:
             t = Path(t)

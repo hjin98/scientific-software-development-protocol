@@ -186,18 +186,26 @@ class Plan(unittest.TestCase):
         self.assertEqual(p.returncode, 2)
         self.assertIn("rerun has not finished", p.stderr)
 
-    def test_plan_rerun_refuses_a_partial_replicate_episode(self):
+    def test_plan_rerun_reruns_a_partial_replicate_episode_whole(self):
         run(HERE / "prepare_campaign.py", "plan", *self.args)
         main = next(c for c in json.loads((self.work / "commands.json").read_text())["commands"] if c["panel"] == "main")
         a0 = main["arms"][0]
         self.fake(main["key"], f"T1-r01-{a0}-r0", "EXECUTION_ERROR", err="429 Model busy, retry later")
         self.fake(main["key"], f"T1-r01-{a0}-r1", "COMPLETE_ADMISSIBLE")
+        self.fake(main["key"], f"T1-r01-{a0}-r2", "EXECUTION_ERROR", err="429 Model busy, retry later")
+        self.fake(main["key"], f"T1-r02-{a0}-r0", "COMPLETE_ADMISSIBLE")              # an episode with no infra replicate is not rerun
         (self.work / "launch").mkdir()
         (self.work / "launch" / "DONE-stage1").write_text("x")
-        p = run(HERE / "prepare_campaign.py", "plan-rerun", "--work", self.work, "--stage", "1", "--parallel", "8")
-        self.assertNotEqual(p.returncode, 0)
-        self.assertIn("1 of 2 replicates", p.stderr)
-        self.assertFalse((self.work / "rerun-commands-stage1.json").exists())
+        p = run(HERE / "prepare_campaign.py", "plan-rerun", "--work", self.work, "--stage", "1", "--parallel", "32")
+        self.assertEqual(p.returncode, 0, p.stderr)
+        plan = json.loads((self.work / "rerun-commands-stage1.json").read_text())
+        (c,) = plan["commands"]
+        self.assertEqual([r["run"] for r in c["originals"]], [f"T1-r01-{a0}-r0", f"T1-r01-{a0}-r2"])
+        self.assertEqual(c["siblings"], [f"T1-r01-{a0}-r1"])
+        self.assertEqual((c["runs"], plan["runs"], plan["parallel"]), (3, 3, 32))
+        argv = c["argv"]
+        self.assertEqual([argv[j + 1] for j, x in enumerate(argv) if x == "--only"], ["T1-r01"])
+        self.assertEqual(argv[argv.index("--parallel") + 1], "32")
 
     def test_conditional_commands_are_two_episodes_and_slots_carry_their_command(self):
         run(HERE / "prepare_campaign.py", "plan", *self.args)

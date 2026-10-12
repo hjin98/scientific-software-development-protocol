@@ -36,7 +36,9 @@ Admissibility (contract section 3): COMPLETE_ADMISSIBLE is admissible; EXECUTION
 is behaviour (admissible, death). Another EXECUTION_ERROR is infrastructure only if its error message matches an infra pattern
 (the provider's own form "429 Model busy, retry later" included); a MALFORMED_EVIDENCE_OR_ASSESSMENT run whose only reason is the
 harness's provider-retry excess (PROVIDER_RETRY_REASON) is infrastructure too (stakeholder sixteenth ruling set). Either may be rerun once. Originals come from --runs, reruns from --rerun; both identities are kept; a second failure is
-inadmissible; a rerun of a slot whose original was not infrastructure is an INTEGRITY finding.
+inadmissible. The harness reruns an episode's replicates together, so a rerun of a slot whose original was not infrastructure is an
+unused sibling (listed in the record, never substituted) when another replicate of the same command, episode and arm was an
+infrastructure failure that was rerun (stakeholder seventeenth ruling set); any other such rerun is an INTEGRITY finding.
 
 Usage: build_campaign_record.py --declaration D.json --map M.json --runs DIR [--runs DIR ...] [--rerun DIR ...]
          [--dispositions F.json] [--subject-commit ARMKEY=COMMIT ...] [--allow-unchecked-subject] [--allow-unresolved]
@@ -309,6 +311,8 @@ def main() -> None:
 
     runs, reruns, used_measures, gated_runs, prefixes_seen = [], [], set(), 0, set()
     profile_keys = collections.Counter()
+    group = lambda slot: (slot.get("command"), slot["episode"], slot["arm"])  # noqa: E731  one harness episode: its replicates rerun together
+    rerun_groups = {group(declared[rid]) for rid, (tries, rr) in picked.items() if tries and rr and tries[0]["kind"] == "infra"}
     for name, slot in declared.items():
         tries, rr = picked[name]
         if not tries:
@@ -316,11 +320,14 @@ def main() -> None:
             continue
         if len(tries) > 1 or len(rr) > 1:
             bad("more than one original or rerun directory for a slot", run=name, dirs=[t["dir"] for t in tries + rr])
-        first, final = tries[0], (rr[0] if rr else tries[0])
+        first = tries[0]
+        substituted = bool(rr) and first["kind"] == "infra"
+        final = rr[0] if substituted else first
         final["id"] = name
         if rr:
-            reruns.append({"run": name, "original": first["dir"], "rerun": rr[0]["dir"], "original_kind": first["kind"], "rerun_kind": rr[0]["kind"]})
-            if first["kind"] != "infra":
+            reruns.append({"run": name, "original": first["dir"], "rerun": rr[0]["dir"], "original_kind": first["kind"], "rerun_kind": rr[0]["kind"],
+                           **({} if substituted else {"unused_sibling": True})})
+            if not substituted and group(slot) not in rerun_groups:
                 bad("rerun of a slot whose original was not a provider-transport failure", run=name, original_kind=first["kind"])
         arm_key = arms[slot["arm"]]
         for t in tries + rr:
@@ -426,10 +433,13 @@ def main() -> None:
               "descriptive": {"builder": "build_campaign_record.py", "development_advisory_included": bool(a.dev_advisory_as_evaluator), "waivers": waivers,
                               "dispositions": a.dispositions.name if a.dispositions else None,
                               "unresolved_items": sum(len(r.get("unresolved_items", [])) for r in runs), "pair_order": pair}}
+    siblings = sum(bool(r.get("unused_sibling")) for r in reruns)
     audit = {"declared": len(declared), "built": len(runs), "reruns": len(reruns), "ignored_other_arms": len(other), "pair_order": pair, "waivers": waivers,
              "by_arm": {k: dict(collections.Counter("admissible" if r["admissible"] else "inadmissible" for r in runs if r["arm"] == k))
                         for k in sorted({r["arm"] for r in runs})},
              "findings": findings}
+    if siblings:                                       # absent otherwise, so a record without whole-episode reruns is byte-identical
+        audit["unused_sibling_reruns"] = siblings
     if a.out:
         a.out.write_text(json.dumps(record, indent=1) + "\n")
     if a.audit:

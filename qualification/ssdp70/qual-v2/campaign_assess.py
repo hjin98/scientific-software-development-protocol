@@ -2,7 +2,7 @@
 """P9 driver: run the blinded evaluator (`eval/assess70.py`) over completed campaign runs, and collect its dispositions.
 
   campaign_assess.py run WORK --keys-root KEYS --evaluator-profile P --evaluator-capabilities C [--shared-rubric R] [--parallel N]
-      Every run directory under WORK/runs/<panel>-cNN whose panel is in --panels (default main, versioning, sentinels, sentinels-add: routing, unversioned and burden items are binding or recorded bytes) and whose summary is COMPLETE_ADMISSIBLE and whose arm is an assessed arm (the arms specification WORK/arms-spec.json,
+      Every run directory under WORK/runs/<panel>-cNN (for a provider-transport original, its executor rerun under WORK/runs/rerun-s<N>-<arm>/<panel>-cNN instead) whose panel is in --panels (default main, versioning, sentinels, sentinels-add: routing, unversioned and burden items are binding or recorded bytes) and whose summary is COMPLETE_ADMISSIBLE and whose arm is an assessed arm (the arms specification WORK/arms-spec.json,
       arms_spec.py; without one p72, p66 or p66b) and that has no assessment.json yet. Needs SSDP70_OMP_PROVIDER_CREDENTIAL. Exits non-zero on the first evaluator failure that is not a
       per-run result (exit codes 0, 1 and 2 of assess70 are results: PASS, FAIL, UNRESOLVED/not evaluated).
   campaign_assess.py cost WORK --price-in P --price-cached P --price-out P     (measured tokens, hit rate, USD per run, projection)
@@ -37,6 +37,7 @@ from pathlib import Path
 HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
 import arms_spec  # noqa: E402
+import build_campaign_record as bcr  # noqa: E402
 EVAL = HERE.parent / "eval"
 ASSESS = EVAL / "assess70.py"
 # Panels whose items need a model judgement. Routing, unversioned and burden items are scored by binding oracles or recorded bytes.
@@ -52,8 +53,15 @@ def in_panels(d: Path, panels) -> bool:
 
 
 def run_dirs(work: Path, panels=DEFAULT_PANELS):
+    """The run directory that stands for each slot: the original (runs/<command>/<run>), or its executor rerun
+    (runs/rerun-s<N>-<arm>/<command>/<run>) when the original is a provider-transport failure. A rerun of a replicate whose original is
+    not one is an unused sibling of a whole-episode rerun (stakeholder seventeenth ruling set) and is never assessed."""
     gated = arms_spec.assessed(arms_spec.load(work))
-    for d in sorted((work / "runs").glob("*/*-r*")):
+    runs = work / "runs"
+    originals = [d for d in sorted(runs.glob("*/*-r*")) if not d.parent.name.startswith("rerun")]
+    reruns = [d for d in sorted(runs.glob("rerun-s*/*/*-r*"))
+              if (runs / d.parent.name / d.name / "summary.json").exists() and bcr.classify(runs / d.parent.name / d.name, bcr.DEFAULT_INFRA)["kind"] == "infra"]
+    for d in originals + reruns:
         if (d / "summary.json").exists() and d.name.rsplit("-", 2)[1] in gated and in_panels(d, panels):
             yield d
 
@@ -99,7 +107,7 @@ def check_authorization(a) -> tuple[dict | None, int]:
     return auth, 0
 
 
-SLOT = re.compile(r"[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+-r[0-9]+")
+SLOT = re.compile(r"(rerun-s[0-9]+-[A-Za-z0-9_.]+/)?[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+-r[0-9]+")
 
 
 def slot_of(d: Path, work: Path) -> str:
@@ -392,7 +400,7 @@ def cmd_collect(a) -> int:
         data = json.loads(path.read_text())
         slot = slot_of(d, a.work)
         if data.get("assessment_status") in FORMAT_INVALID or (data.get("assessment_status") == "EXECUTION_ERROR" and slot in exec_frozen):
-            row = {"run": rid, "panel": slot.split("/")[0], "arm": d.name.rsplit("-", 2)[1], "first_status": data["assessment_status"],
+            row = {"run": rid, "panel": d.parent.name, "arm": d.name.rsplit("-", 2)[1], "first_status": data["assessment_status"],
                    "first_class": error_class(data, path.parent), "first_items": sorted(set(re.findall(r"item (\S+) ", " ".join(e for e in data.get("errors", []) if isinstance(e, str)))))}
             first.append(row)
             rerun = (rerun_root / slot / "assessment.json") if rerun_root is not None else None
