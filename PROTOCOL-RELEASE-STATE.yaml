@@ -1,9 +1,9 @@
 schema_version: 1
 project: hjin98/scientific-software-development-protocol
 accepted_current:
-  version: "6.6.0"
-  public_source_ref: 22f4bdba53795da3a6f13f162529f3a843fc37ae
-  recovery_ref: 384666764da4c55b282e6b1595ab97e2f86e1dc4
+  version: "7.2.1"
+  public_source_ref: aaeaf8b6b2121b9fb8aba31917c8265649c43954
+  recovery_ref: efdd1b59a7592b1cecef0a0013c35b54a7a6315d
 historical:
   "5.16.0":
     public_source_ref: NONE
@@ -26,6 +26,9 @@ historical:
   "6.5.0":
     public_source_ref: 7f7b5e24858e813e45ace867a7f8ea5180f43bf0
     recovery_ref: c4d5da1e0acb0e9f27376bf69561e8762747cd2d
+  "6.6.0":
+    public_source_ref: 22f4bdba53795da3a6f13f162529f3a843fc37ae
+    recovery_ref: 384666764da4c55b282e6b1595ab97e2f86e1dc4
 candidate:
   version: "7.2.1"
   semantic_ref: aaeaf8b6b2121b9fb8aba31917c8265649c43954
