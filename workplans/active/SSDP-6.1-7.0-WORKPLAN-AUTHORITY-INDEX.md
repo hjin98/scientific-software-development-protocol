@@ -4,7 +4,7 @@ workplan_id: SSDP-6.1-7.0-WORKPLAN-AUTHORITY-INDEX
 protocol_version: 6.6.0
 status: active
 created_date: 2026-09-09
-reviewed_date: 2026-09-28
+reviewed_date: 2026-10-19
 active_serious_challenge: none
 ---
 
@@ -52,7 +52,7 @@ PROTOCOL 7 SD-B: SUPERSEDE (2026-09-27); size budget is a compression target, ne
 STAKEHOLDER DECISIONS: section 4 rule ACCEPTED; SC1 claim-integrity floor ACCEPTED; SC2 Option B SELECTED (2026-09-27)
 ```
 
-The previously proposed deterministic control-plane / mandatory-orchestrator design was reassigned to **Protocol 8.0** (2026-09-27) and is now consolidated into one proposed handoff (section below). Its archived design artifacts retain their historical `SSDP-7.0-...` filenames and embedded target wording; those target-version labels mean Protocol 8.0. They do not compete with the Protocol 7.0 target and do not authorize D4 implementation.
+The previously proposed deterministic control-plane / mandatory-orchestrator design was reassigned to **Protocol 8.0** (2026-09-27) and consolidated into one proposed handoff, which has since been retired from this repository (section below). Its archived design artifacts retain their historical `SSDP-7.0-...` filenames and embedded target wording; those target-version labels mean Protocol 8.0. They do not compete with the Protocol 7.0 target and do not authorize D4 implementation.
 
 ## Protocol 6.1 completed handoff
 
@@ -190,11 +190,13 @@ LIFECYCLE STATUS: COMPLETED / ARCHIVED
 
 Protocol 6.6 is accepted-current. Its reduced-root-router, strict no-self-adoption version semantics, stochastic Protocol-6 robustness boundary, and bounded live trajectory evidence are inputs to Protocol 8's preserved deliberate D3 Orchestrator architecture reopen. They do not themselves select a Protocol 8 architecture or authorize Protocol 8 D4.
 
-## Protocol 8.0 deterministic-orchestrator future design handoff
+## Protocol 8.0 deterministic-orchestrator design handoff (retired)
 
-Protocol 8.0 deterministic-orchestrator design/review SHALL use the single current consolidated handoff:
+Retired 2026-10-19: the orchestrator and the deterministic control-plane / mandatory-orchestrator work moved to the separate, fully automated SSDS project. This repository now holds only the skill-based protocol and governs no Protocol 8 work. The `orchestrator/` implementation was removed; its last in-repository state is the parent of the removal commit. The consolidated handoff is archived byte-identical at:
 
-- `workplans/active/SSDP-8.0-DETERMINISTIC-CONTROL-PLANE-AND-MANDATORY-ORCHESTRATOR-CONSOLIDATED.md`
+- `workplans/archive/SSDP-8.0-DETERMINISTIC-CONTROL-PLANE-AND-MANDATORY-ORCHESTRATOR-CONSOLIDATED.md`
+
+The remainder of this section is the historical record as of retirement.
 
 It supersedes, as one composition, these archived byte-identical design and review records (its §37.4 maps each to the sections now carrying it):
 
@@ -269,10 +271,9 @@ There is exactly one mutable repository release-state owner: `PROTOCOL-RELEASE-S
 - Repository default/latest is never a protocol-version oracle.
 - Protocol 6.6 is accepted-current with exact public fallback `22f4bdba53795da3a6f13f162529f3a843fc37ae` and recovery `384666764da4c55b282e6b1595ab97e2f86e1dc4`.
 - Protocol 7 is the proposed scientific inspectability/epistemic-initiative/feedback-loop revision governed by its single consolidated workplan above; select its artifacts by exact ID, never by `SSDP-7.0*` globs, because the historical deterministic-orchestrator family shares that prefix.
-- The deterministic-orchestrator proposal targets Protocol 8.0 through its single consolidated workplan; that workplan binds Protocol 6.6 recovery as the inherited pre-cutover baseline and does not authorize D4. Select its artifacts by exact ID as well.
-- Under the future Protocol 8 deterministic-orchestrator proposal, after its own qualified cutover, the deterministic control plane would own machine lifecycle transitions while workplans/skills/documents remain semantic artifacts.
+- The deterministic-orchestrator proposal (Protocol 8.0) is retired from this repository and continues in SSDS; its archived artifacts are historical only. Select them by exact ID as well.
 - Shadow comparison is permitted only while one side remains explicitly non-authoritative.
-- No `main` merge or Protocol 7/8 D4 cutover is authorized merely by these active design workplans.
+- No `main` merge or Protocol 7 D4 cutover is authorized merely by these active design workplans.
 
 ## Historical discipline
 

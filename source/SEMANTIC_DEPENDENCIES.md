@@ -52,7 +52,7 @@ active workplan HAS DERIVED_FROM -> exact accepted PEM base + validated candidat
 
 `source/shared/references/evidence-evolution-and-dependencies.md` owns evidence lifecycle/applicability/dependency/evolution semantics, including parameter-sensitive evidence applicability and `USES_DEFINITION` trace semantics. `source/shared/references/project-engineering-memory.md` owns agent-facing PEM use: conditional activation, accepted-base/overlay use, Historical Applicability Set (HAS), applicability, authority binding and closeout learning. `source/shared/references/project-engineering-memory-schema.md` owns family/notice/schema/summary/partition/publication representation. `workflow-and-workplans.md` owns authority lifecycle/mutation, handoffs and Working State and routes memory questions to the PEM owner. No PEM/definition-trace edge recursively proves an endpoint, and no memory/trace relation creates D1-D4 authority.
 
-The self-hosted repository `PROJECT-ENGINEERING-MEMORY.md` is project-local candidate state and is not copied into generic `dist/` packages or protocol profile snapshots.
+The self-hosted repository `PROJECT-ENGINEERING-MEMORY.md` is project-local candidate state and is not copied into generic `dist/` packages.
 
 ## Activation relationships
 
@@ -84,15 +84,14 @@ ssdp-protocol-6.5 PRESERVES -> frozen Protocol 6.4 profile/schema-v2 stage-graph
 PEM schema 1 VERSIONED_INDEPENDENTLY_OF -> SSDP protocol/profile schema
 ```
 
-All previously published 5.16/6.0/6.1/6.2/6.3/6.4/6.5 profile resources remain frozen historical/version-bound or predecessor resources. Current accepted/public/recovery/candidate mappings are not owned by this view; repository `PROTOCOL-RELEASE-STATE.yaml` owns those mutable facts. Unsupported PEM schemas fail safe for memory-dependent decisions without breaking unrelated protocol routes.
+All previously published 5.16/6.0/6.1/6.2/6.3/6.4/6.5 orchestrator profile resources remain frozen historical/version-bound or predecessor resources, recoverable from Git history after the orchestrator left this repository. Current accepted/public/recovery/candidate mappings are not owned by this view; repository `PROTOCOL-RELEASE-STATE.yaml` owns those mutable facts. Unsupported PEM schemas fail safe for memory-dependent decisions without breaking unrelated protocol routes.
 
 ## Source/generated relationships
 
 ```text
 source/ -> source/build_skills.py -> dist/skills/* + dist/*.zip
-source/ + current protocol prompt/profile inputs -> orchestrator current profile/snapshot resources
-PROJECT-ENGINEERING-MEMORY.md -X-> generic dist/profile/snapshot
-PROTOCOL-RELEASE-STATE.yaml -X-> versioned generic dist/profile/snapshot
+PROJECT-ENGINEERING-MEMORY.md -X-> generic dist
+PROTOCOL-RELEASE-STATE.yaml -X-> versioned generic dist
 ```
 
 Generated descendants are not independent authority. Package transport closure and runtime activation are separate relationships. A partitioned PEM root + canonical cold partitions form one logical publication; any optional active index/summary is derived from canonical memory and cannot become a second owner.
