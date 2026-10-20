@@ -348,7 +348,6 @@ For the full user-facing capability history, see [CHANGELOG.md](CHANGELOG.md). F
 | `source/shared/references/` | canonical concern owners loaded by progressive disclosure |
 | `source/shared/fragments/` | shared text generated into entrypoints (the Scientific checks section) |
 | `dist/skills/` | ready-to-install generated skill bundles |
-| `orchestrator/` | optional version-bound orchestration/profile implementation |
 | `qualification/` | non-normative qualification, Review, and evaluation evidence per protocol cycle |
 | `PROJECT-ENGINEERING-MEMORY.md` | this repository's project-local memory; not generic protocol authority |
 | `PROTOCOL-RELEASE-STATE.yaml` | sole mutable release-state owner |
@@ -357,7 +356,7 @@ For the full user-facing capability history, see [CHANGELOG.md](CHANGELOG.md). F
 
 ## Contributing to this repository
 
-The root README is a guide. Canonical protocol semantics live under `source/`; generated distributions and orchestrator snapshots are derivatives.
+The root README is a guide. Canonical protocol semantics live under `source/`; generated distributions are derivatives. This repository holds the skill-based protocol only: the orchestrator and the proposed Protocol 8 deterministic control plane moved to the separate, fully automated SSDS project, and their last in-repository state is recoverable from Git history.
 
 Repository acceptance commands:
 
@@ -370,10 +369,6 @@ python source/build_skills.py --output /tmp/protocol-dist
 python source/validate_packages.py --dist /tmp/protocol-dist
 python source/check_dist.py --expected /tmp/protocol-dist --committed dist
 git diff --check
-
-python -m pip install ./orchestrator -r orchestrator/requirements-dev.txt
-python orchestrator/scripts/generate_protocol_snapshot.py --check
-python orchestrator/scripts/run_core_tests.py
 ```
 
 Mechanical qualification establishes only the property its oracle actually discriminates. Semantic adequacy still requires appropriate independent Review of the assembled candidate.

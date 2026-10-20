@@ -1,6 +1,6 @@
 # Scientific Software Development Protocol Source
 
-`source/` is the canonical version-intrinsic SSDP source. Its declared version is `source/PROTOCOL_VERSION`. Mutable repository release state—accepted-current version, public fallback, recovery and active candidate Review/ratification—is owned outside this immutable semantic payload by root `../PROTOCOL-RELEASE-STATE.yaml`. Generated distributions and orchestrator snapshots are derivatives; frozen historical/version-bound resources remain immutable.
+`source/` is the canonical version-intrinsic SSDP source. Its declared version is `source/PROTOCOL_VERSION`. Mutable repository release state—accepted-current version, public fallback, recovery and active candidate Review/ratification—is owned outside this immutable semantic payload by root `../PROTOCOL-RELEASE-STATE.yaml`. Generated distributions are derivatives; frozen historical/version-bound resources remain immutable.
 
 ## Governing model
 
@@ -60,10 +60,6 @@ python source/build_skills.py --output /tmp/protocol-dist
 python source/validate_packages.py --dist /tmp/protocol-dist
 python source/check_dist.py --expected /tmp/protocol-dist --committed dist
 git diff --check
-
-python -m pip install ./orchestrator -r orchestrator/requirements-dev.txt
-python orchestrator/scripts/generate_protocol_snapshot.py --check
-python orchestrator/scripts/run_core_tests.py
 ```
 
 `source/version_preflight.py` is an optional offline entry check (`--skill-root <bundle> --workplan <plan.md> --release-state PROTOCOL-RELEASE-STATE.yaml`); it applies the versioning owner's rule and is not a version authority. `qualification/ssdp66/eval/` holds the removable Protocol 6.6 evaluation harness.
